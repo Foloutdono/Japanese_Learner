@@ -71,7 +71,8 @@ class SRSEngine:
         return self.conn_pool.getconn()
 
     def _init_db(self):
-        with self._get_conn() as conn:
+        conn = self._get_conn()
+        try:
             with conn.cursor() as cur:
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS cards (
@@ -80,6 +81,7 @@ class SRSEngine:
                     )
                 """)
             conn.commit()
+        finally:
             self.conn_pool.putconn(conn)
 
     # =========================================================
@@ -88,7 +90,8 @@ class SRSEngine:
 
     def load(self):
         self.cards = {}
-        with self._get_conn() as conn:
+        conn = self._get_conn()
+        try:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 cur.execute("SELECT id, data FROM cards")
                 for row in cur.fetchall():
@@ -96,10 +99,12 @@ class SRSEngine:
                     if isinstance(data, str):
                         data = json.loads(data)
                     self.cards[row["id"]] = CardState(**data)
+        finally:
             self.conn_pool.putconn(conn)
 
     def save_all(self):
-        with self._get_conn() as conn:
+        conn = self._get_conn()
+        try:
             with conn.cursor() as cur:
                 for key, card in self.cards.items():
                     cur.execute("""
@@ -109,10 +114,13 @@ class SRSEngine:
                     """, (key, json.dumps(asdict(card), ensure_ascii=False)))
             conn.commit()
             self.conn_pool.putconn(conn)
+        finally:
+            self.conn_pool.putconn(conn)
 
     def save_card(self, card_id: str):
         card = self.cards[card_id]
-        with self._get_conn() as conn:
+        conn = self._get_conn()
+        try:
             with conn.cursor() as cur:
                 cur.execute("""
                     INSERT INTO cards (id, data)
@@ -120,25 +128,30 @@ class SRSEngine:
                     ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data
                 """, (card_id, json.dumps(asdict(card), ensure_ascii=False)))
             conn.commit()
+        finally:
             self.conn_pool.putconn(conn)
 
     def delete_cards(self, card_ids: list[str]):
         if not card_ids:
             return
-        with self._get_conn() as conn:
+        conn = self._get_conn()
+        try:
             with conn.cursor() as cur:
                 cur.execute(
                     "DELETE FROM cards WHERE id = ANY(%s)",
                     (card_ids,)
                 )
             conn.commit()
+        finally:
             self.conn_pool.putconn(conn)
 
     def delete_all_cards(self):
-        with self._get_conn() as conn:
+        conn = self._get_conn()
+        try:
             with conn.cursor() as cur:
                 cur.execute("DELETE FROM cards")
             conn.commit()
+        finally:
             self.conn_pool.putconn(conn)
     # =========================================================
     # CARD ACCESS
@@ -238,17 +251,24 @@ class SRSEngine:
 
     def get_stats(self, card_ids: list[str]) -> dict:
         total = len(card_ids)
+
         new = learning = mastered = 0
 
+        # faster lookup once
+        cards = self.cards
+
         for cid in card_ids:
-            if cid not in self.cards or self.cards[cid].total_reviews == 0:
+            card = cards.get(cid)
+
+            if not card or card.total_reviews == 0:
                 new += 1
-            elif self.cards[cid].interval >= 21:
+            elif card.interval >= 21:
                 mastered += 1
             else:
                 learning += 1
 
         due_now = len(self.get_due_cards(card_ids))
+
         return {
             "total": total,
             "new": new,

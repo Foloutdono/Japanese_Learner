@@ -204,36 +204,110 @@ PHASES_KEYS = ["kk-s", "k-k", "s-k"]
 
 @app.get("/api/stats")
 def get_stats():
-    result = {}
+    result = {
+        "kana": get_kana_stats(),
+        "vocab": get_vocab_stats(),
+        "kanji": get_kanji_stats(),
+    }
+    return result
 
-    # Kana
-    kana_stats = {}
-    for set_name, kana_list in KANA_SETS.items():
-        kana_stats[set_name] = {
-            mode: srs.get_stats([kana_to_id(k, mode) for k in kana_list])
+
+def get_kana_stats():
+    all_ids = {
+        set_name: {
+            mode: [kana_to_id(k, mode) for k in kana_list]
             for mode in KANA_MODES
         }
-    result["kana"] = kana_stats
+        for set_name, kana_list in KANA_SETS.items()
+    }
 
-    # Vocab
-    vocab_stats = {}
-    for level, vocab_list in VOCAB_BY_LEVEL.items():
-        vocab_stats[level] = {
-            key: srs.get_stats([vocab_to_id(w, level, key) for w in vocab_list])
+    # ONE CALL TOTAL
+    flat_ids = [
+        cid
+        for modes in all_ids.values()
+        for ids in modes.values()
+        for cid in ids
+    ]
+
+    stats_map = srs.get_stats(flat_ids)
+
+    # rebuild structure without extra DB calls
+    return {
+        set_name: {
+            mode: extract_stats(stats_map, ids)
+            for mode, ids in modes.items()
+        }
+        for set_name, modes in all_ids.items()
+    }
+
+
+def get_vocab_stats():
+    all_ids = {
+        level: {
+            key: [vocab_to_id(w, level, key) for w in vocab_list]
             for key in PHASES_KEYS
         }
-    result["vocab"] = vocab_stats
+        for level, vocab_list in VOCAB_BY_LEVEL.items()
+    }
 
-    # Kanji
-    kanji_stats = {}
-    for level, kanji_list in KANJI_BY_LEVEL.items():
-        kanji_stats[level] = {
-            key: srs.get_stats([kanji_to_id(k, level, key) for k in kanji_list])
+    flat_ids = [
+        cid
+        for phases in all_ids.values()
+        for ids in phases.values()
+        for cid in ids
+    ]
+
+    stats_map = srs.get_stats(flat_ids)
+
+    return {
+        level: {
+            key: extract_stats(stats_map, ids)
+            for key, ids in phases.items()
+        }
+        for level, phases in all_ids.items()
+    }
+
+
+def get_kanji_stats():
+    all_ids = {
+        level: {
+            key: [kanji_to_id(k, level, key) for k in kanji_list]
             for key in PHASES_KEYS
         }
-    result["kanji"] = kanji_stats
+        for level, kanji_list in KANJI_BY_LEVEL.items()
+    }
 
-    return result
+    flat_ids = [
+        cid
+        for phases in all_ids.values()
+        for ids in phases.values()
+        for cid in ids
+    ]
+
+    stats_map = srs.get_stats(flat_ids)
+
+    return {
+        level: {
+            key: extract_stats(stats_map, ids)
+            for key, ids in phases.items()
+        }
+        for level, phases in all_ids.items()
+    }
+
+def extract_stats(stats_map: dict, card_ids: list[str]) -> dict:
+    total = len(card_ids)
+    new = stats_map.get("new", 0)
+    learning = stats_map.get("learning", 0)
+    mastered = stats_map.get("mastered", 0)
+    due_now = stats_map.get("due_now", 0)
+
+    return {
+        "total": total,
+        "new": new,
+        "learning": learning,
+        "mastered": mastered,
+        "due_now": due_now,
+    }
 
 
 @app.delete("/api/stats/reset")
