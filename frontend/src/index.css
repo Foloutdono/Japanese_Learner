@@ -11,25 +11,87 @@
   --text-primary:   #eaeaea;
   --text-secondary: #a0a0c0;
   --border:         #2d2d4e;
+
+  --radius:         12px;
+  --max-w:          1100px;
+  --gap:            24px;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
+html, body, #root {
+  height: 100%;
   background: var(--bg-main);
   color: var(--text-primary);
-  font-family: 'Segoe UI', sans-serif;
-  min-height: 100vh;
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
 button {
   cursor: pointer;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-family: inherit;
   font-weight: 600;
   padding: 10px 20px;
-  transition: opacity 0.15s;
+  transition: filter 0.15s;
+}
+button:hover { filter: brightness(1.15); }
+
+input {
+  font-family: inherit;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+input:focus { border-color: var(--accent2); }
+
+/* ── Utility classes ── */
+.container {
+  width: 100%;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
-button:hover { opacity: 0.85; }
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.top-bar {
+  background: var(--bg-panel);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.btn-back {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 8px 16px;
+  white-space: nowrap;
+}
+
+/* ── Responsive grid ── */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+
+@media (max-width: 900px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  .container { padding: 0 16px; }
+  .top-bar { padding: 12px 16px; }
+}

@@ -38,63 +38,69 @@ export default function HomeScreen() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
       {/* Header */}
-      <div style={{ background: 'var(--bg-panel)', padding: '32px', textAlign: 'center' }}>
-        <div style={{ fontSize: 52, color: 'var(--accent)', fontFamily: 'Yu Gothic, sans-serif' }}>
+      <header style={{ background: 'var(--bg-panel)', padding: '40px 24px', textAlign: 'center' }}>
+        <div style={{ fontSize: 64, color: 'var(--accent)', fontFamily: 'Yu Gothic, sans-serif', lineHeight: 1 }}>
           日本語
         </div>
-        <div style={{ fontSize: 20, fontWeight: 'bold', marginTop: 4 }}>
+        <div style={{ fontSize: 22, fontWeight: 'bold', marginTop: 8 }}>
           Apprendre le Japonais
         </div>
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8 }}>
           Répétition espacée (SM-2) · Hiragana · Katakana · Vocabulaire JLPT
         </div>
-      </div>
+      </header>
 
       {/* Cards */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        gap: 24,
-        padding: 40,
-        flex: 1,
-      }}>
-        {cards.map(card => (
-          <div
-            key={card.path}
-            onClick={() => navigate(card.path)}
-            style={{
-              background: 'var(--bg-card)',
-              borderRadius: 12,
-              padding: '32px 28px',
-              width: 220,
-              textAlign: 'center',
-              cursor: 'pointer',
-              transition: 'background 0.2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-panel)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-card)'}
-          >
-            <div style={{ fontSize: 48, color: card.color, fontFamily: 'Yu Gothic, sans-serif' }}>
-              {card.icon}
-            </div>
-            <div style={{ fontSize: 16, fontWeight: 'bold', margin: '8px 0' }}>
-              {card.title}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', whiteSpace: 'pre-line', marginBottom: 16 }}>
-              {card.desc}
-            </div>
-            <button style={{ background: card.color, color: '#fff', width: '100%' }}>
-              Commencer →
-            </button>
+      <main style={{ flex: 1, padding: '40px 24px' }}>
+        <div className="container">
+          <div className="grid-4">
+            {cards.map(card => (
+              <div
+                key={card.path}
+                onClick={() => navigate(card.path)}
+                style={{
+                  background: 'var(--bg-card)',
+                  borderRadius: 'var(--radius)',
+                  padding: '36px 24px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s, transform 0.15s',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'var(--bg-panel)'
+                  e.currentTarget.style.transform = 'translateY(-4px)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'var(--bg-card)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                <div style={{ fontSize: 64, color: card.color, fontFamily: 'Yu Gothic, sans-serif', lineHeight: 1 }}>
+                  {card.icon}
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 'bold' }}>
+                  {card.title}
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', whiteSpace: 'pre-line', lineHeight: 1.6, flex: 1 }}>
+                  {card.desc}
+                </div>
+                <button style={{ background: card.color, color: '#fff', width: '100%', marginTop: 8 }}>
+                  Commencer →
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      </main>
 
-      {/* Footer tip */}
-      <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, padding: '0 0 24px' }}>
+      {/* Footer */}
+      <footer style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, padding: '16px 24px' }}>
         💡 Sessions courtes (15-20 min) mais régulières — le SRS planifie tout automatiquement.
-      </div>
+      </footer>
 
     </div>
   )

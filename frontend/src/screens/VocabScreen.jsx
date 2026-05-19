@@ -125,7 +125,7 @@ export default function VocabScreen() {
     <div style={{ minHeight: '100vh' }}>
       <TopBar onBack={() => setPhase(null)} title={`Vocabulaire ${level} — Phase ${phase}`} />
 
-      <div style={{ maxWidth: 560, margin: '0 auto', padding: 32, textAlign: 'center' }}>
+      <div className="container" style={{ padding: '32px 24px' }}>
 
         {loading && <div style={{ color: 'var(--text-secondary)' }}>Chargement...</div>}
 
@@ -237,14 +237,8 @@ export default function VocabScreen() {
 
 function TopBar({ onBack, title }) {
   return (
-    <div style={{
-      background: 'var(--bg-panel)', padding: '12px 24px',
-      display: 'flex', alignItems: 'center', gap: 16,
-    }}>
-      <button onClick={onBack}
-        style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13 }}>
-        ← Menu
-      </button>
+    <div className="top-bar">
+      <button className="btn-back" onClick={onBack}>← Menu</button>
       <span style={{ fontSize: 16, fontWeight: 'bold' }}>{title}</span>
     </div>
   )

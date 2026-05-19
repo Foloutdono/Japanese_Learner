@@ -109,7 +109,7 @@ export default function KanaScreen() {
       <TopBar onBack={() => setSelectedSet(null)} title={selectedSet} />
 
       {/* Mode toggle */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 12, padding: '20px 0 0' }}>
+      <div className="container" style={{ padding: '32px 24px' }}>
         {['mcq', 'type'].map(m => (
           <button key={m} onClick={() => switchMode(m)}
             style={{
@@ -210,14 +210,8 @@ export default function KanaScreen() {
 
 function TopBar({ onBack, title }) {
   return (
-    <div style={{
-      background: 'var(--bg-panel)', padding: '12px 24px',
-      display: 'flex', alignItems: 'center', gap: 16,
-    }}>
-      <button onClick={onBack}
-        style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13 }}>
-        ← Menu
-      </button>
+    <div className="top-bar">
+      <button className="btn-back" onClick={onBack}>← Menu</button>
       <span style={{ fontSize: 16, fontWeight: 'bold' }}>{title}</span>
     </div>
   )
