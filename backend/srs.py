@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 from typing import Optional
 from collections import deque
+from psycopg2.pool import SimpleConnectionPool
 
 
 @dataclass
@@ -57,6 +58,8 @@ class SRSEngine:
         self._requeue: deque[tuple[str, int]] = deque()
         self._cards_shown_this_session = 0
 
+        self.conn_pool = SimpleConnectionPool(1, 10, self.database_url)
+
         self._init_db()
         self.load()
 
@@ -65,7 +68,7 @@ class SRSEngine:
     # =========================================================
 
     def _get_conn(self):
-        return psycopg2.connect(self.database_url)
+        return self.conn_pool.getconn()
 
     def _init_db(self):
         with self._get_conn() as conn:
@@ -77,6 +80,7 @@ class SRSEngine:
                     )
                 """)
             conn.commit()
+            self.conn_pool.putconn(conn)
 
     # =========================================================
     # LOAD / SAVE
@@ -92,6 +96,7 @@ class SRSEngine:
                     if isinstance(data, str):
                         data = json.loads(data)
                     self.cards[row["id"]] = CardState(**data)
+            self.conn_pool.putconn(conn)
 
     def save_all(self):
         with self._get_conn() as conn:
@@ -103,6 +108,7 @@ class SRSEngine:
                         ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data
                     """, (key, json.dumps(asdict(card), ensure_ascii=False)))
             conn.commit()
+            self.conn_pool.putconn(conn)
 
     def save_card(self, card_id: str):
         card = self.cards[card_id]
@@ -114,6 +120,7 @@ class SRSEngine:
                     ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data
                 """, (card_id, json.dumps(asdict(card), ensure_ascii=False)))
             conn.commit()
+            self.conn_pool.putconn(conn)
 
     def delete_cards(self, card_ids: list[str]):
         if not card_ids:
@@ -125,13 +132,14 @@ class SRSEngine:
                     (card_ids,)
                 )
             conn.commit()
+            self.conn_pool.putconn(conn)
 
     def delete_all_cards(self):
         with self._get_conn() as conn:
             with conn.cursor() as cur:
                 cur.execute("DELETE FROM cards")
             conn.commit()
-
+            self.conn_pool.putconn(conn)
     # =========================================================
     # CARD ACCESS
     # =========================================================
@@ -254,4 +262,4 @@ class SRSEngine:
     # =========================================================
 
     def close(self):
-        pass  # connections are opened/closed per operation
+        self.conn_pool.closeall()  # connections are opened/closed per operation
