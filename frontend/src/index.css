@@ -1,0 +1,35 @@
+:root {
+  --bg-main:        #1a1a2e;
+  --bg-card:        #16213e;
+  --bg-panel:       #0f3460;
+  --accent:         #e94560;
+  --accent2:        #4cc9f0;
+  --accent3:        #533483;
+  --success:        #00b894;
+  --warning:        #fdcb6e;
+  --danger:         #d63031;
+  --text-primary:   #eaeaea;
+  --text-secondary: #a0a0c0;
+  --border:         #2d2d4e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', sans-serif;
+  min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-weight: 600;
+  padding: 10px 20px;
+  transition: opacity 0.15s;
+}
+
+button:hover { opacity: 0.85; }
