@@ -20,7 +20,7 @@ app.add_middleware(
 )
 
 # One shared SRS engine (single-user for now)
-DATA_DIR = "/data"
+DATA_DIR = "/tmp"
 SRS_PATH = os.path.join(DATA_DIR, "srs_data.db")
 srs = SRSEngine(SRS_PATH)
 
