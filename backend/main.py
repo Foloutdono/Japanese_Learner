@@ -20,9 +20,8 @@ app.add_middleware(
 )
 
 # One shared SRS engine (single-user for now)
-DATA_DIR = "/tmp"
-SRS_PATH = os.path.join(DATA_DIR, "srs_data.db")
-srs = SRSEngine(SRS_PATH)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+srs = SRSEngine(DATABASE_URL)
 
 @app.get("/")
 def root():
@@ -240,17 +239,11 @@ def get_stats():
 @app.delete("/api/stats/reset")
 def reset_stats(card_ids: list[str] | None = None):
     if card_ids is None:
-        # Reset everything
         srs.cards.clear()
-        srs.conn.execute("DELETE FROM cards")
-        srs.conn.commit()
+        srs.delete_all_cards()
     else:
         for cid in card_ids:
             if cid in srs.cards:
                 del srs.cards[cid]
-        srs.conn.execute(
-            f"DELETE FROM cards WHERE id IN ({','.join('?' * len(card_ids))})",
-            card_ids
-        )
-        srs.conn.commit()
+        srs.delete_cards(card_ids)
     return {"ok": True}
