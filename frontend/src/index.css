@@ -92,6 +92,7 @@ input:focus { border-color: var(--accent2); }
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap); }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+.grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); }
 
 @media (max-width: 900px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
@@ -101,4 +102,7 @@ input:focus { border-color: var(--accent2); }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
   .container { padding: 0 16px; }
   .top-bar { padding: 12px 16px; }
+}
+@media (max-width: 560px) {
+  .grid-5 { grid-template-columns: repeat(3, 1fr); }
 }
