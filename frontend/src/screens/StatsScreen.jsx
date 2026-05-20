@@ -39,9 +39,9 @@ export default function StatsScreen() {
       )}
 
       {stats && (
-        <div className="container" style={{ padding: '32px 24px' }}>
+        <div className="container" style={{ padding: '32px 24px'}}>
 
-          <Section title="Kana" color="var(--accent)" />
+          <Section title="Kana" className="section-title" />
           <div className="grid-2" style={{ marginBottom: 32 }}>
             {Object.entries(stats.kana).map(([setName, modes]) => (
               <div key={setName} className="card">
@@ -60,11 +60,11 @@ export default function StatsScreen() {
             ))}
           </div>
 
-          <Section title="Vocabulaire JLPT" color="var(--accent2)" />
+          <Section title="Vocabulaire JLPT" color="var(--text-primary)" />
           <div className="grid-3" style={{ marginBottom: 32 }}>
             {Object.entries(stats.vocab).map(([level, phases]) => (
               <div key={level} className="card">
-                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12, color: 'var(--accent2)' }}>
+                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12, color: 'var(--text-primary)' }}>
                   {level}
                 </div>
                 {[['kk-s', 'K+K→S'], ['k-k', 'K→S'], ['s-k', 'S→K']].map(([key, label]) => (
@@ -77,11 +77,11 @@ export default function StatsScreen() {
             ))}
           </div>
 
-          <Section title="Kanji" color="var(--accent3)" />
+          <Section title="Kanji" color="var(--text-primary)" />
           <div className="grid-3" style={{ marginBottom: 32 }}>
             {Object.entries(stats.kanji).map(([level, phases]) => (
               <div key={level} className="card">
-                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12, color: 'var(--accent3)' }}>
+                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12, color: 'var(--text-primary)' }}>
                   {level}
                 </div>
                 {[['kk-s', 'K+K→S'], ['k-k', 'K→S'], ['s-k', 'S→K']].map(([key, label]) => (
@@ -94,7 +94,7 @@ export default function StatsScreen() {
             ))}
           </div>
 
-          <Section title="Résumé global" color="var(--success)" />
+          <Section title="Résumé global" color="var(--text-primary)" />
           <GlobalSummary stats={stats} />
 
         </div>
