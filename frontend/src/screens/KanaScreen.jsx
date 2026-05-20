@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
 import TopBar from '../components/TopBar'
 import { CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading } from '../components/QuizComponents'
+import { playKana } from '../components/sound'
 
 const SETS = [
   'Hiragana (de base)',
@@ -74,6 +75,7 @@ export default function KanaScreen() {
     setSelected(choice)
     setAnswered(true)
     setShowRating(true)
+    playKana(card.romaji)
   }
 
   // Type submit
@@ -81,6 +83,7 @@ export default function KanaScreen() {
     if (submitted || !input.trim()) return
     setSubmitted(true)
     setShowRating(true)
+    playKana(card.romaji)
   }
 
   // ── Set selection screen ──
