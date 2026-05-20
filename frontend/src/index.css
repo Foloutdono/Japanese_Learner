@@ -81,13 +81,6 @@ input:focus { border-color: var(--accent2); }
   white-space: nowrap;
 }
 
-.section-title {
-  font-size: 40px;
-  font-weight: bold;
-  color:var(--text-primary);
-  align-self: center;
-}
-
 /* ── Responsive grid ── */
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap); }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }

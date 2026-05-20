@@ -41,7 +41,7 @@ export default function StatsScreen() {
       {stats && (
         <div className="container" style={{ padding: '32px 24px'}}>
 
-          <Section title="Kana" className="section-title" />
+          <Section title="Kana"/>
           <div className="grid-2" style={{ marginBottom: 32 }}>
             {Object.entries(stats.kana).map(([setName, modes]) => (
               <div key={setName} className="card">
@@ -103,10 +103,10 @@ export default function StatsScreen() {
   )
 }
 
-function Section({ title, color }) {
+function Section({ title}) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 20, fontWeight: 'bold', color }}>{title}</div>
+      <div style={{ fontSize: 40, fontWeight: 'bold', color: 'var(--text-primary)', alignSelf: 'center' }}>{title}</div>
       <div style={{ height: 1, background: 'var(--border)', marginTop: 8 }} />
     </div>
   )
