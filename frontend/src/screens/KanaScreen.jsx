@@ -34,7 +34,6 @@ export default function KanaScreen({ session }) {
   const [showRating, setShowRating]   = useState(false)
 
   function fetchCard(set, m) {
-    console.log('session token:', session?.access_token?.slice(0, 20))
     setLoading(true)
     setAnswered(false)
     setSelected(null)
