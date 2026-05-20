@@ -65,7 +65,7 @@ export default function KanaScreen() {
     fetch(api('/api/kana/review'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ card_id: card.card_id, quality }),
+      body: JSON.stringify({ card_id: card.card_id, mode, quality }),
     }).then(() => fetchCard(selectedSet, mode))
   }
 

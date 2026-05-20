@@ -318,5 +318,5 @@ def get_all_kana() -> list[dict]:
 def get_kana_by_set(set_name: str) -> list[dict]:
     return KANA_SETS.get(set_name, [])
 
-def kana_to_id(kana_entry: dict, prefix: str = "") -> str:
-    return f"kana_{prefix}_{kana_entry['kana']}"
+def kana_to_id(kana_entry: dict) -> str:
+    return f"kana_{kana_entry['kana']}"

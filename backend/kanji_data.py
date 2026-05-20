@@ -2232,9 +2232,8 @@ KANJI_BY_LEVEL = {
     "N1": KANJI_N1,
 }
 
-def kanji_to_id(word: dict, level: str, mode: str = "mcq") -> str:
-    """mode-aware ID so MCQ and typing track separately."""
-    return f"kanji_{level}_{mode}_{word['kanji']}"
+def kanji_to_id(kanji_entry: dict, level: str) -> str:
+    return f"kanji_{level}_{kanji_entry['kanji']}"
 
 def get_kanji(level: str) -> list[dict]:
     return KANJI_BY_LEVEL.get(level, [])

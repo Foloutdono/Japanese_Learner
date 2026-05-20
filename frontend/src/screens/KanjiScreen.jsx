@@ -56,7 +56,7 @@ export default function KanjiScreen() {
     fetch(api('/api/kanji/review'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ card_id: card.card_id, quality }),
+      body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),
     }).then(() => fetchCard(level, phase))
   }
 

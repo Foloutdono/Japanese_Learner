@@ -8430,11 +8430,8 @@ VOCAB_BY_LEVEL = {
     "N1": VOCAB_N1,
 }
 
-def vocab_to_id(word: dict, level: str, mode: str = "mcq") -> str:
-    """Unique ID: level + mode + kanji + kana.
-    Including kana ensures words without a distinct kanji (これ, する, パン…)
-    never collide with each other."""
-    return f"vocab_{level}_{mode}_{word['kanji']}_{word['kana']}"
+def vocab_to_id(vocab_entry: dict, level: str) -> str:
+    return f"vocab_{level}_{vocab_entry['kanji']}_{vocab_entry['kana']}"
 
 def get_vocab(level: str) -> list[dict]:
     return VOCAB_BY_LEVEL.get(level, [])
