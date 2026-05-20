@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
 import TopBar from '../components/TopBar'
+import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -20,13 +21,10 @@ export default function KanjiScreen() {
   const [card, setCard]             = useState(null)
   const [loading, setLoading]       = useState(false)
   const [done, setDone]             = useState(false)
-
   const [answered, setAnswered]     = useState(false)
   const [selected, setSelected]     = useState(null)
-
   const [input, setInput]           = useState('')
   const [submitted, setSubmitted]   = useState(false)
-
   const [showRating, setShowRating] = useState(false)
 
   function fetchCard(lvl, ph) {
@@ -79,14 +77,18 @@ export default function KanjiScreen() {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => navigate('/')} title="Kanji" />
-        <div style={{ padding: 40, textAlign: 'center' }}>
+        <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
             Choisissez un niveau
           </div>
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="grid-5" style={{ maxWidth: 600, margin: '0 auto' }}>
             {LEVELS.map(l => (
               <button key={l} onClick={() => setLevel(l)}
-                style={{ background: 'var(--accent3)', color: '#fff', fontSize: 18, padding: '20px 40px' }}>
+                style={{
+                  background: 'var(--accent3)', color: '#fff',
+                  fontSize: 20, fontWeight: 'bold',
+                  padding: '24px 0', width: '100%',
+                }}>
                 {l}
               </button>
             ))}
@@ -101,15 +103,19 @@ export default function KanjiScreen() {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => setLevel(null)} title={`Kanji ${level}`} />
-        <div style={{ padding: 40, textAlign: 'center' }}>
+        <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
             Choisissez une phase
           </div>
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="grid-3" style={{ maxWidth: 700, margin: '0 auto' }}>
             {PHASES.map(p => (
               <button key={p.id} onClick={() => startSession(level, p.id)}
-                style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', padding: '20px 32px' }}>
-                <div style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 6 }}>{p.label}</div>
+                style={{
+                  background: 'var(--bg-card)', color: 'var(--text-primary)',
+                  padding: '28px 20px', display: 'flex',
+                  flexDirection: 'column', alignItems: 'center', gap: 8,
+                }}>
+                <div style={{ fontSize: 16, fontWeight: 'bold' }}>{p.label}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.desc}</div>
               </button>
             ))}
@@ -124,27 +130,18 @@ export default function KanjiScreen() {
     <div style={{ minHeight: '100vh' }}>
       <TopBar onBack={() => setPhase(null)} title={`Kanji ${level} — Phase ${phase}`} />
 
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
 
-        {loading && <div style={{ color: 'var(--text-secondary)' }}>Chargement...</div>}
-
-        {done && (
-          <div style={{ color: 'var(--success)', fontSize: 18 }}>
-            ✅ Toutes les cartes sont à jour !
-            <br /><br />
-            <button onClick={() => setPhase(null)}
-              style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)' }}>
-              ← Retour
-            </button>
-          </div>
-        )}
+        {loading && <Loading />}
+        {done    && <DoneMessage onBack={() => setPhase(null)} />}
 
         {card && !loading && (
           <>
-            {/* Prompt */}
-            <div style={{ background: 'var(--bg-card)', borderRadius: 12, padding: '32px 24px', marginBottom: 24 }}>
-
-              {/* Phase 1: kanji + kana */}
+            {/* Prompt card */}
+            <div style={{
+              background: 'var(--bg-card)', borderRadius: 12,
+              padding: '40px 24px', marginBottom: 32,
+            }}>
               {phase === 1 && (
                 <>
                   <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
@@ -161,7 +158,6 @@ export default function KanjiScreen() {
                 </>
               )}
 
-              {/* Phase 2: kanji only */}
               {phase === 2 && (
                 <>
                   <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
@@ -175,7 +171,6 @@ export default function KanjiScreen() {
                 </>
               )}
 
-              {/* Phase 3: meaning → write kanji */}
               {phase === 3 && (
                 <>
                   <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent3)' }}>
@@ -192,65 +187,31 @@ export default function KanjiScreen() {
 
             {/* MCQ (phase 1 & 2) */}
             {phase !== 3 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {card.choices.map(choice => {
-                  const isCorrect  = choice === card.meaning
-                  const isSelected = choice === selected
-                  let bg = 'var(--bg-card)'
-                  if (answered && isCorrect)               bg = 'var(--success)'
-                  if (answered && isSelected && !isCorrect) bg = 'var(--danger)'
-                  return (
-                    <button key={choice} onClick={() => onMCQAnswer(choice)}
-                      style={{ background: bg, color: 'var(--text-primary)', fontSize: 15, textAlign: 'left', padding: '14px 20px' }}>
-                      {choice}
-                    </button>
-                  )
-                })}
-              </div>
+              <MCQGrid
+                choices={card.choices}
+                correct={card.meaning}
+                selected={selected}
+                answered={answered}
+                onAnswer={onMCQAnswer}
+              />
             )}
 
-            {/* Type input (phase 3) */}
+            {/* Type input (phase 3) — kanji specific: bigger font, show kanji on wrong */}
             {phase === 3 && (
-              <div>
-                <input
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && onTypeSubmit()}
-                  placeholder="Tapez le kanji..."
-                  disabled={submitted}
-                  autoFocus
-                  style={{
-                    background: 'var(--bg-card)', color: 'var(--text-primary)',
-                    border: '1px solid var(--border)', borderRadius: 8,
-                    padding: '12px 20px', fontSize: 24, width: '100%',
-                    marginBottom: 12, outline: 'none',
-                    fontFamily: 'Yu Gothic, sans-serif',
-                  }}
-                />
-                {!submitted && (
-                  <button onClick={onTypeSubmit}
-                    style={{ background: 'var(--accent)', color: '#fff', width: '100%' }}>
-                    Valider
-                  </button>
-                )}
-                {submitted && (
-                  <div style={{ marginTop: 8 }}>
-                    <div style={{
-                      fontSize: 16, fontWeight: 'bold',
-                      color: input.trim() === card.kanji ? 'var(--success)' : 'var(--danger)',
-                    }}>
-                      {input.trim() === card.kanji
-                        ? '✅ Correct !'
-                        : `❌ Réponse : ${card.kanji}`}
-                    </div>
-                    {input.trim() !== card.kanji && (
-                      <div style={{ fontSize: 48, fontFamily: 'Yu Gothic, sans-serif', marginTop: 8 }}>
-                        {card.kanji}
-                      </div>
-                    )}
+              <TypeInput
+                value={input}
+                onChange={setInput}
+                onSubmit={onTypeSubmit}
+                submitted={submitted}
+                answer={card.kanji}
+                placeholder="Tapez le kanji..."
+                inputStyle={{ fontSize: 24, fontFamily: 'Yu Gothic, sans-serif' }}
+                wrongExtra={
+                  <div style={{ fontSize: 64, fontFamily: 'Yu Gothic, sans-serif', marginTop: 12 }}>
+                    {card.kanji}
                   </div>
-                )}
-              </div>
+                }
+              />
             )}
 
             <RatingBar active={showRating} onRate={postReview} />

@@ -72,7 +72,8 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
 }
 
 // ── Type input + submit + result ──────────────────────────
-export function TypeInput({ value, onChange, onSubmit, submitted, correct, answer, placeholder = 'Tapez la réponse...' }) {
+export function TypeInput({ value, onChange, onSubmit, submitted, answer,
+                            placeholder = 'Tapez la réponse...', inputStyle = {}, wrongExtra = null }) {
   const isCorrect = value.trim().toLowerCase() === answer?.toLowerCase()
 
   return (
@@ -89,24 +90,20 @@ export function TypeInput({ value, onChange, onSubmit, submitted, correct, answe
           padding: '12px 20px',
           fontSize: 18,
           marginBottom: 12,
+          ...inputStyle,
         }}
       />
       {!submitted && (
-        <button
-          onClick={onSubmit}
-          style={{ background: 'var(--accent)', color: '#fff', width: '100%' }}
-        >
+        <button onClick={onSubmit}
+          style={{ background: 'var(--accent)', color: '#fff', width: '100%' }}>
           Valider
         </button>
       )}
       {submitted && (
-        <div style={{
-          fontSize: 18,
-          fontWeight: 'bold',
-          marginTop: 8,
-          color: isCorrect ? 'var(--success)' : 'var(--danger)',
-        }}>
+        <div style={{ fontSize: 18, fontWeight: 'bold', marginTop: 8,
+          color: isCorrect ? 'var(--success)' : 'var(--danger)' }}>
           {isCorrect ? '✅ Correct !' : `❌ Réponse : ${answer}`}
+          {!isCorrect && wrongExtra}
         </div>
       )}
     </div>
