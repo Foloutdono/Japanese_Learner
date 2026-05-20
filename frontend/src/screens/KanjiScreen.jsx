@@ -1,4 +1,4 @@
-import { api } from '../api'
+import { apiFetch } from '../api'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
@@ -14,7 +14,7 @@ const PHASES = [
   { id: 3, label: 'Phase 3', desc: 'Sens → Kanji (écriture)' },
 ]
 
-export default function KanjiScreen() {
+export default function KanjiScreen({ session }) {
   const navigate = useNavigate()
 
   const [level, setLevel]           = useState(null)
@@ -36,7 +36,7 @@ export default function KanjiScreen() {
     setSubmitted(false)
     setShowRating(false)
 
-    fetch(api(`/api/kanji/card?level=${lvl}&phase=${ph}`))
+    apiFetch(`/api/kanji/card?level=${lvl}&phase=${ph}`, session)
       .then(r => r.json())
       .then(data => {
         if (data.done) { setDone(true); setCard(null) }
@@ -53,7 +53,7 @@ export default function KanjiScreen() {
   }
 
   function postReview(quality) {
-    fetch(api('/api/kanji/review'), {
+    apiFetch('/api/kanji/review', session, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),

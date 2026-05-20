@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../supabase'
 
 const cards = [
   {
@@ -48,6 +49,16 @@ export default function HomeScreen() {
         <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8 }}>
           Répétition espacée (SM-2) · Hiragana · Katakana · Vocabulaire JLPT
         </div>
+        <button
+          onClick={() => supabase.auth.signOut()}
+          style={{
+            background: 'rgba(255,255,255,0.08)',
+            color: 'var(--text-secondary)',
+            fontSize: 12, marginTop: 12,
+          }}
+        >
+          Déconnexion
+        </button>
       </header>
 
       {/* Cards */}

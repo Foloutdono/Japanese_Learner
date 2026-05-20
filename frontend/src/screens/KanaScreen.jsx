@@ -1,4 +1,4 @@
-import { api } from '../api'
+import { apiFetch } from '../api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
@@ -13,7 +13,7 @@ const SETS = [
   'Katakana (combinaisons)',
 ]
 
-export default function KanaScreen() {
+export default function KanaScreen({ session }) {
   const navigate = useNavigate()
 
   const [selectedSet, setSelectedSet] = useState(null)
@@ -41,7 +41,7 @@ export default function KanaScreen() {
     setSubmitted(false)
     setShowRating(false)
 
-    fetch(api(`/api/kana/card?set_name=${encodeURIComponent(set)}&mode=${m}`))
+    apiFetch(`/api/kana/card?set_name=${encodeURIComponent(set)}&mode=${m}`, session)
       .then(r => r.json())
       .then(data => {
         if (data.done) { setDone(true); setCard(null) }
@@ -62,7 +62,7 @@ export default function KanaScreen() {
   }
 
   function postReview(quality) {
-    fetch(api('/api/kana/review'), {
+    apiFetch('/api/kana/review', session, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ card_id: card.card_id, mode, quality }),

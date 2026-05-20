@@ -2,19 +2,19 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api'
 
-export default function StatsScreen() {
+export default function StatsScreen({ session }) {
   const navigate = useNavigate()
   const [stats, setStats] = useState(null)
 
   useEffect(() => { fetchStats() }, [])
 
   function fetchStats() {
-    fetch(api('/api/stats')).then(r => r.json()).then(setStats)
+    apiFetch('/api/stats', session).then(r => r.json()).then(setStats)
   }
 
   function resetAll() {
     if (!confirm('Effacer TOUTE la progression ? Cette action est irréversible.')) return
-    fetch(api('/api/stats/reset'), { method: 'DELETE' }).then(() => fetchStats())
+    apiFetch('/api/stats/reset', session, { method: 'DELETE' }).then(() => fetchStats())
   }
 
   return (
