@@ -6,7 +6,7 @@ from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from pydantic import BaseModel
 import random
-import datetime
+from datetime import datetime
 
 from srs import SRSEngine
 
@@ -15,7 +15,7 @@ app = FastAPI()
 # Allow requests from the React frontend later
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://japanese-learner-seven.vercel.app"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
