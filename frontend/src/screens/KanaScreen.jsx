@@ -2,6 +2,8 @@ import { api } from '../api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
+import TopBar from '../components/TopBar'
+import SetSelectionScreen from '../components/SetSelectionScreen'
 
 const SETS = [
   'Hiragana (de base)',
@@ -83,24 +85,7 @@ export default function KanaScreen() {
 
   // ── Set selection screen ──
   if (!selectedSet) {
-    return (
-      <div style={{ minHeight: '100vh' }}>
-        <TopBar onBack={() => navigate('/')} title="Kana" />
-        <div style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 32 }}>
-            Choisissez une série
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', flexDirection: 'column' }}>
-            {SETS.map(s => (
-              <button key={s} onClick={() => startSession(s)}
-                className='button-set-choice'>
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
+    <SetSelectionScreen setsNames={SETS} startSession={startSession} />
   }
 
   // ── Quiz screen ──
@@ -204,15 +189,6 @@ export default function KanaScreen() {
           </>
         )}
       </div>
-    </div>
-  )
-}
-
-function TopBar({ onBack, title }) {
-  return (
-    <div className="top-bar">
-      <button className="btn-back" onClick={onBack}>← Menu</button>
-      <span style={{ fontSize: 16, fontWeight: 'bold' }}>{title}</span>
     </div>
   )
 }

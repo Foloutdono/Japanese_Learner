@@ -2,6 +2,7 @@ import { api } from '../api'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
+import TopBar from '../components/TopBar'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -256,15 +257,6 @@ export default function KanjiScreen() {
           </>
         )}
       </div>
-    </div>
-  )
-}
-
-function TopBar({ onBack, title }) {
-  return (
-    <div className="top-bar">
-      <button className="btn-back" onClick={onBack}>← Menu</button>
-      <span style={{ fontSize: 16, fontWeight: 'bold' }}>{title}</span>
     </div>
   )
 }
