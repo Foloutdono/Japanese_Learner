@@ -90,10 +90,10 @@ export default function KanaScreen() {
           <div style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 32 }}>
             Choisissez une série
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', flexDirection: 'column' }}>
             {SETS.map(s => (
               <button key={s} onClick={() => startSession(s)}
-                className='button-mcq'>
+                className='button-set-choice'>
                 {s}
               </button>
             ))}
@@ -157,7 +157,7 @@ export default function KanaScreen() {
                   else if (answered && isSelected && !isCorrect) bg = 'var(--danger)'
                   return (
                     <button key={choice} onClick={() => onMCQAnswer(choice)}
-                      style={{ background: bg, color: 'var(--text-primary)', fontSize: 18, minWidth: 100 }}>
+                      className='button-mcq'>
                       {choice}
                     </button>
                   )

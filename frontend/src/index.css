@@ -81,7 +81,12 @@ input:focus { border-color: var(--accent2); }
   padding: 8px 16px;
   white-space: nowrap;
 }
-
+.button-set-choice {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 15px;
+  padding: 20px 30px;
+}
 .button-mcq {
   background: var(--bg-card);
   color: var(--text-primary);
