@@ -287,7 +287,7 @@ def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None 
 # ── Dictionnary ──────────────────────────────────────────────────
 
 @app.get("/api/dictionary")
-def get_dictionary(q: str = "", user_id: str = Depends(get_user_id)):
+def get_dictionary(q: str = ""):
     results = []
     for level, kanji_list in KANJI_BY_LEVEL.items():
         for k in kanji_list:

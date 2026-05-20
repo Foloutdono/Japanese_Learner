@@ -24,6 +24,13 @@ const cards = [
     color: '#533483',
   },
   {
+    icon: '辞',
+    title: 'Dictionnaire',
+    desc: 'Tous les kanji\nPrononciation & sens\nOrdre des traits',
+    path: '/dictionary',
+    color: '#e17055',
+  },
+  {
     icon: '📊',
     title: 'Statistiques',
     desc: 'Progression SRS\nCartes maîtrisées\nRévisions dues',

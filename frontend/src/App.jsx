@@ -8,6 +8,7 @@ import KanaScreen  from './screens/KanaScreen'
 import VocabScreen from './screens/VocabScreen'
 import KanjiScreen from './screens/KanjiScreen'
 import StatsScreen from './screens/StatsScreen'
+import DictionaryScreen from './screens/DictionaryScreen'
 
 export default function App() {
   const [session, setSession] = useState(undefined) // undefined = loading
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="/vocab" element={<VocabScreen session={session} />} />
         <Route path="/kanji" element={<KanjiScreen session={session} />} />
         <Route path="/stats" element={<StatsScreen session={session} />} />
+        <Route path="/dictionary" element={<DictionaryScreen session={session} />} />
       </Routes>
     </BrowserRouter>
   )
