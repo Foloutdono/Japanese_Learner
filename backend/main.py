@@ -10,6 +10,7 @@ from pydantic import BaseModel
 import random
 from datetime import datetime
 from srs import SRSEngine
+import httpx
 
 app = FastAPI()
 
@@ -32,20 +33,23 @@ security = HTTPBearer()
 def get_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
     token = credentials.credentials
     try:
-        payload = jwt.decode(
-            token,
-            SUPABASE_SERVICE_KEY,
-            algorithms=["HS256"],
-            options={"verify_aud": False}
+        # Ask Supabase to validate the token
+        response = httpx.get(
+            f"{SUPABASE_URL}/auth/v1/user",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "apikey": SUPABASE_SERVICE_KEY,
+            }
         )
-        user_id = payload.get("sub")
+        if response.status_code != 200:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        
+        user_id = response.json().get("id")
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token")
         return user_id
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+    except httpx.RequestError:
+        raise HTTPException(status_code=401, detail="Auth service unavailable")
 
 def prefixed(card_ids: list[str], user_id: str) -> list[str]:
     return [f"{user_id}:{cid}" for cid in card_ids]
