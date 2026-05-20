@@ -157,7 +157,7 @@ export default function VocabScreen({ session }) {
               )}
               {phase === 2 && (
                 <div style={{ fontSize: 52, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                  {card.kanji}
+                  {card.kanji ? card.kanji : (card.kana + " (No Kanji)")}
                 </div>
               )}
               {phase === 3 && (
