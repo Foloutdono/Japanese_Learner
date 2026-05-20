@@ -27,10 +27,10 @@ export function MCQButton({ choice, correct, selected, answered, onClick }) {
       style={{
         background: bg,
         color: 'var(--text-primary)',
-        fontSize: 30,
+        fontSize: 60,
         minWidth: 120,
         padding: '80px 100px',
-        textAlign: 'left',
+        textAlign: 'center',
         transition: 'background 0.15s',
       }}
     >
