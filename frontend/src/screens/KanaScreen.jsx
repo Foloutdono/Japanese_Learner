@@ -2,8 +2,6 @@ import { api } from '../api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
-import TopBar from '../components/TopBar'
-import SetSelectionScreen from '../components/QuizComponents'
 
 const SETS = [
   'Hiragana (de base)',
@@ -206,6 +204,15 @@ export default function KanaScreen() {
           </>
         )}
       </div>
+    </div>
+  )
+}
+
+function TopBar({ onBack, title }) {
+  return (
+    <div className="top-bar">
+      <button className="btn-back" onClick={onBack}>← Menu</button>
+      <span style={{ fontSize: 16, fontWeight: 'bold' }}>{title}</span>
     </div>
   )
 }
