@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../api'
+import { apiFetch } from '../api'
 
 export default function StatsScreen({ session }) {
   const navigate = useNavigate()

@@ -34,6 +34,7 @@ export default function KanaScreen({ session }) {
   const [showRating, setShowRating]   = useState(false)
 
   function fetchCard(set, m) {
+    console.log('session token:', session?.access_token?.slice(0, 20))
     setLoading(true)
     setAnswered(false)
     setSelected(null)
@@ -44,6 +45,11 @@ export default function KanaScreen({ session }) {
     apiFetch(`/api/kana/card?set_name=${encodeURIComponent(set)}&mode=${m}`, session)
       .then(r => r.json())
       .then(data => {
+        if (data.error || data.detail) {
+          console.error('API error:', data)
+          setLoading(false)
+          return
+        }
         if (data.done) { setDone(true); setCard(null) }
         else { setCard(data); setDone(false) }
         setLoading(false)
