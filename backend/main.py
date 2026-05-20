@@ -11,9 +11,11 @@ import random
 from datetime import datetime
 from srs import SRSEngine
 import httpx
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
+app.mount("/kanjivg", StaticFiles(directory="kanjivg"), name="kanjivg")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://japanese-learner-seven.vercel.app"],
@@ -281,3 +283,26 @@ def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None 
             srs.cards.pop(cid, None)
         srs.delete_cards(prefixed_ids)
     return {"ok": True}
+
+# ── Dictionnary ──────────────────────────────────────────────────
+
+@app.get("/api/dictionary")
+def get_dictionary(q: str = "", user_id: str = Depends(get_user_id)):
+    results = []
+    for level, kanji_list in KANJI_BY_LEVEL.items():
+        for k in kanji_list:
+            if q == "" or (
+                q in k.get("kanji", "") or
+                q in k.get("kana", "") or
+                q in k.get("meaning", "").lower()
+            ):
+                codepoint = hex(ord(k["kanji"]))[2:].zfill(5)
+                results.append({
+                    "kanji":       k["kanji"],
+                    "kana":        k.get("kana", ""),
+                    "meaning":     k.get("meaning", ""),
+                    "stroke_count": k.get("stroke_count", ""),
+                    "level":       level,
+                    "svg_url":     f"/kanjivg/{codepoint}.svg",
+                })
+    return {"results": results, "total": len(results)}
