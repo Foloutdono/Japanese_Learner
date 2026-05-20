@@ -6,6 +6,7 @@ from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from pydantic import BaseModel
 import random
+import datetime
 
 from srs import SRSEngine
 
@@ -202,111 +203,85 @@ KANA_MODES  = ["mcq", "type"]
 PHASES_KEYS = ["kk-s", "k-k", "s-k"]
 
 
-@app.get("/api/stats")
-def get_stats():
-    result = {
-        "kana": get_kana_stats(),
-        "vocab": get_vocab_stats(),
-        "kanji": get_kanji_stats(),
+def compute_stats(card_states: dict, card_ids: list[str]) -> dict:
+    new = learning = mastered = due_now = 0
+    now = datetime.now()
+
+    for cid in card_ids:
+        state = card_states.get(cid, "new")
+        if state == "new":
+            new += 1
+        elif state == "mastered":
+            mastered += 1
+        else:
+            learning += 1
+
+        # use in-memory card, no DB call
+        card = srs.cards.get(cid)
+        if card and card.total_reviews > 0:
+            if now >= datetime.fromisoformat(card.next_review):
+                due_now += 1
+
+    return {
+        "total": len(card_ids),
+        "new": new,
+        "learning": learning,
+        "mastered": mastered,
+        "due_now": due_now,
     }
-    return result
 
 
-def get_kana_stats():
-    all_ids = {
+def get_kana_stats(card_states: dict):
+    return {
         set_name: {
-            mode: [kana_to_id(k, mode) for k in kana_list]
+            mode: compute_stats(card_states, [kana_to_id(k, mode) for k in kana_list])
             for mode in KANA_MODES
         }
         for set_name, kana_list in KANA_SETS.items()
     }
 
-    # ONE CALL TOTAL
-    flat_ids = [
-        cid
-        for modes in all_ids.values()
-        for ids in modes.values()
-        for cid in ids
-    ]
 
-    stats_map = srs.get_stats(flat_ids)
-
-    # rebuild structure without extra DB calls
+def get_vocab_stats(card_states: dict):
     return {
-        set_name: {
-            mode: extract_stats(stats_map, ids)
-            for mode, ids in modes.items()
-        }
-        for set_name, modes in all_ids.items()
-    }
-
-
-def get_vocab_stats():
-    all_ids = {
         level: {
-            key: [vocab_to_id(w, level, key) for w in vocab_list]
+            key: compute_stats(card_states, [vocab_to_id(w, level, key) for w in vocab_list])
             for key in PHASES_KEYS
         }
         for level, vocab_list in VOCAB_BY_LEVEL.items()
     }
 
-    flat_ids = [
-        cid
-        for phases in all_ids.values()
-        for ids in phases.values()
-        for cid in ids
-    ]
 
-    stats_map = srs.get_stats(flat_ids)
-
+def get_kanji_stats(card_states: dict):
     return {
         level: {
-            key: extract_stats(stats_map, ids)
-            for key, ids in phases.items()
-        }
-        for level, phases in all_ids.items()
-    }
-
-
-def get_kanji_stats():
-    all_ids = {
-        level: {
-            key: [kanji_to_id(k, level, key) for k in kanji_list]
+            key: compute_stats(card_states, [kanji_to_id(k, level, key) for k in kanji_list])
             for key in PHASES_KEYS
         }
         for level, kanji_list in KANJI_BY_LEVEL.items()
     }
 
-    flat_ids = [
-        cid
-        for phases in all_ids.values()
-        for ids in phases.values()
-        for cid in ids
-    ]
 
-    stats_map = srs.get_stats(flat_ids)
+@app.get("/api/stats")
+def get_stats():
+    # Build all card IDs across everything
+    all_ids = []
+    for kana_list in KANA_SETS.values():
+        for mode in KANA_MODES:
+            all_ids += [kana_to_id(k, mode) for k in kana_list]
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for key in PHASES_KEYS:
+            all_ids += [vocab_to_id(w, level, key) for w in vocab_list]
+    for level, kanji_list in KANJI_BY_LEVEL.items():
+        for key in PHASES_KEYS:
+            all_ids += [kanji_to_id(k, level, key) for k in kanji_list]
 
-    return {
-        level: {
-            key: extract_stats(stats_map, ids)
-            for key, ids in phases.items()
-        }
-        for level, phases in all_ids.items()
-    }
-
-def extract_stats(stats_map: dict, card_ids: list[str]) -> dict:
-    total = len(card_ids)
-    new = stats_map.get("new", 0)
-    learning = stats_map.get("learning", 0)
-    mastered = stats_map.get("mastered", 0)
-    due_now = stats_map.get("due_now", 0)
+    # ONE call to load all states
+    card_states = srs.get_bulk_stats(all_ids)
 
     return {
-        "total": total,
-        "new": new,
-        "learning": learning,
-        "mastered": mastered,
-        "due_now": due_now,
+        "kana":  get_kana_stats(card_states),
+        "vocab": get_vocab_stats(card_states),
+        "kanji": get_kanji_stats(card_states),
     }
 
 

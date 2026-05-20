@@ -248,34 +248,18 @@ class SRSEngine:
         ]
         random.shuffle(unseen)
         return unseen[:limit]
-
-    def get_stats(self, card_ids: list[str]) -> dict:
-        total = len(card_ids)
-
-        new = learning = mastered = 0
-
-        # faster lookup once
-        cards = self.cards
-
+    
+    def get_bulk_stats(self, card_ids: list[str]) -> dict:
+        result = {}
         for cid in card_ids:
-            card = cards.get(cid)
-
-            if not card or card.total_reviews == 0:
-                new += 1
+            card = self.cards.get(cid)
+            if card is None or card.total_reviews == 0:
+                result[cid] = "new"
             elif card.interval >= 21:
-                mastered += 1
+                result[cid] = "mastered"
             else:
-                learning += 1
-
-        due_now = len(self.get_due_cards(card_ids))
-
-        return {
-            "total": total,
-            "new": new,
-            "learning": learning,
-            "mastered": mastered,
-            "due_now": due_now,
-        }
+                result[cid] = "learning"
+        return result
 
     # =========================================================
     # CLEANUP
