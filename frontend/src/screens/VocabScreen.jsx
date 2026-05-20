@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
 import TopBar from '../components/TopBar'
 import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
+import { speakJapanese } from '../components/sound'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -64,12 +65,14 @@ export default function VocabScreen() {
     setSelected(choice)
     setAnswered(true)
     setShowRating(true)
+    speakJapanese(card.kana)
   }
 
   function onTypeSubmit() {
     if (submitted || !input.trim()) return
     setSubmitted(true)
     setShowRating(true)
+    speakJapanese(card.kana)
   }
 
   // ── Level selection ──
