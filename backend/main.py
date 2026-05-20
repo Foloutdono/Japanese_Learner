@@ -22,6 +22,7 @@ app.add_middleware(
 )
 
 DATABASE_URL         = os.environ.get("DATABASE_URL")
+SUPABASE_URL         = os.environ.get("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 
 srs = SRSEngine(DATABASE_URL)
