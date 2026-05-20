@@ -4,11 +4,18 @@ export function playKana(romaji) {
   audio.play().catch(() => {})
 }
 
-export function speakJapanese(text) {
-  if (!text) return
-  window.speechSynthesis.cancel() // stop any ongoing speech
-  const utterance = new SpeechSynthesisUtterance(text)
-  utterance.lang = 'ja-JP'
-  utterance.rate = 0.8
-  window.speechSynthesis.speak(utterance)
+export async function speakJapanese(text) {
+  window.speechSynthesis.cancel()
+  try {
+    // Try Puter (good quality)
+    const audio = await window.puter.ai.txt2speech(text, {
+      lang: "ja-JP"
+    });
+    audio.play();
+  } catch {
+    // Fallback to browser TTS
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "ja-JP";
+    speechSynthesis.speak(utterance);
+  }
 }
