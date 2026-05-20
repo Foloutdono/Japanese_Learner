@@ -49,7 +49,7 @@ export default function StatsScreen() {
                 <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                   {['mcq', 'type'].map(m => (
                     <div key={m} style={{ flex: 1, minWidth: 120 }}>
-                      <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                      <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginBottom: 6 }}>
                         {m === 'mcq' ? 'QCM' : 'Écriture'}
                       </div>
                       <StatCell s={modes[m]} />
@@ -60,7 +60,7 @@ export default function StatsScreen() {
             ))}
           </div>
 
-          <Section title="Vocabulaire JLPT" color="var(--text-primary)" />
+          <Section title="Vocabulaire JLPT"/>
           <div className="grid-3" style={{ marginBottom: 32 }}>
             {Object.entries(stats.vocab).map(([level, phases]) => (
               <div key={level} className="card">
@@ -69,7 +69,7 @@ export default function StatsScreen() {
                 </div>
                 {[['kk-s', 'K+K→S'], ['k-k', 'K→S'], ['s-k', 'S→K']].map(([key, label]) => (
                   <div key={key} style={{ marginBottom: 10 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
                     <StatCell s={phases[key]} />
                   </div>
                 ))}
@@ -77,7 +77,7 @@ export default function StatsScreen() {
             ))}
           </div>
 
-          <Section title="Kanji" color="var(--text-primary)" />
+          <Section title="Kanji"/>
           <div className="grid-3" style={{ marginBottom: 32 }}>
             {Object.entries(stats.kanji).map(([level, phases]) => (
               <div key={level} className="card">
@@ -86,7 +86,7 @@ export default function StatsScreen() {
                 </div>
                 {[['kk-s', 'K+K→S'], ['k-k', 'K→S'], ['s-k', 'S→K']].map(([key, label]) => (
                   <div key={key} style={{ marginBottom: 10 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
                     <StatCell s={phases[key]} />
                   </div>
                 ))}
@@ -94,7 +94,7 @@ export default function StatsScreen() {
             ))}
           </div>
 
-          <Section title="Résumé global" color="var(--text-primary)" />
+          <Section title="Résumé global" />
           <GlobalSummary stats={stats} />
 
         </div>
@@ -106,7 +106,7 @@ export default function StatsScreen() {
 function Section({ title}) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 40, fontWeight: 'bold', color: 'var(--text-primary)', alignSelf: 'center' }}>{title}</div>
+      <div style={{ fontSize: 40, fontWeight: 'bold', color: 'var(--text-primary)', textAlign: 'center' }}>{title}</div>
       <div style={{ height: 1, background: 'var(--border)', marginTop: 8 }} />
     </div>
   )
@@ -126,7 +126,7 @@ function StatCell({ s }) {
           <div style={{ width: `${learningPct}%`, background: 'var(--accent2)' }} />
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 10, fontSize: 11 }}>
+      <div style={{ display: 'flex', gap: 10, fontSize: 15 }}>
         <span style={{ color: 'var(--warning)' }}>N {s.new}</span>
         <span style={{ color: 'var(--accent2)' }}>A {s.learning}</span>
         <span style={{ color: 'var(--success)' }}>M {s.mastered}</span>
