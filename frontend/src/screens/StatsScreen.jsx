@@ -45,11 +45,11 @@ export default function StatsScreen() {
           <div className="grid-2" style={{ marginBottom: 32 }}>
             {Object.entries(stats.kana).map(([setName, modes]) => (
               <div key={setName} className="card">
-                <div style={{ fontWeight: 'bold', marginBottom: 12 }}>{setName}</div>
+                <div style={{ fontWeight: 'bold', marginBottom: 12, fontSize: 18 }}>{setName}</div>
                 <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                   {['mcq', 'type'].map(m => (
                     <div key={m} style={{ flex: 1, minWidth: 120 }}>
-                      <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                      <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 6 }}>
                         {m === 'mcq' ? 'QCM' : 'Écriture'}
                       </div>
                       <StatCell s={modes[m]} />

@@ -93,7 +93,7 @@ export default function KanaScreen() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center' }}>
             {SETS.map(s => (
               <button key={s} onClick={() => startSession(s)}
-                style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 15, padding: '20px 32px' }}>
+                className='button-mcq'>
                 {s}
               </button>
             ))}
