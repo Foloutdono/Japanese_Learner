@@ -18,7 +18,7 @@ export function MCQButton({ choice, correct, selected, answered, onClick }) {
   const isCorrect  = choice === correct
   const isSelected = choice === selected
   let bg = 'var(--bg-card)'
-  if (answered && isCorrect)               bg = 'var(--success)'
+  if (answered && isCorrect)                bg = 'var(--success)'
   if (answered && isSelected && !isCorrect) bg = 'var(--danger)'
 
   return (
@@ -27,12 +27,19 @@ export function MCQButton({ choice, correct, selected, answered, onClick }) {
       style={{
         background: bg,
         color: 'var(--text-primary)',
-        fontSize: 60,
-        minWidth: 120,
-        padding: '80px 100px',
+        fontSize: 'clamp(16px, 3vw, 28px)',
+        padding: 0,
+        aspectRatio: '2 / 1',
+        width: '100%',
+        borderRadius: 12,
         textAlign: 'center',
-        transition: 'background 0.15s',
+        fontWeight: 'bold',
+        transition: 'background 0.15s, transform 0.1s',
+        cursor: answered ? 'default' : 'pointer',
+        border: '2px solid var(--border)',
       }}
+      onMouseEnter={e => { if (!answered) e.currentTarget.style.transform = 'scale(1.02)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
     >
       {choice}
     </button>
@@ -42,7 +49,14 @@ export function MCQButton({ choice, correct, selected, answered, onClick }) {
 // ── MCQ choices grid ──────────────────────────────────────
 export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gap: 12,
+      width: '100%',
+      maxWidth: 600,
+      margin: '0 auto',
+    }}>
       {choices.map(choice => (
         <MCQButton
           key={choice}
