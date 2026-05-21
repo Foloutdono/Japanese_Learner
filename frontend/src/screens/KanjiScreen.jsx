@@ -147,7 +147,7 @@ export default function KanjiScreen({ session }) {
   // ── Quiz ──
   return (
     <div style={{ minHeight: '100vh' }}>
-      <KanjiTopBar onBack={() => setPhase(null)} title={`Kanji ${level} — Phase ${phase}`} />
+      <KanjiTopBar onBack={() => setPhase(null)} title={`Kanji ${level} — Phase ${phase}`}/>
 
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
 

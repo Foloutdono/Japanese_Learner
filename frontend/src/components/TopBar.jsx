@@ -6,11 +6,11 @@ export default function TopBar({ onBack, title }) {
     </div>
   )
 }
-export function KanjiTopBar({ onBack, title }) {
+export function KanjiTopBar({ onBack, title}) {
   <div className="top-bar">
     <button className="btn-back" onClick={() => setPhase(null)}>← Menu</button>
     <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>
-      {`Kanji ${level} — Phase ${phase}`}
+      {title}
     </span>
     <button
       onClick={() => setDrawingEnabled(d => !d)}
