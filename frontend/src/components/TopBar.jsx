@@ -8,12 +8,12 @@ export function TopBar({ onBack, title }) {
 }
 export function KanjiTopBar({ onBack, onClick, title, drawingEnabled}) {
   <div className="top-bar">
-    <button className="btn-back" onClick={() => setPhase(null)}>← Menu</button>
+    <button className="btn-back" onClick={onBack}>← Menu</button>
     <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>
       {title}
     </span>
     <button
-      onClick={() => setDrawingEnabled(d => !d)}
+      onClick={onClick}
       style={{
         background: drawingEnabled ? 'var(--warning)' : 'var(--bg-card)',
         color: drawingEnabled ? '#111' : 'var(--text-secondary)',
