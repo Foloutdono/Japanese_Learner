@@ -121,7 +121,7 @@ export default function KanjiScreen({ session }) {
   if (!phase) {
     return (
       <div style={{ minHeight: '100vh' }}>
-        <TopBar onBack={() => setLevel(null)} title={`Kanji ${level}`} />
+        <KanjiTopBar onBack={() => setLevel(null)} title={`Kanji ${level}`} />
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
             Choisissez une phase
@@ -147,7 +147,7 @@ export default function KanjiScreen({ session }) {
   // ── Quiz ──
   return (
     <div style={{ minHeight: '100vh' }}>
-      <TopBar onBack={() => setPhase(null)} title={`Kanji ${level} — Phase ${phase}`} />
+      <KanjiTopBar onBack={() => setPhase(null)} title={`Kanji ${level} — Phase ${phase}`} />
 
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
 
