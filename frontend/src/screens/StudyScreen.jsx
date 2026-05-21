@@ -60,7 +60,7 @@ export default function StudyScreen({ session }) {
 
     const mixParam = mixLevels.join(',')
     apiFetch(
-      api(`/api/decks/${deck_id}/study?mode=${mode}&mix_levels=${mixParam}`),
+      `/api/decks/${deck_id}/study?mode=${mode}&mix_levels=${mixParam}`,
       session
     )
       .then(r => r.json())
