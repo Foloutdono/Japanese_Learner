@@ -5,3 +5,4 @@ PyJWT
 cryptography
 httpx
 aiofiles
+python-multipart
