@@ -5,6 +5,7 @@ import RatingBar from '../components/RatingBar'
 import TopBar from '../components/TopBar'
 import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
 import { speakJapanese } from '../components/sound'
+import DrawingCanvas from '../components/DrawingCanvas'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -27,6 +28,7 @@ export default function KanjiScreen({ session }) {
   const [input, setInput]           = useState('')
   const [submitted, setSubmitted]   = useState(false)
   const [showRating, setShowRating] = useState(false)
+  const [showDrawing, setShowDrawing] = useState(false)
 
   function fetchCard(lvl, ph) {
     setLoading(true)
@@ -35,6 +37,7 @@ export default function KanjiScreen({ session }) {
     setInput('')
     setSubmitted(false)
     setShowRating(false)
+    setShowDrawing(false)
 
     apiFetch(`/api/kanji/card?level=${lvl}&phase=${ph}`, session)
       .then(r => r.json())
@@ -58,6 +61,25 @@ export default function KanjiScreen({ session }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),
     }).then(() => fetchCard(level, phase))
+  }
+
+  function postReview(quality) {
+    if (quality <= 2 && card?.kanji) {
+      setShowRating(false)
+      setShowDrawing(true)
+      // still post the review in background
+      apiFetch('/api/kanji/review', session, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),
+      })
+    } else {
+      apiFetch('/api/kanji/review', session, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),
+      }).then(() => fetchCard(level, phase))
+    }
   }
 
   function onMCQAnswer(choice) {
@@ -218,6 +240,13 @@ export default function KanjiScreen({ session }) {
             )}
 
             <RatingBar active={showRating} onRate={postReview} />
+
+            {showDrawing && (
+              <DrawingCanvas
+                kanji={card.kanji}
+                onDone={() => fetchCard(level, phase)}
+              />
+            )}
           </>
         )}
       </div>
