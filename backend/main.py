@@ -287,22 +287,34 @@ def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None 
 # ── Dictionnary ──────────────────────────────────────────────────
 
 @app.get("/api/dictionary")
-def get_dictionary(q: str = ""):
-    results = []
+def get_dictionary(q: str = "", page: int = 0, limit: int = 50):
+    all_results = []
     for level, kanji_list in KANJI_BY_LEVEL.items():
         for k in kanji_list:
             if q == "" or (
                 q in k.get("kanji", "") or
                 q in k.get("kana", "") or
-                q in k.get("meaning", "").lower()
+                q.lower() in k.get("meaning", "").lower()
             ):
                 codepoint = hex(ord(k["kanji"]))[2:].zfill(5)
-                results.append({
-                    "kanji":       k["kanji"],
-                    "kana":        k.get("kana", ""),
-                    "meaning":     k.get("meaning", ""),
+                all_results.append({
+                    "kanji":        k["kanji"],
+                    "kana":         k.get("kana", ""),
+                    "meaning":      k.get("meaning", ""),
                     "stroke_count": k.get("stroke_count", ""),
-                    "level":       level,
-                    "svg_url":     f"/kanjivg/{codepoint}.svg",
+                    "level":        level,
+                    "svg_url":      f"/kanjivg/{codepoint}.svg",
                 })
-    return {"results": results, "total": len(results)}
+
+    total   = len(all_results)
+    start   = page * limit
+    end     = start + limit
+    page_results = all_results[start:end]
+
+    return {
+        "results": page_results,
+        "total":   total,
+        "page":    page,
+        "limit":   limit,
+        "has_more": end < total,
+    }
