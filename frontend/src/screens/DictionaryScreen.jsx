@@ -169,17 +169,17 @@ export default function DictionaryScreen() {
                     }}>
                       {entry.kanji}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                    <div style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
                       {shortKana(entry.kana)}
                     </div>
                     <div style={{
-                      fontSize: 11, color: 'var(--text-primary)',
+                      fontSize: 15, color: 'var(--text-primary)',
                       overflow: 'hidden', textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                     }}>
                       {shortMeaning(entry.meaning)}
                     </div>
-                    <div style={{ fontSize: 10, color: 'var(--accent2)', fontWeight: 'bold' }}>
+                    <div style={{ fontSize: 15, color: 'var(--accent2)', fontWeight: 'bold' }}>
                       {entry.level}
                     </div>
                   </div>
