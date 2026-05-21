@@ -2,7 +2,7 @@ import { apiFetch } from '../api'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
-import { KanjiTopBar } from '../components/TopBar'
+import { KanjiTopBar, TopBar } from '../components/TopBar'
 import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
 import { speakJapanese } from '../components/sound'
 import DrawingCanvas from '../components/DrawingCanvas'
@@ -95,7 +95,7 @@ export default function KanjiScreen({ session }) {
   if (!level) {
     return (
       <div style={{ minHeight: '100vh' }}>
-        <KanjiTopBar onBack={() => navigate('/')} title="Kanji" drawingEnabled={drawingEnabled}/>
+        <TopBar onBack={() => navigate('/')} title="Kanji"/>
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
             Choisissez un niveau
@@ -121,7 +121,7 @@ export default function KanjiScreen({ session }) {
   if (!phase) {
     return (
       <div style={{ minHeight: '100vh' }}>
-        <KanjiTopBar onBack={() => setLevel(null)} title={`Kanji ${level}`} drawingEnabled={drawingEnabled}/>
+        <TopBar onBack={() => setLevel(null)} title={`Kanji ${level}`}/>
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
             Choisissez une phase
@@ -147,7 +147,8 @@ export default function KanjiScreen({ session }) {
   // ── Quiz ──
   return (
     <div style={{ minHeight: '100vh' }}>
-      <KanjiTopBar onBack={() => setPhase(null)} title={`Kanji ${level} — Phase ${phase}`} drawingEnabled={drawingEnabled}/>
+      <KanjiTopBar onBack={() => setPhase(null)} onClick={() => setDrawingEnabled(d => !d)}
+      title={`Kanji ${level} — Phase ${phase}`} drawingEnabled={drawingEnabled}/>
 
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
 
