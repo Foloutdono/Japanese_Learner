@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopBar from '../components/TopBar'
+import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 
 const DECK_TYPES = [

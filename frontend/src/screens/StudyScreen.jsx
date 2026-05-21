@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import TopBar from '../components/TopBar'
+import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
 import DrawingCanvas from '../components/DrawingCanvas'

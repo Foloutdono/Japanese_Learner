@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import TopBar from '../components/TopBar'
+import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 
 export default function DeckDetailScreen({ session }) {
