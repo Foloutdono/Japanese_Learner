@@ -7,21 +7,23 @@ export function TopBar({ onBack, title }) {
   )
 }
 export function KanjiTopBar({ onBack, onClick, title, drawingEnabled}) {
-  <div className="top-bar">
-    <button className="btn-back" onClick={onBack}>← Menu</button>
-    <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>
-      {title}
-    </span>
-    <button
-      onClick={onClick}
-      style={{
-        background: drawingEnabled ? 'var(--warning)' : 'var(--bg-card)',
-        color: drawingEnabled ? '#111' : 'var(--text-secondary)',
-        fontSize: 12, padding: '6px 12px',
-      }}
-      title="Activer/désactiver la pratique d'écriture"
-    >
-      ✏️ {drawingEnabled ? 'Écriture ON' : 'Écriture OFF'}
-    </button>
-  </div>
+  return (
+    <div className="top-bar">
+      <button className="btn-back" onClick={onBack}>← Menu</button>
+      <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>
+        {title}
+      </span>
+      <button
+        onClick={onClick}
+        style={{
+          background: drawingEnabled ? 'var(--warning)' : 'var(--bg-card)',
+          color: drawingEnabled ? '#111' : 'var(--text-secondary)',
+          fontSize: 12, padding: '6px 12px',
+        }}
+        title="Activer/désactiver la pratique d'écriture"
+      >
+        ✏️ {drawingEnabled ? 'Écriture ON' : 'Écriture OFF'}
+      </button>
+    </div>
+  )
 }
