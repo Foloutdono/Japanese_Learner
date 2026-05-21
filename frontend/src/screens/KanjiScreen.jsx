@@ -2,7 +2,7 @@ import { apiFetch } from '../api'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
-import TopBar from '../components/TopBar'
+import { KanjiTopBar } from '../components/TopBar'
 import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
 import { speakJapanese } from '../components/sound'
 import DrawingCanvas from '../components/DrawingCanvas'
@@ -29,6 +29,7 @@ export default function KanjiScreen({ session }) {
   const [submitted, setSubmitted]   = useState(false)
   const [showRating, setShowRating] = useState(false)
   const [showDrawing, setShowDrawing] = useState(false)
+  const [drawingEnabled, setDrawingEnabled] = useState(true)
 
   function fetchCard(lvl, ph) {
     setLoading(true)
@@ -56,15 +57,8 @@ export default function KanjiScreen({ session }) {
   }
 
   function postReview(quality) {
-    apiFetch('/api/kanji/review', session, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),
-    }).then(() => fetchCard(level, phase))
-  }
-
-  function postReview(quality) {
-    if (quality <= 2 && card?.kanji) {
+    const wrongAnswer = quality < 2 && card?.kanji
+    if (wrongAnswer && drawingEnabled) {
       setShowRating(false)
       setShowDrawing(true)
       // still post the review in background
@@ -101,7 +95,7 @@ export default function KanjiScreen({ session }) {
   if (!level) {
     return (
       <div style={{ minHeight: '100vh' }}>
-        <TopBar onBack={() => navigate('/')} title="Kanji" />
+        <KanjiTopBar onBack={() => navigate('/')} title="Kanji" />
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
             Choisissez un niveau
@@ -244,6 +238,7 @@ export default function KanjiScreen({ session }) {
             {showDrawing && (
               <DrawingCanvas
                 kanji={card.kanji}
+                meaning={card.meaning}
                 onDone={() => fetchCard(level, phase)}
               />
             )}
