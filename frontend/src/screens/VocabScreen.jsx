@@ -2,7 +2,7 @@ import { apiFetch } from '../api'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingBar from '../components/RatingBar'
-import TopBar from '../components/TopBar'
+import { TopBar } from '../components/TopBar'
 import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
 import { speakJapanese } from '../components/sound'
 

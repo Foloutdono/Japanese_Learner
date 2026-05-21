@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import TopBar from '../components/TopBar'
+import { TopBar } from '../components/TopBar'
 import { api } from '../api'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
