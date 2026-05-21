@@ -83,6 +83,15 @@ export default function DictionaryScreen() {
     return meaning?.split(';')[0] ?? ''
   }
 
+  function shortKana(kana) {
+    if (!kana) return '';
+
+    const firstKana = kana.split(';')[0].trim();
+
+    // Return up to 3 characters safely
+    return Array.from(firstKana).slice(0, 3).join('');
+  }
+
   return (
     <div style={{ minHeight: '100vh' }}>
       <TopBar onBack={() => navigate('/')} title="Dictionnaire" />
@@ -161,7 +170,7 @@ export default function DictionaryScreen() {
                       {entry.kanji}
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-                      {entry.kana}
+                      {shortKana(entry.kana)}
                     </div>
                     <div style={{
                       fontSize: 11, color: 'var(--text-primary)',
