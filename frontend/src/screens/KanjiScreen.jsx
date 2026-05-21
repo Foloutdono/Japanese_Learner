@@ -95,7 +95,7 @@ export default function KanjiScreen({ session }) {
   if (!level) {
     return (
       <div style={{ minHeight: '100vh' }}>
-        <KanjiTopBar onBack={() => navigate('/')} title="Kanji" />
+        <KanjiTopBar onBack={() => navigate('/')} title="Kanji" drawingEnabled={drawingEnabled}/>
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
             Choisissez un niveau
@@ -121,7 +121,7 @@ export default function KanjiScreen({ session }) {
   if (!phase) {
     return (
       <div style={{ minHeight: '100vh' }}>
-        <KanjiTopBar onBack={() => setLevel(null)} title={`Kanji ${level}`} />
+        <KanjiTopBar onBack={() => setLevel(null)} title={`Kanji ${level}`} drawingEnabled={drawingEnabled}/>
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
             Choisissez une phase
@@ -147,7 +147,7 @@ export default function KanjiScreen({ session }) {
   // ── Quiz ──
   return (
     <div style={{ minHeight: '100vh' }}>
-      <KanjiTopBar onBack={() => setPhase(null)} title={`Kanji ${level} — Phase ${phase}`}/>
+      <KanjiTopBar onBack={() => setPhase(null)} title={`Kanji ${level} — Phase ${phase}`} drawingEnabled={drawingEnabled}/>
 
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
 
