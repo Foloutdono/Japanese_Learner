@@ -14,6 +14,9 @@ import httpx
 from fastapi.staticfiles import StaticFiles
 import uuid
 import psycopg2.extras
+import csv
+import io
+from fastapi import UploadFile, File
 
 app = FastAPI()
 
@@ -656,4 +659,68 @@ def get_deck_stats(deck_id: str, mode: str = "flashcard",
         "learning": sum(1 for s in states.values() if s == "learning"),
         "mastered": sum(1 for s in states.values() if s == "mastered"),
         "due_now":  due_now,
+    }
+
+@app.post("/api/decks/{deck_id}/import")
+async def import_cards(
+    deck_id: str,
+    file: UploadFile = File(...),
+    user_id: str = Depends(get_user_id)
+):
+    # Verify deck belongs to user
+    conn = db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT type FROM decks WHERE id = %s AND user_id = %s",
+                       (deck_id, user_id))
+            deck = cur.fetchone()
+            if not deck:
+                raise HTTPException(status_code=404, detail="Deck not found")
+    finally:
+        conn.close()
+
+    # Parse CSV
+    content = await file.read()
+    try:
+        text = content.decode('utf-8-sig')  # handle BOM from Excel
+    except UnicodeDecodeError:
+        text = content.decode('latin-1')
+
+    reader  = csv.DictReader(io.StringIO(text))
+    headers = [h.strip().lower() for h in (reader.fieldnames or [])]
+
+    if 'front' not in headers or 'back' not in headers:
+        raise HTTPException(
+            status_code=400,
+            detail="Le fichier CSV doit contenir les colonnes 'front' et 'back'"
+        )
+
+    inserted = 0
+    errors   = []
+    conn     = db_conn()
+
+    try:
+        with conn.cursor() as cur:
+            for i, row in enumerate(reader, start=2):
+                front = row.get('front', '').strip()
+                back  = row.get('back',  '').strip()
+                if not front or not back:
+                    errors.append(f"Ligne {i}: front/back manquant — ignorée")
+                    continue
+                kana  = row.get('kana',  '').strip()
+                hint  = row.get('hint',  '').strip()
+                notes = row.get('notes', '').strip()
+                cur.execute("""
+                    INSERT INTO custom_cards (deck_id, user_id, front, back, kana, hint, notes)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (deck_id, user_id, front, back, kana, hint, notes))
+                inserted += 1
+        conn.commit()
+    finally:
+        conn.close()
+
+    return {
+        "inserted": inserted,
+        "errors":   errors,
+        "ok":       True,
     }

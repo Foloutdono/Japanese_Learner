@@ -3,6 +3,7 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 
+
 export default function DeckDetailScreen({ session }) {
   const navigate          = useNavigate()
   const { deck_id }       = useParams()
@@ -14,6 +15,9 @@ export default function DeckDetailScreen({ session }) {
   const [adding, setAdding]       = useState(false)
   const [editing, setEditing]     = useState(null) // card id being edited
   const [form, setForm]           = useState({ front: '', back: '', kana: '', hint: '', notes: '' })
+
+  const [importing, setImporting]   = useState(false)
+  const [importResult, setImportResult] = useState(null)
 
   useEffect(() => { fetchCards() }, [])
 
@@ -76,6 +80,37 @@ export default function DeckDetailScreen({ session }) {
       .then(() => setCards(prev => prev.filter(c => c.id !== id)))
   }
 
+  function handleCSVImport(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setImporting(true)
+    setImportResult(null)
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    fetch(api(`/api/decks/${deck_id}/import`), {
+        method: 'POST',
+        headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        },
+        body: formData,
+    })
+        .then(r => r.json())
+        .then(data => {
+        setImportResult(data)
+        setImporting(false)
+        if (data.inserted > 0) fetchCards()
+        })
+        .catch(() => {
+        setImportResult({ error: 'Erreur lors de l\'import' })
+        setImporting(false)
+        })
+
+    // Reset input so same file can be re-imported
+    e.target.value = ''
+  }
+
   const isVocabOrKanji = deck?.type === 'vocab' || deck?.type === 'kanji'
 
   return (
@@ -100,7 +135,63 @@ export default function DeckDetailScreen({ session }) {
               + Ajouter une carte
             </button>
           </div>
+          <label style={{
+            background: 'var(--bg-panel)', color: 'var(--text-primary)',
+            fontSize: 13, padding: '10px 20px', borderRadius: 8,
+            cursor: 'pointer', fontWeight: 'bold',
+            opacity: importing ? 0.7 : 1,
+            }}>
+            {importing ? '⏳ Import...' : '📥 Importer CSV'}
+            <input
+                type="file"
+                accept=".csv"
+                onChange={handleCSVImport}
+                style={{ display: 'none' }}
+                disabled={importing}
+            />
+          </label>
         </div>
+
+        {importResult && (
+            <div style={{
+                background: importResult.error ? 'var(--danger)' : 'var(--bg-card)',
+                borderRadius: 8, padding: '12px 16px', marginBottom: 16,
+                borderLeft: `4px solid ${importResult.error ? 'var(--danger)' : 'var(--success)'}`,
+            }}>
+                {importResult.error ? (
+                <div style={{ color: 'var(--danger)' }}>{importResult.error}</div>
+                ) : (
+                <>
+                    <div style={{ color: 'var(--success)', fontSize: 14 }}>
+                    ✅ {importResult.inserted} carte{importResult.inserted !== 1 ? 's' : ''} importée{importResult.inserted !== 1 ? 's' : ''}
+                    </div>
+                    {importResult.errors?.length > 0 && (
+                    <div style={{ marginTop: 8 }}>
+                        {importResult.errors.map((e, i) => (
+                        <div key={i} style={{ fontSize: 12, color: 'var(--warning)' }}>{e}</div>
+                        ))}
+                    </div>
+                    )}
+                </>
+                )}
+                <button onClick={() => setImportResult(null)}
+                style={{ background: 'transparent', color: 'var(--text-secondary)', fontSize: 11, marginTop: 8, padding: 0 }}>
+                ✕ Fermer
+                </button>
+            </div>
+        )}
+
+        <details style={{ marginBottom: 16, color: 'var(--text-secondary)', fontSize: 12 }}>
+            <summary style={{ cursor: 'pointer' }}>Format CSV attendu</summary>
+            <pre style={{
+                background: 'var(--bg-card)', padding: 12, borderRadius: 6,
+                marginTop: 8, overflowX: 'auto', fontSize: 11,
+            }}>
+                {deck?.type === 'flashcard'
+                ? 'front,back,hint,notes\n犬,dog,,animal commun\n猫,cat,félin,'
+                : 'front,back,kana,hint,notes\n犬,dog,いぬ,,\n猫,cat,ねこ,,félin'}
+            </pre>
+        </details>
 
         {/* Add / Edit form */}
         {adding && (
