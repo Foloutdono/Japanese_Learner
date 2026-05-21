@@ -37,6 +37,13 @@ const cards = [
     path: '/stats',
     color: '#2d6a4f',
   },
+  {
+    icon: '📚',
+    title: 'Mes Decks',
+    desc: 'Cartes personnalisées\nFlashcards & Kanji\nMélangez avec le contenu JLPT',
+    path: '/decks',
+    color: '#6c5ce7',
+  },
 ]
 
 export default function HomeScreen() {
