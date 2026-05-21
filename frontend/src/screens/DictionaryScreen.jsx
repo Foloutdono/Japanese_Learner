@@ -80,7 +80,7 @@ export default function DictionaryScreen() {
 
   // Short meaning — first part before comma
   function shortMeaning(meaning) {
-    return meaning?.split(',')[0] ?? ''
+    return meaning?.split(';')[0] ?? ''
   }
 
   return (
