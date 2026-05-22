@@ -35,6 +35,12 @@ export const translations = {
         loading:          'Chargement...',
 
         // Quiz
+        phase1:          'Phase 1',
+        phase1Desc:      'Kanji + Kana → Sens',
+        phase2:          'Phase 2',
+        phase2Desc:      'Kanji → Sens',
+        phase3:          'Phase 3',
+        phase3Desc:      'Sens → Kanji (écriture)',
         hiraganaBase:   'Hiragana (de base)',
         hiraganaCombinations: 'Hiragana (combinaisons)',
         katakanaBase:   'Katakana (de base)',
@@ -210,6 +216,12 @@ export const translations = {
         loading:          'Loading...',
 
         // Quiz
+        phase1:          'Phase 1',
+        phase1Desc:      'Kanji + Kana → Meaning',
+        phase2:          'Phase 2',
+        phase2Desc:      'Kanji → Meaning',
+        phase3:          'Phase 3',
+        phase3Desc:      'Meaning → Kanji (writing)',
         hiraganaBase:   'Hiragana (basic)',
         hiraganaCombinations: 'Hiragana (combinaisons)',
         katakanaBase:   'Katakana (basic)',

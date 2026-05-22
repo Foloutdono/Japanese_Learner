@@ -6,13 +6,16 @@ import { KanjiTopBar, TopBar } from '../components/TopBar'
 import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
 import { speakJapanese } from '../components/sound'
 import DrawingCanvas from '../components/DrawingCanvas'
+import { useLang } from '../LangContext'
+
+const { t } = useLang()
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
 const PHASES = [
-  { id: 1, label: 'Phase 1', desc: 'Kanji + Kana → Sens' },
-  { id: 2, label: 'Phase 2', desc: 'Kanji → Sens' },
-  { id: 3, label: 'Phase 3', desc: 'Sens → Kanji (écriture)' },
+  { id: 1, label: t.phase1, desc: t.phase1Desc },
+  { id: 2, label: t.phase2, desc: t.phase2Desc },
+  { id: 3, label: t.phase3, desc: t.phase3Desc },
 ]
 
 export default function KanjiScreen({ session }) {
@@ -98,7 +101,7 @@ export default function KanjiScreen({ session }) {
         <TopBar onBack={() => navigate('/')} title="Kanji"/>
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-            Choisissez un niveau
+            {t.chooseLevel}
           </div>
           <div className="grid-5" style={{ maxWidth: 600, margin: '0 auto' }}>
             {LEVELS.map(l => (
@@ -124,7 +127,7 @@ export default function KanjiScreen({ session }) {
         <TopBar onBack={() => setLevel(null)} title={`Kanji ${level}`}/>
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-            Choisissez une phase
+            {t.choosePhase}
           </div>
           <div className="grid-3" style={{ maxWidth: 700, margin: '0 auto' }}>
             {PHASES.map(p => (
