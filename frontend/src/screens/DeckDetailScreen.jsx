@@ -151,18 +151,18 @@ export default function DeckDetailScreen({ session }) {
 								style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', fontSize: 13 }}>
 								+ Ajouter
 							</button>
-							<button
-								onClick={() => setShowImport(true)}
-								style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', fontSize: 13 }}>
-								📥 Importer
-							</button>
-							{cards.length > 0 && (
+                            {cards.length > 0 && (
 								<button
 									onClick={() => setSelectMode(true)}
 									style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', fontSize: 13 }}>
 									☑ Sélectionner
 								</button>
 							)}
+							<button
+								onClick={() => setShowImport(true)}
+								style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', fontSize: 13 }}>
+								📥 Importer
+							</button>
 						</div>
 					)}
 

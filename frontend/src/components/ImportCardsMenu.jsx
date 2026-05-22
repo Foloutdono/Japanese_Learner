@@ -34,10 +34,10 @@ export default function ImportCardsMenu({ onImport, onClose, deckType }) {
         .map(line => {
             const parts = line.split(ts)
             return {
-            front: parts[0]?.trim() ?? '',
-            back:  parts[1]?.trim() ?? '',
-            kana:  parts[2]?.trim() ?? '',
-            hint:  parts[3]?.trim() ?? '',
+                front: parts[0]?.trim() ?? '',
+                back:  parts[1]?.trim() ?? '',
+                hint:  parts[2]?.trim() ?? '',
+                notes:  parts[3]?.trim() ?? '',
             }
         })
         .filter(c => c.front && c.back)
