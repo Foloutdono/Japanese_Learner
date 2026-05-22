@@ -7,6 +7,12 @@ export const translations = {
         start:            'Commencer →',
 
         // Home cards
+        kanaTitle:        'Kana',
+        vocabTitle:       'Vocabulaire JLPT',
+        kanjiTitle:       'Kanji',
+        statsTitle:       'Statistiques',
+        decksTitle:       'Mes Decks',
+        dictionaryTitle:  'Dictionnaire',
         kanaDesc:         'Hiragana & Katakana\nde base + combinaisons\nQCM puis écriture libre',
         vocabDesc:        'N5 → N1\nKanji + Kana → Sens\nProgression par phases',
         kanjiDesc:        'Apprentissage des Kanji\nN5 → N1\nExercices d\'écriture',
@@ -29,6 +35,10 @@ export const translations = {
         loading:          'Chargement...',
 
         // Quiz
+        hiraganaBase:   'Hiragana (de base)',
+        hiraganaCombinations: 'Hiragana (combinaisons)',
+        katakanaBase:   'Katakana (de base)',
+        katakanaCombinations: 'Katakana (combinaisons)',
         chooseSet:        'Choisissez une série',
         chooseLevel:      'Choisissez un niveau',
         choosePhase:      'Choisissez une phase',
@@ -172,6 +182,12 @@ export const translations = {
         start:            'Start →',
 
         // Home cards
+        kanaTitle:        'Kana',
+        vocabTitle:       'Vocabulary JLPT',
+        kanjiTitle:       'Kanji',
+        statsTitle:       'Statistics',
+        decksTitle:       'My Decks',
+        dictionaryTitle:  'Dictionary',
         kanaDesc:         'Hiragana & Katakana\nbasic + combinations\nMCQ then free writing',
         vocabDesc:        'N5 → N1\nKanji + Kana → Meaning\nPhase progression',
         kanjiDesc:        'Kanji learning\nN5 → N1\nWriting exercises',
@@ -194,6 +210,10 @@ export const translations = {
         loading:          'Loading...',
 
         // Quiz
+        hiraganaBase:   'Hiragana (basic)',
+        hiraganaCombinations: 'Hiragana (combinaisons)',
+        katakanaBase:   'Katakana (basic)',
+        katakanaCombinations: 'Katakana (combinaisons)',
         chooseSet:        'Choose a set',
         chooseLevel:      'Choose a level',
         choosePhase:      'Choose a phase',
