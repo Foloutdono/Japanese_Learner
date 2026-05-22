@@ -329,6 +329,7 @@ export default function DeckDetailScreen({ session }) {
                     importing={importing}
                     setImporting={setImporting}
                     doImport={doImport}
+                    setShowImport={setShowImport}
                 />
             )}
         </div>

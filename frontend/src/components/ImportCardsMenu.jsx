@@ -66,7 +66,7 @@ function ImportCardsFooter({ doImport, setShowImport, importPreview, importing})
     )
 }
 
-function ImportCardsPreview(importPreview) {
+function ImportCardsPreview({importPreview}) {
     return (
         <div style={{ marginTop: 24 }}>
             <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>
@@ -104,7 +104,7 @@ function ImportCardsPreview(importPreview) {
     )
 }
 
-function ImportCardsSeparators(termSep, setTermSep, customTerm, setCustomTerm, cardSep, setCardSep, customCard, setCustomCard) {
+function ImportCardsSeparators({ termSep, setTermSep, customTerm, setCustomTerm, cardSep, setCardSep, customCard, setCustomCard }) {
     return (
         <div style={{ display: 'flex', gap: 48, marginTop: 20, flexWrap: 'wrap' }}>
 
@@ -152,7 +152,7 @@ function ImportCardsSeparators(termSep, setTermSep, customTerm, setCustomTerm, c
         </div>
     )
 }
-function ImportsCardsHeader(setShowImport) {
+function ImportsCardsHeader({ setShowImport }) {
     return (
         <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
