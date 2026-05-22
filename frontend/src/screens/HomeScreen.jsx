@@ -5,57 +5,54 @@ import { LANGUAGES } from '../i18n'
 
 
 export default function HomeScreen() {
-  const { t } = useLang()
+  const { t, lang, switchLang } = useLang()
+  const next = LANGUAGES.find(l => l.code !== lang) ?? LANGUAGES[0]
 
+  const navigate = useNavigate()
   const cards = [
     {
       icon: 'あ',
-      title: t.kanaTitle,
-      desc: t.kanaDesc,
+      title: t?.kanaTitle ?? '',
+      desc: t?.kanaDesc ?? '',
       path: '/kana',
       color: '#e94560',
     },
     {
       icon: '語',
-      title: t.vocabTitle,
-      desc: t.vocabDesc,
+      title: t?.vocabTitle ?? '',
+      desc: t?.vocabDesc ?? '',
       path: '/vocab',
       color: '#4cc9f0',
     },
     {
       icon: '漢',
-      title: t.kanjiTitle,
-      desc: t.kanjiDesc,
+      title: t?.kanjiTitle ?? '',
+      desc: t?.kanjiDesc ?? '',
       path: '/kanji',
       color: '#533483',
     },
     {
       icon: '辞',
-      title: t.dictionaryTitle,
-      desc: t.dictionaryDesc,
+      title: t?.dictionaryTitle ?? '',
+      desc: t?.dictionaryDesc ?? '',
       path: '/dictionary',
       color: '#e17055',
     },
     {
       icon: '📊',
-      title: t.statsTitle,
-      desc: t.statsDesc,
+      title: t?.statsTitle ?? '',
+      desc: t?.statsDesc ?? '',
       path: '/stats',
       color: '#2d6a4f',
     },
     {
       icon: '📚',
-      title: t.decksTitle,
-      desc: t.decksDesc,
+      title: t?.decksTitle ?? '',
+      desc: t?.decksDesc ?? '',
       path: '/decks',
       color: '#6c5ce7',
     },
   ]
-
-  const { lang, switchLang } = useLang()
-  const next = LANGUAGES.find(l => l.code !== lang) ?? LANGUAGES[0]
-
-  const navigate = useNavigate()
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -66,10 +63,10 @@ export default function HomeScreen() {
           日本語
         </div>
         <div style={{ fontSize: 22, fontWeight: 'bold', marginTop: 8 }}>
-          {t.learnJapanese}
+          {t?.learnJapanese ?? ''}
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8 }}>
-          {t.appDesc}
+          {t?.appDesc ?? ''}
         </div>
         <button
           onClick={() => supabase.auth.signOut()}
@@ -79,7 +76,7 @@ export default function HomeScreen() {
             fontSize: 12, marginTop: 12,
           }}
         >
-          {t.signOut}
+          {t?.signOut ?? ''}
         </button>
         <button
           onClick={() => switchLang(next.code)}
@@ -90,7 +87,7 @@ export default function HomeScreen() {
           }}
           title={next.label}
         >
-          {next.flag} {next.label}
+          {t?.switchLang ?? ''} {next.flag} {next.label}
         </button>
       </header>
 
