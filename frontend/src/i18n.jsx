@@ -7,6 +7,7 @@ export const translations = {
         start:            'Commencer →',
 
         // Home cards
+        signOut:         'Déconnexion',
         kanaTitle:        'Kana',
         vocabTitle:       'Vocabulaire JLPT',
         kanjiTitle:       'Kanji',
@@ -182,6 +183,7 @@ export const translations = {
         start:            'Start →',
 
         // Home cards
+        signOut:          'Sign Out',
         kanaTitle:        'Kana',
         vocabTitle:       'Vocabulary JLPT',
         kanjiTitle:       'Kanji',
