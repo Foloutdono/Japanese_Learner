@@ -1,54 +1,18 @@
-import { useLang } from '../LangContext'
-import { LANGUAGES } from '../i18n'
-
 export function TopBar({ onBack, title }) {
-  const { lang, switchLang } = useLang()
-  const next = LANGUAGES.find(l => l.code !== lang) ?? LANGUAGES[0]
-
-  const { t } = useLang()
-
   return (
     <div className="top-bar">
-      <button className="btn-back" onClick={onBack}>{t.menu}</button>
+      <button className="btn-back" onClick={onBack}>← Menu</button>
       <span style={{ fontSize: 16, fontWeight: 'bold' }}>{title}</span>
-
-      <button
-        onClick={() => switchLang(next.code)}
-        style={{
-          background: 'rgba(255,255,255,0.08)',
-          color: 'var(--text-primary)',
-          fontSize: 14, padding: '6px 12px',
-        }}
-        title={next.label}
-      >
-        {next.flag} {next.label}
-      </button>
     </div>
   )
 }
 export function KanjiTopBar({ onBack, onClick, title, drawingEnabled}) {
-  const { lang, switchLang } = useLang()
-  const next = LANGUAGES.find(l => l.code !== lang) ?? LANGUAGES[0]
-
-  const { t } = useLang()
-
   return (
     <div className="top-bar">
-      <button className="btn-back" onClick={onBack}>{t.menu}</button>
+      <button className="btn-back" onClick={onBack}>← Menu</button>
       <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>
         {title}
       </span>
-      <button
-        onClick={() => switchLang(next.code)}
-        style={{
-          background: 'rgba(255,255,255,0.08)',
-          color: 'var(--text-primary)',
-          fontSize: 14, padding: '6px 12px',
-        }}
-        title={next.label}
-      >
-        {next.flag} {next.label}
-      </button>
       <button
         onClick={onClick}
         style={{
@@ -56,9 +20,9 @@ export function KanjiTopBar({ onBack, onClick, title, drawingEnabled}) {
           color: drawingEnabled ? '#111' : 'var(--text-secondary)',
           fontSize: 12, padding: '6px 12px',
         }}
-        title={t.toggleWriting}
+        title="Activer/désactiver la pratique d'écriture"
       >
-        ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
+        ✏️ {drawingEnabled ? 'Écriture ON' : 'Écriture OFF'}
       </button>
     </div>
   )
