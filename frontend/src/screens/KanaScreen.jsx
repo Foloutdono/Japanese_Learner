@@ -5,12 +5,15 @@ import RatingBar from '../components/RatingBar'
 import { TopBar } from '../components/TopBar'
 import { CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading } from '../components/QuizComponents'
 import { playKana } from '../components/sound'
+import { useLang } from '../LangContext'
+
+const { t } = useLang()
 
 const SETS = [
-  'Hiragana (de base)',
-  'Hiragana (combinaisons)',
-  'Katakana (de base)',
-  'Katakana (combinaisons)',
+  t.hiraganaBase,
+  t.hiraganaCombinations,
+  t.katakanaBase,
+  t.katakanaCombinations,
 ]
 
 export default function KanaScreen({ session }) {
@@ -98,7 +101,7 @@ export default function KanaScreen({ session }) {
         <TopBar onBack={() => navigate('/')} title="Kana" />
         <div style={{ padding: 40, textAlign: 'center' }}>
           <div style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 32 }}>
-            Choisissez une série
+            {t.chooseSet}
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', flexDirection: 'column' }}>
             {SETS.map(s => (
