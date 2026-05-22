@@ -130,7 +130,7 @@ export default function HomeScreen() {
                   {card.desc}
                 </div>
                 <button style={{ background: card.color, color: '#fff', width: '100%', marginTop: 8 }}>
-                  {t.start}
+                  {t?.start ?? ''}
                 </button>
               </div>
             ))}
@@ -140,7 +140,7 @@ export default function HomeScreen() {
 
       {/* Footer */}
       <footer style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, padding: '16px 24px' }}>
-        {t.tip}
+        {t?.tip ?? ''}
       </footer>
 
     </div>
