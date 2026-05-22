@@ -15,7 +15,7 @@ export default function DeckDetailScreen({ session }) {
     const [loading, setLoading]     = useState(true)
     const [adding, setAdding]       = useState(false)
     const [editing, setEditing]     = useState(null) // card id being edited
-    const [form, setForm]           = useState({ front: '', back: '', kana: '', hint: '', notes: '' })
+    const [form, setForm]           = useState({ front: '', back: '', hint: '', notes: '' })
 
     const [showImport, setShowImport]     = useState(false)
     const [importResult, setImportResult] = useState(null)
@@ -29,7 +29,7 @@ export default function DeckDetailScreen({ session }) {
     }
 
     function resetForm() {
-        setForm({ front: '', back: '', kana: '', hint: '', notes: '' })
+        setForm({ front: '', back: '', hint: '', notes: '' })
     }
 
     function startAdd() {
@@ -40,8 +40,8 @@ export default function DeckDetailScreen({ session }) {
 
     function startEdit(card) {
         setForm({
-        front: card.front, back: card.back,
-        kana: card.kana || '', hint: card.hint || '', notes: card.notes || '',
+            front: card.front, back: card.back,
+            hint: card.hint || '', notes: card.notes || '',
         })
         setEditing(card.id)
         setAdding(true)
@@ -50,28 +50,28 @@ export default function DeckDetailScreen({ session }) {
     function saveCard() {
         if (!form.front.trim() || !form.back.trim()) return
         if (editing) {
-        apiFetch(`/api/decks/${deck_id}/cards/${editing}`, session, {
-            method: 'PUT',
-            body: JSON.stringify(form),
-        })
-            .then(r => r.json())
-            .then(updated => {
-            setCards(prev => prev.map(c => c.id === editing ? updated : c))
-            setAdding(false)
-            setEditing(null)
-            resetForm()
+            apiFetch(`/api/decks/${deck_id}/cards/${editing}`, session, {
+                method: 'PUT',
+                body: JSON.stringify(form),
             })
+                .then(r => r.json())
+                .then(updated => {
+                setCards(prev => prev.map(c => c.id === editing ? updated : c))
+                setAdding(false)
+                setEditing(null)
+                resetForm()
+                })
         } else {
-        apiFetch(`/api/decks/${deck_id}/cards`, session, {
-            method: 'POST',
-            body: JSON.stringify(form),
-        })
-            .then(r => r.json())
-            .then(card => {
-            setCards(prev => [...prev, card])
-            resetForm()
-            // keep form open for rapid entry
+            apiFetch(`/api/decks/${deck_id}/cards`, session, {
+                method: 'POST',
+                body: JSON.stringify(form),
             })
+                .then(r => r.json())
+                .then(card => {
+                setCards(prev => [...prev, card])
+                resetForm()
+                // keep form open for rapid entry
+                })
         }
     }
 
@@ -88,7 +88,6 @@ export default function DeckDetailScreen({ session }) {
             body: JSON.stringify({
                 front: card.front,
                 back:  card.back,
-                kana:  card.kana  || '',
                 hint:  card.hint  || '',
                 notes: '',
             }),
@@ -97,10 +96,7 @@ export default function DeckDetailScreen({ session }) {
         setImportResult({ inserted: cards.length })
         setShowImport(false)
         fetchCards()
-        }
-
-
-    const isVocabOrKanji = deck?.type === 'vocab' || deck?.type === 'kanji'
+    }
 
     return (
         <div style={{ minHeight: '100vh' }}>
@@ -148,18 +144,6 @@ export default function DeckDetailScreen({ session }) {
                     </div>
                 )}
 
-                <details style={{ marginBottom: 16, color: 'var(--text-secondary)', fontSize: 12 }}>
-                    <summary style={{ cursor: 'pointer' }}>Format CSV attendu</summary>
-                    <pre style={{
-                        background: 'var(--bg-card)', padding: 12, borderRadius: 6,
-                        marginTop: 8, overflowX: 'auto', fontSize: 11,
-                    }}>
-                        {deck?.type === 'flashcard'
-                        ? 'front,back,hint,notes\n犬,dog,,animal commun\n猫,cat,félin,'
-                        : 'front,back,kana,hint,notes\n犬,dog,いぬ,,\n猫,cat,ねこ,,félin'}
-                    </pre>
-                </details>
-
                 {/* Add / Edit form */}
                 {adding && (
                 <div className="card" style={{ marginBottom: 24 }}>
@@ -173,11 +157,6 @@ export default function DeckDetailScreen({ session }) {
                     <input value={form.back} onChange={e => setForm(f => ({ ...f, back: e.target.value }))}
                         placeholder="Verso / Sens"
                         style={{ padding: '10px 14px', fontSize: 15 }} />
-                    {isVocabOrKanji && (
-                        <input value={form.kana} onChange={e => setForm(f => ({ ...f, kana: e.target.value }))}
-                        placeholder="Lecture en kana (optionnel)"
-                        style={{ padding: '10px 14px', fontSize: 15 }} />
-                    )}
                     <input value={form.hint} onChange={e => setForm(f => ({ ...f, hint: e.target.value }))}
                         placeholder="Indice (optionnel)"
                         style={{ padding: '10px 14px', fontSize: 15 }} />
@@ -223,24 +202,24 @@ export default function DeckDetailScreen({ session }) {
                         <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                             <div>
-                            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>Recto</div>
-                            <div style={{ fontSize: 18, fontFamily: 'Yu Gothic, sans-serif' }}>{card.front}</div>
+                                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>Recto</div>
+                                <div style={{ fontSize: 18, fontFamily: 'Yu Gothic, sans-serif' }}>{card.front}</div>
                             </div>
                             <div>
-                            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>Verso</div>
-                            <div style={{ fontSize: 15 }}>{card.back}</div>
-                            </div>
-                            {card.kana && (
-                            <div>
-                                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>Kana</div>
-                                <div style={{ fontSize: 15 }}>{card.kana}</div>
-                            </div>
-                            )}
+                                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>Verso</div>
+                                <div style={{ fontSize: 15 }}>{card.back}</div>
+                            </div>                
                             {card.hint && (
-                            <div>
-                                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>Indice</div>
-                                <div style={{ fontSize: 13, color: 'var(--warning)' }}>{card.hint}</div>
-                            </div>
+                                <div>
+                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>Indice</div>
+                                    <div style={{ fontSize: 13, color: 'var(--warning)' }}>{card.hint}</div>
+                                </div>
+                            )}
+                            {card.notes && (
+                                <div>
+                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>Notes</div>
+                                    <div style={{ fontSize: 13, color: 'var(--warning)' }}>{card.notes}</div>
+                                </div>
                             )}
                         </div>
                         </div>

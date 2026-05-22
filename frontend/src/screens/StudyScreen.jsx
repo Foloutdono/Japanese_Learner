@@ -93,20 +93,17 @@ export default function StudyScreen({ session }) {
     setSelected(choice)
     setAnswered(true)
     setShowRating(true)
-    if (card.kana) speakJapanese(card.kana)
   }
 
   function onTypeSubmit() {
     if (submitted || !input.trim()) return
     setSubmitted(true)
     setShowRating(true)
-    if (card.kana) speakJapanese(card.kana)
   }
 
   function onFlashcardReveal() {
     setFlipped(true)
     setShowRating(true)
-    if (card.kana) speakJapanese(card.kana)
   }
 
   // ── Config screen (mode + mix) ──
@@ -217,11 +214,6 @@ export default function StudyScreen({ session }) {
               }}>
                 {card.front}
               </div>
-              {card.kana && mode !== 'flashcard' && (
-                <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 8 }}>
-                  {card.kana}
-                </div>
-              )}
               {card.hint && !flipped && !answered && (
                 <div style={{ fontSize: 13, color: 'var(--warning)', marginTop: 12 }}>
                   💡 {card.hint}
@@ -240,11 +232,6 @@ export default function StudyScreen({ session }) {
             {(mode === 'flashcard' || card.source === 'custom') && flipped && (
               <div className="card" style={{ marginBottom: 16, padding: '24px' }}>
                 <div style={{ fontSize: 22, color: 'var(--success)' }}>{card.back}</div>
-                {card.kana && (
-                  <div style={{ fontSize: 16, color: 'var(--text-secondary)', marginTop: 8 }}>
-                    {card.kana}
-                  </div>
-                )}
                 {card.notes && (
                   <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8 }}>
                     {card.notes}
@@ -271,7 +258,7 @@ export default function StudyScreen({ session }) {
                 onChange={setInput}
                 onSubmit={onTypeSubmit}
                 submitted={submitted}
-                answer={card.kana || card.back}
+                answer={card.back}
                 placeholder="Tapez la réponse..."
               />
             )}

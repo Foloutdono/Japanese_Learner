@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-export default function ImportCardsMenu({ onImport, onClose }) {
+export default function ImportCardsMenu({ onImport, onClose, deckType }) {
     const [importText, setImportText] = useState('')
     const [termSep, setTermSep]       = useState('comma')
     const [cardSep, setCardSep]       = useState('newline')
@@ -122,7 +122,7 @@ function Separators({ termSep, setTermSep, customTerm, setCustomTerm, cardSep, s
             title="Entre le terme et la définition"
             value={termSep} onChange={setTermSep}
             custom={customTerm} onCustomChange={setCustomTerm}
-            options={[['tab', 'Tab'], ['comma', 'Virgule'], ['custom', 'Personnalisé']]}
+            options={[['comma', 'Virgule'], ['tab', 'Tab'], ['custom', 'Personnalisé']]}
         />
         <SepGroup
             title="Entre les cartes"
@@ -160,7 +160,9 @@ function Preview({ cards }) {
             Aperçu{cards.length > 0 ? ` — ${cards.length} carte${cards.length !== 1 ? 's' : ''}` : ' — aucune carte'}
         </div>
         {cards.length === 0 ? (
-            <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Rien à visualiser pour l'instant</div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+                Rien à visualiser pour l'instant
+            </div>
         ) : (
             <div style={{ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {cards.slice(0, 20).map((c, i) => (
@@ -168,10 +170,10 @@ function Preview({ cards }) {
                 background: 'var(--bg-card)', borderRadius: 6,
                 padding: '8px 14px', display: 'flex', gap: 16, fontSize: 13,
                 }}>
-                <span style={{ color: 'var(--text-primary)', minWidth: 100 }}>{c.front}</span>
-                <span style={{ color: 'var(--text-secondary)' }}>→</span>
-                <span style={{ color: 'var(--text-secondary)' }}>{c.back}</span>
-                {c.kana && <span style={{ color: 'var(--accent2)' }}>{c.kana}</span>}
+                    <span style={{ color: 'var(--text-primary)', minWidth: 100 }}>{c.front}</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>→</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{c.back}</span>
+                    {c.kana && <span style={{ color: 'var(--accent2)' }}>{c.kana}</span>}
                 </div>
             ))}
             {cards.length > 20 && (
