@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import { LangProvider } from './LangContext'
 
 import AuthScreen  from './screens/AuthScreen'
 import HomeScreen  from './screens/HomeScreen'
@@ -46,6 +47,7 @@ export default function App() {
 
   // Logged in
   return (
+    <LangProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/"      element={<HomeScreen session={session} />} />
@@ -59,5 +61,6 @@ export default function App() {
           <Route path="/decks/:deck_id/study"     element={<StudyScreen session={session} />} />
         </Routes>
       </BrowserRouter>
+    </LangProvider>
   )
 }
