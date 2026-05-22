@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
-import { useLang } from '../LangContext'
 
 export default function AuthScreen() {
-  const { t } = useLang()
   const [mode, setMode]       = useState('login') // 'login' | 'signup'
   const [email, setEmail]     = useState('')
   const [password, setPassword] = useState('')
@@ -19,7 +17,7 @@ export default function AuthScreen() {
     if (mode === 'signup') {
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setError(error.message)
-      else setSuccess(t.accountCreated)
+      else setSuccess('Compte créé ! Vous pouvez vous connecter.')
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError(error.message)
@@ -40,7 +38,7 @@ export default function AuthScreen() {
           日本語
         </div>
         <div style={{ fontSize: 20, fontWeight: 'bold', marginTop: 8 }}>
-          {t.appSubtitle}
+          Apprendre le Japonais
         </div>
       </div>
 
@@ -49,7 +47,7 @@ export default function AuthScreen() {
 
         {/* Mode toggle */}
         <div style={{ display: 'flex', marginBottom: 24, borderRadius: 8, overflow: 'hidden' }}>
-          {[['login', t.loginBtn], ['signup', t.signupBtn]].map(([m, label]) => (
+          {[['login', 'Connexion'], ['signup', 'Inscription']].map(([m, label]) => (
             <button key={m} onClick={() => { setMode(m); setError(null); setSuccess(null) }}
               style={{
                 flex: 1, borderRadius: 0,
@@ -65,7 +63,7 @@ export default function AuthScreen() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <input
             type="email"
-            placeholder={t.email}
+            placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
@@ -73,7 +71,7 @@ export default function AuthScreen() {
           />
           <input
             type="password"
-            placeholder={t.password}
+            placeholder="Mot de passe"
             value={password}
             onChange={e => setPassword(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
@@ -103,7 +101,7 @@ export default function AuthScreen() {
             opacity: loading ? 0.7 : 1,
           }}
         >
-          {loading ? t.loading : mode === 'login' ? t.loginBtn : t.signupBtn}
+          {loading ? 'Chargement...' : mode === 'login' ? 'Se connecter' : "S'inscrire"}
         </button>
       </div>
     </div>
