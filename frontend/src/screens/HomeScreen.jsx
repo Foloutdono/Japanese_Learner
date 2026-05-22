@@ -3,56 +3,57 @@ import { supabase } from '../supabase'
 import { useLang } from '../LangContext'
 import { LANGUAGES } from '../i18n'
 
-const { t } = useLang()
-
-const cards = [
-  {
-    icon: 'あ',
-    title: t.kanaTitle,
-    desc: t.kanaDesc,
-    path: '/kana',
-    color: '#e94560',
-  },
-  {
-    icon: '語',
-    title: t.vocabTitle,
-    desc: t.vocabDesc,
-    path: '/vocab',
-    color: '#4cc9f0',
-  },
-  {
-    icon: '漢',
-    title: t.kanjiTitle,
-    desc: t.kanjiDesc,
-    path: '/kanji',
-    color: '#533483',
-  },
-  {
-    icon: '辞',
-    title: t.dictionaryTitle,
-    desc: t.dictionaryDesc,
-    path: '/dictionary',
-    color: '#e17055',
-  },
-  {
-    icon: '📊',
-    title: t.statsTitle,
-    desc: t.statsDesc,
-    path: '/stats',
-    color: '#2d6a4f',
-  },
-  {
-    icon: '📚',
-    title: t.decksTitle,
-    desc: t.decksDesc,
-    path: '/decks',
-    color: '#6c5ce7',
-  },
-]
 
 export default function HomeScreen() {
+  const { t } = useLang()
+
+  const cards = [
+    {
+      icon: 'あ',
+      title: t.kanaTitle,
+      desc: t.kanaDesc,
+      path: '/kana',
+      color: '#e94560',
+    },
+    {
+      icon: '語',
+      title: t.vocabTitle,
+      desc: t.vocabDesc,
+      path: '/vocab',
+      color: '#4cc9f0',
+    },
+    {
+      icon: '漢',
+      title: t.kanjiTitle,
+      desc: t.kanjiDesc,
+      path: '/kanji',
+      color: '#533483',
+    },
+    {
+      icon: '辞',
+      title: t.dictionaryTitle,
+      desc: t.dictionaryDesc,
+      path: '/dictionary',
+      color: '#e17055',
+    },
+    {
+      icon: '📊',
+      title: t.statsTitle,
+      desc: t.statsDesc,
+      path: '/stats',
+      color: '#2d6a4f',
+    },
+    {
+      icon: '📚',
+      title: t.decksTitle,
+      desc: t.decksDesc,
+      path: '/decks',
+      color: '#6c5ce7',
+    },
+  ]
+
   const { lang, switchLang } = useLang()
-  const next = LANGUAGES.find(l => l.code !== lang)
+  const next = LANGUAGES.find(l => l.code !== lang) ?? LANGUAGES[0]
 
   const navigate = useNavigate()
 

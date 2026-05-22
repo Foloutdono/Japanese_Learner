@@ -3,7 +3,7 @@ import { LANGUAGES } from '../i18n'
 
 export function TopBar({ onBack, title }) {
   const { lang, switchLang } = useLang()
-  const next = LANGUAGES.find(l => l.code !== lang)
+  const next = LANGUAGES.find(l => l.code !== lang) ?? LANGUAGES[0]
 
   const { t } = useLang()
 
@@ -28,7 +28,7 @@ export function TopBar({ onBack, title }) {
 }
 export function KanjiTopBar({ onBack, onClick, title, drawingEnabled}) {
   const { lang, switchLang } = useLang()
-  const next = LANGUAGES.find(l => l.code !== lang)
+  const next = LANGUAGES.find(l => l.code !== lang) ?? LANGUAGES[0]
 
   const { t } = useLang()
 

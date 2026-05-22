@@ -7,16 +7,15 @@ import { CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading } fro
 import { playKana } from '../components/sound'
 import { useLang } from '../LangContext'
 
-const { t } = useLang()
-
-const SETS = [
-  t.hiraganaBase,
-  t.hiraganaCombinations,
-  t.katakanaBase,
-  t.katakanaCombinations,
-]
-
 export default function KanaScreen({ session }) {
+  const { t } = useLang()
+
+  const SETS = [
+    t.hiraganaBase,
+    t.hiraganaCombinations,
+    t.katakanaBase,
+    t.katakanaCombinations,
+  ]
   const navigate = useNavigate()
 
   const [selectedSet, setSelectedSet] = useState(null)

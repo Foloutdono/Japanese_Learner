@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { supabase } from '../supabase'
 import { useLang } from '../LangContext'
 
-const { t } = useLang()
-
 export default function AuthScreen() {
+  const { t } = useLang()
   const [mode, setMode]       = useState('login') // 'login' | 'signup'
   const [email, setEmail]     = useState('')
   const [password, setPassword] = useState('')
