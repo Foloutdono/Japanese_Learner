@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import { LangProvider } from './LangContext'
 
 import AuthScreen  from './screens/AuthScreen'
 import HomeScreen  from './screens/HomeScreen'
@@ -46,18 +47,20 @@ export default function App() {
 
   // Logged in
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/"      element={<HomeScreen session={session} />} />
-        <Route path="/kana"  element={<KanaScreen session={session} />} />
-        <Route path="/vocab" element={<VocabScreen session={session} />} />
-        <Route path="/kanji" element={<KanjiScreen session={session} />} />
-        <Route path="/stats" element={<StatsScreen session={session} />} />
-        <Route path="/dictionary" element={<DictionaryScreen session={session} />} />
-        <Route path="/decks"                    element={<DecksScreen session={session} />} />
-        <Route path="/decks/:deck_id"           element={<DeckDetailScreen session={session} />} />
-        <Route path="/decks/:deck_id/study"     element={<StudyScreen session={session} />} />
-      </Routes>
-    </BrowserRouter>
+    <LangProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/"      element={<HomeScreen session={session} />} />
+          <Route path="/kana"  element={<KanaScreen session={session} />} />
+          <Route path="/vocab" element={<VocabScreen session={session} />} />
+          <Route path="/kanji" element={<KanjiScreen session={session} />} />
+          <Route path="/stats" element={<StatsScreen session={session} />} />
+          <Route path="/dictionary" element={<DictionaryScreen session={session} />} />
+          <Route path="/decks"                    element={<DecksScreen session={session} />} />
+          <Route path="/decks/:deck_id"           element={<DeckDetailScreen session={session} />} />
+          <Route path="/decks/:deck_id/study"     element={<StudyScreen session={session} />} />
+        </Routes>
+      </BrowserRouter>
+    </LangProvider>
   )
 }

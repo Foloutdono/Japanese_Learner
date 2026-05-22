@@ -56,42 +56,42 @@ export default function ImportCardsMenu({ onImport, onClose, deckType }) {
 
     return (
         <div style={{
-        position: 'fixed', inset: 0, zIndex: 200,
-        background: 'rgba(0,0,0,0.7)',
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-        padding: '40px 16px', overflowY: 'auto',
+            position: 'fixed', inset: 0, zIndex: 200,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+            padding: '40px 16px', overflowY: 'auto',
         }}>
-        <div style={{
-            background: 'var(--bg-main)', borderRadius: 12,
-            width: '100%', maxWidth: 700, padding: 32,
-        }}>
-            <Header onClose={onClose} />
-            <textarea
-            value={importText}
-            onChange={e => setImportText(e.target.value)}
-            placeholder={`Mot 1\tDéfinition 1\nMot 2\tDéfinition 2`}
-            style={{
-                width: '100%', height: 180,
-                background: 'var(--bg-card)', color: 'var(--text-primary)',
-                border: '1px solid var(--border)', borderRadius: 8,
-                padding: 16, fontSize: 14, resize: 'vertical',
-                fontFamily: 'monospace', outline: 'none',
-            }}
-            />
-            <Separators
-            termSep={termSep} setTermSep={setTermSep}
-            customTerm={customTerm} setCustomTerm={setCustomTerm}
-            cardSep={cardSep} setCardSep={setCardSep}
-            customCard={customCard} setCustomCard={setCustomCard}
-            />
-            <Preview cards={preview} />
-            <Footer
-            count={preview.length}
-            importing={importing}
-            onImport={handleImport}
-            onClose={onClose}
-            />
-        </div>
+            <div style={{
+                background: 'var(--bg-main)', borderRadius: 12,
+                width: '100%', maxWidth: 700, padding: 32,
+            }}>
+                <Header onClose={onClose} />
+                <textarea
+                    value={importText}
+                    onChange={e => setImportText(e.target.value)}
+                    placeholder={`Front\, Back\, Hint\, Notes\n水, water, みず, wet\n火, fire, ひ, burns\n...`}
+                    style={{
+                        width: '100%', height: 180,
+                        background: 'var(--bg-card)', color: 'var(--text-primary)',
+                        border: '1px solid var(--border)', borderRadius: 8,
+                        padding: 16, fontSize: 14, resize: 'vertical',
+                        fontFamily: 'monospace', outline: 'none',
+                    }}
+                />
+                <Separators
+                    termSep={termSep} setTermSep={setTermSep}
+                    customTerm={customTerm} setCustomTerm={setCustomTerm}
+                    cardSep={cardSep} setCardSep={setCardSep}
+                    customCard={customCard} setCustomCard={setCustomCard}
+                />
+                <Preview cards={preview} />
+                <Footer
+                    count={preview.length}
+                    importing={importing}
+                    onImport={handleImport}
+                    onClose={onClose}
+                />
+            </div>
         </div>
     )
 }
