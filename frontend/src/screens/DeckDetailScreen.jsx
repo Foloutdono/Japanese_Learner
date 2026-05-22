@@ -18,13 +18,6 @@ export default function DeckDetailScreen({ session }) {
     const [form, setForm]           = useState({ front: '', back: '', kana: '', hint: '', notes: '' })
 
     const [showImport, setShowImport]     = useState(false)
-    const [importText, setImportText]     = useState('')
-    const [termSep, setTermSep]           = useState('tab')
-    const [cardSep, setCardSep]           = useState('newline')
-    const [customTerm, setCustomTerm]     = useState('')
-    const [customCard, setCustomCard]     = useState('')
-    const [importPreview, setImportPreview] = useState([])
-    const [importing, setImporting]       = useState(false)
     const [importResult, setImportResult] = useState(null)
 
     useEffect(() => { fetchCards() }, [])
@@ -88,70 +81,24 @@ export default function DeckDetailScreen({ session }) {
         .then(() => setCards(prev => prev.filter(c => c.id !== id)))
     }
 
-    function getTermSep() {
-    if (termSep === 'tab')    return '\t'
-    if (termSep === 'comma')  return ','
-    if (termSep === 'custom') return customTerm
-    return '\t'
-    }
-
-    function getCardSep() {
-    if (cardSep === 'newline')    return '\n'
-    if (cardSep === 'semicolon')  return ';'
-    if (cardSep === 'custom')     return customCard
-    return '\n'
-    }
-
-    function parseImportText(text) {
-    const ts = getTermSep()
-    const cs = getCardSep()
-    if (!text.trim() || !ts) return []
-    return text
-        .split(cs)
-        .map(line => line.trim())
-        .filter(Boolean)
-        .map(line => {
-        const parts = line.split(ts)
-        return {
-            front: parts[0]?.trim() ?? '',
-            back:  parts[1]?.trim() ?? '',
-            kana:  parts[2]?.trim() ?? '',
-            hint:  parts[3]?.trim() ?? '',
+    async function handleImport(cards) {
+        for (const card of cards) {
+            await apiFetch(`/api/decks/${deck_id}/cards`, session, {
+            method: 'POST',
+            body: JSON.stringify({
+                front: card.front,
+                back:  card.back,
+                kana:  card.kana  || '',
+                hint:  card.hint  || '',
+                notes: '',
+            }),
+            })
         }
-        })
-        .filter(c => c.front && c.back)
-    }
+        setImportResult({ inserted: cards.length })
+        setShowImport(false)
+        fetchCards()
+        }
 
-    useEffect(() => {
-    setImportPreview(parseImportText(importText))
-    }, [importText, termSep, cardSep, customTerm, customCard])
-
-    async function doImport() {
-    const cards = parseImportText(importText)
-    if (cards.length === 0) return
-    setImporting(true)
-
-    let inserted = 0
-    for (const card of cards) {
-        await apiFetch(`/api/decks/${deck_id}/cards`, session, {
-        method: 'POST',
-        body: JSON.stringify({
-            front: card.front,
-            back:  card.back,
-            kana:  card.kana  || '',
-            hint:  card.hint  || '',
-            notes: '',
-        }),
-        })
-        inserted++
-    }
-
-    setImporting(false)
-    setShowImport(false)
-    setImportText('')
-    setImportResult({ inserted })
-    fetchCards()
-    }
 
     const isVocabOrKanji = deck?.type === 'vocab' || deck?.type === 'kanji'
 
@@ -314,22 +261,8 @@ export default function DeckDetailScreen({ session }) {
             </div>
             {showImport && (
                 <ImportCardsMenu
-                    importText={importText}
-                    setImportText={setImportText}
-                    termSep={termSep}
-                    setTermSep={setTermSep}
-                    customTerm={customTerm}
-                    setCustomTerm={setCustomTerm}
-                    cardSep={cardSep}
-                    setCardSep={setCardSep}
-                    customCard={customCard}
-                    setCustomCard={setCustomCard}
-                    importPreview={importPreview}
-                    setImportPreview={setImportPreview}
-                    importing={importing}
-                    setImporting={setImporting}
-                    doImport={doImport}
-                    setShowImport={setShowImport}
+                    onImport={handleImport}
+                    onClose={() => setShowImport(false)}
                 />
             )}
         </div>
