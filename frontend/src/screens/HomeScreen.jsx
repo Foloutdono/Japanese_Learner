@@ -1,53 +1,58 @@
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
+import { useLang } from '../LangContext'
+import { LANGUAGES } from '../i18n'
 
-const cards = [
-  {
-    icon: 'あ',
-    title: 'Kana',
-    desc: 'Hiragana & Katakana\nde base + combinaisons\nQCM puis écriture libre',
-    path: '/kana',
-    color: '#e94560',
-  },
-  {
-    icon: '語',
-    title: 'Vocabulaire JLPT',
-    desc: 'N5 → N1\nKanji + Kana → Sens\nProgression par phases',
-    path: '/vocab',
-    color: '#4cc9f0',
-  },
-  {
-    icon: '漢',
-    title: 'Kanji',
-    desc: 'Apprentissage des Kanji\nN5 → N1\nExercices d\'écriture',
-    path: '/kanji',
-    color: '#533483',
-  },
-  {
-    icon: '辞',
-    title: 'Dictionnaire',
-    desc: 'Tous les kanji\nPrononciation & sens\nOrdre des traits',
-    path: '/dictionary',
-    color: '#e17055',
-  },
-  {
-    icon: '📊',
-    title: 'Statistiques',
-    desc: 'Progression SRS\nCartes maîtrisées\nRévisions dues',
-    path: '/stats',
-    color: '#2d6a4f',
-  },
-  {
-    icon: '📚',
-    title: 'Mes Decks',
-    desc: 'Cartes personnalisées\nFlashcards & Kanji\nMélangez avec le contenu JLPT',
-    path: '/decks',
-    color: '#6c5ce7',
-  },
-]
 
 export default function HomeScreen() {
+  const { t, lang, switchLang } = useLang()
+  const next = LANGUAGES.find(l => l.code !== lang) ?? LANGUAGES[0]
+
   const navigate = useNavigate()
+  const cards = [
+    {
+      icon: 'あ',
+      title: t?.kanaTitle ?? '',
+      desc: t?.kanaDesc ?? '',
+      path: '/kana',
+      color: '#e94560',
+    },
+    {
+      icon: '語',
+      title: t?.vocabTitle ?? '',
+      desc: t?.vocabDesc ?? '',
+      path: '/vocab',
+      color: '#4cc9f0',
+    },
+    {
+      icon: '漢',
+      title: t?.kanjiTitle ?? '',
+      desc: t?.kanjiDesc ?? '',
+      path: '/kanji',
+      color: '#533483',
+    },
+    {
+      icon: '辞',
+      title: t?.dictionaryTitle ?? '',
+      desc: t?.dictionaryDesc ?? '',
+      path: '/dictionary',
+      color: '#e17055',
+    },
+    {
+      icon: '📊',
+      title: t?.statsTitle ?? '',
+      desc: t?.statsDesc ?? '',
+      path: '/stats',
+      color: '#2d6a4f',
+    },
+    {
+      icon: '📚',
+      title: t?.decksTitle ?? '',
+      desc: t?.decksDesc ?? '',
+      path: '/decks',
+      color: '#6c5ce7',
+    },
+  ]
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -58,10 +63,10 @@ export default function HomeScreen() {
           日本語
         </div>
         <div style={{ fontSize: 22, fontWeight: 'bold', marginTop: 8 }}>
-          Apprendre le Japonais
+          {t?.learnJapanese ?? ''}
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8 }}>
-          Répétition espacée (SM-2) · Hiragana · Katakana · Vocabulaire JLPT
+          {t?.appDesc ?? ''}
         </div>
         <button
           onClick={() => supabase.auth.signOut()}
@@ -71,7 +76,18 @@ export default function HomeScreen() {
             fontSize: 12, marginTop: 12,
           }}
         >
-          Déconnexion
+          {t?.signOut ?? ''}
+        </button>
+        <button
+          onClick={() => switchLang(next.code)}
+          style={{
+            background: 'rgba(255,255,255,0.08)',
+            color: 'var(--text-primary)',
+            fontSize: 14, padding: '6px 12px',
+          }}
+          title={next.label}
+        >
+          {t?.switchLang ?? ''} {next.flag} {next.label}
         </button>
       </header>
 
@@ -114,7 +130,7 @@ export default function HomeScreen() {
                   {card.desc}
                 </div>
                 <button style={{ background: card.color, color: '#fff', width: '100%', marginTop: 8 }}>
-                  Commencer →
+                  {t?.start ?? ''}
                 </button>
               </div>
             ))}
@@ -124,7 +140,7 @@ export default function HomeScreen() {
 
       {/* Footer */}
       <footer style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, padding: '16px 24px' }}>
-        💡 Sessions courtes (15-20 min) mais régulières — le SRS planifie tout automatiquement.
+        {t?.tip ?? ''}
       </footer>
 
     </div>
