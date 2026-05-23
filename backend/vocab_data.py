@@ -672,7 +672,7 @@ VOCAB_N5 = [
 
 VOCAB_N4 = [
     {"kanji": "会場", "kana": "かいじょう", "meaning": "assembly hall or meeting place"},
-    {"kanji": "会場", "kana": "てんいん", "meaning": "shop assistant"},
+    {"kanji": "店員", "kana": "てんいん", "meaning": "shop assistant"},
     {"kanji": "地震", "kana": "じしん", "meaning": "earthquake"},
     {"kanji": "", "kana": "または", "meaning": "or,otherwise"},
     {"kanji": "法律", "kana": "ほうりつ", "meaning": "law"},
@@ -896,7 +896,7 @@ VOCAB_N4 = [
     {"kanji": "", "kana": "つもり", "meaning": "intention"},
     {"kanji": "自由", "kana": "じゆう", "meaning": "freedom"},
     {"kanji": "割合", "kana": "わりあい", "meaning": "rate,ratio,percentage"},
-    {"kanji": "注意", "kana": "ちゅうい", "meaning": "caution"},
+    {"kanji": "注意", "kana": "ちゅうい", "meaning": "(1) take caution, (2) warning or advice"},
     {"kanji": "", "kana": "こと", "meaning": "thing,matter"},
     {"kanji": "表", "kana": "おもて", "meaning": "the front"},
     {"kanji": "楽む", "kana": "たのしむ", "meaning": "to enjoy oneself"},
