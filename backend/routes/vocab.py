@@ -1,0 +1,71 @@
+import random
+from fastapi import APIRouter, Depends
+from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from auth import get_user_id, prefixed, unprefixed
+from srs_instance import srs
+from translations import get_meaning, get_meanings
+from translations.fr.vocab_fr import VOCAB_FR
+from pydantic import BaseModel
+
+router = APIRouter()
+
+class ReviewPayload(BaseModel):
+    card_id: str
+    mode:    str
+    quality: int
+
+FR_MAP = VOCAB_FR
+
+
+@router.get("/api/vocab/card")
+def get_vocab_card(level: str, phase: int, lang: str = "fr",
+                   user_id: str = Depends(get_user_id)):
+    vocab_list = VOCAB_BY_LEVEL.get(level)
+    if not vocab_list:
+        return {"error": "Unknown level"}
+
+    phase_key = {1: "kk-s", 2: "k-k", 3: "s-k"}.get(phase)
+    if not phase_key:
+        return {"error": "Invalid phase"}
+
+    raw_ids  = [vocab_to_id(w, level) for w in vocab_list]
+    card_ids = prefixed(raw_ids, user_id)
+
+    due = srs.get_due_cards(card_ids, phase_key)
+    if due:
+        card_id = random.choice(due)
+    else:
+        new = srs.get_new_cards(card_ids, phase_key, limit=1)
+        if new:
+            card_id = new[0]
+        else:
+            return {"done": True}
+
+    raw_id  = unprefixed(card_id, user_id)
+    word    = next(w for w in vocab_list if vocab_to_id(w, level) == raw_id)
+    meaning = get_meaning(word, lang, FR_MAP)
+
+    all_meanings = [
+        get_meaning(w, lang, FR_MAP)
+        for w in vocab_list
+        if get_meaning(w, lang, FR_MAP) != meaning
+    ]
+    choices = random.sample(all_meanings, min(3, len(all_meanings))) + [meaning]
+    random.shuffle(choices)
+
+    return {
+        "card_id":   raw_id,
+        "phase":     phase,
+        "phase_key": phase_key,
+        "kanji":     word.get("kanji", ""),
+        "kana":      word.get("kana", ""),
+        "meaning":   meaning,
+        "choices":   choices,
+    }
+
+
+@router.post("/api/vocab/review")
+def post_vocab_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
+    card_id = f"{user_id}:{payload.card_id}"
+    s = srs.review(card_id, payload.mode, payload.quality)
+    return {"card_id": payload.card_id, "interval": s["interval"], "next_review": s["next_review"]}
