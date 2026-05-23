@@ -1,4 +1,4 @@
-VOCAB_FR = {
+KANJI_FR = {
     "土" : "sol; terre; sol; Turquie",
     "山" : "montagne",
     "先" : "avant; devant; précédent; futur; priorité",
