@@ -42,7 +42,7 @@ export default function KanjiScreen({ session }) {
     setShowRating(false)
     setShowDrawing(false)
 
-    apiFetch(`/api/kanji/card?level=${lvl}&phase=${ph}`, session)
+    apiFetch(`/api/kanji/card?level=${lvl}&phase=${ph}&lang=${lang}`, session)
       .then(r => r.json())
       .then(data => {
         if (data.done) { setDone(true); setCard(null) }

@@ -43,7 +43,7 @@ export default function KanaScreen({ session }) {
     setSubmitted(false)
     setShowRating(false)
 
-    apiFetch(`/api/kana/card?set_name=${encodeURIComponent(set)}&mode=${m}`, session)
+    apiFetch(`/api/kana/card?set_name=${encodeURIComponent(set)}&mode=${m}&lang=${lang}`, session)
       .then(r => r.json())
       .then(data => {
         if (data.error || data.detail) {

@@ -6,26 +6,12 @@ import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComp
 import DrawingCanvas from '../components/DrawingCanvas'
 import { apiFetch, api } from '../api'
 import { speakJapanese } from '../components/sound'
-
-const MODES_BY_TYPE = {
-    flashcard: [{ key: 'flashcard', label: 'Flashcard' }],
-    vocab:     [
-        { key: 'flashcard', label: 'Flashcard' },
-        { key: 'kk-s',     label: 'Phase 1 — K+K→S' },
-        { key: 'k-k',      label: 'Phase 2 — K→S' },
-        { key: 's-k',      label: 'Phase 3 — S→K' },
-    ],
-    kanji:     [
-        { key: 'flashcard', label: 'Flashcard' },
-        { key: 'kk-s',     label: 'Phase 1 — K+K→S' },
-        { key: 'k-k',      label: 'Phase 2 — K→S' },
-        { key: 's-k',      label: 'Phase 3 — S→K' },
-    ],
-}
+import { useLang } from '../LangContext'
 
 const JLPT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
 export default function StudyScreen({ session }) {
+    const { t, lang } = useLang()
     const navigate      = useNavigate()
     const { deck_id }   = useParams()
     const { state }     = useLocation()
@@ -48,6 +34,22 @@ export default function StudyScreen({ session }) {
     const [drawingEnabled, setDrawingEnabled] = useState(true)
     const [configured, setConfigured]   = useState(false)
 
+    const MODES_BY_TYPE = {
+        flashcard: [{ key: 'flashcard', label: 'Flashcard' }],
+        vocab:     [
+            { key: 'flashcard', label: 'Flashcard' },
+            { key: 'kk-s',     label: 'Phase 1 — K+K→S' },
+            { key: 'k-k',      label: 'Phase 2 — K→S' },
+            { key: 's-k',      label: 'Phase 3 — S→K' },
+        ],
+        kanji:     [
+            { key: 'flashcard', label: 'Flashcard' },
+            { key: 'kk-s',     label: 'Phase 1 — K+K→S' },
+            { key: 'k-k',      label: 'Phase 2 — K→S' },
+            { key: 's-k',      label: 'Phase 3 — S→K' },
+        ],
+    }
+
     function fetchCard() {
         setLoading(true)
         setFlipped(false)
@@ -60,7 +62,7 @@ export default function StudyScreen({ session }) {
 
         const mixParam = mixLevels.join(',')
         apiFetch(
-        `/api/decks/${deck_id}/study?mode=${mode}&mix_levels=${mixParam}`,
+        `/api/decks/${deck_id}/study?mode=${mode}&mix_levels=${mixParam}&lang=${lang}`,
         session
         )
         .then(r => r.json())

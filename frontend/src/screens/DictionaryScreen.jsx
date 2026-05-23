@@ -51,7 +51,7 @@ export default function DictionaryScreen() {
     if (p === 0) setLoading(true)
     else setLoadingMore(true)
 
-    fetch(api(`/api/dictionary?q=${encodeURIComponent(q)}&page=${p}&limit=${LIMIT}`))
+    fetch(api(`/api/dictionary?q=${encodeURIComponent(q)}&page=${p}&limit=${LIMIT}&lang=${lang}`))
       .then(r => r.json())
       .then(data => {
         if (p === 0) setResults(data.results || [])
