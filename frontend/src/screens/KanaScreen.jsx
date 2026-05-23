@@ -5,16 +5,11 @@ import RatingBar from '../components/RatingBar'
 import { TopBar } from '../components/TopBar'
 import { CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading } from '../components/QuizComponents'
 import { playKana } from '../components/sound'
-
-const SETS = [
-  'Hiragana (de base)',
-  'Hiragana (combinaisons)',
-  'Katakana (de base)',
-  'Katakana (combinaisons)',
-]
+import { useLang } from '../LangContext'
 
 export default function KanaScreen({ session }) {
   const navigate = useNavigate()
+  const { t } = useLang()
 
   const [selectedSet, setSelectedSet] = useState(null)
   const [mode, setMode]               = useState('mcq')
@@ -32,6 +27,13 @@ export default function KanaScreen({ session }) {
 
   // Rating state
   const [showRating, setShowRating]   = useState(false)
+  
+  const SETS = [
+    t.hiraganaBase,
+    t.hiraganaCombinations,
+    t.katakanaBase,
+    t.katakanaCombinations,
+  ]
 
   function fetchCard(set, m) {
     setLoading(true)
@@ -98,7 +100,7 @@ export default function KanaScreen({ session }) {
         <TopBar onBack={() => navigate('/')} title="Kana" />
         <div style={{ padding: 40, textAlign: 'center' }}>
           <div style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 32 }}>
-            Choisissez une série
+            {t?.selectKanaSet ?? ''}
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', flexDirection: 'column' }}>
             {SETS.map(s => (
@@ -145,7 +147,7 @@ export default function KanaScreen({ session }) {
                 onSubmit={onTypeSubmit}
                 submitted={submitted}
                 answer={card.romaji}
-                placeholder="Tapez le romaji..."
+                placeholder={t?.typeRomaji ?? 'Tapez le romaji...'}
               />
             )}
 

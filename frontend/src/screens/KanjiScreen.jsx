@@ -6,17 +6,11 @@ import { KanjiTopBar, TopBar } from '../components/TopBar'
 import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
 import { speakJapanese } from '../components/sound'
 import DrawingCanvas from '../components/DrawingCanvas'
-
-const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
-
-const PHASES = [
-  { id: 1, label: 'Phase 1', desc: 'Kanji + Kana → Sens' },
-  { id: 2, label: 'Phase 2', desc: 'Kanji → Sens' },
-  { id: 3, label: 'Phase 3', desc: 'Sens → Kanji (écriture)' },
-]
+import { useLang } from '../LangContext'
 
 export default function KanjiScreen({ session }) {
   const navigate = useNavigate()
+  const { t } = useLang()
 
   const [level, setLevel]           = useState(null)
   const [phase, setPhase]           = useState(null)
@@ -30,6 +24,14 @@ export default function KanjiScreen({ session }) {
   const [showRating, setShowRating] = useState(false)
   const [showDrawing, setShowDrawing] = useState(false)
   const [drawingEnabled, setDrawingEnabled] = useState(true)
+
+  const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
+
+  const PHASES = [
+    { id: 1, label: t.phase1, desc: t.phase1Desc },
+    { id: 2, label: t.phase2, desc: t.phase2Desc },
+    { id: 3, label: t.phase3, desc: t.phase3Desc },
+  ]
 
   function fetchCard(lvl, ph) {
     setLoading(true)
@@ -98,7 +100,7 @@ export default function KanjiScreen({ session }) {
         <TopBar onBack={() => navigate('/')} title="Kanji"/>
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-            Choisissez un niveau
+            {t?.selectKanjiLevel ?? 'Choisissez un niveau'}
           </div>
           <div className="grid-5" style={{ maxWidth: 600, margin: '0 auto' }}>
             {LEVELS.map(l => (
@@ -124,7 +126,7 @@ export default function KanjiScreen({ session }) {
         <TopBar onBack={() => setLevel(null)} title={`Kanji ${level}`}/>
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-            Choisissez une phase
+            {t?.selectKanjiPhase ?? 'Choisissez une phase'}
           </div>
           <div className="grid-3" style={{ maxWidth: 700, margin: '0 auto' }}>
             {PHASES.map(p => (
@@ -224,7 +226,7 @@ export default function KanjiScreen({ session }) {
                 onSubmit={onTypeSubmit}
                 submitted={submitted}
                 answer={card.kanji}
-                placeholder="Tapez le kanji..."
+                placeholder={t?.typeKanji ?? 'Tapez le kanji...'}
                 inputStyle={{ fontSize: 24, fontFamily: 'Yu Gothic, sans-serif' }}
                 wrongExtra={
                   <div style={{ fontSize: 64, fontFamily: 'Yu Gothic, sans-serif', marginTop: 12 }}>
