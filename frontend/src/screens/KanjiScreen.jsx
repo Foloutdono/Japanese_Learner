@@ -10,7 +10,7 @@ import { useLang } from '../LangContext'
 
 export default function KanjiScreen({ session }) {
   const navigate = useNavigate()
-  const { t } = useLang()
+  const { t, lang, contentMaps } = useLang()
 
   const [level, setLevel]           = useState(null)
   const [phase, setPhase]           = useState(null)
@@ -92,6 +92,10 @@ export default function KanjiScreen({ session }) {
     setShowRating(true)
     speakJapanese(card.kana)
   }
+  function translateChoice(choice, kanjiChar) {
+    if (lang === 'en') return choice
+    return contentMaps.kanji[kanjiChar] ?? choice
+  }
 
   // ── Level selection ──
   if (!level) {
@@ -157,96 +161,108 @@ export default function KanjiScreen({ session }) {
         {loading && <Loading />}
         {done    && <DoneMessage onBack={() => setPhase(null)} />}
 
-        {card && !loading && (
-          <>
-            {/* Prompt card */}
-            <div style={{
-              background: 'var(--bg-card)', borderRadius: 12,
-              padding: '40px 24px', marginBottom: 32,
-            }}>
-              {phase === 1 && (
-                <>
-                  <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                    {card.kanji}
-                  </div>
-                  <div style={{ fontSize: 22, color: 'var(--text-secondary)', marginTop: 8 }}>
-                    {card.kana}
-                  </div>
-                  {card.stroke_count && (
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
-                      {card.stroke_count} traits
+        {card && !loading && (() => {
+          const translatedCorrect = lang === 'fr'
+            ? (contentMaps.kanji[card.kanji] ?? card.meaning)
+            : card.meaning
+
+          const translatedChoices = card.choices_kanji?.map(k =>
+            lang === 'fr'
+              ? (contentMaps.kanji[k] ?? k)
+              : card.choices[card.choices_kanji.indexOf(k)]
+          ) ?? card.choices
+
+          return (
+            <>
+              {/* Prompt card */}
+              <div style={{
+                background: 'var(--bg-card)', borderRadius: 12,
+                padding: '40px 24px', marginBottom: 32,
+              }}>
+                {phase === 1 && (
+                  <>
+                    <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                      {card.kanji}
                     </div>
-                  )}
-                </>
+                    <div style={{ fontSize: 22, color: 'var(--text-secondary)', marginTop: 8 }}>
+                      {card.kana}
+                    </div>
+                    {card.stroke_count && (
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                        {card.stroke_count} {t.strokes}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {phase === 2 && (
+                  <>
+                    <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                      {card.kanji}
+                    </div>
+                    {card.stroke_count && (
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>
+                        {card.stroke_count} {t.strokes}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {phase === 3 && (
+                  <>
+                    <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent3)' }}>
+                      {translatedCorrect}
+                    </div>
+                    {card.kana && (
+                      <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 8 }}>
+                        ({card.kana})
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* MCQ (phase 1 & 2) */}
+              {phase !== 3 && (
+                <MCQGrid
+                  choices={translatedChoices}
+                  correct={translatedCorrect}
+                  selected={selected}
+                  answered={answered}
+                  onAnswer={onMCQAnswer}
+                />
               )}
 
-              {phase === 2 && (
-                <>
-                  <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                    {card.kanji}
-                  </div>
-                  {card.stroke_count && (
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>
-                      {card.stroke_count} traits
-                    </div>
-                  )}
-                </>
-              )}
-
+              {/* Type input (phase 3) */}
               {phase === 3 && (
-                <>
-                  <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent3)' }}>
-                    {card.meaning}
-                  </div>
-                  {card.kana && (
-                    <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 8 }}>
-                      ({card.kana})
+                <TypeInput
+                  value={input}
+                  onChange={setInput}
+                  onSubmit={onTypeSubmit}
+                  submitted={submitted}
+                  answer={card.kanji}
+                  placeholder={t?.typeKanji ?? 'Tapez le kanji...'}
+                  inputStyle={{ fontSize: 24, fontFamily: 'Yu Gothic, sans-serif' }}
+                  wrongExtra={
+                    <div style={{ fontSize: 64, fontFamily: 'Yu Gothic, sans-serif', marginTop: 12 }}>
+                      {card.kanji}
                     </div>
-                  )}
-                </>
+                  }
+                />
               )}
-            </div>
 
-            {/* MCQ (phase 1 & 2) */}
-            {phase !== 3 && (
-              <MCQGrid
-                choices={card.choices}
-                correct={card.meaning}
-                selected={selected}
-                answered={answered}
-                onAnswer={onMCQAnswer}
-              />
-            )}
+              <RatingBar active={showRating} onRate={postReview} />
 
-            {/* Type input (phase 3) — kanji specific: bigger font, show kanji on wrong */}
-            {phase === 3 && (
-              <TypeInput
-                value={input}
-                onChange={setInput}
-                onSubmit={onTypeSubmit}
-                submitted={submitted}
-                answer={card.kanji}
-                placeholder={t?.typeKanji ?? 'Tapez le kanji...'}
-                inputStyle={{ fontSize: 24, fontFamily: 'Yu Gothic, sans-serif' }}
-                wrongExtra={
-                  <div style={{ fontSize: 64, fontFamily: 'Yu Gothic, sans-serif', marginTop: 12 }}>
-                    {card.kanji}
-                  </div>
-                }
-              />
-            )}
-
-            <RatingBar active={showRating} onRate={postReview} />
-
-            {showDrawing && (
-              <DrawingCanvas
-                kanji={card.kanji}
-                meaning={card.meaning}
-                onDone={() => fetchCard(level, phase)}
-              />
-            )}
-          </>
-        )}
+              {showDrawing && (
+                <DrawingCanvas
+                  kanji={card.kanji}
+                  meaning={translatedCorrect}
+                  onDone={() => fetchCard(level, phase)}
+                />
+              )}
+            </>
+          )
+        })()}
       </div>
     </div>
   )

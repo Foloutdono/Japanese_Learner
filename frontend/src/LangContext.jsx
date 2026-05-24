@@ -1,12 +1,16 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import { translations } from './i18n'
+import { getTranslations } from './translationCache'
 
 const LangContext = createContext()
 
 export function LangProvider({ children }) {
-    const [lang, setLang] = useState(
-        localStorage.getItem('lang') || 'fr'
-    )
+    const [lang, setLang]         = useState(localStorage.getItem('lang') || 'fr')
+    const [contentMaps, setContentMaps] = useState({ kanji: {}, vocab: {} })
+
+    useEffect(() => {
+        getTranslations(lang).then(setContentMaps)
+    }, [lang])
 
     function switchLang(code) {
         setLang(code)
@@ -16,9 +20,9 @@ export function LangProvider({ children }) {
     const t = translations[lang] ?? translations.fr
 
     return (
-        <LangContext.Provider value={{ lang, switchLang, t }}>
+    <LangContext.Provider value={{ lang, switchLang, t, contentMaps }}>
         {children}
-        </LangContext.Provider>
+    </LangContext.Provider>
     )
 }
 

@@ -53,6 +53,12 @@ def get_kanji_card(level: str, phase: int, lang: str = "fr",
     choices = random.sample(all_meanings, min(3, len(all_meanings))) + [meaning]
     random.shuffle(choices)
 
+    choices_kanji = [
+        k.get("kanji", "") 
+        for k in kanji_list 
+        if get_meaning(k, "en", {}) != entry.get("meaning")  
+    ][:3] + [entry.get("kanji", "")]
+
     return {
         "card_id":      raw_id,
         "phase":        phase,
@@ -62,6 +68,7 @@ def get_kanji_card(level: str, phase: int, lang: str = "fr",
         "meaning":      meaning,
         "stroke_count": entry.get("stroke_count", ""),
         "choices":      choices,
+        "choices_kanji": choices_kanji,
     }
 
 
