@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { api } from '../api'
+import { useLang } from '../LangContext'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 const LIMIT = 50
@@ -16,6 +17,7 @@ function speakJapanese(text) {
 }
 
 export default function DictionaryScreen() {
+  const { t, lang } = useLang()
   const navigate        = useNavigate()
   const [query, setQuery]         = useState('')
   const [results, setResults]     = useState([])
@@ -94,7 +96,7 @@ export default function DictionaryScreen() {
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      <TopBar onBack={() => navigate('/')} title="Dictionnaire" />
+      <TopBar onBack={() => navigate('/')} title={t.dictionaryTitle ?? 'Dictionnaire'} />
 
       <div className="container" style={{ padding: '24px' }}>
 
@@ -103,7 +105,7 @@ export default function DictionaryScreen() {
           <input
             value={query}
             onChange={onSearch}
-            placeholder="Rechercher kanji, kana, ou sens..."
+            placeholder={t.dictionaryPlaceholder ?? 'Rechercher kanji, kana, ou sens...'}
             autoFocus
             style={{ flex: 1, padding: '14px 20px', fontSize: 16 }}
           />
@@ -116,13 +118,13 @@ export default function DictionaryScreen() {
 
         {loading && (
           <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>
-            Chargement...
+            {t.loadingDictionary ?? 'Chargement...'}
           </div>
         )}
 
         {!loading && results.length === 0 && (
           <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>
-            Aucun résultat pour « {query} »
+            {t.noResults ?? `Aucun résultat pour « ${query} »`}
           </div>
         )}
 
@@ -190,12 +192,12 @@ export default function DictionaryScreen() {
               <div ref={sentinelRef} style={{ height: 40, marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {loadingMore && (
                   <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-                    Chargement...
+                    {t.loadingMore ?? 'Chargement...'}
                   </div>
                 )}
                 {!hasMore && results.length > 0 && (
                   <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-                    {total} kanji affichés
+                    {t.displayedKanji ?? `${total} kanji affichés`}
                   </div>
                 )}
               </div>
@@ -268,7 +270,7 @@ export default function DictionaryScreen() {
                     width: '100%', marginTop: 16, fontSize: 13,
                   }}
                 >
-                  Fermer
+                  {t.close ?? 'Fermer'}
                 </button>
               </div>
             )}
