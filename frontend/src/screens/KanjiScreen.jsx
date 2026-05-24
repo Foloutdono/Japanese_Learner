@@ -172,6 +172,8 @@ export default function KanjiScreen({ session }) {
               : card.choices[card.choices_kanji.indexOf(k)]
           ) ?? card.choices
 
+          console.log(translatedChoices, translatedCorrect, card)
+
           return (
             <>
               {/* Prompt card */}
