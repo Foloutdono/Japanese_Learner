@@ -175,7 +175,7 @@ export default function KanjiScreen({ session }) {
           const translatedChoices =
             lang === 'en'
               ? card.choices
-              : await Promise.all(
+              : Promise.all(
                   (card.choices ?? []).map(choice =>
                     translateChoice(choice, lang)
                   )
