@@ -92,9 +92,14 @@ export default function KanjiScreen({ session }) {
     setShowRating(true)
     speakJapanese(card.kana)
   }
-  function translateChoice(choice, kanjiChar) {
-    if (lang === 'en') return choice
-    return contentMaps.kanji[kanjiChar] ?? choice
+
+  function translateChoice(word, lang) {
+    return apiFetch(
+      `/api/translation/vocab?word=${encodeURIComponent(word)}&lang=${lang}`,
+      session
+    )
+      .then(r => r.json())
+      .then(data => data.translation)
   }
 
   // ── Level selection ──
@@ -162,17 +167,19 @@ export default function KanjiScreen({ session }) {
         {done    && <DoneMessage onBack={() => setPhase(null)} />}
 
         {card && !loading && (() => {
-          const translatedCorrect = lang === 'fr'
-            ? (contentMaps.kanji[card.kanji] ?? card.meaning)
-            : card.meaning
+          const translatedCorrect = 
+            lang === 'en'
+              ? card.meaning
+              : translateChoice(card.kanji, lang)
 
-          const translatedChoices = card.choices_kanji?.map(k =>
-            lang === 'fr'
-              ? (contentMaps.kanji[k] ?? k)
-              : card.choices[card.choices_kanji.indexOf(k)]
-          ) ?? card.choices
-
-          console.log(translatedChoices, translatedCorrect, card)
+          const translatedChoices =
+            lang === 'en'
+              ? card.choices
+              : await Promise.all(
+                  (card.choices ?? []).map(choice =>
+                    translateChoice(choice, lang)
+                  )
+                )
 
           return (
             <>
