@@ -45,13 +45,20 @@ def get_kanji_card(level: str, phase: int, lang: str = "fr",
     entry   = next(k for k in kanji_list if kanji_to_id(k, level) == raw_id)
     meaning = get_meaning(entry, lang, FR_MAP)
 
-    all_meanings = [
-        get_meaning(k, lang, FR_MAP)
-        for k in kanji_list
+    all_candidates = [
+        k for k in kanji_list
         if get_meaning(k, lang, FR_MAP) != meaning
     ]
-    choices = random.sample(all_meanings, min(3, len(all_meanings))) + [meaning]
-    random.shuffle(choices)
+    choice_entries = random.sample(all_candidates, min(3, len(all_candidates))) + [entry]
+    random.shuffle(choice_entries)
+
+    choices = [
+        {
+            "kanji": c.get("kanji", ""),
+            "meaning": get_meaning(c, lang, FR_MAP),
+        }
+        for c in choice_entries
+    ]
 
     return {
         "card_id":      raw_id,
