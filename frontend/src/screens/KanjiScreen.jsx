@@ -93,8 +93,8 @@ export default function KanjiScreen({ session }) {
   }
 
   function postReview(quality) {
-    const wrongAnswer = quality < 2 && card?.kanji
-    if (wrongAnswer && drawingEnabled) {
+    const needTraining = quality <= 3 && card?.kanji
+    if (needTraining && drawingEnabled) {
       setShowRating(false)
       setShowDrawing(true)
       // still post the review in background
