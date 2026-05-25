@@ -9,7 +9,7 @@ import { useLang } from '../LangContext'
 
 export default function KanaScreen({ session }) {
   const navigate = useNavigate()
-  const { t } = useLang()
+  const { t, lang } = useLang()
 
   const [selectedSet, setSelectedSet] = useState(null)
   const [mode, setMode]               = useState('mcq')
