@@ -177,11 +177,10 @@ export default function KanjiScreen({ session }) {
               ? (card.choices ?? []).map(choice =>
                     choice.meaning
                   )
-              : Promise.all(
-                  (card.choices ?? []).map(choice =>
+              : (card.choices ?? []).map(choice =>
                     translateChoice(choice.kanji, lang)
                   )
-                )
+
 
           return (
             <>
