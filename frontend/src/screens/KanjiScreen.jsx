@@ -34,7 +34,9 @@ export default function KanjiScreen({ session }) {
     { id: 3, label: t.phase3, desc: t.phase3Desc },
   ]
   useEffect(() => {
-    if (card && level && phase) fetchCard(level, phase)
+    if (card && card.lang !== lang) {
+      translateCard(card, lang)
+    }
   }, [lang])
 
   function fetchCard(lvl, ph) {
@@ -50,8 +52,36 @@ export default function KanjiScreen({ session }) {
       .then(r => r.json())
       .then(data => {
         if (data.done) { setDone(true); setCard(null) }
-        else { setCard(data); setDone(false) }
+        else { setCard({ ...data, lang }) ; setDone(false) }
         setLoading(false)
+      })
+  }
+
+  function translateCard(cardToTranslate, targetLang) {
+    if (!cardToTranslate) return
+
+    const words = [
+      cardToTranslate.kanji,
+      ...(cardToTranslate.choices ?? []).map(c => c.kanji),
+    ]
+    const uniqueWords = [...new Set(words.filter(Boolean))]
+
+    Promise.all(uniqueWords.map(word =>
+      apiFetch(`/api/translation/kanji?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
+        .then(r => r.json())
+        .then(data => [word, data.translation || ""])
+    ))
+      .then(entries => {
+        const translationMap = Object.fromEntries(entries)
+        setCard(current => ({
+          ...current,
+          lang: targetLang,
+          meaning: translationMap[current.kanji] ?? current.meaning,
+          choices: (current.choices ?? []).map(choice => ({
+            ...choice,
+            meaning: translationMap[choice.kanji] ?? choice.meaning,
+          })),
+        }))
       })
   }
 
