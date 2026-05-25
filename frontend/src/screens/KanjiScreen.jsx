@@ -7,10 +7,11 @@ import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComp
 import { speakJapanese } from '../components/sound'
 import DrawingCanvas from '../components/DrawingCanvas'
 import { useLang } from '../LangContext'
+import { useEffect } from 'react'
 
 export default function KanjiScreen({ session }) {
   const navigate = useNavigate()
-  const { t, lang, contentMaps } = useLang()
+  const { t, lang } = useLang()
 
   const [level, setLevel]           = useState(null)
   const [phase, setPhase]           = useState(null)
@@ -32,6 +33,9 @@ export default function KanjiScreen({ session }) {
     { id: 2, label: t.phase2, desc: t.phase2Desc },
     { id: 3, label: t.phase3, desc: t.phase3Desc },
   ]
+  useEffect(() => {
+    if (card && level && phase) fetchCard(level, phase)
+  }, [lang])
 
   function fetchCard(lvl, ph) {
     setLoading(true)
@@ -91,15 +95,6 @@ export default function KanjiScreen({ session }) {
     setSubmitted(true)
     setShowRating(true)
     speakJapanese(card.kana)
-  }
-
-  function translateChoice(word, lang) {
-    return apiFetch(
-      `/api/translation/vocab?word=${encodeURIComponent(word)}&lang=${lang}`,
-      session
-    )
-      .then(r => r.json())
-      .then(data => data.translation)
   }
 
   // ── Level selection ──
@@ -167,20 +162,8 @@ export default function KanjiScreen({ session }) {
         {done    && <DoneMessage onBack={() => setPhase(null)} />}
 
         {card && !loading && (() => {
-          const translatedCorrect = 
-            lang === 'en'
-              ? card.meaning
-              : translateChoice(card.kanji, lang)
-
-          const translatedChoices =
-            lang === 'en'
-              ? (card.choices ?? []).map(choice =>
-                    choice.meaning
-                  )
-              : (card.choices ?? []).map(choice =>
-                    translateChoice(choice.kanji, lang)
-                  )
-
+          const translatedCorrect = card.meaning
+          const translatedChoices = (card.choices ?? []).map(c => c.meaning)
 
           return (
             <>
