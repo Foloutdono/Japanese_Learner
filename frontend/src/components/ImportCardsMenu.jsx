@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useLang } from '../LangContext'
 
 export default function ImportCardsMenu({ onImport, onClose, deckType }) {
+    const { t } = useLang()
     const [importText, setImportText] = useState('')
     const [termSep, setTermSep]       = useState('comma')
     const [cardSep, setCardSep]       = useState('newline')
@@ -102,14 +104,14 @@ function Header({ onClose }) {
     return (
         <>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <div style={{ fontSize: 16, fontWeight: 'bold' }}>Importez vos données</div>
+            <div style={{ fontSize: 16, fontWeight: 'bold' }}>{t.importData}</div>
             <button onClick={onClose}
             style={{ background: 'transparent', color: 'var(--text-secondary)', fontSize: 20, padding: '0 8px' }}>
             ✕
             </button>
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
-            Copiez et collez vos données ici (à partir de Word, Excel, Google Docs, etc.)
+            {t.copyPasteData}
         </div>
         </>
     )
@@ -119,13 +121,13 @@ function Separators({ termSep, setTermSep, customTerm, setCustomTerm, cardSep, s
     return (
         <div style={{ display: 'flex', gap: 48, marginTop: 20, flexWrap: 'wrap' }}>
         <SepGroup
-            title="Entre le terme et la définition"
+            title={t.enterTermSep}
             value={termSep} onChange={setTermSep}
             custom={customTerm} onCustomChange={setCustomTerm}
             options={[['comma', 'Virgule'], ['tab', 'Tab'], ['custom', 'Personnalisé']]}
         />
         <SepGroup
-            title="Entre les cartes"
+            title={t.enterCardSep}
             value={cardSep} onChange={setCardSep}
             custom={customCard} onCustomChange={setCustomCard}
             options={[['newline', 'Nouvelle rangée'], ['semicolon', 'Point-virgule'], ['custom', 'Personnalisé']]}
@@ -156,33 +158,33 @@ function SepGroup({ title, value, onChange, custom, onCustomChange, options }) {
 function Preview({ cards }) {
     return (
         <div style={{ marginTop: 24 }}>
-        <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>
-            Aperçu{cards.length > 0 ? ` — ${cards.length} carte${cards.length !== 1 ? 's' : ''}` : ' — aucune carte'}
-        </div>
-        {cards.length === 0 ? (
-            <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-                Rien à visualiser pour l'instant
+            <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>
+                {t.preview}{cards.length > 0 ? ` — ${cards.length} ${t.card}${cards.length !== 1 ? 's' : ''}` : ` — ${t.noCardsToPreview}`}
             </div>
-        ) : (
-            <div style={{ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {cards.slice(0, 20).map((c, i) => (
-                <div key={i} style={{
-                background: 'var(--bg-card)', borderRadius: 6,
-                padding: '8px 14px', display: 'flex', gap: 16, fontSize: 13,
-                }}>
-                    <span style={{ color: 'var(--text-primary)', minWidth: 100 }}>{c.front}</span>
-                    <span style={{ color: 'var(--text-secondary)' }}>→</span>
-                    <span style={{ color: 'var(--text-secondary)' }}>{c.back}</span>
-                    {c.kana && <span style={{ color: 'var(--accent2)' }}>{c.kana}</span>}
+            {cards.length === 0 ? (
+                <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+                    {t.noCardsToPreview}
                 </div>
-            ))}
-            {cards.length > 20 && (
-                <div style={{ color: 'var(--text-secondary)', fontSize: 12, padding: '4px 14px' }}>
-                ... et {cards.length - 20} autres
+            ) : (
+                <div style={{ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {cards.slice(0, 20).map((c, i) => (
+                    <div key={i} style={{
+                    background: 'var(--bg-card)', borderRadius: 6,
+                    padding: '8px 14px', display: 'flex', gap: 16, fontSize: 13,
+                    }}>
+                        <span style={{ color: 'var(--text-primary)', minWidth: 100 }}>{c.front}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>→</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>{c.back}</span>
+                        {c.kana && <span style={{ color: 'var(--accent2)' }}>{c.kana}</span>}
+                    </div>
+                ))}
+                {cards.length > 20 && (
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 12, padding: '4px 14px' }}>
+                    ... et {cards.length - 20} {t.otherCards}
+                    </div>
+                )}
                 </div>
             )}
-            </div>
-        )}
         </div>
     )
 }
@@ -192,7 +194,7 @@ function Footer({ count, importing, onImport, onClose }) {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
         <button onClick={onClose}
             style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', fontSize: 14 }}>
-            Annuler l'importation
+            {t.cancel}
         </button>
         <button onClick={onImport} disabled={count === 0 || importing}
             style={{
@@ -200,7 +202,7 @@ function Footer({ count, importing, onImport, onClose }) {
             color: count > 0 ? '#fff' : 'var(--text-secondary)',
             fontSize: 14, opacity: importing ? 0.7 : 1,
             }}>
-            {importing ? '⏳ Import en cours...' : `Importer${count > 0 ? ` ${count} cartes` : ''}`}
+            {importing ? t.importing : `Importer${count > 0 ? ` ${count} ${t.cards}` : ''}`}
         </button>
         </div>
     )
