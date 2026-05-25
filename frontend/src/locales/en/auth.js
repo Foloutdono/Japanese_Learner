@@ -7,4 +7,7 @@ export default {
     loginBtn:         'Log in',
     signupBtn:        'Sign up',
     loading:          'Loading...',
+    appTitle:         '日本語',
+    learnJapanese:    'Learn Japanese',
+    signupSuccess:    'Check your email to confirm your account.',
 }

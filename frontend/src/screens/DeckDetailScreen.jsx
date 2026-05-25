@@ -3,11 +3,13 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 import ImportCardsMenu from '../components/ImportCardsMenu'
+import { useLang } from '../LangContext'
 
 
 export default function DeckDetailScreen({ session }) {
 	const navigate          = useNavigate()
 	const { deck_id }       = useParams()
+	const { t } = useLang()
 	const { state }         = useLocation()
 	const deck              = state?.deck
 
@@ -144,24 +146,24 @@ export default function DeckDetailScreen({ session }) {
 							<button
 								onClick={() => navigate(`/decks/${deck_id}/study`, { state: { deck } })}
 								style={{ background: '#6c5ce7', color: '#fff', fontSize: 13 }}>
-								▶ Étudier
+								{t.study}
 							</button>
 							<button
 								onClick={startAdd}
 								style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', fontSize: 13 }}>
-								+ Ajouter
+								+ {t.addCard}
 							</button>
                             {cards.length > 0 && (
 								<button
 									onClick={() => setSelectMode(true)}
 									style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', fontSize: 13 }}>
-									☑ Sélectionner
+									☑ {t.select}
 								</button>
 							)}
 							<button
 								onClick={() => setShowImport(true)}
 								style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', fontSize: 13 }}>
-								📥 Importer
+								📥 {t.import}
 							</button>
 						</div>
 					)}
@@ -186,12 +188,12 @@ export default function DeckDetailScreen({ session }) {
 									fontSize: 13,
 									opacity: selected.size === 0 ? 0.5 : 1,
 								}}>
-								🗑 Supprimer ({selected.size})
+								🗑 {t.delete} ({selected.size})
 							</button>
 							<button
 								onClick={exitSelectMode}
 								style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', fontSize: 13 }}>
-								✕ Annuler
+								✕ {t.cancel}
 							</button>
 						</div>
 					)}
@@ -218,7 +220,7 @@ export default function DeckDetailScreen({ session }) {
 				{adding && (
 					<div className="card" style={{ marginBottom: 24 }}>
 						<div style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 16 }}>
-							{editing ? 'Modifier la carte' : 'Nouvelle carte'}
+							{editing ? t.editCard : t.newCard}
 						</div>
 						<div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 							<input value={form.front} onChange={e => setForm(f => ({ ...f, front: e.target.value }))}
@@ -238,11 +240,11 @@ export default function DeckDetailScreen({ session }) {
 						<div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
 							<button onClick={saveCard}
 								style={{ background: '#6c5ce7', color: '#fff', flex: 1 }}>
-								{editing ? '✓ Enregistrer' : '+ Ajouter'}
+								{editing ? '✓ ' + t.save : '+ ' + t.addCard}
 							</button>
 							<button onClick={() => { setAdding(false); setEditing(null); resetForm() }}
 								style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', flex: 1 }}>
-								Annuler
+								{t.cancel}
 							</button>
 						</div>
 					</div>
@@ -250,15 +252,15 @@ export default function DeckDetailScreen({ session }) {
 
 				{loading && (
 					<div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>
-						Chargement...
+						{t.loading}...
 					</div>
 				)}
 
 				{!loading && cards.length === 0 && !adding && (
 					<div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>
 						<div style={{ fontSize: 40, marginBottom: 12 }}>🃏</div>
-						<div>Aucune carte dans ce deck.</div>
-						<div style={{ fontSize: 13, marginTop: 8 }}>Ajoutez votre première carte ci-dessus.</div>
+						<div>{t.noCards}</div>
+						<div style={{ fontSize: 13, marginTop: 8 }}>{t.addFirstCard}</div>
 					</div>
 				)}
 

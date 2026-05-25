@@ -134,7 +134,7 @@ export default function KanjiScreen({ session }) {
         <TopBar onBack={() => navigate('/')} title="Kanji"/>
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-            {t?.selectKanjiLevel ?? 'Choisissez un niveau'}
+            {t?.chooseLevel ?? 'Choisissez un niveau'}
           </div>
           <div className="grid-5" style={{ maxWidth: 600, margin: '0 auto' }}>
             {LEVELS.map(l => (
@@ -160,7 +160,7 @@ export default function KanjiScreen({ session }) {
         <TopBar onBack={() => setLevel(null)} title={`Kanji ${level}`}/>
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-            {t?.selectKanjiPhase ?? 'Choisissez une phase'}
+            {t?.choosePhase ?? 'Choisissez une phase'}
           </div>
           <div className="grid-3" style={{ maxWidth: 700, margin: '0 auto' }}>
             {PHASES.map(p => (

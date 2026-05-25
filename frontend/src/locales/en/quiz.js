@@ -51,4 +51,6 @@ export default {
     strokes:          'strokes',
     notAvailable:     'Not available',
     toggleWriting:    'Toggle writing practice',
+
+    vocabulary:        'Vocabulary',
 }

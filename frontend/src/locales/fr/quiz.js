@@ -49,4 +49,6 @@ export default {
     strokes:          'traits',
     notAvailable:     'Non disponible',
     toggleWriting:    'Activer/désactiver la pratique d\'écriture',
+
+    vocabulary:        'Vocabulaire',
 }

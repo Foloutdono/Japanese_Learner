@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../api'
+import { useLang } from '../LangContext'
 
 export default function StatsScreen({ session }) {
   const navigate = useNavigate()
   const [stats, setStats] = useState(null)
+  const { t } = useLang()
 
   useEffect(() => { fetchStats() }, [])
 
@@ -28,20 +30,20 @@ export default function StatsScreen({ session }) {
         </button>
         <button onClick={resetAll}
           style={{ background: 'var(--danger)', color: '#fff', fontSize: 13 }}>
-          🗑 Réinitialiser
+          🗑 {t.resetStats}
         </button>
       </div>
 
       {!stats && (
         <div style={{ textAlign: 'center', padding: 80, color: 'var(--text-secondary)' }}>
-          Chargement...
+          {t.loading}
         </div>
       )}
 
       {stats && (
         <div className="container" style={{ padding: '32px 24px'}}>
 
-          <Section title="Kana"/>
+          <Section title={t.kana} />
           <div className="grid-2" style={{ marginBottom: 32 }}>
             {Object.entries(stats.kana).map(([setName, modes]) => (
               <div key={setName} className="card">
@@ -60,7 +62,7 @@ export default function StatsScreen({ session }) {
             ))}
           </div>
 
-          <Section title="Vocabulaire JLPT"/>
+          <Section title={t.jlptVocab} />
           <div className="grid-3" style={{ marginBottom: 32 }}>
             {Object.entries(stats.vocab).map(([level, phases]) => (
               <div key={level} className="card">
@@ -77,7 +79,7 @@ export default function StatsScreen({ session }) {
             ))}
           </div>
 
-          <Section title="Kanji"/>
+          <Section title={t.kanji} />
           <div className="grid-3" style={{ marginBottom: 32 }}>
             {Object.entries(stats.kanji).map(([level, phases]) => (
               <div key={level} className="card">
@@ -94,7 +96,7 @@ export default function StatsScreen({ session }) {
             ))}
           </div>
 
-          <Section title="Résumé global" />
+          <Section title={t.globalSummary} />
           <GlobalSummary stats={stats} />
 
         </div>
@@ -153,11 +155,11 @@ function GlobalSummary({ stats }) {
       }
 
   const cols = [
-    { label: 'À apprendre', value: newC,     color: 'var(--warning)' },
-    { label: 'En cours',    value: learning,  color: 'var(--accent2)' },
-    { label: 'Maîtrisées',  value: mastered,  color: 'var(--success)' },
-    { label: '⚡ À revoir', value: due,       color: 'var(--accent)'  },
-    { label: 'Total',       value: total,     color: 'var(--text-primary)' },
+    { label: t.new, value: newC,     color: 'var(--warning)' },
+    { label: t.learning,    value: learning,  color: 'var(--accent2)' },
+    { label: t.mastered,  value: mastered,  color: 'var(--success)' },
+    { label: t.dueNow, value: due,       color: 'var(--accent)'  },
+    { label: t.total,       value: total,     color: 'var(--text-primary)' },
   ]
 
   return (

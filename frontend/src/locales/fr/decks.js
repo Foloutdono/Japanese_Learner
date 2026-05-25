@@ -70,4 +70,6 @@ export default {
     beginBtn:         '▶ Commencer',
     configBack:       '← Config',
     revealBtn:        'Révéler la réponse',
+    mixWithJLPT:      'Mélanger avec le contenu JLPT',
+    writePractice:    'Pratique d\'écriture'
 }

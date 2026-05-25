@@ -3,4 +3,5 @@ export default {
     menu:             '← Menu',
     back:             '← Back',
     logout:           'Logout',
+    
 }

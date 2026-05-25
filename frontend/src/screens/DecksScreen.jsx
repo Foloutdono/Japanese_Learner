@@ -2,12 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
-
-const DECK_TYPES = [
-  { value: 'flashcard', label: 'Flashcard',  desc: 'Recto / Verso — toute langue', color: '#6c5ce7' },
-  { value: 'vocab',     label: 'Vocabulaire', desc: 'Compatible mode JLPT',        color: '#4cc9f0' },
-  { value: 'kanji',     label: 'Kanji',       desc: 'Avec ordre des traits',        color: '#e94560' },
-]
+import { useLang } from '../LangContext'
 
 function typeColor(type) {
   return DECK_TYPES.find(t => t.value === type)?.color ?? '#6c5ce7'
@@ -18,6 +13,8 @@ function typeLabel(type) {
 }
 
 export default function DecksScreen({ session }) {
+  const { t } = useLang()
+
   const navigate = useNavigate()
   const [decks, setDecks]         = useState([])
   const [loading, setLoading]     = useState(true)
@@ -25,6 +22,12 @@ export default function DecksScreen({ session }) {
   const [newName, setNewName]     = useState('')
   const [newType, setNewType]     = useState('flashcard')
   const [error, setError]         = useState(null)
+
+  const DECK_TYPES = [
+    { value: 'flashcard', label: 'Flashcard',  desc: t.flashcardDesc, color: '#6c5ce7' },
+    { value: 'vocab',     label: t.vocabulary, desc: t.vocabDesc,        color: '#4cc9f0' },
+    { value: 'kanji',     label: t.kanji,       desc: t.kanjiDesc,        color: '#e94560' },
+  ]
 
   useEffect(() => { fetchDecks() }, [])
 
@@ -57,7 +60,7 @@ export default function DecksScreen({ session }) {
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      <TopBar onBack={() => navigate('/')} title="Mes Decks" />
+      <TopBar onBack={() => navigate('/')} title={t.decks} />
 
       <div className="container" style={{ padding: '32px 24px' }}>
 
@@ -67,7 +70,7 @@ export default function DecksScreen({ session }) {
             onClick={() => setCreating(c => !c)}
             style={{ background: '#6c5ce7', color: '#fff', fontSize: 14 }}
           >
-            {creating ? '✕ Annuler' : '+ Nouveau deck'}
+            {creating ? t.cancel : t.createDeck}
           </button>
         </div>
 
@@ -75,7 +78,7 @@ export default function DecksScreen({ session }) {
         {creating && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 16 }}>
-              Nouveau deck
+              {t.createDeck}
             </div>
             <input
               value={newName}
@@ -100,22 +103,22 @@ export default function DecksScreen({ session }) {
             </div>
             <button onClick={createDeck}
               style={{ background: '#6c5ce7', color: '#fff', width: '100%' }}>
-              Créer
+              {t.createDeck}
             </button>
           </div>
         )}
 
         {loading && (
           <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>
-            Chargement...
+            {t.loading}...
           </div>
         )}
 
         {!loading && decks.length === 0 && (
           <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>📚</div>
-            <div>Aucun deck pour l'instant.</div>
-            <div style={{ fontSize: 13, marginTop: 8 }}>Créez votre premier deck ci-dessus.</div>
+            <div>{t.noDecks}</div>
+            <div style={{ fontSize: 13, marginTop: 8 }}>{t.createFirstDeck}</div>
           </div>
         )}
 
@@ -148,12 +151,12 @@ export default function DecksScreen({ session }) {
                   <button
                     onClick={() => navigate(`/decks/${deck.id}`, { state: { deck } })}
                     style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', flex: 1, fontSize: 13 }}>
-                    ✏️ Éditer
+                    {t.edit}
                   </button>
                   <button
                     onClick={() => navigate(`/decks/${deck.id}/study`, { state: { deck } })}
                     style={{ background: typeColor(deck.type), color: '#fff', flex: 1, fontSize: 13 }}>
-                    ▶ Étudier
+                    {t.study}
                   </button>
                 </div>
               </div>

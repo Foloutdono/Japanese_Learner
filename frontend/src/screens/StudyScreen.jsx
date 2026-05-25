@@ -118,7 +118,7 @@ export default function StudyScreen({ session }) {
             {/* Mode selection */}
             <div style={{ marginBottom: 32 }}>
                 <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 12 }}>
-                Mode d'étude
+                    {t?.studyMode ?? "Mode d'étude"}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {availableModes.map(m => (
@@ -137,24 +137,24 @@ export default function StudyScreen({ session }) {
             {/* Mix with built-in (vocab/kanji only) */}
             {(deck?.type === 'vocab' || deck?.type === 'kanji') && (
                 <div style={{ marginBottom: 32 }}>
-                <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 12 }}>
-                    Mélanger avec le contenu JLPT (optionnel)
-                </div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {JLPT_LEVELS.map(l => (
-                    <button key={l}
-                        onClick={() => setMixLevels(prev =>
-                        prev.includes(l) ? prev.filter(x => x !== l) : [...prev, l]
-                        )}
-                        style={{
-                        background: mixLevels.includes(l) ? 'var(--accent2)' : 'var(--bg-card)',
-                        color: mixLevels.includes(l) ? '#111' : 'var(--text-primary)',
-                        fontSize: 14, padding: '10px 20px',
-                        }}>
-                        {l}
-                    </button>
-                    ))}
-                </div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 12 }}>
+                        {t?.mixWithJLPT ?? 'Mélanger avec les listes JLPT'}
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {JLPT_LEVELS.map(l => (
+                        <button key={l}
+                            onClick={() => setMixLevels(prev =>
+                            prev.includes(l) ? prev.filter(x => x !== l) : [...prev, l]
+                            )}
+                            style={{
+                            background: mixLevels.includes(l) ? 'var(--accent2)' : 'var(--bg-card)',
+                            color: mixLevels.includes(l) ? '#111' : 'var(--text-primary)',
+                            fontSize: 14, padding: '10px 20px',
+                            }}>
+                            {l}
+                        </button>
+                        ))}
+                    </div>
                 </div>
             )}
 
@@ -168,7 +168,7 @@ export default function StudyScreen({ session }) {
                     color: drawingEnabled ? '#111' : 'var(--text-secondary)',
                     fontSize: 13,
                     }}>
-                    ✏️ Pratique d'écriture {drawingEnabled ? 'ON' : 'OFF'}
+                    ✏️ {t.writePractice} {drawingEnabled ? 'ON' : 'OFF'}
                 </button>
                 </div>
             )}
@@ -176,7 +176,7 @@ export default function StudyScreen({ session }) {
             <button
                 onClick={() => { setConfigured(true); fetchCard() }}
                 style={{ background: '#6c5ce7', color: '#fff', width: '100%', fontSize: 16, padding: '16px' }}>
-                ▶ Commencer
+                {t.startSession}
             </button>
             </div>
         </div>
@@ -227,7 +227,7 @@ export default function StudyScreen({ session }) {
                     {(mode === 'flashcard' || card.source === 'custom') && !flipped && (
                         <button onClick={onFlashcardReveal}
                             style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', width: '100%', fontSize: 16, padding: '16px' }}>
-                            Révéler la réponse
+                            {t?.revealAnswer ?? 'Afficher la réponse'}
                         </button>
                     )}
 
@@ -261,7 +261,7 @@ export default function StudyScreen({ session }) {
                             onSubmit={onTypeSubmit}
                             submitted={submitted}
                             answer={card.back}
-                            placeholder="Tapez la réponse..."
+                            placeholder={t?.typeAnswer ?? 'Tapez votre réponse...'}
                         />
                     )}
 

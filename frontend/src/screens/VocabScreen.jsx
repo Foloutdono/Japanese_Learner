@@ -5,17 +5,13 @@ import RatingBar from '../components/RatingBar'
 import { TopBar } from '../components/TopBar'
 import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
 import { speakJapanese } from '../components/sound'
+import { useLang } from '../LangContext'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-const PHASES = [
-  { id: 1, label: 'Phase 1', desc: 'Kanji + Kana → Sens' },
-  { id: 2, label: 'Phase 2', desc: 'Kanji → Sens' },
-  { id: 3, label: 'Phase 3', desc: 'Sens → Kana (écriture)' },
-]
-
 export default function VocabScreen({ session }) {
   const navigate = useNavigate()
+  const { t, lang } = useLang()
 
   const [level, setLevel]           = useState(null)
   const [phase, setPhase]           = useState(null)
@@ -27,6 +23,12 @@ export default function VocabScreen({ session }) {
   const [input, setInput]           = useState('')
   const [submitted, setSubmitted]   = useState(false)
   const [showRating, setShowRating] = useState(false)
+
+  const PHASES = [
+    { id: 1, label: t.phase1, desc: t.phase1Desc },
+    { id: 2, label: t.phase2, desc: t.phase2Desc },
+    { id: 3, label: t.phase3, desc: t.phase3Desc },
+  ]
 
   function fetchCard(lvl, ph) {
     setLoading(true)
@@ -79,10 +81,10 @@ export default function VocabScreen({ session }) {
   if (!level) {
     return (
       <div style={{ minHeight: '100vh' }}>
-        <TopBar onBack={() => navigate('/')} title="Vocabulaire JLPT" />
+        <TopBar onBack={() => navigate('/')} title={`${t.vocabulary} JLPT`} />
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-            Choisissez un niveau
+            {t?.chooseLevel ?? 'Choisissez un niveau'}
           </div>
           <div className="grid-5" style={{ maxWidth: 600, margin: '0 auto' }}>
             {LEVELS.map(l => (
@@ -105,10 +107,10 @@ export default function VocabScreen({ session }) {
   if (!phase) {
     return (
       <div style={{ minHeight: '100vh' }}>
-        <TopBar onBack={() => setLevel(null)} title={`Vocabulaire ${level}`} />
+        <TopBar onBack={() => setLevel(null)} title={`${t.vocabulary} ${level}`} />
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
           <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-            Choisissez une phase
+            {t?.choosePhase ?? 'Choisissez une phase'}
           </div>
           <div className="grid-3" style={{ maxWidth: 700, margin: '0 auto' }}>
             {PHASES.map(p => (
@@ -131,7 +133,7 @@ export default function VocabScreen({ session }) {
   // ── Quiz ──
   return (
     <div style={{ minHeight: '100vh' }}>
-      <TopBar onBack={() => setPhase(null)} title={`Vocabulaire ${level} — Phase ${phase}`} />
+      <TopBar onBack={() => setPhase(null)} title={`${t.vocabulary} ${level} — Phase ${phase}`} />
 
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
 

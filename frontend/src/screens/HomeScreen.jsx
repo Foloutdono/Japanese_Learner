@@ -60,7 +60,7 @@ export default function HomeScreen() {
       {/* Header */}
       <header style={{ background: 'var(--bg-panel)', padding: '40px 24px', textAlign: 'center' }}>
         <div style={{ fontSize: 64, color: 'var(--accent)', fontFamily: 'Yu Gothic, sans-serif', lineHeight: 1 }}>
-          日本語
+          {t?.appTitle ?? ''}
         </div>
         <div style={{ fontSize: 22, fontWeight: 'bold', marginTop: 8 }}>
           {t?.learnJapanese ?? ''}

@@ -1,6 +1,8 @@
 export default {
     // Home
+    appTitle:         '日本語',
     appSubtitle:      'Learn Japanese',
+    learnJapanese:   'Learn Japanese',
     appDesc:          'Spaced repetition (SM-2) · Hiragana · Katakana · JLPT Vocabulary',
     tip:              '💡 Short sessions (15-20 min) but regular — SRS schedules everything automatically.',
     start:            'Start →',

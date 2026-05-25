@@ -1,6 +1,8 @@
 export default {
     // Home
+    appTitle:         '日本語',
     appSubtitle:      'Apprendre le Japonais',
+    learnJapanese:   'Apprendre le japonais',
     appDesc:          'Répétition espacée (SM-2) · Hiragana · Katakana · Vocabulaire JLPT',
     tip:              '💡 Sessions courtes (15-20 min) mais régulières — le SRS planifie tout automatiquement.',
     start:            'Commencer →',
