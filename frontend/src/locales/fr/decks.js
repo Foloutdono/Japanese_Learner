@@ -71,5 +71,6 @@ export default {
     configBack:       '← Config',
     revealBtn:        'Révéler la réponse',
     mixWithJLPT:      'Mélanger avec le contenu JLPT',
-    writePractice:    'Pratique d\'écriture'
+    writePractice:    'Pratique d\'écriture',
+    deckName:         'Nom du deck...',
 }

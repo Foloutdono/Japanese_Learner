@@ -72,4 +72,5 @@ export default {
     revealBtn:        'Reveal answer',
     mixWithJLPT:      'Mix with JLPT content',
     writePractice:    'Writing practice',
+    deckName:         'Deck name...',
 }

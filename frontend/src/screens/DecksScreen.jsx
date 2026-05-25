@@ -4,14 +4,6 @@ import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 
-function typeColor(type) {
-  return DECK_TYPES.find(t => t.value === type)?.color ?? '#6c5ce7'
-}
-
-function typeLabel(type) {
-  return DECK_TYPES.find(t => t.value === type)?.label ?? type
-}
-
 export default function DecksScreen({ session }) {
   const { t } = useLang()
 
@@ -28,6 +20,14 @@ export default function DecksScreen({ session }) {
     { value: 'vocab',     label: t.vocabulary, desc: t.vocabDesc,        color: '#4cc9f0' },
     { value: 'kanji',     label: t.kanji,       desc: t.kanjiDesc,        color: '#e94560' },
   ]
+
+  function typeColor(type) {
+    return DECK_TYPES.find(t => t.value === type)?.color ?? '#6c5ce7'
+  }
+
+  function typeLabel(type) {
+    return DECK_TYPES.find(t => t.value === type)?.label ?? type
+  }
 
   useEffect(() => { fetchDecks() }, [])
 
@@ -84,7 +84,7 @@ export default function DecksScreen({ session }) {
               value={newName}
               onChange={e => setNewName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && createDeck()}
-              placeholder="Nom du deck..."
+              placeholder={t.deckName}
               autoFocus
               style={{ width: '100%', padding: '10px 14px', fontSize: 15, marginBottom: 12 }}
             />
@@ -110,7 +110,7 @@ export default function DecksScreen({ session }) {
 
         {loading && (
           <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>
-            {t.loading}...
+            {t.loading}
           </div>
         )}
 
