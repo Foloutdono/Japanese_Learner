@@ -11,6 +11,27 @@ def _load_translation_map(lang: str, item_type: str) -> dict:
         if item_type == "vocab":
             from translations.fr.vocab_fr import VOCAB_FR
             return VOCAB_FR
+
+    if lang == "en":
+        if item_type == "kanji":
+            from kanji_data import KANJI_BY_LEVEL
+            return {
+                entry["kanji"]: entry.get("meaning", "")
+                for level_list in KANJI_BY_LEVEL.values()
+                for entry in level_list
+                if entry.get("kanji")
+            }
+
+        if item_type == "vocab":
+            from vocab_data import VOCAB_BY_LEVEL
+            return {
+                key: entry.get("meaning", "")
+                for level_list in VOCAB_BY_LEVEL.values()
+                for entry in level_list
+                for key in [entry.get("kanji"), entry.get("kana")]
+                if key
+            }
+
     raise HTTPException(status_code=400, detail=f"Unsupported language: {lang}")
 
 
