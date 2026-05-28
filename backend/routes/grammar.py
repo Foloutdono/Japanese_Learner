@@ -2,7 +2,7 @@ import random
 from fastapi import APIRouter, Depends
 from auth import get_user_id, prefixed, unprefixed
 from srs_instance import srs
-from backend.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
+from grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
 from pydantic import BaseModel
 
 router = APIRouter()
