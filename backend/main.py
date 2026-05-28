@@ -9,6 +9,7 @@ from routes.stats           import router as stats_router
 from routes.dictionary      import router as dictionary_router
 from routes.decks           import router as decks_router
 from routes.translations    import router as translations_router
+from routes.grammar         import router as grammar_router
 
 app = FastAPI()
 
@@ -28,6 +29,7 @@ app.include_router(stats_router)
 app.include_router(dictionary_router)
 app.include_router(decks_router)
 app.include_router(translations_router)
+app.include_router(grammar_router)
 
 @app.get("/")
 def root():

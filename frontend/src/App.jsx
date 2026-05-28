@@ -13,6 +13,7 @@ import DictionaryScreen from './screens/DictionaryScreen'
 import DecksScreen      from './screens/DecksScreen'
 import DeckDetailScreen from './screens/DeckDetailScreen'
 import StudyScreen      from './screens/StudyScreen'
+import GrammarScreen from './screens/GrammarScreen'
 
 export default function App() {
   const [session, setSession] = useState(undefined) // undefined = loading
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/decks"                    element={<DecksScreen session={session} />} />
           <Route path="/decks/:deck_id"           element={<DeckDetailScreen session={session} />} />
           <Route path="/decks/:deck_id/study"     element={<StudyScreen session={session} />} />
+          <Route path="/grammar" element={<GrammarScreen session={session} />} />
         </Routes>
       </BrowserRouter>
     </LangProvider>
