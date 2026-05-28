@@ -54,7 +54,7 @@ export default function GrammarScreen({ session }) {
 	}
 
 	function postReview(quality) {
-		apiFetch(api('/api/grammar/review'), session, {
+		apiFetch('/api/grammar/review', session, {
 			method: 'POST',
 			body: JSON.stringify({ card_id: card.card_id, mode, quality }),
 		}).then(() => fetchCard(level, mode))
