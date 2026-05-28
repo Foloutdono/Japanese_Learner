@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch, api } from '../api'
 import { useLang } from '../LangContext'
-import TopBar from '../components/TopBar'
+import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import { MCQGrid, DoneMessage, Loading } from '../components/QuizComponents'
 
