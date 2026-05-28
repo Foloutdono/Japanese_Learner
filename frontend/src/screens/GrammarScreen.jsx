@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch, api } from '../api'
+import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
@@ -37,13 +37,13 @@ export default function GrammarScreen({ session }) {
 		setShowRating(false)
 		setShowEx(false)
 
-		// apiFetch(api(`/api/grammar/card?level=${lvl}&mode=${m}&lang=${lang}`), session)
-		// 	.then(r => r.json())
-		// 	.then(data => {
-		// 		if (data.done) { setDone(true); setCard(null) }
-		// 		else { setCard(data); setDone(false) }
-		// 		setLoading(false)
-		// 	})
+		apiFetch(`/api/grammar/card?level=${lvl}&mode=${m}&lang=${lang}`, session)
+			.then(r => r.json())
+			.then(data => {
+				if (data.done) { setDone(true); setCard(null) }
+				else { setCard(data); setDone(false) }
+				setLoading(false)
+			})
 	}
 
 	function startSession(lvl, m) {
