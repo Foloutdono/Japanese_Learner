@@ -38,7 +38,7 @@ export default function VocabScreen({ session }) {
     setSubmitted(false)
     setShowRating(false)
 
-    apiFetch(`/api/vocab/card?level=${lvl}&phase=${ph}`, session)
+    apiFetch(`/api/vocab/card?level=${lvl}&phase=${ph}&lang=${lang}`, session)
       .then(r => r.json())
       .then(data => {
         if (data.done) { setDone(true); setCard(null) }

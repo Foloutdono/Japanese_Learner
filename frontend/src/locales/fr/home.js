@@ -21,4 +21,7 @@ export default {
     statsDesc:        'Progression SRS\nCartes maîtrisées\nRévisions dues',
     decksDesc:        'Cartes personnalisées\nFlashcards & Kanji\nMélangez avec le contenu JLPT',
     dictionaryDesc:   'Tous les kanji\nPrononciation & sens\nOrdre des traits',
+    grammarTitle: 'Grammaire',
+    grammarDesc: 'Règles JLPT N5 → N1\nFlashcard, QCM\nExemples de phrases',
+
 }

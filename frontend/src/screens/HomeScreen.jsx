@@ -40,9 +40,9 @@ export default function HomeScreen() {
     },
     {
       icon: '文',
-      title: 'Grammaire',
-      desc: 'Règles JLPT N5 → N1\nFlashcard, QCM\nExemples de phrases',
-      path: '/grammar',
+      title: t?.grammarTitle ?? 'Grammaire',
+      desc:  t?.grammarDesc  ?? '',
+      path:  '/grammar',
       color: '#e17055',
     },
     {

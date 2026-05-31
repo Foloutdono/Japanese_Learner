@@ -17,6 +17,22 @@ export default function StudyScreen({ session }) {
     const { state }     = useLocation()
     const deck          = state?.deck
 
+    const MODES_BY_TYPE = {
+        flashcard: [{ key: 'flashcard', label: 'Flashcard' }],
+        vocab:     [
+            { key: 'flashcard', label: 'Flashcard' },
+            { key: 'kk-s',     label: 'Phase 1 — K+K→S' },
+            { key: 'k-k',      label: 'Phase 2 — K→S' },
+            { key: 's-k',      label: 'Phase 3 — S→K' },
+        ],
+        kanji:     [
+            { key: 'flashcard', label: 'Flashcard' },
+            { key: 'kk-s',     label: 'Phase 1 — K+K→S' },
+            { key: 'k-k',      label: 'Phase 2 — K→S' },
+            { key: 's-k',      label: 'Phase 3 — S→K' },
+        ],
+    }
+
     const availableModes = MODES_BY_TYPE[deck?.type] ?? MODES_BY_TYPE.flashcard
 
     const [mode, setMode]               = useState(availableModes[0].key)
@@ -34,21 +50,6 @@ export default function StudyScreen({ session }) {
     const [drawingEnabled, setDrawingEnabled] = useState(true)
     const [configured, setConfigured]   = useState(false)
 
-    const MODES_BY_TYPE = {
-        flashcard: [{ key: 'flashcard', label: 'Flashcard' }],
-        vocab:     [
-            { key: 'flashcard', label: 'Flashcard' },
-            { key: 'kk-s',     label: 'Phase 1 — K+K→S' },
-            { key: 'k-k',      label: 'Phase 2 — K→S' },
-            { key: 's-k',      label: 'Phase 3 — S→K' },
-        ],
-        kanji:     [
-            { key: 'flashcard', label: 'Flashcard' },
-            { key: 'kk-s',     label: 'Phase 1 — K+K→S' },
-            { key: 'k-k',      label: 'Phase 2 — K→S' },
-            { key: 's-k',      label: 'Phase 3 — S→K' },
-        ],
-    }
 
     function fetchCard() {
         setLoading(true)

@@ -21,4 +21,6 @@ export default {
     statsDesc:        'SRS progress\nMastered cards\nDue reviews',
     decksDesc:        'Custom cards\nFlashcards & Kanji\nMix with JLPT content',
     dictionaryDesc:   'All kanji\nPronunciation & meaning\nStroke order',
+    grammarTitle: 'Grammar',
+    grammarDesc: 'JLPT N5 → N1 rules\nFlashcard, MCQ\nExample sentences',
 }

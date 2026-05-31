@@ -139,6 +139,7 @@ function StatCell({ s }) {
 }
 
 function GlobalSummary({ stats }) {
+  const { t } = useLang()
   let total = 0, newC = 0, learning = 0, mastered = 0, due = 0
 
   for (const modes of Object.values(stats.kana))

@@ -16,51 +16,46 @@ import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
 
 export default function App() {
-  const [session, setSession] = useState(undefined) // undefined = loading
+  const [session, setSession] = useState(undefined)
 
   useEffect(() => {
-    // Get current session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-    })
-
-    // Listen for login/logout
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
-
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session))
     return () => subscription.unsubscribe()
   }, [])
 
-  // Still loading
   if (session === undefined) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: 'var(--text-secondary)' }}>Chargement...</div>
-      </div>
+      <LangProvider>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ color: 'var(--text-secondary)' }}>Chargement...</div>
+        </div>
+      </LangProvider>
     )
   }
 
-  // Not logged in
   if (!session) {
-    return <AuthScreen />
+    return (
+      <LangProvider>
+        <AuthScreen />
+      </LangProvider>
+    )
   }
 
-  // Logged in
   return (
     <LangProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/"      element={<HomeScreen session={session} />} />
-          <Route path="/kana"  element={<KanaScreen session={session} />} />
-          <Route path="/vocab" element={<VocabScreen session={session} />} />
-          <Route path="/kanji" element={<KanjiScreen session={session} />} />
-          <Route path="/stats" element={<StatsScreen session={session} />} />
-          <Route path="/dictionary" element={<DictionaryScreen session={session} />} />
-          <Route path="/decks"                    element={<DecksScreen session={session} />} />
-          <Route path="/decks/:deck_id"           element={<DeckDetailScreen session={session} />} />
-          <Route path="/decks/:deck_id/study"     element={<StudyScreen session={session} />} />
-          <Route path="/grammar" element={<GrammarScreen session={session} />} />
+          <Route path="/"                     element={<HomeScreen session={session} />} />
+          <Route path="/kana"                 element={<KanaScreen session={session} />} />
+          <Route path="/vocab"                element={<VocabScreen session={session} />} />
+          <Route path="/kanji"                element={<KanjiScreen session={session} />} />
+          <Route path="/stats"                element={<StatsScreen session={session} />} />
+          <Route path="/dictionary"           element={<DictionaryScreen session={session} />} />
+          <Route path="/decks"                element={<DecksScreen session={session} />} />
+          <Route path="/decks/:deck_id"       element={<DeckDetailScreen session={session} />} />
+          <Route path="/decks/:deck_id/study" element={<StudyScreen session={session} />} />
+          <Route path="/grammar"              element={<GrammarScreen session={session} />} />
         </Routes>
       </BrowserRouter>
     </LangProvider>
