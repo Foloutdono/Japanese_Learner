@@ -303,10 +303,10 @@ ALL_KANA = {
 }
 
 KANA_SETS = {
-    "Hiragana (de base)":       HIRAGANA_BASIC,
-    "Hiragana (combinaisons)":  HIRAGANA_COMBINATIONS,
-    "Katakana (de base)":       KATAKANA_BASIC,
-    "Katakana (combinaisons)":  KATAKANA_COMBINATIONS,
+    "Hiragana (basic)":       HIRAGANA_BASIC,
+    "Hiragana (combinations)":  HIRAGANA_COMBINATIONS,
+    "Katakana (basic)":       KATAKANA_BASIC,
+    "Katakana (combinations)":  KATAKANA_COMBINATIONS,
 }
 
 def get_all_kana() -> list[dict]:
