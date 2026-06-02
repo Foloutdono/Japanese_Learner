@@ -1,9 +1,9 @@
 export default {
     // Quiz
     hiraganaBase:   'Hiragana (basic)',
-    hiraganaCombinations: 'Hiragana (combinaisons)',
+    hiraganaCombinations: 'Hiragana (combinations)',
     katakanaBase:   'Katakana (basic)',
-    katakanaCombinations: 'Katakana (combinaisons)',
+    katakanaCombinations: 'Katakana (combinations)',
 
     // Phases
     phase1:         'Phase 1',

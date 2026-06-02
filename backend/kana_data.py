@@ -295,23 +295,16 @@ KATAKANA_COMBINATIONS = [
 # Accessors
 # ─────────────────────────────────────────────
 
-ALL_KANA = {
+KANA_SETS = {
     "hiragana_basic":       HIRAGANA_BASIC,
     "hiragana_combos":      HIRAGANA_COMBINATIONS,
     "katakana_basic":       KATAKANA_BASIC,
     "katakana_combos":      KATAKANA_COMBINATIONS,
 }
 
-KANA_SETS = {
-    "Hiragana (basic)":       HIRAGANA_BASIC,
-    "Hiragana (combinations)":  HIRAGANA_COMBINATIONS,
-    "Katakana (basic)":       KATAKANA_BASIC,
-    "Katakana (combinations)":  KATAKANA_COMBINATIONS,
-}
-
 def get_all_kana() -> list[dict]:
     result = []
-    for items in ALL_KANA.values():
+    for items in KANA_SETS.values():
         result.extend(items)
     return result
 

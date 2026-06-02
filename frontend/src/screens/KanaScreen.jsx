@@ -42,7 +42,12 @@ export default function KanaScreen({ session }) {
     setInput('')
     setSubmitted(false)
     setShowRating(false)
-
+    switch (set) {
+      case t.hiraganaBase:        set = 'hiragana_basic'; break
+      case t.hiraganaCombinations: set = 'hiragana_combos'; break
+      case t.katakanaBase:        set = 'katakana_basic'; break
+      case t.katakanaCombinations: set = 'katakana_combos'; break
+    }
     apiFetch(`/api/kana/card?set_name=${encodeURIComponent(set)}&mode=${m}`, session)
       .then(r => r.json())
       .then(data => {
