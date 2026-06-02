@@ -22,6 +22,7 @@ def get_kana_sets():
 def get_kana_card(set_name: str, mode: str, user_id: str = Depends(get_user_id)):
     kana_list = KANA_SETS.get(set_name)
     if not kana_list:
+        print(f"Unknown set: {set_name}")
         return {"error": "Unknown set"}
 
     raw_ids  = [kana_to_id(k) for k in kana_list]
