@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
+import { TopBar } from '../components/TopBar'
 
 export default function StatsScreen({ session }) {
-  const navigate = useNavigate()
+  const navigate    = useNavigate()
+  const { t }       = useLang()
   const [stats, setStats] = useState(null)
-  const { t } = useLang()
 
   useEffect(() => { fetchStats() }, [])
 
@@ -15,22 +16,22 @@ export default function StatsScreen({ session }) {
   }
 
   function resetAll() {
-    if (!confirm('Effacer TOUTE la progression ? Cette action est irréversible.')) return
+    if (!confirm(t.resetConfirm)) return
     apiFetch('/api/stats/reset', session, { method: 'DELETE' }).then(() => fetchStats())
   }
 
   return (
     <div style={{ minHeight: '100vh' }}>
       <div className="top-bar">
-        <button className="btn-back" onClick={() => navigate('/')}>← Menu</button>
-        <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>Statistiques</span>
+        <button className="btn-back" onClick={() => navigate('/')}>{t.menu}</button>
+        <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>{t.statistics}</span>
         <button onClick={fetchStats}
           style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-primary)', fontSize: 13 }}>
           ↻
         </button>
         <button onClick={resetAll}
           style={{ background: 'var(--danger)', color: '#fff', fontSize: 13 }}>
-          🗑 {t.resetStats}
+          {t.resetStats}
         </button>
       </div>
 
@@ -41,7 +42,7 @@ export default function StatsScreen({ session }) {
       )}
 
       {stats && (
-        <div className="container" style={{ padding: '32px 24px'}}>
+        <div className="container" style={{ padding: '32px 24px' }}>
 
           <Section title={t.kana} />
           <div className="grid-2" style={{ marginBottom: 32 }}>
@@ -52,9 +53,9 @@ export default function StatsScreen({ session }) {
                   {['mcq', 'type'].map(m => (
                     <div key={m} style={{ flex: 1, minWidth: 120 }}>
                       <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                        {m === 'mcq' ? 'QCM' : 'Écriture'}
+                        {m === 'mcq' ? t.modeQCM : t.modeType}
                       </div>
-                      <StatCell s={modes[m]} />
+                      <StatCell s={modes[m]} t={t} />
                     </div>
                   ))}
                 </div>
@@ -66,13 +67,11 @@ export default function StatsScreen({ session }) {
           <div className="grid-3" style={{ marginBottom: 32 }}>
             {Object.entries(stats.vocab).map(([level, phases]) => (
               <div key={level} className="card">
-                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12, color: 'var(--text-primary)' }}>
-                  {level}
-                </div>
+                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>{level}</div>
                 {[['kk-s', 'K+K→S'], ['k-k', 'K→S'], ['s-k', 'S→K']].map(([key, label]) => (
                   <div key={key} style={{ marginBottom: 10 }}>
                     <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
-                    <StatCell s={phases[key]} />
+                    <StatCell s={phases[key]} t={t} />
                   </div>
                 ))}
               </div>
@@ -83,13 +82,11 @@ export default function StatsScreen({ session }) {
           <div className="grid-3" style={{ marginBottom: 32 }}>
             {Object.entries(stats.kanji).map(([level, phases]) => (
               <div key={level} className="card">
-                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12, color: 'var(--text-primary)' }}>
-                  {level}
-                </div>
+                <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>{level}</div>
                 {[['kk-s', 'K+K→S'], ['k-k', 'K→S'], ['s-k', 'S→K']].map(([key, label]) => (
                   <div key={key} style={{ marginBottom: 10 }}>
                     <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
-                    <StatCell s={phases[key]} />
+                    <StatCell s={phases[key]} t={t} />
                   </div>
                 ))}
               </div>
@@ -97,15 +94,14 @@ export default function StatsScreen({ session }) {
           </div>
 
           <Section title={t.globalSummary} />
-          <GlobalSummary stats={stats} />
-
+          <GlobalSummary stats={stats} t={t} />
         </div>
       )}
     </div>
   )
 }
 
-function Section({ title}) {
+function Section({ title }) {
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={{ fontSize: 40, fontWeight: 'bold', color: 'var(--text-primary)', textAlign: 'center' }}>{title}</div>
@@ -114,9 +110,9 @@ function Section({ title}) {
   )
 }
 
-function StatCell({ s }) {
+function StatCell({ s, t }) {
   if (!s) return null
-  const total = s.total || 1
+  const total      = s.total || 1
   const masteredPct = Math.round((s.mastered / total) * 100)
   const learningPct = Math.round((s.learning / total) * 100)
 
@@ -138,8 +134,7 @@ function StatCell({ s }) {
   )
 }
 
-function GlobalSummary({ stats }) {
-  const { t } = useLang()
+function GlobalSummary({ stats, t }) {
   let total = 0, newC = 0, learning = 0, mastered = 0, due = 0
 
   for (const modes of Object.values(stats.kana))
@@ -156,11 +151,11 @@ function GlobalSummary({ stats }) {
       }
 
   const cols = [
-    { label: t.new, value: newC,     color: 'var(--warning)' },
-    { label: t.learning,    value: learning,  color: 'var(--accent2)' },
-    { label: t.mastered,  value: mastered,  color: 'var(--success)' },
-    { label: t.dueNow, value: due,       color: 'var(--accent)'  },
-    { label: t.total,       value: total,     color: 'var(--text-primary)' },
+    { label: t.new,      value: newC,     color: 'var(--warning)' },
+    { label: t.learning, value: learning, color: 'var(--accent2)' },
+    { label: t.mastered, value: mastered, color: 'var(--success)' },
+    { label: t.dueNow,   value: due,      color: 'var(--accent)'  },
+    { label: t.total,    value: total,    color: 'var(--text-primary)' },
   ]
 
   return (

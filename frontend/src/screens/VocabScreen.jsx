@@ -1,17 +1,25 @@
-import { apiFetch } from '../api'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import RatingBar from '../components/RatingBar'
-import { TopBar } from '../components/TopBar'
-import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
-import { speakJapanese } from '../components/sound'
+import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
-
-const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
+import { TopBar } from '../components/TopBar'
+import RatingBar from '../components/RatingBar'
+import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
+import LevelSelector from '../components/LevelSelector'
+import ModeSelector from '../components/ModeSelector'
+import SelectionScreen from '../components/SelectionScreen'
+import PromptCard from '../components/PromptCard'
+import { speakJapanese } from '../components/sound'
 
 export default function VocabScreen({ session }) {
-  const navigate = useNavigate()
+  const navigate    = useNavigate()
   const { t, lang } = useLang()
+
+  const PHASES = [
+    { key: 1, label: t.phase1, desc: t.phase1Desc },
+    { key: 2, label: t.phase2, desc: t.phase2Desc },
+    { key: 3, label: t.phase3, desc: t.phase3Desc },
+  ]
 
   const [level, setLevel]           = useState(null)
   const [phase, setPhase]           = useState(null)
@@ -23,12 +31,6 @@ export default function VocabScreen({ session }) {
   const [input, setInput]           = useState('')
   const [submitted, setSubmitted]   = useState(false)
   const [showRating, setShowRating] = useState(false)
-
-  const PHASES = [
-    { id: 1, label: t.phase1, desc: t.phase1Desc },
-    { id: 2, label: t.phase2, desc: t.phase2Desc },
-    { id: 3, label: t.phase3, desc: t.phase3Desc },
-  ]
 
   function fetchCard(lvl, ph) {
     setLoading(true)
@@ -57,7 +59,6 @@ export default function VocabScreen({ session }) {
   function postReview(quality) {
     apiFetch('/api/vocab/review', session, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),
     }).then(() => fetchCard(level, phase))
   }
@@ -82,23 +83,9 @@ export default function VocabScreen({ session }) {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => navigate('/')} title={`${t.vocabulary} JLPT`} />
-        <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
-          <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-            {t?.chooseLevel ?? 'Choisissez un niveau'}
-          </div>
-          <div className="grid-5" style={{ maxWidth: 600, margin: '0 auto' }}>
-            {LEVELS.map(l => (
-              <button key={l} onClick={() => setLevel(l)}
-                style={{
-                  background: 'var(--accent2)', color: '#111',
-                  fontSize: 20, fontWeight: 'bold',
-                  padding: '24px 0', width: '100%',
-                }}>
-                {l}
-              </button>
-            ))}
-          </div>
-        </div>
+        <SelectionScreen subtitle={t.selectLevel}>
+          <LevelSelector onSelect={setLevel} color="var(--accent2)" />
+        </SelectionScreen>
       </div>
     )
   }
@@ -108,24 +95,12 @@ export default function VocabScreen({ session }) {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => setLevel(null)} title={`${t.vocabulary} ${level}`} />
-        <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
-          <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-            {t?.choosePhase ?? 'Choisissez une phase'}
-          </div>
-          <div className="grid-3" style={{ maxWidth: 700, margin: '0 auto' }}>
-            {PHASES.map(p => (
-              <button key={p.id} onClick={() => startSession(level, p.id)}
-                style={{
-                  background: 'var(--bg-card)', color: 'var(--text-primary)',
-                  padding: '28px 20px', display: 'flex',
-                  flexDirection: 'column', alignItems: 'center', gap: 8,
-                }}>
-                <div style={{ fontSize: 16, fontWeight: 'bold' }}>{p.label}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.desc}</div>
-              </button>
-            ))}
-          </div>
-        </div>
+        <SelectionScreen subtitle={t.selectPhase}>
+          <ModeSelector
+            modes={PHASES.map(p => ({ key: p.key, label: p.label, desc: p.desc }))}
+            onSelect={ph => startSession(level, ph)}
+          />
+        </SelectionScreen>
       </div>
     )
   }
@@ -133,65 +108,37 @@ export default function VocabScreen({ session }) {
   // ── Quiz ──
   return (
     <div style={{ minHeight: '100vh' }}>
-      <TopBar onBack={() => setPhase(null)} title={`${t.vocabulary} ${level} — Phase ${phase}`} />
-
+      <TopBar onBack={() => setPhase(null)} title={`${t.vocabulary} ${level} — ${t.phase1.replace('1', phase)}`} />
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
-
         {loading && <Loading />}
         {done    && <DoneMessage onBack={() => setPhase(null)} />}
-
         {card && !loading && (
           <>
-            {/* Prompt card */}
-            <div style={{
-              background: 'var(--bg-card)', borderRadius: 12,
-              padding: '40px 24px', marginBottom: 32,
-            }}>
+            <PromptCard>
               {phase === 1 && (
                 <>
-                  <div style={{ fontSize: 52, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                    {card.kanji}
-                  </div>
-                  <div style={{ fontSize: 22, color: 'var(--text-secondary)', marginTop: 8 }}>
-                    {card.kana}
-                  </div>
+                  <div style={{ fontSize: 52, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                  <div style={{ fontSize: 22, color: 'var(--text-secondary)', marginTop: 8 }}>{card.kana}</div>
                 </>
               )}
               {phase === 2 && (
                 <div style={{ fontSize: 52, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                  {card.kanji ? card.kanji : (card.kana + " (No Kanji)")}
+                  {card.kanji || card.kana}
                 </div>
               )}
               {phase === 3 && (
-                <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent2)' }}>
-                  {card.meaning}
-                </div>
+                <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent2)' }}>{card.meaning}</div>
               )}
-            </div>
+            </PromptCard>
 
-            {/* MCQ (phase 1 & 2) */}
             {phase !== 3 && (
-              <MCQGrid
-                choices={card.choices}
-                correct={card.meaning}
-                selected={selected}
-                answered={answered}
-                onAnswer={onMCQAnswer}
-              />
+              <MCQGrid choices={card.choices} correct={card.meaning}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
-
-            {/* Type input (phase 3) */}
             {phase === 3 && (
-              <TypeInput
-                value={input}
-                onChange={setInput}
-                onSubmit={onTypeSubmit}
-                submitted={submitted}
-                answer={card.kana}
-                placeholder="Tapez la lecture en kana..."
-              />
+              <TypeInput value={input} onChange={setInput} onSubmit={onTypeSubmit}
+                submitted={submitted} answer={card.kana} placeholder={t.typeKana} />
             )}
-
             <RatingBar active={showRating} onRate={postReview} />
           </>
         )}

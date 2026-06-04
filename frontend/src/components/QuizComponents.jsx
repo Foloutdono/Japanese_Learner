@@ -74,10 +74,12 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
 }
 
 // ── Type input + submit + result ──────────────────────────
-export function TypeInput({ value, onChange, onSubmit, submitted, answer,
-                            placeholder = 'Tapez la réponse...', inputStyle = {}, wrongExtra = null }) {
-  const isCorrect = value.trim().toLowerCase() === answer?.toLowerCase()
+export function TypeInput({
+  value, onChange, onSubmit, submitted, answer,
+  placeholder, inputStyle = {}, wrongExtra = null,
+}) {
   const { t } = useLang()
+  const isCorrect = value.trim().toLowerCase() === answer?.toLowerCase()
 
   return (
     <div>
@@ -85,7 +87,7 @@ export function TypeInput({ value, onChange, onSubmit, submitted, answer,
         value={value}
         onChange={e => onChange(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && onSubmit()}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t.typeAnswer}
         disabled={submitted}
         autoFocus
         style={{
@@ -97,15 +99,19 @@ export function TypeInput({ value, onChange, onSubmit, submitted, answer,
         }}
       />
       {!submitted && (
-        <button onClick={onSubmit}
-          style={{ background: 'var(--accent)', color: '#fff', width: '100%' }}>
-          {t?.submit ?? 'Valider'}
+        <button
+          onClick={onSubmit}
+          style={{ background: 'var(--accent)', color: '#fff', width: '100%' }}
+        >
+          {t.submit}
         </button>
       )}
       {submitted && (
-        <div style={{ fontSize: 18, fontWeight: 'bold', marginTop: 8,
-          color: isCorrect ? 'var(--success)' : 'var(--danger)' }}>
-          {isCorrect ? t?.correct ?? '✅ Correct !' : `${t?.wrong ?? '❌'} : ${answer}`}
+        <div style={{
+          fontSize: 18, fontWeight: 'bold', marginTop: 8,
+          color: isCorrect ? 'var(--success)' : 'var(--danger)',
+        }}>
+          {isCorrect ? t.correct : `${t.wrong} ${answer}`}
           {!isCorrect && wrongExtra}
         </div>
       )}
@@ -113,11 +119,14 @@ export function TypeInput({ value, onChange, onSubmit, submitted, answer,
   )
 }
 
-// ── Mode toggle (QCM / Écriture) ──────────────────────────
-export function ModeToggle({ mode, onChange, modes = [['mcq', 'QCM'], ['type', 'Écriture']] }) {
+// ── Mode toggle ───────────────────────────────────────────
+export function ModeToggle({ mode, onChange, modes }) {
+  const { t } = useLang()
+  const defaultModes = [['mcq', t.modeQCM], ['type', t.modeType]]
+
   return (
     <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
-      {modes.map(([key, label]) => (
+      {(modes ?? defaultModes).map(([key, label]) => (
         <button
           key={key}
           onClick={() => onChange(key)}
@@ -139,19 +148,19 @@ export function DoneMessage({ onBack }) {
   const { t } = useLang()
   return (
     <div style={{ color: 'var(--success)', fontSize: 18, textAlign: 'center', padding: 40 }}>
-      {t?.quizComplete ?? 'Quiz terminé !'}
+      {t.quizComplete}
       <br /><br />
       <button
         onClick={onBack}
         style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)' }}
       >
-        {t?.backToPhases ?? '← Retour aux phases'}
+        {t.backToMenu}
       </button>
     </div>
   )
 }
 
-// ── Loading spinner ───────────────────────────────────────
+// ── Loading ───────────────────────────────────────────────
 export function Loading() {
   const { t } = useLang()
   return (

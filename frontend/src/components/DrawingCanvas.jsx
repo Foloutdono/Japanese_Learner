@@ -1,4 +1,5 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
+import { useLang } from '../LangContext'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -8,13 +9,12 @@ function kanjiToSvgUrl(kanji) {
 }
 
 export default function DrawingCanvas({ kanji, meaning, onDone }) {
+  const { t } = useLang()
   const canvasRef = useRef(null)
   const drawing   = useRef(false)
   const lastPos   = useRef(null)
 
-  useEffect(() => {
-    clearCanvas()
-  }, [kanji])
+  useEffect(() => { clearCanvas() }, [kanji])
 
   function getPos(e, canvas) {
     const rect   = canvas.getBoundingClientRect()
@@ -80,25 +80,20 @@ export default function DrawingCanvas({ kanji, meaning, onDone }) {
       zIndex: 100, padding: 24,
     }}>
 
-      {/* Title */}
-      <div style={{
-        fontSize: 14, fontWeight: 'bold',
-        color: 'var(--warning)', marginBottom: 24,
-      }}>
-        ✏️ Entraînez-vous à écrire ce kanji
+      <div style={{ fontSize: 14, fontWeight: 'bold', color: 'var(--warning)', marginBottom: 24 }}>
+        {t.writingPractice}
       </div>
 
-      {/* Two panels side by side */}
       <div style={{
         display: 'flex', gap: 24,
         justifyContent: 'center', alignItems: 'flex-start',
         flexWrap: 'wrap', width: '100%', maxWidth: 600,
       }}>
 
-        {/* Drawing canvas */}
+        {/* Drawing panel */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
-            Votre dessin
+            {t.yourDrawing}
           </div>
           <canvas
             ref={canvasRef}
@@ -128,26 +123,24 @@ export default function DrawingCanvas({ kanji, meaning, onDone }) {
               fontSize: 12, marginTop: 8, width: '100%', maxWidth: 260,
             }}
           >
-            ↺ Effacer
+            {t.eraseBtn}
           </button>
         </div>
 
-        {/* Stroke order reference */}
+        {/* Stroke order panel */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
-            Ordre des traits
+            {t.strokeOrder}
           </div>
           <div style={{
-            width: '100%', maxWidth: 260,
-            aspectRatio: '1',
+            width: '100%', maxWidth: 260, aspectRatio: '1',
             background: '#fff', borderRadius: 10,
-            border: '2px solid var(--border)',
-            overflow: 'hidden',
+            border: '2px solid var(--border)', overflow: 'hidden',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <img
               src={kanjiToSvgUrl(kanji)}
-              alt={`Stroke order ${kanji}`}
+              alt={`${t.strokeOrder} ${kanji}`}
               style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               onError={e => {
                 e.target.style.display = 'none'
@@ -160,37 +153,29 @@ export default function DrawingCanvas({ kanji, meaning, onDone }) {
               width: '100%', height: '100%',
               alignItems: 'center', justifyContent: 'center',
             }}>
-              Non disponible
+              {t.notAvailable}
             </div>
           </div>
 
-          {/* Kanji + meaning below stroke order */}
           <div style={{ marginTop: 12, textAlign: 'center' }}>
-            <div style={{
-              fontSize: 32, fontFamily: 'Yu Gothic, sans-serif',
-              color: '#fff', lineHeight: 1,
-            }}>
+            <div style={{ fontSize: 32, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1 }}>
               {kanji}
             </div>
-            <div style={{
-              fontSize: 13, color: 'var(--text-secondary)', marginTop: 4,
-            }}>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
               {meaning}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Done button */}
       <button
         onClick={onDone}
         style={{
           background: 'var(--success)', color: '#111',
-          fontSize: 16, padding: '14px 60px',
-          marginTop: 32,
+          fontSize: 16, padding: '14px 60px', marginTop: 32,
         }}
       >
-        ✓ C'est bon, continuer
+        {t.continueBtn}
       </button>
     </div>
   )

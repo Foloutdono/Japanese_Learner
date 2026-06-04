@@ -1,33 +1,28 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
+import { TopBar } from '../components/TopBar'
+import EmptyState from '../components/EmptyState'
 
 export default function DecksScreen({ session }) {
-  const { t } = useLang()
-
-  const navigate = useNavigate()
-  const [decks, setDecks]         = useState([])
-  const [loading, setLoading]     = useState(true)
-  const [creating, setCreating]   = useState(false)
-  const [newName, setNewName]     = useState('')
-  const [newType, setNewType]     = useState('flashcard')
-  const [error, setError]         = useState(null)
+  const navigate  = useNavigate()
+  const { t }     = useLang()
 
   const DECK_TYPES = [
-    { value: 'flashcard', label: 'Flashcard',  desc: t.flashcardDesc, color: '#6c5ce7' },
-    { value: 'vocab',     label: t.vocabulary, desc: t.vocabDesc,        color: '#4cc9f0' },
-    { value: 'kanji',     label: t.kanji,       desc: t.kanjiDesc,        color: '#e94560' },
+    { value: 'flashcard', label: t.flashcardType, desc: t.flashcardDesc, color: '#6c5ce7' },
+    { value: 'vocab',     label: t.vocabType,     desc: t.vocabDesc,     color: '#4cc9f0' },
+    { value: 'kanji',     label: t.kanjiType,     desc: t.kanjiDesc,     color: '#e94560' },
   ]
 
-  function typeColor(type) {
-    return DECK_TYPES.find(t => t.value === type)?.color ?? '#6c5ce7'
-  }
+  const typeColor = type => DECK_TYPES.find(d => d.value === type)?.color ?? '#6c5ce7'
+  const typeLabel = type => DECK_TYPES.find(d => d.value === type)?.label ?? type
 
-  function typeLabel(type) {
-    return DECK_TYPES.find(t => t.value === type)?.label ?? type
-  }
+  const [decks, setDecks]       = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [creating, setCreating] = useState(false)
+  const [newName, setNewName]   = useState('')
+  const [newType, setNewType]   = useState('flashcard')
 
   useEffect(() => { fetchDecks() }, [])
 
@@ -53,7 +48,7 @@ export default function DecksScreen({ session }) {
   }
 
   function deleteDeck(id, name) {
-    if (!confirm(`Supprimer le deck « ${name} » ? Cette action est irréversible.`)) return
+    if (!confirm(`${t.delete} « ${name} » ?`)) return
     apiFetch(`/api/decks/${id}`, session, { method: 'DELETE' })
       .then(() => setDecks(prev => prev.filter(d => d.id !== id)))
   }
@@ -64,12 +59,9 @@ export default function DecksScreen({ session }) {
 
       <div className="container" style={{ padding: '32px 24px' }}>
 
-        {/* Create button */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
-          <button
-            onClick={() => setCreating(c => !c)}
-            style={{ background: '#6c5ce7', color: '#fff', fontSize: 14 }}
-          >
+          <button onClick={() => setCreating(c => !c)}
+            style={{ background: '#6c5ce7', color: '#fff', fontSize: 14 }}>
             {creating ? t.cancel : t.createDeck}
           </button>
         </div>
@@ -77,52 +69,42 @@ export default function DecksScreen({ session }) {
         {/* Create form */}
         {creating && (
           <div className="card" style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 16 }}>
-              {t.createDeck}
-            </div>
+            <div style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 16 }}>{t.createDeck}</div>
             <input
               value={newName}
               onChange={e => setNewName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && createDeck()}
-              placeholder={t.deckName}
+              placeholder={t.deckNamePlaceholder}
               autoFocus
               style={{ width: '100%', padding: '10px 14px', fontSize: 15, marginBottom: 12 }}
             />
             <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-              {DECK_TYPES.map(t => (
-                <button key={t.value} onClick={() => setNewType(t.value)}
+              {DECK_TYPES.map(dt => (
+                <button key={dt.value} onClick={() => setNewType(dt.value)}
                   style={{
-                    background: newType === t.value ? t.color : 'var(--bg-panel)',
-                    color: newType === t.value ? '#fff' : 'var(--text-secondary)',
+                    background: newType === dt.value ? dt.color : 'var(--bg-panel)',
+                    color: newType === dt.value ? '#fff' : 'var(--text-secondary)',
                     fontSize: 13, padding: '8px 16px',
                   }}>
-                  {t.label}
-                  <div style={{ fontSize: 10, opacity: 0.8 }}>{t.desc}</div>
+                  {dt.label}
+                  <div style={{ fontSize: 10, opacity: 0.8 }}>{dt.desc}</div>
                 </button>
               ))}
             </div>
-            <button onClick={createDeck}
-              style={{ background: '#6c5ce7', color: '#fff', width: '100%' }}>
+            <button onClick={createDeck} style={{ background: '#6c5ce7', color: '#fff', width: '100%' }}>
               {t.createDeck}
             </button>
           </div>
         )}
 
         {loading && (
-          <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>
-            {t.loading}
-          </div>
+          <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>{t.loading}</div>
         )}
 
         {!loading && decks.length === 0 && (
-          <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📚</div>
-            <div>{t.noDecks}</div>
-            <div style={{ fontSize: 13, marginTop: 8 }}>{t.createFirstDeck}</div>
-          </div>
+          <EmptyState icon="📚" message={t.noDecks} hint={t.createFirstDeck} />
         )}
 
-        {/* Deck grid */}
         {!loading && decks.length > 0 && (
           <div className="grid-3">
             {decks.map(deck => (
@@ -142,11 +124,9 @@ export default function DecksScreen({ session }) {
                     🗑
                   </button>
                 </div>
-
                 <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                  {deck.card_count} carte{deck.card_count !== 1 ? 's' : ''}
+                  {deck.card_count} {t.cards}
                 </div>
-
                 <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
                   <button
                     onClick={() => navigate(`/decks/${deck.id}`, { state: { deck } })}

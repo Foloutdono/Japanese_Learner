@@ -1,61 +1,47 @@
-import { apiFetch } from '../api'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import RatingBar from '../components/RatingBar'
+import { apiFetch } from '../api'
+import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
+import RatingBar from '../components/RatingBar'
 import { CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading } from '../components/QuizComponents'
 import { playKana } from '../components/sound'
-import { useLang } from '../LangContext'
 
 export default function KanaScreen({ session }) {
-  const navigate = useNavigate()
+  const navigate    = useNavigate()
   const { t, lang } = useLang()
 
-  const [selectedSet, setSelectedSet] = useState(null)
+  // Map translated labels → API slugs
+  const SETS = [
+    { label: t.hiraganaBase,         slug: 'hiragana_basic'  },
+    { label: t.hiraganaCombinations, slug: 'hiragana_combos' },
+    { label: t.katakanaBase,         slug: 'katakana_basic'  },
+    { label: t.katakanaCombinations, slug: 'katakana_combos' },
+  ]
+
+  const [selectedSet, setSelectedSet] = useState(null) // { label, slug }
   const [mode, setMode]               = useState('mcq')
   const [card, setCard]               = useState(null)
   const [loading, setLoading]         = useState(false)
   const [done, setDone]               = useState(false)
-
-  // MCQ state
   const [answered, setAnswered]       = useState(false)
   const [selected, setSelected]       = useState(null)
-
-  // Type state
   const [input, setInput]             = useState('')
   const [submitted, setSubmitted]     = useState(false)
-
-  // Rating state
   const [showRating, setShowRating]   = useState(false)
-  
-  const SETS = [
-    t.hiraganaBase,
-    t.hiraganaCombinations,
-    t.katakanaBase,
-    t.katakanaCombinations,
-  ]
 
-  function fetchCard(set, m) {
+  function fetchCard(slug, m) {
     setLoading(true)
     setAnswered(false)
     setSelected(null)
     setInput('')
     setSubmitted(false)
     setShowRating(false)
-    switch (set) {
-      case t.hiraganaBase:        set = 'hiragana_basic'; break
-      case t.hiraganaCombinations: set = 'hiragana_combos'; break
-      case t.katakanaBase:        set = 'katakana_basic'; break
-      case t.katakanaCombinations: set = 'katakana_combos'; break
-    }
-    apiFetch(`/api/kana/card?set_name=${encodeURIComponent(set)}&mode=${m}`, session)
+
+    apiFetch(`/api/kana/card?set_name=${encodeURIComponent(slug)}&mode=${m}`, session)
       .then(r => r.json())
       .then(data => {
-        if (data.error || data.detail) {
-          console.error('API error:', data)
-          setLoading(false)
-          return
-        }
+        if (data.error || data.detail) { console.error('API error:', data); setLoading(false); return }
         if (data.done) { setDone(true); setCard(null) }
         else { setCard(data); setDone(false) }
         setLoading(false)
@@ -65,23 +51,21 @@ export default function KanaScreen({ session }) {
   function startSession(set) {
     setSelectedSet(set)
     setDone(false)
-    fetchCard(set, mode)
+    fetchCard(set.slug, mode)
   }
 
   function switchMode(m) {
     setMode(m)
-    if (selectedSet) fetchCard(selectedSet, m)
+    if (selectedSet) fetchCard(selectedSet.slug, m)
   }
 
   function postReview(quality) {
     apiFetch('/api/kana/review', session, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ card_id: card.card_id, mode, quality }),
-    }).then(() => fetchCard(selectedSet, mode))
+    }).then(() => fetchCard(selectedSet.slug, mode))
   }
 
-  // MCQ answer
   function onMCQAnswer(choice) {
     if (answered) return
     setSelected(choice)
@@ -90,7 +74,6 @@ export default function KanaScreen({ session }) {
     playKana(card.romaji)
   }
 
-  // Type submit
   function onTypeSubmit() {
     if (submitted || !input.trim()) return
     setSubmitted(true)
@@ -98,20 +81,17 @@ export default function KanaScreen({ session }) {
     playKana(card.romaji)
   }
 
-  // ── Set selection screen ──
+  // ── Set selection ──
   if (!selectedSet) {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => navigate('/')} title="Kana" />
-        <div style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 32 }}>
-            {t?.selectKanaSet ?? ''}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', flexDirection: 'column' }}>
+        <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
+          <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>{t.selectKanaSet}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 400, margin: '0 auto' }}>
             {SETS.map(s => (
-              <button key={s} onClick={() => startSession(s)}
-                className='button-set-choice'>
-                {s}
+              <button key={s.slug} onClick={() => startSession(s)} className="button-set-choice">
+                {s.label}
               </button>
             ))}
           </div>
@@ -120,42 +100,25 @@ export default function KanaScreen({ session }) {
     )
   }
 
-  // ── Quiz screen ──
+  // ── Quiz ──
   return (
     <div style={{ minHeight: '100vh' }}>
-      <TopBar onBack={() => setSelectedSet(null)} title={selectedSet} />
-
+      <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} />
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
         <ModeToggle mode={mode} onChange={switchMode} />
-
         {loading && <Loading />}
         {done    && <DoneMessage onBack={() => setSelectedSet(null)} />}
-
         {card && !loading && (
           <>
             <CharDisplay char={card.kana} />
-
             {mode === 'mcq' && (
-              <MCQGrid
-                choices={card.choices}
-                correct={card.romaji}
-                selected={selected}
-                answered={answered}
-                onAnswer={onMCQAnswer}
-              />
+              <MCQGrid choices={card.choices} correct={card.romaji}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
-
             {mode === 'type' && (
-              <TypeInput
-                value={input}
-                onChange={setInput}
-                onSubmit={onTypeSubmit}
-                submitted={submitted}
-                answer={card.romaji}
-                placeholder={t?.typeRomaji ?? 'Tapez le romaji...'}
-              />
+              <TypeInput value={input} onChange={setInput} onSubmit={onTypeSubmit}
+                submitted={submitted} answer={card.romaji} placeholder={t.typeRomaji} />
             )}
-
             <RatingBar active={showRating} onRate={postReview} />
           </>
         )}
