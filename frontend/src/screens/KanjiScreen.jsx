@@ -9,7 +9,7 @@ import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
-import DrawingCanvas from '../components/DrawingCanvas'
+import {DrawingQuiz, DrawingOverlay} from '../components/DrawingCanvas'
 import { speakJapanese } from '../components/sound'
 
 export default function KanjiScreen({ session }) {
@@ -222,9 +222,10 @@ export default function KanjiScreen({ session }) {
               />
             )}
             {phase === 4 && card.kanji && (
-              <DrawingCanvas
+              <DrawingQuiz
                 kanji={card.kanji}
                 meaning={translatedCorrect}
+                kana={card.kana}
                 onDone={() => {
                   setAnswered(true)
                   setShowRating(true)
@@ -246,7 +247,7 @@ export default function KanjiScreen({ session }) {
             <RatingBar active={showRating} onRate={postReview} />
 
             {showDrawing && (
-              <DrawingCanvas
+              <DrawingOverlay
                 kanji={card.kanji}
                 meaning={translatedCorrect}
                 onDone={() => fetchCard(level, phase)}

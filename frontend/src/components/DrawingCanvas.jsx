@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useLang } from '../LangContext'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
@@ -8,13 +8,13 @@ function kanjiToSvgUrl(kanji) {
   return `${API_BASE}/kanjivg/${codepoint}.svg`
 }
 
-export default function DrawingCanvas({ kanji, meaning, onDone }) {
+// ── Shared canvas drawing logic ───────────────────────────
+function Canvas({ canvasRef, onClear }) {
   const { t } = useLang()
-  const canvasRef = useRef(null)
-  const drawing   = useRef(false)
-  const lastPos   = useRef(null)
+  const drawing = useRef(false)
+  const lastPos = useRef(null)
 
-  useEffect(() => { clearCanvas() }, [kanji])
+  useEffect(() => { clear() }, [])
 
   function getPos(e, canvas) {
     const rect   = canvas.getBoundingClientRect()
@@ -27,7 +27,7 @@ export default function DrawingCanvas({ kanji, meaning, onDone }) {
     }
   }
 
-  function clearCanvas() {
+  function clear() {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -37,6 +37,7 @@ export default function DrawingCanvas({ kanji, meaning, onDone }) {
     ctx.lineWidth   = 5
     ctx.lineCap     = 'round'
     ctx.lineJoin    = 'round'
+    onClear?.()
   }
 
   function startDraw(e) {
@@ -72,111 +73,161 @@ export default function DrawingCanvas({ kanji, meaning, onDone }) {
   }
 
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+      <canvas
+        ref={canvasRef}
+        width={260} height={260}
+        style={{
+          borderRadius: 10, border: '2px solid var(--border)',
+          touchAction: 'none', cursor: 'crosshair',
+          display: 'block', width: '100%', maxWidth: 260,
+        }}
+        onMouseDown={startDraw} onMouseMove={draw}
+        onMouseUp={stopDraw}   onMouseLeave={stopDraw}
+        onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw}
+      />
+      <button onClick={clear}
+        style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', fontSize: 12, marginTop: 8, width: '100%', maxWidth: 260 }}>
+        {t.eraseBtn}
+      </button>
+    </div>
+  )
+}
+
+// ── Stroke order reference panel ──────────────────────────
+function StrokeRef({ kanji, meaning }) {
+  const { t } = useLang()
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.strokeOrder}</div>
+      <div style={{
+        width: '100%', maxWidth: 260, aspectRatio: '1',
+        background: '#fff', borderRadius: 10, border: '2px solid var(--border)',
+        overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <img
+          src={kanjiToSvgUrl(kanji)}
+          alt={`${t.strokeOrder} ${kanji}`}
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
+        />
+        <div style={{
+          display: 'none', color: '#999', fontSize: 12, textAlign: 'center', padding: 16,
+          width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {t.notAvailable}
+        </div>
+      </div>
+      <div style={{ marginTop: 12, textAlign: 'center' }}>
+        <div style={{ fontSize: 32, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1 }}>{kanji}</div>
+        {meaning && <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>{meaning}</div>}
+      </div>
+    </div>
+  )
+}
+
+// ── MODE 1: Fullscreen overlay (post-wrong-answer remediation) ──
+// Used when the SRS review was already submitted and we just want practice.
+// onDone → goes to next card.
+export function DrawingOverlay({ kanji, meaning, onDone }) {
+  const { t }      = useLang()
+  const canvasRef  = useRef(null)
+
+  return (
     <div style={{
-      position: 'fixed', inset: 0,
-      background: 'var(--bg-main)',
+      position: 'fixed', inset: 0, background: 'var(--bg-main)',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       zIndex: 100, padding: 24,
     }}>
-
       <div style={{ fontSize: 14, fontWeight: 'bold', color: 'var(--warning)', marginBottom: 24 }}>
         {t.writingPractice}
       </div>
-
       <div style={{
-        display: 'flex', gap: 24,
-        justifyContent: 'center', alignItems: 'flex-start',
-        flexWrap: 'wrap', width: '100%', maxWidth: 600,
+        display: 'flex', gap: 24, justifyContent: 'center',
+        alignItems: 'flex-start', flexWrap: 'wrap', width: '100%', maxWidth: 600,
       }}>
-
-        {/* Drawing panel */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
-            {t.yourDrawing}
-          </div>
-          <canvas
-            ref={canvasRef}
-            width={260}
-            height={260}
-            style={{
-              borderRadius: 10,
-              border: '2px solid var(--border)',
-              touchAction: 'none',
-              cursor: 'crosshair',
-              display: 'block',
-              width: '100%',
-              maxWidth: 260,
-            }}
-            onMouseDown={startDraw}
-            onMouseMove={draw}
-            onMouseUp={stopDraw}
-            onMouseLeave={stopDraw}
-            onTouchStart={startDraw}
-            onTouchMove={draw}
-            onTouchEnd={stopDraw}
-          />
-          <button
-            onClick={clearCanvas}
-            style={{
-              background: 'var(--bg-panel)', color: 'var(--text-secondary)',
-              fontSize: 12, marginTop: 8, width: '100%', maxWidth: 260,
-            }}
-          >
-            {t.eraseBtn}
-          </button>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.yourDrawing}</div>
+          <Canvas canvasRef={canvasRef} />
         </div>
-
-        {/* Stroke order panel */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
-            {t.strokeOrder}
-          </div>
-          <div style={{
-            width: '100%', maxWidth: 260, aspectRatio: '1',
-            background: '#fff', borderRadius: 10,
-            border: '2px solid var(--border)', overflow: 'hidden',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <img
-              src={kanjiToSvgUrl(kanji)}
-              alt={`${t.strokeOrder} ${kanji}`}
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              onError={e => {
-                e.target.style.display = 'none'
-                e.target.nextSibling.style.display = 'flex'
-              }}
-            />
-            <div style={{
-              display: 'none', color: '#999', fontSize: 12,
-              textAlign: 'center', padding: 16,
-              width: '100%', height: '100%',
-              alignItems: 'center', justifyContent: 'center',
-            }}>
-              {t.notAvailable}
-            </div>
-          </div>
-
-          <div style={{ marginTop: 12, textAlign: 'center' }}>
-            <div style={{ fontSize: 32, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1 }}>
-              {kanji}
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-              {meaning}
-            </div>
-          </div>
-        </div>
+        <StrokeRef kanji={kanji} meaning={meaning} />
       </div>
-
-      <button
-        onClick={onDone}
-        style={{
-          background: 'var(--success)', color: '#111',
-          fontSize: 16, padding: '14px 60px', marginTop: 32,
-        }}
-      >
+      <button onClick={onDone}
+        style={{ background: 'var(--success)', color: '#111', fontSize: 16, padding: '14px 60px', marginTop: 32 }}>
         {t.continueBtn}
       </button>
     </div>
   )
 }
+
+// ── MODE 2: Inline quiz phase (phase 4) ──
+// Shows the prompt, user draws, clicks validate, sees correction, then rates.
+// onValidate() → parent shows RatingBar.
+export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
+  const { t }          = useLang()
+  const canvasRef      = useRef(null)
+  const [revealed, setRevealed] = useState(false)
+
+  function handleValidate() {
+    setRevealed(true)
+    onValidate()
+  }
+
+  return (
+    <div style={{ width: '100%' }}>
+      <div style={{
+        display: 'flex', gap: 24, justifyContent: 'center',
+        alignItems: 'flex-start', flexWrap: 'wrap', width: '100%', maxWidth: 600, margin: '0 auto',
+      }}>
+        {/* Drawing side */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.yourDrawing}</div>
+          <Canvas canvasRef={canvasRef} />
+        </div>
+
+        {/* Correction side — hidden until validated */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {!revealed ? (
+            // Placeholder so layout doesn't shift
+            <div style={{
+              width: '100%', maxWidth: 260, aspectRatio: '1',
+              background: 'var(--bg-card)', borderRadius: 10,
+              border: '2px dashed var(--border)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>?</span>
+            </div>
+          ) : (
+            <StrokeRef kanji={kanji} meaning={meaning} />
+          )}
+        </div>
+      </div>
+
+      {/* Validate button — only before revealed */}
+      {!revealed && (
+        <button
+          onClick={handleValidate}
+          style={{
+            background: 'var(--accent)', color: '#fff',
+            width: '100%', maxWidth: 600, margin: '20px auto 0', display: 'block',
+            fontSize: 15, padding: '14px',
+          }}
+        >
+          {t.revealAnswer}
+        </button>
+      )}
+
+      {/* Correction details after reveal */}
+      {revealed && (
+        <div style={{ marginTop: 16, textAlign: 'center' }}>
+          <div style={{ fontSize: 64, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{kanji}</div>
+          {kana && <div style={{ fontSize: 20, color: 'var(--text-secondary)', marginTop: 4 }}>{kana}</div>}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Default export: fullscreen overlay (backwards compat) ──
+export default DrawingOverlay
