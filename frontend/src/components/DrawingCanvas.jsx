@@ -5,6 +5,7 @@ const API_BASE = import.meta.env.VITE_API_URL || ''
 
 function kanjiToSvgUrl(kanji) {
   const codepoint = kanji.codePointAt(0).toString(16).padStart(5, '0')
+  console.log(`Fetching SVG for ${kanji} (U+${codepoint})`)
   return `${API_BASE}/kanjivg/${codepoint}.svg`
 }
 
