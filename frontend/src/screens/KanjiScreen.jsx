@@ -220,7 +220,7 @@ export default function KanjiScreen({ session }) {
                 }
               />
             )}
-            {phase === 4 && (
+            {phase === 4 && card.kanji && (
               <DrawingCanvas
                 kanji={card.kanji}
                 meaning={translatedCorrect}
