@@ -20,6 +20,7 @@ export default function KanjiScreen({ session }) {
     { key: 1, label: t.phase1, desc: t.phase1Desc },
     { key: 2, label: t.phase2, desc: t.phase2Desc },
     { key: 3, label: t.phase3, desc: t.phase3Desc },
+    { key: 4, label: t.phase4 ?? 'Write', desc: t.phase4Desc ?? 'See the meaning, write the kanji' },
   ]
 
   const [level, setLevel]             = useState(null)
@@ -189,9 +190,22 @@ export default function KanjiScreen({ session }) {
                   )}
                 </>
               )}
+              {phase === 4 && (
+                <>
+                  <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent3)' }}>{translatedCorrect}</div>
+                  {card.kana && (
+                    <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 8 }}>({card.kana})</div>
+                  )}
+                  {card.stroke_count && (
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                      {card.stroke_count} {t.strokes}
+                    </div>
+                  )}
+                </>
+              )}
             </PromptCard>
 
-            {phase !== 3 && (
+            {phase !== 3 && phase !== 4 && (
               <MCQGrid choices={translatedChoices} correct={translatedCorrect}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
@@ -205,6 +219,27 @@ export default function KanjiScreen({ session }) {
                   </div>
                 }
               />
+            )}
+            {phase === 4 && (
+              <DrawingCanvas
+                kanji={card.kanji}
+                meaning={translatedCorrect}
+                onDone={() => {
+                  setAnswered(true)
+                  setShowRating(true)
+                  speakJapanese(card.kana)
+                }}
+              />
+            )}
+            {phase === 4 && answered && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                  {card.kanji}
+                </div>
+                <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 4 }}>
+                  {card.kana}
+                </div>
+              </div>
             )}
 
             <RatingBar active={showRating} onRate={postReview} />
