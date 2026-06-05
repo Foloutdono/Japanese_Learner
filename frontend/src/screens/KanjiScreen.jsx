@@ -238,9 +238,6 @@ export default function KanjiScreen({ session }) {
                 <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
                   {card.kanji}
                 </div>
-                <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 4 }}>
-                  {card.kana}
-                </div>
               </div>
             )}
 

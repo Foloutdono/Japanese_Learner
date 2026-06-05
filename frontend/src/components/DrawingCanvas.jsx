@@ -187,8 +187,8 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
         </div>
 
         {/* Correction side — hidden until validated */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {!revealed ? (
+        <div style={{ flex: 1}}>
+          {!revealed && (
             // Placeholder so layout doesn't shift
             <div style={{
               width: '100%', maxWidth: 260, aspectRatio: '1',
@@ -198,8 +198,6 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
             }}>
               <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>?</span>
             </div>
-          ) : (
-            <StrokeRef kanji={kanji} meaning={meaning} />
           )}
         </div>
       </div>
