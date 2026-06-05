@@ -226,7 +226,7 @@ export default function KanjiScreen({ session }) {
                 kanji={card.kanji}
                 meaning={translatedCorrect}
                 kana={card.kana}
-                onDone={() => {
+                onValidate={() => {
                   setAnswered(true)
                   setShowRating(true)
                   speakJapanese(card.kana)
