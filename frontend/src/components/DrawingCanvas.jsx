@@ -187,7 +187,7 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
         </div>
 
         {/* Correction side — hidden until validated */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ flex: 1}}>
           {!revealed ? (
             <>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.strokeOrder}</div>
