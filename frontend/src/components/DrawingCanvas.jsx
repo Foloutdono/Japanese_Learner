@@ -187,17 +187,19 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
         </div>
 
         {/* Correction side — hidden until validated */}
-        <div style={{ flex: 1}}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {!revealed && (
-            // Placeholder so layout doesn't shift
-            <div style={{
-              width: '100%', maxWidth: 260, aspectRatio: '1',
-              background: 'var(--bg-card)', borderRadius: 10,
-              border: '2px dashed var(--border)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>?</span>
-            </div>
+            <>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.strokeOrder}</div>
+              <div style={{
+                width: '100%', maxWidth: 260, aspectRatio: '1',
+                background: 'var(--bg-card)', borderRadius: 10,
+                border: '2px dashed var(--border)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>?</span>
+              </div>
+            </>
           )}
         </div>
       </div>
