@@ -59,7 +59,10 @@ export default function KanjiScreen({ session }) {
         else { setCard({ ...data, lang }); setDone(false) }
         setLoading(false)
       })
-
+      .catch(err => {
+        console.error('Error fetching card:', err)
+        setLoading(false)
+      })
   }
 
   function translateCard(cardToTranslate, targetLang) {
@@ -194,7 +197,6 @@ export default function KanjiScreen({ session }) {
                 </>
               )}
               {phase === 4 && (
-                console.log('Card meaning:', card) &&
                 <>
                   <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent3)' }}>{translatedCorrect}</div>
                   {card.kana && (
