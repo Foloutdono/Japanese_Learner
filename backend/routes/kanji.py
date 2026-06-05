@@ -24,7 +24,7 @@ def get_kanji_card(level: str, phase: int, lang: str = "fr",
     if not kanji_list:
         return {"error": "Unknown level"}
 
-    phase_key = {1: "kk-s", 2: "k-k", 3: "s-k"}.get(phase)
+    phase_key = {1: "kk-s", 2: "k-k", 3: "s-k", 4: "k-d"}.get(phase)
     if not phase_key:
         return {"error": "Invalid phase"}
 
