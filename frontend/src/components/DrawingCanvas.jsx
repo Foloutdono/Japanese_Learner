@@ -95,7 +95,7 @@ function Canvas({ canvasRef, onClear }) {
 }
 
 // ── Stroke order reference panel ──────────────────────────
-function StrokeRef({ kanji, meaning }) {
+function StrokeRef({ kanji, meaning, showMeaning = true }) {
   const { t } = useLang()
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
@@ -118,10 +118,12 @@ function StrokeRef({ kanji, meaning }) {
           {t.notAvailable}
         </div>
       </div>
-      <div style={{ marginTop: 12, textAlign: 'center' }}>
-        <div style={{ fontSize: 32, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1 }}>{kanji}</div>
-        {meaning && <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>{meaning}</div>}
-      </div>
+      {showMeaning && (
+        <div style={{ marginTop: 12, textAlign: 'center' }}>
+          <div style={{ fontSize: 32, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1 }}>{kanji}</div>
+          {meaning && <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>{meaning}</div>}
+        </div>
+      )}
     </div>
   )
 }
@@ -201,7 +203,7 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
               </div>
             </>
           ) : (
-            <StrokeRef kanji={kanji} meaning={meaning} />
+            <StrokeRef kanji={kanji} meaning={meaning} showMeaning={false} />
           )}
         </div>
       </div>
