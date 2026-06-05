@@ -50,6 +50,8 @@ export default function KanjiScreen({ session }) {
     setShowRating(false)
     setShowDrawing(false)
 
+    console.log(`Fetching card for level ${lvl} phase ${ph} and language ${lang}`)
+
     apiFetch(`/api/kanji/card?level=${lvl}&phase=${ph}&lang=${lang}`, session)
       .then(r => r.json())
       .then(data => {
@@ -196,16 +198,11 @@ export default function KanjiScreen({ session }) {
                   {card.kana && (
                     <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 8 }}>({card.kana})</div>
                   )}
-                  {card.stroke_count && (
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
-                      {card.stroke_count} {t.strokes}
-                    </div>
-                  )}
                 </>
               )}
             </PromptCard>
 
-            {phase !== 3 && phase !== 4 && (
+            {(phase === 1 || phase === 2) && (
               <MCQGrid choices={translatedChoices} correct={translatedCorrect}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
