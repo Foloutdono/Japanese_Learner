@@ -217,14 +217,6 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
           {t.revealAnswer}
         </button>
       )}
-
-      {/* Correction details after reveal */}
-      {revealed && (
-        <div style={{ marginTop: 16, textAlign: 'center' }}>
-          <div style={{ fontSize: 64, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{kanji}</div>
-          {kana && <div style={{ fontSize: 20, color: 'var(--text-secondary)', marginTop: 4 }}>{kana}</div>}
-        </div>
-      )}
     </div>
   )
 }
