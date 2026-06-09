@@ -85,6 +85,14 @@ class SRSEngine:
                     CREATE INDEX IF NOT EXISTS idx_due_reviews
                     ON card_modes(mode, next_review)
                 """)
+                self._log_sql("create_due_lookup_index", """
+                    CREATE INDEX IF NOT EXISTS idx_due_lookup
+                    ON card_modes(mode, total_reviews, next_review)
+                """)
+                cur.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_due_lookup
+                    ON card_modes(mode, total_reviews, next_review)
+                """)
 
     def _ensure_card(self, card_id: str) -> None:
         with self.storage.connection() as conn:
@@ -233,15 +241,15 @@ class SRSEngine:
                     sql += " AND card_id = ANY(%s)"
                     params.append(card_ids)
                 sql += " ORDER BY next_review ASC"
+                if limit is not None:
+                    sql += " LIMIT %s"
+                    params.append(limit)
                 self._log_sql("get_due_cards", sql, tuple(params))
                 cur.execute(sql, tuple(params))
                 rows = cur.fetchall()
-        cards = [row[0] for row in rows]
-        return cards[:limit] if limit is not None else cards
+        return [row[0] for row in rows]
 
     def get_new_cards(self, mode: str, limit: int = 20, card_ids: list[str] | None = None) -> list[str]:
-        import random
-
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 sql = """
@@ -255,13 +263,14 @@ class SRSEngine:
                 if card_ids:
                     sql += " AND c.id = ANY(%s)"
                     params.append(card_ids)
-                sql += " ORDER BY c.id"
+                sql += " ORDER BY random()"
+                if limit is not None:
+                    sql += " LIMIT %s"
+                    params.append(limit)
                 self._log_sql("get_new_cards", sql, tuple(params))
                 cur.execute(sql, tuple(params))
                 rows = cur.fetchall()
-        cards = [row[0] for row in rows]
-        random.shuffle(cards)
-        return cards[:limit]
+        return [row[0] for row in rows]
 
     def get_due_count(self, mode: str) -> int:
         with self.storage.connection() as conn:
