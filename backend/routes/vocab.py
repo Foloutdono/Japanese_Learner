@@ -34,13 +34,13 @@ def get_vocab_card(level: str, phase: int, lang: str = "fr",
     card_ids = prefixed(raw_ids, user_id)
     srs.ensure_cards(card_ids, phase_key)
 
-    due = [cid for cid in srs.get_due_cards(phase_key) if cid in set(card_ids)]
+    due = srs.get_due_cards(phase_key, card_ids=card_ids)
     logger.info("vocab study request phase=%s level=%s mode=%s user_id=%s candidate_count=%d due_count=%d due_ids=%s", phase, level, phase_key, user_id, len(card_ids), len(due), due[:10])
     if due:
         card_id = random.choice(due)
         logger.info("vocab using due card", extra={"card_id": card_id, "due_count": len(due)})
     else:
-        new = [cid for cid in srs.get_new_cards(phase_key, limit=1) if cid in set(card_ids)]
+        new = srs.get_new_cards(phase_key, limit=1, card_ids=card_ids)
         logger.info("vocab fallback to new card new_count=%d new_ids=%s", len(new), new[:10])
         if new:
             card_id = new[0]

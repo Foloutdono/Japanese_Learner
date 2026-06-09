@@ -31,13 +31,13 @@ def get_grammar_card(level: str, mode: str = "flashcard",
     card_ids = prefixed(raw_ids, user_id)
     srs.ensure_cards(card_ids, mode)
 
-    due = [cid for cid in srs.get_due_cards(mode) if cid in set(card_ids)]
+    due = srs.get_due_cards(mode, card_ids=card_ids)
     logger.info("grammar study request level=%s mode=%s user_id=%s candidate_count=%d due_count=%d due_ids=%s", level, mode, user_id, len(card_ids), len(due), due[:10])
     if due:
         card_id = random.choice(due)
         logger.info("grammar using due card", extra={"card_id": card_id, "due_count": len(due)})
     else:
-        new = [cid for cid in srs.get_new_cards(mode, limit=1) if cid in set(card_ids)]
+        new = srs.get_new_cards(mode, limit=1, card_ids=card_ids)
         logger.info("grammar fallback to new card new_count=%d new_ids=%s", len(new), new[:10])
         if new:
             card_id = new[0]

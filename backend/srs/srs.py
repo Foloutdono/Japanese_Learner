@@ -217,7 +217,7 @@ class SRSEngine:
         self._save_state(updated)
         return self._to_dict(updated)
 
-    def get_due_cards(self, mode: str, limit: int | None = None) -> list[str]:
+    def get_due_cards(self, mode: str, limit: int | None = None, card_ids: list[str] | None = None) -> list[str]:
         now = datetime.utcnow()
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -227,15 +227,19 @@ class SRSEngine:
                     WHERE mode = %s
                       AND total_reviews > 0
                       AND next_review <= %s
-                    ORDER BY next_review ASC
                 """
-                self._log_sql("get_due_cards", sql, (mode, now))
-                cur.execute(sql, (mode, now))
+                params: list[Any] = [mode, now]
+                if card_ids:
+                    sql += " AND card_id = ANY(%s)"
+                    params.append(card_ids)
+                sql += " ORDER BY next_review ASC"
+                self._log_sql("get_due_cards", sql, tuple(params))
+                cur.execute(sql, tuple(params))
                 rows = cur.fetchall()
         cards = [row[0] for row in rows]
         return cards[:limit] if limit is not None else cards
 
-    def get_new_cards(self, mode: str, limit: int = 20) -> list[str]:
+    def get_new_cards(self, mode: str, limit: int = 20, card_ids: list[str] | None = None) -> list[str]:
         import random
 
         with self.storage.connection() as conn:
@@ -245,11 +249,15 @@ class SRSEngine:
                     FROM cards c
                     LEFT JOIN card_modes cm
                       ON cm.card_id = c.id AND cm.mode = %s
-                    WHERE cm.card_id IS NULL OR cm.total_reviews = 0
-                    ORDER BY c.id
+                    WHERE (cm.card_id IS NULL OR cm.total_reviews = 0)
                 """
-                self._log_sql("get_new_cards", sql, (mode,))
-                cur.execute(sql, (mode,))
+                params: list[Any] = [mode]
+                if card_ids:
+                    sql += " AND c.id = ANY(%s)"
+                    params.append(card_ids)
+                sql += " ORDER BY c.id"
+                self._log_sql("get_new_cards", sql, tuple(params))
+                cur.execute(sql, tuple(params))
                 rows = cur.fetchall()
         cards = [row[0] for row in rows]
         random.shuffle(cards)
