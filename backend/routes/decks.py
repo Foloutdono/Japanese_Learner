@@ -231,7 +231,7 @@ def get_study_card(deck_id: str, mode: str = "flashcard",
         return {"done": True}
 
     all_ids = [p["card_id"] for p in pool]
-    srs.ensure_cards(all_ids)
+    srs.ensure_cards(all_ids, mode)
     due = [cid for cid in srs.get_due_cards(mode) if cid in set(all_ids)]
     logger.info("deck study request", extra={"deck_id": deck_id, "mode": mode, "user_id": user_id, "candidate_count": len(all_ids), "due_count": len(due), "due_ids": due[:10]})
     if due:
