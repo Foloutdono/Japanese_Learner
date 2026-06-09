@@ -23,6 +23,7 @@ class SRSEngine:
                         id TEXT PRIMARY KEY
                     )
                 """)
+                cur.execute("ALTER TABLE cards DROP COLUMN IF EXISTS data")
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS card_modes (
                         card_id TEXT NOT NULL,
