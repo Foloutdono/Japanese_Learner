@@ -3,6 +3,7 @@ import random
 from fastapi import APIRouter, Depends
 from auth import get_user_id, prefixed, unprefixed
 from srs_instance import srs
+from srs.batch_cache import ensure_initialized, key as batch_key, take_next
 from grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
 from pydantic import BaseModel
 
@@ -29,18 +30,19 @@ def get_grammar_card(level: str, mode: str = "flashcard",
 
     raw_ids  = [grammar_to_id(g, level) for g in grammar_list]
     card_ids = prefixed(raw_ids, user_id)
-    srs.ensure_cards(card_ids, mode)
+    cache_key = batch_key(user_id, mode, level)
+    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode))
 
-    due = srs.get_due_cards(mode, card_ids=card_ids)
+    due = srs.get_due_cards(mode, limit=10, card_ids=card_ids)
     logger.info("grammar study request level=%s mode=%s user_id=%s candidate_count=%d due_count=%d due_ids=%s", level, mode, user_id, len(card_ids), len(due), due[:10])
     if due:
         card_id = random.choice(due)
         logger.info("grammar using due card", extra={"card_id": card_id, "due_count": len(due)})
     else:
-        new = srs.get_new_cards(mode, limit=1, card_ids=card_ids)
-        logger.info("grammar fallback to new card new_count=%d new_ids=%s", len(new), new[:10])
+        new = take_next(cache_key, lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids), limit=10)
+        logger.info("grammar fallback to new card new_count=%d new_ids=%s", 1 if new else 0, [new] if new else [])
         if new:
-            card_id = new[0]
+            card_id = new
             logger.info("grammar using new card", extra={"card_id": card_id})
         else:
             logger.warning("grammar study exhausted level=%s mode=%s user_id=%s", level, mode, user_id)

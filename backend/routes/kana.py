@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from kana_data import KANA_SETS, kana_to_id
 from auth import get_user_id, prefixed, unprefixed
 from srs_instance import srs
+from srs.batch_cache import ensure_initialized, key as batch_key, take_next
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -29,18 +30,19 @@ def get_kana_card(set_name: str, mode: str, user_id: str = Depends(get_user_id))
 
     raw_ids  = [kana_to_id(k) for k in kana_list]
     card_ids = prefixed(raw_ids, user_id)
-    srs.ensure_cards(card_ids, mode)
+    cache_key = batch_key(user_id, mode, set_name)
+    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode))
 
-    due = srs.get_due_cards(mode, card_ids=card_ids)
+    due = srs.get_due_cards(mode, limit=10, card_ids=card_ids)
     logger.info("kana study request set_name=%s mode=%s user_id=%s candidate_count=%d due_count=%d due_ids=%s", set_name, mode, user_id, len(card_ids), len(due), due[:10])
     if due:
         card_id = random.choice(due)
         logger.info("kana using due card", extra={"card_id": card_id, "due_count": len(due)})
     else:
-        new = srs.get_new_cards(mode, limit=1, card_ids=card_ids)
-        logger.info("kana fallback to new card new_count=%d new_ids=%s", len(new), new[:10])
+        new = take_next(cache_key, lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids), limit=10)
+        logger.info("kana fallback to new card new_count=%d new_ids=%s", 1 if new else 0, [new] if new else [])
         if new:
-            card_id = new[0]
+            card_id = new
             logger.info("kana using new card", extra={"card_id": card_id})
         else:
             logger.warning("kana study exhausted set_name=%s mode=%s user_id=%s", set_name, mode, user_id)
