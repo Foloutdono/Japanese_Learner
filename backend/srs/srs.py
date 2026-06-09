@@ -53,7 +53,7 @@ class SRSEngine:
             with conn.cursor() as cur:
                 cur.execute("INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING", (card_id,))
 
-    def ensure_cards(self, card_ids: list[str]) -> None:
+    def ensure_cards(self, card_ids: list[str], mode: str | None = None) -> None:
         if not card_ids:
             return
         with self.storage.connection() as conn:
@@ -62,6 +62,21 @@ class SRSEngine:
                     "INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING",
                     [(card_id,) for card_id in card_ids],
                 )
+                if mode:
+                    cur.execute(
+                        """
+                        INSERT INTO card_modes(
+                            card_id, mode, difficulty, stability, interval_days,
+                            repetitions, lapses, learning_step, is_learning,
+                            next_review, total_reviews, correct_reviews, last_quality
+                        )
+                        SELECT c.id, %s, 2.5, 0.0, 0, 0, 0, 0, TRUE, NOW(), 0, 0, -1
+                        FROM cards c
+                        WHERE c.id = ANY(%s)
+                        ON CONFLICT(card_id, mode) DO NOTHING
+                        """,
+                        (mode, card_ids),
+                    )
 
     def _state_from_row(self, row: Any) -> CardState:
         return CardState(
@@ -191,9 +206,10 @@ class SRSEngine:
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT cm.card_id
-                    FROM card_modes cm
-                    RIGHT JOIN cards c ON c.id = cm.card_id AND cm.mode = %s
+                    SELECT c.id
+                    FROM cards c
+                    LEFT JOIN card_modes cm
+                      ON cm.card_id = c.id AND cm.mode = %s
                     WHERE cm.card_id IS NULL OR cm.total_reviews = 0
                     ORDER BY c.id
                     """,
