@@ -19,7 +19,7 @@ class SRSEngine:
         self._init_db()
 
     def _log_sql(self, label: str, sql: str, params: Any = None) -> None:
-        logger.info("SRS SQL %s", label, extra={"sql": sql, "params": params})
+        logger.info("SRS SQL %s sql=%s params=%r", label, sql, params)
 
     def _init_db(self) -> None:
         with self.storage.connection() as conn:
