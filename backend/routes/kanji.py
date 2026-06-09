@@ -1,3 +1,4 @@
+import logging
 import random
 from fastapi import APIRouter, Depends
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
@@ -8,6 +9,7 @@ from translations.fr.kanji_fr import KANJI_FR
 from pydantic import BaseModel
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 class ReviewPayload(BaseModel):
     card_id: str
@@ -33,13 +35,18 @@ def get_kanji_card(level: str, phase: int, lang: str = "fr",
     srs.ensure_cards(card_ids)
 
     due = [cid for cid in srs.get_due_cards(phase_key) if cid in set(card_ids)]
+    logger.info("kanji study request", extra={"level": level, "phase": phase, "mode": phase_key, "user_id": user_id, "candidate_count": len(card_ids), "due_count": len(due), "due_ids": due[:10]})
     if due:
         card_id = random.choice(due)
+        logger.info("kanji using due card", extra={"card_id": card_id, "due_count": len(due)})
     else:
         new = [cid for cid in srs.get_new_cards(phase_key, limit=1) if cid in set(card_ids)]
+        logger.info("kanji fallback to new card", extra={"new_count": len(new), "new_ids": new[:10]})
         if new:
             card_id = new[0]
+            logger.info("kanji using new card", extra={"card_id": card_id})
         else:
+            logger.warning("kanji study exhausted", extra={"level": level, "phase": phase, "mode": phase_key, "user_id": user_id})
             return {"done": True}
 
     raw_id  = unprefixed(card_id, user_id)
