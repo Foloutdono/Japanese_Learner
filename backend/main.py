@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -10,6 +12,8 @@ from routes.dictionary      import router as dictionary_router
 from routes.decks           import router as decks_router
 from routes.translations    import router as translations_router
 from routes.grammar         import router as grammar_router
+
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 
