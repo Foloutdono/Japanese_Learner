@@ -198,6 +198,7 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
                 background: 'var(--bg-card)', borderRadius: 10,
                 border: '2px dashed var(--border)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                justifySelf: 'center',
               }}>
                 <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>?</span>
               </div>

@@ -28,11 +28,11 @@ def get_grammar_card(level: str, mode: str = "flashcard",
     raw_ids  = [grammar_to_id(g, level) for g in grammar_list]
     card_ids = prefixed(raw_ids, user_id)
 
-    due = srs.get_due_cards(card_ids, mode)
+    due = [cid for cid in srs.get_due_cards(mode) if cid in set(card_ids)]
     if due:
         card_id = random.choice(due)
     else:
-        new = srs.get_new_cards(card_ids, mode, limit=1)
+        new = [cid for cid in srs.get_new_cards(mode, limit=1) if cid in set(card_ids)]
         if new:
             card_id = new[0]
         else:
@@ -97,7 +97,7 @@ def get_grammar_stats(user_id: str = Depends(get_user_id)):
                 "new":      sum(1 for s in srs.get_bulk_stats(prefixed(raw_ids, user_id), mode).values() if s == "new"),
                 "learning": sum(1 for s in srs.get_bulk_stats(prefixed(raw_ids, user_id), mode).values() if s == "learning"),
                 "mastered": sum(1 for s in srs.get_bulk_stats(prefixed(raw_ids, user_id), mode).values() if s == "mastered"),
-                "due_now":  srs.get_due_count(prefixed(raw_ids, user_id), mode),
+                "due_now":  sum(1 for cid in prefixed(raw_ids, user_id) if cid in set(srs.get_due_cards(mode))),
             }
             for mode in MODES
         }

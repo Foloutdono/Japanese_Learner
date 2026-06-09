@@ -31,11 +31,11 @@ def get_kanji_card(level: str, phase: int, lang: str = "fr",
     raw_ids  = [kanji_to_id(k, level) for k in kanji_list]
     card_ids = prefixed(raw_ids, user_id)
 
-    due = srs.get_due_cards(card_ids, phase_key)
+    due = [cid for cid in srs.get_due_cards(phase_key) if cid in set(card_ids)]
     if due:
         card_id = random.choice(due)
     else:
-        new = srs.get_new_cards(card_ids, phase_key, limit=1)
+        new = [cid for cid in srs.get_new_cards(phase_key, limit=1) if cid in set(card_ids)]
         if new:
             card_id = new[0]
         else:

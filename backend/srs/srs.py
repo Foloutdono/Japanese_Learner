@@ -1,0 +1,299 @@
+from datetime import datetime, timedelta
+from typing import Any
+
+from .models import CardState, ReviewResult
+from .scheduler import Scheduler
+from .storage import Storage
+
+
+class SRSEngine:
+    """Database-backed SRS engine that uses the scheduler and storage helpers."""
+
+    def __init__(self, database_url: str):
+        self.database_url = database_url
+        self.storage = Storage(database_url)
+        self.scheduler = Scheduler()
+        self._init_db()
+
+    def _init_db(self) -> None:
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS cards (
+                        id TEXT PRIMARY KEY
+                    )
+                """)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS card_modes (
+                        card_id TEXT NOT NULL,
+                        mode TEXT NOT NULL,
+                        difficulty REAL NOT NULL DEFAULT 2.5,
+                        stability REAL NOT NULL DEFAULT 0,
+                        interval_days INTEGER NOT NULL DEFAULT 0,
+                        repetitions INTEGER NOT NULL DEFAULT 0,
+                        lapses INTEGER NOT NULL DEFAULT 0,
+                        learning_step INTEGER NOT NULL DEFAULT 0,
+                        is_learning BOOLEAN NOT NULL DEFAULT TRUE,
+                        next_review TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                        total_reviews INTEGER NOT NULL DEFAULT 0,
+                        correct_reviews INTEGER NOT NULL DEFAULT 0,
+                        last_quality SMALLINT NOT NULL DEFAULT -1,
+                        PRIMARY KEY(card_id, mode),
+                        FOREIGN KEY(card_id) REFERENCES cards(id) ON DELETE CASCADE
+                    )
+                """)
+                cur.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_due_reviews
+                    ON card_modes(mode, next_review)
+                """)
+
+    def _ensure_card(self, card_id: str) -> None:
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING", (card_id,))
+
+    def _state_from_row(self, row: Any) -> CardState:
+        return CardState(
+            card_id=row[0],
+            mode=row[1],
+            difficulty=float(row[2] or 2.5),
+            stability=float(row[3] or 0.0),
+            interval_days=int(row[4] or 0),
+            repetitions=int(row[5] or 0),
+            lapses=int(row[6] or 0),
+            learning_step=int(row[7] or 0),
+            is_learning=bool(row[8]),
+            next_review=row[9],
+            total_reviews=int(row[10] or 0),
+            correct_reviews=int(row[11] or 0),
+            last_quality=int(row[12] or -1),
+        )
+
+    def _load_state(self, card_id: str, mode: str) -> CardState:
+        self._ensure_card(card_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT card_id, mode, difficulty, stability, interval_days,
+                           repetitions, lapses, learning_step, is_learning,
+                           next_review, total_reviews, correct_reviews, last_quality
+                    FROM card_modes
+                    WHERE card_id = %s AND mode = %s
+                    """,
+                    (card_id, mode),
+                )
+                row = cur.fetchone()
+        if row is None:
+            return CardState(card_id=card_id, mode=mode, next_review=datetime.utcnow())
+        return self._state_from_row(row)
+
+    def _save_state(self, state: CardState) -> None:
+        self._ensure_card(state.card_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO card_modes(
+                        card_id, mode, difficulty, stability, interval_days,
+                        repetitions, lapses, learning_step, is_learning,
+                        next_review, total_reviews, correct_reviews, last_quality
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT(card_id, mode) DO UPDATE SET
+                        difficulty = EXCLUDED.difficulty,
+                        stability = EXCLUDED.stability,
+                        interval_days = EXCLUDED.interval_days,
+                        repetitions = EXCLUDED.repetitions,
+                        lapses = EXCLUDED.lapses,
+                        learning_step = EXCLUDED.learning_step,
+                        is_learning = EXCLUDED.is_learning,
+                        next_review = EXCLUDED.next_review,
+                        total_reviews = EXCLUDED.total_reviews,
+                        correct_reviews = EXCLUDED.correct_reviews,
+                        last_quality = EXCLUDED.last_quality
+                    """,
+                    (
+                        state.card_id,
+                        state.mode,
+                        state.difficulty,
+                        state.stability,
+                        state.interval_days,
+                        state.repetitions,
+                        state.lapses,
+                        state.learning_step,
+                        state.is_learning,
+                        state.next_review or datetime.utcnow(),
+                        state.total_reviews,
+                        state.correct_reviews,
+                        state.last_quality,
+                    ),
+                )
+
+    def _to_dict(self, state: CardState) -> dict[str, Any]:
+        return {
+            "card_id": state.card_id,
+            "mode": state.mode,
+            "difficulty": state.difficulty,
+            "stability": state.stability,
+            "interval": state.interval_days,
+            "interval_days": state.interval_days,
+            "repetitions": state.repetitions,
+            "lapses": state.lapses,
+            "learning_step": state.learning_step,
+            "is_learning": state.is_learning,
+            "next_review": state.next_review.isoformat() if state.next_review else None,
+            "total_reviews": state.total_reviews,
+            "correct_reviews": state.correct_reviews,
+            "last_quality": state.last_quality,
+        }
+
+    def review(self, card_id: str, mode: str, quality: int) -> dict[str, Any]:
+        state = self._load_state(card_id, mode)
+        updated = self.scheduler.review(state, quality)
+        self._save_state(updated)
+        return self._to_dict(updated)
+
+    def get_due_cards(self, mode: str, limit: int | None = None) -> list[str]:
+        now = datetime.utcnow()
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT card_id
+                    FROM card_modes
+                    WHERE mode = %s
+                      AND total_reviews > 0
+                      AND next_review <= %s
+                    ORDER BY next_review ASC
+                    """,
+                    (mode, now),
+                )
+                rows = cur.fetchall()
+        cards = [row[0] for row in rows]
+        return cards[:limit] if limit is not None else cards
+
+    def get_new_cards(self, mode: str, limit: int = 20) -> list[str]:
+        import random
+
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT cm.card_id
+                    FROM card_modes cm
+                    RIGHT JOIN cards c ON c.id = cm.card_id AND cm.mode = %s
+                    WHERE cm.card_id IS NULL OR cm.total_reviews = 0
+                    ORDER BY c.id
+                    """,
+                    (mode,),
+                )
+                rows = cur.fetchall()
+        cards = [row[0] for row in rows]
+        random.shuffle(cards)
+        return cards[:limit]
+
+    def get_due_count(self, mode: str) -> int:
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM card_modes
+                    WHERE mode = %s
+                      AND total_reviews > 0
+                      AND next_review <= NOW()
+                    """,
+                    (mode,),
+                )
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
+
+    def delete_cards(self, card_ids: list[str]) -> None:
+        if not card_ids:
+            return
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM card_modes WHERE card_id = ANY(%s)", (card_ids,))
+                cur.execute("DELETE FROM cards WHERE id = ANY(%s)", (card_ids,))
+
+    def get_card_stats(self, card_id: str, mode: str) -> dict[str, Any]:
+        state = self._load_state(card_id, mode)
+        return {
+            "card_id": card_id,
+            "mode": mode,
+            "total_reviews": state.total_reviews,
+            "correct_reviews": state.correct_reviews,
+            "interval": state.interval_days,
+            "next_review": state.next_review.isoformat() if state.next_review else None,
+            "is_learning": state.is_learning,
+            "learning_step": state.learning_step,
+            "lapses": state.lapses,
+            "repetitions": state.repetitions,
+            "difficulty": state.difficulty,
+            "stability": state.stability,
+            "last_quality": state.last_quality,
+        }
+
+    def get_deck_stats(self, mode: str) -> dict[str, Any]:
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT
+                        COUNT(*) AS total,
+                        COUNT(*) FILTER (WHERE cm.card_id IS NULL OR cm.total_reviews = 0) AS new,
+                        COUNT(*) FILTER (WHERE cm.card_id IS NOT NULL AND cm.total_reviews > 0 AND cm.interval_days < 21) AS learning,
+                        COUNT(*) FILTER (WHERE cm.card_id IS NOT NULL AND cm.total_reviews > 0 AND cm.interval_days >= 21) AS mastered,
+                        COUNT(*) FILTER (WHERE cm.card_id IS NOT NULL AND cm.total_reviews > 0 AND cm.next_review <= NOW()) AS due_now
+                    FROM cards c
+                    LEFT JOIN card_modes cm
+                      ON cm.card_id = c.id AND cm.mode = %s
+                    """,
+                    (mode,),
+                )
+                row = cur.fetchone()
+        if not row:
+            return {"total": 0, "new": 0, "learning": 0, "mastered": 0, "due_now": 0}
+        return {
+            "total": int(row[0] or 0),
+            "new": int(row[1] or 0),
+            "learning": int(row[2] or 0),
+            "mastered": int(row[3] or 0),
+            "due_now": int(row[4] or 0),
+        }
+
+    def build_session(self, mode: str, new_limit: int = 10, review_limit: int = 100) -> list[str]:
+        due = self.get_due_cards(mode, limit=review_limit)
+        if len(due) < review_limit:
+            new = self.get_new_cards(mode, limit=max(0, new_limit))
+        else:
+            new = []
+        session = due + new
+        return session[: review_limit + new_limit]
+
+    def get_bulk_stats(self, card_ids: list[str], mode: str) -> dict[str, str]:
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT cm.card_id, cm.total_reviews, cm.interval_days
+                    FROM card_modes cm
+                    WHERE cm.mode = %s AND cm.card_id = ANY(%s)
+                    """,
+                    (mode, card_ids),
+                )
+                rows = {row[0]: row for row in cur.fetchall()}
+        result: dict[str, str] = {}
+        for card_id in card_ids:
+            row = rows.get(card_id)
+            if not row or row[1] == 0:
+                result[card_id] = "new"
+            elif row[2] >= 21:
+                result[card_id] = "mastered"
+            else:
+                result[card_id] = "learning"
+        return result
+
+    def close(self) -> None:
+        self.storage.close()

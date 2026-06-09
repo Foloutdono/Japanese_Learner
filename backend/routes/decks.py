@@ -88,9 +88,9 @@ def delete_deck(deck_id: str, user_id: str = Depends(get_user_id)):
             if cur.rowcount == 0:
                 raise HTTPException(status_code=404, detail="Deck not found")
         conn.commit()
-        keys = [k for k in srs.cards if f"custom_{deck_id}" in k]
-        for k in keys:
-            del srs.cards[k]
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT id FROM custom_cards WHERE deck_id = %s AND user_id = %s", (deck_id, user_id))
+            keys = [f"{user_id}:custom_{deck_id}_{row['id']}" for row in cur.fetchall()]
         srs.delete_cards(keys)
         return {"ok": True}
     finally:
@@ -172,7 +172,6 @@ def delete_card(deck_id: str, card_id: str, user_id: str = Depends(get_user_id))
                 raise HTTPException(status_code=404, detail="Card not found")
         conn.commit()
         key = f"{user_id}:custom_{deck_id}_{card_id}"
-        srs.cards.pop(key, None)
         srs.delete_cards([key])
         return {"ok": True}
     finally:
@@ -230,11 +229,11 @@ def get_study_card(deck_id: str, mode: str = "flashcard",
         return {"done": True}
 
     all_ids = [p["card_id"] for p in pool]
-    due     = srs.get_due_cards(all_ids, mode)
+    due = [cid for cid in srs.get_due_cards(mode) if cid in set(all_ids)]
     if due:
         card_id = random.choice(due)
     else:
-        new = srs.get_new_cards(all_ids, mode, limit=1)
+        new = [cid for cid in srs.get_new_cards(mode, limit=1) if cid in set(all_ids)]
         if new:
             card_id = new[0]
         else:
@@ -315,7 +314,7 @@ def get_deck_stats(deck_id: str, mode: str = "flashcard",
         return {"total": 0, "new": 0, "learning": 0, "mastered": 0, "due_now": 0}
 
     states  = srs.get_bulk_stats(card_ids, mode)
-    due_now = srs.get_due_count(card_ids, mode)
+    due_now = sum(1 for cid in card_ids if cid in set(srs.get_due_cards(mode)))
     return {
         "total":    len(card_ids),
         "new":      sum(1 for s in states.values() if s == "new"),

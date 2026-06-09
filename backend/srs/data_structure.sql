@@ -1,0 +1,36 @@
+CREATE TABLE cards (
+    id TEXT PRIMARY KEY
+);
+
+CREATE TABLE card_modes (
+
+    card_id TEXT NOT NULL,
+    mode TEXT NOT NULL,
+
+    difficulty REAL NOT NULL DEFAULT 2.5,
+    stability REAL NOT NULL DEFAULT 0,
+
+    interval_days INTEGER NOT NULL DEFAULT 0,
+
+    repetitions INTEGER NOT NULL DEFAULT 0,
+    lapses INTEGER NOT NULL DEFAULT 0,
+
+    learning_step INTEGER NOT NULL DEFAULT 0,
+    is_learning BOOLEAN NOT NULL DEFAULT TRUE,
+
+    next_review TIMESTAMPTZ NOT NULL,
+
+    total_reviews INTEGER NOT NULL DEFAULT 0,
+    correct_reviews INTEGER NOT NULL DEFAULT 0,
+
+    last_quality SMALLINT NOT NULL DEFAULT -1,
+
+    PRIMARY KEY(card_id, mode),
+
+    FOREIGN KEY(card_id)
+    REFERENCES cards(id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX idx_due_reviews
+ON card_modes(mode, next_review);
