@@ -229,6 +229,7 @@ def get_study_card(deck_id: str, mode: str = "flashcard",
         return {"done": True}
 
     all_ids = [p["card_id"] for p in pool]
+    srs.ensure_cards(all_ids)
     due = [cid for cid in srs.get_due_cards(mode) if cid in set(all_ids)]
     if due:
         card_id = random.choice(due)

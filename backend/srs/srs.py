@@ -52,6 +52,16 @@ class SRSEngine:
             with conn.cursor() as cur:
                 cur.execute("INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING", (card_id,))
 
+    def ensure_cards(self, card_ids: list[str]) -> None:
+        if not card_ids:
+            return
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.executemany(
+                    "INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING",
+                    [(card_id,) for card_id in card_ids],
+                )
+
     def _state_from_row(self, row: Any) -> CardState:
         return CardState(
             card_id=row[0],

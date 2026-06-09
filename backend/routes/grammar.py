@@ -27,6 +27,7 @@ def get_grammar_card(level: str, mode: str = "flashcard",
 
     raw_ids  = [grammar_to_id(g, level) for g in grammar_list]
     card_ids = prefixed(raw_ids, user_id)
+    srs.ensure_cards(card_ids)
 
     due = [cid for cid in srs.get_due_cards(mode) if cid in set(card_ids)]
     if due:
