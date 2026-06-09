@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from auth import get_user_id
 from db import db_conn
 from srs_instance import srs
+from srs.batch_cache import ensure_initialized, key as batch_key, take_next
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from translations import get_meaning
@@ -231,17 +232,18 @@ def get_study_card(deck_id: str, mode: str = "flashcard",
         return {"done": True}
 
     all_ids = [p["card_id"] for p in pool]
-    srs.ensure_cards(all_ids, mode)
-    due = srs.get_due_cards(mode, card_ids=all_ids)
+    cache_key = batch_key(user_id, mode, deck_id)
+    ensure_initialized(cache_key, lambda: srs.ensure_cards(all_ids, mode))
+    due = srs.get_due_cards(mode, limit=10, card_ids=all_ids)
     logger.info("deck study request deck_id=%s mode=%s user_id=%s candidate_count=%d due_count=%d due_ids=%s", deck_id, mode, user_id, len(all_ids), len(due), due[:10])
     if due:
         card_id = random.choice(due)
         logger.info("deck using due card", extra={"card_id": card_id, "due_count": len(due)})
     else:
-        new = srs.get_new_cards(mode, limit=1, card_ids=all_ids)
-        logger.info("deck fallback to new card new_count=%d new_ids=%s", len(new), new[:10])
+        new = take_next(cache_key, lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=all_ids), limit=10)
+        logger.info("deck fallback to new card new_count=%d new_ids=%s", 1 if new else 0, [new] if new else [])
         if new:
-            card_id = new[0]
+            card_id = new
             logger.info("deck using new card", extra={"card_id": card_id})
         else:
             logger.warning("deck study exhausted deck_id=%s mode=%s user_id=%s", deck_id, mode, user_id)

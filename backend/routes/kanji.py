@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from auth import get_user_id, prefixed, unprefixed
 from srs_instance import srs
+from srs.batch_cache import ensure_initialized, key as batch_key, take_next
 from translations import get_meaning
 from translations.fr.kanji_fr import KANJI_FR
 from pydantic import BaseModel
@@ -32,18 +33,19 @@ def get_kanji_card(level: str, phase: int, lang: str = "fr",
 
     raw_ids  = [kanji_to_id(k, level) for k in kanji_list]
     card_ids = prefixed(raw_ids, user_id)
-    srs.ensure_cards(card_ids, phase_key)
+    cache_key = batch_key(user_id, phase_key, level)
+    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, phase_key))
 
-    due = srs.get_due_cards(phase_key, card_ids=card_ids)
+    due = srs.get_due_cards(phase_key, limit=10, card_ids=card_ids)
     logger.info("kanji study request level=%s phase=%s mode=%s user_id=%s candidate_count=%d due_count=%d due_ids=%s", level, phase, phase_key, user_id, len(card_ids), len(due), due[:10])
     if due:
         card_id = random.choice(due)
         logger.info("kanji using due card", extra={"card_id": card_id, "due_count": len(due)})
     else:
-        new = srs.get_new_cards(phase_key, limit=1, card_ids=card_ids)
-        logger.info("kanji fallback to new card new_count=%d new_ids=%s", len(new), new[:10])
+        new = take_next(cache_key, lambda limit: srs.get_new_cards(phase_key, limit=limit, card_ids=card_ids), limit=10)
+        logger.info("kanji fallback to new card new_count=%d new_ids=%s", 1 if new else 0, [new] if new else [])
         if new:
-            card_id = new[0]
+            card_id = new
             logger.info("kanji using new card", extra={"card_id": card_id})
         else:
             logger.warning("kanji study exhausted level=%s phase=%s mode=%s user_id=%s", level, phase, phase_key, user_id)
