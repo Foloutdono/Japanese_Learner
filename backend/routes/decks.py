@@ -1,3 +1,4 @@
+import logging
 import random
 import csv
 import io
@@ -14,6 +15,7 @@ from translations.fr.kanji_fr import KANJI_FR as KANJI_FR_MAP
 import psycopg2.extras
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 class DeckPayload(BaseModel):
@@ -231,13 +233,18 @@ def get_study_card(deck_id: str, mode: str = "flashcard",
     all_ids = [p["card_id"] for p in pool]
     srs.ensure_cards(all_ids)
     due = [cid for cid in srs.get_due_cards(mode) if cid in set(all_ids)]
+    logger.info("deck study request", extra={"deck_id": deck_id, "mode": mode, "user_id": user_id, "candidate_count": len(all_ids), "due_count": len(due), "due_ids": due[:10]})
     if due:
         card_id = random.choice(due)
+        logger.info("deck using due card", extra={"card_id": card_id, "due_count": len(due)})
     else:
         new = [cid for cid in srs.get_new_cards(mode, limit=1) if cid in set(all_ids)]
+        logger.info("deck fallback to new card", extra={"new_count": len(new), "new_ids": new[:10]})
         if new:
             card_id = new[0]
+            logger.info("deck using new card", extra={"card_id": card_id})
         else:
+            logger.warning("deck study exhausted", extra={"deck_id": deck_id, "mode": mode, "user_id": user_id})
             return {"done": True}
 
     entry = next(p for p in pool if p["card_id"] == card_id)
