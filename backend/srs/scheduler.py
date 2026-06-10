@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from .models import CardState
 
 LEARNING_STEPS = [
+    timedelta(minutes=3),
     timedelta(minutes=10),
     timedelta(hours=1),
     timedelta(days=1),
