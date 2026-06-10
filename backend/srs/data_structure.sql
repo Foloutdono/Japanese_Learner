@@ -18,7 +18,7 @@ CREATE TABLE card_modes (
     learning_step INTEGER NOT NULL DEFAULT 0,
     is_learning BOOLEAN NOT NULL DEFAULT TRUE,
 
-    next_review TIMESTAMPTZ NOT NULL,
+    next_review TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     total_reviews INTEGER NOT NULL DEFAULT 0,
     correct_reviews INTEGER NOT NULL DEFAULT 0,

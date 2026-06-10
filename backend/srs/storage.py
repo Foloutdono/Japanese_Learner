@@ -29,5 +29,11 @@ class Storage:
         finally:
             self.pool.putconn(conn)
 
+    @contextmanager
+    def cursor(self):
+        with self.connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                yield cur
+
     def close(self):
         self.pool.closeall()

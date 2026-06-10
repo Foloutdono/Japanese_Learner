@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from .models import CardState
@@ -95,22 +95,20 @@ class SRSEngine:
                 """)
 
     def _ensure_card(self, card_id: str) -> None:
-        with self.storage.connection() as conn:
-            with conn.cursor() as cur:
-                sql = "INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING"
-                self._log_sql("ensure_card", sql, (card_id,))
-                cur.execute(sql, (card_id,))
+        with self.storage.cursor() as cur:
+            sql = "INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING"
+            self._log_sql("ensure_card", sql, (card_id,))
+            cur.execute(sql, (card_id,))
 
     def ensure_cards(self, card_ids: list[str], mode: str | None = None) -> None:
         if not card_ids:
             return
-        with self.storage.connection() as conn:
-            with conn.cursor() as cur:
-                sql_cards = "INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING"
-                self._log_sql("ensure_cards_bulk", sql_cards, [(card_id,) for card_id in card_ids])
-                cur.executemany(sql_cards, [(card_id,) for card_id in card_ids])
-                if mode:
-                    sql_modes = """
+        with self.storage.cursor() as cur:
+            sql_cards = "INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING"
+            self._log_sql("ensure_cards_bulk", sql_cards, [(card_id,) for card_id in card_ids])
+            cur.executemany(sql_cards, [(card_id,) for card_id in card_ids])
+            if mode:
+                sql_modes = """
                         INSERT INTO card_modes(
                             card_id, mode, difficulty, stability, interval_days,
                             repetitions, lapses, learning_step, is_learning,
@@ -121,8 +119,8 @@ class SRSEngine:
                         WHERE c.id = ANY(%s)
                         ON CONFLICT(card_id, mode) DO NOTHING
                     """
-                    self._log_sql("ensure_cards_modes", sql_modes, (mode, card_ids))
-                    cur.execute(sql_modes, (mode, card_ids))
+                self._log_sql("ensure_cards_modes", sql_modes, (mode, card_ids))
+                cur.execute(sql_modes, (mode, card_ids))
 
     def _state_from_row(self, row: Any) -> CardState:
         return CardState(
@@ -135,7 +133,7 @@ class SRSEngine:
             lapses=int(row[6] or 0),
             learning_step=int(row[7] or 0),
             is_learning=bool(row[8]),
-            next_review=row[9],
+            next_review=row[9] or datetime.now(timezone.utc),
             total_reviews=int(row[10] or 0),
             correct_reviews=int(row[11] or 0),
             last_quality=int(row[12] or -1),
@@ -143,28 +141,26 @@ class SRSEngine:
 
     def _load_state(self, card_id: str, mode: str) -> CardState:
         self._ensure_card(card_id)
-        with self.storage.connection() as conn:
-            with conn.cursor() as cur:
-                sql = """
-                    SELECT card_id, mode, difficulty, stability, interval_days,
-                           repetitions, lapses, learning_step, is_learning,
-                           next_review, total_reviews, correct_reviews, last_quality
-                    FROM card_modes
-                    WHERE card_id = %s AND mode = %s
-                """
-                self._log_sql("load_state", sql, (card_id, mode))
-                cur.execute(sql, (card_id, mode))
-                row = cur.fetchone()
+        with self.storage.cursor() as cur:
+            sql = """
+                SELECT card_id, mode, difficulty, stability, interval_days,
+                       repetitions, lapses, learning_step, is_learning,
+                       next_review, total_reviews, correct_reviews, last_quality
+                FROM card_modes
+                WHERE card_id = %s AND mode = %s
+            """
+            self._log_sql("load_state", sql, (card_id, mode))
+            cur.execute(sql, (card_id, mode))
+            row = cur.fetchone()
         if row is None:
-            return CardState(card_id=card_id, mode=mode, next_review=datetime.utcnow())
+            return CardState(card_id=card_id, mode=mode)
         return self._state_from_row(row)
 
     def _save_state(self, state: CardState) -> None:
         self._ensure_card(state.card_id)
-        with self.storage.connection() as conn:
-            with conn.cursor() as cur:
-                sql = """
-                    INSERT INTO card_modes(
+        with self.storage.cursor() as cur:
+            sql = """
+                INSERT INTO card_modes(
                         card_id, mode, difficulty, stability, interval_days,
                         repetitions, lapses, learning_step, is_learning,
                         next_review, total_reviews, correct_reviews, last_quality
@@ -183,23 +179,23 @@ class SRSEngine:
                         correct_reviews = EXCLUDED.correct_reviews,
                         last_quality = EXCLUDED.last_quality
                 """
-                params = (
-                    state.card_id,
-                    state.mode,
-                    state.difficulty,
-                    state.stability,
-                    state.interval_days,
-                    state.repetitions,
-                    state.lapses,
-                    state.learning_step,
-                    state.is_learning,
-                    state.next_review or datetime.utcnow(),
-                    state.total_reviews,
-                    state.correct_reviews,
-                    state.last_quality,
-                )
-                self._log_sql("save_state", sql, params)
-                cur.execute(sql, params)
+            params = (
+                state.card_id,
+                state.mode,
+                state.difficulty,
+                state.stability,
+                state.interval_days,
+                state.repetitions,
+                state.lapses,
+                state.learning_step,
+                state.is_learning,
+                state.next_review or datetime.now(timezone.utc),
+                state.total_reviews,
+                state.correct_reviews,
+                state.last_quality,
+            )
+            self._log_sql("save_state", sql, params)
+            cur.execute(sql, params)
 
     def _to_dict(self, state: CardState) -> dict[str, Any]:
         return {
@@ -226,7 +222,7 @@ class SRSEngine:
         return self._to_dict(updated)
 
     def get_due_cards(self, mode: str, limit: int | None = None, card_ids: list[str] | None = None) -> list[str]:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 sql = """

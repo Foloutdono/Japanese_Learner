@@ -232,7 +232,7 @@ def get_study_card(deck_id: str, mode: str = "flashcard",
         return {"done": True}
 
     all_ids = [p["card_id"] for p in pool]
-    cache_key = batch_key(user_id, mode, deck_id)
+    cache_key = batch_key("user", user_id, mode, deck_id)
     ensure_initialized(cache_key, lambda: srs.ensure_cards(all_ids, mode))
     due = srs.get_due_cards(mode, limit=10, card_ids=all_ids)
     logger.info("deck study request deck_id=%s mode=%s user_id=%s candidate_count=%d due_count=%d due_ids=%s", deck_id, mode, user_id, len(all_ids), len(due), due[:10])

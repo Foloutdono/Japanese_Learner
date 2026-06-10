@@ -33,7 +33,7 @@ def get_vocab_card(level: str, phase: int, lang: str = "fr",
 
     raw_ids  = [vocab_to_id(w, level) for w in vocab_list]
     card_ids = prefixed(raw_ids, user_id)
-    cache_key = batch_key(user_id, phase_key, level)
+    cache_key = batch_key("user", user_id, phase_key, level)
     ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, phase_key))
 
     due = srs.get_due_cards(phase_key, limit=10, card_ids=card_ids)
