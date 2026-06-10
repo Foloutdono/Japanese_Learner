@@ -32,7 +32,7 @@ export function MCQButton({ choice, correct, selected, answered, onClick }) {
         fontSize: 'clamp(16px, 3vw, 28px)',
         padding: '12px 20px',
         aspectRatio: '2 / 1',
-        width: '100%',
+        width: '80%',
         borderRadius: 12,
         textAlign: 'center',
         fontWeight: 'bold',
