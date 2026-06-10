@@ -30,7 +30,7 @@ export function MCQButton({ choice, correct, selected, answered, onClick }) {
         background: bg,
         color: 'var(--text-primary)',
         fontSize: 'clamp(16px, 3vw, 28px)',
-        padding: 0,
+        padding: '12px 20px',
         aspectRatio: '2 / 1',
         width: '100%',
         borderRadius: 12,
