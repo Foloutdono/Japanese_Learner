@@ -124,19 +124,19 @@ class SRSEngine:
 
     def _state_from_row(self, row: Any) -> CardState:
         return CardState(
-            card_id=row[0],
-            mode=row[1],
-            difficulty=float(row[2] or 2.5),
-            stability=float(row[3] or 0.0),
-            interval_days=int(row[4] or 0),
-            repetitions=int(row[5] or 0),
-            lapses=int(row[6] or 0),
-            learning_step=int(row[7] or 0),
-            is_learning=bool(row[8]),
-            next_review=row[9] or datetime.now(timezone.utc),
-            total_reviews=int(row[10] or 0),
-            correct_reviews=int(row[11] or 0),
-            last_quality=int(row[12] or -1),
+            card_id=row['card_id'],
+            mode=row['mode'],
+            difficulty=float(row['difficulty'] or 2.5),
+            stability=float(row['stability'] or 0.0),
+            interval_days=int(row['interval_days'] or 0),
+            repetitions=int(row['repetitions'] or 0),
+            lapses=int(row['lapses'] or 0),
+            learning_step=int(row['learning_step'] or 0),
+            is_learning=bool(row['is_learning']),
+            next_review=row['next_review'] or datetime.now(timezone.utc),
+            total_reviews=int(row['total_reviews'] or 0),
+            correct_reviews=int(row['correct_reviews'] or 0),
+            last_quality=int(row['last_quality'] or -1),
         )
 
     def _load_state(self, card_id: str, mode: str) -> CardState:
