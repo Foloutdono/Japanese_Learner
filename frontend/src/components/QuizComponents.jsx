@@ -56,7 +56,6 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
       gridTemplateColumns: 'repeat(2, 1fr)',
       gap: 12,
       width: '100%',
-      maxWidth: 600,
       margin: '0 auto',
     }}>
       {choices.map(choice => (
