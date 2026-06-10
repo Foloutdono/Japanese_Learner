@@ -30,7 +30,7 @@ def get_kana_card(set_name: str, mode: str, user_id: str = Depends(get_user_id))
 
     raw_ids  = [kana_to_id(k) for k in kana_list]
     card_ids = prefixed(raw_ids, user_id)
-    cache_key = batch_key(user_id, mode, set_name)
+    cache_key = batch_key("user", user_id, mode, set_name)
     ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode))
 
     due = srs.get_due_cards(mode, limit=10, card_ids=card_ids)

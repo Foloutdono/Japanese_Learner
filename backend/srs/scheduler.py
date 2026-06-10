@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .models import CardState
 
@@ -17,7 +17,7 @@ class Scheduler:
 
     def review(self, state: CardState, quality: int) -> CardState:
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         state.total_reviews += 1
         state.last_quality = quality
@@ -70,55 +70,42 @@ class Scheduler:
     ) -> CardState:
 
         if quality < 3:
-
             state.lapses += 1
+            state.is_learning = True
+            state.learning_step = 0
+            state.interval_days = max(1, state.interval_days)
+            state.repetitions = max(0, state.repetitions - 1)
+            state.stability = max(0.1, state.stability * 0.7)
+            state.next_review = now + LEARNING_STEPS[0]
+            return state
 
-            state.interval_days = max(
-                1,
-                round(state.interval_days * 0.4)
-            )
-
-            state.repetitions = max(
-                0,
-                state.repetitions - 1
-            )
-
-            state.stability *= 0.8
-
+        if quality >= 5:
+            bonus = 1.15
+            state.difficulty -= 0.05
+        elif quality == 4:
+            bonus = 1.05
         else:
+            bonus = 1.00
+            state.difficulty += 0.05
 
-            if quality == 5:
-                bonus = 1.15
-                state.difficulty += 0.10
+        state.difficulty = min(
+            MAX_DIFFICULTY,
+            max(MIN_DIFFICULTY, state.difficulty)
+        )
 
-            elif quality == 4:
-                bonus = 1.0
-                state.difficulty += 0.02
+        if state.interval_days == 0:
+            state.interval_days = 1
 
-            else:
-                bonus = 0.8
-                state.difficulty -= 0.08
+        stability_factor = 1.0 + min(1.5, state.stability / 20.0)
+        growth = max(1.0, state.difficulty * bonus * stability_factor)
 
-            state.difficulty = min(
-                MAX_DIFFICULTY,
-                max(MIN_DIFFICULTY, state.difficulty)
-            )
+        state.interval_days = max(
+            1,
+            round(state.interval_days * growth)
+        )
 
-            if state.interval_days == 0:
-                state.interval_days = 1
-
-            growth = state.difficulty * bonus
-
-            state.interval_days = max(
-                1,
-                round(state.interval_days * growth)
-            )
-
-            state.stability += (
-                quality * 0.5
-            )
-
-            state.repetitions += 1
+        state.stability = max(1.0, state.stability + quality * 0.25)
+        state.repetitions += 1
 
         state.next_review = (
             now + timedelta(days=state.interval_days)

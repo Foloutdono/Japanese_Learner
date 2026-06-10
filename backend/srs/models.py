@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from datetime import datetime
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 
 
 @dataclass
@@ -18,7 +18,7 @@ class CardState:
     learning_step: int = 0
     is_learning: bool = True
 
-    next_review: datetime | None = None
+    next_review: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     total_reviews: int = 0
     correct_reviews: int = 0
