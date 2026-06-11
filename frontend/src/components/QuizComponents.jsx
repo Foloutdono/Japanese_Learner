@@ -29,16 +29,29 @@ export function MCQButton({ choice, correct, selected, answered, onClick }) {
       style={{
         background: bg,
         color: 'var(--text-primary)',
-        fontSize: 'clamp(16px, 3vw, 28px)',
-        padding: '12px 20px',
-        aspectRatio: '2 / 1',
+
+        fontSize: 'clamp(16px, 2vw, 24px)',
+
+        minHeight: '70px',
+        padding: '12px',
+
         width: '100%',
+
         borderRadius: 12,
-        textAlign: 'center',
-        fontWeight: 'bold',
-        transition: 'background 0.15s, transform 0.1s',
-        cursor: answered ? 'default' : 'pointer',
         border: '2px solid var(--border)',
+
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+
+        textAlign: 'center',
+        wordBreak: 'break-word',
+
+        fontWeight: 'bold',
+
+        transition: 'background 0.15s, transform 0.1s',
+
+        cursor: answered ? 'default' : 'pointer',
       }}
       onMouseEnter={e => { if (!answered) e.currentTarget.style.transform = 'scale(1.02)' }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
@@ -53,9 +66,10 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(2, 1fr)',
-      gap: 12,
-      width: '80%',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+      gap: 'clamp(8px, 2vw, 16px)',
+      width: '100%',
+      maxWidth: 900,
       margin: '0 auto',
     }}>
       {choices.map(choice => (
