@@ -49,7 +49,10 @@ def get_kana_card(set_name: str, mode: str, user_id: str = Depends(get_user_id))
             return {"done": True}
 
     raw_id     = unprefixed(card_id, user_id)
-    kana_entry = next(k for k in kana_list if kana_to_id(k) == raw_id)
+    kana_entry = next((k for k in kana_list if kana_to_id(k) == raw_id), None)
+
+    if kana_entry is None:
+        return {"done": True}
 
     all_romaji = [k["romaji"] for k in kana_list if k["romaji"] != kana_entry["romaji"]]
     choices    = random.sample(all_romaji, min(3, len(all_romaji))) + [kana_entry["romaji"]]

@@ -52,7 +52,11 @@ def get_vocab_card(level: str, phase: int, lang: str = "fr",
             return {"done": True}
 
     raw_id  = unprefixed(card_id, user_id)
-    word    = next(w for w in vocab_list if vocab_to_id(w, level) == raw_id)
+    
+    word = next((w for w in vocab_list if vocab_to_id(w, level) == raw_id), None)
+    if word is None:
+        return {"done": True}
+    
     meaning = get_meaning(word, lang, FR_MAP)
 
     all_meanings = [

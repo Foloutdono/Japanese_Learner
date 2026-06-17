@@ -52,7 +52,9 @@ def get_kanji_card(level: str, phase: int, lang: str = "fr",
             return {"done": True}
 
     raw_id  = unprefixed(card_id, user_id)
-    entry   = next(k for k in kanji_list if kanji_to_id(k, level) == raw_id)
+    entry   = next((k for k in kanji_list if kanji_to_id(k, level) == raw_id), None)
+    if entry is None:
+        return {"done": True}
     meaning = get_meaning(entry, lang, FR_MAP)
 
     all_candidates = [
