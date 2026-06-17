@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends
 from db import db_conn
 from kana_data import KANA_SETS, kana_to_id
@@ -7,6 +8,7 @@ from auth import get_user_id, prefixed
 from srs_instance import srs
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 KANA_MODES  = ["mcq", "type"]
 PHASES_KEYS = ["kk-s", "k-k", "s-k"]
@@ -30,6 +32,7 @@ def compute_stats(raw_ids: list[str], mode: str, user_id: str) -> dict:
 
 @router.get("/api/stats")
 def get_stats(user_id: str = Depends(get_user_id)):
+    logger.info("Computing stats for user_id=%s", user_id)
     kana_stats = {
         set_name: {
             mode: compute_stats([kana_to_id(k) for k in kana_list], mode, user_id)
@@ -37,6 +40,7 @@ def get_stats(user_id: str = Depends(get_user_id)):
         }
         for set_name, kana_list in KANA_SETS.items()
     }
+    logger.info("Computed kana stats for user_id=%s", user_id)
     vocab_stats = {
         level: {
             key: compute_stats([vocab_to_id(w, level) for w in vocab_list], key, user_id)
@@ -44,6 +48,7 @@ def get_stats(user_id: str = Depends(get_user_id)):
         }
         for level, vocab_list in VOCAB_BY_LEVEL.items()
     }
+    logger.info("Computed vocab stats for user_id=%s", user_id)
     kanji_stats = {
         level: {
             key: compute_stats([kanji_to_id(k, level) for k in kanji_list], key, user_id)
@@ -51,11 +56,13 @@ def get_stats(user_id: str = Depends(get_user_id)):
         }
         for level, kanji_list in KANJI_BY_LEVEL.items()
     }
+    logger.info("Computed kanji stats for user_id=%s", user_id)
     return {"kana": kana_stats, "vocab": vocab_stats, "kanji": kanji_stats}
 
 
 @router.delete("/api/stats/reset")
 def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None = None):
+    logger.info("Resetting stats for user_id=%s", user_id)
     if card_ids is None:
         conn = db_conn()
         try:
