@@ -13,51 +13,119 @@ logger = logging.getLogger(__name__)
 KANA_MODES  = ["mcq", "type"]
 PHASES_KEYS = ["kk-s", "k-k", "s-k"]
 
+KANA_IDS = {
+    set_name: [kana_to_id(k) for k in kana_list]
+    for set_name, kana_list in KANA_SETS.items()
+}
 
-def compute_stats(raw_ids: list[str], mode: str, user_id: str) -> dict:
-    card_ids = prefixed(raw_ids, user_id)
-    states   = srs.get_bulk_stats(card_ids, mode)
-    due_now  = sum(1 for cid in card_ids if cid in set(srs.get_due_cards(mode)))
-    new      = sum(1 for s in states.values() if s == "new")
-    mastered = sum(1 for s in states.values() if s == "mastered")
-    learning = sum(1 for s in states.values() if s == "learning")
+VOCAB_IDS = {
+    level: [vocab_to_id(v, level) for v in vocab_list]
+    for level, vocab_list in VOCAB_BY_LEVEL.items()
+}
+
+KANJI_IDS = {
+    level: [kanji_to_id(k, level) for k in kanji_list]
+    for level, kanji_list in KANJI_BY_LEVEL.items()
+}
+
+
+def compute_stats_from_cache(
+    raw_ids: list[str],
+    mode: str,
+    user_id: str,
+    cache: dict,
+):
+    total = len(raw_ids)
+
+    new = 0
+    learning = 0
+    mastered = 0
+    due_now = 0
+
+    for raw_id in raw_ids:
+
+        key = (f"{user_id}:{raw_id}", mode)
+
+        item = cache.get(key)
+
+        if item is None:
+            new += 1
+            continue
+
+        state = item["state"]
+
+        if state == "new":
+            new += 1
+
+        elif state == "learning":
+            learning += 1
+
+        elif state == "mastered":
+            mastered += 1
+
+        if item["due"]:
+            due_now += 1
+
     return {
-        "total":    len(card_ids),
-        "new":      new,
+        "total": total,
+        "new": new,
         "learning": learning,
         "mastered": mastered,
-        "due_now":  due_now,
+        "due_now": due_now,
     }
 
 
 @router.get("/api/stats")
 def get_stats(user_id: str = Depends(get_user_id)):
+
     logger.info("Computing stats for user_id=%s", user_id)
+
+    cache = srs.get_user_states(user_id)
+
     kana_stats = {
         set_name: {
-            mode: compute_stats([kana_to_id(k) for k in kana_list], mode, user_id)
+            mode: compute_stats_from_cache(
+                ids,
+                mode,
+                user_id,
+                cache,
+            )
             for mode in KANA_MODES
         }
-        for set_name, kana_list in KANA_SETS.items()
+        for set_name, ids in KANA_IDS.items()
     }
-    logger.info("Computed kana stats for user_id=%s", user_id)
+
     vocab_stats = {
         level: {
-            key: compute_stats([vocab_to_id(w, level) for w in vocab_list], key, user_id)
-            for key in PHASES_KEYS
+            mode: compute_stats_from_cache(
+                ids,
+                mode,
+                user_id,
+                cache,
+            )
+            for mode in PHASES_KEYS
         }
-        for level, vocab_list in VOCAB_BY_LEVEL.items()
+        for level, ids in VOCAB_IDS.items()
     }
-    logger.info("Computed vocab stats for user_id=%s", user_id)
+
     kanji_stats = {
         level: {
-            key: compute_stats([kanji_to_id(k, level) for k in kanji_list], key, user_id)
-            for key in PHASES_KEYS
+            mode: compute_stats_from_cache(
+                ids,
+                mode,
+                user_id,
+                cache,
+            )
+            for mode in PHASES_KEYS
         }
-        for level, kanji_list in KANJI_BY_LEVEL.items()
+        for level, ids in KANJI_IDS.items()
     }
-    logger.info("Computed kanji stats for user_id=%s", user_id)
-    return {"kana": kana_stats, "vocab": vocab_stats, "kanji": kanji_stats}
+
+    return {
+        "kana": kana_stats,
+        "vocab": vocab_stats,
+        "kanji": kanji_stats,
+    }
 
 
 @router.delete("/api/stats/reset")
