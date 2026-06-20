@@ -18,7 +18,10 @@ export default function StatsScreen({ session }) {
 
   function fetchStats() {
     apiFetch('/api/stats', session).then(r => r.json()).then(setStats)
-    apiFetch('/api/stats/extra', session).then(r => r.json()).then(setExtra)
+    apiFetch('/api/stats/extra', session)
+      .then(r => (r.ok ? r.json() : null))
+      .then(setExtra)
+      .catch(() => setExtra(null))
   }
 
   function resetAll() {
@@ -66,11 +69,11 @@ export default function StatsScreen({ session }) {
           <Section title={t.overview || 'Overview'} />
           <OverviewRow stats={stats} extra={extra} t={t} />
 
-          {extra && extra.forecast.length > 0 && (
+          {extra?.forecast?.length > 0 && (
             <DueForecast forecast={extra.forecast} t={t} />
           )}
 
-          {extra && extra.weakest.length > 0 && (
+          {extra?.weakest?.length > 0 && (
             <WeakestItems weakest={extra.weakest} t={t} />
           )}
 
