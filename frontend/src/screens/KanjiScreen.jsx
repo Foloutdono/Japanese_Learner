@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { KanjiTopBar, TopBar } from '../components/TopBar'
@@ -15,6 +15,7 @@ import { speakJapanese } from '../components/sound'
 export default function KanjiScreen({ session }) {
   const navigate    = useNavigate()
   const { t, lang } = useLang()
+  const [searchParams] = useSearchParams()
 
   const PHASES = [
     { key: 1, label: t.phase1, desc: t.phase1Desc },
@@ -40,6 +41,18 @@ export default function KanjiScreen({ session }) {
   useEffect(() => {
     if (card && card.lang !== lang) translateCard(card, lang)
   }, [lang])
+
+  // Deep-link support: if level/phase are given in the URL (e.g. from the
+  // Stats screen's "due now" button), jump straight into that session
+  // instead of making the user pick again.
+  useEffect(() => {
+    const lvl = searchParams.get('level')
+    const ph  = searchParams.get('phase')
+    if (lvl && ph) {
+      startSession(lvl, Number(ph))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function fetchCard(lvl, ph) {
     setLoading(true)
