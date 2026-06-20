@@ -398,13 +398,16 @@ class SRSEngine:
                     WHERE card_id LIKE %s
                 """
 
+                safe_user_id = user_id.replace("\\", "\\\\").replace("%", r"\%").replace("_", r"\_")
+                pattern = f"{safe_user_id}:%"
+
                 self._log_sql(
                     "get_user_states",
                     sql,
-                    (f"{user_id}:%",)
+                    (pattern,)
                 )
 
-                cur.execute(sql, (f"{user_id}:%",))
+                cur.execute(sql, (pattern,))
 
                 rows = cur.fetchall()
 
