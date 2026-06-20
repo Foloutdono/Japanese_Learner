@@ -534,23 +534,45 @@ class SRSEngine:
         return {"current": current, "longest": longest}
 
     def get_due_forecast(self, user_id: str, days: int = 7) -> list[dict[str, Any]]:
-        """Cards becoming due per day, for the next `days` days (today first)."""
+        """
+        Cards due per day for the next `days` days, today first.
+
+        Overdue cards (next_review in the past) are folded into "today" rather
+        than appearing under their original due date, and every day in the
+        range is included (zero-filled) so the result is always exactly
+        `days` entries in chronological order.
+        """
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 sql = """
-                    SELECT date_trunc('day', next_review)::date AS day, COUNT(*)
-                    FROM card_modes
-                    WHERE card_id LIKE %s
-                      AND total_reviews > 0
-                      AND next_review <= NOW() + (%s || ' days')::interval
-                    GROUP BY day
-                    ORDER BY day ASC
+                    WITH day_range AS (
+                        SELECT generate_series(0, %s - 1) AS day_offset
+                    ),
+                    due AS (
+                        SELECT
+                            (GREATEST(next_review, NOW())::date - CURRENT_DATE) AS day_offset,
+                            COUNT(*) AS cnt
+                        FROM card_modes
+                        WHERE card_id LIKE %s
+                          AND total_reviews > 0
+                          AND next_review <= NOW() + (%s || ' days')::interval
+                        GROUP BY 1
+                    )
+                    SELECT day_range.day_offset, COALESCE(due.cnt, 0)
+                    FROM day_range
+                    LEFT JOIN due ON due.day_offset = day_range.day_offset
+                    ORDER BY day_range.day_offset ASC
                 """
-                self._log_sql("get_due_forecast", sql, (pattern, days))
-                cur.execute(sql, (pattern, days))
+                self._log_sql("get_due_forecast", sql, (days, pattern, days))
+                cur.execute(sql, (days, pattern, days))
                 rows = cur.fetchall()
-        return [{"date": day.isoformat(), "count": int(count)} for day, count in rows]
+
+        today = datetime.now(timezone.utc).date()
+        return [
+            {"date": (today + timedelta(days=offset)).isoformat(), "count": int(count)}
+            for offset, count in rows
+        ]
 
     def get_weakest_cards(self, user_id: str, limit: int = 10) -> list[dict[str, Any]]:
         """Reviewed cards with the lowest accuracy (ties broken by most lapses)."""
