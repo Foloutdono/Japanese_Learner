@@ -374,3 +374,56 @@ class SRSEngine:
 
     def close(self) -> None:
         self.storage.close()
+
+
+    def get_user_states(self, user_id: str) -> dict[tuple[str, str], str]:
+        """
+        Returns:
+            {
+                (card_id, mode): "new" | "learning" | "mastered"
+            }
+        """
+
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+
+                sql = """
+                    SELECT
+                        card_id,
+                        mode,
+                        total_reviews,
+                        interval_days,
+                        next_review
+                    FROM card_modes
+                    WHERE card_id LIKE %s
+                """
+
+                self._log_sql(
+                    "get_user_states",
+                    sql,
+                    (f"{user_id}:%",)
+                )
+
+                cur.execute(sql, (f"{user_id}:%",))
+
+                rows = cur.fetchall()
+
+        result = {}
+
+        for card_id, mode, total_reviews, interval_days, next_review in rows:
+
+            if total_reviews == 0:
+                state = "new"
+
+            elif interval_days >= 21:
+                state = "mastered"
+
+            else:
+                state = "learning"
+
+            result[(card_id, mode)] = {
+                "state": state,
+                "due": next_review is not None and next_review <= datetime.utcnow()
+            }
+
+        return result
