@@ -34,3 +34,14 @@ CREATE TABLE card_modes (
 
 CREATE INDEX idx_due_reviews
 ON card_modes(mode, next_review);
+
+CREATE TABLE review_log (
+    id BIGSERIAL PRIMARY KEY,
+    card_id TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    quality SMALLINT NOT NULL,
+    reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_review_log_card_id
+ON review_log(card_id, reviewed_at);

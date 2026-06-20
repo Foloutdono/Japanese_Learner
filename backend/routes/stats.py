@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 KANA_MODES  = ["mcq", "type"]
 PHASES_KEYS = ["kk-s", "k-k", "s-k"]
+# Kanji has a 4th phase (drawing) that vocab doesn't currently have.
+KANJI_PHASE_KEYS = PHASES_KEYS + ["k-d"]
 
 KANA_IDS = {
     set_name: [kana_to_id(k) for k in kana_list]
@@ -29,49 +31,44 @@ KANJI_IDS = {
 }
 
 
-def compute_stats_from_cache(
-    raw_ids: list[str],
-    mode: str,
-    user_id: str,
-    cache: dict,
-):
-    total = len(raw_ids)
+def _build_reverse_index():
+    """
+    Computed once at import time (the content universe is static).
 
-    new = 0
-    learning = 0
-    mastered = 0
-    due_now = 0
+    Returns:
+        index:  (raw_id, mode) -> (category, key)
+        totals: (category, key) -> total number of items
+    """
+    index = {}
+    totals = {}
 
-    for raw_id in raw_ids:
+    for category, ids_map, modes in (
+        ("kana", KANA_IDS, KANA_MODES),
+        ("vocab", VOCAB_IDS, PHASES_KEYS),
+        ("kanji", KANJI_IDS, KANJI_PHASE_KEYS),
+    ):
+        for key, ids in ids_map.items():
+            totals[(category, key)] = len(ids)
+            for raw_id in ids:
+                for mode in modes:
+                    index[(raw_id, mode)] = (category, key)
 
-        key = (f"{user_id}:{raw_id}", mode)
+    return index, totals
 
-        item = cache.get(key)
 
-        if item is None:
-            new += 1
-            continue
+_ID_MODE_INDEX, _CATEGORY_TOTALS = _build_reverse_index()
 
-        state = item["state"]
 
-        if state == "new":
-            new += 1
-
-        elif state == "learning":
-            learning += 1
-
-        elif state == "mastered":
-            mastered += 1
-
-        if item["due"]:
-            due_now += 1
-
+def _empty_bucket(total: int) -> dict:
+    # Everything starts as "new" until the cache proves otherwise.
     return {
         "total": total,
-        "new": new,
-        "learning": learning,
-        "mastered": mastered,
-        "due_now": due_now,
+        "new": total,
+        "learning": 0,
+        "mastered": 0,
+        "due_now": 0,
+        "reviews": 0,   # sum of total_reviews across cards in this bucket
+        "correct": 0,   # sum of correct_reviews across cards in this bucket
     }
 
 
@@ -83,48 +80,87 @@ def get_stats(user_id: str = Depends(get_user_id)):
     cache = srs.get_user_states(user_id)
 
     kana_stats = {
-        set_name: {
-            mode: compute_stats_from_cache(
-                ids,
-                mode,
-                user_id,
-                cache,
-            )
-            for mode in KANA_MODES
-        }
+        set_name: {mode: _empty_bucket(len(ids)) for mode in KANA_MODES}
         for set_name, ids in KANA_IDS.items()
     }
 
     vocab_stats = {
-        level: {
-            mode: compute_stats_from_cache(
-                ids,
-                mode,
-                user_id,
-                cache,
-            )
-            for mode in PHASES_KEYS
-        }
+        level: {mode: _empty_bucket(len(ids)) for mode in PHASES_KEYS}
         for level, ids in VOCAB_IDS.items()
     }
 
     kanji_stats = {
-        level: {
-            mode: compute_stats_from_cache(
-                ids,
-                mode,
-                user_id,
-                cache,
-            )
-            for mode in PHASES_KEYS
-        }
+        level: {mode: _empty_bucket(len(ids)) for mode in KANJI_PHASE_KEYS}
         for level, ids in KANJI_IDS.items()
     }
+
+    buckets = {"kana": kana_stats, "vocab": vocab_stats, "kanji": kanji_stats}
+    prefix_len = len(user_id) + 1  # strip "user_id:" from the stored card_id
+
+    # Only iterate over what the user has actually touched, not the whole
+    # content universe. Counts default to "new"/total above and get
+    # adjusted here.
+    for (full_card_id, mode), item in cache.items():
+
+        raw_id = full_card_id[prefix_len:]
+        loc = _ID_MODE_INDEX.get((raw_id, mode))
+
+        if loc is None:
+            # Stale or unknown id (e.g. content removed since reviewed).
+            continue
+
+        category, key = loc
+        bucket = buckets[category][key][mode]
+
+        state = item["state"]
+        if state != "new":
+            bucket["new"] -= 1
+            bucket[state] += 1
+
+        if item["due"]:
+            bucket["due_now"] += 1
+
+        bucket["reviews"] += item["total_reviews"]
+        bucket["correct"] += item["correct_reviews"]
 
     return {
         "kana": kana_stats,
         "vocab": vocab_stats,
         "kanji": kanji_stats,
+    }
+
+
+@router.get("/api/stats/extra")
+def get_extra_stats(user_id: str = Depends(get_user_id)):
+    """
+    Supplementary stats that don't fit the per-category/mode shape of /api/stats:
+    streak, recent activity trend, upcoming due forecast, and weakest cards.
+    """
+    logger.info("Computing extra stats for user_id=%s", user_id)
+
+    streak = srs.get_streak(user_id)
+    trend = srs.get_daily_review_counts(user_id, days=30)
+    forecast = srs.get_due_forecast(user_id, days=7)
+    weakest_raw = srs.get_weakest_cards(user_id, limit=10)
+
+    prefix_len = len(user_id) + 1
+    weakest = []
+    for entry in weakest_raw:
+        raw_id = entry["card_id"][prefix_len:]
+        loc = _ID_MODE_INDEX.get((raw_id, entry["mode"]))
+        category, key = loc if loc else (None, None)
+        weakest.append({
+            **entry,
+            "raw_id": raw_id,
+            "category": category,
+            "key": key,
+        })
+
+    return {
+        "streak": streak,
+        "trend": trend,
+        "forecast": forecast,
+        "weakest": weakest,
     }
 
 

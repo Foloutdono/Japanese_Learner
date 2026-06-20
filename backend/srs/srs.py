@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from .models import CardState
@@ -21,6 +21,12 @@ class SRSEngine:
     def _log_sql(self, label: str, sql: str, params: Any = None) -> None:
         # logger.info("SRS SQL %s sql=%s params=%r", label, sql, params)
         pass
+
+    @staticmethod
+    def _user_prefix_pattern(user_id: str) -> str:
+        """Build a safe LIKE pattern matching '{user_id}:%' (escapes %, _, \\)."""
+        safe_user_id = user_id.replace("\\", "\\\\").replace("%", r"\%").replace("_", r"\_")
+        return f"{safe_user_id}:%"
 
     def _init_db(self) -> None:
         with self.storage.connection() as conn:
@@ -93,6 +99,34 @@ class SRSEngine:
                 cur.execute("""
                     CREATE INDEX IF NOT EXISTS idx_due_lookup
                     ON card_modes(mode, total_reviews, next_review)
+                """)
+
+                self._log_sql("create_review_log_table", """
+                    CREATE TABLE IF NOT EXISTS review_log (
+                        id BIGSERIAL PRIMARY KEY,
+                        card_id TEXT NOT NULL,
+                        mode TEXT NOT NULL,
+                        quality SMALLINT NOT NULL,
+                        reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    )
+                """)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS review_log (
+                        id BIGSERIAL PRIMARY KEY,
+                        card_id TEXT NOT NULL,
+                        mode TEXT NOT NULL,
+                        quality SMALLINT NOT NULL,
+                        reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    )
+                """)
+
+                self._log_sql("create_review_log_card_index", """
+                    CREATE INDEX IF NOT EXISTS idx_review_log_card_id
+                    ON review_log(card_id, reviewed_at)
+                """)
+                cur.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_review_log_card_id
+                    ON review_log(card_id, reviewed_at)
                 """)
 
     def _ensure_card(self, card_id: str) -> None:
@@ -220,7 +254,14 @@ class SRSEngine:
         state = self._load_state(card_id, mode)
         updated = self.scheduler.review(state, quality)
         self._save_state(updated)
+        self._log_review(card_id, mode, quality)
         return self._to_dict(updated)
+
+    def _log_review(self, card_id: str, mode: str, quality: int) -> None:
+        with self.storage.cursor() as cur:
+            sql = "INSERT INTO review_log(card_id, mode, quality) VALUES (%s, %s, %s)"
+            self._log_sql("log_review", sql, (card_id, mode, quality))
+            cur.execute(sql, (card_id, mode, quality))
 
     def get_due_cards(self, mode: str, limit: int | None = None, card_ids: list[str] | None = None) -> list[str]:
         now = datetime.now(timezone.utc)
@@ -393,13 +434,13 @@ class SRSEngine:
                         mode,
                         total_reviews,
                         interval_days,
-                        next_review
+                        next_review,
+                        correct_reviews
                     FROM card_modes
                     WHERE card_id LIKE %s
                 """
 
-                safe_user_id = user_id.replace("\\", "\\\\").replace("%", r"\%").replace("_", r"\_")
-                pattern = f"{safe_user_id}:%"
+                pattern = self._user_prefix_pattern(user_id)
 
                 self._log_sql(
                     "get_user_states",
@@ -413,7 +454,7 @@ class SRSEngine:
 
         result = {}
 
-        for card_id, mode, total_reviews, interval_days, next_review in rows:
+        for card_id, mode, total_reviews, interval_days, next_review, correct_reviews in rows:
 
             if total_reviews == 0:
                 state = "new"
@@ -426,7 +467,115 @@ class SRSEngine:
 
             result[(card_id, mode)] = {
                 "state": state,
-                "due": next_review is not None and next_review <= datetime.now(timezone.utc)
+                "due": next_review is not None and next_review <= datetime.now(timezone.utc),
+                "total_reviews": total_reviews,
+                "correct_reviews": correct_reviews,
             }
 
         return result
+
+    def get_daily_review_counts(self, user_id: str, days: int = 30) -> list[dict[str, Any]]:
+        """Reviews per day for the last `days` days (oldest first), for streak/trend charts."""
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT date_trunc('day', reviewed_at)::date AS day, COUNT(*)
+                    FROM review_log
+                    WHERE card_id LIKE %s
+                      AND reviewed_at >= NOW() - (%s || ' days')::interval
+                    GROUP BY day
+                    ORDER BY day ASC
+                """
+                self._log_sql("get_daily_review_counts", sql, (pattern, days))
+                cur.execute(sql, (pattern, days))
+                rows = cur.fetchall()
+        return [{"date": day.isoformat(), "count": int(count)} for day, count in rows]
+
+    def get_streak(self, user_id: str) -> dict[str, int]:
+        """Current and longest consecutive-day streak of having at least one review."""
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT DISTINCT date_trunc('day', reviewed_at)::date AS day
+                    FROM review_log
+                    WHERE card_id LIKE %s
+                    ORDER BY day DESC
+                """
+                self._log_sql("get_streak", sql, (pattern,))
+                cur.execute(sql, (pattern,))
+                days = [row[0] for row in cur.fetchall()]
+
+        if not days:
+            return {"current": 0, "longest": 0}
+
+        today = datetime.now(timezone.utc).date()
+        day_set = set(days)
+
+        # Current streak: walk back from today (or yesterday, if nothing logged yet today).
+        current = 0
+        cursor = today if today in day_set else today - timedelta(days=1)
+        while cursor in day_set:
+            current += 1
+            cursor -= timedelta(days=1)
+
+        # Longest streak: walk the sorted distinct days once.
+        longest = 1
+        run = 1
+        ordered = sorted(day_set)
+        for prev, curr in zip(ordered, ordered[1:]):
+            if (curr - prev).days == 1:
+                run += 1
+            else:
+                run = 1
+            longest = max(longest, run)
+
+        return {"current": current, "longest": longest}
+
+    def get_due_forecast(self, user_id: str, days: int = 7) -> list[dict[str, Any]]:
+        """Cards becoming due per day, for the next `days` days (today first)."""
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT date_trunc('day', next_review)::date AS day, COUNT(*)
+                    FROM card_modes
+                    WHERE card_id LIKE %s
+                      AND total_reviews > 0
+                      AND next_review <= NOW() + (%s || ' days')::interval
+                    GROUP BY day
+                    ORDER BY day ASC
+                """
+                self._log_sql("get_due_forecast", sql, (pattern, days))
+                cur.execute(sql, (pattern, days))
+                rows = cur.fetchall()
+        return [{"date": day.isoformat(), "count": int(count)} for day, count in rows]
+
+    def get_weakest_cards(self, user_id: str, limit: int = 10) -> list[dict[str, Any]]:
+        """Reviewed cards with the lowest accuracy (ties broken by most lapses)."""
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT card_id, mode, total_reviews, correct_reviews, lapses
+                    FROM card_modes
+                    WHERE card_id LIKE %s
+                      AND total_reviews > 0
+                    ORDER BY (correct_reviews::float / total_reviews) ASC, lapses DESC
+                    LIMIT %s
+                """
+                self._log_sql("get_weakest_cards", sql, (pattern, limit))
+                cur.execute(sql, (pattern, limit))
+                rows = cur.fetchall()
+        return [
+            {
+                "card_id": card_id,
+                "mode": mode,
+                "total_reviews": total_reviews,
+                "correct_reviews": correct_reviews,
+                "accuracy": round(correct_reviews / total_reviews * 100, 1),
+                "lapses": lapses,
+            }
+            for card_id, mode, total_reviews, correct_reviews, lapses in rows
+        ]
