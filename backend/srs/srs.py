@@ -467,7 +467,7 @@ class SRSEngine:
 
             result[(card_id, mode)] = {
                 "state": state,
-                "due": next_review is not None and next_review <= datetime.now(timezone.utc),
+                "due": total_reviews > 0 and next_review is not None and next_review <= datetime.now(timezone.utc),
                 "total_reviews": total_reviews,
                 "correct_reviews": correct_reviews,
             }
