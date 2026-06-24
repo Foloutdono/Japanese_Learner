@@ -12,6 +12,7 @@ from routes.dictionary      import router as dictionary_router
 from routes.decks           import router as decks_router
 from routes.translations    import router as translations_router
 from routes.grammar         import router as grammar_router
+from routes.phrase           import router as phrase_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -34,6 +35,7 @@ app.include_router(dictionary_router)
 app.include_router(decks_router)
 app.include_router(translations_router)
 app.include_router(grammar_router)
+app.include_router(phrase_router)
 
 @app.get("/")
 def root():
