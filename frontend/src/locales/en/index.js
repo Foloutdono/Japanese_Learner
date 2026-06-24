@@ -137,8 +137,41 @@ const stats = {
   mastered:          'Mastered',
   dueNow:            '⚡ Due now',
   total:             'Total',
+  overview:        'Overview',
+  streak:          'Streak',
+  longestStreak:   'Best streak',
+  accuracy:        'Accuracy',
+  dueToday:        'Due today',
+  upcomingReviews: 'Upcoming reviews',
+  weakestItems:    'Needs practice',
+  lapses:          'lapses',
+  reviewNow:       'Review now',
 }
 
+// ── Phrases analyser ────────────────────────────────────────────
+const phraseAnalyzer = {
+  phraseAnalyzer:      'Phrase analyzer',
+  phrasePlaceholder:   'Type or paste a Japanese phrase…',
+  analyze:             'Analyze',
+  showHistory:         'History',
+  hideHistory:         'Hide history',
+  noHistory:           'No phrases analyzed yet.',
+  phraseAnalyzeError:  "Couldn't analyze this phrase. Try again.",
+  clickForDetails:     'Click for definition & stats',
+  inThisPhrase:        'In this phrase',
+  appDefinition:       'Definition in the app',
+  cardStats:           'Card stats',
+  totalReviews:        'Reviews',
+  correctReviews:      'Correct',
+  interval:            'Interval',
+  days:                'days',
+  nextReview:          'Next review',
+  status_mastered:     'Mastered',
+  status_learning:     'Learning',
+  status_new:          'New',
+  status_not_started:  'Not in deck',
+  status_due:          'Due now',
+}
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Search kanji, kana, or meaning...',
@@ -215,6 +248,7 @@ export default {
   ...home,
   ...quiz,
   ...stats,
+  ...phraseAnalyzer,
   ...dictionary,
   ...decks,
 }
