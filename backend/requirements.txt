@@ -6,3 +6,4 @@ cryptography
 httpx
 aiofiles
 python-multipart
+requests>=2.31.0
