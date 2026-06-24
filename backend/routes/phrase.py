@@ -20,13 +20,8 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openrouter/owl-alpha")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Representative mode used to gauge "do I know this word/kanji" for the
-# breakdown badges. Vocab/kanji are tracked across several phases (kk-s,
-# k-k, s-k, ...); s-k (see word, recall meaning) is the closest proxy for
-# "do I know what this means when I read it", which is what this feature
-# needs. Swap this if a different phase is a better fit for your app.
-VOCAB_STATUS_MODE = "s-k"
-KANJI_STATUS_MODE = "k-k"
+VOCAB_STATUS_MODE = "kk-s"
+KANJI_STATUS_MODE = "kk-s"
 
 SYSTEM_PROMPT = """You are a Japanese language tutor. Given a Japanese phrase, segment it into words and respond with ONLY a single JSON object (no markdown fences, no commentary) matching exactly this schema:
 
