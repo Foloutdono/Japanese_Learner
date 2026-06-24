@@ -470,6 +470,8 @@ class SRSEngine:
                 "due": total_reviews > 0 and next_review is not None and next_review <= datetime.now(timezone.utc),
                 "total_reviews": total_reviews,
                 "correct_reviews": correct_reviews,
+                "interval_days": interval_days,
+                "next_review": next_review.isoformat() if next_review else None,
             }
 
         return result
