@@ -45,3 +45,14 @@ CREATE TABLE review_log (
 
 CREATE INDEX idx_review_log_card_id
 ON review_log(card_id, reviewed_at);
+
+CREATE TABLE phrase_history (
+    id BIGSERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    phrase TEXT NOT NULL,
+    result JSONB NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_phrase_history_user
+ON phrase_history(user_id, created_at DESC);

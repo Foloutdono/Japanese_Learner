@@ -14,6 +14,7 @@ import DecksScreen      from './screens/DecksScreen'
 import DeckDetailScreen from './screens/DeckDetailScreen'
 import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
+import PhraseAnalyzerScreen from './screens/PhraseAnalyzerScreen'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/decks/:deck_id"       element={<DeckDetailScreen session={session} />} />
           <Route path="/decks/:deck_id/study" element={<StudyScreen session={session} />} />
           <Route path="/grammar"              element={<GrammarScreen session={session} />} />
+          <Route path="/phrase-analyzer"      element={<PhraseAnalyzerScreen session={session} />} />
         </Routes>
       </BrowserRouter>
     </LangProvider>
