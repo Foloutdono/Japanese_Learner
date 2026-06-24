@@ -13,6 +13,7 @@ export default function HomeScreen() {
     { icon: '漢', title: t.kanjiTitle,      desc: t.kanjiDesc,      path: '/kanji',      color: '#533483' },
     { icon: '辞', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: '#e17055' },
     { icon: '文', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/grammar',    color: '#00b894' },
+    { icon: '📖', title: t.readingTitle,    desc: t.readingDesc,    path: '/reading',    color: '#ff9ff3' },
     { icon: '💬', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: '#ff6b6b' },
     { icon: '📊', title: t.statsTitle,      desc: t.statsDesc,      path: '/stats',      color: '#2d6a4f' },
     { icon: '📚', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: '#6c5ce7' },
