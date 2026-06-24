@@ -150,6 +150,8 @@ const stats = {
 
 // ── Phrases analyser ────────────────────────────────────────────
 const phraseAnalyzer = {
+  phraseAnalyzerTitle: 'Analyseur de phrases',
+  phraseAnalyzerDesc:  'Analysez une phrase japonaise\nObtenez définitions & statistiques',
   phraseAnalyzer:      'Analyseur de phrases',
   phrasePlaceholder:   'Ecrivez ou collez une phrase japonaise…',
   analyze:             'Analyser',
