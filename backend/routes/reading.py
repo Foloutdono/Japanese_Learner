@@ -15,7 +15,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openrouter/owl-alpha")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-3.5-haiku")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 PHASES = {
@@ -30,16 +30,22 @@ MAX_DISPLAY_SECONDS = 12
 SECONDS_PER_CHAR = 0.35
 BASE_SECONDS = 1.5
 
-SYSTEM_PROMPT_TEMPLATE = """You are generating a short Japanese reading-practice phrase for a learner at JLPT level {level}.
+SYSTEM_PROMPT_TEMPLATE = """You are generating short Japanese reading-practice phrases for a learner at JLPT level {level}.
 
 {phase_instruction}
 
-Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
-{{"phrase": "...", "romaji": "..."}}
+Generate {count} DIFFERENT phrases. Vary their topic, vocabulary, and grammar pattern — none should be a close variant of another.
 
-- "phrase" must be a natural, grammatically correct, short phrase or sentence (roughly 3-8 words) appropriate for JLPT {level}.
-- "romaji" is the exact, standard Hepburn romanization of "phrase": lowercase, words separated by single spaces, no punctuation.
+Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
+{{"phrases": [{{"phrase": "...", "romaji": "..."}}]}}
+- The "phrases" array must contain exactly {count} entries.
+- Each "phrase" must be natural, grammatically correct, short (roughly 3-8 words), appropriate for JLPT {level}.
+- Each "romaji" is the exact, standard Hepburn romanization of its phrase: lowercase, words separated by single spaces, no punctuation.
 """
+
+MIN_BATCH = 1
+MAX_BATCH = 10
+DEFAULT_BATCH = 5
 
 
 class ResultPayload(BaseModel):
@@ -50,7 +56,7 @@ class ResultPayload(BaseModel):
     answer: str
 
 
-def _call_llm(level: str, phase: str) -> dict:
+def _call_llm_batch(level: str, phase: str, count: int) -> list[dict]:
     if not OPENROUTER_API_KEY:
         raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured")
 
@@ -58,7 +64,7 @@ def _call_llm(level: str, phase: str) -> dict:
     if not phase_instruction:
         raise HTTPException(status_code=400, detail="Unknown phase")
 
-    system_prompt = SYSTEM_PROMPT_TEMPLATE.format(level=level, phase_instruction=phase_instruction)
+    system_prompt = SYSTEM_PROMPT_TEMPLATE.format(level=level, phase_instruction=phase_instruction, count=count)
 
     response = requests.post(
         OPENROUTER_URL,
@@ -70,10 +76,10 @@ def _call_llm(level: str, phase: str) -> dict:
             "model": OPENROUTER_MODEL,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": "Generate one phrase."},
+                {"role": "user", "content": f"Generate {count} phrases."},
             ],
         },
-        timeout=30,
+        timeout=45,
     )
 
     if not response.ok:
@@ -81,21 +87,26 @@ def _call_llm(level: str, phase: str) -> dict:
         raise HTTPException(status_code=502, detail="LLM request failed")
 
     content = response.json()["choices"][0]["message"]["content"]
-    return _parse_llm_json(content)
+    data = _parse_llm_json(content)
+
+    phrases = data.get("phrases")
+    if not isinstance(phrases, list) or not phrases:
+        raise HTTPException(status_code=502, detail="LLM response missing phrases")
+
+    valid = [p for p in phrases if isinstance(p, dict) and "phrase" in p and "romaji" in p]
+    if not valid:
+        raise HTTPException(status_code=502, detail="LLM response missing required fields")
+
+    return valid
 
 
 def _parse_llm_json(content: str) -> dict:
     cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
     try:
-        data = json.loads(cleaned)
+        return json.loads(cleaned)
     except json.JSONDecodeError:
         logger.error("Failed to parse LLM response as JSON: %r", content)
         raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
-
-    if "phrase" not in data or "romaji" not in data:
-        raise HTTPException(status_code=502, detail="LLM response missing required fields")
-
-    return data
 
 
 def _display_seconds(phrase: str) -> float:
@@ -117,18 +128,22 @@ def normalize_romaji(text: str) -> str:
     return text
 
 
-@router.get("/api/reading/phrase")
-def get_reading_phrase(level: str, phase: str, user_id: str = Depends(get_user_id)):
-    data = _call_llm(level, phase)
-    phrase = data["phrase"]
-    romaji = data["romaji"]
+@router.get("/api/reading/batch")
+def get_reading_batch(level: str, phase: str, count: int = DEFAULT_BATCH, user_id: str = Depends(get_user_id)):
+    count = max(MIN_BATCH, min(MAX_BATCH, count))
+    items = _call_llm_batch(level, phase, count)
 
     return {
         "level": level,
         "phase": phase,
-        "phrase": phrase,
-        "romaji": romaji,
-        "display_seconds": _display_seconds(phrase),
+        "phrases": [
+            {
+                "phrase": item["phrase"],
+                "romaji": item["romaji"],
+                "display_seconds": _display_seconds(item["phrase"]),
+            }
+            for item in items
+        ],
     }
 
 
