@@ -56,3 +56,18 @@ CREATE TABLE phrase_history (
 
 CREATE INDEX idx_phrase_history_user
 ON phrase_history(user_id, created_at DESC);
+
+CREATE TABLE reading_log (
+    id BIGSERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    level TEXT NOT NULL,
+    phase TEXT NOT NULL,
+    phrase TEXT NOT NULL,
+    romaji TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    correct BOOLEAN NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_reading_log_user
+ON reading_log(user_id, created_at DESC);
