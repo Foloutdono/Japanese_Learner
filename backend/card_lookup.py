@@ -12,8 +12,8 @@ from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 # k-k, s-k, ...); s-k (see word, recall meaning) is the closest proxy for
 # "do I know what this means when I read it". Swap this if a different
 # phase is a better fit for your app.
-VOCAB_STATUS_MODE = "s-k"
-KANJI_STATUS_MODE = "k-k"
+VOCAB_STATUS_MODE = "kk-s"
+KANJI_STATUS_MODE = "kk-s"
 
 
 def is_kanji(char: str) -> bool:
