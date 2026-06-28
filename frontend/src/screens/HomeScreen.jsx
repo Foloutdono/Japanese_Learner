@@ -8,15 +8,15 @@ export default function HomeScreen() {
   const { t }           = useLang()
 
   const cards = [
-    { icon: 'あ', title: t.kanaTitle,       desc: t.kanaDesc,       path: '/kana',       color: '#EF476F' }, // Coral Red
-    { icon: '語', title: t.vocabTitle,      desc: t.vocabDesc,      path: '/vocab',      color: '#118AB2' }, // Ocean Blue
-    { icon: '漢', title: t.kanjiTitle,      desc: t.kanjiDesc,      path: '/kanji',      color: '#6D28D9' }, // Royal Purple
-    { icon: '辞', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: '#F59E0B' }, // Amber
-    { icon: '文', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/grammar',    color: '#10B981' }, // Emerald
-    { icon: '読', title: t.readingTitle,    desc: t.readingDesc,    path: '/reading',    color: '#EC4899' }, // Rose Pink
-    { icon: '💬', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: '#F97316' }, // Orange
-    { icon: '📊', title: t.statsTitle,      desc: t.statsDesc,      path: '/stats',      color: '#14B8A6' }, // Teal
-    { icon: '📚', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: '#3B82F6' }, // Bright Blue
+    { icon: 'あ',   title: t.kanaTitle,       desc: t.kanaDesc,       path: '/kana',       color: '#EF476F' },
+    { icon: '単語', title: t.vocabTitle,      desc: t.vocabDesc,      path: '/vocab',      color: '#118AB2' },
+    { icon: '漢字', title: t.kanjiTitle,      desc: t.kanjiDesc,      path: '/kanji',      color: '#6D28D9' },
+    { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: '#F59E0B' },
+    { icon: '文法', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/grammar',    color: '#10B981' },
+    { icon: '読書', title: t.readingTitle,    desc: t.readingDesc,    path: '/reading',    color: '#EC4899' },
+    { icon: '解析', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: '#F97316' },
+    { icon: '統計', title: t.statsTitle,      desc: t.statsDesc,      path: '/stats',      color: '#14B8A6' },
+    { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: '#3B82F6' },
   ]
 
   console.log(t.phraseAnalyzerTitle, t.phraseAnalyzerDesc)
