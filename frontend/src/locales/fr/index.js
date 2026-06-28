@@ -178,6 +178,7 @@ const phraseAnalyzer = {
 // ── Reading ───────────────────────────────────────────────
 const reading = {
   readingTitle:         'Entraînement à la lecture',
+  readingDesc:          'Phrases courtes\nJLPT N5 → N1\nHiragana, Katakana, Kanji',
   readingHiragana:      'Hiragana uniquement',
   readingHiraganaDesc:  'Phrases écrites uniquement en hiragana',
   readingKatakana:      'Katakana uniquement',
