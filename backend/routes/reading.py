@@ -10,6 +10,8 @@ from pydantic import BaseModel
 
 from db import db_conn
 from auth import get_user_id
+from srs_instance import srs
+from card_lookup import find_segments_in_text, attach_stats_to_segments
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -152,20 +154,21 @@ def get_reading_batch(
 ):
     count = max(MIN_BATCH, min(MAX_BATCH, count))
     items = _call_llm_batch(level, phase, count, lang)
+    states = srs.get_user_states(user_id)
 
-    return {
-        "level": level,
-        "phase": phase,
-        "phrases": [
-            {
-                "phrase": item["phrase"],
-                "romaji": item["romaji"],
-                "translation": item.get("translation", ""),
-                "display_seconds": _display_seconds(item["phrase"]),
-            }
-            for item in items
-        ],
-    }
+    phrases = []
+    for item in items:
+        phrase = item["phrase"]
+        segments = attach_stats_to_segments(find_segments_in_text(phrase), states, user_id)
+        phrases.append({
+            "phrase": phrase,
+            "romaji": item["romaji"],
+            "translation": item.get("translation", ""),
+            "display_seconds": _display_seconds(phrase),
+            "segments": segments,
+        })
+
+    return {"level": level, "phase": phase, "phrases": phrases}
 
 
 @router.post("/api/reading/result")
