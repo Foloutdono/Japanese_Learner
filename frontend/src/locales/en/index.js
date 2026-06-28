@@ -174,9 +174,11 @@ const phraseAnalyzer = {
   status_not_started:  'Not in deck',
   status_due:          'Due now',
 }
+
 // ── Reading ───────────────────────────────────────────────
 const reading = {
   readingTitle:         'Reading practice',
+  readingDesc:          'Short phrases\nJLPT N5 → N1\nHiragana, Katakana, Kanji',
   readingHiragana:      'Hiragana only',
   readingHiraganaDesc:  'Phrases written only in hiragana',
   readingKatakana:      'Katakana only',
