@@ -9,6 +9,24 @@ import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
 import { Loading } from '../components/QuizComponents'
 
+const STATUS_COLORS = {
+  mastered:     'var(--success)',
+  learning:     'var(--accent2)',
+  new:          'var(--warning)',
+  not_started:  'var(--text-secondary)',
+  due:          'var(--accent)',
+}
+
+const STATUS_LABELS = {
+  mastered:     'Mastered',
+  learning:     'Learning',
+  new:          'New',
+  not_started:  'Not in deck',
+  due:          'Due now',
+}
+
+const MOBILE_BREAKPOINT = 768
+
 export default function ReadingScreen({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
@@ -30,6 +48,21 @@ export default function ReadingScreen({ session }) {
   const [feedback, setFeedback] = useState(null) // { correct, romaji }
   const [score, setScore]   = useState({ correct: 0, total: 0 })
   const [error, setError]   = useState(null)
+  const [detail, setDetail] = useState(null) // { title, level, entry, stats } for the clicked vocab/kanji segment
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
+  )
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  function openSegmentDetail(seg) {
+    if (seg.type === 'plain') return
+    setDetail({ title: seg.text, level: seg.level, entry: seg.entry, stats: seg.stats })
+  }
 
   const timerRef = useRef(null)
   const fetchingRef = useRef(false) // guards against duplicate concurrent prefetches
@@ -75,6 +108,7 @@ export default function ReadingScreen({ session }) {
     setData(phraseData)
     setAnswer('')
     setFeedback(null)
+    setDetail(null)
     setStage('showing')
     setTimeLeft(phraseData.display_seconds)
   }
@@ -285,8 +319,25 @@ export default function ReadingScreen({ session }) {
         {stage === 'feedback' && data && feedback && (
           <>
             <PromptCard>
-              <div style={{ fontSize: 32, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', marginBottom: 12 }}>
-                {data.phrase}
+              <div style={{ fontSize: 32, fontFamily: 'Yu Gothic, sans-serif', marginBottom: 12, lineHeight: 1.5 }}>
+                {data.segments
+                  ? data.segments.map((seg, i) => (
+                      <span
+                        key={i}
+                        onClick={() => openSegmentDetail(seg)}
+                        style={{
+                          color: seg.type === 'plain' ? '#fff' : (STATUS_COLORS[seg.stats.status] || STATUS_COLORS.not_started),
+                          cursor: seg.type !== 'plain' ? 'pointer' : 'default',
+                          textDecoration: seg.type !== 'plain' ? 'underline' : 'none',
+                          textDecorationStyle: 'dotted',
+                          textUnderlineOffset: 4,
+                        }}
+                        title={seg.type !== 'plain' ? (t.clickForDetails || 'Click for definition & stats') : undefined}
+                      >
+                        {seg.text}
+                      </span>
+                    ))
+                  : data.phrase}
               </div>
               <div style={{
                 fontSize: 18,
@@ -320,6 +371,131 @@ export default function ReadingScreen({ session }) {
           </>
         )}
       </div>
+
+      {detail && (
+        <DetailPanel detail={detail} t={t} isMobile={isMobile} onClose={() => setDetail(null)} />
+      )}
     </div>
+  )
+}
+
+function DetailPanel({ detail, t, isMobile, onClose }) {
+  const { title, level, entry, stats } = detail
+
+  const content = (
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif' }}>{title}</div>
+        <button onClick={onClose} style={{ background: 'none', fontSize: 18, color: 'var(--text-secondary)' }}>✕</button>
+      </div>
+
+      {level && (
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>{level}</div>
+      )}
+
+      {entry && Object.keys(entry).length > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <Label>{t.appDefinition || 'Definition in the app'}</Label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {Object.entries(entry).map(([key, value]) => (
+              <div key={key} style={{ fontSize: 14, display: 'flex', gap: 8 }}>
+                <span style={{ color: 'var(--text-secondary)', minWidth: 90, textTransform: 'capitalize' }}>{key}</span>
+                <span>{String(value)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style={{ marginTop: 16 }}>
+        <Label>{t.cardStats || 'Card stats'}</Label>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+          <StatusBadge status={stats.status} />
+          {stats.due && <StatusBadge status="due" />}
+        </div>
+        <StatRow label={t.totalReviews || 'Reviews'} value={stats.total_reviews} />
+        <StatRow label={t.correctReviews || 'Correct'} value={stats.correct_reviews} />
+        <StatRow
+          label={t.accuracy || 'Accuracy'}
+          value={stats.accuracy !== null ? `${stats.accuracy}%` : '—'}
+        />
+        <StatRow
+          label={t.interval || 'Interval'}
+          value={stats.interval_days !== null ? `${stats.interval_days} ${t.days || 'days'}` : '—'}
+        />
+        <StatRow
+          label={t.nextReview || 'Next review'}
+          value={stats.next_review ? new Date(stats.next_review).toLocaleDateString() : '—'}
+        />
+      </div>
+    </>
+  )
+
+  if (isMobile) {
+    return (
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 50,
+        }}
+      >
+        <div
+          onClick={e => e.stopPropagation()}
+          className="card"
+          style={{ width: '100%', maxWidth: 480, margin: 16, padding: 24, maxHeight: '80vh', overflowY: 'auto' }}
+        >
+          {content}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 50 }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="card"
+        style={{
+          position: 'fixed', top: 0, right: 0, height: '100vh', width: 360,
+          padding: 24, overflowY: 'auto', borderRadius: 0,
+        }}
+      >
+        {content}
+      </div>
+    </div>
+  )
+}
+
+function Label({ children }) {
+  return (
+    <div style={{ fontSize: 12, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
+      {children}
+    </div>
+  )
+}
+
+function StatRow({ label, value }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '4px 0' }}>
+      <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
+      <span>{value}</span>
+    </div>
+  )
+}
+
+function StatusBadge({ status }) {
+  const color = STATUS_COLORS[status] || STATUS_COLORS.not_started
+  const label = STATUS_LABELS[status] || status
+  return (
+    <span style={{
+      fontSize: 12, color, border: `1px solid ${color}`,
+      borderRadius: 4, padding: '2px 8px',
+    }}>
+      {label}
+    </span>
   )
 }
