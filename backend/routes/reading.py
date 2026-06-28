@@ -25,10 +25,10 @@ PHASES = {
 }
 
 # Display time scales with phrase length, clamped to a sane range. Tune freely.
-MIN_DISPLAY_SECONDS = 3
-MAX_DISPLAY_SECONDS = 12
-SECONDS_PER_CHAR = 0.35
-BASE_SECONDS = 1.5
+MIN_DISPLAY_SECONDS = 5
+MAX_DISPLAY_SECONDS = 25
+SECONDS_PER_CHAR = 0.6
+BASE_SECONDS = 3.0
 
 SYSTEM_PROMPT_TEMPLATE = """You are generating short Japanese reading-practice phrases for a learner at JLPT level {level}.
 
