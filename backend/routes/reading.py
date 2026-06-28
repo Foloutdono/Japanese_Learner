@@ -5,6 +5,7 @@ import re
 import unicodedata
 
 import requests
+import pykakasi
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -20,6 +21,8 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-3.5-haiku")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
+_kakasi = pykakasi.kakasi()
+
 PHASES = {
     "hiragana": "Use ONLY hiragana characters. No kanji, no katakana.",
     "katakana": "Use ONLY katakana characters (e.g. common loanwords). No kanji, no hiragana.",
@@ -32,6 +35,13 @@ MAX_DISPLAY_SECONDS = 25
 SECONDS_PER_CHAR = 0.6
 BASE_SECONDS = 3.0
 
+# We deliberately do NOT ask the LLM to spell out romaji directly — models
+# are unreliable at inventing Hepburn spelling on the fly and can garble it
+# (e.g. misreading 降ります and producing "borimasu" instead of "furimasu").
+# Instead we ask for the phrase's reading in hiragana (a much more
+# constrained, reliable task — it's transcription, not free spelling) and
+# convert hiragana -> romaji ourselves with pykakasi, which is a mechanical,
+# unambiguous conversion once the kanji has already been resolved to kana.
 SYSTEM_PROMPT_TEMPLATE = """You are generating short Japanese reading-practice phrases for a learner at JLPT level {level}.
 
 {phase_instruction}
@@ -39,10 +49,10 @@ SYSTEM_PROMPT_TEMPLATE = """You are generating short Japanese reading-practice p
 Generate {count} DIFFERENT phrases. Vary their topic, vocabulary, and grammar pattern — none should be a close variant of another.
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
-{{"phrases": [{{"phrase": "...", "romaji": "...", "translation": "..."}}]}}
+{{"phrases": [{{"phrase": "...", "reading": "...", "translation": "..."}}]}}
 - The "phrases" array must contain exactly {count} entries.
 - Each "phrase" must be natural, grammatically correct, short (roughly 3-8 words), appropriate for JLPT {level}.
-- Each "romaji" is the exact, standard Hepburn romanization of its phrase: lowercase, words separated by single spaces, no punctuation.
+- Each "reading" is the COMPLETE reading of "phrase" written ENTIRELY in hiragana — convert any katakana to hiragana too, and resolve every kanji to its correct reading IN THIS CONTEXT. No kanji, no spaces, no punctuation should remain in "reading". Double-check each kanji's reading before answering — many kanji have multiple possible readings and only one is correct here.
 - Each "translation" is a natural translation of the phrase into {lang_name} (language code: {lang}).
 """
 
@@ -112,7 +122,7 @@ def _call_llm_batch(level: str, phase: str, count: int, lang: str) -> list[dict]
     if not isinstance(phrases, list) or not phrases:
         raise HTTPException(status_code=502, detail="LLM response missing phrases")
 
-    valid = [p for p in phrases if isinstance(p, dict) and "phrase" in p and "romaji" in p]
+    valid = [p for p in phrases if isinstance(p, dict) and "phrase" in p and "reading" in p]
     if not valid:
         raise HTTPException(status_code=502, detail="LLM response missing required fields")
 
@@ -131,6 +141,13 @@ def _parse_llm_json(content: str) -> dict:
 def _display_seconds(phrase: str) -> float:
     seconds = BASE_SECONDS + SECONDS_PER_CHAR * len(phrase)
     return max(MIN_DISPLAY_SECONDS, min(MAX_DISPLAY_SECONDS, round(seconds, 1)))
+
+
+def hiragana_to_romaji(reading: str) -> str:
+    """Deterministic kana -> Hepburn romaji conversion (no kanji ambiguity
+    left to resolve at this point, so this is purely mechanical)."""
+    converted = _kakasi.convert(reading)
+    return " ".join(item["hepburn"] for item in converted if item["hepburn"])
 
 
 def normalize_romaji(text: str) -> str:
@@ -162,7 +179,7 @@ def get_reading_batch(
         segments = attach_stats_to_segments(find_segments_in_text(phrase), states, user_id)
         phrases.append({
             "phrase": phrase,
-            "romaji": item["romaji"],
+            "romaji": hiragana_to_romaji(item["reading"]),
             "translation": item.get("translation", ""),
             "display_seconds": _display_seconds(phrase),
             "segments": segments,
