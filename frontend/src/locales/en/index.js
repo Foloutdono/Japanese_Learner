@@ -193,6 +193,7 @@ const reading = {
   correctRomaji:        'Correct romaji',
   yourAnswer:           'Your answer',
   nextPhrase:           'Next phrase',
+  translation:          'Translation',
 }
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {

@@ -11,7 +11,7 @@ import { Loading } from '../components/QuizComponents'
 
 export default function ReadingScreen({ session }) {
   const navigate = useNavigate()
-  const { t }    = useLang()
+  const { t, lang } = useLang()
 
   const PHASES = [
     { key: 'hiragana', label: t.readingHiragana || 'Hiragana only', desc: t.readingHiraganaDesc || 'Phrases written only in hiragana' },
@@ -61,7 +61,7 @@ export default function ReadingScreen({ session }) {
   // silently append to the queue).
   function fetchBatch(lvl, ph) {
     fetchingRef.current = true
-    return apiFetch(`/api/reading/batch?level=${lvl}&phase=${ph}&count=${BATCH_SIZE}`, session)
+    return apiFetch(`/api/reading/batch?level=${lvl}&phase=${ph}&count=${BATCH_SIZE}&lang=${lang}`, session)
       .then(r => {
         if (!r.ok) throw new Error('Request failed')
         return r.json()
@@ -298,6 +298,11 @@ export default function ReadingScreen({ session }) {
               <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginTop: 8 }}>
                 {t.correctRomaji || 'Correct romaji'}: <strong>{feedback.romaji}</strong>
               </div>
+              {data.translation && (
+                <div style={{ fontSize: 15, color: 'var(--text-primary)', marginTop: 4 }}>
+                  {t.translation || 'Translation'}: {data.translation}
+                </div>
+              )}
               {!feedback.correct && (
                 <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 4 }}>
                   {t.yourAnswer || 'Your answer'}: {answer}
