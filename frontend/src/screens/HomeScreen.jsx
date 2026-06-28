@@ -8,15 +8,15 @@ export default function HomeScreen() {
   const { t }           = useLang()
 
   const cards = [
-    { icon: 'あ', title: t.kanaTitle,       desc: t.kanaDesc,       path: '/kana',       color: '#e94560' },
-    { icon: '語', title: t.vocabTitle,      desc: t.vocabDesc,      path: '/vocab',      color: '#4cc9f0' },
-    { icon: '漢', title: t.kanjiTitle,      desc: t.kanjiDesc,      path: '/kanji',      color: '#533483' },
-    { icon: '辞', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: '#e17055' },
-    { icon: '文', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/grammar',    color: '#00b894' },
-    { icon: '📖', title: t.readingTitle,    desc: t.readingDesc,    path: '/reading',    color: '#ff9ff3' },
-    { icon: '💬', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: '#ff6b6b' },
-    { icon: '📊', title: t.statsTitle,      desc: t.statsDesc,      path: '/stats',      color: '#2d6a4f' },
-    { icon: '📚', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: '#6c5ce7' },
+    { icon: 'あ', title: t.kanaTitle,       desc: t.kanaDesc,       path: '/kana',       color: '#EF476F' }, // Coral Red
+    { icon: '語', title: t.vocabTitle,      desc: t.vocabDesc,      path: '/vocab',      color: '#118AB2' }, // Ocean Blue
+    { icon: '漢', title: t.kanjiTitle,      desc: t.kanjiDesc,      path: '/kanji',      color: '#6D28D9' }, // Royal Purple
+    { icon: '辞', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: '#F59E0B' }, // Amber
+    { icon: '文', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/grammar',    color: '#10B981' }, // Emerald
+    { icon: '読', title: t.readingTitle,    desc: t.readingDesc,    path: '/reading',    color: '#EC4899' }, // Rose Pink
+    { icon: '💬', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: '#F97316' }, // Orange
+    { icon: '📊', title: t.statsTitle,      desc: t.statsDesc,      path: '/stats',      color: '#14B8A6' }, // Teal
+    { icon: '📚', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: '#3B82F6' }, // Bright Blue
   ]
 
   console.log(t.phraseAnalyzerTitle, t.phraseAnalyzerDesc)
