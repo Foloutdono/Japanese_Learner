@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from db import db_conn
 from auth import get_user_id
 from srs_instance import srs
-from backend.card_lookup import find_segments_in_text, attach_stats_to_segments
+from card_lookup import find_segments_in_text, attach_stats_to_segments
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

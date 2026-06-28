@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from db import db_conn
 from auth import get_user_id
 from srs_instance import srs
-from backend.card_lookup import (
+from card_lookup import (
     find_vocab_match, find_kanji_matches, serializable_entry, card_stats,
     VOCAB_STATUS_MODE, KANJI_STATUS_MODE,
 )
