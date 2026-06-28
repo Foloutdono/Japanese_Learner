@@ -175,6 +175,25 @@ const phraseAnalyzer = {
   status_due:          'À réviser',
 }
 
+// ── Reading ───────────────────────────────────────────────
+const reading = {
+  readingTitle:         'Entraînement à la lecture',
+  readingHiragana:      'Hiragana uniquement',
+  readingHiraganaDesc:  'Phrases écrites uniquement en hiragana',
+  readingKatakana:      'Katakana uniquement',
+  readingKatakanaDesc:  'Phrases écrites uniquement en katakana',
+  readingMixed:         'Tout',
+  readingMixedDesc:     'Japonais naturel avec kanji et kana',
+  readingFetchError:    "Impossible de charger une phrase. Veuillez réessayer.",
+  writeWhatYouSaw:      'Écrivez ce que vous avez vu, en romaji',
+  romajiPlaceholder:    'e.g. konnichiwa',
+  correct:              'Correct!',
+  incorrect:            'Pas tout à fait',
+  correctRomaji:        'Correct romaji',
+  yourAnswer:           'Votre réponse',
+  nextPhrase:           'Phrase suivante',
+}
+
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Rechercher kanji, kana, ou sens...',
@@ -252,5 +271,7 @@ export default {
   ...quiz,
   ...stats,
   ...dictionary,
+  ...phraseAnalyzer,
+  ...reading,
   ...decks,
 }
