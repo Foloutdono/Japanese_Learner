@@ -19,6 +19,8 @@ export default function HomeScreen() {
     { icon: '📚', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: '#6c5ce7' },
   ]
 
+  console.log(t.phraseAnalyzerTitle, t.phraseAnalyzerDesc)
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
