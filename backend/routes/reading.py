@@ -37,11 +37,25 @@ SYSTEM_PROMPT_TEMPLATE = """You are generating short Japanese reading-practice p
 Generate {count} DIFFERENT phrases. Vary their topic, vocabulary, and grammar pattern — none should be a close variant of another.
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
-{{"phrases": [{{"phrase": "...", "romaji": "..."}}]}}
+{{"phrases": [{{"phrase": "...", "romaji": "...", "translation": "..."}}]}}
 - The "phrases" array must contain exactly {count} entries.
 - Each "phrase" must be natural, grammatically correct, short (roughly 3-8 words), appropriate for JLPT {level}.
 - Each "romaji" is the exact, standard Hepburn romanization of its phrase: lowercase, words separated by single spaces, no punctuation.
+- Each "translation" is a natural translation of the phrase into {lang_name} (language code: {lang}).
 """
+
+# Best-effort code -> name mapping so the LLM gets an unambiguous instruction
+# even if it only recognizes ISO codes loosely. Add more as your app supports
+# more languages.
+LANG_NAMES = {
+    "en": "English",
+    "fr": "French",
+    "es": "Spanish",
+    "de": "German",
+    "ja": "Japanese",
+    "it": "Italian",
+    "pt": "Portuguese",
+}
 
 MIN_BATCH = 1
 MAX_BATCH = 10
@@ -56,7 +70,7 @@ class ResultPayload(BaseModel):
     answer: str
 
 
-def _call_llm_batch(level: str, phase: str, count: int) -> list[dict]:
+def _call_llm_batch(level: str, phase: str, count: int, lang: str) -> list[dict]:
     if not OPENROUTER_API_KEY:
         raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured")
 
@@ -64,7 +78,10 @@ def _call_llm_batch(level: str, phase: str, count: int) -> list[dict]:
     if not phase_instruction:
         raise HTTPException(status_code=400, detail="Unknown phase")
 
-    system_prompt = SYSTEM_PROMPT_TEMPLATE.format(level=level, phase_instruction=phase_instruction, count=count)
+    lang_name = LANG_NAMES.get(lang, lang)
+    system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
+        level=level, phase_instruction=phase_instruction, count=count, lang=lang, lang_name=lang_name,
+    )
 
     response = requests.post(
         OPENROUTER_URL,
@@ -129,9 +146,12 @@ def normalize_romaji(text: str) -> str:
 
 
 @router.get("/api/reading/batch")
-def get_reading_batch(level: str, phase: str, count: int = DEFAULT_BATCH, user_id: str = Depends(get_user_id)):
+def get_reading_batch(
+    level: str, phase: str, count: int = DEFAULT_BATCH, lang: str = "en",
+    user_id: str = Depends(get_user_id),
+):
     count = max(MIN_BATCH, min(MAX_BATCH, count))
-    items = _call_llm_batch(level, phase, count)
+    items = _call_llm_batch(level, phase, count, lang)
 
     return {
         "level": level,
@@ -140,6 +160,7 @@ def get_reading_batch(level: str, phase: str, count: int = DEFAULT_BATCH, user_i
             {
                 "phrase": item["phrase"],
                 "romaji": item["romaji"],
+                "translation": item.get("translation", ""),
                 "display_seconds": _display_seconds(item["phrase"]),
             }
             for item in items
