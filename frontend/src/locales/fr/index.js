@@ -194,6 +194,9 @@ const reading = {
   yourAnswer:           'Votre réponse',
   nextPhrase:           'Phrase suivante',
   translation:          'Traduction',
+  didYouGetIt:          'L\'avez-vous eu juste ?',
+  gradeCorrect:         'J\'ai eu juste',
+  gradeIncorrect:       'Je n\'ai pas eu juste',
 }
 
 // ── Dictionary ────────────────────────────────────────────

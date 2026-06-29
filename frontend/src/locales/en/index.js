@@ -194,6 +194,9 @@ const reading = {
   yourAnswer:           'Your answer',
   nextPhrase:           'Next phrase',
   translation:          'Translation',
+  didYouGetIt:          'Did you get it right?',
+  gradeCorrect:         'I got it right',
+  gradeIncorrect:       'I got it wrong',
 }
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
