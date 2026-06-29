@@ -13,6 +13,7 @@ from db import db_conn
 from auth import get_user_id
 from srs_instance import srs
 from card_lookup import find_segments_in_text, attach_stats_to_segments
+from kanji_data import get_kanji_string
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -46,6 +47,14 @@ SYSTEM_PROMPT_TEMPLATE = """You are generating short Japanese reading-practice p
 
 {phase_instruction}
 
+When writing phrases:
+
+- You MAY use hiragana, katakana and punctuation freely.
+- If you use any kanji, every kanji MUST belong to this list:
+{allowed_kanji}
+- Never use a kanji outside this list.
+- If a word normally contains a disallowed kanji, replace that kanji with its hiragana reading instead.
+
 Generate {count} DIFFERENT phrases. Vary their topic, vocabulary, and grammar pattern — none should be a close variant of another.
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
@@ -67,6 +76,14 @@ LANG_NAMES = {
     "ja": "Japanese",
     "it": "Italian",
     "pt": "Portuguese",
+}
+
+LEVEL_HIERARCHY = {
+    "N5": ("N5",),
+    "N4": ("N5", "N4"),
+    "N3": ("N5", "N4", "N3"),
+    "N2": ("N5", "N4", "N3", "N2"),
+    "N1": ("N5", "N4", "N3", "N2", "N1"),
 }
 
 MIN_BATCH = 1
@@ -92,8 +109,20 @@ def _call_llm_batch(level: str, phase: str, count: int, lang: str) -> list[dict]
         raise HTTPException(status_code=400, detail="Unknown phase")
 
     lang_name = LANG_NAMES.get(lang, lang)
+    
+    allowed_levels = LEVEL_HIERARCHY.get(level)
+    if not allowed_levels:
+        raise HTTPException(status_code=400, detail="Unknown JLPT level")
+
+    allowed_kanji = get_kanji_string(allowed_levels)
+
     system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
-        level=level, phase_instruction=phase_instruction, count=count, lang=lang, lang_name=lang_name,
+        level=level,
+        phase_instruction=phase_instruction,
+        allowed_kanji=allowed_kanji,
+        count=count,
+        lang=lang,
+        lang_name=lang_name,
     )
 
     response = requests.post(
