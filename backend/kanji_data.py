@@ -2232,6 +2232,19 @@ KANJI_BY_LEVEL = {
     "N1": KANJI_N1,
 }
 
+def get_kanji_string(levels=("N5", "N4", "N3", "N2", "N1")) -> str:
+    seen = set()
+    result = []
+
+    for level in levels:
+        for entry in KANJI_BY_LEVEL.get(level, []):
+            kanji = entry["kanji"]
+            if kanji not in seen:
+                seen.add(kanji)
+                result.append(kanji)
+
+    return "".join(result)
+
 def kanji_to_id(kanji_entry: dict, level: str) -> str:
     return f"kanji_{level}_{kanji_entry['kanji']}"
 
