@@ -171,6 +171,17 @@ export default function ReadingScreen({ session }) {
 
   function submitAnswer() {
     if (!answer.trim() || stage !== 'answering') return
+    // No correctness check here anymore — auto-comparing romaji proved too
+    // brittle. Reveal the answer and let the user judge for themselves.
+    setFeedback({ correct: null, romaji: data.romaji })
+    setStage('feedback')
+  }
+
+  function gradeAnswer(isCorrect) {
+    if (feedback?.correct !== null) return // already graded, ignore repeat clicks
+
+    setFeedback(f => ({ ...f, correct: isCorrect }))
+    setScore(s => ({ correct: s.correct + (isCorrect ? 1 : 0), total: s.total + 1 }))
 
     apiFetch('/api/reading/result', session, {
       method: 'POST',
@@ -179,19 +190,11 @@ export default function ReadingScreen({ session }) {
         phrase: data.phrase,
         romaji: data.romaji,
         answer: answer.trim(),
+        correct: isCorrect,
       }),
+    }).catch(() => {
+      // Logging failure shouldn't block the user from continuing.
     })
-      .then(r => r.json())
-      .then(({ correct, romaji }) => {
-        setFeedback({ correct, romaji })
-        setStage('feedback')
-        setScore(s => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }))
-      })
-      .catch(() => {
-        // Network hiccup: still let the user move on rather than getting stuck.
-        setFeedback({ correct: null, romaji: data.romaji })
-        setStage('feedback')
-      })
   }
 
   function retry() {
@@ -341,10 +344,12 @@ export default function ReadingScreen({ session }) {
               </div>
               <div style={{
                 fontSize: 18,
-                color: feedback.correct ? 'var(--success)' : 'var(--danger)',
+                color: feedback.correct === null ? 'var(--text-secondary)' : (feedback.correct ? 'var(--success)' : 'var(--danger)'),
                 fontWeight: 'bold',
               }}>
-                {feedback.correct ? (t.correct || 'Correct!') : (t.incorrect || 'Not quite')}
+                {feedback.correct === null
+                  ? (t.didYouGetIt || 'Did you get it right?')
+                  : (feedback.correct ? (t.correct || 'Correct!') : (t.incorrect || 'Not quite'))}
               </div>
               <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginTop: 8 }}>
                 {t.correctRomaji || 'Correct romaji'}: <strong>{feedback.romaji}</strong>
@@ -354,19 +359,34 @@ export default function ReadingScreen({ session }) {
                   {t.translation || 'Translation'}: {data.translation}
                 </div>
               )}
-              {!feedback.correct && (
-                <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 4 }}>
-                  {t.yourAnswer || 'Your answer'}: {answer}
-                </div>
-              )}
+              <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 4 }}>
+                {t.yourAnswer || 'Your answer'}: {answer}
+              </div>
             </PromptCard>
             <div style={{ marginTop: 16 }}>
-              <button
-                onClick={next}
-                style={{ background: 'var(--accent)', color: '#fff', padding: '10px 28px', fontSize: 15 }}
-              >
-                {t.nextPhrase || 'Next phrase'}
-              </button>
+              {feedback.correct === null ? (
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                  <button
+                    onClick={() => gradeAnswer(false)}
+                    style={{ background: 'var(--danger)', color: '#fff', padding: '10px 24px', fontSize: 15 }}
+                  >
+                    {t.gradeIncorrect || "I got it wrong"}
+                  </button>
+                  <button
+                    onClick={() => gradeAnswer(true)}
+                    style={{ background: 'var(--success)', color: '#fff', padding: '10px 24px', fontSize: 15 }}
+                  >
+                    {t.gradeCorrect || "I got it right"}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={next}
+                  style={{ background: 'var(--accent)', color: '#fff', padding: '10px 28px', fontSize: 15 }}
+                >
+                  {t.nextPhrase || 'Next phrase'}
+                </button>
+              )}
             </div>
           </>
         )}

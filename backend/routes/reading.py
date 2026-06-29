@@ -80,6 +80,7 @@ class ResultPayload(BaseModel):
     phrase: str
     romaji: str
     answer: str
+    correct: bool
 
 
 def _call_llm_batch(level: str, phase: str, count: int, lang: str) -> list[dict]:
@@ -136,20 +137,20 @@ def _parse_llm_json(content: str) -> dict:
     except json.JSONDecodeError:
         logger.error("Failed to parse LLM response as JSON: %r", content)
         raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
-
-
+ 
+ 
 def _display_seconds(phrase: str) -> float:
     seconds = BASE_SECONDS + SECONDS_PER_CHAR * len(phrase)
     return max(MIN_DISPLAY_SECONDS, min(MAX_DISPLAY_SECONDS, round(seconds, 1)))
-
-
+ 
+ 
 def hiragana_to_romaji(reading: str) -> str:
     """Deterministic kana -> Hepburn romaji conversion (no kanji ambiguity
     left to resolve at this point, so this is purely mechanical)."""
     converted = _kakasi.convert(reading)
     return " ".join(item["hepburn"] for item in converted if item["hepburn"])
-
-
+ 
+ 
 def normalize_romaji(text: str) -> str:
     """
     Loose normalization so reasonable romanization variants still count as
@@ -162,8 +163,8 @@ def normalize_romaji(text: str) -> str:
     text = "".join(c for c in text if not unicodedata.combining(c))
     text = re.sub(r"[^a-z]", "", text)
     return text
-
-
+ 
+ 
 @router.get("/api/reading/batch")
 def get_reading_batch(
     level: str, phase: str, count: int = DEFAULT_BATCH, lang: str = "en",
@@ -172,7 +173,7 @@ def get_reading_batch(
     count = max(MIN_BATCH, min(MAX_BATCH, count))
     items = _call_llm_batch(level, phase, count, lang)
     states = srs.get_user_states(user_id)
-
+ 
     phrases = []
     for item in items:
         phrase = item["phrase"]
@@ -184,14 +185,15 @@ def get_reading_batch(
             "display_seconds": _display_seconds(phrase),
             "segments": segments,
         })
-
+ 
     return {"level": level, "phase": phase, "phrases": phrases}
-
-
+ 
+ 
 @router.post("/api/reading/result")
 def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_id)):
-    correct = normalize_romaji(payload.answer) == normalize_romaji(payload.romaji)
-
+    # Correctness is now self-assessed by the user after seeing the reveal
+    # (romaji auto-matching was too brittle — see normalize_romaji's
+    # docstring; it's kept below only as an optional sanity-check helper).
     conn = db_conn()
     try:
         with conn.cursor() as cur:
@@ -200,15 +202,15 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
                 INSERT INTO reading_log(user_id, level, phase, phrase, romaji, answer, correct)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, payload.level, payload.phase, payload.phrase, payload.romaji, payload.answer, correct),
+                (user_id, payload.level, payload.phase, payload.phrase, payload.romaji, payload.answer, payload.correct),
             )
         conn.commit()
     finally:
         conn.close()
-
-    return {"correct": correct, "romaji": payload.romaji}
-
-
+ 
+    return {"correct": payload.correct, "romaji": payload.romaji}
+ 
+ 
 @router.get("/api/reading/history")
 def get_reading_history(user_id: str = Depends(get_user_id), limit: int = 50):
     conn = db_conn()
@@ -227,7 +229,7 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = 50):
             rows = cur.fetchall()
     finally:
         conn.close()
-
+ 
     return [
         {
             "level": level, "phase": phase, "phrase": phrase, "romaji": romaji,
