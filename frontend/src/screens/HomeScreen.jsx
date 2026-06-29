@@ -18,9 +18,7 @@ export default function HomeScreen() {
     { icon: '統計', title: t.statsTitle,      desc: t.statsDesc,      path: '/stats',      color: '#14B8A6' },
     { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: '#3B82F6' },
   ]
-
-  console.log(t.phraseAnalyzerTitle, t.phraseAnalyzerDesc)
-
+  
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 

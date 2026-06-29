@@ -19,8 +19,18 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-3.5-haiku")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openrouter/owl-alpha")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+MODELS = [
+    OPENROUTER_MODEL,                     # Primary
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "google/gemma-4-31b-it:free",
+    "openrouter/owl-alpha",
+]
+
+RETRY_STATUS = {429, 500, 502, 503, 504}
 
 SYSTEM_PROMPT = """You are a Japanese language tutor. Given a Japanese phrase, segment it into words and respond with ONLY a single JSON object (no markdown fences, no commentary) matching exactly this schema:
 
@@ -46,30 +56,70 @@ class PhraseRequest(BaseModel):
 
 def _call_llm(phrase: str) -> dict:
     if not OPENROUTER_API_KEY:
-        raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured")
+        raise HTTPException(
+            status_code=500,
+            detail="OPENROUTER_API_KEY is not configured",
+        )
 
-    response = requests.post(
-        OPENROUTER_URL,
-        headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": OPENROUTER_MODEL,
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": phrase},
-            ],
-        },
-        timeout=30,
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    last_error = None
+
+    for model in MODELS:
+        for attempt in range(3):
+            try:
+                response = requests.post(
+                    OPENROUTER_URL,
+                    headers=headers,
+                    json={
+                        "model": model,
+                        "messages": [
+                            {"role": "system", "content": SYSTEM_PROMPT},
+                            {"role": "user", "content": phrase},
+                        ],
+                    },
+                    timeout=30,
+                )
+
+                if response.ok:
+                    logger.info("OpenRouter succeeded with %s", model)
+                    content = response.json()["choices"][0]["message"]["content"]
+                    return _parse_llm_json(content)
+
+                logger.warning(
+                    "OpenRouter failed (%s) model=%s attempt=%d body=%s",
+                    response.status_code,
+                    model,
+                    attempt + 1,
+                    response.text,
+                )
+
+                last_error = response
+
+                # Retry only temporary failures
+                if response.status_code in RETRY_STATUS:
+                    time.sleep(2 ** attempt)   # 1s, 2s, 4s
+                    continue
+
+                # Permanent error -> next model
+                break
+
+            except requests.RequestException as e:
+                logger.exception("Network error with model %s", model)
+                last_error = e
+                time.sleep(2 ** attempt)
+
+        logger.info("Falling back to next model...")
+
+    logger.error("All OpenRouter models failed.")
+
+    raise HTTPException(
+        status_code=503,
+        detail="The AI service is temporarily unavailable. Please try again in a few moments.",
     )
-
-    if not response.ok:
-        logger.error("OpenRouter call failed: status=%s body=%s", response.status_code, response.text)
-        raise HTTPException(status_code=502, detail="LLM request failed")
-
-    content = response.json()["choices"][0]["message"]["content"]
-    return _parse_llm_json(content)
 
 
 def _parse_llm_json(content: str) -> dict:
