@@ -16,6 +16,7 @@ import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
 import PhraseAnalyzerScreen from './screens/PhraseAnalyzerScreen'
 import ReadingScreen from './screens/ReadingScreen'
+import ReadingComprehensionScreen from './screens/ReadingComprehensionScreen'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="/grammar"              element={<GrammarScreen session={session} />} />
           <Route path="/phrase-analyzer"      element={<PhraseAnalyzerScreen session={session} />} />
           <Route path="/reading"              element={<ReadingScreen session={session} />} />
+          <Route path="/reading-comprehension" element={<ReadingComprehensionScreen session={session} />} />
         </Routes>
       </BrowserRouter>
     </LangProvider>

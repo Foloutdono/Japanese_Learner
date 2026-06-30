@@ -71,3 +71,19 @@ CREATE TABLE reading_log (
 
 CREATE INDEX idx_reading_log_user
 ON reading_log(user_id, created_at DESC);
+
+CREATE TABLE comprehension_log (
+    id BIGSERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    level TEXT NOT NULL,
+    text TEXT NOT NULL,
+    translation TEXT NOT NULL,
+    questions JSONB NOT NULL,
+    answers JSONB NOT NULL,
+    score INTEGER NOT NULL,
+    total INTEGER NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_comprehension_log_user
+ON comprehension_log(user_id, created_at DESC);
