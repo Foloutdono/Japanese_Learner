@@ -276,23 +276,31 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = 50):
 
 # Text length and question count scale with JLPT level difficulty.
 COMPREHENSION_SPECS = {
-    "N5": {"chars": "50-80",   "questions": 3},
-    "N4": {"chars": "80-130",  "questions": 3},
-    "N3": {"chars": "130-200", "questions": 4},
-    "N2": {"chars": "200-280", "questions": 5},
-    "N1": {"chars": "280-380", "questions": 5},
+    "N5": {"chars": "150-220",  "questions": 6},
+    "N4": {"chars": "220-320",  "questions": 7},
+    "N3": {"chars": "320-450",  "questions": 8},
+    "N2": {"chars": "450-600",  "questions": 9},
+    "N1": {"chars": "600-800",  "questions": 10},
 }
-DEFAULT_COMPREHENSION_SPEC = {"chars": "100-160", "questions": 4}
+DEFAULT_COMPREHENSION_SPEC = {"chars": "300-400", "questions": 8}
 
-# Default reading window in seconds; users can stop early.
-DEFAULT_READ_SECONDS = 420  # 7 minutes
+# Reading window in seconds, scaled per level alongside text length; users
+# can stop early regardless.
+READ_SECONDS_BY_LEVEL = {
+    "N5": 240,   # 4 min
+    "N4": 300,   # 5 min
+    "N3": 420,   # 7 min
+    "N2": 540,   # 9 min
+    "N1": 600,   # 10 min
+}
+DEFAULT_READ_SECONDS = 420
 
 # Same allowed-kanji restriction as the phrase-reading mode (see
 # SYSTEM_PROMPT_TEMPLATE above) — a comprehension text full of kanji the
 # user has never studied defeats the point of leveling it by JLPT level.
 COMPREHENSION_PROMPT_TEMPLATE = """You are creating a Japanese reading-comprehension exercise for a learner at JLPT level {level}.
 
-Write a short, self-contained Japanese text ({chars} characters) using vocabulary and grammar appropriate for JLPT {level}. Then write {questions} multiple-choice questions about the text to test comprehension.
+Write a self-contained Japanese text ({chars} characters) using vocabulary and grammar appropriate for JLPT {level}. Then write {questions} multiple-choice questions ABOUT THE TEXT, mixing different question types so the exercise tests more than just plot recall.
 
 When writing the text:
 
@@ -302,12 +310,19 @@ When writing the text:
 - Never use a kanji outside this list.
 - If a word normally contains a disallowed kanji, replace that kanji with its hiragana reading instead.
 
+Question types to mix across the {questions} questions (use a good variety — don't make them all "comprehension"):
+- "comprehension": tests understanding of what happened, who/what/when/where, or the main idea of a specific passage in the text.
+- "vocabulary": asks what a specific word or kanji FROM THE TEXT means (quote the exact word/kanji from the text in the question).
+- "grammar": asks about a grammar point, particle, or verb form used in a specific sentence from the text (quote the relevant sentence fragment).
+- "inference": asks the learner to infer something not stated directly (the author's intent, a character's feeling, what likely happens next).
+
 Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
 {{
   "text": "...",
   "translation": "...",
   "questions": [
     {{
+      "type": "comprehension",
       "question": "...",
       "options": ["...", "...", "...", "..."],
       "correct": 0
@@ -316,14 +331,17 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) matching exa
 }}
 
 Rules:
-- "text" must be natural, coherent Japanese with a clear topic (a short story, announcement, letter, description, etc).
+- "text" must be natural, coherent Japanese with a clear topic (a short story, announcement, letter, description, etc), long enough to support questions of every type above.
 - "translation" is a faithful {lang_name} translation of "text".
-- Each "question" is written in {lang_name} and tests genuine comprehension (not just vocabulary lookup).
+- "type" must be exactly one of: "comprehension", "vocabulary", "grammar", "inference".
+- Each "question" is written in {lang_name} (quoting the relevant Japanese word/phrase from the text in italics-style quotes where relevant) and must be answerable using only the text provided.
 - "options" must contain exactly 4 choices in {lang_name}. All options must be plausible — avoid obviously wrong distractors.
 - "correct" is the 0-based index of the only correct option.
-- Generate exactly {questions} questions.
+- Generate exactly {questions} questions, with at least one of each type if {questions} >= 4, and a roughly even mix overall.
 """
 
+
+VALID_QUESTION_TYPES = {"comprehension", "vocabulary", "grammar", "inference"}
 
 class ComprehensionAnswersPayload(BaseModel):
     level: str
@@ -387,6 +405,10 @@ def _call_llm_comprehension(level: str, lang: str) -> dict:
             raise HTTPException(status_code=502, detail=f"Question {i} missing required fields")
         if len(q["options"]) != 4:
             raise HTTPException(status_code=502, detail=f"Question {i} must have exactly 4 options")
+        # Be lenient on "type" — default rather than reject, since it's
+        # metadata for display, not something correctness depends on.
+        if q.get("type") not in VALID_QUESTION_TYPES:
+            q["type"] = "comprehension"
 
     return data
 
@@ -400,7 +422,7 @@ def get_comprehension_text(level: str, lang: str = "en", user_id: str = Depends(
         "text": data["text"],
         "translation": data["translation"],
         "questions": data["questions"],
-        "read_seconds": DEFAULT_READ_SECONDS,
+        "read_seconds": READ_SECONDS_BY_LEVEL.get(level, DEFAULT_READ_SECONDS),
         "question_count": spec["questions"],
     }
 
@@ -446,6 +468,7 @@ def post_comprehension_result(payload: ComprehensionAnswersPayload, user_id: str
         "created_at": created_at.isoformat(),
         "results": [
             {
+                "type": q.get("type", "comprehension"),
                 "question": q["question"],
                 "options": q["options"],
                 "correct": q["correct"],
