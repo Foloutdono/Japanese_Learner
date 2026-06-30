@@ -182,3 +182,52 @@ export function Loading() {
     </div>
   )
 }
+
+// ── Question type badge ─────────────────────────────────────────
+export function QuestionTypeBadge({ type }) {
+  const { t } = useLang()
+
+  const TYPES = {
+    comprehension: {
+      label: t.questionTypeComprehension ?? 'Comprehension',
+      color: '#3B82F6',
+    },
+    vocabulary: {
+      label: t.questionTypeVocabulary ?? 'Vocabulary',
+      color: '#10B981',
+    },
+    grammar: {
+      label: t.questionTypeGrammar ?? 'Grammar',
+      color: '#F59E0B',
+    },
+    inference: {
+      label: t.questionTypeInference ?? 'Inference',
+      color: '#8B5CF6',
+    },
+  }
+
+  const { label, color } = TYPES[type] ?? {
+    label: type,
+    color: 'var(--text-secondary)',
+  }
+
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '4px 10px',
+        borderRadius: 999,
+        background: color,
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 700,
+        letterSpacing: '0.03em',
+        textTransform: 'uppercase',
+        marginBottom: 12,
+      }}
+    >
+      {label}
+    </span>
+  )
+}
