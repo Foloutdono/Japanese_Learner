@@ -22,6 +22,14 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-3.5-haiku")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
+MODELS = [
+    OPENROUTER_MODEL,                     # Primary
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "google/gemma-4-31b-it:free",
+    "openrouter/owl-alpha",
+]
+
 _kakasi = pykakasi.kakasi()
 
 PHASES = {
@@ -129,27 +137,10 @@ def _call_llm_batch(level: str, phase: str, count: int, lang: str) -> list[dict]
         lang_name=lang_name,
     )
 
-    response = requests.post(
-        OPENROUTER_URL,
-        headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": OPENROUTER_MODEL,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Generate {count} phrases."},
-            ],
-        },
-        timeout=45,
-    )
-
-    if not response.ok:
-        logger.error("OpenRouter call failed: status=%s body=%s", response.status_code, response.text)
-        raise HTTPException(status_code=502, detail="LLM request failed")
-
-    content = response.json()["choices"][0]["message"]["content"]
+    content = _chat([
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": f"Generate {count} phrases."},
+    ])
     data = _parse_llm_json(content)
 
     phrases = data.get("phrases")
@@ -161,6 +152,55 @@ def _call_llm_batch(level: str, phase: str, count: int, lang: str) -> list[dict]
         raise HTTPException(status_code=502, detail="LLM response missing required fields")
 
     return valid
+
+def _chat(messages, timeout=60):
+    last_error = None
+    SESSION = requests.Session()
+
+    for model in MODELS:
+        for attempt in range(2):
+            try:
+                response = SESSION.post(
+                    OPENROUTER_URL,
+                    headers={
+                        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": model,
+                        "messages": messages,
+                    },
+                    timeout=timeout,
+                )
+            except requests.RequestException as e:
+                logger.warning("%s network error: %s", model, e)
+                continue
+
+            if response.ok:
+                logger.info("Using model %s", model)
+                try:
+                    return response.json()["choices"][0]["message"]["content"]
+                except (KeyError, IndexError):
+                    logger.error(response.text)
+                continue
+
+            logger.warning(
+                "%s failed (%s): %s",
+                model,
+                response.status_code,
+                response.text[:300],
+            )
+
+            last_error = response
+
+            # only try another model for temporary failures
+            if response.status_code not in (429, 500, 502, 503, 504):
+                break
+
+    raise HTTPException(
+        503,
+        detail=f"All LLM providers failed. Last error: {response.status_code}"
+    )
 
 
 def _parse_llm_json(content: str) -> dict:
@@ -305,9 +345,9 @@ Write a self-contained Japanese text ({chars} characters) using vocabulary and g
 When writing the text:
 
 - You MAY use hiragana, katakana and punctuation freely.
-- If you use any kanji, every kanji MUST belong to this list:
+- If you use any kanji, you may use only the following kanji::
 {allowed_kanji}
-- Never use a kanji outside this list.
+- Any other kanji outside this list is forbidden.
 - If a word normally contains a disallowed kanji, replace that kanji with its hiragana reading instead.
 
 Question types to mix across the {questions} questions (use a good variety — don't make them all "comprehension"):
@@ -368,27 +408,10 @@ def _call_llm_comprehension(level: str, lang: str) -> dict:
         lang_name=lang_name,
     )
 
-    response = requests.post(
-        OPENROUTER_URL,
-        headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": OPENROUTER_MODEL,
-            "messages": [
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": "Generate the reading comprehension exercise."},
-            ],
-        },
-        timeout=60,
-    )
-
-    if not response.ok:
-        logger.error("OpenRouter comprehension call failed: status=%s body=%s", response.status_code, response.text)
-        raise HTTPException(status_code=502, detail="LLM request failed")
-
-    content = response.json()["choices"][0]["message"]["content"]
+    content = _chat([
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": "Generate the reading comprehension exercise."},
+    ])
     cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
     try:
         data = json.loads(cleaned)
