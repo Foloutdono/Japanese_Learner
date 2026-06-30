@@ -211,6 +211,10 @@ const readingComprehension = {
   correctAnswer:              'Réponse correcte',
   gradeCorrect:               'J\'ai eu juste',
   gradeIncorrect:             'Je n\'ai pas eu juste',
+  questionTypeComprehension: "Compréhension",
+  questionTypeVocabulary: "Vocabulaire",
+  questionTypeGrammar: "Grammaire",
+  questionTypeInference: "Inférence",
 }
 
 // ── Dictionary ────────────────────────────────────────────
