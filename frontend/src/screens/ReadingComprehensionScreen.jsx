@@ -6,7 +6,7 @@ import { TopBar } from '../components/TopBar'
 import LevelSelector from '../components/LevelSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
-import { Loading } from '../components/QuizComponents'
+import { Loading, QuestionTypeBadge  } from '../components/QuizComponents'
 
 // 'selecting' | 'loading' | 'reading' | 'questions' | 'submitting' | 'results' | 'error'
 
@@ -247,7 +247,7 @@ export default function ReadingComprehensionScreen({ session }) {
               </div>
 
               <PromptCard>
-                <QuestionTypeBadge type={q.type} t={t} />
+                <QuestionTypeBadge type={q.type}/>
                 <div style={{ fontSize: 17, fontWeight: 'bold', lineHeight: 1.6, marginTop: 10, marginBottom: 8 }}>
                   {q.question}
                 </div>
