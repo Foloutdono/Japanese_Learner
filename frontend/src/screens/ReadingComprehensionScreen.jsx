@@ -247,7 +247,8 @@ export default function ReadingComprehensionScreen({ session }) {
               </div>
 
               <PromptCard>
-                <div style={{ fontSize: 17, fontWeight: 'bold', lineHeight: 1.6, marginBottom: 8 }}>
+                <QuestionTypeBadge type={q.type} t={t} />
+                <div style={{ fontSize: 17, fontWeight: 'bold', lineHeight: 1.6, marginTop: 10, marginBottom: 8 }}>
                   {q.question}
                 </div>
               </PromptCard>
