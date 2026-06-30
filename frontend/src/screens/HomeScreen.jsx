@@ -17,6 +17,7 @@ export default function HomeScreen() {
     { icon: '解析', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: '#F97316' },
     { icon: '統計', title: t.statsTitle,      desc: t.statsDesc,      path: '/stats',      color: '#14B8A6' },
     { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: '#3B82F6' },
+    { icon: '理解', title: t.readingComprehensionTitle, desc: t.readingComprehensionDesc, path: '/reading-comprehension', color: '#8B5CF6' },
   ]
   
   return (

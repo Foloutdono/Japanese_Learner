@@ -78,6 +78,8 @@ LANG_NAMES = {
     "pt": "Portuguese",
 }
 
+# A level's allowed kanji pool includes every level at or below it, since
+# JLPT levels are cumulative (someone studying N3 already knows N5/N4 kanji).
 LEVEL_HIERARCHY = {
     "N5": ("N5",),
     "N4": ("N5", "N4"),
@@ -100,6 +102,13 @@ class ResultPayload(BaseModel):
     correct: bool
 
 
+def _allowed_kanji_for_level(level: str) -> str:
+    allowed_levels = LEVEL_HIERARCHY.get(level)
+    if not allowed_levels:
+        raise HTTPException(status_code=400, detail="Unknown JLPT level")
+    return get_kanji_string(allowed_levels)
+
+
 def _call_llm_batch(level: str, phase: str, count: int, lang: str) -> list[dict]:
     if not OPENROUTER_API_KEY:
         raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured")
@@ -109,12 +118,7 @@ def _call_llm_batch(level: str, phase: str, count: int, lang: str) -> list[dict]
         raise HTTPException(status_code=400, detail="Unknown phase")
 
     lang_name = LANG_NAMES.get(lang, lang)
-    
-    allowed_levels = LEVEL_HIERARCHY.get(level)
-    if not allowed_levels:
-        raise HTTPException(status_code=400, detail="Unknown JLPT level")
-
-    allowed_kanji = get_kanji_string(allowed_levels)
+    allowed_kanji = _allowed_kanji_for_level(level)
 
     system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
         level=level,
@@ -166,20 +170,20 @@ def _parse_llm_json(content: str) -> dict:
     except json.JSONDecodeError:
         logger.error("Failed to parse LLM response as JSON: %r", content)
         raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
- 
- 
+
+
 def _display_seconds(phrase: str) -> float:
     seconds = BASE_SECONDS + SECONDS_PER_CHAR * len(phrase)
     return max(MIN_DISPLAY_SECONDS, min(MAX_DISPLAY_SECONDS, round(seconds, 1)))
- 
- 
+
+
 def hiragana_to_romaji(reading: str) -> str:
     """Deterministic kana -> Hepburn romaji conversion (no kanji ambiguity
     left to resolve at this point, so this is purely mechanical)."""
     converted = _kakasi.convert(reading)
     return " ".join(item["hepburn"] for item in converted if item["hepburn"])
- 
- 
+
+
 def normalize_romaji(text: str) -> str:
     """
     Loose normalization so reasonable romanization variants still count as
@@ -192,8 +196,8 @@ def normalize_romaji(text: str) -> str:
     text = "".join(c for c in text if not unicodedata.combining(c))
     text = re.sub(r"[^a-z]", "", text)
     return text
- 
- 
+
+
 @router.get("/api/reading/batch")
 def get_reading_batch(
     level: str, phase: str, count: int = DEFAULT_BATCH, lang: str = "en",
@@ -202,7 +206,7 @@ def get_reading_batch(
     count = max(MIN_BATCH, min(MAX_BATCH, count))
     items = _call_llm_batch(level, phase, count, lang)
     states = srs.get_user_states(user_id)
- 
+
     phrases = []
     for item in items:
         phrase = item["phrase"]
@@ -214,15 +218,15 @@ def get_reading_batch(
             "display_seconds": _display_seconds(phrase),
             "segments": segments,
         })
- 
+
     return {"level": level, "phase": phase, "phrases": phrases}
- 
- 
+
+
 @router.post("/api/reading/result")
 def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_id)):
     # Correctness is now self-assessed by the user after seeing the reveal
     # (romaji auto-matching was too brittle — see normalize_romaji's
-    # docstring; it's kept below only as an optional sanity-check helper).
+    # docstring; it's kept above only as an optional sanity-check helper).
     conn = db_conn()
     try:
         with conn.cursor() as cur:
@@ -236,10 +240,10 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
         conn.commit()
     finally:
         conn.close()
- 
+
     return {"correct": payload.correct, "romaji": payload.romaji}
- 
- 
+
+
 @router.get("/api/reading/history")
 def get_reading_history(user_id: str = Depends(get_user_id), limit: int = 50):
     conn = db_conn()
@@ -258,7 +262,7 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = 50):
             rows = cur.fetchall()
     finally:
         conn.close()
- 
+
     return [
         {
             "level": level, "phase": phase, "phrase": phrase, "romaji": romaji,
@@ -266,3 +270,188 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = 50):
         }
         for level, phase, phrase, romaji, answer, correct, created_at in rows
     ]
+
+
+# ── Reading Comprehension ─────────────────────────────────────────────────────
+
+# Text length and question count scale with JLPT level difficulty.
+COMPREHENSION_SPECS = {
+    "N5": {"chars": "50-80",   "questions": 3},
+    "N4": {"chars": "80-130",  "questions": 3},
+    "N3": {"chars": "130-200", "questions": 4},
+    "N2": {"chars": "200-280", "questions": 5},
+    "N1": {"chars": "280-380", "questions": 5},
+}
+DEFAULT_COMPREHENSION_SPEC = {"chars": "100-160", "questions": 4}
+
+# Default reading window in seconds; users can stop early.
+DEFAULT_READ_SECONDS = 420  # 7 minutes
+
+# Same allowed-kanji restriction as the phrase-reading mode (see
+# SYSTEM_PROMPT_TEMPLATE above) — a comprehension text full of kanji the
+# user has never studied defeats the point of leveling it by JLPT level.
+COMPREHENSION_PROMPT_TEMPLATE = """You are creating a Japanese reading-comprehension exercise for a learner at JLPT level {level}.
+
+Write a short, self-contained Japanese text ({chars} characters) using vocabulary and grammar appropriate for JLPT {level}. Then write {questions} multiple-choice questions about the text to test comprehension.
+
+When writing the text:
+
+- You MAY use hiragana, katakana and punctuation freely.
+- If you use any kanji, every kanji MUST belong to this list:
+{allowed_kanji}
+- Never use a kanji outside this list.
+- If a word normally contains a disallowed kanji, replace that kanji with its hiragana reading instead.
+
+Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
+{{
+  "text": "...",
+  "translation": "...",
+  "questions": [
+    {{
+      "question": "...",
+      "options": ["...", "...", "...", "..."],
+      "correct": 0
+    }}
+  ]
+}}
+
+Rules:
+- "text" must be natural, coherent Japanese with a clear topic (a short story, announcement, letter, description, etc).
+- "translation" is a faithful {lang_name} translation of "text".
+- Each "question" is written in {lang_name} and tests genuine comprehension (not just vocabulary lookup).
+- "options" must contain exactly 4 choices in {lang_name}. All options must be plausible — avoid obviously wrong distractors.
+- "correct" is the 0-based index of the only correct option.
+- Generate exactly {questions} questions.
+"""
+
+
+class ComprehensionAnswersPayload(BaseModel):
+    level: str
+    text: str
+    translation: str
+    questions: list[dict]
+    answers: list[int]  # user's chosen option index per question, in order
+
+
+def _call_llm_comprehension(level: str, lang: str) -> dict:
+    if not OPENROUTER_API_KEY:
+        raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured")
+
+    spec = COMPREHENSION_SPECS.get(level, DEFAULT_COMPREHENSION_SPEC)
+    lang_name = LANG_NAMES.get(lang, lang)
+    allowed_kanji = _allowed_kanji_for_level(level)
+
+    prompt = COMPREHENSION_PROMPT_TEMPLATE.format(
+        level=level,
+        chars=spec["chars"],
+        questions=spec["questions"],
+        allowed_kanji=allowed_kanji,
+        lang=lang,
+        lang_name=lang_name,
+    )
+
+    response = requests.post(
+        OPENROUTER_URL,
+        headers={
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": OPENROUTER_MODEL,
+            "messages": [
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": "Generate the reading comprehension exercise."},
+            ],
+        },
+        timeout=60,
+    )
+
+    if not response.ok:
+        logger.error("OpenRouter comprehension call failed: status=%s body=%s", response.status_code, response.text)
+        raise HTTPException(status_code=502, detail="LLM request failed")
+
+    content = response.json()["choices"][0]["message"]["content"]
+    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        logger.error("Failed to parse comprehension LLM response: %r", content)
+        raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
+
+    for field in ("text", "translation", "questions"):
+        if field not in data:
+            raise HTTPException(status_code=502, detail=f"LLM response missing field: {field}")
+
+    for i, q in enumerate(data["questions"]):
+        if not all(k in q for k in ("question", "options", "correct")):
+            raise HTTPException(status_code=502, detail=f"Question {i} missing required fields")
+        if len(q["options"]) != 4:
+            raise HTTPException(status_code=502, detail=f"Question {i} must have exactly 4 options")
+
+    return data
+
+
+@router.get("/api/reading/comprehension")
+def get_comprehension_text(level: str, lang: str = "en", user_id: str = Depends(get_user_id)):
+    data = _call_llm_comprehension(level, lang)
+    spec = COMPREHENSION_SPECS.get(level, DEFAULT_COMPREHENSION_SPEC)
+    return {
+        "level": level,
+        "text": data["text"],
+        "translation": data["translation"],
+        "questions": data["questions"],
+        "read_seconds": DEFAULT_READ_SECONDS,
+        "question_count": spec["questions"],
+    }
+
+
+@router.post("/api/reading/comprehension/result")
+def post_comprehension_result(payload: ComprehensionAnswersPayload, user_id: str = Depends(get_user_id)):
+    questions = payload.questions
+    answers = payload.answers
+
+    if len(answers) != len(questions):
+        raise HTTPException(status_code=400, detail="Answer count does not match question count")
+
+    score = sum(
+        1 for i, q in enumerate(questions)
+        if i < len(answers) and answers[i] == q.get("correct")
+    )
+    total = len(questions)
+
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO comprehension_log
+                    (user_id, level, text, translation, questions, answers, score, total)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id, created_at
+                """,
+                (
+                    user_id, payload.level, payload.text, payload.translation,
+                    json.dumps(questions), json.dumps(answers), score, total,
+                ),
+            )
+            row_id, created_at = cur.fetchone()
+        conn.commit()
+    finally:
+        conn.close()
+
+    return {
+        "id": row_id,
+        "score": score,
+        "total": total,
+        "created_at": created_at.isoformat(),
+        "results": [
+            {
+                "question": q["question"],
+                "options": q["options"],
+                "correct": q["correct"],
+                "user_answer": answers[i] if i < len(answers) else None,
+                "is_correct": i < len(answers) and answers[i] == q["correct"],
+            }
+            for i, q in enumerate(questions)
+        ],
+    }
