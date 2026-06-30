@@ -210,6 +210,10 @@ const readingComprehension = {
   correctAnswer:              'Correct answer',
   gradeCorrect:               'I got it right',
   gradeIncorrect:             'I got it wrong',
+  questionTypeComprehension: "Comprehension",
+  questionTypeVocabulary: "Vocabulary",
+  questionTypeGrammar: "Grammar",
+  questionTypeInference: "Inference",
 }
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
