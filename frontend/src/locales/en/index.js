@@ -198,6 +198,19 @@ const reading = {
   gradeCorrect:         'I got it right',
   gradeIncorrect:       'I got it wrong',
 }
+// ── Reading comprehension ────────────────────────────────────────────
+const readingComprehension = {
+  readingComprehensionTitle: 'Reading comprehension',
+  readingComprehensionDesc:  'Short passages\nJLPT N5 → N1\nMultiple choice questions',
+  readingComprehensionFetchError: "Couldn't load a passage. Try again.",
+  nextPassage:                'Next passage',
+  question:                   'Question',
+  answer:                     'Answer',
+  yourAnswer:                 'Your answer',
+  correctAnswer:              'Correct answer',
+  gradeCorrect:               'I got it right',
+  gradeIncorrect:             'I got it wrong',
+}
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Search kanji, kana, or meaning...',
@@ -276,6 +289,7 @@ export default {
   ...stats,
   ...phraseAnalyzer,
   ...reading,
+  ...readingComprehension,
   ...dictionary,
   ...decks,
 }
