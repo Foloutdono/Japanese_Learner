@@ -1,5 +1,28 @@
 import { useLang } from '../LangContext'
 import { LANGUAGES } from '../i18n'
+import { useMuted, toggleMute } from './sound'
+
+// ── Mute toggle button ─────────────────────────────────────
+// Reusable anywhere a mute control is needed (top bar, home page...).
+export function MuteButton() {
+  const { t } = useLang()
+  const muted = useMuted()
+
+  return (
+    <button
+      onClick={toggleMute}
+      style={{
+        background: 'rgba(255,255,255,0.08)',
+        color: 'var(--text-primary)',
+        fontSize: 16,
+        padding: '6px 10px',
+      }}
+      title={muted ? (t.unmute ?? 'Activer le son') : (t.mute ?? 'Couper le son')}
+    >
+      {muted ? '🔇' : '🔊'}
+    </button>
+  )
+}
 
 // ── Language switcher button ──────────────────────────────
 // Reusable anywhere a lang toggle is needed.
@@ -31,6 +54,7 @@ export function TopBar({ onBack, title }) {
     <div className="top-bar">
       <button className="btn-back" onClick={onBack}>{t.menu}</button>
       <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>{title}</span>
+      <MuteButton />
       <LangSwitcher />
     </div>
   )
@@ -44,6 +68,7 @@ export function KanjiTopBar({ onBack, onClick, title, drawingEnabled }) {
     <div className="top-bar">
       <button className="btn-back" onClick={onBack}>{t.menu}</button>
       <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>{title}</span>
+      <MuteButton />
       <LangSwitcher />
       <button
         onClick={onClick}
