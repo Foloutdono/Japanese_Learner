@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
-import { api } from '../api'
+import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
@@ -61,7 +61,7 @@ function speakJapanese(text) {
 	window.speechSynthesis.speak(u)
 }
 
-export default function DictionaryScreen() {
+export default function DictionaryScreen({ session }) {
 	const { t, lang } = useLang()
 	const navigate            = useNavigate()
 	const [query, setQuery]           = useState('')
@@ -102,7 +102,7 @@ export default function DictionaryScreen() {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
 
-		fetch(api(`/api/dictionary?q=${encodeURIComponent(q)}&page=${p}&limit=${LIMIT}&lang=${lang}&category=${cat}`))
+		apiFetch(`/api/dictionary?q=${encodeURIComponent(q)}&page=${p}&limit=${LIMIT}&lang=${lang}&category=${cat}`, session)
 			.then(r => r.json())
 			.then(data => {
 				if (p === 0) setResults(data.results || [])
