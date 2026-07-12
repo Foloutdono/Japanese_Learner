@@ -4,7 +4,7 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { KanjiTopBar, TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
-import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
+import { MCQGrid, TypeInput, DoneMessage, Loading, DeckProgress } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
@@ -36,6 +36,7 @@ export default function KanjiScreen({ session }) {
   const [showRating, setShowRating]   = useState(false)
   const [showDrawing, setShowDrawing] = useState(false)
   const [drawingEnabled, setDrawingEnabled] = useState(true)
+  const [progress, setProgress]       = useState(null)
 
   // Re-translate when language changes without re-fetching
   useEffect(() => {
@@ -97,11 +98,22 @@ export default function KanjiScreen({ session }) {
     })
   }
 
+  // Deck progress (à apprendre / en cours / maîtrisé) for the current
+  // level+phase. Fetched independently from the card so it never blocks
+  // or slows down card navigation.
+  function loadProgress(lvl, ph) {
+    apiFetch(`/api/kanji/stats?level=${encodeURIComponent(lvl)}&phase=${ph}`, session)
+      .then(r => r.json())
+      .then(data => setProgress(data?.error ? null : data))
+      .catch(() => {})
+  }
+
   function startSession(lvl, ph) {
     setLevel(lvl)
     setPhase(ph)
     setDone(false)
     fetchCard(lvl, ph)
+    loadProgress(lvl, ph)
   }
 
   function postReview(quality) {
@@ -110,6 +122,9 @@ export default function KanjiScreen({ session }) {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),
     }).then(() => {
+      // Fire in parallel with whatever comes next: the review already
+      // happened, so the counts can refresh without blocking the UI.
+      loadProgress(level, phase)
       if (needTraining && drawingEnabled) {
         setShowRating(false)
         setShowDrawing(true)
@@ -174,6 +189,7 @@ export default function KanjiScreen({ session }) {
         drawingEnabled={drawingEnabled}
       />
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
+        <DeckProgress stats={progress} />
         {loading && <Loading />}
         {done    && <DoneMessage onBack={() => setPhase(null)} />}
 

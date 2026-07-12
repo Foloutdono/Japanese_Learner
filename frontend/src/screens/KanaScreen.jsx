@@ -4,7 +4,7 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
-import { CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading } from '../components/QuizComponents'
+import { CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading, DeckProgress } from '../components/QuizComponents'
 import { playKana } from '../components/sound'
 
 export default function KanaScreen({ session }) {
@@ -29,6 +29,7 @@ export default function KanaScreen({ session }) {
   const [input, setInput]             = useState('')
   const [submitted, setSubmitted]     = useState(false)
   const [showRating, setShowRating]   = useState(false)
+  const [progress, setProgress]       = useState(null)
 
   function fetchCard(slug, m) {
     setLoading(true)
@@ -48,22 +49,41 @@ export default function KanaScreen({ session }) {
       })
   }
 
+  // Deck progress (à apprendre / en cours / maîtrisé) for the current
+  // set+mode. Fetched independently from the card so it never blocks or
+  // slows down card navigation.
+  function loadProgress(slug, m) {
+    apiFetch(`/api/kana/stats?set_name=${encodeURIComponent(slug)}&mode=${m}`, session)
+      .then(r => r.json())
+      .then(data => setProgress(data?.error ? null : data))
+      .catch(() => {})
+  }
+
   function startSession(set) {
     setSelectedSet(set)
     setDone(false)
     fetchCard(set.slug, mode)
+    loadProgress(set.slug, mode)
   }
 
   function switchMode(m) {
     setMode(m)
-    if (selectedSet) fetchCard(selectedSet.slug, m)
+    if (selectedSet) {
+      fetchCard(selectedSet.slug, m)
+      loadProgress(selectedSet.slug, m)
+    }
   }
 
   function postReview(quality) {
     apiFetch('/api/kana/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode, quality }),
-    }).then(() => fetchCard(selectedSet.slug, mode))
+    }).then(() => {
+      // Fire both in parallel: the next card should appear as soon as
+      // it's ready, without waiting on the (heavier) stats recompute.
+      fetchCard(selectedSet.slug, mode)
+      loadProgress(selectedSet.slug, mode)
+    })
   }
 
   function onMCQAnswer(choice) {
@@ -106,6 +126,7 @@ export default function KanaScreen({ session }) {
       <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} />
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
         <ModeToggle mode={mode} onChange={switchMode} />
+        <DeckProgress stats={progress} />
         {loading && <Loading />}
         {done    && <DoneMessage onBack={() => setSelectedSet(null)} />}
         {card && !loading && (

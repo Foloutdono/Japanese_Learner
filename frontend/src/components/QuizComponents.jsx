@@ -183,6 +183,49 @@ export function Loading() {
   )
 }
 
+// ── Deck progress (à apprendre / en cours / maîtrisé) ─────
+export function DeckProgress({ stats }) {
+  const { t } = useLang()
+  if (!stats || !stats.total) return null
+
+  const { total, new: toLearn, learning, mastered } = stats
+
+  const segments = [
+    { key: 'new',      value: toLearn,  color: 'var(--text-secondary)', label: t.progressNew      ?? 'À apprendre' },
+    { key: 'learning', value: learning, color: 'var(--accent)',         label: t.progressLearning ?? 'En cours' },
+    { key: 'mastered', value: mastered, color: 'var(--success)',        label: t.progressMastered ?? 'Maîtrisé' },
+  ]
+
+  return (
+    <div style={{ maxWidth: 480, margin: '0 auto 20px' }}>
+      <div style={{
+        display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden',
+        background: 'var(--bg-card)',
+      }}>
+        {segments.map(s => (
+          s.value > 0 && (
+            <div key={s.key} style={{ width: `${(s.value / total) * 100}%`, background: s.color }} />
+          )
+        ))}
+      </div>
+      <div style={{
+        display: 'flex', justifyContent: 'center', flexWrap: 'wrap',
+        gap: 14, marginTop: 8, fontSize: 12, color: 'var(--text-secondary)',
+      }}>
+        {segments.map(s => (
+          <span key={s.key} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span style={{
+              width: 8, height: 8, borderRadius: '50%',
+              background: s.color, display: 'inline-block',
+            }} />
+            {s.value}/{total} {s.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Question type badge ─────────────────────────────────────────
 export function QuestionTypeBadge({ type }) {
   const { t } = useLang()
