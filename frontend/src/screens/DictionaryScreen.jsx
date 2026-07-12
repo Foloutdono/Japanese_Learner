@@ -214,7 +214,7 @@ export default function DictionaryScreen({ session }) {
 						<div style={{ flex: 1 }}>
 							<div style={{
 								display: 'grid',
-								gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+								gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
 								gap: 12,
 							}}>
 								{results.map(entry => (
