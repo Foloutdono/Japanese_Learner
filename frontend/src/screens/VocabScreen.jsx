@@ -4,7 +4,7 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
-import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
+import { MCQGrid, TypeInput, DoneMessage, Loading, DeckProgress } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
@@ -31,6 +31,7 @@ export default function VocabScreen({ session }) {
   const [input, setInput]           = useState('')
   const [submitted, setSubmitted]   = useState(false)
   const [showRating, setShowRating] = useState(false)
+  const [progress, setProgress]     = useState(null)
 
   function fetchCard(lvl, ph) {
     setLoading(true)
@@ -49,18 +50,34 @@ export default function VocabScreen({ session }) {
       })
   }
 
+  // Deck progress (à apprendre / en cours / maîtrisé) for the current
+  // level+phase. Fetched independently from the card so it never blocks
+  // or slows down card navigation.
+  function loadProgress(lvl, ph) {
+    apiFetch(`/api/vocab/stats?level=${encodeURIComponent(lvl)}&phase=${ph}`, session)
+      .then(r => r.json())
+      .then(data => setProgress(data?.error ? null : data))
+      .catch(() => {})
+  }
+
   function startSession(lvl, ph) {
     setLevel(lvl)
     setPhase(ph)
     setDone(false)
     fetchCard(lvl, ph)
+    loadProgress(lvl, ph)
   }
 
   function postReview(quality) {
     apiFetch('/api/vocab/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),
-    }).then(() => fetchCard(level, phase))
+    }).then(() => {
+      // Fire both in parallel: the next card should appear as soon as
+      // it's ready, without waiting on the (heavier) stats recompute.
+      fetchCard(level, phase)
+      loadProgress(level, phase)
+    })
   }
 
   function onMCQAnswer(choice) {
@@ -110,6 +127,7 @@ export default function VocabScreen({ session }) {
     <div style={{ minHeight: '100vh' }}>
       <TopBar onBack={() => setPhase(null)} title={`${t.vocabulary} ${level} — ${t.phase1.replace('1', phase)}`} />
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
+        <DeckProgress stats={progress} />
         {loading && <Loading />}
         {done    && <DoneMessage onBack={() => setPhase(null)} />}
         {card && !loading && (
