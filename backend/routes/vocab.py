@@ -78,6 +78,37 @@ def get_vocab_card(level: str, phase: int, lang: str = "fr",
     }
 
 
+@router.get("/api/vocab/stats")
+def get_vocab_stats(level: str, phase: int, user_id: str = Depends(get_user_id)):
+    """
+    Lightweight, per-level/phase progress (à apprendre / en cours / maîtrisé).
+    Unlike /api/stats (which recomputes every category for the whole user),
+    this only touches the card_ids for this one level and does a single
+    bulk-state lookup, so it's cheap enough to call after every review.
+    """
+    vocab_list = VOCAB_BY_LEVEL.get(level)
+    if not vocab_list:
+        return {"error": "Unknown level"}
+
+    phase_key = {1: "kk-s", 2: "k-k", 3: "s-k"}.get(phase)
+    if not phase_key:
+        return {"error": "Invalid phase"}
+
+    raw_ids  = [vocab_to_id(w, level) for w in vocab_list]
+    card_ids = prefixed(raw_ids, user_id)
+
+    states  = srs.get_bulk_stats(card_ids, phase_key)
+    due     = srs.get_due_cards(phase_key, limit=len(card_ids), card_ids=card_ids)
+
+    return {
+        "total":    len(card_ids),
+        "new":      sum(1 for s in states.values() if s == "new"),
+        "learning": sum(1 for s in states.values() if s == "learning"),
+        "mastered": sum(1 for s in states.values() if s == "mastered"),
+        "due_now":  len(due),
+    }
+
+
 @router.post("/api/vocab/review")
 def post_vocab_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"

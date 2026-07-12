@@ -67,6 +67,33 @@ def get_kana_card(set_name: str, mode: str, user_id: str = Depends(get_user_id))
     }
 
 
+@router.get("/api/kana/stats")
+def get_kana_stats(set_name: str, mode: str, user_id: str = Depends(get_user_id)):
+    """
+    Lightweight, per-set/mode progress (à apprendre / en cours / maîtrisé).
+    Unlike /api/stats (which recomputes every category for the whole user),
+    this only touches the card_ids for this one set and does a single
+    bulk-state lookup, so it's cheap enough to call after every review.
+    """
+    kana_list = KANA_SETS.get(set_name)
+    if not kana_list:
+        return {"error": "Unknown set"}
+
+    raw_ids  = [kana_to_id(k) for k in kana_list]
+    card_ids = prefixed(raw_ids, user_id)
+
+    states  = srs.get_bulk_stats(card_ids, mode)
+    due     = srs.get_due_cards(mode, limit=len(card_ids), card_ids=card_ids)
+
+    return {
+        "total":    len(card_ids),
+        "new":      sum(1 for s in states.values() if s == "new"),
+        "learning": sum(1 for s in states.values() if s == "learning"),
+        "mastered": sum(1 for s in states.values() if s == "mastered"),
+        "due_now":  len(due),
+    }
+
+
 @router.post("/api/kana/review")
 def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
