@@ -7,6 +7,51 @@ import { useLang } from '../LangContext'
 const API_BASE = import.meta.env.VITE_API_URL || ''
 const LIMIT = 50
 
+const STATUS_META = {
+	new:      { color: 'var(--text-secondary)', fallback: 'À apprendre' },
+	learning: { color: 'var(--accent)',         fallback: 'En cours' },
+	mastered: { color: 'var(--success)',        fallback: 'Maîtrisé' },
+}
+
+const TYPE_META = {
+	kanji: { color: '#3B82F6', fallback: 'Kanji' },
+	vocab: { color: '#10B981', fallback: 'Vocabulaire' },
+}
+
+// Kanji and vocab entries can share the same character (a one-kanji word),
+// so the character alone isn't a safe React key / selection identity.
+function entryKey(entry) {
+	return `${entry.type}:${entry.level}:${entry.kanji || entry.kana}`
+}
+
+function StatusBadge({ state, t }) {
+	const meta = STATUS_META[state] ?? STATUS_META.new
+	return (
+		<span style={{
+			display: 'inline-flex', alignItems: 'center', gap: 4,
+			fontSize: 11, color: 'var(--text-secondary)',
+		}}>
+			<span style={{ width: 7, height: 7, borderRadius: '50%', background: meta.color, display: 'inline-block' }} />
+			{t?.[`status_${state}`] ?? meta.fallback}
+		</span>
+	)
+}
+
+function TypeBadge({ type, t }) {
+	const meta = TYPE_META[type] ?? TYPE_META.kanji
+	return (
+		<span style={{
+			display: 'inline-flex', alignItems: 'center',
+			padding: '2px 8px', borderRadius: 999,
+			background: meta.color, color: '#fff',
+			fontSize: 10, fontWeight: 700, letterSpacing: '0.03em',
+			textTransform: 'uppercase',
+		}}>
+			{type === 'kanji' ? (t?.dictKanji ?? 'Kanji') : (t?.dictVocab ?? 'Vocabulaire')}
+		</span>
+	)
+}
+
 function speakJapanese(text) {
 	if (!text) return
 	window.speechSynthesis.cancel()
@@ -20,6 +65,7 @@ export default function DictionaryScreen() {
 	const { t, lang } = useLang()
 	const navigate            = useNavigate()
 	const [query, setQuery]           = useState('')
+	const [category, setCategory]     = useState('all') // 'all' | 'kanji' | 'vocab'
 	const [results, setResults]       = useState([])
 	const [loading, setLoading]       = useState(false)
 	const [loadingMore, setLoadingMore] = useState(false)
@@ -32,7 +78,7 @@ export default function DictionaryScreen() {
 	const observerRef = useRef(null)
 	const sentinelRef = useRef(null)
 
-	useEffect(() => { fetchPage(0, '') }, [])
+	useEffect(() => { fetchPage(0, '', category) }, [])
 
 	useEffect(() => {
 		if (observerRef.current) observerRef.current.disconnect()
@@ -43,7 +89,7 @@ export default function DictionaryScreen() {
 		}, { threshold: 0.1 })
 		if (sentinelRef.current) observerRef.current.observe(sentinelRef.current)
 		return () => observerRef.current?.disconnect()
-	}, [hasMore, loadingMore, loading, page, query])
+	}, [hasMore, loadingMore, loading, page, query, category])
 
 	useEffect(() => {
 		const handler = () => setIsMobile(window.innerWidth <= 768)
@@ -52,11 +98,11 @@ export default function DictionaryScreen() {
 		return () => window.removeEventListener('resize', handler)
 	}, [])
 
-	function fetchPage(p, q) {
+	function fetchPage(p, q, cat) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
 
-		fetch(api(`/api/dictionary?q=${encodeURIComponent(q)}&page=${p}&limit=${LIMIT}&lang=${lang}`))
+		fetch(api(`/api/dictionary?q=${encodeURIComponent(q)}&page=${p}&limit=${LIMIT}&lang=${lang}&category=${cat}`))
 			.then(r => r.json())
 			.then(data => {
 				if (p === 0) setResults(data.results || [])
@@ -76,21 +122,33 @@ export default function DictionaryScreen() {
 		setPage(0)
 		setHasMore(true)
 		clearTimeout(debounceRef.current)
-		debounceRef.current = setTimeout(() => fetchPage(0, q), 300)
+		debounceRef.current = setTimeout(() => fetchPage(0, q, category), 300)
+	}
+
+	function switchCategory(cat) {
+		if (cat === category) return
+		setCategory(cat)
+		setSelected(null)
+		setPage(0)
+		setHasMore(true)
+		fetchPage(0, query, cat)
 	}
 
 	function loadMore() {
-		fetchPage(page + 1, query)
+		fetchPage(page + 1, query, category)
 	}
 
 	function shortMeaning(meaning) {
 		return meaning?.split(';')[0] ?? ''
 	}
 
-	function shortKana(kana) {
+	function shortKana(kana, type) {
 		if (!kana) return ''
 		const firstKana = kana.split(';')[0].trim()
-		return Array.from(firstKana).slice(0, 3).join('')
+		// Kanji readings are often stacked (on'yomi/kun'yomi) and get
+		// truncated to a compact preview; vocab has a single reading and
+		// should be shown in full.
+		return type === 'vocab' ? firstKana : Array.from(firstKana).slice(0, 3).join('')
 	}
 
 	return (
@@ -100,7 +158,7 @@ export default function DictionaryScreen() {
 			<div className="container" style={{ padding: '24px' }}>
 
 				{/* Search bar + count */}
-				<div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 24 }}>
+				<div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
 					<input
 						value={query}
 						onChange={onSearch}
@@ -110,9 +168,31 @@ export default function DictionaryScreen() {
 					/>
 					{!loading && (
 						<div style={{ color: 'var(--text-secondary)', fontSize: 13, whiteSpace: 'nowrap' }}>
-							{total} kanji
+							{total} {t.dictionaryResults ?? 'résultats'}
 						</div>
 					)}
+				</div>
+
+				{/* Category filter */}
+				<div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+					{[
+						['all',   t.dictAll   ?? 'Tout'],
+						['kanji', t.dictKanji ?? 'Kanji'],
+						['vocab', t.dictVocab ?? 'Vocabulaire'],
+					].map(([key, label]) => (
+						<button
+							key={key}
+							onClick={() => switchCategory(key)}
+							style={{
+								background: category === key ? 'var(--accent)' : 'var(--bg-card)',
+								color: 'var(--text-primary)',
+								fontSize: 13,
+								padding: '8px 16px',
+							}}
+						>
+							{label}
+						</button>
+					))}
 				</div>
 
 				{loading && (
@@ -139,43 +219,46 @@ export default function DictionaryScreen() {
 							}}>
 								{results.map(entry => (
 									<div
-										key={entry.kanji}
+										key={entryKey(entry)}
 										onClick={() => setSelected(entry)}
 										style={{
-											background: selected?.kanji === entry.kanji ? 'var(--bg-panel)' : 'var(--bg-card)',
+											background: selected && entryKey(selected) === entryKey(entry) ? 'var(--bg-panel)' : 'var(--bg-card)',
 											borderRadius: 10,
 											padding: '16px 10px',
 											textAlign: 'center',
 											cursor: 'pointer',
-											border: selected?.kanji === entry.kanji
+											border: selected && entryKey(selected) === entryKey(entry)
 												? '1px solid var(--accent)'
 												: '1px solid var(--border)',
 											transition: 'background 0.15s',
 											display: 'flex',
 											flexDirection: 'column',
+											alignItems: 'center',
 											gap: 4,
 										}}
 										onMouseEnter={e => {
-											if (selected?.kanji !== entry.kanji)
+											if (!(selected && entryKey(selected) === entryKey(entry)))
 												e.currentTarget.style.background = 'var(--bg-panel)'
 										}}
 										onMouseLeave={e => {
-											if (selected?.kanji !== entry.kanji)
+											if (!(selected && entryKey(selected) === entryKey(entry)))
 												e.currentTarget.style.background = 'var(--bg-card)'
 										}}
 									>
-										<div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1 }}>
-											{entry.kanji}
+										<TypeBadge type={entry.type} t={t} />
+										<div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1, marginTop: 4 }}>
+											{entry.kanji || entry.kana}
 										</div>
 										<div style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
-											{shortKana(entry.kana)}
+											{shortKana(entry.kana, entry.type)}
 										</div>
-										<div style={{ fontSize: 15, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+										<div style={{ fontSize: 15, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>
 											{shortMeaning(entry.meaning)}
 										</div>
 										<div style={{ fontSize: 15, color: 'var(--accent2)', fontWeight: 'bold' }}>
 											{entry.level}
 										</div>
+										<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
 									</div>
 								))}
 							</div>
@@ -189,7 +272,7 @@ export default function DictionaryScreen() {
 								)}
 								{!hasMore && results.length > 0 && (
 									<div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-										{t.displayedKanji ?? `${total} kanji affichés`}
+										{t.displayedKanji ?? `${total} résultats affichés`}
 									</div>
 								)}
 							</div>
@@ -237,15 +320,21 @@ export default function DictionaryScreen() {
 
 function DetailPanel({ entry, onClose }) {
 	const { t, lang, contentMaps } = useLang()
+	const map = entry.type === 'vocab' ? contentMaps?.vocab : contentMaps?.kanji
 	const meaning = lang === 'fr'
-		? (contentMaps?.kanji?.[entry.kanji] ?? entry.meaning)
+		? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
 		: entry.meaning
 
 	return (
 		<>
+			<div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+				<TypeBadge type={entry.type} t={t} />
+				<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
+			</div>
+
 			<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
 				<div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1 }}>
-					{entry.kanji}
+					{entry.kanji || entry.kana}
 				</div>
 				<button
 					onClick={() => speakJapanese(entry.kana)}
@@ -263,25 +352,27 @@ function DetailPanel({ entry, onClose }) {
 				<InfoRow label={t.strokes ?? 'Traits'} value={`${entry.stroke_count} ${t.strokes ?? 'traits'}`} />
 			)}
 
-			<div style={{ marginTop: 20 }}>
-				<div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 8, fontWeight: 'bold', letterSpacing: 1 }}>
-					{t.strokeOrder ?? 'ORDRE DES TRAITS'}
-				</div>
-				<div style={{ background: '#fff', borderRadius: 8, padding: 8, width: '100%' }}>
-					<img
-						src={`${API_BASE}${entry.svg_url}`}
-						alt={`Stroke order ${entry.kanji}`}
-						style={{ width: '100%', display: 'block' }}
-						onError={e => {
-							e.target.style.display = 'none'
-							e.target.nextSibling.style.display = 'block'
-						}}
-					/>
-					<div style={{ display: 'none', color: '#999', fontSize: 12, textAlign: 'center', padding: 8 }}>
-						{t.notAvailable ?? 'Non disponible'}
+			{entry.type === 'kanji' && entry.svg_url && (
+				<div style={{ marginTop: 20 }}>
+					<div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 8, fontWeight: 'bold', letterSpacing: 1 }}>
+						{t.strokeOrder ?? 'ORDRE DES TRAITS'}
+					</div>
+					<div style={{ background: '#fff', borderRadius: 8, padding: 8, width: '100%' }}>
+						<img
+							src={`${API_BASE}${entry.svg_url}`}
+							alt={`Stroke order ${entry.kanji}`}
+							style={{ width: '100%', display: 'block' }}
+							onError={e => {
+								e.target.style.display = 'none'
+								e.target.nextSibling.style.display = 'block'
+							}}
+						/>
+						<div style={{ display: 'none', color: '#999', fontSize: 12, textAlign: 'center', padding: 8 }}>
+							{t.notAvailable ?? 'Non disponible'}
+						</div>
 					</div>
 				</div>
-			</div>
+			)}
 
 			<button
 				onClick={onClose}
