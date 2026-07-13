@@ -15,6 +15,58 @@ from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 VOCAB_STATUS_MODE = "kk-s"
 KANJI_STATUS_MODE = "kk-s"
 
+# Used to pick between multiple deck entries that share the same surface
+# form (e.g. 歩 is both the everyday word "marcher"/"pas" and the shogi
+# piece "fu"/pawn, with different readings and meanings). Lower rank =
+# more common = preferred default when we have no reading to disambiguate
+# with. Unknown level strings fall back to a high rank (least preferred,
+# but never crashes).
+_LEVEL_ORDER = {"N5": 0, "N4": 1, "N3": 2, "N2": 3, "N1": 4}
+
+
+def _level_rank(level: str) -> int:
+    return _LEVEL_ORDER.get(level, 99)
+
+
+def _reading_variants(kana_field: str) -> list:
+    """A deck's kana field can list several readings separated by ';'."""
+    if not kana_field:
+        return []
+    return [r.strip() for r in kana_field.split(';') if r.strip()]
+
+
+def _reading_matches(entry_kana: str, reading: str) -> bool:
+    if not entry_kana or not reading:
+        return False
+    variants = _reading_variants(entry_kana)
+    return reading in variants or reading == entry_kana.strip()
+
+
+def _pick_best_candidate(candidates: list, reading: str = None):
+    """
+    Disambiguate between multiple deck entries sharing the same surface
+    form.
+
+    candidates: list of (level, entry, entry_kana) tuples, all already
+    known to match the requested surface/base text.
+
+    Priority:
+      1. An entry whose reading matches the one we were given (exact
+         signal — e.g. from the phrase analyzer's LLM segmentation).
+      2. Otherwise, the entry from the lowest (most common) JLPT level,
+         since niche secondary meanings tend to be introduced later.
+      3. Otherwise, whichever candidate came first (stable fallback).
+    """
+    if not candidates:
+        return None
+
+    if reading:
+        for level, entry, entry_kana in candidates:
+            if _reading_matches(entry_kana, reading):
+                return level, entry
+
+    return min(candidates, key=lambda c: _level_rank(c[0]))[:2]
+
 
 def is_kanji(char: str) -> bool:
     return "\u4e00" <= char <= "\u9fff"
@@ -57,51 +109,82 @@ def find_vocab_match(surface: str, base: str, reading: str):
     vocab deck — used by the phrase analyzer, which gets word boundaries
     from the LLM.
 
+    Several deck entries can share the same kanji surface (e.g. 歩 as the
+    everyday word "marcher" vs. the shogi piece "fu"/pawn) with different
+    readings and meanings. We disambiguate using the reading supplied by
+    the LLM rather than silently returning whichever entry happens to
+    come first in the deck; see _pick_best_candidate for the fallback
+    order when no reading matches.
+
     NOTE: assumes vocab entries expose kanji/kana-ish fields similar to
     kanji_data entries. Field names are a guess — adjust the .get(...)
     calls below if vocab_data.py uses different keys.
     """
+    kanji_candidates = []      # entries whose kanji field == surface/base
+    kana_only_candidates = []  # entries with no kanji field, kana-only words
+
     for level, vocab_list in VOCAB_BY_LEVEL.items():
         for entry in vocab_list:
             entry_word = entry.get("kanji") or entry.get("word") or entry.get("vocab") or ""
             entry_kana = entry.get("kana") or entry.get("reading") or ""
             if entry_word and entry_word in (surface, base):
-                return level, entry, vocab_to_id(entry, level)
-            if entry_kana and entry_kana == reading and not entry_word:
-                return level, entry, vocab_to_id(entry, level)
-    return None
+                kanji_candidates.append((level, entry, entry_kana))
+            elif entry_kana and not entry_word and _reading_matches(entry_kana, reading):
+                kana_only_candidates.append((level, entry, entry_kana))
+
+    best = _pick_best_candidate(kanji_candidates, reading) or _pick_best_candidate(kana_only_candidates, reading)
+    if best is None:
+        return None
+
+    level, entry = best
+    return level, entry, vocab_to_id(entry, level)
 
 
 def find_kanji_matches(text: str):
-    """Find every kanji character in `text` that exists in the kanji deck."""
+    """Find every kanji character in `text` that exists in the kanji deck.
+
+    If the same character were ever duplicated across levels in the deck,
+    this picks the lowest-level (most common) entry rather than whichever
+    happens to be found first while iterating.
+    """
     matches = []
     seen = set()
     for char in text:
         if char in seen or not is_kanji(char):
             continue
         seen.add(char)
-        for level, kanji_list in KANJI_BY_LEVEL.items():
-            for entry in kanji_list:
-                if entry.get("kanji") == char:
-                    matches.append((char, level, entry, kanji_to_id(entry, level)))
-                    break
-            else:
-                continue
-            break
+        candidates = [
+            (level, entry)
+            for level, kanji_list in KANJI_BY_LEVEL.items()
+            for entry in kanji_list
+            if entry.get("kanji") == char
+        ]
+        if not candidates:
+            continue
+        level, entry = min(candidates, key=lambda c: _level_rank(c[0]))
+        matches.append((char, level, entry, kanji_to_id(entry, level)))
     return matches
 
 
 def _vocab_candidates():
     """All (word, level, entry) triples from the vocab deck, longest first —
     built once at import time so dictionary scanning doesn't redo this
-    per request."""
+    per request.
+
+    Ties (same word length) are broken by JLPT level, lowest first. This
+    matters when several entries share the same surface form (e.g. 歩 as
+    the everyday word "marcher" vs. the shogi piece "fu"/pawn): without a
+    known reading to disambiguate against (this function scans raw,
+    unsegmented text), the greedy scan below just takes whichever
+    candidate comes first — so we make sure that's the common one.
+    """
     candidates = []
     for level, vocab_list in VOCAB_BY_LEVEL.items():
         for entry in vocab_list:
             word = entry.get("kanji") or entry.get("word") or entry.get("vocab") or ""
             if word:
                 candidates.append((word, level, entry))
-    candidates.sort(key=lambda c: -len(c[0]))
+    candidates.sort(key=lambda c: (-len(c[0]), _level_rank(c[1])))
     return candidates
 
 
@@ -145,16 +228,18 @@ def find_segments_in_text(text: str):
     for idx, char in enumerate(text):
         if covered[idx] or not is_kanji(char):
             continue
-        for level, kanji_list in KANJI_BY_LEVEL.items():
-            for entry in kanji_list:
-                if entry.get("kanji") == char:
-                    raw_id = kanji_to_id(entry, level)
-                    kanji_hits.append((idx, idx + 1, level, entry, raw_id))
-                    covered[idx] = True
-                    break
-            else:
-                continue
-            break
+        candidates = [
+            (level, entry)
+            for level, kanji_list in KANJI_BY_LEVEL.items()
+            for entry in kanji_list
+            if entry.get("kanji") == char
+        ]
+        if not candidates:
+            continue
+        level, entry = min(candidates, key=lambda c: _level_rank(c[0]))
+        raw_id = kanji_to_id(entry, level)
+        kanji_hits.append((idx, idx + 1, level, entry, raw_id))
+        covered[idx] = True
 
     # Merge vocab + kanji hits into one ordered, non-overlapping list, then
     # fill the gaps with plain-text segments.
