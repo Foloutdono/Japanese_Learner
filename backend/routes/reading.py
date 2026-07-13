@@ -70,6 +70,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) matching exa
 - The "phrases" array must contain exactly {count} entries.
 - Each "phrase" must be natural, grammatically correct, short (roughly 3-8 words), appropriate for JLPT {level}.
 - Each "reading" is the COMPLETE reading of "phrase" written ENTIRELY in hiragana — convert any katakana to hiragana too, and resolve every kanji to its correct reading IN THIS CONTEXT. No kanji, no spaces, no punctuation should remain in "reading". Double-check each kanji's reading before answering — many kanji have multiple possible readings and only one is correct here.
+- Some common words have both an everyday/colloquial reading and a separate, more formal reading used in news broadcasts, official announcements, or business writing (e.g. 明日 → あした in everyday speech vs あす in formal contexts; 明後日 → あさって vs みょうごにち; 昨日 → きのう vs さくじつ). Default to the EVERYDAY reading — that's what a learner needs for normal conversation. Only use the formal reading if "phrase" is itself explicitly formal in register (a news headline, an official notice, business correspondence); a plain conversational sentence should always get the everyday reading, even though the formal one isn't "wrong".
 - Each "translation" is a natural translation of the phrase into {lang_name} (language code: {lang}).
 """
 
