@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
+import { Readings } from '../components/QuizComponents'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 const LIMIT = 50
@@ -568,7 +569,18 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 				</button>
 			</div>
 
-			<InfoRow label={t.reading ?? 'Lecture'} value={entry.kana} />
+			{entry.type === 'kanji'
+				? (
+					<div style={{ padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
+						<Readings
+							kana={entry.kana}
+							onLabel={t.onyomi ?? "Lectures on'yomi (sino-japonaises)"}
+							kunLabel={t.kunyomi ?? "Lectures kun'yomi (japonaises)"}
+						/>
+					</div>
+				)
+				: <InfoRow label={t.reading ?? 'Lecture'} value={entry.kana} />
+			}
 			<InfoRow label={t.meaning  ?? 'Sens'}    value={meaning} />
 			<InfoRow label={t.level    ?? 'Niveau'}  value={entry.level} />
 			{entry.stroke_count && (

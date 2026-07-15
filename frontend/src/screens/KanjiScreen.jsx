@@ -4,7 +4,7 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { KanjiTopBar, TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
-import { MCQGrid, TypeInput, DoneMessage, Loading, DeckProgress } from '../components/QuizComponents'
+import { MCQGrid, TypeInput, DoneMessage, Loading, DeckProgress, Readings } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
@@ -199,7 +199,16 @@ export default function KanjiScreen({ session }) {
               {phase === 1 && (
                 <>
                   <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
-                  <div style={{ fontSize: 22, color: 'var(--text-secondary)', marginTop: 8 }}>{card.kana}</div>
+                  <div style={{ marginTop: 8 }}>
+                    <Readings
+                      kana={card.kana}
+                      onLabel={t.onyomi ?? "On'yomi"}
+                      kunLabel={t.kunyomi ?? "Kun'yomi"}
+                      size={18}
+                      color="var(--text-secondary)"
+                      center
+                    />
+                  </div>
                   {card.stroke_count && (
                     <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
                       {card.stroke_count} {t.strokes}
