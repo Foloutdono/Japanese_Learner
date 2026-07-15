@@ -226,6 +226,78 @@ export function DeckProgress({ stats }) {
   )
 }
 
+// ── Kanji/vocab readings display ──────────────────────────
+// On'yomi readings are written in katakana, kun'yomi in hiragana — a
+// kanji's combined reading field mixes both, separated by '・' or ';',
+// e.g. "イチ・イツ・ひと~・ひと.つ". We classify each token by its first
+// actual kana character (skipping '.'/'~', which are okurigana/variant
+// markers, not kana). Vocab readings don't have this on/kun distinction
+// (a whole word has one register of readings, not two), so when a field
+// doesn't contain both kinds, Readings just renders a plain list instead
+// of forcing on'yomi/kun'yomi labels onto it.
+function isOnyomiToken(token) {
+  const firstKana = [...token].find(c => /[\u3040-\u30FF]/.test(c))
+  if (!firstKana) return false
+  return /[\u30A0-\u30FF]/.test(firstKana) // katakana range
+}
+
+function splitReadingTokens(kana) {
+  return (kana || '')
+    .split(/[・;]/)
+    .map(s => s.trim())
+    .filter(Boolean)
+}
+
+export function ReadingGroup({ label, readings, size = 16, color = 'var(--text-primary)', center = false }) {
+  if (!readings.length) return null
+  return (
+    <div style={{ marginBottom: 10 }}>
+      {label && (
+        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 5, textAlign: center ? 'center' : 'left' }}>
+          {label}
+        </div>
+      )}
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', columnGap: 16, rowGap: 4,
+        justifyContent: center ? 'center' : 'flex-start',
+      }}>
+        {readings.map((r, i) => (
+          <span key={i} style={{ fontSize: size, color, whiteSpace: 'nowrap' }}>
+            {readings.length > 1 && (
+              <span style={{ fontSize: Math.max(size - 5, 10), color: 'var(--text-secondary)', marginRight: 4 }}>
+                {i + 1}.
+              </span>
+            )}
+            <span style={{ fontFamily: 'Yu Gothic, sans-serif' }}>{r}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Renders a kana reading field elegantly: on'yomi/kun'yomi split for a
+// kanji's mixed readings, or a plain (numbered if there's more than one)
+// list for a single-register reading like vocab. Returns null if empty.
+export function Readings({ kana, onLabel, kunLabel, size = 16, color, center = false }) {
+  const tokens = splitReadingTokens(kana)
+  if (!tokens.length) return null
+
+  const on  = tokens.filter(isOnyomiToken)
+  const kun = tokens.filter(t => !isOnyomiToken(t))
+
+  if (on.length && kun.length) {
+    return (
+      <div>
+        <ReadingGroup label={onLabel}  readings={on}  size={size} color={color} center={center} />
+        <ReadingGroup label={kunLabel} readings={kun} size={size} color={color} center={center} />
+      </div>
+    )
+  }
+
+  return <ReadingGroup readings={tokens} size={size} color={color} center={center} />
+}
+
 // ── Question type badge ─────────────────────────────────────────
 export function QuestionTypeBadge({ type }) {
   const { t } = useLang()

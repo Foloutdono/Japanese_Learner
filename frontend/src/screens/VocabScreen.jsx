@@ -4,7 +4,7 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
-import { MCQGrid, TypeInput, DoneMessage, Loading, DeckProgress } from '../components/QuizComponents'
+import { MCQGrid, TypeInput, DoneMessage, Loading, DeckProgress, Readings } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
@@ -136,7 +136,9 @@ export default function VocabScreen({ session }) {
               {phase === 1 && (
                 <>
                   <div style={{ fontSize: 52, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
-                  <div style={{ fontSize: 22, color: 'var(--text-secondary)', marginTop: 8 }}>{card.kana}</div>
+                  <div style={{ marginTop: 8 }}>
+                    <Readings kana={card.kana} size={20} color="var(--text-secondary)" center />
+                  </div>
                 </>
               )}
               {phase === 2 && (
