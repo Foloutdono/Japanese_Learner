@@ -1,0 +1,1286 @@
+[
+  {
+    "number": 1,
+    "char": "一",
+    "stroke_count": 1,
+    "kanji_count": 32
+  },
+  {
+    "number": 2,
+    "char": "丨",
+    "stroke_count": 1,
+    "kanji_count": 11
+  },
+  {
+    "number": 3,
+    "char": "丶",
+    "stroke_count": 1,
+    "kanji_count": 5
+  },
+  {
+    "number": 4,
+    "char": "丿",
+    "stroke_count": 1,
+    "kanji_count": 22
+  },
+  {
+    "number": 5,
+    "char": "乙",
+    "stroke_count": 1,
+    "kanji_count": 19
+  },
+  {
+    "number": 6,
+    "char": "亅",
+    "stroke_count": 1,
+    "kanji_count": 6
+  },
+  {
+    "number": 7,
+    "char": "二",
+    "stroke_count": 2,
+    "kanji_count": 16
+  },
+  {
+    "number": 8,
+    "char": "亠",
+    "stroke_count": 2,
+    "kanji_count": 18
+  },
+  {
+    "number": 9,
+    "char": "人",
+    "stroke_count": 2,
+    "kanji_count": 469
+  },
+  {
+    "number": 10,
+    "char": "儿",
+    "stroke_count": 2,
+    "kanji_count": 31
+  },
+  {
+    "number": 11,
+    "char": "入",
+    "stroke_count": 2,
+    "kanji_count": 5
+  },
+  {
+    "number": 12,
+    "char": "八",
+    "stroke_count": 2,
+    "kanji_count": 16
+  },
+  {
+    "number": 13,
+    "char": "冂",
+    "stroke_count": 2,
+    "kanji_count": 19
+  },
+  {
+    "number": 14,
+    "char": "冖",
+    "stroke_count": 2,
+    "kanji_count": 16
+  },
+  {
+    "number": 15,
+    "char": "冫",
+    "stroke_count": 2,
+    "kanji_count": 42
+  },
+  {
+    "number": 16,
+    "char": "几",
+    "stroke_count": 2,
+    "kanji_count": 16
+  },
+  {
+    "number": 17,
+    "char": "凵",
+    "stroke_count": 2,
+    "kanji_count": 8
+  },
+  {
+    "number": 18,
+    "char": "刀",
+    "stroke_count": 2,
+    "kanji_count": 107
+  },
+  {
+    "number": 19,
+    "char": "力",
+    "stroke_count": 2,
+    "kanji_count": 81
+  },
+  {
+    "number": 20,
+    "char": "勹",
+    "stroke_count": 2,
+    "kanji_count": 21
+  },
+  {
+    "number": 21,
+    "char": "匕",
+    "stroke_count": 2,
+    "kanji_count": 5
+  },
+  {
+    "number": 22,
+    "char": "匚",
+    "stroke_count": 2,
+    "kanji_count": 24
+  },
+  {
+    "number": 23,
+    "char": "匸",
+    "stroke_count": 2,
+    "kanji_count": 9
+  },
+  {
+    "number": 24,
+    "char": "十",
+    "stroke_count": 2,
+    "kanji_count": 24
+  },
+  {
+    "number": 25,
+    "char": "卜",
+    "stroke_count": 2,
+    "kanji_count": 8
+  },
+  {
+    "number": 26,
+    "char": "卩",
+    "stroke_count": 2,
+    "kanji_count": 19
+  },
+  {
+    "number": 27,
+    "char": "厂",
+    "stroke_count": 2,
+    "kanji_count": 31
+  },
+  {
+    "number": 28,
+    "char": "厶",
+    "stroke_count": 2,
+    "kanji_count": 11
+  },
+  {
+    "number": 29,
+    "char": "又",
+    "stroke_count": 2,
+    "kanji_count": 26
+  },
+  {
+    "number": 30,
+    "char": "口",
+    "stroke_count": 3,
+    "kanji_count": 465
+  },
+  {
+    "number": 31,
+    "char": "囗",
+    "stroke_count": 3,
+    "kanji_count": 53
+  },
+  {
+    "number": 32,
+    "char": "土",
+    "stroke_count": 3,
+    "kanji_count": 293
+  },
+  {
+    "number": 33,
+    "char": "士",
+    "stroke_count": 3,
+    "kanji_count": 15
+  },
+  {
+    "number": 34,
+    "char": "夂",
+    "stroke_count": 3,
+    "kanji_count": 4
+  },
+  {
+    "number": 35,
+    "char": "夊",
+    "stroke_count": 3,
+    "kanji_count": 9
+  },
+  {
+    "number": 36,
+    "char": "夕",
+    "stroke_count": 3,
+    "kanji_count": 13
+  },
+  {
+    "number": 37,
+    "char": "大",
+    "stroke_count": 3,
+    "kanji_count": 62
+  },
+  {
+    "number": 38,
+    "char": "女",
+    "stroke_count": 3,
+    "kanji_count": 230
+  },
+  {
+    "number": 39,
+    "char": "子",
+    "stroke_count": 3,
+    "kanji_count": 33
+  },
+  {
+    "number": 40,
+    "char": "宀",
+    "stroke_count": 3,
+    "kanji_count": 103
+  },
+  {
+    "number": 41,
+    "char": "寸",
+    "stroke_count": 3,
+    "kanji_count": 20
+  },
+  {
+    "number": 42,
+    "char": "小",
+    "stroke_count": 3,
+    "kanji_count": 10
+  },
+  {
+    "number": 43,
+    "char": "尢",
+    "stroke_count": 3,
+    "kanji_count": 14
+  },
+  {
+    "number": 44,
+    "char": "尸",
+    "stroke_count": 3,
+    "kanji_count": 42
+  },
+  {
+    "number": 45,
+    "char": "屮",
+    "stroke_count": 3,
+    "kanji_count": 4
+  },
+  {
+    "number": 46,
+    "char": "山",
+    "stroke_count": 3,
+    "kanji_count": 203
+  },
+  {
+    "number": 47,
+    "char": "川",
+    "stroke_count": 3,
+    "kanji_count": 9
+  },
+  {
+    "number": 48,
+    "char": "工",
+    "stroke_count": 3,
+    "kanji_count": 7
+  },
+  {
+    "number": 49,
+    "char": "己",
+    "stroke_count": 3,
+    "kanji_count": 11
+  },
+  {
+    "number": 50,
+    "char": "巾",
+    "stroke_count": 3,
+    "kanji_count": 72
+  },
+  {
+    "number": 51,
+    "char": "干",
+    "stroke_count": 3,
+    "kanji_count": 8
+  },
+  {
+    "number": 52,
+    "char": "幺",
+    "stroke_count": 3,
+    "kanji_count": 5
+  },
+  {
+    "number": 53,
+    "char": "广",
+    "stroke_count": 3,
+    "kanji_count": 75
+  },
+  {
+    "number": 54,
+    "char": "廴",
+    "stroke_count": 3,
+    "kanji_count": 10
+  },
+  {
+    "number": 55,
+    "char": "廾",
+    "stroke_count": 3,
+    "kanji_count": 12
+  },
+  {
+    "number": 56,
+    "char": "弋",
+    "stroke_count": 3,
+    "kanji_count": 7
+  },
+  {
+    "number": 57,
+    "char": "弓",
+    "stroke_count": 3,
+    "kanji_count": 49
+  },
+  {
+    "number": 58,
+    "char": "彑",
+    "stroke_count": 3,
+    "kanji_count": 12
+  },
+  {
+    "number": 59,
+    "char": "彡",
+    "stroke_count": 3,
+    "kanji_count": 15
+  },
+  {
+    "number": 60,
+    "char": "彳",
+    "stroke_count": 3,
+    "kanji_count": 59
+  },
+  {
+    "number": 61,
+    "char": "忄",
+    "stroke_count": 3,
+    "kanji_count": 405
+  },
+  {
+    "number": 62,
+    "char": "戈",
+    "stroke_count": 4,
+    "kanji_count": 35
+  },
+  {
+    "number": 63,
+    "char": "戸",
+    "stroke_count": 4,
+    "kanji_count": 15
+  },
+  {
+    "number": 64,
+    "char": "才",
+    "stroke_count": 3,
+    "kanji_count": 458
+  },
+  {
+    "number": 65,
+    "char": "支",
+    "stroke_count": 4,
+    "kanji_count": 3
+  },
+  {
+    "number": 66,
+    "char": "攴",
+    "stroke_count": 4,
+    "kanji_count": 53
+  },
+  {
+    "number": 67,
+    "char": "文",
+    "stroke_count": 4,
+    "kanji_count": 10
+  },
+  {
+    "number": 68,
+    "char": "斗",
+    "stroke_count": 4,
+    "kanji_count": 10
+  },
+  {
+    "number": 69,
+    "char": "斤",
+    "stroke_count": 4,
+    "kanji_count": 16
+  },
+  {
+    "number": 70,
+    "char": "方",
+    "stroke_count": 4,
+    "kanji_count": 25
+  },
+  {
+    "number": 71,
+    "char": "无",
+    "stroke_count": 4,
+    "kanji_count": 4
+  },
+  {
+    "number": 72,
+    "char": "日",
+    "stroke_count": 4,
+    "kanji_count": 202
+  },
+  {
+    "number": 73,
+    "char": "曰",
+    "stroke_count": 4,
+    "kanji_count": 18
+  },
+  {
+    "number": 74,
+    "char": "月",
+    "stroke_count": 4,
+    "kanji_count": 24
+  },
+  {
+    "number": 75,
+    "char": "木",
+    "stroke_count": 4,
+    "kanji_count": 700
+  },
+  {
+    "number": 76,
+    "char": "欠",
+    "stroke_count": 4,
+    "kanji_count": 41
+  },
+  {
+    "number": 77,
+    "char": "止",
+    "stroke_count": 4,
+    "kanji_count": 18
+  },
+  {
+    "number": 78,
+    "char": "歹",
+    "stroke_count": 4,
+    "kanji_count": 39
+  },
+  {
+    "number": 79,
+    "char": "殳",
+    "stroke_count": 4,
+    "kanji_count": 22
+  },
+  {
+    "number": 80,
+    "char": "毋",
+    "stroke_count": 4,
+    "kanji_count": 7
+  },
+  {
+    "number": 81,
+    "char": "比",
+    "stroke_count": 4,
+    "kanji_count": 5
+  },
+  {
+    "number": 82,
+    "char": "毛",
+    "stroke_count": 4,
+    "kanji_count": 23
+  },
+  {
+    "number": 83,
+    "char": "氏",
+    "stroke_count": 4,
+    "kanji_count": 5
+  },
+  {
+    "number": 84,
+    "char": "气",
+    "stroke_count": 4,
+    "kanji_count": 13
+  },
+  {
+    "number": 85,
+    "char": "氵",
+    "stroke_count": 3,
+    "kanji_count": 656
+  },
+  {
+    "number": 86,
+    "char": "火",
+    "stroke_count": 4,
+    "kanji_count": 207
+  },
+  {
+    "number": 87,
+    "char": "爪",
+    "stroke_count": 4,
+    "kanji_count": 10
+  },
+  {
+    "number": 88,
+    "char": "父",
+    "stroke_count": 4,
+    "kanji_count": 4
+  },
+  {
+    "number": 89,
+    "char": "爻",
+    "stroke_count": 4,
+    "kanji_count": 4
+  },
+  {
+    "number": 90,
+    "char": "爿",
+    "stroke_count": 4,
+    "kanji_count": 8
+  },
+  {
+    "number": 91,
+    "char": "片",
+    "stroke_count": 4,
+    "kanji_count": 13
+  },
+  {
+    "number": 92,
+    "char": "牙",
+    "stroke_count": 5,
+    "kanji_count": 2
+  },
+  {
+    "number": 93,
+    "char": "牛",
+    "stroke_count": 4,
+    "kanji_count": 45
+  },
+  {
+    "number": 94,
+    "char": "犭",
+    "stroke_count": 3,
+    "kanji_count": 135
+  },
+  {
+    "number": 95,
+    "char": "玄",
+    "stroke_count": 5,
+    "kanji_count": 4
+  },
+  {
+    "number": 96,
+    "char": "王",
+    "stroke_count": 4,
+    "kanji_count": 201
+  },
+  {
+    "number": 97,
+    "char": "瓜",
+    "stroke_count": 6,
+    "kanji_count": 7
+  },
+  {
+    "number": 98,
+    "char": "瓦",
+    "stroke_count": 5,
+    "kanji_count": 35
+  },
+  {
+    "number": 99,
+    "char": "甘",
+    "stroke_count": 5,
+    "kanji_count": 4
+  },
+  {
+    "number": 100,
+    "char": "生",
+    "stroke_count": 5,
+    "kanji_count": 8
+  },
+  {
+    "number": 101,
+    "char": "用",
+    "stroke_count": 5,
+    "kanji_count": 6
+  },
+  {
+    "number": 102,
+    "char": "甲",
+    "stroke_count": 5,
+    "kanji_count": 76
+  },
+  {
+    "number": 103,
+    "char": "疋",
+    "stroke_count": 5,
+    "kanji_count": 7
+  },
+  {
+    "number": 104,
+    "char": "疒",
+    "stroke_count": 5,
+    "kanji_count": 163
+  },
+  {
+    "number": 105,
+    "char": "癶",
+    "stroke_count": 5,
+    "kanji_count": 5
+  },
+  {
+    "number": 106,
+    "char": "白",
+    "stroke_count": 5,
+    "kanji_count": 36
+  },
+  {
+    "number": 107,
+    "char": "皮",
+    "stroke_count": 5,
+    "kanji_count": 10
+  },
+  {
+    "number": 108,
+    "char": "皿",
+    "stroke_count": 5,
+    "kanji_count": 34
+  },
+  {
+    "number": 109,
+    "char": "目",
+    "stroke_count": 5,
+    "kanji_count": 145
+  },
+  {
+    "number": 110,
+    "char": "矛",
+    "stroke_count": 5,
+    "kanji_count": 5
+  },
+  {
+    "number": 111,
+    "char": "矢",
+    "stroke_count": 5,
+    "kanji_count": 15
+  },
+  {
+    "number": 112,
+    "char": "石",
+    "stroke_count": 5,
+    "kanji_count": 177
+  },
+  {
+    "number": 113,
+    "char": "礻",
+    "stroke_count": 4,
+    "kanji_count": 92
+  },
+  {
+    "number": 114,
+    "char": "禸",
+    "stroke_count": 5,
+    "kanji_count": 5
+  },
+  {
+    "number": 115,
+    "char": "禾",
+    "stroke_count": 5,
+    "kanji_count": 125
+  },
+  {
+    "number": 116,
+    "char": "穴",
+    "stroke_count": 5,
+    "kanji_count": 60
+  },
+  {
+    "number": 117,
+    "char": "立",
+    "stroke_count": 5,
+    "kanji_count": 34
+  },
+  {
+    "number": 118,
+    "char": "竹",
+    "stroke_count": 6,
+    "kanji_count": 260
+  },
+  {
+    "number": 119,
+    "char": "米",
+    "stroke_count": 6,
+    "kanji_count": 91
+  },
+  {
+    "number": 120,
+    "char": "糸",
+    "stroke_count": 6,
+    "kanji_count": 319
+  },
+  {
+    "number": 121,
+    "char": "缶",
+    "stroke_count": 6,
+    "kanji_count": 18
+  },
+  {
+    "number": 122,
+    "char": "罓",
+    "stroke_count": 4,
+    "kanji_count": 43
+  },
+  {
+    "number": 123,
+    "char": "羊",
+    "stroke_count": 6,
+    "kanji_count": 33
+  },
+  {
+    "number": 124,
+    "char": "羽",
+    "stroke_count": 6,
+    "kanji_count": 40
+  },
+  {
+    "number": 125,
+    "char": "考",
+    "stroke_count": 6,
+    "kanji_count": 11
+  },
+  {
+    "number": 126,
+    "char": "而",
+    "stroke_count": 6,
+    "kanji_count": 6
+  },
+  {
+    "number": 127,
+    "char": "耒",
+    "stroke_count": 6,
+    "kanji_count": 20
+  },
+  {
+    "number": 128,
+    "char": "耳",
+    "stroke_count": 6,
+    "kanji_count": 43
+  },
+  {
+    "number": 129,
+    "char": "聿",
+    "stroke_count": 6,
+    "kanji_count": 8
+  },
+  {
+    "number": 130,
+    "char": "肉",
+    "stroke_count": 6,
+    "kanji_count": 217
+  },
+  {
+    "number": 131,
+    "char": "臣",
+    "stroke_count": 7,
+    "kanji_count": 7
+  },
+  {
+    "number": 132,
+    "char": "自",
+    "stroke_count": 6,
+    "kanji_count": 8
+  },
+  {
+    "number": 133,
+    "char": "至",
+    "stroke_count": 6,
+    "kanji_count": 9
+  },
+  {
+    "number": 134,
+    "char": "臼",
+    "stroke_count": 6,
+    "kanji_count": 16
+  },
+  {
+    "number": 135,
+    "char": "舌",
+    "stroke_count": 6,
+    "kanji_count": 13
+  },
+  {
+    "number": 136,
+    "char": "舛",
+    "stroke_count": 6,
+    "kanji_count": 4
+  },
+  {
+    "number": 137,
+    "char": "舟",
+    "stroke_count": 6,
+    "kanji_count": 54
+  },
+  {
+    "number": 138,
+    "char": "艮",
+    "stroke_count": 6,
+    "kanji_count": 3
+  },
+  {
+    "number": 139,
+    "char": "色",
+    "stroke_count": 6,
+    "kanji_count": 4
+  },
+  {
+    "number": 140,
+    "char": "艹",
+    "stroke_count": 4,
+    "kanji_count": 617
+  },
+  {
+    "number": 141,
+    "char": "虍",
+    "stroke_count": 6,
+    "kanji_count": 25
+  },
+  {
+    "number": 142,
+    "char": "虫",
+    "stroke_count": 6,
+    "kanji_count": 290
+  },
+  {
+    "number": 143,
+    "char": "血",
+    "stroke_count": 6,
+    "kanji_count": 12
+  },
+  {
+    "number": 144,
+    "char": "行",
+    "stroke_count": 6,
+    "kanji_count": 20
+  },
+  {
+    "number": 145,
+    "char": "衤",
+    "stroke_count": 5,
+    "kanji_count": 179
+  },
+  {
+    "number": 146,
+    "char": "西",
+    "stroke_count": 6,
+    "kanji_count": 10
+  },
+  {
+    "number": 147,
+    "char": "見",
+    "stroke_count": 7,
+    "kanji_count": 36
+  },
+  {
+    "number": 148,
+    "char": "角",
+    "stroke_count": 7,
+    "kanji_count": 25
+  },
+  {
+    "number": 149,
+    "char": "言",
+    "stroke_count": 7,
+    "kanji_count": 300
+  },
+  {
+    "number": 150,
+    "char": "谷",
+    "stroke_count": 7,
+    "kanji_count": 12
+  },
+  {
+    "number": 151,
+    "char": "豆",
+    "stroke_count": 7,
+    "kanji_count": 13
+  },
+  {
+    "number": 152,
+    "char": "豕",
+    "stroke_count": 7,
+    "kanji_count": 21
+  },
+  {
+    "number": 153,
+    "char": "豸",
+    "stroke_count": 7,
+    "kanji_count": 26
+  },
+  {
+    "number": 154,
+    "char": "貝",
+    "stroke_count": 7,
+    "kanji_count": 100
+  },
+  {
+    "number": 155,
+    "char": "赤",
+    "stroke_count": 7,
+    "kanji_count": 9
+  },
+  {
+    "number": 156,
+    "char": "走",
+    "stroke_count": 7,
+    "kanji_count": 27
+  },
+  {
+    "number": 157,
+    "char": "足",
+    "stroke_count": 7,
+    "kanji_count": 154
+  },
+  {
+    "number": 158,
+    "char": "身",
+    "stroke_count": 7,
+    "kanji_count": 23
+  },
+  {
+    "number": 159,
+    "char": "車",
+    "stroke_count": 7,
+    "kanji_count": 110
+  },
+  {
+    "number": 160,
+    "char": "辛",
+    "stroke_count": 7,
+    "kanji_count": 16
+  },
+  {
+    "number": 161,
+    "char": "辰",
+    "stroke_count": 7,
+    "kanji_count": 4
+  },
+  {
+    "number": 162,
+    "char": "辶",
+    "stroke_count": 3,
+    "kanji_count": 175
+  },
+  {
+    "number": 163,
+    "char": "邗",
+    "stroke_count": 6,
+    "kanji_count": 106
+  },
+  {
+    "number": 164,
+    "char": "酉",
+    "stroke_count": 7,
+    "kanji_count": 86
+  },
+  {
+    "number": 165,
+    "char": "釆",
+    "stroke_count": 7,
+    "kanji_count": 5
+  },
+  {
+    "number": 166,
+    "char": "里",
+    "stroke_count": 7,
+    "kanji_count": 5
+  },
+  {
+    "number": 167,
+    "char": "金",
+    "stroke_count": 8,
+    "kanji_count": 456
+  },
+  {
+    "number": 168,
+    "char": "镸",
+    "stroke_count": 7,
+    "kanji_count": 4
+  },
+  {
+    "number": 169,
+    "char": "門",
+    "stroke_count": 8,
+    "kanji_count": 79
+  },
+  {
+    "number": 170,
+    "char": "阝",
+    "stroke_count": 3,
+    "kanji_count": 115
+  },
+  {
+    "number": 171,
+    "char": "隶",
+    "stroke_count": 8,
+    "kanji_count": 3
+  },
+  {
+    "number": 172,
+    "char": "隹",
+    "stroke_count": 8,
+    "kanji_count": 36
+  },
+  {
+    "number": 173,
+    "char": "雨",
+    "stroke_count": 8,
+    "kanji_count": 66
+  },
+  {
+    "number": 174,
+    "char": "青",
+    "stroke_count": 8,
+    "kanji_count": 9
+  },
+  {
+    "number": 175,
+    "char": "非",
+    "stroke_count": 8,
+    "kanji_count": 3
+  },
+  {
+    "number": 176,
+    "char": "靣",
+    "stroke_count": 8,
+    "kanji_count": 6
+  },
+  {
+    "number": 177,
+    "char": "革",
+    "stroke_count": 9,
+    "kanji_count": 68
+  },
+  {
+    "number": 178,
+    "char": "韋",
+    "stroke_count": 10,
+    "kanji_count": 18
+  },
+  {
+    "number": 179,
+    "char": "韭",
+    "stroke_count": 9,
+    "kanji_count": 5
+  },
+  {
+    "number": 180,
+    "char": "音",
+    "stroke_count": 9,
+    "kanji_count": 10
+  },
+  {
+    "number": 181,
+    "char": "頁",
+    "stroke_count": 9,
+    "kanji_count": 84
+  },
+  {
+    "number": 182,
+    "char": "風",
+    "stroke_count": 9,
+    "kanji_count": 26
+  },
+  {
+    "number": 183,
+    "char": "飛",
+    "stroke_count": 9,
+    "kanji_count": 2
+  },
+  {
+    "number": 184,
+    "char": "飠",
+    "stroke_count": 8,
+    "kanji_count": 97
+  },
+  {
+    "number": 185,
+    "char": "首",
+    "stroke_count": 9,
+    "kanji_count": 3
+  },
+  {
+    "number": 186,
+    "char": "香",
+    "stroke_count": 9,
+    "kanji_count": 9
+  },
+  {
+    "number": 187,
+    "char": "馬",
+    "stroke_count": 10,
+    "kanji_count": 120
+  },
+  {
+    "number": 188,
+    "char": "骨",
+    "stroke_count": 10,
+    "kanji_count": 37
+  },
+  {
+    "number": 189,
+    "char": "高",
+    "stroke_count": 10,
+    "kanji_count": 5
+  },
+  {
+    "number": 190,
+    "char": "髟",
+    "stroke_count": 10,
+    "kanji_count": 51
+  },
+  {
+    "number": 191,
+    "char": "鬥",
+    "stroke_count": 10,
+    "kanji_count": 10
+  },
+  {
+    "number": 192,
+    "char": "鬯",
+    "stroke_count": 10,
+    "kanji_count": 2
+  },
+  {
+    "number": 193,
+    "char": "鬲",
+    "stroke_count": 10,
+    "kanji_count": 8
+  },
+  {
+    "number": 194,
+    "char": "鬼",
+    "stroke_count": 10,
+    "kanji_count": 20
+  },
+  {
+    "number": 195,
+    "char": "魚",
+    "stroke_count": 11,
+    "kanji_count": 207
+  },
+  {
+    "number": 196,
+    "char": "鳬",
+    "stroke_count": 9,
+    "kanji_count": 186
+  },
+  {
+    "number": 197,
+    "char": "鹵",
+    "stroke_count": 11,
+    "kanji_count": 7
+  },
+  {
+    "number": 198,
+    "char": "鹿",
+    "stroke_count": 11,
+    "kanji_count": 25
+  },
+  {
+    "number": 199,
+    "char": "麦",
+    "stroke_count": 7,
+    "kanji_count": 17
+  },
+  {
+    "number": 200,
+    "char": "麻",
+    "stroke_count": 11,
+    "kanji_count": 5
+  },
+  {
+    "number": 201,
+    "char": "黄",
+    "stroke_count": 11,
+    "kanji_count": 6
+  },
+  {
+    "number": 202,
+    "char": "黍",
+    "stroke_count": 12,
+    "kanji_count": 4
+  },
+  {
+    "number": 203,
+    "char": "黒",
+    "stroke_count": 11,
+    "kanji_count": 29
+  },
+  {
+    "number": 204,
+    "char": "黹",
+    "stroke_count": 12,
+    "kanji_count": 3
+  },
+  {
+    "number": 205,
+    "char": "黽",
+    "stroke_count": 13,
+    "kanji_count": 8
+  },
+  {
+    "number": 206,
+    "char": "鼎",
+    "stroke_count": 13,
+    "kanji_count": 5
+  },
+  {
+    "number": 207,
+    "char": "鼓",
+    "stroke_count": 13,
+    "kanji_count": 9
+  },
+  {
+    "number": 208,
+    "char": "鼡",
+    "stroke_count": 8,
+    "kanji_count": 14
+  },
+  {
+    "number": 209,
+    "char": "鼻",
+    "stroke_count": 14,
+    "kanji_count": 11
+  },
+  {
+    "number": 210,
+    "char": "齊",
+    "stroke_count": 14,
+    "kanji_count": 4
+  },
+  {
+    "number": 211,
+    "char": "齒",
+    "stroke_count": 15,
+    "kanji_count": 36
+  },
+  {
+    "number": 212,
+    "char": "龍",
+    "stroke_count": 16,
+    "kanji_count": 9
+  },
+  {
+    "number": 213,
+    "char": "龜",
+    "stroke_count": 18,
+    "kanji_count": 3
+  },
+  {
+    "number": 214,
+    "char": "龠",
+    "stroke_count": 17,
+    "kanji_count": 5
+  }
+]

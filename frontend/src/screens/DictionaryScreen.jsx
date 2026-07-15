@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
@@ -64,6 +64,8 @@ function speakJapanese(text) {
 export default function DictionaryScreen({ session }) {
 	const { t, lang } = useLang()
 	const navigate            = useNavigate()
+
+	const [mode, setMode]             = useState('search') // 'search' | 'radical'
 	const [query, setQuery]           = useState('')
 	const [category, setCategory]     = useState('all') // 'all' | 'kanji' | 'vocab'
 	const [results, setResults]       = useState([])
@@ -74,11 +76,26 @@ export default function DictionaryScreen({ session }) {
 	const [total, setTotal]           = useState(0)
 	const [selected, setSelected]     = useState(null)
 	const [isMobile, setIsMobile]     = useState(window.innerWidth <= 768)
+
+	// Radical browsing
+	const [radicalGroups, setRadicalGroups]     = useState(null)
+	const [loadingRadicals, setLoadingRadicals] = useState(false)
+	const [selectedRadical, setSelectedRadical] = useState(null) // number | null
+
 	const debounceRef = useRef(null)
 	const observerRef = useRef(null)
 	const sentinelRef = useRef(null)
 
-	useEffect(() => { fetchPage(0, '', category) }, [])
+	const radicalCharByNumber = useMemo(() => {
+		const map = {}
+		;(radicalGroups || []).forEach(g => g.radicals.forEach(r => { map[r.number] = r.char }))
+		return map
+	}, [radicalGroups])
+
+	useEffect(() => {
+		fetchPage(0, '', category, null)
+		loadRadicalGrid()
+	}, [])
 
 	useEffect(() => {
 		if (observerRef.current) observerRef.current.disconnect()
@@ -89,7 +106,7 @@ export default function DictionaryScreen({ session }) {
 		}, { threshold: 0.1 })
 		if (sentinelRef.current) observerRef.current.observe(sentinelRef.current)
 		return () => observerRef.current?.disconnect()
-	}, [hasMore, loadingMore, loading, page, query, category])
+	}, [hasMore, loadingMore, loading, page, query, category, selectedRadical])
 
 	useEffect(() => {
 		const handler = () => setIsMobile(window.innerWidth <= 768)
@@ -98,11 +115,14 @@ export default function DictionaryScreen({ session }) {
 		return () => window.removeEventListener('resize', handler)
 	}, [])
 
-	function fetchPage(p, q, cat) {
+	function fetchPage(p, q, cat, rad) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
 
-		apiFetch(`/api/dictionary?q=${encodeURIComponent(q)}&page=${p}&limit=${LIMIT}&lang=${lang}&category=${cat}`, session)
+		const params = new URLSearchParams({ q, page: p, limit: LIMIT, lang, category: cat })
+		if (rad != null) params.set('radical', rad)
+
+		apiFetch(`/api/dictionary?${params.toString()}`, session)
 			.then(r => r.json())
 			.then(data => {
 				if (p === 0) setResults(data.results || [])
@@ -115,6 +135,14 @@ export default function DictionaryScreen({ session }) {
 			})
 	}
 
+	function loadRadicalGrid() {
+		setLoadingRadicals(true)
+		apiFetch('/api/dictionary/radicals', session)
+			.then(r => r.json())
+			.then(data => { setRadicalGroups(data.groups || []); setLoadingRadicals(false) })
+			.catch(() => setLoadingRadicals(false))
+	}
+
 	function onSearch(e) {
 		const q = e.target.value
 		setQuery(q)
@@ -122,7 +150,13 @@ export default function DictionaryScreen({ session }) {
 		setPage(0)
 		setHasMore(true)
 		clearTimeout(debounceRef.current)
-		debounceRef.current = setTimeout(() => fetchPage(0, q, category), 300)
+		debounceRef.current = setTimeout(() => {
+			if (mode === 'radical') {
+				if (selectedRadical != null) fetchPage(0, q, 'kanji', selectedRadical)
+			} else {
+				fetchPage(0, q, category, null)
+			}
+		}, 300)
 	}
 
 	function switchCategory(cat) {
@@ -131,25 +165,61 @@ export default function DictionaryScreen({ session }) {
 		setSelected(null)
 		setPage(0)
 		setHasMore(true)
-		fetchPage(0, query, cat)
+		fetchPage(0, query, cat, null)
+	}
+
+	function switchToSearchMode() {
+		if (mode === 'search') return
+		setMode('search')
+		setSelectedRadical(null)
+		setSelected(null)
+		setQuery('')
+		setPage(0)
+		setHasMore(true)
+		fetchPage(0, '', category, null)
+	}
+
+	function switchToRadicalMode() {
+		if (mode === 'radical') return
+		setMode('radical')
+		setSelectedRadical(null)
+		setSelected(null)
+		setResults([])
+		if (!radicalGroups) loadRadicalGrid()
+	}
+
+	function pickRadical(number) {
+		setSelectedRadical(number)
+		setSelected(null)
+		setQuery('')
+		setPage(0)
+		setHasMore(true)
+		fetchPage(0, '', 'kanji', number)
+	}
+
+	function backToRadicalGrid() {
+		setSelectedRadical(null)
+		setSelected(null)
+		setResults([])
+	}
+
+	// Jump straight to a radical's results from the detail panel, even if
+	// the picker grid itself was never opened this session.
+	function jumpToRadical(number) {
+		setMode('radical')
+		setSelectedRadical(number)
+		setSelected(null)
+		setQuery('')
+		setPage(0)
+		setHasMore(true)
+		fetchPage(0, '', 'kanji', number)
 	}
 
 	function loadMore() {
-		fetchPage(page + 1, query, category)
+		fetchPage(page + 1, query, category, selectedRadical)
 	}
 
-	function shortMeaning(meaning) {
-		return meaning?.split(';')[0] ?? ''
-	}
-
-	function shortKana(kana, type) {
-		if (!kana) return ''
-		const firstKana = kana.split(';')[0].trim()
-		// Kanji readings are often stacked (on'yomi/kun'yomi) and get
-		// truncated to a compact preview; vocab has a single reading and
-		// should be shown in full.
-		return type === 'vocab' ? firstKana : Array.from(firstKana).slice(0, 3).join('')
-	}
+	const showingRadicalGrid = mode === 'radical' && selectedRadical == null
 
 	return (
 		<div style={{ minHeight: '100vh' }}>
@@ -157,34 +227,17 @@ export default function DictionaryScreen({ session }) {
 
 			<div className="container" style={{ padding: '24px' }}>
 
-				{/* Search bar + count */}
-				<div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
-					<input
-						value={query}
-						onChange={onSearch}
-						placeholder={t.dictionaryPlaceholder ?? 'Rechercher kanji, kana, ou sens...'}
-						autoFocus
-						style={{ flex: 1, padding: '14px 20px', fontSize: 16 }}
-					/>
-					{!loading && (
-						<div style={{ color: 'var(--text-secondary)', fontSize: 13, whiteSpace: 'nowrap' }}>
-							{total} {t.dictionaryResults ?? 'résultats'}
-						</div>
-					)}
-				</div>
-
-				{/* Category filter */}
-				<div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+				{/* Mode tabs */}
+				<div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
 					{[
-						['all',   t.dictAll   ?? 'Tout'],
-						['kanji', t.dictKanji ?? 'Kanji'],
-						['vocab', t.dictVocab ?? 'Vocabulaire'],
+						['search',  t.dictModeSearch  ?? 'Recherche'],
+						['radical', t.dictModeRadical ?? 'Par radical'],
 					].map(([key, label]) => (
 						<button
 							key={key}
-							onClick={() => switchCategory(key)}
+							onClick={() => key === 'radical' ? switchToRadicalMode() : switchToSearchMode()}
 							style={{
-								background: category === key ? 'var(--accent)' : 'var(--bg-card)',
+								background: mode === key ? 'var(--accent)' : 'var(--bg-card)',
 								color: 'var(--text-primary)',
 								fontSize: 13,
 								padding: '8px 16px',
@@ -195,98 +248,268 @@ export default function DictionaryScreen({ session }) {
 					))}
 				</div>
 
-				{loading && (
-					<div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>
-						{t.loadingDictionary ?? 'Chargement...'}
-					</div>
-				)}
-
-				{!loading && results.length === 0 && (
-					<div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>
-						{t.noResults ?? `Aucun résultat pour « ${query} »`}
-					</div>
-				)}
-
-				{!loading && results.length > 0 && (
-					<div className="dict-layout">
-
-						{/* Grid */}
-						<div style={{ flex: 1 }}>
-							<div style={{
-								display: 'grid',
-								gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-								gap: 12,
-							}}>
-								{results.map(entry => (
-									<div
-										key={entryKey(entry)}
-										onClick={() => setSelected(entry)}
-										style={{
-											background: selected && entryKey(selected) === entryKey(entry) ? 'var(--bg-panel)' : 'var(--bg-card)',
-											borderRadius: 10,
-											padding: '16px 10px',
-											textAlign: 'center',
-											cursor: 'pointer',
-											border: selected && entryKey(selected) === entryKey(entry)
-												? '1px solid var(--accent)'
-												: '1px solid var(--border)',
-											transition: 'background 0.15s',
-											display: 'flex',
-											flexDirection: 'column',
-											alignItems: 'center',
-											gap: 4,
-										}}
-										onMouseEnter={e => {
-											if (!(selected && entryKey(selected) === entryKey(entry)))
-												e.currentTarget.style.background = 'var(--bg-panel)'
-										}}
-										onMouseLeave={e => {
-											if (!(selected && entryKey(selected) === entryKey(entry)))
-												e.currentTarget.style.background = 'var(--bg-card)'
-										}}
-									>
-										<TypeBadge type={entry.type} t={t} />
-										<div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1, marginTop: 4 }}>
-											{entry.kanji || entry.kana}
-										</div>
-										<div style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
-											{shortKana(entry.kana, entry.type)}
-										</div>
-										<div style={{ fontSize: 15, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>
-											{shortMeaning(entry.meaning)}
-										</div>
-										<div style={{ fontSize: 15, color: 'var(--accent2)', fontWeight: 'bold' }}>
-											{entry.level}
-										</div>
-										<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
-									</div>
-								))}
-							</div>
-
-							{/* Infinite scroll sentinel */}
-							<div ref={sentinelRef} style={{ height: 40, marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-								{loadingMore && (
-									<div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-										{t.loadingMore ?? 'Chargement...'}
-									</div>
-								)}
-								{!hasMore && results.length > 0 && (
-									<div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-										{t.displayedKanji ?? `${total} résultats affichés`}
-									</div>
-								)}
-							</div>
-						</div>
-
-						{/* Desktop side panel — hidden on mobile via CSS */}
-						{selected && (
-							<div className="dict-panel">
-								<DetailPanel entry={selected} onClose={() => setSelected(null)} />
+				{/* Search bar + count — hidden while browsing the plain radical grid,
+				    shown again once a radical is picked (to narrow further) */}
+				{!showingRadicalGrid && (
+					<div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
+						<input
+							value={query}
+							onChange={onSearch}
+							placeholder={
+								mode === 'radical'
+									? (t.dictionaryPlaceholderRadical ?? 'Filtrer ces résultats...')
+									: (t.dictionaryPlaceholder ?? 'Rechercher kanji, kana, ou sens...')
+							}
+							autoFocus={mode === 'search'}
+							style={{ flex: 1, padding: '14px 20px', fontSize: 16 }}
+						/>
+						{!loading && (
+							<div style={{ color: 'var(--text-secondary)', fontSize: 13, whiteSpace: 'nowrap' }}>
+								{total} {t.dictionaryResults ?? 'résultats'}
 							</div>
 						)}
 					</div>
 				)}
+
+				{/* Category filter — only meaningful in plain search mode */}
+				{mode === 'search' && (
+					<div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+						{[
+							['all',   t.dictAll   ?? 'Tout'],
+							['kanji', t.dictKanji ?? 'Kanji'],
+							['vocab', t.dictVocab ?? 'Vocabulaire'],
+						].map(([key, label]) => (
+							<button
+								key={key}
+								onClick={() => switchCategory(key)}
+								style={{
+									background: category === key ? 'var(--accent)' : 'var(--bg-card)',
+									color: 'var(--text-primary)',
+									fontSize: 13,
+									padding: '8px 16px',
+								}}
+							>
+								{label}
+							</button>
+						))}
+					</div>
+				)}
+
+				{/* Selected-radical header */}
+				{mode === 'radical' && selectedRadical != null && (
+					<div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+						<button
+							onClick={backToRadicalGrid}
+							style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, padding: '8px 14px' }}
+						>
+							← {t.dictBackToRadicals ?? 'Radicaux'}
+						</button>
+						<div style={{
+							fontSize: 28, fontFamily: 'Yu Gothic, sans-serif', color: '#fff',
+							background: 'var(--bg-card)', borderRadius: 8, padding: '4px 14px',
+						}}>
+							{radicalCharByNumber[selectedRadical] ?? '?'}
+						</div>
+						<span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+							{t.dictRadicalNumber ? t.dictRadicalNumber(selectedRadical) : `radical #${selectedRadical}`}
+						</span>
+					</div>
+				)}
+
+				{/* Radical picker grid */}
+				{showingRadicalGrid && (
+					<RadicalGrid
+						groups={radicalGroups}
+						loading={loadingRadicals}
+						onPick={pickRadical}
+						t={t}
+					/>
+				)}
+
+				{/* Results (search mode, or a radical's kanji) */}
+				{!showingRadicalGrid && (
+					<ResultsSection
+						loading={loading}
+						loadingMore={loadingMore}
+						hasMore={hasMore}
+						results={results}
+						total={total}
+						query={query}
+						selected={selected}
+						setSelected={setSelected}
+						isMobile={isMobile}
+						sentinelRef={sentinelRef}
+						onRadicalClick={jumpToRadical}
+						t={t}
+					/>
+				)}
 			</div>
+		</div>
+	)
+}
+
+// ── Radical picker grid ─────────────────────────────────────
+
+function RadicalGrid({ groups, loading, onPick, t }) {
+	if (loading || !groups) {
+		return (
+			<div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>
+				{t.loadingDictionary ?? 'Chargement...'}
+			</div>
+		)
+	}
+
+	return (
+		<div>
+			{groups.map(group => (
+				<div key={group.stroke_count} style={{ marginBottom: 24 }}>
+					<div style={{
+						fontSize: 12, color: 'var(--text-secondary)', fontWeight: 'bold',
+						marginBottom: 10, letterSpacing: 1, textTransform: 'uppercase',
+					}}>
+						{group.stroke_count} {group.stroke_count > 1
+							? (t.dictStrokesPlural ?? 'traits')
+							: (t.dictStrokeSingular ?? 'trait')}
+					</div>
+					<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+						{group.radicals.map(r => (
+							<button
+								key={r.number}
+								onClick={() => onPick(r.number)}
+								title={`${r.kanji_count} kanji`}
+								style={{
+									width: 56, height: 56, padding: 0,
+									background: 'var(--bg-card)', color: '#fff',
+									border: '1px solid var(--border)', borderRadius: 10,
+									display: 'flex', flexDirection: 'column',
+									alignItems: 'center', justifyContent: 'center',
+									cursor: 'pointer',
+								}}
+							>
+								<span style={{ fontSize: 26, fontFamily: 'Yu Gothic, sans-serif', lineHeight: 1 }}>
+									{r.char}
+								</span>
+								<span style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 3 }}>
+									{r.kanji_count}
+								</span>
+							</button>
+						))}
+					</div>
+				</div>
+			))}
+		</div>
+	)
+}
+
+// ── Results grid + detail panel (shared by search mode and radical results) ──
+
+function shortMeaning(meaning) {
+	return meaning?.split(';')[0] ?? ''
+}
+
+function shortKana(kana, type) {
+	if (!kana) return ''
+	const firstKana = kana.split(';')[0].trim()
+	return type === 'vocab' ? firstKana : Array.from(firstKana).slice(0, 3).join('')
+}
+
+function ResultsSection({
+	loading, loadingMore, hasMore, results, total, query,
+	selected, setSelected, isMobile, sentinelRef, onRadicalClick, t,
+}) {
+	return (
+		<>
+			{loading && (
+				<div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>
+					{t.loadingDictionary ?? 'Chargement...'}
+				</div>
+			)}
+
+			{!loading && results.length === 0 && (
+				<div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>
+					{t.noResults ?? `Aucun résultat pour « ${query} »`}
+				</div>
+			)}
+
+			{!loading && results.length > 0 && (
+				<div className="dict-layout">
+
+					{/* Grid */}
+					<div style={{ flex: 1 }}>
+						<div style={{
+							display: 'grid',
+							gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+							gap: 12,
+						}}>
+							{results.map(entry => (
+								<div
+									key={entryKey(entry)}
+									onClick={() => setSelected(entry)}
+									style={{
+										background: selected && entryKey(selected) === entryKey(entry) ? 'var(--bg-panel)' : 'var(--bg-card)',
+										borderRadius: 10,
+										padding: '16px 10px',
+										textAlign: 'center',
+										cursor: 'pointer',
+										border: selected && entryKey(selected) === entryKey(entry)
+											? '1px solid var(--accent)'
+											: '1px solid var(--border)',
+										transition: 'background 0.15s',
+										display: 'flex',
+										flexDirection: 'column',
+										alignItems: 'center',
+										gap: 4,
+									}}
+									onMouseEnter={e => {
+										if (!(selected && entryKey(selected) === entryKey(entry)))
+											e.currentTarget.style.background = 'var(--bg-panel)'
+									}}
+									onMouseLeave={e => {
+										if (!(selected && entryKey(selected) === entryKey(entry)))
+											e.currentTarget.style.background = 'var(--bg-card)'
+									}}
+								>
+									<TypeBadge type={entry.type} t={t} />
+									<div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1, marginTop: 4 }}>
+										{entry.kanji || entry.kana}
+									</div>
+									<div style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
+										{shortKana(entry.kana, entry.type)}
+									</div>
+									<div style={{ fontSize: 15, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>
+										{shortMeaning(entry.meaning)}
+									</div>
+									<div style={{ fontSize: 15, color: 'var(--accent2)', fontWeight: 'bold' }}>
+										{entry.level}
+									</div>
+									<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
+								</div>
+							))}
+						</div>
+
+						{/* Infinite scroll sentinel */}
+						<div ref={sentinelRef} style={{ height: 40, marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+							{loadingMore && (
+								<div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+									{t.loadingMore ?? 'Chargement...'}
+								</div>
+							)}
+							{!hasMore && results.length > 0 && (
+								<div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+									{t.displayedKanji ?? `${total} résultats affichés`}
+								</div>
+							)}
+						</div>
+					</div>
+
+					{/* Desktop side panel — hidden on mobile via CSS */}
+					{selected && (
+						<div className="dict-panel">
+							<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} />
+						</div>
+					)}
+				</div>
+			)}
 
 			{/* Mobile modal */}
 			{selected && isMobile && (
@@ -308,17 +531,17 @@ export default function DictionaryScreen({ session }) {
 							padding: 24,
 						}}
 					>
-						<DetailPanel entry={selected} onClose={() => setSelected(null)} />
+						<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} />
 					</div>
 				</div>
 			)}
-		</div>
+		</>
 	)
 }
 
 // ── Detail panel ──────────────────────────────────────────
 
-function DetailPanel({ entry, onClose }) {
+function DetailPanel({ entry, onClose, onRadicalClick }) {
 	const { t, lang, contentMaps } = useLang()
 	const map = entry.type === 'vocab' ? contentMaps?.vocab : contentMaps?.kanji
 	const meaning = lang === 'fr'
@@ -350,6 +573,22 @@ function DetailPanel({ entry, onClose }) {
 			<InfoRow label={t.level    ?? 'Niveau'}  value={entry.level} />
 			{entry.stroke_count && (
 				<InfoRow label={t.strokes ?? 'Traits'} value={`${entry.stroke_count} ${t.strokes ?? 'traits'}`} />
+			)}
+			{entry.type === 'kanji' && entry.radical != null && (
+				<InfoRow
+					label={t.radical ?? 'Radical'}
+					value={
+						<button
+							onClick={() => onRadicalClick?.(entry.radical)}
+							style={{
+								background: 'transparent', color: 'var(--accent)',
+								padding: 0, fontSize: 14, textDecoration: 'underline',
+							}}
+						>
+							#{entry.radical}
+						</button>
+					}
+				/>
 			)}
 
 			{entry.type === 'kanji' && entry.svg_url && (
