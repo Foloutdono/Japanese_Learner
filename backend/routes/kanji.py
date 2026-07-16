@@ -34,7 +34,7 @@ def get_kanji_card(level: str, mode: str, lang: str = "fr",
     raw_ids  = [kanji_to_id(k, level) for k in kanji_list]
     card_ids = prefixed(raw_ids, user_id)
     cache_key = batch_key("user", user_id, mode, level)
-    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode))
+    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode), version=card_ids)
 
     due = srs.get_due_cards(mode, limit=10, card_ids=card_ids)
     logger.info("kanji study request level=%s mode=%s user_id=%s candidate_count=%d due_count=%d due_ids=%s", level, mode, user_id, len(card_ids), len(due), due[:10])
