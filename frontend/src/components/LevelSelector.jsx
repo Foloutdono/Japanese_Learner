@@ -8,12 +8,15 @@
  *   color            — brand colour for this section, as a hex string
  *                       (default: '#e94560', i.e. var(--accent))
  *   levels           — array of level strings (default: N5…N1)
- *   eyebrow, title, subtitle — header copy. Defaults match the previous
- *     hard-coded text so existing screens render unchanged, but every
- *     section should now pass its own (e.g. "Kanji JLPT" for /kanji) —
- *     previously this header always said "Vocabulary JLPT" no matter
- *     which section rendered it. Pass eyebrow="" / etc. to hide a line,
- *     or wrap in <SelectionScreen> and omit all three to use its header.
+ *   eyebrow, title, subtitle — header copy. eyebrow/title default to the
+ *     original copy so existing screens render unchanged, but every
+ *     section should now pass its own eyebrow (e.g. "Kanji JLPT" for
+ *     /kanji) — previously this header always said "Vocabulary JLPT" no
+ *     matter which section rendered it. subtitle has no default: tapping
+ *     a tile is self-explanatory, so the grid stays caption-free unless
+ *     a screen has something genuinely new to say. Pass eyebrow="" / etc.
+ *     to hide a line, or wrap in <SelectionScreen> and omit all three to
+ *     use its header.
  */
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
@@ -43,7 +46,7 @@ export default function LevelSelector({
   levels = DEFAULT_LEVELS,
   eyebrow = 'Vocabulary JLPT',
   title = 'Choose your JLPT level',
-  subtitle = 'Tap a tile to begin the next challenge.',
+  subtitle,
 }) {
   return (
     <div className="level-selector">
@@ -65,6 +68,7 @@ export default function LevelSelector({
           >
             <div className="select-tile__badge">{l}</div>
             <div className="select-tile__copy">{LEVEL_HINTS[l]}</div>
+            <span className="select-tile__cue" aria-hidden="true" />
           </button>
         ))}
       </div>
