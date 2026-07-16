@@ -148,7 +148,7 @@ export default function VocabScreen({ session }) {
                   back={
                     <InlineReveal
                       t={t}
-                      kana={card.kana}
+                      kana={card.kanji ? card.kana : null}
                       isLarge={isKjToM}
                       main={
                         isKjToM
@@ -163,7 +163,7 @@ export default function VocabScreen({ session }) {
               {card.format === 'qcm' && (
                 <InlineReveal
                   t={t}
-                  kana={card.kana}
+                  kana={card.kanji ? card.kana : null}
                   revealed={answered}
                   main={
                     isKjToM
