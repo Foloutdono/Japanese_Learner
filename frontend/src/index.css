@@ -1,18 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Serif+JP:wght@600;700&display=swap');
 
 :root {
-  --bg-main:        #1a1a2e;
-  --bg-card:        #16213e;
-  --bg-panel:       #0f3460;
-  --accent:         #e94560;
-  --accent2:        #4cc9f0;
-  --accent3:        #533483;
-  --success:        #00b894;
-  --warning:        #fdcb6e;
-  --danger:         #d63031;
-  --text-primary:   #eaeaea;
-  --text-secondary: #a0a0c0;
-  --border:         #2d2d4e;
+  /* Sumi (墨) — ink black, warmed rather than blue-cold */
+  --bg-main:        #17151a;
+  --bg-card:        #201d24;
+  --bg-panel:       #2a2530;
+
+  /* Shu-iro (朱色) — cinnabar vermillion, the traditional seal/lacquer red */
+  --accent:         #c1442c;
+  /* Yamabuki-iro (山吹色) — kerria-blossom gold */
+  --accent2:        #c99a3e;
+  /* Fuji-iro (藤色) — wisteria */
+  --accent3:        #7c6a9c;
+  /* Matcha (抹茶) */
+  --success:        #7d9a5b;
+  /* Kohaku (琥珀) — amber, kept close to yamabuki but distinct */
+  --warning:        #d1a24a;
+  /* Enji-iro (臙脂色) — deep carmine */
+  --danger:         #9c3428;
+
+  /* Kinari (生成り) — raw silk, warm off-white */
+  --text-primary:   #ece5d8;
+  /* Nezumi-iro (鼠色) — mouse grey, the classic Edo neutral */
+  --text-secondary: #a79c8c;
+  --border:         #35303a;
 
   --radius:         12px;
   --max-w:          1100px;
@@ -60,23 +71,23 @@ button:focus-visible {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(ellipse 55% 100% at 18% 0%, color-mix(in srgb, var(--glow-color, var(--accent2)) 20%, transparent), transparent 72%),
-    radial-gradient(ellipse 50% 90% at 82% 0%, color-mix(in srgb, var(--glow-color, var(--accent2)) 13%, transparent), transparent 72%);
+    radial-gradient(ellipse 60% 100% at 14% 0%, color-mix(in srgb, var(--glow-color, var(--accent2)) 13%, transparent), transparent 72%),
+    radial-gradient(ellipse 45% 80% at 88% 6%, color-mix(in srgb, var(--glow-color, var(--accent2)) 7%, transparent), transparent 72%);
   mask-image: linear-gradient(to bottom, black, transparent);
   -webkit-mask-image: linear-gradient(to bottom, black, transparent);
 }
 
 .selection-screen__glyph {
   position: absolute;
-  top: -40px;
-  right: -20px;
-  font-family: 'Yu Gothic', system-ui, sans-serif;
-  font-size: 340px;
+  top: -30px;
+  right: 0;
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 320px;
   line-height: 1;
   color: var(--glow-color, var(--accent2));
-  opacity: 0.05;
+  opacity: 0.045;
   user-select: none;
-  transform: rotate(-8deg);
 }
 
 .selection-screen__inner {
@@ -179,8 +190,8 @@ button:focus-visible {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at top left, rgba(255,255,255,0.24), transparent 42%);
-  opacity: 0.8;
+  background: radial-gradient(circle at top left, rgba(255,255,255,0.12), transparent 42%);
+  opacity: 0.7;
   pointer-events: none;
 }
 
