@@ -102,7 +102,7 @@ export default function VocabScreen({ session }) {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => navigate('/')} title={`${t.vocabulary} JLPT`} />
-        <SelectionScreen subtitle={t.selectLevel}>
+        <SelectionScreen>
           <LevelSelector onSelect={setLevel} color="var(--accent2)" />
         </SelectionScreen>
       </div>
