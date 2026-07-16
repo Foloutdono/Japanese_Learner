@@ -339,32 +339,6 @@ export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', c
   )
 }
 
-// ── Reveal panel ───────────────────────────────────────────
-// Shared "answer" layout: the resolved answer on the left, readings on
-// the right — used identically whether it's revealed by tapping a
-// Flashcard or by answering a QCM. `kana` is optional (kana quiz cards
-// have no separate reading to show — the kana itself IS the answer).
-export function RevealPanel({ left, kana, t }) {
-  return (
-    <div style={{
-      display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'flex-start',
-      flexWrap: 'wrap', marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)',
-    }}>
-      <div>{left}</div>
-      {kana && (
-        <div style={{ paddingLeft: 20, borderLeft: '1px solid var(--border)' }}>
-          <Readings
-            kana={kana}
-            onLabel={t?.onyomi ?? "On'yomi"}
-            kunLabel={t?.kunyomi ?? "Kun'yomi"}
-            size={18}
-          />
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ── Inline reveal panel ──────────────────────────────────
 // Single-box layout: main content on the left, readings on the right,
 // no divider line. Used when the "answer" is already conveyed some
