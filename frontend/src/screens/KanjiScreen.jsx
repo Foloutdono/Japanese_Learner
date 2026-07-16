@@ -151,7 +151,7 @@ export default function KanjiScreen({ session }) {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => navigate('/')} title={t.kanjiTitle} />
-        <SelectionScreen subtitle={t.selectLevel}>
+        <SelectionScreen>
           <LevelSelector onSelect={setLevel} color="var(--accent3)" />
         </SelectionScreen>
       </div>

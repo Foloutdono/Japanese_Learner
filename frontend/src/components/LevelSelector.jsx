@@ -16,7 +16,7 @@ export default function LevelSelector({
   levels = DEFAULT_LEVELS,
 }) {
   return (
-    <div className="grid-5" style={{ maxWidth: 600, margin: '0 auto' }}>
+    <div className="grid-5" style={{ maxWidth: 600, margin: '0 auto', display: 'grid', gap: 12, gridTemplateColumns: `repeat(${levels.length}, 1fr)` }}>
       {levels.map(l => (
         <button
           key={l}
@@ -24,7 +24,7 @@ export default function LevelSelector({
           style={{
             background: color,
             color: '#fff',
-            fontSize: 20,
+            fontSize: 25,
             fontWeight: 'bold',
             padding: '24px 0',
             width: '100%',
