@@ -24,7 +24,7 @@ export function MuteButton() {
   )
 }
 
-// ── Language switcher button ──────────────────────────────
+// ── Language switcher button ─────────────────────────────
 // Reusable anywhere a lang toggle is needed.
 export function LangSwitcher() {
   const { lang, switchLang } = useLang()
