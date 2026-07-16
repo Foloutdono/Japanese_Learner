@@ -214,7 +214,8 @@ export default function KanjiScreen({ session }) {
                 {card.format === 'qcm' && (
                   <InlineReveal
                     t={t}
-                    kana={answered ? card.kana : null}
+                    kana={card.kana}
+                    revealed={answered}
                     main={
                       <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
                         {isKjToM ? card.kanji : card.meaning}
