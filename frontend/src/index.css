@@ -146,8 +146,9 @@ button:focus-visible {
 .select-tile-grid {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 18px;
   width: 100%;
 }
@@ -160,6 +161,8 @@ button:focus-visible {
   justify-content: center;
   padding: 26px 16px;
   min-height: 128px;
+  flex: 1 1 160px;
+  max-width: 220px;
   border-radius: 22px;
   color: #fff;
   box-shadow: 0 22px 54px rgba(0, 0, 0, 0.2);
@@ -183,6 +186,31 @@ button:focus-visible {
 }
 
 .select-tile:active { transform: translateY(0) scale(0.98); }
+
+.select-tile__cue {
+  position: absolute;
+  z-index: 2;
+  bottom: 14px;
+  right: 14px;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid rgba(255,255,255,0.75);
+  border-bottom: 2px solid rgba(255,255,255,0.75);
+  transform: rotate(-45deg) translate(-6px, -6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.select-tile--mode .select-tile__cue {
+  border-color: var(--mode-color, var(--accent2));
+}
+
+.select-tile:hover .select-tile__cue,
+.select-tile:focus-visible .select-tile__cue {
+  opacity: 1;
+  transform: rotate(-45deg) translate(0, 0);
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .select-tile-grid .select-tile:nth-child(odd)  { animation: float 6.4s ease-in-out infinite; }

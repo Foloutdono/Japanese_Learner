@@ -47,6 +47,7 @@ export default function ModeSelector({ modes, onSelect, columns = 3, eyebrow, ti
               <div className="select-tile__icon">{m.icon ?? m.label.charAt(0)}</div>
               <div className="select-tile__label">{m.label}</div>
               {m.desc && <div className="select-tile__desc">{m.desc}</div>}
+              <span className="select-tile__cue" aria-hidden="true" />
             </button>
           )
         })}
