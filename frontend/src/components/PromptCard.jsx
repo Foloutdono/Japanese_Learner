@@ -13,6 +13,8 @@ export default function PromptCard({ children, style = {} }) {
       borderRadius: 12,
       padding: '40px 24px',
       marginBottom: 32,
+      maxHeight: '60vh',
+      overflow: 'auto',
       ...style,
     }}>
       {children}

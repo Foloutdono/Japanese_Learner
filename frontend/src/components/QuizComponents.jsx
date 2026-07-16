@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 
 // ── Big kana/kanji display ────────────────────────────────
-export function CharDisplay({ char, size = 96 }) {
+export function CharDisplay({ char, size = 110 }) {
   return (
     <div style={{
       fontSize: size,
       fontFamily: 'Yu Gothic, sans-serif',
       color: '#fff',
       margin: '16px 0',
-      lineHeight: 1,
+      lineHeight: 1.1,
+      maxHeight: `${size * 1.4}px`,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     }}>
       {char}
     </div>

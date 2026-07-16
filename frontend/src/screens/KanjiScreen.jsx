@@ -198,7 +198,7 @@ export default function KanjiScreen({ session }) {
                     onReveal={onFlashcardReveal}
                     front={
                       isKjToM
-                        ? <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                        ? <div style={{ fontSize: 100, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
                         : <MeaningDisplay meaning={card.meaning} size={44} />
                     }
                     back={
@@ -208,7 +208,7 @@ export default function KanjiScreen({ session }) {
                         main={
                           isKjToM
                             ? <MeaningDisplay meaning={card.meaning} size={28} />
-                            : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                            : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
                         }
                       />
                     }
@@ -222,7 +222,7 @@ export default function KanjiScreen({ session }) {
                     revealed={answered}
                     main={
                       isKjToM
-                        ? <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                        ? <div style={{ fontSize: 100, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
                         : <MeaningDisplay meaning={card.meaning} size={44} />
                     }
                   />
