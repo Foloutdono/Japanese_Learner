@@ -6,7 +6,7 @@ import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   MCQGrid, DoneMessage, Loading, DeckProgress,
-  RevealPanel, InlineReveal, Flashcard,
+  InlineReveal, Flashcard,
 } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
@@ -160,22 +160,16 @@ export default function VocabScreen({ session }) {
               )}
 
               {card.format === 'qcm' && (
-                <>
-                  <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                    {isKjToM ? wordForm(card) : card.meaning}
-                  </div>
-                  {answered && (
-                    <RevealPanel
-                      kana={card.kana}
-                      t={t}
-                      left={
-                        isKjToM
-                          ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent2)' }}>{card.meaning}</div>
-                          : <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{wordForm(card)}</div>
-                      }
-                    />
-                  )}
-                </>
+                <InlineReveal
+                  t={t}
+                  kana={card.kana}
+                  revealed={answered}
+                  main={
+                    isKjToM
+                      ? <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{wordForm(card)}</div>
+                      : <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.meaning}</div>
+                  }
+                />
               )}
             </PromptCard>
 
