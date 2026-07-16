@@ -1,47 +1,15 @@
-import { useLang } from '../LangContext'
-import { LANGUAGES } from '../i18n'
-import { useMuted, toggleMute } from './sound'
-
-// ── Mute toggle button ─────────────────────────────────────
-// Reusable anywhere a mute control is needed (top bar, home page...).
-export function MuteButton() {
-  const { t } = useLang()
-  const muted = useMuted()
-
-  return (
-    <button
-      onClick={toggleMute}
-      style={{
-        background: 'rgba(255,255,255,0.08)',
-        color: 'var(--text-primary)',
-        fontSize: 16,
-        padding: '6px 10px',
-      }}
-      title={muted ? (t.unmute ?? 'Activer le son') : (t.mute ?? 'Couper le son')}
-    >
-      {muted ? '🔇' : '🔊'}
-    </button>
-  )
-}
-
-// ── Language switcher button ──────────────────────────────
-// Reusable anywhere a lang toggle is needed.
-export function LangSwitcher() {
-  const { lang, switchLang } = useLang()
-  const next = LANGUAGES.find(l => l.code !== lang) ?? LANGUAGES[0]
-
-  return (
-    <button
-      onClick={() => switchLang(next.code)}
-      style={{
-        background: 'rgba(255,255,255,0.08)',
-        color: 'var(--text-primary)',
-        fontSize: 14,
-        padding: '6px 12px',
-      }}
-      title={next.label}
-    >
-      {next.flag} {next.label}
-    </button>
-  )
+// ── Liste centralisée des sections de l'app ────────────────
+export function getNavLinks(t) {
+  return [
+    { icon: 'あ',   title: t.kanaTitle,       desc: t.kanaDesc,       path: '/kana',       color: '#EF476F' },
+    { icon: '単語', title: t.vocabTitle,      desc: t.vocabDesc,      path: '/vocab',      color: '#118AB2' },
+    { icon: '漢字', title: t.kanjiTitle,      desc: t.kanjiDesc,      path: '/kanji',      color: '#6D28D9' },
+    { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: '#F59E0B' },
+    { icon: '文法', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/grammar',    color: '#10B981' },
+    { icon: '読書', title: t.readingTitle,    desc: t.readingDesc,    path: '/reading',    color: '#EC4899' },
+    { icon: '解析', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: '#F97316' },
+    { icon: '統計', title: t.statsTitle,      desc: t.statsDesc,      path: '/stats',      color: '#14B8A6' },
+    { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: '#3B82F6' },
+    { icon: '理解', title: t.readingComprehensionTitle, desc: t.readingComprehensionDesc, path: '/reading-comprehension', color: '#8B5CF6' },
+  ]
 }
