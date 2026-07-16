@@ -267,7 +267,7 @@ export default function ReadingScreen({ session }) {
         {stage === 'showing' && data && (
           <>
             <PromptCard>
-              <div style={{ fontSize: 36, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>
+              <div style={{ fontSize: 36, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>
                 {data.phrase}
               </div>
             </PromptCard>

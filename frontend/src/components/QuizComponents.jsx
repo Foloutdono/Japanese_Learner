@@ -3,10 +3,11 @@ import { useLang } from '../LangContext'
 
 // ── Big kana/kanji display ────────────────────────────────
 export function CharDisplay({ char, size = 110 }) {
+  const isLargeSize = size >= 60
   return (
     <div style={{
       fontSize: size,
-      fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
+      fontFamily: isLargeSize ? 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif' : 'system-ui, -apple-system, "Segoe UI", sans-serif',
       color: '#fff',
       margin: '16px 0',
       lineHeight: 1.1,
@@ -256,8 +257,9 @@ function splitReadingTokens(kana) {
     .filter(Boolean)
 }
 
-export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false }) {
+export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false }) {
   if (!readings.length) return null
+  const fontFamily = isLarge ? 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif' : 'system-ui, -apple-system, "Segoe UI", sans-serif'
   return (
     <div style={{ marginBottom: 10 }}>
       {label && (
@@ -276,7 +278,7 @@ export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-p
                 {i + 1}.
               </span>
             )}
-            <span style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' }}>{r}</span>
+            <span style={{ fontFamily }}>{r}</span>
           </span>
         ))}
       </div>
@@ -287,7 +289,7 @@ export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-p
 // Renders a kana reading field elegantly: on'yomi/kun'yomi split for a
 // kanji's mixed readings, or a plain (numbered if there's more than one)
 // list for a single-register reading like vocab. Returns null if empty.
-export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = false }) {
+export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = false, isLarge = false }) {
   const tokens = splitReadingTokens(kana)
   if (!tokens.length) return null
 
@@ -297,13 +299,13 @@ export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = f
   if (on.length && kun.length) {
     return (
       <div>
-        <ReadingGroup label={onLabel}  readings={on}  size={size} color={color} center={center} />
-        <ReadingGroup label={kunLabel} readings={kun} size={size} color={color} center={center} />
+        <ReadingGroup label={onLabel}  readings={on}  size={size} color={color} center={center} isLarge={isLarge} />
+        <ReadingGroup label={kunLabel} readings={kun} size={size} color={color} center={center} isLarge={isLarge} />
       </div>
     )
   }
 
-  return <ReadingGroup readings={tokens} size={size} color={color} center={center} />
+  return <ReadingGroup readings={tokens} size={size} color={color} center={center} isLarge={isLarge} />
 }
 
 // ── Meaning display ────────────────────────────────────────
@@ -349,7 +351,7 @@ export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', c
 // `main` is just whatever should sit next to the readings, decided by
 // the caller (unchanged prompt for QCM, swapped-to-answer for
 // Flashcard).
-export function InlineReveal({ main, kana, t, gap = 24, revealed = true }) {
+export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false }) {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
@@ -390,6 +392,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true }) {
             kunLabel={t?.kunyomi ?? "Kun'yomi"}
             size={25}
             center
+            isLarge={isLarge}
           />
         </div>
       )}

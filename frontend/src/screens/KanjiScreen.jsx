@@ -198,17 +198,18 @@ export default function KanjiScreen({ session }) {
                     onReveal={onFlashcardReveal}
                     front={
                       isKjToM
-                        ? <div style={{ fontSize: 100, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
+                        ? <div style={{ fontSize: 100, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
                         : <MeaningDisplay meaning={card.meaning} size={44} />
                     }
                     back={
                       <InlineReveal
                         t={t}
                         kana={card.kana}
+                        isLarge={isKjToM}
                         main={
                           isKjToM
                             ? <MeaningDisplay meaning={card.meaning} size={28} />
-                            : <div style={{ fontSize: 72, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
+                            : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
                         }
                       />
                     }
@@ -222,7 +223,7 @@ export default function KanjiScreen({ session }) {
                     revealed={answered}
                     main={
                       isKjToM
-                        ? <div style={{ fontSize: 100, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
+                        ? <div style={{ fontSize: 100, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
                         : <MeaningDisplay meaning={card.meaning} size={44} />
                     }
                   />
@@ -261,7 +262,7 @@ export default function KanjiScreen({ session }) {
             )}
             {mode === 'write' && answered && (
               <div style={{ marginTop: 16 }}>
-                <div style={{ fontSize: 72, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>
+                <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>
                   {card.kanji}
                 </div>
               </div>
