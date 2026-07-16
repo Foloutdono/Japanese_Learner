@@ -6,7 +6,7 @@ import { KanjiTopBar, TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   MCQGrid, DoneMessage, Loading, DeckProgress,
-  RevealPanel, FlashcardFront,
+  InlineReveal, FlashcardFront,
 } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
@@ -200,39 +200,27 @@ export default function KanjiScreen({ session }) {
                 )}
 
                 {card.format === 'flashcard' && answered && (
-                  <>
-                    <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                      {isKjToM ? card.kanji : card.meaning}
-                    </div>
-                    <RevealPanel
-                      kana={card.kana}
-                      t={t}
-                      left={
-                        isKjToM
-                          ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent3)' }}>{card.meaning}</div>
-                          : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
-                      }
-                    />
-                  </>
+                  <InlineReveal
+                    t={t}
+                    kana={card.kana}
+                    main={
+                      isKjToM
+                        ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent3)' }}>{card.meaning}</div>
+                        : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                    }
+                  />
                 )}
 
                 {card.format === 'qcm' && (
-                  <>
-                    <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                      {isKjToM ? card.kanji : card.meaning}
-                    </div>
-                    {answered && (
-                      <RevealPanel
-                        kana={card.kana}
-                        t={t}
-                        left={
-                          isKjToM
-                            ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent3)' }}>{card.meaning}</div>
-                            : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
-                        }
-                      />
-                    )}
-                  </>
+                  <InlineReveal
+                    t={t}
+                    kana={answered ? card.kana : null}
+                    main={
+                      <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                        {isKjToM ? card.kanji : card.meaning}
+                      </div>
+                    }
+                  />
                 )}
               </PromptCard>
             )}
