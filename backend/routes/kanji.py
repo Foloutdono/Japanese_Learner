@@ -7,6 +7,7 @@ from srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, take_next
 from translations import get_meaning
 from translations.fr.kanji_fr import KANJI_FR
+from quiz_modes import QCM_FLASHCARD_MODES, KANJI_MODES
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -18,18 +19,7 @@ class ReviewPayload(BaseModel):
     quality: int
 
 FR_MAP = KANJI_FR
-
-# format: "qcm" | "flashcard" — how the prompt/choices are presented.
-# direction: "kj-m" (kanji shown, recall the meaning) |
-#            "m-kj" (meaning shown, recall the kanji)
-# "write" has no format/direction — it's its own thing (drawing practice).
-QCM_FLASHCARD_MODES = {
-    "qcm-kj-m":       ("qcm", "kj-m"),
-    "qcm-m-kj":       ("qcm", "m-kj"),
-    "flashcard-kj-m": ("flashcard", "kj-m"),
-    "flashcard-m-kj": ("flashcard", "m-kj"),
-}
-VALID_MODES = set(QCM_FLASHCARD_MODES) | {"write"}
+VALID_MODES = set(KANJI_MODES)
 
 
 @router.get("/api/kanji/card")

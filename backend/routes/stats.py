@@ -6,14 +6,10 @@ from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from auth import get_user_id, prefixed
 from srs_instance import srs
+from quiz_modes import KANA_MODES, VOCAB_MODES as VOCAB_PHASE_KEYS, KANJI_MODES as KANJI_PHASE_KEYS
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-
-KANA_MODES  = ["qcm", "flashcard", "write"]
-VOCAB_PHASE_KEYS = ["qcm-kj-m", "qcm-m-kj", "flashcard-kj-m", "flashcard-m-kj"]
-# Kanji has a 5th mode (drawing) that vocab doesn't have.
-KANJI_PHASE_KEYS = VOCAB_PHASE_KEYS + ["write"]
 
 KANA_IDS = {
     set_name: [kana_to_id(k) for k in kana_list]

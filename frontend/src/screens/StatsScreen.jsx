@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
+import { KANA_MODE_KEYS, kanaModes, vocabKanjiStatsLabels } from '../components/quizModes'
 
 export default function StatsScreen({ session }) {
   const navigate    = useNavigate()
   const { t }       = useLang()
   const [stats, setStats] = useState(null)
   const [extra, setExtra] = useState(null)
+  const kanaLabels = Object.fromEntries(kanaModes(t))
 
   useEffect(() => { fetchStats() }, [])
 
@@ -78,10 +80,10 @@ export default function StatsScreen({ session }) {
               <div key={setName} className="card">
                 <div style={{ fontWeight: 'bold', marginBottom: 12, fontSize: 18 }}>{setName}</div>
                 <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-                  {['qcm', 'flashcard', 'write'].map(m => (
+                  {KANA_MODE_KEYS.map(m => (
                     <div key={m} style={{ flex: 1, minWidth: 120 }}>
                       <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                        {{ qcm: t.modeQCM ?? 'QCM', flashcard: t.modeFlashcard ?? 'Flashcard', write: t.modeWrite ?? 'Écriture' }[m]}
+                        {kanaLabels[m]}
                       </div>
                       <StatCell s={modes[m]} t={t} onStartReview={() => startReview('kana', setName, m)} />
                     </div>
@@ -96,12 +98,7 @@ export default function StatsScreen({ session }) {
             {Object.entries(stats.vocab).map(([level, phases]) => (
               <div key={level} className="card">
                 <LevelHeader level={level} phases={phases} t={t} />
-                {[
-                  ['qcm-kj-m', 'QCM →sens'],
-                  ['qcm-m-kj', 'QCM →mot'],
-                  ['flashcard-kj-m', 'Carte →sens'],
-                  ['flashcard-m-kj', 'Carte →mot'],
-                ].map(([key, label]) => (
+                {vocabKanjiStatsLabels(t.wordNoun ?? 'mot').map(([key, label]) => (
                   <div key={key} style={{ marginBottom: 10 }}>
                     <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
                     <StatCell s={phases[key]} t={t} onStartReview={() => startReview('vocab', level, key)} />
@@ -116,13 +113,7 @@ export default function StatsScreen({ session }) {
             {Object.entries(stats.kanji).map(([level, phases]) => (
               <div key={level} className="card">
                 <LevelHeader level={level} phases={phases} t={t} />
-                {[
-                  ['qcm-kj-m', 'QCM →sens'],
-                  ['qcm-m-kj', 'QCM →kanji'],
-                  ['flashcard-kj-m', 'Carte →sens'],
-                  ['flashcard-m-kj', 'Carte →kanji'],
-                  ['write', 'Écriture'],
-                ].map(([key, label]) => (
+                {[...vocabKanjiStatsLabels(t.kanjiNoun ?? 'kanji'), ['write', 'Écriture']].map(([key, label]) => (
                   phases[key] && (
                     <div key={key} style={{ marginBottom: 10 }}>
                       <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
