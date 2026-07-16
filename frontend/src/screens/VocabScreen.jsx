@@ -141,7 +141,7 @@ export default function VocabScreen({ session }) {
                   resetKey={card.card_id}
                   onReveal={onFlashcardReveal}
                   front={
-                    <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                    <div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>
                       {isKjToM ? wordForm(card) : card.meaning}
                     </div>
                   }
@@ -152,7 +152,7 @@ export default function VocabScreen({ session }) {
                       main={
                         isKjToM
                           ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent2)' }}>{card.meaning}</div>
-                          : <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{wordForm(card)}</div>
+                          : <div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>{wordForm(card)}</div>
                       }
                     />
                   }
@@ -166,8 +166,8 @@ export default function VocabScreen({ session }) {
                   revealed={answered}
                   main={
                     isKjToM
-                      ? <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{wordForm(card)}</div>
-                      : <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.meaning}</div>
+                      ? <div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>{wordForm(card)}</div>
+                      : <div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>{card.meaning}</div>
                   }
                 />
               )}

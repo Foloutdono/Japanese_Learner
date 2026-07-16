@@ -193,7 +193,7 @@ export default function PhraseAnalyzerScreen({ session }) {
         {result && !loading && (
           <>
             <div className="card" style={{ marginBottom: 24, padding: '20px 24px' }}>
-              <div style={{ fontSize: 28, fontFamily: 'Yu Gothic, sans-serif', marginBottom: 12, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 28, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', marginBottom: 12, lineHeight: 1.6 }}>
                 {result.words.map((w, i) => (
                   <span
                     key={i}
@@ -255,7 +255,7 @@ function WordCard({ word, t, onVocabClick, onKanjiClick }) {
           onClick={onVocabClick}
           style={{ cursor: word.vocab_match ? 'pointer' : 'default' }}
         >
-          <span style={{ fontSize: 22, fontFamily: 'Yu Gothic, sans-serif', color: wordColor(word) }}>
+          <span style={{ fontSize: 22, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: wordColor(word) }}>
             {word.surface}
           </span>
           {word.reading && (
@@ -283,7 +283,7 @@ function WordCard({ word, t, onVocabClick, onKanjiClick }) {
                 background: 'var(--bg-panel)', borderRadius: 6, padding: '4px 8px',
               }}
             >
-              <span style={{ fontSize: 16, fontFamily: 'Yu Gothic, sans-serif', color: STATUS_COLORS[k.stats.status] }}>
+              <span style={{ fontSize: 16, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: STATUS_COLORS[k.stats.status] }}>
                 {k.kanji}
               </span>
               <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{k.level}</span>
@@ -331,7 +331,7 @@ function DetailPanel({ detail, t, onClose }) {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif' }}>{title}</div>
+          <div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' }}>{title}</div>
           <button onClick={onClose} style={{ background: 'none', fontSize: 18, color: 'var(--text-secondary)' }}>✕</button>
         </div>
 

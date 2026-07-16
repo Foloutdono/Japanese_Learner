@@ -267,7 +267,7 @@ export default function ReadingScreen({ session }) {
         {stage === 'showing' && data && (
           <>
             <PromptCard>
-              <div style={{ fontSize: 36, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+              <div style={{ fontSize: 36, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>
                 {data.phrase}
               </div>
             </PromptCard>
@@ -322,7 +322,7 @@ export default function ReadingScreen({ session }) {
         {stage === 'feedback' && data && feedback && (
           <>
             <PromptCard>
-              <div style={{ fontSize: 32, fontFamily: 'Yu Gothic, sans-serif', marginBottom: 12, lineHeight: 1.5 }}>
+              <div style={{ fontSize: 32, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', marginBottom: 12, lineHeight: 1.5 }}>
                 {data.segments
                   ? data.segments.map((seg, i) => (
                       <span
@@ -405,7 +405,7 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
   const content = (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif' }}>{title}</div>
+        <div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' }}>{title}</div>
         <button onClick={onClose} style={{ background: 'none', fontSize: 18, color: 'var(--text-secondary)' }}>✕</button>
       </div>
 

@@ -6,7 +6,7 @@ export function CharDisplay({ char, size = 110 }) {
   return (
     <div style={{
       fontSize: size,
-      fontFamily: 'Yu Gothic, sans-serif',
+      fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
       color: '#fff',
       margin: '16px 0',
       lineHeight: 1.1,
@@ -276,7 +276,7 @@ export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-p
                 {i + 1}.
               </span>
             )}
-            <span style={{ fontFamily: 'Yu Gothic, sans-serif' }}>{r}</span>
+            <span style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' }}>{r}</span>
           </span>
         ))}
       </div>

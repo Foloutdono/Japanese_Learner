@@ -206,7 +206,7 @@ export default function ReadingComprehensionScreen({ session }) {
           </div>
 
           <div className="card" style={{ padding: '24px 28px', marginBottom: 16 }}>
-            <div style={{ fontSize: 18, fontFamily: 'Yu Gothic, sans-serif', lineHeight: 2.0, color: '#fff' }}>
+            <div style={{ fontSize: 18, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', lineHeight: 2.0, color: '#fff' }}>
               {exercise.text}
             </div>
           </div>
@@ -347,7 +347,7 @@ export default function ReadingComprehensionScreen({ session }) {
             <div style={{ fontSize: 13, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>
               {t.originalText || 'Original text'}
             </div>
-            <div style={{ fontSize: 16, fontFamily: 'Yu Gothic, sans-serif', lineHeight: 2.0, color: '#fff' }}>
+            <div style={{ fontSize: 16, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', lineHeight: 2.0, color: '#fff' }}>
               {exercise.text}
             </div>
             <div style={{ marginTop: 12, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>

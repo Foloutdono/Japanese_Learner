@@ -252,7 +252,7 @@ export default function DeckDetailScreen({ session }) {
                     <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                       <div>
                         <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 2 }}>{t.frontPlaceholder}</div>
-                        <div style={{ fontSize: 20, fontFamily: 'Yu Gothic, sans-serif' }}>{card.front}</div>
+                        <div style={{ fontSize: 20, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' }}>{card.front}</div>
                       </div>
                       <div>
                         <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 2 }}>{t.backPlaceholder}</div>
