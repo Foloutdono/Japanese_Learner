@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 
 // ── Big kana/kanji display ────────────────────────────────
@@ -336,20 +337,49 @@ export function RevealPanel({ left, kana, t }) {
 // `main` is just whatever should sit next to the readings, decided by
 // the caller (unchanged prompt for QCM, swapped-to-answer for
 // Flashcard).
-export function InlineReveal({ main, kana, t, gap = 24 }) {
+export function InlineReveal({ main, kana, t, gap = 24, revealed = true }) {
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    if (!revealed) { setShow(false); return }
+    // Mount hidden, then flip open on the next frame — flipping straight
+    // to open on mount would skip the transition entirely.
+    const id = requestAnimationFrame(() => setShow(true))
+    return () => cancelAnimationFrame(id)
+  }, [revealed])
+
   return (
     <div style={{
       display: 'flex', gap, justifyContent: 'center', alignItems: 'center',
-      flexWrap: 'wrap',
+      flexWrap: 'wrap', maxWidth: 640, margin: '0 auto',
     }}>
-      <div>{main}</div>
+      {/* Capped width + wrapping keeps long meanings (e.g. multi-clause
+          definitions) from stretching the row and shoving the readings
+          off to the side. */}
+      <div style={{ textAlign: 'center', maxWidth: 340, wordBreak: 'break-word' }}>
+        {main}
+      </div>
       {kana && (
-        <Readings
-          kana={kana}
-          onLabel={t?.onyomi ?? "On'yomi"}
-          kunLabel={t?.kunyomi ?? "Kun'yomi"}
-          size={16}
-        />
+        // Kept mounted at all times (width/opacity 0 when not revealed)
+        // so opening it is a transition, not a pop-in — this is what
+        // makes `main` visibly slide left as the space opens up.
+        // Capped width forces long reading lists (kanji with many
+        // on'yomi/kun'yomi) to wrap into a compact, centered block
+        // instead of spilling out in one long left-aligned line.
+        <div style={{
+          maxWidth: show ? 300 : 0,
+          opacity: show ? 1 : 0,
+          overflow: 'hidden',
+          transition: show ? 'max-width 0.35s ease, opacity 0.3s ease 0.05s' : 'none',
+        }}>
+          <Readings
+            kana={kana}
+            onLabel={t?.onyomi ?? "On'yomi"}
+            kunLabel={t?.kunyomi ?? "Kun'yomi"}
+            size={16}
+            center
+          />
+        </div>
       )}
     </div>
   )
