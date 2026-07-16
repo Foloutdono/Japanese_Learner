@@ -8,6 +8,7 @@ import {
   CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading,
   DeckProgress, Flashcard,
 } from '../components/QuizComponents'
+import PromptCard from '../components/PromptCard'
 import { playKana } from '../components/sound'
 import { kanaModes } from '../components/quizModes'
 
@@ -145,23 +146,35 @@ export default function KanaScreen({ session }) {
         {card && !loading && (
           <>
             {mode === 'flashcard' && (
-              <Flashcard
-                t={t}
-                resetKey={card.card_id}
-                onReveal={onFlashcardReveal}
-                front={<CharDisplay char={card.kana} />}
-                back={
-                  <>
-                    <CharDisplay char={card.kana} />
-                    <div style={{ fontSize: 32, fontWeight: 'bold', color: 'var(--accent)', marginTop: 12 }}>
-                      {card.romaji}
+              <PromptCard>
+                <Flashcard
+                  t={t}
+                  resetKey={card.card_id}
+                  onReveal={onFlashcardReveal}
+                  front={<CharDisplay char={card.kana} />}
+                  back={
+                    <div>
+                      <CharDisplay char={card.kana} />
+                      <div style={{ fontSize: 32, fontWeight: 'bold', color: 'var(--accent)', marginTop: 12 }}>
+                        {card.romaji}
+                      </div>
                     </div>
-                  </>
-                }
-              />
+                  }
+                />
+              </PromptCard>
             )}
 
-            {mode !== 'flashcard' && <CharDisplay char={card.kana} />}
+            {mode === 'qcm' && (
+              <PromptCard>
+                <CharDisplay char={card.kana} />
+              </PromptCard>
+            )}
+
+            {mode === 'write' && (
+              <PromptCard>
+                <CharDisplay char={card.kana} />
+              </PromptCard>
+            )}
 
             {mode === 'qcm' && (
               <MCQGrid choices={card.choices} correct={card.romaji}

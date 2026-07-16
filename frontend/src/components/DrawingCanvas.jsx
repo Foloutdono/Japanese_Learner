@@ -120,7 +120,7 @@ function StrokeRef({ kanji, meaning, showMeaning = true }) {
       </div>
       {showMeaning && (
         <div style={{ marginTop: 12, textAlign: 'center' }}>
-          <div style={{ fontSize: 32, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1 }}>{kanji}</div>
+          <div style={{ fontSize: 32, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1 }}>{kanji}</div>
           {meaning && <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>{meaning}</div>}
         </div>
       )}

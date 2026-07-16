@@ -306,7 +306,7 @@ export default function DictionaryScreen({ session }) {
 							← {t.dictBackToRadicals ?? 'Radicaux'}
 						</button>
 						<div style={{
-							fontSize: 28, fontFamily: 'Yu Gothic, sans-serif', color: '#fff',
+							fontSize: 28, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff',
 							background: 'var(--bg-card)', borderRadius: 8, padding: '4px 14px',
 						}}>
 							{radicalCharByNumber[selectedRadical] ?? '?'}
@@ -387,7 +387,7 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 									cursor: 'pointer',
 								}}
 							>
-								<span style={{ fontSize: 26, fontFamily: 'Yu Gothic, sans-serif', lineHeight: 1 }}>
+								<span style={{ fontSize: 26, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', lineHeight: 1 }}>
 									{r.char}
 								</span>
 								<span style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 3 }}>
@@ -471,7 +471,7 @@ function ResultsSection({
 									}}
 								>
 									<TypeBadge type={entry.type} t={t} />
-									<div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1, marginTop: 4 }}>
+									<div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1, marginTop: 4 }}>
 										{entry.kanji || entry.kana}
 									</div>
 									<div style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
@@ -557,7 +557,7 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 			</div>
 
 			<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-				<div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff', lineHeight: 1 }}>
+				<div style={{ fontSize: 80, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1 }}>
 					{entry.kanji || entry.kana}
 				</div>
 				<button

@@ -36,7 +36,7 @@ export default function AuthScreen() {
     }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{ fontSize: 64, color: 'var(--accent)', fontFamily: 'Yu Gothic, sans-serif' }}>
+        <div style={{ fontSize: 64, color: 'var(--accent)', fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' }}>
           {t.appTitle}
         </div>
         <div style={{ fontSize: 20, fontWeight: 'bold', marginTop: 8 }}>

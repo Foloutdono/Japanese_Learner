@@ -107,7 +107,7 @@ export default function GrammarScreen({ session }) {
           <>
             {/* Grammar point card */}
             <PromptCard style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: 'var(--accent)', marginBottom: 8 }}>
+              <div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: 'var(--accent)', marginBottom: 8 }}>
                 {card.grammar}
               </div>
               {mode === 'flashcard' && !flipped && (
@@ -129,7 +129,7 @@ export default function GrammarScreen({ session }) {
                 background: 'var(--bg-card)', borderRadius: 10,
                 padding: '20px 24px', marginBottom: 20, textAlign: 'left',
               }}>
-                <div style={{ fontSize: 20, fontFamily: 'Yu Gothic, sans-serif', marginBottom: 8 }}>
+                <div style={{ fontSize: 20, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', marginBottom: 8 }}>
                   {answered ? card.fill_example.jp_full : card.fill_example.jp_blanked}
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{card.fill_example.en}</div>
