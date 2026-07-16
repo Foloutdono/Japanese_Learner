@@ -10,10 +10,10 @@ from srs_instance import srs
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-KANA_MODES  = ["mcq", "type"]
-PHASES_KEYS = ["kk-s", "k-k", "s-k"]
-# Kanji has a 4th phase (drawing) that vocab doesn't currently have.
-KANJI_PHASE_KEYS = PHASES_KEYS + ["k-d"]
+KANA_MODES  = ["qcm", "flashcard", "write"]
+VOCAB_PHASE_KEYS = ["qcm-kj-m", "qcm-m-kj", "flashcard-kj-m", "flashcard-m-kj"]
+# Kanji has a 5th mode (drawing) that vocab doesn't have.
+KANJI_PHASE_KEYS = VOCAB_PHASE_KEYS + ["write"]
 
 KANA_IDS = {
     set_name: [kana_to_id(k) for k in kana_list]
@@ -44,7 +44,7 @@ def _build_reverse_index():
 
     for category, ids_map, modes in (
         ("kana", KANA_IDS, KANA_MODES),
-        ("vocab", VOCAB_IDS, PHASES_KEYS),
+        ("vocab", VOCAB_IDS, VOCAB_PHASE_KEYS),
         ("kanji", KANJI_IDS, KANJI_PHASE_KEYS),
     ):
         for key, ids in ids_map.items():
@@ -85,7 +85,7 @@ def get_stats(user_id: str = Depends(get_user_id)):
     }
 
     vocab_stats = {
-        level: {mode: _empty_bucket(len(ids)) for mode in PHASES_KEYS}
+        level: {mode: _empty_bucket(len(ids)) for mode in VOCAB_PHASE_KEYS}
         for level, ids in VOCAB_IDS.items()
     }
 

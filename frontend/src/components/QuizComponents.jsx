@@ -135,7 +135,11 @@ export function TypeInput({
 // ── Mode toggle ───────────────────────────────────────────
 export function ModeToggle({ mode, onChange, modes }) {
   const { t } = useLang()
-  const defaultModes = [['mcq', t.modeQCM], ['type', t.modeType]]
+  const defaultModes = [
+    ['qcm', t.modeQCM ?? 'QCM'],
+    ['flashcard', t.modeFlashcard ?? 'Flashcard'],
+    ['write', t.modeWrite ?? 'Écriture'],
+  ]
 
   return (
     <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
@@ -296,6 +300,46 @@ export function Readings({ kana, onLabel, kunLabel, size = 16, color, center = f
   }
 
   return <ReadingGroup readings={tokens} size={size} color={color} center={center} />
+}
+
+// ── Reveal panel ───────────────────────────────────────────
+// Shared "answer" layout: the resolved answer on the left, readings on
+// the right — used identically whether it's revealed by tapping a
+// Flashcard or by answering a QCM. `kana` is optional (kana quiz cards
+// have no separate reading to show — the kana itself IS the answer).
+export function RevealPanel({ left, kana, t }) {
+  return (
+    <div style={{
+      display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'flex-start',
+      flexWrap: 'wrap', marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)',
+    }}>
+      <div>{left}</div>
+      {kana && (
+        <div style={{ paddingLeft: 20, borderLeft: '1px solid var(--border)' }}>
+          <Readings
+            kana={kana}
+            onLabel={t?.onyomi ?? "On'yomi"}
+            kunLabel={t?.kunyomi ?? "Kun'yomi"}
+            size={16}
+            center
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Flashcard front ────────────────────────────────────────
+// Tap-to-reveal wrapper for a flashcard's prompt side.
+export function FlashcardFront({ children, onReveal, t }) {
+  return (
+    <div onClick={onReveal} style={{ cursor: 'pointer' }}>
+      {children}
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 16 }}>
+        {t?.tapToReveal ?? 'Touchez pour révéler'}
+      </div>
+    </div>
+  )
 }
 
 // ── Question type badge ─────────────────────────────────────────
