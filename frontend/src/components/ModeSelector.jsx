@@ -1,29 +1,22 @@
 /**
  * ModeSelector
- * A tile grid where each tile shows an icon badge, a label and a
- * description. Shares the same grid, radius, shadow and hover motion
- * as LevelSelector for visual consistency — but keeps the card itself
- * neutral and colours only the icon badge, since study modes are
- * parallel choices, not a ranked difficulty ladder like JLPT levels.
+ * Renders study modes as a single-column, hairline-divided list —
+ * matching LevelSelector's row treatment rather than a grid of
+ * icon-badged cards. Modes are parallel choices, so by default every
+ * row shares one accent colour; pass m.color on individual modes only
+ * when a genuine semantic distinction is needed (e.g. right/wrong).
  *
  * Props:
- *   modes    — array of { key, label, desc?, icon?, color? }.
- *              `icon` can be any short string/emoji; if omitted, the
- *              tile falls back to the label's first letter so every
- *              tile always has a badge to scan.
- *   onSelect(key) — called when a tile is clicked
- *   columns  — target column count on wide screens (default 3). The
- *              grid still wraps responsively on narrower screens.
+ *   modes    — array of { key, label, desc?, color? }
+ *   onSelect(key) — called when a row is clicked
  *   eyebrow, title, subtitle — optional header copy, same shape as
- *     LevelSelector's. Leave all three unset to render just the grid
+ *     LevelSelector's. Leave all three unset to render just the list
  *     (e.g. when wrapped in <SelectionScreen>, which can supply its
  *     own header instead).
+ *   columns  — accepted for backward compatibility, no longer affects
+ *     layout now that modes render as a list rather than a grid.
  */
-const PALETTE = ['var(--accent)', 'var(--accent2)', 'var(--accent3)', 'var(--success)', 'var(--warning)']
-
-export default function ModeSelector({ modes, onSelect, columns = 3, eyebrow, title, subtitle }) {
-  const gridMaxWidth = Math.min(1000, columns * 260)
-
+export default function ModeSelector({ modes, onSelect, eyebrow, title, subtitle }) {
   return (
     <div className="mode-selector">
       {(eyebrow || title || subtitle) && (
@@ -33,24 +26,23 @@ export default function ModeSelector({ modes, onSelect, columns = 3, eyebrow, ti
           {subtitle && <div className="selector-header__subtitle">{subtitle}</div>}
         </div>
       )}
-      <div className="select-tile-grid" style={{ maxWidth: gridMaxWidth, margin: '0 auto' }}>
-        {modes.map((m, i) => {
-          const modeColor = m.color ?? PALETTE[i % PALETTE.length]
-          return (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => onSelect(m.key)}
-              className="select-tile select-tile--mode"
-              style={{ '--mode-color': modeColor }}
-            >
-              <div className="select-tile__icon">{m.icon ?? m.label.charAt(0)}</div>
-              <div className="select-tile__label">{m.label}</div>
-              {m.desc && <div className="select-tile__desc">{m.desc}</div>}
-              <span className="select-tile__cue" aria-hidden="true" />
-            </button>
-          )
-        })}
+      <div className="choice-list">
+        {modes.map((m, i) => (
+          <button
+            key={m.key}
+            type="button"
+            onClick={() => onSelect(m.key)}
+            className="choice-row"
+            style={{ '--row-color': m.color ?? 'var(--accent)' }}
+          >
+            <span className="choice-row__accent" aria-hidden="true" />
+            <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
+            <span className="choice-row__main">
+              <span className="choice-row__title">{m.label}</span>
+              {m.desc && <span className="choice-row__desc">{m.desc}</span>}
+            </span>
+          </button>
+        ))}
       </div>
     </div>
   )

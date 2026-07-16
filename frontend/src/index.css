@@ -56,72 +56,49 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* ── Selection screen shell (ambient atmosphere) ─────────── */
+/* ── Selection screen shell ───────────────────────────────
+   No glow, no watermark — the negative space itself (ma, 間)
+   is the atmosphere. A single hairline marks the header edge. */
 .selection-screen {
   position: relative;
-  padding: 56px 24px 64px;
-  text-align: center;
-  overflow: hidden;
-}
-
-.selection-screen__atmosphere {
-  position: absolute;
-  inset: 0;
-  height: 380px;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse 60% 100% at 14% 0%, color-mix(in srgb, var(--glow-color, var(--accent2)) 13%, transparent), transparent 72%),
-    radial-gradient(ellipse 45% 80% at 88% 6%, color-mix(in srgb, var(--glow-color, var(--accent2)) 7%, transparent), transparent 72%);
-  mask-image: linear-gradient(to bottom, black, transparent);
-  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
-}
-
-.selection-screen__glyph {
-  position: absolute;
-  top: -30px;
-  right: 0;
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 320px;
-  line-height: 1;
-  color: var(--glow-color, var(--accent2));
-  opacity: 0.045;
-  user-select: none;
+  padding: 64px 24px 72px;
+  text-align: left;
 }
 
 .selection-screen__inner {
   position: relative;
-  z-index: 1;
   margin: 0 auto;
 }
 
 /* ── Selector header (eyebrow / title / subtitle) ────────── */
 /* Shared by SelectionScreen, LevelSelector and ModeSelector so every
-   selection screen reads the same way regardless of which grid it wraps. */
+   selection screen reads the same way regardless of which list it wraps.
+   Deliberate contrast: a small tracked sans eyebrow against a large
+   serif title — the pairing does the work a glow used to. */
 .selector-header {
-  position: relative;
-  z-index: 1;
-  text-align: center;
+  text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 28px;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
 }
 
 .selector-header__eyebrow {
   font-family: var(--font-display);
-  color: var(--accent2);
-  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 
 .selector-header__title {
-  font-family: var(--font-display);
-  font-size: 1.9rem;
+  font-family: 'Noto Serif JP', serif;
   font-weight: 700;
+  font-size: 2.4rem;
+  line-height: 1.2;
   letter-spacing: 0.01em;
 }
 
@@ -129,190 +106,105 @@ button:focus-visible {
   color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.6;
-  max-width: 540px;
-  margin: 0 auto;
+  max-width: 480px;
 }
 
-/* ── Shared tile grid (LevelSelector + ModeSelector) ─────── */
-/* auto-fit lets both grids fill the available width and reflow at any
-   viewport size on their own — no fixed-column breakpoints to maintain. */
+/* ── Shared choice list (LevelSelector + ModeSelector) ────── */
+/* An editorial list, not a grid of cards: one column, hairline
+   rules, generous padding. Asymmetry (title left / description
+   right) instead of four identical boxes side by side. */
 .level-selector,
 .mode-selector {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  padding: 30px 8px 8px;
-}
-
-.level-selector::before,
-.mode-selector::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 32px;
-  background: radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 42%);
-  pointer-events: none;
-}
-
-.select-tile-grid {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 18px;
   width: 100%;
 }
 
-.select-tile {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-  justify-content: center;
-  padding: 26px 16px;
-  min-height: 128px;
-  flex: 1 1 160px;
-  max-width: 220px;
-  border-radius: 22px;
-  color: #fff;
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.16),
-    0 14px 28px -14px rgba(0, 0, 0, 0.38);
-  transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease, border-color 0.22s ease;
+.choice-list {
+  width: 100%;
+  border-top: 1px solid var(--border);
+}
+
+.choice-row {
   position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+  width: 100%;
+  padding: 30px 6px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--text-primary);
+  text-align: left;
   overflow: hidden;
 }
 
-.select-tile::after {
-  content: '';
+.choice-row__accent {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at top left, rgba(255,255,255,0.12), transparent 42%);
-  opacity: 0.7;
-  pointer-events: none;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--row-color, var(--accent));
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.25s ease;
 }
 
-.select-tile:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.2),
-    0 22px 40px -16px rgba(0, 0, 0, 0.45);
+.choice-row:hover .choice-row__accent,
+.choice-row:focus-visible .choice-row__accent {
+  transform: scaleY(1);
 }
 
-.select-tile:active { transform: translateY(0) scale(0.98); }
-
-.select-tile__cue {
-  position: absolute;
-  z-index: 2;
-  bottom: 14px;
-  right: 14px;
-  width: 9px;
-  height: 9px;
-  border-right: 2px solid rgba(255,255,255,0.75);
-  border-bottom: 2px solid rgba(255,255,255,0.75);
-  transform: rotate(-45deg) translate(-6px, -6px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.select-tile--mode .select-tile__cue {
-  border-color: var(--mode-color, var(--accent2));
-}
-
-.select-tile:hover .select-tile__cue,
-.select-tile:focus-visible .select-tile__cue {
-  opacity: 1;
-  transform: rotate(-45deg) translate(0, 0);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .select-tile-grid .select-tile:nth-child(odd)  { animation: float 6.4s ease-in-out infinite; }
-  .select-tile-grid .select-tile:nth-child(even) { animation: float 5.7s ease-in-out infinite; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.select-tile__badge {
-  position: relative;
-  z-index: 1;
-  font-size: 1.75rem;
-  font-weight: 800;
+.choice-row__index {
+  padding-top: 5px;
+  min-width: 30px;
   font-family: var(--font-display);
-}
-
-.select-tile__copy {
-  position: relative;
-  z-index: 1;
-  font-size: 0.92rem;
-  color: rgba(255,255,255,0.9);
-  text-align: center;
-  line-height: 1.4;
-}
-
-/* ── Mode tile variant ────────────────────────────────────
-   Neutral card + colour-coded icon badge, instead of a fully
-   coloured tile — modes are parallel choices, not a difficulty
-   ladder, so the colour marks the tile rather than owning it. */
-.select-tile--mode {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-}
-
-.select-tile--mode::after { display: none; }
-
-.select-tile--mode:hover {
-  border-color: var(--mode-color, var(--accent2));
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.2),
-    0 22px 40px -16px rgba(0, 0, 0, 0.45),
-    0 0 0 1px var(--mode-color, var(--accent2)) inset;
-}
-
-.select-tile__icon {
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: #fff;
-  background: linear-gradient(
-    155deg,
-    color-mix(in srgb, var(--mode-color, var(--accent2)) 100%, white 10%),
-    color-mix(in srgb, var(--mode-color, var(--accent2)) 100%, black 22%)
-  );
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.35),
-    inset 0 -6px 10px rgba(0, 0, 0, 0.16),
-    0 10px 18px -6px color-mix(in srgb, var(--mode-color, var(--accent2)) 55%, transparent);
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
-}
-
-.select-tile--mode:hover .select-tile__icon {
-  transform: translateY(-2px);
-}
-
-.select-tile__label {
-  font-size: 1rem;
-  font-weight: 700;
-  font-family: var(--font-display);
-}
-
-.select-tile__desc {
-  font-size: 0.85rem;
+  letter-spacing: 0.04em;
   color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.choice-row:hover .choice-row__index,
+.choice-row:focus-visible .choice-row__index {
+  color: var(--row-color, var(--accent));
+}
+
+.choice-row__main {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  transition: transform 0.25s ease;
+}
+
+.choice-row:hover .choice-row__main,
+.choice-row:focus-visible .choice-row__main {
+  transform: translateX(10px);
+}
+
+.choice-row__title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: 1.4rem;
+  white-space: nowrap;
+}
+
+.choice-row__desc {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
   line-height: 1.5;
-  text-align: center;
+  text-align: right;
+  max-width: 320px;
+}
+
+@media (max-width: 640px) {
+  .choice-row__main { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .choice-row__desc { text-align: left; max-width: none; }
 }
 
 input {
@@ -404,7 +296,6 @@ input:focus { border-color: var(--accent2); }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
   .container { padding: 0 16px; }
   .top-bar { padding: 12px 16px; }
-  .selection-screen { padding: 40px 16px 48px; }
-  .selection-screen__glyph { font-size: 200px; }
-  .selector-header__title { font-size: 1.5rem; }
+  .selection-screen { padding: 44px 16px 56px; }
+  .selector-header__title { font-size: 1.7rem; }
 }
