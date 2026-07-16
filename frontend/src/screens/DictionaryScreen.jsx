@@ -557,7 +557,7 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 			</div>
 
 			<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-				<div style={{ fontSize: 80, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1 }}>
+				<div style={{ fontSize: 80, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1 }}>
 					{entry.kanji || entry.kana}
 				</div>
 				<button

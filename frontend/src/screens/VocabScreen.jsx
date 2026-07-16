@@ -149,6 +149,7 @@ export default function VocabScreen({ session }) {
                     <InlineReveal
                       t={t}
                       kana={card.kana}
+                      isLarge={isKjToM}
                       main={
                         isKjToM
                           ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent2)' }}>{card.meaning}</div>

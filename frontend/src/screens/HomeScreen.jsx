@@ -24,7 +24,7 @@ export default function HomeScreen() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
       <header style={{ background: 'var(--bg-panel)', padding: '40px 24px', textAlign: 'center' }}>
-        <div style={{ fontSize: 64, color: 'var(--accent)', fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', lineHeight: 1 }}>
+        <div style={{ fontSize: 64, color: 'var(--accent)', fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', lineHeight: 1 }}>
           {t.appTitle}
         </div>
         <div style={{ fontSize: 22, fontWeight: 'bold', marginTop: 8 }}>{t.learnJapanese}</div>
@@ -56,7 +56,7 @@ export default function HomeScreen() {
                 onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-panel)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-card)';  e.currentTarget.style.transform = 'translateY(0)' }}
               >
-                <div style={{ fontSize: 64, color: card.color, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', lineHeight: 1 }}>
+                <div style={{ fontSize: 64, color: card.color, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', lineHeight: 1 }}>
                   {card.icon}
                 </div>
                 <div style={{ fontSize: 18, fontWeight: 'bold' }}>{card.title}</div>
