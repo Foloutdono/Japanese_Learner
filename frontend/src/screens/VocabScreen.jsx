@@ -4,7 +4,10 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
-import { MCQGrid, TypeInput, DoneMessage, Loading, DeckProgress, Readings } from '../components/QuizComponents'
+import {
+  MCQGrid, DoneMessage, Loading, DeckProgress,
+  RevealPanel, FlashcardFront,
+} from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
@@ -15,33 +18,30 @@ export default function VocabScreen({ session }) {
   const navigate    = useNavigate()
   const { t, lang } = useLang()
 
-  const PHASES = [
-    { key: 1, label: t.phase1, desc: t.phase1Desc },
-    { key: 2, label: t.phase2, desc: t.phase2Desc },
-    { key: 3, label: t.phase3, desc: t.phase3Desc },
+  const MODES = [
+    { key: 'qcm-kj-m',       label: t.modeQcmKjM ?? 'QCM (mot → sens)',   desc: t.modeQcmKjMDesc ?? 'Le mot est affiché, choisissez le sens' },
+    { key: 'qcm-m-kj',       label: t.modeQcmMKj ?? 'QCM (sens → mot)',   desc: t.modeQcmMKjDesc ?? 'Le sens est affiché, choisissez le mot' },
+    { key: 'flashcard-kj-m', label: t.modeFcKjM  ?? 'Carte (mot → sens)', desc: t.modeFcKjMDesc  ?? 'Le mot est affiché, révélez le sens' },
+    { key: 'flashcard-m-kj', label: t.modeFcMKj  ?? 'Carte (sens → mot)', desc: t.modeFcMKjDesc  ?? 'Le sens est affiché, révélez le mot' },
   ]
 
   const [level, setLevel]           = useState(null)
-  const [phase, setPhase]           = useState(null)
+  const [mode, setMode]             = useState(null)
   const [card, setCard]             = useState(null)
   const [loading, setLoading]       = useState(false)
   const [done, setDone]             = useState(false)
   const [answered, setAnswered]     = useState(false)
   const [selected, setSelected]     = useState(null)
-  const [input, setInput]           = useState('')
-  const [submitted, setSubmitted]   = useState(false)
   const [showRating, setShowRating] = useState(false)
   const [progress, setProgress]     = useState(null)
 
-  function fetchCard(lvl, ph) {
+  function fetchCard(lvl, m) {
     setLoading(true)
     setAnswered(false)
     setSelected(null)
-    setInput('')
-    setSubmitted(false)
     setShowRating(false)
 
-    apiFetch(`/api/vocab/card?level=${lvl}&phase=${ph}&lang=${lang}`, session)
+    apiFetch(`/api/vocab/card?level=${lvl}&mode=${m}&lang=${lang}`, session)
       .then(r => r.json())
       .then(data => {
         if (data.done) { setDone(true); setCard(null) }
@@ -51,33 +51,39 @@ export default function VocabScreen({ session }) {
   }
 
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
-  // level+phase. Fetched independently from the card so it never blocks
+  // level+mode. Fetched independently from the card so it never blocks
   // or slows down card navigation.
-  function loadProgress(lvl, ph) {
-    apiFetch(`/api/vocab/stats?level=${encodeURIComponent(lvl)}&phase=${ph}`, session)
+  function loadProgress(lvl, m) {
+    apiFetch(`/api/vocab/stats?level=${encodeURIComponent(lvl)}&mode=${m}`, session)
       .then(r => r.json())
       .then(data => setProgress(data?.error ? null : data))
       .catch(() => {})
   }
 
-  function startSession(lvl, ph) {
+  function startSession(lvl, m) {
     setLevel(lvl)
-    setPhase(ph)
+    setMode(m)
     setDone(false)
-    fetchCard(lvl, ph)
-    loadProgress(lvl, ph)
+    fetchCard(lvl, m)
+    loadProgress(lvl, m)
   }
 
   function postReview(quality) {
     apiFetch('/api/vocab/review', session, {
       method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),
+      body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
     }).then(() => {
       // Fire both in parallel: the next card should appear as soon as
       // it's ready, without waiting on the (heavier) stats recompute.
-      fetchCard(level, phase)
-      loadProgress(level, phase)
+      fetchCard(level, mode)
+      loadProgress(level, mode)
     })
+  }
+
+  // The written form to quiz on — some vocab entries are kana-only (no
+  // kanji), so fall back to kana for both the prompt and the choices.
+  function wordForm(entry) {
+    return entry.kanji || entry.kana
   }
 
   function onMCQAnswer(choice) {
@@ -88,9 +94,9 @@ export default function VocabScreen({ session }) {
     speakJapanese(card.kana)
   }
 
-  function onTypeSubmit() {
-    if (submitted || !input.trim()) return
-    setSubmitted(true)
+  function onFlashcardReveal() {
+    if (answered) return
+    setAnswered(true)
     setShowRating(true)
     speakJapanese(card.kana)
   }
@@ -107,58 +113,85 @@ export default function VocabScreen({ session }) {
     )
   }
 
-  // ── Phase selection ──
-  if (!phase) {
+  // ── Mode selection ──
+  if (!mode) {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => setLevel(null)} title={`${t.vocabulary} ${level}`} />
-        <SelectionScreen subtitle={t.selectPhase}>
-          <ModeSelector
-            modes={PHASES.map(p => ({ key: p.key, label: p.label, desc: p.desc }))}
-            onSelect={ph => startSession(level, ph)}
-          />
+        <SelectionScreen subtitle={t.selectMode ?? t.selectPhase}>
+          <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} />
         </SelectionScreen>
       </div>
     )
   }
 
   // ── Quiz ──
+  const isKjToM = card?.direction === 'kj-m'
+  const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
+
   return (
     <div style={{ minHeight: '100vh' }}>
-      <TopBar onBack={() => setPhase(null)} title={`${t.vocabulary} ${level} — ${t.phase1.replace('1', phase)}`} />
+      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${level} — ${modeLabel}`} />
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
         <DeckProgress stats={progress} />
         {loading && <Loading />}
-        {done    && <DoneMessage onBack={() => setPhase(null)} />}
+        {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>
             <PromptCard>
-              {phase === 1 && (
-                <>
-                  <div style={{ fontSize: 52, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
-                  <div style={{ marginTop: 8 }}>
-                    <Readings kana={card.kana} size={20} color="var(--text-secondary)" center />
+              {card.format === 'flashcard' && !answered && (
+                <FlashcardFront onReveal={onFlashcardReveal} t={t}>
+                  <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                    {isKjToM ? wordForm(card) : card.meaning}
                   </div>
+                </FlashcardFront>
+              )}
+
+              {card.format === 'flashcard' && answered && (
+                <>
+                  <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                    {isKjToM ? wordForm(card) : card.meaning}
+                  </div>
+                  <RevealPanel
+                    kana={card.kana}
+                    t={t}
+                    left={
+                      isKjToM
+                        ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent2)' }}>{card.meaning}</div>
+                        : <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{wordForm(card)}</div>
+                    }
+                  />
                 </>
               )}
-              {phase === 2 && (
-                <div style={{ fontSize: 52, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                  {card.kanji || card.kana}
-                </div>
-              )}
-              {phase === 3 && (
-                <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent2)' }}>{card.meaning}</div>
+
+              {card.format === 'qcm' && (
+                <>
+                  <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                    {isKjToM ? wordForm(card) : card.meaning}
+                  </div>
+                  {answered && (
+                    <RevealPanel
+                      kana={card.kana}
+                      t={t}
+                      left={
+                        isKjToM
+                          ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent2)' }}>{card.meaning}</div>
+                          : <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{wordForm(card)}</div>
+                      }
+                    />
+                  )}
+                </>
               )}
             </PromptCard>
 
-            {phase !== 3 && (
-              <MCQGrid choices={card.choices} correct={card.meaning}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer} />
+            {card.format === 'qcm' && (
+              <MCQGrid
+                choices={card.choices.map(c => isKjToM ? c.meaning : wordForm(c))}
+                correct={isKjToM ? card.meaning : wordForm(card)}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer}
+              />
             )}
-            {phase === 3 && (
-              <TypeInput value={input} onChange={setInput} onSubmit={onTypeSubmit}
-                submitted={submitted} answer={card.kana} placeholder={t.typeKana} />
-            )}
+
             <RatingBar active={showRating} onRate={postReview} />
           </>
         )}

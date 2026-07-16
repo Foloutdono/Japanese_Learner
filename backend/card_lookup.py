@@ -8,12 +8,13 @@ from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 
 # Representative mode used to gauge "do I know this word/kanji" for the
-# clickable badges. Vocab/kanji are tracked across several phases (kk-s,
-# k-k, s-k, ...); s-k (see word, recall meaning) is the closest proxy for
-# "do I know what this means when I read it". Swap this if a different
-# phase is a better fit for your app.
-VOCAB_STATUS_MODE = "kk-s"
-KANJI_STATUS_MODE = "kk-s"
+# clickable badges. Vocab/kanji are now tracked across 4-5 modes (qcm and
+# flashcard, each kanji→meaning and meaning→kanji, plus "write" for
+# kanji); qcm-kj-m (see the word, recognize the meaning among choices) is
+# the closest proxy for "do I know what this means when I read it".
+# Swap this if a different mode is a better fit for your app.
+VOCAB_STATUS_MODE = "qcm-kj-m"
+KANJI_STATUS_MODE = "qcm-kj-m"
 
 # Used to pick between multiple deck entries that share the same surface
 # form (e.g. 歩 is both the everyday word "marcher"/"pas" and the shogi

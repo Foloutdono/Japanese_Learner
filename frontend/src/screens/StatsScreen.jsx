@@ -4,10 +4,6 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 
-// Maps the SRS phase_key used by vocab/kanji to the numeric phase the
-// session screens expect (KanjiScreen's PHASES, and presumably VocabScreen's).
-const PHASE_KEY_TO_NUM = { 'kk-s': 1, 'k-k': 2, 's-k': 3, 'k-d': 4 }
-
 export default function StatsScreen({ session }) {
   const navigate    = useNavigate()
   const { t }       = useLang()
@@ -31,15 +27,14 @@ export default function StatsScreen({ session }) {
 
   // There's no dedicated "review" screen — due cards are just prioritized
   // automatically inside a normal session. So this drops the user straight
-  // into the right level/phase (or set/mode for kana) and the session
+  // into the right level/mode (or set/mode for kana) and the session
   // itself will surface due cards first.
   function startReview(category, key, mode) {
     if (category === 'kana') {
       navigate(`/kana?set=${encodeURIComponent(key)}&mode=${mode}`)
       return
     }
-    const phase = PHASE_KEY_TO_NUM[mode]
-    navigate(`/${category}?level=${encodeURIComponent(key)}&phase=${phase}`)
+    navigate(`/${category}?level=${encodeURIComponent(key)}&mode=${mode}`)
   }
 
   return (
@@ -83,10 +78,10 @@ export default function StatsScreen({ session }) {
               <div key={setName} className="card">
                 <div style={{ fontWeight: 'bold', marginBottom: 12, fontSize: 18 }}>{setName}</div>
                 <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-                  {['mcq', 'type'].map(m => (
+                  {['qcm', 'flashcard', 'write'].map(m => (
                     <div key={m} style={{ flex: 1, minWidth: 120 }}>
                       <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                        {m === 'mcq' ? t.modeQCM : t.modeType}
+                        {{ qcm: t.modeQCM ?? 'QCM', flashcard: t.modeFlashcard ?? 'Flashcard', write: t.modeWrite ?? 'Écriture' }[m]}
                       </div>
                       <StatCell s={modes[m]} t={t} onStartReview={() => startReview('kana', setName, m)} />
                     </div>
@@ -101,7 +96,12 @@ export default function StatsScreen({ session }) {
             {Object.entries(stats.vocab).map(([level, phases]) => (
               <div key={level} className="card">
                 <LevelHeader level={level} phases={phases} t={t} />
-                {[['kk-s', 'K+K→S'], ['k-k', 'K→S'], ['s-k', 'S→K']].map(([key, label]) => (
+                {[
+                  ['qcm-kj-m', 'QCM →sens'],
+                  ['qcm-m-kj', 'QCM →mot'],
+                  ['flashcard-kj-m', 'Carte →sens'],
+                  ['flashcard-m-kj', 'Carte →mot'],
+                ].map(([key, label]) => (
                   <div key={key} style={{ marginBottom: 10 }}>
                     <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
                     <StatCell s={phases[key]} t={t} onStartReview={() => startReview('vocab', level, key)} />
@@ -116,7 +116,13 @@ export default function StatsScreen({ session }) {
             {Object.entries(stats.kanji).map(([level, phases]) => (
               <div key={level} className="card">
                 <LevelHeader level={level} phases={phases} t={t} />
-                {[['kk-s', 'K+K→S'], ['k-k', 'K→S'], ['s-k', 'S→K'], ['k-d', 'K→Draw']].map(([key, label]) => (
+                {[
+                  ['qcm-kj-m', 'QCM →sens'],
+                  ['qcm-m-kj', 'QCM →kanji'],
+                  ['flashcard-kj-m', 'Carte →sens'],
+                  ['flashcard-m-kj', 'Carte →kanji'],
+                  ['write', 'Écriture'],
+                ].map(([key, label]) => (
                   phases[key] && (
                     <div key={key} style={{ marginBottom: 10 }}>
                       <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>

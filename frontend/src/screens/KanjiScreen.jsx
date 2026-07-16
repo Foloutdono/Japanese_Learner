@@ -4,7 +4,10 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { KanjiTopBar, TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
-import { MCQGrid, TypeInput, DoneMessage, Loading, DeckProgress, Readings } from '../components/QuizComponents'
+import {
+  MCQGrid, DoneMessage, Loading, DeckProgress,
+  RevealPanel, FlashcardFront,
+} from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
@@ -17,22 +20,21 @@ export default function KanjiScreen({ session }) {
   const { t, lang } = useLang()
   const [searchParams] = useSearchParams()
 
-  const PHASES = [
-    { key: 1, label: t.phase1, desc: t.phase1Desc },
-    { key: 2, label: t.phase2, desc: t.phase2Desc },
-    { key: 3, label: t.phase3, desc: t.phase3Desc },
-    { key: 4, label: t.phase4 ?? 'Write', desc: t.phase4Desc ?? 'See the meaning, write the kanji' },
+  const MODES = [
+    { key: 'qcm-kj-m',       label: t.modeQcmKjM ?? 'QCM (kanji → sens)',   desc: t.modeQcmKjMDesc ?? 'Le kanji est affiché, choisissez le sens' },
+    { key: 'qcm-m-kj',       label: t.modeQcmMKj ?? 'QCM (sens → kanji)',   desc: t.modeQcmMKjDesc ?? 'Le sens est affiché, choisissez le kanji' },
+    { key: 'flashcard-kj-m', label: t.modeFcKjM  ?? 'Carte (kanji → sens)', desc: t.modeFcKjMDesc  ?? 'Le kanji est affiché, révélez le sens' },
+    { key: 'flashcard-m-kj', label: t.modeFcMKj  ?? 'Carte (sens → kanji)', desc: t.modeFcMKjDesc  ?? 'Le sens est affiché, révélez le kanji' },
+    { key: 'write',          label: t.modeWrite  ?? 'Écriture',             desc: t.modeWriteDesc  ?? 'Voir le sens, écrire le kanji' },
   ]
 
   const [level, setLevel]             = useState(null)
-  const [phase, setPhase]             = useState(null)
+  const [mode, setMode]               = useState(null)
   const [card, setCard]               = useState(null)
   const [loading, setLoading]         = useState(false)
   const [done, setDone]               = useState(false)
   const [answered, setAnswered]       = useState(false)
   const [selected, setSelected]       = useState(null)
-  const [input, setInput]             = useState('')
-  const [submitted, setSubmitted]     = useState(false)
   const [showRating, setShowRating]   = useState(false)
   const [showDrawing, setShowDrawing] = useState(false)
   const [drawingEnabled, setDrawingEnabled] = useState(true)
@@ -43,30 +45,26 @@ export default function KanjiScreen({ session }) {
     if (card && card.lang !== lang) translateCard(card, lang)
   }, [lang])
 
-  // Deep-link support: if level/phase are given in the URL (e.g. from the
+  // Deep-link support: if level/mode are given in the URL (e.g. from the
   // Stats screen's "due now" button), jump straight into that session
   // instead of making the user pick again.
   useEffect(() => {
     const lvl = searchParams.get('level')
-    const ph  = searchParams.get('phase')
-    if (lvl && ph) {
-      startSession(lvl, Number(ph))
+    const m   = searchParams.get('mode')
+    if (lvl && m) {
+      startSession(lvl, m)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function fetchCard(lvl, ph) {
+  function fetchCard(lvl, m) {
     setLoading(true)
     setAnswered(false)
     setSelected(null)
-    setInput('')
-    setSubmitted(false)
     setShowRating(false)
     setShowDrawing(false)
 
-    console.log(`Fetching card for level ${lvl} phase ${ph} and language ${lang}`)
-
-    apiFetch(`/api/kanji/card?level=${lvl}&phase=${ph}&lang=${lang}`, session)
+    apiFetch(`/api/kanji/card?level=${lvl}&mode=${m}&lang=${lang}`, session)
       .then(r => r.json())
       .then(data => {
         if (data.done) { setDone(true); setCard(null) }
@@ -99,37 +97,41 @@ export default function KanjiScreen({ session }) {
   }
 
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
-  // level+phase. Fetched independently from the card so it never blocks
+  // level+mode. Fetched independently from the card so it never blocks
   // or slows down card navigation.
-  function loadProgress(lvl, ph) {
-    apiFetch(`/api/kanji/stats?level=${encodeURIComponent(lvl)}&phase=${ph}`, session)
+  function loadProgress(lvl, m) {
+    apiFetch(`/api/kanji/stats?level=${encodeURIComponent(lvl)}&mode=${m}`, session)
       .then(r => r.json())
       .then(data => setProgress(data?.error ? null : data))
       .catch(() => {})
   }
 
-  function startSession(lvl, ph) {
+  function startSession(lvl, m) {
     setLevel(lvl)
-    setPhase(ph)
+    setMode(m)
     setDone(false)
-    fetchCard(lvl, ph)
-    loadProgress(lvl, ph)
+    fetchCard(lvl, m)
+    loadProgress(lvl, m)
   }
 
   function postReview(quality) {
-    const needTraining = quality <= 3 && card?.kanji
+    // Struggling to recall the kanji from its meaning is exactly when a
+    // quick writing drill helps most — recognition-direction modes and
+    // the writing mode itself don't need this extra step.
+    const needTraining = quality <= 3 && card?.direction === 'm-kj' && drawingEnabled
+
     apiFetch('/api/kanji/review', session, {
       method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode: card.phase_key, quality }),
+      body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
     }).then(() => {
       // Fire in parallel with whatever comes next: the review already
       // happened, so the counts can refresh without blocking the UI.
-      loadProgress(level, phase)
-      if (needTraining && drawingEnabled) {
+      loadProgress(level, mode)
+      if (needTraining) {
         setShowRating(false)
         setShowDrawing(true)
       } else {
-        fetchCard(level, phase)
+        fetchCard(level, mode)
       }
     })
   }
@@ -142,9 +144,9 @@ export default function KanjiScreen({ session }) {
     speakJapanese(card.kana)
   }
 
-  function onTypeSubmit() {
-    if (submitted || !input.trim()) return
-    setSubmitted(true)
+  function onFlashcardReveal() {
+    if (answered) return
+    setAnswered(true)
     setShowRating(true)
     speakJapanese(card.kana)
   }
@@ -161,108 +163,106 @@ export default function KanjiScreen({ session }) {
     )
   }
 
-  // ── Phase selection ──
-  if (!phase) {
+  // ── Mode selection ──
+  if (!mode) {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => setLevel(null)} title={`${t.kanjiTitle} ${level}`} />
-        <SelectionScreen subtitle={t.selectPhase}>
-          <ModeSelector
-            modes={PHASES.map(p => ({ key: p.key, label: p.label, desc: p.desc }))}
-            onSelect={ph => startSession(level, ph)}
-          />
+        <SelectionScreen subtitle={t.selectMode ?? t.selectPhase}>
+          <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} />
         </SelectionScreen>
       </div>
     )
   }
 
   // ── Quiz ──
-  const translatedCorrect = card?.meaning ?? ''
-  const translatedChoices = (card?.choices ?? []).map(c => c.meaning)
+  const isKjToM = card?.direction === 'kj-m'
+  const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
 
   return (
     <div style={{ minHeight: '100vh' }}>
       <KanjiTopBar
-        onBack={() => setPhase(null)}
+        onBack={() => setMode(null)}
         onClick={() => setDrawingEnabled(d => !d)}
-        title={`${t.kanjiTitle} ${level} — ${PHASES.find(p => p.key === phase)?.label}`}
+        title={`${t.kanjiTitle} ${level} — ${modeLabel}`}
         drawingEnabled={drawingEnabled}
       />
       <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
         <DeckProgress stats={progress} />
         {loading && <Loading />}
-        {done    && <DoneMessage onBack={() => setPhase(null)} />}
+        {done    && <DoneMessage onBack={() => setMode(null)} />}
 
         {card && !loading && (
           <>
-            <PromptCard>
-              {phase === 1 && (
-                <>
-                  <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
-                  <div style={{ marginTop: 8 }}>
-                    <Readings
-                      kana={card.kana}
-                      onLabel={t.onyomi ?? "On'yomi"}
-                      kunLabel={t.kunyomi ?? "Kun'yomi"}
-                      size={18}
-                      color="var(--text-secondary)"
-                      center
-                    />
-                  </div>
-                  {card.stroke_count && (
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
-                      {card.stroke_count} {t.strokes}
+            {mode !== 'write' && (
+              <PromptCard>
+                {card.format === 'flashcard' && !answered && (
+                  <FlashcardFront onReveal={onFlashcardReveal} t={t}>
+                    <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                      {isKjToM ? card.kanji : card.meaning}
                     </div>
-                  )}
-                </>
-              )}
-              {phase === 2 && (
-                <>
-                  <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
-                  {card.stroke_count && (
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>
-                      {card.stroke_count} {t.strokes}
-                    </div>
-                  )}
-                </>
-              )}
-              {phase === 3 && (
-                <>
-                  <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent3)' }}>{translatedCorrect}</div>
-                  {card.kana && (
-                    <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 8 }}>({card.kana})</div>
-                  )}
-                </>
-              )}
-              {phase === 4 && (
-                <>
-                  <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent3)' }}>{translatedCorrect}</div>
-                  {card.kana && (
-                    <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 8 }}>({card.kana})</div>
-                  )}
-                </>
-              )}
-            </PromptCard>
+                  </FlashcardFront>
+                )}
 
-            {(phase === 1 || phase === 2) && (
-              <MCQGrid choices={translatedChoices} correct={translatedCorrect}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer} />
+                {card.format === 'flashcard' && answered && (
+                  <>
+                    <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                      {isKjToM ? card.kanji : card.meaning}
+                    </div>
+                    <RevealPanel
+                      kana={card.kana}
+                      t={t}
+                      left={
+                        isKjToM
+                          ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent3)' }}>{card.meaning}</div>
+                          : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                      }
+                    />
+                  </>
+                )}
+
+                {card.format === 'qcm' && (
+                  <>
+                    <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                      {isKjToM ? card.kanji : card.meaning}
+                    </div>
+                    {answered && (
+                      <RevealPanel
+                        kana={card.kana}
+                        t={t}
+                        left={
+                          isKjToM
+                            ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent3)' }}>{card.meaning}</div>
+                            : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                        }
+                      />
+                    )}
+                  </>
+                )}
+              </PromptCard>
             )}
-            {phase === 3 && (
-              <TypeInput value={input} onChange={setInput} onSubmit={onTypeSubmit}
-                submitted={submitted} answer={card.kanji} placeholder={t.typeKanji}
-                inputStyle={{ fontSize: 24, fontFamily: 'Yu Gothic, sans-serif' }}
-                wrongExtra={
-                  <div style={{ fontSize: 64, fontFamily: 'Yu Gothic, sans-serif', marginTop: 12 }}>
-                    {card.kanji}
-                  </div>
-                }
+
+            {mode === 'write' && (
+              <PromptCard>
+                <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent3)' }}>{card.meaning}</div>
+                {card.kana && (
+                  <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 8 }}>({card.kana})</div>
+                )}
+              </PromptCard>
+            )}
+
+            {card.format === 'qcm' && (
+              <MCQGrid
+                choices={card.choices.map(c => isKjToM ? c.meaning : c.kanji)}
+                correct={isKjToM ? card.meaning : card.kanji}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}
-            {phase === 4 && card.kanji && (
+
+            {mode === 'write' && card.kanji && (
               <DrawingQuiz
                 kanji={card.kanji}
-                meaning={translatedCorrect}
+                meaning={card.meaning}
                 kana={card.kana}
                 onValidate={() => {
                   setAnswered(true)
@@ -271,7 +271,7 @@ export default function KanjiScreen({ session }) {
                 }}
               />
             )}
-            {phase === 4 && answered && (
+            {mode === 'write' && answered && (
               <div style={{ marginTop: 16 }}>
                 <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
                   {card.kanji}
@@ -284,8 +284,8 @@ export default function KanjiScreen({ session }) {
             {showDrawing && (
               <DrawingOverlay
                 kanji={card.kanji}
-                meaning={translatedCorrect}
-                onDone={() => fetchCard(level, phase)}
+                meaning={card.meaning}
+                onDone={() => fetchCard(level, mode)}
               />
             )}
           </>

@@ -1,149 +1,392 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/TopBar'
-import RatingBar from '../components/RatingBar'
-import { CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading, DeckProgress } from '../components/QuizComponents'
-import { playKana } from '../components/sound'
 
-export default function KanaScreen({ session }) {
-  const navigate    = useNavigate()
-  const { t, lang } = useLang()
+// ── Big kana/kanji display ────────────────────────────────
+export function CharDisplay({ char, size = 96 }) {
+  return (
+    <div style={{
+      fontSize: size,
+      fontFamily: 'Yu Gothic, sans-serif',
+      color: '#fff',
+      margin: '16px 0',
+      lineHeight: 1,
+    }}>
+      {char}
+    </div>
+  )
+}
 
-  // Map translated labels → API slugs
-  const SETS = [
-    { label: t.hiraganaBase,         slug: 'hiragana_basic'  },
-    { label: t.hiraganaCombinations, slug: 'hiragana_combos' },
-    { label: t.katakanaBase,         slug: 'katakana_basic'  },
-    { label: t.katakanaCombinations, slug: 'katakana_combos' },
+// ── MCQ answer button ─────────────────────────────────────
+export function MCQButton({ choice, correct, selected, answered, onClick }) {
+  const isCorrect  = choice === correct
+  const isSelected = choice === selected
+  let bg = 'var(--bg-card)'
+  if (answered && isCorrect)                bg = 'var(--success)'
+  if (answered && isSelected && !isCorrect) bg = 'var(--danger)'
+
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: bg,
+        color: 'var(--text-primary)',
+
+        fontSize: 'clamp(16px, 2vw, 24px)',
+
+        minHeight: '70px',
+        padding: '12px',
+
+        width: '100%',
+
+        borderRadius: 12,
+        border: '2px solid var(--border)',
+
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+
+        textAlign: 'center',
+        wordBreak: 'break-word',
+
+        fontWeight: 'bold',
+
+        transition: 'background 0.15s, transform 0.1s',
+
+        cursor: answered ? 'default' : 'pointer',
+      }}
+      onMouseEnter={e => { if (!answered) e.currentTarget.style.transform = 'scale(1.02)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
+    >
+      {choice}
+    </button>
+  )
+}
+
+// ── MCQ choices grid ──────────────────────────────────────
+export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+      gap: 'clamp(8px, 2vw, 16px)',
+      width: '100%',
+      maxWidth: 900,
+      margin: '0 auto',
+    }}>
+      {choices.map(choice => (
+        <MCQButton
+          key={choice}
+          choice={choice}
+          correct={correct}
+          selected={selected}
+          answered={answered}
+          onClick={() => onAnswer(choice)}
+        />
+      ))}
+    </div>
+  )
+}
+
+// ── Type input + submit + result ──────────────────────────
+export function TypeInput({
+  value, onChange, onSubmit, submitted, answer,
+  placeholder, inputStyle = {}, wrongExtra = null,
+}) {
+  const { t } = useLang()
+  const isCorrect = value.trim().toLowerCase() === answer?.toLowerCase()
+
+  return (
+    <div>
+      <input
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && onSubmit()}
+        placeholder={placeholder ?? t.typeAnswer}
+        disabled={submitted}
+        autoFocus
+        style={{
+          width: '100%',
+          padding: '12px 20px',
+          fontSize: 18,
+          marginBottom: 12,
+          ...inputStyle,
+        }}
+      />
+      {!submitted && (
+        <button
+          onClick={onSubmit}
+          style={{ background: 'var(--accent)', color: '#fff', width: '100%' }}
+        >
+          {t.submit}
+        </button>
+      )}
+      {submitted && (
+        <div style={{
+          fontSize: 18, fontWeight: 'bold', marginTop: 8,
+          color: isCorrect ? 'var(--success)' : 'var(--danger)',
+        }}>
+          {isCorrect ? t.correct : `${t.wrong} ${answer}`}
+          {!isCorrect && wrongExtra}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Mode toggle ───────────────────────────────────────────
+export function ModeToggle({ mode, onChange, modes }) {
+  const { t } = useLang()
+  const defaultModes = [
+    ['qcm', t.modeQCM ?? 'QCM'],
+    ['flashcard', t.modeFlashcard ?? 'Flashcard'],
+    ['write', t.modeWrite ?? 'Écriture'],
   ]
 
-  const [selectedSet, setSelectedSet] = useState(null) // { label, slug }
-  const [mode, setMode]               = useState('mcq')
-  const [card, setCard]               = useState(null)
-  const [loading, setLoading]         = useState(false)
-  const [done, setDone]               = useState(false)
-  const [answered, setAnswered]       = useState(false)
-  const [selected, setSelected]       = useState(null)
-  const [input, setInput]             = useState('')
-  const [submitted, setSubmitted]     = useState(false)
-  const [showRating, setShowRating]   = useState(false)
-  const [progress, setProgress]       = useState(null)
+  return (
+    <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+      {(modes ?? defaultModes).map(([key, label]) => (
+        <button
+          key={key}
+          onClick={() => onChange(key)}
+          style={{
+            background: mode === key ? 'var(--accent)' : 'var(--bg-card)',
+            color: 'var(--text-primary)',
+            fontSize: 13,
+          }}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}
 
-  function fetchCard(slug, m) {
-    setLoading(true)
-    setAnswered(false)
-    setSelected(null)
-    setInput('')
-    setSubmitted(false)
-    setShowRating(false)
+// ── Done message ──────────────────────────────────────────
+export function DoneMessage({ onBack }) {
+  const { t } = useLang()
+  return (
+    <div style={{ color: 'var(--success)', fontSize: 18, textAlign: 'center', padding: 40 }}>
+      {t.quizComplete}
+      <br /><br />
+      <button
+        onClick={onBack}
+        style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)' }}
+      >
+        {t.backToMenu}
+      </button>
+    </div>
+  )
+}
 
-    apiFetch(`/api/kana/card?set_name=${encodeURIComponent(slug)}&mode=${m}`, session)
-      .then(r => r.json())
-      .then(data => {
-        if (data.error || data.detail) { console.error('API error:', data); setLoading(false); return }
-        if (data.done) { setDone(true); setCard(null) }
-        else { setCard(data); setDone(false) }
-        setLoading(false)
-      })
-  }
+// ── Loading ───────────────────────────────────────────────
+export function Loading() {
+  const { t } = useLang()
+  return (
+    <div style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 40 }}>
+      {t.loading}
+    </div>
+  )
+}
 
-  // Deck progress (à apprendre / en cours / maîtrisé) for the current
-  // set+mode. Fetched independently from the card so it never blocks or
-  // slows down card navigation.
-  function loadProgress(slug, m) {
-    apiFetch(`/api/kana/stats?set_name=${encodeURIComponent(slug)}&mode=${m}`, session)
-      .then(r => r.json())
-      .then(data => setProgress(data?.error ? null : data))
-      .catch(() => {})
-  }
+// ── Deck progress (à apprendre / en cours / maîtrisé) ─────
+export function DeckProgress({ stats }) {
+  const { t } = useLang()
+  if (!stats || !stats.total) return null
 
-  function startSession(set) {
-    setSelectedSet(set)
-    setDone(false)
-    fetchCard(set.slug, mode)
-    loadProgress(set.slug, mode)
-  }
+  const { total, new: toLearn, learning, mastered } = stats
 
-  function switchMode(m) {
-    setMode(m)
-    if (selectedSet) {
-      fetchCard(selectedSet.slug, m)
-      loadProgress(selectedSet.slug, m)
-    }
-  }
+  const segments = [
+    { key: 'new',      value: toLearn,  color: 'var(--text-secondary)', label: t.progressNew      ?? 'À apprendre' },
+    { key: 'learning', value: learning, color: 'var(--accent)',         label: t.progressLearning ?? 'En cours' },
+    { key: 'mastered', value: mastered, color: 'var(--success)',        label: t.progressMastered ?? 'Maîtrisé' },
+  ]
 
-  function postReview(quality) {
-    apiFetch('/api/kana/review', session, {
-      method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode, quality }),
-    }).then(() => {
-      // Fire both in parallel: the next card should appear as soon as
-      // it's ready, without waiting on the (heavier) stats recompute.
-      fetchCard(selectedSet.slug, mode)
-      loadProgress(selectedSet.slug, mode)
-    })
-  }
+  return (
+    <div style={{ maxWidth: 480, margin: '0 auto 20px' }}>
+      <div style={{
+        display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden',
+        background: 'var(--bg-card)',
+      }}>
+        {segments.map(s => (
+          s.value > 0 && (
+            <div key={s.key} style={{ width: `${(s.value / total) * 100}%`, background: s.color }} />
+          )
+        ))}
+      </div>
+      <div style={{
+        display: 'flex', justifyContent: 'center', flexWrap: 'wrap',
+        gap: 14, marginTop: 8, fontSize: 12, color: 'var(--text-secondary)',
+      }}>
+        {segments.map(s => (
+          <span key={s.key} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span style={{
+              width: 8, height: 8, borderRadius: '50%',
+              background: s.color, display: 'inline-block',
+            }} />
+            {s.value}/{total} {s.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
 
-  function onMCQAnswer(choice) {
-    if (answered) return
-    setSelected(choice)
-    setAnswered(true)
-    setShowRating(true)
-    playKana(card.romaji)
-  }
+// ── Kanji/vocab readings display ──────────────────────────
+// On'yomi readings are written in katakana, kun'yomi in hiragana — a
+// kanji's combined reading field mixes both, separated by '・' or ';',
+// e.g. "イチ・イツ・ひと~・ひと.つ". We classify each token by its first
+// actual kana character (skipping '.'/'~', which are okurigana/variant
+// markers, not kana). Vocab readings don't have this on/kun distinction
+// (a whole word has one register of readings, not two), so when a field
+// doesn't contain both kinds, Readings just renders a plain list instead
+// of forcing on'yomi/kun'yomi labels onto it.
+function isOnyomiToken(token) {
+  const firstKana = [...token].find(c => /[\u3040-\u30FF]/.test(c))
+  if (!firstKana) return false
+  return /[\u30A0-\u30FF]/.test(firstKana) // katakana range
+}
 
-  function onTypeSubmit() {
-    if (submitted || !input.trim()) return
-    setSubmitted(true)
-    setShowRating(true)
-    playKana(card.romaji)
-  }
+function splitReadingTokens(kana) {
+  return (kana || '')
+    .split(/[・;]/)
+    .map(s => s.trim())
+    .filter(Boolean)
+}
 
-  // ── Set selection ──
-  if (!selectedSet) {
-    return (
-      <div style={{ minHeight: '100vh' }}>
-        <TopBar onBack={() => navigate('/')} title="Kana" />
-        <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
-          <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>{t.selectKanaSet}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 400, margin: '0 auto' }}>
-            {SETS.map(s => (
-              <button key={s.slug} onClick={() => startSession(s)} className="button-set-choice">
-                {s.label}
-              </button>
-            ))}
-          </div>
+export function ReadingGroup({ label, readings, size = 16, color = 'var(--text-primary)', center = false }) {
+  if (!readings.length) return null
+  return (
+    <div style={{ marginBottom: 10 }}>
+      {label && (
+        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 5, textAlign: center ? 'center' : 'left' }}>
+          {label}
         </div>
+      )}
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', columnGap: 16, rowGap: 4,
+        justifyContent: center ? 'center' : 'flex-start',
+      }}>
+        {readings.map((r, i) => (
+          <span key={i} style={{ fontSize: size, color, whiteSpace: 'nowrap' }}>
+            {readings.length > 1 && (
+              <span style={{ fontSize: Math.max(size - 5, 10), color: 'var(--text-secondary)', marginRight: 4 }}>
+                {i + 1}.
+              </span>
+            )}
+            <span style={{ fontFamily: 'Yu Gothic, sans-serif' }}>{r}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Renders a kana reading field elegantly: on'yomi/kun'yomi split for a
+// kanji's mixed readings, or a plain (numbered if there's more than one)
+// list for a single-register reading like vocab. Returns null if empty.
+export function Readings({ kana, onLabel, kunLabel, size = 16, color, center = false }) {
+  const tokens = splitReadingTokens(kana)
+  if (!tokens.length) return null
+
+  const on  = tokens.filter(isOnyomiToken)
+  const kun = tokens.filter(t => !isOnyomiToken(t))
+
+  if (on.length && kun.length) {
+    return (
+      <div>
+        <ReadingGroup label={onLabel}  readings={on}  size={size} color={color} center={center} />
+        <ReadingGroup label={kunLabel} readings={kun} size={size} color={color} center={center} />
       </div>
     )
   }
 
-  // ── Quiz ──
+  return <ReadingGroup readings={tokens} size={size} color={color} center={center} />
+}
+
+// ── Reveal panel ───────────────────────────────────────────
+// Shared "answer" layout: the resolved answer on the left, readings on
+// the right — used identically whether it's revealed by tapping a
+// Flashcard or by answering a QCM. `kana` is optional (kana quiz cards
+// have no separate reading to show — the kana itself IS the answer).
+export function RevealPanel({ left, kana, t }) {
   return (
-    <div style={{ minHeight: '100vh' }}>
-      <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} />
-      <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
-        <ModeToggle mode={mode} onChange={switchMode} />
-        <DeckProgress stats={progress} />
-        {loading && <Loading />}
-        {done    && <DoneMessage onBack={() => setSelectedSet(null)} />}
-        {card && !loading && (
-          <>
-            <CharDisplay char={card.kana} />
-            {mode === 'mcq' && (
-              <MCQGrid choices={card.choices} correct={card.romaji}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer} />
-            )}
-            {mode === 'type' && (
-              <TypeInput value={input} onChange={setInput} onSubmit={onTypeSubmit}
-                submitted={submitted} answer={card.romaji} placeholder={t.typeRomaji} />
-            )}
-            <RatingBar active={showRating} onRate={postReview} />
-          </>
-        )}
+    <div style={{
+      display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'flex-start',
+      flexWrap: 'wrap', marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)',
+    }}>
+      <div>{left}</div>
+      {kana && (
+        <div style={{ paddingLeft: 20, borderLeft: '1px solid var(--border)' }}>
+          <Readings
+            kana={kana}
+            onLabel={t?.onyomi ?? "On'yomi"}
+            kunLabel={t?.kunyomi ?? "Kun'yomi"}
+            size={16}
+            center
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Flashcard front ────────────────────────────────────────
+// Tap-to-reveal wrapper for a flashcard's prompt side.
+export function FlashcardFront({ children, onReveal, t }) {
+  return (
+    <div onClick={onReveal} style={{ cursor: 'pointer' }}>
+      {children}
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 16 }}>
+        {t?.tapToReveal ?? 'Touchez pour révéler'}
       </div>
     </div>
+  )
+}
+
+// ── Question type badge ─────────────────────────────────────────
+export function QuestionTypeBadge({ type }) {
+  const { t } = useLang()
+
+  const TYPES = {
+    comprehension: {
+      label: t.questionTypeComprehension ?? 'Comprehension',
+      color: '#3B82F6',
+    },
+    vocabulary: {
+      label: t.questionTypeVocabulary ?? 'Vocabulary',
+      color: '#10B981',
+    },
+    grammar: {
+      label: t.questionTypeGrammar ?? 'Grammar',
+      color: '#F59E0B',
+    },
+    inference: {
+      label: t.questionTypeInference ?? 'Inference',
+      color: '#8B5CF6',
+    },
+  }
+
+  const { label, color } = TYPES[type] ?? {
+    label: type,
+    color: 'var(--text-secondary)',
+  }
+
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '4px 10px',
+        borderRadius: 999,
+        background: color,
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 700,
+        letterSpacing: '0.03em',
+        textTransform: 'uppercase',
+        marginBottom: 12,
+      }}
+    >
+      {label}
+    </span>
   )
 }
