@@ -356,7 +356,16 @@ export function RevealPanel({ left, kana, t }) {
           <Readings
             kana={kana}
             onLabel={t?.onyomi ?? "On'yomi"}
-            size={18}────────────────────────────────────────
+            kunLabel={t?.kunyomi ?? "Kun'yomi"}
+            size={18}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Inline reveal panel ──────────────────────────────────
 // Single-box layout: main content on the left, readings on the right,
 // no divider line. Used when the "answer" is already conveyed some
 // other way (e.g. the highlighted MCQ choice) so we don't repeat it —
