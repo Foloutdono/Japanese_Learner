@@ -385,14 +385,49 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true }) {
   )
 }
 
-// ── Flashcard front ────────────────────────────────────────
-// Tap-to-reveal wrapper for a flashcard's prompt side.
-export function FlashcardFront({ children, onReveal, t }) {
+// ── Flashcard (click anywhere to reveal, then flip freely) ─
+// Owns its own reveal/face state so the card behaves like a physical
+// flashcard: the first click reveals the back (and fires `onReveal`
+// once, e.g. so the parent can log the card as "seen"); every click
+// after that just flips between front and back at will, with no extra
+// prop wiring needed from the parent.
+//
+//   <Flashcard
+//     front={<CharDisplay char={char} />}
+//     back={<RevealPanel left={meaning} kana={kana} t={t} />}
+//     onReveal={() => markSeen(cardId)}
+//     resetKey={cardId}
+//     t={t}
+//   />
+export function Flashcard({ front, back, onReveal, t, resetKey }) {
+  const [revealed, setRevealed] = useState(false)
+  const [showBack, setShowBack] = useState(false)
+
+  // When the caller moves on to a new card (e.g. passes the card's id
+  // as resetKey), snap back to the unrevealed front instead of
+  // carrying over the previous card's flip state.
+  useEffect(() => {
+    setRevealed(false)
+    setShowBack(false)
+  }, [resetKey])
+
+  const handleClick = () => {
+    if (!revealed) {
+      setRevealed(true)
+      setShowBack(true)
+      onReveal?.()
+    } else {
+      setShowBack(s => !s)
+    }
+  }
+
   return (
-    <div onClick={onReveal} style={{ cursor: 'pointer' }}>
-      {children}
+    <div onClick={handleClick} style={{ cursor: 'pointer' }}>
+      {showBack ? back : front}
       <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 16 }}>
-        {t?.tapToReveal ?? 'Touchez pour révéler'}
+        {revealed
+          ? (t?.tapToFlip ?? 'Touchez pour retourner')
+          : (t?.tapToReveal ?? 'Touchez pour révéler')}
       </div>
     </div>
   )
