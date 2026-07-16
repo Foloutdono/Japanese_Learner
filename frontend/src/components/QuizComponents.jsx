@@ -329,6 +329,32 @@ export function RevealPanel({ left, kana, t }) {
   )
 }
 
+// ── Inline reveal ──────────────────────────────────────────
+// Single-box layout: main content on the left, readings on the right,
+// no divider line. Used when the "answer" is already conveyed some
+// other way (e.g. the highlighted MCQ choice) so we don't repeat it —
+// `main` is just whatever should sit next to the readings, decided by
+// the caller (unchanged prompt for QCM, swapped-to-answer for
+// Flashcard).
+export function InlineReveal({ main, kana, t, gap = 24 }) {
+  return (
+    <div style={{
+      display: 'flex', gap, justifyContent: 'center', alignItems: 'center',
+      flexWrap: 'wrap',
+    }}>
+      <div>{main}</div>
+      {kana && (
+        <Readings
+          kana={kana}
+          onLabel={t?.onyomi ?? "On'yomi"}
+          kunLabel={t?.kunyomi ?? "Kun'yomi"}
+          size={16}
+        />
+      )}
+    </div>
+  )
+}
+
 // ── Flashcard front ────────────────────────────────────────
 // Tap-to-reveal wrapper for a flashcard's prompt side.
 export function FlashcardFront({ children, onReveal, t }) {
