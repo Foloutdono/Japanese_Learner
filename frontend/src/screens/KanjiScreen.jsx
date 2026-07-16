@@ -6,7 +6,7 @@ import { KanjiTopBar, TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   MCQGrid, DoneMessage, Loading, DeckProgress,
-  InlineReveal, FlashcardFront,
+  InlineReveal, Flashcard,
 } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
@@ -191,22 +191,26 @@ export default function KanjiScreen({ session }) {
           <>
             {mode !== 'write' && (
               <PromptCard>
-                {card.format === 'flashcard' && !answered && (
-                  <FlashcardFront onReveal={onFlashcardReveal} t={t}>
-                    <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                      {isKjToM ? card.kanji : card.meaning}
-                    </div>
-                  </FlashcardFront>
-                )}
-
-                {card.format === 'flashcard' && answered && (
-                  <InlineReveal
+                {card.format === 'flashcard' && (
+                  <Flashcard
                     t={t}
-                    kana={card.kana}
-                    main={
-                      isKjToM
-                        ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent3)' }}>{card.meaning}</div>
-                        : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                    resetKey={card.card_id}
+                    onReveal={onFlashcardReveal}
+                    front={
+                      <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                        {isKjToM ? card.kanji : card.meaning}
+                      </div>
+                    }
+                    back={
+                      <InlineReveal
+                        t={t}
+                        kana={card.kana}
+                        main={
+                          isKjToM
+                            ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent3)' }}>{card.meaning}</div>
+                            : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                        }
+                      />
                     }
                   />
                 )}
