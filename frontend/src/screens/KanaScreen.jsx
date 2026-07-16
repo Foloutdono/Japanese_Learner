@@ -121,8 +121,7 @@ export default function KanaScreen({ session }) {
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => navigate('/')} title="Kana" />
         <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
-          <div style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>{t.selectKanaSet}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 400, margin: '0 auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 600, margin: '0 auto' }}>
             {SETS.map(s => (
               <button key={s.slug} onClick={() => startSession(s)} className="button-set-choice">
                 {s.label}
