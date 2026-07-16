@@ -7,9 +7,8 @@ def key(*parts: object) -> str:
 
 
 def ensure_initialized(cache_key: str, init_fn) -> None:
-    if cache_key not in _initialized:
-        init_fn()
-        _initialized.add(cache_key)
+    init_fn()
+    _initialized.add(cache_key)
 
 
 def take_next(cache_key: str, fetch_fn, limit: int = 10) -> str | None:
