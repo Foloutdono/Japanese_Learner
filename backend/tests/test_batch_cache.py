@@ -19,6 +19,17 @@ class BatchCacheTests(unittest.TestCase):
         self.assertIn(key_b, batch_cache._initialized)
         self.assertNotEqual(key_a, key_b)
 
+    def test_ensure_initialized_runs_for_every_call(self) -> None:
+        calls = []
+
+        def init() -> None:
+            calls.append("called")
+
+        batch_cache.ensure_initialized("cache-key", init)
+        batch_cache.ensure_initialized("cache-key", init)
+
+        self.assertEqual(calls, ["called", "called"])
+
 
 if __name__ == "__main__":
     unittest.main()

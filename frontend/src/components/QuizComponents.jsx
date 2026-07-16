@@ -385,7 +385,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true }) {
             kana={kana}
             onLabel={t?.onyomi ?? "On'yomi"}
             kunLabel={t?.kunyomi ?? "Kun'yomi"}
-            size={18}
+            size={25}
             center
           />
         </div>
