@@ -1,22 +1,19 @@
 /**
  * LevelSelector
- * Renders a responsive JLPT level tile grid, colour-branded to match
- * whatever section it lives in (Vocabulary, Kanji, Grammar...).
+ * Renders JLPT levels as a single-column, hairline-divided list —
+ * not a grid of coloured tiles. Each row pairs a small sequence
+ * index with a large serif level mark and a hint, right-aligned
+ * for asymmetry. One accent colour, used only on hover/focus.
  *
  * Props:
  *   onSelect(level)  — called when a level is clicked
- *   color            — brand colour for this section, as a hex string
- *                       (default: '#c1442c', shu-iro vermillion, i.e. var(--accent))
+ *   color            — accent colour for this section, as a hex string
+ *                       or CSS var() (default: var(--accent), shu-iro)
  *   levels           — array of level strings (default: N5…N1)
- *   eyebrow, title, subtitle — header copy. eyebrow/title default to the
- *     original copy so existing screens render unchanged, but every
- *     section should now pass its own eyebrow (e.g. "Kanji JLPT" for
- *     /kanji) — previously this header always said "Vocabulary JLPT" no
- *     matter which section rendered it. subtitle has no default: tapping
- *     a tile is self-explanatory, so the grid stays caption-free unless
- *     a screen has something genuinely new to say. Pass eyebrow="" / etc.
- *     to hide a line, or wrap in <SelectionScreen> and omit all three to
- *     use its header.
+ *   eyebrow, title, subtitle — header copy. subtitle has no default:
+ *     the list is self-explanatory. Pass eyebrow="" / etc. to hide a
+ *     line, or wrap in <SelectionScreen> and omit all three to use
+ *     its header instead.
  */
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
@@ -28,21 +25,9 @@ const LEVEL_HINTS = {
   N1: 'Challenge your best Japanese',
 }
 
-// Darkens a #rrggbb colour towards black so each tile can use a subtle
-// diagonal gradient instead of a flat fill. Falls back to the plain
-// colour for anything that isn't a hex string (e.g. a CSS var()).
-function shade(hex, percent) {
-  if (typeof hex !== 'string' || !hex.startsWith('#') || hex.length !== 7) return hex
-  const n = parseInt(hex.slice(1), 16)
-  const r = Math.round(((n >> 16) & 255) * (1 - percent))
-  const g = Math.round(((n >> 8) & 255) * (1 - percent))
-  const b = Math.round((n & 255) * (1 - percent))
-  return `rgb(${r}, ${g}, ${b})`
-}
-
 export default function LevelSelector({
   onSelect,
-  color = '#c1442c',
+  color = 'var(--accent)',
   levels = DEFAULT_LEVELS,
   eyebrow = 'Vocabulary JLPT',
   title = 'Choose your JLPT level',
@@ -52,23 +37,26 @@ export default function LevelSelector({
     <div className="level-selector">
       {(eyebrow || title || subtitle) && (
         <div className="selector-header">
-          {eyebrow && <div className="selector-header__eyebrow" style={{ color }}>{eyebrow}</div>}
+          {eyebrow && <div className="selector-header__eyebrow">{eyebrow}</div>}
           {title && <div className="selector-header__title">{title}</div>}
           {subtitle && <div className="selector-header__subtitle">{subtitle}</div>}
         </div>
       )}
-      <div className="select-tile-grid" style={{ maxWidth: 780, margin: '0 auto' }}>
-        {levels.map(l => (
+      <div className="choice-list">
+        {levels.map((l, i) => (
           <button
             key={l}
             type="button"
             onClick={() => onSelect(l)}
-            className="select-tile"
-            style={{ background: `linear-gradient(135deg, ${color}, ${shade(color, 0.35)})` }}
+            className="choice-row"
+            style={{ '--row-color': color }}
           >
-            <div className="select-tile__badge">{l}</div>
-            <div className="select-tile__copy">{LEVEL_HINTS[l]}</div>
-            <span className="select-tile__cue" aria-hidden="true" />
+            <span className="choice-row__accent" aria-hidden="true" />
+            <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
+            <span className="choice-row__main">
+              <span className="choice-row__title">{l}</span>
+              <span className="choice-row__desc">{LEVEL_HINTS[l]}</span>
+            </span>
           </button>
         ))}
       </div>
