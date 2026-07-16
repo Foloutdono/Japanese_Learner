@@ -14,19 +14,14 @@ import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
 import {DrawingQuiz, DrawingOverlay} from '../components/DrawingCanvas'
 import { speakJapanese } from '../components/sound'
+import { kanjiModes } from '../components/quizModes'
 
 export default function KanjiScreen({ session }) {
   const navigate    = useNavigate()
   const { t, lang } = useLang()
   const [searchParams] = useSearchParams()
 
-  const MODES = [
-    { key: 'qcm-kj-m',       label: t.modeQcmKjM ?? 'QCM (kanji → sens)',   desc: t.modeQcmKjMDesc ?? 'Le kanji est affiché, choisissez le sens' },
-    { key: 'qcm-m-kj',       label: t.modeQcmMKj ?? 'QCM (sens → kanji)',   desc: t.modeQcmMKjDesc ?? 'Le sens est affiché, choisissez le kanji' },
-    { key: 'flashcard-kj-m', label: t.modeFcKjM  ?? 'Carte (kanji → sens)', desc: t.modeFcKjMDesc  ?? 'Le kanji est affiché, révélez le sens' },
-    { key: 'flashcard-m-kj', label: t.modeFcMKj  ?? 'Carte (sens → kanji)', desc: t.modeFcMKjDesc  ?? 'Le sens est affiché, révélez le kanji' },
-    { key: 'write',          label: t.modeWrite  ?? 'Écriture',             desc: t.modeWriteDesc  ?? 'Voir le sens, écrire le kanji' },
-  ]
+  const MODES = kanjiModes(t)
 
   const [level, setLevel]             = useState(null)
   const [mode, setMode]               = useState(null)

@@ -13,17 +13,13 @@ import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
 import { speakJapanese } from '../components/sound'
+import { vocabKanjiModes } from '../components/quizModes'
 
 export default function VocabScreen({ session }) {
   const navigate    = useNavigate()
   const { t, lang } = useLang()
 
-  const MODES = [
-    { key: 'qcm-kj-m',       label: t.modeQcmKjM ?? 'QCM (mot → sens)',   desc: t.modeQcmKjMDesc ?? 'Le mot est affiché, choisissez le sens' },
-    { key: 'qcm-m-kj',       label: t.modeQcmMKj ?? 'QCM (sens → mot)',   desc: t.modeQcmMKjDesc ?? 'Le sens est affiché, choisissez le mot' },
-    { key: 'flashcard-kj-m', label: t.modeFcKjM  ?? 'Carte (mot → sens)', desc: t.modeFcKjMDesc  ?? 'Le mot est affiché, révélez le sens' },
-    { key: 'flashcard-m-kj', label: t.modeFcMKj  ?? 'Carte (sens → mot)', desc: t.modeFcMKjDesc  ?? 'Le sens est affiché, révélez le mot' },
-  ]
+  const MODES = vocabKanjiModes(t, t.wordNoun ?? 'mot')
 
   const [level, setLevel]           = useState(null)
   const [mode, setMode]             = useState(null)

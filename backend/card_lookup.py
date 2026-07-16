@@ -6,15 +6,14 @@ phrase analyzer and the reading-practice mode.
 
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from quiz_modes import STATUS_MODE
 
 # Representative mode used to gauge "do I know this word/kanji" for the
-# clickable badges. Vocab/kanji are now tracked across 4-5 modes (qcm and
-# flashcard, each kanji→meaning and meaning→kanji, plus "write" for
-# kanji); qcm-kj-m (see the word, recognize the meaning among choices) is
-# the closest proxy for "do I know what this means when I read it".
-# Swap this if a different mode is a better fit for your app.
-VOCAB_STATUS_MODE = "qcm-kj-m"
-KANJI_STATUS_MODE = "qcm-kj-m"
+# clickable badges — see quiz_modes.py for the reasoning. Both vocab and
+# kanji use the same mode here, but they're kept as separate names since
+# nothing requires them to always match.
+VOCAB_STATUS_MODE = STATUS_MODE
+KANJI_STATUS_MODE = STATUS_MODE
 
 # Used to pick between multiple deck entries that share the same surface
 # form (e.g. 歩 is both the everyday word "marcher"/"pas" and the shogi

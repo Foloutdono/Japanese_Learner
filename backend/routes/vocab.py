@@ -7,6 +7,7 @@ from srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, take_next
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
+from quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -18,16 +19,6 @@ class ReviewPayload(BaseModel):
     quality: int
 
 FR_MAP = VOCAB_FR
-
-# format: "qcm" | "flashcard" — how the prompt/choices are presented.
-# direction: "kj-m" (word shown, recall the meaning) |
-#            "m-kj" (meaning shown, recall the word)
-MODE_INFO = {
-    "qcm-kj-m":       ("qcm", "kj-m"),
-    "qcm-m-kj":       ("qcm", "m-kj"),
-    "flashcard-kj-m": ("flashcard", "kj-m"),
-    "flashcard-m-kj": ("flashcard", "m-kj"),
-}
 
 
 @router.get("/api/vocab/card")
