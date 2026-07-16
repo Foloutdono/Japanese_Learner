@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
+
 :root {
   --bg-main:        #1a1a2e;
   --bg-card:        #16213e;
@@ -15,6 +17,8 @@
   --radius:         12px;
   --max-w:          1100px;
   --gap:            24px;
+
+  --font-display:   'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,8 +40,91 @@ button {
   transition: filter 0.15s;
 }
 button:hover { filter: brightness(1.15); }
+button:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
 
-.level-selector {
+/* ── Selection screen shell (ambient atmosphere) ─────────── */
+.selection-screen {
+  position: relative;
+  padding: 56px 24px 64px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.selection-screen__atmosphere {
+  position: absolute;
+  inset: -10% -10% auto -10%;
+  height: 420px;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--glow-color, var(--accent2)) 22%, transparent), transparent 55%),
+    radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--glow-color, var(--accent2)) 14%, transparent), transparent 50%);
+}
+
+.selection-screen__glyph {
+  position: absolute;
+  top: -40px;
+  right: -20px;
+  font-family: 'Yu Gothic', system-ui, sans-serif;
+  font-size: 340px;
+  line-height: 1;
+  color: var(--glow-color, var(--accent2));
+  opacity: 0.05;
+  user-select: none;
+  transform: rotate(-8deg);
+}
+
+.selection-screen__inner {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+}
+
+/* ── Selector header (eyebrow / title / subtitle) ────────── */
+/* Shared by SelectionScreen, LevelSelector and ModeSelector so every
+   selection screen reads the same way regardless of which grid it wraps. */
+.selector-header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.selector-header__eyebrow {
+  font-family: var(--font-display);
+  color: var(--accent2);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.selector-header__title {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.selector-header__subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* ── Shared tile grid (LevelSelector + ModeSelector) ─────── */
+/* auto-fit lets both grids fill the available width and reflow at any
+   viewport size on their own — no fixed-column breakpoints to maintain. */
+.level-selector,
+.mode-selector {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -46,7 +133,8 @@ button:hover { filter: brightness(1.15); }
   padding: 30px 8px 8px;
 }
 
-.level-selector::before {
+.level-selector::before,
+.mode-selector::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -55,62 +143,32 @@ button:hover { filter: brightness(1.15); }
   pointer-events: none;
 }
 
-.level-selector__header {
-  z-index: 1;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.level-selector__eyebrow {
-  color: var(--accent2);
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.level-selector__title {
-  font-size: 1.85rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-.level-selector__subtitle {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.6;
-  max-width: 540px;
-  margin: 0 auto;
-}
-
-.level-selector__grid {
+.select-tile-grid {
+  position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 18px;
   width: 100%;
-  max-width: 780px;
 }
 
-.level-selector__tile {
+.select-tile {
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: center;
   justify-content: center;
-  padding: 26px 14px;
-  min-height: 112px;
+  padding: 26px 16px;
+  min-height: 128px;
   border-radius: 22px;
   color: #fff;
   box-shadow: 0 22px 54px rgba(0, 0, 0, 0.2);
-  transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease, border-color 0.22s ease;
   position: relative;
   overflow: hidden;
 }
 
-.level-selector__tile::after {
+.select-tile::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -119,37 +177,16 @@ button:hover { filter: brightness(1.15); }
   pointer-events: none;
 }
 
-.level-selector__tile-badge {
-  position: relative;
-  z-index: 1;
-  font-size: 1.75rem;
-  font-weight: 800;
-}
-
-.level-selector__tile-copy {
-  position: relative;
-  z-index: 1;
-  font-size: 0.95rem;
-  color: rgba(255,255,255,0.9);
-  text-align: center;
-  line-height: 1.4;
-}
-
-.level-selector__tile:hover {
+.select-tile:hover {
   transform: translateY(-4px) scale(1.02);
   box-shadow: 0 28px 66px rgba(0, 0, 0, 0.24);
 }
 
-.level-selector__tile:active {
-  transform: translateY(0) scale(0.98);
-}
+.select-tile:active { transform: translateY(0) scale(0.98); }
 
-.level-selector__tile:nth-child(odd) {
-  animation: float 6.4s ease-in-out infinite;
-}
-
-.level-selector__tile:nth-child(even) {
-  animation: float 5.7s ease-in-out infinite;
+@media (prefers-reduced-motion: no-preference) {
+  .select-tile-grid .select-tile:nth-child(odd)  { animation: float 6.4s ease-in-out infinite; }
+  .select-tile-grid .select-tile:nth-child(even) { animation: float 5.7s ease-in-out infinite; }
 }
 
 @keyframes float {
@@ -157,11 +194,64 @@ button:hover { filter: brightness(1.15); }
   50% { transform: translateY(-5px); }
 }
 
-.selection-screen__subtitle {
-  margin-bottom: 18px;
-  color: var(--text-secondary);
+.select-tile__badge {
+  position: relative;
+  z-index: 1;
+  font-size: 1.75rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+}
+
+.select-tile__copy {
+  position: relative;
+  z-index: 1;
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.9);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ── Mode tile variant ────────────────────────────────────
+   Neutral card + colour-coded icon badge, instead of a fully
+   coloured tile — modes are parallel choices, not a difficulty
+   ladder, so the colour marks the tile rather than owning it. */
+.select-tile--mode {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.select-tile--mode::after { display: none; }
+
+.select-tile--mode:hover {
+  border-color: var(--mode-color, var(--accent2));
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.28), 0 0 0 1px var(--mode-color, var(--accent2)) inset;
+}
+
+.select-tile__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: var(--mode-color, var(--accent2));
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.select-tile__label {
   font-size: 1rem;
-  line-height: 1.6;
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+.select-tile__desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  text-align: center;
 }
 
 input {
@@ -249,21 +339,11 @@ input:focus { border-color: var(--accent2); }
     display: none;
   }
 }
-@media (max-width: 680px) {
-  .level-selector {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
 @media (max-width: 560px) {
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
   .container { padding: 0 16px; }
   .top-bar { padding: 12px 16px; }
-  .level-selector {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (max-width: 420px) {
-  .level-selector {
-    grid-template-columns: 1fr;
-  }
+  .selection-screen { padding: 40px 16px 48px; }
+  .selection-screen__glyph { font-size: 200px; }
+  .selector-header__title { font-size: 1.5rem; }
 }
