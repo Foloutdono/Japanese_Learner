@@ -6,7 +6,7 @@
  * Props:
  *   onSelect(level)  — called when a level is clicked
  *   color            — brand colour for this section, as a hex string
- *                       (default: '#e94560', i.e. var(--accent))
+ *                       (default: '#c1442c', shu-iro vermillion, i.e. var(--accent))
  *   levels           — array of level strings (default: N5…N1)
  *   eyebrow, title, subtitle — header copy. eyebrow/title default to the
  *     original copy so existing screens render unchanged, but every
@@ -42,7 +42,7 @@ function shade(hex, percent) {
 
 export default function LevelSelector({
   onSelect,
-  color = '#e94560',
+  color = '#c1442c',
   levels = DEFAULT_LEVELS,
   eyebrow = 'Vocabulary JLPT',
   title = 'Choose your JLPT level',
