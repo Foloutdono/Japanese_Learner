@@ -6,7 +6,7 @@ import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading,
-  DeckProgress, FlashcardFront,
+  DeckProgress, Flashcard,
 } from '../components/QuizComponents'
 import { playKana } from '../components/sound'
 import { kanaModes } from '../components/quizModes'
@@ -144,18 +144,21 @@ export default function KanaScreen({ session }) {
         {done    && <DoneMessage onBack={() => setSelectedSet(null)} />}
         {card && !loading && (
           <>
-            {mode === 'flashcard' && !answered && (
-              <FlashcardFront onReveal={onFlashcardReveal} t={t}>
-                <CharDisplay char={card.kana} />
-              </FlashcardFront>
-            )}
-            {mode === 'flashcard' && answered && (
-              <>
-                <CharDisplay char={card.kana} />
-                <div style={{ fontSize: 32, fontWeight: 'bold', color: 'var(--accent)', marginTop: 12 }}>
-                  {card.romaji}
-                </div>
-              </>
+            {mode === 'flashcard' && (
+              <Flashcard
+                t={t}
+                resetKey={card.card_id}
+                onReveal={onFlashcardReveal}
+                front={<CharDisplay char={card.kana} />}
+                back={
+                  <>
+                    <CharDisplay char={card.kana} />
+                    <div style={{ fontSize: 32, fontWeight: 'bold', color: 'var(--accent)', marginTop: 12 }}>
+                      {card.romaji}
+                    </div>
+                  </>
+                }
+              />
             )}
 
             {mode !== 'flashcard' && <CharDisplay char={card.kana} />}

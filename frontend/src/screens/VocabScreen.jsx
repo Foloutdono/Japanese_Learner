@@ -6,7 +6,7 @@ import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   MCQGrid, DoneMessage, Loading, DeckProgress,
-  RevealPanel, FlashcardFront,
+  RevealPanel, InlineReveal, Flashcard,
 } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
@@ -135,29 +135,28 @@ export default function VocabScreen({ session }) {
         {card && !loading && (
           <>
             <PromptCard>
-              {card.format === 'flashcard' && !answered && (
-                <FlashcardFront onReveal={onFlashcardReveal} t={t}>
-                  <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                    {isKjToM ? wordForm(card) : card.meaning}
-                  </div>
-                </FlashcardFront>
-              )}
-
-              {card.format === 'flashcard' && answered && (
-                <>
-                  <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                    {isKjToM ? wordForm(card) : card.meaning}
-                  </div>
-                  <RevealPanel
-                    kana={card.kana}
-                    t={t}
-                    left={
-                      isKjToM
-                        ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent2)' }}>{card.meaning}</div>
-                        : <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{wordForm(card)}</div>
-                    }
-                  />
-                </>
+              {card.format === 'flashcard' && (
+                <Flashcard
+                  t={t}
+                  resetKey={card.card_id}
+                  onReveal={onFlashcardReveal}
+                  front={
+                    <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
+                      {isKjToM ? wordForm(card) : card.meaning}
+                    </div>
+                  }
+                  back={
+                    <InlineReveal
+                      t={t}
+                      kana={card.kana}
+                      main={
+                        isKjToM
+                          ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent2)' }}>{card.meaning}</div>
+                          : <div style={{ fontSize: 40, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{wordForm(card)}</div>
+                      }
+                    />
+                  }
+                />
               )}
 
               {card.format === 'qcm' && (
