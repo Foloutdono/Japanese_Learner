@@ -1,11 +1,19 @@
 /**
  * LevelSelector
- * Renders a responsive JLPT level button grid.
+ * Renders a responsive JLPT level tile grid, colour-branded to match
+ * whatever section it lives in (Vocabulary, Kanji, Grammar...).
  *
  * Props:
- *   onSelect(level: string) — called when a level is clicked
- *   color  — button background color (default: var(--accent))
- *   levels — array of level strings (default: N5…N1)
+ *   onSelect(level)  — called when a level is clicked
+ *   color            — brand colour for this section, as a hex string
+ *                       (default: '#e94560', i.e. var(--accent))
+ *   levels           — array of level strings (default: N5…N1)
+ *   eyebrow, title, subtitle — header copy. Defaults match the previous
+ *     hard-coded text so existing screens render unchanged, but every
+ *     section should now pass its own (e.g. "Kanji JLPT" for /kanji) —
+ *     previously this header always said "Vocabulary JLPT" no matter
+ *     which section rendered it. Pass eyebrow="" / etc. to hide a line,
+ *     or wrap in <SelectionScreen> and omit all three to use its header.
  */
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
@@ -17,29 +25,46 @@ const LEVEL_HINTS = {
   N1: 'Challenge your best Japanese',
 }
 
+// Darkens a #rrggbb colour towards black so each tile can use a subtle
+// diagonal gradient instead of a flat fill. Falls back to the plain
+// colour for anything that isn't a hex string (e.g. a CSS var()).
+function shade(hex, percent) {
+  if (typeof hex !== 'string' || !hex.startsWith('#') || hex.length !== 7) return hex
+  const n = parseInt(hex.slice(1), 16)
+  const r = Math.round(((n >> 16) & 255) * (1 - percent))
+  const g = Math.round(((n >> 8) & 255) * (1 - percent))
+  const b = Math.round((n & 255) * (1 - percent))
+  return `rgb(${r}, ${g}, ${b})`
+}
+
 export default function LevelSelector({
   onSelect,
-  color = 'var(--accent)',
+  color = '#e94560',
   levels = DEFAULT_LEVELS,
+  eyebrow = 'Vocabulary JLPT',
+  title = 'Choose your JLPT level',
+  subtitle = 'Tap a tile to begin the next challenge.',
 }) {
   return (
     <div className="level-selector">
-      <div className="level-selector__header">
-        <div className="level-selector__eyebrow">Vocabulary JLPT</div>
-        <div className="level-selector__title">Choose your JLPT level</div>
-        <div className="level-selector__subtitle">Tap a tile to begin the next challenge.</div>
-      </div>
-      <div className="level-selector__grid">
+      {(eyebrow || title || subtitle) && (
+        <div className="selector-header">
+          {eyebrow && <div className="selector-header__eyebrow" style={{ color }}>{eyebrow}</div>}
+          {title && <div className="selector-header__title">{title}</div>}
+          {subtitle && <div className="selector-header__subtitle">{subtitle}</div>}
+        </div>
+      )}
+      <div className="select-tile-grid" style={{ maxWidth: 780, margin: '0 auto' }}>
         {levels.map(l => (
           <button
             key={l}
             type="button"
             onClick={() => onSelect(l)}
-            className="level-selector__tile"
-            style={{ background: color }}
+            className="select-tile"
+            style={{ background: `linear-gradient(135deg, ${color}, ${shade(color, 0.35)})` }}
           >
-            <div className="level-selector__tile-badge">{l}</div>
-            <div className="level-selector__tile-copy">{LEVEL_HINTS[l]}</div>
+            <div className="select-tile__badge">{l}</div>
+            <div className="select-tile__copy">{LEVEL_HINTS[l]}</div>
           </button>
         ))}
       </div>
