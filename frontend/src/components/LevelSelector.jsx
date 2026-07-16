@@ -9,6 +9,13 @@
  */
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
+const LEVEL_HINTS = {
+  N5: 'Beginner-friendly vocabulary',
+  N4: 'Solidify core grammar',
+  N3: 'Boost reading fluency',
+  N2: 'Master intermediate kanji',
+  N1: 'Challenge your best Japanese',
+}
 
 export default function LevelSelector({
   onSelect,
@@ -18,6 +25,7 @@ export default function LevelSelector({
   return (
     <div className="level-selector">
       <div className="level-selector__header">
+        <div className="level-selector__eyebrow">Vocabulary JLPT</div>
         <div className="level-selector__title">Choose your JLPT level</div>
         <div className="level-selector__subtitle">Tap a tile to begin the next challenge.</div>
       </div>
@@ -27,12 +35,11 @@ export default function LevelSelector({
             key={l}
             type="button"
             onClick={() => onSelect(l)}
-            style={{
-              background: color,
-              backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0) 60%)',
-            }}
+            className="level-selector__tile"
+            style={{ background: color }}
           >
-            {l}
+            <div className="level-selector__tile-badge">{l}</div>
+            <div className="level-selector__tile-copy">{LEVEL_HINTS[l]}</div>
           </button>
         ))}
       </div>
