@@ -6,7 +6,7 @@ import { KanjiTopBar, TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   MCQGrid, DoneMessage, Loading, DeckProgress,
-  InlineReveal, Flashcard,
+  InlineReveal, Flashcard, MeaningDisplay,
 } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
@@ -197,9 +197,9 @@ export default function KanjiScreen({ session }) {
                     resetKey={card.card_id}
                     onReveal={onFlashcardReveal}
                     front={
-                      <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                        {isKjToM ? card.kanji : card.meaning}
-                      </div>
+                      isKjToM
+                        ? <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                        : <MeaningDisplay meaning={card.meaning} size={44} />
                     }
                     back={
                       <InlineReveal
@@ -207,7 +207,7 @@ export default function KanjiScreen({ session }) {
                         kana={card.kana}
                         main={
                           isKjToM
-                            ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent3)' }}>{card.meaning}</div>
+                            ? <MeaningDisplay meaning={card.meaning} size={28} />
                             : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
                         }
                       />
@@ -221,9 +221,9 @@ export default function KanjiScreen({ session }) {
                     kana={card.kana}
                     revealed={answered}
                     main={
-                      <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>
-                        {isKjToM ? card.kanji : card.meaning}
-                      </div>
+                      isKjToM
+                        ? <div style={{ fontSize: 80, fontFamily: 'Yu Gothic, sans-serif', color: '#fff' }}>{card.kanji}</div>
+                        : <MeaningDisplay meaning={card.meaning} size={44} />
                     }
                   />
                 )}
@@ -232,7 +232,7 @@ export default function KanjiScreen({ session }) {
 
             {mode === 'write' && (
               <PromptCard>
-                <div style={{ fontSize: 28, fontWeight: 'bold', color: 'var(--accent3)' }}>{card.meaning}</div>
+                <MeaningDisplay meaning={card.meaning} size={32} />
                 {card.kana && (
                   <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 8 }}>({card.kana})</div>
                 )}

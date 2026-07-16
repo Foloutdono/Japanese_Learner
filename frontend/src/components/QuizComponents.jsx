@@ -253,7 +253,7 @@ function splitReadingTokens(kana) {
     .filter(Boolean)
 }
 
-export function ReadingGroup({ label, readings, size = 16, color = 'var(--text-primary)', center = false }) {
+export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false }) {
   if (!readings.length) return null
   return (
     <div style={{ marginBottom: 10 }}>
@@ -284,7 +284,7 @@ export function ReadingGroup({ label, readings, size = 16, color = 'var(--text-p
 // Renders a kana reading field elegantly: on'yomi/kun'yomi split for a
 // kanji's mixed readings, or a plain (numbered if there's more than one)
 // list for a single-register reading like vocab. Returns null if empty.
-export function Readings({ kana, onLabel, kunLabel, size = 16, color, center = false }) {
+export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = false }) {
   const tokens = splitReadingTokens(kana)
   if (!tokens.length) return null
 
@@ -301,6 +301,42 @@ export function Readings({ kana, onLabel, kunLabel, size = 16, color, center = f
   }
 
   return <ReadingGroup readings={tokens} size={size} color={color} center={center} />
+}
+
+// ── Meaning display ────────────────────────────────────────
+// A card's `meaning` field is often several synonyms separated by
+// commas/semicolons (e.g. "to eat, to have a meal"). Rather than
+// showing them all at the same weight, the first one — the primary
+// meaning — is rendered larger and highlighted; the rest sit below it
+// as smaller, muted secondary meanings.
+function splitMeaningTokens(meaning) {
+  return (meaning || '')
+    .split(/[,;]/)
+    .map(s => s.trim())
+    .filter(Boolean)
+}
+
+export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', center = true }) {
+  const [primary, ...rest] = splitMeaningTokens(meaning)
+  if (!primary) return null
+
+  return (
+    <div style={{ textAlign: center ? 'center' : 'left' }}>
+      <div style={{ fontSize: size, fontWeight: 800, color, lineHeight: 1.2 }}>
+        {primary}
+      </div>
+      {rest.length > 0 && (
+        <div style={{
+          fontSize: Math.round(size * 0.55),
+          color: 'var(--text-secondary)',
+          fontWeight: 500,
+          marginTop: 6,
+        }}>
+          {rest.join(', ')}
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ── Reveal panel ───────────────────────────────────────────
@@ -320,17 +356,7 @@ export function RevealPanel({ left, kana, t }) {
           <Readings
             kana={kana}
             onLabel={t?.onyomi ?? "On'yomi"}
-            kunLabel={t?.kunyomi ?? "Kun'yomi"}
-            size={16}
-            center
-          />
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Inline reveal ──────────────────────────────────────────
+            size={18}────────────────────────────────────────
 // Single-box layout: main content on the left, readings on the right,
 // no divider line. Used when the "answer" is already conveyed some
 // other way (e.g. the highlighted MCQ choice) so we don't repeat it —
@@ -367,7 +393,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true }) {
         // on'yomi/kun'yomi) to wrap into a compact, centered block
         // instead of spilling out in one long left-aligned line.
         <div style={{
-          maxWidth: show ? 300 : 0,
+          maxWidth: show ? 320 : 0,
           opacity: show ? 1 : 0,
           overflow: 'hidden',
           transition: show ? 'max-width 0.35s ease, opacity 0.3s ease 0.05s' : 'none',
@@ -376,7 +402,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true }) {
             kana={kana}
             onLabel={t?.onyomi ?? "On'yomi"}
             kunLabel={t?.kunyomi ?? "Kun'yomi"}
-            size={16}
+            size={18}
             center
           />
         </div>
