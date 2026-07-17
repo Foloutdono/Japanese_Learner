@@ -57,25 +57,12 @@ const quiz = {
   katakanaCombinations: 'Katakana (combinaisons)',
 
   // Selection prompts
-  selectKanaSet:     'Choisissez un ensemble',
-  selectLevel:       'Choisissez un niveau',
-  selectPhase:       'Choisissez une phase',
-  selectMode:        'Choisissez un mode',
-
-  // Phases
-  phase1:            'Phase 1',
-  phase2:            'Phase 2',
-  phase3:            'Phase 3',
-  phase1Desc:        'Kanji + Kana → Sens',
-  phase2Desc:        'Kanji → Sens',
-  phase3Desc:        'Sens → Kanji (écriture)',
+  selectLevel:       'Choisissez un niveau JLPT',
+  selectMode:        "Choisissez un mode d'entraînement",
 
   // Input
   submit:            'Valider',
-  typeAnswer:        'Tapez votre réponse...',
   typeRomaji:        'Tapez le romaji...',
-  typeKana:          'Tapez la lecture en kana...',
-  typeKanji:         'Tapez le kanji...',
 
   // Feedback
   correct:           '✅ Correct !',

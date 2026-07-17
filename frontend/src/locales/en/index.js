@@ -55,15 +55,11 @@ const quiz = {
   katakanaCombinations: 'Katakana (combinations)',
 
   // Selection prompts
-  selectLevel:       'Choose a level',
-  selectPhase:       'Choose a phase',
-  selectMode:        'Choose a mode',
-
-  // Phases
+  selectLevel:       'Choose your JLPT level',
+  selectMode:        'Choose your training mode',
 
   // Input
   submit:            'Submit',
-  typeAnswer:        'Type your answer...',
   typeRomaji:        'Type the romaji...',
 
   // Feedback
