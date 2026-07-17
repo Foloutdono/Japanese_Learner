@@ -16,14 +16,12 @@
  *   columns  — accepted for backward compatibility, no longer affects
  *     layout now that modes render as a list rather than a grid.
  */
-export default function ModeSelector({ modes, onSelect, eyebrow, title, subtitle }) {
+export default function ModeSelector({ modes, onSelect, title }) {
   return (
     <div className="mode-selector">
-      {(eyebrow || title || subtitle) && (
+      {(title) && (
         <div className="selector-header">
-          {eyebrow && <div className="selector-header__eyebrow">{eyebrow}</div>}
           {title && <div className="selector-header__title">{title}</div>}
-          {subtitle && <div className="selector-header__subtitle">{subtitle}</div>}
         </div>
       )}
       <div className="choice-list">

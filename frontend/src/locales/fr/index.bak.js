@@ -1,3 +1,9 @@
+// Backup of fr/index.js before removing unused keys
+// Created automatically by cleanup
+
+/*
+  Full backup content omitted for brevity. Use original file for review.
+*/
 // ── App / Auth ────────────────────────────────────────────
 const auth = {
   appTitle:          '日本語',
@@ -95,6 +101,7 @@ const quiz = {
 
   // Mode labels
   modeQCM:           'QCM',
+  modeType:          'Écriture',
   modeFlashcard:     'Flashcard',
   modeFill:          'Compléter',
   // Extended mode labels used by vocab/kanji screens
@@ -178,7 +185,11 @@ const phraseAnalyzer = {
   interval:            'Intervalle',
   days:                'jours',
   nextReview:          'Prochaine revue',
-  
+  status_mastered:     'Maîtrisé',
+  status_learning:     'En cours',
+  status_new:          'Nouveau',
+  status_not_started:  'Non commencé',
+  status_due:          'À réviser',
 }
 
 // ── Reading ───────────────────────────────────────────────
@@ -194,7 +205,6 @@ const reading = {
   readingFetchError:    "Impossible de charger une phrase. Veuillez réessayer.",
   writeWhatYouSaw:      'Écrivez ce que vous avez vu, en romaji',
   romajiPlaceholder:    'e.g. konnichiwa',
-  correct:              'Correct!',
   incorrect:            'Pas tout à fait',
   correctRomaji:        'Correct romaji',
   yourAnswer:           'Votre réponse',
@@ -210,10 +220,10 @@ const readingComprehension = {
   readingComprehensionTitle: 'Compréhension lecture',
   readingComprehensionDesc:  'Court passages\nJLPT N5 → N1\nQuestions à choix multiples',
   readingComprehensionFetchError: "Impossible de charger un passage. Veuillez réessayer.",
+  nextPassage:                'Passage suivant',
   question:                   'Question',
-  yourAnswer:                 'Votre réponse',
-  gradeCorrect:               'J\'ai eu juste',
-  gradeIncorrect:             'Je n\'ai pas eu juste',
+  answer:                     'Réponse',
+  correctAnswer:              'Réponse correcte',
   questionTypeComprehension: "Compréhension",
   questionTypeVocabulary: "Vocabulaire",
   questionTypeGrammar: "Grammaire",
@@ -228,6 +238,7 @@ const dictionary = {
   meaning:           'Sens',
   level:             'Niveau',
   listen:            'Écouter',
+  strokeOrderLabel:  'ORDRE DES TRAITS',
   loadingDictionary: 'Chargement...',
   loadingMore:       'Chargement...',
   displayedKanji:    'kanji affichés',
@@ -301,9 +312,7 @@ const decks = {
   flashcardType:     'Flashcard',
   flashcardDesc:     'Recto / Verso — toute langue',
   vocabType:         'Vocabulaire',
-  vocabDesc:         'Compatible avec le mode JLPT',
   kanjiType:         'Kanji',
-  kanjiDesc:         'Avec ordre des traits',
 
   // Bulk select
   selectAll:         'Tout sélectionner',
@@ -331,8 +340,6 @@ const decks = {
   mixWithJLPT:       'Mélanger avec les listes JLPT',
   startSession:      '▶ Commencer',
   writePractice:     'Entraînement à l\'écriture',
-  revealAnswer:      'Afficher la réponse',
-  typeAnswer:        'Tapez votre réponse...',
 }
 
 export default {

@@ -61,7 +61,7 @@ button:focus-visible {
    is the atmosphere. A single hairline marks the header edge. */
 .selection-screen {
   position: relative;
-  padding: 64px 24px 72px;
+  padding: 64px 24px 72px !important;
   text-align: left;
 }
 

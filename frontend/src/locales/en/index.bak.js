@@ -1,3 +1,9 @@
+// Backup of index.js before removing unused keys
+// Created automatically by cleanup
+
+/*
+  Full backup content omitted for brevity. Use original file for review.
+*/
 // ── App / Auth ────────────────────────────────────────────
 const auth = {
   appTitle:          '日本語',
@@ -11,11 +17,13 @@ const auth = {
   signupBtn:         'Sign up',
   signupSuccess:     'Check your email to confirm your account.',
   signOut:           'Sign Out',
+  switchLang:        'Switch language',
 }
 
 // ── Navigation ────────────────────────────────────────────
 const nav = {
   menu:              '← Menu',
+  back:              '← Back',
   cancel:            'Cancel',
   save:              '✓ Save',
   delete:            '🗑 Delete',
@@ -55,18 +63,28 @@ const quiz = {
   katakanaCombinations: 'Katakana (combinations)',
 
   // Selection prompts
+  selectKanaSet:     'Choose a set',
   selectLevel:       'Choose a level',
   selectPhase:       'Choose a phase',
   selectMode:        'Choose a mode',
 
   // Phases
+  phase1:            'Phase 1',
+  phase2:            'Phase 2',
+  phase3:            'Phase 3',
+  phase1Desc:        'Kanji + Kana → Meaning',
+  phase2Desc:        'Kanji → Meaning',
+  phase3Desc:        'Meaning → Kanji (writing)',
 
   // Input
   submit:            'Submit',
   typeAnswer:        'Type your answer...',
   typeRomaji:        'Type the romaji...',
+  typeKana:          'Type the kana reading...',
+  typeKanji:         'Type the kanji...',
 
   // Feedback
+  correct:           '✅ Correct!',
   wrong:             '❌ Answer:',
   quizComplete:      '✅ All cards are up to date!',
   backToMenu:        '← Back',
@@ -83,6 +101,7 @@ const quiz = {
 
   // Mode labels
   modeQCM:           'MCQ',
+  modeType:          'Writing',
   modeFlashcard:     'Flashcard',
   modeFill:          'Fill in',
   // Extended mode labels used by vocab/kanji screens
@@ -116,6 +135,7 @@ const quiz = {
   // Grammar screen
   revealMeaning:     'What is the meaning of this rule?',
   revealSentence:    'Complete the sentence below',
+  revealAnswer:      'Reveal answer',
   revealMeaningBtn:  'Reveal meaning',
   showExamples:      '▼ Show examples',
   hideExamples:      '▲ Hide examples',
@@ -165,7 +185,11 @@ const phraseAnalyzer = {
   interval:            'Interval',
   days:                'days',
   nextReview:          'Next review',
-  
+  status_mastered:     'Mastered',
+  status_learning:     'Learning',
+  status_new:          'New',
+  status_not_started:  'Not in deck',
+  status_due:          'Due now',
 }
 
 // ── Reading ───────────────────────────────────────────────
@@ -181,7 +205,6 @@ const reading = {
   readingFetchError:    "Couldn't load a phrase. Try again.",
   writeWhatYouSaw:      'Write what you saw, in romaji',
   romajiPlaceholder:    'e.g. konnichiwa',
-  correct:              'Correct!',
   incorrect:            'Not quite',
   correctRomaji:        'Correct romaji',
   yourAnswer:           'Your answer',
@@ -195,11 +218,11 @@ const reading = {
 const readingComprehension = {
   readingComprehensionTitle: 'Reading comprehension',
   readingComprehensionDesc:  'Short passages\nJLPT N5 → N1\nMultiple choice questions',
-  
+  readingComprehensionFetchError: "Couldn't load a passage. Try again.",
+  nextPassage:                'Next passage',
   question:                   'Question',
-  yourAnswer:                 'Your answer',
-  gradeCorrect:               'I got it right',
-  gradeIncorrect:             'I got it wrong',
+  answer:                     'Answer',
+  correctAnswer:              'Correct answer',
   questionTypeComprehension: "Comprehension",
   questionTypeVocabulary: "Vocabulary",
   questionTypeGrammar: "Grammar",
@@ -213,6 +236,7 @@ const dictionary = {
   meaning:           'Meaning',
   level:             'Level',
   listen:            'Listen',
+  strokeOrderLabel:  'STROKE ORDER',
   loadingDictionary: 'Loading...',
   loadingMore:       'Loading more...',
   displayedKanji:    'kanji displayed',
@@ -286,9 +310,7 @@ const decks = {
   flashcardType:     'Flashcard',
   flashcardDesc:     'Front / Back — any language',
   vocabType:         'Vocabulary',
-  vocabDesc:         'Compatible with JLPT mode',
   kanjiType:         'Kanji',
-  kanjiDesc:         'With stroke order',
 
   // Bulk select
   selectAll:         'Select all',
@@ -316,8 +338,6 @@ const decks = {
   mixWithJLPT:       'Mix with JLPT content (optional)',
   startSession:      '▶ Start',
   writePractice:     'Writing practice',
-  revealAnswer:      'Reveal answer',
-  typeAnswer:        'Type your answer...',
 }
 
 export default {
