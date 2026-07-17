@@ -6,12 +6,12 @@ export default function RatingBar({ onRate, active }) {
 
   // Keys 1-6 map to the 6 quality buttons
   const QUALITY_BTNS = [
-    { q: 5, label: t.perfect,    color: '#00b894' },
-    { q: 4, label: t.correctHesit, color: '#00cec9' },
-    { q: 3, label: t.difficult,  color: '#fdcb6e' },
-    { q: 2, label: t.wrongSeen,  color: '#e17055' },
-    { q: 1, label: t.wrongRated, color: '#d63031' },
-    { q: 0, label: t.blackout,   color: '#6c5ce7' },
+    { q: 5, label: t.perfect      },
+    { q: 4, label: t.correctHesit },
+    { q: 3, label: t.difficult    },
+    { q: 2, label: t.wrongSeen    },
+    { q: 1, label: t.wrongRated   },
+    { q: 0, label: t.blackout     },
   ]
 
   useEffect(() => {
@@ -27,22 +27,22 @@ export default function RatingBar({ onRate, active }) {
   if (!active) return null
 
   return (
-    <div style={{ marginTop: 32 }}>
-      <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 12 }}>
+    <div className="rating-bar">
+      <div className="rating-bar__hint">
         {t.rateAnswer}{' '}
-        <kbd style={{ background: 'var(--bg-panel)', padding: '2px 6px', borderRadius: 4, fontSize: 12 }}>1</kbd>
+        <kbd className="rating-bar__key">1</kbd>
         {' '}{t.to}{' '}
-        <kbd style={{ background: 'var(--bg-panel)', padding: '2px 6px', borderRadius: 4, fontSize: 12 }}>6</kbd>
+        <kbd className="rating-bar__key">6</kbd>
         {' :'}
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
-        {QUALITY_BTNS.map(({ q, label, color }, i) => (
+      <div className="rating-bar__buttons">
+        {QUALITY_BTNS.map(({ q, label }, i) => (
           <button
             key={q}
             onClick={() => onRate(q)}
-            style={{ background: color, color: q >= 3 ? '#111' : '#fff', fontSize: 13 }}
+            className={`rating-bar__btn rating-bar__btn--q${q}`}
           >
-            <span style={{ opacity: 0.7, marginRight: 6, fontSize: 11 }}>[{i + 1}]</span>
+            <span className="rating-bar__btn-index">[{i + 1}]</span>
             {label}
           </button>
         ))}

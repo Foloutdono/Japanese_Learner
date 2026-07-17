@@ -19,6 +19,25 @@
   /* Enji-iro (臙脂色) — deep carmine */
   --danger:         #9c3428;
 
+  /* Additional pigments — extends the seal-red/gold/wisteria trio above
+     so data-driven accents (nav sections, SRS ratings) can stay inside
+     the same traditional palette instead of reaching for arbitrary hex. */
+  /* Ai-iro (藍色) — indigo blue */
+  --accent4:        #3f6d8e;
+  /* Cha-iro (茶色) — tea brown */
+  --accent5:        #8a6b4f;
+  /* Rokushou-iro (緑青色) — verdigris green */
+  --accent6:        #4f7d7a;
+  /* Sabi-iro (錆色) — rust */
+  --accent7:        #a85c3f;
+
+  /* Ai-iro (藍色) — indigo, for cool contrast against the vermillion accent */
+  --indigo:         #3d5a73;
+  /* Rokusho-iro (緑青色) — verdigris, the patina green of aged bronze */
+  --teal:            #4f7a72;
+  /* Sabi-iro (錆色) — rust, the colour of oxidised iron */
+  --rust:            #a8622f;
+
   /* Kinari (生成り) — raw silk, warm off-white */
   --text-primary:   #ece5d8;
   /* Nezumi-iro (鼠色) — mouse grey, the classic Edo neutral */
@@ -800,4 +819,118 @@ input:focus { border-color: var(--accent2); }
 @media (max-width: 560px) {
   .home-header { padding: 44px 16px 32px; }
   .home-main { padding: 40px 16px; }
+}
+
+/* ── Rating bar (SRS quality buttons) ─────────────────────
+   Six levels collapse onto three hues (success / warning / danger)
+   rather than a six-colour flat-UI gradient: a filled tile is the
+   strong signal at each hue's best/worst end, an outlined tile is
+   the softer middle case. "Blackout" gets no colour at all — an
+   empty, bordered void, since the answer drew a blank. */
+.rating-bar { margin-top: 32px; }
+
+.rating-bar__hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.rating-bar__key {
+  background: var(--bg-panel);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font-display);
+}
+
+.rating-bar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.rating-btn {
+  font-size: 13px;
+  border: 1px solid transparent;
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.rating-btn__index {
+  opacity: 0.65;
+  margin-right: 6px;
+  font-size: 11px;
+  font-family: var(--font-display);
+}
+
+.rating-btn--fill-success    { background: var(--success); color: var(--bg-main); }
+.rating-btn--outline-success { background: transparent; border-color: var(--success); color: var(--success); }
+.rating-btn--fill-warning    { background: var(--warning); color: var(--bg-main); }
+.rating-btn--outline-danger  { background: transparent; border-color: var(--danger); color: var(--danger); }
+.rating-btn--fill-danger     { background: var(--danger); color: var(--text-primary); }
+.rating-btn--void            { background: var(--bg-panel); border-color: var(--border); color: var(--text-secondary); }
+
+/* ── Shared nav control buttons (mute / lang switcher) ───── */
+.btn-nav {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+.btn-nav--icon { font-size: 16px; padding: 6px 10px; }
+.btn-nav--lang { font-size: 14px; padding: 6px 12px; }
+
+/* ── Rating bar (SRS quality scale) ──────────────────────────
+   Six fixed quality levels, so each gets a named modifier class
+   rather than an inline color — same treatment as .type-badge.
+   The hues run success → warning → danger, matching the meaning
+   (perfect recall down to total blackout) while staying inside
+   the traditional palette. */
+.rating-bar { margin-top: 32px; }
+
+.rating-bar__hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.rating-bar__key {
+  background: var(--bg-panel);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.rating-bar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.rating-bar__btn { font-size: 13px; }
+
+.rating-bar__btn-index {
+  opacity: 0.7;
+  margin-right: 6px;
+  font-size: 11px;
+}
+
+.rating-bar__btn--q5 { background: var(--success);  color: var(--bg-main); }
+.rating-bar__btn--q4 { background: var(--accent6);  color: var(--text-primary); }
+.rating-bar__btn--q3 { background: var(--accent2);  color: var(--bg-main); }
+.rating-bar__btn--q2 { background: var(--warning);  color: var(--bg-main); }
+.rating-bar__btn--q1 { background: var(--accent);   color: var(--text-primary); }
+.rating-bar__btn--q0 { background: var(--danger);   color: var(--text-primary); }
+
+/* ── Shared nav control button (mute / lang switcher) ─────── */
+.btn-nav {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-size: 14px;
+  padding: 6px 12px;
+}
+.btn-nav--icon {
+  font-size: 16px;
+  padding: 6px 10px;
 }
