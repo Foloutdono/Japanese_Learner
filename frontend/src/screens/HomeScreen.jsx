@@ -27,7 +27,7 @@ export default function HomeScreen() {
       <main className="home-main">
         <div className="container">
           <div className="home-grid">
-            {cards.map(card => (
+            {cards.map(card => (card.path === '/' ? null : (
               <button
                 key={card.path}
                 type="button"
@@ -40,7 +40,7 @@ export default function HomeScreen() {
                 <span className="home-card__rule" aria-hidden="true" />
                 <span className="home-card__desc">{card.desc}</span>
               </button>
-            ))}
+            )))}
           </div>
         </div>
       </main>
