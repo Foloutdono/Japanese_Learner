@@ -6,7 +6,7 @@ import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   MCQGrid, DoneMessage, Loading, DeckProgress,
-  InlineReveal, Flashcard,
+  InlineReveal, Flashcard, CharDisplay, MeaningDisplay,
 } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
@@ -100,7 +100,7 @@ export default function VocabScreen({ session }) {
   // ── Level selection ──
   if (!level) {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => navigate('/')} title={`${t.vocabulary} JLPT`} />
         <SelectionScreen>
           <LevelSelector onSelect={setLevel} color="var(--accent2)" title={t.selectLevel} />
@@ -112,7 +112,7 @@ export default function VocabScreen({ session }) {
   // ── Mode selection ──
   if (!mode) {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => setLevel(null)} title={`${t.vocabulary} ${level}`} />
         <SelectionScreen>
           <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} title={t.selectMode} />
@@ -126,9 +126,9 @@ export default function VocabScreen({ session }) {
   const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="screen">
       <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${level} — ${modeLabel}`} />
-      <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
+      <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
@@ -141,9 +141,7 @@ export default function VocabScreen({ session }) {
                   resetKey={card.card_id}
                   onReveal={onFlashcardReveal}
                   front={
-                    <div style={{ fontSize: 50, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>
-                      {isKjToM ? wordForm(card) : card.meaning}
-                    </div>
+                    <CharDisplay char={isKjToM ? wordForm(card) : card.meaning} size={50} />
                   }
                   back={
                     <InlineReveal
@@ -152,8 +150,8 @@ export default function VocabScreen({ session }) {
                       isLarge={isKjToM}
                       main={
                         isKjToM
-                          ? <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent2)' }}>{card.meaning}</div>
-                          : <div style={{ fontSize: 50, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>{wordForm(card)}</div>
+                          ? <MeaningDisplay meaning={card.meaning} size={22} color="var(--accent2)" center={false} />
+                          : <CharDisplay char={wordForm(card)} size={50} />
                       }
                     />
                   }
@@ -167,8 +165,8 @@ export default function VocabScreen({ session }) {
                   revealed={answered}
                   main={
                     isKjToM
-                      ? <div style={{ fontSize: 50, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>{wordForm(card)}</div>
-                      : <div style={{ fontSize: 50, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>{card.meaning}</div>
+                      ? <CharDisplay char={wordForm(card)} size={50} />
+                      : <CharDisplay char={card.meaning} size={50} />
                   }
                 />
               )}

@@ -6,7 +6,7 @@ import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   MCQGrid, DoneMessage, Loading, DeckProgress,
-  InlineReveal, Flashcard, MeaningDisplay,
+  InlineReveal, Flashcard, MeaningDisplay, CharDisplay,
 } from '../components/QuizComponents'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
@@ -149,7 +149,7 @@ export default function KanjiScreen({ session }) {
   // ── Level selection ──
   if (!level) {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.kanjiTitle} />
         <SelectionScreen>
           <LevelSelector onSelect={setLevel} color="var(--accent3)" />
@@ -161,7 +161,7 @@ export default function KanjiScreen({ session }) {
   // ── Mode selection ──
   if (!mode) {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => setLevel(null)} title={`${t.kanjiTitle} ${level}`} />
         <SelectionScreen>
           <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} title={t.selectMode} />
@@ -175,14 +175,14 @@ export default function KanjiScreen({ session }) {
   const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="screen">
       <TopBar
         onBack={() => setMode(null)}
         onClick={() => setDrawingEnabled(d => !d)}
         title={`${t.kanjiTitle} ${level} — ${modeLabel}`}
         drawingEnabled={drawingEnabled}
       />
-      <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
+      <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
@@ -198,7 +198,7 @@ export default function KanjiScreen({ session }) {
                     onReveal={onFlashcardReveal}
                     front={
                       isKjToM
-                        ? <div style={{ fontSize: 100, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
+                        ? <CharDisplay char={card.kanji} size={100} />
                         : <MeaningDisplay meaning={card.meaning} size={44} />
                     }
                     back={
@@ -209,7 +209,7 @@ export default function KanjiScreen({ session }) {
                         main={
                           isKjToM
                             ? <MeaningDisplay meaning={card.meaning} size={28} />
-                            : <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
+                            : <CharDisplay char={card.kanji} size={72} />
                         }
                       />
                     }
@@ -223,7 +223,7 @@ export default function KanjiScreen({ session }) {
                     revealed={answered}
                     main={
                       isKjToM
-                        ? <div style={{ fontSize: 100, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1.1, overflow: 'hidden' }}>{card.kanji}</div>
+                        ? <CharDisplay char={card.kanji} size={100} />
                         : <MeaningDisplay meaning={card.meaning} size={44} />
                     }
                   />
@@ -235,7 +235,7 @@ export default function KanjiScreen({ session }) {
               <PromptCard>
                 <MeaningDisplay meaning={card.meaning} size={32} />
                 {card.kana && (
-                  <div style={{ fontSize: 18, color: 'var(--text-secondary)', marginTop: 8 }}>({card.kana})</div>
+                  <div className="quiz-subtitle">({card.kana})</div>
                 )}
               </PromptCard>
             )}
@@ -261,10 +261,8 @@ export default function KanjiScreen({ session }) {
               />
             )}
             {mode === 'write' && answered && (
-              <div style={{ marginTop: 16 }}>
-                <div style={{ fontSize: 72, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>
-                  {card.kanji}
-                </div>
+              <div className="quiz-writing-result">
+                <CharDisplay char={card.kanji} size={72} />
               </div>
             )}
 

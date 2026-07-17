@@ -3,6 +3,13 @@ import { useLang } from '../LangContext'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
+// Canvas 2D drawing colors — these are JS canvas-API values, not CSS,
+// so they can't reference CSS custom properties directly. Kept in sync
+// with the palette by hand: board matches --bg-card (sumi ink slab),
+// stroke matches --text-primary (kinari — warm off-white "ink" line).
+const CANVAS_BOARD_COLOR  = '#201d24'
+const CANVAS_STROKE_COLOR = '#ece5d8'
+
 function kanjiToSvgUrl(kanji) {
   const codepoint = kanji.codePointAt(0).toString(16).padStart(5, '0')
   return `${API_BASE}/kanjivg/${codepoint}.svg`
@@ -31,9 +38,9 @@ function Canvas({ canvasRef, onClear }) {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
-    ctx.fillStyle = '#1a1a2e'
+    ctx.fillStyle = CANVAS_BOARD_COLOR
     ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.strokeStyle = '#ffffff'
+    ctx.strokeStyle = CANVAS_STROKE_COLOR
     ctx.lineWidth   = 5
     ctx.lineCap     = 'round'
     ctx.lineJoin    = 'round'
@@ -49,7 +56,7 @@ function Canvas({ canvasRef, onClear }) {
     const ctx = canvas.getContext('2d')
     ctx.beginPath()
     ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2)
-    ctx.fillStyle = '#fff'
+    ctx.fillStyle = CANVAS_STROKE_COLOR
     ctx.fill()
   }
 
@@ -73,21 +80,16 @@ function Canvas({ canvasRef, onClear }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+    <div className="canvas-wrap">
       <canvas
         ref={canvasRef}
         width={260} height={260}
-        style={{
-          borderRadius: 10, border: '2px solid var(--border)',
-          touchAction: 'none', cursor: 'crosshair',
-          display: 'block', width: '100%', maxWidth: 260,
-        }}
+        className="canvas-board"
         onMouseDown={startDraw} onMouseMove={draw}
         onMouseUp={stopDraw}   onMouseLeave={stopDraw}
         onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw}
       />
-      <button onClick={clear}
-        style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', fontSize: 12, marginTop: 8, width: '100%', maxWidth: 260 }}>
+      <button onClick={clear} className="canvas-clear-btn">
         {t.eraseBtn}
       </button>
     </div>
@@ -98,32 +100,33 @@ function Canvas({ canvasRef, onClear }) {
 function StrokeRef({ kanji, meaning, showMeaning = true }) {
   const { t } = useLang()
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.strokeOrder}</div>
-      <div style={{
-        width: '100%', maxWidth: 260, aspectRatio: '1',
-        background: '#fff', borderRadius: 10, border: '2px solid var(--border)',
-        overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
+    <div className="stroke-ref">
+      <div className="stroke-ref__label">{t.strokeOrder}</div>
+      <div className="stroke-ref__frame">
         <img
           src={kanjiToSvgUrl(kanji)}
           alt={`${t.strokeOrder} ${kanji}`}
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          className="stroke-ref__img"
           onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
         />
-        <div style={{
-          display: 'none', color: '#999', fontSize: 12, textAlign: 'center', padding: 16,
-          width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center',
-        }}>
-          {t.notAvailable}
-        </div>
+        <div className="stroke-ref__fallback">{t.notAvailable}</div>
       </div>
       {showMeaning && (
-        <div style={{ marginTop: 12, textAlign: 'center' }}>
-          <div style={{ fontSize: 32, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1 }}>{kanji}</div>
-          {meaning && <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>{meaning}</div>}
+        <div className="stroke-ref__meaning-wrap">
+          <CharDisplay char={kanji} size={32} />
+          {meaning && <div className="stroke-ref__meaning">{meaning}</div>}
         </div>
       )}
+    </div>
+  )
+}
+
+// Local mini version of QuizComponents' CharDisplay — kept self-contained
+// here to avoid a cross-import just for one glyph; same CSS class/vars.
+function CharDisplay({ char, size = 110 }) {
+  return (
+    <div className="char-display" style={{ '--char-size': `${size}px`, '--char-font': 'inherit' }}>
+      {char}
     </div>
   )
 }
@@ -136,27 +139,16 @@ export function DrawingOverlay({ kanji, meaning, onDone }) {
   const canvasRef  = useRef(null)
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'var(--bg-main)',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      zIndex: 100, padding: 24,
-    }}>
-      <div style={{ fontSize: 14, fontWeight: 'bold', color: 'var(--warning)', marginBottom: 24 }}>
-        {t.writingPractice}
-      </div>
-      <div style={{
-        display: 'flex', gap: 24, justifyContent: 'center',
-        alignItems: 'flex-start', flexWrap: 'wrap', width: '100%', maxWidth: 600,
-      }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.yourDrawing}</div>
+    <div className="drawing-overlay">
+      <div className="drawing-overlay__label">{t.writingPractice}</div>
+      <div className="drawing-overlay__panels">
+        <div className="canvas-wrap">
+          <div className="stroke-ref__label">{t.yourDrawing}</div>
           <Canvas canvasRef={canvasRef} />
         </div>
         <StrokeRef kanji={kanji} meaning={meaning} />
       </div>
-      <button onClick={onDone}
-        style={{ background: 'var(--success)', color: '#111', fontSize: 16, padding: '14px 60px', marginTop: 32 }}>
+      <button onClick={onDone} className="drawing-overlay__continue">
         {t.continueBtn}
       </button>
     </div>
@@ -177,30 +169,21 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
   }
 
   return (
-    <div style={{ width: '100%' }}>
-      <div style={{
-        display: 'flex', gap: 24, justifyContent: 'center',
-        alignItems: 'flex-start', flexWrap: 'wrap', width: '100%', maxWidth: 600, margin: '0 auto',
-      }}>
+    <div className="drawing-quiz">
+      <div className="drawing-quiz__panels">
         {/* Drawing side */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.yourDrawing}</div>
+        <div className="drawing-quiz__side">
+          <div className="stroke-ref__label">{t.yourDrawing}</div>
           <Canvas canvasRef={canvasRef} />
         </div>
 
         {/* Correction side — hidden until validated */}
-        <div style={{ flex: 1}}>
+        <div className="drawing-quiz__correction">
           {!revealed ? (
             <>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>{t.strokeOrder}</div>
-              <div style={{
-                width: '100%', maxWidth: 260, aspectRatio: '1',
-                background: 'var(--bg-card)', borderRadius: 10,
-                border: '2px dashed var(--border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                justifySelf: 'center',
-              }}>
-                <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>?</span>
+              <div className="stroke-ref__label">{t.strokeOrder}</div>
+              <div className="drawing-quiz__placeholder">
+                <span className="drawing-quiz__placeholder-mark">?</span>
               </div>
             </>
           ) : (
@@ -211,14 +194,7 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
 
       {/* Validate button — only before revealed */}
       {!revealed && (
-        <button
-          onClick={handleValidate}
-          style={{
-            background: 'var(--accent)', color: '#fff',
-            width: '100%', maxWidth: 600, margin: '20px auto 0', display: 'block',
-            fontSize: 15, padding: '14px',
-          }}
-        >
+        <button onClick={handleValidate} className="drawing-quiz__validate">
           {t.revealAnswer}
         </button>
       )}
