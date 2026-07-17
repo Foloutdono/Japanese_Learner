@@ -31,7 +31,7 @@ export default function ModeSelector({ modes, onSelect, title }) {
             type="button"
             onClick={() => onSelect(m.key)}
             className="choice-row"
-            style={{ '--row-color': m.color ?? 'var(--accent)' }}
+            style={m.color ? { '--row-color': m.color } : undefined}
           >
             <span className="choice-row__accent" aria-hidden="true" />
             <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>

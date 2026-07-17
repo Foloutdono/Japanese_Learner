@@ -7,8 +7,9 @@
  *
  * Props:
  *   onSelect(level)  — called when a level is clicked
- *   color            — accent colour for this section, as a hex string
- *                       or CSS var() (default: var(--accent), shu-iro)
+ *   color            — optional accent colour override for this section, as
+ *                       a hex string or CSS var(). Falls back to shu-iro
+ *                       (var(--accent)) via CSS when omitted.
  *   levels           — array of level strings (default: N5…N1)
  *   eyebrow, title, subtitle — header copy. subtitle has no default:
  *     the list is self-explanatory. Pass eyebrow="" / etc. to hide a
@@ -27,10 +28,12 @@ const LEVEL_HINTS = {
 
 export default function LevelSelector({
   onSelect,
-  color = 'var(--accent)',
+  color,
   levels = DEFAULT_LEVELS,
   title = 'Choose your JLPT level'
 }) {
+  const rowStyle = color ? { '--row-color': color } : undefined
+
   return (
     <div className="level-selector">
       {(title) && (
@@ -45,7 +48,7 @@ export default function LevelSelector({
             type="button"
             onClick={() => onSelect(l)}
             className="choice-row"
-            style={{ '--row-color': color }}
+            style={rowStyle}
           >
             <span className="choice-row__accent" aria-hidden="true" />
             <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>

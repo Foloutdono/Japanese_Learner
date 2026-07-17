@@ -24,9 +24,12 @@ export default function SelectionScreen({
   subtitle,
   maxWidth = 720,
 }) {
+  const innerStyle =
+    maxWidth !== 720 ? { '--content-max-w': `${maxWidth}px` } : undefined
+
   return (
     <div className="container selection-screen">
-      <div className="selection-screen__inner" style={{ maxWidth }}>
+      <div className="selection-screen__inner" style={innerStyle}>
         {(eyebrow || heading || subtitle) && (
           <div className="selector-header">
             {eyebrow && <div className="selector-header__eyebrow">{eyebrow}</div>}
