@@ -21,10 +21,6 @@ export function TopBar({
     <div className="top-bar">
       <BurgerMenu links={getNavLinks(t)} currentPath={currentPath} />
 
-      <button className="btn-back" onClick={onBack}>
-        {t.menu}
-      </button>
-
       <span className="top-bar__title">{title}</span>
 
       {showWritingToggle && (
@@ -40,6 +36,9 @@ export function TopBar({
           ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
         </button>
       )}
+      <button className="btn-back" onClick={onBack}>
+        {t.back}
+      </button>
     </div>
   )
 }

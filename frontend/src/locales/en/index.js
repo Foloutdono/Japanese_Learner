@@ -16,6 +16,7 @@ const auth = {
 // ── Navigation ────────────────────────────────────────────
 const nav = {
   menu:              'Menu',
+  back:              '←',
   cancel:            'Cancel',
   save:              '✓ Save',
   delete:            '🗑 Delete',
