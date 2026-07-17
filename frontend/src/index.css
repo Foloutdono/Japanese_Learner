@@ -31,6 +31,11 @@
   /* Sabi-iro (錆色) — rust */
   --accent7:        #a85c3f;
 
+  /* Washi (和紙) — pale rice paper. The only light surface in the app;
+     used solely where a diagram needs a bright backdrop for contrast
+     (e.g. stroke-order references drawn in black ink). */
+  --paper:          #f3ecdf;
+
   /* Ai-iro (藍色) — indigo, for cool contrast against the vermillion accent */
   --indigo:         #3d5a73;
   /* Rokusho-iro (緑青色) — verdigris, the patina green of aged bronze */
@@ -412,7 +417,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-card__title {
-  color: var(--text-primary);
+  color: var(--paper);
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: 1.3rem;
@@ -923,9 +928,9 @@ input:focus { border-color: var(--accent2); }
 .rating-bar__btn--q5 { background: var(--success);  color: var(--bg-main); }
 .rating-bar__btn--q4 { background: var(--accent6);  color: var(--text-primary); }
 .rating-bar__btn--q3 { background: var(--accent2);  color: var(--bg-main); }
-.rating-bar__btn--q2 { background: var(--warning);  color: var(--bg-main); }
+.rating-bar__btn--q2 { background: var(--accent7);  color: var(--text-primary); }
 .rating-bar__btn--q1 { background: var(--accent);   color: var(--text-primary); }
-.rating-bar__btn--q0 { background: var(--danger);   color: var(--text-primary); }
+.rating-bar__btn--q0 { background: var(--accent4);  color: var(--text-primary); }
 
 /* ── Shared nav control button (mute / lang switcher) ─────── */
 .btn-nav {
@@ -938,3 +943,249 @@ input:focus { border-color: var(--accent2); }
   font-size: 16px;
   padding: 6px 10px;
 }
+
+/* ── Auth screen ──────────────────────────────────────────── */
+.auth-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.auth-header__glyph {
+  font-family: var(--font-jp);
+  font-size: 4rem;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.auth-header__title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-top: 8px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-mode-toggle {
+  display: flex;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.auth-mode-toggle__btn {
+  flex: 1;
+  border-radius: 0;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+.auth-mode-toggle__btn--active { background: var(--accent); }
+
+.auth-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-input {
+  padding: 12px 16px;
+  font-size: 15px;
+}
+
+.auth-message {
+  font-size: 13px;
+  margin-top: 12px;
+}
+.auth-message--error   { color: var(--danger); }
+.auth-message--success { color: var(--success); }
+
+.auth-submit {
+  background: var(--accent);
+  color: var(--text-primary);
+  width: 100%;
+  margin-top: 20px;
+  font-size: 15px;
+}
+.auth-submit:disabled { opacity: 0.7; }
+
+/* ── Drawing canvas ───────────────────────────────────────── */
+.canvas-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.canvas-board {
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  touch-action: none;
+  cursor: crosshair;
+  display: block;
+  width: 100%;
+  max-width: 260px;
+}
+
+.canvas-clear-btn {
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 260px;
+}
+
+.stroke-ref {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stroke-ref__label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.stroke-ref__frame {
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 1;
+  background: var(--paper);
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stroke-ref__img { width: 100%; height: 100%; object-fit: contain; }
+
+.stroke-ref__fallback {
+  display: none;
+  color: #8a7f6c;
+  font-size: 12px;
+  text-align: center;
+  padding: 16px;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.stroke-ref__meaning-wrap { margin-top: 12px; text-align: center; }
+
+.stroke-ref__meaning {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.drawing-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+.drawing-overlay__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--warning);
+  margin-bottom: 24px;
+}
+
+.drawing-overlay__panels {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 600px;
+}
+
+.drawing-overlay__continue {
+  background: var(--success);
+  color: var(--bg-main);
+  font-size: 16px;
+  padding: 14px 60px;
+  margin-top: 32px;
+}
+
+.drawing-quiz { width: 100%; }
+
+.drawing-quiz__panels {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.drawing-quiz__side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.drawing-quiz__correction { flex: 1; }
+
+.drawing-quiz__placeholder {
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 1;
+  background: var(--bg-card);
+  border-radius: 10px;
+  border: 2px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+}
+
+.drawing-quiz__placeholder-mark { color: var(--text-secondary); font-size: 13px; }
+
+.drawing-quiz__validate {
+  background: var(--accent);
+  color: var(--text-primary);
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto 0;
+  display: block;
+  font-size: 15px;
+  padding: 14px;
+}
+
+/* ── Kanji/Vocab quiz extras ──────────────────────────────── */
+.quiz-subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.quiz-writing-result { margin-top: 16px; }

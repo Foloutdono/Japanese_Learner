@@ -29,47 +29,33 @@ export default function AuthScreen() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex',
-      flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: 24,
-    }}>
-      {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{ fontSize: 64, color: 'var(--accent)', fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif' }}>
-          {t.appTitle}
-        </div>
-        <div style={{ fontSize: 20, fontWeight: 'bold', marginTop: 8 }}>
-          {t.learnJapanese}
-        </div>
+    <div className="auth-screen">
+      <div className="auth-header">
+        <div className="auth-header__glyph">{t.appTitle}</div>
+        <div className="auth-header__title">{t.learnJapanese}</div>
       </div>
 
-      {/* Card */}
-      <div className="card" style={{ width: '100%', maxWidth: 400 }}>
-
-        {/* Mode toggle */}
-        <div style={{ display: 'flex', marginBottom: 24, borderRadius: 8, overflow: 'hidden' }}>
+      <div className="card auth-card">
+        <div className="auth-mode-toggle">
           {[['login', t.login], ['signup', t.signup]].map(([m, label]) => (
-            <button key={m} onClick={() => { setMode(m); setError(null); setSuccess(null) }}
-              style={{
-                flex: 1, borderRadius: 0,
-                background: mode === m ? 'var(--accent)' : 'var(--bg-panel)',
-                color: 'var(--text-primary)', fontSize: 14,
-              }}>
+            <button
+              key={m}
+              onClick={() => { setMode(m); setError(null); setSuccess(null) }}
+              className={`auth-mode-toggle__btn${mode === m ? ' auth-mode-toggle__btn--active' : ''}`}
+            >
               {label}
             </button>
           ))}
         </div>
 
-        {/* Fields */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="auth-fields">
           <input
             type="email"
             placeholder={t.email}
             value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            style={{ padding: '12px 16px', fontSize: 15 }}
+            className="auth-input"
           />
           <input
             type="password"
@@ -77,32 +63,14 @@ export default function AuthScreen() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            style={{ padding: '12px 16px', fontSize: 15 }}
+            className="auth-input"
           />
         </div>
 
-        {/* Error / success */}
-        {error && (
-          <div style={{ color: 'var(--danger)', fontSize: 13, marginTop: 12 }}>
-            {error}
-          </div>
-        )}
-        {success && (
-          <div style={{ color: 'var(--success)', fontSize: 13, marginTop: 12 }}>
-            {success}
-          </div>
-        )}
+        {error && <div className="auth-message auth-message--error">{error}</div>}
+        {success && <div className="auth-message auth-message--success">{success}</div>}
 
-        {/* Submit */}
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          style={{
-            background: 'var(--accent)', color: '#fff',
-            width: '100%', marginTop: 20, fontSize: 15,
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
+        <button onClick={handleSubmit} disabled={loading} className="auth-submit">
           {loading ? t.loading : mode === 'login' ? t.loginBtn : t.signupBtn}
         </button>
       </div>
