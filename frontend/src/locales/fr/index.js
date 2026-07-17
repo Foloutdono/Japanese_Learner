@@ -68,7 +68,6 @@ const quiz = {
   correct:           '✅ Correct !',
   wrong:             '❌ Réponse :',
   quizComplete:      '✅ Toutes les cartes sont à jour !',
-  backToMenu:        '← Retour',
 
   // Rating bar
   rateAnswer:        'Évaluez votre réponse — touches',

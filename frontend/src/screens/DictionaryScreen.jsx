@@ -303,7 +303,7 @@ export default function DictionaryScreen({ session }) {
 							onClick={backToRadicalGrid}
 							style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, padding: '8px 14px' }}
 						>
-							← {t.dictBackToRadicals ?? 'Radicaux'}
+							{t.dictBackToRadicals ?? 'Radicaux'}
 						</button>
 						<div style={{
 							fontSize: 28, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff',
