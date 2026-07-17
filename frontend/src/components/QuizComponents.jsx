@@ -142,7 +142,7 @@ export function DeckProgress({ stats }) {
   const { total, new: toLearn, learning, mastered } = stats
 
   const segments = [
-    { key: 'new',      value: toLearn,  color: 'var(--text-secondary)', label: t.progressNew      ?? 'À apprendre' },
+    { key: 'new',      value: toLearn,  color: 'var(--ink-soft)', label: t.progressNew      ?? 'À apprendre' },
     { key: 'learning', value: learning, color: 'var(--accent)',         label: t.progressLearning ?? 'En cours' },
     { key: 'mastered', value: mastered, color: 'var(--success)',        label: t.progressMastered ?? 'Maîtrisé' },
   ]
@@ -194,7 +194,7 @@ function splitReadingTokens(kana) {
     .filter(Boolean)
 }
 
-export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false }) {
+export function ReadingGroup({ label, readings, size = 18, color = 'var(--ink)', center = false, isLarge = false }) {
   if (!readings.length) return null
   const style = {
     '--reading-size': `${size}px`,
@@ -305,14 +305,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
         // Capped width forces long reading lists (kanji with many
         // on'yomi/kun'yomi) to wrap into a compact, centered block
         // instead of spilling out in one long left-aligned line.
-        <div
-          className="inline-reveal__panel"
-          style={{
-            maxWidth: show ? 320 : 0,
-            opacity: show ? 1 : 0,
-            transition: show ? 'max-width 0.35s ease, opacity 0.3s ease 0.05s' : 'none',
-          }}
-        >
+        <div className={`inline-reveal__panel${show ? ' inline-reveal__panel--open' : ''}`}>
           <Readings
             kana={kana}
             onLabel={t?.onyomi ?? "On'yomi"}
