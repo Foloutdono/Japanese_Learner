@@ -1,31 +1,43 @@
 import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 
+// ── Big kana/kanji display ────────────────────────────────
 export function CharDisplay({ char, size = 110 }) {
+  const isLargeSize = size >= 60
   return (
-    <div 
-      className="char-display" 
-      data-large={size >= 60 ? 'true' : 'false'}
-      style={{ '--char-size': `${size}px` }}
+    <div
+      className="char-display"
+      style={{
+        '--char-size': `${size}px`,
+        '--char-font': isLargeSize ? 'var(--font-jp)' : 'inherit',
+      }}
     >
       {char}
     </div>
   )
 }
 
+// ── MCQ answer button ─────────────────────────────────────
 export function MCQButton({ choice, correct, selected, answered, onClick }) {
-  const isCorrect = choice === correct
+  const isCorrect  = choice === correct
   const isSelected = choice === selected
+
   let variant = ''
   if (answered && isCorrect) variant = ' mcq-button--correct'
   else if (answered && isSelected) variant = ' mcq-button--wrong'
+
   return (
-    <button onClick={onClick} disabled={answered} className={`mcq-button${variant}`}>
+    <button
+      onClick={onClick}
+      disabled={answered}
+      className={`mcq-button${variant}`}
+    >
       {choice}
     </button>
   )
 }
 
+// ── MCQ choices grid ──────────────────────────────────────
 export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
   return (
     <div className="mcq-grid">
@@ -43,11 +55,16 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
   )
 }
 
-export function TypeInput({ value, onChange, onSubmit, submitted, answer, placeholder, wrongExtra = null }) {
+// ── Type input + submit + result ──────────────────────────
+export function TypeInput({
+  value, onChange, onSubmit, submitted, answer,
+  placeholder, inputStyle = {}, wrongExtra = null,
+}) {
   const { t } = useLang()
   const isCorrect = value.trim().toLowerCase() === answer?.toLowerCase()
+
   return (
-    <div className="type-input-wrapper">
+    <div>
       <input
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -56,6 +73,7 @@ export function TypeInput({ value, onChange, onSubmit, submitted, answer, placeh
         disabled={submitted}
         autoFocus
         className="quiz-input"
+        style={inputStyle}
       />
       {!submitted && (
         <button onClick={onSubmit} className="quiz-submit">
@@ -72,6 +90,7 @@ export function TypeInput({ value, onChange, onSubmit, submitted, answer, placeh
   )
 }
 
+// ── Mode toggle ───────────────────────────────────────────
 export function ModeToggle({ mode, onChange, modes }) {
   const { t } = useLang()
   const defaultModes = [
@@ -79,6 +98,7 @@ export function ModeToggle({ mode, onChange, modes }) {
     ['flashcard', t.modeFlashcard ?? 'Flashcard'],
     ['write', t.modeWrite ?? 'Écriture'],
   ]
+
   return (
     <div className="mode-toggle">
       {(modes ?? defaultModes).map(([key, label]) => (
@@ -94,6 +114,7 @@ export function ModeToggle({ mode, onChange, modes }) {
   )
 }
 
+// ── Done message ──────────────────────────────────────────
 export function DoneMessage({ onBack }) {
   const { t } = useLang()
   return (
@@ -107,29 +128,34 @@ export function DoneMessage({ onBack }) {
   )
 }
 
+// ── Loading ───────────────────────────────────────────────
 export function Loading() {
   const { t } = useLang()
   return <div className="quiz-loading">{t.loading}</div>
 }
 
+// ── Deck progress (à apprendre / en cours / maîtrisé) ─────
 export function DeckProgress({ stats }) {
   const { t } = useLang()
   if (!stats || !stats.total) return null
+
   const { total, new: toLearn, learning, mastered } = stats
+
   const segments = [
-    { key: 'new', value: toLearn, color: 'var(--text-secondary)', label: t.progressNew ?? 'À apprendre' },
-    { key: 'learning', value: learning, color: 'var(--accent)', label: t.progressLearning ?? 'En cours' },
-    { key: 'mastered', value: mastered, color: 'var(--success)', label: t.progressMastered ?? 'Maîtrisé' },
+    { key: 'new',      value: toLearn,  color: 'var(--text-secondary)', label: t.progressNew      ?? 'À apprendre' },
+    { key: 'learning', value: learning, color: 'var(--accent)',         label: t.progressLearning ?? 'En cours' },
+    { key: 'mastered', value: mastered, color: 'var(--success)',        label: t.progressMastered ?? 'Maîtrisé' },
   ]
+
   return (
     <div className="deck-progress">
       <div className="deck-progress__bar">
         {segments.map(s => (
           s.value > 0 && (
-            <div 
-              key={s.key} 
-              className="deck-progress__segment" 
-              style={{ '--seg-width': `${(s.value / total) * 100}%`, '--seg-color': s.color }}
+            <div
+              key={s.key}
+              className="deck-progress__segment"
+              style={{ width: `${(s.value / total) * 100}%`, background: s.color }}
             />
           )
         ))}
@@ -137,7 +163,7 @@ export function DeckProgress({ stats }) {
       <div className="deck-progress__legend">
         {segments.map(s => (
           <span key={s.key} className="deck-progress__legend-item">
-            <span className="deck-progress__dot" style={{ '--dot-color': s.color }} />
+            <span className="deck-progress__dot" style={{ background: s.color }} />
             {s.value}/{total} {s.label}
           </span>
         ))}
@@ -146,14 +172,26 @@ export function DeckProgress({ stats }) {
   )
 }
 
+// ── Kanji/vocab readings display ──────────────────────────
+// On'yomi readings are written in katakana, kun'yomi in hiragana — a
+// kanji's combined reading field mixes both, separated by '・' or ';',
+// e.g. "イチ・イツ・ひと~・ひと.つ". We classify each token by its first
+// actual kana character (skipping '.'/'~', which are okurigana/variant
+// markers, not kana). Vocab readings don't have this on/kun distinction
+// (a whole word has one register of readings, not two), so when a field
+// doesn't contain both kinds, Readings just renders a plain list instead
+// of forcing on'yomi/kun'yomi labels onto it.
 function isOnyomiToken(token) {
-  const firstKana = [...token].find(c => /[぀-ヿ]/.test(c))
+  const firstKana = [...token].find(c => /[\u3040-\u30FF]/.test(c))
   if (!firstKana) return false
-  return /[゠-ヿ]/.test(firstKana) 
+  return /[\u30A0-\u30FF]/.test(firstKana) // katakana range
 }
 
 function splitReadingTokens(kana) {
-  return (kana || '').split(/[・;]/).map(s => s.trim()).filter(Boolean)
+  return (kana || '')
+    .split(/[・;]/)
+    .map(s => s.trim())
+    .filter(Boolean)
 }
 
 export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false }) {
@@ -185,30 +223,47 @@ export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-p
   )
 }
 
+// Renders a kana reading field elegantly: on'yomi/kun'yomi split for a
+// kanji's mixed readings, or a plain (numbered if there's more than one)
+// list for a single-register reading like vocab. Returns null if empty.
 export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = false, isLarge = false }) {
   const tokens = splitReadingTokens(kana)
   if (!tokens.length) return null
-  const on = tokens.filter(isOnyomiToken)
+
+  const on  = tokens.filter(isOnyomiToken)
   const kun = tokens.filter(t => !isOnyomiToken(t))
+
   if (on.length && kun.length) {
     return (
       <div>
-        <ReadingGroup label={onLabel} readings={on} size={size} color={color} center={center} isLarge={isLarge} />
+        <ReadingGroup label={onLabel}  readings={on}  size={size} color={color} center={center} isLarge={isLarge} />
         <ReadingGroup label={kunLabel} readings={kun} size={size} color={color} center={center} isLarge={isLarge} />
       </div>
     )
   }
+
   return <ReadingGroup readings={tokens} size={size} color={color} center={center} isLarge={isLarge} />
 }
 
+// ── Meaning display ────────────────────────────────────────
+// A card's `meaning` field is often several synonyms separated by
+// commas/semicolons (e.g. "to eat, to have a meal"). Rather than
+// showing them all at the same weight, the first one — the primary
+// meaning — is rendered larger and highlighted; the rest sit below it
+// as smaller, muted secondary meanings.
 function splitMeaningTokens(meaning) {
-  return (meaning || '').split(/[,;]/).map(s => s.trim()).filter(Boolean)
+  return (meaning || '')
+    .split(/[,;]/)
+    .map(s => s.trim())
+    .filter(Boolean)
 }
 
 export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', center = true }) {
   const [primary, ...rest] = splitMeaningTokens(meaning)
   if (!primary) return null
+
   const style = { '--meaning-size': `${size}px`, '--meaning-color': color }
+
   return (
     <div className={`meaning-display${center ? ' meaning-display--center' : ''}`} style={style}>
       <div className="meaning-display__primary">{primary}</div>
@@ -219,18 +274,45 @@ export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', c
   )
 }
 
+// ── Inline reveal panel ──────────────────────────────────
+// Single-box layout: main content on the left, readings on the right,
+// no divider line. Used when the "answer" is already conveyed some
+// other way (e.g. the highlighted MCQ choice) so we don't repeat it —
+// `main` is just whatever should sit next to the readings, decided by
+// the caller (unchanged prompt for QCM, swapped-to-answer for
+// Flashcard).
 export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false }) {
   const [show, setShow] = useState(false)
+
   useEffect(() => {
     if (!revealed) { setShow(false); return }
+    // Mount hidden, then flip open on the next frame — flipping straight
+    // to open on mount would skip the transition entirely.
     const id = requestAnimationFrame(() => setShow(true))
     return () => cancelAnimationFrame(id)
   }, [revealed])
+
   return (
     <div className="inline-reveal" style={{ '--reveal-gap': `${gap}px` }}>
+      {/* Capped width + wrapping keeps long meanings (e.g. multi-clause
+          definitions) from stretching the row and shoving the readings
+          off to the side. */}
       <div className="inline-reveal__main">{main}</div>
       {kana && (
-        <div className={`inline-reveal__panel ${show ? 'is-open' : 'is-closed'}`}>
+        // Kept mounted at all times (width/opacity 0 when not revealed)
+        // so opening it is a transition, not a pop-in — this is what
+        // makes `main` visibly slide left as the space opens up.
+        // Capped width forces long reading lists (kanji with many
+        // on'yomi/kun'yomi) to wrap into a compact, centered block
+        // instead of spilling out in one long left-aligned line.
+        <div
+          className="inline-reveal__panel"
+          style={{
+            maxWidth: show ? 320 : 0,
+            opacity: show ? 1 : 0,
+            transition: show ? 'max-width 0.35s ease, opacity 0.3s ease 0.05s' : 'none',
+          }}
+        >
           <Readings
             kana={kana}
             onLabel={t?.onyomi ?? "On'yomi"}
@@ -245,13 +327,32 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
   )
 }
 
+// ── Flashcard (click anywhere to reveal, then flip freely) ─
+// Owns its own reveal/face state so the card behaves like a physical
+// flashcard: the first click reveals the back (and fires `onReveal`
+// once, e.g. so the parent can log the card as "seen"); every click
+// after that just flips between front and back at will, with no extra
+// prop wiring needed from the parent.
+//
+//   <Flashcard
+//     front={<CharDisplay char={char} />}
+//     back={<RevealPanel left={meaning} kana={kana} t={t} />}
+//     onReveal={() => markSeen(cardId)}
+//     resetKey={cardId}
+//     t={t}
+//   />
 export function Flashcard({ front, back, onReveal, t, resetKey }) {
   const [revealed, setRevealed] = useState(false)
   const [showBack, setShowBack] = useState(false)
+
+  // When the caller moves on to a new card (e.g. passes the card's id
+  // as resetKey), snap back to the unrevealed front instead of
+  // carrying over the previous card's flip state.
   useEffect(() => {
     setRevealed(false)
     setShowBack(false)
   }, [resetKey])
+
   const handleClick = () => {
     if (!revealed) {
       setRevealed(true)
@@ -261,6 +362,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey }) {
       setShowBack(s => !s)
     }
   }
+
   return (
     <div onClick={handleClick} className="flashcard">
       {showBack ? back : front}
@@ -273,15 +375,19 @@ export function Flashcard({ front, back, onReveal, t, resetKey }) {
   )
 }
 
+// ── Question type badge ─────────────────────────────────────────
 export function QuestionTypeBadge({ type }) {
   const { t } = useLang()
+
   const TYPES = {
     comprehension: { label: t.questionTypeComprehension ?? 'Comprehension', variant: 'comprehension' },
-    vocabulary: { label: t.questionTypeVocabulary ?? 'Vocabulary', variant: 'vocabulary' },
-    grammar: { label: t.questionTypeGrammar ?? 'Grammar', variant: 'grammar' },
-    inference: { label: t.questionTypeInference ?? 'Inference', variant: 'inference' },
+    vocabulary:    { label: t.questionTypeVocabulary ?? 'Vocabulary',       variant: 'vocabulary' },
+    grammar:       { label: t.questionTypeGrammar ?? 'Grammar',             variant: 'grammar' },
+    inference:     { label: t.questionTypeInference ?? 'Inference',         variant: 'inference' },
   }
+
   const { label, variant } = TYPES[type] ?? { label: type, variant: 'default' }
+
   return (
     <span className={`type-badge type-badge--${variant}`}>
       {label}
