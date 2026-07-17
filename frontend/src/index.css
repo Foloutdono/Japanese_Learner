@@ -356,18 +356,70 @@ input:focus { border-color: var(--accent2); }
   padding: 24px;
 }
 
-/* Glyph-as-index variant of .choice-row__index, used when the row
-   marker is a kanji/kana character rather than a sequence number. */
-.choice-row__index--glyph {
-  font-family: var(--font-jp);
-  font-size: 1.8rem;
-  min-width: 56px;
-  padding-top: 0;
-  line-height: 1;
+/* Nav cards — laid out as shoji-screen panels: cards butt up against
+   each other, the grid gap itself is the hairline (background shows
+   through as a 1px lattice), instead of shadowed rounded tiles. One
+   signature interaction: a brush-stroke rule under the title that
+   extends open on hover, echoing a single stroke of ink. */
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
 }
 
-.choice-row__desc--multiline {
+.home-card {
+  background: var(--bg-card);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  text-align: left;
+  border-radius: 0;
+  transition: background 0.2s ease;
+}
+.home-card:hover,
+.home-card:focus-visible {
+  background: var(--bg-panel);
+}
+
+.home-card__glyph {
+  font-family: var(--font-jp);
+  font-size: 2.6rem;
+  line-height: 1;
+  color: var(--row-color, var(--accent));
+}
+
+.home-card__title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.home-card__rule {
+  width: 28px;
+  height: 2px;
+  background: var(--row-color, var(--accent));
+  transform: scaleX(0.4);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.home-card:hover .home-card__rule,
+.home-card:focus-visible .home-card__rule {
+  transform: scaleX(1);
+}
+
+.home-card__desc {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
   white-space: pre-line;
+}
+
+@media (max-width: 640px) {
+  .home-grid { grid-template-columns: 1fr; }
 }
 
 /* ── Ghost / panel button utilities ──────────────────────── */

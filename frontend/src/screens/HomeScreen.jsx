@@ -26,21 +26,19 @@ export default function HomeScreen() {
 
       <main className="home-main">
         <div className="container">
-          <div className="choice-list">
-            {cards.map((card, i) => (
+          <div className="home-grid">
+            {cards.map(card => (
               <button
                 key={card.path}
                 type="button"
                 onClick={() => navigate(card.path)}
-                className="choice-row"
+                className="home-card"
                 style={{ '--row-color': card.color }}
               >
-                <span className="choice-row__accent" aria-hidden="true" />
-                <span className="choice-row__index choice-row__index--glyph">{card.icon}</span>
-                <span className="choice-row__main">
-                  <span className="choice-row__title">{card.title}</span>
-                  <span className="choice-row__desc choice-row__desc--multiline">{card.desc}</span>
-                </span>
+                <span className="home-card__glyph">{card.icon}</span>
+                <span className="home-card__title">{card.title}</span>
+                <span className="home-card__rule" aria-hidden="true" />
+                <span className="home-card__desc">{card.desc}</span>
               </button>
             ))}
           </div>
