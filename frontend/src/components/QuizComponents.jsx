@@ -5,7 +5,13 @@ import { useLang } from '../LangContext'
 export function CharDisplay({ char, size = 110 }) {
   const isLargeSize = size >= 60
   return (
-    <div className={`char-display ${isLargeSize ? 'char-display--large' : ''}`}>
+    <div
+      className="char-display"
+      style={{
+        '--char-size': `${size}px`,
+        '--char-font': isLargeSize ? 'var(--font-jp)' : 'inherit',
+      }}
+    >
       {char}
     </div>
   )
