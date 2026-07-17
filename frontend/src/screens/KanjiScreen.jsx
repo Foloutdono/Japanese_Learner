@@ -163,8 +163,8 @@ export default function KanjiScreen({ session }) {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => setLevel(null)} title={`${t.kanjiTitle} ${level}`} />
-        <SelectionScreen subtitle={t.selectMode ?? t.selectPhase}>
-          <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} />
+        <SelectionScreen>
+          <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} title={t.selectMode} />
         </SelectionScreen>
       </div>
     )

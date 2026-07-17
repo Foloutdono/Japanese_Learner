@@ -114,7 +114,7 @@ export default function VocabScreen({ session }) {
     return (
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => setLevel(null)} title={`${t.vocabulary} ${level}`} />
-        <SelectionScreen subtitle={t.selectMode ?? t.selectPhase}>
+        <SelectionScreen>
           <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} title={t.selectMode} />
         </SelectionScreen>
       </div>
