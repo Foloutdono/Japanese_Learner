@@ -1,55 +1,43 @@
 import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 
-// ═══════════════════════════════════════════════════════════════
-// QUIZ COMPONENTS — Japanese Minimalist Design System
-// Zero inline styles. Everything lives in CSS.
-// ═══════════════════════════════════════════════════════════════
-
-// ── CharDisplay ──────────────────────────────────────────────
-// Large Japanese character. Size via data-size attribute.
-// Font switches to Japanese face at md+ sizes.
-export function CharDisplay({ char, size = 'xl', interactive = false }) {
-  const sizeMap = {
-    32: 'xs', 48: 'sm', 72: 'md', 96: 'lg',
-    110: 'xl', 140: '2xl', 180: '3xl',
-  }
-  
-  // Support both numeric sizes and string tokens
-  const sizeToken = typeof size === 'number' ? (sizeMap[size] || 'xl') : size
-  
-  const className = [
-    'char-display',
-    `char-display--size-${sizeToken}`,
-    interactive && 'char-display--interactive',
-  ].filter(Boolean).join(' ')
-
-  return <div className={className}>{char}</div>
+// ── Big kana/kanji display ────────────────────────────────
+export function CharDisplay({ char, size = 110 }) {
+  const isLargeSize = size >= 60
+  return (
+    <div
+      className="char-display"
+      style={{
+        '--char-size': `${size}px`,
+        '--char-font': isLargeSize ? 'var(--font-jp)' : 'inherit',
+      }}
+    >
+      {char}
+    </div>
+  )
 }
 
-// ── MCQ Button ───────────────────────────────────────────────
+// ── MCQ answer button ─────────────────────────────────────
 export function MCQButton({ choice, correct, selected, answered, onClick }) {
   const isCorrect  = choice === correct
   const isSelected = choice === selected
 
-  const className = [
-    'mcq-button',
-    answered && isCorrect  && 'mcq-button--correct',
-    answered && isSelected && !isCorrect && 'mcq-button--wrong',
-  ].filter(Boolean).join(' ')
+  let variant = ''
+  if (answered && isCorrect) variant = ' mcq-button--correct'
+  else if (answered && isSelected) variant = ' mcq-button--wrong'
 
   return (
     <button
       onClick={onClick}
       disabled={answered}
-      className={className}
+      className={`mcq-button${variant}`}
     >
       {choice}
     </button>
   )
 }
 
-// ── MCQ Grid ─────────────────────────────────────────────────
+// ── MCQ choices grid ──────────────────────────────────────
 export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
   return (
     <div className="mcq-grid">
@@ -67,10 +55,10 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
   )
 }
 
-// ── Type Input ───────────────────────────────────────────────
+// ── Type input + submit + result ──────────────────────────
 export function TypeInput({
   value, onChange, onSubmit, submitted, answer,
-  placeholder, wrongExtra = null,
+  placeholder, inputStyle = {}, wrongExtra = null,
 }) {
   const { t } = useLang()
   const isCorrect = value.trim().toLowerCase() === answer?.toLowerCase()
@@ -85,6 +73,7 @@ export function TypeInput({
         disabled={submitted}
         autoFocus
         className="quiz-input"
+        style={inputStyle}
       />
       {!submitted && (
         <button onClick={onSubmit} className="quiz-submit">
@@ -101,7 +90,7 @@ export function TypeInput({
   )
 }
 
-// ── Mode Toggle ──────────────────────────────────────────────
+// ── Mode toggle ───────────────────────────────────────────
 export function ModeToggle({ mode, onChange, modes }) {
   const { t } = useLang()
   const defaultModes = [
@@ -125,7 +114,7 @@ export function ModeToggle({ mode, onChange, modes }) {
   )
 }
 
-// ── Done Message ─────────────────────────────────────────────
+// ── Done message ──────────────────────────────────────────
 export function DoneMessage({ onBack }) {
   const { t } = useLang()
   return (
@@ -139,13 +128,13 @@ export function DoneMessage({ onBack }) {
   )
 }
 
-// ── Loading ──────────────────────────────────────────────────
+// ── Loading ───────────────────────────────────────────────
 export function Loading() {
   const { t } = useLang()
   return <div className="quiz-loading">{t.loading}</div>
 }
 
-// ── Deck Progress ────────────────────────────────────────────
+// ── Deck progress (à apprendre / en cours / maîtrisé) ─────
 export function DeckProgress({ stats }) {
   const { t } = useLang()
   if (!stats || !stats.total) return null
@@ -183,11 +172,19 @@ export function DeckProgress({ stats }) {
   )
 }
 
-// ── Reading token utilities ──────────────────────────────────
+// ── Kanji/vocab readings display ──────────────────────────
+// On'yomi readings are written in katakana, kun'yomi in hiragana — a
+// kanji's combined reading field mixes both, separated by '・' or ';',
+// e.g. "イチ・イツ・ひと~・ひと.つ". We classify each token by its first
+// actual kana character (skipping '.'/'~', which are okurigana/variant
+// markers, not kana). Vocab readings don't have this on/kun distinction
+// (a whole word has one register of readings, not two), so when a field
+// doesn't contain both kinds, Readings just renders a plain list instead
+// of forcing on'yomi/kun'yomi labels onto it.
 function isOnyomiToken(token) {
   const firstKana = [...token].find(c => /[\u3040-\u30FF]/.test(c))
   if (!firstKana) return false
-  return /[\u30A0-\u30FF]/.test(firstKana)
+  return /[\u30A0-\u30FF]/.test(firstKana) // katakana range
 }
 
 function splitReadingTokens(kana) {
@@ -197,30 +194,16 @@ function splitReadingTokens(kana) {
     .filter(Boolean)
 }
 
-// ── ReadingGroup ─────────────────────────────────────────────
-export function ReadingGroup({ label, readings, size = 'md', color, center = false, isLarge = false }) {
+export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false }) {
   if (!readings.length) return null
-
-  const className = [
-    'reading-group',
-    center && 'reading-group--center',
-    isLarge && 'reading-group--large',
-  ].filter(Boolean).join(' ')
-
-  // Size tokens map to CSS custom properties
-  const sizeMap = { xs: 14, sm: 16, md: 18, lg: 22, xl: 25, '2xl': 32 }
-  const sizeValue = sizeMap[size] || sizeMap.md
-
+  const style = {
+    '--reading-size': `${size}px`,
+    '--reading-index-size': `${Math.max(size - 5, 10)}px`,
+    '--reading-color': color,
+    '--reading-font': isLarge ? 'var(--font-jp)' : 'inherit',
+  }
   return (
-    <div 
-      className={className}
-      style={{
-        '--reading-size': `${sizeValue}px`,
-        '--reading-index-size': `${Math.max(sizeValue - 5, 10)}px`,
-        '--reading-color': color || 'var(--text-primary)',
-        '--reading-font': isLarge ? 'var(--font-jp)' : 'inherit',
-      }}
-    >
+    <div className="reading-group" style={style}>
       {label && (
         <div className={`reading-group__label${center ? ' reading-group__label--center' : ''}`}>
           {label}
@@ -240,8 +223,10 @@ export function ReadingGroup({ label, readings, size = 'md', color, center = fal
   )
 }
 
-// ── Readings ─────────────────────────────────────────────────
-export function Readings({ kana, onLabel, kunLabel, size = 'md', color, center = false, isLarge = false }) {
+// Renders a kana reading field elegantly: on'yomi/kun'yomi split for a
+// kanji's mixed readings, or a plain (numbered if there's more than one)
+// list for a single-register reading like vocab. Returns null if empty.
+export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = false, isLarge = false }) {
   const tokens = splitReadingTokens(kana)
   if (!tokens.length) return null
 
@@ -260,31 +245,27 @@ export function Readings({ kana, onLabel, kunLabel, size = 'md', color, center =
   return <ReadingGroup readings={tokens} size={size} color={color} center={center} isLarge={isLarge} />
 }
 
-// ── MeaningDisplay ───────────────────────────────────────────
-export function MeaningDisplay({ meaning, size = 'lg', color, center = true }) {
-  const [primary, ...rest] = (meaning || '')
+// ── Meaning display ────────────────────────────────────────
+// A card's `meaning` field is often several synonyms separated by
+// commas/semicolons (e.g. "to eat, to have a meal"). Rather than
+// showing them all at the same weight, the first one — the primary
+// meaning — is rendered larger and highlighted; the rest sit below it
+// as smaller, muted secondary meanings.
+function splitMeaningTokens(meaning) {
+  return (meaning || '')
     .split(/[,;]/)
     .map(s => s.trim())
     .filter(Boolean)
-  
+}
+
+export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', center = true }) {
+  const [primary, ...rest] = splitMeaningTokens(meaning)
   if (!primary) return null
 
-  const sizeMap = { sm: 20, md: 24, lg: 28, xl: 36, '2xl': 48 }
-  const sizeValue = sizeMap[size] || sizeMap.lg
-
-  const className = [
-    'meaning-display',
-    center && 'meaning-display--center',
-  ].filter(Boolean).join(' ')
+  const style = { '--meaning-size': `${size}px`, '--meaning-color': color }
 
   return (
-    <div 
-      className={className}
-      style={{
-        '--meaning-size': `${sizeValue}px`,
-        '--meaning-color': color || 'var(--accent3)',
-      }}
-    >
+    <div className={`meaning-display${center ? ' meaning-display--center' : ''}`} style={style}>
       <div className="meaning-display__primary">{primary}</div>
       {rest.length > 0 && (
         <div className="meaning-display__secondary">{rest.join(', ')}</div>
@@ -293,26 +274,50 @@ export function MeaningDisplay({ meaning, size = 'lg', color, center = true }) {
   )
 }
 
-// ── InlineReveal ─────────────────────────────────────────────
+// ── Inline reveal panel ──────────────────────────────────
+// Single-box layout: main content on the left, readings on the right,
+// no divider line. Used when the "answer" is already conveyed some
+// other way (e.g. the highlighted MCQ choice) so we don't repeat it —
+// `main` is just whatever should sit next to the readings, decided by
+// the caller (unchanged prompt for QCM, swapped-to-answer for
+// Flashcard).
 export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false }) {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
     if (!revealed) { setShow(false); return }
+    // Mount hidden, then flip open on the next frame — flipping straight
+    // to open on mount would skip the transition entirely.
     const id = requestAnimationFrame(() => setShow(true))
     return () => cancelAnimationFrame(id)
   }, [revealed])
 
   return (
     <div className="inline-reveal" style={{ '--reveal-gap': `${gap}px` }}>
+      {/* Capped width + wrapping keeps long meanings (e.g. multi-clause
+          definitions) from stretching the row and shoving the readings
+          off to the side. */}
       <div className="inline-reveal__main">{main}</div>
       {kana && (
-        <div className={`inline-reveal__panel${show ? ' inline-reveal__panel--visible' : ''}`}>
+        // Kept mounted at all times (width/opacity 0 when not revealed)
+        // so opening it is a transition, not a pop-in — this is what
+        // makes `main` visibly slide left as the space opens up.
+        // Capped width forces long reading lists (kanji with many
+        // on'yomi/kun'yomi) to wrap into a compact, centered block
+        // instead of spilling out in one long left-aligned line.
+        <div
+          className="inline-reveal__panel"
+          style={{
+            maxWidth: show ? 320 : 0,
+            opacity: show ? 1 : 0,
+            transition: show ? 'max-width 0.35s ease, opacity 0.3s ease 0.05s' : 'none',
+          }}
+        >
           <Readings
             kana={kana}
             onLabel={t?.onyomi ?? "On'yomi"}
             kunLabel={t?.kunyomi ?? "Kun'yomi"}
-            size="xl"
+            size={25}
             center
             isLarge={isLarge}
           />
@@ -322,11 +327,27 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
   )
 }
 
-// ── Flashcard ────────────────────────────────────────────────
+// ── Flashcard (click anywhere to reveal, then flip freely) ─
+// Owns its own reveal/face state so the card behaves like a physical
+// flashcard: the first click reveals the back (and fires `onReveal`
+// once, e.g. so the parent can log the card as "seen"); every click
+// after that just flips between front and back at will, with no extra
+// prop wiring needed from the parent.
+//
+//   <Flashcard
+//     front={<CharDisplay char={char} />}
+//     back={<RevealPanel left={meaning} kana={kana} t={t} />}
+//     onReveal={() => markSeen(cardId)}
+//     resetKey={cardId}
+//     t={t}
+//   />
 export function Flashcard({ front, back, onReveal, t, resetKey }) {
   const [revealed, setRevealed] = useState(false)
   const [showBack, setShowBack] = useState(false)
 
+  // When the caller moves on to a new card (e.g. passes the card's id
+  // as resetKey), snap back to the unrevealed front instead of
+  // carrying over the previous card's flip state.
   useEffect(() => {
     setRevealed(false)
     setShowBack(false)
@@ -354,15 +375,15 @@ export function Flashcard({ front, back, onReveal, t, resetKey }) {
   )
 }
 
-// ── QuestionTypeBadge ────────────────────────────────────────
+// ── Question type badge ─────────────────────────────────────────
 export function QuestionTypeBadge({ type }) {
   const { t } = useLang()
 
   const TYPES = {
     comprehension: { label: t.questionTypeComprehension ?? 'Comprehension', variant: 'comprehension' },
-    vocabulary:    { label: t.questionTypeVocabulary    ?? 'Vocabulary',    variant: 'vocabulary' },
-    grammar:       { label: t.questionTypeGrammar       ?? 'Grammar',       variant: 'grammar' },
-    inference:     { label: t.questionTypeInference     ?? 'Inference',     variant: 'inference' },
+    vocabulary:    { label: t.questionTypeVocabulary ?? 'Vocabulary',       variant: 'vocabulary' },
+    grammar:       { label: t.questionTypeGrammar ?? 'Grammar',             variant: 'grammar' },
+    inference:     { label: t.questionTypeInference ?? 'Inference',         variant: 'inference' },
   }
 
   const { label, variant } = TYPES[type] ?? { label: type, variant: 'default' }
@@ -371,37 +392,5 @@ export function QuestionTypeBadge({ type }) {
     <span className={`type-badge type-badge--${variant}`}>
       {label}
     </span>
-  )
-}
-
-// ── RatingBar ────────────────────────────────────────────────
-export function RatingBar({ onRate, t }) {
-  const levels = [
-    { key: 5, label: t?.ratingPerfect   ?? 'Parfait',    variant: 'fill-success' },
-    { key: 4, label: t?.ratingGood      ?? 'Bon',        variant: 'outline-success' },
-    { key: 3, label: t?.ratingHard      ?? 'Difficile',  variant: 'fill-warning' },
-    { key: 2, label: t?.ratingWrong     ?? 'Faux',       variant: 'outline-danger' },
-    { key: 1, label: t?.ratingVeryWrong ?? 'Très faux',  variant: 'fill-danger' },
-    { key: 0, label: t?.ratingBlackout  ?? 'Blackout',   variant: 'void' },
-  ]
-
-  return (
-    <div className="rating-bar">
-      <div className="rating-bar__hint">
-        {t?.rateQuality ?? 'Évaluez votre réponse'}
-      </div>
-      <div className="rating-bar__buttons">
-        {levels.map(({ key, label, variant }) => (
-          <button
-            key={key}
-            onClick={() => onRate(key)}
-            className={`rating-btn rating-btn--${variant}`}
-          >
-            <span className="rating-btn__index">{key}</span>
-            {label}
-          </button>
-        ))}
-      </div>
-    </div>
   )
 }
