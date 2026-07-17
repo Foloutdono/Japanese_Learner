@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
-import { KanjiTopBar, TopBar } from '../components/TopBar'
+import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   MCQGrid, DoneMessage, Loading, DeckProgress,
@@ -176,7 +176,7 @@ export default function KanjiScreen({ session }) {
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      <KanjiTopBar
+      <TopBar
         onBack={() => setMode(null)}
         onClick={() => setDrawingEnabled(d => !d)}
         title={`${t.kanjiTitle} ${level} — ${modeLabel}`}
