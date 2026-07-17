@@ -65,7 +65,6 @@ const quiz = {
   // Feedback
   wrong:             '❌ Answer:',
   quizComplete:      '✅ All cards are up to date!',
-  backToMenu:        '← Back',
 
   // Rating bar
   rateAnswer:        'Rate your answer — keys',
