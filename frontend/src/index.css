@@ -1,72 +1,53 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Serif+JP:wght@600;700&display=swap');
 
-/* ── Design system ──────────────────────────────────────────
-   Ma (間) — the negative space is the atmosphere, not the dark
-   background. The app now lives on washi (rice paper): a warm,
-   quiet light ground with generous space between things. Sumi
-   ink supplies the one high-contrast structural move — the top
-   bar, the hero band, a handful of deliberate "ink" buttons —
-   so the red/black/white contrast the tradition is built on
-   still reads clearly against the paper, per Fireart's take on
-   Japanese minimalism (negative space, restraint, contrast,
-   dramatic type, one focal element at a time). */
 :root {
-  /* Washi (和紙) — rice paper. The ground the whole app sits on. */
-  --paper:          #f6f1e4;
-  --paper-raised:   #efe6d0;
-  --paper-sunken:   #e7dabd;
+  /* Sumi (墨) — ink black, warmed rather than blue-cold */
+  --bg-main:        #17151a;
+  --bg-card:        #201d24;
+  --bg-panel:       #2a2530;
 
-  /* Sumi (墨) — ink black. Reserved for structural chrome (top
-     bar, hero band, nav drawer) so it reads as a deliberate slab
-     of contrast, not a default dark mode. */
-  --sumi:           #1c1811;
-  --sumi-raised:    #272117;
-
-  /* Shu-iro (朱色) — cinnabar vermillion, the seal/lacquer red.
-     The single accent allowed to run through both light and
-     dark surfaces, echoing a hanko stamp pressed into paper. */
-  --accent:         #b7402a;
-  --accent-deep:    #8c2f1e;
-  /* Yamabuki-iro (山吹色) — kerria-blossom gold, deepened slightly
-     so it still reads as text on paper, not just as a fill. */
-  --accent2:        #a97a25;
+  /* Shu-iro (朱色) — cinnabar vermillion, the traditional seal/lacquer red */
+  --accent:         #c1442c;
+  /* Yamabuki-iro (山吹色) — kerria-blossom gold */
+  --accent2:        #c99a3e;
   /* Fuji-iro (藤色) — wisteria */
-  --accent3:        #6f5d8f;
-  /* Matcha (抹茶), darkened so it holds up as plain text on paper */
-  --success:        #5c7a43;
-  /* Kohaku (琥珀) — amber */
-  --warning:        #ad7c2e;
+  --accent3:        #7c6a9c;
+  /* Matcha (抹茶) */
+  --success:        #7d9a5b;
+  /* Kohaku (琥珀) — amber, kept close to yamabuki but distinct */
+  --warning:        #d1a24a;
   /* Enji-iro (臙脂色) — deep carmine */
-  --danger:         #93301f;
+  --danger:         #9c3428;
 
-  /* Additional pigments — extends the seal-red/gold/wisteria trio
-     so data-driven accents (nav sections, SRS ratings) stay inside
+  /* Additional pigments — extends the seal-red/gold/wisteria trio above
+     so data-driven accents (nav sections, SRS ratings) can stay inside
      the same traditional palette instead of reaching for arbitrary hex. */
   /* Ai-iro (藍色) — indigo blue */
-  --accent4:        #375b78;
+  --accent4:        #3f6d8e;
   /* Cha-iro (茶色) — tea brown */
-  --accent5:        #7a5c40;
+  --accent5:        #8a6b4f;
   /* Rokushou-iro (緑青色) — verdigris green */
-  --accent6:        #43645f;
+  --accent6:        #4f7d7a;
   /* Sabi-iro (錆色) — rust */
-  --accent7:        #954e34;
+  --accent7:        #a85c3f;
 
-  /* A brighter, near-white washi reserved for stroke-order
-     diagrams — needs to stay crisp against ink strokes even
-     though the rest of the app now sits on warm paper too. */
-  --washi-bright:   #fbf8f0;
+  /* Washi (和紙) — pale rice paper. The only light surface in the app;
+     used solely where a diagram needs a bright backdrop for contrast
+     (e.g. stroke-order references drawn in black ink). */
+  --paper:          #f3ecdf;
 
-  /* Sumi (墨) — ink, the primary text colour on paper. */
-  --ink:            #221d15;
-  /* Nezumi-iro (鼠色) — mouse grey, warmed toward the paper. */
-  --ink-soft:       #6f6552;
-  --border:         #ddcfa9;
+  /* Ai-iro (藍色) — indigo, for cool contrast against the vermillion accent */
+  --indigo:         #3d5a73;
+  /* Rokusho-iro (緑青色) — verdigris, the patina green of aged bronze */
+  --teal:            #4f7a72;
+  /* Sabi-iro (錆色) — rust, the colour of oxidised iron */
+  --rust:            #a8622f;
 
-  /* Text/icon colours for use on the dark sumi surfaces (top bar,
-     hero band, nav drawer, seal-stamped buttons) — never mixed
-     with --ink, which assumes a paper ground. */
-  --on-dark:        #f3ecdf;
-  --on-dark-soft:   #b3a488;
+  /* Kinari (生成り) — raw silk, warm off-white */
+  --text-primary:   #ece5d8;
+  /* Nezumi-iro (鼠色) — mouse grey, the classic Edo neutral */
+  --text-secondary: #a79c8c;
+  --border:         #35303a;
 
   --radius:         12px;
   --max-w:          1100px;
@@ -80,8 +61,8 @@
 
 html, body, #root {
   height: 100%;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--bg-main);
+  color: var(--text-primary);
   font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
@@ -131,7 +112,7 @@ button:focus-visible {
 
 .selector-header__eyebrow {
   font-family: var(--font-display);
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -147,7 +128,7 @@ button:focus-visible {
 }
 
 .selector-header__subtitle {
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.6;
   max-width: 480px;
@@ -178,7 +159,7 @@ button:focus-visible {
   border: none;
   border-bottom: 1px solid var(--border);
   border-radius: 0;
-  color: var(--ink);
+  color: var(--text-primary);
   text-align: left;
   overflow: hidden;
 }
@@ -207,7 +188,7 @@ button:focus-visible {
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   transition: color 0.2s ease;
 }
 
@@ -239,7 +220,7 @@ button:focus-visible {
 }
 
 .choice-row__desc {
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   font-size: 0.9rem;
   line-height: 1.5;
   text-align: right;
@@ -255,8 +236,8 @@ input {
   font-family: inherit;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: var(--paper-raised);
-  color: var(--ink);
+  background: var(--bg-card);
+  color: var(--text-primary);
   outline: none;
   transition: border-color 0.2s;
 }
@@ -271,14 +252,13 @@ input:focus { border-color: var(--accent2); }
 }
 
 .card {
-  background: var(--paper-raised);
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 24px;
 }
 
 .top-bar {
-  background: var(--sumi);
-  color: var(--on-dark);
+  background: var(--bg-panel);
   padding: 14px 24px;
   display: flex;
   align-items: center;
@@ -289,15 +269,15 @@ input:focus { border-color: var(--accent2); }
 }
 
 .btn-back {
-  background: rgba(255,255,255,0.1);
-  color: var(--on-dark);
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
   font-size: 13px;
   padding: 8px 16px;
   white-space: nowrap;
 }
 .button-set-choice {
-  background: var(--paper-raised);
-  color: var(--ink);
+  background: var(--bg-card);
+  color: var(--text-primary);
   font-size: 18px;
   padding: 35px 30px;
 }
@@ -313,7 +293,7 @@ input:focus { border-color: var(--accent2); }
 	flex-shrink: 0;
 	position: sticky;
 	top: 80px;
-	background: var(--paper-raised);
+	background: var(--bg-card);
 	border-radius: 12px;
 	padding: 24px;
 }
@@ -355,62 +335,49 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-header {
-  background: var(--sumi);
-  color: var(--on-dark);
+  background: var(--bg-panel);
   border-bottom: 1px solid var(--border);
-  padding: 64px 24px 44px;
+  padding: 92px 24px 56px;
   text-align: center;
 }
 
-/* Hanko (判子) — the seal stamp. A single hand-pressed square,
-   set slightly askew, standing in for a signature. It's the one
-   ornament in the whole system; everything else stays quiet. */
 .home-header__glyph {
-  position: relative;
-  display: inline-block;
   font-family: var(--font-jp);
-  font-size: 4rem;
+  font-size: 5rem;
   color: var(--accent);
   line-height: 1;
-  padding: 6px 16px;
-}
-.home-header__glyph::after {
-  content: '';
-  position: absolute;
-  inset: -6px 2px;
-  border: 1.5px solid var(--accent);
-  transform: rotate(-2deg);
-  opacity: 0.65;
 }
 
 .home-header__title {
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
-  font-size: 1.4rem;
-  margin-top: 14px;
+  font-size: 1.6rem;
+  letter-spacing: 0.06em;
+  margin-top: 22px;
 }
 
 .home-header__desc {
-  color: var(--on-dark-soft);
+  color: var(--text-secondary);
   font-size: 0.85rem;
-  margin-top: 8px;
+  letter-spacing: 0.02em;
+  margin-top: 10px;
 }
 
 .home-header__actions {
   display: flex;
   gap: 8px;
   justify-content: center;
-  margin-top: 18px;
+  margin-top: 28px;
 }
 
 .home-main {
   flex: 1;
-  padding: 56px 24px;
+  padding: 64px 24px;
 }
 
 .home-footer {
   text-align: center;
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   padding: 24px;
 }
@@ -429,8 +396,8 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-card {
-  background: var(--paper-raised);
-  padding: 40px 32px;
+  background: var(--bg-card);
+  padding: 48px 36px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -441,7 +408,7 @@ input:focus { border-color: var(--accent2); }
 }
 .home-card:hover,
 .home-card:focus-visible {
-  background: var(--paper-sunken);
+  background: var(--bg-panel);
 }
 
 .home-card__glyph {
@@ -452,7 +419,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-card__title {
-  color: var(--ink);
+  color: var(--paper);
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: 1.3rem;
@@ -472,7 +439,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-card__desc {
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   font-size: 0.875rem;
   line-height: 1.6;
   white-space: pre-line;
@@ -484,23 +451,23 @@ input:focus { border-color: var(--accent2); }
 
 /* ── Ghost / panel button utilities ──────────────────────── */
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--on-dark-soft);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
   font-size: 12px;
   padding: 8px 16px;
 }
 
 .btn-panel {
-  background: var(--sumi);
-  color: var(--on-dark);
+  background: var(--bg-panel);
+  color: var(--text-primary);
 }
 
 /* ── Burger menu / nav drawer ─────────────────────────────
    A hairline-edged drawer, no rounded cards — the same editorial
    language as the rest of the app, just laid out vertically. */
 .burger-toggle {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--on-dark);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
   font-size: 18px;
   padding: 6px 10px;
   line-height: 1;
@@ -518,7 +485,7 @@ input:focus { border-color: var(--accent2); }
   width: 280px;
   max-width: 85vw;
   height: 100%;
-  background: var(--sumi);
+  background: var(--bg-panel);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -545,12 +512,12 @@ input:focus { border-color: var(--accent2); }
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--on-dark-soft);
+  color: var(--text-secondary);
 }
 
 .burger-drawer__close {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--on-dark);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
   font-size: 16px;
   padding: 4px 10px;
 }
@@ -567,7 +534,7 @@ input:focus { border-color: var(--accent2); }
   gap: 12px;
   width: 100%;
   background: transparent;
-  color: var(--on-dark);
+  color: var(--text-primary);
   font-size: 15px;
   padding: 12px 20px;
   border-radius: 0;
@@ -610,11 +577,11 @@ input:focus { border-color: var(--accent2); }
 }
 .btn-writing-toggle--on {
   background: var(--warning);
-  color: var(--on-dark);
+  color: var(--bg-main);
 }
 .btn-writing-toggle--off {
-  background: var(--paper-raised);
-  color: var(--ink-soft);
+  background: var(--bg-card);
+  color: var(--text-secondary);
 }
 
 /* ── Quiz screen shells ───────────────────────────────────── */
@@ -644,43 +611,89 @@ input:focus { border-color: var(--accent2); }
   font-family: var(--char-font, var(--font-jp));
   font-size: var(--char-size, 110px);
   max-height: calc(var(--char-size, 110px) * 1.4);
-  color: var(--ink);
-  margin: 16px 0;
+  color: var(--text-primary);
+  margin: 28px 0;
   line-height: 1.1;
+  letter-spacing: 0.02em;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.mcq-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: clamp(8px, 2vw, 16px);
+/* ── MCQ answer list ───────────────────────────────────────
+   Same editorial hairline-row language as choice-row (LevelSelector /
+   ModeSelector): the quiz reads as "pick a row", not "tap a coloured
+   tile" — one system across the whole app instead of two competing
+   button languages. Correct/wrong states lean on the same restrained
+   accent-as-line logic as the rating bar, not a flat colour fill. */
+.mcq-list {
   width: 100%;
-  max-width: 900px;
+  max-width: 640px;
   margin: 0 auto;
+  border-top: 1px solid var(--border);
+  text-align: left;
 }
 
-.mcq-button {
-  background: var(--paper-raised);
-  color: var(--ink);
-  font-size: clamp(16px, 2vw, 24px);
-  min-height: 70px;
-  padding: 12px;
-  width: 100%;
-  border-radius: 12px;
-  border: 2px solid var(--border);
+.mcq-row {
+  position: relative;
   display: flex;
-  justify-content: center;
   align-items: center;
-  text-align: center;
-  word-break: break-word;
-  font-weight: 700;
-  transition: background 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
+  gap: 20px;
+  width: 100%;
+  padding: 20px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--text-primary);
+  text-align: left;
+  overflow: hidden;
+  transition: background 0.15s ease;
 }
-.mcq-button:not(:disabled):hover { transform: scale(1.02); }
-.mcq-button:disabled { cursor: default; }
-.mcq-button--correct { background: var(--success); border-color: var(--success); color: var(--on-dark); }
-.mcq-button--wrong   { background: var(--danger); border-color: var(--danger); color: var(--on-dark); }
+.mcq-row:not(:disabled):hover,
+.mcq-row:focus-visible { background: rgba(255, 255, 255, 0.03); }
+.mcq-row:disabled { cursor: default; }
+
+.mcq-row__accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+.mcq-row:not(:disabled):hover .mcq-row__accent,
+.mcq-row:focus-visible .mcq-row__accent { transform: scaleY(1); }
+
+.mcq-row__index {
+  min-width: 26px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.mcq-row__text {
+  flex: 1;
+  font-family: var(--font-jp);
+  font-size: clamp(17px, 2vw, 21px);
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.mcq-row--correct { background: rgba(125, 154, 91, 0.1); }
+.mcq-row--correct .mcq-row__accent { background: var(--success); transform: scaleY(1); }
+.mcq-row--correct .mcq-row__index,
+.mcq-row--correct .mcq-row__text { color: var(--success); }
+
+.mcq-row--wrong { background: rgba(156, 52, 40, 0.1); }
+.mcq-row--wrong .mcq-row__accent { background: var(--danger); transform: scaleY(1); }
+.mcq-row--wrong .mcq-row__index,
+.mcq-row--wrong .mcq-row__text { color: var(--danger); }
 
 .quiz-input {
   width: 100%;
@@ -691,7 +704,7 @@ input:focus { border-color: var(--accent2); }
 
 .quiz-submit {
   background: var(--accent);
-  color: var(--on-dark);
+  color: var(--text-primary);
   width: 100%;
 }
 
@@ -710,11 +723,11 @@ input:focus { border-color: var(--accent2); }
 }
 
 .mode-toggle__btn {
-  background: var(--paper-raised);
-  color: var(--ink);
+  background: var(--bg-card);
+  color: var(--text-primary);
   font-size: 13px;
 }
-.mode-toggle__btn--active { background: var(--accent); color: var(--on-dark); }
+.mode-toggle__btn--active { background: var(--accent); }
 
 .quiz-done {
   color: var(--success);
@@ -724,7 +737,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .quiz-loading {
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   text-align: center;
   padding: 40px;
 }
@@ -736,7 +749,7 @@ input:focus { border-color: var(--accent2); }
   height: 8px;
   border-radius: 4px;
   overflow: hidden;
-  background: var(--paper-raised);
+  background: var(--bg-card);
 }
 
 .deck-progress__segment { height: 100%; }
@@ -748,7 +761,7 @@ input:focus { border-color: var(--accent2); }
   gap: 14px;
   margin-top: 8px;
   font-size: 12px;
-  color: var(--ink-soft);
+  color: var(--text-secondary);
 }
 
 .deck-progress__legend-item {
@@ -768,7 +781,7 @@ input:focus { border-color: var(--accent2); }
 
 .reading-group__label {
   font-size: 11px;
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   margin-bottom: 5px;
   text-align: left;
 }
@@ -785,13 +798,13 @@ input:focus { border-color: var(--accent2); }
 
 .reading-group__item {
   font-size: var(--reading-size, 18px);
-  color: var(--reading-color, var(--ink));
+  color: var(--reading-color, var(--text-primary));
   white-space: nowrap;
 }
 
 .reading-group__item-index {
   font-size: var(--reading-index-size, 13px);
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   margin-right: 4px;
 }
 
@@ -811,7 +824,7 @@ input:focus { border-color: var(--accent2); }
 
 .meaning-display__secondary {
   font-size: calc(var(--meaning-size, 28px) * 0.55);
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   font-weight: 500;
   margin-top: 6px;
 }
@@ -848,27 +861,35 @@ input:focus { border-color: var(--accent2); }
 
 .flashcard__hint {
   font-size: 12px;
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   margin-top: 16px;
 }
 
+/* A hairline underline in the type's colour, not a filled pill — the
+   accent marks the label instead of drowning it, keeping the palette
+   restrained (ink + one accent) the way a seal-stamp of colour sits
+   on plain paper rather than tinting the whole card. */
 .type-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  color: var(--on-dark);
-  font-size: 12px;
+  padding: 0 2px 7px;
+  border: none;
+  border-bottom: 2px solid var(--badge-color, var(--text-secondary));
+  border-radius: 0;
+  background: none;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
 }
-.type-badge--comprehension { background: var(--accent3); }
-.type-badge--vocabulary    { background: var(--success); }
-.type-badge--grammar       { background: var(--warning); }
-.type-badge--inference     { background: var(--accent); }
-.type-badge--default       { background: var(--ink-soft); }
+.type-badge--comprehension { --badge-color: var(--accent3); }
+.type-badge--vocabulary    { --badge-color: var(--success); }
+.type-badge--grammar       { --badge-color: var(--warning); }
+.type-badge--inference     { --badge-color: var(--accent); }
+.type-badge--default       { --badge-color: var(--text-secondary); }
 
 @media (max-width: 560px) {
   .home-header { padding: 44px 16px 32px; }
@@ -884,13 +905,13 @@ input:focus { border-color: var(--accent2); }
 .rating-bar { margin-top: 32px; }
 
 .rating-bar__hint {
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   font-size: 13px;
   margin-bottom: 12px;
 }
 
 .rating-bar__key {
-  background: var(--sumi);
+  background: var(--bg-panel);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
@@ -907,8 +928,8 @@ input:focus { border-color: var(--accent2); }
 .rating-btn {
   font-size: 13px;
   border: 1px solid transparent;
-  background: var(--paper-raised);
-  color: var(--ink);
+  background: var(--bg-card);
+  color: var(--text-primary);
 }
 
 .rating-btn__index {
@@ -918,29 +939,50 @@ input:focus { border-color: var(--accent2); }
   font-family: var(--font-display);
 }
 
-.rating-btn--fill-success    { background: var(--success); color: var(--on-dark); }
+.rating-btn--fill-success    { background: var(--success); color: var(--bg-main); }
 .rating-btn--outline-success { background: transparent; border-color: var(--success); color: var(--success); }
-.rating-btn--fill-warning    { background: var(--warning); color: var(--ink); }
+.rating-btn--fill-warning    { background: var(--warning); color: var(--bg-main); }
 .rating-btn--outline-danger  { background: transparent; border-color: var(--danger); color: var(--danger); }
-.rating-btn--fill-danger     { background: var(--danger); color: var(--on-dark); }
-.rating-btn--void            { background: var(--sumi); border-color: var(--border); color: var(--on-dark-soft); }
+.rating-btn--fill-danger     { background: var(--danger); color: var(--text-primary); }
+.rating-btn--void            { background: var(--bg-panel); border-color: var(--border); color: var(--text-secondary); }
 
-/* ── Shared nav control buttons (mute / lang switcher) ─────
-   Always sits on a dark surface (top bar or hero band), so the
-   translucent-white chip + light text pairing is fixed, not
-   themed per usage. */
+/* ── Shared nav control buttons (mute / lang switcher) ───── */
 .btn-nav {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--on-dark);
-  font-size: 14px;
-  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
 }
 .btn-nav--icon { font-size: 16px; padding: 6px 10px; }
 .btn-nav--lang { font-size: 14px; padding: 6px 12px; }
 
-/* Second SRS scale — mode-toggle-style rating pills used lower in
-   the flow. Each fill picks dark or light text depending on how
-   light the hue itself is. */
+/* ── Rating bar (SRS quality scale) ──────────────────────────
+   Six fixed quality levels, so each gets a named modifier class
+   rather than an inline color — same treatment as .type-badge.
+   The hues run success → warning → danger, matching the meaning
+   (perfect recall down to total blackout) while staying inside
+   the traditional palette. */
+.rating-bar { margin-top: 32px; }
+
+.rating-bar__hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.rating-bar__key {
+  background: var(--bg-panel);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.rating-bar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
 .rating-bar__btn { font-size: 13px; }
 
 .rating-bar__btn-index {
@@ -949,12 +991,24 @@ input:focus { border-color: var(--accent2); }
   font-size: 11px;
 }
 
-.rating-bar__btn--q5 { background: var(--success);  color: var(--on-dark); }
-.rating-bar__btn--q4 { background: var(--accent6);  color: var(--on-dark); }
-.rating-bar__btn--q3 { background: var(--accent2);  color: var(--on-dark); }
-.rating-bar__btn--q2 { background: var(--accent7);  color: var(--on-dark); }
-.rating-bar__btn--q1 { background: var(--accent);   color: var(--on-dark); }
-.rating-bar__btn--q0 { background: var(--accent4);  color: var(--on-dark); }
+.rating-bar__btn--q5 { background: var(--success);  color: var(--bg-main); }
+.rating-bar__btn--q4 { background: var(--accent6);  color: var(--text-primary); }
+.rating-bar__btn--q3 { background: var(--accent2);  color: var(--bg-main); }
+.rating-bar__btn--q2 { background: var(--accent7);  color: var(--text-primary); }
+.rating-bar__btn--q1 { background: var(--accent);   color: var(--text-primary); }
+.rating-bar__btn--q0 { background: var(--accent4);  color: var(--text-primary); }
+
+/* ── Shared nav control button (mute / lang switcher) ─────── */
+.btn-nav {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-size: 14px;
+  padding: 6px 12px;
+}
+.btn-nav--icon {
+  font-size: 16px;
+  padding: 6px 10px;
+}
 
 /* ── Auth screen ──────────────────────────────────────────── */
 .auth-screen {
@@ -1000,8 +1054,8 @@ input:focus { border-color: var(--accent2); }
 .auth-mode-toggle__btn {
   flex: 1;
   border-radius: 0;
-  background: var(--sumi);
-  color: var(--on-dark);
+  background: var(--bg-panel);
+  color: var(--text-primary);
   font-size: 14px;
 }
 .auth-mode-toggle__btn--active { background: var(--accent); }
@@ -1026,7 +1080,7 @@ input:focus { border-color: var(--accent2); }
 
 .auth-submit {
   background: var(--accent);
-  color: var(--on-dark);
+  color: var(--text-primary);
   width: 100%;
   margin-top: 20px;
   font-size: 15px;
@@ -1052,9 +1106,8 @@ input:focus { border-color: var(--accent2); }
 }
 
 .canvas-clear-btn {
-  background: var(--paper-raised);
-  border: 1px solid var(--border);
-  color: var(--ink-soft);
+  background: var(--bg-panel);
+  color: var(--text-secondary);
   font-size: 12px;
   margin-top: 8px;
   width: 100%;
@@ -1070,7 +1123,7 @@ input:focus { border-color: var(--accent2); }
 
 .stroke-ref__label {
   font-size: 12px;
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
@@ -1078,7 +1131,7 @@ input:focus { border-color: var(--accent2); }
   width: 100%;
   max-width: 260px;
   aspect-ratio: 1;
-  background: var(--washi-bright);
+  background: var(--paper);
   border-radius: 10px;
   border: 2px solid var(--border);
   overflow: hidden;
@@ -1105,14 +1158,14 @@ input:focus { border-color: var(--accent2); }
 
 .stroke-ref__meaning {
   font-size: 13px;
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   margin-top: 4px;
 }
 
 .drawing-overlay {
   position: fixed;
   inset: 0;
-  background: var(--paper);
+  background: var(--bg-main);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1140,7 +1193,7 @@ input:focus { border-color: var(--accent2); }
 
 .drawing-overlay__continue {
   background: var(--success);
-  color: var(--on-dark);
+  color: var(--bg-main);
   font-size: 16px;
   padding: 14px 60px;
   margin-top: 32px;
@@ -1172,7 +1225,7 @@ input:focus { border-color: var(--accent2); }
   width: 100%;
   max-width: 260px;
   aspect-ratio: 1;
-  background: var(--paper-raised);
+  background: var(--bg-card);
   border-radius: 10px;
   border: 2px dashed var(--border);
   display: flex;
@@ -1181,11 +1234,11 @@ input:focus { border-color: var(--accent2); }
   justify-self: center;
 }
 
-.drawing-quiz__placeholder-mark { color: var(--ink-soft); font-size: 13px; }
+.drawing-quiz__placeholder-mark { color: var(--text-secondary); font-size: 13px; }
 
 .drawing-quiz__validate {
   background: var(--accent);
-  color: var(--on-dark);
+  color: var(--text-primary);
   width: 100%;
   max-width: 600px;
   margin: 20px auto 0;
@@ -1197,7 +1250,7 @@ input:focus { border-color: var(--accent2); }
 /* ── Kanji/Vocab quiz extras ──────────────────────────────── */
 .quiz-subtitle {
   font-size: 18px;
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   margin-top: 8px;
 }
 

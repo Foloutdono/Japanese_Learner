@@ -17,37 +17,43 @@ export function CharDisplay({ char, size = 110 }) {
   )
 }
 
-// ── MCQ answer button ─────────────────────────────────────
-export function MCQButton({ choice, correct, selected, answered, onClick }) {
+// ── MCQ answer row ─────────────────────────────────────────
+// An editorial hairline row, not a boxed button — the same visual
+// language as LevelSelector/ModeSelector, so the choice always reads
+// as "pick a row from a list" everywhere in the app, quiz included.
+export function MCQButton({ choice, correct, selected, answered, onClick, index }) {
   const isCorrect  = choice === correct
   const isSelected = choice === selected
 
   let variant = ''
-  if (answered && isCorrect) variant = ' mcq-button--correct'
-  else if (answered && isSelected) variant = ' mcq-button--wrong'
+  if (answered && isCorrect) variant = ' mcq-row--correct'
+  else if (answered && isSelected) variant = ' mcq-row--wrong'
 
   return (
     <button
       onClick={onClick}
       disabled={answered}
-      className={`mcq-button${variant}`}
+      className={`mcq-row${variant}`}
     >
-      {choice}
+      <span className="mcq-row__accent" aria-hidden="true" />
+      <span className="mcq-row__index">{String(index + 1).padStart(2, '0')}</span>
+      <span className="mcq-row__text">{choice}</span>
     </button>
   )
 }
 
-// ── MCQ choices grid ──────────────────────────────────────
+// ── MCQ choices list ───────────────────────────────────────
 export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
   return (
-    <div className="mcq-grid">
-      {choices.map(choice => (
+    <div className="mcq-list">
+      {choices.map((choice, i) => (
         <MCQButton
           key={choice}
           choice={choice}
           correct={correct}
           selected={selected}
           answered={answered}
+          index={i}
           onClick={() => onAnswer(choice)}
         />
       ))}
@@ -142,7 +148,7 @@ export function DeckProgress({ stats }) {
   const { total, new: toLearn, learning, mastered } = stats
 
   const segments = [
-    { key: 'new',      value: toLearn,  color: 'var(--ink-soft)', label: t.progressNew      ?? 'À apprendre' },
+    { key: 'new',      value: toLearn,  color: 'var(--text-secondary)', label: t.progressNew      ?? 'À apprendre' },
     { key: 'learning', value: learning, color: 'var(--accent)',         label: t.progressLearning ?? 'En cours' },
     { key: 'mastered', value: mastered, color: 'var(--success)',        label: t.progressMastered ?? 'Maîtrisé' },
   ]
@@ -194,7 +200,7 @@ function splitReadingTokens(kana) {
     .filter(Boolean)
 }
 
-export function ReadingGroup({ label, readings, size = 18, color = 'var(--ink)', center = false, isLarge = false }) {
+export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false }) {
   if (!readings.length) return null
   const style = {
     '--reading-size': `${size}px`,
