@@ -5,6 +5,7 @@
 // le reste de l'app.
 export function getNavLinks(t) {
   return [
+    { icon: '家',   title: t.homeTitle || 'Home', desc: t.homeDesc || 'Back to home', path: '/', color: 'var(--accent8)' },
     { icon: 'あ',   title: t.kanaTitle,       desc: t.kanaDesc,       path: '/kana',       color: 'var(--accent)'  },  // Shu-iro
     { icon: '単語', title: t.vocabTitle,      desc: t.vocabDesc,      path: '/vocab',      color: 'var(--accent4)' }, // Ai-iro
     { icon: '漢字', title: t.kanjiTitle,      desc: t.kanjiDesc,      path: '/kanji',      color: 'var(--accent3)' }, // Fuji-iro

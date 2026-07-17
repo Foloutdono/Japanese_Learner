@@ -412,6 +412,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-card__title {
+  color: var(--text-secondary);
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: 1.3rem;
