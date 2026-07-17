@@ -32,6 +32,8 @@ const nav = {
 const home = {
   tip:               '💡 Des sessions courtes (15-20 min) mais régulières — la SRS gère tout automatiquement.',
   start:             'Commencer →',
+  homeTitle:         'Accueil',
+  homeDesc:          'Retour au menu principal',
   kanaTitle:         'Kana',
   kanaDesc:          'Hiragana & Katakana\nde base + combinaisons\nQCM puis écriture libre',
   vocabTitle:        'Vocabulaire JLPT',
