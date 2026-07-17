@@ -31,124 +31,42 @@ export function BurgerMenu({ links = [] }) {
       <button
         onClick={() => setOpen(o => !o)}
         aria-label={t.menu ?? 'Menu'}
-        style={{
-          background: 'rgba(255,255,255,0.08)',
-          color: 'var(--text-primary)',
-          fontSize: 18,
-          padding: '6px 10px',
-          lineHeight: 1,
-        }}
+        className="burger-toggle"
       >
         ☰
       </button>
 
       {open && (
-        <div
-          onClick={close}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 100,
-            display: 'flex',
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              width: 280,
-              maxWidth: '85vw',
-              height: '100%',
-              background: 'var(--bg-panel)',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '2px 0 12px rgba(0,0,0,0.3)',
-              animation: 'burgerSlideIn 0.18s ease-out',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '16px 16px',
-                borderBottom: '1px solid rgba(255,255,255,0.08)',
-              }}
-            >
-              <span style={{ fontSize: 16, fontWeight: 'bold' }}>{t.menu ?? 'Menu'}</span>
-              <button
-                onClick={close}
-                style={{
-                  background: 'rgba(255,255,255,0.08)',
-                  color: 'var(--text-primary)',
-                  fontSize: 16,
-                  padding: '4px 10px',
-                }}
-              >
-                ✕
-              </button>
+        <div className="burger-overlay" onClick={close}>
+          <div className="burger-drawer" onClick={e => e.stopPropagation()}>
+            <div className="burger-drawer__header">
+              <span className="burger-drawer__title">{t.menu ?? 'Menu'}</span>
+              <button className="burger-drawer__close" onClick={close}>✕</button>
             </div>
 
-            <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
+            <nav className="burger-drawer__nav">
               {links.map(link => (
                 <button
                   key={link.path}
                   onClick={() => go(link.path)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    width: '100%',
-                    background: 'transparent',
-                    color: 'var(--text-primary)',
-                    fontSize: 15,
-                    padding: '12px 16px',
-                    borderRadius: 0,
-                    justifyContent: 'flex-start',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                  className="burger-drawer__link"
                 >
-                  <span style={{ fontSize: 20, fontFamily: 'Yu Gothic, system-ui, sans-serif' }}>
-                    {link.icon}
-                  </span>
+                  <span className="burger-drawer__link-icon">{link.icon}</span>
                   <span>{link.title}</span>
                 </button>
               ))}
             </nav>
 
-            <div
-              style={{
-                display: 'flex',
-                gap: 8,
-                padding: 16,
-                borderTop: '1px solid rgba(255,255,255,0.08)',
-                flexWrap: 'wrap',
-              }}
-            >
+            <div className="burger-drawer__footer">
               <MuteButton />
               <LangSwitcher />
-              <button
-                onClick={() => supabase.auth.signOut()}
-                style={{
-                  background: 'rgba(255,255,255,0.08)',
-                  color: 'var(--text-secondary)',
-                  fontSize: 12,
-                }}
-              >
+              <button className="btn-ghost" onClick={() => supabase.auth.signOut()}>
                 {t.signOut}
               </button>
             </div>
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes burgerSlideIn {
-          from { transform: translateX(-100%); }
-          to   { transform: translateX(0); }
-        }
-      `}</style>
     </>
   )
 }

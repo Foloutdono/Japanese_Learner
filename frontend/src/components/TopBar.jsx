@@ -15,7 +15,7 @@ export function TopBar({ onBack, title }) {
     <div className="top-bar">
       <BurgerMenu links={getNavLinks(t)} />
       <button className="btn-back" onClick={onBack}>{t.menu}</button>
-      <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>{title}</span>
+      <span className="top-bar__title">{title}</span>
       <MuteButton />
       <LangSwitcher />
     </div>
@@ -30,17 +30,12 @@ export function KanjiTopBar({ onBack, onClick, title, drawingEnabled }) {
     <div className="top-bar">
       <BurgerMenu links={getNavLinks(t)} />
       <button className="btn-back" onClick={onBack}>{t.menu}</button>
-      <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>{title}</span>
+      <span className="top-bar__title">{title}</span>
       <MuteButton />
       <LangSwitcher />
       <button
         onClick={onClick}
-        style={{
-          background: drawingEnabled ? 'var(--warning)' : 'var(--bg-card)',
-          color: drawingEnabled ? '#111' : 'var(--text-secondary)',
-          fontSize: 12,
-          padding: '6px 12px',
-        }}
+        className={`btn-writing-toggle ${drawingEnabled ? 'btn-writing-toggle--on' : 'btn-writing-toggle--off'}`}
         title={t.toggleWriting}
       >
         ✏️ {drawingEnabled ? t.writingOn : t.writingOff}

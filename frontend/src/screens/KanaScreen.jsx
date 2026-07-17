@@ -118,10 +118,10 @@ export default function KanaScreen({ session }) {
   // ── Set selection ──
   if (!selectedSet) {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => navigate('/')} title="Kana" />
-        <div className="container" style={{ padding: '60px 24px', textAlign: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 600, margin: '0 auto' }}>
+        <div className="container set-select">
+          <div className="set-select__list">
             {SETS.map(s => (
               <button key={s.slug} onClick={() => startSession(s)} className="button-set-choice">
                 {s.label}
@@ -135,9 +135,9 @@ export default function KanaScreen({ session }) {
 
   // ── Quiz ──
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="screen">
       <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} />
-      <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
+      <div className="container quiz-area">
         <ModeToggle mode={mode} onChange={switchMode} modes={MODES} />
         <DeckProgress stats={progress} />
         {loading && <Loading />}
@@ -154,9 +154,7 @@ export default function KanaScreen({ session }) {
                   back={
                     <div>
                       <CharDisplay char={card.kana} />
-                      <div style={{ fontSize: 32, fontWeight: 'bold', color: 'var(--accent)', marginTop: 12 }}>
-                        {card.romaji}
-                      </div>
+                      <div className="flashcard-answer">{card.romaji}</div>
                     </div>
                   }
                 />

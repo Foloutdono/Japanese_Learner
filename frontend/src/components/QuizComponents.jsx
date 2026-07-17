@@ -5,16 +5,13 @@ import { useLang } from '../LangContext'
 export function CharDisplay({ char, size = 110 }) {
   const isLargeSize = size >= 60
   return (
-    <div style={{
-      fontSize: size,
-      fontFamily: isLargeSize ? 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif' : 'system-ui, -apple-system, "Segoe UI", sans-serif',
-      color: '#fff',
-      margin: '16px 0',
-      lineHeight: 1.1,
-      maxHeight: `${size * 1.4}px`,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-    }}>
+    <div
+      className="char-display"
+      style={{
+        '--char-size': `${size}px`,
+        '--char-font': isLargeSize ? 'var(--font-jp)' : 'inherit',
+      }}
+    >
       {char}
     </div>
   )
@@ -24,42 +21,16 @@ export function CharDisplay({ char, size = 110 }) {
 export function MCQButton({ choice, correct, selected, answered, onClick }) {
   const isCorrect  = choice === correct
   const isSelected = choice === selected
-  let bg = 'var(--bg-card)'
-  if (answered && isCorrect)                bg = 'var(--success)'
-  if (answered && isSelected && !isCorrect) bg = 'var(--danger)'
+
+  let variant = ''
+  if (answered && isCorrect) variant = ' mcq-button--correct'
+  else if (answered && isSelected) variant = ' mcq-button--wrong'
 
   return (
     <button
       onClick={onClick}
-      style={{
-        background: bg,
-        color: 'var(--text-primary)',
-
-        fontSize: 'clamp(16px, 2vw, 24px)',
-
-        minHeight: '70px',
-        padding: '12px',
-
-        width: '100%',
-
-        borderRadius: 12,
-        border: '2px solid var(--border)',
-
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-
-        textAlign: 'center',
-        wordBreak: 'break-word',
-
-        fontWeight: 'bold',
-
-        transition: 'background 0.15s, transform 0.1s',
-
-        cursor: answered ? 'default' : 'pointer',
-      }}
-      onMouseEnter={e => { if (!answered) e.currentTarget.style.transform = 'scale(1.02)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
+      disabled={answered}
+      className={`mcq-button${variant}`}
     >
       {choice}
     </button>
@@ -69,14 +40,7 @@ export function MCQButton({ choice, correct, selected, answered, onClick }) {
 // ── MCQ choices grid ──────────────────────────────────────
 export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-      gap: 'clamp(8px, 2vw, 16px)',
-      width: '100%',
-      maxWidth: 900,
-      margin: '0 auto',
-    }}>
+    <div className="mcq-grid">
       {choices.map(choice => (
         <MCQButton
           key={choice}
@@ -108,27 +72,16 @@ export function TypeInput({
         placeholder={placeholder ?? t.typeAnswer}
         disabled={submitted}
         autoFocus
-        style={{
-          width: '100%',
-          padding: '12px 20px',
-          fontSize: 18,
-          marginBottom: 12,
-          ...inputStyle,
-        }}
+        className="quiz-input"
+        style={inputStyle}
       />
       {!submitted && (
-        <button
-          onClick={onSubmit}
-          style={{ background: 'var(--accent)', color: '#fff', width: '100%' }}
-        >
+        <button onClick={onSubmit} className="quiz-submit">
           {t.submit}
         </button>
       )}
       {submitted && (
-        <div style={{
-          fontSize: 18, fontWeight: 'bold', marginTop: 8,
-          color: isCorrect ? 'var(--success)' : 'var(--danger)',
-        }}>
+        <div className={`quiz-result ${isCorrect ? 'quiz-result--correct' : 'quiz-result--wrong'}`}>
           {isCorrect ? t.correct : `${t.wrong} ${answer}`}
           {!isCorrect && wrongExtra}
         </div>
@@ -147,16 +100,12 @@ export function ModeToggle({ mode, onChange, modes }) {
   ]
 
   return (
-    <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+    <div className="mode-toggle">
       {(modes ?? defaultModes).map(([key, label]) => (
         <button
           key={key}
           onClick={() => onChange(key)}
-          style={{
-            background: mode === key ? 'var(--accent)' : 'var(--bg-card)',
-            color: 'var(--text-primary)',
-            fontSize: 13,
-          }}
+          className={`mode-toggle__btn${mode === key ? ' mode-toggle__btn--active' : ''}`}
         >
           {label}
         </button>
@@ -169,13 +118,10 @@ export function ModeToggle({ mode, onChange, modes }) {
 export function DoneMessage({ onBack }) {
   const { t } = useLang()
   return (
-    <div style={{ color: 'var(--success)', fontSize: 18, textAlign: 'center', padding: 40 }}>
+    <div className="quiz-done">
       {t.quizComplete}
       <br /><br />
-      <button
-        onClick={onBack}
-        style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)' }}
-      >
+      <button onClick={onBack} className="btn-panel">
         {t.backToMenu}
       </button>
     </div>
@@ -185,11 +131,7 @@ export function DoneMessage({ onBack }) {
 // ── Loading ───────────────────────────────────────────────
 export function Loading() {
   const { t } = useLang()
-  return (
-    <div style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 40 }}>
-      {t.loading}
-    </div>
-  )
+  return <div className="quiz-loading">{t.loading}</div>
 }
 
 // ── Deck progress (à apprendre / en cours / maîtrisé) ─────
@@ -206,27 +148,22 @@ export function DeckProgress({ stats }) {
   ]
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto 20px' }}>
-      <div style={{
-        display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden',
-        background: 'var(--bg-card)',
-      }}>
+    <div className="deck-progress">
+      <div className="deck-progress__bar">
         {segments.map(s => (
           s.value > 0 && (
-            <div key={s.key} style={{ width: `${(s.value / total) * 100}%`, background: s.color }} />
+            <div
+              key={s.key}
+              className="deck-progress__segment"
+              style={{ width: `${(s.value / total) * 100}%`, background: s.color }}
+            />
           )
         ))}
       </div>
-      <div style={{
-        display: 'flex', justifyContent: 'center', flexWrap: 'wrap',
-        gap: 14, marginTop: 8, fontSize: 12, color: 'var(--text-secondary)',
-      }}>
+      <div className="deck-progress__legend">
         {segments.map(s => (
-          <span key={s.key} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-            <span style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: s.color, display: 'inline-block',
-            }} />
+          <span key={s.key} className="deck-progress__legend-item">
+            <span className="deck-progress__dot" style={{ background: s.color }} />
             {s.value}/{total} {s.label}
           </span>
         ))}
@@ -259,26 +196,26 @@ function splitReadingTokens(kana) {
 
 export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false }) {
   if (!readings.length) return null
-  const fontFamily = isLarge ? 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif' : 'system-ui, -apple-system, "Segoe UI", sans-serif'
+  const style = {
+    '--reading-size': `${size}px`,
+    '--reading-index-size': `${Math.max(size - 5, 10)}px`,
+    '--reading-color': color,
+    '--reading-font': isLarge ? 'var(--font-jp)' : 'inherit',
+  }
   return (
-    <div style={{ marginBottom: 10 }}>
+    <div className="reading-group" style={style}>
       {label && (
-        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 5, textAlign: center ? 'center' : 'left' }}>
+        <div className={`reading-group__label${center ? ' reading-group__label--center' : ''}`}>
           {label}
         </div>
       )}
-      <div style={{
-        display: 'flex', flexWrap: 'wrap', columnGap: 16, rowGap: 4,
-        justifyContent: center ? 'center' : 'flex-start',
-      }}>
+      <div className={`reading-group__list${center ? ' reading-group__list--center' : ''}`}>
         {readings.map((r, i) => (
-          <span key={i} style={{ fontSize: size, color, whiteSpace: 'nowrap' }}>
+          <span key={i} className="reading-group__item">
             {readings.length > 1 && (
-              <span style={{ fontSize: Math.max(size - 5, 10), color: 'var(--text-secondary)', marginRight: 4 }}>
-                {i + 1}.
-              </span>
+              <span className="reading-group__item-index">{i + 1}.</span>
             )}
-            <span style={{ fontFamily }}>{r}</span>
+            <span className="reading-group__item-text">{r}</span>
           </span>
         ))}
       </div>
@@ -325,20 +262,13 @@ export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', c
   const [primary, ...rest] = splitMeaningTokens(meaning)
   if (!primary) return null
 
+  const style = { '--meaning-size': `${size}px`, '--meaning-color': color }
+
   return (
-    <div style={{ textAlign: center ? 'center' : 'left' }}>
-      <div style={{ fontSize: size, fontWeight: 800, color, lineHeight: 1.2 }}>
-        {primary}
-      </div>
+    <div className={`meaning-display${center ? ' meaning-display--center' : ''}`} style={style}>
+      <div className="meaning-display__primary">{primary}</div>
       {rest.length > 0 && (
-        <div style={{
-          fontSize: Math.round(size * 0.55),
-          color: 'var(--text-secondary)',
-          fontWeight: 500,
-          marginTop: 6,
-        }}>
-          {rest.join(', ')}
-        </div>
+        <div className="meaning-display__secondary">{rest.join(', ')}</div>
       )}
     </div>
   )
@@ -363,16 +293,11 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
   }, [revealed])
 
   return (
-    <div style={{
-      display: 'flex', gap, justifyContent: 'center', alignItems: 'center',
-      flexWrap: 'wrap', maxWidth: 640, margin: '0 auto',
-    }}>
+    <div className="inline-reveal" style={{ '--reveal-gap': `${gap}px` }}>
       {/* Capped width + wrapping keeps long meanings (e.g. multi-clause
           definitions) from stretching the row and shoving the readings
           off to the side. */}
-      <div style={{ textAlign: 'center', maxWidth: 340, wordBreak: 'break-word' }}>
-        {main}
-      </div>
+      <div className="inline-reveal__main">{main}</div>
       {kana && (
         // Kept mounted at all times (width/opacity 0 when not revealed)
         // so opening it is a transition, not a pop-in — this is what
@@ -380,12 +305,14 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
         // Capped width forces long reading lists (kanji with many
         // on'yomi/kun'yomi) to wrap into a compact, centered block
         // instead of spilling out in one long left-aligned line.
-        <div style={{
-          maxWidth: show ? 320 : 0,
-          opacity: show ? 1 : 0,
-          overflow: 'hidden',
-          transition: show ? 'max-width 0.35s ease, opacity 0.3s ease 0.05s' : 'none',
-        }}>
+        <div
+          className="inline-reveal__panel"
+          style={{
+            maxWidth: show ? 320 : 0,
+            opacity: show ? 1 : 0,
+            transition: show ? 'max-width 0.35s ease, opacity 0.3s ease 0.05s' : 'none',
+          }}
+        >
           <Readings
             kana={kana}
             onLabel={t?.onyomi ?? "On'yomi"}
@@ -437,9 +364,9 @@ export function Flashcard({ front, back, onReveal, t, resetKey }) {
   }
 
   return (
-    <div onClick={handleClick} style={{ cursor: 'pointer' }}>
+    <div onClick={handleClick} className="flashcard">
       {showBack ? back : front}
-      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 16 }}>
+      <div className="flashcard__hint">
         {revealed
           ? (t?.tapToFlip ?? 'Touchez pour retourner')
           : (t?.tapToReveal ?? 'Touchez pour révéler')}
@@ -453,45 +380,16 @@ export function QuestionTypeBadge({ type }) {
   const { t } = useLang()
 
   const TYPES = {
-    comprehension: {
-      label: t.questionTypeComprehension ?? 'Comprehension',
-      color: '#3B82F6',
-    },
-    vocabulary: {
-      label: t.questionTypeVocabulary ?? 'Vocabulary',
-      color: '#10B981',
-    },
-    grammar: {
-      label: t.questionTypeGrammar ?? 'Grammar',
-      color: '#F59E0B',
-    },
-    inference: {
-      label: t.questionTypeInference ?? 'Inference',
-      color: '#8B5CF6',
-    },
+    comprehension: { label: t.questionTypeComprehension ?? 'Comprehension', variant: 'comprehension' },
+    vocabulary:    { label: t.questionTypeVocabulary ?? 'Vocabulary',       variant: 'vocabulary' },
+    grammar:       { label: t.questionTypeGrammar ?? 'Grammar',             variant: 'grammar' },
+    inference:     { label: t.questionTypeInference ?? 'Inference',         variant: 'inference' },
   }
 
-  const { label, color } = TYPES[type] ?? {
-    label: type,
-    color: 'var(--text-secondary)',
-  }
+  const { label, variant } = TYPES[type] ?? { label: type, variant: 'default' }
 
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        padding: '4px 10px',
-        borderRadius: 999,
-        background: color,
-        color: '#fff',
-        fontSize: 12,
-        fontWeight: 700,
-        letterSpacing: '0.03em',
-        textTransform: 'uppercase',
-        marginBottom: 12,
-      }}
-    >
+    <span className={`type-badge type-badge--${variant}`}>
       {label}
     </span>
   )
