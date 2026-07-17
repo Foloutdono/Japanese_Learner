@@ -29,17 +29,13 @@ export default function LevelSelector({
   onSelect,
   color = 'var(--accent)',
   levels = DEFAULT_LEVELS,
-  eyebrow = 'Vocabulary JLPT',
-  title = 'Choose your JLPT level',
-  subtitle,
+  title = 'Choose your JLPT level'
 }) {
   return (
     <div className="level-selector">
-      {(eyebrow || title || subtitle) && (
+      {(title) && (
         <div className="selector-header">
-          {eyebrow && <div className="selector-header__eyebrow">{eyebrow}</div>}
           {title && <div className="selector-header__title">{title}</div>}
-          {subtitle && <div className="selector-header__subtitle">{subtitle}</div>}
         </div>
       )}
       <div className="choice-list">

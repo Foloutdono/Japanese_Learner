@@ -103,7 +103,7 @@ export default function VocabScreen({ session }) {
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => navigate('/')} title={`${t.vocabulary} JLPT`} />
         <SelectionScreen>
-          <LevelSelector onSelect={setLevel} color="var(--accent2)" />
+          <LevelSelector onSelect={setLevel} color="var(--accent2)" title={t.selectLevel} />
         </SelectionScreen>
       </div>
     )
@@ -115,7 +115,7 @@ export default function VocabScreen({ session }) {
       <div style={{ minHeight: '100vh' }}>
         <TopBar onBack={() => setLevel(null)} title={`${t.vocabulary} ${level}`} />
         <SelectionScreen subtitle={t.selectMode ?? t.selectPhase}>
-          <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} />
+          <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} title={t.selectMode} />
         </SelectionScreen>
       </div>
     )
