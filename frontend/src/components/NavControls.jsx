@@ -11,12 +11,7 @@ export function MuteButton() {
   return (
     <button
       onClick={toggleMute}
-      style={{
-        background: 'rgba(255,255,255,0.08)',
-        color: 'var(--text-primary)',
-        fontSize: 16,
-        padding: '6px 10px',
-      }}
+      className="btn-nav btn-nav--icon"
       title={muted ? (t.unmute ?? 'Activer le son') : (t.mute ?? 'Couper le son')}
     >
       {muted ? '🔇' : '🔊'}
@@ -31,16 +26,7 @@ export function LangSwitcher() {
   const next = LANGUAGES.find(l => l.code !== lang) ?? LANGUAGES[0]
 
   return (
-    <button
-      onClick={() => switchLang(next.code)}
-      style={{
-        background: 'rgba(255,255,255,0.08)',
-        color: 'var(--text-primary)',
-        fontSize: 14,
-        padding: '6px 12px',
-      }}
-      title={next.label}
-    >
+    <button onClick={() => switchLang(next.code)} className="btn-nav" title={next.label}>
       {next.flag} {next.label}
     </button>
   )
