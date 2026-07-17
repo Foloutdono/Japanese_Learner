@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
-import { useLang, LangSwitcher } from '../LangContext'
+import { useLang } from '../LangContext'
+import { LangSwitcher } from '../components/NavControls'
 import { getNavLinks } from '../navLinks'
 
 export default function HomeScreen() {
