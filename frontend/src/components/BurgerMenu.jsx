@@ -14,7 +14,7 @@ import { MuteButton, LangSwitcher } from './NavControls'
 //     { icon: '単語', title: t.vocabTitle, path: '/vocab' },
 //     ...
 //   ]} />
-export function BurgerMenu({ links = [] }) {
+export function BurgerMenu({ links = [], currentPath = null }) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const { t } = useLang()
@@ -49,7 +49,7 @@ export function BurgerMenu({ links = [] }) {
                 <button
                   key={link.path}
                   onClick={() => go(link.path)}
-                  className="burger-drawer__link"
+                  className={`burger-drawer__link ${currentPath === link.path ? 'burger-drawer__link--active' : ''}`}
                 >
                   <span className="burger-drawer__link-icon">{link.icon}</span>
                   <span>{link.title}</span>

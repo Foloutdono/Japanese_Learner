@@ -1,6 +1,5 @@
 import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
-import { MuteButton, LangSwitcher } from './NavControls'
 import { BurgerMenu } from './BurgerMenu'
 
 // ── Standard top bar ──────────────────────────────────────

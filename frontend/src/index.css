@@ -538,6 +538,9 @@ input:focus { border-color: var(--accent2); }
 .burger-drawer__link:focus-visible {
   background: rgba(255, 255, 255, 0.06);
 }
+.burger-drawer__link--active {
+  background: rgba(255, 255, 255, 0.12);
+}
 
 .burger-drawer__link-icon {
   font-family: var(--font-jp);
