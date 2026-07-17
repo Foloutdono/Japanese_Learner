@@ -30,6 +30,7 @@
   --gap:            24px;
 
   --font-display:   'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-jp:        'Yu Gothic', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -298,4 +299,453 @@ input:focus { border-color: var(--accent2); }
   .top-bar { padding: 12px 16px; }
   .selection-screen { padding: 44px 16px 56px; }
   .selector-header__title { font-size: 1.7rem; }
+}
+/* ── Home screen ──────────────────────────────────────────
+   Header centred like a title page; nav re-uses the editorial
+   choice-list (see selector-header block above) instead of a
+   grid of coloured tiles, so the whole app reads as one system. */
+.home-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-header {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 56px 24px 40px;
+  text-align: center;
+}
+
+.home-header__glyph {
+  font-family: var(--font-jp);
+  font-size: 4rem;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.home-header__title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin-top: 10px;
+}
+
+.home-header__desc {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.home-header__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.home-main {
+  flex: 1;
+  padding: 56px 24px;
+}
+
+.home-footer {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  padding: 24px;
+}
+
+/* Glyph-as-index variant of .choice-row__index, used when the row
+   marker is a kanji/kana character rather than a sequence number. */
+.choice-row__index--glyph {
+  font-family: var(--font-jp);
+  font-size: 1.8rem;
+  min-width: 56px;
+  padding-top: 0;
+  line-height: 1;
+}
+
+.choice-row__desc--multiline {
+  white-space: pre-line;
+}
+
+/* ── Ghost / panel button utilities ──────────────────────── */
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 8px 16px;
+}
+
+.btn-panel {
+  background: var(--bg-panel);
+  color: var(--text-primary);
+}
+
+/* ── Burger menu / nav drawer ─────────────────────────────
+   A hairline-edged drawer, no rounded cards — the same editorial
+   language as the rest of the app, just laid out vertically. */
+.burger-toggle {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-size: 18px;
+  padding: 6px 10px;
+  line-height: 1;
+}
+
+.burger-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+}
+
+.burger-drawer {
+  width: 280px;
+  max-width: 85vw;
+  height: 100%;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
+  animation: burgerSlideIn 0.18s ease-out;
+}
+
+@keyframes burgerSlideIn {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.burger-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.burger-drawer__title {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.burger-drawer__close {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-size: 16px;
+  padding: 4px 10px;
+}
+
+.burger-drawer__nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.burger-drawer__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 15px;
+  padding: 12px 20px;
+  border-radius: 0;
+  justify-content: flex-start;
+  transition: background 0.15s ease;
+}
+.burger-drawer__link:hover,
+.burger-drawer__link:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.burger-drawer__link-icon {
+  font-family: var(--font-jp);
+  font-size: 20px;
+  color: var(--accent2);
+}
+
+.burger-drawer__footer {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+/* ── Top bar extras ───────────────────────────────────────── */
+.top-bar__title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1rem;
+  flex: 1;
+}
+
+.btn-writing-toggle {
+  font-size: 12px;
+  padding: 6px 12px;
+}
+.btn-writing-toggle--on {
+  background: var(--warning);
+  color: var(--bg-main);
+}
+.btn-writing-toggle--off {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+
+/* ── Quiz screen shells ───────────────────────────────────── */
+.screen { min-height: 100vh; }
+
+.set-select { padding: 60px 24px; text-align: center; }
+
+.set-select__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.quiz-area { padding: 32px 24px; text-align: center; }
+
+.flashcard-answer {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 12px;
+}
+
+/* ── Quiz components ─────────────────────────────────────── */
+.char-display {
+  font-family: var(--char-font, var(--font-jp));
+  font-size: var(--char-size, 110px);
+  max-height: calc(var(--char-size, 110px) * 1.4);
+  color: var(--text-primary);
+  margin: 16px 0;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mcq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: clamp(8px, 2vw, 16px);
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mcq-button {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: clamp(16px, 2vw, 24px);
+  min-height: 70px;
+  padding: 12px;
+  width: 100%;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  word-break: break-word;
+  font-weight: 700;
+  transition: background 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
+}
+.mcq-button:not(:disabled):hover { transform: scale(1.02); }
+.mcq-button:disabled { cursor: default; }
+.mcq-button--correct { background: var(--success); border-color: var(--success); }
+.mcq-button--wrong   { background: var(--danger); border-color: var(--danger); }
+
+.quiz-input {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.quiz-submit {
+  background: var(--accent);
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.quiz-result {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+.quiz-result--correct { color: var(--success); }
+.quiz-result--wrong   { color: var(--danger); }
+
+.mode-toggle {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.mode-toggle__btn {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.mode-toggle__btn--active { background: var(--accent); }
+
+.quiz-done {
+  color: var(--success);
+  font-size: 18px;
+  text-align: center;
+  padding: 40px;
+}
+
+.quiz-loading {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 40px;
+}
+
+.deck-progress { max-width: 480px; margin: 0 auto 20px; }
+
+.deck-progress__bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.deck-progress__segment { height: 100%; }
+
+.deck-progress__legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.deck-progress__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.deck-progress__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.reading-group { margin-bottom: 10px; }
+
+.reading-group__label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+  text-align: left;
+}
+.reading-group__label--center { text-align: center; }
+
+.reading-group__list {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 16px;
+  row-gap: 4px;
+  justify-content: flex-start;
+}
+.reading-group__list--center { justify-content: center; }
+
+.reading-group__item {
+  font-size: var(--reading-size, 18px);
+  color: var(--reading-color, var(--text-primary));
+  white-space: nowrap;
+}
+
+.reading-group__item-index {
+  font-size: var(--reading-index-size, 13px);
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.reading-group__item-text {
+  font-family: var(--reading-font, inherit);
+}
+
+.meaning-display { text-align: left; }
+.meaning-display--center { text-align: center; }
+
+.meaning-display__primary {
+  font-size: var(--meaning-size, 28px);
+  font-weight: 800;
+  color: var(--meaning-color, var(--accent3));
+  line-height: 1.2;
+}
+
+.meaning-display__secondary {
+  font-size: calc(var(--meaning-size, 28px) * 0.55);
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-top: 6px;
+}
+
+.inline-reveal {
+  display: flex;
+  gap: var(--reveal-gap, 24px);
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.inline-reveal__main {
+  text-align: center;
+  max-width: 340px;
+  word-break: break-word;
+}
+
+.inline-reveal__panel { overflow: hidden; }
+
+.flashcard { cursor: pointer; }
+
+.flashcard__hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 16px;
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.type-badge--comprehension { background: var(--accent3); }
+.type-badge--vocabulary    { background: var(--success); }
+.type-badge--grammar       { background: var(--warning); }
+.type-badge--inference     { background: var(--accent); }
+.type-badge--default       { background: var(--text-secondary); }
+
+@media (max-width: 560px) {
+  .home-header { padding: 44px 16px 32px; }
+  .home-main { padding: 40px 16px; }
 }
