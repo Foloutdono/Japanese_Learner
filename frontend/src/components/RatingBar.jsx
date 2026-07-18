@@ -35,8 +35,8 @@ export default function RatingBar({ onRate, active }) {
             onClick={() => onRate(q)}
             className={`rating-bar__btn rating-bar__btn--q${q}`}
           >
-            <span className="rating-bar__btn-index">[{i + 1}]</span>
-            {label}
+            <span className="rating-bar__btn-index">{String(i + 1).padStart(2, '0')}</span>
+            <span className="rating-bar__btn-label">{label}</span>
           </button>
         ))}
       </div>
