@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
+import { Loading } from '../components/Loading'
 import { KANA_MODE_KEYS, kanaModes, vocabKanjiStatsLabels } from '../components/quizModes'
 
 export default function StatsScreen({ session }) {
@@ -56,9 +57,7 @@ export default function StatsScreen({ session }) {
         }
       />
 
-      {!stats && (
-        <div className="stats-loading">{t.loading}</div>
-      )}
+      {!stats && <Loading />}
 
       {stats && (
         <div className="container stats-container">
@@ -91,6 +90,7 @@ export default function StatsScreen({ session }) {
                 </div>
               </div>
             ))}
+            <GridFiller count={Object.keys(stats.kana).length} cols={2} glyph="仮" />
           </div>
 
           <Section title={t.jlptVocab} />
@@ -106,6 +106,7 @@ export default function StatsScreen({ session }) {
                 ))}
               </div>
             ))}
+            <GridFiller count={Object.keys(stats.vocab).length} cols={3} glyph="語" />
           </div>
 
           <Section title={t.kanji} />
@@ -123,6 +124,7 @@ export default function StatsScreen({ session }) {
                 ))}
               </div>
             ))}
+            <GridFiller count={Object.keys(stats.kanji).length} cols={3} glyph="字" />
           </div>
 
           <Section title={t.globalSummary} />
@@ -131,6 +133,23 @@ export default function StatsScreen({ session }) {
       )}
     </div>
   )
+}
+
+// A 3-col (or 2-col) grid with a level/set count that isn't a clean
+// multiple of the column count leaves a bare, high-contrast patch of
+// the lattice background in the trailing row (see JLPT: 5 levels in
+// 3 columns). Rather than a stray blank cell, fill it with a soft,
+// oversized kanji watermark on the same card background as its
+// neighbours — decorative, not another data card, so it reads as
+// intentional negative space instead of a layout accident.
+function GridFiller({ count, cols, glyph }) {
+  const empty = (cols - (count % cols)) % cols
+  if (!empty) return null
+  return Array.from({ length: empty }, (_, i) => (
+    <div key={`filler-${i}`} className="stats-filler-card" aria-hidden="true">
+      <span className="stats-filler-card__glyph">{glyph}</span>
+    </div>
+  ))
 }
 
 function Section({ title }) {
