@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
@@ -345,7 +345,7 @@ export default function DictionaryScreen({ session }) {
 							onClick={backToRadicalGrid}
 							className="dict-radical-back-btn"
 						>
-							← {t.dictBackToRadicals ?? 'Radicaux'}
+							{t.dictBackToRadicals ?? 'Radicaux'}
 						</button>
 						<div className="dict-radical-char">
 							{radicalCharByNumber[selectedRadical] ?? '?'}
@@ -515,23 +515,31 @@ function shortKana(kana, type) {
 // change without a window resize — opening the side detail panel eats
 // 320px + gap out of .dict-results-wrap via the flex layout — so this
 // watches the container itself instead of just the window.
-function useResultsColumns(containerRef) {
+//
+// A callback ref, not useRef + useEffect(..., []): the grid <div> only
+// exists once `!loading && results.length > 0`, so a one-shot mount
+// effect can fire before it's in the DOM and never re-run once it
+// appears, leaving cols stuck at the initial value forever.
+function useResultsColumns() {
+	const [node, setNode] = useState(null)
 	const [cols, setCols] = useState(1)
+	const ref = useCallback(el => setNode(el), [])
+
 	useEffect(() => {
-		const el = containerRef.current
-		if (!el) return
+		if (!node) return
 		const TILE = 180, GAP = 2
 		const measure = () => {
-			const width = el.clientWidth
+			const width = node.clientWidth
 			if (!width) return
 			setCols(Math.max(1, Math.floor((width + GAP) / (TILE + GAP))))
 		}
 		measure()
 		const ro = new ResizeObserver(measure)
-		ro.observe(el)
+		ro.observe(node)
 		return () => ro.disconnect()
-	}, [])
-	return cols
+	}, [node])
+
+	return [ref, cols]
 }
 
 // Same reasoning as RadicalFiller: a ragged last row of entry cards
@@ -552,8 +560,7 @@ function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
 	selected, setSelected, isMobile, sentinelRef, onRadicalClick, t,
 }) {
-	const resultsGridRef = useRef(null)
-	const cols = useResultsColumns(resultsGridRef)
+	const [resultsGridRef, cols] = useResultsColumns()
 
 	return (
 		<>
