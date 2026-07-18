@@ -30,7 +30,7 @@ export function MCQButton({ choice, correct, selected, answered, onClick, index 
   else if (answered && isSelected) variant = ' mcq-row--wrong'
 
   if (answered &&window.innerWidth < 480) {
-    variant += 'mcq-row--small'
+    variant += ' mcq-row--small'
   }
 
   return (
