@@ -276,28 +276,62 @@ input:focus { border-color: var(--accent2); }
   gap: 16px;
 }
 
+.top-bar__peek {
+  display: none; /* desktop: no peek tab, no autohide at all */
+}
+
 /* Auto-hide on scroll — opt-in via the `autoHide` prop on <TopBar/>,
-   active on phones only (see the 768px query below). On desktop the
-   bar behaves exactly like a normal .top-bar — no collapsing, always
-   visible, no extra classes matter.
-   Hidden by default on mobile; a scroll-up reveals it for a few
-   seconds. The grid-template-rows 1fr→0fr trick collapses the bar to
-   its *actual* content height without any JS measuring, so the page
-   content slides up to fill the space instead of leaving a gap. */
+   active on phones only (see the 768px query below). On desktop
+   .top-bar--autohide has no effect: the bar stays in normal flow,
+   always visible, exactly like a plain .top-bar.
+
+   On mobile it becomes `position: fixed`, so — hidden or not — it is
+   NEVER part of the document flow and never reserves space; the page
+   content simply fills the full height from the top. Hidden by
+   default; a scroll-up reveals it as an overlay for a few seconds. */
 @media (max-width: 768px) {
   .top-bar--autohide {
-    position: sticky;
+    position: fixed;
     top: 0;
-    display: grid;
-    grid-template-rows: 1fr;
-    transition: grid-template-rows 0.25s ease;
+    left: 0;
+    right: 0;
+    transform: translateY(0);
+    transition: transform 0.25s ease;
   }
   .top-bar--autohide.top-bar--hidden {
-    grid-template-rows: 0fr;
+    transform: translateY(-100%);
   }
-  .top-bar--autohide .top-bar__inner {
-    overflow: hidden;
-    min-height: 0;
+
+  /* Fallback affordance: a small always-reachable tab, docked at the
+     top-center, that slides into view whenever the bar is hidden. It
+     covers the case a scroll gesture can't — pages too short to
+     scroll — so the burger/back button is never out of reach. */
+  .top-bar__peek {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    width: 56px;
+    height: 20px;
+    border: none;
+    border-radius: 0 0 12px 12px;
+    background: var(--bg-panel);
+    color: var(--text-primary);
+    font-size: 11px;
+    line-height: 1;
+    z-index: 20;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transform: translate(-50%, -100%);
+    transition: transform 0.25s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .top-bar__peek--visible {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 
