@@ -72,7 +72,6 @@ const quiz = {
   quizComplete:      '✅ Toutes les cartes sont à jour !',
 
   // Rating bar
-  rateAnswer:        'Évaluez votre réponse — touches',
   to:                'à',
   perfect:           'Parfait',
   correctHesit:      'Correct',

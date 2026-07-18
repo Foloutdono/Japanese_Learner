@@ -70,7 +70,6 @@ const quiz = {
   quizComplete:      '✅ All cards are up to date!',
 
   // Rating bar
-  rateAnswer:        'Rate your answer — keys',
   to:                'to',
   perfect:           'Perfect',
   correctHesit:      'Correct',
