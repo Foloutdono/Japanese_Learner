@@ -682,7 +682,7 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 28px;
+  gap: 22px;
   padding: 32px 24px;
   text-align: center;
 }
@@ -2553,7 +2553,7 @@ input:focus { border-color: var(--accent2); }
   .quiz-card, 
   .prompt-card, 
   .flashcard {
-    padding: 16px;
+    padding: 5px;
     border-radius: 10px;
   }
 
