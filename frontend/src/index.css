@@ -2992,6 +2992,9 @@ input:focus { border-color: var(--accent2); }
     --radical-tile: 64px;
     --radical-gap: 1px;
   }
+  .dict-radical-group__list {
+    margin: 0 auto;
+  }
   .dict-radical-btn__char { font-size: 28px; }
   .dict-radical-btn__count { font-size: 10px; }
   .dict-radical-filler__glyph { font-size: 32px; }
