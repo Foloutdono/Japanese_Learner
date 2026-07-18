@@ -345,7 +345,7 @@ export default function DictionaryScreen({ session }) {
 							onClick={backToRadicalGrid}
 							className="dict-radical-back-btn"
 						>
-							{t.dictBackToRadicals ?? 'Radicaux'}
+							← {t.dictBackToRadicals ?? 'Radicaux'}
 						</button>
 						<div className="dict-radical-char">
 							{radicalCharByNumber[selectedRadical] ?? '?'}
@@ -403,20 +403,37 @@ function jumpToStrokeSheet(count) {
 // sheets column actually has (sidebar rail included) and changes on
 // resize. Measured here so RadicalFiller below can top up a ragged
 // last row with exactly as many tiles as the lattice really has.
-function useRadicalColumns(containerRef) {
+// Reads tile size/gap from the CSS custom properties on the ref'd
+// node (set in .dict-radical-sheets, see index.css) rather than
+// hardcoding numbers here — so PC vs. phone sizing lives in one place
+// and can't drift out of sync with what's actually on screen.
+//
+// A callback ref, not useRef + useEffect(..., []): the grid only
+// mounts once `!loading && groups`, so a one-shot mount effect can
+// fire before it's in the DOM and never re-run once it appears,
+// leaving cols stuck at the initial value forever.
+function useRadicalColumns() {
+	const [node, setNode] = useState(null)
 	const [cols, setCols] = useState(1)
+	const ref = useCallback(el => setNode(el), [])
+
 	useEffect(() => {
-		const TILE = 56, GAP = 1
+		if (!node) return
 		const measure = () => {
-			const width = containerRef.current?.clientWidth
+			const width = node.clientWidth
 			if (!width) return
+			const style = getComputedStyle(node)
+			const TILE = parseFloat(style.getPropertyValue('--radical-tile')) || 56
+			const GAP = parseFloat(style.getPropertyValue('--radical-gap')) || 1
 			setCols(Math.max(1, Math.floor((width + GAP) / (TILE + GAP))))
 		}
 		measure()
-		window.addEventListener('resize', measure)
-		return () => window.removeEventListener('resize', measure)
-	}, [])
-	return cols
+		const ro = new ResizeObserver(measure)
+		ro.observe(node)
+		return () => ro.disconnect()
+	}, [node])
+
+	return [ref, cols]
 }
 
 // Same idea as GridFiller in StatsScreen: a group whose radical count
@@ -436,8 +453,7 @@ function RadicalFiller({ count, cols, glyph }) {
 }
 
 function RadicalGrid({ groups, loading, onPick, t }) {
-	const sheetsRef = useRef(null)
-	const cols = useRadicalColumns(sheetsRef)
+	const [sheetsRef, cols] = useRadicalColumns()
 
 	if (loading || !groups) {
 		return (
