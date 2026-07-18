@@ -1,53 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Serif+JP:wght@600;700&display=swap');
 
-/* ── Design system, light + dark ──────────────────────────────
-   Same variable names in both themes (values only flip under
-   [data-theme="light"]) so nothing outside this file — including
-   colours passed inline from JS, e.g. DeckProgress's
-   `color: 'var(--success)'` — ever breaks when the theme changes.
-
-   One deliberate exception: --bg-panel and its paired text tokens
-   NEVER flip. Sumi ink is the app's one high-contrast structural
-   move (top bar, hero header, nav drawer, seal-stamped buttons) —
-   a fixed slab of black-on-paper or black-on-ink, per the
-   red/black/white contrast Japanese minimalism is built on. Every
-   rule that sits on --bg-panel uses --text-on-panel(-soft)
-   explicitly instead of the ambient --text-primary, which is what
-   flips. */
 :root {
-  /* ── Fixed tokens (identical in both themes) ── */
-
-  /* Sumi (墨) — ink black. Reserved for structural chrome. */
-  --bg-panel:           #1e1912;
-  --bg-panel-raised:    #2a2318;
-  /* Kinari (生成り) — text for use on sumi surfaces. Constant,
-     because sumi itself is constant. */
-  --text-on-panel:      #f3ecdf;
-  --text-on-panel-soft: #b3a488;
-  /* Dark ink text for use on light/mid-tone colour fills
-     (success, warning) that stay legible with dark text
-     regardless of theme. */
-  --text-on-fill:       #1c1811;
-
-  /* Washi (和紙) — the one bright surface reserved for diagrams
-     that need true white behind black ink (stroke order refs),
-     independent of the ambient theme. */
-  --paper:              #faf6ea;
-
-  --radius:  12px;
-  --max-w:   1100px;
-  --gap:     24px;
-
-  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
-  --font-jp:      'Yu Gothic', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
-
-  /* ── Flipping tokens — dark theme (default) ── */
+  /* Sumi (墨) — ink black, warmed rather than blue-cold */
   --bg-main:        #17151a;
   --bg-card:        #201d24;
-  --bg-card-hover:  #2a2530;
-  --overlay-hover:  rgba(255, 255, 255, 0.035);
+  --bg-panel:       #2a2530;
 
-  /* Shu-iro (朱色) — cinnabar vermillion, the seal/lacquer red */
+  /* Shu-iro (朱色) — cinnabar vermillion, the traditional seal/lacquer red */
   --accent:         #c1442c;
   /* Yamabuki-iro (山吹色) — kerria-blossom gold */
   --accent2:        #c99a3e;
@@ -55,10 +14,14 @@
   --accent3:        #7c6a9c;
   /* Matcha (抹茶) */
   --success:        #7d9a5b;
-  /* Kohaku (琥珀) — amber */
+  /* Kohaku (琥珀) — amber, kept close to yamabuki but distinct */
   --warning:        #d1a24a;
   /* Enji-iro (臙脂色) — deep carmine */
   --danger:         #9c3428;
+
+  /* Additional pigments — extends the seal-red/gold/wisteria trio above
+     so data-driven accents (nav sections, SRS ratings) can stay inside
+     the same traditional palette instead of reaching for arbitrary hex. */
   /* Ai-iro (藍色) — indigo blue */
   --accent4:        #3f6d8e;
   /* Cha-iro (茶色) — tea brown */
@@ -68,42 +31,30 @@
   /* Sabi-iro (錆色) — rust */
   --accent7:        #a85c3f;
 
+  /* Washi (和紙) — pale rice paper. The only light surface in the app;
+     used solely where a diagram needs a bright backdrop for contrast
+     (e.g. stroke-order references drawn in black ink). */
+  --paper:          #f3ecdf;
+
+  /* Ai-iro (藍色) — indigo, for cool contrast against the vermillion accent */
+  --indigo:         #3d5a73;
+  /* Rokusho-iro (緑青色) — verdigris, the patina green of aged bronze */
+  --teal:            #4f7a72;
+  /* Sabi-iro (錆色) — rust, the colour of oxidised iron */
+  --rust:            #a8622f;
+
   /* Kinari (生成り) — raw silk, warm off-white */
   --text-primary:   #ece5d8;
   /* Nezumi-iro (鼠色) — mouse grey, the classic Edo neutral */
   --text-secondary: #a79c8c;
   --border:         #35303a;
-}
 
-/* ── Light theme — washi (和紙), rice paper ──────────────────
-   The negative space itself moves from ink to paper; the sumi
-   chrome above stays exactly as dark, so it now reads as a
-   deliberate ink stamp on a pale ground instead of a dark-mode
-   default. Pigments are all deepened a shade so they still work
-   as plain text on paper, not just as fills on ink. */
-:root[data-theme="light"] {
-  --bg-main:        #f6f1e4;
-  --bg-card:        #efe6d0;
-  --bg-card-hover:  #e7dabd;
-  --overlay-hover:  rgba(28, 24, 17, 0.045);
+  --radius:         12px;
+  --max-w:          1100px;
+  --gap:            24px;
 
-  --accent:         #b7402a;
-  --accent2:        #a97a25;
-  --accent3:        #6f5d8f;
-  --success:        #5c7a43;
-  --warning:        #ad7c2e;
-  --danger:         #93301f;
-  --accent4:        #375b78;
-  --accent5:        #7a5c40;
-  --accent6:        #43645f;
-  --accent7:        #954e34;
-
-  --text-primary:   #221d15;
-  --text-secondary: #6f6552;
-  /* Darkened well past the paper tones around it — a hairline
-     that's actually visible, not a shade indistinguishable from
-     the card it's supposed to divide. */
-  --border:         #c3af7c;
+  --font-display:   'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-jp:        'Yu Gothic', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -113,7 +64,6 @@ html, body, #root {
   background: var(--bg-main);
   color: var(--text-primary);
   font-family: 'Segoe UI', system-ui, sans-serif;
-  transition: background 0.2s ease, color 0.2s ease;
 }
 
 button {
@@ -147,6 +97,10 @@ button:focus-visible {
 }
 
 /* ── Selector header (eyebrow / title / subtitle) ────────── */
+/* Shared by SelectionScreen, LevelSelector and ModeSelector so every
+   selection screen reads the same way regardless of which list it wraps.
+   Deliberate contrast: a small tracked sans eyebrow against a large
+   serif title — the pairing does the work a glow used to. */
 .selector-header {
   text-align: left;
   display: flex;
@@ -181,6 +135,9 @@ button:focus-visible {
 }
 
 /* ── Shared choice list (LevelSelector + ModeSelector) ────── */
+/* An editorial list, not a grid of cards: one column, hairline
+   rules, generous padding. Asymmetry (title left / description
+   right) instead of four identical boxes side by side. */
 .level-selector,
 .mode-selector {
   width: 100%;
@@ -302,7 +259,6 @@ input:focus { border-color: var(--accent2); }
 
 .top-bar {
   background: var(--bg-panel);
-  color: var(--text-on-panel);
   padding: 14px 24px;
   display: flex;
   align-items: center;
@@ -314,7 +270,7 @@ input:focus { border-color: var(--accent2); }
 
 .btn-back {
   background: rgba(255,255,255,0.08);
-  color: var(--text-on-panel);
+  color: var(--text-primary);
   font-size: 13px;
   padding: 8px 16px;
   white-space: nowrap;
@@ -353,8 +309,13 @@ input:focus { border-color: var(--accent2); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 768px) {
-  .dict-layout { display: block; }
-  .dict-panel { display: none; }
+  .dict-layout {
+    display: block;
+  }
+
+  .dict-panel {
+    display: none;
+  }
 }
 @media (max-width: 560px) {
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
@@ -363,11 +324,10 @@ input:focus { border-color: var(--accent2); }
   .selection-screen { padding: 44px 16px 56px; }
   .selector-header__title { font-size: 1.7rem; }
 }
-
 /* ── Home screen ──────────────────────────────────────────
    Header centred like a title page; nav re-uses the editorial
-   choice-list instead of a grid of coloured tiles, so the whole
-   app reads as one system. */
+   choice-list (see selector-header block above) instead of a
+   grid of coloured tiles, so the whole app reads as one system. */
 .home-screen {
   min-height: 100vh;
   display: flex;
@@ -376,7 +336,6 @@ input:focus { border-color: var(--accent2); }
 
 .home-header {
   background: var(--bg-panel);
-  color: var(--text-on-panel);
   border-bottom: 1px solid var(--border);
   padding: 92px 24px 56px;
   text-align: center;
@@ -398,7 +357,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-header__desc {
-  color: var(--text-on-panel-soft);
+  color: var(--text-secondary);
   font-size: 0.85rem;
   letter-spacing: 0.02em;
   margin-top: 10px;
@@ -424,8 +383,10 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* Nav cards — laid out as shoji-screen panels: cards butt up against
-   each other, the grid gap itself is the hairline, instead of
-   shadowed rounded tiles. */
+   each other, the grid gap itself is the hairline (background shows
+   through as a 1px lattice), instead of shadowed rounded tiles. One
+   signature interaction: a brush-stroke rule under the title that
+   extends open on hover, echoing a single stroke of ink. */
 .home-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -447,7 +408,7 @@ input:focus { border-color: var(--accent2); }
 }
 .home-card:hover,
 .home-card:focus-visible {
-  background: var(--bg-card-hover);
+  background: var(--bg-panel);
 }
 
 .home-card__glyph {
@@ -458,7 +419,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-card__title {
-  color: var(--text-primary);
+  color: var(--paper);
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: 1.3rem;
@@ -491,24 +452,22 @@ input:focus { border-color: var(--accent2); }
 /* ── Ghost / panel button utilities ──────────────────────── */
 .btn-ghost {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-on-panel-soft);
+  color: var(--text-secondary);
   font-size: 12px;
   padding: 8px 16px;
 }
 
 .btn-panel {
   background: var(--bg-panel);
-  color: var(--text-on-panel);
+  color: var(--text-primary);
 }
 
 /* ── Burger menu / nav drawer ─────────────────────────────
    A hairline-edged drawer, no rounded cards — the same editorial
-   language as the rest of the app, just laid out vertically. It
-   sits on --bg-panel (constant ink), so every text colour in here
-   is a fixed on-panel token, not the ambient (flipping) one. */
+   language as the rest of the app, just laid out vertically. */
 .burger-toggle {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-on-panel);
+  color: var(--text-primary);
   font-size: 18px;
   padding: 6px 10px;
   line-height: 1;
@@ -527,7 +486,6 @@ input:focus { border-color: var(--accent2); }
   max-width: 85vw;
   height: 100%;
   background: var(--bg-panel);
-  color: var(--text-on-panel);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -554,12 +512,12 @@ input:focus { border-color: var(--accent2); }
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--text-on-panel-soft);
+  color: var(--text-secondary);
 }
 
 .burger-drawer__close {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-on-panel);
+  color: var(--text-primary);
   font-size: 16px;
   padding: 4px 10px;
 }
@@ -576,7 +534,7 @@ input:focus { border-color: var(--accent2); }
   gap: 12px;
   width: 100%;
   background: transparent;
-  color: var(--text-on-panel);
+  color: var(--text-primary);
   font-size: 15px;
   padding: 12px 20px;
   border-radius: 0;
@@ -617,9 +575,14 @@ input:focus { border-color: var(--accent2); }
   font-size: 12px;
   padding: 6px 12px;
 }
-.btn-writing-toggle--on  { background: var(--warning); color: var(--text-on-fill); }
-.btn-writing-toggle--off { background: var(--bg-card); color: var(--text-secondary); }
-:root[data-theme="light"] .btn-writing-toggle--on { color: var(--text-on-panel); }
+.btn-writing-toggle--on {
+  background: var(--warning);
+  color: var(--bg-main);
+}
+.btn-writing-toggle--off {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
 
 /* ── Quiz screen shells ───────────────────────────────────── */
 .screen { min-height: 100vh; }
@@ -657,9 +620,11 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* ── MCQ answer list ───────────────────────────────────────
-   Same editorial hairline-row language as choice-row: the quiz
-   reads as "pick a row", not "tap a coloured tile" — one system
-   across the whole app. */
+   Same editorial hairline-row language as choice-row (LevelSelector /
+   ModeSelector): the quiz reads as "pick a row", not "tap a coloured
+   tile" — one system across the whole app instead of two competing
+   button languages. Correct/wrong states lean on the same restrained
+   accent-as-line logic as the rating bar, not a flat colour fill. */
 .mcq-list {
   width: 100%;
   max-width: 640px;
@@ -685,7 +650,7 @@ input:focus { border-color: var(--accent2); }
   transition: background 0.15s ease;
 }
 .mcq-row:not(:disabled):hover,
-.mcq-row:focus-visible { background: var(--overlay-hover); }
+.mcq-row:focus-visible { background: rgba(255, 255, 255, 0.03); }
 .mcq-row:disabled { cursor: default; }
 
 .mcq-row__accent {
@@ -739,7 +704,7 @@ input:focus { border-color: var(--accent2); }
 
 .quiz-submit {
   background: var(--accent);
-  color: var(--text-on-panel);
+  color: var(--text-primary);
   width: 100%;
 }
 
@@ -762,7 +727,7 @@ input:focus { border-color: var(--accent2); }
   color: var(--text-primary);
   font-size: 13px;
 }
-.mode-toggle__btn--active { background: var(--accent); color: var(--text-on-panel); }
+.mode-toggle__btn--active { background: var(--accent); }
 
 .quiz-done {
   color: var(--success);
@@ -900,9 +865,10 @@ input:focus { border-color: var(--accent2); }
   margin-top: 16px;
 }
 
-/* A hairline underline in the type's colour, not a filled pill —
-   the accent marks the label instead of drowning it, keeping the
-   palette restrained (ink + one accent). */
+/* A hairline underline in the type's colour, not a filled pill — the
+   accent marks the label instead of drowning it, keeping the palette
+   restrained (ink + one accent) the way a seal-stamp of colour sits
+   on plain paper rather than tinting the whole card. */
 .type-badge {
   display: inline-flex;
   align-items: center;
@@ -931,11 +897,11 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* ── Rating bar (SRS quality buttons) ─────────────────────
-   Six levels collapse onto three hues (success / warning / danger).
-   A filled tile is the strong signal at each hue's best/worst end,
-   an outlined tile is the softer middle case. "Blackout" is a
-   literal void — always sumi ink, never a coloured tile, whichever
-   theme is active. */
+   Six levels collapse onto three hues (success / warning / danger)
+   rather than a six-colour flat-UI gradient: a filled tile is the
+   strong signal at each hue's best/worst end, an outlined tile is
+   the softer middle case. "Blackout" gets no colour at all — an
+   empty, bordered void, since the answer drew a blank. */
 .rating-bar { margin-top: 32px; }
 
 .rating-bar__hint {
@@ -945,8 +911,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .rating-bar__key {
-  background: var(--bg-card);
-  color: var(--text-secondary);
+  background: var(--bg-panel);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
@@ -974,18 +939,48 @@ input:focus { border-color: var(--accent2); }
   font-family: var(--font-display);
 }
 
-.rating-btn--fill-success    { background: var(--success); color: var(--text-on-fill); }
+.rating-btn--fill-success    { background: var(--success); color: var(--bg-main); }
 .rating-btn--outline-success { background: transparent; border-color: var(--success); color: var(--success); }
-.rating-btn--fill-warning    { background: var(--warning); color: var(--text-on-fill); }
+.rating-btn--fill-warning    { background: var(--warning); color: var(--bg-main); }
 .rating-btn--outline-danger  { background: transparent; border-color: var(--danger); color: var(--danger); }
-.rating-btn--fill-danger     { background: var(--danger); color: var(--text-on-panel); }
-.rating-btn--void            { background: var(--bg-panel); border-color: var(--border); color: var(--text-on-panel-soft); }
-/* Deepened for light-mode contrast, success/warning read as mid-dark
-   fills there rather than light ones, so they flip to needing light
-   text instead of dark. */
-:root[data-theme="light"] .rating-btn--fill-success,
-:root[data-theme="light"] .rating-btn--fill-warning {
-  color: var(--text-on-panel);
+.rating-btn--fill-danger     { background: var(--danger); color: var(--text-primary); }
+.rating-btn--void            { background: var(--bg-panel); border-color: var(--border); color: var(--text-secondary); }
+
+/* ── Shared nav control buttons (mute / lang switcher) ───── */
+.btn-nav {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+.btn-nav--icon { font-size: 16px; padding: 6px 10px; }
+.btn-nav--lang { font-size: 14px; padding: 6px 12px; }
+
+/* ── Rating bar (SRS quality scale) ──────────────────────────
+   Six fixed quality levels, so each gets a named modifier class
+   rather than an inline color — same treatment as .type-badge.
+   The hues run success → warning → danger, matching the meaning
+   (perfect recall down to total blackout) while staying inside
+   the traditional palette. */
+.rating-bar { margin-top: 32px; }
+
+.rating-bar__hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.rating-bar__key {
+  background: var(--bg-panel);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.rating-bar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
 }
 
 .rating-bar__btn { font-size: 13px; }
@@ -996,25 +991,24 @@ input:focus { border-color: var(--accent2); }
   font-size: 11px;
 }
 
-.rating-bar__btn--q5 { background: var(--success);  color: var(--text-on-fill); }
-.rating-bar__btn--q4 { background: var(--accent6);  color: var(--text-on-panel); }
-.rating-bar__btn--q3 { background: var(--accent2);  color: var(--text-on-fill); }
-.rating-bar__btn--q2 { background: var(--accent7);  color: var(--text-on-panel); }
-.rating-bar__btn--q1 { background: var(--accent);   color: var(--text-on-panel); }
-.rating-bar__btn--q0 { background: var(--accent4);  color: var(--text-on-panel); }
-:root[data-theme="light"] .rating-bar__btn--q5 { color: var(--text-on-panel); }
+.rating-bar__btn--q5 { background: var(--success);  color: var(--bg-main); }
+.rating-bar__btn--q4 { background: var(--accent6);  color: var(--text-primary); }
+.rating-bar__btn--q3 { background: var(--accent2);  color: var(--bg-main); }
+.rating-bar__btn--q2 { background: var(--accent7);  color: var(--text-primary); }
+.rating-bar__btn--q1 { background: var(--accent);   color: var(--text-primary); }
+.rating-bar__btn--q0 { background: var(--accent4);  color: var(--text-primary); }
 
-/* ── Shared nav control buttons (mute / lang / theme switcher) ──
-   Always sits on a dark surface (top bar or hero band), so the
-   translucent-white chip + fixed on-panel text is constant. */
+/* ── Shared nav control button (mute / lang switcher) ─────── */
 .btn-nav {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-on-panel);
+  color: var(--text-primary);
   font-size: 14px;
   padding: 6px 12px;
 }
-.btn-nav--icon { font-size: 16px; padding: 6px 10px; }
-.btn-nav--lang { font-size: 14px; padding: 6px 12px; }
+.btn-nav--icon {
+  font-size: 16px;
+  padding: 6px 10px;
+}
 
 /* ── Auth screen ──────────────────────────────────────────── */
 .auth-screen {
@@ -1061,7 +1055,7 @@ input:focus { border-color: var(--accent2); }
   flex: 1;
   border-radius: 0;
   background: var(--bg-panel);
-  color: var(--text-on-panel);
+  color: var(--text-primary);
   font-size: 14px;
 }
 .auth-mode-toggle__btn--active { background: var(--accent); }
@@ -1086,7 +1080,7 @@ input:focus { border-color: var(--accent2); }
 
 .auth-submit {
   background: var(--accent);
-  color: var(--text-on-panel);
+  color: var(--text-primary);
   width: 100%;
   margin-top: 20px;
   font-size: 15px;
@@ -1109,16 +1103,10 @@ input:focus { border-color: var(--accent2); }
   display: block;
   width: 100%;
   max-width: 260px;
-  /* The canvas is painted true white by the drawing component (the
-     ink stroke needs a white ground) — pairing that fixed white
-     with a themed border keeps the frame visible in both themes,
-     instead of a hairline lost against its own white fill. */
-  background: #ffffff;
 }
 
 .canvas-clear-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--bg-panel);
   color: var(--text-secondary);
   font-size: 12px;
   margin-top: 8px;
@@ -1205,12 +1193,11 @@ input:focus { border-color: var(--accent2); }
 
 .drawing-overlay__continue {
   background: var(--success);
-  color: var(--text-on-fill);
+  color: var(--bg-main);
   font-size: 16px;
   padding: 14px 60px;
   margin-top: 32px;
 }
-:root[data-theme="light"] .drawing-overlay__continue { color: var(--text-on-panel); }
 
 .drawing-quiz { width: 100%; }
 
@@ -1251,7 +1238,7 @@ input:focus { border-color: var(--accent2); }
 
 .drawing-quiz__validate {
   background: var(--accent);
-  color: var(--text-on-panel);
+  color: var(--text-primary);
   width: 100%;
   max-width: 600px;
   margin: 20px auto 0;
