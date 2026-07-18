@@ -1418,15 +1418,6 @@ input:focus { border-color: var(--accent2); }
    reserves for numerals/index marks — while set names and prompt
    words keep --font-jp, so the ink/kana vs. ledger/number split
    reads the same way it does everywhere else in the app. */
-.stats-loading {
-  text-align: center;
-  padding: 96px 24px;
-  color: var(--text-secondary);
-  font-family: var(--font-jp);
-  font-size: 1.05rem;
-  letter-spacing: 0.03em;
-}
-
 .stats-reset-btn {
   background: transparent;
   color: var(--danger);
@@ -1491,6 +1482,27 @@ input:focus { border-color: var(--accent2); }
 .stats-group.grid-2 .card:hover,
 .stats-group.grid-3 .card:hover {
   background: var(--bg-card-hover);
+}
+
+/* Filler cell for a trailing incomplete row (e.g. 5 JLPT levels in a
+   3-col grid) — same card background as its neighbours, so the gap
+   stops reading as a stray high-contrast hole in the lattice, plus a
+   soft oversized kanji watermark so the empty space still feels
+   considered rather than just blank. */
+.stats-filler-card {
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+}
+.stats-filler-card__glyph {
+  font-family: var(--font-jp);
+  font-size: 5.5rem;
+  line-height: 1;
+  color: var(--text-secondary);
+  opacity: 0.14;
+  user-select: none;
 }
 
 .stats-card-title {

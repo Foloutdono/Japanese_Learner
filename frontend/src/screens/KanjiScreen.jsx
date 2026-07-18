@@ -5,9 +5,10 @@ import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
-  MCQGrid, DoneMessage, Loading, DeckProgress,
+  MCQGrid, DoneMessage, DeckProgress,
   InlineReveal, Flashcard, MeaningDisplay, CharDisplay,
 } from '../components/QuizComponents'
+import { Loading } from '../components/Loading'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'

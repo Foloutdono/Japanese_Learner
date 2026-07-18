@@ -163,25 +163,6 @@ export function DoneMessage({ onBack }) {
   )
 }
 
-// ── Loading ───────────────────────────────────────────────
-export function Loading() {
-  const { t } = useLang()
-  return (
-    <div className="quiz-loading">
-      <svg className="quiz-loading__ensor" viewBox="0 0 48 48" aria-hidden="true">
-        <circle
-          className="quiz-loading__ensor-circle"
-          cx="24" cy="24" r="19"
-          fill="none"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-      </svg>
-      <span className="quiz-loading__text">{t.loading}</span>
-    </div>
-  )
-}
-
 // ── Deck progress (à apprendre / en cours / maîtrisé) ─────
 export function DeckProgress({ stats }) {
   const { t } = useLang()
