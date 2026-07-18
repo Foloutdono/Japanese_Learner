@@ -1085,10 +1085,19 @@ input:focus { border-color: var(--accent2); }
   .flashcard {
     padding: 16px;
     border-radius: 10px;
+    margin-bottom: 20px;
+  }
+
+  .inline-reveal {
+    gap: 0px;
   }
 
   .char-display {
     margin: 8px 0;
+  }
+
+  .mcq-row {
+    padding: 10px 10px;
   }
 
   .meaning,
