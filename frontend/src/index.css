@@ -764,15 +764,24 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* ── Quiz components ─────────────────────────────────────── */
+/* `height` (not `max-height`) + `white-space: nowrap` mean this box
+   can never grow past its intended size no matter what ends up in
+   `char` — a stray newline or extra whitespace just gets clipped
+   instead of adding phantom blank lines that push the card (and its
+   scrollable parent) far taller than the glyph actually needs. */
 .char-display {
   font-family: var(--char-font, var(--font-jp));
   font-size: var(--char-size, 110px);
-  max-height: calc(var(--char-size, 110px) * 1.4);
+  height: calc(var(--char-size, 110px) * 1.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-primary);
   margin: 28px 0;
   line-height: 1.1;
   letter-spacing: 0.02em;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 
