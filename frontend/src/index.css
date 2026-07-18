@@ -6,20 +6,19 @@
    (including inline JS colours like DeckProgress's
    `color: 'var(--success)'`) can ever break when the theme flips.
 
-   One deliberate exception: --bg-panel and its paired text tokens
-   NEVER flip. Sumi ink is the app's one high-contrast structural
-   move (top bar, hero header, nav drawer, seal-stamped buttons) — a
-   fixed slab of ink, on paper or on ink, per the red/black/white
-   contrast Japanese minimalism is built on. Every rule that sits on
-   --bg-panel uses --text-on-panel(-soft) explicitly instead of the
-   ambient --text-primary/--text-secondary, which are what flip. */
+   One deliberate exception: --bg-panel's paired text tokens never
+   flip, even though --bg-panel itself now has its own tuned value
+   per theme. Sumi ink is the app's one high-contrast structural move
+   (top bar, hero header, nav drawer, seal-stamped buttons) — a slab
+   of ink that stays dark enough in both themes for --text-on-panel
+   to always read against it, so every rule that sits on --bg-panel
+   uses --text-on-panel(-soft) explicitly instead of the ambient
+   --text-primary/--text-secondary, which are what flip. */
 :root {
   /* ── Fixed tokens (identical in both themes) ── */
 
-  /* Sumi (墨) — ink black. Reserved for structural chrome. */
-  --bg-panel:           #1e1912;
   /* Kinari (生成り) — text for use on sumi surfaces. Constant,
-     because sumi itself is constant. */
+     because sumi itself is dark enough in both themes. */
   --text-on-panel:      #f3ecdf;
   --text-on-panel-soft: #b3a488;
   /* Dark ink text for use on light/mid-tone colour fills (success,
@@ -48,6 +47,10 @@
   --bg-main:        #17151a;
   --bg-card:        #201d24;
   --bg-card-hover:  #2a2530;
+  /* Sumi (墨) — same cool-neutral family as bg-main/bg-card (not the
+     warm brown-black this used to be, which read as an off-hue patch
+     rather than a deliberate darker anchor within the same palette). */
+  --bg-panel:       #100e13;
   --overlay-hover:  rgba(255, 255, 255, 0.035);
   --chip-bg:        rgba(255, 255, 255, 0.08);
 
@@ -100,6 +103,9 @@
   --bg-main:        #f6f1e4;
   --bg-card:        #efe6d0;
   --bg-card-hover:  #e7dabd;
+  /* This is the warm sumi that works so well against paper — kept
+     exactly as-is; only dark mode's value changed. */
+  --bg-panel:       #1e1912;
   --overlay-hover:  rgba(28, 24, 17, 0.045);
   --chip-bg:        rgba(28, 24, 17, 0.055);
 

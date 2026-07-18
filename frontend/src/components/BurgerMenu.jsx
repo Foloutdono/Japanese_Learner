@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { useLang } from '../LangContext'
-import { MuteButton, LangSwitcher } from './NavControls'
+import { MuteButton, LangSwitcher, ThemeToggle } from './NavControls'
 
 // ── Burger menu button + slide-in drawer ──────────────────
 // Drop this anywhere (e.g. in TopBar) to get a full nav drawer
@@ -65,6 +65,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
 
             <div className="burger-drawer__footer">
               <MuteButton />
+              <ThemeToggle />
               <LangSwitcher />
               <button className="btn-ghost" onClick={() => supabase.auth.signOut()}>
                 {t.signOut}
