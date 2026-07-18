@@ -308,11 +308,6 @@ button:focus-visible {
   max-width: 320px;
 }
 
-@media (max-width: 640px) {
-  .choice-row__main { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .choice-row__desc { text-align: left; max-width: none; }
-}
-
 input {
   font-family: inherit;
   border-radius: 8px;
@@ -357,61 +352,6 @@ input:focus { border-color: var(--accent2); }
   display: none; /* desktop: no peek tab, no autohide at all */
 }
 
-/* Auto-hide on scroll — opt-in via the `autoHide` prop on <TopBar/>,
-   active on phones only (see the 768px query below). On desktop
-   .top-bar--autohide has no effect: the bar stays in normal flow,
-   always visible, exactly like a plain .top-bar.
-
-   On mobile it becomes `position: fixed`, so — hidden or not — it is
-   NEVER part of the document flow and never reserves space; the page
-   content simply fills the full height from the top. Hidden by
-   default; a scroll-up reveals it as an overlay for a few seconds. */
-@media (max-width: 768px) {
-  .top-bar--autohide {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    transform: translateY(0);
-    transition: transform 0.25s ease;
-  }
-  .top-bar--autohide.top-bar--hidden {
-    transform: translateY(-100%);
-  }
-
-  /* Fallback affordance: a small always-reachable tab, docked at the
-     top-center, that slides into view whenever the bar is hidden. It
-     covers the case a scroll gesture can't — pages too short to
-     scroll — so the burger/back button is never out of reach. */
-  .top-bar__peek {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    top: 0;
-    left: 50%;
-    width: 56px;
-    height: 20px;
-    border: none;
-    border-radius: 0 0 12px 12px;
-    background: var(--bg-panel);
-    color: var(--text-on-panel);
-    font-size: 11px;
-    line-height: 1;
-    z-index: 20;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    transform: translate(-50%, -100%);
-    transition: transform 0.25s ease;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .top-bar__peek--visible {
-    transform: translate(-50%, 0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
 .btn-back {
   background: rgba(255,255,255,0.08);
   color: var(--text-on-panel);
@@ -448,26 +388,6 @@ input:focus { border-color: var(--accent2); }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
 .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); }
 
-@media (max-width: 900px) {
-  .grid-4 { grid-template-columns: repeat(2, 1fr); }
-  .grid-3 { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 768px) {
-  .dict-layout {
-    display: block;
-  }
-
-  .dict-panel {
-    display: none;
-  }
-}
-@media (max-width: 560px) {
-  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
-  .container { padding: 0 16px; }
-  .top-bar__inner { padding: 12px 16px; }
-  .selection-screen { padding: 44px 16px 56px; }
-  .selector-header__title { font-size: 1.7rem; }
-}
 /* ── Home screen ──────────────────────────────────────────
    Header centred like a title page; nav re-uses the editorial
    choice-list (see selector-header block above) instead of a
@@ -599,10 +519,6 @@ input:focus { border-color: var(--accent2); }
   font-size: 0.875rem;
   line-height: 1.6;
   white-space: pre-line;
-}
-
-@media (max-width: 640px) {
-  .home-grid { grid-template-columns: 1fr; }
 }
 
 /* ── Ghost / panel button utilities ──────────────────────── */
@@ -1073,54 +989,6 @@ input:focus { border-color: var(--accent2); }
 .type-badge--grammar       { --badge-color: var(--warning); }
 .type-badge--inference     { --badge-color: var(--accent); }
 .type-badge--default       { --badge-color: var(--text-secondary); }
-
-@media (max-width: 560px) {
-  .home-header { padding: 44px 16px 32px; }
-  .home-main { padding: 40px 16px; }
-}
-
-@media (max-width: 480px) {
-  .quiz-card, 
-  .prompt-card, 
-  .flashcard {
-    padding: 16px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-  }
-
-  .inline-reveal {
-    gap: 0px;
-  }
-
-  .char-display {
-    margin: 8px 0;
-  }
-
-  .mcq-row--small {
-    padding: 10px 10px;
-  }
-
-  .meaning,
-  .reading {
-    font-size: 0.9rem;
-  }
-  .quiz-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
-
-  .quiz-content {
-    flex: 1;
-    overflow: hidden; /* prevent scrolling */
-  }
-
-  .rating-bar {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-  }
-}
 
 /* ── Rating bar (SRS quality buttons) ─────────────────────
    Six levels collapse onto three hues (success / warning / danger)
@@ -2584,3 +2452,129 @@ input:focus { border-color: var(--accent2); }
 }
 .import-footer__submit--active { background: var(--action-purple); color: var(--text-on-panel); }
 .import-footer__submit--importing { opacity: 0.7; }
+
+@media (max-width: 900px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Auto-hide on scroll — opt-in via the `autoHide` prop on <TopBar/>,
+   active on phones only (see the 768px query below). On desktop
+   .top-bar--autohide has no effect: the bar stays in normal flow,
+   always visible, exactly like a plain .top-bar.
+
+   On mobile it becomes `position: fixed`, so — hidden or not — it is
+   NEVER part of the document flow and never reserves space; the page
+   content simply fills the full height from the top. Hidden by
+   default; a scroll-up reveals it as an overlay for a few seconds. */
+@media (max-width: 768px) {
+  .top-bar--autohide {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(0);
+    transition: transform 0.25s ease;
+  }
+  .top-bar--autohide.top-bar--hidden {
+    transform: translateY(-100%);
+  }
+
+  /* Fallback affordance: a small always-reachable tab, docked at the
+     top-center, that slides into view whenever the bar is hidden. It
+     covers the case a scroll gesture can't — pages too short to
+     scroll — so the burger/back button is never out of reach. */
+  .top-bar__peek {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    width: 56px;
+    height: 20px;
+    border: none;
+    border-radius: 0 0 12px 12px;
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    font-size: 11px;
+    line-height: 1;
+    z-index: 20;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transform: translate(-50%, -100%);
+    transition: transform 0.25s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .top-bar__peek--visible {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .dict-layout {
+    display: block;
+  }
+
+  .dict-panel {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .choice-row__main { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .choice-row__desc { text-align: left; max-width: none; }
+  .home-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .home-header { padding: 44px 16px 32px; }
+  .home-main { padding: 40px 16px; }
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  .container { padding: 0 16px; }
+  .top-bar__inner { padding: 12px 16px; }
+  .selection-screen { padding: 44px 16px 56px; }
+  .selector-header__title { font-size: 1.7rem; }
+}
+
+@media (max-width: 480px) {
+  .quiz-card, 
+  .prompt-card, 
+  .flashcard {
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+
+  .inline-reveal {
+    gap: 0px;
+  }
+
+  .char-display {
+    margin: 8px 0;
+  }
+
+  .mcq-row--small {
+    padding: 10px 10px;
+  }
+
+  .meaning,
+  .reading {
+    font-size: 0.9rem;
+  }
+  .quiz-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .quiz-content {
+    flex: 1;
+    overflow: hidden; /* prevent scrolling */
+  }
+
+  .rating-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+}
