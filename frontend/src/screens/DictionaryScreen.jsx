@@ -397,7 +397,49 @@ function jumpToStrokeSheet(count) {
 	document.getElementById(`stroke-sheet-${count}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
+// The radical lattice sizes itself to content (`width: max-content`),
+// not a fixed grid-2/grid-3 like the stats screen, so the number of
+// columns isn't known up front — it depends on how much width the
+// sheets column actually has (sidebar rail included) and changes on
+// resize. Measured here so RadicalFiller below can top up a ragged
+// last row with exactly as many tiles as the lattice really has.
+function useRadicalColumns(containerRef) {
+	const [cols, setCols] = useState(1)
+	useEffect(() => {
+		const TILE = 56, GAP = 1
+		const measure = () => {
+			const width = containerRef.current?.clientWidth
+			if (!width) return
+			setCols(Math.max(1, Math.floor((width + GAP) / (TILE + GAP))))
+		}
+		measure()
+		window.addEventListener('resize', measure)
+		return () => window.removeEventListener('resize', measure)
+	}, [])
+	return cols
+}
+
+// Same idea as GridFiller in StatsScreen: a group whose radical count
+// isn't a clean multiple of the column count leaves a bare patch of
+// lattice background in its last row. A group that doesn't even reach
+// one full row (radicals.length <= cols) is deliberately narrower —
+// nothing to top up there — so this only fires once a group actually
+// wraps.
+function RadicalFiller({ count, cols, glyph }) {
+	if (count <= cols) return null
+	const empty = (cols - (count % cols)) % cols
+	if (!empty) return null
+	return Array.from({ length: empty }, (_, i) => (
+		<div key={`radical-filler-${i}`} className="dict-radical-filler" aria-hidden="true">
+			<span className="dict-radical-filler__glyph">{glyph}</span>
+		</div>
+	))
+}
+
 function RadicalGrid({ groups, loading, onPick, t }) {
+	const sheetsRef = useRef(null)
+	const cols = useRadicalColumns(sheetsRef)
+
 	if (loading || !groups) {
 		return (
 			<div className="quiz-loading">
@@ -424,7 +466,7 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 				))}
 			</nav>
 
-			<div className="dict-radical-sheets">
+			<div className="dict-radical-sheets" ref={sheetsRef}>
 				{groups.map(group => (
 					<div key={group.stroke_count} id={`stroke-sheet-${group.stroke_count}`} className="dict-radical-group">
 						<div className="dict-radical-group__label">
@@ -449,6 +491,7 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 									</span>
 								</button>
 							))}
+							<RadicalFiller count={group.radicals.length} cols={cols} glyph="部" />
 						</div>
 					</div>
 				))}

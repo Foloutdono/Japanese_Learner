@@ -1947,6 +1947,27 @@ input:focus { border-color: var(--accent2); }
 }
 .dict-radical-btn__count { font-size: 9px; color: var(--text-secondary); margin-top: 3px; font-family: var(--font-display); }
 
+/* Same reasoning as .stats-filler-card: a ragged last row of the
+   lattice would otherwise leave a bare, high-contrast patch of the
+   grid background. A muted, oversized 部 (radical) watermark fills it
+   instead — decorative, not another clickable tile. */
+.dict-radical-filler {
+  width: 56px;
+  height: 56px;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dict-radical-filler__glyph {
+  font-family: var(--font-jp);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--text-secondary);
+  opacity: 0.14;
+  user-select: none;
+}
+
 .dict-results-wrap { flex: 1; }
 
 /* ── Results grid ─────────────────────────────────────────
@@ -1958,15 +1979,14 @@ input:focus { border-color: var(--accent2); }
 .dict-results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1px;
+  gap: 2px;
   background: var(--border);
-  border: 1px solid var(--border);
+  border: 3px solid var(--border);
 }
 
 .dict-entry-card {
   background: var(--bg-card);
   border: none;
-  border-top: 3px solid var(--card-color, var(--border));
   border-radius: 0;
   padding: 22px 12px 18px;
   text-align: center;
