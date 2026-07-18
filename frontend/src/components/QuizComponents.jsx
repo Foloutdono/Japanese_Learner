@@ -1,6 +1,29 @@
 import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 
+// ── Is the page actually cramped? ──────────────────────────
+// Replaces a blind `window.innerWidth < 480` check: that treated
+// every phone as tight on space, even ones with a short card and
+// plenty of room to spare (nothing to gain by shrinking rows then).
+// This checks whether the page genuinely overflows the viewport —
+// re-checked on resize and shortly after each render, since layout
+// (the reveal animation, the rating bar appearing) can change page
+// height without firing a resize event.
+function useIsCramped() {
+  const [cramped, setCramped] = useState(false)
+  useEffect(() => {
+    const check = () => setCramped(document.documentElement.scrollHeight > window.innerHeight)
+    check()
+    window.addEventListener('resize', check)
+    const id = window.setTimeout(check, 350)
+    return () => {
+      window.removeEventListener('resize', check)
+      window.clearTimeout(id)
+    }
+  })
+  return cramped
+}
+
 // ── Big kana/kanji display ────────────────────────────────
 export function CharDisplay({ char, size = 110 }) {
   const isLargeSize = size >= 60
@@ -21,7 +44,7 @@ export function CharDisplay({ char, size = 110 }) {
 // An editorial hairline row, not a boxed button — the same visual
 // language as LevelSelector/ModeSelector, so the choice always reads
 // as "pick a row from a list" everywhere in the app, quiz included.
-export function MCQButton({ choice, correct, selected, answered, onClick, index }) {
+export function MCQButton({ choice, correct, selected, answered, onClick, index, cramped }) {
   const isCorrect  = choice === correct
   const isSelected = choice === selected
 
@@ -29,7 +52,7 @@ export function MCQButton({ choice, correct, selected, answered, onClick, index 
   if (answered && isCorrect) variant = ' mcq-row--correct'
   else if (answered && isSelected) variant = ' mcq-row--wrong'
 
-  if (answered &&window.innerWidth < 480) {
+  if (answered && cramped) {
     variant += ' mcq-row--small'
   }
 
@@ -48,6 +71,7 @@ export function MCQButton({ choice, correct, selected, answered, onClick, index 
 
 // ── MCQ choices list ───────────────────────────────────────
 export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
+  const cramped = useIsCramped()
   return (
     <div className="mcq-list">
       {choices.map((choice, i) => (
@@ -58,6 +82,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
           selected={selected}
           answered={answered}
           index={i}
+          cramped={cramped}
           onClick={() => onAnswer(choice)}
         />
       ))}
@@ -141,7 +166,20 @@ export function DoneMessage({ onBack }) {
 // ── Loading ───────────────────────────────────────────────
 export function Loading() {
   const { t } = useLang()
-  return <div className="quiz-loading">{t.loading}</div>
+  return (
+    <div className="quiz-loading">
+      <svg className="quiz-loading__ensor" viewBox="0 0 48 48" aria-hidden="true">
+        <circle
+          className="quiz-loading__ensor-circle"
+          cx="24" cy="24" r="19"
+          fill="none"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      </svg>
+      <span className="quiz-loading__text">{t.loading}</span>
+    </div>
+  )
 }
 
 // ── Deck progress (à apprendre / en cours / maîtrisé) ─────

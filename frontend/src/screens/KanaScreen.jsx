@@ -5,10 +5,12 @@ import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
-  CharDisplay, MCQGrid, TypeInput, ModeToggle, DoneMessage, Loading,
+  CharDisplay, MCQGrid, TypeInput, DoneMessage, Loading,
   DeckProgress, Flashcard,
 } from '../components/QuizComponents'
 import PromptCard from '../components/PromptCard'
+import SelectionScreen from '../components/SelectionScreen'
+import ModeSelector from '../components/ModeSelector'
 import { playKana } from '../components/sound'
 import { kanaModes } from '../components/quizModes'
 
@@ -27,7 +29,7 @@ export default function KanaScreen({ session }) {
   const MODES = kanaModes(t)
 
   const [selectedSet, setSelectedSet] = useState(null) // { label, slug }
-  const [mode, setMode]               = useState('qcm')
+  const [mode, setMode]               = useState(null)
   const [card, setCard]               = useState(null)
   const [loading, setLoading]         = useState(false)
   const [done, setDone]               = useState(false)
@@ -68,17 +70,14 @@ export default function KanaScreen({ session }) {
 
   function startSession(set) {
     setSelectedSet(set)
+    setMode(null)
     setDone(false)
-    fetchCard(set.slug, mode)
-    loadProgress(set.slug, mode)
   }
 
-  function switchMode(m) {
+  function startMode(m) {
     setMode(m)
-    if (selectedSet) {
-      fetchCard(selectedSet.slug, m)
-      loadProgress(selectedSet.slug, m)
-    }
+    fetchCard(selectedSet.slug, m)
+    loadProgress(selectedSet.slug, m)
   }
 
   function postReview(quality) {
@@ -133,15 +132,28 @@ export default function KanaScreen({ session }) {
     )
   }
 
+  // ── Mode selection ──
+  if (!mode) {
+    return (
+      <div className="screen">
+        <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} autoHide />
+        <SelectionScreen>
+          <ModeSelector modes={MODES} onSelect={startMode} title={t.selectMode} />
+        </SelectionScreen>
+      </div>
+    )
+  }
+
   // ── Quiz ──
+  const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
+
   return (
     <div className="screen">
-      <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} autoHide/>
+      <TopBar onBack={() => setMode(null)} title={`${selectedSet.label} — ${modeLabel}`} autoHide/>
       <div className="container quiz-area">
-        <ModeToggle mode={mode} onChange={switchMode} modes={MODES} />
         <DeckProgress stats={progress} />
         {loading && <Loading />}
-        {done    && <DoneMessage onBack={() => setSelectedSet(null)} />}
+        {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>
             {mode === 'flashcard' && (
