@@ -127,7 +127,7 @@ export default function VocabScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${level} — ${modeLabel}`} />
+      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${level} — ${modeLabel}`} autoHide />
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}

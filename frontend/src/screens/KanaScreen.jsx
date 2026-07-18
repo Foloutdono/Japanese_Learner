@@ -136,7 +136,7 @@ export default function KanaScreen({ session }) {
   // ── Quiz ──
   return (
     <div className="screen">
-      <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label}/>
+      <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} autoHide/>
       <div className="container quiz-area">
         <ModeToggle mode={mode} onChange={switchMode} modes={MODES} />
         <DeckProgress stats={progress} />

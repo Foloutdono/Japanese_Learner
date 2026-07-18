@@ -181,6 +181,7 @@ export default function KanjiScreen({ session }) {
         onClick={() => setDrawingEnabled(d => !d)}
         title={`${t.kanjiTitle} ${level} — ${modeLabel}`}
         drawingEnabled={drawingEnabled}
+        autoHide
       />
       <div className="container quiz-area">
         <DeckProgress stats={progress} />

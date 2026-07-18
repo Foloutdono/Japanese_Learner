@@ -98,7 +98,7 @@ export default function GrammarScreen({ session }) {
   // ── Quiz ──
   return (
     <div className="screen">
-      <TopBar onBack={() => setMode(null)} title={`${t.grammarTitle} ${level} — ${currentModeLabel}`} />
+      <TopBar onBack={() => setMode(null)} title={`${t.grammarTitle} ${level} — ${currentModeLabel}`} autoHide />
       <div className="container quiz-area">
         {loading && <Loading />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
