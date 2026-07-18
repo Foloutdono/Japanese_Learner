@@ -12,7 +12,7 @@ import PromptCard from '../components/PromptCard'
 import SelectionScreen from '../components/SelectionScreen'
 import ModeSelector from '../components/ModeSelector'
 import { playKana } from '../components/sound'
-import { kanaModes } from '../components/quizModes'
+import { kanaModePicker } from '../components/quizModes'
 
 export default function KanaScreen({ session }) {
   const navigate    = useNavigate()
@@ -26,7 +26,7 @@ export default function KanaScreen({ session }) {
     { label: t.katakanaCombinations, slug: 'katakana_combos' },
   ]
 
-  const MODES = kanaModes(t)
+  const MODES = kanaModePicker(t)
 
   const [selectedSet, setSelectedSet] = useState(null) // { label, slug }
   const [mode, setMode]               = useState(null)
