@@ -29,6 +29,10 @@ export function MCQButton({ choice, correct, selected, answered, onClick, index 
   if (answered && isCorrect) variant = ' mcq-row--correct'
   else if (answered && isSelected) variant = ' mcq-row--wrong'
 
+  if (answered &&window.innerWidth < 480) {
+    variant += 'mcq-row--small'
+  }
+
   return (
     <button
       onClick={onClick}
