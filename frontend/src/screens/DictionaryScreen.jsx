@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
@@ -426,7 +426,6 @@ function useRadicalColumns(containerRef) {
 // nothing to top up there — so this only fires once a group actually
 // wraps.
 function RadicalFiller({ count, cols, glyph }) {
-	if (count <= cols) return null
 	const empty = (cols - (count % cols)) % cols
 	if (!empty) return null
 	return Array.from({ length: empty }, (_, i) => (
