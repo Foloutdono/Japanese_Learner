@@ -658,7 +658,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* ── Quiz screen shells ───────────────────────────────────── */
-.screen { min-height: 100vh; }
+.screen { min-height: 100vh; display: flex; flex-direction: column; }
 
 .set-select { padding: 60px 24px; text-align: center; }
 
@@ -670,7 +670,22 @@ input:focus { border-color: var(--accent2); }
   margin: 0 auto;
 }
 
-.quiz-area { padding: 32px 24px; text-align: center; }
+/* flex:1 + justify-content:center means a short card (a kanji + a
+   4-row choice list, say) settles in the middle of whatever room the
+   viewport gives it instead of sticking to the top with a slab of
+   unused space below — gap replaces the individual top/bottom margins
+   that used to live on deck-progress/prompt-card/rating-bar, so the
+   whole stack keeps one consistent rhythm instead of several
+   independently-tuned ones. */
+.quiz-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+  padding: 32px 24px;
+  text-align: center;
+}
 
 .flashcard-answer {
   font-size: 2rem;
@@ -824,7 +839,7 @@ input:focus { border-color: var(--accent2); }
   padding: 40px;
 }
 
-.deck-progress { max-width: 480px; margin: 0 auto 20px; }
+.deck-progress { max-width: 480px; margin: 0 auto; }
 
 .deck-progress__bar {
   display: flex;
@@ -990,42 +1005,6 @@ input:focus { border-color: var(--accent2); }
 .type-badge--inference     { --badge-color: var(--accent); }
 .type-badge--default       { --badge-color: var(--text-secondary); }
 
-/* ── Rating bar (SRS quality buttons) ─────────────────────
-   Six levels collapse onto three hues (success / warning / danger)
-   rather than a six-colour flat-UI gradient: a filled tile is the
-   strong signal at each hue's best/worst end, an outlined tile is
-   the softer middle case. "Blackout" gets no colour at all — an
-   empty, bordered void, since the answer drew a blank. */
-.rating-bar { margin-top: 32px; }
-
-.rating-bar__buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-}
-
-.rating-btn {
-  font-size: 13px;
-  border: 1px solid transparent;
-  background: var(--bg-card);
-  color: var(--text-primary);
-}
-
-.rating-btn__index {
-  opacity: 0.65;
-  margin-right: 6px;
-  font-size: 11px;
-  font-family: var(--font-display);
-}
-
-.rating-btn--fill-success    { background: var(--success); color: var(--text-on-fill); }
-.rating-btn--outline-success { background: transparent; border-color: var(--success); color: var(--success); }
-.rating-btn--fill-warning    { background: var(--warning); color: var(--text-on-fill); }
-.rating-btn--outline-danger  { background: transparent; border-color: var(--danger); color: var(--danger); }
-.rating-btn--fill-danger     { background: var(--danger); color: var(--text-on-panel); }
-.rating-btn--void            { background: var(--bg-panel); border-color: var(--border); color: var(--text-on-panel-soft); }
-
 /* ── Shared nav control buttons (mute / lang switcher) ───── */
 .btn-nav {
   background: rgba(255, 255, 255, 0.08);
@@ -1035,34 +1014,75 @@ input:focus { border-color: var(--accent2); }
 .btn-nav--lang { font-size: 14px; padding: 6px 12px; }
 
 /* ── Rating bar (SRS quality scale) ──────────────────────────
-   Six fixed quality levels, so each gets a named modifier class
-   rather than an inline color — same treatment as .type-badge.
-   The hues run success → warning → danger, matching the meaning
-   (perfect recall down to total blackout) while staying inside
-   the traditional palette. */
-.rating-bar { margin-top: 32px; }
+   A hanko-grid, not a row of flat-UI pills: six panels sit flush
+   against each other behind 1px hairlines — the same shoji-screen
+   logic as the home screen's nav cards — each marked by a thin
+   seal-colour stroke along its top edge rather than a full colour
+   fill, echoing .type-badge and the MCQ row's accent bar ("the
+   accent marks it, it doesn't drown it"). Blackout (q0) gets the
+   one true void: no colour at all, sumi ink instead, since the
+   answer drew a blank. */
+.rating-bar { margin-top: 0; }
 
 .rating-bar__buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
-.rating-bar__btn { font-size: 13px; }
+.rating-bar__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 64px;
+  padding: 14px 6px;
+  background: var(--bg-card);
+  border: none;
+  border-top: 3px solid var(--rating-color, var(--border));
+  border-radius: 0;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+.rating-bar__btn:hover,
+.rating-bar__btn:focus-visible { background: var(--overlay-hover); }
 
 .rating-bar__btn-index {
-  opacity: 0.7;
-  margin-right: 6px;
-  font-size: 11px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
 }
 
-.rating-bar__btn--q5 { background: var(--success);  color: var(--text-on-fill); }
-.rating-bar__btn--q4 { background: var(--accent6);  color: var(--text-on-panel); }
-.rating-bar__btn--q3 { background: var(--accent2);  color: var(--text-on-fill); }
-.rating-bar__btn--q2 { background: var(--accent7);  color: var(--text-on-panel); }
-.rating-bar__btn--q1 { background: var(--accent);   color: var(--text-on-panel); }
-.rating-bar__btn--q0 { background: var(--accent4);  color: var(--text-on-panel); }
+.rating-bar__btn-label { color: var(--rating-color, var(--text-primary)); }
+
+.rating-bar__btn--q5 { --rating-color: var(--success); }
+.rating-bar__btn--q4 { --rating-color: var(--accent6); }
+.rating-bar__btn--q3 { --rating-color: var(--accent2); }
+.rating-bar__btn--q2 { --rating-color: var(--accent7); }
+.rating-bar__btn--q1 { --rating-color: var(--accent); }
+.rating-bar__btn--q0 {
+  background: var(--bg-panel);
+  color: var(--text-on-panel-soft);
+}
+.rating-bar__btn--q0 .rating-bar__btn-index,
+.rating-bar__btn--q0 .rating-bar__btn-label { color: var(--text-on-panel-soft); }
+
+@media (min-width: 560px) {
+  .rating-bar__buttons { grid-template-columns: repeat(6, 1fr); max-width: 640px; }
+}
 
 /* ── Shared nav control button (mute / lang switcher) ─────── */
 .btn-nav {
@@ -2367,7 +2387,6 @@ input:focus { border-color: var(--accent2); }
   background: var(--bg-card);
   border-radius: 12px;
   padding: 40px 24px;
-  margin-bottom: 32px;
   max-height: 60vh;
   overflow: auto;
 }
@@ -2530,7 +2549,6 @@ input:focus { border-color: var(--accent2); }
   .home-header { padding: 44px 16px 32px; }
   .home-main { padding: 40px 16px; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
-  .container { padding: 0 16px; }
   .top-bar__inner { padding: 12px 16px; }
   .selection-screen { padding: 44px 16px 56px; }
   .selector-header__title { font-size: 1.7rem; }
@@ -2542,7 +2560,6 @@ input:focus { border-color: var(--accent2); }
   .flashcard {
     padding: 16px;
     border-radius: 10px;
-    margin-bottom: 20px;
   }
 
   .inline-reveal {
