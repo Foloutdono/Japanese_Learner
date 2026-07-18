@@ -85,6 +85,13 @@ export default function DictionaryScreen({ session }) {
 	}, [radicalGroups])
 
 	useEffect(() => {
+		const saved = window.localStorage.getItem('jp-theme')
+		if (saved === 'light' || saved === 'dark') {
+		document.documentElement.setAttribute('data-theme', saved)
+		}
+	}, [])
+
+	useEffect(() => {
 		fetchPage(0, '', category, null)
 		loadRadicalGrid()
 	}, [])

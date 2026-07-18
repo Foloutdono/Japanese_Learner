@@ -26,6 +26,13 @@ export default function ReadingComprehensionScreen({ session }) {
 
   const timerRef = useRef(null)
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem('jp-theme')
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', saved)
+    }
+  }, [])
+
   function startSession(lvl) {
     setLevel(lvl)
     setStage('loading')

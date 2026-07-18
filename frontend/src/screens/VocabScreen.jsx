@@ -29,7 +29,14 @@ export default function VocabScreen({ session }) {
   const [answered, setAnswered]     = useState(false)
   const [selected, setSelected]     = useState(null)
   const [showRating, setShowRating] = useState(false)
-  const [progress, setProgress]     = useState(null)
+  const [progress, setProgress]       = useState(null)
+  
+  useEffect(() => {
+    const saved = window.localStorage.getItem('jp-theme')
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', saved)
+    }
+  }, [])
 
   function fetchCard(lvl, m) {
     setLoading(true)

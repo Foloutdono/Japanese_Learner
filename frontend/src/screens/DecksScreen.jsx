@@ -24,6 +24,13 @@ export default function DecksScreen({ session }) {
   const [newName, setNewName]   = useState('')
   const [newType, setNewType]   = useState('flashcard')
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem('jp-theme')
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', saved)
+    }
+  }, [])
+
   useEffect(() => { fetchDecks() }, [])
 
   function fetchDecks() {

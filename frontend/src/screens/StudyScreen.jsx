@@ -54,6 +54,13 @@ export default function StudyScreen({ session }) {
     // the quiz view is showing; the config screen never hides its bar.
     const topBarHidden = useAutoHideTopBar(configured)
 
+    useEffect(() => {
+        const saved = window.localStorage.getItem('jp-theme')
+        if (saved === 'light' || saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', saved)
+        }
+    }, [])
+
 
     function fetchCard() {
         setLoading(true)
