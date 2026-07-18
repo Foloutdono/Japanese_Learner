@@ -134,43 +134,45 @@ export default function VocabScreen({ session }) {
         {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>
-            <PromptCard>
-              {card.format === 'flashcard' && (
-                <Flashcard
-                  t={t}
-                  resetKey={card.card_id}
-                  onReveal={onFlashcardReveal}
-                  front={
-                    <CharDisplay char={isKjToM ? wordForm(card) : card.meaning} size={50} />
-                  }
-                  back={
-                    <InlineReveal
-                      t={t}
-                      kana={card.kanji ? card.kana : null}
-                      isLarge={isKjToM}
-                      main={
-                        isKjToM
-                          ? <MeaningDisplay meaning={card.meaning} size={22} color="var(--accent2)" center={false} />
-                          : <CharDisplay char={wordForm(card)} size={50} />
-                      }
-                    />
-                  }
-                />
-              )}
+            <div className="vocab-card-boost">
+              <PromptCard>
+                {card.format === 'flashcard' && (
+                  <Flashcard
+                    t={t}
+                    resetKey={card.card_id}
+                    onReveal={onFlashcardReveal}
+                    front={
+                      <CharDisplay char={isKjToM ? wordForm(card) : card.meaning} size={72} />
+                    }
+                    back={
+                      <InlineReveal
+                        t={t}
+                        kana={card.kanji ? card.kana : null}
+                        isLarge={isKjToM}
+                        main={
+                          isKjToM
+                            ? <MeaningDisplay meaning={card.meaning} size={28} color="var(--accent2)" center={false} />
+                            : <CharDisplay char={wordForm(card)} size={72} />
+                        }
+                      />
+                    }
+                  />
+                )}
 
-              {card.format === 'qcm' && (
-                <InlineReveal
-                  t={t}
-                  kana={card.kanji ? card.kana : null}
-                  revealed={answered}
-                  main={
-                    isKjToM
-                      ? <CharDisplay char={wordForm(card)} size={50} />
-                      : <CharDisplay char={card.meaning} size={50} />
-                  }
-                />
-              )}
-            </PromptCard>
+                {card.format === 'qcm' && (
+                  <InlineReveal
+                    t={t}
+                    kana={card.kanji ? card.kana : null}
+                    revealed={answered}
+                    main={
+                      isKjToM
+                        ? <CharDisplay char={wordForm(card)} size={72} />
+                        : <CharDisplay char={card.meaning} size={72} />
+                    }
+                  />
+                )}
+              </PromptCard>
+            </div>
 
             {card.format === 'qcm' && (
               <MCQGrid

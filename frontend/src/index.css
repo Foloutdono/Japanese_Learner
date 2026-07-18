@@ -914,8 +914,8 @@ input:focus { border-color: var(--accent2); }
 }
 
 .deck-progress__dot {
-  width: 11px;
-  height: 11px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   display: inline-block;
 }
@@ -2437,6 +2437,18 @@ input:focus { border-color: var(--accent2); }
   padding: 40px 24px;
   max-height: 60vh;
   overflow: auto;
+}
+
+/* Bigger card for Vocab only — scoped through this wrapper rather than
+   changing .prompt-card itself, so Kanji/Kana keep their existing
+   card size. Vocab words run longer than a single kanji, so the box
+   gets more breathing room, not just a bigger glyph. */
+.vocab-card-boost .prompt-card {
+  padding: 64px 32px;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ── EmptyState component ─────────────────────────────────── */
