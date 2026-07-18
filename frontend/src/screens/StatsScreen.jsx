@@ -41,12 +41,13 @@ export default function StatsScreen({ session }) {
 
   return (
     <div className="screen">
-      <div className="top-bar">
-        <button className="btn-back" onClick={() => navigate('/')}>{t.menu}</button>
-        <span className="top-bar__title">{t.statistics}</span>
-        <button className="stats-refresh-btn" onClick={fetchStats}>↻</button>
-        <button className="stats-reset-btn" onClick={resetAll}>{t.resetStats}</button>
-      </div>
+      <TopBar
+        onBack={() => navigate('/')}
+        title={t.statistics}
+        actions={
+          <button className="stats-reset-btn" onClick={resetAll}>{t.resetStats}</button>
+        }
+      />
 
       {!stats && (
         <div className="stats-loading">{t.loading}</div>
