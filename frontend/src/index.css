@@ -90,6 +90,12 @@
   --text-primary:   #ece5d8;
   /* Nezumi-iro (鼠色) — mouse grey, the classic Edo neutral */
   --text-secondary: #a79c8c;
+  /* Gin-nezumi (銀鼠) — silver mouse grey. A dedicated, brighter grey
+     for the "new / not started" progress state — kept in the same
+     neutral family as --text-secondary, but --text-secondary itself
+     is deliberately muted for body text and doesn't have enough
+     presence once used as a colour swatch (progress bar, legend dot). */
+  --state-new:      #beb3a0;
   --border:         #35303a;
 }
 
@@ -122,6 +128,9 @@
 
   --text-primary:   #221d15;
   --text-secondary: #6f6552;
+  /* Sumi-nezumi (墨鼠) — charcoal grey. Deepened independently for
+     paper, same reasoning as the dark-theme value above. */
+  --state-new:      #55503f;
   /* Darkened well past the paper tones around it — a hairline
      that's actually visible, not a shade indistinguishable from
      the card it's supposed to divide. */
@@ -1607,10 +1616,9 @@ input:focus { border-color: var(--accent2); }
   align-items: center;
 }
 
-/* Ai-iro (indigo) / cha-iro (brun thé) / matcha — trois teintes bien
-   séparées, plutôt que new+learning dans le même registre or/ambre,
-   difficile à distinguer d'un coup d'œil. */
-.stat-cell__new { color: var(--accent5); }
+/* Gris dédié pour "new" (partagé avec DeckProgress), indigo pour
+   "learning" — deux teintes bien séparées, chacune réglée par thème. */
+.stat-cell__new { color: var(--state-new); }
 .stat-cell__learning { color: var(--accent4); }
 .stat-cell__mastered { color: var(--success); }
 
