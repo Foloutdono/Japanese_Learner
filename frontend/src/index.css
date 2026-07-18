@@ -1,10 +1,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Serif+JP:wght@600;700&display=swap');
 
+/* ── Design system, light + dark ──────────────────────────────
+   Same variable names in both themes — only the values differ under
+   [data-theme="light"] — so nothing that already references a token
+   (including inline JS colours like DeckProgress's
+   `color: 'var(--success)'`) can ever break when the theme flips.
+
+   One deliberate exception: --bg-panel and its paired text tokens
+   NEVER flip. Sumi ink is the app's one high-contrast structural
+   move (top bar, hero header, nav drawer, seal-stamped buttons) — a
+   fixed slab of ink, on paper or on ink, per the red/black/white
+   contrast Japanese minimalism is built on. Every rule that sits on
+   --bg-panel uses --text-on-panel(-soft) explicitly instead of the
+   ambient --text-primary/--text-secondary, which are what flip. */
 :root {
-  /* Sumi (墨) — ink black, warmed rather than blue-cold */
+  /* ── Fixed tokens (identical in both themes) ── */
+
+  /* Sumi (墨) — ink black. Reserved for structural chrome. */
+  --bg-panel:           #1e1912;
+  /* Kinari (生成り) — text for use on sumi surfaces. Constant,
+     because sumi itself is constant. */
+  --text-on-panel:      #f3ecdf;
+  --text-on-panel-soft: #b3a488;
+  /* Dark ink text for use on light/mid-tone colour fills (success,
+     warning) that stay legible with dark text regardless of theme. */
+  --text-on-fill:       #1c1811;
+
+  /* Washi (和紙) — the one bright surface reserved for diagrams that
+     need true white behind black ink (stroke order refs, kanji
+     tiles), independent of the ambient theme. */
+  --paper:              #f3ecdf;
+
+  --radius:         12px;
+  --max-w:          1100px;
+  --gap:            24px;
+
+  --font-display:   'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-jp:        'Yu Gothic', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Fixed "primary action" purple used by deck/study flows (Study,
+     Create deck, Start session…) — independent of the per-deck-type
+     accent colors, which stay data-driven via --type-color. Works as
+     a fill with --text-on-panel text in both themes. */
+  --action-purple:  #6c5ce7;
+
+  /* ── Flipping tokens — dark theme (default) ── */
   --bg-main:        #17151a;
   --bg-card:        #201d24;
-  --bg-panel:       #2a2530;
+  --bg-card-hover:  #2a2530;
+  --overlay-hover:  rgba(255, 255, 255, 0.035);
+  --chip-bg:        rgba(255, 255, 255, 0.08);
 
   /* Shu-iro (朱色) — cinnabar vermillion, the traditional seal/lacquer red */
   --accent:         #c1442c;
@@ -31,11 +76,6 @@
   /* Sabi-iro (錆色) — rust */
   --accent7:        #a85c3f;
 
-  /* Washi (和紙) — pale rice paper. The only light surface in the app;
-     used solely where a diagram needs a bright backdrop for contrast
-     (e.g. stroke-order references drawn in black ink). */
-  --paper:          #f3ecdf;
-
   /* Ai-iro (藍色) — indigo, for cool contrast against the vermillion accent */
   --indigo:         #3d5a73;
   /* Rokusho-iro (緑青色) — verdigris, the patina green of aged bronze */
@@ -48,18 +88,38 @@
   /* Nezumi-iro (鼠色) — mouse grey, the classic Edo neutral */
   --text-secondary: #a79c8c;
   --border:         #35303a;
+}
 
-  --radius:         12px;
-  --max-w:          1100px;
-  --gap:            24px;
+/* ── Light theme — washi (和紙), rice paper ──────────────────
+   The negative space itself moves from ink to paper; the sumi
+   chrome above stays exactly as dark, so it now reads as a
+   deliberate ink stamp on a pale ground instead of a dark-mode
+   default. Pigments are all deepened a shade so they still work as
+   plain text on paper, not just as fills on ink. */
+:root[data-theme="light"] {
+  --bg-main:        #f6f1e4;
+  --bg-card:        #efe6d0;
+  --bg-card-hover:  #e7dabd;
+  --overlay-hover:  rgba(28, 24, 17, 0.045);
+  --chip-bg:        rgba(28, 24, 17, 0.055);
 
-  --font-display:   'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
-  --font-jp:        'Yu Gothic', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --accent:         #b7402a;
+  --accent2:        #a97a25;
+  --accent3:        #6f5d8f;
+  --success:        #5c7a43;
+  --warning:        #ad7c2e;
+  --danger:         #93301f;
+  --accent4:        #375b78;
+  --accent5:        #7a5c40;
+  --accent6:        #43645f;
+  --accent7:        #954e34;
 
-  /* Fixed "primary action" purple used by deck/study flows (Study,
-     Create deck, Start session…) — independent of the per-deck-type
-     accent colors, which stay data-driven via --type-color. */
-  --action-purple:  #6c5ce7;
+  --text-primary:   #221d15;
+  --text-secondary: #6f6552;
+  /* Darkened well past the paper tones around it — a hairline
+     that's actually visible, not a shade indistinguishable from
+     the card it's supposed to divide. */
+  --border:         #c3af7c;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -69,6 +129,7 @@ html, body, #root {
   background: var(--bg-main);
   color: var(--text-primary);
   font-family: 'Segoe UI', system-ui, sans-serif;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 button {
@@ -264,6 +325,7 @@ input:focus { border-color: var(--accent2); }
 
 .top-bar {
   background: var(--bg-panel);
+  color: var(--text-on-panel);
   position: relative;
   top: 0;
   z-index: 10;
@@ -318,7 +380,7 @@ input:focus { border-color: var(--accent2); }
     border: none;
     border-radius: 0 0 12px 12px;
     background: var(--bg-panel);
-    color: var(--text-primary);
+    color: var(--text-on-panel);
     font-size: 11px;
     line-height: 1;
     z-index: 20;
@@ -337,7 +399,7 @@ input:focus { border-color: var(--accent2); }
 
 .btn-back {
   background: rgba(255,255,255,0.08);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   font-size: 13px;
   padding: 8px 16px;
   white-space: nowrap;
@@ -403,6 +465,7 @@ input:focus { border-color: var(--accent2); }
 
 .home-header {
   background: var(--bg-panel);
+  color: var(--text-on-panel);
   border-bottom: 1px solid var(--border);
   padding: 92px 24px 56px;
   text-align: center;
@@ -435,7 +498,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-header__desc {
-  color: var(--text-secondary);
+  color: var(--text-on-panel-soft);
   font-size: 0.85rem;
   letter-spacing: 0.02em;
   margin-top: 10px;
@@ -486,7 +549,7 @@ input:focus { border-color: var(--accent2); }
 }
 .home-card:hover,
 .home-card:focus-visible {
-  background: var(--bg-panel);
+  background: var(--bg-card-hover);
 }
 
 .home-card__glyph {
@@ -497,7 +560,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-card__title {
-  color: var(--paper);
+  color: var(--text-primary);
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: 1.3rem;
@@ -530,14 +593,14 @@ input:focus { border-color: var(--accent2); }
 /* ── Ghost / panel button utilities ──────────────────────── */
 .btn-ghost {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-secondary);
+  color: var(--text-on-panel-soft);
   font-size: 12px;
   padding: 8px 16px;
 }
 
 .btn-panel {
   background: var(--bg-panel);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
 }
 
 /* ── Burger menu / nav drawer ─────────────────────────────
@@ -545,7 +608,7 @@ input:focus { border-color: var(--accent2); }
    language as the rest of the app, just laid out vertically. */
 .burger-toggle {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   font-size: 18px;
   padding: 6px 10px;
   line-height: 1;
@@ -564,6 +627,7 @@ input:focus { border-color: var(--accent2); }
   max-width: 85vw;
   height: 100%;
   background: var(--bg-panel);
+  color: var(--text-on-panel);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -590,12 +654,12 @@ input:focus { border-color: var(--accent2); }
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--text-on-panel-soft);
 }
 
 .burger-drawer__close {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   font-size: 16px;
   padding: 4px 10px;
 }
@@ -612,7 +676,7 @@ input:focus { border-color: var(--accent2); }
   gap: 12px;
   width: 100%;
   background: transparent;
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   font-size: 15px;
   padding: 12px 20px;
   border-radius: 0;
@@ -655,7 +719,7 @@ input:focus { border-color: var(--accent2); }
 }
 .btn-writing-toggle--on {
   background: var(--warning);
-  color: var(--bg-main);
+  color: var(--text-on-fill);
 }
 .btn-writing-toggle--off {
   background: var(--bg-card);
@@ -728,7 +792,7 @@ input:focus { border-color: var(--accent2); }
   transition: background 0.15s ease;
 }
 .mcq-row:not(:disabled):hover,
-.mcq-row:focus-visible { background: rgba(255, 255, 255, 0.03); }
+.mcq-row:focus-visible { background: var(--overlay-hover); }
 .mcq-row:disabled { cursor: default; }
 
 .mcq-row__accent {
@@ -989,7 +1053,8 @@ input:focus { border-color: var(--accent2); }
 }
 
 .rating-bar__key {
-  background: var(--bg-panel);
+  background: var(--bg-card);
+  color: var(--text-secondary);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
@@ -1017,17 +1082,17 @@ input:focus { border-color: var(--accent2); }
   font-family: var(--font-display);
 }
 
-.rating-btn--fill-success    { background: var(--success); color: var(--bg-main); }
+.rating-btn--fill-success    { background: var(--success); color: var(--text-on-fill); }
 .rating-btn--outline-success { background: transparent; border-color: var(--success); color: var(--success); }
-.rating-btn--fill-warning    { background: var(--warning); color: var(--bg-main); }
+.rating-btn--fill-warning    { background: var(--warning); color: var(--text-on-fill); }
 .rating-btn--outline-danger  { background: transparent; border-color: var(--danger); color: var(--danger); }
-.rating-btn--fill-danger     { background: var(--danger); color: var(--text-primary); }
-.rating-btn--void            { background: var(--bg-panel); border-color: var(--border); color: var(--text-secondary); }
+.rating-btn--fill-danger     { background: var(--danger); color: var(--text-on-panel); }
+.rating-btn--void            { background: var(--bg-panel); border-color: var(--border); color: var(--text-on-panel-soft); }
 
 /* ── Shared nav control buttons (mute / lang switcher) ───── */
 .btn-nav {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
 }
 .btn-nav--icon { font-size: 16px; padding: 6px 10px; }
 .btn-nav--lang { font-size: 14px; padding: 6px 12px; }
@@ -1047,7 +1112,8 @@ input:focus { border-color: var(--accent2); }
 }
 
 .rating-bar__key {
-  background: var(--bg-panel);
+  background: var(--bg-card);
+  color: var(--text-secondary);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
@@ -1069,17 +1135,17 @@ input:focus { border-color: var(--accent2); }
   font-size: 11px;
 }
 
-.rating-bar__btn--q5 { background: var(--success);  color: var(--bg-main); }
-.rating-bar__btn--q4 { background: var(--accent6);  color: var(--text-primary); }
-.rating-bar__btn--q3 { background: var(--accent2);  color: var(--bg-main); }
-.rating-bar__btn--q2 { background: var(--accent7);  color: var(--text-primary); }
-.rating-bar__btn--q1 { background: var(--accent);   color: var(--text-primary); }
-.rating-bar__btn--q0 { background: var(--accent4);  color: var(--text-primary); }
+.rating-bar__btn--q5 { background: var(--success);  color: var(--text-on-fill); }
+.rating-bar__btn--q4 { background: var(--accent6);  color: var(--text-on-panel); }
+.rating-bar__btn--q3 { background: var(--accent2);  color: var(--text-on-fill); }
+.rating-bar__btn--q2 { background: var(--accent7);  color: var(--text-on-panel); }
+.rating-bar__btn--q1 { background: var(--accent);   color: var(--text-on-panel); }
+.rating-bar__btn--q0 { background: var(--accent4);  color: var(--text-on-panel); }
 
 /* ── Shared nav control button (mute / lang switcher) ─────── */
 .btn-nav {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   font-size: 14px;
   padding: 6px 12px;
 }
@@ -1133,7 +1199,7 @@ input:focus { border-color: var(--accent2); }
   flex: 1;
   border-radius: 0;
   background: var(--bg-panel);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   font-size: 14px;
 }
 .auth-mode-toggle__btn--active { background: var(--accent); }
@@ -1184,7 +1250,8 @@ input:focus { border-color: var(--accent2); }
 }
 
 .canvas-clear-btn {
-  background: var(--bg-panel);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   color: var(--text-secondary);
   font-size: 12px;
   margin-top: 8px;
@@ -1271,7 +1338,7 @@ input:focus { border-color: var(--accent2); }
 
 .drawing-overlay__continue {
   background: var(--success);
-  color: var(--bg-main);
+  color: var(--text-on-fill);
   font-size: 16px;
   padding: 14px 60px;
   margin-top: 32px;
@@ -1333,6 +1400,23 @@ input:focus { border-color: var(--accent2); }
 }
 
 .quiz-writing-result { margin-top: 16px; }
+
+/* ── Light-theme text-on-fill overrides ────────────────────────
+   --success and --warning are deepened for light mode (so they hold
+   up as plain text on paper) which flips their role as a FILL: they
+   go from light-mid tiles that want dark text to mid-dark tiles that
+   want light text. --accent2/--accent6/--danger etc. stay dark-toned
+   in both themes, so their paired --text-on-fill/--text-on-panel
+   choice never needs to change — only these do. */
+:root[data-theme="light"] .rating-btn--fill-success,
+:root[data-theme="light"] .rating-btn--fill-warning,
+:root[data-theme="light"] .rating-bar__btn--q5,
+:root[data-theme="light"] .btn-writing-toggle--on,
+:root[data-theme="light"] .drawing-overlay__continue,
+:root[data-theme="light"] .study-drawing-toggle--active,
+:root[data-theme="light"] .study-topbar-drawing-toggle--active {
+  color: var(--text-on-panel);
+}
 /* ── Stats screen ─────────────────────────────────────────── */
 .stats-loading {
   text-align: center;
@@ -1341,14 +1425,14 @@ input:focus { border-color: var(--accent2); }
 }
 
 .stats-refresh-btn {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--chip-bg);
   color: var(--text-primary);
   font-size: 13px;
 }
 
 .stats-reset-btn {
   background: var(--danger);
-  color: #fff;
+  color: var(--text-on-panel);
   font-size: 13px;
 }
 
@@ -1552,7 +1636,7 @@ input:focus { border-color: var(--accent2); }
 .dict-radical-char {
   font-size: 28px;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
   background: var(--bg-card);
   border-radius: 8px;
   padding: 4px 14px;
@@ -1575,7 +1659,7 @@ input:focus { border-color: var(--accent2); }
   height: 56px;
   padding: 0;
   background: var(--bg-card);
-  color: #fff;
+  color: var(--text-primary);
   border: 1px solid var(--border);
   border-radius: 10px;
   display: flex;
@@ -1622,7 +1706,7 @@ input:focus { border-color: var(--accent2); }
 .dict-entry-card__char {
   font-size: 40px;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: #fff;
+  color: var(--text-on-panel);
   line-height: 1;
   margin-top: 4px;
 }
@@ -1676,12 +1760,12 @@ input:focus { border-color: var(--accent2); }
 .dict-detail__char {
   font-size: 80px;
   font-family: 'Yu Gothic', system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
   line-height: 1;
 }
 .dict-detail__speak-btn {
   background: var(--bg-panel);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   font-size: 24px;
   padding: 12px 16px;
   border-radius: 10px;
@@ -1703,7 +1787,7 @@ input:focus { border-color: var(--accent2); }
   letter-spacing: 1px;
 }
 .dict-detail__stroke-frame {
-  background: #fff;
+  background: var(--paper);
   border-radius: 8px;
   padding: 8px;
   width: 100%;
@@ -1718,7 +1802,7 @@ input:focus { border-color: var(--accent2); }
 }
 .dict-detail__close-btn {
   background: var(--bg-panel);
-  color: var(--text-secondary);
+  color: var(--text-on-panel-soft);
   width: 100%;
   margin-top: 16px;
   font-size: 13px;
@@ -1756,7 +1840,7 @@ input:focus { border-color: var(--accent2); }
   padding: 2px 8px;
   border-radius: 999px;
   background: var(--pill-color, var(--accent3));
-  color: #fff;
+  color: var(--text-on-panel);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -1766,7 +1850,7 @@ input:focus { border-color: var(--accent2); }
 /* ── Shared "primary purple" action button ────────────────── */
 .btn-primary-purple {
   background: var(--action-purple);
-  color: #fff;
+  color: var(--text-on-panel);
 }
 .btn-primary-purple:disabled { opacity: 0.6; }
 
@@ -1789,13 +1873,13 @@ input:focus { border-color: var(--accent2); }
 .decks-type-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .decks-type-btn {
   background: var(--bg-panel);
-  color: var(--text-secondary);
+  color: var(--text-on-panel-soft);
   font-size: 13px;
   padding: 8px 16px;
 }
 .decks-type-btn--active {
   background: var(--type-color, var(--action-purple));
-  color: #fff;
+  color: var(--text-on-panel);
 }
 .decks-type-btn__desc { font-size: 10px; opacity: 0.8; }
 
@@ -1813,8 +1897,8 @@ input:focus { border-color: var(--accent2); }
 .deck-card__delete { background: transparent; color: var(--danger); font-size: 16px; padding: 4px 8px; }
 .deck-card__count { font-size: 13px; color: var(--text-secondary); }
 .deck-card__actions { display: flex; gap: 8px; margin-top: auto; }
-.deck-card__edit-btn { background: var(--bg-panel); color: var(--text-primary); flex: 1; font-size: 13px; }
-.deck-card__study-btn { background: var(--type-color, var(--accent)); color: #fff; flex: 1; font-size: 13px; }
+.deck-card__edit-btn { background: var(--bg-panel); color: var(--text-on-panel); flex: 1; font-size: 13px; }
+.deck-card__study-btn { background: var(--type-color, var(--accent)); color: var(--text-on-panel); flex: 1; font-size: 13px; }
 
 /* ── Deck detail screen ───────────────────────────────────── */
 .deckdetail-header {
@@ -1829,11 +1913,11 @@ input:focus { border-color: var(--accent2); }
 .deckdetail-actions--select { align-items: center; }
 .deckdetail-select-count { font-size: 13px; color: var(--text-secondary); }
 
-.deckdetail-btn { font-size: 13px; background: var(--bg-panel); color: var(--text-primary); }
+.deckdetail-btn { font-size: 13px; background: var(--bg-panel); color: var(--text-on-panel); }
 .deckdetail-btn--muted { color: var(--text-secondary); }
-.deckdetail-btn--study { background: var(--action-purple); color: #fff; }
-.deckdetail-btn--danger { background: var(--danger); color: #fff; }
-.deckdetail-btn--danger-disabled { background: var(--bg-panel); color: var(--text-secondary); opacity: 0.5; }
+.deckdetail-btn--study { background: var(--action-purple); color: var(--text-on-panel); }
+.deckdetail-btn--danger { background: var(--danger); color: var(--text-on-panel); }
+.deckdetail-btn--danger-disabled { background: var(--bg-panel); color: var(--text-on-panel-soft); opacity: 0.5; }
 
 .deckdetail-import-banner {
   background: var(--bg-card);
@@ -1853,8 +1937,8 @@ input:focus { border-color: var(--accent2); }
 .deckdetail-form__fields { display: flex; flex-direction: column; gap: 10px; }
 .deckdetail-form__input { padding: 10px 14px; font-size: 15px; }
 .deckdetail-form__actions { display: flex; gap: 8px; margin-top: 16px; }
-.deckdetail-form__save { background: var(--action-purple); color: #fff; flex: 1; }
-.deckdetail-form__cancel { background: var(--bg-panel); color: var(--text-secondary); flex: 1; }
+.deckdetail-form__save { background: var(--action-purple); color: var(--text-on-panel); flex: 1; }
+.deckdetail-form__cancel { background: var(--bg-panel); color: var(--text-on-panel-soft); flex: 1; }
 
 .deckdetail-list { display: flex; flex-direction: column; gap: 8px; }
 
@@ -1881,7 +1965,7 @@ input:focus { border-color: var(--accent2); }
   justify-content: center;
 }
 .deckdetail-checkbox--checked { border-color: var(--accent); background: var(--accent); }
-.deckdetail-checkbox__mark { color: #fff; font-size: 12px; line-height: 1; }
+.deckdetail-checkbox__mark { color: var(--text-on-panel); font-size: 12px; line-height: 1; }
 
 .deckdetail-card-content { flex: 1; }
 .deckdetail-card-fields { display: flex; gap: 24px; flex-wrap: wrap; }
@@ -1895,7 +1979,7 @@ input:focus { border-color: var(--accent2); }
 
 .deckdetail-edit-btn {
   background: var(--bg-panel);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   font-size: 13px;
   padding: 6px 12px;
   flex-shrink: 0;
@@ -1932,7 +2016,7 @@ input:focus { border-color: var(--accent2); }
 
 .reveal-btn {
   background: var(--bg-panel);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   width: 100%;
   font-size: 16px;
   padding: 16px;
@@ -1940,7 +2024,7 @@ input:focus { border-color: var(--accent2); }
 
 .grammar-fill-reveal-btn {
   background: var(--accent);
-  color: #fff;
+  color: var(--text-on-panel);
   width: 100%;
   font-size: 15px;
   padding: 14px;
@@ -1948,7 +2032,7 @@ input:focus { border-color: var(--accent2); }
 
 .grammar-examples-toggle {
   background: var(--bg-panel);
-  color: var(--text-secondary);
+  color: var(--text-on-panel-soft);
   font-size: 13px;
 }
 
@@ -2065,15 +2149,15 @@ input:focus { border-color: var(--accent2); }
   padding: 12px;
   border-radius: 8px;
   background: var(--bg-panel);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   border: 1px solid var(--border);
   resize: vertical;
 }
 
 .phrase-input-actions { display: flex; justify-content: space-between; margin-top: 12px; }
 
-.phrase-history-toggle { background: rgba(255, 255, 255, 0.08); color: var(--text-primary); font-size: 13px; }
-.phrase-analyze-btn { background: var(--accent); color: #fff; font-size: 14px; padding: 8px 20px; }
+.phrase-history-toggle { background: var(--chip-bg); color: var(--text-primary); font-size: 13px; }
+.phrase-analyze-btn { background: var(--accent); color: var(--text-on-panel); font-size: 14px; padding: 8px 20px; }
 
 .phrase-history-card { margin-bottom: 24px; padding: 16px 24px; }
 .phrase-history-empty { color: var(--text-secondary); font-size: 14px; }
@@ -2135,12 +2219,12 @@ input:focus { border-color: var(--accent2); }
 
 .rdg-error-card { padding: 16px; color: var(--danger); }
 .rdg-retry-wrap { margin-top: 12px; }
-.rdg-retry-btn { background: var(--accent); color: #fff; }
+.rdg-retry-btn { background: var(--accent); color: var(--text-on-panel); }
 
 .rdg-phrase-display {
   font-size: 36px;
   font-family: 'Yu Gothic', system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .rdg-phrase-progress {
@@ -2169,13 +2253,13 @@ input:focus { border-color: var(--accent2); }
   width: 100%;
   max-width: 360px;
   background: var(--bg-panel);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   border: 1px solid var(--border);
   margin-top: 16px;
   text-align: center;
 }
 .rdg-submit-wrap { margin-top: 16px; }
-.rdg-submit-btn { background: var(--accent); color: #fff; padding: 10px 28px; font-size: 15px; }
+.rdg-submit-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
 
 .rdg-feedback-phrase { font-size: 32px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin-bottom: 12px; line-height: 1.5; }
 .rdg-feedback-status {
@@ -2189,9 +2273,9 @@ input:focus { border-color: var(--accent2); }
 
 .rdg-feedback-actions { margin-top: 16px; }
 .rdg-grade-row { display: flex; gap: 12px; justify-content: center; }
-.rdg-grade-btn--wrong { background: var(--danger); color: #fff; padding: 10px 24px; font-size: 15px; }
-.rdg-grade-btn--right { background: var(--success); color: #fff; padding: 10px 24px; font-size: 15px; }
-.rdg-next-btn { background: var(--accent); color: #fff; padding: 10px 28px; font-size: 15px; }
+.rdg-grade-btn--wrong { background: var(--danger); color: var(--text-on-panel); padding: 10px 24px; font-size: 15px; }
+.rdg-grade-btn--right { background: var(--success); color: var(--text-on-panel); padding: 10px 24px; font-size: 15px; }
+.rdg-next-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
 
 /* ── Reading comprehension screen ─────────────────────────── */
 .comp-loading-wrap { padding: 80px; text-align: center; }
@@ -2199,7 +2283,7 @@ input:focus { border-color: var(--accent2); }
 
 .comp-error-page { padding: 40px; text-align: center; }
 .comp-error-card { padding: 24px; color: var(--danger); }
-.comp-retry-btn { margin-top: 16px; background: var(--accent); color: #fff; }
+.comp-retry-btn { margin-top: 16px; background: var(--accent); color: var(--text-on-panel); }
 
 .comp-reading-page { padding: 24px 24px 40px; }
 .comp-reading-header {
@@ -2211,8 +2295,8 @@ input:focus { border-color: var(--accent2); }
 .comp-time-remaining { font-size: 13px; color: var(--text-secondary); }
 .comp-time-value { color: var(--time-color, var(--text-primary)); }
 .comp-reading-actions { display: flex; gap: 8px; }
-.comp-toggle-translation { background: rgba(255, 255, 255, 0.08); color: var(--text-secondary); font-size: 12px; }
-.comp-done-btn { background: var(--accent); color: #fff; font-size: 13px; }
+.comp-toggle-translation { background: var(--chip-bg); color: var(--text-secondary); font-size: 12px; }
+.comp-done-btn { background: var(--accent); color: var(--text-on-panel); font-size: 13px; }
 
 .comp-bar-track {
   height: 4px;
@@ -2235,7 +2319,7 @@ input:focus { border-color: var(--accent2); }
   font-size: 18px;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 2.0;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .comp-translation-card { padding: 16px 24px; border-left: 3px solid var(--accent2); }
@@ -2253,7 +2337,7 @@ input:focus { border-color: var(--accent2); }
   border-radius: 10px;
   font-size: 15px;
   background: var(--bg-panel);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   border: 1px solid var(--border);
   cursor: pointer;
   transition: background 0.15s;
@@ -2290,13 +2374,13 @@ input:focus { border-color: var(--accent2); }
   font-size: 16px;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 2.0;
-  color: #fff;
+  color: var(--text-primary);
 }
 .comp-original-translation { margin-top: 12px; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
 
 .comp-results-actions { display: flex; gap: 12px; justify-content: center; }
-.comp-try-again-btn { background: var(--accent); color: #fff; padding: 10px 24px; }
-.comp-change-level-btn { background: rgba(255, 255, 255, 0.08); color: var(--text-primary); padding: 10px 24px; }
+.comp-try-again-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 24px; }
+.comp-change-level-btn { background: var(--chip-bg); color: var(--text-primary); padding: 10px 24px; }
 
 /* ── Study screen ──────────────────────────────────────────── */
 .study-config-page { padding: 40px 24px; max-width: 560px; }
@@ -2312,7 +2396,7 @@ input:focus { border-color: var(--accent2); }
   padding: 14px 20px;
   font-size: 14px;
 }
-.study-mode-btn--active { background: var(--action-purple); color: #fff; }
+.study-mode-btn--active { background: var(--action-purple); color: var(--text-on-panel); }
 
 .study-level-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .study-level-btn {
@@ -2321,14 +2405,14 @@ input:focus { border-color: var(--accent2); }
   font-size: 14px;
   padding: 10px 20px;
 }
-.study-level-btn--active { background: var(--accent2); color: #111; }
+.study-level-btn--active { background: var(--accent2); color: var(--text-on-fill); }
 
 .study-drawing-toggle {
   background: var(--bg-card);
   color: var(--text-secondary);
   font-size: 13px;
 }
-.study-drawing-toggle--active { background: var(--warning); color: #111; }
+.study-drawing-toggle--active { background: var(--warning); color: var(--text-on-fill); }
 
 .study-start-btn { width: 100%; font-size: 16px; padding: 16px; }
 
@@ -2338,13 +2422,13 @@ input:focus { border-color: var(--accent2); }
   font-size: 12px;
   padding: 6px 12px;
 }
-.study-topbar-drawing-toggle--active { background: var(--warning); color: #111; }
+.study-topbar-drawing-toggle--active { background: var(--warning); color: var(--text-on-fill); }
 
 .study-prompt-card { padding: 40px 24px; margin-bottom: 24px; }
 .study-front-text {
   font-size: var(--front-size, 32px);
   font-family: 'Yu Gothic', sans-serif;
-  color: #fff;
+  color: var(--text-primary);
 }
 .study-hint-text { font-size: 13px; color: var(--warning); margin-top: 12px; }
 
@@ -2367,7 +2451,7 @@ input:focus { border-color: var(--accent2); }
 .empty-state__icon { font-size: 48px; margin-bottom: 16px; }
 .empty-state__message { font-size: 15px; }
 .empty-state__hint { font-size: 13px; margin-top: 8px; }
-.empty-state__action { background: var(--accent); color: #fff; margin-top: 20px; }
+.empty-state__action { background: var(--accent); color: var(--text-on-panel); margin-top: 20px; }
 
 /* ── ImportCardsMenu component ────────────────────────────── */
 .import-overlay {
@@ -2434,11 +2518,11 @@ input:focus { border-color: var(--accent2); }
 .import-preview__more { color: var(--text-secondary); font-size: 12px; padding: 4px 14px; }
 
 .import-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
-.import-footer__cancel { background: var(--bg-panel); color: var(--text-secondary); font-size: 14px; }
+.import-footer__cancel { background: var(--bg-panel); color: var(--text-on-panel-soft); font-size: 14px; }
 .import-footer__submit {
   background: var(--bg-panel);
-  color: var(--text-secondary);
+  color: var(--text-on-panel-soft);
   font-size: 14px;
 }
-.import-footer__submit--active { background: var(--action-purple); color: #fff; }
+.import-footer__submit--active { background: var(--action-purple); color: var(--text-on-panel); }
 .import-footer__submit--importing { opacity: 0.7; }

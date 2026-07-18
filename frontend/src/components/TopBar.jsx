@@ -10,7 +10,7 @@ function isKanjiRoute(path) {
 
 const MOBILE_BREAKPOINT = 768
 const SCROLL_THRESHOLD   = 2     // px of scroll before reacting — just enough to ignore jitter
-const REVEAL_DURATION    = 3000  // ms the bar stays visible after a reveal
+const REVEAL_DURATION    = 2000  // ms the bar stays visible after a reveal
 
 /**
  * Hidden by default on mobile. Reveals only on scroll-up (call
