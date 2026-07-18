@@ -1079,6 +1079,40 @@ input:focus { border-color: var(--accent2); }
   .home-main { padding: 40px 16px; }
 }
 
+@media (max-width: 480px) {
+  .quiz-card, 
+  .prompt-card, 
+  .flashcard {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .char-display {
+    margin: 8px 0;
+  }
+
+  .meaning,
+  .reading {
+    font-size: 0.9rem;
+  }
+  .quiz-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .quiz-content {
+    flex: 1;
+    overflow: hidden; /* prevent scrolling */
+  }
+
+  .rating-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+}
+
 /* ── Rating bar (SRS quality buttons) ─────────────────────
    Six levels collapse onto three hues (success / warning / danger)
    rather than a six-colour flat-UI gradient: a filled tile is the
