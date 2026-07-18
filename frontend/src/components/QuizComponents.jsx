@@ -2,8 +2,21 @@ import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 
 // ── Big kana/kanji display ────────────────────────────────
+// `char` comes straight from card data, which occasionally has a
+// stray newline or run of whitespace baked in (bad import, a reading
+// accidentally concatenated in the same field, etc.). At this font
+// size each blank line costs ~1.4x the font-size in height, so even
+// one hidden newline can balloon the card far past its intended size
+// with nothing visible to explain it. Collapsing whitespace here means
+// that class of bad data can never reach the layout in the first
+// place, regardless of where it came from.
+function sanitizeDisplayChar(char) {
+  return typeof char === 'string' ? char.replace(/\s+/g, ' ').trim() : char
+}
+
 export function CharDisplay({ char, size = 110 }) {
   const isLargeSize = size >= 60
+  const displayChar = sanitizeDisplayChar(char)
   return (
     <div
       className="char-display"
@@ -11,8 +24,9 @@ export function CharDisplay({ char, size = 110 }) {
         '--char-size': `${size}px`,
         '--char-font': isLargeSize ? 'var(--font-jp)' : 'inherit',
       }}
+      title={typeof displayChar === 'string' ? displayChar : undefined}
     >
-      {char}
+      {displayChar}
     </div>
   )
 }
