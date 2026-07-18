@@ -12,7 +12,7 @@ import { useLang } from '../LangContext'
 function useIsCramped() {
   const [cramped, setCramped] = useState(false)
   useEffect(() => {
-    const check = () => setCramped(document.documentElement.scrollHeight > window.innerHeight)
+    const check = () => setCramped(document.documentElement.scrollHeight > window.innerHeight - 20)
     check()
     window.addEventListener('resize', check)
     const id = window.setTimeout(check, 350)
@@ -20,7 +20,7 @@ function useIsCramped() {
       window.removeEventListener('resize', check)
       window.clearTimeout(id)
     }
-  })
+  }, [])  // ← add this
   return cramped
 }
 
