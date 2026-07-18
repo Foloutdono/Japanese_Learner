@@ -39,6 +39,11 @@ export default function VocabScreen({ session }) {
     }
   }, [])
 
+  // Re-translate when language changes without re-fetching
+  useEffect(() => {
+    if (card && card.lang !== lang) translateCard(card, lang)
+  }, [lang])
+
   function fetchCard(lvl, m) {
     setLoading(true)
     setAnswered(false)
@@ -49,9 +54,31 @@ export default function VocabScreen({ session }) {
       .then(r => r.json())
       .then(data => {
         if (data.done) { setDone(true); setCard(null) }
-        else { setCard(data); setDone(false) }
+        else { setCard({ ...data, lang }); setDone(false) }
         setLoading(false)
       })
+  }
+
+  // Mirrors KanjiScreen's translateCard: words are looked up by
+  // wordForm (kanji, falling back to kana for kana-only entries) since
+  // that's also how the backend's vocab translation map is keyed.
+  function translateCard(cardToTranslate, targetLang) {
+    if (!cardToTranslate) return
+    const words = [wordForm(cardToTranslate), ...(cardToTranslate.choices ?? []).map(wordForm)]
+    const unique = [...new Set(words.filter(Boolean))]
+    Promise.all(unique.map(word =>
+      apiFetch(`/api/translation/vocab?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
+        .then(r => r.json())
+        .then(data => [word, data.translation || ''])
+    )).then(entries => {
+      const map = Object.fromEntries(entries)
+      setCard(cur => ({
+        ...cur,
+        lang: targetLang,
+        meaning: map[wordForm(cur)] ?? cur.meaning,
+        choices: (cur.choices ?? []).map(c => ({ ...c, meaning: map[wordForm(c)] ?? c.meaning })),
+      }))
+    })
   }
 
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
