@@ -274,17 +274,18 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* Auto-hide on scroll — opt-in via the `autoHide` prop on <TopBar/>,
-   active on phones only. Hides on scroll-down (more room while
-   training), reappears on scroll-up or near the top of the page. */
+   active on phones only. Hidden by default; a scroll-up reveals it for
+   a few seconds. `max-height` (set inline by TopBar to match its real
+   height) is what animates — collapsing it to 0 removes the bar from
+   flow entirely, so the page content slides up to fill the space
+   instead of leaving an empty gap behind it. */
 @media (max-width: 768px) {
   .top-bar--autohide {
     position: sticky;
     top: 0;
-    transition: transform 0.25s ease;
-    will-change: transform;
-  }
-  .top-bar--autohide.top-bar--hidden {
-    transform: translateY(-100%);
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+    will-change: max-height;
   }
 }
 
