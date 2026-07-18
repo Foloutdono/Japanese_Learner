@@ -102,59 +102,52 @@ export default function DeckDetailScreen({ session }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="screen">
       <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? 'Deck'} />
 
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container page-pad">
 
         {/* Header row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+        <div className="deckdetail-header">
+          <div className="deckdetail-count">
             {cards.length} {t.cards}
           </div>
 
           {!selectMode && (
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="deckdetail-actions">
               <button onClick={() => navigate(`/decks/${deck_id}/study`, { state: { deck } })}
-                style={{ background: '#6c5ce7', color: '#fff', fontSize: 13 }}>
+                className="deckdetail-btn deckdetail-btn--study">
                 {t.study}
               </button>
-              <button onClick={startAdd}
-                style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', fontSize: 13 }}>
+              <button onClick={startAdd} className="deckdetail-btn">
                 {t.addCard}
               </button>
               {cards.length > 0 && (
-                <button onClick={() => setSelectMode(true)}
-                  style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', fontSize: 13 }}>
+                <button onClick={() => setSelectMode(true)} className="deckdetail-btn deckdetail-btn--muted">
                   {t.select}
                 </button>
               )}
-              <button onClick={() => setShowImport(true)}
-                style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', fontSize: 13 }}>
+              <button onClick={() => setShowImport(true)} className="deckdetail-btn">
                 {t.import}
               </button>
             </div>
           )}
 
           {selectMode && (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            <div className="deckdetail-actions deckdetail-actions--select">
+              <span className="deckdetail-select-count">
                 {selected.size} {t.cards}
               </span>
-              <button onClick={toggleSelectAll}
-                style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', fontSize: 13 }}>
+              <button onClick={toggleSelectAll} className="deckdetail-btn">
                 {selected.size === cards.length ? t.deselectAll : t.selectAll}
               </button>
-              <button onClick={deleteSelected} disabled={selected.size === 0}
-                style={{
-                  background: selected.size > 0 ? 'var(--danger)' : 'var(--bg-panel)',
-                  color: selected.size > 0 ? '#fff' : 'var(--text-secondary)',
-                  fontSize: 13, opacity: selected.size === 0 ? 0.5 : 1,
-                }}>
+              <button
+                onClick={deleteSelected}
+                disabled={selected.size === 0}
+                className={`deckdetail-btn ${selected.size > 0 ? 'deckdetail-btn--danger' : 'deckdetail-btn--danger-disabled'}`}>
                 {t.delete} ({selected.size})
               </button>
-              <button onClick={exitSelectMode}
-                style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', fontSize: 13 }}>
+              <button onClick={exitSelectMode} className="deckdetail-btn deckdetail-btn--muted">
                 {t.cancel}
               </button>
             </div>
@@ -163,16 +156,11 @@ export default function DeckDetailScreen({ session }) {
 
         {/* Import success banner */}
         {importResult && (
-          <div style={{
-            background: 'var(--bg-card)', borderRadius: 8, padding: '12px 16px',
-            marginBottom: 16, borderLeft: '4px solid var(--success)',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          }}>
-            <div style={{ color: 'var(--success)', fontSize: 14 }}>
+          <div className="deckdetail-import-banner">
+            <div className="deckdetail-import-banner__text">
               ✅ {importResult.inserted} {t.cards}
             </div>
-            <button onClick={() => setImportResult(null)}
-              style={{ background: 'transparent', color: 'var(--text-secondary)', fontSize: 11, padding: 0 }}>
+            <button onClick={() => setImportResult(null)} className="deckdetail-import-banner__close">
               ✕
             </button>
           </div>
@@ -180,31 +168,31 @@ export default function DeckDetailScreen({ session }) {
 
         {/* Add / Edit form */}
         {adding && (
-          <div className="card" style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 16 }}>
+          <div className="card deckdetail-form">
+            <div className="deckdetail-form__title">
               {editing ? t.editCard : t.newCard}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="deckdetail-form__fields">
               <input value={form.front} onChange={e => setForm(f => ({ ...f, front: e.target.value }))}
                 placeholder={deck?.type === 'kanji' ? 'Kanji (ex: 日)' : t.frontPlaceholder}
-                style={{ padding: '10px 14px', fontSize: 15 }} />
+                className="deckdetail-form__input" />
               <input value={form.back} onChange={e => setForm(f => ({ ...f, back: e.target.value }))}
                 placeholder={t.backPlaceholder}
-                style={{ padding: '10px 14px', fontSize: 15 }} />
+                className="deckdetail-form__input" />
               <input value={form.hint} onChange={e => setForm(f => ({ ...f, hint: e.target.value }))}
                 placeholder={t.hintPlaceholder}
-                style={{ padding: '10px 14px', fontSize: 15 }} />
+                className="deckdetail-form__input" />
               <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                 placeholder={t.notesPlaceholder}
                 onKeyDown={e => e.key === 'Enter' && saveCard()}
-                style={{ padding: '10px 14px', fontSize: 15 }} />
+                className="deckdetail-form__input" />
             </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button onClick={saveCard} style={{ background: '#6c5ce7', color: '#fff', flex: 1 }}>
+            <div className="deckdetail-form__actions">
+              <button onClick={saveCard} className="deckdetail-form__save">
                 {editing ? t.save : t.addCard}
               </button>
               <button onClick={() => { setAdding(false); setEditing(null); resetForm() }}
-                style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', flex: 1 }}>
+                className="deckdetail-form__cancel">
                 {t.cancel}
               </button>
             </div>
@@ -212,7 +200,7 @@ export default function DeckDetailScreen({ session }) {
         )}
 
         {loading && (
-          <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>{t.loading}</div>
+          <div className="loading-block">{t.loading}</div>
         )}
 
         {!loading && cards.length === 0 && !adding && (
@@ -221,61 +209,48 @@ export default function DeckDetailScreen({ session }) {
 
         {/* Cards list */}
         {!loading && cards.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="deckdetail-list">
             {cards.map(card => {
               const isSel = selected.has(card.id)
               return (
                 <div
                   key={card.id}
-                  className="card"
+                  className={`card deckdetail-card-row${selectMode ? ' deckdetail-card-row--selectable' : ''}${isSel ? ' deckdetail-card-row--selected' : ''}`}
                   onClick={selectMode ? () => toggleSelect(card.id) : undefined}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 16,
-                    cursor: selectMode ? 'pointer' : 'default',
-                    borderLeft: isSel ? '3px solid var(--accent)' : '3px solid transparent',
-                    background: isSel ? 'var(--bg-panel)' : 'var(--bg-card)',
-                    transition: 'background 0.15s, border-color 0.15s',
-                  }}
                 >
                   {selectMode && (
-                    <div style={{
-                      width: 20, height: 20, borderRadius: 4, flexShrink: 0,
-                      border: `2px solid ${isSel ? 'var(--accent)' : 'var(--border)'}`,
-                      background: isSel ? 'var(--accent)' : 'transparent',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      {isSel && <span style={{ color: '#fff', fontSize: 12, lineHeight: 1 }}>✓</span>}
+                    <div className={`deckdetail-checkbox${isSel ? ' deckdetail-checkbox--checked' : ''}`}>
+                      {isSel && <span className="deckdetail-checkbox__mark">✓</span>}
                     </div>
                   )}
 
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                  <div className="deckdetail-card-content">
+                    <div className="deckdetail-card-fields">
                       <div>
-                        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 2 }}>{t.frontPlaceholder}</div>
-                        <div style={{ fontSize: 20, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' }}>{card.front}</div>
+                        <div className="deckdetail-field-label">{t.frontPlaceholder}</div>
+                        <div className="deckdetail-field-value deckdetail-field-value--jp">{card.front}</div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 2 }}>{t.backPlaceholder}</div>
-                        <div style={{ fontSize: 20 }}>{card.back}</div>
+                        <div className="deckdetail-field-label">{t.backPlaceholder}</div>
+                        <div className="deckdetail-field-value">{card.back}</div>
                       </div>
                       {card.hint && (
                         <div>
-                          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 2 }}>{t.hintPlaceholder}</div>
-                          <div style={{ fontSize: 20, color: 'var(--warning)' }}>{card.hint}</div>
+                          <div className="deckdetail-field-label">{t.hintPlaceholder}</div>
+                          <div className="deckdetail-field-value deckdetail-field-value--hint">{card.hint}</div>
                         </div>
                       )}
                       {card.notes && (
                         <div>
-                          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 2 }}>{t.notesPlaceholder}</div>
-                          <div style={{ fontSize: 20, color: 'var(--text-secondary)' }}>{card.notes}</div>
+                          <div className="deckdetail-field-label">{t.notesPlaceholder}</div>
+                          <div className="deckdetail-field-value deckdetail-field-value--notes">{card.notes}</div>
                         </div>
                       )}
                     </div>
                   </div>
 
                   {!selectMode && (
-                    <button onClick={() => startEdit(card)}
-                      style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', fontSize: 13, padding: '6px 12px', flexShrink: 0 }}>
+                    <button onClick={() => startEdit(card)} className="deckdetail-edit-btn">
                       ✏️
                     </button>
                   )}

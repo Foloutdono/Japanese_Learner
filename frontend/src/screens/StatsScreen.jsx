@@ -40,28 +40,20 @@ export default function StatsScreen({ session }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="screen">
       <div className="top-bar">
         <button className="btn-back" onClick={() => navigate('/')}>{t.menu}</button>
-        <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>{t.statistics}</span>
-        <button onClick={fetchStats}
-          style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-primary)', fontSize: 13 }}>
-          ↻
-        </button>
-        <button onClick={resetAll}
-          style={{ background: 'var(--danger)', color: '#fff', fontSize: 13 }}>
-          {t.resetStats}
-        </button>
+        <span className="top-bar__title">{t.statistics}</span>
+        <button className="stats-refresh-btn" onClick={fetchStats}>↻</button>
+        <button className="stats-reset-btn" onClick={resetAll}>{t.resetStats}</button>
       </div>
 
       {!stats && (
-        <div style={{ textAlign: 'center', padding: 80, color: 'var(--text-secondary)' }}>
-          {t.loading}
-        </div>
+        <div className="stats-loading">{t.loading}</div>
       )}
 
       {stats && (
-        <div className="container" style={{ padding: '32px 24px' }}>
+        <div className="container stats-container">
 
           <Section title={t.overview || 'Overview'} />
           <OverviewRow stats={stats} extra={extra} t={t} />
@@ -75,14 +67,14 @@ export default function StatsScreen({ session }) {
           )}
 
           <Section title={t.kana} />
-          <div className="grid-2" style={{ marginBottom: 32 }}>
+          <div className="grid-2 stats-group">
             {Object.entries(stats.kana).map(([setName, modes]) => (
               <div key={setName} className="card">
-                <div style={{ fontWeight: 'bold', marginBottom: 12, fontSize: 18 }}>{setName}</div>
-                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                <div className="stats-card-title">{setName}</div>
+                <div className="stats-mode-row">
                   {KANA_MODE_KEYS.map(m => (
-                    <div key={m} style={{ flex: 1, minWidth: 120 }}>
-                      <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                    <div key={m} className="stats-mode-col">
+                      <div className="stats-mode-label">
                         {kanaLabels[m]}
                       </div>
                       <StatCell s={modes[m]} t={t} onStartReview={() => startReview('kana', setName, m)} />
@@ -94,13 +86,13 @@ export default function StatsScreen({ session }) {
           </div>
 
           <Section title={t.jlptVocab} />
-          <div className="grid-3" style={{ marginBottom: 32 }}>
+          <div className="grid-3 stats-group">
             {Object.entries(stats.vocab).map(([level, phases]) => (
               <div key={level} className="card">
                 <LevelHeader level={level} phases={phases} t={t} />
                 {vocabKanjiStatsLabels(t.wordNoun ?? 'mot').map(([key, label]) => (
-                  <div key={key} style={{ marginBottom: 10 }}>
-                    <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
+                  <div key={key} className="stats-stat-block">
+                    <div className="stats-stat-label">{label}</div>
                     <StatCell s={phases[key]} t={t} onStartReview={() => startReview('vocab', level, key)} />
                   </div>
                 ))}
@@ -109,14 +101,14 @@ export default function StatsScreen({ session }) {
           </div>
 
           <Section title={t.kanji} />
-          <div className="grid-3" style={{ marginBottom: 32 }}>
+          <div className="grid-3 stats-group">
             {Object.entries(stats.kanji).map(([level, phases]) => (
               <div key={level} className="card">
                 <LevelHeader level={level} phases={phases} t={t} />
                 {[...vocabKanjiStatsLabels(t.kanjiNoun ?? 'kanji'), ['write', 'Écriture']].map(([key, label]) => (
                   phases[key] && (
-                    <div key={key} style={{ marginBottom: 10 }}>
-                      <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
+                    <div key={key} className="stats-stat-block">
+                      <div className="stats-stat-label">{label}</div>
                       <StatCell s={phases[key]} t={t} onStartReview={() => startReview('kanji', level, key)} />
                     </div>
                   )
@@ -135,9 +127,9 @@ export default function StatsScreen({ session }) {
 
 function Section({ title }) {
   return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 40, fontWeight: 'bold', color: 'var(--text-primary)', textAlign: 'center' }}>{title}</div>
-      <div style={{ height: 1, background: 'var(--border)', marginTop: 8 }} />
+    <div className="stats-section">
+      <div className="stats-section__title">{title}</div>
+      <div className="stats-section__rule" />
     </div>
   )
 }
@@ -153,9 +145,9 @@ function LevelHeader({ level, phases, t }) {
   const pct = totals.total > 0 ? Math.round((totals.mastered / totals.total) * 100) : 0
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-      <div style={{ fontWeight: 'bold', fontSize: 18 }}>{level}</div>
-      <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{pct}% {t.mastered}</div>
+    <div className="stats-level-header">
+      <div className="stats-level-header__title">{level}</div>
+      <div className="stats-level-header__pct">{pct}% {t.mastered}</div>
     </div>
   )
 }
@@ -168,23 +160,20 @@ function StatCell({ s, t, onStartReview }) {
 
   return (
     <div>
-      <div style={{ height: 6, background: 'var(--bg-panel)', borderRadius: 4, overflow: 'hidden', marginBottom: 4 }}>
-        <div style={{ display: 'flex', height: '100%' }}>
-          <div style={{ width: `${masteredPct}%`, background: 'var(--success)' }} />
-          <div style={{ width: `${learningPct}%`, background: 'var(--accent2)' }} />
+      <div className="stat-cell__track">
+        <div className="stat-cell__fill-row">
+          <div className="stat-cell__segment--mastered" style={{ '--seg-w': `${masteredPct}%` }} />
+          <div className="stat-cell__segment--learning" style={{ '--seg-w': `${learningPct}%` }} />
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 10, fontSize: 15, alignItems: 'center' }}>
-        <span style={{ color: 'var(--warning)' }}>N {s.new}</span>
-        <span style={{ color: 'var(--accent2)' }}>A {s.learning}</span>
-        <span style={{ color: 'var(--success)' }}>M {s.mastered}</span>
+      <div className="stat-cell__row">
+        <span className="stat-cell__new">N {s.new}</span>
+        <span className="stat-cell__learning">A {s.learning}</span>
+        <span className="stat-cell__mastered">M {s.mastered}</span>
         {s.due_now > 0 && (
           <button
+            className="stat-cell__due-btn"
             onClick={onStartReview}
-            style={{
-              color: 'var(--accent)', background: 'none', border: 'none',
-              padding: 0, font: 'inherit', cursor: 'pointer', textDecoration: 'underline',
-            }}
             title={t.reviewNow || 'Review now'}
           >
             ⚡{s.due_now}
@@ -208,14 +197,11 @@ function OverviewRow({ stats, extra, t }) {
   ]
 
   return (
-    <div className="card" style={{
-      display: 'flex', justifyContent: 'space-around',
-      flexWrap: 'wrap', gap: 24, marginBottom: 32, padding: '32px 24px',
-    }}>
+    <div className="card stats-overview-row">
       {cols.map(({ label, value, color }) => (
-        <div key={label} style={{ textAlign: 'center', minWidth: 80 }}>
-          <div style={{ fontSize: 32, fontWeight: 'bold', color }}>{value}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>{label}</div>
+        <div key={label} className="stats-overview-col">
+          <div className="stats-overview-col__value" style={{ '--col-color': color }}>{value}</div>
+          <div className="stats-overview-col__label">{label}</div>
         </div>
       ))}
     </div>
@@ -227,21 +213,19 @@ function DueForecast({ forecast, t }) {
   const today = todayISO()
 
   return (
-    <div className="card" style={{ marginBottom: 32, padding: '20px 24px' }}>
-      <div style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 16 }}>
+    <div className="card stats-forecast-card">
+      <div className="stats-card-heading">
         {t.upcomingReviews || 'Upcoming reviews'}
       </div>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 100 }}>
+      <div className="stats-forecast-bars">
         {forecast.map(({ date, count }) => (
-          <div key={date} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{count}</div>
-            <div style={{
-              width: '100%',
-              height: `${Math.max(4, (count / max) * 70)}px`,
-              background: date === today ? 'var(--accent)' : 'var(--accent2)',
-              borderRadius: 3,
-            }} />
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+          <div key={date} className="stats-forecast-bar">
+            <div className="stats-forecast-bar__count">{count}</div>
+            <div
+              className={`stats-forecast-bar__fill${date === today ? ' stats-forecast-bar__fill--today' : ''}`}
+              style={{ '--bar-h': `${Math.max(4, (count / max) * 70)}px` }}
+            />
+            <div className="stats-forecast-bar__day">
               {formatDayLabel(date, today)}
             </div>
           </div>
@@ -253,23 +237,20 @@ function DueForecast({ forecast, t }) {
 
 function WeakestItems({ weakest, t }) {
   return (
-    <div className="card" style={{ marginBottom: 32, padding: '20px 24px' }}>
-      <div style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 16 }}>
+    <div className="card stats-weakest-card">
+      <div className="stats-card-heading">
         {t.weakestItems || 'Needs practice'}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="stats-weakest-list">
         {weakest.map(w => (
-          <div key={`${w.card_id}:${w.mode}`} style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            fontSize: 14, padding: '6px 0', borderBottom: '1px solid var(--border)',
-          }}>
+          <div key={`${w.card_id}:${w.mode}`} className="stats-weakest-row">
             <span>
               <strong>{w.raw_id}</strong>
-              <span style={{ color: 'var(--text-secondary)' }}> · {w.category || '?'} · {w.mode}</span>
+              <span className="stats-weakest-row__meta"> · {w.category || '?'} · {w.mode}</span>
             </span>
-            <span style={{ display: 'flex', gap: 12 }}>
-              <span style={{ color: 'var(--danger)' }}>{w.accuracy}%</span>
-              <span style={{ color: 'var(--text-secondary)' }}>{w.lapses} {t.lapses || 'lapses'}</span>
+            <span className="stats-weakest-row__right">
+              <span className="stats-weakest-row__accuracy">{w.accuracy}%</span>
+              <span className="stats-weakest-row__lapses">{w.lapses} {t.lapses || 'lapses'}</span>
             </span>
           </div>
         ))}
@@ -306,14 +287,11 @@ function GlobalSummary({ stats, extra, t }) {
   ]
 
   return (
-    <div className="card" style={{
-      display: 'flex', justifyContent: 'space-around',
-      flexWrap: 'wrap', gap: 24, marginBottom: 40, padding: '32px 24px',
-    }}>
+    <div className="card stats-overview-row stats-overview-row--summary">
       {cols.map(({ label, value, color }) => (
-        <div key={label} style={{ textAlign: 'center', minWidth: 80 }}>
-          <div style={{ fontSize: 40, fontWeight: 'bold', color }}>{value}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>{label}</div>
+        <div key={label} className="stats-overview-col">
+          <div className="stats-overview-col__value stats-overview-col__value--lg" style={{ '--col-color': color }}>{value}</div>
+          <div className="stats-overview-col__label">{label}</div>
         </div>
       ))}
     </div>

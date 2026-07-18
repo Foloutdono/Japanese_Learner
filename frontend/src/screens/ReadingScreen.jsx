@@ -214,7 +214,7 @@ export default function ReadingScreen({ session }) {
   // ── Level selection ──
   if (!level) {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.readingTitle || 'Reading practice'} />
         <SelectionScreen subtitle={t.selectLevel}>
           <LevelSelector onSelect={setLevel} color="var(--accent3)" />
@@ -226,7 +226,7 @@ export default function ReadingScreen({ session }) {
   // ── Phase selection ──
   if (!phase) {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => setLevel(null)} title={`${t.readingTitle || 'Reading practice'} ${level}`} />
         <SelectionScreen subtitle={t.selectPhase}>
           <ModeSelector
@@ -240,24 +240,24 @@ export default function ReadingScreen({ session }) {
 
   // ── Session ──
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="screen">
       <TopBar
         onBack={() => setPhase(null)}
         title={`${t.readingTitle || 'Reading practice'} — ${PHASES.find(p => p.key === phase)?.label}`}
       />
-      <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
+      <div className="container quiz-area">
 
-        <div style={{ marginBottom: 16, fontSize: 14, color: 'var(--text-secondary)' }}>
+        <div className="rdg-score">
           {t.score || 'Score'}: {score.correct}/{score.total}
         </div>
 
         {stage === 'loading' && <Loading />}
 
         {stage === 'error' && (
-          <div className="card" style={{ padding: 16, color: 'var(--danger)' }}>
+          <div className="card rdg-error-card">
             {error}
-            <div style={{ marginTop: 12 }}>
-              <button onClick={retry} style={{ background: 'var(--accent)', color: '#fff' }}>
+            <div className="rdg-retry-wrap">
+              <button onClick={retry} className="rdg-retry-btn">
                 {t.retry || 'Retry'}
               </button>
             </div>
@@ -267,21 +267,18 @@ export default function ReadingScreen({ session }) {
         {stage === 'showing' && data && (
           <>
             <PromptCard>
-              <div style={{ fontSize: 36, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff' }}>
+              <div className="rdg-phrase-display">
                 {data.phrase}
               </div>
             </PromptCard>
-            <div style={{ marginTop: 16 }}>
-              <div style={{
-                height: 6, background: 'var(--bg-panel)', borderRadius: 4, overflow: 'hidden', maxWidth: 300, margin: '0 auto',
-              }}>
-                <div style={{
-                  height: '100%', background: 'var(--accent)',
-                  width: `${(timeLeft / data.display_seconds) * 100}%`,
-                  transition: 'width 0.1s linear',
-                }} />
+            <div className="rdg-timer-wrap">
+              <div className="rdg-phrase-progress">
+                <div
+                  className="rdg-phrase-progress__fill"
+                  style={{ '--pct': `${(timeLeft / data.display_seconds) * 100}%` }}
+                />
               </div>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6 }}>
+              <div className="rdg-timer-label">
                 {timeLeft.toFixed(1)}s
               </div>
             </div>
@@ -291,7 +288,7 @@ export default function ReadingScreen({ session }) {
         {stage === 'answering' && (
           <>
             <PromptCard>
-              <div style={{ fontSize: 18, color: 'var(--text-secondary)' }}>
+              <div className="rdg-answering-hint">
                 {t.writeWhatYouSaw || 'Write what you saw, in romaji'}
               </div>
             </PromptCard>
@@ -301,17 +298,13 @@ export default function ReadingScreen({ session }) {
               onChange={e => setAnswer(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && submitAnswer()}
               placeholder={t.romajiPlaceholder || 'e.g. konnichiwa'}
-              style={{
-                fontSize: 22, padding: 12, borderRadius: 8, width: '100%', maxWidth: 360,
-                background: 'var(--bg-panel)', color: 'var(--text-primary)',
-                border: '1px solid var(--border)', marginTop: 16, textAlign: 'center',
-              }}
+              className="rdg-answer-input"
             />
-            <div style={{ marginTop: 16 }}>
+            <div className="rdg-submit-wrap">
               <button
                 onClick={submitAnswer}
                 disabled={!answer.trim()}
-                style={{ background: 'var(--accent)', color: '#fff', padding: '10px 28px', fontSize: 15 }}
+                className="rdg-submit-btn"
               >
                 {t.submit || 'Submit'}
               </button>
@@ -322,19 +315,14 @@ export default function ReadingScreen({ session }) {
         {stage === 'feedback' && data && feedback && (
           <>
             <PromptCard>
-              <div style={{ fontSize: 32, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', marginBottom: 12, lineHeight: 1.5 }}>
+              <div className="rdg-feedback-phrase">
                 {data.segments
                   ? data.segments.map((seg, i) => (
                       <span
                         key={i}
                         onClick={() => openSegmentDetail(seg)}
-                        style={{
-                          color: seg.type === 'plain' ? '#fff' : (STATUS_COLORS[seg.stats.status] || STATUS_COLORS.not_started),
-                          cursor: seg.type !== 'plain' ? 'pointer' : 'default',
-                          textDecoration: seg.type !== 'plain' ? 'underline' : 'none',
-                          textDecorationStyle: 'dotted',
-                          textUnderlineOffset: 4,
-                        }}
+                        className={`word-span${seg.type !== 'plain' ? ' word-span--clickable' : ''}`}
+                        style={{ '--word-color': seg.type === 'plain' ? '#fff' : (STATUS_COLORS[seg.stats.status] || STATUS_COLORS.not_started) }}
                         title={seg.type !== 'plain' ? (t.clickForDetails || 'Click for definition & stats') : undefined}
                       >
                         {seg.text}
@@ -342,39 +330,38 @@ export default function ReadingScreen({ session }) {
                     ))
                   : data.phrase}
               </div>
-              <div style={{
-                fontSize: 18,
-                color: feedback.correct === null ? 'var(--text-secondary)' : (feedback.correct ? 'var(--success)' : 'var(--danger)'),
-                fontWeight: 'bold',
-              }}>
+              <div
+                className="rdg-feedback-status"
+                style={{ '--status-color': feedback.correct === null ? 'var(--text-secondary)' : (feedback.correct ? 'var(--success)' : 'var(--danger)') }}
+              >
                 {feedback.correct === null
                   ? (t.didYouGetIt || 'Did you get it right?')
                   : (feedback.correct ? (t.correct || 'Correct!') : (t.incorrect || 'Not quite'))}
               </div>
-              <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginTop: 8 }}>
+              <div className="rdg-feedback-romaji">
                 {t.correctRomaji || 'Correct romaji'}: <strong>{feedback.romaji}</strong>
               </div>
               {data.translation && (
-                <div style={{ fontSize: 15, color: 'var(--text-primary)', marginTop: 4 }}>
+                <div className="rdg-feedback-translation">
                   {t.translation || 'Translation'}: {data.translation}
                 </div>
               )}
-              <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 4 }}>
+              <div className="rdg-feedback-your-answer">
                 {t.yourAnswer || 'Your answer'}: {answer}
               </div>
             </PromptCard>
-            <div style={{ marginTop: 16 }}>
+            <div className="rdg-feedback-actions">
               {feedback.correct === null ? (
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                <div className="rdg-grade-row">
                   <button
                     onClick={() => gradeAnswer(false)}
-                    style={{ background: 'var(--danger)', color: '#fff', padding: '10px 24px', fontSize: 15 }}
+                    className="rdg-grade-btn--wrong"
                   >
                     {t.gradeIncorrect || "I got it wrong"}
                   </button>
                   <button
                     onClick={() => gradeAnswer(true)}
-                    style={{ background: 'var(--success)', color: '#fff', padding: '10px 24px', fontSize: 15 }}
+                    className="rdg-grade-btn--right"
                   >
                     {t.gradeCorrect || "I got it right"}
                   </button>
@@ -382,7 +369,7 @@ export default function ReadingScreen({ session }) {
               ) : (
                 <button
                   onClick={next}
-                  style={{ background: 'var(--accent)', color: '#fff', padding: '10px 28px', fontSize: 15 }}
+                  className="rdg-next-btn"
                 >
                   {t.nextPhrase || 'Next phrase'}
                 </button>
@@ -404,22 +391,22 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
 
   const content = (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' }}>{title}</div>
-        <button onClick={onClose} style={{ background: 'none', fontSize: 18, color: 'var(--text-secondary)' }}>✕</button>
+      <div className="detail-header">
+        <div className="detail-title">{title}</div>
+        <button onClick={onClose} className="detail-close-btn">✕</button>
       </div>
 
       {level && (
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>{level}</div>
+        <div className="detail-level">{level}</div>
       )}
 
       {entry && Object.keys(entry).length > 0 && (
-        <div style={{ marginTop: 16 }}>
+        <div className="detail-section">
           <Label>{t.appDefinition || 'Definition in the app'}</Label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div className="detail-entry-list">
             {Object.entries(entry).map(([key, value]) => (
-              <div key={key} style={{ fontSize: 14, display: 'flex', gap: 8 }}>
-                <span style={{ color: 'var(--text-secondary)', minWidth: 90, textTransform: 'capitalize' }}>{key}</span>
+              <div key={key} className="detail-entry-row">
+                <span className="detail-entry-row__key">{key}</span>
                 <span>{String(value)}</span>
               </div>
             ))}
@@ -427,9 +414,9 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
         </div>
       )}
 
-      <div style={{ marginTop: 16 }}>
+      <div className="detail-section">
         <Label>{t.cardStats || 'Card stats'}</Label>
-        <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+        <div className="detail-badges">
           <StatusBadge status={stats.status} />
           {stats.due && <StatusBadge status="due" />}
         </div>
@@ -453,18 +440,8 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
 
   if (isMobile) {
     return (
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 50,
-        }}
-      >
-        <div
-          onClick={e => e.stopPropagation()}
-          className="card"
-          style={{ width: '100%', maxWidth: 480, margin: 16, padding: 24, maxHeight: '80vh', overflowY: 'auto' }}
-        >
+      <div onClick={onClose} className="detail-overlay-sheet">
+        <div onClick={e => e.stopPropagation()} className="card detail-sheet">
           {content}
         </div>
       </div>
@@ -472,18 +449,8 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
   }
 
   return (
-    <div
-      onClick={onClose}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 50 }}
-    >
-      <div
-        onClick={e => e.stopPropagation()}
-        className="card"
-        style={{
-          position: 'fixed', top: 0, right: 0, height: '100vh', width: 360,
-          padding: 24, overflowY: 'auto', borderRadius: 0,
-        }}
-      >
+    <div onClick={onClose} className="detail-overlay-side">
+      <div onClick={e => e.stopPropagation()} className="card detail-side">
         {content}
       </div>
     </div>
@@ -492,7 +459,7 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
 
 function Label({ children }) {
   return (
-    <div style={{ fontSize: 12, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
+    <div className="detail-label">
       {children}
     </div>
   )
@@ -500,8 +467,8 @@ function Label({ children }) {
 
 function StatRow({ label, value }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '4px 0' }}>
-      <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
+    <div className="stat-row">
+      <span className="stat-row__label">{label}</span>
       <span>{value}</span>
     </div>
   )
@@ -511,10 +478,7 @@ function StatusBadge({ status }) {
   const color = STATUS_COLORS[status] || STATUS_COLORS.not_started
   const label = STATUS_LABELS[status] || status
   return (
-    <span style={{
-      fontSize: 12, color, border: `1px solid ${color}`,
-      borderRadius: 4, padding: '2px 8px',
-    }}>
+    <span className="status-pill" style={{ '--pill-color': color }}>
       {label}
     </span>
   )

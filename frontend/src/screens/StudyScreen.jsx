@@ -112,23 +112,19 @@ export default function StudyScreen({ session }) {
     // ── Config screen (mode + mix) ──
     if (!configured) {
         return (
-        <div style={{ minHeight: '100vh' }}>
+        <div className="screen">
             <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? 'Étudier'} />
-            <div className="container" style={{ padding: '40px 24px', maxWidth: 560 }}>
+            <div className="container study-config-page">
 
             {/* Mode selection */}
-            <div style={{ marginBottom: 32 }}>
-                <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 12 }}>
+            <div className="study-config-section">
+                <div className="study-config-label">
                     {t?.studyMode ?? "Mode d'étude"}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="study-mode-list">
                 {availableModes.map(m => (
                     <button key={m.key} onClick={() => setMode(m.key)}
-                    style={{
-                        background: mode === m.key ? '#6c5ce7' : 'var(--bg-card)',
-                        color: mode === m.key ? '#fff' : 'var(--text-primary)',
-                        textAlign: 'left', padding: '14px 20px', fontSize: 14,
-                    }}>
+                    className={`study-mode-btn${mode === m.key ? ' study-mode-btn--active' : ''}`}>
                     {m.label}
                     </button>
                 ))}
@@ -137,21 +133,17 @@ export default function StudyScreen({ session }) {
 
             {/* Mix with built-in (vocab/kanji only) */}
             {(deck?.type === 'vocab' || deck?.type === 'kanji') && (
-                <div style={{ marginBottom: 32 }}>
-                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 12 }}>
+                <div className="study-config-section">
+                    <div className="study-config-label">
                         {t?.mixWithJLPT ?? 'Mélanger avec les listes JLPT'}
                     </div>
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <div className="study-level-row">
                         {JLPT_LEVELS.map(l => (
                         <button key={l}
                             onClick={() => setMixLevels(prev =>
                             prev.includes(l) ? prev.filter(x => x !== l) : [...prev, l]
                             )}
-                            style={{
-                            background: mixLevels.includes(l) ? 'var(--accent2)' : 'var(--bg-card)',
-                            color: mixLevels.includes(l) ? '#111' : 'var(--text-primary)',
-                            fontSize: 14, padding: '10px 20px',
-                            }}>
+                            className={`study-level-btn${mixLevels.includes(l) ? ' study-level-btn--active' : ''}`}>
                             {l}
                         </button>
                         ))}
@@ -161,14 +153,10 @@ export default function StudyScreen({ session }) {
 
             {/* Drawing toggle for kanji */}
             {deck?.type === 'kanji' && (
-                <div style={{ marginBottom: 32 }}>
+                <div className="study-config-section">
                 <button
                     onClick={() => setDrawingEnabled(d => !d)}
-                    style={{
-                    background: drawingEnabled ? 'var(--warning)' : 'var(--bg-card)',
-                    color: drawingEnabled ? '#111' : 'var(--text-secondary)',
-                    fontSize: 13,
-                    }}>
+                    className={`study-drawing-toggle${drawingEnabled ? ' study-drawing-toggle--active' : ''}`}>
                     ✏️ {t.writePractice} {drawingEnabled ? 'ON' : 'OFF'}
                 </button>
                 </div>
@@ -176,7 +164,7 @@ export default function StudyScreen({ session }) {
 
             <button
                 onClick={() => { setConfigured(true); fetchCard() }}
-                style={{ background: '#6c5ce7', color: '#fff', width: '100%', fontSize: 16, padding: '16px' }}>
+                className="btn-primary-purple study-start-btn">
                 {t.startSession}
             </button>
             </div>
@@ -186,39 +174,32 @@ export default function StudyScreen({ session }) {
 
     // ── Study screen ──
     return (
-        <div style={{ minHeight: '100vh' }}>
+        <div className="screen">
             <div className="top-bar">
                 <button className="btn-back" onClick={() => setConfigured(false)}>← Config</button>
-                <span style={{ fontSize: 16, fontWeight: 'bold', flex: 1 }}>{deck?.name}</span>
+                <span className="top-bar__title">{deck?.name}</span>
                 {deck?.type === 'kanji' && (
                     <button
                         onClick={() => setDrawingEnabled(d => !d)}
-                        style={{
-                        background: drawingEnabled ? 'var(--warning)' : 'var(--bg-card)',
-                        color: drawingEnabled ? '#111' : 'var(--text-secondary)',
-                        fontSize: 12, padding: '6px 12px',
-                        }}>
+                        className={`study-topbar-drawing-toggle${drawingEnabled ? ' study-topbar-drawing-toggle--active' : ''}`}>
                         ✏️ {drawingEnabled ? 'ON' : 'OFF'}
                     </button>
                 )}
             </div>
 
-            <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
+            <div className="container quiz-area">
                 {loading && <Loading />}
                 {done    && <DoneMessage onBack={() => setConfigured(false)} />}
 
                 {card && !loading && (
                 <>
                     {/* Prompt card */}
-                    <div className="card" style={{ padding: '40px 24px', marginBottom: 24 }}>
-                        <div style={{
-                            fontSize: card.front?.length === 1 ? 80 : 32,
-                            fontFamily: 'Yu Gothic, sans-serif', color: '#fff',
-                        }}>
+                    <div className="card study-prompt-card">
+                        <div className="study-front-text" style={{ '--front-size': card.front?.length === 1 ? '80px' : '32px' }}>
                         {card.front}
                     </div>
                     {card.hint && !flipped && !answered && (
-                        <div style={{ fontSize: 13, color: 'var(--warning)', marginTop: 12 }}>
+                        <div className="study-hint-text">
                         💡 {card.hint}
                         </div>
                     )}
@@ -226,17 +207,16 @@ export default function StudyScreen({ session }) {
 
                     {/* Flashcard mode */}
                     {(mode === 'flashcard' || card.source === 'custom') && !flipped && (
-                        <button onClick={onFlashcardReveal}
-                            style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', width: '100%', fontSize: 16, padding: '16px' }}>
+                        <button onClick={onFlashcardReveal} className="reveal-btn">
                             {t?.revealAnswer ?? 'Afficher la réponse'}
                         </button>
                     )}
 
                     {(mode === 'flashcard' || card.source === 'custom') && flipped && (
-                        <div className="card" style={{ marginBottom: 16, padding: '24px' }}>
-                            <div style={{ fontSize: 22, color: 'var(--success)' }}>{card.back}</div>
+                        <div className="card study-back-card">
+                            <div className="study-back-text">{card.back}</div>
                             {card.notes && (
-                                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8 }}>
+                                <div className="study-back-notes">
                                     {card.notes}
                                 </div>
                             )}

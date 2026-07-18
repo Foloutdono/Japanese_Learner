@@ -54,51 +54,50 @@ export default function DecksScreen({ session }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="screen">
       <TopBar onBack={() => navigate('/')} title={t.decks} />
 
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container page-pad">
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
-          <button onClick={() => setCreating(c => !c)}
-            style={{ background: '#6c5ce7', color: '#fff', fontSize: 14 }}>
+        <div className="decks-toolbar">
+          <button onClick={() => setCreating(c => !c)} className="btn-primary-purple decks-toolbar__btn">
             {creating ? t.cancel : t.createDeck}
           </button>
         </div>
 
         {/* Create form */}
         {creating && (
-          <div className="card" style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 16 }}>{t.createDeck}</div>
+          <div className="card decks-create-card">
+            <div className="decks-create-card__title">{t.createDeck}</div>
             <input
               value={newName}
               onChange={e => setNewName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && createDeck()}
               placeholder={t.deckNamePlaceholder}
               autoFocus
-              style={{ width: '100%', padding: '10px 14px', fontSize: 15, marginBottom: 12 }}
+              className="decks-create-input"
             />
-            <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+            <div className="decks-type-row">
               {DECK_TYPES.map(dt => (
-                <button key={dt.value} onClick={() => setNewType(dt.value)}
-                  style={{
-                    background: newType === dt.value ? dt.color : 'var(--bg-panel)',
-                    color: newType === dt.value ? '#fff' : 'var(--text-secondary)',
-                    fontSize: 13, padding: '8px 16px',
-                  }}>
+                <button
+                  key={dt.value}
+                  onClick={() => setNewType(dt.value)}
+                  className={`decks-type-btn${newType === dt.value ? ' decks-type-btn--active' : ''}`}
+                  style={{ '--type-color': dt.color }}
+                >
                   {dt.label}
-                  <div style={{ fontSize: 10, opacity: 0.8 }}>{dt.desc}</div>
+                  <div className="decks-type-btn__desc">{dt.desc}</div>
                 </button>
               ))}
             </div>
-            <button onClick={createDeck} style={{ background: '#6c5ce7', color: '#fff', width: '100%' }}>
+            <button onClick={createDeck} className="btn-primary-purple decks-create-submit">
               {t.createDeck}
             </button>
           </div>
         )}
 
         {loading && (
-          <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>{t.loading}</div>
+          <div className="loading-block">{t.loading}</div>
         )}
 
         {!loading && decks.length === 0 && (
@@ -108,34 +107,30 @@ export default function DecksScreen({ session }) {
         {!loading && decks.length > 0 && (
           <div className="grid-3">
             {decks.map(deck => (
-              <div key={deck.id} className="card" style={{
-                borderLeft: `4px solid ${typeColor(deck.type)}`,
-                display: 'flex', flexDirection: 'column', gap: 8,
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div key={deck.id} className="card deck-card" style={{ '--type-color': typeColor(deck.type) }}>
+                <div className="deck-card__header">
                   <div>
-                    <div style={{ fontSize: 16, fontWeight: 'bold' }}>{deck.name}</div>
-                    <div style={{ fontSize: 11, color: typeColor(deck.type), marginTop: 2 }}>
+                    <div className="deck-card__name">{deck.name}</div>
+                    <div className="deck-card__type">
                       {typeLabel(deck.type)}
                     </div>
                   </div>
-                  <button onClick={() => deleteDeck(deck.id, deck.name)}
-                    style={{ background: 'transparent', color: 'var(--danger)', fontSize: 16, padding: '4px 8px' }}>
+                  <button onClick={() => deleteDeck(deck.id, deck.name)} className="deck-card__delete">
                     🗑
                   </button>
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                <div className="deck-card__count">
                   {deck.card_count} {t.cards}
                 </div>
-                <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
+                <div className="deck-card__actions">
                   <button
                     onClick={() => navigate(`/decks/${deck.id}`, { state: { deck } })}
-                    style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', flex: 1, fontSize: 13 }}>
+                    className="deck-card__edit-btn">
                     {t.edit}
                   </button>
                   <button
                     onClick={() => navigate(`/decks/${deck.id}/study`, { state: { deck } })}
-                    style={{ background: typeColor(deck.type), color: '#fff', flex: 1, fontSize: 13 }}>
+                    className="deck-card__study-btn">
                     {t.study}
                   </button>
                 </div>

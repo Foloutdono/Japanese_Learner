@@ -72,7 +72,7 @@ export default function GrammarScreen({ session }) {
   // ── Level selection ──
   if (!level) {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.grammarTitle} />
         <SelectionScreen subtitle={t.selectLevel}>
           <LevelSelector onSelect={setLevel} color="var(--accent)" />
@@ -84,7 +84,7 @@ export default function GrammarScreen({ session }) {
   // ── Mode selection ──
   if (!mode) {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => setLevel(null)} title={`${t.grammarTitle} ${level}`} />
         <SelectionScreen subtitle={t.selectMode}>
           <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} />
@@ -97,27 +97,27 @@ export default function GrammarScreen({ session }) {
 
   // ── Quiz ──
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="screen">
       <TopBar onBack={() => setMode(null)} title={`${t.grammarTitle} ${level} — ${currentModeLabel}`} />
-      <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
+      <div className="container quiz-area">
         {loading && <Loading />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
 
         {card && !loading && (
           <>
             {/* Grammar point card */}
-            <PromptCard style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: 'var(--accent)', marginBottom: 8 }}>
+            <PromptCard className="grammar-prompt">
+              <div className="grammar-glyph">
                 {card.grammar}
               </div>
               {mode === 'flashcard' && !flipped && (
-                <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 8 }}>{t.revealMeaning}</div>
+                <div className="grammar-hint">{t.revealMeaning}</div>
               )}
               {mode === 'flashcard' && flipped && (
-                <div style={{ fontSize: 20, color: 'var(--success)', marginTop: 12 }}>{card.meaning}</div>
+                <div className="grammar-meaning">{card.meaning}</div>
               )}
               {mode !== 'flashcard' && (
-                <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginTop: 8 }}>
+                <div className="grammar-reveal-hint">
                   {mode === 'mcq' ? t.revealMeaning : t.revealSentence}
                 </div>
               )}
@@ -125,16 +125,13 @@ export default function GrammarScreen({ session }) {
 
             {/* Fill example sentence */}
             {mode === 'fill' && card.fill_example && (
-              <div style={{
-                background: 'var(--bg-card)', borderRadius: 10,
-                padding: '20px 24px', marginBottom: 20, textAlign: 'left',
-              }}>
-                <div style={{ fontSize: 20, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', marginBottom: 8 }}>
+              <div className="grammar-fill-example">
+                <div className="grammar-fill-example__jp">
                   {answered ? card.fill_example.jp_full : card.fill_example.jp_blanked}
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{card.fill_example.en}</div>
+                <div className="grammar-fill-example__en">{card.fill_example.en}</div>
                 {answered && (
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                  <div className="grammar-fill-example__romaji">
                     {card.fill_example.romaji}
                   </div>
                 )}
@@ -145,7 +142,7 @@ export default function GrammarScreen({ session }) {
             {mode === 'flashcard' && !flipped && (
               <button
                 onClick={() => { setFlipped(true); setShowRating(true) }}
-                style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', width: '100%', fontSize: 16, padding: '16px' }}
+                className="reveal-btn"
               >
                 {t.revealMeaningBtn}
               </button>
@@ -161,7 +158,7 @@ export default function GrammarScreen({ session }) {
             {mode === 'fill' && !answered && (
               <button
                 onClick={() => { setAnswered(true); setShowRating(true) }}
-                style={{ background: 'var(--accent)', color: '#fff', width: '100%', fontSize: 15, padding: '14px' }}
+                className="grammar-fill-reveal-btn"
               >
                 {t.revealAnswer}
               </button>
@@ -169,23 +166,20 @@ export default function GrammarScreen({ session }) {
 
             {/* Examples toggle */}
             {(flipped || answered) && card.examples?.length > 0 && (
-              <div style={{ marginTop: 16 }}>
+              <div className="grammar-examples">
                 <button
                   onClick={() => setShowEx(e => !e)}
-                  style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', fontSize: 13 }}
+                  className="grammar-examples-toggle"
                 >
                   {showEx ? t.hideExamples : t.showExamples}
                 </button>
                 {showEx && (
-                  <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div className="grammar-examples__list">
                     {card.examples.slice(0, 3).map((ex, i) => (
-                      <div key={i} style={{
-                        background: 'var(--bg-card)', borderRadius: 8,
-                        padding: '12px 16px', textAlign: 'left',
-                      }}>
-                        <div style={{ fontSize: 16, fontFamily: 'Yu Gothic, sans-serif', marginBottom: 4 }}>{ex.jp}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 2 }}>{ex.romaji}</div>
-                        <div style={{ fontSize: 13, color: 'var(--text-primary)' }}>{ex.en}</div>
+                      <div key={i} className="grammar-example-card">
+                        <div className="grammar-example-card__jp">{ex.jp}</div>
+                        <div className="grammar-example-card__romaji">{ex.romaji}</div>
+                        <div className="grammar-example-card__en">{ex.en}</div>
                       </div>
                     ))}
                   </div>
