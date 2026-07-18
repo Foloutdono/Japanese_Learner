@@ -1408,23 +1408,44 @@ input:focus { border-color: var(--accent2); }
 :root[data-theme="light"] .study-topbar-drawing-toggle--active {
   color: var(--text-on-panel);
 }
-/* ── Stats screen ─────────────────────────────────────────── */
+/* ── Stats screen ─────────────────────────────────────────
+   Ledger, not dashboard: numbers sit in a hairline shoji-lattice
+   (same 1px-gap-on-border technique as .home-grid) rather than
+   floating rounded/shadowed cards, and every heading keeps the
+   serif-JP-title + seal-red-rule pairing used across the app's
+   selector headers. Data (counts, percentages) consistently uses
+   --font-display — the same tracked sans the rest of the app
+   reserves for numerals/index marks — while set names and prompt
+   words keep --font-jp, so the ink/kana vs. ledger/number split
+   reads the same way it does everywhere else in the app. */
 .stats-loading {
   text-align: center;
-  padding: 80px;
+  padding: 96px 24px;
   color: var(--text-secondary);
+  font-family: var(--font-jp);
+  font-size: 1.05rem;
+  letter-spacing: 0.03em;
 }
 
 .stats-reset-btn {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 8px 16px;
+}
+.stats-reset-btn:hover {
   background: var(--danger);
   color: var(--text-on-panel);
-  font-size: 13px;
+  filter: none;
 }
 
-.stats-container { padding: 40px 24px 72px; }
+.stats-container { padding: 48px 24px 88px; }
 
 .stats-section {
-  margin: 64px 0 28px;
+  margin: 72px 0 28px;
   text-align: left;
 }
 .stats-section:first-child { margin-top: 0; }
@@ -1432,7 +1453,7 @@ input:focus { border-color: var(--accent2); }
 .stats-section__title {
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
-  font-size: 1.9rem;
+  font-size: clamp(1.4rem, 1.15rem + 1.1vw, 1.9rem);
   letter-spacing: 0.01em;
   color: var(--text-primary);
 }
@@ -1446,12 +1467,38 @@ input:focus { border-color: var(--accent2); }
   margin-top: 10px;
 }
 
-.stats-group { margin-bottom: 40px; }
+.stats-group { margin-bottom: 48px; }
+
+/* Shoji-lattice grid — the deck/level cards sit flush against each
+   other with a 1px hairline gap (background showing through), the
+   same panel language as the home screen's nav grid, instead of the
+   generic gapped/rounded/shadowed cards a stats page usually gets.
+   Scoped to .stats-group so the shared .grid-2/.grid-3 utilities
+   used elsewhere are untouched. */
+.stats-group.grid-2,
+.stats-group.grid-3 {
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.stats-group.grid-2 .card,
+.stats-group.grid-3 .card {
+  border-radius: 0;
+  background: var(--bg-card);
+  padding: 28px 24px;
+  transition: background 0.2s ease;
+}
+.stats-group.grid-2 .card:hover,
+.stats-group.grid-3 .card:hover {
+  background: var(--bg-card-hover);
+}
 
 .stats-card-title {
-  font-weight: bold;
-  margin-bottom: 12px;
-  font-size: 18px;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 18px;
+  color: var(--text-primary);
 }
 
 .stats-mode-row {
@@ -1462,62 +1509,100 @@ input:focus { border-color: var(--accent2); }
 
 .stats-mode-col {
   flex: 1;
-  min-width: 120px;
+  min-width: 110px;
 }
 
 .stats-mode-label {
-  font-size: 15px;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text-secondary);
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
-.stats-stat-block { margin-bottom: 10px; }
+.stats-stat-block { margin-bottom: 16px; }
+.stats-stat-block:last-child { margin-bottom: 0; }
 
 .stats-stat-label {
-  font-size: 15px;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text-secondary);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .stats-level-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 18px;
 }
-.stats-level-header__title { font-weight: bold; font-size: 18px; }
-.stats-level-header__pct { font-size: 13px; color: var(--text-secondary); }
+.stats-level-header__title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+.stats-level-header__pct {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent2);
+  white-space: nowrap;
+}
 
-/* Overview / global summary rows */
+/* Overview / global summary — same shoji-lattice technique as the
+   card grids above, but with auto-fit columns: it reflows itself
+   smoothly at any width instead of needing a stack of breakpoints
+   to avoid orphaned/cramped columns. */
 .stats-overview-row {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
   margin-bottom: 32px;
-  padding: 32px 24px;
 }
-.stats-overview-row--summary { margin-bottom: 40px; }
+.stats-overview-row--summary { margin-bottom: 48px; }
 
-.stats-overview-col { text-align: center; min-width: 80px; }
+.stats-overview-col {
+  text-align: center;
+  background: var(--bg-card);
+  padding: 28px 16px;
+}
 
 .stats-overview-col__value {
-  font-size: 32px;
-  font-weight: bold;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.15rem + 1.3vw, 2rem);
+  font-weight: 700;
   color: var(--col-color, var(--text-primary));
 }
-.stats-overview-col__value--lg { font-size: 40px; }
+.stats-overview-col__value--lg { font-size: clamp(1.8rem, 1.3rem + 1.8vw, 2.5rem); }
 
 .stats-overview-col__label {
-  font-size: 12px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--text-secondary);
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 /* Due forecast */
-.stats-forecast-card { margin-bottom: 32px; padding: 20px 24px; }
+.stats-forecast-card { margin-bottom: 32px; padding: 24px; }
 
-.stats-card-heading { font-weight: bold; font-size: 16px; margin-bottom: 16px; }
+.stats-card-heading {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
 
 .stats-forecast-bars {
   display: flex;
@@ -1528,68 +1613,99 @@ input:focus { border-color: var(--accent2); }
 
 .stats-forecast-bar {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
 }
 
-.stats-forecast-bar__count { font-size: 12px; color: var(--text-secondary); }
+.stats-forecast-bar__count {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
 
 .stats-forecast-bar__fill {
   width: 100%;
   height: var(--bar-h, 4px);
   background: var(--accent2);
-  border-radius: 3px;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.3s ease;
 }
 .stats-forecast-bar__fill--today { background: var(--accent); }
 
-.stats-forecast-bar__day { font-size: 11px; color: var(--text-secondary); }
+.stats-forecast-bar__day {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
 
-/* Weakest items */
-.stats-weakest-card { margin-bottom: 32px; padding: 20px 24px; }
+/* Weakest items — same hairline-row rhythm as the choice lists
+   (LevelSelector/ModeSelector), so a "needs practice" table reads
+   like the rest of the app instead of a bolted-on widget. */
+.stats-weakest-card { margin-bottom: 32px; padding: 24px; }
 
 .stats-weakest-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .stats-weakest-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   font-size: 14px;
-  padding: 6px 0;
+  padding: 13px 0;
   border-bottom: 1px solid var(--border);
+}
+.stats-weakest-row:last-child { border-bottom: none; }
+
+.stats-weakest-row strong {
+  font-family: var(--font-jp);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .stats-weakest-row__meta { color: var(--text-secondary); }
 
-.stats-weakest-row__right { display: flex; gap: 12px; }
+.stats-weakest-row__right {
+  display: flex;
+  gap: 14px;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+}
 
-.stats-weakest-row__accuracy { color: var(--danger); }
-.stats-weakest-row__lapses { color: var(--text-secondary); }
+.stats-weakest-row__accuracy { color: var(--danger); font-weight: 700; }
+.stats-weakest-row__lapses { color: var(--text-secondary); font-size: 12px; }
 
 /* StatCell (shared progress bar) */
 .stat-cell__track {
-  height: 6px;
+  height: 7px;
   background: var(--bg-panel);
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .stat-cell__fill-row { display: flex; height: 100%; }
 
-.stat-cell__segment--mastered { width: var(--seg-w, 0%); background: var(--success); }
-.stat-cell__segment--learning { width: var(--seg-w, 0%); background: var(--accent4); }
+.stat-cell__segment--mastered { width: var(--seg-w, 0%); background: var(--success); transition: width 0.3s ease; }
+.stat-cell__segment--learning { width: var(--seg-w, 0%); background: var(--accent4); transition: width 0.3s ease; }
 
 .stat-cell__row {
   display: flex;
   gap: 10px;
-  font-size: 15px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 /* Gris dédié pour "new" (partagé avec DeckProgress), indigo pour
@@ -1598,15 +1714,23 @@ input:focus { border-color: var(--accent2); }
 .stat-cell__learning { color: var(--accent4); }
 .stat-cell__mastered { color: var(--success); }
 
+/* A small seal-stamp pill instead of an underlined text link — the
+   due-review action gets the same treatment as other primary actions
+   in the app (a solid ink/vermillion fill), so it reads as a button,
+   not an afterthought link buried in a stat row. */
 .stat-cell__due-btn {
-  color: var(--accent);
-  background: none;
+  color: var(--text-on-fill);
+  background: var(--accent);
   border: none;
-  padding: 0;
+  border-radius: 999px;
+  padding: 2px 10px;
   font: inherit;
+  font-size: 11px;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
+  margin-left: auto;
 }
+.stat-cell__due-btn:hover { filter: brightness(1.15); }
 
 /* ── Dictionary screen ────────────────────────────────────── */
 .dict-page { padding-top: 24px; padding-bottom: 24px; }
@@ -1701,7 +1825,6 @@ input:focus { border-color: var(--accent2); }
 .dict-entry-card__char {
   font-size: 40px;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: var(--text-on-panel);
   line-height: 1;
   margin-top: 4px;
 }
@@ -2622,6 +2745,10 @@ input:focus { border-color: var(--accent2); }
   .choice-row { gap: 18px; }
   .quiz-area { padding: 32px 24px max(32px, 14vh);}
   .flashcard__hint { margin-top: 2px;}
+
+  .stats-weakest-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .stats-weakest-row__right { gap: 12px; }
+  .stats-forecast-bars { gap: 4px; }
 }
 
 @media (max-width: 560px) {
@@ -2631,6 +2758,15 @@ input:focus { border-color: var(--accent2); }
   .top-bar__inner { padding: 12px 16px; }
   .selection-screen { padding: 44px 16px 56px; }
   .selector-header__title { font-size: 1.7rem; }
+
+  .stats-container { padding: 40px 16px 72px; }
+  .stats-section { margin: 56px 0 24px; }
+  .stats-group.grid-2 .card,
+  .stats-group.grid-3 .card { padding: 22px 18px; }
+  .stats-overview-col { padding: 20px 12px; }
+  .stats-mode-row { gap: 16px; }
+  .stats-forecast-card,
+  .stats-weakest-card { padding: 18px; }
 }
 
 @media (max-width: 480px) {
@@ -2674,6 +2810,11 @@ input:focus { border-color: var(--accent2); }
     z-index: 10;
   }
   .quiz-area { padding: 32px 24px max(32px, 12vh);}
+
+  .stats-overview-row { grid-template-columns: repeat(2, 1fr); }
+  .stats-overview-col { padding: 18px 10px; }
+  .stats-level-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .stats-reset-btn { font-size: 11px; padding: 6px 12px; }
 }
 
 @media (max-width: 400px) {
