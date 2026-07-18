@@ -9,7 +9,7 @@ function isKanjiRoute(path) {
 }
 
 const MOBILE_BREAKPOINT = 768
-const SCROLL_THRESHOLD   = 6     // px of scroll before reacting — ignores jitter
+const SCROLL_THRESHOLD   = 2     // px of scroll before reacting — just enough to ignore jitter
 const REVEAL_DURATION    = 5000  // ms the bar stays visible after a reveal
 
 /**
@@ -83,9 +83,27 @@ export function TopBar({
   const currentPath = window.location.pathname
   const showWritingToggle = isKanjiRoute(currentPath)
   const hidden = useAutoHideTopBar(autoHide)
+  const barRef = useRef(null)
+  const [barHeight, setBarHeight] = useState(0)
+
+  // Measure the bar's real rendered height so the collapse animation
+  // (max-height 0) matches it exactly — otherwise hiding it would
+  // still leave a gap, or clip content that doesn't fit.
+  useEffect(() => {
+    if (!autoHide || !barRef.current) return
+    const measure = () => setBarHeight(barRef.current.scrollHeight)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(barRef.current)
+    return () => ro.disconnect()
+  }, [autoHide])
 
   return (
-    <div className={`top-bar${autoHide ? ' top-bar--autohide' : ''}${hidden ? ' top-bar--hidden' : ''}`}>
+    <div
+      ref={barRef}
+      className={`top-bar${autoHide ? ' top-bar--autohide' : ''}${hidden ? ' top-bar--hidden' : ''}`}
+      style={autoHide ? { maxHeight: hidden ? 0 : barHeight } : undefined}
+    >
       <BurgerMenu links={getNavLinks(t)} currentPath={currentPath} />
 
       <span className="top-bar__title">{title}</span>
