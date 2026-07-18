@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { TopBar } from '../components/TopBar'
+import { TopBar, useAutoHideTopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import { MCQGrid, TypeInput, DoneMessage, Loading } from '../components/QuizComponents'
 import DrawingCanvas from '../components/DrawingCanvas'
@@ -49,6 +49,10 @@ export default function StudyScreen({ session }) {
     const [showDrawing, setShowDrawing] = useState(false)
     const [drawingEnabled, setDrawingEnabled] = useState(true)
     const [configured, setConfigured]   = useState(false)
+
+    // Called unconditionally (Rules of Hooks) — only actually active once
+    // the quiz view is showing; the config screen never hides its bar.
+    const topBarHidden = useAutoHideTopBar(configured)
 
 
     function fetchCard() {
@@ -175,7 +179,7 @@ export default function StudyScreen({ session }) {
     // ── Study screen ──
     return (
         <div className="screen">
-            <div className="top-bar">
+            <div className={`top-bar top-bar--autohide${topBarHidden ? ' top-bar--hidden' : ''}`}>
                 <button className="btn-back" onClick={() => setConfigured(false)}>← Config</button>
                 <span className="top-bar__title">{deck?.name}</span>
                 {deck?.type === 'kanji' && (

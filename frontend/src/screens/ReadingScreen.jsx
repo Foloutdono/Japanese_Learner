@@ -244,6 +244,7 @@ export default function ReadingScreen({ session }) {
       <TopBar
         onBack={() => setPhase(null)}
         title={`${t.readingTitle || 'Reading practice'} — ${PHASES.find(p => p.key === phase)?.label}`}
+        autoHide
       />
       <div className="container quiz-area">
 

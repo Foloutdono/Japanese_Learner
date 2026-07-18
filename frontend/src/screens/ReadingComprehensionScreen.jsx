@@ -173,7 +173,7 @@ export default function ReadingComprehensionScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => { clearTimer(); setStage('selecting') }} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} />
+        <TopBar onBack={() => { clearTimer(); setStage('selecting') }} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} autoHide />
         <div className="container comp-reading-page">
 
           <div className="comp-reading-header">
@@ -232,7 +232,7 @@ export default function ReadingComprehensionScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} />
+        <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} autoHide />
         <div className="container quiz-area">
 
           {stage === 'submitting' ? (
@@ -288,7 +288,7 @@ export default function ReadingComprehensionScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} />
+        <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} autoHide />
         <div className="container page-pad">
 
           <div className="card comp-score-card">

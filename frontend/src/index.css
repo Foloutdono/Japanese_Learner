@@ -273,6 +273,21 @@ input:focus { border-color: var(--accent2); }
   z-index: 10;
 }
 
+/* Auto-hide on scroll — opt-in via the `autoHide` prop on <TopBar/>,
+   active on phones only. Hides on scroll-down (more room while
+   training), reappears on scroll-up or near the top of the page. */
+@media (max-width: 768px) {
+  .top-bar--autohide {
+    position: sticky;
+    top: 0;
+    transition: transform 0.25s ease;
+    will-change: transform;
+  }
+  .top-bar--autohide.top-bar--hidden {
+    transform: translateY(-100%);
+  }
+}
+
 .btn-back {
   background: rgba(255,255,255,0.08);
   color: var(--text-primary);
