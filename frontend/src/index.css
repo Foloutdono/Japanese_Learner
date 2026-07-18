@@ -2452,6 +2452,21 @@ input:focus { border-color: var(--accent2); }
   justify-content: center;
 }
 
+/* .flashcard owns the click-to-reveal handler, but it only sits in the
+   *content* box of .prompt-card — the padding above is outside it, so
+   clicks landing there never reach .flashcard's onClick. Pulling
+   .flashcard out with a negative margin equal to that padding, then
+   adding the same amount back as its own padding, makes its box
+   overlap the padding area exactly (same visual spacing as before)
+   while making that whole area part of its own clickable box. Scoped
+   to vocab-card-boost only, so the shared .flashcard rule used on
+   other screens is untouched. */
+.vocab-card-boost .flashcard {
+  margin: -64px -32px;
+  padding: 64px 32px;
+  box-sizing: border-box;
+}
+
 /* ── EmptyState component ─────────────────────────────────── */
 .empty-state { text-align: center; color: var(--text-secondary); padding: 60px; }
 .empty-state__icon { font-size: 48px; margin-bottom: 16px; }
