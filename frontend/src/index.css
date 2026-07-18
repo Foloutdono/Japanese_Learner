@@ -342,10 +342,21 @@ input:focus { border-color: var(--accent2); }
 }
 
 .home-header__glyph {
+  position: relative;
+  display: inline-block;
   font-family: var(--font-jp);
-  font-size: 5rem;
+  font-size: 4rem;
   color: var(--accent);
   line-height: 1;
+  padding: 6px 16px;
+}
+.home-header__glyph::after {
+  content: '';
+  position: absolute;
+  inset: -6px 2px;
+  border: 1.5px solid var(--accent);
+  transform: rotate(-2deg);
+  opacity: 0.65;
 }
 
 .home-header__title {
