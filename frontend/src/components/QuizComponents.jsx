@@ -69,9 +69,31 @@ export function MCQButton({ choice, correct, selected, answered, onClick, index,
   )
 }
 
+// Digit row shortcuts for the first 4 choices. On an AZERTY keyboard
+// the unshifted number row types &é"' rather than 1234, so both sets
+// are mapped to the same indices — whichever layout someone's on,
+// the physical top-row keys 1-4 answer choices 1-4.
+const CHOICE_KEY_INDEX = { '1': 0, '2': 1, '3': 2, '4': 3, '&': 0, 'é': 1, '"': 2, "'": 3 }
+
 // ── MCQ choices list ───────────────────────────────────────
 export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
   const cramped = useIsCramped()
+
+  useEffect(() => {
+    if (answered) return
+    const handler = e => {
+      if (e.repeat) return
+      const tag = e.target?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      const idx = CHOICE_KEY_INDEX[e.key]
+      if (idx !== undefined && idx < choices.length) {
+        onAnswer(choices[idx])
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [choices, answered, onAnswer])
+
   return (
     <div className="mcq-list">
       {choices.map((choice, i) => (
@@ -159,6 +181,25 @@ export function DoneMessage({ onBack }) {
       <button onClick={onBack} className="btn-panel">
         {t.backToMenu}
       </button>
+    </div>
+  )
+}
+
+// ── Loading ───────────────────────────────────────────────
+export function Loading() {
+  const { t } = useLang()
+  return (
+    <div className="quiz-loading">
+      <svg className="quiz-loading__ensor" viewBox="0 0 48 48" aria-hidden="true">
+        <circle
+          className="quiz-loading__ensor-circle"
+          cx="24" cy="24" r="19"
+          fill="none"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      </svg>
+      <span className="quiz-loading__text">{t.loading}</span>
     </div>
   )
 }
@@ -393,6 +434,24 @@ export function Flashcard({ front, back, onReveal, t, resetKey }) {
       setShowBack(s => !s)
     }
   }
+
+  // Keyboard reveal/flip: spacebar, plus ZQSD — the AZERTY keyboard's
+  // equivalent home-row of WASD — so a French keyboard gets a
+  // natural one-handed shortcut instead of reaching for the mouse.
+  useEffect(() => {
+    const handler = e => {
+      if (e.repeat) return
+      const tag = e.target?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      const key = e.key.toLowerCase()
+      if (key === ' ' || ['z', 'q', 's', 'd'].includes(key)) {
+        e.preventDefault()
+        handleClick()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [revealed])
 
   return (
     <div onClick={handleClick} className="flashcard">
