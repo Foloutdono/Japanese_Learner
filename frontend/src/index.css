@@ -833,10 +833,56 @@ input:focus { border-color: var(--accent2); }
   padding: 40px;
 }
 
+/* An ensō (円相) — the single-stroke ink circle of Zen calligraphy —
+   standing in for a plain "Loading…" spinner. Draws itself open,
+   fades, and closes again on a slow loop while turning, rather than
+   the flat text label the app had before. */
 .quiz-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
   color: var(--text-secondary);
   text-align: center;
   padding: 40px;
+}
+
+.quiz-loading__ensor {
+  width: 40px;
+  height: 40px;
+  overflow: visible;
+}
+
+.quiz-loading__ensor-circle {
+  stroke: var(--accent);
+  stroke-dasharray: 119;
+  transform-origin: 24px 24px;
+  animation:
+    ensor-draw 1.8s ease-in-out infinite,
+    ensor-spin 2.6s linear infinite;
+}
+
+@keyframes ensor-draw {
+  0%   { stroke-dashoffset: 119; opacity: 0.25; }
+  50%  { stroke-dashoffset: 24;  opacity: 1; }
+  100% { stroke-dashoffset: 119; opacity: 0.25; }
+}
+
+@keyframes ensor-spin {
+  to { transform: rotate(360deg); }
+}
+
+.quiz-loading__text {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-loading__ensor-circle {
+    animation: none;
+    stroke-dashoffset: 30;
+    opacity: 0.8;
+  }
 }
 
 .deck-progress { max-width: 480px; margin: 0 auto; }
@@ -868,8 +914,8 @@ input:focus { border-color: var(--accent2); }
 }
 
 .deck-progress__dot {
-  width: 8px;
-  height: 8px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   display: inline-block;
 }
