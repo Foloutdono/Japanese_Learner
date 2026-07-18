@@ -2,21 +2,8 @@ import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 
 // ── Big kana/kanji display ────────────────────────────────
-// `char` comes straight from card data, which occasionally has a
-// stray newline or run of whitespace baked in (bad import, a reading
-// accidentally concatenated in the same field, etc.). At this font
-// size each blank line costs ~1.4x the font-size in height, so even
-// one hidden newline can balloon the card far past its intended size
-// with nothing visible to explain it. Collapsing whitespace here means
-// that class of bad data can never reach the layout in the first
-// place, regardless of where it came from.
-function sanitizeDisplayChar(char) {
-  return typeof char === 'string' ? char.replace(/\s+/g, ' ').trim() : char
-}
-
 export function CharDisplay({ char, size = 110 }) {
   const isLargeSize = size >= 60
-  const displayChar = sanitizeDisplayChar(char)
   return (
     <div
       className="char-display"
@@ -24,9 +11,8 @@ export function CharDisplay({ char, size = 110 }) {
         '--char-size': `${size}px`,
         '--char-font': isLargeSize ? 'var(--font-jp)' : 'inherit',
       }}
-      title={typeof displayChar === 'string' ? displayChar : undefined}
     >
-      {displayChar}
+      {char}
     </div>
   )
 }
@@ -326,14 +312,23 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
         // on'yomi/kun'yomi) to wrap into a compact, centered block
         // instead of spilling out in one long left-aligned line.
         <div className={`inline-reveal__panel${show ? ' inline-reveal__panel--open' : ''}`}>
-          <Readings
-            kana={kana}
-            onLabel={t?.onyomi ?? "On'yomi"}
-            kunLabel={t?.kunyomi ?? "Kun'yomi"}
-            size={25}
-            center
-            isLarge={isLarge}
-          />
+          {/* Fixed-width inner wrapper: the readings' flex-wrap layout
+              is computed once against this stable width, then the
+              outer panel just clips/reveals more of it as its
+              max-width animates open. Without this, the readings
+              re-wrap at every intermediate width during the
+              transition, visibly jumping between layouts whenever
+              there's more than one on'yomi/kun'yomi reading. */}
+          <div className="inline-reveal__panel-inner">
+            <Readings
+              kana={kana}
+              onLabel={t?.onyomi ?? "On'yomi"}
+              kunLabel={t?.kunyomi ?? "Kun'yomi"}
+              size={25}
+              center
+              isLarge={isLarge}
+            />
+          </div>
         </div>
       )}
     </div>
