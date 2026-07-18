@@ -20,6 +20,18 @@ export function kanaModes(t) {
   ]
 }
 
+// Kana mode picker (label + description — used by ModeSelector).
+// Same keys/labels as kanaModes above, just shaped as {key,label,desc}
+// instead of tuples — kanaModes stays tuple-shaped because StatsScreen
+// depends on that exact shape (`Object.fromEntries(kanaModes(t))`).
+export function kanaModePicker(t) {
+  return [
+    { key: 'qcm',       label: t.modeQCM       ?? 'QCM',       desc: t.modeQcmKanaDesc  ?? 'Choisissez la bonne romanisation' },
+    { key: 'flashcard', label: t.modeFlashcard ?? 'Flashcard', desc: t.modeFcKanaDesc   ?? 'Révélez la romanisation' },
+    { key: 'write',     label: t.modeWrite     ?? 'Écriture',  desc: t.modeWriteKanaDesc ?? 'Tapez la romanisation' },
+  ]
+}
+
 // Vocab/kanji mode picker (label + description — used by ModeSelector).
 // `noun` is what to call "the word/kanji itself" side — "mot" for vocab,
 // "kanji" for kanji — so the two screens share one definition instead of
