@@ -83,47 +83,31 @@ export function TopBar({
   const currentPath = window.location.pathname
   const showWritingToggle = isKanjiRoute(currentPath)
   const hidden = useAutoHideTopBar(autoHide)
-  const barRef = useRef(null)
-  const [barHeight, setBarHeight] = useState(0)
-
-  // Measure the bar's real rendered height so the collapse animation
-  // (max-height 0) matches it exactly — otherwise hiding it would
-  // still leave a gap, or clip content that doesn't fit.
-  useEffect(() => {
-    if (!autoHide || !barRef.current) return
-    const measure = () => setBarHeight(barRef.current.scrollHeight)
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(barRef.current)
-    return () => ro.disconnect()
-  }, [autoHide])
 
   return (
-    <div
-      ref={barRef}
-      className={`top-bar${autoHide ? ' top-bar--autohide' : ''}${hidden ? ' top-bar--hidden' : ''}`}
-      style={autoHide ? { maxHeight: hidden ? 0 : barHeight } : undefined}
-    >
-      <BurgerMenu links={getNavLinks(t)} currentPath={currentPath} />
+    <div className={`top-bar${autoHide ? ' top-bar--autohide' : ''}${hidden ? ' top-bar--hidden' : ''}`}>
+      <div className="top-bar__inner">
+        <BurgerMenu links={getNavLinks(t)} currentPath={currentPath} />
 
-      <span className="top-bar__title">{title}</span>
+        <span className="top-bar__title">{title}</span>
 
-      {showWritingToggle && (
-        <button
-          onClick={onToggleDrawing}
-          className={`btn-writing-toggle ${
-            drawingEnabled
-              ? 'btn-writing-toggle--on'
-              : 'btn-writing-toggle--off'
-          }`}
-          title={t.toggleWriting}
-        >
-          ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
+        {showWritingToggle && (
+          <button
+            onClick={onToggleDrawing}
+            className={`btn-writing-toggle ${
+              drawingEnabled
+                ? 'btn-writing-toggle--on'
+                : 'btn-writing-toggle--off'
+            }`}
+            title={t.toggleWriting}
+          >
+            ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
+          </button>
+        )}
+        <button className="btn-back" onClick={onBack}>
+          {t.back}
         </button>
-      )}
-      <button className="btn-back" onClick={onBack}>
-        {t.back}
-      </button>
+      </div>
     </div>
   )
 }
