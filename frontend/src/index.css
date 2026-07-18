@@ -965,11 +965,18 @@ input:focus { border-color: var(--accent2); }
   transition: max-width 0.35s ease, opacity 0.3s ease 0.05s;
 }
 
-/* Sized against the viewport, not against the animating parent — a
-   stable reference so the readings' flex-wrap layout stays put for
-   the whole transition instead of recomputing every frame. */
+/* Sized against its own content, not against the animating parent —
+   max-content is intrinsic (computed from the readings themselves,
+   ignoring the ancestor's current width), so it's just as stable
+   during the reveal transition as a flat px value was, but a card
+   with only one or two short readings no longer reserves the same
+   320px as one with six — which was leaving dead space on the right
+   that pulled the whole row's visual centre left of the card's
+   actual centre. The cap still forces a wrap at a sane width for
+   kanji with many readings. */
 .inline-reveal__panel-inner {
-  width: min(320px, 80vw);
+  width: max-content;
+  max-width: min(320px, 80vw);
 }
 
 .flashcard { cursor: pointer; }
@@ -2563,7 +2570,7 @@ input:focus { border-color: var(--accent2); }
   }
 
   .char-display {
-    margin: 8px 0;
+    margin: 0 0;
   }
 
   .mcq-row--small {
