@@ -6,7 +6,8 @@ import { TopBar } from '../components/TopBar'
 import LevelSelector from '../components/LevelSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
-import { Loading, QuestionTypeBadge  } from '../components/QuizComponents'
+import { QuestionTypeBadge  } from '../components/QuizComponents'
+import { Loading } from '../components/Loading'
 
 // 'selecting' | 'loading' | 'reading' | 'questions' | 'submitting' | 'results' | 'error'
 

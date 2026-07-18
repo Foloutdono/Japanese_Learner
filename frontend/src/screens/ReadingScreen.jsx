@@ -7,7 +7,7 @@ import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
-import { Loading } from '../components/QuizComponents'
+import { Loading } from '../components/Loading'
 
 const STATUS_COLORS = {
   mastered:     'var(--success)',
