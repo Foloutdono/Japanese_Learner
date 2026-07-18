@@ -1430,36 +1430,38 @@ input:focus { border-color: var(--accent2); }
   color: var(--text-secondary);
 }
 
-.stats-refresh-btn {
-  background: var(--chip-bg);
-  color: var(--text-primary);
-  font-size: 13px;
-}
-
 .stats-reset-btn {
   background: var(--danger);
   color: var(--text-on-panel);
   font-size: 13px;
 }
 
-.stats-container { padding: 32px 24px; }
+.stats-container { padding: 40px 24px 72px; }
 
-.stats-section { margin-bottom: 16px; }
+.stats-section {
+  margin: 64px 0 28px;
+  text-align: left;
+}
+.stats-section:first-child { margin-top: 0; }
 
 .stats-section__title {
-  font-size: 40px;
-  font-weight: bold;
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.9rem;
+  letter-spacing: 0.01em;
   color: var(--text-primary);
-  text-align: center;
 }
 
+/* A short seal-red stroke instead of a full-width hairline — a single
+   deliberate mark rather than a line dividing the whole page. */
 .stats-section__rule {
-  height: 1px;
-  background: var(--border);
-  margin-top: 8px;
+  height: 3px;
+  width: 40px;
+  background: var(--accent);
+  margin-top: 10px;
 }
 
-.stats-group { margin-bottom: 32px; }
+.stats-group { margin-bottom: 40px; }
 
 .stats-card-title {
   font-weight: bold;
@@ -1596,7 +1598,7 @@ input:focus { border-color: var(--accent2); }
 .stat-cell__fill-row { display: flex; height: 100%; }
 
 .stat-cell__segment--mastered { width: var(--seg-w, 0%); background: var(--success); }
-.stat-cell__segment--learning { width: var(--seg-w, 0%); background: var(--accent2); }
+.stat-cell__segment--learning { width: var(--seg-w, 0%); background: var(--accent4); }
 
 .stat-cell__row {
   display: flex;
@@ -1605,8 +1607,11 @@ input:focus { border-color: var(--accent2); }
   align-items: center;
 }
 
-.stat-cell__new { color: var(--warning); }
-.stat-cell__learning { color: var(--accent2); }
+/* Ai-iro (indigo) / cha-iro (brun thé) / matcha — trois teintes bien
+   séparées, plutôt que new+learning dans le même registre or/ambre,
+   difficile à distinguer d'un coup d'œil. */
+.stat-cell__new { color: var(--accent5); }
+.stat-cell__learning { color: var(--accent4); }
 .stat-cell__mastered { color: var(--success); }
 
 .stat-cell__due-btn {

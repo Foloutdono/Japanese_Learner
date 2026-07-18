@@ -105,6 +105,7 @@ export function TopBar({
   drawingEnabled,
   onToggleDrawing,
   autoHide = false,
+  actions,
 }) {
   const { t } = useLang()
   const currentPath = window.location.pathname
@@ -132,6 +133,7 @@ export function TopBar({
               ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
             </button>
           )}
+          {actions}
           <button className="btn-back" onClick={onBack}>
             {t.back}
           </button>
