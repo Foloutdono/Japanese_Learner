@@ -12,6 +12,13 @@ export default function StatsScreen({ session }) {
   const [extra, setExtra] = useState(null)
   const kanaLabels = Object.fromEntries(kanaModes(t))
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem('jp-theme')
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', saved)
+    }
+  }, [])
+
   useEffect(() => { fetchStats() }, [])
 
   function fetchStats() {

@@ -33,17 +33,14 @@ export default function KanjiScreen({ session }) {
   const [showRating, setShowRating]   = useState(false)
   const [showDrawing, setShowDrawing] = useState(false)
   const [drawingEnabled, setDrawingEnabled] = useState(true)
+  const [progress, setProgress]       = useState(null)
 
-  // HomeScreen is what persists theme choices, but a deep link (e.g.
-  // from the Stats screen's "due now" button) can land here first —
-  // make sure the saved preference is still applied in that case.
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
     if (saved === 'light' || saved === 'dark') {
       document.documentElement.setAttribute('data-theme', saved)
     }
   }, [])
-  const [progress, setProgress]       = useState(null)
 
   // Re-translate when language changes without re-fetching
   useEffect(() => {

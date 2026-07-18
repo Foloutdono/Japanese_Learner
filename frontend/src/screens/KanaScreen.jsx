@@ -40,6 +40,13 @@ export default function KanaScreen({ session }) {
   const [showRating, setShowRating]   = useState(false)
   const [progress, setProgress]       = useState(null)
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem('jp-theme')
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', saved)
+    }
+  }, [])
+
   function fetchCard(slug, m) {
     setLoading(true)
     setAnswered(false)

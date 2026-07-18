@@ -31,6 +31,13 @@ export default function GrammarScreen({ session }) {
   const [showRating, setShowRating] = useState(false)
   const [showEx, setShowEx]         = useState(false)
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem('jp-theme')
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', saved)
+    }
+  }, [])
+
   function fetchCard(lvl, m) {
     setLoading(true)
     setFlipped(false)

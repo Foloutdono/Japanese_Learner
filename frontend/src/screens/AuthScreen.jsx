@@ -11,6 +11,13 @@ export default function AuthScreen() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(null)
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem('jp-theme')
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', saved)
+    }
+  }, [])
+
   async function handleSubmit() {
     setError(null)
     setSuccess(null)
