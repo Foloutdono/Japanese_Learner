@@ -264,28 +264,40 @@ input:focus { border-color: var(--accent2); }
 
 .top-bar {
   background: var(--bg-panel);
-  padding: 14px 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
   position: relative;
   top: 0;
   z-index: 10;
 }
 
+.top-bar__inner {
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* Auto-hide on scroll — opt-in via the `autoHide` prop on <TopBar/>,
-   active on phones only. Hidden by default; a scroll-up reveals it for
-   a few seconds. `max-height` (set inline by TopBar to match its real
-   height) is what animates — collapsing it to 0 removes the bar from
-   flow entirely, so the page content slides up to fill the space
-   instead of leaving an empty gap behind it. */
+   active on phones only (see the 768px query below). On desktop the
+   bar behaves exactly like a normal .top-bar — no collapsing, always
+   visible, no extra classes matter.
+   Hidden by default on mobile; a scroll-up reveals it for a few
+   seconds. The grid-template-rows 1fr→0fr trick collapses the bar to
+   its *actual* content height without any JS measuring, so the page
+   content slides up to fill the space instead of leaving a gap. */
 @media (max-width: 768px) {
   .top-bar--autohide {
     position: sticky;
     top: 0;
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.25s ease;
+  }
+  .top-bar--autohide.top-bar--hidden {
+    grid-template-rows: 0fr;
+  }
+  .top-bar--autohide .top-bar__inner {
     overflow: hidden;
-    transition: max-height 0.25s ease;
-    will-change: max-height;
+    min-height: 0;
   }
 }
 
@@ -341,7 +353,7 @@ input:focus { border-color: var(--accent2); }
 @media (max-width: 560px) {
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
   .container { padding: 0 16px; }
-  .top-bar { padding: 12px 16px; }
+  .top-bar__inner { padding: 12px 16px; }
   .selection-screen { padding: 44px 16px 56px; }
   .selector-header__title { font-size: 1.7rem; }
 }
