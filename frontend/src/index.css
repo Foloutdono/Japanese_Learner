@@ -1898,7 +1898,12 @@ input:focus { border-color: var(--accent2); }
   background: var(--accent);
 }
 
-.dict-radical-sheets { flex: 1; min-width: 0; }
+.dict-radical-sheets {
+  --radical-tile: 90px;
+  --radical-gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
 
 .dict-radical-group { margin-bottom: 40px; scroll-margin-top: 92px; }
 .dict-radical-group__label {
@@ -1912,11 +1917,15 @@ input:focus { border-color: var(--accent2); }
 
 /* Flush lattice — 1px hairlines showing through the container
    background, the same shoji-screen technique as .home-grid,
-   instead of individually rounded/bordered floating buttons. */
+   instead of individually rounded/bordered floating buttons.
+   Tile size/gap come from .dict-radical-sheets above (inherited),
+   not declared here, so the JS column count (which reads those same
+   custom properties off the ref'd .dict-radical-sheets node) can never
+   drift out of sync with what's actually on screen. */
 .dict-radical-group__list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 56px);
-  gap: 1px;
+  grid-template-columns: repeat(auto-fill, var(--radical-tile));
+  gap: var(--radical-gap);
   background: var(--border);
   border: 1px solid var(--border);
   width: max-content;
@@ -1924,8 +1933,8 @@ input:focus { border-color: var(--accent2); }
 }
 
 .dict-radical-btn {
-  width: 56px;
-  height: 56px;
+  width: var(--radical-tile);
+  height: var(--radical-tile);
   padding: 0;
   background: var(--bg-card);
   color: var(--text-primary);
@@ -1941,19 +1950,19 @@ input:focus { border-color: var(--accent2); }
 .dict-radical-btn:hover,
 .dict-radical-btn:focus-visible { background: var(--bg-card-hover); }
 .dict-radical-btn__char {
-  font-size: 24px;
+  font-size: 38px;
   font-family: var(--font-jp);
   line-height: 1;
 }
-.dict-radical-btn__count { font-size: 9px; color: var(--text-secondary); margin-top: 3px; font-family: var(--font-display); }
+.dict-radical-btn__count { font-size: 14px; color: var(--text-secondary); margin-top: 3px; font-family: var(--font-display); }
 
 /* Same reasoning as .stats-filler-card: a ragged last row of the
    lattice would otherwise leave a bare, high-contrast patch of the
    grid background. A muted, oversized 部 (radical) watermark fills it
    instead — decorative, not another clickable tile. */
 .dict-radical-filler {
-  width: 56px;
-  height: 56px;
+  width: var(--radical-tile);
+  height: var(--radical-tile);
   background: var(--bg-card);
   display: flex;
   align-items: center;
@@ -1961,7 +1970,7 @@ input:focus { border-color: var(--accent2); }
 }
 .dict-radical-filler__glyph {
   font-family: var(--font-jp);
-  font-size: 28px;
+  font-size: 45px;
   line-height: 1;
   color: var(--text-secondary);
   opacity: 0.14;
@@ -2975,6 +2984,17 @@ input:focus { border-color: var(--accent2); }
   .dict-stroke-rail {
     display: none;
   }
+
+  /* Original tile was 56px; PC gets a full 1.6x bump above (90px) but
+     that reads oversized on a phone screen, so mobile gets a smaller,
+     more modest increase instead. */
+  .dict-radical-sheets {
+    --radical-tile: 64px;
+    --radical-gap: 1px;
+  }
+  .dict-radical-btn__char { font-size: 28px; }
+  .dict-radical-btn__count { font-size: 10px; }
+  .dict-radical-filler__glyph { font-size: 32px; }
 }
 
 @media (max-width: 640px) {
