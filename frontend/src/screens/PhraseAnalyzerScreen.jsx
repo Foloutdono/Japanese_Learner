@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
-import { Loading } from '../components/QuizComponents'
+import { Loading } from '../components/Loading'
 
 const STATUS_COLORS = {
   mastered:     'var(--success)',
