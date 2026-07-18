@@ -10,18 +10,22 @@ function isKanjiRoute(path) {
 
 const MOBILE_BREAKPOINT = 768
 const SCROLL_THRESHOLD   = 2     // px of scroll before reacting — just enough to ignore jitter
-const REVEAL_DURATION    = 5000  // ms the bar stays visible after a reveal
+const REVEAL_DURATION    = 3000  // ms the bar stays visible after a reveal
 
 /**
  * Hidden by default on mobile. Reveals only on scroll-up (call
  * `reveal()` yourself for any other trigger — e.g. a tap on a fallback
  * handle), then auto-hides again after REVEAL_DURATION ms (the timer
- * resets on every fresh reveal). Always visible on desktop.
+ * resets on every fresh reveal). Call `onMenuOpenChange(true)` while a
+ * child menu/drawer is open to keep the bar visible and pause the
+ * cooldown, and `onMenuOpenChange(false)` when it closes to resume it.
+ * Always visible on desktop.
  *
- * Returns { hidden, reveal }. Exported so screens that roll their own
- * header markup instead of <TopBar/> (e.g. StudyScreen's quiz view)
- * can reuse the same logic — note this now returns an object, not a
- * bare boolean, so update `const hidden = useAutoHideTopBar(...)` to
+ * Returns { hidden, reveal, onMenuOpenChange }. Exported so screens
+ * that roll their own header markup instead of <TopBar/> (e.g.
+ * StudyScreen's quiz view) can reuse the same logic — note this now
+ * returns an object, not a bare boolean, so update
+ * `const hidden = useAutoHideTopBar(...)` to
  * `const { hidden, reveal } = useAutoHideTopBar(...)` there too.
  */
 export function useAutoHideTopBar(active = true) {
@@ -29,6 +33,7 @@ export function useAutoHideTopBar(active = true) {
   const [hidden, setHidden] = useState(() => active && isMobile())
   const lastY = useRef(0)
   const hideTimer = useRef(null)
+  const menuOpen = useRef(false)
 
   function clearHideTimer() {
     if (hideTimer.current) {
@@ -41,7 +46,22 @@ export function useAutoHideTopBar(active = true) {
     if (!isMobile()) return
     setHidden(false)
     clearHideTimer()
-    hideTimer.current = setTimeout(() => setHidden(true), REVEAL_DURATION)
+    if (!menuOpen.current) {
+      hideTimer.current = setTimeout(() => setHidden(true), REVEAL_DURATION)
+    }
+  }
+
+  function onMenuOpenChange(isOpen) {
+    menuOpen.current = isOpen
+    if (isOpen) {
+      // Keep the bar up and freeze the cooldown while the menu is open.
+      setHidden(false)
+      clearHideTimer()
+    } else if (isMobile()) {
+      // Menu closed — give the user a fresh REVEAL_DURATION window.
+      clearHideTimer()
+      hideTimer.current = setTimeout(() => setHidden(true), REVEAL_DURATION)
+    }
   }
 
   useEffect(() => {
@@ -53,6 +73,7 @@ export function useAutoHideTopBar(active = true) {
 
     function onScroll() {
       if (!isMobile()) { setHidden(false); return }
+      if (menuOpen.current) return
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => {
@@ -75,7 +96,7 @@ export function useAutoHideTopBar(active = true) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active])
 
-  return { hidden, reveal }
+  return { hidden, reveal, onMenuOpenChange }
 }
 
 export function TopBar({
@@ -88,13 +109,13 @@ export function TopBar({
   const { t } = useLang()
   const currentPath = window.location.pathname
   const showWritingToggle = isKanjiRoute(currentPath)
-  const { hidden, reveal } = useAutoHideTopBar(autoHide)
+  const { hidden, reveal, onMenuOpenChange } = useAutoHideTopBar(autoHide)
 
   return (
     <>
       <div className={`top-bar${autoHide ? ' top-bar--autohide' : ''}${hidden ? ' top-bar--hidden' : ''}`}>
         <div className="top-bar__inner">
-          <BurgerMenu links={getNavLinks(t)} currentPath={currentPath} />
+          <BurgerMenu links={getNavLinks(t)} currentPath={currentPath} onOpenChange={onMenuOpenChange} />
 
           <span className="top-bar__title">{title}</span>
 

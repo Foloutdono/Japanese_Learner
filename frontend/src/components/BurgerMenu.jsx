@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { useLang } from '../LangContext'
@@ -14,12 +15,17 @@ import { MuteButton, LangSwitcher } from './NavControls'
 //     { icon: '単語', title: t.vocabTitle, path: '/vocab' },
 //     ...
 //   ]} />
-export function BurgerMenu({ links = [], currentPath = null }) {
+export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const { t } = useLang()
 
-  const close = () => setOpen(false)
+  const setOpenAndNotify = (next) => {
+    setOpen(next)
+    onOpenChange?.(next)
+  }
+
+  const close = () => setOpenAndNotify(false)
 
   const go = (path) => {
     navigate(path)
@@ -29,14 +35,14 @@ export function BurgerMenu({ links = [], currentPath = null }) {
   return (
     <>
       <button
-        onClick={() => setOpen(o => !o)}
+        onClick={() => setOpenAndNotify(!open)}
         aria-label={t.menu ?? 'Menu'}
         className="burger-toggle"
       >
         ☰
       </button>
 
-      {open && (
+      {open && createPortal(
         <div className="burger-overlay" onClick={close}>
           <div className="burger-drawer" onClick={e => e.stopPropagation()}>
             <div className="burger-drawer__header">
@@ -65,7 +71,8 @@ export function BurgerMenu({ links = [], currentPath = null }) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
