@@ -4,7 +4,6 @@ import { useLang } from '../LangContext'
 export default function RatingBar({ onRate, active }) {
   const { t } = useLang()
 
-  // Keys 1-6 map to the 6 quality buttons
   const QUALITY_BTNS = [
     { q: 5, label: t.perfect      },
     { q: 4, label: t.correctHesit },
@@ -14,10 +13,15 @@ export default function RatingBar({ onRate, active }) {
     { q: 0, label: t.blackout     },
   ]
 
+  // Keys 1-6 map to the 6 quality buttons. On an AZERTY keyboard the
+  // unshifted number row types &é"' rather than 1234, so those are
+  // accepted too — same physical top-row keys, either layout.
+  const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '§': 5 }
+
   useEffect(() => {
     if (!active) return
     const handler = e => {
-      const idx = parseInt(e.key) - 1
+      const idx = e.key in AZERTY_INDEX ? AZERTY_INDEX[e.key] : parseInt(e.key) - 1
       if (idx >= 0 && idx <= 5) onRate(QUALITY_BTNS[idx].q)
     }
     window.addEventListener('keydown', handler)
