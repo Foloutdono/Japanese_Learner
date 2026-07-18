@@ -35,6 +35,25 @@ def _load_translation_map(lang: str, item_type: str) -> dict:
     raise HTTPException(status_code=400, detail=f"Unsupported language: {lang}")
 
 
+# ── Bulk maps ─────────────────────────────────────────────
+# Used by the frontend's translationCache.js / LangContext to preload
+# the full { word: meaning } map for a language once per session,
+# instead of round-tripping per word. These were missing entirely —
+# the frontend was calling them on every page load and always hitting
+# a 404, while the per-word routes below (singular "/translation/")
+# only cover the lang-switch-mid-quiz case (KanjiScreen/VocabScreen's
+# translateCard), which needs one word at a time, not the full map.
+@router.get("/api/translations/kanji")
+def get_kanji_translations(lang: str = "fr"):
+    return _load_translation_map(lang, "kanji")
+
+
+@router.get("/api/translations/vocab")
+def get_vocab_translations(lang: str = "fr"):
+    return _load_translation_map(lang, "vocab")
+
+
+# ── Per-word lookup ───────────────────────────────────────
 @router.get("/api/translation/kanji")
 def get_kanji_translation(word: str, lang: str = "fr"):
     if not word:
