@@ -1073,12 +1073,7 @@ input:focus { border-color: var(--accent2); }
 .rating-bar__btn--q3 { --rating-color: var(--accent2); }
 .rating-bar__btn--q2 { --rating-color: var(--accent7); }
 .rating-bar__btn--q1 { --rating-color: var(--accent); }
-.rating-bar__btn--q0 {
-  background: var(--bg-panel);
-  color: var(--text-on-panel-soft);
-}
-.rating-bar__btn--q0 .rating-bar__btn-index,
-.rating-bar__btn--q0 .rating-bar__btn-label { color: var(--text-on-panel-soft); }
+.rating-bar__btn--q0 .rating-bar__btn-label { color: var(--text-secondary); }
 
 @media (min-width: 560px) {
   .rating-bar__buttons { grid-template-columns: repeat(6, 1fr); max-width: 640px; }
