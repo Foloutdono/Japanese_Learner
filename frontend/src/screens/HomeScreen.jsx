@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { useLang } from '../LangContext'
-import { LangSwitcher } from '../components/NavControls'
+import { LangSwitcher, ThemeToggle } from '../components/NavControls'
 import { getNavLinks } from '../navLinks'
 
 export default function HomeScreen() {
@@ -20,6 +20,7 @@ export default function HomeScreen() {
           <button className="btn-ghost" onClick={() => supabase.auth.signOut()}>
             {t.signOut}
           </button>
+          <ThemeToggle />
           <LangSwitcher />
         </div>
       </header>
