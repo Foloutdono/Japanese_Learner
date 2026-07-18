@@ -160,7 +160,7 @@ export default function KanjiScreen({ session }) {
   if (!level) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.kanjiTitle} />
+        <TopBar onBack={() => navigate('/')} title={t.kanjiTitle} autoHide />
         <SelectionScreen>
           <LevelSelector onSelect={setLevel} color="var(--accent3)" />
         </SelectionScreen>
@@ -172,7 +172,7 @@ export default function KanjiScreen({ session }) {
   if (!mode) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setLevel(null)} title={`${t.kanjiTitle} ${level}`} />
+        <TopBar onBack={() => setLevel(null)} title={`${t.kanjiTitle} ${level}`} autoHide />
         <SelectionScreen>
           <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} title={t.selectMode} />
         </SelectionScreen>
@@ -188,9 +188,17 @@ export default function KanjiScreen({ session }) {
     <div className="screen">
       <TopBar
         onBack={() => setMode(null)}
-        onClick={() => setDrawingEnabled(d => !d)}
         title={`${t.kanjiTitle} ${level} — ${modeLabel}`}
-        drawingEnabled={drawingEnabled}
+        autoHide
+        actions={
+          <button
+            onClick={() => setDrawingEnabled(d => !d)}
+            className={`btn-writing-toggle ${drawingEnabled ? 'btn-writing-toggle--on' : 'btn-writing-toggle--off'}`}
+            title={t.toggleWriting}
+          >
+            ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
+          </button>
+        }
       />
       <div className="container quiz-area">
         <DeckProgress stats={progress} />

@@ -3,11 +3,6 @@ import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
 import { BurgerMenu } from './BurgerMenu'
 
-// helper: decide when writing toggle should appear
-function isKanjiRoute(path) {
-  return path?.includes('kanji') // adjust if needed
-}
-
 const MOBILE_BREAKPOINT = 768
 const SCROLL_THRESHOLD   = 2     // px of scroll before reacting — just enough to ignore jitter
 const REVEAL_DURATION    = 2000  // ms the bar stays visible after a reveal
@@ -102,14 +97,11 @@ export function useAutoHideTopBar(active = true) {
 export function TopBar({
   onBack,
   title,
-  drawingEnabled,
-  onToggleDrawing,
   autoHide = false,
   actions,
 }) {
   const { t } = useLang()
   const currentPath = window.location.pathname
-  const showWritingToggle = isKanjiRoute(currentPath)
   const { hidden, reveal, onMenuOpenChange } = useAutoHideTopBar(autoHide)
 
   return (
@@ -120,19 +112,6 @@ export function TopBar({
 
           <span className="top-bar__title">{title}</span>
 
-          {showWritingToggle && (
-            <button
-              onClick={onToggleDrawing}
-              className={`btn-writing-toggle ${
-                drawingEnabled
-                  ? 'btn-writing-toggle--on'
-                  : 'btn-writing-toggle--off'
-              }`}
-              title={t.toggleWriting}
-            >
-              ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
-            </button>
-          )}
           {actions}
           <button className="btn-back" onClick={onBack}>
             {t.back}
