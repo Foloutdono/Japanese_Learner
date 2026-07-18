@@ -1014,11 +1014,21 @@ input:focus { border-color: var(--accent2); }
 .inline-reveal__panel {
   overflow: hidden;
   max-width: 0;
+  /* Without this, a max-width of 0 still lets the browser lay the
+     readings text out — just squeezed into a near-zero-width column,
+     which forces it character-by-character onto dozens of stacked
+     lines. Invisible (opacity: 0) but very much still occupying
+     height, which is what was inflating .inline-reveal and, in turn,
+     the scrollable .prompt-card around it. Capping height at 0 too
+     means the collapsed state can never contribute height, no matter
+     how the text inside tries to wrap. */
+  max-height: 0;
   opacity: 0;
   transition: none;
 }
 .inline-reveal__panel--open {
   max-width: 320px;
+  max-height: none;
   opacity: 1;
   transition: max-width 0.35s ease, opacity 0.3s ease 0.05s;
 }
