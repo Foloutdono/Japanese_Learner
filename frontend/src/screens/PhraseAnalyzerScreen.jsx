@@ -120,34 +120,30 @@ export default function PhraseAnalyzerScreen({ session }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="screen">
       <TopBar onBack={() => navigate('/')} title={t.phraseAnalyzer || 'Phrase analyzer'} />
 
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container page-pad">
 
-        <div className="card" style={{ marginBottom: 24, padding: '20px 24px' }}>
+        <div className="card phrase-input-card">
           <textarea
             value={phrase}
             onChange={e => setPhrase(e.target.value)}
             placeholder={t.phrasePlaceholder || 'Type or paste a Japanese phrase…'}
             rows={3}
-            style={{
-              width: '100%', fontSize: 18, padding: 12, borderRadius: 8,
-              background: 'var(--bg-panel)', color: 'var(--text-primary)',
-              border: '1px solid var(--border)', resize: 'vertical',
-            }}
+            className="phrase-textarea"
           />
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
+          <div className="phrase-input-actions">
             <button
               onClick={() => setShowHistory(s => !s)}
-              style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-primary)', fontSize: 13 }}
+              className="phrase-history-toggle"
             >
               {showHistory ? (t.hideHistory || 'Hide history') : (t.showHistory || 'History')}
             </button>
             <button
               onClick={analyze}
               disabled={!phrase.trim() || loading}
-              style={{ background: 'var(--accent)', color: '#fff', fontSize: 14, padding: '8px 20px' }}
+              className="phrase-analyze-btn"
             >
               {t.analyze || 'Analyze'}
             </button>
@@ -155,9 +151,9 @@ export default function PhraseAnalyzerScreen({ session }) {
         </div>
 
         {showHistory && (
-          <div className="card" style={{ marginBottom: 24, padding: '16px 24px' }}>
+          <div className="card phrase-history-card">
             {history.length === 0 && (
-              <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
+              <div className="phrase-history-empty">
                 {t.noHistory || 'No phrases analyzed yet.'}
               </div>
             )}
@@ -165,16 +161,12 @@ export default function PhraseAnalyzerScreen({ session }) {
               <div
                 key={h.id}
                 onClick={() => loadHistoryEntry(h.id)}
-                style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '8px 0', borderBottom: '1px solid var(--border)',
-                  cursor: 'pointer', fontSize: 15,
-                }}
+                className="phrase-history-row"
               >
                 <span>{h.phrase}</span>
                 <button
                   onClick={e => deleteHistoryEntry(h.id, e)}
-                  style={{ background: 'none', color: 'var(--danger)', fontSize: 12, padding: '2px 8px' }}
+                  className="phrase-history-delete"
                 >
                   ✕
                 </button>
@@ -185,40 +177,35 @@ export default function PhraseAnalyzerScreen({ session }) {
 
         {loading && <Loading />}
         {error && (
-          <div className="card" style={{ padding: 16, color: 'var(--danger)', marginBottom: 24 }}>
+          <div className="card phrase-error-card">
             {error}
           </div>
         )}
 
         {result && !loading && (
           <>
-            <div className="card" style={{ marginBottom: 24, padding: '20px 24px' }}>
-              <div style={{ fontSize: 28, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', marginBottom: 12, lineHeight: 1.6 }}>
+            <div className="card phrase-result-card">
+              <div className="phrase-line">
                 {result.words.map((w, i) => (
                   <span
                     key={i}
                     onClick={() => openVocabDetail(w)}
-                    style={{
-                      color: wordColor(w),
-                      cursor: w.vocab_match ? 'pointer' : 'default',
-                      textDecoration: w.vocab_match ? 'underline' : 'none',
-                      textDecorationStyle: 'dotted',
-                      textUnderlineOffset: 4,
-                    }}
+                    className={`word-span${w.vocab_match ? ' word-span--clickable' : ''}`}
+                    style={{ '--word-color': wordColor(w) }}
                     title={w.vocab_match ? (t.clickForDetails || 'Click for definition & stats') : undefined}
                   >
                     {w.surface}
                   </span>
                 ))}
               </div>
-              <div style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              <div className="phrase-explanation">
                 {result.explanation}
               </div>
             </div>
 
             <Legend t={t} />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="phrase-words-list">
               {result.words.map((w, i) => (
                 <WordCard key={i} word={w} t={t} onVocabClick={() => openVocabDetail(w)} onKanjiClick={openKanjiDetail} />
               ))}
@@ -236,10 +223,10 @@ export default function PhraseAnalyzerScreen({ session }) {
 
 function Legend({ t }) {
   return (
-    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 20, fontSize: 12, color: 'var(--text-secondary)' }}>
+    <div className="status-legend">
       {Object.entries(STATUS_LABELS).map(([status, label]) => (
-        <span key={status} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 10, height: 10, borderRadius: '50%', background: STATUS_COLORS[status] }} />
+        <span key={status} className="status-legend__item">
+          <span className="status-legend__dot" style={{ '--dot-color': STATUS_COLORS[status] }} />
           {t[`status_${status}`] || label}
         </span>
       ))}
@@ -249,20 +236,20 @@ function Legend({ t }) {
 
 function WordCard({ word, t, onVocabClick, onKanjiClick }) {
   return (
-    <div className="card" style={{ padding: '16px 20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
+    <div className="card phrase-word-card">
+      <div className="phrase-word-card__top">
         <div
           onClick={onVocabClick}
-          style={{ cursor: word.vocab_match ? 'pointer' : 'default' }}
+          className={`phrase-word-card__surface-wrap${word.vocab_match ? ' phrase-word-card__surface-wrap--clickable' : ''}`}
         >
-          <span style={{ fontSize: 22, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: wordColor(word) }}>
+          <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(word) }}>
             {word.surface}
           </span>
           {word.reading && (
-            <span style={{ fontSize: 14, color: 'var(--text-secondary)', marginLeft: 8 }}>({word.reading})</span>
+            <span className="phrase-word-card__reading">({word.reading})</span>
           )}
           {word.pos && (
-            <span style={{ fontSize: 11, color: 'var(--text-secondary)', marginLeft: 8, textTransform: 'uppercase' }}>
+            <span className="phrase-word-card__pos">
               {word.pos}
             </span>
           )}
@@ -270,23 +257,20 @@ function WordCard({ word, t, onVocabClick, onKanjiClick }) {
         {word.vocab_match && <StatusBadge status={word.vocab_match.stats.status} />}
       </div>
 
-      <div style={{ fontSize: 15, marginTop: 6 }}>{word.meaning}</div>
+      <div className="phrase-word-card__meaning">{word.meaning}</div>
 
       {word.kanji_matches?.length > 0 && (
-        <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+        <div className="phrase-word-card__kanji-row">
           {word.kanji_matches.map(k => (
             <div
               key={k.raw_id}
               onClick={() => onKanjiClick(k)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer',
-                background: 'var(--bg-panel)', borderRadius: 6, padding: '4px 8px',
-              }}
+              className="phrase-kanji-chip"
             >
-              <span style={{ fontSize: 16, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: STATUS_COLORS[k.stats.status] }}>
+              <span className="phrase-kanji-chip__char" style={{ '--word-color': STATUS_COLORS[k.stats.status] }}>
                 {k.kanji}
               </span>
-              <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{k.level}</span>
+              <span className="phrase-kanji-chip__level">{k.level}</span>
               <StatusBadge status={k.stats.status} small />
             </div>
           ))}
@@ -300,10 +284,7 @@ function StatusBadge({ status, small }) {
   const color = STATUS_COLORS[status] || STATUS_COLORS.not_started
   const label = STATUS_LABELS[status] || status
   return (
-    <span style={{
-      fontSize: small ? 11 : 12, color, border: `1px solid ${color}`,
-      borderRadius: 4, padding: small ? '1px 6px' : '2px 8px',
-    }}>
+    <span className={`status-pill${small ? ' status-pill--sm' : ''}`} style={{ '--pill-color': color }}>
       {label}
     </span>
   )
@@ -317,42 +298,35 @@ function DetailPanel({ detail, t, onClose }) {
   return (
     <div
       onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-        display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 50,
-      }}
+      className="detail-overlay-sheet"
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="card"
-        style={{
-          width: '100%', maxWidth: 480, margin: 16, padding: '24px',
-          maxHeight: '80vh', overflowY: 'auto',
-        }}
+        className="card detail-sheet"
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' }}>{title}</div>
-          <button onClick={onClose} style={{ background: 'none', fontSize: 18, color: 'var(--text-secondary)' }}>✕</button>
+        <div className="detail-header">
+          <div className="detail-title">{title}</div>
+          <button onClick={onClose} className="detail-close-btn">✕</button>
         </div>
 
         {level && (
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>{level}</div>
+          <div className="detail-level">{level}</div>
         )}
 
         {contextMeaning && (
-          <div style={{ marginTop: 16 }}>
+          <div className="detail-section">
             <Label>{t.inThisPhrase || 'In this phrase'}</Label>
-            <div style={{ fontSize: 15 }}>{contextMeaning} {reading && `(${reading})`}</div>
+            <div className="detail-context-value">{contextMeaning} {reading && `(${reading})`}</div>
           </div>
         )}
 
         {entry && Object.keys(entry).length > 0 && (
-          <div style={{ marginTop: 16 }}>
+          <div className="detail-section">
             <Label>{t.appDefinition || 'Definition in the app'}</Label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div className="detail-entry-list">
               {Object.entries(entry).map(([key, value]) => (
-                <div key={key} style={{ fontSize: 14, display: 'flex', gap: 8 }}>
-                  <span style={{ color: 'var(--text-secondary)', minWidth: 90, textTransform: 'capitalize' }}>{key}</span>
+                <div key={key} className="detail-entry-row">
+                  <span className="detail-entry-row__key">{key}</span>
                   <span>{String(value)}</span>
                 </div>
               ))}
@@ -360,9 +334,9 @@ function DetailPanel({ detail, t, onClose }) {
           </div>
         )}
 
-        <div style={{ marginTop: 16 }}>
+        <div className="detail-section">
           <Label>{t.cardStats || 'Card stats'}</Label>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+          <div className="detail-badges">
             <StatusBadge status={stats.status} />
             {stats.due && <StatusBadge status="due" />}
           </div>
@@ -388,7 +362,7 @@ function DetailPanel({ detail, t, onClose }) {
 
 function Label({ children }) {
   return (
-    <div style={{ fontSize: 12, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
+    <div className="detail-label">
       {children}
     </div>
   )
@@ -396,8 +370,8 @@ function Label({ children }) {
 
 function StatRow({ label, value }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '4px 0' }}>
-      <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
+    <div className="stat-row">
+      <span className="stat-row__label">{label}</span>
       <span>{value}</span>
     </div>
   )

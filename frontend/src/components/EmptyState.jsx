@@ -10,16 +10,16 @@
  */
 export default function EmptyState({ icon = '📭', message, hint, action }) {
   return (
-    <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 60 }}>
-      <div style={{ fontSize: 48, marginBottom: 16 }}>{icon}</div>
-      <div style={{ fontSize: 15 }}>{message}</div>
+    <div className="empty-state">
+      <div className="empty-state__icon">{icon}</div>
+      <div className="empty-state__message">{message}</div>
       {hint && (
-        <div style={{ fontSize: 13, marginTop: 8 }}>{hint}</div>
+        <div className="empty-state__hint">{hint}</div>
       )}
       {action && (
         <button
           onClick={action.onClick}
-          style={{ background: 'var(--accent)', color: '#fff', marginTop: 20 }}
+          className="empty-state__action"
         >
           {action.label}
         </button>

@@ -128,7 +128,7 @@ export default function ReadingComprehensionScreen({ session }) {
   // ── Level selection ──
   if (stage === 'selecting') {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.comprehensionTitle || 'Reading comprehension'} />
         <SelectionScreen subtitle={t.selectLevel}>
           <LevelSelector onSelect={startSession} color="var(--accent3)" />
@@ -140,11 +140,11 @@ export default function ReadingComprehensionScreen({ session }) {
   // ── Loading ──
   if (stage === 'loading') {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle || 'Reading comprehension'} />
-        <div style={{ padding: 80, textAlign: 'center' }}>
+        <div className="comp-loading-wrap">
           <Loading />
-          <div style={{ color: 'var(--text-secondary)', marginTop: 16, fontSize: 14 }}>
+          <div className="comp-loading-text">
             {t.comprehensionGenerating || 'Generating a text for you…'}
           </div>
         </div>
@@ -155,11 +155,11 @@ export default function ReadingComprehensionScreen({ session }) {
   // ── Error ──
   if (stage === 'error') {
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle || 'Reading comprehension'} />
-        <div className="container" style={{ padding: 40, textAlign: 'center' }}>
-          <div className="card" style={{ padding: 24, color: 'var(--danger)' }}>{error}</div>
-          <button onClick={() => startSession(level)} style={{ marginTop: 16, background: 'var(--accent)', color: '#fff' }}>
+        <div className="container comp-error-page">
+          <div className="card comp-error-card">{error}</div>
+          <button onClick={() => startSession(level)} className="comp-retry-btn">
             {t.retry || 'Retry'}
           </button>
         </div>
@@ -172,51 +172,51 @@ export default function ReadingComprehensionScreen({ session }) {
     const readPct = (timeLeft / exercise.read_seconds) * 100
 
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => { clearTimer(); setStage('selecting') }} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} />
-        <div className="container" style={{ padding: '24px 24px 40px' }}>
+        <div className="container comp-reading-page">
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-              {t.timeRemaining || 'Time remaining'}: <strong style={{ color: timeLeft < 60 ? 'var(--danger)' : 'var(--text-primary)' }}>
+          <div className="comp-reading-header">
+            <div className="comp-time-remaining">
+              {t.timeRemaining || 'Time remaining'}: <strong className="comp-time-value" style={{ '--time-color': timeLeft < 60 ? 'var(--danger)' : 'var(--text-primary)' }}>
                 {formatTime(timeLeft)}
               </strong>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="comp-reading-actions">
               <button
                 onClick={() => setShowTranslation(s => !s)}
-                style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-secondary)', fontSize: 12 }}
+                className="comp-toggle-translation"
               >
                 {showTranslation ? (t.hideTranslation || 'Hide translation') : (t.showTranslation || 'Show translation')}
               </button>
               <button
                 onClick={finishReading}
-                style={{ background: 'var(--accent)', color: '#fff', fontSize: 13 }}
+                className="comp-done-btn"
               >
                 {t.doneReading || "Done reading"}
               </button>
             </div>
           </div>
 
-          <div style={{ height: 4, background: 'var(--bg-panel)', borderRadius: 4, marginBottom: 24, overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', background: timeLeft < 60 ? 'var(--danger)' : 'var(--accent)',
-              width: `${readPct}%`, transition: 'width 1s linear',
-            }} />
+          <div className="comp-bar-track comp-bar-track--reading">
+            <div
+              className="comp-bar-fill comp-bar-fill--linear"
+              style={{ '--fill-color': timeLeft < 60 ? 'var(--danger)' : 'var(--accent)', '--fill-pct': `${readPct}%` }}
+            />
           </div>
 
-          <div className="card" style={{ padding: '24px 28px', marginBottom: 16 }}>
-            <div style={{ fontSize: 18, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', lineHeight: 2.0, color: '#fff' }}>
+          <div className="card comp-text-card">
+            <div className="comp-text-content">
               {exercise.text}
             </div>
           </div>
 
           {showTranslation && (
-            <div className="card" style={{ padding: '16px 24px', borderLeft: '3px solid var(--accent2)' }}>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 6, textTransform: 'uppercase' }}>
+            <div className="card comp-translation-card">
+              <div className="comp-translation-label">
                 {t.translation || 'Translation'}
               </div>
-              <div style={{ fontSize: 15, lineHeight: 1.6 }}>{exercise.translation}</div>
+              <div className="comp-translation-text">{exercise.translation}</div>
             </div>
           )}
 
@@ -231,43 +231,36 @@ export default function ReadingComprehensionScreen({ session }) {
     const total = exercise.questions.length
 
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} />
-        <div className="container" style={{ padding: '32px 24px', textAlign: 'center' }}>
+        <div className="container quiz-area">
 
           {stage === 'submitting' ? (
             <Loading />
           ) : (
             <>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24 }}>
+              <div className="comp-q-progress">
                 {t.question || 'Question'} {currentQ + 1} / {total}
-                <div style={{ height: 4, background: 'var(--bg-panel)', borderRadius: 4, marginTop: 8, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', background: 'var(--accent)', width: `${((currentQ + 1) / total) * 100}%`, transition: 'width 0.3s' }} />
+                <div className="comp-bar-track comp-bar-track--question">
+                  <div className="comp-bar-fill" style={{ '--fill-pct': `${((currentQ + 1) / total) * 100}%` }} />
                 </div>
               </div>
 
               <PromptCard>
                 <QuestionTypeBadge type={q.type}/>
-                <div style={{ fontSize: 17, fontWeight: 'bold', lineHeight: 1.6, marginTop: 10, marginBottom: 8 }}>
+                <div className="comp-question-text">
                   {q.question}
                 </div>
               </PromptCard>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 24, textAlign: 'left' }}>
+              <div className="comp-options">
                 {q.options.map((option, i) => (
                   <button
                     key={i}
                     onClick={() => answerQuestion(i)}
-                    style={{
-                      textAlign: 'left', padding: '14px 20px', borderRadius: 10, fontSize: 15,
-                      background: 'var(--bg-panel)', color: 'var(--text-primary)',
-                      border: '1px solid var(--border)', cursor: 'pointer',
-                      transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={e => e.target.style.background = 'var(--bg-hover, rgba(255,255,255,0.08))'}
-                    onMouseLeave={e => e.target.style.background = 'var(--bg-panel)'}
+                    className="comp-option-btn"
                   >
-                    <span style={{ color: 'var(--text-secondary)', marginRight: 12, fontWeight: 'bold' }}>
+                    <span className="comp-option-btn__letter">
                       {String.fromCharCode(65 + i)}.
                     </span>
                     {option}
@@ -277,7 +270,7 @@ export default function ReadingComprehensionScreen({ session }) {
 
               <button
                 onClick={() => setStage('reading')}
-                style={{ marginTop: 24, background: 'none', color: 'var(--text-secondary)', fontSize: 13, textDecoration: 'underline' }}
+                className="comp-reread-btn"
               >
                 {t.reReadText || 'Re-read the text'}
               </button>
@@ -294,47 +287,41 @@ export default function ReadingComprehensionScreen({ session }) {
     const scoreColor = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)'
 
     return (
-      <div style={{ minHeight: '100vh' }}>
+      <div className="screen">
         <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} />
-        <div className="container" style={{ padding: '32px 24px' }}>
+        <div className="container page-pad">
 
-          <div className="card" style={{
-            textAlign: 'center', padding: '32px 24px', marginBottom: 24,
-            display: 'flex', gap: 32, justifyContent: 'center', flexWrap: 'wrap',
-          }}>
+          <div className="card comp-score-card">
             <div>
-              <div style={{ fontSize: 56, fontWeight: 'bold', color: scoreColor }}>
+              <div className="comp-score-value" style={{ '--score-color': scoreColor }}>
                 {results.score}/{results.total}
               </div>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>{t.score || 'Score'}</div>
+              <div className="comp-score-label">{t.score || 'Score'}</div>
             </div>
             <div>
-              <div style={{ fontSize: 56, fontWeight: 'bold', color: scoreColor }}>{pct}%</div>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>{t.accuracy || 'Accuracy'}</div>
+              <div className="comp-score-value" style={{ '--score-color': scoreColor }}>{pct}%</div>
+              <div className="comp-score-label">{t.accuracy || 'Accuracy'}</div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
+          <div className="comp-results-list">
             {results.results.map((r, i) => (
-              <div key={i} className="card" style={{
-                padding: '16px 20px',
-                borderLeft: `3px solid ${r.is_correct ? 'var(--success)' : 'var(--danger)'}`,
-              }}>
-                <div style={{ fontWeight: 'bold', marginBottom: 10, fontSize: 15 }}>
-                  <span style={{ color: 'var(--text-secondary)', marginRight: 8 }}>Q{i + 1}.</span>
+              <div key={i} className="card comp-result-item" style={{ '--border-color': r.is_correct ? 'var(--success)' : 'var(--danger)' }}>
+                <div className="comp-result-item__q">
+                  <span className="comp-result-item__qnum">Q{i + 1}.</span>
                   {r.question}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div className="comp-result-item__options">
                   {r.options.map((opt, j) => {
                     const isCorrect = j === r.correct
                     const isUser = j === r.user_answer
                     const color = isCorrect ? 'var(--success)' : (isUser && !isCorrect ? 'var(--danger)' : 'var(--text-secondary)')
                     return (
-                      <div key={j} style={{ fontSize: 14, color, display: 'flex', gap: 8, alignItems: 'center' }}>
-                        <span style={{ fontWeight: 'bold', minWidth: 20 }}>{String.fromCharCode(65 + j)}.</span>
+                      <div key={j} className="comp-result-option" style={{ '--opt-color': color }}>
+                        <span className="comp-result-option__letter">{String.fromCharCode(65 + j)}.</span>
                         <span>{opt}</span>
-                        {isCorrect && <span style={{ fontSize: 12, marginLeft: 4 }}>✓</span>}
-                        {isUser && !isCorrect && <span style={{ fontSize: 12, marginLeft: 4 }}>✗ {t.yourAnswer || 'your answer'}</span>}
+                        {isCorrect && <span className="comp-result-option__mark">✓</span>}
+                        {isUser && !isCorrect && <span className="comp-result-option__mark">✗ {t.yourAnswer || 'your answer'}</span>}
                       </div>
                     )
                   })}
@@ -343,28 +330,28 @@ export default function ReadingComprehensionScreen({ session }) {
             ))}
           </div>
 
-          <div className="card" style={{ padding: '16px 24px', marginBottom: 32 }}>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div className="card comp-original-card">
+            <div className="comp-original-label">
               {t.originalText || 'Original text'}
             </div>
-            <div style={{ fontSize: 16, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', lineHeight: 2.0, color: '#fff' }}>
+            <div className="comp-original-text">
               {exercise.text}
             </div>
-            <div style={{ marginTop: 12, fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            <div className="comp-original-translation">
               {exercise.translation}
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div className="comp-results-actions">
             <button
               onClick={() => startSession(level)}
-              style={{ background: 'var(--accent)', color: '#fff', padding: '10px 24px' }}
+              className="comp-try-again-btn"
             >
               {t.tryAgain || 'Try again'}
             </button>
             <button
               onClick={() => setStage('selecting')}
-              style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-primary)', padding: '10px 24px' }}
+              className="comp-change-level-btn"
             >
               {t.changeLevel || 'Change level'}
             </button>

@@ -28,11 +28,8 @@ function entryKey(entry) {
 function StatusBadge({ state, t }) {
 	const meta = STATUS_META[state] ?? STATUS_META.new
 	return (
-		<span style={{
-			display: 'inline-flex', alignItems: 'center', gap: 4,
-			fontSize: 11, color: 'var(--text-secondary)',
-		}}>
-			<span style={{ width: 7, height: 7, borderRadius: '50%', background: meta.color, display: 'inline-block' }} />
+		<span className="status-badge">
+			<span className="status-badge__dot" style={{ '--dot-color': meta.color }} />
 			{t?.[`status_${state}`] ?? meta.fallback}
 		</span>
 	)
@@ -41,13 +38,7 @@ function StatusBadge({ state, t }) {
 function TypeBadge({ type, t }) {
 	const meta = TYPE_META[type] ?? TYPE_META.kanji
 	return (
-		<span style={{
-			display: 'inline-flex', alignItems: 'center',
-			padding: '2px 8px', borderRadius: 999,
-			background: meta.color, color: '#fff',
-			fontSize: 10, fontWeight: 700, letterSpacing: '0.03em',
-			textTransform: 'uppercase',
-		}}>
+		<span className="dict-type-pill" style={{ '--pill-color': meta.color }}>
 			{type === 'kanji' ? (t?.dictKanji ?? 'Kanji') : (t?.dictVocab ?? 'Vocabulaire')}
 		</span>
 	)
@@ -223,13 +214,13 @@ export default function DictionaryScreen({ session }) {
 	const showingRadicalGrid = mode === 'radical' && selectedRadical == null
 
 	return (
-		<div style={{ minHeight: '100vh' }}>
+		<div className="screen">
 			<TopBar onBack={() => navigate('/')} title={t.dictionaryTitle ?? 'Dictionnaire'} />
 
-			<div className="container" style={{ padding: '24px' }}>
+			<div className="container dict-page">
 
 				{/* Mode tabs */}
-				<div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+				<div className="dict-tab-row">
 					{[
 						['search',  t.dictModeSearch  ?? 'Recherche'],
 						['radical', t.dictModeRadical ?? 'Par radical'],
@@ -237,12 +228,7 @@ export default function DictionaryScreen({ session }) {
 						<button
 							key={key}
 							onClick={() => key === 'radical' ? switchToRadicalMode() : switchToSearchMode()}
-							style={{
-								background: mode === key ? 'var(--accent)' : 'var(--bg-card)',
-								color: 'var(--text-primary)',
-								fontSize: 13,
-								padding: '8px 16px',
-							}}
+							className={`dict-tab-btn${mode === key ? ' dict-tab-btn--active' : ''}`}
 						>
 							{label}
 						</button>
@@ -252,7 +238,7 @@ export default function DictionaryScreen({ session }) {
 				{/* Search bar + count — hidden while browsing the plain radical grid,
 				    shown again once a radical is picked (to narrow further) */}
 				{!showingRadicalGrid && (
-					<div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
+					<div className="dict-search-row">
 						<input
 							value={query}
 							onChange={onSearch}
@@ -262,10 +248,10 @@ export default function DictionaryScreen({ session }) {
 									: (t.dictionaryPlaceholder ?? 'Rechercher kanji, kana, ou sens...')
 							}
 							autoFocus={mode === 'search'}
-							style={{ flex: 1, padding: '14px 20px', fontSize: 16 }}
+							className="dict-search-input"
 						/>
 						{!loading && (
-							<div style={{ color: 'var(--text-secondary)', fontSize: 13, whiteSpace: 'nowrap' }}>
+							<div className="dict-search-count">
 								{total} {t.dictionaryResults ?? 'résultats'}
 							</div>
 						)}
@@ -274,7 +260,7 @@ export default function DictionaryScreen({ session }) {
 
 				{/* Category filter — only meaningful in plain search mode */}
 				{mode === 'search' && (
-					<div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+					<div className="dict-tab-row dict-tab-row--category">
 						{[
 							['all',   t.dictAll   ?? 'Tout'],
 							['kanji', t.dictKanji ?? 'Kanji'],
@@ -283,12 +269,7 @@ export default function DictionaryScreen({ session }) {
 							<button
 								key={key}
 								onClick={() => switchCategory(key)}
-								style={{
-									background: category === key ? 'var(--accent)' : 'var(--bg-card)',
-									color: 'var(--text-primary)',
-									fontSize: 13,
-									padding: '8px 16px',
-								}}
+								className={`dict-tab-btn${category === key ? ' dict-tab-btn--active' : ''}`}
 							>
 								{label}
 							</button>
@@ -298,20 +279,17 @@ export default function DictionaryScreen({ session }) {
 
 				{/* Selected-radical header */}
 				{mode === 'radical' && selectedRadical != null && (
-					<div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+					<div className="dict-radical-header">
 						<button
 							onClick={backToRadicalGrid}
-							style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, padding: '8px 14px' }}
+							className="dict-radical-back-btn"
 						>
 							{t.dictBackToRadicals ?? 'Radicaux'}
 						</button>
-						<div style={{
-							fontSize: 28, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff',
-							background: 'var(--bg-card)', borderRadius: 8, padding: '4px 14px',
-						}}>
+						<div className="dict-radical-char">
 							{radicalCharByNumber[selectedRadical] ?? '?'}
 						</div>
-						<span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+						<span className="dict-radical-label">
 							{t.dictRadicalNumber ? t.dictRadicalNumber(selectedRadical) : `radical #${selectedRadical}`}
 						</span>
 					</div>
@@ -354,7 +332,7 @@ export default function DictionaryScreen({ session }) {
 function RadicalGrid({ groups, loading, onPick, t }) {
 	if (loading || !groups) {
 		return (
-			<div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>
+			<div className="quiz-loading">
 				{t.loadingDictionary ?? 'Chargement...'}
 			</div>
 		)
@@ -363,34 +341,24 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 	return (
 		<div>
 			{groups.map(group => (
-				<div key={group.stroke_count} style={{ marginBottom: 24 }}>
-					<div style={{
-						fontSize: 12, color: 'var(--text-secondary)', fontWeight: 'bold',
-						marginBottom: 10, letterSpacing: 1, textTransform: 'uppercase',
-					}}>
+				<div key={group.stroke_count} className="dict-radical-group">
+					<div className="dict-radical-group__label">
 						{group.stroke_count} {group.stroke_count > 1
 							? (t.dictStrokesPlural ?? 'traits')
 							: (t.dictStrokeSingular ?? 'trait')}
 					</div>
-					<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+					<div className="dict-radical-group__list">
 						{group.radicals.map(r => (
 							<button
 								key={r.number}
 								onClick={() => onPick(r.number)}
 								title={`${r.kanji_count} kanji`}
-								style={{
-									width: 56, height: 56, padding: 0,
-									background: 'var(--bg-card)', color: '#fff',
-									border: '1px solid var(--border)', borderRadius: 10,
-									display: 'flex', flexDirection: 'column',
-									alignItems: 'center', justifyContent: 'center',
-									cursor: 'pointer',
-								}}
+								className="dict-radical-btn"
 							>
-								<span style={{ fontSize: 26, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', lineHeight: 1 }}>
+								<span className="dict-radical-btn__char">
 									{r.char}
 								</span>
-								<span style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 3 }}>
+								<span className="dict-radical-btn__count">
 									{r.kanji_count}
 								</span>
 							</button>
@@ -421,13 +389,13 @@ function ResultsSection({
 	return (
 		<>
 			{loading && (
-				<div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>
+				<div className="quiz-loading">
 					{t.loadingDictionary ?? 'Chargement...'}
 				</div>
 			)}
 
 			{!loading && results.length === 0 && (
-				<div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: 40 }}>
+				<div className="quiz-loading">
 					{t.noResults ?? `Aucun résultat pour « ${query} »`}
 				</div>
 			)}
@@ -436,51 +404,25 @@ function ResultsSection({
 				<div className="dict-layout">
 
 					{/* Grid */}
-					<div style={{ flex: 1 }}>
-						<div style={{
-							display: 'grid',
-							gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-							gap: 12,
-						}}>
+					<div className="dict-results-wrap">
+						<div className="dict-results-grid">
 							{results.map(entry => (
 								<div
 									key={entryKey(entry)}
 									onClick={() => setSelected(entry)}
-									style={{
-										background: selected && entryKey(selected) === entryKey(entry) ? 'var(--bg-panel)' : 'var(--bg-card)',
-										borderRadius: 10,
-										padding: '16px 10px',
-										textAlign: 'center',
-										cursor: 'pointer',
-										border: selected && entryKey(selected) === entryKey(entry)
-											? '1px solid var(--accent)'
-											: '1px solid var(--border)',
-										transition: 'background 0.15s',
-										display: 'flex',
-										flexDirection: 'column',
-										alignItems: 'center',
-										gap: 4,
-									}}
-									onMouseEnter={e => {
-										if (!(selected && entryKey(selected) === entryKey(entry)))
-											e.currentTarget.style.background = 'var(--bg-panel)'
-									}}
-									onMouseLeave={e => {
-										if (!(selected && entryKey(selected) === entryKey(entry)))
-											e.currentTarget.style.background = 'var(--bg-card)'
-									}}
+									className={`dict-entry-card${selected && entryKey(selected) === entryKey(entry) ? ' dict-entry-card--selected' : ''}`}
 								>
 									<TypeBadge type={entry.type} t={t} />
-									<div style={{ fontSize: 40, fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1, marginTop: 4 }}>
+									<div className="dict-entry-card__char">
 										{entry.kanji || entry.kana}
 									</div>
-									<div style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
+									<div className="dict-entry-card__kana">
 										{shortKana(entry.kana, entry.type)}
 									</div>
-									<div style={{ fontSize: 15, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>
+									<div className="dict-entry-card__meaning">
 										{shortMeaning(entry.meaning)}
 									</div>
-									<div style={{ fontSize: 15, color: 'var(--accent2)', fontWeight: 'bold' }}>
+									<div className="dict-entry-card__level">
 										{entry.level}
 									</div>
 									<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
@@ -489,14 +431,14 @@ function ResultsSection({
 						</div>
 
 						{/* Infinite scroll sentinel */}
-						<div ref={sentinelRef} style={{ height: 40, marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+						<div ref={sentinelRef} className="dict-sentinel">
 							{loadingMore && (
-								<div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+								<div className="dict-sentinel__text">
 									{t.loadingMore ?? 'Chargement...'}
 								</div>
 							)}
 							{!hasMore && results.length > 0 && (
-								<div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+								<div className="dict-sentinel__text">
 									{t.displayedKanji ?? `${total} résultats affichés`}
 								</div>
 							)}
@@ -516,21 +458,11 @@ function ResultsSection({
 			{selected && isMobile && (
 				<div
 					onClick={() => setSelected(null)}
-					style={{
-						position: 'fixed', inset: 0, zIndex: 200,
-						background: 'rgba(0,0,0,0.6)',
-						display: 'flex', alignItems: 'center', justifyContent: 'center',
-						padding: 24,
-					}}
+					className="dict-modal-overlay"
 				>
 					<div
 						onClick={e => e.stopPropagation()}
-						style={{
-							background: 'var(--bg-card)', borderRadius: 16,
-							width: '100%', maxWidth: 400,
-							maxHeight: '85vh', overflowY: 'auto',
-							padding: 24,
-						}}
+						className="dict-modal-content"
 					>
 						<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} />
 					</div>
@@ -551,18 +483,18 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 
 	return (
 		<>
-			<div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+			<div className="dict-detail__badges">
 				<TypeBadge type={entry.type} t={t} />
 				<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
 			</div>
 
-			<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-				<div style={{ fontSize: 80, fontFamily: 'Yu Gothic, system-ui, -apple-system, "Segoe UI", sans-serif', color: '#fff', lineHeight: 1 }}>
+			<div className="dict-detail__header">
+				<div className="dict-detail__char">
 					{entry.kanji || entry.kana}
 				</div>
 				<button
 					onClick={() => speakJapanese(entry.kana)}
-					style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', fontSize: 24, padding: '12px 16px', borderRadius: 10 }}
+					className="dict-detail__speak-btn"
 					title={t.listen ?? 'Écouter'}
 				>
 					🔊
@@ -571,7 +503,7 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 
 			{entry.type === 'kanji'
 				? (
-					<div style={{ padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
+					<div className="dict-detail__readings">
 						<Readings
 							kana={entry.kana}
 							onLabel={t.onyomi ?? "Lectures on'yomi (sino-japonaises)"}
@@ -592,10 +524,7 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 					value={
 						<button
 							onClick={() => onRadicalClick?.(entry.radical)}
-							style={{
-								background: 'transparent', color: 'var(--accent)',
-								padding: 0, fontSize: 14, textDecoration: 'underline',
-							}}
+							className="dict-detail__radical-link"
 						>
 							#{entry.radical}
 						</button>
@@ -604,21 +533,21 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 			)}
 
 			{entry.type === 'kanji' && entry.svg_url && (
-				<div style={{ marginTop: 20 }}>
-					<div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 8, fontWeight: 'bold', letterSpacing: 1 }}>
+				<div className="dict-detail__stroke-section">
+					<div className="dict-detail__stroke-label">
 						{t.strokeOrder ?? 'ORDRE DES TRAITS'}
 					</div>
-					<div style={{ background: '#fff', borderRadius: 8, padding: 8, width: '100%' }}>
+					<div className="dict-detail__stroke-frame">
 						<img
 							src={`${API_BASE}${entry.svg_url}`}
 							alt={`Stroke order ${entry.kanji}`}
-							style={{ width: '100%', display: 'block' }}
+							className="dict-detail__stroke-img"
 							onError={e => {
 								e.target.style.display = 'none'
 								e.target.nextSibling.style.display = 'block'
 							}}
 						/>
-						<div style={{ display: 'none', color: '#999', fontSize: 12, textAlign: 'center', padding: 8 }}>
+						<div className="dict-detail__stroke-fallback">
 							{t.notAvailable ?? 'Non disponible'}
 						</div>
 					</div>
@@ -627,7 +556,7 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 
 			<button
 				onClick={onClose}
-				style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', width: '100%', marginTop: 16, fontSize: 13 }}
+				className="dict-detail__close-btn"
 			>
 				{t.close ?? 'Fermer'}
 			</button>
@@ -639,17 +568,11 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 
 function InfoRow({ label, value }) {
 	return (
-		<div style={{
-			display: 'flex', justifyContent: 'space-between',
-			alignItems: 'flex-start',
-			padding: '8px 0',
-			borderBottom: '1px solid var(--border)',
-			gap: 12,
-		}}>
-			<span style={{ fontSize: 12, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+		<div className="dict-info-row">
+			<span className="dict-info-row__label">
 				{label}
 			</span>
-			<span style={{ fontSize: 14, color: 'var(--text-primary)', textAlign: 'right' }}>
+			<span className="dict-info-row__value">
 				{value}
 			</span>
 		</div>

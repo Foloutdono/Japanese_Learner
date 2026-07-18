@@ -57,26 +57,17 @@ export default function ImportCardsMenu({ onImport, onClose }) {
   }
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 200,
-      background: 'rgba(0,0,0,0.7)',
-      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-      padding: '40px 16px', overflowY: 'auto',
-    }}>
-      <div style={{
-        background: 'var(--bg-main)', borderRadius: 12,
-        width: '100%', maxWidth: 700, padding: 32,
-      }}>
+    <div className="import-overlay">
+      <div className="import-modal">
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <div style={{ fontSize: 16, fontWeight: 'bold' }}>{t.importTitle}</div>
-          <button onClick={onClose}
-            style={{ background: 'transparent', color: 'var(--text-secondary)', fontSize: 20, padding: '0 8px' }}>
+        <div className="import-header">
+          <div className="import-header__title">{t.importTitle}</div>
+          <button onClick={onClose} className="import-header__close">
             ✕
           </button>
         </div>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+        <div className="import-subtitle">
           {t.importSubtitle}
         </div>
 
@@ -85,17 +76,11 @@ export default function ImportCardsMenu({ onImport, onClose }) {
           value={importText}
           onChange={e => setImportText(e.target.value)}
           placeholder={`Front, Back, Hint, Notes\n水, water, みず\n火, fire, ひ\n...`}
-          style={{
-            width: '100%', height: 180,
-            background: 'var(--bg-card)', color: 'var(--text-primary)',
-            border: '1px solid var(--border)', borderRadius: 8,
-            padding: 16, fontSize: 14, resize: 'vertical',
-            fontFamily: 'monospace', outline: 'none',
-          }}
+          className="import-textarea"
         />
 
         {/* Separators */}
-        <div style={{ display: 'flex', gap: 48, marginTop: 20, flexWrap: 'wrap' }}>
+        <div className="import-sep-row">
           <SepGroup
             title={t.termSep}
             value={termSep} onChange={setTermSep}
@@ -119,30 +104,27 @@ export default function ImportCardsMenu({ onImport, onClose }) {
         </div>
 
         {/* Preview */}
-        <div style={{ marginTop: 24 }}>
-          <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>
+        <div className="import-preview">
+          <div className="import-preview__title">
             {t.importPreview}
             {preview.length > 0
               ? ` — ${preview.length} ${t.cards}`
               : ` — ${t.noPreview}`}
           </div>
           {preview.length === 0 ? (
-            <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{t.noPreview}</div>
+            <div className="import-preview__empty">{t.noPreview}</div>
           ) : (
-            <div style={{ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="import-preview__list">
               {preview.slice(0, 20).map((c, i) => (
-                <div key={i} style={{
-                  background: 'var(--bg-card)', borderRadius: 6,
-                  padding: '8px 14px', display: 'flex', gap: 16, fontSize: 13,
-                }}>
-                  <span style={{ color: 'var(--text-primary)', minWidth: 100 }}>{c.front}</span>
-                  <span style={{ color: 'var(--text-secondary)' }}>→</span>
-                  <span style={{ color: 'var(--text-secondary)' }}>{c.back}</span>
-                  {c.hint && <span style={{ color: 'var(--accent2)' }}>{c.hint}</span>}
+                <div key={i} className="import-preview-row">
+                  <span className="import-preview-row__front">{c.front}</span>
+                  <span className="import-preview-row__arrow">→</span>
+                  <span className="import-preview-row__back">{c.back}</span>
+                  {c.hint && <span className="import-preview-row__hint">{c.hint}</span>}
                 </div>
               ))}
               {preview.length > 20 && (
-                <div style={{ color: 'var(--text-secondary)', fontSize: 12, padding: '4px 14px' }}>
+                <div className="import-preview__more">
                   ... {t.andMore.replace('{n}', preview.length - 20)}
                 </div>
               )}
@@ -151,19 +133,14 @@ export default function ImportCardsMenu({ onImport, onClose }) {
         </div>
 
         {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
-          <button onClick={onClose}
-            style={{ background: 'var(--bg-panel)', color: 'var(--text-secondary)', fontSize: 14 }}>
+        <div className="import-footer">
+          <button onClick={onClose} className="import-footer__cancel">
             {t.cancel}
           </button>
           <button
             onClick={handleImport}
             disabled={preview.length === 0 || importing}
-            style={{
-              background: preview.length > 0 ? '#6c5ce7' : 'var(--bg-panel)',
-              color: preview.length > 0 ? '#fff' : 'var(--text-secondary)',
-              fontSize: 14, opacity: importing ? 0.7 : 1,
-            }}
+            className={`import-footer__submit${preview.length > 0 ? ' import-footer__submit--active' : ''}${importing ? ' import-footer__submit--importing' : ''}`}
           >
             {importing
               ? t.importing
@@ -181,16 +158,16 @@ export default function ImportCardsMenu({ onImport, onClose }) {
 function SepGroup({ title, value, onChange, custom, onCustomChange, options }) {
   return (
     <div>
-      <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 10 }}>{title}</div>
+      <div className="import-sep-group__title">{title}</div>
       {options.map(([val, label]) => (
-        <label key={val} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, cursor: 'pointer' }}>
+        <label key={val} className="import-sep-option">
           <input type="radio" checked={value === val} onChange={() => onChange(val)} />
-          <span style={{ fontSize: 13 }}>{label}</span>
+          <span className="import-sep-option__label">{label}</span>
           {val === 'custom' && value === 'custom' && (
             <input
               value={custom}
               onChange={e => onCustomChange(e.target.value)}
-              style={{ padding: '4px 8px', fontSize: 13, width: 80 }}
+              className="import-sep-custom-input"
               placeholder="..."
             />
           )}

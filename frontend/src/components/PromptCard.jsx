@@ -3,20 +3,13 @@
  * The grey card that wraps the quiz question. Accepts children for flexibility.
  *
  * Props:
- *   children — anything: kanji display, meaning text, sentence, etc.
- *   style    — optional extra styles on the outer div
+ *   children  — anything: kanji display, meaning text, sentence, etc.
+ *   className — optional extra class(es) on the outer div, for one-off
+ *               tweaks (e.g. a smaller margin-bottom)
  */
-export default function PromptCard({ children, style = {} }) {
+export default function PromptCard({ children, className = '' }) {
   return (
-    <div style={{
-      background: 'var(--bg-card)',
-      borderRadius: 12,
-      padding: '40px 24px',
-      marginBottom: 32,
-      maxHeight: '60vh',
-      overflow: 'auto',
-      ...style,
-    }}>
+    <div className={`prompt-card${className ? ` ${className}` : ''}`}>
       {children}
     </div>
   )
