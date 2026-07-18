@@ -1130,21 +1130,6 @@ input:focus { border-color: var(--accent2); }
    empty, bordered void, since the answer drew a blank. */
 .rating-bar { margin-top: 32px; }
 
-.rating-bar__hint {
-  color: var(--text-secondary);
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-
-.rating-bar__key {
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-family: var(--font-display);
-}
-
 .rating-bar__buttons {
   display: flex;
   flex-wrap: wrap;
@@ -1188,21 +1173,6 @@ input:focus { border-color: var(--accent2); }
    (perfect recall down to total blackout) while staying inside
    the traditional palette. */
 .rating-bar { margin-top: 32px; }
-
-.rating-bar__hint {
-  color: var(--text-secondary);
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-
-.rating-bar__key {
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-family: inherit;
-}
 
 .rating-bar__buttons {
   display: flex;

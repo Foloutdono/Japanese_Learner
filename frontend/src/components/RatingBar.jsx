@@ -28,13 +28,6 @@ export default function RatingBar({ onRate, active }) {
 
   return (
     <div className="rating-bar">
-      <div className="rating-bar__hint">
-        {t.rateAnswer}{' '}
-        <kbd className="rating-bar__key">1</kbd>
-        {' '}{t.to}{' '}
-        <kbd className="rating-bar__key">6</kbd>
-        {' :'}
-      </div>
       <div className="rating-bar__buttons">
         {QUALITY_BTNS.map(({ q, label }, i) => (
           <button
