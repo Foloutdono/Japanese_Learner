@@ -511,10 +511,50 @@ function shortKana(kana, type) {
 	return type === 'vocab' ? firstKana : Array.from(firstKana).slice(0, 3).join('')
 }
 
+// Same idea as useRadicalColumns, but the results grid's width can also
+// change without a window resize — opening the side detail panel eats
+// 320px + gap out of .dict-results-wrap via the flex layout — so this
+// watches the container itself instead of just the window.
+function useResultsColumns(containerRef) {
+	const [cols, setCols] = useState(1)
+	useEffect(() => {
+		const el = containerRef.current
+		if (!el) return
+		const TILE = 180, GAP = 2
+		const measure = () => {
+			const width = el.clientWidth
+			if (!width) return
+			setCols(Math.max(1, Math.floor((width + GAP) / (TILE + GAP))))
+		}
+		measure()
+		const ro = new ResizeObserver(measure)
+		ro.observe(el)
+		return () => ro.disconnect()
+	}, [])
+	return cols
+}
+
+// Same reasoning as RadicalFiller: a ragged last row of entry cards
+// would otherwise leave a bare patch of the lattice background (or,
+// worse, a single undivided block of it) instead of reading as more
+// index-card slots that just happen to be empty.
+function ResultsFiller({ count, cols, glyph }) {
+	const empty = (cols - (count % cols)) % cols
+	if (!empty) return null
+	return Array.from({ length: empty }, (_, i) => (
+		<div key={`results-filler-${i}`} className="dict-results-filler" aria-hidden="true">
+			<span className="dict-results-filler__glyph">{glyph}</span>
+		</div>
+	))
+}
+
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
 	selected, setSelected, isMobile, sentinelRef, onRadicalClick, t,
 }) {
+	const resultsGridRef = useRef(null)
+	const cols = useResultsColumns(resultsGridRef)
+
 	return (
 		<>
 			{loading && (
@@ -534,7 +574,7 @@ function ResultsSection({
 
 					{/* Grid */}
 					<div className="dict-results-wrap">
-						<div className="dict-results-grid">
+						<div className="dict-results-grid" ref={resultsGridRef}>
 							{results.map(entry => (
 								<div
 									key={entryKey(entry)}
@@ -557,6 +597,7 @@ function ResultsSection({
 									<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
 								</div>
 							))}
+							<ResultsFiller count={results.length} cols={cols} glyph="語" />
 						</div>
 
 						{/* Infinite scroll sentinel */}

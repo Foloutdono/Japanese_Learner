@@ -2020,6 +2020,26 @@ input:focus { border-color: var(--accent2); }
 }
 .dict-entry-card__level { font-size: 13px; color: var(--accent2); font-weight: 700; font-family: var(--font-display); letter-spacing: 0.03em; }
 
+/* Same reasoning as .dict-radical-filler: a ragged last row of entry
+   cards would otherwise leave a bare patch of the lattice background
+   showing through. A muted, oversized watermark fills it instead —
+   decorative, not another clickable card. */
+.dict-results-filler {
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 128px;
+}
+.dict-results-filler__glyph {
+  font-family: var(--font-jp);
+  font-size: 40px;
+  line-height: 1;
+  color: var(--text-secondary);
+  opacity: 0.14;
+  user-select: none;
+}
+
 .dict-sentinel {
   height: 40px;
   margin-top: 16px;
