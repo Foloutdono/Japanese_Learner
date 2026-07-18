@@ -13,41 +13,46 @@ const SCROLL_THRESHOLD   = 2     // px of scroll before reacting — just enough
 const REVEAL_DURATION    = 5000  // ms the bar stays visible after a reveal
 
 /**
- * Hidden by default. Reveals only when the user scrolls up, then
- * auto-hides itself again after REVEAL_DURATION ms (the timer resets
- * on every fresh scroll-up). Only ever active on small screens; pass
- * `active=false` (or be on desktop) and it always reports "not hidden".
+ * Hidden by default on mobile. Reveals only on scroll-up (call
+ * `reveal()` yourself for any other trigger — e.g. a tap on a fallback
+ * handle), then auto-hides again after REVEAL_DURATION ms (the timer
+ * resets on every fresh reveal). Always visible on desktop.
  *
- * Exported so screens that roll their own header markup instead of
- * <TopBar/> (e.g. StudyScreen's quiz view) can reuse the same logic.
+ * Returns { hidden, reveal }. Exported so screens that roll their own
+ * header markup instead of <TopBar/> (e.g. StudyScreen's quiz view)
+ * can reuse the same logic — note this now returns an object, not a
+ * bare boolean, so update `const hidden = useAutoHideTopBar(...)` to
+ * `const { hidden, reveal } = useAutoHideTopBar(...)` there too.
  */
 export function useAutoHideTopBar(active = true) {
-  const [hidden, setHidden] = useState(true)
+  const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT
+  const [hidden, setHidden] = useState(() => active && isMobile())
   const lastY = useRef(0)
   const hideTimer = useRef(null)
+
+  function clearHideTimer() {
+    if (hideTimer.current) {
+      clearTimeout(hideTimer.current)
+      hideTimer.current = null
+    }
+  }
+
+  function reveal() {
+    if (!isMobile()) return
+    setHidden(false)
+    clearHideTimer()
+    hideTimer.current = setTimeout(() => setHidden(true), REVEAL_DURATION)
+  }
 
   useEffect(() => {
     if (!active) { setHidden(false); return }
 
-    setHidden(true)
+    setHidden(isMobile())
     lastY.current = window.scrollY
     let ticking = false
 
-    function clearHideTimer() {
-      if (hideTimer.current) {
-        clearTimeout(hideTimer.current)
-        hideTimer.current = null
-      }
-    }
-
-    function reveal() {
-      setHidden(false)
-      clearHideTimer()
-      hideTimer.current = setTimeout(() => setHidden(true), REVEAL_DURATION)
-    }
-
     function onScroll() {
-      if (window.innerWidth > MOBILE_BREAKPOINT) { setHidden(false); return }
+      if (!isMobile()) { setHidden(false); return }
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => {
@@ -67,9 +72,10 @@ export function useAutoHideTopBar(active = true) {
       window.removeEventListener('scroll', onScroll)
       clearHideTimer()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active])
 
-  return hidden
+  return { hidden, reveal }
 }
 
 export function TopBar({
@@ -82,32 +88,49 @@ export function TopBar({
   const { t } = useLang()
   const currentPath = window.location.pathname
   const showWritingToggle = isKanjiRoute(currentPath)
-  const hidden = useAutoHideTopBar(autoHide)
+  const { hidden, reveal } = useAutoHideTopBar(autoHide)
 
   return (
-    <div className={`top-bar${autoHide ? ' top-bar--autohide' : ''}${hidden ? ' top-bar--hidden' : ''}`}>
-      <div className="top-bar__inner">
-        <BurgerMenu links={getNavLinks(t)} currentPath={currentPath} />
+    <>
+      <div className={`top-bar${autoHide ? ' top-bar--autohide' : ''}${hidden ? ' top-bar--hidden' : ''}`}>
+        <div className="top-bar__inner">
+          <BurgerMenu links={getNavLinks(t)} currentPath={currentPath} />
 
-        <span className="top-bar__title">{title}</span>
+          <span className="top-bar__title">{title}</span>
 
-        {showWritingToggle && (
-          <button
-            onClick={onToggleDrawing}
-            className={`btn-writing-toggle ${
-              drawingEnabled
-                ? 'btn-writing-toggle--on'
-                : 'btn-writing-toggle--off'
-            }`}
-            title={t.toggleWriting}
-          >
-            ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
+          {showWritingToggle && (
+            <button
+              onClick={onToggleDrawing}
+              className={`btn-writing-toggle ${
+                drawingEnabled
+                  ? 'btn-writing-toggle--on'
+                  : 'btn-writing-toggle--off'
+              }`}
+              title={t.toggleWriting}
+            >
+              ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
+            </button>
+          )}
+          <button className="btn-back" onClick={onBack}>
+            {t.back}
           </button>
-        )}
-        <button className="btn-back" onClick={onBack}>
-          {t.back}
-        </button>
+        </div>
       </div>
-    </div>
+
+      {/* Fallback affordance: scrolling up reveals the bar, but short
+          pages may not be scrollable at all — this small tab is always
+          reachable by tap so the burger/back button never gets stranded. */}
+      {autoHide && (
+        <button
+          type="button"
+          className={`top-bar__peek${hidden ? ' top-bar__peek--visible' : ''}`}
+          onClick={reveal}
+          aria-label={t.back}
+          tabIndex={hidden ? 0 : -1}
+        >
+          <span aria-hidden="true">▾</span>
+        </button>
+      )}
+    </>
   )
 }
