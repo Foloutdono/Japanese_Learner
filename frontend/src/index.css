@@ -373,13 +373,15 @@ input:focus { border-color: var(--accent2); }
 }
 
 .dict-panel {
-	width: 300px;
+	width: 320px;
 	flex-shrink: 0;
 	position: sticky;
-	top: 80px;
+	top: 88px;
 	background: var(--bg-card);
-	border-radius: 12px;
-	padding: 24px;
+	border: 1px solid var(--border);
+	border-top: 3px solid var(--accent);
+	border-radius: 10px;
+	overflow: hidden;
 }
 
 /* ── Responsive grid ── */
@@ -1745,43 +1747,181 @@ input:focus { border-color: var(--accent2); }
 /* ── Dictionary screen ────────────────────────────────────── */
 .dict-page { padding-top: 24px; padding-bottom: 24px; }
 
-.dict-tab-row { display: flex; gap: 8px; margin-bottom: 16px; }
+/* ── Mode / category tabs ─────────────────────────────────
+   Seal-underline tabs, not filled pill buttons: the same "accent
+   marks it, doesn't drown it" language as .type-badge and the
+   choice-row/mcq-row accent bar, so the dictionary reads as the
+   same system as the quiz and selector screens instead of a
+   separate flat-UI control. */
+.dict-tab-row { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
 .dict-tab-row--category { margin-bottom: 24px; }
 
 .dict-tab-btn {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  font-size: 13px;
-  padding: 8px 16px;
+  position: relative;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 0;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 10px 16px 14px;
+  transition: color 0.15s ease;
 }
-.dict-tab-btn--active { background: var(--accent); }
+.dict-tab-btn::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+.dict-tab-btn:hover { color: var(--text-primary); }
+.dict-tab-btn--active { background: transparent; color: var(--text-primary); }
+.dict-tab-btn--active::after { transform: scaleX(1); }
 
-.dict-search-row { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
-.dict-search-input { flex: 1; padding: 14px 20px; font-size: 16px; }
-.dict-search-count { color: var(--text-secondary); font-size: 13px; white-space: nowrap; }
+.dict-tab-row--category .dict-tab-btn { font-size: 11px; padding: 8px 12px 10px; }
 
-.dict-radical-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-.dict-radical-back-btn { background: var(--bg-card); color: var(--text-primary); font-size: 13px; padding: 8px 14px; }
-.dict-radical-char {
-  font-size: 28px;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: var(--text-primary);
+/* ── Search / index bar ───────────────────────────────────
+   One bordered slot (icon + field + count) instead of a floating
+   input beside a stray count — reads as a single catalog control. */
+.dict-index-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 18px;
+  margin-bottom: 28px;
   background: var(--bg-card);
+  transition: border-color 0.2s ease;
+}
+.dict-index-bar:focus-within { border-color: var(--accent2); }
+.dict-index-bar__icon { width: 16px; height: 16px; color: var(--text-secondary); flex-shrink: 0; }
+.dict-index-bar__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 14px 0;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+.dict-index-bar__input:focus { border: none; }
+.dict-index-bar__count {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Selected-radical header ───────────────────────────────
+   The radical glyph reuses the home screen's hanko-stamp box (a
+   rotated hairline square around a seal-red character) — the app's
+   own signature applied here instead of a plain rounded chip. */
+.dict-radical-header { display: flex; align-items: center; gap: 18px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.dict-radical-back-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 4px 14px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.dict-radical-back-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+
+.dict-radical-char {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  font-family: var(--font-jp);
+  font-size: 26px;
+  color: var(--accent);
+}
+.dict-radical-char::after {
+  content: '';
+  position: absolute;
+  inset: -6px 0;
+  border: 1.5px solid var(--accent);
+  transform: rotate(-3deg);
+  opacity: 0.65;
 }
 .dict-radical-label { color: var(--text-secondary); font-size: 13px; }
 
-.dict-radical-group { margin-bottom: 24px; }
-.dict-radical-group__label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: bold;
-  margin-bottom: 10px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+/* ── Radical picker ─────────────────────────────────────────
+   Laid out as a printed 部首索引 (radical index): stroke-count
+   sheets, each titled the same serif+red-rule way as the stats
+   screen's sections, with a sticky thumb-index rail down the side —
+   the tabbed fore-edge of a real dictionary, letting you jump
+   straight to a stroke count instead of scrolling past every group. */
+.dict-radical-index { display: flex; gap: 32px; align-items: flex-start; }
+
+.dict-stroke-rail {
+  position: sticky;
+  top: 92px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 1px solid var(--border);
+  padding-left: 12px;
 }
-.dict-radical-group__list { display: flex; flex-wrap: wrap; gap: 8px; }
+.dict-stroke-rail__tab {
+  min-width: 26px;
+  text-align: center;
+  padding: 5px 6px;
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.dict-stroke-rail__tab:hover,
+.dict-stroke-rail__tab:focus-visible {
+  color: var(--text-on-panel);
+  background: var(--accent);
+}
+
+.dict-radical-sheets { flex: 1; min-width: 0; }
+
+.dict-radical-group { margin-bottom: 40px; scroll-margin-top: 92px; }
+.dict-radical-group__label {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+/* A short seal-red stroke, same device as .stats-section__rule. */
+.dict-radical-group__rule { height: 2px; width: 28px; background: var(--accent); margin: 10px 0 16px; }
+
+/* Flush lattice — 1px hairlines showing through the container
+   background, the same shoji-screen technique as .home-grid,
+   instead of individually rounded/bordered floating buttons. */
+.dict-radical-group__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 56px);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  width: max-content;
+  max-width: 100%;
+}
 
 .dict-radical-btn {
   width: 56px;
@@ -1789,65 +1929,76 @@ input:focus { border-color: var(--accent2); }
   padding: 0;
   background: var(--bg-card);
   color: var(--text-primary);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: none;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
+.dict-radical-btn:hover,
+.dict-radical-btn:focus-visible { background: var(--bg-card-hover); }
 .dict-radical-btn__char {
-  font-size: 26px;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 24px;
+  font-family: var(--font-jp);
   line-height: 1;
 }
-.dict-radical-btn__count { font-size: 9px; color: var(--text-secondary); margin-top: 3px; }
+.dict-radical-btn__count { font-size: 9px; color: var(--text-secondary); margin-top: 3px; font-family: var(--font-display); }
 
 .dict-results-wrap { flex: 1; }
 
+/* ── Results grid ─────────────────────────────────────────
+   Same flush shoji-lattice as the radical picker — the search
+   results read as index cards in one catalog drawer, not floating
+   shadowed tiles. Each card keeps a thin colour-coded top edge
+   (kanji vs. vocabulary) instead of a loud filled badge, echoing
+   the rating bar's "seal-colour stroke along the top" language. */
 .dict-results-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
 }
 
 .dict-entry-card {
   background: var(--bg-card);
-  border-radius: 10px;
-  padding: 16px 10px;
+  border: none;
+  border-top: 3px solid var(--card-color, var(--border));
+  border-radius: 0;
+  padding: 22px 12px 18px;
   text-align: center;
   cursor: pointer;
-  border: 1px solid var(--border);
-  transition: background 0.15s;
+  transition: background 0.15s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
-.dict-entry-card:hover { background: var(--bg-panel); }
+.dict-entry-card:hover { background: var(--bg-card-hover); }
 .dict-entry-card--selected,
 .dict-entry-card--selected:hover {
-  background: var(--bg-panel);
-  border-color: var(--accent);
+  background: var(--overlay-hover);
 }
 
 .dict-entry-card__char {
-  font-size: 40px;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 38px;
+  font-family: var(--font-jp);
   line-height: 1;
   margin-top: 4px;
 }
-.dict-entry-card__kana { font-size: 15px; color: var(--text-secondary); }
+.dict-entry-card__kana { font-size: 14px; color: var(--text-secondary); font-family: var(--font-jp); }
 .dict-entry-card__meaning {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 100%;
 }
-.dict-entry-card__level { font-size: 15px; color: var(--accent2); font-weight: bold; }
+.dict-entry-card__level { font-size: 13px; color: var(--accent2); font-weight: 700; font-family: var(--font-display); letter-spacing: 0.03em; }
 
 .dict-sentinel {
   height: 40px;
@@ -1856,7 +2007,14 @@ input:focus { border-color: var(--accent2); }
   align-items: center;
   justify-content: center;
 }
-.dict-sentinel__text { color: var(--text-secondary); font-size: 13px; }
+.dict-sentinel__text {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 
 .dict-modal-overlay {
   position: fixed;
@@ -1870,34 +2028,54 @@ input:focus { border-color: var(--accent2); }
 }
 .dict-modal-content {
   background: var(--bg-card);
-  border-radius: 16px;
+  border-radius: 14px;
+  border-top: 3px solid var(--accent);
   width: 100%;
   max-width: 400px;
   max-height: 85vh;
   overflow-y: auto;
-  padding: 24px;
 }
 
-.dict-detail__badges { display: flex; gap: 8px; margin-bottom: 8px; }
-.dict-detail__header {
+/* Dark ink stage for the headline character — same sumi block as the
+   top bar / home header — with a hanko-red stamp button standing in
+   for the old 🔊 emoji. Corners inherit whatever radius the parent
+   (.dict-panel or .dict-modal-content) has, so it always sits flush. */
+.dict-detail__stage {
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  gap: 16px;
+  padding: 30px 24px 24px;
 }
 .dict-detail__char {
-  font-size: 80px;
-  font-family: 'Yu Gothic', system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: var(--text-primary);
+  font-size: 60px;
+  font-family: var(--font-jp);
+  color: var(--text-on-panel);
   line-height: 1;
 }
 .dict-detail__speak-btn {
-  background: var(--bg-panel);
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--accent);
   color: var(--text-on-panel);
-  font-size: 24px;
-  padding: 12px 16px;
-  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-4deg);
+  transition: transform 0.2s ease;
 }
+.dict-detail__speak-btn:hover { transform: rotate(0deg) scale(1.06); }
+.dict-detail__speak-icon { width: 18px; height: 18px; }
+
+.dict-detail__body { padding: 20px 24px 24px; }
+.dict-detail__badges { display: flex; gap: 12px; margin-bottom: 4px; }
 .dict-detail__readings { padding: 8px 0; border-bottom: 1px solid var(--border); }
 .dict-detail__radical-link {
   background: transparent;
@@ -1962,16 +2140,23 @@ input:focus { border-color: var(--accent2); }
   display: inline-block;
 }
 
+/* A hairline underline in the type's colour, not a filled pill — same
+   "accent marks it, doesn't drown it" language as .type-badge, so the
+   dictionary's kanji/vocab marker matches the quiz's question-type
+   marker instead of being its own one-off pill button. */
 .dict-type-pill {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--pill-color, var(--accent3));
-  color: var(--text-on-panel);
-  font-size: 10px;
+  padding: 0 1px 4px;
+  border: none;
+  border-bottom: 2px solid var(--pill-color, var(--accent3));
+  border-radius: 0;
+  background: none;
+  color: var(--pill-color, var(--accent3));
+  font-family: var(--font-display);
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -2744,6 +2929,10 @@ input:focus { border-color: var(--accent2); }
   }
 
   .dict-panel {
+    display: none;
+  }
+
+  .dict-stroke-rail {
     display: none;
   }
 }

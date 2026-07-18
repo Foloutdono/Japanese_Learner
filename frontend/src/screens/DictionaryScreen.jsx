@@ -14,9 +14,13 @@ const STATUS_META = {
 	mastered: { color: 'var(--success)',        fallback: 'Maîtrisé' },
 }
 
+// Colours pulled from the app's own palette (ai-iro indigo / rokushou
+// verdigris) instead of arbitrary hex, so — like every other colour
+// in the app — these correctly flip between the dark and light theme
+// rather than staying fixed regardless of `data-theme`.
 const TYPE_META = {
-	kanji: { color: '#3B82F6', fallback: 'Kanji' },
-	vocab: { color: '#10B981', fallback: 'Vocabulaire' },
+	kanji: { color: 'var(--accent4)', fallback: 'Kanji' },
+	vocab: { color: 'var(--accent6)', fallback: 'Vocabulaire' },
 }
 
 // Kanji and vocab entries can share the same character (a one-kanji word),
@@ -41,6 +45,47 @@ function TypeBadge({ type, t }) {
 		<span className="dict-type-pill" style={{ '--pill-color': meta.color }}>
 			{type === 'kanji' ? (t?.dictKanji ?? 'Kanji') : (t?.dictVocab ?? 'Vocabulaire')}
 		</span>
+	)
+}
+
+// A drawn glyph, not an emoji — 🔊 was the only emoji anywhere in this
+// screen or QuizComponents, which otherwise draws its own icons (see
+// Loading's spinner). Sits inside the hanko-style stamp button below.
+function SpeakIcon() {
+	return (
+		<svg
+			className="dict-detail__speak-icon"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			aria-hidden="true"
+		>
+			<polygon points="4,9 8,9 12,5 12,19 8,15 4,15" fill="currentColor" stroke="none" />
+			<path d="M15.5 8.5a5 5 0 0 1 0 7" />
+			<path d="M18.5 6a8.5 8.5 0 0 1 0 12" />
+		</svg>
+	)
+}
+
+// A small magnifier for the search bar — same reasoning as SpeakIcon.
+function SearchIcon() {
+	return (
+		<svg
+			className="dict-index-bar__icon"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			aria-hidden="true"
+		>
+			<circle cx="11" cy="11" r="7" />
+			<path d="M21 21l-4.35-4.35" />
+		</svg>
 	)
 }
 
@@ -226,6 +271,14 @@ export default function DictionaryScreen({ session }) {
 
 			<div className="container dict-page">
 
+				<div className="selector-header">
+					<div className="selector-header__eyebrow">索引 · Sakuin</div>
+					<h1 className="selector-header__title">{t.dictionaryTitle ?? 'Dictionnaire'}</h1>
+					<p className="selector-header__subtitle">
+						{t.dictionarySubtitle ?? 'Cherchez un kanji, un mot, ou parcourez par radical.'}
+					</p>
+				</div>
+
 				{/* Mode tabs */}
 				<div className="dict-tab-row">
 					{[
@@ -245,7 +298,8 @@ export default function DictionaryScreen({ session }) {
 				{/* Search bar + count — hidden while browsing the plain radical grid,
 				    shown again once a radical is picked (to narrow further) */}
 				{!showingRadicalGrid && (
-					<div className="dict-search-row">
+					<div className="dict-index-bar">
+						<SearchIcon />
 						<input
 							value={query}
 							onChange={onSearch}
@@ -255,10 +309,10 @@ export default function DictionaryScreen({ session }) {
 									: (t.dictionaryPlaceholder ?? 'Rechercher kanji, kana, ou sens...')
 							}
 							autoFocus={mode === 'search'}
-							className="dict-search-input"
+							className="dict-index-bar__input"
 						/>
 						{!loading && (
-							<div className="dict-search-count">
+							<div className="dict-index-bar__count">
 								{total} {t.dictionaryResults ?? 'résultats'}
 							</div>
 						)}
@@ -291,7 +345,7 @@ export default function DictionaryScreen({ session }) {
 							onClick={backToRadicalGrid}
 							className="dict-radical-back-btn"
 						>
-							{t.dictBackToRadicals ?? 'Radicaux'}
+							← {t.dictBackToRadicals ?? 'Radicaux'}
 						</button>
 						<div className="dict-radical-char">
 							{radicalCharByNumber[selectedRadical] ?? '?'}
@@ -336,6 +390,13 @@ export default function DictionaryScreen({ session }) {
 
 // ── Radical picker grid ─────────────────────────────────────
 
+// Jumps to a stroke-count sheet without a full page-jump — `block:
+// 'start'` plus each sheet's own scroll-margin-top (set in CSS) keeps
+// the landed section clear of the sticky search bar above it.
+function jumpToStrokeSheet(count) {
+	document.getElementById(`stroke-sheet-${count}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 function RadicalGrid({ groups, loading, onPick, t }) {
 	if (loading || !groups) {
 		return (
@@ -346,33 +407,52 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 	}
 
 	return (
-		<div>
-			{groups.map(group => (
-				<div key={group.stroke_count} className="dict-radical-group">
-					<div className="dict-radical-group__label">
-						{group.stroke_count} {group.stroke_count > 1
-							? (t.dictStrokesPlural ?? 'traits')
-							: (t.dictStrokeSingular ?? 'trait')}
+		<div className="dict-radical-index">
+			{/* Thumb index — the stroke-count tabs found on the fore-edge of a
+			    printed 部首索引 (radical index), letting you jump straight to
+			    a stroke count instead of scrolling past every group. */}
+			<nav className="dict-stroke-rail" aria-label={t.dictStrokeIndex ?? 'Index par nombre de traits'}>
+				{groups.map(g => (
+					<a
+						key={g.stroke_count}
+						href={`#stroke-sheet-${g.stroke_count}`}
+						onClick={e => { e.preventDefault(); jumpToStrokeSheet(g.stroke_count) }}
+						className="dict-stroke-rail__tab"
+					>
+						{g.stroke_count}
+					</a>
+				))}
+			</nav>
+
+			<div className="dict-radical-sheets">
+				{groups.map(group => (
+					<div key={group.stroke_count} id={`stroke-sheet-${group.stroke_count}`} className="dict-radical-group">
+						<div className="dict-radical-group__label">
+							{group.stroke_count} {group.stroke_count > 1
+								? (t.dictStrokesPlural ?? 'traits')
+								: (t.dictStrokeSingular ?? 'trait')}
+						</div>
+						<div className="dict-radical-group__rule" />
+						<div className="dict-radical-group__list">
+							{group.radicals.map(r => (
+								<button
+									key={r.number}
+									onClick={() => onPick(r.number)}
+									title={`${r.kanji_count} kanji`}
+									className="dict-radical-btn"
+								>
+									<span className="dict-radical-btn__char">
+										{r.char}
+									</span>
+									<span className="dict-radical-btn__count">
+										{r.kanji_count}
+									</span>
+								</button>
+							))}
+						</div>
 					</div>
-					<div className="dict-radical-group__list">
-						{group.radicals.map(r => (
-							<button
-								key={r.number}
-								onClick={() => onPick(r.number)}
-								title={`${r.kanji_count} kanji`}
-								className="dict-radical-btn"
-							>
-								<span className="dict-radical-btn__char">
-									{r.char}
-								</span>
-								<span className="dict-radical-btn__count">
-									{r.kanji_count}
-								</span>
-							</button>
-						))}
-					</div>
-				</div>
-			))}
+				))}
+			</div>
 		</div>
 	)
 }
@@ -490,12 +570,7 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 
 	return (
 		<>
-			<div className="dict-detail__badges">
-				<TypeBadge type={entry.type} t={t} />
-				<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
-			</div>
-
-			<div className="dict-detail__header">
+			<div className="dict-detail__stage">
 				<div className="dict-detail__char">
 					{entry.kanji || entry.kana}
 				</div>
@@ -503,70 +578,78 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 					onClick={() => speakJapanese(entry.kana)}
 					className="dict-detail__speak-btn"
 					title={t.listen ?? 'Écouter'}
+					aria-label={t.listen ?? 'Écouter'}
 				>
-					🔊
+					<SpeakIcon />
 				</button>
 			</div>
 
-			{entry.type === 'kanji'
-				? (
-					<div className="dict-detail__readings">
-						<Readings
-							kana={entry.kana}
-							onLabel={t.onyomi ?? "Lectures on'yomi (sino-japonaises)"}
-							kunLabel={t.kunyomi ?? "Lectures kun'yomi (japonaises)"}
-						/>
-					</div>
-				)
-				: <InfoRow label={t.reading ?? 'Lecture'} value={entry.kana} />
-			}
-			<InfoRow label={t.meaning  ?? 'Sens'}    value={meaning} />
-			<InfoRow label={t.level    ?? 'Niveau'}  value={entry.level} />
-			{entry.stroke_count && (
-				<InfoRow label={t.strokes ?? 'Traits'} value={`${entry.stroke_count} ${t.strokes ?? 'traits'}`} />
-			)}
-			{entry.type === 'kanji' && entry.radical != null && (
-				<InfoRow
-					label={t.radical ?? 'Radical'}
-					value={
-						<button
-							onClick={() => onRadicalClick?.(entry.radical)}
-							className="dict-detail__radical-link"
-						>
-							#{entry.radical}
-						</button>
-					}
-				/>
-			)}
+			<div className="dict-detail__body">
+				<div className="dict-detail__badges">
+					<TypeBadge type={entry.type} t={t} />
+					<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
+				</div>
 
-			{entry.type === 'kanji' && entry.svg_url && (
-				<div className="dict-detail__stroke-section">
-					<div className="dict-detail__stroke-label">
-						{t.strokeOrder ?? 'ORDRE DES TRAITS'}
-					</div>
-					<div className="dict-detail__stroke-frame">
-						<img
-							src={`${API_BASE}${entry.svg_url}`}
-							alt={`Stroke order ${entry.kanji}`}
-							className="dict-detail__stroke-img"
-							onError={e => {
-								e.target.style.display = 'none'
-								e.target.nextSibling.style.display = 'block'
-							}}
-						/>
-						<div className="dict-detail__stroke-fallback">
-							{t.notAvailable ?? 'Non disponible'}
+				{entry.type === 'kanji'
+					? (
+						<div className="dict-detail__readings">
+							<Readings
+								kana={entry.kana}
+								onLabel={t.onyomi ?? "Lectures on'yomi (sino-japonaises)"}
+								kunLabel={t.kunyomi ?? "Lectures kun'yomi (japonaises)"}
+							/>
+						</div>
+					)
+					: <InfoRow label={t.reading ?? 'Lecture'} value={entry.kana} />
+				}
+				<InfoRow label={t.meaning  ?? 'Sens'}    value={meaning} />
+				<InfoRow label={t.level    ?? 'Niveau'}  value={entry.level} />
+				{entry.stroke_count && (
+					<InfoRow label={t.strokes ?? 'Traits'} value={`${entry.stroke_count} ${t.strokes ?? 'traits'}`} />
+				)}
+				{entry.type === 'kanji' && entry.radical != null && (
+					<InfoRow
+						label={t.radical ?? 'Radical'}
+						value={
+							<button
+								onClick={() => onRadicalClick?.(entry.radical)}
+								className="dict-detail__radical-link"
+							>
+								#{entry.radical}
+							</button>
+						}
+					/>
+				)}
+
+				{entry.type === 'kanji' && entry.svg_url && (
+					<div className="dict-detail__stroke-section">
+						<div className="dict-detail__stroke-label">
+							{t.strokeOrder ?? 'ORDRE DES TRAITS'}
+						</div>
+						<div className="dict-detail__stroke-frame">
+							<img
+								src={`${API_BASE}${entry.svg_url}`}
+								alt={`Stroke order ${entry.kanji}`}
+								className="dict-detail__stroke-img"
+								onError={e => {
+									e.target.style.display = 'none'
+									e.target.nextSibling.style.display = 'block'
+								}}
+							/>
+							<div className="dict-detail__stroke-fallback">
+								{t.notAvailable ?? 'Non disponible'}
+							</div>
 						</div>
 					</div>
-				</div>
-			)}
+				)}
 
-			<button
-				onClick={onClose}
-				className="dict-detail__close-btn"
-			>
-				{t.close ?? 'Fermer'}
-			</button>
+				<button
+					onClick={onClose}
+					className="dict-detail__close-btn"
+				>
+					{t.close ?? 'Fermer'}
+				</button>
+			</div>
 		</>
 	)
 }
