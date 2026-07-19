@@ -1819,6 +1819,70 @@ input:focus { border-color: var(--accent2); }
   color: var(--text-primary);
 }
 
+/* The name doubles as the edit trigger — a plain reset button styled
+   to look exactly like the static text, plus a small pencil glyph
+   that only shows on hover so it doesn't read as decoration when
+   the profile isn't the current user's own (future-proofing for
+   viewing someone else's profile). */
+.profile-card__name--editable {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.profile-card__edit-glyph {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.profile-card__name--editable:hover .profile-card__edit-glyph { opacity: 1; }
+
+.profile-card__name-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.profile-card__name-input {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  padding: 4px 10px;
+  border: 1px solid var(--accent9);
+  background: var(--bg-panel-soft, var(--bg-panel));
+  color: var(--text-primary);
+  min-width: 0;
+  width: 12ch;
+}
+.profile-card__name-save,
+.profile-card__name-cancel {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.profile-card__name-save { border-color: var(--accent9); color: var(--accent9); }
+.profile-card__name-cancel { padding: 5px 9px; }
+.profile-card__name-save:disabled,
+.profile-card__name-cancel:disabled { opacity: 0.5; cursor: default; }
+
+.profile-card__name-error {
+  flex-basis: 100%;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--danger);
+}
+
 .profile-card__title {
   font-family: var(--font-display);
   font-size: 12px;
@@ -2023,6 +2087,17 @@ input:focus { border-color: var(--accent2); }
   font-weight: 700;
   font-size: 13px;
   color: var(--text-primary);
+}
+
+/* The "···" divider between the visible top N and the current user's
+   own row when they're further down the list — a gap, not a row, so
+   it's centered and doesn't try to align to the rank/name/xp columns. */
+.leaderboard-row__gap {
+  justify-content: center;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  letter-spacing: 0.2em;
+  padding: 8px 20px;
 }
 
 /* ── Dictionary screen ────────────────────────────────────── */

@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
+import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
+
+const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 
 export default function AuthScreen() {
   const { t } = useLang()
   const [mode, setMode]       = useState('login') // 'login' | 'signup'
   const [email, setEmail]     = useState('')
   const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('')
   const [error, setError]     = useState(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(null)
@@ -21,12 +25,37 @@ export default function AuthScreen() {
   async function handleSubmit() {
     setError(null)
     setSuccess(null)
+
+    if (mode === 'signup' && username && !USERNAME_RE.test(username)) {
+      setError(t.usernameInvalid || '3-20 caractères : lettres, chiffres, underscore.')
+      return
+    }
+
     setLoading(true)
 
     if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({ email, password })
-      if (error) setError(error.message)
-      else setSuccess(t.signupSuccess)
+      const { data, error } = await supabase.auth.signUp({ email, password })
+      if (error) {
+        setError(error.message)
+      } else {
+        setSuccess(t.signupSuccess)
+        // Username is optional at signup — if left blank, /api/profile
+        // will assign a random one on first login, editable later from
+        // the Profile screen. If a session comes back immediately (no
+        // email confirmation required), set it right away rather than
+        // waiting on that fallback. When confirmation *is* required,
+        // there's no session yet to authenticate this call with, so
+        // the chosen name can't be applied until they log in — at
+        // which point the random fallback has already claimed a name
+        // and they'd need to rename it manually. Revisit once we know
+        // whether email confirmation is enabled for this project.
+        if (username && data.session) {
+          apiFetch('/api/profile', data.session, {
+            method: 'PATCH',
+            body: JSON.stringify({ username }),
+          }).catch(() => {})
+        }
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError(error.message)
@@ -56,6 +85,17 @@ export default function AuthScreen() {
         </div>
 
         <div className="auth-fields">
+          {mode === 'signup' && (
+            <input
+              type="text"
+              placeholder={t.usernameOptional || 'Nom d’utilisateur (facultatif)'}
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+              className="auth-input"
+              maxLength={20}
+            />
+          )}
           <input
             type="email"
             placeholder={t.email}
