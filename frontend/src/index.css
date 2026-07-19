@@ -131,6 +131,8 @@
   /* Sumi-nezumi (墨鼠) — charcoal grey. Deepened independently for
      paper, same reasoning as the dark-theme value above. */
   --state-new:      #55503f;
+  --state-learning:      #b7402a;
+  --state-mastered:      #a97a25;
   /* Darkened well past the paper tones around it — a hairline
      that's actually visible, not a shade indistinguishable from
      the card it's supposed to divide. */
@@ -1699,7 +1701,7 @@ input:focus { border-color: var(--accent2); }
 /* StatCell (shared progress bar) */
 .stat-cell__track {
   height: 7px;
-  background: var(--bg-panel);
+  background: var(--state-new);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 6px;
@@ -1707,8 +1709,8 @@ input:focus { border-color: var(--accent2); }
 
 .stat-cell__fill-row { display: flex; height: 100%; }
 
-.stat-cell__segment--mastered { width: var(--seg-w, 0%); background: var(--success); transition: width 0.3s ease; }
-.stat-cell__segment--learning { width: var(--seg-w, 0%); background: var(--accent4); transition: width 0.3s ease; }
+.stat-cell__segment--mastered { width: var(--seg-w, 0%); background: var(--state-mastered); transition: width 0.3s ease; }
+.stat-cell__segment--learning { width: var(--seg-w, 0%); background: var(--state-learning); transition: width 0.3s ease; }
 
 .stat-cell__row {
   display: flex;
@@ -1723,8 +1725,8 @@ input:focus { border-color: var(--accent2); }
 /* Gris dédié pour "new" (partagé avec DeckProgress), indigo pour
    "learning" — deux teintes bien séparées, chacune réglée par thème. */
 .stat-cell__new { color: var(--state-new); }
-.stat-cell__learning { color: var(--accent4); }
-.stat-cell__mastered { color: var(--success); }
+.stat-cell__learning { color: var(--state-learning); }
+.stat-cell__mastered { color: var(--state-mastered); }
 
 /* A small seal-stamp pill instead of an underlined text link — the
    due-review action gets the same treatment as other primary actions
