@@ -101,7 +101,7 @@
   /* Ai-iro (藍色) indigo — deliberately distinct from --accent, which
      is already spoken for by --state-learning's vermillion. Reusing
      it here made "due" and "learning" read as the same color. */
-  --state-due:      var(--accent4);
+  --state-due:      #755894;
   --border:         #35303a;
 }
 
@@ -139,7 +139,7 @@
   --state-new:      #1a1812;
   --state-learning:      #b7402a;
   --state-mastered:      #a97a25;
-  --state-due:      var(--accent4);
+  --state-due:      #755894;
   /* Darkened well past the paper tones around it — a hairline
      that's actually visible, not a shade indistinguishable from
      the card it's supposed to divide. */
