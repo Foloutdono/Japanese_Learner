@@ -18,6 +18,7 @@ import PhraseAnalyzerScreen from './screens/PhraseAnalyzerScreen'
 import ReadingScreen from './screens/ReadingScreen'
 import ReadingComprehensionScreen from './screens/ReadingComprehensionScreen'
 import ProfileScreen from './screens/ProfileScreen'
+import SettingsScreen from './screens/SettingsScreen'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
