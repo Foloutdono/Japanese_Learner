@@ -144,6 +144,29 @@ function MobileLevelBar() {
   const navigate = useNavigate()
   const { t } = useLang()
   const summary = useProfileSummary()
+  const prevXpRef = useRef(null)
+  const [gain, setGain] = useState(null) // { fromPct, toPct, id } — segment to highlight
+
+  // Whenever xp goes up, figure out the percentage span it just moved
+  // through and flag it for a highlighted overlay — cleared once its
+  // fade-out animation ends (see onAnimationEnd below).
+  useEffect(() => {
+    if (!summary) return
+    const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)
+    if (prevXpRef.current !== null && summary.xp > prevXpRef.current) {
+      // Clamped against the *current* span so a level-up (which shifts
+      // xpPrevLevel/xpForNext) still yields a sane highlight instead
+      // of a stale or negative offset.
+      const prevInto = Math.min(span, Math.max(0, prevXpRef.current - summary.xpPrevLevel))
+      const curInto  = Math.min(span, Math.max(0, summary.xp - summary.xpPrevLevel))
+      const fromPct = Math.round((prevInto / span) * 100)
+      const toPct   = Math.round((curInto / span) * 100)
+      if (toPct > fromPct) setGain({ fromPct, toPct, id: Date.now() })
+    }
+    prevXpRef.current = summary.xp
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [summary?.xp, summary?.xpPrevLevel, summary?.xpForNext])
+
   if (!summary) return null
 
   const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)
@@ -155,6 +178,14 @@ function MobileLevelBar() {
       <span className="mobile-level-bar__level">{t.level ?? 'Niv.'} {summary.level}</span>
       <span className="mobile-level-bar__track">
         <span className="mobile-level-bar__fill" style={{ width: `${pct}%` }} />
+        {gain && (
+          <span
+            key={gain.id}
+            className="mobile-level-bar__gain"
+            style={{ left: `${gain.fromPct}%`, width: `${Math.max(0, gain.toPct - gain.fromPct)}%` }}
+            onAnimationEnd={() => setGain(null)}
+          />
+        )}
       </span>
       <span className="mobile-level-bar__xp">{into}/{span} XP</span>
     </button>
