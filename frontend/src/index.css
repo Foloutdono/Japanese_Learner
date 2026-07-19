@@ -103,6 +103,7 @@
      it here made "due" and "learning" read as the same color. */
   --state-due:      #755894;
   --border:         #35303a;
+  --burger-menu-border: #35303a;
 }
 
 /* ── Light theme — washi (和紙), rice paper ──────────────────
@@ -143,7 +144,8 @@
   /* Darkened well past the paper tones around it — a hairline
      that's actually visible, not a shade indistinguishable from
      the card it's supposed to divide. */
-  --border:         #706855;
+  --border:         #c3af7c;
+  --burger-menu-border: #605947;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -586,7 +588,7 @@ input:focus { border-color: var(--accent2); }
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--burger-menu-border);
 }
 
 .burger-drawer__title {
@@ -642,7 +644,7 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   gap: 8px;
   padding: 16px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--burger-menu-border);
   flex-wrap: wrap;
 }
 
