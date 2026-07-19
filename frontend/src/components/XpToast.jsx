@@ -2,16 +2,21 @@ import { useEffect } from 'react'
 import { playXpGain, playLevelUp } from './sound'
 
 // ── XP toast ──────────────────────────────────────────────
-// `toast` is `{ amount, id, leveledUp, newLevel }` — `id` rather than
-// keying off `amount` so two back-to-back reviews worth the same XP
-// still re-trigger the animation, and `leveledUp`/`newLevel` (from
-// srs.review()'s response — see KanjiScreen/VocabScreen/KanaScreen's
-// postReview) switch it into the bigger celebration variant instead
-// of the routine pop. `onDone` clears the parent's state once the
-// toast has had its moment; the component itself doesn't track its
-// own visibility.
+// `toast` is `{ amount, id, leveledUp, newLevel, quality }` — `id`
+// rather than keying off `amount` so two back-to-back reviews worth
+// the same XP still re-trigger the animation, and `leveledUp`/
+// `newLevel` (from srs.review()'s response — see KanjiScreen/
+// VocabScreen/KanaScreen's postReview) switch it into the bigger
+// celebration variant instead of the routine pop. `onDone` clears the
+// parent's state once the toast has had its moment; the component
+// itself doesn't track its own visibility.
 const NORMAL_DURATION = 1600
 const LEVEL_UP_DURATION = 2400
+
+// Same per-quality accent the rating bar itself uses (see
+// .rating-bar__btn--q* in index.css) — q3 "hésitant" and up get a
+// spark burst in the matching color; q0-q2 (failed) ratings get none.
+const SPARK_COLOR_VAR = { 3: '--accent2', 4: '--accent6', 5: '--success' }
 
 export function XpToast({ toast, onDone }) {
   useEffect(() => {
@@ -39,10 +44,29 @@ export function XpToast({ toast, onDone }) {
     )
   }
 
+  // One spark per quality point above q2 (so 1/2/3 sparks for
+  // q3/q4/q5), plus a stronger glow pulse on the pill itself from q4
+  // up — the better the rating, the more the toast celebrates it.
+  const sparkColorVar = SPARK_COLOR_VAR[toast.quality]
+  const sparkCount = sparkColorVar ? toast.quality - 2 : 0
+  const boosted = toast.quality >= 4
+
   return (
-    <div key={toast.id} className="xp-toast" aria-live="polite">
+    <div
+      key={toast.id}
+      className={`xp-toast${boosted ? ' xp-toast--boosted' : ''}`}
+      aria-live="polite"
+      style={sparkColorVar ? { '--spark-color': `var(${sparkColorVar})` } : undefined}
+    >
       <span className="xp-toast__glyph" aria-hidden="true">⚡</span>
       +{toast.amount} XP
+      {sparkCount > 0 && (
+        <span className="xp-toast__sparks" aria-hidden="true">
+          {Array.from({ length: sparkCount }, (_, i) => (
+            <span key={i} className={`xp-toast__spark xp-toast__spark--${i}`} />
+          ))}
+        </span>
+      )}
     </div>
   )
 }

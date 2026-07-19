@@ -115,7 +115,7 @@ export default function VocabScreen({ session }) {
       body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
     }).then(r => r.json()).then(data => {
       if (typeof data.xp_earned === 'number') {
-        setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level })
+        setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level, quality })
         // Optimistic bump for TopBar's ring / mobile level bar / burger
         // profile row — moves them immediately instead of waiting on
         // useProfileSummary's next cached /api/profile refetch.
