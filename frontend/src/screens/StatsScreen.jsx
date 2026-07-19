@@ -74,23 +74,19 @@ export default function StatsScreen({ session }) {
           )}
 
           <Section title={t.kana} />
-          <div className="grid-2 stats-group">
+          <div className="grid-3 stats-group">
             {Object.entries(stats.kana).map(([setName, modes]) => (
               <div key={setName} className="card">
-                <div className="stats-card-title">{setName}</div>
-                <div className="stats-mode-row">
-                  {KANA_MODE_KEYS.map(m => (
-                    <div key={m} className="stats-mode-col">
-                      <div className="stats-mode-label">
-                        {kanaLabels[m]}
-                      </div>
-                      <StatCell s={modes[m]} t={t} onStartReview={() => startReview('kana', setName, m)} />
-                    </div>
-                  ))}
-                </div>
+                <LevelHeader level={setName} phases={modes} t={t} />
+                {KANA_MODE_KEYS.map(m => (
+                  <div key={m} className="stats-stat-block">
+                    <div className="stats-stat-label">{kanaLabels[m]}</div>
+                    <StatCell s={modes[m]} t={t} onStartReview={() => startReview('kana', setName, m)} />
+                  </div>
+                ))}
               </div>
             ))}
-            <GridFiller count={Object.keys(stats.kana).length} cols={2} glyph="仮" />
+            <GridFiller count={Object.keys(stats.kana).length} cols={3} glyph="仮" />
           </div>
 
           <Section title={t.jlptVocab} />
