@@ -96,6 +96,8 @@
      is deliberately muted for body text and doesn't have enough
      presence once used as a colour swatch (progress bar, legend dot). */
   --state-new:      #beb3a0;
+  --state-learning:      #b7402a;
+  --state-mastered:      #a97a25;
   --border:         #35303a;
 }
 
@@ -130,7 +132,7 @@
   --text-secondary: #6f6552;
   /* Sumi-nezumi (墨鼠) — charcoal grey. Deepened independently for
      paper, same reasoning as the dark-theme value above. */
-  --state-new:      #55503f;
+  --state-new:      #1a1812;
   --state-learning:      #b7402a;
   --state-mastered:      #a97a25;
   /* Darkened well past the paper tones around it — a hairline
