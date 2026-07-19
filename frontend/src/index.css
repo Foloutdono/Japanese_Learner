@@ -98,6 +98,10 @@
   --state-new:      #beb3a0;
   --state-learning:      #b7402a;
   --state-mastered:      #a97a25;
+  /* Ai-iro (藍色) indigo — deliberately distinct from --accent, which
+     is already spoken for by --state-learning's vermillion. Reusing
+     it here made "due" and "learning" read as the same color. */
+  --state-due:      var(--accent4);
   --border:         #35303a;
 }
 
@@ -135,6 +139,7 @@
   --state-new:      #1a1812;
   --state-learning:      #b7402a;
   --state-mastered:      #a97a25;
+  --state-due:      var(--accent4);
   /* Darkened well past the paper tones around it — a hairline
      that's actually visible, not a shade indistinguishable from
      the card it's supposed to divide. */
@@ -1735,11 +1740,11 @@ input:focus { border-color: var(--accent2); }
    in the app (a solid ink/vermillion fill), so it reads as a button,
    not an afterthought link buried in a stat row. */
 .stat-cell__due-btn {
-  color: var(--accent);
+  color: var(--state-due);
   background: var(--bg-card);
   font: inherit;
   cursor: pointer;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--state-due);
   border-radius: 999px;
   margin-left: auto;
   padding: 2px 8px;
