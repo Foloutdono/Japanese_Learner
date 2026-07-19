@@ -305,9 +305,9 @@ function GlobalSummary({ stats, extra, t }) {
   const acc = aggregateAccuracy(stats)
 
   const cols = [
-    { label: t.new,      value: newC,     color: 'var(--warning)' },
-    { label: t.learning, value: learning, color: 'var(--accent2)' },
-    { label: t.mastered, value: mastered, color: 'var(--success)' },
+    { label: t.new,      value: newC,     color: 'var(--state-new)' },
+    { label: t.learning, value: learning, color: 'var(--state-learning)' },
+    { label: t.mastered, value: mastered, color: 'var(--state-mastered)' },
     { label: t.dueNow,   value: due,      color: 'var(--accent)'  },
     { label: t.total,    value: total,    color: 'var(--text-primary)' },
     { label: t.accuracy || 'Accuracy', value: acc.reviews > 0 ? `${acc.pct}%` : '—', color: 'var(--success)' },
