@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../supabase'
 import { useLang } from '../LangContext'
-import { MuteButton, LangSwitcher, ThemeToggle } from './NavControls'
 
 // ── Burger menu button + slide-in drawer ──────────────────
 // Drop this anywhere (e.g. in TopBar) to get a full nav drawer
@@ -63,12 +61,28 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
               ))}
             </nav>
 
+            {/* Pinned above the footer rather than inside the scrollable
+                nav list, so it stays reachable regardless of how many
+                nav links there are. */}
+            <div className="burger-drawer__profile-row">
+              <button
+                onClick={() => go('/profile')}
+                className={`burger-drawer__link ${currentPath === '/profile' ? 'burger-drawer__link--active' : ''}`}
+              >
+                <span className="burger-drawer__link-icon">侍</span>
+                <span>{t.profileTitle ?? 'Profil'}</span>
+              </button>
+            </div>
+
+            {/* Sound/theme/lang/sign-out now live on the Settings screen —
+                one entry point here instead of four separate controls
+                crowding the footer. */}
             <div className="burger-drawer__footer">
-              <MuteButton />
-              <ThemeToggle />
-              <LangSwitcher />
-              <button className="btn-ghost" onClick={() => supabase.auth.signOut()}>
-                {t.signOut}
+              <button
+                onClick={() => go('/settings')}
+                className="btn-ghost burger-drawer__settings-btn"
+              >
+                <span aria-hidden="true">⚙</span> {t.settings ?? 'Paramètres'}
               </button>
             </div>
           </div>
