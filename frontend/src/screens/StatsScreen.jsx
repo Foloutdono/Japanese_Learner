@@ -4,6 +4,7 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import { Loading } from '../components/Loading'
+import { SectionHeader } from '../components/SectionHeader'
 import { KANA_MODE_KEYS, kanaModes, vocabKanjiStatsLabels } from '../components/quizModes'
 
 export default function StatsScreen({ session }) {
@@ -62,7 +63,7 @@ export default function StatsScreen({ session }) {
       {stats && (
         <div className="container stats-container">
 
-          <Section title={t.overview || 'Overview'} />
+          <SectionHeader title={t.overview || 'Overview'} />
           <OverviewRow stats={stats} extra={extra} t={t} />
 
           {extra?.forecast?.length > 0 && (
@@ -73,7 +74,7 @@ export default function StatsScreen({ session }) {
             <WeakestItems weakest={extra.weakest} t={t} />
           )}
 
-          <Section title={t.kana} />
+          <SectionHeader title={t.kana} />
           <div className="grid-3 stats-group">
             {Object.entries(stats.kana).map(([setName, modes]) => (
               <div key={setName} className="card">
@@ -89,7 +90,7 @@ export default function StatsScreen({ session }) {
             <GridFiller count={Object.keys(stats.kana).length} cols={3} glyph="仮" />
           </div>
 
-          <Section title={t.jlptVocab} />
+          <SectionHeader title={t.jlptVocab} />
           <div className="grid-3 stats-group">
             {Object.entries(stats.vocab).map(([level, phases]) => (
               <div key={level} className="card">
@@ -105,7 +106,7 @@ export default function StatsScreen({ session }) {
             <GridFiller count={Object.keys(stats.vocab).length} cols={3} glyph="語" />
           </div>
 
-          <Section title={t.kanji} />
+          <SectionHeader title={t.kanji} />
           <div className="grid-3 stats-group">
             {Object.entries(stats.kanji).map(([level, phases]) => (
               <div key={level} className="card">
@@ -123,7 +124,7 @@ export default function StatsScreen({ session }) {
             <GridFiller count={Object.keys(stats.kanji).length} cols={3} glyph="字" />
           </div>
 
-          <Section title={t.globalSummary} />
+          <SectionHeader title={t.globalSummary} />
           <GlobalSummary stats={stats} extra={extra} t={t} />
         </div>
       )}
@@ -146,15 +147,6 @@ function GridFiller({ count, cols, glyph }) {
       <span className="stats-filler-card__glyph">{glyph}</span>
     </div>
   ))
-}
-
-function Section({ title }) {
-  return (
-    <div className="stats-section">
-      <div className="stats-section__title">{title}</div>
-      <div className="stats-section__rule" />
-    </div>
-  )
 }
 
 // Mastered % shown next to a level's title, computed from data we already have.

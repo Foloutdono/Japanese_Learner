@@ -16,5 +16,6 @@ export function getNavLinks(t) {
     { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: 'var(--accent2)' }, // Yamabuki-iro
     { icon: '統計', title: t.statsTitle,      desc: t.statsDesc,      path: '/stats',      color: 'var(--accent5)' }, // Cha-iro
     { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: 'var(--warning)' }, // Kohaku
+    { icon: '顔',   title: t.profileTitle || 'Profile', desc: t.profileDesc || 'XP, goals, badges & leaderboard', path: '/profile', color: 'var(--accent9)' }, // Ruri-iro
   ]
 }
