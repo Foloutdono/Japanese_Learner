@@ -899,7 +899,8 @@ input:focus { border-color: var(--accent2); }
 }
 .settings-row:not(:last-child) { border-bottom: 1px solid var(--border); }
 .settings-row__label { color: var(--text-primary); font-size: 14px; }
-.settings-signout { color: var(--danger); }
+.settings-signout { color: var(--danger); border: 1px solid var(--danger); background: 0 0;}
+.settings-signout:hover { background: var(--bg-card-hover); }
 
 /* .btn-nav (mute/theme/lang) is styled for the always-dark --bg-panel
    context it was built for (top bar, burger footer) — a translucent

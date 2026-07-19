@@ -17,6 +17,7 @@ import PromptCard from '../components/PromptCard'
 import {DrawingQuiz, DrawingOverlay} from '../components/DrawingCanvas'
 import { speakJapanese } from '../components/sound'
 import { kanjiModes } from '../components/quizModes'
+import { applyXpGain } from '../components/userProfileSummary'
 
 export default function KanjiScreen({ session }) {
   const navigate    = useNavigate()
@@ -131,6 +132,10 @@ export default function KanjiScreen({ session }) {
     }).then(r => r.json()).then(data => {
       if (typeof data.xp_earned === 'number') {
         setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level })
+        // Optimistic bump for TopBar's ring / mobile level bar / burger
+        // profile row — moves them immediately instead of waiting on
+        // useProfileSummary's next cached /api/profile refetch.
+        applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
       }
       // Fire in parallel with whatever comes next: the review already
       // happened, so the counts can refresh without blocking the UI.
