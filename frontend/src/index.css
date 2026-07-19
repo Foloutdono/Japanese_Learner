@@ -340,7 +340,6 @@ input:focus { border-color: var(--accent2); }
 
 .card {
   background: var(--bg-card);
-  border-radius: var(--radius);
   padding: 24px;
 }
 
