@@ -18,37 +18,74 @@ const LEVEL_UP_DURATION = 2400
 // spark burst in the matching color; q0-q2 (failed) ratings get none.
 const SPARK_COLOR_VAR = { 3: '--accent2', 4: '--accent6', 5: '--success' }
 
-// Bottom-anchored pulse: a soft wash of `colorVar` rising from the
-// bottom edge of the screen, most opaque low down and fading out
-// toward the top (the gradient stop is itself randomized per layer so
-// stacked pulses don't all reach the same height). Several layers are
-// stacked with randomized delay/duration/peak-opacity for an organic,
-// non-mechanical beat rather than one uniform flash. Regenerated (via
-// the `count` dependency, changed only through React's `key` on the
-// component itself) so each burst gets its own random spread.
+// Builds one wavy, chaotic top-edge silhouette as an SVG path, filled
+// from that edge down to the bottom of a 0-100 viewBox. Several sine
+// terms of random frequency/amplitude/phase are summed for an organic
+// multi-frequency wave, then extra per-point jitter is layered on top
+// so the edge reads as rough/hand-drawn rather than a clean curve —
+// no two calls produce the same silhouette.
+function generateWavePath() {
+  const POINTS = 36
+  const terms = Array.from({ length: 2 + Math.floor(Math.random() * 2) }, () => ({
+    freq: 1 + Math.random() * 4,
+    amp: 8 + Math.random() * 16,
+    phase: Math.random() * Math.PI * 2,
+  }))
+  const baseline = 50 + Math.random() * 15 // 0 = top of viewBox, 100 = bottom
+
+  let d = `M 0 100 L 0 ${baseline.toFixed(1)}`
+  for (let i = 0; i <= POINTS; i++) {
+    const x = (i / POINTS) * 100
+    let y = baseline
+    terms.forEach(term => { y += Math.sin((x / 100) * Math.PI * term.freq + term.phase) * term.amp })
+    y += (Math.random() - 0.5) * 12 // rough per-point jitter, on top of the smooth wave
+    y = Math.max(4, Math.min(96, y))
+    d += ` L ${x.toFixed(1)} ${y.toFixed(1)}`
+  }
+  d += ' L 100 100 Z'
+  return d
+}
+
+// Bottom-anchored pulse: a chaotic wavy silhouette of `colorVar` rising
+// from the bottom edge of the screen, filled with a vertical gradient
+// so it's most opaque low down and fades out toward its own peak.
+// Several layers stack, each with its own random wave shape plus
+// randomized delay/duration/peak-opacity, for an organic, non-uniform
+// beat rather than one identical flash repeated. Regenerated (via the
+// `count` dependency, changed only through React's `key` on the
+// component itself) so each burst gets its own random shapes.
 function PulseEffect({ count, colorVar }) {
   const pulses = useMemo(() => Array.from({ length: count }, (_, i) => ({
     id: i,
     delay: (Math.random() * 0.35).toFixed(2),
-    duration: (0.6 + Math.random() * 0.5).toFixed(2),
-    peak: (0.3 + Math.random() * 0.4).toFixed(2),
-    spread: Math.round(50 + Math.random() * 30), // % where the gradient fades to transparent
+    duration: (0.7 + Math.random() * 0.6).toFixed(2),
+    peak: (0.35 + Math.random() * 0.4).toFixed(2),
+    path: generateWavePath(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
   })), [count])
 
   return (
     <div className="xp-pulse-stage" aria-hidden="true">
       {pulses.map(p => (
-        <span
+        <svg
           key={p.id}
           className="xp-pulse"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
           style={{
-            background: `linear-gradient(to top, var(${colorVar}) 0%, transparent ${p.spread}%)`,
             animationDelay: `${p.delay}s`,
             animationDuration: `${p.duration}s`,
             '--pulse-peak': p.peak,
           }}
-        />
+        >
+          <defs>
+            <linearGradient id={`xp-pulse-grad-${p.id}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="transparent" />
+              <stop offset="100%" style={{ stopColor: `var(${colorVar})` }} />
+            </linearGradient>
+          </defs>
+          <path d={p.path} fill={`url(#xp-pulse-grad-${p.id})`} />
+        </svg>
       ))}
     </div>
   )
