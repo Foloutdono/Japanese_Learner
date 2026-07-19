@@ -1187,7 +1187,9 @@ input:focus { border-color: var(--accent2); }
     opacity: 0.8;
   }
   .xp-toast { animation: none; opacity: 1; }
+  .xp-toast--boosted { animation: none; }
   .xp-toast__glyph { animation: none; }
+  .xp-toast__spark { animation: none; opacity: 0; }
   .level-up-overlay { animation: none; opacity: 1; }
   .level-up-overlay::before { animation: none; opacity: 0.5; }
   .level-up-banner { animation: none; opacity: 1; transform: none; }
@@ -1412,25 +1414,77 @@ input:focus { border-color: var(--accent2); }
   pointer-events: none;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 0.03em;
-  color: var(--text-primary);
+  /* --text-on-panel rather than --text-primary: text-primary flips to
+     a near-black tone in light theme, which reads poorly against this
+     mid-tone blue fill. text-on-panel is a fixed light tone made for
+     exactly this — legible text over a colored/dark surface in either
+     theme. */
+  color: var(--text-on-panel);
   background: linear-gradient(100deg,
     var(--accent9) 0%, var(--accent9) 42%,
     #85a1de 50%,
     var(--accent9) 58%, var(--accent9) 100%);
   background-size: 260% 100%;
-  padding: 8px 20px 8px 15px;
+  padding: 9px 22px 9px 16px;
   border-radius: 999px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   animation:
     xp-toast-pop 1.4s cubic-bezier(0.22, 1.1, 0.3, 1) forwards,
     xp-toast-shine 1.4s ease forwards;
 }
+/* A rating of "correct" or better (q4/q5) also gets a stronger pulsing
+   glow around the pill itself, on top of the spark burst below —
+   the better the answer, the more the toast celebrates it. */
+.xp-toast--boosted {
+  animation:
+    xp-toast-pop 1.4s cubic-bezier(0.22, 1.1, 0.3, 1) forwards,
+    xp-toast-shine 1.4s ease forwards,
+    xp-toast-glow-pulse 0.9s ease-out 1;
+}
+@keyframes xp-toast-glow-pulse {
+  0%   { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 0 0 0 var(--spark-color, transparent); }
+  40%  { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 0 16px 4px var(--spark-color, transparent); }
+  100% { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 0 0 0 var(--spark-color, transparent); }
+}
 .xp-toast__glyph {
   display: inline-block;
-  font-size: 15px;
+  font-size: 17px;
   animation: xp-toast-glyph-flick 0.5s ease 0.18s 2;
+}
+
+/* ── XP toast: quality-scaled spark burst ─────────────────
+   Rendered only for a successful rating (q3 "hésitant" and up — see
+   XpToast.jsx), one extra spark per quality point above q2, colored
+   to match the same per-quality accents the rating bar itself uses
+   (q3 accent2, q4 accent6, q5 success) via the --spark-color custom
+   property set inline. A q0-q2 (failed) rating renders no sparks at
+   all — the plain pop is enough for those. */
+.xp-toast__sparks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.xp-toast__spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--spark-color, var(--accent2));
+  box-shadow: 0 0 6px 1px var(--spark-color, var(--accent2));
+  opacity: 0;
+  animation: xp-toast-spark 0.85s ease-out forwards;
+}
+.xp-toast__spark--0 { --spark-x: -26px; --spark-y: -16px; animation-delay: 0.05s; }
+.xp-toast__spark--1 { --spark-x: 28px;  --spark-y: -12px; animation-delay: 0.12s; }
+.xp-toast__spark--2 { --spark-x: 2px;   --spark-y: -28px; animation-delay: 0.02s; }
+@keyframes xp-toast-spark {
+  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--spark-x)), calc(-50% + var(--spark-y))) scale(1); opacity: 0; }
 }
 
 /* ── Level-up celebration ─────────────────────────────────
