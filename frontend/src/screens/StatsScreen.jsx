@@ -220,7 +220,7 @@ function OverviewRow({ stats, extra, t }) {
     { label: t.streak || 'Streak', value: streak ? `${streak.current}🔥` : '—', color: 'var(--warning)' },
     { label: t.longestStreak || 'Best streak', value: streak ? streak.longest : '—', color: 'var(--text-primary)' },
     { label: t.accuracy || 'Accuracy', value: acc.reviews > 0 ? `${acc.pct}%` : '—', color: 'var(--success)' },
-    { label: t.dueToday || 'Due today', value: dueTotal, color: 'var(--accent)' },
+    { label: t.dueToday || 'Due today', value: dueTotal, color: 'var(--state-due)' },
   ]
 
   return (
@@ -308,7 +308,7 @@ function GlobalSummary({ stats, extra, t }) {
     { label: t.new,      value: newC,     color: 'var(--state-new)' },
     { label: t.learning, value: learning, color: 'var(--state-learning)' },
     { label: t.mastered, value: mastered, color: 'var(--state-mastered)' },
-    { label: t.dueNow,   value: due,      color: 'var(--accent)'  },
+    { label: t.dueNow,   value: due,      color: 'var(--state-due)'  },
     { label: t.total,    value: total,    color: 'var(--text-primary)' },
     { label: t.accuracy || 'Accuracy', value: acc.reviews > 0 ? `${acc.pct}%` : '—', color: 'var(--success)' },
   ]
