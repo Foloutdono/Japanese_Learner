@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
 import { BurgerMenu } from './BurgerMenu'
+import { useProfileSummary } from './useProfileSummary'
 
 const MOBILE_BREAKPOINT = 768
 const SCROLL_THRESHOLD   = 2     // px of scroll before reacting — just enough to ignore jitter
@@ -94,6 +96,71 @@ export function useAutoHideTopBar(active = true) {
   return { hidden, reveal, onMenuOpenChange }
 }
 
+// ── Level progress, desktop: ring ────────────────────────
+// Sits in the top bar itself next to the title. Tapping it opens the
+// full Profile screen. Renders nothing until the summary loads (or if
+// there's no session) rather than showing a placeholder ring.
+function TopBarProfileRing() {
+  const navigate = useNavigate()
+  const { t } = useLang()
+  const summary = useProfileSummary()
+  if (!summary) return null
+
+  const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)
+  const into = Math.min(span, Math.max(0, summary.xp - summary.xpPrevLevel))
+  const pct  = Math.round((into / span) * 100)
+
+  const r = 16
+  const circumference = 2 * Math.PI * r
+  const dashoffset = circumference * (1 - pct / 100)
+
+  return (
+    <button
+      type="button"
+      className="topbar-profile-ring"
+      onClick={() => navigate('/profile')}
+      title={`${t.level ?? 'Niveau'} ${summary.level} — ${into}/${span} XP`}
+    >
+      <svg className="topbar-profile-ring__svg" viewBox="0 0 40 40" aria-hidden="true">
+        <circle className="topbar-profile-ring__track" cx="20" cy="20" r={r} />
+        <circle
+          className="topbar-profile-ring__fill"
+          cx="20" cy="20" r={r}
+          strokeDasharray={circumference}
+          strokeDashoffset={dashoffset}
+        />
+      </svg>
+      <span className="topbar-profile-ring__level">{summary.level}</span>
+    </button>
+  )
+}
+
+// ── Level progress, mobile: bottom bar ───────────────────
+// Fixed to the viewport, independent of TopBar's own DOM position, so
+// it shows up consistently across every screen that renders <TopBar/>
+// without needing every screen to add it individually. CSS keeps it
+// mobile-only — see the ≤768px query in index.css.
+function MobileLevelBar() {
+  const navigate = useNavigate()
+  const { t } = useLang()
+  const summary = useProfileSummary()
+  if (!summary) return null
+
+  const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)
+  const into = Math.min(span, Math.max(0, summary.xp - summary.xpPrevLevel))
+  const pct  = Math.round((into / span) * 100)
+
+  return (
+    <button type="button" className="mobile-level-bar" onClick={() => navigate('/profile')}>
+      <span className="mobile-level-bar__level">{t.level ?? 'Niv.'} {summary.level}</span>
+      <span className="mobile-level-bar__track">
+        <span className="mobile-level-bar__fill" style={{ width: `${pct}%` }} />
+      </span>
+      <span className="mobile-level-bar__xp">{into}/{span} XP</span>
+    </button>
+  )
+}
+
 export function TopBar({
   onBack,
   title,
@@ -112,12 +179,16 @@ export function TopBar({
 
           <span className="top-bar__title">{title}</span>
 
+          <TopBarProfileRing />
+
           {actions}
           <button className="btn-back" onClick={onBack}>
             {t.back}
           </button>
         </div>
       </div>
+
+      <MobileLevelBar />
 
       {/* Fallback affordance: scrolling up reveals the bar, but short
           pages may not be scrollable at all — this small tab is always
