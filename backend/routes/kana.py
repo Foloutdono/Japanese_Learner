@@ -98,4 +98,9 @@ def get_kana_stats(set_name: str, mode: str, user_id: str = Depends(get_user_id)
 def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
-    return {"card_id": payload.card_id, "interval": s["interval"], "next_review": s["next_review"]}
+    return {
+        "card_id": payload.card_id,
+        "interval": s["interval"],
+        "next_review": s["next_review"],
+        "xp_earned": s["xp_earned"],
+    }

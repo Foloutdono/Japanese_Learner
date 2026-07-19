@@ -9,6 +9,7 @@ import {
   InlineReveal, Flashcard, CharDisplay, MeaningDisplay,
 } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
+import { XpToast } from '../components/XpToast'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
@@ -31,6 +32,7 @@ export default function VocabScreen({ session }) {
   const [selected, setSelected]     = useState(null)
   const [showRating, setShowRating] = useState(false)
   const [progress, setProgress]       = useState(null)
+  const [xpToast, setXpToast]         = useState(null)
   
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -103,7 +105,10 @@ export default function VocabScreen({ session }) {
     apiFetch('/api/vocab/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
-    }).then(() => {
+    }).then(r => r.json()).then(data => {
+      if (typeof data.xp_earned === 'number') {
+        setXpToast({ amount: data.xp_earned, id: Date.now() })
+      }
       // Fire both in parallel: the next card should appear as soon as
       // it's ready, without waiting on the (heavier) stats recompute.
       fetchCard(level, mode)
@@ -163,6 +168,7 @@ export default function VocabScreen({ session }) {
   return (
     <div className="screen">
       <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${level} — ${modeLabel}`} autoHide />
+      <XpToast toast={xpToast} onDone={() => setXpToast(null)} />
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}

@@ -9,6 +9,7 @@ import {
   DeckProgress, Flashcard,
 } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
+import { XpToast } from '../components/XpToast'
 import PromptCard from '../components/PromptCard'
 import SelectionScreen from '../components/SelectionScreen'
 import ModeSelector from '../components/ModeSelector'
@@ -40,6 +41,7 @@ export default function KanaScreen({ session }) {
   const [submitted, setSubmitted]     = useState(false)
   const [showRating, setShowRating]   = useState(false)
   const [progress, setProgress]       = useState(null)
+  const [xpToast, setXpToast]         = useState(null)
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -92,7 +94,10 @@ export default function KanaScreen({ session }) {
     apiFetch('/api/kana/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode, quality }),
-    }).then(() => {
+    }).then(r => r.json()).then(data => {
+      if (typeof data.xp_earned === 'number') {
+        setXpToast({ amount: data.xp_earned, id: Date.now() })
+      }
       // Fire both in parallel: the next card should appear as soon as
       // it's ready, without waiting on the (heavier) stats recompute.
       fetchCard(selectedSet.slug, mode)
@@ -156,6 +161,7 @@ export default function KanaScreen({ session }) {
   return (
     <div className="screen">
       <TopBar onBack={() => setMode(null)} title={`${selectedSet.label} — ${modeLabel}`} autoHide/>
+      <XpToast toast={xpToast} onDone={() => setXpToast(null)} />
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
