@@ -126,6 +126,18 @@ export default function KanjiScreen({ session }) {
     // the writing mode itself don't need this extra step.
     const needTraining = quality <= 3 && card?.direction === 'm-kj' && drawingEnabled
 
+    // Kick off whatever comes next immediately, in parallel with
+    // recording the review — none of this depends on the review
+    // response, so waiting for the POST to finish before even
+    // starting it was costing a whole extra round trip on every answer.
+    loadProgress(level, mode)
+    if (needTraining) {
+      setShowRating(false)
+      setShowDrawing(true)
+    } else {
+      fetchCard(level, mode)
+    }
+
     apiFetch('/api/kanji/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
@@ -136,15 +148,6 @@ export default function KanjiScreen({ session }) {
         // profile row — moves them immediately instead of waiting on
         // useProfileSummary's next cached /api/profile refetch.
         applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
-      }
-      // Fire in parallel with whatever comes next: the review already
-      // happened, so the counts can refresh without blocking the UI.
-      loadProgress(level, mode)
-      if (needTraining) {
-        setShowRating(false)
-        setShowDrawing(true)
-      } else {
-        fetchCard(level, mode)
       }
     })
   }
