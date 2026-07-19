@@ -733,6 +733,95 @@ input:focus { border-color: var(--accent2); }
   padding: 4px 0;
 }
 
+/* Compact preview of the Profile screen itself: mini XP ring +
+   avatar initial, name/rank stacked, streak pinned to the right —
+   same visual language as ProfileScreen's own card, scaled down. */
+.burger-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: transparent;
+  color: var(--text-on-panel);
+  padding: 12px 20px;
+  border-radius: 0;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.burger-profile-row:hover,
+.burger-profile-row:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+}
+.burger-profile-row--active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.burger-profile-row__ring-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+.burger-profile-row__ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+.burger-profile-row__ring-track { fill: none; stroke: rgba(255, 255, 255, 0.14); stroke-width: 3; }
+.burger-profile-row__ring-fill {
+  fill: none;
+  stroke: var(--accent9);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.burger-profile-row__avatar {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.burger-profile-row__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.burger-profile-row__name {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-on-panel);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.burger-profile-row__rank {
+  font-size: 0.72rem;
+  color: var(--text-on-panel-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.burger-profile-row__streak {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--text-on-panel);
+}
+
 .burger-drawer__settings-btn {
   display: inline-flex;
   align-items: center;
@@ -811,6 +900,23 @@ input:focus { border-color: var(--accent2); }
 .settings-row:not(:last-child) { border-bottom: 1px solid var(--border); }
 .settings-row__label { color: var(--text-primary); font-size: 14px; }
 .settings-signout { color: var(--danger); }
+
+/* .btn-nav (mute/theme/lang) is styled for the always-dark --bg-panel
+   context it was built for (top bar, burger footer) — a translucent
+   white fill + var(--text-on-panel). Dropped onto this card's
+   var(--bg-card), which is a light cream in light mode, that same
+   near-white-on-white washes out almost completely. Override with
+   the card-context tokens instead, which already flip correctly
+   between themes. */
+.settings-row .btn-nav {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+.settings-row .btn-nav:hover,
+.settings-row .btn-nav:focus-visible {
+  background: var(--bg-card-hover);
+}
 
 /* ── Top bar extras ───────────────────────────────────────── */
 .top-bar__title {

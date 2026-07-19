@@ -5,6 +5,7 @@ import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import { Loading } from '../components/Loading'
 import { SectionHeader } from '../components/SectionHeader'
+import { levelTitle } from '../levelTitle'
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 
@@ -44,20 +45,6 @@ const MOCK_LEADERBOARD = {
     { rank: 5, username: 'Yui',    level: 9,  xp: 2400 },
   ],
   me: { rank: 4, username: 'Aiko', level: 12, xp: 3420 },
-}
-
-// Level-based rank title — a light gamified touch without leaning on
-// any imagery: the number alone (level 12) says less than a title.
-// Thresholds are placeholders; tune once real level pacing exists.
-const LEVEL_TITLES = [
-  [30, '免許皆伝', 'Maître'],
-  [20, '師範',     'Sensei'],
-  [12, '侍',       'Samouraï'],
-  [6,  '浪人',      'Rōnin'],
-  [0,  '見習い',    'Apprenti(e)'],
-]
-function levelTitle(level) {
-  return LEVEL_TITLES.find(([min]) => level >= min) ?? LEVEL_TITLES[LEVEL_TITLES.length - 1]
 }
 
 const RANK_GLYPH = { 1: '一', 2: '二', 3: '三' }
