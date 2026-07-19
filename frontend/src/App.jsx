@@ -65,6 +65,7 @@ export default function App() {
           <Route path="/reading"              element={<ReadingScreen session={session} />} />
           <Route path="/reading-comprehension" element={<ReadingComprehensionScreen session={session} />} />
           <Route path="/profile" element={<ProfileScreen session={session} />} />
+          <Route path="/settings" element={<SettingsScreen session={session} />} />
         </Routes>
       </BrowserRouter>
     </LangProvider>
