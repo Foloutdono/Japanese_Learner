@@ -3038,6 +3038,8 @@ input:focus { border-color: var(--accent2); }
   .stats-mode-row { gap: 16px; }
   .stats-forecast-card,
   .stats-weakest-card { padding: 18px; }
+  .stats-filler-card { min-height: 150px; }
+  .stats-filler-card__glyph { font-size: 6.5rem; }
 }
 
 @media (max-width: 480px) {
