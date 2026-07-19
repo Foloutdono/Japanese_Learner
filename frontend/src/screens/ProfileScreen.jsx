@@ -6,12 +6,11 @@ import { TopBar } from '../components/TopBar'
 import { Loading } from '../components/Loading'
 import { SectionHeader } from '../components/SectionHeader'
 
+const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
+
 // ── Mock fallback ─────────────────────────────────────────
-// /api/profile and /api/leaderboard don't exist on the backend yet —
-// this is a first pass at the screen, built against the shape those
-// endpoints would realistically return, so wiring the real thing up
-// later is just deleting the .catch() fallback below, not rebuilding
-// the screen. Swap these out once the endpoints land.
+// Kept in sync with profile.py's real response shape so a backend
+// hiccup degrades to a believable screen instead of a blank one.
 const MOCK_PROFILE = {
   username: 'Aiko',
   level: 12,
@@ -19,31 +18,33 @@ const MOCK_PROFILE = {
   xpPrevLevel: 3000,
   xpForNext: 4000,
   streak: 14,
-  accuracy: 87,
-  badgeCount: 3,
+  streakLongest: 21,
+  totalReviews: 842,
   goals: [
-    { id: 'daily', label: 'Révisions du jour', current: 32, target: 50, rewardXp: 20 },
-    { id: 'weekly', label: 'Nouveaux mots cette semaine', current: 18, target: 30, rewardXp: 80 },
+    { id: 'daily', label: 'Révisions du jour', current: 18, target: 30, rewardXp: 20 },
+    { id: 'weekly', label: 'Révisions cette semaine', current: 96, target: 150, rewardXp: 80 },
     { id: 'streak', label: 'Garder la série en vie', current: 14, target: 30, rewardXp: 150 },
   ],
   badges: [
     { id: 'first_steps', glyph: '初', label: 'Premiers pas', unlocked: true },
     { id: 'week_streak', glyph: '週', label: '7 jours de série', unlocked: true },
     { id: 'month_streak', glyph: '月', label: '30 jours de série', unlocked: false },
-    { id: 'kanji_100', glyph: '百', label: '100 kanji maîtrisés', unlocked: true },
-    { id: 'perfectionist', glyph: '極', label: '50 sans-faute d’affilée', unlocked: false },
-    { id: 'polyglot', glyph: '皆', label: 'Tous les modules essayés', unlocked: false },
+    { id: 'kanji_100', glyph: '百', label: '100 cartes maîtrisées', unlocked: true },
+    { id: 'perfectionist', glyph: '極', label: "10 sans-faute d'affilée", unlocked: false },
+    { id: 'dedicated', glyph: '皆', label: '500 révisions', unlocked: false },
   ],
 }
 
-const MOCK_LEADERBOARD = [
-  { rank: 1, username: 'Haruto', level: 24, xp: 9800 },
-  { rank: 2, username: 'Mei',    level: 21, xp: 8600 },
-  { rank: 3, username: 'Sora',   level: 19, xp: 7950 },
-  { rank: 4, username: 'Aiko',   level: 12, xp: 3420 },
-  { rank: 5, username: 'Kenji',  level: 11, xp: 3100 },
-  { rank: 6, username: 'Yui',    level: 9,  xp: 2400 },
-]
+const MOCK_LEADERBOARD = {
+  entries: [
+    { rank: 1, username: 'Haruto', level: 24, xp: 9800 },
+    { rank: 2, username: 'Mei',    level: 21, xp: 8600 },
+    { rank: 3, username: 'Sora',   level: 19, xp: 7950 },
+    { rank: 4, username: 'Kenji',  level: 11, xp: 3100 },
+    { rank: 5, username: 'Yui',    level: 9,  xp: 2400 },
+  ],
+  me: { rank: 4, username: 'Aiko', level: 12, xp: 3420 },
+}
 
 // Level-based rank title — a light gamified touch without leaning on
 // any imagery: the number alone (level 12) says less than a title.
@@ -96,7 +97,7 @@ export default function ProfileScreen({ session }) {
 
       {!loading && (
         <div className="container profile-container">
-          <ProfileCard profile={profile} t={t} />
+          <ProfileCard profile={profile} session={session} onUsernameChange={u => setProfile(p => ({ ...p, username: u }))} t={t} />
 
           <SectionHeader title={t.goals || 'Objectifs'} />
           <GoalsCard goals={profile.goals} t={t} />
@@ -105,14 +106,14 @@ export default function ProfileScreen({ session }) {
           <BadgesGrid badges={profile.badges} />
 
           <SectionHeader title={t.leaderboard || 'Classement'} />
-          <Leaderboard entries={leaderboard} currentUsername={profile.username} t={t} />
+          <Leaderboard leaderboard={leaderboard} t={t} />
         </div>
       )}
     </div>
   )
 }
 
-function ProfileCard({ profile, t }) {
+function ProfileCard({ profile, session, onUsernameChange, t }) {
   const [, jpTitle, title] = levelTitle(profile.level)
 
   const span = Math.max(1, profile.xpForNext - profile.xpPrevLevel)
@@ -145,7 +146,7 @@ function ProfileCard({ profile, t }) {
       </div>
 
       <div className="profile-card__info">
-        <div className="profile-card__name">{profile.username}</div>
+        <EditableUsername username={profile.username} session={session} onChange={onUsernameChange} t={t} />
         <div className="profile-card__title" lang="ja">{jpTitle} · {title}</div>
 
         <div className="profile-card__xp-row">
@@ -156,6 +157,83 @@ function ProfileCard({ profile, t }) {
           <div className="profile-card__xp-fill" style={{ width: `${pct}%` }} />
         </div>
       </div>
+    </div>
+  )
+}
+
+// Click the name (or the pencil) to edit it in place — save/cancel via
+// Enter/Escape or the two small buttons, no separate modal/page for
+// what's a one-field change.
+function EditableUsername({ username, session, onChange, t }) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue]     = useState(username)
+  const [error, setError]     = useState(null)
+  const [saving, setSaving]   = useState(false)
+
+  function startEdit() {
+    setValue(username)
+    setError(null)
+    setEditing(true)
+  }
+
+  function cancel() {
+    setEditing(false)
+    setError(null)
+  }
+
+  function save() {
+    if (!USERNAME_RE.test(value)) {
+      setError(t.usernameInvalid || '3-20 caractères : lettres, chiffres, underscore.')
+      return
+    }
+    if (value === username) { setEditing(false); return }
+
+    setSaving(true)
+    setError(null)
+    apiFetch('/api/profile', session, { method: 'PATCH', body: JSON.stringify({ username: value }) })
+      .then(r => {
+        if (r.status === 409) throw new Error(t.usernameTaken || 'Ce nom est déjà pris.')
+        if (!r.ok) throw new Error()
+        return r.json()
+      })
+      .then(data => {
+        onChange(data.username)
+        setEditing(false)
+      })
+      .catch(err => setError(err.message || (t.genericError || 'Une erreur est survenue.')))
+      .finally(() => setSaving(false))
+  }
+
+  if (!editing) {
+    return (
+      <button type="button" className="profile-card__name profile-card__name--editable" onClick={startEdit}>
+        {username}
+        <span className="profile-card__edit-glyph" aria-hidden="true">✎</span>
+      </button>
+    )
+  }
+
+  return (
+    <div className="profile-card__name-edit">
+      <input
+        autoFocus
+        value={value}
+        maxLength={20}
+        onChange={e => setValue(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') save()
+          if (e.key === 'Escape') cancel()
+        }}
+        className="profile-card__name-input"
+        disabled={saving}
+      />
+      <button type="button" onClick={save} disabled={saving} className="profile-card__name-save">
+        {t.save || 'OK'}
+      </button>
+      <button type="button" onClick={cancel} disabled={saving} className="profile-card__name-cancel">
+        ✕
+      </button>
+      {error && <div className="profile-card__name-error">{error}</div>}
     </div>
   )
 }
@@ -205,22 +283,39 @@ function BadgesGrid({ badges }) {
   )
 }
 
-function Leaderboard({ entries, currentUsername, t }) {
+function LeaderboardRow({ e, isMe, t }) {
+  return (
+    <div className={`leaderboard-row${isMe ? ' leaderboard-row--me' : ''}`}>
+      <span className={`leaderboard-row__rank${e.rank <= 3 ? ` leaderboard-row__rank--${e.rank}` : ''}`}>
+        {RANK_GLYPH[e.rank] ?? e.rank ?? '—'}
+      </span>
+      <span className="leaderboard-row__name">{e.username}</span>
+      <span className="leaderboard-row__level">{t.level || 'Niv.'} {e.level}</span>
+      <span className="leaderboard-row__xp">{e.xp.toLocaleString()} XP</span>
+    </div>
+  )
+}
+
+// entries is the top N; me is the current user's own rank/xp, which
+// the backend includes separately whenever they're not already inside
+// that top N (see profile.py's get_leaderboard). If they *are* in the
+// list, `me` still gets returned but the entries loop is what renders
+// them — this just skips double-rendering that row.
+function Leaderboard({ leaderboard, t }) {
+  const { entries, me } = leaderboard
+  const meInList = me && entries.some(e => e.username === me.username)
+
   return (
     <div className="card leaderboard-card">
       {entries.map(e => (
-        <div
-          key={e.rank}
-          className={`leaderboard-row${e.username === currentUsername ? ' leaderboard-row--me' : ''}`}
-        >
-          <span className={`leaderboard-row__rank${e.rank <= 3 ? ` leaderboard-row__rank--${e.rank}` : ''}`}>
-            {RANK_GLYPH[e.rank] ?? e.rank}
-          </span>
-          <span className="leaderboard-row__name">{e.username}</span>
-          <span className="leaderboard-row__level">{t.level || 'Niv.'} {e.level}</span>
-          <span className="leaderboard-row__xp">{e.xp.toLocaleString()} XP</span>
-        </div>
+        <LeaderboardRow key={e.rank} e={e} isMe={me && e.username === me.username} t={t} />
       ))}
+      {me && !meInList && (
+        <>
+          <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
+          <LeaderboardRow e={me} isMe t={t} />
+        </>
+      )}
     </div>
   )
 }

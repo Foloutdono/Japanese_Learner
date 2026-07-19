@@ -5,6 +5,7 @@ from typing import Any
 from .models import CardState
 from .scheduler import Scheduler
 from .storage import Storage
+from . import xp as xp_math
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +128,15 @@ class SRSEngine:
                 cur.execute("""
                     CREATE INDEX IF NOT EXISTS idx_review_log_card_id
                     ON review_log(card_id, reviewed_at)
+                """)
+
+                self._log_sql("add_review_log_xp_earned", """
+                    ALTER TABLE review_log
+                    ADD COLUMN IF NOT EXISTS xp_earned INTEGER NOT NULL DEFAULT 0
+                """)
+                cur.execute("""
+                    ALTER TABLE review_log
+                    ADD COLUMN IF NOT EXISTS xp_earned INTEGER NOT NULL DEFAULT 0
                 """)
 
     def _ensure_card(self, card_id: str) -> None:
@@ -254,14 +264,55 @@ class SRSEngine:
         state = self._load_state(card_id, mode)
         updated = self.scheduler.review(state, quality)
         self._save_state(updated)
-        self._log_review(card_id, mode, quality)
-        return self._to_dict(updated)
+        xp_earned = self._log_review(card_id, mode, quality)
+        result = self._to_dict(updated)
+        result["xp_earned"] = xp_earned
+        return result
 
-    def _log_review(self, card_id: str, mode: str, quality: int) -> None:
+    def _log_review(self, card_id: str, mode: str, quality: int) -> int:
+        # card_id is always "{user_id}:{raw_id}" (see auth.prefixed) and
+        # user_id itself is assumed colon-free everywhere else in this
+        # codebase (e.g. _user_prefix_pattern's LIKE '{user_id}:%'), so
+        # splitting on the first colon is safe.
+        user_id = card_id.split(":", 1)[0]
+        xp_earned = self._compute_review_xp(user_id, quality)
         with self.storage.cursor() as cur:
-            sql = "INSERT INTO review_log(card_id, mode, quality) VALUES (%s, %s, %s)"
-            self._log_sql("log_review", sql, (card_id, mode, quality))
-            cur.execute(sql, (card_id, mode, quality))
+            sql = "INSERT INTO review_log(card_id, mode, quality, xp_earned) VALUES (%s, %s, %s, %s)"
+            self._log_sql("log_review", sql, (card_id, mode, quality, xp_earned))
+            cur.execute(sql, (card_id, mode, quality, xp_earned))
+        return xp_earned
+
+    def get_reviews_today(self, user_id: str) -> int:
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT COUNT(*) FROM review_log
+                    WHERE card_id LIKE %s
+                      AND reviewed_at >= date_trunc('day', NOW())
+                """
+                self._log_sql("reviews_today", sql, (pattern,))
+                cur.execute(sql, (pattern,))
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
+
+    def _compute_review_xp(self, user_id: str, quality: int) -> int:
+        reviews_today = self.get_reviews_today(user_id)
+        # The streak bonus only matters on the day's first review (see
+        # xp_math.compute_review_xp), so skip the extra get_streak()
+        # round trip entirely once that's no longer possible.
+        streak_current = self.get_streak(user_id)["current"] if reviews_today == 0 else 0
+        return xp_math.compute_review_xp(quality, reviews_today, streak_current)
+
+    def get_lifetime_xp(self, user_id: str) -> int:
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = "SELECT COALESCE(SUM(xp_earned), 0) FROM review_log WHERE card_id LIKE %s"
+                self._log_sql("get_lifetime_xp", sql, (pattern,))
+                cur.execute(sql, (pattern,))
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
 
     def get_due_cards(self, mode: str, limit: int | None = None, card_ids: list[str] | None = None) -> list[str]:
         now = datetime.now(timezone.utc)
@@ -575,6 +626,98 @@ class SRSEngine:
             {"date": (today + timedelta(days=offset)).isoformat(), "count": int(count)}
             for offset, count in rows
         ]
+
+    def get_leaderboard(self, limit: int = 20) -> list[dict[str, Any]]:
+        """Top users by lifetime XP. Returns raw user_id — profile.py
+        joins this against user_profiles for display names."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT split_part(card_id, ':', 1) AS user_id, SUM(xp_earned) AS xp
+                    FROM review_log
+                    GROUP BY user_id
+                    ORDER BY xp DESC
+                    LIMIT %s
+                """
+                self._log_sql("get_leaderboard", sql, (limit,))
+                cur.execute(sql, (limit,))
+                rows = cur.fetchall()
+        return [{"user_id": user_id, "xp": int(xp)} for user_id, xp in rows]
+
+    def get_user_rank(self, user_id: str) -> dict[str, Any]:
+        """This user's lifetime XP and 1-based rank among everyone with
+        at least one review — used so the leaderboard can show "you're
+        #47" even when only the top N are listed."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    WITH totals AS (
+                        SELECT split_part(card_id, ':', 1) AS user_id, SUM(xp_earned) AS xp
+                        FROM review_log
+                        GROUP BY user_id
+                    )
+                    SELECT t1.xp, (SELECT COUNT(*) + 1 FROM totals t2 WHERE t2.xp > t1.xp)
+                    FROM totals t1
+                    WHERE t1.user_id = %s
+                """
+                self._log_sql("get_user_rank", sql, (user_id,))
+                cur.execute(sql, (user_id,))
+                row = cur.fetchone()
+        if not row:
+            return {"xp": 0, "rank": None}
+        return {"xp": int(row[0]), "rank": int(row[1])}
+
+    def get_total_reviews(self, user_id: str) -> int:
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = "SELECT COUNT(*) FROM review_log WHERE card_id LIKE %s"
+                self._log_sql("get_total_reviews", sql, (pattern,))
+                cur.execute(sql, (pattern,))
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
+
+    def get_mastered_count(self, user_id: str) -> int:
+        """Mastered (card, mode) pairs across every category — a
+        simpler, unscoped version of the per-category counts /api/stats
+        already computes, good enough for badge thresholds."""
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT COUNT(*) FROM card_modes
+                    WHERE card_id LIKE %s AND total_reviews > 0 AND interval_days >= 21
+                """
+                self._log_sql("get_mastered_count", sql, (pattern,))
+                cur.execute(sql, (pattern,))
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
+
+    def get_best_quality_streak(self, user_id: str, min_quality: int = 4) -> int:
+        """Longest run of consecutive reviews (by time, across all cards/
+        modes) with quality >= min_quality — a classic gaps-and-islands
+        query: the difference between two row-number sequences is
+        constant within an unbroken run and changes at every break."""
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    WITH ordered AS (
+                        SELECT
+                            quality,
+                            ROW_NUMBER() OVER (ORDER BY reviewed_at) -
+                            ROW_NUMBER() OVER (PARTITION BY (quality >= %s) ORDER BY reviewed_at) AS grp
+                        FROM review_log
+                        WHERE card_id LIKE %s
+                    )
+                    SELECT COALESCE(MAX(cnt), 0) FROM (
+                        SELECT COUNT(*) AS cnt FROM ordered WHERE quality >= %s GROUP BY grp
+                    ) runs
+                """
+                self._log_sql("get_best_quality_streak", sql, (min_quality, pattern, min_quality))
+                cur.execute(sql, (min_quality, pattern, min_quality))
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
 
     def get_weakest_cards(self, user_id: str, limit: int = 10) -> list[dict[str, Any]]:
         """Reviewed cards with the lowest accuracy (ties broken by most lapses)."""

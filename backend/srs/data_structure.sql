@@ -40,11 +40,29 @@ CREATE TABLE review_log (
     card_id TEXT NOT NULL,
     mode TEXT NOT NULL,
     quality SMALLINT NOT NULL,
+    -- XP awarded for this specific review, computed once at write time
+    -- (base_xp(quality) * that day's diminishing multiplier + streak
+    -- bonus — see srs/xp.py) and stored rather than recomputed, so
+    -- lifetime/leaderboard totals are just SUM(xp_earned) and never
+    -- drift if the formula's constants change later.
+    xp_earned INTEGER NOT NULL DEFAULT 0,
     reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_review_log_card_id
 ON review_log(card_id, reviewed_at);
+
+-- Display identity for the Profile screen / leaderboard. Deliberately
+-- separate from Supabase's own auth.users table rather than reading/
+-- writing it directly: keeps this app's schema self-contained and not
+-- dependent on the DB role having access to the auth schema. Seeded
+-- lazily (random username) the first time a user hits /api/profile if
+-- no row exists yet — see profile.py.
+CREATE TABLE user_profiles (
+    user_id TEXT PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
 CREATE TABLE phrase_history (
     id BIGSERIAL PRIMARY KEY,
