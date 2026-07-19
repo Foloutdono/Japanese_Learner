@@ -103,4 +103,6 @@ def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)
         "interval": s["interval"],
         "next_review": s["next_review"],
         "xp_earned": s["xp_earned"],
+        "leveled_up": s["leveled_up"],
+        "new_level": s["new_level"],
     }

@@ -934,6 +934,13 @@ input:focus { border-color: var(--accent2); }
     opacity: 0.8;
   }
   .xp-toast { animation: none; opacity: 1; }
+  .xp-toast__glyph { animation: none; }
+  .level-up-overlay { animation: none; opacity: 1; }
+  .level-up-overlay::before { animation: none; opacity: 0.5; }
+  .level-up-banner { animation: none; opacity: 1; transform: none; }
+  .level-up-banner::before,
+  .level-up-banner::after { animation: none; opacity: 0.25; }
+  .level-up-banner__glyph { animation: none; opacity: 1; transform: none; }
 }
 
 .deck-progress { max-width: 480px; margin: 0 auto; }
@@ -1120,33 +1127,185 @@ input:focus { border-color: var(--accent2); }
 
 /* ── XP toast ─────────────────────────────────────────────
    A small "+N XP" pop, fixed just under the top bar so it's visible
-   regardless of scroll position, using the same lapis (accent9) the
-   Profile screen already reserves for XP/level — one consistent
-   colour for "this is XP" everywhere it shows up. Flat pill, no
-   glow/gradient, one rise-and-fade motion rather than a bouncy
-   game-toast — restrained, matching the rest of the app's ma-driven
-   feel rather than leaning hard into the gaming metaphor. */
-@keyframes xp-toast-rise {
-  0%   { opacity: 0; transform: translate(-50%, 6px) scale(0.92); }
-  15%  { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  78%  { opacity: 1; transform: translate(-50%, -4px) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -16px) scale(0.96); }
+   regardless of scroll position. Still the same lapis (accent9) the
+   Profile screen reserves for XP/level, but leaned into as a proper
+   game-toast this time: an overshoot bounce on entry, a gold glint
+   sweeping through the pill, and a little glyph flick — the routine
+   reward should feel like a hit, not a notification. */
+@keyframes xp-toast-pop {
+  0%   { opacity: 0; transform: translate(-50%, 10px) scale(0.4) rotate(-6deg); }
+  42%  { opacity: 1; transform: translate(-50%, -6px) scale(1.14) rotate(2deg); }
+  58%  { transform: translate(-50%, -2px) scale(0.96) rotate(-1deg); }
+  72%  { transform: translate(-50%, -4px) scale(1.03) rotate(0.5deg); }
+  85%  { opacity: 1; transform: translate(-50%, -4px) scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: translate(-50%, -20px) scale(0.94) rotate(0deg); }
+}
+@keyframes xp-toast-shine {
+  0%, 35%  { background-position: -140% 0; }
+  100%     { background-position: 220% 0; }
+}
+@keyframes xp-toast-glyph-flick {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50%      { transform: scale(1.3) rotate(-14deg); }
 }
 .xp-toast {
   position: fixed;
   top: 76px;
   left: 50%;
   z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   pointer-events: none;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 0.03em;
   color: var(--text-on-fill);
-  background: var(--accent9);
-  padding: 7px 18px;
+  background: linear-gradient(100deg,
+    var(--accent9) 0%, var(--accent9) 42%,
+    #85a1de 50%,
+    var(--accent9) 58%, var(--accent9) 100%);
+  background-size: 260% 100%;
+  padding: 8px 20px 8px 15px;
   border-radius: 999px;
-  animation: xp-toast-rise 1.4s ease forwards;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  animation:
+    xp-toast-pop 1.4s cubic-bezier(0.22, 1.1, 0.3, 1) forwards,
+    xp-toast-shine 1.4s ease forwards;
+}
+.xp-toast__glyph {
+  display: inline-block;
+  font-size: 15px;
+  animation: xp-toast-glyph-flick 0.5s ease 0.18s 2;
+}
+
+/* ── Level-up celebration ─────────────────────────────────
+   The big sibling event to the routine XP toast: a dimmed full-screen
+   stage with a hanko-stamp banner slammed down at centre — the app's
+   seal-stamp pairing of shu-iro vermillion and yamabuki gold, gold
+   rays turning slowly behind it, a scatter of dust motes twinkling
+   around the seal. Where the XP toast stays a quick, light pop, this
+   is the one moment the app is allowed to go full game-reward: the
+   glyph lands with an overshoot "stamp" impact rather than a fade. */
+@keyframes level-up-dim {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes level-up-rays-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes level-up-stamp {
+  0%   { opacity: 0; transform: scale(2.2) rotate(-8deg); }
+  55%  { opacity: 1; transform: scale(0.92) rotate(2deg); }
+  72%  { transform: scale(1.05) rotate(-1deg); }
+  86%  { transform: scale(0.98) rotate(0.5deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@keyframes level-up-glyph-in {
+  0%   { opacity: 0; transform: scale(0.3); }
+  55%  { opacity: 0; transform: scale(0.3); }
+  75%  { opacity: 1; transform: scale(1.3); }
+  88%  { transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes level-up-sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.4); }
+  50%      { opacity: 1; transform: scale(1); }
+}
+.level-up-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(16, 14, 19, 0.55) 0%, rgba(16, 14, 19, 0.85) 72%);
+  animation: level-up-dim 0.3s ease forwards;
+}
+.level-up-overlay::before {
+  content: '';
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  max-width: 240vw;
+  max-height: 240vw;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(201, 154, 62, 0.16) 0deg 6deg,
+    transparent 6deg 18deg
+  );
+  animation: level-up-rays-spin 16s linear infinite;
+  pointer-events: none;
+}
+.level-up-banner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 36px 56px 32px;
+  background: linear-gradient(155deg, var(--accent) 0%, #8f2c1b 100%);
+  border: 3px solid var(--accent2);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 6px rgba(16, 14, 19, 0.5),
+    0 20px 50px rgba(0, 0, 0, 0.45),
+    0 0 44px rgba(201, 154, 62, 0.35);
+  animation: level-up-stamp 0.7s cubic-bezier(0.25, 1.5, 0.4, 1) forwards;
+}
+.level-up-banner::before,
+.level-up-banner::after {
+  content: '';
+  position: absolute;
+  inset: -30px;
+  pointer-events: none;
+  background-image: radial-gradient(circle, var(--accent2) 2px, transparent 2.5px);
+  background-size: 46px 46px;
+  background-position: 0 0, 23px 23px;
+  opacity: 0;
+  animation: level-up-sparkle 1.8s ease 0.5s infinite;
+}
+.level-up-banner::after {
+  background-size: 62px 62px;
+  animation-delay: 1s;
+  animation-duration: 2.3s;
+}
+.level-up-banner__glyph {
+  font-family: var(--font-jp);
+  font-size: 3.2rem;
+  line-height: 1;
+  color: var(--accent2);
+  text-shadow: 0 0 18px rgba(201, 154, 62, 0.7), 0 2px 0 rgba(0, 0, 0, 0.3);
+  animation: level-up-glyph-in 0.7s ease 0.15s backwards;
+}
+.level-up-banner__label {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.level-up-banner__level {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-on-panel);
+  margin-top: 2px;
+}
+.level-up-banner__xp {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-on-fill);
+  background: var(--accent2);
+  padding: 5px 16px;
+  border-radius: 999px;
 }
 
 /* ── Rating bar (SRS quality scale) ──────────────────────────
@@ -3406,6 +3565,9 @@ input:focus { border-color: var(--accent2); }
 }
 
 @media (max-width: 560px) {
+  .level-up-banner { padding: 28px 32px 26px; border-radius: 14px; max-width: 86vw; }
+  .level-up-banner__glyph { font-size: 2.4rem; }
+  .level-up-banner__level { font-size: 1.3rem; }
   .home-header { padding: 44px 16px 32px; }
   .home-main { padding: 40px 16px; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
