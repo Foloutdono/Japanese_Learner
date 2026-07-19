@@ -14,6 +14,7 @@ from routes.translations    import router as translations_router
 from routes.grammar         import router as grammar_router
 from routes.phrase           import router as phrase_router
 from routes.reading          import router as reading_router
+from routes.profile          import router as profile_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -38,7 +39,7 @@ app.include_router(translations_router)
 app.include_router(grammar_router)
 app.include_router(phrase_router)
 app.include_router(reading_router)
-
+app.include_router(profile_router)
 @app.get("/")
 def root():
     return {"status": "ok"}
