@@ -91,6 +91,79 @@ function PulseEffect({ count, colorVar }) {
   )
 }
 
+// Builds one full-width "impulse" line as an SVG path across a 100×60
+// viewBox: a smooth macro swoop (one low sine term, so it reads as a
+// single deliberate throw — dip then rise, or the reverse — same
+// gesture as a stadium hola travelling through a row of people)
+// with several higher-frequency jitter terms layered on top so the
+// line looks hand-thrown rather than a clean curve. Randomized start
+// height, swoop direction and jitter every call — no two impulses
+// trace the same path.
+function generateHolaPath() {
+  const POINTS = 40
+  const macro = { freq: 0.55 + Math.random() * 0.5, amp: 24 + Math.random() * 14, phase: Math.random() * Math.PI * 2 }
+  const jitterTerms = Array.from({ length: 3 + Math.floor(Math.random() * 2) }, () => ({
+    freq: 3 + Math.random() * 7,
+    amp: 2 + Math.random() * 5,
+    phase: Math.random() * Math.PI * 2,
+  }))
+  const baseline = 22 + Math.random() * 20
+  let d = ''
+  for (let i = 0; i <= POINTS; i++) {
+    const x = (i / POINTS) * 100
+    let y = baseline + Math.sin((x / 100) * Math.PI * macro.freq + macro.phase) * macro.amp
+    jitterTerms.forEach(term => { y += Math.sin((x / 100) * Math.PI * term.freq + term.phase) * term.amp })
+    y = Math.max(4, Math.min(56, y))
+    d += (i === 0 ? 'M ' : 'L ') + x.toFixed(1) + ' ' + y.toFixed(1) + ' '
+  }
+  return d.trim()
+}
+
+// A short lit segment travels the length of each path (via a small
+// stroke-dasharray dash against a very large gap, animated through
+// stroke-dashoffset) rather than the whole line drawing itself in
+// place — the point is motion passing *through* the screen, like a
+// stadium wave passing through a row of seats, not a static reveal.
+// Several lines stack with independent random paths/speeds/delays —
+// the entropy is what turns one clean sweep into a "hola": a ripple
+// that doesn't arrive as a single uniform event.
+function HolaWave({ count, colorVar }) {
+  const lines = useMemo(() => Array.from({ length: count }, (_, i) => ({
+    id: i,
+    path: generateHolaPath(),
+    delay: (Math.random() * 0.16).toFixed(2),
+    duration: (0.55 + Math.random() * 0.35).toFixed(2),
+    dash: (0.1 + Math.random() * 0.14).toFixed(2),
+    width: (0.5 + Math.random() * 0.8).toFixed(2),
+    peak: (0.55 + Math.random() * 0.35).toFixed(2),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })), [count])
+
+  return (
+    <div className="xp-hola-stage" aria-hidden="true">
+      <svg className="xp-hola-svg" viewBox="0 0 100 60" preserveAspectRatio="none">
+        {lines.map(l => (
+          <path
+            key={l.id}
+            className="xp-hola-line"
+            d={l.path}
+            pathLength="1"
+            style={{
+              color: `var(${colorVar})`,
+              strokeWidth: l.width,
+              strokeDasharray: `${l.dash} ${(Number(l.dash) + 3).toFixed(2)}`,
+              animationDelay: `${l.delay}s`,
+              animationDuration: `${l.duration}s`,
+              '--hola-dash': l.dash,
+              '--hola-peak': l.peak,
+            }}
+          />
+        ))}
+      </svg>
+    </div>
+  )
+}
+
 export function XpToast({ toast, onDone }) {
   useEffect(() => {
     if (!toast) return
@@ -108,6 +181,7 @@ export function XpToast({ toast, onDone }) {
     return (
       <>
         <PulseEffect key={toast.id} count={6} colorVar="--accent2" />
+        <HolaWave key={toast.id} count={5} colorVar="--accent2" />
         <div key={toast.id} className="level-up-overlay" aria-live="polite">
           <div className="level-up-banner">
             <div className="level-up-banner__glyph" aria-hidden="true">昇</div>
@@ -132,6 +206,7 @@ export function XpToast({ toast, onDone }) {
   return (
     <>
       {pulseCount > 0 && <PulseEffect key={toast.id} count={pulseCount} colorVar={sparkColorVar} />}
+      {sparkCount > 0 && <HolaWave key={toast.id} count={sparkCount} colorVar={sparkColorVar} />}
       <div
         key={toast.id}
         className={`xp-toast${boosted ? ' xp-toast--boosted' : ''}`}

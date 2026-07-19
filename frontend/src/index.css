@@ -1191,6 +1191,7 @@ input:focus { border-color: var(--accent2); }
   .xp-toast__glyph { animation: none; }
   .xp-toast__spark { animation: none; opacity: 0; }
   .xp-pulse { animation: none; opacity: 0; }
+  .xp-hola-line { animation: none; opacity: 0; }
   .level-up-overlay { animation: none; opacity: 1; }
   .level-up-overlay::before { animation: none; opacity: 0.5; }
   .level-up-banner { animation: none; opacity: 1; transform: none; }
@@ -1520,6 +1521,50 @@ input:focus { border-color: var(--accent2); }
   0%   { opacity: 0; transform: scaleY(0.92); }
   35%  { opacity: var(--pulse-peak, 0.5); transform: scaleY(1.04); }
   100% { opacity: 0; transform: scaleY(1); }
+}
+
+/* ── Hola wave ─────────────────────────────────────────────
+   The impulse itself: a short lit segment travelling the length of a
+   full-width, hand-thrown-looking path (see generateHolaPath in
+   XpToast.jsx) — energy passing *through* the screen rather than
+   appearing on it, the way a wave moves through a stadium crowd one
+   seat at a time rather than the whole stand lighting up at once.
+   Several lines stack, each with its own random path, speed and
+   delay, so the sweep never reads as one uniform flash — that
+   staggered messiness is the "hola" (a real one is never perfectly
+   synced either), and the jagged macro+jitter path underneath is
+   the same entropy the bottom pulse's silhouette uses, borrowed for
+   a line instead of a fill. Nod to the hit-flash slashes of Japanese
+   rhythm games (Taiko no Tatsujin, beatmania IIDX) rather than a
+   generic loading-style dash animation: fast, glowing, gone. */
+.xp-hola-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  pointer-events: none;
+  overflow: hidden;
+}
+.xp-hola-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.xp-hola-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  opacity: 0;
+  filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 0 7px currentColor);
+  animation-name: xp-hola-sweep;
+  animation-timing-function: cubic-bezier(0.33, 0.66, 0.25, 1);
+  animation-fill-mode: forwards;
+}
+@keyframes xp-hola-sweep {
+  0%   { stroke-dashoffset: calc(1 + var(--hola-dash, 0.15)); opacity: 0; }
+  8%   { opacity: var(--hola-peak, 0.75); }
+  50%  { stroke-dashoffset: 0; }
+  88%  { opacity: var(--hola-peak, 0.75); }
+  100% { stroke-dashoffset: calc(-1 - var(--hola-dash, 0.15)); opacity: 0; }
 }
 
 /* ── Level-up celebration ─────────────────────────────────
