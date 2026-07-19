@@ -859,6 +859,7 @@ input:focus { border-color: var(--accent2); }
   white-space: nowrap;
 }
 .mobile-level-bar__track {
+  position: relative;
   flex: 1;
   height: 6px;
   border-radius: 999px;
@@ -870,7 +871,26 @@ input:focus { border-color: var(--accent2); }
   height: 100%;
   background: var(--accent9);
   border-radius: 999px;
-  transition: width 0.3s ease;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Highlights the XP just earned: sits over the span between the bar's
+   previous width and its new one, in a contrasting warm accent so the
+   gain reads at a glance, then fades back into the base fill color as
+   it settles. Absolutely positioned within the track so it can span an
+   arbitrary from/to percentage without disturbing the main fill. */
+.mobile-level-bar__gain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--accent2);
+  border-radius: 999px;
+  box-shadow: 0 0 6px 1px var(--accent2);
+  animation: mobile-level-bar-gain-fade 1.1s ease forwards;
+}
+@keyframes mobile-level-bar-gain-fade {
+  0%   { opacity: 1; }
+  60%  { opacity: 0.85; }
+  100% { opacity: 0; }
 }
 .mobile-level-bar__xp {
   font-family: var(--font-display);
@@ -1394,7 +1414,7 @@ input:focus { border-color: var(--accent2); }
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.03em;
-  color: var(--text-on-fill);
+  color: var(--text-primary);
   background: linear-gradient(100deg,
     var(--accent9) 0%, var(--accent9) 42%,
     #85a1de 50%,
@@ -1411,7 +1431,6 @@ input:focus { border-color: var(--accent2); }
   display: inline-block;
   font-size: 15px;
   animation: xp-toast-glyph-flick 0.5s ease 0.18s 2;
-  color: var(--text-primary);
 }
 
 /* ── Level-up celebration ─────────────────────────────────
