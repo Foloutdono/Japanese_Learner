@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
 import { BurgerMenu } from './BurgerMenu'
-import { useProfileSummary } from './useProfileSummary'
+import { useProfileSummary } from './userProfileSummary'
 
 const MOBILE_BREAKPOINT = 768
 const SCROLL_THRESHOLD   = 2     // px of scroll before reacting — just enough to ignore jitter

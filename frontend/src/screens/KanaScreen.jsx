@@ -15,6 +15,7 @@ import SelectionScreen from '../components/SelectionScreen'
 import ModeSelector from '../components/ModeSelector'
 import { playKana } from '../components/sound'
 import { kanaModePicker } from '../components/quizModes'
+import { applyXpGain } from '../components/userProfileSummary'
 
 export default function KanaScreen({ session }) {
   const navigate    = useNavigate()
@@ -97,6 +98,10 @@ export default function KanaScreen({ session }) {
     }).then(r => r.json()).then(data => {
       if (typeof data.xp_earned === 'number') {
         setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level })
+        // Optimistic bump for TopBar's ring / mobile level bar / burger
+        // profile row — moves them immediately instead of waiting on
+        // useProfileSummary's next cached /api/profile refetch.
+        applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
       }
       // Fire both in parallel: the next card should appear as soon as
       // it's ready, without waiting on the (heavier) stats recompute.

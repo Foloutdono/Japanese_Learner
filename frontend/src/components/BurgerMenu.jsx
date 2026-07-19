@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { useProfileSummary } from './useProfileSummary'
+import { useProfileSummary } from './userProfileSummary'
 import { levelTitle } from '../levelTitle'
 
 // ── Burger menu button + slide-in drawer ──────────────────
