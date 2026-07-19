@@ -103,6 +103,13 @@ export default function VocabScreen({ session }) {
   }
 
   function postReview(quality) {
+    // Kick off the next card immediately, in parallel with recording
+    // this review — the two don't depend on each other, so waiting
+    // for the review POST to finish before even starting the card
+    // fetch was costing a whole extra round trip on every answer.
+    fetchCard(level, mode)
+    loadProgress(level, mode)
+
     apiFetch('/api/vocab/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
@@ -114,10 +121,6 @@ export default function VocabScreen({ session }) {
         // useProfileSummary's next cached /api/profile refetch.
         applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
       }
-      // Fire both in parallel: the next card should appear as soon as
-      // it's ready, without waiting on the (heavier) stats recompute.
-      fetchCard(level, mode)
-      loadProgress(level, mode)
     })
   }
 
