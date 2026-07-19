@@ -18,39 +18,35 @@ const LEVEL_UP_DURATION = 2400
 // spark burst in the matching color; q0-q2 (failed) ratings get none.
 const SPARK_COLOR_VAR = { 3: '--accent2', 4: '--accent6', 5: '--success' }
 
-// Confetti palette — a few accents in rotation rather than a single
-// tone, so a burst reads as "confetti" and not "colored spark".
-const CONFETTI_COLORS = ['--accent2', '--accent6', '--success', '--accent9', '--accent7', '--accent3']
-
-// Small rhythm-game-style confetti burst rising from the bottom edge
-// of the screen. Regenerated (via the `count` dependency, which only
-// ever changes when a fresh burst is requested through React's `key`
-// on the component itself) so each burst gets its own random spread.
-function ConfettiBurst({ count }) {
-  const pieces = useMemo(() => Array.from({ length: count }, (_, i) => ({
+// Bottom-anchored pulse: a soft wash of `colorVar` rising from the
+// bottom edge of the screen, most opaque low down and fading out
+// toward the top (the gradient stop is itself randomized per layer so
+// stacked pulses don't all reach the same height). Several layers are
+// stacked with randomized delay/duration/peak-opacity for an organic,
+// non-mechanical beat rather than one uniform flash. Regenerated (via
+// the `count` dependency, changed only through React's `key` on the
+// component itself) so each burst gets its own random spread.
+function PulseEffect({ count, colorVar }) {
+  const pulses = useMemo(() => Array.from({ length: count }, (_, i) => ({
     id: i,
-    x: (Math.random() * 100).toFixed(1),
-    delay: (Math.random() * 0.3).toFixed(2),
-    duration: (0.9 + Math.random() * 0.6).toFixed(2),
-    drift: Math.round(Math.random() * 70 - 35),
-    rotate: Math.round(Math.random() * 360),
-    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    delay: (Math.random() * 0.35).toFixed(2),
+    duration: (0.6 + Math.random() * 0.5).toFixed(2),
+    peak: (0.3 + Math.random() * 0.4).toFixed(2),
+    spread: Math.round(50 + Math.random() * 30), // % where the gradient fades to transparent
     // eslint-disable-next-line react-hooks/exhaustive-deps
   })), [count])
 
   return (
-    <div className="xp-confetti" aria-hidden="true">
-      {pieces.map(p => (
+    <div className="xp-pulse-stage" aria-hidden="true">
+      {pulses.map(p => (
         <span
           key={p.id}
-          className="xp-confetti__piece"
+          className="xp-pulse"
           style={{
-            left: `${p.x}%`,
-            background: `var(${p.color})`,
+            background: `linear-gradient(to top, var(${colorVar}) 0%, transparent ${p.spread}%)`,
             animationDelay: `${p.delay}s`,
             animationDuration: `${p.duration}s`,
-            '--drift': `${p.drift}px`,
-            '--rotate': `${p.rotate}deg`,
+            '--pulse-peak': p.peak,
           }}
         />
       ))}
@@ -74,7 +70,7 @@ export function XpToast({ toast, onDone }) {
   if (toast.leveledUp) {
     return (
       <>
-        <ConfettiBurst key={toast.id} count={44} />
+        <PulseEffect key={toast.id} count={6} colorVar="--accent2" />
         <div key={toast.id} className="level-up-overlay" aria-live="polite">
           <div className="level-up-banner">
             <div className="level-up-banner__glyph" aria-hidden="true">昇</div>
@@ -89,16 +85,16 @@ export function XpToast({ toast, onDone }) {
 
   // One spark per quality point above q2 (so 1/2/3 sparks for
   // q3/q4/q5), plus a stronger glow pulse on the pill itself from q4
-  // up, plus a bottom-of-screen confetti burst that scales the same
-  // way — the better the rating, the more the toast celebrates it.
+  // up, plus a bottom-of-screen pulse wash that scales the same way —
+  // the better the rating, the more the toast celebrates it.
   const sparkColorVar = SPARK_COLOR_VAR[toast.quality]
   const sparkCount = sparkColorVar ? toast.quality - 2 : 0
   const boosted = toast.quality >= 4
-  const confettiCount = sparkCount * 12
+  const pulseCount = sparkCount * 2
 
   return (
     <>
-      {confettiCount > 0 && <ConfettiBurst key={toast.id} count={confettiCount} />}
+      {pulseCount > 0 && <PulseEffect key={toast.id} count={pulseCount} colorVar={sparkColorVar} />}
       <div
         key={toast.id}
         className={`xp-toast${boosted ? ' xp-toast--boosted' : ''}`}
