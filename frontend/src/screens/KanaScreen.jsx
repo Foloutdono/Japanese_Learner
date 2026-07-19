@@ -96,7 +96,7 @@ export default function KanaScreen({ session }) {
       body: JSON.stringify({ card_id: card.card_id, mode, quality }),
     }).then(r => r.json()).then(data => {
       if (typeof data.xp_earned === 'number') {
-        setXpToast({ amount: data.xp_earned, id: Date.now() })
+        setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level })
       }
       // Fire both in parallel: the next card should appear as soon as
       // it's ready, without waiting on the (heavier) stats recompute.

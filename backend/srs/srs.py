@@ -264,23 +264,39 @@ class SRSEngine:
         state = self._load_state(card_id, mode)
         updated = self.scheduler.review(state, quality)
         self._save_state(updated)
-        xp_earned = self._log_review(card_id, mode, quality)
+        xp_info = self._log_review(card_id, mode, quality)
         result = self._to_dict(updated)
-        result["xp_earned"] = xp_earned
+        result.update(xp_info)  # xp_earned, leveled_up, new_level
         return result
 
-    def _log_review(self, card_id: str, mode: str, quality: int) -> int:
+    def _log_review(self, card_id: str, mode: str, quality: int) -> dict[str, Any]:
         # card_id is always "{user_id}:{raw_id}" (see auth.prefixed) and
         # user_id itself is assumed colon-free everywhere else in this
         # codebase (e.g. _user_prefix_pattern's LIKE '{user_id}:%'), so
         # splitting on the first colon is safe.
         user_id = card_id.split(":", 1)[0]
+
+        # Read lifetime XP *before* logging this review so the level
+        # right before/after can be compared — this is the only way to
+        # tell "just another review" apart from "that one crossed a
+        # level threshold", which is the actual reward moment worth
+        # calling out on the frontend (see XpToast's level-up variant).
+        prior_xp = self.get_lifetime_xp(user_id)
         xp_earned = self._compute_review_xp(user_id, quality)
+
         with self.storage.cursor() as cur:
             sql = "INSERT INTO review_log(card_id, mode, quality, xp_earned) VALUES (%s, %s, %s, %s)"
             self._log_sql("log_review", sql, (card_id, mode, quality, xp_earned))
             cur.execute(sql, (card_id, mode, quality, xp_earned))
-        return xp_earned
+
+        prior_level = xp_math.level_from_xp(prior_xp)
+        new_level = xp_math.level_from_xp(prior_xp + xp_earned)
+
+        return {
+            "xp_earned": xp_earned,
+            "leveled_up": new_level != prior_level,
+            "new_level": new_level,
+        }
 
     def get_reviews_today(self, user_id: str) -> int:
         pattern = self._user_prefix_pattern(user_id)

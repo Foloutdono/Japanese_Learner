@@ -130,7 +130,7 @@ export default function KanjiScreen({ session }) {
       body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
     }).then(r => r.json()).then(data => {
       if (typeof data.xp_earned === 'number') {
-        setXpToast({ amount: data.xp_earned, id: Date.now() })
+        setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level })
       }
       // Fire in parallel with whatever comes next: the review already
       // happened, so the counts can refresh without blocking the UI.
