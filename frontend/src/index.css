@@ -1411,6 +1411,7 @@ input:focus { border-color: var(--accent2); }
   display: inline-block;
   font-size: 15px;
   animation: xp-toast-glyph-flick 0.5s ease 0.18s 2;
+  color: var(--text-primary);
 }
 
 /* ── Level-up celebration ─────────────────────────────────
