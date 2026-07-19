@@ -127,15 +127,13 @@ export default function KanaScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title="Kana" />
-        <div className="container set-select">
-          <div className="set-select__list">
-            {SETS.map(s => (
-              <button key={s.slug} onClick={() => startSession(s)} className="button-set-choice">
-                {s.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <SelectionScreen>
+          <ModeSelector
+            modes={SETS.map(s => ({ key: s.slug, label: s.label }))}
+            onSelect={slug => startSession(SETS.find(s => s.slug === slug))}
+            title={t.selectKanaSet ?? 'Choose your kana set'}
+          />
+        </SelectionScreen>
       </div>
     )
   }
