@@ -212,9 +212,9 @@ export function DeckProgress({ stats }) {
   const { total, new: toLearn, learning, mastered } = stats
 
   const segments = [
-    { key: 'new',      value: toLearn,  color: 'var(--state-new)', label: t.progressNew      ?? 'À apprendre' },
-    { key: 'learning', value: learning, color: 'var(--accent4)',   label: t.progressLearning ?? 'En cours' },
-    { key: 'mastered', value: mastered, color: 'var(--success)',   label: t.progressMastered ?? 'Maîtrisé' },
+    { key: 'new',      value: toLearn,  color: 'var(--state-new)',      label: t.progressNew      ?? 'À apprendre' },
+    { key: 'learning', value: learning, color: 'var(--state-learning)', label: t.progressLearning ?? 'En cours' },
+    { key: 'mastered', value: mastered, color: 'var(--state-mastered)', label: t.progressMastered ?? 'Maîtrisé' },
   ]
 
   return (
