@@ -1190,6 +1190,7 @@ input:focus { border-color: var(--accent2); }
   .xp-toast--boosted { animation: none; }
   .xp-toast__glyph { animation: none; }
   .xp-toast__spark { animation: none; opacity: 0; }
+  .xp-confetti__piece { animation: none; opacity: 0; }
   .level-up-overlay { animation: none; opacity: 1; }
   .level-up-overlay::before { animation: none; opacity: 0.5; }
   .level-up-banner { animation: none; opacity: 1; transform: none; }
@@ -1485,6 +1486,42 @@ input:focus { border-color: var(--accent2); }
   0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
   30%  { opacity: 1; }
   100% { transform: translate(calc(-50% + var(--spark-x)), calc(-50% + var(--spark-y))) scale(1); opacity: 0; }
+}
+
+/* ── Confetti burst ────────────────────────────────────────
+   A handful of little rectangles rising from the bottom edge of the
+   screen and drifting/rotating outward before falling back and
+   fading — the rhythm-game "you nailed it" flourish, not just a
+   toast-local effect. Triggered alongside the XP toast's spark burst
+   (scaled the same way by rating quality) and always at full count on
+   a level-up. Sits above the mobile level bar's fixed footer so it
+   isn't clipped by it. */
+.xp-confetti {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 45;
+}
+.xp-confetti__piece {
+  position: absolute;
+  bottom: 0;
+  width: 6px;
+  height: 11px;
+  border-radius: 1px;
+  opacity: 0;
+  animation-name: xp-confetti-burst;
+  animation-timing-function: cubic-bezier(0.16, 0.84, 0.44, 1);
+  animation-fill-mode: forwards;
+}
+@keyframes xp-confetti-burst {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  55%  { transform: translate(var(--drift), -130px) rotate(calc(var(--rotate) * 0.6)); opacity: 1; }
+  100% { transform: translate(calc(var(--drift) * 1.4), -20px) rotate(var(--rotate)); opacity: 0; }
 }
 
 /* ── Level-up celebration ─────────────────────────────────
