@@ -143,7 +143,7 @@
   /* Darkened well past the paper tones around it — a hairline
      that's actually visible, not a shade indistinguishable from
      the card it's supposed to divide. */
-  --border:         #c3af7c;
+  --border:         #706855;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -570,7 +570,6 @@ input:focus { border-color: var(--accent2); }
   height: 100%;
   background: var(--bg-panel);
   color: var(--text-on-panel);
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
