@@ -1585,7 +1585,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* Due forecast */
-.stats-forecast-card { margin-bottom: 32px; padding: 24px; }
+.stats-forecast-card { margin-bottom: 32px; padding: 24px; border: 1px solid var(--border); }
 
 .stats-card-heading {
   font-family: 'Noto Serif JP', serif;
@@ -1638,7 +1638,7 @@ input:focus { border-color: var(--accent2); }
 /* Weakest items — same hairline-row rhythm as the choice lists
    (LevelSelector/ModeSelector), so a "needs practice" table reads
    like the rest of the app instead of a bolted-on widget. */
-.stats-weakest-card { margin-bottom: 32px; padding: 24px; }
+.stats-weakest-card { margin-bottom: 32px; padding: 24px; border: 1px solid var(--border); }
 
 .stats-weakest-list {
   display: flex;
