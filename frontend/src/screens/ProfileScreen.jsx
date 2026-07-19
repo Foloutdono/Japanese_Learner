@@ -67,6 +67,7 @@ export default function ProfileScreen({ session }) {
   const { t } = useLang()
   const [profile, setProfile]         = useState(null)
   const [leaderboard, setLeaderboard] = useState(null)
+  const [stale, setStale]             = useState(false)
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -79,12 +80,12 @@ export default function ProfileScreen({ session }) {
     apiFetch('/api/profile', session)
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(setProfile)
-      .catch(() => setProfile(MOCK_PROFILE))
+      .catch(() => { setProfile(MOCK_PROFILE); setStale(true) })
 
     apiFetch('/api/leaderboard', session)
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(setLeaderboard)
-      .catch(() => setLeaderboard(MOCK_LEADERBOARD))
+      .catch(() => { setLeaderboard(MOCK_LEADERBOARD); setStale(true) })
   }, [])
 
   const loading = !profile || !leaderboard
@@ -97,6 +98,13 @@ export default function ProfileScreen({ session }) {
 
       {!loading && (
         <div className="container profile-container">
+          {stale && (
+            <div className="profile-stale-notice" role="status">
+              <span className="profile-stale-notice__glyph" aria-hidden="true">⚠</span>
+              {t.profileStale || 'Impossible d’actualiser — dernières données disponibles affichées.'}
+            </div>
+          )}
+
           <ProfileCard profile={profile} session={session} onUsernameChange={u => setProfile(p => ({ ...p, username: u }))} t={t} />
 
           <SectionHeader title={t.goals || 'Objectifs'} />
