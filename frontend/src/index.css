@@ -933,6 +933,7 @@ input:focus { border-color: var(--accent2); }
     stroke-dashoffset: 30;
     opacity: 0.8;
   }
+  .xp-toast { animation: none; opacity: 1; }
 }
 
 .deck-progress { max-width: 480px; margin: 0 auto; }
@@ -1116,6 +1117,37 @@ input:focus { border-color: var(--accent2); }
 }
 .btn-nav--icon { font-size: 16px; padding: 6px 10px; }
 .btn-nav--lang { font-size: 14px; padding: 6px 12px; }
+
+/* ── XP toast ─────────────────────────────────────────────
+   A small "+N XP" pop, fixed just under the top bar so it's visible
+   regardless of scroll position, using the same lapis (accent9) the
+   Profile screen already reserves for XP/level — one consistent
+   colour for "this is XP" everywhere it shows up. Flat pill, no
+   glow/gradient, one rise-and-fade motion rather than a bouncy
+   game-toast — restrained, matching the rest of the app's ma-driven
+   feel rather than leaning hard into the gaming metaphor. */
+@keyframes xp-toast-rise {
+  0%   { opacity: 0; transform: translate(-50%, 6px) scale(0.92); }
+  15%  { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  78%  { opacity: 1; transform: translate(-50%, -4px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -16px) scale(0.96); }
+}
+.xp-toast {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  z-index: 40;
+  pointer-events: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: var(--text-on-fill);
+  background: var(--accent9);
+  padding: 7px 18px;
+  border-radius: 999px;
+  animation: xp-toast-rise 1.4s ease forwards;
+}
 
 /* ── Rating bar (SRS quality scale) ──────────────────────────
    A hanko-grid, not a row of flat-UI pills: six panels sit flush

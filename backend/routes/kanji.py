@@ -89,7 +89,12 @@ def get_kanji_card(level: str, mode: str, lang: str = "fr",
 def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
-    return {"card_id": payload.card_id, "interval": s["interval"], "next_review": s["next_review"]}
+    return {
+        "card_id": payload.card_id,
+        "interval": s["interval"],
+        "next_review": s["next_review"],
+        "xp_earned": s["xp_earned"],
+    }
 
 
 @router.get("/api/kanji/stats")

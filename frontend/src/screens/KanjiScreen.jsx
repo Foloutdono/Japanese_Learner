@@ -9,6 +9,7 @@ import {
   InlineReveal, Flashcard, MeaningDisplay, CharDisplay,
 } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
+import { XpToast } from '../components/XpToast'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
@@ -35,6 +36,7 @@ export default function KanjiScreen({ session }) {
   const [showDrawing, setShowDrawing] = useState(false)
   const [drawingEnabled, setDrawingEnabled] = useState(true)
   const [progress, setProgress]       = useState(null)
+  const [xpToast, setXpToast]         = useState(null)
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -126,7 +128,10 @@ export default function KanjiScreen({ session }) {
     apiFetch('/api/kanji/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
-    }).then(() => {
+    }).then(r => r.json()).then(data => {
+      if (typeof data.xp_earned === 'number') {
+        setXpToast({ amount: data.xp_earned, id: Date.now() })
+      }
       // Fire in parallel with whatever comes next: the review already
       // happened, so the counts can refresh without blocking the UI.
       loadProgress(level, mode)
@@ -198,6 +203,7 @@ export default function KanjiScreen({ session }) {
           </button>
         }
       />
+      <XpToast toast={xpToast} onDone={() => setXpToast(null)} />
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
