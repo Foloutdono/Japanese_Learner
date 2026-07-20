@@ -121,6 +121,17 @@ export default function KanjiScreen({ session }) {
   }
 
   function postReview(quality) {
+    // Lock: a level-up holds the screen open until its reward is
+    // claimed (see XpToast.jsx), and RatingBar is hidden for the same
+    // reason below — but the overlay is a fixed, full-screen layer, so
+    // this is the actual guard, not just the visible one. Without it,
+    // a review fired while the previous card's level-up is still
+    // waiting on screen would swap xpToast out from under it before
+    // its curtain-close ever plays, and postReview would record a
+    // review — or kick off the drawing drill below — for `card` while
+    // its rating buttons should be inert.
+    if (xpToast?.leveledUp) return
+
     // Struggling to recall the kanji from its meaning is exactly when a
     // quick writing drill helps most — recognition-direction modes and
     // the writing mode itself don't need this extra step.
@@ -296,7 +307,7 @@ export default function KanjiScreen({ session }) {
               </div>
             )}
 
-            <RatingBar active={showRating} onRate={postReview} />
+            <RatingBar active={showRating && !xpToast?.leveledUp} onRate={postReview} />
 
             {showDrawing && (
               <DrawingOverlay

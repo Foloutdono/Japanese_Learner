@@ -116,6 +116,7 @@
   --state-due:      #755894;
   --border:         #35303a;
   --burger-menu-border: #35303a;
+  --level-up-overlay-before: rgba(201, 154, 62, 0.14);
 }
 
 /* ── Light theme — washi (和紙), rice paper ──────────────────
@@ -160,6 +161,7 @@
      the card it's supposed to divide. */
   --border:         #c3af7c;
   --burger-menu-border: #605947;
+  --level-up-overlay-before: rgba(234, 173, 50, 0.14);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1423,12 +1425,13 @@ input:focus { border-color: var(--accent2); }
   9%   { opacity: 0.55; transform: translate(-50%, 6px) scale(0.52) rotate(-4deg); }
   17%  { opacity: 0.55; transform: translate(-50%, 6px) scale(0.52) rotate(-4deg); }
   26%  { opacity: 0.8;  transform: translate(-50%, 2px) scale(0.74) rotate(-2deg); }
-  31%  { opacity: 0.8;  transform: translate(-50%, 2px) scale(0.74) rotate(-2deg); }
+  31%  { opacity: 0.8;  transform: translate(-50%, 2px) scale(0.95) rotate(-2deg); }
   /* the snap — every impact effect below (tsuke beat 3, kumadori
      burst, glyph flick, boosted glow) is timed to land here too,
      ~340ms in, instead of smeared across half a second */
-  38%  { opacity: 1;    transform: translate(-50%, -7px) scale(1.2) rotate(2.5deg); }
-  55%  { transform: translate(-50%, -4px) scale(0.96) rotate(-1deg); }
+  38%  { opacity: 1;    transform: translate(-50%, -7px) scale(1.5) rotate(2.5deg); }
+  43%  { opacity: 1;    transform: translate(-50%, -7px) scale(1.5) rotate(2.5deg); }
+  55%  { transform: translate(-50%, -4px) scale(0.95) rotate(-1deg); }
   70%  { transform: translate(-50%, -5px) scale(1.02) rotate(0.5deg); }
   85%  { transform: translate(-50%, -5px) scale(1)    rotate(0deg); }
   100% { opacity: 1;    transform: translate(-50%, -5px) scale(1) rotate(0deg); }
@@ -1439,7 +1442,7 @@ input:focus { border-color: var(--accent2); }
 }
 @keyframes xp-toast-shine {
   0%, 35% { background-position: -140% 0; }
-  100%    { background-position: 220% 0; }
+  100%    { background-position: 180% 0; }
 }
 @keyframes xp-toast-glyph-flick {
   0%, 100% { transform: scale(1) rotate(0deg); }
@@ -1464,10 +1467,19 @@ input:focus { border-color: var(--accent2); }
      exactly this — legible text over a colored/dark surface in either
      theme. */
   color: var(--text-on-panel);
+  /* Foil, not flat paint: the old version swapped between two blue
+     tones over a hard 16%-wide band, which read as a light smear more
+     than a glint. This spreads the same swap across more stops with a
+     warm near-white core (kinpaku, 金箔 — gold leaf — catching the
+     light dead-on) fading through a cool silvered blue on either
+     side, so the sweep has an actual bright point instead of a flat
+     plateau. */
   background: linear-gradient(100deg,
-    var(--accent9) 0%, var(--accent9) 42%,
-    #85a1de 50%,
-    var(--accent9) 58%, var(--accent9) 100%);
+    var(--accent9) 0%, var(--accent9) 40%,
+    #b9c8ef 46%,
+    #fff7e0 50%,
+    #b9c8ef 54%,
+    var(--accent9) 60%, var(--accent9) 100%);
   background-size: 260% 100%;
   padding: 9px 22px 9px 16px;
   border-radius: 999px;
@@ -1479,8 +1491,8 @@ input:focus { border-color: var(--accent2); }
     0 0 0 1px rgba(255, 255, 255, 0.08) inset,
     0 0 0 1.5px var(--accent2);
   animation:
-    xp-toast-arrive 900ms cubic-bezier(0.3, 0.1, 0.2, 1) forwards,
-    xp-toast-shine 900ms ease forwards;
+    xp-toast-arrive 1100ms cubic-bezier(0.3, 0.1, 0.2, 1) forwards,
+    xp-toast-shine 1500ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 /* A rating of "correct" or better (q4/q5) also gets a stronger pulsing
    glow around the pill itself, timed to flare exactly on the snap
@@ -1489,7 +1501,7 @@ input:focus { border-color: var(--accent2); }
 .xp-toast--boosted {
   animation:
     xp-toast-arrive 900ms cubic-bezier(0.3, 0.1, 0.2, 1) forwards,
-    xp-toast-shine 900ms ease forwards,
+    xp-toast-shine 900ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards,
     xp-toast-glow-pulse 300ms ease-out 220ms 1;
 }
 /* Swaps the whole toast onto its exit the moment XpToast.jsx flips
@@ -1510,6 +1522,63 @@ input:focus { border-color: var(--accent2); }
   font-size: 19px;
   animation: xp-toast-glyph-flick 200ms ease 280ms 1;
 }
+
+/* ── Foil sweep + kirakira glints ──────────────────────────
+   A second, independent layer of shine on top of the base gradient's
+   own sweep above: a bright diagonal streak that crosses the pill
+   once, like light catching gold leaf at an angle rather than the
+   base fill's own colour simply cycling through. Self-clips to the
+   pill's own rounded corners via `border-radius: inherit` — no
+   `overflow: hidden` on .xp-toast itself, since the kumadori burst,
+   tsuke beats and brush-stroke below all rely on being able to spill
+   past its edges. `mix-blend-mode: overlay` so it brightens the fill
+   it crosses instead of just pasting a flat white bar over it. Two
+   fixed four-point glints (kirakira — キラキラ, the onomatopoeia for
+   a sparkle) are timed to flash right as the streak passes their
+   fixed position, the same "land on the passing light, don't scatter
+   randomly" logic as KUMADORI_ANGLES in XpToast.jsx. */
+@keyframes xp-toast-foil-sweep {
+  0%   { transform: translateX(-160%) skewX(-16deg); opacity: 0; }
+  10%  { opacity: 1; }
+  55%  { opacity: 1; }
+  100% { transform: translateX(160%) skewX(-16deg); opacity: 0; }
+}
+.xp-toast::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(75deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.75) 49%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 255, 255, 0.75) 51%,
+    transparent 58%);
+  mix-blend-mode: overlay;
+  transform: translateX(-160%) skewX(-16deg);
+  opacity: 0;
+  animation: xp-toast-foil-sweep 950ms cubic-bezier(0.3, 0.6, 0.25, 1) 140ms 1;
+}
+@keyframes xp-toast-glint-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  50%      { opacity: 1; transform: scale(1) rotate(45deg); }
+}
+.xp-toast__glint {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  z-index: 5;
+  background: #fff;
+  clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 3px #fff);
+  animation: xp-toast-glint-twinkle 560ms ease-out 1 forwards;
+}
+.xp-toast__glint--1 { top: -3px; right: 16%; animation-delay: 380ms; }
+.xp-toast__glint--2 { bottom: -3px; left: 22%; animation-delay: 560ms; }
 
 /* ── Brush-stroke flourish ─────────────────────────────────
    A short calligraphic underline drawn in from the centre right
@@ -1614,7 +1683,7 @@ input:focus { border-color: var(--accent2); }
   opacity: 0;
   filter: drop-shadow(0 0 4px currentColor);
   animation-name: kumadori-streak-strike;
-  animation-duration: 0.42s;
+  animation-duration: 0.95s;
   animation-delay: 0.14s;
   animation-timing-function: cubic-bezier(0.2, 0.85, 0.25, 1);
   animation-fill-mode: forwards;
@@ -1690,13 +1759,13 @@ input:focus { border-color: var(--accent2); }
 .level-up-overlay::before {
   content: '';
   position: absolute;
-  width: 900px;
-  height: 900px;
+  width: 350%;
+  height: 350%;
   max-width: 240vw;
   max-height: 240vw;
   background: repeating-conic-gradient(
     from 0deg,
-    rgba(201, 154, 62, 0.14) 0deg 6deg,
+    var(--level-up-overlay-before) 0deg 6deg,
     transparent 6deg 18deg
   );
   animation: level-up-rays-spin 16s linear infinite;
@@ -1850,7 +1919,7 @@ input:focus { border-color: var(--accent2); }
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--text-on-fill);
+  color: var(--text-on-panel);
   background: var(--accent2);
   padding: 5px 16px;
   border-radius: 999px;
@@ -1906,6 +1975,212 @@ input:focus { border-color: var(--accent2); }
   animation: hanko-ink-bleed 500ms ease-out 1.37s forwards;
 }
 
+/* ── Claim button — the curtain call waits for it ──────────
+   Everything above this point plays itself out on its own clock; this
+   is the one piece of the level-up that doesn't. Once the impact has
+   landed (curtain open, seal struck, kumadori resolved) the stage
+   just holds — rays still turning, banner sparkle still breathing —
+   until the person actually reaches out and takes the reward. That's
+   the point: a level-up is worth a beat of the person's own attention,
+   not something that auto-dismisses out from under them.
+
+   The wrapper (`.level-up-claim-wrap`) carries the entrance: it fades
+   and rises in on a fixed delay timed to land after the kumadori burst
+   and ink-bleed have both finished (~1.9s in — see XpToast.jsx), and
+   is genuinely unclickable until then via a discrete `pointer-events`
+   flip inside the keyframe itself, not a JS-managed disabled state.
+   The button (`.level-up-claim`) is deliberately free of any
+   `animation` of its own so its hover/active *transitions* aren't
+   fighting a forwards-filled keyframe for the same properties — a
+   real trap: an element mid-animation (even one parked at its 100%
+   keyframe via `forwards`) wins the cascade over a plain :hover rule
+   touching the same property, so the lift-on-hover below would
+   silently never show if it lived on the same element as the
+   entrance. The pulsing invite ring lives on ::before for the same
+   reason — it animates box-shadow on its own layer, leaving the
+   button's own box-shadow free for hover/focus. */
+.level-up-claim-wrap {
+  position: relative;
+  margin-top: 16px;
+  opacity: 0;
+  transform: translateY(10px) scale(0.85);
+  pointer-events: none;
+  animation: level-up-claim-in 480ms cubic-bezier(0.2, 0.8, 0.25, 1) 1.86s forwards;
+}
+@keyframes level-up-claim-in {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.85); pointer-events: none; }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.03); }
+  85%  { pointer-events: none; }
+  100% { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+}
+.level-up-claim {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px clamp(20px, 5vw, 28px);
+  border-radius: 999px;
+  border: 2px solid var(--accent2);
+  background: linear-gradient(160deg, #dcb35a 0%, var(--accent2) 45%, #8f6a1f 100%);
+  color: var(--text-on-fill);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.level-up-claim:hover,
+.level-up-claim:focus-visible {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.28) inset,
+    0 0 18px 4px rgba(201, 154, 62, 0.45);
+  outline: none;
+}
+.level-up-claim:active {
+  transform: translateY(0) scale(0.96);
+}
+.level-up-claim:disabled {
+  cursor: default;
+}
+.level-up-claim__glyph {
+  font-family: var(--font-jp);
+  font-size: 1.08em;
+  line-height: 1;
+}
+/* A slow sonar-style ping inviting the click, on its own layer so it
+   never touches the button's own box-shadow (see note above). */
+@keyframes level-up-claim-ping {
+  0%   { box-shadow: 0 0 0 0 rgba(201, 154, 62, 0.55); opacity: 1; }
+  70%  { box-shadow: 0 0 0 11px rgba(201, 154, 62, 0); opacity: 0; }
+  100% { box-shadow: 0 0 0 0 rgba(201, 154, 62, 0); opacity: 0; }
+}
+.level-up-claim::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: level-up-claim-ping 1.9s ease-out 2.3s infinite;
+}
+/* Claimed: a quick stamp-press squish, an ink-bleed ring echoing the
+   hanko above it (this is, narratively, the person's own seal of
+   receipt), then out of the way before the curtain finishes closing.
+   Declared after the base rule so it wins regardless of hover/focus
+   state at the moment of the click. */
+.level-up-claim-wrap--leaving {
+  animation: level-up-claim-out 260ms ease forwards;
+  pointer-events: none;
+}
+@keyframes level-up-claim-out {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  30%  { transform: translateY(0) scale(0.92); }
+  100% { opacity: 0; transform: translateY(-6px) scale(0.9); }
+}
+.level-up-claim-wrap--leaving::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  border: 2px solid var(--accent2);
+  opacity: 0.6;
+  pointer-events: none;
+  animation: level-up-claim-ripple 420ms ease-out forwards;
+}
+@keyframes level-up-claim-ripple {
+  0%   { opacity: 0.6; transform: scale(0.85); }
+  100% { opacity: 0;   transform: scale(1.7); }
+}
+
+/* ── Stage footlights ───────────────────────────────────────
+   A kabuki stage reads its own floor as much as anything above it —
+   footlights along the front edge (today's andon 行灯 equivalent) and
+   embers off the tsuke board. This is that, run along the bottom of
+   the whole viewport rather than tucked under one toast: a warm line
+   ignites the instant a reward lands and a handful of fixed embers
+   (see EMBER_LAYOUT in XpToast.jsx — hand-placed, not randomised, for
+   the same reason KUMADORI_ANGLES is) drift up out of it for as long
+   as the toast or the level-up celebration is on screen. `--big`
+   widens the glow and lengthens the ember climb for the level-up
+   variant; `--footlight-color`, set inline from the same per-quality
+   accent the kumadori burst uses, keeps the two effects reading as
+   one colour story. Entirely decorative and inert: fixed, inset to
+   the viewport edges, pointer-events: none throughout, so it never
+   competes with the page underneath it for clicks. */
+.stage-footlights {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: clamp(90px, 18vw, 160px);
+  z-index: 38;
+  /* No overflow: hidden — the glow already self-terminates via its
+     own gradient stop below, and clipping here would truncate embers
+     mid-rise the moment they passed this strip's own (short) height
+     instead of letting them fade out on their own higher up. */
+  pointer-events: none;
+  opacity: 1;
+  --ember-rise: -120px;
+  transition: opacity 420ms ease;
+}
+.stage-footlights--big {
+  /* Nested inside .level-up-overlay rather than living at the page
+     level, so its z-index is compared against that local context's
+     own children (kabuki-curtain: 2, level-up-banner: 1) — not the
+     page-level 38 above, which would float it above the curtain
+     entirely. 0 keeps it lit behind both, revealed as the curtain
+     parts rather than sitting on top of it. */
+  z-index: 0;
+  height: clamp(120px, 22vw, 220px);
+  --ember-rise: -190px;
+}
+.stage-footlights--leaving {
+  opacity: 0;
+}
+.stage-footlights--big.stage-footlights--leaving {
+  transition-duration: 900ms;
+}
+.stage-footlights__glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--footlight-color, var(--accent2)) 0%, transparent 78%);
+  filter: blur(1px);
+  opacity: 0;
+  animation:
+    footlights-glow-in 700ms ease forwards,
+    footlights-glow-breathe 2600ms ease-in-out 700ms infinite;
+}
+@keyframes footlights-glow-in  { from { opacity: 0; } to { opacity: 0.28; } }
+@keyframes footlights-glow-breathe { 0%, 100% { opacity: 0.28; } 50% { opacity: 0.16; } }
+.stage-footlights--big .stage-footlights__glow {
+  animation-name: footlights-glow-in-big, footlights-glow-breathe-big;
+}
+@keyframes footlights-glow-in-big  { from { opacity: 0; } to { opacity: 0.42; } }
+@keyframes footlights-glow-breathe-big { 0%, 100% { opacity: 0.42; } 50% { opacity: 0.24; } }
+.ember {
+  position: absolute;
+  bottom: 6px;
+  left: var(--ember-x, 50%);
+  width: var(--ember-size, 4px);
+  height: var(--ember-size, 4px);
+  border-radius: 50%;
+  background: var(--footlight-color, var(--accent2));
+  opacity: 0;
+  filter: drop-shadow(0 0 4px var(--footlight-color, var(--accent2)));
+  animation: ember-rise var(--ember-dur, 2800ms) ease-in var(--ember-delay, 0ms) infinite;
+}
+@keyframes ember-rise {
+  0%   { transform: translate(0, 0) scale(0.4); opacity: 0; }
+  12%  { opacity: 1; }
+  65%  { opacity: 0.8; }
+  100% { transform: translate(var(--ember-drift, 0px), var(--ember-rise, -120px)) scale(1); opacity: 0; }
+}
+
 /* Reduced motion — deliberately placed *after* the rules above (and
    after the general prefers-reduced-motion block near the top of the
    file) so it wins the cascade for these selectors specifically.
@@ -1949,6 +2224,29 @@ input:focus { border-color: var(--accent2); }
   .level-up-banner::after,
   .hanko-stamp,
   .hanko-stamp::after { animation: none; opacity: 0; }
+
+  .xp-toast::after,
+  .xp-toast__glint { animation: none; opacity: 0; }
+
+  /* The claim button still has to actually become clickable — it's
+     the one piece of this whole feature that isn't purely decorative
+     — so this redeclares the same animation-name with real (if
+     instant) start/end states rather than just switching it off, the
+     same approach .level-up-banner above already takes. Delay matches
+     the banner's own 1.14s rather than the full-motion 1.86s: reduced
+     motion should mean less waiting too, not just less movement. */
+  @keyframes level-up-claim-in {
+    0%   { opacity: 0; transform: none; pointer-events: none; }
+    100% { opacity: 1; transform: none; pointer-events: auto; }
+  }
+  .level-up-claim-wrap { animation: level-up-claim-in 10ms linear 1.14s forwards; }
+  .level-up-claim-wrap--leaving { animation: none; opacity: 0; }
+  .level-up-claim::before,
+  .level-up-claim-wrap--leaving::after { animation: none; opacity: 0; }
+
+  .ember { animation: none; opacity: 0; }
+  .stage-footlights__glow,
+  .stage-footlights--big .stage-footlights__glow { animation: none; opacity: 0.18; }
 }
 
 /* ── Rating bar (SRS quality scale) ──────────────────────────
