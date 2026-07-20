@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { playXpGain, playLevelUp } from './sound'
 
 // ── XP toast ──────────────────────────────────────────────
@@ -10,157 +10,69 @@ import { playXpGain, playLevelUp } from './sound'
 // celebration variant instead of the routine pop. `onDone` clears the
 // parent's state once the toast has had its moment; the component
 // itself doesn't track its own visibility.
-const NORMAL_DURATION = 1600
-const LEVEL_UP_DURATION = 2400
+//
+// The visual language is kabuki (歌舞伎), not confetti: every reward
+// is a miniature mie (見得) — the freeze-pose an actor snaps into at
+// a scene's peak — counted in by an accelerating run of wooden
+// clapper strikes (tsuke-uchi ツケ打ち, <TsukeBeats/> below) and
+// punctuated by a burst of kumadori (隈取り), the bold brush-stroke
+// make-up lines that radiate from the eyes on a bravado role
+// (<KumadoriBurst/>). The level-up variant adds the jōshiki-maku
+// (定式幕) — kabuki's own striped curtain — yanked open to reveal the
+// hanko-stamp banner already mid-pose. All of the choreography lives
+// in index.css; it's deliberately fixed/timed rather than
+// randomised — a mie is precise, not chaotic.
+const NORMAL_DURATION = 1650
+const LEVEL_UP_DURATION = 2800
 
 // Same per-quality accent the rating bar itself uses (see
 // .rating-bar__btn--q* in index.css) — q3 "hésitant" and up get a
-// spark burst in the matching color; q0-q2 (failed) ratings get none.
-const SPARK_COLOR_VAR = { 3: '--accent2', 4: '--accent6', 5: '--success' }
+// kumadori burst in the matching colour; q0-q2 (failed) ratings get
+// none, just the plain snap.
+const KUMADORI_COLOR_VAR = { 3: '--accent2', 4: '--accent6', 5: '--success' }
 
-// Builds one wavy, chaotic top-edge silhouette as an SVG path, filled
-// from that edge down to the bottom of a 0-100 viewBox. Several sine
-// terms of random frequency/amplitude/phase are summed for an organic
-// multi-frequency wave, then extra per-point jitter is layered on top
-// so the edge reads as rough/hand-drawn rather than a clean curve —
-// no two calls produce the same silhouette.
-function generateWavePath() {
-  const POINTS = 36
-  const terms = Array.from({ length: 2 + Math.floor(Math.random() * 2) }, () => ({
-    freq: 1 + Math.random() * 4,
-    amp: 8 + Math.random() * 16,
-    phase: Math.random() * Math.PI * 2,
-  }))
-  const baseline = 50 + Math.random() * 15 // 0 = top of viewBox, 100 = bottom
-
-  let d = `M 0 100 L 0 ${baseline.toFixed(1)}`
-  for (let i = 0; i <= POINTS; i++) {
-    const x = (i / POINTS) * 100
-    let y = baseline
-    terms.forEach(term => { y += Math.sin((x / 100) * Math.PI * term.freq + term.phase) * term.amp })
-    y += (Math.random() - 0.5) * 12 // rough per-point jitter, on top of the smooth wave
-    y = Math.max(4, Math.min(96, y))
-    d += ` L ${x.toFixed(1)} ${y.toFixed(1)}`
-  }
-  d += ' L 100 100 Z'
-  return d
+// Fixed fan angles per streak count. Hand-placed rather than
+// randomised: a mie is deliberate, so one line lands slightly
+// off-centre, two split evenly either side of straight up, and three
+// add a dead-centre line for the best rating.
+const KUMADORI_ANGLES = {
+  1: [-8],
+  2: [-24, 16],
+  3: [-32, 0, 28],
 }
 
-// Bottom-anchored pulse: a chaotic wavy silhouette of `colorVar` rising
-// from the bottom edge of the screen, filled with a vertical gradient
-// so it's most opaque low down and fades out toward its own peak.
-// Several layers stack, each with its own random wave shape plus
-// randomized delay/duration/peak-opacity, for an organic, non-uniform
-// beat rather than one identical flash repeated. Regenerated (via the
-// `count` dependency, changed only through React's `key` on the
-// component itself) so each burst gets its own random shapes.
-function PulseEffect({ count, colorVar }) {
-  const pulses = useMemo(() => Array.from({ length: count }, (_, i) => ({
-    id: i,
-    delay: (Math.random() * 0.35).toFixed(2),
-    duration: (0.7 + Math.random() * 0.6).toFixed(2),
-    peak: (0.35 + Math.random() * 0.4).toFixed(2),
-    path: generateWavePath(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  })), [count])
-
+// The count-in: three fixed impact marks flashing in on shrinking
+// gaps — the accelerating wooden-clapper beats a kabuki stagehand
+// strikes into a board before an actor's mie. Purely CSS-timed (see
+// .tsuke-beat/-1/-2/-3 in index.css); `big` swaps in the enlarged
+// level-up sizing.
+function TsukeBeats({ big }) {
   return (
-    <div className="xp-pulse-stage" aria-hidden="true">
-      {pulses.map(p => (
-        <svg
-          key={p.id}
-          className="xp-pulse"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          style={{
-            animationDelay: `${p.delay}s`,
-            animationDuration: `${p.duration}s`,
-            '--pulse-peak': p.peak,
-          }}
-        >
-          <defs>
-            <linearGradient id={`xp-pulse-grad-${p.id}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="transparent" />
-              <stop offset="100%" style={{ stopColor: `var(${colorVar})` }} />
-            </linearGradient>
-          </defs>
-          <path d={p.path} fill={`url(#xp-pulse-grad-${p.id})`} />
-        </svg>
-      ))}
-    </div>
+    <span className={`tsuke-beats${big ? ' tsuke-beats--big' : ''}`} aria-hidden="true">
+      <span className="tsuke-beat tsuke-beat--1" />
+      <span className="tsuke-beat tsuke-beat--2" />
+      <span className="tsuke-beat tsuke-beat--3" />
+    </span>
   )
 }
 
-// Builds one full-width "impulse" line as an SVG path across a 100×60
-// viewBox: a smooth macro swoop (one low sine term, so it reads as a
-// single deliberate throw — dip then rise, or the reverse — same
-// gesture as a stadium hola travelling through a row of people)
-// with several higher-frequency jitter terms layered on top so the
-// line looks hand-thrown rather than a clean curve. Randomized start
-// height, swoop direction and jitter every call — no two impulses
-// trace the same path.
-function generateHolaPath() {
-  const POINTS = 40
-  const macro = { freq: 0.55 + Math.random() * 0.5, amp: 24 + Math.random() * 14, phase: Math.random() * Math.PI * 2 }
-  const jitterTerms = Array.from({ length: 3 + Math.floor(Math.random() * 2) }, () => ({
-    freq: 3 + Math.random() * 7,
-    amp: 2 + Math.random() * 5,
-    phase: Math.random() * Math.PI * 2,
-  }))
-  const baseline = 22 + Math.random() * 20
-  let d = ''
-  for (let i = 0; i <= POINTS; i++) {
-    const x = (i / POINTS) * 100
-    let y = baseline + Math.sin((x / 100) * Math.PI * macro.freq + macro.phase) * macro.amp
-    jitterTerms.forEach(term => { y += Math.sin((x / 100) * Math.PI * term.freq + term.phase) * term.amp })
-    y = Math.max(4, Math.min(56, y))
-    d += (i === 0 ? 'M ' : 'L ') + x.toFixed(1) + ' ' + y.toFixed(1) + ' '
-  }
-  return d.trim()
-}
-
-// A short lit segment travels the length of each path (via a small
-// stroke-dasharray dash against a very large gap, animated through
-// stroke-dashoffset) rather than the whole line drawing itself in
-// place — the point is motion passing *through* the screen, like a
-// stadium wave passing through a row of seats, not a static reveal.
-// Several lines stack with independent random paths/speeds/delays —
-// the entropy is what turns one clean sweep into a "hola": a ripple
-// that doesn't arrive as a single uniform event.
-function HolaWave({ count, colorVar }) {
-  const lines = useMemo(() => Array.from({ length: count }, (_, i) => ({
-    id: i,
-    path: generateHolaPath(),
-    delay: (Math.random() * 0.16).toFixed(2),
-    duration: (0.55 + Math.random() * 0.35).toFixed(2),
-    dash: (0.1 + Math.random() * 0.14).toFixed(2),
-    width: (0.5 + Math.random() * 0.8).toFixed(2),
-    peak: (0.55 + Math.random() * 0.35).toFixed(2),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  })), [count])
-
+// The payoff: a fan of tapered, brush-stroke streaks (kumadori)
+// whipping outward from centre at fixed angles, timed to land with
+// the snap. `count` selects the angle set above — no matching count
+// (a q0-q2 rating) renders nothing at all.
+function KumadoriBurst({ count, colorVar, big }) {
+  const angles = KUMADORI_ANGLES[count]
+  if (!angles) return null
   return (
-    <div className="xp-hola-stage" aria-hidden="true">
-      <svg className="xp-hola-svg" viewBox="0 0 100 60" preserveAspectRatio="none">
-        {lines.map(l => (
-          <path
-            key={l.id}
-            className="xp-hola-line"
-            d={l.path}
-            pathLength="1"
-            style={{
-              color: `var(${colorVar})`,
-              strokeWidth: l.width,
-              strokeDasharray: `${l.dash} ${(Number(l.dash) + 3).toFixed(2)}`,
-              animationDelay: `${l.delay}s`,
-              animationDuration: `${l.duration}s`,
-              '--hola-dash': l.dash,
-              '--hola-peak': l.peak,
-            }}
-          />
-        ))}
-      </svg>
-    </div>
+    <span
+      className={`kumadori-burst${big ? ' kumadori-burst--big' : ''}`}
+      aria-hidden="true"
+      style={{ color: `var(${colorVar})` }}
+    >
+      {angles.map((deg, i) => (
+        <span key={i} className="kumadori-streak" style={{ '--streak-angle': `${deg}deg` }} />
+      ))}
+    </span>
   )
 }
 
@@ -179,50 +91,42 @@ export function XpToast({ toast, onDone }) {
 
   if (toast.leveledUp) {
     return (
-      <>
-        <PulseEffect key={toast.id} count={6} colorVar="--accent2" />
-        <HolaWave key={toast.id} count={5} colorVar="--accent2" />
-        <div key={toast.id} className="level-up-overlay" aria-live="polite">
-          <div className="level-up-banner">
-            <div className="level-up-banner__glyph" aria-hidden="true">昇</div>
-            <div className="level-up-banner__label">Niveau supérieur</div>
-            <div className="level-up-banner__level">Niveau {toast.newLevel}</div>
-            <div className="level-up-banner__xp">+{toast.amount} XP</div>
-          </div>
+      // `key` forces a fresh DOM node per toast so the CSS animations
+      // (which only ever play on mount) actually re-trigger for a
+      // second level-up in the same session.
+      <div key={toast.id} className="level-up-overlay" aria-live="polite">
+        <div className="kabuki-curtain kabuki-curtain--left" aria-hidden="true" />
+        <div className="kabuki-curtain kabuki-curtain--right" aria-hidden="true" />
+        <TsukeBeats big />
+        <div className="level-up-banner">
+          <KumadoriBurst count={3} colorVar="--accent2" big />
+          <div className="level-up-banner__glyph" aria-hidden="true">昇</div>
+          <div className="level-up-banner__label">Niveau supérieur</div>
+          <div className="level-up-banner__level">Niveau {toast.newLevel}</div>
+          <div className="level-up-banner__xp">+{toast.amount} XP</div>
         </div>
-      </>
+      </div>
     )
   }
 
-  // One spark per quality point above q2 (so 1/2/3 sparks for
-  // q3/q4/q5), plus a stronger glow pulse on the pill itself from q4
-  // up, plus a bottom-of-screen pulse wash that scales the same way —
-  // the better the rating, the more the toast celebrates it.
-  const sparkColorVar = SPARK_COLOR_VAR[toast.quality]
-  const sparkCount = sparkColorVar ? toast.quality - 2 : 0
+  // One kumadori streak per quality point above q2 (1/2/3 for
+  // q3/q4/q5), plus the stronger glow-pulse on the pill itself from
+  // q4 up — the better the rating, the harder the toast celebrates.
+  const kumadoriColorVar = KUMADORI_COLOR_VAR[toast.quality]
+  const kumadoriCount = kumadoriColorVar ? toast.quality - 2 : 0
   const boosted = toast.quality >= 4
-  const pulseCount = sparkCount * 2
 
   return (
-    <>
-      {pulseCount > 0 && <PulseEffect key={toast.id} count={pulseCount} colorVar={sparkColorVar} />}
-      {sparkCount > 0 && <HolaWave key={toast.id} count={sparkCount} colorVar={sparkColorVar} />}
-      <div
-        key={toast.id}
-        className={`xp-toast${boosted ? ' xp-toast--boosted' : ''}`}
-        aria-live="polite"
-        style={sparkColorVar ? { '--spark-color': `var(${sparkColorVar})` } : undefined}
-      >
-        <span className="xp-toast__glyph" aria-hidden="true">⚡</span>
-        +{toast.amount} XP
-        {sparkCount > 0 && (
-          <span className="xp-toast__sparks" aria-hidden="true">
-            {Array.from({ length: sparkCount }, (_, i) => (
-              <span key={i} className={`xp-toast__spark xp-toast__spark--${i}`} />
-            ))}
-          </span>
-        )}
-      </div>
-    </>
+    <div
+      key={toast.id}
+      className={`xp-toast${boosted ? ' xp-toast--boosted' : ''}`}
+      aria-live="polite"
+      style={kumadoriColorVar ? { '--kumadori-color': `var(${kumadoriColorVar})` } : undefined}
+    >
+      <TsukeBeats />
+      {kumadoriCount > 0 && <KumadoriBurst count={kumadoriCount} colorVar={kumadoriColorVar} />}
+      <span className="xp-toast__glyph" aria-hidden="true">気</span>
+      +{toast.amount} XP
+    </div>
   )
 }
