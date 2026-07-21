@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
@@ -16,6 +16,9 @@ import ModeSelector from '../components/ModeSelector'
 import { playKana } from '../components/sound'
 import { kanaModePicker } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
+import { useCardSession } from '../hooks/useCardSession'
+
+const FETCH_TIMEOUT_MS = 8000
 
 export default function KanaScreen({ session }) {
   const navigate    = useNavigate()
@@ -33,9 +36,6 @@ export default function KanaScreen({ session }) {
 
   const [selectedSet, setSelectedSet] = useState(null) // { label, slug }
   const [mode, setMode]               = useState(null)
-  const [card, setCard]               = useState(null)
-  const [loading, setLoading]         = useState(false)
-  const [done, setDone]               = useState(false)
   const [answered, setAnswered]       = useState(false)
   const [selected, setSelected]       = useState(null)
   const [input, setInput]             = useState('')
@@ -51,27 +51,50 @@ export default function KanaScreen({ session }) {
     }
   }, [])
 
-  function fetchCard(slug, m) {
-    setLoading(true)
+  // One session per deck+mode — batched and cached so answering never
+  // waits on a fetch, and a backend cold start doesn't blank the
+  // screen (see useCardSession for the full rationale). storageKey
+  // stays a stable 'idle' placeholder until a set+mode is chosen; the
+  // hook itself is always called (rules of hooks), it just has
+  // nothing to fetch yet.
+  const storageKey = selectedSet && mode
+    ? `jp-session:kana:${selectedSet.slug}:${mode}`
+    : 'idle'
+
+  const fetchBatch = useCallback((count, excludeIds) => {
+    if (!selectedSet || !mode) return Promise.resolve([])
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+    return apiFetch(
+      `/api/kana/cards?set_name=${encodeURIComponent(selectedSet.slug)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}`,
+      session,
+      { signal: controller.signal },
+    )
+      .then(r => r.json())
+      .then(data => data.cards ?? [])
+      .finally(() => clearTimeout(timer))
+  }, [selectedSet, mode, session])
+
+  const { current: card, loading, done, advance } = useCardSession({
+    storageKey,
+    fetchBatch,
+    batchSize: 10,
+  })
+
+  // Reset per-card UI state whenever the card in hand changes —
+  // advance() is a synchronous local pop now, so there's no fetch
+  // callback to hang this reset off of like there used to be.
+  useEffect(() => {
     setAnswered(false)
     setSelected(null)
     setInput('')
     setSubmitted(false)
     setShowRating(false)
-
-    apiFetch(`/api/kana/card?set_name=${encodeURIComponent(slug)}&mode=${m}`, session)
-      .then(r => r.json())
-      .then(data => {
-        if (data.error || data.detail) { console.error('API error:', data); setLoading(false); return }
-        if (data.done) { setDone(true); setCard(null) }
-        else { setCard(data); setDone(false) }
-        setLoading(false)
-      })
-  }
+  }, [card?.card_id])
 
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
-  // set+mode. Fetched independently from the card so it never blocks or
-  // slows down card navigation.
+  // set+mode. Fetched independently from the card so it never blocks
+  // or slows down card navigation.
   function loadProgress(slug, m) {
     apiFetch(`/api/kana/stats?set_name=${encodeURIComponent(slug)}&mode=${m}`, session)
       .then(r => r.json())
@@ -82,12 +105,10 @@ export default function KanaScreen({ session }) {
   function startSession(set) {
     setSelectedSet(set)
     setMode(null)
-    setDone(false)
   }
 
   function startMode(m) {
     setMode(m)
-    fetchCard(selectedSet.slug, m)
     loadProgress(selectedSet.slug, m)
   }
 
@@ -95,18 +116,12 @@ export default function KanaScreen({ session }) {
     // Lock: a level-up holds the screen open until its reward is
     // claimed (see XpToast.jsx), and RatingBar is hidden for the same
     // reason below — but the overlay is a fixed, full-screen layer, so
-    // this is the actual guard, not just the visible one. Without it,
-    // a review fired while the previous card's level-up is still
-    // waiting on screen would swap xpToast out from under it before
-    // its curtain-close ever plays, and postReview would record a
-    // review for `card` while its rating buttons should be inert.
+    // this is the actual guard, not just the visible one.
     if (xpToast?.leveledUp) return
 
-    // Kick off the next card immediately, in parallel with recording
-    // this review — the two don't depend on each other, so waiting
-    // for the review POST to finish before even starting the card
-    // fetch was costing a whole extra round trip on every answer.
-    fetchCard(selectedSet.slug, mode)
+    // The next card is already sitting in the queue — advancing is a
+    // local pop, no network round trip to wait on.
+    advance()
     loadProgress(selectedSet.slug, mode)
 
     apiFetch('/api/kana/review', session, {
