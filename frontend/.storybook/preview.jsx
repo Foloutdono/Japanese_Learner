@@ -1,4 +1,6 @@
 import '../src/index.css'
+import { MemoryRouter } from 'react-router-dom'
+import { LangProvider } from '../src/LangContext'
 
 export const globalTypes = {
   theme: {
@@ -23,9 +25,13 @@ export default {
     (Story, context) => {
       document.documentElement.setAttribute('data-theme', context.globals.theme)
       return (
-        <div style={{ background: 'var(--bg-main)', minHeight: '100vh', padding: 40 }}>
-          <Story />
-        </div>
+        <LangProvider>
+          <MemoryRouter>
+            <div style={{ background: 'var(--bg-main)', minHeight: '100vh', padding: 40 }}>
+              <Story />
+            </div>
+          </MemoryRouter>
+        </LangProvider>
       )
     },
   ],

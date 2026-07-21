@@ -5,7 +5,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /** @type { import('@storybook/react-vite').StorybookConfig } */
 export default {
-  stories: ['../src/**/*.stories.@(js|jsx)'],
+  stories: ['../src/components/stories/*.stories.@(js|jsx)'],
   framework: {
     name: '@storybook/react-vite',
     options: {},

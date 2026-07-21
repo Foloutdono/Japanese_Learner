@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { XpToast } from './XpToast'
+import { XpToast } from '../XpToast'
 
 function ReplayableToast({ toast: base }) {
   const [id, setId] = useState(0)
