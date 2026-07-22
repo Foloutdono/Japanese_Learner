@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react'
 import { CardStamp } from './CardStamp'
 
-// How long a just-answered card sticks around, tucked visibly apart
-// from the live one, waiting on a possible stage_up before it's given
-// up on and removed. Generous enough to cover a typical review round
-// trip (kana.py/kanji.py/vocab.py's post_*_review no longer makes the
-// extra get_bulk_stats call it used to), short enough that the common
-// case — a review that doesn't promote a card — doesn't leave
-// anything lingering on screen. A stamp that lands after this window
-// is simply missed; on a slow connection that's a far smaller problem
+// How long a just-answered card sticks around, visibly held next to
+// the live one, before giving up on a stage_up that never came and
+// finally fading away. Long enough to comfortably outlast a routine
+// XP toast's full on-screen life (see NORMAL_DURATION + the
+// xp-toast-fall animation in XpToast.jsx/index.css, ~2s together) —
+// the card the toast is celebrating shouldn't already be gone while
+// the toast is still up. A stamp that lands after this window is
+// simply missed; on a slow connection that's a far smaller problem
 // than showing a promotion on the wrong card, which is the bug this
-// whole component exists to fix.
-const REST_MS = 1400
+// whole component originally exists to fix.
+const REST_MS = 2100
 
 /**
  * Wraps one screen's card content so switching cards is an animated
@@ -30,10 +30,16 @@ const REST_MS = 1400
  * about timing: the previous card is kept around, visibly set apart
  * from the live one (see .card-transition-rest in index.css),
  * specifically so a stamp landing on it can never read as belonging
- * to the card the reviewer is now looking at — shortening REST_MS
- * alone wouldn't fix that, since a stamp arriving even a frame after
- * the live card swapped would still look misattributed if the two
- * shared the same on-screen position.
+ * to the card the reviewer is now looking at.
+ *
+ * The resting card holds at essentially full visibility the entire
+ * time it's waiting — it settles into its "set aside" position once,
+ * on entry, and then does not move or dim again until it actually
+ * leaves. Earlier this dimmed early and jumped back to full size the
+ * instant a stamp arrived, which read as the card vanishing and then
+ * glitching back — the whole point of holding it is so nothing about
+ * it changes out from under the reward feedback (the XP toast, and
+ * the stamp when there is one) that's supposed to belong to it.
  *
  * `cardKey` — the current card's id. `stamp` — the same `{ id, to }`
  * shape CardStamp already takes, plus `cardKey` identifying which
@@ -63,7 +69,7 @@ export function CardTransition({ cardKey, stamp, onStampDone, className, childre
     setState({
       key: cardKey,
       content: children,
-      resting: { key: state.key, content: state.content, leaving: false, hadStamp: false },
+      resting: { key: state.key, content: state.content, leaving: false },
     })
   } else if (children !== state.content) {
     // Same card, content refreshed in place (Kanji/Vocab's
@@ -74,16 +80,9 @@ export function CardTransition({ cardKey, stamp, onStampDone, className, childre
   const resting = state.resting
   const restingStamp = resting && !resting.leaving && stamp?.cardKey === resting.key ? stamp : null
 
-  // `hadStamp` picks which fade-out variant plays (see the two
-  // card-transition-fade-out-* keyframes in index.css) — the resting
-  // card can be leaving from two different opacities (settled at 0.4
-  // with no stamp, or fully surfaced at 1 after one played), and a
-  // single keyframe animation can't cleanly pick up from either
-  // starting point, so there are two explicit ones instead of one
-  // animation guessing where it's coming from.
-  const startLeaving = (hadStamp) => {
+  const startLeaving = () => {
     setState(s => (s.resting && s.resting.key === resting.key
-      ? { ...s, resting: { ...s.resting, leaving: true, hadStamp } }
+      ? { ...s, resting: { ...s.resting, leaving: true } }
       : s))
   }
   const removeResting = () => {
@@ -92,22 +91,19 @@ export function CardTransition({ cardKey, stamp, onStampDone, className, childre
 
   useEffect(() => {
     if (!resting || resting.leaving || restingStamp) return
-    const timer = setTimeout(() => startLeaving(false), REST_MS)
+    const timer = setTimeout(startLeaving, REST_MS)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resting?.key, resting?.leaving, restingStamp])
 
   const handleRestAnimationEnd = (e) => {
-    if (e.animationName === 'card-transition-fade-out-settled'
-      || e.animationName === 'card-transition-fade-out-stamped') {
-      removeResting()
-    }
+    if (e.animationName === 'card-transition-fade-out') removeResting()
   }
 
   const restClass = [
     'card-transition-rest',
     restingStamp && 'card-transition-rest--stamping',
-    resting?.leaving && `card-transition-rest--leaving-from-${resting.hadStamp ? 'stamped' : 'settled'}`,
+    resting?.leaving && 'card-transition-rest--leaving',
   ].filter(Boolean).join(' ')
 
   return (
@@ -116,12 +112,12 @@ export function CardTransition({ cardKey, stamp, onStampDone, className, childre
         {state.content}
       </div>
       {resting && (
-        <div className={restClass} onAnimationEnd={handleRestAnimationEnd}>
+        <div key={resting.key} className={restClass} onAnimationEnd={handleRestAnimationEnd}>
           {resting.content}
           {restingStamp && (
             <CardStamp
               transition={restingStamp}
-              onDone={() => { startLeaving(true); onStampDone?.() }}
+              onDone={() => { startLeaving(); onStampDone?.() }}
             />
           )}
         </div>
