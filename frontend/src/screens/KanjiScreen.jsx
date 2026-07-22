@@ -20,6 +20,7 @@ import { speakJapanese } from '../components/sound'
 import { kanjiModes } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
 import { useCardSession } from '../hooks/useCardSession'
+import { estimateReviewXp, recordReviewXp } from '../xpCurve'
 
 const FETCH_TIMEOUT_MS = 8000
 
@@ -176,16 +177,28 @@ export default function KanjiScreen({ session }) {
       advance()
     }
 
+    // The review round trip can take a couple of seconds, which was
+    // showing up as a visible lag before the XP toast appeared. Fire
+    // it instantly instead, with a guessed amount (see xpCurve.js —
+    // it self-calibrates from real amounts over time), and only step
+    // in again if the real response says this review leveled the user
+    // up: that celebration is worth waiting for, a routine review's
+    // exact XP figure is not — see the .then() below.
+    setXpToast({ amount: estimateReviewXp(quality), id: Date.now(), leveledUp: false, newLevel: null, quality })
+
     apiFetch('/api/kanji/review', session, {
       method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
+      body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality, prev_stage: card.stage }),
     }).then(r => r.json()).then(data => {
       if (typeof data.xp_earned === 'number') {
-        setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level, quality })
+        recordReviewXp(quality, data.xp_earned)
         // Optimistic bump for TopBar's ring / mobile level bar / burger
         // profile row — moves them immediately instead of waiting on
         // useProfileSummary's next cached /api/profile refetch.
         applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
+        if (data.leveled_up) {
+          setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: true, newLevel: data.new_level, quality })
+        }
       }
       // Backend resolves the stage promotion itself (see
       // post_kanji_review) — nothing to detect on this end.

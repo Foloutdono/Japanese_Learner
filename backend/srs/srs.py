@@ -267,7 +267,27 @@ class SRSEngine:
         xp_info = self._log_review(card_id, mode, quality)
         result = self._to_dict(updated)
         result.update(xp_info)  # xp_earned, leveled_up, new_level
+        # updated.total_reviews/interval_days are already in hand from
+        # the save above, so the post-review stage (new/learning/
+        # mastered — same classification get_bulk_stats uses) can be
+        # included here for free. Callers that used to run a second
+        # get_bulk_stats([card_id], mode) just to learn this — see
+        # kana.py/kanji.py/vocab.py's post_*_review — can drop that
+        # extra round trip entirely and read result["stage"] instead.
+        result["stage"] = self._classify_stage(updated.total_reviews, updated.interval_days)
         return result
+
+    @staticmethod
+    def _classify_stage(total_reviews: int, interval_days: int) -> str:
+        """Single source of truth for the new/learning/mastered split
+        — used by both review() (above, from an in-memory CardState)
+        and get_bulk_stats() (below, from a SQL row) so the two can
+        never drift apart."""
+        if total_reviews == 0:
+            return "new"
+        if interval_days >= 21:
+            return "mastered"
+        return "learning"
 
     def _log_review(self, card_id: str, mode: str, quality: int) -> dict[str, Any]:
         # card_id is always "{user_id}:{raw_id}" (see auth.prefixed) and
@@ -472,12 +492,10 @@ class SRSEngine:
         result: dict[str, str] = {}
         for card_id in card_ids:
             row = rows.get(card_id)
-            if not row or row[1] == 0:
+            if not row:
                 result[card_id] = "new"
-            elif row[2] >= 21:
-                result[card_id] = "mastered"
             else:
-                result[card_id] = "learning"
+                result[card_id] = self._classify_stage(row[1], row[2])
         return result
 
     def close(self) -> None:
