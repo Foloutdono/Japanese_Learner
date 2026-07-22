@@ -18,6 +18,7 @@ import PromptCard from '../components/PromptCard'
 import { speakJapanese } from '../components/sound'
 import { vocabKanjiModes } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
+import { estimateReviewXp, recordReviewXp } from '../components/xpCurve'
 import { useCardSession } from '../hooks/useCardSession'
 
 const FETCH_TIMEOUT_MS = 8000
@@ -176,16 +177,42 @@ export default function VocabScreen({ session }) {
     const gates = pendingGatesRef.current
     gates.add('network')
 
+    // Show the reward instantly using the last-known XP amount for
+    // this quality rating (see xpCurve.js) rather than waiting on the
+    // review round trip — compute_review_xp's daily/streak bonuses
+    // mean this is only ever a guess, but it's within a few XP of the
+    // real amount almost always, and the toast is on screen well
+    // under two seconds, gone long before a slow connection would
+    // have resolved anyway. Nothing persisted (see applyXpGain below)
+    // is ever based on this guess — only the response is.
+    const toastId = Date.now()
+    gates.add('toast')
+    setXpToast({ amount: estimateReviewXp(quality), id: toastId, leveledUp: false, newLevel: null, quality })
+
     apiFetch('/api/vocab/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
     }).then(r => r.json()).then(data => {
       if (typeof data.xp_earned === 'number') {
-        gates.add('toast')
-        setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level, quality })
+        recordReviewXp(quality, data.xp_earned)
+        if (data.leveled_up) {
+          // A level-up is never worth missing to a lucky-timed guess —
+          // re-arm the gate (the optimistic toast may have already
+          // finished and cleared it) and force the real celebration
+          // in with a fresh id, so it gets its full curtain-call
+          // treatment and holds for the claim tap regardless of how
+          // the estimate landed.
+          gates.add('toast')
+          setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: true, newLevel: data.new_level, quality })
+        } else {
+          // Just settle the digits on the real number in place — same
+          // id, so XpToast doesn't remount or restart its animation.
+          setXpToast(t => (t && t.id === toastId ? { ...t, amount: data.xp_earned } : t))
+        }
         // Optimistic bump for TopBar's ring / mobile level bar / burger
         // profile row — moves them immediately instead of waiting on
-        // useProfileSummary's next cached /api/profile refetch.
+        // useProfileSummary's next cached /api/profile refetch. Always
+        // the real amount, never the guess above.
         applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
       }
       // Backend resolves the stage promotion itself (see
@@ -200,8 +227,9 @@ export default function VocabScreen({ session }) {
       checkAdvance()
     }).catch(() => {
       // Don't strand the reviewer on a dead card if the request
-      // itself failed — no XP/stamp to show, so nothing left to wait
-      // on either.
+      // itself failed — the optimistic toast still runs its own
+      // course and clears its own gate, there's just no real amount
+      // to correct it with.
       gates.delete('network')
       checkAdvance()
     })
