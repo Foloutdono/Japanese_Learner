@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
 import { apiFetch } from '../api'
-import { xpThreshold } from '../xpCurve'
+import { xpThreshold } from './xpCurve'
 
 // ── Level/XP summary, shared by TopBar's profile ring, the mobile
 // level bar, and the burger menu's profile row ──────────────────
