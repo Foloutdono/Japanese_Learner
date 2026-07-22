@@ -5,8 +5,9 @@ export default {
   component: SectionHeader,
 }
 
+// One of StatsScreen's actual section titles.
 export const Default = {
-  render: () => <SectionHeader title="Objectifs" />,
+  render: () => <SectionHeader title="Kana" />,
 }
 
 export const LongTitle = {

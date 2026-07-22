@@ -1,20 +1,16 @@
 import { DrawingOverlay, DrawingQuiz } from '../DrawingCanvas'
 
-// ── DrawingCanvas ─────────────────────────────────────────
-// kanjiToSvgUrl requests `${VITE_API_URL}/kanjivg/{codepoint}.svg` for
-// the stroke-order reference — that 404s with no backend behind
-// Storybook, which is fine: the <img onError> swaps in
-// .stroke-ref__fallback automatically, so a missing stroke image here
-// is the intended offline fallback, not a bug in this story.
-//
-// DrawingQuiz's "after validate" (revealed correction panel) is
-// internal useState — click "Reveal answer" in the canvas itself
-// rather than looking for a separate story for it.
+// kanjiToSvgUrl 404s with no backend — the <img onError> swaps in the
+// stroke-ref fallback automatically, which is the intended offline
+// state here, not a bug.
 export default {
   title: 'Kanji/DrawingCanvas',
 }
 
-export const Overlay = {
+// Shown by KanjiScreen when a review is graded low on a m-kj card
+// (postReview's needTraining branch) — a quick writing drill before
+// moving on.
+export const TrainingOverlay = {
   render: () => (
     <DrawingOverlay
       kanji="水"
@@ -24,7 +20,8 @@ export const Overlay = {
   ),
 }
 
-export const QuizBeforeValidate = {
+// The prompt used directly in KanjiScreen's "write" quiz mode.
+export const WriteModeQuiz = {
   render: () => (
     <DrawingQuiz
       kanji="火"

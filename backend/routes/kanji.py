@@ -18,6 +18,22 @@ class ReviewPayload(BaseModel):
     mode:    str
     quality: int
 
+# Card stage promotions worth a visual "stamp" on the frontend (see
+# CardStamp.jsx) — only the two forward crossings the SRS ladder can
+# make in one review: new → learning, learning → mastered. Anything
+# else (no change, or dropping back out of mastered on a lapsed
+# review) is None, and the frontend simply doesn't stamp the card.
+STAGE_PROMOTIONS = {
+    ("new", "learning"): "learning",
+    ("learning", "mastered"): "mastered",
+}
+
+
+def _stage_promotion(prev_stage: str | None, new_stage: str | None) -> str | None:
+    if not prev_stage or not new_stage:
+        return None
+    return STAGE_PROMOTIONS.get((prev_stage, new_stage))
+
 FR_MAP = KANJI_FR
 VALID_MODES = set(KANJI_MODES)
 MAX_BATCH = 25
@@ -130,7 +146,13 @@ def get_kanji_cards(level: str, mode: str, lang: str = "fr", count: int = 10, ex
 @router.post("/api/kanji/review")
 def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
+    # Stage before and after the review — same get_bulk_stats used by
+    # /api/kanji/stats, just scoped to this one card, so the "new /
+    # learning / mastered" classification is never reimplemented here
+    # and can't drift out of sync with the stats screen's own count.
+    prev_stage = srs.get_bulk_stats([card_id], payload.mode).get(card_id)
     s = srs.review(card_id, payload.mode, payload.quality)
+    new_stage = srs.get_bulk_stats([card_id], payload.mode).get(card_id)
     return {
         "card_id": payload.card_id,
         "interval": s["interval"],
@@ -138,6 +160,7 @@ def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id
         "xp_earned": s["xp_earned"],
         "leveled_up": s["leveled_up"],
         "new_level": s["new_level"],
+        "stage_up": _stage_promotion(prev_stage, new_stage),
     }
 
 

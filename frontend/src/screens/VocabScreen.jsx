@@ -10,6 +10,7 @@ import {
 } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
+import { CardStamp } from '../components/CardStamp'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
@@ -34,6 +35,7 @@ export default function VocabScreen({ session }) {
   const [showRating, setShowRating] = useState(false)
   const [progress, setProgress]       = useState(null)
   const [xpToast, setXpToast]         = useState(null)
+  const [cardStamp, setCardStamp]     = useState(null)
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -165,6 +167,9 @@ export default function VocabScreen({ session }) {
         // useProfileSummary's next cached /api/profile refetch.
         applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
       }
+      // Backend resolves the stage promotion itself (see
+      // post_vocab_review) — nothing to detect on this end.
+      if (data.stage_up) setCardStamp({ id: Date.now(), to: data.stage_up })
     })
   }
 
@@ -221,7 +226,7 @@ export default function VocabScreen({ session }) {
         {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>
-            <div className="vocab-card-boost">
+            <div className="vocab-card-boost quiz-card-stage">
               <PromptCard>
                 {card.format === 'flashcard' && (
                   <Flashcard
@@ -259,6 +264,7 @@ export default function VocabScreen({ session }) {
                   />
                 )}
               </PromptCard>
+              <CardStamp transition={cardStamp} onDone={() => setCardStamp(null)} />
             </div>
 
             {card.format === 'qcm' && (

@@ -10,6 +10,7 @@ import {
 } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
+import { CardStamp } from '../components/CardStamp'
 import PromptCard from '../components/PromptCard'
 import SelectionScreen from '../components/SelectionScreen'
 import ModeSelector from '../components/ModeSelector'
@@ -43,6 +44,7 @@ export default function KanaScreen({ session }) {
   const [showRating, setShowRating]   = useState(false)
   const [progress, setProgress]       = useState(null)
   const [xpToast, setXpToast]         = useState(null)
+  const [cardStamp, setCardStamp]     = useState(null)
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -135,6 +137,9 @@ export default function KanaScreen({ session }) {
         // useProfileSummary's next cached /api/profile refetch.
         applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
       }
+      // Backend resolves the stage promotion itself (see
+      // post_kana_review) — nothing to detect on this end.
+      if (data.stage_up) setCardStamp({ id: Date.now(), to: data.stage_up })
     })
   }
 
@@ -202,32 +207,41 @@ export default function KanaScreen({ session }) {
         {card && !loading && (
           <>
             {mode === 'flashcard' && (
-              <PromptCard>
-                <Flashcard
-                  t={t}
-                  resetKey={card.card_id}
-                  onReveal={onFlashcardReveal}
-                  front={<CharDisplay char={card.kana} />}
-                  back={
-                    <div>
-                      <CharDisplay char={card.kana} />
-                      <div className="flashcard-answer">{card.romaji}</div>
-                    </div>
-                  }
-                />
-              </PromptCard>
+              <div className="quiz-card-stage">
+                <PromptCard>
+                  <Flashcard
+                    t={t}
+                    resetKey={card.card_id}
+                    onReveal={onFlashcardReveal}
+                    front={<CharDisplay char={card.kana} />}
+                    back={
+                      <div>
+                        <CharDisplay char={card.kana} />
+                        <div className="flashcard-answer">{card.romaji}</div>
+                      </div>
+                    }
+                  />
+                </PromptCard>
+                <CardStamp transition={cardStamp} onDone={() => setCardStamp(null)} />
+              </div>
             )}
 
             {mode === 'qcm' && (
-              <PromptCard>
-                <CharDisplay char={card.kana} />
-              </PromptCard>
+              <div className="quiz-card-stage">
+                <PromptCard>
+                  <CharDisplay char={card.kana} />
+                </PromptCard>
+                <CardStamp transition={cardStamp} onDone={() => setCardStamp(null)} />
+              </div>
             )}
 
             {mode === 'write' && (
-              <PromptCard>
-                <CharDisplay char={card.kana} />
-              </PromptCard>
+              <div className="quiz-card-stage">
+                <PromptCard>
+                  <CharDisplay char={card.kana} />
+                </PromptCard>
+                <CardStamp transition={cardStamp} onDone={() => setCardStamp(null)} />
+              </div>
             )}
 
             {mode === 'qcm' && (
