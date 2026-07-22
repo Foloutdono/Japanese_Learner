@@ -53,7 +53,28 @@ def get_kana_sets():
     return {"sets": list(KANA_SETS.keys())}
 
 
-def _build_kana_card(kana_entry: dict, kana_list: list[dict], mode: str, stage: str | None) -> dict:
+def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) -> dict | None:
+    """Turns SRSEngine.preview_reviews_bulk()'s per-card output into
+    the exact shape the frontend indexes by quality — xp/level as-is,
+    plus stage_up resolved against this card's *current* stage the
+    same way post_*_review does after a real review (see
+    _stage_promotion). None when no preview was computed (e.g. the
+    legacy single-card endpoints below don't bother — see get_kana_card)."""
+    if not preview:
+        return None
+    return {
+        str(quality): {
+            "xp_earned":  p["xp_earned"],
+            "leveled_up": p["leveled_up"],
+            "new_level":  p["new_level"],
+            "stage_up":   _stage_promotion(stage, p["stage"]),
+        }
+        for quality, p in preview.items()
+    }
+
+
+def _build_kana_card(kana_entry: dict, kana_list: list[dict], mode: str, stage: str | None,
+                      preview: dict[int, dict] | None = None) -> dict:
     all_romaji = [k["romaji"] for k in kana_list if k["romaji"] != kana_entry["romaji"]]
     choices    = random.sample(all_romaji, min(3, len(all_romaji))) + [kana_entry["romaji"]]
     random.shuffle(choices)
@@ -67,6 +88,11 @@ def _build_kana_card(kana_entry: dict, kana_list: list[dict], mode: str, stage: 
         # as ReviewPayload.prev_stage without another lookup — see the
         # comment on that field for why that matters.
         "stage":   stage,
+        # Exact xp/level/stage-up outcome for every possible rating,
+        # precomputed now so postReview on the frontend never has to
+        # guess or wait on a round trip to know what just happened —
+        # see preview_reviews_bulk's docstring for the full reasoning.
+        "review_preview": _build_review_preview(stage, preview),
     }
 
 
@@ -100,13 +126,17 @@ def _select_cards(set_name: str, mode: str, count: int, exclude_ids: set[str], u
     # stage, so reviewing it later needs no extra lookup to know what
     # it was before.
     states = srs.get_bulk_stats(picked, mode)
+    # Same idea, but for the full xp/level/stage outcome of every
+    # possible rating (0-5) — see preview_reviews_bulk and
+    # _build_review_preview above.
+    previews = srs.preview_reviews_bulk(picked, mode, user_id)
 
     cards = []
     for card_id in picked:
         raw_id = unprefixed(card_id, user_id)
         kana_entry = next((k for k in kana_list if kana_to_id(k) == raw_id), None)
         if kana_entry is not None:
-            cards.append(_build_kana_card(kana_entry, kana_list, mode, states.get(card_id)))
+            cards.append(_build_kana_card(kana_entry, kana_list, mode, states.get(card_id), previews.get(card_id)))
 
     logger.info(
         "kana study request set_name=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
