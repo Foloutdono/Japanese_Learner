@@ -29,60 +29,98 @@ const OUTGOING_MS = 220
  * card instead of keeping a separate "set aside" copy around to
  * catch a late arrival.
  *
- * `cardKey` — the current card's id. `stamp` — `{ id, to, cardKey }`,
- * the same shape CardStamp takes, plus `cardKey` identifying which
- * card it belongs to; only rendered while it matches the live
- * `cardKey`. `onStampDone` fires once a shown stamp's animation
- * genuinely finishes — mirrors CardStamp's own onDone contract.
- * `children` is the current card's display content (just the
- * PromptCard, not MCQGrid/RatingBar — those already reflect the live
- * card immediately and don't need this treatment).
+ * `cardKey` — the current card's id, drives the crossfade. `children`
+ * is always rendered live and up to date — it is NOT gated behind any
+ * "did this actually change" check, because a screen's children can
+ * carry live-updating props of their own (Kanji's `revealed={answered}`
+ * inside its InlineReveal, for instance) that must never go stale
+ * between real card swaps.
+ *
+ * `contentKey` is a separate, optional signal a screen can bump when
+ * it knows the SAME card's content just changed size in place — right
+ * now that's only Kanji/Vocab's re-translate-on-language-change (see
+ * `card.lang` in those screens). It defaults to `cardKey`, so a screen
+ * that never passes it (Kana) simply never triggers an in-place
+ * re-measure — only a real card change ever does. This is the part
+ * that used to be driven by comparing `children` for reference
+ * equality, which broke down because JSX children are a fresh object
+ * every render regardless of whether anything visually changed —
+ * that mismatch was firing the in-place re-measure on essentially
+ * every unrelated re-render (locked/toast/stamp/progress state
+ * changes during postReview), each of which re-armed the height
+ * transition. Most of those re-measures found identical before/after
+ * heights, and a CSS transition between two equal values never fires
+ * `transitionend` — so the height never made it back to `auto` and
+ * stayed pinned to whatever px value happened to be measured,
+ * cropping any later, taller card. Driving this off an explicit key
+ * instead of object identity removes that entirely.
+ *
+ * `stamp` — `{ id, to, cardKey }`, the same shape CardStamp takes,
+ * plus `cardKey` identifying which card it belongs to; only rendered
+ * while it matches the live `cardKey`. `onStampDone` fires once a
+ * shown stamp's animation genuinely finishes — mirrors CardStamp's
+ * own onDone contract.
  */
-export function CardTransition({ cardKey, stamp, onStampDone, className, children }) {
-  const [state, setState] = useState({ key: cardKey, content: children })
+export function CardTransition({ cardKey, contentKey, stamp, onStampDone, className, children }) {
+  const effectiveContentKey = contentKey ?? cardKey
+
+  const [liveKey, setLiveKey] = useState(cardKey)
+  const [liveContentKey, setLiveContentKey] = useState(effectiveContentKey)
   const [outgoing, setOutgoing] = useState(null) // { key, content } | null
   const [height, setHeight] = useState(null) // px while animating, null once settled to auto
 
   const liveRef = useRef(null)
   const prevHeightRef = useRef(null)
+  // Always tracks the latest children, so that when a real card swap
+  // happens we have last render's content ready to hand off to
+  // `outgoing` — without needing `children` itself to be part of any
+  // equality check.
+  const lastChildrenRef = useRef(children)
 
   // "Adjust state during render" (see the React docs on storing
   // information from previous renders) — runs synchronously before
-  // paint whenever cardKey (or in-place content) changes, so there's
-  // never a frame where the outgoing card's content has already been
+  // paint whenever cardKey or contentKey changes, so there's never a
+  // frame where the outgoing card's content has already been
   // overwritten by the incoming one. `liveRef` still points at the
   // *old* DOM node at this point — the swap hasn't committed yet —
   // so this is also the one moment we can read its real height.
-  if (cardKey !== state.key) {
+  if (cardKey !== liveKey) {
     prevHeightRef.current = liveRef.current?.offsetHeight ?? null
-    setOutgoing({ key: state.key, content: state.content })
-    setState({ key: cardKey, content: children })
-  } else if (children !== state.content) {
+    setOutgoing({ key: liveKey, content: lastChildrenRef.current })
+    setLiveKey(cardKey)
+    setLiveContentKey(effectiveContentKey)
+  } else if (effectiveContentKey !== liveContentKey) {
     // Same card, content refreshed in place (Kanji/Vocab's
     // re-translate-on-language-change) — no outgoing copy, just a
     // height re-measure in case the new text is longer or shorter.
     prevHeightRef.current = liveRef.current?.offsetHeight ?? null
-    setState(s => ({ ...s, content: children }))
+    setLiveContentKey(effectiveContentKey)
   }
+  lastChildrenRef.current = children
 
   // Once the live card has actually rendered, animate the container
   // from whatever height the previous card left behind to this one's
   // real height — set the old height first (a same-frame no-op if
   // it's already there), then hand the target to the next frame so
-  // the browser has something to transition *from*.
+  // the browser has something to transition *from*. If the two
+  // heights turn out equal (common — most re-measures aren't a real
+  // resize), skip the dance entirely: a CSS transition between two
+  // identical values never fires `transitionend`, so going through
+  // the pinned-height step here would leave the box permanently
+  // stuck at that px value instead of tracking content normally.
   useLayoutEffect(() => {
     const el = liveRef.current
     if (!el) return
     const target = el.offsetHeight
-    if (prevHeightRef.current == null) {
-      setHeight(target)
+    if (prevHeightRef.current == null || prevHeightRef.current === target) {
+      setHeight(null)
       return
     }
     setHeight(prevHeightRef.current)
     const raf = requestAnimationFrame(() => setHeight(target))
     return () => cancelAnimationFrame(raf)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.key, state.content])
+  }, [liveKey, liveContentKey])
 
   useEffect(() => {
     if (!outgoing) return
@@ -112,8 +150,8 @@ export function CardTransition({ cardKey, stamp, onStampDone, className, childre
         style={height != null ? { height } : undefined}
         onTransitionEnd={handleHeightTransitionEnd}
       >
-        <div key={state.key} ref={liveRef} className="card-transition-live">
-          {state.content}
+        <div key={liveKey} ref={liveRef} className="card-transition-live">
+          {children}
         </div>
         {outgoing && (
           <div key={outgoing.key} className="card-transition-outgoing" aria-hidden="true">

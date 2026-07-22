@@ -312,6 +312,7 @@ export default function VocabScreen({ session }) {
             <CardTransition
               className="vocab-card-boost"
               cardKey={card.card_id}
+              contentKey={`${card.card_id}:${card.lang ?? ''}`}
               stamp={cardStamp}
               onStampDone={() => {
                 setCardStamp(null)
