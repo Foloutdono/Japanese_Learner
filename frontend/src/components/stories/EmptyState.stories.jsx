@@ -5,21 +5,7 @@ export default {
   component: EmptyState,
 }
 
-export const Default = {
-  render: () => <EmptyState message="Aucune carte pour l'instant" />,
-}
-
-export const WithHint = {
-  render: () => (
-    <EmptyState
-      icon="📚"
-      message="Aucun deck pour l'instant"
-      hint="Crée ton premier deck pour commencer"
-    />
-  ),
-}
-
-export const WithAction = {
+export const EmptyDeck = {
   render: () => (
     <EmptyState
       icon="🃏"

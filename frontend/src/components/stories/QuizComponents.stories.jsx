@@ -1,72 +1,69 @@
 import { useState } from 'react'
 import {
-  CharDisplay, MCQButton, MCQGrid, TypeInput, ModeToggle, DoneMessage,
+  CharDisplay, MCQGrid, TypeInput, DoneMessage,
   DeckProgress, Readings, MeaningDisplay, InlineReveal, Flashcard,
   QuestionTypeBadge,
 } from '../QuizComponents'
 
-// ── QuizComponents ────────────────────────────────────────
-// The shared building blocks every quiz screen (Kana/Kanji/Vocab/
-// Grammar/reading comprehension) assembles differently. Most of these
-// call useLang() internally for their own copy — same global
-// LangContext decorator assumption as every other story file here.
-//
-// MCQGrid, TypeInput and Flashcard each attach their own window
-// keydown listener while active/mounted (digit keys 1-4 or AZERTY for
-// MCQGrid, Enter for TypeInput, Space/ZQSD for Flashcard — see each
-// component's own comments) — worth knowing if two of these stories
-// end up mounted on the same canvas and a shortcut seems to fire the
-// wrong one.
-//
-// Debug note, not a story: QuizComponents also exports its own
-// `Loading`, byte-for-byte the same component as the standalone
-// Loading.jsx (see Loading.stories.jsx) — screens currently import
-// the standalone one, so this export looks unused/stale. Worth a
-// second look if the two ever drift apart.
+// Shared building blocks assembled differently by Kana/Kanji/Vocab
+// screens. MCQGrid, TypeInput and Flashcard each attach their own
+// window keydown listener while mounted (digit/AZERTY keys, Enter,
+// Space/ZQSD) — worth knowing if two land on the same canvas.
 export default {
   title: 'Quiz/QuizComponents',
 }
 
-export const CharDisplaySmall = { render: () => <CharDisplay char="あ" size={48} /> }
-export const CharDisplayLarge = { render: () => <CharDisplay char="日" size={110} /> }
+export const CharDisplayKana = { render: () => <CharDisplay char="あ" size={48} /> }
+export const CharDisplayKanji = { render: () => <CharDisplay char="日" size={110} /> }
 
-// MCQGrid owns none of its own state — this wrapper reproduces what
-// KanaScreen/KanjiScreen/VocabScreen actually do: selected/answered
-// live in the parent, onAnswer just records the click.
-function MCQDemo() {
+// Reproduces KanaScreen's qcm mode exactly: selected/answered live in
+// the parent, onAnswer just records the click, correct is the romaji.
+function KanaMCQDemo() {
   const [selected, setSelected] = useState(null)
   const [answered, setAnswered] = useState(false)
-  const choices = ['mizu', 'hi', 'ki', 'tsuchi']
+  const card = { kana: '水', romaji: 'mizu', choices: ['mizu', 'hi', 'ki', 'tsuchi'] }
 
   return (
     <div>
+      <CharDisplay char={card.kana} />
       <MCQGrid
-        choices={choices}
-        correct="mizu"
+        choices={card.choices}
+        correct={card.romaji}
         selected={selected}
         answered={answered}
         onAnswer={c => { setSelected(c); setAnswered(true) }}
       />
-      {answered && (
-        <button style={{ marginTop: 12 }} onClick={() => { setSelected(null); setAnswered(false) }}>
-          Reset
-        </button>
-      )}
     </div>
   )
 }
-export const MCQGridDemo = { render: () => <MCQDemo /> }
+export const KanaMCQ = { render: () => <KanaMCQDemo /> }
 
-export const MCQButtonStates = {
-  render: () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxWidth: 360 }}>
-      <MCQButton choice="mizu" correct="mizu" selected={null} answered={false} index={0} onClick={() => {}} />
-      <MCQButton choice="mizu" correct="mizu" selected="mizu" answered index={1} onClick={() => {}} />
-      <MCQButton choice="hi" correct="mizu" selected="hi" answered index={2} onClick={() => {}} />
+// Reproduces KanjiScreen's qcm mode in the kj-m (kanji → meaning)
+// direction, where choices are meaning strings pulled off card.choices.
+function KanjiMCQDemo() {
+  const [selected, setSelected] = useState(null)
+  const [answered, setAnswered] = useState(false)
+  const card = {
+    kanji: '水', meaning: 'water',
+    choices: [{ meaning: 'water' }, { meaning: 'fire' }, { meaning: 'tree' }, { meaning: 'earth' }],
+  }
+
+  return (
+    <div>
+      <InlineReveal kana="スイ・みず" revealed={answered} main={<CharDisplay char={card.kanji} size={100} />} />
+      <MCQGrid
+        choices={card.choices.map(c => c.meaning)}
+        correct={card.meaning}
+        selected={selected}
+        answered={answered}
+        onAnswer={c => { setSelected(c); setAnswered(true) }}
+      />
     </div>
-  ),
+  )
 }
+export const KanjiMCQ = { render: () => <KanjiMCQDemo /> }
 
+// KanaScreen's write mode.
 function TypeInputDemo() {
   const [value, setValue] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -83,70 +80,52 @@ function TypeInputDemo() {
 }
 export const TypeInputStory = { render: () => <TypeInputDemo /> }
 
-function ModeToggleDemo() {
-  const [mode, setMode] = useState('qcm')
-  return <ModeToggle mode={mode} onChange={setMode} />
-}
-export const ModeToggleStory = { render: () => <ModeToggleDemo /> }
-
 export const DoneMessageStory = {
   render: () => <DoneMessage onBack={() => console.log('[DoneMessage] onBack')} />,
 }
 
+// Real shape from /api/*/stats — the fields StatsScreen's StatCell
+// and each screen's DeckProgress both read.
 export const DeckProgressStory = {
-  render: () => <DeckProgress stats={{ total: 40, new: 12, learning: 18, mastered: 10 }} />,
+  render: () => (
+    <DeckProgress stats={{ total: 40, new: 12, learning: 18, mastered: 10, due_now: 6 }} />
+  ),
 }
 export const DeckProgressEmpty = {
-  // total: 0 (or no stats yet) → renders null, same as a set/mode
-  // that has no cards at all.
-  render: () => <DeckProgress stats={{ total: 0, new: 0, learning: 0, mastered: 0 }} />,
+  render: () => (
+    <DeckProgress stats={{ total: 0, new: 0, learning: 0, mastered: 0, due_now: 0 }} />
+  ),
 }
 
-export const MeaningDisplaySingle = { render: () => <MeaningDisplay meaning="water" /> }
+export const MeaningDisplayStory = { render: () => <MeaningDisplay meaning="water" /> }
 export const MeaningDisplayMultiple = {
   render: () => <MeaningDisplay meaning="to eat, to have a meal, to consume" />,
 }
 
-export const ReadingsMixed = {
+export const ReadingsStory = {
   render: () => <Readings kana="スイ・シュ・みず" onLabel="On'yomi" kunLabel="Kun'yomi" />,
 }
-export const ReadingsSingleRegister = {
-  render: () => <Readings kana="みず" />,
-}
 
-function InlineRevealDemo() {
-  const [revealed, setRevealed] = useState(false)
-  return (
-    <div>
-      <InlineReveal
-        main={<CharDisplay char="水" size={72} />}
-        kana="スイ・みず"
-        revealed={revealed}
-      />
-      <button style={{ marginTop: 12 }} onClick={() => setRevealed(r => !r)}>
-        Toggle revealed
-      </button>
-    </div>
-  )
-}
-export const InlineRevealStory = { render: () => <InlineRevealDemo /> }
-
-export const FlashcardDemo = {
+// KanjiScreen's flashcard, kj-m direction.
+export const FlashcardKanji = {
   render: () => (
     <Flashcard
       resetKey="demo-1"
-      front={<CharDisplay char="水" />}
+      front={<CharDisplay char="水" size={100} />}
       back={
-        <div>
-          <CharDisplay char="水" />
-          <div style={{ opacity: 0.7, marginTop: 8 }}>mizu — water</div>
-        </div>
+        <InlineReveal
+          kana="スイ・みず"
+          isLarge
+          main={<MeaningDisplay meaning="water" size={28} />}
+        />
       }
       onReveal={() => console.log('[Flashcard] onReveal')}
     />
   ),
 }
 
+// Exported by ReadingScreen's segment-tagging data (comprehension /
+// vocabulary / grammar / inference question types).
 export const QuestionTypeBadges = {
   render: () => (
     <div style={{ display: 'flex', gap: 8 }}>
@@ -154,7 +133,6 @@ export const QuestionTypeBadges = {
       <QuestionTypeBadge type="vocabulary" />
       <QuestionTypeBadge type="grammar" />
       <QuestionTypeBadge type="inference" />
-      <QuestionTypeBadge type="unknown_type" />
     </div>
   ),
 }

@@ -64,27 +64,33 @@ const KUMADORI_ANGLES = {
 }
 
 // ── Footlight embers ───────────────────────────────────────
-// Horizontal position, launch delay, sideways drift, size and
-// lifetime for each spark along the footlight strip — hand-placed for
-// the same reason every other set of numbers in this file is
-// (KUMADORI_ANGLES above, the tsuke beat timings in index.css…): a
-// mie is precise, not a particle system, so none of this is
-// Math.random() — it's the same nine embers every time. The routine
-// toast only lights a spread subset of them (EMBER_LAYOUT_LIGHT), so
-// a level-up reads as the whole footlight strip catching, not just a
-// bigger version of the same handful.
+// Horizontal position, launch delay, sideways drift, sway, size,
+// lifetime, and an optional `flare` flag (a softer, bigger radial
+// spark rather than a tight dot — the bigger sparks a real tsuke
+// board throws off among the fine ones) for each spark along the
+// footlight strip — hand-placed for the same reason every other set
+// of numbers in this file is (KUMADORI_ANGLES above, the tsuke beat
+// timings in index.css…): a mie is precise, not a particle system, so
+// none of this is Math.random() — it's the same thirteen embers every
+// time. The routine toast only lights a spread subset of them
+// (EMBER_LAYOUT_LIGHT), so a level-up reads as the whole footlight
+// strip catching, not just a bigger version of the same handful.
 const EMBER_LAYOUT = [
-  { x: 4, delay: 0, drift: -10, size: 4, dur: 2800 },
-  { x: 15, delay: 260, drift: 6, size: 5, dur: 3200 },
-  { x: 27, delay: 80, drift: -5, size: 4, dur: 2600 },
-  { x: 38, delay: 420, drift: 9, size: 6, dur: 3400 },
-  { x: 50, delay: 150, drift: -8, size: 4, dur: 2900 },
-  { x: 61, delay: 340, drift: 5, size: 5, dur: 3100 },
-  { x: 73, delay: 40, drift: -6, size: 4, dur: 2700 },
-  { x: 85, delay: 480, drift: 8, size: 6, dur: 3500 },
-  { x: 95, delay: 200, drift: -4, size: 4, dur: 3000 },
+  { x: 3,  delay: 0,   drift: -10, sway: 5, size: 4, dur: 2800 },
+  { x: 12, delay: 260, drift: 6,   sway: 7, size: 5, dur: 3200, flare: true },
+  { x: 21, delay: 80,  drift: -5,  sway: 4, size: 4, dur: 2600 },
+  { x: 30, delay: 420, drift: 9,   sway: 8, size: 6, dur: 3400 },
+  { x: 39, delay: 150, drift: -8,  sway: 5, size: 4, dur: 2900 },
+  { x: 48, delay: 340, drift: 5,   sway: 6, size: 5, dur: 3100, flare: true },
+  { x: 57, delay: 40,  drift: -6,  sway: 4, size: 4, dur: 2700 },
+  { x: 66, delay: 480, drift: 8,   sway: 7, size: 6, dur: 3500 },
+  { x: 75, delay: 200, drift: -4,  sway: 5, size: 4, dur: 3000 },
+  { x: 83, delay: 360, drift: 7,   sway: 6, size: 5, dur: 3300, flare: true },
+  { x: 90, delay: 110, drift: -6,  sway: 4, size: 4, dur: 2750 },
+  { x: 96, delay: 300, drift: 5,   sway: 5, size: 5, dur: 3050 },
+  { x: 50, delay: 20,  drift: 0,   sway: 3, size: 7, dur: 3700, flare: true },
 ]
-const EMBER_LAYOUT_LIGHT = [EMBER_LAYOUT[0], EMBER_LAYOUT[2], EMBER_LAYOUT[4], EMBER_LAYOUT[6], EMBER_LAYOUT[8]]
+const EMBER_LAYOUT_LIGHT = [EMBER_LAYOUT[0], EMBER_LAYOUT[2], EMBER_LAYOUT[4], EMBER_LAYOUT[6], EMBER_LAYOUT[8], EMBER_LAYOUT[11]]
 
 // The count-in: three fixed impact marks flashing in on shrinking
 // gaps — the accelerating wooden-clapper beats a kabuki stagehand
@@ -145,11 +151,12 @@ function StageFootlights({ big, leaving, colorVar }) {
       {embers.map((e, i) => (
         <span
           key={i}
-          className="ember"
+          className={`ember${e.flare ? ' ember--flare' : ''}`}
           style={{
             '--ember-x': `${e.x}%`,
             '--ember-delay': `${e.delay}ms`,
             '--ember-drift': `${e.drift}px`,
+            '--ember-sway': `${e.sway ?? 5}px`,
             '--ember-size': `${e.size}px`,
             '--ember-dur': `${e.dur}ms`,
           }}

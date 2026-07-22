@@ -9,6 +9,7 @@ export const Text = {
   render: () => <PromptCard>日</PromptCard>,
 }
 
+// Matches how Kanji/Vocab flashcard backs actually nest content.
 export const RichContent = {
   render: () => (
     <PromptCard>

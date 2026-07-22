@@ -2,20 +2,11 @@ import { useState } from 'react'
 import { XpToast } from '../XpToast'
 import RatingBar from '../RatingBar'
 
-// ── XpToast × RatingBar — the reward lock ──────────────────
-// Reproduces the guard added to KanaScreen / KanjiScreen / VocabScreen's
-// postReview: while a level-up's xpToast is up and unclaimed
-// (xpToast?.leveledUp), RatingBar is hidden and further reviews are
-// refused, mirroring postReview's own early `return`. Use this to
-// check the lock actually releases when XpToast's onDone fires — i.e.
-// only once the curtain has genuinely finished closing, not the
-// instant the claim button is clicked.
-//
-// Rate "01 — Parfait" to trigger a level-up in this demo (an easy,
-// deliberate trigger, not the real level threshold). RatingBar should
-// vanish until "Réclamer" is clicked, and clicking a quality button
-// while it's gone should only add a "blocked" line to the log below,
-// never a second toast stacked on the first.
+// Reproduces the guard in every screen's postReview: while a level-up
+// xpToast is up and unclaimed (xpToast?.leveledUp), RatingBar is
+// hidden and further reviews are refused. Rate "01 — Parfait" to
+// trigger a level-up here; the lock should only release once
+// XpToast's onDone fires (curtain fully closed), not on the claim click.
 function LockDemo() {
   const [xpToast, setXpToast] = useState(null)
   const [log, setLog] = useState([])
@@ -48,11 +39,6 @@ function LockDemo() {
           pushLog('xpToast cleared (onDone) — lock released')
         }}
       />
-
-      <p style={{ fontFamily: 'monospace', fontSize: 13, opacity: 0.7, maxWidth: 420 }}>
-        Rate "01 — Parfait" to trigger a level-up. RatingBar should
-        disappear until you click "Réclamer" in the curtain overlay.
-      </p>
 
       <RatingBar active={!xpToast?.leveledUp} onRate={postReview} />
 

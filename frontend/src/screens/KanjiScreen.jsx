@@ -10,6 +10,7 @@ import {
 } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
+import { CardStamp } from '../components/CardStamp'
 import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
@@ -38,6 +39,7 @@ export default function KanjiScreen({ session }) {
   const [drawingEnabled, setDrawingEnabled] = useState(true)
   const [progress, setProgress]       = useState(null)
   const [xpToast, setXpToast]         = useState(null)
+  const [cardStamp, setCardStamp]     = useState(null)
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -185,6 +187,9 @@ export default function KanjiScreen({ session }) {
         // useProfileSummary's next cached /api/profile refetch.
         applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
       }
+      // Backend resolves the stage promotion itself (see
+      // post_kanji_review) — nothing to detect on this end.
+      if (data.stage_up) setCardStamp({ id: Date.now(), to: data.stage_up })
     })
   }
 
@@ -256,54 +261,60 @@ export default function KanjiScreen({ session }) {
         {card && !loading && (
           <>
             {mode !== 'write' && (
-              <PromptCard>
-                {card.format === 'flashcard' && (
-                  <Flashcard
-                    t={t}
-                    resetKey={card.card_id}
-                    onReveal={onFlashcardReveal}
-                    front={
-                      isKjToM
-                        ? <CharDisplay char={card.kanji} size={100} />
-                        : <MeaningDisplay meaning={card.meaning} size={44} />
-                    }
-                    back={
-                      <InlineReveal
-                        t={t}
-                        kana={card.kana}
-                        isLarge={isKjToM}
-                        main={
-                          isKjToM
-                            ? <MeaningDisplay meaning={card.meaning} size={28} />
-                            : <CharDisplay char={card.kanji} size={72} />
-                        }
-                      />
-                    }
-                  />
-                )}
+              <div className="quiz-card-stage">
+                <PromptCard>
+                  {card.format === 'flashcard' && (
+                    <Flashcard
+                      t={t}
+                      resetKey={card.card_id}
+                      onReveal={onFlashcardReveal}
+                      front={
+                        isKjToM
+                          ? <CharDisplay char={card.kanji} size={100} />
+                          : <MeaningDisplay meaning={card.meaning} size={44} />
+                      }
+                      back={
+                        <InlineReveal
+                          t={t}
+                          kana={card.kana}
+                          isLarge={isKjToM}
+                          main={
+                            isKjToM
+                              ? <MeaningDisplay meaning={card.meaning} size={28} />
+                              : <CharDisplay char={card.kanji} size={72} />
+                          }
+                        />
+                      }
+                    />
+                  )}
 
-                {card.format === 'qcm' && (
-                  <InlineReveal
-                    t={t}
-                    kana={card.kana}
-                    revealed={answered}
-                    main={
-                      isKjToM
-                        ? <CharDisplay char={card.kanji} size={100} />
-                        : <MeaningDisplay meaning={card.meaning} size={44} />
-                    }
-                  />
-                )}
-              </PromptCard>
+                  {card.format === 'qcm' && (
+                    <InlineReveal
+                      t={t}
+                      kana={card.kana}
+                      revealed={answered}
+                      main={
+                        isKjToM
+                          ? <CharDisplay char={card.kanji} size={100} />
+                          : <MeaningDisplay meaning={card.meaning} size={44} />
+                      }
+                    />
+                  )}
+                </PromptCard>
+                <CardStamp transition={cardStamp} onDone={() => setCardStamp(null)} />
+              </div>
             )}
 
             {mode === 'write' && (
-              <PromptCard>
-                <MeaningDisplay meaning={card.meaning} size={32} />
-                {card.kana && (
-                  <div className="quiz-subtitle">({card.kana})</div>
-                )}
-              </PromptCard>
+              <div className="quiz-card-stage">
+                <PromptCard>
+                  <MeaningDisplay meaning={card.meaning} size={32} />
+                  {card.kana && (
+                    <div className="quiz-subtitle">({card.kana})</div>
+                  )}
+                </PromptCard>
+                <CardStamp transition={cardStamp} onDone={() => setCardStamp(null)} />
+              </div>
             )}
 
             {card.format === 'qcm' && (

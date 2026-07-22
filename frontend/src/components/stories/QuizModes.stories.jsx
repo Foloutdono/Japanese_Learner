@@ -1,14 +1,10 @@
-// ── quizModes.js — data debug view ─────────────────────────
 // Not a component — kanaModes / kanaModePicker / vocabKanjiModes /
 // kanjiModes / vocabKanjiStatsLabels are the single source of truth
-// for every mode key/label KanaScreen, VocabScreen, KanjiScreen and
-// StatsScreen all read from. This just renders their actual output as
-// a plain list so a wrong key or a missing-translation fallback is
-// visible without spinning up all four screens.
-//
-// t={} below exercises every single `t.xxx ?? '...'` fallback in the
-// file — the same French text a real user would see before that
-// translation key existed — since nothing here is actually filled in.
+// for every mode key/label Kana/Vocab/Kanji/StatsScreen read from.
+// This renders their actual output as a plain list, so a wrong key or
+// a missing-translation fallback is visible without spinning up all
+// four screens. t={} exercises every `t.xxx ?? '...'` fallback — the
+// same text a real user sees before that translation key exists.
 import {
   KANA_MODE_KEYS, VOCAB_MODE_KEYS, KANJI_MODE_KEYS,
   kanaModes, kanaModePicker, vocabKanjiModes, kanjiModes, vocabKanjiStatsLabels,
