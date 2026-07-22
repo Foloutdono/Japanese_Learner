@@ -10,7 +10,7 @@ import {
 } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
-import { CardStamp } from '../components/CardStamp'
+import { CardTransition } from '../components/CardTransition'
 import PromptCard from '../components/PromptCard'
 import SelectionScreen from '../components/SelectionScreen'
 import ModeSelector from '../components/ModeSelector'
@@ -18,7 +18,6 @@ import { playKana } from '../components/sound'
 import { kanaModePicker } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
 import { useCardSession } from '../hooks/useCardSession'
-import { estimateReviewXp, recordReviewXp } from '../xpCurve'
 
 const FETCH_TIMEOUT_MS = 8000
 
@@ -127,32 +126,22 @@ export default function KanaScreen({ session }) {
     advance()
     loadProgress(selectedSet.slug, mode)
 
-    // The review round trip can take a couple of seconds, which was
-    // showing up as a visible lag before the XP toast appeared. Fire
-    // it instantly instead, with a guessed amount (see xpCurve.js —
-    // it self-calibrates from real amounts over time), and only step
-    // in again if the real response says this review leveled the user
-    // up: that celebration is worth waiting for, a routine review's
-    // exact XP figure is not — see the .then() below.
-    setXpToast({ amount: estimateReviewXp(quality), id: Date.now(), leveledUp: false, newLevel: null, quality })
-
     apiFetch('/api/kana/review', session, {
       method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode, quality, prev_stage: card.stage }),
+      body: JSON.stringify({ card_id: card.card_id, mode, quality }),
     }).then(r => r.json()).then(data => {
       if (typeof data.xp_earned === 'number') {
-        recordReviewXp(quality, data.xp_earned)
+        setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level, quality })
         // Optimistic bump for TopBar's ring / mobile level bar / burger
         // profile row — moves them immediately instead of waiting on
         // useProfileSummary's next cached /api/profile refetch.
         applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
-        if (data.leveled_up) {
-          setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: true, newLevel: data.new_level, quality })
-        }
       }
       // Backend resolves the stage promotion itself (see
-      // post_kana_review) — nothing to detect on this end.
-      if (data.stage_up) setCardStamp({ id: Date.now(), to: data.stage_up })
+      // post_kana_review) — nothing to detect on this end. cardKey
+      // lets CardTransition route it to the right card even though
+      // `card` (the live one) has already moved on by now.
+      if (data.stage_up) setCardStamp({ id: Date.now(), to: data.stage_up, cardKey: card.card_id })
     })
   }
 
@@ -219,8 +208,8 @@ export default function KanaScreen({ session }) {
         {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>
-            {mode === 'flashcard' && (
-              <div className="quiz-card-stage">
+            <CardTransition cardKey={card.card_id} stamp={cardStamp} onStampDone={() => setCardStamp(null)}>
+              {mode === 'flashcard' && (
                 <PromptCard>
                   <Flashcard
                     t={t}
@@ -235,27 +224,14 @@ export default function KanaScreen({ session }) {
                     }
                   />
                 </PromptCard>
-                <CardStamp transition={cardStamp} onDone={() => setCardStamp(null)} />
-              </div>
-            )}
+              )}
 
-            {mode === 'qcm' && (
-              <div className="quiz-card-stage">
+              {(mode === 'qcm' || mode === 'write') && (
                 <PromptCard>
                   <CharDisplay char={card.kana} />
                 </PromptCard>
-                <CardStamp transition={cardStamp} onDone={() => setCardStamp(null)} />
-              </div>
-            )}
-
-            {mode === 'write' && (
-              <div className="quiz-card-stage">
-                <PromptCard>
-                  <CharDisplay char={card.kana} />
-                </PromptCard>
-                <CardStamp transition={cardStamp} onDone={() => setCardStamp(null)} />
-              </div>
-            )}
+              )}
+            </CardTransition>
 
             {mode === 'qcm' && (
               <MCQGrid choices={card.choices} correct={card.romaji}
