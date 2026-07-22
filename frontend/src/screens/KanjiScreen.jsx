@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
@@ -40,6 +40,16 @@ export default function KanjiScreen({ session }) {
   const [progress, setProgress]       = useState(null)
   const [xpToast, setXpToast]         = useState(null)
   const [cardStamp, setCardStamp]     = useState(null)
+  const [locked, setLocked]           = useState(false)
+
+  // Gates that must all clear before the deck is allowed to move on
+  // to the next card: the review request itself, the writing drill
+  // when one is triggered, plus whichever of the XP toast / stage
+  // stamp actually end up showing. Kept in a ref, not state —
+  // nothing needs to re-render off it, it's only ever read at the
+  // moment a gate closes, to decide whether advance() can finally
+  // run.
+  const pendingGatesRef = useRef(new Set())
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -152,12 +162,24 @@ export default function KanjiScreen({ session }) {
     loadProgress(lvl, m)
   }
 
+  // advance() only ever runs once every gate above has cleared — see
+  // pendingGatesRef.
+  function checkAdvance() {
+    if (pendingGatesRef.current.size === 0) {
+      advance()
+      setLocked(false)
+    }
+  }
+
   function postReview(quality) {
-    // Lock: a level-up holds the screen open until its reward is
-    // claimed (see XpToast.jsx), and RatingBar is hidden for the same
-    // reason below — but the overlay is a fixed, full-screen layer, so
-    // this is the actual guard, not just the visible one.
-    if (xpToast?.leveledUp) return
+    // Locked the instant a rating is picked, until the card is
+    // actually replaced — covers the network round trip, a writing
+    // drill if one triggers, the XP toast (including an indefinite
+    // level-up hold), and any stage stamp, so nothing can land on a
+    // card that's already mid-celebration, and a second tap can't
+    // fire a review twice.
+    if (locked) return
+    setLocked(true)
 
     // Struggling to recall the kanji from its meaning is exactly when a
     // quick writing drill helps most — recognition-direction modes and
@@ -165,15 +187,18 @@ export default function KanjiScreen({ session }) {
     const needTraining = quality <= 3 && card?.direction === 'm-kj' && drawingEnabled
 
     loadProgress(level, mode)
+
+    const gates = pendingGatesRef.current
+    gates.add('network')
+
     if (needTraining) {
+      gates.add('training')
       setShowRating(false)
       setShowDrawing(true)
-      // advance() happens once the drawing drill is dismissed (see
-      // DrawingOverlay's onDone below), not here.
+      // The 'training' gate clears once the drawing drill is
+      // dismissed (see DrawingOverlay's onDone below).
     } else {
-      // The next card is already sitting in the queue — advancing is
-      // a local pop, no network round trip to wait on.
-      advance()
+      setShowRating(false)
     }
 
     apiFetch('/api/kanji/review', session, {
@@ -181,6 +206,7 @@ export default function KanjiScreen({ session }) {
       body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
     }).then(r => r.json()).then(data => {
       if (typeof data.xp_earned === 'number') {
+        gates.add('toast')
         setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level, quality })
         // Optimistic bump for TopBar's ring / mobile level bar / burger
         // profile row — moves them immediately instead of waiting on
@@ -188,10 +214,22 @@ export default function KanjiScreen({ session }) {
         applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
       }
       // Backend resolves the stage promotion itself (see
-      // post_kanji_review) — nothing to detect on this end. cardKey
-      // lets CardTransition route it to the right card even though
-      // `card` (the live one) has already moved on by now.
-      if (data.stage_up) setCardStamp({ id: Date.now(), to: data.stage_up, cardKey: card.card_id })
+      // post_kanji_review) — nothing to detect on this end. `card` is
+      // still the one just reviewed — advance() hasn't run yet — so
+      // there's no more ambiguity about which card this belongs to.
+      if (data.stage_up) {
+        gates.add('stamp')
+        setCardStamp({ id: Date.now(), to: data.stage_up, cardKey: card.card_id })
+      }
+      gates.delete('network')
+      checkAdvance()
+    }).catch(() => {
+      // Don't strand the reviewer on a dead card if the request
+      // itself failed — no XP/stamp to show, so nothing left to wait
+      // on either (the training gate, if any, still clears on its
+      // own via DrawingOverlay's onDone).
+      gates.delete('network')
+      checkAdvance()
     })
   }
 
@@ -254,7 +292,11 @@ export default function KanjiScreen({ session }) {
           </button>
         }
       />
-      <XpToast toast={xpToast} onDone={() => setXpToast(null)} />
+      <XpToast toast={xpToast} onDone={() => {
+        setXpToast(null)
+        pendingGatesRef.current.delete('toast')
+        checkAdvance()
+      }} />
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
@@ -262,7 +304,11 @@ export default function KanjiScreen({ session }) {
 
         {card && !loading && (
           <>
-            <CardTransition cardKey={card.card_id} stamp={cardStamp} onStampDone={() => setCardStamp(null)}>
+            <CardTransition cardKey={card.card_id} stamp={cardStamp} onStampDone={() => {
+              setCardStamp(null)
+              pendingGatesRef.current.delete('stamp')
+              checkAdvance()
+            }}>
               {mode !== 'write' ? (
                 <PromptCard>
                   {card.format === 'flashcard' && (
@@ -339,13 +385,17 @@ export default function KanjiScreen({ session }) {
               </div>
             )}
 
-            <RatingBar active={showRating && !xpToast?.leveledUp} onRate={postReview} />
+            <RatingBar active={showRating && !locked} onRate={postReview} />
 
             {showDrawing && (
               <DrawingOverlay
                 kanji={card.kanji}
                 meaning={card.meaning}
-                onDone={advance}
+                onDone={() => {
+                  setShowDrawing(false)
+                  pendingGatesRef.current.delete('training')
+                  checkAdvance()
+                }}
               />
             )}
           </>
