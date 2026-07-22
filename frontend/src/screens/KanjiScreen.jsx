@@ -349,11 +349,16 @@ export default function KanjiScreen({ session }) {
 
         {card && !loading && (
           <>
-            <CardTransition cardKey={card.card_id} stamp={cardStamp} onStampDone={() => {
-              setCardStamp(null)
-              pendingGatesRef.current.delete('stamp')
-              checkAdvance()
-            }}>
+            <CardTransition
+              cardKey={card.card_id}
+              contentKey={`${card.card_id}:${card.lang ?? ''}`}
+              stamp={cardStamp}
+              onStampDone={() => {
+                setCardStamp(null)
+                pendingGatesRef.current.delete('stamp')
+                checkAdvance()
+              }}
+            >
               {mode !== 'write' ? (
                 <PromptCard>
                   {card.format === 'flashcard' && (
