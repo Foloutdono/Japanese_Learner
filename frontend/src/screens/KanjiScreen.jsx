@@ -19,7 +19,7 @@ import {DrawingQuiz, DrawingOverlay} from '../components/DrawingCanvas'
 import { speakJapanese } from '../components/sound'
 import { kanjiModes } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
-import { estimateReviewXp, recordReviewXp } from '../xpCurve'
+import { estimateReviewXp, recordReviewXp } from '../components/xpCurve'
 import { useCardSession } from '../hooks/useCardSession'
 
 const FETCH_TIMEOUT_MS = 8000
@@ -247,6 +247,12 @@ export default function KanjiScreen({ session }) {
       if (data.stage_up) {
         gates.add('stamp')
         setCardStamp({ id: Date.now(), to: data.stage_up, cardKey: card.card_id })
+      } else if (!data.leveled_up) {
+        // No stamp to wait for, and no level-up hold either — the
+        // toast is a floating overlay independent of which card is
+        // showing, so don't make the reviewer wait for its own fall
+        // animation before the next card appears.
+        gates.delete('toast')
       }
       gates.delete('network')
       checkAdvance()
