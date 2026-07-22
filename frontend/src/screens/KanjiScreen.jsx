@@ -19,7 +19,7 @@ import {DrawingQuiz, DrawingOverlay} from '../components/DrawingCanvas'
 import { speakJapanese } from '../components/sound'
 import { kanjiModes } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
-import { estimateReviewXp, recordReviewXp } from '../components/xpCurve'
+import { estimateReviewXp, recordReviewXp } from '../xpCurve'
 import { useCardSession } from '../hooks/useCardSession'
 
 const FETCH_TIMEOUT_MS = 8000
