@@ -14,9 +14,14 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 class ReviewPayload(BaseModel):
-    card_id: str
-    mode:    str
-    quality: int
+    card_id:    str
+    mode:       str
+    quality:    int
+    # The card's stage *before* this review, exactly as it was handed
+    # back on the card payload (see _build_vocab_card's "stage" field
+    # below) — sent back by the client instead of looked up again
+    # here. Mirrors kana.py/kanji.py's ReviewPayload.prev_stage.
+    prev_stage: str | None = None
 
 # Card stage promotions worth a visual "stamp" on the frontend (see
 # CardStamp.jsx) — only the two forward crossings the SRS ladder can
@@ -38,7 +43,7 @@ FR_MAP = VOCAB_FR
 MAX_BATCH = 25
 
 
-def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], mode: str, lang: str) -> dict:
+def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], mode: str, lang: str, stage: str | None) -> dict:
     meaning = get_meaning(word, lang, FR_MAP)
     fmt, direction = MODE_INFO[mode]
 
@@ -50,6 +55,10 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], mode: str
         "kanji":     word.get("kanji", ""),
         "kana":      word.get("kana", ""),
         "meaning":   meaning,
+        # Current SRS stage, so the client can hand it straight back
+        # as ReviewPayload.prev_stage without another lookup — see the
+        # comment on that field for why that matters.
+        "stage":     stage,
     }
 
     if fmt == "qcm":
@@ -91,12 +100,19 @@ def _select_cards(level: str, mode: str, lang: str, count: int, exclude_ids: set
         count, exclude_ids,
     )
 
+    # One bulk-stats call for just the handful of cards actually being
+    # returned (at most MAX_BATCH), not the whole deck — cheap, and it
+    # means every card handed to the client already carries its own
+    # stage, so reviewing it later needs no extra lookup to know what
+    # it was before.
+    states = srs.get_bulk_stats(picked, mode)
+
     cards = []
     for card_id in picked:
         raw_id = unprefixed(card_id, user_id)
         word = next((w for w in vocab_list if vocab_to_id(w, level) == raw_id), None)
         if word is not None:
-            cards.append(_build_vocab_card(raw_id, word, vocab_list, mode, lang))
+            cards.append(_build_vocab_card(raw_id, word, vocab_list, mode, lang, states.get(card_id)))
 
     logger.info(
         "vocab study request level=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
@@ -145,13 +161,15 @@ def get_vocab_cards(level: str, mode: str, lang: str = "fr", count: int = 10, ex
 @router.post("/api/vocab/review")
 def post_vocab_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
-    # Stage before and after the review — same get_bulk_stats used by
-    # /api/vocab/stats, just scoped to this one card, so the "new /
-    # learning / mastered" classification is never reimplemented here
-    # and can't drift out of sync with the stats screen's own count.
-    prev_stage = srs.get_bulk_stats([card_id], payload.mode).get(card_id)
     s = srs.review(card_id, payload.mode, payload.quality)
-    new_stage = srs.get_bulk_stats([card_id], payload.mode).get(card_id)
+    # No extra bulk-stats calls needed at all now — review() returns
+    # the post-review stage directly (it already has the updated
+    # total_reviews/interval_days in hand from the save), and the
+    # pre-review stage comes from the client, which already had it on
+    # the card payload (see _select_cards / _build_vocab_card). That's
+    # two full DB round trips removed from the critical path of every
+    # single review — this endpoint used to be the slowest of the
+    # three for exactly that reason.
     return {
         "card_id": payload.card_id,
         "interval": s["interval"],
@@ -159,7 +177,7 @@ def post_vocab_review(payload: ReviewPayload, user_id: str = Depends(get_user_id
         "xp_earned": s["xp_earned"],
         "leveled_up": s["leveled_up"],
         "new_level": s["new_level"],
-        "stage_up": _stage_promotion(prev_stage, new_stage),
+        "stage_up": _stage_promotion(payload.prev_stage, s["stage"]),
     }
 
 

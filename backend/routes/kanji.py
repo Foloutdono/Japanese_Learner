@@ -171,12 +171,12 @@ def get_kanji_cards(level: str, mode: str, lang: str = "fr", count: int = 10, ex
 def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
-    # Only one bulk-stats call now (the post-review stage) instead of
-    # two — the pre-review stage comes from the client, which already
-    # had it on the card payload (see _select_cards). This is the same
-    # single-card get_bulk_stats /api/kanji/stats already calls at deck
-    # scale, so the classification logic still only lives in one place.
-    new_stage = srs.get_bulk_stats([card_id], payload.mode).get(card_id)
+    # No extra bulk-stats call needed at all now — review() returns
+    # the post-review stage directly (it already has the updated
+    # total_reviews/interval_days in hand from the save), and the
+    # pre-review stage comes from the client, which already had it on
+    # the card payload (see _select_cards). That's one full DB round
+    # trip removed from the critical path of every single review.
     return {
         "card_id": payload.card_id,
         "interval": s["interval"],
@@ -184,7 +184,7 @@ def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id
         "xp_earned": s["xp_earned"],
         "leveled_up": s["leveled_up"],
         "new_level": s["new_level"],
-        "stage_up": _stage_promotion(payload.prev_stage, new_stage),
+        "stage_up": _stage_promotion(payload.prev_stage, s["stage"]),
     }
 
 
