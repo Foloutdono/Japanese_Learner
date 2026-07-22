@@ -55,6 +55,14 @@ export default function KanaScreen({ session }) {
   // ever read at the moment a gate closes, to decide whether
   // advance() can finally run.
   const pendingGatesRef = useRef(new Set())
+  // Guards against advancing twice for the same review. Gates can
+  // reach empty more than once per review — e.g. the toast's own
+  // gate is now released as soon as we know it's safe to move on
+  // (see postReview), but the toast keeps animating and still calls
+  // its onDone → checkAdvance() later, by which point the gate set is
+  // already empty again. A ref (not state) so the guard is set the
+  // instant advance() fires, with no render/closure lag to race.
+  const advancedRef = useRef(false)
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -125,9 +133,11 @@ export default function KanaScreen({ session }) {
   }
 
   // advance() only ever runs once every gate above has cleared — see
-  // pendingGatesRef.
+  // pendingGatesRef — and only once per review, even if the gate set
+  // empties out more than once (see advancedRef above).
   function checkAdvance() {
-    if (pendingGatesRef.current.size === 0) {
+    if (pendingGatesRef.current.size === 0 && !advancedRef.current) {
+      advancedRef.current = true
       advance()
       setLocked(false)
     }
@@ -144,6 +154,7 @@ export default function KanaScreen({ session }) {
     setShowRating(false)
     loadProgress(selectedSet.slug, mode)
 
+    advancedRef.current = false
     const gates = pendingGatesRef.current
     gates.add('network')
 
