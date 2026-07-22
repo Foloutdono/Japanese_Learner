@@ -1,45 +1,121 @@
-import { Mascot } from '../Mascot'
+import Mascot from '../Mascot/Mascot'
 
-// ── Moe — all four moods side by side ──────────────────────
-// Self-contained: no useLang()/useNavigate(), no LangProvider or
-// Router decorator needed — the only text baked in is the 気 glyph.
-// This is genuinely the first real look at the shape, since nothing
-// rendered it back to me while building it — treat this file as the
-// actual design review, not just a debug aid.
+// ── Flame Mascot — visual states review ─────────────────────
+// This is the primary design surface for validating:
+// - Shape
+// - Expression
+// - Motion
+// - Scaling
+// Keep this file minimal and dependency-free.
+
 export default {
-  title: 'Mascot/Moe',
+  title: 'Mascot/Flame',
   component: Mascot,
 }
 
-export const AllMoods = {
-  render: () => (
-    <div style={{ display: 'flex', gap: 32, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-      {['blazing', 'milestone', 'flickering', 'ember'].map(mood => (
-        <div key={mood} style={{ textAlign: 'center' }}>
-          <Mascot mood={mood} size={140} />
-          <div style={{ marginTop: 8, fontFamily: 'monospace', fontSize: 12, opacity: 0.7 }}>{mood}</div>
-        </div>
-      ))}
-    </div>
-  ),
+// ────────────────────────────────────────────────────────────
+// 🎭 All States (side-by-side review)
+// ────────────────────────────────────────────────────────────
+export const AllStates = {
+  render: () => {
+    const states = ['calm', 'streak', 'angry']
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          gap: 40,
+          alignItems: 'flex-end',
+          flexWrap: 'wrap',
+          padding: 20,
+        }}
+      >
+        {states.map(state => (
+          <div key={state} style={{ textAlign: 'center' }}>
+            <Mascot state={state} size={140} />
+            <div
+              style={{
+                marginTop: 10,
+                fontFamily: 'monospace',
+                fontSize: 12,
+                opacity: 0.6,
+              }}
+            >
+              {state}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  },
 }
 
-export const Blazing = { render: () => <Mascot mood="blazing" size={160} /> }
-export const Milestone = { render: () => <Mascot mood="milestone" size={160} /> }
-export const Flickering = { render: () => <Mascot mood="flickering" size={160} /> }
-export const Ember = { render: () => <Mascot mood="ember" size={160} /> }
-
-export const WithStreakBadge = {
-  render: () => <Mascot mood="blazing" size={160} streak={14} />,
+// ────────────────────────────────────────────────────────────
+// 🔥 Individual States
+// ────────────────────────────────────────────────────────────
+export const Calm = {
+  render: () => <Mascot state="calm" size={160} />,
 }
 
+export const Streak = {
+  render: () => <Mascot state="streak" size={160} />,
+}
+
+export const Angry = {
+  render: () => <Mascot state="angry" size={160} />,
+}
+
+// ────────────────────────────────────────────────────────────
+// 📏 Size Scaling Test
+// ────────────────────────────────────────────────────────────
 export const SizeRange = {
   render: () => (
-    <div style={{ display: 'flex', gap: 24, alignItems: 'flex-end' }}>
-      <Mascot mood="blazing" size={40} />
-      <Mascot mood="blazing" size={72} />
-      <Mascot mood="blazing" size={120} />
-      <Mascot mood="blazing" size={200} />
+    <div
+      style={{
+        display: 'flex',
+        gap: 24,
+        alignItems: 'flex-end',
+        padding: 20,
+      }}
+    >
+      <Mascot state="calm" size={40} />
+      <Mascot state="calm" size={72} />
+      <Mascot state="calm" size={120} />
+      <Mascot state="calm" size={200} />
     </div>
   ),
+}
+
+// ────────────────────────────────────────────────────────────
+// ⚡ Interaction Preview (important for UX feel)
+// ────────────────────────────────────────────────────────────
+export const StateCycle = {
+  render: () => {
+    const states = ['calm', 'streak', 'angry']
+    let index = 0
+
+    const next = () => {
+      index = (index + 1) % states.length
+      document.getElementById('mascot-preview').dataset.state = states[index]
+    }
+
+    return (
+      <div style={{ textAlign: 'center', padding: 20 }}>
+        <div id="mascot-preview" data-state="calm">
+          <Mascot state="calm" size={140} />
+        </div>
+
+        <button
+          onClick={next}
+          style={{
+            marginTop: 20,
+            padding: '8px 16px',
+            cursor: 'pointer',
+          }}
+        >
+          Change State
+        </button>
+      </div>
+    )
+  },
 }
