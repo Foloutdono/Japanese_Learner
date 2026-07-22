@@ -2569,11 +2569,11 @@ input:focus { border-color: var(--accent2); }
    that arrived after the swap would render on top of whatever card
    replaced it, since both shared the exact same on-screen position.
    This pairs a plain fade/slide-in for the live card with a small
-   "set aside" resting slot for the one just answered — visibly
-   smaller, nudged aside and dimmed — so a stamp always has somewhere
-   unambiguous to land. See CardTransition.jsx for the component that
-   drives these classes; .quiz-card-stage above is still the outer
-   wrapper (unchanged), .card-transition is the new inner structure. */
+   "set aside" resting slot for the one just answered, so a stamp
+   always has somewhere unambiguous to land. See CardTransition.jsx
+   for the component that drives these classes; .quiz-card-stage
+   above is still the outer wrapper (unchanged), .card-transition is
+   the new inner structure. */
 .card-transition {
   display: grid;
 }
@@ -2591,64 +2591,50 @@ input:focus { border-color: var(--accent2); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* The just-answered card, settling to one side behind the live one —
-   purely decorative, never interactive, and never sharing the live
-   card's exact position, which is what makes a stamp landing here
-   unambiguous. transform-origin is offset (not centred) so the scale
-   in the settle keyframe reads as a nudge aside rather than a shrink
-   in place. */
+/* The just-answered card, nudged aside behind the live one — purely
+   decorative, never interactive, never sharing the live card's exact
+   position, which is what makes a stamp landing here unambiguous.
+   This settles ONCE, on entry, and then holds perfectly still —
+   opacity and position never change again until it actually leaves
+   (see --leaving below). It deliberately does NOT dim: it's meant to
+   stay clearly visible for as long as it's waiting, since it's the
+   card the XP toast (and a possible stamp) belong to — dimming it out
+   early and then jumping back for a stamp is exactly the flicker this
+   replaces. transform-origin is offset (not centred) so the small
+   scale-down in the keyframe reads as a nudge aside, not a shrink in
+   place. */
 .card-transition-rest {
   position: relative;
   z-index: 1;
   pointer-events: none;
   transform-origin: 85% 15%;
-  animation: card-transition-settle 380ms cubic-bezier(0.5, 0, 0.15, 1) forwards;
+  animation: card-transition-rest-in 220ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
 }
-@keyframes card-transition-settle {
-  0%   { opacity: 0.9; transform: translate(0, 0) scale(1) rotate(0deg); }
-  100% { opacity: 0.4; transform: translate(6%, -10%) scale(0.86) rotate(3deg); }
+@keyframes card-transition-rest-in {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+  100% { opacity: 0.92; transform: translate(4%, -6%) scale(0.94) rotate(2deg); }
 }
 
-/* A stamp landing is worth surfacing properly — bring the resting
-   card back toward full size/opacity and above the live card while
-   its stamp plays, rather than leaving it half-hidden behind it. */
+/* A stamp landing brings the resting card above the live one so it
+   reads clearly — no motion here, it was already at near-full
+   opacity/size from card-transition-rest-in, so there's nothing to
+   jump or resurface. */
 .card-transition-rest--stamping {
   z-index: 3;
-  animation: card-transition-resurface 260ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-}
-@keyframes card-transition-resurface {
-  0%   { opacity: 0.4; transform: translate(6%, -10%) scale(0.86) rotate(3deg); }
-  100% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
 }
 
-/* Two explicit fade-outs rather than one, because the resting card
-   can be leaving from either of two different states — settled
-   (opacity 0.4, no stamp ever arrived) or fully resurfaced (opacity
-   1, a stamp just finished) — and a single keyframe animation can't
-   cleanly pick up from whichever one applies; each of these just
-   starts from its own known opacity instead. CardTransition.jsx picks
-   which class to apply. */
-.card-transition-rest--leaving-from-settled {
-  animation: card-transition-fade-out-settled 260ms ease-in forwards;
+.card-transition-rest--leaving {
+  animation: card-transition-fade-out 320ms ease-in forwards;
 }
-@keyframes card-transition-fade-out-settled {
-  0%   { opacity: 0.4; }
-  100% { opacity: 0; }
-}
-.card-transition-rest--leaving-from-stamped {
-  animation: card-transition-fade-out-stamped 320ms ease-in forwards;
-}
-@keyframes card-transition-fade-out-stamped {
-  0%   { opacity: 1; }
+@keyframes card-transition-fade-out {
+  0%   { opacity: 0.92; }
   100% { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .card-transition-live { animation-duration: 10ms; }
   .card-transition-rest { animation-duration: 10ms; }
-  .card-transition-rest--stamping { animation-duration: 10ms; }
-  .card-transition-rest--leaving-from-settled,
-  .card-transition-rest--leaving-from-stamped { animation-duration: 120ms; }
+  .card-transition-rest--leaving { animation-duration: 120ms; }
 }
 
 
