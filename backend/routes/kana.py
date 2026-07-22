@@ -14,9 +14,22 @@ MAX_BATCH = 25
 
 
 class ReviewPayload(BaseModel):
-    card_id: str
-    mode:    str
-    quality: int
+    card_id:    str
+    mode:       str
+    quality:    int
+    # The card's stage *before* this review, exactly as it was handed
+    # back on the card payload (see _build_kana_card's "stage" field
+    # below) — sent back by the client instead of looked up again here.
+    # This used to be a second srs.get_bulk_stats() call made inline in
+    # post_kana_review, on top of the one needed for the post-review
+    # stage: two blocking bulk-stats round trips on the same request
+    # that answers every rating, which is exactly the "never blocks
+    # card navigation" rule the rest of this file is careful about
+    # everywhere else (see loadProgress on the frontend, or how /stats
+    # is deliberately its own request). Reusing the value already
+    # computed once per batch removes that whole extra call from the
+    # critical path.
+    prev_stage: str | None = None
 
 # Card stage promotions worth a visual "stamp" on the frontend (see
 # CardStamp.jsx) — only the two forward crossings the SRS ladder can
@@ -40,7 +53,7 @@ def get_kana_sets():
     return {"sets": list(KANA_SETS.keys())}
 
 
-def _build_kana_card(kana_entry: dict, kana_list: list[dict], mode: str) -> dict:
+def _build_kana_card(kana_entry: dict, kana_list: list[dict], mode: str, stage: str | None) -> dict:
     all_romaji = [k["romaji"] for k in kana_list if k["romaji"] != kana_entry["romaji"]]
     choices    = random.sample(all_romaji, min(3, len(all_romaji))) + [kana_entry["romaji"]]
     random.shuffle(choices)
@@ -50,6 +63,10 @@ def _build_kana_card(kana_entry: dict, kana_list: list[dict], mode: str) -> dict
         "romaji":  kana_entry["romaji"],
         "choices": choices,
         "mode":    mode,
+        # Current SRS stage, so the client can hand it straight back
+        # as ReviewPayload.prev_stage without another lookup — see the
+        # comment on that field for why that matters.
+        "stage":   stage,
     }
 
 
@@ -77,12 +94,19 @@ def _select_cards(set_name: str, mode: str, count: int, exclude_ids: set[str], u
         count, exclude_ids,
     )
 
+    # One bulk-stats call for just the handful of cards actually being
+    # returned (at most MAX_BATCH), not the whole deck — cheap, and it
+    # means every card handed to the client already carries its own
+    # stage, so reviewing it later needs no extra lookup to know what
+    # it was before.
+    states = srs.get_bulk_stats(picked, mode)
+
     cards = []
     for card_id in picked:
         raw_id = unprefixed(card_id, user_id)
         kana_entry = next((k for k in kana_list if kana_to_id(k) == raw_id), None)
         if kana_entry is not None:
-            cards.append(_build_kana_card(kana_entry, kana_list, mode))
+            cards.append(_build_kana_card(kana_entry, kana_list, mode, states.get(card_id)))
 
     logger.info(
         "kana study request set_name=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
@@ -154,12 +178,12 @@ def get_kana_stats(set_name: str, mode: str, user_id: str = Depends(get_user_id)
 @router.post("/api/kana/review")
 def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
-    # Stage before and after the review — same get_bulk_stats used by
-    # /api/kana/stats, just scoped to this one card, so the "new /
-    # learning / mastered" classification is never reimplemented here
-    # and can't drift out of sync with the stats screen's own count.
-    prev_stage = srs.get_bulk_stats([card_id], payload.mode).get(card_id)
     s = srs.review(card_id, payload.mode, payload.quality)
+    # Only one bulk-stats call now (the post-review stage) instead of
+    # two — the pre-review stage comes from the client, which already
+    # had it on the card payload (see _select_cards). This is the same
+    # single-card get_bulk_stats /api/kana/stats already calls at deck
+    # scale, so the classification logic still only lives in one place.
     new_stage = srs.get_bulk_stats([card_id], payload.mode).get(card_id)
     return {
         "card_id": payload.card_id,
@@ -168,5 +192,5 @@ def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)
         "xp_earned": s["xp_earned"],
         "leveled_up": s["leveled_up"],
         "new_level": s["new_level"],
-        "stage_up": _stage_promotion(prev_stage, new_stage),
+        "stage_up": _stage_promotion(payload.prev_stage, new_stage),
     }
