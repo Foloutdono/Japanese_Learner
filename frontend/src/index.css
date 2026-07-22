@@ -335,6 +335,17 @@ button:focus-visible {
   max-width: 320px;
 }
 
+/* Persistent-selection variant of choice-row — used where picking a
+   row doesn't immediately navigate away (e.g. StudyScreen's config
+   screen, where mode is one of several choices made before pressing
+   Start), so the accent stroke and index colour stay "on" instead of
+   only lighting up on hover. */
+.choice-row--selectable { cursor: pointer; }
+.choice-row--selected { background: var(--bg-card-hover); }
+.choice-row--selected .choice-row__accent { transform: scaleY(1); }
+.choice-row--selected .choice-row__index,
+.choice-row--selected .choice-row__title { color: var(--row-color, var(--accent)); }
+
 input {
   font-family: inherit;
   border-radius: 8px;
@@ -4501,6 +4512,7 @@ input:focus { border-color: var(--accent2); }
   border-radius: 8px;
   width: 100%;
   max-width: 360px;
+  align-self: center;
   background: var(--bg-panel);
   color: var(--text-on-panel);
   border: 1px solid var(--border);

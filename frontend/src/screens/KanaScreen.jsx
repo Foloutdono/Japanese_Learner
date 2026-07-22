@@ -17,7 +17,6 @@ import ModeSelector from '../components/ModeSelector'
 import { playKana } from '../components/sound'
 import { kanaModePicker } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
-import { estimateReviewXp, recordReviewXp } from '../components/xpCurve'
 import { useCardSession } from '../hooks/useCardSession'
 
 const FETCH_TIMEOUT_MS = 8000
@@ -145,81 +144,50 @@ export default function KanaScreen({ session }) {
 
   function postReview(quality) {
     // Locked the instant a rating is picked, until the card is
-    // actually replaced — covers the network round trip, the XP
-    // toast (including an indefinite level-up hold), and any stage
-    // stamp, so nothing can land on a card that's already mid-
-    // celebration, and a second tap can't fire a review twice.
+    // actually replaced — covers the XP toast (including an
+    // indefinite level-up hold) and any stage stamp, so nothing can
+    // land on a card that's already mid-celebration, and a second tap
+    // can't fire a review twice.
     if (locked) return
     setLocked(true)
     setShowRating(false)
     loadProgress(selectedSet.slug, mode)
 
+    // The exact outcome of this rating — xp, level-up, stage
+    // promotion — was already computed when this card was fetched
+    // (see review_preview on the card payload / preview_reviews_bulk
+    // in srs.py), so there's nothing left to guess or wait on a
+    // network round trip for. That round trip is what used to let the
+    // XP toast finish and release its "safe to advance" gate well
+    // before a slow or cold-starting backend had actually confirmed a
+    // stage promotion — which is what was making the card stamp
+    // silently never show.
+    const preview = card.review_preview?.[quality]
+
     advancedRef.current = false
     const gates = pendingGatesRef.current
-    gates.add('network')
 
-    // Show the reward instantly using the last-known XP amount for
-    // this quality rating (see xpCurve.js) rather than waiting on the
-    // review round trip — compute_review_xp's daily/streak bonuses
-    // mean this is only ever a guess, but it's within a few XP of the
-    // real amount almost always, and the toast is on screen well
-    // under two seconds, gone long before a slow connection would
-    // have resolved anyway. Nothing persisted (see applyXpGain below)
-    // is ever based on this guess — only the response is.
-    const toastId = Date.now()
-    gates.add('toast')
-    setXpToast({ amount: estimateReviewXp(quality), id: toastId, leveledUp: false, newLevel: null, quality })
+    if (preview) {
+      gates.add('toast')
+      setXpToast({ amount: preview.xp_earned, id: Date.now(), leveledUp: preview.leveled_up, newLevel: preview.new_level, quality })
+      applyXpGain({ amount: preview.xp_earned, leveledUp: preview.leveled_up, newLevel: preview.new_level })
 
+      if (preview.stage_up) {
+        gates.add('stamp')
+        setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: card.card_id })
+      }
+    }
+
+    // Fire-and-forget: this only has to persist the review now — the
+    // response isn't read for anything the UI shows. A slow or dead
+    // request can no longer desync the toast or the stamp from
+    // what's actually about to happen.
     apiFetch('/api/kana/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode, quality }),
-    }).then(r => r.json()).then(data => {
-      if (typeof data.xp_earned === 'number') {
-        recordReviewXp(quality, data.xp_earned)
-        if (data.leveled_up) {
-          // A level-up is never worth missing to a lucky-timed guess —
-          // re-arm the gate (the optimistic toast may have already
-          // finished and cleared it) and force the real celebration
-          // in with a fresh id, so it gets its full curtain-call
-          // treatment and holds for the claim tap regardless of how
-          // the estimate landed.
-          gates.add('toast')
-          setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: true, newLevel: data.new_level, quality })
-        } else {
-          // Just settle the digits on the real number in place — same
-          // id, so XpToast doesn't remount or restart its animation.
-          setXpToast(t => (t && t.id === toastId ? { ...t, amount: data.xp_earned } : t))
-        }
-        // Optimistic bump for TopBar's ring / mobile level bar / burger
-        // profile row — moves them immediately instead of waiting on
-        // useProfileSummary's next cached /api/profile refetch. Always
-        // the real amount, never the guess above.
-        applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
-      }
-      // Backend resolves the stage promotion itself (see
-      // post_kana_review) — nothing to detect on this end. `card` is
-      // still the one just reviewed — advance() hasn't run yet — so
-      // there's no more ambiguity about which card this belongs to.
-      if (data.stage_up) {
-        gates.add('stamp')
-        setCardStamp({ id: Date.now(), to: data.stage_up, cardKey: card.card_id })
-      } else if (!data.leveled_up) {
-        // No stamp to wait for, and no level-up hold either — the
-        // toast is a floating overlay independent of which card is
-        // showing, so don't make the reviewer wait for its own fall
-        // animation before the next card appears.
-        gates.delete('toast')
-      }
-      gates.delete('network')
-      checkAdvance()
-    }).catch(() => {
-      // Don't strand the reviewer on a dead card if the request
-      // itself failed — the optimistic toast still runs its own
-      // course and clears its own gate, there's just no real amount
-      // to correct it with.
-      gates.delete('network')
-      checkAdvance()
-    })
+    }).catch(() => {})
+
+    checkAdvance()
   }
 
   function onMCQAnswer(choice) {

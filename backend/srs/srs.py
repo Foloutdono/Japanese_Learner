@@ -1,3 +1,4 @@
+import copy
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -496,6 +497,93 @@ class SRSEngine:
                 result[card_id] = "new"
             else:
                 result[card_id] = self._classify_stage(row[1], row[2])
+        return result
+
+    def _load_states_bulk(self, card_ids: list[str], mode: str) -> dict[str, CardState]:
+        """Like _load_state, but for many cards in one query. Any id
+        with no row yet (shouldn't normally happen here, since callers
+        run ensure_cards() over the whole deck before picking cards to
+        return) falls back to the same default CardState _load_state
+        itself would hand back."""
+        if not card_ids:
+            return {}
+        with self.storage.cursor() as cur:
+            sql = """
+                SELECT card_id, mode, difficulty, stability, interval_days,
+                       repetitions, lapses, learning_step, is_learning,
+                       next_review, total_reviews, correct_reviews, last_quality
+                FROM card_modes
+                WHERE mode = %s AND card_id = ANY(%s)
+            """
+            self._log_sql("load_states_bulk", sql, (mode, card_ids))
+            cur.execute(sql, (mode, card_ids))
+            rows = cur.fetchall()
+        found = {row['card_id']: self._state_from_row(row) for row in rows}
+        return {cid: found.get(cid, CardState(card_id=cid, mode=mode)) for cid in card_ids}
+
+    def preview_reviews_bulk(
+        self, card_ids: list[str], mode: str, user_id: str,
+        qualities: list[int] | None = None,
+    ) -> dict[str, dict[int, dict[str, Any]]]:
+        """
+        Dry-run review() for every card in `card_ids`, across each of
+        `qualities` (default 0-5), against each card's *current* saved
+        state — without persisting anything or touching review_log.
+        Lets kana.py/kanji.py/vocab.py attach the exact xp/level/stage
+        outcome of every possible rating directly onto each card's
+        batch payload (see _build_*_card's "review_preview" field), so
+        the frontend never has to guess at — or wait on a round trip
+        for — what a rating is about to do. That guessing (an
+        optimistic client-side XP estimate, reconciled once the real
+        review POST resolved) is what was letting the XP toast finish
+        and release its "safe to advance" gate well before a slow or
+        cold-starting backend had actually confirmed a stage promotion
+        — which is why the card stamp could silently never show. With
+        the outcome known up front, nothing on screen has to wait on
+        that request at all.
+
+        prior_xp/reviews_today/streak are read once for the whole
+        batch, not once per card — they're per-user, not per-card, and
+        this is a hypothetical preview, so "reviewing" one card here
+        never actually changes them for the next.
+
+        One caveat worth knowing: because this is computed once at
+        batch-fetch time, the *stage* prediction for a given card stays
+        exactly correct however long it sits in the queue (it only
+        depends on that card's own saved state), but the *xp_earned*
+        figure can drift by a few points if the user racks up several
+        other reviews — moving reviews_today/streak along — before
+        finally rating this particular card. Same order of inaccuracy
+        the old client-side guess had, just anchored to a real number
+        instead of a blind estimate, and it no longer affects whether
+        the stamp shows.
+        """
+        qualities = qualities if qualities is not None else [0, 1, 2, 3, 4, 5]
+        states = self._load_states_bulk(card_ids, mode)
+
+        prior_xp = self.get_lifetime_xp(user_id)
+        reviews_today = self.get_reviews_today(user_id)
+        streak_current = self.get_streak(user_id)["current"] if reviews_today == 0 else 0
+        prior_level = xp_math.level_from_xp(prior_xp)
+
+        result: dict[str, dict[int, dict[str, Any]]] = {}
+        for card_id in card_ids:
+            base_state = states[card_id]
+            per_quality: dict[int, dict[str, Any]] = {}
+            for quality in qualities:
+                # A fresh copy per quality — every hypothetical rating
+                # branches off the same saved state, never off the
+                # previous quality's hypothetical outcome.
+                updated = self.scheduler.review(copy.deepcopy(base_state), quality)
+                xp_earned = xp_math.compute_review_xp(quality, reviews_today, streak_current)
+                new_level = xp_math.level_from_xp(prior_xp + xp_earned)
+                per_quality[quality] = {
+                    "xp_earned": xp_earned,
+                    "leveled_up": new_level != prior_level,
+                    "new_level": new_level,
+                    "stage": self._classify_stage(updated.total_reviews, updated.interval_days),
+                }
+            result[card_id] = per_quality
         return result
 
     def close(self) -> None:
