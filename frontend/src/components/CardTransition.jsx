@@ -1,5 +1,6 @@
 import { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import { CardStamp } from './CardStamp'
+import { StageBadge } from './StageBadge'
 
 // How long the outgoing card's own exit animation runs — must match
 // the `card-transition-exit` duration in index.css exactly, since
@@ -60,8 +61,18 @@ const OUTGOING_MS = 220
  * while it matches the live `cardKey`. `onStampDone` fires once a
  * shown stamp's animation genuinely finishes — mirrors CardStamp's
  * own onDone contract.
+ *
+ * `stage` — the live card's SRS stage ('new' | 'learning' |
+ * 'mastered' | undefined), rendered as a permanent corner seal (see
+ * StageBadge.jsx) rather than gated behind `cardKey` the way `stamp`
+ * is — there's no "which card does this belong to" ambiguity to
+ * resolve, it's always just whatever the current card's own stage is,
+ * so it updates the instant `stage` does rather than waiting on the
+ * crossfade. Omit it (or pass undefined) for card sources that don't
+ * track a stage at all — StageBadge itself renders nothing in that
+ * case.
  */
-export function CardTransition({ cardKey, contentKey, stamp, onStampDone, className, children }) {
+export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage, className, children }) {
   const effectiveContentKey = contentKey ?? cardKey
 
   const [liveKey, setLiveKey] = useState(cardKey)
@@ -160,6 +171,7 @@ export function CardTransition({ cardKey, contentKey, stamp, onStampDone, classN
         )}
       </div>
       {showStamp && <CardStamp transition={stamp} onDone={onStampDone} />}
+      <StageBadge stage={stage} />
     </div>
   )
 }

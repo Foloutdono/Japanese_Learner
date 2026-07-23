@@ -254,7 +254,7 @@ export default function StudyScreen({ session }) {
 
                 {card && !loading && (
                 <>
-                    <CardTransition cardKey={card.card_id} stamp={cardStamp} onStampDone={() => setCardStamp(null)}>
+                    <CardTransition cardKey={card.card_id} stamp={cardStamp} stage={card.stage} onStampDone={() => setCardStamp(null)}>
                         <PromptCard>
                             {(mode === 'flashcard' || card.source === 'custom') ? (
                                 <Flashcard

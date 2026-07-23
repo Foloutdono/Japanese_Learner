@@ -257,7 +257,7 @@ export default function KanaScreen({ session }) {
         {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>
-            <CardTransition cardKey={card.card_id} stamp={cardStamp} onStampDone={() => {
+            <CardTransition cardKey={card.card_id} stamp={cardStamp} stage={card.stage} onStampDone={() => {
               setCardStamp(null)
               pendingGatesRef.current.delete('stamp')
               checkAdvance()
