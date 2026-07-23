@@ -282,6 +282,7 @@ export default function VocabScreen({ session }) {
               cardKey={card.card_id}
               contentKey={`${card.card_id}:${card.lang ?? ''}`}
               stamp={cardStamp}
+              stage={card.stage}
               onStampDone={() => {
                 setCardStamp(null)
                 pendingGatesRef.current.delete('stamp')
