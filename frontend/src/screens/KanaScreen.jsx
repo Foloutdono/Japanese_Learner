@@ -169,8 +169,13 @@ export default function KanaScreen({ session }) {
 
     if (preview) {
       gates.add('toast')
-      setXpToast({ amount: preview.xp_earned, id: Date.now(), leveledUp: preview.leveled_up, newLevel: preview.new_level, quality })
-      applyXpGain({ amount: preview.xp_earned, leveledUp: preview.leveled_up, newLevel: preview.new_level })
+      // leveledUp/newLevel come from applyXpGain's own running total,
+      // not preview.leveled_up/preview.new_level — the latter is
+      // computed once per batch fetch and can't see XP already
+      // earned from other cards answered earlier in this same batch
+      // (see the comment on applyXpGain for why that matters here).
+      const { leveledUp, newLevel } = applyXpGain({ amount: preview.xp_earned })
+      setXpToast({ amount: preview.xp_earned, id: Date.now(), leveledUp, newLevel, quality })
 
       if (preview.stage_up) {
         gates.add('stamp')
