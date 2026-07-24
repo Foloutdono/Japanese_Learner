@@ -53,27 +53,48 @@ export function useProfileSummary() {
   return summary
 }
 
-// Call right after a review response comes back (xp_earned /
-// leveled_up / new_level, exactly what srs.review() already returns)
-// to move the ring/level bar immediately instead of waiting on the
-// next cached fetch. On a level-up, xpPrevLevel/xpForNext are
-// recomputed from the client-side curve mirror so the bar reflects
-// the new level's span (with any XP earned past the threshold
-// already carried over) rather than snapping to 0% or 100%.
-export function applyXpGain({ amount, leveledUp, newLevel }) {
-  if (!cache || !amount) return
+// Call right after a review response comes back (xp_earned, from
+// either srs.review() or a card's precomputed review_preview) to
+// move the ring/level bar immediately instead of waiting on the next
+// cached fetch, and to find out whether this particular gain crosses
+// into a new level.
+//
+// This deliberately does NOT take a `leveledUp`/`newLevel` from the
+// caller anymore. A batch's review_preview (see srs.py's
+// preview_reviews_bulk) computes those once, at batch-fetch time,
+// against whatever the user's lifetime XP was *then* — the same
+// stale baseline for every card in the batch (up to 10-25 of them).
+// It has no way to know about any other card in that same batch
+// that's already been rated since, because the actual review POST is
+// fire-and-forget now and its response is never read. So a level-up
+// reached through the *combined* XP of several reviews in a row —
+// the normal case, not an edge case — never gets flagged true by any
+// single card's own preview, and trusting it silently drops both the
+// celebration toast and the level-bar update right when they should
+// fire.
+//
+// `cache` is the one running total that's actually kept accurate
+// across every gain (it's this very function that keeps it that
+// way), so the threshold check belongs here, against the live cache,
+// not against a number computed once at fetch time. `xpForNext` is
+// walked forward in a loop (not a single if) in case one gain is
+// large enough to cross more than one threshold at once.
+export function applyXpGain({ amount }) {
+  if (!cache || !amount) return { leveledUp: false, newLevel: cache?.level }
 
-  const xp = cache.xp + amount
+  let xp = cache.xp + amount
+  let level = cache.level
+  let xpPrevLevel = cache.xpPrevLevel
+  let xpForNext = cache.xpForNext
+  let leveledUp = false
 
-  if (leveledUp && typeof newLevel === 'number') {
-    setCache({
-      ...cache,
-      xp,
-      level: newLevel,
-      xpPrevLevel: xpThreshold(newLevel),
-      xpForNext: xpThreshold(newLevel + 1),
-    })
-  } else {
-    setCache({ ...cache, xp })
+  while (xpForNext != null && xp >= xpForNext) {
+    level += 1
+    xpPrevLevel = xpForNext
+    xpForNext = xpThreshold(level + 1)
+    leveledUp = true
   }
+
+  setCache({ ...cache, xp, level, xpPrevLevel, xpForNext })
+  return { leveledUp, newLevel: level }
 }
