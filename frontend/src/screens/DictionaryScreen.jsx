@@ -22,10 +22,12 @@ const STATUS_META = {
 const TYPE_META = {
 	kanji: { color: 'var(--accent4)', fallback: 'Kanji' },
 	vocab: { color: 'var(--accent6)', fallback: 'Vocabulaire' },
+	kana:  { color: 'var(--accent3)', fallback: 'Kana' },
 }
 
-// Kanji and vocab entries can share the same character (a one-kanji word),
-// so the character alone isn't a safe React key / selection identity.
+// Kanji, vocab, and kana entries can share the same character (a
+// one-kanji word, or a kana that's also a valid word on its own), so
+// the character alone isn't a safe React key / selection identity.
 function entryKey(entry) {
 	return `${entry.type}:${entry.level}:${entry.kanji || entry.kana}`
 }
@@ -42,9 +44,12 @@ function StatusBadge({ state, t }) {
 
 function TypeBadge({ type, t }) {
 	const meta = TYPE_META[type] ?? TYPE_META.kanji
+	const label = type === 'kanji' ? (t?.dictKanji ?? 'Kanji')
+		: type === 'kana' ? (t?.dictKana ?? 'Kana')
+		: (t?.dictVocab ?? 'Vocabulaire')
 	return (
 		<span className="dict-type-pill" style={{ '--pill-color': meta.color }}>
-			{type === 'kanji' ? (t?.dictKanji ?? 'Kanji') : (t?.dictVocab ?? 'Vocabulaire')}
+			{label}
 		</span>
 	)
 }
@@ -327,6 +332,7 @@ export default function DictionaryScreen({ session }) {
 							['all',   t.dictAll   ?? 'Tout'],
 							['kanji', t.dictKanji ?? 'Kanji'],
 							['vocab', t.dictVocab ?? 'Vocabulaire'],
+							['kana',  t.dictKana  ?? 'Kana'],
 						].map(([key, label]) => (
 							<button
 								key={key}
@@ -523,7 +529,7 @@ function shortMeaning(meaning) {
 }
 
 function shortKana(kana, type) {
-	if (!kana) return ''
+	if (!kana || type === 'kana') return ''
 	const firstKana = kana.split(';')[0].trim()
 	return type === 'vocab' ? firstKana : Array.from(firstKana).slice(0, 3).join('')
 }
@@ -670,10 +676,17 @@ function ResultsSection({
 
 function DetailPanel({ entry, onClose, onRadicalClick }) {
 	const { t, lang, contentMaps } = useLang()
-	const map = entry.type === 'vocab' ? contentMaps?.vocab : contentMaps?.kanji
-	const meaning = lang === 'fr'
-		? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
-		: entry.meaning
+	const map = entry.type === 'vocab' ? contentMaps?.vocab
+		: entry.type === 'kanji' ? contentMaps?.kanji
+		: null
+	// Kana has no semantic "meaning" to translate — its romaji is shown
+	// as its own reading row below instead (see the ternary further
+	// down), so this stays null and the "Sens" row simply doesn't render.
+	const meaning = entry.type === 'kana'
+		? null
+		: lang === 'fr'
+			? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
+			: entry.meaning
 
 	const [strokeSvgFailed, setStrokeSvgFailed] = useState(false)
 	useEffect(() => { setStrokeSvgFailed(false) }, [entry.svg_url])
@@ -710,9 +723,11 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 							/>
 						</div>
 					)
+					: entry.type === 'kana'
+					? <InfoRow label={t.romaji ?? 'Rōmaji'} value={entry.romaji} />
 					: <InfoRow label={t.reading ?? 'Lecture'} value={entry.kana} />
 				}
-				<InfoRow label={t.meaning  ?? 'Sens'}    value={meaning} />
+				{meaning != null && <InfoRow label={t.meaning  ?? 'Sens'}    value={meaning} />}
 				<InfoRow label={t.level    ?? 'Niveau'}  value={entry.level} />
 				{entry.stroke_count && (
 					<InfoRow label={t.strokes ?? 'Traits'} value={`${entry.stroke_count} ${t.strokes ?? 'traits'}`} />
@@ -731,7 +746,7 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 					/>
 				)}
 
-				{entry.type === 'kanji' && entry.svg_url && (
+				{(entry.type === 'kanji' || entry.type === 'kana') && entry.svg_url && (
 					<div className="dict-detail__stroke-section">
 						<div className="dict-detail__stroke-label">
 							{t.strokeOrder ?? 'ORDRE DES TRAITS'}
