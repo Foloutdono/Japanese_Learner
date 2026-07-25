@@ -46,7 +46,17 @@ export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, 
     const container = containerRef.current
     if (!container || !svgText) return
 
-    container.innerHTML = svgText
+    // KanjiVG files ship an XML DOCTYPE with an internal subset (the
+    // <!ATTLIST ... [ ... ]> block declaring the kvg: attributes).
+    // innerHTML runs the HTML parser, not an XML one, and it doesn't
+    // understand that subset syntax — it bails out partway through
+    // and leaves the trailing "]>" behind as a literal text node
+    // (that's the stray "]>" rendering above the strokes). Only the
+    // <svg>...</svg> element itself is actually needed, so cut
+    // everything before it — prolog, comments, and DOCTYPE included.
+    const match = svgText.match(/<svg[\s\S]*<\/svg>/)
+    if (!match) { onError?.(); return }
+    container.innerHTML = match[0]
     const svgEl = container.querySelector('svg')
     if (!svgEl) { onError?.(); return }
 
