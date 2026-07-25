@@ -4,6 +4,7 @@ import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { Readings } from '../components/QuizComponents'
+import { StrokeOrderAnimation } from '../components/StrokeOrderAnimation'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 const LIMIT = 50
@@ -674,6 +675,9 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 		? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
 		: entry.meaning
 
+	const [strokeSvgFailed, setStrokeSvgFailed] = useState(false)
+	useEffect(() => { setStrokeSvgFailed(false) }, [entry.svg_url])
+
 	return (
 		<>
 			<div className="dict-detail__stage">
@@ -733,18 +737,19 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 							{t.strokeOrder ?? 'ORDRE DES TRAITS'}
 						</div>
 						<div className="dict-detail__stroke-frame">
-							<img
-								src={`${API_BASE}${entry.svg_url}`}
-								alt={`Stroke order ${entry.kanji}`}
-								className="dict-detail__stroke-img"
-								onError={e => {
-									e.target.style.display = 'none'
-									e.target.nextSibling.style.display = 'block'
-								}}
-							/>
-							<div className="dict-detail__stroke-fallback">
-								{t.notAvailable ?? 'Non disponible'}
-							</div>
+							{!strokeSvgFailed && (
+								<StrokeOrderAnimation
+									src={`${API_BASE}${entry.svg_url}`}
+									loop
+									className="dict-detail__stroke-img"
+									onError={() => setStrokeSvgFailed(true)}
+								/>
+							)}
+							{strokeSvgFailed && (
+								<div className="dict-detail__stroke-fallback" style={{ display: 'block' }}>
+									{t.notAvailable ?? 'Non disponible'}
+								</div>
+							)}
 						</div>
 					</div>
 				)}

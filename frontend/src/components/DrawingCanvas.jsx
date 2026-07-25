@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import { useLang } from '../LangContext'
+import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -16,12 +17,17 @@ function kanjiToSvgUrl(kanji) {
 }
 
 // ── Shared canvas drawing logic ───────────────────────────
-function Canvas({ canvasRef, onClear }) {
+function Canvas({ canvasRef, onClear, resetKey }) {
   const { t } = useLang()
   const drawing = useRef(false)
   const lastPos = useRef(null)
 
-  useEffect(() => { clear() }, [])
+  // Re-clears whenever resetKey changes (pass the card's id) —
+  // previously this only ran once on mount, so if the parent
+  // DrawingQuiz/DrawingOverlay instance was reused across cards
+  // instead of remounting, the board kept whatever was drawn on the
+  // very first card and never wiped it for any card after that.
+  useEffect(() => { clear() }, [resetKey])
 
   function getPos(e, canvas) {
     const rect   = canvas.getBoundingClientRect()
@@ -99,17 +105,26 @@ function Canvas({ canvasRef, onClear }) {
 // ── Stroke order reference panel ──────────────────────────
 function StrokeRef({ kanji, meaning, showMeaning = true }) {
   const { t } = useLang()
+  const [failed, setFailed] = useState(false)
+
+  // Resets the failed flag whenever the kanji itself changes, so a
+  // previous glyph's fetch failure doesn't stick around and hide a
+  // later glyph that would have loaded fine.
+  useEffect(() => { setFailed(false) }, [kanji])
+
   return (
     <div className="stroke-ref">
       <div className="stroke-ref__label">{t.strokeOrder}</div>
       <div className="stroke-ref__frame">
-        <img
-          src={kanjiToSvgUrl(kanji)}
-          alt={`${t.strokeOrder} ${kanji}`}
-          className="stroke-ref__img"
-          onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
-        />
-        <div className="stroke-ref__fallback">{t.notAvailable}</div>
+        {!failed && (
+          <StrokeOrderAnimation
+            src={kanjiToSvgUrl(kanji)}
+            loop
+            className="stroke-ref__img"
+            onError={() => setFailed(true)}
+          />
+        )}
+        {failed && <div className="stroke-ref__fallback" style={{ display: 'flex' }}>{t.notAvailable}</div>}
       </div>
       {showMeaning && (
         <div className="stroke-ref__meaning-wrap">
@@ -134,7 +149,7 @@ function CharDisplay({ char, size = 110 }) {
 // ── MODE 1: Fullscreen overlay (post-wrong-answer remediation) ──
 // Used when the SRS review was already submitted and we just want practice.
 // onDone → goes to next card.
-export function DrawingOverlay({ kanji, meaning, onDone }) {
+export function DrawingOverlay({ kanji, meaning, onDone, resetKey }) {
   const { t }      = useLang()
   const canvasRef  = useRef(null)
 
@@ -144,7 +159,7 @@ export function DrawingOverlay({ kanji, meaning, onDone }) {
       <div className="drawing-overlay__panels">
         <div className="canvas-wrap">
           <div className="stroke-ref__label">{t.yourDrawing}</div>
-          <Canvas canvasRef={canvasRef} />
+          <Canvas canvasRef={canvasRef} resetKey={resetKey ?? kanji} />
         </div>
         <StrokeRef kanji={kanji} meaning={meaning} />
       </div>
@@ -158,10 +173,19 @@ export function DrawingOverlay({ kanji, meaning, onDone }) {
 // ── MODE 2: Inline quiz phase (phase 4) ──
 // Shows the prompt, user draws, clicks validate, sees correction, then rates.
 // onValidate() → parent shows RatingBar.
-export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
+export function DrawingQuiz({ kanji, meaning, kana, onValidate, resetKey }) {
   const { t }          = useLang()
   const canvasRef      = useRef(null)
   const [revealed, setRevealed] = useState(false)
+  const key = resetKey ?? kanji
+
+  // Snap back to the undrawn/unrevealed state whenever a new card
+  // comes in — without this, DrawingQuiz kept reusing the same
+  // component instance across cards (React doesn't remount it just
+  // because the props changed), so `revealed` stayed true and the
+  // canvas kept whatever was drawn for the very first card, which is
+  // exactly the "only works for the first card" bug.
+  useEffect(() => { setRevealed(false) }, [key])
 
   function handleValidate() {
     setRevealed(true)
@@ -174,7 +198,7 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate }) {
         {/* Drawing side */}
         <div className="drawing-quiz__side">
           <div className="stroke-ref__label">{t.yourDrawing}</div>
-          <Canvas canvasRef={canvasRef} />
+          <Canvas canvasRef={canvasRef} resetKey={key} />
         </div>
 
         {/* Correction side — hidden until validated */}
