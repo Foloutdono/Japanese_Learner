@@ -5,7 +5,7 @@ from collections import defaultdict
 from fastapi import APIRouter, Depends
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from kana_data import KANA_SETS, kana_to_id
+from kana_data import HIRAGANA_BASIC, KATAKANA_BASIC, kana_to_id
 from translations import get_meaning
 from translations.fr.kanji_fr import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
@@ -14,17 +14,6 @@ from srs_instance import srs
 from card_lookup import card_stats, VOCAB_STATUS_MODE, KANJI_STATUS_MODE
 
 router = APIRouter()
-
-# Kana has no JLPT level, so this fills the same "level" slot kanji/vocab
-# entries use for display (dict-entry-card__level, the "Niveau" info row)
-# with something meaningful instead — which of the four study sets it
-# belongs to.
-KANA_SET_LABELS = {
-    "hiragana_basic":  "Hiragana",
-    "hiragana_combos": "Hiragana (yōon)",
-    "katakana_basic":  "Katakana",
-    "katakana_combos": "Katakana (yōon)",
-}
 
 # NOTE: card_lookup.py wasn't available while wiring this up, so this is
 # a best guess at the mode string kana progress is actually tracked
@@ -105,9 +94,9 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                     category: str = "all", radical: int | None = None,
                     user_id: str = Depends(get_user_id)):
     """
-    category: "all" | "kanji" | "vocab" | "kana" — lets the client avoid
-    pulling in thousands of vocab entries when only kanji (or vice versa)
-    are wanted.
+    category: "all" | "kanji" | "vocab" | "hiragana" | "katakana" — lets
+    the client avoid pulling in thousands of vocab entries when only
+    kanji (or vice versa) are wanted.
 
     radical: classical (Kangxi) radical number. When given, restricts
     results to kanji filed under that radical — vocab and kana don't
@@ -122,9 +111,10 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
 
     matches = []  # (kind, level, entry, meaning) — cheap, no SRS lookups yet
 
-    want_kanji = category in ("all", "kanji") or radical is not None
-    want_vocab = category in ("all", "vocab") and radical is None
-    want_kana  = category in ("all", "kana")  and radical is None
+    want_kanji    = category in ("all", "kanji")    or radical is not None
+    want_vocab    = category in ("all", "vocab")    and radical is None
+    want_hiragana = category in ("all", "hiragana") and radical is None
+    want_katakana = category in ("all", "katakana") and radical is None
 
     if want_kanji:
         for level, kanji_list in KANJI_BY_LEVEL.items():
@@ -154,18 +144,18 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 ):
                     matches.append(("vocab", level, w, meaning))
 
-    if want_kana:
-        for set_name, kana_list in KANA_SETS.items():
-            label = KANA_SET_LABELS.get(set_name, set_name)
-            for k in kana_list:
-                if q == "" or (
-                    q in k["kana"] or
-                    q.lower() in k["romaji"].lower()
-                ):
-                    # Reuses the tuple's "meaning" slot for romaji — it's
-                    # what dict-entry-card__meaning and the detail panel's
-                    # "Sens" row already read regardless of entry kind.
-                    matches.append(("kana", label, k, k["romaji"]))
+    if want_hiragana:
+        for k in HIRAGANA_BASIC:
+            if q == "" or (q in k["kana"] or q.lower() in k["romaji"].lower()):
+                # Reuses the tuple's "meaning" slot for romaji — it's
+                # what dict-entry-card__meaning and the detail panel's
+                # "Sens" row already read regardless of entry kind.
+                matches.append(("hiragana", "Hiragana", k, k["romaji"]))
+
+    if want_katakana:
+        for k in KATAKANA_BASIC:
+            if q == "" or (q in k["kana"] or q.lower() in k["romaji"].lower()):
+                matches.append(("katakana", "Katakana", k, k["romaji"]))
 
     if radical is not None:
         radical_stroke_count = RADICAL_BY_NUMBER[radical]["stroke_count"]
@@ -217,18 +207,24 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 "level":   level,
                 "status":  card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),
             })
-        else:  # kana
+        else:  # hiragana or katakana
             raw_id = kana_to_id(entry)
-            # Yōon combos ("きゃ") are two characters; KanjiVG only has
-            # stroke files per single character, so this points at the
-            # leading kana's stroke order (き) rather than the full combo.
-            codepoint = hex(ord(entry["kana"][0]))[2:].zfill(5)
+            # Yōon combos ("きゃ") aren't included here at all anymore (see
+            # the loops above), so every kana entry reaching this branch
+            # is always a single character — the codepoint below is always
+            # that one character's own stroke file, no ambiguity.
+            codepoint = hex(ord(entry["kana"]))[2:].zfill(5)
             results.append({
-                "type":    "kana",
+                "type":    kind,
                 "kana":    entry["kana"],
                 "romaji":  entry["romaji"],
                 "meaning": meaning,
                 "level":   level,
+                # Which gojūon row this belongs to (k/s/t/n/h/m/y/r/w/
+                # vowels/n_solo, or the voiced g/z/d/b/p rows) — see
+                # kana_data.py. The frontend's syllabary table groups by
+                # this field to lay out the classic a-i-u-e-o chart.
+                "group":   entry.get("group", ""),
                 "svg_url": f"/kanjivg/{codepoint}.svg",
                 "status":  card_stats(states, user_id, raw_id, KANA_STATUS_MODE),
             })

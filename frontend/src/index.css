@@ -4030,6 +4030,106 @@ input:focus { border-color: var(--accent2); }
   user-select: none;
 }
 
+/* ── Syllabary chart (hiragana/katakana) ──────────────────
+   Classic gojūon table — same flush shoji-lattice language as the
+   results grid and radical picker (thin --border gap lines between
+   --bg-card cells) rather than a bordered spreadsheet-style table. */
+.syllabary-table-wrap { margin-bottom: 20px; }
+
+.syllabary-table__title {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 24px 0 10px;
+}
+
+.syllabary-table {
+  display: grid;
+  grid-template-columns: 40px repeat(5, minmax(44px, 1fr));
+  gap: 2px;
+  background: var(--border);
+  border: 3px solid var(--border);
+  /* Falls back to horizontal scroll rather than crushing cells past
+     readability on very narrow screens, even though the minmax()
+     widths above already keep this comfortably under ~360px. */
+  overflow-x: auto;
+}
+
+.syllabary-cell {
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+}
+
+.syllabary-cell--corner { background: var(--bg-card); }
+
+.syllabary-cell--col-header,
+.syllabary-cell--row-header {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+
+.syllabary-cell--empty {
+  background: var(--bg-card);
+  opacity: 0.35;
+}
+
+.syllabary-cell--kana {
+  flex-direction: column;
+  gap: 2px;
+  border: none;
+  cursor: pointer;
+  padding: 8px 4px;
+  transition: background 0.15s ease;
+}
+.syllabary-cell--kana:hover { background: var(--bg-card-hover); }
+.syllabary-cell--kana.syllabary-cell--selected { background: var(--overlay-hover); }
+
+.syllabary-cell__char {
+  font-family: var(--font-jp);
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.syllabary-cell__romaji {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+}
+
+.syllabary-nsolo-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 8px;
+}
+.syllabary-nsolo-wrap .syllabary-cell--kana {
+  background: var(--bg-card);
+  border: 3px solid var(--border);
+  min-width: 96px;
+}
+.syllabary-nsolo-wrap .syllabary-cell--kana:hover { background: var(--bg-card-hover); }
+.syllabary-nsolo-wrap .syllabary-cell--kana.syllabary-cell--selected { background: var(--overlay-hover); }
+
+/* Smaller screens: tighter cells, smaller glyph — keeps all 6 columns
+   (row-label + 5 vowels) inside a ~360px viewport without triggering
+   the horizontal-scroll fallback above. */
+@media (max-width: 480px) {
+  .syllabary-table { grid-template-columns: 32px repeat(5, minmax(38px, 1fr)); }
+  .syllabary-cell { min-height: 46px; }
+  .syllabary-cell__char { font-size: 20px; }
+  .syllabary-cell__romaji { font-size: 10px; }
+  .syllabary-cell--col-header,
+  .syllabary-cell--row-header { font-size: 11px; }
+}
+
 .dict-sentinel {
   height: 40px;
   margin-top: 16px;
