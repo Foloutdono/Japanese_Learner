@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
@@ -20,9 +20,19 @@ const STATUS_META = {
 // in the app — these correctly flip between the dark and light theme
 // rather than staying fixed regardless of `data-theme`.
 const TYPE_META = {
-	kanji: { color: 'var(--accent4)', fallback: 'Kanji' },
-	vocab: { color: 'var(--accent6)', fallback: 'Vocabulaire' },
-	kana:  { color: 'var(--accent3)', fallback: 'Kana' },
+	kanji:    { color: 'var(--accent4)', fallback: 'Kanji' },
+	vocab:    { color: 'var(--accent6)', fallback: 'Vocabulaire' },
+	hiragana: { color: 'var(--accent3)', fallback: 'Hiragana' },
+	katakana: { color: 'var(--accent5)', fallback: 'Katakana' },
+}
+
+// Both kana types share every bit of detail-panel/card logic that
+// differs from kanji/vocab (no translated "meaning", romaji shown
+// instead of a reading list, the stroke-order panel), so call sites
+// check this instead of repeating the type === 'hiragana' ||
+// type === 'katakana' pair everywhere.
+function isKanaType(type) {
+	return type === 'hiragana' || type === 'katakana'
 }
 
 // Kanji, vocab, and kana entries can share the same character (a
@@ -45,7 +55,8 @@ function StatusBadge({ state, t }) {
 function TypeBadge({ type, t }) {
 	const meta = TYPE_META[type] ?? TYPE_META.kanji
 	const label = type === 'kanji' ? (t?.dictKanji ?? 'Kanji')
-		: type === 'kana' ? (t?.dictKana ?? 'Kana')
+		: type === 'hiragana' ? (t?.dictHiragana ?? 'Hiragana')
+		: type === 'katakana' ? (t?.dictKatakana ?? 'Katakana')
 		: (t?.dictVocab ?? 'Vocabulaire')
 	return (
 		<span className="dict-type-pill" style={{ '--pill-color': meta.color }}>
@@ -110,7 +121,7 @@ export default function DictionaryScreen({ session }) {
 
 	const [mode, setMode]             = useState('search') // 'search' | 'radical'
 	const [query, setQuery]           = useState('')
-	const [category, setCategory]     = useState('all') // 'all' | 'kanji' | 'vocab'
+	const [category, setCategory]     = useState('kanji') // 'kanji' | 'vocab' | 'hiragana' | 'katakana'
 	const [results, setResults]       = useState([])
 	const [loading, setLoading]       = useState(false)
 	const [loadingMore, setLoadingMore] = useState(false)
@@ -169,7 +180,11 @@ export default function DictionaryScreen({ session }) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
 
-		const params = new URLSearchParams({ q, page: p, limit: LIMIT, lang, category: cat })
+		// Hiragana/katakana's basic set is small and fixed (~71 entries
+		// including voiced rows) — one page comfortably holds all of it,
+		// so the syllabary chart never needs to page or infinite-scroll.
+		const limit = (cat === 'hiragana' || cat === 'katakana') ? 100 : LIMIT
+		const params = new URLSearchParams({ q, page: p, limit, lang, category: cat })
 		if (rad != null) params.set('radical', rad)
 
 		apiFetch(`/api/dictionary?${params.toString()}`, session)
@@ -215,7 +230,13 @@ export default function DictionaryScreen({ session }) {
 		setSelected(null)
 		setPage(0)
 		setHasMore(true)
-		fetchPage(0, query, cat, null)
+		// The syllabary categories hide the search box entirely (see
+		// isSyllabary) — if a query was left over from kanji/vocab
+		// search, keeping it would silently filter the chart down to a
+		// handful of cells with no visible input to explain why.
+		const isSyl = cat === 'hiragana' || cat === 'katakana'
+		if (isSyl) setQuery('')
+		fetchPage(0, isSyl ? '' : query, cat, null)
 	}
 
 	function switchToSearchMode() {
@@ -270,6 +291,11 @@ export default function DictionaryScreen({ session }) {
 	}
 
 	const showingRadicalGrid = mode === 'radical' && selectedRadical == null
+	// Hiragana/katakana get the classic gojūon chart instead of the
+	// paginated card grid — both sets are small and fixed (~71 entries
+	// each including voiced rows), so there's nothing to page through
+	// and a search box over a 71-symbol table adds little.
+	const isSyllabary = mode === 'search' && (category === 'hiragana' || category === 'katakana')
 
 	return (
 		<div className="screen">
@@ -302,8 +328,9 @@ export default function DictionaryScreen({ session }) {
 				</div>
 
 				{/* Search bar + count — hidden while browsing the plain radical grid,
-				    shown again once a radical is picked (to narrow further) */}
-				{!showingRadicalGrid && (
+				    shown again once a radical is picked (to narrow further), and hidden
+				    for the syllabary categories (nothing to search on a fixed chart) */}
+				{!showingRadicalGrid && !isSyllabary && (
 					<div className="dict-index-bar">
 						<SearchIcon />
 						<input
@@ -329,10 +356,10 @@ export default function DictionaryScreen({ session }) {
 				{mode === 'search' && (
 					<div className="dict-tab-row dict-tab-row--category">
 						{[
-							['all',   t.dictAll   ?? 'Tout'],
-							['kanji', t.dictKanji ?? 'Kanji'],
-							['vocab', t.dictVocab ?? 'Vocabulaire'],
-							['kana',  t.dictKana  ?? 'Kana'],
+							['kanji',    t.dictKanji    ?? 'Kanji'],
+							['vocab',    t.dictVocab    ?? 'Vocabulaire'],
+							['hiragana', t.dictHiragana ?? 'Hiragana'],
+							['katakana', t.dictKatakana ?? 'Katakana'],
 						].map(([key, label]) => (
 							<button
 								key={key}
@@ -375,20 +402,32 @@ export default function DictionaryScreen({ session }) {
 
 				{/* Results (search mode, or a radical's kanji) */}
 				{!showingRadicalGrid && (
-					<ResultsSection
-						loading={loading}
-						loadingMore={loadingMore}
-						hasMore={hasMore}
-						results={results}
-						total={total}
-						query={query}
-						selected={selected}
-						setSelected={setSelected}
-						isMobile={isMobile}
-						sentinelRef={sentinelRef}
-						onRadicalClick={jumpToRadical}
-						t={t}
-					/>
+					isSyllabary ? (
+						<SyllabaryGrid
+							results={results}
+							loading={loading}
+							selected={selected}
+							setSelected={setSelected}
+							isMobile={isMobile}
+							onRadicalClick={jumpToRadical}
+							t={t}
+						/>
+					) : (
+						<ResultsSection
+							loading={loading}
+							loadingMore={loadingMore}
+							hasMore={hasMore}
+							results={results}
+							total={total}
+							query={query}
+							selected={selected}
+							setSelected={setSelected}
+							isMobile={isMobile}
+							sentinelRef={sentinelRef}
+							onRadicalClick={jumpToRadical}
+							t={t}
+						/>
+					)
 				)}
 			</div>
 		</div>
@@ -529,7 +568,7 @@ function shortMeaning(meaning) {
 }
 
 function shortKana(kana, type) {
-	if (!kana || type === 'kana') return ''
+	if (!kana || isKanaType(type)) return ''
 	const firstKana = kana.split(';')[0].trim()
 	return type === 'vocab' ? firstKana : Array.from(firstKana).slice(0, 3).join('')
 }
@@ -672,6 +711,131 @@ function ResultsSection({
 	)
 }
 
+// ── Syllabary chart (hiragana/katakana) ──────────────────
+// The classic gojūon table: rows are consonant groups, columns are
+// the five vowels a-i-u-e-o. Two stacked tables — the plain gojūon
+// (+ ん/ン standalone) and the voiced/semi-voiced (dakuten/handakuten)
+// rows — same layout real textbooks use rather than one merged block.
+const MAIN_ROWS   = ['vowels', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w']
+const VOICED_ROWS = ['g', 'z', 'd', 'b', 'p']
+const VOWEL_COLS  = ['a', 'i', 'u', 'e', 'o']
+
+// Column placement comes from the entry's own romaji rather than its
+// position within its row-group: y/w rows skip columns for sounds
+// that don't exist (no "yi", "ye", "wi", "wu", "we"), so counting
+// 0/1/2 within the group would misalign them under the wrong vowel.
+function vowelOf(romaji) {
+	const last = romaji?.[romaji.length - 1]
+	return VOWEL_COLS.includes(last) ? last : null
+}
+
+function SyllabaryTable({ rows, title, byGroup, selected, setSelected }) {
+	return (
+		<div className="syllabary-table-wrap">
+			{title && <div className="syllabary-table__title">{title}</div>}
+			<div className="syllabary-table">
+				<div className="syllabary-cell syllabary-cell--corner" aria-hidden="true" />
+				{VOWEL_COLS.map(v => (
+					<div key={`h-${v}`} className="syllabary-cell syllabary-cell--col-header">
+						{v}
+					</div>
+				))}
+				{rows.map(group => {
+					const entries = byGroup[group] ?? []
+					return (
+						<Fragment key={group}>
+							<div className="syllabary-cell syllabary-cell--row-header">
+								{group === 'vowels' ? '' : group.toUpperCase()}
+							</div>
+							{VOWEL_COLS.map(v => {
+								const entry = entries.find(e => vowelOf(e.romaji) === v)
+								if (!entry) {
+									return <div key={v} className="syllabary-cell syllabary-cell--empty" aria-hidden="true" />
+								}
+								const isSelected = selected && entryKey(selected) === entryKey(entry)
+								return (
+									<button
+										key={v}
+										type="button"
+										onClick={() => setSelected(entry)}
+										className={`syllabary-cell syllabary-cell--kana${isSelected ? ' syllabary-cell--selected' : ''}`}
+									>
+										<span className="syllabary-cell__char">{entry.kana}</span>
+										<span className="syllabary-cell__romaji">{entry.romaji}</span>
+									</button>
+								)
+							})}
+						</Fragment>
+					)
+				})}
+			</div>
+		</div>
+	)
+}
+
+function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRadicalClick, t }) {
+	const byGroup = useMemo(() => {
+		const map = {}
+		results.forEach(e => { (map[e.group] ??= []).push(e) })
+		return map
+	}, [results])
+
+	const nSolo = byGroup.n_solo?.[0] ?? null
+
+	if (loading) {
+		return (
+			<div className="quiz-loading">
+				{t.loadingDictionary ?? 'Chargement...'}
+			</div>
+		)
+	}
+
+	return (
+		<div className="dict-layout">
+			<div className="dict-results-wrap">
+				<SyllabaryTable rows={MAIN_ROWS} byGroup={byGroup} selected={selected} setSelected={setSelected} />
+
+				{nSolo && (
+					<div className="syllabary-nsolo-wrap">
+						<button
+							type="button"
+							onClick={() => setSelected(nSolo)}
+							className={`syllabary-cell syllabary-cell--kana syllabary-cell--nsolo${selected && entryKey(selected) === entryKey(nSolo) ? ' syllabary-cell--selected' : ''}`}
+						>
+							<span className="syllabary-cell__char">{nSolo.kana}</span>
+							<span className="syllabary-cell__romaji">{nSolo.romaji}</span>
+						</button>
+					</div>
+				)}
+
+				<SyllabaryTable
+					rows={VOICED_ROWS}
+					title={t.syllabaryVoiced ?? 'Dakuten et handakuten'}
+					byGroup={byGroup}
+					selected={selected}
+					setSelected={setSelected}
+				/>
+			</div>
+
+			{/* Desktop side panel — hidden on mobile via CSS, same as ResultsSection */}
+			{selected && (
+				<div className="dict-panel">
+					<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} />
+				</div>
+			)}
+
+			{/* Mobile modal */}
+			{selected && isMobile && (
+				<div onClick={() => setSelected(null)} className="dict-modal-overlay">
+					<div onClick={e => e.stopPropagation()} className="dict-modal-content">
+						<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} />
+					</div>
+				</div>
+			)}
+		</div>
+	)
+}
+
 // ── Detail panel ──────────────────────────────────────────
 
 function DetailPanel({ entry, onClose, onRadicalClick }) {
@@ -682,7 +846,7 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 	// Kana has no semantic "meaning" to translate — its romaji is shown
 	// as its own reading row below instead (see the ternary further
 	// down), so this stays null and the "Sens" row simply doesn't render.
-	const meaning = entry.type === 'kana'
+	const meaning = isKanaType(entry.type)
 		? null
 		: lang === 'fr'
 			? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
@@ -723,7 +887,7 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 							/>
 						</div>
 					)
-					: entry.type === 'kana'
+					: isKanaType(entry.type)
 					? <InfoRow label={t.romaji ?? 'Rōmaji'} value={entry.romaji} />
 					: <InfoRow label={t.reading ?? 'Lecture'} value={entry.kana} />
 				}
@@ -746,7 +910,7 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 					/>
 				)}
 
-				{(entry.type === 'kanji' || entry.type === 'kana') && entry.svg_url && (
+				{(entry.type === 'kanji' || isKanaType(entry.type)) && entry.svg_url && (
 					<div className="dict-detail__stroke-section">
 						<div className="dict-detail__stroke-label">
 							{t.strokeOrder ?? 'ORDRE DES TRAITS'}
