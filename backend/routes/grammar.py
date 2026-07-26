@@ -5,12 +5,14 @@ from auth import get_user_id, prefixed, unprefixed
 from srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
+from quiz_modes import GRAMMAR_MODES
 from pydantic import BaseModel
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 MAX_BATCH = 25
+VALID_MODES = set(GRAMMAR_MODES)
 
 
 class ReviewPayload(BaseModel):
@@ -119,10 +121,12 @@ def _select_cards(level: str, mode: str, count: int, exclude_ids: set[str], user
     `count` due/new card ids (excluding anything already sitting
     unreviewed in the caller's queue), and builds the full payload for
     each. Returns (grammar_list, cards) — grammar_list is None for an
-    unknown level. Mirrors kana.py's _select_cards.
+    unknown level *or* an invalid mode (callers re-check which, to
+    return the right error message — see get_grammar_card). Mirrors
+    kanji.py's _select_cards.
     """
     grammar_list = GRAMMAR_BY_LEVEL.get(level)
-    if not grammar_list:
+    if not grammar_list or mode not in VALID_MODES:
         return None, None
 
     raw_ids   = [grammar_to_id(g, level) for g in grammar_list]
@@ -167,7 +171,9 @@ def get_grammar_card(level: str, mode: str = "flashcard",
                      user_id: str = Depends(get_user_id)):
     grammar_list, cards = _select_cards(level, mode, count=1, exclude_ids=set(), user_id=user_id)
     if grammar_list is None:
-        return {"error": "Unknown level"}
+        if level not in GRAMMAR_BY_LEVEL:
+            return {"error": "Unknown level"}
+        return {"error": "Invalid mode"}
     if not cards:
         logger.warning("grammar study exhausted level=%s mode=%s user_id=%s", level, mode, user_id)
         return {"done": True}
@@ -191,7 +197,9 @@ def get_grammar_cards(level: str, mode: str = "flashcard", count: int = 10, excl
         user_id=user_id,
     )
     if grammar_list is None:
-        return {"error": "Unknown level"}
+        if level not in GRAMMAR_BY_LEVEL:
+            return {"error": "Unknown level"}
+        return {"error": "Invalid mode"}
     return {"cards": cards}
 
 
@@ -234,6 +242,8 @@ def get_grammar_level_stats(level: str, mode: str, user_id: str = Depends(get_us
     grammar_list = GRAMMAR_BY_LEVEL.get(level)
     if not grammar_list:
         return {"error": "Unknown level"}
+    if mode not in VALID_MODES:
+        return {"error": "Invalid mode"}
 
     raw_ids  = [grammar_to_id(g, level) for g in grammar_list]
     card_ids = prefixed(raw_ids, user_id)
@@ -252,7 +262,6 @@ def get_grammar_level_stats(level: str, mode: str, user_id: str = Depends(get_us
 
 @router.get("/api/grammar/stats")
 def get_grammar_stats(user_id: str = Depends(get_user_id)):
-    MODES = ["flashcard", "mcq", "fill"]
     result = {}
     for level, grammar_list in GRAMMAR_BY_LEVEL.items():
         raw_ids = [grammar_to_id(g, level) for g in grammar_list]
@@ -264,6 +273,6 @@ def get_grammar_stats(user_id: str = Depends(get_user_id)):
                 "mastered": sum(1 for s in srs.get_bulk_stats(prefixed(raw_ids, user_id), mode).values() if s == "mastered"),
                 "due_now":  sum(1 for cid in prefixed(raw_ids, user_id) if cid in set(srs.get_due_cards(mode))),
             }
-            for mode in MODES
+            for mode in GRAMMAR_MODES
         }
     return result
