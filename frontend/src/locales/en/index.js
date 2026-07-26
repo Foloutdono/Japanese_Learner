@@ -11,6 +11,9 @@ const auth = {
   signupBtn:         'Sign up',
   signupSuccess:     'Check your email to confirm your account.',
   signOut:           'Sign Out',
+  usernameOptional:  'Username (optional)',
+  usernameInvalid:   'Username must be 3-20 characters (letters, numbers, underscore).',
+  usernameTaken:     'This username is already taken.',
 }
 
 // ── Landing screen ────────────────────────────────────────
@@ -88,6 +91,8 @@ const quiz = {
   // Selection prompts
   selectLevel:       'Choose your JLPT level',
   selectMode:        'Choose your training mode',
+  selectKanaSet:     'Choose a kana set',
+  selectPhase:       'Choose your training phase',
 
   // Input
   submit:            'Submit',
@@ -190,7 +195,11 @@ const phraseAnalyzer = {
   interval:            'Interval',
   days:                'days',
   nextReview:          'Next review',
-  
+  status_mastered:     'Mastered',
+  status_learning:     'Learning',
+  status_new:          'New',
+  status_not_started:  'Not in deck',
+  status_due:          'Due now',
 }
 
 // ── Reading ───────────────────────────────────────────────
@@ -235,6 +244,7 @@ const dictionary = {
   dictionaryPlaceholder: 'Search kanji, kana, or meaning...',
   noResults:         'No results for',
   reading:           'Reading',
+  romaji:            'Romaji',
   meaning:           'Meaning',
   level:             'Level',
   listen:            'Listen',
@@ -246,6 +256,8 @@ const dictionary = {
   dictAll:           'All',
   dictKanji:         'Kanji',
   dictVocab:         'Vocabulary',
+  dictHiragana:      'Hiragana',
+  dictKatakana:      'Katakana',
   dictBackToRadicals:'← Back to radicals',
   dictModeSearch:    'Search',
   dictModeRadical:   'Radical',
@@ -254,6 +266,12 @@ const dictionary = {
   dictRadicalNumber: (n) => `radical #${n}`,
   dictStrokesPlural: 'strokes',
   dictStrokeSingular: 'stroke',
+  dictionarySubtitle: 'Look up any kanji, kana, or vocabulary entry.',
+  dictStrokeIndex:   'Stroke count index',
+  syllabaryMain:     'Main syllabary',
+  syllabaryNSolo:    'ん',
+  syllabaryVoiced:   'Voiced sounds (dakuten / handakuten)',
+  composingKanji:    'Made of these kanji',
 }
 
 // Reading-comprehension / generic reading labels
@@ -289,6 +307,30 @@ const misc = {
     retry:     'Retry',
 }
 
+// ── Profile ───────────────────────────────────────────────
+const profile = {
+  profileTitle:      'Profile',
+  profileStale:      "Couldn't reach the server — showing your last known data.",
+  level:             'Level',
+  nextLevel:         'Next level',
+  goals:             'Goals',
+  badges:            'Badges',
+  leaderboard:       'Leaderboard',
+  done:              'Done',
+  genericError:      'Something went wrong. Try again.',
+}
+
+// ── Settings ──────────────────────────────────────────────
+const settings = {
+  settings:          'Settings',
+  preferences:       'Preferences',
+  sound:             'Sound',
+  theme:             'Theme',
+  language:          'Language',
+  account:           'Account',
+  signOutDesc:       'Sign out of your account on this device.',
+}
+
 // ── Decks ─────────────────────────────────────────────────
 const decks = {
   decks:             'My Decks',
@@ -312,8 +354,10 @@ const decks = {
   flashcardDesc:     'Front / Back — any language',
   vocabType:         'Vocabulary',
   vocabDesc:         'Compatible with JLPT mode',
+  deckVocabDesc:     'Compatible with JLPT mode',
   kanjiType:         'Kanji',
   kanjiDesc:         'With stroke order',
+  deckKanjiDesc:     'With stroke order',
 
   // Bulk select
   selectAll:         'Select all',
@@ -359,5 +403,7 @@ export default {
   ...comprehension,
   ...progress,
   ...misc,
+  ...profile,
+  ...settings,
   ...decks,
 }
