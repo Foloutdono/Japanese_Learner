@@ -545,10 +545,113 @@ input:focus { border-color: var(--accent2); }
 
 .home-header__actions {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
   justify-content: center;
   margin-top: 28px;
 }
+
+/* ── Home header profile badge ─────────────────────────────
+   Same ring/avatar language as BurgerMenu's own profile row (see
+   .burger-profile-row), sized up slightly since it's the primary
+   element in the actions row now rather than one entry in a drawer
+   list — a glance at level/streak that doubles as the link into the
+   full Profile screen. */
+.home-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-on-panel);
+  padding: 6px 16px 6px 6px;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+.home-profile-badge:hover,
+.home-profile-badge:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.home-profile-badge--fallback {
+  padding: 8px 18px;
+  font-size: 0.85rem;
+}
+.home-profile-badge__fallback-glyph {
+  font-family: var(--font-jp);
+  margin-right: 6px;
+}
+
+.home-profile-badge__ring-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+}
+.home-profile-badge__ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+.home-profile-badge__ring-track { fill: none; stroke: rgba(255, 255, 255, 0.14); stroke-width: 3; }
+.home-profile-badge__ring-fill {
+  fill: none;
+  stroke: var(--accent9);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.home-profile-badge__avatar {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.home-profile-badge__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  text-align: left;
+}
+.home-profile-badge__name {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text-on-panel);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+.home-profile-badge__rank {
+  font-size: 0.72rem;
+  color: var(--text-on-panel-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+
+.home-profile-badge__streak {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--text-on-panel);
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.home-settings-btn { flex-shrink: 0; }
 
 .home-main {
   flex: 1;
