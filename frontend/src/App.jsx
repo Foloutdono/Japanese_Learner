@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import { LangProvider } from './LangContext'
 
+import LandingScreen from './screens/LandingScreen'
 import AuthScreen  from './screens/AuthScreen'
 import HomeScreen  from './screens/HomeScreen'
 import KanaScreen  from './screens/KanaScreen'
@@ -22,6 +23,7 @@ import SettingsScreen from './screens/SettingsScreen'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
+  const [showLanding, setShowLanding] = useState(true)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -42,7 +44,9 @@ export default function App() {
   if (!session) {
     return (
       <LangProvider>
-        <AuthScreen />
+        {showLanding
+          ? <LandingScreen onContinue={() => setShowLanding(false)} />
+          : <AuthScreen onBack={() => setShowLanding(true)} />}
       </LangProvider>
     )
   }
