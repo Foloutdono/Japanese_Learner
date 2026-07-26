@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
@@ -24,6 +25,13 @@ function HomeProfileBadge() {
       </button>
     )
   }
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem('jp-theme')
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', saved)
+    }
+  }, [])
 
   const [, jpTitle, title] = levelTitle(summary.level)
   const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)

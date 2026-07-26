@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
 
@@ -34,6 +35,13 @@ export default function LandingScreen({ onContinue }) {
     { glyph: '実践', title: t.landingPro4Title, desc: t.landingPro4Desc },
     { glyph: '自由', title: t.landingPro5Title, desc: t.landingPro5Desc },
   ]
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem('jp-theme')
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', saved)
+    }
+  }, [])
 
   return (
     <div className="landing-screen">
