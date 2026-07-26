@@ -20,6 +20,7 @@ KANA_MODES  = ["qcm", "flashcard", "write"]
 VOCAB_MODES = list(QCM_FLASHCARD_MODES)
 # Kanji has a 5th mode (drawing practice) that vocab doesn't have.
 KANJI_MODES = VOCAB_MODES + ["write"]
+GRAMMAR_MODES = ["flashcard", "mcq", "fill"]
 
 # Representative mode used to gauge "do I know this word/kanji" for
 # dictionary status badges (see card_lookup.py) — qcm-kj-m (see the

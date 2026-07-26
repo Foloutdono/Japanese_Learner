@@ -10,6 +10,7 @@
 export const KANA_MODE_KEYS  = ['qcm', 'flashcard', 'write']
 export const VOCAB_MODE_KEYS = ['qcm-kj-m', 'qcm-m-kj', 'flashcard-kj-m', 'flashcard-m-kj']
 export const KANJI_MODE_KEYS = [...VOCAB_MODE_KEYS, 'write']
+export const GRAMMAR_MODE_KEYS = ['flashcard', 'mcq', 'fill']
 
 // Kana mode toggle (label only — used by ModeToggle).
 export function kanaModes(t) {
@@ -52,6 +53,20 @@ export function kanjiModes(t) {
   return [
     ...vocabKanjiModes(t, t.kanjiNoun ?? 'kanji'),
     { key: 'write', label: t.modeWrite ?? 'Écriture', desc: t.modeWriteDesc ?? 'Voir le sens, écrire le kanji' },
+  ]
+}
+
+// Grammar mode picker (label + description — used by ModeSelector).
+// Each mode gets its own accurate description now — GrammarScreen used
+// to build the mcq one by stripping the substring 'ci-dessous' out of
+// t.revealSentence, which only worked because that exact French phrase
+// happened to appear there, and silently produced a mangled/unchanged
+// description in any other language.
+export function grammarModePicker(t) {
+  return [
+    { key: 'flashcard', label: t.modeFlashcard ?? 'Flashcard',    desc: t.modeFcGrammarDesc  ?? 'Voir le point de grammaire, révéler le sens' },
+    { key: 'mcq',       label: t.modeQCM       ?? 'QCM',          desc: t.modeQcmGrammarDesc ?? 'Choisissez le bon sens' },
+    { key: 'fill',      label: t.modeFill      ?? 'Texte à trous', desc: t.modeFillGrammarDesc ?? 'Complétez la phrase avec ce point de grammaire' },
   ]
 }
 
