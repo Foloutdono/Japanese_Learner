@@ -5,7 +5,7 @@ import { useLang } from '../LangContext'
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 
-export default function AuthScreen() {
+export default function AuthScreen({ onBack } = {}) {
   const { t } = useLang()
   const [mode, setMode]       = useState('login') // 'login' | 'signup'
   const [email, setEmail]     = useState('')
@@ -66,6 +66,12 @@ export default function AuthScreen() {
 
   return (
     <div className="auth-screen">
+      {onBack && (
+        <button type="button" onClick={onBack} className="auth-back-btn">
+          {t.back || '\u2190 Back'}
+        </button>
+      )}
+
       <div className="auth-header">
         <div className="auth-header__glyph">{t.appTitle}</div>
         <div className="auth-header__title">{t.learnJapanese}</div>
