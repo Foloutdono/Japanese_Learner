@@ -68,7 +68,7 @@ export default function AuthScreen({ onBack } = {}) {
     <div className="auth-screen">
       {onBack && (
         <button type="button" onClick={onBack} className="auth-back-btn">
-          {t.back || '\u2190 Back'}
+          {t.back}
         </button>
       )}
 

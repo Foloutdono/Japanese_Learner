@@ -16,6 +16,37 @@ const auth = {
   switchLang:        'switchLang',
 }
 
+
+// ── Landing screen ────────────────────────────────────────
+// Shown to signed-out visitors before AuthScreen. landingPro*Title/
+// Desc are the five "why people stick with it" rows; landingCta is
+// reused for both the hero button and the closing footer button
+// rather than duplicated under a second key (same reasoning as
+// reading/readingComprehension sharing yourAnswer above).
+const landing = {
+  landingSignIn:         'landingSignIn',
+  landingTagline:        'landingTagline',
+  landingCta:            'landingCta',
+  landingFeaturesTitle:  'landingFeaturesTitle',
+  landingFeaturesIntro:  'landingFeaturesIntro',
+  landingWhyTitle:       'landingWhyTitle',
+  landingPro1Title:      'landingPro1Title',
+  landingPro1Desc:       'landingPro1Desc',
+  landingPro2Title:      'landingPro2Title',
+  landingPro2Desc:       'landingPro2Desc',
+  landingPro3Title:      'landingPro3Title',
+  landingPro3Desc:       'landingPro3Desc',
+  landingPro4Title:      'landingPro4Title',
+  landingPro4Desc:       'landingPro4Desc',
+  landingPro5Title:      'landingPro5Title',
+  landingPro5Desc:       'landingPro5Desc',
+  landingTechTitle:      'landingTechTitle',
+  landingCreatorTitle:   'landingCreatorTitle',
+  landingCreatorBody:    'landingCreatorBody',
+  landingCreatorName:    'landingCreatorName',
+  landingFooterCta:      'landingFooterCta',
+}
+
 // ── Navigation ────────────────────────────────────────────
 const nav = {
   menu:              'menu',
