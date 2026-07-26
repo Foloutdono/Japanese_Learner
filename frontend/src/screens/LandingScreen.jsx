@@ -11,13 +11,16 @@ import { getNavLinks } from '../navLinks'
 // no Router is mounted for these paths to navigate to. The single
 // job of this screen is to hand off to AuthScreen, which it does
 // through the `onContinue` callback (top-bar link, hero CTA, and
-// the closing CTA all call the same thing).
+// the closing CTA all call the same landingCta string).
 //
-// TECH_STACK and the "who & why" copy below are the two spots that
-// are genuinely specific to this project rather than derived from
-// existing app data — fill in landingCreatorBody / landingCreatorName
-// (via LangContext) with your own story, and adjust TECH_STACK if
-// your backend isn't a good fit for the generic "REST API" label.
+// All text below reads off the shared locale (see locale/index.js's
+// `landing` block) now that every landing* key resolves — no inline
+// fallbacks left, same convention as `extra`/`decks` in that file.
+// TECH_STACK and landingCreatorBody/landingCreatorName are the only
+// spots genuinely specific to this project: swap TECH_STACK if your
+// backend isn't a plain "Supabase" fit, and put your own story in
+// landingCreatorBody/landingCreatorName in your real (non-debug)
+// locale files.
 const TECH_STACK = ['React', 'Vite', 'React Router', 'Supabase']
 
 export default function LandingScreen({ onContinue }) {
@@ -25,31 +28,11 @@ export default function LandingScreen({ onContinue }) {
   const features = getNavLinks(t).filter(link => link.path !== '/')
 
   const pros = [
-    {
-      glyph: '順序',
-      title: t.landingPro1Title || 'A path, not a pile',
-      desc: t.landingPro1Desc || 'Kana, then vocabulary, kanji, grammar and reading, in that order — each section builds on the last instead of throwing everything at you at once.',
-    },
-    {
-      glyph: '反復',
-      title: t.landingPro2Title || 'Spaced repetition that adapts',
-      desc: t.landingPro2Desc || 'Flashcard decks reschedule themselves around what you actually forget, so review time goes where it\u2019s needed.',
-    },
-    {
-      glyph: '継続',
-      title: t.landingPro3Title || 'Levels and streaks',
-      desc: t.landingPro3Desc || 'XP, a level title and a daily streak turn practice into something you can see progress on, not just a vague feeling.',
-    },
-    {
-      glyph: '実践',
-      title: t.landingPro4Title || 'Reading you can actually do',
-      desc: t.landingPro4Desc || 'A dictionary and a phrase analyzer sit right next to the reading exercises, so nothing you don\u2019t understand becomes a dead end.',
-    },
-    {
-      glyph: '自由',
-      title: t.landingPro5Title || 'Set up the way you like it',
-      desc: t.landingPro5Desc || 'Light or dark theme, French or English interface — your call, and it\u2019s remembered.',
-    },
+    { glyph: '順序', title: t.landingPro1Title, desc: t.landingPro1Desc },
+    { glyph: '反復', title: t.landingPro2Title, desc: t.landingPro2Desc },
+    { glyph: '継続', title: t.landingPro3Title, desc: t.landingPro3Desc },
+    { glyph: '実践', title: t.landingPro4Title, desc: t.landingPro4Desc },
+    { glyph: '自由', title: t.landingPro5Title, desc: t.landingPro5Desc },
   ]
 
   return (
@@ -61,7 +44,7 @@ export default function LandingScreen({ onContinue }) {
             <span className="landing-topbar__name">{t.learnJapanese}</span>
           </div>
           <button type="button" onClick={onContinue} className="landing-topbar__signin">
-            {t.landingSignIn || 'Sign in'}
+            {t.landingSignIn}
           </button>
         </div>
       </div>
@@ -69,11 +52,9 @@ export default function LandingScreen({ onContinue }) {
       <header className="landing-hero">
         <div className="landing-hero__glyph">{t.appTitle}</div>
         <h1 className="landing-hero__title">{t.learnJapanese}</h1>
-        <p className="landing-hero__tagline">
-          {t.landingTagline || 'A complete, self-paced toolkit for learning Japanese \u2014 from your first kana to reading real text on your own.'}
-        </p>
+        <p className="landing-hero__tagline">{t.landingTagline}</p>
         <button type="button" onClick={onContinue} className="landing-hero__cta">
-          {t.landingCta || 'Get started'}
+          {t.landingCta}
         </button>
       </header>
 
@@ -82,12 +63,10 @@ export default function LandingScreen({ onContinue }) {
 
           <section className="landing-section">
             <div className="section-header">
-              <div className="section-header__title">{t.landingFeaturesTitle || 'Everything in one place'}</div>
+              <div className="section-header__title">{t.landingFeaturesTitle}</div>
               <div className="section-header__rule" aria-hidden="true" />
             </div>
-            <p className="landing-section__intro">
-              {t.landingFeaturesIntro || 'One app instead of five separate tools \u2014 every stage of learning Japanese lives here, in the same place.'}
-            </p>
+            <p className="landing-section__intro">{t.landingFeaturesIntro}</p>
             <div className="landing-feature-grid">
               {features.map(f => (
                 <div key={f.path} className="landing-feature" style={{ '--row-color': f.color }}>
@@ -101,7 +80,7 @@ export default function LandingScreen({ onContinue }) {
 
           <section className="landing-section">
             <div className="section-header">
-              <div className="section-header__title">{t.landingWhyTitle || 'Why people stick with it'}</div>
+              <div className="section-header__title">{t.landingWhyTitle}</div>
               <div className="section-header__rule" aria-hidden="true" />
             </div>
             <ul className="landing-pros-list">
@@ -119,7 +98,7 @@ export default function LandingScreen({ onContinue }) {
 
           <section className="landing-section">
             <div className="section-header">
-              <div className="section-header__title">{t.landingTechTitle || 'Built with'}</div>
+              <div className="section-header__title">{t.landingTechTitle}</div>
               <div className="section-header__rule" aria-hidden="true" />
             </div>
             <div className="landing-tech">
@@ -131,15 +110,12 @@ export default function LandingScreen({ onContinue }) {
 
           <section className="landing-section">
             <div className="section-header">
-              <div className="section-header__title">{t.landingCreatorTitle || 'Who made this, and why'}</div>
+              <div className="section-header__title">{t.landingCreatorTitle}</div>
               <div className="section-header__rule" aria-hidden="true" />
             </div>
             <div className="landing-creator card">
-              <p className="landing-creator__body">
-                {t.landingCreatorBody ||
-                  'Placeholder \u2014 replace this with your own story: who built this app, and what problem you were trying to solve when you started it.'}
-              </p>
-              <p className="landing-creator__name">{t.landingCreatorName || '\u2014 add your name here'}</p>
+              <p className="landing-creator__body">{t.landingCreatorBody}</p>
+              <p className="landing-creator__name">{t.landingCreatorName}</p>
             </div>
           </section>
 
@@ -147,11 +123,11 @@ export default function LandingScreen({ onContinue }) {
       </main>
 
       <footer className="landing-footer">
-        <div className="landing-footer__title">{t.landingFooterCta || 'Ready to start?'}</div>
+        <div className="landing-footer__title">{t.landingFooterCta}</div>
         <button type="button" onClick={onContinue} className="landing-hero__cta">
-          {t.landingCtaFinal || t.landingCta || 'Get started'}
+          {t.landingCta}
         </button>
-        {t.tip && <p className="landing-footer__tip">{t.tip}</p>}
+        <p className="landing-footer__tip">{t.tip}</p>
       </footer>
     </div>
   )
