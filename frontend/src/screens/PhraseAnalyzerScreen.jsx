@@ -80,7 +80,7 @@ export default function PhraseAnalyzerScreen({ session }) {
         fetchHistory()
       })
       .catch(() => {
-        setError(t.phraseAnalyzeError || "Couldn't analyze this phrase. Try again.")
+        setError(t.phraseAnalyzeError)
         setLoading(false)
       })
   }
@@ -128,7 +128,7 @@ export default function PhraseAnalyzerScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title={t.phraseAnalyzer || 'Phrase analyzer'} />
+      <TopBar onBack={() => navigate('/')} title={t.phraseAnalyzer} />
 
       <div className="container page-pad">
 
@@ -136,7 +136,7 @@ export default function PhraseAnalyzerScreen({ session }) {
           <textarea
             value={phrase}
             onChange={e => setPhrase(e.target.value)}
-            placeholder={t.phrasePlaceholder || 'Type or paste a Japanese phrase…'}
+            placeholder={t.phrasePlaceholder}
             rows={3}
             className="phrase-textarea"
           />
@@ -145,14 +145,14 @@ export default function PhraseAnalyzerScreen({ session }) {
               onClick={() => setShowHistory(s => !s)}
               className="phrase-history-toggle"
             >
-              {showHistory ? (t.hideHistory || 'Hide history') : (t.showHistory || 'History')}
+              {showHistory ? (t.hideHistory) : (t.showHistory)}
             </button>
             <button
               onClick={analyze}
               disabled={!phrase.trim() || loading}
               className="phrase-analyze-btn"
             >
-              {t.analyze || 'Analyze'}
+              {t.analyze}
             </button>
           </div>
         </div>
@@ -161,7 +161,7 @@ export default function PhraseAnalyzerScreen({ session }) {
           <div className="card phrase-history-card">
             {history.length === 0 && (
               <div className="phrase-history-empty">
-                {t.noHistory || 'No phrases analyzed yet.'}
+                {t.noHistory}
               </div>
             )}
             {history.map(h => (
@@ -199,7 +199,7 @@ export default function PhraseAnalyzerScreen({ session }) {
                     onClick={() => openVocabDetail(w)}
                     className={`word-span${w.vocab_match ? ' word-span--clickable' : ''}`}
                     style={{ '--word-color': wordColor(w) }}
-                    title={w.vocab_match ? (t.clickForDetails || 'Click for definition & stats') : undefined}
+                    title={w.vocab_match ? (t.clickForDetails) : undefined}
                   >
                     {w.surface}
                   </span>
@@ -322,14 +322,14 @@ function DetailPanel({ detail, t, onClose }) {
 
         {contextMeaning && (
           <div className="detail-section">
-            <Label>{t.inThisPhrase || 'In this phrase'}</Label>
+            <Label>{t.inThisPhrase}</Label>
             <div className="detail-context-value">{contextMeaning} {reading && `(${reading})`}</div>
           </div>
         )}
 
         {entry && Object.keys(entry).length > 0 && (
           <div className="detail-section">
-            <Label>{t.appDefinition || 'Definition in the app'}</Label>
+            <Label>{t.appDefinition}</Label>
             <div className="detail-entry-list">
               {Object.entries(entry).map(([key, value]) => (
                 <div key={key} className="detail-entry-row">
@@ -342,23 +342,23 @@ function DetailPanel({ detail, t, onClose }) {
         )}
 
         <div className="detail-section">
-          <Label>{t.cardStats || 'Card stats'}</Label>
+          <Label>{t.cardStats}</Label>
           <div className="detail-badges">
             <StatusBadge status={stats.status} />
             {stats.due && <StatusBadge status="due" />}
           </div>
-          <StatRow label={t.totalReviews || 'Reviews'} value={stats.total_reviews} />
-          <StatRow label={t.correctReviews || 'Correct'} value={stats.correct_reviews} />
+          <StatRow label={t.totalReviews} value={stats.total_reviews} />
+          <StatRow label={t.correctReviews} value={stats.correct_reviews} />
           <StatRow
-            label={t.accuracy || 'Accuracy'}
+            label={t.accuracy}
             value={stats.accuracy !== null ? `${stats.accuracy}%` : '—'}
           />
           <StatRow
-            label={t.interval || 'Interval'}
-            value={stats.interval_days !== null ? `${stats.interval_days} ${t.days || 'days'}` : '—'}
+            label={t.interval}
+            value={stats.interval_days !== null ? `${stats.interval_days} ${t.days}` : '—'}
           />
           <StatRow
-            label={t.nextReview || 'Next review'}
+            label={t.nextReview}
             value={stats.next_review ? new Date(stats.next_review).toLocaleDateString() : '—'}
           />
         </div>

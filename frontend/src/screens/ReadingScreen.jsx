@@ -32,9 +32,9 @@ export default function ReadingScreen({ session }) {
   const { t, lang } = useLang()
 
   const PHASES = [
-    { key: 'hiragana', label: t.readingHiragana || 'Hiragana only', desc: t.readingHiraganaDesc || 'Phrases written only in hiragana' },
-    { key: 'katakana', label: t.readingKatakana || 'Katakana only', desc: t.readingKatakanaDesc || 'Phrases written only in katakana' },
-    { key: 'mixed',    label: t.readingMixed || 'Everything', desc: t.readingMixedDesc || 'Natural Japanese with kanji and kana' },
+    { key: 'hiragana', label: t.readingHiragana, desc: t.readingHiraganaDesc },
+    { key: 'katakana', label: t.readingKatakana, desc: t.readingKatakanaDesc },
+    { key: 'mixed',    label: t.readingMixed, desc: t.readingMixedDesc },
   ]
 
   const [level, setLevel]   = useState(null)
@@ -87,7 +87,7 @@ export default function ReadingScreen({ session }) {
     setError(null)
     fetchBatch(lvl, ph).then(phrases => {
       if (phrases.length === 0) {
-        setError(t.readingFetchError || "Couldn't load a phrase. Try again.")
+        setError(t.readingFetchError)
         setStage('error')
         return
       }
@@ -141,7 +141,7 @@ export default function ReadingScreen({ session }) {
     setStage('loading')
     fetchBatch(level, phase).then(more => {
       if (more.length === 0) {
-        setError(t.readingFetchError || "Couldn't load a phrase. Try again.")
+        setError(t.readingFetchError)
         setStage('error')
         return
       }
@@ -209,7 +209,7 @@ export default function ReadingScreen({ session }) {
     setError(null)
     fetchBatch(level, phase).then(phrases => {
       if (phrases.length === 0) {
-        setError(t.readingFetchError || "Couldn't load a phrase. Try again.")
+        setError(t.readingFetchError)
         setStage('error')
         return
       }
@@ -222,7 +222,7 @@ export default function ReadingScreen({ session }) {
   if (!level) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.readingTitle || 'Reading practice'} />
+        <TopBar onBack={() => navigate('/')} title={t.readingTitle} />
         <SelectionScreen subtitle={t.selectLevel}>
           <LevelSelector onSelect={setLevel} color="var(--accent3)" />
         </SelectionScreen>
@@ -234,7 +234,7 @@ export default function ReadingScreen({ session }) {
   if (!phase) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setLevel(null)} title={`${t.readingTitle || 'Reading practice'} ${level}`} />
+        <TopBar onBack={() => setLevel(null)} title={`${t.readingTitle} ${level}`} />
         <SelectionScreen subtitle={t.selectPhase}>
           <ModeSelector
             modes={PHASES.map(p => ({ key: p.key, label: p.label, desc: p.desc }))}
@@ -250,13 +250,13 @@ export default function ReadingScreen({ session }) {
     <div className="screen">
       <TopBar
         onBack={() => setPhase(null)}
-        title={`${t.readingTitle || 'Reading practice'} — ${PHASES.find(p => p.key === phase)?.label}`}
+        title={`${t.readingTitle} — ${PHASES.find(p => p.key === phase)?.label}`}
         autoHide
       />
       <div className="container quiz-area">
 
         <div className="rdg-score">
-          {t.score || 'Score'}: {score.correct}/{score.total}
+          {t.score}: {score.correct}/{score.total}
         </div>
 
         {stage === 'loading' && <Loading />}
@@ -266,7 +266,7 @@ export default function ReadingScreen({ session }) {
             {error}
             <div className="rdg-retry-wrap">
               <button onClick={retry} className="rdg-retry-btn">
-                {t.retry || 'Retry'}
+                {t.retry}
               </button>
             </div>
           </div>
@@ -297,7 +297,7 @@ export default function ReadingScreen({ session }) {
           <>
             <PromptCard>
               <div className="rdg-answering-hint">
-                {t.writeWhatYouSaw || 'Write what you saw, in romaji'}
+                {t.writeWhatYouSaw}
               </div>
             </PromptCard>
             <input
@@ -305,7 +305,7 @@ export default function ReadingScreen({ session }) {
               value={answer}
               onChange={e => setAnswer(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && submitAnswer()}
-              placeholder={t.romajiPlaceholder || 'e.g. konnichiwa'}
+              placeholder={t.romajiPlaceholder}
               className="rdg-answer-input"
             />
             <div className="rdg-submit-wrap">
@@ -314,7 +314,7 @@ export default function ReadingScreen({ session }) {
                 disabled={!answer.trim()}
                 className="rdg-submit-btn"
               >
-                {t.submit || 'Submit'}
+                {t.submit}
               </button>
             </div>
           </>
@@ -331,7 +331,7 @@ export default function ReadingScreen({ session }) {
                         onClick={() => openSegmentDetail(seg)}
                         className={`word-span${seg.type !== 'plain' ? ' word-span--clickable' : ''}`}
                         style={{ '--word-color': seg.type === 'plain' ? '#fff' : (STATUS_COLORS[seg.stats.status] || STATUS_COLORS.not_started) }}
-                        title={seg.type !== 'plain' ? (t.clickForDetails || 'Click for definition & stats') : undefined}
+                        title={seg.type !== 'plain' ? (t.clickForDetails) : undefined}
                       >
                         {seg.text}
                       </span>
@@ -343,19 +343,19 @@ export default function ReadingScreen({ session }) {
                 style={{ '--status-color': feedback.correct === null ? 'var(--text-secondary)' : (feedback.correct ? 'var(--success)' : 'var(--danger)') }}
               >
                 {feedback.correct === null
-                  ? (t.didYouGetIt || 'Did you get it right?')
-                  : (feedback.correct ? (t.correct || 'Correct!') : (t.incorrect || 'Not quite'))}
+                  ? (t.didYouGetIt)
+                  : (feedback.correct ? (t.correct) : (t.incorrect))}
               </div>
               <div className="rdg-feedback-romaji">
-                {t.correctRomaji || 'Correct romaji'}: <strong>{feedback.romaji}</strong>
+                {t.correctRomaji}: <strong>{feedback.romaji}</strong>
               </div>
               {data.translation && (
                 <div className="rdg-feedback-translation">
-                  {t.translation || 'Translation'}: {data.translation}
+                  {t.translation}: {data.translation}
                 </div>
               )}
               <div className="rdg-feedback-your-answer">
-                {t.yourAnswer || 'Your answer'}: {answer}
+                {t.yourAnswer}: {answer}
               </div>
             </PromptCard>
             <div className="rdg-feedback-actions">
@@ -365,13 +365,13 @@ export default function ReadingScreen({ session }) {
                     onClick={() => gradeAnswer(false)}
                     className="rdg-grade-btn--wrong"
                   >
-                    {t.gradeIncorrect || "I got it wrong"}
+                    {t.gradeIncorrect}
                   </button>
                   <button
                     onClick={() => gradeAnswer(true)}
                     className="rdg-grade-btn--right"
                   >
-                    {t.gradeCorrect || "I got it right"}
+                    {t.gradeCorrect}
                   </button>
                 </div>
               ) : (
@@ -379,7 +379,7 @@ export default function ReadingScreen({ session }) {
                   onClick={next}
                   className="rdg-next-btn"
                 >
-                  {t.nextPhrase || 'Next phrase'}
+                  {t.nextPhrase}
                 </button>
               )}
             </div>
@@ -410,7 +410,7 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
 
       {entry && Object.keys(entry).length > 0 && (
         <div className="detail-section">
-          <Label>{t.appDefinition || 'Definition in the app'}</Label>
+          <Label>{t.appDefinition}</Label>
           <div className="detail-entry-list">
             {Object.entries(entry).map(([key, value]) => (
               <div key={key} className="detail-entry-row">
@@ -423,23 +423,23 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
       )}
 
       <div className="detail-section">
-        <Label>{t.cardStats || 'Card stats'}</Label>
+        <Label>{t.cardStats}</Label>
         <div className="detail-badges">
           <StatusBadge status={stats.status} />
           {stats.due && <StatusBadge status="due" />}
         </div>
-        <StatRow label={t.totalReviews || 'Reviews'} value={stats.total_reviews} />
-        <StatRow label={t.correctReviews || 'Correct'} value={stats.correct_reviews} />
+        <StatRow label={t.totalReviews} value={stats.total_reviews} />
+        <StatRow label={t.correctReviews} value={stats.correct_reviews} />
         <StatRow
-          label={t.accuracy || 'Accuracy'}
+          label={t.accuracy}
           value={stats.accuracy !== null ? `${stats.accuracy}%` : '—'}
         />
         <StatRow
-          label={t.interval || 'Interval'}
-          value={stats.interval_days !== null ? `${stats.interval_days} ${t.days || 'days'}` : '—'}
+          label={t.interval}
+          value={stats.interval_days !== null ? `${stats.interval_days} ${t.days}` : '—'}
         />
         <StatRow
-          label={t.nextReview || 'Next review'}
+          label={t.nextReview}
           value={stats.next_review ? new Date(stats.next_review).toLocaleDateString() : '—'}
         />
       </div>

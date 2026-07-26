@@ -221,12 +221,12 @@ export default function KanaScreen({ session }) {
   if (!selectedSet) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title="Kana" />
+        <TopBar onBack={() => navigate('/')} title={t.kana} />
         <SelectionScreen>
           <ModeSelector
             modes={SETS.map(s => ({ key: s.slug, label: s.label }))}
             onSelect={slug => startSession(SETS.find(s => s.slug === slug))}
-            title={t.selectKanaSet ?? 'Choose your kana set'}
+            title={t.selectKanaSet}
           />
         </SelectionScreen>
       </div>

@@ -1,3 +1,5 @@
+import { useLang } from '../LangContext'
+
 /**
  * LevelSelector
  * Renders JLPT levels as a single-column, hairline-divided list —
@@ -11,34 +13,41 @@
  *                       a hex string or CSS var(). Falls back to shu-iro
  *                       (var(--accent)) via CSS when omitted.
  *   levels           — array of level strings (default: N5…N1)
- *   eyebrow, title, subtitle — header copy. subtitle has no default:
- *     the list is self-explanatory. Pass eyebrow="" / etc. to hide a
- *     line, or wrap in <SelectionScreen> and omit all three to use
- *     its header instead.
+ *   title            — header copy. Defaults to t.selectLevel rather
+ *                       than a hardcoded string, so a caller that
+ *                       forgets to pass one still gets a translated
+ *                       default instead of permanently-English text.
+ *                       Pass title="" to hide the header line, or wrap
+ *                       in <SelectionScreen> and omit it to use that
+ *                       component's own header instead.
  */
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
-const LEVEL_HINTS = {
-  N5: 'Beginner-friendly vocabulary',
-  N4: 'Solidify core grammar',
-  N3: 'Boost reading fluency',
-  N2: 'Master intermediate kanji',
-  N1: 'Challenge your best Japanese',
-}
 
 export default function LevelSelector({
   onSelect,
   color,
   levels = DEFAULT_LEVELS,
-  title = 'Choose your JLPT level'
+  title,
 }) {
+  const { t } = useLang()
+  // Previously a hardcoded English-only dict — now sourced from the
+  // translation file so it actually changes with the app's language.
+  const LEVEL_HINTS = {
+    N5: t.levelHintN5,
+    N4: t.levelHintN4,
+    N3: t.levelHintN3,
+    N2: t.levelHintN2,
+    N1: t.levelHintN1,
+  }
+  const resolvedTitle = title === '' ? '' : (title ?? t.selectLevel)
   const rowStyle = color ? { '--row-color': color } : undefined
 
   return (
     <div className="level-selector">
-      {(title) && (
+      {(resolvedTitle) && (
         <div className="selector-header">
-          {title && <div className="selector-header__title">{title}</div>}
+          {resolvedTitle && <div className="selector-header__title">{resolvedTitle}</div>}
         </div>
       )}
       <div className="choice-list">

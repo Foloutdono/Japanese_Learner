@@ -27,7 +27,7 @@ function BurgerProfileRow({ go, active, t }) {
     return (
       <button onClick={() => go('/profile')} className={`burger-drawer__link ${active ? 'burger-drawer__link--active' : ''}`}>
         <span className="burger-drawer__link-icon">侍</span>
-        <span>{t.profileTitle ?? 'Profil'}</span>
+        <span>{t.profileTitle}</span>
       </button>
     )
   }
@@ -64,7 +64,7 @@ function BurgerProfileRow({ go, active, t }) {
         <span className="burger-profile-row__rank" lang="ja">{jpTitle} · {title}</span>
       </span>
 
-      <span className="burger-profile-row__streak" title={t.streak ?? 'Série'}>
+      <span className="burger-profile-row__streak" title={t.streak}>
         <span aria-hidden="true">🔥</span> {summary.streak}
       </span>
     </button>
@@ -92,7 +92,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
     <>
       <button
         onClick={() => setOpenAndNotify(!open)}
-        aria-label={t.menu ?? 'Menu'}
+        aria-label={t.menu}
         className="burger-toggle"
       >
         ☰
@@ -102,7 +102,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
         <div className="burger-overlay" onClick={close}>
           <div className="burger-drawer" onClick={e => e.stopPropagation()}>
             <div className="burger-drawer__header">
-              <span className="burger-drawer__title">{t.menu ?? 'Menu'}</span>
+              <span className="burger-drawer__title">{t.menu}</span>
               <button className="burger-drawer__close" onClick={close}>✕</button>
             </div>
 
@@ -134,7 +134,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
                 onClick={() => go('/settings')}
                 className="btn-ghost burger-drawer__settings-btn"
               >
-                <span aria-hidden="true">⚙</span> {t.settings ?? 'Paramètres'}
+                <span aria-hidden="true">⚙</span> {t.settings}
               </button>
             </div>
           </div>

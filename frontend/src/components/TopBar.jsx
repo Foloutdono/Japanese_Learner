@@ -119,7 +119,7 @@ function TopBarProfileRing() {
       type="button"
       className="topbar-profile-ring"
       onClick={() => navigate('/profile')}
-      title={`${t.level ?? 'Niveau'} ${summary.level} — ${into}/${span} XP`}
+      title={`${t.level} ${summary.level} — ${into}/${span} XP`}
     >
       <svg className="topbar-profile-ring__svg" viewBox="0 0 40 40" aria-hidden="true">
         <circle className="topbar-profile-ring__track" cx="20" cy="20" r={r} />
@@ -175,7 +175,7 @@ function MobileLevelBar() {
 
   return (
     <button type="button" className="mobile-level-bar" onClick={() => navigate('/profile')}>
-      <span className="mobile-level-bar__level">{t.level ?? 'Niv.'} {summary.level}</span>
+      <span className="mobile-level-bar__level">{t.level} {summary.level}</span>
       <span className="mobile-level-bar__track">
         <span className="mobile-level-bar__fill" style={{ width: `${pct}%` }} />
         {gain && (

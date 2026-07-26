@@ -79,7 +79,7 @@ export default function ProfileScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title={t.profileTitle || 'Profil'} />
+      <TopBar onBack={() => navigate('/')} title={t.profileTitle} />
 
       {loading && <Loading />}
 
@@ -88,19 +88,19 @@ export default function ProfileScreen({ session }) {
           {stale && (
             <div className="profile-stale-notice" role="status">
               <span className="profile-stale-notice__glyph" aria-hidden="true">⚠</span>
-              {t.profileStale || 'Impossible d’actualiser — dernières données disponibles affichées.'}
+              {t.profileStale}
             </div>
           )}
 
           <ProfileCard profile={profile} session={session} onUsernameChange={u => setProfile(p => ({ ...p, username: u }))} t={t} />
 
-          <SectionHeader title={t.goals || 'Objectifs'} />
+          <SectionHeader title={t.goals} />
           <GoalsCard goals={profile.goals} t={t} />
 
-          <SectionHeader title={t.badges || 'Badges'} />
+          <SectionHeader title={t.badges} />
           <BadgesGrid badges={profile.badges} />
 
-          <SectionHeader title={t.leaderboard || 'Classement'} />
+          <SectionHeader title={t.leaderboard} />
           <Leaderboard leaderboard={leaderboard} t={t} />
         </div>
       )}
@@ -135,7 +135,7 @@ function ProfileCard({ profile, session, onUsernameChange, t }) {
           />
         </svg>
         <div className="profile-card__avatar">{profile.username.charAt(0).toUpperCase()}</div>
-        <div className="profile-card__level-badge" title={`${t.level || 'Niveau'} ${profile.level}`}>
+        <div className="profile-card__level-badge" title={`${t.level} ${profile.level}`}>
           {profile.level}
         </div>
       </div>
@@ -146,7 +146,7 @@ function ProfileCard({ profile, session, onUsernameChange, t }) {
 
         <div className="profile-card__xp-row">
           <span>{into} / {span} XP</span>
-          <span>{t.nextLevel || 'Niveau suivant'}</span>
+          <span>{t.nextLevel}</span>
         </div>
         <div className="profile-card__xp-track">
           <div className="profile-card__xp-fill" style={{ width: `${pct}%` }} />
@@ -178,7 +178,7 @@ function EditableUsername({ username, session, onChange, t }) {
 
   function save() {
     if (!USERNAME_RE.test(value)) {
-      setError(t.usernameInvalid || '3-20 caractères : lettres, chiffres, underscore.')
+      setError(t.usernameInvalid)
       return
     }
     if (value === username) { setEditing(false); return }
@@ -187,7 +187,7 @@ function EditableUsername({ username, session, onChange, t }) {
     setError(null)
     apiFetch('/api/profile', session, { method: 'PATCH', body: JSON.stringify({ username: value }) })
       .then(r => {
-        if (r.status === 409) throw new Error(t.usernameTaken || 'Ce nom est déjà pris.')
+        if (r.status === 409) throw new Error(t.usernameTaken)
         if (!r.ok) throw new Error()
         return r.json()
       })
@@ -195,7 +195,7 @@ function EditableUsername({ username, session, onChange, t }) {
         onChange(data.username)
         setEditing(false)
       })
-      .catch(err => setError(err.message || (t.genericError || 'Une erreur est survenue.')))
+      .catch(err => setError(err.message || (t.genericError)))
       .finally(() => setSaving(false))
   }
 
@@ -223,7 +223,7 @@ function EditableUsername({ username, session, onChange, t }) {
         disabled={saving}
       />
       <button type="button" onClick={save} disabled={saving} className="profile-card__name-save">
-        {t.save || 'OK'}
+        {t.save}
       </button>
       <button type="button" onClick={cancel} disabled={saving} className="profile-card__name-cancel">
         ✕
@@ -252,7 +252,7 @@ function GoalsCard({ goals, t }) {
               />
             </div>
             <div className="goal-row__count">
-              {g.current} / {g.target}{done ? ` · ${t.done || 'Terminé'}` : ''}
+              {g.current} / {g.target}{done ? ` · ${t.done}` : ''}
             </div>
           </div>
         )
@@ -285,7 +285,7 @@ function LeaderboardRow({ e, isMe, t }) {
         {RANK_GLYPH[e.rank] ?? e.rank ?? '—'}
       </span>
       <span className="leaderboard-row__name">{e.username}</span>
-      <span className="leaderboard-row__level">{t.level || 'Niv.'} {e.level}</span>
+      <span className="leaderboard-row__level">{t.level} {e.level}</span>
       <span className="leaderboard-row__xp">{e.xp.toLocaleString()} XP</span>
     </div>
   )

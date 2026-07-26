@@ -27,7 +27,7 @@ export default function AuthScreen() {
     setSuccess(null)
 
     if (mode === 'signup' && username && !USERNAME_RE.test(username)) {
-      setError(t.usernameInvalid || '3-20 caractères : lettres, chiffres, underscore.')
+      setError(t.usernameInvalid)
       return
     }
 
@@ -88,7 +88,7 @@ export default function AuthScreen() {
           {mode === 'signup' && (
             <input
               type="text"
-              placeholder={t.usernameOptional || 'Nom d’utilisateur (facultatif)'}
+              placeholder={t.usernameOptional}
               value={username}
               onChange={e => setUsername(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSubmit()}

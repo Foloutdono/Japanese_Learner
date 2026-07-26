@@ -54,7 +54,7 @@ export default function ReadingComprehensionScreen({ session }) {
         setStage('reading')
       })
       .catch(() => {
-        setError(t.comprehensionFetchError || "Couldn't load a text. Try again.")
+        setError(t.comprehensionFetchError)
         setStage('error')
       })
   }
@@ -122,7 +122,7 @@ export default function ReadingComprehensionScreen({ session }) {
         setStage('results')
       })
       .catch(() => {
-        setError(t.comprehensionSubmitError || "Couldn't submit answers. Try again.")
+        setError(t.comprehensionSubmitError)
         setStage('error')
       })
   }
@@ -137,7 +137,7 @@ export default function ReadingComprehensionScreen({ session }) {
   if (stage === 'selecting') {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.comprehensionTitle || 'Reading comprehension'} />
+        <TopBar onBack={() => navigate('/')} title={t.comprehensionTitle} />
         <SelectionScreen subtitle={t.selectLevel}>
           <LevelSelector onSelect={startSession} color="var(--accent3)" />
         </SelectionScreen>
@@ -149,11 +149,11 @@ export default function ReadingComprehensionScreen({ session }) {
   if (stage === 'loading') {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle || 'Reading comprehension'} />
+        <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} />
         <div className="comp-loading-wrap">
           <Loading />
           <div className="comp-loading-text">
-            {t.comprehensionGenerating || 'Generating a text for you…'}
+            {t.comprehensionGenerating}
           </div>
         </div>
       </div>
@@ -164,11 +164,11 @@ export default function ReadingComprehensionScreen({ session }) {
   if (stage === 'error') {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle || 'Reading comprehension'} />
+        <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} />
         <div className="container comp-error-page">
           <div className="card comp-error-card">{error}</div>
           <button onClick={() => startSession(level)} className="comp-retry-btn">
-            {t.retry || 'Retry'}
+            {t.retry}
           </button>
         </div>
       </div>
@@ -181,12 +181,12 @@ export default function ReadingComprehensionScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => { clearTimer(); setStage('selecting') }} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} autoHide />
+        <TopBar onBack={() => { clearTimer(); setStage('selecting') }} title={`${t.comprehensionTitle} — ${level}`} autoHide />
         <div className="container comp-reading-page">
 
           <div className="comp-reading-header">
             <div className="comp-time-remaining">
-              {t.timeRemaining || 'Time remaining'}: <strong className="comp-time-value" style={{ '--time-color': timeLeft < 60 ? 'var(--danger)' : 'var(--text-primary)' }}>
+              {t.timeRemaining}: <strong className="comp-time-value" style={{ '--time-color': timeLeft < 60 ? 'var(--danger)' : 'var(--text-primary)' }}>
                 {formatTime(timeLeft)}
               </strong>
             </div>
@@ -195,13 +195,13 @@ export default function ReadingComprehensionScreen({ session }) {
                 onClick={() => setShowTranslation(s => !s)}
                 className="comp-toggle-translation"
               >
-                {showTranslation ? (t.hideTranslation || 'Hide translation') : (t.showTranslation || 'Show translation')}
+                {showTranslation ? (t.hideTranslation) : (t.showTranslation)}
               </button>
               <button
                 onClick={finishReading}
                 className="comp-done-btn"
               >
-                {t.doneReading || "Done reading"}
+                {t.doneReading}
               </button>
             </div>
           </div>
@@ -222,7 +222,7 @@ export default function ReadingComprehensionScreen({ session }) {
           {showTranslation && (
             <div className="card comp-translation-card">
               <div className="comp-translation-label">
-                {t.translation || 'Translation'}
+                {t.translation}
               </div>
               <div className="comp-translation-text">{exercise.translation}</div>
             </div>
@@ -240,7 +240,7 @@ export default function ReadingComprehensionScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} autoHide />
+        <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} autoHide />
         <div className="container quiz-area">
 
           {stage === 'submitting' ? (
@@ -248,7 +248,7 @@ export default function ReadingComprehensionScreen({ session }) {
           ) : (
             <>
               <div className="comp-q-progress">
-                {t.question || 'Question'} {currentQ + 1} / {total}
+                {t.question} {currentQ + 1} / {total}
                 <div className="comp-bar-track comp-bar-track--question">
                   <div className="comp-bar-fill" style={{ '--fill-pct': `${((currentQ + 1) / total) * 100}%` }} />
                 </div>
@@ -280,7 +280,7 @@ export default function ReadingComprehensionScreen({ session }) {
                 onClick={() => setStage('reading')}
                 className="comp-reread-btn"
               >
-                {t.reReadText || 'Re-read the text'}
+                {t.reReadText}
               </button>
             </>
           )}
@@ -296,7 +296,7 @@ export default function ReadingComprehensionScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle || 'Reading comprehension'} — ${level}`} autoHide />
+        <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} autoHide />
         <div className="container page-pad">
 
           <div className="card comp-score-card">
@@ -304,11 +304,11 @@ export default function ReadingComprehensionScreen({ session }) {
               <div className="comp-score-value" style={{ '--score-color': scoreColor }}>
                 {results.score}/{results.total}
               </div>
-              <div className="comp-score-label">{t.score || 'Score'}</div>
+              <div className="comp-score-label">{t.score}</div>
             </div>
             <div>
               <div className="comp-score-value" style={{ '--score-color': scoreColor }}>{pct}%</div>
-              <div className="comp-score-label">{t.accuracy || 'Accuracy'}</div>
+              <div className="comp-score-label">{t.accuracy}</div>
             </div>
           </div>
 
@@ -329,7 +329,7 @@ export default function ReadingComprehensionScreen({ session }) {
                         <span className="comp-result-option__letter">{String.fromCharCode(65 + j)}.</span>
                         <span>{opt}</span>
                         {isCorrect && <span className="comp-result-option__mark">✓</span>}
-                        {isUser && !isCorrect && <span className="comp-result-option__mark">✗ {t.yourAnswer || 'your answer'}</span>}
+                        {isUser && !isCorrect && <span className="comp-result-option__mark">✗ {t.yourAnswer}</span>}
                       </div>
                     )
                   })}
@@ -340,7 +340,7 @@ export default function ReadingComprehensionScreen({ session }) {
 
           <div className="card comp-original-card">
             <div className="comp-original-label">
-              {t.originalText || 'Original text'}
+              {t.originalText}
             </div>
             <div className="comp-original-text">
               {exercise.text}
@@ -355,13 +355,13 @@ export default function ReadingComprehensionScreen({ session }) {
               onClick={() => startSession(level)}
               className="comp-try-again-btn"
             >
-              {t.tryAgain || 'Try again'}
+              {t.tryAgain}
             </button>
             <button
               onClick={() => setStage('selecting')}
               className="comp-change-level-btn"
             >
-              {t.changeLevel || 'Change level'}
+              {t.changeLevel}
             </button>
           </div>
 

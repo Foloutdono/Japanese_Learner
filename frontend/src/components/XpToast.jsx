@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLang } from '../LangContext'
 import { playXpGain, playLevelUp } from './sound'
 
 // ── XP toast ──────────────────────────────────────────────
@@ -167,6 +168,7 @@ function StageFootlights({ big, leaving, colorVar }) {
 }
 
 export function XpToast({ toast, onDone }) {
+  const { t } = useLang()
   // 'active' covers the whole entrance and hold — including, for a
   // level-up, the indefinite wait for the claim button, where there's
   // no timer running at all, just a person deciding when to click.
@@ -228,8 +230,8 @@ export function XpToast({ toast, onDone }) {
           <KumadoriBurst count={3} colorVar="--accent2" big />
           <div className="hanko-stamp" aria-hidden="true">印</div>
           <div className="level-up-banner__glyph" aria-hidden="true">昇</div>
-          <div className="level-up-banner__label">Niveau supérieur</div>
-          <div className="level-up-banner__level">Niveau {toast.newLevel}</div>
+          <div className="level-up-banner__label">{t.levelUp}</div>
+          <div className="level-up-banner__level">{t.level} {toast.newLevel}</div>
           <div className="level-up-banner__xp">+{toast.amount} XP</div>
           <div className={`level-up-claim-wrap${leaving ? ' level-up-claim-wrap--leaving' : ''}`}>
             <button
@@ -239,7 +241,7 @@ export function XpToast({ toast, onDone }) {
               disabled={leaving}
             >
               <span className="level-up-claim__glyph" aria-hidden="true">受</span>
-              Réclamer
+              {t.claimBtn}
             </button>
           </div>
         </div>

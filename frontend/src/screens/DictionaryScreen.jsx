@@ -332,25 +332,25 @@ export default function DictionaryScreen({ session }) {
 
 	return (
 		<div className="screen">
-			<TopBar onBack={() => navigate('/')} title={t.dictionaryTitle ?? 'Dictionnaire'} />
+			<TopBar onBack={() => navigate('/')} title={t.dictionaryTitle} />
 
 			<div className="container dict-page">
 
 				<div className="selector-header">
 					<div className="selector-header__eyebrow">索引 · Sakuin</div>
-					<h1 className="selector-header__title">{t.dictionaryTitle ?? 'Dictionnaire'}</h1>
+					<h1 className="selector-header__title">{t.dictionaryTitle}</h1>
 					<p className="selector-header__subtitle">
-						{t.dictionarySubtitle ?? 'Cherchez un kanji, un mot, ou parcourez par radical.'}
+						{t.dictionarySubtitle}
 					</p>
 				</div>
 
 				{/* Category tabs — primary navigation */}
 				<div className="dict-tab-row dict-tab-row--category">
 					{[
-						['kanji',    t.dictKanji    ?? 'Kanji'],
-						['vocab',    t.dictVocab    ?? 'Vocabulaire'],
-						['hiragana', t.dictHiragana ?? 'Hiragana'],
-						['katakana', t.dictKatakana ?? 'Katakana'],
+						['kanji',    t.dictKanji],
+						['vocab',    t.dictVocab],
+						['hiragana', t.dictHiragana],
+						['katakana', t.dictKatakana],
 					].map(([key, label]) => (
 						<button
 							key={key}
@@ -368,8 +368,8 @@ export default function DictionaryScreen({ session }) {
 				{category === 'kanji' && (
 					<div className="dict-tab-row dict-tab-row--submode">
 						{[
-							['search',  t.dictModeSearch  ?? 'Recherche'],
-							['radical', t.dictModeRadical ?? 'Par radical'],
+							['search',  t.dictModeSearch],
+							['radical', t.dictModeRadical],
 						].map(([key, label]) => (
 							<button
 								key={key}
@@ -393,15 +393,15 @@ export default function DictionaryScreen({ session }) {
 							onChange={onSearch}
 							placeholder={
 								mode === 'radical'
-									? (t.dictionaryPlaceholderRadical ?? 'Filtrer ces résultats...')
-									: (t.dictionaryPlaceholder ?? 'Rechercher kanji, kana, ou sens...')
+									? (t.dictionaryPlaceholderRadical)
+									: (t.dictionaryPlaceholder)
 							}
 							autoFocus={mode === 'search'}
 							className="dict-index-bar__input"
 						/>
 						{!loading && (
 							<div className="dict-index-bar__count">
-								{total} {t.dictionaryResults ?? 'résultats'}
+								{total} {t.dictionaryResults}
 							</div>
 						)}
 					</div>
@@ -414,7 +414,7 @@ export default function DictionaryScreen({ session }) {
 							onClick={backToRadicalGrid}
 							className="dict-radical-back-btn"
 						>
-							← {t.dictBackToRadicals ?? 'Radicaux'}
+							← {t.dictBackToRadicals}
 						</button>
 						<div className="dict-radical-char">
 							{radicalCharByNumber[selectedRadical] ?? '?'}
@@ -542,7 +542,7 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 	if (loading || !groups) {
 		return (
 			<div className="quiz-loading">
-				{t.loadingDictionary ?? 'Chargement...'}
+				{t.loadingDictionary}
 			</div>
 		)
 	}
@@ -552,7 +552,7 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 			{/* Thumb index — the stroke-count tabs found on the fore-edge of a
 			    printed 部首索引 (radical index), letting you jump straight to
 			    a stroke count instead of scrolling past every group. */}
-			<nav className="dict-stroke-rail" aria-label={t.dictStrokeIndex ?? 'Index par nombre de traits'}>
+			<nav className="dict-stroke-rail" aria-label={t.dictStrokeIndex}>
 				{groups.map(g => (
 					<a
 						key={g.stroke_count}
@@ -570,8 +570,8 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 					<div key={group.stroke_count} id={`stroke-sheet-${group.stroke_count}`} className="dict-radical-group">
 						<div className="dict-radical-group__label">
 							{group.stroke_count} {group.stroke_count > 1
-								? (t.dictStrokesPlural ?? 'traits')
-								: (t.dictStrokeSingular ?? 'trait')}
+								? (t.dictStrokesPlural)
+								: (t.dictStrokeSingular)}
 						</div>
 						<div className="dict-radical-group__rule" />
 						<div className="dict-radical-group__list">
@@ -666,13 +666,13 @@ function ResultsSection({
 		<>
 			{loading && (
 				<div className="quiz-loading">
-					{t.loadingDictionary ?? 'Chargement...'}
+					{t.loadingDictionary}
 				</div>
 			)}
 
 			{!loading && results.length === 0 && (
 				<div className="quiz-loading">
-					{t.noResults ?? `Aucun résultat pour « ${query} »`}
+					{t.noResults} « {query} »
 				</div>
 			)}
 
@@ -711,12 +711,12 @@ function ResultsSection({
 						<div ref={sentinelRef} className="dict-sentinel">
 							{loadingMore && (
 								<div className="dict-sentinel__text">
-									{t.loadingMore ?? 'Chargement...'}
+									{t.loadingMore}
 								</div>
 							)}
 							{!hasMore && results.length > 0 && (
 								<div className="dict-sentinel__text">
-									{t.displayedKanji ?? `${total} résultats affichés`}
+									{total} {t.displayedKanji}
 								</div>
 							)}
 						</div>
@@ -823,7 +823,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 	if (loading) {
 		return (
 			<div className="quiz-loading">
-				{t.loadingDictionary ?? 'Chargement...'}
+				{t.loadingDictionary}
 			</div>
 		)
 	}
@@ -834,7 +834,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 				<div className="syllabary-chart-group" style={{ '--syl-accent': accentColor }}>
 					<SyllabaryTable
 						rows={MAIN_ROWS}
-						title={t.syllabaryMain ?? 'Syllabes de base'}
+						title={t.syllabaryMain}
 						byGroup={byGroup}
 						selected={selected}
 						setSelected={setSelected}
@@ -843,7 +843,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 					{nSolo && (
 						<div className="syllabary-nsolo-wrap">
 							<div className="syllabary-table__title syllabary-table__title--center">
-								{t.syllabaryNSolo ?? 'Son isolé'}
+								{t.syllabaryNSolo}
 							</div>
 							<button
 								type="button"
@@ -858,7 +858,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 
 					<SyllabaryTable
 						rows={VOICED_ROWS}
-						title={t.syllabaryVoiced ?? 'Dakuten et handakuten'}
+						title={t.syllabaryVoiced}
 						byGroup={byGroup}
 						selected={selected}
 						setSelected={setSelected}
@@ -924,8 +924,8 @@ function DetailPanel({ entry, onClose, onRadicalClick, onKanjiClick }) {
 					<button
 						onClick={() => speakJapanese(entry.kana)}
 						className="dict-detail__speak-btn"
-						title={t.listen ?? 'Écouter'}
-						aria-label={t.listen ?? 'Écouter'}
+						title={t.listen}
+						aria-label={t.listen}
 					>
 						<SpeakIcon />
 					</button>
@@ -935,7 +935,7 @@ function DetailPanel({ entry, onClose, onRadicalClick, onKanjiClick }) {
 					<button
 						onClick={onClose}
 						className="dict-detail__close-x"
-						aria-label={t.close ?? 'Fermer'}
+						aria-label={t.close}
 					>
 						×
 					</button>
@@ -953,23 +953,23 @@ function DetailPanel({ entry, onClose, onRadicalClick, onKanjiClick }) {
 						<div className="dict-detail__readings">
 							<Readings
 								kana={entry.kana}
-								onLabel={t.onyomi ?? "Lectures on'yomi (sino-japonaises)"}
-								kunLabel={t.kunyomi ?? "Lectures kun'yomi (japonaises)"}
+								onLabel={t.onyomi}
+								kunLabel={t.kunyomi}
 							/>
 						</div>
 					)
 					: isKanaType(entry.type)
-					? <InfoRow label={t.romaji ?? 'Rōmaji'} value={entry.romaji} />
-					: <InfoRow label={t.reading ?? 'Lecture'} value={entry.kana} />
+					? <InfoRow label={t.romaji} value={entry.romaji} />
+					: <InfoRow label={t.reading} value={entry.kana} />
 				}
-				{meaning != null && <InfoRow label={t.meaning  ?? 'Sens'}    value={meaning} />}
-				<InfoRow label={t.level    ?? 'Niveau'}  value={entry.level} />
+				{meaning != null && <InfoRow label={t.meaning}    value={meaning} />}
+				<InfoRow label={t.level}  value={entry.level} />
 				{entry.stroke_count && (
-					<InfoRow label={t.strokes ?? 'Traits'} value={`${entry.stroke_count} ${t.strokes ?? 'traits'}`} />
+					<InfoRow label={t.strokes} value={`${entry.stroke_count} ${t.strokes}`} />
 				)}
 				{entry.type === 'kanji' && entry.radical != null && (
 					<InfoRow
-						label={t.radical ?? 'Radical'}
+						label={t.radical}
 						value={
 							<button
 								onClick={() => onRadicalClick?.(entry.radical)}
@@ -984,7 +984,7 @@ function DetailPanel({ entry, onClose, onRadicalClick, onKanjiClick }) {
 				{composingKanji.length > 0 && (
 					<div className="dict-detail__composing-kanji">
 						<div className="dict-detail__composing-kanji-label">
-							{t.composingKanji ?? 'Kanji utilisés'}
+							{t.composingKanji}
 						</div>
 						<div className="dict-detail__kanji-chips">
 							{composingKanji.map(char => (
@@ -1003,7 +1003,7 @@ function DetailPanel({ entry, onClose, onRadicalClick, onKanjiClick }) {
 				{(entry.type === 'kanji' || isKanaType(entry.type)) && entry.svg_url && (
 					<div className="dict-detail__stroke-section">
 						<div className="dict-detail__stroke-label">
-							{t.strokeOrder ?? 'ORDRE DES TRAITS'}
+							{t.strokeOrder}
 						</div>
 						<div className="dict-detail__stroke-frame">
 							{!strokeSvgFailed && (
@@ -1016,7 +1016,7 @@ function DetailPanel({ entry, onClose, onRadicalClick, onKanjiClick }) {
 							)}
 							{strokeSvgFailed && (
 								<div className="dict-detail__stroke-fallback" style={{ display: 'block' }}>
-									{t.notAvailable ?? 'Non disponible'}
+									{t.notAvailable}
 								</div>
 							)}
 						</div>
@@ -1027,7 +1027,7 @@ function DetailPanel({ entry, onClose, onRadicalClick, onKanjiClick }) {
 					onClick={onClose}
 					className="dict-detail__close-btn"
 				>
-					{t.close ?? 'Fermer'}
+					{t.close}
 				</button>
 			</div>
 		</>

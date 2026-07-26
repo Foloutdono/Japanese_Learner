@@ -15,9 +15,9 @@ export const GRAMMAR_MODE_KEYS = ['flashcard', 'mcq', 'fill']
 // Kana mode toggle (label only — used by ModeToggle).
 export function kanaModes(t) {
   return [
-    ['qcm',       t.modeQCM       ?? 'QCM'],
-    ['flashcard', t.modeFlashcard ?? 'Flashcard'],
-    ['write',     t.modeWrite     ?? 'Écriture'],
+    ['qcm',       t.modeQCM],
+    ['flashcard', t.modeFlashcard],
+    ['write',     t.modeWrite],
   ]
 }
 
@@ -27,9 +27,9 @@ export function kanaModes(t) {
 // depends on that exact shape (`Object.fromEntries(kanaModes(t))`).
 export function kanaModePicker(t) {
   return [
-    { key: 'qcm',       label: t.modeQCM       ?? 'QCM',       desc: t.modeQcmKanaDesc  ?? 'Choisissez la bonne romanisation' },
-    { key: 'flashcard', label: t.modeFlashcard ?? 'Flashcard', desc: t.modeFcKanaDesc   ?? 'Révélez la romanisation' },
-    { key: 'write',     label: t.modeWrite     ?? 'Écriture',  desc: t.modeWriteKanaDesc ?? 'Tapez la romanisation' },
+    { key: 'qcm',       label: t.modeQCM,       desc: t.modeQcmKanaDesc },
+    { key: 'flashcard', label: t.modeFlashcard, desc: t.modeFcKanaDesc },
+    { key: 'write',     label: t.modeWrite,  desc: t.modeWriteKanaDesc },
   ]
 }
 
@@ -42,17 +42,17 @@ export function kanaModePicker(t) {
 // so a real translation could only ever be right for one of them).
 export function vocabKanjiModes(t, noun) {
   return [
-    { key: 'qcm-kj-m',       label: t.modeQcmKjM ?? `QCM (${noun} → sens)`,   desc: t.modeQcmKjMDesc ?? `Le ${noun} est affiché, choisissez le sens` },
-    { key: 'qcm-m-kj',       label: t.modeQcmMKj ?? `QCM (sens → ${noun})`,   desc: t.modeQcmMKjDesc ?? `Le sens est affiché, choisissez le ${noun}` },
-    { key: 'flashcard-kj-m', label: t.modeFcKjM  ?? `Carte (${noun} → sens)`, desc: t.modeFcKjMDesc  ?? `Le ${noun} est affiché, révélez le sens` },
-    { key: 'flashcard-m-kj', label: t.modeFcMKj  ?? `Carte (sens → ${noun})`, desc: t.modeFcMKjDesc  ?? `Le sens est affiché, révélez le ${noun}` },
+    { key: 'qcm-kj-m',       label: t.modeQcmKjM,   desc: t.modeQcmKjMDesc },
+    { key: 'qcm-m-kj',       label: t.modeQcmMKj,   desc: t.modeQcmMKjDesc },
+    { key: 'flashcard-kj-m', label: t.modeFcKjM, desc: t.modeFcKjMDesc },
+    { key: 'flashcard-m-kj', label: t.modeFcMKj, desc: t.modeFcMKjDesc },
   ]
 }
 
 export function kanjiModes(t) {
   return [
-    ...vocabKanjiModes(t, t.kanjiNoun ?? 'kanji'),
-    { key: 'write', label: t.modeWrite ?? 'Écriture', desc: t.modeWriteDesc ?? 'Voir le sens, écrire le kanji' },
+    ...vocabKanjiModes(t, t.kanjiNoun),
+    { key: 'write', label: t.modeWrite, desc: t.modeWriteDesc },
   ]
 }
 
@@ -64,19 +64,21 @@ export function kanjiModes(t) {
 // description in any other language.
 export function grammarModePicker(t) {
   return [
-    { key: 'flashcard', label: t.modeFlashcard ?? 'Flashcard',    desc: t.modeFcGrammarDesc  ?? 'Voir le point de grammaire, révéler le sens' },
-    { key: 'mcq',       label: t.modeQCM       ?? 'QCM',          desc: t.modeQcmGrammarDesc ?? 'Choisissez le bon sens' },
-    { key: 'fill',      label: t.modeFill      ?? 'Texte à trous', desc: t.modeFillGrammarDesc ?? 'Complétez la phrase avec ce point de grammaire' },
+    { key: 'flashcard', label: t.modeFlashcard,    desc: t.modeFcGrammarDesc },
+    { key: 'mcq',       label: t.modeQCM,          desc: t.modeQcmGrammarDesc },
+    { key: 'fill',      label: t.modeFill, desc: t.modeFillGrammarDesc },
   ]
 }
 
 // Short [key, label] pairs for the compact Stats grid — same keys as
-// above, terser text to fit a small card.
-export function vocabKanjiStatsLabels(noun) {
+// above, terser text to fit a small card. Reuses modeQCM/modeFlashcard/
+// meaning rather than its own hardcoded strings, so this stops being
+// permanently French regardless of the active language.
+export function vocabKanjiStatsLabels(t, noun) {
   return [
-    ['qcm-kj-m',       'QCM →sens'],
-    ['qcm-m-kj',       `QCM →${noun}`],
-    ['flashcard-kj-m', 'Carte →sens'],
-    ['flashcard-m-kj', `Carte →${noun}`],
+    ['qcm-kj-m',       `${t.modeQCM} → ${t.meaning}`],
+    ['qcm-m-kj',       `${t.modeQCM} → ${noun}`],
+    ['flashcard-kj-m', `${t.modeFlashcard} → ${t.meaning}`],
+    ['flashcard-m-kj', `${t.modeFlashcard} → ${noun}`],
   ]
 }

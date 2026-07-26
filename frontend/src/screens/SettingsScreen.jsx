@@ -19,31 +19,31 @@ export default function SettingsScreen() {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title={t.settings ?? 'Paramètres'} />
+      <TopBar onBack={() => navigate('/')} title={t.settings} />
 
       <div className="container settings-container">
-        <SectionHeader title={t.preferences ?? 'Préférences'} />
+        <SectionHeader title={t.preferences} />
         <div className="card settings-card">
           <div className="settings-row">
-            <span className="settings-row__label">{t.sound ?? 'Son'}</span>
+            <span className="settings-row__label">{t.sound}</span>
             <MuteButton />
           </div>
           <div className="settings-row">
-            <span className="settings-row__label">{t.theme ?? 'Thème'}</span>
+            <span className="settings-row__label">{t.theme}</span>
             <ThemeToggle />
           </div>
           <div className="settings-row">
-            <span className="settings-row__label">{t.language ?? 'Langue'}</span>
+            <span className="settings-row__label">{t.language}</span>
             <LangSwitcher />
           </div>
         </div>
 
-        <SectionHeader title={t.account ?? 'Compte'} />
+        <SectionHeader title={t.account} />
         <div className="card settings-card">
           <div className="settings-row">
-            <span className="settings-row__label">{t.signOutDesc ?? 'Se déconnecter de cet appareil'}</span>
+            <span className="settings-row__label">{t.signOutDesc}</span>
             <button type="button" className="btn-ghost settings-signout" onClick={() => supabase.auth.signOut()}>
-              {t.signOut ?? 'Déconnexion'}
+              {t.signOut}
             </button>
           </div>
         </div>

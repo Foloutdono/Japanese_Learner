@@ -1,3 +1,5 @@
+import { useLang } from '../LangContext'
+
 // ── Permanent stage seal ──────────────────────────────────
 // A small hanko sitting in the corner of every quiz card, always
 // there rather than a one-off celebration — the seal a card has
@@ -16,9 +18,14 @@
 // permanently in place instead of just flashing past once at the
 // moment of promotion.
 const STAGE_GLYPH = { new: '新', learning: '習', mastered: '極' }
-const STAGE_LABEL = { new: 'À apprendre', learning: 'En cours', mastered: 'Maîtrisé' }
 
 export function StageBadge({ stage }) {
+  const { t } = useLang()
+  // Reuses the same new/learning/mastered keys StatsScreen already
+  // reads off — this label used to be a hardcoded French-only dict
+  // that never changed with the app's language.
+  const STAGE_LABEL = { new: t.new, learning: t.learning, mastered: t.mastered }
+
   if (!stage || !STAGE_GLYPH[stage]) return null
   return (
     <div

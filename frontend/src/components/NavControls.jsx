@@ -25,7 +25,7 @@ export function MuteButton() {
     <button
       onClick={toggleMute}
       className="btn-nav btn-nav--icon"
-      title={muted ? (t.unmute ?? 'Activer le son') : (t.mute ?? 'Couper le son')}
+      title={muted ? (t.unmute) : (t.mute)}
     >
       {muted ? '🔇' : '🔊'}
     </button>
@@ -51,7 +51,7 @@ export function ThemeToggle() {
     <button
       onClick={() => setTheme(th => (th === 'dark' ? 'light' : 'dark'))}
       className="btn-nav btn-nav--icon"
-      title={isDark ? (t.lightMode ?? 'Mode clair') : (t.darkMode ?? 'Mode sombre')}
+      title={isDark ? (t.lightMode) : (t.darkMode)}
     >
       {isDark ? '☀' : '☾'}
     </button>

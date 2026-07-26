@@ -11,8 +11,8 @@ export default function DecksScreen({ session }) {
 
   const DECK_TYPES = [
     { value: 'flashcard', label: t.flashcardType, desc: t.flashcardDesc, color: '#6c5ce7' },
-    { value: 'vocab',     label: t.vocabType,     desc: t.vocabDesc,     color: '#4cc9f0' },
-    { value: 'kanji',     label: t.kanjiType,     desc: t.kanjiDesc,     color: '#e94560' },
+    { value: 'vocab',     label: t.vocabType,     desc: t.deckVocabDesc, color: '#4cc9f0' },
+    { value: 'kanji',     label: t.kanjiType,     desc: t.deckKanjiDesc, color: '#e94560' },
   ]
 
   const typeColor = type => DECK_TYPES.find(d => d.value === type)?.color ?? '#6c5ce7'
