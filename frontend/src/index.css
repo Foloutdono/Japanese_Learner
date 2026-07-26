@@ -3767,6 +3767,30 @@ input:focus { border-color: var(--accent2); }
 
 .dict-tab-row--category .dict-tab-btn { font-size: 11px; padding: 8px 12px 10px; }
 
+/* Search/radical sub-toggle, nested under the kanji tab only — pill
+   buttons rather than underline tabs, so it visually reads as a
+   secondary control refining the active category, not another peer
+   of the main Kanji/Vocabulaire/Hiragana/Katakana row above it. */
+.dict-tab-row--submode {
+  display: flex;
+  gap: 8px;
+  border-bottom: none;
+  margin-bottom: 20px;
+}
+.dict-tab-row--submode .dict-tab-btn {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  padding: 6px 14px;
+  letter-spacing: 0.08em;
+}
+.dict-tab-row--submode .dict-tab-btn::after { display: none; }
+.dict-tab-row--submode .dict-tab-btn--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-panel);
+}
+
 /* ── Search / index bar ───────────────────────────────────
    One bordered slot (icon + field + count) instead of a floating
    input beside a stray count — reads as a single catalog control. */
@@ -4033,24 +4057,38 @@ input:focus { border-color: var(--accent2); }
 /* ── Syllabary chart (hiragana/katakana) ──────────────────
    Classic gojūon table — same flush shoji-lattice language as the
    results grid and radical picker (thin --border gap lines between
-   --bg-card cells) rather than a bordered spreadsheet-style table. */
-.syllabary-table-wrap { margin-bottom: 20px; }
+   cells) but tied to the active category's own colour (--syl-accent,
+   set by SyllabaryGrid from TYPE_META) via a top border and a tinted
+   header row, the same way .dict-panel ties its accent into its own
+   top edge — so hiragana and katakana read as distinctly themed
+   sheets rather than one generic grey grid with a label on top. */
+.syllabary-chart-group {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.syllabary-table-wrap { display: flex; flex-direction: column; gap: 10px; }
 
 .syllabary-table__title {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin: 24px 0 10px;
+  padding-left: 2px;
 }
+.syllabary-table__title--center { text-align: center; padding-left: 0; }
 
 .syllabary-table {
   display: grid;
   grid-template-columns: 40px repeat(5, minmax(44px, 1fr));
   gap: 2px;
   background: var(--border);
-  border: 3px solid var(--border);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--syl-accent, var(--accent));
+  border-radius: 10px;
+  overflow: hidden;
   /* Falls back to horizontal scroll rather than crushing cells past
      readability on very narrow screens, even though the minmax()
      widths above already keep this comfortably under ~360px. */
@@ -4065,10 +4103,13 @@ input:focus { border-color: var(--accent2); }
   min-height: 56px;
 }
 
-.syllabary-cell--corner { background: var(--bg-card); }
+.syllabary-cell--corner {
+  background: color-mix(in srgb, var(--syl-accent, var(--accent)) 16%, var(--bg-card));
+}
 
 .syllabary-cell--col-header,
 .syllabary-cell--row-header {
+  background: color-mix(in srgb, var(--syl-accent, var(--accent)) 16%, var(--bg-card));
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 700;
@@ -4076,21 +4117,31 @@ input:focus { border-color: var(--accent2); }
   letter-spacing: 0.03em;
 }
 
-.syllabary-cell--empty {
-  background: var(--bg-card);
-  opacity: 0.35;
+/* A faint centred dash rather than a dimmed blank tile — reads as
+   "this sound doesn't exist" (no yi/ye/wi/wu/we) at a glance, instead
+   of looking like a cell that failed to load. */
+.syllabary-cell--empty { position: relative; }
+.syllabary-cell--empty::after {
+  content: '–';
+  color: var(--text-secondary);
+  opacity: 0.3;
+  font-size: 14px;
 }
 
 .syllabary-cell--kana {
   flex-direction: column;
   gap: 2px;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
   padding: 8px 4px;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 .syllabary-cell--kana:hover { background: var(--bg-card-hover); }
-.syllabary-cell--kana.syllabary-cell--selected { background: var(--overlay-hover); }
+.syllabary-cell--kana:active { transform: scale(0.95); }
+.syllabary-cell--kana.syllabary-cell--selected {
+  background: color-mix(in srgb, var(--syl-accent, var(--accent)) 22%, var(--bg-card-hover));
+}
 
 .syllabary-cell__char {
   font-family: var(--font-jp);
@@ -4107,16 +4158,22 @@ input:focus { border-color: var(--accent2); }
 
 .syllabary-nsolo-wrap {
   display: flex;
-  justify-content: center;
-  margin: 4px 0 8px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 .syllabary-nsolo-wrap .syllabary-cell--kana {
   background: var(--bg-card);
-  border: 3px solid var(--border);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--syl-accent, var(--accent));
+  border-radius: 10px;
   min-width: 96px;
+  padding: 10px 20px;
 }
 .syllabary-nsolo-wrap .syllabary-cell--kana:hover { background: var(--bg-card-hover); }
-.syllabary-nsolo-wrap .syllabary-cell--kana.syllabary-cell--selected { background: var(--overlay-hover); }
+.syllabary-nsolo-wrap .syllabary-cell--kana.syllabary-cell--selected {
+  background: color-mix(in srgb, var(--syl-accent, var(--accent)) 22%, var(--bg-card-hover));
+}
 
 /* Smaller screens: tighter cells, smaller glyph — keeps all 6 columns
    (row-label + 5 vowels) inside a ~360px viewport without triggering
@@ -4204,6 +4261,26 @@ input:focus { border-color: var(--accent2); }
 .dict-detail__speak-btn:hover { transform: rotate(0deg) scale(1.06); }
 .dict-detail__speak-icon { width: 18px; height: 18px; }
 
+.dict-detail__stage-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+/* Only shown once the fullscreen mobile sheet kicks in (see the
+   @media block below) — the desktop side panel already sits next to
+   the results grid and closes just as easily by clicking elsewhere,
+   so it doesn't need its own dismiss button up top. */
+.dict-detail__close-x {
+  display: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-on-panel);
+  font-size: 20px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+}
+
 .dict-detail__body { padding: 20px 24px 24px; }
 .dict-detail__badges { display: flex; gap: 12px; margin-bottom: 4px; }
 .dict-detail__readings { padding: 8px 0; border-bottom: 1px solid var(--border); }
@@ -4214,6 +4291,31 @@ input:focus { border-color: var(--accent2); }
   font-size: 14px;
   text-decoration: underline;
 }
+
+.dict-detail__composing-kanji { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.dict-detail__composing-kanji-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.dict-detail__kanji-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.dict-detail__kanji-chip {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 8px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent4);
+  color: var(--text-primary);
+  font-family: var(--font-jp);
+  font-size: 20px;
+  transition: background 0.15s ease;
+}
+.dict-detail__kanji-chip:hover { background: var(--bg-card-hover); }
 .dict-detail__stroke-section { margin-top: 20px; }
 .dict-detail__stroke-label {
   font-size: 11px;
@@ -5064,6 +5166,39 @@ input:focus { border-color: var(--accent2); }
 
   .dict-panel {
     display: none;
+  }
+
+  /* Detail view takes the full screen on mobile instead of a centered
+     dialog card — there's rarely room to show it alongside the grid
+     it came from, so it may as well use the whole viewport rather
+     than float a smaller box over it. Safe-area insets keep the
+     stage and the "Fermer" button clear of the notch/gesture bar
+     (see viewport-fit=cover in index.html). */
+  .dict-modal-overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+  .dict-modal-content {
+    max-width: none;
+    max-height: none;
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: visible;
+  }
+  .dict-detail__stage {
+    padding-top: calc(30px + env(safe-area-inset-top, 0px));
+    flex-shrink: 0;
+  }
+  .dict-detail__body {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  .dict-detail__close-x {
+    display: flex;
   }
 
   .dict-stroke-rail {

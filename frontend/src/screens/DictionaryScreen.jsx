@@ -176,7 +176,7 @@ export default function DictionaryScreen({ session }) {
 		return () => window.removeEventListener('resize', handler)
 	}, [])
 
-	function fetchPage(p, q, cat, rad) {
+	function fetchPage(p, q, cat, rad, autoSelectChar) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
 
@@ -190,13 +190,22 @@ export default function DictionaryScreen({ session }) {
 		apiFetch(`/api/dictionary?${params.toString()}`, session)
 			.then(r => r.json())
 			.then(data => {
-				if (p === 0) setResults(data.results || [])
-				else setResults(prev => [...prev, ...(data.results || [])])
+				const newResults = data.results || []
+				if (p === 0) setResults(newResults)
+				else setResults(prev => [...prev, ...newResults])
 				setTotal(data.total)
 				setHasMore(data.has_more)
 				setPage(p)
 				setLoading(false)
 				setLoadingMore(false)
+				// Jumping to a specific kanji (see jumpToKanji) needs its
+				// detail panel to open automatically once the search
+				// this triggers actually resolves — there's no other
+				// moment to select it from.
+				if (autoSelectChar) {
+					const match = newResults.find(e => e.kanji === autoSelectChar)
+					if (match) setSelected(match)
+				}
 			})
 	}
 
@@ -236,6 +245,13 @@ export default function DictionaryScreen({ session }) {
 		// handful of cells with no visible input to explain why.
 		const isSyl = cat === 'hiragana' || cat === 'katakana'
 		if (isSyl) setQuery('')
+		// Radical browsing only exists under the kanji tab now (see the
+		// sub-toggle below) — leaving it behind a stale mode === 'radical'
+		// would otherwise show an empty radical grid under vocab/kana.
+		if (cat !== 'kanji' && mode === 'radical') {
+			setMode('search')
+			setSelectedRadical(null)
+		}
 		fetchPage(0, isSyl ? '' : query, cat, null)
 	}
 
@@ -277,6 +293,7 @@ export default function DictionaryScreen({ session }) {
 	// Jump straight to a radical's results from the detail panel, even if
 	// the picker grid itself was never opened this session.
 	function jumpToRadical(number) {
+		setCategory('kanji')
 		setMode('radical')
 		setSelectedRadical(number)
 		setSelected(null)
@@ -284,6 +301,22 @@ export default function DictionaryScreen({ session }) {
 		setPage(0)
 		setHasMore(true)
 		fetchPage(0, '', 'kanji', number)
+	}
+
+	// Jump from a vocab word's detail panel to one of the kanji it's
+	// made of — switches to the kanji tab, searches for that exact
+	// character, and auto-selects it once the search resolves (see
+	// fetchPage's autoSelectChar) so its own detail panel opens right
+	// away instead of leaving the user to pick it out of a result list.
+	function jumpToKanji(char) {
+		setCategory('kanji')
+		setMode('search')
+		setSelectedRadical(null)
+		setSelected(null)
+		setQuery(char)
+		setPage(0)
+		setHasMore(true)
+		fetchPage(0, char, 'kanji', null, char)
 	}
 
 	function loadMore() {
@@ -311,21 +344,43 @@ export default function DictionaryScreen({ session }) {
 					</p>
 				</div>
 
-				{/* Mode tabs */}
-				<div className="dict-tab-row">
+				{/* Category tabs — primary navigation */}
+				<div className="dict-tab-row dict-tab-row--category">
 					{[
-						['search',  t.dictModeSearch  ?? 'Recherche'],
-						['radical', t.dictModeRadical ?? 'Par radical'],
+						['kanji',    t.dictKanji    ?? 'Kanji'],
+						['vocab',    t.dictVocab    ?? 'Vocabulaire'],
+						['hiragana', t.dictHiragana ?? 'Hiragana'],
+						['katakana', t.dictKatakana ?? 'Katakana'],
 					].map(([key, label]) => (
 						<button
 							key={key}
-							onClick={() => key === 'radical' ? switchToRadicalMode() : switchToSearchMode()}
-							className={`dict-tab-btn${mode === key ? ' dict-tab-btn--active' : ''}`}
+							onClick={() => switchCategory(key)}
+							className={`dict-tab-btn${category === key ? ' dict-tab-btn--active' : ''}`}
 						>
 							{label}
 						</button>
 					))}
 				</div>
+
+				{/* Search / radical sub-toggle — radical browsing only makes
+				    sense for kanji (a word can span several, and kana have
+				    no radical at all), so it only appears under that tab. */}
+				{category === 'kanji' && (
+					<div className="dict-tab-row dict-tab-row--submode">
+						{[
+							['search',  t.dictModeSearch  ?? 'Recherche'],
+							['radical', t.dictModeRadical ?? 'Par radical'],
+						].map(([key, label]) => (
+							<button
+								key={key}
+								onClick={() => key === 'radical' ? switchToRadicalMode() : switchToSearchMode()}
+								className={`dict-tab-btn dict-tab-btn--sub${mode === key ? ' dict-tab-btn--active' : ''}`}
+							>
+								{label}
+							</button>
+						))}
+					</div>
+				)}
 
 				{/* Search bar + count — hidden while browsing the plain radical grid,
 				    shown again once a radical is picked (to narrow further), and hidden
@@ -349,26 +404,6 @@ export default function DictionaryScreen({ session }) {
 								{total} {t.dictionaryResults ?? 'résultats'}
 							</div>
 						)}
-					</div>
-				)}
-
-				{/* Category filter — only meaningful in plain search mode */}
-				{mode === 'search' && (
-					<div className="dict-tab-row dict-tab-row--category">
-						{[
-							['kanji',    t.dictKanji    ?? 'Kanji'],
-							['vocab',    t.dictVocab    ?? 'Vocabulaire'],
-							['hiragana', t.dictHiragana ?? 'Hiragana'],
-							['katakana', t.dictKatakana ?? 'Katakana'],
-						].map(([key, label]) => (
-							<button
-								key={key}
-								onClick={() => switchCategory(key)}
-								className={`dict-tab-btn${category === key ? ' dict-tab-btn--active' : ''}`}
-							>
-								{label}
-							</button>
-						))}
 					</div>
 				)}
 
@@ -410,6 +445,8 @@ export default function DictionaryScreen({ session }) {
 							setSelected={setSelected}
 							isMobile={isMobile}
 							onRadicalClick={jumpToRadical}
+							onKanjiClick={jumpToKanji}
+							accentColor={TYPE_META[category]?.color}
 							t={t}
 						/>
 					) : (
@@ -425,6 +462,7 @@ export default function DictionaryScreen({ session }) {
 							isMobile={isMobile}
 							sentinelRef={sentinelRef}
 							onRadicalClick={jumpToRadical}
+							onKanjiClick={jumpToKanji}
 							t={t}
 						/>
 					)
@@ -620,7 +658,7 @@ function ResultsFiller({ count, cols, glyph }) {
 
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
-	selected, setSelected, isMobile, sentinelRef, onRadicalClick, t,
+	selected, setSelected, isMobile, sentinelRef, onRadicalClick, onKanjiClick, t,
 }) {
 	const [resultsGridRef, cols] = useResultsColumns()
 
@@ -687,7 +725,7 @@ function ResultsSection({
 					{/* Desktop side panel — hidden on mobile via CSS */}
 					{selected && (
 						<div className="dict-panel">
-							<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} />
+							<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
 						</div>
 					)}
 				</div>
@@ -703,7 +741,7 @@ function ResultsSection({
 						onClick={e => e.stopPropagation()}
 						className="dict-modal-content"
 					>
-						<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} />
+						<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
 					</div>
 				</div>
 			)}
@@ -773,7 +811,7 @@ function SyllabaryTable({ rows, title, byGroup, selected, setSelected }) {
 	)
 }
 
-function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRadicalClick, t }) {
+function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRadicalClick, onKanjiClick, accentColor, t }) {
 	const byGroup = useMemo(() => {
 		const map = {}
 		results.forEach(e => { (map[e.group] ??= []).push(e) })
@@ -793,34 +831,45 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 	return (
 		<div className="dict-layout">
 			<div className="dict-results-wrap">
-				<SyllabaryTable rows={MAIN_ROWS} byGroup={byGroup} selected={selected} setSelected={setSelected} />
+				<div className="syllabary-chart-group" style={{ '--syl-accent': accentColor }}>
+					<SyllabaryTable
+						rows={MAIN_ROWS}
+						title={t.syllabaryMain ?? 'Syllabes de base'}
+						byGroup={byGroup}
+						selected={selected}
+						setSelected={setSelected}
+					/>
 
-				{nSolo && (
-					<div className="syllabary-nsolo-wrap">
-						<button
-							type="button"
-							onClick={() => setSelected(nSolo)}
-							className={`syllabary-cell syllabary-cell--kana syllabary-cell--nsolo${selected && entryKey(selected) === entryKey(nSolo) ? ' syllabary-cell--selected' : ''}`}
-						>
-							<span className="syllabary-cell__char">{nSolo.kana}</span>
-							<span className="syllabary-cell__romaji">{nSolo.romaji}</span>
-						</button>
-					</div>
-				)}
+					{nSolo && (
+						<div className="syllabary-nsolo-wrap">
+							<div className="syllabary-table__title syllabary-table__title--center">
+								{t.syllabaryNSolo ?? 'Son isolé'}
+							</div>
+							<button
+								type="button"
+								onClick={() => setSelected(nSolo)}
+								className={`syllabary-cell syllabary-cell--kana syllabary-cell--nsolo${selected && entryKey(selected) === entryKey(nSolo) ? ' syllabary-cell--selected' : ''}`}
+							>
+								<span className="syllabary-cell__char">{nSolo.kana}</span>
+								<span className="syllabary-cell__romaji">{nSolo.romaji}</span>
+							</button>
+						</div>
+					)}
 
-				<SyllabaryTable
-					rows={VOICED_ROWS}
-					title={t.syllabaryVoiced ?? 'Dakuten et handakuten'}
-					byGroup={byGroup}
-					selected={selected}
-					setSelected={setSelected}
-				/>
+					<SyllabaryTable
+						rows={VOICED_ROWS}
+						title={t.syllabaryVoiced ?? 'Dakuten et handakuten'}
+						byGroup={byGroup}
+						selected={selected}
+						setSelected={setSelected}
+					/>
+				</div>
 			</div>
 
 			{/* Desktop side panel — hidden on mobile via CSS, same as ResultsSection */}
 			{selected && (
 				<div className="dict-panel">
-					<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} />
+					<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
 				</div>
 			)}
 
@@ -828,7 +877,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 			{selected && isMobile && (
 				<div onClick={() => setSelected(null)} className="dict-modal-overlay">
 					<div onClick={e => e.stopPropagation()} className="dict-modal-content">
-						<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} />
+						<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
 					</div>
 				</div>
 			)}
@@ -838,7 +887,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 
 // ── Detail panel ──────────────────────────────────────────
 
-function DetailPanel({ entry, onClose, onRadicalClick }) {
+function DetailPanel({ entry, onClose, onRadicalClick, onKanjiClick }) {
 	const { t, lang, contentMaps } = useLang()
 	const map = entry.type === 'vocab' ? contentMaps?.vocab
 		: entry.type === 'kanji' ? contentMaps?.kanji
@@ -852,6 +901,16 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 			? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
 			: entry.meaning
 
+	// Every kanji character used in this vocab word, deduplicated and in
+	// reading order — each becomes a link that jumps to that kanji's own
+	// dictionary entry (see jumpToKanji). Matches CJK Unified Ideographs;
+	// a kana-only word (entry.kanji empty) simply yields none.
+	const composingKanji = useMemo(() => {
+		if (entry.type !== 'vocab' || !entry.kanji) return []
+		const chars = entry.kanji.match(/[\u4e00-\u9faf]/g) || []
+		return [...new Set(chars)]
+	}, [entry.type, entry.kanji])
+
 	const [strokeSvgFailed, setStrokeSvgFailed] = useState(false)
 	useEffect(() => { setStrokeSvgFailed(false) }, [entry.svg_url])
 
@@ -861,14 +920,26 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 				<div className="dict-detail__char">
 					{entry.kanji || entry.kana}
 				</div>
-				<button
-					onClick={() => speakJapanese(entry.kana)}
-					className="dict-detail__speak-btn"
-					title={t.listen ?? 'Écouter'}
-					aria-label={t.listen ?? 'Écouter'}
-				>
-					<SpeakIcon />
-				</button>
+				<div className="dict-detail__stage-actions">
+					<button
+						onClick={() => speakJapanese(entry.kana)}
+						className="dict-detail__speak-btn"
+						title={t.listen ?? 'Écouter'}
+						aria-label={t.listen ?? 'Écouter'}
+					>
+						<SpeakIcon />
+					</button>
+					{/* Mobile-only (see index.css) — the fullscreen sheet needs
+					    an immediate way to dismiss without scrolling all the
+					    way down to the "Fermer" button. */}
+					<button
+						onClick={onClose}
+						className="dict-detail__close-x"
+						aria-label={t.close ?? 'Fermer'}
+					>
+						×
+					</button>
+				</div>
 			</div>
 
 			<div className="dict-detail__body">
@@ -908,6 +979,25 @@ function DetailPanel({ entry, onClose, onRadicalClick }) {
 							</button>
 						}
 					/>
+				)}
+
+				{composingKanji.length > 0 && (
+					<div className="dict-detail__composing-kanji">
+						<div className="dict-detail__composing-kanji-label">
+							{t.composingKanji ?? 'Kanji utilisés'}
+						</div>
+						<div className="dict-detail__kanji-chips">
+							{composingKanji.map(char => (
+								<button
+									key={char}
+									onClick={() => onKanjiClick?.(char)}
+									className="dict-detail__kanji-chip"
+								>
+									{char}
+								</button>
+							))}
+						</div>
+					</div>
 				)}
 
 				{(entry.type === 'kanji' || isKanaType(entry.type)) && entry.svg_url && (
