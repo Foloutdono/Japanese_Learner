@@ -13,6 +13,34 @@ const auth = {
   signOut:           'Sign Out',
 }
 
+// ── Landing screen ────────────────────────────────────────
+// Shown to signed-out visitors before AuthScreen. landingCta is
+// reused for both the hero button and the closing footer button
+// rather than duplicated under a second key.
+const landing = {
+  landingSignIn:         'Sign in',
+  landingTagline:        'A complete, self-paced toolkit for learning Japanese — spaced repetition (SM-2), kana to kanji, grammar, and real reading practice, all in one place.',
+  landingCta:            'Get started',
+  landingFeaturesTitle:  'Everything in one place',
+  landingFeaturesIntro:  'Kana, vocabulary, kanji, grammar, reading, and more — one app instead of five separate tools.',
+  landingWhyTitle:       'Why it works',
+  landingPro1Title:      'A path, not a pile',
+  landingPro1Desc:       'Kana, vocabulary, kanji, grammar, and reading are each organized from N5 to N1, so you always know what comes next.',
+  landingPro2Title:      'Spaced repetition (SM-2)',
+  landingPro2Desc:       "Every card is scheduled with the SM-2 algorithm, so you review things right before you'd forget them, not on a fixed calendar.",
+  landingPro3Title:      'Streaks and stats',
+  landingPro3Desc:       'A daily streak and a full stats page — new, in progress, mastered, due now, and your weakest items — show exactly where you stand.',
+  landingPro4Title:      'Reading you can actually do',
+  landingPro4Desc:       "A dictionary and a phrase analyzer sit right next to the reading and reading-comprehension exercises, so nothing you don't understand is a dead end.",
+  landingPro5Title:      'Your own decks, too',
+  landingPro5Desc:       'Build custom flashcard, vocabulary, or kanji decks, import cards straight from a spreadsheet, and mix them with the built-in JLPT content.',
+  landingTechTitle:      'Built with',
+  landingCreatorTitle:   'Who made this, and why',
+  landingCreatorBody:    "This app started as a personal tool for going from zero Japanese to reading real text, without juggling five different apps for kana, vocabulary, kanji, grammar, and reading practice. It's built and maintained by a solo developer, and every feature here is something used daily while learning Japanese.",
+  landingCreatorName:    '— Built and maintained solo.',
+  landingFooterCta:      'Ready to start?',
+}
+
 // ── Navigation ────────────────────────────────────────────
 const nav = {
   menu:              'Menu',
@@ -319,6 +347,7 @@ const decks = {
 
 export default {
   ...auth,
+  ...landing,
   ...nav,
   ...home,
   ...quiz,
