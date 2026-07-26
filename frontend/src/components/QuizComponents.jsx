@@ -151,9 +151,9 @@ export function TypeInput({
 export function ModeToggle({ mode, onChange, modes }) {
   const { t } = useLang()
   const defaultModes = [
-    ['qcm', t.modeQCM ?? 'QCM'],
-    ['flashcard', t.modeFlashcard ?? 'Flashcard'],
-    ['write', t.modeWrite ?? 'Écriture'],
+    ['qcm', t.modeQCM],
+    ['flashcard', t.modeFlashcard],
+    ['write', t.modeWrite],
   ]
 
   return (
@@ -212,9 +212,9 @@ export function DeckProgress({ stats }) {
   const { total, new: toLearn, learning, mastered } = stats
 
   const segments = [
-    { key: 'new',      value: toLearn,  color: 'var(--state-new)',      label: t.progressNew      ?? 'À apprendre' },
-    { key: 'learning', value: learning, color: 'var(--state-learning)', label: t.progressLearning ?? 'En cours' },
-    { key: 'mastered', value: mastered, color: 'var(--state-mastered)', label: t.progressMastered ?? 'Maîtrisé' },
+    { key: 'new',      value: toLearn,  color: 'var(--state-new)',      label: t.progressNew },
+    { key: 'learning', value: learning, color: 'var(--state-learning)', label: t.progressLearning },
+    { key: 'mastered', value: mastered, color: 'var(--state-mastered)', label: t.progressMastered },
   ]
 
   return (
@@ -386,8 +386,8 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
           <div className="inline-reveal__panel-inner">
             <Readings
               kana={kana}
-              onLabel={t?.onyomi ?? "On'yomi"}
-              kunLabel={t?.kunyomi ?? "Kun'yomi"}
+              onLabel={t.onyomi}
+              kunLabel={t.kunyomi}
               size={25}
               center
               isLarge={isLarge}
@@ -458,8 +458,8 @@ export function Flashcard({ front, back, onReveal, t, resetKey }) {
       {showBack ? back : front}
       <div className="flashcard__hint">
         {revealed
-          ? (t?.tapToFlip ?? 'Touchez pour retourner')
-          : (t?.tapToReveal ?? 'Touchez pour révéler')}
+          ? (t.tapToFlip)
+          : (t.tapToReveal)}
       </div>
     </div>
   )
@@ -470,10 +470,10 @@ export function QuestionTypeBadge({ type }) {
   const { t } = useLang()
 
   const TYPES = {
-    comprehension: { label: t.questionTypeComprehension ?? 'Comprehension', variant: 'comprehension' },
-    vocabulary:    { label: t.questionTypeVocabulary ?? 'Vocabulary',       variant: 'vocabulary' },
-    grammar:       { label: t.questionTypeGrammar ?? 'Grammar',             variant: 'grammar' },
-    inference:     { label: t.questionTypeInference ?? 'Inference',         variant: 'inference' },
+    comprehension: { label: t.questionTypeComprehension, variant: 'comprehension' },
+    vocabulary:    { label: t.questionTypeVocabulary,       variant: 'vocabulary' },
+    grammar:       { label: t.questionTypeGrammar,             variant: 'grammar' },
+    inference:     { label: t.questionTypeInference,         variant: 'inference' },
   }
 
   const { label, variant } = TYPES[type] ?? { label: type, variant: 'default' }

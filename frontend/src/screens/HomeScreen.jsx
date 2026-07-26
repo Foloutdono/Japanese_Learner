@@ -20,7 +20,7 @@ function HomeProfileBadge() {
     return (
       <button type="button" onClick={() => navigate('/profile')} className="home-profile-badge home-profile-badge--fallback">
         <span className="home-profile-badge__fallback-glyph" aria-hidden="true">顔</span>
-        <span>{t.profileTitle ?? 'Profil'}</span>
+        <span>{t.profileTitle}</span>
       </button>
     )
   }
@@ -55,7 +55,7 @@ function HomeProfileBadge() {
       </span>
 
       {summary.streak > 0 && (
-        <span className="home-profile-badge__streak" title={t.streak ?? 'Série'}>
+        <span className="home-profile-badge__streak" title={t.streak}>
           <span aria-hidden="true">🔥</span> {summary.streak}
         </span>
       )}
@@ -81,8 +81,8 @@ export default function HomeScreen() {
             type="button"
             onClick={() => navigate('/settings')}
             className="btn-nav btn-nav--icon home-settings-btn"
-            title={t.settings ?? 'Paramètres'}
-            aria-label={t.settings ?? 'Paramètres'}
+            title={t.settings}
+            aria-label={t.settings}
           >
             ⚙
           </button>

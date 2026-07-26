@@ -2972,7 +2972,7 @@ input:focus { border-color: var(--accent2); }
 
 .auth-submit {
   background: var(--accent);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   width: 100%;
   margin-top: 20px;
   font-size: 15px;
@@ -3131,7 +3131,7 @@ input:focus { border-color: var(--accent2); }
 
 .drawing-quiz__validate {
   background: var(--accent);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   width: 100%;
   max-width: 600px;
   margin: 20px auto 0;

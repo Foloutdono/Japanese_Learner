@@ -63,7 +63,7 @@ export default function StatsScreen({ session }) {
       {stats && (
         <div className="container stats-container">
 
-          <SectionHeader title={t.overview || 'Overview'} />
+          <SectionHeader title={t.overview} />
           <OverviewRow stats={stats} extra={extra} t={t} />
 
           {extra?.forecast?.length > 0 && (
@@ -95,7 +95,7 @@ export default function StatsScreen({ session }) {
             {Object.entries(stats.vocab).map(([level, phases]) => (
               <div key={level} className="card">
                 <LevelHeader level={level} phases={phases} t={t} />
-                {vocabKanjiStatsLabels(t.wordNoun ?? 'mot').map(([key, label]) => (
+                {vocabKanjiStatsLabels(t, t.wordNoun).map(([key, label]) => (
                   <div key={key} className="stats-stat-block">
                     <div className="stats-stat-label">{label}</div>
                     <StatCell s={phases[key]} t={t} onStartReview={() => startReview('vocab', level, key)} />
@@ -111,7 +111,7 @@ export default function StatsScreen({ session }) {
             {Object.entries(stats.kanji).map(([level, phases]) => (
               <div key={level} className="card">
                 <LevelHeader level={level} phases={phases} t={t} />
-                {[...vocabKanjiStatsLabels(t.kanjiNoun ?? 'kanji'), ['write', 'Écriture']].map(([key, label]) => (
+                {[...vocabKanjiStatsLabels(t, t.kanjiNoun), ['write', t.modeWrite]].map(([key, label]) => (
                   phases[key] && (
                     <div key={key} className="stats-stat-block">
                       <div className="stats-stat-label">{label}</div>
@@ -189,7 +189,7 @@ function StatCell({ s, t, onStartReview }) {
           <button
             className="stat-cell__due-btn"
             onClick={onStartReview}
-            title={t.reviewNow || 'Review now'}
+            title={t.reviewNow}
           >
             ⚡{s.due_now}
           </button>
@@ -205,10 +205,10 @@ function OverviewRow({ stats, extra, t }) {
   const dueTotal = extra?.forecast?.find(f => f.date === todayISO())?.count ?? 0
 
   const cols = [
-    { label: t.streak || 'Streak', value: streak ? `${streak.current}🔥` : '—', color: 'var(--warning)' },
-    { label: t.longestStreak || 'Best streak', value: streak ? streak.longest : '—', color: 'var(--text-primary)' },
-    { label: t.accuracy || 'Accuracy', value: acc.reviews > 0 ? `${acc.pct}%` : '—', color: 'var(--success)' },
-    { label: t.dueToday || 'Due today', value: dueTotal, color: 'var(--state-due)' },
+    { label: t.streak, value: streak ? `${streak.current}🔥` : '—', color: 'var(--warning)' },
+    { label: t.longestStreak, value: streak ? streak.longest : '—', color: 'var(--text-primary)' },
+    { label: t.accuracy, value: acc.reviews > 0 ? `${acc.pct}%` : '—', color: 'var(--success)' },
+    { label: t.dueToday, value: dueTotal, color: 'var(--state-due)' },
   ]
 
   return (
@@ -230,7 +230,7 @@ function DueForecast({ forecast, t }) {
   return (
     <div className="card stats-forecast-card">
       <div className="stats-card-heading">
-        {t.upcomingReviews || 'Upcoming reviews'}
+        {t.upcomingReviews}
       </div>
       <div className="stats-forecast-bars">
         {forecast.map(({ date, count }) => (
@@ -254,7 +254,7 @@ function WeakestItems({ weakest, t }) {
   return (
     <div className="card stats-weakest-card">
       <div className="stats-card-heading">
-        {t.weakestItems || 'Needs practice'}
+        {t.weakestItems}
       </div>
       <div className="stats-weakest-list">
         {weakest.map(w => (
@@ -265,7 +265,7 @@ function WeakestItems({ weakest, t }) {
             </span>
             <span className="stats-weakest-row__right">
               <span className="stats-weakest-row__accuracy">{w.accuracy}%</span>
-              <span className="stats-weakest-row__lapses">{w.lapses} {t.lapses || 'lapses'}</span>
+              <span className="stats-weakest-row__lapses">{w.lapses} {t.lapses}</span>
             </span>
           </div>
         ))}
@@ -298,7 +298,7 @@ function GlobalSummary({ stats, extra, t }) {
     { label: t.mastered, value: mastered, color: 'var(--state-mastered)' },
     { label: t.dueNow,   value: due,      color: 'var(--state-due)'  },
     { label: t.total,    value: total,    color: 'var(--text-primary)' },
-    { label: t.accuracy || 'Accuracy', value: acc.reviews > 0 ? `${acc.pct}%` : '—', color: 'var(--success)' },
+    { label: t.accuracy, value: acc.reviews > 0 ? `${acc.pct}%` : '—', color: 'var(--success)' },
   ]
 
   return (

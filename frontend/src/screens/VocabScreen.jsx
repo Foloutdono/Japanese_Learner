@@ -26,7 +26,7 @@ export default function VocabScreen({ session }) {
   const navigate    = useNavigate()
   const { t, lang } = useLang()
 
-  const MODES = vocabKanjiModes(t, t.wordNoun ?? 'mot')
+  const MODES = vocabKanjiModes(t, t.wordNoun)
 
   const [level, setLevel]           = useState(null)
   const [mode, setMode]             = useState(null)
