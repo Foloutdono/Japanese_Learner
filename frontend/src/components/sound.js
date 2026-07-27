@@ -29,7 +29,7 @@ const BASE_GAIN = {
   kana: 0.8,
   tts:  0.75, // the browser TTS voice tends to read louder than clips
   sfx: {
-    success:    0.3,
+    success:    0.2,
     'level-up': 0.5,
   },
 }
