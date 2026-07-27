@@ -1,3 +1,5 @@
+import { playClick } from './sound'
+
 /**
  * ModeSelector
  * Renders study modes as a single-column, hairline-divided list —
@@ -29,7 +31,7 @@ export default function ModeSelector({ modes, onSelect, title }) {
           <button
             key={m.key}
             type="button"
-            onClick={() => onSelect(m.key)}
+            onClick={() => { playClick(); onSelect(m.key) }}
             className="choice-row"
             style={m.color ? { '--row-color': m.color } : undefined}
           >

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useLang } from '../LangContext'
+import { playClick } from './sound'
 
 export default function RatingBar({ onRate, active }) {
   const { t } = useLang()
@@ -18,11 +19,18 @@ export default function RatingBar({ onRate, active }) {
   // accepted too — same physical top-row keys, either layout.
   const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '§': 5 }
 
+  // Shared by the on-screen buttons and the keyboard shortcuts below,
+  // so a rating fired either way gets the same tap feedback.
+  function handleRate(q) {
+    playClick()
+    onRate(q)
+  }
+
   useEffect(() => {
     if (!active) return
     const handler = e => {
       const idx = e.key in AZERTY_INDEX ? AZERTY_INDEX[e.key] : parseInt(e.key) - 1
-      if (idx >= 0 && idx <= 5) onRate(QUALITY_BTNS[idx].q)
+      if (idx >= 0 && idx <= 5) handleRate(QUALITY_BTNS[idx].q)
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -36,7 +44,7 @@ export default function RatingBar({ onRate, active }) {
         {QUALITY_BTNS.map(({ q, label }, i) => (
           <button
             key={q}
-            onClick={() => onRate(q)}
+            onClick={() => handleRate(q)}
             className={`rating-bar__btn rating-bar__btn--q${q}`}
           >
             <span className="rating-bar__btn-index">{String(i + 1).padStart(2, '0')}</span>

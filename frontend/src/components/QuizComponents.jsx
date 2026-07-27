@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
+import { playClick } from './sound'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -79,6 +80,14 @@ const CHOICE_KEY_INDEX = { '1': 0, '2': 1, '3': 2, '4': 3, '&': 0, 'é': 1, '"':
 export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
   const cramped = useIsCramped()
 
+  // One shared entry point for an answer, whether it came from a
+  // mouse click on MCQButton or a number-key shortcut below — so the
+  // click sound never gets forgotten on one path but not the other.
+  function handleAnswer(choice) {
+    playClick()
+    onAnswer(choice)
+  }
+
   useEffect(() => {
     if (answered) return
     const handler = e => {
@@ -87,7 +96,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
       const idx = CHOICE_KEY_INDEX[e.key]
       if (idx !== undefined && idx < choices.length) {
-        onAnswer(choices[idx])
+        handleAnswer(choices[idx])
       }
     }
     window.addEventListener('keydown', handler)
@@ -105,7 +114,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
           answered={answered}
           index={i}
           cramped={cramped}
-          onClick={() => onAnswer(choice)}
+          onClick={() => handleAnswer(choice)}
         />
       ))}
     </div>
@@ -125,7 +134,7 @@ export function TypeInput({
       <input
         value={value}
         onChange={e => onChange(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && onSubmit()}
+        onKeyDown={e => { if (e.key === 'Enter') { playClick(); onSubmit() } }}
         placeholder={placeholder ?? t.typeAnswer}
         disabled={submitted}
         autoFocus
@@ -133,7 +142,7 @@ export function TypeInput({
         style={inputStyle}
       />
       {!submitted && (
-        <button onClick={onSubmit} className="quiz-submit">
+        <button onClick={() => { playClick(); onSubmit() }} className="quiz-submit">
           {t.submit}
         </button>
       )}
@@ -161,7 +170,7 @@ export function ModeToggle({ mode, onChange, modes }) {
       {(modes ?? defaultModes).map(([key, label]) => (
         <button
           key={key}
-          onClick={() => onChange(key)}
+          onClick={() => { playClick(); onChange(key) }}
           className={`mode-toggle__btn${mode === key ? ' mode-toggle__btn--active' : ''}`}
         >
           {label}
@@ -178,7 +187,7 @@ export function DoneMessage({ onBack }) {
     <div className="quiz-done">
       {t.quizComplete}
       <br /><br />
-      <button onClick={onBack} className="btn-panel">
+      <button onClick={() => { playClick(); onBack() }} className="btn-panel">
         {t.backToMenu}
       </button>
     </div>
@@ -426,6 +435,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey }) {
   }, [resetKey])
 
   const handleClick = () => {
+    playClick()
     if (!revealed) {
       setRevealed(true)
       setShowBack(true)
