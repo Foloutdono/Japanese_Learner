@@ -79,7 +79,7 @@ export function playSfx(name) {
 }
 
 export function playXpGain() {
-  playSfx('xp-gain')
+  playSfx('success')
 }
 
 export function playLevelUp() {
