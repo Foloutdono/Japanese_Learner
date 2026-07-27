@@ -31,11 +31,6 @@ export default function StatsScreen({ session }) {
       .catch(() => setExtra(null))
   }
 
-  function resetAll() {
-    if (!confirm(t.resetConfirm)) return
-    apiFetch('/api/stats/reset', session, { method: 'DELETE' }).then(() => fetchStats())
-  }
-
   // There's no dedicated "review" screen — due cards are just prioritized
   // automatically inside a normal session. So this drops the user straight
   // into the right level/mode (or set/mode for kana) and the session
@@ -53,9 +48,6 @@ export default function StatsScreen({ session }) {
       <TopBar
         onBack={() => navigate('/')}
         title={t.statistics}
-        actions={
-          <button className="stats-reset-btn" onClick={resetAll}>{t.resetStats}</button>
-        }
       />
 
       {!stats && <Loading />}
@@ -122,6 +114,22 @@ export default function StatsScreen({ session }) {
               </div>
             ))}
             <GridFiller count={Object.keys(stats.kanji).length} cols={3} glyph="字" />
+          </div>
+
+          <SectionHeader title={t.grammarTitle} />
+          <div className="grid-3 stats-group">
+            {Object.entries(stats.grammar).map(([level, phases]) => (
+              <div key={level} className="card">
+                <LevelHeader level={level} phases={phases} t={t} />
+                {Object.entries(phases).map(([key, s]) => (
+                  <div key={key} className="stats-stat-block">
+                    <div className="stats-stat-label">{grammarModeLabel(t, key)}</div>
+                    <StatCell s={s} t={t} onStartReview={() => startReview('grammar', level, key)} />
+                  </div>
+                ))}
+              </div>
+            ))}
+            <GridFiller count={Object.keys(stats.grammar).length} cols={3} glyph="文" />
           </div>
 
           <SectionHeader title={t.globalSummary} />
@@ -283,7 +291,7 @@ function GlobalSummary({ stats, extra, t }) {
       mastered += s.mastered; due += s.due_now
     }
 
-  for (const section of [stats.vocab, stats.kanji])
+  for (const section of [stats.vocab, stats.kanji, stats.grammar])
     for (const phases of Object.values(section))
       for (const s of Object.values(phases)) {
         total += s.total; newC += s.new; learning += s.learning
@@ -317,7 +325,7 @@ function GlobalSummary({ stats, extra, t }) {
 
 function aggregateAccuracy(stats) {
   let reviews = 0, correct = 0
-  for (const section of [stats.kana, stats.vocab, stats.kanji])
+  for (const section of [stats.kana, stats.vocab, stats.kanji, stats.grammar])
     for (const modes of Object.values(section))
       for (const s of Object.values(modes)) {
         reviews += s.reviews || 0
@@ -325,6 +333,15 @@ function aggregateAccuracy(stats) {
       }
   const pct = reviews > 0 ? Math.round((correct / reviews) * 100) : 0
   return { reviews, correct, pct }
+}
+
+// Grammar's mode keys (flashcard/mcq/fill, per GRAMMAR_MODES) don't
+// have dedicated translation entries the way kana/vocab/kanji modes
+// do — fall back to a title-cased version of the key itself so a new
+// mode added on the backend shows up without a frontend change.
+function grammarModeLabel(t, key) {
+  return t[`grammarMode${key.charAt(0).toUpperCase()}${key.slice(1)}`]
+    || key.charAt(0).toUpperCase() + key.slice(1)
 }
 
 function todayISO() {

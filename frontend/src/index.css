@@ -3757,6 +3757,40 @@ input:focus { border-color: var(--accent2); }
   margin-bottom: 48px;
 }
 
+/* Thin doorway card into /stats — same panel language as .card but a
+   single tappable row rather than a data block, since the detail
+   already lives on the stats screen itself. */
+.stats-access-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  margin-bottom: 48px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background 0.2s ease;
+}
+.stats-access-card:hover {
+  background: var(--bg-card-hover);
+}
+.stats-access-card__glyph {
+  font-family: var(--font-jp);
+  font-size: 1.4rem;
+  color: var(--accent5);
+  flex-shrink: 0;
+}
+.stats-access-card__label {
+  font-weight: 700;
+  flex: 1;
+}
+.stats-access-card__arrow {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
 .profile-card__avatar-wrap {
   position: relative;
   flex-shrink: 0;
@@ -5597,6 +5631,12 @@ input:focus { border-color: var(--accent2); }
 
 @media (max-width: 768px) {
   .landing-feature-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* The oversized-glyph filler cell exists to dress up a ragged
+     trailing row on wide, multi-column grids. On mobile the grid is
+     already 1-2 columns and stacked, so the filler just adds an
+     empty decorative block below real content — drop it. */
+  .stats-filler-card { display: none; }
 }
 
 @media (max-width: 640px) {
