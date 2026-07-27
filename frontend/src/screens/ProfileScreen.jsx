@@ -94,6 +94,9 @@ export default function ProfileScreen({ session }) {
 
           <ProfileCard profile={profile} session={session} onUsernameChange={u => setProfile(p => ({ ...p, username: u }))} t={t} />
 
+          <SectionHeader title={t.statistics} />
+          <StatsAccessCard navigate={navigate} t={t} />
+
           <SectionHeader title={t.goals} />
           <GoalsCard goals={profile.goals} t={t} />
 
@@ -230,6 +233,19 @@ function EditableUsername({ username, session, onChange, t }) {
       </button>
       {error && <div className="profile-card__name-error">{error}</div>}
     </div>
+  )
+}
+
+// Stats used to be its own home-screen card; now that it hangs off the
+// profile instead, this is just a thin doorway into /stats rather than
+// a full preview — the stats screen itself already owns the detail.
+function StatsAccessCard({ navigate, t }) {
+  return (
+    <button type="button" className="card stats-access-card" onClick={() => navigate('/stats')}>
+      <span className="stats-access-card__glyph" aria-hidden="true">統計</span>
+      <span className="stats-access-card__label">{t.statistics}</span>
+      <span className="stats-access-card__arrow" aria-hidden="true">→</span>
+    </button>
   )
 }
 

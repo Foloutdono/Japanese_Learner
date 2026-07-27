@@ -100,7 +100,7 @@ export default function HomeScreen() {
       <main className="home-main">
         <div className="container">
           <div className="home-grid">
-            {cards.map(card => ((card.path === '/' || card.path === '/profile') ? null : (
+            {cards.map(card => ((card.path === '/' || card.path === '/profile' || card.path === '/stats') ? null : (
               <button
                 key={card.path}
                 type="button"

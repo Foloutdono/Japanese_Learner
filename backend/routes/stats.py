@@ -4,9 +4,15 @@ from db import db_conn
 from kana_data import KANA_SETS, kana_to_id
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
 from auth import get_user_id, prefixed
 from srs_instance import srs
-from quiz_modes import KANA_MODES, VOCAB_MODES as VOCAB_PHASE_KEYS, KANJI_MODES as KANJI_PHASE_KEYS
+from quiz_modes import (
+    KANA_MODES,
+    VOCAB_MODES as VOCAB_PHASE_KEYS,
+    KANJI_MODES as KANJI_PHASE_KEYS,
+    GRAMMAR_MODES as GRAMMAR_PHASE_KEYS,
+)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -26,6 +32,11 @@ KANJI_IDS = {
     for level, kanji_list in KANJI_BY_LEVEL.items()
 }
 
+GRAMMAR_IDS = {
+    level: [grammar_to_id(g, level) for g in grammar_list]
+    for level, grammar_list in GRAMMAR_BY_LEVEL.items()
+}
+
 
 def _build_reverse_index():
     """
@@ -42,6 +53,7 @@ def _build_reverse_index():
         ("kana", KANA_IDS, KANA_MODES),
         ("vocab", VOCAB_IDS, VOCAB_PHASE_KEYS),
         ("kanji", KANJI_IDS, KANJI_PHASE_KEYS),
+        ("grammar", GRAMMAR_IDS, GRAMMAR_PHASE_KEYS),
     ):
         for key, ids in ids_map.items():
             totals[(category, key)] = len(ids)
@@ -90,7 +102,12 @@ def get_stats(user_id: str = Depends(get_user_id)):
         for level, ids in KANJI_IDS.items()
     }
 
-    buckets = {"kana": kana_stats, "vocab": vocab_stats, "kanji": kanji_stats}
+    grammar_stats = {
+        level: {mode: _empty_bucket(len(ids)) for mode in GRAMMAR_PHASE_KEYS}
+        for level, ids in GRAMMAR_IDS.items()
+    }
+
+    buckets = {"kana": kana_stats, "vocab": vocab_stats, "kanji": kanji_stats, "grammar": grammar_stats}
     prefix_len = len(user_id) + 1  # strip "user_id:" from the stored card_id
 
     # Only iterate over what the user has actually touched, not the whole
@@ -123,6 +140,7 @@ def get_stats(user_id: str = Depends(get_user_id)):
         "kana": kana_stats,
         "vocab": vocab_stats,
         "kanji": kanji_stats,
+        "grammar": grammar_stats,
     }
 
 
