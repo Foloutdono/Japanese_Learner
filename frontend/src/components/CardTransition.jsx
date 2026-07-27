@@ -1,6 +1,7 @@
 import { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import { CardStamp } from './CardStamp'
 import { StageBadge } from './StageBadge'
+import { playSfx } from './sound'
 
 // How long the outgoing card's own exit animation runs — must match
 // the `card-transition-exit` duration in index.css exactly, since
@@ -100,6 +101,7 @@ export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage,
     setOutgoing({ key: liveKey, content: lastChildrenRef.current })
     setLiveKey(cardKey)
     setLiveContentKey(effectiveContentKey)
+    playSfx('card-transition')
   } else if (effectiveContentKey !== liveContentKey) {
     // Same card, content refreshed in place (Kanji/Vocab's
     // re-translate-on-language-change) — no outgoing copy, just a

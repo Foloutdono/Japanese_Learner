@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useLang } from '../LangContext'
-import { playClick } from './sound'
+import { playClick, playSfx } from './sound'
 
 export default function RatingBar({ onRate, active }) {
   const { t } = useLang()
@@ -23,6 +23,10 @@ export default function RatingBar({ onRate, active }) {
   // so a rating fired either way gets the same tap feedback.
   function handleRate(q) {
     playClick()
+    if (q > 2)
+      playSfx('success')
+    else
+      playSfx('failure')
     onRate(q)
   }
 
