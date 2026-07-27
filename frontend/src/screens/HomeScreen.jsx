@@ -17,6 +17,13 @@ function HomeProfileBadge() {
   const { t }     = useLang()
   const summary   = useProfileSummary()
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem('jp-theme')
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', saved)
+    }
+  }, [])
+
   if (!summary) {
     return (
       <button type="button" onClick={() => navigate('/profile')} className="home-profile-badge home-profile-badge--fallback">
@@ -25,13 +32,6 @@ function HomeProfileBadge() {
       </button>
     )
   }
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   const [, jpTitle, title] = levelTitle(summary.level)
   const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)
