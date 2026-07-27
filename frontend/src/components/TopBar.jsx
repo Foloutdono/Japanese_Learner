@@ -4,6 +4,7 @@ import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
 import { BurgerMenu } from './BurgerMenu'
 import { useProfileSummary } from './userProfileSummary'
+import { playClick } from './sound'
 
 const MOBILE_BREAKPOINT = 768
 const SCROLL_THRESHOLD   = 2     // px of scroll before reacting — just enough to ignore jitter
@@ -118,7 +119,7 @@ function TopBarProfileRing() {
     <button
       type="button"
       className="topbar-profile-ring"
-      onClick={() => navigate('/profile')}
+      onClick={() => { playClick(); navigate('/profile') }}
       title={`${t.level} ${summary.level} — ${into}/${span} XP`}
     >
       <svg className="topbar-profile-ring__svg" viewBox="0 0 40 40" aria-hidden="true">
@@ -174,7 +175,7 @@ function MobileLevelBar() {
   const pct  = Math.round((into / span) * 100)
 
   return (
-    <button type="button" className="mobile-level-bar" onClick={() => navigate('/profile')}>
+    <button type="button" className="mobile-level-bar" onClick={() => { playClick(); navigate('/profile') }}>
       <span className="mobile-level-bar__level">{t.level} {summary.level}</span>
       <span className="mobile-level-bar__track">
         <span className="mobile-level-bar__fill" style={{ width: `${pct}%` }} />
@@ -213,7 +214,7 @@ export function TopBar({
           <TopBarProfileRing />
 
           {actions}
-          <button className="btn-back" onClick={onBack}>
+          <button className="btn-back" onClick={() => { playClick(); onBack() }}>
             {t.back}
           </button>
         </div>
@@ -228,7 +229,7 @@ export function TopBar({
         <button
           type="button"
           className={`top-bar__peek${hidden ? ' top-bar__peek--visible' : ''}`}
-          onClick={reveal}
+          onClick={() => { playClick(); reveal() }}
           aria-label={t.back}
           tabIndex={hidden ? 0 : -1}
         >

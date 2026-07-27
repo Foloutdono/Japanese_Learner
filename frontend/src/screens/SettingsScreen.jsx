@@ -4,7 +4,7 @@ import { useLang } from '../LangContext'
 import { supabase } from '../supabase'
 import { TopBar } from '../components/TopBar'
 import { SectionHeader } from '../components/SectionHeader'
-import { MuteButton, ThemeToggle, LangSwitcher } from '../components/NavControls'
+import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components/NavControls'
 
 export default function SettingsScreen() {
   const navigate = useNavigate()
@@ -27,6 +27,12 @@ export default function SettingsScreen() {
           <div className="settings-row">
             <span className="settings-row__label">{t.sound}</span>
             <MuteButton />
+          </div>
+          {/* Per-category mixer: master + kana/voice/effects/ui sliders.
+              Own stacked row rather than squeezed into the label/control
+              pair above — it needs its own width to be usable. */}
+          <div className="settings-row settings-row--stack">
+            <SoundMixer />
           </div>
           <div className="settings-row">
             <span className="settings-row__label">{t.theme}</span>

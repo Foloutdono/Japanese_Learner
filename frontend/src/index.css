@@ -1056,6 +1056,90 @@ input:focus { border-color: var(--accent2); }
   background: var(--bg-card-hover);
 }
 
+/* ── Sound mixer (master + per-category volume) ────────────
+   A stacked row inside the same settings-card, rather than a
+   label/control pair like the other rows — it needs the full card
+   width for its sliders to be usable. */
+.settings-row--stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding-top: 4px;
+  padding-bottom: 20px;
+}
+.sound-mixer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.volume-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 40px;
+  align-items: center;
+  gap: 12px;
+}
+.volume-row__label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.volume-row__value {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.volume-row__slider {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--accent2);
+  cursor: pointer;
+}
+.volume-row__slider:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.sound-mixer__reset {
+  align-self: flex-start;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 14px;
+  cursor: pointer;
+}
+.sound-mixer__reset:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+/* ── Language dropdown ──────────────────────────────────────
+   Shares .btn-nav's background/color (dark-panel default, plus the
+   .settings-row .btn-nav card-context override above) — this just
+   strips the native <select> chrome and draws a themed two-stroke
+   arrow with currentColor, so it stays correct in both contexts and
+   both themes without a separate icon asset. */
+.lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 30px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) calc(50% - 2px),
+    calc(100% - 10px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+.lang-select:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
+
 /* ── Top bar extras ───────────────────────────────────────── */
 .top-bar__title {
   font-family: 'Noto Serif JP', serif;

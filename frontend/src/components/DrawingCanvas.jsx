@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
 import { useLang } from '../LangContext'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
+import { playClick } from './sound'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -95,7 +96,7 @@ function Canvas({ canvasRef, onClear, resetKey }) {
         onMouseUp={stopDraw}   onMouseLeave={stopDraw}
         onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw}
       />
-      <button onClick={clear} className="canvas-clear-btn">
+      <button onClick={() => { playClick(); clear() }} className="canvas-clear-btn">
         {t.eraseBtn}
       </button>
     </div>
@@ -163,7 +164,7 @@ export function DrawingOverlay({ kanji, meaning, onDone, resetKey }) {
         </div>
         <StrokeRef kanji={kanji} meaning={meaning} />
       </div>
-      <button onClick={onDone} className="drawing-overlay__continue">
+      <button onClick={() => { playClick(); onDone() }} className="drawing-overlay__continue">
         {t.continueBtn}
       </button>
     </div>
@@ -188,6 +189,7 @@ export function DrawingQuiz({ kanji, meaning, kana, onValidate, resetKey }) {
   useEffect(() => { setRevealed(false) }, [key])
 
   function handleValidate() {
+    playClick()
     setRevealed(true)
     onValidate()
   }

@@ -8,13 +8,14 @@ const VOLUME_KEY = 'jp-app-volumes'
 // all of them. Add a new category here (and a default below) any
 // time a new kind of sound is introduced — nothing else needs to
 // change for it to get its own row in the mixer.
-export const SOUND_CATEGORIES = ['kana', 'tts', 'sfx']
+export const SOUND_CATEGORIES = ['kana', 'tts', 'sfx', 'ui']
 
 const DEFAULT_VOLUMES = {
   master: 1,
   kana:   1, // playKana — kana pronunciation clips
   tts:    1, // speakJapanese — browser speech synthesis
   sfx:    1, // playSfx / playCorrectAnswer / playLevelUp — gamification cues
+  ui:     1, // playUi / playClick — button taps, toggles, other interface sounds
 }
 
 // ── Developer-only balance knobs ────────────────────────────
@@ -31,6 +32,10 @@ const BASE_GAIN = {
   sfx: {
     success:    0.1,
     'level-up': 0.5,
+  },
+  ui: {
+    click:  0.35, // a tap should be felt, not announced
+    toggle: 0.35,
   },
 }
 
@@ -128,11 +133,15 @@ export function useVolumes() {
   return useSyncExternalStore(subscribeVolumes, getVolumes, () => DEFAULT_VOLUMES)
 }
 
-// Effective 0–1 output level for one played sound.
+// Effective 0–1 output level for one played sound. kana/tts have a
+// single BASE_GAIN number; sfx/ui are keyed per sound name instead,
+// since a "success" chime and a "level-up" fanfare (or a button tap
+// vs. a toggle flip) rarely sit at the same natural loudness.
 function gainFor(category, soundName) {
-  const base = category === 'sfx'
-    ? (BASE_GAIN.sfx[soundName] ?? 1)
-    : (BASE_GAIN[category] ?? 1)
+  const categoryGain = BASE_GAIN[category]
+  const base = (categoryGain && typeof categoryGain === 'object')
+    ? (categoryGain[soundName] ?? 1)
+    : (categoryGain ?? 1)
   return clamp01(volumes.master * (volumes[category] ?? 1) * base)
 }
 
@@ -184,6 +193,41 @@ export function playCorrectAnswer() {
 
 export function playLevelUp() {
   playSfx('level-up')
+}
+
+// ── UI sounds ───────────────────────────────────────────────
+// Same generic-primitive shape as playSfx above, for interface
+// interactions rather than gamification moments: button taps, toggle
+// flips, anything short and frequent enough that it needs its own
+// (much quieter — see BASE_GAIN.ui) category so it never competes
+// with kana/tts/sfx in the mix. Call playUi('name') from any button
+// handler; add a matching /sounds/ui/{name}.mp3 and, if it needs its
+// own balance, a BASE_GAIN.ui entry — nothing else to change.
+//
+// Files expected so far (not included — drop your own in):
+//   /sounds/ui/click.mp3   — generic button press
+//   /sounds/ui/toggle.mp3  — on/off switches (mute, theme, drawing...)
+const _uiCache = new Map()
+
+export function playUi(name) {
+  if (!name || muted) return
+  let audio = _uiCache.get(name)
+  if (!audio) {
+    audio = new Audio(`/sounds/ui/${name}.mp3`)
+    _uiCache.set(name, audio)
+  } else {
+    audio.currentTime = 0
+  }
+  audio.volume = gainFor('ui', name)
+  audio.play().catch(() => {})
+}
+
+export function playClick() {
+  playUi('click')
+}
+
+export function playToggle() {
+  playUi('toggle')
 }
 
 export function speakJapanese(text) {

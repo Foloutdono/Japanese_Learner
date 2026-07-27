@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useProfileSummary } from './userProfileSummary'
 import { levelTitle } from '../levelTitle'
+import { playClick, playToggle } from './sound'
 
 // ── Burger menu button + slide-in drawer ──────────────────
 // Drop this anywhere (e.g. in TopBar) to get a full nav drawer
@@ -83,7 +84,11 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
 
   const close = () => setOpenAndNotify(false)
 
+  // Every drawer link, the profile row, and the settings entry all
+  // funnel through here — one place to hang the click sound on rather
+  // than wiring each destination separately.
   const go = (path) => {
+    playClick()
     navigate(path)
     close()
   }
@@ -91,7 +96,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
   return (
     <>
       <button
-        onClick={() => setOpenAndNotify(!open)}
+        onClick={() => { playToggle(); setOpenAndNotify(!open) }}
         aria-label={t.menu}
         className="burger-toggle"
       >
@@ -99,11 +104,11 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
       </button>
 
       {open && createPortal(
-        <div className="burger-overlay" onClick={close}>
+        <div className="burger-overlay" onClick={() => { playToggle(); close() }}>
           <div className="burger-drawer" onClick={e => e.stopPropagation()}>
             <div className="burger-drawer__header">
               <span className="burger-drawer__title">{t.menu}</span>
-              <button className="burger-drawer__close" onClick={close}>✕</button>
+              <button className="burger-drawer__close" onClick={() => { playToggle(); close() }}>✕</button>
             </div>
 
             <nav className="burger-drawer__nav">

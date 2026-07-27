@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
+import { playClick } from './sound'
 
 export default function ImportCardsMenu({ onImport, onClose }) {
   const { t } = useLang()
@@ -63,7 +64,7 @@ export default function ImportCardsMenu({ onImport, onClose }) {
         {/* Header */}
         <div className="import-header">
           <div className="import-header__title">{t.importTitle}</div>
-          <button onClick={onClose} className="import-header__close">
+          <button onClick={() => { playClick(); onClose() }} className="import-header__close">
             ✕
           </button>
         </div>
@@ -134,11 +135,11 @@ export default function ImportCardsMenu({ onImport, onClose }) {
 
         {/* Footer */}
         <div className="import-footer">
-          <button onClick={onClose} className="import-footer__cancel">
+          <button onClick={() => { playClick(); onClose() }} className="import-footer__cancel">
             {t.cancel}
           </button>
           <button
-            onClick={handleImport}
+            onClick={() => { playClick(); handleImport() }}
             disabled={preview.length === 0 || importing}
             className={`import-footer__submit${preview.length > 0 ? ' import-footer__submit--active' : ''}${importing ? ' import-footer__submit--importing' : ''}`}
           >
@@ -161,7 +162,7 @@ function SepGroup({ title, value, onChange, custom, onCustomChange, options }) {
       <div className="import-sep-group__title">{title}</div>
       {options.map(([val, label]) => (
         <label key={val} className="import-sep-option">
-          <input type="radio" checked={value === val} onChange={() => onChange(val)} />
+          <input type="radio" checked={value === val} onChange={() => { playClick(); onChange(val) }} />
           <span className="import-sep-option__label">{label}</span>
           {val === 'custom' && value === 'custom' && (
             <input
