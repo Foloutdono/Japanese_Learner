@@ -34,7 +34,7 @@ const BASE_GAIN = {
     'level-up': 0.5,
   },
   ui: {
-    click:  0.10, // a tap should be felt, not announced
+    click:  0.25, // a tap should be felt, not announced
     toggle: 0.10,
   },
 }
