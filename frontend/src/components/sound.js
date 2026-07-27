@@ -26,11 +26,11 @@ const DEFAULT_VOLUMES = {
 // passed to playSfx (e.g. 'success', 'level-up'); anything without an
 // entry falls back to 1.
 const BASE_GAIN = {
-  kana: 1,
-  tts:  0.85, // the browser TTS voice tends to read louder than clips
+  kana: 0.8,
+  tts:  0.75, // the browser TTS voice tends to read louder than clips
   sfx: {
-    success:    0.7,
-    'level-up': 1,
+    success:    0.3,
+    'level-up': 0.5,
   },
 }
 
