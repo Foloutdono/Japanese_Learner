@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLang } from '../LangContext'
-import { playCorrectAnswer, playLevelUp } from './sound'
+import { playSfx } from './sound'
 
 // ── XP toast ──────────────────────────────────────────────
 // `toast` is `{ amount, id, leveledUp, newLevel, quality }` — `id`
@@ -183,8 +183,7 @@ export function XpToast({ toast, onDone }) {
   useEffect(() => {
     if (!toast) return
     setPhase('active')
-    if (toast.leveledUp) playLevelUp()
-    else playCorrectAnswer()
+    if (toast.leveledUp) playSfx('level-up')
 
     // A level-up doesn't dismiss itself on a clock — it waits for
     // handleClaim instead.

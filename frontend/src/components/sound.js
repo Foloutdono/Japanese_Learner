@@ -34,8 +34,8 @@ const BASE_GAIN = {
     'level-up': 0.5,
   },
   ui: {
-    click:  0.35, // a tap should be felt, not announced
-    toggle: 0.35,
+    click:  0.10, // a tap should be felt, not announced
+    toggle: 0.10,
   },
 }
 
@@ -185,14 +185,6 @@ export function playSfx(name) {
   }
   audio.volume = gainFor('sfx', name)
   audio.play().catch(() => {})
-}
-
-export function playCorrectAnswer() {
-  playSfx('success')
-}
-
-export function playLevelUp() {
-  playSfx('level-up')
 }
 
 // ── UI sounds ───────────────────────────────────────────────
