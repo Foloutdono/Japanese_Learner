@@ -7,7 +7,7 @@ from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kana_data import HIRAGANA_BASIC, KATAKANA_BASIC, kana_to_id
 from translations import get_meaning
-from translations.fr.kanji_fr import KANJI_FR
+from kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
 from auth import get_user_id
 from srs_instance import srs
@@ -30,7 +30,7 @@ VOCAB_FR_MAP = VOCAB_FR
 _BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Path to kanji_data/
-_DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji_data")
+_DATA_DIR = os.path.join(_BASE_DIR, "kanjidic2", "kanji_data")
 
 with open(os.path.join(_DATA_DIR, "radicals.json"), encoding="utf-8") as f:
     _ALL_RADICALS = json.load(f)

@@ -6,7 +6,7 @@ router = APIRouter()
 def _load_translation_map(lang: str, item_type: str) -> dict:
     if lang == "fr":
         if item_type == "kanji":
-            from translations.fr.kanji_fr import KANJI_FR
+            from kanji_meanings import KANJI_FR
             return KANJI_FR
         if item_type == "vocab":
             from translations.fr.vocab_fr import VOCAB_FR
