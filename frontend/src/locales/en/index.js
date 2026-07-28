@@ -63,7 +63,6 @@ const home = {
   tip:               '💡 Short sessions (15-20 min) but regular — SRS schedules everything automatically.',
   start:             'Start →',
   homeTitle:         'Home',
-  homeDesc:          'Back to the main menu',
   kanaTitle:         'Kana',
   kanaDesc:          'Hiragana & Katakana\nbasic + combinations\nMCQ then free writing',
   vocabTitle:        'Vocabulary JLPT',
@@ -94,13 +93,22 @@ const quiz = {
   selectKanaSet:     'Choose a kana set',
   selectPhase:       'Choose your training phase',
 
+  levelHintN5:       'Beginner level',
+  levelHintN4:       'Elementary level',
+  levelHintN3:       'Intermediate level',
+  levelHintN2:       'Advanced level',
+  levelHintN1:       'Proficiency level',
+
   // Input
   submit:            'Submit',
   typeRomaji:        'Type the romaji...',
+  tapToFlip:          'Tap to flip',
+  tapToReveal:         'Tap to reveal',
 
   // Feedback
   wrong:             '❌ Answer:',
   quizComplete:      '✅ All cards are up to date!',
+  backToMenu:        '← Back to menu',
 
   // Rating bar
   to:                'to',
@@ -122,10 +130,18 @@ const quiz = {
   modeQcmKjMDesc:    'The kanji is shown, choose the meaning',
   modeQcmMKj:        'MCQ (meaning → kanji)',
   modeQcmMKjDesc:    'The meaning is shown, choose the kanji',
-  modeFcKjM:         'Card (kanji → meaning)',
+  modeFcKjM:         'Flashcard (kanji → meaning)',
   modeFcKjMDesc:     'The kanji is shown, reveal the meaning',
-  modeFcMKj:         'Card (meaning → kanji)',
+  modeFcMKj:         'Flashcard (meaning → kanji)',
   modeFcMKjDesc:     'The meaning is shown, reveal the kanji',
+
+  modeFcKanaDesc:     'The kana is shown, reveal the meaning',
+  modeQcmKanaDesc:    'The kana is shown, choose the meaning',
+  modeWriteKanaDesc:   'The kana is shown, write the romaji',
+
+  modeFcGrammarDesc:   'The grammar rule is shown, reveal the meaning',
+  modeQcmGrammarDesc:  'The grammar rule is shown, choose the meaning',
+  modeFillGrammarDesc: 'The grammar rule is shown, fill in the missing word(s)',
 
   // Writing practice
   writingPractice:   '✏️ Practice writing this kanji',
@@ -149,6 +165,12 @@ const quiz = {
   revealMeaningBtn:  'Reveal meaning',
   showExamples:      '▼ Show examples',
   hideExamples:      '▲ Hide examples',
+
+  // XpToast
+  claimBtn:         'Claim',
+  levelUp:          'Level up!',
+  level:            'Level',
+
 }
 
 // ── Stats ─────────────────────────────────────────────────
@@ -329,6 +351,10 @@ const settings = {
   language:          'Language',
   account:           'Account',
   signOutDesc:       'Sign out of your account on this device.',
+  volumeMaster:       'Master volume',
+
+  lightMode:         '☀ Light mode',
+  darkMode:          '☾ Dark mode',
 }
 
 // ── Decks ─────────────────────────────────────────────────
