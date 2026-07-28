@@ -354,6 +354,7 @@ export default function VocabScreen({ session }) {
                 dictCategory="vocab"
                 session={session}
                 onReplaySound={() => speakJapanese(card.kana)}
+                variant="standalone"
               />
             )}
 

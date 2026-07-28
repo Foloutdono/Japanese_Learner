@@ -371,7 +371,15 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 //    argument) or, failing that, falls back to speaking `sound` (or
 //    dictTerm if `sound` isn't given) via the browser's own TTS.
 // A caller that wires up neither renders nothing at all.
-export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, session, sound, onReplaySound }) {
+// `variant="inline"` (default) is the quiet, low-weight style that
+// sits in Flashcard's own hint row, next to "tap to reveal" — it
+// shouldn't outweigh the card's own content.
+// `variant="standalone"` is for MCQ/write modes, which have no
+// existing hint row to blend into: dropped on its own under the
+// choices/input, it needs its own visual presence (background, border,
+// bigger tap target) or it reads as a stray line of grey text easily
+// missed below the answer.
+export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, session, sound, onReplaySound, variant = 'inline' }) {
   const [showDictionary, setShowDictionary] = useState(false)
 
   // Same as Flashcard's own reset — a caller reusing this across
@@ -402,14 +410,17 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, s
     else speakJapanese(speakText)
   }
 
+  const rowClass = variant === 'standalone' ? 'reveal-actions reveal-actions--standalone' : 'reveal-actions'
+  const btnClass = variant === 'standalone' ? 'reveal-action-btn reveal-action-btn--standalone' : 'reveal-action-btn'
+
   return (
     <>
-      <div className="reveal-actions">
+      <div className={rowClass}>
         {canPlaySound && (
           <button
             type="button"
             onClick={replaySound}
-            className="reveal-action-btn"
+            className={btnClass}
             title={t.listen}
             aria-label={t.listen}
           >
@@ -421,7 +432,7 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, s
           <button
             type="button"
             onClick={openDictionary}
-            className="reveal-action-btn"
+            className={btnClass}
             title={t.openDictionary}
             aria-label={t.openDictionary}
           >
