@@ -56,7 +56,7 @@ export default function LevelSelector({
           <button
             key={l}
             type="button"
-            onClick={() => { playUi('click-selection'); onSelect(l) }}
+            onClick={() => { playUi('click-mode-selection'); onSelect(l) }}
             className="choice-row"
             style={rowStyle}
           >

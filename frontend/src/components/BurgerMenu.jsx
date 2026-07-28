@@ -104,7 +104,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
       </button>
 
       {open && createPortal(
-        <div className="burger-overlay" onClick={() => { playUi('click-menu'); close() }}>
+        <div className="burger-overlay" onClick={() => { playUi('click-screen-selection'); close() }}>
           <div className="burger-drawer" onClick={e => e.stopPropagation()}>
             <div className="burger-drawer__header">
               <span className="burger-drawer__title">{t.menu}</span>

@@ -14,7 +14,6 @@ export function getNavLinks(t) {
     { icon: '理解', title: t.readingComprehensionTitle, desc: t.readingComprehensionDesc, path: '/reading-comprehension', color: 'var(--accent7)' }, // Sabi-iro
     { icon: '解析', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: 'var(--danger)' }, // Enji-iro
     { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: 'var(--accent2)' }, // Yamabuki-iro
-    { icon: '統計', title: t.statsTitle,      desc: t.statsDesc,      path: '/stats',      color: 'var(--accent5)' }, // Cha-iro
     { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: 'var(--warning)' }, // Kohaku
   ]
 }

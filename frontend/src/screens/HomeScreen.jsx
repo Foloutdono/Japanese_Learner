@@ -4,6 +4,7 @@ import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
 import { useProfileSummary } from '../components/userProfileSummary'
 import { levelTitle } from '../levelTitle'
+import { playUi } from '../components/sound'
 
 // ── Header profile badge ──────────────────────────────────
 // Replaces the old sign-out/theme/lang button row: a single glance at
@@ -100,11 +101,11 @@ export default function HomeScreen() {
       <main className="home-main">
         <div className="container">
           <div className="home-grid">
-            {cards.map(card => ((card.path === '/' || card.path === '/profile' || card.path === '/stats') ? null : (
+            {cards.map(card => ((card.path === '/') ? null : (
               <button
                 key={card.path}
                 type="button"
-                onClick={() => navigate(card.path)}
+                onClick={() => { playUi('click-screen-selection'); navigate(card.path) }}
                 className="home-card"
                 style={{ '--row-color': card.color }}
               >
