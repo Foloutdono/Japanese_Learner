@@ -3,117 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
-import { Readings } from '../components/QuizComponents'
 import { StrokeOrderAnimation } from '../components/StrokeOrderAnimation'
+import {
+	STATUS_META, TYPE_META, isKanaType, entryKey, speakJapanese,
+	StatusBadge, TypeBadge, SearchIcon, InfoRow, DictionaryDetail,
+} from '../components/DictionaryDetail'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 const LIMIT = 50
-
-const STATUS_META = {
-	new:      { color: 'var(--text-secondary)', fallback: 'À apprendre' },
-	learning: { color: 'var(--accent)',         fallback: 'En cours' },
-	mastered: { color: 'var(--success)',        fallback: 'Maîtrisé' },
-}
-
-// Colours pulled from the app's own palette (ai-iro indigo / rokushou
-// verdigris) instead of arbitrary hex, so — like every other colour
-// in the app — these correctly flip between the dark and light theme
-// rather than staying fixed regardless of `data-theme`.
-const TYPE_META = {
-	kanji:    { color: 'var(--accent4)', fallback: 'Kanji' },
-	vocab:    { color: 'var(--accent6)', fallback: 'Vocabulaire' },
-	hiragana: { color: 'var(--accent3)', fallback: 'Hiragana' },
-	katakana: { color: 'var(--accent5)', fallback: 'Katakana' },
-}
-
-// Both kana types share every bit of detail-panel/card logic that
-// differs from kanji/vocab (no translated "meaning", romaji shown
-// instead of a reading list, the stroke-order panel), so call sites
-// check this instead of repeating the type === 'hiragana' ||
-// type === 'katakana' pair everywhere.
-function isKanaType(type) {
-	return type === 'hiragana' || type === 'katakana'
-}
-
-// Kanji, vocab, and kana entries can share the same character (a
-// one-kanji word, or a kana that's also a valid word on its own), so
-// the character alone isn't a safe React key / selection identity.
-function entryKey(entry) {
-	return `${entry.type}:${entry.level}:${entry.kanji || entry.kana}`
-}
-
-function StatusBadge({ state, t }) {
-	const meta = STATUS_META[state] ?? STATUS_META.new
-	return (
-		<span className="status-badge">
-			<span className="status-badge__dot" style={{ '--dot-color': meta.color }} />
-			{t?.[`status_${state}`] ?? meta.fallback}
-		</span>
-	)
-}
-
-function TypeBadge({ type, t }) {
-	const meta = TYPE_META[type] ?? TYPE_META.kanji
-	const label = type === 'kanji' ? (t?.dictKanji ?? 'Kanji')
-		: type === 'hiragana' ? (t?.dictHiragana ?? 'Hiragana')
-		: type === 'katakana' ? (t?.dictKatakana ?? 'Katakana')
-		: (t?.dictVocab ?? 'Vocabulaire')
-	return (
-		<span className="dict-type-pill" style={{ '--pill-color': meta.color }}>
-			{label}
-		</span>
-	)
-}
-
-// A drawn glyph, not an emoji — 🔊 was the only emoji anywhere in this
-// screen or QuizComponents, which otherwise draws its own icons (see
-// Loading's spinner). Sits inside the hanko-style stamp button below.
-function SpeakIcon() {
-	return (
-		<svg
-			className="dict-detail__speak-icon"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			aria-hidden="true"
-		>
-			<polygon points="4,9 8,9 12,5 12,19 8,15 4,15" fill="currentColor" stroke="none" />
-			<path d="M15.5 8.5a5 5 0 0 1 0 7" />
-			<path d="M18.5 6a8.5 8.5 0 0 1 0 12" />
-		</svg>
-	)
-}
-
-// A small magnifier for the search bar — same reasoning as SpeakIcon.
-function SearchIcon() {
-	return (
-		<svg
-			className="dict-index-bar__icon"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			aria-hidden="true"
-		>
-			<circle cx="11" cy="11" r="7" />
-			<path d="M21 21l-4.35-4.35" />
-		</svg>
-	)
-}
-
-function speakJapanese(text) {
-	if (!text) return
-	window.speechSynthesis.cancel()
-	const u = new SpeechSynthesisUtterance(text)
-	u.lang = 'ja-JP'
-	u.rate = 0.8
-	window.speechSynthesis.speak(u)
-}
 
 export default function DictionaryScreen({ session }) {
 	const { t, lang } = useLang()
