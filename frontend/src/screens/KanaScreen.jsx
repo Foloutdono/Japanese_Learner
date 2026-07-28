@@ -6,7 +6,7 @@ import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   CharDisplay, MCQGrid, TypeInput, DoneMessage,
-  DeckProgress, Flashcard,
+  DeckProgress, Flashcard, RevealActions,
 } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
@@ -247,6 +247,10 @@ export default function KanaScreen({ session }) {
 
   // ── Quiz ──
   const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
+  // Both hiragana sets (basic/combos) and both katakana sets share one
+  // dictionary category each — the dictionary itself doesn't
+  // distinguish combos from the base set.
+  const dictCategory = selectedSet.slug.startsWith('hiragana') ? 'hiragana' : 'katakana'
 
   return (
     <div className="screen">
@@ -280,6 +284,10 @@ export default function KanaScreen({ session }) {
                         <div className="flashcard-answer">{card.romaji}</div>
                       </div>
                     }
+                    dictTerm={card.kana}
+                    dictCategory={dictCategory}
+                    session={session}
+                    onReplaySound={() => playKana(card.romaji)}
                   />
                 </PromptCard>
               )}
@@ -298,6 +306,17 @@ export default function KanaScreen({ session }) {
             {mode === 'write' && (
               <TypeInput value={input} onChange={setInput} onSubmit={onTypeSubmit}
                 submitted={submitted} answer={card.romaji} placeholder={t.typeRomaji} />
+            )}
+            {(mode === 'qcm' || mode === 'write') && (
+              <RevealActions
+                t={t}
+                revealed={mode === 'qcm' ? answered : submitted}
+                resetKey={card.card_id}
+                dictTerm={card.kana}
+                dictCategory={dictCategory}
+                session={session}
+                onReplaySound={() => playKana(card.romaji)}
+              />
             )}
             <RatingBar active={showRating && !locked} onRate={postReview} />
           </>

@@ -356,16 +356,118 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 //     resetKey={cardId}
 //     t={t}
 //   />
-export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCategory, session, sound }) {
-  const [revealed, setRevealed] = useState(false)
+// ── Reveal actions (dictionary lookup + replay sound) ──────
+// The pair of secondary actions that show up once an answer is
+// revealed: jump to the full dictionary entry, and replay its
+// pronunciation. Pulled out of Flashcard so MCQ/write modes — which
+// have their own reveal moment but aren't a Flashcard — can drop the
+// exact same row in after they show the answer, instead of a second
+// copy of this logic drifting out of sync.
+//
+// Both actions are opt-in and independent:
+//  - dictionary lookup needs dictTerm + dictCategory + session
+//  - replay-sound needs either an explicit onReplaySound callback
+//    (e.g. a screen's own playKana/speakJapanese with the right
+//    argument) or, failing that, falls back to speaking `sound` (or
+//    dictTerm if `sound` isn't given) via the browser's own TTS.
+// A caller that wires up neither renders nothing at all.
+export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, session, sound, onReplaySound }) {
   const [showDictionary, setShowDictionary] = useState(false)
+
+  // Same as Flashcard's own reset — a caller reusing this across
+  // cards (passing the card's id as resetKey) shouldn't carry a
+  // dictionary sheet left open from the previous card into the next.
+  useEffect(() => { setShowDictionary(false) }, [resetKey])
+
+  const speakText = sound ?? dictTerm
+  const canLookUp = revealed && dictTerm && dictCategory && session
+  const canPlaySound = revealed && (onReplaySound || speakText)
+
+  if (!canLookUp && !canPlaySound) return null
+
+  function openDictionary(e) {
+    e?.stopPropagation?.()
+    playClick()
+    setShowDictionary(true)
+  }
+
+  function closeDictionary(e) {
+    e?.stopPropagation?.()
+    setShowDictionary(false)
+  }
+
+  function replaySound(e) {
+    e?.stopPropagation?.()
+    if (onReplaySound) onReplaySound()
+    else speakJapanese(speakText)
+  }
+
+  return (
+    <>
+      <div className="reveal-actions">
+        {canPlaySound && (
+          <button
+            type="button"
+            onClick={replaySound}
+            className="reveal-action-btn"
+            title={t.listen}
+            aria-label={t.listen}
+          >
+            <SpeakIcon />
+            {t.listen}
+          </button>
+        )}
+        {canLookUp && (
+          <button
+            type="button"
+            onClick={openDictionary}
+            className="reveal-action-btn"
+            title={t.openDictionary}
+            aria-label={t.openDictionary}
+          >
+            <SearchIcon />
+            {t.openDictionary}
+          </button>
+        )}
+      </div>
+
+      {showDictionary && (
+        <DictionaryLookupSheet
+          term={dictTerm}
+          category={dictCategory}
+          session={session}
+          onClose={closeDictionary}
+        />
+      )}
+    </>
+  )
+}
+
+// ── Flashcard (click anywhere to reveal, then flip freely) ─
+// Owns its own reveal/face state so the card behaves like a physical
+// flashcard: the first click reveals the back (and fires `onReveal`
+// once, e.g. so the parent can log the card as "seen"); every click
+// after that just flips between front and back at will, with no extra
+// prop wiring needed from the parent.
+//
+//   <Flashcard
+//     front={<CharDisplay char={char} />}
+//     back={<RevealPanel left={meaning} kana={kana} t={t} />}
+//     onReveal={() => markSeen(cardId)}
+//     resetKey={cardId}
+//     t={t}
+//   />
+//
+// dictTerm/dictCategory/session/sound/onReplaySound are all opt-in —
+// see RevealActions above — and pass straight through to it.
+export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCategory, session, sound, onReplaySound }) {
+  const [revealed, setRevealed] = useState(false)
 
   // When the caller moves on to a new card (e.g. passes the card's id
   // as resetKey), snap back to the unrevealed front instead of
   // carrying over the previous card's flip state.
   useEffect(() => {
     setRevealed(false)
-    setShowDictionary(false)
   }, [resetKey])
 
   // Reveal is now one-way: once flipped, the card settles on its
@@ -397,79 +499,22 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCa
     return () => window.removeEventListener('keydown', handler)
   }, [revealed])
 
-  // Opt-in: only shows once the caller passes what's needed to look
-  // the card up (a term, its dictionary category, and a session for
-  // the API call). Callers that don't pass these just keep the plain
-  // reveal-only card, unchanged.
-  const canLookUp = revealed && dictTerm && dictCategory && session
-
-  // Same opt-in pattern as the dictionary lookup above: falls back to
-  // dictTerm so a caller that already wires up dictTerm/dictCategory
-  // gets replay-sound for free, but can still pass an explicit `sound`
-  // (e.g. a kana reading) when the dictionary term itself isn't what
-  // should be spoken aloud.
-  const speakText = sound ?? dictTerm
-  const canPlaySound = revealed && speakText
-
-  function openDictionary(e) {
-    e.stopPropagation()
-    playClick()
-    setShowDictionary(true)
-  }
-
-  function closeDictionary(e) {
-    e?.stopPropagation?.()
-    setShowDictionary(false)
-  }
-
-  function replaySound(e) {
-    e.stopPropagation()
-    speakJapanese(speakText)
-  }
-
   return (
     <div onClick={handleClick} className="flashcard">
       {revealed ? back : front}
       <div className="flashcard__hint">
         {!revealed && (t.tapToReveal)}
-        {(canPlaySound || canLookUp) && (
-          <div className="flashcard__actions">
-            {canPlaySound && (
-              <button
-                type="button"
-                onClick={replaySound}
-                className="flashcard__sound-btn"
-                title={t.listen}
-                aria-label={t.listen}
-              >
-                <SpeakIcon />
-                {t.listen}
-              </button>
-            )}
-            {canLookUp && (
-              <button
-                type="button"
-                onClick={openDictionary}
-                className="flashcard__dict-btn"
-                title={t.openDictionary}
-                aria-label={t.openDictionary}
-              >
-                <SearchIcon />
-                {t.openDictionary}
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {showDictionary && (
-        <DictionaryLookupSheet
-          term={dictTerm}
-          category={dictCategory}
+        <RevealActions
+          t={t}
+          revealed={revealed}
+          resetKey={resetKey}
+          dictTerm={dictTerm}
+          dictCategory={dictCategory}
           session={session}
-          onClose={closeDictionary}
+          sound={sound}
+          onReplaySound={onReplaySound}
         />
-      )}
+      </div>
     </div>
   )
 }
