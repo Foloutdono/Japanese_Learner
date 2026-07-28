@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useLang } from '../LangContext'
 import { apiFetch } from '../api'
 import { Readings } from './Readings'
@@ -326,7 +327,7 @@ export function DictionaryLookupSheet({ term, category, session, onClose }) {
   const { t, lang } = useLang()
   const { entry, loading, error } = useDictionaryLookup(session, term, category, lang, true)
 
-  return (
+  return createPortal(
     <div onClick={onClose} className="dict-modal-overlay">
       <div onClick={e => e.stopPropagation()} className="dict-modal-content">
         {loading && (
@@ -345,6 +346,7 @@ export function DictionaryLookupSheet({ term, category, session, onClose }) {
           <DictionaryDetail entry={entry} onClose={onClose} />
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

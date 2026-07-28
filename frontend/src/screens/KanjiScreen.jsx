@@ -405,6 +405,7 @@ export default function KanjiScreen({ session }) {
                 dictCategory="kanji"
                 session={session}
                 onReplaySound={() => speakJapanese(card.kana)}
+                variant="standalone"
               />
             )}
 
@@ -435,6 +436,7 @@ export default function KanjiScreen({ session }) {
                 dictCategory="kanji"
                 session={session}
                 onReplaySound={() => speakJapanese(card.kana)}
+                variant="standalone"
               />
             )}
 

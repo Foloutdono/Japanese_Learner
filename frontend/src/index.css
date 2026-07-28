@@ -1585,6 +1585,31 @@ input:focus { border-color: var(--accent2); }
 .reveal-action-btn:hover { color: var(--accent); }
 .reveal-action-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
+/* Standalone variant — MCQ/write modes have no existing hint row for
+   this to blend into like Flashcard's does, so it gets its own
+   background pill, border, and bigger tap target instead of the
+   quiet inline text treatment, or it reads as a stray grey line
+   easily missed below the answer. */
+.reveal-actions--standalone {
+  margin-top: 18px;
+  gap: 12px;
+}
+.reveal-action-btn--standalone {
+  padding: 9px 16px;
+  background: var(--chip-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+}
+.reveal-action-btn--standalone:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--bg-card-hover);
+}
+.reveal-action-btn--standalone svg { width: 15px; height: 15px; }
+
 /* A hairline underline in the type's colour, not a filled pill — the
    accent marks the label instead of drowning it, keeping the palette
    restrained (ink + one accent) the way a seal-stamp of colour sits

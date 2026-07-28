@@ -316,6 +316,7 @@ export default function KanaScreen({ session }) {
                 dictCategory={dictCategory}
                 session={session}
                 onReplaySound={() => playKana(card.romaji)}
+                variant="standalone"
               />
             )}
             <RatingBar active={showRating && !locked} onRate={postReview} />
