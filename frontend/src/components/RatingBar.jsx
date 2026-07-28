@@ -22,7 +22,6 @@ export default function RatingBar({ onRate, active }) {
   // Shared by the on-screen buttons and the keyboard shortcuts below,
   // so a rating fired either way gets the same tap feedback.
   function handleRate(q) {
-    playClick()
     if (q > 2)
       playSfx('success')
     else
