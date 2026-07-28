@@ -1,5 +1,5 @@
 import { useLang } from '../LangContext'
-import { playClick } from './sound'
+import { playUi } from './sound'
 
 /**
  * LevelSelector
@@ -56,7 +56,7 @@ export default function LevelSelector({
           <button
             key={l}
             type="button"
-            onClick={() => { playClick(); onSelect(l) }}
+            onClick={() => { playUi('click-selection'); onSelect(l) }}
             className="choice-row"
             style={rowStyle}
           >

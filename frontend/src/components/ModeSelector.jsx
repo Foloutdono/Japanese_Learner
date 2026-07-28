@@ -1,4 +1,4 @@
-import { playClick } from './sound'
+import { playUi } from './sound'
 
 /**
  * ModeSelector
@@ -31,7 +31,7 @@ export default function ModeSelector({ modes, onSelect, title }) {
           <button
             key={m.key}
             type="button"
-            onClick={() => { playClick(); onSelect(m.key) }}
+            onClick={() => { playUi('click-selection'); onSelect(m.key) }}
             className="choice-row"
             style={m.color ? { '--row-color': m.color } : undefined}
           >

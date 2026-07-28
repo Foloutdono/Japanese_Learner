@@ -96,7 +96,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
   return (
     <>
       <button
-        onClick={() => { playUi('click'); setOpenAndNotify(!open) }}
+        onClick={() => { playUi('click-menu'); setOpenAndNotify(!open) }}
         aria-label={t.menu}
         className="burger-toggle"
       >
@@ -104,11 +104,11 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
       </button>
 
       {open && createPortal(
-        <div className="burger-overlay" onClick={() => { playUi('click'); close() }}>
+        <div className="burger-overlay" onClick={() => { playUi('click-menu'); close() }}>
           <div className="burger-drawer" onClick={e => e.stopPropagation()}>
             <div className="burger-drawer__header">
               <span className="burger-drawer__title">{t.menu}</span>
-              <button className="burger-drawer__close" onClick={() => { playUi('click'); close() }}>✕</button>
+              <button className="burger-drawer__close" onClick={() => { playUi('click-menu'); close() }}>✕</button>
             </div>
 
             <nav className="burger-drawer__nav">
