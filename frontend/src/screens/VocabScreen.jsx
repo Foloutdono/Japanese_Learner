@@ -323,16 +323,27 @@ export default function VocabScreen({ session }) {
                 )}
 
                 {card.format === 'qcm' && (
-                  <InlineReveal
-                    t={t}
-                    kana={card.kanji ? card.kana : null}
-                    revealed={answered}
-                    main={
-                      isKjToM
-                        ? <CharDisplay char={wordForm(card)} size={72} />
-                        : <CharDisplay char={card.meaning} size={72} />
-                    }
-                  />
+                  <>
+                    <InlineReveal
+                      t={t}
+                      kana={card.kanji ? card.kana : null}
+                      revealed={answered}
+                      main={
+                        isKjToM
+                          ? <CharDisplay char={wordForm(card)} size={72} />
+                          : <CharDisplay char={card.meaning} size={72} />
+                      }
+                    />
+                    <RevealActions
+                      t={t}
+                      revealed={answered}
+                      resetKey={card.card_id}
+                      dictTerm={wordForm(card)}
+                      dictCategory="vocab"
+                      session={session}
+                      onReplaySound={() => speakJapanese(card.kana)}
+                    />
+                  </>
                 )}
               </PromptCard>
             </CardTransition>
@@ -342,19 +353,6 @@ export default function VocabScreen({ session }) {
                 choices={card.choices.map(c => isKjToM ? c.meaning : wordForm(c))}
                 correct={isKjToM ? card.meaning : wordForm(card)}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
-              />
-            )}
-
-            {card.format === 'qcm' && (
-              <RevealActions
-                t={t}
-                revealed={answered}
-                resetKey={card.card_id}
-                dictTerm={wordForm(card)}
-                dictCategory="vocab"
-                session={session}
-                onReplaySound={() => speakJapanese(card.kana)}
-                variant="standalone"
               />
             )}
 
