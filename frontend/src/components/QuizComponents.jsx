@@ -23,7 +23,7 @@ function useIsCramped() {
       window.removeEventListener('resize', check)
       window.clearTimeout(id)
     }
-  }, [])  // ← add this
+  }, [])
   return cramped
 }
 
