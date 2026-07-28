@@ -6,7 +6,7 @@ import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   MCQGrid, DoneMessage, DeckProgress,
-  InlineReveal, Flashcard, MeaningDisplay, CharDisplay,
+  InlineReveal, Flashcard, MeaningDisplay, CharDisplay, RevealActions,
 } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
@@ -358,6 +358,10 @@ export default function KanjiScreen({ session }) {
                           }
                         />
                       }
+                      dictTerm={card.kanji}
+                      dictCategory="kanji"
+                      session={session}
+                      onReplaySound={() => speakJapanese(card.kana)}
                     />
                   )}
 
@@ -392,6 +396,18 @@ export default function KanjiScreen({ session }) {
               />
             )}
 
+            {card.format === 'qcm' && (
+              <RevealActions
+                t={t}
+                revealed={answered}
+                resetKey={card.card_id}
+                dictTerm={card.kanji}
+                dictCategory="kanji"
+                session={session}
+                onReplaySound={() => speakJapanese(card.kana)}
+              />
+            )}
+
             {mode === 'write' && card.kanji && (
               <DrawingQuiz
                 kanji={card.kanji}
@@ -408,6 +424,18 @@ export default function KanjiScreen({ session }) {
               <div className="quiz-writing-result">
                 <CharDisplay char={card.kanji} size={72} />
               </div>
+            )}
+
+            {mode === 'write' && (
+              <RevealActions
+                t={t}
+                revealed={answered}
+                resetKey={card.card_id}
+                dictTerm={card.kanji}
+                dictCategory="kanji"
+                session={session}
+                onReplaySound={() => speakJapanese(card.kana)}
+              />
             )}
 
             <RatingBar active={showRating && !locked} onRate={postReview} />

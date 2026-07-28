@@ -6,7 +6,7 @@ import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
   MCQGrid, DoneMessage, DeckProgress,
-  InlineReveal, Flashcard, CharDisplay, MeaningDisplay,
+  InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
 } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
@@ -315,6 +315,10 @@ export default function VocabScreen({ session }) {
                         }
                       />
                     }
+                    dictTerm={wordForm(card)}
+                    dictCategory="vocab"
+                    session={session}
+                    onReplaySound={() => speakJapanese(card.kana)}
                   />
                 )}
 
@@ -338,6 +342,18 @@ export default function VocabScreen({ session }) {
                 choices={card.choices.map(c => isKjToM ? c.meaning : wordForm(c))}
                 correct={isKjToM ? card.meaning : wordForm(card)}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
+              />
+            )}
+
+            {card.format === 'qcm' && (
+              <RevealActions
+                t={t}
+                revealed={answered}
+                resetKey={card.card_id}
+                dictTerm={wordForm(card)}
+                dictCategory="vocab"
+                session={session}
+                onReplaySound={() => speakJapanese(card.kana)}
               />
             )}
 

@@ -30,7 +30,7 @@ VOCAB_FR_MAP = VOCAB_FR
 _BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Path to kanji_data/
-_DATA_DIR = os.path.join(_BASE_DIR, "kanjidic2", "kanji_data")
+_DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji_data")
 
 with open(os.path.join(_DATA_DIR, "radicals.json"), encoding="utf-8") as f:
     _ALL_RADICALS = json.load(f)
