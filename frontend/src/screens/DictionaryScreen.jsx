@@ -930,18 +930,3 @@ function DetailPanel({ entry, onClose, onRadicalClick, onKanjiClick }) {
 		</>
 	)
 }
-
-// ── Info row ──────────────────────────────────────────────
-
-function InfoRow({ label, value }) {
-	return (
-		<div className="dict-info-row">
-			<span className="dict-info-row__label">
-				{label}
-			</span>
-			<span className="dict-info-row__value">
-				{value}
-			</span>
-		</div>
-	)
-}
