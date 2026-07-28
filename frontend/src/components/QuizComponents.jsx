@@ -371,15 +371,12 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 //    argument) or, failing that, falls back to speaking `sound` (or
 //    dictTerm if `sound` isn't given) via the browser's own TTS.
 // A caller that wires up neither renders nothing at all.
-// `variant="inline"` (default) is the quiet, low-weight style that
-// sits in Flashcard's own hint row, next to "tap to reveal" — it
-// shouldn't outweigh the card's own content.
-// `variant="standalone"` is for MCQ/write modes, which have no
-// existing hint row to blend into: dropped on its own under the
-// choices/input, it needs its own visual presence (background, border,
-// bigger tap target) or it reads as a stray line of grey text easily
-// missed below the answer.
-export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, session, sound, onReplaySound, variant = 'inline' }) {
+//
+// Icon-only, pinned to the card's top-left corner (see .reveal-actions
+// in index.css) — the caller is expected to render this as a child of
+// a `position: relative` card (PromptCard/.flashcard), not out in the
+// surrounding page flow.
+export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, session, sound, onReplaySound }) {
   const [showDictionary, setShowDictionary] = useState(false)
 
   // Same as Flashcard's own reset — a caller reusing this across
@@ -410,34 +407,29 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, s
     else speakJapanese(speakText)
   }
 
-  const rowClass = variant === 'standalone' ? 'reveal-actions reveal-actions--standalone' : 'reveal-actions'
-  const btnClass = variant === 'standalone' ? 'reveal-action-btn reveal-action-btn--standalone' : 'reveal-action-btn'
-
   return (
     <>
-      <div className={rowClass}>
+      <div className="reveal-actions">
         {canPlaySound && (
           <button
             type="button"
             onClick={replaySound}
-            className={btnClass}
+            className="reveal-action-btn"
             title={t.listen}
             aria-label={t.listen}
           >
             <SpeakIcon />
-            {t.listen}
           </button>
         )}
         {canLookUp && (
           <button
             type="button"
             onClick={openDictionary}
-            className={btnClass}
+            className="reveal-action-btn"
             title={t.openDictionary}
             aria-label={t.openDictionary}
           >
             <SearchIcon />
-            {t.openDictionary}
           </button>
         )}
       </div>
@@ -512,19 +504,19 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCa
 
   return (
     <div onClick={handleClick} className="flashcard">
+      <RevealActions
+        t={t}
+        revealed={revealed}
+        resetKey={resetKey}
+        dictTerm={dictTerm}
+        dictCategory={dictCategory}
+        session={session}
+        sound={sound}
+        onReplaySound={onReplaySound}
+      />
       {revealed ? back : front}
       <div className="flashcard__hint">
         {!revealed && (t.tapToReveal)}
-        <RevealActions
-          t={t}
-          revealed={revealed}
-          resetKey={resetKey}
-          dictTerm={dictTerm}
-          dictCategory={dictCategory}
-          session={session}
-          sound={sound}
-          onReplaySound={onReplaySound}
-        />
       </div>
     </div>
   )

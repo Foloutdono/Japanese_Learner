@@ -1550,7 +1550,7 @@ input:focus { border-color: var(--accent2); }
   max-width: min(320px, 80vw);
 }
 
-.flashcard { cursor: pointer; }
+.flashcard { position: relative; cursor: pointer; }
 
 .flashcard__hint {
   font-size: 12px;
@@ -1558,57 +1558,41 @@ input:focus { border-color: var(--accent2); }
   margin-top: 10px;
 }
 
-/* Houses the sound-replay and dictionary-lookup buttons side by side
-   once an answer is revealed. Used inside Flashcard's own hint area,
-   and dropped standalone under MCQ/write modes after they reveal an
-   answer — same row, same quiet weight, wherever it shows up. */
+/* Houses the sound-replay and dictionary-lookup buttons, pinned to
+   the top-left corner of the card they belong to (Flashcard's own
+   `.flashcard`, or the plain `.prompt-card` in MCQ/write modes —
+   both are `position: relative`, see those rules). Icon-only so the
+   pair reads as a permanent, unobtrusive corner control rather than
+   competing with the card's own content for attention. */
 .reveal-actions {
+  position: absolute;
+  top: 10px;
+  left: 10px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 18px;
-  margin-top: 10px;
+  gap: 8px;
+  z-index: 3;
 }
 
 .reveal-action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: transparent;
-  border: none;
-  padding: 0;
-  color: var(--text-secondary);
-  font-size: 12px;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-.reveal-action-btn:hover { color: var(--accent); }
-.reveal-action-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
-
-/* Standalone variant — MCQ/write modes have no existing hint row for
-   this to blend into like Flashcard's does, so it gets its own
-   background pill, border, and bigger tap target instead of the
-   quiet inline text treatment, or it reads as a stray grey line
-   easily missed below the answer. */
-.reveal-actions--standalone {
-  margin-top: 18px;
-  gap: 12px;
-}
-.reveal-action-btn--standalone {
-  padding: 9px 16px;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
   background: var(--chip-bg);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 50%;
   color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
-.reveal-action-btn--standalone:hover {
+.reveal-action-btn:hover {
   color: var(--accent);
   border-color: var(--accent);
   background: var(--bg-card-hover);
 }
-.reveal-action-btn--standalone svg { width: 15px; height: 15px; }
+.reveal-action-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
 
 /* A hairline underline in the type's colour, not a filled pill — the
    accent marks the label instead of drowning it, keeping the palette
@@ -5528,6 +5512,7 @@ input:focus { border-color: var(--accent2); }
 
 /* ── PromptCard component ─────────────────────────────────── */
 .prompt-card {
+  position: relative;
   background: var(--bg-card);
   border-radius: 12px;
   padding: 40px 24px;

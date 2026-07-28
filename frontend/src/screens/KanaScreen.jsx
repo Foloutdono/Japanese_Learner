@@ -295,6 +295,15 @@ export default function KanaScreen({ session }) {
               {(mode === 'qcm' || mode === 'write') && (
                 <PromptCard>
                   <CharDisplay char={card.kana} />
+                  <RevealActions
+                    t={t}
+                    revealed={mode === 'qcm' ? answered : submitted}
+                    resetKey={card.card_id}
+                    dictTerm={card.kana}
+                    dictCategory={dictCategory}
+                    session={session}
+                    onReplaySound={() => playKana(card.romaji)}
+                  />
                 </PromptCard>
               )}
             </CardTransition>
@@ -306,18 +315,6 @@ export default function KanaScreen({ session }) {
             {mode === 'write' && (
               <TypeInput value={input} onChange={setInput} onSubmit={onTypeSubmit}
                 submitted={submitted} answer={card.romaji} placeholder={t.typeRomaji} />
-            )}
-            {(mode === 'qcm' || mode === 'write') && (
-              <RevealActions
-                t={t}
-                revealed={mode === 'qcm' ? answered : submitted}
-                resetKey={card.card_id}
-                dictTerm={card.kana}
-                dictCategory={dictCategory}
-                session={session}
-                onReplaySound={() => playKana(card.romaji)}
-                variant="standalone"
-              />
             )}
             <RatingBar active={showRating && !locked} onRate={postReview} />
           </>

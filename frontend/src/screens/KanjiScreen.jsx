@@ -366,16 +366,27 @@ export default function KanjiScreen({ session }) {
                   )}
 
                   {card.format === 'qcm' && (
-                    <InlineReveal
-                      t={t}
-                      kana={card.kana}
-                      revealed={answered}
-                      main={
-                        isKjToM
-                          ? <CharDisplay char={card.kanji} size={100} />
-                          : <MeaningDisplay meaning={card.meaning} size={44} />
-                      }
-                    />
+                    <>
+                      <InlineReveal
+                        t={t}
+                        kana={card.kana}
+                        revealed={answered}
+                        main={
+                          isKjToM
+                            ? <CharDisplay char={card.kanji} size={100} />
+                            : <MeaningDisplay meaning={card.meaning} size={44} />
+                        }
+                      />
+                      <RevealActions
+                        t={t}
+                        revealed={answered}
+                        resetKey={card.card_id}
+                        dictTerm={card.kanji}
+                        dictCategory="kanji"
+                        session={session}
+                        onReplaySound={() => speakJapanese(card.kana)}
+                      />
+                    </>
                   )}
                 </PromptCard>
               ) : (
@@ -384,6 +395,15 @@ export default function KanjiScreen({ session }) {
                   {card.kana && (
                     <div className="quiz-subtitle">({card.kana})</div>
                   )}
+                  <RevealActions
+                    t={t}
+                    revealed={answered}
+                    resetKey={card.card_id}
+                    dictTerm={card.kanji}
+                    dictCategory="kanji"
+                    session={session}
+                    onReplaySound={() => speakJapanese(card.kana)}
+                  />
                 </PromptCard>
               )}
             </CardTransition>
@@ -393,19 +413,6 @@ export default function KanjiScreen({ session }) {
                 choices={card.choices.map(c => isKjToM ? c.meaning : c.kanji)}
                 correct={isKjToM ? card.meaning : card.kanji}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
-              />
-            )}
-
-            {card.format === 'qcm' && (
-              <RevealActions
-                t={t}
-                revealed={answered}
-                resetKey={card.card_id}
-                dictTerm={card.kanji}
-                dictCategory="kanji"
-                session={session}
-                onReplaySound={() => speakJapanese(card.kana)}
-                variant="standalone"
               />
             )}
 
@@ -425,19 +432,6 @@ export default function KanjiScreen({ session }) {
               <div className="quiz-writing-result">
                 <CharDisplay char={card.kanji} size={72} />
               </div>
-            )}
-
-            {mode === 'write' && (
-              <RevealActions
-                t={t}
-                revealed={answered}
-                resetKey={card.card_id}
-                dictTerm={card.kanji}
-                dictCategory="kanji"
-                session={session}
-                onReplaySound={() => speakJapanese(card.kana)}
-                variant="standalone"
-              />
             )}
 
             <RatingBar active={showRating && !locked} onRate={postReview} />
