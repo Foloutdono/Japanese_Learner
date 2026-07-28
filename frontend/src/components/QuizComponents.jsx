@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 import { playClick } from './sound'
+import { Readings, ReadingGroup } from './Readings'
+import { DictionaryLookupSheet, SearchIcon } from './DictionaryDetail'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -251,78 +253,10 @@ export function DeckProgress({ stats }) {
   )
 }
 
-// ── Kanji/vocab readings display ──────────────────────────
-// On'yomi readings are written in katakana, kun'yomi in hiragana — a
-// kanji's combined reading field mixes both, separated by '・' or ';',
-// e.g. "イチ・イツ・ひと~・ひと.つ". We classify each token by its first
-// actual kana character (skipping '.'/'~', which are okurigana/variant
-// markers, not kana). Vocab readings don't have this on/kun distinction
-// (a whole word has one register of readings, not two), so when a field
-// doesn't contain both kinds, Readings just renders a plain list instead
-// of forcing on'yomi/kun'yomi labels onto it.
-function isOnyomiToken(token) {
-  const firstKana = [...token].find(c => /[\u3040-\u30FF]/.test(c))
-  if (!firstKana) return false
-  return /[\u30A0-\u30FF]/.test(firstKana) // katakana range
-}
-
-function splitReadingTokens(kana) {
-  return (kana || '')
-    .split(/[・;]/)
-    .map(s => s.trim())
-    .filter(Boolean)
-}
-
-export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false }) {
-  if (!readings.length) return null
-  const style = {
-    '--reading-size': `${size}px`,
-    '--reading-index-size': `${Math.max(size - 5, 10)}px`,
-    '--reading-color': color,
-    '--reading-font': isLarge ? 'var(--font-jp)' : 'inherit',
-  }
-  return (
-    <div className="reading-group" style={style}>
-      {label && (
-        <div className={`reading-group__label${center ? ' reading-group__label--center' : ''}`}>
-          {label}
-        </div>
-      )}
-      <div className={`reading-group__list${center ? ' reading-group__list--center' : ''}`}>
-        {readings.map((r, i) => (
-          <span key={i} className="reading-group__item">
-            {readings.length > 1 && (
-              <span className="reading-group__item-index">{i + 1}.</span>
-            )}
-            <span className="reading-group__item-text">{r}</span>
-          </span>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// Renders a kana reading field elegantly: on'yomi/kun'yomi split for a
-// kanji's mixed readings, or a plain (numbered if there's more than one)
-// list for a single-register reading like vocab. Returns null if empty.
-export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = false, isLarge = false }) {
-  const tokens = splitReadingTokens(kana)
-  if (!tokens.length) return null
-
-  const on  = tokens.filter(isOnyomiToken)
-  const kun = tokens.filter(t => !isOnyomiToken(t))
-
-  if (on.length && kun.length) {
-    return (
-      <div>
-        <ReadingGroup label={onLabel}  readings={on}  size={size} color={color} center={center} isLarge={isLarge} />
-        <ReadingGroup label={kunLabel} readings={kun} size={size} color={color} center={center} isLarge={isLarge} />
-      </div>
-    )
-  }
-
-  return <ReadingGroup readings={tokens} size={size} color={color} center={center} isLarge={isLarge} />
-}
+// Readings display now lives in ./Readings (imported above) —
+// re-exported here too for backward compatibility, since other
+// screens still import Readings/ReadingGroup from QuizComponents.
+export { Readings, ReadingGroup }
 
 // ── Meaning display ────────────────────────────────────────
 // A card's `meaning` field is often several synonyms separated by
@@ -422,30 +356,30 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 //     resetKey={cardId}
 //     t={t}
 //   />
-export function Flashcard({ front, back, onReveal, t, resetKey }) {
+export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCategory, session }) {
   const [revealed, setRevealed] = useState(false)
-  const [showBack, setShowBack] = useState(false)
+  const [showDictionary, setShowDictionary] = useState(false)
 
   // When the caller moves on to a new card (e.g. passes the card's id
   // as resetKey), snap back to the unrevealed front instead of
   // carrying over the previous card's flip state.
   useEffect(() => {
     setRevealed(false)
-    setShowBack(false)
+    setShowDictionary(false)
   }, [resetKey])
 
+  // Reveal is now one-way: once flipped, the card settles on its
+  // answer instead of flipping back and forth forever. Retired in
+  // favour of the dictionary lookup below — once you've seen the
+  // answer, looking the entry up is more useful than re-hiding it.
   const handleClick = () => {
+    if (revealed) return
     playClick()
-    if (!revealed) {
-      setRevealed(true)
-      setShowBack(true)
-      onReveal?.()
-    } else {
-      setShowBack(s => !s)
-    }
+    setRevealed(true)
+    onReveal?.()
   }
 
-  // Keyboard reveal/flip: spacebar, plus ZQSD — the AZERTY keyboard's
+  // Keyboard reveal: spacebar, plus ZQSD — the AZERTY keyboard's
   // equivalent home-row of WASD — so a French keyboard gets a
   // natural one-handed shortcut instead of reaching for the mouse.
   useEffect(() => {
@@ -463,14 +397,50 @@ export function Flashcard({ front, back, onReveal, t, resetKey }) {
     return () => window.removeEventListener('keydown', handler)
   }, [revealed])
 
+  // Opt-in: only shows once the caller passes what's needed to look
+  // the card up (a term, its dictionary category, and a session for
+  // the API call). Callers that don't pass these just keep the plain
+  // reveal-only card, unchanged.
+  const canLookUp = revealed && dictTerm && dictCategory && session
+
+  function openDictionary(e) {
+    e.stopPropagation()
+    playClick()
+    setShowDictionary(true)
+  }
+
+  function closeDictionary(e) {
+    e?.stopPropagation?.()
+    setShowDictionary(false)
+  }
+
   return (
     <div onClick={handleClick} className="flashcard">
-      {showBack ? back : front}
+      {revealed ? back : front}
       <div className="flashcard__hint">
-        {revealed
-          ? (t.tapToFlip)
-          : (t.tapToReveal)}
+        {!revealed && (t.tapToReveal)}
+        {canLookUp && (
+          <button
+            type="button"
+            onClick={openDictionary}
+            className="flashcard__dict-btn"
+            title={t.openDictionary}
+            aria-label={t.openDictionary}
+          >
+            <SearchIcon />
+            {t.openDictionary}
+          </button>
+        )}
       </div>
+
+      {showDictionary && (
+        <DictionaryLookupSheet
+          term={dictTerm}
+          category={dictCategory}
+          session={session}
+          onClose={closeDictionary}
+        />
+      )}
     </div>
   )
 }
