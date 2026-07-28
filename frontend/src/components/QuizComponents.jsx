@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 import { playClick } from './sound'
 import { Readings, ReadingGroup } from './Readings'
-import { DictionaryLookupSheet, SearchIcon } from './DictionaryDetail'
+import { DictionaryLookupSheet, SearchIcon, SpeakIcon, speakJapanese } from './DictionaryDetail'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -356,7 +356,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 //     resetKey={cardId}
 //     t={t}
 //   />
-export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCategory, session }) {
+export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCategory, session, sound }) {
   const [revealed, setRevealed] = useState(false)
   const [showDictionary, setShowDictionary] = useState(false)
 
@@ -403,6 +403,14 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCa
   // reveal-only card, unchanged.
   const canLookUp = revealed && dictTerm && dictCategory && session
 
+  // Same opt-in pattern as the dictionary lookup above: falls back to
+  // dictTerm so a caller that already wires up dictTerm/dictCategory
+  // gets replay-sound for free, but can still pass an explicit `sound`
+  // (e.g. a kana reading) when the dictionary term itself isn't what
+  // should be spoken aloud.
+  const speakText = sound ?? dictTerm
+  const canPlaySound = revealed && speakText
+
   function openDictionary(e) {
     e.stopPropagation()
     playClick()
@@ -414,22 +422,43 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCa
     setShowDictionary(false)
   }
 
+  function replaySound(e) {
+    e.stopPropagation()
+    speakJapanese(speakText)
+  }
+
   return (
     <div onClick={handleClick} className="flashcard">
       {revealed ? back : front}
       <div className="flashcard__hint">
         {!revealed && (t.tapToReveal)}
-        {canLookUp && (
-          <button
-            type="button"
-            onClick={openDictionary}
-            className="flashcard__dict-btn"
-            title={t.openDictionary}
-            aria-label={t.openDictionary}
-          >
-            <SearchIcon />
-            {t.openDictionary}
-          </button>
+        {(canPlaySound || canLookUp) && (
+          <div className="flashcard__actions">
+            {canPlaySound && (
+              <button
+                type="button"
+                onClick={replaySound}
+                className="flashcard__sound-btn"
+                title={t.listen}
+                aria-label={t.listen}
+              >
+                <SpeakIcon />
+                {t.listen}
+              </button>
+            )}
+            {canLookUp && (
+              <button
+                type="button"
+                onClick={openDictionary}
+                className="flashcard__dict-btn"
+                title={t.openDictionary}
+                aria-label={t.openDictionary}
+              >
+                <SearchIcon />
+                {t.openDictionary}
+              </button>
+            )}
+          </div>
         )}
       </div>
 

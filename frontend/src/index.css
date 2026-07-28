@@ -1558,11 +1558,22 @@ input:focus { border-color: var(--accent2); }
   margin-top: 10px;
 }
 
-/* Opens the DictionaryLookupSheet from a revealed flashcard — sits in
-   place of the "tap to reveal" hint once the card is flipped, so it
-   keeps the same quiet, secondary weight rather than reading as a
-   competing call-to-action next to the answer. */
-.flashcard__dict-btn {
+/* Houses the sound-replay and dictionary-lookup buttons side by side
+   once a card is revealed, so the two secondary actions read as one
+   quiet row instead of competing separately for space/attention. */
+.flashcard__actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Opens the DictionaryLookupSheet from a revealed flashcard, and its
+   sibling that replays the card's pronunciation — sit in place of the
+   "tap to reveal" hint once the card is flipped, so both keep the
+   same quiet, secondary weight rather than reading as a competing
+   call-to-action next to the answer. */
+.flashcard__dict-btn,
+.flashcard__sound-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1574,8 +1585,10 @@ input:focus { border-color: var(--accent2); }
   cursor: pointer;
   transition: color 0.15s ease;
 }
-.flashcard__dict-btn:hover { color: var(--accent); }
-.flashcard__dict-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+.flashcard__dict-btn:hover,
+.flashcard__sound-btn:hover { color: var(--accent); }
+.flashcard__dict-btn svg,
+.flashcard__sound-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* A hairline underline in the type's colour, not a filled pill — the
    accent marks the label instead of drowning it, keeping the palette
