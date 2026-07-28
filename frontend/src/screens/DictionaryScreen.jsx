@@ -5,8 +5,8 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { StrokeOrderAnimation } from '../components/StrokeOrderAnimation'
 import {
-	STATUS_META, TYPE_META, isKanaType, entryKey, speakJapanese,
-	StatusBadge, TypeBadge, SearchIcon, InfoRow, DictionaryDetail,
+	TYPE_META, isKanaType, entryKey,
+	StatusBadge, TypeBadge, SearchIcon, DictionaryDetail,
 } from '../components/DictionaryDetail'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
@@ -622,7 +622,7 @@ function ResultsSection({
 					{/* Desktop side panel — hidden on mobile via CSS */}
 					{selected && (
 						<div className="dict-panel">
-							<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
+							<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
 						</div>
 					)}
 				</div>
@@ -638,7 +638,7 @@ function ResultsSection({
 						onClick={e => e.stopPropagation()}
 						className="dict-modal-content"
 					>
-						<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
+						<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
 					</div>
 				</div>
 			)}
@@ -766,7 +766,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 			{/* Desktop side panel — hidden on mobile via CSS, same as ResultsSection */}
 			{selected && (
 				<div className="dict-panel">
-					<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
+					<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
 				</div>
 			)}
 
@@ -774,159 +774,10 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 			{selected && isMobile && (
 				<div onClick={() => setSelected(null)} className="dict-modal-overlay">
 					<div onClick={e => e.stopPropagation()} className="dict-modal-content">
-						<DetailPanel entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
+						<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
 					</div>
 				</div>
 			)}
 		</div>
-	)
-}
-
-// ── Detail panel ──────────────────────────────────────────
-
-function DetailPanel({ entry, onClose, onRadicalClick, onKanjiClick }) {
-	const { t, lang, contentMaps } = useLang()
-	const map = entry.type === 'vocab' ? contentMaps?.vocab
-		: entry.type === 'kanji' ? contentMaps?.kanji
-		: null
-	// Kana has no semantic "meaning" to translate — its romaji is shown
-	// as its own reading row below instead (see the ternary further
-	// down), so this stays null and the "Sens" row simply doesn't render.
-	const meaning = isKanaType(entry.type)
-		? null
-		: lang === 'fr'
-			? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
-			: entry.meaning
-
-	// Every kanji character used in this vocab word, deduplicated and in
-	// reading order — each becomes a link that jumps to that kanji's own
-	// dictionary entry (see jumpToKanji). Matches CJK Unified Ideographs;
-	// a kana-only word (entry.kanji empty) simply yields none.
-	const composingKanji = useMemo(() => {
-		if (entry.type !== 'vocab' || !entry.kanji) return []
-		const chars = entry.kanji.match(/[\u4e00-\u9faf]/g) || []
-		return [...new Set(chars)]
-	}, [entry.type, entry.kanji])
-
-	const [strokeSvgFailed, setStrokeSvgFailed] = useState(false)
-	useEffect(() => { setStrokeSvgFailed(false) }, [entry.svg_url])
-
-	return (
-		<>
-			<div className="dict-detail__stage">
-				<div className="dict-detail__char">
-					{entry.kanji || entry.kana}
-				</div>
-				<div className="dict-detail__stage-actions">
-					<button
-						onClick={() => speakJapanese(entry.kana)}
-						className="dict-detail__speak-btn"
-						title={t.listen}
-						aria-label={t.listen}
-					>
-						<SpeakIcon />
-					</button>
-					{/* Mobile-only (see index.css) — the fullscreen sheet needs
-					    an immediate way to dismiss without scrolling all the
-					    way down to the "Fermer" button. */}
-					<button
-						onClick={onClose}
-						className="dict-detail__close-x"
-						aria-label={t.close}
-					>
-						×
-					</button>
-				</div>
-			</div>
-
-			<div className="dict-detail__body">
-				<div className="dict-detail__badges">
-					<TypeBadge type={entry.type} t={t} />
-					<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
-				</div>
-
-				{entry.type === 'kanji'
-					? (
-						<div className="dict-detail__readings">
-							<Readings
-								kana={entry.kana}
-								onLabel={t.onyomi}
-								kunLabel={t.kunyomi}
-							/>
-						</div>
-					)
-					: isKanaType(entry.type)
-					? <InfoRow label={t.romaji} value={entry.romaji} />
-					: <InfoRow label={t.reading} value={entry.kana} />
-				}
-				{meaning != null && <InfoRow label={t.meaning}    value={meaning} />}
-				<InfoRow label={t.level}  value={entry.level} />
-				{entry.stroke_count && (
-					<InfoRow label={t.strokes} value={`${entry.stroke_count} ${t.strokes}`} />
-				)}
-				{entry.type === 'kanji' && entry.radical != null && (
-					<InfoRow
-						label={t.radical}
-						value={
-							<button
-								onClick={() => onRadicalClick?.(entry.radical)}
-								className="dict-detail__radical-link"
-							>
-								#{entry.radical}
-							</button>
-						}
-					/>
-				)}
-
-				{composingKanji.length > 0 && (
-					<div className="dict-detail__composing-kanji">
-						<div className="dict-detail__composing-kanji-label">
-							{t.composingKanji}
-						</div>
-						<div className="dict-detail__kanji-chips">
-							{composingKanji.map(char => (
-								<button
-									key={char}
-									onClick={() => onKanjiClick?.(char)}
-									className="dict-detail__kanji-chip"
-								>
-									{char}
-								</button>
-							))}
-						</div>
-					</div>
-				)}
-
-				{(entry.type === 'kanji' || isKanaType(entry.type)) && entry.svg_url && (
-					<div className="dict-detail__stroke-section">
-						<div className="dict-detail__stroke-label">
-							{t.strokeOrder}
-						</div>
-						<div className="dict-detail__stroke-frame">
-							{!strokeSvgFailed && (
-								<StrokeOrderAnimation
-									src={`${API_BASE}${entry.svg_url}`}
-									loop
-									className="dict-detail__stroke-img"
-									onError={() => setStrokeSvgFailed(true)}
-								/>
-							)}
-							{strokeSvgFailed && (
-								<div className="dict-detail__stroke-fallback" style={{ display: 'block' }}>
-									{t.notAvailable}
-								</div>
-							)}
-						</div>
-					</div>
-				)}
-
-				<button
-					onClick={onClose}
-					className="dict-detail__close-btn"
-				>
-					{t.close}
-				</button>
-			</div>
-		</>
 	)
 }

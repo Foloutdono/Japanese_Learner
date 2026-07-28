@@ -1558,6 +1558,25 @@ input:focus { border-color: var(--accent2); }
   margin-top: 10px;
 }
 
+/* Opens the DictionaryLookupSheet from a revealed flashcard — sits in
+   place of the "tap to reveal" hint once the card is flipped, so it
+   keeps the same quiet, secondary weight rather than reading as a
+   competing call-to-action next to the answer. */
+.flashcard__dict-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.flashcard__dict-btn:hover { color: var(--accent); }
+.flashcard__dict-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
 /* A hairline underline in the type's colour, not a filled pill — the
    accent marks the label instead of drowning it, keeping the palette
    restrained (ink + one accent) the way a seal-stamp of colour sits
