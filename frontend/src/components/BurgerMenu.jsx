@@ -88,7 +88,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
   // funnel through here — one place to hang the click sound on rather
   // than wiring each destination separately.
   const go = (path) => {
-    playUi('click-menu')
+    playUi('click-screen-selection')
     navigate(path)
     close()
   }
@@ -104,11 +104,11 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
       </button>
 
       {open && createPortal(
-        <div className="burger-overlay" onClick={() => { playUi('click-screen-selection'); close() }}>
+        <div className="burger-overlay" onClick={() => { playUi('click-close-menu'); close() }}>
           <div className="burger-drawer" onClick={e => e.stopPropagation()}>
             <div className="burger-drawer__header">
               <span className="burger-drawer__title">{t.menu}</span>
-              <button className="burger-drawer__close" onClick={() => { playUi('click-menu'); close() }}>✕</button>
+              <button className="burger-drawer__close" onClick={() => { playUi('click-close-menu'); close() }}>✕</button>
             </div>
 
             <nav className="burger-drawer__nav">
