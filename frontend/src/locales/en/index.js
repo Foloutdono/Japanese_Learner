@@ -1,3 +1,5 @@
+import { resetVolumes } from "../../components/sound"
+
 // ── App / Auth ────────────────────────────────────────────
 const auth = {
   appTitle:          '日本語',
@@ -351,10 +353,16 @@ const settings = {
   language:          'Language',
   account:           'Account',
   signOutDesc:       'Sign out of your account on this device.',
-  volumeMaster:       'Master volume',
 
   lightMode:         '☀ Light mode',
   darkMode:          '☾ Dark mode',
+
+  volumeMaster:       'Master volume',
+  volumeKana:         'Volume kana',
+  volumeVoice:        'Volume voice',
+  volumeEffects:      'Volume effects',
+  volumeUi:           'Volume UI',
+  resetVolumes:       'Reset volumes',
 }
 
 // ── Decks ─────────────────────────────────────────────────
