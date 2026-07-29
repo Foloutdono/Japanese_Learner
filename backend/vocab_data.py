@@ -27,7 +27,7 @@ import os
 # import ..."), same as kanji_data.py — sits directly in backend/, one
 # dirname() to reach it.
 _BASE_DIR = os.path.dirname(__file__)
-_DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
+_DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 
 with open(os.path.join(_DATA_DIR, "vocab_deck.json"), encoding="utf-8") as f:
     VOCAB_BY_LEVEL: dict[str, list[dict]] = json.load(f)
