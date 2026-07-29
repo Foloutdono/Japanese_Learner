@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../LangContext'
 import { apiFetch } from '../api'
@@ -6,6 +6,16 @@ import { Readings } from './Readings'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
+
+// Small "① ② ③..." markers for JMdict sense numbers — used both on the
+// senses list itself and on each example sentence, so a reader can
+// tell at a glance which sense an example illustrates. Falls back to
+// a plain "N." past the pre-drawn range (senses are capped server-side
+// at 8, so this is already generous headroom).
+const CIRCLED_NUMBERS = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩']
+function senseMarker(number) {
+  return CIRCLED_NUMBERS[number - 1] ?? `${number}.`
+}
 
 // ── Shared dictionary metadata/helpers ─────────────────────
 // Previously defined inside DictionaryScreen.jsx only — pulled out
@@ -153,13 +163,58 @@ export function InfoRow({ label, value }) {
 // often a full sentence — too long to sit inline without wrapping into
 // a two-line pill). A <button> rather than a plain span so a tap on
 // mobile can focus it and reveal the tooltip too, not just desktop
-// hover (see .dict-tag-chip__tooltip in index.css).
+// hover.
+//
+// The tooltip itself is portaled straight to document.body and placed
+// with fixed coordinates computed from the chip's own bounding box,
+// rather than living inside the chip as an absolutely-positioned span.
+// Both places this renders (the mobile fullscreen sheet, the desktop
+// side panel) scroll their own content, and any scrolling ancestor
+// clips an absolutely-positioned child that pokes outside it — the
+// tooltip was getting cut off at the panel's edge. Fixed-position +
+// portal escapes that entirely; the horizontal position is then
+// clamped to the viewport and the tooltip flips above the chip when
+// there isn't enough room below, so it never runs off-screen either.
 export function TagChip({ tag }) {
+  const btnRef = useRef(null)
+  const [popup, setPopup] = useState(null)
+  const hasTooltip = tag.tooltip && tag.tooltip !== tag.label
+
+  const showTooltip = () => {
+    if (!hasTooltip || !btnRef.current) return
+    const rect = btnRef.current.getBoundingClientRect()
+    const halfWidth = 110 // half of .dict-tag-chip__tooltip's max-width
+    const left = Math.min(
+      Math.max(rect.left + rect.width / 2, 8 + halfWidth),
+      window.innerWidth - 8 - halfWidth,
+    )
+    const placement = window.innerHeight - rect.bottom < 90 ? 'above' : 'below'
+    const top = placement === 'above' ? rect.top - 6 : rect.bottom + 6
+    setPopup({ top, left, placement })
+  }
+  const hideTooltip = () => setPopup(null)
+
   return (
-    <button type="button" className="dict-tag-chip">
+    <button
+      type="button"
+      ref={btnRef}
+      className="dict-tag-chip"
+      onMouseEnter={showTooltip}
+      onMouseLeave={hideTooltip}
+      onFocus={showTooltip}
+      onBlur={hideTooltip}
+    >
       {tag.label}
-      {tag.tooltip && tag.tooltip !== tag.label && (
-        <span className="dict-tag-chip__tooltip" role="tooltip">{tag.tooltip}</span>
+      {hasTooltip && popup && createPortal(
+        <span
+          className="dict-tag-chip__tooltip"
+          role="tooltip"
+          data-placement={popup.placement}
+          style={{ top: popup.top, left: popup.left }}
+        >
+          {tag.tooltip}
+        </span>,
+        document.body,
       )}
     </button>
   )
@@ -197,6 +252,18 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
     return [...new Set(chars)]
   }, [entry.type, entry.kanji])
 
+  // The big headline character(s) get their reading shown right on top
+  // as furigana — the fastest way to see how a word is actually read,
+  // rather than only lower down in the reading row. Only for vocab: a
+  // kana-only entry has nothing to annotate, and a single kanji's
+  // on'yomi/kun'yomi list (shown below via <Readings>) is already the
+  // more complete picture than picking one reading to sit above it.
+  // vocab_data.py can pack several readings into entry.kana separated
+  // by "/" — the headline furigana uses just the first, primary one.
+  const headwordReading = entry.type === 'vocab' && entry.kanji && entry.kana
+    ? entry.kana.split('/')[0].trim() || null
+    : null
+
   const [strokeSvgFailed, setStrokeSvgFailed] = useState(false)
   useEffect(() => { setStrokeSvgFailed(false) }, [entry.svg_url])
 
@@ -204,7 +271,9 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
     <>
       <div className="dict-detail__stage">
         <div className="dict-detail__char">
-          {entry.kanji || entry.kana}
+          {headwordReading
+            ? <ruby>{entry.kanji}<rt>{headwordReading}</rt></ruby>
+            : (entry.kanji || entry.kana)}
         </div>
         <div className="dict-detail__stage-actions">
           <button
@@ -234,6 +303,14 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
           <StatusBadge state={entry.status?.state ?? 'new'} t={t} />
         </div>
 
+        {entry.tags?.length > 0 && (
+          <div className="dict-detail__tags">
+            {entry.tags.map(tag => (
+              <TagChip key={tag.code} tag={tag} />
+            ))}
+          </div>
+        )}
+
         {entry.type === 'kanji'
           ? (
             <div className="dict-detail__readings">
@@ -248,13 +325,6 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
           ? <InfoRow label={t.romaji} value={entry.romaji} />
           : <InfoRow label={t.reading} value={entry.kana} />
         }
-        {entry.tags?.length > 0 && (
-          <div className="dict-detail__tags">
-            {entry.tags.map(tag => (
-              <TagChip key={tag.code} tag={tag} />
-            ))}
-          </div>
-        )}
         {meaning != null && <InfoRow label={t.meaning}    value={meaning} />}
         <InfoRow label={t.level}  value={entry.level} />
         {entry.stroke_count && (
@@ -274,6 +344,36 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
           />
         )}
 
+        {/* Every JMdict sense, not just the app's own single gloss —
+            the fuller dictionary picture. The sense already reflected
+            in "Sens" above is marked so it reads as confirmation
+            rather than a duplicate. */}
+        {entry.senses?.length > 1 && (
+          <div className="dict-detail__senses">
+            <div className="dict-detail__senses-label">
+              {t.senses ?? (lang === 'fr' ? 'Autres sens (JMdict)' : 'Other senses (JMdict)')}
+            </div>
+            {entry.senses.map(sense => (
+              <div
+                key={sense.number}
+                className={`dict-sense${sense.primary ? ' dict-sense--primary' : ''}`}
+              >
+                <span className="dict-sense__number">{senseMarker(sense.number)}</span>
+                <div className="dict-sense__body">
+                  {sense.tags?.length > 0 && (
+                    <div className="dict-sense__tags">
+                      {sense.tags.map(tag => (
+                        <TagChip key={`${sense.number}-${tag.code}`} tag={tag} />
+                      ))}
+                    </div>
+                  )}
+                  <div className="dict-sense__gloss">{sense.glossary}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {entry.examples?.length > 0 && (
           <div className="dict-detail__examples">
             <div className="dict-detail__examples-label">
@@ -281,15 +381,26 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
             </div>
             {entry.examples.map((ex, i) => (
               <div key={i} className="dict-example">
+                {ex.sense_glossary && (
+                  <div className="dict-example__sense">
+                    {senseMarker(ex.sense_number ?? 1)} {ex.sense_glossary}
+                  </div>
+                )}
                 <div className="dict-example__jp">
                   {ex.segments?.length > 0
                     ? ex.segments.map((seg, j) => {
+                        // Each segment (a word, a kanji compound, a
+                        // kana run) is its own non-breaking unit — the
+                        // line can wrap between segments but never
+                        // inside one, so a word never gets split with
+                        // a single trailing kanji/kana stranded alone
+                        // on the next line.
                         const content = seg.reading
                           ? <ruby>{seg.text}<rt>{seg.reading}</rt></ruby>
                           : seg.text
                         return seg.highlight
-                          ? <mark key={j} className="dict-example__hl">{content}</mark>
-                          : <span key={j}>{content}</span>
+                          ? <mark key={j} className="dict-example__hl dict-example__seg">{content}</mark>
+                          : <span key={j} className="dict-example__seg">{content}</span>
                       })
                     : ex.jp}
                 </div>

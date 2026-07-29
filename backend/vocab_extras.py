@@ -1,6 +1,7 @@
 """
 Loads the JMdict-derived "extras" for the app's vocab deck: grammatical
-tags and example sentences, layered on top of vocab_data.py's own
+tags, every JMdict sense (not just the one glossed in the app's own
+deck), and example sentences — layered on top of vocab_data.py's own
 JLPT-leveled deck rather than folded into it (vocab_deck.json only ever
 carries {kanji, kana, meaning} — see vocab_data.py's docstring — and
 dictionary.py's public contract for a vocab result shouldn't have to
@@ -20,32 +21,44 @@ Source files sit next to vocab_deck.json under datas/vocab/:
         ("⭐", "ichi", "news3k", "place", ...).
 
     vocab_tags.json — tag code -> {category, sorting_order, notes, score}
-        Human-readable "notes" for every code used above.
+        Human-readable "notes" (English) and a "score" used here to
+        order frequency tags from most to least common.
 
-A single term can carry a dozen JMdict senses (出る has one for nearly
-every verb sense in the book), but the app's own deck entry only shows
-ONE meaning. Pooling tags/examples across every sense (the previous
-version of this module) meant a card could show a part-of-speech tag
-or example sentence that had nothing to do with the meaning actually
-displayed. get_vocab_extras() instead scores each sense against the
-app's own (English) gloss and only pulls from whichever sense(s) best
-match it, falling back to the first sense when nothing matches well
-enough to tell them apart.
+Public API: get_vocab_extras(kanji, kana, meaning_hint="", lang="fr") ->
+    {
+      "tags": [{"code", "label", "tooltip"}, ...],   # word-level, pruned + priority-ordered
+      "senses": [
+          {"number": 1, "primary": bool, "glossary": "...", "tags": [...]},
+          ...
+      ],
+      "examples": [
+          {"jp", "en", "segments": [...], "sense_number": 1, "sense_glossary": "..."},
+          ...
+      ],
+    }
 
-Public API: get_vocab_extras(kanji, kana, meaning_hint="") ->
-    {"tags": [{"code", "label", "tooltip"}, ...],
-     "examples": [{"jp", "en", "segments": [...]}, ...]}
+"tags" is the word-level row: priority star, then part-of-speech, then
+usage/register, then frequency rank — pooled across every sense so a
+word that's both a noun and a suru-verb shows both, deduplicated, and
+capped so it stays a glance rather than a JMdict dump. "senses" lists
+every JMdict sense (numbered in their original dictionary order, not
+reordered) with its own short tags; `primary` flags whichever one best
+matches the app's own (English) gloss, scored via `meaning_hint` — the
+app still shows its own translated meaning elsewhere, this is
+additional context. "examples" pools sentences across senses (primary
+sense's examples first) and tags each with the sense it illustrates so
+the frontend can show "① to take (time, money)" next to it.
 
 Each example's "segments" is a list of
     {"text": str, "reading": str | None, "highlight": bool}
 in reading order — "reading" is set when that chunk should be rendered
 as furigana (a <ruby>), and "highlight" flags the chunk(s) that make up
-the headword itself so the frontend can pick it out visually. Furigana
-comes from the app's own vocab/kanji decks (a lightweight longest-match
-lookup, not a real morphological analyzer), so it's a best effort: any
-compound already in the app's deck gets its real reading, anything
-else falls back to per-character kanji readings, which is occasionally
-wrong for compounds whose reading isn't just the sum of their parts.
+the headword itself. Furigana comes from the app's own vocab/kanji
+decks (a lightweight longest-match lookup, not a real morphological
+analyzer): any compound already in the app's deck gets its real
+reading, anything else falls back to per-character kanji readings,
+which is occasionally wrong for compounds whose reading isn't just the
+sum of their parts.
 """
 import json
 import os
@@ -70,12 +83,14 @@ with open(os.path.join(_DATA_DIR, "vocab_tags.json"), encoding="utf-8") as f:
 # term_tags mix real study-relevant signal (priority/frequency markers,
 # category "popular"/"frequent") with name/place/person/etc. markers
 # (category "name") that don't help a JLPT learner's card — only the
-# former are surfaced as tags.
+# former are ever surfaced.
 _TERM_TAG_CATEGORIES_SHOWN = {"popular", "frequent"}
 
-# A card's tag row is a quick glance, not a JMdict dump.
+# Cards stay a glance, not a JMdict dump.
 _MAX_TAGS = 6
-_MAX_EXAMPLES = 3
+_MAX_SENSE_TAGS = 4
+_MAX_SENSES = 8
+_MAX_EXAMPLES = 5
 
 _HIRAGANA_RE = re.compile(r"[\u3040-\u309F]")
 
@@ -94,13 +109,42 @@ def _readings(kana: str) -> list[str]:
     return [r.strip() for r in (kana or "").split("/") if r.strip()]
 
 
-# ── Short tag labels ─────────────────────────────────────────
+# ── Tag classification + short labels (fr/en) ───────────────
 # Yomitan-style: a short glance-able label on the chip itself, with the
-# full JMdict "notes" text (e.g. "ranked between the top 2,000 and
-# 3,000 words in a frequency analysis...") kept only for the tooltip.
-# Not every JMdict code is worth a bespoke label — anything not listed
-# here just falls back to the raw code, which is already short.
-_SHORT_LABELS = {
+# full JMdict "notes" text kept only for the tooltip. Codes not listed
+# here fall back to the raw code (already short) in either language.
+# Display priority for a constant, predictable chip order: star first,
+# then part-of-speech (what kind of word it is), then frequency rank
+# (how common it is), then everything else (register/field notes).
+_KIND_STAR, _KIND_POS, _KIND_FREQ, _KIND_MISC = 0, 1, 2, 3
+
+_POS_CODES = {
+    "n", "n-suf", "n-pref", "pn", "adj-i", "adj-ix", "adj-na", "adj-no",
+    "adj-t", "adj-f", "adv", "adv-to", "aux", "aux-v", "aux-adj", "conj",
+    "cop", "ctr", "exp", "int", "num", "pref", "prt", "suf",
+    "v1", "v1-s", "v5aru", "v5b", "v5g", "v5k", "v5k-s", "v5m", "v5n",
+    "v5r", "v5r-i", "v5s", "v5t", "v5u", "v5u-s", "v5uru",
+    "vk", "vn", "vr", "vs", "vs-c", "vs-i", "vs-s", "vz", "vt", "vi",
+}
+_MISC_CODES = {
+    "uk", "abbr", "col", "hon", "hum", "pol", "arch", "obs", "dated",
+    "rare", "on-mim", "id", "proverb", "derog",
+}
+# Field-of-use tags worth surfacing (the word belongs to a recognisable
+# study-relevant domain) — kept separate from _MISC_CODES since JMdict
+# calls them "fields" rather than register/misc notes, but they render
+# in the same chip slot. The much longer tail of JMdict field codes
+# (dialects, individual mythologies, card/board games, etc.) is left
+# out on purpose: real but not useful on a JLPT learner's glance card.
+_FIELD_CODES = {
+    "comp", "ling", "med", "math", "physics", "biol", "chem", "music",
+    "sports", "law", "econ", "food", "MA", "Buddh", "Shinto", "geol",
+    "astron", "bot", "zool", "anat", "mil", "photo", "internet",
+    "baseb", "go", "shogi", "sumo", "politics", "psych", "archit",
+    "art", "bus", "finc",
+}
+
+_SHORT_LABELS_FR = {
     "n": "nom", "n-suf": "suffixe", "n-pref": "préfixe", "pn": "pronom",
     "adj-i": "adj. -i", "adj-ix": "adj. -i", "adj-na": "adj. -na",
     "adj-no": "adj. -no", "adj-t": "adj. -taru", "adj-f": "adj.",
@@ -108,7 +152,7 @@ _SHORT_LABELS = {
     "aux": "aux.", "aux-v": "aux. verbe", "aux-adj": "aux. adj.",
     "conj": "conj.", "cop": "copule", "ctr": "compteur",
     "exp": "expression", "int": "interjection", "num": "nombre",
-    "pref": "préfixe", "prt": "particule", "suf": "suffixe", "unc": "?",
+    "pref": "préfixe", "prt": "particule", "suf": "suffixe",
     "v1": "v. ichidan", "v1-s": "v. ichidan",
     "v5aru": "v. godan", "v5b": "v. godan", "v5g": "v. godan",
     "v5k": "v. godan", "v5k-s": "v. godan", "v5m": "v. godan",
@@ -123,29 +167,140 @@ _SHORT_LABELS = {
     "dated": "désuet", "rare": "rare", "on-mim": "onomatopée",
     "id": "idiome", "proverb": "proverbe", "derog": "péjoratif",
     "⭐": "⭐", "ichi": "fréquent", "spec": "fréquent", "gai": "emprunt",
+    "comp": "informatique", "ling": "linguistique", "med": "médecine",
+    "math": "mathématiques", "physics": "physique", "biol": "biologie",
+    "chem": "chimie", "music": "musique", "sports": "sport", "law": "droit",
+    "econ": "économie", "food": "cuisine", "MA": "arts martiaux",
+    "Buddh": "bouddhisme", "Shinto": "shintoïsme", "geol": "géologie",
+    "astron": "astronomie", "bot": "botanique", "zool": "zoologie",
+    "anat": "anatomie", "mil": "militaire", "photo": "photographie",
+    "internet": "internet", "baseb": "baseball", "go": "go (jeu)",
+    "shogi": "shogi", "sumo": "sumo", "politics": "politique",
+    "psych": "psychologie", "archit": "architecture", "art": "art",
+    "bus": "affaires", "finc": "finance",
+}
+_SHORT_LABELS_EN = {
+    "n": "noun", "n-suf": "suffix", "n-pref": "prefix", "pn": "pronoun",
+    "adj-i": "i-adj.", "adj-ix": "i-adj.", "adj-na": "na-adj.",
+    "adj-no": "no-adj.", "adj-t": "taru-adj.", "adj-f": "adj.",
+    "adv": "adv.", "adv-to": "adv. (to)",
+    "aux": "aux.", "aux-v": "aux. verb", "aux-adj": "aux. adj.",
+    "conj": "conj.", "cop": "copula", "ctr": "counter",
+    "exp": "expression", "int": "interjection", "num": "numeral",
+    "pref": "prefix", "prt": "particle", "suf": "suffix",
+    "v1": "ichidan v.", "v1-s": "ichidan v.",
+    "v5aru": "godan v.", "v5b": "godan v.", "v5g": "godan v.",
+    "v5k": "godan v.", "v5k-s": "godan v.", "v5m": "godan v.",
+    "v5n": "godan v.", "v5r": "godan v.", "v5r-i": "godan v.",
+    "v5s": "godan v.", "v5t": "godan v.", "v5u": "godan v.",
+    "v5u-s": "godan v.", "v5uru": "godan v.",
+    "vk": "irr. v. (来る)", "vn": "irr. v. (ぬ)", "vr": "irr. v. (り)",
+    "vs": "suru v.", "vs-c": "suru v.", "vs-i": "suru v.", "vs-s": "suru v.",
+    "vz": "ichidan v. (ずる)", "vt": "transitive", "vi": "intransitive",
+    "uk": "kana usually", "abbr": "abbr.", "col": "colloquial", "hon": "honorific",
+    "hum": "humble", "pol": "polite", "arch": "archaic", "obs": "obsolete",
+    "dated": "dated", "rare": "rare", "on-mim": "onomatopoeia",
+    "id": "idiom", "proverb": "proverb", "derog": "derogatory",
+    "⭐": "⭐", "ichi": "common", "spec": "common", "gai": "loanword",
+    "comp": "computing", "ling": "linguistics", "med": "medicine",
+    "math": "math", "physics": "physics", "biol": "biology",
+    "chem": "chemistry", "music": "music", "sports": "sports", "law": "law",
+    "econ": "economics", "food": "food", "MA": "martial arts",
+    "Buddh": "Buddhism", "Shinto": "Shinto", "geol": "geology",
+    "astron": "astronomy", "bot": "botany", "zool": "zoology",
+    "anat": "anatomy", "mil": "military", "photo": "photography",
+    "internet": "internet", "baseb": "baseball", "go": "go (game)",
+    "shogi": "shogi", "sumo": "sumo", "politics": "politics",
+    "psych": "psychology", "archit": "architecture", "art": "art",
+    "bus": "business", "finc": "finance",
 }
 _NEWS_RANK_RE = re.compile(r"^news(\d+)k$")
 
 
-def _short_label(code: str) -> str:
-    if code in _SHORT_LABELS:
-        return _SHORT_LABELS[code]
+def _short_label(code: str, lang: str) -> str:
+    table = _SHORT_LABELS_FR if lang == "fr" else _SHORT_LABELS_EN
+    if code in table:
+        return table[code]
     m = _NEWS_RANK_RE.match(code)
     if m:
         return f"top {m.group(1)}k"
     return code
 
 
-def _tooltip(code: str) -> str:
-    info = _VOCAB_TAGS.get(code)
-    return info["notes"] if info and info.get("notes") else code
+# A code only earns a chip if it has an actual translated label (POS,
+# curated misc/field tag, star, or a news-frequency rank) — this is
+# the real pruning step. Left unfiltered, JMdict's raw code list is
+# mostly noise for a learner's card: kana/kanji variant markers ("ik",
+# "rK", "sK", ...), a "not displayed in educational software" marker
+# ("X"), bare JMdict sense numbers ("1", "2", ...), and dozens of very
+# niche fields (individual mythologies, regional dialects, card/board
+# games) that add clutter, not value. Anything not in the allow-list
+# below is dropped rather than shown as a raw, untranslated code.
+_RECOGNIZED_CODES = _POS_CODES | set(_SHORT_LABELS_FR)
 
 
-def _add_tag(tags: list, seen: set, code: str) -> None:
-    if code in seen:
-        return
-    seen.add(code)
-    tags.append({"code": code, "label": _short_label(code), "tooltip": _tooltip(code)})
+def _is_recognized(code: str) -> bool:
+    return code in _RECOGNIZED_CODES or bool(_NEWS_RANK_RE.match(code))
+
+
+def _build_tag(code: str, is_term_tag: bool, lang: str) -> dict:
+    info = _VOCAB_TAGS.get(code) or {}
+    if is_term_tag:
+        kind = _KIND_STAR if info.get("category") == "popular" else _KIND_FREQ
+    else:
+        kind = _KIND_POS if code in _POS_CODES else _KIND_MISC
+    return {
+        "code": code,
+        "label": _short_label(code, lang),
+        "tooltip": info.get("notes") or code,
+        "_kind": kind,
+        "_score": info.get("score") or 0,
+    }
+
+
+def _public_tag(t: dict) -> dict:
+    return {"code": t["code"], "label": t["label"], "tooltip": t["tooltip"]}
+
+
+def _collect_sense_tags(sense: dict, lang: str, limit: int = _MAX_SENSE_TAGS) -> list:
+    seen = set()
+    collected = []
+    for code in sense.get("tags", []):
+        if code in seen or not _is_recognized(code):
+            continue
+        seen.add(code)
+        collected.append(_build_tag(code, False, lang))
+    for code in sense.get("term_tags", []):
+        info = _VOCAB_TAGS.get(code)
+        if not info or info.get("category") not in _TERM_TAG_CATEGORIES_SHOWN or code in seen:
+            continue
+        seen.add(code)
+        collected.append(_build_tag(code, True, lang))
+    collected.sort(key=lambda t: (t["_kind"], t["_score"]))
+    return [_public_tag(t) for t in collected[:limit]]
+
+
+def _collect_word_tags(senses: list, lang: str) -> list:
+    # Pooled across every sense (not just the primary one) — a word
+    # that's e.g. both a noun and a suru-verb should show both, the
+    # way a real dictionary entry would, not just whichever sense
+    # happens to match the app's own single gloss.
+    seen = set()
+    collected = []
+    for order, sense in enumerate(senses):
+        for code in sense.get("tags", []):
+            if code in seen or not _is_recognized(code):
+                continue
+            seen.add(code)
+            collected.append((order, _build_tag(code, False, lang)))
+        for code in sense.get("term_tags", []):
+            info = _VOCAB_TAGS.get(code)
+            if not info or info.get("category") not in _TERM_TAG_CATEGORIES_SHOWN or code in seen:
+                continue
+            seen.add(code)
+            collected.append((order, _build_tag(code, True, lang)))
+    collected.sort(key=lambda pair: (pair[1]["_kind"], pair[1]["_score"], pair[0]))
+    return [_public_tag(t) for _, t in collected[:_MAX_TAGS]]
 
 
 def _find_senses(kanji: str, kana: str) -> list[dict] | None:
@@ -164,15 +319,12 @@ def _find_senses(kanji: str, kana: str) -> list[dict] | None:
     return None
 
 
-# ── Sense selection ──────────────────────────────────────────
+# ── Primary-sense scoring ────────────────────────────────────
 # A word can carry many JMdict senses but the app shows one gloss —
-# pick whichever sense(s) actually match it instead of pooling all of
-# them (which mixes tags/examples from unrelated meanings, e.g. 掛かる
-# "to take time" vs. "to start (an engine)").
+# score each sense against it so the frontend can flag which one is
+# "the" meaning already shown elsewhere on the card (all senses are
+# still listed; this only affects the `primary` flag and example order).
 _WORD_RE = re.compile(r"[a-zA-Z']+")
-# Glue words that would otherwise inflate every sense's score equally
-# (JMdict glosses are almost all "to <verb> ...") and create false ties
-# instead of actually distinguishing senses.
 _STOPWORDS = {
     "a", "an", "the", "to", "of", "in", "on", "at", "by", "for", "with",
     "and", "or", "e", "g", "eg", "etc", "someone", "something", "one",
@@ -191,7 +343,7 @@ def _gloss_words(sense: dict) -> set:
     return words
 
 
-def _select_senses(senses: list, meaning_hint: str) -> list:
+def _select_primary(senses: list, meaning_hint: str) -> list:
     meaning_words = _content_words(meaning_hint or "")
     if not meaning_words:
         return senses[:1]
@@ -206,9 +358,7 @@ def _select_senses(senses: list, meaning_hint: str) -> list:
 # Best-effort furigana built from the app's own decks: no morphological
 # analyzer is available server-side, so compounds already in the vocab
 # deck get their real reading via a longest-match lookup, and anything
-# else falls back to per-character kanji readings (imprecise for
-# compounds whose reading isn't the sum of their kanji's own readings,
-# but far better than no furigana at all).
+# else falls back to per-character kanji readings.
 
 def _kata_to_hira(s: str) -> str:
     return "".join(
@@ -238,8 +388,7 @@ def _build_single_kanji_readings() -> dict:
 def _build_vocab_readings() -> dict:
     table = {}
     # Longer entries first so the greedy tokenizer below naturally
-    # prefers a full compound match over a shorter partial one, without
-    # needing its own length bookkeeping per level.
+    # prefers a full compound match over a shorter partial one.
     all_entries = [w for entries in VOCAB_BY_LEVEL.values() for w in entries]
     all_entries.sort(key=lambda w: len(w.get("kanji") or ""), reverse=True)
     for w in all_entries:
@@ -320,18 +469,17 @@ def _target_span(sentence: str, kanji: str, kana: str):
         # Conjugating word (verb/i-adjective): the example rarely uses
         # the bare dictionary form. Match on the invariant kanji stem
         # (the dictionary form minus its trailing okurigana) and extend
-        # through the inflection tail that follows in the sentence —
-        # enough to catch 出た/出ます/太かった/... without a conjugation table.
+        # through the inflection tail that follows — enough to catch
+        # 出た/出ます/太かった/... without a conjugation table.
         stem = re.sub(r"[\u3040-\u309F]+$", "", kanji)
         if stem:
             idx = sentence.find(stem)
             if idx != -1:
                 return idx, _extend_inflection_tail(sentence, idx + len(stem))
 
-    # No kanji field, or this example happens to use the kana-only form
-    # of a word that does have one (common for "usually kana" words) —
-    # fall back to the reading itself, with the same stem+extend trick
-    # since a verb/adjective's final kana is exactly what conjugates.
+    # No kanji field, or this example uses the kana-only form of a word
+    # that does have one (common for "usually kana" words) — fall back
+    # to the reading itself, with the same stem+extend trick.
     for reading in _readings(kana) or ([kana] if kana else []):
         idx = sentence.find(reading)
         if idx != -1:
@@ -357,29 +505,33 @@ def _annotate_sentence(sentence: str, kanji: str, kana: str) -> list:
     ]
 
 
-def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "") -> dict:
-    senses = _find_senses(kanji, kana)
-    if not senses:
-        return {"tags": [], "examples": []}
+def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = "fr") -> dict:
+    all_senses = _find_senses(kanji, kana)
+    if not all_senses:
+        return {"tags": [], "senses": [], "examples": []}
 
-    chosen = _select_senses(senses, meaning_hint)
+    senses = all_senses[:_MAX_SENSES]
+    primary_ids = {id(s) for s in _select_primary(senses, meaning_hint)}
+    numbers = {id(s): i for i, s in enumerate(senses, start=1)}
 
-    tags = []
-    seen_tags = set()
-    for sense in chosen:
-        for code in sense.get("tags", []):
-            _add_tag(tags, seen_tags, code)
-        for code in sense.get("term_tags", []):
-            info = _VOCAB_TAGS.get(code)
-            if not info or info.get("category") not in _TERM_TAG_CATEGORIES_SHOWN:
-                continue
-            _add_tag(tags, seen_tags, code)
-        if len(tags) >= _MAX_TAGS:
-            break
+    senses_out = [
+        {
+            "number": numbers[id(sense)],
+            "primary": id(sense) in primary_ids,
+            "glossary": "; ".join(sense.get("glossary", [])),
+            "tags": _collect_sense_tags(sense, lang),
+        }
+        for sense in senses
+    ]
 
+    # Examples: primary sense(s) first, then the rest in their original
+    # order, so the sentence matching the app's own gloss shows up first.
+    ordered = [s for s in senses if id(s) in primary_ids] + [s for s in senses if id(s) not in primary_ids]
     examples = []
     seen_jp = set()
-    for sense in chosen:
+    for sense in ordered:
+        num = numbers[id(sense)]
+        gloss = "; ".join(sense.get("glossary", []))
         for ex in sense.get("examples", []):
             jp = ex.get("jp")
             if not jp or jp in seen_jp:
@@ -389,10 +541,16 @@ def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "") -> dict:
                 "jp": jp,
                 "en": ex.get("en", ""),
                 "segments": _annotate_sentence(jp, kanji, kana),
+                "sense_number": num,
+                "sense_glossary": gloss,
             })
             if len(examples) >= _MAX_EXAMPLES:
                 break
         if len(examples) >= _MAX_EXAMPLES:
             break
 
-    return {"tags": tags[:_MAX_TAGS], "examples": examples[:_MAX_EXAMPLES]}
+    return {
+        "tags": _collect_word_tags(senses, lang),
+        "senses": senses_out,
+        "examples": examples,
+    }
