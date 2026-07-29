@@ -105,3 +105,27 @@ CREATE TABLE comprehension_log (
 
 CREATE INDEX idx_comprehension_log_user
 ON comprehension_log(user_id, created_at DESC);
+-- Frequency-tier study mode (frequency_data.py / frequency.py): lets a
+-- user pin a specific kanji/vocab to a different tier than its standard
+-- frequency-rank tier. item_key is the kanji character itself for
+-- domain='kanji', or "kanji::kana" for domain='vocab' — see
+-- frequency_data.py's resolve()/tier_keys() for how that key gets
+-- resolved back to a deck entry. tier is always relative to
+-- frequency_data.DEFAULT_TIER_SIZE regardless of what tier_size a given
+-- /tiers request asks for — see that module's docstring.
+--
+-- Created at runtime by FrequencyOverrideStore._init_db()
+-- (srs/frequency_store.py), same self-migrating pattern SRSEngine uses
+-- for cards/card_modes/review_log — listed here for reference, not as a
+-- migration you need to run by hand.
+CREATE TABLE frequency_overrides (
+    user_id TEXT NOT NULL,
+    domain TEXT NOT NULL,
+    item_key TEXT NOT NULL,
+    tier INTEGER NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, domain, item_key)
+);
+
+CREATE INDEX idx_frequency_overrides_user_domain
+ON frequency_overrides(user_id, domain);

@@ -1,9 +1,9 @@
 """
 Loads the app's own JLPT-leveled vocab deck from JSON instead of
-hardcoding it here. Mirrors vocab_data.py's migration exactly.
+hardcoding it here. Mirrors kanji_data.py's migration exactly.
 
 Source of truth is now vocab_deck.json, sitting next to kanji_deck.json /
-radicals.json / kanji_radicals.json under datas/vocab_data/:
+radicals.json / kanji_radicals.json under datas/kanji/:
 
     { "N5": [{"kanji": "毎月", "kana": "まいげつ/まいつき",
                "meaning": "every month"}, ...],
@@ -24,10 +24,10 @@ import json
 import os
 
 # vocab_data.py is imported as a top-level module ("from vocab_data
-# import ..."), same as vocab_data.py — sits directly in backend/, one
+# import ..."), same as kanji_data.py — sits directly in backend/, one
 # dirname() to reach it.
 _BASE_DIR = os.path.dirname(__file__)
-_DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab_data")
+_DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
 
 with open(os.path.join(_DATA_DIR, "vocab_deck.json"), encoding="utf-8") as f:
     VOCAB_BY_LEVEL: dict[str, list[dict]] = json.load(f)
