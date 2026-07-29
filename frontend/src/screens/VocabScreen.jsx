@@ -36,6 +36,10 @@ export default function VocabScreen({ session }) {
   const [level, setLevel]           = useState(null)
   const [tier, setTier]             = useState(null)
   const [tierLabel, setTierLabel]   = useState(null)
+  // tier_size the chosen tier was built at — see KanjiScreen's
+  // loadProgress comment and TierSelector's onSelect for the full
+  // rationale; has to travel alongside `tier` everywhere below.
+  const [tierSize, setTierSize]     = useState(200)
   const [mode, setMode]             = useState(null)
   const [answered, setAnswered]     = useState(false)
   const [selected, setSelected]     = useState(null)
@@ -78,7 +82,7 @@ export default function VocabScreen({ session }) {
   // below) rather than starting a new session.
   const storageKey =
     studyBy === 'level' && level && mode ? `jp-session:vocab:${level}:${mode}`
-    : studyBy === 'frequency' && tier && mode ? `jp-session:vocab:freq:${tier}:${mode}`
+    : studyBy === 'frequency' && tier && mode ? `jp-session:vocab:freq:${tier}:${tierSize}:${mode}`
     : 'idle'
 
   const fetchBatch = useCallback((count, excludeIds) => {
@@ -89,13 +93,13 @@ export default function VocabScreen({ session }) {
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
     const url = studyBy === 'level'
       ? `/api/vocab/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-      : `/api/frequency/vocab/cards?tier=${tier}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
+      : `/api/frequency/vocab/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
     return apiFetch(url, session, { signal: controller.signal })
       .then(r => r.json())
       .then(data => (data.cards ?? []).map(c => ({ ...c, lang })))
       .finally(() => clearTimeout(timer))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studyBy, level, tier, mode, session])
+  }, [studyBy, level, tier, tierSize, mode, session])
   // (lang deliberately excluded above: changing lang shouldn't change
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
@@ -162,7 +166,7 @@ export default function VocabScreen({ session }) {
   function loadProgress(source, m) {
     const url = 'level' in source
       ? `/api/vocab/stats?level=${encodeURIComponent(source.level)}&mode=${m}`
-      : `/api/frequency/vocab/stats?tier=${source.tier}&mode=${m}`
+      : `/api/frequency/vocab/stats?tier=${source.tier}&tier_size=${source.tierSize}&mode=${m}`
     apiFetch(url, session)
       .then(r => r.json())
       .then(data => setProgress(data?.error ? null : data))
@@ -181,7 +185,7 @@ export default function VocabScreen({ session }) {
     setTier(tr)
     setTierLabel(label)
     setMode(m)
-    loadProgress({ tier: tr }, m)
+    loadProgress({ tier: tr, tierSize }, m)
   }
 
   // advance() only ever runs once every gate above has cleared — see
@@ -204,7 +208,7 @@ export default function VocabScreen({ session }) {
     if (locked) return
     setLocked(true)
     setShowRating(false)
-    loadProgress(studyBy === 'level' ? { level } : { tier }, mode)
+    loadProgress(studyBy === 'level' ? { level } : { tier, tierSize }, mode)
 
     // The exact outcome of this rating — xp, level-up, stage
     // promotion — was already computed when this card was fetched
@@ -304,7 +308,7 @@ export default function VocabScreen({ session }) {
             domain="vocab"
             session={session}
             color="var(--accent2)"
-            onSelect={(tr, label) => { setTier(tr); setTierLabel(label) }}
+            onSelect={(tr, label, ts) => { setTier(tr); setTierLabel(label); setTierSize(ts) }}
           />
         </SelectionScreen>
       </div>

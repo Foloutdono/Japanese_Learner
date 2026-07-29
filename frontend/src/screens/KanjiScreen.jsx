@@ -45,6 +45,12 @@ export default function KanjiScreen({ session }) {
   // list isn't kept around after a pick, so nothing else could
   // reconstruct this for headers/storageKey once selection moves on.
   const [tierLabel, setTierLabel]     = useState(null)
+  // The tier_size the chosen tier was built at (see TierSelector's
+  // onSelect third argument) — the same tier *number* means a
+  // different rank range at a different size, so this has to travel
+  // alongside `tier` into every /api/frequency/... call below, not
+  // just live inside TierSelector.
+  const [tierSize, setTierSize]       = useState(200)
   const [mode, setMode]               = useState(null)
   const [answered, setAnswered]       = useState(false)
   const [selected, setSelected]       = useState(null)
@@ -90,7 +96,7 @@ export default function KanjiScreen({ session }) {
   // below) rather than starting a new session.
   const storageKey =
     studyBy === 'level' && level && mode ? `jp-session:kanji:${level}:${mode}`
-    : studyBy === 'frequency' && tier && mode ? `jp-session:kanji:freq:${tier}:${mode}`
+    : studyBy === 'frequency' && tier && mode ? `jp-session:kanji:freq:${tier}:${tierSize}:${mode}`
     : 'idle'
 
   // Same batching contract as before (see useCardSession) — only the
@@ -106,13 +112,13 @@ export default function KanjiScreen({ session }) {
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
     const url = studyBy === 'level'
       ? `/api/kanji/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-      : `/api/frequency/kanji/cards?tier=${tier}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
+      : `/api/frequency/kanji/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
     return apiFetch(url, session, { signal: controller.signal })
       .then(r => r.json())
       .then(data => (data.cards ?? []).map(c => ({ ...c, lang })))
       .finally(() => clearTimeout(timer))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studyBy, level, tier, mode, session])
+  }, [studyBy, level, tier, tierSize, mode, session])
   // (lang deliberately excluded above: changing lang shouldn't change
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
@@ -178,13 +184,13 @@ export default function KanjiScreen({ session }) {
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
   // level+mode. Fetched independently from the card so it never blocks
   // or slows down card navigation.
-  // `source` is { level } or { tier } — kept as one function (rather
-  // than two near-duplicates) since every other caller below already
-  // has to know which path is active anyway.
+  // `source` is { level } or { tier, tierSize } — kept as one function
+  // (rather than two near-duplicates) since every other caller below
+  // already has to know which path is active anyway.
   function loadProgress(source, m) {
     const url = 'level' in source
       ? `/api/kanji/stats?level=${encodeURIComponent(source.level)}&mode=${m}`
-      : `/api/frequency/kanji/stats?tier=${source.tier}&mode=${m}`
+      : `/api/frequency/kanji/stats?tier=${source.tier}&tier_size=${source.tierSize}&mode=${m}`
     apiFetch(url, session)
       .then(r => r.json())
       .then(data => setProgress(data?.error ? null : data))
@@ -203,7 +209,7 @@ export default function KanjiScreen({ session }) {
     setTier(tr)
     setTierLabel(label)
     setMode(m)
-    loadProgress({ tier: tr }, m)
+    loadProgress({ tier: tr, tierSize }, m)
   }
 
   // advance() only ever runs once every gate above has cleared — see
@@ -231,7 +237,7 @@ export default function KanjiScreen({ session }) {
     // the writing mode itself don't need this extra step.
     const needTraining = quality <= 3 && card?.direction === 'm-kj' && drawingEnabled
 
-    loadProgress(studyBy === 'level' ? { level } : { tier }, mode)
+    loadProgress(studyBy === 'level' ? { level } : { tier, tierSize }, mode)
 
     // The exact outcome of this rating — xp, level-up, stage
     // promotion — was already computed when this card was fetched
@@ -344,7 +350,7 @@ export default function KanjiScreen({ session }) {
             domain="kanji"
             session={session}
             color="var(--accent3)"
-            onSelect={(tr, label) => { setTier(tr); setTierLabel(label) }}
+            onSelect={(tr, label, ts) => { setTier(tr); setTierLabel(label); setTierSize(ts) }}
           />
         </SelectionScreen>
       </div>
