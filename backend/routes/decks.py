@@ -12,7 +12,7 @@ from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR as VOCAB_FR_MAP
-from translations.fr.kanji_fr import KANJI_FR as KANJI_FR_MAP
+from kanji_meanings import KANJI_FR as KANJI_FR_MAP
 import psycopg2.extras
 
 router = APIRouter()
