@@ -5,6 +5,7 @@ from collections import defaultdict
 from fastapi import APIRouter, Depends
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from vocab_extras import get_vocab_extras
 from kana_data import HIRAGANA_BASIC, KATAKANA_BASIC, kana_to_id
 from translations import get_meaning
 from kanji_meanings import KANJI_FR
@@ -199,13 +200,16 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
             })
         elif kind == "vocab":
             raw_id = vocab_to_id(entry, level)
+            extras = get_vocab_extras(entry.get("kanji", ""), entry.get("kana", ""))
             results.append({
-                "type":    "vocab",
-                "kanji":   entry.get("kanji", ""),
-                "kana":    entry.get("kana", ""),
-                "meaning": meaning,
-                "level":   level,
-                "status":  card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),
+                "type":     "vocab",
+                "kanji":    entry.get("kanji", ""),
+                "kana":     entry.get("kana", ""),
+                "meaning":  meaning,
+                "level":    level,
+                "tags":     extras["tags"],
+                "examples": extras["examples"],
+                "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),
             })
         else:  # hiragana or katakana
             raw_id = kana_to_id(entry)
