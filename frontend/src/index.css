@@ -501,7 +501,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .dict-panel {
-	width: 320px;
+	width: 380px;
 	flex-shrink: 0;
 	position: sticky;
 	top: 88px;
@@ -4798,7 +4798,18 @@ input:focus { border-color: var(--accent2); }
   font-size: 60px;
   font-family: var(--font-jp);
   color: var(--text-on-panel);
-  line-height: 1;
+  line-height: 1.3;
+}
+/* Furigana over the headline word (vocab only — see headwordReading in
+   DictionaryDetail.jsx). Sized relative to the headline itself (em)
+   so it scales together with it at every breakpoint. */
+.dict-detail__char ruby { ruby-position: over; }
+.dict-detail__char rt {
+  font-size: 0.3em;
+  font-weight: 400;
+  color: var(--text-on-panel-soft);
+  letter-spacing: 0.02em;
+  user-select: none;
 }
 .dict-detail__speak-btn {
   flex-shrink: 0;
@@ -4849,7 +4860,7 @@ input:focus { border-color: var(--accent2); }
 
 .dict-detail__composing-kanji { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 .dict-detail__composing-kanji-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary);
   font-weight: bold;
   letter-spacing: 0.05em;
@@ -4873,7 +4884,7 @@ input:focus { border-color: var(--accent2); }
 .dict-detail__kanji-chip:hover { background: var(--bg-card-hover); }
 .dict-detail__stroke-section { margin-top: 20px; }
 .dict-detail__stroke-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary);
   margin-bottom: 8px;
   font-weight: bold;
@@ -4911,51 +4922,89 @@ input:focus { border-color: var(--accent2); }
 .dict-detail__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 7px;
   margin: 10px 0;
 }
 .dict-tag-chip {
-  position: relative;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--text-secondary);
   background: var(--bg-main);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 2px 10px;
+  padding: 3px 11px;
   line-height: 1.6;
   white-space: nowrap;
 }
 /* Tooltip carries the long JMdict note the chip itself has no room
    for. Shown on hover (desktop) and on focus (tap on mobile — the
-   chip is a real <button>, so a tap focuses it). */
+   chip is a real <button>, so a tap focuses it).
+   Portaled to document.body and positioned with fixed coordinates
+   computed in JS (see TagChip in DictionaryDetail.jsx) rather than
+   living inside the chip as an absolutely-positioned span — that
+   used to get clipped by whichever scrolling container the chip sat
+   in (the mobile fullscreen sheet, the desktop side panel). Mounting
+   only while open (instead of an always-mounted opacity toggle) means
+   no leftover hover/focus CSS is needed here. */
 .dict-tag-chip__tooltip {
-  position: absolute;
-  left: 0;
-  top: calc(100% + 6px);
-  z-index: 5;
+  position: fixed;
+  z-index: 500;
   width: max-content;
   max-width: 220px;
   white-space: normal;
   text-align: left;
-  font-size: 11px;
-  line-height: 1.4;
+  font-size: 12px;
+  line-height: 1.45;
   color: var(--text-primary);
   background: var(--bg-card-hover);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 8px 10px;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.15s ease;
+  padding: 8px 11px;
   pointer-events: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  transform: translate(-50%, 0);
 }
-.dict-tag-chip:hover .dict-tag-chip__tooltip,
-.dict-tag-chip:focus .dict-tag-chip__tooltip,
-.dict-tag-chip:focus-visible .dict-tag-chip__tooltip {
-  opacity: 1;
-  visibility: visible;
+.dict-tag-chip__tooltip[data-placement="above"] {
+  transform: translate(-50%, -100%);
 }
+
+/* Additional JMdict senses beyond the app's own single gloss — same
+   "label + content below" rhythm as the examples section, since both
+   are supplementary dictionary detail rather than core card facts.
+   Each sense is a small numbered row of its own so several senses
+   read as a list, not a wall of text. */
+.dict-detail__senses { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.dict-detail__senses-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.dict-sense {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+  align-items: flex-start;
+}
+.dict-sense + .dict-sense { border-top: 1px dashed var(--border); }
+.dict-sense__number {
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.dict-sense__body { min-width: 0; flex: 1; }
+.dict-sense__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
+/* Sense-level tags are the same chip, just a touch smaller so a dense
+   list of senses doesn't turn into a wall of full-size pills. */
+.dict-sense__tags .dict-tag-chip { font-size: 11px; padding: 1px 9px; }
+.dict-sense__gloss { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
+/* The sense already surfaced as the card's own "Sens" row gets a
+   quiet accent mark instead of repeating a "primary" label — enough
+   to tie it back to the meaning shown above without shouting. */
+.dict-sense--primary .dict-sense__number { color: var(--accent); font-weight: 700; }
 
 /* Example sentences — same "label + bordered block below" rhythm as
    .dict-detail__composing-kanji, kept as its own section since a
@@ -4963,22 +5012,45 @@ input:focus { border-color: var(--accent2); }
    .dict-info-row's label/value split. */
 .dict-detail__examples { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 .dict-detail__examples-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-secondary);
   font-weight: bold;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
-.dict-example { padding: 10px 0; }
+.dict-example { padding: 12px 0; }
 .dict-example + .dict-example { border-top: 1px dashed var(--border); }
+/* Which JMdict sense this sentence illustrates ("① to eat") — ties
+   an example back to a specific gloss when a word has several. */
+.dict-example__sense {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 5px;
+  letter-spacing: 0.02em;
+}
 .dict-example__jp {
   font-family: var(--font-jp);
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text-primary);
   /* Ruby annotations need headroom above the line, or the furigana
      of one line collides with the line above it. */
-  line-height: 2.4;
+  line-height: 2.5;
+  /* Flex-wrap treats each segment (below) as an atomic unit that
+     wraps as a whole rather than letting the browser's default CJK
+     line-breaking rules split in the middle of one — the fix for a
+     lone trailing kanji/kana stranding itself at the start of the
+     next line. text-wrap: pretty is progressive enhancement on top
+     of that for browsers that support paragraph-aware wrapping. */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  text-wrap: pretty;
+}
+.dict-example__seg {
+  white-space: nowrap;
+  display: inline-block;
 }
 .dict-example__jp ruby { white-space: nowrap; }
 .dict-example__jp rt {
@@ -4996,9 +5068,10 @@ input:focus { border-color: var(--accent2); }
   font-weight: 700;
 }
 .dict-example__en {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
-  margin-top: 4px;
+  margin-top: 5px;
+  line-height: 1.5;
 }
 
 .dict-info-row {
@@ -5009,8 +5082,8 @@ input:focus { border-color: var(--accent2); }
   border-bottom: 1px solid var(--border);
   gap: 12px;
 }
-.dict-info-row__label { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
-.dict-info-row__value { font-size: 14px; color: var(--text-primary); text-align: right; }
+.dict-info-row__label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+.dict-info-row__value { font-size: 15px; color: var(--text-primary); text-align: right; }
 
 .status-badge {
   display: inline-flex;
@@ -5848,6 +5921,9 @@ input:focus { border-color: var(--accent2); }
     padding-top: calc(30px + env(safe-area-inset-top, 0px));
     flex-shrink: 0;
   }
+  .dict-detail__char {
+    font-size: 48px;
+  }
   .dict-detail__body {
     flex: 1;
     overflow-y: auto;
@@ -5996,4 +6072,11 @@ input:focus { border-color: var(--accent2); }
     align-items: flex-start;
     gap: 4px;
   }
+
+  /* Very narrow phones: trim the headline glyph, example-sentence
+     text, and tag chip padding a bit further so nothing crowds or
+     forces sideways scroll. */
+  .dict-detail__char { font-size: 40px; }
+  .dict-example__jp { font-size: 15px; line-height: 2.2; }
+  .dict-tag-chip { font-size: 11px; padding: 2px 9px; }
 }

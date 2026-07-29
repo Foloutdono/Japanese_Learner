@@ -200,8 +200,13 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
             })
         elif kind == "vocab":
             raw_id = vocab_to_id(entry, level)
+            # lang is forwarded so tag chips (and the "tooltip" note
+            # text behind them) come back in whichever language the
+            # client is actually displaying — get_vocab_extras defaults
+            # to "fr" otherwise, which used to leak French labels into
+            # English sessions.
             extras = get_vocab_extras(
-                entry.get("kanji", ""), entry.get("kana", ""), entry.get("meaning", ""),
+                entry.get("kanji", ""), entry.get("kana", ""), entry.get("meaning", ""), lang,
             )
             results.append({
                 "type":     "vocab",
@@ -210,6 +215,10 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 "meaning":  meaning,
                 "level":    level,
                 "tags":     extras["tags"],
+                # Every JMdict sense (not just the app's own single
+                # gloss) — lets the detail panel show the fuller
+                # dictionary picture instead of only the one meaning.
+                "senses":   extras["senses"],
                 "examples": extras["examples"],
                 "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),
             })
