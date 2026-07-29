@@ -127,16 +127,18 @@ def _build_card(domain: str, raw_id: str, entry: dict, pool: list[dict], mode: s
     return payload
 
 
-def _select_cards(domain: str, tier: int, mode: str, lang: str, count: int, exclude_ids: set[str], user_id: str):
+def _select_cards(domain: str, tier: int, mode: str, lang: str, count: int, exclude_ids: set[str], user_id: str,
+                   tier_size: int = freq.DEFAULT_TIER_SIZE):
     """Mirrors kanji.py/vocab.py's _select_cards, but the candidate pool
     is a frequency tier (native_level, entry) list instead of a single
-    KANJI_BY_LEVEL[level]/VOCAB_BY_LEVEL[level] slice. `tier` is only
-    used to build the batch-cache group key (via a synthetic
-    "freq_{domain}_{tier}" tag) — every card's real ID still comes from
-    its own native level, so progress stays unified with normal
-    JLPT-level study."""
+    KANJI_BY_LEVEL[level]/VOCAB_BY_LEVEL[level] slice. `tier` (together
+    with `tier_size`, since the same tier number means a different
+    rank range depending on it) is only used to build the batch-cache
+    group key (via a synthetic "freq_{domain}_{tier}_{tier_size}" tag)
+    — every card's real ID still comes from its own native level, so
+    progress stays unified with normal JLPT-level study."""
     overrides = frequency_store.get_overrides(user_id, domain)
-    keys = freq.tier_keys(domain, tier, overrides=overrides)
+    keys = freq.tier_keys(domain, tier, tier_size=tier_size, overrides=overrides)
     resolved = [(key, freq.resolve(domain, key)) for key in keys]
     resolved = [(key, r) for key, r in resolved if r is not None]
     if not resolved:
@@ -147,7 +149,7 @@ def _select_cards(domain: str, tier: int, mode: str, lang: str, count: int, excl
     by_raw_id = {freq.to_id(domain, key): entry for key, (_, entry) in resolved}
 
     card_ids = prefixed(raw_ids, user_id)
-    cache_key = batch_key("user", user_id, mode, f"freq_{domain}_{tier}")
+    cache_key = batch_key("user", user_id, mode, f"freq_{domain}_{tier}_{tier_size}")
     ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode), version=card_ids)
 
     due = srs.get_due_cards(mode, card_ids=card_ids)
@@ -168,8 +170,8 @@ def _select_cards(domain: str, tier: int, mode: str, lang: str, count: int, excl
             cards.append(_build_card(domain, raw_id, entry, pool, mode, lang, states.get(card_id), previews.get(card_id)))
 
     logger.info(
-        "frequency study request domain=%s tier=%d mode=%s user_id=%s requested=%d due_count=%d picked=%d",
-        domain, tier, mode, user_id, count, len(due), len(cards),
+        "frequency study request domain=%s tier=%d tier_size=%d mode=%s user_id=%s requested=%d due_count=%d picked=%d",
+        domain, tier, tier_size, mode, user_id, count, len(due), len(cards),
     )
     return pool, cards
 
@@ -225,13 +227,13 @@ def get_tier_items(domain: str, tier: int, lang: str = "fr", tier_size: int = fr
 
 
 @router.get("/api/frequency/{domain}/card")
-def get_frequency_card(domain: str, tier: int, mode: str, lang: str = "fr",
+def get_frequency_card(domain: str, tier: int, mode: str, lang: str = "fr", tier_size: int = freq.DEFAULT_TIER_SIZE,
                        user_id: str = Depends(get_user_id)):
     _require_domain(domain)
     if mode not in _valid_modes(domain):
         return {"error": "Invalid mode"}
 
-    pool, cards = _select_cards(domain, tier, mode, lang, count=1, exclude_ids=set(), user_id=user_id)
+    pool, cards = _select_cards(domain, tier, mode, lang, count=1, exclude_ids=set(), user_id=user_id, tier_size=tier_size)
     if not pool:
         return {"error": "Empty tier"}
     if not cards:
@@ -242,7 +244,7 @@ def get_frequency_card(domain: str, tier: int, mode: str, lang: str = "fr",
 
 @router.get("/api/frequency/{domain}/cards")
 def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", count: int = 10, exclude: str = "",
-                        user_id: str = Depends(get_user_id)):
+                        tier_size: int = freq.DEFAULT_TIER_SIZE, user_id: str = Depends(get_user_id)):
     _require_domain(domain)
     if mode not in _valid_modes(domain):
         return {"error": "Invalid mode"}
@@ -252,6 +254,7 @@ def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", cou
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
+        tier_size=tier_size,
     )
     if not pool:
         return {"error": "Empty tier"}
@@ -259,13 +262,14 @@ def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", cou
 
 
 @router.get("/api/frequency/{domain}/stats")
-def get_frequency_stats(domain: str, tier: int, mode: str, user_id: str = Depends(get_user_id)):
+def get_frequency_stats(domain: str, tier: int, mode: str, tier_size: int = freq.DEFAULT_TIER_SIZE,
+                        user_id: str = Depends(get_user_id)):
     _require_domain(domain)
     if mode not in _valid_modes(domain):
         return {"error": "Invalid mode"}
 
     overrides = frequency_store.get_overrides(user_id, domain)
-    keys = freq.tier_keys(domain, tier, overrides=overrides)
+    keys = freq.tier_keys(domain, tier, tier_size=tier_size, overrides=overrides)
     raw_ids = [freq.to_id(domain, key) for key in keys]
     raw_ids = [rid for rid in raw_ids if rid is not None]
     if not raw_ids:

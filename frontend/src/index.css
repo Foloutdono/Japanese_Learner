@@ -242,6 +242,33 @@ button:focus-visible {
   max-width: 480px;
 }
 
+/* ── Tier-size toggle (TierSelector) ─────────────────────── */
+/* Same segmented idea as .mode-toggle, sized down to sit inline under
+   a selector header rather than as a standalone control row. */
+.tier-size-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tier-size-toggle__btn {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+
+.tier-size-toggle__btn--active {
+  background: var(--row-color, var(--accent));
+  color: var(--text-primary);
+  border-color: transparent;
+}
+
 /* ── Shared choice list (LevelSelector + ModeSelector) ────── */
 /* An editorial list, not a grid of cards: one column, hairline
    rules, generous padding. Asymmetry (title left / description
