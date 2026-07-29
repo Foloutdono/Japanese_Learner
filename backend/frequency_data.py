@@ -50,12 +50,13 @@ DEFAULT_TIER_SIZE = 200
 # an override's tier number won't line up 1:1 with the custom bucket
 # boundaries. Documented limitation, not a bug — see frequency_store.py.
 _BASE_DIR = os.path.dirname(__file__)
-_DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
+_KANJI_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
+_VOCAB_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 
-with open(os.path.join(_DATA_DIR, "kanji_frequency.json"), encoding="utf-8") as f:
+with open(os.path.join(_KANJI_DIR, "kanji_frequency.json"), encoding="utf-8") as f:
     KANJI_FREQUENCY_ORDER: list[str] = json.load(f)
 
-with open(os.path.join(_DATA_DIR, "vocab_frequency.json"), encoding="utf-8") as f:
+with open(os.path.join(_VOCAB_DIR, "vocab_frequency.json"), encoding="utf-8") as f:
     VOCAB_FREQUENCY_ORDER: list[str] = json.load(f)
 
 
