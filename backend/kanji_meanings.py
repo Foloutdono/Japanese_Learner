@@ -2,7 +2,7 @@
 Retires translations/fr/kanji_fr.py and kanji_fr.json entirely.
 
 Kanji meanings (all languages KANJIDIC2 carries — en, fr, es, pt) now
-come straight from kanji_meanings.json (kanjidic2/kanji_data/), the same
+come straight from kanji_meanings.json (datas/kanji/), the same
 KANJIDIC2 dump already backing kanji_data.py's radical lookups, instead
 of a separately hand-maintained French list. One source of truth instead
 of two datasets that can drift out of sync.
@@ -31,7 +31,7 @@ import json
 import os
 
 _BASE_DIR = os.path.dirname(__file__)
-_DATA_DIR = os.path.join(_BASE_DIR, "kanjidic2", "kanji_data")
+_DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
 
 with open(os.path.join(_DATA_DIR, "kanji_meanings.json"), encoding="utf-8") as f:
     KANJI_MEANINGS: dict[str, dict[str, list[str]]] = json.load(f)

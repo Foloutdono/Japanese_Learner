@@ -85,6 +85,10 @@ def _sense_summary(sense, match_type):
         "term": sense["term"],
         "reading": sense["reading"],
         "tags": sense.get("tags", []),
+        # Frequency markers (news1k..news24k, ichi, spec, gai) live here,
+        # not in "tags" — see build_vocab_frequency.py, which reads this
+        # field to rank the deck by real-world commonness.
+        "term_tags": sense.get("term_tags", []),
         "glossary": sense.get("glossary", []),
         "examples": sense.get("examples", []),
     }

@@ -1,6 +1,6 @@
 """
 Loads the app's own JLPT-leveled kanji deck (as opposed to the full
-~13k-character KANJIDIC2 dump under kanjidic2/kanji_data/) from JSON
+~13k-character KANJIDIC2 dump under datas/kanji/) from JSON
 instead of hardcoding it here.
 
 Source of truth is now kanji_deck.json, sitting next to radicals.json /
@@ -28,7 +28,7 @@ import os
 # deeper and uses dirname(dirname(__file__)) — this file sits directly
 # in backend/ and only needs a single dirname() to reach it.
 _BASE_DIR = os.path.dirname(__file__)
-_DATA_DIR = os.path.join(_BASE_DIR, "kanjidic2", "kanji_data")
+_DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
 
 with open(os.path.join(_DATA_DIR, "kanji_deck.json"), encoding="utf-8") as f:
     KANJI_BY_LEVEL: dict[str, list[dict]] = json.load(f)
