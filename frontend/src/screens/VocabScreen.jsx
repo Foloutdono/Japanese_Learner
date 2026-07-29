@@ -12,6 +12,7 @@ import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
 import { CardTransition } from '../components/CardTransition'
 import LevelSelector from '../components/LevelSelector'
+import TierSelector from '../components/TierSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
@@ -28,7 +29,13 @@ export default function VocabScreen({ session }) {
 
   const MODES = vocabKanjiModes(t, t.wordNoun)
 
+  // See KanjiScreen for the full rationale — studyBy picks 'level'
+  // (JLPT N5…N1) vs 'frequency' (Top 200 / 201-400 / ...), and only
+  // one of level/tier is meaningful at a time depending on it.
+  const [studyBy, setStudyBy]       = useState(null)
   const [level, setLevel]           = useState(null)
+  const [tier, setTier]             = useState(null)
+  const [tierLabel, setTierLabel]   = useState(null)
   const [mode, setMode]             = useState(null)
   const [answered, setAnswered]     = useState(false)
   const [selected, setSelected]     = useState(null)
@@ -69,24 +76,26 @@ export default function VocabScreen({ session }) {
   // yet. lang is intentionally NOT part of the key — switching UI
   // language mid-session re-translates in place (see the effect
   // below) rather than starting a new session.
-  const storageKey = level && mode
-    ? `jp-session:vocab:${level}:${mode}`
+  const storageKey =
+    studyBy === 'level' && level && mode ? `jp-session:vocab:${level}:${mode}`
+    : studyBy === 'frequency' && tier && mode ? `jp-session:vocab:freq:${tier}:${mode}`
     : 'idle'
 
   const fetchBatch = useCallback((count, excludeIds) => {
-    if (!level || !mode) return Promise.resolve([])
+    if (studyBy === 'level' && (!level || !mode)) return Promise.resolve([])
+    if (studyBy === 'frequency' && (!tier || !mode)) return Promise.resolve([])
+    if (!studyBy || !mode) return Promise.resolve([])
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-    return apiFetch(
-      `/api/vocab/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`,
-      session,
-      { signal: controller.signal },
-    )
+    const url = studyBy === 'level'
+      ? `/api/vocab/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
+      : `/api/frequency/vocab/cards?tier=${tier}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
+    return apiFetch(url, session, { signal: controller.signal })
       .then(r => r.json())
       .then(data => (data.cards ?? []).map(c => ({ ...c, lang })))
       .finally(() => clearTimeout(timer))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level, mode, session])
+  }, [studyBy, level, tier, mode, session])
   // (lang deliberately excluded above: changing lang shouldn't change
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
@@ -148,17 +157,31 @@ export default function VocabScreen({ session }) {
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
   // level+mode. Fetched independently from the card so it never blocks
   // or slows down card navigation.
-  function loadProgress(lvl, m) {
-    apiFetch(`/api/vocab/stats?level=${encodeURIComponent(lvl)}&mode=${m}`, session)
+  // `source` is { level } or { tier } — see KanjiScreen's loadProgress
+  // for why this stays one function rather than two near-duplicates.
+  function loadProgress(source, m) {
+    const url = 'level' in source
+      ? `/api/vocab/stats?level=${encodeURIComponent(source.level)}&mode=${m}`
+      : `/api/frequency/vocab/stats?tier=${source.tier}&mode=${m}`
+    apiFetch(url, session)
       .then(r => r.json())
       .then(data => setProgress(data?.error ? null : data))
       .catch(() => {})
   }
 
-  function startSession(lvl, m) {
+  function startLevelSession(lvl, m) {
+    setStudyBy('level')
     setLevel(lvl)
     setMode(m)
-    loadProgress(lvl, m)
+    loadProgress({ level: lvl }, m)
+  }
+
+  function startFrequencySession(tr, label, m) {
+    setStudyBy('frequency')
+    setTier(tr)
+    setTierLabel(label)
+    setMode(m)
+    loadProgress({ tier: tr }, m)
   }
 
   // advance() only ever runs once every gate above has cleared — see
@@ -181,7 +204,7 @@ export default function VocabScreen({ session }) {
     if (locked) return
     setLocked(true)
     setShowRating(false)
-    loadProgress(level, mode)
+    loadProgress(studyBy === 'level' ? { level } : { tier }, mode)
 
     // The exact outcome of this rating — xp, level-up, stage
     // promotion — was already computed when this card was fetched
@@ -240,11 +263,30 @@ export default function VocabScreen({ session }) {
     speakJapanese(card.kana)
   }
 
-  // ── Level selection ──
-  if (!level) {
+  // ── Study-source selection: JLPT level vs. frequency tier ──
+  if (!studyBy) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={`${t.vocabulary} JLPT`} />
+        <TopBar onBack={() => navigate('/')} title={t.vocabulary} />
+        <SelectionScreen>
+          <ModeSelector
+            modes={[
+              { key: 'level', label: t.byLevel, desc: t.byLevelDesc },
+              { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
+            ]}
+            onSelect={setStudyBy}
+            title={t.selectStudySource}
+          />
+        </SelectionScreen>
+      </div>
+    )
+  }
+
+  // ── Level selection (JLPT path) ──
+  if (studyBy === 'level' && !level) {
+    return (
+      <div className="screen">
+        <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} JLPT`} />
         <SelectionScreen>
           <LevelSelector onSelect={setLevel} color="var(--accent2)" title={t.selectLevel} />
         </SelectionScreen>
@@ -252,13 +294,35 @@ export default function VocabScreen({ session }) {
     )
   }
 
-  // ── Mode selection ──
-  if (!mode) {
+  // ── Tier selection (frequency path) ──
+  if (studyBy === 'frequency' && !tier) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setLevel(null)} title={`${t.vocabulary} ${level}`} />
+        <TopBar onBack={() => setStudyBy(null)} title={t.vocabulary} />
         <SelectionScreen>
-          <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} title={t.selectMode} />
+          <TierSelector
+            domain="vocab"
+            session={session}
+            color="var(--accent2)"
+            onSelect={(tr, label) => { setTier(tr); setTierLabel(label) }}
+          />
+        </SelectionScreen>
+      </div>
+    )
+  }
+
+  // ── Mode selection (shared by both paths) ──
+  if (!mode) {
+    const backTitle = studyBy === 'level' ? `${t.vocabulary} ${level}` : `${t.vocabulary} ${tierLabel}`
+    return (
+      <div className="screen">
+        <TopBar onBack={() => (studyBy === 'level' ? setLevel(null) : setTier(null))} title={backTitle} />
+        <SelectionScreen>
+          <ModeSelector
+            modes={MODES}
+            onSelect={m => (studyBy === 'level' ? startLevelSession(level, m) : startFrequencySession(tier, tierLabel, m))}
+            title={t.selectMode}
+          />
         </SelectionScreen>
       </div>
     )
@@ -267,10 +331,11 @@ export default function VocabScreen({ session }) {
   // ── Quiz ──
   const isKjToM = card?.direction === 'kj-m'
   const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
+  const sourceLabel = studyBy === 'level' ? level : tierLabel
 
   return (
     <div className="screen">
-      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${level} — ${modeLabel}`} autoHide />
+      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${sourceLabel} — ${modeLabel}`} autoHide />
       <XpToast toast={xpToast} onDone={() => {
         setXpToast(null)
         pendingGatesRef.current.delete('toast')
