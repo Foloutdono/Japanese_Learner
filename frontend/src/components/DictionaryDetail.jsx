@@ -99,6 +99,24 @@ export function SpeakIcon() {
   )
 }
 
+export function CloseIcon() {
+  return (
+    <svg
+      className="dict-detail__close-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="6" y1="6" x2="18" y2="18" />
+      <line x1="18" y1="6" x2="6" y2="18" />
+    </svg>
+  )
+}
+
 export function SearchIcon() {
   return (
     <svg
@@ -127,6 +145,23 @@ export function InfoRow({ label, value }) {
         {value}
       </span>
     </div>
+  )
+}
+
+// A grammatical/priority tag ("n", "v1", "⭐"...) with its full JMdict
+// note shown as a tooltip rather than on the pill itself (the note is
+// often a full sentence — too long to sit inline without wrapping into
+// a two-line pill). A <button> rather than a plain span so a tap on
+// mobile can focus it and reveal the tooltip too, not just desktop
+// hover (see .dict-tag-chip__tooltip in index.css).
+export function TagChip({ tag }) {
+  return (
+    <button type="button" className="dict-tag-chip">
+      {tag.label}
+      {tag.tooltip && tag.tooltip !== tag.label && (
+        <span className="dict-tag-chip__tooltip" role="tooltip">{tag.tooltip}</span>
+      )}
+    </button>
   )
 }
 
@@ -188,7 +223,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
             className="dict-detail__close-x"
             aria-label={t.close}
           >
-            ×
+            <CloseIcon />
           </button>
         </div>
       </div>
@@ -216,7 +251,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
         {entry.tags?.length > 0 && (
           <div className="dict-detail__tags">
             {entry.tags.map(tag => (
-              <span key={tag} className="dict-tag-chip">{tag}</span>
+              <TagChip key={tag.code} tag={tag} />
             ))}
           </div>
         )}
@@ -246,7 +281,18 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
             </div>
             {entry.examples.map((ex, i) => (
               <div key={i} className="dict-example">
-                <div className="dict-example__jp">{ex.jp}</div>
+                <div className="dict-example__jp">
+                  {ex.segments?.length > 0
+                    ? ex.segments.map((seg, j) => {
+                        const content = seg.reading
+                          ? <ruby>{seg.text}<rt>{seg.reading}</rt></ruby>
+                          : seg.text
+                        return seg.highlight
+                          ? <mark key={j} className="dict-example__hl">{content}</mark>
+                          : <span key={j}>{content}</span>
+                      })
+                    : ex.jp}
+                </div>
                 <div className="dict-example__en">{ex.en}</div>
               </div>
             ))}

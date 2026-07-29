@@ -200,7 +200,9 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
             })
         elif kind == "vocab":
             raw_id = vocab_to_id(entry, level)
-            extras = get_vocab_extras(entry.get("kanji", ""), entry.get("kana", ""))
+            extras = get_vocab_extras(
+                entry.get("kanji", ""), entry.get("kana", ""), entry.get("meaning", ""),
+            )
             results.append({
                 "type":     "vocab",
                 "kanji":    entry.get("kanji", ""),
