@@ -4825,20 +4825,19 @@ input:focus { border-color: var(--accent2); }
    so it doesn't need its own dismiss button up top. */
 .dict-detail__close-x {
   display: none;
-  width: 34px;
-  height: 34px;
+  width: 42px;
+  height: 42px;
   padding: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.12);
   color: var(--text-on-panel);
-  font-size: 20px;
-  line-height: 1;
   align-items: center;
   justify-content: center;
 }
+.dict-detail__close-icon { width: 18px; height: 18px; }
 
 .dict-detail__body { padding: 20px 24px 24px; }
-.dict-detail__badges { display: flex; gap: 12px; margin-bottom: 4px; }
+.dict-detail__badges { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
 .dict-detail__readings { padding: 8px 0; border-bottom: 1px solid var(--border); }
 .dict-detail__radical-link {
   background: transparent;
@@ -4902,18 +4901,23 @@ input:focus { border-color: var(--accent2); }
   font-size: 13px;
 }
 
-/* Grammatical/priority tags ("n", "v1", "⭐ high priority", ...) for a
-   vocab entry — small quiet chips, not another accent-colour pill, so
-   they read as a footnote next to the reading rather than competing
-   with .dict-type-pill / .status-badge for attention. */
+/* Grammatical/priority tags ("nom", "v. godan", "⭐", ...) for a vocab
+   entry — small quiet chips, not another accent-colour pill, so they
+   read as a footnote next to the reading rather than competing with
+   .dict-type-pill / .status-badge for attention. Sits in its own row
+   with margin (not just padding) on both sides so it reads as a
+   distinct footnote rather than fusing into the divider lines of the
+   reading row above and the meaning row below. */
 .dict-detail__tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 4px 0 10px;
+  margin: 10px 0;
 }
 .dict-tag-chip {
+  position: relative;
   font-size: 11px;
+  font-weight: 400;
   color: var(--text-secondary);
   background: var(--bg-main);
   border: 1px solid var(--border);
@@ -4921,6 +4925,36 @@ input:focus { border-color: var(--accent2); }
   padding: 2px 10px;
   line-height: 1.6;
   white-space: nowrap;
+}
+/* Tooltip carries the long JMdict note the chip itself has no room
+   for. Shown on hover (desktop) and on focus (tap on mobile — the
+   chip is a real <button>, so a tap focuses it). */
+.dict-tag-chip__tooltip {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 5;
+  width: max-content;
+  max-width: 220px;
+  white-space: normal;
+  text-align: left;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+.dict-tag-chip:hover .dict-tag-chip__tooltip,
+.dict-tag-chip:focus .dict-tag-chip__tooltip,
+.dict-tag-chip:focus-visible .dict-tag-chip__tooltip {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Example sentences — same "label + bordered block below" rhythm as
@@ -4936,18 +4970,35 @@ input:focus { border-color: var(--accent2); }
   text-transform: uppercase;
   margin-bottom: 8px;
 }
-.dict-example { padding: 8px 0; }
+.dict-example { padding: 10px 0; }
 .dict-example + .dict-example { border-top: 1px dashed var(--border); }
 .dict-example__jp {
   font-family: var(--font-jp);
   font-size: 15px;
   color: var(--text-primary);
-  line-height: 1.5;
+  /* Ruby annotations need headroom above the line, or the furigana
+     of one line collides with the line above it. */
+  line-height: 2.4;
+}
+.dict-example__jp ruby { white-space: nowrap; }
+.dict-example__jp rt {
+  font-size: 0.55em;
+  font-weight: normal;
+  color: var(--text-secondary);
+  user-select: none;
+}
+/* The headword itself, picked out of the sentence — plain highlight
+   colour (matches the app's accent), no background box, same idea as
+   the reference Yomitan/Jitendex popups this feature is modelled on. */
+.dict-example__hl {
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
 }
 .dict-example__en {
   font-size: 12px;
   color: var(--text-secondary);
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .dict-info-row {
