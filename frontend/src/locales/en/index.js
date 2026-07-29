@@ -95,6 +95,15 @@ const quiz = {
   selectKanaSet:     'Choose a kana set',
   selectPhase:       'Choose your training phase',
 
+  byLevel: 'JLPT', 
+  byLevelDesc: 'The standard JLPT levels from N5 to N1, with the most common words and kanji in each level', 
+  byFrequency: 'Word frequency',
+  byFrequencyDesc: 'The frequency of words in real Japanese text, from most common to least common', 
+  selectStudySource: 'Choose your study source', 
+  selectTier: 'Choose a frequency tier', 
+  kanjiUnit: 'kanji', 
+  loadError: 'Error loading tiers. Try again.',
+
   levelHintN5:       'Beginner level',
   levelHintN4:       'Elementary level',
   levelHintN3:       'Intermediate level',
