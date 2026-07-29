@@ -4902,6 +4902,54 @@ input:focus { border-color: var(--accent2); }
   font-size: 13px;
 }
 
+/* Grammatical/priority tags ("n", "v1", "⭐ high priority", ...) for a
+   vocab entry — small quiet chips, not another accent-colour pill, so
+   they read as a footnote next to the reading rather than competing
+   with .dict-type-pill / .status-badge for attention. */
+.dict-detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0 10px;
+}
+.dict-tag-chip {
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 10px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+/* Example sentences — same "label + bordered block below" rhythm as
+   .dict-detail__composing-kanji, kept as its own section since a
+   sentence pair reads best full-width rather than squeezed into an
+   .dict-info-row's label/value split. */
+.dict-detail__examples { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.dict-detail__examples-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.dict-example { padding: 8px 0; }
+.dict-example + .dict-example { border-top: 1px dashed var(--border); }
+.dict-example__jp {
+  font-family: var(--font-jp);
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.dict-example__en {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
 .dict-info-row {
   display: flex;
   justify-content: space-between;

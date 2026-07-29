@@ -213,6 +213,13 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
           ? <InfoRow label={t.romaji} value={entry.romaji} />
           : <InfoRow label={t.reading} value={entry.kana} />
         }
+        {entry.tags?.length > 0 && (
+          <div className="dict-detail__tags">
+            {entry.tags.map(tag => (
+              <span key={tag} className="dict-tag-chip">{tag}</span>
+            ))}
+          </div>
+        )}
         {meaning != null && <InfoRow label={t.meaning}    value={meaning} />}
         <InfoRow label={t.level}  value={entry.level} />
         {entry.stroke_count && (
@@ -230,6 +237,20 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
               </button>
             }
           />
+        )}
+
+        {entry.examples?.length > 0 && (
+          <div className="dict-detail__examples">
+            <div className="dict-detail__examples-label">
+              {t.examples ?? 'Exemples'}
+            </div>
+            {entry.examples.map((ex, i) => (
+              <div key={i} className="dict-example">
+                <div className="dict-example__jp">{ex.jp}</div>
+                <div className="dict-example__en">{ex.en}</div>
+              </div>
+            ))}
+          </div>
         )}
 
         {onKanjiClick && composingKanji.length > 0 && (
