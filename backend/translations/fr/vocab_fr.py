@@ -9,7 +9,7 @@ swap.
 
 Source of truth is now vocab_fr.json, sitting next to vocab_deck.json /
 kanji_fr's replacement (kanji_meanings.json) / etc. under
-datas/vocab_data/:
+datas/vocab/:
 
     { "毎月": "chaque mois", ... }
 
@@ -22,7 +22,7 @@ import os
 # translations/fr/vocab_fr.py -> backend/ is two levels up, same as
 # kanji_fr.py's old path.
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-_DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab_data")
+_DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 
 with open(os.path.join(_DATA_DIR, "vocab_fr.json"), encoding="utf-8") as f:
     VOCAB_FR: dict[str, str] = json.load(f)
