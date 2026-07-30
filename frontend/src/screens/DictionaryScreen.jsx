@@ -619,17 +619,14 @@ function ResultsSection({
 						</div>
 					</div>
 
-					{/* Desktop side panel — hidden on mobile via CSS */}
-					{selected && (
-						<div className="dict-panel">
-							<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
-						</div>
-					)}
 				</div>
 			)}
 
-			{/* Mobile modal */}
-			{selected && isMobile && (
+			{/* Detail sheet — full-screen overlay on every breakpoint now
+			    that cards carry senses/examples long enough to overflow
+			    the old fixed-width sticky side panel (see .dict-modal-content
+			    in index.css for the size difference between mobile/desktop). */}
+			{selected && (
 				<div
 					onClick={() => setSelected(null)}
 					className="dict-modal-overlay"
@@ -763,15 +760,8 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 				</div>
 			</div>
 
-			{/* Desktop side panel — hidden on mobile via CSS, same as ResultsSection */}
+			{/* Detail sheet — full-screen overlay on every breakpoint, same as ResultsSection */}
 			{selected && (
-				<div className="dict-panel">
-					<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
-				</div>
-			)}
-
-			{/* Mobile modal */}
-			{selected && isMobile && (
 				<div onClick={() => setSelected(null)} className="dict-modal-overlay">
 					<div onClick={e => e.stopPropagation()} className="dict-modal-content">
 						<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />

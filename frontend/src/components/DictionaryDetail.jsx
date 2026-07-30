@@ -7,14 +7,19 @@ import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
-// Small "① ② ③..." markers for JMdict sense numbers — used both on the
-// senses list itself and on each example sentence, so a reader can
-// tell at a glance which sense an example illustrates. Falls back to
-// a plain "N." past the pre-drawn range (senses are capped server-side
-// at 8, so this is already generous headroom).
-const CIRCLED_NUMBERS = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩']
-function senseMarker(number) {
-  return CIRCLED_NUMBERS[number - 1] ?? `${number}.`
+// Small round "1 2 3..." markers for JMdict sense numbers — used both
+// on the senses list itself and on each example sentence, so a reader
+// can tell at a glance which sense an example illustrates. Drawn with
+// CSS (a plain circle background) rather than the Unicode "①②③..."
+// glyphs — those render inconsistently across fonts/platforms and end
+// up tiny and hard to read at UI sizes, whereas a real element scales
+// and stays legible at any size.
+function SenseMarker({ number, className = '' }) {
+  return (
+    <span className={`dict-sense-marker ${className}`.trim()}>
+      {number}
+    </span>
+  )
 }
 
 // ── Shared dictionary metadata/helpers ─────────────────────
@@ -358,7 +363,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
                 key={sense.number}
                 className={`dict-sense${sense.primary ? ' dict-sense--primary' : ''}`}
               >
-                <span className="dict-sense__number">{senseMarker(sense.number)}</span>
+                <SenseMarker number={sense.number} className="dict-sense__number" />
                 <div className="dict-sense__body">
                   {sense.tags?.length > 0 && (
                     <div className="dict-sense__tags">
@@ -383,7 +388,8 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
               <div key={i} className="dict-example">
                 {ex.sense_glossary && (
                   <div className="dict-example__sense">
-                    {senseMarker(ex.sense_number ?? 1)} {ex.sense_glossary}
+                    <SenseMarker number={ex.sense_number ?? 1} />
+                    {ex.sense_glossary}
                   </div>
                 )}
                 <div className="dict-example__jp">
