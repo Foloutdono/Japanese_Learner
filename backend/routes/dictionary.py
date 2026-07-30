@@ -214,7 +214,6 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 "kana":     entry.get("kana", ""),
                 "meaning":  meaning,
                 "level":    level,
-                "tags":     extras["tags"],
                 # Every JMdict sense (not just the app's own single
                 # gloss) — lets the detail panel show the fuller
                 # dictionary picture instead of only the one meaning.

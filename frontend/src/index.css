@@ -4863,7 +4863,6 @@ input:focus { border-color: var(--accent2); }
 .dict-detail__close-icon { width: 18px; height: 18px; }
 
 .dict-detail__body { padding: 20px 24px 24px; }
-.dict-detail__badges { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
 .dict-detail__readings { padding: 8px 0; border-bottom: 1px solid var(--border); }
 .dict-detail__radical-link {
   background: transparent;

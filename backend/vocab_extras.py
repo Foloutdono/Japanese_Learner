@@ -400,9 +400,36 @@ def _build_vocab_readings() -> dict:
             table[form] = readings[0]
     return table
 
+def _build_meanings_readings() -> dict:
+    """Extract compound readings from the JMdict meanings data.
+
+    vocab_meanings.json keys are '<kanji>::<kana>' (kana may contain
+    '/' for multiple readings). This gives us readings for many common
+    compounds that aren't in the app's own JLPT deck — e.g. 東京 → とうきょう.
+    """
+    table = {}
+    for key in _VOCAB_MEANINGS:
+        if "::" not in key:
+            continue
+        kanji, kana = key.split("::", 1)
+        if not kanji or not any(_is_kanji(c) for c in kanji):
+            continue
+        readings = _readings(kana)
+        if readings and kanji not in table:
+            table[kanji] = readings[0]
+    return table
 
 _SINGLE_KANJI_READING = _build_single_kanji_readings()
 _VOCAB_READING = _build_vocab_readings()
+
+# Layer JMdict meanings on top: the app's own deck takes precedence,
+# but anything not covered there (place names, common compounds, etc.)
+# gets a real reading instead of falling back to per-character guesswork.
+_MEANINGS_READING = _build_meanings_readings()
+for form, reading in _MEANINGS_READING.items():
+    if form not in _VOCAB_READING:
+        _VOCAB_READING[form] = reading
+
 _MAX_VOCAB_MATCH_LEN = max((len(k) for k in _VOCAB_READING), default=1)
 
 

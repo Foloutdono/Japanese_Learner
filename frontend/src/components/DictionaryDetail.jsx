@@ -384,14 +384,6 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
           <StatusBadge state={entry.status?.state ?? 'new'} t={t} />
         </div>
 
-        {entry.tags?.length > 0 && (
-          <div className="dict-detail__tags">
-            {entry.tags.map(tag => (
-              <TagChip key={tag.code} tag={tag} />
-            ))}
-          </div>
-        )}
-
         {entry.type === 'kanji'
           ? (
             <div className="dict-detail__readings">
