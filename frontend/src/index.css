@@ -500,18 +500,6 @@ input:focus { border-color: var(--accent2); }
 	align-items: flex-start;
 }
 
-.dict-panel {
-	width: 380px;
-	flex-shrink: 0;
-	position: sticky;
-	top: 88px;
-	background: var(--bg-card);
-	border: 1px solid var(--border);
-	border-top: 3px solid var(--accent);
-	border-radius: 10px;
-	overflow: hidden;
-}
-
 /* ── Responsive grid ── */
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap); }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
@@ -4615,8 +4603,8 @@ input:focus { border-color: var(--accent2); }
    results grid and radical picker (thin --border gap lines between
    cells) but tied to the active category's own colour (--syl-accent,
    set by SyllabaryGrid from TYPE_META) via a top border and a tinted
-   header row, the same way .dict-panel ties its accent into its own
-   top edge — so hiragana and katakana read as distinctly themed
+   header row, the same way .dict-modal-content ties its accent into
+   its own top edge — so hiragana and katakana read as distinctly themed
    sheets rather than one generic grey grid with a label on top. */
 .syllabary-chart-group {
   display: flex;
@@ -4774,15 +4762,15 @@ input:focus { border-color: var(--accent2); }
   border-radius: 14px;
   border-top: 3px solid var(--accent);
   width: 100%;
-  max-width: 400px;
-  max-height: 85vh;
+  max-width: 640px;
+  max-height: 92vh;
   overflow-y: auto;
 }
 
 /* Dark ink stage for the headline character — same sumi block as the
    top bar / home header — with a hanko-red stamp button standing in
    for the old 🔊 emoji. Corners inherit whatever radius the parent
-   (.dict-panel or .dict-modal-content) has, so it always sits flush. */
+   (.dict-modal-content) has, so it always sits flush. */
 .dict-detail__stage {
   background: var(--bg-panel);
   color: var(--text-on-panel);
@@ -4984,16 +4972,13 @@ input:focus { border-color: var(--accent2); }
 }
 .dict-sense {
   display: flex;
-  gap: 8px;
-  padding: 6px 0;
+  gap: 10px;
+  padding: 7px 0;
   align-items: flex-start;
 }
 .dict-sense + .dict-sense { border-top: 1px dashed var(--border); }
 .dict-sense__number {
-  flex-shrink: 0;
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.6;
+  margin-top: 1px;
 }
 .dict-sense__body { min-width: 0; flex: 1; }
 .dict-sense__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
@@ -5001,10 +4986,35 @@ input:focus { border-color: var(--accent2); }
    list of senses doesn't turn into a wall of full-size pills. */
 .dict-sense__tags .dict-tag-chip { font-size: 11px; padding: 1px 9px; }
 .dict-sense__gloss { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
-/* The sense already surfaced as the card's own "Sens" row gets a
-   quiet accent mark instead of repeating a "primary" label — enough
-   to tie it back to the meaning shown above without shouting. */
-.dict-sense--primary .dict-sense__number { color: var(--accent); font-weight: 700; }
+/* The sense already surfaced as the card's own "Sens" row gets its
+   badge filled in accent colour instead of repeating a "primary"
+   label — enough to tie it back to the meaning shown above without
+   shouting. */
+.dict-sense--primary .dict-sense-marker {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-panel);
+}
+
+/* Round number badge for JMdict sense markers — replaces the old
+   Unicode "①②③..." glyphs (illegible/inconsistent across fonts) with
+   a plain drawn circle that stays crisp and readable at any size. */
+.dict-sense-marker {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  font-family: var(--font-display, inherit);
+}
 
 /* Example sentences — same "label + bordered block below" rhythm as
    .dict-detail__composing-kanji, kept as its own section since a
@@ -5024,11 +5034,22 @@ input:focus { border-color: var(--accent2); }
 /* Which JMdict sense this sentence illustrates ("① to eat") — ties
    an example back to a specific gloss when a word has several. */
 .dict-example__sense {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
   font-weight: 700;
   color: var(--accent);
   margin-bottom: 5px;
   letter-spacing: 0.02em;
+}
+.dict-example__sense .dict-sense-marker {
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-panel);
 }
 .dict-example__jp {
   font-family: var(--font-jp);
@@ -5891,10 +5912,6 @@ input:focus { border-color: var(--accent2); }
   }
   .dict-layout {
     display: block;
-  }
-
-  .dict-panel {
-    display: none;
   }
 
   /* Detail view takes the full screen on mobile instead of a centered

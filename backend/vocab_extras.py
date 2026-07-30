@@ -495,14 +495,45 @@ def _target_span(sentence: str, kanji: str, kana: str):
 
 def _annotate_sentence(sentence: str, kanji: str, kana: str) -> list:
     span = _target_span(sentence, kanji, kana)
-    return [
-        {
-            "text": seg["text"],
-            "reading": seg["reading"],
-            "highlight": bool(span) and seg["start"] < span[1] and seg["end"] > span[0],
-        }
-        for seg in _tokenize_furigana(sentence)
-    ]
+    segments = _tokenize_furigana(sentence)
+    if not span:
+        return [
+            {"text": seg["text"], "reading": seg["reading"], "highlight": False}
+            for seg in segments
+        ]
+
+    span_start, span_end = span
+    out = []
+    for seg in segments:
+        s_start, s_end = seg["start"], seg["end"]
+        if s_end <= span_start or s_start >= span_end:
+            out.append({"text": seg["text"], "reading": seg["reading"], "highlight": False})
+            continue
+        if seg["reading"] is not None:
+            # Kanji run carrying its own furigana — splitting it mid-way
+            # would break the ruby annotation, and in practice a kanji
+            # run's own boundaries already line up with the matched span
+            # (both come from the same "run of consecutive kanji" logic),
+            # so it's either fully inside the span or not overlapping at
+            # all; keep it whole either way.
+            out.append({"text": seg["text"], "reading": seg["reading"], "highlight": True})
+            continue
+        # Plain kana run: _tokenize_furigana merges every consecutive
+        # non-kanji character into one segment regardless of word
+        # boundaries, so a conjugated word written entirely in kana
+        # (e.g. 会う -> あった) can land in the middle of a run that also
+        # contains neighbouring particles (に...のを). Slice out exactly
+        # the overlapping portion so only the headword itself lights up,
+        # not the whole run it happens to sit inside.
+        local_start = max(s_start, span_start) - s_start
+        local_end = min(s_end, span_end) - s_start
+        text = seg["text"]
+        if local_start > 0:
+            out.append({"text": text[:local_start], "reading": None, "highlight": False})
+        out.append({"text": text[local_start:local_end], "reading": None, "highlight": True})
+        if local_end < len(text):
+            out.append({"text": text[local_end:], "reading": None, "highlight": False})
+    return out
 
 
 def get_vocab_extras(kanji: str, kana: str, meaning_hint: str = "", lang: str = "fr") -> dict:
