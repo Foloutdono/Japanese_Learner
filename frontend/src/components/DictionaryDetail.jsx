@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../LangContext'
 import { apiFetch } from '../api'
-import { Readings, Furigana } from './Readings'
+import { Readings, Furigana, ReadingGroup, splitReadingTokens } from './Readings'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
@@ -27,9 +27,14 @@ function SenseMarker({ number, className = '' }) {
 // fallback list (used when there's only one sense to show examples
 // under, so nesting would add a layer for nothing) share one
 // implementation instead of drifting apart.
-function ExampleSentence({ ex }) {
+function ExampleSentence({ ex, senseNumber }) {
   return (
     <div className="dict-example">
+      {senseNumber != null && (
+        <div className="dict-example__sense">
+          <SenseMarker number={senseNumber} />
+        </div>
+      )}
       <div className="dict-example__jp">
         {ex.segments?.length > 0
           ? ex.segments.map((seg, j) => {
@@ -302,6 +307,24 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
   const [strokeSvgFailed, setStrokeSvgFailed] = useState(false)
   useEffect(() => { setStrokeSvgFailed(false) }, [entry.svg_url])
 
+  // Every JMdict sense (from get_vocab_extras) and the example
+  // sentences that illustrate each one. Split into "nested under a
+  // sense" vs. "flat" here, once, so both the senses list and the
+  // fallback examples block below read from the same source instead
+  // of each re-deriving it slightly differently.
+  const senses = entry.senses ?? []
+  const examples = entry.examples ?? []
+  const senseNumbers = useMemo(() => new Set(senses.map(s => s.number)), [senses])
+  // Examples that don't get nested under a sense row: either the word
+  // only has one sense (so the per-sense list itself doesn't render —
+  // see senses.length > 1 below), or an example's sense_number doesn't
+  // match any listed sense.
+  const flatExamples = senses.length > 1
+    ? examples.filter(ex => !senseNumbers.has(ex.sense_number))
+    : examples
+  const examplesBySense = number => examples.filter(ex => ex.sense_number === number)
+  const vocabReadingTokens = entry.type === 'vocab' ? splitReadingTokens(entry.kana) : []
+
   return (
     <>
       <div className="dict-detail__stage">
@@ -358,7 +381,11 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
           )
           : isKanaType(entry.type)
           ? <InfoRow label={t.romaji} value={entry.romaji} />
-          : <InfoRow label={t.reading} value={entry.kana} />
+          : vocabReadingTokens.length > 0 && (
+            <div className="dict-detail__readings">
+              <ReadingGroup label={t.reading} readings={vocabReadingTokens} size={15} isLarge />
+            </div>
+          )
         }
         {meaning != null && <InfoRow label={t.meaning}    value={meaning} />}
 
@@ -427,7 +454,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
               {t.examples ?? 'Exemples'}
             </div>
             {flatExamples.map((ex, i) => (
-              <ExampleSentence key={i} ex={ex} />
+              <ExampleSentence key={i} ex={ex} senseNumber={senses.length > 1 ? ex.sense_number : null} />
             ))}
           </div>
         )}

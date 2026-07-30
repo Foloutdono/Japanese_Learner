@@ -18,9 +18,13 @@ function isOnyomiToken(token) {
   return /[\u30A0-\u30FF]/.test(firstKana) // katakana range
 }
 
-function splitReadingTokens(kana) {
+// Exported so DictionaryScreen's card-preview truncation (shortKana)
+// splits on the exact same separators instead of drifting out of
+// sync with what Readings actually recognizes — kanji readings use
+// '・'/';', vocab readings (packed by vocab_data.py) use '/'.
+export function splitReadingTokens(kana) {
   return (kana || '')
-    .split(/[・;]/)
+    .split(/[・;/]/)
     .map(s => s.trim())
     .filter(Boolean)
 }
