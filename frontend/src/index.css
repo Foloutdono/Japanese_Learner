@@ -189,6 +189,33 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+/* ── Themed scrollbar ──────────────────────────────────────
+   Set globally (not on one-off containers) so every scrolling surface
+   — the dictionary detail panel, side panels, dropdowns, wherever —
+   picks up the same thin, ink-toned bar instead of each OS's default
+   chrome. Firefox reads scrollbar-color; everything else reads the
+   ::-webkit-scrollbar pseudo-elements. The thumb uses a padding-box
+   border trick to sit inset from the track rather than spanning its
+   full width, which is what keeps a 10px bar reading as "thin" instead
+   of as a slab. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 20px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent2);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner { background: transparent; }
+
 /* ── Selection screen shell ───────────────────────────────
    No glow, no watermark — the negative space itself (ma, 間)
    is the atmosphere. A single hairline marks the header edge. */
@@ -4961,7 +4988,7 @@ input:focus { border-color: var(--accent2); }
    are supplementary dictionary detail rather than core card facts.
    Each sense is a small numbered row of its own so several senses
    read as a list, not a wall of text. */
-.dict-detail__senses { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.dict-detail__senses { margin-top: 16px; }
 .dict-detail__senses-label {
   font-size: 12px;
   color: var(--text-secondary);
@@ -4986,30 +5013,6 @@ input:focus { border-color: var(--accent2); }
    list of senses doesn't turn into a wall of full-size pills. */
 .dict-sense__tags .dict-tag-chip { font-size: 11px; padding: 1px 9px; }
 .dict-sense__gloss { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
-/* The sense already surfaced as the card's own "Sens" row gets its
-   badge filled in accent colour instead of repeating a "primary"
-   label — enough to tie it back to the meaning shown above without
-   shouting. */
-.dict-sense--primary {
-  background: color-mix(in srgb, var(--accent) 7%, transparent);
-  border-radius: 8px;
-  margin: 0 -10px;
-  padding: 7px 10px;
-}
-.dict-sense--primary .dict-sense-marker {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--text-on-panel);
-}
-.dict-sense__primary-tag {
-  display: inline-block;
-  margin-left: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
 
 /* Round number badge for JMdict sense markers — replaces the old
    Unicode "①②③..." glyphs (illegible/inconsistent across fonts) with
@@ -5035,7 +5038,7 @@ input:focus { border-color: var(--accent2); }
    .dict-detail__composing-kanji, kept as its own section since a
    sentence pair reads best full-width rather than squeezed into an
    .dict-info-row's label/value split. */
-.dict-detail__examples { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.dict-detail__examples { margin-top: 16px; }
 .dict-detail__examples-label {
   font-size: 12px;
   color: var(--text-secondary);
@@ -5090,7 +5093,7 @@ input:focus { border-color: var(--accent2); }
 }
 .dict-example__jp ruby { white-space: nowrap; }
 .dict-example__jp rt {
-  font-size: 0.55em;
+  font-size: 0.70em;
   font-weight: normal;
   color: var(--text-secondary);
   user-select: none;
@@ -5134,6 +5137,24 @@ input:focus { border-color: var(--accent2); }
   border-radius: 50%;
   background: var(--dot-color, var(--text-secondary));
   display: inline-block;
+}
+
+/* JLPT level — a solid-fill pill, deliberately the loudest of the
+   three badges in .dict-detail__badges (this one, .dict-type-pill's
+   thin underline, .status-badge's quiet dot). Colour comes from
+   LevelBadge's LEVEL_COLORS map, --text-on-fill keeps the number
+   readable against every one of those mid-tone fills in both themes. */
+.dict-level-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 11px;
+  border-radius: 20px;
+  background: var(--level-color, var(--accent3));
+  color: var(--text-on-fill);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 /* A hairline underline in the type's colour, not a filled pill — same
