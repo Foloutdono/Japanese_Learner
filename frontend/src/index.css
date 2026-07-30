@@ -4990,10 +4990,25 @@ input:focus { border-color: var(--accent2); }
    badge filled in accent colour instead of repeating a "primary"
    label — enough to tie it back to the meaning shown above without
    shouting. */
+.dict-sense--primary {
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  border-radius: 8px;
+  margin: 0 -10px;
+  padding: 7px 10px;
+}
 .dict-sense--primary .dict-sense-marker {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--text-on-panel);
+}
+.dict-sense__primary-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 /* Round number badge for JMdict sense markers — replaces the old
