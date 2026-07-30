@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../LangContext'
 import { apiFetch } from '../api'
-import { Readings, Furigana, ReadingGroup, splitReadingTokens } from './Readings'
+import { Readings, Furigana } from './Readings'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
@@ -111,6 +111,29 @@ export function StatusBadge({ state, t }) {
     <span className="status-badge">
       <span className="status-badge__dot" style={{ '--dot-color': meta.color }} />
       {t?.[`status_${state}`] ?? meta.fallback}
+    </span>
+  )
+}
+
+// JLPT level shown as its own solid-fill pill (not a thin underline
+// like TypeBadge, nor a quiet dot like StatusBadge) — it's the one
+// badge meant to jump out at a glance, so it gets the strongest
+// visual treatment of the three. Colour scales with difficulty
+// (N5 calmest → N1 most intense) using pigments already in the
+// palette rather than introducing new ones.
+const LEVEL_COLORS = {
+  N5: 'var(--success)',
+  N4: 'var(--accent2)',
+  N3: 'var(--warning)',
+  N2: 'var(--accent7)',
+  N1: 'var(--danger)',
+}
+
+export function LevelBadge({ level }) {
+  if (!level) return null
+  return (
+    <span className="dict-level-badge" style={{ '--level-color': LEVEL_COLORS[level] ?? 'var(--accent3)' }}>
+      {level}
     </span>
   )
 }
@@ -315,15 +338,14 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
   const senses = entry.senses ?? []
   const examples = entry.examples ?? []
   const senseNumbers = useMemo(() => new Set(senses.map(s => s.number)), [senses])
-  // Examples that don't get nested under a sense row: either the word
-  // only has one sense (so the per-sense list itself doesn't render —
-  // see senses.length > 1 below), or an example's sense_number doesn't
+  // Examples that don't get nested under a sense row: either there are
+  // no senses at all (so the per-sense list itself doesn't render —
+  // see senses.length > 0 below), or an example's sense_number doesn't
   // match any listed sense.
-  const flatExamples = senses.length > 1
+  const flatExamples = senses.length > 0
     ? examples.filter(ex => !senseNumbers.has(ex.sense_number))
     : examples
   const examplesBySense = number => examples.filter(ex => ex.sense_number === number)
-  const vocabReadingTokens = entry.type === 'vocab' ? splitReadingTokens(entry.kana) : []
 
   return (
     <>
@@ -357,6 +379,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
 
       <div className="dict-detail__body">
         <div className="dict-detail__badges">
+          <LevelBadge level={entry.level} />
           <TypeBadge type={entry.type} t={t} />
           <StatusBadge state={entry.status?.state ?? 'new'} t={t} />
         </div>
@@ -381,36 +404,29 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
           )
           : isKanaType(entry.type)
           ? <InfoRow label={t.romaji} value={entry.romaji} />
-          : vocabReadingTokens.length > 0 && (
-            <div className="dict-detail__readings">
-              <ReadingGroup label={t.reading} readings={vocabReadingTokens} size={15} isLarge />
-            </div>
-          )
+          : null /* vocab: the headline above already carries this exact
+                     reading as furigana, so a second "Reading" row here
+                     was just repeating it — dropped. */
         }
-        {meaning != null && <InfoRow label={t.meaning}    value={meaning} />}
 
-        {/* Every JMdict sense, not just the app's own single gloss —
-            the fuller dictionary picture. This whole block (senses +
-            their examples) sits directly under "Sens" above, right
-            where a reader's eye already is, instead of after a run of
-            unrelated metadata (level, strokes, radical) that used to
-            separate a definition from what illustrates it — that
-            metadata is now its own group further down instead.
-            The sense already reflected in "Sens" above gets its whole
-            row picked out (not just its number badge, which was easy
-            to miss) plus an explicit "↑" label pointing back to it, so
-            it's unambiguous which of these *is* the meaning shown
-            above rather than a sibling sense next to it. */}
-        {senses.length > 1 && (
+        {/* Vocab's definition is shown as the full JMdict senses list
+            rather than a single "Meaning" line — even a word with only
+            one sense renders through this same list, so there's one
+            consistent model instead of a single-gloss row that then
+            duplicates itself inside "other senses" below. Kanji (which
+            has no senses data) and any vocab entry JMdict didn't return
+            senses for fall back to the plain meaning row. This whole
+            block sits directly under the reading, right where a
+            reader's eye already is, instead of after a run of unrelated
+            metadata (level, strokes, radical) — that metadata is its
+            own group further down instead. */}
+        {senses.length > 0 ? (
           <div className="dict-detail__senses">
             <div className="dict-detail__senses-label">
-              {t.senses ?? (lang === 'fr' ? 'Autres sens (JMdict)' : 'Other senses (JMdict)')}
+              {t.senses ?? (lang === 'fr' ? 'Sens (JMdict)' : 'Senses (JMdict)')}
             </div>
             {senses.map(sense => (
-              <div
-                key={sense.number}
-                className={`dict-sense${sense.primary ? ' dict-sense--primary' : ''}`}
-              >
+              <div key={sense.number} className="dict-sense">
                 <SenseMarker number={sense.number} className="dict-sense__number" />
                 <div className="dict-sense__body">
                   {sense.tags?.length > 0 && (
@@ -420,14 +436,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
                       ))}
                     </div>
                   )}
-                  <div className="dict-sense__gloss">
-                    {sense.glossary}
-                    {sense.primary && (
-                      <span className="dict-sense__primary-tag">
-                        {t.primarySense ?? (lang === 'fr' ? '↑ déjà indiqué ci-dessus' : '↑ shown above')}
-                      </span>
-                    )}
-                  </div>
+                  <div className="dict-sense__gloss">{sense.glossary}</div>
                   {examplesBySense(sense.number).length > 0 && (
                     <div className="dict-sense__examples">
                       {examplesBySense(sense.number).map((ex, i) => (
@@ -439,48 +448,52 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
               </div>
             ))}
           </div>
+        ) : (
+          meaning != null && <InfoRow label={t.meaning} value={meaning} />
         )}
 
-        {/* Examples that couldn't be nested above — either the word
-            only has one sense (so the per-sense list itself isn't
-            shown, nesting would just add an empty wrapper) or, rarely,
-            an example's sense_number doesn't match any listed sense.
-            Kept right under "Sens" above for the same reason: an
-            example reads best right next to the definition it's
-            illustrating, not after a block of unrelated metadata. */}
+        {/* Examples that couldn't be nested above — either there's no
+            senses list at all (so there's nothing to nest under), or,
+            rarely, an example's sense_number doesn't match any listed
+            sense. Kept right under the senses/meaning above for the
+            same reason: an example reads best next to the definition
+            it's illustrating, not after a block of unrelated metadata. */}
         {flatExamples.length > 0 && (
           <div className="dict-detail__examples">
             <div className="dict-detail__examples-label">
               {t.examples ?? 'Exemples'}
             </div>
             {flatExamples.map((ex, i) => (
-              <ExampleSentence key={i} ex={ex} senseNumber={senses.length > 1 ? ex.sense_number : null} />
+              <ExampleSentence key={i} ex={ex} senseNumber={senses.length > 0 ? ex.sense_number : null} />
             ))}
           </div>
         )}
 
-        {/* Level/strokes/radical: entry metadata, not part of the
-            definition — grouped on its own below the meaning+examples
-            block above instead of wedged between them. */}
-        <div className="dict-detail__meta">
-          <InfoRow label={t.level}  value={entry.level} />
-          {entry.stroke_count && (
-            <InfoRow label={t.strokes} value={`${entry.stroke_count} ${t.strokes}`} />
-          )}
-          {entry.type === 'kanji' && entry.radical != null && onRadicalClick && (
-            <InfoRow
-              label={t.radical}
-              value={
-                <button
-                  onClick={() => onRadicalClick(entry.radical)}
-                  className="dict-detail__radical-link"
-                >
-                  #{entry.radical}
-                </button>
-              }
-            />
-          )}
-        </div>
+        {/* Strokes/radical: entry metadata, not part of the definition
+            — grouped on its own below the senses+examples block above
+            instead of wedged between them. Level now lives up top as
+            its own badge (see LevelBadge), so it no longer needs a row
+            here too. */}
+        {(entry.stroke_count || (entry.type === 'kanji' && entry.radical != null && onRadicalClick)) && (
+          <div className="dict-detail__meta">
+            {entry.stroke_count && (
+              <InfoRow label={t.strokes} value={`${entry.stroke_count} ${t.strokes}`} />
+            )}
+            {entry.type === 'kanji' && entry.radical != null && onRadicalClick && (
+              <InfoRow
+                label={t.radical}
+                value={
+                  <button
+                    onClick={() => onRadicalClick(entry.radical)}
+                    className="dict-detail__radical-link"
+                  >
+                    #{entry.radical}
+                  </button>
+                }
+              />
+            )}
+          </div>
+        )}
 
         {onKanjiClick && composingKanji.length > 0 && (
           <div className="dict-detail__composing-kanji">
