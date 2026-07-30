@@ -460,35 +460,131 @@ def _extend_inflection_tail(sentence: str, end: int, max_extra: int = 6) -> int:
     return end
 
 
+def _find_occurrence(sentence: str, needle: str, prefer_hiragana_after: bool):
+    """Index of the best occurrence of `needle` in `sentence`.
+
+    A dictionary-form stem (e.g. "飛" stripped from 飛ぶ) can legitimately
+    occur several times in one sentence for unrelated reasons — 飛行機
+    just happens to start with the same character as 飛んだ, the actual
+    conjugated form of the headword. Blindly taking the first match (the
+    old behaviour) highlighted 飛行機 instead. When `prefer_hiragana_after`
+    is set, only an occurrence immediately followed by hiragana counts —
+    a real inflection tail — so an unrelated compound like 飛行機 (followed
+    by the kanji 行) is skipped in favour of 飛んだ (followed by ん).
+    Returns None rather than guessing if nothing qualifies.
+    """
+    start = 0
+    while True:
+        idx = sentence.find(needle, start)
+        if idx == -1:
+            return None
+        end = idx + len(needle)
+        if not prefer_hiragana_after or (end < len(sentence) and _HIRAGANA_RE.match(sentence[end])):
+            return idx
+        start = idx + 1
+
+
+# Kanji numerals 0-9 next to their Arabic-digit spelling — a natural
+# corpus sentence very often spells a date/count in digits ("2日") even
+# though the app's own deck lists the word with its kanji numeral
+# ("二日"). 十/百/千/万 are left out: their digit equivalent isn't a
+# single fixed substring ("十" -> "10", but 二十 -> "20" not "210"),
+# so a blind per-character swap would produce the wrong string.
+_KANJI_DIGIT_CHARS = set("〇一二三四五六七八九")
+_KANJI_DIGIT_TO_ARABIC = str.maketrans({
+    "〇": "0", "一": "1", "二": "2", "三": "3", "四": "4",
+    "五": "5", "六": "6", "七": "7", "八": "8", "九": "9",
+})
+
+
+def _arabic_numeral_variant(kanji: str) -> str | None:
+    """`kanji` with any 0-9 kanji numeral swapped for its Arabic digit
+    (二日 -> 2日), or None if `kanji` has no such numeral to swap."""
+    if not any(c in _KANJI_DIGIT_CHARS for c in kanji):
+        return None
+    return kanji.translate(_KANJI_DIGIT_TO_ARABIC)
+
+
+# A handful of very common kanji that are conventionally written in
+# kana in running text even though JMdict/the app's deck lists them
+# with their kanji — not general enough to trust a kanji deck's own
+# reading for (many kanji have a reading that's technically correct but
+# never actually used to replace the kanji in practice), so this is a
+# short, deliberately hand-picked list rather than every kanji with a
+# known reading.
+_KANA_CONVENTIONAL_SPELLING = {
+    "御": ("ご", "お"), "事": ("こと",), "物": ("もの",), "時": ("とき",),
+    "為": ("ため",), "様": ("よう",), "所": ("ところ",), "方": ("ほう",),
+}
+
+
+def _build_kana_variant_regex(kanji: str):
+    """Regex matching `kanji` with any individual character optionally
+    replaced by its conventional kana spelling (see
+    _KANA_CONVENTIONAL_SPELLING above) — catches compounds like 御飯,
+    conventionally written ご飯, where only part of the word is kana'd
+    while the rest stays kanji. Returns None if no character in `kanji`
+    has a known kana alternative (nothing to vary, skip this stage).
+    """
+    if not any(c in _KANA_CONVENTIONAL_SPELLING for c in kanji):
+        return None
+    parts = []
+    for ch in kanji:
+        alts = _KANA_CONVENTIONAL_SPELLING.get(ch)
+        if alts:
+            options = "|".join(re.escape(a) for a in (ch, *alts))
+            parts.append(f"(?:{options})")
+        else:
+            parts.append(re.escape(ch))
+    return re.compile("".join(parts))
+
+
 def _target_span(sentence: str, kanji: str, kana: str):
     """Best-effort (start, end) of the headword itself within `sentence`."""
     if kanji:
-        idx = sentence.find(kanji)
-        if idx != -1:
+        idx = _find_occurrence(sentence, kanji, prefer_hiragana_after=False)
+        if idx is not None:
             return idx, idx + len(kanji)
+
+        # Same word, spelled with Arabic digits instead of its kanji
+        # numeral (二日 -> 2日) — very common in natural sentences.
+        arabic = _arabic_numeral_variant(kanji)
+        if arabic:
+            idx = _find_occurrence(sentence, arabic, prefer_hiragana_after=False)
+            if idx is not None:
+                return idx, idx + len(arabic)
+
+        # Same word, with one of its characters in its conventional kana
+        # spelling instead of kanji (御飯 -> ご飯).
+        variant_re = _build_kana_variant_regex(kanji)
+        if variant_re:
+            m = variant_re.search(sentence)
+            if m:
+                return m.start(), m.end()
+
         # Conjugating word (verb/i-adjective): the example rarely uses
         # the bare dictionary form. Match on the invariant kanji stem
         # (the dictionary form minus its trailing okurigana) and extend
         # through the inflection tail that follows — enough to catch
         # 出た/出ます/太かった/... without a conjugation table.
         stem = re.sub(r"[\u3040-\u309F]+$", "", kanji)
-        if stem:
-            idx = sentence.find(stem)
-            if idx != -1:
+        if stem and stem != kanji:
+            idx = _find_occurrence(sentence, stem, prefer_hiragana_after=True)
+            if idx is not None:
                 return idx, _extend_inflection_tail(sentence, idx + len(stem))
 
     # No kanji field, or this example uses the kana-only form of a word
     # that does have one (common for "usually kana" words) — fall back
     # to the reading itself, with the same stem+extend trick.
     for reading in _readings(kana) or ([kana] if kana else []):
-        idx = sentence.find(reading)
-        if idx != -1:
+        idx = _find_occurrence(sentence, reading, prefer_hiragana_after=False)
+        if idx is not None:
             return idx, idx + len(reading)
         stem = reading[:-1] if len(reading) > 1 else reading
         if not stem:
             continue
-        idx = sentence.find(stem)
-        if idx != -1:
+        idx = _find_occurrence(sentence, stem, prefer_hiragana_after=True)
+        if idx is not None:
             return idx, _extend_inflection_tail(sentence, idx + len(stem))
     return None
 
