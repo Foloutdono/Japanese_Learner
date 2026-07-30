@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../LangContext'
 import { apiFetch } from '../api'
-import { Readings } from './Readings'
+import { Readings, Furigana } from './Readings'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
@@ -19,6 +19,36 @@ function SenseMarker({ number, className = '' }) {
     <span className={`dict-sense-marker ${className}`.trim()}>
       {number}
     </span>
+  )
+}
+
+// One example sentence: furigana'd/highlighted Japanese + translation.
+// Pulled out so both the nested-under-its-sense rendering and the flat
+// fallback list (used when there's only one sense to show examples
+// under, so nesting would add a layer for nothing) share one
+// implementation instead of drifting apart.
+function ExampleSentence({ ex }) {
+  return (
+    <div className="dict-example">
+      <div className="dict-example__jp">
+        {ex.segments?.length > 0
+          ? ex.segments.map((seg, j) => {
+              // Each segment (a word, a kanji compound, a kana run) is
+              // its own non-breaking unit — the line can wrap between
+              // segments but never inside one, so a word never gets
+              // split with a single trailing kanji/kana stranded alone
+              // on the next line.
+              const content = seg.reading
+                ? <Furigana text={seg.text} reading={seg.reading} />
+                : seg.text
+              return seg.highlight
+                ? <mark key={j} className="dict-example__hl dict-example__seg">{content}</mark>
+                : <span key={j} className="dict-example__seg">{content}</span>
+            })
+          : ex.jp}
+      </div>
+      <div className="dict-example__en">{ex.en}</div>
+    </div>
   )
 }
 
@@ -277,7 +307,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
       <div className="dict-detail__stage">
         <div className="dict-detail__char">
           {headwordReading
-            ? <ruby>{entry.kanji}<rt>{headwordReading}</rt></ruby>
+            ? <Furigana text={entry.kanji} reading={headwordReading} />
             : (entry.kanji || entry.kana)}
         </div>
         <div className="dict-detail__stage-actions">
@@ -331,34 +361,25 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
           : <InfoRow label={t.reading} value={entry.kana} />
         }
         {meaning != null && <InfoRow label={t.meaning}    value={meaning} />}
-        <InfoRow label={t.level}  value={entry.level} />
-        {entry.stroke_count && (
-          <InfoRow label={t.strokes} value={`${entry.stroke_count} ${t.strokes}`} />
-        )}
-        {entry.type === 'kanji' && entry.radical != null && onRadicalClick && (
-          <InfoRow
-            label={t.radical}
-            value={
-              <button
-                onClick={() => onRadicalClick(entry.radical)}
-                className="dict-detail__radical-link"
-              >
-                #{entry.radical}
-              </button>
-            }
-          />
-        )}
 
         {/* Every JMdict sense, not just the app's own single gloss —
-            the fuller dictionary picture. The sense already reflected
-            in "Sens" above is marked so it reads as confirmation
-            rather than a duplicate. */}
-        {entry.senses?.length > 1 && (
+            the fuller dictionary picture. This whole block (senses +
+            their examples) sits directly under "Sens" above, right
+            where a reader's eye already is, instead of after a run of
+            unrelated metadata (level, strokes, radical) that used to
+            separate a definition from what illustrates it — that
+            metadata is now its own group further down instead.
+            The sense already reflected in "Sens" above gets its whole
+            row picked out (not just its number badge, which was easy
+            to miss) plus an explicit "↑" label pointing back to it, so
+            it's unambiguous which of these *is* the meaning shown
+            above rather than a sibling sense next to it. */}
+        {senses.length > 1 && (
           <div className="dict-detail__senses">
             <div className="dict-detail__senses-label">
               {t.senses ?? (lang === 'fr' ? 'Autres sens (JMdict)' : 'Other senses (JMdict)')}
             </div>
-            {entry.senses.map(sense => (
+            {senses.map(sense => (
               <div
                 key={sense.number}
                 className={`dict-sense${sense.primary ? ' dict-sense--primary' : ''}`}
@@ -372,49 +393,67 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
                       ))}
                     </div>
                   )}
-                  <div className="dict-sense__gloss">{sense.glossary}</div>
+                  <div className="dict-sense__gloss">
+                    {sense.glossary}
+                    {sense.primary && (
+                      <span className="dict-sense__primary-tag">
+                        {t.primarySense ?? (lang === 'fr' ? '↑ déjà indiqué ci-dessus' : '↑ shown above')}
+                      </span>
+                    )}
+                  </div>
+                  {examplesBySense(sense.number).length > 0 && (
+                    <div className="dict-sense__examples">
+                      {examplesBySense(sense.number).map((ex, i) => (
+                        <ExampleSentence key={i} ex={ex} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {entry.examples?.length > 0 && (
+        {/* Examples that couldn't be nested above — either the word
+            only has one sense (so the per-sense list itself isn't
+            shown, nesting would just add an empty wrapper) or, rarely,
+            an example's sense_number doesn't match any listed sense.
+            Kept right under "Sens" above for the same reason: an
+            example reads best right next to the definition it's
+            illustrating, not after a block of unrelated metadata. */}
+        {flatExamples.length > 0 && (
           <div className="dict-detail__examples">
             <div className="dict-detail__examples-label">
               {t.examples ?? 'Exemples'}
             </div>
-            {entry.examples.map((ex, i) => (
-              <div key={i} className="dict-example">
-                {ex.sense_glossary && (
-                  <div className="dict-example__sense">
-                    <SenseMarker number={ex.sense_number ?? 1} />
-                    {ex.sense_glossary}
-                  </div>
-                )}
-                <div className="dict-example__jp">
-                  {ex.segments?.length > 0
-                    ? ex.segments.map((seg, j) => {
-                        // Each segment (a word, a kanji compound, a
-                        // kana run) is its own non-breaking unit — the
-                        // line can wrap between segments but never
-                        // inside one, so a word never gets split with
-                        // a single trailing kanji/kana stranded alone
-                        // on the next line.
-                        const content = seg.reading
-                          ? <ruby>{seg.text}<rt>{seg.reading}</rt></ruby>
-                          : seg.text
-                        return seg.highlight
-                          ? <mark key={j} className="dict-example__hl dict-example__seg">{content}</mark>
-                          : <span key={j} className="dict-example__seg">{content}</span>
-                      })
-                    : ex.jp}
-                </div>
-                <div className="dict-example__en">{ex.en}</div>
-              </div>
+            {flatExamples.map((ex, i) => (
+              <ExampleSentence key={i} ex={ex} />
             ))}
           </div>
         )}
+
+        {/* Level/strokes/radical: entry metadata, not part of the
+            definition — grouped on its own below the meaning+examples
+            block above instead of wedged between them. */}
+        <div className="dict-detail__meta">
+          <InfoRow label={t.level}  value={entry.level} />
+          {entry.stroke_count && (
+            <InfoRow label={t.strokes} value={`${entry.stroke_count} ${t.strokes}`} />
+          )}
+          {entry.type === 'kanji' && entry.radical != null && onRadicalClick && (
+            <InfoRow
+              label={t.radical}
+              value={
+                <button
+                  onClick={() => onRadicalClick(entry.radical)}
+                  className="dict-detail__radical-link"
+                >
+                  #{entry.radical}
+                </button>
+              }
+            />
+          )}
+        </div>
 
         {onKanjiClick && composingKanji.length > 0 && (
           <div className="dict-detail__composing-kanji">
