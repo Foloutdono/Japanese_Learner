@@ -92,8 +92,14 @@ export function isKanaType(type) {
 // Kanji, vocab, and kana entries can share the same character (a
 // one-kanji word, or a kana that's also a valid word on its own), so
 // the character alone isn't a safe React key / selection identity.
+// `level` used to be enough of a tiebreaker for same-kanji homographs
+// (different readings of one surface form rarely shared a level), but
+// that assumption breaks down for the JMdict-wide pool (category
+// "jmdict"), where every entry has level: null and homographs are far
+// more common — so kana is always folded in too, not just used as a
+// fallback when kanji is absent.
 export function entryKey(entry) {
-  return `${entry.type}:${entry.level}:${entry.kanji || entry.kana}`
+  return `${entry.type}:${entry.level ?? '_'}:${entry.kanji || ''}:${entry.kana || ''}`
 }
 
 export function speakJapanese(text) {

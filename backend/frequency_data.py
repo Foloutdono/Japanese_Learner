@@ -3,31 +3,54 @@ Frequency-tier system: an alternative axis to the JLPT N5-N1 levels for
 picking what to study — "the 200 most frequent kanji/vocab", "201-400",
 and so on — instead of "N5".
 
-IMPORTANT: this reuses the exact same deck entries as kanji_data.py /
-vocab_data.py, and generates card IDs the exact same way
-(kanji_to_id/vocab_to_id, keyed by each entry's *native* JLPT level).
-That's deliberate: a kanji studied via "Top 200" and the same kanji
-studied via "N5" must be the SAME SRS card, not two separate progress
-tracks. Tiers are just a different ordering/grouping over the same
-underlying deck, never a second copy of it.
+IMPORTANT: for the "kanji" and "vocab" domains, this reuses the exact
+same deck entries as kanji_data.py / vocab_data.py, and generates card
+IDs the exact same way (kanji_to_id/vocab_to_id, keyed by each entry's
+*native* JLPT level). That's deliberate: a kanji studied via "Top 200"
+and the same kanji studied via "N5" must be the SAME SRS card, not two
+separate progress tracks. Tiers are just a different ordering/grouping
+over the same underlying deck, never a second copy of it.
+
+The third domain, "vocab_jmdict", is different on purpose: it's every
+JMdict word OUTSIDE the app's own curated deck (see
+vocab_jmdict_data.py) — there's no JLPT level to unify with, so it
+gets its own id namespace (vocab_jmdict_to_id) and its own frequency
+order entirely. It exists so that pool isn't lookup-only dead weight —
+these words are real study material, just reachable by frequency tier
+instead of by JLPT level, since JLPT level is the one axis they don't
+have.
 
 Standard order source files (sit next to kanji_deck.json etc. under
-datas/kanji/):
+datas/kanji/ and datas/vocab/):
 
-  kanji_frequency.json   Real KANJIDIC2 newspaper-frequency ranking,
-                          built by build_frequency_index.py. Solid data:
-                          2106 of the deck's 2211 kanji have a genuine
-                          rank; the rest are appended in JLPT order.
+  kanji_frequency.json         Real KANJIDIC2 newspaper-frequency
+                                ranking, built by
+                                build_frequency_index.py. Solid data:
+                                2106 of the deck's 2211 kanji have a
+                                genuine rank; the rest are appended in
+                                JLPT order.
 
-  vocab_frequency.json   PLACEHOLDER as of this writing — plain JLPT
-                          deck order (N5 -> N1), because ranking vocab
-                          needs it matched against JMdict's frequency
-                          tags first (build_vocab_meanings.py, then
-                          build_vocab_frequency.py). Swap the file once
-                          you've run that against the full 53-file
-                          JMdict dump; nothing here needs to change,
-                          this module just reads whatever order is in
-                          the file.
+  vocab_frequency.json         PLACEHOLDER as of this writing — plain
+                                JLPT deck order (N5 -> N1). Ranking the
+                                deck's own words for real needs the
+                                same JMdict frequency-tag matching
+                                vocab_jmdict_frequency.json now does
+                                for the non-deck pool (see
+                                build_vocab_jmdict.py) — swap this file
+                                once that's run against the deck too;
+                                nothing here needs to change, this
+                                module just reads whatever order is in
+                                the file.
+
+  vocab_jmdict_frequency.json  Real JMdict-priority-based ranking (news-
+                                frequency rank + ichi/spec/gai common-
+                                word tags + the "⭐" flag) for every
+                                word OUTSIDE the deck, built by
+                                build_vocab_jmdict.py. Same "not a real
+                                corpus analysis" caveat as
+                                kanji_frequency.json's KANJIDIC2 data —
+                                it's JMdict's own editorial priority
+                                signal, not a fresh frequency study.
 
 Per-user customization is layered on top via frequency_store.py rather
 than baked into a per-user copy of the order — see that module for the
@@ -40,6 +63,7 @@ from math import ceil
 
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from vocab_jmdict_data import VOCAB_JMDICT, vocab_jmdict_key, vocab_jmdict_to_id
 
 DEFAULT_TIER_SIZE = 200
 
@@ -58,6 +82,9 @@ with open(os.path.join(_KANJI_DIR, "kanji_frequency.json"), encoding="utf-8") as
 
 with open(os.path.join(_VOCAB_DIR, "vocab_frequency.json"), encoding="utf-8") as f:
     VOCAB_FREQUENCY_ORDER: list[str] = json.load(f)
+
+with open(os.path.join(_VOCAB_DIR, "vocab_jmdict_frequency.json"), encoding="utf-8") as f:
+    VOCAB_JMDICT_FREQUENCY_ORDER: list[str] = json.load(f)
 
 
 def _build_kanji_resolution():
@@ -79,12 +106,36 @@ def _build_vocab_resolution():
     return resolved
 
 
+def _build_vocab_jmdict_resolution():
+    """"kanji::kana" -> (None, entry). Level is always None here — that's
+    not a missing value, it's the accurate answer: this pool is defined
+    as "everything outside the JLPT deck", so nothing in it has a JLPT
+    level by construction. Every downstream consumer already tolerates
+    that: the frontend's LevelBadge renders nothing for a falsy level,
+    and vocab_jmdict_to_id below takes (and ignores) a level argument
+    purely to keep the same call shape as kanji_to_id/vocab_to_id."""
+    return {vocab_jmdict_key(entry): (None, entry) for entry in VOCAB_JMDICT}
+
+
 _KANJI_RESOLUTION = _build_kanji_resolution()
 _VOCAB_RESOLUTION = _build_vocab_resolution()
+_VOCAB_JMDICT_RESOLUTION = _build_vocab_jmdict_resolution()
 
-_DOMAIN_ORDER = {"kanji": KANJI_FREQUENCY_ORDER, "vocab": VOCAB_FREQUENCY_ORDER}
-_DOMAIN_RESOLUTION = {"kanji": _KANJI_RESOLUTION, "vocab": _VOCAB_RESOLUTION}
-_DOMAIN_TO_ID = {"kanji": kanji_to_id, "vocab": vocab_to_id}
+_DOMAIN_ORDER = {
+    "kanji":        KANJI_FREQUENCY_ORDER,
+    "vocab":        VOCAB_FREQUENCY_ORDER,
+    "vocab_jmdict": VOCAB_JMDICT_FREQUENCY_ORDER,
+}
+_DOMAIN_RESOLUTION = {
+    "kanji":        _KANJI_RESOLUTION,
+    "vocab":        _VOCAB_RESOLUTION,
+    "vocab_jmdict": _VOCAB_JMDICT_RESOLUTION,
+}
+_DOMAIN_TO_ID = {
+    "kanji":        kanji_to_id,
+    "vocab":        vocab_to_id,
+    "vocab_jmdict": vocab_jmdict_to_id,
+}
 
 VALID_DOMAINS = set(_DOMAIN_ORDER)
 

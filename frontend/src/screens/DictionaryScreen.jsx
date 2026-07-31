@@ -18,7 +18,7 @@ export default function DictionaryScreen({ session }) {
 
 	const [mode, setMode]             = useState('search') // 'search' | 'radical'
 	const [query, setQuery]           = useState('')
-	const [category, setCategory]     = useState('kanji') // 'kanji' | 'vocab' | 'hiragana' | 'katakana'
+	const [category, setCategory]     = useState('kanji') // 'kanji' | 'vocab' | 'hiragana' | 'katakana' | 'jmdict'
 	const [results, setResults]       = useState([])
 	const [loading, setLoading]       = useState(false)
 	const [loadingMore, setLoadingMore] = useState(false)
@@ -241,13 +241,20 @@ export default function DictionaryScreen({ session }) {
 					</p>
 				</div>
 
-				{/* Category tabs — primary navigation */}
+				{/* Category tabs — primary navigation. "jmdict" is the full
+				    JMdict pool beyond the app's own curated deck (see
+				    vocab_jmdict_data.py on the backend) — a separate tab
+				    rather than folded into "vocab" so the default, curated
+				    ~8k-word search experience doesn't get swamped by ~293k
+				    largely obscure entries; someone who wants the full
+				    dictionary asks for it explicitly. */}
 				<div className="dict-tab-row dict-tab-row--category">
 					{[
 						['kanji',    t.dictKanji],
 						['vocab',    t.dictVocab],
 						['hiragana', t.dictHiragana],
 						['katakana', t.dictKatakana],
+						['jmdict',   t.dictJMdict ?? 'JMdict'],
 					].map(([key, label]) => (
 						<button
 							key={key}
