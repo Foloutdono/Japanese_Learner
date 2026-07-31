@@ -4306,7 +4306,7 @@ input:focus { border-color: var(--accent2); }
    same system as the quiz and selector screens instead of a
    separate flat-UI control. */
 .dict-tab-row { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
-.dict-tab-row--category { margin-bottom: 24px; }
+.dict-tab-row--category { margin-bottom: 24px; flex-wrap: wrap; row-gap: 4px; }
 
 .dict-tab-btn {
   position: relative;

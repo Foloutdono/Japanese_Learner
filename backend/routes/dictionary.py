@@ -5,6 +5,7 @@ from collections import defaultdict
 from fastapi import APIRouter, Depends
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from vocab_jmdict_data import VOCAB_JMDICT, vocab_jmdict_to_id
 from vocab_extras import get_vocab_extras
 from kana_data import HIRAGANA_BASIC, KATAKANA_BASIC, kana_to_id
 from translations import get_meaning
@@ -95,9 +96,16 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                     category: str = "all", radical: int | None = None,
                     user_id: str = Depends(get_user_id)):
     """
-    category: "all" | "kanji" | "vocab" | "hiragana" | "katakana" — lets
-    the client avoid pulling in thousands of vocab entries when only
-    kanji (or vice versa) are wanted.
+    category: "all" | "kanji" | "vocab" | "hiragana" | "katakana" | "jmdict"
+    — lets the client avoid pulling in thousands of vocab entries when
+    only kanji (or vice versa) are wanted.
+
+    "jmdict" is the full JMdict pool beyond the app's own curated JLPT
+    deck (see vocab_jmdict_data.py) — deliberately NOT included under
+    "all", so the default browse/search experience stays the curated
+    ~8k-word deck plus kanji/kana rather than getting swamped by
+    ~293k largely obscure entries. A client wanting full-dictionary
+    lookup asks for category="jmdict" explicitly.
 
     radical: classical (Kangxi) radical number. When given, restricts
     results to kanji filed under that radical — vocab and kana don't
@@ -116,6 +124,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
     want_vocab    = category in ("all", "vocab")    and radical is None
     want_hiragana = category in ("all", "hiragana") and radical is None
     want_katakana = category in ("all", "katakana") and radical is None
+    want_jmdict   = category == "jmdict"            and radical is None
 
     if want_kanji:
         for level, kanji_list in KANJI_BY_LEVEL.items():
@@ -157,6 +166,23 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
         for k in KATAKANA_BASIC:
             if q == "" or (q in k["kana"] or q.lower() in k["romaji"].lower()):
                 matches.append(("katakana", "Katakana", k, k["romaji"]))
+
+    if want_jmdict:
+        # `meaning` here comes straight from the entry itself (the
+        # first JMdict gloss, baked in at build time) rather than
+        # get_meaning()'s usual fr_map lookup — VOCAB_FR only ever
+        # covers the app's own curated deck, so a lookup against it for
+        # ~293k JMdict-only words would just be ~293k guaranteed misses.
+        for w in VOCAB_JMDICT:
+            meaning = w.get("meaning", "")
+            kanji_form = w.get("kanji", "")
+            kana_form  = w.get("kana", "")
+            if q == "" or (
+                q in kanji_form or
+                q in kana_form or
+                q.lower() in meaning.lower()
+            ):
+                matches.append(("jmdict", None, w, meaning))
 
     if radical is not None:
         radical_stroke_count = RADICAL_BY_NUMBER[radical]["stroke_count"]
@@ -217,6 +243,28 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 # Every JMdict sense (not just the app's own single
                 # gloss) — lets the detail panel show the fuller
                 # dictionary picture instead of only the one meaning.
+                "senses":   extras["senses"],
+                "examples": extras["examples"],
+                "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),
+            })
+        elif kind == "jmdict":
+            raw_id = vocab_jmdict_to_id(entry)
+            # Same extras lookup as a normal vocab word — works
+            # unchanged here because vocab_extras.py's _VOCAB_MEANINGS
+            # already has this word's senses layered in (see that
+            # module's vocab_jmdict_meanings.json merge).
+            extras = get_vocab_extras(
+                entry.get("kanji", ""), entry.get("kana", ""), entry.get("meaning", ""), lang,
+            )
+            results.append({
+                "type":     "vocab",
+                "kanji":    entry.get("kanji", ""),
+                "kana":     entry.get("kana", ""),
+                "meaning":  meaning,
+                # No JLPT level — LevelBadge on the frontend already
+                # renders nothing when level is falsy, so this reads
+                # as "unleveled JMdict entry" rather than a bug.
+                "level":    None,
                 "senses":   extras["senses"],
                 "examples": extras["examples"],
                 "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),

@@ -77,6 +77,25 @@ _DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 with open(os.path.join(_DATA_DIR, "vocab_meanings.json"), encoding="utf-8") as f:
     _VOCAB_MEANINGS: dict[str, list[dict]] = json.load(f)
 
+# Full-JMdict pool (see vocab_jmdict_data.py / build_vocab_jmdict.py) —
+# layered into the very same lookup table, under the same
+# "<kanji>::<kana>" key shape, so _find_senses() below needs no
+# JMdict-specific branch: a word from the JLPT deck and a JMdict-only
+# word resolve through the exact same dict lookup. The build script
+# already excludes anything already in the app's own deck, so there's
+# no real collision to worry about; setdefault is just a defensive
+# belt-and-braces in case that ever changes, and the deck's own
+# (curated, reviewed) senses always win.
+# Guarded by exists() rather than a hard import: this file is ~80MB and
+# an optional layer on top of the deck's own (required) meanings —
+# absent, the app should keep working with JLPT-deck words only, not
+# fail to start.
+_JMDICT_MEANINGS_PATH = os.path.join(_DATA_DIR, "vocab_jmdict_meanings.json")
+if os.path.exists(_JMDICT_MEANINGS_PATH):
+    with open(_JMDICT_MEANINGS_PATH, encoding="utf-8") as f:
+        for _key, _senses in json.load(f).items():
+            _VOCAB_MEANINGS.setdefault(_key, _senses)
+
 with open(os.path.join(_DATA_DIR, "vocab_tags.json"), encoding="utf-8") as f:
     _VOCAB_TAGS: dict[str, dict] = json.load(f)
 
@@ -367,21 +386,49 @@ def _kata_to_hira(s: str) -> str:
     )
 
 
-def _first_reading_token(kana: str) -> str:
-    token = re.split(r"[・;]", kana or "")[0].strip()
-    return token.replace(".", "").replace("~", "")
+def _reading_tokens(kana: str) -> list[str]:
+    return [
+        t.replace(".", "").replace("~", "")
+        for t in re.split(r"[・;]", kana or "")
+        if t.strip()
+    ]
+
+
+# Same on'yomi/kun'yomi split Readings.jsx's isOnyomiToken uses on the
+# frontend (on'yomi written in katakana, kun'yomi in hiragana) — kept in
+# sync deliberately so "which reading is this" agrees on both ends.
+def _is_onyomi_token(token: str) -> bool:
+    return any("\u30A0" <= c <= "\u30FF" for c in token)
 
 
 def _build_single_kanji_readings() -> dict:
+    """char -> {"on": reading|None, "kun": reading|None}.
+
+    Previously this took whichever reading token happened to be listed
+    *first* in the kanji's own combined field and used it unconditionally
+    — that assumes on'yomi always comes first, which isn't reliably true
+    across every entry, and produced wrong furigana for compounds like
+    東京 (which fell back to 東's kun'yomi "ひがし" instead of its
+    on'yomi "とう"). Keeping both readings lets the caller in
+    _tokenize_furigana pick the one that actually matches how the kanji
+    is being used there (compound vs. standalone — see below) instead of
+    guessing from field order.
+    """
     table = {}
     for _level, entries in KANJI_BY_LEVEL.items():
         for k in entries:
             char = k.get("kanji")
             if not char or char in table:
                 continue
-            token = _first_reading_token(k.get("kana", ""))
-            if token:
-                table[char] = _kata_to_hira(token)
+            tokens = _reading_tokens(k.get("kana", ""))
+            if not tokens:
+                continue
+            on  = next((t for t in tokens if _is_onyomi_token(t)), None)
+            kun = next((t for t in tokens if not _is_onyomi_token(t)), None)
+            table[char] = {
+                "on":  _kata_to_hira(on) if on else None,
+                "kun": kun,
+            }
     return table
 
 
@@ -458,8 +505,28 @@ def _tokenize_furigana(sentence: str) -> list:
             while j < n and _is_kanji(sentence[j]):
                 j += 1
             run = sentence[i:j]
-            reading = "".join(_SINGLE_KANJI_READING.get(c, c) for c in run)
-            has_reading = any(c in _SINGLE_KANJI_READING for c in run)
+            # A multi-kanji run is almost always a jukugo compound (音読み
+            # reading per character, e.g. 東京 -> とう+きょう), while a
+            # single isolated kanji is far more often standing on its own
+            # (訓読み, e.g. 山 -> やま) — so which reading to prefer for
+            # each character depends on which situation this run is in,
+            # not a fixed per-kanji default.
+            is_compound = len(run) > 1
+            reading_parts = []
+            has_reading = False
+            for c in run:
+                info = _SINGLE_KANJI_READING.get(c)
+                if not info:
+                    reading_parts.append(c)
+                    continue
+                preferred = info["on"] if is_compound else info["kun"]
+                picked = preferred or info["on"] or info["kun"]
+                if picked:
+                    has_reading = True
+                    reading_parts.append(picked)
+                else:
+                    reading_parts.append(c)
+            reading = "".join(reading_parts)
             segments.append({
                 "text": run,
                 "reading": reading if has_reading else None,
