@@ -512,11 +512,6 @@ export default function KanjiScreen({ session }) {
                 }}
               />
             )}
-            {mode === 'write' && answered && (
-              <div className="quiz-writing-result">
-                <CharDisplay char={card.kanji} size={72} />
-              </div>
-            )}
 
             <RatingBar active={showRating && !locked} onRate={postReview} />
 

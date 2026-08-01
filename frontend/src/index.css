@@ -3581,8 +3581,6 @@ input:focus { border-color: var(--accent2); }
   margin-top: 8px;
 }
 
-.quiz-writing-result { margin-top: 16px; }
-
 /* ── Light-theme text-on-fill overrides ────────────────────────
    --success and --warning are deepened for light mode (so they hold
    up as plain text on paper) which flips their role as a FILL: they
