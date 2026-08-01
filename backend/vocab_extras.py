@@ -77,24 +77,19 @@ _DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 with open(os.path.join(_DATA_DIR, "vocab_meanings.json"), encoding="utf-8") as f:
     _VOCAB_MEANINGS: dict[str, list[dict]] = json.load(f)
 
-# Full-JMdict pool (see vocab_jmdict_data.py / build_vocab_jmdict.py) —
-# layered into the very same lookup table, under the same
-# "<kanji>::<kana>" key shape, so _find_senses() below needs no
-# JMdict-specific branch: a word from the JLPT deck and a JMdict-only
-# word resolve through the exact same dict lookup. The build script
-# already excludes anything already in the app's own deck, so there's
-# no real collision to worry about; setdefault is just a defensive
-# belt-and-braces in case that ever changes, and the deck's own
-# (curated, reviewed) senses always win.
-# Guarded by exists() rather than a hard import: this file is ~80MB and
-# an optional layer on top of the deck's own (required) meanings —
-# absent, the app should keep working with JLPT-deck words only, not
-# fail to start.
-_JMDICT_MEANINGS_PATH = os.path.join(_DATA_DIR, "vocab_jmdict_meanings.json")
-if os.path.exists(_JMDICT_MEANINGS_PATH):
-    with open(_JMDICT_MEANINGS_PATH, encoding="utf-8") as f:
-        for _key, _senses in json.load(f).items():
-            _VOCAB_MEANINGS.setdefault(_key, _senses)
+# MEMORY NOTE (2026-08): this used to eagerly load the full ~293k-entry
+# vocab_jmdict_meanings.json (~80MB of JSON, several times heavier once
+# parsed into Python dicts/lists) and merge it into _VOCAB_MEANINGS at
+# import time — a large share of what pushed a 512MB deploy over
+# budget. The JMdict pool is now backed by datas/vocab/vocab_jmdict.sqlite3
+# (see vocab_jmdict_data.py) and queried per-word on demand instead —
+# _find_senses() below falls back to that DB lookup only for words not
+# in the app's own (small, always-in-memory) deck. The deck's own
+# curated senses still always win when both exist, same as before.
+try:
+    import vocab_jmdict_data as _jmdict_db
+except ImportError:  # pragma: no cover - defensive only, always present in prod
+    _jmdict_db = None
 
 with open(os.path.join(_DATA_DIR, "vocab_tags.json"), encoding="utf-8") as f:
     _VOCAB_TAGS: dict[str, dict] = json.load(f)
@@ -325,7 +320,8 @@ def _collect_word_tags(senses: list, lang: str) -> list:
 def _find_senses(kanji: str, kana: str) -> list[dict] | None:
     # Fast path: vocab_meanings.json keys its entries with the exact
     # same packed kana string vocab_deck.json uses (see module
-    # docstring), so most words resolve with a single dict lookup.
+    # docstring), so most words resolve with a single in-memory dict
+    # lookup — this only ever covers the app's own (~8k word) deck.
     senses = _VOCAB_MEANINGS.get(f"{kanji}::{kana}")
     if senses:
         return senses
@@ -335,6 +331,16 @@ def _find_senses(kanji: str, kana: str) -> list[dict] | None:
         senses = _VOCAB_MEANINGS.get(f"{kanji}::{reading}")
         if senses:
             return senses
+    # Not in the app's own deck — try the JMdict pool via SQLite
+    # (queried on demand, see module docstring; never held fully in RAM).
+    if _jmdict_db is not None:
+        senses = _jmdict_db.get_senses(kanji, kana)
+        if senses:
+            return senses
+        for reading in _readings(kana):
+            senses = _jmdict_db.get_senses(kanji, reading)
+            if senses:
+                return senses
     return None
 
 
@@ -448,11 +454,15 @@ def _build_vocab_readings() -> dict:
     return table
 
 def _build_meanings_readings() -> dict:
-    """Extract compound readings from the JMdict meanings data.
+    """Extract compound readings from the JMdict-derived data (the
+    app's own deck's meanings, plus the JMdict pool via SQLite).
 
-    vocab_meanings.json keys are '<kanji>::<kana>' (kana may contain
-    '/' for multiple readings). This gives us readings for many common
-    compounds that aren't in the app's own JLPT deck — e.g. 東京 → とうきょう.
+    This gives us readings for many common compounds that aren't in the
+    app's own JLPT deck — e.g. 東京 → とうきょう. Deliberately pulls only
+    (kanji, kana) pairs, never the senses themselves (tags/glossary/
+    examples) — those are the heavy part of the JMdict pool and are of
+    no use for this table, so vocab_jmdict_data.iter_kanji_kana_pairs()
+    is a dedicated lightweight query for exactly this.
     """
     table = {}
     for key in _VOCAB_MEANINGS:
@@ -464,6 +474,13 @@ def _build_meanings_readings() -> dict:
         readings = _readings(kana)
         if readings and kanji not in table:
             table[kanji] = readings[0]
+    if _jmdict_db is not None:
+        for kanji, kana in _jmdict_db.iter_kanji_kana_pairs():
+            if kanji in table:
+                continue
+            readings = _readings(kana)
+            if readings:
+                table[kanji] = readings[0]
     return table
 
 _SINGLE_KANJI_READING = _build_single_kanji_readings()

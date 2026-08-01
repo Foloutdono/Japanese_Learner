@@ -3,3 +3,6 @@ __pycache__/
 *.pyo
 *.pyd
 .pytest_cache/
+datas/vocab/vocab_jmdict.json
+datas/vocab/vocab_jmdict_meanings.json
+datas/vocab/vocab_jmdict_frequency.json

@@ -15,10 +15,19 @@ The third domain, "vocab_jmdict", is different on purpose: it's every
 JMdict word OUTSIDE the app's own curated deck (see
 vocab_jmdict_data.py) — there's no JLPT level to unify with, so it
 gets its own id namespace (vocab_jmdict_to_id) and its own frequency
-order entirely. It exists so that pool isn't lookup-only dead weight —
-these words are real study material, just reachable by frequency tier
-instead of by JLPT level, since JLPT level is the one axis they don't
-have.
+order entirely.
+
+MEMORY NOTE (2026-08): "vocab_jmdict" is also handled differently from
+"kanji"/"vocab" at the code level now, not just conceptually. The other
+two domains are a few thousand entries each — fine to keep as plain
+in-memory lists/dicts, exactly as before. vocab_jmdict is 292,848
+entries: keeping its order list + resolution dict in RAM was a large
+share of what pushed a 512 MB deploy over budget. It's now backed by
+datas/vocab/vocab_jmdict.sqlite3 (indexed on freq_rank and on
+kanji/kana) via vocab_jmdict_data.py, queried on demand instead of
+loaded wholesale. Every public function below still returns the same
+shapes for all three domains — callers (frequency.py) don't need to
+know which domain is DB-backed.
 
 Standard order source files (sit next to kanji_deck.json etc. under
 datas/kanji/ and datas/vocab/):
@@ -42,15 +51,17 @@ datas/kanji/ and datas/vocab/):
                                 module just reads whatever order is in
                                 the file.
 
-  vocab_jmdict_frequency.json  Real JMdict-priority-based ranking (news-
+  vocab_jmdict.sqlite3         Real JMdict-priority-based ranking (news-
                                 frequency rank + ichi/spec/gai common-
                                 word tags + the "⭐" flag) for every
                                 word OUTSIDE the deck, built by
-                                build_vocab_jmdict.py. Same "not a real
-                                corpus analysis" caveat as
-                                kanji_frequency.json's KANJIDIC2 data —
-                                it's JMdict's own editorial priority
-                                signal, not a fresh frequency study.
+                                build_jmdict_db.py from JMdict-priority
+                                data. Same "not a real corpus analysis"
+                                caveat as kanji_frequency.json's
+                                KANJIDIC2 data — it's JMdict's own
+                                editorial priority signal, not a fresh
+                                frequency study. `freq_rank` is a
+                                column on the `entries` table, indexed.
 
 Per-user customization is layered on top via frequency_store.py rather
 than baked into a per-user copy of the order — see that module for the
@@ -63,7 +74,8 @@ from math import ceil
 
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from vocab_jmdict_data import VOCAB_JMDICT, vocab_jmdict_key, vocab_jmdict_to_id
+import vocab_jmdict_data as jmdict_db
+from vocab_jmdict_data import vocab_jmdict_key, vocab_jmdict_to_id
 
 DEFAULT_TIER_SIZE = 200
 
@@ -83,8 +95,8 @@ with open(os.path.join(_KANJI_DIR, "kanji_frequency.json"), encoding="utf-8") as
 with open(os.path.join(_VOCAB_DIR, "vocab_frequency.json"), encoding="utf-8") as f:
     VOCAB_FREQUENCY_ORDER: list[str] = json.load(f)
 
-with open(os.path.join(_VOCAB_DIR, "vocab_jmdict_frequency.json"), encoding="utf-8") as f:
-    VOCAB_JMDICT_FREQUENCY_ORDER: list[str] = json.load(f)
+# vocab_jmdict has no in-memory order list anymore — see module docstring.
+VALID_DOMAINS = {"kanji", "vocab", "vocab_jmdict"}
 
 
 def _build_kanji_resolution():
@@ -106,42 +118,49 @@ def _build_vocab_resolution():
     return resolved
 
 
-def _build_vocab_jmdict_resolution():
-    """"kanji::kana" -> (None, entry). Level is always None here — that's
-    not a missing value, it's the accurate answer: this pool is defined
-    as "everything outside the JLPT deck", so nothing in it has a JLPT
-    level by construction. Every downstream consumer already tolerates
-    that: the frontend's LevelBadge renders nothing for a falsy level,
-    and vocab_jmdict_to_id below takes (and ignores) a level argument
-    purely to keep the same call shape as kanji_to_id/vocab_to_id."""
-    return {vocab_jmdict_key(entry): (None, entry) for entry in VOCAB_JMDICT}
-
-
 _KANJI_RESOLUTION = _build_kanji_resolution()
 _VOCAB_RESOLUTION = _build_vocab_resolution()
-_VOCAB_JMDICT_RESOLUTION = _build_vocab_jmdict_resolution()
 
 _DOMAIN_ORDER = {
-    "kanji":        KANJI_FREQUENCY_ORDER,
-    "vocab":        VOCAB_FREQUENCY_ORDER,
-    "vocab_jmdict": VOCAB_JMDICT_FREQUENCY_ORDER,
+    "kanji": KANJI_FREQUENCY_ORDER,
+    "vocab": VOCAB_FREQUENCY_ORDER,
+    # vocab_jmdict deliberately absent — DB-backed, see below.
 }
 _DOMAIN_RESOLUTION = {
-    "kanji":        _KANJI_RESOLUTION,
-    "vocab":        _VOCAB_RESOLUTION,
-    "vocab_jmdict": _VOCAB_JMDICT_RESOLUTION,
+    "kanji": _KANJI_RESOLUTION,
+    "vocab": _VOCAB_RESOLUTION,
 }
 _DOMAIN_TO_ID = {
-    "kanji":        kanji_to_id,
-    "vocab":        vocab_to_id,
+    "kanji": kanji_to_id,
+    "vocab": vocab_to_id,
     "vocab_jmdict": vocab_jmdict_to_id,
 }
 
-VALID_DOMAINS = set(_DOMAIN_ORDER)
+
+def _split_key(key: str) -> tuple[str, str]:
+    kanji, _, kana = key.partition("::")
+    return kanji, kana
 
 
 def standard_order(domain: str) -> list[str]:
+    """Full ordered key list. For "vocab_jmdict" this materializes all
+    292k keys from the DB — fine for one-off/admin use, but callers on
+    a hot path should prefer domain_count()/get_by_rank_range() instead
+    of calling this for that domain (see get_tiers below, which no
+    longer does)."""
+    if domain == "vocab_jmdict":
+        rows = jmdict_db.get_by_rank_range(0, jmdict_db.count() - 1)
+        return [vocab_jmdict_key(e) for e in rows]
     return _DOMAIN_ORDER[domain]
+
+
+def domain_count(domain: str) -> int:
+    """Total number of items in a domain — the DB-backed equivalent of
+    len(standard_order(domain)), without materializing the full list
+    for vocab_jmdict."""
+    if domain == "vocab_jmdict":
+        return jmdict_db.count()
+    return len(_DOMAIN_ORDER[domain])
 
 
 def resolve(domain: str, key: str):
@@ -149,6 +168,10 @@ def resolve(domain: str, key: str):
     (shouldn't happen for anything coming out of standard_order(), but
     override keys are user-supplied — see frequency_store.py — so this
     can legitimately miss for a typo'd/stale key)."""
+    if domain == "vocab_jmdict":
+        kanji, kana = _split_key(key)
+        entry = jmdict_db.get_by_key(kanji, kana)
+        return (None, entry) if entry is not None else None
     return _DOMAIN_RESOLUTION[domain].get(key)
 
 
@@ -161,6 +184,12 @@ def to_id(domain: str, key: str) -> str | None:
 
 
 def standard_tier_of(domain: str, key: str, tier_size: int = DEFAULT_TIER_SIZE) -> int | None:
+    if domain == "vocab_jmdict":
+        kanji, kana = _split_key(key)
+        entry = jmdict_db.get_by_key(kanji, kana)
+        if entry is None:
+            return None
+        return entry["freq_rank"] // tier_size + 1
     order = _DOMAIN_ORDER[domain]
     try:
         rank = order.index(key)  # O(n); fine at deck scale (a few thousand items)
@@ -170,7 +199,7 @@ def standard_tier_of(domain: str, key: str, tier_size: int = DEFAULT_TIER_SIZE) 
 
 
 def tier_count(domain: str, tier_size: int = DEFAULT_TIER_SIZE) -> int:
-    return max(1, ceil(len(_DOMAIN_ORDER[domain]) / tier_size))
+    return max(1, ceil(domain_count(domain) / tier_size))
 
 
 def tier_bounds(tier: int, tier_size: int = DEFAULT_TIER_SIZE) -> tuple[int, int]:
@@ -178,6 +207,35 @@ def tier_bounds(tier: int, tier_size: int = DEFAULT_TIER_SIZE) -> tuple[int, int
     start = (tier - 1) * tier_size + 1
     end = tier * tier_size
     return start, end
+
+
+def _tier_keys_jmdict(tier: int, tier_size: int, overrides: dict[str, int]) -> list[str]:
+    """DB-backed equivalent of tier_keys() for vocab_jmdict: fetches
+    only the rank range for this tier (indexed, ~tier_size rows) plus
+    whichever override keys point INTO this tier from elsewhere —
+    never touches the other ~292k rows outside those two small sets."""
+    start, end = tier_bounds(tier, tier_size)
+    base_rows = jmdict_db.get_by_rank_range(start - 1, end - 1)
+
+    keyed_rank = []  # (freq_rank, key) so the result stays frequency-ordered
+    base_keys = set()
+    for e in base_rows:
+        key = vocab_jmdict_key(e)
+        base_keys.add(key)
+        target = overrides.get(key)
+        if target is None or target == tier:
+            keyed_rank.append((e["freq_rank"], key))
+
+    for key, target in overrides.items():
+        if target != tier or key in base_keys:
+            continue
+        kanji, kana = _split_key(key)
+        entry = jmdict_db.get_by_key(kanji, kana)
+        if entry is not None:
+            keyed_rank.append((entry["freq_rank"], key))
+
+    keyed_rank.sort()
+    return [key for _, key in keyed_rank]
 
 
 def tier_keys(domain: str, tier: int, tier_size: int = DEFAULT_TIER_SIZE, overrides: dict[str, int] | None = None) -> list[str]:
@@ -190,8 +248,11 @@ def tier_keys(domain: str, tier: int, tier_size: int = DEFAULT_TIER_SIZE, overri
     may sit slightly off from where their override "intended" them if
     tier_size != DEFAULT_TIER_SIZE.
     """
-    order = _DOMAIN_ORDER[domain]
     overrides = overrides or {}
+    if domain == "vocab_jmdict":
+        return _tier_keys_jmdict(tier, tier_size, overrides)
+
+    order = _DOMAIN_ORDER[domain]
     start, end = tier_bounds(tier, tier_size)
     standard_slice = set(order[start - 1:end]) if start <= len(order) else set()
 
