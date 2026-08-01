@@ -1292,6 +1292,7 @@ input:focus { border-color: var(--accent2); }
   align-items: center;
   gap: 20px;
   width: 100%;
+  max-height: 90px;
   padding: 20px 10px;
   background: transparent;
   border: none;
@@ -1300,7 +1301,8 @@ input:focus { border-color: var(--accent2); }
   color: var(--text-primary);
   text-align: left;
   overflow: hidden;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, max-height 0.32s ease, padding 0.32s ease,
+    opacity 0.25s ease, border-color 0.32s ease;
 }
 .mcq-row:not(:disabled):hover,
 .mcq-row:focus-visible { background: var(--overlay-hover); }
@@ -1347,6 +1349,19 @@ input:focus { border-color: var(--accent2); }
 .mcq-row--wrong .mcq-row__accent { background: var(--danger); transform: scaleY(1); }
 .mcq-row--wrong .mcq-row__index,
 .mcq-row--wrong .mcq-row__text { color: var(--danger); }
+
+/* Once answered, the choices that were neither correct nor picked
+   (the fillers) collapse away instead of sitting there as visual
+   noise — only the correct answer, plus the wrong one actually
+   picked (if any), stay on screen. */
+.mcq-row--filler {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  border-bottom-color: transparent;
+  pointer-events: none;
+}
 
 .quiz-input {
   width: 100%;
@@ -1592,7 +1607,19 @@ input:focus { border-color: var(--accent2); }
   max-width: min(320px, 80vw);
 }
 
-.flashcard { position: relative; cursor: pointer; }
+/* No `position: relative` here on purpose — .reveal-actions (rendered
+   inside .flashcard) needs to anchor to the full .prompt-card box, not
+   to .flashcard's own box. In vocab-card-boost mode .prompt-card is a
+   flex container that centers .flashcard around its content, so
+   .flashcard shrink-wraps to whatever width the word/kanji needs; if
+   .flashcard were the positioning context, top:10/left:10 would land
+   right next to that centered content instead of in the card's real
+   top-left corner. Leaving .flashcard `position: static` lets the
+   absolutely-positioned .reveal-actions skip past it to .prompt-card
+   (still `position: relative`, see below), so the buttons stay pinned
+   to the actual card corner no matter how the content inside is sized
+   or centered. */
+.flashcard { cursor: pointer; }
 
 .flashcard__hint {
   font-size: 12px;
@@ -6070,6 +6097,13 @@ input:focus { border-color: var(--accent2); }
   .flashcard {
     padding: 5px;
     border-radius: 10px;
+  }
+
+  /* Extra headroom so .reveal-actions (top:10/left:10, anchored to
+     .prompt-card) never overlaps the char/word below it once the
+     card's own padding has shrunk to almost nothing. */
+  .prompt-card {
+    padding-top: 46px;
   }
 
   .inline-reveal {

@@ -50,10 +50,15 @@ export function CharDisplay({ char, size = 110 }) {
 export function MCQButton({ choice, correct, selected, answered, onClick, index, cramped }) {
   const isCorrect  = choice === correct
   const isSelected = choice === selected
+  // A filler is any choice that isn't the right answer and wasn't the
+  // one picked — once revealed, it's just noise, so it collapses away
+  // (see .mcq-row--filler) instead of sitting there unanswered-looking.
+  const isFiller   = answered && !isCorrect && !isSelected
 
   let variant = ''
   if (answered && isCorrect) variant = ' mcq-row--correct'
   else if (answered && isSelected) variant = ' mcq-row--wrong'
+  if (isFiller) variant += ' mcq-row--filler'
 
   if (answered && cramped) {
     variant += ' mcq-row--small'
@@ -63,6 +68,7 @@ export function MCQButton({ choice, correct, selected, answered, onClick, index,
     <button
       onClick={onClick}
       disabled={answered}
+      aria-hidden={isFiller}
       className={`mcq-row${variant}`}
     >
       <span className="mcq-row__accent" aria-hidden="true" />
