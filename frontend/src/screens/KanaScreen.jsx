@@ -5,9 +5,10 @@ import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import {
-  CharDisplay, MCQGrid, TypeInput, DoneMessage,
-  DeckProgress, Flashcard, RevealActions,
+  CharDisplay, MCQGrid, DoneMessage,
+  DeckProgress, Flashcard, RevealActions, MeaningDisplay,
 } from '../components/QuizComponents'
+import { DrawingQuiz } from '../components/DrawingCanvas'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
 import { CardTransition } from '../components/CardTransition'
@@ -39,8 +40,6 @@ export default function KanaScreen({ session }) {
   const [mode, setMode]               = useState(null)
   const [answered, setAnswered]       = useState(false)
   const [selected, setSelected]       = useState(null)
-  const [input, setInput]             = useState('')
-  const [submitted, setSubmitted]     = useState(false)
   const [showRating, setShowRating]   = useState(false)
   const [progress, setProgress]       = useState(null)
   const [xpToast, setXpToast]         = useState(null)
@@ -106,8 +105,6 @@ export default function KanaScreen({ session }) {
   useEffect(() => {
     setAnswered(false)
     setSelected(null)
-    setInput('')
-    setSubmitted(false)
     setShowRating(false)
   }, [card?.card_id])
 
@@ -210,9 +207,9 @@ export default function KanaScreen({ session }) {
     playKana(card.romaji)
   }
 
-  function onTypeSubmit() {
-    if (submitted || !input.trim()) return
-    setSubmitted(true)
+  function onDrawValidate() {
+    if (answered) return
+    setAnswered(true)
     setShowRating(true)
     playKana(card.romaji)
   }
@@ -292,12 +289,27 @@ export default function KanaScreen({ session }) {
                 </PromptCard>
               )}
 
-              {(mode === 'qcm' || mode === 'write') && (
+              {mode === 'qcm' && (
                 <PromptCard>
                   <CharDisplay char={card.kana} />
                   <RevealActions
                     t={t}
-                    revealed={mode === 'qcm' ? answered : submitted}
+                    revealed={answered}
+                    resetKey={card.card_id}
+                    dictTerm={card.kana}
+                    dictCategory={dictCategory}
+                    session={session}
+                    onReplaySound={() => playKana(card.romaji)}
+                  />
+                </PromptCard>
+              )}
+
+              {mode === 'write' && (
+                <PromptCard>
+                  <MeaningDisplay meaning={card.romaji} size={40} />
+                  <RevealActions
+                    t={t}
+                    revealed={answered}
                     resetKey={card.card_id}
                     dictTerm={card.kana}
                     dictCategory={dictCategory}
@@ -313,8 +325,12 @@ export default function KanaScreen({ session }) {
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
             {mode === 'write' && (
-              <TypeInput value={input} onChange={setInput} onSubmit={onTypeSubmit}
-                submitted={submitted} answer={card.romaji} placeholder={t.typeRomaji} />
+              <DrawingQuiz
+                kanji={card.kana}
+                meaning={card.romaji}
+                resetKey={card.card_id}
+                onValidate={onDrawValidate}
+              />
             )}
             <RatingBar active={showRating && !locked} onRate={postReview} />
           </>

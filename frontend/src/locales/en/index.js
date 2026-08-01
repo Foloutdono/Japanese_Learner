@@ -148,7 +148,7 @@ const quiz = {
 
   modeFcKanaDesc:     'The kana is shown, reveal the meaning',
   modeQcmKanaDesc:    'The kana is shown, choose the meaning',
-  modeWriteKanaDesc:   'The kana is shown, write the romaji',
+  modeWriteKanaDesc:   'The romaji is shown, draw the kana',
 
   modeFcGrammarDesc:   'The grammar rule is shown, reveal the meaning',
   modeQcmGrammarDesc:  'The grammar rule is shown, choose the meaning',
