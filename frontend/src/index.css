@@ -5631,6 +5631,19 @@ input:focus { border-color: var(--accent2); }
 .rdg-grade-btn--right { background: var(--success); color: var(--text-on-panel); padding: 10px 24px; font-size: 15px; }
 .rdg-next-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
 
+/* Frequency-tier "jump to tier" row, below the fetched tier list — see
+   TierPicker in ReadingScreen.jsx (2026-08, frequency-based sentence
+   source). Reuses .rdg-answer-input/.rdg-submit-btn for the input and
+   button themselves, this just lays the pair out side by side. */
+.rdg-tier-jump {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+.rdg-tier-jump .rdg-answer-input { margin-top: 0; max-width: 140px; font-size: 16px; padding: 10px; }
+
 /* ── Reading comprehension screen ─────────────────────────── */
 .comp-loading-wrap { padding: 80px; text-align: center; }
 .comp-loading-text { color: var(--text-secondary); margin-top: 16px; font-size: 14px; }
