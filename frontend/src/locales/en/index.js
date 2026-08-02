@@ -99,6 +99,8 @@ const quiz = {
   byLevelDesc: 'The standard JLPT levels from N5 to N1, with the most common words and kanji in each level', 
   byFrequency: 'Word frequency',
   byFrequencyDesc: 'The frequency of words in real Japanese text, from most common to least common', 
+  byMastery: 'My cards',
+  byMasteryDesc: "Sentences made entirely of words you're currently learning or have mastered",
   selectStudySource: 'Choose your study source', 
   selectTier: 'Choose a frequency tier', 
   kanjiUnit: 'kanji', 
@@ -238,13 +240,28 @@ const phraseAnalyzer = {
 // ── Reading ───────────────────────────────────────────────
 const reading = {
   readingTitle:         'Reading practice',
-  readingDesc:          'Short phrases\nJLPT N5 → N1\nHiragana, Katakana, Kanji',
-  readingHiragana:      'Hiragana only',
-  readingHiraganaDesc:  'Phrases written only in hiragana',
-  readingKatakana:      'Katakana only',
-  readingKatakanaDesc:  'Phrases written only in katakana',
-  readingMixed:         'Everything',
-  readingMixedDesc:     'Natural Japanese with kanji and kana',
+  readingDesc:          'Real example sentences\nJLPT level, frequency, or your own cards\nNatural Japanese with kanji and kana',
+
+  // Frequency source: which word list (byLevel/byFrequency/byMastery,
+  // selectStudySource, selectTier, loadError live in `quiz` above —
+  // shared with the other frequency-tier pickers in the app).
+  selectDomain:          'Choose a word list',
+  domainVocabDeck:       'Curated deck',
+  domainVocabDecDesc:    "The app's own JLPT-leveled vocabulary",
+  domainVocabJmdict:     'Full dictionary',
+  domainVocabJmdictDesc: 'Every word in the dictionary, ranked by frequency',
+  tierLabel:             'Tier {n}',
+  jumpToTier:            'Jump to tier…',
+
+  // Real example sentences only carry an English translation, whatever
+  // the UI language — see reading.py's translation_lang note. Shown as
+  // a short prefix so it doesn't read as if it matched `lang`.
+  translationEnglish:    'EN',
+
+  // Mastery source: shown instead of a phrase when the learner doesn't
+  // have enough learning/mastered vocabulary yet for a full sentence.
+  notEnoughMasteryWords: 'Not enough words in learning or mastered state yet — keep studying and check back for this mode.',
+
   readingFetchError:    "Couldn't load a phrase. Try again.",
   writeWhatYouSaw:      'Write what you saw, in romaji',
   romajiPlaceholder:    'e.g. konnichiwa',
