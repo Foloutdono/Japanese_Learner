@@ -17,49 +17,20 @@ const STATUS_COLORS = {
   due:          'var(--accent)',
 }
 
-const STATUS_LABELS = {
-  mastered:     'Mastered',
-  learning:     'Learning',
-  new:          'New',
-  not_started:  'Not in deck',
-  due:          'Due now',
-}
-
 const MOBILE_BREAKPOINT = 768
 
 // NOTE ON TRANSLATION KEYS: this rewrite (2026-08, real example
-// sentences instead of LLM-generated ones) needs a handful of new
-// LangContext keys that didn't exist before — the old phase-based ones
-// (t.readingHiragana / t.readingKatakana / t.readingMixed and their
-// *Desc siblings) are no longer referenced anywhere and can be removed
-// from the translations file once you've added these:
-//
-//   t.readingSourceLevel         "By JLPT level"
-//   t.readingSourceLevelDesc     "Sentences using vocabulary from a level you pick"
-//   t.readingSourceFrequency     "By frequency"
-//   t.readingSourceFrequencyDesc "Sentences using words from a frequency tier"
-//   t.readingSourceMastery       "My cards"
-//   t.readingSourceMasteryDesc   "Sentences made entirely of words you're learning or have mastered"
-//   t.selectSource               "How do you want to pick sentences?"
-//   t.selectDomain                "Which word list?"
-//   t.domainVocabDeck            "Curated deck"
-//   t.domainVocabDecDesc         "The app's own JLPT-leveled vocabulary"
-//   t.domainVocabJmdict          "Full dictionary"
-//   t.domainVocabJmdictDesc      "Every word in the JMdict pool, ranked by frequency"
-//   t.selectTier                  "Select a frequency tier"
-//   t.tierLabel                   "Tier {n}" (or adapt to your i18n interpolation style)
-//   t.jumpToTier                  "Jump to tier…"
-//   t.translationEnglish          "EN" (short label prefixing the translation, since real
-//                                   example sentences only have an English gloss regardless
-//                                   of UI language — see reading.py's translation_lang note)
-//   t.notEnoughMasteryWords       "Not enough words in learning/mastered state yet — keep
-//                                   studying and check back for this mode."
-//
-// Existing keys (selectLevel, readingTitle, score, writeWhatYouSaw,
-// romajiPlaceholder, submit, didYouGetIt, correct, incorrect,
-// correctRomaji, translation, yourAnswer, gradeIncorrect, gradeCorrect,
-// nextPhrase, retry, readingFetchError, clickForDetails, ...) are all
-// still used exactly as before.
+// sentences instead of LLM-generated ones) reuses the app's existing
+// generic study-source keys (t.byLevel/byLevelDesc, t.byFrequency/
+// byFrequencyDesc, t.byMastery/byMasteryDesc, t.selectStudySource,
+// t.selectTier, t.loadError, t.status_*) rather than inventing
+// reading-specific duplicates — see index.js's `quiz` and
+// `phraseAnalyzer` sections. The only genuinely new keys are in
+// index.js's `reading` section: selectDomain, domainVocabDeck(Desc),
+// domainVocabJmdict(Desc), tierLabel, jumpToTier, translationEnglish,
+// notEnoughMasteryWords. The old phase-based keys (readingHiragana /
+// readingKatakana / readingMixed and their *Desc siblings) are gone —
+// nothing references them anymore.
 
 const DEFAULT_TIER_SIZE = 200
 
@@ -68,9 +39,9 @@ export default function ReadingScreen({ session }) {
   const { t, lang } = useLang()
 
   const SOURCES = [
-    { key: 'level',     label: t.readingSourceLevel,     desc: t.readingSourceLevelDesc },
-    { key: 'frequency', label: t.readingSourceFrequency, desc: t.readingSourceFrequencyDesc },
-    { key: 'mastery',   label: t.readingSourceMastery,   desc: t.readingSourceMasteryDesc },
+    { key: 'level',     label: t.byLevel,     desc: t.byLevelDesc },
+    { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
+    { key: 'mastery',   label: t.byMastery,   desc: t.byMasteryDesc },
   ]
 
   const DOMAINS = [
@@ -288,7 +259,7 @@ export default function ReadingScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.readingTitle} />
-        <SelectionScreen subtitle={t.selectSource}>
+        <SelectionScreen subtitle={t.selectStudySource}>
           <ModeSelector modes={SOURCES} onSelect={setSource} />
         </SelectionScreen>
       </div>
@@ -379,7 +350,7 @@ function SessionView({
   const titleSuffix =
     source === 'level' ? level :
     source === 'frequency' ? `${domain === 'vocab_jmdict' ? t.domainVocabJmdict : t.domainVocabDeck} — ${t.tierLabel ? t.tierLabel.replace('{n}', tier) : `Tier ${tier}`}` :
-    t.readingSourceMastery
+    t.byMastery
 
   return (
     <div className="screen">
@@ -555,7 +526,7 @@ function TierPicker({ session, domain, onSelect, t }) {
     return () => { cancelled = true }
   }, [domain])
 
-  if (error) return <div className="card rdg-error-card">{t.readingFetchError}</div>
+  if (error) return <div className="card rdg-error-card">{t.loadError}</div>
   if (!tiers) return <Loading />
 
   const visible = tiers.slice(0, 50)
@@ -622,8 +593,8 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
       <div className="detail-section">
         <Label>{t.cardStats}</Label>
         <div className="detail-badges">
-          <StatusBadge status={stats.status} />
-          {stats.due && <StatusBadge status="due" />}
+          <StatusBadge status={stats.status} t={t} />
+          {stats.due && <StatusBadge status="due" t={t} />}
         </div>
         <StatRow label={t.totalReviews} value={stats.total_reviews} />
         <StatRow label={t.correctReviews} value={stats.correct_reviews} />
@@ -679,9 +650,9 @@ function StatRow({ label, value }) {
   )
 }
 
-function StatusBadge({ status }) {
+function StatusBadge({ status, t }) {
   const color = STATUS_COLORS[status] || STATUS_COLORS.not_started
-  const label = STATUS_LABELS[status] || status
+  const label = t[`status_${status}`] || status
   return (
     <span className="status-pill" style={{ '--pill-color': color }}>
       {label}
