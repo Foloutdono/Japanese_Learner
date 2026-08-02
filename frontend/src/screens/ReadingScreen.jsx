@@ -27,22 +27,65 @@ const STATUS_LABELS = {
 
 const MOBILE_BREAKPOINT = 768
 
+// NOTE ON TRANSLATION KEYS: this rewrite (2026-08, real example
+// sentences instead of LLM-generated ones) needs a handful of new
+// LangContext keys that didn't exist before — the old phase-based ones
+// (t.readingHiragana / t.readingKatakana / t.readingMixed and their
+// *Desc siblings) are no longer referenced anywhere and can be removed
+// from the translations file once you've added these:
+//
+//   t.readingSourceLevel         "By JLPT level"
+//   t.readingSourceLevelDesc     "Sentences using vocabulary from a level you pick"
+//   t.readingSourceFrequency     "By frequency"
+//   t.readingSourceFrequencyDesc "Sentences using words from a frequency tier"
+//   t.readingSourceMastery       "My cards"
+//   t.readingSourceMasteryDesc   "Sentences made entirely of words you're learning or have mastered"
+//   t.selectSource               "How do you want to pick sentences?"
+//   t.selectDomain                "Which word list?"
+//   t.domainVocabDeck            "Curated deck"
+//   t.domainVocabDecDesc         "The app's own JLPT-leveled vocabulary"
+//   t.domainVocabJmdict          "Full dictionary"
+//   t.domainVocabJmdictDesc      "Every word in the JMdict pool, ranked by frequency"
+//   t.selectTier                  "Select a frequency tier"
+//   t.tierLabel                   "Tier {n}" (or adapt to your i18n interpolation style)
+//   t.jumpToTier                  "Jump to tier…"
+//   t.translationEnglish          "EN" (short label prefixing the translation, since real
+//                                   example sentences only have an English gloss regardless
+//                                   of UI language — see reading.py's translation_lang note)
+//   t.notEnoughMasteryWords       "Not enough words in learning/mastered state yet — keep
+//                                   studying and check back for this mode."
+//
+// Existing keys (selectLevel, readingTitle, score, writeWhatYouSaw,
+// romajiPlaceholder, submit, didYouGetIt, correct, incorrect,
+// correctRomaji, translation, yourAnswer, gradeIncorrect, gradeCorrect,
+// nextPhrase, retry, readingFetchError, clickForDetails, ...) are all
+// still used exactly as before.
+
+const DEFAULT_TIER_SIZE = 200
+
 export default function ReadingScreen({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
 
-  const PHASES = [
-    { key: 'hiragana', label: t.readingHiragana, desc: t.readingHiraganaDesc },
-    { key: 'katakana', label: t.readingKatakana, desc: t.readingKatakanaDesc },
-    { key: 'mixed',    label: t.readingMixed, desc: t.readingMixedDesc },
+  const SOURCES = [
+    { key: 'level',     label: t.readingSourceLevel,     desc: t.readingSourceLevelDesc },
+    { key: 'frequency', label: t.readingSourceFrequency, desc: t.readingSourceFrequencyDesc },
+    { key: 'mastery',   label: t.readingSourceMastery,   desc: t.readingSourceMasteryDesc },
   ]
 
-  const [level, setLevel]   = useState(null)
-  const [phase, setPhase]   = useState(null)
+  const DOMAINS = [
+    { key: 'vocab',        label: t.domainVocabDeck,   desc: t.domainVocabDecDesc },
+    { key: 'vocab_jmdict', label: t.domainVocabJmdict, desc: t.domainVocabJmdictDesc },
+  ]
+
+  const [source, setSource] = useState(null)       // 'level' | 'frequency' | 'mastery'
+  const [level, setLevel]   = useState(null)        // source === 'level'
+  const [domain, setDomain] = useState(null)        // source === 'frequency'
+  const [tier, setTier]     = useState(null)        // source === 'frequency'
 
   // 'loading' | 'showing' | 'answering' | 'feedback' | 'error'
   const [stage, setStage]   = useState('loading')
-  const [data, setData]     = useState(null)   // current { phrase, romaji, display_seconds }
+  const [data, setData]     = useState(null)   // current phrase item from the batch
   const [timeLeft, setTimeLeft] = useState(0)
   const [answer, setAnswer] = useState('')
   const [feedback, setFeedback] = useState(null) // { correct, romaji }
@@ -78,14 +121,28 @@ export default function ReadingScreen({ session }) {
   const BATCH_SIZE = 5
   const PREFETCH_THRESHOLD = 1 // refill once only this many (or fewer) remain in queue
 
-  function startSession(lvl, ph) {
-    setLevel(lvl)
-    setPhase(ph)
+  // Compact label matching reading.py's _source_label() — sent back on
+  // /api/reading/result so history stays informative without a DB
+  // migration (see reading.py's get_reading_batch docstring).
+  function sourceLabel() {
+    if (source === 'level') return `level:${level}`
+    if (source === 'frequency') return `freq:${domain}:${tier}`
+    return 'mastery'
+  }
+
+  function batchUrl(count) {
+    const params = new URLSearchParams({ source, count, lang })
+    if (source === 'level') params.set('level', level)
+    if (source === 'frequency') { params.set('domain', domain); params.set('tier', tier) }
+    return `/api/reading/batch?${params.toString()}`
+  }
+
+  function startSession() {
     setScore({ correct: 0, total: 0 })
     queueRef.current = []
     setStage('loading')
     setError(null)
-    fetchBatch(lvl, ph).then(phrases => {
+    fetchBatch().then(phrases => {
       if (phrases.length === 0) {
         setError(t.readingFetchError)
         setStage('error')
@@ -99,9 +156,9 @@ export default function ReadingScreen({ session }) {
   // Fetches a fresh batch from the backend. Returns a promise of the phrase
   // list so callers can decide what to do with it (show immediately vs.
   // silently append to the queue).
-  function fetchBatch(lvl, ph) {
+  function fetchBatch() {
     fetchingRef.current = true
-    return apiFetch(`/api/reading/batch?level=${lvl}&phase=${ph}&count=${BATCH_SIZE}&lang=${lang}`, session)
+    return apiFetch(batchUrl(BATCH_SIZE), session)
       .then(r => {
         if (!r.ok) throw new Error('Request failed')
         return r.json()
@@ -129,7 +186,7 @@ export default function ReadingScreen({ session }) {
       showPhrase(head)
 
       if (rest.length <= PREFETCH_THRESHOLD && !fetchingRef.current) {
-        fetchBatch(level, phase).then(more => {
+        fetchBatch().then(more => {
           queueRef.current = [...queueRef.current, ...more]
         })
       }
@@ -139,7 +196,7 @@ export default function ReadingScreen({ session }) {
     // Queue ran dry (unlikely, but possible after a slow/failed prefetch) —
     // fall back to a blocking fetch so the user isn't stuck.
     setStage('loading')
-    fetchBatch(level, phase).then(more => {
+    fetchBatch().then(more => {
       if (more.length === 0) {
         setError(t.readingFetchError)
         setStage('error')
@@ -193,7 +250,8 @@ export default function ReadingScreen({ session }) {
     apiFetch('/api/reading/result', session, {
       method: 'POST',
       body: JSON.stringify({
-        level, phase,
+        source: sourceLabel(),
+        level: source === 'level' ? level : null,
         phrase: data.phrase,
         romaji: data.romaji,
         answer: answer.trim(),
@@ -207,7 +265,7 @@ export default function ReadingScreen({ session }) {
   function retry() {
     setStage('loading')
     setError(null)
-    fetchBatch(level, phase).then(phrases => {
+    fetchBatch().then(phrases => {
       if (phrases.length === 0) {
         setError(t.readingFetchError)
         setStage('error')
@@ -218,11 +276,30 @@ export default function ReadingScreen({ session }) {
     })
   }
 
-  // ── Level selection ──
-  if (!level) {
+  function resetAll() {
+    setSource(null)
+    setLevel(null)
+    setDomain(null)
+    setTier(null)
+  }
+
+  // ── Source selection (level / frequency / my cards) ──
+  if (!source) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.readingTitle} />
+        <SelectionScreen subtitle={t.selectSource}>
+          <ModeSelector modes={SOURCES} onSelect={setSource} />
+        </SelectionScreen>
+      </div>
+    )
+  }
+
+  // ── Level source: pick a JLPT level ──
+  if (source === 'level' && !level) {
+    return (
+      <div className="screen">
+        <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
         <SelectionScreen subtitle={t.selectLevel}>
           <LevelSelector onSelect={setLevel} color="var(--accent3)" />
         </SelectionScreen>
@@ -230,27 +307,85 @@ export default function ReadingScreen({ session }) {
     )
   }
 
-  // ── Phase selection ──
-  if (!phase) {
+  // ── Frequency source: pick a word list, then a tier ──
+  if (source === 'frequency' && !domain) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setLevel(null)} title={`${t.readingTitle} ${level}`} />
-        <SelectionScreen subtitle={t.selectPhase}>
-          <ModeSelector
-            modes={PHASES.map(p => ({ key: p.key, label: p.label, desc: p.desc }))}
-            onSelect={ph => startSession(level, ph)}
-          />
+        <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
+        <SelectionScreen subtitle={t.selectDomain}>
+          <ModeSelector modes={DOMAINS} onSelect={setDomain} />
         </SelectionScreen>
       </div>
     )
   }
 
-  // ── Session ──
+  if (source === 'frequency' && domain && tier == null) {
+    return (
+      <div className="screen">
+        <TopBar onBack={() => setDomain(null)} title={t.readingTitle} />
+        <SelectionScreen subtitle={t.selectTier}>
+          <TierPicker session={session} domain={domain} onSelect={setTier} t={t} />
+        </SelectionScreen>
+      </div>
+    )
+  }
+
+  // ── Session (all sources land here once fully configured) ──
+  return (
+    <SessionView
+      t={t}
+      source={source}
+      level={level}
+      domain={domain}
+      tier={tier}
+      stage={stage}
+      data={data}
+      timeLeft={timeLeft}
+      answer={answer}
+      setAnswer={setAnswer}
+      feedback={feedback}
+      score={score}
+      error={error}
+      detail={detail}
+      isMobile={isMobile}
+      onBack={resetAll}
+      onStart={startSession}
+      submitAnswer={submitAnswer}
+      gradeAnswer={gradeAnswer}
+      next={next}
+      retry={retry}
+      openSegmentDetail={openSegmentDetail}
+      closeDetail={() => setDetail(null)}
+    />
+  )
+}
+
+// Kicks off the session's very first batch fetch exactly once, then
+// renders the same stage machine the single-screen version used to.
+// Split out mainly to keep the selection-screen early-returns above
+// simple (each of those is a plain "pick one thing" screen).
+function SessionView({
+  t, source, level, domain, tier, stage, data, timeLeft, answer, setAnswer,
+  feedback, score, error, detail, isMobile, onBack, onStart, submitAnswer,
+  gradeAnswer, next, retry, openSegmentDetail, closeDetail,
+}) {
+  const startedRef = useRef(false)
+  useEffect(() => {
+    if (startedRef.current) return
+    startedRef.current = true
+    onStart()
+  }, [])
+
+  const titleSuffix =
+    source === 'level' ? level :
+    source === 'frequency' ? `${domain === 'vocab_jmdict' ? t.domainVocabJmdict : t.domainVocabDeck} — ${t.tierLabel ? t.tierLabel.replace('{n}', tier) : `Tier ${tier}`}` :
+    t.readingSourceMastery
+
   return (
     <div className="screen">
       <TopBar
-        onBack={() => setPhase(null)}
-        title={`${t.readingTitle} — ${PHASES.find(p => p.key === phase)?.label}`}
+        onBack={onBack}
+        title={`${t.readingTitle} — ${titleSuffix}`}
         autoHide
       />
       <div className="container quiz-area">
@@ -351,7 +486,11 @@ export default function ReadingScreen({ session }) {
               </div>
               {data.translation && (
                 <div className="rdg-feedback-translation">
-                  {t.translation}: {data.translation}
+                  {/* Real example sentences only carry an English gloss
+                      regardless of UI language — see reading.py's
+                      translation_lang note — so this is labelled
+                      explicitly instead of implying it matches `lang`. */}
+                  {data.translation_lang === 'en' ? (t.translationEnglish ?? 'EN') : t.translation}: {data.translation}
                 </div>
               )}
               <div className="rdg-feedback-your-answer">
@@ -388,9 +527,67 @@ export default function ReadingScreen({ session }) {
       </div>
 
       {detail && (
-        <DetailPanel detail={detail} t={t} isMobile={isMobile} onClose={() => setDetail(null)} />
+        <DetailPanel detail={detail} t={t} isMobile={isMobile} onClose={closeDetail} />
       )}
     </div>
+  )
+}
+
+// ── Frequency tier picker ────────────────────────────────
+// No pre-existing tier-selection UI to reuse here (the study screens
+// that already have frequency tiers weren't part of this rewrite), so
+// this is a small purpose-built list: the first 50 tiers (ranks
+// 1-10,000 at the default tier size — plenty for how deep most readers
+// will want to go) plus a manual "jump to tier" input for anything
+// further out. Mirrors ModeSelector's visual language rather than
+// introducing a new one.
+function TierPicker({ session, domain, onSelect, t }) {
+  const [tiers, setTiers] = useState(null)
+  const [error, setError] = useState(false)
+  const [jumpValue, setJumpValue] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    apiFetch(`/api/frequency/${domain}/tiers?tier_size=${DEFAULT_TIER_SIZE}`, session)
+      .then(r => { if (!r.ok) throw new Error('failed'); return r.json() })
+      .then(d => { if (!cancelled) setTiers(d.tiers || []) })
+      .catch(() => { if (!cancelled) setError(true) })
+    return () => { cancelled = true }
+  }, [domain])
+
+  if (error) return <div className="card rdg-error-card">{t.readingFetchError}</div>
+  if (!tiers) return <Loading />
+
+  const visible = tiers.slice(0, 50)
+  const modes = visible.map(tr => ({
+    key: String(tr.tier),
+    label: t.tierLabel ? t.tierLabel.replace('{n}', tr.tier) : `Tier ${tr.tier}`,
+    desc: `${tr.start_rank}–${tr.end_rank} (${tr.count})`,
+  }))
+
+  return (
+    <>
+      <ModeSelector modes={modes} onSelect={key => onSelect(Number(key))} />
+      <div className="rdg-tier-jump">
+        <input
+          type="number"
+          min="1"
+          max={tiers.length}
+          value={jumpValue}
+          onChange={e => setJumpValue(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && jumpValue && onSelect(Number(jumpValue))}
+          placeholder={t.jumpToTier}
+          className="rdg-answer-input"
+        />
+        <button
+          onClick={() => jumpValue && onSelect(Number(jumpValue))}
+          disabled={!jumpValue}
+          className="rdg-submit-btn"
+        >
+          {t.submit}
+        </button>
+      </div>
+    </>
   )
 }
 

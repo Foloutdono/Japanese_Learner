@@ -23,20 +23,17 @@ frequency_data.py) don't need a rewrite, but note the two real changes:
     the whole pool in memory at once — callers that used to do
     `for w in VOCAB_JMDICT: ...` need to become a `search()` call
     (indexed SQL, also just plain faster than a 292k-row Python scan).
-  - vocab_jmdict_to_id now uses entry["id"] (the DB's own unique row id,
-    = position in the source vocab_jmdict.json), NOT entry["seq"]
-    anymore. seq is NOT unique per kanji/kana pair (a headword with
-    several readings shares one seq — 59,206 of 292,848 rows), so the
-    old `vocab_jmdict_{seq}` scheme could — and, for those 59k rows,
-    DID — collide two different words onto the same SRS card id.
-    "id" fixes that (verified unique for all 292,848 rows).
-    CONSEQUENCE: every already-issued JMdict-pool card id changes shape
-    (`vocab_jmdict_{seq}` -> `vocab_jmdict_{id}`). Run
-    scripts/migrate_jmdict_card_ids.py against your SRS store before
-    deploying this, or existing users' JMdict-pool review history will
-    look like it vanished (new cards, no history) — see that script for
-    the id mapping and the trade-off it documents for the ~59k
-    previously-collided rows.
+  - vocab_jmdict_to_id keeps using entry["seq"] for backwards
+    compatibility with any already-issued card ids, BUT: seq is NOT
+    unique per kanji/kana pair (a headword with several readings
+    shares one seq — 59,206 of 292,848 rows). Two different words can
+    therefore collide onto the same SRS card id. Pre-existing issue,
+    not introduced by this migration — flagging it here since it's
+    easy to fix now that entries also carry a real unique `id`
+    (row position in the source vocab_jmdict.json) if you want to
+    switch vocab_jmdict_to_id to `entry["id"]` instead. Doing so
+    changes card ids for every JMdict-pool card already in a user's
+    SRS state, so it needs an explicit migration, not a silent swap.
 """
 import os
 import sqlite3
@@ -46,7 +43,7 @@ _BASE_DIR = os.path.dirname(__file__)
 _DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 _DB_PATH = os.path.join(_DATA_DIR, "vocab_jmdict.sqlite3")
 
-_COLUMNS = ("id", "seq", "kanji", "kana", "meaning", "freq_rank")
+_COLUMNS = ("id", "seq", "kanji", "kana", "meaning", "freq_rank", "has_examples")
 
 
 def _row_to_entry(row: tuple) -> dict:
@@ -75,16 +72,39 @@ def vocab_jmdict_key(entry: dict) -> str:
 
 
 def vocab_jmdict_to_id(entry: dict, _level: str | None = None) -> str:
-    """Uses the DB's own unique row id (NOT the JMdict seq — see module
-    docstring for why seq could collide two different words onto one
-    card id). Run migrate_jmdict_card_ids.py before deploying this
-    change if you have existing users with JMdict-pool review history."""
-    return f"vocab_jmdict_{entry['id']}"
+    """Unchanged id shape from before this migration — see the seq
+    non-uniqueness caveat in the module docstring."""
+    return f"vocab_jmdict_{entry['seq']}"
+
+
+def get_by_id(entry_id: int) -> dict | None:
+    row = _conn().execute(
+        "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries WHERE id = ?",
+        (entry_id,),
+    ).fetchone()
+    return _row_to_entry(row) if row else None
+
+
+def sample_rank_range_with_examples(start_rank: int, end_rank_inclusive: int, limit: int) -> list[dict]:
+    """Random sample of up to `limit` entries in [start_rank,
+    end_rank_inclusive] that have at least one example sentence — used
+    by reading.py's frequency-tier sentence source. Uses the
+    (has_examples, freq_rank) index: SQLite can narrow to the
+    has_examples=1 rows within the range before the ORDER BY RANDOM(),
+    so this stays cheap even though the tier itself may have very few
+    example-bearing words (~11% of the pool overall)."""
+    rows = _conn().execute(
+        "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
+        "WHERE has_examples = 1 AND freq_rank BETWEEN ? AND ? "
+        "ORDER BY RANDOM() LIMIT ?",
+        (start_rank, end_rank_inclusive, limit),
+    ).fetchall()
+    return [_row_to_entry(r) for r in rows]
 
 
 def get_by_key(kanji: str, kana: str) -> dict | None:
     row = _conn().execute(
-        "SELECT id, seq, kanji, kana, meaning, freq_rank FROM entries WHERE kanji = ? AND kana = ?",
+        "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries WHERE kanji = ? AND kana = ?",
         (kanji, kana),
     ).fetchone()
     return _row_to_entry(row) if row else None
@@ -95,7 +115,7 @@ def get_by_rank_range(start_rank: int, end_rank_inclusive: int) -> list[dict]:
     (0-indexed) — the DB-backed equivalent of slicing the old in-memory
     frequency-order list. Uses the freq_rank index, no table scan."""
     rows = _conn().execute(
-        "SELECT id, seq, kanji, kana, meaning, freq_rank FROM entries "
+        "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
         "WHERE freq_rank BETWEEN ? AND ? ORDER BY freq_rank",
         (start_rank, end_rank_inclusive),
     ).fetchall()
@@ -114,7 +134,7 @@ def search(q: str, limit: int, offset: int) -> tuple[list[dict], int]:
     if q == "":
         total = count()
         rows = _conn().execute(
-            "SELECT id, seq, kanji, kana, meaning, freq_rank FROM entries "
+            "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
             "ORDER BY id LIMIT ? OFFSET ?",
             (limit, offset),
         ).fetchall()
@@ -126,7 +146,7 @@ def search(q: str, limit: int, offset: int) -> tuple[list[dict], int]:
         (like, like, like),
     ).fetchone()[0]
     rows = _conn().execute(
-        "SELECT id, seq, kanji, kana, meaning, freq_rank FROM entries "
+        "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
         "WHERE kanji LIKE ? OR kana LIKE ? OR meaning LIKE ? "
         "ORDER BY id LIMIT ? OFFSET ?",
         (like, like, like, limit, offset),

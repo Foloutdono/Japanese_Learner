@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import random
 import re
 import unicodedata
 
@@ -10,10 +11,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from db import db_conn
-from auth import get_user_id
+from auth import get_user_id, unprefixed
 from srs_instance import srs
-from card_lookup import find_segments_in_text, attach_stats_to_segments
+from card_lookup import find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODE
 from kanji_data import get_kanji_string
+from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+import vocab_extras
+import vocab_jmdict_data as jmdict_db
+import frequency_data as freq
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -22,6 +27,8 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-3.5-haiku")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
+# Still used by Reading Comprehension below (LLM-generated) — untouched
+# by the 2026-08 phrase-mode rewrite.
 MODELS = [
     OPENROUTER_MODEL,                     # Primary
     "nvidia/nemotron-3-super-120b-a12b:free",
@@ -32,51 +39,15 @@ MODELS = [
 
 _kakasi = pykakasi.kakasi()
 
-PHASES = {
-    "hiragana": "Use ONLY hiragana characters. No kanji, no katakana.",
-    "katakana": "Use ONLY katakana characters (e.g. common loanwords). No kanji, no hiragana.",
-    "mixed":    "Use natural Japanese with a normal mix of kanji and kana, as you would write it in everyday text.",
-}
-
 # Display time scales with phrase length, clamped to a sane range. Tune freely.
 MIN_DISPLAY_SECONDS = 5
 MAX_DISPLAY_SECONDS = 25
 SECONDS_PER_CHAR = 0.6
 BASE_SECONDS = 3.0
 
-# We deliberately do NOT ask the LLM to spell out romaji directly — models
-# are unreliable at inventing Hepburn spelling on the fly and can garble it
-# (e.g. misreading 降ります and producing "borimasu" instead of "furimasu").
-# Instead we ask for the phrase's reading in hiragana (a much more
-# constrained, reliable task — it's transcription, not free spelling) and
-# convert hiragana -> romaji ourselves with pykakasi, which is a mechanical,
-# unambiguous conversion once the kanji has already been resolved to kana.
-SYSTEM_PROMPT_TEMPLATE = """You are generating short Japanese reading-practice phrases for a learner at JLPT level {level}.
-
-{phase_instruction}
-
-When writing phrases:
-
-- You MAY use hiragana, katakana and punctuation freely.
-- If you use any kanji, every kanji MUST belong to this list:
-{allowed_kanji}
-- Never use a kanji outside this list.
-- If a word normally contains a disallowed kanji, replace that kanji with its hiragana reading instead.
-
-Generate {count} DIFFERENT phrases. Vary their topic, vocabulary, and grammar pattern — none should be a close variant of another.
-
-Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
-{{"phrases": [{{"phrase": "...", "reading": "...", "translation": "..."}}]}}
-- The "phrases" array must contain exactly {count} entries.
-- Each "phrase" must be natural, grammatically correct, short (roughly 3-8 words), appropriate for JLPT {level}.
-- Each "reading" is the COMPLETE reading of "phrase" written ENTIRELY in hiragana — convert any katakana to hiragana too, and resolve every kanji to its correct reading IN THIS CONTEXT. No kanji, no spaces, no punctuation should remain in "reading". Double-check each kanji's reading before answering — many kanji have multiple possible readings and only one is correct here.
-- Some common words have both an everyday/colloquial reading and a separate, more formal reading used in news broadcasts, official announcements, or business writing (e.g. 明日 → あした in everyday speech vs あす in formal contexts; 明後日 → あさって vs みょうごにち; 昨日 → きのう vs さくじつ). Default to the EVERYDAY reading — that's what a learner needs for normal conversation. Only use the formal reading if "phrase" is itself explicitly formal in register (a news headline, an official notice, business correspondence); a plain conversational sentence should always get the everyday reading, even though the formal one isn't "wrong".
-- Each "translation" is a natural translation of the phrase into {lang_name} (language code: {lang}).
-"""
-
 # Best-effort code -> name mapping so the LLM gets an unambiguous instruction
-# even if it only recognizes ISO codes loosely. Add more as your app supports
-# more languages.
+# even if it only recognizes ISO codes loosely. Still used by Reading
+# Comprehension below.
 LANG_NAMES = {
     "en": "English",
     "fr": "French",
@@ -88,7 +59,11 @@ LANG_NAMES = {
 }
 
 # A level's allowed kanji pool includes every level at or below it, since
-# JLPT levels are cumulative (someone studying N3 already knows N5/N4 kanji).
+# JLPT levels are cumulative. Still used by Reading Comprehension below
+# (constrains the LLM's kanji choice) — the phrase mode below doesn't
+# need this anymore: real example sentences aren't generated against an
+# allow-list, they just come from whatever level/tier/mastery pool the
+# learner picked.
 LEVEL_HIERARCHY = {
     "N5": ("N5",),
     "N4": ("N5", "N4"),
@@ -103,8 +78,8 @@ DEFAULT_BATCH = 5
 
 
 class ResultPayload(BaseModel):
-    level: str
-    phase: str
+    source: str            # compact log label — see _source_label()
+    level: str | None = None
     phrase: str
     romaji: str
     answer: str
@@ -117,42 +92,6 @@ def _allowed_kanji_for_level(level: str) -> str:
         raise HTTPException(status_code=400, detail="Unknown JLPT level")
     return get_kanji_string(allowed_levels)
 
-
-def _call_llm_batch(level: str, phase: str, count: int, lang: str) -> list[dict]:
-    if not OPENROUTER_API_KEY:
-        raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured")
-
-    phase_instruction = PHASES.get(phase)
-    if not phase_instruction:
-        raise HTTPException(status_code=400, detail="Unknown phase")
-
-    lang_name = LANG_NAMES.get(lang, lang)
-    allowed_kanji = _allowed_kanji_for_level(level)
-
-    system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
-        level=level,
-        phase_instruction=phase_instruction,
-        allowed_kanji=allowed_kanji,
-        count=count,
-        lang=lang,
-        lang_name=lang_name,
-    )
-
-    content = _chat([
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": f"Generate {count} phrases."},
-    ])
-    data = _parse_llm_json(content)
-
-    phrases = data.get("phrases")
-    if not isinstance(phrases, list) or not phrases:
-        raise HTTPException(status_code=502, detail="LLM response missing phrases")
-
-    valid = [p for p in phrases if isinstance(p, dict) and "phrase" in p and "reading" in p]
-    if not valid:
-        raise HTTPException(status_code=502, detail="LLM response missing required fields")
-
-    return valid
 
 def _chat(messages, timeout=60):
     last_error = None
@@ -204,24 +143,29 @@ def _chat(messages, timeout=60):
     )
 
 
-def _parse_llm_json(content: str) -> dict:
-    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        logger.error("Failed to parse LLM response as JSON: %r", content)
-        raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
-
-
 def _display_seconds(phrase: str) -> float:
     seconds = BASE_SECONDS + SECONDS_PER_CHAR * len(phrase)
     return max(MIN_DISPLAY_SECONDS, min(MAX_DISPLAY_SECONDS, round(seconds, 1)))
 
 
-def hiragana_to_romaji(reading: str) -> str:
-    """Deterministic kana -> Hepburn romaji conversion (no kanji ambiguity
-    left to resolve at this point, so this is purely mechanical)."""
-    converted = _kakasi.convert(reading)
+def phrase_to_romaji(text: str) -> str:
+    """Deterministic JP -> Hepburn romaji conversion via pykakasi.
+
+    Previously (see git history) only ever called on an LLM-provided
+    all-hiragana "reading" — the app deliberately never asked the LLM
+    to spell romaji directly, because models are unreliable at
+    inventing Hepburn spelling on the fly. Real example sentences carry
+    no such pre-resolved reading, so this now runs directly on the
+    sentence's own mixed kanji/kana text: pykakasi has its own
+    dictionary-based kanji reading, which is NOT context-aware and can
+    occasionally pick the wrong reading for an ambiguous kanji. Accepted
+    trade-off, not an oversight — correctness here was already soft
+    before this change (post_reading_result: "Correctness is now
+    self-assessed by the user after seeing the reveal"), so an
+    occasional wrong reading in the *reference* romaji is a minor
+    annoyance, not a grading bug, since nothing auto-compares against it.
+    """
+    converted = _kakasi.convert(text)
     return " ".join(item["hepburn"] for item in converted if item["hepburn"])
 
 
@@ -239,35 +183,304 @@ def normalize_romaji(text: str) -> str:
     return text
 
 
-@router.get("/api/reading/batch")
-def get_reading_batch(
-    level: str, phase: str, count: int = DEFAULT_BATCH, lang: str = "en",
-    user_id: str = Depends(get_user_id),
-):
-    count = max(MIN_BATCH, min(MAX_BATCH, count))
-    items = _call_llm_batch(level, phase, count, lang)
+# ── Sentence source: real example sentences instead of LLM generation ──
+#
+# 2026-08 rewrite. Previously this endpoint asked an LLM to invent
+# phrases constrained to a kanji allow-list (see git history for the
+# removed SYSTEM_PROMPT_TEMPLATE / _call_llm_batch / PHASES if you need
+# to compare) — replaced with real JMdict/Tatoeba example sentences
+# already sitting in the vocab data (get_vocab_extras()["examples"],
+# see vocab_extras.py). Three ways to pick WHICH word's example
+# sentence gets served:
+#
+#   "level"     — JLPT level (existing LevelSelector UI), from the
+#                 app's own curated deck.
+#   "frequency" — a frequency tier (see frequency_data.py), either over
+#                 the deck ("vocab" domain) or the full JMdict pool
+#                 ("vocab_jmdict" domain) — the same tiers used
+#                 elsewhere in the app for frequency-based study.
+#   "mastery"   — words the learner already has in "learning" or
+#                 "mastered" SRS state. Deliberately stronger than "an
+#                 example sentence FOR one of your cards": a sentence is
+#                 only accepted if EVERY recognizable word in it (not
+#                 just the target) is also one of the learner's own
+#                 learning/mastered cards — otherwise "sentences made of
+#                 the cards you're learning" could still serve a
+#                 sentence stuffed with unfamiliar vocabulary around the
+#                 one word it was picked for. See _pick_words_mastery.
+
+# Mastery mode: how many of the learner's own learning/mastered words to
+# pull example sentences from before giving up on finding `count`
+# sentences that are ENTIRELY made of learning/mastered vocabulary.
+# Capped rather than unbounded — a learner with thousands of mastered
+# words doesn't need this scanning all of them every request, and one
+# with only a handful will simply come back with fewer than `count`.
+_MASTERY_WORD_SAMPLE_CAP = 60
+_MASTERY_SENTENCE_SCAN_CAP = 250
+_MASTERY_MIN_KNOWN_WORDS = 3
+
+
+def _pick_words_level(level: str, count: int) -> list[tuple[str, str, str]]:
+    pool = VOCAB_BY_LEVEL.get(level)
+    if not pool:
+        raise HTTPException(status_code=400, detail="Unknown JLPT level")
+    candidates = [w for w in pool if vocab_extras.has_examples(w.get("kanji", ""), w.get("kana", ""))]
+    random.shuffle(candidates)
+    return [(w.get("kanji", ""), w.get("kana", ""), level) for w in candidates[:count]]
+
+
+def _pick_words_frequency(domain: str, tier: int, tier_size: int, count: int) -> list[tuple[str, str, str | None]]:
+    if domain not in ("vocab", "vocab_jmdict"):
+        raise HTTPException(status_code=400, detail="domain must be 'vocab' or 'vocab_jmdict'")
+
+    start, end = freq.tier_bounds(tier, tier_size)
+
+    if domain == "vocab_jmdict":
+        # DB does the has_examples filter + random sampling in one
+        # indexed query — no need to fetch the whole tier first.
+        rows = jmdict_db.sample_rank_range_with_examples(start - 1, end - 1, count)
+        return [(r["kanji"], r["kana"], None) for r in rows]
+
+    # domain == "vocab": small in-memory deck, same pattern as _pick_words_level.
+    keys = freq.tier_keys("vocab", tier, tier_size=tier_size)
+    random.shuffle(keys)
+    picked = []
+    for key in keys:
+        resolved = freq.resolve("vocab", key)
+        if resolved is None:
+            continue
+        level, entry = resolved
+        kanji, kana = entry.get("kanji", ""), entry.get("kana", "")
+        if vocab_extras.has_examples(kanji, kana):
+            picked.append((kanji, kana, level))
+            if len(picked) >= count:
+                break
+    return picked
+
+
+def _deck_id_to_word():
+    # Built once at import, reused across requests — vocab_to_id(entry,
+    # level) for every deck entry, so mastery mode can resolve a
+    # "vocab_{level}_..." SRS card id back to (kanji, kana) without
+    # string-parsing an id whose kanji/kana fields could themselves
+    # contain characters that make naive splitting fragile. Small
+    # (~8.4k entries), cheap to build once.
+    table = {}
+    for level, entries in VOCAB_BY_LEVEL.items():
+        for entry in entries:
+            table[vocab_to_id(entry, level)] = (entry.get("kanji", ""), entry.get("kana", ""), level)
+    return table
+
+
+_DECK_ID_TO_WORD = _deck_id_to_word()
+
+
+def _known_words_for_mastery(user_id: str) -> list[tuple[str, str, str | None]]:
+    """The learner's own vocab cards (deck + JMdict pool) currently in
+    "learning" or "mastered" SRS stage, per the real srs.py contract
+    (checked against the actual file, not guessed):
+
+      srs.get_user_states(user_id) -> {(prefixed_card_id, mode): {"state": ..., ...}}
+
+    i.e. the key is a (card_id, mode) TUPLE, card_id is prefixed with
+    "{user_id}:" (needs auth.unprefixed), and the status field is named
+    "state", not "status". card_modes also tracks progress separately
+    PER QUIZ MODE (flashcard/qcm/write/...), not per word — so "is this
+    word learning/mastered" isn't single-valued in general. This uses
+    VOCAB_STATUS_MODE (the same mode dictionary.py already reads for its
+    own "is this word known" badge) as the canonical mode for that
+    question, for consistency with the rest of the app rather than
+    inventing a separate "any mode counts" rule here.
+    """
+    states = srs.get_user_states(user_id)
+    known = []
+
+    for (card_id, mode), state in states.items():
+        if mode != VOCAB_STATUS_MODE:
+            continue
+        if state["state"] not in ("learning", "mastered"):
+            continue
+        raw_id = unprefixed(card_id, user_id)
+        if raw_id.startswith("vocab_jmdict_"):
+            try:
+                entry_id = int(raw_id[len("vocab_jmdict_"):])
+            except ValueError:
+                continue
+            entry = jmdict_db.get_by_id(entry_id)
+            if entry is not None:
+                known.append((entry["kanji"], entry["kana"], None))
+        elif raw_id.startswith("vocab_"):
+            word = _DECK_ID_TO_WORD.get(raw_id)
+            if word is not None:
+                known.append(word)
+
+    return known
+
+
+def _pick_words_mastery(user_id: str, count: int) -> list[tuple[str, str, str | None, str, str, list]]:
+    """Returns up to `count` (kanji, kana, level, jp_sentence, en,
+    segments) tuples — segments (with SRS stats already attached) are
+    computed here rather than in the caller, since building them is
+    exactly how a sentence gets verified as entirely learning/mastered
+    vocabulary; recomputing them again downstream would be wasted work.
+    """
+    known_words = _known_words_for_mastery(user_id)
+    seen_words = set()
+    unique_known = []
+    for w in known_words:
+        key = (w[0], w[1])
+        if key not in seen_words:
+            seen_words.add(key)
+            unique_known.append(w)
+
+    if len(unique_known) < _MASTERY_MIN_KNOWN_WORDS:
+        raise HTTPException(
+            status_code=400,
+            detail="Not enough learning/mastered vocabulary yet for sentence mode — keep studying and check back.",
+        )
+
+    random.shuffle(unique_known)
+    sample_words = unique_known[:_MASTERY_WORD_SAMPLE_CAP]
+
     states = srs.get_user_states(user_id)
 
-    phrases = []
-    for item in items:
-        phrase = item["phrase"]
-        segments = attach_stats_to_segments(find_segments_in_text(phrase), states, user_id)
-        phrases.append({
-            "phrase": phrase,
-            "romaji": hiragana_to_romaji(item["reading"]),
-            "translation": item.get("translation", ""),
-            "display_seconds": _display_seconds(phrase),
-            "segments": segments,
-        })
+    candidates = []  # (jp, en, kanji, kana, level)
+    seen_jp = set()
+    for kanji, kana, level in sample_words:
+        extras = vocab_extras.get_vocab_extras(kanji, kana, "", "en")
+        for ex in extras["examples"]:
+            jp = ex["jp"]
+            if jp in seen_jp:
+                continue
+            seen_jp.add(jp)
+            candidates.append((jp, ex.get("en", ""), kanji, kana, level))
 
-    return {"level": level, "phase": phase, "phrases": phrases}
+    random.shuffle(candidates)
+
+    picked = []
+    for jp, en, kanji, kana, level in candidates[:_MASTERY_SENTENCE_SCAN_CAP]:
+        segments = attach_stats_to_segments(find_segments_in_text(jp), states, user_id)
+        # The actual "made of the cards you're learning/mastered"
+        # guarantee: every recognized (non-plain) segment's own status
+        # must be learning/mastered — not just the target word.
+        fully_known = all(
+            seg["type"] == "plain" or seg["stats"]["status"] in ("learning", "mastered")
+            for seg in segments
+        )
+        if not fully_known:
+            continue
+        picked.append((kanji, kana, level, jp, en, segments))
+        if len(picked) >= count:
+            break
+
+    return picked
+
+
+def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None, segments, user_id: str | None = None) -> dict:
+    if segments is None:
+        states = srs.get_user_states(user_id) if user_id else {}
+        segments = attach_stats_to_segments(find_segments_in_text(jp), states, user_id)
+    return {
+        "phrase": jp,
+        "romaji": phrase_to_romaji(jp),
+        "translation": en,
+        "translation_lang": "en",  # see get_reading_batch's docstring
+        "display_seconds": _display_seconds(jp),
+        "segments": segments,
+        "source_word": {"kanji": kanji, "kana": kana, "level": level},
+    }
+
+
+def _source_label(source: str, level: str | None, domain: str | None, tier: int | None) -> str:
+    """Compact string stored in reading_log.phase (column kept as-is —
+    see get_reading_batch's docstring — only what it *means* changed)."""
+    if source == "level":
+        return f"level:{level}"
+    if source == "frequency":
+        return f"freq:{domain}:{tier}"
+    return "mastery"
+
+
+@router.get("/api/reading/batch")
+def get_reading_batch(
+    source: str,                         # "level" | "frequency" | "mastery"
+    level: str | None = None,            # required if source == "level"
+    domain: str | None = None,           # required if source == "frequency": "vocab" | "vocab_jmdict"
+    tier: int | None = None,             # required if source == "frequency"
+    tier_size: int = freq.DEFAULT_TIER_SIZE,
+    count: int = DEFAULT_BATCH,
+    lang: str = "en",
+    user_id: str = Depends(get_user_id),
+):
+    """
+    NOTE on `lang`: real example sentences (JMdict/Tatoeba-sourced) only
+    carry an English translation in this app's data — there's no
+    French/Spanish/etc. translation layer for them (unlike the old
+    LLM-generated phrases, which were translated into whatever `lang`
+    was requested). Every phrase in the response therefore comes back
+    with "translation_lang": "en" regardless of `lang` — the frontend
+    should label the translation as English rather than silently
+    implying it's in the UI language. `lang` is accepted but currently
+    unused; kept in the signature so the frontend doesn't need a
+    conditional query-param builder, and in case a translated-examples
+    layer gets added later.
+
+    NOTE on reading_log.phase: not renamed at the DB column level (no
+    migration tooling available here) — it now stores a compact label
+    from _source_label() ("level:N3" / "freq:vocab:1" / "mastery")
+    instead of the old "hiragana"/"katakana"/"mixed". Rename the column
+    yourself with `ALTER TABLE reading_log RENAME COLUMN phase TO source;`
+    if you'd rather it matched the new field name everywhere.
+    """
+    count = max(MIN_BATCH, min(MAX_BATCH, count))
+
+    if source == "level":
+        if not level:
+            raise HTTPException(status_code=400, detail="level is required for source=level")
+        words = _pick_words_level(level, count)
+    elif source == "frequency":
+        if domain is None or tier is None:
+            raise HTTPException(status_code=400, detail="domain and tier are required for source=frequency")
+        words = _pick_words_frequency(domain, tier, tier_size, count)
+    elif source == "mastery":
+        words = None  # handled separately below — already includes sentence + segments
+    else:
+        raise HTTPException(status_code=400, detail="source must be 'level', 'frequency', or 'mastery'")
+
+    if source == "mastery":
+        picked = _pick_words_mastery(user_id, count)
+        phrases = [
+            _finish_phrase(jp, en, kanji, kana, lvl, segments=segments)
+            for kanji, kana, lvl, jp, en, segments in picked
+        ]
+    else:
+        phrases = []
+        for kanji, kana, lvl in words:
+            example = vocab_extras.pick_random_example(kanji, kana, "", "en")
+            if example is None:
+                continue  # shouldn't happen — has_examples() already filtered — but never trust it blindly
+            phrases.append(_finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl, segments=None, user_id=user_id))
+
+    return {
+        "source": source, "level": level, "domain": domain, "tier": tier,
+        "phrases": phrases,
+    }
 
 
 @router.post("/api/reading/result")
 def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_id)):
-    # Correctness is now self-assessed by the user after seeing the reveal
+    # Correctness is self-assessed by the user after seeing the reveal
     # (romaji auto-matching was too brittle — see normalize_romaji's
     # docstring; it's kept above only as an optional sanity-check helper).
+    #
+    # reading_log.level is NOT NULL (see data_structure.sql) but
+    # payload.level is only ever set for source="level" — frequency and
+    # mastery sessions have no single JLPT level. Falls back to '' rather
+    # than crashing the insert; the compact `phase` label already carries
+    # the real source info ("freq:vocab:1" / "mastery") for anything that
+    # needs it. Consider `ALTER TABLE reading_log ALTER COLUMN level DROP
+    # NOT NULL;` if you'd rather this be a real NULL.
+    level_for_log = payload.level or ""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
@@ -276,7 +489,7 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
                 INSERT INTO reading_log(user_id, level, phase, phrase, romaji, answer, correct)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, payload.level, payload.phase, payload.phrase, payload.romaji, payload.answer, payload.correct),
+                (user_id, level_for_log, payload.source, payload.phrase, payload.romaji, payload.answer, payload.correct),
             )
         conn.commit()
     finally:
@@ -306,7 +519,7 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = 50):
 
     return [
         {
-            "level": level, "phase": phase, "phrase": phrase, "romaji": romaji,
+            "source": phase, "phrase": phrase, "romaji": romaji,
             "answer": answer, "correct": correct, "created_at": created_at.isoformat(),
         }
         for level, phase, phrase, romaji, answer, correct, created_at in rows

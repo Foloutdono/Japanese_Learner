@@ -344,6 +344,57 @@ def _find_senses(kanji: str, kana: str) -> list[dict] | None:
     return None
 
 
+# ── "Does this word have an example sentence?" (reading.py, 2026-08) ──
+# The app's own deck is small enough (~8k words) that precomputing this
+# once at import time is cheap and keeps reading.py's level-mode word
+# picker (VOCAB_BY_LEVEL, filter, sample) a pure in-memory operation —
+# no need to touch _find_senses/get_vocab_extras just to check
+# candidates before picking one.
+def _build_deck_words_with_examples() -> set[str]:
+    keys = set()
+    for key, senses in _VOCAB_MEANINGS.items():
+        if any(s.get("examples") for s in senses):
+            keys.add(key)
+    return keys
+
+
+_DECK_WORDS_WITH_EXAMPLES = _build_deck_words_with_examples()
+
+
+def has_examples(kanji: str, kana: str) -> bool:
+    """Cheap existence check — does NOT build furigana/segments/tags
+    like get_vocab_extras does, just answers "is it worth calling
+    get_vocab_extras on this word for reading practice". Deck words:
+    one set lookup (precomputed above). JMdict-pool words: the
+    has_examples column on vocab_jmdict.sqlite3's entries table
+    (indexed, see build_jmdict_db.py) via get_by_key, which
+    reading.py's frequency-tier picker already calls anyway — reuse
+    that instead of a second round-trip to the DB when possible."""
+    key = f"{kanji}::{kana}"
+    if key in _DECK_WORDS_WITH_EXAMPLES:
+        return True
+    for reading in _readings(kana):
+        if f"{kanji}::{reading}" in _DECK_WORDS_WITH_EXAMPLES:
+            return True
+    if _jmdict_db is not None:
+        entry = _jmdict_db.get_by_key(kanji, kana)
+        if entry is not None:
+            return bool(entry["has_examples"])
+    return False
+
+
+def pick_random_example(kanji: str, kana: str, meaning_hint: str = "", lang: str = "fr") -> dict | None:
+    """One random example for this word (jp/en/segments/sense_glossary
+    — same shape as one item of get_vocab_extras()["examples"]), or
+    None if it has none. Random rather than always examples[0] so
+    reading-practice sessions don't serve the exact same sentence for a
+    word every time it comes up."""
+    import random
+    extras = get_vocab_extras(kanji, kana, meaning_hint, lang)
+    examples = extras["examples"]
+    return random.choice(examples) if examples else None
+
+
 # ── Primary-sense scoring ────────────────────────────────────
 # A word can carry many JMdict senses but the app shows one gloss —
 # score each sense against it so the frontend can flag which one is
