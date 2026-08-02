@@ -4,6 +4,7 @@ import os
 import random
 import re
 import unicodedata
+from functools import lru_cache
 
 import requests
 import pykakasi
@@ -219,17 +220,97 @@ _MASTERY_WORD_SAMPLE_CAP = 60
 _MASTERY_SENTENCE_SCAN_CAP = 250
 _MASTERY_MIN_KNOWN_WORDS = 3
 
+# How many candidate words to try (across level/frequency-vocab sources)
+# before giving up on finding `count` sentences whose kanji all fit the
+# target level — see _sentence_kanji_ok. Needs to be generous: a word's
+# OWN kanji being N5 says nothing about the kanji in ITS example
+# sentences (JMdict/Tatoeba examples aren't difficulty-graded — see the
+# 2026-08 "sentences too hard for the level" fix below), so several
+# candidates in a row can fail before one works, especially for less
+# common N5/N4 words with few examples.
+_LEVEL_CANDIDATE_SCAN_CAP = 80
 
-def _pick_words_level(level: str, count: int) -> list[tuple[str, str, str]]:
+
+# ── Difficulty gate: real example sentences aren't graded by level ──
+#
+# 2026-08 fix. A word being N5 (kanji_to_id-level, VOCAB_BY_LEVEL) only
+# constrains THAT word — its example sentences are real, natural
+# Japanese pulled from JMdict/Tatoeba, which were never curated for
+# JLPT difficulty. A perfectly ordinary N5 word like 彼 ("he") can have
+# an example sentence built around 濡れる ("to get wet") or other N2/N1
+# vocabulary, producing a "N5" sentence a beginner has no chance of
+# reading. Reuses the same allowed-kanji-per-level machinery the (now
+# removed) LLM prompt used to constrain generation with
+# (_allowed_kanji_for_level/LEVEL_HIERARCHY, still used by Reading
+# Comprehension) — except now it FILTERS real sentences instead of
+# constraining generation.
+#
+# Deliberately kanji-character-level, not word-level: checking "is
+# every word in this sentence at or below the target JLPT level" would
+# need to resolve each recognized segment back to a specific vocab
+# entry's level, which depends on find_segments_in_text's exact segment
+# shape (kanji/kana per segment) that this file doesn't otherwise rely
+# on today. A kanji-character check is simpler, doesn't depend on that
+# shape, and catches the common failure mode (an unexpectedly advanced
+# kanji dragging the whole sentence out of reach) — the residual gap is
+# purely-kana advanced VOCABULARY (an obscure verb spelled entirely in
+# hiragana), which this does not catch. Worth revisiting with a
+# word-level check later if that turns out to matter in practice.
+@lru_cache(maxsize=None)
+def _kanji_set_for_level(level: str) -> frozenset:
+    return frozenset(_allowed_kanji_for_level(level))
+
+
+def _sentence_kanji_ok(jp: str, level: str) -> bool:
+    allowed = _kanji_set_for_level(level)
+    return all(not _is_kanji(c) or c in allowed for c in jp)
+
+
+def _is_kanji(c: str) -> bool:
+    return "\u4e00" <= c <= "\u9fff"
+
+
+def _pick_example_within_level(kanji: str, kana: str, level: str) -> dict | None:
+    """Like vocab_extras.pick_random_example, but only considers
+    examples whose sentence fits entirely within the target level's
+    kanji set — shuffled so which valid example gets served still
+    varies across requests, not always the "easiest" one first."""
+    extras = vocab_extras.get_vocab_extras(kanji, kana, "", "en")
+    examples = extras["examples"]
+    random.shuffle(examples)
+    for example in examples:
+        if _sentence_kanji_ok(example["jp"], level):
+            return example
+    return None
+
+
+def _pick_level_appropriate_phrases(word_pool: list[tuple[str, str, str]], level: str, count: int, scan_cap: int = _LEVEL_CANDIDATE_SCAN_CAP) -> list[tuple[str, str, str, dict]]:
+    """Scans `word_pool` (already shuffled by the caller) for up to
+    `count` (kanji, kana, level, example) tuples whose example sentence
+    passes _sentence_kanji_ok. May return fewer than `count` if the pool
+    or scan cap runs out first — callers already tolerate a shorter
+    batch than requested."""
+    picked = []
+    for kanji, kana, lvl in word_pool[:scan_cap]:
+        example = _pick_example_within_level(kanji, kana, level)
+        if example is None:
+            continue
+        picked.append((kanji, kana, lvl, example))
+        if len(picked) >= count:
+            break
+    return picked
+
+
+def _pick_words_level(level: str, sample_size: int) -> list[tuple[str, str, str]]:
     pool = VOCAB_BY_LEVEL.get(level)
     if not pool:
         raise HTTPException(status_code=400, detail="Unknown JLPT level")
     candidates = [w for w in pool if vocab_extras.has_examples(w.get("kanji", ""), w.get("kana", ""))]
     random.shuffle(candidates)
-    return [(w.get("kanji", ""), w.get("kana", ""), level) for w in candidates[:count]]
+    return [(w.get("kanji", ""), w.get("kana", ""), level) for w in candidates[:sample_size]]
 
 
-def _pick_words_frequency(domain: str, tier: int, tier_size: int, count: int) -> list[tuple[str, str, str | None]]:
+def _pick_words_frequency(domain: str, tier: int, tier_size: int, sample_size: int) -> list[tuple[str, str, str | None]]:
     if domain not in ("vocab", "vocab_jmdict"):
         raise HTTPException(status_code=400, detail="domain must be 'vocab' or 'vocab_jmdict'")
 
@@ -237,11 +318,15 @@ def _pick_words_frequency(domain: str, tier: int, tier_size: int, count: int) ->
 
     if domain == "vocab_jmdict":
         # DB does the has_examples filter + random sampling in one
-        # indexed query — no need to fetch the whole tier first.
-        rows = jmdict_db.sample_rank_range_with_examples(start - 1, end - 1, count)
+        # indexed query — no need to fetch the whole tier first. No
+        # difficulty gate here (see get_reading_batch's docstring): pool
+        # words carry no JLPT level to gate kanji against.
+        rows = jmdict_db.sample_rank_range_with_examples(start - 1, end - 1, sample_size)
         return [(r["kanji"], r["kana"], None) for r in rows]
 
     # domain == "vocab": small in-memory deck, same pattern as _pick_words_level.
+    # Oversampled (sample_size, not the final `count`) — the difficulty
+    # gate downstream will reject a chunk of these.
     keys = freq.tier_keys("vocab", tier, tier_size=tier_size)
     random.shuffle(keys)
     picked = []
@@ -253,7 +338,7 @@ def _pick_words_frequency(domain: str, tier: int, tier_size: int, count: int) ->
         kanji, kana = entry.get("kanji", ""), entry.get("kana", "")
         if vocab_extras.has_examples(kanji, kana):
             picked.append((kanji, kana, level))
-            if len(picked) >= count:
+            if len(picked) >= sample_size:
                 break
     return picked
 
@@ -431,35 +516,67 @@ def get_reading_batch(
     instead of the old "hiragana"/"katakana"/"mixed". Rename the column
     yourself with `ALTER TABLE reading_log RENAME COLUMN phase TO source;`
     if you'd rather it matched the new field name everywhere.
+
+    NOTE on difficulty: for source="level" and source="frequency" with
+    domain="vocab", every returned sentence is checked against
+    _sentence_kanji_ok — no kanji outside the target level's allowed
+    set. source="frequency" with domain="vocab_jmdict" has no such gate:
+    JMdict-pool words carry no JLPT level to check kanji against, so a
+    sentence there can still contain arbitrarily advanced kanji even
+    for a "common" (low tier) word. mastery mode has its own, stronger
+    per-word gate (see _pick_words_mastery) and needs nothing extra.
     """
     count = max(MIN_BATCH, min(MAX_BATCH, count))
 
     if source == "level":
         if not level:
             raise HTTPException(status_code=400, detail="level is required for source=level")
-        words = _pick_words_level(level, count)
+        word_pool = _pick_words_level(level, _LEVEL_CANDIDATE_SCAN_CAP)
+        picked = _pick_level_appropriate_phrases(word_pool, level, count)
+        phrases = [
+            _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl, segments=None, user_id=user_id)
+            for kanji, kana, lvl, example in picked
+        ]
     elif source == "frequency":
         if domain is None or tier is None:
             raise HTTPException(status_code=400, detail="domain and tier are required for source=frequency")
-        words = _pick_words_frequency(domain, tier, tier_size, count)
+        if domain == "vocab":
+            word_pool = _pick_words_frequency(domain, tier, tier_size, _LEVEL_CANDIDATE_SCAN_CAP)
+            # Every word here resolved to a real deck level (see
+            # _pick_words_frequency) — group by that level since a tier
+            # can straddle more than one JLPT level, and the kanji gate
+            # needs to check against each word's OWN level, not one
+            # fixed level for the whole tier.
+            phrases = []
+            by_level: dict[str, list[tuple[str, str, str]]] = {}
+            for kanji, kana, lvl in word_pool:
+                by_level.setdefault(lvl, []).append((kanji, kana, lvl))
+            remaining = count
+            for lvl, words in by_level.items():
+                if remaining <= 0:
+                    break
+                picked = _pick_level_appropriate_phrases(words, lvl, remaining, scan_cap=len(words))
+                phrases.extend(
+                    _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl2, segments=None, user_id=user_id)
+                    for kanji, kana, lvl2, example in picked
+                )
+                remaining = count - len(phrases)
+        else:  # vocab_jmdict — no JLPT level, no gate (see docstring above)
+            word_pool = _pick_words_frequency(domain, tier, tier_size, count)
+            phrases = []
+            for kanji, kana, lvl in word_pool:
+                example = vocab_extras.pick_random_example(kanji, kana, "", "en")
+                if example is None:
+                    continue
+                phrases.append(_finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl, segments=None, user_id=user_id))
     elif source == "mastery":
-        words = None  # handled separately below — already includes sentence + segments
-    else:
-        raise HTTPException(status_code=400, detail="source must be 'level', 'frequency', or 'mastery'")
-
-    if source == "mastery":
         picked = _pick_words_mastery(user_id, count)
         phrases = [
             _finish_phrase(jp, en, kanji, kana, lvl, segments=segments)
             for kanji, kana, lvl, jp, en, segments in picked
         ]
     else:
-        phrases = []
-        for kanji, kana, lvl in words:
-            example = vocab_extras.pick_random_example(kanji, kana, "", "en")
-            if example is None:
-                continue  # shouldn't happen — has_examples() already filtered — but never trust it blindly
-            phrases.append(_finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl, segments=None, user_id=user_id))
+        raise HTTPException(status_code=400, detail="source must be 'level', 'frequency', or 'mastery'")
 
     return {
         "source": source, "level": level, "domain": domain, "tier": tier,
