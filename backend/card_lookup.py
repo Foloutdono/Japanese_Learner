@@ -7,6 +7,7 @@ phrase analyzer and the reading-practice mode.
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from quiz_modes import STATUS_MODE
+import vocab_extras
 
 # Representative mode used to gauge "do I know this word/kanji" for the
 # clickable badges — see quiz_modes.py for the reasoning. Both vocab and
@@ -40,6 +41,34 @@ def _reading_matches(entry_kana: str, reading: str) -> bool:
         return False
     variants = _reading_variants(entry_kana)
     return reading in variants or reading == entry_kana.strip()
+
+
+def _surface_variants(word: str, kana: str) -> list:
+    """Alternate real-world spellings of a deck word's `word` (kanji/
+    surface) field that an actual sentence — a JMdict/Tatoeba example,
+    or a real-word reading-practice phrase — commonly uses instead of
+    the deck's own dictionary-form spelling:
+
+      - Arabic-digit spelling of a kanji numeral (二日 -> 2日).
+      - The conventional partial-kana spelling for a small hand-picked
+        set of kanji (御飯 -> ご飯).
+      - The word's own kana reading, but only when JMdict tags it
+        "usually kana" — see vocab_extras.is_usually_kana for why this
+        isn't done for every kanji-having word.
+
+    Does not include `word` itself. See vocab_extras.py, which this
+    reuses rather than re-deriving the same logic here.
+    """
+    if not word:
+        return []
+    variants = []
+    numeral = vocab_extras.numeral_variant(word)
+    if numeral:
+        variants.append(numeral)
+    variants.extend(vocab_extras.kana_spelling_variants(word))
+    if kana and vocab_extras.is_usually_kana(word, kana):
+        variants.extend(r for r in _reading_variants(kana) if len(r) >= 2)
+    return variants
 
 
 def _pick_best_candidate(candidates: list, reading: str = None):
@@ -120,16 +149,20 @@ def find_vocab_match(surface: str, base: str, reading: str):
     kanji_data entries. Field names are a guess — adjust the .get(...)
     calls below if vocab_data.py uses different keys.
     """
-    kanji_candidates = []      # entries whose kanji field == surface/base
-    kana_only_candidates = []  # entries with no kanji field, kana-only words
+    kanji_candidates = []      # entries whose kanji field (or a known spelling variant) == surface/base
+    kana_only_candidates = []  # entries with no kanji field, or "usually kana" entries matched by reading alone
 
     for level, vocab_list in VOCAB_BY_LEVEL.items():
         for entry in vocab_list:
             entry_word = entry.get("kanji") or entry.get("word") or entry.get("vocab") or ""
             entry_kana = entry.get("kana") or entry.get("reading") or ""
-            if entry_word and entry_word in (surface, base):
+            if entry_word and (entry_word in (surface, base) or any(
+                v in (surface, base) for v in _surface_variants(entry_word, entry_kana)
+            )):
                 kanji_candidates.append((level, entry, entry_kana))
-            elif entry_kana and not entry_word and _reading_matches(entry_kana, reading):
+            elif entry_kana and _reading_matches(entry_kana, reading) and (
+                not entry_word or vocab_extras.is_usually_kana(entry_word, entry_kana)
+            ):
                 kana_only_candidates.append((level, entry, entry_kana))
 
     best = _pick_best_candidate(kanji_candidates, reading) or _pick_best_candidate(kana_only_candidates, reading)
@@ -167,23 +200,44 @@ def find_kanji_matches(text: str):
 
 
 def _vocab_candidates():
-    """All (word, level, entry) triples from the vocab deck, longest first —
-    built once at import time so dictionary scanning doesn't redo this
-    per request.
+    """All (surface, level, entry) triples the greedy scan below can
+    match against, longest first — built once at import time so
+    dictionary scanning doesn't redo this per request.
 
-    Ties (same word length) are broken by JLPT level, lowest first. This
+    Ties (same surface length) are broken by JLPT level, lowest first. This
     matters when several entries share the same surface form (e.g. 歩 as
     the everyday word "marcher" vs. the shogi piece "fu"/pawn): without a
     known reading to disambiguate against (this function scans raw,
     unsegmented text), the greedy scan below just takes whichever
     candidate comes first — so we make sure that's the common one.
+
+    Beyond each entry's own dictionary-form surface, this also registers
+    a handful of alternate real-world spellings (see _surface_variants
+    above, built from vocab_extras' numeral_variant / kana_spelling_variants
+    / is_usually_kana helpers) — Arabic-digit numerals, conventional
+    partial-kana spellings, and (for
+    JMdict-confirmed "usually kana" words) the bare kana reading — since
+    a real example/reading-practice sentence very often doesn't spell a
+    word exactly like the deck does (二日 -> 2日, 御飯 -> ご飯,
+    温い -> ぬるい). Every variant maps back to the SAME (level, entry)
+    as the canonical form: raw_id/stats lookups key off the entry
+    itself, not whichever surface text was actually found in the text.
     """
     candidates = []
     for level, vocab_list in VOCAB_BY_LEVEL.items():
         for entry in vocab_list:
             word = entry.get("kanji") or entry.get("word") or entry.get("vocab") or ""
+            kana = entry.get("kana") or entry.get("reading") or ""
             if word:
                 candidates.append((word, level, entry))
+                for variant in _surface_variants(word, kana):
+                    candidates.append((variant, level, entry))
+            elif kana:
+                # Kana-only deck entries (no kanji field at all) were
+                # previously dropped entirely here — nothing to match
+                # them against besides their own kana form.
+                for reading in _reading_variants(kana):
+                    candidates.append((reading, level, entry))
     candidates.sort(key=lambda c: (-len(c[0]), _level_rank(c[1])))
     return candidates
 

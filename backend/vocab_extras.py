@@ -60,6 +60,7 @@ reading, anything else falls back to per-character kanji readings,
 which is occasionally wrong for compounds whose reading isn't just the
 sum of their parts.
 """
+import itertools
 import json
 import os
 import re
@@ -665,6 +666,56 @@ def _arabic_numeral_variant(kanji: str) -> str | None:
     if not any(c in _KANJI_DIGIT_CHARS for c in kanji):
         return None
     return kanji.translate(_KANJI_DIGIT_TO_ARABIC)
+
+
+# ── Public surface-variant helpers ───────────────────────────
+# Other modules that need to recognize a deck word inside arbitrary,
+# already-written text (card_lookup.py's badge/stats matching over
+# generated reading-practice sentences) hit the exact same "the real
+# sentence doesn't spell the word exactly like the deck does" problem
+# this file already solved for single-headword highlighting above.
+# Exposed here so that logic lives in one place instead of being
+# re-derived twice.
+
+def numeral_variant(kanji: str) -> str | None:
+    """Public wrapper around _arabic_numeral_variant — same kanji-numeral
+    -> Arabic-digit swap (二日 -> 2日), for callers outside this module."""
+    return _arabic_numeral_variant(kanji)
+
+
+def kana_spelling_variants(kanji: str) -> list[str]:
+    """All alternate spellings of `kanji` obtained by swapping one or
+    more of its characters for their conventional kana spelling (see
+    _KANA_CONVENTIONAL_SPELLING below), e.g. 御飯 -> ["ご飯"]. Returns
+    [] if `kanji` has no character with a known kana alternative
+    (nothing to vary). A word with two such characters yields every
+    combination except the original all-kanji spelling; in practice
+    the hand-picked list is short enough, and rarely more than one such
+    character occurs in the same word, that this never grows large.
+    """
+    if not any(c in _KANA_CONVENTIONAL_SPELLING for c in kanji):
+        return []
+    options_per_char = [(ch, *_KANA_CONVENTIONAL_SPELLING.get(ch, ())) for ch in kanji]
+    variants = {"".join(combo) for combo in itertools.product(*options_per_char)}
+    variants.discard(kanji)
+    return sorted(variants)
+
+
+def is_usually_kana(kanji: str, kana: str) -> bool:
+    """True if any JMdict sense for this word carries the "uk" tag
+    ("word usually written using kana alone"). Used by card_lookup.py
+    to decide whether it's safe to also match this word's bare kana
+    reading in running text — deliberately NOT done for every
+    kanji-having word, since that would risk matching unrelated
+    okurigana/particles/other words that happen to spell out the same
+    kana sequence; restricting it to JMdict-confirmed "usually kana"
+    words keeps that risk low while fixing the common case (i-adjectives
+    and verbs that are, in practice, at least as often written in
+    hiragana as in kanji, e.g. 温い written ぬるい)."""
+    senses = _find_senses(kanji, kana)
+    if not senses:
+        return False
+    return any("uk" in s.get("tags", []) for s in senses)
 
 
 # A handful of very common kanji that are conventionally written in
