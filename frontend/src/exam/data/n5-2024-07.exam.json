@@ -1,0 +1,457 @@
+{
+  "id": "n5-2024-07",
+  "level": "N5",
+  "title": "JLPT N5 Practice Test",
+  "titleJp": "日本語能力試験 N5",
+  "source": "Official past exam paper, transcribed from PDF (げんごちしき もじ・ごい / ぶんぽう・どっかい / ちょうかい)",
+  "sections": [
+    {
+      "id": "vocabulary",
+      "label": "Vocabulary",
+      "labelJp": "言語知識（文字・語彙）",
+      "timeLimitMin": 25,
+      "mondai": [
+        {
+          "id": "voc-mondai-1",
+          "number": 1,
+          "type": "mcq-text",
+          "instructionsJp": "＿＿＿＿の ことばは ひらがなで どう かきますか。1・2・3・4から いちばん いい ものを ひとつ えらんで ください。",
+          "instructions": "How do you write the underlined word in hiragana? Choose the best answer from 1-4.",
+          "questions": [
+            { "id": "v1", "number": 1, "promptJp": "先週　デパートに　かいものに　いきました。", "underlineJp": "先週", "choices": [{ "id": "c1", "textJp": "せんしゅ" }, { "id": "c2", "textJp": "せんしゅう" }, { "id": "c3", "textJp": "ぜんしゅ" }, { "id": "c4", "textJp": "ぜんしゅう" }], "answer": "c2" },
+            { "id": "v2", "number": 2, "promptJp": "ごはんの　後で　さんぽします。", "underlineJp": "後", "choices": [{ "id": "c1", "textJp": "つぎ" }, { "id": "c2", "textJp": "うしろ" }, { "id": "c3", "textJp": "まえ" }, { "id": "c4", "textJp": "あと" }], "answer": "c4" },
+            { "id": "v3", "number": 3, "promptJp": "もう いちど　言って　ください。", "underlineJp": "言って", "choices": [{ "id": "c1", "textJp": "いって" }, { "id": "c2", "textJp": "きって" }, { "id": "c3", "textJp": "まって" }, { "id": "c4", "textJp": "たって" }], "answer": "c1" },
+            { "id": "v4", "number": 4, "promptJp": "ちかくに　山が　あります。", "underlineJp": "山", "choices": [{ "id": "c1", "textJp": "かわ" }, { "id": "c2", "textJp": "やま" }, { "id": "c3", "textJp": "いけ" }, { "id": "c4", "textJp": "うみ" }], "answer": "c2" },
+            { "id": "v5", "number": 5, "promptJp": "この ホテルは へやが　多いです。", "underlineJp": "多い", "choices": [{ "id": "c1", "textJp": "すくない" }, { "id": "c2", "textJp": "おおい" }, { "id": "c3", "textJp": "せまい" }, { "id": "c4", "textJp": "ひろい" }], "answer": "c2" },
+            { "id": "v6", "number": 6, "promptJp": "ともだちと　いっしょに　学校に　いきます。", "underlineJp": "学校", "choices": [{ "id": "c1", "textJp": "がこう" }, { "id": "c2", "textJp": "がこお" }, { "id": "c3", "textJp": "がっこう" }, { "id": "c4", "textJp": "がっこお" }], "answer": "c3" },
+            { "id": "v7", "number": 7, "promptJp": "えんぴつが　六本　あります。", "underlineJp": "六本", "choices": [{ "id": "c1", "textJp": "ろくほん" }, { "id": "c2", "textJp": "ろくぼん" }, { "id": "c3", "textJp": "ろっほん" }, { "id": "c4", "textJp": "ろっぽん" }], "answer": "c4", "_verify": "Source PDF's options 3 and 4 rendered identically (OCR artifact) — reconstructed as the standard ろっほん/ろっぽん distractor pair; double-check against the original page before publishing." },
+            { "id": "v8", "number": 8, "promptJp": "この　新聞は　いくらですか。", "underlineJp": "新聞", "choices": [{ "id": "c1", "textJp": "しんむん" }, { "id": "c2", "textJp": "しんぶん" }, { "id": "c3", "textJp": "しむん" }, { "id": "c4", "textJp": "しぶん" }], "answer": "c2" },
+            { "id": "v9", "number": 9, "promptJp": "この　カメラは　安いです。", "underlineJp": "安い", "choices": [{ "id": "c1", "textJp": "たかい" }, { "id": "c2", "textJp": "やすい" }, { "id": "c3", "textJp": "おもい" }, { "id": "c4", "textJp": "かるい" }], "answer": "c2" },
+            { "id": "v10", "number": 10, "promptJp": "かさは　外に　あります。", "underlineJp": "外", "choices": [{ "id": "c1", "textJp": "いえ" }, { "id": "c2", "textJp": "なか" }, { "id": "c3", "textJp": "そと" }, { "id": "c4", "textJp": "にわ" }], "answer": "c3" }
+          ]
+        },
+        {
+          "id": "voc-mondai-2",
+          "number": 2,
+          "type": "mcq-text",
+          "instructionsJp": "＿＿＿＿の ことばは どう かきますか。1・2・3・4から いちばん いい ものを ひとつ えらんで ください。",
+          "instructions": "How do you write the underlined word (in kanji/katakana)? Choose the best answer from 1-4.",
+          "questions": [
+            { "id": "v11", "number": 11, "promptJp": "けさ　しゃわーを　あびました。", "underlineJp": "しゃわー", "choices": [{ "id": "c1", "textJp": "シャワー" }, { "id": "c2", "textJp": "シャウー" }, { "id": "c3", "textJp": "ツャワー" }, { "id": "c4", "textJp": "ツャウー" }], "answer": "c1" },
+            { "id": "v12", "number": 12, "promptJp": "コーヒーを　のみました。", "underlineJp": "のみました", "choices": [{ "id": "c1", "textJp": "飯みました" }, { "id": "c2", "textJp": "飲みました" }, { "id": "c3", "textJp": "餃みました" }, { "id": "c4", "textJp": "飼みました" }], "answer": "c2", "_verify": "Options 2 and 4 were OCR-duplicated in the source as 飲みました — option 4 reconstructed as a plausible distractor kanji (飼). Verify against the original page." },
+            { "id": "v13", "number": 13, "promptJp": "あたらしい　くるまを　かいました。", "underlineJp": "くるま", "choices": [{ "id": "c1", "textJp": "卓" }, { "id": "c2", "textJp": "東" }, { "id": "c3", "textJp": "車" }, { "id": "c4", "textJp": "軍" }], "answer": "c3", "_verify": "Options 1/2 and 3/4 were OCR-duplicated in the source as 卓/卓 and 車/車 — reconstructed with plausible distinct distractor kanji. Verify against the original page." },
+            { "id": "v14", "number": 14, "promptJp": "この　ぼうしは　1000えんです。", "underlineJp": "1000えん", "choices": [{ "id": "c1", "textJp": "1000内" }, { "id": "c2", "textJp": "1000用" }, { "id": "c3", "textJp": "1000冊" }, { "id": "c4", "textJp": "1000円" }], "answer": "c4" },
+            { "id": "v15", "number": 15, "promptJp": "しゅくだいが　はんぶん　おわりました。", "underlineJp": "はんぶん", "choices": [{ "id": "c1", "textJp": "羊分" }, { "id": "c2", "textJp": "半今" }, { "id": "c3", "textJp": "判分" }, { "id": "c4", "textJp": "半分" }], "answer": "c4", "_verify": "Source PDF's options were OCR-duplicated as 羊分/半分/羊分/半分 — reconstructed as four distinct kanji forms with 半分 kept at position 4 to match the answer key. Verify against the original page." },
+            { "id": "v16", "number": 16, "promptJp": "わたしの　うちに　きませんか。", "underlineJp": "きません", "choices": [{ "id": "c1", "textJp": "来ません" }, { "id": "c2", "textJp": "采ません" }, { "id": "c3", "textJp": "木ません" }, { "id": "c4", "textJp": "未ません" }], "answer": "c1" },
+            { "id": "v17", "number": 17, "promptJp": "きのう　たなかさんと　あいました。", "underlineJp": "あいました", "choices": [{ "id": "c1", "textJp": "見いました" }, { "id": "c2", "textJp": "書いました" }, { "id": "c3", "textJp": "会いました" }, { "id": "c4", "textJp": "話いました" }], "answer": "c3" },
+            { "id": "v18", "number": 18, "promptJp": "いもうとと　おなじ　ふくを　かいました。", "underlineJp": "おなじ", "choices": [{ "id": "c1", "textJp": "同じ" }, { "id": "c2", "textJp": "回じ" }, { "id": "c3", "textJp": "固じ" }, { "id": "c4", "textJp": "向じ" }], "answer": "c1", "_verify": "Source PDF's options 1 and 3 were OCR-duplicated as 同じ/同じ — reconstructed with plausible distinct distractor kanji. Verify against the original page." }
+          ]
+        },
+        {
+          "id": "voc-mondai-3",
+          "number": 3,
+          "type": "mcq-text",
+          "instructionsJp": "（　）に なにを いれますか。1・2・3・4から いちばん いい ものを ひとつ えらんで ください。",
+          "instructions": "What goes in the ( )? Choose the best answer from 1-4.",
+          "questions": [
+            { "id": "v19", "number": 19, "promptJp": "わたしの　へやは　この　（　　）の　２かいです。", "choices": [{ "id": "c1", "textJp": "エレベーター" }, { "id": "c2", "textJp": "プール" }, { "id": "c3", "textJp": "エアコン" }, { "id": "c4", "textJp": "アパート" }], "answer": "c4" },
+            { "id": "v20", "number": 20, "promptJp": "さとうさんは　ギターを　じょうずに　（　　）。", "choices": [{ "id": "c1", "textJp": "うたいます" }, { "id": "c2", "textJp": "ききます" }, { "id": "c3", "textJp": "ひきます" }, { "id": "c4", "textJp": "あそびます" }], "answer": "c3" },
+            { "id": "v21", "number": 21, "promptJp": "テーブルに　おさらと　はしを　（　　）ください。", "choices": [{ "id": "c1", "textJp": "ならべて" }, { "id": "c2", "textJp": "とって" }, { "id": "c3", "textJp": "たべて" }, { "id": "c4", "textJp": "あらって" }], "answer": "c1" },
+            { "id": "v22", "number": 22, "promptJp": "けさ　そうじを　したから　へやは　（　　）です。", "choices": [{ "id": "c1", "textJp": "きれい" }, { "id": "c2", "textJp": "きたない" }, { "id": "c3", "textJp": "あかるい" }, { "id": "c4", "textJp": "くらい" }], "answer": "c1" },
+            { "id": "v23", "number": 23, "promptJp": "きょうは　500（　　）およぎました。", "choices": [{ "id": "c1", "textJp": "ど" }, { "id": "c2", "textJp": "ばん" }, { "id": "c3", "textJp": "メートル" }, { "id": "c4", "textJp": "グラム" }], "answer": "c3" },
+            { "id": "v24", "number": 24, "promptJp": "えきから　たいしかんまでの　（　　）を　かいて　ください。", "choices": [{ "id": "c1", "textJp": "しゃしん" }, { "id": "c2", "textJp": "ちず" }, { "id": "c3", "textJp": "てがみ" }, { "id": "c4", "textJp": "きっぷ" }], "answer": "c2" },
+            { "id": "v25", "number": 25, "promptJp": "うるさいから　テレビを　（　　）ください。", "choices": [{ "id": "c1", "textJp": "けして" }, { "id": "c2", "textJp": "つけて" }, { "id": "c3", "textJp": "しめて" }, { "id": "c4", "textJp": "あけて" }], "answer": "c1" },
+            { "id": "v26", "number": 26, "promptJp": "きょうは　（　　）が　ふって　います。", "choices": [{ "id": "c1", "textJp": "くもり" }, { "id": "c2", "textJp": "はれ" }, { "id": "c3", "textJp": "かぜ" }, { "id": "c4", "textJp": "ゆき" }], "answer": "c4" },
+            { "id": "v27", "number": 27, "promptJp": "はこに　りんごが　（　　）　あります。", "imageAlt": "A box containing 5 apples.", "choices": [{ "id": "c1", "textJp": "よっつ" }, { "id": "c2", "textJp": "いつつ" }, { "id": "c3", "textJp": "むっつ" }, { "id": "c4", "textJp": "ななつ" }], "answer": "c2" },
+            { "id": "v28", "number": 28, "promptJp": "めがねは　つくえの　（　　）に　あります。", "imageAlt": "A desk with glasses resting on top; a bag and umbrella are on the floor underneath.", "choices": [{ "id": "c1", "textJp": "そば" }, { "id": "c2", "textJp": "よこ" }, { "id": "c3", "textJp": "した" }, { "id": "c4", "textJp": "うえ" }], "answer": "c4" }
+          ]
+        },
+        {
+          "id": "voc-mondai-4",
+          "number": 4,
+          "type": "mcq-text",
+          "instructionsJp": "＿＿＿＿の ぶんと だいたい おなじ いみの ぶんが あります。1・2・3・4から いちばん いい ものを ひとつ えらんで ください。",
+          "instructions": "Choose the sentence with roughly the same meaning as the underlined sentence.",
+          "questions": [
+            { "id": "v29", "number": 29, "promptJp": "まいばん　くにの　かぞくに　でんわします。", "choices": [{ "id": "c1", "textJp": "よるは　ときどき　くにの　かぞくに　でんわします。" }, { "id": "c2", "textJp": "あさは　ときどき　くにの　かぞくに　でんわします。" }, { "id": "c3", "textJp": "よるは　いつも　くにの　かぞくに　でんわします。" }, { "id": "c4", "textJp": "あさは　いつも　くにの　かぞくに　でんわします。" }], "answer": "c3" },
+            { "id": "v30", "number": 30, "promptJp": "この　まちには　ゆうめいな　たてものが　あります。", "choices": [{ "id": "c1", "textJp": "この　まちには　ゆうめいな　ビルが　あります。" }, { "id": "c2", "textJp": "この　まちには　ゆうめいな　おちゃが　あります。" }, { "id": "c3", "textJp": "この　まちには　ゆうめいな　ケーキが　あります。" }, { "id": "c4", "textJp": "この　まちには　ゆうめいな　こうえんが　あります。" }], "answer": "c1" },
+            { "id": "v31", "number": 31, "promptJp": "その　えいがは　おもしろくなかったです。", "choices": [{ "id": "c1", "textJp": "その　えいがは　たのしかったです。" }, { "id": "c2", "textJp": "その　えいがは　つまらなかったです。" }, { "id": "c3", "textJp": "その　えいがは　みじかかったです。" }, { "id": "c4", "textJp": "その　えいがは　ながかったです。" }], "answer": "c2" },
+            { "id": "v32", "number": 32, "promptJp": "たんじょうびは　6がつ15にちです。", "choices": [{ "id": "c1", "textJp": "6がつ15にちに　けっこんしました。" }, { "id": "c2", "textJp": "6がつ15にちに　テストが　はじまりました。" }, { "id": "c3", "textJp": "6がつ15にちに　うまれました。" }, { "id": "c4", "textJp": "6がつ15にちに　くにへ　かえりました。" }], "answer": "c3" },
+            { "id": "v33", "number": 33, "promptJp": "にねんまえに　きょうとへ　いきました。", "choices": [{ "id": "c1", "textJp": "きのう　きょうとへ　いきました。" }, { "id": "c2", "textJp": "おととい　きょうとへ　いきました。" }, { "id": "c3", "textJp": "きょねん　きょうとへ　いきました。" }, { "id": "c4", "textJp": "おととし　きょうとへ　いきました。" }], "answer": "c4" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grammar-reading",
+      "label": "Grammar & Reading",
+      "labelJp": "言語知識（文法）・読解",
+      "timeLimitMin": 50,
+      "mondai": [
+        {
+          "id": "gr-mondai-1",
+          "number": 1,
+          "type": "mcq-text",
+          "instructionsJp": "（　）に 何を 入れますか。1・2・3・4から いちばん いい ものを 一つ えらんで ください。",
+          "instructions": "What goes in the ( )? Choose the best answer from 1-4.",
+          "questions": [
+            { "id": "g1", "number": 1, "promptJp": "日本（　）ラーメンは おいしいです。", "choices": [{ "id": "c1", "textJp": "に" }, { "id": "c2", "textJp": "の" }, { "id": "c3", "textJp": "を" }, { "id": "c4", "textJp": "へ" }], "answer": "c2" },
+            { "id": "g2", "number": 2, "promptJp": "わたしには きょうだいが 二人 います。弟（　）妹です。", "choices": [{ "id": "c1", "textJp": "は" }, { "id": "c2", "textJp": "も" }, { "id": "c3", "textJp": "と" }, { "id": "c4", "textJp": "か" }], "answer": "c3" },
+            { "id": "g3", "number": 3, "promptJp": "山下「田中さん（　）きのう どこかに 出かけましたか。」\n田中「いいえ、いえに いました。」", "choices": [{ "id": "c1", "textJp": "で" }, { "id": "c2", "textJp": "は" }, { "id": "c3", "textJp": "を" }, { "id": "c4", "textJp": "に" }], "answer": "c2" },
+            { "id": "g4", "number": 4, "promptJp": "（タクシーで）\nA「つぎの かどを 右（　）まがって ください。」\nB「わかりました。」", "choices": [{ "id": "c1", "textJp": "が" }, { "id": "c2", "textJp": "や" }, { "id": "c3", "textJp": "か" }, { "id": "c4", "textJp": "に" }], "answer": "c4" },
+            { "id": "g5", "number": 5, "promptJp": "きのう、わたしは ひとり（　）えいがを 見に 行きました。", "choices": [{ "id": "c1", "textJp": "が" }, { "id": "c2", "textJp": "を" }, { "id": "c3", "textJp": "で" }, { "id": "c4", "textJp": "は" }], "answer": "c3" },
+            { "id": "g6", "number": 6, "promptJp": "山下「今日 パーティーが ありますから、田中さん（　）来て ください。」\n田中「ありがとうございます。」", "choices": [{ "id": "c1", "textJp": "に" }, { "id": "c2", "textJp": "も" }, { "id": "c3", "textJp": "や" }, { "id": "c4", "textJp": "で" }], "answer": "c1" },
+            { "id": "g7", "number": 7, "promptJp": "田中「この ぼうしは 山田さん（　）ですか。」\n山田「はい。」", "choices": [{ "id": "c1", "textJp": "や" }, { "id": "c2", "textJp": "は" }, { "id": "c3", "textJp": "の" }, { "id": "c4", "textJp": "か" }], "answer": "c3" },
+            { "id": "g8", "number": 8, "promptJp": "駅まで タクシーで 1000円（　）です。", "choices": [{ "id": "c1", "textJp": "ぐらい" }, { "id": "c2", "textJp": "など" }, { "id": "c3", "textJp": "ごろ" }, { "id": "c4", "textJp": "も" }], "answer": "c1" },
+            { "id": "g9", "number": 9, "promptJp": "A「さようなら。」\nB「さようなら。また（　）。」", "choices": [{ "id": "c1", "textJp": "おととい" }, { "id": "c2", "textJp": "今日" }, { "id": "c3", "textJp": "来週" }, { "id": "c4", "textJp": "今月" }], "answer": "c3" },
+            { "id": "g10", "number": 10, "promptJp": "わたしの 母は 50さいです。父は 55さいです。母は 父（　）5さい わかいです。", "choices": [{ "id": "c1", "textJp": "から" }, { "id": "c2", "textJp": "まで" }, { "id": "c3", "textJp": "より" }, { "id": "c4", "textJp": "のほうが" }], "answer": "c3" },
+            { "id": "g11", "number": 11, "promptJp": "子ども「いただきます。」\n母「あ、食べる（　）手を あらいましょう。」", "choices": [{ "id": "c1", "textJp": "まえに" }, { "id": "c2", "textJp": "のまえに" }, { "id": "c3", "textJp": "あとに" }, { "id": "c4", "textJp": "のあとに" }], "answer": "c1" },
+            { "id": "g12", "number": 12, "promptJp": "A「東京でも 雪が ふりますか。」\nB「ええ、ふりますよ。でも、きょねんは あまり（　）。」", "choices": [{ "id": "c1", "textJp": "ふりませんでした" }, { "id": "c2", "textJp": "ふりません" }, { "id": "c3", "textJp": "ふりました" }, { "id": "c4", "textJp": "ふります" }], "answer": "c1" },
+            { "id": "g13", "number": 13, "promptJp": "（川で）\nA「見て ください。小さな 魚が たくさん（　）よ。」\nB「ほんとうですね。30ぴきくらい いますね。」", "choices": [{ "id": "c1", "textJp": "およぎます" }, { "id": "c2", "textJp": "およぎません" }, { "id": "c3", "textJp": "およぎました" }, { "id": "c4", "textJp": "およいで います" }], "answer": "c4" },
+            { "id": "g14", "number": 14, "promptJp": "中川「山田さんの その カメラは いいですね。どこで かいましたか。」\n山田「いえ、これは 兄に（　）。」", "choices": [{ "id": "c1", "textJp": "あげました" }, { "id": "c2", "textJp": "もらいました" }, { "id": "c3", "textJp": "うりました" }, { "id": "c4", "textJp": "かいました" }], "answer": "c2" },
+            { "id": "g15", "number": 15, "promptJp": "たまごりょうりの じょうずな 作りかたを（　）読みました。", "choices": [{ "id": "c1", "textJp": "何に" }, { "id": "c2", "textJp": "何も" }, { "id": "c3", "textJp": "何かへ" }, { "id": "c4", "textJp": "何かで" }], "answer": "c4" },
+            { "id": "g16", "number": 16, "promptJp": "（電話で）\n本田「はい、本田です。」\n北山「あ、北山花子です。すみません、（　）。」\n本田「はい。ちょっと まって くださいね。」", "choices": [{ "id": "c1", "textJp": "ひろこさんを おねがいします" }, { "id": "c2", "textJp": "ひろこさんを ください" }, { "id": "c3", "textJp": "ひろこさんと 話しますか" }, { "id": "c4", "textJp": "ひろこさんと 話しませんか" }], "answer": "c1" }
+          ]
+        },
+        {
+          "id": "gr-mondai-2",
+          "number": 2,
+          "type": "sentence-order",
+          "instructionsJp": "★ に 入る ものは どれですか。1・2・3・4から いちばん いい ものを 一つ えらんで ください。",
+          "instructions": "Arrange the four pieces into the blank to form a correct sentence, then choose which piece goes in the ★ position.",
+          "questions": [
+            { "id": "g17", "number": 17, "contextJp": "（店で）\n田中「すみません。くだもの ＿＿＿ ＿＿＿ ★ ＿＿＿ か。」\n店の人「こちらです。」", "pieces": [{ "id": "p1", "textJp": "どこ" }, { "id": "p2", "textJp": "あります" }, { "id": "p3", "textJp": "は" }, { "id": "p4", "textJp": "に" }], "order": ["p3", "p1", "p4", "p2"], "starIndex": 2, "answer": "p4" },
+            { "id": "g18", "number": 18, "contextJp": "A「山下さんは？」\nB「となりの へやで ＿＿＿ ＿＿＿ ★ ＿＿＿ して います。」", "pieces": [{ "id": "p1", "textJp": "れんしゅう" }, { "id": "p2", "textJp": "の" }, { "id": "p3", "textJp": "ギター" }, { "id": "p4", "textJp": "を" }], "order": ["p3", "p2", "p1", "p4"], "starIndex": 2, "answer": "p1" },
+            { "id": "g19", "number": 19, "contextJp": "A「会社 ＿＿＿ ＿＿＿ ★ ＿＿＿ 行って いますか。」\nB「わたしは あるいて 行って います。」", "pieces": [{ "id": "p1", "textJp": "で" }, { "id": "p2", "textJp": "は" }, { "id": "p3", "textJp": "へ" }, { "id": "p4", "textJp": "何" }], "order": ["p3", "p2", "p4", "p1"], "starIndex": 2, "answer": "p4" },
+            { "id": "g20", "number": 20, "contextJp": "山田「ジョンさん、しゅくだいは ぜんぶ おわりましたか。」\nジョン「いいえ、まだです。ここ ＿＿＿ ＿＿＿ ★ ＿＿＿ 、さいごの もんだいが むずかしいです。」", "pieces": [{ "id": "p1", "textJp": "は" }, { "id": "p2", "textJp": "かんたんでした" }, { "id": "p3", "textJp": "が" }, { "id": "p4", "textJp": "まで" }], "order": ["p4", "p1", "p2", "p3"], "starIndex": 2, "answer": "p2" },
+            { "id": "g21", "number": 21, "contextJp": "（本屋で）\nヤン「わたしは この 本を 買います。アンナさんは どんな 本が いいですか。」\nアンナ「わたしは もう 少し ＿＿＿ ＿＿＿ ★ ＿＿＿ が いいです。」", "pieces": [{ "id": "p1", "textJp": "本" }, { "id": "p2", "textJp": "かんたんな" }, { "id": "p3", "textJp": "の" }, { "id": "p4", "textJp": "日本語" }], "order": ["p4", "p3", "p2", "p1"], "starIndex": 2, "answer": "p2", "_verify": "Source PDF's 3rd piece rendered as が (duplicating the fixed trailing が before いいです) — reconstructed as の, which is grammatically required (日本語の本) and matches the answer key (★ = かんたんな). Verify against the original page." }
+          ]
+        },
+        {
+          "id": "gr-mondai-3",
+          "number": 3,
+          "type": "cloze-passage",
+          "instructionsJp": "22 から 26 に 何を 入れますか。ぶんしょうの いみを かんがえて、1・2・3・4から いちばん いい ものを 一つ えらんで ください。",
+          "instructions": "What goes in blanks 22-26? Consider the meaning of the passage and choose the best answer from 1-4 for each.",
+          "introJp": "日本で べんきょうして いる 学生が「すきな 店」の ぶんしょうを 書いて、クラスの みんなの 前で 読みました。",
+          "passages": [
+            {
+              "id": "passage-ken",
+              "titleJp": "(1) ケンさんの ぶんしょう",
+              "textTemplateJp": "わたしは すしが すきです。日本には たくさん すし屋が ありますね。わたしの 国には すし屋が ありませんから、今 とても うれしいです。日本に【22】、いろいろな 店で 食べました。学校の 前の 店は、安くて おいしいです。すしが すきな 人は、いっしょに【23】。",
+              "blanks": [
+                { "id": "g22", "number": 22, "choices": [{ "id": "c1", "textJp": "行くから" }, { "id": "c2", "textJp": "行ってから" }, { "id": "c3", "textJp": "来るから" }, { "id": "c4", "textJp": "来てから" }], "answer": "c4" },
+                { "id": "g23", "number": 23, "choices": [{ "id": "c1", "textJp": "行きましたか" }, { "id": "c2", "textJp": "行きませんか" }, { "id": "c3", "textJp": "行って いましたか" }, { "id": "c4", "textJp": "行って いませんか" }], "answer": "c2" }
+              ]
+            },
+            {
+              "id": "passage-minji",
+              "titleJp": "(2) ミンジさんの ぶんしょう",
+              "textTemplateJp": "わたしは えきの ちかくの 本屋が すきです。えきの ちかくの 本屋【24】大きい お店です。外国の 本も 売って います。わたしの 国のも【25】。そして、わたしが すきな りょうりの 本も 多いです。【26】、本は いつも えきの ちかくの 本屋で 買います。みなさんは すきな 本屋が ありますか。",
+              "blanks": [
+                { "id": "g24", "number": 24, "choices": [{ "id": "c1", "textJp": "か" }, { "id": "c2", "textJp": "と" }, { "id": "c3", "textJp": "の" }, { "id": "c4", "textJp": "は" }], "answer": "c4" },
+                { "id": "g25", "number": 25, "choices": [{ "id": "c1", "textJp": "います" }, { "id": "c2", "textJp": "読みます" }, { "id": "c3", "textJp": "あります" }, { "id": "c4", "textJp": "します" }], "answer": "c3" },
+                { "id": "g26", "number": 26, "choices": [{ "id": "c1", "textJp": "だから" }, { "id": "c2", "textJp": "では" }, { "id": "c3", "textJp": "それから" }, { "id": "c4", "textJp": "でも" }], "answer": "c1" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "read-mondai-4",
+          "number": 4,
+          "type": "reading-passage",
+          "instructionsJp": "つぎの (1)から(3)の ぶんしょうを 読んで、しつもんに こたえて ください。こたえは、1・2・3・4から いちばん いい ものを 一つ えらんで ください。",
+          "instructions": "Read the following short passages and answer the questions. Choose the best answer from 1-4.",
+          "passages": [
+            {
+              "id": "r27",
+              "textJp": "わたしは 今日、友だちと 買い物に 行きました。3か月前に 見た えいがの DVDが ほしかったからです。買った DVDは、友だちや 姉と いっしょに 見ます。",
+              "questions": [
+                { "id": "r27-q", "number": 27, "promptJp": "「わたし」は 今日、何を しましたか。", "choices": [{ "id": "c1", "textJp": "友だちと えいがを 見に 行きました。" }, { "id": "c2", "textJp": "友だちと DVDを 買いに 行きました。" }, { "id": "c3", "textJp": "姉と えいがを 見に 行きました。" }, { "id": "c4", "textJp": "姉と DVDを 買いに 行きました。" }], "answer": "c2" }
+              ]
+            },
+            {
+              "id": "r28",
+              "textJp": "わたしの へやには、テーブルが 一つと いすが 二つと 本だなが 一つ あります。本が たくさん ありますから、もっと 大きい 本だなが ほしいです。",
+              "questions": [
+                { "id": "r28-q", "number": 28, "promptJp": "今の へやは どれですか。", "choiceType": "image", "choices": [
+                  { "id": "c1", "imageAlt": "A room with a table, two chairs, one tall bookshelf (books neatly on the shelves), and one small bookshelf (empty)." },
+                  { "id": "c2", "imageAlt": "A room with a table, two chairs, one tall bookshelf, and one small bookshelf, with books scattered on the floor between them." },
+                  { "id": "c3", "imageAlt": "A room with a table, chairs, one tall bookshelf overflowing with books, and more books piled on the floor beside it." },
+                  { "id": "c4", "imageAlt": "A room with just one tall bookshelf (partly filled with books) — no table, chairs, or second shelf." }
+                ], "answer": "c1" }
+              ]
+            },
+            {
+              "id": "r29",
+              "textJp": "森さんの 机の 上に、山口先生の メモと 本が あります。",
+              "memoJp": "森さん\n\nクラスで 使う 本を 中川先生に かりました。\n5ページを 25枚 コピーして ください。\nコピーは 南さんに わたして ください。\n本は、わたしが あした かえしますから、わたしの\n机の 上に おいて ください。\n\n山口",
+              "questions": [
+                { "id": "r29-q", "number": 29, "promptJp": "森さんは コピーを した あとで、本を どうしますか。", "choices": [{ "id": "c1", "textJp": "クラスで 使います。" }, { "id": "c2", "textJp": "南さんに わたします。" }, { "id": "c3", "textJp": "中川先生に かえします。" }, { "id": "c4", "textJp": "山口先生の 机の 上に おきます。" }], "answer": "c4" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "read-mondai-5",
+          "number": 5,
+          "type": "reading-passage",
+          "instructionsJp": "つぎの ぶんしょうを 読んで、しつもんに こたえて ください。こたえは、1・2・3・4から いちばん いい ものを 一つ えらんで ください。",
+          "instructions": "Read the following passage and answer the questions. Choose the best answer from 1-4.",
+          "passages": [
+            {
+              "id": "r30-31",
+              "textJp": "きのうの 夜は おそくまで しごとを しました。とても つかれました。しごとの あと、電車で 帰りました。\n家の 近くの 駅で 電車を おりました。外は 雨でしたが、わたしは かさが ありませんでした。とても こまりました。\n駅の 人が わたしを 見て、「あの はこの 中の かさを 使って ください。」と 言いました。はこの 中には かさが 3本 ありました。\nわたしは「えっ、いいんですか。」と 聞きました。\n駅の 人は「あれは『みんなの かさ』です。お金は いりません。あした、あの はこに かえして ください。」と 言いました。\nわたしは「わかりました。ありがとうございます。」と 言って、かさを かりて 帰りました。",
+              "questions": [
+                { "id": "r30", "number": 30, "promptJp": "どうして こまりましたか。", "choices": [{ "id": "c1", "textJp": "おそい 時間に 駅に 着いたから" }, { "id": "c2", "textJp": "しごとが たくさん あったから" }, { "id": "c3", "textJp": "とても つかれたから" }, { "id": "c4", "textJp": "かさが なかったから" }], "answer": "c4" },
+                { "id": "r31", "number": 31, "promptJp": "「わたし」は、あした どうしますか。", "choices": [{ "id": "c1", "textJp": "かさを はこの 中に 入れます。" }, { "id": "c2", "textJp": "かさを 駅の 人に わたします。" }, { "id": "c3", "textJp": "お金を はこの 中に 入れます。" }, { "id": "c4", "textJp": "お金を 駅の 人に わたします。" }], "answer": "c1" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "read-mondai-6",
+          "number": 6,
+          "type": "table-reading",
+          "instructionsJp": "右の ページを 見て、下の しつもんに こたえて ください。こたえは、1・2・3・4から いちばん いい ものを 一つ えらんで ください。",
+          "instructions": "Look at the flyer and answer the question below. Choose the best answer from 1-4.",
+          "flyer": {
+            "titleJp": "あらきや",
+            "subtitleJp": "安い！",
+            "hoursJp": "朝8:00〜夜9:00（電話：012-34-5678）",
+            "sales": [
+              { "datesJp": "6月11日（月）〜14日（木）", "itemsJp": "さとう 128円　トイレットペーパー 490円" },
+              { "datesJp": "6月15日（金）〜18日（月）", "itemsJp": "しょうゆ 198円　ティッシュペーパー 290円" }
+            ],
+            "weeklyJp": [
+              { "daysJp": "月・火", "itemsJp": "くだもの、魚、ジュース" },
+              { "daysJp": "水・木", "itemsJp": "とうふ、にく、やさい" },
+              { "daysJp": "金・土", "itemsJp": "パン、ぎゅうにゅう、魚、やさい" }
+            ]
+          },
+          "questions": [
+            { "id": "r32", "number": 32, "promptJp": "あらきやで トイレットペーパーと にくと やさいを 同じ 日に 買いたいです。いつが 安いですか。", "choices": [{ "id": "c1", "textJp": "6月11日（月）と 12日（火）" }, { "id": "c2", "textJp": "6月13日（水）と 14日（木）" }, { "id": "c3", "textJp": "6月15日（金）と 16日（土）" }, { "id": "c4", "textJp": "6月17日（日）と 18日（月）" }], "answer": "c2" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "listening",
+      "label": "Listening",
+      "labelJp": "聴解",
+      "timeLimitMin": 30,
+      "mondai": [
+        {
+          "id": "lis-mondai-1",
+          "number": 1,
+          "type": "listening-mcq",
+          "instructionsJp": "もんだい1では、はじめに しつもんを きいて ください。それから はなしを きいて、もんだいようしの 1から4の なかから、いちばん いい ものを ひとつ えらんで ください。",
+          "instructions": "First, listen to the question. Then listen to the conversation and choose the best answer (1-4) from the question booklet.",
+          "audioSourceHint": "N5Q1_1_.mp3 (whole もんだい1 track — split per question and update audioSrc below)",
+          "questions": [
+            {
+              "id": "l1-1", "number": 1, "audioSrc": null,
+              "scriptJp": "靴下の店で、女の人と店の人が話しています。女の人は、どの靴下を買いますか。\nF：子供の靴下、ありますか。\nM：はい。長いのですか、短いのですか。\nF：長いのです。\nM：はい。果物の絵と動物の絵があります。どちらがいいですか。\nF：そうですね、動物のを下さい。\n女の人は、どの靴下を買いますか。",
+              "questionPromptJp": "女の人は、どの靴下を買いますか。",
+              "choiceType": "image",
+              "choices": [
+                { "id": "c1", "imageAlt": "A pair of tall (knee-high) socks with a fruit pattern (grapes), identical pair." },
+                { "id": "c2", "imageAlt": "A pair of tall (knee-high) socks with an animal pattern (cat and dog, different design on each sock)." },
+                { "id": "c3", "imageAlt": "A pair of short (ankle) socks with a fruit pattern (grapes)." },
+                { "id": "c4", "imageAlt": "A pair of short (ankle) socks with an animal pattern (cat and dog)." }
+              ],
+              "answer": "c2"
+            },
+            {
+              "id": "l1-2", "number": 2, "audioSrc": null,
+              "scriptJp": "病院で、医者と女の人が話しています。女の人は、一日に何回薬を飲みますか。\nM：この薬は、朝と夜、ご飯を食べたあとで飲んでください。\nF：昼ご飯のあとは？\nM：昼は飲まないでください。\nF：はい。\nM：4日間飲んでくださいね。\nF：分かりました。\n女の人は、一日に何回薬を飲みますか。",
+              "questionPromptJp": "女の人は、一日に何回薬を飲みますか。",
+              "choiceType": "text",
+              "choices": [{ "id": "c1", "textJp": "1かい" }, { "id": "c2", "textJp": "2かい" }, { "id": "c3", "textJp": "3かい" }, { "id": "c4", "textJp": "4かい" }],
+              "answer": "c2"
+            },
+            {
+              "id": "l1-3", "number": 3, "audioSrc": null,
+              "scriptJp": "デパートで、女の人と店の人が話しています。店の人は、どのかばんを取りますか。\nF：すみません、その上の黒いかばんを取ってください。\nM：どちらですか。この小さいのですか。\nF：いいえ。大きいのです。\nM：はい。\n店の人は、どのかばんを取りますか。",
+              "questionPromptJp": "店の人は、どのかばんを取りますか。",
+              "choiceType": "image",
+              "choices": [
+                { "id": "c1", "imageAlt": "A small, light-colored handbag." },
+                { "id": "c2", "imageAlt": "A large, light-colored tote bag." },
+                { "id": "c3", "imageAlt": "A large, dark (black) drawstring-style bag." },
+                { "id": "c4", "imageAlt": "A small, dark (black) handbag." }
+              ],
+              "answer": "c3"
+            },
+            {
+              "id": "l1-4", "number": 4, "audioSrc": null,
+              "scriptJp": "教室で、先生が話しています。学生は、机の上に何を置きますか。\nM：今からテストをします。このテストでは、辞書を使う問題がありますから、机の上に辞書を出してください。鉛筆と消しゴムも出してください。時計は、かばんの中に入れてください。\nF：先生、ノートはどうしますか。\nM：ノートもかばんの中に入れてください。\n学生は、机の上に何を置きますか。",
+              "questionPromptJp": "学生は、机の上に何を置きますか。",
+              "choiceType": "image",
+              "choices": [
+                { "id": "c1", "imageAlt": "Two pencils and an eraser." },
+                { "id": "c2", "imageAlt": "A notebook, two pencils, and an eraser." },
+                { "id": "c3", "imageAlt": "A dictionary, two pencils, and an eraser." },
+                { "id": "c4", "imageAlt": "A wristwatch, two pencils, and an eraser." }
+              ],
+              "answer": "c3"
+            },
+            {
+              "id": "l1-5", "number": 5, "audioSrc": null,
+              "scriptJp": "バスの中で、旅行会社の人が学生に話しています。学生は、始めに何をしますか。\nF：皆さん、ホテルに着きました。今から1階のレストランで晩ご飯を食べます。晩ご飯は7時からです。今6時50分ですから、すぐに行ってください。皆さんの荷物は、ホテルの人が部屋に持っていきます。晩ご飯のあとは、テレビを見たり、買い物をしたりしてください。\n学生は、始めに何をしますか。",
+              "questionPromptJp": "学生は、始めに何をしますか。",
+              "choiceType": "image",
+              "choices": [
+                { "id": "c1", "imageAlt": "Two women eating a meal together at a table, using chopsticks." },
+                { "id": "c2", "imageAlt": "A woman with luggage arriving at a hotel room door, pressing the doorbell." },
+                { "id": "c3", "imageAlt": "Two women sitting on a couch talking, with a TV in the background." },
+                { "id": "c4", "imageAlt": "A woman shopping in a convenience store, holding a basket." }
+              ],
+              "answer": "c1"
+            },
+            {
+              "id": "l1-6", "number": 6, "audioSrc": null,
+              "scriptJp": "男の人と女の人が話しています。男の人は、何を持っていきますか。\nM：来週の日曜日、海へ行きますね。何を持っていきましょうか。\nF：私はおにぎりを持っていきます。\nM：じゃあ僕は。\nF：飲み物とお菓子をお願いします。\nM：はい。飲み物とお菓子ですね。\nF：あ、飲み物は重いですね。海に着いてから買いましょう。\nM：そうですね。\n男の人は、何を持っていきますか。",
+              "questionPromptJp": "男の人は、何を持っていきますか。",
+              "choiceType": "image",
+              "choices": [
+                { "id": "c1", "imageAlt": "A box of onigiri (rice balls)." },
+                { "id": "c2", "imageAlt": "Three bottles of drinks." },
+                { "id": "c3", "imageAlt": "Three bottles of drinks plus bags of snacks." },
+                { "id": "c4", "imageAlt": "Just bags of snacks/candy." }
+              ],
+              "answer": "c4"
+            },
+            {
+              "id": "l1-7", "number": 7, "audioSrc": null,
+              "scriptJp": "バス停で、女の人とバス会社の人が話しています。女の人は、何番のバスに乗りますか。\nF：すみません、1番のバスはみどり駅に行きますか。\nM：いいえ、みどり駅に行くバスは3番と5番と7番ですよ。\nF：そうですか。\nM：あ、でも、今日は日曜日ですから、5番のバスはありません。\nF：そうですか。\nM：それから、3番は朝と夕方のバスですから、今の時間は7番ですね。\nF：分かりました。ありがとうございます。\n女の人は、何番のバスに乗りますか。",
+              "questionPromptJp": "女の人は、何番のバスに乗りますか。",
+              "choiceType": "text",
+              "choices": [{ "id": "c1", "textJp": "1ばん" }, { "id": "c2", "textJp": "3ばん" }, { "id": "c3", "textJp": "5ばん" }, { "id": "c4", "textJp": "7ばん" }],
+              "answer": "c4"
+            }
+          ]
+        },
+        {
+          "id": "lis-mondai-2",
+          "number": 2,
+          "type": "listening-mcq",
+          "instructionsJp": "もんだい2では、はじめに しつもんを きいて ください。それから はなしを きいて、もんだいようしの 1から4の なかから、いちばん いい ものを ひとつ えらんで ください。",
+          "instructions": "First, listen to the question. Then listen to the conversation and choose the best answer (1-4).",
+          "audioSourceHint": "N5Q2.mp3 (whole もんだい2 track — split per question and update audioSrc below)",
+          "questions": [
+            {
+              "id": "l2-1", "number": 1, "audioSrc": null,
+              "scriptJp": "大学で、男の学生と女の学生が話しています。女の学生は、今日、何時間勉強しますか。\nM：山田さんはいつも何時間ぐらい勉強しますか。\nF：うーん、毎日3時間ぐらいです。\nM：えっ、私は毎日1時間です。\nF：あ、でも、明日はテストがありますから、今日は4時間勉強します。\nM：そうですか。\n女の学生は、今日、何時間勉強しますか。",
+              "questionPromptJp": "女の学生は、今日、何時間勉強しますか。",
+              "choiceType": "text",
+              "choices": [{ "id": "c1", "textJp": "1じかん" }, { "id": "c2", "textJp": "2じかん" }, { "id": "c3", "textJp": "3じかん" }, { "id": "c4", "textJp": "4じかん" }],
+              "answer": "c4"
+            },
+            {
+              "id": "l2-2", "number": 2, "audioSrc": null,
+              "scriptJp": "男の人と女の人が話しています。女の人の電話番号は何番ですか。\nM：あのう、山田さんの電話番号は、512-7734ですね？\nF：いいえ、7734じゃなくて7743です。\nM：え、ちょっと待ってください。メモします。512の。\nF：7743です。\nM：はい。ありがとうございました。\n女の人の電話番号は何番ですか。",
+              "questionPromptJp": "女の人の電話番号は何番ですか。",
+              "choiceType": "text",
+              "choices": [{ "id": "c1", "textJp": "512-7733" }, { "id": "c2", "textJp": "512-7734" }, { "id": "c3", "textJp": "512-7743" }, { "id": "c4", "textJp": "512-7744" }],
+              "answer": "c3"
+            },
+            {
+              "id": "l2-3", "number": 3, "audioSrc": null,
+              "scriptJp": "女の学生と男の学生が話しています。男の学生は、だれと住んでいますか。\nF：山田さんは、お父さんとお母さんと、一緒に住んでいますか。\nM：いえ、両親は遠くに住んでいます。\nF：そうですか。\nM：いま、姉と一緒に住んでいます。\nF：兄弟は一人ですか。\nM：あ、弟もいますよ。弟は両親と一緒です。\n男の学生は、だれと住んでいますか。",
+              "questionPromptJp": "男の学生は、だれと住んでいますか。",
+              "choiceType": "text",
+              "choices": [{ "id": "c1", "textJp": "りょうしん" }, { "id": "c2", "textJp": "あね" }, { "id": "c3", "textJp": "いもうと" }, { "id": "c4", "textJp": "おとうと" }],
+              "answer": "c2"
+            },
+            {
+              "id": "l2-4", "number": 4, "audioSrc": null,
+              "scriptJp": "学校で男の学生と女の学生が話しています。二人はどこで昼ご飯を食べますか。\nM：もう1時ですね。何か食べませんか。\nF：そうですね。でも今日は土曜日だから、学校の、食堂や喫茶店は休みですよ。\nM：じゃ、パン屋でパンを買って、教室で食べましょうか。\nF：そうですね。\n二人はどこで昼ご飯を食べますか。",
+              "questionPromptJp": "二人はどこで昼ご飯を食べますか。",
+              "choiceType": "text",
+              "choices": [{ "id": "c1", "textJp": "しょくどう" }, { "id": "c2", "textJp": "きっさてん" }, { "id": "c3", "textJp": "パンや" }, { "id": "c4", "textJp": "きょうしつ" }],
+              "answer": "c4"
+            },
+            {
+              "id": "l2-5", "number": 5, "audioSrc": null,
+              "scriptJp": "教室で、先生が学生に話しています。学生は何で名前を書きますか。\nF：はい、じゃあちょっと聞いてください。えー、来月のバス旅行に行きたい人は、この紙に、ボールペンで名前を書いてください。鉛筆じゃなくて、ボールペンですよ。黒で書いてください。赤で書かないでくださいね。\n学生は何で名前を書きますか。",
+              "questionPromptJp": "学生は何で名前を書きますか。",
+              "choiceType": "text",
+              "choices": [{ "id": "c1", "textJp": "くろい ボールペン" }, { "id": "c2", "textJp": "あかい ボールペン" }, { "id": "c3", "textJp": "くろい えんぴつ" }, { "id": "c4", "textJp": "あかい えんぴつ" }],
+              "answer": "c1"
+            },
+            {
+              "id": "l2-6", "number": 6, "audioSrc": null,
+              "scriptJp": "女の学生と男の学生が話しています。二人は明日どこで会いますか。\nF：明日の夜、一緒にサッカーを見に行きませんか。\nM：いいですね。どこで会いましょうか。\nF：5時に駅で会いませんか。\nM：駅は人が多いですよ。\nF：そうですね。じゃあ、駅の前の喫茶店はどうですか。\nM：はい、そうしましょう。あ、サッカーを見てから近くのレストランで晩ご飯を食べませんか。\nF：ええ。じゃ、明日5時に会いましょう。\n二人は明日どこで会いますか。",
+              "questionPromptJp": "二人は明日どこで会いますか。",
+              "choiceType": "text",
+              "choices": [{ "id": "c1", "textJp": "こうえん" }, { "id": "c2", "textJp": "えき" }, { "id": "c3", "textJp": "きっさてん" }, { "id": "c4", "textJp": "レストラン" }],
+              "answer": "c3"
+            }
+          ]
+        },
+        {
+          "id": "lis-mondai-3",
+          "number": 3,
+          "type": "listening-situational",
+          "instructionsJp": "もんだい3では、えを みながら しつもんを きいて ください。➡（やじるし）の ひとは なんと いいますか。1から3の なかから、いちばん いい ものを ひとつ えらんで ください。",
+          "instructions": "Look at the picture and listen to the question. What would the person marked with the arrow say? Choose the best answer (1-3).",
+          "audioSourceHint": "N5Q3.mp3 (whole もんだい3 track — split per question and update audioSrc below)",
+          "questions": [
+            {
+              "id": "l3-1", "number": 1, "audioSrc": null,
+              "scriptJp": "ご飯を食べました。何と言いますか。",
+              "imageAlt": "A woman finishing a meal at a table (arrow points at her).",
+              "choices": [{ "id": "c1", "textJp": "ごちそうさまでした。" }, { "id": "c2", "textJp": "いただきます。" }, { "id": "c3", "textJp": "どういたしまして。" }],
+              "answer": "c1"
+            },
+            {
+              "id": "l3-2", "number": 2, "audioSrc": null,
+              "scriptJp": "電車の中です。女の人が来ました。何と言いますか。",
+              "imageAlt": "On a train, a young man (arrow) offers his seat to an elderly woman standing with an elderly man using a cane.",
+              "choices": [{ "id": "c1", "textJp": "どうもありがとう。" }, { "id": "c2", "textJp": "初めまして。" }, { "id": "c3", "textJp": "ここ、どうぞ。" }],
+              "answer": "c3"
+            },
+            {
+              "id": "l3-3", "number": 3, "audioSrc": null,
+              "scriptJp": "家へ帰ります。友達に何と言いますか。",
+              "imageAlt": "A young man (arrow) waving goodbye while leaving through a door, past two receptionists at a desk.",
+              "choices": [{ "id": "c1", "textJp": "いってきます。" }, { "id": "c2", "textJp": "じゃ、また。" }, { "id": "c3", "textJp": "ただいま。" }],
+              "answer": "c2"
+            },
+            {
+              "id": "l3-4", "number": 4, "audioSrc": null,
+              "scriptJp": "郵便局で切手を買います。何と言いますか。",
+              "imageAlt": "A young man (arrow) with a shoulder bag speaking to a post office clerk at the counter.",
+              "choices": [{ "id": "c1", "textJp": "切手を買いませんか。" }, { "id": "c2", "textJp": "切手をどうぞ。" }, { "id": "c3", "textJp": "切手を下さい。" }],
+              "answer": "c3"
+            },
+            {
+              "id": "l3-5", "number": 5, "audioSrc": null,
+              "scriptJp": "友達は鉛筆がありません。友達に何と言いますか。",
+              "imageAlt": "Two students studying at a table; one (arrow) offers a pencil to the other, who has an empty pencil case.",
+              "choices": [{ "id": "c1", "textJp": "鉛筆、借りましょうか。" }, { "id": "c2", "textJp": "鉛筆、使いますか。" }, { "id": "c3", "textJp": "鉛筆、貸してください。" }],
+              "answer": "c2"
+            }
+          ]
+        },
+        {
+          "id": "lis-mondai-4",
+          "number": 4,
+          "type": "listening-response",
+          "instructionsJp": "もんだい4は、えなどが ありません。ぶんを きいて、1から3の なかから、いちばん いい ものを ひとつ えらんで ください。",
+          "instructions": "There are no pictures for mondai 4. Listen to the sentence and choose the best response (1-3).",
+          "audioSourceHint": "N5Q4.mp3 (whole もんだい4 track — split per question and update audioSrc below)",
+          "questions": [
+            { "id": "l4-1", "number": 1, "audioSrc": null, "scriptJp": "F：今日は何日ですか。", "choices": [{ "id": "c1", "textJp": "三日です。" }, { "id": "c2", "textJp": "3週間です。" }, { "id": "c3", "textJp": "3時です。" }], "answer": "c1" },
+            { "id": "l4-2", "number": 2, "audioSrc": null, "scriptJp": "M：すみません、図書館はどこですか。", "choices": [{ "id": "c1", "textJp": "あそこです。" }, { "id": "c2", "textJp": "6時までです。" }, { "id": "c3", "textJp": "本を借ります。" }], "answer": "c1" },
+            { "id": "l4-3", "number": 3, "audioSrc": null, "scriptJp": "F：明日、何時に学校に来ますか。", "choices": [{ "id": "c1", "textJp": "バスで来ます。" }, { "id": "c2", "textJp": "9時半です。" }, { "id": "c3", "textJp": "6人です。" }], "answer": "c2" },
+            { "id": "l4-4", "number": 4, "audioSrc": null, "scriptJp": "M：田中さん、その荷物を持ちましょうか。", "choices": [{ "id": "c1", "textJp": "どういたしまして。" }, { "id": "c2", "textJp": "持ちませんでした。" }, { "id": "c3", "textJp": "ありがとうございます。" }], "answer": "c3" },
+            { "id": "l4-5", "number": 5, "audioSrc": null, "scriptJp": "M：ちょっと休みませんか。", "choices": [{ "id": "c1", "textJp": "日曜日です。" }, { "id": "c2", "textJp": "お元気ですか。" }, { "id": "c3", "textJp": "そうしましょう。" }], "answer": "c3" },
+            { "id": "l4-6", "number": 6, "audioSrc": null, "scriptJp": "M：それは、何の本ですか。", "choices": [{ "id": "c1", "textJp": "料理の本です。" }, { "id": "c2", "textJp": "私の本です。" }, { "id": "c3", "textJp": "はい、そうです。" }], "answer": "c1" }
+          ]
+        }
+      ]
+    }
+  ]
+}

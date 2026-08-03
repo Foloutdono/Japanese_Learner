@@ -1,0 +1,357 @@
+/* ── Exam feature styles ──────────────────────────────────────
+   Only what index.css doesn't already provide. Reuses existing
+   tokens (--bg-card, --border, --accent, --text-secondary, --success,
+   --danger, --font-jp, --font-display, --radius) so this reads as
+   part of the same design system rather than a bolted-on skin, and
+   flips correctly with the light/dark theme for free since every
+   colour here is a var(), never a literal hex. */
+
+.exam-shell {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px 72px;
+}
+
+/* ── Progress bar ── */
+.exam-progress-bar {
+  width: 100%;
+  height: 3px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.exam-progress-bar__fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+
+.exam-shell__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.exam-shell__section {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.exam-shell__count {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+
+/* ── Mondai instructions strip ── */
+.exam-mondai-instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--accent);
+}
+.exam-mondai-instructions__label {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.exam-mondai-instructions__text {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-line;
+}
+
+/* ── Question card ── */
+.exam-card-stage {
+  margin-bottom: 24px;
+}
+.exam-card.prompt-card {
+  max-height: none;
+  text-align: left;
+  padding: 28px 24px;
+}
+.exam-question__prompt {
+  font-family: var(--font-jp);
+  font-size: clamp(17px, 2.2vw, 20px);
+  line-height: 1.8;
+  white-space: pre-line;
+  margin-bottom: 18px;
+}
+.exam-question__prompt--context { margin-bottom: 12px; }
+.exam-question__hint {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.exam-underline {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  font-weight: 700;
+}
+
+/* ── Image placeholder ──
+   Stands in for exam illustrations until real assets are extracted
+   from the source PDFs — see README's "Assets" section. Deliberately
+   looks like scaffolding (dashed border, muted) rather than a
+   finished UI element, so it's obvious at a glance what's still
+   pending. */
+.exam-image-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  background: var(--overlay-hover);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.exam-image-placeholder__icon { font-size: 1.1rem; flex-shrink: 0; }
+.exam-image-placeholder--compact {
+  flex: 1;
+  margin-bottom: 0;
+  padding: 8px 10px;
+  border-width: 1px;
+}
+
+/* ── Sentence-order slots (grammar もんだい2) ── */
+.exam-order-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.exam-order-slot {
+  min-width: 56px;
+  padding: 6px 10px;
+  text-align: center;
+  border-bottom: 2px solid var(--border);
+  font-family: var(--font-jp);
+  color: var(--text-secondary);
+}
+.exam-order-slot--star {
+  color: var(--accent);
+  font-weight: 700;
+  border-bottom-color: var(--accent);
+}
+.exam-order-solution {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* ── Cloze passage blanks (grammar もんだい3) ── */
+.exam-passage__title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: var(--text-secondary);
+}
+.exam-passage__text {
+  font-family: var(--font-jp);
+  font-size: clamp(16px, 2vw, 18px);
+  line-height: 2;
+  white-space: pre-line;
+  margin-bottom: 18px;
+}
+.exam-blank-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 6px;
+  margin: 0 2px;
+  border-radius: 6px;
+  background: var(--chip-bg);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.exam-blank-pill--active {
+  background: var(--accent);
+  color: var(--text-on-panel);
+}
+
+/* ── Reading passage / memo (reading もんだい4-5) ── */
+.exam-passage {
+  margin-bottom: 20px;
+  text-align: left;
+}
+.exam-memo {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--overlay-hover);
+  border-radius: 8px;
+  font-family: var(--font-jp);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+/* ── Flyer / table reading (reading もんだい6) ── */
+.exam-flyer {
+  margin-bottom: 20px;
+  text-align: left;
+}
+.exam-flyer__title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.3rem;
+  margin-bottom: 2px;
+}
+.exam-flyer__subtitle { color: var(--accent); font-weight: 700; margin-bottom: 8px; }
+.exam-flyer__hours { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 14px; }
+.exam-flyer__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+.exam-flyer__dates { font-weight: 700; min-width: 170px; }
+.exam-flyer__items { color: var(--text-secondary); }
+.exam-flyer__weekly { margin-top: 8px; }
+
+/* ── Audio bar (listening) ── */
+.exam-audio-bar { margin-bottom: 16px; }
+.exam-audio-bar audio { width: 100%; }
+.exam-audio-bar--pending {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  background: var(--overlay-hover);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+/* ── Dev-only script reveal (listening QA) ── */
+.exam-dev-panel { margin-bottom: 16px; }
+.exam-dev-panel__toggle {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  padding: 6px 12px;
+}
+.exam-dev-panel__script {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--overlay-hover);
+  border-radius: 8px;
+  font-family: var(--font-jp);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+/* ── Bottom nav bar ── */
+.exam-nav-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+.exam-nav-btn {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+.exam-nav-btn--primary {
+  background: var(--accent);
+  color: var(--text-on-panel);
+}
+.exam-nav-btn:disabled { opacity: 0.4; cursor: default; }
+.exam-nav-buttons__hint {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Result screen ── */
+.exam-result-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 32px 20px;
+  margin-bottom: 24px;
+}
+.exam-result-header__score {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+.exam-result-header__pct {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--success);
+}
+.exam-result-header--low .exam-result-header__pct { color: var(--danger); }
+.exam-result-header__label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.exam-review-list {
+  border-top: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.exam-review-row {
+  border-bottom: 1px solid var(--border);
+}
+.exam-review-row__summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 6px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--text-primary);
+  text-align: left;
+}
+.exam-review-row__icon {
+  width: 22px;
+  text-align: center;
+  font-weight: 700;
+}
+.exam-review-row--correct .exam-review-row__icon { color: var(--success); }
+.exam-review-row--wrong .exam-review-row__icon { color: var(--danger); }
+.exam-review-row__number {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.exam-review-row__chevron { color: var(--text-secondary); }
+.exam-review-row__detail {
+  padding: 4px 6px 20px;
+}
+
+@media (max-width: 560px) {
+  .exam-shell { padding: 24px 16px 56px; }
+  .exam-card.prompt-card { padding: 22px 16px; }
+  .exam-flyer__dates { min-width: 0; }
+}
