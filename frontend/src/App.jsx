@@ -20,6 +20,7 @@ import ReadingScreen from './screens/ReadingScreen'
 import ReadingComprehensionScreen from './screens/ReadingComprehensionScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import SettingsScreen from './screens/SettingsScreen'
+import ExamListScreen from './screens/ExamListScreen'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -70,6 +71,7 @@ export default function App() {
           <Route path="/reading-comprehension" element={<ReadingComprehensionScreen session={session} />} />
           <Route path="/profile" element={<ProfileScreen session={session} />} />
           <Route path="/settings" element={<SettingsScreen session={session} />} />
+          <Route path="/exam" element={<ExamListScreen session={session} />} />
         </Routes>
       </BrowserRouter>
     </LangProvider>
