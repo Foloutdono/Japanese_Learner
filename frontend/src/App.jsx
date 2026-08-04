@@ -22,8 +22,8 @@ import ProfileScreen from './screens/ProfileScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import ExamListScreen from './screens/ExamListScreen'
 import ExamSectionSelect from './screens/ExamSectionSelect'
-import ExamQuestionScreen from './screens/ExamQuestionScreen'
-import ExamResultScreen from './screens/ExamResultScreen'
+import ExamRunner from './screens/ExamRunner'
+import ExamResult from './screens/ExamResult'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -76,8 +76,8 @@ export default function App() {
           <Route path="/settings" element={<SettingsScreen session={session} />} />
           <Route path="/exam" element={<ExamListScreen session={session} />} />
           <Route path="/exam/:examId" element={<ExamSectionSelect session={session} />} />
-          <Route path="/exam/:examId/:sectionId" element={<ExamQuestionScreen session={session} />} />
-          <Route path="/exam/:examId/:sectionId/results" element={<ExamResultScreen session={session} />} />
+          <Route path="/exam/:examId/:sectionId" element={<ExamRunner session={session} />} />
+          <Route path="/exam/:examId/:sectionId/results" element={<ExamResult session={session} />} />
         </Routes>
       </BrowserRouter>
     </LangProvider>
