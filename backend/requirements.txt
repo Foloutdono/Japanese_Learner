@@ -9,3 +9,5 @@ aiofiles
 python-multipart
 pykakasi
 requests>=2.31.0
+fugashi
+unidic-lite

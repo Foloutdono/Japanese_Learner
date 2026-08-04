@@ -65,6 +65,7 @@ import json
 import os
 import re
 
+import morphology
 from vocab_data import VOCAB_BY_LEVEL
 
 try:
@@ -438,10 +439,12 @@ def _select_primary(senses: list, meaning_hint: str) -> list:
 # else falls back to per-character kanji readings.
 
 def _kata_to_hira(s: str) -> str:
-    return "".join(
-        chr(ord(c) - 0x60) if "\u30A1" <= c <= "\u30F6" else c
-        for c in s
-    )
+    # See morphology.kata_to_hira: also resolves the katakana long-vowel
+    # mark (ー) to the correct native hiragana vowel (今日's pron キョー
+    # -> きょう, not きょー) — a plain per-character shift alone gets
+    # that wrong, and this function is used for kanji readings sourced
+    # from kanji_data.py, which are also katakana for on'yomi.
+    return morphology.kata_to_hira(s)
 
 
 def _reading_tokens(kana: str) -> list[str]:
@@ -549,8 +552,21 @@ for form, reading in _MEANINGS_READING.items():
 _MAX_VOCAB_MATCH_LEN = max((len(k) for k in _VOCAB_READING), default=1)
 
 
-def _tokenize_furigana(sentence: str) -> list:
-    """Splits `sentence` into ordered {text, reading, start, end} chunks."""
+def _tokenize_furigana_legacy(sentence: str) -> list:
+    """Fallback path used only when morphology.MORPHOLOGY_AVAILABLE is
+    False — see _tokenize_furigana for the preferred, morphology-based
+    path. Splits `sentence` into ordered {text, reading, start, end}
+    chunks using a dictionary-substring lookup, falling back further to
+    per-character kanji readings for anything not in that lookup.
+
+    This has no way to know a kanji is being used as a conjugating
+    word's stem rather than standing on its own — 上 gets its
+    standalone-noun reading うえ even when it's actually the のぼ- in
+    上る, because a single isolated kanji character carries no
+    information about which one applies. Real tokenization (the
+    morphology-based path) fixes this because it reasons about whole
+    words, not characters.
+    """
     segments = []
     i, n = 0, len(sentence)
     while i < n:
@@ -609,6 +625,87 @@ def _tokenize_furigana(sentence: str) -> list:
         segments.append({"text": sentence[i:j], "reading": None, "start": i, "end": j})
         i = j
     return segments
+
+
+def _split_morpheme_for_furigana(m) -> list:
+    """One morphology.Morpheme -> up to 3 {text, reading, start, end}
+    segments: a leading all-kana prefix (rare — e.g. an unglued
+    particle-like prefix), the kanji-bearing core with its own derived
+    reading, and a trailing all-kana suffix (the usual case: okurigana/
+    conjugation tail, e.g. れ in 上れ). Splitting this way keeps furigana
+    on just the kanji, matching how _tokenize_furigana_legacy's
+    kanji-run segments already worked, so _annotate_sentence downstream
+    doesn't need to change at all.
+    """
+    surface = m.surface
+    start, end = m.start, m.end
+    if not any(_is_kanji(c) for c in surface):
+        return [{"text": surface, "reading": None, "start": start, "end": end}]
+
+    n = len(surface)
+    lead = 0
+    while lead < n and not _is_kanji(surface[lead]):
+        lead += 1
+    tail = n
+    while tail > lead and not _is_kanji(surface[tail - 1]):
+        tail -= 1
+
+    # m.reading is the hiragana reading of the WHOLE surface, as
+    # inflected. Okurigana characters pronounce themselves 1:1 (each
+    # kana character corresponds to exactly one mora in the reading),
+    # so trimming that many characters off each end isolates the
+    # kanji-bearing core's own reading — e.g. surface "上れ", reading
+    # "のぼれ": 1 trailing kana character -> strip 1 -> core reading
+    # "のぼ". Falls back to the untrimmed reading (better than nothing)
+    # if that character-count assumption doesn't hold for some entry.
+    core_reading = m.reading
+    trailing_len = n - tail
+    if trailing_len and len(core_reading) > trailing_len:
+        core_reading = core_reading[:len(core_reading) - trailing_len]
+    if lead and len(core_reading) > lead:
+        core_reading = core_reading[lead:]
+
+    out = []
+    if lead:
+        out.append({"text": surface[:lead], "reading": None, "start": start, "end": start + lead})
+    out.append({
+        "text": surface[lead:tail],
+        "reading": core_reading or None,
+        "start": start + lead, "end": start + tail,
+    })
+    if tail < n:
+        out.append({"text": surface[tail:], "reading": None, "start": start + tail, "end": end})
+    return out
+
+
+def _tokenize_furigana_morphological(sentence: str):
+    """Preferred path (see _tokenize_furigana): real per-morpheme
+    furigana via morphology.tokenize instead of dictionary-substring
+    guessing. Each morpheme's own reading is context-correct — a verb
+    stem gets its verb reading, not its standalone-noun reading (上 in
+    上れません reads のぼ, not うえ) — because a real tokenizer reasons
+    about the whole word being used, not the character in isolation.
+    Returns None if morphology isn't available, so the caller can fall
+    back to the legacy per-character approach."""
+    morphemes = morphology.tokenize(sentence)
+    if morphemes is None:
+        return None
+    segments = []
+    for m in morphemes:
+        segments.extend(_split_morpheme_for_furigana(m))
+    return segments
+
+
+def _tokenize_furigana(sentence: str) -> list:
+    """Splits `sentence` into ordered {text, reading, start, end}
+    chunks. Prefers real tokenization (_tokenize_furigana_morphological)
+    and falls back to the dictionary-substring approach
+    (_tokenize_furigana_legacy) only if that's unavailable in this
+    deploy — see morphology.py's docstring for why."""
+    segments = _tokenize_furigana_morphological(sentence)
+    if segments is not None:
+        return segments
+    return _tokenize_furigana_legacy(sentence)
 
 
 def _extend_inflection_tail(sentence: str, end: int, max_extra: int = 6) -> int:
@@ -799,6 +896,32 @@ def _target_span(sentence: str, kanji: str, kana: str):
         idx = _find_occurrence(sentence, stem, prefer_hiragana_after=True)
         if idx is not None:
             return idx, _extend_inflection_tail(sentence, idx + len(stem))
+
+    # Last resort: real tokenization. Catches an example sentence that
+    # spells this word with a DIFFERENT (but reading-equivalent) kanji
+    # than this card uses — e.g. a card for 登る(のぼる) whose tagged
+    # example actually reads 上れません: 上る is a distinct dictionary
+    # headword from 登る, so no amount of matching against THIS card's
+    # own kanji spelling would ever find it, but the two share the
+    # exact same reading. JMdict/Tatoeba's example-to-headword tagging
+    # isn't always literal-text-exact about which of several synonymous
+    # kanji spellings a sentence happens to use, so this tier trusts a
+    # real tokenizer's own per-token reading to recognize the
+    # equivalence instead of insisting on this card's exact kanji.
+    # `auxiliary_use` is excluded for the same reason card_lookup.py's
+    # _resolve_kana excludes it: reading alone can't tell 要る from
+    # 居る (both いる), and 居る-as-~ている-progressive-marker is common
+    # enough in ordinary text that trusting reading equivalence there
+    # would misidentify that marker as an unrelated card's headword.
+    target_readings = set(_readings(kana) or ([kana] if kana else []))
+    if target_readings:
+        for m in morphology.tokenize(sentence) or []:
+            if m.auxiliary_use or m.pos not in ("verb", "adjective", "noun"):
+                continue
+            if not any(_is_kanji(c) for c in m.surface):
+                continue
+            if m.lemma_reading in target_readings:
+                return m.start, m.end
     return None
 
 
