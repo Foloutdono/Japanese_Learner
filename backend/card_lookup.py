@@ -8,6 +8,7 @@ from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from quiz_modes import STATUS_MODE
 import vocab_extras
+import morphology
 
 # Representative mode used to gauge "do I know this word/kanji" for the
 # clickable badges — see quiz_modes.py for the reasoning. Both vocab and
@@ -246,6 +247,15 @@ def find_vocab_match(surface: str, base: str, reading: str):
     return level, entry, vocab_to_id(entry, level)
 
 
+def _kanji_candidates_for(char: str):
+    return [
+        (level, entry)
+        for level, kanji_list in KANJI_BY_LEVEL.items()
+        for entry in kanji_list
+        if entry.get("kanji") == char
+    ]
+
+
 def find_kanji_matches(text: str):
     """Find every kanji character in `text` that exists in the kanji deck.
 
@@ -259,17 +269,218 @@ def find_kanji_matches(text: str):
         if char in seen or not is_kanji(char):
             continue
         seen.add(char)
-        candidates = [
-            (level, entry)
-            for level, kanji_list in KANJI_BY_LEVEL.items()
-            for entry in kanji_list
-            if entry.get("kanji") == char
-        ]
+        candidates = _kanji_candidates_for(char)
         if not candidates:
             continue
         level, entry = min(candidates, key=lambda c: _level_rank(c[0]))
         matches.append((char, level, entry, kanji_to_id(entry, level)))
     return matches
+
+
+def _kanji_fallback_hits(text: str, covered: list):
+    """(start, end, level, entry, raw_id) for every not-yet-`covered`
+    kanji character in `text` that exists in the kanji deck — the
+    per-character fallback both scan paths (morphology-based and
+    legacy) share for whatever a word-level match didn't already cover."""
+    hits = []
+    for idx, char in enumerate(text):
+        if covered[idx] or not is_kanji(char):
+            continue
+        candidates = _kanji_candidates_for(char)
+        if not candidates:
+            continue
+        level, entry = min(candidates, key=lambda c: _level_rank(c[0]))
+        hits.append((idx, idx + 1, level, entry, kanji_to_id(entry, level)))
+        covered[idx] = True
+    return hits
+
+
+def _assemble_segments(text: str, vocab_hits: list, kanji_hits: list):
+    """Merge vocab + kanji hits into one ordered, non-overlapping list of
+    segments covering the whole string, filling gaps with plain text —
+    shared tail of both scan paths so their output shape stays identical."""
+    n = len(text)
+    hits = sorted(vocab_hits + kanji_hits, key=lambda h: h[0])
+    segments = []
+    cursor = 0
+    for start, end, level, entry, raw_id in hits:
+        if start > cursor:
+            segments.append({"text": text[cursor:start], "start": cursor, "end": start, "type": "plain"})
+        seg_type = "vocab" if (start, end, level, entry, raw_id) in vocab_hits else "kanji"
+        segments.append({
+            "text": text[start:end], "start": start, "end": end, "type": seg_type,
+            "level": level, "raw_id": raw_id, "entry": serializable_entry(entry),
+        })
+        cursor = end
+    if cursor < n:
+        segments.append({"text": text[cursor:n], "start": cursor, "end": n, "type": "plain"})
+    return segments
+
+
+def _index_vocab_by_lemma():
+    """kanji-field text (PLUS its Arabic-numeral variant, e.g. both 二日
+    and 2日) -> [(level, entry), ...]. Used by the morphology-based scan
+    to resolve a token's dictionary form straight to a deck entry —
+    since a real tokenizer already normalizes surface spelling
+    (kana/kanji, conjugation) down to this one dictionary form, this one
+    index replaces essentially all of _vocab_candidates' variant-surface
+    machinery below for that path. Multiple entries can share the same
+    lemma text (homographs, e.g. 歩 as "to walk" vs. the shogi piece) —
+    see _pick_best_candidate for how a token's own reading disambiguates
+    between them. The numeral-variant keys exist because MeCab tokenizes
+    a date/count compound as separate morphemes (二 + 日), so no single
+    token's lemma is ever literally "二日" — see
+    _resolve_numeral_compound below, which is the one place this index
+    still needs the same variant-surface trick the legacy path uses.
+    """
+    index = {}
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for entry in vocab_list:
+            word = entry.get("kanji") or entry.get("word") or entry.get("vocab") or ""
+            if not word:
+                continue
+            index.setdefault(word, []).append((level, entry))
+            numeral = vocab_extras.numeral_variant(word)
+            if numeral and numeral != word:
+                index.setdefault(numeral, []).append((level, entry))
+    return index
+
+
+def _index_vocab_by_kana():
+    """kana-field text -> [(level, entry), ...], covering EVERY deck
+    entry (not just ones with no kanji field at all). Broader than just
+    "kana-only words" because a token's own lemma TEXT doesn't always
+    match whatever a deck happens to store: UniDic's lemma for a
+    kana-primary word can be an archaic kanji spelling no deck would
+    realistically use (あなた's lemma is 貴方), and a kana-only deck
+    entry might store its kana text directly in the "kanji" field
+    rather than leaving it empty — this index doesn't need to assume
+    either convention, it just matches by reading when the lemma-text
+    match already tried in the caller comes up empty."""
+    index = {}
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for entry in vocab_list:
+            kana = entry.get("kana") or entry.get("reading") or ""
+            if not kana:
+                continue
+            for reading in _reading_variants(kana):
+                index.setdefault(reading, []).append((level, entry))
+    return index
+
+
+_VOCAB_BY_LEMMA = _index_vocab_by_lemma()
+_VOCAB_BY_KANA = _index_vocab_by_kana()
+
+
+def _resolve_lemma(lemma: str, reading: str):
+    """(level, entry, raw_id) for the deck entry whose kanji field is
+    `lemma`, disambiguated by `reading` when several entries share that
+    lemma text (see _index_vocab_by_lemma), or None."""
+    candidates = _VOCAB_BY_LEMMA.get(lemma)
+    if not candidates:
+        return None
+    triples = [(level, entry, entry.get("kana") or entry.get("reading") or "") for level, entry in candidates]
+    best = _pick_best_candidate(triples, reading)
+    if best is None:
+        return None
+    level, entry = best
+    return level, entry, vocab_to_id(entry, level)
+
+
+def _resolve_kana(reading: str, pos: str, auxiliary_use: bool):
+    """Fallback for when lemma-TEXT matching finds nothing (see
+    _index_vocab_by_kana for why that happens even for words that ARE
+    in the deck): match by reading instead. Gated to content-word POS
+    classes, a minimum length, and NOT `auxiliary_use` (see
+    morphology.Morpheme) — reading-alone is a genuine homophone risk
+    (箸/橋/端 all はし; 要る/居る both いる), and a verb in its
+    grammaticalized/auxiliary use (居る as the ~ている progressive
+    marker) is both far more common in ordinary text than its
+    independent use and the case most likely to collide with an
+    unrelated deck word of the same reading — so this only fires for
+    words being used on their own, not that class of match."""
+    if auxiliary_use or pos not in ("noun", "pronoun", "verb", "adjective") or len(reading) < 2:
+        return None
+    candidates = _VOCAB_BY_KANA.get(reading)
+    if not candidates:
+        return None
+    level, entry = min(candidates, key=lambda c: _level_rank(c[0]))
+    return level, entry, vocab_to_id(entry, level)
+
+
+def _find_segments_morphological(text: str):
+    """Preferred scan path (see find_segments_in_text): tokenize with a
+    real morphological analyzer instead of guessing word boundaries by
+    substring, then resolve each token to a deck entry by its
+    DICTIONARY FORM (lemma) rather than its literal on-the-page
+    spelling. This one change is what makes conjugated words (要る ->
+    いらない), kana-only spellings of a kanji word (温い -> ぬるい), and
+    correct particle separation (今日 + は, not こんにちは) all just
+    work, without any of the special-cased variant-matching the legacy
+    path below needs — a tokenizer already normalizes all of that for
+    us, and it only ever proposes matches at real word boundaries, so
+    the boundary-safety heuristics the legacy path needs are moot here
+    too.
+    """
+    morphemes = morphology.tokenize(text)
+    if morphemes is None:
+        return None
+
+    n = len(text)
+    covered = [False] * n
+    vocab_hits = []  # (start, end, level, entry, raw_id)
+
+    i = 0
+    while i < len(morphemes):
+        m = morphemes[i]
+
+        # Two-token merge first (longest-match-first, same principle as
+        # the legacy scan): catches deck entries MeCab tokenizes as more
+        # than one morpheme, which in practice is just date/count
+        # compounds (二日 = 二 + 日) — see _index_vocab_by_lemma's
+        # numeral-variant keys.
+        if i + 1 < len(morphemes):
+            m2 = morphemes[i + 1]
+            merged = m.surface + m2.surface
+            hit = _resolve_lemma(merged, "")
+            if hit:
+                level, entry, raw_id = hit
+                vocab_hits.append((m.start, m2.end, level, entry, raw_id))
+                for k in range(m.start, m2.end):
+                    covered[k] = True
+                i += 2
+                continue
+
+        hit = _resolve_lemma(m.lemma, m.lemma_reading) or _resolve_kana(m.lemma_reading, m.pos, m.auxiliary_use)
+        if hit:
+            level, entry, raw_id = hit
+            vocab_hits.append((m.start, m.end, level, entry, raw_id))
+            for k in range(m.start, m.end):
+                covered[k] = True
+        i += 1
+
+    kanji_hits = _kanji_fallback_hits(text, covered)
+    return _assemble_segments(text, vocab_hits, kanji_hits)
+
+
+def find_segments_in_text(text: str):
+    """
+    Scan raw, unsegmented text (e.g. a generated reading-practice
+    phrase) for clickable vocab/kanji badges, in reading order.
+
+    Prefers real tokenization (morphology.py, MeCab-based) — see
+    _find_segments_morphological — and falls back to the older
+    dictionary-substring scan (_find_segments_legacy) only if that's
+    unavailable in this deploy.
+
+    Returns a list of segments covering the whole string, in order:
+        {"text": "...", "start": int, "end": int, "type": "vocab"|"kanji"|"plain",
+         "level": ..., "raw_id": ..., "entry": {...}}   (level/raw_id/entry omitted for "plain")
+    """
+    segments = _find_segments_morphological(text)
+    if segments is not None:
+        return segments
+    return _find_segments_legacy(text)
 
 
 def _vocab_candidates():
@@ -336,12 +547,15 @@ def _vocab_candidates():
 _VOCAB_CANDIDATES = _vocab_candidates()
 
 
-def find_segments_in_text(text: str):
+def _find_segments_legacy(text: str):
     """
-    Scan raw, unsegmented text (e.g. a generated reading-practice phrase,
-    where we don't have LLM-provided word boundaries) against the vocab
-    deck using greedy longest-match, then check any leftover kanji
-    characters against the kanji deck individually.
+    Fallback path used only when morphology.MORPHOLOGY_AVAILABLE is
+    False (fugashi/unidic-lite not installed) — see
+    find_segments_in_text for the preferred, morphology-based path.
+
+    Scans raw, unsegmented text against the vocab deck using greedy
+    longest-match, then checks any leftover kanji characters against
+    the kanji deck individually.
 
     Bare-kana candidates (see _vocab_candidates' `risky` flag) are only
     accepted when _left_boundary_ok/_right_boundary_ok both pass — a
@@ -351,11 +565,11 @@ def find_segments_in_text(text: str):
     on both sides first. When a risky candidate fails that check, the
     scan simply falls through to the next (shorter) candidate at this
     position rather than accepting it — worst case, that position ends
-    up unmatched "plain" text instead of a wrong badge.
-
-    Returns a list of segments covering the whole string, in order:
-        {"text": "...", "start": int, "end": int, "type": "vocab"|"kanji"|"plain",
-         "level": ..., "raw_id": ..., "entry": {...}}   (level/raw_id/entry omitted for "plain")
+    up unmatched "plain" text instead of a wrong badge. Real
+    tokenization (the morphology-based path) makes this whole class of
+    problem moot by only ever considering matches at real word
+    boundaries in the first place, which is why that path is preferred
+    whenever it's available.
     """
     n = len(text)
     covered = [False] * n
@@ -382,41 +596,8 @@ def find_segments_in_text(text: str):
         if not matched:
             i += 1
 
-    kanji_hits = []  # (start, end, level, entry, raw_id)
-    for idx, char in enumerate(text):
-        if covered[idx] or not is_kanji(char):
-            continue
-        candidates = [
-            (level, entry)
-            for level, kanji_list in KANJI_BY_LEVEL.items()
-            for entry in kanji_list
-            if entry.get("kanji") == char
-        ]
-        if not candidates:
-            continue
-        level, entry = min(candidates, key=lambda c: _level_rank(c[0]))
-        raw_id = kanji_to_id(entry, level)
-        kanji_hits.append((idx, idx + 1, level, entry, raw_id))
-        covered[idx] = True
-
-    # Merge vocab + kanji hits into one ordered, non-overlapping list, then
-    # fill the gaps with plain-text segments.
-    hits = sorted(vocab_hits + kanji_hits, key=lambda h: h[0])
-    segments = []
-    cursor = 0
-    for start, end, level, entry, raw_id in hits:
-        if start > cursor:
-            segments.append({"text": text[cursor:start], "start": cursor, "end": start, "type": "plain"})
-        seg_type = "vocab" if (start, end, level, entry, raw_id) in vocab_hits else "kanji"
-        segments.append({
-            "text": text[start:end], "start": start, "end": end, "type": seg_type,
-            "level": level, "raw_id": raw_id, "entry": serializable_entry(entry),
-        })
-        cursor = end
-    if cursor < n:
-        segments.append({"text": text[cursor:n], "start": cursor, "end": n, "type": "plain"})
-
-    return segments
+    kanji_hits = _kanji_fallback_hits(text, covered)
+    return _assemble_segments(text, vocab_hits, kanji_hits)
 
 
 def attach_stats_to_segments(segments: list, states: dict, user_id: str) -> list:
