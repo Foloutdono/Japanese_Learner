@@ -17,6 +17,28 @@ const STATUS_COLORS = {
   due:          'var(--accent)',
 }
 
+// Word-type colors for the inline reading-practice badges (2026-08 —
+// previously these were colored by SRS learning status, same as
+// STATUS_COLORS above; that state now only shows in the detail panel's
+// StatusBadge, see DetailPanel below). Picked from the theme's existing
+// accent3–accent9 range specifically because those aren't used
+// elsewhere for a fixed semantic meaning the way --accent/--accent2/
+// --success/--warning/--danger are (feedback colors, primary actions) —
+// reusing one of those for a word-type color would make it look like
+// this word is somehow "correct" or "the main action" rather than just
+// "a noun". category is computed server-side (see card_lookup.py's
+// _assemble_segments / vocab_extras.word_category) from the word's own
+// dictionary part of speech, not from the one sentence it happens to
+// appear in, so the same card is always the same color everywhere.
+const CATEGORY_COLORS = {
+  grammar:   'var(--accent3)', // purple — structural/grammar points
+  verb:      'var(--accent4)', // blue
+  noun:      'var(--accent6)', // teal
+  adjective: 'var(--accent5)', // tan/brown
+  kanji:     'var(--accent8)', // mauve — single-kanji badges
+  other:     'var(--text-secondary)', // vocab that isn't verb/noun/adj
+}
+
 const MOBILE_BREAKPOINT = 768
 
 // NOTE ON TRANSLATION KEYS: this rewrite (2026-08, real example
@@ -436,7 +458,7 @@ function SessionView({
                         key={i}
                         onClick={() => openSegmentDetail(seg)}
                         className={`word-span${seg.type !== 'plain' ? ' word-span--clickable' : ''}`}
-                        style={{ '--word-color': seg.type === 'plain' ? '#fff' : (STATUS_COLORS[seg.stats.status] || STATUS_COLORS.not_started) }}
+                        style={{ '--word-color': seg.type === 'plain' ? '#fff' : (CATEGORY_COLORS[seg.category] || CATEGORY_COLORS.other) }}
                         title={seg.type !== 'plain' ? (t.clickForDetails) : undefined}
                       >
                         {seg.text}
