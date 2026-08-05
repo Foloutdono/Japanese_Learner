@@ -4,6 +4,7 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import EmptyState from '../components/EmptyState'
+import { Loading } from '../components/Loading'
 
 export default function DecksScreen({ session }) {
   const navigate  = useNavigate()
@@ -38,6 +39,10 @@ export default function DecksScreen({ session }) {
     apiFetch('/api/decks', session)
       .then(r => r.json())
       .then(data => { setDecks(data.decks || []); setLoading(false) })
+      // Without this, a failed/unreachable request left `loading` true
+      // forever — the spinner just spun with no way out. Falls back to
+      // an empty list (→ the "no decks yet" EmptyState) instead.
+      .catch(() => setLoading(false))
   }
 
   function createDeck() {
@@ -55,14 +60,14 @@ export default function DecksScreen({ session }) {
   }
 
   function deleteDeck(id, name) {
-    if (!confirm(`${t.delete} « ${name} » ?`)) return
+    if (!confirm(`${t.delete} "${name}"?`)) return
     apiFetch(`/api/decks/${id}`, session, { method: 'DELETE' })
       .then(() => setDecks(prev => prev.filter(d => d.id !== id)))
   }
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title={t.decks} />
+      <TopBar onBack={() => navigate('/')} title={t.decks} autoHide />
 
       <div className="container page-pad">
 
@@ -103,9 +108,7 @@ export default function DecksScreen({ session }) {
           </div>
         )}
 
-        {loading && (
-          <div className="loading-block">{t.loading}</div>
-        )}
+        {loading && <Loading />}
 
         {!loading && decks.length === 0 && (
           <EmptyState icon="📚" message={t.noDecks} hint={t.createFirstDeck} />

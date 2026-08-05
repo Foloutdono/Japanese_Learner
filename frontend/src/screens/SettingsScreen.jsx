@@ -19,7 +19,7 @@ export default function SettingsScreen() {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title={t.settings} />
+      <TopBar onBack={() => navigate('/')} title={t.settings} autoHide />
 
       <div className="container settings-container">
         <SectionHeader title={t.preferences} />
