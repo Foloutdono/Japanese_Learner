@@ -95,16 +95,23 @@ const quiz = {
   selectKanaSet:     'Choose a kana set',
   selectPhase:       'Choose your training phase',
 
-  byLevel: 'JLPT', 
-  byLevelDesc: 'The standard JLPT levels from N5 to N1, with the most common words and kanji in each level', 
-  byFrequency: 'Word frequency',
-  byFrequencyDesc: 'The frequency of words in real Japanese text, from most common to least common', 
-  byMastery: 'My cards',
-  byMasteryDesc: "Sentences made entirely of words you're currently learning or have mastered",
-  selectStudySource: 'Choose your study source', 
-  selectTier: 'Choose a frequency tier', 
-  kanjiUnit: 'kanji', 
-  loadError: 'Error loading tiers. Try again.',
+  byLevel:           'JLPT',
+  byLevelDesc:       'The standard JLPT levels from N5 to N1, with the most common words and kanji in each level',
+  byFrequency:       'Word frequency',
+  byFrequencyDesc:   'The frequency of words in real Japanese text, from most common to least common',
+  byMastery:         'My cards',
+  byMasteryDesc:     "Sentences made entirely of words you're currently learning or have mastered",
+  // Vocabulary's third study-source option — every JMdict word outside
+  // the JLPT curriculum, ranked by frequency (see VocabScreen.jsx).
+  byJmdict:          'Beyond JLPT',
+  byJmdictDesc:      'Every dictionary word outside the JLPT curriculum, ranked by frequency',
+  selectStudySource: 'Choose your study source',
+  selectTier:        'Choose a frequency tier',
+  kanjiUnit:         'kanji',
+  loadError:         'Error loading tiers. Try again.',
+  // Label for the Top 100/200/500/1000 size toggle above a tier list
+  // (see TierSelector.jsx) — aria-label only, not visible text.
+  tierSizeLabel:     'Tier size',
 
   levelHintN5:       'Beginner level',
   levelHintN4:       'Elementary level',
@@ -274,6 +281,15 @@ const reading = {
   didYouGetIt:          'Did you get it right?',
   gradeCorrect:         'I got it right',
   gradeIncorrect:       'I got it wrong',
+
+  // Word-by-word breakdown toggle + its per-word navigation
+  // (ReadingScreen.jsx) — shown once a phrase has been graded.
+  showBreakdown:        'Show breakdown',
+  hideBreakdown:        'Hide breakdown',
+  preparingBreakdown:   'Preparing breakdown…',
+  jumpToWord:           'Jump to this word',
+  previousWord:         'Previous word',
+  nextWord:             'Next word',
 }
 // ── Reading comprehension ────────────────────────────────────────────
 const readingComprehension = {
@@ -322,6 +338,9 @@ const dictionary = {
   syllabaryNSolo:    'ん',
   syllabaryVoiced:   'Voiced sounds (dakuten / handakuten)',
   composingKanji:    'Made of these kanji',
+  // Icon-button title/aria-label on the dictionary-lookup action that
+  // sits on a revealed card (RevealActions in QuizComponents.jsx).
+  openDictionary:    'Open dictionary entry',
 }
 
 // Reading-comprehension / generic reading labels
@@ -447,6 +466,12 @@ const decks = {
   writePractice:     'Writing practice',
   revealAnswer:      'Reveal answer',
   typeAnswer:        'Type your answer...',
+  // Custom vocab/kanji deck phase labels (StudyScreen.jsx) — K+K→S is
+  // Kanji+Kana → Sens (meaning), same three-phase progression as the
+  // built-in vocab/kanji decks.
+  studyPhase1:       'Phase 1 — K+K→S',
+  studyPhase2:       'Phase 2 — K→S',
+  studyPhase3:       'Phase 3 — S→K',
 }
 
 export default {

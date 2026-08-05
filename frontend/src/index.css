@@ -363,6 +363,8 @@ button:focus-visible {
 .choice-row__main {
   display: flex;
   flex: 1;
+  min-width: 0; /* let title/desc actually shrink+ellipsize instead of
+                    forcing the row wider than its flex basis */
   align-items: baseline;
   justify-content: space-between;
   flex-wrap: wrap;
@@ -380,6 +382,9 @@ button:focus-visible {
   font-weight: 600;
   font-size: 1.4rem;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .choice-row__desc {
@@ -423,6 +428,16 @@ input:focus { border-color: var(--accent2); }
 .card {
   background: var(--bg-card);
   padding: 24px;
+}
+
+/* Vertical breathing room for a plain `.container` page that isn't
+   `.quiz-area` (which already bakes in its own padding) — e.g. the
+   reading-comprehension results screen. Mirrors `.dict-page`'s
+   top/bottom rhythm so a page like this doesn't sit flush against the
+   TopBar with no space above its first card. */
+.page-pad {
+  padding-top: 24px;
+  padding-bottom: 40px;
 }
 
 /* Section header — serif-JP title + a short seal-red stroke instead
@@ -6227,6 +6242,11 @@ input:focus { border-color: var(--accent2); }
 @media (max-width: 640px) {
   .choice-row__main { flex-direction: column; align-items: flex-start; gap: 4px; }
   .choice-row__desc { text-align: left; max-width: none; }
+  /* Once the row is stacked into a column above, there's no sibling
+     fighting the title for horizontal space anymore — let a long
+     (often translated) label wrap onto a second line instead of
+     ellipsizing, since a level/mode name is worse truncated than tall. */
+  .choice-row__title { white-space: normal; overflow: visible; text-overflow: clip; }
   .home-grid { grid-template-columns: 1fr; }
   .landing-hero { padding: 72px 20px 60px; }
   .landing-hero__glyph { font-size: 3.6rem; }

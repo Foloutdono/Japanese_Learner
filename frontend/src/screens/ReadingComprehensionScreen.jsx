@@ -137,8 +137,11 @@ export default function ReadingComprehensionScreen({ session }) {
   if (stage === 'selecting') {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.comprehensionTitle} />
-        <SelectionScreen subtitle={t.selectLevel}>
+        <TopBar onBack={() => navigate('/')} title={t.comprehensionTitle} autoHide />
+        {/* No subtitle here — LevelSelector supplies its own header
+            (defaults to t.selectLevel), same convention as Kanji/Vocab;
+            passing subtitle too used to render the header twice. */}
+        <SelectionScreen>
           <LevelSelector onSelect={startSession} color="var(--accent3)" />
         </SelectionScreen>
       </div>
@@ -149,7 +152,7 @@ export default function ReadingComprehensionScreen({ session }) {
   if (stage === 'loading') {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} />
+        <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} autoHide />
         <div className="comp-loading-wrap">
           <Loading />
           <div className="comp-loading-text">
@@ -164,7 +167,7 @@ export default function ReadingComprehensionScreen({ session }) {
   if (stage === 'error') {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} />
+        <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} autoHide />
         <div className="container comp-error-page">
           <div className="card comp-error-card">{error}</div>
           <button onClick={() => startSession(level)} className="comp-retry-btn">

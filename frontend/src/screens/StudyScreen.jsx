@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
@@ -25,19 +25,23 @@ export default function StudyScreen({ session }) {
     const { state }     = useLocation()
     const deck          = state?.deck
 
+    // Labels sourced from `t` (were hardcoded English literals before —
+    // this is the one spot in the file that never went through
+    // translation) so a French-language user doesn't hit English text
+    // here while the rest of the config screen is translated.
     const MODES_BY_TYPE = {
-        flashcard: [{ key: 'flashcard', label: 'Flashcard' }],
+        flashcard: [{ key: 'flashcard', label: t.modeFlashcard }],
         vocab:     [
-            { key: 'flashcard', label: 'Flashcard' },
-            { key: 'kk-s',     label: 'Phase 1 — K+K→S' },
-            { key: 'k-k',      label: 'Phase 2 — K→S' },
-            { key: 's-k',      label: 'Phase 3 — S→K' },
+            { key: 'flashcard', label: t.modeFlashcard },
+            { key: 'kk-s',     label: t.studyPhase1 },
+            { key: 'k-k',      label: t.studyPhase2 },
+            { key: 's-k',      label: t.studyPhase3 },
         ],
         kanji:     [
-            { key: 'flashcard', label: 'Flashcard' },
-            { key: 'kk-s',     label: 'Phase 1 — K+K→S' },
-            { key: 'k-k',      label: 'Phase 2 — K→S' },
-            { key: 's-k',      label: 'Phase 3 — S→K' },
+            { key: 'flashcard', label: t.modeFlashcard },
+            { key: 'kk-s',     label: t.studyPhase1 },
+            { key: 'k-k',      label: t.studyPhase2 },
+            { key: 's-k',      label: t.studyPhase3 },
         ],
     }
 
@@ -55,6 +59,21 @@ export default function StudyScreen({ session }) {
     const [configured, setConfigured]   = useState(false)
     const [xpToast, setXpToast]         = useState(null)
     const [cardStamp, setCardStamp]     = useState(null)
+    const [locked, setLocked]           = useState(false)
+
+    // Same gating pattern as Kana/Kanji/Vocab/Grammar: advance() only
+    // ever runs once every outcome triggered by the current review —
+    // the XP toast (including an indefinite level-up hold), any stage
+    // stamp, and a writing drill if one triggers — has actually
+    // finished, instead of firing the moment postReview is called.
+    // Kept in a ref, not state — nothing needs to re-render off it,
+    // it's only ever read at the moment a gate closes.
+    const pendingGatesRef = useRef(new Set())
+    // Guards against advancing twice for the same review — see the
+    // other screens' identical comment for the full race this
+    // prevents (the gate set can reach empty more than once per
+    // review).
+    const advancedRef = useRef(false)
 
     useEffect(() => {
         const saved = window.localStorage.getItem('jp-theme')
@@ -107,37 +126,70 @@ export default function StudyScreen({ session }) {
         setShowDrawing(false)
     }, [card?.card_id])
 
+    // advance() only ever runs once every gate above has cleared — see
+    // pendingGatesRef — and only once per review, even if the gate set
+    // empties out more than once (see advancedRef above). Same helper
+    // as Kana/Kanji/Vocab/Grammar.
+    function checkAdvance() {
+        if (pendingGatesRef.current.size === 0 && !advancedRef.current) {
+            advancedRef.current = true
+            advance()
+            setLocked(false)
+        }
+    }
+
     function postReview(quality) {
-        // Lock: a level-up holds the screen open until its reward is
-        // claimed (see XpToast.jsx), and RatingBar is hidden for the
-        // same reason below.
-        if (xpToast?.leveledUp) return
+        // Locked the instant a rating is picked, until the card is
+        // actually replaced — covers a writing drill if one triggers,
+        // the XP toast (including an indefinite level-up hold), and
+        // any stage stamp, so nothing can land on a card that's
+        // already mid-celebration, and a second tap can't fire a
+        // review twice. Same lock as Kana/Kanji/Vocab/Grammar.
+        if (locked) return
+        setLocked(true)
+        setShowRating(false)
 
         const isWrong = quality <= 2
         const isKanji = card?.deck_type === 'kanji' || card?.source === 'builtin_kanji'
         const needTraining = isWrong && isKanji && drawingEnabled && card.front
+        const cardId = card.card_id
+
+        advancedRef.current = false
+        const gates = pendingGatesRef.current
 
         if (needTraining) {
-            setShowRating(false)
+            gates.add('training')
             setShowDrawing(true)
-            // advance() happens once the drawing drill is dismissed
-            // (see DrawingCanvas's onDone below), not here.
-        } else {
-            // The next card is already sitting in the queue — advancing
-            // is a local pop, no network round trip to wait on.
-            advance()
+            // The 'training' gate clears once the drawing drill is
+            // dismissed (see DrawingCanvas's onDone below).
         }
 
+        // Unlike Kana/Kanji/Vocab/Grammar, a deck review's XP / level-up
+        // / stage outcome isn't precomputed on the card (custom decks
+        // have no review_preview to draw from) — it's only known once
+        // this POST resolves. So, unavoidably, the 'review' gate holds
+        // advance() until the response is in, instead of the instant
+        // local pop the other screens get from already knowing the
+        // outcome up front. This is the one place that request can't
+        // be pure fire-and-forget the way it is elsewhere.
+        gates.add('review')
         apiFetch(`/api/decks/${deck_id}/review`, session, {
             method: 'POST',
-            body: JSON.stringify({ card_id: card.card_id, mode, quality }),
+            body: JSON.stringify({ card_id: cardId, mode, quality }),
         }).then(r => r.json()).then(data => {
             if (typeof data.xp_earned === 'number') {
+                gates.add('toast')
                 setXpToast({ amount: data.xp_earned, id: Date.now(), leveledUp: data.leveled_up, newLevel: data.new_level, quality })
                 applyXpGain({ amount: data.xp_earned, leveledUp: data.leveled_up, newLevel: data.new_level })
             }
-            if (data.stage_up) setCardStamp({ id: Date.now(), to: data.stage_up, cardKey: card.card_id })
-        }).catch(() => {})
+            if (data.stage_up) {
+                gates.add('stamp')
+                setCardStamp({ id: Date.now(), to: data.stage_up, cardKey: cardId })
+            }
+        }).catch(() => {}).finally(() => {
+            gates.delete('review')
+            checkAdvance()
+        })
     }
 
     function onMCQAnswer(choice) {
@@ -169,11 +221,11 @@ export default function StudyScreen({ session }) {
     if (!configured) {
         return (
         <div className="screen">
-            <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? t.study} />
+            <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? t.study} autoHide />
             <SelectionScreen>
                 <div className="selector-header">
                     <div className="selector-header__eyebrow">{deck?.name}</div>
-                    <div className="selector-header__title">{t?.studyMode ?? "Mode d'étude"}</div>
+                    <div className="selector-header__title">{t.studyMode}</div>
                 </div>
 
                 <div className="choice-list">
@@ -194,7 +246,7 @@ export default function StudyScreen({ session }) {
 
                 {(deck?.type === 'vocab' || deck?.type === 'kanji') && (
                     <div className="study-config-section">
-                        <div className="selector-header__eyebrow">{t?.mixWithJLPT ?? 'Mélanger avec les listes JLPT'}</div>
+                        <div className="selector-header__eyebrow">{t.mixWithJLPT}</div>
                         <div className="study-level-row">
                             {JLPT_LEVELS.map(l => (
                                 <button key={l}
@@ -246,7 +298,11 @@ export default function StudyScreen({ session }) {
                     </button>
                 )}
             />
-            <XpToast toast={xpToast} onDone={() => setXpToast(null)} />
+            <XpToast toast={xpToast} onDone={() => {
+                setXpToast(null)
+                pendingGatesRef.current.delete('toast')
+                checkAdvance()
+            }} />
 
             <div className="container quiz-area">
                 {loading && <Loading />}
@@ -254,7 +310,11 @@ export default function StudyScreen({ session }) {
 
                 {card && !loading && (
                 <>
-                    <CardTransition cardKey={card.card_id} stamp={cardStamp} stage={card.stage} onStampDone={() => setCardStamp(null)}>
+                    <CardTransition cardKey={card.card_id} stamp={cardStamp} stage={card.stage} onStampDone={() => {
+                        setCardStamp(null)
+                        pendingGatesRef.current.delete('stamp')
+                        checkAdvance()
+                    }}>
                         <PromptCard>
                             {(mode === 'flashcard' || card.source === 'custom') ? (
                                 <Flashcard
@@ -310,17 +370,21 @@ export default function StudyScreen({ session }) {
                             onSubmit={onTypeSubmit}
                             submitted={submitted}
                             answer={card.back}
-                            placeholder={t?.typeAnswer ?? 'Tapez votre réponse...'}
+                            placeholder={t.typeAnswer}
                         />
                     )}
 
-                    <RatingBar active={showRating && !xpToast?.leveledUp} onRate={postReview} />
+                    <RatingBar active={showRating && !locked} onRate={postReview} />
 
                     {showDrawing && (
                         <DrawingCanvas
                             kanji={card.front}
                             meaning={card.back}
-                            onDone={advance}
+                            onDone={() => {
+                                setShowDrawing(false)
+                                pendingGatesRef.current.delete('training')
+                                checkAdvance()
+                            }}
                         />
                     )}
                 </>

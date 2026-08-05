@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 import { playClick } from './sound'
 import { Readings, ReadingGroup } from './Readings'
+import { Loading } from './Loading'
 import { DictionaryLookupSheet, SearchIcon, SpeakIcon, speakJapanese } from './DictionaryDetail'
 
 // ── Is the page actually cramped? ──────────────────────────
@@ -202,24 +203,13 @@ export function DoneMessage({ onBack }) {
   )
 }
 
-// ── Loading ───────────────────────────────────────────────
-export function Loading() {
-  const { t } = useLang()
-  return (
-    <div className="quiz-loading">
-      <svg className="quiz-loading__ensor" viewBox="0 0 48 48" aria-hidden="true">
-        <circle
-          className="quiz-loading__ensor-circle"
-          cx="24" cy="24" r="19"
-          fill="none"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-      </svg>
-      <span className="quiz-loading__text">{t.loading}</span>
-    </div>
-  )
-}
+// Loading now lives in ./Loading (imported above) — re-exported here
+// too for backward compatibility, since some screens still import it
+// from QuizComponents. This used to be a second copy of the exact
+// same markup living in both files; keeping one source of truth means
+// a future tweak to the loading ring can't drift out of sync between
+// the two.
+export { Loading }
 
 // ── Deck progress (à apprendre / en cours / maîtrisé) ─────
 export function DeckProgress({ stats }) {

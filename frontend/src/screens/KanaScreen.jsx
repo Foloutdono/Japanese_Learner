@@ -218,7 +218,7 @@ export default function KanaScreen({ session }) {
   if (!selectedSet) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.kana} />
+        <TopBar onBack={() => navigate('/')} title={t.kana} autoHide />
         <SelectionScreen>
           <ModeSelector
             modes={SETS.map(s => ({ key: s.slug, label: s.label }))}
