@@ -6,19 +6,25 @@ phrase analyzer and the reading-practice mode.
 
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
 from quiz_modes import STATUS_MODE
 import vocab_extras
 import morphology
-import re
 
-# Representative mode used to gauge "do I know this word/kanji/grammar
-# point" for the clickable badges — see quiz_modes.py for the reasoning.
-# Vocab, kanji, and grammar all use the same mode here, but they're kept
-# as separate names since nothing requires them to always match.
+# Representative mode used to gauge "do I know this word/kanji" for the
+# clickable badges — see quiz_modes.py for the reasoning. Vocab and
+# kanji both use the same mode here, but they're kept as separate names
+# since nothing requires them to always match.
+#
+# NOTE (2026-08): grammar-point lookup (GRAMMAR_STATUS_MODE, the old
+# _grammar_hits/_index_grammar_by_surface machinery) was removed
+# entirely — segmentation for both the phrase analyzer and reading
+# practice is now mostly AI-driven (see phrase.py's LLM-based word
+# segmentation), and the old literal-substring grammar matcher was a
+# morphology-only heuristic layered on top of that. If per-grammar-point
+# SRS tracking is wanted again later, it belongs in the AI segmentation
+# result, not resurrected here.
 VOCAB_STATUS_MODE = STATUS_MODE
 KANJI_STATUS_MODE = STATUS_MODE
-GRAMMAR_STATUS_MODE = STATUS_MODE
 
 # Used to pick between multiple deck entries that share the same surface
 # form (e.g. 歩 is both the everyday word "marcher"/"pas" and the shogi
@@ -299,16 +305,18 @@ def _kanji_fallback_hits(text: str, covered: list):
 
 
 def _assemble_segments(text: str, vocab_hits: list, grammar_hits: list, kanji_hits: list):
-    """Merge vocab + grammar + kanji hits into one ordered, non-
-    overlapping list of segments covering the whole string, filling
-    gaps with plain text — shared tail of both scan paths so their
-    output shape stays identical.
+    """Merge vocab + kanji hits into one ordered, non-overlapping list of
+    segments covering the whole string, filling gaps with plain text —
+    shared tail of both scan paths so their output shape stays
+    identical. `grammar_hits` is always empty now (see the 2026-08 note
+    on GRAMMAR_STATUS_MODE above) — kept as a parameter only so both
+    call sites don't need to change shape.
 
-    Each non-plain segment also carries a "category" — "grammar",
-    "kanji", or (for vocab) whatever vocab_extras.word_category says
-    (verb/adjective/noun/other) — computed uniformly here regardless of
-    which scan path produced the hit, so both paths' output is styled
-    the same way on the frontend."""
+    Each non-plain segment also carries a "category" — "kanji", or (for
+    vocab) whatever vocab_extras.word_category says (verb/adjective/
+    noun/other) — computed uniformly here regardless of which scan path
+    produced the hit, so both paths' output is styled the same way on
+    the frontend."""
     n = len(text)
     hits = sorted(vocab_hits + grammar_hits + kanji_hits, key=lambda h: h[0])
     segments = []
@@ -322,9 +330,6 @@ def _assemble_segments(text: str, vocab_hits: list, grammar_hits: list, kanji_hi
             word = entry.get("kanji") or entry.get("word") or entry.get("vocab") or ""
             kana = entry.get("kana") or entry.get("reading") or ""
             category = vocab_extras.word_category(word, kana)
-        elif key in grammar_hits:
-            seg_type = "grammar"
-            category = "grammar"
         else:
             seg_type = "kanji"
             category = "kanji"
@@ -429,110 +434,6 @@ def _resolve_kana(reading: str, pos: str, auxiliary_use: bool):
     return level, entry, vocab_to_id(entry, level)
 
 
-_TILDE_RE = re.compile(r"[～〜]")
-
-
-def _grammar_candidate_strings(entry: dict) -> list:
-    """Literal, directly-matchable surface forms extracted from one
-    grammar_data.py entry's messy scraped "grammar" field — e.g.
-    "じゃない・ではない" (registered variants) -> ["じゃない",
-    "ではない"], "あまり～ない" (a "～"-templated pattern showing where
-    the conjugated verb/adjective goes) -> ["あまり"] (the longer,
-    more distinctive side of the template; the generic "ない" half on
-    its own would badge constantly and mean almost nothing).
-
-    Deliberately conservative: candidates under 2 characters are
-    dropped outright (too generic/collision-prone to badge as a whole
-    grammar point on their own — same reasoning as the vocab kana-
-    reading fallback's length gate), and a field with no template
-    marker and no listed variant (already a single literal string) is
-    used as-is when long enough. Fields that are category labels
-    rather than actual patterns (e.g. "い-adjectives") simply never
-    match anything in real Japanese text, so no special-casing is
-    needed for those — they're harmless dead entries in the index.
-    """
-    raw = entry.get("grammar") or ""
-    variants = re.split(r"[・/]", raw)
-    out = []
-    for v in variants:
-        v = v.strip()
-        if not v:
-            continue
-        if _TILDE_RE.search(v):
-            parts = [p.strip() for p in _TILDE_RE.split(v) if p.strip()]
-            if not parts:
-                continue
-            longest = max(parts, key=len)
-            if len(longest) >= 2:
-                out.append(longest)
-            continue
-        if len(v) >= 2:
-            out.append(v)
-    return out
-
-
-def _index_grammar_by_surface():
-    """literal surface text -> [(level, entry), ...] — see
-    _grammar_candidate_strings. Multiple entries can register the same
-    candidate text (rare, but the "・"/" / " variant splitting means
-    it's possible); _grammar_hits below just takes the lowest-level one,
-    same tie-break as everywhere else in this file."""
-    index = {}
-    for level, grammar_list in GRAMMAR_BY_LEVEL.items():
-        for entry in grammar_list:
-            for candidate in _grammar_candidate_strings(entry):
-                index.setdefault(candidate, []).append((level, entry))
-    return index
-
-
-_GRAMMAR_INDEX = _index_grammar_by_surface()
-_MAX_GRAMMAR_LEN = max((len(c) for c in _GRAMMAR_INDEX), default=0)
-
-
-def _grammar_hits(text: str, morphemes: list, covered: list):
-    """(start, end, level, entry, raw_id) for grammar patterns found in
-    `text`, tried ONLY between two real morpheme boundaries (a
-    morpheme's own start or end offset) — never across the middle of
-    one. That's what makes it safe to match grammar phrases as plain
-    literal substrings despite some of them being quite short and
-    generic (だけ, ばかり, けど, ...): the same boundary-crossing risk
-    that made bare-kana vocab matching dangerous in the legacy scan
-    (お金は|いらない mis-matching はい) doesn't apply here, because
-    every candidate start/end is a position MeCab already decided was
-    a real word edge, not an arbitrary character offset.
-
-    Only ever called on the morphology-based path — the legacy
-    (substring-scan) fallback doesn't have real morpheme boundaries to
-    anchor this against, so it skips grammar matching entirely rather
-    than risk the same class of false positive real tokenization
-    exists specifically to avoid. Only considers not-yet-`covered`
-    spans, so a vocab match always wins a same-span conflict (see
-    _find_segments_morphological, which runs this after vocab hits are
-    already in `covered`).
-    """
-    if not morphemes or not _GRAMMAR_INDEX:
-        return []
-    boundaries = sorted({m.start for m in morphemes} | {m.end for m in morphemes})
-    hits = []
-    for start in boundaries:
-        if start < len(text) and covered[start]:
-            continue
-        ends = [b for b in boundaries if start < b <= start + _MAX_GRAMMAR_LEN]
-        for end in sorted(ends, reverse=True):
-            if any(covered[k] for k in range(start, end)):
-                continue
-            entries = _GRAMMAR_INDEX.get(text[start:end])
-            if not entries:
-                continue
-            level, entry = min(entries, key=lambda c: _level_rank(c[0]))
-            raw_id = grammar_to_id(entry, level)
-            hits.append((start, end, level, entry, raw_id))
-            for k in range(start, end):
-                covered[k] = True
-            break
-    return hits
-
-
 def _find_segments_morphological(text: str):
     """Preferred scan path (see find_segments_in_text): tokenize with a
     real morphological analyzer instead of guessing word boundaries by
@@ -584,9 +485,10 @@ def _find_segments_morphological(text: str):
                 covered[k] = True
         i += 1
 
-    grammar_hits = _grammar_hits(text, morphemes, covered)
+    # Grammar-pattern matching (_grammar_hits) was removed in the 2026-08
+    # AI-segmentation rewrite — see the note on GRAMMAR_STATUS_MODE above.
     kanji_hits = _kanji_fallback_hits(text, covered)
-    return _assemble_segments(text, vocab_hits, grammar_hits, kanji_hits)
+    return _assemble_segments(text, vocab_hits, [], kanji_hits)
 
 
 def find_segments_in_text(text: str):
@@ -731,7 +633,7 @@ def _find_segments_legacy(text: str):
 
 def attach_stats_to_segments(segments: list, states: dict, user_id: str) -> list:
     """Add a "stats" dict to each non-plain segment, using the right mode per type."""
-    modes = {"vocab": VOCAB_STATUS_MODE, "grammar": GRAMMAR_STATUS_MODE}
+    modes = {"vocab": VOCAB_STATUS_MODE}
     enriched = []
     for seg in segments:
         if seg["type"] == "plain":

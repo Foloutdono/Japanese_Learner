@@ -461,17 +461,31 @@ def _pick_words_mastery(user_id: str, count: int) -> list[tuple[str, str, str | 
     return picked
 
 
-def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None, segments, user_id: str | None = None) -> dict:
-    if segments is None:
-        states = srs.get_user_states(user_id) if user_id else {}
-        segments = attach_stats_to_segments(find_segments_in_text(jp), states, user_id)
+def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None) -> dict:
+    """
+    NOTE (2026-08): this used to also attach a `segments` field, built
+    per-request via find_segments_in_text/attach_stats_to_segments (the
+    morphology-based scanner in card_lookup.py). That's gone now —
+    reading practice's word/kanji breakdown is served by the same
+    AI-driven analyzer the phrase-analyzer screen uses (POST
+    /api/phrase/analyze, save=false — see ReadingScreen.jsx), fired in
+    the background as soon as a phrase is shown so it's ready by the
+    time the reader wants it. That gives one consistent, LLM-quality
+    segmentation everywhere in the app instead of two different
+    scanners with different quirks, and drops a synchronous
+    morphology pass from every batch fetch. The morphology scanner
+    itself isn't gone — _pick_words_mastery below still uses it
+    server-side to verify a candidate sentence is entirely made of the
+    learner's own learning/mastered vocabulary before ever offering it
+    — that's a cheap bulk filter, not something worth an LLM call per
+    candidate sentence.
+    """
     return {
         "phrase": jp,
         "romaji": phrase_to_romaji(jp),
         "translation": en,
         "translation_lang": "en",  # see get_reading_batch's docstring
         "display_seconds": _display_seconds(jp),
-        "segments": segments,
         "source_word": {"kanji": kanji, "kana": kana, "level": level},
     }
 
@@ -534,7 +548,7 @@ def get_reading_batch(
         word_pool = _pick_words_level(level, _LEVEL_CANDIDATE_SCAN_CAP)
         picked = _pick_level_appropriate_phrases(word_pool, level, count)
         phrases = [
-            _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl, segments=None, user_id=user_id)
+            _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl)
             for kanji, kana, lvl, example in picked
         ]
     elif source == "frequency":
@@ -557,7 +571,7 @@ def get_reading_batch(
                     break
                 picked = _pick_level_appropriate_phrases(words, lvl, remaining, scan_cap=len(words))
                 phrases.extend(
-                    _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl2, segments=None, user_id=user_id)
+                    _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl2)
                     for kanji, kana, lvl2, example in picked
                 )
                 remaining = count - len(phrases)
@@ -568,11 +582,14 @@ def get_reading_batch(
                 example = vocab_extras.pick_random_example(kanji, kana, "", "en")
                 if example is None:
                     continue
-                phrases.append(_finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl, segments=None, user_id=user_id))
+                phrases.append(_finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl))
     elif source == "mastery":
         picked = _pick_words_mastery(user_id, count)
         phrases = [
-            _finish_phrase(jp, en, kanji, kana, lvl, segments=segments)
+            _finish_phrase(jp, en, kanji, kana, lvl)
+            # `segments` here is only the internal gating result used to
+            # verify the sentence is fully learning/mastered vocabulary
+            # (see _pick_words_mastery) — not sent to the client anymore.
             for kanji, kana, lvl, jp, en, segments in picked
         ]
     else:

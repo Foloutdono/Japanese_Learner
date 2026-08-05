@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+import time
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException
@@ -52,6 +53,13 @@ SYSTEM_PROMPT = """You are a Japanese language tutor. Given a Japanese phrase, s
 
 class PhraseRequest(BaseModel):
     phrase: str
+    # False for callers that just want the AI breakdown without adding
+    # an entry to the user's phrase-analyzer history — added for reading
+    # practice (see reading.py / ReadingScreen.jsx, 2026-08), which
+    # fires this same endpoint automatically for every phrase served so
+    # the breakdown is ready the moment the reader wants it, and
+    # shouldn't flood /api/phrase/history with one row per phrase read.
+    save: bool = True
 
 
 def _call_llm(phrase: str) -> dict:
@@ -181,6 +189,9 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
         "explanation": llm_result.get("explanation", ""),
         "words": enriched_words,
     }
+
+    if not payload.save:
+        return {**result, "id": None, "created_at": None}
 
     conn = db_conn()
     try:
