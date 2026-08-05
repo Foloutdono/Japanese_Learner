@@ -543,6 +543,13 @@ function SessionView({
 
         {stage === 'feedback' && data && feedback && (
           <>
+            {/* rdg-feedback-card wrapper only exists to scope the mobile
+                max-height override below (see index.css) — PromptCard
+                itself caps at 60vh with internal scroll everywhere else
+                in the app (flashcard sizing), which turns into an
+                unwanted "scroll to see the rest of the breakdown" on
+                small screens once the single-card breakdown is open. */}
+            <div className="rdg-feedback-card">
             <PromptCard>
               {/* Fix: pushing "show breakdown" hides everything above the
                   toggle (phrase/status/romaji/translation/your-answer) so
@@ -606,6 +613,7 @@ function SessionView({
                 </div>
               )}
             </PromptCard>
+            </div>
             <div className="rdg-feedback-actions">
               {feedback.correct === null ? (
                 <div className="rdg-grade-row">
@@ -726,6 +734,7 @@ function BreakdownWordCard({ word, t, onWordClick, onKanjiClick }) {
         <div
           onClick={() => onWordClick(word)}
           className={`phrase-word-card__surface-wrap${word.vocab_match ? ' phrase-word-card__surface-wrap--clickable' : ''}`}
+          title={word.vocab_match ? (t.clickForDetails) : undefined}
         >
           <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(word) }}>
             {word.surface}
@@ -737,9 +746,6 @@ function BreakdownWordCard({ word, t, onWordClick, onKanjiClick }) {
             <span className="phrase-word-card__pos">{word.pos}</span>
           )}
         </div>
-        {word.vocab_match && (
-          <span className="rdg-breakdown-tap-hint">{t.tapForDetails ?? 'Tap for details'} ›</span>
-        )}
       </div>
 
       <div className="phrase-word-card__meaning">{word.meaning}</div>

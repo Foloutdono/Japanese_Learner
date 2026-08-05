@@ -5762,45 +5762,45 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 16px;
   width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
 }
-.rdg-breakdown-card-stage { flex: 1; min-width: 0; max-width: 420px; }
+.rdg-breakdown-card-stage { flex: 0 1 380px; min-width: 0; }
 .rdg-breakdown-card { text-align: left; }
 
+/* Fix: the arrows used to sit at the far edges of the whole panel
+   (flex:1 on the card stage pushed them apart) instead of reading as a
+   pair framing the card. Now the row itself is width-capped and
+   centered, so the buttons sit close to the card and stay vertically
+   centered against it regardless of how many lines the card wraps to. */
 .rdg-breakdown-nav {
   flex-shrink: 0;
+  align-self: center;
   width: 40px;
   height: 40px;
   border-radius: 50%;
   background: var(--bg-panel);
   color: var(--text-primary);
   border: 1px solid var(--border);
-  font-size: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  font-size: 18px;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
-.rdg-breakdown-nav:not(:disabled):hover { background: var(--border); }
+.rdg-breakdown-nav:not(:disabled):hover { background: var(--border); border-color: var(--accent); }
 .rdg-breakdown-nav:not(:disabled):active { transform: scale(0.92); }
-.rdg-breakdown-nav:disabled { opacity: 0.35; cursor: default; }
+.rdg-breakdown-nav:disabled { opacity: 0.3; cursor: default; }
 
 .rdg-breakdown-counter {
   text-align: center;
   font-size: 12px;
   color: var(--text-secondary);
   margin-top: 10px;
-}
-
-/* Fix: a clickable word needed a stronger cue than cursor:pointer — a
-   small "tap for details ›" hint that only appears for words actually
-   matched to something in the deck. */
-.rdg-breakdown-tap-hint {
-  font-size: 11px;
-  color: var(--accent);
-  white-space: nowrap;
 }
 
 /* Frequency-tier "jump to tier" row, below the fetched tier list — see
