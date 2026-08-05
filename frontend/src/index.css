@@ -5550,22 +5550,47 @@ input:focus { border-color: var(--accent2); }
   gap: 8px;
 }
 .phrase-word-card__surface-wrap { cursor: default; }
-.phrase-word-card__surface-wrap--clickable { cursor: pointer; }
+/* Fix: a clickable word used to rely on cursor:pointer alone, which is
+   easy to miss on a card that otherwise reads as plain static text.
+   Now it gets a dashed underline plus a subtle hover/press lift, same
+   affordance language as .phrase-kanji-chip below. */
+.phrase-word-card__surface-wrap--clickable {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 2px 6px;
+  margin: -2px -6px;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.phrase-word-card__surface-wrap--clickable .phrase-word-card__surface {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 5px;
+  text-decoration-color: var(--word-color, currentColor);
+}
+.phrase-word-card__surface-wrap--clickable:hover { background: var(--bg-panel); }
+.phrase-word-card__surface-wrap--clickable:active { transform: scale(0.97); }
 .phrase-word-card__surface { font-size: 22px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .phrase-word-card__reading { font-size: 14px; color: var(--text-secondary); margin-left: 8px; }
 .phrase-word-card__pos { font-size: 11px; color: var(--text-secondary); margin-left: 8px; text-transform: uppercase; }
 .phrase-word-card__meaning { font-size: 15px; margin-top: 6px; }
 
 .phrase-word-card__kanji-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+/* Same affordance treatment as the surface wrap above — a chip that's
+   always clickable (both here and in PhraseAnalyzerScreen), so it gets
+   a permanent hover/press state rather than a modifier class. */
 .phrase-kanji-chip {
   display: flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
   background: var(--bg-panel);
+  border: 1px solid transparent;
   border-radius: 6px;
   padding: 4px 8px;
+  transition: border-color 0.15s ease, transform 0.1s ease;
 }
+.phrase-kanji-chip:hover { border-color: var(--border); }
+.phrase-kanji-chip:active { transform: scale(0.95); }
 .phrase-kanji-chip__char { font-size: 16px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .phrase-kanji-chip__level { font-size: 11px; color: var(--text-secondary); }
 
@@ -5695,7 +5720,10 @@ input:focus { border-color: var(--accent2); }
 /* AI breakdown panel (see ReadingScreen.jsx's AnalysisBreakdown) —
    layered on top of .phrase-line/.phrase-word-card/.phrase-explanation
    (the phrase-analyzer screen's own classes) so the two screens read
-   as the same feature rather than two different UIs. */
+   as the same feature rather than two different UIs. Shown one
+   word/kanji card at a time with prev/next arrows, instead of a
+   scrolling list — the overview line above doubles as a jump-to-word
+   index. */
 .rdg-breakdown-wrap { margin-top: 18px; text-align: left; }
 .rdg-breakdown-toggle {
   display: block;
@@ -5706,12 +5734,74 @@ input:focus { border-color: var(--accent2); }
   border-radius: 8px;
   padding: 8px 18px;
   font-size: 14px;
+  transition: background 0.15s ease;
 }
-.rdg-breakdown-toggle:disabled { opacity: 0.6; }
+.rdg-breakdown-toggle:not(:disabled):hover { background: var(--border); }
+.rdg-breakdown-toggle:disabled { opacity: 0.6; cursor: default; }
+
 .rdg-breakdown { margin-top: 14px; }
-.rdg-breakdown-line { justify-content: center; margin-bottom: 10px; }
-.rdg-breakdown-explanation { text-align: center; margin-bottom: 12px; }
-.rdg-breakdown-words { max-height: 50vh; overflow-y: auto; }
+
+.rdg-breakdown-line { justify-content: center; margin-bottom: 12px; gap: 4px 10px; }
+.rdg-breakdown-line__word {
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 5px;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.rdg-breakdown-line__word:hover { background: var(--bg-panel); }
+.rdg-breakdown-line__word:active { transform: scale(0.95); }
+.rdg-breakdown-line__word--active {
+  background: var(--bg-panel);
+  box-shadow: inset 0 -2px 0 var(--word-color, var(--accent));
+  font-weight: 700;
+}
+
+.rdg-breakdown-explanation { text-align: center; margin-bottom: 16px; }
+
+.rdg-breakdown-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+.rdg-breakdown-card-stage { flex: 1; min-width: 0; max-width: 420px; }
+.rdg-breakdown-card { text-align: left; }
+
+.rdg-breakdown-nav {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.rdg-breakdown-nav:not(:disabled):hover { background: var(--border); }
+.rdg-breakdown-nav:not(:disabled):active { transform: scale(0.92); }
+.rdg-breakdown-nav:disabled { opacity: 0.35; cursor: default; }
+
+.rdg-breakdown-counter {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 10px;
+}
+
+/* Fix: a clickable word needed a stronger cue than cursor:pointer — a
+   small "tap for details ›" hint that only appears for words actually
+   matched to something in the deck. */
+.rdg-breakdown-tap-hint {
+  font-size: 11px;
+  color: var(--accent);
+  white-space: nowrap;
+}
 
 /* Frequency-tier "jump to tier" row, below the fetched tier list — see
    TierPicker in ReadingScreen.jsx (2026-08, frequency-based sentence
@@ -6246,7 +6336,8 @@ input:focus { border-color: var(--accent2); }
   .rdg-grade-btn--right,
   .rdg-next-btn { width: 100%; }
   .rdg-grade-row { flex-direction: column; }
-  .rdg-breakdown-words { max-height: 40vh; }
+  .rdg-breakdown-card-stage { max-width: 100%; }
+  .rdg-breakdown-nav { width: 34px; height: 34px; font-size: 17px; }
 }
 
 @media (max-width: 400px) {

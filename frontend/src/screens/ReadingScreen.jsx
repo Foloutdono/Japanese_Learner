@@ -92,6 +92,11 @@ export default function ReadingScreen({ session }) {
   const [analysis, setAnalysis] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
+  // Which word/kanji card the single-card breakdown carousel is
+  // currently showing — see AnalysisBreakdown. Reset to 0 every time a
+  // new phrase is shown (showPhrase) so the reader always starts at the
+  // first word of a fresh breakdown.
+  const [breakdownIndex, setBreakdownIndex] = useState(0)
 
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
@@ -229,6 +234,7 @@ export default function ReadingScreen({ session }) {
     setFeedback(null)
     setDetail(null)
     setShowBreakdown(false)
+    setBreakdownIndex(0)
     setStage('reading')
     setTimeLeft(phraseData.display_seconds)
     fetchAnalysis(phraseData.phrase)
@@ -415,6 +421,8 @@ export default function ReadingScreen({ session }) {
       analysisLoading={analysisLoading}
       showBreakdown={showBreakdown}
       setShowBreakdown={setShowBreakdown}
+      breakdownIndex={breakdownIndex}
+      setBreakdownIndex={setBreakdownIndex}
       onBack={resetAll}
       onStart={startSession}
       submitAnswer={submitAnswer}
@@ -435,7 +443,7 @@ export default function ReadingScreen({ session }) {
 function SessionView({
   t, source, level, domain, tier, stage, data, timeLeft, answer, setAnswer,
   feedback, score, streak, error, detail, isMobile, analysis, analysisLoading,
-  showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
+  showBreakdown, setShowBreakdown, breakdownIndex, setBreakdownIndex, onBack, onStart, submitAnswer,
   gradeAnswer, next, retry, openAnalysisWordDetail,
   openAnalysisKanjiDetail, closeDetail,
 }) {
@@ -536,32 +544,40 @@ function SessionView({
         {stage === 'feedback' && data && feedback && (
           <>
             <PromptCard>
-              <div className="rdg-feedback-phrase">
-                {data.phrase}
-              </div>
-              <div
-                className="rdg-feedback-status"
-                style={{ '--status-color': feedback.correct === null ? 'var(--text-secondary)' : (feedback.correct ? 'var(--success)' : 'var(--danger)') }}
-              >
-                {feedback.correct === null
-                  ? (t.didYouGetIt)
-                  : (feedback.correct ? (t.correct) : (t.incorrect))}
-              </div>
-              <div className="rdg-feedback-romaji">
-                {t.correctRomaji}: <strong>{feedback.romaji}</strong>
-              </div>
-              {data.translation && (
-                <div className="rdg-feedback-translation">
-                  {/* Real example sentences only carry an English gloss
-                      regardless of UI language — see reading.py's
-                      translation_lang note — so this is labelled
-                      explicitly instead of implying it matches `lang`. */}
-                  {data.translation_lang === 'en' ? (t.translationEnglish ?? 'EN') : t.translation}: {data.translation}
-                </div>
+              {/* Fix: pushing "show breakdown" hides everything above the
+                  toggle (phrase/status/romaji/translation/your-answer) so
+                  the single-card breakdown below gets the room instead of
+                  being squeezed under a wall of already-read text. */}
+              {!showBreakdown && (
+                <>
+                  <div className="rdg-feedback-phrase">
+                    {data.phrase}
+                  </div>
+                  <div
+                    className="rdg-feedback-status"
+                    style={{ '--status-color': feedback.correct === null ? 'var(--text-secondary)' : (feedback.correct ? 'var(--success)' : 'var(--danger)') }}
+                  >
+                    {feedback.correct === null
+                      ? (t.didYouGetIt)
+                      : (feedback.correct ? (t.correct) : (t.incorrect))}
+                  </div>
+                  <div className="rdg-feedback-romaji">
+                    {t.correctRomaji}: <strong>{feedback.romaji}</strong>
+                  </div>
+                  {data.translation && (
+                    <div className="rdg-feedback-translation">
+                      {/* Real example sentences only carry an English gloss
+                          regardless of UI language — see reading.py's
+                          translation_lang note — so this is labelled
+                          explicitly instead of implying it matches `lang`. */}
+                      {data.translation_lang === 'en' ? (t.translationEnglish ?? 'EN') : t.translation}: {data.translation}
+                    </div>
+                  )}
+                  <div className="rdg-feedback-your-answer">
+                    {t.yourAnswer}: {answer}
+                  </div>
+                </>
               )}
-              <div className="rdg-feedback-your-answer">
-                {t.yourAnswer}: {answer}
-              </div>
 
               {feedback.correct !== null && (
                 <div className="rdg-breakdown-wrap">
@@ -580,6 +596,8 @@ function SessionView({
                   {showBreakdown && analysis && (
                     <AnalysisBreakdown
                       analysis={analysis}
+                      index={breakdownIndex}
+                      setIndex={setBreakdownIndex}
                       t={t}
                       onWordClick={openAnalysisWordDetail}
                       onKanjiClick={openAnalysisKanjiDetail}
@@ -630,17 +648,28 @@ function SessionView({
 // language PhraseAnalyzerScreen uses for it (word-colored phrase line +
 // per-word cards), reused here on the AI's OWN segmentation instead of
 // the old morphology-based scan — see reading.py's _finish_phrase note.
-function AnalysisBreakdown({ analysis, t, onWordClick, onKanjiClick }) {
+//
+// One word/kanji card at a time (not a scrolling list) — the overview
+// line up top doubles as a jump-to-word index (tap any word chip to
+// jump straight to its card), and the prev/next arrows step through
+// them in order. `index`/`setIndex` live in the parent (ReadingScreen)
+// so they can be reset to 0 whenever a new phrase is shown.
+function AnalysisBreakdown({ analysis, index, setIndex, t, onWordClick, onKanjiClick }) {
+  const words = analysis.words
+  const current = words[Math.min(index, words.length - 1)]
+  const canPrev = index > 0
+  const canNext = index < words.length - 1
+
   return (
     <div className="rdg-breakdown">
       <div className="phrase-line rdg-breakdown-line">
-        {analysis.words.map((w, i) => (
+        {words.map((w, i) => (
           <span
             key={i}
-            onClick={() => onWordClick(w)}
-            className={`word-span${w.vocab_match ? ' word-span--clickable' : ''}`}
+            onClick={() => setIndex(i)}
+            className={`word-span rdg-breakdown-line__word${i === index ? ' rdg-breakdown-line__word--active' : ''}`}
             style={{ '--word-color': wordColor(w) }}
-            title={w.vocab_match ? (t.clickForDetails) : undefined}
+            title={t.jumpToWord ?? 'Jump to this word'}
           >
             {w.surface}
           </span>
@@ -653,41 +682,84 @@ function AnalysisBreakdown({ analysis, t, onWordClick, onKanjiClick }) {
         </div>
       )}
 
-      <div className="phrase-words-list rdg-breakdown-words">
-        {analysis.words.map((w, i) => (
-          <div key={i} className="card phrase-word-card">
-            <div className="phrase-word-card__top">
-              <div
-                onClick={() => onWordClick(w)}
-                className={`phrase-word-card__surface-wrap${w.vocab_match ? ' phrase-word-card__surface-wrap--clickable' : ''}`}
-              >
-                <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(w) }}>
-                  {w.surface}
-                </span>
-                {w.reading && (
-                  <span className="phrase-word-card__reading">({w.reading})</span>
-                )}
-                {w.pos && (
-                  <span className="phrase-word-card__pos">{w.pos}</span>
-                )}
-              </div>
-            </div>
-            <div className="phrase-word-card__meaning">{w.meaning}</div>
-            {w.kanji_matches?.length > 0 && (
-              <div className="phrase-word-card__kanji-row">
-                {w.kanji_matches.map(k => (
-                  <div key={k.raw_id} onClick={() => onKanjiClick(k)} className="phrase-kanji-chip">
-                    <span className="phrase-kanji-chip__char" style={{ '--word-color': STATUS_COLORS[k.stats.status] }}>
-                      {k.kanji}
-                    </span>
-                    <span className="phrase-kanji-chip__level">{k.level}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+      <div className="rdg-breakdown-card-row">
+        <button
+          onClick={() => setIndex(i => Math.max(0, i - 1))}
+          disabled={!canPrev}
+          className="rdg-breakdown-nav rdg-breakdown-nav--prev"
+          aria-label={t.previousWord ?? 'Previous word'}
+        >
+          ‹
+        </button>
+
+        <CardTransition cardKey={index} className="rdg-breakdown-card-stage">
+          <BreakdownWordCard word={current} t={t} onWordClick={onWordClick} onKanjiClick={onKanjiClick} />
+        </CardTransition>
+
+        <button
+          onClick={() => setIndex(i => Math.min(words.length - 1, i + 1))}
+          disabled={!canNext}
+          className="rdg-breakdown-nav rdg-breakdown-nav--next"
+          aria-label={t.nextWord ?? 'Next word'}
+        >
+          ›
+        </button>
       </div>
+
+      <div className="rdg-breakdown-counter">
+        {index + 1} / {words.length}
+      </div>
+    </div>
+  )
+}
+
+// A single word's card. `phrase-word-card__surface-wrap--clickable` and
+// `phrase-kanji-chip--clickable` (see index.css) both carry a visible
+// affordance now — a dashed underline + tap hint on the word, a lifted
+// hover/press state on kanji chips — rather than relying on cursor:
+// pointer alone, which is easy to miss on a card that otherwise reads
+// as plain text.
+function BreakdownWordCard({ word, t, onWordClick, onKanjiClick }) {
+  return (
+    <div className="card phrase-word-card rdg-breakdown-card">
+      <div className="phrase-word-card__top">
+        <div
+          onClick={() => onWordClick(word)}
+          className={`phrase-word-card__surface-wrap${word.vocab_match ? ' phrase-word-card__surface-wrap--clickable' : ''}`}
+        >
+          <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(word) }}>
+            {word.surface}
+          </span>
+          {word.reading && (
+            <span className="phrase-word-card__reading">({word.reading})</span>
+          )}
+          {word.pos && (
+            <span className="phrase-word-card__pos">{word.pos}</span>
+          )}
+        </div>
+        {word.vocab_match && (
+          <span className="rdg-breakdown-tap-hint">{t.tapForDetails ?? 'Tap for details'} ›</span>
+        )}
+      </div>
+
+      <div className="phrase-word-card__meaning">{word.meaning}</div>
+
+      {word.kanji_matches?.length > 0 && (
+        <div className="phrase-word-card__kanji-row">
+          {word.kanji_matches.map(k => (
+            <div
+              key={k.raw_id}
+              onClick={() => onKanjiClick(k)}
+              className="phrase-kanji-chip"
+            >
+              <span className="phrase-kanji-chip__char" style={{ '--word-color': STATUS_COLORS[k.stats.status] }}>
+                {k.kanji}
+              </span>
+              <span className="phrase-kanji-chip__level">{k.level}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
