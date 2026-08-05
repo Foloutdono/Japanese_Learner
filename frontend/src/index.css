@@ -5795,13 +5795,15 @@ input:focus { border-color: var(--accent2); }
   align-self: center;
   width: 40px;
   height: 40px;
+  padding: 0; /* the global `button` rule's 10px 20px padding, combined
+                 with border-box sizing, was eating the entire content
+                 box at this fixed 40px size — squeezing/off-centering
+                 whatever sat inside. Icon needs the full box. */
   border-radius: 50%;
   background: var(--bg-panel);
   color: var(--text-primary);
   border: 1px solid var(--border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  font-size: 18px;
-  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6357,7 +6359,8 @@ input:focus { border-color: var(--accent2); }
   .rdg-next-btn { width: 100%; }
   .rdg-grade-row { flex-direction: column; }
   .rdg-breakdown-card-stage { max-width: 100%; }
-  .rdg-breakdown-nav { width: 34px; height: 34px; font-size: 17px; }
+  .rdg-breakdown-nav { width: 34px; height: 34px; }
+  .rdg-breakdown-nav svg { width: 16px; height: 16px; }
 }
 
 @media (max-width: 400px) {

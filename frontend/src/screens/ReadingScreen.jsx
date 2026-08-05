@@ -650,6 +650,32 @@ function SessionView({
   )
 }
 
+// Simple stroke-based chevron — real vector paths instead of the
+// `‹`/`›` text glyphs this used to render, whose optical centering
+// varies by font/OS. `display: block` avoids the few px of inline
+// descender space an <svg> gets by default, so it sits dead-center in
+// the round nav button regardless.
+function ChevronIcon({ direction = 'left' }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      style={{ display: 'block' }}
+    >
+      {direction === 'left'
+        ? <polyline points="15 5 8 12 15 19" />
+        : <polyline points="9 5 16 12 9 19" />}
+    </svg>
+  )
+}
+
 // AI breakdown panel shown once the reader taps "Show breakdown" — same
 // data shape phrase.py's /api/phrase/analyze returns (words[] with
 // vocab_match/kanji_matches, plus a short explanation), same visual
@@ -697,7 +723,7 @@ function AnalysisBreakdown({ analysis, index, setIndex, t, onWordClick, onKanjiC
           className="rdg-breakdown-nav rdg-breakdown-nav--prev"
           aria-label={t.previousWord ?? 'Previous word'}
         >
-          ‹
+          <ChevronIcon direction="left" />
         </button>
 
         <CardTransition cardKey={index} className="rdg-breakdown-card-stage">
@@ -710,7 +736,7 @@ function AnalysisBreakdown({ analysis, index, setIndex, t, onWordClick, onKanjiC
           className="rdg-breakdown-nav rdg-breakdown-nav--next"
           aria-label={t.nextWord ?? 'Next word'}
         >
-          ›
+          <ChevronIcon direction="right" />
         </button>
       </div>
 
