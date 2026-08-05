@@ -64,6 +64,7 @@ import itertools
 import json
 import os
 import re
+from functools import lru_cache
 
 import morphology
 from vocab_data import VOCAB_BY_LEVEL
@@ -232,6 +233,17 @@ _SHORT_LABELS_EN = {
 }
 _NEWS_RANK_RE = re.compile(r"^news(\d+)k$")
 
+# Coarse part-of-speech buckets, for callers (card_lookup.py's reading-
+# practice badge coloring) that want "verb"/"adjective"/"noun" rather
+# than a raw JMdict code — see word_category below.
+_VERB_POS_CODES = {
+    "v1", "v1-s", "v5aru", "v5b", "v5g", "v5k", "v5k-s", "v5m", "v5n",
+    "v5r", "v5r-i", "v5s", "v5t", "v5u", "v5u-s", "v5uru",
+    "vk", "vn", "vr", "vs", "vs-c", "vs-i", "vs-s", "vz",
+}
+_ADJECTIVE_POS_CODES = {"adj-i", "adj-ix", "adj-na", "adj-no", "adj-t", "adj-f"}
+_NOUN_POS_CODES = {"n", "n-suf", "n-pref", "pn", "ctr", "num"}
+
 
 def _short_label(code: str, lang: str) -> str:
     table = _SHORT_LABELS_FR if lang == "fr" else _SHORT_LABELS_EN
@@ -344,6 +356,34 @@ def _find_senses(kanji: str, kana: str) -> list[dict] | None:
             if senses:
                 return senses
     return None
+
+
+@lru_cache(maxsize=4096)
+def word_category(kanji: str, kana: str) -> str:
+    """Coarse part-of-speech bucket for this word — "verb", "adjective",
+    "noun", or "other" — used by card_lookup.py to color-code
+    reading-practice badges by word type (2026-08). Deliberately derived
+    from the word's OWN JMdict sense tags rather than how it's being
+    used in any one sentence: a sentence's own conjugated-form POS is
+    contextual and would make the same card change color depending on
+    which example happened to be shown, where a word's dictionary part
+    of speech is stable. "other" covers everything that doesn't cleanly
+    fall into the three buckets above (particles, adverbs, conjunctions,
+    interjections, expressions, ...) as well as words with no findable
+    senses at all — left for the caller's own neutral default styling
+    rather than guessed at.
+    """
+    senses = _find_senses(kanji, kana)
+    if not senses:
+        return "other"
+    tags = {t for s in senses for t in s.get("tags", [])}
+    if tags & _VERB_POS_CODES:
+        return "verb"
+    if tags & _ADJECTIVE_POS_CODES:
+        return "adjective"
+    if tags & _NOUN_POS_CODES:
+        return "noun"
+    return "other"
 
 
 # ── "Does this word have an example sentence?" (reading.py, 2026-08) ──
