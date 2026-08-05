@@ -8,6 +8,8 @@ import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
 import { Loading } from '../components/Loading'
+import { CardTransition } from '../components/CardTransition'
+import { playSfx } from '../components/sound'
 
 const STATUS_COLORS = {
   mastered:     'var(--success)',
@@ -17,44 +19,28 @@ const STATUS_COLORS = {
   due:          'var(--accent)',
 }
 
-// Word-type colors for the inline reading-practice badges (2026-08 —
-// previously these were colored by SRS learning status, same as
-// STATUS_COLORS above; that state now only shows in the detail panel's
-// StatusBadge, see DetailPanel below). Picked from the theme's existing
-// accent3–accent9 range specifically because those aren't used
-// elsewhere for a fixed semantic meaning the way --accent/--accent2/
-// --success/--warning/--danger are (feedback colors, primary actions) —
-// reusing one of those for a word-type color would make it look like
-// this word is somehow "correct" or "the main action" rather than just
-// "a noun". category is computed server-side (see card_lookup.py's
-// _assemble_segments / vocab_extras.word_category) from the word's own
-// dictionary part of speech, not from the one sentence it happens to
-// appear in, so the same card is always the same color everywhere.
-const CATEGORY_COLORS = {
-  grammar:   'var(--accent3)', // purple — structural/grammar points
-  verb:      'var(--accent4)', // blue
-  noun:      'var(--accent6)', // teal
-  adjective: 'var(--accent5)', // tan/brown
-  kanji:     'var(--accent8)', // mauve — single-kanji badges
-  other:     'var(--text-secondary)', // vocab that isn't verb/noun/adj
-}
-
 const MOBILE_BREAKPOINT = 768
 
-// NOTE ON TRANSLATION KEYS: this rewrite (2026-08, real example
-// sentences instead of LLM-generated ones) reuses the app's existing
-// generic study-source keys (t.byLevel/byLevelDesc, t.byFrequency/
+// NOTE ON TRANSLATION KEYS: reuses the app's existing generic
+// study-source keys (t.byLevel/byLevelDesc, t.byFrequency/
 // byFrequencyDesc, t.byMastery/byMasteryDesc, t.selectStudySource,
-// t.selectTier, t.loadError, t.status_*) rather than inventing
-// reading-specific duplicates — see index.js's `quiz` and
-// `phraseAnalyzer` sections. The only genuinely new keys are in
-// index.js's `reading` section: selectDomain, domainVocabDeck(Desc),
-// domainVocabJmdict(Desc), tierLabel, jumpToTier, translationEnglish,
-// notEnoughMasteryWords. The old phase-based keys (readingHiragana /
-// readingKatakana / readingMixed and their *Desc siblings) are gone —
-// nothing references them anymore.
+// t.selectTier, t.loadError, t.status_*, t.clickForDetails,
+// t.appDefinition, t.cardStats, t.inThisPhrase) rather than inventing
+// reading-specific duplicates. Genuinely new keys (all with an inline
+// `??` fallback below, so a missing translations.js entry never breaks
+// the screen) are: showBreakdown, hideBreakdown, preparingBreakdown,
+// streak.
 
 const DEFAULT_TIER_SIZE = 200
+
+// Best-effort color for a word chip in the AI breakdown line: prefer
+// its vocab status; if the word itself isn't in the deck but some of
+// its kanji are, hint at partial knowledge with accent3.
+function wordColor(word) {
+  if (word.vocab_match) return STATUS_COLORS[word.vocab_match.stats.status] || STATUS_COLORS.not_started
+  if (word.kanji_matches?.length > 0) return 'var(--accent3)'
+  return 'var(--text-secondary)'
+}
 
 export default function ReadingScreen({ session }) {
   const navigate = useNavigate()
@@ -76,15 +62,37 @@ export default function ReadingScreen({ session }) {
   const [domain, setDomain] = useState(null)        // source === 'frequency'
   const [tier, setTier]     = useState(null)        // source === 'frequency'
 
-  // 'loading' | 'showing' | 'answering' | 'feedback' | 'error'
+  // 'loading' | 'reading' | 'feedback' | 'error'
+  //
+  // 'reading' now covers both looking at the phrase AND writing the
+  // answer at the same time (previously a separate 'answering' stage
+  // that only started once the timer ran out) — see showPhrase/
+  // submitAnswer below.
   const [stage, setStage]   = useState('loading')
   const [data, setData]     = useState(null)   // current phrase item from the batch
   const [timeLeft, setTimeLeft] = useState(0)
   const [answer, setAnswer] = useState('')
   const [feedback, setFeedback] = useState(null) // { correct, romaji }
   const [score, setScore]   = useState({ correct: 0, total: 0 })
+  // Consecutive correct grades — purely a lightweight gaming touch (no
+  // XP/SRS backing here, reading practice isn't a card mode), reset on
+  // any incorrect grade.
+  const [streak, setStreak] = useState(0)
   const [error, setError]   = useState(null)
-  const [detail, setDetail] = useState(null) // { title, level, entry, stats } for the clicked vocab/kanji segment
+  const [detail, setDetail] = useState(null) // { title, level, entry, stats } for the clicked vocab/kanji
+
+  // AI breakdown of the current phrase — fetched in the background the
+  // moment the phrase is shown (see showPhrase), using the exact same
+  // LLM-driven segmentation the phrase-analyzer screen uses
+  // (POST /api/phrase/analyze, save=false so reading sessions don't
+  // flood the analyzer's own history). By the time the reader has
+  // finished reading/writing and reaches the feedback stage, this is
+  // almost always already resolved — the "show breakdown" button just
+  // reveals it rather than triggering the fetch itself.
+  const [analysis, setAnalysis] = useState(null)
+  const [analysisLoading, setAnalysisLoading] = useState(false)
+  const [showBreakdown, setShowBreakdown] = useState(false)
+
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
   )
@@ -102,14 +110,41 @@ export default function ReadingScreen({ session }) {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  function openSegmentDetail(seg) {
-    if (seg.type === 'plain') return
-    setDetail({ title: seg.text, level: seg.level, entry: seg.entry, stats: seg.stats })
+  // DetailPanel just needs {title, level, entry, stats} — sourced from
+  // the AI breakdown's word/kanji shape (the backend no longer returns
+  // a morphology-based `segments` field at all, see reading.py's
+  // _finish_phrase note). Mirrors PhraseAnalyzerScreen's
+  // openVocabDetail/openKanjiDetail, kept separate rather than shared
+  // since the two screens' surrounding layout differs enough not to be
+  // worth a shared component yet.
+  function openAnalysisWordDetail(word) {
+    if (!word.vocab_match) return
+    setDetail({
+      title: word.surface,
+      entry: word.vocab_match.entry,
+      stats: word.vocab_match.stats,
+      level: word.vocab_match.level,
+    })
+  }
+
+  function openAnalysisKanjiDetail(k) {
+    setDetail({ title: k.kanji, entry: k.entry, stats: k.stats, level: k.level })
   }
 
   const timerRef = useRef(null)
   const fetchingRef = useRef(false) // guards against duplicate concurrent prefetches
   const queueRef = useRef([])       // upcoming phrases, prefetched (not rendered, so a ref is fine)
+  // Monotonic counter stamped onto each shown phrase as `_uiKey` — used
+  // as CardTransition's cardKey. Plain `data.phrase` text would collide
+  // (no re-trigger of the crossfade/sound) if the same sentence happens
+  // to come up twice in a row, which real example-sentence batches can
+  // do.
+  const phraseCounterRef = useRef(0)
+  // Identifies which phrase the in-flight analysis fetch belongs to, so
+  // a slow response for a phrase the reader has already moved past
+  // can't overwrite the (possibly already-loaded) analysis for the
+  // phrase actually on screen.
+  const analysisPhraseRef = useRef(null)
 
   const BATCH_SIZE = 5
   const PREFETCH_THRESHOLD = 1 // refill once only this many (or fewer) remain in queue
@@ -132,6 +167,7 @@ export default function ReadingScreen({ session }) {
 
   function startSession() {
     setScore({ correct: 0, total: 0 })
+    setStreak(0)
     queueRef.current = []
     setStage('loading')
     setError(null)
@@ -161,13 +197,41 @@ export default function ReadingScreen({ session }) {
       .finally(() => { fetchingRef.current = false })
   }
 
+  // Kicks off the AI breakdown for `phraseText` in the background —
+  // fired the instant a phrase is shown (see showPhrase) so it has the
+  // whole display+writing window to resolve before the reader ever
+  // asks for it. `save: false` keeps this out of the phrase-analyzer's
+  // own history (see phrase.py's PhraseRequest.save).
+  function fetchAnalysis(phraseText) {
+    analysisPhraseRef.current = phraseText
+    setAnalysis(null)
+    setAnalysisLoading(true)
+    apiFetch('/api/phrase/analyze', session, {
+      method: 'POST',
+      body: JSON.stringify({ phrase: phraseText, save: false }),
+    })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => {
+        if (analysisPhraseRef.current !== phraseText) return // reader already moved on
+        setAnalysis(d)
+      })
+      .catch(() => {
+        if (analysisPhraseRef.current === phraseText) setAnalysis(null)
+      })
+      .finally(() => {
+        if (analysisPhraseRef.current === phraseText) setAnalysisLoading(false)
+      })
+  }
+
   function showPhrase(phraseData) {
-    setData(phraseData)
+    setData({ ...phraseData, _uiKey: phraseCounterRef.current++ })
     setAnswer('')
     setFeedback(null)
     setDetail(null)
-    setStage('showing')
+    setShowBreakdown(false)
+    setStage('reading')
     setTimeLeft(phraseData.display_seconds)
+    fetchAnalysis(phraseData.phrase)
   }
 
   // Pulls the next phrase from the queue (instant — no waiting), and tops
@@ -200,19 +264,18 @@ export default function ReadingScreen({ session }) {
     })
   }
 
-  // Countdown while the phrase is visible, then flip to the answering stage.
+  // Countdown while the phrase is up. Reaching zero no longer changes
+  // `stage` — writing is available from the moment the phrase appears
+  // (see the 'reading' stage's render below) — it just covers the
+  // phrase text so recall keeps mattering for anyone who didn't finish
+  // writing before the timer ran out.
   useEffect(() => {
-    if (stage !== 'showing') return
+    if (stage !== 'reading') return
 
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         const next = prev - 0.1
-        if (next <= 0) {
-          clearTimer()
-          setStage('answering')
-          return 0
-        }
-        return next
+        return next <= 0 ? 0 : next
       })
     }, 100)
 
@@ -227,7 +290,8 @@ export default function ReadingScreen({ session }) {
   }
 
   function submitAnswer() {
-    if (!answer.trim() || stage !== 'answering') return
+    if (!answer.trim() || stage !== 'reading') return
+    clearTimer()
     // No correctness check here anymore — auto-comparing romaji proved too
     // brittle. Reveal the answer and let the user judge for themselves.
     setFeedback({ correct: null, romaji: data.romaji })
@@ -239,6 +303,11 @@ export default function ReadingScreen({ session }) {
 
     setFeedback(f => ({ ...f, correct: isCorrect }))
     setScore(s => ({ correct: s.correct + (isCorrect ? 1 : 0), total: s.total + 1 }))
+    setStreak(s => {
+      const next = isCorrect ? s + 1 : 0
+      return next
+    })
+    if (isCorrect) playSfx('success')
 
     apiFetch('/api/reading/result', session, {
       method: 'POST',
@@ -338,16 +407,22 @@ export default function ReadingScreen({ session }) {
       setAnswer={setAnswer}
       feedback={feedback}
       score={score}
+      streak={streak}
       error={error}
       detail={detail}
       isMobile={isMobile}
+      analysis={analysis}
+      analysisLoading={analysisLoading}
+      showBreakdown={showBreakdown}
+      setShowBreakdown={setShowBreakdown}
       onBack={resetAll}
       onStart={startSession}
       submitAnswer={submitAnswer}
       gradeAnswer={gradeAnswer}
       next={next}
       retry={retry}
-      openSegmentDetail={openSegmentDetail}
+      openAnalysisWordDetail={openAnalysisWordDetail}
+      openAnalysisKanjiDetail={openAnalysisKanjiDetail}
       closeDetail={() => setDetail(null)}
     />
   )
@@ -359,8 +434,10 @@ export default function ReadingScreen({ session }) {
 // simple (each of those is a plain "pick one thing" screen).
 function SessionView({
   t, source, level, domain, tier, stage, data, timeLeft, answer, setAnswer,
-  feedback, score, error, detail, isMobile, onBack, onStart, submitAnswer,
-  gradeAnswer, next, retry, openSegmentDetail, closeDetail,
+  feedback, score, streak, error, detail, isMobile, analysis, analysisLoading,
+  showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
+  gradeAnswer, next, retry, openAnalysisWordDetail,
+  openAnalysisKanjiDetail, closeDetail,
 }) {
   const startedRef = useRef(false)
   useEffect(() => {
@@ -374,6 +451,8 @@ function SessionView({
     source === 'frequency' ? `${domain === 'vocab_jmdict' ? t.domainVocabJmdict : t.domainVocabDeck} — ${t.tierLabel ? t.tierLabel.replace('{n}', tier) : `Tier ${tier}`}` :
     t.byMastery
 
+  const phraseCovered = stage === 'reading' && timeLeft <= 0
+
   return (
     <div className="screen">
       <TopBar
@@ -381,10 +460,17 @@ function SessionView({
         title={`${t.readingTitle} — ${titleSuffix}`}
         autoHide
       />
-      <div className="container quiz-area">
+      <div className="container quiz-area rdg-area">
 
-        <div className="rdg-score">
-          {t.score}: {score.correct}/{score.total}
+        <div className="rdg-score-row">
+          <div className="rdg-score">
+            {t.score}: {score.correct}/{score.total}
+          </div>
+          {streak > 1 && (
+            <div className="rdg-streak" title={t.streak ?? 'Streak'}>
+              🔥 {streak}
+            </div>
+          )}
         </div>
 
         {stage === 'loading' && <Loading />}
@@ -400,13 +486,16 @@ function SessionView({
           </div>
         )}
 
-        {stage === 'showing' && data && (
+        {stage === 'reading' && data && (
           <>
-            <PromptCard>
-              <div className="rdg-phrase-display">
-                {data.phrase}
-              </div>
-            </PromptCard>
+            <CardTransition cardKey={data._uiKey}>
+              <PromptCard>
+                <div className={`rdg-phrase-display${phraseCovered ? ' rdg-phrase-display--covered' : ''}`}>
+                  {phraseCovered ? '🙈' : data.phrase}
+                </div>
+              </PromptCard>
+            </CardTransition>
+
             <div className="rdg-timer-wrap">
               <div className="rdg-phrase-progress">
                 <div
@@ -415,35 +504,31 @@ function SessionView({
                 />
               </div>
               <div className="rdg-timer-label">
-                {timeLeft.toFixed(1)}s
+                {phraseCovered ? (t.writeWhatYouSaw) : `${timeLeft.toFixed(1)}s`}
               </div>
             </div>
-          </>
-        )}
 
-        {stage === 'answering' && (
-          <>
-            <PromptCard>
-              <div className="rdg-answering-hint">
-                {t.writeWhatYouSaw}
+            {/* Fix: the answer field is available the whole time the
+                phrase is on screen, not only after the timer runs out —
+                the reader can start writing as soon as they're ready. */}
+            <div className="rdg-input-center">
+              <input
+                autoFocus
+                value={answer}
+                onChange={e => setAnswer(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && submitAnswer()}
+                placeholder={t.romajiPlaceholder}
+                className="rdg-answer-input"
+              />
+              <div className="rdg-submit-wrap">
+                <button
+                  onClick={submitAnswer}
+                  disabled={!answer.trim()}
+                  className="rdg-submit-btn"
+                >
+                  {t.submit}
+                </button>
               </div>
-            </PromptCard>
-            <input
-              autoFocus
-              value={answer}
-              onChange={e => setAnswer(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && submitAnswer()}
-              placeholder={t.romajiPlaceholder}
-              className="rdg-answer-input"
-            />
-            <div className="rdg-submit-wrap">
-              <button
-                onClick={submitAnswer}
-                disabled={!answer.trim()}
-                className="rdg-submit-btn"
-              >
-                {t.submit}
-              </button>
             </div>
           </>
         )}
@@ -452,19 +537,7 @@ function SessionView({
           <>
             <PromptCard>
               <div className="rdg-feedback-phrase">
-                {data.segments
-                  ? data.segments.map((seg, i) => (
-                      <span
-                        key={i}
-                        onClick={() => openSegmentDetail(seg)}
-                        className={`word-span${seg.type !== 'plain' ? ' word-span--clickable' : ''}`}
-                        style={{ '--word-color': seg.type === 'plain' ? '#fff' : (CATEGORY_COLORS[seg.category] || CATEGORY_COLORS.other) }}
-                        title={seg.type !== 'plain' ? (t.clickForDetails) : undefined}
-                      >
-                        {seg.text}
-                      </span>
-                    ))
-                  : data.phrase}
+                {data.phrase}
               </div>
               <div
                 className="rdg-feedback-status"
@@ -489,6 +562,31 @@ function SessionView({
               <div className="rdg-feedback-your-answer">
                 {t.yourAnswer}: {answer}
               </div>
+
+              {feedback.correct !== null && (
+                <div className="rdg-breakdown-wrap">
+                  <button
+                    onClick={() => setShowBreakdown(s => !s)}
+                    disabled={!analysis && !analysisLoading}
+                    className="rdg-breakdown-toggle"
+                  >
+                    {showBreakdown
+                      ? (t.hideBreakdown ?? 'Hide breakdown')
+                      : analysis
+                        ? (t.showBreakdown ?? 'Show breakdown')
+                        : (t.preparingBreakdown ?? 'Preparing breakdown…')}
+                  </button>
+
+                  {showBreakdown && analysis && (
+                    <AnalysisBreakdown
+                      analysis={analysis}
+                      t={t}
+                      onWordClick={openAnalysisWordDetail}
+                      onKanjiClick={openAnalysisKanjiDetail}
+                    />
+                  )}
+                </div>
+              )}
             </PromptCard>
             <div className="rdg-feedback-actions">
               {feedback.correct === null ? (
@@ -522,6 +620,74 @@ function SessionView({
       {detail && (
         <DetailPanel detail={detail} t={t} isMobile={isMobile} onClose={closeDetail} />
       )}
+    </div>
+  )
+}
+
+// AI breakdown panel shown once the reader taps "Show breakdown" — same
+// data shape phrase.py's /api/phrase/analyze returns (words[] with
+// vocab_match/kanji_matches, plus a short explanation), same visual
+// language PhraseAnalyzerScreen uses for it (word-colored phrase line +
+// per-word cards), reused here on the AI's OWN segmentation instead of
+// the old morphology-based scan — see reading.py's _finish_phrase note.
+function AnalysisBreakdown({ analysis, t, onWordClick, onKanjiClick }) {
+  return (
+    <div className="rdg-breakdown">
+      <div className="phrase-line rdg-breakdown-line">
+        {analysis.words.map((w, i) => (
+          <span
+            key={i}
+            onClick={() => onWordClick(w)}
+            className={`word-span${w.vocab_match ? ' word-span--clickable' : ''}`}
+            style={{ '--word-color': wordColor(w) }}
+            title={w.vocab_match ? (t.clickForDetails) : undefined}
+          >
+            {w.surface}
+          </span>
+        ))}
+      </div>
+
+      {analysis.explanation && (
+        <div className="phrase-explanation rdg-breakdown-explanation">
+          {analysis.explanation}
+        </div>
+      )}
+
+      <div className="phrase-words-list rdg-breakdown-words">
+        {analysis.words.map((w, i) => (
+          <div key={i} className="card phrase-word-card">
+            <div className="phrase-word-card__top">
+              <div
+                onClick={() => onWordClick(w)}
+                className={`phrase-word-card__surface-wrap${w.vocab_match ? ' phrase-word-card__surface-wrap--clickable' : ''}`}
+              >
+                <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(w) }}>
+                  {w.surface}
+                </span>
+                {w.reading && (
+                  <span className="phrase-word-card__reading">({w.reading})</span>
+                )}
+                {w.pos && (
+                  <span className="phrase-word-card__pos">{w.pos}</span>
+                )}
+              </div>
+            </div>
+            <div className="phrase-word-card__meaning">{w.meaning}</div>
+            {w.kanji_matches?.length > 0 && (
+              <div className="phrase-word-card__kanji-row">
+                {w.kanji_matches.map(k => (
+                  <div key={k.raw_id} onClick={() => onKanjiClick(k)} className="phrase-kanji-chip">
+                    <span className="phrase-kanji-chip__char" style={{ '--word-color': STATUS_COLORS[k.stats.status] }}>
+                      {k.kanji}
+                    </span>
+                    <span className="phrase-kanji-chip__level">{k.level}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

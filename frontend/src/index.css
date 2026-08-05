@@ -5570,16 +5570,55 @@ input:focus { border-color: var(--accent2); }
 .phrase-kanji-chip__level { font-size: 11px; color: var(--text-secondary); }
 
 /* ── Reading practice screen ──────────────────────────────── */
-.rdg-score { margin-bottom: 16px; font-size: 14px; color: var(--text-secondary); }
+.rdg-area { width: 100%; max-width: 640px; margin: 0 auto; box-sizing: border-box; }
+
+.rdg-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.rdg-score { font-size: 14px; color: var(--text-secondary); }
+
+/* Lightweight gaming touch: a streak badge that only appears once
+   there's an actual streak (>1) to show off — see ReadingScreen.jsx's
+   `streak` state. Reuses --warning (the same "fire"/attention hue
+   badges elsewhere use) rather than inventing a new accent. */
+.rdg-streak {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--warning);
+  background: var(--bg-panel);
+  border-radius: 999px;
+  padding: 3px 12px;
+  animation: rdg-streak-pop 0.25s ease;
+}
+@keyframes rdg-streak-pop {
+  0%   { transform: scale(0.85); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 .rdg-error-card { padding: 16px; color: var(--danger); }
 .rdg-retry-wrap { margin-top: 12px; }
 .rdg-retry-btn { background: var(--accent); color: var(--text-on-panel); }
 
 .rdg-phrase-display {
-  font-size: 36px;
+  font-size: clamp(24px, 6vw, 36px);
   font-family: 'Yu Gothic', system-ui, -apple-system, "Segoe UI", sans-serif;
   color: var(--text-primary);
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+/* Once the timer runs out the phrase is covered (see ReadingScreen.jsx's
+   `phraseCovered`) rather than the whole layout jumping to a different
+   stage — the writing field stays exactly where it was. */
+.rdg-phrase-display--covered {
+  font-size: clamp(28px, 8vw, 40px);
+  color: var(--text-secondary);
+  opacity: 0.7;
 }
 
 .rdg-phrase-progress {
@@ -5588,6 +5627,7 @@ input:focus { border-color: var(--accent2); }
   border-radius: 4px;
   overflow: hidden;
   max-width: 300px;
+  width: 100%;
   margin: 0 auto;
 }
 .rdg-phrase-progress__fill {
@@ -5601,6 +5641,17 @@ input:focus { border-color: var(--accent2); }
 
 .rdg-answering-hint { font-size: 18px; color: var(--text-secondary); }
 
+/* Fix: centers the writing field as its own block regardless of the
+   parent flex container's cross-axis alignment (previously the input's
+   max-width could leave it hugging one edge instead of sitting in the
+   middle of the screen — see ReadingScreen.jsx's 'reading' stage). */
+.rdg-input-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .rdg-answer-input {
   font-size: 22px;
   padding: 12px;
@@ -5610,13 +5661,22 @@ input:focus { border-color: var(--accent2); }
   background: var(--bg-panel);
   color: var(--text-on-panel);
   border: 1px solid var(--border);
-  margin-top: 16px;
+  margin: 16px auto 0;
   text-align: center;
+  align-self: center;
+  box-sizing: border-box;
 }
-.rdg-submit-wrap { margin-top: 16px; }
+.rdg-submit-wrap { margin-top: 16px; display: flex; justify-content: center; }
 .rdg-submit-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
 
-.rdg-feedback-phrase { font-size: 32px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin-bottom: 12px; line-height: 1.5; }
+.rdg-feedback-phrase {
+  font-size: clamp(22px, 5.5vw, 32px);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  margin-bottom: 12px;
+  line-height: 1.5;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
 .rdg-feedback-status {
   font-size: 18px;
   font-weight: bold;
@@ -5627,10 +5687,31 @@ input:focus { border-color: var(--accent2); }
 .rdg-feedback-your-answer { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
 
 .rdg-feedback-actions { margin-top: 16px; }
-.rdg-grade-row { display: flex; gap: 12px; justify-content: center; }
+.rdg-grade-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .rdg-grade-btn--wrong { background: var(--danger); color: var(--text-on-panel); padding: 10px 24px; font-size: 15px; }
 .rdg-grade-btn--right { background: var(--success); color: var(--text-on-panel); padding: 10px 24px; font-size: 15px; }
 .rdg-next-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
+
+/* AI breakdown panel (see ReadingScreen.jsx's AnalysisBreakdown) —
+   layered on top of .phrase-line/.phrase-word-card/.phrase-explanation
+   (the phrase-analyzer screen's own classes) so the two screens read
+   as the same feature rather than two different UIs. */
+.rdg-breakdown-wrap { margin-top: 18px; text-align: left; }
+.rdg-breakdown-toggle {
+  display: block;
+  margin: 0 auto;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 14px;
+}
+.rdg-breakdown-toggle:disabled { opacity: 0.6; }
+.rdg-breakdown { margin-top: 14px; }
+.rdg-breakdown-line { justify-content: center; margin-bottom: 10px; }
+.rdg-breakdown-explanation { text-align: center; margin-bottom: 12px; }
+.rdg-breakdown-words { max-height: 50vh; overflow-y: auto; }
 
 /* Frequency-tier "jump to tier" row, below the fetched tier list — see
    TierPicker in ReadingScreen.jsx (2026-08, frequency-based sentence
@@ -6158,6 +6239,14 @@ input:focus { border-color: var(--accent2); }
   .stats-overview-col { padding: 18px 10px; }
   .stats-level-header { flex-direction: column; align-items: flex-start; gap: 4px; }
   .stats-reset-btn { font-size: 11px; padding: 6px 12px; }
+
+  .rdg-area { max-width: 100%; }
+  .rdg-answer-input { max-width: 100%; }
+  .rdg-grade-btn--wrong,
+  .rdg-grade-btn--right,
+  .rdg-next-btn { width: 100%; }
+  .rdg-grade-row { flex-direction: column; }
+  .rdg-breakdown-words { max-height: 40vh; }
 }
 
 @media (max-width: 400px) {
