@@ -12,30 +12,40 @@ const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 // ── Mock fallback ─────────────────────────────────────────
 // Kept in sync with profile.py's real response shape so a backend
 // hiccup degrades to a believable screen instead of a blank one.
-const MOCK_PROFILE = {
-  username: 'Aiko',
-  level: 12,
-  xp: 3420,
-  xpPrevLevel: 3000,
-  xpForNext: 4000,
-  streak: 14,
-  streakLongest: 21,
-  totalReviews: 842,
-  goals: [
-    { id: 'daily', label: 'Révisions du jour', current: 18, target: 30, rewardXp: 20 },
-    { id: 'weekly', label: 'Révisions cette semaine', current: 96, target: 150, rewardXp: 80 },
-    { id: 'streak', label: 'Garder la série en vie', current: 14, target: 30, rewardXp: 150 },
-  ],
-  badges: [
-    { id: 'first_steps', glyph: '初', label: 'Premiers pas', unlocked: true },
-    { id: 'week_streak', glyph: '週', label: '7 jours de série', unlocked: true },
-    { id: 'month_streak', glyph: '月', label: '30 jours de série', unlocked: false },
-    { id: 'kanji_100', glyph: '百', label: '100 cartes maîtrisées', unlocked: true },
-    { id: 'perfectionist', glyph: '極', label: "10 sans-faute d'affilée", unlocked: false },
-    { id: 'dedicated', glyph: '皆', label: '500 révisions', unlocked: false },
-  ],
+// A function of `t` (not a module-level constant) — this used to be
+// a plain object with goal/badge labels hardcoded in French, so an
+// English-language user hitting a backend outage saw French fallback
+// text while the rest of the app stayed in English. Building it
+// inside the component, from `t`, keeps the fallback in the same
+// language as everything else.
+function buildMockProfile(t) {
+  return {
+    username: 'Aiko',
+    level: 12,
+    xp: 3420,
+    xpPrevLevel: 3000,
+    xpForNext: 4000,
+    streak: 14,
+    streakLongest: 21,
+    totalReviews: 842,
+    goals: [
+      { id: 'daily', label: t.mockGoalDaily, current: 18, target: 30, rewardXp: 20 },
+      { id: 'weekly', label: t.mockGoalWeekly, current: 96, target: 150, rewardXp: 80 },
+      { id: 'streak', label: t.mockGoalStreak, current: 14, target: 30, rewardXp: 150 },
+    ],
+    badges: [
+      { id: 'first_steps', glyph: '初', label: t.mockBadgeFirstSteps, unlocked: true },
+      { id: 'week_streak', glyph: '週', label: t.mockBadgeWeekStreak, unlocked: true },
+      { id: 'month_streak', glyph: '月', label: t.mockBadgeMonthStreak, unlocked: false },
+      { id: 'kanji_100', glyph: '百', label: t.mockBadgeKanji100, unlocked: true },
+      { id: 'perfectionist', glyph: '極', label: t.mockBadgePerfectionist, unlocked: false },
+      { id: 'dedicated', glyph: '皆', label: t.mockBadgeDedicated, unlocked: false },
+    ],
+  }
 }
 
+// Usernames here are proper nouns, not translatable copy, so this one
+// stays a plain constant — no `t` dependency to route through.
 const MOCK_LEADERBOARD = {
   entries: [
     { rank: 1, username: 'Haruto', level: 24, xp: 9800 },
@@ -67,19 +77,20 @@ export default function ProfileScreen({ session }) {
     apiFetch('/api/profile', session)
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(setProfile)
-      .catch(() => { setProfile(MOCK_PROFILE); setStale(true) })
+      .catch(() => { setProfile(buildMockProfile(t)); setStale(true) })
 
     apiFetch('/api/leaderboard', session)
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(setLeaderboard)
       .catch(() => { setLeaderboard(MOCK_LEADERBOARD); setStale(true) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loading = !profile || !leaderboard
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title={t.profileTitle} />
+      <TopBar onBack={() => navigate('/')} title={t.profileTitle} autoHide />
 
       {loading && <Loading />}
 

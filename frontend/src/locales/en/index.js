@@ -387,6 +387,23 @@ const profile = {
   leaderboard:       'Leaderboard',
   done:              'Done',
   genericError:      'Something went wrong. Try again.',
+
+  // Offline fallback content shown only when /api/profile is
+  // unreachable (see ProfileScreen.jsx's MOCK_PROFILE) — these used to
+  // be hardcoded French strings baked into the mock object itself, so
+  // an English-language user hitting a backend outage would see
+  // French goal/badge names. Routed through `t` instead so the
+  // fallback screen still respects the UI language like everything
+  // else does.
+  mockGoalDaily:          "Today's reviews",
+  mockGoalWeekly:         "This week's reviews",
+  mockGoalStreak:         'Keep the streak alive',
+  mockBadgeFirstSteps:    'First steps',
+  mockBadgeWeekStreak:    '7-day streak',
+  mockBadgeMonthStreak:   '30-day streak',
+  mockBadgeKanji100:      '100 cards mastered',
+  mockBadgePerfectionist: '10 perfect reviews in a row',
+  mockBadgeDedicated:     '500 reviews',
 }
 
 // ── Settings ──────────────────────────────────────────────
@@ -427,6 +444,15 @@ const decks = {
   backPlaceholder:   'Back / Meaning',
   hintPlaceholder:   'Hint (optional)',
   notesPlaceholder:  'Notes (optional)',
+  // Front-field placeholder specific to kanji-type custom decks
+  // (DeckDetailScreen.jsx) — used to be a hardcoded, untranslated
+  // "Kanji (ex: 日)" string.
+  kanjiFrontPlaceholder: 'Kanji (e.g. 日)',
+  // Shown in the TopBar title if a deck's own name isn't available
+  // yet (e.g. this screen opened directly instead of via DecksScreen,
+  // so router state carrying the deck is missing) — used to be a
+  // hardcoded "Deck" string.
+  deckFallbackTitle: 'Deck',
 
   // Deck types
   flashcardType:     'Flashcard',

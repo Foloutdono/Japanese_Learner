@@ -4,6 +4,7 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import EmptyState from '../components/EmptyState'
+import { Loading } from '../components/Loading'
 import ImportCardsMenu from '../components/ImportCardsMenu'
 
 export default function DeckDetailScreen({ session }) {
@@ -36,6 +37,10 @@ export default function DeckDetailScreen({ session }) {
     apiFetch(`/api/decks/${deck_id}/cards`, session)
       .then(r => r.json())
       .then(data => { setCards(data.cards || []); setLoading(false) })
+      // Same fix as DecksScreen's fetchDecks — a failed request used
+      // to leave `loading` true forever instead of settling into the
+      // (empty) card list / EmptyState.
+      .catch(() => setLoading(false))
   }
 
   function resetForm() { setForm({ front: '', back: '', hint: '', notes: '' }) }
@@ -88,7 +93,7 @@ export default function DeckDetailScreen({ session }) {
   function exitSelectMode() { setSelectMode(false); setSelected(new Set()) }
 
   async function deleteSelected() {
-    if (!confirm(`${t.delete} ${selected.size} ${t.cards} ?`)) return
+    if (!confirm(`${t.delete} ${selected.size} ${t.cards}?`)) return
     for (const id of selected) {
       await apiFetch(`/api/decks/${deck_id}/cards/${id}`, session, { method: 'DELETE' })
     }
@@ -110,7 +115,7 @@ export default function DeckDetailScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? 'Deck'} />
+      <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? t.deckFallbackTitle} autoHide />
 
       <div className="container page-pad">
 
@@ -181,7 +186,7 @@ export default function DeckDetailScreen({ session }) {
             </div>
             <div className="deckdetail-form__fields">
               <input value={form.front} onChange={e => setForm(f => ({ ...f, front: e.target.value }))}
-                placeholder={deck?.type === 'kanji' ? 'Kanji (ex: 日)' : t.frontPlaceholder}
+                placeholder={deck?.type === 'kanji' ? t.kanjiFrontPlaceholder : t.frontPlaceholder}
                 className="deckdetail-form__input" />
               <input value={form.back} onChange={e => setForm(f => ({ ...f, back: e.target.value }))}
                 placeholder={t.backPlaceholder}
@@ -206,9 +211,7 @@ export default function DeckDetailScreen({ session }) {
           </div>
         )}
 
-        {loading && (
-          <div className="loading-block">{t.loading}</div>
-        )}
+        {loading && <Loading />}
 
         {!loading && cards.length === 0 && !adding && (
           <EmptyState icon="🃏" message={t.noCards} hint={t.addFirstCard} />
