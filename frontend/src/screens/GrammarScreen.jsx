@@ -190,8 +190,12 @@ export default function GrammarScreen({ session }) {
   if (!level) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.grammarTitle} />
-        <SelectionScreen subtitle={t.selectLevel}>
+        <TopBar onBack={() => navigate('/')} title={t.grammarTitle} autoHide />
+        {/* No subtitle here — LevelSelector supplies its own header
+            (defaulting to t.selectLevel) via SelectionScreen's bare
+            layout shell, same as Kanji/Vocab. Passing subtitle here
+            too used to render that header twice. */}
+        <SelectionScreen>
           <LevelSelector onSelect={setLevel} color="var(--accent)" />
         </SelectionScreen>
       </div>
@@ -202,9 +206,9 @@ export default function GrammarScreen({ session }) {
   if (!mode) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setLevel(null)} title={`${t.grammarTitle} ${level}`} />
-        <SelectionScreen subtitle={t.selectMode}>
-          <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} />
+        <TopBar onBack={() => setLevel(null)} title={`${t.grammarTitle} ${level}`} autoHide />
+        <SelectionScreen>
+          <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} title={t.selectMode} />
         </SelectionScreen>
       </div>
     )
