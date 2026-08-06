@@ -13,6 +13,7 @@ import { XpToast } from '../components/XpToast'
 import { CardTransition } from '../components/CardTransition'
 import LevelSelector from '../components/LevelSelector'
 import TierSelector from '../components/TierSelector'
+import ThemeSelector from '../components/ThemeSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
@@ -30,8 +31,9 @@ export default function VocabScreen({ session }) {
   const MODES = vocabKanjiModes(t, t.wordNoun)
 
   // See KanjiScreen for the full rationale — studyBy picks 'level'
-  // (JLPT N5…N1) vs 'frequency' (Top 200 / 201-400 / ...), and only
-  // one of level/tier is meaningful at a time depending on it.
+  // (JLPT N5…N1), 'theme' (Fruits / Jobs / Body parts / ...), or
+  // 'frequency' (Top 200 / 201-400 / ...), and only one of
+  // level/theme/tier is meaningful at a time depending on it.
   //
   // freqDomain distinguishes WHICH frequency pool a 'frequency' session
   // draws from — the JLPT deck itself ("vocab", ranked by JMdict
@@ -39,10 +41,12 @@ export default function VocabScreen({ session }) {
   // frequency_data.py) vs. the much larger pool of JMdict words outside
   // the deck ("vocab_jmdict"). Both are just "frequency domains" to the
   // backend (see frequency_data.py / frequency.py), so studyBy itself
-  // still only needs the two 'level'/'frequency' values — freqDomain is
-  // the axis orthogonal to that, not a third studyBy value, which is
-  // what lets every existing tier/mode/quiz code path below stay
-  // domain-agnostic instead of forking into a near-duplicate branch.
+  // still only needs 'level'/'theme'/'frequency' — freqDomain is the
+  // axis orthogonal to that (and irrelevant to 'theme': a theme's word
+  // pool already mixes both domains internally — see theme_data.py),
+  // which is what lets every existing tier/mode/quiz code path below
+  // stay domain-agnostic instead of forking into a near-duplicate
+  // branch.
   const [studyBy, setStudyBy]       = useState(null)
   const [freqDomain, setFreqDomain] = useState('vocab') // 'vocab' | 'vocab_jmdict'
   const [level, setLevel]           = useState(null)
@@ -52,6 +56,8 @@ export default function VocabScreen({ session }) {
   // loadProgress comment and TierSelector's onSelect for the full
   // rationale; has to travel alongside `tier` everywhere below.
   const [tierSize, setTierSize]     = useState(200)
+  const [theme, setTheme]           = useState(null)
+  const [themeLabel, setThemeLabel] = useState(null)
   const [mode, setMode]             = useState(null)
   const [answered, setAnswered]     = useState(false)
   const [selected, setSelected]     = useState(null)
@@ -94,24 +100,28 @@ export default function VocabScreen({ session }) {
   // below) rather than starting a new session.
   const storageKey =
     studyBy === 'level' && level && mode ? `jp-session:vocab:${level}:${mode}`
+    : studyBy === 'theme' && theme && mode ? `jp-session:vocab:theme:${theme}:${mode}`
     : studyBy === 'frequency' && tier && mode ? `jp-session:vocab:freq:${freqDomain}:${tier}:${tierSize}:${mode}`
     : 'idle'
 
   const fetchBatch = useCallback((count, excludeIds) => {
     if (studyBy === 'level' && (!level || !mode)) return Promise.resolve([])
+    if (studyBy === 'theme' && (!theme || !mode)) return Promise.resolve([])
     if (studyBy === 'frequency' && (!tier || !mode)) return Promise.resolve([])
     if (!studyBy || !mode) return Promise.resolve([])
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
     const url = studyBy === 'level'
       ? `/api/vocab/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
+      : studyBy === 'theme'
+      ? `/api/vocab/theme/${theme}/cards?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : `/api/frequency/${freqDomain}/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
     return apiFetch(url, session, { signal: controller.signal })
       .then(r => r.json())
       .then(data => (data.cards ?? []).map(c => ({ ...c, lang })))
       .finally(() => clearTimeout(timer))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studyBy, freqDomain, level, tier, tierSize, mode, session])
+  }, [studyBy, freqDomain, level, theme, tier, tierSize, mode, session])
   // (lang deliberately excluded above: changing lang shouldn't change
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
@@ -173,11 +183,14 @@ export default function VocabScreen({ session }) {
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
   // level+mode. Fetched independently from the card so it never blocks
   // or slows down card navigation.
-  // `source` is { level } or { tier } — see KanjiScreen's loadProgress
-  // for why this stays one function rather than two near-duplicates.
+  // `source` is { level }, { theme }, or { tier } — see KanjiScreen's
+  // loadProgress for why this stays one function rather than three
+  // near-duplicates.
   function loadProgress(source, m) {
     const url = 'level' in source
       ? `/api/vocab/stats?level=${encodeURIComponent(source.level)}&mode=${m}`
+      : 'theme' in source
+      ? `/api/vocab/theme/${source.theme}/stats?mode=${m}`
       : `/api/frequency/${freqDomain}/stats?tier=${source.tier}&tier_size=${source.tierSize}&mode=${m}`
     apiFetch(url, session)
       .then(r => r.json())
@@ -200,6 +213,14 @@ export default function VocabScreen({ session }) {
     loadProgress({ tier: tr, tierSize }, m)
   }
 
+  function startThemeSession(th, label, m) {
+    setStudyBy('theme')
+    setTheme(th)
+    setThemeLabel(label)
+    setMode(m)
+    loadProgress({ theme: th }, m)
+  }
+
   // advance() only ever runs once every gate above has cleared — see
   // pendingGatesRef — and only once per review, even if the gate set
   // empties out more than once (see advancedRef above).
@@ -220,7 +241,12 @@ export default function VocabScreen({ session }) {
     if (locked) return
     setLocked(true)
     setShowRating(false)
-    loadProgress(studyBy === 'level' ? { level } : { tier, tierSize }, mode)
+    loadProgress(
+      studyBy === 'level' ? { level }
+      : studyBy === 'theme' ? { theme }
+      : { tier, tierSize },
+      mode,
+    )
 
     // The exact outcome of this rating — xp, level-up, stage
     // promotion — was already computed when this card was fetched
@@ -256,6 +282,11 @@ export default function VocabScreen({ session }) {
     // response isn't read for anything the UI shows. A slow or dead
     // request can no longer desync the toast or the stamp from what's
     // actually about to happen.
+    // /api/vocab/review is domain-agnostic — it only needs card_id +
+    // mode, and a theme card's card_id is the exact same id
+    // vocab_to_id/vocab_jmdict_to_id already produced for it (see
+    // theme_data.py) — so a theme review posts here too, same as
+    // level and frequency ones, no separate endpoint needed.
     apiFetch('/api/vocab/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
@@ -302,6 +333,7 @@ export default function VocabScreen({ session }) {
           <ModeSelector
             modes={[
               { key: 'level', label: t.byLevel, desc: t.byLevelDesc },
+              { key: 'theme', label: t.byTheme, desc: t.byThemeDesc },
               { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
               {
                 key: 'jmdict',
@@ -331,6 +363,22 @@ export default function VocabScreen({ session }) {
     )
   }
 
+  // ── Theme selection (thematic-deck path) ──
+  if (studyBy === 'theme' && !theme) {
+    return (
+      <div className="screen">
+        <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} — ${t.byTheme}`} />
+        <SelectionScreen>
+          <ThemeSelector
+            session={session}
+            color="var(--accent2)"
+            onSelect={(th, label) => { setTheme(th); setThemeLabel(label) }}
+          />
+        </SelectionScreen>
+      </div>
+    )
+  }
+
   // ── Tier selection (frequency path) ──
   if (studyBy === 'frequency' && !tier) {
     const tierTitle = freqDomain === 'vocab_jmdict'
@@ -351,18 +399,27 @@ export default function VocabScreen({ session }) {
     )
   }
 
-  // ── Mode selection (shared by both paths) ──
+  // ── Mode selection (shared by all three paths) ──
   if (!mode) {
-    const backTitle = studyBy === 'level' ? `${t.vocabulary} ${level}` : `${t.vocabulary} ${tierLabel}`
+    const backTitle =
+      studyBy === 'level' ? `${t.vocabulary} ${level}`
+      : studyBy === 'theme' ? `${t.vocabulary} ${themeLabel}`
+      : `${t.vocabulary} ${tierLabel}`
+    const goBack = () => {
+      if (studyBy === 'level') setLevel(null)
+      else if (studyBy === 'theme') setTheme(null)
+      else setTier(null)
+    }
+    const startMode = m => {
+      if (studyBy === 'level') startLevelSession(level, m)
+      else if (studyBy === 'theme') startThemeSession(theme, themeLabel, m)
+      else startFrequencySession(tier, tierLabel, m)
+    }
     return (
       <div className="screen">
-        <TopBar onBack={() => (studyBy === 'level' ? setLevel(null) : setTier(null))} title={backTitle} />
+        <TopBar onBack={goBack} title={backTitle} />
         <SelectionScreen>
-          <ModeSelector
-            modes={MODES}
-            onSelect={m => (studyBy === 'level' ? startLevelSession(level, m) : startFrequencySession(tier, tierLabel, m))}
-            title={t.selectMode}
-          />
+          <ModeSelector modes={MODES} onSelect={startMode} title={t.selectMode} />
         </SelectionScreen>
       </div>
     )
@@ -371,7 +428,10 @@ export default function VocabScreen({ session }) {
   // ── Quiz ──
   const isKjToM = card?.direction === 'kj-m'
   const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
-  const sourceLabel = studyBy === 'level' ? level : tierLabel
+  const sourceLabel =
+    studyBy === 'level' ? level
+    : studyBy === 'theme' ? themeLabel
+    : tierLabel
 
   return (
     <div className="screen">

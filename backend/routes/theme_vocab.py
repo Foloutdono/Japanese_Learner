@@ -23,7 +23,6 @@ import logging
 import random
 
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 
 from auth import get_user_id, prefixed, unprefixed
 from srs_instance import srs
@@ -32,19 +31,22 @@ from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO
 import theme_data
-from vocab import _stage_promotion, _build_review_preview, MAX_BATCH  # reuse, don't duplicate
+from vocab import _build_review_preview, MAX_BATCH  # reuse, don't duplicate
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 FR_MAP = VOCAB_FR
 
-
-class ThemeReviewPayload(BaseModel):
-    card_id:    str
-    mode:       str
-    quality:    int
-    prev_stage: str | None = None
+# No ThemeReviewPayload / POST /api/vocab/theme/review here — reviews
+# are posted to vocab.py's existing POST /api/vocab/review instead.
+# That endpoint is already domain-agnostic (card_id + mode + quality,
+# nothing level/tier/theme-specific), and a theme card's card_id is
+# the exact same id vocab_to_id/vocab_jmdict_to_id already produced
+# for it under its level or frequency tier — see theme_data.py's
+# docstring — so there's nothing a theme-specific review endpoint
+# would do differently. Duplicating it would just be one more place
+# for the stage-promotion logic to drift out of sync.
 
 
 def _entry_meaning(entry: dict, lang: str) -> str:
@@ -158,21 +160,6 @@ def get_theme_cards(theme: str, mode: str, lang: str = "fr", count: int = 10, ex
             return {"error": "Unknown theme"}
         return {"error": "Invalid mode"}
     return {"cards": cards}
-
-
-@router.post("/api/vocab/theme/review")
-def post_theme_review(payload: ThemeReviewPayload, user_id: str = Depends(get_user_id)):
-    card_id = f"{user_id}:{payload.card_id}"
-    s = srs.review(card_id, payload.mode, payload.quality)
-    return {
-        "card_id": payload.card_id,
-        "interval": s["interval"],
-        "next_review": s["next_review"],
-        "xp_earned": s["xp_earned"],
-        "leveled_up": s["leveled_up"],
-        "new_level": s["new_level"],
-        "stage_up": _stage_promotion(payload.prev_stage, s["stage"]),
-    }
 
 
 @router.get("/api/vocab/theme/{theme}/stats")
