@@ -6,3 +6,4 @@ __pycache__/
 datas/vocab/vocab_jmdict.json
 datas/vocab/vocab_jmdict_meanings.json
 datas/vocab/vocab_jmdict_frequency.json
+datas/vocab/vocab_meanings.json
