@@ -106,7 +106,7 @@ export default function ThemeSelector({ session, onSelect, color, title }) {
         <div className="selector-header__subtitle">{t.loadError}</div>
       )}
       {themes && visibleThemes.length === 0 && (
-        <div className="selector-header__subtitle">{t.noResults ?? 'No matches'}</div>
+        <div className="selector-header__subtitle">{t.themeNoResults ?? 'No matches'}</div>
       )}
 
       {themes && visibleThemes.length > 0 && (

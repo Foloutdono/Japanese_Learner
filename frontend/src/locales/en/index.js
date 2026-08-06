@@ -113,6 +113,63 @@ const quiz = {
   // (see TierSelector.jsx) — aria-label only, not visible text.
   tierSizeLabel:     'Tier size',
 
+  // Vocabulary's third study-source option, alongside byLevel/
+  // byFrequency — thematic decks (Fruits, Jobs, Body parts, ...), see
+  // ThemeSelector.jsx / theme_data.py.
+  byTheme:           'By theme',
+  byThemeDesc:       'Everyday vocabulary grouped by topic — food, places, people, and more',
+  selectTheme:       'Choose a theme',
+  // Placeholder/aria-label for ThemeSelector's filter box (only shown
+  // once there are more than a handful of themes to scroll through).
+  filterThemes:      'Filter themes…',
+  // Shown when a theme filter query matches nothing — distinct from
+  // dictionary's `noResults` above, which is followed by the query
+  // term ("No results for {query}") rather than standing alone.
+  themeNoResults:    'No themes match your filter',
+
+  // Theme display labels — key is `theme_data.list_themes()`'s `key`
+  // camelCased and prefixed with `theme` (see ThemeSelector.jsx's
+  // _translationKey), so a theme added to build_theme_db.py only
+  // needs its matching line added here (and in every other language
+  // file) to get a real label instead of ThemeSelector's raw-key
+  // fallback.
+  themeFruits:           'Fruits',
+  themeVegetables:       'Vegetables',
+  themeBodyParts:        'Body parts',
+  themeRooms:            'Rooms',
+  themeBuildings:        'Buildings',
+  themeFurniture:        'Furniture',
+  themeSchool:           'School',
+  themeTravel:           'Travel',
+  themeJobs:             'Jobs',
+  themeDishes:           'Dishes',
+  themeAnimals:          'Animals',
+  themeColors:           'Colors',
+  themeClothing:         'Clothing',
+  themeWeather:          'Weather',
+  themeFamily:           'Family',
+  themeEmotions:         'Emotions',
+  themeNature:           'Nature',
+  themeVehicles:         'Vehicles',
+  themeTechnology:       'Technology',
+  themeSports:           'Sports',
+  themeMusic:            'Music',
+  themeKitchenItems:     'Kitchen items',
+  themeOfficeSupplies:   'Office supplies',
+  themeShoppingMoney:    'Shopping & money',
+  themeGeography:        'Geography',
+  themeInsectsBugs:      'Insects & bugs',
+  themeBirds:            'Birds',
+  themeSeafood:          'Seafood',
+  themeDrinks:           'Drinks',
+  themeShapes:           'Shapes',
+  themeMaterials:        'Materials',
+  themeTools:            'Tools',
+  themeMedical:          'Medical',
+  themePlantsTrees:      'Plants & trees',
+  themeHouseholdItems:   'Household items',
+  themeHolidaysEvents:   'Holidays & events',
+
   levelHintN5:       'Beginner level',
   levelHintN4:       'Elementary level',
   levelHintN3:       'Intermediate level',
