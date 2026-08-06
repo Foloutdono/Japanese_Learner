@@ -286,6 +286,7 @@ button:focus-visible {
   margin-bottom: 20px;
 }
 
+
 .tier-size-toggle__btn {
   background: var(--bg-card);
   color: var(--text-secondary);
@@ -5349,6 +5350,7 @@ input:focus { border-color: var(--accent2); }
 .deckdetail-card-content { flex: 1; }
 .deckdetail-card-fields { display: flex; gap: 24px; flex-wrap: wrap; }
 .deckdetail-field-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
+.deckdetail-source-badge { text-transform: uppercase; letter-spacing: 0.02em; opacity: 0.8; }
 .deckdetail-field-value {
   font-size: 20px;
 }
@@ -6122,6 +6124,42 @@ input:focus { border-color: var(--accent2); }
 @media (max-width: 900px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── BrowseCardsMenu component ────────────────────────────── */
+/* Reuses .import-overlay/.import-modal/.import-header/.import-footer
+   (ImportCardsMenu, above) for the modal shell, .study-level-btn for
+   the JLPT level filter, and .deckdetail-card-row/.deckdetail-checkbox
+   for result rows — only what's genuinely new to this component gets
+   its own classes here. */
+.browse-source-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.browse-source-tab {
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text-on-panel-soft);
+}
+.browse-source-tab--active { background: var(--action-purple); color: var(--text-on-panel); }
+
+.browse-level-row { margin-bottom: 14px; }
+
+.browse-search-input { width: 100%; margin-bottom: 16px; box-sizing: border-box; }
+
+.browse-results__list { max-height: 320px; }
+
+.browse-result-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.browse-result-row--in-deck { opacity: 0.55; cursor: default; }
+.browse-result-row__tag {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 /* Auto-hide on scroll — opt-in via the `autoHide` prop on <TopBar/>,

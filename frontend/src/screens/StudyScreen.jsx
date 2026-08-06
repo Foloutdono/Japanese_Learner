@@ -15,8 +15,22 @@ import { applyXpGain } from '../components/userProfileSummary'
 import { useCardSession } from '../hooks/useCardSession'
 import { useLang } from '../LangContext'
 
-const JLPT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 const FETCH_TIMEOUT_MS = 8000
+
+// Labels for every mode key any source can produce (see decks.py's
+// SOURCES) — sourced from `t` so a French-language user never hits an
+// English literal here. Falls back to the raw key for anything not
+// listed (e.g. a future source's own mode) rather than hiding it.
+function modeLabel(t, key) {
+    const LABELS = {
+        flashcard: t.modeFlashcard,
+        'kk-s':    t.studyPhase1,
+        'k-k':     t.studyPhase2,
+        's-k':     t.studyPhase3,
+        write:     t.modeWrite,
+    }
+    return LABELS[key] ?? key
+}
 
 export default function StudyScreen({ session }) {
     const { t, lang } = useLang()
@@ -25,30 +39,33 @@ export default function StudyScreen({ session }) {
     const { state }     = useLocation()
     const deck          = state?.deck
 
-    // Labels sourced from `t` (were hardcoded English literals before —
-    // this is the one spot in the file that never went through
-    // translation) so a French-language user doesn't hit English text
-    // here while the rest of the config screen is translated.
-    const MODES_BY_TYPE = {
-        flashcard: [{ key: 'flashcard', label: t.modeFlashcard }],
-        vocab:     [
-            { key: 'flashcard', label: t.modeFlashcard },
-            { key: 'kk-s',     label: t.studyPhase1 },
-            { key: 'k-k',      label: t.studyPhase2 },
-            { key: 's-k',      label: t.studyPhase3 },
-        ],
-        kanji:     [
-            { key: 'flashcard', label: t.modeFlashcard },
-            { key: 'kk-s',     label: t.studyPhase1 },
-            { key: 'k-k',      label: t.studyPhase2 },
-            { key: 's-k',      label: t.studyPhase3 },
-        ],
-    }
+    // A deck's available modes now come from what's actually inside
+    // it (custom cards + whatever kanji/vocab/grammar cards were
+    // browsed in — see decks.py's get_deck_modes) instead of a fixed
+    // deck.type, so a deck can genuinely mix sources and offer every
+    // mode any of its cards support. `composition` also drives the
+    // write-practice toggle below (used to be `deck.type === 'kanji'`).
+    const [availableModes, setAvailableModes] = useState([{ key: 'flashcard', label: modeLabel(t, 'flashcard') }])
+    const [composition, setComposition]       = useState(null)
+    const [modesLoaded, setModesLoaded]       = useState(false)
+    const [mode, setMode]                     = useState('flashcard')
 
-    const availableModes = MODES_BY_TYPE[deck?.type] ?? MODES_BY_TYPE.flashcard
+    useEffect(() => {
+        if (!deck_id) return
+        apiFetch(`/api/decks/${deck_id}/modes`, session)
+            .then(r => r.json())
+            .then(data => {
+                const modes = (data.modes?.length ? data.modes : ['flashcard'])
+                    .map(key => ({ key, label: modeLabel(t, key) }))
+                setAvailableModes(modes)
+                setComposition(data.composition ?? null)
+                setMode(prev => (modes.some(m => m.key === prev) ? prev : modes[0].key))
+            })
+            .catch(() => {})
+            .finally(() => setModesLoaded(true))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [deck_id, session])
 
-    const [mode, setMode]               = useState(availableModes[0].key)
-    const [mixLevels, setMixLevels]     = useState([])
     const [answered, setAnswered]       = useState(false)
     const [selected, setSelected]       = useState(null)
     const [input, setInput]             = useState('')
@@ -89,16 +106,15 @@ export default function StudyScreen({ session }) {
     // hook itself is always called (rules of hooks), it just has
     // nothing to fetch yet.
     const storageKey = configured
-        ? `jp-session:study:${deck_id}:${mode}:${mixLevels.join(',')}`
+        ? `jp-session:study:${deck_id}:${mode}`
         : 'idle'
 
     const fetchBatch = useCallback((count, excludeIds) => {
         if (!configured) return Promise.resolve([])
         const controller = new AbortController()
         const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-        const mixParam = mixLevels.join(',')
         return apiFetch(
-            `/api/decks/${deck_id}/study?mode=${mode}&mix_levels=${mixParam}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`,
+            `/api/decks/${deck_id}/study?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`,
             session,
             { signal: controller.signal },
         )
@@ -106,7 +122,7 @@ export default function StudyScreen({ session }) {
             .then(data => data.cards ?? [])
             .finally(() => clearTimeout(timer))
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [configured, deck_id, mode, mixLevels, session])
+    }, [configured, deck_id, mode, session])
 
     const { current: card, loading, done, advance } = useCardSession({
         storageKey,
@@ -150,9 +166,10 @@ export default function StudyScreen({ session }) {
         setShowRating(false)
 
         const isWrong = quality <= 2
-        const isKanji = card?.deck_type === 'kanji' || card?.source === 'builtin_kanji'
+        const isKanji = card?.source === 'builtin_kanji'
         const needTraining = isWrong && isKanji && drawingEnabled && card.front
         const cardId = card.card_id
+        const prevStage = card.stage
 
         advancedRef.current = false
         const gates = pendingGatesRef.current
@@ -164,18 +181,37 @@ export default function StudyScreen({ session }) {
             // dismissed (see DrawingCanvas's onDone below).
         }
 
-        // Unlike Kana/Kanji/Vocab/Grammar, a deck review's XP / level-up
-        // / stage outcome isn't precomputed on the card (custom decks
-        // have no review_preview to draw from) — it's only known once
-        // this POST resolves. So, unavoidably, the 'review' gate holds
-        // advance() until the response is in, instead of the instant
-        // local pop the other screens get from already knowing the
-        // outcome up front. This is the one place that request can't
-        // be pure fire-and-forget the way it is elsewhere.
+        // Builtin-sourced cards (kanji/vocab/grammar) now carry a
+        // review_preview the same way Kanji/Vocab/Grammar's own
+        // screens do (see decks.py's SOURCES build functions), so the
+        // outcome is known instantly and advance() doesn't have to
+        // wait on this POST — only custom cards (which have no
+        // precomputed preview) still hold the gate open until the
+        // response comes back.
+        const preview = card.review_preview?.[String(quality)]
+
+        if (preview) {
+            if (typeof preview.xp_earned === 'number') {
+                gates.add('toast')
+                setXpToast({ amount: preview.xp_earned, id: Date.now(), leveledUp: preview.leveled_up, newLevel: preview.new_level, quality })
+                applyXpGain({ amount: preview.xp_earned, leveledUp: preview.leveled_up, newLevel: preview.new_level })
+            }
+            if (preview.stage_up) {
+                gates.add('stamp')
+                setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: cardId })
+            }
+            apiFetch(`/api/decks/${deck_id}/review`, session, {
+                method: 'POST',
+                body: JSON.stringify({ card_id: cardId, mode, quality, prev_stage: prevStage }),
+            }).catch(() => {})
+            checkAdvance()
+            return
+        }
+
         gates.add('review')
         apiFetch(`/api/decks/${deck_id}/review`, session, {
             method: 'POST',
-            body: JSON.stringify({ card_id: cardId, mode, quality }),
+            body: JSON.stringify({ card_id: cardId, mode, quality, prev_stage: prevStage }),
         }).then(r => r.json()).then(data => {
             if (typeof data.xp_earned === 'number') {
                 gates.add('toast')
@@ -213,10 +249,6 @@ export default function StudyScreen({ session }) {
         if (card.kana) speakJapanese(card.kana)
     }
 
-    function toggleMixLevel(l) {
-        setMixLevels(prev => prev.includes(l) ? prev.filter(x => x !== l) : [...prev, l])
-    }
-
     // ── Config screen (mode + mix) ──
     if (!configured) {
         return (
@@ -244,22 +276,11 @@ export default function StudyScreen({ session }) {
                     ))}
                 </div>
 
-                {(deck?.type === 'vocab' || deck?.type === 'kanji') && (
-                    <div className="study-config-section">
-                        <div className="selector-header__eyebrow">{t.mixWithJLPT}</div>
-                        <div className="study-level-row">
-                            {JLPT_LEVELS.map(l => (
-                                <button key={l}
-                                    onClick={() => toggleMixLevel(l)}
-                                    className={`study-level-btn${mixLevels.includes(l) ? ' study-level-btn--active' : ''}`}>
-                                    {l}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {deck?.type === 'kanji' && (
+                {/* Browsed-in kanji cards unlock write practice the same
+                    way a dedicated kanji deck used to via deck.type —
+                    composition (from /api/decks/{id}/modes) is what
+                    actually tells us kanji cards are present now. */}
+                {composition?.kanji > 0 && (
                     <div className="study-config-section">
                         <button
                             onClick={() => setDrawingEnabled(d => !d)}
@@ -271,6 +292,7 @@ export default function StudyScreen({ session }) {
 
                 <button
                     onClick={() => setConfigured(true)}
+                    disabled={!modesLoaded}
                     className="btn-primary-purple study-start-btn">
                     {t.startSession}
                 </button>
@@ -280,15 +302,15 @@ export default function StudyScreen({ session }) {
     }
 
     // ── Study screen ──
-    const modeLabel = availableModes.find(m => m.key === mode)?.label ?? mode
+    const currentModeLabel = availableModes.find(m => m.key === mode)?.label ?? mode
 
     return (
         <div className="screen">
             <TopBar
                 onBack={() => setConfigured(false)}
-                title={`${deck?.name ?? ''} — ${modeLabel}`}
+                title={`${deck?.name ?? ''} — ${currentModeLabel}`}
                 autoHide
-                actions={deck?.type === 'kanji' && (
+                actions={composition?.kanji > 0 && (
                     <button
                         onClick={() => setDrawingEnabled(d => !d)}
                         className={`btn-writing-toggle ${drawingEnabled ? 'btn-writing-toggle--on' : 'btn-writing-toggle--off'}`}
@@ -340,8 +362,15 @@ export default function StudyScreen({ session }) {
                                 />
                             ) : (
                                 <>
-                                    <div className="study-front-text" style={{ '--front-size': card.front?.length === 1 ? '80px' : '32px' }}>
-                                        {card.front}
+                                    {/* Grammar's "fill" mode shows the blanked example
+                                        sentence instead of the grammar point itself —
+                                        answering is still via the MCQ choices below
+                                        (grammar cards always carry `choices`, see
+                                        _build_grammar_card); a true type-the-blank
+                                        input would be a nice follow-up but isn't
+                                        needed to make the mode usable. */}
+                                    <div className="study-front-text" style={{ '--front-size': card.fill_example ? '24px' : (card.front?.length === 1 ? '80px' : '32px') }}>
+                                        {card.fill_example ? card.fill_example.jp_blanked : card.front}
                                     </div>
                                     {card.hint && !answered && (
                                         <div className="study-hint-text">💡 {card.hint}</div>

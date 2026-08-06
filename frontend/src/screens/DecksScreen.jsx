@@ -11,6 +11,7 @@ export default function DecksScreen({ session }) {
   const { t }     = useLang()
 
   const DECK_TYPES = [
+    { value: 'mixed',     label: t.mixedType ?? 'Mixte',        desc: t.mixedDesc ?? 'Vos cartes + contenu existant (kanji, vocab, grammaire)', color: '#f9a826' },
     { value: 'flashcard', label: t.flashcardType, desc: t.flashcardDesc, color: '#6c5ce7' },
     { value: 'vocab',     label: t.vocabType,     desc: t.deckVocabDesc, color: '#4cc9f0' },
     { value: 'kanji',     label: t.kanjiType,     desc: t.deckKanjiDesc, color: '#e94560' },
@@ -23,7 +24,7 @@ export default function DecksScreen({ session }) {
   const [loading, setLoading]   = useState(true)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName]   = useState('')
-  const [newType, setNewType]   = useState('flashcard')
+  const [newType, setNewType]   = useState('mixed')
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')

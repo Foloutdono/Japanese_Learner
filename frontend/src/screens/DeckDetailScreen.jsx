@@ -6,6 +6,7 @@ import { TopBar } from '../components/TopBar'
 import EmptyState from '../components/EmptyState'
 import { Loading } from '../components/Loading'
 import ImportCardsMenu from '../components/ImportCardsMenu'
+import BrowseCardsMenu from '../components/BrowseCardsMenu'
 
 export default function DeckDetailScreen({ session }) {
   const navigate        = useNavigate()
@@ -21,6 +22,7 @@ export default function DeckDetailScreen({ session }) {
   const [form, setForm]             = useState({ front: '', back: '', hint: '', notes: '' })
   const [showImport, setShowImport] = useState(false)
   const [importResult, setImportResult] = useState(null)
+  const [showBrowse, setShowBrowse] = useState(false)
   const [selectMode, setSelectMode] = useState(false)
   const [selected, setSelected]     = useState(new Set())
 
@@ -43,6 +45,22 @@ export default function DeckDetailScreen({ session }) {
       .catch(() => setLoading(false))
   }
 
+  // Custom cards are keyed by their own numeric id; app-sourced cards
+  // (added via Browse) have no id of their own — they're identified
+  // by (source, raw_id) instead — so every card in the combined list
+  // needs one stable key regardless of where it came from.
+  function cardKey(card) {
+    return card.origin === 'app' ? `app:${card.source}:${card.raw_id}` : `custom:${card.id}`
+  }
+
+  function deleteCard(card) {
+    if (card.origin === 'app') {
+      const params = new URLSearchParams({ source: card.source, raw_id: card.raw_id })
+      return apiFetch(`/api/decks/${deck_id}/cards/app?${params.toString()}`, session, { method: 'DELETE' })
+    }
+    return apiFetch(`/api/decks/${deck_id}/cards/${card.id}`, session, { method: 'DELETE' })
+  }
+
   function resetForm() { setForm({ front: '', back: '', hint: '', notes: '' }) }
 
   function startAdd() { resetForm(); setEditing(null); setAdding(true) }
@@ -62,7 +80,7 @@ export default function DeckDetailScreen({ session }) {
       })
         .then(r => r.json())
         .then(updated => {
-          setCards(prev => prev.map(c => c.id === editing ? updated : c))
+          setCards(prev => prev.map(c => (c.origin === 'custom' && c.id === editing) ? { ...updated, origin: 'custom' } : c))
           setAdding(false)
           setEditing(null)
           resetForm()
@@ -77,27 +95,28 @@ export default function DeckDetailScreen({ session }) {
     }
   }
 
-  function toggleSelect(id) {
+  function toggleSelect(key) {
     setSelected(prev => {
       const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
       return next
     })
   }
 
   function toggleSelectAll() {
-    setSelected(selected.size === cards.length ? new Set() : new Set(cards.map(c => c.id)))
+    setSelected(selected.size === cards.length ? new Set() : new Set(cards.map(cardKey)))
   }
 
   function exitSelectMode() { setSelectMode(false); setSelected(new Set()) }
 
   async function deleteSelected() {
     if (!confirm(`${t.delete} ${selected.size} ${t.cards}?`)) return
-    for (const id of selected) {
-      await apiFetch(`/api/decks/${deck_id}/cards/${id}`, session, { method: 'DELETE' })
+    for (const card of cards) {
+      if (!selected.has(cardKey(card))) continue
+      await deleteCard(card)
     }
-    setCards(prev => prev.filter(c => !selected.has(c.id)))
+    setCards(prev => prev.filter(c => !selected.has(cardKey(c))))
     exitSelectMode()
   }
 
@@ -133,6 +152,9 @@ export default function DeckDetailScreen({ session }) {
               </button>
               <button onClick={startAdd} className="deckdetail-btn">
                 {t.addCard}
+              </button>
+              <button onClick={() => setShowBrowse(true)} className="deckdetail-btn">
+                📚 Parcourir
               </button>
               {cards.length > 0 && (
                 <button onClick={() => setSelectMode(true)} className="deckdetail-btn deckdetail-btn--muted">
@@ -221,12 +243,13 @@ export default function DeckDetailScreen({ session }) {
         {!loading && cards.length > 0 && (
           <div className="deckdetail-list">
             {cards.map(card => {
-              const isSel = selected.has(card.id)
+              const key   = cardKey(card)
+              const isSel = selected.has(key)
               return (
                 <div
-                  key={card.id}
+                  key={key}
                   className={`card deckdetail-card-row${selectMode ? ' deckdetail-card-row--selectable' : ''}${isSel ? ' deckdetail-card-row--selected' : ''}`}
-                  onClick={selectMode ? () => toggleSelect(card.id) : undefined}
+                  onClick={selectMode ? () => toggleSelect(key) : undefined}
                 >
                   {selectMode && (
                     <div className={`deckdetail-checkbox${isSel ? ' deckdetail-checkbox--checked' : ''}`}>
@@ -237,9 +260,25 @@ export default function DeckDetailScreen({ session }) {
                   <div className="deckdetail-card-content">
                     <div className="deckdetail-card-fields">
                       <div>
-                        <div className="deckdetail-field-label">{t.frontPlaceholder}</div>
+                        <div className="deckdetail-field-label">
+                          {t.frontPlaceholder}
+                          {/* App-sourced cards (browsed in from kanji/vocab/
+                              grammar) carry their own SRS progress shared
+                              with the rest of the app — see decks.py's
+                              _build_pool — so they're shown read-only here,
+                              tagged by source, instead of an editable form. */}
+                          {card.origin === 'app' && (
+                            <span className="deckdetail-source-badge"> · {card.source}{card.level ? ` ${card.level}` : ''}</span>
+                          )}
+                        </div>
                         <div className="deckdetail-field-value deckdetail-field-value--jp">{card.front}</div>
                       </div>
+                      {card.kana && (
+                        <div>
+                          <div className="deckdetail-field-label">かな</div>
+                          <div className="deckdetail-field-value">{card.kana}</div>
+                        </div>
+                      )}
                       <div>
                         <div className="deckdetail-field-label">{t.backPlaceholder}</div>
                         <div className="deckdetail-field-value">{card.back}</div>
@@ -259,9 +298,14 @@ export default function DeckDetailScreen({ session }) {
                     </div>
                   </div>
 
-                  {!selectMode && (
+                  {!selectMode && card.origin === 'custom' && (
                     <button onClick={() => startEdit(card)} className="deckdetail-edit-btn">
                       ✏️
+                    </button>
+                  )}
+                  {!selectMode && card.origin === 'app' && (
+                    <button onClick={() => deleteCard(card).then(fetchCards)} className="deckdetail-edit-btn">
+                      🗑
                     </button>
                   )}
                 </div>
@@ -273,6 +317,15 @@ export default function DeckDetailScreen({ session }) {
 
       {showImport && (
         <ImportCardsMenu onImport={handleImport} onClose={() => setShowImport(false)} />
+      )}
+
+      {showBrowse && (
+        <BrowseCardsMenu
+          deckId={deck_id}
+          session={session}
+          onAdded={fetchCards}
+          onClose={() => setShowBrowse(false)}
+        />
       )}
     </div>
   )
