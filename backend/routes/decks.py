@@ -196,6 +196,37 @@ def _ensure_deck_schema() -> None:
                     PRIMARY KEY (deck_id, source, raw_id)
                 )
             """)
+            # A previous deploy created deck_cards before `decks`
+            # existed, with deck_id as TEXT and no FK (see the comment
+            # above _ensure_deck_schema) — CREATE TABLE IF NOT EXISTS
+            # above is a no-op against that already-existing table, so
+            # the stale TEXT column survives untouched and now mismatches
+            # decks.id (BIGINT), breaking any join between them
+            # (UndefinedFunction: operator does not exist: text = bigint).
+            # This brings an existing deck_cards up to the same shape a
+            # fresh one gets from the CREATE TABLE above. Safe to rerun
+            # every startup: the ALTER is a no-op once the column is
+            # already BIGINT, and the constraint is only added if it's
+            # not already there. deck_cards was never reachable while
+            # `decks` didn't exist (every endpoint that writes to it
+            # checks the deck exists first), so there's no real data at
+            # risk in the ::bigint cast.
+            cur.execute("""
+                ALTER TABLE deck_cards
+                ALTER COLUMN deck_id TYPE BIGINT USING deck_id::bigint
+            """)
+            cur.execute("""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_constraint WHERE conname = 'deck_cards_deck_id_fkey'
+                    ) THEN
+                        ALTER TABLE deck_cards
+                        ADD CONSTRAINT deck_cards_deck_id_fkey
+                        FOREIGN KEY (deck_id) REFERENCES decks(id) ON DELETE CASCADE;
+                    END IF;
+                END $$;
+            """)
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_deck_cards_deck
                 ON deck_cards(deck_id, user_id)
