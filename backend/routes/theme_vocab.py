@@ -31,7 +31,7 @@ from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO
 import theme_data
-from vocab import _build_review_preview, MAX_BATCH  # reuse, don't duplicate
+from routes.vocab import _build_review_preview, MAX_BATCH  # reuse, don't duplicate
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
