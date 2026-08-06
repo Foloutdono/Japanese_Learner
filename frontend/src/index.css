@@ -279,6 +279,13 @@ button:focus-visible {
   margin-bottom: 20px;
 }
 
+.theme-selector__search {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+}
+
 .tier-size-toggle__btn {
   background: var(--bg-card);
   color: var(--text-secondary);
