@@ -130,6 +130,46 @@ CREATE TABLE frequency_overrides (
 CREATE INDEX idx_frequency_overrides_user_domain
 ON frequency_overrides(user_id, domain);
 
+-- decks, custom_cards, and deck_cards — the whole custom-deck
+-- feature's schema — are self-migrated by decks.py at import time
+-- (_ensure_deck_schema), same pattern SRSEngine uses for cards/
+-- card_modes/review_log. Listed here for reference, not a migration
+-- you need to run by hand. (Earlier versions of this file assumed
+-- decks/custom_cards already existed elsewhere and only self-migrated
+-- deck_cards — they didn't, which crashed every /api/decks request
+-- with UndefinedTable. All three are created together now, in
+-- dependency order, so decks.py is fully self-contained.)
+
+CREATE TABLE decks (
+    id BIGSERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL DEFAULT 'mixed',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_decks_user
+ON decks(user_id);
+
+-- The user's own hand-authored cards. deck_cards below only ever
+-- holds *references* into the read-only app decks — never a copy of
+-- them — so this table is the one place actual card content the user
+-- typed lives.
+CREATE TABLE custom_cards (
+    id BIGSERIAL PRIMARY KEY,
+    deck_id BIGINT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL,
+    front TEXT NOT NULL,
+    back TEXT NOT NULL,
+    kana TEXT NOT NULL DEFAULT '',
+    hint TEXT NOT NULL DEFAULT '',
+    notes TEXT NOT NULL DEFAULT '',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_custom_cards_deck
+ON custom_cards(deck_id, user_id);
+
 -- Membership links between a user's custom deck and cards sourced
 -- from the app's own built-in decks (kanji/vocab/grammar today — see
 -- decks.py's SOURCES registry for where kana or a fuller dictionary
@@ -140,19 +180,8 @@ ON frequency_overrides(user_id, domain);
 -- shares one SRS progress everywhere — same behaviour the deck
 -- feature's old mix_levels parameter gave, just persisted now instead
 -- of recomputed from whole JLPT levels on every request.
---
--- The user's own hand-authored cards remain in custom_cards below,
--- unchanged — this table only ever holds *references* into the
--- read-only deck data, never a copy of it.
---
--- Self-migrated by decks.py at import time (_ensure_deck_schema),
--- same pattern SRSEngine uses for cards/card_modes/review_log —
--- listed here for reference, not a migration you need to run by hand.
--- No FK to decks(id): decks.py may import before that table exists in
--- startup order, so membership rows are cleaned up explicitly in
--- delete_deck instead of relying on ON DELETE CASCADE.
 CREATE TABLE deck_cards (
-    deck_id TEXT NOT NULL,
+    deck_id BIGINT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
     user_id TEXT NOT NULL,
     source TEXT NOT NULL,        -- 'kanji' | 'vocab' | 'grammar' (kana/dictionary: future)
     level TEXT NOT NULL,         -- JLPT level the entry lives under, e.g. 'N5'
@@ -163,12 +192,3 @@ CREATE TABLE deck_cards (
 
 CREATE INDEX idx_deck_cards_deck
 ON deck_cards(deck_id, user_id);
-
--- Referenced by decks.py but not shown here since I don't yet have
--- their definitions — `decks` (id, user_id, name, type, created_at)
--- and `custom_cards` (id, deck_id, user_id, front, back, kana, hint,
--- notes, created_at). Both are assumed to already exist elsewhere in
--- the schema (decks.py doesn't self-migrate them the way it does
--- deck_cards above) — worth pasting their real CREATE TABLE here too
--- next time this file gets updated, so the whole deck feature's
--- schema lives in one place.

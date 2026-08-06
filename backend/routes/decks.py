@@ -140,18 +140,54 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
 
 
 def _ensure_deck_schema() -> None:
-    """Self-migrating, same pattern SRSEngine._init_db uses — see
-    data_structure.sql's deck_cards comment. No FK to decks(id) here
-    on purpose: this module may import (and so run this) before the
-    table that owns `decks` has necessarily been created elsewhere in
-    startup, and deck_cards rows are cleaned up explicitly in
-    delete_deck rather than relying on cascade."""
+    """
+    Self-migrating, same pattern SRSEngine._init_db uses. This used to
+    only create deck_cards, on the assumption `decks` and
+    `custom_cards` already existed somewhere else in the schema — they
+    didn't (UndefinedTable: relation "decks" does not exist), so the
+    whole deck feature was 500ing on first request. All three tables
+    are created here now, in dependency order, so decks.py is fully
+    self-contained the same way srs.py is for its own tables.
+    """
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute("""
+                CREATE TABLE IF NOT EXISTS decks (
+                    id BIGSERIAL PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    type TEXT NOT NULL DEFAULT 'mixed',
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_decks_user
+                ON decks(user_id)
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS custom_cards (
+                    id BIGSERIAL PRIMARY KEY,
+                    deck_id BIGINT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+                    user_id TEXT NOT NULL,
+                    front TEXT NOT NULL,
+                    back TEXT NOT NULL,
+                    kana TEXT NOT NULL DEFAULT '',
+                    hint TEXT NOT NULL DEFAULT '',
+                    notes TEXT NOT NULL DEFAULT '',
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_custom_cards_deck
+                ON custom_cards(deck_id, user_id)
+            """)
+            # decks now exists before this runs (same transaction,
+            # created just above), so this can safely FK to it — no
+            # more "may import before decks exists" concern.
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS deck_cards (
-                    deck_id TEXT NOT NULL,
+                    deck_id BIGINT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
                     user_id TEXT NOT NULL,
                     source TEXT NOT NULL,
                     level TEXT NOT NULL,
@@ -275,13 +311,18 @@ def delete_deck(deck_id: str, user_id: str = Depends(get_user_id)):
             )
             if cur.rowcount == 0:
                 raise HTTPException(status_code=404, detail="Deck not found")
-            # deck_cards rows are just membership links to shared app
-            # cards (kanji/vocab/grammar) — their SRS progress lives
-            # under the app's own card ids (see SOURCES / _build_pool)
-            # and is deliberately left untouched: deleting this deck
-            # shouldn't reset progress made studying the same kanji/
-            # word/grammar point elsewhere. Only the membership rows
-            # and this deck's own custom cards' SRS state are removed.
+            # custom_cards and deck_cards both FK to decks(id) ON DELETE
+            # CASCADE now, so this DELETE already removed them — the
+            # explicit deck_cards delete below is just a harmless no-op
+            # safety net (kept in case that FK is ever loosened). Their
+            # SRS *progress*, however, is handled separately on purpose:
+            # custom cards are deck-scoped, so their srs state is
+            # deleted below via custom_keys; app-sourced cards
+            # (kanji/vocab/grammar) are NOT deck-scoped (see SOURCES /
+            # _build_pool), so deleting this deck must never touch
+            # their SRS state — that's shared with the Kanji/Vocab/
+            # Grammar screens and any other deck referencing the same
+            # card.
             cur.execute("DELETE FROM deck_cards WHERE deck_id = %s AND user_id = %s", (deck_id, user_id))
         conn.commit()
         srs.delete_cards(custom_keys)
