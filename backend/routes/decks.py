@@ -1,27 +1,186 @@
 import logging
-import random
 import csv
 import io
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from pydantic import BaseModel
-from auth import get_user_id
+from auth import get_user_id, prefixed, unprefixed
 from db import db_conn
 from srs_instance import srs
-from srs.batch_cache import ensure_initialized, key as batch_key, take_next
+from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
 from translations import get_meaning
-from translations.fr.vocab_fr import VOCAB_FR as VOCAB_FR_MAP
-from kanji_meanings import KANJI_FR as KANJI_FR_MAP
+from translations.fr.vocab_fr import VOCAB_FR
+from kanji_meanings import KANJI_FR
+
+# Reuse the exact same MCQ/choice-building + review-preview logic the
+# Kanji/Vocab/Grammar screens use, instead of a second copy living
+# here that could drift out of sync. Each _build_*_card already knows
+# how to shape one card payload (choices, fill-in blanks, review
+# previews, ...) for its own mode set — decks.py just needs to route
+# to the right one per card. See SOURCES below.
+from kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
+from vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
+from grammar import VALID_MODES as GRAMMAR_VALID_MODES, _build_grammar_card
 import psycopg2.extras
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+MAX_BATCH = 25
+
+
+# ── Source registry ──────────────────────────────────────────
+# One entry per kind of card a deck can pull in from the rest of the
+# app, on top of the user's own custom_cards. Browsing, adding,
+# removing, computing a deck's available study modes, and building
+# study-session cards ALL key off this dict — so wiring in a new
+# source (kana, or a fuller dictionary-backed vocab search once those
+# files are in) is just adding an entry here, not touching every
+# endpoint below.
+#
+#   by_level:    {level: [entry, ...]} — same shape as
+#                KANJI_BY_LEVEL/VOCAB_BY_LEVEL/GRAMMAR_BY_LEVEL
+#   to_id:       entry, level -> raw id string (kanji_to_id-style)
+#   valid_modes: study modes this source's cards support
+#   build:       (raw_id, entry, level, level_list, mode, lang,
+#                 stage, preview) -> full card payload for the
+#                 frontend, in the uniform shape decks.py needs
+#                 regardless of the underlying router's own signature
+#
+# NOT registered yet, on purpose — the natural next additions:
+#   - "kana":  kana_data.py exists but there's no kana.py router to
+#     borrow a _build_kana_card from yet, and kana-only quiz modes are
+#     being reworked elsewhere in the app right now. Add it here once
+#     that lands.
+#   - a real dictionary-backed "vocab" search: today's browse only
+#     searches the JLPT-leveled VOCAB_BY_LEVEL deck, not the full
+#     dictionary. Once the fuller dictionary files are in, either
+#     extend this "vocab" entry's by_level/to_id or add a sibling
+#     source (e.g. "dictionary") reusing _build_vocab_card the same
+#     way.
+
+def _wrap_kanji(raw_id, entry, level, level_list, mode, lang, stage, preview):
+    return _build_kanji_card(raw_id, entry, level_list, mode, lang, stage, preview)
+
+
+def _wrap_vocab(raw_id, entry, level, level_list, mode, lang, stage, preview):
+    return _build_vocab_card(raw_id, entry, level_list, mode, lang, stage, preview)
+
+
+def _wrap_grammar(raw_id, entry, level, level_list, mode, lang, stage, preview):
+    card = _build_grammar_card(entry, level, level_list, mode, stage, preview)
+    card["card_id"] = raw_id
+    return card
+
+
+SOURCES = {
+    "kanji": {
+        "by_level":    KANJI_BY_LEVEL,
+        "to_id":       kanji_to_id,
+        "valid_modes": KANJI_VALID_MODES,
+        "build":       _wrap_kanji,
+    },
+    "vocab": {
+        "by_level":    VOCAB_BY_LEVEL,
+        "to_id":       vocab_to_id,
+        "valid_modes": set(VOCAB_MODE_INFO.keys()),
+        "build":       _wrap_vocab,
+    },
+    "grammar": {
+        "by_level":    GRAMMAR_BY_LEVEL,
+        "to_id":       grammar_to_id,
+        "valid_modes": GRAMMAR_VALID_MODES,
+        "build":       _wrap_grammar,
+    },
+}
+
+# Card stage promotions worth a visual "stamp" on the frontend — same
+# rule as kana.py/kanji.py/vocab.py/grammar.py's own copy.
+STAGE_PROMOTIONS = {
+    ("new", "learning"): "learning",
+    ("learning", "mastered"): "mastered",
+}
+
+
+def _stage_promotion(prev_stage: str | None, new_stage: str | None) -> str | None:
+    if not prev_stage or not new_stage:
+        return None
+    return STAGE_PROMOTIONS.get((prev_stage, new_stage))
+
+
+def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) -> dict | None:
+    """Same shape as kanji.py/vocab.py/grammar.py's own helper — kept
+    as a local copy here (rather than imported) because, unlike the
+    MCQ/choice-building logic, this one has nothing source-specific in
+    it and custom cards need it too (see get_deck_study_cards)."""
+    if not preview:
+        return None
+    return {
+        str(quality): {
+            "xp_earned":  p["xp_earned"],
+            "leveled_up": p["leveled_up"],
+            "new_level":  p["new_level"],
+            "stage_up":   _stage_promotion(stage, p["stage"]),
+        }
+        for quality, p in preview.items()
+    }
+
+
+def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
+    """Front/kana/meaning fields for browsing + the deck card list —
+    lighter than a full study-card payload (no choices, no SRS state),
+    just enough to show what an entry is before/after it's added."""
+    if source == "grammar":
+        return {"front": entry.get("grammar", ""), "kana": "", "meaning": entry.get("meaning", "")}
+    fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
+    meaning = get_meaning(entry, lang, fr_map)
+    return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
+
+
+def _ensure_deck_schema() -> None:
+    """Self-migrating, same pattern SRSEngine._init_db uses — see
+    data_structure.sql's deck_cards comment. No FK to decks(id) here
+    on purpose: this module may import (and so run this) before the
+    table that owns `decks` has necessarily been created elsewhere in
+    startup, and deck_cards rows are cleaned up explicitly in
+    delete_deck rather than relying on cascade."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS deck_cards (
+                    deck_id TEXT NOT NULL,
+                    user_id TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    level TEXT NOT NULL,
+                    raw_id TEXT NOT NULL,
+                    added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    PRIMARY KEY (deck_id, source, raw_id)
+                )
+            """)
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_deck_cards_deck
+                ON deck_cards(deck_id, user_id)
+            """)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+_ensure_deck_schema()
+
 
 class DeckPayload(BaseModel):
     name: str
-    type: str
+    # Historic values ('flashcard'/'vocab'/'kanji') are kept for
+    # backward compatibility with existing decks, but a deck's real
+    # composition — what's actually in custom_cards/deck_cards — is
+    # what decides its available study modes now (see get_deck_modes),
+    # not this field. 'mixed' is the honest default for a deck that
+    # can hold anything.
+    type: str = "mixed"
 
 
 class CardPayload(BaseModel):
@@ -33,9 +192,26 @@ class CardPayload(BaseModel):
 
 
 class ReviewPayload(BaseModel):
-    card_id: str
-    mode:    str
-    quality: int
+    card_id:    str
+    mode:       str
+    quality:    int
+    # Mirrors kanji.py/vocab.py/grammar.py's ReviewPayload.prev_stage
+    # — sent back by the client from the card payload it was handed,
+    # instead of looked up again here.
+    prev_stage: str | None = None
+
+
+class AppCardRef(BaseModel):
+    source: str
+    level:  str
+    raw_id: str
+
+
+class AddAppCardsPayload(BaseModel):
+    cards: list[AppCardRef]
+
+
+DECK_TYPES = ("flashcard", "vocab", "kanji", "grammar", "mixed")
 
 
 # ── DECK CRUD ─────────────────────────────────────────────
@@ -47,14 +223,18 @@ def get_decks(user_id: str = Depends(get_user_id)):
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
                 SELECT d.id, d.name, d.type, d.created_at,
-                       COUNT(c.id) AS card_count
+                       COUNT(DISTINCT c.id) AS custom_count,
+                       COUNT(DISTINCT dc.raw_id) AS app_count
                 FROM decks d
-                LEFT JOIN custom_cards c ON c.deck_id = d.id
+                LEFT JOIN custom_cards c  ON c.deck_id  = d.id
+                LEFT JOIN deck_cards   dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
                 WHERE d.user_id = %s
                 GROUP BY d.id
                 ORDER BY d.created_at DESC
             """, (user_id,))
             decks = [dict(row) for row in cur.fetchall()]
+        for d in decks:
+            d["card_count"] = d.pop("custom_count") + d.pop("app_count")
         return {"decks": decks}
     finally:
         conn.close()
@@ -62,7 +242,7 @@ def get_decks(user_id: str = Depends(get_user_id)):
 
 @router.post("/api/decks")
 def create_deck(payload: DeckPayload, user_id: str = Depends(get_user_id)):
-    if payload.type not in ("flashcard", "vocab", "kanji"):
+    if payload.type not in DECK_TYPES:
         raise HTTPException(status_code=400, detail="Invalid deck type")
     conn = db_conn()
     try:
@@ -74,6 +254,7 @@ def create_deck(payload: DeckPayload, user_id: str = Depends(get_user_id)):
             """, (user_id, payload.name, payload.type))
             deck = dict(cur.fetchone())
         conn.commit()
+        deck["card_count"] = 0
         return deck
     finally:
         conn.close()
@@ -83,6 +264,10 @@ def create_deck(payload: DeckPayload, user_id: str = Depends(get_user_id)):
 def delete_deck(deck_id: str, user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT id FROM custom_cards WHERE deck_id = %s AND user_id = %s", (deck_id, user_id))
+            custom_keys = [f"{user_id}:custom_{deck_id}_{row['id']}" for row in cur.fetchall()]
+
         with conn.cursor() as cur:
             cur.execute(
                 "DELETE FROM decks WHERE id = %s AND user_id = %s",
@@ -90,20 +275,30 @@ def delete_deck(deck_id: str, user_id: str = Depends(get_user_id)):
             )
             if cur.rowcount == 0:
                 raise HTTPException(status_code=404, detail="Deck not found")
+            # deck_cards rows are just membership links to shared app
+            # cards (kanji/vocab/grammar) — their SRS progress lives
+            # under the app's own card ids (see SOURCES / _build_pool)
+            # and is deliberately left untouched: deleting this deck
+            # shouldn't reset progress made studying the same kanji/
+            # word/grammar point elsewhere. Only the membership rows
+            # and this deck's own custom cards' SRS state are removed.
+            cur.execute("DELETE FROM deck_cards WHERE deck_id = %s AND user_id = %s", (deck_id, user_id))
         conn.commit()
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id FROM custom_cards WHERE deck_id = %s AND user_id = %s", (deck_id, user_id))
-            keys = [f"{user_id}:custom_{deck_id}_{row['id']}" for row in cur.fetchall()]
-        srs.delete_cards(keys)
+        srs.delete_cards(custom_keys)
         return {"ok": True}
     finally:
         conn.close()
 
 
-# ── CARD CRUD ─────────────────────────────────────────────
+# ── CARD CRUD (custom cards) ──────────────────────────────
 
 @router.get("/api/decks/{deck_id}/cards")
-def get_cards(deck_id: str, user_id: str = Depends(get_user_id)):
+def get_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user_id)):
+    """Combined listing for DeckDetailScreen: the user's own custom
+    cards plus every app-sourced card (kanji/vocab/grammar) that's
+    been added via /browse + /cards/app, tagged with `origin` so the
+    frontend can tell an editable custom card apart from a linked one
+    (which has no front/back to edit — just a remove action)."""
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -113,7 +308,34 @@ def get_cards(deck_id: str, user_id: str = Depends(get_user_id)):
                 WHERE deck_id = %s AND user_id = %s
                 ORDER BY created_at ASC
             """, (deck_id, user_id))
-            cards = [dict(row) for row in cur.fetchall()]
+            custom = [dict(row) for row in cur.fetchall()]
+            cur.execute("""
+                SELECT source, level, raw_id, added_at
+                FROM deck_cards
+                WHERE deck_id = %s AND user_id = %s
+                ORDER BY added_at ASC
+            """, (deck_id, user_id))
+            app_links = [dict(row) for row in cur.fetchall()]
+        cards = [{"origin": "custom", **c} for c in custom]
+
+        for link in app_links:
+            cfg = SOURCES.get(link["source"])
+            if not cfg:
+                continue
+            entry = next(
+                (e for e in cfg["by_level"].get(link["level"], [])
+                 if cfg["to_id"](e, link["level"]) == link["raw_id"]),
+                None,
+            )
+            if entry is None:
+                continue
+            fields = _meaning_preview(link["source"], entry, lang)
+            cards.append({
+                "origin": "app", "source": link["source"], "level": link["level"],
+                "raw_id": link["raw_id"], "added_at": link["added_at"],
+                "front": fields["front"], "back": fields["meaning"], "kana": fields["kana"],
+            })
+
         return {"cards": cards}
     finally:
         conn.close()
@@ -135,6 +357,7 @@ def add_card(deck_id: str, payload: CardPayload, user_id: str = Depends(get_user
                   payload.kana, payload.hint, payload.notes))
             card = dict(cur.fetchone())
         conn.commit()
+        card["origin"] = "custom"
         return card
     finally:
         conn.close()
@@ -181,150 +404,335 @@ def delete_card(deck_id: str, card_id: str, user_id: str = Depends(get_user_id))
         conn.close()
 
 
-# ── STUDY ─────────────────────────────────────────────────
+# ── APP-SOURCED CARDS (browse & add existing kanji/vocab/grammar) ──
 
-@router.get("/api/decks/{deck_id}/study")
-def get_study_card(deck_id: str, mode: str = "flashcard",
-                   mix_levels: str = "", lang: str = "fr",
-                   user_id: str = Depends(get_user_id)):
+@router.get("/api/decks/{deck_id}/browse")
+def browse_app_cards(deck_id: str, source: str, level: str = "", query: str = "",
+                     limit: int = 40, lang: str = "fr",
+                     user_id: str = Depends(get_user_id)):
+    """
+    Search the app's own built-in decks for cards to pull into a
+    custom deck — backs the "browse existing cards" picker. Matching
+    today is a plain substring check over each entry's own fields and
+    is scoped to the JLPT-leveled decks (KANJI_BY_LEVEL/
+    VOCAB_BY_LEVEL/GRAMMAR_BY_LEVEL) — good enough to try a level or a
+    known word/kanji, not a real dictionary search yet. See SOURCES'
+    docstring for where a fuller dictionary-backed source plugs in
+    once those files are available.
+    """
+    cfg = SOURCES.get(source)
+    if not cfg:
+        raise HTTPException(status_code=400, detail="Unknown source")
+
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT type FROM decks WHERE id = %s AND user_id = %s",
-                       (deck_id, user_id))
-            deck = cur.fetchone()
-            if not deck:
+            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
+            if not cur.fetchone():
                 raise HTTPException(status_code=404, detail="Deck not found")
+            cur.execute("""
+                SELECT raw_id FROM deck_cards
+                WHERE deck_id = %s AND user_id = %s AND source = %s
+            """, (deck_id, user_id, source))
+            already = {row["raw_id"] for row in cur.fetchall()}
+    finally:
+        conn.close()
+
+    levels = [level] if level else list(cfg["by_level"].keys())
+    q = query.strip().lower()
+
+    results = []
+    for lvl in levels:
+        for entry in cfg["by_level"].get(lvl, []):
+            if q:
+                haystack = " ".join(str(v) for v in entry.values()).lower()
+                if q not in haystack:
+                    continue
+            raw_id = cfg["to_id"](entry, lvl)
+            fields = _meaning_preview(source, entry, lang)
+            results.append({
+                "source": source, "level": lvl, "raw_id": raw_id,
+                "front": fields["front"], "kana": fields["kana"], "meaning": fields["meaning"],
+                "in_deck": raw_id in already,
+            })
+            if len(results) >= limit:
+                break
+        if len(results) >= limit:
+            break
+
+    return {"results": results}
+
+
+@router.post("/api/decks/{deck_id}/cards/app")
+def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depends(get_user_id)):
+    conn = db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail="Deck not found")
+
+            added = 0
+            with conn.cursor() as write_cur:
+                for c in payload.cards:
+                    cfg = SOURCES.get(c.source)
+                    if not cfg:
+                        continue
+                    level_list = cfg["by_level"].get(c.level, [])
+                    # Ignore refs that don't resolve to a real entry
+                    # instead of 500ing — a stale browse result (deck
+                    # data changed under it) shouldn't break the rest
+                    # of the batch.
+                    if not any(cfg["to_id"](e, c.level) == c.raw_id for e in level_list):
+                        continue
+                    write_cur.execute("""
+                        INSERT INTO deck_cards (deck_id, user_id, source, level, raw_id)
+                        VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (deck_id, source, raw_id) DO NOTHING
+                    """, (deck_id, user_id, c.source, c.level, c.raw_id))
+                    added += write_cur.rowcount
+        conn.commit()
+        return {"added": added}
+    finally:
+        conn.close()
+
+
+@router.delete("/api/decks/{deck_id}/cards/app")
+def remove_app_card(deck_id: str, source: str, raw_id: str, user_id: str = Depends(get_user_id)):
+    # raw_id (not level) is enough to identify the row — it's the
+    # deck_cards primary key together with deck_id/source. Taken as a
+    # query param rather than a path segment because some raw ids
+    # embed a "/" (multi-reading vocab kana, e.g. "まいげつ/まいつき"),
+    # which would otherwise split across path segments.
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                DELETE FROM deck_cards
+                WHERE deck_id = %s AND user_id = %s AND source = %s AND raw_id = %s
+            """, (deck_id, user_id, source, raw_id))
+            if cur.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Card not found in deck")
+        conn.commit()
+        return {"ok": True}
+    finally:
+        conn.close()
+
+
+@router.get("/api/decks/{deck_id}/modes")
+def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
+    """
+    What study modes this deck can actually offer right now, derived
+    from what's in it rather than a fixed deck `type`: 'flashcard' as
+    soon as there's at least one card of any kind, plus each present
+    source's own modes (e.g. a deck with kanji cards in it picks up
+    kk-s/k-k/s-k/write, one with grammar cards picks up fill, ...).
+    StudyScreen's mode picker reads this instead of hardcoding modes
+    off deck.type.
+    """
+    conn = db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail="Deck not found")
+            cur.execute(
+                "SELECT COUNT(*) AS n FROM custom_cards WHERE deck_id = %s AND user_id = %s",
+                (deck_id, user_id),
+            )
+            custom_count = cur.fetchone()["n"]
+            cur.execute("""
+                SELECT source, COUNT(*) AS n FROM deck_cards
+                WHERE deck_id = %s AND user_id = %s
+                GROUP BY source
+            """, (deck_id, user_id))
+            source_counts = {row["source"]: row["n"] for row in cur.fetchall()}
+    finally:
+        conn.close()
+
+    modes = set()
+    if custom_count:
+        modes.add("flashcard")
+    for source, count in source_counts.items():
+        cfg = SOURCES.get(source)
+        if cfg and count:
+            modes |= cfg["valid_modes"]
+
+    return {
+        "modes": sorted(modes),
+        "composition": {"custom": custom_count, **source_counts},
+    }
+
+
+# ── STUDY ─────────────────────────────────────────────────
+
+def _build_pool(deck_id: str, user_id: str) -> list[dict]:
+    """Every card belonging to this deck — custom and app-sourced
+    alike — as a flat pool ready to be filtered/picked from. App-
+    sourced raw ids are NOT deck-scoped (they're the same
+    kanji_to_id/vocab_to_id/grammar_to_id used by the Kanji/Vocab/
+    Grammar screens themselves), so studying a card here and studying
+    it from its own screen share one SRS progress — same behaviour the
+    old mix_levels parameter used to give, now backed by persisted
+    membership instead of "whole JLPT level, recomputed every time"."""
+    conn = db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
                 SELECT id, front, back, kana, hint, notes
                 FROM custom_cards WHERE deck_id = %s AND user_id = %s
             """, (deck_id, user_id))
-            custom_cards = [dict(r) for r in cur.fetchall()]
+            custom = [dict(row) for row in cur.fetchall()]
+            cur.execute("""
+                SELECT source, level, raw_id FROM deck_cards
+                WHERE deck_id = %s AND user_id = %s
+            """, (deck_id, user_id))
+            app_links = [dict(row) for row in cur.fetchall()]
     finally:
         conn.close()
 
-    deck_type = deck["type"]
-    pool      = []
+    pool = []
+    for c in custom:
+        pool.append({
+            "raw_id": f"custom_{deck_id}_{c['id']}",
+            "source": "custom", "level": None, "entry": c,
+        })
 
-    for c in custom_cards:
-        cid = f"{user_id}:custom_{deck_id}_{c['id']}"
-        pool.append({"card_id": cid, "source": "custom", "data": c})
+    for link in app_links:
+        cfg = SOURCES.get(link["source"])
+        if not cfg:
+            continue
+        entry = next(
+            (e for e in cfg["by_level"].get(link["level"], [])
+             if cfg["to_id"](e, link["level"]) == link["raw_id"]),
+            None,
+        )
+        if entry is None:
+            continue
+        pool.append({
+            "raw_id": link["raw_id"], "source": link["source"],
+            "level": link["level"], "entry": entry,
+        })
 
-    if mix_levels:
-        levels    = [l.strip() for l in mix_levels.split(",") if l.strip()]
-        phase_key = {"flashcard": "kk-s", "phase1": "kk-s",
-                     "phase2": "k-k", "phase3": "s-k"}.get(mode, "kk-s")
+    return pool
 
-        if deck_type == "vocab":
-            for level in levels:
-                for w in VOCAB_BY_LEVEL.get(level, []):
-                    cid = f"{user_id}:{vocab_to_id(w, level)}"
-                    pool.append({"card_id": cid, "source": "builtin_vocab",
-                                 "data": w, "level": level, "phase_key": phase_key})
-        elif deck_type == "kanji":
-            for level in levels:
-                for k in KANJI_BY_LEVEL.get(level, []):
-                    cid = f"{user_id}:{kanji_to_id(k, level)}"
-                    pool.append({"card_id": cid, "source": "builtin_kanji",
-                                 "data": k, "level": level, "phase_key": phase_key})
 
+def _eligible(pool_entry: dict, mode: str) -> bool:
+    # Custom cards render as a plain Flashcard regardless of the
+    # session's mode (see StudyScreen), so they stay in the pool for
+    # every mode rather than only 'flashcard' — same behaviour the
+    # original mixed-deck pool had.
+    if pool_entry["source"] == "custom":
+        return True
+    cfg = SOURCES.get(pool_entry["source"])
+    return bool(cfg) and mode in cfg["valid_modes"]
+
+
+@router.get("/api/decks/{deck_id}/study")
+def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr",
+                         count: int = 10, exclude: str = "",
+                         user_id: str = Depends(get_user_id)):
+    """
+    Batched session endpoint — same shape (`{"cards": [...]}`, `count`
+    + `exclude`) as /api/kanji/cards, /api/vocab/cards and
+    /api/grammar/cards, so useCardSession can keep a deck's queue
+    filled the same way it does for the built-in decks instead of
+    fetching one card at a time.
+    """
+    conn = db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail="Deck not found")
+    finally:
+        conn.close()
+
+    pool = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode)]
     if not pool:
-        return {"done": True}
+        return {"cards": []}
 
-    all_ids = [p["card_id"] for p in pool]
-    cache_key = batch_key("user", user_id, mode, deck_id)
-    ensure_initialized(cache_key, lambda: srs.ensure_cards(all_ids, mode), version=all_ids)
-    due = srs.get_due_cards(mode, limit=10, card_ids=all_ids)
-    logger.info("deck study request deck_id=%s mode=%s user_id=%s candidate_count=%d due_count=%d due_ids=%s", deck_id, mode, user_id, len(all_ids), len(due), due[:10])
-    if due:
-        card_id = random.choice(due)
-        logger.info("deck using due card", extra={"card_id": card_id, "due_count": len(due)})
-    else:
-        new = take_next(cache_key, lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=all_ids), limit=10)
-        logger.info("deck fallback to new card new_count=%d new_ids=%s", 1 if new else 0, [new] if new else [])
-        if new:
-            card_id = new
-            logger.info("deck using new card", extra={"card_id": card_id})
+    by_raw    = {p["raw_id"]: p for p in pool}
+    raw_ids   = list(by_raw.keys())
+    card_ids  = prefixed(raw_ids, user_id)
+    cache_key = batch_key("user", user_id, "deck", deck_id, mode)
+    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode), version=card_ids)
+
+    due = srs.get_due_cards(mode, card_ids=card_ids)
+    exclude_ids = {f"{user_id}:{rid}" for rid in exclude.split(",") if rid}
+    picked = pick_ids(
+        cache_key, due,
+        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
+        max(1, min(count, MAX_BATCH)), exclude_ids,
+    )
+
+    if not picked:
+        return {"cards": []}
+
+    states   = srs.get_bulk_stats(picked, mode)
+    previews = srs.preview_reviews_bulk(picked, mode, user_id)
+
+    cards = []
+    for card_id in picked:
+        raw_id = unprefixed(card_id, user_id)
+        p = by_raw.get(raw_id)
+        if p is None:
+            continue
+        stage   = states.get(card_id)
+        preview = previews.get(card_id)
+
+        if p["source"] == "custom":
+            c = p["entry"]
+            cards.append({
+                "card_id": raw_id, "source": "custom",
+                "front": c["front"], "back": c["back"],
+                "kana": c.get("kana", ""), "hint": c.get("hint", ""),
+                "notes": c.get("notes", ""), "mode": mode,
+                "stage": stage,
+                "review_preview": _build_review_preview(stage, preview),
+            })
         else:
-            logger.warning("deck study exhausted deck_id=%s mode=%s user_id=%s", deck_id, mode, user_id)
-            return {"done": True}
+            cfg = SOURCES[p["source"]]
+            level_list = cfg["by_level"].get(p["level"], [])
+            card = cfg["build"](raw_id, p["entry"], p["level"], level_list, mode, lang, stage, preview)
+            card["card_id"] = raw_id
+            card["source"]  = f"builtin_{p['source']}"
+            cards.append(card)
 
-    entry = next(p for p in pool if p["card_id"] == card_id)
-    d     = entry["data"]
-
-    if entry["source"] == "custom":
-        return {
-            "card_id":   card_id, "source": "custom",
-            "front":     d["front"], "back": d["back"],
-            "kana":      d.get("kana", ""), "hint": d.get("hint", ""),
-            "notes":     d.get("notes", ""), "mode": mode,
-            "deck_type": deck_type,
-        }
-
-    elif entry["source"] == "builtin_vocab":
-        meaning      = get_meaning(d, lang, VOCAB_FR_MAP)
-        all_meanings = [
-            get_meaning(w, lang, VOCAB_FR_MAP)
-            for w in VOCAB_BY_LEVEL.get(entry["level"], [])
-            if get_meaning(w, lang, VOCAB_FR_MAP) != meaning
-        ]
-        choices = random.sample(all_meanings, min(3, len(all_meanings))) + [meaning]
-        random.shuffle(choices)
-        return {
-            "card_id":   card_id, "source": "builtin_vocab",
-            "front":     d.get("kanji", ""), "back": meaning,
-            "kana":      d.get("kana", ""), "choices": choices,
-            "phase_key": entry["phase_key"], "mode": mode,
-            "deck_type": deck_type,
-        }
-
-    elif entry["source"] == "builtin_kanji":
-        meaning      = get_meaning(d, lang, KANJI_FR_MAP)
-        all_meanings = [
-            get_meaning(k, lang, KANJI_FR_MAP)
-            for k in KANJI_BY_LEVEL.get(entry["level"], [])
-            if get_meaning(k, lang, KANJI_FR_MAP) != meaning
-        ]
-        choices   = random.sample(all_meanings, min(3, len(all_meanings))) + [meaning]
-        codepoint = hex(ord(d["kanji"]))[2:].zfill(5)
-        random.shuffle(choices)
-        return {
-            "card_id":      card_id, "source": "builtin_kanji",
-            "front":        d.get("kanji", ""), "back": meaning,
-            "kana":         d.get("kana", ""), "choices": choices,
-            "stroke_count": d.get("stroke_count", ""),
-            "svg_url":      f"/kanjivg/{codepoint}.svg",
-            "phase_key":    entry["phase_key"], "mode": mode,
-            "deck_type":    deck_type,
-        }
+    logger.info(
+        "deck study request deck_id=%s mode=%s user_id=%s pool=%d due=%d picked=%d",
+        deck_id, mode, user_id, len(pool), len(due), len(cards),
+    )
+    return {"cards": cards}
 
 
 @router.post("/api/decks/{deck_id}/review")
 def review_deck_card(deck_id: str, payload: ReviewPayload,
                      user_id: str = Depends(get_user_id)):
-    s = srs.review(payload.card_id, payload.mode, payload.quality)
-    return {"card_id": payload.card_id, "interval": s["interval"], "next_review": s["next_review"]}
+    card_id = f"{user_id}:{payload.card_id}"
+    s = srs.review(card_id, payload.mode, payload.quality)
+    return {
+        "card_id":     payload.card_id,
+        "interval":    s["interval"],
+        "next_review": s["next_review"],
+        "xp_earned":   s["xp_earned"],
+        "leveled_up":  s["leveled_up"],
+        "new_level":   s["new_level"],
+        "stage_up":    _stage_promotion(payload.prev_stage, s["stage"]),
+    }
 
 
 @router.get("/api/decks/{deck_id}/stats")
 def get_deck_stats(deck_id: str, mode: str = "flashcard",
                    user_id: str = Depends(get_user_id)):
-    conn = db_conn()
-    try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("""
-                SELECT id FROM custom_cards
-                WHERE deck_id = %s AND user_id = %s
-            """, (deck_id, user_id))
-            card_ids = [f"{user_id}:custom_{deck_id}_{r['id']}" for r in cur.fetchall()]
-    finally:
-        conn.close()
+    pool     = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode)]
+    card_ids = prefixed([p["raw_id"] for p in pool], user_id)
 
     if not card_ids:
         return {"total": 0, "new": 0, "learning": 0, "mastered": 0, "due_now": 0}
 
     states  = srs.get_bulk_stats(card_ids, mode)
-    due_now = sum(1 for cid in card_ids if cid in set(srs.get_due_cards(mode)))
+    due_now = len(srs.get_due_cards(mode, card_ids=card_ids))
     return {
         "total":    len(card_ids),
         "new":      sum(1 for s in states.values() if s == "new"),
