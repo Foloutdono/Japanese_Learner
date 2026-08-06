@@ -77,18 +77,29 @@ except ImportError:  # pragma: no cover - defensive only, always present in prod
 _BASE_DIR = os.path.dirname(__file__)
 _DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 
-with open(os.path.join(_DATA_DIR, "vocab_meanings.json"), encoding="utf-8") as f:
-    _VOCAB_MEANINGS: dict[str, list[dict]] = json.load(f)
-
 # MEMORY NOTE (2026-08): this used to eagerly load the full ~293k-entry
 # vocab_jmdict_meanings.json (~80MB of JSON, several times heavier once
-# parsed into Python dicts/lists) and merge it into _VOCAB_MEANINGS at
-# import time — a large share of what pushed a 512MB deploy over
-# budget. The JMdict pool is now backed by datas/vocab/vocab_jmdict.sqlite3
-# (see vocab_jmdict_data.py) and queried per-word on demand instead —
-# _find_senses() below falls back to that DB lookup only for words not
-# in the app's own (small, always-in-memory) deck. The deck's own
-# curated senses still always win when both exist, same as before.
+# parsed into Python dicts/lists) and merge it into an in-memory
+# _VOCAB_MEANINGS dict at import time — a large share of what pushed a
+# 512MB deploy over budget. The JMdict pool is now backed by
+# datas/vocab/vocab_jmdict.sqlite3 (see vocab_jmdict_data.py) and
+# queried per-word on demand instead — _find_senses() below falls back
+# to that DB lookup only for words not in the app's own deck.
+#
+# MEMORY NOTE (2026-08, cont'd): the app's own deck's senses
+# (vocab_meanings.json, ~8,400 words) used to get the same eager
+# in-memory treatment as a "small enough" exception — but parsed into
+# Python objects plus the _MEANINGS_READING structure derived from
+# them (see _build_meanings_readings below), that was still two full
+# resident copies of the same data on every worker. It's now migrated
+# into the SAME sqlite database as the JMdict pool (a `curated_senses`
+# table — see build_curated_senses_db.py) and queried through
+# vocab_meanings_data.py exactly like _jmdict_db is queried below — no
+# more always-in-memory dict for either half of this module's data.
+# The deck's own curated senses still always win over the JMdict pool
+# when both exist, same as before (see _find_senses).
+import vocab_meanings_data
+
 try:
     import vocab_jmdict_data as _jmdict_db
 except ImportError:  # pragma: no cover - defensive only, always present in prod
@@ -332,17 +343,17 @@ def _collect_word_tags(senses: list, lang: str) -> list:
 
 
 def _find_senses(kanji: str, kana: str) -> list[dict] | None:
-    # Fast path: vocab_meanings.json keys its entries with the exact
-    # same packed kana string vocab_deck.json uses (see module
-    # docstring), so most words resolve with a single in-memory dict
-    # lookup — this only ever covers the app's own (~8k word) deck.
-    senses = _VOCAB_MEANINGS.get(f"{kanji}::{kana}")
+    # Fast path: curated_senses keys its rows with the exact same
+    # packed kana string vocab_deck.json uses (see module docstring),
+    # so most words resolve with a single indexed query — this only
+    # ever covers the app's own (~8k word) deck.
+    senses = vocab_meanings_data.get(f"{kanji}::{kana}")
     if senses:
         return senses
     # Fallback for any mismatch in reading order/subset between the two
     # decks — try each individual reading on its own.
     for reading in _readings(kana):
-        senses = _VOCAB_MEANINGS.get(f"{kanji}::{reading}")
+        senses = vocab_meanings_data.get(f"{kanji}::{reading}")
         if senses:
             return senses
     # Not in the app's own deck — try the JMdict pool via SQLite
@@ -387,20 +398,14 @@ def word_category(kanji: str, kana: str) -> str:
 
 
 # ── "Does this word have an example sentence?" (reading.py, 2026-08) ──
-# The app's own deck is small enough (~8k words) that precomputing this
-# once at import time is cheap and keeps reading.py's level-mode word
+# The app's own deck is small enough (~8k words) that keeping this one
+# set of keys resident is cheap and keeps reading.py's level-mode word
 # picker (VOCAB_BY_LEVEL, filter, sample) a pure in-memory operation —
 # no need to touch _find_senses/get_vocab_extras just to check
-# candidates before picking one.
-def _build_deck_words_with_examples() -> set[str]:
-    keys = set()
-    for key, senses in _VOCAB_MEANINGS.items():
-        if any(s.get("examples") for s in senses):
-            keys.add(key)
-    return keys
-
-
-_DECK_WORDS_WITH_EXAMPLES = _build_deck_words_with_examples()
+# candidates before picking one. has_examples is precomputed per key at
+# build time now (see build_curated_senses_db.py), so this is one
+# indexed query instead of decoding every sense blob at import.
+_DECK_WORDS_WITH_EXAMPLES = vocab_meanings_data.keys_with_examples()
 
 
 def has_examples(kanji: str, kana: str) -> bool:
@@ -560,7 +565,7 @@ def _build_meanings_readings() -> dict:
     is a dedicated lightweight query for exactly this.
     """
     table = {}
-    for key in _VOCAB_MEANINGS:
+    for key in vocab_meanings_data.iter_keys():
         if "::" not in key:
             continue
         kanji, kana = key.split("::", 1)
