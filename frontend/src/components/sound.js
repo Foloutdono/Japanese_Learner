@@ -6,19 +6,19 @@ const VOLUME_KEY = 'jp-app-volumes'
 export const SOUND_CATEGORIES = ['kana', 'tts', 'sfx', 'ui']
 
 const DEFAULT_VOLUMES = {
-  master: 2,
-  kana:   1.2,
-  tts:    1.5,
+  master: 1,
+  kana:   1,
+  tts:    1,
   sfx:    1,
   ui:     1,
 }
 
 const BASE_GAIN = {
   kana: 0.8,
-  tts:  0.75,
+  tts:  0.9,
   sfx: {
-    success:    0.1,
-    'level-up': 0.5,
+    success:    0.3,
+    'level-up': 0.7,
   },
   ui: {
     click:  0.25,
