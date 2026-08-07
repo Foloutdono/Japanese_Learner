@@ -690,12 +690,15 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
 
 
 def _eligible(pool_entry: dict, mode: str) -> bool:
-    # Custom cards render as a plain Flashcard regardless of the
-    # session's mode (see StudyScreen), so they stay in the pool for
-    # every mode rather than only 'flashcard' — same behaviour the
-    # original mixed-deck pool had.
+    # Custom cards are a plain front/back pair — no MCQ distractors, no
+    # kanji to draw, no fill-in-the-blank sentence — so they can only
+    # ever render as a simple flashcard (see StudyScreen's
+    # renderCustomPrompt). They join any *flashcard-flavored* session
+    # ('flashcard' itself, or kanji/vocab's 'flashcard-kj-m'/
+    # 'flashcard-m-kj') but sit out qcm-*/write/mcq/fill, which need
+    # data only an app-sourced card has.
     if pool_entry["source"] == "custom":
-        return True
+        return "flashcard" in mode
     cfg = SOURCES.get(pool_entry["source"])
     return bool(cfg) and mode in cfg["valid_modes"]
 
