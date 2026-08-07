@@ -6,9 +6,9 @@ const VOLUME_KEY = 'jp-app-volumes'
 export const SOUND_CATEGORIES = ['kana', 'tts', 'sfx', 'ui']
 
 const DEFAULT_VOLUMES = {
-  master: 1,
-  kana:   1,
-  tts:    1,
+  master: 2,
+  kana:   1.2,
+  tts:    1.5,
   sfx:    1,
   ui:     1,
 }
