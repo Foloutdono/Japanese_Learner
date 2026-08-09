@@ -97,7 +97,18 @@ class Scheduler:
             state.interval_days = 1
 
         stability_factor = 1.0 + min(1.5, state.stability / 20.0)
-        growth = max(1.0, state.difficulty * bonus * stability_factor)
+        # Reflect difficulty around the midpoint of its own range before
+        # using it as the growth multiplier. difficulty rises for weak
+        # answers and falls for strong ones (see above), so used directly
+        # as a multiplier it made hard cards grow their interval *faster*
+        # (reviewed less often) and easy cards grow it *slower* (reviewed
+        # more often) — exactly backwards. Reflecting it inverts that:
+        # a hard card (difficulty near MAX_DIFFICULTY) now yields a small
+        # ease (near MIN_DIFFICULTY) and thus small growth/short interval,
+        # while an easy card (difficulty near MIN_DIFFICULTY) yields a
+        # large ease and long interval.
+        ease = MIN_DIFFICULTY + MAX_DIFFICULTY - state.difficulty
+        growth = max(1.0, ease * bonus * stability_factor)
 
         state.interval_days = max(
             1,
