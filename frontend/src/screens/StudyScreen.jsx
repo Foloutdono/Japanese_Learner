@@ -101,12 +101,24 @@ export default function StudyScreen({ session }) {
   // screens' own comments for the full rationale.
   const pendingGatesRef = useRef(new Set())
   const advancedRef     = useRef(false)
+  // Belt-and-suspenders: if some gate (toast/stamp/training) never
+  // actually clears — a toast that doesn't mount for an edge-case
+  // payload, a drawing overlay dismiss that doesn't fire its onDone,
+  // anything — the session used to just sit there forever: answered
+  // card, no rating bar, nothing to do. This forces every gate open
+  // and advances anyway once too much time has passed, so a stuck
+  // gate costs a skipped animation, not a frozen quiz.
+  const safetyTimerRef  = useRef(null)
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
     if (saved === 'light' || saved === 'dark') {
       document.documentElement.setAttribute('data-theme', saved)
     }
+  }, [])
+
+  useEffect(() => () => {
+    if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current)
   }, [])
 
   // v2: bumped after the mode-key rework (real 'qcm-kj-m'/'flashcard-
@@ -165,6 +177,10 @@ export default function StudyScreen({ session }) {
   function checkAdvance() {
     if (pendingGatesRef.current.size === 0 && !advancedRef.current) {
       advancedRef.current = true
+      if (safetyTimerRef.current) {
+        clearTimeout(safetyTimerRef.current)
+        safetyTimerRef.current = null
+      }
       advance()
       setLocked(false)
     }
@@ -191,6 +207,11 @@ export default function StudyScreen({ session }) {
 
     advancedRef.current = false
     const gates = pendingGatesRef.current
+    // A level-up toast never auto-dismisses (see XpToast — it waits
+    // indefinitely for the player to tap the claim button), so the
+    // safety-net below must never force it closed early; that's the
+    // one case where "gate still open" isn't a bug, it's the design.
+    let safeToForce = true
 
     if (needTraining) {
       gates.add('training')
@@ -202,14 +223,40 @@ export default function StudyScreen({ session }) {
       setShowRating(false)
     }
 
-    if (preview) {
-      gates.add('toast')
-      const { leveledUp, newLevel } = applyXpGain({ amount: preview.xp_earned })
-      setXpToast({ amount: preview.xp_earned, id: Date.now(), leveledUp, newLevel, quality })
-      if (preview.stage_up) {
-        gates.add('stamp')
-        setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: card.card_id })
+    try {
+      if (preview) {
+        gates.add('toast')
+        // Guard against a non-numeric xp_earned (undefined/NaN) — the
+        // gate above is already added by this point, and if
+        // applyXpGain or setXpToast were to throw on a bad value,
+        // execution would abort right here: no toast would ever
+        // render, meaning nothing is left to fire the animationend
+        // that normally clears the 'toast' gate, and the review would
+        // never reach checkAdvance() below either — a silent,
+        // permanent freeze on the answered card. The try/catch around
+        // this whole block is the same guarantee from the other side:
+        // even if something here still throws, the gate gets dropped
+        // in the catch instead of hanging forever.
+        const amount = typeof preview.xp_earned === 'number' ? preview.xp_earned : 0
+        const { leveledUp, newLevel } = applyXpGain({ amount })
+        if (leveledUp) safeToForce = false
+        setXpToast({ amount, id: Date.now(), leveledUp, newLevel, quality })
+        if (preview.stage_up) {
+          gates.add('stamp')
+          setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: card.card_id })
+        }
       }
+    } catch (err) {
+      gates.delete('toast')
+      console.error('XP toast setup failed', err)
+    }
+
+    if (gates.size > 0 && safeToForce) {
+      if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current)
+      safetyTimerRef.current = setTimeout(() => {
+        gates.clear()
+        checkAdvance()
+      }, 4000)
     }
 
     // Fire-and-forget — the response isn't read for anything the UI

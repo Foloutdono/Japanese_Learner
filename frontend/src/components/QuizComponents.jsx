@@ -460,27 +460,43 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, s
 // dictTerm/dictCategory/session/sound/onReplaySound are all opt-in —
 // see RevealActions above — and pass straight through to it.
 export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCategory, session, sound, onReplaySound }) {
-  const [revealed, setRevealed] = useState(false)
+  // `revealed` — has this card been shown at least once. Permanent
+  // for the card's lifetime: it's what unlocks the dictionary lookup/
+  // sound-replay row below and fires `onReveal` (once), same as
+  // before.
+  // `showingBack` — which face is on top right now. Separate from
+  // `revealed` on purpose: collapsing them into one flag is what made
+  // the reveal one-way (see the retired comment this replaces) — once
+  // `revealed` flipped true, there was no remaining state left to say
+  // "but show the front again".
+  const [revealed, setRevealed]       = useState(false)
+  const [showingBack, setShowingBack] = useState(false)
 
   // When the caller moves on to a new card (e.g. passes the card's id
   // as resetKey), snap back to the unrevealed front instead of
   // carrying over the previous card's flip state.
   useEffect(() => {
     setRevealed(false)
+    setShowingBack(false)
   }, [resetKey])
 
-  // Reveal is now one-way: once flipped, the card settles on its
-  // answer instead of flipping back and forth forever. Retired in
-  // favour of the dictionary lookup below — once you've seen the
-  // answer, looking the entry up is more useful than re-hiding it.
+  // First tap reveals the back and fires onReveal once (so the parent
+  // can start the rating flow / log the card as seen). Every tap
+  // after that just flips between front and back at will — there's no
+  // "settle on the answer" point anymore, since re-checking the front
+  // after seeing the back is a completely normal thing to want mid-review.
   const handleClick = () => {
-    if (revealed) return
     playClick()
-    setRevealed(true)
-    onReveal?.()
+    if (!revealed) {
+      setRevealed(true)
+      setShowingBack(true)
+      onReveal?.()
+    } else {
+      setShowingBack(s => !s)
+    }
   }
 
-  // Keyboard reveal: spacebar, plus ZQSD — the AZERTY keyboard's
+  // Keyboard reveal/flip: spacebar, plus ZQSD — the AZERTY keyboard's
   // equivalent home-row of WASD — so a French keyboard gets a
   // natural one-handed shortcut instead of reaching for the mouse.
   useEffect(() => {
@@ -510,7 +526,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCa
         sound={sound}
         onReplaySound={onReplaySound}
       />
-      {revealed ? back : front}
+      {showingBack ? back : front}
       <div className="flashcard__hint">
         {!revealed && (t.tapToReveal)}
       </div>
