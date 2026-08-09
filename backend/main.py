@@ -17,6 +17,7 @@ from routes.reading          import router as reading_router
 from routes.profile          import router as profile_router
 from routes.frequency       import router as frequency_router
 from routes.theme_vocab      import router as theme_vocab_router
+from routes.translation import router as translation_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -44,6 +45,8 @@ app.include_router(reading_router)
 app.include_router(profile_router)
 app.include_router(frequency_router)
 app.include_router(theme_vocab_router)
+app.include_router(translation_router)
+
 @app.get("/")
 def root():
     return {"status": "ok"}

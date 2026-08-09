@@ -362,6 +362,23 @@ const readingComprehension = {
   questionTypeGrammar: "Grammar",
   questionTypeInference: "Inference",
 }
+// ── Translation mode ──────────────────────────────────────────────
+// TranslationScreen.jsx reuses reading/quiz's existing keys wholesale
+// for everything the two screens share (byLevel*, byFrequency*,
+// byMastery*, selectStudySource, selectLevel, selectDomain, selectTier,
+// domainVocabDeck*/domainVocabJmdict*, tierLabel, jumpToTier, submit,
+// loadError, retry, score, streak, translation, translationEnglish,
+// yourAnswer, gradeCorrect/gradeIncorrect, nextPhrase) — only the
+// genuinely new keys live here.
+const translationMode = {
+  translationTitle:      'Translation',
+  translationDesc:       'Translate a sentence into Japanese\nJLPT level, frequency, or your own cards\nAI analysis to help you self-assess',
+  translationFetchError: "Couldn't load a phrase. Try again.",
+  japanesePlaceholder:   'Write it in Japanese…',
+  aiAnalysis:            'AI analysis',
+  analyzingTranslation:  'Analyzing your translation…',
+  analysisUnavailable:   'Analysis unavailable — judge against the reference above.',
+}
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Search kanji, kana, or meaning...',
@@ -567,6 +584,7 @@ export default {
   ...phraseAnalyzer,
   ...reading,
   ...readingComprehension,
+  ...translationMode,
   ...dictionary,
   ...comprehension,
   ...progress,
