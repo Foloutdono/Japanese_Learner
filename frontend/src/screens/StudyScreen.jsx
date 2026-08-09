@@ -109,7 +109,13 @@ export default function StudyScreen({ session }) {
     }
   }, [])
 
-  const storageKey = mode ? `jp-session:deck:${deck_id}:${mode}` : 'idle'
+  // v2: bumped after the mode-key rework (real 'qcm-kj-m'/'flashcard-
+  // kj-m'/etc. keys instead of the earlier invented 'kk-s'/'k-k'/'s-k'
+  // ones) and the per-source rendering rewrite — a cached batch from
+  // before either change has a shape this screen no longer expects,
+  // and useCardSession has no way to know that on its own; bumping the
+  // key is what makes it fetch fresh instead of resuming stale data.
+  const storageKey = mode ? `jp-session:deck:v2:${deck_id}:${mode}` : 'idle'
 
   const fetchBatch = useCallback((count, excludeIds) => {
     if (!mode) return Promise.resolve([])

@@ -20,9 +20,9 @@ from kanji_meanings import KANJI_FR
 # how to shape one card payload (choices, fill-in blanks, review
 # previews, ...) for its own mode set — decks.py just needs to route
 # to the right one per card. See SOURCES below.
-from routes.kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
-from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
-from routes.grammar import VALID_MODES as GRAMMAR_VALID_MODES, _build_grammar_card
+from kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
+from vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
+from grammar import VALID_MODES as GRAMMAR_VALID_MODES, _build_grammar_card
 import psycopg2.extras
 
 router = APIRouter()
@@ -435,6 +435,38 @@ def add_card(deck_id: str, payload: CardPayload, user_id: str = Depends(get_user
         conn.close()
 
 
+@router.delete("/api/decks/{deck_id}/cards/app")
+def remove_app_card(deck_id: str, source: str, raw_id: str, user_id: str = Depends(get_user_id)):
+    # raw_id (not level) is enough to identify the row — it's the
+    # deck_cards primary key together with deck_id/source. Taken as a
+    # query param rather than a path segment because some raw ids
+    # embed a "/" (multi-reading vocab kana, e.g. "まいげつ/まいつき"),
+    # which would otherwise split across path segments.
+    #
+    # Declared here — BEFORE the generic PUT/DELETE .../cards/{card_id}
+    # routes just below — very much on purpose. FastAPI/Starlette
+    # matches routes in declaration order, not by specificity: with
+    # this route declared *after* the generic one, a request to
+    # DELETE /cards/app was matching {card_id}="app" on the generic
+    # route first, crashing there instead (custom_cards.id is bigint,
+    # and casting the literal string "app" to it throws) — which is
+    # what the frontend was seeing as an opaque CORS-looking fetch
+    # failure, since the crash never made it to a clean JSON response.
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                DELETE FROM deck_cards
+                WHERE deck_id = %s AND user_id = %s AND source = %s AND raw_id = %s
+            """, (deck_id, user_id, source, raw_id))
+            if cur.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Card not found in deck")
+        conn.commit()
+        return {"ok": True}
+    finally:
+        conn.close()
+
+
 @router.put("/api/decks/{deck_id}/cards/{card_id}")
 def update_card(deck_id: str, card_id: str, payload: CardPayload,
                 user_id: str = Depends(get_user_id)):
@@ -565,28 +597,6 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
                     added += write_cur.rowcount
         conn.commit()
         return {"added": added}
-    finally:
-        conn.close()
-
-
-@router.delete("/api/decks/{deck_id}/cards/app")
-def remove_app_card(deck_id: str, source: str, raw_id: str, user_id: str = Depends(get_user_id)):
-    # raw_id (not level) is enough to identify the row — it's the
-    # deck_cards primary key together with deck_id/source. Taken as a
-    # query param rather than a path segment because some raw ids
-    # embed a "/" (multi-reading vocab kana, e.g. "まいげつ/まいつき"),
-    # which would otherwise split across path segments.
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute("""
-                DELETE FROM deck_cards
-                WHERE deck_id = %s AND user_id = %s AND source = %s AND raw_id = %s
-            """, (deck_id, user_id, source, raw_id))
-            if cur.rowcount == 0:
-                raise HTTPException(status_code=404, detail="Card not found in deck")
-        conn.commit()
-        return {"ok": True}
     finally:
         conn.close()
 
