@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from db import db_conn
 from auth import get_user_id
-import reading  # reused wholesale below — see get_translation_batch's docstring
+import routes.reading as reading  # reused wholesale below — see get_translation_batch's docstring
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
