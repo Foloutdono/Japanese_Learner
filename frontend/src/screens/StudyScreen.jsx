@@ -110,6 +110,27 @@ export default function StudyScreen({ session }) {
   // gate costs a skipped animation, not a frozen quiz.
   const safetyTimerRef  = useRef(null)
 
+  // useCardSession's own exclude list only protects cards still
+  // sitting unreviewed in its local queue — the card just answered
+  // has already been popped out via advance() by the time a refill
+  // runs, so it's not in there. The review POST for it is
+  // fire-and-forget (see postReview), so there's a real window where
+  // a refill reaches the backend before that POST has actually
+  // committed the card's new next_review date — and the backend,
+  // still seeing it as due, serves the exact same card right back.
+  // Since the reset effect below keys off card_id, an unchanged id
+  // means nothing resets: same revealed face, hidden rating bar,
+  // frozen. This is what actually closes that gap: a short-lived
+  // memory of "just reviewed" ids, always merged into the exclude
+  // list regardless of what's still in the queue. Cleared per id
+  // after a few seconds — plenty long for the POST to have landed.
+  const recentlyReviewedRef = useRef(new Map())
+
+  function markReviewed(cardId) {
+    recentlyReviewedRef.current.set(cardId, true)
+    setTimeout(() => recentlyReviewedRef.current.delete(cardId), 8000)
+  }
+
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
     if (saved === 'light' || saved === 'dark') {
@@ -133,8 +154,9 @@ export default function StudyScreen({ session }) {
     if (!mode) return Promise.resolve([])
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+    const allExcluded = Array.from(new Set([...excludeIds, ...recentlyReviewedRef.current.keys()]))
     return apiFetch(
-      `/api/decks/${deck_id}/study?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`,
+      `/api/decks/${deck_id}/study?mode=${mode}&lang=${lang}&count=${count}&exclude=${allExcluded.join(',')}`,
       session,
       { signal: controller.signal },
     )
@@ -258,6 +280,11 @@ export default function StudyScreen({ session }) {
         checkAdvance()
       }, 4000)
     }
+
+    // Close the exclude-list race described above: from this point on,
+    // any refill (even one already in flight) must not be able to
+    // hand this exact card back.
+    markReviewed(card.card_id)
 
     // Fire-and-forget — the response isn't read for anything the UI
     // shows, same as Kanji/Vocab/Grammar's own review calls.
