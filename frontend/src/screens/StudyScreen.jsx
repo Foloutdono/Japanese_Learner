@@ -96,6 +96,17 @@ export default function StudyScreen({ session }) {
   const [xpToast, setXpToast]         = useState(null)
   const [cardStamp, setCardStamp]     = useState(null)
   const [locked, setLocked]           = useState(false)
+  // Bumped every single time advance() actually runs (see
+  // checkAdvance) — independent of whether the served card's card_id
+  // happens to be different. Everything that resets "for a new card"
+  // (the UI-state effect below, Flashcard's resetKey, RevealActions'
+  // resetKey) now keys off `${card_id}:${cardNonce}` instead of
+  // card_id alone. This is the actual guarantee: even in the one
+  // scenario nothing else here can fully rule out — the backend
+  // handing back the exact same card_id — the screen still visibly
+  // resets to a fresh, unrevealed card with the rating bar showing,
+  // because the nonce changed regardless.
+  const [cardNonce, setCardNonce]     = useState(0)
 
   // Same gating scheme as Kana/Kanji/Vocab/Grammar — see those
   // screens' own comments for the full rationale.
@@ -179,7 +190,7 @@ export default function StudyScreen({ session }) {
     setShowRating(false)
     setShowEx(false)
     setShowDrawing(false)
-  }, [card?.card_id])
+  }, [card?.card_id, cardNonce])
 
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
   // mode. Fetched independently from the card so it never blocks or
@@ -204,6 +215,7 @@ export default function StudyScreen({ session }) {
         safetyTimerRef.current = null
       }
       advance()
+      setCardNonce(n => n + 1)
       setLocked(false)
     }
   }
@@ -212,88 +224,97 @@ export default function StudyScreen({ session }) {
     if (locked || !card) return
     setLocked(true)
 
-    // Same writing-drill trigger as KanjiScreen: only meaningful when
-    // struggling to recall a kanji from its meaning, and only for an
-    // actual kanji-sourced card — vocab/grammar/custom cards never
-    // carry direction 'm-kj' from a kanji source, so this naturally
-    // never fires for them.
-    const needTraining =
-      quality <= 3 && card.source === 'builtin_kanji' && card.direction === 'm-kj' && drawingEnabled
-
-    loadProgress(mode)
-
-    // Precomputed at fetch time (see review_preview / preview_reviews_bulk
-    // in decks.py) for every source including custom cards now, so
-    // there's nothing to wait on a round trip for.
-    const preview = card.review_preview?.[quality]
-
-    advancedRef.current = false
-    const gates = pendingGatesRef.current
-    // A level-up toast never auto-dismisses (see XpToast — it waits
-    // indefinitely for the player to tap the claim button), so the
-    // safety-net below must never force it closed early; that's the
-    // one case where "gate still open" isn't a bug, it's the design.
-    let safeToForce = true
-
-    if (needTraining) {
-      gates.add('training')
-      setShowRating(false)
-      setShowDrawing(true)
-      // The 'training' gate clears once the drawing drill is
-      // dismissed (see DrawingOverlay's onDone below).
-    } else {
-      setShowRating(false)
-    }
-
+    // Everything from here down is best-effort — XP toast, stage
+    // stamp, the writing drill, the review POST. The one thing that
+    // must happen regardless of whether any of it throws or hangs is
+    // checkAdvance() at the very end, so it's in a finally: a
+    // synchronous error anywhere above can no longer silently skip
+    // past it and leave the card frozen.
     try {
-      if (preview) {
-        gates.add('toast')
-        // Guard against a non-numeric xp_earned (undefined/NaN) — the
-        // gate above is already added by this point, and if
-        // applyXpGain or setXpToast were to throw on a bad value,
-        // execution would abort right here: no toast would ever
-        // render, meaning nothing is left to fire the animationend
-        // that normally clears the 'toast' gate, and the review would
-        // never reach checkAdvance() below either — a silent,
-        // permanent freeze on the answered card. The try/catch around
-        // this whole block is the same guarantee from the other side:
-        // even if something here still throws, the gate gets dropped
-        // in the catch instead of hanging forever.
-        const amount = typeof preview.xp_earned === 'number' ? preview.xp_earned : 0
-        const { leveledUp, newLevel } = applyXpGain({ amount })
-        if (leveledUp) safeToForce = false
-        setXpToast({ amount, id: Date.now(), leveledUp, newLevel, quality })
-        if (preview.stage_up) {
-          gates.add('stamp')
-          setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: card.card_id })
-        }
+      // Same writing-drill trigger as KanjiScreen: only meaningful when
+      // struggling to recall a kanji from its meaning, and only for an
+      // actual kanji-sourced card — vocab/grammar/custom cards never
+      // carry direction 'm-kj' from a kanji source, so this naturally
+      // never fires for them.
+      const needTraining =
+        quality <= 3 && card.source === 'builtin_kanji' && card.direction === 'm-kj' && drawingEnabled
+
+      loadProgress(mode)
+
+      // Precomputed at fetch time (see review_preview / preview_reviews_bulk
+      // in decks.py) for every source including custom cards now, so
+      // there's nothing to wait on a round trip for.
+      const preview = card.review_preview?.[quality]
+
+      advancedRef.current = false
+      const gates = pendingGatesRef.current
+      // A level-up toast never auto-dismisses (see XpToast — it waits
+      // indefinitely for the player to tap the claim button), so the
+      // safety-net below must never force it closed early; that's the
+      // one case where "gate still open" isn't a bug, it's the design.
+      let safeToForce = true
+
+      if (needTraining) {
+        gates.add('training')
+        setShowRating(false)
+        setShowDrawing(true)
+        // The 'training' gate clears once the drawing drill is
+        // dismissed (see DrawingOverlay's onDone below).
+      } else {
+        setShowRating(false)
       }
+
+      try {
+        if (preview) {
+          gates.add('toast')
+          // Guard against a non-numeric xp_earned (undefined/NaN) — the
+          // gate above is already added by this point, and if
+          // applyXpGain or setXpToast were to throw on a bad value,
+          // execution would abort right here: no toast would ever
+          // render, meaning nothing is left to fire the animationend
+          // that normally clears the 'toast' gate. The try/catch around
+          // this whole block is the same guarantee from the other side:
+          // even if something here still throws, the gate gets dropped
+          // in the catch instead of hanging forever.
+          const amount = typeof preview.xp_earned === 'number' ? preview.xp_earned : 0
+          const { leveledUp, newLevel } = applyXpGain({ amount })
+          if (leveledUp) safeToForce = false
+          setXpToast({ amount, id: Date.now(), leveledUp, newLevel, quality })
+          if (preview.stage_up) {
+            gates.add('stamp')
+            setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: `${card.card_id}:${cardNonce}` })
+          }
+        }
+      } catch (err) {
+        gates.delete('toast')
+        console.error('XP toast setup failed', err)
+      }
+
+      if (gates.size > 0 && safeToForce) {
+        if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current)
+        safetyTimerRef.current = setTimeout(() => {
+          gates.clear()
+          checkAdvance()
+        }, 4000)
+      }
+
+      // Close the exclude-list race described above: from this point
+      // on, any refill (even one already in flight) must not be able
+      // to hand this exact card back.
+      markReviewed(card.card_id)
+
+      // Fire-and-forget — the response isn't read for anything the UI
+      // shows, same as Kanji/Vocab/Grammar's own review calls.
+      apiFetch(`/api/decks/${deck_id}/review`, session, {
+        method: 'POST',
+        body: JSON.stringify({ card_id: card.card_id, mode, quality, prev_stage: card.stage }),
+      }).catch(() => {})
     } catch (err) {
-      gates.delete('toast')
-      console.error('XP toast setup failed', err)
+      console.error('postReview failed', err)
+      pendingGatesRef.current.clear()
+    } finally {
+      checkAdvance()
     }
-
-    if (gates.size > 0 && safeToForce) {
-      if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current)
-      safetyTimerRef.current = setTimeout(() => {
-        gates.clear()
-        checkAdvance()
-      }, 4000)
-    }
-
-    // Close the exclude-list race described above: from this point on,
-    // any refill (even one already in flight) must not be able to
-    // hand this exact card back.
-    markReviewed(card.card_id)
-
-    // Fire-and-forget — the response isn't read for anything the UI
-    // shows, same as Kanji/Vocab/Grammar's own review calls.
-    apiFetch(`/api/decks/${deck_id}/review`, session, {
-      method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode, quality, prev_stage: card.stage }),
-    }).catch(() => {})
-
-    checkAdvance()
   }
 
   function onMCQAnswer(choice) {
@@ -355,7 +376,7 @@ export default function StudyScreen({ session }) {
       <PromptCard>
         <Flashcard
           t={t}
-          resetKey={c.card_id}
+          resetKey={`${c.card_id}:${cardNonce}`}
           onReveal={onFlashcardReveal}
           front={
             <div className="study-front-text" style={{ '--front-size': c.front?.length === 1 ? '80px' : '32px' }}>
@@ -392,7 +413,7 @@ export default function StudyScreen({ session }) {
         <PromptCard>
           <MeaningDisplay meaning={c.meaning} size={32} />
           {c.kana && <div className="quiz-subtitle">({c.kana})</div>}
-          <RevealActions t={t} revealed={answered} resetKey={c.card_id}
+          <RevealActions t={t} revealed={answered} resetKey={`${c.card_id}:${cardNonce}`}
             dictTerm={c.kanji} dictCategory="kanji" session={session}
             onReplaySound={() => speakJapanese(c.kana)} />
         </PromptCard>
@@ -402,7 +423,7 @@ export default function StudyScreen({ session }) {
       <PromptCard>
         {c.format === 'flashcard' && (
           <Flashcard
-            t={t} resetKey={c.card_id} onReveal={onFlashcardReveal}
+            t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
             front={isKjToM ? <CharDisplay char={c.kanji} size={100} /> : <MeaningDisplay meaning={c.meaning} size={44} />}
             back={
               <InlineReveal
@@ -420,7 +441,7 @@ export default function StudyScreen({ session }) {
               t={t} kana={c.kana} revealed={answered}
               main={isKjToM ? <CharDisplay char={c.kanji} size={100} /> : <MeaningDisplay meaning={c.meaning} size={44} />}
             />
-            <RevealActions t={t} revealed={answered} resetKey={c.card_id}
+            <RevealActions t={t} revealed={answered} resetKey={`${c.card_id}:${cardNonce}`}
               dictTerm={c.kanji} dictCategory="kanji" session={session}
               onReplaySound={() => speakJapanese(c.kana)} />
           </>
@@ -434,7 +455,7 @@ export default function StudyScreen({ session }) {
       <PromptCard>
         {c.format === 'flashcard' && (
           <Flashcard
-            t={t} resetKey={c.card_id} onReveal={onFlashcardReveal}
+            t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
             front={<CharDisplay char={isKjToM ? wordForm(c) : c.meaning} size={72} />}
             back={
               <InlineReveal
@@ -454,7 +475,7 @@ export default function StudyScreen({ session }) {
               t={t} kana={c.kanji ? c.kana : null} revealed={answered}
               main={isKjToM ? <CharDisplay char={wordForm(c)} size={72} /> : <CharDisplay char={c.meaning} size={72} />}
             />
-            <RevealActions t={t} revealed={answered} resetKey={c.card_id}
+            <RevealActions t={t} revealed={answered} resetKey={`${c.card_id}:${cardNonce}`}
               dictTerm={wordForm(c)} dictCategory="vocab" session={session}
               onReplaySound={() => speakJapanese(c.kana)} />
           </>
@@ -506,7 +527,7 @@ export default function StudyScreen({ session }) {
         {card && !loading && (
           <>
             <CardTransition
-              cardKey={card.card_id}
+              cardKey={`${card.card_id}:${cardNonce}`}
               stamp={cardStamp}
               stage={card.stage}
               onStampDone={() => {
