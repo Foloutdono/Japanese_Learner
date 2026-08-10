@@ -24,6 +24,7 @@ const BASE_GAIN = {
   ui: {
     click:  0.25,
     toggle: 0.10,
+    jingle: 0.5,
   },
   // Deliberately quiet relative to everything else — it's a bed under
   // the app, not a foreground sound competing with kana/TTS/SFX.
