@@ -27,7 +27,7 @@ const BASE_GAIN = {
   },
   // Deliberately quiet relative to everything else — it's a bed under
   // the app, not a foreground sound competing with kana/TTS/SFX.
-  ambiance: 0.22,
+  ambiance: 0.40,
 }
 
 // ═══════════════════════════════════════════════════════════════
