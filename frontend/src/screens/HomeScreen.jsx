@@ -4,7 +4,7 @@ import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
 import { useProfileSummary } from '../components/userProfileSummary'
 import { levelTitle } from '../levelTitle'
-import { playUi, playAnnouncement } from '../components/sound'
+import { playUi, playAnnouncement, useAmbianceEnabled, startAmbiance, stopAmbiance } from '../components/sound'
 
 // ── Header profile badge ──────────────────────────────────
 // Replaces the old sign-out/theme/lang button row: a single glance at
@@ -75,6 +75,16 @@ function HomeProfileBadge() {
 export default function HomeScreen() {
   const navigate = useNavigate()
   const { t }     = useLang()
+  const ambianceEnabled = useAmbianceEnabled()
+
+  // Ambiance is scoped to this screen only for now — starts while
+  // Home is mounted and the preference (set in Settings) is on, and
+  // stops on navigating away. If it should ever play on another
+  // screen too, that screen just needs this same effect.
+  useEffect(() => {
+    if (ambianceEnabled) startAmbiance()
+    return () => stopAmbiance()
+  }, [ambianceEnabled])
 
   const cards = getNavLinks(t)
 

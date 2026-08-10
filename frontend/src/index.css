@@ -1083,25 +1083,58 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* ── Settings screen ───────────────────────────────────────
-   Simple stacked rows inside the same flat `.card` used elsewhere —
-   no new visual system needed for what's just a handful of toggles. */
+   Previously a bare flat `.card` with cramped 6px padding and plain
+   label/control rows — the one screen in the app that didn't speak
+   the same visual language as everything else (hairline rows with a
+   left accent bar that lights up on interaction, rounded panels with
+   an accent top edge). Brought in line with both. */
 .settings-container { padding: 48px 24px 88px; max-width: 640px; margin: 0 auto; }
 .settings-card {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 6px 20px;
+  padding: 4px 24px;
   margin-bottom: 40px;
+  border-radius: var(--radius);
+  border-top: 3px solid var(--accent);
+  background: var(--bg-card);
 }
+
+/* Same accent-bar-on-interaction language as .choice-row__accent /
+   .mcq-row__accent — a settings row is still fundamentally "a row
+   with a control", so it reads as part of the same family instead of
+   a plain bare list. The bar sits in the row's own left padding
+   rather than needing an extra span in the markup. */
 .settings-row {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 0;
+  padding: 18px 4px 18px 16px;
+  transition: background 0.15s ease;
 }
+.settings-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+.settings-row:hover,
+.settings-row:focus-within { background: var(--overlay-hover); }
+.settings-row:hover::before,
+.settings-row:focus-within::before { transform: scaleY(1); }
 .settings-row:not(:last-child) { border-bottom: 1px solid var(--border); }
-.settings-row__label { color: var(--text-primary); font-size: 14px; }
+.settings-row__label {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 500;
+}
 .settings-signout { color: var(--danger); border: 1px solid var(--danger); background: 0 0;}
 .settings-signout:hover { background: var(--bg-card-hover); }
 
@@ -1121,31 +1154,44 @@ input:focus { border-color: var(--accent2); }
 .settings-row .btn-nav:focus-visible {
   background: var(--bg-card-hover);
 }
+/* Ambiance toggle, off state — same glyph, dimmed, rather than a
+   second icon (see AmbianceToggle's own comment). */
+.btn-nav--off { opacity: 0.45; }
 
 /* ── Sound mixer (master + per-category volume) ────────────
    A stacked row inside the same settings-card, rather than a
    label/control pair like the other rows — it needs the full card
-   width for its sliders to be usable. */
+   width for its sliders to be usable. No left accent bar/hover here:
+   it's one continuous control block, not a row you "select". */
 .settings-row--stack {
   flex-direction: column;
   align-items: stretch;
   gap: 4px;
-  padding-top: 4px;
-  padding-bottom: 20px;
+  padding: 16px 4px 22px 16px;
 }
+.settings-row--stack::before { display: none; }
+.settings-row--stack:hover,
+.settings-row--stack:focus-within { background: transparent; }
 .sound-mixer {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 .volume-row {
   display: grid;
-  grid-template-columns: 100px 1fr 40px;
+  grid-template-columns: 92px 1fr 38px;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
+/* Small tracked-out uppercase kicker — the same quiet "label"
+   register the dictionary card's section headers use, so this reads
+   as part of one consistent typographic system across the app rather
+   than its own one-off sentence-case treatment. */
 .volume-row__label {
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   color: var(--text-secondary);
 }
 .volume-row__value {
@@ -1165,14 +1211,14 @@ input:focus { border-color: var(--accent2); }
   cursor: not-allowed;
 }
 .sound-mixer__reset {
-  align-self: flex-start;
-  margin-top: 4px;
+  align-self: flex-end;
+  margin-top: 6px;
   font-size: 12px;
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 999px;
-  padding: 4px 14px;
+  padding: 5px 16px;
   cursor: pointer;
 }
 .sound-mixer__reset:hover {
@@ -1326,7 +1372,7 @@ input:focus { border-color: var(--accent2); }
   text-align: left;
   overflow: hidden;
   transition: background 0.15s ease, max-height 0.32s ease, padding 0.32s ease,
-    opacity 0.25s ease, border-color 0.32s ease;
+    opacity 0.25s ease, border-color 0.32s ease, border-width 0.32s ease;
 }
 .mcq-row:not(:disabled):hover,
 .mcq-row:focus-visible { background: var(--overlay-hover); }
@@ -1383,6 +1429,7 @@ input:focus { border-color: var(--accent2); }
   padding-top: 0;
   padding-bottom: 0;
   opacity: 0;
+  border-bottom-width: 0;
   border-bottom-color: transparent;
   pointer-events: none;
 }
@@ -4913,7 +4960,29 @@ input:focus { border-color: var(--accent2); }
 }
 .dict-detail__close-icon { width: 18px; height: 18px; }
 
-.dict-detail__body { padding: 20px 24px 24px; }
+.dict-detail__body {
+  padding: 20px 24px 24px;
+  /* Shared vertical rhythm for every supplementary section below the
+     core reading/meaning block (tags, senses, examples, meta,
+     composing kanji, stroke order) — one value instead of each
+     section picking its own 16px/20px. */
+  --dict-block-gap: 20px;
+}
+
+/* The three badges deliberately use three different visual weights
+   (level = solid pill, type = hairline underline, status = quiet dot
+   — see each badge's own comment), but they still need one shared
+   row to sit in: centred baseline, even gap, and space before the
+   readings block below instead of the bare-div default of "however
+   JSX whitespace happens to space them". */
+.dict-detail__badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
 .dict-detail__readings { padding: 8px 0; border-bottom: 1px solid var(--border); }
 .dict-detail__radical-link {
   background: transparent;
@@ -4923,15 +4992,7 @@ input:focus { border-color: var(--accent2); }
   text-decoration: underline;
 }
 
-.dict-detail__composing-kanji { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-.dict-detail__composing-kanji-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: bold;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
+.dict-detail__composing-kanji { margin-top: var(--dict-block-gap); padding-top: 16px; border-top: 1px solid var(--border); }
 .dict-detail__kanji-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .dict-detail__kanji-chip {
   width: 44px;
@@ -4947,14 +5008,7 @@ input:focus { border-color: var(--accent2); }
   transition: background 0.15s ease;
 }
 .dict-detail__kanji-chip:hover { background: var(--bg-card-hover); }
-.dict-detail__stroke-section { margin-top: 20px; }
-.dict-detail__stroke-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
+.dict-detail__stroke-section { margin-top: var(--dict-block-gap); }
 .dict-detail__stroke-frame {
   background: var(--paper);
   border-radius: 8px;
@@ -4977,19 +5031,6 @@ input:focus { border-color: var(--accent2); }
   font-size: 13px;
 }
 
-/* Grammatical/priority tags ("nom", "v. godan", "⭐", ...) for a vocab
-   entry — small quiet chips, not another accent-colour pill, so they
-   read as a footnote next to the reading rather than competing with
-   .dict-type-pill / .status-badge for attention. Sits in its own row
-   with margin (not just padding) on both sides so it reads as a
-   distinct footnote rather than fusing into the divider lines of the
-   reading row above and the meaning row below. */
-.dict-detail__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin: 10px 0;
-}
 .dict-tag-chip {
   font-size: 12px;
   font-weight: 400;
@@ -5038,15 +5079,7 @@ input:focus { border-color: var(--accent2); }
    are supplementary dictionary detail rather than core card facts.
    Each sense is a small numbered row of its own so several senses
    read as a list, not a wall of text. */
-.dict-detail__senses { margin-top: 16px; }
-.dict-detail__senses-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: bold;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
+.dict-detail__senses { margin-top: var(--dict-block-gap); }
 .dict-sense {
   display: flex;
   gap: 10px;
@@ -5088,15 +5121,27 @@ input:focus { border-color: var(--accent2); }
    .dict-detail__composing-kanji, kept as its own section since a
    sentence pair reads best full-width rather than squeezed into an
    .dict-info-row's label/value split. */
-.dict-detail__examples { margin-top: 16px; }
-.dict-detail__examples-label {
+.dict-detail__examples { margin-top: var(--dict-block-gap); }
+
+/* One kicker style for every "supplementary detail" section header
+   in the card (senses, examples, composing kanji, stroke order) —
+   these four used to be near-identical copies that had quietly
+   drifted apart (stroke-label alone was missing text-transform and
+   used 1px tracking instead of 0.05em). Small, tracked-out, and
+   quiet: the label recedes, the content it introduces does the
+   talking. */
+.dict-detail__senses-label,
+.dict-detail__examples-label,
+.dict-detail__composing-kanji-label,
+.dict-detail__stroke-label {
   font-size: 12px;
   color: var(--text-secondary);
   font-weight: bold;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
+
 .dict-example { padding: 12px 0; }
 .dict-example + .dict-example { border-top: 1px dashed var(--border); }
 /* Which JMdict sense this sentence illustrates ("① to eat") — ties
@@ -5163,6 +5208,7 @@ input:focus { border-color: var(--accent2); }
   line-height: 1.5;
 }
 
+.dict-detail__meta { margin-top: var(--dict-block-gap); }
 .dict-info-row {
   display: flex;
   justify-content: space-between;
@@ -5171,7 +5217,19 @@ input:focus { border-color: var(--accent2); }
   border-bottom: 1px solid var(--border);
   gap: 12px;
 }
-.dict-info-row__label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+/* Uppercase + tracked, same quiet "label" language as the section
+   kickers above (senses/examples/composing-kanji/stroke-order) —
+   previously plain sentence case, which read as a different register
+   from the rest of the card even though it's doing the same job:
+   naming the fact, not carrying it. */
+.dict-info-row__label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
 .dict-info-row__value { font-size: 15px; color: var(--text-primary); text-align: right; }
 
 .status-badge {
@@ -6296,15 +6354,6 @@ input:focus { border-color: var(--accent2); }
   font-size: 11px;
   color: var(--text-secondary);
   white-space: nowrap;
-}
-
-.browse-only-note {
-  font-size: 13px;
-  color: var(--text-secondary);
-  background: var(--bg-panel);
-  border-radius: 8px;
-  padding: 10px 14px;
-  margin-bottom: 16px;
 }
 
 /* Auto-hide on scroll — opt-in via the `autoHide` prop on <TopBar/>,

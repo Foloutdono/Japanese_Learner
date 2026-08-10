@@ -4,7 +4,9 @@ import { LANGUAGES } from '../i18n'
 import {
   useMuted, toggleMute,
   useVolumes, setVolume, resetVolumes,
+  useAmbianceEnabled, setAmbianceEnabled,
   playClick, playToggle,
+  SOUND_CATEGORIES,
 } from './sound'
 
 const THEME_KEY = 'jp-theme'
@@ -76,6 +78,32 @@ export function ThemeToggle() {
   )
 }
 
+// ── Ambiance toggle button (🎐) ─────────────────────────────
+// Independent from MuteButton: mute silences everything including
+// ambiance (sound.js's setMuted retunes its gain to 0), but this is
+// the control that decides whether ambiance is part of the mix at
+// all. Same glyph in both states — only dimmed when off — rather
+// than swapping icons, so it doesn't read as a second mute button.
+export function AmbianceToggle() {
+  const { t } = useLang()
+  const enabled = useAmbianceEnabled()
+
+  function handleClick() {
+    setAmbianceEnabled(!enabled)
+    playClick()
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      className={`btn-nav btn-nav--icon${enabled ? '' : ' btn-nav--off'}`}
+      title={enabled ? t.ambianceOff : t.ambianceOn}
+    >
+      🎐
+    </button>
+  )
+}
+
 // ── Language switcher (dropdown) ───────────────────────────
 // A real <select> rather than the old cycle-through-two button: it
 // scales to any number of LANGUAGES without extra taps, and lets the
@@ -117,10 +145,11 @@ export function LangSwitcher() {
 // Disabled (but still visible) while globally muted, so the numbers
 // don't silently drift out of sync with what's actually audible.
 const CATEGORY_LABEL_KEYS = {
-  kana: 'volumeKana',
-  tts:  'volumeVoice',
-  sfx:  'volumeEffects',
-  ui:   'volumeUi',
+  kana:     'volumeKana',
+  tts:      'volumeVoice',
+  sfx:      'volumeEffects',
+  ui:       'volumeUi',
+  ambiance: 'volumeAmbiance',
 }
 
 function VolumeRow({ label, value, onChange, disabled }) {
@@ -147,7 +176,6 @@ export function SoundMixer() {
   const { t } = useLang()
   const muted = useMuted()
   const volumes = useVolumes()
-  const categories = ['kana', 'tts', 'sfx', 'ui']
 
   return (
     <div className="sound-mixer">
@@ -157,7 +185,7 @@ export function SoundMixer() {
         onChange={v => setVolume('master', v)}
         disabled={muted}
       />
-      {categories.map(cat => (
+      {SOUND_CATEGORIES.map(cat => (
         <VolumeRow
           key={cat}
           label={t[CATEGORY_LABEL_KEYS[cat]]}
