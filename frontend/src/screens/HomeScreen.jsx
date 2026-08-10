@@ -82,7 +82,7 @@ export default function HomeScreen() {
   // stops on navigating away. If it should ever play on another
   // screen too, that screen just needs this same effect.
   useEffect(() => {
-    if (ambianceEnabled) startAmbiance()
+    if (ambianceEnabled) startAmbiance('home')
     return () => stopAmbiance()
   }, [ambianceEnabled])
 

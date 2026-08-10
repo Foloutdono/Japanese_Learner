@@ -27,7 +27,7 @@ const BASE_GAIN = {
   },
   // Deliberately quiet relative to everything else — it's a bed under
   // the app, not a foreground sound competing with kana/TTS/SFX.
-  ambiance: 0.40,
+  ambiance: 0.22,
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -52,6 +52,24 @@ function getAudioContext() {
     _audioCtx.resume().catch(() => {})
   }
   return _audioCtx
+}
+
+// Ambiance schedules itself on mount regardless of gesture state (see
+// startAmbiance below), but stays silently suspended until *some*
+// gesture calls getAudioContext() again. Every play* helper already
+// does that lazily on its own first call — which covers UI click
+// sounds — but the very first interaction after a refresh isn't
+// guaranteed to be one of those. Listening for any gesture at all
+// closes that gap, so ambiance picks up as soon as realistically
+// possible instead of waiting on an unrelated sound to happen to fire.
+if (typeof window !== 'undefined') {
+  const unlockAudioContext = () => {
+    getAudioContext()
+    window.removeEventListener('pointerdown', unlockAudioContext)
+    window.removeEventListener('keydown', unlockAudioContext)
+  }
+  window.addEventListener('pointerdown', unlockAudioContext, { once: true })
+  window.addEventListener('keydown', unlockAudioContext, { once: true })
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -296,19 +314,21 @@ export function speakJapanese(text) {
 // drag). One `_ambianceGain` node stays wired in for as long as it's
 // playing; setMuted/setVolume/resetVolumes above just retune it.
 //
-// Playback is scoped to whichever screen calls startAmbiance() —
-// currently only HomeScreen, via a mount-effect that also calls
-// stopAmbiance() on unmount, so it plays there and nowhere else.
+// Playback is scoped to whichever screen calls startAmbiance(track) —
+// HomeScreen plays 'home', SelectionScreen plays 'selection' — each
+// via its own mount-effect that also calls stopAmbiance() on unmount,
+// so a track only ever plays while its screen is actually mounted.
 // isAmbianceEnabled/setAmbianceEnabled below is just the persisted
 // on/off *preference* (surfaced in Settings) — flipping it doesn't
 // start or stop anything by itself, since sound.js has no notion of
 // which screen is currently mounted. A screen that wants ambiance
 // reads the preference with useAmbianceEnabled() and reacts to it.
+//
+// Tracks live at /sounds/ambiant/<track>.mp3 — 'home' and 'selection'
+// are the two in use today; a new screen just picks its own track
+// name (matching its own .mp3) and calls startAmbiance with it.
 // ─────────────────────────────────────────────────────────────────
 const AMBIANCE_KEY = 'jp-app-ambiance'
-// Swap this to change the track, or extend into a per-track selector
-// later — for now the app ships one loop, expected at this path.
-const AMBIANCE_TRACK = 'home'
 
 function readAmbianceEnabled() {
   if (typeof window === 'undefined') return false
@@ -324,31 +344,43 @@ const ambianceListeners = new Set()
 
 let _ambianceSource = null
 let _ambianceGain = null
+// Which track is currently playing (or mid-load) — null when
+// stopped. Lets startAmbiance no-op on a redundant call for the
+// track that's already active, and tells a late-resolving fetch
+// whether it's been superseded by a track switch in the meantime.
+let _ambianceTrack = null
 
 function updateAmbianceGain() {
-  if (!_ambianceGain) return
-  _ambianceGain.gain.value = muted ? 0 : gainFor('ambiance', AMBIANCE_TRACK)
+  if (!_ambianceGain || !_ambianceTrack) return
+  _ambianceGain.gain.value = muted ? 0 : gainFor('ambiance', _ambianceTrack)
 }
 
-// Starts playback if the preference is on and nothing's already
-// playing — safe to call unconditionally from a screen's mount
-// effect without checking isAmbianceEnabled() first.
-export function startAmbiance() {
-  if (!ambianceEnabled) return
-  const ctx = getAudioContext()
-  if (!ctx || _ambianceSource) return
+// Starts `track` if the preference is on — safe to call
+// unconditionally from a screen's mount effect without checking
+// isAmbianceEnabled() first. A no-op if `track` is already playing;
+// switches cleanly (stop, then start the new one) if a different
+// track is currently playing.
+export function startAmbiance(track) {
+  if (!ambianceEnabled || !track) return
+  if (_ambianceTrack === track) return
+  stopAmbiance()
 
-  getBuffer(`/sounds/ambiant/${AMBIANCE_TRACK}.mp3`).then(buffer => {
-    // The screen may have unmounted, or the preference flipped back
-    // off, while this was loading.
-    if (!buffer || !ambianceEnabled || _ambianceSource) return
+  const ctx = getAudioContext()
+  if (!ctx) return
+  _ambianceTrack = track
+
+  getBuffer(`/sounds/ambiant/${track}.mp3`).then(buffer => {
+    // Superseded by another startAmbiance/stopAmbiance call (screen
+    // unmounted, preference flipped off, or a different track was
+    // requested) while this was loading.
+    if (!buffer || !ambianceEnabled || _ambianceTrack !== track) return
 
     const source = ctx.createBufferSource()
     source.buffer = buffer
     source.loop = true
 
     const gain = ctx.createGain()
-    gain.gain.value = muted ? 0 : gainFor('ambiance', AMBIANCE_TRACK)
+    gain.gain.value = muted ? 0 : gainFor('ambiance', track)
 
     source.connect(gain)
     gain.connect(ctx.destination)
@@ -370,6 +402,7 @@ export function stopAmbiance() {
   }
   _ambianceSource = null
   _ambianceGain = null
+  _ambianceTrack = null
 }
 
 export function isAmbianceEnabled() {

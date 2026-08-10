@@ -1,3 +1,6 @@
+import { useEffect } from 'react'
+import { useAmbianceEnabled, startAmbiance, stopAmbiance } from './sound'
+
 /**
  * SelectionScreen
  * Layout shell shared by every level/phase/mode selection screen.
@@ -16,6 +19,11 @@
  * Removed: `glyph` and `color` (formerly the atmosphere glow/watermark
  * tint). Callers passing them are simply ignored now — no visual
  * effect, no error.
+ *
+ * Also owns the 'selection' ambiance track (see sound.js) for as long
+ * as it's mounted — every level/mode/tier/theme picker renders inside
+ * this shell, so this is the one place that needs the start/stop
+ * effect rather than each selector duplicating it.
  */
 export default function SelectionScreen({
   children,
@@ -24,6 +32,13 @@ export default function SelectionScreen({
   subtitle,
   maxWidth = 720,
 }) {
+  const ambianceEnabled = useAmbianceEnabled()
+
+  useEffect(() => {
+    if (ambianceEnabled) startAmbiance('selection')
+    return () => stopAmbiance()
+  }, [ambianceEnabled])
+
   const innerStyle =
     maxWidth !== 720 ? { '--content-max-w': `${maxWidth}px` } : undefined
 
