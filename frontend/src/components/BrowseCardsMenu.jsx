@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { apiFetch } from '../api'
+import { useLang } from '../LangContext'
 
 // ── Browse & add existing app cards into a custom deck ─────
 //
@@ -13,21 +14,39 @@ import { apiFetch } from '../api'
 // here should need to change to pick those up once they exist (just
 // another tab).
 //
-//   <BrowseCardsMenu deckId={deckId} session={session}
+// `deckType` restricts which of the three tabs are even offered —
+// mirrors decks.py's SOURCE_FOR_TYPE (a 'kanji' deck only ever gets
+// the kanji tab, 'mixed'/unset gets all three) — the server enforces
+// the actual rule regardless, this is just so the picker doesn't
+// dangle options that would get rejected anyway.
+//
+//   <BrowseCardsMenu deckId={deckId} deckType={deck?.type} session={session}
 //     onAdded={() => fetchCards()} onClose={() => setShowBrowse(false)} />
-
-const SOURCE_TABS = [
-  { key: 'kanji',   label: '漢字 Kanji' },
-  { key: 'vocab',   label: '語彙 Vocabulaire' },
-  { key: 'grammar', label: '文法 Grammaire' },
-]
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
 const SEARCH_DEBOUNCE_MS = 300
 
-export default function BrowseCardsMenu({ deckId, session, onAdded, onClose }) {
-  const [source, setSource]     = useState('kanji')
+const RESTRICTED_SOURCES_BY_TYPE = { kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'] }
+
+function allowedSourcesFor(type) {
+  if (type in RESTRICTED_SOURCES_BY_TYPE) return RESTRICTED_SOURCES_BY_TYPE[type]
+  if (type === 'flashcard') return []
+  return ['kanji', 'vocab', 'grammar']
+}
+
+export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, onClose }) {
+  const { t } = useLang()
+
+  const SOURCE_TABS = [
+    { key: 'kanji',   label: t.browseTabKanji },
+    { key: 'vocab',   label: t.browseTabVocab },
+    { key: 'grammar', label: t.browseTabGrammar },
+  ]
+  const allowedKeys = allowedSourcesFor(deckType)
+  const tabs = SOURCE_TABS.filter(s => allowedKeys.includes(s.key))
+
+  const [source, setSource]     = useState(() => tabs[0]?.key ?? allowedKeys[0] ?? 'kanji')
   const [level, setLevel]       = useState('')
   const [query, setQuery]       = useState('')
   const [results, setResults]   = useState([])
@@ -43,6 +62,7 @@ export default function BrowseCardsMenu({ deckId, session, onAdded, onClose }) {
   const debounceRef = useRef(null)
 
   const runSearch = useCallback(() => {
+    if (!source) return
     setLoading(true)
     const params = new URLSearchParams({ source, level, query, limit: '60' })
     apiFetch(`/api/decks/${deckId}/browse?${params.toString()}`, session)
@@ -86,33 +106,42 @@ export default function BrowseCardsMenu({ deckId, session, onAdded, onClose }) {
     }
   }
 
+  const sourceLabel = SOURCE_TABS.find(s => s.key === source)?.label ?? source
+
   return (
     <div className="import-overlay" onClick={onClose}>
       <div className="import-modal" onClick={e => e.stopPropagation()}>
         <div className="import-header">
-          <div className="import-header__title">Parcourir les cartes existantes</div>
+          <div className="import-header__title">{t.browseTitle}</div>
           <button onClick={onClose} className="import-header__close">✕</button>
         </div>
-        <div className="import-subtitle">
-          Ajoutez des kanji, mots ou points de grammaire déjà présents dans l'application à ce deck.
-        </div>
+        <div className="import-subtitle">{t.browseSubtitle}</div>
 
-        <div className="browse-source-tabs">
-          {SOURCE_TABS.map(s => (
-            <button
-              key={s.key}
-              onClick={() => setSource(s.key)}
-              className={`browse-source-tab${source === s.key ? ' browse-source-tab--active' : ''}`}>
-              {s.label}
-            </button>
-          ))}
-        </div>
+        {tabs.length > 1 ? (
+          <div className="browse-source-tabs">
+            {tabs.map(s => (
+              <button
+                key={s.key}
+                onClick={() => setSource(s.key)}
+                className={`browse-source-tab${source === s.key ? ' browse-source-tab--active' : ''}`}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          // A restricted-type deck (Kanji/Vocab/Grammar) has exactly
+          // one possible source — nothing to choose, so the tab bar
+          // is replaced by a plain note instead of a one-button row.
+          <div className="browse-only-note">
+            {t.browseOnlyAccepts.replace('{type}', sourceLabel)}
+          </div>
+        )}
 
         <div className="study-level-row browse-level-row">
           <button
             onClick={() => setLevel('')}
             className={`study-level-btn${level === '' ? ' study-level-btn--active' : ''}`}>
-            Tous
+            {t.browseAllLevels}
           </button>
           {LEVELS.map(l => (
             <button key={l}
@@ -126,19 +155,19 @@ export default function BrowseCardsMenu({ deckId, session, onAdded, onClose }) {
         <input
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Rechercher (kanji, kana, sens...)"
+          placeholder={t.browseSearchPlaceholder}
           className="deckdetail-form__input browse-search-input"
         />
 
         <div className="import-preview browse-results">
           <div className="import-preview__title">
-            {selected.size > 0 ? `${selected.size} sélectionné(s)` : 'Résultats'}
+            {selected.size > 0 ? t.browseSelectedCount.replace('{n}', selected.size) : t.browseResults}
           </div>
 
-          {loading && <div className="import-preview__empty">Recherche...</div>}
+          {loading && <div className="import-preview__empty">{t.searching}</div>}
 
           {!loading && results.length === 0 && (
-            <div className="import-preview__empty">Aucun résultat.</div>
+            <div className="import-preview__empty">{t.noResults}</div>
           )}
 
           {!loading && results.length > 0 && (
@@ -160,7 +189,7 @@ export default function BrowseCardsMenu({ deckId, session, onAdded, onClose }) {
                     )}
                     <div className="import-preview-row__arrow">→</div>
                     <div className="import-preview-row__back">{r.meaning}</div>
-                    {r.in_deck && <div className="browse-result-row__tag">déjà ajouté</div>}
+                    {r.in_deck && <div className="browse-result-row__tag">{t.alreadyAdded}</div>}
                   </div>
                 )
               })}
@@ -169,12 +198,12 @@ export default function BrowseCardsMenu({ deckId, session, onAdded, onClose }) {
         </div>
 
         <div className="import-footer">
-          <button onClick={onClose} className="import-footer__cancel">Fermer</button>
+          <button onClick={onClose} className="import-footer__cancel">{t.close}</button>
           <button
             onClick={addSelected}
             disabled={selected.size === 0 || adding}
             className={`import-footer__submit${selected.size > 0 ? ' import-footer__submit--active' : ''}${adding ? ' import-footer__submit--importing' : ''}`}>
-            {adding ? 'Ajout...' : `Ajouter (${selected.size})`}
+            {adding ? t.adding : t.addSelected.replace('{n}', selected.size)}
           </button>
         </div>
       </div>

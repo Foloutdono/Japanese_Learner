@@ -528,15 +528,45 @@ const decks = {
   // hardcoded "Deck" string.
   deckFallbackTitle: 'Deck',
 
-  // Deck types
+  // Deck types — each one (besides "Mixed") now restricts what can be
+  // added to it (see DeckDetailScreen/BrowseCardsMenu and decks.py's
+  // SOURCE_FOR_TYPE), so the description is the actual rule, not just
+  // a feature note.
   flashcardType:     'Flashcard',
-  flashcardDesc:     'Front / Back — any language',
+  flashcardDesc:     'Your own cards only — any language',
   vocabType:         'Vocabulary',
-  vocabDesc:         'Compatible with JLPT mode',
-  deckVocabDesc:     'Compatible with JLPT mode',
+  vocabDesc:         'Vocabulary only — from JLPT levels',
+  deckVocabDesc:     'Vocabulary only — from JLPT levels',
   kanjiType:         'Kanji',
-  kanjiDesc:         'With stroke order',
-  deckKanjiDesc:     'With stroke order',
+  kanjiDesc:         'Kanji only — with stroke order',
+  deckKanjiDesc:     'Kanji only — with stroke order',
+  grammarType:       'Grammar',
+  deckGrammarDesc:   'Grammar points only — from JLPT levels',
+  mixedType:         'Mixed',
+  mixedDesc:         'Your own cards plus kanji, vocab and grammar, all mixed',
+
+  // Browse existing cards (BrowseCardsMenu.jsx)
+  browseBtn:              '📚 Browse',
+  browseTitle:            'Browse existing cards',
+  browseSubtitle:         'Add kanji, words, or grammar points already in the app to this deck.',
+  browseTabKanji:         '漢字 Kanji',
+  browseTabVocab:         '語彙 Vocabulary',
+  browseTabGrammar:       '文法 Grammar',
+  browseAllLevels:        'All',
+  browseSearchPlaceholder: 'Search (kanji, kana, meaning...)',
+  browseResults:          'Results',
+  // {n} follows the same placeholder convention as andMore above.
+  browseSelectedCount:    '{n} selected',
+  searching:              'Searching...',
+  noResults:              'No results.',
+  alreadyAdded:           'already added',
+  close:                  'Close',
+  adding:                 'Adding...',
+  addSelected:            'Add ({n})',
+  // Shown instead of the source tabs when a deck's type only accepts
+  // one kind of card (e.g. a Kanji-type deck) — there's nothing left
+  // to choose between, so the tabs are replaced by this instead.
+  browseOnlyAccepts:      'This deck only accepts {type} cards.',
 
   // Bulk select
   selectAll:         'Select all',

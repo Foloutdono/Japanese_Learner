@@ -8,12 +8,47 @@ import { Loading } from '../components/Loading'
 import ImportCardsMenu from '../components/ImportCardsMenu'
 import BrowseCardsMenu from '../components/BrowseCardsMenu'
 
+// Mirrors decks.py's SOURCE_FOR_TYPE / _allowed_sources / _allows_custom
+// exactly — kept in sync by hand since it's this small. This is only
+// ever used to shape the UI (hide/show buttons, restrict the Browse
+// tabs); decks.py enforces the real rule server-side regardless of
+// what the frontend shows.
+const RESTRICTED_SOURCES_BY_TYPE = { kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'] }
+
+function allowedSourcesFor(type) {
+  if (type in RESTRICTED_SOURCES_BY_TYPE) return RESTRICTED_SOURCES_BY_TYPE[type]
+  if (type === 'flashcard') return []
+  return ['kanji', 'vocab', 'grammar'] // 'mixed', or a legacy/unknown type
+}
+
+function allowsCustomFor(type) {
+  return !(type in RESTRICTED_SOURCES_BY_TYPE)
+}
+
 export default function DeckDetailScreen({ session }) {
   const navigate        = useNavigate()
   const { deck_id }     = useParams()
   const { state }       = useLocation()
   const { t }           = useLang()
-  const deck            = state?.deck
+
+  // Falls back to fetching the deck when opened without router state
+  // (a refresh, a direct link) — needed now that a deck's `type`
+  // actually restricts what can be added to it, so the UI has to know
+  // it reliably rather than silently defaulting to "allow everything"
+  // whenever state happens to be missing.
+  const [deck, setDeck] = useState(state?.deck ?? null)
+
+  useEffect(() => {
+    if (deck) return
+    apiFetch(`/api/decks/${deck_id}`, session)
+      .then(r => r.json())
+      .then(d => { if (!d?.error) setDeck(d) })
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deck_id])
+
+  const allowedSources = allowedSourcesFor(deck?.type)
+  const allowCustom    = allowsCustomFor(deck?.type)
 
   const [cards, setCards]           = useState([])
   const [loading, setLoading]       = useState(true)
@@ -150,20 +185,26 @@ export default function DeckDetailScreen({ session }) {
                 className="deckdetail-btn deckdetail-btn--study">
                 {t.study}
               </button>
-              <button onClick={startAdd} className="deckdetail-btn">
-                {t.addCard}
-              </button>
-              <button onClick={() => setShowBrowse(true)} className="deckdetail-btn">
-                📚 Parcourir
-              </button>
+              {allowCustom && (
+                <button onClick={startAdd} className="deckdetail-btn">
+                  {t.addCard}
+                </button>
+              )}
+              {allowedSources.length > 0 && (
+                <button onClick={() => setShowBrowse(true)} className="deckdetail-btn">
+                  {t.browseBtn}
+                </button>
+              )}
               {cards.length > 0 && (
                 <button onClick={() => setSelectMode(true)} className="deckdetail-btn deckdetail-btn--muted">
                   {t.select}
                 </button>
               )}
-              <button onClick={() => setShowImport(true)} className="deckdetail-btn">
-                {t.import}
-              </button>
+              {allowCustom && (
+                <button onClick={() => setShowImport(true)} className="deckdetail-btn">
+                  {t.import}
+                </button>
+              )}
             </div>
           )}
 
@@ -268,7 +309,9 @@ export default function DeckDetailScreen({ session }) {
                               _build_pool — so they're shown read-only here,
                               tagged by source, instead of an editable form. */}
                           {card.origin === 'app' && (
-                            <span className="deckdetail-source-badge"> · {card.source}{card.level ? ` ${card.level}` : ''}</span>
+                            <span className="deckdetail-source-badge">
+                              {' '}· {{ kanji: t.kanjiType, vocab: t.vocabType, grammar: t.grammarType }[card.source] ?? card.source}{card.level ? ` ${card.level}` : ''}
+                            </span>
                           )}
                         </div>
                         <div className="deckdetail-field-value deckdetail-field-value--jp">{card.front}</div>
@@ -322,6 +365,7 @@ export default function DeckDetailScreen({ session }) {
       {showBrowse && (
         <BrowseCardsMenu
           deckId={deck_id}
+          deckType={deck?.type}
           session={session}
           onAdded={fetchCards}
           onClose={() => setShowBrowse(false)}

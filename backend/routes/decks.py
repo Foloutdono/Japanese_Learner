@@ -20,9 +20,9 @@ from kanji_meanings import KANJI_FR
 # how to shape one card payload (choices, fill-in blanks, review
 # previews, ...) for its own mode set — decks.py just needs to route
 # to the right one per card. See SOURCES below.
-from routes.kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
-from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
-from routes.grammar import VALID_MODES as GRAMMAR_VALID_MODES, _build_grammar_card
+from kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
+from vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
+from grammar import VALID_MODES as GRAMMAR_VALID_MODES, _build_grammar_card
 import psycopg2.extras
 
 router = APIRouter()
@@ -95,6 +95,41 @@ SOURCES = {
         "build":       _wrap_grammar,
     },
 }
+
+# What a deck's `type` actually restricts it to — this is what makes
+# the type picker on DecksScreen mean something instead of every type
+# behaving identically once a deck exists. 'mixed' (and legacy decks
+# with an unrecognized/missing type — see _allowed_sources) is the
+# only one with no restriction at all.
+#   - a type naming one of SOURCES ('kanji'/'vocab'/'grammar') only
+#     ever accepts app-sourced cards from that one source, and no
+#     custom (hand-typed) cards at all
+#   - 'flashcard' is the mirror image: custom cards only, no app
+#     sources
+# Enforced in add_card/import_cards (custom cards) and
+# add_app_cards/browse_app_cards (app-sourced cards) below.
+SOURCE_FOR_TYPE = {
+    "kanji":   {"kanji"},
+    "vocab":   {"vocab"},
+    "grammar": {"grammar"},
+}
+
+
+def _allowed_sources(deck_type: str) -> set[str]:
+    """App sources a deck of this type accepts — empty set means
+    'custom cards only, no app sources' (type == 'flashcard'); None
+    would mean unrestricted, but callers use `_allows_custom` /
+    membership checks instead of a sentinel, so 'mixed' and any
+    unrecognized/legacy type just fall through to every source."""
+    if deck_type in SOURCE_FOR_TYPE:
+        return SOURCE_FOR_TYPE[deck_type]
+    if deck_type == "flashcard":
+        return set()
+    return set(SOURCES.keys())  # 'mixed' and any legacy/unknown type
+
+
+def _allows_custom(deck_type: str) -> bool:
+    return deck_type not in SOURCE_FOR_TYPE
 
 # Card stage promotions worth a visual "stamp" on the frontend — same
 # rule as kana.py/kanji.py/vocab.py/grammar.py's own copy.
@@ -307,6 +342,39 @@ def get_decks(user_id: str = Depends(get_user_id)):
         conn.close()
 
 
+@router.get("/api/decks/{deck_id}")
+def get_deck(deck_id: str, user_id: str = Depends(get_user_id)):
+    """
+    Single-deck lookup — mainly so DeckDetailScreen/StudyScreen can
+    reliably know a deck's `type` (needed now that type actually
+    restricts what can be added to it — see SOURCE_FOR_TYPE) even when
+    they're opened without the router `state` that normally carries
+    the deck object (a page refresh, a direct link, ...), instead of
+    silently falling back to "no restriction" in that case.
+    """
+    conn = db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+                SELECT d.id, d.name, d.type, d.created_at,
+                       COUNT(DISTINCT c.id) AS custom_count,
+                       COUNT(DISTINCT dc.raw_id) AS app_count
+                FROM decks d
+                LEFT JOIN custom_cards c  ON c.deck_id  = d.id
+                LEFT JOIN deck_cards   dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
+                WHERE d.id = %s AND d.user_id = %s
+                GROUP BY d.id
+            """, (deck_id, user_id))
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="Deck not found")
+            deck = dict(row)
+        deck["card_count"] = deck.pop("custom_count") + deck.pop("app_count")
+        return deck
+    finally:
+        conn.close()
+
+
 @router.post("/api/decks")
 def create_deck(payload: DeckPayload, user_id: str = Depends(get_user_id)):
     if payload.type not in DECK_TYPES:
@@ -418,9 +486,15 @@ def add_card(deck_id: str, payload: CardPayload, user_id: str = Depends(get_user
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            if not cur.fetchone():
+            cur.execute("SELECT id, type FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
+            deck = cur.fetchone()
+            if not deck:
                 raise HTTPException(status_code=404, detail="Deck not found")
+            if not _allows_custom(deck["type"]):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"This deck only accepts {deck['type']} cards — browse and add some instead",
+                )
             cur.execute("""
                 INSERT INTO custom_cards (deck_id, user_id, front, back, kana, hint, notes)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -531,9 +605,15 @@ def browse_app_cards(deck_id: str, source: str, level: str = "", query: str = ""
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            if not cur.fetchone():
+            cur.execute("SELECT id, type FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
+            deck = cur.fetchone()
+            if not deck:
                 raise HTTPException(status_code=404, detail="Deck not found")
+            if source not in _allowed_sources(deck["type"]):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"This deck only accepts {deck['type']} cards",
+                )
             cur.execute("""
                 SELECT raw_id FROM deck_cards
                 WHERE deck_id = %s AND user_id = %s AND source = %s
@@ -572,13 +652,22 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            if not cur.fetchone():
+            cur.execute("SELECT id, type FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
+            deck = cur.fetchone()
+            if not deck:
                 raise HTTPException(status_code=404, detail="Deck not found")
+            allowed = _allowed_sources(deck["type"])
 
             added = 0
             with conn.cursor() as write_cur:
                 for c in payload.cards:
+                    if c.source not in allowed:
+                        # Same leniency as the "doesn't resolve to a
+                        # real entry" case below — a stale browse
+                        # result (e.g. the deck's type changed since
+                        # the picker was opened) shouldn't 500 out the
+                        # rest of an otherwise-valid batch.
+                        continue
                     cfg = SOURCES.get(c.source)
                     if not cfg:
                         continue
@@ -835,8 +924,14 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("SELECT type FROM decks WHERE id = %s AND user_id = %s",
                        (deck_id, user_id))
-            if not cur.fetchone():
+            deck = cur.fetchone()
+            if not deck:
                 raise HTTPException(status_code=404, detail="Deck not found")
+            if not _allows_custom(deck["type"]):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"This deck only accepts {deck['type']} cards — browse and add some instead",
+                )
     finally:
         conn.close()
 

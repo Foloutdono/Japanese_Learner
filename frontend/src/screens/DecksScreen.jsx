@@ -10,14 +10,22 @@ export default function DecksScreen({ session }) {
   const navigate  = useNavigate()
   const { t }     = useLang()
 
+  // Colors pulled from the app's real theme palette (index.css :root)
+  // instead of the generic purple/cyan/pink placeholders this used to
+  // have — accent = kanji's own rust-red, accent4 a cool blue for
+  // vocab, accent6 a teal for grammar, accent3 a muted mauve for pure
+  // hand cards, accent2 (gold) for the unrestricted "anything goes"
+  // option. Using the CSS vars directly (not their hex values) means
+  // these also follow the light/dark theme switch automatically.
   const DECK_TYPES = [
-    { value: 'mixed',     label: t.mixedType ?? 'Mixte',        desc: t.mixedDesc ?? 'Vos cartes + contenu existant (kanji, vocab, grammaire)', color: '#f9a826' },
-    { value: 'flashcard', label: t.flashcardType, desc: t.flashcardDesc, color: '#6c5ce7' },
-    { value: 'vocab',     label: t.vocabType,     desc: t.deckVocabDesc, color: '#4cc9f0' },
-    { value: 'kanji',     label: t.kanjiType,     desc: t.deckKanjiDesc, color: '#e94560' },
+    { value: 'mixed',     label: t.mixedType,     desc: t.mixedDesc,     color: 'var(--accent2)' },
+    { value: 'flashcard', label: t.flashcardType, desc: t.flashcardDesc, color: 'var(--accent3)' },
+    { value: 'vocab',     label: t.vocabType,     desc: t.deckVocabDesc, color: 'var(--accent4)' },
+    { value: 'kanji',     label: t.kanjiType,     desc: t.deckKanjiDesc, color: 'var(--accent)'  },
+    { value: 'grammar',   label: t.grammarType,   desc: t.deckGrammarDesc, color: 'var(--accent6)' },
   ]
 
-  const typeColor = type => DECK_TYPES.find(d => d.value === type)?.color ?? '#6c5ce7'
+  const typeColor = type => DECK_TYPES.find(d => d.value === type)?.color ?? 'var(--accent2)'
   const typeLabel = type => DECK_TYPES.find(d => d.value === type)?.label ?? type
 
   const [decks, setDecks]       = useState([])
