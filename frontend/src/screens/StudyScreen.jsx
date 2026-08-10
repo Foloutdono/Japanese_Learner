@@ -368,6 +368,18 @@ export default function StudyScreen({ session }) {
               {c.kana && <div className="quiz-subtitle">{c.kana}</div>}
             </div>
           }
+          // Custom cards previously left these undefined — every other
+          // source (kanji/vocab) always passes session at minimum, and
+          // Flashcard renders RevealActions with these unconditionally.
+          // Grammar's flashcard mode never actually exercises
+          // RevealActions at all (it's a bespoke flip, not <Flashcard>),
+          // so kanji/vocab were the only paths that had ever called it
+          // with real values — custom was the one path calling it with
+          // session/dictTerm/dictCategory all undefined.
+          dictTerm={c.front}
+          dictCategory="vocab"
+          session={session}
+          onReplaySound={c.kana ? () => speakJapanese(c.kana) : undefined}
         />
         {c.hint && !answered && <div className="study-hint-text">💡 {c.hint}</div>}
       </PromptCard>
