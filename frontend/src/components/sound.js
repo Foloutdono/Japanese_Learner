@@ -201,7 +201,7 @@ function gainFor(category, soundName) {
 // ═══════════════════════════════════════════════════════════════
 export function playKana(romaji) {
   if (!romaji || muted) return
-  playDecoded(`/sounds/${romaji}.mp3`, 'kana', romaji)
+  playDecoded(`/sounds/kanas/${romaji}.mp3`, 'kana', romaji)
 }
 
 export function playSfx(name) {
@@ -212,6 +212,12 @@ export function playSfx(name) {
 export function playUi(name) {
   if (!name || muted) return
   playDecoded(`/sounds/ui/${name}.mp3`, 'ui', name)
+}
+
+export function playAnnouncement(name) {
+  if (!name || muted) return
+  playDecoded(`/sounds/announcements/jingle.mp3`, 'ui', 'jingle')
+  playDecoded(`/sounds/announcements/${name}.wav`, 'ui', name)
 }
 
 export function playClick() {

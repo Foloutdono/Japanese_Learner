@@ -4,7 +4,7 @@ import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
 import { useProfileSummary } from '../components/userProfileSummary'
 import { levelTitle } from '../levelTitle'
-import { playUi } from '../components/sound'
+import { playUi, playAnnouncement } from '../components/sound'
 
 // ── Header profile badge ──────────────────────────────────
 // Replaces the old sign-out/theme/lang button row: a single glance at
@@ -105,7 +105,7 @@ export default function HomeScreen() {
               <button
                 key={card.path}
                 type="button"
-                onClick={() => { playUi('click-screen-selection'); navigate(card.path) }}
+                onClick={() => { playAnnouncement(card.path.slice(1)); navigate(card.path) }}
                 className="home-card"
                 style={{ '--row-color': card.color }}
               >
