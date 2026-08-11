@@ -4869,13 +4869,15 @@ input:focus { border-color: var(--accent2); }
 
 .dict-results-wrap { flex: 1; }
 
-/* ═══════════════════════════════════════════════════════════
-   Dictionary results grid — redesigned
-   ═══════════════════════════════════════════════════════════ */
-
+/* ── Results grid ─────────────────────────────────────────
+   Same flush shoji-lattice as the radical picker — the search
+   results read as index cards in one catalog drawer, not floating
+   shadowed tiles. Each card keeps a thin colour-coded top edge
+   (kanji vs. vocabulary) instead of a loud filled badge, echoing
+   the rating bar's "seal-colour stroke along the top" language. */
 .dict-results-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 2px;
   background: var(--border);
   border: 3px solid var(--border);
@@ -4883,104 +4885,44 @@ input:focus { border-color: var(--accent2); }
 
 .dict-entry-card {
   background: var(--bg-card);
-  padding: 32px 20px 24px;
-  text-align: center;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
-  position: relative;
-  overflow: hidden;
   border: none;
   border-radius: 0;
-  color: inherit;
+  padding: 22px 12px 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 5px;
 }
-
-.dict-entry-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--badge-color, var(--accent3));
-  opacity: 0.8;
-  transition: height 0.25s ease, opacity 0.25s ease;
-}
-
-.dict-entry-card:hover {
-  background: var(--bg-panel);
-  transform: translateY(-2px);
-}
-
-.dict-entry-card:hover::before {
-  height: 4px;
-  opacity: 1;
-}
-
+.dict-entry-card:hover { background: var(--bg-card-hover); }
 .dict-entry-card--selected,
 .dict-entry-card--selected:hover {
   background: var(--overlay-hover);
 }
 
 .dict-entry-card__char {
+  font-size: 38px;
   font-family: var(--font-jp);
-  font-size: 42px;
-  line-height: 1.2;
-  color: var(--text-primary);
-  margin-bottom: 8px;
+  line-height: 1;
+  margin-top: 4px;
 }
-
-.dict-entry-card__kana {
-  font-family: var(--font-jp);
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-bottom: 12px;
-  line-height: 1.4;
-}
-
+.dict-entry-card__kana { font-size: 14px; color: var(--text-secondary); font-family: var(--font-jp); }
 .dict-entry-card__meaning {
   font-size: 14px;
   color: var(--text-primary);
-  font-weight: 500;
-  margin-bottom: 16px;
-  line-height: 1.4;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
+.dict-entry-card__level { font-size: 13px; color: var(--accent2); font-weight: 700; font-family: var(--font-display); letter-spacing: 0.03em; }
 
-.dict-entry-card__meta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.dict-entry-card__level {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--accent2);
-}
-
-.dict-entry-card__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
-.dict-entry-card__status::before {
-  content: '';
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--status-color, var(--text-secondary));
-}
-
-/* Filler */
+/* Same reasoning as .dict-radical-filler: a ragged last row of entry
+   cards would otherwise leave a bare patch of the lattice background
+   showing through. A muted, oversized watermark fills it instead —
+   decorative, not another clickable card. */
 .dict-results-filler {
   background: var(--bg-card);
   display: flex;
@@ -4988,7 +4930,6 @@ input:focus { border-color: var(--accent2); }
   justify-content: center;
   min-height: 128px;
 }
-
 .dict-results-filler__glyph {
   font-family: var(--font-jp);
   font-size: 40px;
@@ -5156,10 +5097,6 @@ input:focus { border-color: var(--accent2); }
   justify-content: center;
   padding: 24px;
 }
-/* ═══════════════════════════════════════════════════════════
-   Dictionary detail modal — redesigned
-   ═══════════════════════════════════════════════════════════ */
-
 .dict-modal-content {
   background: var(--bg-card);
   border-radius: 14px;
@@ -5168,47 +5105,40 @@ input:focus { border-color: var(--accent2); }
   max-width: 640px;
   max-height: 92vh;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
 }
 
-/* Stage */
+/* Dark ink stage for the headline character — same sumi block as the
+   top bar / home header — with a hanko-red stamp button standing in
+   for the old 🔊 emoji. Corners inherit whatever radius the parent
+   (.dict-modal-content) has, so it always sits flush. */
 .dict-detail__stage {
   background: var(--bg-panel);
   color: var(--text-on-panel);
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 36px 32px 28px;
+  gap: 16px;
+  padding: 30px 24px 24px;
 }
-
 .dict-detail__char {
-  font-size: 56px;
+  font-size: 60px;
   font-family: var(--font-jp);
   color: var(--text-on-panel);
-  line-height: 1.2;
+  line-height: 1.3;
 }
-
+/* Furigana over the headline word (vocab only — see headwordReading in
+   DictionaryDetail.jsx). Sized relative to the headline itself (em)
+   so it scales together with it at every breakpoint. */
 .dict-detail__char ruby { ruby-position: over; }
 .dict-detail__char rt {
-  font-size: 0.28em;
+  font-size: 0.3em;
   font-weight: 400;
   color: var(--text-on-panel-soft);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
   user-select: none;
 }
-
-.dict-detail__stage-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
 .dict-detail__speak-btn {
   flex-shrink: 0;
   width: 42px;
@@ -5217,241 +5147,283 @@ input:focus { border-color: var(--accent2); }
   border-radius: 50%;
   background: var(--accent);
   color: var(--text-on-panel);
-  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s ease, filter 0.15s;
+  transform: rotate(-4deg);
+  transition: transform 0.2s ease;
 }
-
-.dict-detail__speak-btn:hover {
-  transform: scale(1.08);
-  filter: brightness(1.15);
-}
-
+.dict-detail__speak-btn:hover { transform: rotate(0deg) scale(1.06); }
 .dict-detail__speak-icon { width: 18px; height: 18px; }
 
-/* Close X (mobile) */
+.dict-detail__stage-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+/* Only shown once the fullscreen mobile sheet kicks in (see the
+   @media block below) — the desktop side panel already sits next to
+   the results grid and closes just as easily by clicking elsewhere,
+   so it doesn't need its own dismiss button up top. */
 .dict-detail__close-x {
   display: none;
   width: 42px;
   height: 42px;
   padding: 0;
   border-radius: 50%;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   color: var(--text-on-panel);
   align-items: center;
   justify-content: center;
-  border: none;
-  cursor: pointer;
 }
-
 .dict-detail__close-icon { width: 18px; height: 18px; }
 
-/* Body */
 .dict-detail__body {
-  padding: 28px 32px 32px;
-  --dict-block-gap: 24px;
+  padding: 20px 24px 24px;
+  /* Shared vertical rhythm for every supplementary section below the
+     core reading/meaning block (tags, senses, examples, meta,
+     composing kanji, stroke order) — one value instead of each
+     section picking its own 16px/20px. */
+  --dict-block-gap: 20px;
 }
 
-/* Badges row */
+/* The three badges deliberately use three different visual weights
+   (level = solid pill, type = hairline underline, status = quiet dot
+   — see each badge's own comment), but they still need one shared
+   row to sit in: centred baseline, even gap, and space before the
+   readings block below instead of the bare-div default of "however
+   JSX whitespace happens to space them". */
 .dict-detail__badges {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
   flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
-/* Section headers — serif + hairline rule */
+.dict-detail__readings { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.dict-detail__radical-link {
+  background: transparent;
+  color: var(--accent);
+  padding: 0;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.dict-detail__composing-kanji { margin-top: var(--dict-block-gap); padding-top: 16px; border-top: 1px solid var(--border); }
+.dict-detail__kanji-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.dict-detail__kanji-chip {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 8px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent4);
+  color: var(--text-primary);
+  font-family: var(--font-jp);
+  font-size: 20px;
+  transition: background 0.15s ease;
+}
+.dict-detail__kanji-chip:hover { background: var(--bg-card-hover); }
+.dict-detail__stroke-section { margin-top: var(--dict-block-gap); }
+.dict-detail__stroke-frame {
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 8px;
+  width: 100%;
+}
+.dict-detail__stroke-img { width: 100%; display: block; }
+.dict-detail__stroke-fallback {
+  display: none;
+  color: #999;
+  font-size: 12px;
+  text-align: center;
+  padding: 8px;
+}
+.dict-detail__close-btn {
+  background: var(--bg-panel);
+  color: var(--text-on-panel-soft);
+  width: 100%;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.dict-tag-chip {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 11px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+/* Tooltip carries the long JMdict note the chip itself has no room
+   for. Shown on hover (desktop) and on focus (tap on mobile — the
+   chip is a real <button>, so a tap focuses it).
+   Portaled to document.body and positioned with fixed coordinates
+   computed in JS (see TagChip in DictionaryDetail.jsx) rather than
+   living inside the chip as an absolutely-positioned span — that
+   used to get clipped by whichever scrolling container the chip sat
+   in (the mobile fullscreen sheet, the desktop side panel). Mounting
+   only while open (instead of an always-mounted opacity toggle) means
+   no leftover hover/focus CSS is needed here. */
+.dict-tag-chip__tooltip {
+  position: fixed;
+  z-index: 500;
+  width: max-content;
+  max-width: 220px;
+  white-space: normal;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 11px;
+  pointer-events: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  transform: translate(-50%, 0);
+}
+.dict-tag-chip__tooltip[data-placement="above"] {
+  transform: translate(-50%, -100%);
+}
+
+/* Additional JMdict senses beyond the app's own single gloss — same
+   "label + content below" rhythm as the examples section, since both
+   are supplementary dictionary detail rather than core card facts.
+   Each sense is a small numbered row of its own so several senses
+   read as a list, not a wall of text. */
+.dict-detail__senses { margin-top: var(--dict-block-gap); }
+.dict-sense {
+  display: flex;
+  gap: 10px;
+  padding: 7px 0;
+  align-items: flex-start;
+}
+.dict-sense + .dict-sense { border-top: 1px dashed var(--border); }
+.dict-sense__number {
+  margin-top: 1px;
+}
+.dict-sense__body { min-width: 0; flex: 1; }
+.dict-sense__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
+/* Sense-level tags are the same chip, just a touch smaller so a dense
+   list of senses doesn't turn into a wall of full-size pills. */
+.dict-sense__tags .dict-tag-chip { font-size: 11px; padding: 1px 9px; }
+.dict-sense__gloss { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
+
+/* Round number badge for JMdict sense markers — replaces the old
+   Unicode "①②③..." glyphs (illegible/inconsistent across fonts) with
+   a plain drawn circle that stays crisp and readable at any size. */
+.dict-sense-marker {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  font-family: var(--font-display, inherit);
+}
+
+/* Example sentences — same "label + bordered block below" rhythm as
+   .dict-detail__composing-kanji, kept as its own section since a
+   sentence pair reads best full-width rather than squeezed into an
+   .dict-info-row's label/value split. */
+.dict-detail__examples { margin-top: var(--dict-block-gap); }
+
+/* One kicker style for every "supplementary detail" section header
+   in the card (senses, examples, composing kanji, stroke order) —
+   these four used to be near-identical copies that had quietly
+   drifted apart (stroke-label alone was missing text-transform and
+   used 1px tracking instead of 0.05em). Small, tracked-out, and
+   quiet: the label recedes, the content it introduces does the
+   talking. */
 .dict-detail__senses-label,
 .dict-detail__examples-label,
 .dict-detail__composing-kanji-label,
 .dict-detail__stroke-label {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.08em;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: bold;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
+  margin-bottom: 10px;
+}
+
+.dict-example { padding: 12px 0; }
+.dict-example + .dict-example { border-top: 1px dashed var(--border); }
+/* Which JMdict sense this sentence illustrates ("① to eat") — ties
+   an example back to a specific gloss when a word has several. */
+.dict-example__sense {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.dict-detail__senses-label::after,
-.dict-detail__examples-label::after,
-.dict-detail__composing-kanji-label::after,
-.dict-detail__stroke-label::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* Senses */
-.dict-detail__senses { margin-top: 0; }
-
-.dict-sense {
-  display: flex;
-  gap: 14px;
-  padding: 14px 0;
-  align-items: flex-start;
-}
-
-.dict-sense + .dict-sense {
-  border-top: 1px dashed var(--border);
-}
-
-.dict-sense__number {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  font-family: var(--font-display);
+  gap: 6px;
   font-size: 11px;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 2px;
+  color: var(--accent);
+  margin-bottom: 5px;
+  letter-spacing: 0.02em;
 }
-
-.dict-sense__body { min-width: 0; flex: 1; }
-
-.dict-sense__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 8px;
+.dict-example__sense .dict-sense-marker {
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-panel);
 }
-
-.dict-sense__tags .dict-tag-chip {
-  font-size: 11px;
-  padding: 2px 10px;
-}
-
-.dict-sense__gloss {
-  font-size: 15px;
-  color: var(--text-primary);
-  line-height: 1.5;
-  font-weight: 500;
-  margin-bottom: 12px;
-}
-
-/* Example sentences */
-.dict-example {
-  margin-top: 10px;
-  padding: 14px 16px;
-  background: var(--bg-panel);
-  border-radius: 8px;
-  border-left: 2px solid var(--accent2);
-}
-
 .dict-example__jp {
   font-family: var(--font-jp);
-  font-size: 16px;
+  font-size: 17px;
   color: var(--text-primary);
-  line-height: 2.2;
-  margin-bottom: 6px;
+  /* Ruby annotations need headroom above the line, or the furigana
+     of one line collides with the line above it. */
+  line-height: 2.5;
+  /* Flex-wrap treats each segment (below) as an atomic unit that
+     wraps as a whole rather than letting the browser's default CJK
+     line-breaking rules split in the middle of one — the fix for a
+     lone trailing kanji/kana stranding itself at the start of the
+     next line. text-wrap: pretty is progressive enhancement on top
+     of that for browsers that support paragraph-aware wrapping. */
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   text-wrap: pretty;
 }
-
+.dict-example__seg {
+  white-space: nowrap;
+  display: inline-block;
+}
 .dict-example__jp ruby { white-space: nowrap; }
 .dict-example__jp rt {
-  font-size: 0.65em;
+  font-size: 0.70em;
+  font-weight: normal;
   color: var(--text-secondary);
   user-select: none;
 }
-
+/* The headword itself, picked out of the sentence — plain highlight
+   colour (matches the app's accent), no background box, same idea as
+   the reference Yomitan/Jitendex popups this feature is modelled on. */
 .dict-example__hl {
   background: transparent;
   color: var(--accent);
   font-weight: 700;
 }
-
 .dict-example__en {
   font-size: 13px;
   color: var(--text-secondary);
+  margin-top: 5px;
   line-height: 1.5;
 }
 
-/* Kanji composition */
-.dict-detail__composing-kanji { margin-top: var(--dict-block-gap); padding-top: 24px; border-top: 1px solid var(--border); }
-
-.dict-detail__kanji-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.dict-detail__kanji-chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 64px;
-  padding: 14px 8px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--accent4);
-  border-radius: 10px;
-  color: var(--text-primary);
-  font-family: var(--font-jp);
-  font-size: 24px;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
-}
-
-.dict-detail__kanji-chip:hover {
-  background: var(--bg-card-hover);
-  transform: translateY(-2px);
-}
-
-.dict-detail__kanji-chip::after {
-  content: attr(data-meaning);
-  font-size: 10px;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  line-height: 1.3;
-  text-align: center;
-}
-
-/* Close button */
-.dict-detail__close-btn {
-  width: 100%;
-  padding: 14px;
-  background: var(--bg-panel);
-  color: var(--text-on-panel-soft);
-  border: none;
-  border-top: 1px solid var(--border);
-  border-radius: 0;
-  margin-top: 0;
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease;
-}
-
-.dict-detail__close-btn:hover {
-  color: var(--text-on-panel);
-  background: var(--bg-card-hover);
-}
-
-/* Meta / info rows */
-.dict-detail__meta { margin-top: var(--dict-block-gap); padding-top: 20px; border-top: 1px solid var(--border); }
-
+.dict-detail__meta { margin-top: var(--dict-block-gap); }
 .dict-info-row {
   display: flex;
   justify-content: space-between;
@@ -5460,7 +5432,11 @@ input:focus { border-color: var(--accent2); }
   border-bottom: 1px solid var(--border);
   gap: 12px;
 }
-
+/* Uppercase + tracked, same quiet "label" language as the section
+   kickers above (senses/examples/composing-kanji/stroke-order) —
+   previously plain sentence case, which read as a different register
+   from the rest of the card even though it's doing the same job:
+   naming the fact, not carrying it. */
 .dict-info-row__label {
   font-size: 12px;
   font-weight: 600;
@@ -5469,7 +5445,6 @@ input:focus { border-color: var(--accent2); }
   color: var(--text-secondary);
   white-space: nowrap;
 }
-
 .dict-info-row__value { font-size: 15px; color: var(--text-primary); text-align: right; }
 
 .status-badge {
@@ -6695,32 +6670,6 @@ input:focus { border-color: var(--accent2); }
      already 1-2 columns and stacked, so the filler just adds an
      empty decorative block below real content — drop it. */
   .stats-filler-card { display: none; }
-
-  .dict-modal-overlay {
-    padding: 0;
-    align-items: stretch;
-  }
-  .dict-modal-content {
-    max-width: none;
-    max-height: none;
-    width: 100%;
-    height: 100dvh;
-    border-radius: 0;
-    border-top: none;
-  }
-  .dict-detail__stage {
-    padding: 28px 24px 24px;
-    padding-top: calc(28px + env(safe-area-inset-top, 0px));
-    flex-shrink: 0;
-  }
-  .dict-detail__char { font-size: 48px; }
-  .dict-detail__body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px;
-    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-  }
-  .dict-detail__close-x { display: flex; }
 }
 
 @media (max-width: 640px) {
