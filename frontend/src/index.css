@@ -739,9 +739,9 @@ input:focus { border-color: var(--accent2); }
 .home-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
+  gap: 2px;
   background: var(--border);
-  border: 1px solid var(--border);
+  border: 3px solid var(--border);
 }
 
 .home-card {
@@ -4754,8 +4754,7 @@ input:focus { border-color: var(--accent2); }
   grid-template-columns: 40px repeat(5, minmax(44px, 1fr));
   gap: 2px;
   background: var(--border);
-  border: 1px solid var(--border);
-  border-bottom: 3px solid var(--syl-accent, var(--accent));
+  border: 3px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
   /* Falls back to horizontal scroll rather than crushing cells past
@@ -4833,8 +4832,7 @@ input:focus { border-color: var(--accent2); }
 }
 .syllabary-nsolo-wrap .syllabary-cell--kana {
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-top: 3px solid var(--syl-accent, var(--accent));
+  border: 2px solid var(--border);
   border-radius: 10px;
   min-width: 96px;
   padding: 10px 20px;
@@ -5190,7 +5188,6 @@ input:focus { border-color: var(--accent2); }
 .dict-example__jp rt {
   font-size: 0.70em;
   font-weight: normal;
-  color: var(--text-secondary);
   user-select: none;
 }
 /* The headword itself, picked out of the sentence — plain highlight
