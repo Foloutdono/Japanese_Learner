@@ -485,6 +485,7 @@ const settings = {
   settings:          'Settings',
   preferences:       'Preferences',
   sound:             'Sound',
+  ambiance:          'Ambiance',
   theme:             'Theme',
   language:          'Language',
   account:           'Account',
