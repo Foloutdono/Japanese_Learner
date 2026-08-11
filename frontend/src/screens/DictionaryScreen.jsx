@@ -6,7 +6,7 @@ import { useLang } from '../LangContext'
 import { StrokeOrderAnimation } from '../components/StrokeOrderAnimation'
 import {
 	TYPE_META, isKanaType, entryKey,
-	StatusBadge, TypeBadge, SearchIcon, DictionaryDetail,
+	StatusBadge, SearchIcon, DictionaryDetail,
 } from '../components/DictionaryDetail'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
@@ -591,7 +591,6 @@ function ResultsSection({
 									onClick={() => setSelected(entry)}
 									className={`dict-entry-card${selected && entryKey(selected) === entryKey(entry) ? ' dict-entry-card--selected' : ''}`}
 								>
-									<TypeBadge type={entry.type} t={t} />
 									<div className="dict-entry-card__char">
 										{entry.kanji || entry.kana}
 									</div>
@@ -742,9 +741,6 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 
 					{nSolo && (
 						<div className="syllabary-nsolo-wrap">
-							<div className="syllabary-table__title syllabary-table__title--center">
-								{t.syllabaryNSolo}
-							</div>
 							<button
 								type="button"
 								onClick={() => setSelected(nSolo)}

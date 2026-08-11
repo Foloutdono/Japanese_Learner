@@ -4755,7 +4755,7 @@ input:focus { border-color: var(--accent2); }
   gap: 2px;
   background: var(--border);
   border: 1px solid var(--border);
-  border-top: 3px solid var(--syl-accent, var(--accent));
+  border-bottom: 3px solid var(--syl-accent, var(--accent));
   border-radius: 10px;
   overflow: hidden;
   /* Falls back to horizontal scroll rather than crushing cells past
@@ -5247,11 +5247,6 @@ input:focus { border-color: var(--accent2); }
   display: inline-block;
 }
 
-/* JLPT level — a solid-fill pill, deliberately the loudest of the
-   three badges in .dict-detail__badges (this one, .dict-type-pill's
-   thin underline, .status-badge's quiet dot). Colour comes from
-   LevelBadge's LEVEL_COLORS map, --text-on-fill keeps the number
-   readable against every one of those mid-tone fills in both themes. */
 .dict-level-badge {
   display: inline-flex;
   align-items: center;
@@ -5263,26 +5258,6 @@ input:focus { border-color: var(--accent2); }
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
-}
-
-/* A hairline underline in the type's colour, not a filled pill — same
-   "accent marks it, doesn't drown it" language as .type-badge, so the
-   dictionary's kanji/vocab marker matches the quiz's question-type
-   marker instead of being its own one-off pill button. */
-.dict-type-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 1px 4px;
-  border: none;
-  border-bottom: 2px solid var(--pill-color, var(--accent3));
-  border-radius: 0;
-  background: none;
-  color: var(--pill-color, var(--accent3));
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 /* ── Shared "primary purple" action button ────────────────── */

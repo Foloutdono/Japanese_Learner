@@ -144,19 +144,6 @@ export function LevelBadge({ level }) {
   )
 }
 
-export function TypeBadge({ type, t }) {
-  const meta = TYPE_META[type] ?? TYPE_META.kanji
-  const label = type === 'kanji' ? (t?.dictKanji ?? 'Kanji')
-    : type === 'hiragana' ? (t?.dictHiragana ?? 'Hiragana')
-    : type === 'katakana' ? (t?.dictKatakana ?? 'Katakana')
-    : (t?.dictVocab ?? 'Vocabulaire')
-  return (
-    <span className="dict-type-pill" style={{ '--pill-color': meta.color }}>
-      {label}
-    </span>
-  )
-}
-
 // Drawn glyphs, not emoji — kept consistent with the rest of the
 // dictionary UI, which draws its own icons rather than using emoji.
 export function SpeakIcon() {
