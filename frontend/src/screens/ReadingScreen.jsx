@@ -356,7 +356,7 @@ export default function ReadingScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.readingTitle} />
-        <SelectionScreen subtitle={t.selectStudySource}>
+        <SelectionScreen heading={t.selectStudySource}>
           <ModeSelector modes={SOURCES} onSelect={setSource} />
         </SelectionScreen>
       </div>
@@ -368,7 +368,7 @@ export default function ReadingScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
-        <SelectionScreen subtitle={t.selectLevel}>
+        <SelectionScreen heading={t.selectLevel}>
           <LevelSelector onSelect={setLevel} color="var(--accent3)" />
         </SelectionScreen>
       </div>
@@ -380,7 +380,7 @@ export default function ReadingScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
-        <SelectionScreen subtitle={t.selectDomain}>
+        <SelectionScreen heading={t.selectDomain}>
           <ModeSelector modes={DOMAINS} onSelect={setDomain} />
         </SelectionScreen>
       </div>
@@ -391,7 +391,7 @@ export default function ReadingScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setDomain(null)} title={t.readingTitle} />
-        <SelectionScreen subtitle={t.selectTier}>
+        <SelectionScreen heading={t.selectTier}>
           <TierPicker session={session} domain={domain} onSelect={setTier} t={t} />
         </SelectionScreen>
       </div>
