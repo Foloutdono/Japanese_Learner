@@ -261,13 +261,14 @@ button:focus-visible {
   font-size: 2.4rem;
   line-height: 1.2;
   letter-spacing: 0.01em;
+  text-align: center;
 }
 
 .selector-header__subtitle {
   color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.6;
-  max-width: 480px;
+  text-align: center;
 }
 
 /* ── Tier-size toggle (TierSelector) ─────────────────────── */
@@ -739,9 +740,9 @@ input:focus { border-color: var(--accent2); }
 .home-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
+  gap: 2px;
   background: var(--border);
-  border: 1px solid var(--border);
+  border: 3px solid var(--border);
 }
 
 .home-card {
@@ -1095,7 +1096,7 @@ input:focus { border-color: var(--accent2); }
   padding: 4px 24px;
   margin-bottom: 40px;
   border-radius: var(--radius);
-  border-top: 3px solid var(--accent);
+  border-bottom: 3px solid var(--border);
   background: var(--bg-card);
 }
 
@@ -4998,8 +4999,7 @@ input:focus { border-color: var(--accent2); }
 }
 .syllabary-nsolo-wrap .syllabary-cell--kana {
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-top: 3px solid var(--syl-accent, var(--accent));
+  border: 2px solid var(--border);
   border-radius: 10px;
   min-width: 96px;
   padding: 10px 20px;
@@ -5412,11 +5412,6 @@ input:focus { border-color: var(--accent2); }
   display: inline-block;
 }
 
-/* JLPT level — a solid-fill pill, deliberately the loudest of the
-   three badges in .dict-detail__badges (this one, .dict-type-pill's
-   thin underline, .status-badge's quiet dot). Colour comes from
-   LevelBadge's LEVEL_COLORS map, --text-on-fill keeps the number
-   readable against every one of those mid-tone fills in both themes. */
 .dict-level-badge {
   display: inline-flex;
   align-items: center;
@@ -5428,26 +5423,6 @@ input:focus { border-color: var(--accent2); }
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
-}
-
-/* A hairline underline in the type's colour, not a filled pill — same
-   "accent marks it, doesn't drown it" language as .type-badge, so the
-   dictionary's kanji/vocab marker matches the quiz's question-type
-   marker instead of being its own one-off pill button. */
-.dict-type-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 1px 4px;
-  border: none;
-  border-bottom: 2px solid var(--pill-color, var(--accent3));
-  border-radius: 0;
-  background: none;
-  color: var(--pill-color, var(--accent3));
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 /* ── Shared "primary purple" action button ────────────────── */
