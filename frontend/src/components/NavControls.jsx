@@ -4,16 +4,12 @@ import { LANGUAGES } from '../i18n'
 import {
   useMuted, toggleMute,
   useVolumes, setVolume, resetVolumes,
-  useAmbianceEnabled, setAmbianceEnabled,
   playClick, playToggle,
   SOUND_CATEGORIES,
 } from './sound'
 
 const THEME_KEY = 'jp-theme'
 
-// Reads any theme saved from a previous visit (or the OS preference,
-// the first time) so index.css's [data-theme="light"] rules can be
-// applied immediately rather than flashing dark-then-light.
 function getInitialTheme() {
   if (typeof window === 'undefined') return 'dark'
   const saved = window.localStorage.getItem(THEME_KEY)
@@ -21,12 +17,6 @@ function getInitialTheme() {
   return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
 }
 
-// ── Mute toggle button ─────────────────────────────────────
-// Reusable anywhere a mute control is needed (top bar, home page...).
-// toggleMute() runs first, then playClick() — so the click itself
-// respects the *new* mute state: muting stays silent, unmuting gives
-// an audible confirmation instead of the very button that turns sound
-// back on staying silent about it.
 export function MuteButton() {
   const { t } = useLang()
   const muted = useMuted()
@@ -47,10 +37,6 @@ export function MuteButton() {
   )
 }
 
-// ── Theme toggle button (☀/☾) ──────────────────────────────
-// Reusable anywhere a light/dark control is needed. Persists the
-// choice to localStorage and applies it via a `data-theme` attribute
-// on <html>, which is what index.css's light-theme overrides key off.
 export function ThemeToggle() {
   const { t } = useLang()
   const [theme, setTheme] = useState(getInitialTheme)
@@ -78,40 +64,6 @@ export function ThemeToggle() {
   )
 }
 
-// ── Ambiance toggle button (🎐) ─────────────────────────────
-// Independent from MuteButton: mute silences everything including
-// ambiance (sound.js's setMuted retunes its gain to 0), but this is
-// the control that decides whether ambiance is part of the mix at
-// all. Same glyph in both states — only dimmed when off — rather
-// than swapping icons, so it doesn't read as a second mute button.
-export function AmbianceToggle() {
-  const { t } = useLang()
-  const enabled = useAmbianceEnabled()
-
-  function handleClick() {
-    setAmbianceEnabled(!enabled)
-    playClick()
-  }
-
-  return (
-    <button
-      onClick={handleClick}
-      className={`btn-nav btn-nav--icon${enabled ? '' : ' btn-nav--off'}`}
-      title={enabled ? t.ambianceOff : t.ambianceOn}
-    >
-      🎐
-    </button>
-  )
-}
-
-// ── Language switcher (dropdown) ───────────────────────────
-// A real <select> rather than the old cycle-through-two button: it
-// scales to any number of LANGUAGES without extra taps, and lets the
-// user land on their language directly instead of hunting through a
-// toggle. Shares .btn-nav for its background/color (including the
-// card-context override already defined for `.settings-row .btn-nav`
-// in index.css) — `.lang-select` on top just strips the native select
-// chrome and draws a themed arrow in its place.
 export function LangSwitcher() {
   const { t, lang, switchLang } = useLang()
 
@@ -136,28 +88,18 @@ export function LangSwitcher() {
   )
 }
 
-// ── Sound mixer ─────────────────────────────────────────────
-// Master volume plus one slider per category from sound.js's
-// SOUND_CATEGORIES — kana pronunciation, TTS, gamification SFX, and
-// UI sounds (button taps/toggles). Purely a thin view over
-// getVolumes/setVolume/resetVolumes: sound.js owns persistence and
-// the actual 0–1 math, this just renders it and writes back on drag.
-// Disabled (but still visible) while globally muted, so the numbers
-// don't silently drift out of sync with what's actually audible.
 const CATEGORY_LABEL_KEYS = {
   kana:         'volumeKana',
   tts:          'volumeVoice',
   sfx:          'volumeEffects',
   ui:           'volumeUi',
   jingle:       'volumeJingle',
-  announcement: 'volumeAnnouncements',
+  announcement: 'volumeAnnouncement',
   ambiance:     'volumeAmbiance',
 }
 
-/* ── Master volume (prominent card) ───────────────────────── */
 function MasterVolume({ value, onChange, disabled }) {
   const pct = Math.round(value * 100)
-
   return (
     <div className={`master-volume-card${disabled ? ' master-volume-card--muted' : ''}`}>
       <div className="master-volume-header">
@@ -192,10 +134,8 @@ function MasterVolume({ value, onChange, disabled }) {
   )
 }
 
-/* ── Category volume (compact row) ────────────────────────── */
 function CategoryVolume({ label, value, onChange, disabled }) {
   const pct = Math.round(value * 100)
-
   return (
     <div className="category-volume-row">
       <span className="category-volume-row__label">{label}</span>
@@ -221,7 +161,6 @@ function CategoryVolume({ label, value, onChange, disabled }) {
   )
 }
 
-/* ── Sound mixer ──────────────────────────────────────────── */
 export function SoundMixer() {
   const { t } = useLang()
   const muted = useMuted()

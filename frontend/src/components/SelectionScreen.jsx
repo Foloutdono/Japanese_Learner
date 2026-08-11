@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useAmbianceEnabled, startAmbiance, stopAmbiance } from './sound'
+import { startAmbiance, stopAmbiance } from './sound'
 
 /**
  * SelectionScreen
@@ -32,12 +32,11 @@ export default function SelectionScreen({
   subtitle,
   maxWidth = 720,
 }) {
-  const ambianceEnabled = useAmbianceEnabled()
 
   useEffect(() => {
-    if (ambianceEnabled) startAmbiance('selection')
+    startAmbiance('selection')
     return () => stopAmbiance()
-  }, [ambianceEnabled])
+  })
 
   const innerStyle =
     maxWidth !== 720 ? { '--content-max-w': `${maxWidth}px` } : undefined
