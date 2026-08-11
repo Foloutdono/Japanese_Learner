@@ -299,14 +299,12 @@ export default function KanjiScreen({ session }) {
     setSelected(choice)
     setAnswered(true)
     setShowRating(true)
-    speakJapanese(card.kana)
   }
 
   function onFlashcardReveal() {
     if (answered) return
     setAnswered(true)
     setShowRating(true)
-    speakJapanese(card.kana)
   }
 
   // ── Study-source selection: JLPT level vs. frequency tier ──
