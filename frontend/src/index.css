@@ -1120,7 +1120,7 @@ input:focus { border-color: var(--accent2); }
   margin-bottom: 32px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  border-top: 3px solid var(--accent);
+  border-bottom: 3px solid var(--border);
   background: var(--bg-card);
   overflow: hidden;
 }
@@ -1135,19 +1135,6 @@ input:focus { border-color: var(--accent2); }
   padding: 18px 24px 18px 28px;
   transition: background 0.15s ease;
   overflow: hidden;
-}
-
-.settings-row::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--accent);
-  transform: scaleY(0);
-  transform-origin: center;
-  transition: transform 0.25s ease;
 }
 
 .settings-row:hover::before,
@@ -1250,7 +1237,7 @@ input:focus { border-color: var(--accent2); }
 /* ═══════════════════════════════════════════════════════════
    Sound mixer — filled-track redesign
    ═══════════════════════════════════════════════════════════ */
-   
+
 /* ── Master volume card ───────────────────────────────────── */
 .master-volume-card {
   padding: 18px 20px;
@@ -1279,7 +1266,7 @@ input:focus { border-color: var(--accent2); }
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-primary);
+  color: var(--text-on-panel);
 }
 .master-volume-title svg {
   color: var(--accent2);
@@ -1301,6 +1288,7 @@ input:focus { border-color: var(--accent2); }
   height: 28px;
   display: flex;
   align-items: center;
+  flex: 1;
 }
 
 .master-volume-fill {
