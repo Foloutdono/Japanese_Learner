@@ -499,6 +499,7 @@ const settings = {
   volumeVoice:        'Volume voice',
   volumeEffects:      'Volume effects',
   volumeUi:           'Volume UI',
+  volumeAmbiance:     'Volume ambiance',
   resetVolumes:       'Reset volumes',
 }
 

@@ -1095,7 +1095,7 @@ input:focus { border-color: var(--accent2); }
   padding: 4px 24px;
   margin-bottom: 40px;
   border-radius: var(--radius);
-  border-top: 3px solid var(--accent);
+  border-bottom: 3px solid var(--accent);
   background: var(--bg-card);
 }
 
@@ -1113,22 +1113,7 @@ input:focus { border-color: var(--accent2); }
   padding: 18px 4px 18px 16px;
   transition: background 0.15s ease;
 }
-.settings-row::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--accent);
-  transform: scaleY(0);
-  transform-origin: center;
-  transition: transform 0.2s ease;
-}
-.settings-row:hover,
 .settings-row:focus-within { background: var(--overlay-hover); }
-.settings-row:hover::before,
-.settings-row:focus-within::before { transform: scaleY(1); }
 .settings-row:not(:last-child) { border-bottom: 1px solid var(--border); }
 .settings-row__label {
   color: var(--text-primary);
