@@ -121,8 +121,7 @@ export function StatusBadge({ state, t }) {
   )
 }
 
-// JLPT level shown as its own solid-fill pill (not a thin underline
-// like TypeBadge, nor a quiet dot like StatusBadge) — it's the one
+// JLPT level shown as its own solid-fill pill — it's the one
 // badge meant to jump out at a glance, so it gets the strongest
 // visual treatment of the three. Colour scales with difficulty
 // (N5 calmest → N1 most intense) using pigments already in the
@@ -373,7 +372,6 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
       <div className="dict-detail__body">
         <div className="dict-detail__badges">
           <LevelBadge level={entry.level} />
-          <TypeBadge type={entry.type} t={t} />
           <StatusBadge state={entry.status?.state ?? 'new'} t={t} />
         </div>
 
