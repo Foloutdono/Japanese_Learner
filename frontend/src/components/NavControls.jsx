@@ -230,13 +230,6 @@ export function SoundMixer() {
           />
         ))}
       </div>
-      <button
-        type="button"
-        onClick={() => { playClick(); resetVolumes() }}
-        className="sound-mixer__reset"
-      >
-        {t.resetVolumes}
-      </button>
     </div>
   )
 }

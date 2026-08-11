@@ -1194,26 +1194,6 @@ input:focus { border-color: var(--accent2); }
   opacity: 0.45;
 }
 
-/* Reset volumes: bouton panel cohérent avec le reste de l'app */
-.sound-mixer__reset {
-  margin-top: 18px;
-  align-self: flex-start;
-  background: var(--bg-panel);
-  color: var(--text-on-panel-soft);
-  font-size: 13px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-family: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: filter 0.15s;
-}
-
-.sound-mixer__reset:hover {
-  filter: brightness(1.15);
-}
-
 /* Sign out: hover inversé vermillon */
 .settings-signout {
   color: var(--danger);
