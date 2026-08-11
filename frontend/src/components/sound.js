@@ -27,9 +27,9 @@ const BASE_GAIN = {
     click:  0.25,
     toggle: 0.10,
   },
-  jingle:       0.6,
+  jingle:       0.3,
   announcement: 1,
-  ambiance: 0.22,
+  ambiance: 0.45,
 }
 
 let _audioCtx = null

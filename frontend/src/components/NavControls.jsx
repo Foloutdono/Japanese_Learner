@@ -17,6 +17,54 @@ function getInitialTheme() {
   return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
 }
 
+/* ── Icônes SVG (remplacent les émojis) ─────────────────── */
+
+function IconVolume({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+    </svg>
+  )
+}
+
+function IconVolumeOff({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <line x1="23" y1="9" x2="17" y2="15" />
+      <line x1="17" y1="9" x2="23" y2="15" />
+    </svg>
+  )
+}
+
+function IconSun({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" />
+      <line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  )
+}
+
+function IconMoon({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  )
+}
+
+/* ── Composants exportés ────────────────────────────────── */
+
 export function MuteButton() {
   const { t } = useLang()
   const muted = useMuted()
@@ -30,9 +78,10 @@ export function MuteButton() {
     <button
       onClick={handleClick}
       className="btn-nav btn-nav--icon"
-      title={muted ? (t.unmute) : (t.mute)}
+      title={muted ? t.unmute : t.mute}
+      aria-label={muted ? t.unmute : t.mute}
     >
-      {muted ? '🔇' : '🔊'}
+      {muted ? <IconVolumeOff /> : <IconVolume />}
     </button>
   )
 }
@@ -57,9 +106,10 @@ export function ThemeToggle() {
     <button
       onClick={handleClick}
       className="btn-nav btn-nav--icon"
-      title={isDark ? (t.lightMode) : (t.darkMode)}
+      title={isDark ? t.lightMode : t.darkMode}
+      aria-label={isDark ? t.lightMode : t.darkMode}
     >
-      {isDark ? '☀' : '☾'}
+      {isDark ? <IconSun /> : <IconMoon />}
     </button>
   )
 }
@@ -81,7 +131,7 @@ export function LangSwitcher() {
     >
       {LANGUAGES.map(l => (
         <option key={l.code} value={l.code}>
-          {l.flag} {l.label}
+          {l.label}
         </option>
       ))}
     </select>
@@ -104,11 +154,7 @@ function MasterVolume({ value, onChange, disabled }) {
     <div className={`master-volume-card${disabled ? ' master-volume-card--muted' : ''}`}>
       <div className="master-volume-header">
         <div className="master-volume-title">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-          </svg>
+          <IconVolume size={16} />
           <span>Master Volume</span>
         </div>
         <span

@@ -1083,77 +1083,174 @@ input:focus { border-color: var(--accent2); }
   white-space: nowrap;
 }
 
-/* ── Settings screen ───────────────────────────────────────
-   Previously a bare flat `.card` with cramped 6px padding and plain
-   label/control rows — the one screen in the app that didn't speak
-   the same visual language as everything else (hairline rows with a
-   left accent bar that lights up on interaction, rounded panels with
-   an accent top edge). Brought in line with both. */
-.settings-container { padding: 48px 24px 88px; max-width: 640px; margin: 0 auto; }
+/* ═══════════════════════════════════════════════════════════
+   Settings panel — refined
+   ═══════════════════════════════════════════════════════════ */
+
+.settings-container {
+  padding: 48px 24px 88px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* Page header: même langage serif + trait-rouge que .section-header */
+.settings-header {
+  margin-bottom: 40px;
+}
+
+.settings-header__title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 1.4rem + 1.5vw, 2.4rem);
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+}
+
+.settings-header__rule {
+  height: 3px;
+  width: 40px;
+  background: var(--accent);
+  margin-top: 12px;
+}
+
+/* Card: accent en haut (sceau) au lieu d'une lourde bordure basse */
 .settings-card {
   display: flex;
   flex-direction: column;
-  padding: 4px 24px;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
   border-radius: var(--radius);
-  border-bottom: 3px solid var(--border);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
   background: var(--bg-card);
+  overflow: hidden;
 }
 
-/* Same accent-bar-on-interaction language as .choice-row__accent /
-   .mcq-row__accent — a settings row is still fundamentally "a row
-   with a control", so it reads as part of the same family instead of
-   a plain bare list. The bar sits in the row's own left padding
-   rather than needing an extra span in the markup. */
+/* Row: barre d'accent à gauche au survol, même langage que .choice-row */
 .settings-row {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 4px 18px 16px;
+  padding: 18px 24px 18px 28px;
   transition: background 0.15s ease;
+  overflow: hidden;
 }
-.settings-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+
+.settings-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.25s ease;
+}
+
+.settings-row:hover::before,
+.settings-row:focus-within::before {
+  transform: scaleY(1);
+}
+
+.settings-row:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+
+/* Variante stack (sound mixer) — pas de barre latérale,
+   le master-volume card a déjà son propre cadre */
+.settings-row--stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 20px 24px 24px 28px;
+}
+
+.settings-row--stack::before {
+  display: none;
+}
+
 .settings-row__label {
   color: var(--text-primary);
   font-size: 15px;
   font-weight: 500;
 }
-.settings-signout { color: var(--danger); border: 1px solid var(--danger); background: 0 0;}
-.settings-signout:hover { background: var(--bg-card-hover); }
 
-/* .btn-nav (mute/theme/lang) is styled for the always-dark --bg-panel
-   context it was built for (top bar, burger footer) — a translucent
-   white fill + var(--text-on-panel). Dropped onto this card's
-   var(--bg-card), which is a light cream in light mode, that same
-   near-white-on-white washes out almost completely. Override with
-   the card-context tokens instead, which already flip correctly
-   between themes. */
+/* Labels de section ("Sound", "Theme", "Language") */
+.settings-row__label--section {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+
+/* Boutons dans une settings-row: fond transparent pour
+   s'harmoniser avec var(--bg-card), et flex centré pour les SVG */
 .settings-row .btn-nav {
   background: transparent;
   color: var(--text-primary);
   border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
+
 .settings-row .btn-nav:hover,
 .settings-row .btn-nav:focus-visible {
   background: var(--bg-card-hover);
 }
-/* Ambiance toggle, off state — same glyph, dimmed, rather than a
-   second icon (see AmbianceToggle's own comment). */
-.btn-nav--off { opacity: 0.45; }
+
+.btn-nav--off {
+  opacity: 0.45;
+}
+
+/* Reset volumes: bouton panel cohérent avec le reste de l'app */
+.sound-mixer__reset {
+  margin-top: 18px;
+  align-self: flex-start;
+  background: var(--bg-panel);
+  color: var(--text-on-panel-soft);
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: filter 0.15s;
+}
+
+.sound-mixer__reset:hover {
+  filter: brightness(1.15);
+}
+
+/* Sign out: hover inversé vermillon */
+.settings-signout {
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  background: transparent;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.settings-signout:hover {
+  background: var(--danger);
+  color: var(--text-on-panel);
+  filter: none;
+}
 
 /* ═══════════════════════════════════════════════════════════
    Sound mixer — filled-track redesign
    ═══════════════════════════════════════════════════════════ */
-
-.settings-row--stack {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 4px;
-  padding: 16px 4px 22px 16px;
-}
-
+   
 /* ── Master volume card ───────────────────────────────────── */
 .master-volume-card {
   padding: 18px 20px;
