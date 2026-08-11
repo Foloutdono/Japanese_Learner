@@ -154,26 +154,74 @@ const CATEGORY_LABEL_KEYS = {
   ambiance:     'volumeAmbiance',
 }
 
-function VolumeRow({ label, value, onChange, disabled }) {
+/* ── Master volume (prominent card) ───────────────────────── */
+function MasterVolume({ value, onChange, disabled }) {
   const pct = Math.round(value * 100)
+
   return (
-    <div className="volume-row">
-      <span className="volume-row__label">{label}</span>
-      <input
-        type="range"
-        min={0}
-        max={100}
-        step={5}
-        value={pct}
-        disabled={disabled}
-        onChange={e => onChange(Number(e.target.value) / 100)}
-        className="volume-row__slider"
-      />
-      <span className="volume-row__value">{pct}%</span>
+    <div className={`master-volume-card${disabled ? ' master-volume-card--muted' : ''}`}>
+      <div className="master-volume-header">
+        <div className="master-volume-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          </svg>
+          <span>Master Volume</span>
+        </div>
+        <span
+          className="master-volume-value"
+          style={{ color: pct === 0 ? 'var(--text-secondary)' : 'var(--accent2)' }}
+        >
+          {pct}%
+        </span>
+      </div>
+      <div className="master-volume-slider-wrap">
+        <div className="master-volume-fill" style={{ width: `${pct}%` }} />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={pct}
+          disabled={disabled}
+          onChange={e => onChange(Number(e.target.value) / 100)}
+        />
+      </div>
     </div>
   )
 }
 
+/* ── Category volume (compact row) ────────────────────────── */
+function CategoryVolume({ label, value, onChange, disabled }) {
+  const pct = Math.round(value * 100)
+
+  return (
+    <div className="category-volume-row">
+      <span className="category-volume-row__label">{label}</span>
+      <div className={`vol-slider-wrap${disabled ? ' vol-slider-wrap--disabled' : ''}`}>
+        <div className="vol-slider-fill" style={{ width: `${pct}%` }} />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={pct}
+          disabled={disabled}
+          onChange={e => onChange(Number(e.target.value) / 100)}
+        />
+      </div>
+      <span
+        className="category-volume-row__value"
+        style={{ color: pct === 0 ? 'var(--text-secondary)' : 'var(--text-primary)' }}
+      >
+        {pct}%
+      </span>
+    </div>
+  )
+}
+
+/* ── Sound mixer ──────────────────────────────────────────── */
 export function SoundMixer() {
   const { t } = useLang()
   const muted = useMuted()
@@ -181,22 +229,27 @@ export function SoundMixer() {
 
   return (
     <div className="sound-mixer">
-      <VolumeRow
-        label={t.volumeMaster}
+      <MasterVolume
         value={volumes.master}
         onChange={v => setVolume('master', v)}
         disabled={muted}
       />
-      {SOUND_CATEGORIES.map(cat => (
-        <VolumeRow
-          key={cat}
-          label={t[CATEGORY_LABEL_KEYS[cat]]}
-          value={volumes[cat]}
-          onChange={v => setVolume(cat, v)}
-          disabled={muted}
-        />
-      ))}
-      <button type="button" onClick={() => { playClick(); resetVolumes() }} className="sound-mixer__reset">
+      <div className="sound-mixer__categories">
+        {SOUND_CATEGORIES.map(cat => (
+          <CategoryVolume
+            key={cat}
+            label={t[CATEGORY_LABEL_KEYS[cat]]}
+            value={volumes[cat]}
+            onChange={v => setVolume(cat, v)}
+            disabled={muted}
+          />
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => { playClick(); resetVolumes() }}
+        className="sound-mixer__reset"
+      >
         {t.resetVolumes}
       </button>
     </div>
