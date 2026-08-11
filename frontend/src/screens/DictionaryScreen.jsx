@@ -234,7 +234,6 @@ export default function DictionaryScreen({ session }) {
 			<div className="container dict-page">
 
 				<div className="selector-header">
-					<div className="selector-header__eyebrow">索引 · Sakuin</div>
 					<h1 className="selector-header__title">{t.dictionaryTitle}</h1>
 					<p className="selector-header__subtitle">
 						{t.dictionarySubtitle}

@@ -264,7 +264,7 @@ export default function TranslationScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.translationTitle ?? 'Translation'} />
-        <SelectionScreen subtitle={t.selectStudySource}>
+        <SelectionScreen>
           <ModeSelector modes={SOURCES} onSelect={setSource} />
         </SelectionScreen>
       </div>
@@ -276,7 +276,7 @@ export default function TranslationScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
-        <SelectionScreen subtitle={t.selectLevel}>
+        <SelectionScreen>
           <LevelSelector onSelect={setLevel} color="var(--accent9)" />
         </SelectionScreen>
       </div>
@@ -288,7 +288,7 @@ export default function TranslationScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
-        <SelectionScreen subtitle={t.selectDomain}>
+        <SelectionScreen>
           <ModeSelector modes={DOMAINS} onSelect={setDomain} />
         </SelectionScreen>
       </div>

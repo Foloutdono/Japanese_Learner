@@ -261,13 +261,14 @@ button:focus-visible {
   font-size: 2.4rem;
   line-height: 1.2;
   letter-spacing: 0.01em;
+  text-align: center;
 }
 
 .selector-header__subtitle {
   color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.6;
-  max-width: 480px;
+  text-align: center;
 }
 
 /* ── Tier-size toggle (TierSelector) ─────────────────────── */
@@ -332,7 +333,6 @@ button:focus-visible {
   border-radius: 0;
   color: var(--text-primary);
   text-align: left;
-  overflow: hidden;
 }
 
 .choice-row__accent {
