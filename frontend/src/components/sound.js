@@ -3,15 +3,17 @@ import { useSyncExternalStore } from 'react'
 const MUTE_KEY   = 'jp-app-muted'
 const VOLUME_KEY = 'jp-app-volumes'
 
-export const SOUND_CATEGORIES = ['kana', 'tts', 'sfx', 'ui', 'ambiance']
+export const SOUND_CATEGORIES = ['kana', 'tts', 'sfx', 'ui', 'jingle', 'announcement', 'ambiance']
 
 const DEFAULT_VOLUMES = {
-  master:   1,
-  kana:     1,
-  tts:      1,
-  sfx:      1,
-  ui:       1,
-  ambiance: 1,
+  master:       1,
+  kana:         1,
+  tts:          1,
+  sfx:          1,
+  ui:           1,
+  jingle:       1,
+  announcement: 1,
+  ambiance:     1,
 }
 
 const BASE_GAIN = {
@@ -24,8 +26,14 @@ const BASE_GAIN = {
   ui: {
     click:  0.25,
     toggle: 0.10,
-    jingle: 0.15,
   },
+  // Split out from 'ui' into their own categories (rather than just
+  // more BASE_GAIN.ui entries) so they get their own mixer sliders —
+  // the jingle-then-announcement pair reads as a distinct "event", not
+  // a UI click, and the two want to be balanced against each other
+  // independently of ordinary button/toggle sounds.
+  jingle:       0.6,
+  announcement: 1,
   // Deliberately quiet relative to everything else — it's a bed under
   // the app, not a foreground sound competing with kana/TTS/SFX.
   ambiance: 0.22,
@@ -258,7 +266,7 @@ export function playAnnouncement(name) {
     let when = ctx.currentTime
 
     if (jingleBuffer) {
-      const jingleGain = gainFor('ui', 'jingle')
+      const jingleGain = gainFor('jingle', 'jingle')
       if (jingleGain > 0) {
         const source = ctx.createBufferSource()
         source.buffer = jingleBuffer
@@ -272,7 +280,7 @@ export function playAnnouncement(name) {
     }
 
     if (announcementBuffer) {
-      const announcementGain = gainFor('ui', name)
+      const announcementGain = gainFor('announcement', name)
       if (announcementGain > 0) {
         const source = ctx.createBufferSource()
         source.buffer = announcementBuffer

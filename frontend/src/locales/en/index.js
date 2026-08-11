@@ -500,6 +500,8 @@ const settings = {
   volumeEffects:      'Volume effects',
   volumeUi:           'Volume UI',
   volumeAmbiance:     'Volume ambiance',
+  volumeJingle:       'Volume jingle',
+  volumeAnnouncements: 'Volume announcements',
   resetVolumes:       'Reset volumes',
 }
 

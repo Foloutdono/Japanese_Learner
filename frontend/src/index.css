@@ -261,14 +261,13 @@ button:focus-visible {
   font-size: 2.4rem;
   line-height: 1.2;
   letter-spacing: 0.01em;
-  text-align: center;
 }
 
 .selector-header__subtitle {
   color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.6;
-  text-align: center;
+  max-width: 480px;
 }
 
 /* ── Tier-size toggle (TierSelector) ─────────────────────── */
@@ -333,6 +332,7 @@ button:focus-visible {
   border-radius: 0;
   color: var(--text-primary);
   text-align: left;
+  overflow: hidden;
 }
 
 .choice-row__accent {
@@ -739,9 +739,9 @@ input:focus { border-color: var(--accent2); }
 .home-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2px;
+  gap: 1px;
   background: var(--border);
-  border: 3px solid var(--border);
+  border: 1px solid var(--border);
 }
 
 .home-card {
@@ -1095,7 +1095,7 @@ input:focus { border-color: var(--accent2); }
   padding: 4px 24px;
   margin-bottom: 40px;
   border-radius: var(--radius);
-  border-bottom: 3px solid var(--border);
+  border-top: 3px solid var(--accent);
   background: var(--bg-card);
 }
 
@@ -1113,7 +1113,22 @@ input:focus { border-color: var(--accent2); }
   padding: 18px 4px 18px 16px;
   transition: background 0.15s ease;
 }
+.settings-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+.settings-row:hover,
 .settings-row:focus-within { background: var(--overlay-hover); }
+.settings-row:hover::before,
+.settings-row:focus-within::before { transform: scaleY(1); }
 .settings-row:not(:last-child) { border-bottom: 1px solid var(--border); }
 .settings-row__label {
   color: var(--text-primary);
@@ -1143,230 +1158,78 @@ input:focus { border-color: var(--accent2); }
    second icon (see AmbianceToggle's own comment). */
 .btn-nav--off { opacity: 0.45; }
 
-/* ═══════════════════════════════════════════════════════════
-   Sound mixer — filled-track redesign
-   ═══════════════════════════════════════════════════════════ */
-
-/* ── Master volume card ───────────────────────────────────── */
-.master-volume-card {
-  padding: 18px 20px;
-  background: var(--bg-panel);
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  margin-bottom: 4px;
-  transition: opacity 0.2s ease;
+/* ── Sound mixer (master + per-category volume) ────────────
+   A stacked row inside the same settings-card, rather than a
+   label/control pair like the other rows — it needs the full card
+   width for its sliders to be usable. No left accent bar/hover here:
+   it's one continuous control block, not a row you "select". */
+.settings-row--stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 16px 4px 22px 16px;
 }
-.master-volume-card--muted {
-  opacity: 0.55;
-}
-
-.master-volume-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.master-volume-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-primary);
-}
-.master-volume-title svg {
-  color: var(--accent2);
-  flex-shrink: 0;
-}
-
-.master-volume-value {
-  font-size: 13px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  min-width: 38px;
-  text-align: right;
-}
-
-/* ── Shared slider wrappers ───────────────────────────────── */
-.master-volume-slider-wrap,
-.vol-slider-wrap {
-  position: relative;
-  height: 28px;
-  display: flex;
-  align-items: center;
-}
-
-.master-volume-fill {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 6px;
-  border-radius: 999px;
-  pointer-events: none;
-  z-index: 1;
-  background: linear-gradient(90deg, var(--accent2), #dcb35a);
-}
-
-.vol-slider-fill {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 4px;
-  border-radius: 999px;
-  pointer-events: none;
-  z-index: 1;
-  background: var(--accent3);
-  opacity: 0.9;
-}
-
-/* ── Inputs ───────────────────────────────────────────────── */
-.master-volume-slider-wrap input[type="range"],
-.vol-slider-wrap input[type="range"] {
-  width: 100%;
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  outline: none;
-  cursor: pointer;
-  position: relative;
-  z-index: 2;
-  margin: 0;
-}
-
-/* WebKit track */
-.master-volume-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
-  height: 6px;
-  background: var(--border);
-  border-radius: 999px;
-}
-.vol-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
-  height: 4px;
-  background: var(--bg-card-hover);
-  border-radius: 999px;
-}
-
-/* WebKit thumb */
-.master-volume-slider-wrap input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent2);
-  border: 2px solid var(--text-on-panel);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  cursor: pointer;
-  margin-top: -6px;
-  transition: transform 0.1s;
-}
-.master-volume-slider-wrap input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-}
-
-.vol-slider-wrap input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--text-secondary);
-  border: 2px solid var(--bg-card);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
-  cursor: pointer;
-  margin-top: -5px;
-  transition: transform 0.1s, background 0.15s;
-}
-.vol-slider-wrap input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  background: var(--text-primary);
-}
-
-/* Firefox track */
-.master-volume-slider-wrap input[type="range"]::-moz-range-track {
-  height: 6px;
-  background: var(--border);
-  border-radius: 999px;
-}
-.vol-slider-wrap input[type="range"]::-moz-range-track {
-  height: 4px;
-  background: var(--bg-card-hover);
-  border-radius: 999px;
-}
-
-/* Firefox thumb */
-.master-volume-slider-wrap input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent2);
-  border: 2px solid var(--text-on-panel);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  cursor: pointer;
-}
-.vol-slider-wrap input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--text-secondary);
-  border: 2px solid var(--bg-card);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
-  cursor: pointer;
-}
-
-/* Disabled */
-.vol-slider-wrap input[type="range"]:disabled,
-.master-volume-slider-wrap input[type="range"]:disabled {
-  cursor: not-allowed;
-}
-.vol-slider-wrap input[type="range"]:disabled::-webkit-slider-thumb,
-.master-volume-slider-wrap input[type="range"]:disabled::-webkit-slider-thumb {
-  background: #555;
-}
-.vol-slider-wrap--disabled .vol-slider-fill,
-.master-volume-card--muted .master-volume-fill {
-  opacity: 0.2;
-}
-
-/* ── Category rows ────────────────────────────────────────── */
-.sound-mixer__categories {
+.settings-row--stack::before { display: none; }
+.settings-row--stack:hover,
+.settings-row--stack:focus-within { background: transparent; }
+.sound-mixer {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 20px;
+  gap: 14px;
 }
-
-.category-volume-row {
-  display: flex;
+.volume-row {
+  display: grid;
+  grid-template-columns: 118px 1fr 38px;
   align-items: center;
   gap: 14px;
 }
-
-.category-volume-row__label {
-  width: 90px;
+/* Small tracked-out uppercase kicker — the same quiet "label"
+   register the dictionary card's section headers use, so this reads
+   as part of one consistent typographic system across the app rather
+   than its own one-off sentence-case treatment. Locked to one line —
+   a wrapped label would throw off the row's alignment with its
+   slider — and truncates gracefully if a translation runs long
+   rather than overflowing into the slider column. */
+.volume-row__label {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.category-volume-row__value {
-  width: 36px;
+.volume-row__value {
   font-size: 12px;
+  color: var(--text-secondary);
   text-align: right;
   font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
 }
-
-/* Reset button spacing */
+.volume-row__slider {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--accent2);
+  cursor: pointer;
+}
+.volume-row__slider:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 .sound-mixer__reset {
-  margin-top: 18px;
+  align-self: flex-end;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 16px;
+  cursor: pointer;
+}
+.sound-mixer__reset:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
 }
 
 /* ── Language dropdown ──────────────────────────────────────
@@ -4897,7 +4760,8 @@ input:focus { border-color: var(--accent2); }
   grid-template-columns: 40px repeat(5, minmax(44px, 1fr));
   gap: 2px;
   background: var(--border);
-  border: 3px solid var(--border);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--syl-accent, var(--accent));
   border-radius: 10px;
   overflow: hidden;
   /* Falls back to horizontal scroll rather than crushing cells past
@@ -4975,7 +4839,8 @@ input:focus { border-color: var(--accent2); }
 }
 .syllabary-nsolo-wrap .syllabary-cell--kana {
   background: var(--bg-card);
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--syl-accent, var(--accent));
   border-radius: 10px;
   min-width: 96px;
   padding: 10px 20px;
@@ -5331,6 +5196,7 @@ input:focus { border-color: var(--accent2); }
 .dict-example__jp rt {
   font-size: 0.70em;
   font-weight: normal;
+  color: var(--text-secondary);
   user-select: none;
 }
 /* The headword itself, picked out of the sentence — plain highlight
@@ -5387,6 +5253,11 @@ input:focus { border-color: var(--accent2); }
   display: inline-block;
 }
 
+/* JLPT level — a solid-fill pill, deliberately the loudest of the
+   three badges in .dict-detail__badges (this one, .dict-type-pill's
+   thin underline, .status-badge's quiet dot). Colour comes from
+   LevelBadge's LEVEL_COLORS map, --text-on-fill keeps the number
+   readable against every one of those mid-tone fills in both themes. */
 .dict-level-badge {
   display: inline-flex;
   align-items: center;
@@ -5398,6 +5269,26 @@ input:focus { border-color: var(--accent2); }
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
+}
+
+/* A hairline underline in the type's colour, not a filled pill — same
+   "accent marks it, doesn't drown it" language as .type-badge, so the
+   dictionary's kanji/vocab marker matches the quiz's question-type
+   marker instead of being its own one-off pill button. */
+.dict-type-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 1px 4px;
+  border: none;
+  border-bottom: 2px solid var(--pill-color, var(--accent3));
+  border-radius: 0;
+  background: none;
+  color: var(--pill-color, var(--accent3));
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 /* ── Shared "primary purple" action button ────────────────── */
