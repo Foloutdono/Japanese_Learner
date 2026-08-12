@@ -58,6 +58,17 @@ def _stage_promotion(prev_stage, new_stage):
         return None
     return STAGE_PROMOTIONS.get((prev_stage, new_stage))
 
+# See kanji.py's own copy of this pair for the full reasoning.
+STAGE_DEMOTIONS = {
+    ("mastered", "learning"): "learning",
+}
+
+
+def _stage_demotion(prev_stage, new_stage):
+    if not prev_stage or not new_stage:
+        return None
+    return STAGE_DEMOTIONS.get((prev_stage, new_stage))
+
 
 def _build_review_preview(stage, preview):
     if not preview:
@@ -68,6 +79,7 @@ def _build_review_preview(stage, preview):
             "leveled_up": p["leveled_up"],
             "new_level": p["new_level"],
             "stage_up": _stage_promotion(stage, p["stage"]),
+            "stage_down": _stage_demotion(stage, p["stage"]),
         }
         for quality, p in preview.items()
     }

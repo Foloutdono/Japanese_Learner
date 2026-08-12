@@ -2948,70 +2948,63 @@ input:focus { border-color: var(--accent2); }
    card — see StageBadge.jsx. Sits well under the celebratory
    .card-stamp-overlay's z-index (6), so a promotion's own strike
    still visually reads as "on top of" the seal it's about to replace.
-   Angled a couple of degrees off-true, same as a real hand-stamped
-   impression never lands perfectly square. */
+
+   One imprint, three inks: a real name seal doesn't change shape as
+   its owner's standing changes, so new/learning/mastered share the
+   exact same carved-square mark below and differ only by --seal-color
+   (still the same escalation the rest of the app colours new/
+   learning/mastered with, just read through ink instead of shape).
+   Tinted fill + ink-toned border (color-mix toward transparent, not a
+   flat opaque swatch) so the seal sits *in* the card's own surface —
+   whatever --bg-card is showing through — rather than floating on top
+   of it as a separate sticker; the inset shadow reads as pressed in,
+   not raised. Sized and positioned to stay fully inside the card's own
+   padding — no corner overhang — with only a couple of degrees of
+   tilt, same as a real hand-stamped impression never landing dead
+   square. */
 .stage-badge {
+  --seal-color: var(--state-new);
   position: absolute;
-  top: -14px;
-  right: -10px;
+  top: 8px;
+  right: 8px;
   z-index: 3;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(30px, 7vw, 42px);
-  height: clamp(30px, 7vw, 42px);
-  border-radius: 8px;
+  width: clamp(24px, 5.6vw, 32px);
+  height: clamp(24px, 5.6vw, 32px);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--seal-color) 15%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--seal-color) 65%, transparent);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  color: var(--seal-color);
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: clamp(15px, 3.2vw, 21px);
+  font-size: clamp(12px, 2.4vw, 15px);
   line-height: 1;
-  transform: rotate(-4deg);
+  transform: rotate(-5deg);
   pointer-events: none;
 }
 
-/* 'new' — a seal not yet struck: an empty carved outline rather than
-   a filled stamp, so an untouched card visibly reads as "waiting"
-   instead of just missing a badge. */
-.stage-badge--new {
-  background: transparent;
-  border: 1.5px solid color-mix(in srgb, var(--state-new) 60%, transparent);
-  color: color-mix(in srgb, var(--state-new) 75%, transparent);
-}
+/* 'new' — a seal not yet struck: the same mark, just faint, so an
+   untouched card visibly reads as "waiting" instead of missing a
+   badge or looking identical to 'learning'. */
+.stage-badge--new { opacity: 0.55; }
 
-/* 'learning' — the same solid vermillion hanko CardStamp's routine
-   promotion strikes, just permanently in place rather than flashing
-   past once. */
-.stage-badge--learning {
-  background: var(--state-learning);
-  border: 2px solid rgba(243, 236, 223, 0.85);
-  color: var(--text-on-panel);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.22);
-}
+.stage-badge--learning { --seal-color: var(--state-learning); }
 
-/* 'mastered' — CardStamp's gold-leaf graduation seal, scaled down to
-   corner-badge size but keeping its double-ring, diploma-seal read. */
+/* 'mastered' keeps the same block, just adds a second, fainter ring
+   just outside its own edge — the traditional double-ring seal a
+   diploma or certificate carries, kept subtle enough not to read as
+   a raised/lifted badge. */
 .stage-badge--mastered {
-  border-radius: 50%;
-  width: clamp(34px, 7.6vw, 48px);
-  height: clamp(34px, 7.6vw, 48px);
-  background:
-    radial-gradient(circle at 32% 26%, rgba(255, 244, 214, 0.35), transparent 55%),
-    var(--state-mastered);
-  border: 2px solid rgba(243, 236, 223, 0.9);
-  color: var(--text-on-panel);
+  --seal-color: var(--state-mastered);
   box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.42),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.25),
-    0 0 0 4px color-mix(in srgb, var(--state-mastered) 28%, transparent);
+    inset 0 1px 3px rgba(0, 0, 0, 0.2),
+    0 0 0 3px color-mix(in srgb, var(--seal-color) 18%, transparent);
 }
 
-.stage-badge__glyph {
-  display: block;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-.stage-badge--new .stage-badge__glyph {
-  text-shadow: none;
-}
+.stage-badge__glyph { display: block; }
 
 /* Used where there's no card corner to strike into — e.g. the
    dictionary detail panel's badge row (see .dict-detail__badges) —
@@ -3021,13 +3014,6 @@ input:focus { border-color: var(--accent2); }
   position: static;
   top: auto;
   right: auto;
-  width: clamp(26px, 6vw, 34px);
-  height: clamp(26px, 6vw, 34px);
-  font-size: clamp(13px, 2.8vw, 16px);
-}
-.stage-badge--inline.stage-badge--mastered {
-  width: clamp(28px, 6.6vw, 38px);
-  height: clamp(28px, 6.6vw, 38px);
 }
 
 .card-stamp-overlay {
@@ -3137,6 +3123,81 @@ input:focus { border-color: var(--accent2); }
   opacity: 0.9;
 }
 
+/* ── Demotion: burn away, then reappear anew ───────────────
+   A mastered card lapsing back to learning (see the backend's
+   stage_down) doesn't get the routine strike-in — CardStamp swaps in
+   CardBurn instead of .card-stamp-wash (see CardStamp.jsx), and this
+   stamp itself waits until the burn has actually cleared before it
+   lands, via the animation-delay overrides below (source order matters
+   here: these have to come after the base .card-stamp/.card-stamp::after
+   rules to win at equal specificity). */
+.card-stamp--demoted {
+  animation-delay: 1150ms;
+}
+.card-stamp--demoted::after {
+  animation-delay: 1510ms;
+}
+
+/* The char itself: a dark, ember-edged sweep climbing the card from
+   its base — background stops are fixed to the element's own height,
+   not to the sweep's current progress, so the leading edge always
+   glows warmest right as it reaches a given point and everything
+   already passed settles to cold ash below it. Clipped to the card's
+   own rounded corners (inherit) so nothing bleeds past the edges —
+   this is the card catching and going out, not a screen-wide effect. */
+.card-stamp-burn {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+@keyframes card-burn-sweep-in {
+  0%   { clip-path: inset(100% 0 0 0); }
+  100% { clip-path: inset(0% 0 0 0); }
+}
+@keyframes card-burn-clear {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+.card-stamp-burn__char {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    #14100c 0%,
+    #241a12 55%,
+    #7a3315 78%,
+    #ff8a3d 90%,
+    rgba(255, 138, 61, 0) 100%
+  );
+  clip-path: inset(100% 0 0 0);
+  animation:
+    card-burn-sweep-in 700ms cubic-bezier(0.45, 0, 0.2, 1) forwards,
+    card-burn-clear 420ms ease-in 950ms forwards;
+}
+.card-stamp-burn__embers {
+  position: absolute;
+  inset: 0;
+  animation: card-burn-clear 300ms ease-in 950ms forwards;
+}
+.ember {
+  position: absolute;
+  bottom: 6%;
+  left: var(--ember-x, 50%);
+  width: var(--ember-size, 5px);
+  height: var(--ember-size, 5px);
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe0a8, #ff7a2e 60%, transparent 100%);
+  opacity: 0;
+  animation: ember-rise var(--ember-dur, 900ms) ease-out var(--ember-delay, 0ms) forwards;
+}
+@keyframes ember-rise {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--ember-drift, 6px), -130px) scale(0.3); }
+}
+
 /* ── 'Mastered' — the graduation seal ──────────────────────
    Everything the routine stamp does, turned up into a full stage
    production: struck dead-centre rather than in a corner, a second
@@ -3238,9 +3299,13 @@ input:focus { border-color: var(--accent2); }
   }
   .card-stamp, .card-stamp--mastered { animation: card-stamp-strike 10ms linear forwards; }
   .card-stamp--mastered { animation-name: card-stamp-strike-center; }
+  .card-stamp--demoted, .card-stamp--demoted::after { animation-delay: 0ms; }
   .card-stamp::after,
   .card-stamp-wash,
   .card-stamp__brush,
+  .card-stamp-burn__char,
+  .card-stamp-burn__embers,
+  .ember,
   .kumadori-streak,
   .petal { animation: none; opacity: 0; }
   .card-stamp-overlay--leaving { animation-duration: 180ms; }
@@ -4937,17 +5002,14 @@ input:focus { border-color: var(--accent2); }
 
 /* Corner seal shrinks a touch on the index card — .stage-badge's own
    clamp() already scales it down on narrow viewports, but a card this
-   small needs a lower ceiling than the full quiz-card corner size. */
+   small needs a lower ceiling than the full quiz-card corner size.
+   Stays inside the card's own padding, same as the base rule. */
 .dict-entry-card .stage-badge {
-  width: clamp(22px, 6vw, 28px);
-  height: clamp(22px, 6vw, 28px);
-  font-size: clamp(11px, 2.6vw, 14px);
-  top: -8px;
-  right: -6px;
-}
-.dict-entry-card .stage-badge--mastered {
-  width: clamp(24px, 6.6vw, 32px);
-  height: clamp(24px, 6.6vw, 32px);
+  width: clamp(18px, 5vw, 24px);
+  height: clamp(18px, 5vw, 24px);
+  font-size: clamp(10px, 2.2vw, 12px);
+  top: 6px;
+  right: 6px;
 }
 
 /* Same reasoning as .dict-radical-filler: a ragged last row of entry

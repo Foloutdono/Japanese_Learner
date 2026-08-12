@@ -39,6 +39,18 @@ def _stage_promotion(prev_stage: str | None, new_stage: str | None) -> str | Non
         return None
     return STAGE_PROMOTIONS.get((prev_stage, new_stage))
 
+# See kanji.py's own copy of this pair for the full reasoning — same
+# duplication pattern this file already follows for STAGE_PROMOTIONS.
+STAGE_DEMOTIONS = {
+    ("mastered", "learning"): "learning",
+}
+
+
+def _stage_demotion(prev_stage: str | None, new_stage: str | None) -> str | None:
+    if not prev_stage or not new_stage:
+        return None
+    return STAGE_DEMOTIONS.get((prev_stage, new_stage))
+
 FR_MAP = VOCAB_FR
 MAX_BATCH = 25
 
@@ -57,6 +69,7 @@ def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) ->
             "leveled_up": p["leveled_up"],
             "new_level":  p["new_level"],
             "stage_up":   _stage_promotion(stage, p["stage"]),
+            "stage_down": _stage_demotion(stage, p["stage"]),
         }
         for quality, p in preview.items()
     }
@@ -207,6 +220,7 @@ def post_vocab_review(payload: ReviewPayload, user_id: str = Depends(get_user_id
         "leveled_up": s["leveled_up"],
         "new_level": s["new_level"],
         "stage_up": _stage_promotion(payload.prev_stage, s["stage"]),
+        "stage_down": _stage_demotion(payload.prev_stage, s["stage"]),
     }
 
 

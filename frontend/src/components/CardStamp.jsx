@@ -8,14 +8,15 @@ import { useEffect, useState } from 'react'
 // visible: the card itself gets officially notarised, kabuki-style,
 // the instant it crosses into a new stage.
 //
-// `transition` is `{ id, to }` — `id` so two promotions of different
-// cards back-to-back still remount and replay (same reasoning as
-// XpToast's toast.id), `to` is 'learning' | 'mastered'. Only these
-// two transitions get a stamp: dropping *out* of mastered (a lapsed
-// review) isn't a celebration, so screens should never construct a
-// transition object for it.
+// `transition` is `{ id, to, demoted? }` — `id` so two promotions of
+// different cards back-to-back still remount and replay (same
+// reasoning as XpToast's toast.id), `to` is 'learning' | 'mastered'.
+// `demoted` marks the one reachable *downward* crossing (mastered
+// lapsing back to learning, see the backend's stage_down) — instead
+// of the routine strike-in, the card burns away first and reappears
+// with the fresh 'learning' stamp landing on it (see CardBurn below).
 //
-// The two variants are deliberately unequal weight. 'learning' is a
+// The two upward variants are deliberately unequal weight. 'learning' is a
 // quick administrative notation — a single vermillion hanko landing
 // on the card, in and gone in about a second, because it happens
 // often and shouldn't slow the reviewer down. 'mastered' is the
@@ -45,6 +46,53 @@ import { useEffect, useState } from 'react'
 const STAMP_GLYPH = { learning: '習', mastered: '極' }
 const STAMP_LABEL = { learning: 'En cours', mastered: 'Maîtrisé' }
 const HOLD_MS      = { learning: 900, mastered: 1700 }
+
+// A demotion holds longer than a routine promotion — the burn needs
+// room to actually read before the fresh stamp lands on top of it.
+// The stamp's own strike-in delay lives in CSS (.card-stamp--demoted's
+// animation-delay override, index.css) timed to begin right as the
+// burn overlay finishes clearing; this is just how long the whole
+// sequence holds before the shared 'leaving' fade-out phase.
+const DEMOTED_HOLD_MS = 2300
+
+// Fixed ember positions, same reasoning as PETAL_LAYOUT below — a
+// mie is deliberate, not a particle system, so it's the same six
+// embers every time.
+const EMBER_LAYOUT = [
+  { x: 10, delay: 60,  drift: 5,  dur: 900,  size: 5 },
+  { x: 26, delay: 190, drift: -7, dur: 980,  size: 4 },
+  { x: 42, delay: 20,  drift: 6,  dur: 940,  size: 6 },
+  { x: 58, delay: 230, drift: -5, dur: 900,  size: 4 },
+  { x: 74, delay: 100, drift: 7,  dur: 970,  size: 5 },
+  { x: 90, delay: 270, drift: -6, dur: 920,  size: 4 },
+]
+
+// The demotion's own overlay: a dark char sweeps up from the card's
+// base and holds a beat before clearing — see CardStamp's `demoted`
+// branch below for how this hands off to the fresh stamp landing
+// right after.
+function CardBurn() {
+  return (
+    <div className="card-stamp-burn" aria-hidden="true">
+      <div className="card-stamp-burn__char" />
+      <div className="card-stamp-burn__embers">
+        {EMBER_LAYOUT.map((e, i) => (
+          <span
+            key={i}
+            className="ember"
+            style={{
+              '--ember-x': `${e.x}%`,
+              '--ember-delay': `${e.delay}ms`,
+              '--ember-drift': `${e.drift}px`,
+              '--ember-dur': `${e.dur}ms`,
+              '--ember-size': `${e.size}px`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 // Fixed petal drop positions for the mastered shower — hand-placed
 // rather than randomised, same reasoning as EMBER_LAYOUT /
@@ -90,13 +138,15 @@ export function CardStamp({ transition, onDone }) {
   useEffect(() => {
     if (!transition) return
     setPhase('active')
-    const timer = setTimeout(() => setPhase('leaving'), HOLD_MS[transition.to] ?? 1000)
+    const holdMs = transition.demoted ? DEMOTED_HOLD_MS : (HOLD_MS[transition.to] ?? 1000)
+    const timer = setTimeout(() => setPhase('leaving'), holdMs)
     return () => clearTimeout(timer)
   }, [transition])
 
   if (!transition) return null
 
   const mastered = transition.to === 'mastered'
+  const demoted  = !!transition.demoted
   const leaving  = phase === 'leaving'
 
   const handleAnimationEnd = (e) => {
@@ -106,13 +156,13 @@ export function CardStamp({ transition, onDone }) {
   return (
     <div
       key={transition.id}
-      className={`card-stamp-overlay card-stamp-overlay--${transition.to}${leaving ? ' card-stamp-overlay--leaving' : ''}`}
+      className={`card-stamp-overlay card-stamp-overlay--${transition.to}${demoted ? ' card-stamp-overlay--demoted' : ''}${leaving ? ' card-stamp-overlay--leaving' : ''}`}
       aria-hidden="true"
       onAnimationEnd={handleAnimationEnd}
     >
-      <div className="card-stamp-wash" />
+      {demoted ? <CardBurn /> : <div className="card-stamp-wash" />}
       {mastered && <PetalShower />}
-      <div className={`card-stamp${mastered ? ' card-stamp--mastered' : ''}`}>
+      <div className={`card-stamp${mastered ? ' card-stamp--mastered' : ''}${demoted ? ' card-stamp--demoted' : ''}`}>
         {mastered && (
           <span
             className="kumadori-burst kumadori-burst--big card-stamp__burst"

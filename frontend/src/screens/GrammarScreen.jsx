@@ -154,6 +154,9 @@ export default function GrammarScreen({ session }) {
       if (preview.stage_up) {
         gates.add('stamp')
         setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: card.card_id })
+      } else if (preview.stage_down) {
+        gates.add('stamp')
+        setCardStamp({ id: Date.now(), to: preview.stage_down, demoted: true, cardKey: card.card_id })
       }
     }
 
