@@ -15,8 +15,9 @@ import { CardTransition } from '../components/CardTransition'
 import PromptCard from '../components/PromptCard'
 import SelectionScreen from '../components/SelectionScreen'
 import ModeSelector from '../components/ModeSelector'
+import ReviewDeck from '../components/ReviewDeck'
 import { playKana } from '../components/sound'
-import { kanaModePicker } from '../components/quizModes'
+import { kanaModePicker, reviewMode } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
 import { useCardSession } from '../hooks/useCardSession'
 
@@ -45,6 +46,9 @@ export default function KanaScreen({ session }) {
   const [xpToast, setXpToast]         = useState(null)
   const [cardStamp, setCardStamp]     = useState(null)
   const [locked, setLocked]           = useState(false)
+  const [reviewing, setReviewing]     = useState(false)
+  const [reviewCards, setReviewCards] = useState([])
+  const [reviewLoading, setReviewLoading] = useState(false)
 
   // Gates that must all clear before the deck is allowed to move on
   // to the next card: the review request itself, plus whichever of
@@ -126,6 +130,19 @@ export default function KanaScreen({ session }) {
   function startMode(m) {
     setMode(m)
     loadProgress(selectedSet.slug, m)
+  }
+
+  // Fetches the full set of already-studied cards once — see
+  // ReviewDeck for why this doesn't go through useCardSession (no due
+  // queue, no refill, just a fixed list to flip through).
+  function startReview() {
+    setReviewing(true)
+    setReviewLoading(true)
+    apiFetch(`/api/kana/review-cards?set_name=${encodeURIComponent(selectedSet.slug)}`, session)
+      .then(r => r.json())
+      .then(data => setReviewCards(data.cards ?? []))
+      .catch(() => setReviewCards([]))
+      .finally(() => setReviewLoading(false))
   }
 
   // advance() only ever runs once every gate above has cleared — see
@@ -234,13 +251,46 @@ export default function KanaScreen({ session }) {
   }
 
   // ── Mode selection ──
-  if (!mode) {
+  if (!mode && !reviewing) {
     return (
       <div className="screen">
         <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} autoHide />
         <SelectionScreen>
-          <ModeSelector modes={MODES} onSelect={startMode} title={t.selectMode} />
+          <ModeSelector
+            modes={[...MODES, reviewMode(t)]}
+            onSelect={m => (m === 'review' ? startReview() : startMode(m))}
+            title={t.selectMode}
+          />
         </SelectionScreen>
+      </div>
+    )
+  }
+
+  // ── Review (self-paced, ungraded browse of already-studied cards) ──
+  if (reviewing) {
+    const dictCategory = selectedSet.slug.startsWith('hiragana') ? 'hiragana' : 'katakana'
+    return (
+      <div className="screen">
+        <TopBar onBack={() => setReviewing(false)} title={`${selectedSet.label} — ${t.modeReview}`} autoHide />
+        <div className="container quiz-area">
+          <ReviewDeck
+            cards={reviewCards}
+            loading={reviewLoading}
+            t={t}
+            session={session}
+            dictCategory={dictCategory}
+            dictTerm={c => c.kana}
+            onReplaySound={c => playKana(c.romaji)}
+            renderFront={c => <CharDisplay char={c.kana} />}
+            renderBack={c => (
+              <div>
+                <CharDisplay char={c.kana} />
+                <div className="flashcard-answer">{c.romaji}</div>
+              </div>
+            )}
+            onExit={() => setReviewing(false)}
+          />
+        </div>
       </div>
     )
   }

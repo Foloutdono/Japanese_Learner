@@ -17,9 +17,10 @@ import TierSelector from '../components/TierSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
+import ReviewDeck from '../components/ReviewDeck'
 import {DrawingQuiz, DrawingOverlay} from '../components/DrawingCanvas'
 import { speakJapanese } from '../components/sound'
-import { kanjiModes } from '../components/quizModes'
+import { kanjiModes, reviewMode } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
 import { useCardSession } from '../hooks/useCardSession'
 
@@ -62,6 +63,9 @@ export default function KanjiScreen({ session }) {
   const [xpToast, setXpToast]         = useState(null)
   const [cardStamp, setCardStamp]     = useState(null)
   const [locked, setLocked]           = useState(false)
+  const [reviewing, setReviewing]     = useState(false)
+  const [reviewCards, setReviewCards] = useState([])
+  const [reviewLoading, setReviewLoading] = useState(false)
 
   // Gates that must all clear before the deck is allowed to move on
   // to the next card: the review request itself, a writing drill
@@ -211,6 +215,21 @@ export default function KanjiScreen({ session }) {
     setTierLabel(label)
     setMode(m)
     loadProgress({ tier: tr, tierSize }, m)
+  }
+
+  // Fetches the full set of already-studied cards once — see
+  // ReviewDeck for why this doesn't go through useCardSession (no due
+  // queue, no refill, just a fixed list to flip through). JLPT-level
+  // only for now: the frequency-tier path has no matching backend
+  // endpoint yet.
+  function startReview() {
+    setReviewing(true)
+    setReviewLoading(true)
+    apiFetch(`/api/kanji/review-cards?level=${level}&lang=${lang}`, session)
+      .then(r => r.json())
+      .then(data => setReviewCards(data.cards ?? []))
+      .catch(() => setReviewCards([]))
+      .finally(() => setReviewLoading(false))
   }
 
   // advance() only ever runs once every gate above has cleared — see
@@ -363,18 +382,50 @@ export default function KanjiScreen({ session }) {
   }
 
   // ── Mode selection (shared by both paths) ──
-  if (!mode) {
+  if (!mode && !reviewing) {
     const backTitle = studyBy === 'level' ? `${t.kanjiTitle} ${level}` : `${t.kanjiTitle} ${tierLabel}`
+    // Review only exists for the JLPT-level path today (see
+    // startReview) — the frequency-tier path keeps the plain mode list.
+    const modesWithReview = studyBy === 'level' ? [...MODES, reviewMode(t)] : MODES
     return (
       <div className="screen">
         <TopBar onBack={() => (studyBy === 'level' ? setLevel(null) : setTier(null))} title={backTitle} autoHide />
         <SelectionScreen>
           <ModeSelector
-            modes={MODES}
-            onSelect={m => (studyBy === 'level' ? startLevelSession(level, m) : startFrequencySession(tier, tierLabel, m))}
+            modes={modesWithReview}
+            onSelect={m => {
+              if (m === 'review') { startReview(); return }
+              if (studyBy === 'level') startLevelSession(level, m)
+              else startFrequencySession(tier, tierLabel, m)
+            }}
             title={t.selectMode}
           />
         </SelectionScreen>
+      </div>
+    )
+  }
+
+  // ── Review (self-paced, ungraded browse of already-studied cards) ──
+  if (reviewing) {
+    return (
+      <div className="screen">
+        <TopBar onBack={() => setReviewing(false)} title={`${t.kanjiTitle} ${level} — ${t.modeReview}`} autoHide />
+        <div className="container quiz-area">
+          <ReviewDeck
+            cards={reviewCards}
+            loading={reviewLoading}
+            t={t}
+            session={session}
+            dictCategory="kanji"
+            dictTerm={c => c.kanji}
+            onReplaySound={c => speakJapanese(c.kana)}
+            renderFront={c => <CharDisplay char={c.kanji} size={100} />}
+            renderBack={c => (
+              <InlineReveal t={t} kana={c.kana} main={<MeaningDisplay meaning={c.meaning} size={28} />} />
+            )}
+            onExit={() => setReviewing(false)}
+          />
+        </div>
       </div>
     )
   }

@@ -215,6 +215,46 @@ def get_kanji_cards(level: str, mode: str, lang: str = "fr", count: int = 10, ex
     return {"cards": cards}
 
 
+@router.get("/api/kanji/review-cards")
+def get_kanji_review_cards(level: str, lang: str = "fr", user_id: str = Depends(get_user_id)):
+    """
+    Every card in this level the user has already studied, in ANY mode
+    (qcm/flashcard either direction, or write) — not just due ones —
+    for a self-paced, ungraded browse of "kanji I already know"
+    instead of an SRS-driven session. `stage` is the most advanced
+    stage reached across those modes — see kana.py's own review-cards
+    endpoint for the full rationale (mirrored here).
+    """
+    kanji_list = KANJI_BY_LEVEL.get(level)
+    if not kanji_list:
+        return {"error": "Unknown level"}
+
+    raw_ids  = [kanji_to_id(k, level) for k in kanji_list]
+    card_ids = prefixed(raw_ids, user_id)
+    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in KANJI_MODES}
+
+    cards = []
+    for entry, card_id in zip(kanji_list, card_ids):
+        stages = [per_mode_states[m].get(card_id, "new") for m in KANJI_MODES]
+        stage = "mastered" if "mastered" in stages else "learning" if "learning" in stages else "new"
+        if stage == "new":
+            continue
+        cards.append({
+            "card_id":      kanji_to_id(entry, level),
+            "kanji":        entry.get("kanji", ""),
+            "kana":         entry.get("kana", ""),
+            "meaning":      get_meaning(entry, lang, FR_MAP),
+            "stroke_count": entry.get("stroke_count", ""),
+            "stage":        stage,
+        })
+
+    logger.info(
+        "kanji review request level=%s user_id=%s studied=%d/%d",
+        level, user_id, len(cards), len(kanji_list),
+    )
+    return {"cards": cards}
+
+
 @router.post("/api/kanji/review")
 def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"

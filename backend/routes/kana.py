@@ -5,6 +5,7 @@ from kana_data import KANA_SETS, kana_to_id
 from auth import get_user_id, prefixed, unprefixed
 from srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
+from quiz_modes import KANA_MODES
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -216,6 +217,46 @@ def get_kana_stats(set_name: str, mode: str, user_id: str = Depends(get_user_id)
         "mastered": sum(1 for s in states.values() if s == "mastered"),
         "due_now":  len(due),
     }
+
+
+@router.get("/api/kana/review-cards")
+def get_kana_review_cards(set_name: str, user_id: str = Depends(get_user_id)):
+    """
+    Every card in this set the user has already studied, in ANY mode
+    (qcm/flashcard/write) — not just due ones — for a self-paced,
+    ungraded browse of "cards I already know" instead of an SRS-driven
+    session. `stage` is the most advanced stage reached across those
+    modes (mastered beats learning beats new): progress is tracked per
+    (card, mode) pair, and someone browsing what they've learned
+    shouldn't have to pick which specific drill type's progress to
+    check first.
+    """
+    kana_list = KANA_SETS.get(set_name)
+    if not kana_list:
+        return {"error": "Unknown set"}
+
+    raw_ids  = [kana_to_id(k) for k in kana_list]
+    card_ids = prefixed(raw_ids, user_id)
+    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in KANA_MODES}
+
+    cards = []
+    for kana_entry, card_id in zip(kana_list, card_ids):
+        stages = [per_mode_states[m].get(card_id, "new") for m in KANA_MODES]
+        stage = "mastered" if "mastered" in stages else "learning" if "learning" in stages else "new"
+        if stage == "new":
+            continue
+        cards.append({
+            "card_id": kana_to_id(kana_entry),
+            "kana":    kana_entry["kana"],
+            "romaji":  kana_entry["romaji"],
+            "stage":   stage,
+        })
+
+    logger.info(
+        "kana review request set_name=%s user_id=%s studied=%d/%d",
+        set_name, user_id, len(cards), len(kana_list),
+    )
+    return {"cards": cards}
 
 
 @router.post("/api/kana/review")

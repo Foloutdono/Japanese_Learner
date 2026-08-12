@@ -102,6 +102,15 @@ const quiz = {
   modeFcMKj:         (noun) => `Carte (sens → ${noun})`,
   modeFcMKjDesc:     (noun) => `Le sens est affiché, révélez le ${noun}`,
 
+  // « Réviser ses cartes » — parcours libre et sans notation des cartes
+  // déjà étudiées dans ce paquet (voir ReviewDeck.jsx). Ajouté à chaque
+  // sélecteur de mode, à côté de modeQCM/modeFlashcard/etc.
+  modeReview:        'Révision',
+  modeReviewDesc:    'Parcourez les cartes que vous connaissez déjà, à votre rythme — sans notation',
+  reviewEmpty:       "Vous n'avez encore étudié aucune de ces cartes — revenez après votre première session.",
+  reviewPrev:        '‹ Précédent',
+  reviewNext:        'Suivant ›',
+
   // Writing practice
   writingPractice:   '✏️ Entraînez-vous à écrire ce kanji',
   writingOn:         'Écriture ON',

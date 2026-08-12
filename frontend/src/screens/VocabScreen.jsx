@@ -18,8 +18,9 @@ import ThemeSelector from '../components/ThemeSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
+import ReviewDeck from '../components/ReviewDeck'
 import { speakJapanese } from '../components/sound'
-import { vocabKanjiModes } from '../components/quizModes'
+import { vocabKanjiModes, reviewMode } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
 import { useCardSession } from '../hooks/useCardSession'
 
@@ -67,6 +68,9 @@ export default function VocabScreen({ session }) {
   const [xpToast, setXpToast]         = useState(null)
   const [cardStamp, setCardStamp]     = useState(null)
   const [locked, setLocked]           = useState(false)
+  const [reviewing, setReviewing]     = useState(false)
+  const [reviewCards, setReviewCards] = useState([])
+  const [reviewLoading, setReviewLoading] = useState(false)
 
   // Gates that must all clear before the deck is allowed to move on
   // to the next card: the review request itself, plus whichever of
@@ -220,6 +224,21 @@ export default function VocabScreen({ session }) {
     setThemeLabel(label)
     setMode(m)
     loadProgress({ theme: th }, m)
+  }
+
+  // Fetches the full set of already-studied cards once — see
+  // ReviewDeck for why this doesn't go through useCardSession (no due
+  // queue, no refill, just a fixed list to flip through). JLPT-level
+  // only for now: the theme/frequency paths have no matching backend
+  // endpoint yet.
+  function startReview() {
+    setReviewing(true)
+    setReviewLoading(true)
+    apiFetch(`/api/vocab/review-cards?level=${level}&lang=${lang}`, session)
+      .then(r => r.json())
+      .then(data => setReviewCards(data.cards ?? []))
+      .catch(() => setReviewCards([]))
+      .finally(() => setReviewLoading(false))
   }
 
   // advance() only ever runs once every gate above has cleared — see
@@ -404,7 +423,7 @@ export default function VocabScreen({ session }) {
   }
 
   // ── Mode selection (shared by all three paths) ──
-  if (!mode) {
+  if (!mode && !reviewing) {
     const backTitle =
       studyBy === 'level' ? `${t.vocabulary} ${level}`
       : studyBy === 'theme' ? `${t.vocabulary} ${themeLabel}`
@@ -415,16 +434,49 @@ export default function VocabScreen({ session }) {
       else setTier(null)
     }
     const startMode = m => {
+      if (m === 'review') { startReview(); return }
       if (studyBy === 'level') startLevelSession(level, m)
       else if (studyBy === 'theme') startThemeSession(theme, themeLabel, m)
       else startFrequencySession(tier, tierLabel, m)
     }
+    // Review only exists for the JLPT-level path today (see
+    // startReview) — theme/frequency decks keep the plain mode list.
+    const modesWithReview = studyBy === 'level' ? [...MODES, reviewMode(t)] : MODES
     return (
       <div className="screen">
         <TopBar onBack={goBack} title={backTitle} />
         <SelectionScreen>
-          <ModeSelector modes={MODES} onSelect={startMode} title={t.selectMode} />
+          <ModeSelector modes={modesWithReview} onSelect={startMode} title={t.selectMode} />
         </SelectionScreen>
+      </div>
+    )
+  }
+
+  // ── Review (self-paced, ungraded browse of already-studied cards) ──
+  if (reviewing) {
+    return (
+      <div className="screen">
+        <TopBar onBack={() => setReviewing(false)} title={`${t.vocabulary} ${level} — ${t.modeReview}`} />
+        <div className="container quiz-area">
+          <ReviewDeck
+            cards={reviewCards}
+            loading={reviewLoading}
+            t={t}
+            session={session}
+            dictCategory="vocab"
+            dictTerm={c => wordForm(c)}
+            onReplaySound={c => speakJapanese(c.kana)}
+            renderFront={c => <CharDisplay char={wordForm(c)} size={72} />}
+            renderBack={c => (
+              <InlineReveal
+                t={t}
+                kana={c.kanji ? c.kana : null}
+                main={<MeaningDisplay meaning={c.meaning} size={28} color="var(--accent2)" center={false} />}
+              />
+            )}
+            onExit={() => setReviewing(false)}
+          />
+        </div>
       </div>
     )
   }

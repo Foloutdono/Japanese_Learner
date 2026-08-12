@@ -13,7 +13,8 @@ import LevelSelector from '../components/LevelSelector'
 import ModeSelector from '../components/ModeSelector'
 import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
-import { grammarModePicker } from '../components/quizModes'
+import ReviewDeck from '../components/ReviewDeck'
+import { grammarModePicker, reviewMode } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
 import { useCardSession } from '../hooks/useCardSession'
 
@@ -36,6 +37,9 @@ export default function GrammarScreen({ session }) {
   const [xpToast, setXpToast]       = useState(null)
   const [cardStamp, setCardStamp]   = useState(null)
   const [locked, setLocked]         = useState(false)
+  const [reviewing, setReviewing]     = useState(false)
+  const [reviewCards, setReviewCards] = useState([])
+  const [reviewLoading, setReviewLoading] = useState(false)
 
   // Gates that must all clear before the deck is allowed to move on
   // to the next card: the review request itself, plus whichever of
@@ -109,6 +113,19 @@ export default function GrammarScreen({ session }) {
     setLevel(lvl)
     setMode(m)
     loadProgress(lvl, m)
+  }
+
+  // Fetches the full set of already-studied cards once — see
+  // ReviewDeck for why this doesn't go through useCardSession (no due
+  // queue, no refill, just a fixed list to flip through).
+  function startReview() {
+    setReviewing(true)
+    setReviewLoading(true)
+    apiFetch(`/api/grammar/review-cards?level=${encodeURIComponent(level)}`, session)
+      .then(r => r.json())
+      .then(data => setReviewCards(data.cards ?? []))
+      .catch(() => setReviewCards([]))
+      .finally(() => setReviewLoading(false))
   }
 
   // advance() only ever runs once every gate above has cleared — see
@@ -207,13 +224,45 @@ export default function GrammarScreen({ session }) {
   }
 
   // ── Mode selection ──
-  if (!mode) {
+  if (!mode && !reviewing) {
     return (
       <div className="screen">
         <TopBar onBack={() => setLevel(null)} title={`${t.grammarTitle} ${level}`} autoHide />
         <SelectionScreen>
-          <ModeSelector modes={MODES} onSelect={m => startSession(level, m)} title={t.selectMode} />
+          <ModeSelector
+            modes={[...MODES, reviewMode(t)]}
+            onSelect={m => (m === 'review' ? startReview() : startSession(level, m))}
+            title={t.selectMode}
+          />
         </SelectionScreen>
+      </div>
+    )
+  }
+
+  // ── Review (self-paced, ungraded browse of already-studied cards) ──
+  if (reviewing) {
+    return (
+      <div className="screen">
+        <TopBar onBack={() => setReviewing(false)} title={`${t.grammarTitle} ${level} — ${t.modeReview}`} autoHide />
+        <div className="container quiz-area">
+          <ReviewDeck
+            cards={reviewCards}
+            loading={reviewLoading}
+            t={t}
+            session={session}
+            renderFront={c => <div className="grammar-glyph">{c.grammar}</div>}
+            renderBack={c => (
+              <div>
+                <div className="grammar-glyph">{c.grammar}</div>
+                <div className="grammar-meaning"><GlossList meaning={c.meaning} /></div>
+                {c.explanation && (
+                  <div className="review-grammar-explanation">{c.explanation}</div>
+                )}
+              </div>
+            )}
+            onExit={() => setReviewing(false)}
+          />
+        </div>
       </div>
     )
   }

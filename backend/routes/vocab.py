@@ -7,7 +7,7 @@ from srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
-from quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO
+from quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO, VOCAB_MODES
 from mcq import pick_distractors
 from pydantic import BaseModel
 
@@ -199,6 +199,45 @@ def get_vocab_cards(level: str, mode: str, lang: str = "fr", count: int = 10, ex
         if level not in VOCAB_BY_LEVEL:
             return {"error": "Unknown level"}
         return {"error": "Invalid mode"}
+    return {"cards": cards}
+
+
+@router.get("/api/vocab/review-cards")
+def get_vocab_review_cards(level: str, lang: str = "fr", user_id: str = Depends(get_user_id)):
+    """
+    Every card in this level the user has already studied, in ANY mode
+    (qcm/flashcard, either direction) — not just due ones — for a
+    self-paced, ungraded browse of "words I already know" instead of
+    an SRS-driven session. `stage` is the most advanced stage reached
+    across those modes — see kana.py's own review-cards endpoint for
+    the full rationale (mirrored here).
+    """
+    vocab_list = VOCAB_BY_LEVEL.get(level)
+    if not vocab_list:
+        return {"error": "Unknown level"}
+
+    raw_ids  = [vocab_to_id(w, level) for w in vocab_list]
+    card_ids = prefixed(raw_ids, user_id)
+    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in VOCAB_MODES}
+
+    cards = []
+    for word, card_id in zip(vocab_list, card_ids):
+        stages = [per_mode_states[m].get(card_id, "new") for m in VOCAB_MODES]
+        stage = "mastered" if "mastered" in stages else "learning" if "learning" in stages else "new"
+        if stage == "new":
+            continue
+        cards.append({
+            "card_id": vocab_to_id(word, level),
+            "kanji":   word.get("kanji", ""),
+            "kana":    word.get("kana", ""),
+            "meaning": get_meaning(word, lang, FR_MAP),
+            "stage":   stage,
+        })
+
+    logger.info(
+        "vocab review request level=%s user_id=%s studied=%d/%d",
+        level, user_id, len(cards), len(vocab_list),
+    )
     return {"cards": cards}
 
 

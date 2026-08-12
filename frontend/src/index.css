@@ -1788,6 +1788,30 @@ input:focus { border-color: var(--accent2); }
   display: inline-block;
 }
 
+/* ── Review deck (self-paced, ungraded browse) ─────────────
+   Counter + prev/next nav for ReviewDeck.jsx — sits where
+   DeckProgress/RatingBar would in the graded flow, but there's no bar
+   to show (nothing due, no new/learning/mastered split to track) and
+   no rating to collect, just a position in a fixed list. */
+.review-deck__counter {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.review-deck__nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.review-deck__nav .btn-panel:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .reading-group { margin-bottom: 10px; }
 
 .reading-group__label {
@@ -6042,6 +6066,16 @@ input:focus { border-color: var(--accent2); }
 .grammar-hint { color: var(--text-secondary); font-size: 14px; margin-top: 8px; }
 .grammar-reveal-hint { font-size: 15px; color: var(--text-secondary); margin-top: 8px; }
 .grammar-meaning { font-size: 20px; color: var(--success); margin-top: 12px; }
+
+/* Grammar's review-deck back face only (see GrammarScreen.jsx) — the
+   graded flashcard mode never shows `explanation` at all today, so
+   there's no existing style for it to match. */
+.review-grammar-explanation {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 12px;
+  line-height: 1.5;
+}
 
 .grammar-fill-example {
   background: var(--bg-card);

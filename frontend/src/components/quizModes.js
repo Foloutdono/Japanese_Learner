@@ -74,6 +74,21 @@ export function grammarModePicker(t) {
   ]
 }
 
+// "Review your cards" — a self-paced, ungraded browse over cards
+// already studied in this deck (see the backend's *_review_cards
+// endpoints — get_kana_review_cards etc.), not one of the graded
+// modes above. Deliberately kept out of KANA_MODE_KEYS/VOCAB_MODE_KEYS/
+// etc.: those feed format/direction lookups (QCM_FLASHCARD_MODES on
+// the backend, allModeMeta on the frontend) that assume every mode key
+// is a gradable quiz format, which "review" isn't. Screens append this
+// entry to their own mode list right before handing it to
+// ModeSelector, and special-case the 'review' key in onSelect instead
+// of setting the normal `mode` state — see KanaScreen.jsx for the
+// pattern.
+export function reviewMode(t) {
+  return { key: 'review', label: t.modeReview, desc: t.modeReviewDesc }
+}
+
 // Short [key, label] pairs for the compact Stats grid — same keys as
 // above, terser text to fit a small card. Reuses modeQCM/modeFlashcard/
 // meaning rather than its own hardcoded strings, so this stops being

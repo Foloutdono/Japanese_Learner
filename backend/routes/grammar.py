@@ -216,6 +216,45 @@ def get_grammar_cards(level: str, mode: str = "flashcard", count: int = 10, excl
     return {"cards": cards}
 
 
+@router.get("/api/grammar/review-cards")
+def get_grammar_review_cards(level: str, user_id: str = Depends(get_user_id)):
+    """
+    Every card in this level the user has already studied, in ANY mode
+    (flashcard/mcq/fill) — not just due ones — for a self-paced,
+    ungraded browse of "grammar points I already know" instead of an
+    SRS-driven session. `stage` is the most advanced stage reached
+    across those modes — see kana.py's own review-cards endpoint for
+    the full rationale (mirrored here).
+    """
+    grammar_list = GRAMMAR_BY_LEVEL.get(level)
+    if not grammar_list:
+        return {"error": "Unknown level"}
+
+    raw_ids  = [grammar_to_id(g, level) for g in grammar_list]
+    card_ids = prefixed(raw_ids, user_id)
+    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in GRAMMAR_MODES}
+
+    cards = []
+    for entry, card_id in zip(grammar_list, card_ids):
+        stages = [per_mode_states[m].get(card_id, "new") for m in GRAMMAR_MODES]
+        stage = "mastered" if "mastered" in stages else "learning" if "learning" in stages else "new"
+        if stage == "new":
+            continue
+        cards.append({
+            "card_id":     grammar_to_id(entry, level),
+            "grammar":     entry["grammar"],
+            "meaning":     entry["meaning"],
+            "explanation": entry["explanation"],
+            "stage":       stage,
+        })
+
+    logger.info(
+        "grammar review request level=%s user_id=%s studied=%d/%d",
+        level, user_id, len(cards), len(grammar_list),
+    )
+    return {"cards": cards}
+
+
 @router.post("/api/grammar/review")
 def post_grammar_review(payload: ReviewPayload,
                         user_id: str = Depends(get_user_id)):

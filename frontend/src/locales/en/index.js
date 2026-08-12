@@ -223,6 +223,15 @@ const quiz = {
   modeQcmGrammarDesc:  'The grammar rule is shown, choose the meaning',
   modeFillGrammarDesc: 'The grammar rule is shown, fill in the missing word(s)',
 
+  // "Review your cards" — a self-paced, ungraded browse over cards
+  // already studied in this deck (see ReviewDeck.jsx). Appended to
+  // every mode picker alongside modeQCM/modeFlashcard/etc.
+  modeReview:        'Review',
+  modeReviewDesc:    'Flip through the cards you already know, at your own pace — no grading',
+  reviewEmpty:       "You haven't studied any of these cards yet — come back after your first session.",
+  reviewPrev:        '‹ Previous',
+  reviewNext:        'Next ›',
+
   // Writing practice
   writingPractice:   '✏️ Practice writing this kanji',
   writingOn:         'Writing ON',
