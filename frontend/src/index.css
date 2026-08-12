@@ -5190,17 +5190,6 @@ input:focus { border-color: var(--accent2); }
   background: color-mix(in srgb, var(--syl-accent, var(--accent)) 22%, var(--bg-card-hover));
 }
 
-/* ── Progress, read off the chart itself ───────────────────
-   Each kana already carries its own SRS state (see card_stats in
-   dictionary.py); this shows it as a short bar seated inside the
-   cell's bottom edge, in the same two inks the seals use — vermillion
-   for learning, gold for mastered. An inset shadow rather than a real
-   border so it costs no layout and can't disturb the flush lattice
-   the cells sit in. 'new' is deliberately unmarked: an untouched
-   syllabary should look like a clean sheet, not a wall of markers. */
-.syllabary-cell--state-learning { box-shadow: inset 0 -3px 0 var(--state-learning); }
-.syllabary-cell--state-mastered { box-shadow: inset 0 -3px 0 var(--state-mastered); }
-
 .syllabary-cell__char {
   font-family: var(--font-jp);
   font-size: 27px;
@@ -5214,34 +5203,6 @@ input:focus { border-color: var(--accent2); }
   font-family: var(--font-display);
   letter-spacing: 0.04em;
 }
-
-/* Legend for the two marks above — the same swatch-plus-name pattern
-   DeckProgress uses, so the chart explains itself instead of leaving
-   two coloured bars unaccounted for. */
-.syllabary-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding-left: 2px;
-}
-.syllabary-legend__item {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.syllabary-legend__item::before {
-  content: '';
-  width: 14px;
-  height: 3px;
-  background: var(--legend-color);
-}
-.syllabary-legend__item--learning { --legend-color: var(--state-learning); }
-.syllabary-legend__item--mastered { --legend-color: var(--state-mastered); }
 
 .syllabary-nsolo-wrap {
   display: flex;

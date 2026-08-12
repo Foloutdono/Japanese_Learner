@@ -726,7 +726,7 @@ function SyllabaryTable({ rows, title, byGroup, selected, setSelected }) {
 										key={v}
 										type="button"
 										onClick={() => setSelected(entry)}
-										className={`syllabary-cell syllabary-cell--kana syllabary-cell--state-${entry.status?.status ?? 'new'}${isSelected ? ' syllabary-cell--selected' : ''}`}
+										className={`syllabary-cell syllabary-cell--kana${isSelected ? ' syllabary-cell--selected' : ''}`}
 									>
 										<span className="syllabary-cell__char">{entry.kana}</span>
 										<span className="syllabary-cell__romaji">{entry.romaji}</span>
@@ -775,7 +775,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 							<button
 								type="button"
 								onClick={() => setSelected(nSolo)}
-								className={`syllabary-cell syllabary-cell--kana syllabary-cell--nsolo syllabary-cell--state-${nSolo.status?.status ?? 'new'}${selected && entryKey(selected) === entryKey(nSolo) ? ' syllabary-cell--selected' : ''}`}
+								className={`syllabary-cell syllabary-cell--kana syllabary-cell--nsolo${selected && entryKey(selected) === entryKey(nSolo) ? ' syllabary-cell--selected' : ''}`}
 							>
 								<span className="syllabary-cell__char">{nSolo.kana}</span>
 								<span className="syllabary-cell__romaji">{nSolo.romaji}</span>
@@ -790,17 +790,6 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 						selected={selected}
 						setSelected={setSelected}
 					/>
-
-					{/* What the underlines on the cells above mean. The chart
-					    already knew each kana's SRS state (every entry carries
-					    its own `status` — see card_stats in dictionary.py) but
-					    had no way to show it, so a syllabary you'd half learned
-					    looked identical to one you'd never opened. Same two
-					    inks the seals use everywhere else in the app. */}
-					<div className="syllabary-legend">
-						<span className="syllabary-legend__item syllabary-legend__item--learning">{t.learning}</span>
-						<span className="syllabary-legend__item syllabary-legend__item--mastered">{t.mastered}</span>
-					</div>
 				</div>
 			</div>
 
