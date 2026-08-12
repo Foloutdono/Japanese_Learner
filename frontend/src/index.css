@@ -4964,19 +4964,26 @@ input:focus { border-color: var(--accent2); }
   border: 3px solid var(--border);
 }
 
+/* One index card. The two bits of metadata (level, SRS seal) are
+   pinned to the top corners — out of the flow entirely — so the
+   middle of the card is nothing but headword, reading and meaning,
+   read straight down the centre in that order. They used to sit in
+   that same flow, which put a level chip between the meaning and the
+   next card's edge and gave every card a lopsided fourth line. */
 .dict-entry-card {
   position: relative;
   background: var(--bg-card);
   border: none;
   border-radius: 0;
-  padding: 22px 12px 18px;
+  padding: 30px 12px 20px;
   text-align: center;
   cursor: pointer;
   transition: background 0.15s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  gap: 6px;
 }
 .dict-entry-card:hover { background: var(--bg-card-hover); }
 .dict-entry-card--selected,
@@ -4988,9 +4995,21 @@ input:focus { border-color: var(--accent2); }
   font-size: 38px;
   font-family: var(--font-jp);
   line-height: 1;
-  margin-top: 4px;
 }
-.dict-entry-card__kana { font-size: 14px; color: var(--text-secondary); font-family: var(--font-jp); }
+.dict-entry-card__kana {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: var(--font-jp);
+  letter-spacing: 0.02em;
+  /* A two-token reading ("サン・やま", see shortKana) is longer than the
+     old three-character slice ever was — clip it rather than let it
+     wrap and shove the meaning line out of alignment with the cards
+     either side of it. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .dict-entry-card__meaning {
   font-size: 14px;
   color: var(--text-primary);
@@ -5000,16 +5019,30 @@ input:focus { border-color: var(--accent2); }
   width: 100%;
 }
 
-/* Corner seal shrinks a touch on the index card — .stage-badge's own
-   clamp() already scales it down on narrow viewports, but a card this
-   small needs a lower ceiling than the full quiz-card corner size.
-   Stays inside the card's own padding, same as the base rule. */
+.dict-entry-card .dict-level-badge {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+}
+
+/* At card size the seal drops its pressed-in shadow and softens its
+   edges: the inset highlight and a crisp 65% border are legible
+   detail on a quiz card's 32px stamp, but at 22px they collapse into
+   a hard little box that pulls the eye off the character. What's left
+   is a wash of the seal's ink and the glyph sitting in it — an
+   impression on the card rather than a chip stuck to it. */
 .dict-entry-card .stage-badge {
-  width: clamp(18px, 5vw, 24px);
-  height: clamp(18px, 5vw, 24px);
-  font-size: clamp(10px, 2.2vw, 12px);
-  top: 6px;
-  right: 6px;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  top: 5px;
+  right: 5px;
+  background: color-mix(in srgb, var(--seal-color) 10%, transparent);
+  border-color: color-mix(in srgb, var(--seal-color) 38%, transparent);
+  box-shadow: none;
+}
+.dict-entry-card .stage-badge--mastered {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--seal-color) 13%, transparent);
 }
 
 /* Same reasoning as .dict-radical-filler: a ragged last row of entry
@@ -5121,9 +5154,20 @@ input:focus { border-color: var(--accent2); }
   background: color-mix(in srgb, var(--syl-accent, var(--accent)) 22%, var(--bg-card-hover));
 }
 
+/* ── Progress, read off the chart itself ───────────────────
+   Each kana already carries its own SRS state (see card_stats in
+   dictionary.py); this shows it as a short bar seated inside the
+   cell's bottom edge, in the same two inks the seals use — vermillion
+   for learning, gold for mastered. An inset shadow rather than a real
+   border so it costs no layout and can't disturb the flush lattice
+   the cells sit in. 'new' is deliberately unmarked: an untouched
+   syllabary should look like a clean sheet, not a wall of markers. */
+.syllabary-cell--state-learning { box-shadow: inset 0 -3px 0 var(--state-learning); }
+.syllabary-cell--state-mastered { box-shadow: inset 0 -3px 0 var(--state-mastered); }
+
 .syllabary-cell__char {
   font-family: var(--font-jp);
-  font-size: 26px;
+  font-size: 27px;
   line-height: 1;
   color: var(--text-primary);
 }
@@ -5132,7 +5176,36 @@ input:focus { border-color: var(--accent2); }
   font-size: 11px;
   color: var(--text-secondary);
   font-family: var(--font-display);
+  letter-spacing: 0.04em;
 }
+
+/* Legend for the two marks above — the same swatch-plus-name pattern
+   DeckProgress uses, so the chart explains itself instead of leaving
+   two coloured bars unaccounted for. */
+.syllabary-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding-left: 2px;
+}
+.syllabary-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.syllabary-legend__item::before {
+  content: '';
+  width: 14px;
+  height: 3px;
+  background: var(--legend-color);
+}
+.syllabary-legend__item--learning { --legend-color: var(--state-learning); }
+.syllabary-legend__item--mastered { --legend-color: var(--state-mastered); }
 
 .syllabary-nsolo-wrap {
   display: flex;
@@ -5256,12 +5329,12 @@ input:focus { border-color: var(--accent2); }
    label competing with the character. */
 .dict-detail__type-mark {
   position: absolute;
-  top: 50%;
+  top: 60%;
   left: 14px;
   transform: translateY(-50%);
   writing-mode: vertical-rl;
   font-family: var(--font-jp);
-  font-size: 13px;
+  font-size: 25px;
   letter-spacing: 0.34em;
   color: var(--type-color, var(--accent));
   opacity: 0.75;
@@ -5783,22 +5856,25 @@ input:focus { border-color: var(--accent2); }
   text-transform: none;
 }
 
-/* Quiet index-tab: a coloured spine stroke on the left, a lightly
-   tinted ground behind it, coloured text — the level's colour still
-   carries the difficulty signal (N5 calmest -> N1 most intense) but
-   as a small library-card label instead of a loud solid-fill pill. */
+/* Quiet tinted tag: the level's own colour as a wash behind its own
+   text, and nothing else — no spine stroke, no border, no fill. The
+   colour still carries the difficulty signal (N5 calmest -> N1 most
+   intense) without the badge becoming a piece of furniture on a card
+   that already has a headword and a seal competing for attention.
+   The wash mixes toward `transparent` rather than a named surface, so
+   the same tag composites correctly over a card, over the sumi
+   identity plate, and over either theme's paper. */
 .dict-level-badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px 3px 8px;
+  padding: 3px 9px;
   border-radius: 4px;
-  border-left: 3px solid var(--level-color, var(--accent3));
-  background: color-mix(in srgb, var(--level-color, var(--accent3)) 16%, var(--bg-card));
+  background: color-mix(in srgb, var(--level-color, var(--accent3)) 18%, transparent);
   color: var(--level-color, var(--accent3));
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
 }
 
 /* ── Shared "primary purple" action button ────────────────── */
@@ -6972,10 +7048,6 @@ input:focus { border-color: var(--accent2); }
   }
   /* Tucked in tighter next to the headword at this width, and out of
      the way of the safe-area inset above. */
-  .dict-detail__type-mark {
-    left: 8px;
-    font-size: 11px;
-  }
   .dict-detail__body {
     flex: 1;
     overflow-y: auto;

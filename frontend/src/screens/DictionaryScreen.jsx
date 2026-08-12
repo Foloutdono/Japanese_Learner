@@ -1,16 +1,15 @@
-import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, Fragment } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
-import { StrokeOrderAnimation } from '../components/StrokeOrderAnimation'
+import { splitReadingTokens } from '../components/Readings'
 import {
 	TYPE_META, isKanaType, entryKey,
 	SearchIcon, DictionaryDetail, LevelBadge,
 } from '../components/DictionaryDetail'
 import { StageBadge } from '../components/StageBadge'
 
-const API_BASE = import.meta.env.VITE_API_URL || ''
 const LIMIT = 50
 
 export default function DictionaryScreen({ session }) {
@@ -528,8 +527,25 @@ function shortMeaning(meaning) {
 
 function shortKana(kana, type) {
 	if (!kana || isKanaType(type)) return ''
-	const firstKana = kana.split(';')[0].trim()
-	return type === 'vocab' ? firstKana : Array.from(firstKana).slice(0, 3).join('')
+	if (type === 'vocab') return kana.split(';')[0].trim()
+	// Kanji: whole reading tokens, never a raw character slice. Cutting
+	// at a fixed character count used to sever a reading mid-token and
+	// leave the separator dangling — 山 showed "サン・", 語 showed
+	// "ゴ・か" — because '・' and the following reading's first
+	// character both count as characters like any other. Splitting on
+	// the readings themselves (the same helper <Readings> uses, so the
+	// two can't disagree about what a token is) and taking the first two
+	// gives a card the on'yomi and kun'yomi whole: "サン・セン".
+	//
+	// The '.'/'~' okurigana markers KANJIDIC2 carries (かた.る — the る
+	// is a suffix, not part of the kanji's own reading) are dropped for
+	// the card: it's a glance at how the character sounds, and the
+	// detail panel's own reading list keeps them for anyone who wants
+	// the precise form.
+	return splitReadingTokens(kana)
+		.slice(0, 2)
+		.map(token => token.replace(/[.~]/g, ''))
+		.join('・')
 }
 
 // Same idea as useRadicalColumns, but the results grid's width can also
@@ -711,7 +727,7 @@ function SyllabaryTable({ rows, title, byGroup, selected, setSelected }) {
 										key={v}
 										type="button"
 										onClick={() => setSelected(entry)}
-										className={`syllabary-cell syllabary-cell--kana${isSelected ? ' syllabary-cell--selected' : ''}`}
+										className={`syllabary-cell syllabary-cell--kana syllabary-cell--state-${entry.status?.status ?? 'new'}${isSelected ? ' syllabary-cell--selected' : ''}`}
 									>
 										<span className="syllabary-cell__char">{entry.kana}</span>
 										<span className="syllabary-cell__romaji">{entry.romaji}</span>
@@ -760,7 +776,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 							<button
 								type="button"
 								onClick={() => setSelected(nSolo)}
-								className={`syllabary-cell syllabary-cell--kana syllabary-cell--nsolo${selected && entryKey(selected) === entryKey(nSolo) ? ' syllabary-cell--selected' : ''}`}
+								className={`syllabary-cell syllabary-cell--kana syllabary-cell--nsolo syllabary-cell--state-${nSolo.status?.status ?? 'new'}${selected && entryKey(selected) === entryKey(nSolo) ? ' syllabary-cell--selected' : ''}`}
 							>
 								<span className="syllabary-cell__char">{nSolo.kana}</span>
 								<span className="syllabary-cell__romaji">{nSolo.romaji}</span>
@@ -775,6 +791,17 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 						selected={selected}
 						setSelected={setSelected}
 					/>
+
+					{/* What the underlines on the cells above mean. The chart
+					    already knew each kana's SRS state (every entry carries
+					    its own `status` — see card_stats in dictionary.py) but
+					    had no way to show it, so a syllabary you'd half learned
+					    looked identical to one you'd never opened. Same two
+					    inks the seals use everywhere else in the app. */}
+					<div className="syllabary-legend">
+						<span className="syllabary-legend__item syllabary-legend__item--learning">{t.learning}</span>
+						<span className="syllabary-legend__item syllabary-legend__item--mastered">{t.mastered}</span>
+					</div>
 				</div>
 			</div>
 
