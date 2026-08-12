@@ -4,8 +4,9 @@ import { TopBar } from '../components/TopBar'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { splitReadingTokens } from '../components/Readings'
+import { firstGloss } from '../components/gloss'
 import {
-	TYPE_META, isKanaType, entryKey, firstGloss,
+	TYPE_META, isKanaType, entryKey,
 	SearchIcon, DictionaryDetail, LevelBadge,
 } from '../components/DictionaryDetail'
 import { StageBadge } from '../components/StageBadge'

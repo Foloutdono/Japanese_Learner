@@ -8,6 +8,7 @@ import {
   MCQGrid, DoneMessage, DeckProgress,
   InlineReveal, Flashcard, MeaningDisplay, CharDisplay, RevealActions,
 } from '../components/QuizComponents'
+import { formatGlossLine } from '../components/gloss'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
 import { CardTransition } from '../components/CardTransition'
@@ -500,6 +501,7 @@ export default function KanjiScreen({ session }) {
               <MCQGrid
                 choices={card.choices.map(c => isKjToM ? c.meaning : c.kanji)}
                 correct={isKjToM ? card.meaning : card.kanji}
+                formatChoice={isKjToM ? formatGlossLine : undefined}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}
@@ -507,7 +509,7 @@ export default function KanjiScreen({ session }) {
             {mode === 'write' && card.kanji && (
               <DrawingQuiz
                 kanji={card.kanji}
-                meaning={card.meaning}
+                meaning={formatGlossLine(card.meaning)}
                 kana={card.kana}
                 onValidate={() => {
                   setAnswered(true)
@@ -522,7 +524,7 @@ export default function KanjiScreen({ session }) {
             {showDrawing && (
               <DrawingOverlay
                 kanji={card.kanji}
-                meaning={card.meaning}
+                meaning={formatGlossLine(card.meaning)}
                 onDone={() => {
                   setShowDrawing(false)
                   pendingGatesRef.current.delete('training')

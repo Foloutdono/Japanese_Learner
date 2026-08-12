@@ -5461,12 +5461,13 @@ input:focus { border-color: var(--accent2); }
 /* ── Gloss lists ───────────────────────────────────────────
    One meaning is really several synonymous glosses, and the decks
    disagree about the punctuation between them (see splitGlosses in
-   DictionaryDetail.jsx). They're split apart and re-rendered as real
+   components/gloss.jsx). They're split apart and re-rendered as real
    elements, joined by this middot — so a kanji's "; "-separated list
    and a vocab word's ","-separated one look identical on screen, and
    the separator recedes far enough that the words themselves are what
-   the eye picks up. */
-.dict-gloss__sep {
+   the eye picks up. Not dictionary-scoped: the quiz modes render their
+   card meanings through the same component. */
+.gloss__sep {
   margin: 0 0.45em;
   color: var(--text-secondary);
   opacity: 0.45;

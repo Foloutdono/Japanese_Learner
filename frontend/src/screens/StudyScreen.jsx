@@ -8,6 +8,7 @@ import {
   MCQGrid, DoneMessage, DeckProgress,
   InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
 } from '../components/QuizComponents'
+import { formatGlossLine, GlossList } from '../components/gloss'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
 import { CardTransition } from '../components/CardTransition'
@@ -459,7 +460,7 @@ export default function StudyScreen({ session }) {
         {c.format === 'flashcard' && (
           <Flashcard
             t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
-            front={<CharDisplay char={isKjToM ? wordForm(c) : c.meaning} size={72} />}
+            front={<CharDisplay char={isKjToM ? wordForm(c) : formatGlossLine(c.meaning)} size={72} />}
             back={
               <InlineReveal
                 t={t} kana={c.kanji ? c.kana : null} isLarge={isKjToM}
@@ -476,7 +477,7 @@ export default function StudyScreen({ session }) {
           <>
             <InlineReveal
               t={t} kana={c.kanji ? c.kana : null} revealed={answered}
-              main={isKjToM ? <CharDisplay char={wordForm(c)} size={72} /> : <CharDisplay char={c.meaning} size={72} />}
+              main={isKjToM ? <CharDisplay char={wordForm(c)} size={72} /> : <CharDisplay char={formatGlossLine(c.meaning)} size={72} />}
             />
             <RevealActions t={t} revealed={answered} resetKey={`${c.card_id}:${cardNonce}`}
               dictTerm={wordForm(c)} dictCategory="vocab" session={session}
@@ -492,7 +493,7 @@ export default function StudyScreen({ session }) {
       <PromptCard className="grammar-prompt">
         <div className="grammar-glyph">{c.grammar}</div>
         {mode === 'flashcard' && !flipped && <div className="grammar-hint">{t.revealMeaning}</div>}
-        {mode === 'flashcard' && flipped && <div className="grammar-meaning">{c.meaning}</div>}
+        {mode === 'flashcard' && flipped && <div className="grammar-meaning"><GlossList meaning={c.meaning} /></div>}
         {mode !== 'flashcard' && (
           <div className="grammar-reveal-hint">{mode === 'mcq' ? t.revealMeaning : t.revealSentence}</div>
         )}
@@ -569,6 +570,7 @@ export default function StudyScreen({ session }) {
                 Kanji/Vocab's {kanji,meaning} choice objects below. */}
             {card.source === 'builtin_grammar' && mode === 'mcq' && (
               <MCQGrid choices={card.choices} correct={card.meaning}
+                formatChoice={formatGlossLine}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
 
@@ -605,6 +607,7 @@ export default function StudyScreen({ session }) {
               <MCQGrid
                 choices={card.choices.map(c => isKjToM ? c.meaning : wordForm(c))}
                 correct={isKjToM ? card.meaning : wordForm(card)}
+                formatChoice={isKjToM ? formatGlossLine : undefined}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}
@@ -613,7 +616,7 @@ export default function StudyScreen({ session }) {
             {card.source === 'builtin_kanji' && mode === 'write' && card.kanji && (
               <DrawingQuiz
                 kanji={card.kanji}
-                meaning={card.meaning}
+                meaning={formatGlossLine(card.meaning)}
                 kana={card.kana}
                 onValidate={() => {
                   setAnswered(true)
@@ -628,7 +631,7 @@ export default function StudyScreen({ session }) {
             {showDrawing && (
               <DrawingOverlay
                 kanji={card.kanji}
-                meaning={card.meaning}
+                meaning={formatGlossLine(card.meaning)}
                 onDone={() => {
                   setShowDrawing(false)
                   pendingGatesRef.current.delete('training')

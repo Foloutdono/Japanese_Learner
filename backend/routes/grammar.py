@@ -6,6 +6,7 @@ from srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
 from quiz_modes import GRAMMAR_MODES
+from mcq import pick_distractors
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -85,12 +86,11 @@ def get_grammar_levels():
 
 def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], mode: str,
                          stage: str | None = None, preview: dict[int, dict] | None = None) -> dict:
-    # MCQ: choose 3 wrong meanings + 1 correct
-    all_meanings = [
-        g["meaning"] for g in grammar_list
-        if g["meaning"] != entry["meaning"]
-    ]
-    choices = random.sample(all_meanings, min(3, len(all_meanings))) + [entry["meaning"]]
+    # MCQ: choose 3 wrong meanings + 1 correct. The candidates already
+    # *are* meanings here, hence the identity accessor.
+    choices = pick_distractors(
+        [g["meaning"] for g in grammar_list], lambda m: m, entry["meaning"],
+    ) + [entry["meaning"]]
     random.shuffle(choices)
 
     # Fill-in: pick a random example and blank out the grammar point

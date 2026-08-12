@@ -30,6 +30,7 @@ from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO
+from mcq import pick_distractors
 import theme_data
 from routes.vocab import _build_review_preview, MAX_BATCH  # reuse, don't duplicate
 
@@ -80,8 +81,9 @@ def _build_theme_card(card_id: str, entry: dict, pool: list[dict], mode: str, la
     }
 
     if fmt == "qcm":
-        all_candidates = [e for e in pool if _entry_meaning(e, lang) != meaning]
-        choice_entries = random.sample(all_candidates, min(3, len(all_candidates))) + [entry]
+        choice_entries = pick_distractors(
+            pool, lambda e: _entry_meaning(e, lang), meaning,
+        ) + [entry]
         random.shuffle(choice_entries)
         payload["choices"] = [
             {"kanji": c["kanji"], "kana": c["kana"], "meaning": _entry_meaning(c, lang)}

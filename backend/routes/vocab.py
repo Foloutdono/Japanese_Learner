@@ -8,6 +8,7 @@ from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO
+from mcq import pick_distractors
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -100,8 +101,9 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], mode: str
     }
 
     if fmt == "qcm":
-        all_candidates = [w for w in vocab_list if get_meaning(w, lang, FR_MAP) != meaning]
-        choice_entries = random.sample(all_candidates, min(3, len(all_candidates))) + [word]
+        choice_entries = pick_distractors(
+            vocab_list, lambda w: get_meaning(w, lang, FR_MAP), meaning,
+        ) + [word]
         random.shuffle(choice_entries)
         payload["choices"] = [
             {

@@ -5,6 +5,7 @@ import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import RatingBar from '../components/RatingBar'
 import { MCQGrid, DoneMessage, DeckProgress } from '../components/QuizComponents'
+import { formatGlossLine, GlossList } from '../components/gloss'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
 import { CardTransition } from '../components/CardTransition'
@@ -249,7 +250,7 @@ export default function GrammarScreen({ session }) {
                   <div className="grammar-hint">{t.revealMeaning}</div>
                 )}
                 {mode === 'flashcard' && flipped && (
-                  <div className="grammar-meaning">{card.meaning}</div>
+                  <div className="grammar-meaning"><GlossList meaning={card.meaning} /></div>
                 )}
                 {mode !== 'flashcard' && (
                   <div className="grammar-reveal-hint">
@@ -284,6 +285,7 @@ export default function GrammarScreen({ session }) {
             {/* MCQ */}
             {mode === 'mcq' && (
               <MCQGrid choices={card.choices} correct={card.meaning}
+                formatChoice={formatGlossLine}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
 

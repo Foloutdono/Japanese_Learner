@@ -36,6 +36,7 @@ from translations import get_meaning
 from kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
 from quiz_modes import QCM_FLASHCARD_MODES, KANJI_MODES
+from mcq import pick_distractors
 
 import frequency_data as freq
 from frequency_store_instance import frequency_store
@@ -122,8 +123,9 @@ def _build_card(domain: str, raw_id: str, entry: dict, pool: list[dict], mode: s
     payload["direction"] = direction
 
     if fmt == "qcm":
-        all_candidates = [e for e in pool if get_meaning(e, lang, fr_map) != meaning]
-        choice_entries = random.sample(all_candidates, min(3, len(all_candidates))) + [entry]
+        choice_entries = pick_distractors(
+            pool, lambda e: get_meaning(e, lang, fr_map), meaning,
+        ) + [entry]
         random.shuffle(choice_entries)
         if domain == "kanji":
             payload["choices"] = [

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 import { playClick } from './sound'
 import { Readings, ReadingGroup } from './Readings'
+import { glossParts } from './gloss'
 import { Loading } from './Loading'
 import { DictionaryLookupSheet, SearchIcon, SpeakIcon, speakJapanese } from './DictionaryDetail'
 
@@ -48,7 +49,13 @@ export function CharDisplay({ char, size = 110 }) {
 // An editorial hairline row, not a boxed button — the same visual
 // language as LevelSelector/ModeSelector, so the choice always reads
 // as "pick a row from a list" everywhere in the app, quiz included.
-export function MCQButton({ choice, correct, selected, answered, onClick, index, cramped }) {
+// `display` is what the row shows; `choice` stays the raw value every
+// comparison below runs on. Keeping those separate is deliberate: a
+// meaning choice gets normalised for reading (see formatGlossLine),
+// and if that normalised text were also what "did the user pick the
+// right answer" compared, then any two options whose raw strings
+// differed only in punctuation would start grading as the same answer.
+export function MCQButton({ choice, display, correct, selected, answered, onClick, index, cramped }) {
   const isCorrect  = choice === correct
   const isSelected = choice === selected
   // A filler is any choice that isn't the right answer and wasn't the
@@ -74,7 +81,7 @@ export function MCQButton({ choice, correct, selected, answered, onClick, index,
     >
       <span className="mcq-row__accent" aria-hidden="true" />
       <span className="mcq-row__index">{String(index + 1).padStart(2, '0')}</span>
-      <span className="mcq-row__text">{choice}</span>
+      <span className="mcq-row__text">{display ?? choice}</span>
     </button>
   )
 }
@@ -86,7 +93,13 @@ export function MCQButton({ choice, correct, selected, answered, onClick, index,
 const CHOICE_KEY_INDEX = { '1': 0, '2': 1, '3': 2, '4': 3, '&': 0, 'é': 1, '"': 2, "'": 3 }
 
 // ── MCQ choices list ───────────────────────────────────────
-export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
+// `formatChoice` is an optional display transform for the choice text
+// — screens whose options are meanings pass formatGlossLine so a
+// packed "to appear,to leave" reads properly, while screens whose
+// options are kanji or romaji pass nothing and are left untouched.
+// Only the rendered text changes; `choices`/`correct` stay raw for
+// keying and grading (see MCQButton).
+export function MCQGrid({ choices, correct, selected, answered, onAnswer, formatChoice }) {
   const cramped = useIsCramped()
 
   // One shared entry point for an answer, whether it came from a
@@ -118,6 +131,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer }) {
         <MCQButton
           key={choice}
           choice={choice}
+          display={formatChoice ? formatChoice(choice) : choice}
           correct={correct}
           selected={selected}
           answered={answered}
@@ -255,20 +269,23 @@ export function DeckProgress({ stats }) {
 export { Readings, ReadingGroup }
 
 // ── Meaning display ────────────────────────────────────────
-// A card's `meaning` field is often several synonyms separated by
-// commas/semicolons (e.g. "to eat, to have a meal"). Rather than
-// showing them all at the same weight, the first one — the primary
-// meaning — is rendered larger and highlighted; the rest sit below it
-// as smaller, muted secondary meanings.
-function splitMeaningTokens(meaning) {
-  return (meaning || '')
-    .split(/[,;]/)
-    .map(s => s.trim())
-    .filter(Boolean)
-}
-
+// A card's `meaning` field is several synonymous glosses packed into
+// one string. Rather than showing them all at the same weight, the
+// first one — the primary meaning — is rendered larger and
+// highlighted; the rest sit below it as smaller, muted secondary
+// meanings.
+//
+// Splitting is delegated to glossParts (see gloss.jsx). This used to
+// split on /[,;]/ directly, which got the common case right but broke
+// on the two things that helper exists to handle: a gloss carrying its
+// own comma inside a qualifier ("to take (seat, position)" came out as
+// the two fragments "to take (seat" and "position)"), and the leading
+// JMdict code groups some deck entries still carry ("(v5r,vi) to
+// relieve" led with a bare "(v5r" as the headline meaning). It also
+// now shares the dictionary's sentence-casing, so the same word reads
+// the same way in a quiz as it does in its dictionary entry.
 export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', center = true }) {
-  const [primary, ...rest] = splitMeaningTokens(meaning)
+  const [primary, ...rest] = glossParts(meaning)
   if (!primary) return null
 
   const style = { '--meaning-size': `${size}px`, '--meaning-color': color }
@@ -277,7 +294,7 @@ export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', c
     <div className={`meaning-display${center ? ' meaning-display--center' : ''}`} style={style}>
       <div className="meaning-display__primary">{primary}</div>
       {rest.length > 0 && (
-        <div className="meaning-display__secondary">{rest.join(', ')}</div>
+        <div className="meaning-display__secondary">{rest.join(' · ')}</div>
       )}
     </div>
   )

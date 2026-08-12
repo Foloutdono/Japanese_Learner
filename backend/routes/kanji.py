@@ -8,6 +8,7 @@ from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from translations import get_meaning
 from kanji_meanings import KANJI_FR
 from quiz_modes import QCM_FLASHCARD_MODES, KANJI_MODES
+from mcq import pick_distractors
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -117,8 +118,9 @@ def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], mode: st
     payload["direction"] = direction
 
     if fmt == "qcm":
-        all_candidates = [k for k in kanji_list if get_meaning(k, lang, FR_MAP) != meaning]
-        choice_entries = random.sample(all_candidates, min(3, len(all_candidates))) + [entry]
+        choice_entries = pick_distractors(
+            kanji_list, lambda k: get_meaning(k, lang, FR_MAP), meaning,
+        ) + [entry]
         random.shuffle(choice_entries)
         payload["choices"] = [
             {"kanji": c.get("kanji", ""), "meaning": get_meaning(c, lang, FR_MAP)}

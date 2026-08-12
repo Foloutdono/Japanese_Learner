@@ -8,6 +8,7 @@ import {
   MCQGrid, DoneMessage, DeckProgress,
   InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
 } from '../components/QuizComponents'
+import { formatGlossLine } from '../components/gloss'
 import { Loading } from '../components/Loading'
 import { XpToast } from '../components/XpToast'
 import { CardTransition } from '../components/CardTransition'
@@ -469,7 +470,7 @@ export default function VocabScreen({ session }) {
                     resetKey={card.card_id}
                     onReveal={onFlashcardReveal}
                     front={
-                      <CharDisplay char={isKjToM ? wordForm(card) : card.meaning} size={72} />
+                      <CharDisplay char={isKjToM ? wordForm(card) : formatGlossLine(card.meaning)} size={72} />
                     }
                     back={
                       <InlineReveal
@@ -499,7 +500,7 @@ export default function VocabScreen({ session }) {
                       main={
                         isKjToM
                           ? <CharDisplay char={wordForm(card)} size={72} />
-                          : <CharDisplay char={card.meaning} size={72} />
+                          : <CharDisplay char={formatGlossLine(card.meaning)} size={72} />
                       }
                     />
                     <RevealActions
@@ -520,6 +521,7 @@ export default function VocabScreen({ session }) {
               <MCQGrid
                 choices={card.choices.map(c => isKjToM ? c.meaning : wordForm(c))}
                 correct={isKjToM ? card.meaning : wordForm(card)}
+                formatChoice={isKjToM ? formatGlossLine : undefined}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}
