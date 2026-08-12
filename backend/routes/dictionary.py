@@ -14,7 +14,7 @@ from kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
 from auth import get_user_id
 from srs_instance import srs
-from card_lookup import card_stats, VOCAB_STATUS_MODE, KANJI_STATUS_MODE
+from card_lookup import card_stats, VOCAB_STATUS_MODE, KANJI_STATUS_MODE, is_kanji
 
 router = APIRouter()
 
@@ -64,6 +64,64 @@ def _build_app_radical_index():
 
 
 _APP_RADICAL_KANJI = _build_app_radical_index()
+
+# Same ordering rule card_lookup._level_rank uses (lower = more common) —
+# duplicated here rather than imported since that name is private to
+# card_lookup.py.
+_LEVEL_ORDER = {"N5": 0, "N4": 1, "N3": 2, "N2": 3, "N1": 4}
+
+
+def _level_rank(level: str) -> int:
+    return _LEVEL_ORDER.get(level, 99)
+
+
+def _build_kanji_to_vocab_index():
+    """
+    kanji char -> [(level, vocab_entry), ...], for every word in the app's
+    own vocab deck (VOCAB_BY_LEVEL) whose kanji field contains that
+    character. Powers each kanji's "used in these words" example list (see
+    _vocab_examples_for_kanji) — built once at import time, same reasoning
+    as _build_app_radical_index above.
+    """
+    index = defaultdict(list)
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for w in vocab_list:
+            chars = {c for c in w.get("kanji", "") if is_kanji(c)}
+            for char in chars:
+                index[char].append((level, w))
+    return index
+
+
+_KANJI_TO_VOCAB = _build_kanji_to_vocab_index()
+
+_MAX_KANJI_VOCAB_EXAMPLES = 4
+
+
+def _vocab_examples_for_kanji(char: str, lang: str) -> list[dict]:
+    """Up to _MAX_KANJI_VOCAB_EXAMPLES real vocab words containing `char`,
+    most-common level first. Multi-character compounds are listed before
+    the bare single-character word itself — a kanji's card should show how
+    it combines with others, not just repeat itself."""
+    candidates = _KANJI_TO_VOCAB.get(char, [])
+    compounds = sorted((c for c in candidates if len(c[1].get("kanji", "")) > 1), key=lambda c: _level_rank(c[0]))
+    singles   = sorted((c for c in candidates if len(c[1].get("kanji", "")) <= 1), key=lambda c: _level_rank(c[0]))
+
+    seen = set()
+    out = []
+    for level, w in compounds + singles:
+        key = (w.get("kanji", ""), w.get("kana", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({
+            "kanji":   w.get("kanji", ""),
+            "kana":    w.get("kana", ""),
+            "meaning": get_meaning(w, lang, VOCAB_FR_MAP),
+            "level":   level,
+        })
+        if len(out) >= _MAX_KANJI_VOCAB_EXAMPLES:
+            break
+    return out
 
 
 @router.get("/api/dictionary/radicals")
@@ -245,6 +303,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 "level":        level,
                 "svg_url":      f"/kanjivg/{codepoint}.svg",
                 "status":       card_stats(states, user_id, raw_id, KANJI_STATUS_MODE),
+                "vocab_examples": _vocab_examples_for_kanji(entry["kanji"], lang),
             })
         elif kind == "vocab":
             raw_id = vocab_to_id(entry, level)

@@ -6,8 +6,9 @@ import { useLang } from '../LangContext'
 import { StrokeOrderAnimation } from '../components/StrokeOrderAnimation'
 import {
 	TYPE_META, isKanaType, entryKey,
-	StatusBadge, SearchIcon, DictionaryDetail,
+	SearchIcon, DictionaryDetail, LevelBadge,
 } from '../components/DictionaryDetail'
+import { StageBadge } from '../components/StageBadge'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 const LIMIT = 50
@@ -216,6 +217,21 @@ export default function DictionaryScreen({ session }) {
 		fetchPage(0, char, 'kanji', null, char)
 	}
 
+	// Jump from a kanji's detail panel to one of the vocab words it
+	// appears in (see entry.vocab_examples) — the mirror image of
+	// jumpToKanji above: switches to the vocab tab, searches for that
+	// exact word, and auto-selects it once the search resolves.
+	function jumpToVocab(kanji) {
+		setCategory('vocab')
+		setMode('search')
+		setSelectedRadical(null)
+		setSelected(null)
+		setQuery(kanji)
+		setPage(0)
+		setHasMore(true)
+		fetchPage(0, kanji, 'vocab', null, kanji)
+	}
+
 	function loadMore() {
 		fetchPage(page + 1, query, category, selectedRadical)
 	}
@@ -349,6 +365,7 @@ export default function DictionaryScreen({ session }) {
 							isMobile={isMobile}
 							onRadicalClick={jumpToRadical}
 							onKanjiClick={jumpToKanji}
+							onVocabClick={jumpToVocab}
 							accentColor={TYPE_META[category]?.color}
 							t={t}
 						/>
@@ -366,6 +383,7 @@ export default function DictionaryScreen({ session }) {
 							sentinelRef={sentinelRef}
 							onRadicalClick={jumpToRadical}
 							onKanjiClick={jumpToKanji}
+							onVocabClick={jumpToVocab}
 							t={t}
 						/>
 					)
@@ -561,7 +579,7 @@ function ResultsFiller({ count, cols, glyph }) {
 
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
-	selected, setSelected, isMobile, sentinelRef, onRadicalClick, onKanjiClick, t,
+	selected, setSelected, isMobile, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, t,
 }) {
 	const [resultsGridRef, cols] = useResultsColumns()
 
@@ -600,10 +618,8 @@ function ResultsSection({
 									<div className="dict-entry-card__meaning">
 										{shortMeaning(entry.meaning)}
 									</div>
-									<div className="dict-entry-card__level">
-										{entry.level}
-									</div>
-									<StatusBadge state={entry.status?.state ?? 'new'} t={t} />
+									<LevelBadge level={entry.level} />
+									<StageBadge stage={entry.status?.status ?? 'new'} />
 								</div>
 							))}
 							<ResultsFiller count={results.length} cols={cols} glyph="語" />
@@ -640,7 +656,7 @@ function ResultsSection({
 						onClick={e => e.stopPropagation()}
 						className="dict-modal-content"
 					>
-						<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
+						<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick} />
 					</div>
 				</div>
 			)}
@@ -710,7 +726,7 @@ function SyllabaryTable({ rows, title, byGroup, selected, setSelected }) {
 	)
 }
 
-function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRadicalClick, onKanjiClick, accentColor, t }) {
+function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRadicalClick, onKanjiClick, onVocabClick, accentColor, t }) {
 	const byGroup = useMemo(() => {
 		const map = {}
 		results.forEach(e => { (map[e.group] ??= []).push(e) })
@@ -766,7 +782,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRa
 			{selected && (
 				<div onClick={() => setSelected(null)} className="dict-modal-overlay">
 					<div onClick={e => e.stopPropagation()} className="dict-modal-content">
-						<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} />
+						<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick} />
 					</div>
 				</div>
 			)}

@@ -333,7 +333,6 @@ button:focus-visible {
   border-radius: 0;
   color: var(--text-primary);
   text-align: left;
-  overflow: hidden;
 }
 
 .choice-row__accent {
@@ -3014,6 +3013,23 @@ input:focus { border-color: var(--accent2); }
   text-shadow: none;
 }
 
+/* Used where there's no card corner to strike into — e.g. the
+   dictionary detail panel's badge row (see .dict-detail__badges) —
+   same seal, laid out in flow next to the level tab instead of
+   floating absolutely over a positioned parent. */
+.stage-badge--inline {
+  position: static;
+  top: auto;
+  right: auto;
+  width: clamp(26px, 6vw, 34px);
+  height: clamp(26px, 6vw, 34px);
+  font-size: clamp(13px, 2.8vw, 16px);
+}
+.stage-badge--inline.stage-badge--mastered {
+  width: clamp(28px, 6.6vw, 38px);
+  height: clamp(28px, 6.6vw, 38px);
+}
+
 .card-stamp-overlay {
   position: absolute;
   inset: -10px;
@@ -4884,6 +4900,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .dict-entry-card {
+  position: relative;
   background: var(--bg-card);
   border: none;
   border-radius: 0;
@@ -4917,7 +4934,21 @@ input:focus { border-color: var(--accent2); }
   white-space: nowrap;
   width: 100%;
 }
-.dict-entry-card__level { font-size: 13px; color: var(--accent2); font-weight: 700; font-family: var(--font-display); letter-spacing: 0.03em; }
+
+/* Corner seal shrinks a touch on the index card — .stage-badge's own
+   clamp() already scales it down on narrow viewports, but a card this
+   small needs a lower ceiling than the full quiz-card corner size. */
+.dict-entry-card .stage-badge {
+  width: clamp(22px, 6vw, 28px);
+  height: clamp(22px, 6vw, 28px);
+  font-size: clamp(11px, 2.6vw, 14px);
+  top: -8px;
+  right: -6px;
+}
+.dict-entry-card .stage-badge--mastered {
+  width: clamp(24px, 6.6vw, 32px);
+  height: clamp(24px, 6.6vw, 32px);
+}
 
 /* Same reasoning as .dict-radical-filler: a ragged last row of entry
    cards would otherwise leave a bare patch of the lattice background
@@ -5184,12 +5215,12 @@ input:focus { border-color: var(--accent2); }
   --dict-block-gap: 20px;
 }
 
-/* The three badges deliberately use three different visual weights
-   (level = solid pill, type = hairline underline, status = quiet dot
-   — see each badge's own comment), but they still need one shared
-   row to sit in: centred baseline, even gap, and space before the
-   readings block below instead of the bare-div default of "however
-   JSX whitespace happens to space them". */
+/* Level (a quiet colour-coded index tab) sits next to status (the
+   same hanko seal every quiz card stamps itself with — see
+   StageBadge.jsx and its --inline modifier below), one shared row:
+   centred baseline, even gap, and space before the readings block
+   below instead of the bare-div default of "however JSX whitespace
+   happens to space them". */
 .dict-detail__badges {
   display: flex;
   align-items: center;
@@ -5348,6 +5379,8 @@ input:focus { border-color: var(--accent2); }
 .dict-detail__senses-label,
 .dict-detail__examples-label,
 .dict-detail__composing-kanji-label,
+.dict-detail__vocab-examples-label,
+.dict-detail__practice-label,
 .dict-detail__stroke-label {
   font-size: 12px;
   color: var(--text-secondary);
@@ -5355,6 +5388,77 @@ input:focus { border-color: var(--accent2); }
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-bottom: 10px;
+}
+
+/* "Used in these words" — the reverse of .dict-detail__composing-kanji
+   (that links a vocab word down to its kanji; this links a kanji out
+   to real words it appears in). Same bordered-block rhythm as the
+   composing-kanji section, but rows rather than chips since each one
+   also carries a short meaning. */
+.dict-detail__vocab-examples {
+  margin-top: var(--dict-block-gap);
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.dict-vocab-example-list { display: flex; flex-direction: column; }
+.dict-vocab-example-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 4px;
+  background: transparent;
+  border-radius: 6px;
+  text-align: left;
+  font-weight: 400;
+}
+.dict-vocab-example-row:hover { background: var(--overlay-hover); }
+.dict-vocab-example-row + .dict-vocab-example-row { border-top: 1px dashed var(--border); }
+.dict-vocab-example-row__word {
+  flex-shrink: 0;
+  font-family: var(--font-jp);
+  font-size: 16px;
+  color: var(--text-primary);
+}
+.dict-vocab-example-row__word ruby { ruby-position: over; }
+.dict-vocab-example-row__word rt {
+  font-size: 0.5em;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.dict-vocab-example-row__meaning {
+  min-width: 0;
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* SRS practice record — accuracy/reviews/interval/next review were
+   already being fetched for the status seal but never shown anywhere
+   on the dictionary screen (see DictionaryDetail.jsx). Same bordered-
+   block rhythm as the meta/composing-kanji sections above; InfoRow
+   itself (already used for strokes/radical) supplies each stat's own
+   label/value line. */
+.dict-detail__practice {
+  margin-top: var(--dict-block-gap);
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.dict-detail__due-note {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  margin-bottom: 8px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--state-due) 16%, var(--bg-card));
+  color: var(--state-due);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .dict-example { padding: 12px 0; }
@@ -5447,28 +5551,18 @@ input:focus { border-color: var(--accent2); }
 }
 .dict-info-row__value { font-size: 15px; color: var(--text-primary); text-align: right; }
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-.status-badge__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--dot-color, var(--text-secondary));
-  display: inline-block;
-}
-
+/* Quiet index-tab: a coloured spine stroke on the left, a lightly
+   tinted ground behind it, coloured text — the level's colour still
+   carries the difficulty signal (N5 calmest -> N1 most intense) but
+   as a small library-card label instead of a loud solid-fill pill. */
 .dict-level-badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 11px;
-  border-radius: 20px;
-  background: var(--level-color, var(--accent3));
-  color: var(--text-on-fill);
+  padding: 3px 10px 3px 8px;
+  border-radius: 4px;
+  border-left: 3px solid var(--level-color, var(--accent3));
+  background: color-mix(in srgb, var(--level-color, var(--accent3)) 16%, var(--bg-card));
+  color: var(--level-color, var(--accent3));
   font-family: var(--font-display);
   font-size: 12px;
   font-weight: 700;

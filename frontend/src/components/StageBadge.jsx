@@ -19,7 +19,10 @@ import { useLang } from '../LangContext'
 // moment of promotion.
 const STAGE_GLYPH = { new: '新', learning: '習', mastered: '極' }
 
-export function StageBadge({ stage }) {
+// `inline`: for contexts with no card corner to sit in (e.g. the
+// dictionary detail panel's badge row) — same seal, laid out in flow
+// instead of absolutely positioned over a `position: relative` parent.
+export function StageBadge({ stage, inline }) {
   const { t } = useLang()
   // Reuses the same new/learning/mastered keys StatsScreen already
   // reads off — this label used to be a hardcoded French-only dict
@@ -29,7 +32,7 @@ export function StageBadge({ stage }) {
   if (!stage || !STAGE_GLYPH[stage]) return null
   return (
     <div
-      className={`stage-badge stage-badge--${stage}`}
+      className={`stage-badge stage-badge--${stage}${inline ? ' stage-badge--inline' : ''}`}
       title={STAGE_LABEL[stage]}
       aria-hidden="true"
     >

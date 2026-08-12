@@ -4,6 +4,7 @@ import { useLang } from '../LangContext'
 import { apiFetch } from '../api'
 import { Readings, Furigana } from './Readings'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
+import { StageBadge } from './StageBadge'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -63,11 +64,11 @@ function ExampleSentence({ ex, senseNumber }) {
 // QuizComponents' Flashcard, via DictionaryLookupSheet below) reuses
 // the exact same badges/panel instead of a second copy drifting out
 // of sync with it.
-export const STATUS_META = {
-  new:      { color: 'var(--text-secondary)', fallback: 'À apprendre' },
-  learning: { color: 'var(--accent)',         fallback: 'En cours' },
-  mastered: { color: 'var(--success)',        fallback: 'Maîtrisé' },
-}
+//
+// Status (new/learning/mastered) is now shown via the same hanko-seal
+// StageBadge every quiz card already stamps itself with (see
+// StageBadge.jsx) rather than a dictionary-only dot+label — one seal
+// vocabulary for the same underlying SRS state everywhere in the app.
 
 // Colours pulled from the app's own palette (ai-iro indigo / rokushou
 // verdigris) instead of arbitrary hex, so — like every other colour
@@ -102,6 +103,14 @@ export function entryKey(entry) {
   return `${entry.type}:${entry.level ?? '_'}:${entry.kanji || ''}:${entry.kana || ''}`
 }
 
+// First gloss only — vocab_examples' meaning can pack several
+// semicolon-separated senses (same shape as DictionaryScreen's own
+// shortMeaning), and a whole list of them per example word is more
+// than a one-line row can show.
+function shortGloss(meaning) {
+  return meaning?.split(';')[0] ?? ''
+}
+
 export function speakJapanese(text) {
   if (!text) return
   window.speechSynthesis.cancel()
@@ -111,21 +120,12 @@ export function speakJapanese(text) {
   window.speechSynthesis.speak(u)
 }
 
-export function StatusBadge({ state, t }) {
-  const meta = STATUS_META[state] ?? STATUS_META.new
-  return (
-    <span className="status-badge">
-      <span className="status-badge__dot" style={{ '--dot-color': meta.color }} />
-      {t?.[`status_${state}`] ?? meta.fallback}
-    </span>
-  )
-}
-
-// JLPT level shown as its own solid-fill pill — it's the one
-// badge meant to jump out at a glance, so it gets the strongest
-// visual treatment of the three. Colour scales with difficulty
-// (N5 calmest → N1 most intense) using pigments already in the
-// palette rather than introducing new ones.
+// JLPT level shown as a quiet index-tab: a left accent stroke plus a
+// lightly-tinted ground in the level's own colour, rather than a loud
+// solid-fill pill — reads like a library card's colour-coded spine
+// label. Colour still scales with difficulty (N5 calmest → N1 most
+// intense) using pigments already in the palette rather than
+// introducing new ones.
 const LEVEL_COLORS = {
   N5: 'var(--success)',
   N4: 'var(--accent2)',
@@ -283,7 +283,7 @@ export function TagChip({ tag }) {
 // which has no dictionary screen underneath it to jump around in)
 // just omits them, and those bits simply don't render rather than
 // rendering as dead buttons.
-export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick }) {
+export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
@@ -372,7 +372,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
       <div className="dict-detail__body">
         <div className="dict-detail__badges">
           <LevelBadge level={entry.level} />
-          <StatusBadge state={entry.status?.state ?? 'new'} t={t} />
+          <StageBadge stage={entry.status?.status ?? 'new'} inline />
         </div>
 
         {entry.type === 'kanji'
@@ -494,6 +494,65 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick 
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Real vocab words from the app's own deck that use this
+            kanji — the reverse of composingKanji above (a vocab word
+            links down to its kanji; a kanji links out to words it
+            appears in). Kanji only: vocab/kana entries have nothing
+            analogous to show here. */}
+        {onVocabClick && entry.type === 'kanji' && entry.vocab_examples?.length > 0 && (
+          <div className="dict-detail__vocab-examples">
+            <div className="dict-detail__vocab-examples-label">
+              {t.vocabExamples}
+            </div>
+            <div className="dict-vocab-example-list">
+              {entry.vocab_examples.map((w, i) => (
+                <button
+                  key={i}
+                  onClick={() => onVocabClick(w.kanji, w.kana)}
+                  className="dict-vocab-example-row"
+                >
+                  <span className="dict-vocab-example-row__word">
+                    {w.kana ? <Furigana text={w.kanji} reading={w.kana.split('/')[0].trim()} /> : w.kanji}
+                  </span>
+                  <span className="dict-vocab-example-row__meaning">
+                    {shortGloss(w.meaning)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SRS practice record — accuracy/reviews/interval/next review
+            were already being fetched for the status seal above but
+            never shown anywhere. Nothing renders for an entry that's
+            never been reviewed (total_reviews === 0): an all-dashes
+            stats block for an untouched card would just be noise. */}
+        {entry.status?.total_reviews > 0 && (
+          <div className="dict-detail__practice">
+            <div className="dict-detail__practice-label">
+              {t.cardStats}
+            </div>
+            {entry.status.due && (
+              <div className="dict-detail__due-note">{t.dueNow}</div>
+            )}
+            <InfoRow label={t.totalReviews} value={entry.status.total_reviews} />
+            <InfoRow label={t.correctReviews} value={entry.status.correct_reviews} />
+            <InfoRow
+              label={t.accuracy}
+              value={entry.status.accuracy != null ? `${entry.status.accuracy}%` : '—'}
+            />
+            <InfoRow
+              label={t.interval}
+              value={entry.status.interval_days != null ? `${entry.status.interval_days} ${t.days}` : '—'}
+            />
+            <InfoRow
+              label={t.nextReview}
+              value={entry.status.next_review ? new Date(entry.status.next_review).toLocaleDateString() : '—'}
+            />
           </div>
         )}
 

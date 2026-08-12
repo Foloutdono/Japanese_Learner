@@ -223,6 +223,8 @@ const dictionary = {
   dictAll:           'Tout',
   dictKanji:         'Kanji',
   dictVocab:         'Vocabulaire',
+  composingKanji:    'Composé de ces kanji',
+  vocabExamples:     'Utilisé dans ces mots',
   dictBackToRadicals:'← Retour aux radicaux',
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',
