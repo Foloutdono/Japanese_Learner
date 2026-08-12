@@ -3007,8 +3007,8 @@ input:focus { border-color: var(--accent2); }
 .stage-badge__glyph { display: block; }
 
 /* Used where there's no card corner to strike into — e.g. the
-   dictionary detail panel's badge row (see .dict-detail__badges) —
-   same seal, laid out in flow next to the level tab instead of
+   dictionary identity plate's top row (see .dict-detail__stage-badges)
+   — same seal, laid out in flow next to the level tab instead of
    floating absolutely over a positioned parent. */
 .stage-badge--inline {
   position: static;
@@ -5193,33 +5193,88 @@ input:focus { border-color: var(--accent2); }
 .dict-modal-content {
   background: var(--bg-card);
   border-radius: 14px;
-  border-top: 3px solid var(--accent);
   width: 100%;
   max-width: 640px;
   max-height: 92vh;
   overflow-y: auto;
 }
 
-/* Dark ink stage for the headline character — same sumi block as the
-   top bar / home header — with a hanko-red stamp button standing in
-   for the old 🔊 emoji. Corners inherit whatever radius the parent
-   (.dict-modal-content) has, so it always sits flush. */
+/* ── Identity plate ────────────────────────────────────────
+   Dark ink stage for the headword — same sumi block as the top bar /
+   home header. Now a centred composition rather than a left-aligned
+   row: the headword sits alone in the middle with its reading
+   directly beneath it, level/status in one top corner and the
+   actions in the other, so the eye lands on the character first and
+   everything else reads as annotation around it. The 3px top rule
+   (previously a fixed vermillion line on .dict-modal-content) is
+   driven by --type-color here instead — see typeStyle in
+   DictionaryDetail.jsx — so a kanji, a word and a kana panel are
+   visibly different objects. Corners inherit whatever radius the
+   parent (.dict-modal-content) has, so it always sits flush. */
 .dict-detail__stage {
+  position: relative;
   background: var(--bg-panel);
   color: var(--text-on-panel);
+  border-top: 3px solid var(--type-color, var(--accent));
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px 28px;
+}
+
+.dict-detail__stage-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 30px 24px 24px;
+  width: 100%;
 }
+.dict-detail__stage-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px; /* matches the action buttons, so the row keeps
+                       its height even for an entry with no level */
+}
+
+/* Level tab and status seal both live on sumi now. The seal's own
+   --seal-color is tuned for a card surface (see .stage-badge): in the
+   light theme --state-new is a near-black that would vanish against
+   this panel, so 'new' switches to the constant on-panel soft tone.
+   Vermillion and gold already read correctly on ink in both themes. */
+.dict-detail__stage .stage-badge { --seal-color: var(--text-on-panel-soft); }
+.dict-detail__stage .stage-badge--learning { --seal-color: var(--state-learning); }
+.dict-detail__stage .stage-badge--mastered { --seal-color: var(--state-mastered); }
+
+/* Running head, tategaki — what kind of entry this is, set vertically
+   down the plate's left edge the way a printed dictionary prints its
+   own. Absolutely positioned so it never pulls the headword off
+   centre, and quiet enough to read as a watermark rather than a
+   label competing with the character. */
+.dict-detail__type-mark {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-family: var(--font-jp);
+  font-size: 13px;
+  letter-spacing: 0.34em;
+  color: var(--type-color, var(--accent));
+  opacity: 0.75;
+  user-select: none;
+  pointer-events: none;
+}
+
 .dict-detail__char {
   font-size: 60px;
   font-family: var(--font-jp);
   color: var(--text-on-panel);
-  line-height: 1.3;
+  line-height: 1.15;
+  text-align: center;
 }
 /* Furigana over the headline word (vocab only — see headwordReading in
    DictionaryDetail.jsx). Sized relative to the headline itself (em)
@@ -5251,6 +5306,63 @@ input:focus { border-color: var(--accent2); }
 
 .dict-detail__stage-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 
+/* ── Reading, on the plate ─────────────────────────────────
+   A kanji's on/kun split, sitting directly under the headword it
+   belongs to instead of in the body below. Reuses the shared
+   <Readings> component (see Readings.jsx) but re-laid-out for this
+   context: each group becomes one centred line, its 音 / 訓 label a
+   small carved square — the same seal language as .stage-badge — so
+   the two registers are distinguishable at a glance without the long
+   translated "Lectures on'yomi (sino-japonaises)" labels the body
+   version uses. */
+.dict-detail__stage-readings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 100%;
+}
+.dict-detail__stage-readings .reading-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 0;
+}
+.dict-detail__stage-readings .reading-group__label {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  margin-bottom: 0;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--text-on-panel-soft) 55%, transparent);
+  background: color-mix(in srgb, var(--text-on-panel-soft) 12%, transparent);
+  color: var(--text-on-panel-soft);
+  font-family: var(--font-jp);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.dict-detail__stage-readings .reading-group__list { justify-content: center; }
+.dict-detail__stage-readings .reading-group__item { color: var(--text-on-panel); }
+.dict-detail__stage-readings .reading-group__item-text { font-family: var(--font-jp); }
+/* The 1./2. ordinals earn their keep in the body's full reading list,
+   but on a one-line plate they're clutter around what is usually two
+   or three tokens. */
+.dict-detail__stage-readings .reading-group__item-index { display: none; }
+
+/* Kana's romaji — its only "reading", so it gets the plain treatment
+   rather than the on/kun apparatus above. */
+.dict-detail__stage-romaji {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+
 /* Only shown once the fullscreen mobile sheet kicks in (see the
    @media block below) — the desktop side panel already sits next to
    the results grid and closes just as easily by clicking elsewhere,
@@ -5277,27 +5389,17 @@ input:focus { border-color: var(--accent2); }
   --dict-block-gap: 20px;
 }
 
-/* Level (a quiet colour-coded index tab) sits next to status (the
-   same hanko seal every quiz card stamps itself with — see
-   StageBadge.jsx and its --inline modifier below), one shared row:
-   centred baseline, even gap, and space before the readings block
-   below instead of the bare-div default of "however JSX whitespace
-   happens to space them". */
-.dict-detail__badges {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.dict-detail__readings { padding: 8px 0; border-bottom: 1px solid var(--border); }
-.dict-detail__radical-link {
-  background: transparent;
-  color: var(--accent);
-  padding: 0;
-  font-size: 14px;
-  text-decoration: underline;
+/* ── Primary gloss ─────────────────────────────────────────
+   The definition for an entry with no JMdict senses list — kanji, and
+   any vocab word JMdict returned nothing for. This is the single most
+   important fact on a kanji's panel, so it's set as real prose (serif,
+   generous) rather than the right-hand column of a label/value row
+   the way it used to be. */
+.dict-detail__gloss-text {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--text-primary);
 }
 
 .dict-detail__composing-kanji { margin-top: var(--dict-block-gap); padding-top: 16px; border-top: 1px solid var(--border); }
@@ -5316,7 +5418,30 @@ input:focus { border-color: var(--accent2); }
   transition: background 0.15s ease;
 }
 .dict-detail__kanji-chip:hover { background: var(--bg-card-hover); }
-.dict-detail__stroke-section { margin-top: var(--dict-block-gap); }
+
+/* ── How it's written ──────────────────────────────────────
+   Stroke-order diagram with its stroke count and radical in a column
+   beside it — all three facts describe drawing the character, so they
+   share one block instead of the diagram sitting at the bottom of the
+   panel with its own numbers stranded in a metadata list further up.
+   The diagram takes the remaining width; the figures take exactly what
+   they need (auto), which keeps the washi sheet as large as possible
+   at any panel width. */
+.dict-detail__form {
+  margin-top: var(--dict-block-gap);
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.dict-detail__form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+.dict-detail__form-stats {
+  grid-template-columns: 1fr;
+  min-width: 96px;
+}
 .dict-detail__stroke-frame {
   background: var(--paper);
   border-radius: 8px;
@@ -5425,10 +5550,9 @@ input:focus { border-color: var(--accent2); }
   font-family: var(--font-display, inherit);
 }
 
-/* Example sentences — same "label + bordered block below" rhythm as
-   .dict-detail__composing-kanji, kept as its own section since a
-   sentence pair reads best full-width rather than squeezed into an
-   .dict-info-row's label/value split. */
+/* Example sentences — same "label + block below" rhythm as
+   .dict-detail__composing-kanji, kept as its own section because a
+   sentence plus its translation needs the panel's full width. */
 .dict-detail__examples { margin-top: var(--dict-block-gap); }
 
 /* One kicker style for every "supplementary detail" section header
@@ -5443,13 +5567,35 @@ input:focus { border-color: var(--accent2); }
 .dict-detail__composing-kanji-label,
 .dict-detail__vocab-examples-label,
 .dict-detail__practice-label,
-.dict-detail__stroke-label {
+.dict-detail__gloss-label,
+.dict-detail__form-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   font-size: 12px;
   color: var(--text-secondary);
   font-weight: bold;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-bottom: 10px;
+}
+/* A short coloured tick opening every section header — the same
+   single-deliberate-mark gesture .section-header__rule makes on the
+   stats/profile screens, turned inline and tinted with the entry's own
+   type colour (see typeStyle in DictionaryDetail.jsx) so the panel
+   reads as one keyed document instead of a stack of unrelated blocks. */
+.dict-detail__senses-label::before,
+.dict-detail__examples-label::before,
+.dict-detail__composing-kanji-label::before,
+.dict-detail__vocab-examples-label::before,
+.dict-detail__practice-label::before,
+.dict-detail__gloss-label::before,
+.dict-detail__form-label::before {
+  content: '';
+  flex-shrink: 0;
+  width: 14px;
+  height: 2px;
+  background: var(--type-color, var(--accent));
 }
 
 /* "Used in these words" — the reverse of .dict-detail__composing-kanji
@@ -5497,30 +5643,6 @@ input:focus { border-color: var(--accent2); }
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: right;
-}
-
-/* SRS practice record — accuracy/reviews/interval/next review were
-   already being fetched for the status seal but never shown anywhere
-   on the dictionary screen (see DictionaryDetail.jsx). Same bordered-
-   block rhythm as the meta/composing-kanji sections above; InfoRow
-   itself (already used for strokes/radical) supplies each stat's own
-   label/value line. */
-.dict-detail__practice {
-  margin-top: var(--dict-block-gap);
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-.dict-detail__due-note {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  margin-bottom: 8px;
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--state-due) 16%, var(--bg-card));
-  color: var(--state-due);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
 }
 
 .dict-example { padding: 12px 0; }
@@ -5589,29 +5711,77 @@ input:focus { border-color: var(--accent2); }
   line-height: 1.5;
 }
 
-.dict-detail__meta { margin-top: var(--dict-block-gap); }
-.dict-info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-  gap: 12px;
+/* ── Figures ───────────────────────────────────────────────
+   One number with its name under it — the panel's unit for anything
+   countable (stroke count, radical, and the whole practice record).
+   Laid out in the same flush shoji lattice as the results grid and the
+   syllabary chart (hairline --border showing through 2px gaps) rather
+   than as bordered floating cards, so a run of figures reads as one
+   ruled table. auto-fit keeps four tiles on one row on a desktop panel
+   and folds them to two per row as it narrows, with no breakpoint. */
+.dict-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+  gap: 2px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
 }
-/* Uppercase + tracked, same quiet "label" language as the section
-   kickers above (senses/examples/composing-kanji/stroke-order) —
-   previously plain sentence case, which read as a different register
-   from the rest of the card even though it's doing the same job:
-   naming the fact, not carrying it. */
-.dict-info-row__label {
-  font-size: 12px;
+.dict-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 12px;
+  background: var(--bg-main);
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  font-weight: 400;
+}
+.dict-stat__value {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+.dict-stat__label {
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  white-space: nowrap;
 }
-.dict-info-row__value { font-size: 15px; color: var(--text-primary); text-align: right; }
+/* The radical tile navigates (see onRadicalClick) — it carries the
+   accent colour and a hover ground so it reads as the one figure in
+   the block you can actually follow somewhere. */
+.dict-stat--link { cursor: pointer; transition: background 0.15s ease; }
+.dict-stat--link .dict-stat__value { color: var(--accent); }
+.dict-stat--link:hover { background: var(--bg-card-hover); }
+
+/* ── Your own record ───────────────────────────────────────
+   Sits last in the panel: it describes the reader's progress, not the
+   word itself. The "due now" flag rides inline on the section label
+   rather than as a row of its own — it's a state of this block, not
+   another statistic in it. */
+.dict-detail__practice {
+  margin-top: var(--dict-block-gap);
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.dict-detail__due-note {
+  margin-left: auto;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--state-due) 16%, var(--bg-card));
+  color: var(--state-due);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
 
 /* Quiet index-tab: a coloured spine stroke on the left, a lightly
    tinted ground behind it, coloured text — the level's colour still
@@ -6784,11 +6954,27 @@ input:focus { border-color: var(--accent2); }
     overflow-y: visible;
   }
   .dict-detail__stage {
-    padding-top: calc(30px + env(safe-area-inset-top, 0px));
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
     flex-shrink: 0;
   }
   .dict-detail__char {
     font-size: 48px;
+  }
+  /* The washi sheet needs the full width of a phone screen to stay
+     legible, so the figures move underneath it and run as a row
+     instead of a column beside it. */
+  .dict-detail__form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dict-detail__form-stats {
+    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+    min-width: 0;
+  }
+  /* Tucked in tighter next to the headword at this width, and out of
+     the way of the safe-area inset above. */
+  .dict-detail__type-mark {
+    left: 8px;
+    font-size: 11px;
   }
   .dict-detail__body {
     flex: 1;

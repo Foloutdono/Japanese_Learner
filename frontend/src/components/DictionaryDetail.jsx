@@ -81,6 +81,19 @@ export const TYPE_META = {
   katakana: { color: 'var(--accent5)', fallback: 'Katakana' },
 }
 
+// Vertical (tategaki) type mark running down the identity plate's
+// left edge — what kind of entry this is, in the same register a
+// printed dictionary prints its own running head. Deliberately
+// Japanese rather than the translated TYPE_META label: it's a
+// decorative mark (aria-hidden), and the kanji read as part of the
+// plate's composition where a Latin word would read as a UI chip.
+const TYPE_MARK = {
+  kanji:    '漢字',
+  vocab:    '語彙',
+  hiragana: '平仮名',
+  katakana: '片仮名',
+}
+
 // Both kana types share every bit of detail-panel/card logic that
 // differs from kanji/vocab (no translated "meaning", romaji shown
 // instead of a reading list, the stroke-order panel), so call sites
@@ -200,17 +213,23 @@ export function SearchIcon() {
   )
 }
 
-export function InfoRow({ label, value }) {
-  return (
-    <div className="dict-info-row">
-      <span className="dict-info-row__label">
-        {label}
-      </span>
-      <span className="dict-info-row__value">
-        {value}
-      </span>
-    </div>
+// One number, named underneath it. The panel's unit of measurement —
+// used for both the form block's stroke count/radical (which sit
+// beside the stroke-order diagram they describe) and the practice
+// record's grid, so a figure reads the same way wherever it appears
+// instead of each block inventing its own label/value arrangement.
+// `onClick` turns it into a real button (the radical tile navigates);
+// without one it's inert text, not a dead-looking control.
+function StatTile({ value, label, onClick }) {
+  const inner = (
+    <>
+      <span className="dict-stat__value">{value}</span>
+      <span className="dict-stat__label">{label}</span>
+    </>
   )
+  return onClick
+    ? <button type="button" onClick={onClick} className="dict-stat dict-stat--link">{inner}</button>
+    : <div className="dict-stat">{inner}</div>
 }
 
 // A grammatical/priority tag ("n", "v1", "⭐"...) with its full JMdict
@@ -288,9 +307,9 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
     : null
-  // Kana has no semantic "meaning" to translate — its romaji is shown
-  // as its own reading row below instead (see the ternary further
-  // down), so this stays null and the "Sens" row simply doesn't render.
+  // Kana has no semantic "meaning" to translate — its romaji stands in
+  // as its reading on the identity plate instead, so this stays null
+  // and the gloss block simply doesn't render for it.
   const meaning = isKanaType(entry.type)
     ? null
     : lang === 'fr'
@@ -308,11 +327,11 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
   }, [entry.type, entry.kanji])
 
   // The big headline character(s) get their reading shown right on top
-  // as furigana — the fastest way to see how a word is actually read,
-  // rather than only lower down in the reading row. Only for vocab: a
-  // kana-only entry has nothing to annotate, and a single kanji's
-  // on'yomi/kun'yomi list (shown below via <Readings>) is already the
-  // more complete picture than picking one reading to sit above it.
+  // as furigana — the fastest way to see how a word is actually read.
+  // Only for vocab: a kana-only entry has nothing to annotate, and a
+  // single kanji's on'yomi/kun'yomi split (shown under the headword on
+  // the plate via <Readings>) is already the more complete picture
+  // than picking one reading to sit above it.
   // vocab_data.py can pack several readings into entry.kana separated
   // by "/" — the headline furigana uses just the first, primary one.
   const headwordReading = entry.type === 'vocab' && entry.kanji && entry.kana
@@ -339,70 +358,91 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
     : examples
   const examplesBySense = number => examples.filter(ex => ex.sense_number === number)
 
+  // The panel's one data-driven accent: what kind of entry this is
+  // (see TYPE_META) tints the plate's top rule and every section
+  // marker below it, so a kanji panel and a vocab panel are
+  // recognisably different objects at a glance rather than the same
+  // grey form with different text in it.
+  const typeStyle = { '--type-color': TYPE_META[entry.type]?.color ?? 'var(--accent)' }
+
+  const isKanji = entry.type === 'kanji'
+  const isKana  = isKanaType(entry.type)
+  // Stroke count and radical describe the *drawing* of the character,
+  // so they belong beside the stroke-order diagram rather than in a
+  // metadata run somewhere else in the panel. The whole block only
+  // exists if at least one of the three has something to show.
+  const hasRadicalLink = isKanji && entry.radical != null && !!onRadicalClick
+  const showForm = (isKanji || isKana) && (entry.svg_url || entry.stroke_count || hasRadicalLink)
+
   return (
     <>
-      <div className="dict-detail__stage">
+      {/* ── Identity plate ───────────────────────────────────
+          Everything needed to answer "what is this, and how is it
+          read" — headword, reading, level, status seal — on one sumi
+          block, so the body below can open straight onto meaning
+          instead of a row of loose badges. */}
+      <div className="dict-detail__stage" style={typeStyle}>
+        <span className="dict-detail__type-mark" aria-hidden="true">
+          {TYPE_MARK[entry.type]}
+        </span>
+
+        <div className="dict-detail__stage-top">
+          <div className="dict-detail__stage-badges">
+            <LevelBadge level={entry.level} />
+            <StageBadge stage={entry.status?.status ?? 'new'} inline />
+          </div>
+          <div className="dict-detail__stage-actions">
+            <button
+              onClick={() => speakJapanese(entry.kana)}
+              className="dict-detail__speak-btn"
+              title={t.listen}
+              aria-label={t.listen}
+            >
+              <SpeakIcon />
+            </button>
+            {/* Mobile-only (see index.css) — the fullscreen sheet needs
+                an immediate way to dismiss without scrolling all the
+                way down to the "Fermer" button. */}
+            <button
+              onClick={onClose}
+              className="dict-detail__close-x"
+              aria-label={t.close}
+            >
+              <CloseIcon />
+            </button>
+          </div>
+        </div>
+
         <div className="dict-detail__char">
           {headwordReading
             ? <Furigana text={entry.kanji} reading={headwordReading} />
             : (entry.kanji || entry.kana)}
         </div>
-        <div className="dict-detail__stage-actions">
-          <button
-            onClick={() => speakJapanese(entry.kana)}
-            className="dict-detail__speak-btn"
-            title={t.listen}
-            aria-label={t.listen}
-          >
-            <SpeakIcon />
-          </button>
-          {/* Mobile-only (see index.css) — the fullscreen sheet needs
-              an immediate way to dismiss without scrolling all the
-              way down to the "Fermer" button. */}
-          <button
-            onClick={onClose}
-            className="dict-detail__close-x"
-            aria-label={t.close}
-          >
-            <CloseIcon />
-          </button>
-        </div>
+
+        {/* Reading, directly under the headword it belongs to. Kanji
+            gets its on/kun split labelled 音/訓 — the traditional
+            abbreviations, short enough to sit inline where the full
+            "Lectures on'yomi (sino-japonaises)" never could. Kana gets
+            its romaji. Vocab gets neither: the headword above already
+            carries its reading as furigana. */}
+        {isKanji && (
+          <div className="dict-detail__stage-readings">
+            <Readings kana={entry.kana} onLabel="音" kunLabel="訓" size={17} />
+          </div>
+        )}
+        {isKana && entry.romaji && (
+          <div className="dict-detail__stage-romaji">{entry.romaji}</div>
+        )}
       </div>
 
-      <div className="dict-detail__body">
-        <div className="dict-detail__badges">
-          <LevelBadge level={entry.level} />
-          <StageBadge stage={entry.status?.status ?? 'new'} inline />
-        </div>
+      <div className="dict-detail__body" style={typeStyle}>
 
-        {entry.type === 'kanji'
-          ? (
-            <div className="dict-detail__readings">
-              <Readings
-                kana={entry.kana}
-                onLabel={t.onyomi}
-                kunLabel={t.kunyomi}
-              />
-            </div>
-          )
-          : isKanaType(entry.type)
-          ? <InfoRow label={t.romaji} value={entry.romaji} />
-          : null /* vocab: the headline above already carries this exact
-                     reading as furigana, so a second "Reading" row here
-                     was just repeating it — dropped. */
-        }
-
-        {/* Vocab's definition is shown as the full JMdict senses list
-            rather than a single "Meaning" line — even a word with only
-            one sense renders through this same list, so there's one
-            consistent model instead of a single-gloss row that then
-            duplicates itself inside "other senses" below. Kanji (which
-            has no senses data) and any vocab entry JMdict didn't return
-            senses for fall back to the plain meaning row. This whole
-            block sits directly under the reading, right where a
-            reader's eye already is, instead of after a run of unrelated
-            metadata (level, strokes, radical) — that metadata is its
-            own group further down instead. */}
+        {/* ── 1. What it means ─────────────────────────────
+            First thing in the body, always. Vocab shows the full
+            JMdict senses list (even a single-sense word renders
+            through it, so there's one model rather than a gloss row
+            that then repeats itself); kanji and any vocab entry
+            JMdict had no senses for show one prominent gloss line. */}
         {senses.length > 0 ? (
           <div className="dict-detail__senses">
             <div className="dict-detail__senses-label">
@@ -432,15 +472,18 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
             ))}
           </div>
         ) : (
-          meaning != null && <InfoRow label={t.meaning} value={meaning} />
+          meaning != null && (
+            <div className="dict-detail__gloss">
+              <div className="dict-detail__gloss-label">{t.meaning}</div>
+              <div className="dict-detail__gloss-text">{meaning}</div>
+            </div>
+          )
         )}
 
-        {/* Examples that couldn't be nested above — either there's no
-            senses list at all (so there's nothing to nest under), or,
-            rarely, an example's sense_number doesn't match any listed
-            sense. Kept right under the senses/meaning above for the
-            same reason: an example reads best next to the definition
-            it's illustrating, not after a block of unrelated metadata. */}
+        {/* ── 2. How it's used ─────────────────────────────
+            Examples that couldn't nest under a specific sense above.
+            Immediately after the definition, because a sentence reads
+            best next to the meaning it illustrates. */}
         {flatExamples.length > 0 && (
           <div className="dict-detail__examples">
             <div className="dict-detail__examples-label">
@@ -452,32 +495,12 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
           </div>
         )}
 
-        {/* Strokes/radical: entry metadata, not part of the definition
-            — grouped on its own below the senses+examples block above
-            instead of wedged between them. Level now lives up top as
-            its own badge (see LevelBadge), so it no longer needs a row
-            here too. */}
-        {(entry.stroke_count || (entry.type === 'kanji' && entry.radical != null && onRadicalClick)) && (
-          <div className="dict-detail__meta">
-            {entry.stroke_count && (
-              <InfoRow label={t.strokes} value={`${entry.stroke_count} ${t.strokes}`} />
-            )}
-            {entry.type === 'kanji' && entry.radical != null && onRadicalClick && (
-              <InfoRow
-                label={t.radical}
-                value={
-                  <button
-                    onClick={() => onRadicalClick(entry.radical)}
-                    className="dict-detail__radical-link"
-                  >
-                    #{entry.radical}
-                  </button>
-                }
-              />
-            )}
-          </div>
-        )}
-
+        {/* ── 3. What it connects to ───────────────────────
+            Two directions of the same relationship, and an entry only
+            ever has one of them: a vocab word links down to the kanji
+            it's built from, a kanji links out to the words it appears
+            in. Adjacent so they read as one "elsewhere in the
+            dictionary" zone. */}
         {onKanjiClick && composingKanji.length > 0 && (
           <div className="dict-detail__composing-kanji">
             <div className="dict-detail__composing-kanji-label">
@@ -497,12 +520,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
           </div>
         )}
 
-        {/* Real vocab words from the app's own deck that use this
-            kanji — the reverse of composingKanji above (a vocab word
-            links down to its kanji; a kanji links out to words it
-            appears in). Kanji only: vocab/kana entries have nothing
-            analogous to show here. */}
-        {onVocabClick && entry.type === 'kanji' && entry.vocab_examples?.length > 0 && (
+        {onVocabClick && isKanji && entry.vocab_examples?.length > 0 && (
           <div className="dict-detail__vocab-examples">
             <div className="dict-detail__vocab-examples-label">
               {t.vocabExamples}
@@ -526,55 +544,83 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
           </div>
         )}
 
-        {/* SRS practice record — accuracy/reviews/interval/next review
-            were already being fetched for the status seal above but
-            never shown anywhere. Nothing renders for an entry that's
-            never been reviewed (total_reviews === 0): an all-dashes
-            stats block for an untouched card would just be noise. */}
+        {/* ── 4. How it's written ──────────────────────────
+            The stroke-order diagram with its own stroke count and
+            radical sitting right beside it — these three facts are
+            all about drawing the character, so they're one block
+            rather than a diagram at the bottom and its numbers
+            stranded in a metadata list further up. */}
+        {showForm && (
+          <div className="dict-detail__form">
+            <div className="dict-detail__form-label">
+              {t.strokeOrder}
+            </div>
+            <div className="dict-detail__form-grid">
+              {entry.svg_url && (
+                <div className="dict-detail__stroke-frame">
+                  {!strokeSvgFailed && (
+                    <StrokeOrderAnimation
+                      src={`${API_BASE}${entry.svg_url}`}
+                      loop
+                      className="dict-detail__stroke-img"
+                      onError={() => setStrokeSvgFailed(true)}
+                    />
+                  )}
+                  {strokeSvgFailed && (
+                    <div className="dict-detail__stroke-fallback" style={{ display: 'block' }}>
+                      {t.notAvailable}
+                    </div>
+                  )}
+                </div>
+              )}
+              {(entry.stroke_count || hasRadicalLink) && (
+                <div className="dict-stat-grid dict-detail__form-stats">
+                  {entry.stroke_count && (
+                    <StatTile value={entry.stroke_count} label={t.strokes} />
+                  )}
+                  {hasRadicalLink && (
+                    <StatTile
+                      value={`#${entry.radical}`}
+                      label={t.radical}
+                      onClick={() => onRadicalClick(entry.radical)}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── 5. Your own record ──────────────────────────
+            Last, because it's about the reader rather than the word.
+            Four figures in the same lattice the results grid uses;
+            nothing renders at all for an entry never reviewed, since
+            a grid of dashes is noise, not information. */}
         {entry.status?.total_reviews > 0 && (
           <div className="dict-detail__practice">
             <div className="dict-detail__practice-label">
               {t.cardStats}
-            </div>
-            {entry.status.due && (
-              <div className="dict-detail__due-note">{t.dueNow}</div>
-            )}
-            <InfoRow label={t.totalReviews} value={entry.status.total_reviews} />
-            <InfoRow label={t.correctReviews} value={entry.status.correct_reviews} />
-            <InfoRow
-              label={t.accuracy}
-              value={entry.status.accuracy != null ? `${entry.status.accuracy}%` : '—'}
-            />
-            <InfoRow
-              label={t.interval}
-              value={entry.status.interval_days != null ? `${entry.status.interval_days} ${t.days}` : '—'}
-            />
-            <InfoRow
-              label={t.nextReview}
-              value={entry.status.next_review ? new Date(entry.status.next_review).toLocaleDateString() : '—'}
-            />
-          </div>
-        )}
-
-        {(entry.type === 'kanji' || isKanaType(entry.type)) && entry.svg_url && (
-          <div className="dict-detail__stroke-section">
-            <div className="dict-detail__stroke-label">
-              {t.strokeOrder}
-            </div>
-            <div className="dict-detail__stroke-frame">
-              {!strokeSvgFailed && (
-                <StrokeOrderAnimation
-                  src={`${API_BASE}${entry.svg_url}`}
-                  loop
-                  className="dict-detail__stroke-img"
-                  onError={() => setStrokeSvgFailed(true)}
-                />
+              {entry.status.due && (
+                <span className="dict-detail__due-note">{t.dueNow}</span>
               )}
-              {strokeSvgFailed && (
-                <div className="dict-detail__stroke-fallback" style={{ display: 'block' }}>
-                  {t.notAvailable}
-                </div>
-              )}
+            </div>
+            <div className="dict-stat-grid">
+              <StatTile
+                value={entry.status.accuracy != null ? `${entry.status.accuracy}%` : '—'}
+                label={t.accuracy}
+              />
+              <StatTile
+                value={`${entry.status.correct_reviews}/${entry.status.total_reviews}`}
+                label={t.totalReviews}
+              />
+              <StatTile
+                value={entry.status.interval_days != null ? `${entry.status.interval_days} ${t.days}` : '—'}
+                label={t.interval}
+              />
+              <StatTile
+                value={entry.status.next_review ? new Date(entry.status.next_review).toLocaleDateString() : '—'}
+                label={t.nextReview}
+              />
             </div>
           </div>
         )}
