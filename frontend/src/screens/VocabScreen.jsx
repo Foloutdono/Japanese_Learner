@@ -351,7 +351,7 @@ export default function VocabScreen({ session }) {
   if (!studyBy) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.vocabulary} />
+        <TopBar onBack={() => navigate('/')} title={t.vocabulary} autoHide />
         <SelectionScreen>
           <ModeSelector
             modes={[
@@ -378,7 +378,7 @@ export default function VocabScreen({ session }) {
   if (studyBy === 'level' && !level) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} JLPT`} />
+        <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} JLPT`} autoHide />
         <SelectionScreen>
           <LevelSelector onSelect={setLevel} color="var(--accent2)" title={t.selectLevel} />
         </SelectionScreen>
@@ -390,7 +390,7 @@ export default function VocabScreen({ session }) {
   if (studyBy === 'theme' && !theme) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} — ${t.byTheme}`} />
+        <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} — ${t.byTheme}`} autoHide />
         <SelectionScreen>
           <ThemeSelector
             session={session}
@@ -409,7 +409,7 @@ export default function VocabScreen({ session }) {
       : t.vocabulary
     return (
       <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={tierTitle} />
+        <TopBar onBack={() => setStudyBy(null)} title={tierTitle} autoHide />
         <SelectionScreen>
           <TierSelector
             domain={freqDomain}
@@ -444,7 +444,7 @@ export default function VocabScreen({ session }) {
     const modesWithReview = studyBy === 'level' ? [...MODES, reviewMode(t)] : MODES
     return (
       <div className="screen">
-        <TopBar onBack={goBack} title={backTitle} />
+        <TopBar onBack={goBack} title={backTitle} autoHide />
         <SelectionScreen>
           <ModeSelector modes={modesWithReview} onSelect={startMode} title={t.selectMode} />
         </SelectionScreen>
@@ -456,7 +456,7 @@ export default function VocabScreen({ session }) {
   if (reviewing) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setReviewing(false)} title={`${t.vocabulary} ${level} — ${t.modeReview}`} />
+        <TopBar onBack={() => setReviewing(false)} title={`${t.vocabulary} ${level} — ${t.modeReview}`} autoHide />
         <div className="container quiz-area">
           <ReviewDeck
             cards={reviewCards}

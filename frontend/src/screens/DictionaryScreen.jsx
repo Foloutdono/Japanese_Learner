@@ -241,8 +241,11 @@ export default function DictionaryScreen({ session }) {
 
 			<div className="container dict-page">
 
+				{/* No repeated <h1> here — TopBar above already carries the
+				    screen title, and every other screen in the app treats
+				    that as the one place it's shown. Only the description
+				    is genuinely new content, so that's all this adds. */}
 				<div className="selector-header">
-					<h1 className="selector-header__title">{t.dictionaryTitle}</h1>
 					<p className="selector-header__subtitle">
 						{t.dictionarySubtitle}
 					</p>

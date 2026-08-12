@@ -144,7 +144,7 @@ function SentenceOrderBlock({ question, selected, onSelect, revealed }) {
           </span>
         ))}
       </div>
-      <p className="exam-question__hint">{t.examStarHint ?? 'Which piece belongs in the ★ position?'}</p>
+      <p className="exam-question__hint">{t.examStarHint}</p>
       <div className="mcq-list">
         {pieces.map((piece, i) => {
           const isSelected = selected === piece.id
@@ -162,7 +162,7 @@ function SentenceOrderBlock({ question, selected, onSelect, revealed }) {
       </div>
       {revealed && (
         <p className="exam-order-solution" lang="ja">
-          {(t.examFullSentence ?? 'Full sentence:')} {order.map(id => byId[id].textJp).join(' ')}
+          {t.examFullSentence} {order.map(id => byId[id].textJp).join(' ')}
         </p>
       )}
     </div>
@@ -299,7 +299,7 @@ function AudioBar({ src, audioRef, t }) {
     return (
       <div className="exam-audio-bar exam-audio-bar--pending">
         <span aria-hidden="true">🔈</span>
-        <span>{t.examAudioPending ?? 'Audio clip not linked yet — split the source track and set audioSrc for this question.'}</span>
+        <span>{t.examAudioPending}</span>
       </div>
     )
   }

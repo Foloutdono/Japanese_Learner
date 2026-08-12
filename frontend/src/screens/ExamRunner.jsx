@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi } from '../components/sound'
 import { CardTransition } from '../components/CardTransition'
+import { Loading } from '../components/Loading'
+import EmptyState from '../components/EmptyState'
 import { getExam, flattenQuestions, submitAttempt } from '../exam/examService'
 import QuestionRenderer from '../exam/QuestionRenderer'
 
@@ -38,18 +40,11 @@ export default function ExamRunner() {
   }, [exam, sectionId])
 
   if (!exam) {
-    return (
-      <div className="quiz-loading">
-        <svg className="quiz-loading__ensor" viewBox="0 0 48 48">
-          <circle className="quiz-loading__ensor-circle" cx="24" cy="24" r="19" fill="none" strokeWidth="3" />
-        </svg>
-        <span className="quiz-loading__text">{t.loading ?? 'Loading…'}</span>
-      </div>
-    )
+    return <Loading />
   }
 
   if (questions.length === 0) {
-    return <div className="empty-state"><p className="empty-state__message">{t.examSectionEmpty ?? 'This section has no questions yet.'}</p></div>
+    return <EmptyState icon="📄" message={t.examSectionEmpty} />
   }
 
   const section = exam.sections.find(s => s.id === sectionId)
@@ -103,17 +98,21 @@ export default function ExamRunner() {
       </CardTransition>
 
       <div className="exam-nav-buttons">
+        {/* Reuses ReviewDeck's prev/next wording (see quizModes' review
+            mode) rather than inventing a third "back"/"next" pair —
+            t.back is a bare "←" glyph made for TopBar's compact button,
+            not a fit here. */}
         <button type="button" className="exam-nav-btn" disabled={index === 0} onClick={goBack}>
-          {t.back ?? 'Back'}
+          {t.reviewPrev}
         </button>
-        <span className="exam-nav-buttons__hint">{answeredCount} / {questions.length} {t.examAnswered ?? 'answered'}</span>
+        <span className="exam-nav-buttons__hint">{answeredCount} / {questions.length} {t.examAnswered}</span>
         {isLast ? (
           <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={finish}>
-            {t.examFinishSection ?? 'Finish section'}
+            {t.examFinishSection}
           </button>
         ) : (
           <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={goNext}>
-            {t.next ?? 'Next'}
+            {t.reviewNext}
           </button>
         )}
       </div>

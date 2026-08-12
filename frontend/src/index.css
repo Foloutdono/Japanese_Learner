@@ -4160,8 +4160,11 @@ input:focus { border-color: var(--accent2); }
   margin-top: 8px;
 }
 
-/* Due forecast */
-.stats-forecast-card { margin-bottom: 32px; padding: 24px; border: 1px solid var(--border); }
+/* Due forecast — no border: matches the flat .card convention the
+   level/set groups below already use (see .stats-group.grid-3);
+   this and .stats-weakest-card used to be the only bordered cards on
+   the page. */
+.stats-forecast-card { margin-bottom: 32px; padding: 24px; }
 
 .stats-card-heading {
   font-family: 'Noto Serif JP', serif;
@@ -4214,7 +4217,7 @@ input:focus { border-color: var(--accent2); }
 /* Weakest items — same hairline-row rhythm as the choice lists
    (LevelSelector/ModeSelector), so a "needs practice" table reads
    like the rest of the app instead of a bolted-on widget. */
-.stats-weakest-card { margin-bottom: 32px; padding: 24px; border: 1px solid var(--border); }
+.stats-weakest-card { margin-bottom: 32px; padding: 24px; }
 
 .stats-weakest-list {
   display: flex;
@@ -5944,9 +5947,13 @@ input:focus { border-color: var(--accent2); }
   font-size: 13px;
   padding: 8px 16px;
 }
+/* Quiet tinted chip instead of a solid type-colored fill — same
+   "colour carries the meaning, background stays quiet" language as
+   .dict-level-badge, so picking a deck type doesn't read as 5
+   different loud, competing-colour buttons in a row. */
 .decks-type-btn--active {
-  background: var(--type-color, var(--action-purple));
-  color: var(--text-on-panel);
+  background: color-mix(in srgb, var(--type-color, var(--action-purple)) 20%, var(--bg-panel));
+  color: var(--type-color, var(--action-purple));
 }
 .decks-type-btn__desc { font-size: 10px; opacity: 0.8; }
 
@@ -5956,7 +5963,6 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   flex-direction: column;
   gap: 8px;
-  border-left: 4px solid var(--type-color, var(--border));
 }
 .deck-card__header { display: flex; justify-content: space-between; align-items: flex-start; }
 .deck-card__name { font-size: 16px; font-weight: bold; }
@@ -5965,7 +5971,12 @@ input:focus { border-color: var(--accent2); }
 .deck-card__count { font-size: 13px; color: var(--text-secondary); }
 .deck-card__actions { display: flex; gap: 8px; margin-top: auto; }
 .deck-card__edit-btn { background: var(--bg-panel); color: var(--text-on-panel); flex: 1; font-size: 13px; }
-.deck-card__study-btn { background: var(--type-color, var(--accent)); color: var(--text-on-panel); flex: 1; font-size: 13px; }
+/* Same colour DeckDetailScreen's own "Study" button uses
+   (.deckdetail-btn--study) — was a 5-way rotating --type-color fill,
+   so a grid of several decks showed that many different-coloured
+   buttons all competing at once, and disagreed with its own sibling
+   screen's single colour for the same action. */
+.deck-card__study-btn { background: var(--action-purple); color: var(--text-on-panel); flex: 1; font-size: 13px; }
 
 /* ── Deck detail screen ───────────────────────────────────── */
 .deckdetail-header {

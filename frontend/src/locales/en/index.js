@@ -620,6 +620,35 @@ const decks = {
   studyPhase3:       'Phase 3 — S→K',
 }
 
+// ── Mock exam ─────────────────────────────────────────────
+// Was entirely untranslated until now — every string below only ever
+// rendered through its own inline `?? 'English default'` fallback
+// (see ExamListScreen/ExamSectionSelect/ExamRunner/ExamResult/
+// QuestionRenderer), so a French-language user saw English exam text
+// while the rest of the app stayed in French. examListTitle keeps the
+// literal Japanese glyphs in both locales, same convention as appTitle.
+const exam = {
+  examTitle:           'Mock Exam',
+  examDesc:            'Past JLPT papers, digitized',
+  examEyebrow:         'Mock Exam',
+  examListTitle:       '過去問モード',
+  examListSubtitle:    'Full past JLPT papers, digitized — vocabulary, grammar, reading, and listening, scored against the official answer key.',
+  examSections:        'sections',
+  examQuestions:       'questions',
+  examNoneAvailable:   'No exams available yet.',
+  examSectionSubtitle: 'Pick a section to start. Each section is scored independently.',
+  examSectionEmpty:    'This section has no questions yet.',
+  examAnswered:        'answered',
+  examFinishSection:   'Finish section',
+  examQuestionAbbrev:  'Q',
+  examResultMissing:   "This result isn't available — start the section again.",
+  examBackToSections:  'Back to sections',
+  examRetrySection:    'Retry section',
+  examStarHint:        'Which piece belongs in the ★ position?',
+  examFullSentence:    'Full sentence:',
+  examAudioPending:    'Audio clip not linked yet — split the source track and set audioSrc for this question.',
+}
+
 export default {
   ...auth,
   ...landing,
@@ -638,4 +667,5 @@ export default {
   ...profile,
   ...settings,
   ...decks,
+  ...exam,
 }

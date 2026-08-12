@@ -12,6 +12,37 @@ const auth = {
   signupSuccess:     'Vérifiez vos emails pour confirmer votre compte.',
   signOut:           'Déconnexion',
   switchLang:        'Changer la langue',
+  usernameOptional:  "Nom d'utilisateur (optionnel)",
+  usernameInvalid:   "Le nom d'utilisateur doit contenir 3 à 20 caractères (lettres, chiffres, underscore).",
+  usernameTaken:     'Ce nom d\'utilisateur est déjà pris.',
+}
+
+// ── Landing screen ────────────────────────────────────────
+// Shown to signed-out visitors before AuthScreen. landingCta is
+// reused for both the hero button and the closing footer button
+// rather than duplicated under a second key.
+const landing = {
+  landingSignIn:         'Se connecter',
+  landingTagline:        'Une trousse complète et à votre rythme pour apprendre le japonais — répétition espacée (SM-2), du kana au kanji, la grammaire, et une vraie pratique de lecture, tout en un seul endroit.',
+  landingCta:            'Commencer',
+  landingFeaturesTitle:  'Tout au même endroit',
+  landingFeaturesIntro:  'Kana, vocabulaire, kanji, grammaire, lecture, et plus encore — une seule application au lieu de cinq outils séparés.',
+  landingWhyTitle:       'Pourquoi ça marche',
+  landingPro1Title:      'Un parcours, pas un tas',
+  landingPro1Desc:       'Kana, vocabulaire, kanji, grammaire et lecture sont chacun organisés de N5 à N1, pour toujours savoir ce qui vient ensuite.',
+  landingPro2Title:      'Répétition espacée (SM-2)',
+  landingPro2Desc:       "Chaque carte est planifiée avec l'algorithme SM-2, pour réviser juste avant de l'oublier, pas selon un calendrier fixe.",
+  landingPro3Title:      'Séries et statistiques',
+  landingPro3Desc:       'Une série quotidienne et une page de statistiques complète — nouveau, en cours, maîtrisé, à réviser maintenant, et vos points faibles — montrent exactement où vous en êtes.',
+  landingPro4Title:      'Une lecture que vous pouvez vraiment faire',
+  landingPro4Desc:       "Un dictionnaire et un analyseur de phrases se trouvent juste à côté des exercices de lecture et de compréhension, pour que rien de ce que vous ne comprenez pas ne soit une impasse.",
+  landingPro5Title:      'Vos propres decks, aussi',
+  landingPro5Desc:       'Créez vos propres decks de flashcards, de vocabulaire ou de kanji, importez des cartes directement depuis une feuille de calcul, et mélangez-les avec le contenu JLPT intégré.',
+  landingTechTitle:      'Construit avec',
+  landingCreatorTitle:   'Qui a fait ça, et pourquoi',
+  landingCreatorBody:    "Cette application a commencé comme un outil personnel pour passer de zéro japonais à la lecture de vrais textes, sans jongler entre cinq applications différentes pour le kana, le vocabulaire, le kanji, la grammaire et la lecture. Elle est développée et maintenue par un développeur solo, et chaque fonctionnalité ici est utilisée quotidiennement en apprenant le japonais.",
+  landingCreatorName:    '— Développée et maintenue en solo.',
+  landingFooterCta:      'Prêt à commencer ?',
 }
 
 // ── Navigation ────────────────────────────────────────────
@@ -61,15 +92,83 @@ const quiz = {
   // Selection prompts
   selectLevel:       'Choisissez un niveau JLPT',
   selectMode:        "Choisissez un mode d'entraînement",
+  selectKanaSet:     'Choisissez un ensemble de kana',
+  selectPhase:       "Choisissez votre phase d'entraînement",
+
+  byLevel:           'JLPT',
+  byLevelDesc:       'Les niveaux JLPT standards de N5 à N1, avec les mots et kanji les plus courants de chaque niveau',
+  byFrequency:       'Fréquence des mots',
+  byFrequencyDesc:   'La fréquence des mots dans de vrais textes japonais, du plus courant au moins courant',
+  byMastery:         'Mes cartes',
+  byMasteryDesc:     "Des phrases entièrement composées de mots que vous apprenez actuellement ou avez déjà maîtrisés",
+  byJmdict:          'Hors-JLPT',
+  byJmdictDesc:      'Tout le vocabulaire du dictionnaire hors programme JLPT, classé par fréquence',
+  selectStudySource: "Choisissez votre source d'étude",
+  selectTier:        'Choisissez un palier de fréquence',
+  kanjiUnit:         'kanji',
+  loadError:         'Erreur lors du chargement des paliers. Réessayez.',
+  tierSizeLabel:     'Taille du palier',
+
+  byTheme:           'Par thème',
+  byThemeDesc:       'Vocabulaire du quotidien regroupé par thème — nourriture, lieux, personnes, et plus',
+  selectTheme:       'Choisissez un thème',
+  filterThemes:      'Filtrer les thèmes…',
+  themeNoResults:    'Aucun thème ne correspond à votre filtre',
+
+  themeFruits:           'Fruits',
+  themeVegetables:       'Légumes',
+  themeBodyParts:        'Parties du corps',
+  themeRooms:            'Pièces',
+  themeBuildings:        'Bâtiments',
+  themeFurniture:        'Meubles',
+  themeSchool:           'École',
+  themeTravel:           'Voyage',
+  themeJobs:             'Métiers',
+  themeDishes:           'Plats',
+  themeAnimals:          'Animaux',
+  themeColors:           'Couleurs',
+  themeClothing:         'Vêtements',
+  themeWeather:          'Météo',
+  themeFamily:           'Famille',
+  themeEmotions:         'Émotions',
+  themeNature:           'Nature',
+  themeVehicles:         'Véhicules',
+  themeTechnology:       'Technologie',
+  themeSports:           'Sports',
+  themeMusic:            'Musique',
+  themeKitchenItems:     'Ustensiles de cuisine',
+  themeOfficeSupplies:   'Fournitures de bureau',
+  themeShoppingMoney:    'Achats & argent',
+  themeGeography:        'Géographie',
+  themeInsectsBugs:      'Insectes',
+  themeBirds:            'Oiseaux',
+  themeSeafood:          'Fruits de mer',
+  themeDrinks:           'Boissons',
+  themeShapes:           'Formes',
+  themeMaterials:        'Matériaux',
+  themeTools:            'Outils',
+  themeMedical:          'Médical',
+  themePlantsTrees:      'Plantes & arbres',
+  themeHouseholdItems:   'Objets du foyer',
+  themeHolidaysEvents:   'Fêtes & événements',
+
+  levelHintN5:       'Niveau débutant',
+  levelHintN4:       'Niveau élémentaire',
+  levelHintN3:       'Niveau intermédiaire',
+  levelHintN2:       'Niveau avancé',
+  levelHintN1:       'Niveau de maîtrise',
 
   // Input
   submit:            'Valider',
   typeRomaji:        'Tapez le romaji...',
+  tapToFlip:          'Touchez pour retourner',
+  tapToReveal:        'Touchez pour révéler',
 
   // Feedback
   correct:           '✅ Correct !',
   wrong:             '❌ Réponse :',
   quizComplete:      '✅ Toutes les cartes sont à jour !',
+  backToMenu:        '← Retour au menu',
 
   // Rating bar
   to:                'à',
@@ -101,6 +200,14 @@ const quiz = {
   modeFcKjMDesc:     (noun) => `Le ${noun} est affiché, révélez le sens`,
   modeFcMKj:         (noun) => `Carte (sens → ${noun})`,
   modeFcMKjDesc:     (noun) => `Le sens est affiché, révélez le ${noun}`,
+
+  modeFcKanaDesc:     'Le kana est affiché, révélez le sens',
+  modeQcmKanaDesc:    'Le kana est affiché, choisissez le sens',
+  modeWriteKanaDesc:  'Le romaji est affiché, dessinez le kana',
+
+  modeFcGrammarDesc:   'La règle de grammaire est affichée, révélez le sens',
+  modeQcmGrammarDesc:  'La règle de grammaire est affichée, choisissez le sens',
+  modeFillGrammarDesc: 'La règle de grammaire est affichée, complétez le(s) mot(s) manquant(s)',
 
   // « Réviser ses cartes » — parcours libre et sans notation des cartes
   // déjà étudiées dans ce paquet (voir ReviewDeck.jsx). Ajouté à chaque
@@ -134,6 +241,10 @@ const quiz = {
   revealMeaningBtn:  'Révéler le sens',
   showExamples:      '▼ Voir les exemples',
   hideExamples:      '▲ Masquer les exemples',
+
+  // XpToast
+  claimBtn:         'Récupérer',
+  levelUp:          'Niveau supérieur !',
 }
 
 // ── Stats ─────────────────────────────────────────────────
@@ -180,7 +291,11 @@ const phraseAnalyzer = {
   interval:            'Intervalle',
   days:                'jours',
   nextReview:          'Prochaine revue',
-  
+  status_mastered:     'Maîtrisé',
+  status_learning:     'En cours',
+  status_new:          'Nouveau',
+  status_not_started:  'Pas dans le deck',
+  status_due:          'À réviser',
 }
 
 // ── Reading ───────────────────────────────────────────────
@@ -193,6 +308,30 @@ const reading = {
   readingKatakanaDesc:  'Phrases écrites uniquement en katakana',
   readingMixed:         'Tout',
   readingMixedDesc:     'Japonais naturel avec kanji et kana',
+
+  // Source de fréquence : quelle liste de mots (byLevel/byFrequency/
+  // byMastery, selectStudySource, selectTier, loadError vivent dans
+  // `quiz` ci-dessus — partagés avec les autres sélecteurs de palier
+  // de fréquence de l'application).
+  selectDomain:          'Choisissez une liste de mots',
+  domainVocabDeck:       'Deck sélectionné',
+  domainVocabDecDesc:    "Le vocabulaire JLPT propre à l'application",
+  domainVocabJmdict:     'Dictionnaire complet',
+  domainVocabJmdictDesc: 'Tous les mots du dictionnaire, classés par fréquence',
+  tierLabel:             'Palier {n}',
+  jumpToTier:            'Aller au palier…',
+
+  // Les vraies phrases d'exemple n'ont qu'une traduction anglaise,
+  // quelle que soit la langue de l'interface — voir la note
+  // translation_lang de reading.py. Affiché en préfixe court pour ne
+  // pas laisser croire qu'elle correspond à `lang`.
+  translationEnglish:    'EN',
+
+  // Source "mes cartes" : affiché à la place d'une phrase quand
+  // l'apprenant n'a pas encore assez de vocabulaire en cours/maîtrisé
+  // pour une phrase complète.
+  notEnoughMasteryWords: "Pas encore assez de mots en cours ou maîtrisés — continuez à étudier et revenez pour ce mode.",
+
   readingFetchError:    "Impossible de charger une phrase. Veuillez réessayer.",
   writeWhatYouSaw:      'Écrivez ce que vous avez vu, en romaji',
   romajiPlaceholder:    'e.g. konnichiwa',
@@ -205,6 +344,15 @@ const reading = {
   didYouGetIt:          'L\'avez-vous eu juste ?',
   gradeCorrect:         'J\'ai eu juste',
   gradeIncorrect:       'Je n\'ai pas eu juste',
+
+  // Décomposition mot par mot + sa navigation (ReadingScreen.jsx) —
+  // affichée une fois la phrase corrigée.
+  showBreakdown:        'Voir la décomposition',
+  hideBreakdown:        'Masquer la décomposition',
+  preparingBreakdown:   'Préparation de la décomposition…',
+  jumpToWord:           'Aller à ce mot',
+  previousWord:         'Mot précédent',
+  nextWord:             'Mot suivant',
 }
 
 // ── Reading comprehension ────────────────────────────────────────────
@@ -222,11 +370,31 @@ const readingComprehension = {
   questionTypeInference: "Inférence",
 }
 
+// ── Translation mode ──────────────────────────────────────────────
+// TranslationScreen.jsx réutilise entièrement les clés existantes de
+// reading/quiz pour tout ce que les deux écrans partagent (byLevel*,
+// byFrequency*, byMastery*, selectStudySource, selectLevel,
+// selectDomain, selectTier, domainVocabDeck*/domainVocabJmdict*,
+// tierLabel, jumpToTier, submit, loadError, retry, score, streak,
+// translation, translationEnglish, yourAnswer, gradeCorrect/
+// gradeIncorrect, nextPhrase) — seules les clés vraiment nouvelles
+// vivent ici.
+const translationMode = {
+  translationTitle:      'Traduction',
+  translationDesc:       'Traduisez une phrase en japonais\nNiveau JLPT, fréquence, ou vos propres cartes\nAnalyse IA pour vous auto-évaluer',
+  translationFetchError: "Impossible de charger une phrase. Veuillez réessayer.",
+  japanesePlaceholder:   'Écrivez-la en japonais…',
+  aiAnalysis:            'Analyse IA',
+  analyzingTranslation:  'Analyse de votre traduction…',
+  analysisUnavailable:   'Analyse indisponible — jugez par rapport à la référence ci-dessus.',
+}
+
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Rechercher kanji, kana, ou sens...',
   noResults:         'Aucun résultat pour',
   reading:           'Lecture',
+  romaji:            'Romaji',
   meaning:           'Sens',
   level:             'Niveau',
   listen:            'Écouter',
@@ -238,6 +406,8 @@ const dictionary = {
   dictAll:           'Tout',
   dictKanji:         'Kanji',
   dictVocab:         'Vocabulaire',
+  dictHiragana:      'Hiragana',
+  dictKatakana:      'Katakana',
   composingKanji:    'Composé de ces kanji',
   vocabExamples:     'Utilisé dans ces mots',
   dictBackToRadicals:'← Retour aux radicaux',
@@ -248,6 +418,14 @@ const dictionary = {
   dictRadicalNumber: (n) => `radical #${n}`,
   dictStrokesPlural: 'traits',
   dictStrokeSingular: 'trait',
+  dictionarySubtitle: 'Recherchez n\'importe quel kanji, kana, ou mot de vocabulaire.',
+  dictStrokeIndex:   'Index par nombre de traits',
+  syllabaryMain:     'Syllabaire principal',
+  syllabaryNSolo:    'ん',
+  syllabaryVoiced:   'Sons voisés (dakuten / handakuten)',
+  // Titre/aria-label de l'icône d'action "ouvrir le dictionnaire" sur
+  // une carte révélée (RevealActions dans QuizComponents.jsx).
+  openDictionary:    'Ouvrir la fiche du dictionnaire',
 }
 
 // Reading-comprehension / generic reading labels
@@ -283,6 +461,56 @@ const misc = {
   retry:     'Réessayer',
 }
 
+// ── Profile ───────────────────────────────────────────────
+const profile = {
+  profileTitle:      'Profil',
+  profileStale:      "Impossible d'atteindre le serveur — affichage de vos dernières données connues.",
+  nextLevel:         'Niveau suivant',
+  goals:             'Objectifs',
+  badges:            'Badges',
+  leaderboard:       'Classement',
+  done:              'Terminé',
+  genericError:      'Une erreur est survenue. Réessayez.',
+
+  // Contenu de repli hors-ligne, affiché uniquement quand /api/profile
+  // est inaccessible (voir ProfileScreen.jsx buildMockProfile) —
+  // routé via `t` pour que l'écran de repli respecte la langue de
+  // l'interface comme partout ailleurs.
+  mockGoalDaily:          "Révisions du jour",
+  mockGoalWeekly:         'Révisions de la semaine',
+  mockGoalStreak:         'Maintenez votre série',
+  mockBadgeFirstSteps:    'Premiers pas',
+  mockBadgeWeekStreak:    'Série de 7 jours',
+  mockBadgeMonthStreak:   'Série de 30 jours',
+  mockBadgeKanji100:      '100 cartes maîtrisées',
+  mockBadgePerfectionist: '10 révisions parfaites de suite',
+  mockBadgeDedicated:     '500 révisions',
+}
+
+// ── Settings ──────────────────────────────────────────────
+const settings = {
+  settings:          'Réglages',
+  preferences:       'Préférences',
+  sound:             'Son',
+  ambiance:          'Ambiance',
+  theme:             'Thème',
+  language:          'Langue',
+  account:           'Compte',
+  signOutDesc:       'Déconnectez votre compte sur cet appareil.',
+
+  lightMode:         '☀ Mode clair',
+  darkMode:          '☾ Mode sombre',
+
+  volumeMaster:       'Volume principal',
+  volumeKana:         'Volume kana',
+  volumeVoice:        'Volume voix',
+  volumeEffects:      'Volume effets',
+  volumeUi:           'Volume interface',
+  volumeAmbiance:     "Volume ambiance",
+  volumeJingle:       'Volume jingle',
+  volumeAnnouncements: 'Volume annonces',
+}
+
 // ── Decks ─────────────────────────────────────────────────
 const decks = {
   decks:             'Mes Decks',
@@ -300,14 +528,48 @@ const decks = {
   backPlaceholder:   'Verso / Sens',
   hintPlaceholder:   'Indice (optionnel)',
   notesPlaceholder:  'Notes (optionnel)',
+  // Placeholder du champ recto propre aux decks personnalisés de type
+  // kanji (DeckDetailScreen.jsx).
+  kanjiFrontPlaceholder: 'Kanji (ex : 日)',
+  // Affiché dans le titre du TopBar si le nom du deck n'est pas encore
+  // disponible (ex : cet écran ouvert directement plutôt que depuis
+  // DecksScreen, donc l'état du routeur portant le deck est absent).
+  deckFallbackTitle: 'Deck',
 
   // Deck types
   flashcardType:     'Flashcard',
   flashcardDesc:     'Recto / Verso — toute langue',
   vocabType:         'Vocabulaire',
   vocabDesc:         'Compatible avec le mode JLPT',
+  deckVocabDesc:     'Vocabulaire uniquement — issu des niveaux JLPT',
   kanjiType:         'Kanji',
   kanjiDesc:         'Avec ordre des traits',
+  deckKanjiDesc:     'Kanji uniquement — avec ordre des traits',
+  grammarType:       'Grammaire',
+  deckGrammarDesc:   'Points de grammaire uniquement — issus des niveaux JLPT',
+  mixedType:         'Mixte',
+  mixedDesc:         'Vos propres cartes plus kanji, vocabulaire et grammaire, tous mélangés',
+
+  // Parcourir les cartes existantes (BrowseCardsMenu.jsx)
+  browseBtn:              '📚 Parcourir',
+  browseTitle:            'Parcourir les cartes existantes',
+  browseSubtitle:         "Ajoutez à ce deck des kanji, mots ou points de grammaire déjà présents dans l'application.",
+  browseTabKanji:         '漢字 Kanji',
+  browseTabVocab:         '語彙 Vocabulaire',
+  browseTabGrammar:       '文法 Grammaire',
+  browseAllLevels:        'Tous',
+  browseSearchPlaceholder: 'Rechercher (kanji, kana, sens...)',
+  browseResults:          'Résultats',
+  browseSelectedCount:    '{n} sélectionné(s)',
+  searching:              'Recherche...',
+  alreadyAdded:           'déjà ajouté',
+  adding:                 'Ajout...',
+  addSelected:            'Ajouter ({n})',
+  // Affiché à la place des onglets de source quand le type d'un deck
+  // n'accepte qu'une seule sorte de carte (ex : un deck de type
+  // Kanji) — il n'y a alors rien à choisir, donc les onglets sont
+  // remplacés par ce message.
+  browseOnlyAccepts:      'Ce deck n\'accepte que les cartes de type {type}.',
 
   // Bulk select
   selectAll:         'Tout sélectionner',
@@ -337,10 +599,47 @@ const decks = {
   writePractice:     'Entraînement à l\'écriture',
   revealAnswer:      'Afficher la réponse',
   typeAnswer:        'Tapez votre réponse...',
+  // Labels des phases pour les decks personnalisés vocab/kanji
+  // (StudyScreen.jsx) — K+K→S = Kanji+Kana → Sens, même progression à
+  // trois phases que les decks vocab/kanji intégrés.
+  studyPhase1:       'Phase 1 — K+K→S',
+  studyPhase2:       'Phase 2 — K→S',
+  studyPhase3:       'Phase 3 — S→K',
+}
+
+// ── Examen blanc ──────────────────────────────────────────
+// N'était pas du tout traduit — chaque chaîne ci-dessous ne
+// s'affichait que via son propre repli `?? 'texte anglais'` (voir
+// ExamListScreen/ExamSectionSelect/ExamRunner/ExamResult/
+// QuestionRenderer), si bien qu'un utilisateur francophone voyait ce
+// texte en anglais alors que le reste de l'app restait en français.
+// examListTitle garde les mêmes glyphes japonais dans les deux
+// langues, même convention que appTitle.
+const exam = {
+  examTitle:           'Examen blanc',
+  examDesc:            'Épreuves JLPT réelles, numérisées',
+  examEyebrow:         'Examen blanc',
+  examListTitle:       '過去問モード',
+  examListSubtitle:    'Des épreuves JLPT réelles, numérisées — vocabulaire, grammaire, lecture et écoute, corrigées selon le barème officiel.',
+  examSections:        'sections',
+  examQuestions:       'questions',
+  examNoneAvailable:   'Aucun examen disponible pour le moment.',
+  examSectionSubtitle: 'Choisissez une section pour commencer. Chaque section est corrigée indépendamment.',
+  examSectionEmpty:    'Cette section ne contient encore aucune question.',
+  examAnswered:        'répondu',
+  examFinishSection:   'Terminer la section',
+  examQuestionAbbrev:  'Q',
+  examResultMissing:   "Ce résultat n'est plus disponible — recommencez la section.",
+  examBackToSections:  'Retour aux sections',
+  examRetrySection:    'Recommencer la section',
+  examStarHint:        'Quel élément va à la position ★ ?',
+  examFullSentence:    'Phrase complète :',
+  examAudioPending:    "Extrait audio non encore lié — découpez la piste source et renseignez audioSrc pour cette question.",
 }
 
 export default {
   ...auth,
+  ...landing,
   ...nav,
   ...home,
   ...quiz,
@@ -352,5 +651,9 @@ export default {
   ...phraseAnalyzer,
   ...reading,
   ...readingComprehension,
+  ...translationMode,
+  ...profile,
+  ...settings,
   ...decks,
+  ...exam,
 }

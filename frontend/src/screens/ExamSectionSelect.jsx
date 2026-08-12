@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi } from '../components/sound'
+import { TopBar } from '../components/TopBar'
 import SelectionScreen from '../components/SelectionScreen'
 import ModeSelector from '../components/ModeSelector'
+import { Loading } from '../components/Loading'
 import { getExam, flattenQuestions } from '../exam/examService'
 
 // Route: /exam/:examId
@@ -31,11 +33,9 @@ export default function ExamSectionSelect() {
 
   if (!exam) {
     return (
-      <div className="quiz-loading">
-        <svg className="quiz-loading__ensor" viewBox="0 0 48 48">
-          <circle className="quiz-loading__ensor-circle" cx="24" cy="24" r="19" fill="none" strokeWidth="3" />
-        </svg>
-        <span className="quiz-loading__text">{t.loading ?? 'Loading…'}</span>
+      <div className="screen">
+        <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
+        <Loading />
       </div>
     )
   }
@@ -44,21 +44,24 @@ export default function ExamSectionSelect() {
   const modes = exam.sections.map(section => ({
     key: section.id,
     label: section.labelJp,
-    desc: `${allQuestions.filter(q => q.sectionId === section.id).length} ${t.examQuestions ?? 'questions'} · ~${section.timeLimitMin} min`,
+    desc: `${allQuestions.filter(q => q.sectionId === section.id).length} ${t.examQuestions} · ~${section.timeLimitMin} min`,
     color: SECTION_COLOR[section.id],
   }))
 
   return (
-    <SelectionScreen
-      eyebrow={exam.level}
-      heading={exam.titleJp}
-      subtitle={t.examSectionSubtitle ?? 'Pick a section to start. Each section is scored independently.'}
-    >
-      <ModeSelector
-        modes={modes}
-        onSelect={(sectionId) => { playUi('click-screen-selection'); navigate(`/exam/${examId}/${sectionId}`) }}
-        title=""
-      />
-    </SelectionScreen>
+    <div className="screen">
+      <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
+      <SelectionScreen
+        eyebrow={exam.level}
+        heading={exam.titleJp}
+        subtitle={t.examSectionSubtitle}
+      >
+        <ModeSelector
+          modes={modes}
+          onSelect={(sectionId) => { playUi('click-screen-selection'); navigate(`/exam/${examId}/${sectionId}`) }}
+          title=""
+        />
+      </SelectionScreen>
+    </div>
   )
 }

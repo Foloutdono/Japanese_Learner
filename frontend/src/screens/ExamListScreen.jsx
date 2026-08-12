@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi } from '../components/sound'
+import { TopBar } from '../components/TopBar'
 import SelectionScreen from '../components/SelectionScreen'
 import ModeSelector from '../components/ModeSelector'
+import { Loading } from '../components/Loading'
+import EmptyState from '../components/EmptyState'
 import { listExams } from '../exam/examService'
 
 // Route: /exam
@@ -25,38 +28,31 @@ export default function ExamListScreen() {
   const modes = (exams ?? []).map(exam => ({
     key: exam.id,
     label: exam.titleJp,
-    desc: `${exam.level} · ${exam.sectionCount} ${t.examSections ?? 'sections'} · ${exam.questionCount} ${t.examQuestions ?? 'questions'}`,
+    desc: `${exam.level} · ${exam.sectionCount} ${t.examSections} · ${exam.questionCount} ${t.examQuestions}`,
   }))
 
   return (
-    <SelectionScreen
-      eyebrow={t.examEyebrow ?? 'Mock Exam'}
-      heading={t.examListTitle ?? '過去問モード'}
-      subtitle={t.examListSubtitle ?? 'Full past JLPT papers, digitized — vocabulary, grammar, reading, and listening, scored against the official answer key.'}
-    >
-      {exams === null && (
-        <div className="quiz-loading">
-          <svg className="quiz-loading__ensor" viewBox="0 0 48 48">
-            <circle className="quiz-loading__ensor-circle" cx="24" cy="24" r="19" fill="none" strokeWidth="3" />
-          </svg>
-          <span className="quiz-loading__text">{t.loading ?? 'Loading…'}</span>
-        </div>
-      )}
+    <div className="screen">
+      <TopBar onBack={() => navigate('/')} title={t.examTitle} autoHide />
+      <SelectionScreen
+        eyebrow={t.examEyebrow}
+        heading={t.examListTitle}
+        subtitle={t.examListSubtitle}
+      >
+        {exams === null && <Loading />}
 
-      {exams?.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-state__icon">📄</div>
-          <p className="empty-state__message">{t.examNoneAvailable ?? 'No exams available yet.'}</p>
-        </div>
-      )}
+        {exams?.length === 0 && (
+          <EmptyState icon="📄" message={t.examNoneAvailable} />
+        )}
 
-      {exams?.length > 0 && (
-        <ModeSelector
-          modes={modes}
-          onSelect={(examId) => { playUi('click-screen-selection'); navigate(`/exam/${examId}`) }}
-          title=""
-        />
-      )}
-    </SelectionScreen>
+        {exams?.length > 0 && (
+          <ModeSelector
+            modes={modes}
+            onSelect={(examId) => { playUi('click-screen-selection'); navigate(`/exam/${examId}`) }}
+            title=""
+          />
+        )}
+      </SelectionScreen>
+    </div>
   )
 }

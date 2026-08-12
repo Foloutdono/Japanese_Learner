@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi, playSfx } from '../components/sound'
 import QuestionRenderer from '../exam/QuestionRenderer'
+import EmptyState from '../components/EmptyState'
 import { flattenQuestions } from '../exam/examService'
 
 // Route: /exam/:examId/:sectionId/result
@@ -23,13 +24,11 @@ export default function ExamResult() {
 
   if (!summary || !exam) {
     return (
-      <div className="empty-state">
-        <div className="empty-state__icon">🗒️</div>
-        <p className="empty-state__message">{t.examResultMissing ?? "This result isn't available — start the section again."}</p>
-        <button type="button" className="empty-state__action" onClick={() => navigate(`/exam/${examId}`)}>
-          {t.examBackToSections ?? 'Back to sections'}
-        </button>
-      </div>
+      <EmptyState
+        icon="🗒️"
+        message={t.examResultMissing}
+        action={{ label: t.examBackToSections, onClick: () => navigate(`/exam/${examId}`) }}
+      />
     )
   }
 
@@ -64,7 +63,7 @@ export default function ExamResult() {
                 <button type="button" className="exam-review-row__summary" onClick={() => toggle(r.id)} aria-expanded={isOpen}>
                   <span className="exam-review-row__icon" aria-hidden="true">{r.isCorrect ? '✓' : '✗'}</span>
                   <span className="exam-review-row__number">
-                    {t.examQuestionAbbrev ?? 'Q'}{q.number}
+                    {t.examQuestionAbbrev}{q.number}
                   </span>
                   <span className="exam-review-row__chevron" aria-hidden="true">{isOpen ? '︿' : '﹀'}</span>
                 </button>
@@ -80,14 +79,14 @@ export default function ExamResult() {
 
       <div className="exam-nav-buttons">
         <button type="button" className="exam-nav-btn" onClick={() => { playUi('click-screen-selection'); navigate(`/exam/${examId}`) }}>
-          {t.examBackToSections ?? 'Back to sections'}
+          {t.examBackToSections}
         </button>
         <button
           type="button"
           className="exam-nav-btn exam-nav-btn--primary"
           onClick={() => { playUi('click-screen-selection'); navigate(`/exam/${examId}/${sectionId}`, { replace: true }) }}
         >
-          {t.examRetrySection ?? 'Retry section'}
+          {t.examRetrySection}
         </button>
       </div>
     </div>
