@@ -5,7 +5,7 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { splitReadingTokens } from '../components/Readings'
 import {
-	TYPE_META, isKanaType, entryKey,
+	TYPE_META, isKanaType, entryKey, firstGloss,
 	SearchIcon, DictionaryDetail, LevelBadge,
 } from '../components/DictionaryDetail'
 import { StageBadge } from '../components/StageBadge'
@@ -521,8 +521,12 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 
 // ── Results grid + detail panel (shared by search mode and radical results) ──
 
+// Cards get one gloss, not the whole list. This used to split on ';'
+// alone, which meant a vocab entry (comma-separated — see splitGlosses)
+// never matched and the card printed the entire packed string:
+// "to appear,to leave" rather than "To appear".
 function shortMeaning(meaning) {
-	return meaning?.split(';')[0] ?? ''
+	return firstGloss(meaning)
 }
 
 function shortKana(kana, type) {

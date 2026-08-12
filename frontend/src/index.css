@@ -3410,7 +3410,7 @@ input:focus { border-color: var(--accent2); }
   padding: 14px 6px;
   background: var(--bg-card);
   border: none;
-  border-top: 3px solid var(--rating-color, var(--border));
+  border-bottom-color: 3px solid var(--rating-color, var(--border));
   border-radius: 0;
   color: var(--text-primary);
   font-size: 12px;
@@ -5097,7 +5097,6 @@ input:focus { border-color: var(--accent2); }
   gap: 2px;
   background: var(--border);
   border: 1px solid var(--border);
-  border-top: 3px solid var(--syl-accent, var(--accent));
   border-radius: 10px;
   overflow: hidden;
   /* Falls back to horizontal scroll rather than crushing cells past
@@ -5288,9 +5287,6 @@ input:focus { border-color: var(--accent2); }
   position: relative;
   background: var(--bg-panel);
   color: var(--text-on-panel);
-  border-top: 3px solid var(--type-color, var(--accent));
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -5462,6 +5458,23 @@ input:focus { border-color: var(--accent2); }
   --dict-block-gap: 20px;
 }
 
+/* ── Gloss lists ───────────────────────────────────────────
+   One meaning is really several synonymous glosses, and the decks
+   disagree about the punctuation between them (see splitGlosses in
+   DictionaryDetail.jsx). They're split apart and re-rendered as real
+   elements, joined by this middot — so a kanji's "; "-separated list
+   and a vocab word's ","-separated one look identical on screen, and
+   the separator recedes far enough that the words themselves are what
+   the eye picks up. */
+.dict-gloss__sep {
+  margin: 0 0.45em;
+  color: var(--text-secondary);
+  opacity: 0.45;
+  /* Never let a line break land on the separator instead of between
+     the glosses it divides. */
+  display: inline-block;
+}
+
 /* ── Primary gloss ─────────────────────────────────────────
    The definition for an entry with no JMdict senses list — kanji, and
    any vocab word JMdict returned nothing for. This is the single most
@@ -5484,7 +5497,6 @@ input:focus { border-color: var(--accent2); }
   border-radius: 8px;
   background: var(--bg-main);
   border: 1px solid var(--border);
-  border-top: 2px solid var(--accent4);
   color: var(--text-primary);
   font-family: var(--font-jp);
   font-size: 20px;
