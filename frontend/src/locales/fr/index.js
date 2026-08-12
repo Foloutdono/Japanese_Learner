@@ -87,14 +87,20 @@ const quiz = {
   // Extended mode labels used by vocab/kanji screens
   modeWrite:         'Écriture',
   modeWriteDesc:     'Voir le sens, écrire le kanji',
-  modeQcmKjM:        'QCM (kanji → sens)',
-  modeQcmKjMDesc:    'Le kanji est affiché, choisissez le sens',
-  modeQcmMKj:        'QCM (sens → kanji)',
-  modeQcmMKjDesc:    'Le sens est affiché, choisissez le kanji',
-  modeFcKjM:         'Carte (kanji → sens)',
-  modeFcKjMDesc:     'Le kanji est affiché, révélez le sens',
-  modeFcMKj:         'Carte (sens → kanji)',
-  modeFcMKjDesc:     'Le sens est affiché, révélez le kanji',
+  // Paramétré sur le nom de l'élément étudié ("kanji" ou "mot" — voir
+  // kanjiNoun/wordNoun plus bas et vocabKanjiModes dans quizModes.js).
+  // C'étaient des chaînes fixes disant "kanji" quel que soit l'écran,
+  // si bien que le sélecteur de mode du vocabulaire annonçait
+  // « QCM (kanji → sens) » pour un paquet de mots. Les deux noms sont
+  // masculins, donc "Le" convient dans les deux cas.
+  modeQcmKjM:        (noun) => `QCM (${noun} → sens)`,
+  modeQcmKjMDesc:    (noun) => `Le ${noun} est affiché, choisissez le sens`,
+  modeQcmMKj:        (noun) => `QCM (sens → ${noun})`,
+  modeQcmMKjDesc:    (noun) => `Le sens est affiché, choisissez le ${noun}`,
+  modeFcKjM:         (noun) => `Carte (${noun} → sens)`,
+  modeFcKjMDesc:     (noun) => `Le ${noun} est affiché, révélez le sens`,
+  modeFcMKj:         (noun) => `Carte (sens → ${noun})`,
+  modeFcMKjDesc:     (noun) => `Le sens est affiché, révélez le ${noun}`,
 
   // Writing practice
   writingPractice:   '✏️ Entraînez-vous à écrire ce kanji',

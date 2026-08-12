@@ -1,4 +1,4 @@
-"""
+r"""
 Construit datas/vocab/vocab_jmdict.sqlite3 à partir de vocab_jmdict.json +
 vocab_jmdict_meanings.json (déjà purgé de match_type/term/reading, voir
 optimize_vocab_data.py) + vocab_jmdict_frequency.json.
@@ -18,15 +18,18 @@ Schéma :
     - id : identifiant interne = position de la paire kanji/kana dans
       vocab_jmdict.json (garanti unique). C'est CE champ qui sert de clé
       de tri (freq_rank) et de jointure avec senses — PAS "seq".
-    - seq : le numéro de séquence JMdict d'origine, gardé pour
-      vocab_jmdict_to_id(). /!\ ATTENTION, bug préexistant repéré au
-      passage : seq n'est pas unique par paire kanji/kana (un même
-      headword avec plusieurs lectures partage le même seq — 59 206 cas
-      sur 292 848). vocab_jmdict_to_id() actuel (f"vocab_jmdict_{seq}")
-      peut donc générer le MÊME id de carte SRS pour deux mots
-      différents et faire fusionner leur progression. Ce n'est pas
-      introduit par cette migration, mais ça vaut la peine d'être
-      corrigé séparément (utiliser l'"id" interne à la place de seq).
+    - seq : le numéro de séquence JMdict d'origine. N'est PAS unique
+      par paire kanji/kana (un même headword avec plusieurs lectures
+      partage le même seq — 781 lignes sur 290 groupes de seq, sur
+      212 460 entrées dans la base livrée). vocab_jmdict_to_id() utilisait
+      f"vocab_jmdict_{seq}", ce qui générait le MÊME id de carte SRS
+      pour deux mots différents et fusionnait leur progression — corrigé
+      (2026-08) en utilisant l'"id" interne à la place ; voir la note
+      CARD-ID SCHEME dans vocab_jmdict_data.py et
+      scripts/migrate_jmdict_card_ids.py pour la migration des cartes
+      déjà existantes en production. `seq` reste dans le schéma (gardé
+      pour référence / debug JMdict) mais n'est plus utilisé pour
+      construire un id de carte.
     - meaning : gardé tel quel (1er gloss) pour que dictionary.py liste/
       cherche sans jamais toucher la table senses (le "meaning" recopié
       reste redondant avec senses.blob mais évite de charger les senses

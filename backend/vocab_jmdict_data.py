@@ -17,23 +17,40 @@ lookup; at this table size (292k rows, indexed) that's sub-millisecond,
 irrelevant next to the DB file's own disk I/O.
 
 Public surface kept close to the old module so callers (dictionary.py,
-frequency_data.py) don't need a rewrite, but note the two real changes:
+frequency_data.py) don't need a rewrite, but note the real change:
 
   - VOCAB_JMDICT (the full in-memory list) is GONE. Nothing should hold
     the whole pool in memory at once — callers that used to do
     `for w in VOCAB_JMDICT: ...` need to become a `search()` call
     (indexed SQL, also just plain faster than a 292k-row Python scan).
-  - vocab_jmdict_to_id keeps using entry["seq"] for backwards
-    compatibility with any already-issued card ids, BUT: seq is NOT
-    unique per kanji/kana pair (a headword with several readings
-    shares one seq — 59,206 of 292,848 rows). Two different words can
-    therefore collide onto the same SRS card id. Pre-existing issue,
-    not introduced by this migration — flagging it here since it's
-    easy to fix now that entries also carry a real unique `id`
-    (row position in the source vocab_jmdict.json) if you want to
-    switch vocab_jmdict_to_id to `entry["id"]` instead. Doing so
-    changes card ids for every JMdict-pool card already in a user's
-    SRS state, so it needs an explicit migration, not a silent swap.
+
+CARD-ID SCHEME (2026-08 fix): vocab_jmdict_to_id used to build the SRS
+card id from entry["seq"] — the JMdict sequence number. seq is NOT
+unique per kanji/kana pair (a headword with several readings shares
+one seq: measured 781 rows across 290 seq groups out of 212,460
+entries in the shipped vocab_jmdict.sqlite3 — e.g. seq=1063550 covers
+both シングルス "singles (tennis)" and シングルズ "single people").
+Two different words collided onto the same SRS card id, and studying
+one silently advanced the other.
+
+It now uses entry["id"] instead — the row's own primary key, unique by
+construction, one per kanji/kana pair. This also fixes a second,
+independent bug it happened to mask: reading.py's
+_known_words_for_mastery() decodes the "vocab_jmdict_<n>" suffix and
+passes it straight to get_by_id(), which has ALWAYS queried the `id`
+column. While the suffix was really a seq (range ~1,000,000-9,999,999,
+disjoint from id's range 0-212,459), that lookup returned None for
+essentially every JMdict-pool word — so no JMdict word could ever
+count as "known" for reading-difficulty purposes. Now that the suffix
+really is an id, that lookup starts working.
+
+Changing the id an existing SRS card is stored under orphans any
+progress already recorded against the old (seq-based) id — see
+scripts/migrate_jmdict_card_ids.py, which must be run against the
+production database once this ships. Until that migration has run,
+every returning user's JMdict-pool progress reverts to "new" the
+moment they open a word they'd studied before; the migration exists
+specifically to prevent that.
 """
 import os
 import sqlite3
@@ -72,9 +89,13 @@ def vocab_jmdict_key(entry: dict) -> str:
 
 
 def vocab_jmdict_to_id(entry: dict, _level: str | None = None) -> str:
-    """Unchanged id shape from before this migration — see the seq
-    non-uniqueness caveat in the module docstring."""
-    return f"vocab_jmdict_{entry['seq']}"
+    """entry["id"] (unique per row), not entry["seq"] (shared by
+    multi-reading headwords) — see the module docstring's CARD-ID
+    SCHEME note. Any already-issued seq-based card id needs
+    scripts/migrate_jmdict_card_ids.py run against production before
+    this ships, or existing progress under the old id becomes
+    unreachable."""
+    return f"vocab_jmdict_{entry['id']}"
 
 
 def get_by_id(entry_id: int) -> dict | None:

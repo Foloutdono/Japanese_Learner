@@ -24,7 +24,7 @@ const FETCH_TIMEOUT_MS = 8000
 
 export default function KanaScreen({ session }) {
   const navigate    = useNavigate()
-  const { t, lang } = useLang()
+  const { t } = useLang()
 
   // Map translated labels → API slugs
   const SETS = [

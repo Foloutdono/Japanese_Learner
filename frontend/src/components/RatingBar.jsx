@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useLang } from '../LangContext'
-import { playClick, playSfx } from './sound'
+import { playSfx } from './sound'
 
 export default function RatingBar({ onRate, active }) {
   const { t } = useLang()

@@ -27,7 +27,12 @@ export async function listExams() {
       const mod = await loader()
       const exam = mod.default ?? mod
       return {
-        id: exam.id,
+        // The registry key, not exam.id from inside the JSON: getExam()
+        // resolves against LOCAL_EXAMS[examId], so the key is the only
+        // id that's guaranteed to load. They agree today; if a data file
+        // ever disagreed, returning its internal id here would hand the
+        // picker an id that getExam() then rejects as unknown.
+        id,
         level: exam.level,
         title: exam.title,
         titleJp: exam.titleJp,

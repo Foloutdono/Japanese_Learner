@@ -165,13 +165,6 @@ export function setVolume(category, value) {
   volumeListeners.forEach(fn => fn())
 }
 
-export function resetVolumes() {
-  volumes = { ...DEFAULT_VOLUMES }
-  try { window.localStorage.setItem(VOLUME_KEY, JSON.stringify(volumes)) } catch {}
-  updateAmbianceGain()
-  volumeListeners.forEach(fn => fn())
-}
-
 function subscribeVolumes(fn) {
   volumeListeners.add(fn)
   return () => volumeListeners.delete(fn)

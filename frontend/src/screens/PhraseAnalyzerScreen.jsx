@@ -214,7 +214,7 @@ export default function PhraseAnalyzerScreen({ session }) {
 
             <div className="phrase-words-list">
               {result.words.map((w, i) => (
-                <WordCard key={i} word={w} t={t} onVocabClick={() => openVocabDetail(w)} onKanjiClick={openKanjiDetail} />
+                <WordCard key={i} word={w} onVocabClick={() => openVocabDetail(w)} onKanjiClick={openKanjiDetail} />
               ))}
             </div>
           </>
@@ -241,7 +241,7 @@ function Legend({ t }) {
   )
 }
 
-function WordCard({ word, t, onVocabClick, onKanjiClick }) {
+function WordCard({ word, onVocabClick, onKanjiClick }) {
   return (
     <div className="card phrase-word-card">
       <div className="phrase-word-card__top">

@@ -4,7 +4,7 @@ import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
 import { useProfileSummary } from '../components/userProfileSummary'
 import { levelTitle } from '../levelTitle'
-import { playUi, playAnnouncement, startAmbiance, stopAmbiance } from '../components/sound'
+import { playAnnouncement, startAmbiance, stopAmbiance } from '../components/sound'
 
 // ── Header profile badge ──────────────────────────────────
 // Replaces the old sign-out/theme/lang button row: a single glance at

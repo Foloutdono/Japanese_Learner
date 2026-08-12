@@ -387,6 +387,15 @@ def _known_words_for_mastery(user_id: str) -> list[tuple[str, str, str | None]]:
             continue
         raw_id = unprefixed(card_id, user_id)
         if raw_id.startswith("vocab_jmdict_"):
+            # get_by_id() queries entries.id. vocab_jmdict_to_id() now
+            # builds this suffix from that same `id`, so this resolves
+            # correctly — until the migration in
+            # scripts/migrate_jmdict_card_ids.py has run, though, a
+            # returning user's card_ids here are still the OLD
+            # seq-based suffix (out of get_by_id's id range), so this
+            # silently matches nothing for them. That's the same
+            # pre-migration gap the module docstring describes, not a
+            # new issue introduced here.
             try:
                 entry_id = int(raw_id[len("vocab_jmdict_"):])
             except ValueError:

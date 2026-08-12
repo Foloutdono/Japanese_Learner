@@ -133,7 +133,7 @@ export default function StatsScreen({ session }) {
           </div>
 
           <SectionHeader title={t.globalSummary} />
-          <GlobalSummary stats={stats} extra={extra} t={t} />
+          <GlobalSummary stats={stats} t={t} />
         </div>
       )}
     </div>
@@ -282,7 +282,7 @@ function WeakestItems({ weakest, t }) {
   )
 }
 
-function GlobalSummary({ stats, extra, t }) {
+function GlobalSummary({ stats, t }) {
   let total = 0, newC = 0, learning = 0, mastered = 0, due = 0
 
   for (const modes of Object.values(stats.kana))

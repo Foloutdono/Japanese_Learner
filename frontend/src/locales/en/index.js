@@ -1,5 +1,3 @@
-import { resetVolumes } from "../../components/sound"
-
 // ── App / Auth ────────────────────────────────────────────
 const auth = {
   appTitle:          '日本語',
@@ -203,14 +201,19 @@ const quiz = {
   // Extended mode labels used by vocab/kanji screens
   modeWrite:         'Writing',
   modeWriteDesc:     'See meaning, write the kanji',
-  modeQcmKjM:        'MCQ (kanji → meaning)',
-  modeQcmKjMDesc:    'The kanji is shown, choose the meaning',
-  modeQcmMKj:        'MCQ (meaning → kanji)',
-  modeQcmMKjDesc:    'The meaning is shown, choose the kanji',
-  modeFcKjM:         'Flashcard (kanji → meaning)',
-  modeFcKjMDesc:     'The kanji is shown, reveal the meaning',
-  modeFcMKj:         'Flashcard (meaning → kanji)',
-  modeFcMKjDesc:     'The meaning is shown, reveal the kanji',
+  // Parameterised on what the studied item is called ("kanji" or
+  // "word" — see kanjiNoun/wordNoun below and vocabKanjiModes in
+  // quizModes.js). These were fixed strings saying "kanji" no matter
+  // which screen showed them, so the vocabulary mode picker announced
+  // "MCQ (kanji → meaning)" for a deck of words.
+  modeQcmKjM:        (noun) => `MCQ (${noun} → meaning)`,
+  modeQcmKjMDesc:    (noun) => `The ${noun} is shown, choose the meaning`,
+  modeQcmMKj:        (noun) => `MCQ (meaning → ${noun})`,
+  modeQcmMKjDesc:    (noun) => `The meaning is shown, choose the ${noun}`,
+  modeFcKjM:         (noun) => `Flashcard (${noun} → meaning)`,
+  modeFcKjMDesc:     (noun) => `The ${noun} is shown, reveal the meaning`,
+  modeFcMKj:         (noun) => `Flashcard (meaning → ${noun})`,
+  modeFcMKjDesc:     (noun) => `The meaning is shown, reveal the ${noun}`,
 
   modeFcKanaDesc:     'The kana is shown, reveal the meaning',
   modeQcmKanaDesc:    'The kana is shown, choose the meaning',
@@ -503,7 +506,6 @@ const settings = {
   volumeAmbiance:     'Volume ambiance',
   volumeJingle:       'Volume jingle',
   volumeAnnouncements: 'Volume announcements',
-  resetVolumes:       'Reset volumes',
 }
 
 // ── Decks ─────────────────────────────────────────────────

@@ -11,7 +11,6 @@ import { Loading } from '../components/Loading'
 import { CardTransition } from '../components/CardTransition'
 import { playSfx } from '../components/sound'
 
-const MOBILE_BREAKPOINT = 768
 const DEFAULT_TIER_SIZE = 200
 
 // NOTE ON TRANSLATION KEYS: reuses the same generic study-source keys
@@ -61,21 +60,11 @@ export default function TranslationScreen({ session }) {
   const [analysis, setAnalysis] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
 
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
-  )
-
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
     if (saved === 'light' || saved === 'dark') {
       document.documentElement.setAttribute('data-theme', saved)
     }
-  }, [])
-
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT)
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
   }, [])
 
   const fetchingRef = useRef(false) // guards against duplicate concurrent prefetches
@@ -322,7 +311,6 @@ export default function TranslationScreen({ session }) {
       score={score}
       streak={streak}
       error={error}
-      isMobile={isMobile}
       analysis={analysis}
       analysisLoading={analysisLoading}
       onBack={resetAll}
@@ -340,7 +328,7 @@ export default function TranslationScreen({ session }) {
 // splits it: keeps the selection-screen early-returns above simple.
 function SessionView({
   t, source, level, domain, tier, stage, data, answer, setAnswer,
-  feedback, score, streak, error, isMobile, analysis, analysisLoading,
+  feedback, score, streak, error, analysis, analysisLoading,
   onBack, onStart, submitAnswer, gradeAnswer, next, retry,
 }) {
   const startedRef = useRef(false)

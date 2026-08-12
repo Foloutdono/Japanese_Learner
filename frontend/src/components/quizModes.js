@@ -40,12 +40,16 @@ export function kanaModePicker(t) {
 // both screens previously reused the same t.modeQcmKjM translation key
 // for text that needs to say something different — "mot" vs "kanji" —
 // so a real translation could only ever be right for one of them).
-export function vocabKanjiModes(t, noun) {
+// `noun` defaults to the vocab wording so StudyScreen's own no-argument
+// call (allModeMeta, which merges this with kanjiModes and lets the
+// kanji entries win on the shared keys) still resolves to real text
+// rather than "undefined".
+export function vocabKanjiModes(t, noun = t.wordNoun) {
   return [
-    { key: 'qcm-kj-m',       label: t.modeQcmKjM,   desc: t.modeQcmKjMDesc },
-    { key: 'qcm-m-kj',       label: t.modeQcmMKj,   desc: t.modeQcmMKjDesc },
-    { key: 'flashcard-kj-m', label: t.modeFcKjM, desc: t.modeFcKjMDesc },
-    { key: 'flashcard-m-kj', label: t.modeFcMKj, desc: t.modeFcMKjDesc },
+    { key: 'qcm-kj-m',       label: t.modeQcmKjM(noun), desc: t.modeQcmKjMDesc(noun) },
+    { key: 'qcm-m-kj',       label: t.modeQcmMKj(noun), desc: t.modeQcmMKjDesc(noun) },
+    { key: 'flashcard-kj-m', label: t.modeFcKjM(noun),  desc: t.modeFcKjMDesc(noun) },
+    { key: 'flashcard-m-kj', label: t.modeFcMKj(noun),  desc: t.modeFcMKjDesc(noun) },
   ]
 }
 

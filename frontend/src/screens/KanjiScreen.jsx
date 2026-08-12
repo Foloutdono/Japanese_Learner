@@ -510,7 +510,6 @@ export default function KanjiScreen({ session }) {
               <DrawingQuiz
                 kanji={card.kanji}
                 meaning={formatGlossLine(card.meaning)}
-                kana={card.kana}
                 onValidate={() => {
                   setAnswered(true)
                   setShowRating(true)

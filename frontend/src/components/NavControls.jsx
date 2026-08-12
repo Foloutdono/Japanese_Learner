@@ -3,7 +3,7 @@ import { useLang } from '../LangContext'
 import { LANGUAGES } from '../i18n'
 import {
   useMuted, toggleMute,
-  useVolumes, setVolume, resetVolumes,
+  useVolumes, setVolume,
   playClick, playToggle,
   SOUND_CATEGORIES,
 } from './sound'

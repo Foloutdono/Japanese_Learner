@@ -27,7 +27,6 @@ export default function DictionaryScreen({ session }) {
 	const [hasMore, setHasMore]       = useState(true)
 	const [total, setTotal]           = useState(0)
 	const [selected, setSelected]     = useState(null)
-	const [isMobile, setIsMobile]     = useState(window.innerWidth <= 768)
 
 	// Radical browsing
 	const [radicalGroups, setRadicalGroups]     = useState(null)
@@ -66,13 +65,6 @@ export default function DictionaryScreen({ session }) {
 		if (sentinelRef.current) observerRef.current.observe(sentinelRef.current)
 		return () => observerRef.current?.disconnect()
 	}, [hasMore, loadingMore, loading, page, query, category, selectedRadical])
-
-	useEffect(() => {
-		const handler = () => setIsMobile(window.innerWidth <= 768)
-		handler()
-		window.addEventListener('resize', handler)
-		return () => window.removeEventListener('resize', handler)
-	}, [])
 
 	function fetchPage(p, q, cat, rad, autoSelectChar) {
 		if (p === 0) setLoading(true)
@@ -362,7 +354,6 @@ export default function DictionaryScreen({ session }) {
 							loading={loading}
 							selected={selected}
 							setSelected={setSelected}
-							isMobile={isMobile}
 							onRadicalClick={jumpToRadical}
 							onKanjiClick={jumpToKanji}
 							onVocabClick={jumpToVocab}
@@ -379,7 +370,6 @@ export default function DictionaryScreen({ session }) {
 							query={query}
 							selected={selected}
 							setSelected={setSelected}
-							isMobile={isMobile}
 							sentinelRef={sentinelRef}
 							onRadicalClick={jumpToRadical}
 							onKanjiClick={jumpToKanji}
@@ -600,7 +590,7 @@ function ResultsFiller({ count, cols, glyph }) {
 
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
-	selected, setSelected, isMobile, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, t,
+	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, t,
 }) {
 	const [resultsGridRef, cols] = useResultsColumns()
 
@@ -747,7 +737,7 @@ function SyllabaryTable({ rows, title, byGroup, selected, setSelected }) {
 	)
 }
 
-function SyllabaryGrid({ results, loading, selected, setSelected, isMobile, onRadicalClick, onKanjiClick, onVocabClick, accentColor, t }) {
+function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick, onKanjiClick, onVocabClick, accentColor, t }) {
 	const byGroup = useMemo(() => {
 		const map = {}
 		results.forEach(e => { (map[e.group] ??= []).push(e) })

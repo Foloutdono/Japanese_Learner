@@ -174,7 +174,7 @@ export function DrawingOverlay({ kanji, meaning, onDone, resetKey }) {
 // ── MODE 2: Inline quiz phase (phase 4) ──
 // Shows the prompt, user draws, clicks validate, sees correction, then rates.
 // onValidate() → parent shows RatingBar.
-export function DrawingQuiz({ kanji, meaning, kana, onValidate, resetKey }) {
+export function DrawingQuiz({ kanji, meaning, onValidate, resetKey }) {
   const { t }          = useLang()
   const canvasRef      = useRef(null)
   const [revealed, setRevealed] = useState(false)
