@@ -20,9 +20,9 @@ from kanji_meanings import KANJI_FR
 # how to shape one card payload (choices, fill-in blanks, review
 # previews, ...) for its own mode set — decks.py just needs to route
 # to the right one per card. See SOURCES below.
-from kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
-from vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
-from grammar import VALID_MODES as GRAMMAR_VALID_MODES, _build_grammar_card
+from routes.kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
+from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
+from routes.grammar import VALID_MODES as GRAMMAR_VALID_MODES, _build_grammar_card
 import psycopg2.extras
 
 router = APIRouter()
