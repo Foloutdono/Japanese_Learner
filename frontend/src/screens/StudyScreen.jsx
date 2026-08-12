@@ -20,6 +20,7 @@ import { speakJapanese } from '../components/sound'
 import { vocabKanjiModes, kanjiModes, grammarModePicker } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
 import { useCardSession } from '../hooks/useCardSession'
+import { ChevronIcon, PencilIcon, LightbulbIcon } from '../components/Icons'
 
 const FETCH_TIMEOUT_MS = 8000
 
@@ -406,7 +407,7 @@ export default function StudyScreen({ session }) {
           session={session}
           onReplaySound={c.kana ? () => speakJapanese(c.kana) : undefined}
         />
-        {c.hint && !answered && <div className="study-hint-text">💡 {c.hint}</div>}
+        {c.hint && !answered && <div className="study-hint-text"><LightbulbIcon size={14} /> {c.hint}</div>}
       </PromptCard>
     )
   }
@@ -514,7 +515,7 @@ export default function StudyScreen({ session }) {
             className={`btn-writing-toggle ${drawingEnabled ? 'btn-writing-toggle--on' : 'btn-writing-toggle--off'}`}
             title={t.toggleWriting}
           >
-            ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
+            <PencilIcon size={14} /> {drawingEnabled ? t.writingOn : t.writingOff}
           </button>
         )}
       />
@@ -585,7 +586,7 @@ export default function StudyScreen({ session }) {
             {card.source === 'builtin_grammar' && (flipped || answered) && card.examples?.length > 0 && (
               <div className="grammar-examples">
                 <button onClick={() => setShowEx(e => !e)} className="grammar-examples-toggle">
-                  {showEx ? t.hideExamples : t.showExamples}
+                  <ChevronIcon direction={showEx ? 'up' : 'down'} size={14} /> {showEx ? t.hideExamples : t.showExamples}
                 </button>
                 {showEx && (
                   <div className="grammar-examples__list">

@@ -5,6 +5,7 @@ import { useLang } from '../LangContext'
 import { useProfileSummary } from './userProfileSummary'
 import { levelTitle } from '../levelTitle'
 import { playUi } from './sound'
+import { MenuIcon, CrossIcon, GearIcon, FireIcon } from './Icons'
 
 // ── Burger menu button + slide-in drawer ──────────────────
 // Drop this anywhere (e.g. in TopBar) to get a full nav drawer
@@ -66,7 +67,7 @@ function BurgerProfileRow({ go, active, t }) {
       </span>
 
       <span className="burger-profile-row__streak" title={t.streak}>
-        <span aria-hidden="true">🔥</span> {summary.streak}
+        <FireIcon size={14} /> {summary.streak}
       </span>
     </button>
   )
@@ -100,7 +101,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
         aria-label={t.menu}
         className="burger-toggle"
       >
-        ☰
+        <MenuIcon size={20} />
       </button>
 
       {open && createPortal(
@@ -108,7 +109,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
           <div className="burger-drawer" onClick={e => e.stopPropagation()}>
             <div className="burger-drawer__header">
               <span className="burger-drawer__title">{t.menu}</span>
-              <button className="burger-drawer__close" onClick={() => { playUi('click-close-menu'); close() }}>✕</button>
+              <button className="burger-drawer__close" onClick={() => { playUi('click-close-menu'); close() }} aria-label={t.close}><CrossIcon size={16} /></button>
             </div>
 
             <nav className="burger-drawer__nav">
@@ -139,7 +140,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
                 onClick={() => go('/settings')}
                 className="btn-ghost burger-drawer__settings-btn"
               >
-                <span aria-hidden="true">⚙</span> {t.settings}
+                <GearIcon size={16} /> {t.settings}
               </button>
             </div>
           </div>

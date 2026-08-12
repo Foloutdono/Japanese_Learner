@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { playUi } from '../components/sound'
+import { ImageIcon, SpeakerOffIcon, StarIcon } from '../components/Icons'
 
 // ── QuestionRenderer ─────────────────────────────────────────
 // Takes ONE flattened question (see examService.flattenQuestions) and
@@ -86,7 +87,7 @@ function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed
 function ImagePlaceholder({ alt, compact = false }) {
   return (
     <span className={compact ? 'exam-image-placeholder exam-image-placeholder--compact' : 'exam-image-placeholder'}>
-      <span className="exam-image-placeholder__icon" aria-hidden="true">🖼</span>
+      <ImageIcon size={17} className="exam-image-placeholder__icon" />
       <span className="exam-image-placeholder__alt">{alt}</span>
     </span>
   )
@@ -140,7 +141,7 @@ function SentenceOrderBlock({ question, selected, onSelect, revealed }) {
       <div className="exam-order-slots" aria-hidden="true">
         {order.map((pieceId, i) => (
           <span key={i} className={`exam-order-slot${i === starIndex ? ' exam-order-slot--star' : ''}`}>
-            {i === starIndex ? '★' : '＿＿＿'}
+            {i === starIndex ? <StarIcon size={15} /> : '＿＿＿'}
           </span>
         ))}
       </div>
@@ -298,7 +299,7 @@ function AudioBar({ src, audioRef, t }) {
   if (!src) {
     return (
       <div className="exam-audio-bar exam-audio-bar--pending">
-        <span aria-hidden="true">🔈</span>
+        <SpeakerOffIcon size={16} />
         <span>{t.examAudioPending}</span>
       </div>
     )

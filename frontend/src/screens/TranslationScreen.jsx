@@ -10,6 +10,7 @@ import PromptCard from '../components/PromptCard'
 import { Loading } from '../components/Loading'
 import { CardTransition } from '../components/CardTransition'
 import { playSfx } from '../components/sound'
+import { FireIcon } from '../components/Icons'
 
 const DEFAULT_TIER_SIZE = 200
 
@@ -358,7 +359,7 @@ function SessionView({
           </div>
           {streak > 1 && (
             <div className="trn-streak" title={t.streak ?? 'Streak'}>
-              🔥 {streak}
+              <FireIcon size={14} /> {streak}
             </div>
           )}
         </div>

@@ -5,6 +5,7 @@ import { playUi, playSfx } from '../components/sound'
 import QuestionRenderer from '../exam/QuestionRenderer'
 import EmptyState from '../components/EmptyState'
 import { flattenQuestions } from '../exam/examService'
+import { CheckIcon, CrossIcon, ChevronIcon, PageIcon } from '../components/Icons'
 
 // Route: /exam/:examId/:sectionId/result
 // Reads its data from router state (handed off by ExamRunner.finish())
@@ -25,7 +26,7 @@ export default function ExamResult() {
   if (!summary || !exam) {
     return (
       <EmptyState
-        icon="🗒️"
+        icon={<PageIcon size={40} />}
         message={t.examResultMissing}
         action={{ label: t.examBackToSections, onClick: () => navigate(`/exam/${examId}`) }}
       />
@@ -61,11 +62,11 @@ export default function ExamResult() {
             return (
               <div key={r.id} className={`exam-review-row${r.isCorrect ? ' exam-review-row--correct' : ' exam-review-row--wrong'}`}>
                 <button type="button" className="exam-review-row__summary" onClick={() => toggle(r.id)} aria-expanded={isOpen}>
-                  <span className="exam-review-row__icon" aria-hidden="true">{r.isCorrect ? '✓' : '✗'}</span>
+                  <span className="exam-review-row__icon" aria-hidden="true">{r.isCorrect ? <CheckIcon size={14} /> : <CrossIcon size={14} />}</span>
                   <span className="exam-review-row__number">
                     {t.examQuestionAbbrev}{q.number}
                   </span>
-                  <span className="exam-review-row__chevron" aria-hidden="true">{isOpen ? '︿' : '﹀'}</span>
+                  <span className="exam-review-row__chevron" aria-hidden="true"><ChevronIcon direction={isOpen ? 'up' : 'down'} size={14} /></span>
                 </button>
                 {isOpen && (
                   <div className="exam-review-row__detail">

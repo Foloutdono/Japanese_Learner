@@ -5,6 +5,7 @@ import { getNavLinks } from '../navLinks'
 import { useProfileSummary } from '../components/userProfileSummary'
 import { levelTitle } from '../levelTitle'
 import { playAnnouncement, startAmbiance, stopAmbiance } from '../components/sound'
+import { FireIcon, GearIcon, LightbulbIcon } from '../components/Icons'
 
 // ── Header profile badge ──────────────────────────────────
 // Replaces the old sign-out/theme/lang button row: a single glance at
@@ -65,7 +66,7 @@ function HomeProfileBadge() {
 
       {summary.streak > 0 && (
         <span className="home-profile-badge__streak" title={t.streak}>
-          <span aria-hidden="true">🔥</span> {summary.streak}
+          <FireIcon size={14} /> {summary.streak}
         </span>
       )}
     </button>
@@ -98,7 +99,7 @@ export default function HomeScreen() {
             title={t.settings}
             aria-label={t.settings}
           >
-            ⚙
+            <GearIcon size={17} />
           </button>
         </div>
       </header>
@@ -124,7 +125,7 @@ export default function HomeScreen() {
         </div>
       </main>
 
-      <footer className="home-footer">{t.tip}</footer>
+      <footer className="home-footer"><LightbulbIcon size={14} /> {t.tip}</footer>
     </div>
   )
 }

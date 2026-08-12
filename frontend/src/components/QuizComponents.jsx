@@ -5,6 +5,7 @@ import { Readings, ReadingGroup } from './Readings'
 import { glossParts } from './gloss'
 import { Loading } from './Loading'
 import { DictionaryLookupSheet, SearchIcon, SpeakIcon, speakJapanese } from './DictionaryDetail'
+import { CheckCircleIcon, XCircleIcon, ChevronIcon } from './Icons'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -171,7 +172,9 @@ export function TypeInput({
       )}
       {submitted && (
         <div className={`quiz-result ${isCorrect ? 'quiz-result--correct' : 'quiz-result--wrong'}`}>
-          {isCorrect ? t.correct : `${t.wrong} ${answer}`}
+          {isCorrect
+            ? <><CheckCircleIcon size={16} /> {t.correct}</>
+            : <><XCircleIcon size={16} /> {t.wrong} {answer}</>}
           {!isCorrect && wrongExtra}
         </div>
       )}
@@ -208,10 +211,10 @@ export function DoneMessage({ onBack }) {
   const { t } = useLang()
   return (
     <div className="quiz-done">
-      {t.quizComplete}
+      <CheckCircleIcon size={22} /> {t.quizComplete}
       <br /><br />
       <button onClick={() => { playClick(); onBack() }} className="btn-panel">
-        {t.backToMenu}
+        <ChevronIcon direction="left" size={14} /> {t.backToMenu}
       </button>
     </div>
   )

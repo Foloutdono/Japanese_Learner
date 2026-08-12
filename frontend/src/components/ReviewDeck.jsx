@@ -5,6 +5,7 @@ import { CardTransition } from './CardTransition'
 import PromptCard from './PromptCard'
 import { Loading } from './Loading'
 import EmptyState from './EmptyState'
+import { ChevronIcon, OpenBookIcon } from './Icons'
 
 // ── Review deck (self-paced, ungraded browse) ──────────────
 // The counterpart to the graded quiz flow (useCardSession + RatingBar
@@ -35,7 +36,7 @@ export default function ReviewDeck({
   if (!cards || cards.length === 0) {
     return (
       <EmptyState
-        icon="📖"
+        icon={<OpenBookIcon size={40} />}
         message={t.reviewEmpty}
         action={{ label: t.backToMenu, onClick: onExit }}
       />
@@ -67,10 +68,10 @@ export default function ReviewDeck({
       </CardTransition>
       <div className="review-deck__nav">
         <button onClick={goPrev} disabled={safeIndex === 0} className="btn-panel">
-          {t.reviewPrev}
+          <ChevronIcon direction="left" size={14} /> {t.reviewPrev}
         </button>
         <button onClick={goNext} disabled={safeIndex === cards.length - 1} className="btn-panel">
-          {t.reviewNext}
+          {t.reviewNext} <ChevronIcon direction="right" size={14} />
         </button>
       </div>
     </>

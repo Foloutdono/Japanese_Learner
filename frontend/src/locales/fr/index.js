@@ -46,23 +46,28 @@ const landing = {
 }
 
 // ── Navigation ────────────────────────────────────────────
+// Ces valeurs portaient autrefois leur propre glyphe intégré à la
+// chaîne (ex : save: '✓ Enregistrer') — le glyphe est maintenant une
+// vraie <Icon/> rendue par le bouton qui affiche le texte, pas du
+// texte, donc chaque langue obtient la même icône plutôt qu'un
+// caractère dépendant de la police.
 const nav = {
   menu:              'Menu',
-  back:              '←',
+  back:              'Retour',
   cancel:            'Annuler',
-  save:              '✓ Enregistrer',
-  delete:            '🗑 Supprimer',
-  edit:              '✏️ Modifier',
+  save:              'Enregistrer',
+  delete:            'Supprimer',
+  edit:              'Modifier',
   close:             'Fermer',
   loading:           'Chargement...',
-  import:            '📥 Importer',
-  select:            '☑ Sélectionner',
+  import:            'Importer',
+  select:            'Sélectionner',
 }
 
 // ── Home screen ───────────────────────────────────────────
 const home = {
-  tip:               '💡 Des sessions courtes (15-20 min) mais régulières — la SRS gère tout automatiquement.',
-  start:             'Commencer →',
+  tip:               'Des sessions courtes (15-20 min) mais régulières — la SRS gère tout automatiquement.',
+  start:             'Commencer',
   homeTitle:         'Accueil',
   homeDesc:          'Retour au menu principal',
   kanaTitle:         'Kana',
@@ -164,11 +169,15 @@ const quiz = {
   tapToFlip:          'Touchez pour retourner',
   tapToReveal:        'Touchez pour révéler',
 
-  // Feedback
-  correct:           '✅ Correct !',
-  wrong:             '❌ Réponse :',
-  quizComplete:      '✅ Toutes les cartes sont à jour !',
-  backToMenu:        '← Retour au menu',
+  // Feedback — les glyphes ❌/✅/← qu'elles portaient autrefois en
+  // ligne sont maintenant de vraies <Icon/> rendues par ce qui
+  // affiche le texte (voir TypeInput/DoneMessage dans
+  // QuizComponents.jsx), plus intégrées à la chaîne.
+  // (correct: retiré ici — cette clé n'était jamais atteinte, voir
+  // reading.correct plus bas qui gagne toujours dans l'ordre du spread)
+  wrong:             'Réponse :',
+  quizComplete:      'Toutes les cartes sont à jour !',
+  backToMenu:        'Retour au menu',
 
   // Rating bar
   to:                'à',
@@ -215,18 +224,18 @@ const quiz = {
   modeReview:        'Révision',
   modeReviewDesc:    'Parcourez les cartes que vous connaissez déjà, à votre rythme — sans notation',
   reviewEmpty:       "Vous n'avez encore étudié aucune de ces cartes — revenez après votre première session.",
-  reviewPrev:        '‹ Précédent',
-  reviewNext:        'Suivant ›',
+  reviewPrev:        'Précédent',
+  reviewNext:        'Suivant',
 
   // Writing practice
-  writingPractice:   '✏️ Entraînez-vous à écrire ce kanji',
+  writingPractice:   'Entraînez-vous à écrire ce kanji',
   writingOn:         'Écriture ON',
   writingOff:        'Écriture OFF',
   toggleWriting:     'Activer/désactiver l\'écriture',
   yourDrawing:       'Votre dessin',
   strokeOrder:       'Ordre des traits',
-  continueBtn:       "✓ C'est bon, continuer",
-  eraseBtn:          '↺ Effacer',
+  continueBtn:       "C'est bon, continuer",
+  eraseBtn:          'Effacer',
 
   // Misc
   strokes:           'traits',
@@ -239,8 +248,8 @@ const quiz = {
   revealSentence:    'Complétez la phrase ci-dessous',
   revealAnswer:      'Révéler la réponse',
   revealMeaningBtn:  'Révéler le sens',
-  showExamples:      '▼ Voir les exemples',
-  hideExamples:      '▲ Masquer les exemples',
+  showExamples:      'Voir les exemples',
+  hideExamples:      'Masquer les exemples',
 
   // XpToast
   claimBtn:         'Récupérer',
@@ -250,7 +259,7 @@ const quiz = {
 // ── Stats ─────────────────────────────────────────────────
 const stats = {
   statistics:         'Statistiques',
-  resetStats:         '🗑 Tout réinitialiser',
+  resetStats:         'Tout réinitialiser',
   resetConfirm:       'Effacer TOUTE la progression ? Cette action est irréversible.',
   kana:               'Kana',
   jlptVocab:          'Vocabulaire JLPT',
@@ -258,7 +267,7 @@ const stats = {
   new:                'Nouveau',
   learning:           'En cours',
   mastered:           'Maîtrisé',
-  dueNow:             '⚡ À réviser',
+  dueNow:             'À réviser',
   total:              'Total',
   overview:           'Aperçu',
   streak:             'Série',
@@ -410,7 +419,7 @@ const dictionary = {
   dictKatakana:      'Katakana',
   composingKanji:    'Composé de ces kanji',
   vocabExamples:     'Utilisé dans ces mots',
-  dictBackToRadicals:'← Retour aux radicaux',
+  dictBackToRadicals:'Retour aux radicaux',
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',
   dictionaryPlaceholderRadical: 'Filtrer ces résultats par radical...',
@@ -498,8 +507,10 @@ const settings = {
   account:           'Compte',
   signOutDesc:       'Déconnectez votre compte sur cet appareil.',
 
-  lightMode:         '☀ Mode clair',
-  darkMode:          '☾ Mode sombre',
+  // N'apparaît que comme texte title/aria-label (NavControls.jsx) —
+  // le bouton visible est déjà une vraie icône SVG IconSun/IconMoon.
+  lightMode:         'Mode clair',
+  darkMode:          'Mode sombre',
 
   volumeMaster:       'Volume principal',
   volumeKana:         'Volume kana',
@@ -518,7 +529,7 @@ const decks = {
   deckNamePlaceholder: 'Nom du deck...',
   noDecks:           'Aucun deck pour l\'instant.',
   createFirstDeck:   'Créez votre premier deck ci-dessus.',
-  study:             '▶ Étudier',
+  study:             'Étudier',
   addCard:           '+ Ajouter',
   newCard:           'Nouvelle carte',
   editCard:          'Modifier la carte',
@@ -551,7 +562,7 @@ const decks = {
   mixedDesc:         'Vos propres cartes plus kanji, vocabulaire et grammaire, tous mélangés',
 
   // Parcourir les cartes existantes (BrowseCardsMenu.jsx)
-  browseBtn:              '📚 Parcourir',
+  browseBtn:              'Parcourir',
   browseTitle:            'Parcourir les cartes existantes',
   browseSubtitle:         "Ajoutez à ce deck des kanji, mots ou points de grammaire déjà présents dans l'application.",
   browseTabKanji:         '漢字 Kanji',
@@ -588,14 +599,14 @@ const decks = {
   newRow:            'Nouvelle ligne',
   semicolon:         'Point-virgule',
   importBtn:         'Importer',
-  importing:         '⏳ Importation...',
+  importing:         'Importation...',
   cards:             'cartes',
   andMore:           '... et {n} autres',
 
   // Study screen
   studyMode:         "Mode d'étude",
   mixWithJLPT:       'Mélanger avec les listes JLPT',
-  startSession:      '▶ Commencer',
+  startSession:      'Commencer',
   writePractice:     'Entraînement à l\'écriture',
   revealAnswer:      'Afficher la réponse',
   typeAnswer:        'Tapez votre réponse...',
@@ -632,7 +643,7 @@ const exam = {
   examResultMissing:   "Ce résultat n'est plus disponible — recommencez la section.",
   examBackToSections:  'Retour aux sections',
   examRetrySection:    'Recommencer la section',
-  examStarHint:        'Quel élément va à la position ★ ?',
+  examStarHint:        "Quel élément va à la position marquée d'une étoile ?",
   examFullSentence:    'Phrase complète :',
   examAudioPending:    "Extrait audio non encore lié — découpez la piste source et renseignez audioSrc pour cette question.",
 }

@@ -45,23 +45,27 @@ const landing = {
 }
 
 // ── Navigation ────────────────────────────────────────────
+// These used to carry their own glyph baked into the string (e.g.
+// save: '✓ Save') — the glyph is now a real <Icon/> rendered by
+// whatever button shows the label, not text, so every language gets
+// the same icon instead of a font-dependent character.
 const nav = {
   menu:              'Menu',
-  back:              '←',
+  back:              'Back',
   cancel:            'Cancel',
-  save:              '✓ Save',
-  delete:            '🗑 Delete',
-  edit:              '✏️ Edit',
+  save:              'Save',
+  delete:            'Delete',
+  edit:              'Edit',
   close:             'Close',
   loading:           'Loading...',
-  import:            '📥 Import',
-  select:            '☑ Select',
+  import:            'Import',
+  select:            'Select',
 }
 
 // ── Home screen ───────────────────────────────────────────
 const home = {
-  tip:               '💡 Short sessions (15-20 min) but regular — SRS schedules everything automatically.',
-  start:             'Start →',
+  tip:               'Short sessions (15-20 min) but regular — SRS schedules everything automatically.',
+  start:             'Start',
   homeTitle:         'Home',
   kanaTitle:         'Kana',
   kanaDesc:          'Hiragana & Katakana\nbasic + combinations\nMCQ then free writing',
@@ -180,10 +184,13 @@ const quiz = {
   tapToFlip:          'Tap to flip',
   tapToReveal:         'Tap to reveal',
 
-  // Feedback
-  wrong:             '❌ Answer:',
-  quizComplete:      '✅ All cards are up to date!',
-  backToMenu:        '← Back to menu',
+  // Feedback — the ❌/✅/← glyphs these used to carry inline are now
+  // real <Icon/>s rendered by whatever shows the text (see
+  // QuizComponents.jsx's TypeInput/DoneMessage), not baked into the
+  // string.
+  wrong:             'Answer:',
+  quizComplete:      'All cards are up to date!',
+  backToMenu:        'Back to menu',
 
   // Rating bar
   to:                'to',
@@ -229,18 +236,18 @@ const quiz = {
   modeReview:        'Review',
   modeReviewDesc:    'Flip through the cards you already know, at your own pace — no grading',
   reviewEmpty:       "You haven't studied any of these cards yet — come back after your first session.",
-  reviewPrev:        '‹ Previous',
-  reviewNext:        'Next ›',
+  reviewPrev:        'Previous',
+  reviewNext:        'Next',
 
   // Writing practice
-  writingPractice:   '✏️ Practice writing this kanji',
+  writingPractice:   'Practice writing this kanji',
   writingOn:         'Writing ON',
   writingOff:        'Writing OFF',
   toggleWriting:     'Toggle writing practice',
   yourDrawing:       'Your drawing',
   strokeOrder:       'Stroke order',
-  continueBtn:       '✓ Got it, continue',
-  eraseBtn:          '↺ Erase',
+  continueBtn:       'Got it, continue',
+  eraseBtn:          'Erase',
 
   // Misc
   strokes:           'strokes',
@@ -252,8 +259,8 @@ const quiz = {
   revealMeaning:     'What is the meaning of this rule?',
   revealSentence:    'Complete the sentence below',
   revealMeaningBtn:  'Reveal meaning',
-  showExamples:      '▼ Show examples',
-  hideExamples:      '▲ Hide examples',
+  showExamples:      'Show examples',
+  hideExamples:      'Hide examples',
 
   // XpToast
   claimBtn:         'Claim',
@@ -265,7 +272,7 @@ const quiz = {
 // ── Stats ─────────────────────────────────────────────────
 const stats = {
   statistics:        'Statistics',
-  resetStats:        '🗑 Reset all',
+  resetStats:        'Reset all',
   resetConfirm:      'Erase ALL progress? This action is irreversible.',
   kana:              'Kana',
   jlptVocab:         'JLPT Vocabulary',
@@ -273,7 +280,7 @@ const stats = {
   new:               'New',
   learning:          'In progress',
   mastered:          'Mastered',
-  dueNow:            '⚡ Due now',
+  dueNow:            'Due now',
   total:             'Total',
   overview:        'Overview',
   streak:          'Streak',
@@ -410,7 +417,7 @@ const dictionary = {
   dictVocab:         'Vocabulary',
   dictHiragana:      'Hiragana',
   dictKatakana:      'Katakana',
-  dictBackToRadicals:'← Back to radicals',
+  dictBackToRadicals:'Back to radicals',
   dictModeSearch:    'Search',
   dictModeRadical:   'Radical',
   dictionaryPlaceholderRadical: 'Filter these results by radical...',
@@ -504,8 +511,10 @@ const settings = {
   account:           'Account',
   signOutDesc:       'Sign out of your account on this device.',
 
-  lightMode:         '☀ Light mode',
-  darkMode:          '☾ Dark mode',
+  // Only ever surfaces as title/aria-label text (NavControls.jsx) —
+  // the visible toggle is already a real IconSun/IconMoon SVG.
+  lightMode:         'Light mode',
+  darkMode:          'Dark mode',
 
   volumeMaster:       'Master volume',
   volumeKana:         'Volume kana',
@@ -524,7 +533,7 @@ const decks = {
   deckNamePlaceholder: 'Deck name...',
   noDecks:           'No decks yet.',
   createFirstDeck:   'Create your first deck above.',
-  study:             '▶ Study',
+  study:             'Study',
   addCard:           '+ Add card',
   newCard:           'New card',
   editCard:          'Edit card',
@@ -562,7 +571,7 @@ const decks = {
   mixedDesc:         'Your own cards plus kanji, vocab and grammar, all mixed',
 
   // Browse existing cards (BrowseCardsMenu.jsx)
-  browseBtn:              '📚 Browse',
+  browseBtn:              'Browse',
   browseTitle:            'Browse existing cards',
   browseSubtitle:         'Add kanji, words, or grammar points already in the app to this deck.',
   browseTabKanji:         '漢字 Kanji',
@@ -601,14 +610,14 @@ const decks = {
   newRow:            'New row',
   semicolon:         'Semicolon',
   importBtn:         'Import',
-  importing:         '⏳ Importing...',
+  importing:         'Importing...',
   cards:             'cards',
   andMore:           '... and {n} more',
 
   // Study screen
   studyMode:         'Study mode',
   mixWithJLPT:       'Mix with JLPT content (optional)',
-  startSession:      '▶ Start',
+  startSession:      'Start',
   writePractice:     'Writing practice',
   revealAnswer:      'Reveal answer',
   typeAnswer:        'Type your answer...',
@@ -644,7 +653,7 @@ const exam = {
   examResultMissing:   "This result isn't available — start the section again.",
   examBackToSections:  'Back to sections',
   examRetrySection:    'Retry section',
-  examStarHint:        'Which piece belongs in the ★ position?',
+  examStarHint:        'Which piece belongs in the starred position?',
   examFullSentence:    'Full sentence:',
   examAudioPending:    'Audio clip not linked yet — split the source track and set audioSrc for this question.',
 }

@@ -6,6 +6,7 @@ import { Readings, Furigana } from './Readings'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { StageBadge } from './StageBadge'
 import { GlossList, firstGloss } from './gloss'
+import { BoltIcon } from './Icons'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -603,7 +604,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
             <div className="dict-detail__practice-label">
               {t.cardStats}
               {entry.status.due && (
-                <span className="dict-detail__due-note">{t.dueNow}</span>
+                <span className="dict-detail__due-note"><BoltIcon size={12} /> {t.dueNow}</span>
               )}
             </div>
             <div className="dict-stat-grid">

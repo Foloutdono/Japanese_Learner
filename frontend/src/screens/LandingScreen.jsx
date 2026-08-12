@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useLang } from '../LangContext'
 import { getNavLinks } from '../navLinks'
+import { LightbulbIcon } from '../components/Icons'
 
 // ── Landing screen ──────────────────────────────────────────
 // Shown to signed-out visitors before AuthScreen: what the app is,
@@ -135,7 +136,7 @@ export default function LandingScreen({ onContinue }) {
         <button type="button" onClick={onContinue} className="landing-hero__cta">
           {t.landingCta}
         </button>
-        <p className="landing-footer__tip">{t.tip}</p>
+        <p className="landing-footer__tip"><LightbulbIcon size={14} /> {t.tip}</p>
       </footer>
     </div>
   )

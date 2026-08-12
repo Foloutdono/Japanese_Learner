@@ -5,6 +5,7 @@ import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import EmptyState from '../components/EmptyState'
 import { Loading } from '../components/Loading'
+import { TrashIcon, PencilIcon, PlayIcon, BooksIcon } from '../components/Icons'
 
 export default function DecksScreen({ session }) {
   const navigate  = useNavigate()
@@ -120,7 +121,7 @@ export default function DecksScreen({ session }) {
         {loading && <Loading />}
 
         {!loading && decks.length === 0 && (
-          <EmptyState icon="📚" message={t.noDecks} hint={t.createFirstDeck} />
+          <EmptyState icon={<BooksIcon size={40} />} message={t.noDecks} hint={t.createFirstDeck} />
         )}
 
         {!loading && decks.length > 0 && (
@@ -134,8 +135,8 @@ export default function DecksScreen({ session }) {
                       {typeLabel(deck.type)}
                     </div>
                   </div>
-                  <button onClick={() => deleteDeck(deck.id, deck.name)} className="deck-card__delete">
-                    🗑
+                  <button onClick={() => deleteDeck(deck.id, deck.name)} className="deck-card__delete" aria-label={t.delete} title={t.delete}>
+                    <TrashIcon size={16} />
                   </button>
                 </div>
                 <div className="deck-card__count">
@@ -145,12 +146,12 @@ export default function DecksScreen({ session }) {
                   <button
                     onClick={() => navigate(`/decks/${deck.id}`, { state: { deck } })}
                     className="deck-card__edit-btn">
-                    {t.edit}
+                    <PencilIcon size={14} /> {t.edit}
                   </button>
                   <button
                     onClick={() => navigate(`/decks/${deck.id}/study`, { state: { deck } })}
                     className="deck-card__study-btn">
-                    {t.study}
+                    <PlayIcon size={14} /> {t.study}
                   </button>
                 </div>
               </div>

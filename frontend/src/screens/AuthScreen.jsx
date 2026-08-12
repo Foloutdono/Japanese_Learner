@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
+import { ChevronIcon } from '../components/Icons'
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 
@@ -67,8 +68,8 @@ export default function AuthScreen({ onBack } = {}) {
   return (
     <div className="auth-screen">
       {onBack && (
-        <button type="button" onClick={onBack} className="auth-back-btn">
-          {t.back}
+        <button type="button" onClick={onBack} className="auth-back-btn" aria-label={t.back} title={t.back}>
+          <ChevronIcon direction="left" size={16} />
         </button>
       )}
 

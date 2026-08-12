@@ -1,14 +1,16 @@
+import { InboxIcon } from './Icons'
+
 /**
  * EmptyState
  * Centered icon + message + optional hint, used when a list is empty.
  *
  * Props:
- *   icon    — emoji or string (default '📭')
+ *   icon    — a <Icon/> element (see Icons.jsx), default <InboxIcon/>
  *   message — primary text
  *   hint    — secondary smaller text (optional)
  *   action  — { label, onClick } to render an action button (optional)
  */
-export default function EmptyState({ icon = '📭', message, hint, action }) {
+export default function EmptyState({ icon = <InboxIcon size={40} />, message, hint, action }) {
   return (
     <div className="empty-state">
       <div className="empty-state__icon">{icon}</div>

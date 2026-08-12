@@ -23,6 +23,7 @@ import { speakJapanese } from '../components/sound'
 import { kanjiModes, reviewMode } from '../components/quizModes'
 import { applyXpGain } from '../components/userProfileSummary'
 import { useCardSession } from '../hooks/useCardSession'
+import { PencilIcon } from '../components/Icons'
 
 const FETCH_TIMEOUT_MS = 8000
 
@@ -447,7 +448,7 @@ export default function KanjiScreen({ session }) {
             className={`btn-writing-toggle ${drawingEnabled ? 'btn-writing-toggle--on' : 'btn-writing-toggle--off'}`}
             title={t.toggleWriting}
           >
-            ✏️ {drawingEnabled ? t.writingOn : t.writingOff}
+            <PencilIcon size={14} /> {drawingEnabled ? t.writingOn : t.writingOff}
           </button>
         }
       />

@@ -4,6 +4,7 @@ import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/TopBar'
 import { Loading } from '../components/Loading'
+import { CrossIcon } from '../components/Icons'
 
 const STATUS_COLORS = {
   mastered:     'var(--success)',
@@ -174,8 +175,9 @@ export default function PhraseAnalyzerScreen({ session }) {
                 <button
                   onClick={e => deleteHistoryEntry(h.id, e)}
                   className="phrase-history-delete"
+                  aria-label={t.delete}
                 >
-                  ✕
+                  <CrossIcon size={13} />
                 </button>
               </div>
             ))}
@@ -313,7 +315,7 @@ function DetailPanel({ detail, t, onClose }) {
       >
         <div className="detail-header">
           <div className="detail-title">{title}</div>
-          <button onClick={onClose} className="detail-close-btn">✕</button>
+          <button onClick={onClose} className="detail-close-btn" aria-label={t.close}><CrossIcon size={16} /></button>
         </div>
 
         {level && (

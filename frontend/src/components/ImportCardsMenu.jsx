@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useLang } from '../LangContext'
 import { playClick } from './sound'
+import { CrossIcon, ChevronIcon } from './Icons'
 
 export default function ImportCardsMenu({ onImport, onClose }) {
   const { t } = useLang()
@@ -64,8 +65,8 @@ export default function ImportCardsMenu({ onImport, onClose }) {
         {/* Header */}
         <div className="import-header">
           <div className="import-header__title">{t.importTitle}</div>
-          <button onClick={() => { playClick(); onClose() }} className="import-header__close">
-            ✕
+          <button onClick={() => { playClick(); onClose() }} className="import-header__close" aria-label={t.close}>
+            <CrossIcon size={16} />
           </button>
         </div>
         <div className="import-subtitle">
@@ -119,7 +120,7 @@ export default function ImportCardsMenu({ onImport, onClose }) {
               {preview.slice(0, 20).map((c, i) => (
                 <div key={i} className="import-preview-row">
                   <span className="import-preview-row__front">{c.front}</span>
-                  <span className="import-preview-row__arrow">→</span>
+                  <span className="import-preview-row__arrow"><ChevronIcon direction="right" size={13} /></span>
                   <span className="import-preview-row__back">{c.back}</span>
                   {c.hint && <span className="import-preview-row__hint">{c.hint}</span>}
                 </div>

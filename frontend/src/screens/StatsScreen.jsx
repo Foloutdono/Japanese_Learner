@@ -6,6 +6,7 @@ import { TopBar } from '../components/TopBar'
 import { Loading } from '../components/Loading'
 import { SectionHeader } from '../components/SectionHeader'
 import { KANA_MODE_KEYS, kanaModes, vocabKanjiStatsLabels } from '../components/quizModes'
+import { FireIcon, BoltIcon } from '../components/Icons'
 
 export default function StatsScreen({ session }) {
   const navigate    = useNavigate()
@@ -199,7 +200,7 @@ function StatCell({ s, t, onStartReview }) {
             onClick={onStartReview}
             title={t.reviewNow}
           >
-            ⚡{s.due_now}
+            <BoltIcon size={12} /> {s.due_now}
           </button>
         )}
       </div>
@@ -213,7 +214,7 @@ function OverviewRow({ stats, extra, t }) {
   const dueTotal = extra?.forecast?.find(f => f.date === todayISO())?.count ?? 0
 
   const cols = [
-    { label: t.streak, value: streak ? `${streak.current}🔥` : '—', color: 'var(--warning)' },
+    { label: t.streak, value: streak ? <>{streak.current} <FireIcon size={20} /></> : '—', color: 'var(--warning)' },
     { label: t.longestStreak, value: streak ? streak.longest : '—', color: 'var(--text-primary)' },
     { label: t.accuracy, value: acc.reviews > 0 ? `${acc.pct}%` : '—', color: 'var(--success)' },
     { label: t.dueToday, value: dueTotal, color: 'var(--state-due)' },

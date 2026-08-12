@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react'
 import { useLang } from '../LangContext'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { playClick } from './sound'
+import { UndoIcon, CheckIcon } from './Icons'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -97,7 +98,7 @@ function Canvas({ canvasRef, onClear, resetKey }) {
         onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw}
       />
       <button onClick={() => { playClick(); clear() }} className="canvas-clear-btn">
-        {t.eraseBtn}
+        <UndoIcon size={14} /> {t.eraseBtn}
       </button>
     </div>
   )
@@ -165,7 +166,7 @@ export function DrawingOverlay({ kanji, meaning, onDone, resetKey }) {
         <StrokeRef kanji={kanji} meaning={meaning} />
       </div>
       <button onClick={() => { playClick(); onDone() }} className="drawing-overlay__continue">
-        {t.continueBtn}
+        <CheckIcon size={14} /> {t.continueBtn}
       </button>
     </div>
   )

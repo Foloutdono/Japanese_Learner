@@ -492,11 +492,16 @@ input:focus { border-color: var(--accent2); }
   display: none; /* desktop: no peek tab, no autohide at all */
 }
 
+/* Icon-only now (a real ChevronIcon SVG, not the '←' text glyph it
+   used to render) — centered square padding instead of the wider
+   text-label padding this used to need. */
 .btn-back {
   background: rgba(255,255,255,0.08);
   color: var(--text-on-panel);
-  font-size: 13px;
-  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
   white-space: nowrap;
 }
 
@@ -3758,13 +3763,18 @@ input:focus { border-color: var(--accent2); }
   padding: 24px;
 }
 
+/* Icon-only now (ChevronIcon SVG, not the '←' text glyph) — centered
+   square padding instead of the wider text-label padding. */
 .auth-back-btn {
   position: absolute;
   top: 24px;
   left: 24px;
   background: var(--chip-bg);
   color: var(--text-primary);
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
 }
 
 .auth-header {
@@ -6886,7 +6896,10 @@ input:focus { border-color: var(--accent2); }
 
 /* ── EmptyState component ─────────────────────────────────── */
 .empty-state { text-align: center; color: var(--text-secondary); padding: 60px; }
-.empty-state__icon { font-size: 48px; margin-bottom: 16px; }
+/* Icon prop is a real <Icon/> SVG now, not an emoji character — center
+   it as a block instead of relying on text-align/line-height tuned
+   for a glyph. */
+.empty-state__icon { display: flex; justify-content: center; color: var(--text-secondary); opacity: 0.7; margin-bottom: 16px; }
 .empty-state__message { font-size: 15px; }
 .empty-state__hint { font-size: 13px; margin-top: 8px; }
 .empty-state__action { background: var(--accent); color: var(--text-on-panel); margin-top: 20px; }

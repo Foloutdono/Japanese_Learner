@@ -7,6 +7,7 @@ import EmptyState from '../components/EmptyState'
 import { Loading } from '../components/Loading'
 import ImportCardsMenu from '../components/ImportCardsMenu'
 import BrowseCardsMenu from '../components/BrowseCardsMenu'
+import { PlayIcon, ImportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIcon, PencilIcon, TrashIcon, CardIcon } from '../components/Icons'
 
 // Mirrors decks.py's SOURCE_FOR_TYPE / _allowed_sources / _allows_custom
 // exactly — kept in sync by hand since it's this small. This is only
@@ -183,7 +184,7 @@ export default function DeckDetailScreen({ session }) {
             <div className="deckdetail-actions">
               <button onClick={() => navigate(`/decks/${deck_id}/study`, { state: { deck } })}
                 className="deckdetail-btn deckdetail-btn--study">
-                {t.study}
+                <PlayIcon size={14} /> {t.study}
               </button>
               {allowCustom && (
                 <button onClick={startAdd} className="deckdetail-btn">
@@ -197,12 +198,12 @@ export default function DeckDetailScreen({ session }) {
               )}
               {cards.length > 0 && (
                 <button onClick={() => setSelectMode(true)} className="deckdetail-btn deckdetail-btn--muted">
-                  {t.select}
+                  <CheckboxIcon size={14} /> {t.select}
                 </button>
               )}
               {allowCustom && (
                 <button onClick={() => setShowImport(true)} className="deckdetail-btn">
-                  {t.import}
+                  <ImportIcon size={14} /> {t.import}
                 </button>
               )}
             </div>
@@ -220,7 +221,7 @@ export default function DeckDetailScreen({ session }) {
                 onClick={deleteSelected}
                 disabled={selected.size === 0}
                 className={`deckdetail-btn ${selected.size > 0 ? 'deckdetail-btn--danger' : 'deckdetail-btn--danger-disabled'}`}>
-                {t.delete} ({selected.size})
+                <TrashIcon size={14} /> {t.delete} ({selected.size})
               </button>
               <button onClick={exitSelectMode} className="deckdetail-btn deckdetail-btn--muted">
                 {t.cancel}
@@ -233,10 +234,10 @@ export default function DeckDetailScreen({ session }) {
         {importResult && (
           <div className="deckdetail-import-banner">
             <div className="deckdetail-import-banner__text">
-              ✅ {importResult.inserted} {t.cards}
+              <CheckCircleIcon size={15} /> {importResult.inserted} {t.cards}
             </div>
-            <button onClick={() => setImportResult(null)} className="deckdetail-import-banner__close">
-              ✕
+            <button onClick={() => setImportResult(null)} className="deckdetail-import-banner__close" aria-label={t.close}>
+              <CrossIcon size={14} />
             </button>
           </div>
         )}
@@ -277,7 +278,7 @@ export default function DeckDetailScreen({ session }) {
         {loading && <Loading />}
 
         {!loading && cards.length === 0 && !adding && (
-          <EmptyState icon="🃏" message={t.noCards} hint={t.addFirstCard} />
+          <EmptyState icon={<CardIcon size={40} />} message={t.noCards} hint={t.addFirstCard} />
         )}
 
         {/* Cards list */}
@@ -294,7 +295,7 @@ export default function DeckDetailScreen({ session }) {
                 >
                   {selectMode && (
                     <div className={`deckdetail-checkbox${isSel ? ' deckdetail-checkbox--checked' : ''}`}>
-                      {isSel && <span className="deckdetail-checkbox__mark">✓</span>}
+                      {isSel && <span className="deckdetail-checkbox__mark"><CheckIcon size={12} /></span>}
                     </div>
                   )}
 
@@ -342,13 +343,13 @@ export default function DeckDetailScreen({ session }) {
                   </div>
 
                   {!selectMode && card.origin === 'custom' && (
-                    <button onClick={() => startEdit(card)} className="deckdetail-edit-btn">
-                      ✏️
+                    <button onClick={() => startEdit(card)} className="deckdetail-edit-btn" aria-label={t.edit} title={t.edit}>
+                      <PencilIcon size={15} />
                     </button>
                   )}
                   {!selectMode && card.origin === 'app' && (
-                    <button onClick={() => deleteCard(card).then(fetchCards)} className="deckdetail-edit-btn">
-                      🗑
+                    <button onClick={() => deleteCard(card).then(fetchCards)} className="deckdetail-edit-btn" aria-label={t.delete} title={t.delete}>
+                      <TrashIcon size={15} />
                     </button>
                   )}
                 </div>

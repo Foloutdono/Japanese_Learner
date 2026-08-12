@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { apiFetch } from '../api'
 import { useLang } from '../LangContext'
+import { CrossIcon, CheckIcon, ChevronIcon } from './Icons'
 
 // ── Browse & add existing app cards into a custom deck ─────
 //
@@ -113,7 +114,7 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
       <div className="import-modal" onClick={e => e.stopPropagation()}>
         <div className="import-header">
           <div className="import-header__title">{t.browseTitle}</div>
-          <button onClick={onClose} className="import-header__close">✕</button>
+          <button onClick={onClose} className="import-header__close" aria-label={t.close}><CrossIcon size={16} /></button>
         </div>
         <div className="import-subtitle">{t.browseSubtitle}</div>
 
@@ -181,13 +182,13 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
                     className={`deckdetail-card-row browse-result-row${r.in_deck ? ' browse-result-row--in-deck' : ' deckdetail-card-row--selectable'}${isSel ? ' deckdetail-card-row--selected' : ''}`}
                   >
                     <div className={`deckdetail-checkbox${isSel || r.in_deck ? ' deckdetail-checkbox--checked' : ''}`}>
-                      {(isSel || r.in_deck) && <span className="deckdetail-checkbox__mark">✓</span>}
+                      {(isSel || r.in_deck) && <span className="deckdetail-checkbox__mark"><CheckIcon size={12} /></span>}
                     </div>
                     <div className="import-preview-row__front">{r.front}</div>
                     {r.kana && r.kana !== r.front && (
                       <div className="import-preview-row__hint">{r.kana}</div>
                     )}
-                    <div className="import-preview-row__arrow">→</div>
+                    <div className="import-preview-row__arrow"><ChevronIcon direction="right" size={13} /></div>
                     <div className="import-preview-row__back">{r.meaning}</div>
                     {r.in_deck && <div className="browse-result-row__tag">{t.alreadyAdded}</div>}
                   </div>

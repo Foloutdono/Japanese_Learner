@@ -10,6 +10,7 @@ import PromptCard from '../components/PromptCard'
 import { Loading } from '../components/Loading'
 import { CardTransition } from '../components/CardTransition'
 import { playSfx } from '../components/sound'
+import { FireIcon, EyeOffIcon, CrossIcon } from '../components/Icons'
 
 const STATUS_COLORS = {
   mastered:     'var(--success)',
@@ -476,7 +477,7 @@ function SessionView({
           </div>
           {streak > 1 && (
             <div className="rdg-streak" title={t.streak ?? 'Streak'}>
-              🔥 {streak}
+              <FireIcon size={14} /> {streak}
             </div>
           )}
         </div>
@@ -499,7 +500,7 @@ function SessionView({
             <CardTransition cardKey={data._uiKey}>
               <PromptCard>
                 <div className={`rdg-phrase-display${phraseCovered ? ' rdg-phrase-display--covered' : ''}`}>
-                  {phraseCovered ? '🙈' : data.phrase}
+                  {phraseCovered ? <EyeOffIcon size={34} /> : data.phrase}
                 </div>
               </PromptCard>
             </CardTransition>
@@ -861,7 +862,7 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
     <>
       <div className="detail-header">
         <div className="detail-title">{title}</div>
-        <button onClick={onClose} className="detail-close-btn">✕</button>
+        <button onClick={onClose} className="detail-close-btn" aria-label={t.close}><CrossIcon size={16} /></button>
       </div>
 
       {level && (

@@ -8,6 +8,7 @@ import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
 import { QuestionTypeBadge  } from '../components/QuizComponents'
 import { Loading } from '../components/Loading'
+import { CheckIcon, CrossIcon } from '../components/Icons'
 
 // 'selecting' | 'loading' | 'reading' | 'questions' | 'submitting' | 'results' | 'error'
 
@@ -331,8 +332,8 @@ export default function ReadingComprehensionScreen({ session }) {
                       <div key={j} className="comp-result-option" style={{ '--opt-color': color }}>
                         <span className="comp-result-option__letter">{String.fromCharCode(65 + j)}.</span>
                         <span>{opt}</span>
-                        {isCorrect && <span className="comp-result-option__mark">✓</span>}
-                        {isUser && !isCorrect && <span className="comp-result-option__mark">✗ {t.yourAnswer}</span>}
+                        {isCorrect && <span className="comp-result-option__mark"><CheckIcon size={13} /></span>}
+                        {isUser && !isCorrect && <span className="comp-result-option__mark"><CrossIcon size={13} /> {t.yourAnswer}</span>}
                       </div>
                     )
                   })}

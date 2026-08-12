@@ -6,6 +6,7 @@ import { TopBar } from '../components/TopBar'
 import { Loading } from '../components/Loading'
 import { SectionHeader } from '../components/SectionHeader'
 import { levelTitle } from '../levelTitle'
+import { WarningIcon, PencilIcon, CrossIcon, ChevronIcon } from '../components/Icons'
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 
@@ -98,7 +99,7 @@ export default function ProfileScreen({ session }) {
         <div className="container profile-container">
           {stale && (
             <div className="profile-stale-notice" role="status">
-              <span className="profile-stale-notice__glyph" aria-hidden="true">⚠</span>
+              <WarningIcon size={16} className="profile-stale-notice__glyph" />
               {t.profileStale}
             </div>
           )}
@@ -217,7 +218,7 @@ function EditableUsername({ username, session, onChange, t }) {
     return (
       <button type="button" className="profile-card__name profile-card__name--editable" onClick={startEdit}>
         {username}
-        <span className="profile-card__edit-glyph" aria-hidden="true">✎</span>
+        <PencilIcon size={13} className="profile-card__edit-glyph" />
       </button>
     )
   }
@@ -239,8 +240,8 @@ function EditableUsername({ username, session, onChange, t }) {
       <button type="button" onClick={save} disabled={saving} className="profile-card__name-save">
         {t.save}
       </button>
-      <button type="button" onClick={cancel} disabled={saving} className="profile-card__name-cancel">
-        ✕
+      <button type="button" onClick={cancel} disabled={saving} className="profile-card__name-cancel" aria-label={t.cancel}>
+        <CrossIcon size={13} />
       </button>
       {error && <div className="profile-card__name-error">{error}</div>}
     </div>
@@ -255,7 +256,7 @@ function StatsAccessCard({ navigate, t }) {
     <button type="button" className="card stats-access-card" onClick={() => navigate('/stats')}>
       <span className="stats-access-card__glyph" aria-hidden="true">統計</span>
       <span className="stats-access-card__label">{t.statistics}</span>
-      <span className="stats-access-card__arrow" aria-hidden="true">→</span>
+      <ChevronIcon direction="right" size={16} className="stats-access-card__arrow" />
     </button>
   )
 }

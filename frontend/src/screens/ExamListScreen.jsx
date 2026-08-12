@@ -8,6 +8,7 @@ import ModeSelector from '../components/ModeSelector'
 import { Loading } from '../components/Loading'
 import EmptyState from '../components/EmptyState'
 import { listExams } from '../exam/examService'
+import { PageIcon } from '../components/Icons'
 
 // Route: /exam
 // Lists every locally-bundled past exam as a ModeSelector list — same
@@ -42,7 +43,7 @@ export default function ExamListScreen() {
         {exams === null && <Loading />}
 
         {exams?.length === 0 && (
-          <EmptyState icon="📄" message={t.examNoneAvailable} />
+          <EmptyState icon={<PageIcon size={40} />} message={t.examNoneAvailable} />
         )}
 
         {exams?.length > 0 && (

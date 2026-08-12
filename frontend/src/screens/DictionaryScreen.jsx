@@ -10,6 +10,7 @@ import {
 	SearchIcon, DictionaryDetail, LevelBadge,
 } from '../components/DictionaryDetail'
 import { StageBadge } from '../components/StageBadge'
+import { ChevronIcon } from '../components/Icons'
 
 const LIMIT = 50
 
@@ -328,7 +329,7 @@ export default function DictionaryScreen({ session }) {
 							onClick={backToRadicalGrid}
 							className="dict-radical-back-btn"
 						>
-							← {t.dictBackToRadicals}
+							<ChevronIcon direction="left" size={14} /> {t.dictBackToRadicals}
 						</button>
 						<div className="dict-radical-char">
 							{radicalCharByNumber[selectedRadical] ?? '?'}

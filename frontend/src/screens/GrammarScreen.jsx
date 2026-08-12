@@ -15,6 +15,7 @@ import SelectionScreen from '../components/SelectionScreen'
 import PromptCard from '../components/PromptCard'
 import ReviewDeck from '../components/ReviewDeck'
 import { grammarModePicker, reviewMode } from '../components/quizModes'
+import { ChevronIcon } from '../components/Icons'
 import { applyXpGain } from '../components/userProfileSummary'
 import { useCardSession } from '../hooks/useCardSession'
 
@@ -352,7 +353,7 @@ export default function GrammarScreen({ session }) {
                   onClick={() => setShowEx(e => !e)}
                   className="grammar-examples-toggle"
                 >
-                  {showEx ? t.hideExamples : t.showExamples}
+                  <ChevronIcon direction={showEx ? 'up' : 'down'} size={14} /> {showEx ? t.hideExamples : t.showExamples}
                 </button>
                 {showEx && (
                   <div className="grammar-examples__list">

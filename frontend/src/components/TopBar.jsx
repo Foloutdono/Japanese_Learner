@@ -5,6 +5,7 @@ import { getNavLinks } from '../navLinks'
 import { BurgerMenu } from './BurgerMenu'
 import { useProfileSummary } from './userProfileSummary'
 import { playClick } from './sound'
+import { ChevronIcon } from './Icons'
 
 const MOBILE_BREAKPOINT = 768
 const SCROLL_THRESHOLD   = 2     // px of scroll before reacting — just enough to ignore jitter
@@ -214,8 +215,8 @@ export function TopBar({
           <TopBarProfileRing />
 
           {actions}
-          <button className="btn-back" onClick={() => { playClick(); onBack() }}>
-            {t.back}
+          <button className="btn-back" onClick={() => { playClick(); onBack() }} aria-label={t.back} title={t.back}>
+            <ChevronIcon direction="left" size={16} />
           </button>
         </div>
       </div>
@@ -233,7 +234,7 @@ export function TopBar({
           aria-label={t.back}
           tabIndex={hidden ? 0 : -1}
         >
-          <span aria-hidden="true">▾</span>
+          <ChevronIcon direction="down" size={14} />
         </button>
       )}
     </>

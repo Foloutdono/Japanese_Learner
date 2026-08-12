@@ -7,6 +7,7 @@ import { Loading } from '../components/Loading'
 import EmptyState from '../components/EmptyState'
 import { getExam, flattenQuestions, submitAttempt } from '../exam/examService'
 import QuestionRenderer from '../exam/QuestionRenderer'
+import { PageIcon, ChevronIcon } from '../components/Icons'
 
 // Route: /exam/:examId/:sectionId
 // Renders one question at a time from the chosen section, in order,
@@ -44,7 +45,7 @@ export default function ExamRunner() {
   }
 
   if (questions.length === 0) {
-    return <EmptyState icon="📄" message={t.examSectionEmpty} />
+    return <EmptyState icon={<PageIcon size={40} />} message={t.examSectionEmpty} />
   }
 
   const section = exam.sections.find(s => s.id === sectionId)
@@ -100,10 +101,10 @@ export default function ExamRunner() {
       <div className="exam-nav-buttons">
         {/* Reuses ReviewDeck's prev/next wording (see quizModes' review
             mode) rather than inventing a third "back"/"next" pair —
-            t.back is a bare "←" glyph made for TopBar's compact button,
-            not a fit here. */}
+            t.back is a bare icon-only button made for TopBar's compact
+            style, not a fit here. */}
         <button type="button" className="exam-nav-btn" disabled={index === 0} onClick={goBack}>
-          {t.reviewPrev}
+          <ChevronIcon direction="left" size={14} /> {t.reviewPrev}
         </button>
         <span className="exam-nav-buttons__hint">{answeredCount} / {questions.length} {t.examAnswered}</span>
         {isLast ? (
@@ -112,7 +113,7 @@ export default function ExamRunner() {
           </button>
         ) : (
           <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={goNext}>
-            {t.reviewNext}
+            {t.reviewNext} <ChevronIcon direction="right" size={14} />
           </button>
         )}
       </div>
