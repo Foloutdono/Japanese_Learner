@@ -26,7 +26,13 @@ import { playUi } from '../../lib/audio'
  * Props:
  *   onSelect(level)  — called when a station is chosen
  *   color            — the line's colour, as a hex string or CSS var().
- *                       Falls back to shu-iro (var(--accent)) in CSS.
+ *     No caller passes it: <SelectionScreen> sets --line-color from
+ *     the section's own colour in config/navLinks.js, and inheriting
+ *     that is the whole point of one line having one colour. The six
+ *     screens here used to hardcode it, and four of the six disagreed
+ *     with the plate hanging directly above them — /vocab drew an
+ *     amber rail under a blue 単語 plate. Kept as the escape hatch for
+ *     a caller with no station of its own; CSS falls back to shu-iro.
  *   levels           — array of level strings (default: N5…N1)
  */
 
@@ -72,8 +78,11 @@ export default function LevelSelector({
               it again. */}
           <span className="route-stop__body">
             <span className="route-stop__name">{level}</span>
+            <span className="choice-leader" aria-hidden="true" />
             <span className="route-stop__hint">{LEVEL_HINTS[level]}</span>
           </span>
+
+          <span className="route-stop__go" aria-hidden="true">▶</span>
         </button>
       ))}
     </div>

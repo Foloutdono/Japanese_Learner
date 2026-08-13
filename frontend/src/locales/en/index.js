@@ -70,6 +70,7 @@ const home = {
   // themselves are Japanese proper nouns and live in that config,
   // not here — these are the two labels that genuinely translate.
   departures:  'Departures',
+  platforms:   'Platforms',
   // Hover text on a 種別 badge. Deliberately not "Local"/"Rapid" —
   // that is the railway word for the pips, and repeating it explains
   // nothing to somebody choosing a study mode. Each one says what the

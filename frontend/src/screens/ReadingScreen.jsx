@@ -370,7 +370,7 @@ export default function ReadingScreen({ session }) {
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
         <SelectionScreen heading={t.selectLevel}>
-          <LevelSelector onSelect={setLevel} color="var(--accent3)" />
+          <LevelSelector onSelect={setLevel} />
         </SelectionScreen>
       </div>
     )

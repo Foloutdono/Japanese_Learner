@@ -143,7 +143,7 @@ export default function ReadingComprehensionScreen({ session }) {
             (defaults to t.selectLevel), same convention as Kanji/Vocab;
             passing subtitle too used to render the header twice. */}
         <SelectionScreen>
-          <LevelSelector onSelect={startSession} color="var(--accent3)" />
+          <LevelSelector onSelect={startSession} />
         </SelectionScreen>
       </div>
     )

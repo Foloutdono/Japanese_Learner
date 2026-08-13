@@ -4,6 +4,7 @@ import { useLang } from '../../LangContext'
 import { getNavLinks } from '../../config/navLinks'
 import { stationFor } from '../../config/stations'
 import { StationSign } from '../station/StationSign'
+import { useStationClock } from '../station/useStationClock'
 import { startAmbiance, stopAmbiance } from '../../lib/audio'
 
 /**
@@ -30,18 +31,48 @@ import { startAmbiance, stopAmbiance } from '../../lib/audio'
  *     on screens with no station match (see above); a plated screen's
  *     name is already on the sign overhead, so repeating it as a
  *     second heading underneath was the redundant one.
- *   maxWidth — max-width for the content column (default 720).
+ *   maxWidth — max-width for the content column. Left unset by every
+ *     caller today; the two defaults live in CSS instead, because a
+ *     plated screen and a bare one want different ones (a plate whose
+ *     panel is 320px narrower than the board it came from reads as a
+ *     different piece of furniture — see --content-max-w).
  *
  * Also owns the 'selection' ambiance track for as long as it's
  * mounted — every level/mode/tier/theme picker renders inside this
  * shell, so this is the one place that needs the start/stop effect.
  */
+// のりば — the right-hand half of the plate, and the exact counterpart
+// of the board's own masthead: what this panel is, and the time. The
+// clock is not decoration and not filler — a platform always tells you
+// the time, it is the one piece of information every station in the
+// world puts next to its name, and it is the same component ticking on
+// the same minute boundary as the one on the home board. Arriving
+// somewhere and finding the clock still running is most of what makes
+// two screens feel like one place.
+function PlatformAside({ t }) {
+  const now = useStationClock()
+  const hh  = String(now.getHours()).padStart(2, '0')
+  const mm  = String(now.getMinutes()).padStart(2, '0')
+
+  return (
+    <>
+      <span className="station-sign__label">
+        <span lang="ja">のりば</span>
+        <span className="station-sign__label-sub">{t.platforms}</span>
+      </span>
+      <span className="board-clock station-sign__clock" aria-label={`${hh}:${mm}`}>
+        {hh}<span className="board-clock__colon" aria-hidden="true">:</span>{mm}
+      </span>
+    </>
+  )
+}
+
 export default function SelectionScreen({
   children,
   eyebrow,
   heading,
   subtitle,
-  maxWidth = 720,
+  maxWidth,
 }) {
   const { t } = useLang()
 
@@ -54,7 +85,7 @@ export default function SelectionScreen({
   }, [])
 
   const innerStyle =
-    maxWidth !== 720 ? { '--content-max-w': `${maxWidth}px` } : undefined
+    maxWidth ? { '--content-max-w': `${maxWidth}px` } : undefined
 
   // From the router rather than window.location: the two agree under
   // BrowserRouter, but only one of them is the app's actual source of
@@ -82,6 +113,7 @@ export default function SelectionScreen({
             name={section.icon}
             latin={section.title}
             color={section.color}
+            aside={<PlatformAside t={t} />}
             size="sm"
           />
         ) : (eyebrow || heading || subtitle) && (

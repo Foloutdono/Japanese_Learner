@@ -40,11 +40,11 @@ function ConcourseToday() {
 // playing behind this screen is a Japanese metro platform, and
 // choosing a section announces its name aloud over it.
 //
-// So: you are standing in 日本語駅. The plate overhead says so. The
-// board lists eleven services and where each one is bound. The yellow
-// tactile paving marks the edge. Pick a destination and the station
-// announces it, exactly as it always did — but now the announcement
-// is the thing the screen has been promising.
+// So: you are standing in 日本語駅. The board's masthead says so, the
+// line stripe under it carries the station's colour, and below that
+// are eleven services and where each one is bound. Pick a destination
+// and the station announces it, exactly as it always did — but now
+// the announcement is the thing the screen has been promising.
 //
 // It replaces a two-column grid of eleven cards, which is the layout
 // every learning app arrives at and the reason none of them are
@@ -136,19 +136,27 @@ export default function HomeScreen() {
 
   return (
     <div className="station">
+      {/* The band runs the full width of the room — it's the underside
+          of the roof — but what hangs from it lines up with the board
+          below, which is why there's an inner column here. Without it
+          the date sat 24px from the left edge of the window and the
+          board's first platform number 200px further in, on any screen
+          wide enough to show the difference. */}
       <div className="station__concourse">
-        <ConcourseToday />
-        <div className="station__concourse-right">
-          <ICCard />
-          <button
-            type="button"
-            onClick={() => navigate('/settings')}
-            className="btn-nav btn-nav--icon station__settings"
-            title={t.settings}
-            aria-label={t.settings}
-          >
-            <GearIcon size={17} />
-          </button>
+        <div className="station__concourse-inner">
+          <ConcourseToday />
+          <div className="station__concourse-right">
+            <ICCard />
+            <button
+              type="button"
+              onClick={() => navigate('/settings')}
+              className="btn-nav btn-nav--icon station__settings"
+              title={t.settings}
+              aria-label={t.settings}
+            >
+              <GearIcon size={17} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -162,10 +170,14 @@ export default function HomeScreen() {
       </main>
 
       {/* The LED strip under a real board, which carries the notices
-          rather than the timetable. */}
+          rather than the timetable. Held to the board's own column so
+          the line it sets never runs wider than the panel it belongs
+          to. */}
       <footer className="station__notice">
-        <span className="station__notice-chime" aria-hidden="true">♪</span>
-        <span className="station__notice-text">{t.tip}</span>
+        <span className="station__notice-inner">
+          <span className="station__notice-chime" aria-hidden="true">♪</span>
+          <span className="station__notice-text">{t.tip}</span>
+        </span>
       </footer>
     </div>
   )

@@ -218,7 +218,7 @@ export default function GrammarScreen({ session }) {
             layout shell, same as Kanji/Vocab. Passing subtitle here
             too used to render that header twice. */}
         <SelectionScreen>
-          <LevelSelector onSelect={setLevel} color="var(--accent)" />
+          <LevelSelector onSelect={setLevel} />
         </SelectionScreen>
       </div>
     )

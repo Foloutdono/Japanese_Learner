@@ -267,7 +267,7 @@ export default function TranslationScreen({ session }) {
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
         <SelectionScreen heading={t.selectLevel}>
-          <LevelSelector onSelect={setLevel} color="var(--accent9)" />
+          <LevelSelector onSelect={setLevel} />
         </SelectionScreen>
       </div>
     )

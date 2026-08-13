@@ -18,14 +18,24 @@ import { playUi } from '../../lib/audio'
  * no glossary: more stops, more help.
  *
  * The same component also drives the study-source pickers ("by
- * level", "by theme"), whose keys aren't services at all — those get
- * a plain numbered roundel rather than a wrong badge.
+ * level", "by theme"), whose keys aren't services at all. Those get
+ * the board's own 番線 platform number rather than a wrong badge —
+ * previously a roundel reading "01…04", which is the one piece of
+ * furniture on these screens that looked like it came from a generic
+ * list rather than from a station. The home board says 「1 番線」 for
+ * the track a service leaves from; a selection screen is where you
+ * pick which one to board, so it says the same thing in the same
+ * type. Nothing new to learn, and the two screens stop being cousins.
  *
  * No header of its own — every caller renders inside <SelectionScreen>,
  * which already names the section on the station plate overhead.
  *
  * Props:
- *   modes    — array of { key, label, desc?, color? }
+ *   modes    — array of { key, label, desc?, sample?, color? }
+ *     sample — optional Japanese specimen line (the characters a set
+ *       actually contains, say). Set in the Japanese face and spaced
+ *       like the 停車駅 strip under a destination, because it is the
+ *       same kind of information: what this row actually stops at.
  *   onSelect(key) — called when a row is chosen
  */
 export default function ModeSelector({ modes, onSelect }) {
@@ -64,14 +74,37 @@ export default function ModeSelector({ modes, onSelect }) {
                   )}
                 </span>
               ) : (
-                <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
+                <span className="choice-row__platform">
+                  <span className="choice-row__no">{i + 1}</span>
+                  <span className="choice-row__no-unit" lang="ja">番線</span>
+                </span>
               )}
             </span>
 
+            {/* Title left, 備考 right — the departure board's own row,
+                and the one LevelSelector's route stops already used.
+                Stacked under the title instead, the description left
+                the right two-thirds of every row empty on any screen
+                wider than a tablet. Below 640px they stack. */}
             <span className="choice-row__main">
               <span className="choice-row__title">{m.label}</span>
-              {m.desc && <span className="choice-row__desc">{m.desc}</span>}
+              {(m.desc || m.sample) && (
+                <>
+                  <span className="choice-leader" aria-hidden="true" />
+                  <span className="choice-row__note">
+                    {m.desc && <span className="choice-row__desc">{m.desc}</span>}
+                    {m.sample && (
+                      <span className="choice-row__sample" lang="ja" aria-hidden="true">{m.sample}</span>
+                    )}
+                  </span>
+                </>
+              )}
             </span>
+
+            {/* The same mark the board puts at the end of every
+                service, appearing on hover. A selection row led
+                somewhere and said so with nothing at all. */}
+            <span className="choice-row__go" aria-hidden="true">▶</span>
           </button>
         )
       })}

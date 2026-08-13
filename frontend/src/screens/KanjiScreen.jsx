@@ -358,7 +358,7 @@ export default function KanjiScreen({ session }) {
       <div className="screen">
         <TopBar onBack={() => setStudyBy(null)} title={t.kanjiTitle} autoHide />
         <SelectionScreen>
-          <LevelSelector onSelect={setLevel} color="var(--accent3)" />
+          <LevelSelector onSelect={setLevel} />
         </SelectionScreen>
       </div>
     )
@@ -373,7 +373,6 @@ export default function KanjiScreen({ session }) {
           <TierSelector
             domain="kanji"
             session={session}
-            color="var(--accent3)"
             onSelect={(tr, label, ts) => { setTier(tr); setTierLabel(label); setTierSize(ts) }}
           />
         </SelectionScreen>

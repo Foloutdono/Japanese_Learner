@@ -35,6 +35,12 @@
   --max-w:          1100px;
   --gap:            24px;
 
+  /* The station's column. The departure board, the concourse band
+     above it and the notice strip below it are all one object seen in
+     three pieces, so they share one width rather than three literals
+     that have to be kept equal by hand. */
+  --board-w:        1040px;
+
   --font-display:   'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
   --font-jp:        'Yu Gothic', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -252,14 +258,24 @@ button:focus-visible {
    is the atmosphere. A single hairline marks the header edge. */
 .selection-screen {
   position: relative;
-  padding: 48px 24px 72px !important;
+  padding: 40px 24px 64px !important;
   text-align: left;
+}
+/* The ceiling light from .station, so the panel is standing in the
+   same room it left rather than floating in a void. */
+.selection-screen--station {
+  background:
+    radial-gradient(ellipse 130% 52% at 50% 24%,
+      color-mix(in srgb, var(--text-primary) 5%, transparent), transparent 72%);
 }
 
 .selection-screen__inner {
   position: relative;
   margin: 0 auto;
   max-width: var(--content-max-w, 720px);
+}
+.selection-screen--station .selection-screen__inner {
+  max-width: var(--content-max-w, var(--board-w));
 }
 
 /* ── Selector header (eyebrow / title / subtitle) ────────── */
@@ -359,7 +375,7 @@ button:focus-visible {
   align-items: center;
   gap: 18px;
   width: 100%;
-  padding: 20px 14px;
+  padding: 22px 14px;
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--border);
@@ -399,31 +415,27 @@ button:focus-visible {
   transform: scaleY(1);
 }
 
-/* The sequence number, drawn as station numbering — the same
-   roundel the departure board and the station plate use, so a list of
-   choices reads as more stops on the same line rather than a
-   numbered list from a different app. */
-.choice-row__index {
+/* Same mark, same behaviour, same colour as the board's — declared
+   once for both so a hover on a selection row and a hover on a
+   departure row can never drift apart. */
+.board-row__go,
+.choice-row__go,
+.route-stop__go {
+  justify-self: end;
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--row-color, var(--accent)) 40%, transparent);
-  font-family: var(--font-display);
   font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--text-secondary);
-  transition: border-color 0.2s ease, color 0.2s ease;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
-
-.choice-row:hover .choice-row__index,
-.choice-row:focus-visible .choice-row__index {
-  color: var(--row-color, var(--accent));
-  border-color: var(--row-color, var(--accent));
+.choice-row__go,
+.route-stop__go { color: var(--row-color, var(--line-color, var(--accent))); }
+.choice-row:hover .choice-row__go,
+.choice-row:focus-visible .choice-row__go,
+.route-stop:hover .route-stop__go,
+.route-stop:focus-visible .route-stop__go {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .choice-row__main {
@@ -431,15 +443,37 @@ button:focus-visible {
   flex: 1;
   min-width: 0; /* let title/desc actually shrink+ellipsize instead of
                     forcing the row wider than its flex basis */
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 24px;
+  flex-wrap: wrap;
+}
+/* 点線 — the leader. */
+.choice-leader {
+  flex: 1 1 0;
+  align-self: baseline;
+  min-width: 0;
+  height: 0;
+  margin-bottom: 0.28em;
+  border-bottom: 1px dotted color-mix(in srgb, var(--text-secondary) 42%, transparent);
+}
+
+/* 備考 — the right-hand column. A group rather than a single element
+   because a row can carry both a description and a specimen line, and
+   they belong to each other. */
+.choice-row__note {
+  display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 0;
+  text-align: right;
 }
 
 .choice-row__title {
   font-family: 'Noto Serif JP', serif;
   font-weight: 600;
-  font-size: 1.25rem;
+  font-size: 1.34rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -450,8 +484,19 @@ button:focus-visible {
   color: var(--text-secondary);
   font-size: 0.88rem;
   line-height: 1.55;
-  text-align: left;
-  max-width: 56ch;
+  max-width: 46ch;
+}
+
+/* The characters a set actually contains, set in the Japanese face
+   and tracked open like the stops printed under a destination. Quiet
+   enough to stay a caption, large enough to actually read a kana at —
+   which is the entire point of showing them. */
+.choice-row__sample {
+  font-family: var(--font-jp);
+  font-size: 1rem;
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+  color: color-mix(in srgb, var(--row-color, var(--accent)) 62%, var(--text-secondary));
 }
 
 /* Persistent-selection variant of choice-row — used where picking a
@@ -462,7 +507,7 @@ button:focus-visible {
 .choice-row--selectable { cursor: pointer; }
 .choice-row--selected { background: var(--bg-card-hover); }
 .choice-row--selected .choice-row__accent { transform: scaleY(1); }
-.choice-row--selected .choice-row__index,
+.choice-row--selected .choice-row__no,
 .choice-row--selected .choice-row__title { color: var(--row-color, var(--accent)); }
 
 input {
@@ -622,11 +667,14 @@ input:focus { border-color: var(--accent2); }
    screen still pretending it was a menu.
 
    Everything here is drawn from real railway signage: the station
-   plate (駅名標), the departure board (発車標), station numbering
-   roundels, and the yellow tactile paving at the platform edge. Those
-   conventions are worth borrowing exactly because of what they were
-   designed for — letting somebody who can't read the language find
-   their train.
+   plate (駅名標), the departure board (発車標), the line colours and
+   the station numbering roundels. Those conventions are worth
+   borrowing exactly because of what they were designed for — letting
+   somebody who can't read the language find their train. Not all of
+   them survived contact with a screen: 点字ブロック, the yellow
+   tactile paving, was the most literal borrowing here and the first
+   one cut, because a full-width band of the loudest colour in the
+   palette is a bad way to close a quiet panel however real it is.
 
    The board is --bg-panel in both themes rather than flipping with
    the palette. A departure board is a lit panel in a room, not a
@@ -656,12 +704,18 @@ input:focus { border-color: var(--accent2); }
    bottom hairline is what turns it into an architectural band (the
    underside of the station roof) instead of a row of controls. */
 .station__concourse {
+  padding: 0 24px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+/* Same column as the board below — see --board-w. */
+.station__concourse-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 24px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  width: min(var(--board-w), 100%);
+  margin: 0 auto;
+  padding: 18px 0;
 }
 .station__settings { flex-shrink: 0; }
 
@@ -857,20 +911,35 @@ input:focus { border-color: var(--accent2); }
   text-align: center;
 }
 
-.station-sign__top {
+/* Name block against label-and-clock. Stretch, not baseline: the
+   aside splits itself between the two corners on the right and needs
+   the plate's full height to do it. */
+.station-sign__head {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px 28px;
+}
+
+/* Roundel, then the three registers — .board__station, element for
+   element. */
+.station-sign__names {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 20px;
+  gap: 14px;
+  min-width: 0;
+}
+.station-sign__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
 }
 
 /* 駅ナンバリング — the line code in its coloured roundel, the thing
    you point at when you can't pronounce the name. */
 .station-sign__roundel {
-  position: absolute;
-  left: 12px;
-  top: 12px;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -902,7 +971,7 @@ input:focus { border-color: var(--accent2); }
   letter-spacing: 0.16em;
   text-indent: 0.16em;
   color: var(--text-primary);
-  margin: 2px 0 4px;
+  margin: 2px 0 0;
 }
 
 .station-sign__romaji {
@@ -913,10 +982,7 @@ input:focus { border-color: var(--accent2); }
   text-indent: 0.3em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  /* Replaces the old "← previous station" row's job of holding the
-     stripe away from the text — simpler now that the plate ends the
-     moment it's finished naming the station. */
-  margin-bottom: 14px;
+  margin-top: 5px;
 }
 
 /* The line stripe: the one place a station plate carries colour. */
@@ -933,27 +999,64 @@ input:focus { border-color: var(--accent2); }
    is not hanging any more: it is the head of the panel underneath. */
 .station-sign--sm {
   width: 100%;
-  padding: 16px 20px 0;
+  padding: 20px 22px 16px;
   background: none;
   border: none;
   border-radius: 0;
   box-shadow: none;
   text-align: left;
 }
-.station-sign--sm .station-sign__top { justify-content: flex-start; }
-.station-sign--sm .station-sign__roundel { position: static; }
 .station-sign--sm .station-sign__kana {
   font-size: 0.7rem;
   letter-spacing: 0.28em;
   text-indent: 0.28em;
 }
 .station-sign--sm .station-sign__name {
-  font-size: clamp(1.5rem, 1.2rem + 1.1vw, 1.9rem);
+  font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.2rem);
   letter-spacing: 0.14em;
   text-indent: 0.14em;
 }
-.station-sign--sm .station-sign__romaji { margin-bottom: 14px; }
-.station-sign--sm .station-sign__stripe { height: 4px; margin: 0 -20px; }
+.station-sign--sm .station-sign__stripe { height: 4px; margin: 0 -22px; }
+
+/* のりば — what the panel is, and what time it is, in the two corners
+   the right-hand side actually has. Together on one line they were a
+   single dense clump floating at the plate's midpoint; apart, they
+   bracket the name and give the masthead its full height. Sized and
+   tracked exactly like the board's own 発車標 label so neither screen
+   looks like it invented its own signage. */
+.station-sign__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  text-align: right;
+}
+.station-sign__label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: color-mix(in srgb, var(--line-color, var(--accent)) 80%, transparent);
+}
+.station-sign__label-sub {
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* The board's clock, in this line's colour rather than the board's
+   amber — the panel it's sitting on is the section's, not the
+   station's. Qualified by .station-sign because .board-clock sets the
+   amber at the same specificity and wins on source order otherwise,
+   which is how a red 仮名 plate ended up with a gold clock. */
+.station-sign .station-sign__clock { color: var(--line-color, var(--accent)); }
 
 /* The panel the plate heads. Same surface, border and radius as the
    departure board, so the two screens are recognisably the same
@@ -968,9 +1071,12 @@ input:focus { border-color: var(--accent2); }
    rows, and a board's rows are not inset from the thing holding them.
    The plate's stripe above is the only divider they need. */
 .selection-screen--station .choice-list { border-top: none; }
-.selection-screen--station .choice-row { padding-left: 20px; padding-right: 20px; }
+.selection-screen--station .choice-row { padding-left: 22px; padding-right: 22px; }
 .selection-screen--station .choice-row:last-child { border-bottom: none; }
-.selection-screen--station .route { padding: 8px 12px 14px; }
+.selection-screen--station .route { padding: 0; }
+.selection-screen--station .route-stop { padding-right: 22px; padding-left: 56px; }
+.selection-screen--station .route-stop__rail { left: 27px; }
+.selection-screen--station .route-stop__marker { left: 21px; }
 
 /* ── 発車標 — the departure board ─────────────────────────── */
 .station__platform {
@@ -978,12 +1084,12 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 40px 24px 32px;
+  padding: 36px 24px 28px;
 }
 
 .board {
   position: relative;
-  width: min(1040px, 100%);
+  width: min(var(--board-w), 100%);
   background:
     linear-gradient(180deg,
       color-mix(in srgb, #fff 3%, var(--bg-panel)) 0%,
@@ -1078,7 +1184,6 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   align-items: baseline;
   gap: 12px;
-  align-self: flex-start;
 }
 .board__label {
   display: flex;
@@ -1128,11 +1233,11 @@ input:focus { border-color: var(--accent2); }
 .board-row {
   position: relative;
   display: grid;
-  grid-template-columns: 82px minmax(0, 1fr) minmax(0, auto) 22px;
-  gap: 20px;
+  grid-template-columns: 82px minmax(0, auto) minmax(0, 1fr) 22px;
+  gap: 20px 24px;
   align-items: center;
   width: 100%;
-  padding: 22px;
+  padding: 20px 22px;
   background: none;
   border: none;
   border-radius: 0;
@@ -1162,12 +1267,14 @@ input:focus { border-color: var(--accent2); }
   filter: none;
 }
 
-.board-row__platform {
+.board-row__platform,
+.choice-row__platform {
   display: flex;
   align-items: baseline;
   gap: 4px;
 }
-.board-row__no {
+.board-row__no,
+.choice-row__no {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.5rem;
@@ -1175,11 +1282,17 @@ input:focus { border-color: var(--accent2); }
   color: var(--line-color, var(--accent2));
   font-variant-numeric: tabular-nums;
 }
-.board-row__no-unit {
+.board-row__no-unit,
+.choice-row__no-unit {
   font-family: var(--font-jp);
   font-size: 0.6rem;
   opacity: 0.5;
 }
+/* On a card surface rather than the board's sumi panel, the number
+   takes the row's own colour and the unit needs a touch more weight
+   to survive against a lighter background. */
+.choice-row__no { color: var(--row-color, var(--accent)); }
+.choice-row__no-unit { color: var(--text-secondary); opacity: 1; }
 
 .board-row__dest {
   display: flex;
@@ -1213,6 +1326,11 @@ input:focus { border-color: var(--accent2); }
   font-size: 1.12rem;
   line-height: 1.2;
   letter-spacing: 0.04em;
+  /* 行 belongs to the name in front of it. Once the destination shares
+     a row with its own latin name (see the small-screen rules), the
+     two were free to break apart and leave a stranded 行 on its own
+     line under 読書. */
+  white-space: nowrap;
 }
 /* 行 — "bound for". Set smaller than the destination itself, the way
    it is on the board. */
@@ -1240,47 +1358,29 @@ input:focus { border-color: var(--accent2); }
   white-space: nowrap;
 }
 
-.board-row__go {
-  justify-self: end;
-  font-size: 0.7rem;
-  color: var(--line-color, var(--accent2));
-  opacity: 0;
-  transform: translateX(-4px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
+.board-row__go { color: var(--line-color, var(--accent2)); }
 .board-row:hover .board-row__go,
 .board-row:focus-visible .board-row__go {
   opacity: 1;
   transform: translateX(0);
 }
 
-/* ── 点字ブロック — tactile paving ──────────────────────────
-   The yellow strip of raised domes along every platform edge in
-   Japan, and the line you're told to stand behind. It closes the
-   board the way it closes the platform. */
-.tactile {
-  height: 14px;
-  background-color: color-mix(in srgb, var(--warning) 34%, #000);
-  background-image: radial-gradient(
-    circle at center,
-    color-mix(in srgb, var(--warning) 82%, transparent) 0 2px,
-    transparent 2.6px);
-  background-size: 11px 11px;
-  background-position: center;
-}
-
 /* ── The notice strip ─────────────────────────────────────
    The LED band under a real board carries the notices, not the
    timetable. */
 .station__notice {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 22px 24px 34px;
+  padding: 20px 24px 34px;
   color: var(--text-secondary);
   font-size: 0.75rem;
   line-height: 1.5;
+}
+.station__notice-inner {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  width: min(var(--board-w), 100%);
+  margin: 0 auto;
   text-align: center;
 }
 .station__notice-chime { color: var(--accent2); }
@@ -1346,8 +1446,7 @@ input:focus { border-color: var(--accent2); }
   flex: 1;
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 10px 24px;
+  gap: 10px 20px;
   flex-wrap: wrap;
   min-width: 0;
 }
@@ -1363,6 +1462,9 @@ input:focus { border-color: var(--accent2); }
   line-height: 1.5;
   text-align: right;
 }
+/* The rail already runs down the left; a leader from N5 out to its
+   hint is the horizontal half of the same diagram. */
+.route-stop .choice-leader { margin-bottom: 0.42em; }
 /* ── 種別 — the service badge ──────────────────────────────
    How much the train stops for you. Each type keeps the colour it
    has on a real board: local plain, rapid blue, express green,
@@ -8465,7 +8567,14 @@ input:focus { border-color: var(--accent2); }
 
 @media (max-width: 640px) {
   .choice-row__main { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .choice-row__desc { text-align: left; max-width: none; }
+  .choice-row__note { align-items: flex-start; text-align: left; }
+  .choice-row__desc { max-width: none; }
+  /* A leader connects two things across a gap. Once the row stacks
+     there is no gap and no across — it was drawing a 24px stub of
+     dots between a title and the line under it. */
+  .choice-leader { display: none; }
+  .route-stop__body { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .route-stop__hint { text-align: left; }
   /* Once the row is stacked into a column above, there's no sibling
      fighting the title for horizontal space anymore — let a long
      (often translated) label wrap onto a second line instead of
@@ -8514,9 +8623,17 @@ input:focus { border-color: var(--accent2); }
 
   /* 備考 is the first thing to go: the destination and the platform
      number are what you are actually scanning for. */
-  .board-row { grid-template-columns: 54px 1fr 18px; gap: 10px; padding: 12px 14px; }
+  .board-row { grid-template-columns: 54px 1fr 18px; gap: 10px; padding: 14px 14px; }
   .board-row__note { display: none; }
   .board-row__no { font-size: 1.2rem; }
+  .board-row__names {
+    flex: 1;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .board-row__latin { text-align: right; }
 
   /* The masthead stacks: the station's name is the thing worth the
      width, so the panel label and clock drop under it rather than
@@ -8525,6 +8642,13 @@ input:focus { border-color: var(--accent2); }
   .board__now { justify-content: space-between; align-items: flex-end; }
   .board__label { align-items: flex-start; }
 
+  .station-sign--sm { padding: 16px 16px 14px; }
+  .station-sign--sm .station-sign__stack { align-items: flex-start; }
+  .station-sign--sm .station-sign__romaji {
+    letter-spacing: 0.16em;
+    text-indent: 0.16em;
+  }
+  .station-sign--sm .station-sign__stripe { margin: 0 -16px; }
   .station-sign__name { font-size: 2rem; }
   .ic-card__balance { display: none; }
   .route-stop { padding: 18px 4px 18px 42px; gap: 14px; }

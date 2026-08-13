@@ -379,7 +379,7 @@ export default function VocabScreen({ session }) {
       <div className="screen">
         <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} JLPT`} autoHide />
         <SelectionScreen>
-          <LevelSelector onSelect={setLevel} color="var(--accent2)" />
+          <LevelSelector onSelect={setLevel} />
         </SelectionScreen>
       </div>
     )
@@ -393,7 +393,6 @@ export default function VocabScreen({ session }) {
         <SelectionScreen>
           <ThemeSelector
             session={session}
-            color="var(--accent2)"
             onSelect={(th, label) => { setTheme(th); setThemeLabel(label) }}
           />
         </SelectionScreen>
@@ -413,7 +412,6 @@ export default function VocabScreen({ session }) {
           <TierSelector
             domain={freqDomain}
             session={session}
-            color="var(--accent2)"
             onSelect={(tr, label, ts) => { setTier(tr); setTierLabel(label); setTierSize(ts) }}
           />
         </SelectionScreen>

@@ -27,12 +27,19 @@ export default function KanaScreen({ session }) {
   const navigate    = useNavigate()
   const { t } = useLang()
 
-  // Map translated labels → API slugs
+  // Map translated labels → API slugs.
+  //
+  // `sample` is the first row of each set, and it is the only thing on
+  // this screen that answers the question actually being asked. "Kana
+  // (combinations)" names a set without showing one; きゃ きゅ きょ
+  // shows it, in the script you came here to learn, and needs no
+  // translating into either language the app speaks. It's the 停車駅
+  // strip under a destination — the stops this service actually makes.
   const SETS = [
-    { label: t.hiraganaBase,         slug: 'hiragana_basic'  },
-    { label: t.hiraganaCombinations, slug: 'hiragana_combos' },
-    { label: t.katakanaBase,         slug: 'katakana_basic'  },
-    { label: t.katakanaCombinations, slug: 'katakana_combos' },
+    { label: t.hiraganaBase,         slug: 'hiragana_basic',  sample: 'あ い う え お' },
+    { label: t.hiraganaCombinations, slug: 'hiragana_combos', sample: 'きゃ きゅ きょ' },
+    { label: t.katakanaBase,         slug: 'katakana_basic',  sample: 'ア イ ウ エ オ' },
+    { label: t.katakanaCombinations, slug: 'katakana_combos', sample: 'キャ キュ キョ' },
   ]
 
   const MODES = kanaModePicker(t)
@@ -241,7 +248,7 @@ export default function KanaScreen({ session }) {
         <TopBar onBack={() => navigate('/')} title={t.kana} autoHide />
         <SelectionScreen>
           <ModeSelector
-            modes={SETS.map(s => ({ key: s.slug, label: s.label }))}
+            modes={SETS.map(s => ({ key: s.slug, label: s.label, sample: s.sample }))}
             onSelect={slug => startSession(SETS.find(s => s.slug === slug))}
           />
         </SelectionScreen>

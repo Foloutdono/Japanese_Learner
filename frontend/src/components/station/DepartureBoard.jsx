@@ -20,12 +20,19 @@ import { useStationClock } from './useStationClock'
 // read as pasted on — which it was.
 //
 // A platform is one place, so this is one object. The station's
-// identity is the board's masthead, the line stripe under it is the
-// same stripe the plate carried, and the tactile paving closes the
-// bottom. Everything between the stripe and the paving is where the
+// identity is the board's masthead and the line stripe under it is
+// the same stripe the plate carries; everything below is where the
 // trains are. The selection screens keep the standalone plate, where
 // it is the whole content of the header and has nothing to compete
 // with.
+//
+// The 点字ブロック that used to close the bottom is gone. It was the
+// literal answer — every platform in Japan has that yellow dotted
+// strip along its edge — and it was the wrong one: a full-width band
+// of the loudest colour in the palette, closing a panel that its own
+// border and radius already closed, and turning muddy brown in light
+// theme. Authenticity is not a defence for the busiest object on the
+// screen sitting at the bottom of it.
 
 export function DepartureBoard({ sections, station, name, onDepart }) {
   const { t } = useLang()
@@ -71,12 +78,6 @@ export function DepartureBoard({ sections, station, name, onDepart }) {
           />
         ))}
       </div>
-
-      {/* 点字ブロック — the tactile paving that runs the length of
-          every platform in Japan, and the line you are told to stand
-          behind. Here it closes the board off the way it closes the
-          platform: everything above is where the trains are. */}
-      <div className="tactile" aria-hidden="true" />
     </div>
   )
 }

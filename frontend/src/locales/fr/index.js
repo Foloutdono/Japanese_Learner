@@ -72,6 +72,7 @@ const home = {
   // sont des noms propres japonais et vivent dans cette config,
   // pas ici — voici les deux libellés qui se traduisent vraiment.
   departures:  'Départs',
+  platforms:   'Quais',
   // Texte au survol d'un badge 種別. Volontairement pas
   // « Omnibus »/« Rapide » : c'est le mot ferroviaire pour les pastilles,
   // et le répéter n'explique rien à qui choisit un mode d'étude.

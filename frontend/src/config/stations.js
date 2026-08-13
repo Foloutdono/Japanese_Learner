@@ -8,10 +8,9 @@
 //
 // Japanese railway signage is one of the most refined information
 // systems anywhere — the station plate (駅名標), the departure board
-// (発車標), the line colours, the two-letter station numbering, the
-// yellow tactile paving at the platform edge. All of it exists to let
-// somebody who cannot read the language find their train, which is a
-// fairly exact description of what this app is for.
+// (発車標), the line colours, the two-letter station numbering. All of
+// it exists to let somebody who cannot read the language find their
+// train, which is a fairly exact description of what this app is for.
 //
 // This file is the part of that system the components can't derive:
 // how each section's name is *read* (a station plate carries hiragana
