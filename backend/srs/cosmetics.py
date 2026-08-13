@@ -10,13 +10,21 @@ because XP already measures effort and a second effort ladder would
 say nothing new. Rank answers "how much Japanese do you know"; level
 answers "how much have you shown up". They can and should disagree.
 
-**Cosmetics.** Four slots, thirty-six items, all earned and none
-purchasable:
+**Cosmetics.** Seven slots, all earned and none purchasable:
 
-    紙  paper  the surface your study cards are printed on
-    輪  ring   the treatment on your profile's XP ring
-    印  seal   the hanko struck into the corner of every card
-    称号 title  what you're called under your own name
+    紙  paper    the surface your study cards are printed on
+    輪  ring     the treatment on your profile's XP ring
+    印  seal     the hanko struck into the corner of every card
+    称号 title    what you're called under your own name
+    背景 backdrop the room you're studying in — behind everything
+    祝  flourish what a reward looks like when it fires
+    筆  brush    the ink you write kanji with, in the drawing pad
+
+The last three are new, and they were chosen because between them they
+cover the three moments the older four never touched: the space around
+the card, the instant a review pays out, and the act of writing
+itself. A cosmetic set that only dresses the card is a set you stop
+noticing.
 
 Everything here is authentic material vocabulary rather than invented
 rarity tiers — unryū paper really does have visible cloud-like fibres,
@@ -72,7 +80,10 @@ def rank_for(mastered: int) -> dict:
 
 
 # ── Cosmetics ─────────────────────────────────────────────────
-SLOTS = ("paper", "ring", "seal", "title")
+# Order matters: this is the order the storehouse lists its cases in,
+# and it runs outward from the card you're looking at to the room
+# you're sitting in.
+SLOTS = ("paper", "ring", "seal", "title", "backdrop", "flourish", "brush")
 
 # Ordered worst → best, purely for presentation weight (the storehouse
 # sorts by it and 極 items get the gold treatment). Same four-tier
@@ -94,70 +105,156 @@ def _c(id, slot, jp, rarity, metric="", target=0):
     return Cosmetic(id, slot, jp, rarity, metric, target)
 
 
+# ── A note on the unlock conditions ───────────────────────────
+# Some of these are counters (review ten thousand cards) and some are
+# *moments* (`dawn_today`, `night_today`, `due_cleared` — binary facts
+# about a single day, see srs.get_daruma_facts). Moments work as unlock
+# conditions precisely because ownership is permanent: study once
+# before eight in the morning and the dawn paper is yours forever. That
+# turns a handful of items into small dares rather than long grinds,
+# and a catalogue made only of long grinds is a catalogue you check
+# twice a year.
+
 # 紙 — paper stocks. Real Japanese papers, roughly in order of how
 # precious they'd actually be.
 PAPERS = [
     _c("paper_washi",       "paper", "和紙",   "nami"),                                   # default
     _c("paper_torinoko",    "paper", "鳥の子", "nami",   "level", 8),
+    _c("paper_sugihara",    "paper", "杉原紙", "nami",   "reviews_total", 250),
     _c("paper_kozo",        "paper", "楮紙",   "jou",    "perfect_run_lifetime", 50),
     _c("paper_unryu",       "paper", "雲龍紙", "jou",    "shelf_count", 25),
     _c("paper_aizome",      "paper", "藍染",   "jou",    "mastered_total", 500),
+    _c("paper_ganpi",       "paper", "雁皮紙", "jou",    "perfect_run_lifetime", 120),
+    _c("paper_chiyogami",   "paper", "千代紙", "jou",    "categories_today", 4),
     _c("paper_momiji",      "paper", "紅葉紙", "toku",   "shelf_colors", 8),
     _c("paper_sabi",        "paper", "錆紙",   "toku",   "reviews_total", 5000),
     _c("paper_suminagashi", "paper", "墨流し", "toku",   "streak_longest", 100),
+    _c("paper_danshi",      "paper", "檀紙",   "toku",   "best_day_reviews", 300),
+    _c("paper_sumizome",    "paper", "墨染",   "toku",   "night_today", 1),
     _c("paper_yozora",      "paper", "夜空紙", "kiwami", "shelf_kiwami", 3),
     _c("paper_kinpaku",     "paper", "金箔",   "kiwami", "rank_index", SHODAN_INDEX),
+    _c("paper_rakusui",     "paper", "落水紙", "kiwami", "mastered_total", 2000),
 ]
 
 # 輪 — the ring drawn around your avatar.
 RINGS = [
     _c("ring_hosomichi", "ring", "細道",   "nami"),                              # default
     _c("ring_kumihimo",  "ring", "組紐",   "nami",   "level", 15),
+    _c("ring_asanoha",   "ring", "麻の葉", "nami",   "reviews_total", 300),
     _c("ring_enso",      "ring", "円相",   "jou",    "streak_longest", 30),
     _c("ring_sakura",    "ring", "桜輪",   "jou",    "mastered_total", 100),
     _c("ring_seigaiha",  "ring", "青海波", "jou",    "reviews_total", 1000),
+    _c("ring_shippou",   "ring", "七宝",   "jou",    "mastered_total", 250),
+    _c("ring_kikko",     "ring", "亀甲",   "jou",    "study_days_week", 7),
+    _c("ring_tomoe",     "ring", "三巴",   "toku",   "rises_total", 3),
     _c("ring_raijin",    "ring", "雷紋",   "toku",   "rises_total", 7),
     _c("ring_kinrin",    "ring", "金輪",   "toku",   "level", 40),
+    _c("ring_gesshin",   "ring", "月輪",   "toku",   "night_today", 1),
     _c("ring_hinode",    "ring", "日輪",   "kiwami", "rank_index", 14),
 ]
 
 # 印 — the hanko struck into every card's corner.
 SEALS = [
-    _c("seal_shu",     "seal", "朱印",   "nami"),                            # default
-    _c("seal_sumi",    "seal", "墨印",   "nami",   "level", 20),
-    _c("seal_hisui",   "seal", "翡翠印", "jou",    "mastered_total", 300),
-    _c("seal_koban",   "seal", "小判印", "jou",    "reviews_total", 2000),
-    _c("seal_kin",     "seal", "金印",   "toku",   "shelf_count", 50),
-    _c("seal_tenkoku", "seal", "篆刻",   "kiwami", "rank_index", 12),
+    _c("seal_shu",      "seal", "朱印",   "nami"),                            # default
+    _c("seal_sumi",     "seal", "墨印",   "nami",   "level", 20),
+    _c("seal_rakkan",   "seal", "落款",   "nami",   "reviews_total", 300),
+    _c("seal_hisui",    "seal", "翡翠印", "jou",    "mastered_total", 300),
+    _c("seal_koban",    "seal", "小判印", "jou",    "reviews_total", 2000),
+    _c("seal_yuin",     "seal", "遊印",   "jou",    "new_cards_today", 25),
+    _c("seal_hyotan",   "seal", "瓢箪印", "jou",    "shelf_count", 30),
+    _c("seal_kin",      "seal", "金印",   "toku",   "shelf_count", 50),
+    _c("seal_hakubun",  "seal", "白文",   "toku",   "perfect_run_lifetime", 100),
+    _c("seal_tenkoku",  "seal", "篆刻",   "kiwami", "rank_index", 12),
+    _c("seal_gyokuji",  "seal", "玉璽",   "kiwami", "rank_index", 15),
 ]
 
 # 称号 — what you're called. Distinct from levelTitle.js's automatic
 # level rank, which everybody gets; these are chosen and earned.
 TITLES = [
     _c("title_minarai",    "title", "見習い",     "nami"),                                # default
+    _c("title_hajime",     "title", "初心",       "nami",   "reviews_total", 100),
     _c("title_kakehashi",  "title", "架け橋",     "nami",   "reviews_total", 500),
+    _c("title_akatsuki",   "title", "暁",         "nami",   "dawn_today", 1),
+    _c("title_yonaga",     "title", "夜長",       "nami",   "night_today", 1),
     _c("title_idaten",     "title", "韋駄天",     "jou",    "best_day_reviews", 150),
     _c("title_fudo",       "title", "不動",       "jou",    "perfect_run_lifetime", 50),
     _c("title_hyakume",    "title", "百目",       "jou",    "shelf_count", 100),
+    _c("title_hayate",     "title", "疾風",       "jou",    "best_day_reviews", 300),
+    _c("title_muketsu",    "title", "無欠",       "jou",    "perfect_run_lifetime", 100),
     _c("title_nanakorobi", "title", "八起",       "toku",   "rises_total", 7),
     _c("title_tetsujin",   "title", "鉄人",       "toku",   "reviews_total", 5000),
     _c("title_sennichi",   "title", "千日行者",   "toku",   "streak_longest", 100),
     _c("title_kuramori",   "title", "蔵守",       "toku",   "unlocked_count", 20),
     _c("title_shishou",    "title", "師匠",       "toku",   "rank_index", SHODAN_INDEX),
+    _c("title_kaigen",     "title", "開眼",       "toku",   "shelf_count", 60),
+    _c("title_tsuwamono",  "title", "兵",         "toku",   "reviews_total", 10000),
     _c("title_shosei",     "title", "書聖",       "kiwami", "mastered_total", 1000),
     _c("title_meijin",     "title", "名人",       "kiwami", "rank_index", 17),
+    _c("title_musou",      "title", "無双",       "kiwami", "streak_longest", 200),
+    _c("title_daruma",     "title", "達磨",       "kiwami", "shelf_kiwami", 8),
 ]
 
-ALL = {c.id: c for c in (*PAPERS, *RINGS, *SEALS, *TITLES)}
+# 背景 — the room behind everything. Every one of these is a wash or a
+# pattern laid *behind* the cards, never under the text: the cards
+# themselves stay opaque, so no backdrop can cost a single point of
+# reading contrast however loud it looks in the case.
+BACKDROPS = [
+    _c("backdrop_muji",      "backdrop", "無地",   "nami"),                                # default
+    _c("backdrop_tatami",    "backdrop", "畳",     "nami",   "level", 5),
+    _c("backdrop_shoji",     "backdrop", "障子",   "nami",   "reviews_total", 500),
+    _c("backdrop_kanoko",    "backdrop", "鹿の子", "jou",    "mastered_total", 200),
+    _c("backdrop_asagiri",   "backdrop", "朝霧",   "jou",    "dawn_today", 1),
+    _c("backdrop_hoshizora", "backdrop", "星空",   "jou",    "night_today", 1),
+    _c("backdrop_sumie",     "backdrop", "墨絵",   "toku",   "perfect_run_lifetime", 150),
+    _c("backdrop_sakura",    "backdrop", "桜吹雪", "toku",   "streak_longest", 60),
+    _c("backdrop_kasumi",    "backdrop", "霞",     "toku",   "shelf_count", 40),
+    _c("backdrop_kinbyobu",  "backdrop", "金屏風", "kiwami", "rank_index", 14),
+    _c("backdrop_amanogawa", "backdrop", "天の川", "kiwami", "reviews_total", 20000),
+]
+
+# 祝 — what a reward looks like when it lands. The app's celebration is
+# staged as kabuki (see XpToast.jsx); these change the character of the
+# performance, not its choreography.
+FLOURISHES = [
+    _c("flourish_tsuke",    "flourish", "ツケ",   "nami"),                              # default
+    _c("flourish_hanabi",   "flourish", "花火",   "nami",   "level", 10),
+    _c("flourish_koban",    "flourish", "小判",   "nami",   "reviews_total", 1000),
+    _c("flourish_sakura",   "flourish", "桜",     "jou",    "mastered_total", 300),
+    _c("flourish_kaminari", "flourish", "雷",     "jou",    "best_day_reviews", 200),
+    _c("flourish_kitsune",  "flourish", "狐火",   "jou",    "night_today", 1),
+    _c("flourish_matsuri",  "flourish", "祭",     "toku",   "shelf_count", 50),
+    _c("flourish_ryu",      "flourish", "龍",     "toku",   "rank_index", 12),
+    _c("flourish_hoo",      "flourish", "鳳凰",   "kiwami", "rank_index", 17),
+]
+
+# 筆 — the ink you actually write with, in the handwriting pad. Colour
+# and stroke weight; the pad reads both off CSS custom properties (see
+# DrawingCanvas.jsx) so a brush is defined in exactly one place like
+# every other material here.
+BRUSHES = [
+    _c("brush_sumi",     "brush", "墨",     "nami"),                                # default
+    _c("brush_shuboku",  "brush", "朱墨",   "nami",   "level", 12),
+    _c("brush_aiboku",   "brush", "藍墨",   "nami",   "mastered_total", 150),
+    _c("brush_futofude", "brush", "太筆",   "jou",    "perfect_run_lifetime", 75),
+    _c("brush_chaboku",  "brush", "茶墨",   "jou",    "reviews_total", 3000),
+    _c("brush_menso",    "brush", "面相筆", "toku",   "best_day_reviews", 250),
+    _c("brush_kinboku",  "brush", "金墨",   "toku",   "rank_index", SHODAN_INDEX),
+    _c("brush_nijimi",   "brush", "滲み",   "kiwami", "mastered_total", 1500),
+]
+
+ALL = {c.id: c for c in (*PAPERS, *RINGS, *SEALS, *TITLES, *BACKDROPS, *FLOURISHES, *BRUSHES)}
 BY_SLOT = {slot: [c for c in ALL.values() if c.slot == slot] for slot in SLOTS}
 
 # Everyone owns one item per slot from the start, so no slot can ever
 # be empty and "unequipped" is never a state the UI has to render.
 DEFAULTS = {
-    "paper": "paper_washi",
-    "ring":  "ring_hosomichi",
-    "seal":  "seal_shu",
-    "title": "title_minarai",
+    "paper":    "paper_washi",
+    "ring":     "ring_hosomichi",
+    "seal":     "seal_shu",
+    "title":    "title_minarai",
+    "backdrop": "backdrop_muji",
+    "flourish": "flourish_tsuke",
+    "brush":    "brush_sumi",
 }
 
 # `unlocked_count` is the one predicate that depends on the others, so

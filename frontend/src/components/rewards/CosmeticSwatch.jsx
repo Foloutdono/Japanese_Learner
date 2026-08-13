@@ -8,15 +8,20 @@
 // equipping it will actually look like — there is exactly one
 // definition of each material in index.css and both paths read it.
 
+import { flourishGlyph } from '../../stores/cosmetics'
+
 // A ring preview is the profile ring at a fixed 68%, close enough to
 // full to show the treatment along most of the circumference without
 // looking complete.
 const PREVIEW_PCT = 0.68
 
 export function CosmeticSwatch({ item, size = 64 }) {
-  if (item.slot === 'paper') return <PaperSwatch item={item} size={size} />
-  if (item.slot === 'ring')  return <RingSwatch item={item} size={size} />
-  if (item.slot === 'seal')  return <SealSwatch item={item} size={size} />
+  if (item.slot === 'paper')    return <PaperSwatch item={item} size={size} />
+  if (item.slot === 'ring')     return <RingSwatch item={item} size={size} />
+  if (item.slot === 'seal')     return <SealSwatch item={item} size={size} />
+  if (item.slot === 'backdrop') return <BackdropSwatch item={item} size={size} />
+  if (item.slot === 'flourish') return <FlourishSwatch item={item} />
+  if (item.slot === 'brush')    return <BrushSwatch item={item} />
   return <TitleSwatch item={item} />
 }
 
@@ -78,6 +83,44 @@ function TitleSwatch({ item }) {
   return (
     <div className="cos-swatch cos-swatch--title">
       <span className="cos-swatch__title-jp" lang="ja">{item.jp}</span>
+    </div>
+  )
+}
+
+// A scrap of the actual room, cut to swatch size — same
+// `--backdrop-*` properties #root paints itself with.
+function BackdropSwatch({ item, size }) {
+  return (
+    <div
+      className="cos-swatch cos-swatch--backdrop"
+      data-backdrop-preview={item.id}
+      style={{ width: size * 1.35, height: size }}
+      aria-hidden="true"
+    />
+  )
+}
+
+// A real toast pill, in miniature: the fill and the trim are the two
+// things a flourish actually changes at the speed a reward happens.
+// The glyph comes from the same map XpToast reads, so the preview and
+// the celebration can't show different characters.
+function FlourishSwatch({ item }) {
+  return (
+    <div className="cos-swatch cos-swatch--flourish" data-flourish-preview={item.id} aria-hidden="true">
+      <span className="cos-swatch__pill">
+        <span className="cos-swatch__pill-glyph" lang="ja">{flourishGlyph(item.id)}</span>
+        +8 XP
+      </span>
+    </div>
+  )
+}
+
+// One stroke, drawn with the real ink at the real width — including
+// the bleed, which is the whole of what 滲み is.
+function BrushSwatch({ item }) {
+  return (
+    <div className="cos-swatch cos-swatch--brush" data-brush-preview={item.id} aria-hidden="true">
+      <span className="cos-swatch__stroke" />
     </div>
   )
 }

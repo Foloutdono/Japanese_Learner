@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { playSfx } from '../../lib/audio'
+import { useLoadout, flourishGlyph } from '../../stores/cosmetics'
 
 // ── XP toast ──────────────────────────────────────────────
 // `toast` is `{ amount, id, leveledUp, newLevel, quality }` — `id`
@@ -172,6 +173,10 @@ export function StageFootlights({ big, leaving, colorVar }) {
 
 export function XpToast({ toast, onDone }) {
   const { t } = useLang()
+  // 祝 — the equipped flourish. Its colours are already on <html> as
+  // custom properties (see the 祝 block in index.css); only the
+  // character in the middle needs to come through JavaScript.
+  const flourish = useLoadout().flourish
   // 'active' covers the whole entrance and hold — including, for a
   // level-up, the indefinite wait for the claim button, where there's
   // no timer running at all, just a person deciding when to click.
@@ -273,7 +278,7 @@ export function XpToast({ toast, onDone }) {
       >
         <TsukeBeats />
         {kumadoriCount > 0 && <KumadoriBurst count={kumadoriCount} colorVar={kumadoriColorVar} />}
-        <span className="xp-toast__glyph" aria-hidden="true">気</span>
+        <span className="xp-toast__glyph" aria-hidden="true">{flourishGlyph(flourish)}</span>
         +{toast.amount} XP
         <span className="xp-toast__brush" aria-hidden="true" />
         <span className="xp-toast__glint xp-toast__glint--1" aria-hidden="true" />

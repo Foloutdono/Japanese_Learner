@@ -41,15 +41,23 @@ def _init_db() -> None:
                     PRIMARY KEY (user_id, cosmetic_id)
                 )
             """)
-            cur.execute("""
+            # One nullable column per slot. Built from cosmetics.SLOTS
+            # rather than spelled out, so adding a slot to the
+            # catalogue is a one-line edit there and not a schema
+            # change here that someone has to remember to make.
+            columns = ",\n                    ".join(f"{slot} TEXT" for slot in cosmetics.SLOTS)
+            cur.execute(f"""
                 CREATE TABLE IF NOT EXISTS user_loadout (
                     user_id TEXT PRIMARY KEY,
-                    paper TEXT,
-                    ring TEXT,
-                    seal TEXT,
-                    title TEXT
+                    {columns}
                 )
             """)
+            # And the same list again as ALTERs, because the table
+            # already exists for every current user: CREATE TABLE IF
+            # NOT EXISTS is a no-op on them, so a new slot would
+            # otherwise be a column that only new accounts have.
+            for slot in cosmetics.SLOTS:
+                cur.execute(f"ALTER TABLE user_loadout ADD COLUMN IF NOT EXISTS {slot} TEXT")
         conn.commit()
     finally:
         conn.close()
@@ -160,7 +168,7 @@ def _loadout(user_id: str, owned: set[str]) -> dict:
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT paper, ring, seal, title FROM user_loadout WHERE user_id = %s",
+                f"SELECT {', '.join(cosmetics.SLOTS)} FROM user_loadout WHERE user_id = %s",
                 (user_id,),
             )
             row = cur.fetchone()

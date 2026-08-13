@@ -29,18 +29,46 @@ export const RANK_LABELS = [
   '初段', '二段', '三段', '四段', '五段', '六段', '七段', '八段', '九段', '十段',
 ]
 
-export const SLOTS = ['paper', 'ring', 'seal', 'title']
+// Mirrors srs/cosmetics.py's SLOTS, in the same order: outward from
+// the card you're looking at to the room you're sitting in.
+export const SLOTS = ['paper', 'ring', 'seal', 'title', 'backdrop', 'flourish', 'brush']
 
 export const DEFAULT_LOADOUT = {
-  paper: 'paper_washi',
-  ring:  'ring_hosomichi',
-  seal:  'seal_shu',
-  title: 'title_minarai',
+  paper:    'paper_washi',
+  ring:     'ring_hosomichi',
+  seal:     'seal_shu',
+  title:    'title_minarai',
+  backdrop: 'backdrop_muji',
+  flourish: 'flourish_tsuke',
+  brush:    'brush_sumi',
 }
 
-// Only these three are CSS-driven; `title` is text the profile renders
-// directly, so it never becomes an attribute.
-const THEMED_SLOTS = ['paper', 'ring', 'seal']
+// Everything except `title`, which is text the profile renders
+// directly and so never becomes an attribute. The other six all
+// resolve to CSS custom properties keyed off <html>'s attributes —
+// including `brush`, whose colour and weight the drawing pad reads
+// back out of the computed style rather than keeping its own copy.
+const THEMED_SLOTS = ['paper', 'ring', 'seal', 'backdrop', 'flourish', 'brush']
+
+// 祝 — the one part of a cosmetic that can't be CSS: the character
+// struck in the middle of the reward. Keyed by id, defaulting to the
+// original 気 so an unknown id (a catalogue edit deployed ahead of the
+// frontend) degrades to the stock toast instead of a blank.
+const FLOURISH_GLYPH = {
+  flourish_tsuke:    '気',
+  flourish_hanabi:   '華',
+  flourish_koban:    '両',
+  flourish_sakura:   '桜',
+  flourish_kaminari: '雷',
+  flourish_kitsune:  '狐',
+  flourish_matsuri:  '祭',
+  flourish_ryu:      '龍',
+  flourish_hoo:      '鳳',
+}
+
+export function flourishGlyph(id) {
+  return FLOURISH_GLYPH[id] ?? FLOURISH_GLYPH.flourish_tsuke
+}
 
 export function applyLoadout(loadout) {
   const root = document.documentElement

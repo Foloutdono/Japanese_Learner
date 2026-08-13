@@ -6,12 +6,49 @@ import { UndoIcon, CheckIcon } from '../ui/Icons'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
-// Canvas 2D drawing colors — these are JS canvas-API values, not CSS,
-// so they can't reference CSS custom properties directly. Kept in sync
-// with the palette by hand: board matches --bg-card (sumi ink slab),
-// stroke matches --text-primary (kinari — warm off-white "ink" line).
-const CANVAS_BOARD_COLOR  = '#201d24'
-const CANVAS_STROKE_COLOR = '#ece5d8'
+// The board stays a fixed sumi slab: it's the writing surface, not a
+// cosmetic, and it has to stay dark enough for pale ink in either
+// theme.
+const CANVAS_BOARD_COLOR = '#201d24'
+
+// The ink, though, is the equipped 筆 (see the brush block in
+// index.css). Canvas takes numbers rather than custom properties, so
+// rather than keep a second palette in JavaScript — which is exactly
+// how the old hardcoded CANVAS_STROKE_COLOR drifted out of step with
+// --text-primary — the value is read back off the computed style at
+// the moment it's needed. Resolved per stroke, not once at module
+// load, so equipping a brush mid-session (the quick-change drawer is
+// reachable from the quiz itself now) takes effect on the very next
+// line without a remount.
+const FALLBACK_INK = '#ece5d8'
+
+function brush() {
+  if (typeof window === 'undefined') return { ink: FALLBACK_INK, width: 5, blur: 0 }
+  const css = getComputedStyle(document.documentElement)
+  const ink = css.getPropertyValue('--brush-ink').trim()
+  const width = parseFloat(css.getPropertyValue('--brush-width'))
+  const blur = parseFloat(css.getPropertyValue('--brush-blur'))
+  return {
+    ink: ink || FALLBACK_INK,
+    width: Number.isFinite(width) ? width : 5,
+    blur: Number.isFinite(blur) ? blur : 0,
+  }
+}
+
+// Everything a stroke needs, applied together — the two draw handlers
+// and the initial clear all have to agree, and they only do if they
+// ask the same function.
+function applyBrush(ctx) {
+  const { ink, width, blur } = brush()
+  ctx.strokeStyle = ink
+  ctx.fillStyle   = ink
+  ctx.lineWidth   = width
+  ctx.lineCap     = 'round'
+  ctx.lineJoin    = 'round'
+  // 滲み — ink bleeding into wet paper. The only brush that sets this.
+  ctx.filter = blur > 0 ? `blur(${blur}px)` : 'none'
+  return width
+}
 
 function kanjiToSvgUrl(kanji) {
   const codepoint = kanji.codePointAt(0).toString(16).padStart(5, '0')
@@ -46,12 +83,12 @@ function Canvas({ canvasRef, onClear, resetKey }) {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
+    // The board is wiped with the filter off — a blurred brush must
+    // not soften the edges of the slab it's drawn on.
+    ctx.filter = 'none'
     ctx.fillStyle = CANVAS_BOARD_COLOR
     ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.strokeStyle = CANVAS_STROKE_COLOR
-    ctx.lineWidth   = 5
-    ctx.lineCap     = 'round'
-    ctx.lineJoin    = 'round'
+    applyBrush(ctx)
     onClear?.()
   }
 
@@ -62,9 +99,12 @@ function Canvas({ canvasRef, onClear, resetKey }) {
     const pos    = getPos(e, canvas)
     lastPos.current = pos
     const ctx = canvas.getContext('2d')
+    // The dot that makes a single tap leave a mark. Sized off the
+    // brush, so the fine 面相筆 doesn't start every stroke with a blob
+    // three times the width of the line that follows it.
+    const width = applyBrush(ctx)
     ctx.beginPath()
-    ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2)
-    ctx.fillStyle = CANVAS_STROKE_COLOR
+    ctx.arc(pos.x, pos.y, width / 2, 0, Math.PI * 2)
     ctx.fill()
   }
 

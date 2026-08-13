@@ -4,6 +4,7 @@ import { useLang } from '../../LangContext'
 import { getNavLinks } from '../../config/navLinks'
 import { BurgerMenu } from './BurgerMenu'
 import { useProfileSummary } from '../../stores/profileSummary'
+import { QuickChange } from '../rewards/QuickChange'
 import { playClick } from '../../lib/audio'
 import { ChevronIcon } from './Icons'
 
@@ -213,6 +214,14 @@ export function TopBar({
           <span className="top-bar__title">{title}</span>
 
           <TopBarProfileRing />
+
+          {/* 蔵 — the quick-change drawer. In the top bar rather than
+              on the storehouse screen because the whole point is to
+              reach it *without* leaving what you're doing: the moment
+              you want a different paper is the moment you're looking
+              at a card printed on the old one. Every screen with a top
+              bar has it, mid-quiz included. */}
+          <QuickChange />
 
           {actions}
           <button className="btn-back" onClick={() => { playClick(); onBack() }} aria-label={t.back} title={t.back}>

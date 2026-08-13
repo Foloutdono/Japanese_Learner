@@ -2173,11 +2173,11 @@ input:focus { border-color: var(--accent2); }
      side, so the sweep has an actual bright point instead of a flat
      plateau. */
   background: linear-gradient(100deg,
-    var(--accent9) 0%, var(--accent9) 40%,
+    var(--flourish-fill, var(--accent9)) 0%, var(--flourish-fill, var(--accent9)) 40%,
     #b9c8ef 46%,
     #fff7e0 50%,
     #b9c8ef 54%,
-    var(--accent9) 60%, var(--accent9) 100%);
+    var(--flourish-fill, var(--accent9)) 60%, var(--flourish-fill, var(--accent9)) 100%);
   background-size: 260% 100%;
   padding: 9px 22px 9px 16px;
   border-radius: 999px;
@@ -2187,7 +2187,7 @@ input:focus { border-color: var(--accent2); }
   box-shadow:
     0 4px 14px rgba(0, 0, 0, 0.35),
     0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-    0 0 0 1.5px var(--accent2);
+    0 0 0 1.5px var(--flourish-trim, var(--accent2));
   animation:
     xp-toast-arrive 1100ms cubic-bezier(0.3, 0.1, 0.2, 1) forwards,
     xp-toast-shine 1500ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
@@ -2210,9 +2210,9 @@ input:focus { border-color: var(--accent2); }
   animation: xp-toast-fall 380ms cubic-bezier(0.4, 0, 0.7, 0.3) forwards;
 }
 @keyframes xp-toast-glow-pulse {
-  0%   { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 0 0 1.5px var(--accent2), 0 0 0 0 var(--kumadori-color, transparent); }
-  45%  { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 0 0 1.5px var(--accent2), 0 0 18px 5px var(--kumadori-color, transparent); }
-  100% { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 0 0 1.5px var(--accent2), 0 0 0 0 var(--kumadori-color, transparent); }
+  0%   { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 0 0 1.5px var(--flourish-trim, var(--accent2)), 0 0 0 0 var(--kumadori-color, transparent); }
+  45%  { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 0 0 1.5px var(--flourish-trim, var(--accent2)), 0 0 18px 5px var(--kumadori-color, transparent); }
+  100% { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 0 0 1.5px var(--flourish-trim, var(--accent2)), 0 0 0 0 var(--kumadori-color, transparent); }
 }
 .xp-toast__glyph {
   display: inline-block;
@@ -9633,6 +9633,756 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
   --seal-frame: var(--text-secondary);
   --seal-frame-w: 1.5px;
   --seal-frame-off: -6px;
+}
+
+
+/* ── 紙, continued ─────────────────────────────────────────── */
+
+/* Sugihara: thin, soft, faintly warm — the everyday paper of the
+   Muromachi court, and the first upgrade from plain washi. */
+:root[data-paper="paper_sugihara"], [data-paper-preview="paper_sugihara"] {
+  --paper-tint: var(--accent5);
+  --paper-amt: 5%;
+  --paper-edge: var(--accent5);
+}
+
+/* Gampi: the glossy one. Nearly translucent, with a sheen that runs
+   across the sheet rather than sitting on it. */
+:root[data-paper="paper_ganpi"], [data-paper-preview="paper_ganpi"] {
+  --paper-tint: var(--warning);
+  --paper-amt: 7%;
+  --paper-edge: var(--accent2);
+  --paper-img: linear-gradient(
+    108deg,
+    transparent 0 38%,
+    color-mix(in srgb, var(--text-primary) 7%, transparent) 47%,
+    color-mix(in srgb, var(--text-primary) 2%, transparent) 56%,
+    transparent 70%);
+}
+
+/* Chiyogami: block-printed pattern paper. A small repeating figure,
+   kept faint — the real thing is loud because it's used for tiny
+   boxes, not for something you read off. */
+:root[data-paper="paper_chiyogami"], [data-paper-preview="paper_chiyogami"] {
+  --paper-tint: var(--accent8);
+  --paper-amt: 10%;
+  --paper-edge: var(--accent8);
+  --paper-img:
+    repeating-linear-gradient(45deg,
+      color-mix(in srgb, var(--accent8) 12%, transparent) 0 4px,
+      transparent 4px 14px),
+    repeating-linear-gradient(-45deg,
+      color-mix(in srgb, var(--accent2) 9%, transparent) 0 4px,
+      transparent 4px 14px);
+}
+
+/* Danshi: the ceremonial sheet, crimped into fine ridges. Used for
+   documents that mattered. */
+:root[data-paper="paper_danshi"], [data-paper-preview="paper_danshi"] {
+  --paper-tint: var(--text-secondary);
+  --paper-amt: 8%;
+  --paper-edge: var(--text-secondary);
+  --paper-img: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--text-primary) 5%, transparent) 0 1px,
+    transparent 1px 5px,
+    color-mix(in srgb, #000 5%, transparent) 5px 6px,
+    transparent 6px 11px);
+}
+
+/* Sumizome: dyed in ink, the colour of a mourning robe — and of the
+   hours you earned it in. */
+:root[data-paper="paper_sumizome"], [data-paper-preview="paper_sumizome"] {
+  --paper-tint: var(--indigo);
+  --paper-amt: 34%;
+  --paper-edge: var(--text-secondary);
+  --paper-img:
+    radial-gradient(ellipse 80% 70% at 30% 20%, color-mix(in srgb, #000 22%, transparent), transparent 72%),
+    radial-gradient(ellipse 70% 60% at 78% 84%, color-mix(in srgb, #000 18%, transparent), transparent 70%);
+}
+
+/* Rakusui: water dripped onto the wet sheet while it drains, punching
+   a lace of tiny holes clean through it. */
+:root[data-paper="paper_rakusui"], [data-paper-preview="paper_rakusui"] {
+  --paper-tint: var(--accent6);
+  --paper-amt: 8%;
+  --paper-edge: var(--accent6);
+  --paper-img:
+    radial-gradient(circle at 20% 24%, color-mix(in srgb, var(--text-primary) 13%, transparent) 0 2px, transparent 3px),
+    radial-gradient(circle at 62% 16%, color-mix(in srgb, var(--text-primary) 11%, transparent) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 84% 46%, color-mix(in srgb, var(--text-primary) 12%, transparent) 0 2px, transparent 3px),
+    radial-gradient(circle at 34% 62%, color-mix(in srgb, var(--text-primary) 10%, transparent) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 72% 78%, color-mix(in srgb, var(--text-primary) 12%, transparent) 0 2px, transparent 3px),
+    radial-gradient(circle at 14% 86%, color-mix(in srgb, var(--text-primary) 9%, transparent) 0 1.5px, transparent 3px);
+}
+
+/* ── 輪, continued ─────────────────────────────────────────── */
+
+/* Hemp leaf: the six-point star every child's kimono is printed with,
+   read here as an even tick around the circumference. */
+:root[data-ring="ring_asanoha"], [data-ring-preview="ring_asanoha"] {
+  --ring-color: var(--accent6);
+  --ring-w: 4;
+  --ring-deco-color: var(--accent6);
+  --ring-deco-w: 9;
+  --ring-deco-dash: 1 7;
+  --ring-deco-op: 0.45;
+}
+/* Seven treasures: interlocking circles, so the decoration overlaps
+   the line it sits on rather than beading beside it. */
+:root[data-ring="ring_shippou"], [data-ring-preview="ring_shippou"] {
+  --ring-color: var(--accent3);
+  --ring-w: 5;
+  --ring-deco-color: var(--accent2);
+  --ring-deco-w: 10;
+  --ring-deco-dash: 6 4;
+  --ring-deco-cap: round;
+  --ring-deco-op: 0.35;
+}
+/* Tortoise shell: long, hard, hexagonal segments. Slow and armoured. */
+:root[data-ring="ring_kikko"], [data-ring-preview="ring_kikko"] {
+  --ring-color: var(--accent5);
+  --ring-w: 6;
+  --ring-deco-color: var(--warning);
+  --ring-deco-w: 3;
+  --ring-deco-dash: 14 6;
+  --ring-deco-op: 0.7;
+}
+/* Three commas chasing each other — the crest on every temple drum. */
+:root[data-ring="ring_tomoe"], [data-ring-preview="ring_tomoe"] {
+  --ring-color: var(--daruma-aka, var(--accent));
+  --ring-w: 5;
+  --ring-deco-color: var(--text-primary);
+  --ring-deco-w: 9;
+  --ring-deco-dash: 22 42;
+  --ring-deco-cap: round;
+  --ring-deco-op: 0.5;
+}
+/* Moonring: a cold halo, and the only other ring that turns. Twice as
+   slow as the sun. */
+:root[data-ring="ring_gesshin"], [data-ring-preview="ring_gesshin"] {
+  --ring-color: var(--accent4);
+  --ring-w: 5;
+  --ring-cap: round;
+  --ring-deco-color: #cfd8ea;
+  --ring-deco-w: 10;
+  --ring-deco-dash: 2 10;
+  --ring-deco-cap: round;
+  --ring-deco-op: 0.5;
+}
+:root[data-ring="ring_gesshin"] .profile-card__ring-deco,
+[data-ring-preview="ring_gesshin"] .cos-ring__deco {
+  transform-origin: 50% 50%;
+  animation: hinode-turn 68s linear infinite reverse;
+}
+
+/* ── 印, continued ─────────────────────────────────────────── */
+
+/* Rakkan: the signature seal at the end of a piece of calligraphy —
+   tall, narrow, and struck at the angle a hand naturally lands. */
+:root[data-seal="seal_rakkan"], [data-seal-preview="seal_rakkan"] {
+  --seal-radius: 2px;
+  --seal-rotate: -9deg;
+  --seal-border-w: 1px;
+  --seal-bg-amt: 18%;
+}
+/* A play seal: carved for pleasure, not for authority. Round, loose,
+   set at whatever angle it fell. */
+:root[data-seal="seal_yuin"], [data-seal-preview="seal_yuin"] {
+  --seal-radius: 40%;
+  --seal-rotate: -12deg;
+  --seal-border-w: 1.5px;
+  --seal-bg-amt: 20%;
+}
+/* Gourd-shaped, the way the good-luck ones are cut. */
+:root[data-seal="seal_hyotan"], [data-seal-preview="seal_hyotan"] {
+  --seal-radius: 45% 45% 50% 50% / 60% 60% 40% 40%;
+  --seal-rotate: -4deg;
+  --seal-border-w: 2px;
+  --seal-bg-amt: 16%;
+}
+/* 白文 — intaglio: the characters are cut *away*, so they print pale
+   and the ground prints solid. The heaviest wall in the case. */
+:root[data-seal="seal_hakubun"], [data-seal-preview="seal_hakubun"] {
+  --seal-radius: 3px;
+  --seal-rotate: -2deg;
+  --seal-border-w: 3px;
+  --seal-bg-amt: 32%;
+  --seal-frame: var(--bg-card);
+  --seal-frame-w: 1.5px;
+  --seal-frame-off: -5px;
+}
+/* 玉璽 — the jade seal of state. Square, immovable, double-framed. */
+:root[data-seal="seal_gyokuji"], [data-seal-preview="seal_gyokuji"] {
+  --seal-radius: 1px;
+  --seal-rotate: 0deg;
+  --seal-border-w: 2.5px;
+  --seal-bg-amt: 24%;
+  --seal-frame: var(--accent2);
+  --seal-frame-w: 2px;
+  --seal-frame-off: -7px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   背景 — the room
+   ════════════════════════════════════════════════════════════
+   Painted on #root, not on body: html/body/#root all carry
+   --bg-main, and #root's own opaque background would cover anything
+   painted further down the stack.
+
+   Every backdrop is a pattern of colours mixed toward `transparent`
+   over that same --bg-main, so like the papers it inherits the
+   theme instead of fighting it. And because the study cards are
+   opaque, no backdrop can cost a single point of reading contrast
+   however busy it looks in the case — which is what makes it safe
+   to ship a night sky. */
+#root {
+  background-image: var(--backdrop-img, none);
+  background-size: var(--backdrop-size, auto);
+  background-position: var(--backdrop-pos, center);
+  background-repeat: var(--backdrop-repeat, repeat);
+  background-attachment: fixed;
+}
+
+/* Plain — deliberately empty, like paper_washi. */
+:root[data-backdrop="backdrop_muji"], [data-backdrop-preview="backdrop_muji"] { --backdrop-img: none; }
+
+/* Woven rush matting: fine weft lines, and the darker seam every
+   half-mat where two panels meet. */
+:root[data-backdrop="backdrop_tatami"], [data-backdrop-preview="backdrop_tatami"] {
+  --backdrop-swatch-size: 46px 46px;
+  --backdrop-img:
+    repeating-linear-gradient(0deg,
+      color-mix(in srgb, var(--success) 5%, transparent) 0 1px,
+      transparent 1px 4px),
+    repeating-linear-gradient(90deg,
+      color-mix(in srgb, #000 6%, transparent) 0 2px,
+      transparent 2px 92px);
+}
+
+/* Shoji: paper panes in a wooden lattice, lit from behind. */
+:root[data-backdrop="backdrop_shoji"], [data-backdrop-preview="backdrop_shoji"] {
+  --backdrop-swatch-size: 44px 40px;
+  --backdrop-img:
+    repeating-linear-gradient(0deg,
+      color-mix(in srgb, var(--text-secondary) 13%, transparent) 0 1.5px,
+      transparent 1.5px 74px),
+    repeating-linear-gradient(90deg,
+      color-mix(in srgb, var(--text-secondary) 13%, transparent) 0 1.5px,
+      transparent 1.5px 58px),
+    radial-gradient(ellipse 70% 55% at 50% 30%,
+      color-mix(in srgb, var(--warning) 7%, transparent), transparent 72%);
+}
+
+/* Kanoko shibori: fawn-spot tie-dye, each dot the mark of one grain
+   of rice bound into the cloth. */
+:root[data-backdrop="backdrop_kanoko"], [data-backdrop-preview="backdrop_kanoko"] {
+  --backdrop-swatch-size: 20px 20px;
+  --backdrop-img:
+    radial-gradient(circle at 8px 8px, color-mix(in srgb, var(--accent4) 16%, transparent) 0 3px, transparent 4px),
+    radial-gradient(circle at 28px 28px, color-mix(in srgb, var(--accent4) 12%, transparent) 0 3px, transparent 4px);
+  --backdrop-size: 40px 40px;
+}
+
+/* Morning mist lying in the valley, before the day has decided
+   anything. */
+:root[data-backdrop="backdrop_asagiri"], [data-backdrop-preview="backdrop_asagiri"] {
+  --backdrop-img:
+    linear-gradient(0deg,
+      color-mix(in srgb, var(--warning) 14%, transparent) 0%,
+      transparent 38%),
+    linear-gradient(0deg,
+      transparent 52%,
+      color-mix(in srgb, var(--accent8) 7%, transparent) 78%,
+      color-mix(in srgb, var(--accent3) 6%, transparent) 100%);
+  --backdrop-repeat: no-repeat;
+  --backdrop-size: 100% 100%;
+}
+
+/* A fixed sky. Hand-placed, not random: the same stars every night,
+   which is the whole point of a sky. */
+:root[data-backdrop="backdrop_hoshizora"], [data-backdrop-preview="backdrop_hoshizora"] {
+  --backdrop-swatch-size: 150px 112px;
+  --backdrop-img:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--text-primary) 55%, transparent) 0 1px, transparent 2px),
+    radial-gradient(circle at 31% 62%, color-mix(in srgb, var(--text-primary) 40%, transparent) 0 1px, transparent 2px),
+    radial-gradient(circle at 47% 24%, color-mix(in srgb, var(--text-primary) 60%, transparent) 0 1.4px, transparent 2.4px),
+    radial-gradient(circle at 58% 78%, color-mix(in srgb, var(--text-primary) 35%, transparent) 0 1px, transparent 2px),
+    radial-gradient(circle at 73% 38%, color-mix(in srgb, var(--text-primary) 50%, transparent) 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 86% 12%, color-mix(in srgb, var(--text-primary) 45%, transparent) 0 1px, transparent 2px),
+    radial-gradient(circle at 92% 66%, color-mix(in srgb, var(--text-primary) 38%, transparent) 0 1px, transparent 2px),
+    radial-gradient(circle at 21% 88%, color-mix(in srgb, var(--text-primary) 42%, transparent) 0 1.2px, transparent 2.2px),
+    linear-gradient(180deg, color-mix(in srgb, var(--indigo) 22%, transparent), transparent 60%);
+  --backdrop-size: 620px 480px;
+}
+
+/* Ink-wash mountains, receding: the near range darker, the far range
+   barely there. */
+:root[data-backdrop="backdrop_sumie"], [data-backdrop-preview="backdrop_sumie"] {
+  --backdrop-img:
+    radial-gradient(ellipse 46% 32% at 18% 101%, color-mix(in srgb, var(--text-primary) 20%, transparent), transparent 70%),
+    radial-gradient(ellipse 38% 26% at 52% 105%, color-mix(in srgb, var(--text-primary) 14%, transparent), transparent 70%),
+    radial-gradient(ellipse 52% 24% at 86% 103%, color-mix(in srgb, var(--text-primary) 10%, transparent), transparent 70%);
+  --backdrop-repeat: no-repeat;
+  --backdrop-size: 100% 100%;
+}
+
+/* 桜吹雪 — a blizzard of petals, drifting on the diagonal a real one
+   falls at. */
+:root[data-backdrop="backdrop_sakura"], [data-backdrop-preview="backdrop_sakura"] {
+  --backdrop-swatch-size: 96px 84px;
+  --backdrop-img:
+    radial-gradient(ellipse 4px 2.5px at 14% 22%, color-mix(in srgb, var(--accent8) 42%, transparent), transparent),
+    radial-gradient(ellipse 3px 2px at 38% 58%, color-mix(in srgb, var(--accent8) 34%, transparent), transparent),
+    radial-gradient(ellipse 4px 2.5px at 62% 12%, color-mix(in srgb, var(--accent8) 38%, transparent), transparent),
+    radial-gradient(ellipse 3px 2px at 78% 74%, color-mix(in srgb, var(--accent8) 30%, transparent), transparent),
+    radial-gradient(ellipse 4px 2.5px at 91% 34%, color-mix(in srgb, var(--accent8) 36%, transparent), transparent),
+    radial-gradient(ellipse 3px 2px at 26% 86%, color-mix(in srgb, var(--accent8) 32%, transparent), transparent);
+  --backdrop-size: 340px 300px;
+}
+
+/* 霞 — the stylised gold cloud-bands that cut across a folding
+   screen, hiding the parts of the scene the painter didn't want. */
+:root[data-backdrop="backdrop_kasumi"], [data-backdrop-preview="backdrop_kasumi"] {
+  --backdrop-img:
+    linear-gradient(96deg,
+      transparent 0 12%,
+      color-mix(in srgb, var(--accent2) 13%, transparent) 18% 30%,
+      transparent 36% 58%,
+      color-mix(in srgb, var(--accent2) 10%, transparent) 64% 74%,
+      transparent 80%);
+  --backdrop-repeat: no-repeat;
+  --backdrop-size: 100% 100%;
+}
+
+/* 金屏風 — a gold-leaf screen: square leaves laid edge to edge, with
+   the joins visible the way they always are. */
+:root[data-backdrop="backdrop_kinbyobu"], [data-backdrop-preview="backdrop_kinbyobu"] {
+  --backdrop-swatch-size: 32px 32px;
+  --backdrop-img:
+    repeating-linear-gradient(0deg,
+      color-mix(in srgb, var(--accent2) 12%, transparent) 0 1px,
+      transparent 1px 62px),
+    repeating-linear-gradient(90deg,
+      color-mix(in srgb, var(--accent2) 12%, transparent) 0 1px,
+      transparent 1px 62px),
+    linear-gradient(122deg,
+      color-mix(in srgb, var(--accent2) 11%, transparent),
+      color-mix(in srgb, var(--warning) 6%, transparent) 52%,
+      color-mix(in srgb, var(--accent2) 12%, transparent));
+}
+
+/* 天の川 — the river of heaven, running corner to corner. */
+:root[data-backdrop="backdrop_amanogawa"], [data-backdrop-preview="backdrop_amanogawa"] {
+  --backdrop-img:
+    repeating-linear-gradient(122deg,
+      transparent 0 3px,
+      color-mix(in srgb, var(--text-primary) 9%, transparent) 3px 4px,
+      transparent 4px 9px),
+    linear-gradient(122deg,
+      transparent 0 26%,
+      color-mix(in srgb, var(--accent3) 16%, transparent) 42%,
+      color-mix(in srgb, var(--accent4) 14%, transparent) 58%,
+      transparent 74%);
+  --backdrop-repeat: no-repeat;
+  --backdrop-size: 100% 100%;
+}
+
+/* ════════════════════════════════════════════════════════════
+   祝 — the flourish
+   ════════════════════════════════════════════════════════════
+   The reward keeps its choreography (see XpToast.jsx — the tsuke
+   count-in, the mie, the kumadori burst); what a flourish changes is
+   who is performing it. Two custom properties do almost all of the
+   work — the fill of the pill and the hairline of trim around it —
+   because those two are what the eye actually reads at the size and
+   speed a toast happens. The character in the middle is the third
+   part, and the only one that can't be CSS (see flourishGlyph in
+   stores/cosmetics.js). */
+:root[data-flourish="flourish_tsuke"], [data-flourish-preview="flourish_tsuke"] {
+  --flourish-fill: var(--accent9);
+  --flourish-trim: var(--accent2);
+}
+/* Fireworks over the river in summer. */
+:root[data-flourish="flourish_hanabi"], [data-flourish-preview="flourish_hanabi"] {
+  --flourish-fill: var(--accent3);
+  --flourish-trim: var(--accent8);
+}
+/* Gold oval coins, the way a jackpot lands in every Edo-period
+   story. */
+:root[data-flourish="flourish_koban"], [data-flourish-preview="flourish_koban"] {
+  --flourish-fill: var(--accent5);
+  --flourish-trim: var(--accent2);
+}
+:root[data-flourish="flourish_sakura"], [data-flourish-preview="flourish_sakura"] {
+  --flourish-fill: var(--accent8);
+  --flourish-trim: #f2d9e2;
+}
+/* 雷 — struck, not awarded. */
+:root[data-flourish="flourish_kaminari"], [data-flourish-preview="flourish_kaminari"] {
+  --flourish-fill: var(--indigo);
+  --flourish-trim: var(--warning);
+}
+/* 狐火 — foxfire: the cold blue lights that lead travellers off the
+   road at night. Earned at night, naturally. */
+:root[data-flourish="flourish_kitsune"], [data-flourish-preview="flourish_kitsune"] {
+  --flourish-fill: #24404a;
+  --flourish-trim: var(--accent6);
+}
+/* 祭 — the whole street turns out. */
+:root[data-flourish="flourish_matsuri"], [data-flourish-preview="flourish_matsuri"] {
+  --flourish-fill: var(--accent);
+  --flourish-trim: var(--accent2);
+}
+:root[data-flourish="flourish_ryu"], [data-flourish-preview="flourish_ryu"] {
+  --flourish-fill: var(--accent6);
+  --flourish-trim: #d9c27a;
+}
+/* 鳳凰 — the phoenix on the Byōdō-in roof. The last thing in the
+   case, and the only one that is simply gold on gold. */
+:root[data-flourish="flourish_hoo"], [data-flourish-preview="flourish_hoo"] {
+  --flourish-fill: var(--accent2);
+  --flourish-trim: #fff2c4;
+}
+
+/* ════════════════════════════════════════════════════════════
+   筆 — the brush
+   ════════════════════════════════════════════════════════════
+   The handwriting pad is a <canvas>, and canvas takes numbers, not
+   custom properties. Rather than keep a second copy of the palette in
+   JavaScript — which is exactly how CANVAS_STROKE_COLOR drifted from
+   --text-primary — the pad reads these back off the computed style at
+   the moment it draws (see DrawingCanvas.jsx). One definition per
+   material, same as every other slot. */
+:root { --brush-ink: var(--text-primary); --brush-width: 5; }
+
+:root[data-brush="brush_sumi"], [data-brush-preview="brush_sumi"] {
+  --brush-ink: var(--text-primary);
+  --brush-width: 5;
+}
+/* 朱墨 — the red ink a teacher corrects with. */
+:root[data-brush="brush_shuboku"], [data-brush-preview="brush_shuboku"] {
+  --brush-ink: var(--accent);
+  --brush-width: 5;
+}
+:root[data-brush="brush_aiboku"], [data-brush-preview="brush_aiboku"] {
+  --brush-ink: #6f9fc4;
+  --brush-width: 5;
+}
+/* 太筆 — the big brush, for big characters. */
+:root[data-brush="brush_futofude"], [data-brush-preview="brush_futofude"] {
+  --brush-ink: var(--text-primary);
+  --brush-width: 11;
+}
+:root[data-brush="brush_chaboku"], [data-brush-preview="brush_chaboku"] {
+  --brush-ink: #b08b5e;
+  --brush-width: 6;
+}
+/* 面相筆 — the fine brush a painter does faces with. Two hairs
+   wide. */
+:root[data-brush="brush_menso"], [data-brush-preview="brush_menso"] {
+  --brush-ink: var(--text-primary);
+  --brush-width: 2.5;
+}
+:root[data-brush="brush_kinboku"], [data-brush-preview="brush_kinboku"] {
+  --brush-ink: var(--accent2);
+  --brush-width: 6;
+}
+/* 滲み — ink bleeding into wet paper. Soft-edged, and wider for it. */
+:root[data-brush="brush_nijimi"], [data-brush-preview="brush_nijimi"] {
+  --brush-ink: #7d8fa8;
+  --brush-width: 9;
+  --brush-blur: 1.6;
+}
+
+/* ── Swatches for the three new cases ──────────────────────── */
+/* Each one previews the actual thing, same rule as the other four:
+   the backdrop swatch is a scrap of the real room, the flourish
+   swatch is a real (miniature) toast pill, the brush swatch is a real
+   stroke drawn with the real ink. */
+.cos-swatch--backdrop {
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background-color: var(--bg-main);
+  background-image: var(--backdrop-img, none);
+  /* A swatch is 86px of a pattern designed to be seen across a whole
+     viewport, so the ones built on a large tile (a night sky is sparse
+     on purpose) crop down to an empty rectangle. Those declare a
+     second, denser size for the case; everything else falls through to
+     the real one. */
+  background-size: var(--backdrop-swatch-size, var(--backdrop-size, auto));
+  background-position: var(--backdrop-pos, center);
+  background-repeat: var(--backdrop-repeat, repeat);
+}
+
+.cos-swatch--flourish {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 86px;
+  height: 64px;
+  border-radius: 6px;
+  background: var(--bg-panel);
+}
+.cos-swatch__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--flourish-fill, var(--accent9));
+  box-shadow: 0 0 0 1.5px var(--flourish-trim, var(--accent2));
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+}
+.cos-swatch__pill-glyph { font-family: var(--font-jp); font-size: 13px; }
+
+.cos-swatch--brush {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 86px;
+  height: 64px;
+  border-radius: 6px;
+  background: var(--bg-panel);
+}
+.cos-swatch__stroke {
+  display: block;
+  width: 58px;
+  height: calc(var(--brush-width, 5) * 1px);
+  border-radius: 999px;
+  background: var(--brush-ink, var(--text-primary));
+  filter: blur(calc(var(--brush-blur, 0) * 0.6px));
+}
+
+/* ════════════════════════════════════════════════════════════
+   The quick-change drawer
+   ════════════════════════════════════════════════════════════
+   Cosmetics used to be reachable from exactly one place: a screen you
+   had to leave the session to visit. Which meant that in practice you
+   equipped a paper once and then studied on it for a month without
+   ever seeing the other nine. This is the storehouse's front counter —
+   every owned item, one tap, without leaving the card you're on. */
+.quick-drawer-btn {
+  flex-shrink: 0;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-jp);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.quick-drawer-btn:hover {
+  color: var(--accent2);
+  border-color: color-mix(in srgb, var(--accent2) 40%, transparent);
+  filter: none;
+}
+/* Unopened unlocks are waiting in there. Same seal-red dot the daruma
+   hall and the profile use for "something is ready". */
+.quick-drawer-btn__dot {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--daruma-aka);
+}
+
+.quick-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.45);
+  animation: quick-drawer-fade 160ms ease forwards;
+}
+@keyframes quick-drawer-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.quick-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  box-shadow: -18px 0 44px rgba(0, 0, 0, 0.35);
+  animation: quick-drawer-slide 220ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes quick-drawer-slide {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+.quick-drawer__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.quick-drawer__glyph {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--accent2);
+}
+.quick-drawer__title {
+  flex: 1;
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.quick-drawer__close {
+  background: none;
+  border: none;
+  padding: 6px;
+  line-height: 0;
+  color: var(--text-secondary);
+}
+
+.quick-drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 20px 20px;
+}
+
+.quick-drawer__foot {
+  border-top: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.quick-drawer__count {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.quick-drawer__more {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.quick-drawer__more:hover { border-color: var(--accent2); color: var(--accent2); filter: none; }
+
+.quick-slot { padding: 16px 0; border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent); }
+.quick-slot:last-child { border-bottom: none; }
+
+.quick-slot__head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.quick-slot__label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.quick-slot__equipped {
+  flex: 1;
+  font-family: var(--font-jp);
+  font-size: 12.5px;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+/* A horizontal rail rather than a grid: a slot can hold twenty-one
+   items and this is a drawer over a live quiz, not a catalogue. */
+.quick-slot__rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.quick-item {
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 74px;
+  padding: 8px 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: inherit;
+  font: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.quick-item:hover { border-color: var(--text-secondary); filter: none; }
+.quick-item--on {
+  border-color: var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 10%, var(--bg-card));
+}
+.quick-item--busy { opacity: 0.5; }
+.quick-item__preview {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+/* The shared swatches are built for the storehouse's own case, where
+   there is room for an 86px preview. Scaled down here rather than
+   redrawn, so the drawer can never show a different thing from the
+   storehouse. */
+.quick-item__preview .cos-swatch {
+  transform: scale(0.44);
+  transform-origin: center;
+}
+.quick-item__name {
+  font-family: var(--font-jp);
+  font-size: 10.5px;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.quick-item--on .quick-item__name { color: var(--accent2); }
+
+/* 称号 has nothing to draw — it *is* text — so its rail shows the name
+   itself at a readable size instead of a 44%-scaled swatch of it. */
+.quick-item--title { width: auto; min-width: 74px; }
+.quick-item--title .quick-item__preview {
+  height: auto;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+  padding: 2px 8px;
+}
+
+@media (max-width: 560px) {
+  .quick-drawer { width: 100%; }
 }
 
 /* ── The storehouse screen ─────────────────────────────────── */
