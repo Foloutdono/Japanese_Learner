@@ -247,6 +247,7 @@ export default function DictionaryScreen({ session }) {
 				    that as the one place it's shown. Only the description
 				    is genuinely new content, so that's all this adds. */}
 				<div className="selector-header">
+					<h1 className="selector-header__title" lang="ja">{t.dictionaryHeading}</h1>
 					<p className="selector-header__subtitle">
 						{t.dictionarySubtitle}
 					</p>
@@ -316,7 +317,7 @@ export default function DictionaryScreen({ session }) {
 						/>
 						{!loading && (
 							<div className="dict-index-bar__count">
-								{total} {t.dictionaryResults}
+								{t.dictionaryResults(total)}
 							</div>
 						)}
 					</div>

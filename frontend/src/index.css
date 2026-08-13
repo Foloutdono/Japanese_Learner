@@ -1719,9 +1719,12 @@ input:focus { border-color: var(--accent2); }
 .mode-toggle__btn--active { background: var(--accent); }
 
 .quiz-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   color: var(--success);
   font-size: 18px;
-  text-align: center;
   padding: 40px;
 }
 
@@ -3513,10 +3516,17 @@ input:focus { border-color: var(--accent2); }
   font-size: 14px;
   padding: 6px 12px;
 }
+/* Square padding for a square glyph, and line-height:0 so the button
+   is exactly the icon plus its padding. An <svg> is inline-level: it
+   sits on the text baseline with descender space reserved under it, so
+   `align-items: center` centres a line box that is taller than the
+   glyph and the icon ends up sitting high. The `display: block` below
+   takes the icon out of that line box entirely. */
 .btn-nav--icon {
-  font-size: 16px;
-  padding: 6px 10px;
+  padding: 8px;
+  line-height: 0;
 }
+.btn-nav svg { display: block; }
 .btn-nav--lang { font-size: 14px; padding: 6px 12px; }
 
 /* ── Landing screen ───────────────────────────────────────────
@@ -5378,6 +5388,11 @@ input:focus { border-color: var(--accent2); }
   left: 14px;
   transform: translateY(-50%);
   writing-mode: vertical-rl;
+  /* Without this the label wraps into a second column whenever the
+     plate is short — the katakana plate has no readings block, so
+     片仮名 broke across two columns and, because vertical-rl stacks
+     columns right to left, rendered as 名 / 片仮. */
+  white-space: nowrap;
   font-family: var(--font-jp);
   font-size: 25px;
   letter-spacing: 0.34em;

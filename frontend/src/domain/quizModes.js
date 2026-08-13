@@ -12,6 +12,20 @@ export const VOCAB_MODE_KEYS = ['qcm-kj-m', 'qcm-m-kj', 'flashcard-kj-m', 'flash
 export const KANJI_MODE_KEYS = [...VOCAB_MODE_KEYS, 'write']
 export const GRAMMAR_MODE_KEYS = ['flashcard', 'mcq', 'fill']
 
+// ── Where the writing drill applies ───────────────────────────────
+// After a bad rating, KanjiScreen and StudyScreen offer a quick
+// handwriting drill — but only for meaning→kanji cards, where being
+// asked to produce the character is the whole point (see `needTraining`
+// in both screens). In every other mode the toggle that enables it did
+// nothing at all, while still occupying the top bar: it showed up over
+// "MCQ (kanji → meaning)", where no card can ever satisfy the
+// condition. Recognition modes don't need it, and `write` mode always
+// draws regardless, so it has no say there either.
+export const WRITING_DRILL_MODES = ['qcm-m-kj', 'flashcard-m-kj']
+
+export const usesWritingDrill = mode => WRITING_DRILL_MODES.includes(mode)
+
+
 // Kana mode toggle (label only — used by ModeToggle).
 export function kanaModes(t) {
   return [

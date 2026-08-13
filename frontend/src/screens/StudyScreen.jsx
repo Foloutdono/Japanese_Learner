@@ -17,7 +17,7 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
 import { DrawingQuiz, DrawingOverlay } from '../components/study/DrawingCanvas'
 import { speakJapanese } from '../lib/audio'
-import { vocabKanjiModes, kanjiModes, grammarModePicker } from '../domain/quizModes'
+import { vocabKanjiModes, kanjiModes, grammarModePicker, usesWritingDrill } from '../domain/quizModes'
 import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession } from '../hooks/useCardSession'
 import { ChevronIcon, PencilIcon, LightbulbIcon } from '../components/ui/Icons'
@@ -509,7 +509,11 @@ export default function StudyScreen({ session }) {
         onBack={() => setMode(null)}
         title={`${deck?.name ?? ''} — ${currentModeLabel}`}
         autoHide
-        actions={composition?.kanji > 0 && (
+        // Two conditions, not one: the deck has to contain kanji AND
+        // the mode has to be one where the drill can fire at all.
+        // Only the first was checked, so the toggle sat in the top
+        // bar of every recognition mode doing nothing.
+        actions={composition?.kanji > 0 && usesWritingDrill(mode) && (
           <button
             onClick={() => setDrawingEnabled(d => !d)}
             className={`btn-writing-toggle ${drawingEnabled ? 'btn-writing-toggle--on' : 'btn-writing-toggle--off'}`}

@@ -20,7 +20,7 @@ import PromptCard from '../components/study/PromptCard'
 import ReviewDeck from '../components/study/ReviewDeck'
 import {DrawingQuiz, DrawingOverlay} from '../components/study/DrawingCanvas'
 import { speakJapanese } from '../lib/audio'
-import { kanjiModes, reviewMode } from '../domain/quizModes'
+import { kanjiModes, reviewMode, usesWritingDrill } from '../domain/quizModes'
 import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession } from '../hooks/useCardSession'
 import { PencilIcon } from '../components/ui/Icons'
@@ -442,7 +442,7 @@ export default function KanjiScreen({ session }) {
         onBack={() => setMode(null)}
         title={`${t.kanjiTitle} ${sourceLabel} — ${modeLabel}`}
         autoHide
-        actions={
+        actions={usesWritingDrill(mode) ? (
           <button
             onClick={() => setDrawingEnabled(d => !d)}
             className={`btn-writing-toggle ${drawingEnabled ? 'btn-writing-toggle--on' : 'btn-writing-toggle--off'}`}
@@ -450,7 +450,7 @@ export default function KanjiScreen({ session }) {
           >
             <PencilIcon size={14} /> {drawingEnabled ? t.writingOn : t.writingOff}
           </button>
-        }
+        ) : undefined}
       />
       <XpToast toast={xpToast} onDone={() => {
         setXpToast(null)
