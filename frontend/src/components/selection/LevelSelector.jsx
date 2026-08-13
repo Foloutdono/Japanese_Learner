@@ -16,14 +16,18 @@ import { playUi } from '../../lib/audio'
  * whole point. A list says "pick one of five". A line says "this is
  * how far it goes".
  *
+ * No header of its own — every caller renders inside <SelectionScreen>,
+ * which already names the section on the station plate overhead
+ * (and, on the rare path with no plate, carries its own heading).
+ * A "Choose your JLPT level" caption on top of that was two things
+ * saying the same thing, one of them in a diagram plain enough not to
+ * need a caption at all.
+ *
  * Props:
  *   onSelect(level)  — called when a station is chosen
  *   color            — the line's colour, as a hex string or CSS var().
  *                       Falls back to shu-iro (var(--accent)) in CSS.
  *   levels           — array of level strings (default: N5…N1)
- *   title            — header copy. Defaults to t.selectLevel. Pass
- *                       title="" to hide it, or wrap in
- *                       <SelectionScreen> and omit it.
  */
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
@@ -32,7 +36,6 @@ export default function LevelSelector({
   onSelect,
   color,
   levels = DEFAULT_LEVELS,
-  title,
 }) {
   const { t } = useLang()
   const LEVEL_HINTS = {
@@ -42,46 +45,37 @@ export default function LevelSelector({
     N2: t.levelHintN2,
     N1: t.levelHintN1,
   }
-  const resolvedTitle = title === '' ? '' : (title ?? t.selectLevel)
   const lineStyle = color ? { '--line-color': color } : undefined
 
   return (
-    <div className="level-selector">
-      {resolvedTitle && (
-        <div className="selector-header">
-          <div className="selector-header__title">{resolvedTitle}</div>
-        </div>
-      )}
+    <div className="route" style={lineStyle}>
+      {levels.map((level, i) => (
+        <button
+          key={level}
+          type="button"
+          onClick={() => { playUi('click-mode-selection'); onSelect(level) }}
+          className={[
+            'route-stop',
+            i === 0 ? 'route-stop--first' : '',
+            i === levels.length - 1 ? 'route-stop--last' : '',
+          ].filter(Boolean).join(' ')}
+        >
+          {/* The rail, drawn per stop so the first and last ends can
+              be capped — a line diagram that runs off the top of the
+              first station reads as "there is more up there". */}
+          <span className="route-stop__rail" aria-hidden="true" />
+          <span className="route-stop__marker" aria-hidden="true" />
 
-      <div className="route" style={lineStyle}>
-        {levels.map((level, i) => (
-          <button
-            key={level}
-            type="button"
-            onClick={() => { playUi('click-mode-selection'); onSelect(level) }}
-            className={[
-              'route-stop',
-              i === 0 ? 'route-stop--first' : '',
-              i === levels.length - 1 ? 'route-stop--last' : '',
-            ].filter(Boolean).join(' ')}
-          >
-            {/* The rail, drawn per stop so the first and last ends can
-                be capped — a line diagram that runs off the top of the
-                first station reads as "there is more up there". */}
-            <span className="route-stop__rail" aria-hidden="true" />
-            <span className="route-stop__marker" aria-hidden="true" />
-
-            {/* No sequence number: the line is the sequence. A row
-                list needs "01…05" to say these are ordered; a diagram
-                that draws the order can't gain anything by numbering
-                it again. */}
-            <span className="route-stop__body">
-              <span className="route-stop__name">{level}</span>
-              <span className="route-stop__hint">{LEVEL_HINTS[level]}</span>
-            </span>
-          </button>
-        ))}
-      </div>
+          {/* No sequence number: the line is the sequence. A row
+              list needs "01…05" to say these are ordered; a diagram
+              that draws the order can't gain anything by numbering
+              it again. */}
+          <span className="route-stop__body">
+            <span className="route-stop__name">{level}</span>
+            <span className="route-stop__hint">{LEVEL_HINTS[level]}</span>
+          </span>
+        </button>
+      ))}
     </div>
   )
 }

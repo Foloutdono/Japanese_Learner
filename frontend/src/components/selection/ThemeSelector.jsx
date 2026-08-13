@@ -37,8 +37,9 @@ import { playUi } from '../../lib/audio'
  *              the same way TierSelector hands back a range label.
  *   color    — optional accent colour override, same convention as
  *              LevelSelector/TierSelector/ModeSelector.
- *   title    — header copy. Defaults to t.selectTheme; pass title=""
- *              to hide it (e.g. when wrapped in <SelectionScreen>).
+ *
+ * No header of its own — every caller renders inside <SelectionScreen>,
+ * which already names the section on the station plate overhead.
  */
 function _fallbackLabel(key) {
   return key.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase())
@@ -48,7 +49,7 @@ function _translationKey(themeKey) {
   return 'theme' + themeKey.split('_').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('')
 }
 
-export default function ThemeSelector({ session, onSelect, color, title }) {
+export default function ThemeSelector({ session, onSelect, color }) {
   const { t } = useLang()
   const [themes, setThemes] = useState(null)
   const [failed, setFailed] = useState(false)
@@ -77,17 +78,10 @@ export default function ThemeSelector({ session, onSelect, color, title }) {
     return labeled.filter(th => th.label.toLowerCase().includes(q))
   }, [labeled, query])
 
-  const resolvedTitle = title === '' ? '' : (title ?? t.selectTheme)
   const rowStyle = color ? { '--row-color': color } : undefined
 
   return (
     <div className="level-selector">
-      {resolvedTitle && (
-        <div className="selector-header">
-          <div className="selector-header__title">{resolvedTitle}</div>
-        </div>
-      )}
-
       {themes && themes.length > 8 && (
         <input
           type="text"

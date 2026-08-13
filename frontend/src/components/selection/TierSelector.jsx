@@ -45,10 +45,11 @@ const TIER_SIZE_OPTIONS = [100, 200, 500, 1000]
  *              selection.
  *   color    — optional accent colour override, same convention as
  *              LevelSelector/ModeSelector.
- *   title    — header copy. Defaults to t.selectTier; pass title=""
- *              to hide it (e.g. when wrapped in <SelectionScreen>).
+ *
+ * No header of its own — every caller renders inside <SelectionScreen>,
+ * which already names the section on the station plate overhead.
  */
-export default function TierSelector({ domain, session, onSelect, color, title }) {
+export default function TierSelector({ domain, session, onSelect, color }) {
   const { t } = useLang()
   const [tierSize, setTierSize] = useState(DEFAULT_TIER_SIZE)
   const [tiers, setTiers] = useState(null)
@@ -65,19 +66,12 @@ export default function TierSelector({ domain, session, onSelect, color, title }
     return () => { cancelled = true }
   }, [domain, session, tierSize])
 
-  const resolvedTitle = title === '' ? '' : (title ?? t.selectTier)
   const rowStyle = color ? { '--row-color': color } : undefined
   const unit = domain === 'vocab' ? t.wordNoun : (t.kanjiUnit ?? 'kanji')
   const visibleTiers = (tiers ?? []).filter(tr => tr.count > 0)
 
   return (
     <div className="level-selector">
-      {resolvedTitle && (
-        <div className="selector-header">
-          <div className="selector-header__title">{resolvedTitle}</div>
-        </div>
-      )}
-
       <div className="tier-size-toggle" role="group" aria-label={t.tierSizeLabel ?? 'Tier size'}>
         {TIER_SIZE_OPTIONS.map(size => (
           <button

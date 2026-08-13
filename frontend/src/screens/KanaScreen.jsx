@@ -243,7 +243,6 @@ export default function KanaScreen({ session }) {
           <ModeSelector
             modes={SETS.map(s => ({ key: s.slug, label: s.label }))}
             onSelect={slug => startSession(SETS.find(s => s.slug === slug))}
-            title={t.selectKanaSet}
           />
         </SelectionScreen>
       </div>
@@ -259,7 +258,6 @@ export default function KanaScreen({ session }) {
           <ModeSelector
             modes={[...MODES, reviewMode(t)]}
             onSelect={m => (m === 'review' ? startReview() : startMode(m))}
-            title={t.selectMode}
           />
         </SelectionScreen>
       </div>

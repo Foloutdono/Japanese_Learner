@@ -17,54 +17,49 @@ import { playUi } from '../../lib/audio'
  * level", "by theme"), whose keys aren't services at all — those get
  * no badge rather than a wrong one.
  *
+ * No header of its own — every caller renders inside <SelectionScreen>,
+ * which already names the section on the station plate overhead (and,
+ * on the rare path with no plate, carries its own heading). A "Choose
+ * your training mode" caption on top of a self-explanatory list of
+ * rows was spending a full line to repeat the sign above it.
+ *
  * Props:
  *   modes    — array of { key, label, desc?, color? }
  *   onSelect(key) — called when a row is chosen
- *   title    — optional header copy. Leave unset when wrapped in
- *     <SelectionScreen>, which supplies its own.
- *   columns  — accepted for backward compatibility, ignored.
  */
-export default function ModeSelector({ modes, onSelect, title }) {
+export default function ModeSelector({ modes, onSelect }) {
   const { t } = useLang()
 
   return (
-    <div className="mode-selector">
-      {title && (
-        <div className="selector-header">
-          <div className="selector-header__title">{title}</div>
-        </div>
-      )}
+    <div className="choice-list">
+      {modes.map((m, i) => {
+        const service = serviceFor(m.key)
+        return (
+          <button
+            key={m.key}
+            type="button"
+            onClick={() => { playUi('click-mode-selection'); onSelect(m.key) }}
+            className="choice-row"
+            style={m.color ? { '--row-color': m.color } : undefined}
+          >
+            <span className="choice-row__accent" aria-hidden="true" />
 
-      <div className="choice-list">
-        {modes.map((m, i) => {
-          const service = serviceFor(m.key)
-          return (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => { playUi('click-mode-selection'); onSelect(m.key) }}
-              className="choice-row"
-              style={m.color ? { '--row-color': m.color } : undefined}
-            >
-              <span className="choice-row__accent" aria-hidden="true" />
-
-              {service ? (
-                <span className={`service service--${service}`}>
-                  <span className="service__jp" lang="ja">{SERVICE_JP[service]}</span>
-                  <span className="service__latin">{t.serviceLabel?.[service]}</span>
-                </span>
-              ) : (
-                <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
-              )}
-
-              <span className="choice-row__main">
-                <span className="choice-row__title">{m.label}</span>
-                {m.desc && <span className="choice-row__desc">{m.desc}</span>}
+            {service ? (
+              <span className={`service service--${service}`}>
+                <span className="service__jp" lang="ja">{SERVICE_JP[service]}</span>
+                <span className="service__latin">{t.serviceLabel?.[service]}</span>
               </span>
-            </button>
-          )
-        })}
-      </div>
+            ) : (
+              <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
+            )}
+
+            <span className="choice-row__main">
+              <span className="choice-row__title">{m.label}</span>
+              {m.desc && <span className="choice-row__desc">{m.desc}</span>}
+            </span>
+          </button>
+        )
+      })}
     </div>
   )
 }

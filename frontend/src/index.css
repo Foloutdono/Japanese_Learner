@@ -336,12 +336,15 @@ button:focus-visible {
   border-color: transparent;
 }
 
-/* ── Shared choice list (LevelSelector + ModeSelector) ────── */
+/* ── Shared choice list (ThemeSelector + TierSelector) ─────── */
 /* An editorial list, not a grid of cards: one column, hairline
    rules, generous padding. Asymmetry (title left / description
-   right) instead of four identical boxes side by side. */
-.level-selector,
-.mode-selector {
+   right) instead of four identical boxes side by side.
+   ModeSelector/LevelSelector render their list directly now (no
+   header, no wrapper) — .level-selector stays because ThemeSelector
+   and TierSelector still wrap a header-less filter/toggle row plus
+   the list in one. */
+.level-selector {
   width: 100%;
 }
 

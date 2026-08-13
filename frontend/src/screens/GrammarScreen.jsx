@@ -233,7 +233,6 @@ export default function GrammarScreen({ session }) {
           <ModeSelector
             modes={[...MODES, reviewMode(t)]}
             onSelect={m => (m === 'review' ? startReview() : startSession(level, m))}
-            title={t.selectMode}
           />
         </SelectionScreen>
       </div>

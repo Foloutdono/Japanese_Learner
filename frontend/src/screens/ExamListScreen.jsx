@@ -50,7 +50,6 @@ export default function ExamListScreen() {
           <ModeSelector
             modes={modes}
             onSelect={(examId) => { playUi('click-screen-selection'); navigate(`/exam/${examId}`) }}
-            title=""
           />
         )}
       </SelectionScreen>

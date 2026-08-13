@@ -367,7 +367,6 @@ export default function VocabScreen({ session }) {
               },
             ]}
             onSelect={selectStudySource}
-            title={t.selectStudySource}
           />
         </SelectionScreen>
       </div>
@@ -380,7 +379,7 @@ export default function VocabScreen({ session }) {
       <div className="screen">
         <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} JLPT`} autoHide />
         <SelectionScreen>
-          <LevelSelector onSelect={setLevel} color="var(--accent2)" title={t.selectLevel} />
+          <LevelSelector onSelect={setLevel} color="var(--accent2)" />
         </SelectionScreen>
       </div>
     )
@@ -446,7 +445,7 @@ export default function VocabScreen({ session }) {
       <div className="screen">
         <TopBar onBack={goBack} title={backTitle} autoHide />
         <SelectionScreen>
-          <ModeSelector modes={modesWithReview} onSelect={startMode} title={t.selectMode} />
+          <ModeSelector modes={modesWithReview} onSelect={startMode} />
         </SelectionScreen>
       </div>
     )

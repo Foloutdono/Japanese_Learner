@@ -346,7 +346,6 @@ export default function KanjiScreen({ session }) {
               { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
             ]}
             onSelect={setStudyBy}
-            title={t.selectStudySource}
           />
         </SelectionScreen>
       </div>
@@ -399,7 +398,6 @@ export default function KanjiScreen({ session }) {
               if (studyBy === 'level') startLevelSession(level, m)
               else startFrequencySession(tier, tierLabel, m)
             }}
-            title={t.selectMode}
           />
         </SelectionScreen>
       </div>
