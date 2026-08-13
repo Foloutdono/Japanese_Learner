@@ -57,43 +57,86 @@ export function stationFor(path) {
 /** The origin — the station the home screen itself is standing in. */
 export const HOME_STATION = STATIONS['/']
 
-// ── 種別 — train types ────────────────────────────────────
-// On a Japanese line the service type tells you how much the train
-// stops for you: 各駅停車 halts at every station, 特急 blows through
-// almost all of them. That is *exactly* the ladder the quiz modes
-// form, so the mapping is real information rather than a costume:
+// ── 種別 — service types ──────────────────────────────────
+// On a Japanese line the service type says one thing: how often the
+// train stops for you. 各駅停車 halts at every station; 特急 runs
+// past nearly all of them. Studying has exactly that axis — how much
+// the mode holds your hand — so the badge is real information.
 //
-//   各駅停車  local          multiple choice — every prompt comes with
-//                            the answer somewhere in front of you
-//   快速      rapid          flashcard — you self-assess, unaided
-//   急行      express        fill in the blank — produce it, in context
-//   特急      limited exp.   writing — produce it from nothing, stroke
-//                            by stroke
+// The first version of this table got it wrong in a way worth
+// recording, because the result *looked* arbitrary and was: it keyed
+// off the question's **format** alone. Every multiple-choice mode was
+// 各駅停車 and every flashcard was 快速. So "MCQ → meaning" (the
+// easiest mode in the app: the character is in front of you and the
+// answer is one of four on screen) carried the same badge as
+// "MCQ → kanji" (you must retrieve the character, the choices only
+// confirm it), while "Flashcard → meaning" carried a *different*
+// badge despite being about as hard as the latter. Two rows that
+// differ got the same mark, two rows that match got different ones.
+// Nothing about the ladder was legible, so it read as decoration.
 //
+// What actually sets the difficulty is **how many supports are left
+// standing**, and format is only one of them. Direction is the other:
+// being shown a character and asked what it means (recognition) is a
+// different task from being shown a meaning and asked for the
+// character (recall). Counting both gives a real four-rung ladder,
+// and each rung is one support removed from the one before it:
+//
+//   4 stops  各駅停車  the prompt is the form, and the answer is on
+//                      screen. Recognition, multiple choice.
+//   3 stops  快速      one support gone — either you must retrieve
+//                      the form (recall + choices) or you get no
+//                      choices (recognition + flashcard). Two roads
+//                      to the same rung, which is why they share it.
+//   2 stops  急行      retrieve it from memory and grade yourself,
+//                      with nothing on screen to check against.
+//   1 stop   特急      produce it by hand, stroke by stroke. No
+//                      prompt, no choices, no reveal.
+//
+// `stops` is rendered as pips on the badge (see ModeSelector), which
+// is the part that makes the ladder visible without the reader having
+// to know what 快速 means — the old English gloss ("RAPID") never
+// managed that, because it is railway vocabulary, not study
+// vocabulary.
+const SERVICES = {
+  local:   { jp: '各駅停車', stops: 4 },
+  rapid:   { jp: '快速',     stops: 3 },
+  express: { jp: '急行',     stops: 2 },
+  ltd:     { jp: '特急',     stops: 1 },
+  // 復習 is not a service at all: it's an ungraded browse through
+  // cards you've already met (see reviewMode in quizModes.js), so it
+  // has no rung on the ladder and deliberately shows no pips. It
+  // keeps the badge frame purely so the titles beside it stay in one
+  // column.
+  review:  { jp: '復習',     stops: 0 },
+}
+
 // Keyed by the mode keys in domain/quizModes.js. Anything not in the
 // table (the study-source pickers reuse this same list component for
 // "by level" / "by theme", which aren't services at all) simply gets
 // no badge, rather than a wrong one.
 const SERVICE = {
+  // Recognition + choices: the form is shown, the answer is on screen.
   'qcm':             'local',
   'mcq':             'local',
   'qcm-kj-m':        'local',
-  'qcm-m-kj':        'local',
-  'flashcard':       'rapid',
-  'flashcard-kj-m':  'rapid',
-  'flashcard-m-kj':  'rapid',
-  'fill':            'express',
-  'write':           'ltd',
-  'review':          'local',
-}
 
-export const SERVICE_JP = {
-  local:   '各駅停車',
-  rapid:   '快速',
-  express: '急行',
-  ltd:     '特急',
+  // One support removed, from either direction.
+  'qcm-m-kj':        'rapid',   // recall, but the choices confirm it
+  'flashcard':       'rapid',   // recognition, but nothing to pick from
+  'flashcard-kj-m':  'rapid',
+
+  // Retrieved from memory and self-graded.
+  'flashcard-m-kj':  'express',
+  'fill':            'express',
+
+  // Produced by hand.
+  'write':           'ltd',
+
+  'review':          'review',
 }
 
 export function serviceFor(modeKey) {
-  return SERVICE[modeKey] ?? null
+  const key = SERVICE[modeKey]
+  return key ? { key, ...SERVICES[key] } : null
 }

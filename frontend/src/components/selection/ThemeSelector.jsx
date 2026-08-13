@@ -114,7 +114,9 @@ export default function ThemeSelector({ session, onSelect, color }) {
               style={rowStyle}
             >
               <span className="choice-row__accent" aria-hidden="true" />
-              <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
+              <span className="choice-row__lead">
+                <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
+              </span>
               <span className="choice-row__main">
                 <span className="choice-row__title">{th.label}</span>
                 <span className="choice-row__desc">{th.count} {t.wordNoun}</span>

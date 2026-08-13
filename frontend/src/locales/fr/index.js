@@ -72,11 +72,16 @@ const home = {
   // sont des noms propres japonais et vivent dans cette config,
   // pas ici — voici les deux libellés qui se traduisent vraiment.
   departures:  'Départs',
+  // Texte au survol d'un badge 種別. Volontairement pas
+  // « Omnibus »/« Rapide » : c'est le mot ferroviaire pour les pastilles,
+  // et le répéter n'explique rien à qui choisit un mode d'étude.
+  // Chaque ligne dit ce que le palier demande vraiment.
   serviceLabel: {
-    local:   'Omnibus',
-    rapid:   'Rapide',
-    express: 'Express',
-    ltd:     'Express limité',
+    local:   'Toutes gares — la réponse est à l\'écran',
+    rapid:   'Un appui en moins',
+    express: 'De mémoire, auto-évalué',
+    ltd:     'Écrit à la main, sans aide',
+    review:  'Parcours libre, sans note',
   },
   tip:               'Des sessions courtes (15-20 min) mais régulières — la SRS gère tout automatiquement.',
   start:             'Commencer',

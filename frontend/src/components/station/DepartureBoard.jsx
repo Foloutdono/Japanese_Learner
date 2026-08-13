@@ -12,8 +12,22 @@ import { useStationClock } from './useStationClock'
 // ranked list you scan top to bottom for the one you want, which is
 // what a home screen is for, and it holds eleven destinations without
 // becoming the wall of tiles this screen used to be.
+//
+// ── Why the station name is up here ──
+// It used to hang on its own plate above the board, a 420px sign
+// floating over a 1040px panel with a gap between them. Two objects
+// of different widths, neither explaining the other, and the plate
+// read as pasted on — which it was.
+//
+// A platform is one place, so this is one object. The station's
+// identity is the board's masthead, the line stripe under it is the
+// same stripe the plate carried, and the tactile paving closes the
+// bottom. Everything between the stripe and the paving is where the
+// trains are. The selection screens keep the standalone plate, where
+// it is the whole content of the header and has nothing to compete
+// with.
 
-export function DepartureBoard({ sections, onDepart }) {
+export function DepartureBoard({ sections, station, name, onDepart }) {
   const { t } = useLang()
   const now = useStationClock()
 
@@ -22,14 +36,30 @@ export function DepartureBoard({ sections, onDepart }) {
 
   return (
     <div className="board">
-      <div className="board__head">
-        <span className="board__label" lang="ja">発車標</span>
-        <span className="board__label-sub">{t.departures}</span>
-        <span className="board-clock__label" lang="ja" aria-hidden="true">現在時刻</span>
-        <span className="board-clock" aria-label={`${hh}:${mm}`}>
-          {hh}<span className="board-clock__colon" aria-hidden="true">:</span>{mm}
+      <div className="board__masthead">
+        <span className="board__station">
+          {station.code && (
+            <span className="board__roundel" aria-hidden="true">{station.code}</span>
+          )}
+          <span className="board__station-names">
+            <span className="board__kana" lang="ja">{station.kana}</span>
+            <span className="board__name" lang="ja">{name}</span>
+            <span className="board__romaji">{station.latin}</span>
+          </span>
+        </span>
+
+        <span className="board__now">
+          <span className="board__label">
+            <span lang="ja">発車標</span>
+            <span className="board__label-sub">{t.departures}</span>
+          </span>
+          <span className="board-clock" aria-label={`${hh}:${mm}`}>
+            {hh}<span className="board-clock__colon" aria-hidden="true">:</span>{mm}
+          </span>
         </span>
       </div>
+
+      <div className="board__stripe" aria-hidden="true" />
 
       <div className="board__rows">
         {sections.map((section, i) => (

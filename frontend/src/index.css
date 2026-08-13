@@ -357,15 +357,29 @@ button:focus-visible {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 18px;
   width: 100%;
-  padding: 30px 6px;
+  padding: 20px 14px;
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--border);
   border-radius: 0;
   color: var(--text-primary);
   text-align: left;
+  transition: background 0.15s ease;
+}
+.choice-row:hover,
+.choice-row:focus-visible { background: var(--bg-card-hover); }
+
+/* One fixed column for whatever leads the row — a service badge on a
+   mode list, a numbered roundel on a source list. Fixed, so the
+   titles line up in the same place on every selection screen in the
+   app instead of stepping left and right as you move between them. */
+.choice-row__lead {
+  flex-shrink: 0;
+  width: 86px;
+  display: flex;
+  justify-content: center;
 }
 
 .choice-row__accent {
@@ -373,11 +387,11 @@ button:focus-visible {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 2px;
+  width: 3px;
   background: var(--row-color, var(--accent));
   transform: scaleY(0);
   transform-origin: center;
-  transition: transform 0.25s ease;
+  transition: transform 0.18s ease;
 }
 
 .choice-row:hover .choice-row__accent,
@@ -404,7 +418,6 @@ button:focus-visible {
   letter-spacing: 0.02em;
   color: var(--text-secondary);
   transition: border-color 0.2s ease, color 0.2s ease;
-  transition: color 0.2s ease;
 }
 
 .choice-row:hover .choice-row__index,
@@ -421,12 +434,6 @@ button:focus-visible {
   flex-direction: column;
   align-items: flex-start;
   gap: 5px;
-  transition: transform 0.25s ease;
-}
-
-.choice-row:hover .choice-row__main,
-.choice-row:focus-visible .choice-row__main {
-  transform: translateX(10px);
 }
 
 .choice-row__title {
@@ -830,34 +837,12 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* ── 駅名標 — the station plate ────────────────────────────
-   Reading, name, romaji, and the line's colour along the bottom. The
-   same component hangs over the home platform and over the top of
-   every selection screen, which is what turns a set of screens into
-   a line you are travelling down. */
-.station__plate {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  padding: 52px 24px 8px;
-}
-
-/* Two hanger rods running up out of frame. Platform signs are
-   suspended from the ceiling, and drawing the thing they hang from is
-   most of what makes the plate read as an object in a room rather
-   than a card on a page. */
-.station__plate::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 232px;
-  height: 52px;
-  transform: translateX(-50%);
-  background:
-    linear-gradient(var(--border), var(--border)) 30px 0 / 3px 100% no-repeat,
-    linear-gradient(var(--border), var(--border)) 199px 0 / 3px 100% no-repeat;
-}
-
+   Reading, name, plain-language name, and the line's colour along the
+   bottom. Used at the top of every selection screen, where it is the
+   entire header and names the station you have just arrived at. The
+   home platform used to hang one of these above its board; it now
+   carries the same information as the board's own masthead instead —
+   see .board__masthead below for why. */
 .station-sign {
   position: relative;
   width: min(420px, 100%);
@@ -958,7 +943,8 @@ input:focus { border-color: var(--accent2); }
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 16px 24px 32px;
+  align-items: flex-start;
+  padding: 40px 24px 32px;
 }
 
 .board {
@@ -981,39 +967,105 @@ input:focus { border-color: var(--accent2); }
     transparent 1px 3px);
 }
 
-.board__head {
+/* The station's own name, at the head of its board. Left: who you
+   are standing in front of, in the three registers a 駅名標 always
+   carries — reading, name, plain-language name. Right: what the panel
+   is, and the time. The line stripe under it is the same one the
+   plate carries; below that, the trains. */
+.board__masthead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 20px 22px 16px;
+}
+
+.board__station {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.board__roundel {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 999px;
+  border: 2px solid var(--accent2);
+  color: var(--accent2);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.board__station-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.board__kana {
+  font-family: var(--font-jp);
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  opacity: 0.55;
+}
+.board__name {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+}
+.board__romaji {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-indent: 0.26em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.board__now {
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  padding: 14px 18px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 14px;
 }
 .board__label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   letter-spacing: 0.12em;
   color: var(--accent2);
 }
 .board__label-sub {
-  flex: 1;
   font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-size: 0.55rem;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  opacity: 0.55;
+  opacity: 0.5;
+}
+
+/* The line's colour, the full width of the platform. */
+.board__stripe {
+  height: 5px;
+  background: var(--accent);
 }
 
 /* The clock. Only the colon ticks — the digits change once a minute,
    which is when the component re-renders. */
-.board-clock__label {
-  font-family: var(--font-jp);
-  font-size: 0.6rem;
-  letter-spacing: 0.14em;
-  opacity: 0.45;
-  margin-right: 8px;
-}
 .board-clock {
   font-family: var(--font-display);
   font-weight: 700;
@@ -1028,7 +1080,7 @@ input:focus { border-color: var(--accent2); }
 }
 @keyframes board-tick { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0.15; } }
 
-.board__rows { display: flex; flex-direction: column; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.board__rows { display: flex; flex-direction: column; }
 
 .board-row {
   position: relative;
@@ -1269,48 +1321,51 @@ input:focus { border-color: var(--accent2); }
    limited express red. */
 .service {
   --service-color: var(--text-secondary);
-  flex-shrink: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  /* Fixed width so the titles beside them stay in one column, wide
-     enough for the longest label in either language ("EXPRESS
-     LIMITÉ"). */
-  width: 84px;
-  padding: 5px 4px;
+  gap: 4px;
+  padding: 6px 4px 5px;
   border: 1px solid color-mix(in srgb, var(--service-color) 45%, transparent);
   border-radius: 3px;
   background: color-mix(in srgb, var(--service-color) 10%, transparent);
-  align-self: center;
 }
+/* Cooler as it gets harder, ending on seal red — the same escalation
+   the SRS stages use, so a badge's colour means the same kind of
+   thing here as it does on a card. */
 .service--local   { --service-color: var(--text-secondary); }
 .service--rapid   { --service-color: var(--accent4); }
-.service--express { --service-color: var(--success); }
+.service--express { --service-color: var(--warning); }
 .service--ltd     { --service-color: var(--accent); }
+.service--review  { --service-color: var(--text-secondary); }
 
 .service__jp {
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   line-height: 1.1;
   color: var(--service-color);
   white-space: nowrap;
 }
-.service__latin {
-  font-family: var(--font-display);
-  font-size: 0.48rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--service-color);
-  opacity: 0.7;
-  white-space: nowrap;
-}
 
-/* The choice rows keep their baseline alignment for the index-number
-   variant, but a service badge is a block and wants centring. */
-.choice-row:has(.service) { align-items: center; }
+/* The stopping pattern, as pips: four dots for a train that halts
+   everywhere, one for the 特急. This is the part that makes the
+   ladder readable without knowing any railway vocabulary — the
+   English gloss that used to sit here ("RAPID") never could, so it
+   moved to the badge's title attribute where it can afford words. */
+.service__stops {
+  display: flex;
+  gap: 3px;
+}
+.service__pip {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--service-color);
+  opacity: 0.22;
+}
+.service__pip--on { opacity: 1; }
 
 /* ── Ghost / panel button utilities ──────────────────────── */
 .btn-ghost {
@@ -8406,21 +8461,33 @@ input:focus { border-color: var(--accent2); }
   .level-up-banner { padding: 28px 32px 26px; border-radius: 14px; max-width: 86vw; }
   .level-up-banner__glyph { font-size: 2.4rem; }
   .level-up-banner__level { font-size: 1.3rem; }
-  .station__concourse { padding: 14px 16px 0; }
-  .station__plate { padding: 20px 16px 4px; }
-  .station__platform { padding: 12px 16px 24px; }
+  .station__concourse { padding: 14px 16px; }
+  .station__platform { padding: 20px 12px 24px; }
 
   /* 備考 is the first thing to go: the destination and the platform
      number are what you are actually scanning for. */
-  .board-row { grid-template-columns: 58px 1fr 20px; gap: 10px; }
+  .board-row { grid-template-columns: 54px 1fr 18px; gap: 10px; padding: 12px 14px; }
   .board-row__note { display: none; }
-  .board__head { padding: 12px 14px 8px; }
-  .board-row { padding: 12px 14px; }
-  .board-row__no { font-size: 1.25rem; }
+  .board-row__no { font-size: 1.2rem; }
+
+  /* The masthead stacks: the station's name is the thing worth the
+     width, so the panel label and clock drop under it rather than
+     squeezing it into two characters per line. */
+  .board__masthead { padding: 16px 14px 12px; gap: 10px; }
+  .board__now { width: 100%; justify-content: space-between; align-items: flex-end; }
+  .board__label { align-items: flex-start; }
+
   .station-sign__name { font-size: 2rem; }
   .ic-card__balance { display: none; }
   .route-stop { padding: 18px 4px 18px 42px; gap: 14px; }
   .route-stop__name { font-size: 1.45rem; }
+
+  /* The badge column costs a third of a phone's width; the pips still
+     carry the ladder without it. */
+  .choice-row { padding: 16px 8px; gap: 12px; }
+  .choice-row__lead { width: 64px; }
+  .service { padding: 5px 2px 4px; }
+  .service__jp { font-size: 0.66rem; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
   .top-bar__inner { padding: 12px 16px; }
   .selection-screen { padding: 44px 16px 56px; }

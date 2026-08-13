@@ -6,7 +6,6 @@ import { HOME_STATION } from '../config/stations'
 import { useProfileSummary } from '../stores/profileSummary'
 import { levelTitle } from '../domain/levelTitle'
 import { playAnnouncement, startAmbiance, stopAmbiance } from '../lib/audio'
-import { StationSign } from '../components/station/StationSign'
 import { DepartureBoard } from '../components/station/DepartureBoard'
 import { useStationClock } from '../components/station/useStationClock'
 import { FlameIcon, GearIcon } from '../components/ui/Icons'
@@ -153,12 +152,13 @@ export default function HomeScreen() {
         </div>
       </div>
 
-      <header className="station__plate">
-        <StationSign station={HOME_STATION} name={t.appTitle} latin={HOME_STATION.latin} color="var(--accent)" />
-      </header>
-
       <main className="station__platform">
-        <DepartureBoard sections={sections} onDepart={depart} />
+        <DepartureBoard
+          sections={sections}
+          station={HOME_STATION}
+          name={t.appTitle}
+          onDepart={depart}
+        />
       </main>
 
       {/* The LED strip under a real board, which carries the notices

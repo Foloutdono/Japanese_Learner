@@ -70,11 +70,16 @@ const home = {
   // themselves are Japanese proper nouns and live in that config,
   // not here — these are the two labels that genuinely translate.
   departures:  'Departures',
+  // Hover text on a 種別 badge. Deliberately not "Local"/"Rapid" —
+  // that is the railway word for the pips, and repeating it explains
+  // nothing to somebody choosing a study mode. Each one says what the
+  // rung actually asks of you.
   serviceLabel: {
-    local:   'Local',
-    rapid:   'Rapid',
-    express: 'Express',
-    ltd:     'Ltd. Express',
+    local:   'Every stop — the answer is on screen',
+    rapid:   'One support removed',
+    express: 'From memory, self-graded',
+    ltd:     'Written by hand, nothing given',
+    review:  'Ungraded browse, at your own pace',
   },
   tip:               'Short sessions (15-20 min) but regular — SRS schedules everything automatically.',
   start:             'Start',

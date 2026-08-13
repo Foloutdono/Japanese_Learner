@@ -1,27 +1,28 @@
 import { useLang } from '../../LangContext'
-import { serviceFor, SERVICE_JP } from '../../config/stations'
+import { serviceFor } from '../../config/stations'
 import { playUi } from '../../lib/audio'
 
 /**
  * ModeSelector — 種別
  *
- * Study modes as service types. On a Japanese line the type tells you
- * how much the train stops for you — 各駅停車 halts everywhere, 特急
- * skips nearly everything — and that is exactly the ladder these
- * modes form: multiple choice puts the answer in front of you,
- * flashcards make you self-assess, writing gives you nothing but a
- * blank pad. The badge is real information rather than a costume, and
- * the mapping lives in config/stations.js.
+ * Study modes as service types. On a Japanese line the type says how
+ * often the train stops for you, and studying has exactly that axis:
+ * how much the mode holds your hand. The ladder and the reasoning
+ * behind each rung live in config/stations.js.
+ *
+ * The pips are the important part. "快速" means nothing to somebody
+ * learning their first hundred kanji, and neither does the English
+ * "RAPID" this used to print underneath it — that is railway
+ * vocabulary, not study vocabulary, which is why the badges read as
+ * arbitrary. Four dots against one is legible immediately and needs
+ * no glossary: more stops, more help.
  *
  * The same component also drives the study-source pickers ("by
  * level", "by theme"), whose keys aren't services at all — those get
- * no badge rather than a wrong one.
+ * a plain numbered roundel rather than a wrong badge.
  *
  * No header of its own — every caller renders inside <SelectionScreen>,
- * which already names the section on the station plate overhead (and,
- * on the rare path with no plate, carries its own heading). A "Choose
- * your training mode" caption on top of a self-explanatory list of
- * rows was spending a full line to repeat the sign above it.
+ * which already names the section on the station plate overhead.
  *
  * Props:
  *   modes    — array of { key, label, desc?, color? }
@@ -44,14 +45,28 @@ export default function ModeSelector({ modes, onSelect }) {
           >
             <span className="choice-row__accent" aria-hidden="true" />
 
-            {service ? (
-              <span className={`service service--${service}`}>
-                <span className="service__jp" lang="ja">{SERVICE_JP[service]}</span>
-                <span className="service__latin">{t.serviceLabel?.[service]}</span>
-              </span>
-            ) : (
-              <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
-            )}
+            <span className="choice-row__lead">
+              {service ? (
+                <span
+                  className={`service service--${service.key}`}
+                  title={t.serviceLabel?.[service.key]}
+                >
+                  <span className="service__jp" lang="ja">{service.jp}</span>
+                  {service.stops > 0 && (
+                    <span className="service__stops" aria-hidden="true">
+                      {[1, 2, 3, 4].map(n => (
+                        <span
+                          key={n}
+                          className={`service__pip${n <= service.stops ? ' service__pip--on' : ''}`}
+                        />
+                      ))}
+                    </span>
+                  )}
+                </span>
+              ) : (
+                <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
+              )}
+            </span>
 
             <span className="choice-row__main">
               <span className="choice-row__title">{m.label}</span>
