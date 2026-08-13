@@ -27,7 +27,9 @@ import os
 # import ..."), so — unlike dictionary.py, which lives one package
 # deeper and uses dirname(dirname(__file__)) — this file sits directly
 # in backend/ and only needs a single dirname() to reach it.
-_BASE_DIR = os.path.dirname(__file__)
+# One level up: this module now lives in a package, and datas/
+# is still at the backend root.
+_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 _DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
 
 with open(os.path.join(_DATA_DIR, "kanji_deck.json"), encoding="utf-8") as f:

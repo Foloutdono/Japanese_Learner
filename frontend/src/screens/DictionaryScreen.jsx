@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef, useMemo, useCallback, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TopBar } from '../components/TopBar'
-import { apiFetch } from '../api'
+import { TopBar } from '../components/ui/TopBar'
+import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { splitReadingTokens } from '../components/Readings'
-import { firstGloss } from '../components/gloss'
+import { splitReadingTokens } from '../components/study/Readings'
+import { firstGloss } from '../components/study/gloss'
 import {
 	TYPE_META, isKanaType, entryKey,
 	SearchIcon, DictionaryDetail, LevelBadge,
-} from '../components/DictionaryDetail'
-import { StageBadge } from '../components/StageBadge'
-import { ChevronIcon } from '../components/Icons'
+} from '../components/dictionary/DictionaryDetail'
+import { StageBadge } from '../components/study/StageBadge'
+import { ChevronIcon } from '../components/ui/Icons'
 
 const LIMIT = 50
 

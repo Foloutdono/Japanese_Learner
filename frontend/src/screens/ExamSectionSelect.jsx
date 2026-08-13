@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { playUi } from '../components/sound'
-import { TopBar } from '../components/TopBar'
-import SelectionScreen from '../components/SelectionScreen'
-import ModeSelector from '../components/ModeSelector'
-import { Loading } from '../components/Loading'
+import { playUi } from '../lib/audio'
+import { TopBar } from '../components/ui/TopBar'
+import SelectionScreen from '../components/selection/SelectionScreen'
+import ModeSelector from '../components/selection/ModeSelector'
+import { Loading } from '../components/ui/Loading'
 import { getExam, flattenQuestions } from '../exam/examService'
 
 // Route: /exam/:examId

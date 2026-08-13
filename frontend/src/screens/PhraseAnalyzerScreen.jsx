@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../api'
+import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/TopBar'
-import { Loading } from '../components/Loading'
-import { CrossIcon } from '../components/Icons'
+import { TopBar } from '../components/ui/TopBar'
+import { Loading } from '../components/ui/Loading'
+import { CrossIcon } from '../components/ui/Icons'
 
 const STATUS_COLORS = {
   mastered:     'var(--success)',

@@ -22,9 +22,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from db import db_conn
-from auth import get_user_id
-from srs_instance import srs
+from core.db import db_conn
+from core.auth import get_user_id
+from core.srs_instance import srs
 from srs import daruma
 from srs.xp import level_progress
 

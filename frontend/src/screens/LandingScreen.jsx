@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useLang } from '../LangContext'
-import { getNavLinks } from '../navLinks'
-import { LightbulbIcon } from '../components/Icons'
+import { getNavLinks } from '../config/navLinks'
+import { LightbulbIcon } from '../components/ui/Icons'
 
 // ── Landing screen ──────────────────────────────────────────
 // Shown to signed-out visitors before AuthScreen: what the app is,

@@ -3,18 +3,18 @@ import os
 from collections import defaultdict
 
 from fastapi import APIRouter, Depends
-from kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-import vocab_jmdict_data as jmdict_db
-from vocab_jmdict_data import vocab_jmdict_to_id
-from vocab_extras import get_vocab_extras
-from kana_data import HIRAGANA_BASIC, KATAKANA_BASIC, kana_to_id
+from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+import content.vocab_jmdict_data as jmdict_db
+from content.vocab_jmdict_data import vocab_jmdict_to_id
+from content.vocab_extras import get_vocab_extras
+from content.kana_data import HIRAGANA_BASIC, KATAKANA_BASIC, kana_to_id
 from translations import get_meaning
-from kanji_meanings import KANJI_FR
+from content.kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
-from auth import get_user_id
-from srs_instance import srs
-from card_lookup import card_stats, VOCAB_STATUS_MODE, KANJI_STATUS_MODE, is_kanji
+from core.auth import get_user_id
+from core.srs_instance import srs
+from study.card_lookup import card_stats, VOCAB_STATUS_MODE, KANJI_STATUS_MODE, is_kanji
 
 router = APIRouter()
 

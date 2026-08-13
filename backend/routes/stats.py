@@ -1,13 +1,13 @@
 import logging
 from fastapi import APIRouter, Depends
-from db import db_conn
-from kana_data import KANA_SETS, kana_to_id
-from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
-from auth import get_user_id, prefixed
-from srs_instance import srs
-from quiz_modes import (
+from core.db import db_conn
+from content.kana_data import KANA_SETS, kana_to_id
+from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from content.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
+from core.auth import get_user_id, prefixed
+from core.srs_instance import srs
+from study.quiz_modes import (
     KANA_MODES,
     VOCAB_MODES as VOCAB_PHASE_KEYS,
     KANJI_MODES as KANJI_PHASE_KEYS,

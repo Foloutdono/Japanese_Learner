@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../supabase'
-import { apiFetch } from '../api'
+import { supabase } from '../lib/supabase'
+import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { ChevronIcon } from '../components/Icons'
+import { ChevronIcon } from '../components/ui/Icons'
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 

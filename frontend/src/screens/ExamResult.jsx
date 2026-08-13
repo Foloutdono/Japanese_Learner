@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { playUi, playSfx } from '../components/sound'
+import { playUi, playSfx } from '../lib/audio'
 import QuestionRenderer from '../exam/QuestionRenderer'
-import EmptyState from '../components/EmptyState'
+import EmptyState from '../components/ui/EmptyState'
 import { flattenQuestions } from '../exam/examService'
-import { CheckIcon, CrossIcon, ChevronIcon, PageIcon } from '../components/Icons'
+import { CheckIcon, CrossIcon, ChevronIcon, PageIcon } from '../components/ui/Icons'
 
 // Route: /exam/:examId/:sectionId/result
 // Reads its data from router state (handed off by ExamRunner.finish())

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { apiFetch } from '../api'
+import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/TopBar'
-import EmptyState from '../components/EmptyState'
-import { Loading } from '../components/Loading'
-import ImportCardsMenu from '../components/ImportCardsMenu'
-import BrowseCardsMenu from '../components/BrowseCardsMenu'
-import { PlayIcon, ImportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIcon, PencilIcon, TrashIcon, CardIcon } from '../components/Icons'
+import { TopBar } from '../components/ui/TopBar'
+import EmptyState from '../components/ui/EmptyState'
+import { Loading } from '../components/ui/Loading'
+import ImportCardsMenu from '../components/decks/ImportCardsMenu'
+import BrowseCardsMenu from '../components/decks/BrowseCardsMenu'
+import { PlayIcon, ImportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIcon, PencilIcon, TrashIcon, CardIcon } from '../components/ui/Icons'
 
 // Mirrors decks.py's SOURCE_FOR_TYPE / _allowed_sources / _allows_custom
 // exactly — kept in sync by hand since it's this small. This is only

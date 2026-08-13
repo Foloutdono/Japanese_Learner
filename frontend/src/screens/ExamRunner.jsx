@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { playUi } from '../components/sound'
-import { CardTransition } from '../components/CardTransition'
-import { Loading } from '../components/Loading'
-import EmptyState from '../components/EmptyState'
+import { playUi } from '../lib/audio'
+import { CardTransition } from '../components/study/CardTransition'
+import { Loading } from '../components/ui/Loading'
+import EmptyState from '../components/ui/EmptyState'
 import { getExam, flattenQuestions, submitAttempt } from '../exam/examService'
 import QuestionRenderer from '../exam/QuestionRenderer'
-import { PageIcon, ChevronIcon } from '../components/Icons'
+import { PageIcon, ChevronIcon } from '../components/ui/Icons'
 
 // Route: /exam/:examId/:sectionId
 // Renders one question at a time from the chosen section, in order,

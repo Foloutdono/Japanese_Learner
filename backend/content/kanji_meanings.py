@@ -30,7 +30,9 @@ complete (KANJIDIC2's primary field), so this only affects lang="fr".
 import json
 import os
 
-_BASE_DIR = os.path.dirname(__file__)
+# One level up: this module now lives in a package, and datas/
+# is still at the backend root.
+_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 _DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
 
 with open(os.path.join(_DATA_DIR, "kanji_meanings.json"), encoding="utf-8") as f:

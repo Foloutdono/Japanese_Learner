@@ -26,7 +26,9 @@ import os
 # vocab_data.py is imported as a top-level module ("from vocab_data
 # import ..."), same as kanji_data.py — sits directly in backend/, one
 # dirname() to reach it.
-_BASE_DIR = os.path.dirname(__file__)
+# One level up: this module now lives in a package, and datas/
+# is still at the backend root.
+_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 _DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 
 with open(os.path.join(_DATA_DIR, "vocab_deck.json"), encoding="utf-8") as f:

@@ -27,9 +27,11 @@ import os
 import sqlite3
 import threading
 
-from frequency_data import resolve as _resolve, to_id as _to_id
+from content.frequency_data import resolve as _resolve, to_id as _to_id
 
-_BASE_DIR = os.path.dirname(__file__)
+# One level up: this module now lives in a package, and datas/
+# is still at the backend root.
+_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 _DB_PATH = os.path.join(_BASE_DIR, "datas", "vocab", "vocab_jmdict.sqlite3")
 
 _local = threading.local()

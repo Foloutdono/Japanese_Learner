@@ -8,10 +8,10 @@ import requests
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from db import db_conn
-from auth import get_user_id
-from srs_instance import srs
-from card_lookup import (
+from core.db import db_conn
+from core.auth import get_user_id
+from core.srs_instance import srs
+from study.card_lookup import (
     find_vocab_match, find_kanji_matches, serializable_entry, card_stats,
     VOCAB_STATUS_MODE, KANJI_STATUS_MODE,
 )

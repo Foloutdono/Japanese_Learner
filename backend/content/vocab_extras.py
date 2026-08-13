@@ -66,15 +66,17 @@ import os
 import re
 from functools import lru_cache
 
-import morphology
-from vocab_data import VOCAB_BY_LEVEL
+from study import morphology
+from content.vocab_data import VOCAB_BY_LEVEL
 
 try:
-    from kanji_data import KANJI_BY_LEVEL
+    from content.kanji_data import KANJI_BY_LEVEL
 except ImportError:  # pragma: no cover - defensive only, always present in prod
     KANJI_BY_LEVEL = {}
 
-_BASE_DIR = os.path.dirname(__file__)
+# One level up: this module now lives in a package, and datas/
+# is still at the backend root.
+_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 _DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 
 # MEMORY NOTE (2026-08): this used to eagerly load the full ~293k-entry
@@ -98,10 +100,9 @@ _DATA_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 # more always-in-memory dict for either half of this module's data.
 # The deck's own curated senses still always win over the JMdict pool
 # when both exist, same as before (see _find_senses).
-import vocab_meanings_data
-
+from content import vocab_meanings_data
 try:
-    import vocab_jmdict_data as _jmdict_db
+    import content.vocab_jmdict_data as _jmdict_db
 except ImportError:  # pragma: no cover - defensive only, always present in prod
     _jmdict_db = None
 

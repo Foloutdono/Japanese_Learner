@@ -72,10 +72,10 @@ import json
 import os
 from math import ceil
 
-from kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-import vocab_jmdict_data as jmdict_db
-from vocab_jmdict_data import vocab_jmdict_key, vocab_jmdict_to_id
+from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+import content.vocab_jmdict_data as jmdict_db
+from content.vocab_jmdict_data import vocab_jmdict_key, vocab_jmdict_to_id
 
 DEFAULT_TIER_SIZE = 200
 
@@ -85,7 +85,9 @@ DEFAULT_TIER_SIZE = 200
 # tier_size still re-buckets the standard order correctly; it just means
 # an override's tier number won't line up 1:1 with the custom bucket
 # boundaries. Documented limitation, not a bug — see frequency_store.py.
-_BASE_DIR = os.path.dirname(__file__)
+# One level up: this module now lives in a package, and datas/
+# is still at the backend root.
+_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 _KANJI_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
 _VOCAB_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 

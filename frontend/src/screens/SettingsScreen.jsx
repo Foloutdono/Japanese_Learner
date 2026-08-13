@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { supabase } from '../supabase'
-import { TopBar } from '../components/TopBar'
-import { SectionHeader } from '../components/SectionHeader'
-import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components/NavControls'
+import { supabase } from '../lib/supabase'
+import { TopBar } from '../components/ui/TopBar'
+import { SectionHeader } from '../components/ui/SectionHeader'
+import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components/ui/NavControls'
 
 export default function SettingsScreen() {
   const navigate = useNavigate()

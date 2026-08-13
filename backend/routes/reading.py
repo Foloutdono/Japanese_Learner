@@ -11,15 +11,15 @@ import pykakasi
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from db import db_conn
-from auth import get_user_id, unprefixed
-from srs_instance import srs
-from card_lookup import find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODE
-from kanji_data import get_kanji_string
-from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-import vocab_extras
-import vocab_jmdict_data as jmdict_db
-import frequency_data as freq
+from core.db import db_conn
+from core.auth import get_user_id, unprefixed
+from core.srs_instance import srs
+from study.card_lookup import find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODE
+from content.kanji_data import get_kanji_string
+from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from content import vocab_extras
+import content.vocab_jmdict_data as jmdict_db
+import content.frequency_data as freq
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

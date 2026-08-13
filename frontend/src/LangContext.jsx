@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { translations } from './i18n'
-import { getTranslations } from './translationCache'
+import { getTranslations } from './lib/translationCache'
 
 const LangContext = createContext()
 

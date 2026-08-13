@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { getNavLinks } from '../navLinks'
-import { useProfileSummary } from '../components/userProfileSummary'
-import { levelTitle } from '../levelTitle'
-import { playAnnouncement, startAmbiance, stopAmbiance } from '../components/sound'
-import { FlameIcon, GearIcon, LightbulbIcon } from '../components/Icons'
+import { getNavLinks } from '../config/navLinks'
+import { useProfileSummary } from '../stores/profileSummary'
+import { levelTitle } from '../domain/levelTitle'
+import { playAnnouncement, startAmbiance, stopAmbiance } from '../lib/audio'
+import { FlameIcon, GearIcon, LightbulbIcon } from '../components/ui/Icons'
 
 // ── Header profile badge ──────────────────────────────────
 // Replaces the old sign-out/theme/lang button row: a single glance at
@@ -87,7 +87,10 @@ export default function HomeScreen() {
   useEffect(() => {
     startAmbiance('home')
     return () => stopAmbiance()
-  })
+    // Mount/unmount only. Without the dependency array this
+    // effect re-ran on every render, tearing the loop down and
+    // starting it again from zero each time.
+  }, [])
 
   const cards = getNavLinks(t)
 

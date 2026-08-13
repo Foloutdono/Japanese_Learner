@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../api'
+import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/TopBar'
-import { Loading } from '../components/Loading'
-import { SectionHeader } from '../components/SectionHeader'
-import { KANA_MODE_KEYS, kanaModes, vocabKanjiStatsLabels } from '../components/quizModes'
-import { FlameIcon, BoltIcon } from '../components/Icons'
+import { TopBar } from '../components/ui/TopBar'
+import { Loading } from '../components/ui/Loading'
+import { SectionHeader } from '../components/ui/SectionHeader'
+import { KANA_MODE_KEYS, kanaModes, vocabKanjiStatsLabels } from '../domain/quizModes'
+import { FlameIcon, BoltIcon } from '../components/ui/Icons'
 
 export default function StatsScreen({ session }) {
   const navigate    = useNavigate()

@@ -3,16 +3,16 @@ import csv
 import io
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from pydantic import BaseModel
-from auth import get_user_id, prefixed, unprefixed
-from db import db_conn
-from srs_instance import srs
+from core.auth import get_user_id, prefixed, unprefixed
+from core.db import db_conn
+from core.srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
-from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
+from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from content.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
-from kanji_meanings import KANJI_FR
+from content.kanji_meanings import KANJI_FR
 
 # Reuse the exact same MCQ/choice-building + review-preview logic the
 # Kanji/Vocab/Grammar screens use, instead of a second copy living

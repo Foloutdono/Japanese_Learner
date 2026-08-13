@@ -1,11 +1,11 @@
 import logging
 import random
 from fastapi import APIRouter, Depends
-from kana_data import KANA_SETS, kana_to_id
-from auth import get_user_id, prefixed, unprefixed
-from srs_instance import srs
+from content.kana_data import KANA_SETS, kana_to_id
+from core.auth import get_user_id, prefixed, unprefixed
+from core.srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
-from quiz_modes import KANA_MODES
+from study.quiz_modes import KANA_MODES
 from pydantic import BaseModel
 
 router = APIRouter()

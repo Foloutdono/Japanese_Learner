@@ -1,14 +1,14 @@
 import logging
 import random
 from fastapi import APIRouter, Depends
-from kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from auth import get_user_id, prefixed, unprefixed
-from srs_instance import srs
+from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from core.auth import get_user_id, prefixed, unprefixed
+from core.srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from translations import get_meaning
-from kanji_meanings import KANJI_FR
-from quiz_modes import QCM_FLASHCARD_MODES, KANJI_MODES
-from mcq import pick_distractors
+from content.kanji_meanings import KANJI_FR
+from study.quiz_modes import QCM_FLASHCARD_MODES, KANJI_MODES
+from study.mcq import pick_distractors
 from pydantic import BaseModel
 
 router = APIRouter()

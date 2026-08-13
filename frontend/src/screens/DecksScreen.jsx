@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../api'
+import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/TopBar'
-import EmptyState from '../components/EmptyState'
-import { Loading } from '../components/Loading'
-import { TrashIcon, PencilIcon, PlayIcon, BooksIcon } from '../components/Icons'
+import { TopBar } from '../components/ui/TopBar'
+import EmptyState from '../components/ui/EmptyState'
+import { Loading } from '../components/ui/Loading'
+import { TrashIcon, PencilIcon, PlayIcon, BooksIcon } from '../components/ui/Icons'
 
 export default function DecksScreen({ session }) {
   const navigate  = useNavigate()

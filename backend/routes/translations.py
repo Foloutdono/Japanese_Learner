@@ -6,7 +6,7 @@ router = APIRouter()
 def _load_translation_map(lang: str, item_type: str) -> dict:
     if lang == "fr":
         if item_type == "kanji":
-            from kanji_meanings import KANJI_FR
+            from content.kanji_meanings import KANJI_FR
             return KANJI_FR
         if item_type == "vocab":
             from translations.fr.vocab_fr import VOCAB_FR
@@ -14,7 +14,7 @@ def _load_translation_map(lang: str, item_type: str) -> dict:
 
     if lang == "en":
         if item_type == "kanji":
-            from kanji_data import KANJI_BY_LEVEL
+            from content.kanji_data import KANJI_BY_LEVEL
             return {
                 entry["kanji"]: entry.get("meaning", "")
                 for level_list in KANJI_BY_LEVEL.values()
@@ -23,7 +23,7 @@ def _load_translation_map(lang: str, item_type: str) -> dict:
             }
 
         if item_type == "vocab":
-            from vocab_data import VOCAB_BY_LEVEL
+            from content.vocab_data import VOCAB_BY_LEVEL
             return {
                 key: entry.get("meaning", "")
                 for level_list in VOCAB_BY_LEVEL.values()

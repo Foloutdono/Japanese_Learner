@@ -1,12 +1,12 @@
 import logging
 import random
 from fastapi import APIRouter, Depends
-from auth import get_user_id, prefixed, unprefixed
-from srs_instance import srs
+from core.auth import get_user_id, prefixed, unprefixed
+from core.srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
-from grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
-from quiz_modes import GRAMMAR_MODES
-from mcq import pick_distractors
+from content.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
+from study.quiz_modes import GRAMMAR_MODES
+from study.mcq import pick_distractors
 from pydantic import BaseModel
 
 router = APIRouter()

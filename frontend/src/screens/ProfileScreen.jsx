@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../api'
+import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/TopBar'
-import { Loading } from '../components/Loading'
-import { SectionHeader } from '../components/SectionHeader'
-import { levelTitle } from '../levelTitle'
-import { WarningIcon, PencilIcon, CrossIcon, ChevronIcon } from '../components/Icons'
-import { Daruma } from '../components/Daruma'
-import { DEFAULT_LOADOUT } from '../components/cosmetics'
+import { TopBar } from '../components/ui/TopBar'
+import { Loading } from '../components/ui/Loading'
+import { SectionHeader } from '../components/ui/SectionHeader'
+import { levelTitle } from '../domain/levelTitle'
+import { WarningIcon, PencilIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
+import { Daruma } from '../components/rewards/Daruma'
+import { DEFAULT_LOADOUT } from '../stores/cosmetics'
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 

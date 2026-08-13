@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useLang } from '../LangContext'
-import { playUi } from '../components/sound'
-import { ImageIcon, SpeakerOffIcon, StarIcon } from '../components/Icons'
+import { playUi } from '../lib/audio'
+import { ImageIcon, SpeakerOffIcon, StarIcon } from '../components/ui/Icons'
 
 // ── QuestionRenderer ─────────────────────────────────────────
 // Takes ONE flattened question (see examService.flattenQuestions) and

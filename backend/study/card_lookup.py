@@ -4,12 +4,11 @@ existing vocab/kanji decks and the user's SRS state. Used by both the
 phrase analyzer and the reading-practice mode.
 """
 
-from vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from quiz_modes import STATUS_MODE
-import vocab_extras
-import morphology
-
+from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from study.quiz_modes import STATUS_MODE
+from content import vocab_extras
+from study import morphology
 # Representative mode used to gauge "do I know this word/kanji" for the
 # clickable badges — see quiz_modes.py for the reasoning. Vocab and
 # kanji both use the same mode here, but they're kept as separate names

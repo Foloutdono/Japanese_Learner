@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { playUi } from '../components/sound'
-import { TopBar } from '../components/TopBar'
-import SelectionScreen from '../components/SelectionScreen'
-import ModeSelector from '../components/ModeSelector'
-import { Loading } from '../components/Loading'
-import EmptyState from '../components/EmptyState'
+import { playUi } from '../lib/audio'
+import { TopBar } from '../components/ui/TopBar'
+import SelectionScreen from '../components/selection/SelectionScreen'
+import ModeSelector from '../components/selection/ModeSelector'
+import { Loading } from '../components/ui/Loading'
+import EmptyState from '../components/ui/EmptyState'
 import { listExams } from '../exam/examService'
-import { PageIcon } from '../components/Icons'
+import { PageIcon } from '../components/ui/Icons'
 
 // Route: /exam
 // Lists every locally-bundled past exam as a ModeSelector list — same

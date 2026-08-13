@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { supabase } from './supabase'
+import { supabase } from './lib/supabase'
 import { LangProvider } from './LangContext'
 
 import LandingScreen from './screens/LandingScreen'
@@ -27,11 +27,21 @@ import ExamResult from './screens/ExamResult'
 import TranslationScreen from './screens/TranslationScreen'
 import DarumaScreen from './screens/DarumaScreen'
 import StorehouseScreen from './screens/StorehouseScreen'
-import { CosmeticTheme } from './components/cosmetics'
+import { CosmeticTheme } from './stores/cosmetics'
+import { preload } from './lib/audio'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
   const [showLanding, setShowLanding] = useState(true)
+
+  // Decode the two sounds whose first play must not be late: the UI
+  // click, which is the very first interaction, and the level-up
+  // chime, which fires under a full-screen celebration where a
+  // hundred milliseconds of fetch is plainly visible. Everything else
+  // can decode on demand.
+  useEffect(() => {
+    preload(['/sounds/ui/click.mp3', '/sounds/sfx/level-up.mp3'])
+  }, [])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
