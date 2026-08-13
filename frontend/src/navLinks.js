@@ -26,5 +26,11 @@ export function getNavLinks(t) {
     // (cha-iro) was the one pigment in the shared palette no other
     // card had claimed yet.
     { icon: '模試', title: t.examTitle || 'Mock Exam', desc: t.examDesc || 'Past JLPT papers, digitized', path: '/exam', color: 'var(--accent5)' }, // Cha-iro
+    // 達磨堂 — study goals as daruma dolls (see screens/DarumaScreen).
+    // The one card that doesn't take a pigment from the shared accent
+    // palette: it gets --daruma-aka, the doll's own lacquer red, since
+    // that colour is the feature's entire identity and every other
+    // section's pigment was already claimed.
+    { icon: '達磨', title: t.darumaTitle, desc: t.darumaDesc, path: '/daruma', color: 'var(--daruma-aka)' },
   ]
 }

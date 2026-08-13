@@ -140,7 +140,10 @@ function KumadoriBurst({ count, colorVar, big }) {
 // kumadori burst and glow-pulse use, falling back to the gold trim
 // (--accent2) everything else in this file already falls back to.
 // Purely decorative throughout — aria-hidden, pointer-events: none.
-function StageFootlights({ big, leaving, colorVar }) {
+// Exported so the daruma 満願 ceremony (DarumaRitual.jsx) lights the
+// same stage rather than growing a second, subtly-different celebration
+// language of its own.
+export function StageFootlights({ big, leaving, colorVar }) {
   const embers = big ? EMBER_LAYOUT : EMBER_LAYOUT_LIGHT
   return (
     <div

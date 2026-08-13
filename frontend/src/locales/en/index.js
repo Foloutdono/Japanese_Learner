@@ -489,9 +489,6 @@ const profile = {
   // French goal/badge names. Routed through `t` instead so the
   // fallback screen still respects the UI language like everything
   // else does.
-  mockGoalDaily:          "Today's reviews",
-  mockGoalWeekly:         "This week's reviews",
-  mockGoalStreak:         'Keep the streak alive',
   mockBadgeFirstSteps:    'First steps',
   mockBadgeWeekStreak:    '7-day streak',
   mockBadgeMonthStreak:   '30-day streak',
@@ -658,6 +655,139 @@ const exam = {
   examAudioPending:    'Audio clip not linked yet — split the source track and set audioSrc for this question.',
 }
 
+// ── 達磨堂 — the Daruma Hall ───────────────────────────────
+// Goal copy lives here, not in the backend: routes/daruma.py sends
+// nothing but goal ids, precisely because the version of this feature
+// it replaced shipped hardcoded French labels to English users. Every
+// id in srs/daruma.py's catalogue needs an entry in both
+// darumaGoalTitle and darumaGoalDesc, in both locales.
+const darumaGoals = {
+  // The two nested maps are keyed by backend goal id. Titles are the
+  // wish as you'd write it on the doll's belly — short, imperative;
+  // descriptions say exactly what's being counted, because a goal you
+  // can't verify is a goal you don't trust.
+  darumaGoalTitle: {
+    daily_reviews_30:  'Thirty reviews',
+    daily_reviews_60:  'Sixty reviews',
+    daily_reviews_120: 'A hundred and twenty',
+    daily_new_5:       'Five new cards',
+    daily_new_15:      'Fifteen new cards',
+    daily_perfect_10:  'Ten flawless',
+    daily_perfect_20:  'Twenty flawless',
+    daily_accuracy_85: 'Steady hand',
+    daily_clear_due:   'Empty the queue',
+    daily_breadth_3:   'Three disciplines',
+    daily_dawn:        'Before dawn',
+    daily_night:       'After dark',
+    daily_xp_150:      'A hundred and fifty XP',
+
+    weekly_reviews_300: 'Three hundred this week',
+    weekly_reviews_700: 'Seven hundred this week',
+    weekly_new_40:      'Forty new cards',
+    weekly_days_5:      'Five days of study',
+    weekly_days_7:      'Every day this week',
+    weekly_perfect_25:  'Twenty-five flawless',
+    weekly_xp_1200:     'Twelve hundred XP',
+    weekly_breadth_4:   'Four disciplines',
+
+    vow_streak_7:      'Seven days unbroken',
+    vow_streak_30:     'A month unbroken',
+    vow_streak_100:    'A hundred days unbroken',
+    vow_reviews_1000:  'A thousand reviews',
+    vow_reviews_5000:  'Five thousand reviews',
+    vow_mastered_100:  'A hundred mastered',
+    vow_mastered_500:  'Five hundred mastered',
+    vow_perfect_50:    'Fifty flawless in a row',
+    vow_nanakorobi:    'Fall seven, rise eight',
+    vow_breadth_5:     'Every discipline in a day',
+  },
+
+  darumaGoalDesc: {
+    daily_reviews_30:  'Review 30 cards today.',
+    daily_reviews_60:  'Review 60 cards today.',
+    daily_reviews_120: 'Review 120 cards today.',
+    daily_new_5:       'Meet 5 cards you have never seen before.',
+    daily_new_15:      'Meet 15 cards you have never seen before.',
+    daily_perfect_10:  'Answer 10 in a row rated Good or better.',
+    daily_perfect_20:  'Answer 20 in a row rated Good or better.',
+    daily_accuracy_85: 'Finish the day at 85% accuracy over at least 20 reviews.',
+    daily_clear_due:   'Leave nothing due at the end of the day.',
+    daily_breadth_3:   'Study three of kana, vocab, kanji, grammar or your own decks.',
+    daily_dawn:        'Get a review in before 8 in the morning.',
+    daily_night:       'Still studying at 10 at night.',
+    daily_xp_150:      'Earn 150 XP today.',
+
+    weekly_reviews_300: 'Review 300 cards before Monday.',
+    weekly_reviews_700: 'Review 700 cards before Monday.',
+    weekly_new_40:      'Meet 40 cards you have never seen before this week.',
+    weekly_days_5:      'Study on five separate days this week.',
+    weekly_days_7:      'Study every single day this week.',
+    weekly_perfect_25:  'Answer 25 in a row rated Good or better this week.',
+    weekly_xp_1200:     'Earn 1,200 XP this week.',
+    weekly_breadth_4:   'Study four different disciplines this week.',
+
+    vow_streak_7:      'Reach a 7-day streak.',
+    vow_streak_30:     'Reach a 30-day streak.',
+    vow_streak_100:    'Reach a 100-day streak.',
+    vow_reviews_1000:  'Log 1,000 reviews in total.',
+    vow_reviews_5000:  'Log 5,000 reviews in total.',
+    vow_mastered_100:  'Carry 100 cards to mastered.',
+    vow_mastered_500:  'Carry 500 cards to mastered.',
+    vow_perfect_50:    'Answer 50 in a row rated Good or better.',
+    vow_nanakorobi:    'Rise from a broken streak seven times.',
+    vow_breadth_5:     'Study all five disciplines in a single day.',
+  },
+
+  // Traditional daruma colours, with the wish each one is sold for.
+  darumaColor: {
+    aka:      'Red — luck and protection',
+    kin:      'Gold — fortune',
+    shiro:    'White — a clean goal',
+    murasaki: 'Purple — health and long life',
+    ao:       'Blue — study and career',
+    midori:   'Green — vigour',
+    kuro:     'Black — warding off misfortune',
+    momo:     'Pink — affection',
+  },
+}
+
+const daruma = {
+  darumaTitle:        'Daruma Hall',
+  darumaDesc:         'Vows, rewards, and a shelf of finished dolls',
+  darumaMotto:        'Fall seven times, rise eight',
+  darumaToday:        "Today's wishes",
+  darumaThisWeek:     "This week's wishes",
+  darumaVows:         'Great vows',
+  darumaShelf:        'The shelf',
+
+  darumaTokens:       'Rise tokens',
+  darumaOnShelf:      'On the shelf',
+  darumaClaim:        'Paint the eye',
+  darumaClaimed:      'Fulfilled',
+  darumaFulfilled:    'The wish is fulfilled',
+  darumaEnshrine:     'Place it on the shelf',
+
+  darumaEmptySlot:    'Empty slot',
+  darumaTakeVow:      'Take the vow',
+  darumaRelease:      'Give it back',
+  darumaShowCatalogue: 'Browse the great vows',
+  darumaHideCatalogue: 'Hide the great vows',
+  darumaNoSlots:      'All three slots are taken',
+  darumaAllVowsTaken: 'Every vow is either taken or fulfilled.',
+  darumaVowsFulfilled: n => `${n} great ${n === 1 ? 'vow' : 'vows'} already fulfilled.`,
+
+  darumaMendPrompt:   day => `You missed ${day}. One rise token buys that day back.`,
+  darumaMendBtn:      'Rise again',
+  darumaNoTokens:     'No rise tokens',
+
+  darumaNoneToday:    'Nothing drawn — check back tomorrow.',
+  darumaShelfEmpty:   'The shelf is bare. Finish a wish and the doll ends up here.',
+  darumaOffline:      "Couldn't reach the hall — this may be out of date.",
+
+  darumaDoorwayDesc:  "Today's three wishes",
+  darumaReadyCount:   n => `${n} ${n === 1 ? 'daruma is' : 'darumas are'} waiting for the second eye`,
+}
+
 export default {
   ...auth,
   ...landing,
@@ -677,4 +807,6 @@ export default {
   ...settings,
   ...decks,
   ...exam,
+  ...darumaGoals,
+  ...daruma,
 }

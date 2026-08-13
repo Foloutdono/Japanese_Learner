@@ -485,9 +485,6 @@ const profile = {
   // est inaccessible (voir ProfileScreen.jsx buildMockProfile) —
   // routé via `t` pour que l'écran de repli respecte la langue de
   // l'interface comme partout ailleurs.
-  mockGoalDaily:          "Révisions du jour",
-  mockGoalWeekly:         'Révisions de la semaine',
-  mockGoalStreak:         'Maintenez votre série',
   mockBadgeFirstSteps:    'Premiers pas',
   mockBadgeWeekStreak:    'Série de 7 jours',
   mockBadgeMonthStreak:   'Série de 30 jours',
@@ -648,6 +645,135 @@ const exam = {
   examAudioPending:    "Extrait audio non encore lié — découpez la piste source et renseignez audioSrc pour cette question.",
 }
 
+// ── 達磨堂 — le Hall des Daruma ────────────────────────────
+// Le texte des objectifs vit ici, pas côté serveur : routes/daruma.py
+// n'envoie que des identifiants, précisément parce que la version
+// précédente de cette fonctionnalité envoyait des libellés codés en
+// dur en français à des utilisateurs anglophones. Chaque identifiant
+// du catalogue de srs/daruma.py doit avoir une entrée dans
+// darumaGoalTitle et darumaGoalDesc, dans les deux langues.
+const darumaGoals = {
+  darumaGoalTitle: {
+    daily_reviews_30:  'Trente révisions',
+    daily_reviews_60:  'Soixante révisions',
+    daily_reviews_120: 'Cent vingt révisions',
+    daily_new_5:       'Cinq nouvelles cartes',
+    daily_new_15:      'Quinze nouvelles cartes',
+    daily_perfect_10:  'Dix sans faute',
+    daily_perfect_20:  'Vingt sans faute',
+    daily_accuracy_85: 'Main sûre',
+    daily_clear_due:   'Vider la file',
+    daily_breadth_3:   'Trois disciplines',
+    daily_dawn:        'Avant l’aube',
+    daily_night:       'À la nuit tombée',
+    daily_xp_150:      'Cent cinquante XP',
+
+    weekly_reviews_300: 'Trois cents cette semaine',
+    weekly_reviews_700: 'Sept cents cette semaine',
+    weekly_new_40:      'Quarante nouvelles cartes',
+    weekly_days_5:      'Cinq jours d’étude',
+    weekly_days_7:      'Tous les jours cette semaine',
+    weekly_perfect_25:  'Vingt-cinq sans faute',
+    weekly_xp_1200:     'Mille deux cents XP',
+    weekly_breadth_4:   'Quatre disciplines',
+
+    vow_streak_7:      'Sept jours d’affilée',
+    vow_streak_30:     'Un mois d’affilée',
+    vow_streak_100:    'Cent jours d’affilée',
+    vow_reviews_1000:  'Mille révisions',
+    vow_reviews_5000:  'Cinq mille révisions',
+    vow_mastered_100:  'Cent cartes maîtrisées',
+    vow_mastered_500:  'Cinq cents cartes maîtrisées',
+    vow_perfect_50:    'Cinquante sans faute d’affilée',
+    vow_nanakorobi:    'Tomber sept fois, se relever huit',
+    vow_breadth_5:     'Toutes les disciplines en un jour',
+  },
+
+  darumaGoalDesc: {
+    daily_reviews_30:  'Réviser 30 cartes aujourd’hui.',
+    daily_reviews_60:  'Réviser 60 cartes aujourd’hui.',
+    daily_reviews_120: 'Réviser 120 cartes aujourd’hui.',
+    daily_new_5:       'Découvrir 5 cartes jamais vues.',
+    daily_new_15:      'Découvrir 15 cartes jamais vues.',
+    daily_perfect_10:  'Enchaîner 10 réponses notées Bien ou mieux.',
+    daily_perfect_20:  'Enchaîner 20 réponses notées Bien ou mieux.',
+    daily_accuracy_85: 'Finir la journée à 85 % de réussite sur au moins 20 révisions.',
+    daily_clear_due:   'Ne rien laisser à réviser en fin de journée.',
+    daily_breadth_3:   'Étudier trois domaines parmi kana, vocabulaire, kanji, grammaire et vos paquets.',
+    daily_dawn:        'Faire une révision avant 8 h du matin.',
+    daily_night:       'Étudier encore à 22 h.',
+    daily_xp_150:      'Gagner 150 XP aujourd’hui.',
+
+    weekly_reviews_300: 'Réviser 300 cartes avant lundi.',
+    weekly_reviews_700: 'Réviser 700 cartes avant lundi.',
+    weekly_new_40:      'Découvrir 40 cartes jamais vues cette semaine.',
+    weekly_days_5:      'Étudier cinq jours différents cette semaine.',
+    weekly_days_7:      'Étudier chaque jour de la semaine.',
+    weekly_perfect_25:  'Enchaîner 25 réponses notées Bien ou mieux cette semaine.',
+    weekly_xp_1200:     'Gagner 1 200 XP cette semaine.',
+    weekly_breadth_4:   'Étudier quatre disciplines différentes cette semaine.',
+
+    vow_streak_7:      'Atteindre une série de 7 jours.',
+    vow_streak_30:     'Atteindre une série de 30 jours.',
+    vow_streak_100:    'Atteindre une série de 100 jours.',
+    vow_reviews_1000:  'Cumuler 1 000 révisions.',
+    vow_reviews_5000:  'Cumuler 5 000 révisions.',
+    vow_mastered_100:  'Amener 100 cartes jusqu’à la maîtrise.',
+    vow_mastered_500:  'Amener 500 cartes jusqu’à la maîtrise.',
+    vow_perfect_50:    'Enchaîner 50 réponses notées Bien ou mieux.',
+    vow_nanakorobi:    'Se relever sept fois d’une série brisée.',
+    vow_breadth_5:     'Étudier les cinq disciplines dans la même journée.',
+  },
+
+  darumaColor: {
+    aka:      'Rouge — chance et protection',
+    kin:      'Or — fortune',
+    shiro:    'Blanc — un objectif net',
+    murasaki: 'Violet — santé et longévité',
+    ao:       'Bleu — études et carrière',
+    midori:   'Vert — vigueur',
+    kuro:     'Noir — conjurer le mauvais sort',
+    momo:     'Rose — affection',
+  },
+}
+
+const daruma = {
+  darumaTitle:        'Hall des Daruma',
+  darumaDesc:         'Vœux, récompenses et une étagère de daruma achevés',
+  darumaMotto:        'Tomber sept fois, se relever huit',
+  darumaToday:        'Les vœux du jour',
+  darumaThisWeek:     'Les vœux de la semaine',
+  darumaVows:         'Grands vœux',
+  darumaShelf:        'L’étagère',
+
+  darumaTokens:       'Jetons de relève',
+  darumaOnShelf:      'Sur l’étagère',
+  darumaClaim:        'Peindre l’œil',
+  darumaClaimed:      'Vœu exaucé',
+  darumaFulfilled:    'Le vœu est exaucé',
+  darumaEnshrine:     'Le poser sur l’étagère',
+
+  darumaEmptySlot:    'Emplacement libre',
+  darumaTakeVow:      'Faire le vœu',
+  darumaRelease:      'Le rendre',
+  darumaShowCatalogue: 'Parcourir les grands vœux',
+  darumaHideCatalogue: 'Masquer les grands vœux',
+  darumaNoSlots:      'Les trois emplacements sont pris',
+  darumaAllVowsTaken: 'Tous les vœux sont pris ou déjà exaucés.',
+  darumaVowsFulfilled: n => `${n} grand${n === 1 ? '' : 's'} vœu${n === 1 ? '' : 'x'} déjà exaucé${n === 1 ? '' : 's'}.`,
+
+  darumaMendPrompt:   day => `Vous avez manqué le ${day}. Un jeton de relève rachète cette journée.`,
+  darumaMendBtn:      'Se relever',
+  darumaNoTokens:     'Aucun jeton',
+
+  darumaNoneToday:    'Rien de tiré — revenez demain.',
+  darumaShelfEmpty:   'L’étagère est vide. Exaucez un vœu et le daruma viendra s’y poser.',
+  darumaOffline:      'Hall injoignable — ces données peuvent être périmées.',
+
+  darumaDoorwayDesc:  'Les trois vœux du jour',
+  darumaReadyCount:   n => `${n} daruma attend${n === 1 ? '' : 'ent'} son second œil`,
+}
+
 export default {
   ...auth,
   ...landing,
@@ -667,4 +793,6 @@ export default {
   ...settings,
   ...decks,
   ...exam,
+  ...darumaGoals,
+  ...daruma,
 }

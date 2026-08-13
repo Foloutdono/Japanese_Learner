@@ -25,6 +25,7 @@ import ExamSectionSelect from './screens/ExamSectionSelect'
 import ExamRunner from './screens/ExamRunner'
 import ExamResult from './screens/ExamResult'
 import TranslationScreen from './screens/TranslationScreen'
+import DarumaScreen from './screens/DarumaScreen'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -80,6 +81,7 @@ export default function App() {
           <Route path="/exam/:examId/:sectionId" element={<ExamRunner session={session} />} />
           <Route path="/exam/:examId/:sectionId/results" element={<ExamResult session={session} />} />
           <Route path="/translation" element={<TranslationScreen session={session} />} />
+          <Route path="/daruma" element={<DarumaScreen session={session} />} />
         </Routes>
       </BrowserRouter>
     </LangProvider>

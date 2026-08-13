@@ -1,6 +1,7 @@
 import logging
 import random
 import re
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from psycopg2 import errors as pg_errors
@@ -9,6 +10,7 @@ from pydantic import BaseModel, field_validator
 from db import db_conn
 from auth import get_user_id
 from srs_instance import srs
+from srs import daruma
 from srs.xp import level_progress
 
 router = APIRouter()
@@ -102,41 +104,63 @@ class UsernamePayload(BaseModel):
 
 
 # ── Goals ─────────────────────────────────────────────────────
-# First-pass fixed targets — not personalized/adaptive yet, just real
-# progress against real activity instead of static mock numbers.
-DAILY_REVIEW_TARGET = 30
-WEEKLY_REVIEW_TARGET = 150
-STREAK_GOAL_TARGET = 30
+# Goals themselves moved to the Daruma Hall (routes/daruma.py) — this
+# is only the summary the profile card and the home screen's hall badge
+# need: today's three darumas at a glance, plus how many darumas
+# anywhere are sitting complete and unclaimed, which is the number that
+# earns a dot on the nav card.
+def _daruma_summary(user_id: str) -> dict:
+    today = datetime.now(timezone.utc).date()
+    facts = srs.get_daruma_facts(user_id)
+    day_key = daruma.period_key("daily", today)
+    week_key = daruma.period_key("weekly", today)
 
+    dailies = daruma.daily_goals(user_id, today)
+    weeklies = daruma.weekly_goals(user_id, today)
+    vows = daruma.VOW_POOL
 
-def _goals(user_id: str, streak_current: int) -> list[dict]:
-    reviews_today = srs.get_reviews_today(user_id)
-    trend = srs.get_daily_review_counts(user_id, days=7)
-    reviews_this_week = sum(d["count"] for d in trend)
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT goal_id, period_key, vowed_at, claimed_at
+                FROM daruma_goals
+                WHERE user_id = %s AND period_key IN (%s, %s, 'vow')
+                """,
+                (user_id, day_key, week_key),
+            )
+            rows = {
+                (gid, period): {"vowed_at": vowed, "claimed_at": claimed}
+                for gid, period, vowed, claimed in cur.fetchall()
+            }
+    except Exception:
+        # The hall's tables are created by routes/daruma.py's own
+        # bootstrap; if that hasn't run (or the query fails for any
+        # other reason) the profile screen shouldn't 500 over a
+        # decorative summary.
+        logger.exception("daruma summary failed")
+        conn.rollback()
+        rows = {}
+    finally:
+        conn.close()
 
-    return [
-        {
-            "id": "daily",
-            "label": "Révisions du jour",
-            "current": min(reviews_today, DAILY_REVIEW_TARGET),
-            "target": DAILY_REVIEW_TARGET,
-            "rewardXp": 20,
-        },
-        {
-            "id": "weekly",
-            "label": "Révisions cette semaine",
-            "current": min(reviews_this_week, WEEKLY_REVIEW_TARGET),
-            "target": WEEKLY_REVIEW_TARGET,
-            "rewardXp": 80,
-        },
-        {
-            "id": "streak",
-            "label": "Garder la série en vie",
-            "current": min(streak_current, STREAK_GOAL_TARGET),
-            "target": STREAK_GOAL_TARGET,
-            "rewardXp": 150,
-        },
-    ]
+    def ser(goal, key):
+        return daruma.serialize(goal, facts, rows.get((goal.id, key)))
+
+    today_dolls = [ser(g, day_key) for g in dailies]
+    everything = (
+        today_dolls
+        + [ser(g, week_key) for g in weeklies]
+        # An unvowed 大願 that happens to be satisfied isn't claimable,
+        # so it must not light the badge either.
+        + [d for d in (ser(g, "vow") for g in vows) if d["vowed"]]
+    )
+
+    return {
+        "today": today_dolls,
+        "ready": sum(1 for d in everything if d["complete"] and not d["claimed"]),
+    }
 
 
 # ── Badges ────────────────────────────────────────────────────
@@ -182,7 +206,7 @@ def get_profile(user_id: str = Depends(get_user_id)):
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": total_reviews,
-        "goals": _goals(user_id, streak["current"]),
+        "daruma": _daruma_summary(user_id),
         "badges": _badges(user_id, streak),
     }
 

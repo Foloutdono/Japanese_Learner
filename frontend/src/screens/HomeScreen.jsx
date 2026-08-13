@@ -76,6 +76,13 @@ function HomeProfileBadge() {
 export default function HomeScreen() {
   const navigate = useNavigate()
   const { t }     = useLang()
+  // Same shared store HomeProfileBadge reads, so this is a second
+  // subscriber rather than a second fetch. Only one number is wanted
+  // here: how many darumas are sitting fulfilled and unclaimed, which
+  // is the one thing on the home screen that expires — an unclaimed
+  // daily is gone at midnight.
+  const summary   = useProfileSummary()
+  const darumaReady = summary?.daruma?.ready ?? 0
 
   useEffect(() => {
     startAmbiance('home')
@@ -119,6 +126,11 @@ export default function HomeScreen() {
                 <span className="home-card__title">{card.title}</span>
                 <span className="home-card__rule" aria-hidden="true" />
                 <span className="home-card__desc">{card.desc}</span>
+                {card.path === '/daruma' && darumaReady > 0 && (
+                  <span className="home-card__badge" title={t.darumaReadyCount(darumaReady)}>
+                    {darumaReady}
+                  </span>
+                )}
               </button>
             )))}
           </div>

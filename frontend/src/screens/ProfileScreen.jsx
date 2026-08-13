@@ -7,6 +7,7 @@ import { Loading } from '../components/Loading'
 import { SectionHeader } from '../components/SectionHeader'
 import { levelTitle } from '../levelTitle'
 import { WarningIcon, PencilIcon, CrossIcon, ChevronIcon } from '../components/Icons'
+import { Daruma } from '../components/Daruma'
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 
@@ -29,11 +30,14 @@ function buildMockProfile(t) {
     streak: 14,
     streakLongest: 21,
     totalReviews: 842,
-    goals: [
-      { id: 'daily', label: t.mockGoalDaily, current: 18, target: 30, rewardXp: 20 },
-      { id: 'weekly', label: t.mockGoalWeekly, current: 96, target: 150, rewardXp: 80 },
-      { id: 'streak', label: t.mockGoalStreak, current: 14, target: 30, rewardXp: 150 },
-    ],
+    daruma: {
+      ready: 0,
+      today: [
+        { id: 'daily_reviews_30', glyph: '行', color: 'aka', rarity: 'nami', current: 18, target: 30, rewardXp: 25, rewardTokens: 0, vowed: true, claimed: false, complete: false },
+        { id: 'daily_new_5', glyph: '芽', color: 'midori', rarity: 'nami', current: 2, target: 5, rewardXp: 30, rewardTokens: 0, vowed: true, claimed: false, complete: false },
+        { id: 'daily_perfect_10', glyph: '一', color: 'kin', rarity: 'jou', current: 0, target: 10, rewardXp: 40, rewardTokens: 0, vowed: false, claimed: false, complete: false },
+      ],
+    },
     badges: [
       { id: 'first_steps', glyph: '初', label: t.mockBadgeFirstSteps, unlocked: true },
       { id: 'week_streak', glyph: '週', label: t.mockBadgeWeekStreak, unlocked: true },
@@ -110,7 +114,7 @@ export default function ProfileScreen({ session }) {
           <StatsAccessCard navigate={navigate} t={t} />
 
           <SectionHeader title={t.goals} />
-          <GoalsCard goals={profile.goals} t={t} />
+          <DarumaHallCard daruma={profile.daruma} navigate={navigate} t={t} />
 
           <SectionHeader title={t.badges} />
           <BadgesGrid badges={profile.badges} />
@@ -261,31 +265,44 @@ function StatsAccessCard({ navigate, t }) {
   )
 }
 
-function GoalsCard({ goals, t }) {
+// Goals live in the Daruma Hall now (see screens/DarumaScreen.jsx), so
+// what the profile keeps is a window onto it rather than a second copy
+// of the mechanic: today's three dolls at their real pigment level, and
+// a count of anything anywhere that's finished and unclaimed. The whole
+// card is the doorway — no separate "go to goals" link under it.
+function DarumaHallCard({ daruma, navigate, t }) {
+  const today = daruma?.today ?? []
+  const ready = daruma?.ready ?? 0
+
   return (
-    <div className="card goals-card">
-      {goals.map(g => {
-        const pct = Math.min(100, Math.round((g.current / g.target) * 100))
-        const done = pct >= 100
-        return (
-          <div key={g.id} className="goal-row">
-            <div className="goal-row__top">
-              <span className="goal-row__label">{g.label}</span>
-              <span className="goal-row__reward">+{g.rewardXp} XP</span>
-            </div>
-            <div className="goal-row__track">
-              <div
-                className={`goal-row__fill${done ? ' goal-row__fill--done' : ''}`}
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <div className="goal-row__count">
-              {g.current} / {g.target}{done ? ` · ${t.done}` : ''}
-            </div>
-          </div>
-        )
-      })}
-    </div>
+    <button type="button" className="card daruma-doorway" onClick={() => navigate('/daruma')}>
+      <div className="daruma-doorway__dolls">
+        {today.map(d => (
+          <span key={d.id} className="daruma-doorway__doll" title={t.darumaGoalTitle?.[d.id] ?? d.id}>
+            <Daruma
+              color={d.color}
+              rarity={d.rarity}
+              glyph={d.glyph}
+              eyes={d.claimed ? 2 : (d.vowed ? 1 : 0)}
+              progress={d.target ? d.current / d.target : 0}
+              dim={!d.vowed && !d.claimed}
+              size={56}
+            />
+            <span className="daruma-doorway__count">{d.current}/{d.target}</span>
+          </span>
+        ))}
+      </div>
+
+      <div className="daruma-doorway__text">
+        <span className="daruma-doorway__title" lang="ja">達磨堂</span>
+        <span className="daruma-doorway__desc">
+          {ready > 0 ? t.darumaReadyCount(ready) : t.darumaDoorwayDesc}
+        </span>
+      </div>
+
+      {ready > 0 && <span className="daruma-doorway__badge">{ready}</span>}
+      <ChevronIcon direction="right" size={16} className="stats-access-card__arrow" />
+    </button>
   )
 }
 

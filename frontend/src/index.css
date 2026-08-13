@@ -44,6 +44,26 @@
      a fill with --text-on-panel text in both themes. */
   --action-purple:  #6c5ce7;
 
+  /* ── Daruma pigments (達磨) ──
+     A separate family from the accent palette on purpose: these are
+     the eight lacquer colours a daruma shop actually sells, each
+     standing for a specific wish (red = luck, blue = study, gold =
+     fortune…), and the Daruma Hall uses them as data — the colour of
+     a doll on the shelf says what kind of goal it was. Borrowing
+     --accent/--accent4/etc. would have made "kanji section" and
+     "study vow" the same colour by accident. Deepened a shade under
+     the light theme like every other pigment here. */
+  --daruma-aka:      #c33a2c;
+  --daruma-kin:      #c9a227;
+  --daruma-shiro:    #ece3d0;
+  --daruma-murasaki: #7c5f9e;
+  --daruma-ao:       #3f6d8e;
+  --daruma-midori:   #5f8a52;
+  --daruma-kuro:     #34303a;
+  --daruma-momo:     #c67a89;
+  /* Bare kōzo paper — the unpainted part of a doll in progress. */
+  --daruma-blank:    #b3a996;
+
   /* ── Flipping tokens — dark theme (default) ── */
   --bg-main:        #17151a;
   --bg-card:        #201d24;
@@ -148,6 +168,16 @@
   --accent7:        #954e34;
   --accent8:        #9c5866;
   --accent9:        #3f5488;
+
+  --daruma-aka:      #b23425;
+  --daruma-kin:      #a97a25;
+  --daruma-shiro:    #f0e8d6;
+  --daruma-murasaki: #6b5289;
+  --daruma-ao:       #37607d;
+  --daruma-midori:   #527a49;
+  --daruma-kuro:     #2c2721;
+  --daruma-momo:     #b3697a;
+  --daruma-blank:    #c2b7a0;
 
   --text-primary:   #221d15;
   --text-secondary: #6f6552;
@@ -4545,57 +4575,78 @@ input:focus { border-color: var(--accent2); }
   transition: width 0.4s ease;
 }
 
-/* Goals */
-.goals-card { margin-bottom: 48px; }
-
-.goal-row { padding: 16px 0; border-bottom: 1px solid var(--border); }
-.goal-row:first-child { padding-top: 0; }
-.goal-row:last-child { padding-bottom: 0; border-bottom: none; }
-
-.goal-row__top {
+/* Goals → the Daruma Hall doorway.
+   Same single-tappable-row language as .stats-access-card above, but
+   it carries today's three dolls at their real pigment level instead
+   of a glyph — the preview *is* the data, so the card earns its
+   height rather than being a link with decoration. */
+.daruma-doorway {
+  position: relative;
+  width: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 10px;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 22px;
+  margin-bottom: 48px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background 0.2s ease;
+}
+.daruma-doorway:hover { background: var(--bg-card-hover); }
+
+.daruma-doorway__dolls {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.daruma-doorway__doll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.daruma-doorway__count {
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--text-secondary);
 }
 
-.goal-row__label {
+.daruma-doorway__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.daruma-doorway__title {
   font-family: var(--font-jp);
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 1.05rem;
   color: var(--text-primary);
 }
-
-.goal-row__reward {
-  flex-shrink: 0;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent2);
-  background: var(--chip-bg);
-  padding: 2px 9px;
-  border-radius: 999px;
-}
-
-.goal-row__track {
-  height: 6px;
-  background: var(--bg-panel);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.goal-row__fill {
-  height: 100%;
-  background: var(--success);
-  border-radius: 3px;
-  transition: width 0.3s ease;
-}
-.goal-row__fill--done { background: var(--accent2); }
-
-.goal-row__count {
-  font-family: var(--font-display);
-  font-size: 11px;
+.daruma-doorway__desc {
+  font-size: 12.5px;
   color: var(--text-secondary);
-  margin-top: 6px;
+}
+
+/* Same seal-red dot the home card uses — see .home-card__badge. */
+.daruma-doorway__badge {
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--daruma-aka);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Badges — a shoji-lattice grid like Stats' card grids, but each
@@ -7265,4 +7316,849 @@ input:focus { border-color: var(--accent2); }
   .dict-detail__char { font-size: 40px; }
   .dict-example__jp { font-size: 15px; line-height: 2.2; }
   .dict-tag-chip { font-size: 11px; padding: 2px 9px; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   達磨堂 — the Daruma Hall
+   ════════════════════════════════════════════════════════════
+   Study goals as daruma dolls. The doll is doing three jobs that
+   would otherwise be three widgets: it's the progress bar (pigment
+   rises as you close on the target), the reward (a finished one goes
+   on the shelf), and the commitment (which eyes are painted). That
+   collapse is the design, and the ritual it's built on is a real one
+   rather than a skin — which is why there is no track, no checkbox
+   and no badge anywhere on this screen.
+
+   Everything below stays inside the app's existing rules: flat fills,
+   hairline borders, theme tokens only, serif-JP for Japanese, display
+   font for numbers. The only gradients are the two that are literally
+   ink bleeding. */
+
+/* ── The doll ─────────────────────────────────────────────── */
+.daruma { display: block; overflow: visible; }
+.daruma--dim { opacity: 0.45; }
+
+/* Bare kōzo paper, then pigment clipped over it — a doll at 40% is
+   genuinely 40% painted rather than tinted at 40% alpha. */
+.daruma__paper   { fill: var(--daruma-blank); }
+.daruma__pigment { fill: var(--daruma-color); }
+.daruma__outline {
+  fill: none;
+  stroke: var(--text-on-fill);
+  stroke-width: 2.5;
+  opacity: 0.75;
+}
+
+/* Masked off before the body is dipped, on a real doll and here. */
+.daruma__face {
+  fill: var(--paper);
+  stroke: var(--text-on-fill);
+  stroke-width: 1.4;
+  stroke-opacity: 0.3;
+}
+
+/* Crane eyebrows and tortoise moustache — the two long-lived
+   auspicious animals a daruma's face is always drawn from. Stroked,
+   not filled: these have to survive being rendered at 13px inside a
+   reward chip, and a filled sliver disappears long before then. */
+.daruma__brow {
+  fill: none;
+  stroke: var(--text-on-fill);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  opacity: 0.88;
+}
+
+.daruma__eye {
+  fill: var(--paper);
+  stroke: var(--text-on-fill);
+  stroke-width: 1.6;
+  stroke-opacity: 0.55;
+  transition: fill 0.35s ease;
+}
+/* Whole eye inked in, no pupil and no catchlight — that is how it is
+   actually done, and a daruma's flat stare is the point. */
+.daruma__eye--painted {
+  fill: var(--text-on-fill);
+  stroke-opacity: 0.9;
+}
+
+.daruma__glyph {
+  fill: var(--accent2);
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 21px;
+  /* Outlined rather than plain-filled: the belly kanji is gold, and
+     gold-on-gold (the 金 daruma) or gold-on-white (the 白 one) has no
+     contrast at all without an ink edge under it. paint-order puts
+     the stroke behind the fill so it reads as a brushed outline, not
+     a thickened letterform. */
+  paint-order: stroke;
+  stroke: var(--text-on-fill);
+  stroke-width: 1.4;
+  stroke-opacity: 0.5;
+  stroke-linejoin: round;
+}
+
+/* Rarity: only the top two tiers get anything at all — a hairline for
+   特, a gold double ring for 極 — the same escalation StageBadge uses
+   from learning to mastered. */
+.daruma__ring {
+  fill: none;
+  stroke: var(--accent2);
+  stroke-width: 1.2;
+  opacity: 0.5;
+}
+.daruma__ring--inner { stroke-dasharray: 3 5; opacity: 0.75; }
+
+/* The 起 token: the doll itself, tipped and already coming back up. */
+.rise-token {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: -0.18em;
+}
+.rise-token__doll { transform: rotate(-18deg); }
+
+/* Unclaimed-daruma count on the home screen's hall card. The one
+   thing on that grid that expires — a daily doll is burned at
+   midnight — so it is the one thing that gets a dot. */
+.home-card__badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--daruma-aka);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── The hall ─────────────────────────────────────────────── */
+.daruma-container { padding: 48px 24px 88px; }
+
+/* Sumi slab, like the app's other one-of-a-kind headers (top bar,
+   hero). The motto is the feature's thesis and gets the space to say
+   so: 七転び八起き is literally what the 起 token below it buys. */
+.daruma-hall {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 30px 28px 24px;
+  margin-bottom: 44px;
+}
+
+.daruma-hall__motto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 26px;
+}
+.daruma-hall__motto-jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 1.7rem;
+  letter-spacing: 0.06em;
+  color: var(--text-on-panel);
+}
+.daruma-hall__motto-en {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+
+/* Three pillars, hairline-divided — the same shoji rhythm the stats
+   grids use, laid out in a row on ink instead of a lattice on paper. */
+.daruma-hall__pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--burger-menu-border);
+  border: 1px solid var(--burger-menu-border);
+}
+.daruma-hall__pillar {
+  background: var(--bg-panel);
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.daruma-hall__pillar-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-on-panel);
+}
+.daruma-hall__pillar-value svg { color: var(--accent2); }
+.daruma-hall__pillar-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+  text-align: center;
+}
+
+/* Only rendered on the days a token would actually buy something
+   back, so its presence is the whole message. */
+.daruma-hall__mend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--burger-menu-border);
+}
+.daruma-hall__mend-text {
+  font-size: 12.5px;
+  color: var(--text-on-panel-soft);
+}
+.daruma-hall__mend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 16px;
+  border: 1px solid var(--accent2);
+  background: transparent;
+  color: var(--accent2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.daruma-hall__mend-btn:hover:not(:disabled) {
+  background: var(--accent2);
+  color: var(--text-on-fill);
+}
+.daruma-hall__mend-btn:disabled {
+  border-color: var(--burger-menu-border);
+  color: var(--text-on-panel-soft);
+  cursor: not-allowed;
+}
+.daruma-hall__mend-glyph { font-family: var(--font-jp); font-size: 15px; }
+
+/* ── Rows of dolls ────────────────────────────────────────── */
+/* Two deliberate departures from the shoji-lattice grid the rest of
+   the app uses for card rows (.badges-grid, the stats grids):
+     • capped width — a weekly row only ever holds two dolls, and
+       letting auto-fit stretch two cards across 1100px leaves each
+       one mostly empty space with a small doll marooned in it;
+     • real gaps with per-card hairlines instead of 1px lattice gaps
+       over a border-coloured backdrop — these cards are tall and
+       come in threes and twos, so the moment the column count stops
+       dividing the card count (three dailies in two columns on a
+       tablet) the lattice leaves a full-height slab of raw border
+       colour sitting there. An orphan cell that size reads as a
+       rendering bug; self-bordered cards just don't have one. */
+.daruma-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  max-width: 840px;
+  margin-bottom: 44px;
+}
+
+.daruma-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 22px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  font: inherit;
+  color: inherit;
+  transition: background 0.2s ease;
+}
+
+/* The card is the claim button when there is something to claim, and
+   plain markup otherwise — rather than a permanently clickable card
+   with a dead button inside it, which invites the click that does
+   nothing. */
+button.daruma-card { cursor: pointer; }
+button.daruma-card:hover { background: var(--bg-card-hover); }
+
+/* A fulfilled, unclaimed doll is the one urgent thing on the screen,
+   so it gets the single accent edge the app uses everywhere else to
+   mark "this one" — plus a slow breath, because it is waiting on you. */
+.daruma-card--ready {
+  border-color: var(--accent2);
+  animation: daruma-await 2.6s ease-in-out infinite;
+}
+@keyframes daruma-await {
+  0%, 100% { background: var(--bg-card); }
+  50%      { background: color-mix(in srgb, var(--accent2) 9%, var(--bg-card)); }
+}
+
+.daruma-card--claimed { opacity: 0.72; }
+
+.daruma-card__doll { line-height: 0; }
+
+.daruma-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.daruma-card__title {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+.daruma-card__desc {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* Numbers, not a bar — the doll is already the bar. */
+.daruma-card__meter {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+  font-family: var(--font-display);
+}
+.daruma-card__count { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.daruma-card__pct   { font-size: 11px; color: var(--text-secondary); }
+
+.daruma-card__rewards {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.daruma-card__reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--accent2);
+  background: var(--chip-bg);
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+.daruma-card__reward--token { color: var(--daruma-aka); }
+
+.daruma-card__release {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 10.5px;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.daruma-card__release:hover { color: var(--danger); border-color: var(--danger); }
+
+/* Struck across the card's foot like a paper seal band. */
+.daruma-card__ribbon {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+  padding: 7px 18px;
+  background: var(--accent2);
+  color: var(--text-on-fill);
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.daruma-card__ribbon-glyph {
+  font-family: var(--font-jp);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.daruma-card__done {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--success);
+  color: var(--text-on-fill);
+}
+
+/* ── 大願 — the vow slots ─────────────────────────────────── */
+.daruma-vows { margin-bottom: 44px; }
+.daruma-vows .daruma-row { margin-bottom: 0; }
+
+/* An empty slot is a blank doll's silhouette waiting to be bought —
+   a dashed carved outline, the same "not yet struck" language
+   StageBadge's 'new' seal uses. */
+.daruma-slot {
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  padding: 30px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text-secondary);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.daruma-slot:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+/* The doll's own silhouette, carved and not yet struck — the same
+   "empty seal" language StageBadge's 'new' variant uses. The glyph
+   sits inside the outline rather than floating over it, so the slot
+   reads as a daruma-shaped hole. */
+.daruma-slot__ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 88px;
+  border: 1px dashed var(--border);
+  border-radius: 50% 50% 46% 46% / 52% 52% 48% 48%;
+}
+.daruma-slot__glyph {
+  font-family: var(--font-jp);
+  font-size: 1.6rem;
+  opacity: 0.35;
+}
+.daruma-slot__label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.daruma-catalogue-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 7px 0;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.daruma-catalogue-toggle:hover { color: var(--accent2); }
+
+.daruma-catalogue {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.daruma-cat-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.daruma-cat-row:last-child { border-bottom: none; }
+
+.daruma-cat-row__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.daruma-cat-row__title {
+  font-family: var(--font-jp);
+  font-size: 0.92rem;
+  color: var(--text-primary);
+}
+.daruma-cat-row__desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+.daruma-cat-row__reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent2);
+}
+.daruma-cat-row__take {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.daruma-cat-row__take:hover:not(:disabled) { background: var(--accent); color: var(--text-on-panel); }
+.daruma-cat-row__take:disabled {
+  border-color: var(--border);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.daruma-cat-done {
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+}
+
+/* ── 達磨棚 — the shelf ───────────────────────────────────── */
+.daruma-shelf { margin-bottom: 48px; }
+
+/* The colours are not decoration: a shelf that is mostly 青 (study)
+   versus mostly 金 (fortune) is a real statement about how you have
+   been learning, so the tally leads. */
+.daruma-shelf__tally {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+}
+.daruma-shelf__tally-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.daruma-shelf__tally-count {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* A literal plank: the dolls sit on a hairline with a sliver of
+   shelf-edge under it, wrapping for as many rows as it takes. */
+.daruma-shelf__plank {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 14px;
+  padding: 18px 18px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--accent5);
+}
+.daruma-shelf__doll {
+  line-height: 0;
+  transition: transform 0.2s ease;
+}
+.daruma-shelf__doll:hover { transform: translateY(-3px); }
+
+/* ── 満願 — the eye-painting ceremony ─────────────────────── */
+/* XpToast's level-up is a kabuki curtain call: loud, theatrical, the
+   whole stage. This is deliberately its opposite number — a
+   calligrapher's gesture. One brush comes down, one eye is inked, the
+   ink bleeds outward, done. Same footlights underneath (imported from
+   XpToast rather than reimplemented) so both still read as the same
+   app celebrating, in two registers. */
+.daruma-ritual {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Near-opaque, not a light scrim: the hall underneath is a dense
+     screen of cards and text, and at 88% it stayed legible enough to
+     compete with the banner sitting on top of it. */
+  background: color-mix(in srgb, var(--bg-panel) 95%, transparent);
+  animation: daruma-ritual-in 380ms ease-out both;
+}
+.daruma-ritual--leaving { animation: daruma-ritual-out 460ms ease-in both; }
+
+@keyframes daruma-ritual-in  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes daruma-ritual-out { from { opacity: 1 } to { opacity: 0 } }
+
+/* The overlay arrives the way ink arrives: one loaded sweep across
+   the ground, left to right, not a fade. */
+.daruma-ritual__wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg,
+    transparent 0%,
+    color-mix(in srgb, var(--daruma-color) 20%, transparent) 42%,
+    color-mix(in srgb, var(--daruma-color) 6%, transparent) 62%,
+    transparent 100%);
+  transform-origin: left center;
+  animation: daruma-wash 900ms cubic-bezier(0.3, 0, 0.2, 1) both;
+}
+@keyframes daruma-wash {
+  0%   { opacity: 0; transform: scaleX(0); }
+  45%  { opacity: 1; }
+  100% { opacity: 0.28; transform: scaleX(1); }
+}
+
+.daruma-ritual__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 0 24px;
+}
+
+/* Twelve gold spokes, turning slowly — the only part of this that is
+   not an ink gesture, and it stays behind the doll where it reads as
+   light rather than as confetti. */
+.daruma-ritual__rays {
+  position: absolute;
+  top: 100px;
+  left: 50%;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.daruma-ritual--act2 .daruma-ritual__rays {
+  animation: daruma-rays-in 900ms ease-out both, daruma-rays-turn 26s linear 900ms infinite;
+}
+.daruma-ritual__ray {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 210px;
+  margin-left: -1px;
+  transform-origin: 50% 0;
+  transform: rotate(var(--ray-angle));
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--accent2) 55%, transparent), transparent 78%);
+}
+@keyframes daruma-rays-in   { from { opacity: 0; } to { opacity: 0.7; } }
+@keyframes daruma-rays-turn { to { transform: rotate(360deg); } }
+
+.daruma-ritual__doll {
+  position: relative;
+  animation: daruma-rise 700ms cubic-bezier(0.2, 1.1, 0.4, 1) both;
+}
+@keyframes daruma-rise {
+  0%   { opacity: 0; transform: translateY(38px) scale(0.86) rotate(-8deg); }
+  60%  { transform: translateY(0) scale(1.03) rotate(4deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+/* 36.5% / 37.5% is the doll's unpainted eye in its own box (see EYE in
+   Daruma.jsx) — anchored to the doll, not the viewport, so the brush
+   lands on the eye at every breakpoint. */
+.daruma-ritual__brush {
+  position: absolute;
+  left: 36.5%;
+  top: 37.5%;
+  width: 11px;
+  height: 130px;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    var(--accent5) 0%, var(--accent5) 46%,
+    var(--text-on-fill) 54%, #0d0b10 100%);
+  clip-path: polygon(30% 0, 70% 0, 66% 54%, 56% 88%, 50% 100%, 44% 88%, 34% 54%);
+  opacity: 0;
+  animation: daruma-brush 1250ms cubic-bezier(0.45, 0.05, 0.25, 1) 200ms both;
+}
+@keyframes daruma-brush {
+  0%   { opacity: 0; transform: translate(-50%, -100%) translate(76px, -150px) rotate(34deg); }
+  22%  { opacity: 1; transform: translate(-50%, -100%) translate(30px, -52px) rotate(20deg); }
+  44%  { opacity: 1; transform: translate(-50%, -100%) translate(0, 2px) rotate(7deg); }
+  60%  { opacity: 1; transform: translate(-50%, -100%) translate(0, 5px) rotate(7deg); }
+  100% { opacity: 0; transform: translate(-50%, -100%) translate(52px, -128px) rotate(28deg); }
+}
+
+/* Ink spreading out of the freshly painted eye into the paper. */
+.daruma-ritual__bleed {
+  position: absolute;
+  left: 36.5%;
+  top: 37.5%;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  border: 2px solid var(--text-on-fill);
+  transform: translate(-50%, -50%) scale(0.2);
+}
+.daruma-ritual--act2 .daruma-ritual__bleed { animation: daruma-bleed 1100ms ease-out both; }
+@keyframes daruma-bleed {
+  0%   { opacity: 0.6; transform: translate(-50%, -50%) scale(0.2); }
+  100% { opacity: 0;   transform: translate(-50%, -50%) scale(3.6); }
+}
+
+.daruma-ritual__banner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  text-align: center;
+}
+.daruma-ritual--act2 .daruma-ritual__banner {
+  animation: daruma-banner-in 620ms cubic-bezier(0.2, 0.9, 0.3, 1) 180ms both;
+}
+@keyframes daruma-banner-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.daruma-ritual__mangan {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 2.6rem;
+  letter-spacing: 0.14em;
+  color: var(--accent2);
+  text-shadow: 0 2px 14px color-mix(in srgb, var(--accent2) 40%, transparent);
+}
+.daruma-ritual__label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.daruma-ritual__goal {
+  font-family: var(--font-jp);
+  font-size: 1.05rem;
+  color: var(--text-on-panel);
+  max-width: 30ch;
+}
+
+.daruma-ritual__rewards {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.daruma-ritual__reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent2) 45%, transparent);
+  color: var(--accent2);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+}
+.daruma-ritual__reward--token {
+  border-color: color-mix(in srgb, var(--daruma-aka) 55%, transparent);
+  color: var(--daruma-aka);
+}
+
+/* Genuinely unclickable until the ink has settled, via a
+   pointer-events flip inside the keyframe rather than a JS-managed
+   disabled flag — the same trick .level-up-claim uses. */
+.daruma-ritual__claim {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 12px;
+  padding: 10px 24px;
+  background: var(--accent2);
+  border: none;
+  color: var(--text-on-fill);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: filter 0.2s ease;
+}
+.daruma-ritual__claim:hover { filter: brightness(1.1); }
+.daruma-ritual--act2 .daruma-ritual__claim {
+  animation: daruma-claim-in 500ms ease-out 700ms both;
+}
+@keyframes daruma-claim-in {
+  from { opacity: 0; transform: translateY(8px); pointer-events: none; }
+  to   { opacity: 1; transform: translateY(0); pointer-events: auto; }
+}
+.daruma-ritual__claim-glyph { font-family: var(--font-jp); font-size: 16px; }
+
+/* Nothing in the ceremony carries information the static frame does
+   not — the eyes, the pigment level and the banner are all already
+   correct the moment the overlay mounts. */
+@media (prefers-reduced-motion: reduce) {
+  .daruma-ritual,
+  .daruma-ritual__wash,
+  .daruma-ritual__doll,
+  .daruma-ritual__bleed,
+  .daruma-ritual--act2 .daruma-ritual__rays,
+  .daruma-ritual--act2 .daruma-ritual__banner,
+  .daruma-ritual--act2 .daruma-ritual__claim,
+  .daruma-card--ready {
+    animation: none;
+  }
+  .daruma-ritual__brush { display: none; }
+  .daruma-ritual__banner,
+  .daruma-ritual__claim { opacity: 1; pointer-events: auto; }
+  .daruma-ritual__rays  { opacity: 0.5; }
+}
+
+@media (max-width: 768px) {
+  .daruma-container { padding: 40px 16px 72px; }
+  .daruma-hall { padding: 24px 18px 18px; }
+  .daruma-hall__motto-jp { font-size: 1.35rem; }
+  /* One column on a phone: two 150px cards make the goal titles wrap
+     to three lines each, and there is no orphan-cell risk either. */
+  .daruma-row { grid-template-columns: 1fr; }
+  .daruma-card { padding: 18px 12px 14px; }
+
+  /* Doorway card: the three dolls stack over the label rather than
+     squeezing both onto one line. */
+  .daruma-doorway { flex-wrap: wrap; }
+  .daruma-doorway__text { flex-basis: 100%; order: 3; }
+
+  /* The catalogue's four columns do not fit a phone — reflow to
+     doll + text on the first line, reward + button under it. */
+  .daruma-cat-row { flex-wrap: wrap; }
+  .daruma-cat-row__text { flex-basis: 0; }
+  .daruma-cat-row__reward { margin-left: 58px; }
+
+  .daruma-ritual__mangan { font-size: 2rem; }
+  .daruma-ritual__rays { top: 78px; }
 }

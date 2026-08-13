@@ -140,6 +140,47 @@ class SRSEngine:
                     ADD COLUMN IF NOT EXISTS xp_earned INTEGER NOT NULL DEFAULT 0
                 """)
 
+                # XP that isn't a review. Until the daruma goals landed,
+                # review_log.xp_earned *was* lifetime XP, so a goal
+                # reward had nowhere to live except a fake review row —
+                # which would have inflated review counts, streaks, and
+                # the goals' own progress. A separate ledger keeps the
+                # two kinds of XP apart at the source; the three places
+                # that add them back up (get_lifetime_xp, get_leaderboard,
+                # get_user_rank) union the tables explicitly.
+                sql = """
+                    CREATE TABLE IF NOT EXISTS xp_ledger (
+                        id BIGSERIAL PRIMARY KEY,
+                        user_id TEXT NOT NULL,
+                        source TEXT NOT NULL,
+                        ref TEXT,
+                        xp INTEGER NOT NULL,
+                        awarded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    )
+                """
+                self._log_sql("create_xp_ledger_table", sql)
+                cur.execute(sql)
+
+                sql = "CREATE INDEX IF NOT EXISTS idx_xp_ledger_user ON xp_ledger(user_id)"
+                self._log_sql("create_xp_ledger_index", sql)
+                cur.execute(sql)
+
+                # 七転び八起き — days bought back with a 起 token (see
+                # routes/daruma.py). Kept here rather than alongside the
+                # other daruma tables because get_streak has to read it:
+                # a mended day counts as a studied day for streak
+                # purposes and nothing else.
+                sql = """
+                    CREATE TABLE IF NOT EXISTS streak_mends (
+                        user_id TEXT NOT NULL,
+                        mend_day DATE NOT NULL,
+                        mended_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                        PRIMARY KEY (user_id, mend_day)
+                    )
+                """
+                self._log_sql("create_streak_mends_table", sql)
+                cur.execute(sql)
+
     def _ensure_card(self, card_id: str) -> None:
         with self.storage.cursor() as cur:
             sql = "INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING"
@@ -345,11 +386,36 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = "SELECT COALESCE(SUM(xp_earned), 0) FROM review_log WHERE card_id LIKE %s"
-                self._log_sql("get_lifetime_xp", sql, (pattern,))
-                cur.execute(sql, (pattern,))
+                sql = """
+                    SELECT
+                        (SELECT COALESCE(SUM(xp_earned), 0) FROM review_log WHERE card_id LIKE %s)
+                      + (SELECT COALESCE(SUM(xp), 0) FROM xp_ledger WHERE user_id = %s)
+                """
+                self._log_sql("get_lifetime_xp", sql, (pattern, user_id))
+                cur.execute(sql, (pattern, user_id))
                 row = cur.fetchone()
         return int(row[0]) if row else 0
+
+    def award_xp(self, user_id: str, source: str, ref: str, xp: int) -> dict[str, Any]:
+        """Grant XP that didn't come from answering a card (a claimed
+        daruma, today). Returns the same {xp_earned, leveled_up,
+        new_level} shape review() does, so a goal reward can drop
+        straight into the frontend's existing XpToast level-up
+        celebration with no second code path."""
+        prior_xp = self.get_lifetime_xp(user_id)
+
+        with self.storage.cursor() as cur:
+            sql = "INSERT INTO xp_ledger(user_id, source, ref, xp) VALUES (%s, %s, %s, %s)"
+            self._log_sql("award_xp", sql, (user_id, source, ref, xp))
+            cur.execute(sql, (user_id, source, ref, xp))
+
+        prior_level = xp_math.level_from_xp(prior_xp)
+        new_level = xp_math.level_from_xp(prior_xp + xp)
+        return {
+            "xp_earned": xp,
+            "leveled_up": new_level != prior_level,
+            "new_level": new_level,
+        }
 
     def get_due_cards(self, mode: str, limit: int | None = None, card_ids: list[str] | None = None) -> list[str]:
         now = datetime.now(timezone.utc)
@@ -667,8 +733,12 @@ class SRSEngine:
                 rows = cur.fetchall()
         return [{"date": day.isoformat(), "count": int(count)} for day, count in rows]
 
-    def get_streak(self, user_id: str) -> dict[str, int]:
-        """Current and longest consecutive-day streak of having at least one review."""
+    def _studied_days(self, user_id: str) -> set:
+        """Every day this user has a review on, plus every day they've
+        bought back with a 起 token. Both count as "showed up" for
+        streak purposes and for nothing else — mended days are
+        deliberately invisible to review counts, XP, and goal
+        progress."""
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -676,17 +746,21 @@ class SRSEngine:
                     SELECT DISTINCT date_trunc('day', reviewed_at)::date AS day
                     FROM review_log
                     WHERE card_id LIKE %s
-                    ORDER BY day DESC
+                    UNION
+                    SELECT mend_day FROM streak_mends WHERE user_id = %s
                 """
-                self._log_sql("get_streak", sql, (pattern,))
-                cur.execute(sql, (pattern,))
-                days = [row[0] for row in cur.fetchall()]
+                self._log_sql("studied_days", sql, (pattern, user_id))
+                cur.execute(sql, (pattern, user_id))
+                return {row[0] for row in cur.fetchall()}
 
-        if not days:
+    def get_streak(self, user_id: str) -> dict[str, int]:
+        """Current and longest consecutive-day streak of having at least one review."""
+        day_set = self._studied_days(user_id)
+
+        if not day_set:
             return {"current": 0, "longest": 0}
 
         today = datetime.now(timezone.utc).date()
-        day_set = set(days)
 
         # Current streak: walk back from today (or yesterday, if nothing logged yet today).
         current = 0
@@ -707,6 +781,45 @@ class SRSEngine:
             longest = max(longest, run)
 
         return {"current": current, "longest": longest}
+
+    def mendable_day(self, user_id: str):
+        """The single missed day that a 起 token could buy back, or None.
+
+        Deliberately narrow: only the gap immediately before the current
+        run, and only if filling it actually reconnects to an earlier
+        studied day. You can rescue the streak you just dropped — you
+        can't retroactively invent a month you didn't study.
+
+        Returns a `date`, or None when there's nothing worth mending
+        (no history yet, or the day before the run was never studied
+        either, so mending it would extend the streak by exactly one
+        and stop).
+        """
+        day_set = self._studied_days(user_id)
+        if not day_set:
+            return None
+
+        today = datetime.now(timezone.utc).date()
+        # Walk back to the start of the current run the same way
+        # get_streak does, then look one further.
+        cursor = today if today in day_set else today - timedelta(days=1)
+        if cursor not in day_set:
+            # Two or more days missed — past saving with one token.
+            return None
+        while cursor in day_set:
+            cursor -= timedelta(days=1)
+
+        gap = cursor
+        return gap if (gap - timedelta(days=1)) in day_set else None
+
+    def mend_streak(self, user_id: str, day) -> None:
+        with self.storage.cursor() as cur:
+            sql = """
+                INSERT INTO streak_mends(user_id, mend_day) VALUES (%s, %s)
+                ON CONFLICT (user_id, mend_day) DO NOTHING
+            """
+            self._log_sql("mend_streak", sql, (user_id, day))
+            cur.execute(sql, (user_id, day))
 
     def get_due_forecast(self, user_id: str, days: int = 7) -> list[dict[str, Any]]:
         """
@@ -755,8 +868,11 @@ class SRSEngine:
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 sql = """
-                    SELECT split_part(card_id, ':', 1) AS user_id, SUM(xp_earned) AS xp
-                    FROM review_log
+                    SELECT user_id, SUM(xp) AS xp FROM (
+                        SELECT split_part(card_id, ':', 1) AS user_id, xp_earned AS xp FROM review_log
+                        UNION ALL
+                        SELECT user_id, xp FROM xp_ledger
+                    ) all_xp
                     GROUP BY user_id
                     ORDER BY xp DESC
                     LIMIT %s
@@ -774,8 +890,11 @@ class SRSEngine:
             with conn.cursor() as cur:
                 sql = """
                     WITH totals AS (
-                        SELECT split_part(card_id, ':', 1) AS user_id, SUM(xp_earned) AS xp
-                        FROM review_log
+                        SELECT user_id, SUM(xp) AS xp FROM (
+                            SELECT split_part(card_id, ':', 1) AS user_id, xp_earned AS xp FROM review_log
+                            UNION ALL
+                            SELECT user_id, xp FROM xp_ledger
+                        ) all_xp
                         GROUP BY user_id
                     )
                     SELECT t1.xp, (SELECT COUNT(*) + 1 FROM totals t2 WHERE t2.xp > t1.xp)
@@ -868,3 +987,140 @@ class SRSEngine:
             }
             for card_id, mode, total_reviews, correct_reviews, lapses in rows
         ]
+
+    # ── Daruma goal facts ─────────────────────────────────────
+    # Everything srs/daruma.py's goal catalogue can be measured against,
+    # in four round trips rather than one per goal — the pool is sampled
+    # per user per day, so which metrics are needed isn't knowable ahead
+    # of time and computing all of them is cheaper than being clever.
+    #
+    # A card's category is the first underscore-token of its raw id
+    # (kana_..., vocab_N5_..., kanji_N5_..., grammar_N5_..., custom_...),
+    # which is what makes "study three different categories today"
+    # answerable without joining against the content tables.
+    def _perfect_run(self, cur, pattern: str, window: str | None) -> int:
+        """Longest unbroken run of quality>=4 reviews inside `window`
+        ('day' | 'week' | None for lifetime). Same gaps-and-islands
+        shape as get_best_quality_streak, just windowed — a run is
+        recomputed within the window rather than clipped from a global
+        one, so "ten flawless in a row today" means today."""
+        clause = f" AND reviewed_at >= date_trunc('{window}', NOW())" if window else ""
+        sql = f"""
+            WITH ordered AS (
+                SELECT quality,
+                       ROW_NUMBER() OVER (ORDER BY reviewed_at) -
+                       ROW_NUMBER() OVER (PARTITION BY (quality >= 4) ORDER BY reviewed_at) AS grp
+                FROM review_log
+                WHERE card_id LIKE %s{clause}
+            )
+            SELECT COALESCE(MAX(cnt), 0) FROM (
+                SELECT COUNT(*) AS cnt FROM ordered WHERE quality >= 4 GROUP BY grp
+            ) runs
+        """
+        cur.execute(sql, (pattern,))
+        row = cur.fetchone()
+        return int(row[0]) if row else 0
+
+    def get_daruma_facts(self, user_id: str, tz_offset: int = 0) -> dict[str, Any]:
+        """
+        `tz_offset` is minutes east of UTC (the frontend sends
+        `-new Date().getTimezoneOffset()`), and is used for exactly one
+        thing: deciding whether a review happened at dawn or at night
+        from the reviewer's point of view. Day and week boundaries stay
+        UTC, matching get_reviews_today / get_streak / the stats screen
+        — having "today" mean two different things in two parts of the
+        same app would be worse than a dawn goal that's an hour off at
+        the edges.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        # Category = first token of the raw (unprefixed) card id.
+        category = "split_part(split_part(card_id, ':', 2), '_', 1)"
+        today = "date_trunc('day', NOW())"
+
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(f"""
+                    SELECT
+                      COUNT(*) FILTER (WHERE reviewed_at >= {today}),
+                      COALESCE(SUM(xp_earned) FILTER (WHERE reviewed_at >= {today}), 0),
+                      COUNT(*) FILTER (WHERE reviewed_at >= {today} AND quality >= 3),
+                      COUNT(DISTINCT {category}) FILTER (WHERE reviewed_at >= {today}),
+                      MIN(reviewed_at) FILTER (WHERE reviewed_at >= {today}),
+                      MAX(reviewed_at) FILTER (WHERE reviewed_at >= {today}),
+                      COUNT(*),
+                      COALESCE(SUM(xp_earned), 0),
+                      COUNT(DISTINCT date_trunc('day', reviewed_at)::date),
+                      COUNT(DISTINCT {category})
+                    FROM review_log
+                    WHERE card_id LIKE %s AND reviewed_at >= date_trunc('week', NOW())
+                """, (pattern,))
+                (reviews_today, xp_today, correct_today, cats_today, first_today,
+                 last_today, reviews_week, xp_week, days_week, cats_week) = cur.fetchone()
+
+                cur.execute("""
+                    WITH firsts AS (
+                        SELECT card_id, MIN(reviewed_at) AS first_at
+                        FROM review_log WHERE card_id LIKE %s GROUP BY card_id
+                    )
+                    SELECT
+                      COUNT(*) FILTER (WHERE first_at >= date_trunc('day', NOW())),
+                      COUNT(*) FILTER (WHERE first_at >= date_trunc('week', NOW()))
+                    FROM firsts
+                """, (pattern,))
+                new_today, new_week = cur.fetchone()
+
+                cur.execute("""
+                    SELECT
+                      (SELECT COUNT(*) FROM review_log WHERE card_id LIKE %s),
+                      (SELECT COUNT(*) FROM card_modes
+                        WHERE card_id LIKE %s AND total_reviews > 0 AND interval_days >= 21),
+                      (SELECT COUNT(*) FROM card_modes
+                        WHERE card_id LIKE %s AND total_reviews > 0 AND next_review <= NOW()),
+                      (SELECT COUNT(*) FROM streak_mends WHERE user_id = %s)
+                """, (pattern, pattern, pattern, user_id))
+                reviews_total, mastered_total, due_now, rises_total = cur.fetchone()
+
+                run_today = self._perfect_run(cur, pattern, "day")
+                run_week = self._perfect_run(cur, pattern, "week")
+                run_life = self._perfect_run(cur, pattern, None)
+
+        def local_hour(ts):
+            if ts is None:
+                return None
+            minutes = ts.hour * 60 + ts.minute + tz_offset
+            return (minutes // 60) % 24
+
+        streak = self.get_streak(user_id)
+        reviews_today = int(reviews_today)
+        dawn = local_hour(first_today)
+        dusk = local_hour(last_today)
+
+        return {
+            "reviews_today": reviews_today,
+            "xp_today": int(xp_today),
+            "accuracy_today": round(correct_today / reviews_today * 100) if reviews_today else 0,
+            "categories_today": int(cats_today),
+            "new_cards_today": int(new_today),
+            "perfect_run_today": run_today,
+            # A cleared queue only counts as cleared if you cleared it —
+            # otherwise every user who has never studied wakes up with
+            # this goal already satisfied.
+            "due_cleared": 1 if (due_now == 0 and reviews_today > 0) else 0,
+            "dawn_today": 1 if (dawn is not None and dawn < 8) else 0,
+            "night_today": 1 if (dusk is not None and dusk >= 22) else 0,
+
+            "reviews_week": int(reviews_week),
+            "xp_week": int(xp_week),
+            "study_days_week": int(days_week),
+            "categories_week": int(cats_week),
+            "new_cards_week": int(new_week),
+            "perfect_run_week": run_week,
+
+            "reviews_total": int(reviews_total),
+            "mastered_total": int(mastered_total),
+            "perfect_run_lifetime": run_life,
+            "streak_current": streak["current"],
+            "streak_longest": streak["longest"],
+            "rises_total": int(rises_total),
+            "due_now": int(due_now),
+        }
