@@ -752,6 +752,27 @@ input:focus { border-color: var(--accent2); }
   border-left: 1px solid rgba(255, 255, 255, 0.14);
 }
 
+/* Darumas waiting on their second eye. This count used to sit on the
+   home grid's own Daruma card; that card is a hall on the profile now,
+   so the one notice on this screen that expires — an unclaimed daily
+   doll is burned at midnight — moved onto the door that leads to it.
+   Same seal red wherever it appears; see .hall-card__badge. */
+.home-profile-badge__dot {
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--daruma-aka);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .home-settings-btn { flex-shrink: 0; }
 
 .home-main {
@@ -827,6 +848,24 @@ input:focus { border-color: var(--accent2); }
   font-size: 0.875rem;
   line-height: 1.6;
   white-space: pre-line;
+}
+
+/* Fills the orphan cell an odd section count leaves in the last row —
+   decorative, not another card. 道: the way, which is what the eleven
+   cards above it are for. */
+.home-card--filler {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+.home-card__watermark {
+  font-family: var(--font-jp);
+  font-size: 4rem;
+  line-height: 1;
+  color: var(--text-secondary);
+  opacity: 0.1;
+  user-select: none;
 }
 
 /* ── Ghost / panel button utilities ──────────────────────── */
@@ -4391,38 +4430,223 @@ input:focus { border-color: var(--accent2); }
   margin-bottom: 48px;
 }
 
-/* Thin doorway card into /stats — same panel language as .card but a
-   single tappable row rather than a data block, since the detail
-   already lives on the stats screen itself. */
-.stats-access-card {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px 24px;
+/* ── The halls ─────────────────────────────────────────────
+   The Daruma Hall, the Storehouse and the statistics: the three parts
+   of the app that are a record of what you've done rather than
+   something to go and do. They used to be two cards buried in the home
+   screen's grid of thirteen plus a thin link row here, and nothing
+   about that arrangement said they belonged together.
+
+   Same flush shoji-lattice as the badge grid below and the home grid
+   itself — the hairline between cards is the grid gap showing the
+   background through, not a border on each card — so the halls read as
+   one block of the profile rather than three floating panels. The
+   column count is left to auto-fit: three halls today, and a fourth
+   simply lands in the row without a media query. */
+.hall-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
   margin-bottom: 48px;
-  cursor: pointer;
+}
+
+.hall-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 20px 20px;
+  background: var(--bg-card);
+  border: none;
+  border-radius: 0;
   text-align: left;
   font: inherit;
   color: inherit;
+  cursor: pointer;
   transition: background 0.2s ease;
 }
-.stats-access-card:hover {
-  background: var(--bg-card-hover);
+.hall-card:hover,
+.hall-card:focus-visible { background: var(--bg-card-hover); }
+
+/* The section's own pigment, as a stroke along the top edge — the same
+   way each home card carries its colour, so a hall keeps its identity
+   after moving screens. */
+.hall-card__rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--hall-color, var(--accent));
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
 }
-.stats-access-card__glyph {
-  font-family: var(--font-jp);
-  font-size: 1.4rem;
-  color: var(--accent5);
+.hall-card:hover .hall-card__rule,
+.hall-card:focus-visible .hall-card__rule { opacity: 1; }
+
+.hall-card__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* A hung plate rather than a bare glyph: 蔵 is one character and 達磨
+   is two, and only a fixed plate keeps their titles on the same
+   baseline across the row. */
+.hall-card__glyph {
   flex-shrink: 0;
-}
-.stats-access-card__label {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-jp);
   font-weight: 700;
-  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--hall-color, var(--accent));
+  background: color-mix(in srgb, var(--hall-color, var(--accent)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--hall-color, var(--accent)) 30%, transparent);
 }
-.stats-access-card__arrow {
+
+.hall-card__heading {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.hall-card__title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+.hall-card__note {
+  font-size: 12.5px;
+  line-height: 1.45;
   color: var(--text-secondary);
-  font-size: 1.1rem;
+}
+
+/* Something is finished and waiting. Seal red on the daruma hall by
+   inheritance from --hall-color; deliberately not the hall's own
+   pigment, because "you have something to collect" is the same message
+   whichever door it's behind. */
+.hall-card__badge {
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--daruma-aka);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hall-card__arrow {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+.hall-card:hover .hall-card__arrow { transform: translateX(3px); }
+
+/* Whatever the hall shows of itself. Given a floor so three cards with
+   very different contents (dolls, swatches, figures) still line up. */
+.hall-card__preview {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  min-height: 58px;
+}
+
+/* Today's three dolls. */
+.hall-dolls {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.hall-doll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.hall-doll__count {
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* What you're wearing. The swatches are the storehouse's own (see
+   CosmeticSwatch), shrunk here — the seal swatch carries a fixed 64px
+   press because at its live size the differences between seals are
+   nearly invisible, which is the right call in a case full of them and
+   the wrong one in a doorway. */
+.hall-loadout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.hall-loadout__slot { display: flex; }
+.hall-loadout .cos-swatch--paper { border-radius: 4px; }
+.hall-loadout .cos-swatch__ink { font-size: 1rem; }
+.hall-loadout .cos-swatch--seal {
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+}
+.hall-loadout .cos-swatch--seal .stage-badge {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+.hall-loadout__title {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--accent2);
+}
+
+/* Three running totals. --font-display for the numbers, same as every
+   other figure in the app. */
+.hall-figures {
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+}
+.hall-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hall-figure__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.hall-figure__label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 .profile-card__avatar-wrap {
@@ -4585,87 +4809,18 @@ input:focus { border-color: var(--accent2); }
   transition: width 0.4s ease;
 }
 
-/* Goals → the Daruma Hall doorway.
-   Same single-tappable-row language as .stats-access-card above, but
-   it carries today's three dolls at their real pigment level instead
-   of a glyph — the preview *is* the data, so the card earns its
-   height rather than being a link with decoration. */
-.daruma-doorway {
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 18px 22px;
-  margin-bottom: 48px;
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  transition: background 0.2s ease;
-}
-.daruma-doorway:hover { background: var(--bg-card-hover); }
-
-.daruma-doorway__dolls {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  flex-shrink: 0;
-}
-.daruma-doorway__doll {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-.daruma-doorway__count {
-  font-family: var(--font-display);
-  font-size: 10px;
-  color: var(--text-secondary);
-}
-
-.daruma-doorway__text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-.daruma-doorway__title {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--text-primary);
-}
-.daruma-doorway__desc {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-}
-
-/* Same seal-red dot the home card uses — see .home-card__badge. */
-.daruma-doorway__badge {
-  flex-shrink: 0;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--daruma-aka);
-  color: var(--text-on-panel);
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Badges — a shoji-lattice grid like Stats' card grids, but each
    tile is a medallion rather than a data card: unlocked badges get
    a solid gold fill (the one "trophy" moment on the screen),
    locked ones stay a dashed, muted outline. */
 .badges-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  /* auto-*fit*, not auto-fill: with fill, a wide screen lays out a
+     dozen 100px tracks and the six badges leave two thirds of the
+     lattice as one bare grey slab. Fit collapses the empty tracks so
+     the medallions spread across the width they actually have — and
+     keeps working when there are nine badges instead of six. */
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);
@@ -7233,6 +7388,9 @@ input:focus { border-color: var(--accent2); }
      ellipsizing, since a level/mode name is worse truncated than tall. */
   .choice-row__title { white-space: normal; overflow: visible; text-overflow: clip; }
   .home-grid { grid-template-columns: 1fr; }
+  /* One column can't orphan a cell, so the filler would just be a
+     blank card at the bottom of the list. */
+  .home-card--filler { display: none; }
   .landing-hero { padding: 72px 20px 60px; }
   .landing-hero__glyph { font-size: 3.6rem; }
   .landing-hero__title { font-size: 1.6rem; }
@@ -7276,7 +7434,7 @@ input:focus { border-color: var(--accent2); }
 
   .profile-container { padding: 40px 16px 72px; }
   .profile-card { padding: 24px 20px; }
-  .badges-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+  .badges-grid { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
   .leaderboard-row { padding: 12px 16px; gap: 10px; }
   .leaderboard-row__level { display: none; }
 }
@@ -7549,27 +7707,6 @@ input:focus { border-color: var(--accent2); }
   0%, 100% { transform: scaleY(1)    scaleX(1);    opacity: 0.95; }
   35%      { transform: scaleY(1.12) scaleX(0.94); opacity: 1; }
   68%      { transform: scaleY(0.94) scaleX(1.05); opacity: 0.85; }
-}
-
-/* Unclaimed-daruma count on the home screen's hall card. The one
-   thing on that grid that expires — a daily doll is burned at
-   midnight — so it is the one thing that gets a dot. */
-.home-card__badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--daruma-aka);
-  color: var(--text-on-panel);
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* ── The hall ─────────────────────────────────────────────── */
@@ -8626,11 +8763,6 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
      to three lines each, and there is no orphan-cell risk either. */
   .daruma-row { grid-template-columns: 1fr; }
   .daruma-card { padding: 18px 12px 14px; }
-
-  /* Doorway card: the three dolls stack over the label rather than
-     squeezing both onto one line. */
-  .daruma-doorway { flex-wrap: wrap; }
-  .daruma-doorway__text { flex-basis: 100%; order: 3; }
 
   /* The catalogue's four columns do not fit a phone — reflow to
      doll + text on the first line, reward + button under it. */

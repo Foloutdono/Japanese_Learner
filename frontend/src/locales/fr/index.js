@@ -474,7 +474,10 @@ const profile = {
   profileTitle:      'Profil',
   profileStale:      "Impossible d'atteindre le serveur — affichage de vos dernières données connues.",
   nextLevel:         'Niveau suivant',
-  goals:             'Objectifs',
+  // Les portes du profil vers le Hall des daruma, le Grenier et les
+  // statistiques — voir la portée 'profile' de config/navLinks.js.
+  halls:             'Salles',
+  hallStatsNote:     'Tout ce que vous avez fait, compté',
   badges:            'Badges',
   leaderboard:       'Classement',
   done:              'Terminé',
@@ -895,6 +898,7 @@ const storehouseCatalogue = {
 const storehouse = {
   storehouseTitle:   'Grenier',
   storehouseDesc:    'Rang, papiers, anneaux, sceaux et titres',
+  storehouseNote:    (n, total) => `${n} trésors sur ${total} récoltés`,
   storehouseOffline: 'Grenier injoignable — ces données peuvent être périmées.',
 
   masteryRank:     'Rang de maîtrise',

@@ -475,7 +475,10 @@ const profile = {
   profileStale:      "Couldn't reach the server — showing your last known data.",
   level:             'Level',
   nextLevel:         'Next level',
-  goals:             'Goals',
+  // The profile's doorways into the Daruma Hall, the Storehouse and
+  // the statistics — see config/navLinks.js's 'profile' scope.
+  halls:             'Halls',
+  hallStatsNote:     'Everything you have done, counted',
   badges:            'Badges',
   leaderboard:       'Leaderboard',
   done:              'Done',
@@ -912,6 +915,7 @@ const storehouseCatalogue = {
 const storehouse = {
   storehouseTitle:   'Storehouse',
   storehouseDesc:    'Rank, papers, rings, seals and titles',
+  storehouseNote:    (n, total) => `${n} of ${total} treasures collected`,
   storehouseOffline: "Couldn't reach the storehouse — this may be out of date.",
 
   masteryRank:     'Mastery rank',

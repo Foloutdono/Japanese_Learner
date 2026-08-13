@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useLang } from '../LangContext'
-import { getNavLinks } from '../config/navLinks'
+import { getShowcase } from '../config/navLinks'
 import { LightbulbIcon } from '../components/ui/Icons'
 
 // ── Landing screen ──────────────────────────────────────────
@@ -27,7 +27,10 @@ const TECH_STACK = ['React', 'Vite', 'React Router', 'Supabase']
 
 export default function LandingScreen({ onContinue }) {
   const { t } = useLang()
-  const features = getNavLinks(t).filter(link => link.path !== '/')
+  // Everything worth advertising, whichever screen it lives on now —
+  // the Daruma Hall and the Storehouse moved to the profile, but they
+  // are still two of the better reasons to sign up. See navLinks.js.
+  const features = getShowcase(t)
 
   const pros = [
     { glyph: '順序', title: t.landingPro1Title, desc: t.landingPro1Desc },

@@ -6,8 +6,11 @@ import { TopBar } from '../components/ui/TopBar'
 import { Loading } from '../components/ui/Loading'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { levelTitle } from '../domain/levelTitle'
-import { WarningIcon, PencilIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
+import { WarningIcon, PencilIcon, CrossIcon, FlameIcon } from '../components/ui/Icons'
 import { Daruma } from '../components/rewards/Daruma'
+import { CosmeticSwatch } from '../components/rewards/CosmeticSwatch'
+import { HallCard } from '../components/profile/HallCard'
+import { getProfileHalls } from '../config/navLinks'
 import { DEFAULT_LOADOUT } from '../stores/cosmetics'
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
@@ -119,11 +122,8 @@ export default function ProfileScreen({ session }) {
 
           <ProfileCard profile={profile} session={session} onUsernameChange={u => setProfile(p => ({ ...p, username: u }))} t={t} />
 
-          <SectionHeader title={t.statistics} />
-          <StatsAccessCard navigate={navigate} t={t} />
-
-          <SectionHeader title={t.goals} />
-          <DarumaHallCard daruma={profile.daruma} navigate={navigate} t={t} />
+          <SectionHeader title={t.halls} />
+          <HallGrid profile={profile} navigate={navigate} t={t} />
 
           <SectionHeader title={t.badges} />
           <BadgesGrid badges={profile.badges} />
@@ -297,57 +297,151 @@ function EditableUsername({ username, session, onChange, t }) {
   )
 }
 
-// Stats used to be its own home-screen card; now that it hangs off the
-// profile instead, this is just a thin doorway into /stats rather than
-// a full preview — the stats screen itself already owns the detail.
-function StatsAccessCard({ navigate, t }) {
+// ── The halls ─────────────────────────────────────────────
+// The three places that belong to the user rather than to the
+// language: the Daruma Hall, the Storehouse and the statistics. They
+// were scattered — two cards lost in the home screen's grid of
+// thirteen and a thin link row here — and none of that said what they
+// have in common, which is that they're all a record of what you've
+// done rather than something to go and do.
+//
+// The grid is driven entirely by config/navLinks.js's 'profile' scope,
+// so this renders however many halls exist; only the preview inside
+// each one is hall-specific. That's the seam a fourth hall goes
+// through (a shelf of finished dolls, a review calendar, friends):
+// one registry entry, one case below.
+function HallGrid({ profile, navigate, t }) {
   return (
-    <button type="button" className="card stats-access-card" onClick={() => navigate('/stats')}>
-      <span className="stats-access-card__glyph" aria-hidden="true">統計</span>
-      <span className="stats-access-card__label">{t.statistics}</span>
-      <ChevronIcon direction="right" size={16} className="stats-access-card__arrow" />
-    </button>
+    <div className="hall-grid">
+      {getProfileHalls(t).map(hall => {
+        const { note, badge, preview } = hallState(hall.path, profile, t)
+        return (
+          <HallCard
+            key={hall.path}
+            hall={hall}
+            note={note}
+            badge={badge}
+            onOpen={() => navigate(hall.path)}
+          >
+            {preview}
+          </HallCard>
+        )
+      })}
+    </div>
   )
 }
 
-// Goals live in the Daruma Hall now (see screens/DarumaScreen.jsx), so
-// what the profile keeps is a window onto it rather than a second copy
-// of the mechanic: today's three dolls at their real pigment level, and
-// a count of anything anywhere that's finished and unclaimed. The whole
-// card is the doorway — no separate "go to goals" link under it.
-function DarumaHallCard({ daruma, navigate, t }) {
-  const today = daruma?.today ?? []
-  const ready = daruma?.ready ?? 0
+// Everything here comes from the one /api/profile response the screen
+// already fetched — a hall preview must never cost its own request, or
+// opening the profile would fan out into one call per doorway.
+function hallState(path, profile, t) {
+  if (path === '/daruma') {
+    // The count of anything, anywhere, that's finished and unclaimed —
+    // the only number on this screen that expires, since an unclaimed
+    // daily doll is burned at midnight.
+    const ready = profile.daruma?.ready ?? 0
+    return {
+      badge: ready,
+      note: ready > 0 ? t.darumaReadyCount(ready) : t.darumaDoorwayDesc,
+      preview: <DarumaPreview today={profile.daruma?.today ?? []} t={t} />,
+    }
+  }
 
+  if (path === '/storehouse') {
+    const cos = profile.cosmetics
+    return {
+      // Unopened unlocks: earned, never seen. The storehouse plays the
+      // ceremony the first time you walk in on them.
+      badge: cos?.unseen ?? 0,
+      note: cos ? t.storehouseNote(cos.ownedCount, cos.totalCount) : null,
+      preview: <LoadoutPreview cosmetics={cos} t={t} />,
+    }
+  }
+
+  return {
+    badge: 0,
+    note: t.hallStatsNote,
+    preview: <FiguresPreview profile={profile} t={t} />,
+  }
+}
+
+// Today's three dolls at their real pigment, eyes and fill — the same
+// dolls the hall itself shows, just smaller. The preview *is* the
+// data, so the card earns its height instead of being a link with
+// decoration on it.
+function DarumaPreview({ today, t }) {
+  if (!today.length) return null
   return (
-    <button type="button" className="card daruma-doorway" onClick={() => navigate('/daruma')}>
-      <div className="daruma-doorway__dolls">
-        {today.map(d => (
-          <span key={d.id} className="daruma-doorway__doll" title={t.darumaGoalTitle?.[d.id] ?? d.id}>
-            <Daruma
-              color={d.color}
-              rarity={d.rarity}
-              glyph={d.glyph}
-              eyes={d.claimed ? 2 : (d.vowed ? 1 : 0)}
-              progress={d.target ? d.current / d.target : 0}
-              dim={!d.vowed && !d.claimed}
-              size={56}
-            />
-            <span className="daruma-doorway__count">{d.current}/{d.target}</span>
-          </span>
-        ))}
-      </div>
-
-      <div className="daruma-doorway__text">
-        <span className="daruma-doorway__title" lang="ja">達磨堂</span>
-        <span className="daruma-doorway__desc">
-          {ready > 0 ? t.darumaReadyCount(ready) : t.darumaDoorwayDesc}
+    <span className="hall-dolls">
+      {today.map(d => (
+        <span key={d.id} className="hall-doll" title={t.darumaGoalTitle?.[d.id] ?? d.id}>
+          <Daruma
+            color={d.color}
+            rarity={d.rarity}
+            glyph={d.glyph}
+            eyes={d.claimed ? 2 : (d.vowed ? 1 : 0)}
+            progress={d.target ? d.current / d.target : 0}
+            dim={!d.vowed && !d.claimed}
+            size={48}
+          />
+          <span className="hall-doll__count">{d.current}/{d.target}</span>
         </span>
-      </div>
+      ))}
+    </span>
+  )
+}
 
-      {ready > 0 && <span className="daruma-doorway__badge">{ready}</span>}
-      <ChevronIcon direction="right" size={16} className="stats-access-card__arrow" />
-    </button>
+// What you're currently wearing, drawn with the same swatches the
+// storehouse itself uses (see CosmeticSwatch) — the real paper, the
+// real ring, the real seal, not icons standing in for them. The title
+// is text by nature, so it sits alongside as text.
+const WORN_SLOTS = ['paper', 'ring', 'seal']
+
+function LoadoutPreview({ cosmetics, t }) {
+  const loadout = cosmetics?.loadout
+  if (!loadout) return null
+  return (
+    <span className="hall-loadout">
+      {WORN_SLOTS.map(slot => (
+        <span
+          key={slot}
+          className="hall-loadout__slot"
+          title={`${t.cosmeticSlot?.[slot] ?? slot} · ${t.cosmeticName?.[loadout[slot]] ?? ''}`}
+        >
+          <CosmeticSwatch item={{ slot, id: loadout[slot] }} size={34} />
+        </span>
+      ))}
+      {cosmetics.titleJp && (
+        <span className="hall-loadout__title" lang="ja">{cosmetics.titleJp}</span>
+      )}
+    </span>
+  )
+}
+
+// Three running totals, not a chart: the stats screen owns the charts,
+// and a doorway that tries to be the room is just a slower way in.
+// Mastered comes off the 段位 ladder's own count (see cosmetics.py) so
+// this figure and the rank plaque can never disagree.
+function FiguresPreview({ profile, t }) {
+  const figures = [
+    { key: 'reviews',  value: profile.totalReviews,               label: t.totalReviews },
+    { key: 'streak',   value: profile.streak,                     label: t.streak, flame: true },
+    { key: 'mastered', value: profile.cosmetics?.rank?.mastered,  label: t.mastered },
+  ].filter(f => typeof f.value === 'number')
+
+  if (!figures.length) return null
+  return (
+    <span className="hall-figures">
+      {figures.map(f => (
+        <span key={f.key} className="hall-figure">
+          <span className="hall-figure__value">
+            {f.flame && <FlameIcon size={13} />}
+            {f.value.toLocaleString()}
+          </span>
+          <span className="hall-figure__label">{f.label}</span>
+        </span>
+      ))}
+    </span>
   )
 }
 

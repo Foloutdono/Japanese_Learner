@@ -35,6 +35,12 @@ function HomeProfileBadge() {
     )
   }
 
+  // The Daruma Hall left the grid for the profile, and with it went the
+  // only notice that something is expiring — an unclaimed daily doll is
+  // burned at midnight. So the count follows it here, onto the door it
+  // now lives behind, rather than disappearing from the home screen.
+  const ready = summary.daruma?.ready ?? 0
+
   const [, jpTitle, title] = levelTitle(summary.level)
   const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)
   const into = Math.min(span, Math.max(0, summary.xp - summary.xpPrevLevel))
@@ -69,6 +75,12 @@ function HomeProfileBadge() {
           <FlameIcon size={16} /> {summary.streak}
         </span>
       )}
+
+      {ready > 0 && (
+        <span className="home-profile-badge__dot" title={t.darumaReadyCount(ready)}>
+          {ready}
+        </span>
+      )}
     </button>
   )
 }
@@ -76,13 +88,6 @@ function HomeProfileBadge() {
 export default function HomeScreen() {
   const navigate = useNavigate()
   const { t }     = useLang()
-  // Same shared store HomeProfileBadge reads, so this is a second
-  // subscriber rather than a second fetch. Only one number is wanted
-  // here: how many darumas are sitting fulfilled and unclaimed, which
-  // is the one thing on the home screen that expires — an unclaimed
-  // daily is gone at midnight.
-  const summary   = useProfileSummary()
-  const darumaReady = summary?.daruma?.ready ?? 0
 
   useEffect(() => {
     startAmbiance('home')
@@ -92,7 +97,10 @@ export default function HomeScreen() {
     // starting it again from zero each time.
   }, [])
 
-  const cards = getNavLinks(t)
+  // Only the sections that are about Japanese. The ones that are about
+  // you — the Daruma Hall, the Storehouse, the statistics — are halls
+  // on the profile screen now; see config/navLinks.js.
+  const cards = getNavLinks(t).filter(card => card.path !== '/')
 
   return (
     <div className="home-screen">
@@ -117,7 +125,7 @@ export default function HomeScreen() {
       <main className="home-main">
         <div className="container">
           <div className="home-grid">
-            {cards.map(card => ((card.path === '/') ? null : (
+            {cards.map(card => (
               <button
                 key={card.path}
                 type="button"
@@ -129,13 +137,21 @@ export default function HomeScreen() {
                 <span className="home-card__title">{card.title}</span>
                 <span className="home-card__rule" aria-hidden="true" />
                 <span className="home-card__desc">{card.desc}</span>
-                {card.path === '/daruma' && darumaReady > 0 && (
-                  <span className="home-card__badge" title={t.darumaReadyCount(darumaReady)}>
-                    {darumaReady}
-                  </span>
-                )}
               </button>
-            )))}
+            ))}
+
+            {/* An odd number of sections leaves the last row half empty,
+                and an empty cell in a lattice grid isn't blank — it's a
+                slab of the border colour the gaps are painted in, which
+                reads as a rendering fault. Same watermark filler the
+                dictionary and stats grids use for their ragged rows.
+                Two fixed columns here (one on a phone, where nothing can
+                be orphaned), so the parity is known without measuring. */}
+            {cards.length % 2 === 1 && (
+              <div className="home-card home-card--filler" aria-hidden="true">
+                <span className="home-card__watermark" lang="ja">道</span>
+              </div>
+            )}
           </div>
         </div>
       </main>
