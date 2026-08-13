@@ -1076,9 +1076,18 @@ class SRSEngine:
                         WHERE card_id LIKE %s AND total_reviews > 0 AND interval_days >= 21),
                       (SELECT COUNT(*) FROM card_modes
                         WHERE card_id LIKE %s AND total_reviews > 0 AND next_review <= NOW()),
-                      (SELECT COUNT(*) FROM streak_mends WHERE user_id = %s)
-                """, (pattern, pattern, pattern, user_id))
-                reviews_total, mastered_total, due_now, rises_total = cur.fetchone()
+                      (SELECT COUNT(*) FROM streak_mends WHERE user_id = %s),
+                      -- Best single day ever, for the 韋駄天 title
+                      -- (see srs/cosmetics.py). A lifetime high-water
+                      -- mark, not a rolling window: the point of the
+                      -- title is that you did it once.
+                      (SELECT COALESCE(MAX(cnt), 0) FROM (
+                          SELECT COUNT(*) AS cnt FROM review_log
+                          WHERE card_id LIKE %s
+                          GROUP BY date_trunc('day', reviewed_at)
+                       ) d)
+                """, (pattern, pattern, pattern, user_id, pattern))
+                reviews_total, mastered_total, due_now, rises_total, best_day = cur.fetchone()
 
                 run_today = self._perfect_run(cur, pattern, "day")
                 run_week = self._perfect_run(cur, pattern, "week")
@@ -1117,6 +1126,7 @@ class SRSEngine:
             "perfect_run_week": run_week,
 
             "reviews_total": int(reviews_total),
+            "best_day_reviews": int(best_day),
             "mastered_total": int(mastered_total),
             "perfect_run_lifetime": run_life,
             "streak_current": streak["current"],

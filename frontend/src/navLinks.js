@@ -32,5 +32,9 @@ export function getNavLinks(t) {
     // that colour is the feature's entire identity and every other
     // section's pigment was already claimed.
     { icon: '達磨', title: t.darumaTitle, desc: t.darumaDesc, path: '/daruma', color: 'var(--daruma-aka)' },
+    // 蔵 — mastery rank and the cosmetics earned along the way (see
+    // screens/StorehouseScreen). Gold, because that is what the
+    // storehouse is for.
+    { icon: '蔵', title: t.storehouseTitle, desc: t.storehouseDesc, path: '/storehouse', color: 'var(--accent2)' },
   ]
 }

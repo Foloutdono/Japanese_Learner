@@ -26,6 +26,8 @@ import ExamRunner from './screens/ExamRunner'
 import ExamResult from './screens/ExamResult'
 import TranslationScreen from './screens/TranslationScreen'
 import DarumaScreen from './screens/DarumaScreen'
+import StorehouseScreen from './screens/StorehouseScreen'
+import { CosmeticTheme } from './components/cosmetics'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -59,6 +61,11 @@ export default function App() {
 
   return (
     <LangProvider>
+      {/* Renders nothing — keeps <html>'s data-paper/-ring/-seal
+          attributes in step with the equipped loadout, which is how
+          cosmetics reach every screen without any of them knowing
+          cosmetics exist. See components/cosmetics.js. */}
+      <CosmeticTheme />
       <BrowserRouter>
         <Routes>
           <Route path="/"                     element={<HomeScreen session={session} />} />
@@ -82,6 +89,7 @@ export default function App() {
           <Route path="/exam/:examId/:sectionId/results" element={<ExamResult session={session} />} />
           <Route path="/translation" element={<TranslationScreen session={session} />} />
           <Route path="/daruma" element={<DarumaScreen session={session} />} />
+          <Route path="/storehouse" element={<StorehouseScreen session={session} />} />
         </Routes>
       </BrowserRouter>
     </LangProvider>

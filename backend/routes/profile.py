@@ -12,6 +12,7 @@ from auth import get_user_id
 from srs_instance import srs
 from srs import daruma
 from srs.xp import level_progress
+from routes.cosmetics import summary_for as cosmetics_summary
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -207,6 +208,11 @@ def get_profile(user_id: str = Depends(get_user_id)):
         "streakLongest": streak["longest"],
         "totalReviews": total_reviews,
         "daruma": _daruma_summary(user_id),
+        # Loadout + mastery rank ride along on the one profile fetch
+        # every screen already makes, so applying a paper skin or a
+        # ring never costs a second request (see components/
+        # cosmetics.js, which stamps them onto <html>).
+        "cosmetics": cosmetics_summary(user_id),
         "badges": _badges(user_id, streak),
     }
 

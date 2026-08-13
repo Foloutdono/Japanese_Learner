@@ -774,6 +774,139 @@ const daruma = {
   darumaReadyCount:   n => `${n} daruma attend${n === 1 ? '' : 'ent'} son second œil`,
 }
 
+// ── 蔵 — le Grenier ────────────────────────────────────────
+// Texte des cosmétiques. Comme pour le hall des daruma,
+// routes/cosmetics.py n'envoie que des identifiants et le nom japonais
+// de l'objet (un nom propre : 雲龍紙 s'appelle 雲龍紙 dans toutes les
+// langues, même convention que appTitle) ; le nom lisible et la
+// description vivent ici.
+//
+// Chaque description dit ce qu'est réellement la matière. C'est là
+// toute la récompense : ce qu'on gagne au bout d'un an d'étude n'est
+// pas un effet lumineux, c'est une feuille de papier dragon-nuage et
+// la raison de son nom.
+const storehouseCatalogue = {
+  cosmeticSlot: {
+    paper: 'Papier',
+    ring:  'Anneau',
+    seal:  'Sceau',
+    title: 'Titre',
+  },
+
+  cosmeticReq: {
+    level:                n => `Atteindre le niveau ${n}`,
+    rank_index:           r => `Atteindre le rang ${r}`,
+    mastered_total:       n => `Maîtriser ${n.toLocaleString('fr-FR')} cartes`,
+    reviews_total:        n => `Cumuler ${n.toLocaleString('fr-FR')} révisions`,
+    streak_longest:       n => `Tenir une série de ${n} jours`,
+    perfect_run_lifetime: n => `Enchaîner ${n} réponses notées Bien ou mieux`,
+    rises_total:          n => `Se relever ${n} fois d’une série brisée`,
+    shelf_count:          n => `Poser ${n} daruma sur l’étagère`,
+    shelf_colors:         n => `Poser un daruma de chacune des ${n} couleurs`,
+    shelf_kiwami:         n => `Poser ${n} daruma ultimes sur l’étagère`,
+    best_day_reviews:     n => `Réviser ${n} cartes en une seule journée`,
+    unlocked_count:       n => `Débloquer ${n} objets du grenier`,
+  },
+
+  cosmeticName: {
+    paper_washi:       'Washi',
+    paper_torinoko:    'Torinoko',
+    paper_kozo:        'Kōzo',
+    paper_unryu:       'Unryū',
+    paper_aizome:      'Aizome',
+    paper_momiji:      'Momiji',
+    paper_sabi:        'Sabi',
+    paper_suminagashi: 'Suminagashi',
+    paper_yozora:      'Yozora',
+    paper_kinpaku:     'Kinpaku',
+
+    ring_hosomichi: 'Hosomichi',
+    ring_kumihimo:  'Kumihimo',
+    ring_enso:      'Ensō',
+    ring_sakura:    'Sakura',
+    ring_seigaiha:  'Seigaiha',
+    ring_raijin:    'Raijin',
+    ring_kinrin:    'Kinrin',
+    ring_hinode:    'Hinode',
+
+    seal_shu:     'Sceau vermillon',
+    seal_sumi:    'Sceau d’encre',
+    seal_hisui:   'Sceau de jade',
+    seal_koban:   'Sceau koban',
+    seal_kin:     'Sceau d’or',
+    seal_tenkoku: 'Tenkoku',
+
+    title_minarai:    'Apprenti(e)',
+    title_kakehashi:  'Bâtisseur de ponts',
+    title_idaten:     'Idaten',
+    title_fudo:       'L’Inébranlable',
+    title_hyakume:    'Cent Yeux',
+    title_nanakorobi: 'Huit fois relevé',
+    title_tetsujin:   'Homme de fer',
+    title_sennichi:   'Marcheur des mille jours',
+    title_kuramori:   'Gardien du grenier',
+    title_shishou:    'Maître',
+    title_shosei:     'Sage du pinceau',
+    title_meijin:     'Meijin',
+  },
+
+  cosmeticDesc: {
+    paper_washi:       'Papier artisanal ordinaire. Toutes les cartes commencent ici.',
+    paper_torinoko:    'Grain lisse couleur coquille d’œuf, « l’enfant de l’oiseau » — le papier des copistes.',
+    paper_kozo:        'Écorce de mûrier, fibres longues laissées apparentes. Assez solide pour traverser un siècle.',
+    paper_unryu:       'Papier dragon-nuage : des volutes de fibre brute dérivent dans la feuille.',
+    paper_aizome:      'Teint à l’indigo. Le bleu s’assombrit à chaque passage dans la cuve.',
+    paper_momiji:      'Papier d’automne, moucheté des couleurs de l’érable qui tourne.',
+    paper_sabi:        'Papier rouille. La patine que le fer gagne à rester dehors.',
+    paper_suminagashi: 'Encre flottée : une goutte de sumi tournée sur l’eau, puis relevée en anneaux.',
+    paper_yozora:      'Papier ciel de nuit, poudré d’étoiles d’argent.',
+    paper_kinpaku:     'Feuille d’or battue, posée au centième d’épaisseur d’un cheveu.',
+
+    ring_hosomichi: 'Le sentier étroit. Une ligne, rien d’autre.',
+    ring_kumihimo:  'Cordon de soie tressée, celui qui referme un rouleau.',
+    ring_enso:      'Le cercle zen, tracé d’un seul souffle et jamais repris.',
+    ring_sakura:    'Une chaîne de pétales de cerisier, saisie en pleine chute.',
+    ring_seigaiha:  'Vagues de l’océan bleu — le plus ancien motif répété du Japon.',
+    ring_raijin:    'La grecque du tonnerre. Un orage rendu à angle droit.',
+    ring_kinrin:    'Un anneau d’or massif.',
+    ring_hinode:    'Le soleil levant, ses rayons encore en mouvement.',
+
+    seal_shu:     'Pâte de cinabre au coin de chaque carte.',
+    seal_sumi:    'Frappé à l’encre simple. Plus discret, et plus difficile à contester.',
+    seal_hisui:   'Taillé dans le jade, cerclé de vert.',
+    seal_koban:   'Ovale, comme l’ancienne pièce d’or dont il porte le nom.',
+    seal_kin:     'Un sceau cerclé d’or, réservé à ce qui compte.',
+    seal_tenkoku: 'Écriture sigillaire, gravée à la main. La plus ancienne façon de signer.',
+
+    title_minarai:    'Celui qui regarde et apprend.',
+    title_kakehashi:  'Un pont jeté entre deux langues.',
+    title_idaten:     'Le dieu aux pieds rapides. Personne ne l’a jamais devancé.',
+    title_fudo:       'Fudō Myōō, qui ne cille pas. Cinquante d’affilée, sans une faute.',
+    title_hyakume:    'Cent yeux peints vous regardent depuis l’étagère.',
+    title_nanakorobi: 'Tomber sept fois. Se relever huit.',
+    title_tetsujin:   'Cinq mille révisions. Taillé dans le fer.',
+    title_sennichi:   'Pour les moines qui parcourent la montagne mille jours sans s’arrêter.',
+    title_kuramori:   'Vous avez rempli le grenier.',
+    title_shishou:    'Celui qui enseigne. Premier dan.',
+    title_shosei:     'Sage du pinceau — mille cartes menées jusqu’à la maîtrise.',
+    title_meijin:     'Meijin. Le nom ne se donne qu’une fois par génération.',
+  },
+}
+
+const storehouse = {
+  storehouseTitle:   'Grenier',
+  storehouseDesc:    'Rang, papiers, anneaux, sceaux et titres',
+  storehouseOffline: 'Grenier injoignable — ces données peuvent être périmées.',
+
+  masteryRank:     'Rang de maîtrise',
+  cardsMastered:   'cartes maîtrisées',
+  rankNext:        (label, left) => `Encore ${left} avant ${label}`,
+  rankMax:         'Le sommet de l’échelle.',
+  cosmeticsOwned:  'Collectés',
+  cosmeticEquipped: 'Porté',
+  cosmeticUnlocked: 'Le grenier s’ouvre',
+}
+
 export default {
   ...auth,
   ...landing,
@@ -795,4 +928,6 @@ export default {
   ...exam,
   ...darumaGoals,
   ...daruma,
+  ...storehouseCatalogue,
+  ...storehouse,
 }

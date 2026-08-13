@@ -6870,9 +6870,10 @@ input:focus { border-color: var(--accent2); }
 .study-back-notes { font-size: 13px; color: var(--text-secondary); margin-top: 8px; }
 
 /* ── PromptCard component ─────────────────────────────────── */
+/* The card's surface itself is a cosmetic (紙, see the Storehouse
+   block at the end of this file, which owns background/border here). */
 .prompt-card {
   position: relative;
-  background: var(--bg-card);
   border-radius: 12px;
   padding: 40px 24px;
   max-height: 60vh;
@@ -8161,4 +8162,769 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
 
   .daruma-ritual__mangan { font-size: 2rem; }
   .daruma-ritual__rays { top: 78px; }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   蔵 — the Storehouse: cosmetics
+   ════════════════════════════════════════════════════════════
+   Three of the four slots are pure CSS, applied from attributes
+   stamped on <html> by components/cosmetics.js:
+
+     <html data-paper="paper_unryu" data-ring="ring_enso" data-seal="seal_kin">
+
+   Each material is defined exactly once, as a block of custom
+   properties on a doubled selector:
+
+     :root[data-paper="X"], [data-paper-preview="X"] { ... }
+
+   The first half dresses the live component; the second dresses the
+   storehouse's own swatch. One definition, so a preview can never
+   drift from what equipping it actually does.
+
+   ── Why every paper is a tint rather than a colour ──
+   A study card holds kanji at --text-primary, and --text-primary
+   flips with the theme. A paper that set its own background outright
+   would have to ship a light and a dark variant *and* get the ink
+   contrast right in both, twenty blocks with twenty chances to make
+   a kanji unreadable. Instead every paper mixes its pigment *into*
+   --bg-card, which already flips. Aizome indigo over a dark card is
+   dark; the same indigo over washi is pale. Contrast is preserved by
+   construction, and no cosmetic can ever make the app unusable. */
+
+/* ── 紙 — the card surface ─────────────────────────────────── */
+.prompt-card {
+  background-color: color-mix(in srgb, var(--paper-tint, transparent) var(--paper-amt, 0%), var(--bg-card));
+  background-image: var(--paper-img, none);
+  border: 1px solid color-mix(in srgb, var(--paper-edge, transparent) 45%, transparent);
+}
+
+/* Plain handmade paper — the default, and deliberately an empty
+   block: everything above already falls back to it. */
+:root[data-paper="paper_washi"], [data-paper-preview="paper_washi"] { --paper-amt: 0%; }
+
+:root[data-paper="paper_torinoko"], [data-paper-preview="paper_torinoko"] {
+  --paper-tint: var(--warning);
+  --paper-amt: 9%;
+  --paper-edge: var(--warning);
+}
+
+/* Mulberry bark with the long fibres left in — fine hairlines raked
+   across the sheet at the angle a sheet is actually couched. */
+:root[data-paper="paper_kozo"], [data-paper-preview="paper_kozo"] {
+  --paper-tint: var(--accent5);
+  --paper-amt: 10%;
+  --paper-edge: var(--accent5);
+  --paper-img: repeating-linear-gradient(
+    102deg,
+    transparent 0 6px,
+    color-mix(in srgb, var(--text-primary) 6%, transparent) 6px 7px);
+}
+
+/* Cloud-dragon: wisps of raw fibre drifting through the sheet. */
+:root[data-paper="paper_unryu"], [data-paper-preview="paper_unryu"] {
+  --paper-tint: var(--accent5);
+  --paper-amt: 6%;
+  --paper-edge: var(--text-secondary);
+  --paper-img:
+    radial-gradient(ellipse 55% 8% at 22% 26%, color-mix(in srgb, var(--text-primary) 9%, transparent), transparent 70%),
+    radial-gradient(ellipse 42% 6% at 74% 54%, color-mix(in srgb, var(--text-primary) 8%, transparent), transparent 70%),
+    radial-gradient(ellipse 62% 7% at 44% 82%, color-mix(in srgb, var(--text-primary) 7%, transparent), transparent 70%);
+}
+
+/* Indigo, deepened by each dip in the vat — mottled the way a real
+   dye bath never lands perfectly even. */
+:root[data-paper="paper_aizome"], [data-paper-preview="paper_aizome"] {
+  --paper-tint: var(--accent4);
+  --paper-amt: 30%;
+  --paper-edge: var(--accent4);
+  --paper-img:
+    radial-gradient(ellipse 70% 60% at 24% 18%, color-mix(in srgb, var(--accent4) 24%, transparent), transparent 68%),
+    radial-gradient(ellipse 60% 55% at 82% 76%, color-mix(in srgb, var(--indigo) 22%, transparent), transparent 66%);
+}
+
+/* Autumn, flecked with turning maple. */
+:root[data-paper="paper_momiji"], [data-paper-preview="paper_momiji"] {
+  --paper-tint: var(--accent7);
+  --paper-amt: 18%;
+  --paper-edge: var(--accent7);
+  --paper-img:
+    radial-gradient(circle 5px at 18% 24%, color-mix(in srgb, var(--danger) 55%, transparent), transparent),
+    radial-gradient(circle 4px at 72% 18%, color-mix(in srgb, var(--accent2) 55%, transparent), transparent),
+    radial-gradient(circle 6px at 58% 66%, color-mix(in srgb, var(--rust) 50%, transparent), transparent),
+    radial-gradient(circle 4px at 30% 78%, color-mix(in srgb, var(--accent2) 45%, transparent), transparent),
+    radial-gradient(circle 3px at 88% 46%, color-mix(in srgb, var(--danger) 45%, transparent), transparent);
+}
+
+/* The patina iron earns from being left out in the weather. */
+:root[data-paper="paper_sabi"], [data-paper-preview="paper_sabi"] {
+  --paper-tint: var(--rust);
+  --paper-amt: 20%;
+  --paper-edge: var(--rust);
+  --paper-img:
+    radial-gradient(circle 2px at 12% 32%, color-mix(in srgb, var(--rust) 60%, transparent), transparent),
+    radial-gradient(circle 3px at 44% 12%, color-mix(in srgb, var(--rust) 50%, transparent), transparent),
+    radial-gradient(circle 2px at 66% 44%, color-mix(in srgb, var(--accent5) 55%, transparent), transparent),
+    radial-gradient(circle 3px at 84% 22%, color-mix(in srgb, var(--rust) 45%, transparent), transparent),
+    radial-gradient(circle 2px at 28% 68%, color-mix(in srgb, var(--accent5) 50%, transparent), transparent),
+    radial-gradient(circle 3px at 74% 84%, color-mix(in srgb, var(--rust) 40%, transparent), transparent);
+}
+
+/* Floating ink: one drop of sumi spun on water and lifted off in
+   rings. Off-centre, because a centred one would look like a target. */
+:root[data-paper="paper_suminagashi"], [data-paper-preview="paper_suminagashi"] {
+  --paper-tint: var(--accent3);
+  --paper-amt: 12%;
+  --paper-edge: var(--accent3);
+  --paper-img: repeating-radial-gradient(
+    ellipse 120% 100% at 34% 42%,
+    transparent 0 9px,
+    color-mix(in srgb, var(--text-primary) 8%, transparent) 9px 11px);
+}
+
+/* Night sky, dusted with silver. */
+:root[data-paper="paper_yozora"], [data-paper-preview="paper_yozora"] {
+  --paper-tint: var(--accent9);
+  --paper-amt: 26%;
+  --paper-edge: var(--accent9);
+  --paper-img:
+    radial-gradient(circle 1.5px at 14% 22%, color-mix(in srgb, var(--paper) 80%, transparent), transparent),
+    radial-gradient(circle 1px   at 38% 62%, color-mix(in srgb, var(--paper) 70%, transparent), transparent),
+    radial-gradient(circle 2px   at 66% 28%, color-mix(in srgb, var(--paper) 85%, transparent), transparent),
+    radial-gradient(circle 1px   at 82% 70%, color-mix(in srgb, var(--paper) 65%, transparent), transparent),
+    radial-gradient(circle 1.5px at 52% 88%, color-mix(in srgb, var(--paper) 75%, transparent), transparent),
+    radial-gradient(circle 1px   at 24% 78%, color-mix(in srgb, var(--paper) 60%, transparent), transparent),
+    radial-gradient(circle 1px   at 92% 14%, color-mix(in srgb, var(--paper) 70%, transparent), transparent);
+}
+
+/* Beaten leaf, laid square by square — the faint seams between
+   sheets are the tell that it's real gilding and not gold paint. */
+:root[data-paper="paper_kinpaku"], [data-paper-preview="paper_kinpaku"] {
+  --paper-tint: var(--accent2);
+  --paper-amt: 32%;
+  --paper-edge: var(--accent2);
+  --paper-img:
+    repeating-linear-gradient(90deg, transparent 0 33px, color-mix(in srgb, var(--accent2) 30%, transparent) 33px 35px),
+    repeating-linear-gradient(0deg,  transparent 0 33px, color-mix(in srgb, var(--accent2) 30%, transparent) 33px 35px),
+    linear-gradient(118deg, transparent 38%, color-mix(in srgb, var(--paper) 12%, transparent) 50%, transparent 62%);
+}
+
+/* ── 輪 — the profile ring ─────────────────────────────────── */
+/* The progress arc's stroke-dasharray is the progress itself (set
+   inline from the XP percentage), so a cosmetic must never touch it.
+   Patterned rings get a second, purely decorative circle underneath
+   instead — that one is free to be dashed, dotted or fretted. */
+.profile-card__ring-fill,
+.home-profile-badge__ring-fill,
+.cos-ring__fill {
+  stroke: var(--ring-color, var(--accent9));
+  stroke-linecap: var(--ring-cap, round);
+}
+.profile-card__ring-fill { stroke-width: var(--ring-w, 4); }
+.cos-ring__fill          { fill: none; stroke-width: var(--ring-w, 4); }
+
+.cos-ring__track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 4;
+}
+
+.profile-card__ring-deco,
+.cos-ring__deco {
+  fill: none;
+  stroke: var(--ring-deco-color, transparent);
+  stroke-width: var(--ring-deco-w, 0);
+  stroke-dasharray: var(--ring-deco-dash, none);
+  stroke-linecap: var(--ring-deco-cap, butt);
+  opacity: var(--ring-deco-op, 0);
+}
+
+:root[data-ring="ring_hosomichi"], [data-ring-preview="ring_hosomichi"] {
+  --ring-color: var(--accent9);
+}
+/* Braided silk cord — short beads with round ends read as plaiting. */
+:root[data-ring="ring_kumihimo"], [data-ring-preview="ring_kumihimo"] {
+  --ring-color: var(--accent5);
+  --ring-w: 5;
+  --ring-deco-color: var(--accent2);
+  --ring-deco-w: 7;
+  --ring-deco-dash: 5 5;
+  --ring-deco-cap: round;
+  --ring-deco-op: 0.55;
+}
+/* The zen circle: one thick breath, with the brush's own overshoot
+   sitting faintly outside it. */
+:root[data-ring="ring_enso"], [data-ring-preview="ring_enso"] {
+  --ring-color: var(--text-primary);
+  --ring-w: 7;
+  --ring-cap: round;
+  --ring-deco-color: var(--text-primary);
+  --ring-deco-w: 2;
+  --ring-deco-dash: 96 30;
+  --ring-deco-op: 0.3;
+}
+/* Petals caught mid-fall — dots, not dashes. */
+:root[data-ring="ring_sakura"], [data-ring-preview="ring_sakura"] {
+  --ring-color: var(--accent8);
+  --ring-w: 4;
+  --ring-deco-color: var(--accent8);
+  --ring-deco-w: 6;
+  --ring-deco-dash: 0.5 9;
+  --ring-deco-cap: round;
+  --ring-deco-op: 0.7;
+}
+:root[data-ring="ring_seigaiha"], [data-ring-preview="ring_seigaiha"] {
+  --ring-color: var(--accent4);
+  --ring-w: 4;
+  --ring-deco-color: var(--accent6);
+  --ring-deco-w: 8;
+  --ring-deco-dash: 2 5;
+  --ring-deco-op: 0.5;
+}
+/* A storm rendered as a right angle: long bar, short tick. */
+:root[data-ring="ring_raijin"], [data-ring-preview="ring_raijin"] {
+  --ring-color: var(--danger);
+  --ring-w: 5;
+  --ring-deco-color: var(--accent2);
+  --ring-deco-w: 8;
+  --ring-deco-dash: 9 3 3 3;
+  --ring-deco-op: 0.55;
+}
+:root[data-ring="ring_kinrin"], [data-ring-preview="ring_kinrin"] {
+  --ring-color: var(--accent2);
+  --ring-w: 6;
+  --ring-deco-color: var(--accent2);
+  --ring-deco-w: 1.5;
+  --ring-deco-op: 0.65;
+}
+/* Still turning. The one ring that moves — slowly enough that it
+   reads as light rather than as a loading spinner. */
+:root[data-ring="ring_hinode"], [data-ring-preview="ring_hinode"] {
+  --ring-color: var(--accent2);
+  --ring-w: 6;
+  --ring-cap: round;
+  --ring-deco-color: var(--warning);
+  --ring-deco-w: 11;
+  --ring-deco-dash: 1.5 6;
+  --ring-deco-cap: round;
+  --ring-deco-op: 0.6;
+}
+:root[data-ring="ring_hinode"] .profile-card__ring-deco,
+[data-ring-preview="ring_hinode"] .cos-ring__deco {
+  transform-origin: 50% 50%;
+  animation: hinode-turn 34s linear infinite;
+}
+@keyframes hinode-turn { to { transform: rotate(360deg); } }
+
+/* ── 印 — the stage seal ───────────────────────────────────── */
+/* A seal changes *form*, never colour: --seal-color is the card's SRS
+   stage (new / learning / mastered) and carries real information, so
+   a cosmetic that recoloured it would be trading a fact for a
+   decoration. The material shows in the frame instead — an outline
+   rather than a box-shadow, because .stage-badge--mastered already
+   owns box-shadow for its double-ring. */
+.stage-badge {
+  border-radius: var(--seal-radius, 6px);
+  border-width: var(--seal-border-w, 1.5px);
+  background: color-mix(in srgb, var(--seal-color) var(--seal-bg-amt, 15%), transparent);
+  transform: rotate(var(--seal-rotate, -5deg));
+  outline: var(--seal-frame-w, 0) solid var(--seal-frame, transparent);
+  outline-offset: var(--seal-frame-off, -4px);
+}
+
+:root[data-seal="seal_shu"], [data-seal-preview="seal_shu"] { --seal-radius: 6px; }
+/* Quieter, squarer, and set straight — plain ink doesn't perform. */
+:root[data-seal="seal_sumi"], [data-seal-preview="seal_sumi"] {
+  --seal-radius: 3px;
+  --seal-rotate: -1deg;
+  --seal-border-w: 1px;
+  --seal-bg-amt: 26%;
+}
+:root[data-seal="seal_hisui"], [data-seal-preview="seal_hisui"] {
+  --seal-radius: 9px;
+  --seal-rotate: -3deg;
+  --seal-frame: var(--accent6);
+  --seal-frame-w: 1.5px;
+  --seal-frame-off: -4px;
+}
+/* Oval, like the old gold coin it's named for. */
+:root[data-seal="seal_koban"], [data-seal-preview="seal_koban"] {
+  --seal-radius: 50%;
+  --seal-rotate: -8deg;
+  --seal-frame: var(--accent5);
+  --seal-frame-w: 1.5px;
+  --seal-frame-off: -3px;
+}
+:root[data-seal="seal_kin"], [data-seal-preview="seal_kin"] {
+  --seal-radius: 5px;
+  --seal-rotate: -4deg;
+  --seal-border-w: 2px;
+  --seal-frame: var(--accent2);
+  --seal-frame-w: 2px;
+  --seal-frame-off: -5px;
+}
+/* Carved by hand: square, heavy-walled, sitting dead straight the way
+   a stone seal presses. */
+:root[data-seal="seal_tenkoku"], [data-seal-preview="seal_tenkoku"] {
+  --seal-radius: 2px;
+  --seal-rotate: 0deg;
+  --seal-border-w: 2.5px;
+  --seal-bg-amt: 22%;
+  /* Stone, not --seal-color: these blocks sit on :root (or on the
+     swatch), and --seal-color is only defined further down on
+     .stage-badge itself, so referencing it from here resolves to an
+     invalid colour and the outline silently disappears. */
+  --seal-frame: var(--text-secondary);
+  --seal-frame-w: 1.5px;
+  --seal-frame-off: -6px;
+}
+
+/* ── The storehouse screen ─────────────────────────────────── */
+.storehouse-container { padding: 48px 24px 88px; }
+
+/* 段位 — a carved rank plaque, not a progress card. The glyph is the
+   point; the bar under it is the only number on the whole thing. */
+.rank-plaque {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 26px 28px;
+  margin-bottom: 44px;
+}
+
+.rank-plaque__seal {
+  flex-shrink: 0;
+  width: 92px;
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.rank-plaque__glyph {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 1.9rem;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+
+/* 初段 is the threshold that means something in every discipline that
+   uses this ladder, so the plaque turns to gold there and stays. */
+.rank-plaque--dan .rank-plaque__seal {
+  border-color: color-mix(in srgb, var(--accent2) 70%, transparent);
+  background: color-mix(in srgb, var(--accent2) 14%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent2) 12%, transparent);
+}
+.rank-plaque--dan .rank-plaque__glyph { color: var(--accent2); }
+
+.rank-plaque__body { flex: 1; min-width: 0; }
+.rank-plaque__label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+  margin-bottom: 6px;
+}
+.rank-plaque__count {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-on-panel);
+  margin-bottom: 12px;
+}
+.rank-plaque__track {
+  height: 6px;
+  background: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.rank-plaque__fill {
+  height: 100%;
+  background: var(--accent2);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.rank-plaque__next {
+  margin-top: 7px;
+  font-size: 12px;
+  color: var(--text-on-panel-soft);
+}
+
+.rank-plaque__tally {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.rank-plaque__tally-value {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-on-panel);
+}
+.rank-plaque__tally-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+
+/* ── Cosmetic tiles ────────────────────────────────────────── */
+.cos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+  margin-bottom: 44px;
+}
+
+.cos-tile {
+  position: relative;
+  display: flex;
+  /* Wraps so the requirement row (width: 100%) drops to its own line
+     under the swatch instead of squeezing beside it. */
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+button.cos-tile { cursor: pointer; }
+button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--text-secondary); }
+
+/* Only the top tier gets a mark, and it's the same gold hairline the
+   mastered seal and the 極 daruma already use. */
+.cos-tile--kiwami { border-color: color-mix(in srgb, var(--accent2) 45%, var(--border)); }
+.cos-tile--equipped { border-color: var(--accent); box-shadow: inset 2px 0 0 var(--accent); }
+
+/* A locked item keeps its swatch legible — greying it out entirely
+   would hide the thing you're working toward — but drains it enough
+   that the owned ones read first. */
+.cos-tile--locked { opacity: 0.62; }
+.cos-tile--locked .cos-tile__preview { filter: saturate(0.35); }
+
+.cos-tile__preview { flex-shrink: 0; line-height: 0; }
+.cos-tile__text { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+.cos-tile__jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: var(--text-primary);
+}
+.cos-tile__name {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.cos-tile__desc {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.cos-tile__equipped {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.cos-tile__req {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+.cos-tile__req-text {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+.cos-tile__req-track {
+  display: block;
+  height: 3px;
+  background: var(--bg-panel);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cos-tile__req-fill {
+  display: block;
+  height: 100%;
+  background: var(--text-secondary);
+  border-radius: 2px;
+}
+.cos-tile__req-count {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* ── Swatches ──────────────────────────────────────────────── */
+/* Each one is the real component, not an icon of it — a paper swatch
+   is a card surface with ink on it, a ring is a ring. */
+.cos-swatch { flex-shrink: 0; }
+
+.cos-swatch--paper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background-color: color-mix(in srgb, var(--paper-tint, transparent) var(--paper-amt, 0%), var(--bg-card));
+  background-image: var(--paper-img, none);
+  border: 1px solid color-mix(in srgb, var(--paper-edge, var(--border)) 45%, var(--border));
+}
+.cos-swatch__ink {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--text-primary);
+  opacity: 0.85;
+}
+
+.cos-swatch--ring { transform: rotate(-90deg); }
+
+.cos-swatch--seal {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--bg-panel);
+}
+/* Seals differ by form alone — corner radius, wall thickness, the
+   angle they're struck at, whether they carry an inner frame. At the
+   badge's live size (24-32px) those differences are real but nearly
+   invisible side by side, so the swatch shows an enlarged press. */
+.cos-swatch--seal .stage-badge {
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+}
+
+.cos-swatch--title {
+  width: 86px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: var(--bg-panel);
+  border: 1px solid color-mix(in srgb, var(--accent2) 30%, transparent);
+}
+.cos-swatch__title-jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--accent2);
+  text-align: center;
+  line-height: 1.25;
+  padding: 0 6px;
+}
+
+/* ── 開封 — the unlock ceremony ────────────────────────────── */
+/* The third and lightest of the app's three celebrations, and the
+   only one that can fire in a batch — cross one threshold and three
+   items can land at once — so it has to stay short. A storehouse's
+   double doors part, the object is lifted out, its name is read, the
+   doors close. Click to advance early. */
+.kura-unlock {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  /* Near-opaque for the same reason the 満願 overlay is: the
+     storehouse behind it is a dense grid of tiles, and a light scrim
+     leaves it legible enough to compete with the object on show. */
+  background: color-mix(in srgb, var(--bg-panel) 96%, transparent);
+  animation: kura-fade-in 260ms ease-out both;
+}
+@keyframes kura-fade-in { from { opacity: 0 } to { opacity: 1 } }
+
+/* Kura doors are plastered white with a heavy dark frame; these are
+   two slabs that slide apart and, at the end, slam back together. */
+.kura-unlock__door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50.5%;
+  background: var(--bg-panel);
+  border-right: 2px solid color-mix(in srgb, var(--accent2) 30%, transparent);
+  animation: kura-doors-open 620ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.kura-unlock__door--left  { left: 0;  transform-origin: left center; }
+.kura-unlock__door--right { right: 0; border-right: none;
+  border-left: 2px solid color-mix(in srgb, var(--accent2) 30%, transparent); }
+
+@keyframes kura-doors-open  { from { transform: translateX(0) }    to { transform: translateX(-100%) } }
+@keyframes kura-doors-close { from { transform: translateX(-100%) } to { transform: translateX(0) } }
+
+.kura-unlock__door--right { animation-name: kura-doors-open-r; }
+@keyframes kura-doors-open-r  { from { transform: translateX(0) }   to { transform: translateX(100%) } }
+@keyframes kura-doors-close-r { from { transform: translateX(100%) } to { transform: translateX(0) } }
+
+/* Only the left door's close animation is listened for (see
+   CosmeticUnlock's handleAnimationEnd) — they're symmetric, so one is
+   enough and two would advance twice. */
+.kura-unlock--closing .kura-unlock__door--left  { animation: kura-doors-close 520ms cubic-bezier(0.4, 0, 0.2, 1) both; }
+.kura-unlock--closing .kura-unlock__door--right { animation: kura-doors-close-r 520ms cubic-bezier(0.4, 0, 0.2, 1) both; }
+
+.kura-unlock__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 0 24px;
+  animation: kura-lift 700ms cubic-bezier(0.2, 0.9, 0.3, 1) 340ms both;
+}
+.kura-unlock--closing .kura-unlock__stage { animation: kura-sink 300ms ease-in both; }
+@keyframes kura-lift { from { opacity: 0; transform: translateY(24px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes kura-sink { from { opacity: 1 } to { opacity: 0 } }
+
+.kura-unlock__eyebrow {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 14px;
+}
+
+/* The object sits on a plinth of light rather than a shelf — a thin
+   gold ellipse under it, the way a treasure is lit in a museum case. */
+.kura-unlock__object {
+  position: relative;
+  line-height: 0;
+  margin-bottom: 18px;
+}
+.kura-unlock__object::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  width: 130%;
+  height: 12px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--accent2) 40%, transparent), transparent 70%);
+}
+
+.kura-unlock__jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: 0.06em;
+  color: var(--text-on-panel);
+}
+.kura-unlock__name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--accent2);
+}
+.kura-unlock__slot {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.kura-unlock__count {
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--text-on-panel-soft);
+}
+
+/* ── Profile: rank plaque and earned title ─────────────────── */
+.profile-card__rank {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 3px 11px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 4px;
+  font-family: var(--font-jp);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.profile-card__rank--dan {
+  border-color: color-mix(in srgb, var(--accent2) 55%, transparent);
+  color: var(--accent2);
+}
+.profile-card__rank-label {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* The equipped 称号 replaces the automatic level rank under the name
+   when the user has chosen one — see ProfileScreen's ProfileCard. */
+.profile-card__earned-title { color: var(--accent2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .kura-unlock,
+  .kura-unlock__door,
+  .kura-unlock__stage,
+  .profile-card__ring-deco,
+  .cos-ring__deco { animation: none; }
+  /* Without the open animation the doors would sit closed over the
+     object; park them off-screen instead. */
+  .kura-unlock__door--left  { transform: translateX(-100%); }
+  .kura-unlock__door--right { transform: translateX(100%); }
+}
+
+@media (max-width: 768px) {
+  .storehouse-container { padding: 40px 16px 72px; }
+  .cos-grid { grid-template-columns: 1fr; }
+
+  /* The plaque's three columns don't fit a phone: the collected tally
+     drops under the rank rather than squeezing the bar to nothing. */
+  .rank-plaque { flex-wrap: wrap; gap: 18px; padding: 20px 18px; }
+  .rank-plaque__seal { width: 68px; height: 68px; }
+  .rank-plaque__glyph { font-size: 1.45rem; }
+  .rank-plaque__tally { flex-basis: 100%; align-items: flex-start; }
+
+  .kura-unlock__jp { font-size: 1.6rem; }
 }

@@ -8,6 +8,7 @@ import { SectionHeader } from '../components/SectionHeader'
 import { levelTitle } from '../levelTitle'
 import { WarningIcon, PencilIcon, CrossIcon, ChevronIcon } from '../components/Icons'
 import { Daruma } from '../components/Daruma'
+import { DEFAULT_LOADOUT } from '../components/cosmetics'
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 
@@ -30,6 +31,14 @@ function buildMockProfile(t) {
     streak: 14,
     streakLongest: 21,
     totalReviews: 842,
+    cosmetics: {
+      loadout: { paper: 'paper_washi', ring: 'ring_kumihimo', seal: 'seal_shu', title: 'title_minarai' },
+      titleJp: '見習い',
+      rank: { index: 7, label: '三級', isDan: false, mastered: 742, from: 700, next: 1000, nextLabel: '二級' },
+      ownedCount: 9,
+      totalCount: 36,
+      unseen: 0,
+    },
     daruma: {
       ready: 0,
       today: [
@@ -146,6 +155,10 @@ function ProfileCard({ profile, session, onUsernameChange, t }) {
       <div className="profile-card__avatar-wrap">
         <svg className="profile-card__ring" viewBox="0 0 96 96" aria-hidden="true">
           <circle className="profile-card__ring-track" cx="48" cy="48" r={r} />
+          {/* Purely decorative, and the only part a 輪 cosmetic may
+              pattern — the arc below owns stroke-dasharray, because
+              that IS the XP progress. */}
+          <circle className="profile-card__ring-deco" cx="48" cy="48" r={r} />
           <circle
             className="profile-card__ring-fill"
             cx="48" cy="48" r={r}
@@ -161,7 +174,8 @@ function ProfileCard({ profile, session, onUsernameChange, t }) {
 
       <div className="profile-card__info">
         <EditableUsername username={profile.username} session={session} onChange={onUsernameChange} t={t} />
-        <div className="profile-card__title" lang="ja">{jpTitle} · {title}</div>
+        <ProfileTitle profile={profile} jpTitle={jpTitle} title={title} t={t} />
+        <RankBadge rank={profile.cosmetics?.rank} t={t} />
 
         <div className="profile-card__xp-row">
           <span>{into} / {span} XP</span>
@@ -171,6 +185,37 @@ function ProfileCard({ profile, session, onUsernameChange, t }) {
           <div className="profile-card__xp-fill" style={{ width: `${pct}%` }} />
         </div>
       </div>
+    </div>
+  )
+}
+
+// Two ranks can sit under a name and they mean different things: the
+// automatic level title (levelTitle.js — everybody gets one, it tracks
+// XP) and the 称号 chosen in the storehouse, which had to be earned.
+// The chosen one wins when there is one, because picking it was the
+// point; otherwise the level title keeps the line from being empty.
+function ProfileTitle({ profile, jpTitle, title, t }) {
+  const equipped = profile.cosmetics?.loadout?.title
+  if (equipped && equipped !== DEFAULT_LOADOUT.title) {
+    return (
+      <div className="profile-card__title profile-card__earned-title" lang="ja">
+        {profile.cosmetics?.titleJp}
+        {t.cosmeticName?.[equipped] ? ` · ${t.cosmeticName[equipped]}` : ''}
+      </div>
+    )
+  }
+  return <div className="profile-card__title" lang="ja">{jpTitle} · {title}</div>
+}
+
+// 段位 — mastery, which is a different axis from the level ring above
+// it: the ring says how much you've shown up, this says how much
+// Japanese you hold. See srs/cosmetics.py.
+function RankBadge({ rank, t }) {
+  if (!rank) return null
+  return (
+    <div className={`profile-card__rank${rank.isDan ? ' profile-card__rank--dan' : ''}`} title={t.masteryRank}>
+      <span lang="ja">{rank.label}</span>
+      <span className="profile-card__rank-label">{t.masteryRank}</span>
     </div>
   )
 }

@@ -788,6 +788,142 @@ const daruma = {
   darumaReadyCount:   n => `${n} ${n === 1 ? 'daruma is' : 'darumas are'} waiting for the second eye`,
 }
 
+// ── 蔵 — the Storehouse ────────────────────────────────────
+// Cosmetic copy. As with the daruma hall, routes/cosmetics.py sends
+// ids and the item's own Japanese name (which is a proper noun — 雲龍紙
+// is called 雲龍紙 in every language, same convention as appTitle) and
+// nothing else; the reading name and the description live here.
+//
+// Every description says what the material actually is. That's the
+// whole reward: the point of studying for a year is not a glow effect,
+// it's owning a sheet of cloud-dragon paper and knowing why it's
+// called that.
+const storehouseCatalogue = {
+  cosmeticSlot: {
+    paper: 'Paper',
+    ring:  'Ring',
+    seal:  'Seal',
+    title: 'Title',
+  },
+
+  // One formatter per unlock metric. `requirementText` (see
+  // components/cosmetics.js) picks by `req.metric` and passes the
+  // target — already resolved to a rank label for rank_index.
+  cosmeticReq: {
+    level:                n => `Reach level ${n}`,
+    rank_index:           r => `Reach ${r}`,
+    mastered_total:       n => `Master ${n.toLocaleString()} cards`,
+    reviews_total:        n => `Log ${n.toLocaleString()} reviews`,
+    streak_longest:       n => `Hold a ${n}-day streak`,
+    perfect_run_lifetime: n => `Answer ${n} in a row rated Good or better`,
+    rises_total:          n => `Rise from a broken streak ${n} times`,
+    shelf_count:          n => `Shelve ${n} darumas`,
+    shelf_colors:         n => `Shelve a daruma of all ${n} colours`,
+    shelf_kiwami:         n => `Shelve ${n} ultimate darumas`,
+    best_day_reviews:     n => `Review ${n} cards in a single day`,
+    unlocked_count:       n => `Unlock ${n} items in the storehouse`,
+  },
+
+  cosmeticName: {
+    // 紙 — papers
+    paper_washi:       'Washi',
+    paper_torinoko:    'Torinoko',
+    paper_kozo:        'Kōzo',
+    paper_unryu:       'Unryū',
+    paper_aizome:      'Aizome',
+    paper_momiji:      'Momiji',
+    paper_sabi:        'Sabi',
+    paper_suminagashi: 'Suminagashi',
+    paper_yozora:      'Yozora',
+    paper_kinpaku:     'Kinpaku',
+    // 輪 — rings
+    ring_hosomichi: 'Hosomichi',
+    ring_kumihimo:  'Kumihimo',
+    ring_enso:      'Ensō',
+    ring_sakura:    'Sakura',
+    ring_seigaiha:  'Seigaiha',
+    ring_raijin:    'Raijin',
+    ring_kinrin:    'Kinrin',
+    ring_hinode:    'Hinode',
+    // 印 — seals
+    seal_shu:     'Vermillion seal',
+    seal_sumi:    'Ink seal',
+    seal_hisui:   'Jade seal',
+    seal_koban:   'Koban seal',
+    seal_kin:     'Gold seal',
+    seal_tenkoku: 'Tenkoku',
+    // 称号 — titles
+    title_minarai:    'Apprentice',
+    title_kakehashi:  'Bridge-Builder',
+    title_idaten:     'Idaten',
+    title_fudo:       'The Immovable',
+    title_hyakume:    'Hundred Eyes',
+    title_nanakorobi: 'Eight-Times-Risen',
+    title_tetsujin:   'Iron One',
+    title_sennichi:   'Thousand-Day Walker',
+    title_kuramori:   'Keeper of the Storehouse',
+    title_shishou:    'Master',
+    title_shosei:     'Sage of the Brush',
+    title_meijin:     'Meijin',
+  },
+
+  cosmeticDesc: {
+    paper_washi:       'Plain handmade paper. Every card starts here.',
+    paper_torinoko:    'Smooth eggshell stock, "the child of the bird" — the surface scribes reach for.',
+    paper_kozo:        'Mulberry bark, long fibres left visible. Tough enough to survive a century.',
+    paper_unryu:       'Cloud-dragon paper: wisps of raw fibre drifting through the sheet.',
+    paper_aizome:      'Indigo-dyed. The blue deepens with every dip in the vat.',
+    paper_momiji:      'Autumn paper, flecked with the colours of turning maple.',
+    paper_sabi:        'Rust paper. The patina iron earns by being left out in the weather.',
+    paper_suminagashi: 'Floating ink: a drop of sumi spun on water and lifted off in rings.',
+    paper_yozora:      'Night-sky paper, dusted with stars in silver.',
+    paper_kinpaku:     'Beaten gold leaf, laid a hundredth of a hair thick.',
+
+    ring_hosomichi: 'The narrow road. One line, nothing else.',
+    ring_kumihimo:  'Braided silk cord, the kind that ties a scroll shut.',
+    ring_enso:      'The zen circle, drawn in a single breath and never corrected.',
+    ring_sakura:    'A chain of cherry petals, caught mid-fall.',
+    ring_seigaiha:  'Blue ocean waves — the oldest repeating pattern in Japan.',
+    ring_raijin:    'The thunder fret. A storm, rendered as a right angle.',
+    ring_kinrin:    'A ring of solid gold.',
+    ring_hinode:    'The rising sun, with its rays still turning.',
+
+    seal_shu:     'Cinnabar paste on the corner of every card.',
+    seal_sumi:    'Struck in plain ink. Quieter, and harder to argue with.',
+    seal_hisui:   'Carved from jade, framed in green.',
+    seal_koban:   'Oval, like the old gold coin it is named for.',
+    seal_kin:     'A gold-framed seal, reserved for what matters.',
+    seal_tenkoku: 'Seal script, carved by hand. The oldest way to sign anything.',
+
+    title_minarai:    'One who watches and learns.',
+    title_kakehashi:  'A bridge laid between two languages.',
+    title_idaten:     'The swift-footed god. Nobody has ever outrun him.',
+    title_fudo:       'Fudō Myōō, who does not flinch. Fifty in a row, no mistakes.',
+    title_hyakume:    'A hundred painted eyes looking back at you from the shelf.',
+    title_nanakorobi: 'Fall seven times. Get up eight.',
+    title_tetsujin:   'Five thousand reviews. Made of iron.',
+    title_sennichi:   'For the monks who walk the mountain a thousand days without stopping.',
+    title_kuramori:   'You have filled the storehouse.',
+    title_shishou:    'The one who teaches. First dan.',
+    title_shosei:     'Sage of the brush — a thousand cards carried to mastery.',
+    title_meijin:     'Meijin. The name is only given out once in a generation.',
+  },
+}
+
+const storehouse = {
+  storehouseTitle:   'Storehouse',
+  storehouseDesc:    'Rank, papers, rings, seals and titles',
+  storehouseOffline: "Couldn't reach the storehouse — this may be out of date.",
+
+  masteryRank:     'Mastery rank',
+  cardsMastered:   'cards mastered',
+  rankNext:        (label, left) => `${left} more to ${label}`,
+  rankMax:         'The top of the ladder.',
+  cosmeticsOwned:  'Collected',
+  cosmeticEquipped: 'Worn',
+  cosmeticUnlocked: 'The storehouse opens',
+}
+
 export default {
   ...auth,
   ...landing,
@@ -809,4 +945,6 @@ export default {
   ...exam,
   ...darumaGoals,
   ...daruma,
+  ...storehouseCatalogue,
+  ...storehouse,
 }
