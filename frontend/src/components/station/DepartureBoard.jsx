@@ -1,39 +1,17 @@
-import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { stationFor } from '../../config/stations'
+import { useStationClock } from './useStationClock'
 
 // ── 発車標 — the departure board ───────────────────────────
 // Every section of the app, as a service leaving this platform. The
-// board keeps a real board's columns — 番線 (which platform), 行き先
-// (where it's bound), 備考 (remarks) — and its manners: the amber-on-
-// black panel, the coloured station-numbering roundel, the row you're
-// pointing at lighting up.
+// board keeps a real board's manners: the amber-on-black panel, the
+// coloured station-numbering roundel, the row you're pointing at
+// lighting up.
 //
 // It is deliberately a *board*, not a grid of cards: a board is a
 // ranked list you scan top to bottom for the one you want, which is
 // what a home screen is for, and it holds eleven destinations without
 // becoming the wall of tiles this screen used to be.
-
-// A station clock, told the truth. Updated on the turn of each minute
-// rather than by a one-second interval — the colon does the ticking
-// (CSS: .board-clock__colon), and re-rendering React sixty times a
-// minute to move a number that changes once is not a trade worth
-// making.
-function useStationClock() {
-  const [now, setNow] = useState(() => new Date())
-
-  useEffect(() => {
-    let timer
-    const schedule = () => {
-      const ms = 60_000 - (Date.now() % 60_000)
-      timer = setTimeout(() => { setNow(new Date()); schedule() }, ms + 20)
-    }
-    schedule()
-    return () => clearTimeout(timer)
-  }, [])
-
-  return now
-}
 
 export function DepartureBoard({ sections, onDepart }) {
   const { t } = useLang()
@@ -51,12 +29,6 @@ export function DepartureBoard({ sections, onDepart }) {
         <span className="board-clock" aria-label={`${hh}:${mm}`}>
           {hh}<span className="board-clock__colon" aria-hidden="true">:</span>{mm}
         </span>
-      </div>
-
-      <div className="board__columns" aria-hidden="true">
-        <span className="board__col board__col--platform" lang="ja">番線</span>
-        <span className="board__col board__col--dest" lang="ja">行き先</span>
-        <span className="board__col board__col--note" lang="ja">備考</span>
       </div>
 
       <div className="board__rows">

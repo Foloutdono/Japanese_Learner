@@ -14,33 +14,41 @@
 // fairly exact description of what this app is for.
 //
 // This file is the part of that system the components can't derive:
-// how each section's name is *said* (a station plate carries hiragana
-// above the kanji and romaji below), and its line code. Names of
-// places aren't translated copy — 漢字 station is 漢字 station in
-// every language — so they live here rather than in the locale files,
-// the same call appTitle and 辞書 already make.
+// how each section's name is *read* (a station plate carries hiragana
+// above the kanji), and its line code. Names of places aren't
+// translated copy — 漢字 station is 漢字 station in every language —
+// so they live here rather than in the locale files, the same call
+// appTitle and 辞書 already make.
+//
+// There's deliberately no romaji field: a literal transliteration of
+// 解析 ("KAISEKI") tells a non-reader nothing a real station name
+// wouldn't either, and the app already has a plain-language name for
+// every section — the one on the departure board. StationSign takes
+// that string directly from its caller (see `latin` there) instead of
+// this file inventing a second, less useful English label. The one
+// exception is 日本語駅 itself, which has no board row to borrow a
+// name from, so it keeps its own.
 
-// path -> { code, kana, romaji }
+// path -> { code, kana }
 //   code   two letters, the way a real line is coded (JY, G, T…). It
 //          rides in the coloured roundel on the board and the plate.
 //   kana   the reading, set above the name on a station plate.
-//   romaji set below it, for exactly the reason it is on the real ones.
 const STATIONS = {
-  '/':                      { code: 'JP', kana: 'にほんご',   romaji: 'NIHONGO' },
-  '/kana':                  { code: 'KN', kana: 'かな',       romaji: 'KANA' },
-  '/vocab':                 { code: 'TG', kana: 'たんご',     romaji: 'TANGO' },
-  '/kanji':                 { code: 'KJ', kana: 'かんじ',     romaji: 'KANJI' },
-  '/grammar':               { code: 'BP', kana: 'ぶんぽう',   romaji: 'BUNPOU' },
-  '/reading':               { code: 'DS', kana: 'どくしょ',   romaji: 'DOKUSHO' },
-  '/reading-comprehension': { code: 'RK', kana: 'りかい',     romaji: 'RIKAI' },
-  '/translation':           { code: 'HY', kana: 'ほんやく',   romaji: 'HON-YAKU' },
-  '/phrase-analyzer':       { code: 'KS', kana: 'かいせき',   romaji: 'KAISEKI' },
-  '/dictionary':            { code: 'JS', kana: 'じしょ',     romaji: 'JISHO' },
-  '/decks':                 { code: 'KZ', kana: 'きょうざい', romaji: 'KYOUZAI' },
-  '/exam':                  { code: 'MS', kana: 'もし',       romaji: 'MOSHI' },
+  '/':                      { code: 'JP', kana: 'にほんご',   latin: 'NIHONGO' },
+  '/kana':                  { code: 'KN', kana: 'かな' },
+  '/vocab':                 { code: 'TG', kana: 'たんご' },
+  '/kanji':                 { code: 'KJ', kana: 'かんじ' },
+  '/grammar':               { code: 'BP', kana: 'ぶんぽう' },
+  '/reading':               { code: 'DS', kana: 'どくしょ' },
+  '/reading-comprehension': { code: 'RK', kana: 'りかい' },
+  '/translation':           { code: 'HY', kana: 'ほんやく' },
+  '/phrase-analyzer':       { code: 'KS', kana: 'かいせき' },
+  '/dictionary':            { code: 'JS', kana: 'じしょ' },
+  '/decks':                 { code: 'KZ', kana: 'きょうざい' },
+  '/exam':                  { code: 'MS', kana: 'もし' },
 }
 
-const UNKNOWN = { code: '??', kana: '', romaji: '' }
+const UNKNOWN = { code: '??', kana: '' }
 
 export function stationFor(path) {
   return STATIONS[path] ?? UNKNOWN

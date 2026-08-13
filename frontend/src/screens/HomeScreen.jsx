@@ -8,7 +8,32 @@ import { levelTitle } from '../domain/levelTitle'
 import { playAnnouncement, startAmbiance, stopAmbiance } from '../lib/audio'
 import { StationSign } from '../components/station/StationSign'
 import { DepartureBoard } from '../components/station/DepartureBoard'
+import { useStationClock } from '../components/station/useStationClock'
 import { FlameIcon, GearIcon } from '../components/ui/Icons'
+
+// 月火水木金土日 — the weekday glyph a real information board leads
+// with, largest and first, exactly the way the station plate leads
+// with kana and every board row leads with kanji. The localized date
+// underneath is the same "Japanese label above, plain-language line
+// below" grammar those already use, so the concourse isn't inventing
+// a fourth way of pairing the two scripts.
+const WEEKDAY_JP = ['日', '月', '火', '水', '木', '金', '土']
+
+function ConcourseToday() {
+  const { lang } = useLang()
+  const now = useStationClock()
+  const latin = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' }).format(now)
+
+  return (
+    <div className="concourse-today">
+      <span className="concourse-today__dot" aria-hidden="true" />
+      <span className="concourse-today__body">
+        <span className="concourse-today__jp" lang="ja">{WEEKDAY_JP[now.getDay()]}曜日</span>
+        <span className="concourse-today__latin">{latin}</span>
+      </span>
+    </div>
+  )
+}
 
 // ── 日本語駅 ───────────────────────────────────────────────
 // The home screen is a station platform, because the app was already
@@ -113,20 +138,23 @@ export default function HomeScreen() {
   return (
     <div className="station">
       <div className="station__concourse">
-        <ICCard />
-        <button
-          type="button"
-          onClick={() => navigate('/settings')}
-          className="btn-nav btn-nav--icon station__settings"
-          title={t.settings}
-          aria-label={t.settings}
-        >
-          <GearIcon size={17} />
-        </button>
+        <ConcourseToday />
+        <div className="station__concourse-right">
+          <ICCard />
+          <button
+            type="button"
+            onClick={() => navigate('/settings')}
+            className="btn-nav btn-nav--icon station__settings"
+            title={t.settings}
+            aria-label={t.settings}
+          >
+            <GearIcon size={17} />
+          </button>
+        </div>
       </div>
 
       <header className="station__plate">
-        <StationSign station={HOME_STATION} name={t.appTitle} color="var(--accent)" />
+        <StationSign station={HOME_STATION} name={t.appTitle} latin={HOME_STATION.latin} color="var(--accent)" />
       </header>
 
       <main className="station__platform">

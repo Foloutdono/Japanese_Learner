@@ -640,15 +640,66 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* ── Concourse ─────────────────────────────────────────────
-   The bit before the gates: your card, and the way out. */
+   The bit before the gates: today's date on the departure-board side
+   of the room, your card and the way out on the other. A bar rather
+   than two elements floating at the top of an empty page — the faint
+   bottom hairline is what turns it into an architectural band (the
+   underside of the station roof) instead of a row of controls. */
 .station__concourse {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 20px 24px 0;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
 }
 .station__settings { flex-shrink: 0; }
+
+.station__concourse-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 本日 — today, read the way a real information board reads a date:
+   the Japanese weekday first and largest, the localized date beneath
+   it — the same "label above, latin below" grammar the station plate
+   and every board row already use, so the concourse doesn't invent a
+   fourth way of pairing the two scripts. */
+.concourse-today {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+}
+.concourse-today__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent2);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent2) 70%, transparent);
+  flex-shrink: 0;
+}
+.concourse-today__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.concourse-today__jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.concourse-today__latin {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
 
 /* ── IC card ───────────────────────────────────────────────
    Nobody gets onto a platform in Japan without touching a card to a
@@ -874,18 +925,11 @@ input:focus { border-color: var(--accent2); }
   text-indent: 0.3em;
   text-transform: uppercase;
   color: var(--text-secondary);
+  /* Replaces the old "← previous station" row's job of holding the
+     stripe away from the text — simpler now that the plate ends the
+     moment it's finished naming the station. */
+  margin-bottom: 14px;
 }
-
-.station-sign__neighbours {
-  display: flex;
-  justify-content: flex-start;
-  min-height: 20px;
-  margin-top: 10px;
-  font-family: var(--font-jp);
-  font-size: 0.72rem;
-  color: var(--text-secondary);
-}
-.station-sign__arrow { margin-right: 5px; }
 
 /* The line stripe: the one place a station plate carries colour. */
 .station-sign__stripe {
@@ -903,6 +947,7 @@ input:focus { border-color: var(--accent2); }
   margin-bottom: 34px;
 }
 .station-sign--sm .station-sign__name { font-size: 1.9rem; }
+.station-sign--sm .station-sign__romaji { margin-bottom: 10px; }
 .station-sign--sm .station-sign__stripe { height: 6px; margin: 0 -16px; }
 
 /* ── 発車標 — the departure board ─────────────────────────── */
@@ -980,20 +1025,7 @@ input:focus { border-color: var(--accent2); }
 }
 @keyframes board-tick { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0.15; } }
 
-.board__columns {
-  display: grid;
-  grid-template-columns: 78px minmax(0, 1fr) minmax(0, auto) 22px;
-  gap: 16px;
-  padding: 8px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  font-family: var(--font-jp);
-  font-size: 0.62rem;
-  letter-spacing: 0.18em;
-  opacity: 0.45;
-}
-.board__col--note { text-align: right; }
-
-.board__rows { display: flex; flex-direction: column; }
+.board__rows { display: flex; flex-direction: column; border-top: 1px solid rgba(255, 255, 255, 0.06); }
 
 .board-row {
   position: relative;
@@ -1153,29 +1185,6 @@ input:focus { border-color: var(--accent2); }
   text-align: center;
 }
 .station__notice-chime { color: var(--accent2); }
-
-/* ── The platform notice ──────────────────────────────────
-   Only on screens that carry a station plate (SelectionScreen adds
-   the modifier when it finds one). Everywhere else — the exam paper
-   picker's own title, say — the big serif heading is still the right
-   call and is left alone. */
-.selection-screen--station .selector-header {
-  gap: 12px;
-  padding-bottom: 24px;
-}
-.selection-screen--station .selector-header__title {
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  text-align: left;
-  color: var(--text-secondary);
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-.selection-screen--station .selector-header__subtitle { text-align: left; }
-.selection-screen--station .choice-list { border-top: none; }
 
 /* ── 路線図 — the route diagram ────────────────────────────
    The stopping-pattern strip inside a train car, turned upright. One
@@ -8356,10 +8365,6 @@ input:focus { border-color: var(--accent2); }
      (often translated) label wrap onto a second line instead of
      ellipsizing, since a level/mode name is worse truncated than tall. */
   .choice-row__title { white-space: normal; overflow: visible; text-overflow: clip; }
-  /* The board keeps its columns down to a tablet; below that the
-     remarks step aside (see the 560px block) rather than each column
-     getting four legible characters. */
-  .board__columns,
   .board-row { grid-template-columns: 72px 1fr 1fr 20px; gap: 12px; }
   .landing-hero { padding: 72px 20px 60px; }
   .landing-hero__glyph { font-size: 3.6rem; }
@@ -8404,9 +8409,7 @@ input:focus { border-color: var(--accent2); }
 
   /* 備考 is the first thing to go: the destination and the platform
      number are what you are actually scanning for. */
-  .board__columns,
   .board-row { grid-template-columns: 58px 1fr 20px; gap: 10px; }
-  .board__col--note,
   .board-row__note { display: none; }
   .board__head { padding: 12px 14px 8px; }
   .board-row { padding: 12px 14px; }

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { getNavLinks } from '../../config/navLinks'
-import { stationFor, HOME_STATION } from '../../config/stations'
+import { stationFor } from '../../config/stations'
 import { StationSign } from '../station/StationSign'
 import { startAmbiance, stopAmbiance } from '../../lib/audio'
 
@@ -14,19 +14,22 @@ import { startAmbiance, stopAmbiance } from '../../lib/audio'
  * Home is a platform in 日本語駅 and every section is a service
  * leaving it (see config/stations.js). This is where you get off: the
  * same 駅名標 the home screen hangs over its own platform, now naming
- * the station you have just arrived at, with an arrow back to
- * にほんご. One component, two ends of the same journey — which is
- * what makes the app read as a line rather than a set of screens.
+ * the station you have just arrived at. One component, two ends of
+ * the same journey — which is what makes the app read as a line
+ * rather than a set of screens.
  *
  * The plate is derived from the URL rather than passed in: every
  * selection screen lives at its own section's path, so nothing has to
  * be threaded through eleven callers, and a path with no station
- * (a custom deck's study setup, say) simply doesn't get one.
+ * (a custom deck's study setup, say) simply doesn't get one — and
+ * keeps its full eyebrow/heading/subtitle header instead, since it
+ * has no plate to say any of that for it.
  *
  * Props:
- *   eyebrow, heading, subtitle — optional page header, rendered under
- *     the plate. Callers that supply their own copy (the exam screens
- *     name a specific paper) keep working exactly as before.
+ *   eyebrow, heading, subtitle — optional page header. Rendered only
+ *     on screens with no station match (see above); a plated screen's
+ *     name is already on the sign overhead, so repeating it as a
+ *     second heading underneath was the redundant one.
  *   maxWidth — max-width for the content column (default 720).
  *
  * Also owns the 'selection' ambiance track for as long as it's
@@ -73,17 +76,15 @@ export default function SelectionScreen({
   return (
     <div className={`container selection-screen${section ? ' selection-screen--station' : ''}`}>
       <div className="selection-screen__inner" style={lineStyle}>
-        {section && (
+        {section ? (
           <StationSign
             station={station}
             name={section.icon}
+            latin={section.title}
             color={section.color}
-            prev={HOME_STATION.kana}
             size="sm"
           />
-        )}
-
-        {(eyebrow || heading || subtitle) && (
+        ) : (eyebrow || heading || subtitle) && (
           <div className="selector-header">
             {eyebrow && <div className="selector-header__eyebrow">{eyebrow}</div>}
             {heading && <div className="selector-header__title">{heading}</div>}
