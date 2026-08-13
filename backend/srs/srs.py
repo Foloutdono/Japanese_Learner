@@ -988,6 +988,82 @@ class SRSEngine:
             for card_id, mode, total_reviews, correct_reviews, lapses in rows
         ]
 
+    # ── Rhythm: how you study, not how much ───────────────────
+    # Three aggregates the stats screen explores. All three read
+    # something the app has always recorded and never shown: the clock
+    # on review_log, the rating on review_log, and the interval the
+    # scheduler landed on in card_modes.
+
+    def get_review_hours(self, user_id: str, tz_offset: int = 0) -> list[int]:
+        """Reviews per hour of the *local* day — 24 buckets, 0..23.
+
+        `tz_offset` is minutes east of UTC, the same convention the
+        daruma routes take (`-new Date().getTimezoneOffset()` on the
+        client). reviewed_at is stored in UTC, so without the shift a
+        Paris user's 21:00 session is filed under 19:00 and the whole
+        chart is quietly wrong for everyone who isn't on UTC.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT
+                        EXTRACT(HOUR FROM reviewed_at + (%s || ' minutes')::interval)::int AS hour,
+                        COUNT(*)
+                    FROM review_log
+                    WHERE card_id LIKE %s
+                    GROUP BY 1
+                """
+                self._log_sql("get_review_hours", sql, (tz_offset, pattern))
+                cur.execute(sql, (tz_offset, pattern))
+                rows = cur.fetchall()
+
+        hours = [0] * 24
+        for hour, count in rows:
+            hours[int(hour) % 24] = int(count)
+        return hours
+
+    def get_quality_mix(self, user_id: str) -> dict[str, int]:
+        """How many times each rating has been given, all time."""
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT quality, COUNT(*)
+                    FROM review_log
+                    WHERE card_id LIKE %s
+                    GROUP BY 1
+                    ORDER BY 1
+                """
+                self._log_sql("get_quality_mix", sql, (pattern,))
+                cur.execute(sql, (pattern,))
+                rows = cur.fetchall()
+        return {str(int(quality)): int(count) for quality, count in rows}
+
+    def get_interval_histogram(self, user_id: str) -> list[dict[str, int]]:
+        """(interval, number of card-modes sitting at it) for every card
+        that has been reviewed at least once.
+
+        Returned raw rather than pre-bucketed: the buckets are a display
+        choice, and keeping them on the client means the screen can
+        re-cut them without a backend change.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT interval_days, COUNT(*)
+                    FROM card_modes
+                    WHERE card_id LIKE %s
+                      AND total_reviews > 0
+                    GROUP BY 1
+                    ORDER BY 1
+                """
+                self._log_sql("get_interval_histogram", sql, (pattern,))
+                cur.execute(sql, (pattern,))
+                rows = cur.fetchall()
+        return [{"days": int(days), "count": int(count)} for days, count in rows]
+
     # ── Daruma goal facts ─────────────────────────────────────
     # Everything srs/daruma.py's goal catalogue can be measured against,
     # in four round trips rather than one per goal — the pool is sampled

@@ -4134,262 +4134,803 @@ input:focus { border-color: var(--accent2); }
 
 .stats-container { padding: 48px 24px 88px; }
 
-.stats-group { margin-bottom: 48px; }
+/* One line of orientation under a section header, for the two sections
+   that are tools rather than readouts. A control you have to poke at
+   to understand is a control most people won't poke at. */
+.stats-lede {
+  margin: -6px 0 18px;
+  max-width: 70ch;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
 
-/* Shoji-lattice grid — the deck/level cards sit flush against each
-   other with a 1px hairline gap (background showing through), the
-   same panel language as the home screen's nav grid, instead of the
-   generic gapped/rounded/shadowed cards a stats page usually gets.
-   Scoped to .stats-group so the shared .grid-3 utility used elsewhere
-   is untouched. All three stats sections (kana/vocab/kanji) share this
-   same grid-3 + card + LevelHeader shape now, so there's only one
-   variant to style instead of a bespoke one-off for kana. */
-.stats-group.grid-3 {
+/* ── The headline band ─────────────────────────────────────
+   Six figures, each with a second line, in the same flush lattice the
+   rest of the app uses for card grids. Every plaque takes its accent
+   from the state it reports — the same six colours the progress bars,
+   seals and rating buttons use elsewhere — so a number's colour means
+   the same thing here as it does on a quiz card. */
+.headline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
   gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);
-}
-.stats-group.grid-3 .card {
-  border-radius: 0;
-  background: var(--bg-card);
-  padding: 28px 24px;
-  transition: background 0.2s ease;
-}
-.stats-group.grid-3 .card:hover {
-  background: var(--bg-card-hover);
+  margin-bottom: 48px;
 }
 
-/* Filler cell for a trailing incomplete row (e.g. 5 JLPT levels in a
-   3-col grid) — same card background as its neighbours, so the gap
-   stops reading as a stray high-contrast hole in the lattice, plus a
-   soft oversized kanji watermark so the empty space still feels
-   considered rather than just blank. */
-.stats-filler-card {
+.plaque {
+  --plaque-color: var(--text-primary);
+  position: relative;
   background: var(--bg-card);
+  padding: 22px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.plaque--streak   { --plaque-color: var(--warning); }
+.plaque--due      { --plaque-color: var(--state-due); }
+.plaque--mastered { --plaque-color: var(--state-mastered); }
+.plaque--accuracy { --plaque-color: var(--success); }
+.plaque--learning { --plaque-color: var(--state-learning); }
+.plaque--new      { --plaque-color: var(--state-new); }
+
+.plaque__rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--plaque-color);
+  opacity: 0.5;
+}
+
+.plaque__top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 100%;
+  gap: 8px;
+  min-height: 38px;
 }
-.stats-filler-card__glyph {
-  font-family: var(--font-jp);
-  font-size: 5.5rem;
+.plaque__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 1.1rem + 1.5vw, 2.2rem);
   line-height: 1;
-  color: var(--text-secondary);
-  opacity: 0.14;
-  user-select: none;
+  color: var(--plaque-color);
+}
+.headline__flame { margin-bottom: 2px; }
+
+.plaque__ring {
+  width: 34px;
+  height: 34px;
+  margin-left: auto;
+  transform: rotate(-90deg);
+  flex-shrink: 0;
+}
+.plaque__ring-track { fill: none; stroke: var(--border); stroke-width: 3; }
+.plaque__ring-fill {
+  fill: none;
+  stroke: var(--plaque-color);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.plaque__icon {
+  margin-left: auto;
+  color: var(--plaque-color);
+  opacity: 0.45;
+  line-height: 0;
 }
 
-.stats-stat-block { margin-bottom: 16px; }
-.stats-stat-block:last-child { margin-bottom: 0; }
-
-.stats-stat-label {
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-
-.stats-level-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-.stats-level-header__title {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-.stats-level-header__pct {
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent2);
-  white-space: nowrap;
-}
-
-/* Overview / global summary — same shoji-lattice technique as the
-   card grids above, but with auto-fit columns: it reflows itself
-   smoothly at any width instead of needing a stack of breakpoints
-   to avoid orphaned/cramped columns. */
-.stats-overview-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  border: 1px solid var(--border);
-  margin-bottom: 32px;
-}
-.stats-overview-row--summary { margin-bottom: 48px; }
-
-.stats-overview-col {
-  text-align: center;
-  background: var(--bg-card);
-  padding: 28px 16px;
-}
-
-.stats-overview-col__value {
-  font-family: var(--font-display);
-  font-size: clamp(1.5rem, 1.15rem + 1.3vw, 2rem);
-  font-weight: 700;
-  color: var(--col-color, var(--text-primary));
-}
-.stats-overview-col__value--lg { font-size: clamp(1.8rem, 1.3rem + 1.8vw, 2.5rem); }
-
-.stats-overview-col__label {
+.plaque__label {
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  color: var(--text-primary);
+}
+.plaque__note {
+  font-size: 11.5px;
+  line-height: 1.4;
   color: var(--text-secondary);
-  margin-top: 8px;
 }
 
-/* Due forecast — no border: matches the flat .card convention the
-   level/set groups below already use (see .stats-group.grid-3);
-   this and .stats-weakest-card used to be the only bordered cards on
-   the page. */
-.stats-forecast-card { margin-bottom: 32px; padding: 24px; }
+/* ── 稽古暦 — the practice calendar ─────────────────────────
+   Half a year of days, dyed in ai-iro: the indigo a cloth takes darker
+   the more times it goes back in the vat, which is exactly what this
+   chart is measuring. Scrolls horizontally on narrow screens rather
+   than shrinking the squares below the size of a thumb. */
+.calendar-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 20px 20px 14px;
+  margin-bottom: 48px;
+}
+.calendar-panel__scroll {
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
 
-.stats-card-heading {
+.calendar {
+  --cell: 15px;
+  --cell-gap: 3px;
+  display: inline-block;
+  min-width: 100%;
+}
+
+.calendar__months {
+  display: grid;
+  grid-template-columns: repeat(var(--weeks), calc(var(--cell) + var(--cell-gap)));
+  height: 13px;
+  margin-bottom: 3px;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+.calendar__month { white-space: nowrap; }
+
+.calendar__grid { display: flex; gap: var(--cell-gap); }
+.calendar__week {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cell-gap);
+}
+
+/* The ramp is mixed toward --bg-card, the surface the calendar is
+   actually drawn on, and never toward --bg-panel: that token is the
+   app's dark ink panel in *both* themes, so an unworked day came out
+   near-black on light paper and the whole year read as a solid block
+   with a few blue holes in it. */
+.calendar__day {
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--border) 55%, var(--bg-card));
+}
+.calendar__day--l1 { background: color-mix(in srgb, var(--accent4) 30%, var(--bg-card)); }
+.calendar__day--l2 { background: color-mix(in srgb, var(--accent4) 55%, var(--bg-card)); }
+.calendar__day--l3 { background: color-mix(in srgb, var(--accent4) 78%, var(--bg-card)); }
+.calendar__day--l4 { background: var(--accent4); }
+.calendar__day:not(.calendar__day--future):hover {
+  outline: 1.5px solid var(--text-primary);
+  outline-offset: 1px;
+}
+/* Days that haven't happened. Drawn as an empty frame rather than a
+   zero square, so the calendar doesn't claim you skipped tomorrow. */
+.calendar__day--future {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border) 65%, transparent);
+}
+
+.calendar-panel__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.calendar-panel__reading {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+.calendar-panel__legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+.calendar-panel__best {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent4);
+}
+.calendar-panel__scale {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.calendar-panel__scale .calendar__day { width: 11px; height: 11px; }
+.calendar-panel__scale-label,
+.calendar-panel__scale-max {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  color: var(--text-secondary);
+}
+.calendar-panel__scale-max { margin-left: 4px; }
+
+/* ── The Explorer ──────────────────────────────────────────
+   Controls on top, a totals line that follows the current slice, then
+   the grouped rows. */
+.explorer { margin-bottom: 48px; }
+
+.explorer__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.explorer__control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.explorer__control-label {
+  width: 76px;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.explorer__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.explorer__chip {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.explorer__chip:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+.explorer__chip--on {
+  background: var(--bg-panel);
+  border-color: var(--bg-panel);
+  color: var(--text-on-panel);
+}
+
+.explorer__totals {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.explorer__totals .composition { height: 8px; }
+.explorer__totals-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.explorer__figure {
+  --fig-color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.explorer__figure--mastered { --fig-color: var(--state-mastered); }
+.explorer__figure--learning { --fig-color: var(--state-learning); }
+.explorer__figure--new      { --fig-color: var(--state-new); }
+.explorer__figure--due      { --fig-color: var(--state-due); }
+.explorer__figure--accuracy { --fig-color: var(--success); }
+.explorer__figure--muted    { --fig-color: var(--text-secondary); }
+.explorer__figure-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--fig-color);
+}
+.explorer__figure-label {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.explorer__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.explorer-group { background: var(--bg-card); }
+.explorer-group__head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.explorer-group__head:hover { background: var(--bg-card-hover); }
+.explorer-group__caret {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+.explorer-group__label {
+  width: 132px;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 13.5px;
+}
+.explorer-group__pct {
+  width: 44px;
+  flex-shrink: 0;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--state-mastered);
+}
+.explorer-group__counts {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* The same seal-red count the daruma hall and the profile use for
+   "something is waiting for you". */
+.explorer-group__due,
+.explorer-leaf__due {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 34px;
+  height: 20px;
+  padding: 0 7px;
+  border: none;
+  border-radius: 999px;
+  background: var(--state-due);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+}
+.explorer-leaf__due { cursor: pointer; }
+.explorer-leaf__due:hover { filter: brightness(1.15); }
+/* Holds the column open on rows with nothing due, so the numbers
+   above and below it stay in line. */
+.explorer-leaf__due--empty {
+  background: none;
+  height: 20px;
+}
+
+.explorer-group__body {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--border) 22%, var(--bg-card));
+}
+.explorer-leaf {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 16px 7px 40px;
+}
+.explorer-leaf + .explorer-leaf {
+  border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+}
+.explorer-leaf__name {
+  width: 176px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.explorer-leaf__group {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.explorer-leaf__mode {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.explorer-leaf .composition { height: 5px; }
+.explorer-leaf__numbers {
+  flex-shrink: 0;
+  display: flex;
+  gap: 14px;
+  font-family: var(--font-display);
+  font-size: 11px;
+}
+.explorer-leaf__pct  { width: 34px; text-align: right; color: var(--state-mastered); }
+.explorer-leaf__acc  { width: 34px; text-align: right; color: var(--success); }
+.explorer-leaf__size { width: 40px; text-align: right; color: var(--text-secondary); }
+
+/* Mastered, in progress, and the untouched remainder showing through
+   as the track — three shares of one width, so a 12-card kana set and
+   a 1500-word level are directly comparable. */
+.composition {
+  flex: 1;
+  min-width: 60px;
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--state-new) 26%, transparent);
+}
+.composition__seg { display: block; height: 100%; }
+.composition__seg--mastered { background: var(--state-mastered); }
+.composition__seg--learning { background: var(--state-learning); }
+
+/* ── Forecast ──────────────────────────────────────────────
+   Bars are each day's own pile; the pale block behind them is the
+   running total, because "what if I skip a day" is the question a
+   forecast is actually asked. */
+.forecast {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 20px 20px 14px;
+  margin-bottom: 48px;
+}
+.forecast__chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 158px;
+}
+.forecast__day {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.forecast__count {
+  height: 14px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+.forecast__bars {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.forecast__cumulative {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--state-due) 14%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--state-due) 40%, transparent);
+}
+.forecast__bar {
+  position: relative;
+  width: 62%;
+  background: var(--state-due);
+  border-radius: 2px 2px 0 0;
+}
+/* Today already contains everything overdue — the backend folds late
+   cards into day zero — so it is a backlog, not a plan, and gets the
+   seal red the rest of the app uses for "now". */
+.forecast__day--today .forecast__bar { background: var(--accent); }
+.forecast__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  color: var(--text-secondary);
+}
+.forecast__day--today .forecast__label { color: var(--accent); }
+.forecast__date { opacity: 0.7; }
+
+.forecast__legend {
+  display: flex;
+  gap: 18px;
+  margin-top: 12px;
+}
+.forecast__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+.forecast__legend-item::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.forecast__legend-item--bar::before { background: var(--state-due); }
+.forecast__legend-item--cum::before {
+  background: color-mix(in srgb, var(--state-due) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--state-due) 40%, transparent);
+}
+
+/* ── 調子 — the rhythm panels ──────────────────────────────── */
+.rhythm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+.rhythm-panel {
+  background: var(--bg-card);
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rhythm-panel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.rhythm-panel__title {
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
-  font-size: 1.05rem;
-  margin-bottom: 20px;
+  font-size: 0.98rem;
+}
+.rhythm-panel__note,
+.rhythm-panel__foot {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+.rhythm-panel__foot { text-align: left; }
+
+/* Twenty-four columns with the small hours shaded behind them, so a
+   late-night habit reads as late-night and not just as a tall bar. */
+.clock {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 92px;
+}
+.clock__slot {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+.clock__slot--night { background: color-mix(in srgb, var(--indigo) 14%, transparent); }
+.clock__bar {
+  width: 100%;
+  background: color-mix(in srgb, var(--accent4) 72%, transparent);
+  border-radius: 1px 1px 0 0;
+}
+.clock__bar--peak { background: var(--accent); }
+.clock__axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -6px;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  color: var(--text-secondary);
+}
+
+.rating-mix {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rating-mix__row {
+  --rating-color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Same five inks the rating bar itself uses — see .rating-bar__btn--q*. */
+.rating-mix__row--q5 { --rating-color: var(--success); }
+.rating-mix__row--q4 { --rating-color: var(--accent6); }
+.rating-mix__row--q3 { --rating-color: var(--accent2); }
+.rating-mix__row--q2 { --rating-color: var(--accent7); }
+.rating-mix__row--q1 { --rating-color: var(--accent); }
+.rating-mix__label {
+  width: 96px;
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rating-mix__track {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--border) 70%, transparent);
+}
+.rating-mix__fill {
+  display: block;
+  height: 100%;
+  background: var(--rating-color);
+}
+.rating-mix__pct {
+  width: 34px;
+  flex-shrink: 0;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 11px;
   color: var(--text-primary);
 }
 
-.stats-forecast-bars {
+.ladder {
   display: flex;
-  gap: 8px;
-  align-items: flex-end;
-  height: 100px;
+  flex-direction: column;
+  gap: 5px;
+}
+.ladder__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ladder__label {
+  width: 96px;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+.ladder__track {
+  flex: 1;
+  height: 9px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--border) 70%, transparent);
+}
+.ladder__fill {
+  display: block;
+  height: 100%;
+  background: color-mix(in srgb, var(--state-learning) 75%, transparent);
+}
+/* A month out or further: the part of the deck that has gone quiet,
+   which is what the whole schedule is working toward. */
+.ladder__fill--settled { background: var(--state-mastered); }
+.ladder__count {
+  width: 46px;
+  flex-shrink: 0;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--text-primary);
 }
 
-.stats-forecast-bar {
+/* ── 弱点 — the trouble list ────────────────────────────────
+   The card itself is the headline, because that's the thing you're
+   failing to recognise. Every row is a door into the drill it came
+   from. */
+.trouble {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+.trouble__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: none;
+  border-radius: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.trouble__row--open { cursor: pointer; }
+.trouble__row--open:hover { background: var(--bg-card-hover); }
+.trouble__glyph {
+  flex-shrink: 0;
+  min-width: 1.5em;
+  font-family: var(--font-jp);
+  font-size: 1.45rem;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+.trouble__meta {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  gap: 1px;
 }
-
-.stats-forecast-bar__count {
+.trouble__where {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 9.5px;
   font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   color: var(--text-secondary);
 }
-
-.stats-forecast-bar__fill {
-  width: 100%;
-  height: var(--bar-h, 4px);
-  background: var(--accent2);
-  border-radius: 2px 2px 0 0;
-  transition: height 0.3s ease;
-}
-.stats-forecast-bar__fill--today { background: var(--accent); }
-
-.stats-forecast-bar__day {
-  font-family: var(--font-display);
-  font-size: 10px;
-  letter-spacing: 0.02em;
-  color: var(--text-secondary);
+.trouble__mode {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-/* Weakest items — same hairline-row rhythm as the choice lists
-   (LevelSelector/ModeSelector), so a "needs practice" table reads
-   like the rest of the app instead of a bolted-on widget. */
-.stats-weakest-card { margin-bottom: 32px; padding: 24px; }
-
-.stats-weakest-list {
+.trouble__accuracy {
+  width: 56px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  gap: 3px;
 }
-
-.stats-weakest-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  padding: 13px 0;
-  border-bottom: 1px solid var(--border);
+.trouble__accuracy-track {
+  height: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--border) 70%, transparent);
 }
-.stats-weakest-row:last-child { border-bottom: none; }
-
-.stats-weakest-row strong {
-  font-family: var(--font-jp);
-  font-size: 1.05rem;
+.trouble__accuracy-fill {
+  display: block;
+  height: 100%;
+  background: var(--danger);
+}
+.trouble__accuracy-value {
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 11px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--danger);
 }
-
-.stats-weakest-row__meta { color: var(--text-secondary); }
-
-.stats-weakest-row__right {
-  display: flex;
-  gap: 14px;
+.trouble__lapses {
   flex-shrink: 0;
   font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--text-secondary);
 }
-
-.stats-weakest-row__accuracy { color: var(--danger); font-weight: 700; }
-.stats-weakest-row__lapses { color: var(--text-secondary); font-size: 12px; }
-
-/* StatCell (shared progress bar) */
-.stat-cell__track {
-  height: 7px;
-  background: var(--state-new);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-
-.stat-cell__fill-row { display: flex; height: 100%; }
-
-.stat-cell__segment--mastered { width: var(--seg-w, 0%); background: var(--state-mastered); transition: width 0.3s ease; }
-.stat-cell__segment--learning { width: var(--seg-w, 0%); background: var(--state-learning); transition: width 0.3s ease; }
-
-.stat-cell__row {
-  display: flex;
-  gap: 7px;
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-/* Gris dédié pour "new" (partagé avec DeckProgress), indigo pour
-   "learning" — deux teintes bien séparées, chacune réglée par thème. */
-.stat-cell__new { color: var(--state-new); }
-.stat-cell__learning { color: var(--state-learning); }
-.stat-cell__mastered { color: var(--state-mastered); }
-
-/* A small seal-stamp pill instead of an underlined text link — the
-   due-review action gets the same treatment as other primary actions
-   in the app (a solid ink/vermillion fill), so it reads as a button,
-   not an afterthought link buried in a stat row. */
-.stat-cell__due-btn {
-  color: var(--state-due);
-  background: var(--bg-card);
-  font: inherit;
-  cursor: pointer;
-  border: 1px solid var(--state-due);
-  border-radius: 999px;
-  margin-left: auto;
-  padding: 2px 8px;
-  font-size: 11px;
-  text-decoration: none;
-}
-.stat-cell__due-btn:hover { filter: brightness(1.15); }
+.trouble__lapses-unit { font-size: 9px; margin-left: 1px; opacity: 0.7; }
+.trouble__go { flex-shrink: 0; color: var(--text-secondary); opacity: 0.45; }
 
 /* ── Profile screen ────────────────────────────────────────
    Same visual language as Stats (shoji-lattice grids, serif-JP
@@ -7372,11 +7913,6 @@ input:focus { border-color: var(--accent2); }
 @media (max-width: 768px) {
   .landing-feature-grid { grid-template-columns: repeat(2, 1fr); }
 
-  /* The oversized-glyph filler cell exists to dress up a ragged
-     trailing row on wide, multi-column grids. On mobile the grid is
-     already 1-2 columns and stacked, so the filler just adds an
-     empty decorative block below real content — drop it. */
-  .stats-filler-card { display: none; }
 }
 
 @media (max-width: 640px) {
@@ -7403,9 +7939,21 @@ input:focus { border-color: var(--accent2); }
   .quiz-area { padding: 32px 24px max(32px, 14vh);}
   .flashcard__hint { margin-top: 2px;}
 
-  .stats-weakest-row { flex-direction: column; align-items: flex-start; gap: 6px; }
-  .stats-weakest-row__right { gap: 12px; }
-  .stats-forecast-bars { gap: 4px; }
+  /* The Explorer's group header is five columns wide by design; at
+     this width the label and the composition bar are the two that
+     still say something, so the rest step aside rather than each
+     getting four legible characters. */
+  .explorer-group__label { width: auto; flex: 1; }
+  .explorer-group__counts { display: none; }
+  .explorer__control-label { width: 100%; }
+  .explorer-leaf { padding-left: 24px; }
+  .explorer-leaf__name { width: 132px; }
+  .explorer-leaf__acc, .explorer-leaf__size { display: none; }
+  .forecast__chart { height: 130px; gap: 3px; }
+  /* Fourteen numbers across a phone collide into one grey smear —
+     the bar heights still rank the days, and the exact figure is a
+     tap away on the tooltip. */
+  .forecast__count { display: none; }
 
   .profile-card { flex-direction: column; text-align: center; gap: 18px; }
   .profile-card__info { width: 100%; }
@@ -7425,12 +7973,11 @@ input:focus { border-color: var(--accent2); }
 
   .stats-container { padding: 40px 16px 72px; }
   .section-header { margin: 56px 0 24px; }
-  .stats-group.grid-3 .card { padding: 22px 18px; }
-  .stats-overview-col { padding: 20px 12px; }
-  .stats-forecast-card,
-  .stats-weakest-card { padding: 18px; }
-  .stats-filler-card { min-height: 150px; }
-  .stats-filler-card__glyph { font-size: 6.5rem; }
+  .plaque { padding: 18px 14px 14px; }
+  .calendar-panel,
+  .forecast { padding: 16px 14px 12px; }
+  .rhythm-panel { padding: 16px 14px; }
+  .trouble__row { padding: 12px; gap: 10px; }
 
   .profile-container { padding: 40px 16px 72px; }
   .profile-card { padding: 24px 20px; }
@@ -7488,9 +8035,8 @@ input:focus { border-color: var(--accent2); }
   }
   .quiz-area { padding: 32px 24px max(32px, 12vh);}
 
-  .stats-overview-row { grid-template-columns: repeat(2, 1fr); }
-  .stats-overview-col { padding: 18px 10px; }
-  .stats-level-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+  /* Two plaques per row rather than one tall column of six. */
+  .headline { grid-template-columns: repeat(2, 1fr); }
   .stats-reset-btn { font-size: 11px; padding: 6px 12px; }
 
   .rdg-area { max-width: 100%; }

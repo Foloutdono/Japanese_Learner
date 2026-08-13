@@ -144,18 +144,45 @@ def get_stats(user_id: str = Depends(get_user_id)):
     }
 
 
+# A year of days plus a few, so the practice calendar always has 53
+# whole weeks to draw and the leading week is never half-empty.
+TREND_DAYS = 371
+FORECAST_DAYS = 14
+
+
+def _rhythm(user_id: str, tz_offset: int) -> dict | None:
+    """When you study, how you rate yourself, and how far ahead the
+    scheduler has pushed your cards.
+
+    Guarded deliberately: these are the newest queries in the file and
+    the least load-bearing thing on the screen. If one of them fails,
+    the user should lose a chart — not their streak, forecast, weakest
+    cards and every level bar along with it.
+    """
+    try:
+        return {
+            "hours": srs.get_review_hours(user_id, tz_offset),
+            "quality": srs.get_quality_mix(user_id),
+            "intervals": srs.get_interval_histogram(user_id),
+        }
+    except Exception:
+        logger.exception("rhythm stats failed for user_id=%s", user_id)
+        return None
+
+
 @router.get("/api/stats/extra")
-def get_extra_stats(user_id: str = Depends(get_user_id)):
+def get_extra_stats(tz_offset: int = 0, user_id: str = Depends(get_user_id)):
     """
     Supplementary stats that don't fit the per-category/mode shape of /api/stats:
-    streak, recent activity trend, upcoming due forecast, and weakest cards.
+    streak, activity trend, upcoming due forecast, weakest cards, and the
+    rhythm aggregates (hour of day, rating mix, interval ladder).
     """
     logger.info("Computing extra stats for user_id=%s", user_id)
 
     streak = srs.get_streak(user_id)
-    trend = srs.get_daily_review_counts(user_id, days=30)
-    forecast = srs.get_due_forecast(user_id, days=7)
-    weakest_raw = srs.get_weakest_cards(user_id, limit=10)
+    trend = srs.get_daily_review_counts(user_id, days=TREND_DAYS)
+    forecast = srs.get_due_forecast(user_id, days=FORECAST_DAYS)
+    weakest_raw = srs.get_weakest_cards(user_id, limit=12)
 
     prefix_len = len(user_id) + 1
     weakest = []
@@ -175,6 +202,7 @@ def get_extra_stats(user_id: str = Depends(get_user_id)):
         "trend": trend,
         "forecast": forecast,
         "weakest": weakest,
+        "rhythm": _rhythm(user_id, tz_offset),
     }
 
 

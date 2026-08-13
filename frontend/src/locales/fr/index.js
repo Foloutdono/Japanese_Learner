@@ -277,7 +277,66 @@ const stats = {
   upcomingReviews:    'Prochaines révisions',
   weakestItems:       'Besoin de pratique',
   lapses:             'Ratés',
+  lapsesShort:        'R',
   reviewNow:          'Réviser maintenant',
+
+  // ── Bandeau de tête ─────────────────────────────────────
+  longestIs:       n => `Record : ${n} jours`,
+  noStreakYet:     'Commencez aujourd\'hui',
+  dueNote:         'Elles vous attendent',
+  dueClear:        'Rien en attente',
+  ofTotalCards:    n => `sur ${n} cartes`,
+  acrossReviews:   n => `sur ${n} révisions`,
+  startedNote:     n => `${n} commencées`,
+  untouchedNote:   'Jamais vues',
+
+  // ── Calendrier de pratique ──────────────────────────────
+  practiceCalendar: 'Calendrier de pratique',
+  reviewsCount:     n => `${n} révisions`,
+  calendarSummary:  (days, of, reviews) => `${days} jours pratiqués sur ${of} · ${reviews} révisions`,
+  bestDay:          'Meilleur jour',
+  calendarLess:     'moins',
+  calendarMore:     'plus',
+
+  // ── L'explorateur ───────────────────────────────────────
+  explorer:      'Explorer',
+  explorerLede:  'Tous les niveaux et tous les exercices dans un seul tableau. Groupez, triez, filtrez — les totaux suivent vos choix.',
+  groupBy:       'Grouper par',
+  sortBy:        'Trier par',
+  allCategories: 'Tout',
+  buckets:       'ensembles',
+  sortName:      'Nom',
+  dimCategory:   'Matière',
+  dimLevel:      'Niveau',
+  dimFormat:     'Format',
+  dimDirection:  'Sens',
+  dimMode:       'Exercice',
+  dirRecognition:'Reconnaissance',
+  dirRecall:     'Rappel',
+  dirProduction: 'Écriture',
+
+  // ── Prévisions ──────────────────────────────────────────
+  perDay:     'Par jour',
+  cumulative: 'Cumul',
+
+  // ── Rythme ──────────────────────────────────────────────
+  rhythm:        'Votre rythme',
+  studyClock:    'Quand vous étudiez',
+  peakHour:      h => `Pic à ${h}h`,
+  ratingMix:     'Comment vous vous notez',
+  goodOrBetter:  pct => `${pct}% bien ou mieux`,
+  intervalLadder:'Jusqu\'où porte la mémoire',
+  settledShare:  pct => `${pct}% à un mois ou plus`,
+  intervalLearning: 'Apprentissage',
+  intervalDay:      'Demain',
+  intervalWeek:     '2–6 jours',
+  intervalWeeks:    '1–3 semaines',
+  intervalMonth:    '3–8 semaines',
+  intervalMonths:   '2–6 mois',
+  intervalSeason:   '6–12 mois',
+  intervalYear:     'Plus d\'un an',
+
+  troubleLede: 'Vos plus faibles précisions, les pires en premier. Choisissez-en une pour aller droit à l\'exercice.',
 }
 
 // ── Phrases analyser ────────────────────────────────────────────

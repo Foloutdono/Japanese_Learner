@@ -290,7 +290,66 @@ const stats = {
   upcomingReviews: 'Upcoming reviews',
   weakestItems:    'Needs practice',
   lapses:          'lapses',
+  lapsesShort:     'L',
   reviewNow:       'Review now',
+
+  // ── Headline band ───────────────────────────────────────
+  longestIs:       n => `Best: ${n} days`,
+  noStreakYet:     'Start one today',
+  dueNote:         'Waiting for you',
+  dueClear:        'Nothing waiting',
+  ofTotalCards:    n => `of ${n} cards`,
+  acrossReviews:   n => `across ${n} reviews`,
+  startedNote:     n => `${n} started`,
+  untouchedNote:   'Never seen',
+
+  // ── The practice calendar ───────────────────────────────
+  practiceCalendar: 'Practice calendar',
+  reviewsCount:     n => `${n} reviews`,
+  calendarSummary:  (days, of, reviews) => `${days} days practised out of ${of} · ${reviews} reviews`,
+  bestDay:          'Best day',
+  calendarLess:     'less',
+  calendarMore:     'more',
+
+  // ── The Explorer ────────────────────────────────────────
+  explorer:      'Explore',
+  explorerLede:  'Every level and every drill, in one table. Group it, sort it, narrow it down — the totals follow whatever you pick.',
+  groupBy:       'Group by',
+  sortBy:        'Sort by',
+  allCategories: 'Everything',
+  buckets:       'buckets',
+  sortName:      'Name',
+  dimCategory:   'Subject',
+  dimLevel:      'Level',
+  dimFormat:     'Format',
+  dimDirection:  'Direction',
+  dimMode:       'Drill',
+  dirRecognition:'Recognition',
+  dirRecall:     'Recall',
+  dirProduction: 'Writing',
+
+  // ── Forecast ────────────────────────────────────────────
+  perDay:     'Per day',
+  cumulative: 'Running total',
+
+  // ── Rhythm ──────────────────────────────────────────────
+  rhythm:        'Your rhythm',
+  studyClock:    'When you study',
+  peakHour:      h => `Busiest at ${h}:00`,
+  ratingMix:     'How you rate yourself',
+  goodOrBetter:  pct => `${pct}% good or better`,
+  intervalLadder:'How far ahead',
+  settledShare:  pct => `${pct}% a month out or more`,
+  intervalLearning: 'Learning',
+  intervalDay:      'Tomorrow',
+  intervalWeek:     '2–6 days',
+  intervalWeeks:    '1–3 weeks',
+  intervalMonth:    '3–8 weeks',
+  intervalMonths:   '2–6 months',
+  intervalSeason:   '6–12 months',
+  intervalYear:     'Over a year',
+
+  troubleLede: 'Your worst accuracy, worst first. Pick one to go straight to that drill.',
 }
 
 // ── Phrases analyser ────────────────────────────────────────────

@@ -1,19 +1,44 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
 import { Loading } from '../components/ui/Loading'
 import { SectionHeader } from '../components/ui/SectionHeader'
-import { KANA_MODE_KEYS, kanaModes, vocabKanjiStatsLabels } from '../domain/quizModes'
-import { FlameIcon, BoltIcon } from '../components/ui/Icons'
+import { flattenStats, sumRows } from '../domain/statsModel'
+import { Headline } from '../components/stats/Headline'
+import { PracticeCalendar } from '../components/stats/PracticeCalendar'
+import { Explorer } from '../components/stats/Explorer'
+import { Forecast } from '../components/stats/Forecast'
+import { StudyClock, RatingMix, IntervalLadder } from '../components/stats/Rhythm'
+import { TroubleList } from '../components/stats/TroubleList'
 
+// Minutes east of UTC — the review log is stored in UTC, so the hour
+// histogram has to be told which day the user is actually living in.
+// Same convention the daruma routes take.
+const TZ = -new Date().getTimezoneOffset()
+
+// ── 統計 ───────────────────────────────────────────────────
+// The screen is four questions, in the order they get asked:
+//
+//   Where do I stand?      the headline band
+//   Have I been showing up? the practice calendar
+//   Where am I weak?        the Explorer, then the trouble list
+//   What's coming?          the forecast, then the rhythm charts
+//
+// The old screen answered the first and then printed the payload:
+// eighteen cards of level × mode progress bars in backend order, which
+// is complete in the sense that everything is on the page and useless
+// in the sense that nothing can be compared. Every number here comes
+// from the same two fetches it always did — plus three aggregates that
+// were sitting unused in the database (see routes/stats.py's _rhythm)
+// and one, the daily trend, that was already being fetched on every
+// load and thrown away without ever being drawn.
 export default function StatsScreen({ session }) {
-  const navigate    = useNavigate()
-  const { t }       = useLang()
+  const navigate = useNavigate()
+  const { t }    = useLang()
   const [stats, setStats] = useState(null)
   const [extra, setExtra] = useState(null)
-  const kanaLabels = Object.fromEntries(kanaModes(t))
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -22,20 +47,29 @@ export default function StatsScreen({ session }) {
     }
   }, [])
 
-  useEffect(() => { fetchStats() }, [])
+  useEffect(() => {
+    apiFetch('/api/stats', session)
+      .then(r => (r.ok ? r.json() : Promise.reject()))
+      .then(setStats)
+      .catch(() => setStats(null))
 
-  function fetchStats() {
-    apiFetch('/api/stats', session).then(r => r.json()).then(setStats)
-    apiFetch('/api/stats/extra', session)
+    apiFetch(`/api/stats/extra?tz_offset=${TZ}`, session)
       .then(r => (r.ok ? r.json() : null))
       .then(setExtra)
       .catch(() => setExtra(null))
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  // There's no dedicated "review" screen — due cards are just prioritized
-  // automatically inside a normal session. So this drops the user straight
-  // into the right level/mode (or set/mode for kana) and the session
-  // itself will surface due cards first.
+  // One flattening for the whole screen: the headline, the Explorer
+  // and every total below them read the same array, so they cannot
+  // drift apart the way three separate reduce()s over a nested payload
+  // eventually do.
+  const rows   = useMemo(() => flattenStats(stats, t), [stats, t])
+  const totals = useMemo(() => sumRows(rows), [rows])
+
+  // There's no dedicated "review" screen — due cards are prioritised
+  // inside a normal session, so this drops the user into the right
+  // level/mode and lets the session surface them.
   function startReview(category, key, mode) {
     if (category === 'kana') {
       navigate(`/kana?set=${encodeURIComponent(key)}&mode=${mode}`)
@@ -44,313 +78,49 @@ export default function StatsScreen({ session }) {
     navigate(`/${category}?level=${encodeURIComponent(key)}&mode=${mode}`)
   }
 
+  const dueToday = extra?.forecast?.[0]?.count ?? totals.due
+  const rhythm = extra?.rhythm
+
   return (
     <div className="screen">
-      <TopBar
-        onBack={() => navigate('/')}
-        title={t.statistics}
-      />
+      <TopBar onBack={() => navigate('/')} title={t.statistics} autoHide />
 
       {!stats && <Loading />}
 
       {stats && (
         <div className="container stats-container">
+          <Headline totals={totals} streak={extra?.streak} dueToday={dueToday} t={t} />
 
-          <SectionHeader title={t.overview} />
-          <OverviewRow stats={stats} extra={extra} t={t} />
+          <SectionHeader title={t.practiceCalendar} />
+          <PracticeCalendar trend={extra?.trend} />
 
-          {extra?.forecast?.length > 0 && (
-            <DueForecast forecast={extra.forecast} t={t} />
+          <SectionHeader title={t.explorer} />
+          <p className="stats-lede">{t.explorerLede}</p>
+          <Explorer rows={rows} onStartReview={startReview} />
+
+          <SectionHeader title={t.upcomingReviews} />
+          <Forecast forecast={extra?.forecast} />
+
+          {rhythm && (
+            <>
+              <SectionHeader title={t.rhythm} />
+              <div className="rhythm-grid">
+                <StudyClock hours={rhythm.hours} />
+                <RatingMix quality={rhythm.quality} />
+                <IntervalLadder intervals={rhythm.intervals} />
+              </div>
+            </>
           )}
 
           {extra?.weakest?.length > 0 && (
-            <WeakestItems weakest={extra.weakest} t={t} />
+            <>
+              <SectionHeader title={t.weakestItems} />
+              <p className="stats-lede">{t.troubleLede}</p>
+              <TroubleList weakest={extra.weakest} onStartReview={startReview} />
+            </>
           )}
-
-          <SectionHeader title={t.kana} />
-          <div className="grid-3 stats-group">
-            {Object.entries(stats.kana).map(([setName, modes]) => (
-              <div key={setName} className="card">
-                <LevelHeader level={setName} phases={modes} t={t} />
-                {KANA_MODE_KEYS.map(m => (
-                  <div key={m} className="stats-stat-block">
-                    <div className="stats-stat-label">{kanaLabels[m]}</div>
-                    <StatCell s={modes[m]} t={t} onStartReview={() => startReview('kana', setName, m)} />
-                  </div>
-                ))}
-              </div>
-            ))}
-            <GridFiller count={Object.keys(stats.kana).length} cols={3} glyph="仮" />
-          </div>
-
-          <SectionHeader title={t.jlptVocab} />
-          <div className="grid-3 stats-group">
-            {Object.entries(stats.vocab).map(([level, phases]) => (
-              <div key={level} className="card">
-                <LevelHeader level={level} phases={phases} t={t} />
-                {vocabKanjiStatsLabels(t, t.wordNoun).map(([key, label]) => (
-                  <div key={key} className="stats-stat-block">
-                    <div className="stats-stat-label">{label}</div>
-                    <StatCell s={phases[key]} t={t} onStartReview={() => startReview('vocab', level, key)} />
-                  </div>
-                ))}
-              </div>
-            ))}
-            <GridFiller count={Object.keys(stats.vocab).length} cols={3} glyph="語" />
-          </div>
-
-          <SectionHeader title={t.kanji} />
-          <div className="grid-3 stats-group">
-            {Object.entries(stats.kanji).map(([level, phases]) => (
-              <div key={level} className="card">
-                <LevelHeader level={level} phases={phases} t={t} />
-                {[...vocabKanjiStatsLabels(t, t.kanjiNoun), ['write', t.modeWrite]].map(([key, label]) => (
-                  phases[key] && (
-                    <div key={key} className="stats-stat-block">
-                      <div className="stats-stat-label">{label}</div>
-                      <StatCell s={phases[key]} t={t} onStartReview={() => startReview('kanji', level, key)} />
-                    </div>
-                  )
-                ))}
-              </div>
-            ))}
-            <GridFiller count={Object.keys(stats.kanji).length} cols={3} glyph="字" />
-          </div>
-
-          <SectionHeader title={t.grammarTitle} />
-          <div className="grid-3 stats-group">
-            {Object.entries(stats.grammar).map(([level, phases]) => (
-              <div key={level} className="card">
-                <LevelHeader level={level} phases={phases} t={t} />
-                {Object.entries(phases).map(([key, s]) => (
-                  <div key={key} className="stats-stat-block">
-                    <div className="stats-stat-label">{grammarModeLabel(t, key)}</div>
-                    <StatCell s={s} t={t} onStartReview={() => startReview('grammar', level, key)} />
-                  </div>
-                ))}
-              </div>
-            ))}
-            <GridFiller count={Object.keys(stats.grammar).length} cols={3} glyph="文" />
-          </div>
-
-          <SectionHeader title={t.globalSummary} />
-          <GlobalSummary stats={stats} t={t} />
         </div>
       )}
     </div>
   )
-}
-
-// A 3-col (or 2-col) grid with a level/set count that isn't a clean
-// multiple of the column count leaves a bare, high-contrast patch of
-// the lattice background in the trailing row (see JLPT: 5 levels in
-// 3 columns). Rather than a stray blank cell, fill it with a soft,
-// oversized kanji watermark on the same card background as its
-// neighbours — decorative, not another data card, so it reads as
-// intentional negative space instead of a layout accident.
-function GridFiller({ count, cols, glyph }) {
-  const empty = (cols - (count % cols)) % cols
-  if (!empty) return null
-  return Array.from({ length: empty }, (_, i) => (
-    <div key={`filler-${i}`} className="stats-filler-card" aria-hidden="true">
-      <span className="stats-filler-card__glyph">{glyph}</span>
-    </div>
-  ))
-}
-
-// Mastered % shown next to a level's title, computed from data we already have.
-function LevelHeader({ level, phases, t }) {
-  const totals = Object.values(phases).reduce((acc, s) => {
-    acc.total += s.total
-    acc.mastered += s.mastered
-    return acc
-  }, { total: 0, mastered: 0 })
-
-  const pct = totals.total > 0 ? Math.round((totals.mastered / totals.total) * 100) : 0
-
-  return (
-    <div className="stats-level-header">
-      <div className="stats-level-header__title">{level}</div>
-      <div className="stats-level-header__pct">{pct}% {t.mastered}</div>
-    </div>
-  )
-}
-
-function StatCell({ s, t, onStartReview }) {
-  if (!s) return null
-  const total      = s.total || 1
-  const masteredPct = Math.round((s.mastered / total) * 100)
-  const learningPct = Math.round((s.learning / total) * 100)
-
-  return (
-    <div>
-      <div className="stat-cell__track">
-        <div className="stat-cell__fill-row">
-          <div className="stat-cell__segment--mastered" style={{ '--seg-w': `${masteredPct}%` }} />
-          <div className="stat-cell__segment--learning" style={{ '--seg-w': `${learningPct}%` }} />
-        </div>
-      </div>
-      <div className="stat-cell__row">
-        <span className="stat-cell__new">N {s.new}</span>
-        <span className="stat-cell__learning">A {s.learning}</span>
-        <span className="stat-cell__mastered">M {s.mastered}</span>
-        {s.due_now > 0 && (
-          <button
-            className="stat-cell__due-btn"
-            onClick={onStartReview}
-            title={t.reviewNow}
-          >
-            <BoltIcon size={12} /> {s.due_now}
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function OverviewRow({ stats, extra, t }) {
-  const acc = aggregateAccuracy(stats)
-  const streak = extra?.streak
-  const dueTotal = extra?.forecast?.find(f => f.date === todayISO())?.count ?? 0
-
-  const cols = [
-    { label: t.streak, value: streak ? <>{streak.current} <FlameIcon size={22} /></> : '—', color: 'var(--warning)' },
-    { label: t.longestStreak, value: streak ? streak.longest : '—', color: 'var(--text-primary)' },
-    { label: t.accuracy, value: acc.reviews > 0 ? `${acc.pct}%` : '—', color: 'var(--success)' },
-    { label: t.dueToday, value: dueTotal, color: 'var(--state-due)' },
-  ]
-
-  return (
-    <div className="card stats-overview-row">
-      {cols.map(({ label, value, color }) => (
-        <div key={label} className="stats-overview-col">
-          <div className="stats-overview-col__value" style={{ '--col-color': color }}>{value}</div>
-          <div className="stats-overview-col__label">{label}</div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function DueForecast({ forecast, t }) {
-  const max = Math.max(1, ...forecast.map(f => f.count))
-  const today = todayISO()
-
-  return (
-    <div className="card stats-forecast-card">
-      <div className="stats-card-heading">
-        {t.upcomingReviews}
-      </div>
-      <div className="stats-forecast-bars">
-        {forecast.map(({ date, count }) => (
-          <div key={date} className="stats-forecast-bar">
-            <div className="stats-forecast-bar__count">{count}</div>
-            <div
-              className={`stats-forecast-bar__fill${date === today ? ' stats-forecast-bar__fill--today' : ''}`}
-              style={{ '--bar-h': `${Math.max(4, (count / max) * 70)}px` }}
-            />
-            <div className="stats-forecast-bar__day">
-              {formatDayLabel(date, today)}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function WeakestItems({ weakest, t }) {
-  return (
-    <div className="card stats-weakest-card">
-      <div className="stats-card-heading">
-        {t.weakestItems}
-      </div>
-      <div className="stats-weakest-list">
-        {weakest.map(w => (
-          <div key={`${w.card_id}:${w.mode}`} className="stats-weakest-row">
-            <span>
-              <strong>{w.raw_id}</strong>
-              <span className="stats-weakest-row__meta"> · {w.category || '?'} · {w.mode}</span>
-            </span>
-            <span className="stats-weakest-row__right">
-              <span className="stats-weakest-row__accuracy">{w.accuracy}%</span>
-              <span className="stats-weakest-row__lapses">{w.lapses} {t.lapses}</span>
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function GlobalSummary({ stats, t }) {
-  let total = 0, newC = 0, learning = 0, mastered = 0, due = 0
-
-  for (const modes of Object.values(stats.kana))
-    for (const s of Object.values(modes)) {
-      total += s.total; newC += s.new; learning += s.learning
-      mastered += s.mastered; due += s.due_now
-    }
-
-  for (const section of [stats.vocab, stats.kanji, stats.grammar])
-    for (const phases of Object.values(section))
-      for (const s of Object.values(phases)) {
-        total += s.total; newC += s.new; learning += s.learning
-        mastered += s.mastered; due += s.due_now
-      }
-
-  const acc = aggregateAccuracy(stats)
-
-  const cols = [
-    { label: t.new,      value: newC,     color: 'var(--state-new)' },
-    { label: t.learning, value: learning, color: 'var(--state-learning)' },
-    { label: t.mastered, value: mastered, color: 'var(--state-mastered)' },
-    { label: t.dueNow,   value: due,      color: 'var(--state-due)'  },
-    { label: t.total,    value: total,    color: 'var(--text-primary)' },
-    { label: t.accuracy, value: acc.reviews > 0 ? `${acc.pct}%` : '—', color: 'var(--success)' },
-  ]
-
-  return (
-    <div className="card stats-overview-row stats-overview-row--summary">
-      {cols.map(({ label, value, color }) => (
-        <div key={label} className="stats-overview-col">
-          <div className="stats-overview-col__value stats-overview-col__value--lg" style={{ '--col-color': color }}>{value}</div>
-          <div className="stats-overview-col__label">{label}</div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-// --- helpers ---
-
-function aggregateAccuracy(stats) {
-  let reviews = 0, correct = 0
-  for (const section of [stats.kana, stats.vocab, stats.kanji, stats.grammar])
-    for (const modes of Object.values(section))
-      for (const s of Object.values(modes)) {
-        reviews += s.reviews || 0
-        correct += s.correct || 0
-      }
-  const pct = reviews > 0 ? Math.round((correct / reviews) * 100) : 0
-  return { reviews, correct, pct }
-}
-
-// Grammar's mode keys (flashcard/mcq/fill, per GRAMMAR_MODES) don't
-// have dedicated translation entries the way kana/vocab/kanji modes
-// do — fall back to a title-cased version of the key itself so a new
-// mode added on the backend shows up without a frontend change.
-function grammarModeLabel(t, key) {
-  return t[`grammarMode${key.charAt(0).toUpperCase()}${key.slice(1)}`]
-    || key.charAt(0).toUpperCase() + key.slice(1)
-}
-
-function todayISO() {
-  return new Date().toISOString().slice(0, 10)
-}
-
-function formatDayLabel(dateStr, todayStr) {
-  if (dateStr === todayStr) return 'Today'
-  const d = new Date(dateStr)
-  return d.toLocaleDateString(undefined, { weekday: 'short' })
 }
