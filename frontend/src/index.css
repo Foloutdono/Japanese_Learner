@@ -1046,6 +1046,7 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   flex-direction: column;
   min-width: 0;
+  align-items: center;
 }
 .board__kana {
   font-family: var(--font-jp);
@@ -1064,18 +1065,20 @@ input:focus { border-color: var(--accent2); }
 }
 .board__romaji {
   font-family: var(--font-display);
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.26em;
   text-indent: 0.26em;
   text-transform: uppercase;
   opacity: 0.5;
+  margin-top: 5px;
 }
 
 .board__now {
   display: flex;
   align-items: baseline;
   gap: 12px;
+  align-self: flex-start;
 }
 .board__label {
   display: flex;
@@ -1101,7 +1104,7 @@ input:focus { border-color: var(--accent2); }
    ties the two objects together across screens. */
 .board__stripe {
   height: 4px;
-  background: var(--accent);
+  background: var(--accent2);
 }
 
 /* The clock. Only the colon ticks — the digits change once a minute,
@@ -1129,7 +1132,7 @@ input:focus { border-color: var(--accent2); }
   gap: 20px;
   align-items: center;
   width: 100%;
-  padding: 15px 22px;
+  padding: 22px;
   background: none;
   border: none;
   border-radius: 0;
@@ -8519,7 +8522,7 @@ input:focus { border-color: var(--accent2); }
      width, so the panel label and clock drop under it rather than
      squeezing it into two characters per line. */
   .board__masthead { padding: 16px 14px 12px; gap: 10px; }
-  .board__now { width: 100%; justify-content: space-between; align-items: flex-end; }
+  .board__now { justify-content: space-between; align-items: flex-end; }
   .board__label { align-items: flex-start; }
 
   .station-sign__name { font-size: 2rem; }
