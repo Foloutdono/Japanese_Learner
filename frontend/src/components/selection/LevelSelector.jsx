@@ -2,25 +2,28 @@ import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
 
 /**
- * LevelSelector
- * Renders JLPT levels as a single-column, hairline-divided list —
- * not a grid of coloured tiles. Each row pairs a small sequence
- * index with a large serif level mark and a hint, right-aligned
- * for asymmetry. One accent colour, used only on hover/focus.
+ * LevelSelector — 路線図
+ *
+ * The JLPT levels are a line, and this draws them as one: the
+ * stopping pattern diagram that hangs inside every train car in
+ * Japan. A single coloured rail runs down the left with a station
+ * marker at each stop, N5 at the near end and N1 at the far one, and
+ * you tap the station you want to get off at.
+ *
+ * It is a route map rather than a list of five rows because that is
+ * genuinely what these are — an ordered line you travel from one end
+ * of, where the distance between the first stop and the last is the
+ * whole point. A list says "pick one of five". A line says "this is
+ * how far it goes".
  *
  * Props:
- *   onSelect(level)  — called when a level is clicked
- *   color            — optional accent colour override for this section, as
- *                       a hex string or CSS var(). Falls back to shu-iro
- *                       (var(--accent)) via CSS when omitted.
+ *   onSelect(level)  — called when a station is chosen
+ *   color            — the line's colour, as a hex string or CSS var().
+ *                       Falls back to shu-iro (var(--accent)) in CSS.
  *   levels           — array of level strings (default: N5…N1)
- *   title            — header copy. Defaults to t.selectLevel rather
- *                       than a hardcoded string, so a caller that
- *                       forgets to pass one still gets a translated
- *                       default instead of permanently-English text.
- *                       Pass title="" to hide the header line, or wrap
- *                       in <SelectionScreen> and omit it to use that
- *                       component's own header instead.
+ *   title            — header copy. Defaults to t.selectLevel. Pass
+ *                       title="" to hide it, or wrap in
+ *                       <SelectionScreen> and omit it.
  */
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
@@ -32,8 +35,6 @@ export default function LevelSelector({
   title,
 }) {
   const { t } = useLang()
-  // Previously a hardcoded English-only dict — now sourced from the
-  // translation file so it actually changes with the app's language.
   const LEVEL_HINTS = {
     N5: t.levelHintN5,
     N4: t.levelHintN4,
@@ -42,29 +43,41 @@ export default function LevelSelector({
     N1: t.levelHintN1,
   }
   const resolvedTitle = title === '' ? '' : (title ?? t.selectLevel)
-  const rowStyle = color ? { '--row-color': color } : undefined
+  const lineStyle = color ? { '--line-color': color } : undefined
 
   return (
     <div className="level-selector">
-      {(resolvedTitle) && (
+      {resolvedTitle && (
         <div className="selector-header">
-          {resolvedTitle && <div className="selector-header__title">{resolvedTitle}</div>}
+          <div className="selector-header__title">{resolvedTitle}</div>
         </div>
       )}
-      <div className="choice-list">
-        {levels.map((l, i) => (
+
+      <div className="route" style={lineStyle}>
+        {levels.map((level, i) => (
           <button
-            key={l}
+            key={level}
             type="button"
-            onClick={() => { playUi('click-mode-selection'); onSelect(l) }}
-            className="choice-row"
-            style={rowStyle}
+            onClick={() => { playUi('click-mode-selection'); onSelect(level) }}
+            className={[
+              'route-stop',
+              i === 0 ? 'route-stop--first' : '',
+              i === levels.length - 1 ? 'route-stop--last' : '',
+            ].filter(Boolean).join(' ')}
           >
-            <span className="choice-row__accent" aria-hidden="true" />
-            <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
-            <span className="choice-row__main">
-              <span className="choice-row__title">{l}</span>
-              <span className="choice-row__desc">{LEVEL_HINTS[l]}</span>
+            {/* The rail, drawn per stop so the first and last ends can
+                be capped — a line diagram that runs off the top of the
+                first station reads as "there is more up there". */}
+            <span className="route-stop__rail" aria-hidden="true" />
+            <span className="route-stop__marker" aria-hidden="true" />
+
+            {/* No sequence number: the line is the sequence. A row
+                list needs "01…05" to say these are ordered; a diagram
+                that draws the order can't gain anything by numbering
+                it again. */}
+            <span className="route-stop__body">
+              <span className="route-stop__name">{level}</span>
+              <span className="route-stop__hint">{LEVEL_HINTS[level]}</span>
             </span>
           </button>
         ))}

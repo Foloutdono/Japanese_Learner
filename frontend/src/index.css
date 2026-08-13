@@ -592,173 +592,157 @@ input:focus { border-color: var(--accent2); }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
 .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); }
 
-/* ── Home screen ──────────────────────────────────────────
-   Header centred like a title page; nav re-uses the editorial
-   choice-list (see selector-header block above) instead of a
-   grid of coloured tiles, so the whole app reads as one system. */
-.home-screen {
+/* ════════════════════════════════════════════════════════════
+   日本語駅 — the station
+   ════════════════════════════════════════════════════════════
+   The home screen is a platform. The ambiance track behind it is a
+   Japanese metro platform, and choosing a section announces its name
+   aloud over that track — the visuals were the only part of this
+   screen still pretending it was a menu.
+
+   Everything here is drawn from real railway signage: the station
+   plate (駅名標), the departure board (発車標), station numbering
+   roundels, and the yellow tactile paving at the platform edge. Those
+   conventions are worth borrowing exactly because of what they were
+   designed for — letting somebody who can't read the language find
+   their train.
+
+   The board is --bg-panel in both themes rather than flipping with
+   the palette. A departure board is a lit panel in a room, not a
+   sheet of paper: it is dark at noon and dark at midnight, and the
+   app already keeps --bg-panel/--text-on-panel paired for exactly
+   this "legible text on a lit dark surface" case. */
+
+.station {
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  background: var(--bg-main);
 }
 
-.home-header {
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border-bottom: 1px solid var(--border);
-  padding: 92px 24px 56px;
-  text-align: center;
-}
-
-.home-header__glyph {
-  position: relative;
-  display: inline-block;
-  font-family: var(--font-jp);
-  font-size: 4rem;
-  color: var(--accent);
-  line-height: 1;
-  padding: 6px 16px;
-}
-.home-header__glyph::after {
-  content: '';
-  position: absolute;
-  inset: -6px 2px;
-  border: 1.5px solid var(--accent);
-  transform: rotate(-2deg);
-  opacity: 0.65;
-}
-
-.home-header__title {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.6rem;
-  letter-spacing: 0.06em;
-  margin-top: 22px;
-}
-
-.home-header__desc {
-  color: var(--text-on-panel-soft);
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  margin-top: 10px;
-}
-
-.home-header__actions {
+/* ── Concourse ─────────────────────────────────────────────
+   The bit before the gates: your card, and the way out. */
+.station__concourse {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
-  justify-content: center;
-  margin-top: 28px;
+  padding: 20px 24px 0;
 }
+.station__settings { flex-shrink: 0; }
 
-/* ── Home header profile badge ─────────────────────────────
-   Same ring/avatar language as BurgerMenu's own profile row (see
-   .burger-profile-row), sized up slightly since it's the primary
-   element in the actions row now rather than one entry in a drawer
-   list — a glance at level/streak that doubles as the link into the
-   full Profile screen. */
-.home-profile-badge {
+/* ── IC card ───────────────────────────────────────────────
+   Nobody gets onto a platform in Japan without touching a card to a
+   gate. The shape is the real one: a rounded landscape card with the
+   contactless mark in the corner, the holder's name, and a balance —
+   which here is the level bar, the closest thing this app has to
+   money in an account. */
+.ic-card {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  gap: 14px;
+  padding: 10px 16px 10px 12px;
+  border-radius: 10px;
+  background:
+    linear-gradient(122deg,
+      color-mix(in srgb, var(--accent6) 26%, var(--bg-panel)) 0%,
+      var(--bg-panel) 58%);
+  border: 1px solid color-mix(in srgb, var(--accent6) 30%, transparent);
   color: var(--text-on-panel);
-  padding: 6px 16px 6px 6px;
-  border-radius: 999px;
-  transition: background 0.15s ease;
+  text-align: left;
+  transition: transform 0.15s ease, border-color 0.15s ease;
 }
-.home-profile-badge:hover,
-.home-profile-badge:focus-visible {
-  background: rgba(255, 255, 255, 0.14);
+.ic-card:hover,
+.ic-card:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent6) 60%, transparent);
+  filter: none;
 }
+.ic-card--blank { padding: 12px 18px; }
 
-.home-profile-badge--fallback {
-  padding: 8px 18px;
-  font-size: 0.85rem;
-}
-.home-profile-badge__fallback-glyph {
-  font-family: var(--font-jp);
-  margin-right: 6px;
-}
-
-.home-profile-badge__ring-wrap {
+/* The contactless mark: three arcs, thickening outward. */
+.ic-card__wave {
   position: relative;
+  width: 16px;
+  height: 18px;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
 }
-.home-profile-badge__ring {
+.ic-card__wave span {
   position: absolute;
-  inset: 0;
-  transform: rotate(-90deg);
-}
-.home-profile-badge__ring-track { fill: none; stroke: rgba(255, 255, 255, 0.14); stroke-width: 3; }
-.home-profile-badge__ring-fill {
-  fill: none;
-  stroke: var(--accent9);
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-.home-profile-badge__avatar {
-  position: absolute;
-  inset: 4px;
+  top: 50%;
+  left: 1px;
+  border: 1.5px solid var(--text-on-panel);
+  border-color: transparent var(--text-on-panel) transparent transparent;
   border-radius: 50%;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 0.95rem;
+  opacity: 0.75;
 }
+.ic-card__wave span:nth-child(1) { width: 6px;  height: 6px;  margin-top: -3px; }
+.ic-card__wave span:nth-child(2) { width: 11px; height: 11px; margin-top: -5.5px; opacity: 0.5; }
+.ic-card__wave span:nth-child(3) { width: 16px; height: 16px; margin-top: -8px;   opacity: 0.3; }
 
-.home-profile-badge__info {
+.ic-card__body {
   display: flex;
   flex-direction: column;
+  gap: 1px;
   min-width: 0;
-  text-align: left;
 }
-.home-profile-badge__name {
-  font-family: 'Noto Serif JP', serif;
+.ic-card__name {
+  font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.92rem;
-  color: var(--text-on-panel);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 140px;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
 }
-.home-profile-badge__rank {
-  font-size: 0.72rem;
-  color: var(--text-on-panel-soft);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 140px;
+.ic-card__rank {
+  font-family: var(--font-jp);
+  font-size: 0.7rem;
+  color: var(--text-on-panel-soft, var(--text-on-panel));
+  opacity: 0.7;
 }
 
-.home-profile-badge__streak {
+.ic-card__balance {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 84px;
   flex-shrink: 0;
+}
+.ic-card__level {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.ic-card__track {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+.ic-card__fill {
+  display: block;
+  height: 100%;
+  background: var(--accent2);
+}
+
+.ic-card__streak {
   display: inline-flex;
   align-items: center;
   gap: 3px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.8rem;
-  color: var(--text-on-panel);
-  padding-left: 10px;
-  border-left: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-/* Darumas waiting on their second eye. This count used to sit on the
-   home grid's own Daruma card; that card is a hall on the profile now,
-   so the one notice on this screen that expires — an unclaimed daily
-   doll is burned at midnight — moved onto the door that leads to it.
-   Same seal red wherever it appears; see .hall-card__badge. */
-.home-profile-badge__dot {
   flex-shrink: 0;
+}
+.ic-card__dot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
@@ -773,100 +757,453 @@ input:focus { border-color: var(--accent2); }
   justify-content: center;
 }
 
-.home-settings-btn { flex-shrink: 0; }
-
-.home-main {
-  flex: 1;
-  padding: 64px 24px;
-}
-
-.home-footer {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  padding: 24px;
-}
-
-/* Nav cards — laid out as shoji-screen panels: cards butt up against
-   each other, the grid gap itself is the hairline (background shows
-   through as a 1px lattice), instead of shadowed rounded tiles. One
-   signature interaction: a brush-stroke rule under the title that
-   extends open on hover, echoing a single stroke of ink. */
-.home-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2px;
-  background: var(--border);
-  border: 3px solid var(--border);
-}
-
-.home-card {
-  background: var(--bg-card);
-  padding: 48px 36px;
+/* ── 駅名標 — the station plate ────────────────────────────
+   Reading, name, romaji, and the line's colour along the bottom. The
+   same component hangs over the home platform and over the top of
+   every selection screen, which is what turns a set of screens into
+   a line you are travelling down. */
+.station__plate {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 14px;
-  text-align: left;
-  border-radius: 0;
-  transition: background 0.2s ease;
-}
-.home-card:hover,
-.home-card:focus-visible {
-  background: var(--bg-card-hover);
+  justify-content: center;
+  padding: 28px 24px 8px;
 }
 
-.home-card__glyph {
-  font-family: var(--font-jp);
-  font-size: 2.6rem;
-  line-height: 1;
-  color: var(--row-color, var(--accent));
+.station-sign {
+  position: relative;
+  width: min(420px, 100%);
+  padding: 14px 18px 0;
+  /* Lifted a little off the wall behind it: in dark theme --bg-card
+     and --bg-main are close enough that a flat panel disappears, and
+     a station plate is an object hanging in a room. */
+  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--border) 140%, transparent);
+  border-radius: 4px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+  text-align: center;
 }
 
-.home-card__title {
-  color: var(--text-primary);
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.3rem;
-}
-
-.home-card__rule {
-  width: 28px;
-  height: 2px;
-  background: var(--row-color, var(--accent));
-  transform: scaleX(0.4);
-  transform-origin: left;
-  transition: transform 0.25s ease;
-}
-.home-card:hover .home-card__rule,
-.home-card:focus-visible .home-card__rule {
-  transform: scaleX(1);
-}
-
-.home-card__desc {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.6;
-  white-space: pre-line;
-}
-
-/* Fills the orphan cell an odd section count leaves in the last row —
-   decorative, not another card. 道: the way, which is what the eleven
-   cards above it are for. */
-.home-card--filler {
+.station-sign__top {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: default;
+  gap: 10px;
+  min-height: 20px;
 }
-.home-card__watermark {
+
+/* 駅ナンバリング — the line code in its coloured roundel, the thing
+   you point at when you can't pronounce the name. */
+.station-sign__roundel {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 2px solid var(--line-color, var(--accent));
+  color: var(--line-color, var(--accent));
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.station-sign__kana {
   font-family: var(--font-jp);
-  font-size: 4rem;
-  line-height: 1;
+  font-size: 0.82rem;
+  letter-spacing: 0.32em;
+  text-indent: 0.32em;
   color: var(--text-secondary);
-  opacity: 0.1;
-  user-select: none;
 }
+
+.station-sign__name {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 2.5rem;
+  line-height: 1.15;
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+  color: var(--text-primary);
+  margin: 2px 0 4px;
+}
+
+.station-sign__romaji {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.station-sign__neighbours {
+  display: flex;
+  justify-content: flex-start;
+  min-height: 20px;
+  margin-top: 10px;
+  font-family: var(--font-jp);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+.station-sign__arrow { margin-right: 5px; }
+
+/* The line stripe: the one place a station plate carries colour. */
+.station-sign__stripe {
+  height: 7px;
+  margin: 0 -18px;
+  background: var(--line-color, var(--accent));
+  border-radius: 0 0 3px 3px;
+}
+
+/* Smaller plate for the selection screens — same object, hung a
+   little further away. */
+.station-sign--sm {
+  width: 100%;
+  padding: 12px 16px 0;
+  margin-bottom: 34px;
+}
+.station-sign--sm .station-sign__name { font-size: 1.9rem; }
+.station-sign--sm .station-sign__stripe { height: 6px; margin: 0 -16px; }
+
+/* ── 発車標 — the departure board ─────────────────────────── */
+.station__platform {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 16px 24px 32px;
+}
+
+.board {
+  width: min(880px, 100%);
+  background: var(--bg-panel);
+  border: 1px solid color-mix(in srgb, var(--accent2) 22%, transparent);
+  border-radius: 6px;
+  overflow: hidden;
+  color: var(--text-on-panel);
+}
+
+.board__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.board__label {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  color: var(--accent2);
+}
+.board__label-sub {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+/* The clock. Only the colon ticks — the digits change once a minute,
+   which is when the component re-renders. */
+.board-clock {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  color: var(--accent2);
+  font-variant-numeric: tabular-nums;
+}
+.board-clock__colon {
+  padding: 0 1px;
+  animation: board-tick 2s steps(1, end) infinite;
+}
+@keyframes board-tick { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0.15; } }
+
+.board__columns {
+  display: grid;
+  grid-template-columns: 86px 1fr 1fr 24px;
+  gap: 16px;
+  padding: 8px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: var(--font-jp);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  opacity: 0.45;
+}
+.board__col--note { text-align: left; }
+
+.board__rows { display: flex; flex-direction: column; }
+
+.board-row {
+  display: grid;
+  grid-template-columns: 86px 1fr 1fr 24px;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+  padding: 13px 18px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.board-row:last-child { border-bottom: none; }
+.board-row:hover,
+.board-row:focus-visible {
+  background: rgba(255, 255, 255, 0.055);
+  filter: none;
+}
+
+.board-row__platform {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.board-row__no {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--line-color, var(--accent2));
+  font-variant-numeric: tabular-nums;
+}
+.board-row__no-unit {
+  font-family: var(--font-jp);
+  font-size: 0.6rem;
+  opacity: 0.5;
+}
+
+.board-row__dest {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.board-row__roundel {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--line-color, var(--accent2));
+  color: var(--line-color, var(--accent2));
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+}
+.board-row__names {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.board-row__jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 1.12rem;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+}
+/* 行 — "bound for". Set smaller than the destination itself, the way
+   it is on the board. */
+.board-row__bound {
+  margin-left: 4px;
+  font-size: 0.72rem;
+  opacity: 0.6;
+}
+.board-row__latin {
+  font-family: var(--font-display);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.board-row__note {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  opacity: 0.62;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-row__go {
+  justify-self: end;
+  font-size: 0.7rem;
+  color: var(--line-color, var(--accent2));
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.board-row:hover .board-row__go,
+.board-row:focus-visible .board-row__go {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── 点字ブロック — tactile paving ──────────────────────────
+   The yellow strip of raised domes along every platform edge in
+   Japan, and the line you're told to stand behind. It closes the
+   board the way it closes the platform. */
+.tactile {
+  height: 20px;
+  background-color: color-mix(in srgb, var(--warning) 82%, #000);
+  background-image: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--warning) 100%, transparent) 0 2.6px,
+    transparent 3.2px);
+  background-size: 13px 13px;
+  background-position: center;
+}
+
+/* ── The notice strip ─────────────────────────────────────
+   The LED band under a real board carries the notices, not the
+   timetable. */
+.station__notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px 28px;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-align: center;
+}
+.station__notice-chime { color: var(--accent2); }
+
+/* ── 路線図 — the route diagram ────────────────────────────
+   The stopping-pattern strip inside a train car, turned upright. One
+   rail down the left, a marker at every station, and the level you
+   want somewhere along it. A list would say "pick one of five"; a
+   line says how far it goes. */
+.route {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-left: 4px;
+}
+
+.route-stop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+  padding: 22px 6px 22px 46px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--text-primary);
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.route-stop:hover,
+.route-stop:focus-visible { background: var(--bg-card-hover); filter: none; }
+
+/* The rail, drawn per stop so the ends can be capped. */
+.route-stop__rail {
+  position: absolute;
+  left: 17px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: color-mix(in srgb, var(--line-color, var(--accent)) 55%, transparent);
+}
+.route-stop--first .route-stop__rail { top: 50%; border-radius: 2px 2px 0 0; }
+.route-stop--last  .route-stop__rail { bottom: 50%; border-radius: 0 0 2px 2px; }
+
+.route-stop__marker {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  border-radius: 50%;
+  background: var(--bg-main);
+  border: 4px solid var(--line-color, var(--accent));
+  transition: transform 0.15s ease;
+}
+.route-stop:hover .route-stop__marker,
+.route-stop:focus-visible .route-stop__marker { transform: scale(1.25); }
+
+.route-stop__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.route-stop__name {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.7rem;
+  line-height: 1;
+}
+.route-stop__hint {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+/* ── 種別 — the service badge ──────────────────────────────
+   How much the train stops for you. Each type keeps the colour it
+   has on a real board: local plain, rapid blue, express green,
+   limited express red. */
+.service {
+  --service-color: var(--text-secondary);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 74px;
+  padding: 5px 6px;
+  border: 1px solid color-mix(in srgb, var(--service-color) 45%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--service-color) 10%, transparent);
+  align-self: center;
+}
+.service--local   { --service-color: var(--text-secondary); }
+.service--rapid   { --service-color: var(--accent4); }
+.service--express { --service-color: var(--success); }
+.service--ltd     { --service-color: var(--accent); }
+
+.service__jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.76rem;
+  line-height: 1.1;
+  color: var(--service-color);
+  white-space: nowrap;
+}
+.service__latin {
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--service-color);
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+/* The choice rows keep their baseline alignment for the index-number
+   variant, but a service badge is a block and wants centring. */
+.choice-row:has(.service) { align-items: center; }
 
 /* ── Ghost / panel button utilities ──────────────────────── */
 .btn-ghost {
@@ -3622,9 +3959,9 @@ input:focus { border-color: var(--accent2); }
   font-size: 13px;
 }
 
-/* Hero — same sumi panel + stamped glyph as .home-header, but
-   larger and with its own tagline + CTA since there's no profile
-   badge or settings gear to share the row with yet. */
+/* Hero — a sumi panel with a stamped glyph, sized up and given its
+   own tagline + CTA since there's no IC card or settings gear to
+   share the row with yet. */
 .landing-hero {
   background: var(--bg-panel);
   color: var(--text-on-panel);
@@ -3692,9 +4029,10 @@ input:focus { border-color: var(--accent2); }
   margin-bottom: 32px;
 }
 
-/* Feature grid — the shoji-lattice technique from .home-grid
-   (1px gap doubling as a hairline), reused so this preview reads as
-   the same nav grid the person will land on right after signing in. */
+/* Feature grid — the shoji-lattice technique (1px gap doubling as a
+   hairline) the app uses for every card grid; see .hall-grid. This
+   one is a shop window, so it stays a grid rather than becoming the
+   departure board the signed-in home screen is. */
 .landing-feature-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -4109,7 +4447,7 @@ input:focus { border-color: var(--accent2); }
 }
 /* ── Stats screen ─────────────────────────────────────────
    Ledger, not dashboard: numbers sit in a hairline shoji-lattice
-   (same 1px-gap-on-border technique as .home-grid) rather than
+   (same 1px-gap-on-border technique as .hall-grid) rather than
    floating rounded/shadowed cards, and every heading keeps the
    serif-JP-title + seal-red-rule pairing used across the app's
    selector headers. Data (counts, percentages) consistently uses
@@ -5681,7 +6019,7 @@ input:focus { border-color: var(--accent2); }
 .dict-radical-group__rule { height: 2px; width: 28px; background: var(--accent); margin: 10px 0 16px; }
 
 /* Flush lattice — 1px hairlines showing through the container
-   background, the same shoji-screen technique as .home-grid,
+   background, the same shoji-screen technique as .hall-grid,
    instead of individually rounded/bordered floating buttons.
    Tile size/gap come from .dict-radical-sheets above (inherited),
    not declared here, so the JS column count (which reads those same
@@ -7923,10 +8261,11 @@ input:focus { border-color: var(--accent2); }
      (often translated) label wrap onto a second line instead of
      ellipsizing, since a level/mode name is worse truncated than tall. */
   .choice-row__title { white-space: normal; overflow: visible; text-overflow: clip; }
-  .home-grid { grid-template-columns: 1fr; }
-  /* One column can't orphan a cell, so the filler would just be a
-     blank card at the bottom of the list. */
-  .home-card--filler { display: none; }
+  /* The board keeps its columns down to a tablet; below that the
+     remarks step aside (see the 560px block) rather than each column
+     getting four legible characters. */
+  .board__columns,
+  .board-row { grid-template-columns: 72px 1fr 1fr 20px; gap: 12px; }
   .landing-hero { padding: 72px 20px 60px; }
   .landing-hero__glyph { font-size: 3.6rem; }
   .landing-hero__title { font-size: 1.6rem; }
@@ -7964,8 +8303,23 @@ input:focus { border-color: var(--accent2); }
   .level-up-banner { padding: 28px 32px 26px; border-radius: 14px; max-width: 86vw; }
   .level-up-banner__glyph { font-size: 2.4rem; }
   .level-up-banner__level { font-size: 1.3rem; }
-  .home-header { padding: 44px 16px 32px; }
-  .home-main { padding: 40px 16px; }
+  .station__concourse { padding: 14px 16px 0; }
+  .station__plate { padding: 20px 16px 4px; }
+  .station__platform { padding: 12px 16px 24px; }
+
+  /* 備考 is the first thing to go: the destination and the platform
+     number are what you are actually scanning for. */
+  .board__columns,
+  .board-row { grid-template-columns: 58px 1fr 20px; gap: 10px; }
+  .board__col--note,
+  .board-row__note { display: none; }
+  .board__head { padding: 12px 14px 8px; }
+  .board-row { padding: 12px 14px; }
+  .board-row__no { font-size: 1.25rem; }
+  .station-sign__name { font-size: 2rem; }
+  .ic-card__balance { display: none; }
+  .route-stop { padding: 18px 4px 18px 42px; gap: 14px; }
+  .route-stop__name { font-size: 1.45rem; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
   .top-bar__inner { padding: 12px 16px; }
   .selection-screen { padding: 44px 16px 56px; }
@@ -9471,7 +9825,6 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
    Patterned rings get a second, purely decorative circle underneath
    instead — that one is free to be dashed, dotted or fretted. */
 .profile-card__ring-fill,
-.home-profile-badge__ring-fill,
 .cos-ring__fill {
   stroke: var(--ring-color, var(--accent9));
   stroke-linecap: var(--ring-cap, round);

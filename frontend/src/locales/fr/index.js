@@ -66,6 +66,18 @@ const nav = {
 
 // ── Home screen ───────────────────────────────────────────
 const home = {
+  // ── 日本語駅 — la gare ────────────────────────────────────
+  // L'accueil est un quai et chaque section un train qui en part
+  // (voir config/stations.js). Les noms de stations et de services
+  // sont des noms propres japonais et vivent dans cette config,
+  // pas ici — voici les deux libellés qui se traduisent vraiment.
+  departures:  'Départs',
+  serviceLabel: {
+    local:   'Omnibus',
+    rapid:   'Rapide',
+    express: 'Express',
+    ltd:     'Express limité',
+  },
   tip:               'Des sessions courtes (15-20 min) mais régulières — la SRS gère tout automatiquement.',
   start:             'Commencer',
   homeTitle:         'Accueil',

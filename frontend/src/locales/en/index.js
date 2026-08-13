@@ -64,6 +64,18 @@ const nav = {
 
 // ── Home screen ───────────────────────────────────────────
 const home = {
+  // ── 日本語駅 — the station ────────────────────────────────
+  // The home screen is a platform and every section is a service
+  // leaving it (see config/stations.js). Station and service names
+  // themselves are Japanese proper nouns and live in that config,
+  // not here — these are the two labels that genuinely translate.
+  departures:  'Departures',
+  serviceLabel: {
+    local:   'Local',
+    rapid:   'Rapid',
+    express: 'Express',
+    ltd:     'Ltd. Express',
+  },
   tip:               'Short sessions (15-20 min) but regular — SRS schedules everything automatically.',
   start:             'Start',
   homeTitle:         'Home',

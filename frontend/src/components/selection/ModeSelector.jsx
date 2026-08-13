@@ -1,48 +1,69 @@
+import { useLang } from '../../LangContext'
+import { serviceFor, SERVICE_JP } from '../../config/stations'
 import { playUi } from '../../lib/audio'
 
 /**
- * ModeSelector
- * Renders study modes as a single-column, hairline-divided list —
- * matching LevelSelector's row treatment rather than a grid of
- * icon-badged cards. Modes are parallel choices, so by default every
- * row shares one accent colour; pass m.color on individual modes only
- * when a genuine semantic distinction is needed (e.g. right/wrong).
+ * ModeSelector — 種別
+ *
+ * Study modes as service types. On a Japanese line the type tells you
+ * how much the train stops for you — 各駅停車 halts everywhere, 特急
+ * skips nearly everything — and that is exactly the ladder these
+ * modes form: multiple choice puts the answer in front of you,
+ * flashcards make you self-assess, writing gives you nothing but a
+ * blank pad. The badge is real information rather than a costume, and
+ * the mapping lives in config/stations.js.
+ *
+ * The same component also drives the study-source pickers ("by
+ * level", "by theme"), whose keys aren't services at all — those get
+ * no badge rather than a wrong one.
  *
  * Props:
  *   modes    — array of { key, label, desc?, color? }
- *   onSelect(key) — called when a row is clicked
- *   eyebrow, title, subtitle — optional header copy, same shape as
- *     LevelSelector's. Leave all three unset to render just the list
- *     (e.g. when wrapped in <SelectionScreen>, which can supply its
- *     own header instead).
- *   columns  — accepted for backward compatibility, no longer affects
- *     layout now that modes render as a list rather than a grid.
+ *   onSelect(key) — called when a row is chosen
+ *   title    — optional header copy. Leave unset when wrapped in
+ *     <SelectionScreen>, which supplies its own.
+ *   columns  — accepted for backward compatibility, ignored.
  */
 export default function ModeSelector({ modes, onSelect, title }) {
+  const { t } = useLang()
+
   return (
     <div className="mode-selector">
-      {(title) && (
+      {title && (
         <div className="selector-header">
-          {title && <div className="selector-header__title">{title}</div>}
+          <div className="selector-header__title">{title}</div>
         </div>
       )}
+
       <div className="choice-list">
-        {modes.map((m, i) => (
-          <button
-            key={m.key}
-            type="button"
-            onClick={() => { playUi('click-mode-selection'); onSelect(m.key) }}
-            className="choice-row"
-            style={m.color ? { '--row-color': m.color } : undefined}
-          >
-            <span className="choice-row__accent" aria-hidden="true" />
-            <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
-            <span className="choice-row__main">
-              <span className="choice-row__title">{m.label}</span>
-              {m.desc && <span className="choice-row__desc">{m.desc}</span>}
-            </span>
-          </button>
-        ))}
+        {modes.map((m, i) => {
+          const service = serviceFor(m.key)
+          return (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => { playUi('click-mode-selection'); onSelect(m.key) }}
+              className="choice-row"
+              style={m.color ? { '--row-color': m.color } : undefined}
+            >
+              <span className="choice-row__accent" aria-hidden="true" />
+
+              {service ? (
+                <span className={`service service--${service}`}>
+                  <span className="service__jp" lang="ja">{SERVICE_JP[service]}</span>
+                  <span className="service__latin">{t.serviceLabel?.[service]}</span>
+                </span>
+              ) : (
+                <span className="choice-row__index">{String(i + 1).padStart(2, '0')}</span>
+              )}
+
+              <span className="choice-row__main">
+                <span className="choice-row__title">{m.label}</span>
+                {m.desc && <span className="choice-row__desc">{m.desc}</span>}
+              </span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )
