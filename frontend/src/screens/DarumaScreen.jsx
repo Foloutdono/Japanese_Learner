@@ -11,7 +11,7 @@ import { DarumaRitual } from '../components/DarumaRitual'
 import { XpToast } from '../components/XpToast'
 import { applyXpGain } from '../components/userProfileSummary'
 import { playClick, startAmbiance, stopAmbiance } from '../components/sound'
-import { FireIcon, ChevronIcon, WarningIcon, CheckIcon, CrossIcon } from '../components/Icons'
+import { FlameIcon, ChevronIcon, WarningIcon, CheckIcon, CrossIcon } from '../components/Icons'
 
 // ── 達磨堂 — the Daruma Hall ───────────────────────────────
 // Every goal in the app is a daruma, and every daruma is the same
@@ -173,21 +173,32 @@ function HallHeader({ hall, t, busy, onRise }) {
         <span className="daruma-hall__motto-en">{t.darumaMotto}</span>
       </div>
 
+      {/* Each pillar leads with a real mark at the same weight as its
+          number. The previous version hung 17px icons off a 1.35rem
+          figure, which made both the flame and the token read as
+          specks rather than as things. */}
       <div className="daruma-hall__pillars">
         <div className="daruma-hall__pillar">
           <span className="daruma-hall__pillar-value">
-            <FireIcon size={17} /> {hall.streak}
+            <span className="daruma-hall__pillar-mark"><FlameIcon size={28} /></span>
+            {hall.streak}
           </span>
           <span className="daruma-hall__pillar-label">{t.streak}</span>
         </div>
         <div className="daruma-hall__pillar">
           <span className="daruma-hall__pillar-value">
-            <RiseToken size={17} /> {hall.tokens}
+            <span className="daruma-hall__pillar-mark"><RiseToken size={28} /></span>
+            {hall.tokens}
           </span>
           <span className="daruma-hall__pillar-label">{t.darumaTokens}</span>
         </div>
         <div className="daruma-hall__pillar">
-          <span className="daruma-hall__pillar-value">{hall.shelf.length}</span>
+          <span className="daruma-hall__pillar-value">
+            <span className="daruma-hall__pillar-mark">
+              <Daruma color="aka" eyes={2} progress={1} size={26} />
+            </span>
+            {hall.shelf.length}
+          </span>
           <span className="daruma-hall__pillar-label">{t.darumaOnShelf}</span>
         </div>
       </div>

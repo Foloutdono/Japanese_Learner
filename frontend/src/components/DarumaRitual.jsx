@@ -37,9 +37,13 @@ import { playSfx } from './sound'
 // the whole sequence is CSS-timed and this component only decides when
 // the acts change. `onDone` fires on the real animationend of the exit
 // wash, never on a guessed duration — the same contract XpToast holds.
-const ACT_BRUSH  = 1000
-const ACT_IMPACT = 2100
-const ACT_MANGAN = 2700
+// The brush's own animation runs 2000ms starting at ACT_BRUSH, and
+// its contact keyframe sits at 75% of that — so ACT_IMPACT must be
+// ACT_BRUSH + 1500 exactly, or the ink lands before or after the
+// bristles touch. Change one, change the other.
+const ACT_BRUSH  = 900
+const ACT_IMPACT = 2400
+const ACT_MANGAN = 3100
 
 // Ink thrown off the strike. Hand-placed rather than randomised, for
 // the same reason XpToast's embers are: a brush stroke is a deliberate
@@ -55,6 +59,97 @@ const SPLATTER = [
   { a: 104,  d: 84,  s: 4 },
   { a: 148,  d: 58,  s: 3 },
 ]
+
+// ── 筆 — the brush ────────────────────────────────────────
+// Drawn in SVG rather than stacked divs, for one reason: bristles
+// have to bend. A brush that lands on a surface and stays a rigid
+// wedge reads as a cursor; a real one splays under pressure, curls
+// away from the direction of travel, and springs back when lifted.
+// That needs two bundle shapes to cross-fade between and a flex
+// transform pivoted at the ferrule, neither of which a clip-path
+// rectangle can do.
+//
+// Everything else is just observation of an actual fude: a bamboo
+// shaft with visible nodes and a lit edge, a metal ferrule, and a
+// bundle whose individual hairs show near the tip. The hairs are
+// three lighter strands over the dark mass — enough to break up the
+// silhouette, few enough to stay clean in motion.
+//
+// The tip point sits at (26, 252) in this box, and the wrapper's
+// transform anchors that point to the doll's unpainted eye.
+const BRISTLES_RELAXED = `
+  M 16 168
+  C 15 200, 19 228, 24.6 250
+  C 25.2 252.4, 26.8 252.4, 27.4 250
+  C 33 228, 37 200, 36 168
+  Z
+`
+// Under pressure: the bundle widens at the shoulder, the mass bows to
+// one side, and the point blunts as the hairs fan out against the
+// paper.
+const BRISTLES_PRESSED = `
+  M 14.5 168
+  C 12.5 202, 17 226, 22.5 244
+  C 23.6 249, 25 252.5, 26.6 253
+  C 28.6 252, 30.4 247, 31.6 242
+  C 36.4 222, 38.5 200, 37.5 168
+  Z
+`
+
+function Brush() {
+  return (
+    <span className="daruma-ritual__brush" aria-hidden="true">
+      <svg viewBox="0 0 52 256" width="100%" height="100%" className="brush">
+        <defs>
+          <linearGradient id="brush-bamboo" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stopColor="#3a2a1c" />
+            <stop offset="26%"  stopColor="#8a6b4f" />
+            <stop offset="44%"  stopColor="#c2a179" />
+            <stop offset="62%"  stopColor="#8a6b4f" />
+            <stop offset="100%" stopColor="#2e2114" />
+          </linearGradient>
+          <linearGradient id="brush-metal" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stopColor="#6b5424" />
+            <stop offset="34%"  stopColor="#e0bd6a" />
+            <stop offset="56%"  stopColor="#c99a3e" />
+            <stop offset="100%" stopColor="#5c471f" />
+          </linearGradient>
+          <linearGradient id="brush-ink" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#3b3542" />
+            <stop offset="38%"  stopColor="#1a1620" />
+            <stop offset="100%" stopColor="#07050a" />
+          </linearGradient>
+        </defs>
+
+        {/* Shaft, with two node bands and a highlight down the lit edge */}
+        <rect className="brush__shaft" x="18" y="0" width="16" height="152" rx="3" />
+        <rect className="brush__node" x="18" y="38" width="16" height="3" />
+        <rect className="brush__node" x="18" y="86" width="16" height="3" />
+        <rect className="brush__sheen" x="22.5" y="4" width="3" height="144" rx="1.5" />
+
+        {/* Ferrule */}
+        <rect className="brush__ferrule" x="14.5" y="148" width="23" height="22" rx="2" />
+        <rect className="brush__ferrule-line" x="14.5" y="154" width="23" height="1.2" />
+
+        {/* The bundle. Both shapes are always present; the pressed one
+            is revealed at the moment of contact, and the group flexes
+            about the ferrule at the same time. */}
+        <g className="brush__bristles">
+          <path className="brush__tip" d={BRISTLES_RELAXED} fill="url(#brush-ink)" />
+          <path className="brush__tip brush__tip--pressed" d={BRISTLES_PRESSED} fill="url(#brush-ink)" />
+          <path className="brush__hair" d="M 22 172 C 22 200, 24 226, 26 244" />
+          <path className="brush__hair" d="M 26 170 C 26.5 198, 27 224, 26.8 246" />
+          <path className="brush__hair" d="M 30.5 172 C 30 200, 28.5 226, 27 244" />
+        </g>
+
+        {/* Loaded ink gathering at the point during the hover, heavy
+            enough that two drops let go before the stroke is made. */}
+        <circle className="brush__bead brush__bead--1" cx="26" cy="250" r="3" />
+        <circle className="brush__bead brush__bead--2" cx="26" cy="250" r="2.4" />
+      </svg>
+    </span>
+  )
+}
 
 export function DarumaRitual({ ritual, onDone }) {
   const { t } = useLang()
@@ -127,11 +222,7 @@ export function DarumaRitual({ ritual, onDone }) {
               the viewport, so the strike lands on the eye at every
               breakpoint. See EYE in Daruma.jsx for the 40.5%/30%. */}
           <span className="daruma-ritual__ground" aria-hidden="true" />
-          <span className="daruma-ritual__brush" aria-hidden="true">
-            <span className="daruma-ritual__brush-handle" />
-            <span className="daruma-ritual__brush-ferrule" />
-            <span className="daruma-ritual__brush-tip" />
-          </span>
+          <Brush />
           <span className="daruma-ritual__shock" aria-hidden="true" />
           <span className="daruma-ritual__shock daruma-ritual__shock--2" aria-hidden="true" />
           <span className="daruma-ritual__drip" aria-hidden="true" />

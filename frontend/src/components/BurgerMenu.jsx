@@ -5,7 +5,7 @@ import { useLang } from '../LangContext'
 import { useProfileSummary } from './userProfileSummary'
 import { levelTitle } from '../levelTitle'
 import { playUi } from './sound'
-import { MenuIcon, CrossIcon, GearIcon, FireIcon } from './Icons'
+import { MenuIcon, CrossIcon, GearIcon, FlameIcon } from './Icons'
 
 // ── Burger menu button + slide-in drawer ──────────────────
 // Drop this anywhere (e.g. in TopBar) to get a full nav drawer
@@ -67,7 +67,7 @@ function BurgerProfileRow({ go, active, t }) {
       </span>
 
       <span className="burger-profile-row__streak" title={t.streak}>
-        <FireIcon size={14} /> {summary.streak}
+        <FlameIcon size={16} /> {summary.streak}
       </span>
     </button>
   )

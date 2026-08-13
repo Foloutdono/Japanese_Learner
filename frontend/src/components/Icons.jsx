@@ -277,6 +277,34 @@ export function StarIcon({ size = 16, className }) {
   )
 }
 
+// A flame with a hotter core, drawn as two filled shapes rather than
+// the single silhouette FireIcon uses — at the size a streak counter
+// wants (22px+) a flat one-tone flame reads as an orange smudge, and
+// the inner core is what makes it legible as fire. The core flickers,
+// very slightly; the outer body never moves, because a whole icon
+// wobbling in a stats row is a distraction rather than a detail.
+// FireIcon stays for the small inline uses that only need a mark.
+export function FlameIcon({ size = 22, className }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} className={`flame ${className ?? ''}`} aria-hidden="true">
+      <path
+        className="flame__body"
+        d="M12 22.6 C7.5 22.6, 4.5 19.4, 4.5 15.2 C4.5 12.5, 6 10.3, 7.3 8.5
+           C8.5 6.9, 9.3 5.5, 9.3 3.5 C9.3 2.7, 9.2 2.1, 9 1.4
+           C12.6 2.9, 14.7 5.5, 15.1 8.6 C15.9 7.8, 16.3 6.8, 16.4 5.5
+           C18.4 8, 19.5 11, 19.5 14.4 C19.5 19, 16.3 22.6, 12 22.6 Z"
+      />
+      <path
+        className="flame__core"
+        d="M12 21.5 C9.6 21.5, 8 19.8, 8 17.4 C8 15.8, 8.9 14.6, 9.7 13.5
+           C10.4 12.5, 10.8 11.6, 10.8 10.3 C12.8 11.5, 14 13.2, 14.4 15
+           C14.8 14.6, 15 14, 15 13.3 C15.8 14.7, 16.2 16.2, 16.2 17.6
+           C16.2 19.9, 14.4 21.5, 12 21.5 Z"
+      />
+    </svg>
+  )
+}
+
 export function FireIcon({ size = 16, className }) {
   return (
     <svg {...base} width={size} height={size} className={className} strokeLinejoin="round">

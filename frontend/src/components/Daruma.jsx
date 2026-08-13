@@ -208,14 +208,43 @@ function Eye({ side, painted }) {
   )
 }
 
-// The 起 token — a daruma tipped off vertical and already coming back
-// up. Small enough to sit inline in a counter or a button label, so it
-// renders below every detail threshold on purpose: at 13px the colour
-// and the silhouette are the whole message.
+// ── 起 — the rise token ───────────────────────────────────
+// This used to be a miniature <Daruma/>, and at the 17px a counter
+// gives it that was a red blob with two dots in it — the shape that
+// makes a daruma legible needs about 40px to survive, and a currency
+// mark has to work at half that.
+//
+// So the token is its own object: a coin. A gold-rimmed disc with a
+// tipped daruma struck into the face, which is a thing temples
+// genuinely sell, and which reads at any size because a ring plus one
+// silhouette is about as robust as a mark gets. The figure leans, and
+// the arc under it is the swing it's already making on the way back
+// up — 七転び八起き compressed into one glyph.
+const TOKEN_BODY = 'M16 7.4 C19.3 7.4, 21.5 10.3, 22 14.4 C22.6 18.8, 20.9 23, 16 23 C11.1 23, 9.4 18.8, 10 14.4 C10.5 10.3, 12.7 7.4, 16 7.4 Z'
+
 export function RiseToken({ size = 20, className = '' }) {
   return (
-    <span className={`rise-token ${className}`} aria-hidden="true">
-      <Daruma color="aka" eyes={2} progress={1} size={size} className="rise-token__doll" />
-    </span>
+    <svg
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      className={`rise-token ${className}`}
+      role="presentation"
+      aria-hidden="true"
+    >
+      <circle className="rise-token__disc" cx="16" cy="16" r="15" />
+      <circle className="rise-token__rim" cx="16" cy="16" r="12.4" />
+      <g transform="rotate(-15 16 16)">
+        <path className="rise-token__body" d={TOKEN_BODY} />
+        {size >= 22 && (
+          <>
+            <circle className="rise-token__eye" cx="13.7" cy="14.2" r="1.5" />
+            <circle className="rise-token__eye" cx="18.3" cy="14.2" r="1.5" />
+          </>
+        )}
+      </g>
+      {/* The righting swing, only where there's room to read it. */}
+      {size >= 26 && <path className="rise-token__swing" d="M8.6 21.6 A 9 9 0 0 0 23.4 21.6" />}
+    </svg>
   )
 }
