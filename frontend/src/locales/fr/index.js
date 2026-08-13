@@ -88,19 +88,19 @@ const home = {
   homeTitle:         'Accueil',
   homeDesc:          'Retour au menu principal',
   kanaTitle:         'Kana',
-  kanaDesc:          'Hiragana & Katakana\nde base + combinaisons\nQCM puis écriture libre',
+  kanaDesc:          'Hiragana et katakana, son par son\nReconnaître d\'abord, écrire à la main ensuite\nLe sol sur lequel tout le reste repose',
   vocabTitle:        'Vocabulaire JLPT',
   vocabDesc:         'N5 → N1\nKanji + Kana → Sens\nProgression par phases',
   kanjiTitle:        'Kanji',
   kanjiDesc:         'Apprentissage des kanji\nN5 → N1\nExercices d\'écriture',
   dictionaryTitle:   'Dictionnaire',
-  dictionaryDesc:    'Tous les kanji\nPrononciation & sens\nOrdre des traits',
+  dictionaryDesc:    'Un kanji, un kana, n\'importe quel mot\nLectures, radicaux, ordre des traits, exemples\nEt si vous l\'avez déjà croisé',
   grammarTitle:      'Grammaire',
-  grammarDesc:       'Règles JLPT N5 → N1\nFlashcard, QCM\nExemples de phrases',
+  grammarDesc:       'Tous les points JLPT, de N5 à N1\nCe à quoi il s\'accroche et ce qu\'il fait\nAvec des phrases qui l\'emploient vraiment',
   statsTitle:        'Statistiques',
-  statsDesc:         'Progression SRS\nCartes maîtrisées\nRévisions dues',
+  statsDesc:         'Tout ce que vous avez fait, compté\nOù vous êtes solide, et où vous ne l\'êtes pas\nEt ce qui tombe ensuite',
   decksTitle:        'Mes Decks',
-  decksDesc:         'Cartes personnalisées\nFlashcards & Kanji\nMélange avec JLPT',
+  decksDesc:         'Vos propres cartes, planifiées comme le reste\nÉcrivez-les ici ou importez un tableur\nMêlées au contenu intégré',
 }
 
 // ── Quiz shared ───────────────────────────────────────────
@@ -118,13 +118,13 @@ const quiz = {
   selectPhase:       "Choisissez votre phase d'entraînement",
 
   byLevel:           'JLPT',
-  byLevelDesc:       'Les niveaux JLPT standards de N5 à N1, avec les mots et kanji les plus courants de chaque niveau',
+  byLevelDesc:       'Les cinq grades de l\'examen, de N5 à N1',
   byFrequency:       'Fréquence des mots',
-  byFrequencyDesc:   'La fréquence des mots dans de vrais textes japonais, du plus courant au moins courant',
+  byFrequencyDesc:   'Classés selon leur fréquence réelle à l\'écrit',
   byMastery:         'Mes cartes',
-  byMasteryDesc:     "Des phrases entièrement composées de mots que vous apprenez actuellement ou avez déjà maîtrisés",
+  byMasteryDesc:     'Bâties uniquement sur des mots déjà rencontrés',
   byJmdict:          'Hors-JLPT',
-  byJmdictDesc:      'Tout le vocabulaire du dictionnaire hors programme JLPT, classé par fréquence',
+  byJmdictDesc:      'Tout ce qui dépasse le programme, du plus courant au moins',
   selectStudySource: "Choisissez votre source d'étude",
   selectTier:        'Choisissez un palier de fréquence',
   kanjiUnit:         'kanji',
@@ -132,7 +132,7 @@ const quiz = {
   tierSizeLabel:     'Taille du palier',
 
   byTheme:           'Par thème',
-  byThemeDesc:       'Vocabulaire du quotidien regroupé par thème — nourriture, lieux, personnes, et plus',
+  byThemeDesc:       'Regroupés par sujet — nourriture, travail, voyage, le corps',
   selectTheme:       'Choisissez un thème',
   filterThemes:      'Filtrer les thèmes…',
   themeNoResults:    'Aucun thème ne correspond à votre filtre',
@@ -211,7 +211,7 @@ const quiz = {
   modeFill:          'Compléter',
   // Extended mode labels used by vocab/kanji screens
   modeWrite:         'Écriture',
-  modeWriteDesc:     'Voir le sens, écrire le kanji',
+  modeWriteDesc:     'Le sens seul. Tracez le caractère, trait par trait.',
   // Paramétré sur le nom de l'élément étudié ("kanji" ou "mot" — voir
   // kanjiNoun/wordNoun plus bas et vocabKanjiModes dans quizModes.js).
   // C'étaient des chaînes fixes disant "kanji" quel que soit l'écran,
@@ -219,27 +219,27 @@ const quiz = {
   // « QCM (kanji → sens) » pour un paquet de mots. Les deux noms sont
   // masculins, donc "Le" convient dans les deux cas.
   modeQcmKjM:        (noun) => `QCM (${noun} → sens)`,
-  modeQcmKjMDesc:    (noun) => `Le ${noun} est affiché, choisissez le sens`,
+  modeQcmKjMDesc:    (noun) => `Le ${noun} est affiché. Choisissez son sens parmi quatre.`,
   modeQcmMKj:        (noun) => `QCM (sens → ${noun})`,
-  modeQcmMKjDesc:    (noun) => `Le sens est affiché, choisissez le ${noun}`,
+  modeQcmMKjDesc:    (noun) => `Le sens est affiché. Choisissez le ${noun} parmi quatre.`,
   modeFcKjM:         (noun) => `Carte (${noun} → sens)`,
-  modeFcKjMDesc:     (noun) => `Le ${noun} est affiché, révélez le sens`,
+  modeFcKjMDesc:     (noun) => `Le ${noun} seul. Rappelez le sens, puis vérifiez.`,
   modeFcMKj:         (noun) => `Carte (sens → ${noun})`,
-  modeFcMKjDesc:     (noun) => `Le sens est affiché, révélez le ${noun}`,
+  modeFcMKjDesc:     (noun) => `Le sens seul. Rappelez le ${noun}, puis vérifiez.`,
 
-  modeFcKanaDesc:     'Le kana est affiché, révélez le sens',
-  modeQcmKanaDesc:    'Le kana est affiché, choisissez le sens',
-  modeWriteKanaDesc:  'Le romaji est affiché, dessinez le kana',
+  modeFcKanaDesc:     'Le kana seul. Dites le son, puis vérifiez.',
+  modeQcmKanaDesc:    'Le kana est affiché. Choisissez son son parmi quatre.',
+  modeWriteKanaDesc:  'Le son est donné. Tracez le kana.',
 
-  modeFcGrammarDesc:   'La règle de grammaire est affichée, révélez le sens',
-  modeQcmGrammarDesc:  'La règle de grammaire est affichée, choisissez le sens',
-  modeFillGrammarDesc: 'La règle de grammaire est affichée, complétez le(s) mot(s) manquant(s)',
+  modeFcGrammarDesc:   'Le point seul. Rappelez ce qu\'il fait, puis vérifiez.',
+  modeQcmGrammarDesc:  'Le point est affiché. Choisissez ce qu\'il fait parmi quatre.',
+  modeFillGrammarDesc: 'Une phrase dont le point a été retiré. Remettez-le.',
 
   // « Réviser ses cartes » — parcours libre et sans notation des cartes
   // déjà étudiées dans ce paquet (voir ReviewDeck.jsx). Ajouté à chaque
   // sélecteur de mode, à côté de modeQCM/modeFlashcard/etc.
   modeReview:        'Révision',
-  modeReviewDesc:    'Parcourez les cartes que vous connaissez déjà, à votre rythme — sans notation',
+  modeReviewDesc:    'Parcourez ce que vous savez déjà. Rien n\'est noté ni replanifié.',
   reviewEmpty:       "Vous n'avez encore étudié aucune de ces cartes — revenez après votre première session.",
   reviewPrev:        'Précédent',
   reviewNext:        'Suivant',
@@ -359,7 +359,7 @@ const stats = {
 // ── Phrases analyser ────────────────────────────────────────────
 const phraseAnalyzer = {
   phraseAnalyzerTitle: 'Analyseur de phrases',
-  phraseAnalyzerDesc:  'Analysez une phrase japonaise\nObtenez définitions & statistiques',
+  phraseAnalyzerDesc:  'Collez une phrase, voyez-la démontée\nChaque mot, sa lecture, votre historique\nPour celle que vous avez presque comprise',
   phraseAnalyzer:      'Analyseur de phrases',
   phrasePlaceholder:   'Ecrivez ou collez une phrase japonaise…',
   analyze:             'Analyser',
@@ -386,7 +386,7 @@ const phraseAnalyzer = {
 // ── Reading ───────────────────────────────────────────────
 const reading = {
   readingTitle:         'Entraînement à la lecture',
-  readingDesc:          'Phrases courtes\nJLPT N5 → N1\nHiragana, Katakana, Kanji',
+  readingDesc:          'De vraies phrases, à votre niveau\nPar grade, par fréquence, ou depuis vos cartes\nLire d\'abord, vérifier ensuite',
   readingHiragana:      'Hiragana uniquement',
   readingHiraganaDesc:  'Phrases écrites uniquement en hiragana',
   readingKatakana:      'Katakana uniquement',
@@ -400,9 +400,9 @@ const reading = {
   // de fréquence de l'application).
   selectDomain:          'Choisissez une liste de mots',
   domainVocabDeck:       'Deck sélectionné',
-  domainVocabDecDesc:    "Le vocabulaire JLPT propre à l'application",
+  domainVocabDecDesc:    'Le deck gradué, de N5 à N1',
   domainVocabJmdict:     'Dictionnaire complet',
-  domainVocabJmdictDesc: 'Tous les mots du dictionnaire, classés par fréquence',
+  domainVocabJmdictDesc: 'Tout le dictionnaire, du plus courant au moins',
   tierLabel:             'Palier {n}',
   jumpToTier:            'Aller au palier…',
 
@@ -443,7 +443,7 @@ const reading = {
 // ── Reading comprehension ────────────────────────────────────────────
 const readingComprehension = {
   readingComprehensionTitle: 'Compréhension lecture',
-  readingComprehensionDesc:  'Court passages\nJLPT N5 → N1\nQuestions à choix multiples',
+  readingComprehensionDesc:  'Des textes courts, puis des questions\nLa moitié lecture de l\'examen, répétée\nDe N5 à N1',
   readingComprehensionFetchError: "Impossible de charger un passage. Veuillez réessayer.",
   question:                   'Question',
   yourAnswer:                 'Votre réponse',
@@ -466,7 +466,7 @@ const readingComprehension = {
 // vivent ici.
 const translationMode = {
   translationTitle:      'Traduction',
-  translationDesc:       'Traduisez une phrase en japonais\nNiveau JLPT, fréquence, ou vos propres cartes\nAnalyse IA pour vous auto-évaluer',
+  translationDesc:       'À vous de le dire en japonais\nUne réponse de référence, et un avis sur la vôtre\nLe sens difficile, volontairement',
   translationFetchError: "Impossible de charger une phrase. Veuillez réessayer.",
   japanesePlaceholder:   'Écrivez-la en japonais…',
   aiAnalysis:            'Analyse IA',
@@ -626,10 +626,10 @@ const decks = {
   flashcardType:     'Flashcard',
   flashcardDesc:     'Recto / Verso — toute langue',
   vocabType:         'Vocabulaire',
-  vocabDesc:         'Compatible avec le mode JLPT',
+  vocabDesc:         'Le vocabulaire gradué de N5 à N1\nOu par fréquence, par thème, ou hors programme\nDe la forme au sens, et retour',
   deckVocabDesc:     'Vocabulaire uniquement — issu des niveaux JLPT',
   kanjiType:         'Kanji',
-  kanjiDesc:         'Avec ordre des traits',
+  kanjiDesc:         'Les caractères par niveau, avec l\'ordre des traits\nLes lire, puis les écrire de mémoire\nChaque lecture, chaque sens',
   deckKanjiDesc:     'Kanji uniquement — avec ordre des traits',
   grammarType:       'Grammaire',
   deckGrammarDesc:   'Points de grammaire uniquement — issus des niveaux JLPT',
@@ -703,7 +703,7 @@ const decks = {
 // langues, même convention que appTitle.
 const exam = {
   examTitle:           'Examen blanc',
-  examDesc:            'Épreuves JLPT réelles, numérisées',
+  examDesc:            'De vraies annales, chronométrées et notées\nVocabulaire, grammaire, lecture, écoute\nCorrigées sur le barème officiel',
   examEyebrow:         'Examen blanc',
   examListTitle:       '過去問モード',
   examListSubtitle:    'Des épreuves JLPT réelles, numérisées — vocabulaire, grammaire, lecture et écoute, corrigées selon le barème officiel.',
@@ -1099,7 +1099,7 @@ const storehouse = {
   quickChange:     'Changement rapide',
   quickChangeAll:  'Grenier',
   storehouseTitle:   'Grenier',
-  storehouseDesc:    'Rang, papiers, anneaux, sceaux et titres',
+  storehouseDesc:    'Votre rang, et tout ce qui a été gagné en chemin',
   storehouseNote:    (n, total) => `${n} trésors sur ${total} récoltés`,
   storehouseOffline: 'Grenier injoignable — ces données peuvent être périmées.',
 

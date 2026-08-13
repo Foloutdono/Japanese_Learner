@@ -85,19 +85,19 @@ const home = {
   start:             'Start',
   homeTitle:         'Home',
   kanaTitle:         'Kana',
-  kanaDesc:          'Hiragana & Katakana\nbasic + combinations\nMCQ then free writing',
+  kanaDesc:          'Hiragana and katakana, sound by sound\nRecognition first, then written by hand\nThe ground everything else stands on',
   vocabTitle:        'Vocabulary JLPT',
   vocabDesc:         'N5 → N1\nKanji + Kana → Meaning\nPhase progression',
   kanjiTitle:        'Kanji',
   kanjiDesc:         'Kanji learning\nN5 → N1\nWriting exercises',
   dictionaryTitle:   'Dictionary',
-  dictionaryDesc:    'All kanji\nPronunciation & meaning\nStroke order',
+  dictionaryDesc:    'Kanji, kana, or any word\nReadings, radicals, stroke order, examples\nAnd whether you have met it before',
   grammarTitle:      'Grammar',
-  grammarDesc:       'JLPT N5 → N1 rules\nFlashcard, MCQ\nExample sentences',
+  grammarDesc:       'Every JLPT pattern, N5 through N1\nWhat it attaches to and what it does\nWith sentences that use it properly',
   statsTitle:        'Statistics',
-  statsDesc:         'SRS progress\nMastered cards\nDue reviews',
+  statsDesc:         'Everything you have done, counted\nWhere you are strong, and where you are not\nAnd what falls due next',
   decksTitle:        'My Decks',
-  decksDesc:         'Custom cards\nFlashcards & Kanji\nMix with JLPT content',
+  decksDesc:         'Your own cards, scheduled like the rest\nWrite them here or import a spreadsheet\nMixed in with the built-in material',
 }
 
 // ── Quiz shared ───────────────────────────────────────────
@@ -115,15 +115,15 @@ const quiz = {
   selectPhase:       'Choose your training phase',
 
   byLevel:           'JLPT',
-  byLevelDesc:       'The standard JLPT levels from N5 to N1, with the most common words and kanji in each level',
+  byLevelDesc:       'The exam\'s own five grades, N5 up to N1',
   byFrequency:       'Word frequency',
-  byFrequencyDesc:   'The frequency of words in real Japanese text, from most common to least common',
+  byFrequencyDesc:   'Ranked by how often they actually appear in print',
   byMastery:         'My cards',
-  byMasteryDesc:     "Sentences made entirely of words you're currently learning or have mastered",
+  byMasteryDesc:     'Built only from words you have already met',
   // Vocabulary's third study-source option — every JMdict word outside
   // the JLPT curriculum, ranked by frequency (see VocabScreen.jsx).
   byJmdict:          'Beyond JLPT',
-  byJmdictDesc:      'Every dictionary word outside the JLPT curriculum, ranked by frequency',
+  byJmdictDesc:      'Everything past the syllabus, commonest first',
   selectStudySource: 'Choose your study source',
   selectTier:        'Choose a frequency tier',
   kanjiUnit:         'kanji',
@@ -136,7 +136,7 @@ const quiz = {
   // byFrequency — thematic decks (Fruits, Jobs, Body parts, ...), see
   // ThemeSelector.jsx / theme_data.py.
   byTheme:           'By theme',
-  byThemeDesc:       'Everyday vocabulary grouped by topic — food, places, people, and more',
+  byThemeDesc:       'Grouped by subject — food, work, travel, the body',
   selectTheme:       'Choose a theme',
   // Placeholder/aria-label for ThemeSelector's filter box (only shown
   // once there are more than a handful of themes to scroll through).
@@ -224,34 +224,34 @@ const quiz = {
   modeFill:          'Fill in',
   // Extended mode labels used by vocab/kanji screens
   modeWrite:         'Writing',
-  modeWriteDesc:     'See meaning, write the kanji',
+  modeWriteDesc:     'Meaning only. Draw the character stroke by stroke.',
   // Parameterised on what the studied item is called ("kanji" or
   // "word" — see kanjiNoun/wordNoun below and vocabKanjiModes in
   // quizModes.js). These were fixed strings saying "kanji" no matter
   // which screen showed them, so the vocabulary mode picker announced
   // "MCQ (kanji → meaning)" for a deck of words.
   modeQcmKjM:        (noun) => `MCQ (${noun} → meaning)`,
-  modeQcmKjMDesc:    (noun) => `The ${noun} is shown, choose the meaning`,
+  modeQcmKjMDesc:    (noun) => `The ${noun} is shown. Pick its meaning from four.`,
   modeQcmMKj:        (noun) => `MCQ (meaning → ${noun})`,
-  modeQcmMKjDesc:    (noun) => `The meaning is shown, choose the ${noun}`,
+  modeQcmMKjDesc:    (noun) => `The meaning is shown. Pick the ${noun} from four.`,
   modeFcKjM:         (noun) => `Flashcard (${noun} → meaning)`,
-  modeFcKjMDesc:     (noun) => `The ${noun} is shown, reveal the meaning`,
+  modeFcKjMDesc:     (noun) => `The ${noun} alone. Recall the meaning, then check.`,
   modeFcMKj:         (noun) => `Flashcard (meaning → ${noun})`,
-  modeFcMKjDesc:     (noun) => `The meaning is shown, reveal the ${noun}`,
+  modeFcMKjDesc:     (noun) => `The meaning alone. Recall the ${noun}, then check.`,
 
-  modeFcKanaDesc:     'The kana is shown, reveal the meaning',
-  modeQcmKanaDesc:    'The kana is shown, choose the meaning',
-  modeWriteKanaDesc:   'The romaji is shown, draw the kana',
+  modeFcKanaDesc:     'The kana alone. Say the sound, then check.',
+  modeQcmKanaDesc:    'The kana is shown. Pick its sound from four.',
+  modeWriteKanaDesc:   'The sound is given. Draw the kana.',
 
-  modeFcGrammarDesc:   'The grammar rule is shown, reveal the meaning',
-  modeQcmGrammarDesc:  'The grammar rule is shown, choose the meaning',
-  modeFillGrammarDesc: 'The grammar rule is shown, fill in the missing word(s)',
+  modeFcGrammarDesc:   'The pattern alone. Recall what it does, then check.',
+  modeQcmGrammarDesc:  'The pattern is shown. Pick what it does from four.',
+  modeFillGrammarDesc: 'A sentence with the pattern taken out. Put it back.',
 
   // "Review your cards" — a self-paced, ungraded browse over cards
   // already studied in this deck (see ReviewDeck.jsx). Appended to
   // every mode picker alongside modeQCM/modeFlashcard/etc.
   modeReview:        'Review',
-  modeReviewDesc:    'Flip through the cards you already know, at your own pace — no grading',
+  modeReviewDesc:    'Browse what you already know. Nothing graded, nothing rescheduled.',
   reviewEmpty:       "You haven't studied any of these cards yet — come back after your first session.",
   reviewPrev:        'Previous',
   reviewNext:        'Next',
@@ -372,7 +372,7 @@ const stats = {
 // ── Phrases analyser ────────────────────────────────────────────
 const phraseAnalyzer = {
   phraseAnalyzerTitle: 'Phrase analyzer',
-  phraseAnalyzerDesc:  'Analyze a Japanese phrase\nGet definitions & stats',
+  phraseAnalyzerDesc:  'Paste a sentence, see it taken apart\nEvery word, its reading, your history with it\nFor the one you almost understood',
   phraseAnalyzer:      'Phrase analyzer',
   phrasePlaceholder:   'Type or paste a Japanese phrase…',
   analyze:             'Analyze',
@@ -399,16 +399,16 @@ const phraseAnalyzer = {
 // ── Reading ───────────────────────────────────────────────
 const reading = {
   readingTitle:         'Reading practice',
-  readingDesc:          'Real example sentences\nJLPT level, frequency, or your own cards\nNatural Japanese with kanji and kana',
+  readingDesc:          'Real sentences, pitched at your level\nBy grade, by frequency, or from your own cards\nRead first, check after',
 
   // Frequency source: which word list (byLevel/byFrequency/byMastery,
   // selectStudySource, selectTier, loadError live in `quiz` above —
   // shared with the other frequency-tier pickers in the app).
   selectDomain:          'Choose a word list',
   domainVocabDeck:       'Curated deck',
-  domainVocabDecDesc:    "The app's own JLPT-leveled vocabulary",
+  domainVocabDecDesc:    'The graded deck, N5 through N1',
   domainVocabJmdict:     'Full dictionary',
-  domainVocabJmdictDesc: 'Every word in the dictionary, ranked by frequency',
+  domainVocabJmdictDesc: 'The whole dictionary, commonest first',
   tierLabel:             'Tier {n}',
   jumpToTier:            'Jump to tier…',
 
@@ -446,7 +446,7 @@ const reading = {
 // ── Reading comprehension ────────────────────────────────────────────
 const readingComprehension = {
   readingComprehensionTitle: 'Reading comprehension',
-  readingComprehensionDesc:  'Short passages\nJLPT N5 → N1\nMultiple choice questions',
+  readingComprehensionDesc:  'Short passages, then questions\nThe reading half of the exam, rehearsed\nN5 through N1',
   
   question:                   'Question',
   yourAnswer:                 'Your answer',
@@ -467,7 +467,7 @@ const readingComprehension = {
 // genuinely new keys live here.
 const translationMode = {
   translationTitle:      'Translation',
-  translationDesc:       'Translate a sentence into Japanese\nJLPT level, frequency, or your own cards\nAI analysis to help you self-assess',
+  translationDesc:       'Put it into Japanese yourself\nA reference answer, and a read on yours\nThe hard direction, on purpose',
   translationFetchError: "Couldn't load a phrase. Try again.",
   japanesePlaceholder:   'Write it in Japanese…',
   aiAnalysis:            'AI analysis',
@@ -635,10 +635,10 @@ const decks = {
   flashcardType:     'Flashcard',
   flashcardDesc:     'Your own cards only — any language',
   vocabType:         'Vocabulary',
-  vocabDesc:         'Vocabulary only — from JLPT levels',
+  vocabDesc:         'Words graded N5 to N1\nOr by frequency, by theme, or past the syllabus\nForm to meaning, and back again',
   deckVocabDesc:     'Vocabulary only — from JLPT levels',
   kanjiType:         'Kanji',
-  kanjiDesc:         'Kanji only — with stroke order',
+  kanjiDesc:         'Characters by level, with stroke order\nRead them, then write them from memory\nEvery reading, every meaning',
   deckKanjiDesc:     'Kanji only — with stroke order',
   grammarType:       'Grammar',
   deckGrammarDesc:   'Grammar points only — from JLPT levels',
@@ -713,7 +713,7 @@ const decks = {
 // literal Japanese glyphs in both locales, same convention as appTitle.
 const exam = {
   examTitle:           'Mock Exam',
-  examDesc:            'Past JLPT papers, digitized',
+  examDesc:            'Real past papers, timed and scored\nVocabulary, grammar, reading, listening\nMarked against the official key',
   examEyebrow:         'Mock Exam',
   examListTitle:       '過去問モード',
   examListSubtitle:    'Full past JLPT papers, digitized — vocabulary, grammar, reading, and listening, scored against the official answer key.',
@@ -1116,7 +1116,7 @@ const storehouse = {
   quickChange:     'Quick change',
   quickChangeAll:  'Storehouse',
   storehouseTitle:   'Storehouse',
-  storehouseDesc:    'Rank, papers, rings, seals and titles',
+  storehouseDesc:    'Your rank, and everything earned along the way',
   storehouseNote:    (n, total) => `${n} of ${total} treasures collected`,
   storehouseOffline: "Couldn't reach the storehouse — this may be out of date.",
 
