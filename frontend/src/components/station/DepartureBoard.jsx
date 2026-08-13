@@ -47,6 +47,7 @@ export function DepartureBoard({ sections, onDepart }) {
       <div className="board__head">
         <span className="board__label" lang="ja">発車標</span>
         <span className="board__label-sub">{t.departures}</span>
+        <span className="board-clock__label" lang="ja" aria-hidden="true">現在時刻</span>
         <span className="board-clock" aria-label={`${hh}:${mm}`}>
           {hh}<span className="board-clock__colon" aria-hidden="true">:</span>{mm}
         </span>

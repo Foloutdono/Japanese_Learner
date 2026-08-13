@@ -62,9 +62,17 @@ export default function SelectionScreen({
   const section = getNavLinks(t).find(link => link.path === pathname)
   const station = stationFor(pathname)
 
+  // The section's pigment becomes the line colour for everything
+  // below the plate — the numbering roundels, the row accents, the
+  // route diagram. One line, one colour, from the departure board all
+  // the way to the last choice before you start studying.
+  const lineStyle = section
+    ? { ...innerStyle, '--row-color': section.color, '--line-color': section.color }
+    : innerStyle
+
   return (
-    <div className="container selection-screen">
-      <div className="selection-screen__inner" style={innerStyle}>
+    <div className={`container selection-screen${section ? ' selection-screen--station' : ''}`}>
+      <div className="selection-screen__inner" style={lineStyle}>
         {section && (
           <StationSign
             station={station}

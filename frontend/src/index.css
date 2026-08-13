@@ -353,8 +353,8 @@ button:focus-visible {
 .choice-row {
   position: relative;
   display: flex;
-  align-items: baseline;
-  gap: 28px;
+  align-items: center;
+  gap: 20px;
   width: 100%;
   padding: 30px 6px;
   background: transparent;
@@ -382,20 +382,32 @@ button:focus-visible {
   transform: scaleY(1);
 }
 
+/* The sequence number, drawn as station numbering — the same
+   roundel the departure board and the station plate use, so a list of
+   choices reads as more stops on the same line rather than a
+   numbered list from a different app. */
 .choice-row__index {
-  padding-top: 5px;
-  min-width: 30px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--row-color, var(--accent)) 40%, transparent);
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: var(--text-secondary);
+  transition: border-color 0.2s ease, color 0.2s ease;
   transition: color 0.2s ease;
 }
 
 .choice-row:hover .choice-row__index,
 .choice-row:focus-visible .choice-row__index {
   color: var(--row-color, var(--accent));
+  border-color: var(--row-color, var(--accent));
 }
 
 .choice-row__main {
@@ -403,10 +415,9 @@ button:focus-visible {
   flex: 1;
   min-width: 0; /* let title/desc actually shrink+ellipsize instead of
                     forcing the row wider than its flex basis */
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
   transition: transform 0.25s ease;
 }
 
@@ -418,7 +429,7 @@ button:focus-visible {
 .choice-row__title {
   font-family: 'Noto Serif JP', serif;
   font-weight: 600;
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -427,10 +438,10 @@ button:focus-visible {
 
 .choice-row__desc {
   color: var(--text-secondary);
-  font-size: 0.9rem;
-  line-height: 1.5;
-  text-align: right;
-  max-width: 320px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  text-align: left;
+  max-width: 56ch;
 }
 
 /* Persistent-selection variant of choice-row — used where picking a
@@ -618,7 +629,14 @@ input:focus { border-color: var(--accent2); }
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-main);
+  /* Platform lighting. A station is lit from its own ceiling, so the
+     middle of the room is brighter than the ends — without this the
+     screen is two panels floating in a void, which is the difference
+     between a picture of a place and a place. */
+  background:
+    radial-gradient(ellipse 130% 52% at 50% 30%,
+      color-mix(in srgb, var(--text-primary) 5%, transparent), transparent 72%),
+    var(--bg-main);
 }
 
 /* ── Concourse ─────────────────────────────────────────────
@@ -763,9 +781,27 @@ input:focus { border-color: var(--accent2); }
    every selection screen, which is what turns a set of screens into
    a line you are travelling down. */
 .station__plate {
+  position: relative;
   display: flex;
   justify-content: center;
-  padding: 28px 24px 8px;
+  padding: 52px 24px 8px;
+}
+
+/* Two hanger rods running up out of frame. Platform signs are
+   suspended from the ceiling, and drawing the thing they hang from is
+   most of what makes the plate read as an object in a room rather
+   than a card on a page. */
+.station__plate::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 232px;
+  height: 52px;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(var(--border), var(--border)) 30px 0 / 3px 100% no-repeat,
+    linear-gradient(var(--border), var(--border)) 199px 0 / 3px 100% no-repeat;
 }
 
 .station-sign {
@@ -878,12 +914,23 @@ input:focus { border-color: var(--accent2); }
 }
 
 .board {
-  width: min(880px, 100%);
+  position: relative;
+  width: min(1040px, 100%);
   background: var(--bg-panel);
   border: 1px solid color-mix(in srgb, var(--accent2) 22%, transparent);
   border-radius: 6px;
   overflow: hidden;
   color: var(--text-on-panel);
+}
+.board::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.022) 0 1px,
+    transparent 1px 3px);
 }
 
 .board__head {
@@ -912,6 +959,13 @@ input:focus { border-color: var(--accent2); }
 
 /* The clock. Only the colon ticks — the digits change once a minute,
    which is when the component re-renders. */
+.board-clock__label {
+  font-family: var(--font-jp);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  opacity: 0.45;
+  margin-right: 8px;
+}
 .board-clock {
   font-family: var(--font-display);
   font-weight: 700;
@@ -928,7 +982,7 @@ input:focus { border-color: var(--accent2); }
 
 .board__columns {
   display: grid;
-  grid-template-columns: 86px 1fr 1fr 24px;
+  grid-template-columns: 78px minmax(0, 1fr) minmax(0, auto) 22px;
   gap: 16px;
   padding: 8px 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -937,13 +991,14 @@ input:focus { border-color: var(--accent2); }
   letter-spacing: 0.18em;
   opacity: 0.45;
 }
-.board__col--note { text-align: left; }
+.board__col--note { text-align: right; }
 
 .board__rows { display: flex; flex-direction: column; }
 
 .board-row {
+  position: relative;
   display: grid;
-  grid-template-columns: 86px 1fr 1fr 24px;
+  grid-template-columns: 78px minmax(0, 1fr) minmax(0, auto) 22px;
   gap: 16px;
   align-items: center;
   width: 100%;
@@ -958,6 +1013,19 @@ input:focus { border-color: var(--accent2); }
   transition: background 0.15s ease;
 }
 .board-row:last-child { border-bottom: none; }
+.board-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--line-color, var(--accent2));
+  transform: scaleY(0);
+  transition: transform 0.18s ease;
+}
+.board-row:hover::before,
+.board-row:focus-visible::before { transform: scaleY(1); }
 .board-row:hover,
 .board-row:focus-visible {
   background: rgba(255, 255, 255, 0.055);
@@ -1033,6 +1101,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .board-row__note {
+  text-align: right;
   font-size: 0.78rem;
   line-height: 1.4;
   opacity: 0.62;
@@ -1084,6 +1153,29 @@ input:focus { border-color: var(--accent2); }
   text-align: center;
 }
 .station__notice-chime { color: var(--accent2); }
+
+/* ── The platform notice ──────────────────────────────────
+   Only on screens that carry a station plate (SelectionScreen adds
+   the modifier when it finds one). Everywhere else — the exam paper
+   picker's own title, say — the big serif heading is still the right
+   call and is left alone. */
+.selection-screen--station .selector-header {
+  gap: 12px;
+  padding-bottom: 24px;
+}
+.selection-screen--station .selector-header__title {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--text-secondary);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.selection-screen--station .selector-header__subtitle { text-align: left; }
+.selection-screen--station .choice-list { border-top: none; }
 
 /* ── 路線図 — the route diagram ────────────────────────────
    The stopping-pattern strip inside a train car, turned upright. One
@@ -1170,8 +1262,11 @@ input:focus { border-color: var(--accent2); }
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  width: 74px;
-  padding: 5px 6px;
+  /* Fixed width so the titles beside them stay in one column, wide
+     enough for the longest label in either language ("EXPRESS
+     LIMITÉ"). */
+  width: 84px;
+  padding: 5px 4px;
   border: 1px solid color-mix(in srgb, var(--service-color) 45%, transparent);
   border-radius: 3px;
   background: color-mix(in srgb, var(--service-color) 10%, transparent);
@@ -1192,9 +1287,9 @@ input:focus { border-color: var(--accent2); }
 }
 .service__latin {
   font-family: var(--font-display);
-  font-size: 0.5rem;
+  font-size: 0.48rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--service-color);
   opacity: 0.7;
