@@ -1,4 +1,4 @@
-import { getAudioContext, getBuffer } from './context'
+import { getAudioContext, getBuffer, whenUnlocked } from './context'
 import { playBuffer, fadeOutAndStop, ramp } from './mixer'
 import { isMuted } from './settings'
 import { stopSpeaking } from './speech'
@@ -41,6 +41,7 @@ let current = null        // { track, handle }
 let requested = null      // the track the app last asked for
 let stopTimer = null
 let hidden = false
+let cancelDeferred = null // unsubscribe for a start waiting on a gesture
 
 const trackUrl = track => `/sounds/ambiant/${track}.mp3`
 
@@ -62,7 +63,22 @@ export function startAmbiance(track) {
   requested = track
 
   const ctx = getAudioContext()
-  if (!ctx) return
+  // Nothing has been clicked yet, so there is no context to play into.
+  // The ambiance is the one sound asked for by a screen mounting
+  // rather than by a gesture, so it has to wait for one: hold the
+  // request and pick it up the moment the page is first touched,
+  // unless the app has asked for something else by then. Only ever one
+  // deferral in flight — a mount/unmount/mount pair (StrictMode, or a
+  // quick route change) would otherwise queue two starts and the
+  // unlock would play the loop twice, over itself.
+  if (!ctx) {
+    if (cancelDeferred) cancelDeferred()
+    cancelDeferred = whenUnlocked(() => {
+      cancelDeferred = null
+      if (requested === track) startAmbiance(track)
+    })
+    return
+  }
 
   const outgoing = current
   current = null

@@ -5062,7 +5062,7 @@ input:focus { border-color: var(--accent2); }
   border: 3px solid var(--border);
 }
 
-/* One index card. The two bits of metadata (level, SRS seal) are
+/* One index card. The two bits of metadata (level, SRS stage) are
    pinned to the top corners — out of the flow entirely — so the
    middle of the card is nothing but headword, reading and meaning,
    read straight down the centre in that order. They used to sit in
@@ -5073,7 +5073,7 @@ input:focus { border-color: var(--accent2); }
   background: var(--bg-card);
   border: none;
   border-radius: 0;
-  padding: 30px 12px 20px;
+  padding: 24px 12px 20px;
   text-align: center;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -5117,31 +5117,70 @@ input:focus { border-color: var(--accent2); }
   width: 100%;
 }
 
+/* ── Marginalia, not badges ────────────────────────────────
+   Both marks used to be chips: a filled level pill and a bordered
+   hanko, one in each top corner. On a single card that's fine; on a
+   grid of forty it's eighty pieces of furniture, and the headword —
+   the only thing anyone is actually scanning for — was competing with
+   two of them on every tile. Badge treatments don't survive
+   repetition: what reads as a label once reads as noise twenty times
+   over.
+
+   So on the grid, and only on the grid, both shed everything except
+   their ink. No fill, no border, no ring, no tilt — just two small
+   characters annotated into the card's top corners, the way a reader
+   pencils a note in a margin. The information is unchanged and the
+   colour still carries it (level hue, seal ink); what's gone is the
+   box around it. The full pill and the struck seal stay exactly as
+   they were on the detail panel, where there's one entry to look at
+   and the ceremony is affordable. */
 .dict-entry-card .dict-level-badge {
   position: absolute;
   top: 7px;
-  left: 7px;
+  left: 10px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
 }
 
-/* At card size the seal drops its pressed-in shadow and softens its
-   edges: the inset highlight and a crisp 65% border are legible
-   detail on a quiz card's 32px stamp, but at 22px they collapse into
-   a hard little box that pulls the eye off the character. What's left
-   is a wash of the seal's ink and the glyph sitting in it — an
-   impression on the card rather than a chip stuck to it. */
+/* `outline: none` is not redundant: the equipped seal skin draws its
+   carved frame as an outline (see the --seal-frame block near the end
+   of this file), and with the box gone that ring would be left
+   hanging in mid-air around a bare character. The skin still shows
+   everywhere the seal is a seal — quiz cards, the detail panel — it
+   just doesn't apply to a margin note. */
 .dict-entry-card .stage-badge {
-  width: 22px;
-  height: 22px;
-  font-size: 12px;
+  position: absolute;
   top: 5px;
-  right: 5px;
-  background: color-mix(in srgb, var(--seal-color) 10%, transparent);
-  border-color: color-mix(in srgb, var(--seal-color) 38%, transparent);
+  right: 10px;
+  width: auto;
+  height: auto;
+  border: none;
+  border-radius: 0;
+  background: none;
   box-shadow: none;
+  outline: none;
+  transform: none;
+  font-size: 13px;
+  opacity: 0.65;
 }
-.dict-entry-card .stage-badge--mastered {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--seal-color) 13%, transparent);
-}
+
+/* A card you have never studied says nothing at all. 'new' is the
+   default state of almost every entry in a 2000-kanji dictionary, so
+   stamping it on each one spends ink to tell you the absence of news —
+   and drowns out the handful of cards that do have something to say.
+   Silence is the 'new' mark here; the seal appears the moment the card
+   has actually been earned. (The detail panel still shows the faint
+   unstruck seal, where a single card has room to say "not yet".) */
+.dict-entry-card .stage-badge--new { display: none; }
+
+/* 極 keeps a little more presence than 習 — gold is quieter than
+   vermillion against both papers, and a mastered card is the one
+   worth spotting from across the grid. */
+.dict-entry-card .stage-badge--mastered { opacity: 0.85; }
 
 /* Same reasoning as .dict-radical-filler: a ragged last row of entry
    cards would otherwise leave a bare patch of the lattice background
