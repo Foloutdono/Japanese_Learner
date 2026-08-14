@@ -116,7 +116,11 @@ export default function StorehouseScreen({ session }) {
 
             {SLOTS.map(slot => (
               <div key={slot}>
-                <SectionHeader title={`${t.cosmeticSlot[slot]} · ${store.slots[slot].filter(i => i.owned).length}/${store.slots[slot].length}`} />
+                <SectionHeader
+                  jp={t.cosmeticSlotJp?.[slot]}
+                  title={t.cosmeticSlot[slot]}
+                  count={`${store.slots[slot].filter(i => i.owned).length}/${store.slots[slot].length}`}
+                />
                 <div className="cos-grid">
                   {store.slots[slot].map(item => (
                     <CosmeticTile

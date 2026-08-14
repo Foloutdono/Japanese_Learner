@@ -24,7 +24,7 @@ export default function SettingsScreen() {
 
       <div className="container settings-container">
         <StationHeader />
-        <SectionHeader title={t.preferences} />
+        <SectionHeader jp="設定" title={t.preferences} />
         <div className="card settings-card">
           <div className="settings-row">
             <span className="settings-row__label">{t.sound}</span>
@@ -43,7 +43,7 @@ export default function SettingsScreen() {
           </div>
         </div>
 
-        <SectionHeader title={t.account} />
+        <SectionHeader jp="会員" title={t.account} />
         <div className="card settings-card">
           <div className="settings-row">
             <span className="settings-row__label">{t.signOutDesc}</span>

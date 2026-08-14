@@ -19,13 +19,15 @@ const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 // ── Mock fallback ─────────────────────────────────────────
 // Kept in sync with profile.py's real response shape so a backend
 // hiccup degrades to a believable screen instead of a blank one.
-// A function of `t` (not a module-level constant) — this used to be
-// a plain object with goal/badge labels hardcoded in French, so an
-// English-language user hitting a backend outage saw French fallback
-// text while the rest of the app stayed in English. Building it
-// inside the component, from `t`, keeps the fallback in the same
-// language as everything else.
-function buildMockProfile(t) {
+//
+// It used to take `t`, because the badge labels inside it were the
+// only translated strings in the payload. They are not in the payload
+// any more — real badges and mock badges both arrive as ids and get
+// named at render time from t.badgeName — so the fallback is language
+// -agnostic by construction rather than by being rebuilt per locale.
+// Still a function, not a constant: the week below is relative to
+// today and would otherwise freeze at module load.
+function buildMockProfile() {
   return {
     username: 'Aiko',
     level: 12,
@@ -65,12 +67,12 @@ function buildMockProfile(t) {
       ],
     },
     badges: [
-      { id: 'first_steps', glyph: '初', label: t.mockBadgeFirstSteps, unlocked: true },
-      { id: 'week_streak', glyph: '週', label: t.mockBadgeWeekStreak, unlocked: true },
-      { id: 'month_streak', glyph: '月', label: t.mockBadgeMonthStreak, unlocked: false },
-      { id: 'kanji_100', glyph: '百', label: t.mockBadgeKanji100, unlocked: true },
-      { id: 'perfectionist', glyph: '極', label: t.mockBadgePerfectionist, unlocked: false },
-      { id: 'dedicated', glyph: '皆', label: t.mockBadgeDedicated, unlocked: false },
+      { id: 'first_steps',   glyph: '初', unlocked: true,  progress: 1,   target: 1 },
+      { id: 'week_streak',   glyph: '週', unlocked: true,  progress: 7,   target: 7 },
+      { id: 'month_streak',  glyph: '月', unlocked: false, progress: 21,  target: 30 },
+      { id: 'kanji_100',     glyph: '百', unlocked: true,  progress: 100, target: 100 },
+      { id: 'perfectionist', glyph: '極', unlocked: false, progress: 7,   target: 10 },
+      { id: 'dedicated',     glyph: '皆', unlocked: true,  progress: 500, target: 500 },
     ],
   }
 }
@@ -108,7 +110,7 @@ export default function ProfileScreen({ session }) {
     apiFetch('/api/profile', session)
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(setProfile)
-      .catch(() => { setProfile(buildMockProfile(t)); setStale(true) })
+      .catch(() => { setProfile(buildMockProfile()); setStale(true) })
 
     apiFetch('/api/leaderboard', session)
       .then(r => (r.ok ? r.json() : Promise.reject()))
@@ -147,23 +149,39 @@ export default function ProfileScreen({ session }) {
             />
           </CommuterPass>
 
-          <SectionHeader title={t.thisWeek} />
-          <WeekStrip week={profile.week} t={t} />
+          <section className="profile-block profile-block--wide">
+            <SectionHeader jp="今週" title={t.thisWeek} />
+            <WeekStrip week={profile.week} t={t} />
+          </section>
 
-          <SectionHeader title={t.records} />
-          <Records profile={profile} t={t} />
+          <div className="profile-pair">
+            <section className="profile-block">
+              <SectionHeader jp="記録" title={t.records} />
+              <Records profile={profile} t={t} />
+            </section>
 
-          <SectionHeader title={t.masteryLadder} />
-          <MasteryLadder rank={profile.cosmetics?.rank} t={t} />
+            <section className="profile-block">
+              <SectionHeader jp="段位" title={t.masteryLadder} />
+              <MasteryLadder rank={profile.cosmetics?.rank} t={t} />
+            </section>
+          </div>
 
-          <SectionHeader title={t.halls} />
-          <HallGrid profile={profile} navigate={navigate} t={t} />
+          <section className="profile-block profile-block--wide">
+            <SectionHeader jp="殿堂" title={t.halls} />
+            <HallGrid profile={profile} navigate={navigate} t={t} />
+          </section>
 
-          <SectionHeader title={t.badges} count={badgeCount} />
-          <BadgesGrid badges={profile.badges} />
+          <div className="profile-pair">
+            <section className="profile-block">
+              <SectionHeader jp="徽章" title={t.badges} count={badgeCount} />
+              <BadgesGrid badges={profile.badges} t={t} />
+            </section>
 
-          <SectionHeader title={t.leaderboard} />
-          <Leaderboard leaderboard={leaderboard} t={t} />
+            <section className="profile-block">
+              <SectionHeader jp="番付" title={t.leaderboard} />
+              <Leaderboard leaderboard={leaderboard} t={t} />
+            </section>
+          </div>
         </div>
       )}
     </div>
@@ -435,19 +453,39 @@ function FiguresPreview({ profile, t }) {
   )
 }
 
-function BadgesGrid({ badges }) {
+// A badge that only says locked or unlocked is a decoration. A locked
+// one now shows how far off it is, because "7 / 10 perfect in a row"
+// is a thing you can go and finish tonight and "極" is not.
+//
+// The name comes from t.badgeName[id] rather than from the response:
+// the backend used to ship hardcoded French labels to every client.
+function BadgesGrid({ badges, t }) {
   return (
     <div className="badges-grid">
-      {badges.map(b => (
-        <div
-          key={b.id}
-          className={`badge-tile${b.unlocked ? '' : ' badge-tile--locked'}`}
-          title={b.label}
-        >
-          <span className="badge-tile__glyph" lang="ja">{b.glyph}</span>
-          <span className="badge-tile__label">{b.label}</span>
-        </div>
-      ))}
+      {badges.map(b => {
+        const name = t.badgeName?.[b.id] ?? b.label ?? b.id
+        const pct = b.target ? Math.round((b.progress / b.target) * 100) : 0
+        return (
+          <div
+            key={b.id}
+            className={`badge-tile${b.unlocked ? '' : ' badge-tile--locked'}`}
+            title={name}
+          >
+            <span className="badge-tile__glyph" lang="ja">{b.glyph}</span>
+            <span className="badge-tile__label">{name}</span>
+            {!b.unlocked && typeof b.target === 'number' && (
+              <span className="badge-tile__progress">
+                <span className="badge-tile__track" aria-hidden="true">
+                  <span className="badge-tile__fill" style={{ width: `${pct}%` }} />
+                </span>
+                <span className="badge-tile__count">
+                  {b.progress.toLocaleString()} / {b.target.toLocaleString()}
+                </span>
+              </span>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -474,16 +512,32 @@ function Leaderboard({ leaderboard, t }) {
   const { entries, me } = leaderboard
   const meInList = me && entries.some(e => e.username === me.username)
 
+  // The person directly above you, and by how much. `entries` is the
+  // top N in rank order, so the one to catch is whoever sits at your
+  // rank minus one — which exists in the list whenever you are inside
+  // it, and whenever you are just outside it too, because that is the
+  // last row of the top N.
+  const chase = me && entries.find(e => e.rank === me.rank - 1)
+  const gap = chase ? chase.xp - me.xp : 0
+
   return (
-    <div className="card leaderboard-card">
-      {entries.map(e => (
-        <LeaderboardRow key={e.rank} e={e} isMe={me && e.username === me.username} t={t} />
-      ))}
-      {me && !meInList && (
-        <>
-          <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
-          <LeaderboardRow e={me} isMe t={t} />
-        </>
+    <div className="banzuke">
+      <div className="banzuke__rows">
+        {entries.map(e => (
+          <LeaderboardRow key={e.rank} e={e} isMe={me && e.username === me.username} t={t} />
+        ))}
+        {me && !meInList && (
+          <>
+            <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
+            <LeaderboardRow e={me} isMe t={t} />
+          </>
+        )}
+      </div>
+
+      {chase && gap > 0 && (
+        <p className="banzuke__chase">
+          {t.chaseNext(gap.toLocaleString(), chase.username)}
+        </p>
       )}
     </div>
   )

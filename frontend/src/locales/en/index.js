@@ -559,6 +559,19 @@ const profile = {
   masteryLadder:     'Mastery',
   rankRemaining:     (n, label) => `${n} more to ${label}`,
   rankTopped:        'Highest rank reached',
+  // Badge names, keyed by the id the backend sends. They used to be
+  // hardcoded French strings baked into routes/profile.py and shipped
+  // to every client, so an English profile has always shown six French
+  // badge names. The id travels now and the name lives here.
+  badgeName: {
+    first_steps:   'First steps',
+    week_streak:   '7-day streak',
+    month_streak:  '30-day streak',
+    kanji_100:     '100 cards mastered',
+    perfectionist: '10 perfect in a row',
+    dedicated:     '500 reviews',
+  },
+  chaseNext:         (xp, who) => `${xp} XP behind ${who}`,
   badgesEarned:      (n, m) => `${n} of ${m}`,
   passLabel:         'Commuter pass',
   passSince:         'Member since level 1',
@@ -583,12 +596,6 @@ const profile = {
   // French goal/badge names. Routed through `t` instead so the
   // fallback screen still respects the UI language like everything
   // else does.
-  mockBadgeFirstSteps:    'First steps',
-  mockBadgeWeekStreak:    '7-day streak',
-  mockBadgeMonthStreak:   '30-day streak',
-  mockBadgeKanji100:      '100 cards mastered',
-  mockBadgePerfectionist: '10 perfect reviews in a row',
-  mockBadgeDedicated:     '500 reviews',
 }
 
 // ── Settings ──────────────────────────────────────────────
@@ -893,6 +900,18 @@ const daruma = {
 // it's owning a sheet of cloud-dragon paper and knowing why it's
 // called that.
 const storehouseCatalogue = {
+  // The seven slots in Japanese — proper names of the objects, the
+  // same in every language, used as the section headings in the
+  // storehouse the way every other heading in the app is paired.
+  cosmeticSlotJp: {
+    paper:    '紙',
+    ring:     '輪',
+    seal:     '印',
+    title:    '称号',
+    backdrop: '背景',
+    flourish: '彩',
+    brush:    '筆',
+  },
   cosmeticSlot: {
     paper:    'Paper',
     ring:     'Ring',

@@ -93,19 +93,19 @@ export default function StatsScreen({ session }) {
           <StationHeader />
           <Headline totals={totals} streak={extra?.streak} dueToday={dueToday} t={t} />
 
-          <SectionHeader title={t.practiceCalendar} />
+          <SectionHeader jp="暦" title={t.practiceCalendar} />
           <PracticeCalendar trend={extra?.trend} />
 
-          <SectionHeader title={t.explorer} />
+          <SectionHeader jp="内訳" title={t.explorer} />
           <p className="stats-lede">{t.explorerLede}</p>
           <Explorer rows={rows} onStartReview={startReview} />
 
-          <SectionHeader title={t.upcomingReviews} />
+          <SectionHeader jp="予定" title={t.upcomingReviews} />
           <Forecast forecast={extra?.forecast} />
 
           {rhythm && (
             <>
-              <SectionHeader title={t.rhythm} />
+              <SectionHeader jp="時間帯" title={t.rhythm} />
               <div className="rhythm-grid">
                 <StudyClock hours={rhythm.hours} />
                 <RatingMix quality={rhythm.quality} />
@@ -116,7 +116,7 @@ export default function StatsScreen({ session }) {
 
           {extra?.weakest?.length > 0 && (
             <>
-              <SectionHeader title={t.weakestItems} />
+              <SectionHeader jp="弱点" title={t.weakestItems} />
               <p className="stats-lede">{t.troubleLede}</p>
               <TroubleList weakest={extra.weakest} onStartReview={startReview} />
             </>

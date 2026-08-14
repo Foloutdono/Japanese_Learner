@@ -127,13 +127,13 @@ export default function DarumaScreen({ session }) {
           <>
             <HallHeader hall={hall} t={t} busy={busy} onRise={() => { playClick(); post('rise') }} />
 
-            <SectionHeader title={t.darumaToday} />
+            <SectionHeader jp="今日" title={t.darumaToday} />
             <DarumaRow dolls={hall.daily} t={t} busy={busy} onClaim={claim} emptyLabel={t.darumaNoneToday} />
 
-            <SectionHeader title={t.darumaThisWeek} />
+            <SectionHeader jp="今週" title={t.darumaThisWeek} />
             <DarumaRow dolls={hall.weekly} t={t} busy={busy} onClaim={claim} emptyLabel={t.darumaNoneToday} />
 
-            <SectionHeader title={`${t.darumaVows} · ${hall.vowsTaken}/${hall.vowSlots}`} />
+            <SectionHeader jp="大願" title={t.darumaVows} count={`${hall.vowsTaken}/${hall.vowSlots}`} />
             <Vows
               hall={hall}
               t={t}
@@ -145,7 +145,7 @@ export default function DarumaScreen({ session }) {
               onRelease={id => { playClick(); post('release', { goal_id: id }) }}
             />
 
-            <SectionHeader title={t.darumaShelf} />
+            <SectionHeader jp="棚" title={t.darumaShelf} />
             <Shelf shelf={hall.shelf} t={t} />
           </>
         )}

@@ -559,6 +559,19 @@ const profile = {
   masteryLadder:     'Maîtrise',
   rankRemaining:     (n, label) => `Encore ${n} avant ${label}`,
   rankTopped:        'Rang le plus haut atteint',
+  // Noms des badges, indexés par l'id envoyé par le backend. Ils
+  // étaient codés en dur en français dans routes/profile.py et servis
+  // à tous les clients — un profil en anglais affichait donc six noms
+  // français. L'id circule désormais et le nom vit ici.
+  badgeName: {
+    first_steps:   'Premiers pas',
+    week_streak:   'Série de 7 jours',
+    month_streak:  'Série de 30 jours',
+    kanji_100:     '100 cartes maîtrisées',
+    perfectionist: "10 sans-faute d'affilée",
+    dedicated:     '500 révisions',
+  },
+  chaseNext:         (xp, who) => `${xp} XP derrière ${who}`,
   badgesEarned:      (n, m) => `${n} sur ${m}`,
   passLabel:         "Carte d'abonnement",
   passSince:         'Membre depuis le niveau 1',
@@ -579,12 +592,6 @@ const profile = {
   // est inaccessible (voir ProfileScreen.jsx buildMockProfile) —
   // routé via `t` pour que l'écran de repli respecte la langue de
   // l'interface comme partout ailleurs.
-  mockBadgeFirstSteps:    'Premiers pas',
-  mockBadgeWeekStreak:    'Série de 7 jours',
-  mockBadgeMonthStreak:   'Série de 30 jours',
-  mockBadgeKanji100:      '100 cartes maîtrisées',
-  mockBadgePerfectionist: '10 révisions parfaites de suite',
-  mockBadgeDedicated:     '500 révisions',
 }
 
 // ── Settings ──────────────────────────────────────────────
@@ -880,6 +887,18 @@ const daruma = {
 // pas un effet lumineux, c'est une feuille de papier dragon-nuage et
 // la raison de son nom.
 const storehouseCatalogue = {
+  // The seven slots in Japanese — proper names of the objects, the
+  // same in every language, used as the section headings in the
+  // storehouse the way every other heading in the app is paired.
+  cosmeticSlotJp: {
+    paper:    '紙',
+    ring:     '輪',
+    seal:     '印',
+    title:    '称号',
+    backdrop: '背景',
+    flourish: '彩',
+    brush:    '筆',
+  },
   cosmeticSlot: {
     paper:    'Papier',
     ring:     'Anneau',

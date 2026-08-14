@@ -165,18 +165,24 @@ def _daruma_summary(user_id: str) -> dict:
 
 
 # ── Badges ────────────────────────────────────────────────────
-# (id, glyph, label, predicate) — predicate receives the same facts
-# dict every badge check needs, computed once up front so adding a
-# badge never means adding a new query.
-def _badge_defs():
-    return [
-        ("first_steps", "初", "Premiers pas", lambda f: f["total_reviews"] >= 1),
-        ("week_streak", "週", "7 jours de série", lambda f: f["streak_longest"] >= 7),
-        ("month_streak", "月", "30 jours de série", lambda f: f["streak_longest"] >= 30),
-        ("kanji_100", "百", "100 cartes maîtrisées", lambda f: f["mastered_count"] >= 100),
-        ("perfectionist", "極", "10 sans-faute d'affilée", lambda f: f["best_quality_streak"] >= 10),
-        ("dedicated", "皆", "500 révisions", lambda f: f["total_reviews"] >= 500),
-    ]
+# (id, glyph, fact, target) — every badge is one fact reaching one
+# number, so they are declared as data rather than as predicates.
+#
+# Two things fall out of that. A locked badge can now say how far off
+# it is, which is the difference between a badge and a decoration: you
+# cannot chase "10 sans-faute d'affilée" if the app will not tell you
+# that you are on 7. And the labels are gone from here entirely —
+# they were hardcoded French strings shipped to every client, so an
+# English user's profile has always shown six French badge names. The
+# id travels instead and the frontend names it (see t.badgeName).
+_BADGE_DEFS = [
+    ("first_steps",   "初", "total_reviews",       1),
+    ("week_streak",   "週", "streak_longest",      7),
+    ("month_streak",  "月", "streak_longest",     30),
+    ("kanji_100",     "百", "mastered_count",    100),
+    ("perfectionist", "極", "best_quality_streak", 10),
+    ("dedicated",     "皆", "total_reviews",     500),
+]
 
 
 def _badge_facts(user_id: str, streak: dict) -> dict:
@@ -191,10 +197,19 @@ def _badge_facts(user_id: str, streak: dict) -> dict:
 
 
 def _badges(facts: dict) -> list[dict]:
-    return [
-        {"id": bid, "glyph": glyph, "label": label, "unlocked": bool(pred(facts))}
-        for bid, glyph, label, pred in _badge_defs()
-    ]
+    out = []
+    for bid, glyph, fact, target in _BADGE_DEFS:
+        have = int(facts[fact])
+        out.append({
+            "id": bid,
+            "glyph": glyph,
+            "unlocked": have >= target,
+            # Capped at the target so a badge earned long ago reads
+            # "500 / 500" rather than "4 210 / 500".
+            "progress": min(have, target),
+            "target": target,
+        })
+    return out
 
 
 # ── Routes ────────────────────────────────────────────────────

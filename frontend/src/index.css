@@ -200,6 +200,12 @@
      deliberately quieter than any section of the language itself. */
   --line-profile:   #5a7186;  /* 藍鼠     ainezumi,    slate       */
   --line-settings:  #7d7468;  /* 利休鼠   rikyunezu,   stone       */
+
+  /* 金銀銅 — the podium. Its own three, because a medal is an
+     identity and not a progress state. */
+  --medal-gold:     #c99a3e;
+  --medal-silver:   #a8adb4;
+  --medal-bronze:   #a8703f;
 }
 
 /* ── Light theme — washi (和紙), rice paper ──────────────────
@@ -278,6 +284,10 @@
   --line-exam:      #7a5c40;
   --line-profile:   #4c6072;
   --line-settings:  #6b6357;
+
+  --medal-gold:     #a97a25;
+  --medal-silver:   #8d939b;
+  --medal-bronze:   #8a5527;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -720,7 +730,7 @@ input:focus { border-color: var(--accent2); }
    dividing the whole page). Shared by any screen with grouped
    content: Stats, Profile, and onward. */
 .section-header {
-  margin: 72px 0 28px;
+  margin: 56px 0 22px;
   text-align: left;
 }
 .section-header:first-child { margin-top: 0; }
@@ -736,9 +746,50 @@ input:focus { border-color: var(--accent2); }
 .section-header__rule {
   height: 3px;
   width: 40px;
-  background: var(--accent);
+  background: var(--line-color, var(--accent));
   margin-top: 10px;
 }
+
+/* ── The paired form ───────────────────────────────────────
+   Japanese term, then the plain-language one tracked out beside it,
+   then a rule the full width of the pair. Same construction as the
+   plate and the board masthead, so a heading finally belongs to the
+   same signage as everything under it. */
+.section-header--paired { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; }
+.section-header--paired .section-header__mark {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+.section-header__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: clamp(1.35rem, 1.1rem + 1vw, 1.75rem);
+  letter-spacing: 0.1em;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+/* Demoted to a caption once there is a Japanese term above it — the
+   pair is the heading, not two headings. */
+.section-header--paired .section-header__title {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.section-header--paired .section-header__rule {
+  flex-basis: 100%;
+  width: 100%;
+  height: 1px;
+  margin-top: 12px;
+  background: linear-gradient(90deg,
+    var(--line-color, var(--accent)) 0 40px,
+    var(--surface-line) 40px);
+}
+.section-header--paired .section-header__count { margin-left: auto; }
 
 .top-bar {
   background: var(--bg-panel);
@@ -1527,7 +1578,7 @@ input:focus { border-color: var(--accent2); }
   width: 100%;
   height: 82px;
   border-radius: 4px;
-  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
   overflow: hidden;
 }
 .week-day__fill {
@@ -1714,6 +1765,111 @@ input:focus { border-color: var(--accent2); }
   .week-day__count { font-size: 0.62rem; }
   .record { padding: 16px 14px; }
   .record__value { font-size: 1.4rem; }
+}
+
+
+/* ══ The profile's composition ══════════════════════════════
+   Blocks, not a stack. A section owns its heading and its content as
+   one unit, so the spacing between sections is set once here instead
+   of by whatever margin each component happened to carry.
+
+   The pairs are deliberate: records read against mastery (how much you
+   have shown up, against how much you hold), and the badge grid reads
+   against the ranking board (what you are chasing alone, against what
+   you are chasing with everyone else). Each half means more beside its
+   opposite than it did alone at full width. */
+/* A column, so the content below the heading can be told to fill the
+   rest of the block — two cards side by side that end at different
+   heights read as two loose objects rather than as a pair. */
+.profile-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.profile-block > .section-header { margin-top: 0; }
+.profile-pair .profile-block > :last-child { flex: 1; }
+
+.profile-pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+@media (min-width: 1000px) {
+  .profile-pair { grid-template-columns: 1fr 1fr; gap: 40px 44px; }
+}
+
+/* One rhythm for the whole column, replacing six components' worth of
+   individual bottom margins. */
+.profile-container .profile-block,
+.profile-container .profile-pair { margin-bottom: 52px; }
+.profile-container .week,
+.profile-container .records,
+.profile-container .dan,
+.profile-container .hall-grid,
+.profile-container .badges-grid,
+.profile-container .banzuke { margin-bottom: 0; }
+
+/* Half-width now, so the four figures fold to two columns rather than
+   squeezing four into 480px. */
+.profile-pair .records { grid-template-columns: repeat(2, 1fr); }
+
+/* ══ 番付 — the ranking board ═══════════════════════════════ */
+.banzuke {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
+  overflow: hidden;
+}
+.banzuke__rows { display: flex; flex-direction: column; }
+/* The one line on the board you can act on: who is directly ahead and
+   by how much. */
+.banzuke__chase {
+  margin: 0;
+  padding: 13px 18px;
+  border-top: 1px solid var(--surface-line);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ── A badge says what it is waiting for ─────────────────── */
+.badge-tile__progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  margin-top: 2px;
+}
+.badge-tile__track {
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+  overflow: hidden;
+}
+.badge-tile__fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent2);
+  transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+.badge-tile__count {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 560px) {
+  .profile-container .profile-block,
+  .profile-container .profile-pair { margin-bottom: 40px; }
+  .profile-pair { gap: 40px; }
+  .profile-pair .records { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ── 発車標 — the departure board ─────────────────────────── */
@@ -6730,9 +6886,9 @@ input:focus { border-color: var(--accent2); }
 }
 /* Medal tones for the top 3 — kanji numerals in a filled disc rather
    than 🥇🥈🥉, so it stays inside the app's ink/pigment language. */
-.leaderboard-row__rank--1 { background: var(--accent2); color: var(--text-on-fill); }
-.leaderboard-row__rank--2 { background: var(--state-new); color: var(--text-on-fill); }
-.leaderboard-row__rank--3 { background: var(--accent7); color: var(--text-on-fill); }
+.leaderboard-row__rank--1 { background: var(--medal-gold);   color: var(--text-on-fill); border-color: transparent; }
+.leaderboard-row__rank--2 { background: var(--medal-silver); color: var(--text-on-fill); border-color: transparent; }
+.leaderboard-row__rank--3 { background: var(--medal-bronze); color: var(--text-on-fill); border-color: transparent; }
 
 .leaderboard-row__name {
   flex: 1;
