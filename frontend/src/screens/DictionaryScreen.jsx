@@ -39,6 +39,7 @@ export default function DictionaryScreen({ session }) {
 	const debounceRef = useRef(null)
 	const observerRef = useRef(null)
 	const sentinelRef = useRef(null)
+	const searchRef   = useRef(null)
 
 	const radicalCharByNumber = useMemo(() => {
 		const map = {}
@@ -56,6 +57,28 @@ export default function DictionaryScreen({ session }) {
 	useEffect(() => {
 		fetchPage(0, '', category, null)
 		loadRadicalGrid()
+	}, [])
+
+	// ── Keyboard ──
+	// "/" jumps to the field from anywhere on the page and Escape
+	// closes the open entry — the two things you do constantly in a
+	// dictionary and previously had to reach for the mouse to do.
+	// Guarded on the event target so "/" typed into the field itself
+	// (or any other input on the page) still types a slash.
+	useEffect(() => {
+		function onKey(e) {
+			const typing = /^(INPUT|TEXTAREA)$/.test(e.target.tagName) || e.target.isContentEditable
+			if (e.key === '/' && !typing) {
+				e.preventDefault()
+				searchRef.current?.focus()
+				searchRef.current?.select()
+			} else if (e.key === 'Escape') {
+				if (typing && e.target === searchRef.current) e.target.blur()
+				else setSelected(null)
+			}
+		}
+		window.addEventListener('keydown', onKey)
+		return () => window.removeEventListener('keydown', onKey)
 	}, [])
 
 	useEffect(() => {
@@ -257,6 +280,16 @@ export default function DictionaryScreen({ session }) {
 				    ~8k-word search experience doesn't get swamped by ~293k
 				    largely obscure entries; someone who wants the full
 				    dictionary asks for it explicitly. */}
+				{/* ── 索引台 — the index console ──
+				    Category, mode and query were three control rows stacked
+				    down the page, so the first four things on a dictionary
+				    were four bands of chrome. They are one instrument now:
+				    collections along the top edge, the mode opposite them,
+				    the field itself across the bottom. Same card material as
+				    everything else, so the console reads as a piece of the
+				    station's furniture rather than a toolbar. */}
+				<div className="dict-console">
+				<div className="dict-console__top">
 				<div className="dict-tab-row dict-tab-row--category">
 					{[
 						['kanji',    t.dictKanji,                '漢', 'var(--line-kanji)'],
@@ -283,7 +316,10 @@ export default function DictionaryScreen({ session }) {
 
 				{/* Search / radical sub-toggle — radical browsing only makes
 				    sense for kanji (a word can span several, and kana have
-				    no radical at all), so it only appears under that tab. */}
+				    no radical at all), so it only appears under that tab.
+				    Opposite the collections rather than on a row of its
+				    own: it is a property of the kanji collection, not a
+				    third navigation level. */}
 				{category === 'kanji' && (
 					<div className="dict-tab-row dict-tab-row--submode">
 						{[
@@ -300,6 +336,7 @@ export default function DictionaryScreen({ session }) {
 						))}
 					</div>
 				)}
+				</div>
 
 				{/* Search bar + count — hidden while browsing the plain radical grid,
 				    shown again once a radical is picked (to narrow further), and hidden
@@ -308,6 +345,7 @@ export default function DictionaryScreen({ session }) {
 					<div className="dict-index-bar">
 						<SearchIcon />
 						<input
+							ref={searchRef}
 							value={query}
 							onChange={onSearch}
 							placeholder={
@@ -318,6 +356,10 @@ export default function DictionaryScreen({ session }) {
 							autoFocus={mode === 'search'}
 							className="dict-index-bar__input"
 						/>
+						{/* The key that focuses this field, printed on it. A
+						    reference tool you use all day should tell you how
+						    to reach it without the mouse. */}
+						<kbd className="dict-index-bar__key" aria-hidden="true">/</kbd>
 						{!loading && (
 							<div className="dict-index-bar__count">
 								{t.dictionaryResults(total)}
@@ -325,6 +367,7 @@ export default function DictionaryScreen({ session }) {
 						)}
 					</div>
 				)}
+				</div>
 
 				{/* Selected-radical header */}
 				{mode === 'radical' && selectedRadical != null && (

@@ -12461,3 +12461,107 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
   .dict-tab-row--category { gap: 6px; }
   .dict-tab-row--category .dict-tab-btn { padding: 6px 11px 6px 7px; gap: 6px; }
 }
+
+/* ── 索引台 — the index console ────────────────────────────
+   Collections, mode and query were three stacked control rows, so the
+   first thing a dictionary showed you was four bands of chrome. One
+   instrument now: collections along the top edge, mode opposite them,
+   the field across the bottom. Built from the same card material as
+   every other object in the app, so it reads as station furniture and
+   not as a toolbar. */
+.dict-console {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 26px;
+}
+.dict-console__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--surface-line);
+}
+.dict-console .dict-tab-row--category { margin-bottom: 0; }
+
+/* The mode toggle is a property of the kanji collection, not a third
+   level of navigation, so it sits opposite the collections rather
+   than under them. */
+.dict-console .dict-tab-row--submode {
+  border-bottom: none;
+  margin-bottom: 0;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+.dict-console .dict-tab-btn--sub {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+.dict-console .dict-tab-btn--sub::after { display: none; }
+.dict-console .dict-tab-btn--sub.dict-tab-btn--active {
+  background: var(--line-jisho);
+  color: var(--bg-main);
+}
+
+/* The field runs the full width of the console and carries no border
+   of its own — the console is its frame. */
+.dict-console .dict-index-bar {
+  border: none;
+  border-radius: 0;
+  background: none;
+  margin-bottom: 0;
+  padding: 4px 18px;
+  gap: 14px;
+}
+.dict-console .dict-index-bar:focus-within {
+  background: color-mix(in srgb, var(--line-jisho) 7%, transparent);
+}
+.dict-index-bar__input { font-size: 1.05rem; }
+.dict-index-bar__input::placeholder { color: color-mix(in srgb, var(--text-secondary) 80%, transparent); }
+
+/* The key that focuses the field, printed on the field. */
+.dict-index-bar__key {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--surface-line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  transition: opacity 0.16s ease;
+}
+.dict-index-bar:focus-within .dict-index-bar__key { opacity: 0; }
+
+@media (max-width: 700px) {
+  .dict-console__top { padding: 10px 10px; }
+  .dict-console .dict-index-bar { padding: 2px 12px; gap: 10px; }
+  .dict-index-bar__input { font-size: 1rem; }
+  .dict-index-bar__key { display: none; }
+}
+
+/* ── Closing the dock ──
+   In dock mode the ✕ in the panel's own header is the close, and
+   Escape works from anywhere on the page. The full-width "close"
+   slab underneath is a thumb affordance: it costs a whole row of a
+   420px reading panel to repeat something already available twice,
+   so it stays on phones and goes here. */
+@media (min-width: 1100px) {
+  .dict-dock .dict-detail__close-x { display: inline-flex; }
+  .dict-dock .dict-detail__close-btn { display: none; }
+}
