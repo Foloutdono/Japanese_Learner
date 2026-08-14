@@ -25,3 +25,9 @@ dist-ssr
 
 *storybook.log
 storybook-static
+
+# Throwaway Playwright probes and their screenshots
+shot*.mjs
+sweep*.mjs
+probe*.mjs
+shots/
