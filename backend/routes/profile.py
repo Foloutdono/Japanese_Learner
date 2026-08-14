@@ -179,13 +179,18 @@ def _badge_defs():
     ]
 
 
-def _badges(user_id: str, streak: dict) -> list[dict]:
-    facts = {
+def _badge_facts(user_id: str, streak: dict) -> dict:
+    """The numbers every badge predicate needs — and, as it turns out,
+    the numbers the profile screen wants to show. Computed once."""
+    return {
         "total_reviews": srs.get_total_reviews(user_id),
         "mastered_count": srs.get_mastered_count(user_id),
         "best_quality_streak": srs.get_best_quality_streak(user_id, min_quality=4),
         "streak_longest": streak["longest"],
     }
+
+
+def _badges(facts: dict) -> list[dict]:
     return [
         {"id": bid, "glyph": glyph, "label": label, "unlocked": bool(pred(facts))}
         for bid, glyph, label, pred in _badge_defs()
@@ -199,21 +204,29 @@ def get_profile(user_id: str = Depends(get_user_id)):
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     streak = srs.get_streak(user_id)
-    total_reviews = srs.get_total_reviews(user_id)
+    facts = _badge_facts(user_id, streak)
 
     return {
         "username": username,
         **progress,
         "streak": streak["current"],
         "streakLongest": streak["longest"],
-        "totalReviews": total_reviews,
+        "totalReviews": facts["total_reviews"],
+        # Longest unbroken run of "good or better" answers. Already
+        # computed for the 極 badge's predicate and previously
+        # discarded; the profile shows it as a personal best.
+        "bestQualityStreak": facts["best_quality_streak"],
+        # The last seven days of activity, for the 今週 strip. Same
+        # helper the stats screen's practice calendar uses, asked for a
+        # week instead of a year.
+        "week": srs.get_daily_review_counts(user_id, days=7),
         "daruma": _daruma_summary(user_id),
         # Loadout + mastery rank ride along on the one profile fetch
         # every screen already makes, so applying a paper skin or a
         # ring never costs a second request (see components/
         # cosmetics.js, which stamps them onto <html>).
         "cosmetics": cosmetics_summary(user_id),
-        "badges": _badges(user_id, streak),
+        "badges": _badges(facts),
     }
 
 

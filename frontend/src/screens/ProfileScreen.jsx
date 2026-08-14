@@ -6,13 +6,13 @@ import { TopBar } from '../components/ui/TopBar'
 import { StationHeader } from '../components/station/StationHeader'
 import { Loading } from '../components/ui/Loading'
 import { SectionHeader } from '../components/ui/SectionHeader'
-import { levelTitle } from '../domain/levelTitle'
 import { WarningIcon, PencilIcon, CrossIcon, FlameIcon } from '../components/ui/Icons'
 import { Daruma } from '../components/rewards/Daruma'
 import { CosmeticSwatch } from '../components/rewards/CosmeticSwatch'
 import { HallCard } from '../components/profile/HallCard'
+import { CommuterPass } from '../components/profile/CommuterPass'
+import { WeekStrip, Records, MasteryLadder } from '../components/profile/ProfileBlocks'
 import { getProfileHalls } from '../config/navLinks'
-import { DEFAULT_LOADOUT } from '../stores/cosmetics'
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 
@@ -35,6 +35,19 @@ function buildMockProfile(t) {
     streak: 14,
     streakLongest: 21,
     totalReviews: 842,
+    bestQualityStreak: 12,
+    week: (() => {
+      const counts = [24, 0, 31, 18, 40, 12, 7]
+      const out = []
+      const now = new Date()
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now)
+        d.setDate(now.getDate() - i)
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        if (counts[6 - i]) out.push({ date: key, count: counts[6 - i] })
+      }
+      return out
+    })(),
     cosmetics: {
       loadout: { paper: 'paper_washi', ring: 'ring_kumihimo', seal: 'seal_shu', title: 'title_minarai' },
       titleJp: '見習い',
@@ -105,6 +118,9 @@ export default function ProfileScreen({ session }) {
   }, [])
 
   const loading = !profile || !leaderboard
+  const badgeCount = profile
+    ? t.badgesEarned(profile.badges.filter(b => b.unlocked).length, profile.badges.length)
+    : null
 
   return (
     <div className="screen">
@@ -122,12 +138,28 @@ export default function ProfileScreen({ session }) {
             </div>
           )}
 
-          <ProfileCard profile={profile} session={session} onUsernameChange={u => setProfile(p => ({ ...p, username: u }))} t={t} />
+          <CommuterPass profile={profile} t={t}>
+            <PassHolder
+              profile={profile}
+              session={session}
+              onUsernameChange={u => setProfile(p => ({ ...p, username: u }))}
+              t={t}
+            />
+          </CommuterPass>
+
+          <SectionHeader title={t.thisWeek} />
+          <WeekStrip week={profile.week} t={t} />
+
+          <SectionHeader title={t.records} />
+          <Records profile={profile} t={t} />
+
+          <SectionHeader title={t.masteryLadder} />
+          <MasteryLadder rank={profile.cosmetics?.rank} t={t} />
 
           <SectionHeader title={t.halls} />
           <HallGrid profile={profile} navigate={navigate} t={t} />
 
-          <SectionHeader title={t.badges} />
+          <SectionHeader title={t.badges} count={badgeCount} />
           <BadgesGrid badges={profile.badges} />
 
           <SectionHeader title={t.leaderboard} />
@@ -138,26 +170,28 @@ export default function ProfileScreen({ session }) {
   )
 }
 
-function ProfileCard({ profile, session, onUsernameChange, t }) {
-  const [, jpTitle, title] = levelTitle(profile.level)
-
+// The holder half of the pass: the level ring with the initial struck
+// in it, and the name — which is editable in place, because changing
+// it is a one-field change and does not deserve a page of its own.
+//
+// The ring is the XP arc. It used to carry a level badge as well,
+// which is now printed large on the pass itself where a pass prints
+// its class, so the ring is left to do one job.
+function PassHolder({ profile, session, onUsernameChange, t }) {
   const span = Math.max(1, profile.xpForNext - profile.xpPrevLevel)
   const into = Math.min(span, Math.max(0, profile.xp - profile.xpPrevLevel))
   const pct  = Math.round((into / span) * 100)
 
-  // Ring geometry: same "draw a stroke around a circle" idea as the
-  // shared Loading spinner, but static — filled to the level's
-  // progress instead of animating.
   const r = 42
   const circumference = 2 * Math.PI * r
   const dashoffset = circumference * (1 - pct / 100)
 
   return (
-    <div className="profile-card">
-      <div className="profile-card__avatar-wrap">
-        <svg className="profile-card__ring" viewBox="0 0 96 96" aria-hidden="true">
+    <div className="pass__holder">
+      <div className="pass__avatar-wrap">
+        <svg className="pass__ring" viewBox="0 0 96 96" aria-hidden="true">
           <circle className="profile-card__ring-track" cx="48" cy="48" r={r} />
-          {/* Purely decorative, and the only part a 輪 cosmetic may
+          {/* Decorative only, and the one part a 輪 cosmetic may
               pattern — the arc below owns stroke-dasharray, because
               that IS the XP progress. */}
           <circle className="profile-card__ring-deco" cx="48" cy="48" r={r} />
@@ -168,56 +202,10 @@ function ProfileCard({ profile, session, onUsernameChange, t }) {
             strokeDashoffset={dashoffset}
           />
         </svg>
-        <div className="profile-card__avatar">{profile.username.charAt(0).toUpperCase()}</div>
-        <div className="profile-card__level-badge" title={`${t.level} ${profile.level}`}>
-          {profile.level}
-        </div>
+        <div className="pass__avatar">{profile.username.charAt(0).toUpperCase()}</div>
       </div>
 
-      <div className="profile-card__info">
-        <EditableUsername username={profile.username} session={session} onChange={onUsernameChange} t={t} />
-        <ProfileTitle profile={profile} jpTitle={jpTitle} title={title} t={t} />
-        <RankBadge rank={profile.cosmetics?.rank} t={t} />
-
-        <div className="profile-card__xp-row">
-          <span>{into} / {span} XP</span>
-          <span>{t.nextLevel}</span>
-        </div>
-        <div className="profile-card__xp-track">
-          <div className="profile-card__xp-fill" style={{ width: `${pct}%` }} />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Two ranks can sit under a name and they mean different things: the
-// automatic level title (levelTitle.js — everybody gets one, it tracks
-// XP) and the 称号 chosen in the storehouse, which had to be earned.
-// The chosen one wins when there is one, because picking it was the
-// point; otherwise the level title keeps the line from being empty.
-function ProfileTitle({ profile, jpTitle, title, t }) {
-  const equipped = profile.cosmetics?.loadout?.title
-  if (equipped && equipped !== DEFAULT_LOADOUT.title) {
-    return (
-      <div className="profile-card__title profile-card__earned-title" lang="ja">
-        {profile.cosmetics?.titleJp}
-        {t.cosmeticName?.[equipped] ? ` · ${t.cosmeticName[equipped]}` : ''}
-      </div>
-    )
-  }
-  return <div className="profile-card__title" lang="ja">{jpTitle} · {title}</div>
-}
-
-// 段位 — mastery, which is a different axis from the level ring above
-// it: the ring says how much you've shown up, this says how much
-// Japanese you hold. See srs/cosmetics.py.
-function RankBadge({ rank, t }) {
-  if (!rank) return null
-  return (
-    <div className={`profile-card__rank${rank.isDan ? ' profile-card__rank--dan' : ''}`} title={t.masteryRank}>
-      <span lang="ja">{rank.label}</span>
-      <span className="profile-card__rank-label">{t.masteryRank}</span>
+      <EditableUsername username={profile.username} session={session} onChange={onUsernameChange} t={t} />
     </div>
   )
 }

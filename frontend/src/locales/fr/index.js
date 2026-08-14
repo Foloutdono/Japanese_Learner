@@ -548,6 +548,21 @@ const misc = {
 
 // ── Profile ───────────────────────────────────────────────
 const profile = {
+  // ── Profil ──
+  thisWeek:          'Cette semaine',
+  records:           'Records',
+  currentStreak:     'Série en cours',
+  longestStreak:     'Plus longue série',
+  perfectRun:        'Meilleure série parfaite',
+  perfectRunUnit:    "d'affilée",
+  dayUnit:           'jours',
+  masteryLadder:     'Maîtrise',
+  rankRemaining:     (n, label) => `Encore ${n} avant ${label}`,
+  rankTopped:        'Rang le plus haut atteint',
+  badgesEarned:      (n, m) => `${n} sur ${m}`,
+  passLabel:         "Carte d'abonnement",
+  passSince:         'Membre depuis le niveau 1',
+  noActivityWeek:    "Rien d'étudié cette semaine pour l'instant",
   profileTitle:      'Profil',
   profileStale:      "Impossible d'atteindre le serveur — affichage de vos dernières données connues.",
   nextLevel:         'Niveau suivant',
