@@ -6420,6 +6420,12 @@ input:focus { border-color: var(--accent2); }
 .dict-index-bar__icon { width: 16px; height: 16px; color: var(--text-secondary); flex-shrink: 0; }
 .dict-index-bar__input {
   flex: 1;
+  /* An <input> carries an intrinsic min-content width of roughly
+     170px from its default `size`, and a flex item's default
+     `min-width: auto` refuses to go below that — so on a 360px phone
+     the field held its ground and shoved the result count out through
+     the right-hand side of the bar. */
+  min-width: 0;
   border: none;
   background: transparent;
   padding: 14px 0;
@@ -6428,6 +6434,8 @@ input:focus { border-color: var(--accent2); }
 }
 .dict-index-bar__input:focus { border: none; }
 .dict-index-bar__count {
+  flex-shrink: 0;
+  white-space: nowrap;
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
