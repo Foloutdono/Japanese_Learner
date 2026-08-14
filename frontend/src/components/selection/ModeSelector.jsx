@@ -1,31 +1,37 @@
 import { useLang } from '../../LangContext'
 import { serviceFor } from '../../config/stations'
 import { playUi } from '../../lib/audio'
+import { useReportPlatformCount } from './platformCount'
 
 /**
- * ModeSelector — 種別
+ * ModeSelector — のりば案内
  *
- * Study modes as service types. On a Japanese line the type says how
- * often the train stops for you, and studying has exactly that axis:
- * how much the mode holds your hand. The ladder and the reasoning
- * behind each rung live in config/stations.js.
+ * The choices at a station, drawn as the signs at the head of each
+ * platform: a coloured rail carrying either the 番線 platform number
+ * or the 種別 service type, then the destination and what it is.
  *
- * The pips are the important part. "快速" means nothing to somebody
- * learning their first hundred kanji, and neither does the English
- * "RAPID" this used to print underneath it — that is railway
- * vocabulary, not study vocabulary, which is why the badges read as
- * arbitrary. Four dots against one is legible immediately and needs
- * no glossary: more stops, more help.
+ * ── Why cards and not rows ──
+ * This used to be full-width rows, borrowed from the home departure
+ * board. That board carries eleven services with a remark on each and
+ * earns its 1040px. These screens mostly carry two to five short
+ * options, and the same row at the same width put a six-character
+ * title at one end and a five-character specimen at the other with
+ * five hundred pixels of nothing between them. A grid fills width by
+ * multiplying columns instead of stretching one row, so two options
+ * and thirty options both look deliberate.
  *
- * The same component also drives the study-source pickers ("by
- * level", "by theme"), whose keys aren't services at all. Those get
- * the board's own 番線 platform number rather than a wrong badge —
- * previously a roundel reading "01…04", which is the one piece of
- * furniture on these screens that looked like it came from a generic
- * list rather than from a station. The home board says 「1 番線」 for
- * the track a service leaves from; a selection screen is where you
- * pick which one to board, so it says the same thing in the same
- * type. Nothing new to learn, and the two screens stop being cousins.
+ * ── The ladder ──
+ * On a Japanese line the service type says how often the train stops
+ * for you, and studying has exactly that axis: how much the mode
+ * holds your hand. The ladder and the reasoning behind each rung live
+ * in config/stations.js. The pips are the part that makes it legible
+ * — "快速" means nothing to somebody learning their first hundred
+ * kanji, and neither does the English "RAPID". Four dots against one
+ * needs no glossary: more stops, more help.
+ *
+ * The same component drives the study-source pickers ("by level", "by
+ * theme"), whose keys aren't services at all — those get the board's
+ * own 番線 platform number rather than a wrong badge.
  *
  * No header of its own — every caller renders inside <SelectionScreen>,
  * which already names the section on the station plate overhead.
@@ -33,16 +39,17 @@ import { playUi } from '../../lib/audio'
  * Props:
  *   modes    — array of { key, label, desc?, sample?, color? }
  *     sample — optional Japanese specimen line (the characters a set
- *       actually contains, say). Set in the Japanese face and spaced
- *       like the 停車駅 strip under a destination, because it is the
- *       same kind of information: what this row actually stops at.
- *   onSelect(key) — called when a row is chosen
+ *       actually contains, say), set in the Japanese face. It is the
+ *       停車駅 strip under a destination: what this one actually stops
+ *       at.
+ *   onSelect(key) — called when a card is chosen
  */
 export default function ModeSelector({ modes, onSelect }) {
   const { t } = useLang()
+  useReportPlatformCount(modes.length)
 
   return (
-    <div className="choice-list">
+    <div className="platform-grid">
       {modes.map((m, i) => {
         const service = serviceFor(m.key)
         return (
@@ -50,61 +57,42 @@ export default function ModeSelector({ modes, onSelect }) {
             key={m.key}
             type="button"
             onClick={() => { playUi('click-mode-selection'); onSelect(m.key) }}
-            className="choice-row"
+            className={`platform-card${service ? ` platform-card--${service.key}` : ''}`}
             style={m.color ? { '--row-color': m.color } : undefined}
+            title={service ? t.serviceLabel?.[service.key] : undefined}
           >
-            <span className="choice-row__accent" aria-hidden="true" />
-
-            <span className="choice-row__lead">
+            <span className="platform-card__lead">
               {service ? (
-                <span
-                  className={`service service--${service.key}`}
-                  title={t.serviceLabel?.[service.key]}
-                >
-                  <span className="service__jp" lang="ja">{service.jp}</span>
+                <>
+                  <span className="platform-card__service" lang="ja">{service.jp}</span>
                   {service.stops > 0 && (
-                    <span className="service__stops" aria-hidden="true">
+                    <span className="platform-card__stops" aria-hidden="true">
                       {[1, 2, 3, 4].map(n => (
                         <span
                           key={n}
-                          className={`service__pip${n <= service.stops ? ' service__pip--on' : ''}`}
+                          className={`platform-card__pip${n <= service.stops ? ' platform-card__pip--on' : ''}`}
                         />
                       ))}
                     </span>
                   )}
-                </span>
+                </>
               ) : (
-                <span className="choice-row__platform">
-                  <span className="choice-row__no">{i + 1}</span>
-                  <span className="choice-row__no-unit" lang="ja">番線</span>
-                </span>
-              )}
-            </span>
-
-            {/* Title left, 備考 right — the departure board's own row,
-                and the one LevelSelector's route stops already used.
-                Stacked under the title instead, the description left
-                the right two-thirds of every row empty on any screen
-                wider than a tablet. Below 640px they stack. */}
-            <span className="choice-row__main">
-              <span className="choice-row__title">{m.label}</span>
-              {(m.desc || m.sample) && (
                 <>
-                  <span className="choice-leader" aria-hidden="true" />
-                  <span className="choice-row__note">
-                    {m.desc && <span className="choice-row__desc">{m.desc}</span>}
-                    {m.sample && (
-                      <span className="choice-row__sample" lang="ja" aria-hidden="true">{m.sample}</span>
-                    )}
-                  </span>
+                  <span className="platform-card__no">{i + 1}</span>
+                  <span className="platform-card__unit" lang="ja">番線</span>
                 </>
               )}
             </span>
 
-            {/* The same mark the board puts at the end of every
-                service, appearing on hover. A selection row led
-                somewhere and said so with nothing at all. */}
-            <span className="choice-row__go" aria-hidden="true">▶</span>
+            <span className="platform-card__body">
+              <span className="platform-card__title">{m.label}</span>
+              {m.desc && <span className="platform-card__desc">{m.desc}</span>}
+              {m.sample && (
+                <span className="platform-card__sample" lang="ja" aria-hidden="true">{m.sample}</span>
+              )}
+            </span>
+
+            <span className="platform-card__go" aria-hidden="true">▶</span>
           </button>
         )
       })}

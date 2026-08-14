@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
+import { useReportPlatformCount } from './platformCount'
 
 /**
  * ThemeSelector
@@ -79,6 +80,7 @@ export default function ThemeSelector({ session, onSelect, color }) {
   }, [labeled, query])
 
   const rowStyle = color ? { '--row-color': color } : undefined
+  useReportPlatformCount(visibleThemes.length)
 
   return (
     <div className="level-selector">
@@ -104,28 +106,24 @@ export default function ThemeSelector({ session, onSelect, color }) {
       )}
 
       {themes && visibleThemes.length > 0 && (
-        <div className="choice-list">
+        <div className="platform-grid">
           {visibleThemes.map((th, i) => (
             <button
               key={th.key}
               type="button"
               onClick={() => { playUi('click-mode-selection'); onSelect(th.key, th.label) }}
-              className="choice-row"
+              className="platform-card"
               style={rowStyle}
             >
-              <span className="choice-row__accent" aria-hidden="true" />
-              <span className="choice-row__lead">
-                <span className="choice-row__platform">
-                  <span className="choice-row__no">{i + 1}</span>
-                  <span className="choice-row__no-unit" lang="ja">番線</span>
-                </span>
+              <span className="platform-card__lead">
+                <span className="platform-card__no">{i + 1}</span>
+                <span className="platform-card__unit" lang="ja">番線</span>
               </span>
-              <span className="choice-row__main">
-                <span className="choice-row__title">{th.label}</span>
-                <span className="choice-leader" aria-hidden="true" />
-                <span className="choice-row__desc">{th.count} {t.wordNoun}</span>
+              <span className="platform-card__body">
+                <span className="platform-card__title">{th.label}</span>
+                <span className="platform-card__desc">{th.count} {t.wordNoun}</span>
               </span>
-              <span className="choice-row__go" aria-hidden="true">▶</span>
+              <span className="platform-card__go" aria-hidden="true">▶</span>
             </button>
           ))}
         </div>

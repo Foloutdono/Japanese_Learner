@@ -1,5 +1,6 @@
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
+import { useReportPlatformCount } from './platformCount'
 
 /**
  * LevelSelector — 路線図
@@ -52,6 +53,7 @@ export default function LevelSelector({
     N1: t.levelHintN1,
   }
   const lineStyle = color ? { '--line-color': color } : undefined
+  useReportPlatformCount(levels.length)
 
   return (
     <div className="route" style={lineStyle}>
@@ -72,13 +74,18 @@ export default function LevelSelector({
           <span className="route-stop__rail" aria-hidden="true" />
           <span className="route-stop__marker" aria-hidden="true" />
 
-          {/* No sequence number: the line is the sequence. A row
-              list needs "01…05" to say these are ordered; a diagram
-              that draws the order can't gain anything by numbering
-              it again. */}
+          {/* A card on the rail, so a level reads as the same object
+              as every other choice in the app — but kept in one
+              column, because these are a line and not a grid. The
+              hint sits under the name rather than across from it: set
+              across, it was a caption at one end of a 600px row and
+              its level at the other.
+
+              No sequence number: the line is the sequence. A list
+              needs "01…05" to say these are ordered; a diagram that
+              draws the order can't gain anything by numbering it. */}
           <span className="route-stop__body">
             <span className="route-stop__name">{level}</span>
-            <span className="choice-leader" aria-hidden="true" />
             <span className="route-stop__hint">{LEVEL_HINTS[level]}</span>
           </span>
 

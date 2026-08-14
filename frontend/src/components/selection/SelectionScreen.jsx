@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { getNavLinks } from '../../config/navLinks'
@@ -6,6 +6,7 @@ import { stationFor } from '../../config/stations'
 import { StationSign } from '../station/StationSign'
 import { useStationClock } from '../station/useStationClock'
 import { startAmbiance, stopAmbiance } from '../../lib/audio'
+import { PlatformCountContext } from './platformCount'
 
 /**
  * SelectionScreen
@@ -33,31 +34,35 @@ import { startAmbiance, stopAmbiance } from '../../lib/audio'
  *     second heading underneath was the redundant one.
  *   maxWidth — max-width for the content column. Left unset by every
  *     caller today; the two defaults live in CSS instead, because a
- *     plated screen and a bare one want different ones (a plate whose
- *     panel is 320px narrower than the board it came from reads as a
- *     different piece of furniture — see --content-max-w).
+ *     plated screen and a bare one want different ones.
  *
  * Also owns the 'selection' ambiance track for as long as it's
  * mounted — every level/mode/tier/theme picker renders inside this
  * shell, so this is the one place that needs the start/stop effect.
  */
-// のりば — the right-hand half of the plate, and the exact counterpart
-// of the board's own masthead: what this panel is, and the time. The
-// clock is not decoration and not filler — a platform always tells you
-// the time, it is the one piece of information every station in the
-// world puts next to its name, and it is the same component ticking on
-// the same minute boundary as the one on the home board. Arriving
-// somewhere and finding the clock still running is most of what makes
-// two screens feel like one place.
-function PlatformAside({ t }) {
+
+// のりば — the right-hand half of the plate: what the panel is, how
+// many platforms it has, and the time. Stacked into one block rather
+// than spread across two opposite corners, where the label and the
+// clock were two specks with 700px of nothing between them and read
+// as leftovers rather than a readout.
+//
+// The clock is not filler — a platform always tells you the time, and
+// this is the same component ticking on the same minute boundary as
+// the one on the home board. Arriving somewhere and finding the clock
+// still running is most of what makes two screens feel like one place.
+function PlatformAside({ t, count }) {
   const now = useStationClock()
   const hh  = String(now.getHours()).padStart(2, '0')
   const mm  = String(now.getMinutes()).padStart(2, '0')
 
   return (
     <>
-      <span className="station-sign__label">
-        <span lang="ja">のりば</span>
+      <span className="station-sign__noriba">
+        <span className="station-sign__label">
+          <span lang="ja">のりば</span>
+          {count > 0 && <span className="station-sign__count">{count}</span>}
+        </span>
         <span className="station-sign__label-sub">{t.platforms}</span>
       </span>
       <span className="board-clock station-sign__clock" aria-label={`${hh}:${mm}`}>
@@ -75,6 +80,7 @@ export default function SelectionScreen({
   maxWidth,
 }) {
   const { t } = useLang()
+  const [count, setCount] = useState(0)
 
   useEffect(() => {
     startAmbiance('selection')
@@ -97,7 +103,7 @@ export default function SelectionScreen({
   const station = stationFor(pathname)
 
   // The section's pigment becomes the line colour for everything
-  // below the plate — the numbering roundels, the row accents, the
+  // below the plate — the numbering roundels, the card rails, the
   // route diagram. One line, one colour, from the departure board all
   // the way to the last choice before you start studying.
   const lineStyle = section
@@ -113,7 +119,7 @@ export default function SelectionScreen({
             name={section.icon}
             latin={section.title}
             color={section.color}
-            aside={<PlatformAside t={t} />}
+            aside={<PlatformAside t={t} count={count} />}
             size="sm"
           />
         ) : (eyebrow || heading || subtitle) && (
@@ -123,7 +129,9 @@ export default function SelectionScreen({
             {subtitle && <div className="selector-header__subtitle">{subtitle}</div>}
           </div>
         )}
-        {children}
+        <PlatformCountContext.Provider value={setCount}>
+          {children}
+        </PlatformCountContext.Provider>
       </div>
     </div>
   )

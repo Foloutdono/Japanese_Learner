@@ -352,163 +352,195 @@ button:focus-visible {
   border-color: transparent;
 }
 
-/* ── Shared choice list (ThemeSelector + TierSelector) ─────── */
-/* An editorial list, not a grid of cards: one column, hairline
-   rules, generous padding. Asymmetry (title left / description
-   right) instead of four identical boxes side by side.
-   ModeSelector/LevelSelector render their list directly now (no
-   header, no wrapper) — .level-selector stays because ThemeSelector
-   and TierSelector still wrap a header-less filter/toggle row plus
-   the list in one. */
-.level-selector {
-  width: 100%;
-}
 
-.choice-list {
-  width: 100%;
-  border-top: 1px solid var(--border);
-}
 
-.choice-row {
+/* ── のりば案内 — the platform signs ────────────────────────
+   Every selection screen's choices: the sign at the head of a
+   platform, a coloured rail carrying either the 番線 number or the
+   種別 service type, then where it goes and what it is.
+
+   These were full-width rows borrowed from the home departure board.
+   That board carries eleven services with a remark on each and earns
+   its 1040px; these screens mostly carry two to five short options,
+   and the same row at the same width put a six-character title at one
+   end and a five-character specimen at the other with five hundred
+   pixels of nothing between them. A grid fills width by multiplying
+   columns instead of stretching one row, which is why it looks
+   deliberate at two options and at thirty. */
+.platform-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 14px;
+  width: 100%;
+  padding: 18px 22px 24px;
+}
+/* An odd count would otherwise end on a card with an empty half-row
+   beside it — the exact sparseness the grid exists to avoid. The last
+   one takes the whole width instead. */
+.platform-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* The wrapper ThemeSelector/TierSelector put around a filter or size
+   toggle plus the grid. It owns the horizontal inset in that case, so
+   the control above lines up with the cards below it. */
+.level-selector { width: 100%; }
+.selection-screen .level-selector { padding: 18px 22px 24px; }
+.selection-screen .level-selector .platform-grid { padding: 0; }
+
+.platform-card {
+  --rail: var(--row-color, var(--accent));
   position: relative;
   display: flex;
-  align-items: center;
-  gap: 18px;
+  align-items: stretch;
+  gap: 0;
   width: 100%;
-  padding: 22px 14px;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border);
-  border-radius: 0;
+  padding: 0;
+  /* Lifted off the wall behind it: in dark theme --bg-card and
+     --bg-main are close enough that a flat card disappears. */
+  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--text-primary) 15%, var(--border));
+  border-radius: 6px;
+  overflow: hidden;
   color: var(--text-primary);
   text-align: left;
-  transition: background 0.15s ease;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
 }
-.choice-row:hover,
-.choice-row:focus-visible { background: var(--bg-card-hover); }
+.platform-card:hover,
+.platform-card:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: var(--rail);
+  transform: translateY(-1px);
+  filter: none;
+}
 
-/* One fixed column for whatever leads the row — a service badge on a
-   mode list, a numbered roundel on a source list. Fixed, so the
-   titles line up in the same place on every selection screen in the
-   app instead of stepping left and right as you move between them. */
-.choice-row__lead {
+/* 種別 colours — cooler as it gets harder, ending on seal red, the
+   same escalation the SRS stages use. A source list has no service
+   type and keeps the line's own colour. */
+.platform-card--local   { --rail: var(--text-secondary); }
+.platform-card--rapid   { --rail: var(--accent4); }
+.platform-card--express { --rail: var(--warning); }
+.platform-card--ltd     { --rail: var(--accent); }
+.platform-card--review  { --rail: var(--text-secondary); }
+
+/* One cell for whatever leads the card — 番線 on a source list, 種別
+   on a mode list — so titles start at the same x on every selection
+   screen in the app. The rail down its left edge is where the colour
+   lives. */
+.platform-card__lead {
+  position: relative;
   flex-shrink: 0;
-  width: 86px;
+  width: 78px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  gap: 5px;
+  padding: 20px 8px 20px 18px;
 }
 
-.choice-row__accent {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--row-color, var(--accent));
-  transform: scaleY(0);
-  transform-origin: center;
-  transition: transform 0.18s ease;
+/* 駅ナンバリング — the line roundel. A ring, not a numeral: it is the
+   one object on a Japanese board you can find without reading
+   anything, and the only place colour appears. */
+.platform-card__no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2.5px solid var(--rail);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--rail);
+  font-variant-numeric: tabular-nums;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+/* Filled on approach, the way the active service lights up. */
+.platform-card:hover .platform-card__no,
+.platform-card:focus-visible .platform-card__no {
+  background: var(--rail);
+  color: var(--bg-main);
+}
+.platform-card__unit {
+  font-family: var(--font-jp);
+  font-size: 0.6rem;
+  color: var(--text-secondary);
 }
 
-.choice-row:hover .choice-row__accent,
-.choice-row:focus-visible .choice-row__accent {
-  transform: scaleY(1);
+.platform-card__service {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.74rem;
+  line-height: 1.15;
+  color: var(--rail);
+  text-align: center;
+  white-space: nowrap;
+}
+/* The stopping pattern as pips: four dots for a train that halts
+   everywhere, one for the 特急. This is what makes the ladder legible
+   without any railway vocabulary — the English gloss that used to sit
+   here ("RAPID") never could, so it lives in the card's title
+   attribute where it can afford words. */
+.platform-card__stops { display: flex; gap: 3px; }
+.platform-card__pip {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--rail);
+  opacity: 0.22;
+}
+.platform-card__pip--on { opacity: 1; }
+
+.platform-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 16px 20px 16px;
+}
+.platform-card__title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: 1.24rem;
+  line-height: 1.28;
+}
+.platform-card__desc {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+/* The characters a set actually contains, in the Japanese face and
+   tracked open like the stops printed under a destination. Quiet
+   enough to stay a caption, large enough to actually read a kana at,
+   which is the entire point of showing them. */
+.platform-card__sample {
+  font-family: var(--font-jp);
+  font-size: 1rem;
+  line-height: 1.4;
+  letter-spacing: 0.16em;
+  color: color-mix(in srgb, var(--rail) 62%, var(--text-secondary));
 }
 
-/* Same mark, same behaviour, same colour as the board's — declared
-   once for both so a hover on a selection row and a hover on a
-   departure row can never drift apart. */
-.board-row__go,
-.choice-row__go,
+.platform-card__go,
 .route-stop__go {
-  justify-self: end;
+  align-self: center;
   flex-shrink: 0;
+  padding-right: 14px;
   font-size: 0.7rem;
+  color: var(--rail, var(--line-color, var(--accent)));
   opacity: 0;
   transform: translateX(-4px);
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
-.choice-row__go,
-.route-stop__go { color: var(--row-color, var(--line-color, var(--accent))); }
-.choice-row:hover .choice-row__go,
-.choice-row:focus-visible .choice-row__go,
+.platform-card:hover .platform-card__go,
+.platform-card:focus-visible .platform-card__go,
 .route-stop:hover .route-stop__go,
 .route-stop:focus-visible .route-stop__go {
   opacity: 1;
   transform: translateX(0);
 }
-
-.choice-row__main {
-  display: flex;
-  flex: 1;
-  min-width: 0; /* let title/desc actually shrink+ellipsize instead of
-                    forcing the row wider than its flex basis */
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 6px 24px;
-  flex-wrap: wrap;
-}
-/* 点線 — the leader. */
-.choice-leader {
-  flex: 1 1 0;
-  align-self: baseline;
-  min-width: 0;
-  height: 0;
-  margin-bottom: 0.28em;
-  border-bottom: 1px dotted color-mix(in srgb, var(--text-secondary) 42%, transparent);
-}
-
-/* 備考 — the right-hand column. A group rather than a single element
-   because a row can carry both a description and a specimen line, and
-   they belong to each other. */
-.choice-row__note {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  min-width: 0;
-  text-align: right;
-}
-
-.choice-row__title {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 600;
-  font-size: 1.34rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.choice-row__desc {
-  color: var(--text-secondary);
-  font-size: 0.88rem;
-  line-height: 1.55;
-  max-width: 46ch;
-}
-
-/* The characters a set actually contains, set in the Japanese face
-   and tracked open like the stops printed under a destination. Quiet
-   enough to stay a caption, large enough to actually read a kana at —
-   which is the entire point of showing them. */
-.choice-row__sample {
-  font-family: var(--font-jp);
-  font-size: 1rem;
-  line-height: 1.4;
-  letter-spacing: 0.18em;
-  color: color-mix(in srgb, var(--row-color, var(--accent)) 62%, var(--text-secondary));
-}
-
-/* Persistent-selection variant of choice-row — used where picking a
-   row doesn't immediately navigate away (e.g. StudyScreen's config
-   screen, where mode is one of several choices made before pressing
-   Start), so the accent stroke and index colour stay "on" instead of
-   only lighting up on hover. */
-.choice-row--selectable { cursor: pointer; }
-.choice-row--selected { background: var(--bg-card-hover); }
-.choice-row--selected .choice-row__accent { transform: scaleY(1); }
-.choice-row--selected .choice-row__no,
-.choice-row--selected .choice-row__title { color: var(--row-color, var(--accent)); }
 
 input {
   font-family: inherit;
@@ -943,11 +975,10 @@ input:focus { border-color: var(--accent2); }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 30px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 999px;
-  border: 2px solid var(--line-color, var(--accent));
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2.5px solid var(--line-color, var(--accent));
   color: var(--line-color, var(--accent));
   font-family: var(--font-display);
   font-size: 11px;
@@ -1029,9 +1060,15 @@ input:focus { border-color: var(--accent2); }
   flex-direction: column;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
   text-align: right;
+}
+.station-sign__noriba {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
 }
 .station-sign__label {
   display: flex;
@@ -1042,6 +1079,20 @@ input:focus { border-color: var(--accent2); }
   font-size: 0.78rem;
   letter-spacing: 0.12em;
   color: color-mix(in srgb, var(--line-color, var(--accent)) 80%, transparent);
+}
+/* How many platforms this station has. The label alone was a caption
+   with nothing to caption; the number is what makes the block worth
+   the corner it sits in — and it is the same thing station numbering
+   does on a real line, telling you the size of what you're looking
+   at, not just its name. */
+.station-sign__count {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  color: var(--line-color, var(--accent));
+  font-variant-numeric: tabular-nums;
 }
 .station-sign__label-sub {
   font-family: var(--font-display);
@@ -1056,27 +1107,22 @@ input:focus { border-color: var(--accent2); }
    station's. Qualified by .station-sign because .board-clock sets the
    amber at the same specificity and wins on source order otherwise,
    which is how a red 仮名 plate ended up with a gold clock. */
-.station-sign .station-sign__clock { color: var(--line-color, var(--accent)); }
-
-/* The panel the plate heads. Same surface, border and radius as the
-   departure board, so the two screens are recognisably the same
-   furniture. */
-.selection-screen--station .selection-screen__inner {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
+.station-sign .station-sign__clock {
+  padding: 3px 9px 4px;
+  border-radius: 4px;
+  background: var(--text-primary);
+  color: var(--bg-main);
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
 }
-/* The list runs to the panel's own edges — its rows are the board's
-   rows, and a board's rows are not inset from the thing holding them.
-   The plate's stripe above is the only divider they need. */
-.selection-screen--station .choice-list { border-top: none; }
-.selection-screen--station .choice-row { padding-left: 22px; padding-right: 22px; }
-.selection-screen--station .choice-row:last-child { border-bottom: none; }
-.selection-screen--station .route { padding: 0; }
-.selection-screen--station .route-stop { padding-right: 22px; padding-left: 56px; }
-.selection-screen--station .route-stop__rail { left: 27px; }
-.selection-screen--station .route-stop__marker { left: 21px; }
+/* The blinking colon is a hole punched in the chip, not a dimmed
+   glyph — on a filled block the old 0.15 opacity read as a smudge. */
+.station-sign .board-clock__colon { padding: 0 2px; }
+
+/* No panel behind the cards. A card drawn on a surface of its own
+   fill is invisible, and once the choices are objects in their own
+   right the box around them stops doing anything the plate and its
+   stripe weren't already doing. */
 
 /* ── 発車標 — the departure board ─────────────────────────── */
 .station__platform {
@@ -1267,14 +1313,12 @@ input:focus { border-color: var(--accent2); }
   filter: none;
 }
 
-.board-row__platform,
-.choice-row__platform {
+.board-row__platform {
   display: flex;
   align-items: baseline;
   gap: 4px;
 }
-.board-row__no,
-.choice-row__no {
+.board-row__no {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.5rem;
@@ -1282,17 +1326,11 @@ input:focus { border-color: var(--accent2); }
   color: var(--line-color, var(--accent2));
   font-variant-numeric: tabular-nums;
 }
-.board-row__no-unit,
-.choice-row__no-unit {
+.board-row__no-unit {
   font-family: var(--font-jp);
   font-size: 0.6rem;
   opacity: 0.5;
 }
-/* On a card surface rather than the board's sumi panel, the number
-   takes the row's own colour and the unit needs a touch more weight
-   to survive against a lighter background. */
-.choice-row__no { color: var(--row-color, var(--accent)); }
-.choice-row__no-unit { color: var(--text-secondary); opacity: 1; }
 
 .board-row__dest {
   display: flex;
@@ -1358,7 +1396,14 @@ input:focus { border-color: var(--accent2); }
   white-space: nowrap;
 }
 
-.board-row__go { color: var(--line-color, var(--accent2)); }
+.board-row__go {
+  justify-self: end;
+  font-size: 0.7rem;
+  color: var(--line-color, var(--accent2));
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
 .board-row:hover .board-row__go,
 .board-row:focus-visible .board-row__go {
   opacity: 1;
@@ -1391,36 +1436,50 @@ input:focus { border-color: var(--accent2); }
    want somewhere along it. A list would say "pick one of five"; a
    line says how far it goes. */
 .route {
+  --route-gap: 10px;
   position: relative;
   display: flex;
   flex-direction: column;
-  padding-left: 4px;
+  gap: var(--route-gap);
+  width: 100%;
+  padding: 18px 22px 24px;
 }
 
+/* Each stop is a platform card like any other choice in the app — but
+   kept in one column, because these are a line and not a grid, and
+   threaded by the rail so the line is still the thing you read first. */
 .route-stop {
+  --rail: var(--line-color, var(--accent));
   position: relative;
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 18px;
   width: 100%;
-  padding: 22px 6px 22px 46px;
-  background: none;
-  border: none;
-  border-radius: 0;
+  padding: 20px 0 20px 66px;
+  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
+  border: 1px solid var(--border);
+  border-radius: 6px;
   color: var(--text-primary);
   text-align: left;
-  transition: background 0.15s ease;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
 }
-.route-stop + .route-stop { border-top: 1px solid var(--border); }
 .route-stop:hover,
-.route-stop:focus-visible { background: var(--bg-card-hover); filter: none; }
+.route-stop:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: color-mix(in srgb, var(--rail) 55%, var(--border));
+  transform: translateY(-1px);
+  filter: none;
+}
 
-/* The rail, drawn per stop so the ends can be capped. */
+/* The rail, drawn per stop so the ends can be capped — a line diagram
+   that runs off the top of the first station reads as "there is more
+   up there". It reaches past the card into the gap above and below so
+   the line stays unbroken between them. */
 .route-stop__rail {
   position: absolute;
-  left: 17px;
-  top: 0;
-  bottom: 0;
+  left: 29px;
+  top: calc(-1px - var(--route-gap));
+  bottom: calc(-1px - var(--route-gap));
   width: 4px;
   background: color-mix(in srgb, var(--line-color, var(--accent)) 55%, transparent);
 }
@@ -1429,94 +1488,37 @@ input:focus { border-color: var(--accent2); }
 
 .route-stop__marker {
   position: absolute;
-  left: 11px;
+  left: 23px;
   top: 50%;
   width: 16px;
   height: 16px;
   margin-top: -8px;
   border-radius: 50%;
-  background: var(--bg-main);
+  background: var(--bg-card);
   border: 4px solid var(--line-color, var(--accent));
   transition: transform 0.15s ease;
 }
 .route-stop:hover .route-stop__marker,
-.route-stop:focus-visible .route-stop__marker { transform: scale(1.25); }
+.route-stop:focus-visible .route-stop__marker { transform: scale(1.2); }
 
 .route-stop__body {
   flex: 1;
   display: flex;
-  align-items: baseline;
-  gap: 10px 20px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 4px;
   min-width: 0;
 }
 .route-stop__name {
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
-  font-size: 1.7rem;
-  line-height: 1;
+  font-size: 1.85rem;
+  line-height: 1.05;
 }
 .route-stop__hint {
   color: var(--text-secondary);
   font-size: 0.85rem;
   line-height: 1.5;
-  text-align: right;
 }
-/* The rail already runs down the left; a leader from N5 out to its
-   hint is the horizontal half of the same diagram. */
-.route-stop .choice-leader { margin-bottom: 0.42em; }
-/* ── 種別 — the service badge ──────────────────────────────
-   How much the train stops for you. Each type keeps the colour it
-   has on a real board: local plain, rapid blue, express green,
-   limited express red. */
-.service {
-  --service-color: var(--text-secondary);
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 4px 5px;
-  border: 1px solid color-mix(in srgb, var(--service-color) 45%, transparent);
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--service-color) 10%, transparent);
-}
-/* Cooler as it gets harder, ending on seal red — the same escalation
-   the SRS stages use, so a badge's colour means the same kind of
-   thing here as it does on a card. */
-.service--local   { --service-color: var(--text-secondary); }
-.service--rapid   { --service-color: var(--accent4); }
-.service--express { --service-color: var(--warning); }
-.service--ltd     { --service-color: var(--accent); }
-.service--review  { --service-color: var(--text-secondary); }
-
-.service__jp {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 0.78rem;
-  line-height: 1.1;
-  color: var(--service-color);
-  white-space: nowrap;
-}
-
-/* The stopping pattern, as pips: four dots for a train that halts
-   everywhere, one for the 特急. This is the part that makes the
-   ladder readable without knowing any railway vocabulary — the
-   English gloss that used to sit here ("RAPID") never could, so it
-   moved to the badge's title attribute where it can afford words. */
-.service__stops {
-  display: flex;
-  gap: 3px;
-}
-.service__pip {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--service-color);
-  opacity: 0.22;
-}
-.service__pip--on { opacity: 1; }
-
 /* ── Ghost / panel button utilities ──────────────────────── */
 .btn-ghost {
   background: rgba(255, 255, 255, 0.08);
@@ -8566,20 +8568,6 @@ input:focus { border-color: var(--accent2); }
 }
 
 @media (max-width: 640px) {
-  .choice-row__main { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .choice-row__note { align-items: flex-start; text-align: left; }
-  .choice-row__desc { max-width: none; }
-  /* A leader connects two things across a gap. Once the row stacks
-     there is no gap and no across — it was drawing a 24px stub of
-     dots between a title and the line under it. */
-  .choice-leader { display: none; }
-  .route-stop__body { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .route-stop__hint { text-align: left; }
-  /* Once the row is stacked into a column above, there's no sibling
-     fighting the title for horizontal space anymore — let a long
-     (often translated) label wrap onto a second line instead of
-     ellipsizing, since a level/mode name is worse truncated than tall. */
-  .choice-row__title { white-space: normal; overflow: visible; text-overflow: clip; }
   .board-row { grid-template-columns: 72px 1fr 1fr 20px; gap: 12px; }
   .landing-hero { padding: 72px 20px 60px; }
   .landing-hero__glyph { font-size: 3.6rem; }
@@ -8589,7 +8577,6 @@ input:focus { border-color: var(--accent2); }
   .landing-feature-grid { grid-template-columns: 1fr; }
   .landing-pros-item { gap: 14px; padding: 22px 4px; }
   .landing-pros-item__glyph { min-width: 40px; }
-  .choice-row { gap: 18px; }
   .quiz-area { padding: 32px 24px max(32px, 14vh);}
   .flashcard__hint { margin-top: 2px;}
 
@@ -8651,15 +8638,21 @@ input:focus { border-color: var(--accent2); }
   .station-sign--sm .station-sign__stripe { margin: 0 -16px; }
   .station-sign__name { font-size: 2rem; }
   .ic-card__balance { display: none; }
-  .route-stop { padding: 18px 4px 18px 42px; gap: 14px; }
-  .route-stop__name { font-size: 1.45rem; }
+  .route { padding: 14px 14px 20px; }
+  .route-stop { padding: 14px 0 14px 52px; gap: 12px; }
+  .route-stop__rail { left: 23px; }
+  .route-stop__marker { left: 17px; }
+  .route-stop__name { font-size: 1.3rem; }
 
-  /* The badge column costs a third of a phone's width; the pips still
-     carry the ladder without it. */
-  .choice-row { padding: 16px 8px; gap: 12px; }
-  .choice-row__lead { width: 64px; }
-  .service { padding: 5px 2px 4px; }
-  .service__jp { font-size: 0.66rem; }
+  /* One card per row, and the lead cell gives up the width a phone
+     needs for the title beside it. */
+  .platform-grid { grid-template-columns: 1fr; gap: 10px; padding: 14px 14px 20px; }
+  .selection-screen .level-selector { padding: 14px 14px 20px; }
+  .platform-card__lead { width: 64px; padding: 16px 4px 16px 12px; }
+  .platform-card__no { width: 32px; height: 32px; font-size: 0.92rem; border-width: 2px; }
+  .platform-card__service { font-size: 0.64rem; }
+  .platform-card__body { padding: 14px 10px 14px 14px; }
+  .platform-card__title { font-size: 1.08rem; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
   .top-bar__inner { padding: 12px 16px; }
   .selection-screen { padding: 44px 16px 56px; }
@@ -8753,16 +8746,6 @@ input:focus { border-color: var(--accent2); }
 }
 
 @media (max-width: 400px) {
-  .choice-row {
-    gap: 8px;
-  }
-
-  .choice-row__main {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
   /* Very narrow phones: trim the headline glyph, example-sentence
      text, and tag chip padding a bit further so nothing crowds or
      forces sideways scroll. */
