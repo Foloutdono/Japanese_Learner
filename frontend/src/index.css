@@ -258,20 +258,39 @@ button:focus-visible {
    is the atmosphere. A single hairline marks the header edge. */
 .selection-screen {
   position: relative;
-  padding: 40px 24px 64px !important;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 76px);
+  padding: 40px 24px 56px !important;
   text-align: left;
 }
 /* The ceiling light from .station, so the panel is standing in the
-   same room it left rather than floating in a void. */
-.selection-screen--station {
+   same room it left rather than floating in a void. Painted by a
+   full-bleed pseudo-element rather than on the element itself:
+   .container caps its width and centres it, so a background declared
+   here stopped at the container's edges and read as a lighter
+   rectangle with two seams down the page. clip (not hidden) keeps the
+   100vw from adding a scrollbar without making this a scroll
+   container. */
+.selection-screen--station { overflow-x: clip; }
+.selection-screen--station::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  pointer-events: none;
   background:
-    radial-gradient(ellipse 130% 52% at 50% 24%,
+    radial-gradient(ellipse 90% 46% at 50% 20%,
       color-mix(in srgb, var(--text-primary) 5%, transparent), transparent 72%);
 }
 
 .selection-screen__inner {
   position: relative;
-  margin: 0 auto;
+  margin: auto;
+  width: 100%;
   max-width: var(--content-max-w, 720px);
 }
 .selection-screen--station .selection-screen__inner {
@@ -497,18 +516,18 @@ button:focus-visible {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 20px 16px 20px 16px;
+  gap: 7px;
+  padding: 24px 18px 24px 16px;
 }
 .platform-card__title {
   font-family: 'Noto Serif JP', serif;
   font-weight: 600;
-  font-size: 1.24rem;
-  line-height: 1.28;
+  font-size: 1.4rem;
+  line-height: 1.25;
 }
 .platform-card__desc {
   color: var(--text-secondary);
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   line-height: 1.5;
 }
 /* The characters a set actually contains, in the Japanese face and
@@ -1030,7 +1049,7 @@ input:focus { border-color: var(--accent2); }
    is not hanging any more: it is the head of the panel underneath. */
 .station-sign--sm {
   width: 100%;
-  padding: 20px 22px 16px;
+  padding: 22px 22px 0;
   background: none;
   border: none;
   border-radius: 0;
@@ -1038,15 +1057,20 @@ input:focus { border-color: var(--accent2); }
   text-align: left;
 }
 .station-sign--sm .station-sign__kana {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   letter-spacing: 0.28em;
   text-indent: 0.28em;
 }
 .station-sign--sm .station-sign__name {
-  font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.2rem);
+  font-size: clamp(1.9rem, 1.4rem + 2.2vw, 3.1rem);
   letter-spacing: 0.14em;
   text-indent: 0.14em;
 }
+/* The gap between the name block and the line under it. Belongs to
+   the head, not to the plate's padding: the stripe is the plate's
+   bottom edge, so anything below it separates the plate from the grid
+   instead. */
+.station-sign--sm .station-sign__head { margin-bottom: 18px; }
 .station-sign--sm .station-sign__stripe { height: 4px; margin: 0 -22px; }
 
 /* のりば — what the panel is, and what time it is, in the two corners
