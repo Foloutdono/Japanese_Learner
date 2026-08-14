@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
-import { StationHeader } from '../components/station/StationHeader'
 import { Loading } from '../components/ui/Loading'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { WarningIcon, PencilIcon, CrossIcon, FlameIcon } from '../components/ui/Icons'
@@ -132,7 +131,11 @@ export default function ProfileScreen({ session }) {
 
       {!loading && (
         <div className="container profile-container">
-          <StationHeader />
+          {/* No 駅名標 here. This screen used to open with a plate
+              announcing your arrival at "定期券 station" and then, four
+              lines down, draw your actual 定期券 — the same object
+              twice, once as a place you had travelled to. The pass is
+              the masthead. See config/identity.js. */}
           {stale && (
             <div className="profile-stale-notice" role="status">
               <WarningIcon size={16} className="profile-stale-notice__glyph" />

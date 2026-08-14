@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { getNavLinks } from '../../config/navLinks'
 import { sectionFor, stationFor } from '../../config/stations'
+import { identityFor } from '../../config/identity'
+import { PassWave } from '../profile/PassWave'
 import { BurgerMenu } from './BurgerMenu'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { QuickChange } from '../rewards/QuickChange'
@@ -217,6 +219,12 @@ function MobileLevelBar() {
 //                 ("漢字 N5 — MCQ"), which is precisely what an in-car
 //                 display shows under the station name.
 //
+// On an identity route (/profile, /settings) none of that applies:
+// you are not travelling, you are holding your pass. The roundel gives
+// way to the contactless mark, the reading goes — a pass has no
+// reading, because it is not a place — and the stripe takes the card's
+// own ink rather than a line colour. See config/identity.js.
+//
 // `pathname` comes from the router rather than window.location so the
 // bar re-reads its line on navigation instead of only on remount.
 export function TopBar({
@@ -229,26 +237,51 @@ export function TopBar({
   const { pathname } = useLocation()
   const { hidden, reveal, onMenuOpenChange } = useAutoHideTopBar(autoHide)
 
-  const section = sectionFor(pathname, t)
+  const identity = identityFor(pathname, t)
+  const section = identity ? null : sectionFor(pathname, t)
   const station = stationFor(section?.path ?? pathname)
 
   return (
     <>
       <div
-        className={`top-bar${autoHide ? ' top-bar--autohide' : ''}${hidden ? ' top-bar--hidden' : ''}`}
+        className={[
+          'top-bar',
+          autoHide && 'top-bar--autohide',
+          hidden && 'top-bar--hidden',
+          identity && 'top-bar--pass',
+        ].filter(Boolean).join(' ')}
         style={section ? { '--line-color': section.color } : undefined}
       >
         <div className="top-bar__inner">
           <BurgerMenu links={getNavLinks(t)} currentPath={pathname} onOpenChange={onMenuOpenChange} />
 
           <span className="top-bar__station">
-            {station.code !== '??' && (
-              <span className="top-bar__roundel" aria-hidden="true">{station.code}</span>
-            )}
+            {identity
+              ? (
+                /* A card, not a roundel. The station code rides in a
+                   circle; a pass is a rectangle, and reading the two
+                   apart at a glance is the whole point of giving the
+                   identity routes their own mark. */
+                <span className="top-bar__card" aria-hidden="true">
+                  <PassWave className="pass__wave top-bar__wave" />
+                </span>
+              )
+              : station.code !== '??' && (
+                  <span className="top-bar__roundel" aria-hidden="true">{station.code}</span>
+                )}
             <span className="top-bar__stack">
-              {station.kana && (
-                <span className="top-bar__kana" lang="ja" aria-hidden="true">{station.kana}</span>
-              )}
+              {/* Both modes carry two registers, and they are the same
+                  two: the small one names the object, the large one
+                  names where you are in it. On a line that is the
+                  station's reading over its name; on the pass it is
+                  the card over its face, so the bar reads "your pass →
+                  profile" and "your pass → settings". Without it the
+                  identity bar sat a register short and looked it. */}
+              {identity
+                ? <span className="top-bar__kana top-bar__kana--pass" lang="ja">定期券</span>
+                : station.kana && (
+                    <span className="top-bar__kana" lang="ja" aria-hidden="true">{station.kana}</span>
+                  )}
               <span className="top-bar__title">{title}</span>
             </span>
           </span>

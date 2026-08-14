@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { levelTitle } from '../../domain/levelTitle'
-import { stationFor, SYSTEM_STATIONS } from '../../config/stations'
+import { stationFor } from '../../config/stations'
+import { PassWave } from '../profile/PassWave'
 import { playUi } from '../../lib/audio'
-import { CrossIcon, FlameIcon } from './Icons'
+import { CrossIcon, FlameIcon, GearIcon } from './Icons'
 
 // ── 路線図 — the network map ───────────────────────────────
 // The nav drawer was a list of icon+label rows on a dark panel: the
@@ -26,16 +27,18 @@ import { CrossIcon, FlameIcon } from './Icons'
 // line legend on a Tokyo Metro map, and it means the drawer answers
 // "which line was 文法 again?" without being asked.
 //
-// Two runs, not one. The language sections are the line; 定期券 and
-// 設定 are a separate short segment below the gap, because they are
-// where you are in the *system* rather than in the language — the
-// exact split config/navLinks.js already models with `scope`. The gap
-// and the capped rail ends say that on their own, so neither run
-// needs a heading.
+// The map ends where the line ends. Below it is the 定期券 — you, in
+// your pocket, holding the map. It was drawn as two more stops on the
+// rail at first, which was wrong twice over: it put the traveller on
+// the route as though you could catch a train to yourself, and it
+// made 設定 a destination when preferences are the card's own
+// settings. Now it is a card, with the gear as a control printed on
+// it. See config/identity.js.
 
-// One stop. `trailing` replaces the code roundel for stops that have
-// something better to put there (the pass shows your streak).
-function MapStop({ path, color, glyph, title, active, first, last, onClick, trailing, children, className = '' }) {
+// One stop on the line. Every stop is a section, so it always has a
+// station code — the `trailing`/`children` escape hatches this used to
+// carry existed only for the pass, which is no longer a stop.
+function MapStop({ path, color, glyph, title, active, first, last, onClick }) {
   const station = stationFor(path)
 
   return (
@@ -48,98 +51,105 @@ function MapStop({ path, color, glyph, title, active, first, last, onClick, trai
         active && 'map-stop--active',
         first && 'map-stop--first',
         last && 'map-stop--last',
-        className,
       ].filter(Boolean).join(' ')}
       style={{ '--line-color': color }}
     >
       <span className="map-stop__rail" aria-hidden="true" />
       <span className="map-stop__dot" aria-hidden="true" />
 
-      {children ?? (
-        <span className="map-stop__body">
-          <span className="map-stop__name" lang="ja">{glyph}</span>
-          <span className="map-stop__title">{title}</span>
-        </span>
-      )}
+      <span className="map-stop__body">
+        <span className="map-stop__name" lang="ja">{glyph}</span>
+        <span className="map-stop__title">{title}</span>
+      </span>
 
-      {trailing ?? (station.code !== '??' && (
+      {station.code !== '??' && (
         <span className="map-stop__code" aria-hidden="true">{station.code}</span>
-      ))}
+      )}
     </button>
   )
 }
 
-// 定期券 — the commuter pass, as a stop on the map. Ring + name + rank
-// + streak: a compact reading of the Profile screen rather than a
-// plain link, so opening the drawer already tells you where you stand.
-// Falls back to a plain station row until the summary loads (or if
-// there is no session), same as TopBar's ring and level bar.
-function PassStop({ go, active, t, last }) {
+// ── 定期券 — the stub ──────────────────────────────────────
+// The same card the profile screen draws at full size (see
+// components/profile/CommuterPass), reduced to what fits in a pocket:
+// the contactless mark, the holder, the rank, the level as a balance,
+// and the streak. Tapping it opens the full pass.
+//
+// The gear is a control *on* the card, not a row beside it, because
+// that is what preferences are — sound, theme, language, the account
+// the card is issued to. It is a nested <button>, so the card is a
+// <div> with its own click handler rather than a <button>, which
+// cannot legally contain one.
+function PassStub({ go, t, activePath }) {
   const summary = useProfileSummary()
-  const system = SYSTEM_STATIONS(t)['/profile']
 
-  // A summary with no username takes the same path as no summary at
-  // all. It used to reach summary.username.charAt(0) regardless, and
-  // a throw here does not just lose the pass — it unmounts the whole
-  // drawer, which is the app's only navigation.
-  if (!summary?.username) {
-    return (
-      <MapStop
-        path="/profile"
-        color={system.color}
-        glyph={system.icon}
-        title={system.title}
-        active={active}
-        first
-        last={last}
-        onClick={() => go('/profile')}
-      />
-    )
-  }
+  const gear = (
+    <button
+      type="button"
+      className={`pass-stub__gear${activePath === '/settings' ? ' pass-stub__gear--active' : ''}`}
+      onClick={e => { e.stopPropagation(); go('/settings') }}
+      aria-label={t.settings}
+      title={t.settings}
+    >
+      <GearIcon size={15} />
+    </button>
+  )
 
-  const [, jpTitle, title] = levelTitle(summary.level)
-  const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)
-  const into = Math.min(span, Math.max(0, summary.xp - summary.xpPrevLevel))
+  // A summary with no username is treated as not loaded. It used to
+  // reach summary.username.charAt(0) regardless, and a throw here does
+  // not just lose the pass — it unmounts the whole drawer, which is
+  // the app's only navigation. The card still draws, blank, so the
+  // drawer never changes shape while the summary is in flight.
+  const loaded = Boolean(summary?.username)
+
+  const [, jpTitle, title] = loaded ? levelTitle(summary.level) : []
+  const span = loaded ? Math.max(1, summary.xpForNext - summary.xpPrevLevel) : 1
+  const into = loaded ? Math.min(span, Math.max(0, summary.xp - summary.xpPrevLevel)) : 0
   const pct  = Math.round((into / span) * 100)
 
-  const r = 15
-  const circumference = 2 * Math.PI * r
-  const dashoffset = circumference * (1 - pct / 100)
-
   return (
-    <MapStop
-      path="/profile"
-      color={system.color}
-      active={active}
-      first
-      last={last}
-      className="map-stop--pass"
+    <div
+      className={`pass-stub${activePath === '/profile' ? ' pass-stub--active' : ''}`}
+      role="button"
+      tabIndex={0}
       onClick={() => go('/profile')}
-      trailing={
-        <span className="map-stop__streak" title={t.streak}>
-          <FlameIcon size={13} /> {summary.streak}
-        </span>
-      }
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go('/profile') } }}
     >
-      <span className="pass-stop__ring-wrap">
-        <svg className="pass-stop__ring" viewBox="0 0 36 36" aria-hidden="true">
-          <circle className="pass-stop__ring-track" cx="18" cy="18" r={r} />
-          <circle
-            className="pass-stop__ring-fill"
-            cx="18" cy="18" r={r}
-            strokeDasharray={circumference}
-            strokeDashoffset={dashoffset}
-          />
-        </svg>
-        <span className="pass-stop__avatar">{summary.username.charAt(0).toUpperCase()}</span>
-      </span>
+      <div className="pass-stub__head">
+        <span className="pass-stub__brand">
+          <PassWave className="pass__wave pass-stub__wave" />
+          <span className="pass-stub__brand-names">
+            <span className="pass-stub__brand-jp" lang="ja">定期券</span>
+            <span className="pass-stub__brand-sub">{t.passLabel}</span>
+          </span>
+        </span>
+        {gear}
+      </div>
 
-      <span className="map-stop__body">
-        <span className="map-stop__label" lang="ja">{system.icon}</span>
-        <span className="map-stop__name map-stop__name--holder">{summary.username}</span>
-        <span className="map-stop__title" lang="ja">{jpTitle} · {title}</span>
-      </span>
-    </MapStop>
+      <div className="pass-stub__body">
+        <span className="pass-stub__holder">
+          <span className="pass-stub__name">{loaded ? summary.username : '—'}</span>
+          {loaded && <span className="pass-stub__rank" lang="ja">{jpTitle} · {title}</span>}
+        </span>
+        {loaded && (
+          <span className="pass-stub__streak" title={t.streak}>
+            <FlameIcon size={13} /> {summary.streak}
+          </span>
+        )}
+      </div>
+
+      {/* The balance strip, exactly as the full card draws it: how far
+          into the level you are, not an abstract percentage. */}
+      <div className="pass-stub__balance">
+        <span className="pass-stub__level">
+          <span className="pass-stub__level-label">{t.level}</span>
+          <span className="pass-stub__level-num">{loaded ? summary.level : '—'}</span>
+        </span>
+        <span className="pass-stub__track" aria-hidden="true">
+          <span className="pass-stub__fill" style={{ width: `${pct}%` }} />
+        </span>
+      </div>
+    </div>
   )
 }
 
@@ -173,8 +183,6 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
     navigate(path)
     close()
   }
-
-  const settings = SYSTEM_STATIONS(t)['/settings']
 
   return (
     <>
@@ -228,20 +236,11 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
               ))}
             </nav>
 
-            {/* The system stations. Pinned below the scrollable run
-                rather than inside it, so they stay reachable however
-                many sections the line grows to. */}
-            <div className="burger-drawer__system">
-              <PassStop go={go} active={currentPath === '/profile'} t={t} />
-              <MapStop
-                path="/settings"
-                color={settings.color}
-                glyph={settings.icon}
-                title={settings.title}
-                active={currentPath === '/settings'}
-                last
-                onClick={() => go('/settings')}
-              />
+            {/* Pinned below the scrollable run rather than inside it,
+                so the pass stays in your pocket however many sections
+                the line grows to. */}
+            <div className="burger-drawer__pocket">
+              <PassStub go={go} t={t} activePath={currentPath} />
             </div>
           </div>
         </div>,

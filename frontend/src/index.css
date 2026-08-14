@@ -196,10 +196,12 @@
   --line-jisho:     #c99a3e;  /* 山吹色   yamabuki,    kerria gold */
   --line-decks:     #9c4a5e;  /* 蘇芳     suou,        sappanwood  */
   --line-exam:      #8a6b4f;  /* 茶色     cha-iro,     tea brown   */
-  /* The two system stations. Slate and stone: present, named, and
+  /* Not a line — the pass's ink. /profile and /settings were given
+     line colours when they were modelled as stations; they are the
+     定期券 now (see config/identity.js), so one pigment is left and it
+     belongs to the card rather than to a route. Slate: present, and
      deliberately quieter than any section of the language itself. */
-  --line-profile:   #5a7186;  /* 藍鼠     ainezumi,    slate       */
-  --line-settings:  #7d7468;  /* 利休鼠   rikyunezu,   stone       */
+  --pass-ink:       #5a7186;  /* 藍鼠     ainezumi,    slate       */
 
   /* 金銀銅 — the podium. Its own three, because a medal is an
      identity and not a progress state. */
@@ -282,8 +284,7 @@
   --line-jisho:     #a97a25;
   --line-decks:     #853d4e;
   --line-exam:      #7a5c40;
-  --line-profile:   #4c6072;
-  --line-settings:  #6b6357;
+  --pass-ink:       #4c6072;
 
   --medal-gold:     #a97a25;
   --medal-silver:   #8d939b;
@@ -851,6 +852,41 @@ input:focus { border-color: var(--accent2); }
   letter-spacing: 0.04em;
 }
 
+/* An identity route is not a place, so the bar carries no code, no
+   reading and no line: the contactless mark stands where the roundel
+   would, and the stripe takes the card's ink. See config/identity.js. */
+.top-bar--pass .top-bar__stripe { background: var(--pass-ink); }
+
+/* The card the mark is printed on. Same footprint as the roundel it
+   replaces so the title starts at the same x on every screen, but
+   rectangular — a station code rides in a circle, a pass does not, and
+   telling the two apart at a glance is the point.
+
+   Slate is the pass's ink because on the profile screen the card sits
+   on a bright page. On sumi it falls away, and beside a lit gold
+   roundel it read as a roundel that had failed — so the edge is the
+   pigment lifted halfway to the panel's own cream, and the slate stays
+   as the fill behind the mark. */
+.top-bar__card {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 27px;
+  border-radius: 3px;
+  border: 1.5px solid color-mix(in srgb, var(--pass-ink) 45%, var(--text-on-panel));
+  background: color-mix(in srgb, var(--pass-ink) 42%, transparent);
+}
+.top-bar__wave { width: 15px; height: 16px; }
+/* .pass__wave fades its outer arcs to 0.45 and 0.25 — legible on the
+   pale card, not on sumi. On the bar they are drawn in the panel's own
+   ink at weights that survive it. */
+.top-bar__wave span { border-right-color: var(--text-on-panel); border-width: 1.3px; }
+.top-bar__wave span:nth-child(1) { width: 5px;  height: 5px;  margin-top: -2.5px; opacity: 0.95; }
+.top-bar__wave span:nth-child(2) { width: 10px; height: 10px; margin-top: -5px;   opacity: 0.7; }
+.top-bar__wave span:nth-child(3) { width: 15px; height: 15px; margin-top: -7.5px; opacity: 0.45; }
+
 .top-bar__stack {
   display: flex;
   flex-direction: column;
@@ -870,6 +906,15 @@ input:focus { border-color: var(--accent2); }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* The pass's register is a name, not a reading — 定期券 is what the
+   object is called, so it is set solid rather than tracked open the
+   way a 駅名標 sets kana, and takes the card's ink. */
+.top-bar__kana--pass {
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--pass-ink) 40%, var(--text-on-panel));
 }
 
 .top-bar__peek {
@@ -1392,6 +1437,65 @@ input:focus { border-color: var(--accent2); }
    right the box around them stops doing anything the plate and its
    stripe weren't already doing. */
 
+/* ── The back of the card ─────────────────────────────────
+   StationHeader's counterpart for the routes that are you rather than
+   somewhere you go — see components/profile/IdentityHeader. Same three
+   registers as the plate and the same rule underneath, so the two
+   mastheads rhyme; but the eyebrow is the card's issuer rather than a
+   reading, and the rule is the pass's ink rather than a line colour.
+   Nothing here says "you have arrived". */
+.id-header {
+  --pass-color: var(--pass-ink, var(--accent9));
+  margin-bottom: 44px;
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+.id-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 6px;
+}
+/* Same rule as the stub's: the stroke comes down with the arcs. */
+.id-header__wave { width: 18px; height: 20px; }
+.id-header__wave span { border-width: 1.4px; }
+.id-header__wave span:nth-child(1) { width: 6px;  height: 6px;  margin-top: -3px; }
+.id-header__wave span:nth-child(2) { width: 12px; height: 12px; margin-top: -6px; }
+.id-header__wave span:nth-child(3) { width: 18px; height: 18px; margin-top: -9px; }
+.id-header__issuer {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.id-header__name {
+  display: block;
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: clamp(1.9rem, 1.4rem + 2.2vw, 3.1rem);
+  line-height: 1.15;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  color: var(--text-primary);
+}
+.id-header__latin {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.id-header__stripe {
+  height: 4px;
+  margin-top: 18px;
+  background: var(--pass-color);
+}
+
 /* The plate on a screen that isn't a selection screen. Same object,
    same spacing under it — see .platform-grid's 52px top padding, which
    is the pause this is matching. */
@@ -1420,7 +1524,7 @@ input:focus { border-color: var(--accent2); }
    Laid out the way a real pass is printed: issuer and class along the
    top, holder in the middle, balance along the bottom. */
 .pass {
-  --pass-color: var(--line-profile, var(--accent9));
+  --pass-color: var(--pass-ink, var(--accent9));
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1657,15 +1761,15 @@ input:focus { border-color: var(--accent2); }
 .week-day__fill {
   width: 100%;
   border-radius: 4px;
-  background: color-mix(in srgb, var(--line-profile, var(--accent9)) 70%, transparent);
+  background: color-mix(in srgb, var(--pass-ink, var(--accent9)) 70%, transparent);
   transition: height 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
 }
 /* A day with nothing on it still gets a mark, so the row reads as
    seven days rather than as four bars floating in a box. */
 .week-day--empty .week-day__fill { min-height: 3px; background: color-mix(in srgb, var(--text-primary) 14%, transparent); }
-.week-day--today .week-day__fill { background: var(--line-profile, var(--accent9)); }
+.week-day--today .week-day__fill { background: var(--pass-ink, var(--accent9)); }
 .week-day--today .week-day__dow {
-  color: var(--line-profile, var(--accent9));
+  color: var(--pass-ink, var(--accent9));
   border-color: currentColor;
 }
 .week-day__count {
@@ -2492,11 +2596,188 @@ input:focus { border-color: var(--accent2); }
   overflow-y: auto;
   padding: 14px 0;
 }
-/* 定期券 and 設定, pinned below the scrollable run rather than inside
-   it, so they stay reachable however many sections the line grows to. */
-.burger-drawer__system {
-  padding: 14px 0 calc(14px + env(safe-area-inset-bottom, 0px));
+
+/* ── 定期券 — the stub, in your pocket ─────────────────────
+   Where the map ends. This was two more stops on the rail, which put
+   the traveller on the route as though you could catch a train to
+   yourself; it is a card now. Same object as .pass on the profile
+   screen — the contactless mark, the holder, the balance, the
+   magnetic stripe down the right edge — at the size a pocket allows. */
+.burger-drawer__pocket {
+  padding: 12px 12px calc(14px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--burger-menu-border);
+}
+
+.pass-stub {
+  --pass-color: var(--pass-ink, var(--accent9));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 13px 15px 12px;
+  /* On the sumi panel the pass reads as a card by being lighter than
+     the drawer, the way it reads as a card on the profile by being
+     tinted against the page. */
+  background: linear-gradient(122deg,
+    color-mix(in srgb, var(--pass-color) 34%, rgba(255, 255, 255, 0.05)) 0%,
+    rgba(255, 255, 255, 0.05) 64%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+.pass-stub:hover,
+.pass-stub:focus-visible {
+  border-color: color-mix(in srgb, var(--pass-color) 70%, transparent);
+  transform: translateY(-1px);
+}
+/* The magnetic stripe — the one place the card carries its colour at
+   full strength, exactly as .pass::after draws it. */
+.pass-stub::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 4px;
+  background: var(--pass-color);
+}
+.pass-stub--active { border-color: color-mix(in srgb, var(--pass-color) 80%, transparent); }
+
+.pass-stub__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pass-stub__brand { display: flex; align-items: center; gap: 9px; min-width: 0; }
+/* The contactless arcs are drawn against --text-primary by .pass__wave;
+   on the drawer's dark panel they need the panel's ink instead. */
+.pass-stub__wave { width: 16px; height: 18px; }
+/* The stroke has to come down with the arcs. .pass__wave's 1.6px is
+   sized for a 7px innermost arc; kept at that weight on a 5px one it
+   stops being an arc and reads as a comma. */
+.pass-stub__wave span { border-right-color: var(--text-on-panel); border-width: 1.3px; }
+.pass-stub__wave span:nth-child(1) { width: 6px;  height: 6px;  margin-top: -3px; }
+.pass-stub__wave span:nth-child(2) { width: 11px; height: 11px; margin-top: -5.5px; }
+.pass-stub__wave span:nth-child(3) { width: 16px; height: 16px; margin-top: -8px; }
+
+.pass-stub__brand-names { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.pass-stub__brand-jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: var(--text-on-panel);
+}
+.pass-stub__brand-sub {
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 設定 — a control printed on the card, not a destination beside it.
+   Preferences are the card's own settings, so this is where they
+   belong and why it is a gear rather than a station. */
+.pass-stub__gear {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  color: var(--text-on-panel-soft);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.pass-stub__gear:hover,
+.pass-stub__gear:focus-visible,
+.pass-stub__gear--active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.34);
+  color: var(--text-on-panel);
+  filter: none;
+}
+
+.pass-stub__body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pass-stub__holder { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.pass-stub__name {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.2;
+  color: var(--text-on-panel);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pass-stub__rank {
+  font-size: 0.68rem;
+  color: var(--text-on-panel-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pass-stub__streak {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.76rem;
+  color: var(--text-on-panel);
+}
+
+/* The balance, the way a real IC card prints one: the figure, then
+   how full it is. */
+.pass-stub__balance { display: flex; align-items: center; gap: 10px; }
+.pass-stub__level { display: inline-flex; align-items: baseline; gap: 4px; flex-shrink: 0; }
+.pass-stub__level-label {
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.pass-stub__level-num {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-on-panel);
+  font-variant-numeric: tabular-nums;
+}
+.pass-stub__track {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+.pass-stub__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent9);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .map-stop {
@@ -2630,67 +2911,6 @@ input:focus { border-color: var(--accent2); }
   background: var(--map-ink);
   border-color: var(--map-ink);
   color: var(--bg-panel);
-}
-
-/* 定期券 — the pass, as a stop. Same rail and marker as any other
-   station; the body carries the ring, the holder and the rank, and
-   the streak takes the corner the code roundel would have had. */
-.map-stop--pass { padding-top: 12px; padding-bottom: 12px; gap: 11px; }
-.pass-stop__ring-wrap {
-  position: relative;
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-}
-.pass-stop__ring {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-.pass-stop__ring-track { fill: none; stroke: rgba(255, 255, 255, 0.14); stroke-width: 3; }
-.pass-stop__ring-fill {
-  fill: none;
-  stroke: var(--accent9);
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-.pass-stop__avatar {
-  position: absolute;
-  inset: 4px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-on-panel);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 0.8rem;
-}
-.map-stop__label {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 0.56rem;
-  letter-spacing: 0.2em;
-  color: var(--map-ink);
-}
-/* A username is latin text, not a station name — it takes the same
-   serif but none of the tracking the kanji names need. */
-.map-stop__name--holder {
-  font-size: 0.95rem;
-  letter-spacing: 0.01em;
-}
-.map-stop__streak {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.76rem;
-  color: var(--text-on-panel);
 }
 
 /* ── Mobile level bar ──────────────────────────────────────

@@ -48,16 +48,19 @@ const STATIONS = {
   '/decks':                 { code: 'KZ', kana: 'きょうざい' },
   '/exam':                  { code: 'MS', kana: 'もし' },
 
-  // The stations that aren't about Japanese — where you are in the
-  // system rather than in the language. They had no plate at all,
-  // which is why they were the screens that still looked like a
-  // different app. 定期券 is the commuter pass, i.e. the same object
-  // the home concourse already draws as your IC card.
-  '/profile':               { code: 'TK', kana: 'ていきけん' },
+  // The halls. Not about Japanese, but still places you go to — the
+  // storehouse holds things, the daruma hall holds goals, the stats
+  // screen holds the record. They had no plate at all, which is why
+  // they were among the screens that still looked like a different
+  // app.
+  //
+  // /profile and /settings are deliberately NOT here. They are you,
+  // not somewhere you travel, and they are modelled in
+  // config/identity.js — see that file for why the distinction earns
+  // its own registry.
   '/stats':                 { code: 'TO', kana: 'とうけい' },
   '/daruma':                { code: 'DR', kana: 'だるま' },
   '/storehouse':            { code: 'KR', kana: 'くら' },
-  '/settings':              { code: 'ST', kana: 'せってい' },
 }
 
 const UNKNOWN = { code: '??', kana: '' }
@@ -69,38 +72,22 @@ export function stationFor(path) {
 /** The origin — the station the home screen itself is standing in. */
 export const HOME_STATION = STATIONS['/']
 
-// ── The system stations ───────────────────────────────────
-// Your profile and the settings are places in the app, but they are
-// not sections of the language, so they are deliberately not in
-// navLinks.js — putting them there would drop them onto the departure
-// board and the landing page's feature grid. They still need a name,
-// a glyph and a line colour to be given a plate, and this is the only
-// thing that needs them.
-export function SYSTEM_STATIONS(t) {
-  return {
-    '/profile':  { icon: '定期券', title: t.profileTitle, color: 'var(--line-profile)' },
-    '/settings': { icon: '設定',   title: t.settings,     color: 'var(--line-settings)' },
-  }
-}
-
 // ── Which station am I standing in? ───────────────────────
-// Three registries hold sections — the board's, the profile's halls,
-// and the two system stations above — and every caller that wanted
-// "the section for this path" was spreading all three itself.
-// StationHeader did it; the top bar needed the same answer to know
-// what colour its line is. One lookup, so a new station is added in
-// one place and every masthead in the app finds it.
+// Two registries hold sections — the board's and the profile's halls
+// — and every caller that wanted "the section for this path" was
+// spreading both itself. StationHeader did it; the top bar needed the
+// same answer to know what colour its line is. One lookup, so a new
+// station is added in one place and every masthead in the app finds
+// it.
 //
 // Falls back to the longest matching prefix so a nested route
 // (/decks/<id>) still knows which line it is on, and returns null —
-// not a blank — for a path that genuinely has no station, so callers
-// can render nothing rather than an empty plate.
+// not a blank — for a path that has no station, so callers can render
+// nothing rather than an empty plate. The identity routes fall
+// through to that null by design: they are not stations, and asking
+// this function for one is how a caller finds that out.
 export function sectionFor(path, t) {
-  const all = [
-    ...getNavLinks(t),
-    ...getProfileHalls(t),
-    ...Object.entries(SYSTEM_STATIONS(t)).map(([p, s]) => ({ ...s, path: p })),
-  ]
+  const all = [...getNavLinks(t), ...getProfileHalls(t)]
   const exact = all.find(s => s.path === path)
   if (exact) return exact
 
