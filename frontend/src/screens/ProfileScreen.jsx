@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
+import { StationHeader } from '../components/station/StationHeader'
 import { Loading } from '../components/ui/Loading'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { levelTitle } from '../domain/levelTitle'
@@ -113,6 +114,7 @@ export default function ProfileScreen({ session }) {
 
       {!loading && (
         <div className="container profile-container">
+          <StationHeader />
           {stale && (
             <div className="profile-stale-notice" role="status">
               <WarningIcon size={16} className="profile-stale-notice__glyph" />

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { StationHeader } from '../components/station/StationHeader'
 import { TopBar } from '../components/ui/TopBar'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -241,6 +242,7 @@ export default function DictionaryScreen({ session }) {
 			<TopBar onBack={() => navigate('/')} title={t.dictionaryTitle} />
 
 			<div className="container dict-page">
+				<StationHeader />
 
 				{/* No heading block here: TopBar above already names the
 				    screen, and a subtitle explaining that a dictionary is

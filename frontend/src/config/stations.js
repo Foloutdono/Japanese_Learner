@@ -45,6 +45,17 @@ const STATIONS = {
   '/dictionary':            { code: 'JS', kana: 'じしょ' },
   '/decks':                 { code: 'KZ', kana: 'きょうざい' },
   '/exam':                  { code: 'MS', kana: 'もし' },
+
+  // The stations that aren't about Japanese — where you are in the
+  // system rather than in the language. They had no plate at all,
+  // which is why they were the screens that still looked like a
+  // different app. 定期券 is the commuter pass, i.e. the same object
+  // the home concourse already draws as your IC card.
+  '/profile':               { code: 'TK', kana: 'ていきけん' },
+  '/stats':                 { code: 'TO', kana: 'とうけい' },
+  '/daruma':                { code: 'DR', kana: 'だるま' },
+  '/storehouse':            { code: 'KR', kana: 'くら' },
+  '/settings':              { code: 'ST', kana: 'せってい' },
 }
 
 const UNKNOWN = { code: '??', kana: '' }
@@ -55,6 +66,20 @@ export function stationFor(path) {
 
 /** The origin — the station the home screen itself is standing in. */
 export const HOME_STATION = STATIONS['/']
+
+// ── The system stations ───────────────────────────────────
+// Your profile and the settings are places in the app, but they are
+// not sections of the language, so they are deliberately not in
+// navLinks.js — putting them there would drop them onto the departure
+// board and the landing page's feature grid. They still need a name,
+// a glyph and a line colour to be given a plate, and this is the only
+// thing that needs them.
+export function SYSTEM_STATIONS(t) {
+  return {
+    '/profile':  { icon: '定期券', title: t.profileTitle, color: 'var(--line-profile)' },
+    '/settings': { icon: '設定',   title: t.settings,     color: 'var(--line-settings)' },
+  }
+}
 
 // ── 種別 — service types ──────────────────────────────────
 // On a Japanese line the service type says one thing: how often the

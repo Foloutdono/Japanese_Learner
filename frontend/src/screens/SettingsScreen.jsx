@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { supabase } from '../lib/supabase'
 import { TopBar } from '../components/ui/TopBar'
+import { StationHeader } from '../components/station/StationHeader'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components/ui/NavControls'
 
@@ -22,6 +23,7 @@ export default function SettingsScreen() {
       <TopBar onBack={() => navigate('/')} title={t.settings} autoHide />
 
       <div className="container settings-container">
+        <StationHeader />
         <SectionHeader title={t.preferences} />
         <div className="card settings-card">
           <div className="settings-row">

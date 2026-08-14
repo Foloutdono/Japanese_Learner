@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
+import { StationHeader } from '../components/station/StationHeader'
 import { Loading } from '../components/ui/Loading'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { CosmeticSwatch } from '../components/rewards/CosmeticSwatch'
@@ -101,6 +102,7 @@ export default function StorehouseScreen({ session }) {
       <TopBar onBack={() => navigate('/')} title={t.storehouseTitle} autoHide />
 
       <div className="container storehouse-container">
+        <StationHeader />
         {error && (
           <div className="profile-stale-notice" role="status">
             <WarningIcon size={16} className="profile-stale-notice__glyph" />

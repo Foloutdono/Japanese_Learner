@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
+import { StationHeader } from '../components/station/StationHeader'
 import { Loading } from '../components/ui/Loading'
 import EmptyState from '../components/ui/EmptyState'
 import { SectionHeader } from '../components/ui/SectionHeader'
@@ -114,6 +115,7 @@ export default function DarumaScreen({ session }) {
       <TopBar onBack={() => navigate('/')} title={t.darumaTitle} autoHide />
 
       <div className="container daruma-container">
+        <StationHeader />
         {error && (
           <div className="profile-stale-notice" role="status">
             <WarningIcon size={16} className="profile-stale-notice__glyph" />

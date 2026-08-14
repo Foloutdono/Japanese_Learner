@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
+import { StationHeader } from '../components/station/StationHeader'
 import EmptyState from '../components/ui/EmptyState'
 import { Loading } from '../components/ui/Loading'
 import { TrashIcon, PencilIcon, PlayIcon, BooksIcon } from '../components/ui/Icons'
@@ -80,6 +81,7 @@ export default function DecksScreen({ session }) {
       <TopBar onBack={() => navigate('/')} title={t.decks} autoHide />
 
       <div className="container page-pad">
+        <StationHeader />
 
         <div className="decks-toolbar">
           <button onClick={() => setCreating(c => !c)} className="btn-primary-purple decks-toolbar__btn">

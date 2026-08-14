@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
+import { StationHeader } from '../components/station/StationHeader'
 import { Loading } from '../components/ui/Loading'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { flattenStats, sumRows } from '../domain/statsModel'
@@ -89,6 +90,7 @@ export default function StatsScreen({ session }) {
 
       {stats && (
         <div className="container stats-container">
+          <StationHeader />
           <Headline totals={totals} streak={extra?.streak} dueToday={dueToday} t={t} />
 
           <SectionHeader title={t.practiceCalendar} />

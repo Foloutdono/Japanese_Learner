@@ -35,6 +35,24 @@
   --max-w:          1100px;
   --gap:            24px;
 
+  /* ── The card surface ────────────────────────────────────
+     Every raised object in the app — a platform card, an MCQ answer,
+     a deck, a daruma, a cosmetic, a stats panel — is the same piece of
+     material, and it was eleven near-copies of `background:
+     var(--bg-card); border: 1px solid var(--border)` scattered across
+     this file. Several had drifted: the dictionary entry to no border
+     and no radius, the settings card to a 3px bottom rule nothing else
+     has. That is how one screen ends up looking like it came from a
+     different app.
+
+     --surface is lifted off the wall behind it: in dark theme
+     --bg-card and --bg-main are close enough that a flat panel
+     disappears. --surface-line is crisper than --border alone, which
+     all but vanishes on sumi. */
+  --surface:        color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
+  --surface-line:   color-mix(in srgb, var(--text-primary) 15%, var(--border));
+  --surface-radius: 6px;
+
   /* The station's column. The departure board, the concourse band
      above it and the notice strip below it are all one object seen in
      three pieces, so they share one width rather than three literals
@@ -178,6 +196,10 @@
   --line-jisho:     #c99a3e;  /* 山吹色   yamabuki,    kerria gold */
   --line-decks:     #9c4a5e;  /* 蘇芳     suou,        sappanwood  */
   --line-exam:      #8a6b4f;  /* 茶色     cha-iro,     tea brown   */
+  /* The two system stations. Slate and stone: present, named, and
+     deliberately quieter than any section of the language itself. */
+  --line-profile:   #5a7186;  /* 藍鼠     ainezumi,    slate       */
+  --line-settings:  #7d7468;  /* 利休鼠   rikyunezu,   stone       */
 }
 
 /* ── Light theme — washi (和紙), rice paper ──────────────────
@@ -254,6 +276,8 @@
   --line-jisho:     #a97a25;
   --line-decks:     #853d4e;
   --line-exam:      #7a5c40;
+  --line-profile:   #4c6072;
+  --line-settings:  #6b6357;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -322,13 +346,22 @@ button:focus-visible {
 
 .station,
 .selection-screen__inner,
-.quiz-area {
+.quiz-area,
+.profile-container,
+.stats-container,
+.storehouse-container,
+.daruma-container,
+.settings-container,
+.dict-page {
   animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
 
 .platform-card,
 .route-stop,
-.board-row {
+.board-row,
+.deck-card,
+.daruma-card,
+.hall-card {
   animation: arrive 0.32s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
 /* Capped at eight: past that the last rows are waiting on an
@@ -351,7 +384,16 @@ button:focus-visible {
   .quiz-area,
   .platform-card,
   .route-stop,
-  .board-row {
+  .board-row,
+  .deck-card,
+  .daruma-card,
+  .hall-card,
+  .profile-container,
+  .stats-container,
+  .storehouse-container,
+  .daruma-container,
+  .settings-container,
+  .dict-page {
     animation: arrive-soft 0.2s linear backwards;
   }
 }
@@ -493,8 +535,8 @@ button:focus-visible {
   padding: 0;
   /* Lifted off the wall behind it: in dark theme --bg-card and
      --bg-main are close enough that a flat card disappears. */
-  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
-  border: 1px solid color-mix(in srgb, var(--text-primary) 15%, var(--border));
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
   border-radius: 6px;
   overflow: hidden;
   color: var(--text-primary);
@@ -1033,7 +1075,7 @@ input:focus { border-color: var(--accent2); }
   /* Lifted a little off the wall behind it: in dark theme --bg-card
      and --bg-main are close enough that a flat panel disappears, and
      a station plate is an object hanging in a room. */
-  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
+  background: var(--surface);
   border: 1px solid color-mix(in srgb, var(--border) 140%, transparent);
   border-radius: 4px;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
@@ -1225,6 +1267,24 @@ input:focus { border-color: var(--accent2); }
    fill is invisible, and once the choices are objects in their own
    right the box around them stops doing anything the plate and its
    stripe weren't already doing. */
+
+/* The plate on a screen that isn't a selection screen. Same object,
+   same spacing under it — see .platform-grid's 52px top padding, which
+   is the pause this is matching. */
+.station-header {
+  margin-bottom: 44px;
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+.station-header .station-sign--sm { padding: 0 0 0 0; }
+.station-header .station-sign__stripe { margin: 0; }
+
+/* Those screens open straight onto the plate now, so they no longer
+   need the top padding that stood in for a header. */
+.profile-container,
+.stats-container,
+.storehouse-container,
+.daruma-container,
+.settings-container { padding-top: 32px; }
 
 /* ── 発車標 — the departure board ─────────────────────────── */
 .station__platform {
@@ -1558,7 +1618,7 @@ input:focus { border-color: var(--accent2); }
   gap: 18px;
   width: 100%;
   padding: 26px 0 26px 66px;
-  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--text-primary);
@@ -1944,10 +2004,9 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   flex-direction: column;
   margin-bottom: 32px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  border-bottom: 3px solid var(--border);
-  background: var(--bg-card);
+  border-radius: var(--surface-radius);
+  border: 1px solid var(--surface-line);
+  background: var(--surface);
   overflow: hidden;
 }
 
@@ -2411,8 +2470,8 @@ input:focus { border-color: var(--accent2); }
   width: 100%;
   max-height: 96px;
   padding: 18px;
-  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
-  border: 1px solid color-mix(in srgb, var(--text-primary) 15%, var(--border));
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
   border-radius: 6px;
   color: var(--text-primary);
   text-align: left;
@@ -4952,7 +5011,7 @@ input:focus { border-color: var(--accent2); }
 .plaque {
   --plaque-color: var(--text-primary);
   position: relative;
-  background: var(--bg-card);
+  background: var(--surface);
   padding: 22px 18px 18px;
   display: flex;
   flex-direction: column;
@@ -5034,8 +5093,9 @@ input:focus { border-color: var(--accent2); }
    chart is measuring. Scrolls horizontally on narrow screens rather
    than shrinking the squares below the size of a thumb. */
 .calendar-panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
   padding: 20px 20px 14px;
   margin-bottom: 48px;
 }
@@ -5386,8 +5446,9 @@ input:focus { border-color: var(--accent2); }
    running total, because "what if I skip a day" is the question a
    forecast is actually asked. */
 .forecast {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
   padding: 20px 20px 14px;
   margin-bottom: 48px;
 }
@@ -5484,7 +5545,7 @@ input:focus { border-color: var(--accent2); }
   margin-bottom: 48px;
 }
 .rhythm-panel {
-  background: var(--bg-card);
+  background: var(--surface);
   padding: 18px 18px 16px;
   display: flex;
   flex-direction: column;
@@ -5645,7 +5706,7 @@ input:focus { border-color: var(--accent2); }
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: var(--bg-card);
+  background: var(--surface);
   border: none;
   border-radius: 0;
   font: inherit;
@@ -5755,8 +5816,9 @@ input:focus { border-color: var(--accent2); }
   align-items: center;
   gap: 28px;
   padding: 32px 28px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
   margin-bottom: 48px;
 }
 
@@ -6158,7 +6220,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .badge-tile {
-  background: var(--bg-card);
+  background: var(--surface);
   padding: 22px 12px;
   display: flex;
   flex-direction: column;
@@ -6555,9 +6617,9 @@ input:focus { border-color: var(--accent2); }
    next card's edge and gave every card a lopsided fourth line. */
 .dict-entry-card {
   position: relative;
-  background: var(--bg-card);
-  border: none;
-  border-radius: 0;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
   padding: 24px 12px 20px;
   text-align: center;
   cursor: pointer;
@@ -9217,8 +9279,9 @@ input:focus { border-color: var(--accent2); }
 
 .daruma-card {
   position: relative;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
   padding: 22px 18px 18px;
   display: flex;
   flex-direction: column;
@@ -11316,12 +11379,13 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
   align-items: flex-start;
   gap: 14px;
   padding: 14px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
   text-align: left;
   font: inherit;
   color: inherit;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 button.cos-tile { cursor: pointer; }
 button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--text-secondary); }
