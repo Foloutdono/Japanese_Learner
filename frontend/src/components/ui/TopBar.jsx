@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { getNavLinks } from '../../config/navLinks'
+import { sectionFor, stationFor } from '../../config/stations'
 import { BurgerMenu } from './BurgerMenu'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { QuickChange } from '../rewards/QuickChange'
@@ -195,6 +196,29 @@ function MobileLevelBar() {
   )
 }
 
+// ── 車内案内表示器 — the in-car information display ────────
+// The strip above a train door: which line you are riding, in its
+// colour, and where you are on it. That is exactly a top bar's job,
+// and this one used to be a plain dark strip with a serif string in
+// it — the only piece of chrome in the app that gave no sign of the
+// station it belonged to.
+//
+// Three things carry that now, all of them objects the app already
+// owns rather than new invention:
+//
+//   the stripe    the section's line colour along the bottom edge, the
+//                 same 4px band the station plate ends on.
+//   the roundel   駅ナンバリング — the two-letter code from
+//                 config/stations.js. It is the one mark you can find
+//                 without reading anything, and the top bar was the
+//                 last place in the app not using it.
+//   the reading   かんじ above 漢字, the 駅名標 register system. The
+//                 title below it is frequently a whole journey
+//                 ("漢字 N5 — MCQ"), which is precisely what an in-car
+//                 display shows under the station name.
+//
+// `pathname` comes from the router rather than window.location so the
+// bar re-reads its line on navigation instead of only on remount.
 export function TopBar({
   onBack,
   title,
@@ -202,16 +226,32 @@ export function TopBar({
   actions,
 }) {
   const { t } = useLang()
-  const currentPath = window.location.pathname
+  const { pathname } = useLocation()
   const { hidden, reveal, onMenuOpenChange } = useAutoHideTopBar(autoHide)
+
+  const section = sectionFor(pathname, t)
+  const station = stationFor(section?.path ?? pathname)
 
   return (
     <>
-      <div className={`top-bar${autoHide ? ' top-bar--autohide' : ''}${hidden ? ' top-bar--hidden' : ''}`}>
+      <div
+        className={`top-bar${autoHide ? ' top-bar--autohide' : ''}${hidden ? ' top-bar--hidden' : ''}`}
+        style={section ? { '--line-color': section.color } : undefined}
+      >
         <div className="top-bar__inner">
-          <BurgerMenu links={getNavLinks(t)} currentPath={currentPath} onOpenChange={onMenuOpenChange} />
+          <BurgerMenu links={getNavLinks(t)} currentPath={pathname} onOpenChange={onMenuOpenChange} />
 
-          <span className="top-bar__title">{title}</span>
+          <span className="top-bar__station">
+            {station.code !== '??' && (
+              <span className="top-bar__roundel" aria-hidden="true">{station.code}</span>
+            )}
+            <span className="top-bar__stack">
+              {station.kana && (
+                <span className="top-bar__kana" lang="ja" aria-hidden="true">{station.kana}</span>
+              )}
+              <span className="top-bar__title">{title}</span>
+            </span>
+          </span>
 
           <TopBarProfileRing />
 
@@ -228,6 +268,11 @@ export function TopBar({
             <ChevronIcon direction="left" size={16} />
           </button>
         </div>
+
+        {/* The line, along the bottom edge. Same band the station
+            plate ends on, so the bar reads as the head of the same
+            object rather than a separate piece of chrome. */}
+        <div className="top-bar__stripe" aria-hidden="true" />
       </div>
 
       <MobileLevelBar />

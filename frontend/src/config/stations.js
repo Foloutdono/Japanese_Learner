@@ -28,6 +28,8 @@
 // exception is 日本語駅 itself, which has no board row to borrow a
 // name from, so it keeps its own.
 
+import { getNavLinks, getProfileHalls } from './navLinks'
+
 // path -> { code, kana }
 //   code   two letters, the way a real line is coded (JY, G, T…). It
 //          rides in the coloured roundel on the board and the plate.
@@ -79,6 +81,32 @@ export function SYSTEM_STATIONS(t) {
     '/profile':  { icon: '定期券', title: t.profileTitle, color: 'var(--line-profile)' },
     '/settings': { icon: '設定',   title: t.settings,     color: 'var(--line-settings)' },
   }
+}
+
+// ── Which station am I standing in? ───────────────────────
+// Three registries hold sections — the board's, the profile's halls,
+// and the two system stations above — and every caller that wanted
+// "the section for this path" was spreading all three itself.
+// StationHeader did it; the top bar needed the same answer to know
+// what colour its line is. One lookup, so a new station is added in
+// one place and every masthead in the app finds it.
+//
+// Falls back to the longest matching prefix so a nested route
+// (/decks/<id>) still knows which line it is on, and returns null —
+// not a blank — for a path that genuinely has no station, so callers
+// can render nothing rather than an empty plate.
+export function sectionFor(path, t) {
+  const all = [
+    ...getNavLinks(t),
+    ...getProfileHalls(t),
+    ...Object.entries(SYSTEM_STATIONS(t)).map(([p, s]) => ({ ...s, path: p })),
+  ]
+  const exact = all.find(s => s.path === path)
+  if (exact) return exact
+
+  return all
+    .filter(s => s.path !== '/' && path.startsWith(`${s.path}/`))
+    .sort((a, b) => b.path.length - a.path.length)[0] ?? null
 }
 
 // ── 種別 — service types ──────────────────────────────────

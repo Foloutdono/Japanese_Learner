@@ -407,6 +407,10 @@ button:focus-visible {
     animation: arrive-soft 0.2s linear backwards;
   }
 }
+/* .burger-drawer's reduced-motion override is NOT here: this block
+   only wins because every base rule it overrides is declared above
+   it, and the drawer's own animation is set two thousand lines down.
+   It lives next to that rule instead — see the 路線図 block. */
 
 /* ── Selection screen shell ───────────────────────────────
    No glow, no watermark — the negative space itself (ma, 間)
@@ -791,6 +795,12 @@ input:focus { border-color: var(--accent2); }
 }
 .section-header--paired .section-header__count { margin-left: auto; }
 
+/* ── 車内案内表示器 — the top bar ───────────────────────────
+   The strip above a train door. See components/ui/TopBar.jsx for what
+   the three registers are and why. The bar itself stays sumi dark on
+   every screen and in both themes; the only thing that changes with
+   the section is the stripe along its bottom edge and the ink in the
+   roundel. */
 .top-bar {
   background: var(--bg-panel);
   color: var(--text-on-panel);
@@ -800,27 +810,94 @@ input:focus { border-color: var(--accent2); }
 }
 
 .top-bar__inner {
-  padding: 14px 24px;
+  padding: 12px 24px 13px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
+}
+
+/* The line, along the bottom edge — the same 4px band
+   .station-sign__stripe ends the plate on, so a screen's masthead and
+   its top bar read as two parts of one object. A route with no
+   station falls back to the board's own amber. */
+.top-bar__stripe {
+  height: 4px;
+  background: var(--line-color, var(--accent2));
+}
+
+.top-bar__station {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 駅ナンバリング at chrome scale: the same ring the plate and the
+   platform cards draw, and on a dark bar it is the one lit thing. */
+.top-bar__roundel {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--line-color, var(--accent2));
+  color: var(--line-color, var(--accent2));
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.top-bar__stack {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* The reading, set above the name — the 駅名標 register, at the size
+   chrome can afford. Hidden on phones, where the title needs the
+   whole line (see the ≤560px query). */
+.top-bar__kana {
+  font-family: var(--font-jp);
+  font-size: 0.58rem;
+  line-height: 1.5;
+  letter-spacing: 0.26em;
+  text-indent: 0.26em;
+  color: var(--text-on-panel-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .top-bar__peek {
   display: none; /* desktop: no peek tab, no autohide at all */
 }
 
-/* Icon-only now (a real ChevronIcon SVG, not the '←' text glyph it
-   used to render) — centered square padding instead of the wider
-   text-label padding this used to need. */
+/* Icon-only (a real ChevronIcon SVG, not the '←' text glyph it used
+   to render) — centered square padding instead of the wider
+   text-label padding this used to need. Hairline rather than a filled
+   chip, so the roundel keeps the only fill on the bar. */
 .btn-back {
-  background: rgba(255,255,255,0.08);
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
   color: var(--text-on-panel);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 8px;
   white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.btn-back:hover,
+.btn-back:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.34);
+  filter: none;
 }
 
 /* ── Top bar: desktop profile ring ────────────────────────
@@ -2277,211 +2354,343 @@ input:focus { border-color: var(--accent2); }
   color: var(--text-on-panel);
 }
 
-/* ── Burger menu / nav drawer ─────────────────────────────
-   A hairline-edged drawer, no rounded cards — the same editorial
-   language as the rest of the app, just laid out vertically. */
+/* ── 路線図 — the nav drawer as a network map ──────────────
+   See components/ui/BurgerMenu.jsx for the reasoning. A rail runs
+   down the left edge and every section is a stop on it, in its own
+   line colour, carrying its 駅ナンバリング code. Two runs: the
+   language sections, then 定期券 and 設定 below the gap. */
+
+/* The toggle is the map's legend: three line segments in three of the
+   system's own pigments. Still unmistakably a menu — a stack of
+   coloured lines is what a metro legend looks like — and the middle
+   one runs out to full width on approach. */
 .burger-toggle {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-on-panel);
-  font-size: 18px;
-  padding: 6px 10px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 34px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
+.burger-toggle:hover,
+.burger-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.34);
+  filter: none;
+}
+.burger-toggle__map {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 18px;
+}
+.burger-toggle__line {
+  height: 2.5px;
+  border-radius: 2px;
+  transition: width 0.18s ease;
+}
+.burger-toggle__line:nth-child(1) { width: 100%; background: var(--line-kana); }
+.burger-toggle__line:nth-child(2) { width: 64%;  background: var(--line-jisho); }
+.burger-toggle__line:nth-child(3) { width: 100%; background: var(--line-reading); }
+.burger-toggle:hover .burger-toggle__line:nth-child(2),
+.burger-toggle:focus-visible .burger-toggle__line:nth-child(2) { width: 100%; }
 
 .burger-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(2px);
   z-index: 100;
   display: flex;
+  animation: burgerFade 0.18s ease-out;
 }
+@keyframes burgerFade { from { opacity: 0; } to { opacity: 1; } }
 
 .burger-drawer {
-  width: 280px;
-  max-width: 85vw;
+  width: 312px;
+  max-width: 88vw;
   height: 100%;
   background: var(--bg-panel);
   color: var(--text-on-panel);
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
-  animation: burgerSlideIn 0.18s ease-out;
+  box-shadow: 2px 0 24px rgba(0, 0, 0, 0.45);
+  animation: burgerSlideIn 0.22s cubic-bezier(0.22, 0.68, 0.32, 1);
 }
 
 @keyframes burgerSlideIn {
   from { transform: translateX(-100%); }
   to   { transform: translateX(0); }
 }
+/* The drawer travels its own full width, which is the largest motion
+   in the app. It still has to announce itself, so it fades in place
+   rather than not animating at all. Declared here rather than in the
+   shared prefers-reduced-motion block near the top of the file: that
+   block sits above .burger-drawer and would lose on source order. */
+@media (prefers-reduced-motion: reduce) {
+  .burger-drawer { animation: burgerFade 0.15s linear; }
+}
 
 .burger-drawer__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 16px;
+  gap: 12px;
+  padding: 20px 18px 16px;
   border-bottom: 1px solid var(--burger-menu-border);
 }
-
-.burger-drawer__title {
-  font-family: var(--font-display);
-  font-size: 0.75rem;
+.burger-drawer__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.burger-drawer__jp {
+  font-family: 'Noto Serif JP', serif;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  font-size: 1.3rem;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+}
+.burger-drawer__sub {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--text-on-panel-soft);
 }
-
 .burger-drawer__close {
-  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
   color: var(--text-on-panel);
-  font-size: 16px;
-  padding: 4px 10px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.burger-drawer__close:hover,
+.burger-drawer__close:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.34);
+  filter: none;
 }
 
 .burger-drawer__nav {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 14px 0;
+}
+/* 定期券 and 設定, pinned below the scrollable run rather than inside
+   it, so they stay reachable however many sections the line grows to. */
+.burger-drawer__system {
+  padding: 14px 0 calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--burger-menu-border);
 }
 
-.burger-drawer__link {
+.map-stop {
+  /* The map's small marks — the code and the name of the stop you are
+     standing at — take the line colour lifted toward the panel's own
+     warm ink. On the sumi ground the darker pigments (indigo, grape,
+     slate) fall close to what they are printed on at 0.6rem; the hue
+     still identifies the line, it just clears the background. The
+     rail and the marker keep the raw pigment: at 3px they carry. */
+  --map-ink: color-mix(in srgb, var(--line-color, var(--accent2)) 74%, var(--text-on-panel));
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
+  padding: 9px 14px 9px 46px;
   background: transparent;
-  color: var(--text-on-panel);
-  font-size: 15px;
-  padding: 12px 20px;
+  border: none;
   border-radius: 0;
-  justify-content: flex-start;
-  transition: background 0.15s ease;
-}
-.burger-drawer__link:hover,
-.burger-drawer__link:focus-visible {
-  background: rgba(255, 255, 255, 0.06);
-}
-.burger-drawer__link--active {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.burger-drawer__link-icon {
-  font-family: var(--font-jp);
-  font-size: 20px;
-  color: var(--accent2);
-}
-
-.burger-drawer__footer {
-  display: flex;
-  gap: 8px;
-  padding: 16px;
-  border-top: 1px solid var(--burger-menu-border);
-  flex-wrap: wrap;
-}
-
-/* Pinned row for the profile link, sitting between the scrollable
-   nav list and the footer — same link styling, plus a hairline to
-   set it apart as a fixed destination rather than a nav item. */
-.burger-drawer__profile-row {
-  border-top: 1px solid var(--burger-menu-border);
-  padding: 4px 0;
-}
-
-/* Compact preview of the Profile screen itself: mini XP ring +
-   avatar initial, name/rank stacked, streak pinned to the right —
-   same visual language as ProfileScreen's own card, scaled down. */
-.burger-profile-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  background: transparent;
   color: var(--text-on-panel);
-  padding: 12px 20px;
-  border-radius: 0;
   text-align: left;
   transition: background 0.15s ease;
 }
-.burger-profile-row:hover,
-.burger-profile-row:focus-visible {
+.map-stop:hover,
+.map-stop:focus-visible {
   background: rgba(255, 255, 255, 0.06);
-}
-.burger-profile-row--active {
-  background: rgba(255, 255, 255, 0.12);
+  filter: none;
 }
 
-.burger-profile-row__ring-wrap {
+/* One rail segment per stop, each in its own pigment. The rows are
+   flush, so the segments meet and the whole run reads as a single
+   ribbon changing colour at every station — which is what makes the
+   drawer answer "which line was 文法 again?" without being asked.
+   Capped at the ends of each run, the way .route-stop caps its own. */
+.map-stop__rail {
+  position: absolute;
+  left: 21px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: color-mix(in srgb, var(--line-color, var(--accent2)) 62%, transparent);
+}
+.map-stop--first .map-stop__rail { top: 50%; border-radius: 2px 2px 0 0; }
+.map-stop--last  .map-stop__rail { bottom: 50%; border-radius: 0 0 2px 2px; }
+
+.map-stop__dot {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  margin-top: -6.5px;
+  border-radius: 50%;
+  background: var(--bg-panel);
+  border: 3px solid var(--line-color, var(--accent2));
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.map-stop:hover .map-stop__dot,
+.map-stop:focus-visible .map-stop__dot { transform: scale(1.18); }
+
+/* 現在地 — you are here. The marker fills and takes a halo, the name
+   takes the line's ink, and a bar seals the row's left edge. */
+.map-stop--active { background: rgba(255, 255, 255, 0.05); }
+.map-stop--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--line-color, var(--accent2));
+}
+.map-stop--active .map-stop__dot {
+  background: var(--line-color, var(--accent2));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color, var(--accent2)) 26%, transparent);
+}
+.map-stop--active .map-stop__name { color: var(--map-ink); }
+
+.map-stop__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.map-stop__name {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s ease;
+}
+.map-stop__title {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The station's own code, right-aligned so the eleven of them stack
+   into a column — the way a numbering list reads on a real map.
+   Fills on approach, exactly like .platform-card__no. */
+.map-stop__code {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--map-ink) 62%, transparent);
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--map-ink);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.map-stop:hover .map-stop__code,
+.map-stop:focus-visible .map-stop__code,
+.map-stop--active .map-stop__code {
+  background: var(--map-ink);
+  border-color: var(--map-ink);
+  color: var(--bg-panel);
+}
+
+/* 定期券 — the pass, as a stop. Same rail and marker as any other
+   station; the body carries the ring, the holder and the rank, and
+   the streak takes the corner the code roundel would have had. */
+.map-stop--pass { padding-top: 12px; padding-bottom: 12px; gap: 11px; }
+.pass-stop__ring-wrap {
   position: relative;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
 }
-.burger-profile-row__ring {
+.pass-stop__ring {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   transform: rotate(-90deg);
 }
-.burger-profile-row__ring-track { fill: none; stroke: rgba(255, 255, 255, 0.14); stroke-width: 3; }
-.burger-profile-row__ring-fill {
+.pass-stop__ring-track { fill: none; stroke: rgba(255, 255, 255, 0.14); stroke-width: 3; }
+.pass-stop__ring-fill {
   fill: none;
   stroke: var(--accent9);
   stroke-width: 3;
   stroke-linecap: round;
 }
-.burger-profile-row__avatar {
+.pass-stop__avatar {
   position: absolute;
   inset: 4px;
   border-radius: 50%;
-  background: var(--bg-panel);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--text-on-panel);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
-
-.burger-profile-row__info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1;
-}
-.burger-profile-row__name {
-  font-family: 'Noto Serif JP', serif;
+.map-stop__label {
+  font-family: var(--font-jp);
   font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--text-on-panel);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  color: var(--map-ink);
 }
-.burger-profile-row__rank {
-  font-size: 0.72rem;
-  color: var(--text-on-panel-soft);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* A username is latin text, not a station name — it takes the same
+   serif but none of the tracking the kanji names need. */
+.map-stop__name--holder {
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
 }
-
-.burger-profile-row__streak {
+.map-stop__streak {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-on-panel);
-}
-
-.burger-drawer__settings-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  justify-content: center;
-  font-size: 13px;
 }
 
 /* ── Mobile level bar ──────────────────────────────────────
@@ -2937,11 +3146,20 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* ── Top bar extras ───────────────────────────────────────── */
+/* Frequently a whole journey rather than a name ("漢字 N5 — MCQ"),
+   which is exactly what an in-car display prints under the station.
+   It no longer carries `flex: 1` — .top-bar__station owns the growth
+   now, and the title has to be able to shrink inside it or a long
+   composite pushes the clock and the back button off the bar. */
 .top-bar__title {
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: 1rem;
-  flex: 1;
+  line-height: 1.3;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn-writing-toggle {
@@ -9290,7 +9508,17 @@ input:focus { border-color: var(--accent2); }
   .platform-card__body { padding: 14px 10px 14px 14px; }
   .platform-card__title { font-size: 1.08rem; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
-  .top-bar__inner { padding: 12px 16px; }
+  /* The title needs the whole line on a phone, and it is frequently a
+     whole journey ("漢字 N5 — MCQ"), so the reading above it goes and
+     the roundel shrinks. The roundel stays: it is the only thing on
+     the bar that says which line you are on without being read. */
+  .top-bar__inner { padding: 10px 14px 11px; gap: 10px; }
+  .top-bar__station { gap: 10px; }
+  .top-bar__kana { display: none; }
+  .top-bar__roundel { width: 26px; height: 26px; font-size: 9px; }
+  .top-bar__title { font-size: 0.94rem; }
+  .burger-toggle { width: 34px; height: 32px; }
+  .burger-toggle__map { width: 16px; gap: 3.5px; }
   .selection-screen { padding: 44px 16px 56px; }
   .selector-header__title { font-size: 1.7rem; }
 

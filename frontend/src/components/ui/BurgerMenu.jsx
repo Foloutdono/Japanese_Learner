@@ -1,36 +1,99 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { levelTitle } from '../../domain/levelTitle'
+import { stationFor, SYSTEM_STATIONS } from '../../config/stations'
 import { playUi } from '../../lib/audio'
-import { MenuIcon, CrossIcon, GearIcon, FlameIcon } from './Icons'
+import { CrossIcon, FlameIcon } from './Icons'
 
-// ── Burger menu button + slide-in drawer ──────────────────
-// Drop this anywhere (e.g. in TopBar) to get a full nav drawer
-// with the same links as HomeScreen, plus sound/lang/sign-out.
+// ── 路線図 — the network map ───────────────────────────────
+// The nav drawer was a list of icon+label rows on a dark panel: the
+// last piece of the app still drawn as generic chrome, sitting one tap
+// away from twelve screens that are all station plates.
 //
-// Usage:
-//   <BurgerMenu links={[
-//     { icon: 'あ', title: t.kanaTitle, path: '/kana' },
-//     { icon: '単語', title: t.vocabTitle, path: '/vocab' },
-//     ...
-//   ]} />
-// Ring + name + rank + streak — a compact preview of the Profile
-// screen itself rather than a plain nav link, so opening the drawer
-// already tells you where you stand. Falls back to a plain "Profil"
-// link until the summary loads (or if there's no session), same as
-// TopBar's profile ring/level bar.
-function BurgerProfileRow({ go, active, t }) {
-  const summary = useProfileSummary()
+// A drawer of destinations *is* a route map, so it is drawn as one. A
+// rail runs down the left edge and every section is a stop on it,
+// marked with its own line colour and carrying its 駅ナンバリング code
+// — the same three objects the departure board, the station plate and
+// the platform cards already use. The stop you are standing at gets a
+// filled marker and its name in the line's colour, which is how a real
+// map says 現在地.
+//
+// The rail changes colour at each station rather than running one
+// tint the whole way down: eleven pigments stacked flush read as the
+// line legend on a Tokyo Metro map, and it means the drawer answers
+// "which line was 文法 again?" without being asked.
+//
+// Two runs, not one. The language sections are the line; 定期券 and
+// 設定 are a separate short segment below the gap, because they are
+// where you are in the *system* rather than in the language — the
+// exact split config/navLinks.js already models with `scope`. The gap
+// and the capped rail ends say that on their own, so neither run
+// needs a heading.
 
-  if (!summary) {
+// One stop. `trailing` replaces the code roundel for stops that have
+// something better to put there (the pass shows your streak).
+function MapStop({ path, color, glyph, title, active, first, last, onClick, trailing, children, className = '' }) {
+  const station = stationFor(path)
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      className={[
+        'map-stop',
+        active && 'map-stop--active',
+        first && 'map-stop--first',
+        last && 'map-stop--last',
+        className,
+      ].filter(Boolean).join(' ')}
+      style={{ '--line-color': color }}
+    >
+      <span className="map-stop__rail" aria-hidden="true" />
+      <span className="map-stop__dot" aria-hidden="true" />
+
+      {children ?? (
+        <span className="map-stop__body">
+          <span className="map-stop__name" lang="ja">{glyph}</span>
+          <span className="map-stop__title">{title}</span>
+        </span>
+      )}
+
+      {trailing ?? (station.code !== '??' && (
+        <span className="map-stop__code" aria-hidden="true">{station.code}</span>
+      ))}
+    </button>
+  )
+}
+
+// 定期券 — the commuter pass, as a stop on the map. Ring + name + rank
+// + streak: a compact reading of the Profile screen rather than a
+// plain link, so opening the drawer already tells you where you stand.
+// Falls back to a plain station row until the summary loads (or if
+// there is no session), same as TopBar's ring and level bar.
+function PassStop({ go, active, t, last }) {
+  const summary = useProfileSummary()
+  const system = SYSTEM_STATIONS(t)['/profile']
+
+  // A summary with no username takes the same path as no summary at
+  // all. It used to reach summary.username.charAt(0) regardless, and
+  // a throw here does not just lose the pass — it unmounts the whole
+  // drawer, which is the app's only navigation.
+  if (!summary?.username) {
     return (
-      <button onClick={() => go('/profile')} className={`burger-drawer__link ${active ? 'burger-drawer__link--active' : ''}`}>
-        <span className="burger-drawer__link-icon">侍</span>
-        <span>{t.profileTitle}</span>
-      </button>
+      <MapStop
+        path="/profile"
+        color={system.color}
+        glyph={system.icon}
+        title={system.title}
+        active={active}
+        first
+        last={last}
+        onClick={() => go('/profile')}
+      />
     )
   }
 
@@ -44,32 +107,39 @@ function BurgerProfileRow({ go, active, t }) {
   const dashoffset = circumference * (1 - pct / 100)
 
   return (
-    <button
+    <MapStop
+      path="/profile"
+      color={system.color}
+      active={active}
+      first
+      last={last}
+      className="map-stop--pass"
       onClick={() => go('/profile')}
-      className={`burger-profile-row${active ? ' burger-profile-row--active' : ''}`}
+      trailing={
+        <span className="map-stop__streak" title={t.streak}>
+          <FlameIcon size={13} /> {summary.streak}
+        </span>
+      }
     >
-      <span className="burger-profile-row__ring-wrap">
-        <svg className="burger-profile-row__ring" viewBox="0 0 36 36" aria-hidden="true">
-          <circle className="burger-profile-row__ring-track" cx="18" cy="18" r={r} />
+      <span className="pass-stop__ring-wrap">
+        <svg className="pass-stop__ring" viewBox="0 0 36 36" aria-hidden="true">
+          <circle className="pass-stop__ring-track" cx="18" cy="18" r={r} />
           <circle
-            className="burger-profile-row__ring-fill"
+            className="pass-stop__ring-fill"
             cx="18" cy="18" r={r}
             strokeDasharray={circumference}
             strokeDashoffset={dashoffset}
           />
         </svg>
-        <span className="burger-profile-row__avatar">{summary.username.charAt(0).toUpperCase()}</span>
+        <span className="pass-stop__avatar">{summary.username.charAt(0).toUpperCase()}</span>
       </span>
 
-      <span className="burger-profile-row__info">
-        <span className="burger-profile-row__name">{summary.username}</span>
-        <span className="burger-profile-row__rank" lang="ja">{jpTitle} · {title}</span>
+      <span className="map-stop__body">
+        <span className="map-stop__label" lang="ja">{system.icon}</span>
+        <span className="map-stop__name map-stop__name--holder">{summary.username}</span>
+        <span className="map-stop__title" lang="ja">{jpTitle} · {title}</span>
       </span>
-
-      <span className="burger-profile-row__streak" title={t.streak}>
-        <FlameIcon size={16} /> {summary.streak}
-      </span>
-    </button>
+    </MapStop>
   )
 }
 
@@ -85,63 +155,93 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
 
   const close = () => setOpenAndNotify(false)
 
-  // Every drawer link, the profile row, and the settings entry all
-  // funnel through here — one place to hang the click sound on rather
-  // than wiring each destination separately.
+  // Escape closes it. The QuickChange drawer already did this and its
+  // comment claimed this one did too; it didn't.
+  useEffect(() => {
+    if (!open) return
+    const onKey = e => { if (e.key === 'Escape') { playUi('click-close-menu'); close() } }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
+  // Every stop, the pass and the settings entry all funnel through
+  // here — one place to hang the click sound on rather than wiring
+  // each destination separately.
   const go = (path) => {
     playUi('click-screen-selection')
     navigate(path)
     close()
   }
 
+  const settings = SYSTEM_STATIONS(t)['/settings']
+
   return (
     <>
+      {/* 路線図 as a button: three line segments in three of the
+          system's own pigments, with an interchange marker on the
+          middle one. Still unmistakably a menu — a stack of coloured
+          lines is what a metro map's legend looks like. */}
       <button
         onClick={() => { playUi('click-menu'); setOpenAndNotify(!open) }}
         aria-label={t.menu}
+        aria-expanded={open}
         className="burger-toggle"
       >
-        <MenuIcon size={20} />
+        <span className="burger-toggle__map" aria-hidden="true">
+          <span className="burger-toggle__line" />
+          <span className="burger-toggle__line" />
+          <span className="burger-toggle__line" />
+        </span>
       </button>
 
       {open && createPortal(
         <div className="burger-overlay" onClick={() => { playUi('click-close-menu'); close() }}>
           <div className="burger-drawer" onClick={e => e.stopPropagation()}>
             <div className="burger-drawer__header">
-              <span className="burger-drawer__title">{t.menu}</span>
-              <button className="burger-drawer__close" onClick={() => { playUi('click-close-menu'); close() }} aria-label={t.close}><CrossIcon size={16} /></button>
+              <span className="burger-drawer__heading">
+                <span className="burger-drawer__jp" lang="ja">路線図</span>
+                <span className="burger-drawer__sub">{t.menu}</span>
+              </span>
+              <button
+                className="burger-drawer__close"
+                onClick={() => { playUi('click-close-menu'); close() }}
+                aria-label={t.close}
+              >
+                <CrossIcon size={14} />
+              </button>
             </div>
 
             <nav className="burger-drawer__nav">
-              {links.map(link => (
-                <button
+              {links.map((link, i) => (
+                <MapStop
                   key={link.path}
+                  path={link.path}
+                  color={link.color}
+                  glyph={link.icon}
+                  title={link.title}
+                  active={currentPath === link.path}
+                  first={i === 0}
+                  last={i === links.length - 1}
                   onClick={() => go(link.path)}
-                  className={`burger-drawer__link ${currentPath === link.path ? 'burger-drawer__link--active' : ''}`}
-                >
-                  <span className="burger-drawer__link-icon">{link.icon}</span>
-                  <span>{link.title}</span>
-                </button>
+                />
               ))}
             </nav>
 
-            {/* Pinned above the footer rather than inside the scrollable
-                nav list, so it stays reachable regardless of how many
-                nav links there are. */}
-            <div className="burger-drawer__profile-row">
-              <BurgerProfileRow go={go} active={currentPath === '/profile'} t={t} />
-            </div>
-
-            {/* Sound/theme/lang/sign-out now live on the Settings screen —
-                one entry point here instead of four separate controls
-                crowding the footer. */}
-            <div className="burger-drawer__footer">
-              <button
+            {/* The system stations. Pinned below the scrollable run
+                rather than inside it, so they stay reachable however
+                many sections the line grows to. */}
+            <div className="burger-drawer__system">
+              <PassStop go={go} active={currentPath === '/profile'} t={t} />
+              <MapStop
+                path="/settings"
+                color={settings.color}
+                glyph={settings.icon}
+                title={settings.title}
+                active={currentPath === '/settings'}
+                last
                 onClick={() => go('/settings')}
-                className="btn-ghost burger-drawer__settings-btn"
-              >
-                <GearIcon size={16} /> {t.settings}
-              </button>
+              />
             </div>
           </div>
         </div>,

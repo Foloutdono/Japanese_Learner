@@ -1,7 +1,6 @@
 import { useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
-import { getNavLinks, getProfileHalls } from '../../config/navLinks'
-import { SYSTEM_STATIONS, stationFor } from '../../config/stations'
+import { sectionFor, stationFor } from '../../config/stations'
 import { StationSign } from './StationSign'
 import { useStationClock } from './useStationClock'
 
@@ -23,9 +22,7 @@ export function StationHeader({ aside }) {
   const { pathname } = useLocation()
   const now = useStationClock()
 
-  const section =
-    [...getNavLinks(t), ...getProfileHalls(t)].find(l => l.path === pathname) ??
-    SYSTEM_STATIONS(t)[pathname]
+  const section = sectionFor(pathname, t)
   if (!section) return null
 
   const station = stationFor(pathname)
