@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback, Fragment } from 'react'
+import { useState, useEffect, useRef, useMemo, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { StationHeader } from '../components/station/StationHeader'
 import { TopBar } from '../components/ui/TopBar'
@@ -11,6 +11,7 @@ import {
 	SearchIcon, DictionaryDetail, LevelBadge,
 } from '../components/dictionary/DictionaryDetail'
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
+import { SectionHeader } from '../components/ui/SectionHeader'
 import { StageBadge } from '../components/study/StageBadge'
 import { ChevronIcon } from '../components/ui/Icons'
 
@@ -436,125 +437,97 @@ export default function DictionaryScreen({ session }) {
 
 // ── Radical picker grid ─────────────────────────────────────
 
-// Jumps to a stroke-count sheet without a full page-jump — `block:
-// 'start'` plus each sheet's own scroll-margin-top (set in CSS) keeps
-// the landed section clear of the sticky search bar above it.
-function jumpToStrokeSheet(count) {
-	document.getElementById(`stroke-sheet-${count}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
-
-// The radical lattice sizes itself to content (`width: max-content`),
-// not a fixed grid-2/grid-3 like the stats screen, so the number of
-// columns isn't known up front — it depends on how much width the
-// sheets column actually has (sidebar rail included) and changes on
-// resize. Measured here so RadicalFiller below can top up a ragged
-// last row with exactly as many tiles as the lattice really has.
-// Reads tile size/gap from the CSS custom properties on the ref'd
-// node (set in .dict-radical-sheets, see index.css) rather than
-// hardcoding numbers here — so PC vs. phone sizing lives in one place
-// and can't drift out of sync with what's actually on screen.
+// ── 部首索引 — the radical index ──────────────────────────
+// A printed radical index has a thumb rail down the fore-edge so you
+// can land on a stroke count without turning every page. This is that
+// rail, laid across the top where it can be reached with one hand and
+// stay in view: 一画, 二画, 三画 …
 //
-// A callback ref, not useRef + useEffect(..., []): the grid only
-// mounts once `!loading && groups`, so a one-shot mount effect can
-// fire before it's in the DOM and never re-run once it appears,
-// leaving cols stuck at the initial value forever.
-function useRadicalColumns() {
-	const [node, setNode] = useState(null)
-	const [cols, setCols] = useState(1)
-	const ref = useCallback(el => setNode(el), [])
-
-	useEffect(() => {
-		if (!node) return
-		const measure = () => {
-			const width = node.clientWidth
-			if (!width) return
-			const style = getComputedStyle(node)
-			const TILE = parseFloat(style.getPropertyValue('--radical-tile')) || 56
-			const GAP = parseFloat(style.getPropertyValue('--radical-gap')) || 1
-			setCols(Math.max(1, Math.floor((width + GAP) / (TILE + GAP))))
-		}
-		measure()
-		const ro = new ResizeObserver(measure)
-		ro.observe(node)
-		return () => ro.disconnect()
-	}, [node])
-
-	return [ref, cols]
-}
-
-// Same idea as GridFiller in StatsScreen: a group whose radical count
-// isn't a clean multiple of the column count leaves a bare patch of
-// lattice background in its last row. A group that doesn't even reach
-// one full row (radicals.length <= cols) is deliberately narrower —
-// nothing to top up there — so this only fires once a group actually
-// wraps.
-function RadicalFiller({ count, cols, glyph }) {
-	const empty = (cols - (count % cols)) % cols
-	if (!empty) return null
-	return Array.from({ length: empty }, (_, i) => (
-		<div key={`radical-filler-${i}`} className="dict-radical-filler" aria-hidden="true">
-			<span className="dict-radical-filler__glyph">{glyph}</span>
-		</div>
-	))
+// It also tracks where you are. An index that only jumps is half an
+// index — the other half is telling you which section you are looking
+// at, which an IntersectionObserver answers for free.
+function StrokeRail({ groups, active, onJump, t }) {
+	return (
+		<nav className="stroke-rail" aria-label={t.dictStrokeIndex}>
+			{groups.map(g => (
+				<button
+					key={g.stroke_count}
+					type="button"
+					onClick={() => onJump(g.stroke_count)}
+					aria-current={active === g.stroke_count ? 'true' : undefined}
+					className={`stroke-rail__tab${active === g.stroke_count ? ' stroke-rail__tab--active' : ''}`}
+				>
+					<span className="stroke-rail__n">{g.stroke_count}</span>
+					<span className="stroke-rail__unit" lang="ja">画</span>
+				</button>
+			))}
+		</nav>
+	)
 }
 
 function RadicalGrid({ groups, loading, onPick, t }) {
-	const [sheetsRef, cols] = useRadicalColumns()
+	const [active, setActive] = useState(null)
+	const sheetRefs = useRef(new Map())
+
+	// Which stroke group is currently under the rail. rootMargin pulls
+	// the observation band up to just below the sticky rail so the
+	// section you are actually reading is the one that lights up, not
+	// the one scrolled off behind it.
+	useEffect(() => {
+		if (!groups?.length) return
+		const io = new IntersectionObserver(
+			entries => {
+				const visible = entries
+					.filter(e => e.isIntersecting)
+					.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
+				if (visible) setActive(Number(visible.target.dataset.stroke))
+			},
+			{ rootMargin: '-140px 0px -60% 0px', threshold: 0 },
+		)
+		sheetRefs.current.forEach(el => el && io.observe(el))
+		return () => io.disconnect()
+	}, [groups])
+
+	function jump(count) {
+		sheetRefs.current.get(count)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+		setActive(count)
+	}
 
 	if (loading || !groups) {
-		return (
-			<div className="quiz-loading">
-				{t.loadingDictionary}
-			</div>
-		)
+		return <div className="quiz-loading">{t.loadingDictionary}</div>
 	}
 
 	return (
 		<div className="dict-radical-index">
-			{/* Thumb index — the stroke-count tabs found on the fore-edge of a
-			    printed 部首索引 (radical index), letting you jump straight to
-			    a stroke count instead of scrolling past every group. */}
-			<nav className="dict-stroke-rail" aria-label={t.dictStrokeIndex}>
-				{groups.map(g => (
-					<a
-						key={g.stroke_count}
-						href={`#stroke-sheet-${g.stroke_count}`}
-						onClick={e => { e.preventDefault(); jumpToStrokeSheet(g.stroke_count) }}
-						className="dict-stroke-rail__tab"
-					>
-						{g.stroke_count}
-					</a>
-				))}
-			</nav>
+			<StrokeRail groups={groups} active={active ?? groups[0]?.stroke_count} onJump={jump} t={t} />
 
-			<div className="dict-radical-sheets" ref={sheetsRef}>
+			<div className="dict-radical-sheets">
 				{groups.map(group => (
-					<div key={group.stroke_count} id={`stroke-sheet-${group.stroke_count}`} className="dict-radical-group">
-						<div className="dict-radical-group__label">
-							{group.stroke_count} {group.stroke_count > 1
-								? (t.dictStrokesPlural)
-								: (t.dictStrokeSingular)}
-						</div>
-						<div className="dict-radical-group__rule" />
-						<div className="dict-radical-group__list">
+					<section
+						key={group.stroke_count}
+						data-stroke={group.stroke_count}
+						ref={el => { sheetRefs.current.set(group.stroke_count, el) }}
+						className="radical-sheet"
+					>
+						<SectionHeader
+							jp={`${group.stroke_count}画`}
+							title={`${group.stroke_count} ${group.stroke_count > 1 ? t.dictStrokesPlural : t.dictStrokeSingular}`}
+							count={group.radicals.length}
+						/>
+						<div className="radical-sheet__list">
 							{group.radicals.map(r => (
 								<button
 									key={r.number}
 									onClick={() => onPick(r.number)}
 									title={`${r.kanji_count} kanji`}
-									className="dict-radical-btn"
+									className="radical-tile"
 								>
-									<span className="dict-radical-btn__char">
-										{r.char}
-									</span>
-									<span className="dict-radical-btn__count">
-										{r.kanji_count}
-									</span>
+									<span className="radical-tile__char" lang="ja">{r.char}</span>
+									<span className="radical-tile__count">{r.kanji_count}</span>
 								</button>
 							))}
-							<RadicalFiller count={group.radicals.length} cols={cols} glyph="部" />
 						</div>
-					</div>
+					</section>
 				))}
 			</div>
 		</div>
@@ -594,41 +567,6 @@ function shortKana(kana, type) {
 		.join('・')
 }
 
-// Same idea as useRadicalColumns, but the results grid's width can also
-// change without a window resize — opening the side detail panel eats
-// 320px + gap out of .dict-results-wrap via the flex layout — so this
-// watches the container itself instead of just the window.
-//
-// A callback ref, not useRef + useEffect(..., []): the grid <div> only
-// exists once `!loading && results.length > 0`, so a one-shot mount
-// effect can fire before it's in the DOM and never re-run once it
-// appears, leaving cols stuck at the initial value forever.
-function useResultsColumns() {
-	const [node, setNode] = useState(null)
-	const [cols, setCols] = useState(1)
-	const ref = useCallback(el => setNode(el), [])
-
-	useEffect(() => {
-		if (!node) return
-		const TILE = 180, GAP = 2
-		const measure = () => {
-			const width = node.clientWidth
-			if (!width) return
-			setCols(Math.max(1, Math.floor((width + GAP) / (TILE + GAP))))
-		}
-		measure()
-		const ro = new ResizeObserver(measure)
-		ro.observe(node)
-		return () => ro.disconnect()
-	}, [node])
-
-	return [ref, cols]
-}
-
-// Same reasoning as RadicalFiller: a ragged last row of entry cards
-// would otherwise leave a bare patch of the lattice background (or,
-// worse, a single undivided block of it) instead of reading as more
-// index-card slots that just happen to be empty.
 // ── The detail dock ──────────────────────────────────────
 // One node, two presentations. On a wide screen it is a sticky column
 // standing beside the catalogue — you scan and read at the same time,
@@ -640,9 +578,6 @@ function useResultsColumns() {
 // the original side panel got wrong and why it was replaced by a
 // modal: a panel pinned to the viewport cannot hold an entry with a
 // dozen senses and a page of examples. Sticky + its own overflow can.
-//
-// Rendering once and letting CSS choose beats mounting two copies and
-// keeping them in step.
 function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick }) {
 	return (
 		<>
@@ -662,21 +597,10 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 	)
 }
 
-function ResultsFiller({ count, cols, glyph }) {
-	const empty = (cols - (count % cols)) % cols
-	if (!empty) return null
-	return Array.from({ length: empty }, (_, i) => (
-		<div key={`results-filler-${i}`} className="dict-results-filler" aria-hidden="true">
-			<span className="dict-results-filler__glyph">{glyph}</span>
-		</div>
-	))
-}
-
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
 	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, t,
 }) {
-	const [resultsGridRef, cols] = useResultsColumns()
 
 	return (
 		<>
@@ -697,7 +621,7 @@ function ResultsSection({
 
 					{/* Grid */}
 					<div className="dict-results-wrap">
-						<div className="dict-results-grid" ref={resultsGridRef}>
+						<div className="dict-results-grid">
 							{results.map(entry => (
 								<div
 									key={entryKey(entry)}
@@ -723,7 +647,6 @@ function ResultsSection({
 									<StageBadge stage={entry.status?.status ?? 'new'} />
 								</div>
 							))}
-							<ResultsFiller count={results.length} cols={cols} glyph="語" />
 						</div>
 
 						{/* Infinite scroll sentinel */}
@@ -771,10 +694,10 @@ function vowelOf(romaji) {
 	return VOWEL_COLS.includes(last) ? last : null
 }
 
-function SyllabaryTable({ rows, title, byGroup, selected, setSelected }) {
+function SyllabaryTable({ rows, jp, title, byGroup, selected, setSelected }) {
 	return (
 		<div className="syllabary-table-wrap">
-			{title && <div className="syllabary-table__title">{title}</div>}
+			{title && <SectionHeader jp={jp} title={title} />}
 			<div className="syllabary-table">
 				<div className="syllabary-cell syllabary-cell--corner" aria-hidden="true" />
 				{VOWEL_COLS.map(v => (
@@ -835,35 +758,48 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 	return (
 		<div className="dict-layout">
 			<div className="dict-results-wrap">
+				{/* Two charts, side by side once there is room. A 五十音 table
+				    is five columns wide and no wider — stacked, it left two
+				    thirds of a desktop empty and pushed 濁音 below the fold,
+				    when the two are meant to be read against each other. */}
 				<div className="syllabary-chart-group" style={{ '--syl-accent': accentColor }}>
-					<SyllabaryTable
-						rows={MAIN_ROWS}
-						title={t.syllabaryMain}
-						byGroup={byGroup}
-						selected={selected}
-						setSelected={setSelected}
-					/>
+					<div className="syllabary-col">
+						<SyllabaryTable
+							rows={MAIN_ROWS}
+							jp="五十音"
+							title={t.syllabaryMain}
+							byGroup={byGroup}
+							selected={selected}
+							setSelected={setSelected}
+						/>
 
-					{nSolo && (
-						<div className="syllabary-nsolo-wrap">
-							<button
-								type="button"
-								onClick={() => setSelected(nSolo)}
-								className={`syllabary-cell syllabary-cell--kana syllabary-cell--nsolo${selected && entryKey(selected) === entryKey(nSolo) ? ' syllabary-cell--selected' : ''}`}
-							>
-								<span className="syllabary-cell__char">{nSolo.kana}</span>
-								<span className="syllabary-cell__romaji">{nSolo.romaji}</span>
-							</button>
-						</div>
-					)}
+						{/* ん belongs to the gojūon chart — it is the one kana
+						    that sits in no vowel column — so it stays with it
+						    rather than drifting between the two tables. */}
+						{nSolo && (
+							<div className="syllabary-nsolo-wrap">
+								<button
+									type="button"
+									onClick={() => setSelected(nSolo)}
+									className={`syllabary-cell syllabary-cell--kana syllabary-cell--nsolo${selected && entryKey(selected) === entryKey(nSolo) ? ' syllabary-cell--selected' : ''}`}
+								>
+									<span className="syllabary-cell__char">{nSolo.kana}</span>
+									<span className="syllabary-cell__romaji">{nSolo.romaji}</span>
+								</button>
+							</div>
+						)}
+					</div>
 
-					<SyllabaryTable
-						rows={VOICED_ROWS}
-						title={t.syllabaryVoiced}
-						byGroup={byGroup}
-						selected={selected}
-						setSelected={setSelected}
-					/>
+					<div className="syllabary-col">
+						<SyllabaryTable
+							rows={VOICED_ROWS}
+							jp="濁音"
+							title={t.syllabaryVoiced}
+							byGroup={byGroup}
+							selected={selected}
+							setSelected={setSelected}
+						/>
+					</div>
 				</div>
 			</div>
 

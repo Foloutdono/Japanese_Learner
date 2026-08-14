@@ -666,17 +666,19 @@ function useDictionaryLookup(session, term, category, lang, active) {
 }
 
 // ── Standalone lookup sheet ─────────────────────────────────
-// Fetches and shows one dictionary entry by term + category, in the
-// same overlay chrome DictionaryScreen's own mobile modal already
-// uses (.dict-modal-overlay/.dict-modal-content) — so it looks like
-// part of the same feature wherever it's opened from.
+// Fetches and shows one dictionary entry by term + category, opened
+// from a quiz card ("what was that word?"). It has its own centred
+// chrome rather than borrowing the catalogue's: the dictionary screen
+// docks its panel beside the results on a wide screen, which is right
+// there and wrong here — this is a portal over a quiz, with no
+// catalogue to sit next to, so it is always a sheet.
 export function DictionaryLookupSheet({ term, category, session, onClose }) {
   const { t, lang } = useLang()
   const { entry, loading, error } = useDictionaryLookup(session, term, category, lang, true)
 
   return createPortal(
-    <div onClick={onClose} className="dict-modal-overlay">
-      <div onClick={e => e.stopPropagation()} className="dict-modal-content">
+    <div onClick={onClose} className="dict-sheet__scrim">
+      <div onClick={e => e.stopPropagation()} className="dict-sheet">
         {loading && (
           <div className="quiz-loading">{t.loadingDictionary}</div>
         )}

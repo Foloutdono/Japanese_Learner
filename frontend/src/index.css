@@ -7084,34 +7084,6 @@ input:focus { border-color: var(--accent2); }
    straight to a stroke count instead of scrolling past every group. */
 .dict-radical-index { display: flex; gap: 32px; align-items: flex-start; }
 
-.dict-stroke-rail {
-  position: sticky;
-  top: 92px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  border-left: 1px solid var(--border);
-  padding-left: 12px;
-}
-.dict-stroke-rail__tab {
-  min-width: 26px;
-  text-align: center;
-  padding: 5px 6px;
-  border-radius: 4px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-secondary);
-  text-decoration: none;
-  transition: color 0.15s ease, background 0.15s ease;
-}
-.dict-stroke-rail__tab:hover,
-.dict-stroke-rail__tab:focus-visible {
-  color: var(--text-on-panel);
-  background: var(--accent);
-}
-
 .dict-radical-sheets {
   --radical-tile: 90px;
   --radical-gap: 2px;
@@ -7119,15 +7091,7 @@ input:focus { border-color: var(--accent2); }
   min-width: 0;
 }
 
-.dict-radical-group { margin-bottom: 40px; scroll-margin-top: 92px; }
-.dict-radical-group__label {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--text-primary);
-}
 /* A short seal-red stroke, same device as .section-header__rule. */
-.dict-radical-group__rule { height: 2px; width: 28px; background: var(--accent); margin: 10px 0 16px; }
 
 /* Flush lattice — 1px hairlines showing through the container
    background, the same shoji-screen technique as .hall-grid,
@@ -7136,63 +7100,11 @@ input:focus { border-color: var(--accent2); }
    not declared here, so the JS column count (which reads those same
    custom properties off the ref'd .dict-radical-sheets node) can never
    drift out of sync with what's actually on screen. */
-.dict-radical-group__list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, var(--radical-tile));
-  gap: var(--radical-gap);
-  background: var(--border);
-  border: 1px solid var(--border);
-  width: max-content;
-  max-width: 100%;
-}
-
-.dict-radical-btn {
-  width: var(--radical-tile);
-  height: var(--radical-tile);
-  padding: 0;
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: none;
-  border-radius: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.dict-radical-btn:hover,
-.dict-radical-btn:focus-visible { background: var(--bg-card-hover); }
-.dict-radical-btn__char {
-  font-size: 38px;
-  font-family: var(--font-jp);
-  line-height: 1;
-}
-.dict-radical-btn__count { font-size: 14px; color: var(--text-secondary); margin-top: 3px; font-family: var(--font-display); }
 
 /* Same reasoning as .stats-filler-card: a ragged last row of the
    lattice would otherwise leave a bare, high-contrast patch of the
    grid background. A muted, oversized 部 (radical) watermark fills it
    instead — decorative, not another clickable tile. */
-.dict-radical-filler {
-  width: var(--radical-tile);
-  height: var(--radical-tile);
-  background: var(--bg-card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.dict-radical-filler__glyph {
-  font-family: var(--font-jp);
-  font-size: 45px;
-  line-height: 1;
-  color: var(--text-secondary);
-  opacity: 0.14;
-  user-select: none;
-}
-
-
-
 /* ── Results grid ─────────────────────────────────────────
    Same flush shoji-lattice as the radical picker — the search
    results read as index cards in one catalog drawer, not floating
@@ -7345,26 +7257,6 @@ input:focus { border-color: var(--accent2); }
    vermillion against both papers, and a mastered card is the one
    worth spotting from across the grid. */
 .dict-entry-card .stage-badge--mastered { opacity: 0.85; }
-
-/* Same reasoning as .dict-radical-filler: a ragged last row of entry
-   cards would otherwise leave a bare patch of the lattice background
-   showing through. A muted, oversized watermark fills it instead —
-   decorative, not another clickable card. */
-.dict-results-filler {
-  background: var(--bg-card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 128px;
-}
-.dict-results-filler__glyph {
-  font-family: var(--font-jp);
-  font-size: 40px;
-  line-height: 1;
-  color: var(--text-secondary);
-  opacity: 0.14;
-  user-select: none;
-}
 
 /* ── Syllabary chart (hiragana/katakana) ──────────────────
    Classic gojūon table — same flush shoji-lattice language as the
@@ -9320,9 +9212,6 @@ input:focus { border-color: var(--accent2); }
     display: flex;
   }
 
-  .dict-stroke-rail {
-    display: none;
-  }
 
   /* Original tile was 56px; PC gets a full 1.6x bump above (90px) but
      that reads oversized on a phone screen, so mobile gets a smaller,
@@ -9331,12 +9220,6 @@ input:focus { border-color: var(--accent2); }
     --radical-tile: 64px;
     --radical-gap: 1px;
   }
-  .dict-radical-group__list {
-    margin: 0 auto;
-  }
-  .dict-radical-btn__char { font-size: 28px; }
-  .dict-radical-btn__count { font-size: 10px; }
-  .dict-radical-filler__glyph { font-size: 32px; }
 }
 
 @media (max-width: 768px) {
@@ -12565,3 +12448,276 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
   .dict-dock .dict-detail__close-x { display: inline-flex; }
   .dict-dock .dict-detail__close-btn { display: none; }
 }
+
+/* ══ 部首索引 — the radical index ═══════════════════════════
+   Appended, like everything else that refines the dictionary block
+   above: equal specificity, and a media query adds none. */
+
+/* The thumb rail off a printed radical index, laid across the top
+   where one hand can reach it and it stays in view. It also reports
+   where you are — an index that only jumps is half an index. */
+.stroke-rail {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px 0 14px;
+  margin-bottom: 4px;
+  background: linear-gradient(180deg,
+    var(--bg-main) 0%, var(--bg-main) 72%, transparent 100%);
+}
+.stroke-rail__tab {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 6px 12px;
+  border: 1px solid var(--surface-line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.stroke-rail__tab:hover { border-color: var(--line-jisho); color: var(--text-primary); }
+.stroke-rail__n {
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.stroke-rail__unit { font-family: var(--font-jp); font-size: 0.62rem; opacity: 0.7; }
+.stroke-rail__tab--active {
+  background: var(--line-jisho);
+  border-color: var(--line-jisho);
+  color: var(--bg-main);
+}
+.stroke-rail__tab--active .stroke-rail__unit { opacity: 0.85; }
+
+.dict-radical-index { display: block; }
+.dict-radical-sheets { display: block; }
+.radical-sheet { scroll-margin-top: 76px; }
+.radical-sheet + .radical-sheet { margin-top: 12px; }
+.radical-sheet .section-header { margin-top: 34px; margin-bottom: 16px; }
+
+/* Radicals as tiles, not lattice cells. The old grid drew its seams
+   with a background showing through 1px gaps, which meant every
+   ragged last row had to be padded with ghost 部 glyphs to stop it
+   showing as a bare slab — nine filler tiles on a five-radical group.
+   Tiles with their own edges need no filler, so the fillers and the
+   column-measuring hook that fed them are both gone. */
+.radical-sheet__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  gap: 8px;
+}
+.radical-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 4px 8px;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
+  color: var(--text-primary);
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+.radical-tile:hover,
+.radical-tile:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: var(--line-jisho);
+  transform: translateY(-2px);
+  filter: none;
+}
+.radical-tile__char {
+  font-family: var(--font-jp);
+  font-size: 26px;
+  line-height: 1.1;
+}
+/* How many kanji use it — the number you are actually choosing on. */
+.radical-tile__count {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.radical-tile:hover .radical-tile__count { color: var(--line-jisho); }
+
+/* ══ 五十音 — the syllabary ═════════════════════════════════
+   The gojūon table is the one chart every learner already has a
+   picture of, and it was rendered as a spreadsheet: 200px cells for a
+   single character, grey header blocks, romaji shrunk to nothing.
+   Same cells as everything else in the catalogue now — kana large,
+   romaji tracked underneath — capped so a cell is a tile rather than
+   a field. */
+/* Two charts side by side once there is room for them; stacked below
+   that. Each column sizes to its own table rather than splitting the
+   width evenly, so the five-column tables stay tile-sized instead of
+   stretching to fill a half. */
+.syllabary-chart-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px 56px;
+  justify-content: start;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .syllabary-chart-group { grid-template-columns: auto auto; }
+}
+.syllabary-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.syllabary-col .section-header { margin-top: 0; }
+.syllabary-table {
+  grid-template-columns: 30px repeat(5, minmax(56px, 92px));
+  gap: 6px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  justify-content: start;
+  overflow-x: auto;
+}
+.syllabary-cell {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
+  gap: 2px;
+  padding: 10px 4px 8px;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+.syllabary-cell__char { font-size: 26px; line-height: 1.15; }
+.syllabary-cell__romaji {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+button.syllabary-cell:hover,
+button.syllabary-cell:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: var(--syl-accent, var(--line-kana));
+  transform: translateY(-2px);
+  filter: none;
+}
+.syllabary-cell--selected {
+  border-color: var(--syl-accent, var(--line-kana));
+  background: color-mix(in srgb, var(--syl-accent, var(--line-kana)) 14%, var(--surface));
+}
+.syllabary-cell--selected .syllabary-cell__romaji { color: var(--syl-accent, var(--line-kana)); }
+
+/* Headers are labels, not cells: no box, just tracked type in the
+   collection's own colour. */
+.syllabary-cell--col-header,
+.syllabary-cell--row-header {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--syl-accent, var(--line-kana));
+}
+.syllabary-cell--corner,
+.syllabary-cell--empty { background: none; border: none; }
+
+.syllabary-nsolo-wrap { justify-content: flex-start; padding-left: 36px; }
+.syllabary-cell--nsolo { max-width: 92px; }
+
+@media (max-width: 560px) {
+  .radical-sheet__list { grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; }
+  .radical-tile__char { font-size: 22px; }
+  .stroke-rail { gap: 4px; padding: 10px 0 12px; }
+  .stroke-rail__tab { padding: 5px 9px; }
+  .syllabary-table { grid-template-columns: 22px repeat(5, minmax(48px, 1fr)); gap: 4px; }
+  .syllabary-cell__char { font-size: 21px; }
+  .syllabary-nsolo-wrap { padding-left: 26px; }
+}
+
+/* ── The entry plate, refined ──────────────────────────────
+   Three bands with room between them rather than three lines stacked
+   tight: the reading sits away from the headword, the headword gets
+   the middle of the card to itself, and the gloss is pinned to the
+   bottom above the level stripe. A fixed min-height and a two-line
+   clamp on the gloss keep every plate in a row the same size — a wall
+   of them only reads as a wall if the plates match. */
+.dict-entry-card {
+  min-height: 132px;
+  justify-content: space-between;
+  padding: 26px 12px 18px;
+  gap: 0;
+}
+.dict-entry-card__kana {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  color: var(--text-secondary);
+  min-height: 1.3em;
+}
+.dict-entry-card__char {
+  font-size: 44px;
+  line-height: 1.05;
+  margin: 6px 0 8px;
+  transition: transform 0.16s ease;
+}
+.dict-entry-card:hover .dict-entry-card__char { transform: translateY(-1px); }
+.dict-entry-card__meaning {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  margin-top: 0;
+}
+/* The line stripe thickens on approach, the way a platform card's
+   roundel fills. */
+.dict-entry-card::after { transition: height 0.16s ease, opacity 0.16s ease; }
+.dict-entry-card:hover::after { height: 5px; opacity: 1; }
+
+/* The SRS seal is marginalia, not a second badge competing with the
+   level in the opposite corner. */
+.dict-entry-card .stage-badge { opacity: 0.75; }
+.dict-entry-card:hover .stage-badge { opacity: 1; }
+
+@media (max-width: 560px) {
+  .dict-entry-card { min-height: 112px; padding: 20px 8px 14px; }
+  .dict-entry-card__char { font-size: 34px; margin: 4px 0 6px; }
+}
+
+/* ── The standalone lookup sheet ───────────────────────────
+   Opened from a quiz card, portalled over whatever is on screen. It
+   is always centred: the catalogue docks its panel beside the results
+   on a wide screen, which is correct there and meaningless here,
+   where there is no catalogue to stand beside.
+
+   It had been borrowing .dict-modal-*, which the dock replaced — and
+   which I deleted with it, leaving this sheet unstyled. Its own
+   chrome now, so the two cannot be coupled again by accident. */
+.dict-sheet__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.dict-sheet {
+  width: min(640px, 100%);
+  max-height: 88dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: 12px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+/* A portalled sheet has no page behind it to click away from, so the
+   ✕ has to be present at every width. */
+.dict-sheet .dict-detail__close-x { display: inline-flex; }
