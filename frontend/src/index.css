@@ -3289,7 +3289,7 @@ input:focus { border-color: var(--accent2); }
   transform: translateY(-1px);
   filter: none;
 }
-.mcq-row:disabled { cursor: default; }
+.mcq-row:disabled { cursor: default; padding: 0px; margin: 0px; border-width: 0px; opacity: 0.5; pointer-events: none; }
 
 /* The rail a platform card carries, kept here as the state marker:
    nothing until the answer is graded, then the colour of the verdict. */
