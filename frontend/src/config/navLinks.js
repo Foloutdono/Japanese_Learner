@@ -12,33 +12,36 @@
 // across is a one-word edit here — no screen hardcodes which sections
 // it shows, they all ask for a scope.
 //
-// Each section gets a distinct pigment from the shared palette
-// (index.css :root) rather than an arbitrary colour, so a section keeps
-// the same identity wherever it's rendered — home card, burger row,
-// profile hall, landing showcase.
+// Each section gets a line colour from the --line-* family (index.css
+// :root), so a section keeps the same identity wherever it's rendered
+// — departure board row, station plate, card rail, burger row, profile
+// hall, landing showcase.
+//
+// That family exists for exactly this and nothing else. These used to
+// be picked from whatever was left over in the accent palette, which
+// put three sections on the app's *state* colours: grammar was
+// --success, decks were --warning, the analyser was --danger. Those
+// mean correct / caution / wrong on the quiz screens a tap later. See
+// the --line-* block in index.css for the rest of the reasoning.
 function sections(t) {
   return [
     { icon: '家',   title: t.homeTitle,       desc: t.homeDesc,       path: '/', color: 'var(--accent8)', scope: 'home', showcase: false },
-    { icon: 'あ',   title: t.kanaTitle,       desc: t.kanaDesc,       path: '/kana',       color: 'var(--accent)',  scope: 'home' },  // Shu-iro
-    { icon: '単語', title: t.vocabTitle,      desc: t.vocabDesc,      path: '/vocab',      color: 'var(--accent4)', scope: 'home' }, // Ai-iro
-    { icon: '漢字', title: t.kanjiTitle,      desc: t.kanjiDesc,      path: '/kanji',      color: 'var(--accent3)', scope: 'home' }, // Fuji-iro
-    { icon: '文法', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/grammar',    color: 'var(--success)', scope: 'home' }, // Matcha
-    { icon: '読書', title: t.readingTitle,    desc: t.readingDesc,    path: '/reading',    color: 'var(--accent6)', scope: 'home' }, // Rokushou-iro
-    { icon: '理解', title: t.readingComprehensionTitle, desc: t.readingComprehensionDesc, path: '/reading-comprehension', color: 'var(--accent7)', scope: 'home' }, // Sabi-iro
+    { icon: 'あ',   title: t.kanaTitle,       desc: t.kanaDesc,       path: '/kana',       color: 'var(--line-kana)',    scope: 'home' },
+    { icon: '単語', title: t.vocabTitle,      desc: t.vocabDesc,      path: '/vocab',      color: 'var(--line-vocab)',   scope: 'home' },
+    { icon: '漢字', title: t.kanjiTitle,      desc: t.kanjiDesc,      path: '/kanji',      color: 'var(--line-kanji)',   scope: 'home' },
+    { icon: '文法', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/grammar',    color: 'var(--line-grammar)', scope: 'home' },
+    { icon: '読書', title: t.readingTitle,    desc: t.readingDesc,    path: '/reading',    color: 'var(--line-reading)', scope: 'home' },
+    { icon: '理解', title: t.readingComprehensionTitle, desc: t.readingComprehensionDesc, path: '/reading-comprehension', color: 'var(--line-rikai)', scope: 'home' },
     // Translation mode: given a phrase in the UI's foreign language,
     // type the Japanese translation; the deck's reference translation
-    // plus an LLM analysis help you judge your own attempt. --accent9
-    // was the one pigment in the shared palette no other card had
-    // claimed yet.
-    { icon: '翻訳', title: t.translationTitle || 'Translation', desc: t.translationDesc || 'Translate into Japanese', path: '/translation', color: 'var(--accent9)', scope: 'home' }, // Kon-iro
-    { icon: '解析', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: 'var(--danger)', scope: 'home' }, // Enji-iro
-    { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: 'var(--accent2)', scope: 'home' }, // Yamabuki-iro
-    { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: 'var(--warning)', scope: 'home' }, // Kohaku
+    // plus an LLM analysis help you judge your own attempt.
+    { icon: '翻訳', title: t.translationTitle || 'Translation', desc: t.translationDesc || 'Translate into Japanese', path: '/translation', color: 'var(--line-honyaku)', scope: 'home' },
+    { icon: '解析', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: 'var(--line-kaiseki)', scope: 'home' },
+    { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: 'var(--line-jisho)',   scope: 'home' },
+    { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: 'var(--line-decks)',   scope: 'home' },
     // Past-paper mock exams (vocab/grammar/reading/listening, scored
-    // against the official answer key) — see src/exam/. --accent5
-    // (cha-iro) was the one pigment in the shared palette no other
-    // card had claimed yet.
-    { icon: '模試', title: t.examTitle || 'Mock Exam', desc: t.examDesc || 'Past JLPT papers, digitized', path: '/exam', color: 'var(--accent5)', scope: 'home' }, // Cha-iro
+    // against the official answer key) — see src/exam/.
+    { icon: '模試', title: t.examTitle || 'Mock Exam', desc: t.examDesc || 'Past JLPT papers, digitized', path: '/exam', color: 'var(--line-exam)', scope: 'home' },
 
     // ── The halls ─────────────────────────────────────────
     // 達磨堂 — study goals as daruma dolls (see screens/DarumaScreen).

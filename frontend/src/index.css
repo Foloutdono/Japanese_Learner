@@ -144,6 +144,40 @@
   --border:         #35303a;
   --burger-menu-border: #35303a;
   --level-up-overlay-before: rgba(201, 154, 62, 0.14);
+
+  /* ── 路線色 — the line colours ───────────────────────────
+     One pigment per section, and nothing else may use them.
+
+     The sections used to draw from whatever was unclaimed in the
+     accent palette — the comments in navLinks.js literally read
+     "--accent5 was the one pigment no other card had claimed yet",
+     which is archaeology, not a system. Two consequences, both real:
+
+     1. THREE of the eleven were the app's *state* colours. Grammar was
+        --success, decks were --warning, the phrase analyser was
+        --danger. Those mean correct / caution / wrong a few screens
+        later — the MCQ list paints the right answer --success and the
+        wrong one --danger — so "grammar" and "correct" were the same
+        pigment by accident.
+     2. Several were indistinguishable at roundel size: yamabuki gold
+        against kohaku amber, shu vermillion against sabi rust against
+        enji carmine, ai indigo against ruri lapis.
+
+     These walk the wheel instead, so no two are confusable and none
+     carries a second meaning. Still traditional pigments — that
+     convention is worth keeping; it just needed to be a set rather
+     than leftovers. */
+  --line-kana:      #c1442c;  /* 朱色     shu-iro,     vermillion  */
+  --line-vocab:     #3f6d8e;  /* 藍色     ai-iro,      indigo      */
+  --line-kanji:     #7c6a9c;  /* 藤色     fuji-iro,    wisteria    */
+  --line-grammar:   #6b8a4a;  /* 松葉色   matsuba-iro, pine        */
+  --line-reading:   #4f7d7a;  /* 緑青     rokushou,    verdigris   */
+  --line-rikai:     #c1702f;  /* 黄丹     ouni,        safflower   */
+  --line-honyaku:   #4f6aa8;  /* 瑠璃色   ruri-iro,    lapis       */
+  --line-kaiseki:   #7a4a6e;  /* 葡萄色   budou-iro,   grape       */
+  --line-jisho:     #c99a3e;  /* 山吹色   yamabuki,    kerria gold */
+  --line-decks:     #9c4a5e;  /* 蘇芳     suou,        sappanwood  */
+  --line-exam:      #8a6b4f;  /* 茶色     cha-iro,     tea brown   */
 }
 
 /* ── Light theme — washi (和紙), rice paper ──────────────────
@@ -175,6 +209,13 @@
   --accent8:        #9c5866;
   --accent9:        #3f5488;
 
+  /* Deepened for paper like every other pigment. These three had no
+     light value at all, which only stopped mattering because nothing
+     prominent used them — the rating bar does now. */
+  --indigo:         #33495d;
+  --teal:           #43645f;
+  --rust:           #8d5027;
+
   --daruma-aka:      #b23425;
   --daruma-kin:      #a97a25;
   --daruma-shiro:    #f0e8d6;
@@ -199,6 +240,20 @@
   --border:         #c3af7c;
   --burger-menu-border: #605947;
   --level-up-overlay-before: rgba(234, 173, 50, 0.14);
+
+  /* Same eleven, deepened a shade so each still reads as text and as a
+     2.5px ring on paper rather than only as a fill on ink. */
+  --line-kana:      #b7402a;
+  --line-vocab:     #375b78;
+  --line-kanji:     #6f5d8f;
+  --line-grammar:   #5a7540;
+  --line-reading:   #43645f;
+  --line-rikai:     #a85c26;
+  --line-honyaku:   #43598c;
+  --line-kaiseki:   #653d5b;
+  --line-jisho:     #a97a25;
+  --line-decks:     #853d4e;
+  --line-exam:      #7a5c40;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -252,6 +307,54 @@ button:focus-visible {
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-corner { background: transparent; }
+
+/* ── 入線 — arrival ────────────────────────────────────────
+   See the note above .station-in / .platform-card for why the stagger
+   sits on the choices rather than the header. */
+@keyframes arrive {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes arrive-soft {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.station,
+.selection-screen__inner,
+.quiz-area {
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+
+.platform-card,
+.route-stop,
+.board-row {
+  animation: arrive 0.32s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+/* Capped at eight: past that the last rows are waiting on an
+   animation instead of being read, and a board with thirty themes
+   should not take a second to finish arriving. */
+.platform-card:nth-child(1),  .route-stop:nth-child(1),  .board-row:nth-child(1)  { animation-delay: 0.02s; }
+.platform-card:nth-child(2),  .route-stop:nth-child(2),  .board-row:nth-child(2)  { animation-delay: 0.05s; }
+.platform-card:nth-child(3),  .route-stop:nth-child(3),  .board-row:nth-child(3)  { animation-delay: 0.08s; }
+.platform-card:nth-child(4),  .route-stop:nth-child(4),  .board-row:nth-child(4)  { animation-delay: 0.11s; }
+.platform-card:nth-child(5),  .route-stop:nth-child(5),  .board-row:nth-child(5)  { animation-delay: 0.14s; }
+.platform-card:nth-child(6),  .route-stop:nth-child(6),  .board-row:nth-child(6)  { animation-delay: 0.17s; }
+.platform-card:nth-child(7),  .route-stop:nth-child(7),  .board-row:nth-child(7)  { animation-delay: 0.20s; }
+.platform-card:nth-child(n+8), .route-stop:nth-child(n+8), .board-row:nth-child(n+8) { animation-delay: 0.23s; }
+
+/* An arriving card must not also be sliding: the two transforms fight
+   and the row twitches. Fading alone still reads as arrival. */
+@media (prefers-reduced-motion: reduce) {
+  .station,
+  .selection-screen__inner,
+  .quiz-area,
+  .platform-card,
+  .route-stop,
+  .board-row {
+    animation: arrive-soft 0.2s linear backwards;
+  }
+}
 
 /* ── Selection screen shell ───────────────────────────────
    No glow, no watermark — the negative space itself (ma, 間)
@@ -2282,63 +2385,85 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* ── MCQ answer list ───────────────────────────────────────
-   Same editorial hairline-row language as choice-row (LevelSelector /
-   ModeSelector): the quiz reads as "pick a row", not "tap a coloured
-   tile" — one system across the whole app instead of two competing
-   button languages. Correct/wrong states lean on the same restrained
-   accent-as-line logic as the rating bar, not a flat colour fill. */
+   The same のりば card the selection screens are built from: bordered,
+   6px, a ring index, and a hover that lifts and takes the accent. This
+   list was the last place still speaking the old hairline-row
+   language, so the app taught you to pick a card and then, one tap
+   later, asked you to pick a rule.
+
+   Rows are spaced with margin rather than the grid `gap` the platform
+   grid uses, because a filler still occupies a gap when it collapses.
+   Margin is a property the collapse can animate to zero along with
+   everything else. */
 .mcq-list {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  border-top: 1px solid var(--border);
   text-align: left;
 }
 
 .mcq-row {
+  --mcq-color: var(--accent);
   position: relative;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   width: 100%;
-  max-height: 90px;
-  padding: 20px 10px;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border);
-  border-radius: 0;
+  max-height: 96px;
+  padding: 18px;
+  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--text-primary) 15%, var(--border));
+  border-radius: 6px;
   color: var(--text-primary);
   text-align: left;
   overflow: hidden;
-  transition: background 0.15s ease, max-height 0.32s ease, padding 0.32s ease,
-    opacity 0.25s ease, border-color 0.32s ease, border-width 0.32s ease;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease,
+    max-height 0.32s ease, padding 0.32s ease, margin 0.32s ease,
+    opacity 0.25s ease, border-width 0.32s ease;
 }
+.mcq-row + .mcq-row { margin-top: 12px; }
 .mcq-row:not(:disabled):hover,
-.mcq-row:focus-visible { background: var(--overlay-hover); }
+.mcq-row:not(:disabled):focus-visible {
+  background: var(--bg-card-hover);
+  border-color: var(--mcq-color);
+  transform: translateY(-1px);
+  filter: none;
+}
 .mcq-row:disabled { cursor: default; }
 
+/* The rail a platform card carries, kept here as the state marker:
+   nothing until the answer is graded, then the colour of the verdict. */
 .mcq-row__accent {
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 2px;
-  background: var(--accent);
-  transform: scaleY(0);
-  transform-origin: center;
+  width: 3px;
+  background: var(--mcq-color);
+  transform: scaleX(0);
+  transform-origin: left;
   transition: transform 0.2s ease;
 }
-.mcq-row:not(:disabled):hover .mcq-row__accent,
-.mcq-row:focus-visible .mcq-row__accent { transform: scaleY(1); }
 
 .mcq-row__index {
-  min-width: 26px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--mcq-color) 55%, transparent);
   font-family: var(--font-display);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
   color: var(--text-secondary);
-  transition: color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.mcq-row:not(:disabled):hover .mcq-row__index,
+.mcq-row:not(:disabled):focus-visible .mcq-row__index {
+  border-color: var(--mcq-color);
+  color: var(--mcq-color);
 }
 
 .mcq-row__text {
@@ -2349,15 +2474,25 @@ input:focus { border-color: var(--accent2); }
   word-break: break-word;
 }
 
-.mcq-row--correct { background: rgba(125, 154, 91, 0.1); }
-.mcq-row--correct .mcq-row__accent { background: var(--success); transform: scaleY(1); }
+/* Graded. The ring fills — the same "this one is live" move a
+   platform card's roundel makes on hover. */
+.mcq-row--correct { --mcq-color: var(--success); }
+.mcq-row--wrong   { --mcq-color: var(--danger); }
+.mcq-row--correct,
+.mcq-row--wrong {
+  background: color-mix(in srgb, var(--mcq-color) 12%, var(--bg-card));
+  border-color: var(--mcq-color);
+}
+.mcq-row--correct .mcq-row__accent,
+.mcq-row--wrong .mcq-row__accent { transform: scaleX(1); }
 .mcq-row--correct .mcq-row__index,
-.mcq-row--correct .mcq-row__text { color: var(--success); }
-
-.mcq-row--wrong { background: rgba(156, 52, 40, 0.1); }
-.mcq-row--wrong .mcq-row__accent { background: var(--danger); transform: scaleY(1); }
-.mcq-row--wrong .mcq-row__index,
-.mcq-row--wrong .mcq-row__text { color: var(--danger); }
+.mcq-row--wrong .mcq-row__index {
+  background: var(--mcq-color);
+  border-color: var(--mcq-color);
+  color: var(--bg-main);
+}
+.mcq-row--correct .mcq-row__text,
+.mcq-row--wrong .mcq-row__text { color: var(--mcq-color); }
 
 /* Once answered, the choices that were neither correct nor picked
    (the fillers) collapse away instead of sitting there as visual
@@ -2365,11 +2500,11 @@ input:focus { border-color: var(--accent2); }
    picked (if any), stay on screen. */
 .mcq-row--filler {
   max-height: 0;
+  margin-top: 0;
   padding-top: 0;
   padding-bottom: 0;
   opacity: 0;
-  border-bottom-width: 0;
-  border-bottom-color: transparent;
+  border-width: 0;
   pointer-events: none;
 }
 
@@ -4161,7 +4296,7 @@ input:focus { border-color: var(--accent2); }
   padding: 14px 6px;
   background: var(--bg-card);
   border: none;
-  border-bottom-color: 3px solid var(--rating-color, var(--border));
+  border-bottom: 3px solid var(--rating-color, transparent);
   border-radius: 0;
   color: var(--text-primary);
   font-size: 12px;
@@ -4183,10 +4318,13 @@ input:focus { border-color: var(--accent2); }
 
 .rating-bar__btn-label { color: var(--rating-color, var(--text-primary)); }
 
+/* Matcha through amber to vermillion — the same escalation the SRS
+   stages and the 種別 ladder use, so "how did that go" reads the same
+   way wherever it is asked. */
 .rating-bar__btn--q5 { --rating-color: var(--success); }
-.rating-bar__btn--q4 { --rating-color: var(--accent6); }
-.rating-bar__btn--q3 { --rating-color: var(--accent2); }
-.rating-bar__btn--q2 { --rating-color: var(--accent7); }
+.rating-bar__btn--q4 { --rating-color: var(--teal); }
+.rating-bar__btn--q3 { --rating-color: var(--warning); }
+.rating-bar__btn--q2 { --rating-color: var(--rust); }
 .rating-bar__btn--q1 { --rating-color: var(--accent); }
 .rating-bar__btn--q0 .rating-bar__btn-label { color: var(--text-secondary); }
 
