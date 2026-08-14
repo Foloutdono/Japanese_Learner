@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { shortDate } from '../lib/formatDate'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -302,6 +303,10 @@ function StatusBadge({ status, small }) {
 // Slide-up panel showing the app's own definition (from the matched deck
 // entry) plus the user's real SRS stats for that card.
 function DetailPanel({ detail, t, onClose }) {
+  // `t` arrives as a prop but the locale itself does not, and the
+  // review date needs it — reading the context here beats threading
+  // a second argument through every caller.
+  const { lang } = useLang()
   const { title, reading, contextMeaning, entry, stats, level } = detail
 
   return (
@@ -361,7 +366,7 @@ function DetailPanel({ detail, t, onClose }) {
           />
           <StatRow
             label={t.nextReview}
-            value={stats.next_review ? new Date(stats.next_review).toLocaleDateString() : '—'}
+            value={shortDate(stats.next_review, lang) ?? '—'}
           />
         </div>
       </div>

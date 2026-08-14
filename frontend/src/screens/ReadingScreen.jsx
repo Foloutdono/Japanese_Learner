@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { shortDate } from '../lib/formatDate'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -856,6 +857,10 @@ function TierPicker({ session, domain, onSelect, t }) {
 }
 
 function DetailPanel({ detail, t, isMobile, onClose }) {
+  // `t` arrives as a prop but the locale does not, and the review date
+  // needs it — reading the context here beats threading a second
+  // argument through every caller.
+  const { lang } = useLang()
   const { title, level, entry, stats } = detail
 
   const content = (
@@ -901,7 +906,7 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
         />
         <StatRow
           label={t.nextReview}
-          value={stats.next_review ? new Date(stats.next_review).toLocaleDateString() : '—'}
+          value={shortDate(stats.next_review, lang) ?? '—'}
         />
       </div>
     </>

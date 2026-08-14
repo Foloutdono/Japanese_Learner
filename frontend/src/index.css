@@ -7306,30 +7306,12 @@ input:focus { border-color: var(--accent2); }
   min-height: 56px;
 }
 
-.syllabary-cell--corner {
-  background: color-mix(in srgb, var(--syl-accent, var(--accent)) 16%, var(--bg-card));
-}
 
 .syllabary-cell--col-header,
-.syllabary-cell--row-header {
-  background: color-mix(in srgb, var(--syl-accent, var(--accent)) 16%, var(--bg-card));
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-secondary);
-  letter-spacing: 0.03em;
-}
 
 /* A faint centred dash rather than a dimmed blank tile — reads as
    "this sound doesn't exist" (no yi/ye/wi/wu/we) at a glance, instead
    of looking like a cell that failed to load. */
-.syllabary-cell--empty { position: relative; }
-.syllabary-cell--empty::after {
-  content: '–';
-  color: var(--text-secondary);
-  opacity: 0.3;
-  font-size: 14px;
-}
 
 .syllabary-cell--kana {
   flex-direction: column;
@@ -7360,19 +7342,6 @@ input:focus { border-color: var(--accent2); }
   letter-spacing: 0.04em;
 }
 
-.syllabary-nsolo-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-.syllabary-nsolo-wrap .syllabary-cell--kana {
-  background: var(--bg-card);
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  min-width: 96px;
-  padding: 10px 20px;
-}
 .syllabary-nsolo-wrap .syllabary-cell--kana:hover { background: var(--bg-card-hover); }
 .syllabary-nsolo-wrap .syllabary-cell--kana.syllabary-cell--selected {
   background: color-mix(in srgb, var(--syl-accent, var(--accent)) 22%, var(--bg-card-hover));
@@ -7385,10 +7354,7 @@ input:focus { border-color: var(--accent2); }
   .syllabary-table { grid-template-columns: 32px repeat(5, minmax(38px, 1fr)); }
   .syllabary-cell { min-height: 46px; }
   .syllabary-cell__char { font-size: 20px; }
-  .syllabary-cell__romaji { font-size: 10px; }
-  .syllabary-cell--col-header,
-  .syllabary-cell--row-header { font-size: 11px; }
-}
+  .syllabary-cell__romaji { font-size: 10px; }}
 
 .dict-sentinel {
   height: 40px;
@@ -7958,6 +7924,10 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  /* A grid track can be narrower than its content; without this the
+     tile refuses to shrink and the value is clipped by the grid's
+     overflow: hidden rather than wrapping. */
+  min-width: 0;
   gap: 3px;
   padding: 10px 12px;
   background: var(--bg-main);
@@ -7967,6 +7937,9 @@ input:focus { border-color: var(--accent2); }
   font-weight: 400;
 }
 .dict-stat__value {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
   font-family: var(--font-display);
   font-size: 17px;
   font-weight: 700;
@@ -8741,11 +8714,13 @@ input:focus { border-color: var(--accent2); }
 .trn-submit-wrap { margin-top: 16px; display: flex; justify-content: center; }
 .trn-submit-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
 
-/* Only wrapper existing to scope the mobile max-height override below
-   — PromptCard itself caps at 60vh with internal scroll, which turns
-   into an unwanted extra scroll region on small screens once the
-   prompt + reveal + analysis are all stacked inside it. */
-.trn-feedback-card { }
+/* .trn-feedback-card carries no styles of its own — it exists purely
+   to scope the mobile max-height override further down (PromptCard
+   caps at 60vh with internal scroll, which becomes an unwanted second
+   scroll region once prompt + reveal + analysis stack inside it). It
+   used to be declared here as an empty ruleset to "hold" the name; a
+   class needs no such declaration to be selectable, so the empty rule
+   is gone and only the override that actually does something remains. */
 
 .trn-feedback-prompt {
   font-size: 15px;
@@ -12608,26 +12583,6 @@ button.syllabary-cell:focus-visible {
 }
 .syllabary-cell--selected .syllabary-cell__romaji { color: var(--syl-accent, var(--line-kana)); }
 
-/* Headers are labels, not cells: no box, just tracked type in the
-   collection's own colour. */
-.syllabary-cell--col-header,
-.syllabary-cell--row-header {
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: var(--font-display);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--syl-accent, var(--line-kana));
-}
-.syllabary-cell--corner,
-.syllabary-cell--empty { background: none; border: none; }
-
-.syllabary-nsolo-wrap { justify-content: flex-start; padding-left: 36px; }
-.syllabary-cell--nsolo { max-width: 92px; }
-
 @media (max-width: 560px) {
   .radical-sheet__list { grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; }
   .radical-tile__char { font-size: 22px; }
@@ -12635,7 +12590,6 @@ button.syllabary-cell:focus-visible {
   .stroke-rail__tab { padding: 5px 9px; }
   .syllabary-table { grid-template-columns: 22px repeat(5, minmax(48px, 1fr)); gap: 4px; }
   .syllabary-cell__char { font-size: 21px; }
-  .syllabary-nsolo-wrap { padding-left: 26px; }
 }
 
 /* ── The entry plate, refined ──────────────────────────────
@@ -12721,3 +12675,69 @@ button.syllabary-cell:focus-visible {
 /* A portalled sheet has no page behind it to click away from, so the
    ✕ has to be present at every width. */
 .dict-sheet .dict-detail__close-x { display: inline-flex; }
+
+/* ══ 五十音 — the chart, properly ═══════════════════════════
+   It was a spreadsheet: A I U E O across the top in latin, K S T down
+   the side in latin, a dash in every hole, and ん hanging underneath
+   as an orphan. All four are now what a Japanese chart actually does.
+
+   Columns are headed by the vowel kana — they are the five sounds the
+   whole chart is built from, and printing their romaji taught the
+   wrong alphabet at the top of a chart about the right one. Rows are
+   headed 行 (gyō): か行, さ行, た行, which is their name. Holes are
+   empty, because a dash is a mark saying "look here" over the one
+   thing there is nothing to see. ん gets a labelled 撥音 row inside
+   the table it belongs to. */
+.syllabary-table {
+  grid-template-columns: 46px repeat(5, minmax(52px, 76px));
+  gap: 5px;
+  align-items: stretch;
+}
+
+/* Heads are type, not cells: no box, no fill, just the kana in the
+   collection's colour with its romaji tucked under it. */
+.syllabary-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  background: none;
+  border: none;
+  padding: 0;
+  min-height: 0;
+}
+.syllabary-head--row { align-items: flex-end; padding-right: 8px; }
+.syllabary-head__kana {
+  font-family: var(--font-jp);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--syl-accent, var(--line-kana));
+}
+.syllabary-head__romaji {
+  font-family: var(--font-display);
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.syllabary-head--col { padding-bottom: 4px; }
+
+/* A sound that does not exist occupies its slot and says nothing. */
+.syllabary-gap { background: none; border: none; }
+
+.syllabary-cell {
+  min-height: 62px;
+  justify-content: center;
+}
+.syllabary-cell__char { font-size: 27px; line-height: 1.1; }
+
+@media (max-width: 560px) {
+  .syllabary-table { grid-template-columns: 34px repeat(5, minmax(44px, 1fr)); gap: 4px; }
+  .syllabary-head__kana { font-size: 0.7rem; }
+  .syllabary-head--row { padding-right: 5px; }
+  .syllabary-cell { min-height: 52px; }
+  .syllabary-cell__char { font-size: 22px; }
+}

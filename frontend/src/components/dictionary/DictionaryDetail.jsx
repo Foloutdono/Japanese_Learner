@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { LEVEL_COLORS } from './levelColors'
+import { shortDate } from '../../lib/formatDate'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
 import { apiFetch } from '../../lib/api'
@@ -614,7 +615,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
                 label={t.interval}
               />
               <StatTile
-                value={entry.status.next_review ? new Date(entry.status.next_review).toLocaleDateString() : '—'}
+                value={shortDate(entry.status.next_review, lang) ?? '—'}
                 label={t.nextReview}
               />
             </div>

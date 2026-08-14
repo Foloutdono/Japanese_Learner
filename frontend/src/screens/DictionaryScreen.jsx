@@ -694,28 +694,49 @@ function vowelOf(romaji) {
 	return VOWEL_COLS.includes(last) ? last : null
 }
 
-function SyllabaryTable({ rows, jp, title, byGroup, selected, setSelected }) {
+function SyllabaryTable({ rows, jp, title, byGroup, vowelHeads, tail, selected, setSelected }) {
 	return (
 		<div className="syllabary-table-wrap">
 			{title && <SectionHeader jp={jp} title={title} />}
 			<div className="syllabary-table">
-				<div className="syllabary-cell syllabary-cell--corner" aria-hidden="true" />
-				{VOWEL_COLS.map(v => (
-					<div key={`h-${v}`} className="syllabary-cell syllabary-cell--col-header">
-						{v}
-					</div>
-				))}
+				<div className="syllabary-gap" aria-hidden="true" />
+
+				{/* Columns are headed by the vowel *kana*, not by "a i u e o".
+				    They are the five sounds the chart is built on and the
+				    learner is here to read them — printing their romaji
+				    instead taught the wrong alphabet at the top of a chart
+				    about the right one. The romaji stays underneath, small,
+				    the way every cell below does it. */}
+				{VOWEL_COLS.map(v => {
+					const head = vowelHeads[v]
+					return (
+						<div key={`h-${v}`} className="syllabary-head syllabary-head--col">
+							<span className="syllabary-head__kana" lang="ja">{head ?? ''}</span>
+							<span className="syllabary-head__romaji">{v}</span>
+						</div>
+					)
+				})}
+
 				{rows.map(group => {
 					const entries = byGroup[group] ?? []
+					// 行 (gyō) — the row's name in Japanese is its own first
+					// kana plus 行: か行, さ行, た行. Derived from the data
+					// rather than a lookup table, so it is right for every
+					// row including や行 and わ行, which skip columns.
+					const lead = entries.find(e => vowelOf(e.romaji) === 'a')?.kana
 					return (
 						<Fragment key={group}>
-							<div className="syllabary-cell syllabary-cell--row-header">
-								{group === 'vowels' ? '' : group.toUpperCase()}
+							<div className="syllabary-head syllabary-head--row">
+								{lead && <span className="syllabary-head__kana" lang="ja">{lead}行</span>}
 							</div>
 							{VOWEL_COLS.map(v => {
 								const entry = entries.find(e => vowelOf(e.romaji) === v)
+								// A sound that does not exist (yi, ye, wi, wu, we)
+								// gets nothing at all. It used to get a dash,
+								// which is a mark saying "look here" over the one
+								// thing on the chart there is nothing to see.
 								if (!entry) {
-									return <div key={v} className="syllabary-cell syllabary-cell--empty" aria-hidden="true" />
+									return <div key={v} className="syllabary-gap" aria-hidden="true" />
 								}
 								const isSelected = selected && entryKey(selected) === entryKey(entry)
 								return (
@@ -733,6 +754,25 @@ function SyllabaryTable({ rows, jp, title, byGroup, selected, setSelected }) {
 						</Fragment>
 					)
 				})}
+
+				{/* 撥音 — ん belongs to this chart and to no vowel column, so
+				    it gets its own labelled row at the foot of the table
+				    rather than floating underneath it as an orphan. */}
+				{tail && (
+					<>
+						<div className="syllabary-head syllabary-head--row">
+							<span className="syllabary-head__kana" lang="ja">撥音</span>
+						</div>
+						<button
+							type="button"
+							onClick={() => setSelected(tail)}
+							className={`syllabary-cell syllabary-cell--kana${selected && entryKey(selected) === entryKey(tail) ? ' syllabary-cell--selected' : ''}`}
+						>
+							<span className="syllabary-cell__char">{tail.kana}</span>
+							<span className="syllabary-cell__romaji">{tail.romaji}</span>
+						</button>
+					</>
+				)}
 			</div>
 		</div>
 	)
@@ -746,6 +786,17 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 	}, [results])
 
 	const nSolo = byGroup.n_solo?.[0] ?? null
+
+	// あ い う え お for the column heads, taken from the chart's own
+	// vowel row rather than written down a second time.
+	const vowelHeads = useMemo(() => {
+		const out = {}
+		;(byGroup.vowels ?? []).forEach(e => {
+			const v = vowelOf(e.romaji)
+			if (v) out[v] = e.kana
+		})
+		return out
+	}, [byGroup])
 
 	if (loading) {
 		return (
@@ -769,25 +820,11 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 							jp="五十音"
 							title={t.syllabaryMain}
 							byGroup={byGroup}
+							vowelHeads={vowelHeads}
+							tail={nSolo}
 							selected={selected}
 							setSelected={setSelected}
 						/>
-
-						{/* ん belongs to the gojūon chart — it is the one kana
-						    that sits in no vowel column — so it stays with it
-						    rather than drifting between the two tables. */}
-						{nSolo && (
-							<div className="syllabary-nsolo-wrap">
-								<button
-									type="button"
-									onClick={() => setSelected(nSolo)}
-									className={`syllabary-cell syllabary-cell--kana syllabary-cell--nsolo${selected && entryKey(selected) === entryKey(nSolo) ? ' syllabary-cell--selected' : ''}`}
-								>
-									<span className="syllabary-cell__char">{nSolo.kana}</span>
-									<span className="syllabary-cell__romaji">{nSolo.romaji}</span>
-								</button>
-							</div>
-						)}
 					</div>
 
 					<div className="syllabary-col">
@@ -796,6 +833,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 							jp="濁音"
 							title={t.syllabaryVoiced}
 							byGroup={byGroup}
+							vowelHeads={vowelHeads}
 							selected={selected}
 							setSelected={setSelected}
 						/>
