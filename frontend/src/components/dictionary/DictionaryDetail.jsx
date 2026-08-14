@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
+import { LEVEL_COLORS } from './levelColors'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
 import { apiFetch } from '../../lib/api'
@@ -138,14 +139,6 @@ export function speakJapanese(text) {
 // label. Colour still scales with difficulty (N5 calmest → N1 most
 // intense) using pigments already in the palette rather than
 // introducing new ones.
-const LEVEL_COLORS = {
-  N5: 'var(--success)',
-  N4: 'var(--accent2)',
-  N3: 'var(--warning)',
-  N2: 'var(--accent7)',
-  N1: 'var(--danger)',
-}
-
 export function LevelBadge({ level }) {
   if (!level) return null
   return (

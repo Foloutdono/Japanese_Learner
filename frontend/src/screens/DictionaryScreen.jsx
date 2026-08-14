@@ -10,6 +10,7 @@ import {
 	TYPE_META, isKanaType, entryKey,
 	SearchIcon, DictionaryDetail, LevelBadge,
 } from '../components/dictionary/DictionaryDetail'
+import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { StageBadge } from '../components/study/StageBadge'
 import { ChevronIcon } from '../components/ui/Icons'
 
@@ -258,17 +259,23 @@ export default function DictionaryScreen({ session }) {
 				    dictionary asks for it explicitly. */}
 				<div className="dict-tab-row dict-tab-row--category">
 					{[
-						['kanji',    t.dictKanji],
-						['vocab',    t.dictVocab],
-						['hiragana', t.dictHiragana],
-						['katakana', t.dictKatakana],
-						['jmdict',   t.dictJMdict ?? 'JMdict'],
-					].map(([key, label]) => (
+						['kanji',    t.dictKanji,                '漢', 'var(--line-kanji)'],
+						['vocab',    t.dictVocab,                '語', 'var(--line-vocab)'],
+						['hiragana', t.dictHiragana,             'あ', 'var(--line-kana)'],
+						['katakana', t.dictKatakana,             'ア', 'var(--line-rikai)'],
+						['jmdict',   t.dictJMdict ?? 'JMdict',   '辞', 'var(--line-jisho)'],
+					].map(([key, label, glyph, color]) => (
 						<button
 							key={key}
 							onClick={() => switchCategory(key)}
+							style={{ '--tab-color': color }}
 							className={`dict-tab-btn${category === key ? ' dict-tab-btn--active' : ''}`}
 						>
+							{/* Each collection gets the roundel the rest of the app
+							    selects things with, in its own line colour — five
+							    words with an underline said nothing about which
+							    collection you were standing in. */}
+							<span className="dict-tab-glyph" lang="ja" aria-hidden="true">{glyph}</span>
 							{label}
 						</button>
 					))}
@@ -579,6 +586,39 @@ function useResultsColumns() {
 // would otherwise leave a bare patch of the lattice background (or,
 // worse, a single undivided block of it) instead of reading as more
 // index-card slots that just happen to be empty.
+// ── The detail dock ──────────────────────────────────────
+// One node, two presentations. On a wide screen it is a sticky column
+// standing beside the catalogue — you scan and read at the same time,
+// which is the whole point of a reference tool and something a modal
+// structurally cannot do. Below 1100px the same node reflows into the
+// centred sheet it has always been.
+//
+// It carries its own scroll (see .dict-dock), which is precisely what
+// the original side panel got wrong and why it was replaced by a
+// modal: a panel pinned to the viewport cannot hold an entry with a
+// dozen senses and a page of examples. Sticky + its own overflow can.
+//
+// Rendering once and letting CSS choose beats mounting two copies and
+// keeping them in step.
+function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick }) {
+	return (
+		<>
+			{/* Only painted in sheet mode — on a desktop nothing is
+			    covered, so there is nothing to dim. */}
+			<div className="dict-dock__scrim" onClick={onClose} aria-hidden="true" />
+			<aside className="dict-dock">
+				<DictionaryDetail
+					entry={entry}
+					onClose={onClose}
+					onRadicalClick={onRadicalClick}
+					onKanjiClick={onKanjiClick}
+					onVocabClick={onVocabClick}
+				/>
+			</aside>
+		</>
+	)
+}
+
 function ResultsFiller({ count, cols, glyph }) {
 	const empty = (cols - (count % cols)) % cols
 	if (!empty) return null
@@ -619,13 +659,19 @@ function ResultsSection({
 								<div
 									key={entryKey(entry)}
 									onClick={() => setSelected(entry)}
+									style={{ '--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)' }}
 									className={`dict-entry-card${selected && entryKey(selected) === entryKey(entry) ? ' dict-entry-card--selected' : ''}`}
 								>
-									<div className="dict-entry-card__char">
-										{entry.kanji || entry.kana}
-									</div>
+									{/* Reading above, headword large, meaning below — the
+									    three registers a 駅名標 carries, in the order it
+									    carries them. A kanji is a name with a reading and a
+									    meaning, which is exactly what a station plate is
+									    for, so the catalogue is a wall of them. */}
 									<div className="dict-entry-card__kana">
 										{shortKana(entry.kana, entry.type)}
+									</div>
+									<div className="dict-entry-card__char">
+										{entry.kanji || entry.kana}
 									</div>
 									<div className="dict-entry-card__meaning">
 										{shortMeaning(entry.meaning)}
@@ -652,24 +698,12 @@ function ResultsSection({
 						</div>
 					</div>
 
-				</div>
-			)}
-
-			{/* Detail sheet — full-screen overlay on every breakpoint now
-			    that cards carry senses/examples long enough to overflow
-			    the old fixed-width sticky side panel (see .dict-modal-content
-			    in index.css for the size difference between mobile/desktop). */}
-			{selected && (
-				<div
-					onClick={() => setSelected(null)}
-					className="dict-modal-overlay"
-				>
-					<div
-						onClick={e => e.stopPropagation()}
-						className="dict-modal-content"
-					>
-						<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick} />
-					</div>
+					{selected && (
+						<DetailDock
+							entry={selected} onClose={() => setSelected(null)}
+							onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
+						/>
+					)}
 				</div>
 			)}
 		</>
@@ -790,13 +824,11 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 				</div>
 			</div>
 
-			{/* Detail sheet — full-screen overlay on every breakpoint, same as ResultsSection */}
 			{selected && (
-				<div onClick={() => setSelected(null)} className="dict-modal-overlay">
-					<div onClick={e => e.stopPropagation()} className="dict-modal-content">
-						<DictionaryDetail entry={selected} onClose={() => setSelected(null)} onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick} />
-					</div>
-				</div>
+				<DetailDock
+					entry={selected} onClose={() => setSelected(null)}
+					onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
+				/>
 			)}
 		</div>
 	)

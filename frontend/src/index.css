@@ -868,11 +868,7 @@ input:focus { border-color: var(--accent2); }
   padding: 35px 30px;
 }
 
-.dict-layout {
-	display: flex;
-	gap: 24px;
-	align-items: flex-start;
-}
+
 
 /* ── Responsive grid ── */
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap); }
@@ -1871,6 +1867,7 @@ input:focus { border-color: var(--accent2); }
   .profile-pair { gap: 40px; }
   .profile-pair .records { grid-template-columns: repeat(2, 1fr); }
 }
+
 
 /* ── 発車標 — the departure board ─────────────────────────── */
 .station__platform {
@@ -7194,7 +7191,7 @@ input:focus { border-color: var(--accent2); }
   user-select: none;
 }
 
-.dict-results-wrap { flex: 1; }
+
 
 /* ── Results grid ─────────────────────────────────────────
    Same flush shoji-lattice as the radical picker — the search
@@ -7204,10 +7201,8 @@ input:focus { border-color: var(--accent2); }
    the rating bar's "seal-colour stroke along the top" language. */
 .dict-results-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 2px;
-  background: var(--border);
-  border: 3px solid var(--border);
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 12px;
 }
 
 /* One index card. The two bits of metadata (level, SRS stage) are
@@ -7217,19 +7212,40 @@ input:focus { border-color: var(--accent2); }
    that same flow, which put a level chip between the meaning and the
    next card's edge and gave every card a lopsided fourth line. */
 .dict-entry-card {
+  --plate: var(--level-color, var(--text-secondary));
   position: relative;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--surface-radius);
-  padding: 24px 12px 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: background 0.15s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 20px 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+/* The line stripe along the plate's bottom edge, in the level's
+   colour — the one place an entry carries colour. */
+.dict-entry-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--plate);
+  opacity: 0.85;
+}
+.dict-entry-card:hover,
+.dict-entry-card:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: var(--plate);
+  transform: translateY(-2px);
+  filter: none;
 }
 .dict-entry-card:hover { background: var(--bg-card-hover); }
 .dict-entry-card--selected,
@@ -7355,8 +7371,8 @@ input:focus { border-color: var(--accent2); }
    results grid and radical picker (thin --border gap lines between
    cells) but tied to the active category's own colour (--syl-accent,
    set by SyllabaryGrid from TYPE_META) via a top border and a tinted
-   header row, the same way .dict-modal-content ties its accent into
-   its own top edge — so hiragana and katakana read as distinctly themed
+   header row, the same way the detail dock ties its accent into its
+   own top edge — so hiragana and katakana read as distinctly themed
    sheets rather than one generic grey grid with a label on top. */
 .syllabary-chart-group {
   display: flex;
@@ -7498,25 +7514,6 @@ input:focus { border-color: var(--accent2); }
   text-transform: uppercase;
 }
 
-.dict-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-.dict-modal-content {
-  background: var(--bg-card);
-  border-radius: 14px;
-  width: 100%;
-  max-width: 640px;
-  max-height: 92vh;
-  overflow-y: auto;
-}
-
 /* ── Identity plate ────────────────────────────────────────
    Dark ink stage for the headword — same sumi block as the top bar /
    home header. Now a centred composition rather than a left-aligned
@@ -7524,11 +7521,11 @@ input:focus { border-color: var(--accent2); }
    directly beneath it, level/status in one top corner and the
    actions in the other, so the eye lands on the character first and
    everything else reads as annotation around it. The 3px top rule
-   (previously a fixed vermillion line on .dict-modal-content) is
+   (previously a fixed vermillion line on the old modal shell) is
    driven by --type-color here instead — see typeStyle in
    DictionaryDetail.jsx — so a kanji, a word and a kana panel are
    visibly different objects. Corners inherit whatever radius the
-   parent (.dict-modal-content) has, so it always sits flush. */
+   dock around it has, so it always sits flush. */
 .dict-detail__stage {
   position: relative;
   background: var(--bg-panel);
@@ -9295,27 +9292,7 @@ input:focus { border-color: var(--accent2); }
     display: block;
   }
 
-  /* Detail view takes the full screen on mobile instead of a centered
-     dialog card — there's rarely room to show it alongside the grid
-     it came from, so it may as well use the whole viewport rather
-     than float a smaller box over it. Safe-area insets keep the
-     stage and the "Fermer" button clear of the notch/gesture bar
-     (see viewport-fit=cover in index.html). */
-  .dict-modal-overlay {
-    padding: 0;
-    align-items: stretch;
-  }
-  .dict-modal-content {
-    max-width: none;
-    max-height: none;
-    width: 100%;
-    height: 100dvh;
-    border-radius: 0;
-    display: flex;
-    flex-direction: column;
-    overflow-y: visible;
-  }
-  .dict-detail__stage {
+      .dict-detail__stage {
     padding-top: calc(16px + env(safe-area-inset-top, 0px));
     flex-shrink: 0;
   }
@@ -12312,4 +12289,175 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
   .rank-plaque__tally { flex-basis: 100%; align-items: flex-start; }
 
   .kura-unlock__jp { font-size: 1.6rem; }
+}
+
+/* ══ 辞書 — the catalogue ═══════════════════════════════════
+   At the end of the file on purpose: this block re-styles rules the
+   original dictionary section declares further up, at equal
+   specificity. Media queries add no specificity either, so a
+   phone-width override written above the rule it overrides simply
+   loses — which is exactly what happened, and why the results grid
+   stayed one column wide on a phone.
+   ── The dock ──
+   One node, two presentations. Wide: a sticky column beside the
+   results, so scanning and reading happen at once — which is what a
+   reference tool is and what a modal structurally prevents. Narrow:
+   the centred sheet it has always been.
+
+   The scroll lives on the dock itself. That is the correction to the
+   original side panel, which was pinned to the viewport with no
+   overflow of its own and therefore could not hold an entry with a
+   dozen senses — the reason it was abandoned for a modal. */
+.dict-dock {
+  flex: 0 0 clamp(340px, 30vw, 440px);
+  position: sticky;
+  top: 84px;
+  max-height: calc(100dvh - 108px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--surface-radius);
+  animation: arrive 0.28s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+.dict-dock__scrim { display: none; }
+
+@media (max-width: 1099px) {
+  .dict-dock__scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.6);
+  }
+  .dict-dock {
+    position: fixed;
+    z-index: 201;
+    inset: 24px;
+    flex: none;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    width: min(640px, calc(100vw - 32px));
+    max-height: 88dvh;
+    border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* ── The catalogue column ──
+   Results and dock are siblings; the results take whatever the dock
+   leaves. min-width: 0 so the grid can actually shrink instead of
+   forcing the dock off the edge. */
+/* A catalogue with a reading panel beside it wants the room. .container
+   caps at --max-w and is declared later in this file, so the override
+   has to out-specify it rather than out-order it. */
+.container.dict-page { max-width: min(1480px, 100%); }
+
+.dict-layout { display: flex; gap: 28px; align-items: flex-start; }
+.dict-results-wrap { flex: 1; min-width: 0; }
+
+/* ── An entry, as a plate ──
+   Reading, headword, meaning — the three registers, in a card whose
+   bottom edge carries the JLPT level's colour the way a station
+   plate carries its line's. */
+.dict-entry-card__kana {
+  order: -1;
+  min-height: 1.2em;
+}
+.dict-entry-card__char {
+  font-family: var(--font-jp);
+  font-size: 40px;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+.dict-entry-card__meaning {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.dict-entry-card--selected {
+  border-color: var(--plate);
+  background: var(--bg-card-hover);
+}
+.dict-entry-card--selected::after { opacity: 1; height: 4px; }
+
+/* The level sits where a plate's station number sits, and the SRS
+   seal opposite it. Both out of the flow, so the middle of the card
+   is nothing but the three registers. */
+.dict-entry-card .dict-level-badge {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--plate);
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  opacity: 0.9;
+}
+
+/* ── The category rail ──
+   Five collections, each with its own line colour, drawn as the
+   station chips the rest of the app selects things with rather than
+   as five words with an underline. */
+.dict-tab-row--category {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: none;
+  margin-bottom: 18px;
+}
+.dict-tab-row--category .dict-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 9px;
+  border: 1px solid var(--surface-line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.dict-tab-row--category .dict-tab-btn::after { display: none; }
+.dict-tab-row--category .dict-tab-btn:hover { border-color: var(--tab-color, var(--accent)); }
+.dict-tab-row--category .dict-tab-btn--active {
+  color: var(--text-primary);
+  border-color: var(--tab-color, var(--accent));
+  background: color-mix(in srgb, var(--tab-color, var(--accent)) 12%, var(--surface));
+}
+.dict-tab-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--tab-color, var(--accent)) 55%, transparent);
+  color: var(--tab-color, var(--accent));
+  font-family: var(--font-jp);
+  font-size: 12px;
+  font-weight: 700;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+.dict-tab-btn--active .dict-tab-glyph {
+  background: var(--tab-color, var(--accent));
+  border-color: var(--tab-color, var(--accent));
+  color: var(--bg-main);
+}
+
+@media (max-width: 560px) {
+  .dict-results-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; }
+  .dict-entry-card__char { font-size: 32px; }
+  .dict-tab-row--category { gap: 6px; }
+  .dict-tab-row--category .dict-tab-btn { padding: 6px 11px 6px 7px; gap: 6px; }
 }
