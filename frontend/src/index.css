@@ -13293,3 +13293,280 @@ button.syllabary-cell:focus-visible {
   .syllabary-cell { min-height: 52px; }
   .syllabary-cell__char { font-size: 22px; }
 }
+
+/* ══ 改札 — the ticket gate ═════════════════════════════════
+   The departure cutscene. See components/station/TicketGate for the
+   timeline and why this is drawn rather than filmed.
+
+   Everything here is transform and opacity so the whole thing is
+   compositor work — it has to start on the frame you tap, and it has
+   to cost nothing on a phone. Timings mirror the component's
+   constants: CONTACT_MS 300, NAVIGATE_MS 600, DONE_MS 780. */
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: gate-leave 140ms linear 640ms backwards;
+}
+.gate__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-main);
+  opacity: 0;
+  animation: gate-scrim 120ms ease-out forwards;
+}
+/* Effectively opaque. At 0.96 in the light theme this was cream over
+   cream and the board stayed legible through it, so the gate read as
+   a panel floating on the home screen rather than as a place. */
+@keyframes gate-scrim { to { opacity: 0.995; } }
+@keyframes gate-leave { to { opacity: 0; } }
+
+/* The gate itself: two pillars with a lane between them. */
+.gate__rig {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: min(620px, 88vw);
+  height: min(252px, 37vh);
+  animation: arrive 0.3s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+
+/* --surface on --bg-main is almost no contrast in the light theme, so
+   the pillars disappeared and the gate had no body — just two lamps
+   floating either side of a rectangle. They are shaded and shadowed
+   now so they read as objects standing in a room. */
+.gate__pillar {
+  position: relative;
+  flex: 0 0 clamp(52px, 12vw, 74px);
+  background: linear-gradient(180deg,
+    var(--surface) 0%,
+    color-mix(in srgb, var(--surface) 78%, var(--text-primary)) 100%);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 20%, transparent);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+}
+.gate__pillar--left  { border-radius: 8px 0 0 8px; border-right: none; }
+.gate__pillar--right { border-radius: 0 8px 8px 0; border-left: none; }
+
+/* The status light down the inside edge of each pillar: seal red
+   while the gate is shut, the line's own colour once it opens — the
+   same "this is the colour of where you are going" the plate and the
+   board rows already use. */
+.gate__lamp {
+  position: absolute;
+  inset: 12px auto 12px 0;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--danger);
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+.gate__pillar--right .gate__lamp { inset: 12px 0 12px auto; }
+.gate--open .gate__lamp {
+  background: var(--line-color, var(--success));
+  box-shadow: 0 0 12px 1px var(--line-color, var(--success));
+}
+
+/* The reader pad. */
+/* On the pillar's top face, which is where a 改札 is actually tapped
+   — and the only placement that keeps the card on screen. Mounted on
+   the side, the card had to come to rest beside the rig; at 390px the
+   rig is already 88vw, so it went off the edge. Centred on the
+   pillar, it also stopped hiding the reader it was tapping. */
+.gate__reader {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(36px, 8.5vw, 48px);
+  height: clamp(36px, 8.5vw, 48px);
+  border-radius: 8px;
+  border: 2px solid color-mix(in srgb, var(--text-primary) 42%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.18);
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.gate--open .gate__reader {
+  border-color: var(--line-color, var(--accent));
+  background: color-mix(in srgb, var(--line-color, var(--accent)) 22%, transparent);
+}
+.gate__wave { width: 16px; height: 18px; }
+.gate__wave span { border-width: 1.3px; }
+.gate__wave span:nth-child(1) { width: 6px;  height: 6px;  margin-top: -3px; }
+.gate__wave span:nth-child(2) { width: 11px; height: 11px; margin-top: -5.5px; }
+.gate__wave span:nth-child(3) { width: 16px; height: 16px; margin-top: -8px; }
+/* One pulse on contact, not a loop: it answers the tap. */
+.gate--open .gate__wave { animation: gate-wave 420ms ease-out; }
+@keyframes gate-wave {
+  0%   { transform: scale(1);    opacity: 1; }
+  45%  { transform: scale(1.45); opacity: 0.55; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+.gate__lane {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  /* Sumi in both themes: this is the opening, and a dark one is what
+     lets the line colour and the destination name carry. Against
+     --bg-main the glow had nothing to read against in light mode. */
+  background: var(--bg-panel);
+  border-block: 1px solid color-mix(in srgb, var(--text-primary) 20%, transparent);
+}
+
+/* What is through the gate: dark behind the closed flaps, lit once
+   they part. */
+.gate__beyond {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background:
+    radial-gradient(120% 100% at 50% 50%,
+      color-mix(in srgb, var(--line-color, var(--accent)) 55%, transparent) 0%,
+      color-mix(in srgb, var(--line-color, var(--accent)) 12%, transparent) 55%,
+      transparent 78%);
+  opacity: 0;
+  transition: opacity 0.34s ease;
+}
+.gate--open .gate__beyond { opacity: 1; }
+.gate__roundel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--line-color, var(--accent));
+  color: var(--line-color, var(--accent));
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+}
+.gate__dest {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: clamp(1.7rem, 6vw, 2.6rem);
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  /* The opening is sumi in both themes, so this takes the panel ink
+     rather than the page ink — --text-primary is near-black on light
+     and would vanish into the tunnel. */
+  color: var(--text-on-panel);
+}
+.gate__dest-latin {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+
+/* The flaps. Closed they meet in the middle; open they retract into
+   the pillars they came from. */
+.gate__flap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: linear-gradient(180deg,
+    var(--surface) 0%,
+    color-mix(in srgb, var(--surface) 82%, var(--text-primary)) 100%);
+  transition: transform 0.26s cubic-bezier(0.5, 0, 0.2, 1);
+  will-change: transform;
+}
+.gate__flap--l { left: 0;  border-right: 1px solid var(--line-color, var(--accent)); }
+.gate__flap--r { right: 0; border-left:  1px solid var(--line-color, var(--accent)); }
+.gate--open .gate__flap--l { transform: translateX(-100%); }
+.gate--open .gate__flap--r { transform: translateX(100%); }
+
+/* The pass, arriving. Starts low and off to the right — where a hand
+   comes from — pauses on the reader, and withdraws. */
+.gate__card {
+  position: absolute;
+  right: clamp(2px, 1.5vw, 12px);
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  width: clamp(104px, 26vw, 148px);
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(122deg,
+    color-mix(in srgb, var(--pass-ink) 42%, var(--bg-panel)) 0%,
+    var(--bg-panel) 70%);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+  color: var(--text-on-panel);
+  animation: gate-tap 620ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards;
+}
+/* The stillness between 48% and 58% is the tap itself: the card waits
+   while the reader answers it. */
+@keyframes gate-tap {
+  0%   { transform: translate(46%, 210%) rotate(12deg);  opacity: 0; }
+  20%  { opacity: 1; }
+  /* Held still over the pad from 48% to 58% — that pause is the tap,
+     and the chime and the lamp land inside it. */
+  48%  { transform: translate(4%, -58%) rotate(-4deg);   opacity: 1; }
+  58%  { transform: translate(4%, -58%) rotate(-4deg);   opacity: 1; }
+  76%  { transform: translate(6%, -86%) rotate(-6deg);   opacity: 1; }
+  100% { transform: translate(18%, -180%) rotate(-11deg); opacity: 0; }
+}
+.gate__card-brand {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  color: color-mix(in srgb, var(--pass-ink) 40%, var(--text-on-panel));
+}
+.gate__card-name {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gate__card-level {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-on-panel-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The wipe. Once the flaps are open the line colour floods out of the
+   lane and takes the screen; the destination is revealed from behind
+   it, already mounted and running its own arrive animation. */
+.gate__wipe {
+  position: absolute;
+  inset: 0;
+  background: var(--line-color, var(--accent));
+  opacity: 0;
+  transform: scale(0.25);
+  border-radius: 50%;
+  animation: gate-wipe 300ms cubic-bezier(0.5, 0, 0.3, 1) 460ms forwards;
+}
+@keyframes gate-wipe {
+  0%   { opacity: 0;   transform: scale(0.25); border-radius: 50%; }
+  40%  { opacity: 0.9; }
+  100% { opacity: 1;   transform: scale(3);    border-radius: 0; }
+}
+
+/* No gate at all when motion is unwelcome — TicketGate navigates
+   immediately in that case and never mounts this. Belt and braces. */
+@media (prefers-reduced-motion: reduce) {
+  .gate { display: none; }
+}
