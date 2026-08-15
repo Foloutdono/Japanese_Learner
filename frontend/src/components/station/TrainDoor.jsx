@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import { useBoarding, endBoarding } from '../../stores/boarding'
 import { useLang } from '../../LangContext'
-import { sectionFor } from '../../config/stations'
+import { sectionFor, stationFor } from '../../config/stations'
 import { playDoorChime } from '../../lib/audio'
 
 // ── 扉 — the train door ────────────────────────────────────
@@ -30,7 +30,7 @@ function prefersReducedMotion() {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 }
 
-function DoorScene({ commit, color }) {
+function DoorScene({ commit, color, code }) {
   const [phase, setPhase] = useState('shut')
   const timers = useRef([])
   const committed = useRef(false)
@@ -90,14 +90,19 @@ function DoorScene({ commit, color }) {
           rather than painted, so the screen behind shows through them
           — you can see where you are going before the doors move,
           which is what a train door actually does. */}
-      <div className="door__leaf door__leaf--l">
-        <span className="door__glass" />
-        <span className="door__belt" />
-      </div>
-      <div className="door__leaf door__leaf--r">
-        <span className="door__glass" />
-        <span className="door__belt" />
-      </div>
+      {['l', 'r'].map(side => (
+        <div key={side} className={`door__leaf door__leaf--${side}`}>
+          <span className="door__glass">
+            {/* Light running across the glass as the leaf moves. */}
+            <span className="door__sheen" />
+          </span>
+          <span className="door__belt" />
+          {/* 号車 — the car plate. Small, and the only type on the
+              door, so it does the work a whole destination board
+              would have done, far more quietly. */}
+          {code && <span className="door__plate">{code}</span>}
+        </div>
+      ))}
       <span className="door__seam" />
     </div>,
     document.body,
@@ -121,6 +126,17 @@ export function TrainDoor() {
   const { t } = useLang()
   if (!boarding) return null
 
-  const color = boarding.color ?? sectionFor(pathname, t)?.color
-  return <DoorScene key={boarding.id} commit={boarding.commit} color={color} />
+  const section = sectionFor(pathname, t)
+  const color = boarding.color ?? section?.color
+  const station = section ? stationFor(section.path) : null
+  const code = station && station.code !== '??' ? station.code : null
+
+  return (
+    <DoorScene
+      key={boarding.id}
+      commit={boarding.commit}
+      color={color}
+      code={code}
+    />
+  )
 }
