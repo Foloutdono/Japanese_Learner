@@ -1,6 +1,11 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { DepartureGate } from './components/station/DepartureGate'
 import { TrainDoor } from './components/station/TrainDoor'
+// Development-only. Vite statically replaces import.meta.env.DEV with
+// `false` in a production build, so this import and the route below
+// are both dropped by tree-shaking — the screen is not merely
+// unreachable in production, it is not in the bundle.
+import RewardsPreview from './screens/RewardsPreview'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { LangProvider } from './LangContext'
@@ -102,6 +107,9 @@ export default function App() {
           <Route path="/translation" element={<TranslationScreen session={session} />} />
           <Route path="/daruma" element={<DarumaScreen session={session} />} />
           <Route path="/storehouse" element={<StorehouseScreen session={session} />} />
+          {import.meta.env.DEV && (
+            <Route path="/dev/rewards" element={<RewardsPreview />} />
+          )}
         </Routes>
 
         {/* 改札 — the departure cutscene. Beside <Routes/>, never

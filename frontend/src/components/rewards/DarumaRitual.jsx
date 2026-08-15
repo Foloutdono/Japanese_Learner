@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { Daruma, RiseToken } from './Daruma'
-import { StageFootlights } from './XpToast'
+import { StageFootlights } from './StageFootlights'
 import { playSfx } from '../../lib/audio'
 
 // ── 開眼 — the eye-opening ceremony ────────────────────────

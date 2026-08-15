@@ -1,289 +1,154 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
-import { playSfx } from '../../lib/audio'
-import { useLoadout, flourishGlyph } from '../../stores/cosmetics'
+import { playSfx, playGateChime } from '../../lib/audio'
+import { rewardTier, rankFor } from '../../domain/rewardTier'
+import { SplitFlap } from './SplitFlap'
 
-// ── XP toast ──────────────────────────────────────────────
-// `toast` is `{ amount, id, leveledUp, newLevel, quality }` — `id`
-// rather than keying off `amount` so two back-to-back reviews worth
-// the same XP still re-trigger the animation, and `leveledUp`/
-// `newLevel` (from srs.review()'s response — see KanjiScreen/
-// VocabScreen/KanaScreen's postReview) switch it into the bigger
-// celebration variant instead of the routine pop. `onDone` clears the
-// parent's state once the toast has had its moment; internally the
-// component tracks one extra bit itself — `phase`, 'active' | 'leaving'
-// — purely to drive a real exit animation instead of vanishing
-// mid-frame (see the phase notes on the state below).
+// ── 発車標 — the reward board ──────────────────────────────
+// What happens when you earn something. It used to be a kabuki
+// production — wooden clappers counting in, a kumadori burst, stage
+// footlights igniting along the bottom of the screen, a striped
+// curtain ripped open, a hanko slammed into the corner — and it played
+// at that scale for *every* review. Something that happens after
+// nearly every card cannot also be a ceremony.
 //
-// The visual language is kabuki (歌舞伎), not confetti: every reward
-// is a miniature mie (見得) — the freeze-pose an actor snaps into at
-// a scene's peak — counted in by an accelerating run of wooden
-// clapper strikes (tsuke-uchi ツケ打ち, <TsukeBeats/> below), punctuated
-// by a burst of kumadori (隈取り), the bold brush-stroke make-up
-// lines that radiate from the eyes on a bravado role (<KumadoriBurst/>),
-// and finished with a short calligraphic brush-stroke drawn in under
-// the pill (.xp-toast__brush in index.css) — the literacy half of
-// "art/literacy". A line of stage footlights (<StageFootlights/>)
-// ignites along the very bottom of the screen with every reward, so
-// the celebration reads as something the whole stage responds to
-// rather than a badge popping up in one corner.
+// It is the station's own display now, and it comes in three sizes.
+// See domain/rewardTier for where the boundaries come from; the short
+// version is that a rank promotion happens four times in the whole
+// progression, so only that one is allowed to stop everything.
 //
-// The level-up variant is the one moment the app goes full stage
-// production: a big tsuke count-in, the jōshiki-maku (定式幕) —
-// kabuki's own striped curtain — ripped open by an unseen stagehand
-// (kuroko) to reveal the banner already mid-pose, and a hanko (印)
-// seal slamming into its corner with a spreading ink-bleed ring, like
-// a certificate being made official. And unlike the routine toast, it
-// no longer dismisses itself on a timer — it holds there, curtain
-// open, seal struck, gold rays still slowly turning, until the
-// reward is actually claimed. A small stamped "受" (receive) pill
-// (.level-up-claim) fades in once the impact has resolved and stays
-// interactive — genuinely unclickable before then, genuinely clickable
-// after, via a discrete pointer-events flip inside its own CSS
-// keyframe rather than a JS-managed disabled flag — and only that
-// click starts the exit: the curtain swings shut (the actual meaning
-// of "curtain call"), then the overlay fades. XpToast only ever calls
-// onDone once the matching CSS animation genuinely finishes
-// (handleToastAnimationEnd / handleOverlayAnimationEnd below) — never
-// on a guessed duration — so nothing is ever removed from the DOM
-// mid-animation.
-const NORMAL_DURATION = 1650
+//   fare   XP, no level. A fare tick at the gate: the amount flips up
+//          on a single small board, under a second, no interaction.
+//   level  The level turned over. The board flips the number, holds
+//          long enough to read, and leaves on its own.
+//   rank   The title changed. Your 定期券 is re-issued: the pass comes
+//          up, the level flips, the 称号 turns over under it, and it
+//          waits to be dismissed by hand.
+//
+// The kabuki is not gone, only moved: the daruma hall's 満願 ceremony
+// is genuinely theatrical and still uses StageFootlights, which now
+// lives in its own module.
+const FARE_MS  = 1500
+const LEVEL_MS = 2600
 
-// Same per-quality accent the rating bar itself uses (see
-// .rating-bar__btn--q* in index.css) — q3 "hésitant" and up get a
-// kumadori burst in the matching colour; q0-q2 (failed) ratings get
-// none, just the plain snap.
-const KUMADORI_COLOR_VAR = { 3: '--accent2', 4: '--accent6', 5: '--success' }
-
-// Fixed fan angles per streak count. Hand-placed rather than
-// randomised: a mie is deliberate, so one line lands slightly
-// off-centre, two split evenly either side of straight up, and three
-// add a dead-centre line for the best rating.
-const KUMADORI_ANGLES = {
-  1: [-8],
-  2: [-24, 16],
-  3: [-32, 0, 28],
-}
-
-// ── Footlight embers ───────────────────────────────────────
-// Horizontal position, launch delay, sideways drift, sway, size,
-// lifetime, and an optional `flare` flag (a softer, bigger radial
-// spark rather than a tight dot — the bigger sparks a real tsuke
-// board throws off among the fine ones) for each spark along the
-// footlight strip — hand-placed for the same reason every other set
-// of numbers in this file is (KUMADORI_ANGLES above, the tsuke beat
-// timings in index.css…): a mie is precise, not a particle system, so
-// none of this is Math.random() — it's the same thirteen embers every
-// time. The routine toast only lights a spread subset of them
-// (EMBER_LAYOUT_LIGHT), so a level-up reads as the whole footlight
-// strip catching, not just a bigger version of the same handful.
-const EMBER_LAYOUT = [
-  { x: 3,  delay: 0,   drift: -10, sway: 5, size: 4, dur: 2800 },
-  { x: 12, delay: 260, drift: 6,   sway: 7, size: 5, dur: 3200, flare: true },
-  { x: 21, delay: 80,  drift: -5,  sway: 4, size: 4, dur: 2600 },
-  { x: 30, delay: 420, drift: 9,   sway: 8, size: 6, dur: 3400 },
-  { x: 39, delay: 150, drift: -8,  sway: 5, size: 4, dur: 2900 },
-  { x: 48, delay: 340, drift: 5,   sway: 6, size: 5, dur: 3100, flare: true },
-  { x: 57, delay: 40,  drift: -6,  sway: 4, size: 4, dur: 2700 },
-  { x: 66, delay: 480, drift: 8,   sway: 7, size: 6, dur: 3500 },
-  { x: 75, delay: 200, drift: -4,  sway: 5, size: 4, dur: 3000 },
-  { x: 83, delay: 360, drift: 7,   sway: 6, size: 5, dur: 3300, flare: true },
-  { x: 90, delay: 110, drift: -6,  sway: 4, size: 4, dur: 2750 },
-  { x: 96, delay: 300, drift: 5,   sway: 5, size: 5, dur: 3050 },
-  { x: 50, delay: 20,  drift: 0,   sway: 3, size: 7, dur: 3700, flare: true },
-]
-const EMBER_LAYOUT_LIGHT = [EMBER_LAYOUT[0], EMBER_LAYOUT[2], EMBER_LAYOUT[4], EMBER_LAYOUT[6], EMBER_LAYOUT[8], EMBER_LAYOUT[11]]
-
-// The count-in: three fixed impact marks flashing in on shrinking
-// gaps — the accelerating wooden-clapper beats a kabuki stagehand
-// strikes into a board before an actor's mie. Purely CSS-timed (see
-// .tsuke-beat/-1/-2/-3 in index.css); `big` swaps in the enlarged
-// level-up sizing.
-function TsukeBeats({ big }) {
-  return (
-    <span className={`tsuke-beats${big ? ' tsuke-beats--big' : ''}`} aria-hidden="true">
-      <span className="tsuke-beat tsuke-beat--1" />
-      <span className="tsuke-beat tsuke-beat--2" />
-      <span className="tsuke-beat tsuke-beat--3" />
-    </span>
-  )
-}
-
-// The payoff: a fan of tapered, brush-stroke streaks (kumadori)
-// whipping outward from centre at fixed angles, timed to land with
-// the snap. `count` selects the angle set above — no matching count
-// (a q0-q2 rating) renders nothing at all.
-function KumadoriBurst({ count, colorVar, big }) {
-  const angles = KUMADORI_ANGLES[count]
-  if (!angles) return null
-  return (
-    <span
-      className={`kumadori-burst${big ? ' kumadori-burst--big' : ''}`}
-      aria-hidden="true"
-      style={{ color: `var(${colorVar})` }}
-    >
-      {angles.map((deg, i) => (
-        <span key={i} className="kumadori-streak" style={{ '--streak-angle': `${deg}deg` }} />
-      ))}
-    </span>
-  )
-}
-
-// ── Stage footlights ──────────────────────────────────────
-// A kabuki stage is lit from its own floor as much as from above;
-// this is that — a warm line igniting along the very bottom edge of
-// the screen, with a handful of embers drifting up out of it, so a
-// reward reads as something the whole stage responds to rather than
-// a badge popping up in one corner. `big` widens it into the fuller
-// footlight row (and the taller ember climb — see --ember-rise on
-// .stage-footlights--big in index.css) for the level-up curtain call;
-// `colorVar` tints it to match the same per-quality accent the
-// kumadori burst and glow-pulse use, falling back to the gold trim
-// (--accent2) everything else in this file already falls back to.
-// Purely decorative throughout — aria-hidden, pointer-events: none.
-// Exported so the daruma 満願 ceremony (DarumaRitual.jsx) lights the
-// same stage rather than growing a second, subtly-different celebration
-// language of its own.
-export function StageFootlights({ big, leaving, colorVar }) {
-  const embers = big ? EMBER_LAYOUT : EMBER_LAYOUT_LIGHT
-  return (
-    <div
-      className={`stage-footlights${big ? ' stage-footlights--big' : ''}${leaving ? ' stage-footlights--leaving' : ''}`}
-      aria-hidden="true"
-      style={colorVar ? { '--footlight-color': `var(${colorVar})` } : undefined}
-    >
-      <div className="stage-footlights__glow" />
-      {embers.map((e, i) => (
-        <span
-          key={i}
-          className={`ember${e.flare ? ' ember--flare' : ''}`}
-          style={{
-            '--ember-x': `${e.x}%`,
-            '--ember-delay': `${e.delay}ms`,
-            '--ember-drift': `${e.drift}px`,
-            '--ember-sway': `${e.sway ?? 5}px`,
-            '--ember-size': `${e.size}px`,
-            '--ember-dur': `${e.dur}ms`,
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
+// The shell reads the reward; the scene below plays it. Keyed on the
+// toast id so a second reward mounts fresh rather than needing its
+// state reset inside an effect — same shape as the ticket gate and
+// the train door, and the reason none of the three has to fight
+// react-hooks/set-state-in-effect.
 export function XpToast({ toast, onDone }) {
+  if (!toast) return null
+  return <RewardScene key={toast.id} toast={toast} onDone={onDone} />
+}
+
+function RewardScene({ toast, onDone }) {
   const { t } = useLang()
-  // 祝 — the equipped flourish. Its colours are already on <html> as
-  // custom properties (see the 祝 block in index.css); only the
-  // character in the middle needs to come through JavaScript.
-  const flourish = useLoadout().flourish
-  // 'active' covers the whole entrance and hold — including, for a
-  // level-up, the indefinite wait for the claim button, where there's
-  // no timer running at all, just a person deciding when to click.
-  // 'leaving' is the exit: for the routine toast that's the fall
-  // defined by xp-toast-fall in index.css; for a level-up it's the
-  // curtain swinging shut again, followed by the overlay's own fade.
-  // Either way, onDone only fires once the matching animationend
-  // actually arrives (see the two handlers below) — never on a JS
-  // timer guessing how long the CSS will take.
-  const [phase, setPhase] = useState('active')
+  const [leaving, setLeaving] = useState(false)
+
+  const tier = rewardTier(toast)
 
   useEffect(() => {
-    if (!toast) return
-    setPhase('active')
-    if (toast.leveledUp) playSfx('level-up')
+    if (tier === 'rank') playSfx('level-up')
+    else if (tier === 'level') playSfx('level-up')
+    else playGateChime()
 
-    // A level-up doesn't dismiss itself on a clock — it waits for
-    // handleClaim instead.
-    if (toast.leveledUp) return
-
-    const timer = setTimeout(() => setPhase('leaving'), NORMAL_DURATION)
-    return () => clearTimeout(timer)
+    // A promotion waits to be dismissed; the other two are on a clock.
+    if (tier === 'rank') return
+    const id = setTimeout(() => setLeaving(true), tier === 'level' ? LEVEL_MS : FARE_MS)
+    return () => clearTimeout(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast])
+  }, [])
 
-  if (!toast) return null
+  // onDone only ever fires on the real animationend of the exit, never
+  // on a timer guessing how long the CSS will take. animationend
+  // bubbles from every flap, so both handlers match by name.
+  const onExitEnd = name => e => { if (e.animationName === name) onDone?.() }
 
-  const leaving = phase === 'leaving'
-  const handleClaim = () => setPhase('leaving')
-
-  // animationend bubbles up from every child (tsuke beats, kumadori
-  // streaks, the glyph flick, the footlight embers…), so both
-  // handlers below key off the specific animation name rather than
-  // firing on whichever bubble reaches them first.
-  const handleToastAnimationEnd = (e) => {
-    if (e.animationName === 'xp-toast-fall') onDone?.()
-  }
-  const handleOverlayAnimationEnd = (e) => {
-    if (e.animationName === 'level-up-overlay-fade-out') onDone?.()
-  }
-
-  if (toast.leveledUp) {
-    return (
-      // `key` forces a fresh DOM node per toast so the CSS animations
-      // (which only ever play on mount) actually re-trigger for a
-      // second level-up in the same session.
+  // ── fare ──
+  if (tier === 'fare') {
+    return createPortal(
       <div
-        key={toast.id}
-        className={`level-up-overlay${leaving ? ' level-up-overlay--leaving' : ''}`}
+        className={`fare-tick${leaving ? ' fare-tick--leaving' : ''}`}
         aria-live="polite"
-        onAnimationEnd={handleOverlayAnimationEnd}
+        onAnimationEnd={onExitEnd('fare-tick-out')}
       >
-        <StageFootlights big leaving={leaving} />
-        <div className={`kabuki-curtain kabuki-curtain--left${leaving ? ' kabuki-curtain--leaving' : ''}`} aria-hidden="true" />
-        <div className={`kabuki-curtain kabuki-curtain--right${leaving ? ' kabuki-curtain--leaving' : ''}`} aria-hidden="true" />
-        <TsukeBeats big />
-        <div className="level-up-banner">
-          <KumadoriBurst count={3} colorVar="--accent2" big />
-          <div className="hanko-stamp" aria-hidden="true">印</div>
-          <div className="level-up-banner__glyph" aria-hidden="true">昇</div>
-          <div className="level-up-banner__label">{t.levelUp}</div>
-          <div className="level-up-banner__level">{t.level} {toast.newLevel}</div>
-          <div className="level-up-banner__xp">+{toast.amount} XP</div>
-          <div className={`level-up-claim-wrap${leaving ? ' level-up-claim-wrap--leaving' : ''}`}>
-            <button
-              type="button"
-              className="level-up-claim"
-              onClick={handleClaim}
-              disabled={leaving}
-            >
-              <span className="level-up-claim__glyph" aria-hidden="true">受</span>
-              {t.claimBtn}
-            </button>
-          </div>
-        </div>
-      </div>
+        <span className="fare-tick__label">XP</span>
+        <SplitFlap from={0} to={toast.amount} label={`+${toast.amount} XP`} />
+      </div>,
+      document.body,
     )
   }
 
-  // One kumadori streak per quality point above q2 (1/2/3 for
-  // q3/q4/q5), plus the stronger glow-pulse on the pill itself from
-  // q4 up — the better the rating, the harder the toast celebrates.
-  const kumadoriColorVar = KUMADORI_COLOR_VAR[toast.quality]
-  const kumadoriCount = kumadoriColorVar ? toast.quality - 2 : 0
-  const boosted = toast.quality >= 4
+  const level = toast.newLevel
+  const rank = rankFor(level)
 
-  return (
-    <>
-      {/* Own key, distinct from the pill's below: this is a sibling,
-          not a wrapper, and both need to remount independently for a
-          second toast fired back-to-back to replay its animations. */}
-      <StageFootlights key={`footlights-${toast.id}`} leaving={leaving} colorVar={kumadoriColorVar} />
+  // ── level ──
+  if (tier === 'level') {
+    return createPortal(
       <div
-        key={toast.id}
-        className={`xp-toast${boosted ? ' xp-toast--boosted' : ''}${leaving ? ' xp-toast--leaving' : ''}`}
+        className={`level-board${leaving ? ' level-board--leaving' : ''}`}
         aria-live="polite"
-        style={kumadoriColorVar ? { '--kumadori-color': `var(${kumadoriColorVar})` } : undefined}
-        onAnimationEnd={handleToastAnimationEnd}
+        onAnimationEnd={onExitEnd('level-board-out')}
       >
-        <TsukeBeats />
-        {kumadoriCount > 0 && <KumadoriBurst count={kumadoriCount} colorVar={kumadoriColorVar} />}
-        <span className="xp-toast__glyph" aria-hidden="true">{flourishGlyph(flourish)}</span>
-        +{toast.amount} XP
-        <span className="xp-toast__brush" aria-hidden="true" />
-        <span className="xp-toast__glint xp-toast__glint--1" aria-hidden="true" />
-        <span className="xp-toast__glint xp-toast__glint--2" aria-hidden="true" />
+        <div className="level-board__panel">
+          <span className="level-board__label" lang="ja">進級</span>
+          <span className="level-board__latin">{t.levelUp}</span>
+          <div className="level-board__flaps">
+            <span className="level-board__unit">{t.level}</span>
+            <SplitFlap from={level - 1} to={level} label={`${t.level} ${level}`} />
+          </div>
+          <span className="level-board__xp">+{toast.amount} XP</span>
+          <div className="level-board__stripe" aria-hidden="true" />
+        </div>
+      </div>,
+      document.body,
+    )
+  }
+
+  // ── rank ──
+  const before = rankFor(Math.max(0, level - 1))
+  return createPortal(
+    <div
+      className={`reissue${leaving ? ' reissue--leaving' : ''}`}
+      aria-live="polite"
+      onAnimationEnd={onExitEnd('reissue-out')}
+    >
+      <div className="reissue__scrim" aria-hidden="true" />
+
+      <div className="reissue__pass">
+        <div className="reissue__head">
+          <span className="reissue__brand" lang="ja">定期券</span>
+          <span className="reissue__issued" lang="ja">再発行</span>
+        </div>
+
+        <div className="reissue__flaps">
+          <span className="reissue__unit">{t.level}</span>
+          <SplitFlap from={level - 1} to={level} stagger={90} label={`${t.level} ${level}`} />
+        </div>
+
+        {/* The title is the reason this tier exists, so it turns over
+            on its own board under the number rather than just being
+            printed there. */}
+        <div className="reissue__rank" lang="ja">
+          <span className="reissue__rank-from">{before.jp}</span>
+          <span className="reissue__rank-arrow" aria-hidden="true">→</span>
+          <span className="reissue__rank-to">{rank.jp}</span>
+        </div>
+        <div className="reissue__rank-latin">{rank.latin}</div>
+
+        <div className="reissue__stripe" aria-hidden="true" />
+
+        <button
+          type="button"
+          className="reissue__claim"
+          onClick={() => setLeaving(true)}
+          disabled={leaving}
+        >
+          {t.claimBtn}
+        </button>
       </div>
-    </>
+    </div>,
+    document.body,
   )
 }
