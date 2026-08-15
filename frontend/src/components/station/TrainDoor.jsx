@@ -86,7 +86,8 @@ function DoorScene({ commit, color, code }) {
 
   return createPortal(
     <div className={`door door--${phase}`} style={style} aria-hidden="true">
-      {/* Two leaves meeting on the seam. The windows are cut out
+      {/* Two leaves meeting on the seam — which each leaf carries half
+          of, so it travels with them. The windows are cut out
           rather than painted, so the screen behind shows through them
           — you can see where you are going before the doors move,
           which is what a train door actually does. */}
@@ -103,7 +104,6 @@ function DoorScene({ commit, color, code }) {
           {code && <span className="door__plate">{code}</span>}
         </div>
       ))}
-      <span className="door__seam" />
     </div>,
     document.body,
   )

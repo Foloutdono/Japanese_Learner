@@ -3,6 +3,7 @@ import { shortDate } from '../lib/formatDate'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
+import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
 import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
@@ -359,7 +360,13 @@ export default function ReadingScreen({ session }) {
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.readingTitle} />
         <SelectionScreen heading={t.selectStudySource}>
-          <ModeSelector modes={SOURCES} onSelect={setSource} />
+          {/* 'mastery' needs no further choice, so choosing it is the
+              last step and boards straight away. The other two each
+              have one more list after this one. */}
+          <ModeSelector
+            modes={SOURCES}
+            onSelect={key => (key === 'mastery' ? board(() => setSource(key)) : setSource(key))}
+          />
         </SelectionScreen>
       </div>
     )
@@ -371,7 +378,7 @@ export default function ReadingScreen({ session }) {
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
         <SelectionScreen heading={t.selectLevel}>
-          <LevelSelector onSelect={setLevel} />
+          <LevelSelector onSelect={lvl => board(() => setLevel(lvl))} />
         </SelectionScreen>
       </div>
     )
@@ -394,7 +401,7 @@ export default function ReadingScreen({ session }) {
       <div className="screen">
         <TopBar onBack={() => setDomain(null)} title={t.readingTitle} />
         <SelectionScreen heading={t.selectTier}>
-          <TierPicker session={session} domain={domain} onSelect={setTier} t={t} />
+          <TierPicker session={session} domain={domain} onSelect={tr => board(() => setTier(tr))} t={t} />
         </SelectionScreen>
       </div>
     )
