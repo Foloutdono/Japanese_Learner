@@ -621,6 +621,10 @@ const settings = {
   volumeUi:           'Volume UI',
   volumeAmbiance:     'Volume ambiance',
   volumeJingle:       'Volume jingle',
+  // The station announcements (playAnnouncement). This key was the one
+  // channel in SLIDER_LABELS with nothing behind it in either locale,
+  // so its row in the mixer drew a slider with no label at all.
+  volumeAnnouncement: 'Volume announcements',
   volumeAnnouncements: 'Volume announcements',
 }
 

@@ -617,6 +617,7 @@ const settings = {
   volumeUi:           'Volume interface',
   volumeAmbiance:     "Volume ambiance",
   volumeJingle:       'Volume jingle',
+  volumeAnnouncement: 'Volume annonces',
   volumeAnnouncements: 'Volume annonces',
 }
 

@@ -4,7 +4,6 @@ import { useLang } from '../../LangContext'
 import { getNavLinks } from '../../config/navLinks'
 import { sectionFor, stationFor } from '../../config/stations'
 import { identityFor } from '../../config/identity'
-import { PassWave } from '../profile/PassWave'
 import { BurgerMenu } from './BurgerMenu'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { QuickChange } from '../rewards/QuickChange'
@@ -199,34 +198,24 @@ function MobileLevelBar() {
 }
 
 // ── 車内案内表示器 — the in-car information display ────────
-// The strip above a train door: which line you are riding, in its
-// colour, and where you are on it. That is exactly a top bar's job,
-// and this one used to be a plain dark strip with a serif string in
-// it — the only piece of chrome in the app that gave no sign of the
-// station it belonged to.
+// The strip above a train door. It carries one thing: where you are,
+// in the two registers a 駅名標 uses — かんじ above 漢字, the reading
+// over the name. The title below is frequently a whole journey
+// ("漢字 N5 — MCQ"), which is precisely what an in-car display shows
+// under a station name.
 //
-// Three things carry that now, all of them objects the app already
-// owns rather than new invention:
+// It briefly carried a line-coloured roundel and a stripe as well.
+// Both are gone: the plate already names the station four lines below,
+// and repeating its code and its colour in the chrome made the top of
+// every screen an echo of the object underneath it rather than a bar.
+// Two registers, quiet, and the controls — that is the whole bar.
 //
-//   the stripe    the section's line colour along the bottom edge, the
-//                 same 4px band the station plate ends on.
-//   the roundel   駅ナンバリング — the two-letter code from
-//                 config/stations.js. It is the one mark you can find
-//                 without reading anything, and the top bar was the
-//                 last place in the app not using it.
-//   the reading   かんじ above 漢字, the 駅名標 register system. The
-//                 title below it is frequently a whole journey
-//                 ("漢字 N5 — MCQ"), which is precisely what an in-car
-//                 display shows under the station name.
-//
-// On an identity route (/profile, /settings) none of that applies:
-// you are not travelling, you are holding your pass. The roundel gives
-// way to the contactless mark, the reading goes — a pass has no
-// reading, because it is not a place — and the stripe takes the card's
-// own ink rather than a line colour. See config/identity.js.
+// On an identity route (/profile, /settings) the small register is the
+// card rather than a reading, because a pass is not a place: the bar
+// reads "your pass → profile". See config/identity.js.
 //
 // `pathname` comes from the router rather than window.location so the
-// bar re-reads its line on navigation instead of only on remount.
+// bar re-reads itself on navigation instead of only on remount.
 export function TopBar({
   onBack,
   title,
@@ -238,6 +227,8 @@ export function TopBar({
   const { hidden, reveal, onMenuOpenChange } = useAutoHideTopBar(autoHide)
 
   const identity = identityFor(pathname, t)
+  // Resolve the section only to canonicalise a nested path
+  // (/decks/<id> -> /decks) before asking for its reading.
   const section = identity ? null : sectionFor(pathname, t)
   const station = stationFor(section?.path ?? pathname)
 
@@ -248,35 +239,17 @@ export function TopBar({
           'top-bar',
           autoHide && 'top-bar--autohide',
           hidden && 'top-bar--hidden',
-          identity && 'top-bar--pass',
         ].filter(Boolean).join(' ')}
-        style={section ? { '--line-color': section.color } : undefined}
       >
         <div className="top-bar__inner">
           <BurgerMenu links={getNavLinks(t)} currentPath={pathname} onOpenChange={onMenuOpenChange} />
 
           <span className="top-bar__station">
-            {identity
-              ? (
-                /* A card, not a roundel. The station code rides in a
-                   circle; a pass is a rectangle, and reading the two
-                   apart at a glance is the whole point of giving the
-                   identity routes their own mark. */
-                <span className="top-bar__card" aria-hidden="true">
-                  <PassWave className="pass__wave top-bar__wave" />
-                </span>
-              )
-              : station.code !== '??' && (
-                  <span className="top-bar__roundel" aria-hidden="true">{station.code}</span>
-                )}
             <span className="top-bar__stack">
-              {/* Both modes carry two registers, and they are the same
-                  two: the small one names the object, the large one
-                  names where you are in it. On a line that is the
-                  station's reading over its name; on the pass it is
-                  the card over its face, so the bar reads "your pass →
-                  profile" and "your pass → settings". Without it the
-                  identity bar sat a register short and looked it. */}
+              {/* The reading, above the name — the 駅名標 register, at
+                  the size chrome can afford. On an identity route it is
+                  the card rather than a reading, so the bar says "your
+                  pass → profile" instead of naming a place. */}
               {identity
                 ? <span className="top-bar__kana top-bar__kana--pass" lang="ja">定期券</span>
                 : station.kana && (
@@ -302,10 +275,6 @@ export function TopBar({
           </button>
         </div>
 
-        {/* The line, along the bottom edge. Same band the station
-            plate ends on, so the bar reads as the head of the same
-            object rather than a separate piece of chrome. */}
-        <div className="top-bar__stripe" aria-hidden="true" />
       </div>
 
       <MobileLevelBar />

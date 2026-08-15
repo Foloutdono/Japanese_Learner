@@ -817,15 +817,6 @@ input:focus { border-color: var(--accent2); }
   gap: 14px;
 }
 
-/* The line, along the bottom edge — the same 4px band
-   .station-sign__stripe ends the plate on, so a screen's masthead and
-   its top bar read as two parts of one object. A route with no
-   station falls back to the board's own amber. */
-.top-bar__stripe {
-  height: 4px;
-  background: var(--line-color, var(--accent2));
-}
-
 .top-bar__station {
   display: flex;
   align-items: center;
@@ -833,59 +824,6 @@ input:focus { border-color: var(--accent2); }
   flex: 1;
   min-width: 0;
 }
-
-/* 駅ナンバリング at chrome scale: the same ring the plate and the
-   platform cards draw, and on a dark bar it is the one lit thing. */
-.top-bar__roundel {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2px solid var(--line-color, var(--accent2));
-  color: var(--line-color, var(--accent2));
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-/* An identity route is not a place, so the bar carries no code, no
-   reading and no line: the contactless mark stands where the roundel
-   would, and the stripe takes the card's ink. See config/identity.js. */
-.top-bar--pass .top-bar__stripe { background: var(--pass-ink); }
-
-/* The card the mark is printed on. Same footprint as the roundel it
-   replaces so the title starts at the same x on every screen, but
-   rectangular — a station code rides in a circle, a pass does not, and
-   telling the two apart at a glance is the point.
-
-   Slate is the pass's ink because on the profile screen the card sits
-   on a bright page. On sumi it falls away, and beside a lit gold
-   roundel it read as a roundel that had failed — so the edge is the
-   pigment lifted halfway to the panel's own cream, and the slate stays
-   as the fill behind the mark. */
-.top-bar__card {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 27px;
-  border-radius: 3px;
-  border: 1.5px solid color-mix(in srgb, var(--pass-ink) 45%, var(--text-on-panel));
-  background: color-mix(in srgb, var(--pass-ink) 42%, transparent);
-}
-.top-bar__wave { width: 15px; height: 16px; }
-/* .pass__wave fades its outer arcs to 0.45 and 0.25 — legible on the
-   pale card, not on sumi. On the bar they are drawn in the panel's own
-   ink at weights that survive it. */
-.top-bar__wave span { border-right-color: var(--text-on-panel); border-width: 1.3px; }
-.top-bar__wave span:nth-child(1) { width: 5px;  height: 5px;  margin-top: -2.5px; opacity: 0.95; }
-.top-bar__wave span:nth-child(2) { width: 10px; height: 10px; margin-top: -5px;   opacity: 0.7; }
-.top-bar__wave span:nth-child(3) { width: 15px; height: 15px; margin-top: -7.5px; opacity: 0.45; }
 
 .top-bar__stack {
   display: flex;
@@ -1431,70 +1369,6 @@ input:focus { border-color: var(--accent2); }
   color: var(--text-secondary);
 }
 .station-sign .board-clock__colon { padding: 0 1px; }
-
-/* No panel behind the cards. A card drawn on a surface of its own
-   fill is invisible, and once the choices are objects in their own
-   right the box around them stops doing anything the plate and its
-   stripe weren't already doing. */
-
-/* ── The back of the card ─────────────────────────────────
-   StationHeader's counterpart for the routes that are you rather than
-   somewhere you go — see components/profile/IdentityHeader. Same three
-   registers as the plate and the same rule underneath, so the two
-   mastheads rhyme; but the eyebrow is the card's issuer rather than a
-   reading, and the rule is the pass's ink rather than a line colour.
-   Nothing here says "you have arrived". */
-.id-header {
-  --pass-color: var(--pass-ink, var(--accent9));
-  margin-bottom: 44px;
-  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
-}
-.id-header__brand {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 6px;
-}
-/* Same rule as the stub's: the stroke comes down with the arcs. */
-.id-header__wave { width: 18px; height: 20px; }
-.id-header__wave span { border-width: 1.4px; }
-.id-header__wave span:nth-child(1) { width: 6px;  height: 6px;  margin-top: -3px; }
-.id-header__wave span:nth-child(2) { width: 12px; height: 12px; margin-top: -6px; }
-.id-header__wave span:nth-child(3) { width: 18px; height: 18px; margin-top: -9px; }
-.id-header__issuer {
-  font-family: var(--font-display);
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.id-header__name {
-  display: block;
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: clamp(1.9rem, 1.4rem + 2.2vw, 3.1rem);
-  line-height: 1.15;
-  letter-spacing: 0.14em;
-  text-indent: 0.14em;
-  color: var(--text-primary);
-}
-.id-header__latin {
-  display: block;
-  margin-top: 5px;
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.3em;
-  text-indent: 0.3em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.id-header__stripe {
-  height: 4px;
-  margin-top: 18px;
-  background: var(--pass-color);
-}
 
 /* The plate on a screen that isn't a selection screen. Same object,
    same spacing under it — see .platform-grid's 52px top padding, which
@@ -3023,16 +2897,23 @@ input:focus { border-color: var(--accent2); }
 }
 
 /* Row: barre d'accent à gauche au survol, même langage que .choice-row */
+/* `overflow: hidden` is here for the sliding left bar (::before), so
+   anything the row cannot fit is cut rather than wrapped — and French
+   labels ("Se déconnecter de votre compte") are long enough to hit
+   that at 360px. Wrapping lets the control drop under its label
+   instead of the label being sliced off. */
 .settings-row {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 10px 16px;
   padding: 18px 24px 18px 28px;
   transition: background 0.15s ease;
   overflow: hidden;
 }
+.settings-row__label { min-width: 0; overflow-wrap: anywhere; }
 
 .settings-row:hover::before,
 .settings-row:focus-within::before {
@@ -3623,12 +3504,27 @@ input:focus { border-color: var(--accent2); }
 
 .quiz-done {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 24px;
+  text-align: center;
+}
+.quiz-done__msg {
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  margin: 0;
   color: var(--success);
   font-size: 18px;
-  padding: 40px;
+  line-height: 1.4;
+}
+.quiz-done .btn-panel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* An ensō (円相) — the single-stroke ink circle of Zen calligraphy —
@@ -7476,7 +7372,25 @@ input:focus { border-color: var(--accent2); }
    The radical glyph reuses the home screen's hanko-stamp box (a
    rotated hairline square around a seal-red character) — the app's
    own signature applied here instead of a plain rounded chip. */
-.dict-radical-header { display: flex; align-items: center; gap: 18px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+/* Back button, stamp, label. It never wrapped, so on a phone the three
+   ran edge to edge with the label pressed against the viewport — the
+   button alone is most of a 390px line. */
+.dict-radical-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px 18px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+@media (max-width: 560px) {
+  /* The button takes its own line; the stamp and its number stay
+     together underneath, which is the pair that actually belongs
+     side by side. */
+  .dict-radical-back-btn { flex: 1 0 100%; }
+  .dict-radical-header { gap: 12px 14px; margin-bottom: 22px; padding-bottom: 16px; }
+}
 .dict-radical-back-btn {
   background: transparent;
   color: var(--text-secondary);
@@ -7503,12 +7417,19 @@ input:focus { border-color: var(--accent2); }
   font-size: 26px;
   color: var(--accent);
 }
+/* The stamp around the glyph. `inset: -6px 0` gave it -6px top and
+   bottom but 0 left and right, so the "square" was 48 wide by 60 tall
+   — a tall rectangle, and the 3° rotation turned it into a skewed
+   slab with a small dash floating inside. Uniform inset and the same
+   rounded corner .hanko-stamp uses, so it reads as the seal it is
+   meant to be. */
 .dict-radical-char::after {
   content: '';
   position: absolute;
-  inset: -6px 0;
+  inset: -6px;
   border: 1.5px solid var(--accent);
-  transform: rotate(-3deg);
+  border-radius: 6px;
+  transform: rotate(-2deg);
   opacity: 0.65;
 }
 .dict-radical-label { color: var(--text-secondary); font-size: 13px; }
@@ -8357,6 +8278,15 @@ input:focus { border-color: var(--accent2); }
   border-radius: 8px;
   overflow: hidden;
 }
+/* The practice block always holds exactly four figures, so its track
+   count has to divide four. auto-fit only collapses tracks that are
+   empty *everywhere*; a three-column fit leaves the fourth tile alone
+   on row two with two bare cells beside it, and a bare cell in a
+   flush lattice is a slab of raw seam colour. Two by two cannot go
+   ragged at any width, in any container. The form block above it
+   keeps auto-fit: with two tiles, one column or two are both whole. */
+.dict-detail__practice .dict-stat-grid { grid-template-columns: repeat(2, 1fr); }
+
 .dict-stat {
   display: flex;
   flex-direction: column;
@@ -9728,13 +9658,10 @@ input:focus { border-color: var(--accent2); }
   .platform-card__title { font-size: 1.08rem; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
   /* The title needs the whole line on a phone, and it is frequently a
-     whole journey ("漢字 N5 — MCQ"), so the reading above it goes and
-     the roundel shrinks. The roundel stays: it is the only thing on
-     the bar that says which line you are on without being read. */
+     whole journey ("漢字 N5 — MCQ"), so the reading above it goes. */
   .top-bar__inner { padding: 10px 14px 11px; gap: 10px; }
   .top-bar__station { gap: 10px; }
   .top-bar__kana { display: none; }
-  .top-bar__roundel { width: 26px; height: 26px; font-size: 9px; }
   .top-bar__title { font-size: 0.94rem; }
   .burger-toggle { width: 34px; height: 32px; }
   .burger-toggle__map { width: 16px; gap: 3.5px; }
@@ -12634,11 +12561,11 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
     inset: 0;
     z-index: 200;
     background: rgba(0, 0, 0, 0.6);
+    animation: arrive-soft 0.2s linear;
   }
   .dict-dock {
     position: fixed;
     z-index: 201;
-    inset: 24px;
     flex: none;
     top: 50%;
     left: 50%;
@@ -12649,7 +12576,45 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
     max-height: 88dvh;
     border-radius: 12px;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    /* NOT `arrive`. That keyframe ends on `transform: none`, which
+       cancels the centring translate above for the whole 0.28s it
+       runs — the panel was drawn half a viewport down and to the
+       right, then snapped into place when the animation finished.
+       A centring transform and a transform animation cannot share an
+       element, so this one fades instead. */
+    animation: arrive-soft 0.22s linear;
   }
+}
+
+/* ── The sheet on a phone ──
+   A card floating in the middle of a 390px screen puts its controls
+   where no thumb reaches and leaves slivers of the catalogue showing
+   down both sides. Docked to the bottom edge instead: full width,
+   rounded only where it leaves the screen, and it rises from the edge
+   it is attached to. Its own transform is free here — nothing is
+   centring it — so this one can move. */
+@media (max-width: 700px) {
+  .dict-dock {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: none;
+    width: 100%;
+    max-height: 86dvh;
+    border-width: 1px 0 0;
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.5);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    animation: dict-sheet-up 0.26s cubic-bezier(0.22, 0.68, 0.32, 1);
+  }
+  @keyframes dict-sheet-up {
+    from { transform: translateY(14%); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+  }
+}
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) {
+  .dict-dock { animation: arrive-soft 0.15s linear; }
 }
 
 /* ── The catalogue column ──
@@ -12858,6 +12823,51 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
   .dict-console .dict-index-bar { padding: 2px 12px; gap: 10px; }
   .dict-index-bar__input { font-size: 1rem; }
   .dict-index-bar__key { display: none; }
+}
+
+/* ── The console on a phone ────────────────────────────────
+   Five collection chips, a mode toggle and a field: at 360px that was
+   four stacked bands of chrome before a single entry, and the count
+   sat hard against a placeholder clipped mid-word — two pieces of
+   type touching with nothing between them.
+
+   Chips tighten so the five fit two rows instead of three, the toggle
+   goes full width under them rather than orphaned on a row of its
+   own, and the count drops below the field. Nothing is hidden: a
+   count you cannot read is the same as no count, but so is a count
+   welded to the placeholder. */
+@media (max-width: 560px) {
+  .dict-console__top {
+    gap: 10px;
+    align-items: stretch;
+  }
+  .dict-tab-row--category { gap: 6px; width: 100%; }
+  .dict-tab-row--category .dict-tab-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 10px 6px 6px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+  .dict-tab-glyph { width: 20px; height: 20px; font-size: 11px; }
+
+  /* The toggle is a property of the collection above it, so at this
+     width it sits under them at full width rather than beside. */
+  .dict-console .dict-tab-row--submode { width: 100%; }
+  .dict-console .dict-tab-btn--sub { flex: 1; text-align: center; padding: 7px 10px; }
+
+  /* The count wraps to its own line. An <input> will shrink to
+     nothing before a `flex-shrink: 0` sibling gives up a pixel, so
+     side by side the field always lost — and the placeholder was cut
+     mid-word right against the number. */
+  .dict-console .dict-index-bar { flex-wrap: wrap; padding: 4px 14px 8px; row-gap: 0; }
+  .dict-index-bar__input { padding: 12px 0 4px; }
+  .dict-index-bar__count {
+    flex: 1 0 100%;
+    text-align: right;
+    padding-bottom: 4px;
+  }
 }
 
 /* ── Closing the dock ──

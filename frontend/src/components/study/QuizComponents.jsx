@@ -211,8 +211,13 @@ export function DoneMessage({ onBack }) {
   const { t } = useLang()
   return (
     <div className="quiz-done">
-      <CheckCircleIcon size={22} /> {t.quizComplete}
-      <br /><br />
+      {/* The message and the button are two rows, not two <br/>s. In a
+          flex container a <br> is a zero-width flex item and breaks
+          nothing, so the button used to sit on the same line as the
+          text it was supposed to follow. */}
+      <p className="quiz-done__msg">
+        <CheckCircleIcon size={22} /> {t.quizComplete}
+      </p>
       <button onClick={() => { playClick(); onBack() }} className="btn-panel">
         <ChevronIcon direction="left" size={14} /> {t.backToMenu}
       </button>

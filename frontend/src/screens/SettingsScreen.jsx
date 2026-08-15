@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { supabase } from '../lib/supabase'
 import { TopBar } from '../components/ui/TopBar'
-import { IdentityHeader } from '../components/profile/IdentityHeader'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components/ui/NavControls'
 
@@ -23,9 +22,6 @@ export default function SettingsScreen() {
       <TopBar onBack={() => navigate('/')} title={t.settings} autoHide />
 
       <div className="container settings-container">
-        {/* Not a station plate: settings are the pass's own
-            settings, not a place. See config/identity.js. */}
-        <IdentityHeader />
         <SectionHeader jp="環境設定" title={t.preferences} />
         <div className="card settings-card">
           <div className="settings-row">
