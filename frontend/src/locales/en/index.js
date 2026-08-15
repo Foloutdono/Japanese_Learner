@@ -331,7 +331,6 @@ const stats = {
 
   // ── The Explorer ────────────────────────────────────────
   explorer:      'Explore',
-  explorerLede:  'Every level and every drill, in one table. Group it, sort it, narrow it down — the totals follow whatever you pick.',
   groupBy:       'Group by',
   sortBy:        'Sort by',
   allCategories: 'Everything',

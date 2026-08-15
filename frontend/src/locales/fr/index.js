@@ -318,7 +318,6 @@ const stats = {
 
   // ── L'explorateur ───────────────────────────────────────
   explorer:      'Explorer',
-  explorerLede:  'Tous les niveaux et tous les exercices dans un seul tableau. Groupez, triez, filtrez — les totaux suivent vos choix.',
   groupBy:       'Grouper par',
   sortBy:        'Trier par',
   allCategories: 'Tout',

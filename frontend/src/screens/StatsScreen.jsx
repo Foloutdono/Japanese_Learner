@@ -97,7 +97,6 @@ export default function StatsScreen({ session }) {
           <PracticeCalendar trend={extra?.trend} />
 
           <SectionHeader jp="内訳" title={t.explorer} />
-          <p className="stats-lede">{t.explorerLede}</p>
           <Explorer rows={rows} onStartReview={startReview} />
 
           <SectionHeader jp="予定" title={t.upcomingReviews} />

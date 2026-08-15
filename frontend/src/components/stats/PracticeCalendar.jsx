@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { buildCalendar, monthTicks } from '../../domain/statsModel'
 
@@ -40,9 +40,22 @@ export function PracticeCalendar({ trend }) {
     [lang],
   )
 
+  // A year reads oldest-to-newest left to right, which is correct and
+  // stays. But the scroll then opens on last August: on a phone, where
+  // only about six weeks fit, you had to drag the whole year sideways
+  // to find out whether you studied *today*. Start pinned to the right
+  // instead, so the newest weeks are what you land on and the history
+  // is what you scroll back into. No-op on a desktop where the whole
+  // year already fits, since there is nothing to scroll.
+  const scrollRef = useRef(null)
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollLeft = el.scrollWidth
+  }, [columns])
+
   return (
     <div className="calendar-panel">
-      <div className="calendar-panel__scroll">
+      <div className="calendar-panel__scroll" ref={scrollRef}>
         <div className="calendar" style={{ '--weeks': WEEKS }}>
           <div className="calendar__months">
             {ticks.map(tick => (

@@ -170,7 +170,13 @@ function GroupRow({ group, expanded, onToggle, sort, desc, onStartReview, t }) {
         <span className="explorer-group__counts">
           {totals.mastered.toLocaleString()} / {totals.total.toLocaleString()}
         </span>
-        {totals.due > 0 && <span className="explorer-group__due">{totals.due}</span>}
+        {/* The empty case is rendered, not skipped — same as LeafRow
+            below. Dropping the element entirely let the composition bar
+            grow into the space on rows with nothing due, so the bars
+            ended at a different x on every row. */}
+        {totals.due > 0
+          ? <span className="explorer-group__due">{totals.due}</span>
+          : <span className="explorer-group__due explorer-group__due--empty" aria-hidden="true" />}
       </button>
 
       {expanded && (

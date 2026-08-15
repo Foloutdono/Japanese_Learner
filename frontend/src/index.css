@@ -995,7 +995,30 @@ input:focus { border-color: var(--accent2); }
   margin: 0 auto;
   padding: 18px 0;
 }
-.station__settings { flex-shrink: 0; }
+/* .btn-nav is panel chrome: white-on-8%-white, --text-on-panel ink.
+   The concourse is not a panel — it is the page — so in light mode
+   that painted a cream gear on cream washi and the button simply was
+   not there. It takes the page's own ink instead, in both themes.
+
+   Qualified `.btn-nav.station__settings` deliberately: both are single
+   classes, and .btn-nav is declared some four thousand lines below
+   here, so on equal specificity it won on source order and the
+   override did nothing at all. */
+.btn-nav.station__settings {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.btn-nav.station__settings:hover,
+.btn-nav.station__settings:focus-visible {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+  background: var(--bg-card-hover);
+  filter: none;
+}
 
 .station__concourse-right {
   display: flex;
@@ -1807,7 +1830,6 @@ input:focus { border-color: var(--accent2); }
   .pass { padding: 20px 18px 18px; gap: 18px; }
   .pass__level-num { font-size: 1.9rem; }
   .pass__body { gap: 16px; }
-  .pass__ranks { align-items: flex-start; text-align: left; }
   .pass__avatar-wrap { width: 64px; height: 64px; }
   .pass__avatar { font-size: 1.4rem; inset: 8px; }
   .week { padding: 18px 12px 12px; }
@@ -6155,7 +6177,12 @@ input:focus { border-color: var(--accent2); }
   cursor: pointer;
   transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
-.explorer__chip:hover {
+/* `:not(--on)` is load-bearing, not tidiness. `.explorer__chip:hover`
+   is two classes and `.explorer__chip--on` is one, so hover *wins* on
+   specificity and repainted the selected chip's text --text-primary —
+   near-black ink on the near-black selected pill. In light mode the
+   label of whatever you had just clicked vanished. */
+.explorer__chip:not(.explorer__chip--on):hover {
   color: var(--text-primary);
   border-color: var(--text-secondary);
 }
@@ -6163,6 +6190,10 @@ input:focus { border-color: var(--accent2); }
   background: var(--bg-panel);
   border-color: var(--bg-panel);
   color: var(--text-on-panel);
+}
+.explorer__chip--on:hover {
+  border-color: var(--bg-panel);
+  filter: brightness(1.25);
 }
 
 .explorer__totals {
@@ -6242,6 +6273,14 @@ input:focus { border-color: var(--accent2); }
   flex-shrink: 0;
   font-weight: 700;
   font-size: 13.5px;
+  /* A flex item will not go below its longest unbreakable word, and
+     "hiragana_combos" is one word. Once the row also reserves a column
+     for the due badge, that pushed the whole header past a 320px
+     viewport. It truncates instead. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .explorer-group__pct {
   width: 44px;
@@ -6284,7 +6323,10 @@ input:focus { border-color: var(--accent2); }
 .explorer-leaf__due:hover { filter: brightness(1.15); }
 /* Holds the column open on rows with nothing due, so the numbers
    above and below it stay in line. */
-.explorer-leaf__due--empty {
+/* Holds the column open on a row with nothing due, so every
+   composition bar in the table starts and ends at the same x. */
+.explorer-leaf__due--empty,
+.explorer-group__due--empty {
   background: none;
   height: 20px;
 }
@@ -9591,7 +9633,19 @@ input:focus { border-color: var(--accent2); }
      getting four legible characters. */
   .explorer-group__label { width: auto; flex: 1; }
   .explorer-group__counts { display: none; }
+
+  /* The three control rows are the first thing on the panel and were
+     taking six lines of chrome before a single figure: a 76px label
+     column beside chips that then wrapped two and three deep. Label
+     over chips, and the chips themselves tighten. */
+  .explorer__control {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
   .explorer__control-label { width: 100%; }
+  .explorer__chip { padding: 5px 10px; font-size: 11px; }
+  .explorer__chips { gap: 5px; }
   .explorer-leaf { padding-left: 24px; }
   .explorer-leaf__name { width: 132px; }
   .explorer-leaf__acc, .explorer-leaf__size { display: none; }
@@ -12181,6 +12235,33 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 10px;
   margin-bottom: 44px;
+}
+
+/* ── 棚 — the shelves ──────────────────────────────────────
+   Seven cases of roughly five items each. At 360px the grid is one
+   column, so the storehouse became thirty-five stacked tiles — some
+   three and a half thousand pixels of scrolling, which is why it felt
+   like it had no end.
+
+   Each case becomes a shelf you slide along instead. The page is then
+   seven shelf-heights tall rather than thirty-five tile-heights, and
+   it is what a 蔵 actually is. The tile width is deliberately under a
+   full column so the next item always peeks in at the edge — a shelf
+   that looks full is a shelf you know to push. */
+@media (max-width: 820px) {
+  .cos-grid {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    margin-bottom: 26px;
+    padding-bottom: 8px;
+  }
+  .cos-grid > * {
+    flex: 0 0 min(78%, 260px);
+    scroll-snap-align: start;
+  }
 }
 
 .cos-tile {
