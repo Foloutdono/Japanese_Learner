@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
-import { playSfx, playGateChime } from '../../lib/audio'
+import { playFareTick, playFlapClatter, playStationMelody } from '../../lib/audio'
 import { rewardTier, rankFor } from '../../domain/rewardTier'
 import { SplitFlap } from './SplitFlap'
 
@@ -29,7 +29,7 @@ import { SplitFlap } from './SplitFlap'
 // The kabuki is not gone, only moved: the daruma hall's 満願 ceremony
 // is genuinely theatrical and still uses StageFootlights, which now
 // lives in its own module.
-const FARE_MS  = 1500
+const FARE_MS  = 1900
 const LEVEL_MS = 2600
 
 // The shell reads the reward; the scene below plays it. Keyed on the
@@ -45,13 +45,33 @@ export function XpToast({ toast, onDone }) {
 function RewardScene({ toast, onDone }) {
   const { t } = useLang()
   const [leaving, setLeaving] = useState(false)
+  // StrictMode runs effects twice in development, and playing a sound
+  // is not idempotent — every reward fired its audio as an audible
+  // flam. The timers below are safe by construction (cleanup clears
+  // them), but this one call is immediate, so it needs the guard.
+  const sounded = useRef(false)
 
   const tier = rewardTier(toast)
 
   useEffect(() => {
-    if (tier === 'rank') playSfx('level-up')
-    else if (tier === 'level') playSfx('level-up')
-    else playGateChime()
+    // Each tier gets its own voice. They used to share one sample, so
+    // the rarest event in the app and a routine level sounded
+    // identical — and the fare tick borrowed the ticket gate's chime,
+    // which already means something else entirely.
+    //
+    //   fare   its own soft blip. Not playUi('click') — that points at
+    //          /sounds/ui/click.mp3, which does not exist, so the tick
+    //          was silent; and not the gate's chime, which already
+    //          means "your pass was read".
+    //   level  the board turning over — filtered noise, because a
+    //          split-flap drum is plastic hitting a stop, not a tone.
+    //   rank   発車メロディ, the platform melody. Four times ever.
+    if (!sounded.current) {
+      sounded.current = true
+      if (tier === 'rank') playStationMelody()
+      else if (tier === 'level') playFlapClatter()
+      else playFareTick()
+    }
 
     // A promotion waits to be dismissed; the other two are on a clock.
     if (tier === 'rank') return
@@ -69,12 +89,13 @@ function RewardScene({ toast, onDone }) {
   if (tier === 'fare') {
     return createPortal(
       <div
-        className={`fare-tick${leaving ? ' fare-tick--leaving' : ''}`}
+        className={`fare-tick fare-tick--q${toast.quality ?? 5}${leaving ? ' fare-tick--leaving' : ''}`}
         aria-live="polite"
         onAnimationEnd={onExitEnd('fare-tick-out')}
       >
-        <span className="fare-tick__label">XP</span>
+        <span className="fare-tick__plus" aria-hidden="true">+</span>
         <SplitFlap from={0} to={toast.amount} label={`+${toast.amount} XP`} />
+        <span className="fare-tick__label">XP</span>
       </div>,
       document.body,
     )

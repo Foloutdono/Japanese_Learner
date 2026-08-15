@@ -56,6 +56,24 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // The reward preview renders synthetic props and touches no user
+  // data, so it is deliberately outside the auth gate: requiring a
+  // sign-in to look at a reward would mean the one tool built to avoid
+  // levelling an account needs an account. Dev-only, like the route
+  // itself — import.meta.env.DEV is false in a production build, so
+  // this whole branch is dropped.
+  if (import.meta.env.DEV && window.location.pathname === '/dev/rewards') {
+    return (
+      <LangProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/dev/rewards" element={<RewardsPreview />} />
+          </Routes>
+        </BrowserRouter>
+      </LangProvider>
+    )
+  }
+
   if (session === undefined) {
     return (
       <LangProvider>

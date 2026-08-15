@@ -18,6 +18,9 @@ import { isMuted } from './settings'
 // public/sounds/README.md.
 const GATE_CHIME = '/sounds/ui/gate-chime.mp3'
 const DOOR_CHIME = '/sounds/ui/door-chime.mp3'
+const FARE_TICK = '/sounds/ui/fare-tick.mp3'
+const FLAP_CLATTER = '/sounds/ui/flap-clatter.mp3'
+const STATION_MELODY = '/sounds/ui/station-melody.mp3'
 
 // getBuffer deliberately evicts failed fetches so a dropped request
 // can retry — correct in general, wrong for an asset that is *known*
@@ -38,6 +41,28 @@ const GATE_BLIPS = [
 const DOOR_BLIPS = [
   { freq: 1318.5, at: 0,    dur: 0.16, peak: 0.34 },
   { freq: 987.8,  at: 0.15, dur: 0.30, peak: 0.34 },
+]
+
+// A single soft blip for XP earned. Deliberately not the gate's
+// chime, which already means "your pass was read", and deliberately
+// not playUi('click') — that resolves to /sounds/ui/click.mp3, a file
+// that does not exist, so the tick was silent. A reward you cannot
+// hear is not a louder reward.
+const FARE_BLIPS = [
+  { freq: 1174.7, at: 0, dur: 0.11, peak: 0.24 },  // D6
+]
+
+// 発車メロディ — the short melody a Japanese platform plays as a train
+// is about to leave. This is a five-note figure in a pentatonic scale
+// (D-E-G-A-B, the yo scale), rising then settling, and it plays when
+// the pass is re-issued: four times in the whole progression, so it is
+// the only sound here allowed to take a second and a half.
+const MELODY_NOTES = [
+  { freq: 587.3,  at: 0,    dur: 0.30, peak: 0.30 },  // D5
+  { freq: 659.3,  at: 0.15, dur: 0.30, peak: 0.30 },  // E5
+  { freq: 880.0,  at: 0.30, dur: 0.34, peak: 0.32 },  // A5
+  { freq: 987.8,  at: 0.48, dur: 0.40, peak: 0.30 },  // B5
+  { freq: 783.99, at: 0.70, dur: 0.75, peak: 0.26 },  // G5, the settle
 ]
 
 /**
@@ -73,6 +98,55 @@ function synthesise(ctx, blips) {
   }
 }
 
+// ── The board turning over ────────────────────────────────
+// A split-flap drum is not a tone at all, it is a piece of plastic
+// hitting a stop — so this is filtered noise, not an oscillator: a run
+// of very short bandpassed bursts, accelerating slightly and falling
+// in level, the way a real board sounds when one drum spins down.
+//
+// A tone here would have been wrong twice over: it would not sound
+// like the object on screen, and it would have collided with the two
+// chimes, which are tones and mean something else.
+function synthesiseClatter(ctx) {
+  const bus = busFor('ui')
+  if (!bus) return
+
+  const now = ctx.currentTime
+  // Shrinking gaps: the drum slows as it settles, so the ticks bunch
+  // up rather than marking time.
+  const ticks = [0, 0.055, 0.10, 0.14, 0.173, 0.20, 0.222, 0.24]
+
+  // One short noise buffer, reused by every tick.
+  const frames = Math.floor(ctx.sampleRate * 0.03)
+  const buffer = ctx.createBuffer(1, frames, ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < frames; i++) {
+    // Decaying white noise — the tail is what stops each tick reading
+    // as a click.
+    data[i] = (Math.random() * 2 - 1) * (1 - i / frames) ** 2
+  }
+
+  ticks.forEach((at, i) => {
+    const src = ctx.createBufferSource()
+    src.buffer = buffer
+
+    const band = ctx.createBiquadFilter()
+    band.type = 'bandpass'
+    // Each drum lands a little lower than the last as it loses energy.
+    band.frequency.setValueAtTime(2600 - i * 130, now + at)
+    band.Q.setValueAtTime(1.6, now + at)
+
+    const env = ctx.createGain()
+    const peak = 0.34 * (1 - i / ticks.length) + 0.06
+    env.gain.setValueAtTime(peak, now + at)
+    env.gain.exponentialRampToValueAtTime(0.0001, now + at + 0.03)
+
+    src.connect(band); band.connect(env); env.connect(bus)
+    src.start(now + at)
+    src.onended = () => { env.disconnect(); band.disconnect(); src.disconnect() }
+  })
+}
+
 function playChime(path, name, blips) {
   if (isMuted()) return
   const ctx = getAudioContext()
@@ -97,4 +171,31 @@ export function playGateChime() {
 /** The doors are about to open. */
 export function playDoorChime() {
   playChime(DOOR_CHIME, 'door-chime', DOOR_BLIPS)
+}
+
+/** XP earned, no level. The quiet one. */
+export function playFareTick() {
+  playChime(FARE_TICK, 'fare-tick', FARE_BLIPS)
+}
+
+/** 進級 — the board turning your level over. */
+export function playFlapClatter() {
+  if (isMuted()) return
+  const ctx = getAudioContext()
+  if (!ctx) return
+
+  if (assetMissing.has(FLAP_CLATTER)) { synthesiseClatter(ctx); return }
+
+  getBuffer(FLAP_CLATTER)
+    .then(buffer => {
+      if (isMuted()) return
+      if (buffer) playBuffer(buffer, 'ui', 'flap-clatter')
+      else { assetMissing.add(FLAP_CLATTER); synthesiseClatter(ctx) }
+    })
+    .catch(() => { assetMissing.add(FLAP_CLATTER); synthesiseClatter(ctx) })
+}
+
+/** 再発行 — the pass re-issued. The one that gets a melody. */
+export function playStationMelody() {
+  playChime(STATION_MELODY, 'station-melody', MELODY_NOTES)
 }

@@ -13172,11 +13172,15 @@ html { scrollbar-gutter: stable; }
 }
 
 /* ══ 改札 — the fare tick ═══════════════════════════════════
-   XP with no level change, which is nearly every review. A gate
-   deducting a fare: one small board, top right, gone in a second and
-   a half, nothing to dismiss. */
+   XP with no level change, which is nearly every review. It has to
+   stay the quietest of the three — it fires constantly — but the
+   first pass overcorrected from the old kabuki toast and made it so
+   discreet it read as chrome. Bigger drums, a leading +, the quality
+   accent along the top edge, and one pulse on arrival: noticed
+   without being addressed. */
 .fare-tick {
-  --flap-size: 30px;
+  --flap-size: 40px;
+  --fare-accent: var(--accent2);
   position: fixed;
   /* Clear of the top bar rather than on top of it — at 14px it sat
      over the 蔵 button. Below the bar it also lands directly under
@@ -13186,24 +13190,54 @@ html { scrollbar-gutter: stable; }
   z-index: 240;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 11px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
-  animation: fare-tick-in 260ms cubic-bezier(0.22, 0.68, 0.32, 1);
+  gap: 7px;
+  padding: 10px 14px 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg-panel) 95%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fare-accent) 40%, transparent);
+  /* The accent reads along the top edge and in the glow, so the
+     quality of the answer is legible at a glance without the tick
+     having to grow or linger. */
+  box-shadow:
+    inset 0 2px 0 var(--fare-accent),
+    0 10px 26px rgba(0, 0, 0, 0.36),
+    0 0 0 0 color-mix(in srgb, var(--fare-accent) 55%, transparent);
+  animation:
+    fare-tick-in 300ms cubic-bezier(0.2, 1.5, 0.4, 1),
+    fare-tick-pulse 620ms ease-out 120ms;
+}
+.fare-tick__plus {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--fare-accent);
 }
 .fare-tick__label {
   font-family: var(--font-display);
-  font-size: 0.58rem;
+  font-size: 0.64rem;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   color: var(--text-on-panel-soft);
 }
-.fare-tick--leaving { animation: fare-tick-out 240ms ease-in forwards; }
-@keyframes fare-tick-in  { from { opacity: 0; transform: translateY(-10px); } }
-@keyframes fare-tick-out { to   { opacity: 0; transform: translateY(-8px); } }
+
+/* Same per-quality accents the rating bar uses, so a scraped q3 and a
+   clean q5 are not celebrated identically. Below q3 the answer was
+   wrong and the tick stays neutral. */
+.fare-tick--q3 { --fare-accent: var(--accent2); }
+.fare-tick--q4 { --fare-accent: var(--accent6); }
+.fare-tick--q5 { --fare-accent: var(--success); }
+
+.fare-tick--leaving { animation: fare-tick-out 260ms ease-in forwards; }
+@keyframes fare-tick-in  { from { opacity: 0; transform: translateY(-14px) scale(0.9); } }
+@keyframes fare-tick-out { to   { opacity: 0; transform: translateY(-10px); } }
+/* One ring outward, not a loop. */
+@keyframes fare-tick-pulse {
+  from { box-shadow: inset 0 2px 0 var(--fare-accent), 0 10px 26px rgba(0,0,0,0.36),
+                     0 0 0 0 color-mix(in srgb, var(--fare-accent) 55%, transparent); }
+  to   { box-shadow: inset 0 2px 0 var(--fare-accent), 0 10px 26px rgba(0,0,0,0.36),
+                     0 0 0 14px color-mix(in srgb, var(--fare-accent) 0%, transparent); }
+}
 
 /* ══ 進級 — the level board ═════════════════════════════════
    The number turned over. Centred and unmissable, but on a clock: it
