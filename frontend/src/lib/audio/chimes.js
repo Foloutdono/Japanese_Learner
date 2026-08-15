@@ -18,9 +18,12 @@ import { isMuted } from './settings'
 // public/sounds/README.md.
 const GATE_CHIME = '/sounds/ui/gate-chime.mp3'
 const DOOR_CHIME = '/sounds/ui/door-chime.mp3'
+const CLICK = '/sounds/ui/click.mp3'
+const TOGGLE = '/sounds/ui/toggle.mp3'
 const FARE_TICK = '/sounds/ui/fare-tick.mp3'
 const FLAP_CLATTER = '/sounds/ui/flap-clatter.mp3'
 const STATION_MELODY = '/sounds/ui/station-melody.mp3'
+const ARRIVAL = '/sounds/ui/arrival.mp3'
 
 // getBuffer deliberately evicts failed fetches so a dropped request
 // can retry — correct in general, wrong for an asset that is *known*
@@ -43,6 +46,27 @@ const DOOR_BLIPS = [
   { freq: 987.8,  at: 0.15, dur: 0.30, peak: 0.34 },
 ]
 
+// ── The generic click ─────────────────────────────────────
+// playClick() is the most-used sound in the app — 31 call sites, from
+// the back button to the rating bar to the storehouse — and it has
+// been silent for as long as it has existed, because
+// /sounds/ui/click.mp3 was referenced and never added. Worse than
+// silent, actually: getBuffer evicts failed fetches so a retry is
+// possible, so every one of those 31 taps also fired a 404.
+//
+// Very short and very quiet. At this frequency the difference between
+// "present" and "irritating" is about thirty milliseconds.
+const CLICK_BLIPS = [
+  { freq: 1567.98, at: 0, dur: 0.032, peak: 0.16 },  // G6
+]
+
+// A toggle is a state change, not a press, so it says so: two steps,
+// drier and lower than the click.
+const TOGGLE_BLIPS = [
+  { freq: 987.77,  at: 0,     dur: 0.030, peak: 0.15 },  // B5
+  { freq: 1318.51, at: 0.038, dur: 0.045, peak: 0.15 },  // E6
+]
+
 // A single soft blip for XP earned. Deliberately not the gate's
 // chime, which already means "your pass was read", and deliberately
 // not playUi('click') — that resolves to /sounds/ui/click.mp3, a file
@@ -50,6 +74,15 @@ const DOOR_BLIPS = [
 // hear is not a louder reward.
 const FARE_BLIPS = [
   { freq: 1174.7, at: 0, dur: 0.11, peak: 0.24 },  // D6
+]
+
+// 到着 — arriving. Played when a session finishes, which in this app
+// is the end of a journey rather than a victory: a pair that steps
+// down and settles instead of climbing. Deliberately unlike the
+// departure melody, which rises.
+const ARRIVAL_NOTES = [
+  { freq: 783.99, at: 0,    dur: 0.26, peak: 0.26 },  // G5
+  { freq: 587.33, at: 0.17, dur: 0.55, peak: 0.24 },  // D5
 ]
 
 // 発車メロディ — the short melody a Japanese platform plays as a train
@@ -173,6 +206,22 @@ export function playDoorChime() {
   playChime(DOOR_CHIME, 'door-chime', DOOR_BLIPS)
 }
 
+/**
+ * The app's generic click and toggle.
+ *
+ * These deliberately shadow playback.js's versions of the same names —
+ * index.js exports these instead — so all 31 call sites gain a working
+ * sound without a single one of them being edited, and still upgrade
+ * to a real recording the moment /sounds/ui/click.mp3 exists.
+ */
+export function playClick() {
+  playChime(CLICK, 'click', CLICK_BLIPS)
+}
+
+export function playToggle() {
+  playChime(TOGGLE, 'toggle', TOGGLE_BLIPS)
+}
+
 /** XP earned, no level. The quiet one. */
 export function playFareTick() {
   playChime(FARE_TICK, 'fare-tick', FARE_BLIPS)
@@ -193,6 +242,11 @@ export function playFlapClatter() {
       else { assetMissing.add(FLAP_CLATTER); synthesiseClatter(ctx) }
     })
     .catch(() => { assetMissing.add(FLAP_CLATTER); synthesiseClatter(ctx) })
+}
+
+/** 到着 — a session finished. */
+export function playArrival() {
+  playChime(ARRIVAL, 'arrival', ARRIVAL_NOTES)
 }
 
 /** 再発行 — the pass re-issued. The one that gets a melody. */

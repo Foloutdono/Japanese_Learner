@@ -5,6 +5,7 @@ import {
   groupRows, sortItems, sortLabel, sortArrow, sumRows, SORTS,
 } from '../../domain/statsModel'
 import { BoltIcon, ChevronIcon } from '../ui/Icons'
+import { playToggle } from '../../lib/audio'
 
 // ── 一覧 — the Explorer ────────────────────────────────────
 // The old stats screen printed the payload: four sections, eighteen
@@ -114,7 +115,7 @@ function ChipRow({ label, value, options, onChange }) {
           <button
             key={o.key}
             type="button"
-            onClick={() => onChange(o.key)}
+            onClick={() => { playToggle(); onChange(o.key) }}
             className={`explorer__chip${o.key === value ? ' explorer__chip--on' : ''}`}
           >
             {o.label}

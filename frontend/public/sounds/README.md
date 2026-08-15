@@ -24,22 +24,25 @@ and each has its own volume slider on the Settings screen.
 
 ---
 
-## Missing — referenced by code, no file on disk
+## All synthesised today
 
-These two are the priority, because they are not hypothetical: the code
-calls them today, gets nothing, and re-requests them every time
-(`getBuffer` deliberately evicts failed fetches so a dropped request can
-retry, which for a permanently absent file means a 404 per call).
+Nothing in this list is a blocker: every sound below is generated in
+`src/lib/audio/chimes.js` and works right now. Each one looks for its
+file first, so dropping a real recording in replaces the synthesised
+version automatically with no code change.
 
-| File | Called by | Used at | Notes |
-|---|---|---|---|
-| `ui/click.mp3` | `playClick()` | **31 call sites** | The app's generic button click. Every back button, every rating press, the quick-change drawer, the daruma hall. Currently the single most-used sound in the app and it does not exist. |
-| `ui/toggle.mp3` | `playToggle()` | 2 call sites | On/off switches in Settings. Should read as a state change, not a press — a touch drier and shorter than the click. |
+`ui/click.mp3` was the urgent one and is no longer urgent. It is
+referenced from **31 call sites** — the back button, the rating bar,
+the quiz rows, the storehouse, the daruma hall — and had never
+existed, so all 31 were silent *and* fired a 404 apiece (getBuffer
+evicts failed fetches so a retry stays possible, which for a
+permanently absent file means one request per tap). It now falls back
+to a synthesised tick.
 
-Keep both **very** short (40–90ms) and quiet. A click that is even
-slightly too long or too present becomes exhausting at 31 call sites.
-
----
+| File | Where | Notes |
+|---|---|---|
+| `ui/click.mp3` | 31 sites | The generic press. Keep it **very** short and quiet — 30–60ms. At this frequency the gap between "present" and "irritating" is about thirty milliseconds. Synthesised now as a single G6. |
+| `ui/toggle.mp3` | settings switches | A state change, not a press: two steps, drier and lower than the click. Synthesised now as B5 → E6. |
 
 ## Wanted — the station's own sounds
 
@@ -58,6 +61,7 @@ board"). If you generate them separately, generate them as a pair.
 | `ui/door-chime.mp3` | ピンポーン, just before the train doors part (`TrainDoor`, 170ms in). ~400–600ms — heard standing still rather than mid-stride, so softer and rounder than the gate's. Synthesised now as E6 → B5. |
 | `ui/fare-tick.mp3` | XP earned, no level (`XpToast`, fare tier). The most frequent sound in the app after the click — fires on nearly every review, so it has to be **very** short and quiet: ~80–140ms, one soft blip. It must not be confusable with the gate chime, which already means "your pass was read". Synthesised now as a single D6. |
 | `ui/flap-clatter.mp3` | 進級, the board turning your level over (`XpToast`, level tier). ~250–350ms. **Not a tone** — a split-flap drum is plastic hitting a stop, so this wants a run of short mechanical ticks that bunch up as the drum settles. Synthesised now as eight bandpassed noise bursts falling from 2.6kHz. |
+| `ui/arrival.mp3` | 到着, a study session finished (`DoneMessage`). ~700–900ms. This is the end of a journey rather than a victory, so it steps **down** and settles — deliberately the inverse of the departure melody below. Synthesised now as G5 → D5. |
 | `ui/station-melody.mp3` | 発車メロディ, the pass re-issued (`XpToast`, rank tier). This one fires **four times in the whole progression**, so it is the only sound here that can afford ~1.5s and a real tune. A short pentatonic figure that rises and settles. Synthesised now as D5-E5-A5-B5-G5 in the yo scale. |
 
 Optional, only if either cutscene wants more body:

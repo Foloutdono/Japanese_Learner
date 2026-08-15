@@ -22,7 +22,14 @@ import './mixer'
 
 export { SOUND_CATEGORIES, toggleMute, useMuted, setVolume, useVolumes } from './settings'
 export { preload } from './context'
-export { playKana, playSfx, playUi, playClick, playToggle, playAnnouncement } from './playback'
-export { playGateChime, playDoorChime, playFareTick, playFlapClatter, playStationMelody } from './chimes'
+// playClick/playToggle come from chimes, not playback: those two
+// resolve to files that do not exist, so playback's versions are
+// silent. See the note in chimes.js.
+export { playKana, playSfx, playUi, playAnnouncement } from './playback'
+export {
+  playClick, playToggle,
+  playGateChime, playDoorChime, playFareTick, playFlapClatter, playStationMelody,
+  playArrival,
+} from './chimes'
 export { startAmbiance, stopAmbiance } from './ambiance'
 export { speakJapanese } from './speech'

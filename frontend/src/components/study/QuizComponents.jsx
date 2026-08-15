@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLang } from '../../LangContext'
-import { playClick } from '../../lib/audio'
+import { playClick, playArrival } from '../../lib/audio'
 import { Readings, ReadingGroup } from './Readings'
 import { glossParts } from './gloss'
 import { Loading } from '../ui/Loading'
@@ -209,6 +209,17 @@ export function ModeToggle({ mode, onChange, modes }) {
 // ── Done message ──────────────────────────────────────────
 export function DoneMessage({ onBack }) {
   const { t } = useLang()
+
+  // The end of a session had no sound at all — the one moment in a
+  // study run that is unambiguously an achievement. Guarded against
+  // StrictMode's double effect, which would otherwise flam it.
+  const sounded = useRef(false)
+  useEffect(() => {
+    if (sounded.current) return
+    sounded.current = true
+    playArrival()
+  }, [])
+
   return (
     <div className="quiz-done">
       {/* The message and the button are two rows, not two <br/>s. In a

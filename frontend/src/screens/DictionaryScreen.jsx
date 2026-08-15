@@ -4,6 +4,7 @@ import { StationHeader } from '../components/station/StationHeader'
 import { TopBar } from '../components/ui/TopBar'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
+import { playUi } from '../lib/audio'
 import { splitReadingTokens } from '../components/study/Readings'
 import { firstGloss } from '../components/study/gloss'
 import {
@@ -152,6 +153,9 @@ export default function DictionaryScreen({ session }) {
 
 	function switchCategory(cat) {
 		if (cat === category) return
+		// Same sound the study screens use for choosing a mode — this
+		// is the same kind of act, so it should not have its own.
+		playUi('click-mode-selection')
 		setCategory(cat)
 		setSelected(null)
 		setPage(0)
@@ -625,7 +629,7 @@ function ResultsSection({
 							{results.map(entry => (
 								<div
 									key={entryKey(entry)}
-									onClick={() => setSelected(entry)}
+									onClick={() => { playUi('click-menu'); setSelected(entry) }}
 									style={{ '--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)' }}
 									className={`dict-entry-card${selected && entryKey(selected) === entryKey(entry) ? ' dict-entry-card--selected' : ''}`}
 								>
@@ -666,7 +670,7 @@ function ResultsSection({
 
 					{selected && (
 						<DetailDock
-							entry={selected} onClose={() => setSelected(null)}
+							entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 							onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
 						/>
 					)}
@@ -743,7 +747,7 @@ function SyllabaryTable({ rows, jp, title, byGroup, vowelHeads, tail, selected, 
 									<button
 										key={v}
 										type="button"
-										onClick={() => setSelected(entry)}
+										onClick={() => { playUi('click-menu'); setSelected(entry) }}
 										className={`syllabary-cell syllabary-cell--kana${isSelected ? ' syllabary-cell--selected' : ''}`}
 									>
 										<span className="syllabary-cell__char">{entry.kana}</span>
@@ -843,7 +847,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 
 			{selected && (
 				<DetailDock
-					entry={selected} onClose={() => setSelected(null)}
+					entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 					onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
 				/>
 			)}
