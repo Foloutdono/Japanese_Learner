@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { getNavLinks } from '../config/navLinks'
 import { useProfileSummary } from '../stores/profileSummary'
 import { levelTitle } from '../domain/levelTitle'
 import { playAnnouncement, startAmbiance, stopAmbiance } from '../lib/audio'
-import { TicketGate } from '../components/station/TicketGate'
-import { HOME_STATION, stationFor } from '../config/stations'
+import { beginDeparture } from '../stores/departure'
+import { HOME_STATION } from '../config/stations'
 import { DepartureBoard } from '../components/station/DepartureBoard'
 import { useStationClock } from '../components/station/useStationClock'
 import { FlameIcon, GearIcon } from '../components/ui/Icons'
@@ -130,11 +130,6 @@ export default function HomeScreen() {
 
   const sections = getNavLinks(t).filter(card => card.path !== '/')
 
-  // The board row being departed for, or null. Holding the section
-  // rather than a boolean keeps the gate's colour, name and code
-  // available without a second lookup.
-  const [departing, setDeparting] = useState(null)
-
   // ── Departing ─────────────────────────────────────────────
   // The announcement has always played here. What it lacked was
   // anywhere to land: navigation happened on this same frame, so the
@@ -146,9 +141,13 @@ export default function HomeScreen() {
   // so the announcement now runs across the gate and finishes on the
   // platform, which is what it does in a real station: the voice
   // keeps going while you walk through.
+  //
+  // Published to a store rather than kept here, because the gate is
+  // mounted beside <Routes/> in App: rendered from this screen it
+  // would be unmounted by its own navigation. See stores/departure.
   function depart(section) {
     playAnnouncement(section.path.slice(1))
-    setDeparting(section)
+    beginDeparture(section)
   }
 
   return (
@@ -196,19 +195,6 @@ export default function HomeScreen() {
           <span className="station__notice-text">{t.tip}</span>
         </span>
       </footer>
-
-      {/* Keyed on the path so a second departure — possible if the
-          first is skipped mid-flight — mounts a fresh gate rather
-          than reusing one whose animations have already run. */}
-      {departing && (
-        <TicketGate
-          key={departing.path}
-          section={departing}
-          station={stationFor(departing.path)}
-          onNavigate={() => navigate(departing.path)}
-          onDone={() => setDeparting(null)}
-        />
-      )}
     </div>
   )
 }

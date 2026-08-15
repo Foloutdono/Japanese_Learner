@@ -28,9 +28,15 @@ import { playGateChime } from '../../lib/audio'
 // at 600ms, while the wipe is opaque, so the destination is already
 // mounted and running its own arrive animation by the time the gate
 // fades off it.
-const CONTACT_MS  = 300   // card reaches the reader; chime, lamp turns
-const NAVIGATE_MS = 600   // wipe is opaque — swap the screen behind it
-const DONE_MS     = 780   // gate leaves
+// One dial for the whole cutscene. The CSS reads it as --gate-x and
+// multiplies every duration and delay by it, so the timers here and
+// the animations there cannot drift apart — raise this and the card,
+// the flaps, the wipe and the navigation all stretch together.
+const SPEED = 1.4
+
+const CONTACT_MS  = 300 * SPEED   // card meets the reader; chime, lamp turns
+const NAVIGATE_MS = 600 * SPEED   // wipe is opaque — swap the screen behind it
+const DONE_MS     = 780 * SPEED   // gate leaves
 
 function prefersReducedMotion() {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
@@ -98,7 +104,7 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
   return createPortal(
     <div
       className={`gate gate--${phase}`}
-      style={{ '--line-color': section.color }}
+      style={{ '--line-color': section.color, '--gate-x': SPEED }}
       aria-hidden="true"
     >
       <div className="gate__scrim" />

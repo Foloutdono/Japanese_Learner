@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { DepartureGate } from './components/station/DepartureGate'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { LangProvider } from './LangContext'
@@ -101,6 +102,12 @@ export default function App() {
           <Route path="/daruma" element={<DarumaScreen session={session} />} />
           <Route path="/storehouse" element={<StorehouseScreen session={session} />} />
         </Routes>
+
+        {/* 改札 — the departure cutscene. Beside <Routes/>, never
+            inside it: the gate has to keep playing across the very
+            navigation it triggers, and a screen that renders it is
+            unmounted by that navigation. See stores/departure. */}
+        <DepartureGate />
       </BrowserRouter>
     </LangProvider>
   )
