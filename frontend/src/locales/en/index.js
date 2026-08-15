@@ -914,6 +914,7 @@ const storehouseCatalogue = {
     backdrop: '背景',
     flourish: '彩',
     brush:    '筆',
+    mcq:      '番線',
   },
   cosmeticSlot: {
     paper:    'Paper',
@@ -923,6 +924,7 @@ const storehouseCatalogue = {
     backdrop: 'Backdrop',
     flourish: 'Flourish',
     brush:    'Brush',
+    mcq:      'MCQ rows',
   },
 
   // One formatter per unlock metric. `requirementText` (see

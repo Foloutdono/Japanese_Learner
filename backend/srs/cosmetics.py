@@ -19,6 +19,7 @@ answers "how much have you shown up". They can and should disagree.
     背景 backdrop the room you're studying in — behind everything
     祝  flourish what a reward looks like when it fires
     筆  brush    the ink you write kanji with, in the drawing pad
+    番線 mcq      the answer rows you actually spend the session reading
 
 The last three are new, and they were chosen because between them they
 cover the three moments the older four never touched: the space around
@@ -83,7 +84,7 @@ def rank_for(mastered: int) -> dict:
 # Order matters: this is the order the storehouse lists its cases in,
 # and it runs outward from the card you're looking at to the room
 # you're sitting in.
-SLOTS = ("paper", "ring", "seal", "title", "backdrop", "flourish", "brush")
+SLOTS = ("paper", "ring", "seal", "title", "backdrop", "flourish", "brush", "mcq")
 
 # Ordered worst → best, purely for presentation weight (the storehouse
 # sorts by it and 極 items get the gold treatment). Same four-tier
@@ -134,6 +135,10 @@ PAPERS = [
     _c("paper_yozora",      "paper", "夜空紙", "kiwami", "shelf_kiwami", 3),
     _c("paper_kinpaku",     "paper", "金箔",   "kiwami", "rank_index", SHODAN_INDEX),
     _c("paper_rakusui",     "paper", "落水紙", "kiwami", "mastered_total", 2000),
+    # The station's own stock — the card as a ticket rather than a sheet.
+    _c("paper_kippu",       "paper", "切符",   "nami",   "reviews_total", 150),
+    _c("paper_koken",       "paper", "硬券",   "jou",    "study_days_week", 5),
+    _c("paper_teiki",       "paper", "定期券", "toku",   "streak_longest", 30),
 ]
 
 # 輪 — the ring drawn around your avatar.
@@ -151,6 +156,9 @@ RINGS = [
     _c("ring_kinrin",    "ring", "金輪",   "toku",   "level", 40),
     _c("ring_gesshin",   "ring", "月輪",   "toku",   "night_today", 1),
     _c("ring_hinode",    "ring", "日輪",   "kiwami", "rank_index", 14),
+    # 環状線 — a loop line is a ring, which is the joke and also the point.
+    _c("ring_kanjosen",  "ring", "環状線", "jou",    "study_days_week", 6),
+    _c("ring_rosenzu",   "ring", "路線図", "toku",   "categories_today", 5),
 ]
 
 # 印 — the hanko struck into every card's corner.
@@ -166,6 +174,10 @@ SEALS = [
     _c("seal_hakubun",  "seal", "白文",   "toku",   "perfect_run_lifetime", 100),
     _c("seal_tenkoku",  "seal", "篆刻",   "kiwami", "rank_index", 12),
     _c("seal_gyokuji",  "seal", "玉璽",   "kiwami", "rank_index", 15),
+    # 駅スタンプ — the commemorative stamp every station in Japan keeps
+    # at the gate, which is already exactly what this slot is.
+    _c("seal_ekistamp", "seal", "駅印",   "nami",   "reviews_total", 400),
+    _c("seal_kaisatsu", "seal", "改札印", "jou",    "study_days_week", 7),
 ]
 
 # 称号 — what you're called. Distinct from levelTitle.js's automatic
@@ -192,6 +204,8 @@ TITLES = [
     _c("title_meijin",     "title", "名人",       "kiwami", "rank_index", 17),
     _c("title_musou",      "title", "無双",       "kiwami", "streak_longest", 200),
     _c("title_daruma",     "title", "達磨",       "kiwami", "shelf_kiwami", 8),
+    _c("title_shashou",    "title", "車掌",       "nami",   "reviews_total", 250),
+    _c("title_ekicho",     "title", "駅長",       "toku",   "unlocked_count", 30),
 ]
 
 # 背景 — the room behind everything. Every one of these is a wash or a
@@ -210,6 +224,10 @@ BACKDROPS = [
     _c("backdrop_kasumi",    "backdrop", "霞",     "toku",   "shelf_count", 40),
     _c("backdrop_kinbyobu",  "backdrop", "金屏風", "kiwami", "rank_index", 14),
     _c("backdrop_amanogawa", "backdrop", "天の川", "kiwami", "reviews_total", 20000),
+    # The rooms this app is actually set in.
+    _c("backdrop_shanai",    "backdrop", "車内",   "nami",   "level", 12),
+    _c("backdrop_rosenzu",   "backdrop", "路線図", "jou",    "categories_today", 4),
+    _c("backdrop_koka",      "backdrop", "高架",   "toku",   "best_day_reviews", 220),
 ]
 
 # 祝 — what a reward looks like when it lands. The app's celebration is
@@ -242,7 +260,26 @@ BRUSHES = [
     _c("brush_nijimi",   "brush", "滲み",   "kiwami", "mastered_total", 1500),
 ]
 
-ALL = {c.id: c for c in (*PAPERS, *RINGS, *SEALS, *TITLES, *BACKDROPS, *FLOURISHES, *BRUSHES)}
+# 番線 — the answer rows. The one surface a session is genuinely spent
+# looking at: four rows, several hundred times a day. Every other slot
+# dresses something you glance at.
+#
+# These are the station's own furniture rather than more paper and ink,
+# because that is what the app is now — the home screen is a departure
+# board and the rows below are, structurally, exactly the same object.
+MCQS = [
+    _c("mcq_hyoji",    "mcq", "表示",   "nami"),                                   # default
+    _c("mcq_hassha",   "mcq", "発車標", "nami",   "reviews_total", 200),
+    _c("mcq_kippu",    "mcq", "切符",   "nami",   "level", 10),
+    _c("mcq_noriba",   "mcq", "のりば", "jou",    "mastered_total", 150),
+    _c("mcq_kaisatsu", "mcq", "改札",   "jou",    "perfect_run_lifetime", 60),
+    _c("mcq_koken",    "mcq", "硬券",   "jou",    "reviews_total", 2500),
+    _c("mcq_horo",     "mcq", "幌",     "toku",   "streak_longest", 45),
+    _c("mcq_tsurikawa", "mcq", "吊革",  "toku",   "best_day_reviews", 200),
+    _c("mcq_shinkansen", "mcq", "新幹線", "kiwami", "rank_index", 14),
+]
+
+ALL = {c.id: c for c in (*PAPERS, *RINGS, *SEALS, *TITLES, *BACKDROPS, *FLOURISHES, *BRUSHES, *MCQS)}
 BY_SLOT = {slot: [c for c in ALL.values() if c.slot == slot] for slot in SLOTS}
 
 # Everyone owns one item per slot from the start, so no slot can ever
@@ -255,6 +292,7 @@ DEFAULTS = {
     "backdrop": "backdrop_muji",
     "flourish": "flourish_tsuke",
     "brush":    "brush_sumi",
+    "mcq":      "mcq_hyoji",
 }
 
 # `unlocked_count` is the one predicate that depends on the others, so

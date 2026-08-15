@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom'
 import { useBoarding, endBoarding } from '../../stores/boarding'
 import { useLang } from '../../LangContext'
 import { sectionFor, stationFor } from '../../config/stations'
-import { playDoorChime } from '../../lib/audio'
+import { playDoorChime, playDoorSlide } from '../../lib/audio'
 
 // ── 扉 — the train door ────────────────────────────────────
 // The bookend to the ticket gate. The gate is leaving the concourse
@@ -56,6 +56,9 @@ function DoorScene({ commit, color, code }) {
 
     const at = (ms, fn) => timers.current.push(setTimeout(fn, ms))
     at(CHIME_MS, playDoorChime)
+    // Under the leaves for the whole of their travel — the chime only
+    // announces the move, and the move itself was silent.
+    at(OPEN_MS, playDoorSlide)
     at(COMMIT_MS, commitOnce)
     at(OPEN_MS, () => setPhase('open'))
     at(DONE_MS, () => { commitOnce(); endBoarding() })

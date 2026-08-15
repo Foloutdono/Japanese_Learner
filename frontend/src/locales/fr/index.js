@@ -898,6 +898,7 @@ const storehouseCatalogue = {
     backdrop: '背景',
     flourish: '彩',
     brush:    '筆',
+    mcq:      '番線',
   },
   cosmeticSlot: {
     paper:    'Papier',
@@ -907,6 +908,7 @@ const storehouseCatalogue = {
     backdrop: 'Décor',
     flourish: 'Fanfare',
     brush:    'Pinceau',
+    mcq:      'Rangées QCM',
   },
 
   cosmeticReq: {

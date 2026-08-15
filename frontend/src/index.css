@@ -294,12 +294,21 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, #root {
-  height: 100%;
   background: var(--bg-main);
   color: var(--text-primary);
   font-family: 'Segoe UI', system-ui, sans-serif;
   transition: background 0.2s ease, color 0.2s ease;
 }
+html, body { height: 100%; }
+
+/* min-height, not height. #root carries the backdrop (see 背景 near
+   the end of this file), and a background is clipped to its own
+   element's box however it is attached — so at `height: 100%` the
+   room was painted across exactly one screenful and stopped. Measured
+   on the storehouse: #root 800px, document 6565px. Everything below
+   the fold was bare --bg-main, which is the backdrop "disappearing"
+   on scroll. */
+#root { min-height: 100%; }
 
 button {
   cursor: pointer;
@@ -3385,6 +3394,13 @@ input:focus { border-color: var(--accent2); }
   text-align: left;
 }
 
+/* The 番線 cosmetic drives the four properties below. They are read
+   with inline fallbacks rather than re-declared here, and that is the
+   whole trick: a custom property declared on the element *shadows* the
+   inherited one, so `--mcq-bg: var(--surface)` on this rule silently
+   beat every `:root[data-mcq=...]` value and each material rendered
+   as the stock row. Only --mcq-color is declared locally, because the
+   correct/wrong states legitimately override it on the same element. */
 .mcq-row {
   --mcq-color: var(--accent);
   position: relative;
@@ -3394,9 +3410,10 @@ input:focus { border-color: var(--accent2); }
   width: 100%;
   max-height: 96px;
   padding: 18px;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: 6px;
+  background-color: var(--mcq-bg, var(--surface));
+  background-image: var(--mcq-img, none);
+  border: 1px solid var(--mcq-border, var(--surface-line));
+  border-radius: var(--mcq-radius, 6px);
   color: var(--text-primary);
   text-align: left;
   overflow: hidden;
@@ -13540,3 +13557,265 @@ html { scrollbar-gutter: stable; }
   color: var(--text-secondary);
 }
 .preview-table__rank { font-family: var(--font-jp); color: var(--text-primary); }
+
+/* ════════════════════════════════════════════════════════════
+   番線 — the answer rows
+   ════════════════════════════════════════════════════════════
+   The one surface a session is genuinely spent looking at: four rows,
+   several hundred times a day. Every other slot dresses something you
+   glance at, which is why this one is station furniture rather than
+   more paper and ink — the home screen is a departure board and these
+   rows are, structurally, the same object.
+
+   Same doubled-selector contract as every other material: the first
+   half dresses the live rows, the second dresses the case swatch. */
+:root[data-mcq="mcq_hyoji"], [data-mcq-preview="mcq_hyoji"] { --mcq-img: none; }
+
+/* 発車標 — the departure board. Sumi panel, amber rule under each row,
+   which is exactly how the home board draws its own. */
+:root[data-mcq="mcq_hassha"], [data-mcq-preview="mcq_hassha"] {
+  --mcq-bg: var(--bg-panel);
+  --mcq-border: color-mix(in srgb, var(--accent2) 34%, transparent);
+  --mcq-radius: 3px;
+  --mcq-ink: var(--text-on-panel);
+  --mcq-img: linear-gradient(180deg, transparent calc(100% - 2px),
+    color-mix(in srgb, var(--accent2) 55%, transparent) calc(100% - 2px));
+}
+
+/* 切符 — a paper ticket: soft stock, and the punched notch down the
+   left edge where the gate took it. */
+:root[data-mcq="mcq_kippu"], [data-mcq-preview="mcq_kippu"] {
+  --mcq-bg: color-mix(in srgb, var(--accent2) 7%, var(--surface));
+  --mcq-border: color-mix(in srgb, var(--accent2) 30%, transparent);
+  --mcq-radius: 4px;
+  --mcq-img:
+    radial-gradient(circle 5px at 0 50%, var(--bg-main) 96%, transparent),
+    radial-gradient(circle 5px at 100% 50%, var(--bg-main) 96%, transparent),
+    repeating-linear-gradient(90deg,
+      transparent 0 5px,
+      color-mix(in srgb, var(--accent2) 22%, transparent) 5px 7px);
+  --mcq-img-size: auto, auto, 100% 1px;
+  --mcq-img-pos: left center, right center, left bottom;
+  --mcq-img-repeat: no-repeat, no-repeat, repeat-x;
+}
+
+/* のりば — the platform sign. The line's colour as a solid bar down
+   the leading edge, the way a real 番線 marker carries it. */
+:root[data-mcq="mcq_noriba"], [data-mcq-preview="mcq_noriba"] {
+  --mcq-bg: var(--surface);
+  --mcq-border: var(--surface-line);
+  --mcq-radius: 2px;
+  --mcq-img: linear-gradient(90deg,
+    var(--mcq-color) 0 6px, transparent 6px);
+}
+
+/* 改札 — the gate. Brushed metal with the reader's green lamp along
+   the bottom edge. */
+:root[data-mcq="mcq_kaisatsu"], [data-mcq-preview="mcq_kaisatsu"] {
+  --mcq-bg: color-mix(in srgb, var(--text-primary) 5%, var(--surface));
+  --mcq-border: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  --mcq-radius: 5px;
+  --mcq-img:
+    repeating-linear-gradient(90deg,
+      color-mix(in srgb, var(--text-primary) 3%, transparent) 0 1px,
+      transparent 1px 4px),
+    linear-gradient(180deg, transparent calc(100% - 3px),
+      color-mix(in srgb, var(--success) 60%, transparent) calc(100% - 3px));
+}
+
+/* 硬券 — the old cardboard ticket: heavy stock, hard corners, and the
+   two rules a Japanese 硬券 is printed between. */
+:root[data-mcq="mcq_koken"], [data-mcq-preview="mcq_koken"] {
+  --mcq-bg: color-mix(in srgb, var(--accent6) 9%, var(--surface));
+  --mcq-border: color-mix(in srgb, var(--text-primary) 34%, transparent);
+  --mcq-radius: 0px;
+  --mcq-img:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--text-primary) 26%, transparent) 0 1px,
+      transparent 1px),
+    linear-gradient(0deg,
+      color-mix(in srgb, var(--text-primary) 26%, transparent) 0 1px,
+      transparent 1px);
+  --mcq-img-size: 100% 4px, 100% 4px;
+  --mcq-img-pos: left top, left bottom;
+  --mcq-img-repeat: no-repeat, no-repeat;
+}
+
+/* 幌 — the gangway bellows between two carriages: deep concertina
+   pleats, which is the most tactile shape on a train. */
+:root[data-mcq="mcq_horo"], [data-mcq-preview="mcq_horo"] {
+  --mcq-bg: color-mix(in srgb, var(--text-primary) 8%, var(--surface));
+  --mcq-border: color-mix(in srgb, var(--text-primary) 26%, transparent);
+  --mcq-radius: 8px;
+  --mcq-img: repeating-linear-gradient(90deg,
+    color-mix(in srgb, var(--text-primary) 11%, transparent) 0 2px,
+    transparent 2px 9px,
+    color-mix(in srgb, var(--bg-main) 40%, transparent) 9px 11px,
+    transparent 11px 18px);
+}
+
+/* 吊革 — the hanging strap. The loop and its stem, drawn once at the
+   right where a hand would reach it. */
+:root[data-mcq="mcq_tsurikawa"], [data-mcq-preview="mcq_tsurikawa"] {
+  --mcq-bg: var(--surface);
+  --mcq-border: color-mix(in srgb, var(--accent2) 40%, transparent);
+  --mcq-radius: 10px;
+  --mcq-img:
+    radial-gradient(circle 9px at calc(100% - 26px) -2px,
+      transparent 0 6px,
+      color-mix(in srgb, var(--accent2) 55%, transparent) 6px 8px,
+      transparent 8px),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--accent2) 40%, transparent) 0 6px,
+      transparent 6px);
+  --mcq-img-size: auto, 2px 8px;
+  --mcq-img-pos: right center, calc(100% - 26px) top;
+  --mcq-img-repeat: no-repeat, no-repeat;
+}
+
+/* 新幹線 — the livery: white flank, blue belt along the bottom. */
+:root[data-mcq="mcq_shinkansen"], [data-mcq-preview="mcq_shinkansen"] {
+  --mcq-bg: color-mix(in srgb, var(--bg-main) 55%, var(--surface));
+  --mcq-border: color-mix(in srgb, var(--line-vocab) 45%, transparent);
+  --mcq-radius: 14px;
+  --mcq-img:
+    linear-gradient(180deg, transparent calc(100% - 7px),
+      var(--line-vocab) calc(100% - 7px) calc(100% - 3px),
+      transparent calc(100% - 3px)),
+    linear-gradient(180deg,
+      color-mix(in srgb, #fff 22%, transparent) 0 40%, transparent 70%);
+}
+
+/* The extra background layers above need their own sizing, so the row
+   reads them the same way it reads the image itself. */
+.mcq-row {
+  background-size: var(--mcq-img-size, auto);
+  background-position: var(--mcq-img-pos, center);
+  background-repeat: var(--mcq-img-repeat, repeat);
+}
+/* Boards and gates are dark panels in both themes, so their text has
+   to come with them. */
+:root[data-mcq="mcq_hassha"] .mcq-row,
+:root[data-mcq="mcq_hassha"] .mcq-row__text { color: var(--mcq-ink, var(--text-primary)); }
+
+/* ── 切符 · 硬券 · 定期券 — the station's own paper ─────────
+   The card as a ticket rather than a sheet. */
+:root[data-paper="paper_kippu"], [data-paper-preview="paper_kippu"] {
+  --paper-tint: var(--accent2);
+  --paper-amt: 7%;
+  --paper-edge: var(--accent2);
+  --paper-img: repeating-linear-gradient(90deg,
+    transparent 0 6px,
+    color-mix(in srgb, var(--accent2) 10%, transparent) 6px 7px);
+}
+:root[data-paper="paper_koken"], [data-paper-preview="paper_koken"] {
+  --paper-tint: var(--accent6);
+  --paper-amt: 11%;
+  --paper-edge: var(--text-primary);
+  --paper-img: repeating-linear-gradient(0deg,
+    transparent 0 15px,
+    color-mix(in srgb, var(--text-primary) 7%, transparent) 15px 16px);
+}
+:root[data-paper="paper_teiki"], [data-paper-preview="paper_teiki"] {
+  --paper-tint: var(--pass-ink);
+  --paper-amt: 14%;
+  --paper-edge: var(--pass-ink);
+  --paper-img:
+    linear-gradient(122deg,
+      color-mix(in srgb, var(--pass-ink) 16%, transparent) 0%,
+      transparent 58%),
+    repeating-linear-gradient(90deg,
+      transparent 0 22px,
+      color-mix(in srgb, var(--pass-ink) 8%, transparent) 22px 23px);
+}
+
+/* ── 環状線 · 路線図 — the ring as a line ──────────────────── */
+:root[data-ring="ring_kanjosen"], [data-ring-preview="ring_kanjosen"] {
+  --ring-stroke: var(--line-grammar);
+  --ring-width: 5;
+  --ring-dash: none;
+  --ring-cap: butt;
+}
+:root[data-ring="ring_rosenzu"], [data-ring-preview="ring_rosenzu"] {
+  --ring-stroke: var(--line-kanji);
+  --ring-width: 4;
+  --ring-dash: 10 5;
+  --ring-cap: butt;
+}
+
+/* ── 駅印 · 改札印 — the stamp at the gate ──────────────────
+   Every station in Japan keeps a commemorative stamp by the barrier,
+   which is already exactly what this slot is. */
+:root[data-seal="seal_ekistamp"], [data-seal-preview="seal_ekistamp"] {
+  --seal-color: var(--line-jisho);
+  --seal-shape: 6px;
+  --seal-border: 2px;
+}
+:root[data-seal="seal_kaisatsu"], [data-seal-preview="seal_kaisatsu"] {
+  --seal-color: var(--success);
+  --seal-shape: 2px;
+  --seal-border: 3px;
+}
+
+/* ── 車内 · 路線図 · 高架 — the rooms this app is set in ──── */
+:root[data-backdrop="backdrop_shanai"], [data-backdrop-preview="backdrop_shanai"] {
+  --backdrop-swatch-size: 48px 48px;
+  /* The carriage: window band, seat moquette below it, grab poles. */
+  --backdrop-img:
+    repeating-linear-gradient(90deg,
+      color-mix(in srgb, var(--text-secondary) 9%, transparent) 0 2px,
+      transparent 2px 120px),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--line-vocab) 7%, transparent) 0 38%,
+      transparent 38% 100%);
+}
+:root[data-backdrop="backdrop_rosenzu"], [data-backdrop-preview="backdrop_rosenzu"] {
+  --backdrop-swatch-size: 54px 54px;
+  /* A route diagram: coloured runs crossing, with interchange dots. */
+  --backdrop-img:
+    repeating-linear-gradient(45deg,
+      color-mix(in srgb, var(--line-kana) 8%, transparent) 0 3px,
+      transparent 3px 86px),
+    repeating-linear-gradient(-45deg,
+      color-mix(in srgb, var(--line-vocab) 8%, transparent) 0 3px,
+      transparent 3px 104px),
+    repeating-linear-gradient(0deg,
+      color-mix(in srgb, var(--line-grammar) 7%, transparent) 0 3px,
+      transparent 3px 132px);
+}
+:root[data-backdrop="backdrop_koka"], [data-backdrop-preview="backdrop_koka"] {
+  --backdrop-swatch-size: 60px 60px;
+  /* Elevated track: girders overhead and the light between them. */
+  --backdrop-img:
+    repeating-linear-gradient(90deg,
+      color-mix(in srgb, var(--text-primary) 8%, transparent) 0 6px,
+      transparent 6px 64px),
+    repeating-linear-gradient(0deg,
+      color-mix(in srgb, var(--text-primary) 5%, transparent) 0 4px,
+      transparent 4px 180px),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--warning) 5%, transparent), transparent 55%);
+}
+
+/* The 番線 case swatch: three miniature rows wearing the material. */
+.cos-swatch--mcq {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px;
+  border-radius: 6px;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+.cos-swatch__mcq-row {
+  flex: 1;
+  min-height: 0;
+  border-radius: calc(var(--mcq-radius, 6px) * 0.5);
+  background-color: var(--mcq-bg, var(--surface));
+  background-image: var(--mcq-img, none);
+  background-size: var(--mcq-img-size, auto);
+  background-position: var(--mcq-img-pos, center);
+  background-repeat: var(--mcq-img-repeat, repeat);
+  border: 1px solid var(--mcq-border, var(--surface-line));
+}

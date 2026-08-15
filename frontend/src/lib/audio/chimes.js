@@ -24,6 +24,7 @@ const FARE_TICK = '/sounds/ui/fare-tick.mp3'
 const FLAP_CLATTER = '/sounds/ui/flap-clatter.mp3'
 const STATION_MELODY = '/sounds/ui/station-melody.mp3'
 const ARRIVAL = '/sounds/ui/arrival.mp3'
+const DOOR_SLIDE = '/sounds/sfx/door-slide.mp3'
 
 // getBuffer deliberately evicts failed fetches so a dropped request
 // can retry — correct in general, wrong for an asset that is *known*
@@ -38,12 +39,17 @@ const GATE_BLIPS = [
   { freq: 2637.0, at: 0.075, dur: 0.075, peak: 0.5 },
 ]
 
-// Falling: E6 down to B5, an octave under the gate's and twice as
-// long. A door chime is heard standing still rather than mid-stride,
-// so it can afford to be softer and rounder.
+// Falling: E6 down to B5, an octave under the gate's. A door chime is
+// heard standing still rather than mid-stride, so it can afford to be
+// softer and rounder — and a real one is not a bare sine. Each note
+// carries a quiet octave beneath it and the pair overlaps rather than
+// butting end to end, which is most of what made the first version
+// sound like a test tone instead of a chime.
 const DOOR_BLIPS = [
-  { freq: 1318.5, at: 0,    dur: 0.16, peak: 0.34 },
-  { freq: 987.8,  at: 0.15, dur: 0.30, peak: 0.34 },
+  { freq: 1318.5, at: 0,    dur: 0.34, peak: 0.30 },  // E6
+  { freq: 659.3,  at: 0,    dur: 0.34, peak: 0.09 },  // E5, under it
+  { freq: 987.8,  at: 0.19, dur: 0.62, peak: 0.30 },  // B5
+  { freq: 493.9,  at: 0.19, dur: 0.62, peak: 0.09 },  // B4, under it
 ]
 
 // ── The generic click ─────────────────────────────────────
@@ -65,15 +71,6 @@ const CLICK_BLIPS = [
 const TOGGLE_BLIPS = [
   { freq: 987.77,  at: 0,     dur: 0.030, peak: 0.15 },  // B5
   { freq: 1318.51, at: 0.038, dur: 0.045, peak: 0.15 },  // E6
-]
-
-// A single soft blip for XP earned. Deliberately not the gate's
-// chime, which already means "your pass was read", and deliberately
-// not playUi('click') — that resolves to /sounds/ui/click.mp3, a file
-// that does not exist, so the tick was silent. A reward you cannot
-// hear is not a louder reward.
-const FARE_BLIPS = [
-  { freq: 1174.7, at: 0, dur: 0.11, peak: 0.24 },  // D6
 ]
 
 // 到着 — arriving. Played when a session finishes, which in this app
@@ -140,14 +137,16 @@ function synthesise(ctx, blips) {
 // A tone here would have been wrong twice over: it would not sound
 // like the object on screen, and it would have collided with the two
 // chimes, which are tones and mean something else.
-function synthesiseClatter(ctx) {
+function synthesiseClatter(ctx, count) {
   const bus = busFor('ui')
   if (!bus) return
 
   const now = ctx.currentTime
   // Shrinking gaps: the drum slows as it settles, so the ticks bunch
-  // up rather than marking time.
-  const ticks = [0, 0.055, 0.10, 0.14, 0.173, 0.20, 0.222, 0.24]
+  // up rather than marking time. `count` trims the run — one tick is
+  // a single drum turning, which is the XP board.
+  const ALL = [0, 0.055, 0.10, 0.14, 0.173, 0.20, 0.222, 0.24]
+  const ticks = ALL.slice(0, count ?? ALL.length)
 
   // One short noise buffer, reused by every tick.
   const frames = Math.floor(ctx.sampleRate * 0.03)
@@ -178,6 +177,78 @@ function synthesiseClatter(ctx) {
     src.start(now + at)
     src.onended = () => { env.disconnect(); band.disconnect(); src.disconnect() }
   })
+}
+
+// ── The doors running open ────────────────────────────────
+// The chime says the doors are *about* to move; for three quarters of
+// a second after it, they moved in silence. This is that stretch: a
+// pneumatic slide, which is broadband rush rather than any pitch —
+// filtered noise swept upward as the leaves gather speed and closed
+// back down as they reach the stop, with a soft thump at the end.
+function synthesiseSlide(ctx) {
+  const bus = busFor('ui')
+  if (!bus) return
+
+  const now = ctx.currentTime
+  const dur = 0.62
+
+  // Long noise bed.
+  const frames = Math.floor(ctx.sampleRate * dur)
+  const buffer = ctx.createBuffer(1, frames, ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1
+
+  const src = ctx.createBufferSource()
+  src.buffer = buffer
+
+  const band = ctx.createBiquadFilter()
+  band.type = 'bandpass'
+  band.Q.setValueAtTime(0.8, now)
+  // Opens up as they accelerate, closes as they settle.
+  band.frequency.setValueAtTime(380, now)
+  band.frequency.linearRampToValueAtTime(1250, now + dur * 0.45)
+  band.frequency.linearRampToValueAtTime(520, now + dur)
+
+  const env = ctx.createGain()
+  env.gain.setValueAtTime(0.0001, now)
+  env.gain.exponentialRampToValueAtTime(0.13, now + 0.10)
+  env.gain.setValueAtTime(0.13, now + dur * 0.55)
+  env.gain.exponentialRampToValueAtTime(0.0001, now + dur)
+
+  src.connect(band); band.connect(env); env.connect(bus)
+  src.start(now)
+  src.onended = () => { env.disconnect(); band.disconnect(); src.disconnect() }
+
+  // The stop at the end of the travel.
+  const thump = ctx.createOscillator()
+  const tEnv = ctx.createGain()
+  thump.type = 'sine'
+  thump.frequency.setValueAtTime(96, now + dur - 0.03)
+  thump.frequency.exponentialRampToValueAtTime(58, now + dur + 0.07)
+  tEnv.gain.setValueAtTime(0.0001, now + dur - 0.03)
+  tEnv.gain.exponentialRampToValueAtTime(0.16, now + dur - 0.015)
+  tEnv.gain.exponentialRampToValueAtTime(0.0001, now + dur + 0.12)
+  thump.connect(tEnv); tEnv.connect(bus)
+  thump.start(now + dur - 0.03)
+  thump.stop(now + dur + 0.14)
+  thump.onended = () => { tEnv.disconnect(); thump.disconnect() }
+}
+
+/** The leaves running open. Starts when they do, not with the chime. */
+export function playDoorSlide() {
+  if (isMuted()) return
+  const ctx = getAudioContext()
+  if (!ctx) return
+
+  if (assetMissing.has(DOOR_SLIDE)) { synthesiseSlide(ctx); return }
+
+  getBuffer(DOOR_SLIDE)
+    .then(buffer => {
+      if (isMuted()) return
+      if (buffer) playBuffer(buffer, 'sfx', 'door-slide')
+      else { assetMissing.add(DOOR_SLIDE); synthesiseSlide(ctx) }
+    })
+    .catch(() => { assetMissing.add(DOOR_SLIDE); synthesiseSlide(ctx) })
 }
 
 function playChime(path, name, blips) {
@@ -222,9 +293,31 @@ export function playToggle() {
   playChime(TOGGLE, 'toggle', TOGGLE_BLIPS)
 }
 
-/** XP earned, no level. The quiet one. */
+/**
+ * XP earned, no level.
+ *
+ * This was a single sine blip, and it was the wrong sound for what is
+ * on screen: the fare tick shows a split-flap board, and a board makes
+ * a mechanical noise, not a tone. It is one drum turning now — the
+ * same synthesis the level tier uses, with a single tick instead of a
+ * run — so the two read as the same machine at different sizes rather
+ * than as two unrelated sounds. It also stops competing with the gate
+ * chime, which is a tone and means something else.
+ */
 export function playFareTick() {
-  playChime(FARE_TICK, 'fare-tick', FARE_BLIPS)
+  if (isMuted()) return
+  const ctx = getAudioContext()
+  if (!ctx) return
+
+  if (assetMissing.has(FARE_TICK)) { synthesiseClatter(ctx, 1); return }
+
+  getBuffer(FARE_TICK)
+    .then(buffer => {
+      if (isMuted()) return
+      if (buffer) playBuffer(buffer, 'ui', 'fare-tick')
+      else { assetMissing.add(FARE_TICK); synthesiseClatter(ctx, 1) }
+    })
+    .catch(() => { assetMissing.add(FARE_TICK); synthesiseClatter(ctx, 1) })
 }
 
 /** 進級 — the board turning your level over. */

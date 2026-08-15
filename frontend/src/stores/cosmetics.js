@@ -31,7 +31,7 @@ export const RANK_LABELS = [
 
 // Mirrors srs/cosmetics.py's SLOTS, in the same order: outward from
 // the card you're looking at to the room you're sitting in.
-export const SLOTS = ['paper', 'ring', 'seal', 'title', 'backdrop', 'flourish', 'brush']
+export const SLOTS = ['paper', 'ring', 'seal', 'title', 'backdrop', 'flourish', 'brush', 'mcq']
 
 export const DEFAULT_LOADOUT = {
   paper:    'paper_washi',
@@ -41,14 +41,15 @@ export const DEFAULT_LOADOUT = {
   backdrop: 'backdrop_muji',
   flourish: 'flourish_tsuke',
   brush:    'brush_sumi',
+  mcq:      'mcq_hyoji',
 }
 
 // Everything except `title`, which is text the profile renders
-// directly and so never becomes an attribute. The other six all
-// resolve to CSS custom properties keyed off <html>'s attributes —
-// including `brush`, whose colour and weight the drawing pad reads
-// back out of the computed style rather than keeping its own copy.
-const THEMED_SLOTS = ['paper', 'ring', 'seal', 'backdrop', 'flourish', 'brush']
+// directly and so never becomes an attribute. The rest all resolve to
+// CSS custom properties keyed off <html>'s attributes — including
+// `brush`, whose colour and weight the drawing pad reads back out of
+// the computed style rather than keeping its own copy.
+const THEMED_SLOTS = ['paper', 'ring', 'seal', 'backdrop', 'flourish', 'brush', 'mcq']
 
 // 祝 — the one part of a cosmetic that can't be CSS: the character
 // struck in the middle of the reward. Keyed by id, defaulting to the

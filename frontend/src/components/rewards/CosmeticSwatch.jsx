@@ -22,6 +22,7 @@ export function CosmeticSwatch({ item, size = 64 }) {
   if (item.slot === 'backdrop') return <BackdropSwatch item={item} size={size} />
   if (item.slot === 'flourish') return <FlourishSwatch item={item} />
   if (item.slot === 'brush')    return <BrushSwatch item={item} />
+  if (item.slot === 'mcq')      return <McqSwatch item={item} />
   return <TitleSwatch item={item} />
 }
 
@@ -122,5 +123,24 @@ function BrushSwatch({ item }) {
     <div className="cos-swatch cos-swatch--brush" data-brush-preview={item.id} aria-hidden="true">
       <span className="cos-swatch__stroke" />
     </div>
+  )
+}
+
+// 番線 — three stacked answer rows under the material, which is what
+// the slot actually changes. Uses the same -preview attribute contract
+// as every other swatch, so one definition dresses both the live rows
+// and the case.
+function McqSwatch({ item, size = 44 }) {
+  return (
+    <span
+      className="cos-swatch cos-swatch--mcq"
+      data-mcq-preview={item.id}
+      style={{ width: size, height: size }}
+      aria-hidden="true"
+    >
+      <span className="cos-swatch__mcq-row" />
+      <span className="cos-swatch__mcq-row" />
+      <span className="cos-swatch__mcq-row" />
+    </span>
   )
 }
