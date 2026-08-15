@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
+import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
 import RatingBar from '../components/study/RatingBar'
 import {
@@ -431,10 +432,13 @@ export default function VocabScreen({ session }) {
       else setTier(null)
     }
     const startMode = m => {
+      // Review is a browse, not a session — it does not board.
       if (m === 'review') { startReview(); return }
-      if (studyBy === 'level') startLevelSession(level, m)
-      else if (studyBy === 'theme') startThemeSession(theme, themeLabel, m)
-      else startFrequencySession(tier, tierLabel, m)
+      board(() => {
+        if (studyBy === 'level') startLevelSession(level, m)
+        else if (studyBy === 'theme') startThemeSession(theme, themeLabel, m)
+        else startFrequencySession(tier, tierLabel, m)
+      })
     }
     // Review only exists for the JLPT-level path today (see
     // startReview) — theme/frequency decks keep the plain mode list.

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { DepartureGate } from './components/station/DepartureGate'
+import { TrainDoor } from './components/station/TrainDoor'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { LangProvider } from './LangContext'
@@ -108,6 +109,14 @@ export default function App() {
             navigation it triggers, and a screen that renders it is
             unmounted by that navigation. See stores/departure. */}
         <DepartureGate />
+
+        {/* 扉 — boarding, on the last choice of a selection screen.
+            Outside <Routes/> for a sharper version of the gate's
+            reason: committing the choice is what makes the screen
+            render a different tree, so a door rendered by the
+            selection branch would be unmounted by the very state
+            change it is covering. See stores/boarding. */}
+        <TrainDoor />
       </BrowserRouter>
     </LangProvider>
   )

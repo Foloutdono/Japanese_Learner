@@ -13579,3 +13579,92 @@ button.syllabary-cell:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .gate { display: none; }
 }
+
+/* ══ 扉 — the train door ════════════════════════════════════
+   Boarding, played on the last choice of a selection screen. See
+   components/station/TrainDoor for the timeline.
+
+   Same discipline as the gate: transform and opacity only, and every
+   duration multiplied by --door-x so the JS timers and these
+   animations cannot drift apart. Base figures unscaled — chime 120ms,
+   commit 190ms, open 250ms, done 780ms. */
+.door {
+  --door-x: 1;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  overflow: hidden;
+  animation: door-leave calc(150ms * var(--door-x)) linear calc(630ms * var(--door-x)) backwards;
+}
+@keyframes door-leave { to { opacity: 0; } }
+
+/* Each leaf covers its half and slides off its own side. They are
+   opaque because they are the reveal: what parts behind them is the
+   quiz, already committed while they were still shut. */
+.door__leaf {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50.5%;   /* the half-pixel is the overlap on the seam */
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--surface) 92%, var(--text-primary)) 0%,
+      var(--surface) 18%,
+      var(--surface) 74%,
+      color-mix(in srgb, var(--surface) 88%, var(--text-primary)) 100%);
+  transition: transform calc(560ms * var(--door-x)) cubic-bezier(0.36, 0.02, 0.16, 1);
+  will-change: transform;
+}
+.door__leaf--l { left: 0;  border-right: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent); }
+.door__leaf--r { right: 0; border-left:  1px solid color-mix(in srgb, var(--text-primary) 16%, transparent); }
+.door--open .door__leaf--l { transform: translateX(-100%); }
+.door--open .door__leaf--r { transform: translateX(100%); }
+
+/* The window. Genuinely cut out — the screen behind shows through it,
+   so the destination is visible before the doors move. */
+.door__glass {
+  position: absolute;
+  top: 12%;
+  bottom: 34%;
+  left: 14%;
+  right: 14%;
+  border-radius: 10px;
+  border: 2px solid color-mix(in srgb, var(--text-primary) 20%, transparent);
+  background: color-mix(in srgb, var(--bg-main) 22%, transparent);
+  backdrop-filter: blur(3px);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* The livery band along the bottom of the car, in the line's colour —
+   the same pigment the board row, the plate and the gate all use for
+   this destination. */
+.door__belt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 15%;
+  height: clamp(10px, 2.2vh, 18px);
+  background: var(--line-color, var(--accent));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--line-color, var(--accent)) 55%, transparent);
+}
+
+/* The rubber seal down the middle. Goes the moment the leaves do —
+   a seam between two doors that are no longer touching is a line
+   floating in the opening. */
+.door__seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  margin-left: -2px;
+  background: color-mix(in srgb, var(--text-primary) 30%, transparent);
+  transition: opacity calc(160ms * var(--door-x)) linear;
+}
+.door--open .door__seam { opacity: 0; }
+
+/* TrainDoor navigates immediately and never mounts this when motion
+   is unwelcome. Belt and braces. */
+@media (prefers-reduced-motion: reduce) {
+  .door { display: none; }
+}

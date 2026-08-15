@@ -41,22 +41,28 @@ slightly too long or too present becomes exhausting at 31 call sites.
 
 ---
 
-## Wanted — for the ticket gate
+## Wanted — the two station chimes
 
-`src/lib/audio/gate.js` synthesises this today: two sine blips, B6 then
-E7, ~55ms and ~75ms. That is deliberately a placeholder. Drop a real
-file in and it is picked up automatically — no code change, the
-synthesiser is only the fallback.
+`src/lib/audio/chimes.js` synthesises both today, and that is
+deliberately a placeholder. Each looks for its file first and only
+falls back to generating it — drop the file in and it is used
+automatically, with no code change.
 
-| File | Notes |
-|---|---|
-| `ui/gate-chime.mp3` | The 改札 acknowledgement, played the instant the pass touches the reader (`TicketGate`, at 300ms). Target ~150–250ms total. It fires on **every departure**, so err quiet and bright rather than long and full — this is the one asset where restraint matters most. A rising two-tone reads as "accepted"; a flat single beep gets tiring, and anything buzzer-like reads as *rejected*. |
-
-Optional, only if the gate ever wants more body:
+They are written as mirror images and should stay that way: the gate
+**rises** ("accepted, go"), the door **falls** ("arrived, board"). If
+you generate them separately, generate them as a pair.
 
 | File | Notes |
 |---|---|
-| `sfx/gate-open.mp3` | The flaps retracting — a short mechanical shhk, ~200ms, landing at 360ms. Currently silent, and honestly fine that way; add it only if the gate feels thin with the chime alone. |
+| `ui/gate-chime.mp3` | 改札, the instant the pass touches the reader (`TicketGate`, 420ms in). Target ~150–250ms. Fires on **every departure**, so err quiet and bright rather than long and full — the one asset where restraint matters most. A rising two-tone reads as "accepted"; a flat single beep gets tiring, and anything buzzer-like reads as *rejected*. Synthesised now as B6 → E7. |
+| `ui/door-chime.mp3` | ピンポーン, just before the train doors part (`TrainDoor`, 170ms in). Target ~400–600ms — it is heard standing still rather than mid-stride, so it can afford to be softer, rounder and longer than the gate's. Synthesised now as E6 → B5, an octave under the gate and twice the length. |
+
+Optional, only if either cutscene wants more body:
+
+| File | Notes |
+|---|---|
+| `sfx/gate-open.mp3` | The gate flaps retracting — a short mechanical shhk, ~200ms, landing at 500ms. |
+| `sfx/door-slide.mp3` | The train doors running open — a longer pneumatic slide, ~700ms, landing at 350ms and running under the whole opening. This is the one most likely to be worth it: the doors currently move in silence for three quarters of a second. |
 
 ---
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
+import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
 import RatingBar from '../components/study/RatingBar'
 import {
@@ -264,7 +265,7 @@ export default function KanaScreen({ session }) {
         <SelectionScreen>
           <ModeSelector
             modes={[...MODES, reviewMode(t)]}
-            onSelect={m => (m === 'review' ? startReview() : startMode(m))}
+            onSelect={m => (m === 'review' ? startReview() : board(() => startMode(m)))}
           />
         </SelectionScreen>
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
+import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
 import RatingBar from '../components/study/RatingBar'
 import { MCQGrid, DoneMessage, DeckProgress } from '../components/study/QuizComponents'
@@ -232,7 +233,7 @@ export default function GrammarScreen({ session }) {
         <SelectionScreen>
           <ModeSelector
             modes={[...MODES, reviewMode(t)]}
-            onSelect={m => (m === 'review' ? startReview() : startSession(level, m))}
+            onSelect={m => (m === 'review' ? startReview() : board(() => startSession(level, m)))}
           />
         </SelectionScreen>
       </div>

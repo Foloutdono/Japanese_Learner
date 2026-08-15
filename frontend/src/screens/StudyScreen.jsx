@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
+import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
 import RatingBar from '../components/study/RatingBar'
 import {
@@ -362,7 +363,7 @@ export default function StudyScreen({ session }) {
             <div className="quiz-done">{t.noCards}</div>
           )}
           {modesLoaded && availableModes.length > 0 && (
-            <ModeSelector modes={availableModes} onSelect={startSession} />
+            <ModeSelector modes={availableModes} onSelect={m => board(() => startSession(m))} />
           )}
         </SelectionScreen>
       </div>
