@@ -1,3 +1,10 @@
+# Local env overrides. .env.production is deliberately tracked (VITE_
+# vars ship to the browser by design and it carries only the anon key)
+# — these are the per-machine ones, e.g. VITE_API_URL pointing at a
+# local backend.
+.env.local
+.env.*.local
+
 # Logs
 logs
 *.log

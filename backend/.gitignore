@@ -3,6 +3,14 @@ __pycache__/
 *.pyo
 *.pyd
 .pytest_cache/
+
+# Local secrets. DATABASE_URL and SUPABASE_SERVICE_KEY live here, and
+# the service-role key bypasses row-level security on the whole
+# project — this file must never be committed. .env.example is the
+# tracked one: dummy values only, no real credential.
+.env
+.env.*
+!.env.example
 datas/vocab/vocab_jmdict.json
 datas/vocab/vocab_jmdict_meanings.json
 datas/vocab/vocab_jmdict_frequency.json

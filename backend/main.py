@@ -1,10 +1,30 @@
 import logging
+import os
+from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+# ── Local environment ─────────────────────────────────────────
+# Nothing else reads backend/.env, so without this the file is purely
+# decorative: DATABASE_URL comes back None and psycopg2 falls through
+# to libpq's own defaults (localhost:5432), which is a confusing way
+# to be told your configuration was never loaded — the error names a
+# server you never configured rather than the setting you did.
+#
+# This has to run before the route imports below. core/srs_instance.py
+# opens a connection pool at import time and core/auth.py reads its
+# variables the same way, so by the time the first `from routes...`
+# line executes the environment must already be complete.
+#
+# override=False (the default) leaves a real deployment untouched:
+# there the variables are already in the process environment and no
+# .env file exists, so this call does nothing at all.
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).parent / ".env")
 
-from routes.kana            import router as kana_router
+from fastapi import FastAPI                                      # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware               # noqa: E402
+from fastapi.staticfiles import StaticFiles                      # noqa: E402
+
+from routes.kana            import router as kana_router         # noqa: E402
 from routes.vocab           import router as vocab_router
 from routes.kanji           import router as kanji_router
 from routes.stats           import router as stats_router
@@ -27,9 +47,20 @@ app = FastAPI()
 
 app.mount("/kanjivg", StaticFiles(directory="kanjivg"), name="kanjivg")
 
+# ── CORS ──────────────────────────────────────────────────────
+# The deployed frontend, plus anything CORS_ORIGINS adds — a
+# comma-separated list, set in backend/.env so a local Vite server can
+# be allowed without editing this file and without a localhost origin
+# ever being hardcoded into the deployed list. Unset, which is the
+# case in production, this is exactly the single-origin list it has
+# always been.
+CORS_ORIGINS = ["https://japanese-learner-seven.vercel.app"] + [
+    o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://japanese-learner-seven.vercel.app"],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )

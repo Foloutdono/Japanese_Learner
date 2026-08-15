@@ -11,3 +11,6 @@ pykakasi
 requests>=2.31.0
 fugashi
 unidic-lite
+# main.py loads backend/.env through this. It arrives transitively
+# with uvicorn[standard] today, which is not something to rely on.
+python-dotenv
