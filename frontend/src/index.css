@@ -3481,14 +3481,19 @@ input:focus { border-color: var(--accent2); }
    (the fillers) collapse away instead of sitting there as visual
    noise — only the correct answer, plus the wrong one actually
    picked (if any), stay on screen. */
-.mcq-row--filler {
+.mcq-row.mcq-row--filler {
   max-height: 0;
   padding: 0;
-  margin: 0;
   opacity: 0;
   border-width: 0;
   pointer-events: none;
 }
+/* The gap has to be killed at the same weight that sets it.
+   `.mcq-row + .mcq-row` is two classes; the filler rule above was one,
+   so `margin: 0` lost on specificity and every collapsed row still
+   contributed its 12px — three fillers meant 36px of dead space under
+   the answer, on every screen size, not just narrow ones. */
+.mcq-row + .mcq-row.mcq-row--filler { margin-top: 0; }
 
 .quiz-input {
   width: 100%;
@@ -9037,10 +9042,6 @@ input:focus { border-color: var(--accent2); }
 
   .char-display {
     margin: 0 0;
-  }
-
-  .mcq-row--small {
-    padding: 10px 10px;
   }
 
   .meaning,
