@@ -12629,8 +12629,8 @@ button.syllabary-cell:focus-visible {
   position: relative;
   display: flex;
   align-items: stretch;
-  width: min(620px, 88vw);
-  height: min(252px, 37vh);
+  width: min(620px, 110vw);
+  height: min(252px, 47vh);
   animation: arrive calc(300ms * var(--gate-x)) cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
 
