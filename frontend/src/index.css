@@ -2060,7 +2060,9 @@ input:focus { border-color: var(--accent2); }
 .board__now {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  flex-direction: column;
+  height: -webkit-fit-available;
+  justify-content: space-between;
 }
 .board__label {
   display: flex;
@@ -2068,17 +2070,15 @@ input:focus { border-color: var(--accent2); }
   gap: 8px;
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: 0.78rem;
   letter-spacing: 0.12em;
-  color: color-mix(in srgb, var(--accent2) 76%, transparent);
+  color: color-mix(in srgb, var(--accent2) 85%, transparent);
 }
 .board__label-sub {
   font-family: var(--font-display);
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  opacity: 0.42;
 }
 
 /* The line's colour, the full width of the platform — the same stroke
@@ -8984,7 +8984,6 @@ input:focus { border-color: var(--accent2); }
      squeezing it into two characters per line. */
   .board__masthead { padding: 16px 14px 12px; gap: 10px; }
   .board__now { justify-content: space-between; align-items: flex-end; }
-  .board__label { align-items: flex-start; }
 
   .station-sign--sm { padding: 16px 16px 14px; }
   .station-sign--sm .station-sign__stack { align-items: flex-start; }

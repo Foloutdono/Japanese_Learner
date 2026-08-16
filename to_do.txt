@@ -1,0 +1,10 @@
+general :
+- divide the furiganas to appear above the kanji they belong to
+
+
+dictionnary :
+- vary used in these word to capture more readings.
+- preselect kana to fill the space better
+- remove the border top of the stroke order for the kanas detail card
+- add padding at the end of the kanas section on mobile to prevent the xp of hidding content
+- reduce the section header margin bottom on mobile
