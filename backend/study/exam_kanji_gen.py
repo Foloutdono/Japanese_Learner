@@ -27,8 +27,7 @@ import os
 import random
 
 from content.vocab_data import VOCAB_BY_LEVEL
-from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_validation import validate_questions
+from study.exam_gen_utils import GenerationFailed, make_choices
 
 _BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 _KANJI_DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
@@ -38,10 +37,6 @@ with open(os.path.join(_KANJI_DATA_DIR, "kanji_readings.json"), encoding="utf-8"
 
 with open(os.path.join(_KANJI_DATA_DIR, "kanji_radicals.json"), encoding="utf-8") as f:
     KANJI_RADICALS: dict[str, dict] = json.load(f)
-
-
-class GenerationFailed(Exception):
-    pass
 
 
 # ── Reverse indexes, built once at import ──────────────────────
@@ -239,24 +234,12 @@ def build_orthography_distractors(word: dict, rng: random.Random) -> list[str]:
     return sorted(candidates)
 
 
-def _make_choices(rng: random.Random, correct: str, distractors: list[str]) -> tuple[list[dict], str] | None:
-    if len(distractors) < 3:
-        return None
-    picked = rng.sample(distractors, 3)
-    options = [correct] + picked
-    rng.shuffle(options)
-    ids = ["c1", "c2", "c3", "c4"]
-    choices = [{"id": ids[i], "textJp": text} for i, text in enumerate(options)]
-    answer_id = ids[options.index(correct)]
-    return choices, answer_id
-
-
 # ── Mondai assembly ──────────────────────────────────────────────
 _READING_INSTRUCTIONS_JP = "つぎの　ことばの　読み方として　最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。"
 _ORTHOGRAPHY_INSTRUCTIONS_JP = "つぎの　ことばを　漢字で　書く　とき、最も　よい　ものを　1・2・3・4から　一つ　えらんで　ください。"
 
 
-def _build_reading_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set, rng: random.Random) -> dict:
+def build_reading_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set, rng: random.Random) -> dict:
     questions = []
     for word in pool:
         if len(questions) >= spec["count"]:
@@ -265,7 +248,7 @@ def _build_reading_mondai(spec: dict, pool: list[dict], used_words: set, used_pr
         if key in used_words or word["kanji"] in used_prompts:
             continue
         distractors = build_kanji_reading_distractors(word, rng)
-        made = _make_choices(rng, word["kana"].split("/")[0].strip(), distractors)
+        made = make_choices(rng, word["kana"].split("/")[0].strip(), distractors)
         if made is None:
             continue
         choices, answer_id = made
@@ -292,7 +275,7 @@ def _build_reading_mondai(spec: dict, pool: list[dict], used_words: set, used_pr
     }
 
 
-def _build_orthography_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set, rng: random.Random) -> dict:
+def build_orthography_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set, rng: random.Random) -> dict:
     questions = []
     for word in pool:
         if len(questions) >= spec["count"]:
@@ -302,7 +285,7 @@ def _build_orthography_mondai(spec: dict, pool: list[dict], used_words: set, use
         if key in used_words or reading in used_prompts:
             continue
         distractors = build_orthography_distractors(word, rng)
-        made = _make_choices(rng, word["kanji"], distractors)
+        made = make_choices(rng, word["kanji"], distractors)
         if made is None:
             continue
         choices, answer_id = made
@@ -329,76 +312,10 @@ def _build_orthography_mondai(spec: dict, pool: list[dict], used_words: set, use
     }
 
 
-def _generate_once(level: str, seed: int) -> dict:
-    rng = random.Random(seed)
-    blueprint = LEVEL_BLUEPRINT[level]
-    vocab_section = next(s for s in blueprint["sections"] if s["id"] in ("vocabulary", "vocabulary_grammar_reading"))
-
-    reading_spec = next((m for m in vocab_section["mondai"] if m["type"] == "kanji-reading"), None)
-    ortho_spec = next((m for m in vocab_section["mondai"] if m["type"] == "kanji-orthography"), None)
-    # N1 has no 表記 mondai — ortho_spec is None there, matching the
-    # real exam rather than inventing a task it doesn't have.
-
-    # A handful of deck entries (8 across the whole deck, e.g. 丸い/円い)
-    # record more than one accepted kanji spelling in the same "kanji"
-    # field, "/"-separated the same way "kana" sometimes is. Skipped
-    # rather than handled: showing "丸い/円い" as a single choice is
-    # wrong, and picking one spelling risks a distractor accidentally
-    # matching the OTHER accepted one.
-    pool = [w for w in VOCAB_BY_LEVEL.get(level, []) if w.get("kanji") and "/" not in w["kanji"]]
-    rng.shuffle(pool)
-
-    used_words: set = set()
-    used_prompts: set = set()
-    mondai = []
-    if reading_spec:
-        mondai.append(_build_reading_mondai(reading_spec, pool, used_words, used_prompts, rng))
-    if ortho_spec:
-        mondai.append(_build_orthography_mondai(ortho_spec, pool, used_words, used_prompts, rng))
-
-    # The official timeLimitMin covers the WHOLE vocabulary section
-    # (up to 6 mondai at N2) — this paper only contains the 1-2 mondai
-    # this generator can build so far. Showing the full official time
-    # for a fraction of the section's items would overstate how long
-    # it should take (110 min for N1's 6-question paper, when the real
-    # N1 vocabulary section has 71 items) — scale it down by the
-    # fraction of the section's own item count this paper covers.
-    included_items = sum(m["count"] for m in (reading_spec, ortho_spec) if m)
-    total_section_items = sum(m["count"] for m in vocab_section["mondai"])
-    scaled_time_limit = max(5, round(vocab_section["timeLimitMin"] * included_items / total_section_items))
-
-    return {
-        "level": level,
-        "title": f"{level} Vocabulary Practice — Kanji Reading & Writing",
-        "titleJp": f"{level} 語彙 — 漢字読み・表記",
-        "sections": [{
-            "id": "vocabulary",
-            "label": "Vocabulary",
-            "labelJp": "語彙 — 漢字読み・表記",
-            "timeLimitMin": scaled_time_limit,
-            "mondai": mondai,
-        }],
-    }
-
-
-_MAX_GENERATION_ATTEMPTS = 5
-
-
-def generate_kanji_paper(level: str, seed: int) -> dict:
-    last_errors: list[str] = []
-    for attempt in range(_MAX_GENERATION_ATTEMPTS):
-        try:
-            paper = _generate_once(level, seed + attempt)
-        except GenerationFailed as e:
-            last_errors = [str(e)]
-            continue
-
-        all_questions = [q for m in paper["sections"][0]["mondai"] for q in m["questions"]]
-        errors = validate_questions(all_questions)
-        if not errors:
-            return paper
-        last_errors = errors
-
-    raise GenerationFailed(
-        f"Could not generate a valid {level} kanji paper after {_MAX_GENERATION_ATTEMPTS} attempts: {last_errors}"
-    )
+# Paper-level orchestration (which mondai go in a paper, the
+# retry-on-validation-failure loop, the section's scaled time limit)
+# lives in exam_vocab_gen.py now — this module stopped being
+# kanji-only content once 文脈規定/言い換え類義/用法 needed the SAME
+# "vocabulary" section, so it's the section-level orchestrator for all
+# of them. build_reading_mondai/build_orthography_mondai above are
+# what it calls into.

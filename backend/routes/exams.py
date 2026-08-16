@@ -11,7 +11,7 @@ from core.auth import get_user_id
 from study.exam_schema import ensure_exam_schema
 from study.exam_scoring import flatten_questions, score_attempt
 from study.exam_stub import STUB_EXAM_ID, STUB_PAPER
-from study.exam_kanji_gen import generate_kanji_paper, GenerationFailed
+from study.exam_vocab_gen import generate_vocabulary_paper, GenerationFailed
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -26,7 +26,12 @@ _LEVELS = ["N5", "N4", "N3", "N2", "N1"]
 EXAM_GENERATORS = {
     STUB_EXAM_ID: ("stub-1", lambda seed: STUB_PAPER),
     **{
-        f"{level.lower()}-kanji-01": ("kanji-gen-1", partial(generate_kanji_paper, level))
+        # "-vocab-01", not "-kanji-01": this generator now covers the
+        # whole vocabulary section (漢字読み/表記/文脈規定/言い換え類義/
+        # 用法 where each has a generator), not kanji items alone — see
+        # exam_vocab_gen.py. Renamed rather than kept for continuity
+        # since nothing has shipped to real users under the old id yet.
+        f"{level.lower()}-vocab-01": ("vocab-gen-1", partial(generate_vocabulary_paper, level))
         for level in _LEVELS
     },
 }
