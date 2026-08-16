@@ -39,9 +39,10 @@ function sections(t) {
     { icon: '解析', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: 'var(--line-kaiseki)', scope: 'home' },
     { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: 'var(--line-jisho)',   scope: 'home' },
     { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: 'var(--line-decks)',   scope: 'home' },
-    // Past-paper mock exams (vocab/grammar/reading/listening, scored
-    // against the official answer key) — see src/exam/.
-    { icon: '模試', title: t.examTitle || 'Mock Exam', desc: t.examDesc || 'Past JLPT papers, digitized', path: '/exam', color: 'var(--line-exam)', scope: 'home' },
+    // Generated mock exams (vocab/grammar/reading/listening, built to
+    // the official JLPT blueprint but never copied from a real past
+    // paper) — see src/exam/.
+    { icon: '模試', title: t.examTitle || 'Mock Exam', desc: t.examDesc || 'Practice exams built to the JLPT format', path: '/exam', color: 'var(--line-exam)', scope: 'home' },
 
     // ── The halls ─────────────────────────────────────────
     // 達磨堂 — study goals as daruma dolls (see screens/DarumaScreen).

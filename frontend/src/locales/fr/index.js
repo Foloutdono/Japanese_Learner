@@ -724,12 +724,18 @@ const decks = {
 // texte en anglais alors que le reste de l'app restait en français.
 // examListTitle garde les mêmes glyphes japonais dans les deux
 // langues, même convention que appTitle.
+//
+// Cette app n'est affiliée ni à la JEES ni à la Japan Foundation et ne
+// prétend reproduire ni corriger sur leur barème officiel — chaque
+// examen est généré selon le format public du JLPT (nombre de
+// sections, minutage, types d'épreuves), jamais recopié d'une annale.
+// Garder cette distinction en tête si ce texte est retouché.
 const exam = {
   examTitle:           'Examen blanc',
-  examDesc:            'De vraies annales, chronométrées et notées\nVocabulaire, grammaire, lecture, écoute\nCorrigées sur le barème officiel',
+  examDesc:            "Examens complets, chronométrés et notés\nVocabulaire, grammaire, lecture, écoute\nAu format JLPT officiel — notation non officielle",
   examEyebrow:         'Examen blanc',
-  examListTitle:       '過去問モード',
-  examListSubtitle:    'Des épreuves JLPT réelles, numérisées — vocabulaire, grammaire, lecture et écoute, corrigées selon le barème officiel.',
+  examListTitle:       '模擬試験モード',
+  examListSubtitle:    "Des examens générés selon le vrai format JLPT — vocabulaire, grammaire, lecture et écoute, avec une estimation de note non officielle. Aucune affiliation avec la JEES ou la Japan Foundation.",
   examSections:        'sections',
   examQuestions:       'questions',
   examNoneAvailable:   'Aucun examen disponible pour le moment.',
@@ -743,7 +749,7 @@ const exam = {
   examRetrySection:    'Recommencer la section',
   examStarHint:        "Quel élément va à la position marquée d'une étoile ?",
   examFullSentence:    'Phrase complète :',
-  examAudioPending:    "Extrait audio non encore lié — découpez la piste source et renseignez audioSrc pour cette question.",
+  examAudioPending:    "Extrait audio pas encore généré pour cette question.",
 }
 
 // ── 達磨堂 — le Hall des Daruma ────────────────────────────

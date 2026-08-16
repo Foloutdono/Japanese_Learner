@@ -1,54 +1,34 @@
 // ── Exam data service ─────────────────────────────────────────
-// Every function here returns a Promise, even though today's
-// implementation resolves instantly from a local JSON file. That's
-// deliberate: once the backend exists, each function body becomes a
-// `apiFetch('/api/...')` call (see api.js, same as TierSelector uses)
-// and nothing in any screen changes — screens only ever depend on
-// this module's exported shape, never on "is this local or remote".
+// Every function here returns a Promise. That's deliberate: this is
+// the seam the backend generator lands behind — each function body
+// becomes an `apiFetch('/api/...')` call (see api.js, same as
+// TierSelector uses) and nothing in any screen changes — screens only
+// ever depend on this module's exported shape, never on "is this
+// local or remote".
 //
 // Swap plan (when the backend lands):
 //   listExams()        -> GET  /api/exams
 //   getExam(id)         -> GET  /api/exams/:id
 //   submitAttempt(..)   -> POST /api/exams/:id/attempts
 // Keep the return shapes identical and every screen below keeps working.
-
-// Registry of locally-bundled exams. Add a new entry here (and drop
-// the matching .exam.json in ./data) to make another past paper
-// available — nothing else in the app needs to change, since every
-// screen only ever reads through this service.
-const LOCAL_EXAMS = {
-  'n5-2024-07': () => import('./data/n5-2024-07.exam.json'),
-}
+//
+// There is deliberately no bundled exam here. The one that used to
+// ship (n5-2024-07.exam.json) was a transcription of a real JLPT
+// paper and has been removed — every exam this app offers from here
+// on is generated from data the project actually owns (see
+// backend/study/exam_blueprint.py once the generator lands), never
+// copied from a past paper. Until the backend generator exists,
+// listExams() returns nothing and the list screen shows its empty
+// state rather than a broken loader.
 
 /** List available exams (id, title, level, counts) for the picker screen. */
 export async function listExams() {
-  return Promise.all(
-    Object.entries(LOCAL_EXAMS).map(async ([id, loader]) => {
-      const mod = await loader()
-      const exam = mod.default ?? mod
-      return {
-        // The registry key, not exam.id from inside the JSON: getExam()
-        // resolves against LOCAL_EXAMS[examId], so the key is the only
-        // id that's guaranteed to load. They agree today; if a data file
-        // ever disagreed, returning its internal id here would hand the
-        // picker an id that getExam() then rejects as unknown.
-        id,
-        level: exam.level,
-        title: exam.title,
-        titleJp: exam.titleJp,
-        sectionCount: exam.sections.length,
-        questionCount: countQuestions(exam),
-      }
-    })
-  )
+  return []
 }
 
 /** Fetch one exam in full (all sections/mondai/questions). */
 export async function getExam(examId) {
-  const loader = LOCAL_EXAMS[examId]
-  if (!loader) throw new Error(`Unknown exam id: ${examId}`)
-  const mod = await loader()
-  return mod.default ?? mod
+  throw new Error(`Unknown exam id: ${examId}`)
 }
 
 /**
@@ -99,10 +79,6 @@ function pushMondaiQuestions(section, mondai, out) {
       if (passage.blanks) for (const q of passage.blanks) out.push({ ...common, passage, ...q })
     }
   }
-}
-
-function countQuestions(exam) {
-  return flattenQuestions(exam).length
 }
 
 function scoreAttempt(exam, answers) {

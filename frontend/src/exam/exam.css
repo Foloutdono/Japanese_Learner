@@ -102,11 +102,10 @@
 }
 
 /* ── Image placeholder ──
-   Stands in for exam illustrations until real assets are extracted
-   from the source PDFs — see README's "Assets" section. Deliberately
-   looks like scaffolding (dashed border, muted) rather than a
-   finished UI element, so it's obvious at a glance what's still
-   pending. */
+   Stands in for exam illustrations until a real illustration set is
+   commissioned or generated. Deliberately looks like scaffolding
+   (dashed border, muted) rather than a finished UI element, so it's
+   obvious at a glance what's still pending. */
 .exam-image-placeholder {
   display: flex;
   align-items: center;

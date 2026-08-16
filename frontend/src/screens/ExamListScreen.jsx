@@ -11,10 +11,10 @@ import { listExams } from '../exam/examService'
 import { PageIcon } from '../components/ui/Icons'
 
 // Route: /exam
-// Lists every locally-bundled past exam as a ModeSelector list — same
-// row language as every other picker screen in the app. Once the
-// backend exists, listExams() starts returning server data instead of
-// local JSON and this screen doesn't change at all.
+// Lists every available generated practice exam as a ModeSelector
+// list — same row language as every other picker screen in the app.
+// Once the backend generator exists, listExams() starts returning
+// server data and this screen doesn't change at all.
 export default function ExamListScreen() {
   const navigate = useNavigate()
   const { t } = useLang()

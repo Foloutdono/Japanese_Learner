@@ -80,10 +80,10 @@ function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed
   )
 }
 
-// Stand-in for a real exam illustration/photo. Once assets are
-// extracted from the source PDFs, swap this for a plain <img> — every
-// call site already carries the real alt text, so nothing else needs
-// to change.
+// Stand-in for a real exam illustration/photo. Once an illustration
+// set is commissioned or generated, swap this for a plain <img> —
+// every call site already carries the real alt text, so nothing else
+// needs to change.
 function ImagePlaceholder({ alt, compact = false }) {
   return (
     <span className={compact ? 'exam-image-placeholder exam-image-placeholder--compact' : 'exam-image-placeholder'}>

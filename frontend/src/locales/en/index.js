@@ -737,12 +737,18 @@ const decks = {
 // QuestionRenderer), so a French-language user saw English exam text
 // while the rest of the app stayed in French. examListTitle keeps the
 // literal Japanese glyphs in both locales, same convention as appTitle.
+//
+// This app has no affiliation with JEES or the Japan Foundation and
+// makes no claim to reproduce or score against their official
+// material — every exam is generated to the public JLPT format
+// (section counts, timing, task types), never copied from a past
+// paper. Keep that distinction in mind if you touch this copy again.
 const exam = {
   examTitle:           'Mock Exam',
-  examDesc:            'Real past papers, timed and scored\nVocabulary, grammar, reading, listening\nMarked against the official key',
+  examDesc:            'Full-length practice exams, timed and scored\nVocabulary, grammar, reading, listening\nBuilt to the official JLPT format — unofficial scoring',
   examEyebrow:         'Mock Exam',
-  examListTitle:       '過去問モード',
-  examListSubtitle:    'Full past JLPT papers, digitized — vocabulary, grammar, reading, and listening, scored against the official answer key.',
+  examListTitle:       '模擬試験モード',
+  examListSubtitle:    'Practice exams generated to match the real JLPT format — vocabulary, grammar, reading, and listening, with an unofficial estimated score. Not affiliated with JEES or the Japan Foundation.',
   examSections:        'sections',
   examQuestions:       'questions',
   examNoneAvailable:   'No exams available yet.',
@@ -756,7 +762,7 @@ const exam = {
   examRetrySection:    'Retry section',
   examStarHint:        'Which piece belongs in the starred position?',
   examFullSentence:    'Full sentence:',
-  examAudioPending:    'Audio clip not linked yet — split the source track and set audioSrc for this question.',
+  examAudioPending:    'Audio clip not generated yet for this question.',
 }
 
 // ── 達磨堂 — the Daruma Hall ───────────────────────────────
