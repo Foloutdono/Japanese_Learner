@@ -1280,7 +1280,6 @@ input:focus { border-color: var(--accent2); }
   letter-spacing: 0.16em;
   text-indent: 0.16em;
   color: var(--text-primary);
-  margin: 2px 0 0;
 }
 
 .station-sign__romaji {
@@ -2061,8 +2060,9 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   align-items: baseline;
   flex-direction: column;
-  height: -webkit-fit-available;
+  height: -webkit-fill-available;
   justify-content: space-between;
+  align-items: end;
 }
 .board__label {
   display: flex;
