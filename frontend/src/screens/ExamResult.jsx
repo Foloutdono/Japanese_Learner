@@ -1,29 +1,64 @@
-import { useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi, playCorrect } from '../lib/audio'
 import QuestionRenderer from '../exam/QuestionRenderer'
 import EmptyState from '../components/ui/EmptyState'
-import { flattenQuestions } from '../exam/examService'
+import { Loading } from '../components/ui/Loading'
+import { flattenQuestions, getAttempt, getExam } from '../exam/examService'
 import { CheckIcon, CrossIcon, ChevronIcon, PageIcon } from '../components/ui/Icons'
 
-// Route: /exam/:examId/:sectionId/result
-// Reads its data from router state (handed off by ExamRunner.finish())
-// rather than refetching — a finished attempt is local-only for now
-// (see examService's submitAttempt), so there's nothing to fetch by
-// URL yet. Once attempts are persisted server-side, this becomes
-// `getAttempt(attemptId)` keyed off a route param instead, and the
-// rest of the screen is unaffected.
-export default function ExamResult() {
+// Provisional until backend/study/exam_blueprint.py's per-level
+// PASS_THRESHOLDS lands (see the JLPT mock-exam plan) — the official
+// exam has a real sectional minimum per level, not one flat 60% cutoff
+// for every section. This is a placeholder honest enough to build the
+// rest of the result screen against, not the final rule.
+const PASS_PCT = 60
+
+// Route: /exam/:examId/:sectionId/results
+// Fast path: ExamRunner.finish() hands this screen its data directly
+// via router state, no refetch needed. Slow/reload path: the URL also
+// carries ?attempt=<id> (set by the same finish()), so a refreshed or
+// bookmarked result page can reconstruct itself from the server —
+// GET the paper and GET the persisted attempt — instead of showing a
+// dead end. Only truly gone (no state AND no attempt id, e.g. someone
+// hand-edits the URL) falls through to the empty state.
+export default function ExamResult({ session }) {
   const { examId, sectionId } = useParams()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { t } = useLang()
   const [expandedId, setExpandedId] = useState(null)
+  const [loaded, setLoaded] = useState(location.state ?? null)
 
-  const { summary, exam } = location.state ?? {}
+  const attemptId = searchParams.get('attempt')
 
-  if (!summary || !exam) {
+  useEffect(() => {
+    if (loaded || !attemptId) return
+    let alive = true
+    Promise.all([getExam(examId, session), getAttempt(examId, attemptId, session)])
+      .then(([exam, summary]) => { if (alive) setLoaded({ exam, summary }) })
+      .catch(() => { if (alive) setLoaded(false) })
+    return () => { alive = false }
+  }, [loaded, attemptId, examId, session])
+
+  const { summary, exam } = loaded || {}
+  const sectionStats = summary?.perSection[sectionId] ?? null
+  const passed = (sectionStats?.pct ?? 0) >= PASS_PCT
+
+  // Real effect (not a call in the render body) — the render-body call
+  // used to re-fire on every re-render, e.g. each time a review row
+  // was expanded, once the scorePct bug below stopped masking it.
+  useEffect(() => {
+    if (passed) playCorrect()
+  }, [passed])
+
+  if (loaded === null && attemptId) {
+    return <Loading />
+  }
+
+  if (!summary || !exam || !sectionStats) {
     return (
       <EmptyState
         icon={<PageIcon size={40} />}
@@ -35,10 +70,6 @@ export default function ExamResult() {
 
   const section = exam.sections.find(s => s.id === sectionId)
   const questionsById = Object.fromEntries(flattenQuestions(exam).map(q => [q.id, q]))
-  const sectionStats = summary.perSection[sectionId] ?? { correct: 0, total: 0 }
-
-  const passed = summary.scorePct >= 60
-  if (passed) playCorrect()
 
   function toggle(id) {
     playUi('click-mode-selection')
@@ -49,7 +80,12 @@ export default function ExamResult() {
     <div className="exam-shell">
       <div className={`quiz-done exam-result-header${passed ? '' : ' exam-result-header--low'}`}>
         <span className="exam-result-header__score">{sectionStats.correct} / {sectionStats.total}</span>
-        <span className="exam-result-header__pct">{summary.scorePct}%</span>
+        {/* Per-section percentage, not the old whole-paper scorePct —
+            that field divided one section's correct count by every
+            question in the paper (examService.js used to), so a
+            perfect vocabulary-only run displayed 37%. See
+            exam_scoring.py's module docstring. */}
+        <span className="exam-result-header__pct">{sectionStats.pct}%</span>
         <span className="exam-result-header__label" lang="ja">{section.labelJp}</span>
       </div>
 

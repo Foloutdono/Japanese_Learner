@@ -19,7 +19,7 @@ const SECTION_COLOR = {
   listening: 'var(--teal)',
 }
 
-export default function ExamSectionSelect() {
+export default function ExamSectionSelect({ session }) {
   const { examId } = useParams()
   const navigate = useNavigate()
   const { t } = useLang()
@@ -27,9 +27,9 @@ export default function ExamSectionSelect() {
 
   useEffect(() => {
     let alive = true
-    getExam(examId).then(e => { if (alive) setExam(e) })
+    getExam(examId, session).then(e => { if (alive) setExam(e) })
     return () => { alive = false }
-  }, [examId])
+  }, [examId, session])
 
   if (!exam) {
     return (

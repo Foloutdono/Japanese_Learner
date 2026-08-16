@@ -1,53 +1,69 @@
+import { apiFetch } from '../lib/api'
+
 // ── Exam data service ─────────────────────────────────────────
-// Every function here returns a Promise. That's deliberate: this is
-// the seam the backend generator lands behind — each function body
-// becomes an `apiFetch('/api/...')` call (see api.js, same as
-// TierSelector uses) and nothing in any screen changes — screens only
-// ever depend on this module's exported shape, never on "is this
-// local or remote".
+// The seam every exam screen goes through — nothing reaches
+// backend/routes/exams.py directly. Scoring is server-authoritative
+// (backend/study/exam_scoring.py): submitAttempt() posts raw answers
+// and the score that comes back is the one the app trusts, so a
+// learner's result can never disagree with what the server recorded.
 //
-// Swap plan (when the backend lands):
-//   listExams()        -> GET  /api/exams
-//   getExam(id)         -> GET  /api/exams/:id
-//   submitAttempt(..)   -> POST /api/exams/:id/attempts
-// Keep the return shapes identical and every screen below keeps working.
-//
-// There is deliberately no bundled exam here. The one that used to
-// ship (n5-2024-07.exam.json) was a transcription of a real JLPT
-// paper and has been removed — every exam this app offers from here
-// on is generated from data the project actually owns (see
-// backend/study/exam_blueprint.py once the generator lands), never
-// copied from a past paper. Until the backend generator exists,
-// listExams() returns nothing and the list screen shows its empty
-// state rather than a broken loader.
+// There is deliberately no bundled exam file here. The one that used
+// to ship (n5-2024-07.exam.json) was a transcription of a real JLPT
+// paper and has been removed — every exam this app offers is
+// generated from data the project actually owns, never copied from a
+// past paper. See backend/routes/exams.py's EXAM_SOURCES for what's
+// currently registered (today: one hand-written stub paper, ahead of
+// the real generator).
 
 /** List available exams (id, title, level, counts) for the picker screen. */
-export async function listExams() {
-  return []
+export async function listExams(session) {
+  const res = await apiFetch('/api/exams', session)
+  if (!res.ok) throw new Error(`Failed to list exams: ${res.status}`)
+  return res.json()
 }
 
 /** Fetch one exam in full (all sections/mondai/questions). */
-export async function getExam(examId) {
-  throw new Error(`Unknown exam id: ${examId}`)
+export async function getExam(examId, session) {
+  const res = await apiFetch(`/api/exams/${examId}`, session)
+  if (!res.ok) throw new Error(`Unknown exam id: ${examId}`)
+  return res.json()
 }
 
 /**
- * Persist a finished attempt. Local-only for now (returns the score
- * summary immediately); once there's a backend this becomes a POST
- * and the summary comes back from the server instead of being
- * computed client-side, so the call site barely changes.
+ * Persist a finished section attempt and return its score summary,
+ * scored server-side against the materialized paper — never trust a
+ * client-computed score, since a generated exam's content isn't
+ * guaranteed to still match whatever the client last fetched.
  */
-export async function submitAttempt(examId, { answers, startedAt, finishedAt }) {
-  const exam = await getExam(examId)
-  const summary = scoreAttempt(exam, answers)
-  return { examId, startedAt, finishedAt, ...summary }
+export async function submitAttempt(examId, { sectionId, answers, startedAt, finishedAt }, session) {
+  const res = await apiFetch(`/api/exams/${examId}/attempts`, session, {
+    method: 'POST',
+    body: JSON.stringify({
+      section_id: sectionId,
+      answers,
+      started_at: startedAt,
+      finished_at: finishedAt,
+    }),
+  })
+  if (!res.ok) throw new Error(`Failed to submit attempt: ${res.status}`)
+  return res.json()
 }
 
-// ── Scoring + shape helpers ────────────────────────────────────
-// Pure functions, no I/O — kept here (not in a screen) so the future
-// backend can reuse this exact scoring logic server-side if/when
-// scoring moves off the client.
+/** Reload a previously-submitted attempt — what makes a result URL survive a refresh. */
+export async function getAttempt(examId, attemptId, session) {
+  const res = await apiFetch(`/api/exams/${examId}/attempts/${attemptId}`, session)
+  if (!res.ok) throw new Error(`Unknown attempt: ${attemptId}`)
+  return res.json()
+}
 
+// ── Shape helpers ────────────────────────────────────────────
+// Client-side mirror of exam_scoring.py's flatten_questions — used to
+// map a question id back to its full question object for rendering
+// (the server's `review` only carries ids/given/answer), never to
+// compute a score itself. Kept in sync by hand with the Python
+// version; if the two ever drift, question rendering breaks loudly
+// (a missing field) rather than silently mis-scoring anything, since
+// scoring never runs here.
 export function flattenQuestions(exam) {
   const out = []
   for (const section of exam.sections) {
@@ -65,9 +81,6 @@ function pushMondaiQuestions(section, mondai, out) {
     mondaiId: mondai.id,
     mondaiNumber: mondai.number,
     type: mondai.type,
-    // Mondai-level extras some renderers need alongside the question
-    // itself (table-reading's flyer is the only one so far) — spread
-    // in only when present so other question types stay unaffected.
     ...(mondai.flyer ? { flyer: mondai.flyer } : {}),
   }
   if (mondai.questions) {
@@ -78,27 +91,5 @@ function pushMondaiQuestions(section, mondai, out) {
       if (passage.questions) for (const q of passage.questions) out.push({ ...common, passage, ...q })
       if (passage.blanks) for (const q of passage.blanks) out.push({ ...common, passage, ...q })
     }
-  }
-}
-
-function scoreAttempt(exam, answers) {
-  const questions = flattenQuestions(exam)
-  let correct = 0
-  const perSection = {}
-  const review = questions.map(q => {
-    const given = answers[q.id]
-    const isCorrect = given != null && given === q.answer
-    if (isCorrect) correct++
-    perSection[q.sectionId] ??= { correct: 0, total: 0 }
-    perSection[q.sectionId].total++
-    if (isCorrect) perSection[q.sectionId].correct++
-    return { id: q.id, sectionId: q.sectionId, mondaiId: q.mondaiId, given: given ?? null, answer: q.answer, isCorrect }
-  })
-  return {
-    total: questions.length,
-    correct,
-    scorePct: questions.length ? Math.round((correct / questions.length) * 100) : 0,
-    perSection,
-    review,
   }
 }

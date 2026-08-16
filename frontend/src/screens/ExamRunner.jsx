@@ -18,7 +18,7 @@ import { PageIcon, ChevronIcon } from '../components/ui/Icons'
 // whoever is splitting audio/images can QA a question without
 // spoiling it for real learners. Flip this to however your app gates
 // dev tooling elsewhere once that exists.
-export default function ExamRunner() {
+export default function ExamRunner({ session }) {
   const { examId, sectionId } = useParams()
   const navigate = useNavigate()
   const { t } = useLang()
@@ -31,9 +31,9 @@ export default function ExamRunner() {
 
   useEffect(() => {
     let alive = true
-    getExam(examId).then(e => { if (alive) setExam(e) })
+    getExam(examId, session).then(e => { if (alive) setExam(e) })
     return () => { alive = false }
-  }, [examId])
+  }, [examId, session])
 
   const questions = useMemo(() => {
     if (!exam) return []
@@ -72,8 +72,15 @@ export default function ExamRunner() {
 
   async function finish() {
     playUi('click-screen-selection')
-    const summary = await submitAttempt(examId, { answers, startedAt, finishedAt: Date.now() })
-    navigate(`/exam/${examId}/${sectionId}/result`, { state: { summary, exam, sectionId } })
+    // section_id travels in the payload so the server can persist
+    // which section this attempt belongs to (a paper can have several).
+    const summary = await submitAttempt(examId, { sectionId, answers, startedAt, finishedAt: Date.now() }, session)
+    // attempt id in the URL (not just router state) is what makes a
+    // reloaded result page recoverable — see ExamResult. The route
+    // itself is /results (plural, App.jsx:124); this used to navigate
+    // to the singular /result, which no registered route ever
+    // matched, so the result screen never rendered.
+    navigate(`/exam/${examId}/${sectionId}/results?attempt=${summary.attemptId}`, { state: { summary, exam } })
   }
 
   return (

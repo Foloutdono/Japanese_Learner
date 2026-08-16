@@ -40,6 +40,7 @@ from routes.theme_vocab      import router as theme_vocab_router
 from routes.translation import router as translation_router
 from routes.daruma          import router as daruma_router
 from routes.cosmetics       import router as cosmetics_router
+from routes.exams           import router as exams_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -81,6 +82,7 @@ app.include_router(theme_vocab_router)
 app.include_router(translation_router)
 app.include_router(daruma_router)
 app.include_router(cosmetics_router)
+app.include_router(exams_router)
 
 @app.get("/")
 def root():

@@ -15,16 +15,16 @@ import { PageIcon } from '../components/ui/Icons'
 // list — same row language as every other picker screen in the app.
 // Once the backend generator exists, listExams() starts returning
 // server data and this screen doesn't change at all.
-export default function ExamListScreen() {
+export default function ExamListScreen({ session }) {
   const navigate = useNavigate()
   const { t } = useLang()
   const [exams, setExams] = useState(null)
 
   useEffect(() => {
     let alive = true
-    listExams().then(list => { if (alive) setExams(list) })
+    listExams(session).then(list => { if (alive) setExams(list) })
     return () => { alive = false }
-  }, [])
+  }, [session])
 
   const modes = (exams ?? []).map(exam => ({
     key: exam.id,
