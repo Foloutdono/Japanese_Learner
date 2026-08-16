@@ -733,10 +733,10 @@ const decks = {
 // ── Mock exam ─────────────────────────────────────────────
 // Was entirely untranslated until now — every string below only ever
 // rendered through its own inline `?? 'English default'` fallback
-// (see ExamListScreen/ExamSectionSelect/ExamRunner/ExamResult/
-// QuestionRenderer), so a French-language user saw English exam text
-// while the rest of the app stayed in French. examListTitle keeps the
-// literal Japanese glyphs in both locales, same convention as appTitle.
+// (see ExamScreen/ExamRunner/ExamResult/QuestionRenderer), so a
+// French-language user saw English exam text while the rest of the app
+// stayed in French. examListTitle keeps the literal Japanese glyphs in
+// both locales, same convention as appTitle.
 //
 // This app has no affiliation with JEES or the Japan Foundation and
 // makes no claim to reproduce or score against their official
@@ -749,20 +749,46 @@ const exam = {
   examEyebrow:         'Mock Exam',
   examListTitle:       '模擬試験モード',
   examListSubtitle:    'Practice exams generated to match the real JLPT format — vocabulary, grammar, reading, and listening, with an unofficial estimated score. Not affiliated with JEES or the Japan Foundation.',
-  examSections:        'sections',
   examQuestions:       'questions',
   examNoneAvailable:   'No exams available yet.',
-  examSectionSubtitle: 'Pick a section to start. Each section is scored independently.',
+
+  // ── Paper kinds ──
+  // The four generators (backend/study/exam_*_gen.py), named in the
+  // reader's own language with the Japanese kept alongside as the
+  // specimen line — the picker used to show only "N5 語彙", which told
+  // a beginner nothing about what was behind the card.
+  examKindVocab:       'Vocabulary',
+  examKindGrammar:     'Grammar',
+  examKindReading:     'Reading',
+  examKindListening:   'Listening',
+  examNotGeneratedYet: 'Written on first open',
+  examGenerating:      'Writing your exam…',
+  examGeneratingHint:  'Questions are generated fresh the first time a paper is opened — this takes a minute or two. Afterwards it loads instantly and stays the same every time.',
+  examLoadFailed:      "This paper couldn't be generated right now.",
+  examLoadFailedHint:  'The question writer may be temporarily unavailable. Try again in a moment.',
+  examRetry:           'Try again',
+
   examSectionEmpty:    'This section has no questions yet.',
   examAnswered:        'answered',
-  examFinishSection:   'Finish section',
+  examFinishSection:   'Finish',
   examQuestionAbbrev:  'Q',
-  examResultMissing:   "This result isn't available — start the section again.",
-  examBackToSections:  'Back to sections',
-  examRetrySection:    'Retry section',
+  examResultMissing:   "This result isn't available — start the exam again.",
+  examBackToExams:     'Back to exams',
+  examRetrySection:    'Try again',
   examStarHint:        'Which piece belongs in the starred position?',
   examFullSentence:    'Full sentence:',
   examAudioPending:    'Audio clip not generated yet for this question.',
+
+  // ── Result ──
+  // Never call this a JLPT score. The real one is an IRT-scaled 尺度得点
+  // computed from official item parameters no third party has, so the
+  // honest thing to show is raw proportion correct plus a practice
+  // target — and to say plainly that that is what it is.
+  examScoreCorrect:    'correct',
+  examPracticeTarget:  'Practice target',
+  examUnofficialNote:  'Unofficial practice score — raw proportion correct, not a JLPT scaled score.',
+  examReviewTitle:     'Review your answers',
+  examReviewHint:      'Tap a question to see it again with the correct answer.',
 }
 
 // ── 達磨堂 — the Daruma Hall ───────────────────────────────

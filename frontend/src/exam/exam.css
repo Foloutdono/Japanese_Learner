@@ -6,11 +6,75 @@
    flips correctly with the light/dark theme for free since every
    colour here is a var(), never a literal hex. */
 
+/* Sits inside .container under a TopBar now, like every other screen
+   in the app — it used to be a bare full-page block with no masthead
+   at all, which is what made the exam feel like a different product
+   the moment you started one. .container already supplies the page
+   gutter, so this only sets the reading column and the bottom room. */
 .exam-shell {
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding: 32px 24px 72px;
+}
+/* Compound selector on purpose, not plain `.exam-shell`. This file is
+   @imported from the very top of index.css, so at equal specificity
+   every rule here loses on source order to index.css's own — including
+   `.container { padding: 0 24px }`, which silently flattened this
+   element's vertical padding to zero when it was written as a
+   single-class rule. The side gutter still comes from .container; the
+   top gap under the TopBar and the bottom room are set here. */
+.exam-shell.container {
+  padding-top: 28px;
+  padding-bottom: 72px;
+}
+
+/* ── Generating ──
+   A never-before-opened paper is written on demand (several LLM calls
+   per mondai), so this can hold for a minute or two. Three brush
+   strokes drawing themselves in sequence — the app's own ink language,
+   not a third spinner — because the honest signal here is "something
+   is being written", not "something is loading". */
+.exam-generating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 64px 24px;
+}
+.exam-generating__brush {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 54px;
+  margin-bottom: 14px;
+}
+.exam-generating__stroke {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line-color, var(--accent));
+  transform-origin: left center;
+  animation: exam-brush 1.9s ease-in-out infinite;
+}
+.exam-generating__stroke:nth-child(2) { animation-delay: 0.22s; }
+.exam-generating__stroke:nth-child(3) { animation-delay: 0.44s; }
+@keyframes exam-brush {
+  0%, 70%, 100% { transform: scaleX(0); opacity: 0.25; }
+  25%, 45%      { transform: scaleX(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exam-generating__stroke { animation: none; transform: scaleX(1); opacity: 0.5; }
+}
+.exam-generating__title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.exam-generating__hint {
+  max-width: 380px;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
 }
 
 /* ── Progress bar ── */
@@ -54,8 +118,22 @@
   font-family: var(--font-display);
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
-  color: var(--timer-color, var(--text-secondary));
+  color: var(--text-secondary);
   letter-spacing: 0.03em;
+}
+/* Last minute. A class rather than the inline --timer-color the JSX
+   used to set, so the urgency is describable in one place — and can
+   pulse, which an inline colour couldn't. */
+.exam-shell__timer--low {
+  color: var(--danger);
+  font-weight: 700;
+  animation: exam-timer-pulse 1s ease-in-out infinite;
+}
+@keyframes exam-timer-pulse {
+  50% { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exam-shell__timer--low { animation: none; }
 }
 
 /* ── Mondai instructions strip ── */
@@ -303,25 +381,55 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 32px 20px;
-  margin-bottom: 24px;
-}
-.exam-result-header__score {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  color: var(--text-secondary);
+  gap: 6px;
+  padding: 36px 20px 30px;
+  margin-bottom: 14px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
 }
 .exam-result-header__pct {
   font-family: 'Noto Serif JP', serif;
-  font-size: 3rem;
+  font-size: 3.2rem;
   font-weight: 700;
+  line-height: 1;
   color: var(--success);
 }
 .exam-result-header--low .exam-result-header__pct { color: var(--danger); }
-.exam-result-header__label {
-  font-size: 0.85rem;
+.exam-result-header__score {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
   color: var(--text-secondary);
+}
+/* The number the percentage is being judged against, stated plainly
+   next to it — a bare "48%" in red says you did badly without ever
+   saying badly against what. */
+.exam-result-header__target {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  opacity: 0.85;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+.exam-result-disclaimer {
+  margin-bottom: 28px;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+.exam-review__title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.exam-review__hint {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
 }
 
 .exam-review-list {
@@ -362,7 +470,21 @@
 }
 
 @media (max-width: 560px) {
-  .exam-shell { padding: 24px 16px 56px; }
+  .exam-shell.container { padding-top: 20px; padding-bottom: 56px; }
   .exam-card.prompt-card { padding: 22px 16px; }
   .exam-flyer__dates { min-width: 0; }
+  .exam-generating { padding: 44px 12px; }
+  /* The three-across nav bar (prev · counter · next) is the one row
+     that genuinely doesn't fit a narrow phone — the counter goes under
+     the buttons rather than squeezing all three. */
+  .exam-nav-buttons {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .exam-nav-buttons__hint {
+    order: 1;
+    width: 100%;
+    text-align: center;
+    padding-top: 4px;
+  }
 }

@@ -27,8 +27,7 @@ import ReadingScreen from './screens/ReadingScreen'
 import ReadingComprehensionScreen from './screens/ReadingComprehensionScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import SettingsScreen from './screens/SettingsScreen'
-import ExamListScreen from './screens/ExamListScreen'
-import ExamSectionSelect from './screens/ExamSectionSelect'
+import ExamScreen from './screens/ExamScreen'
 import ExamRunner from './screens/ExamRunner'
 import ExamResult from './screens/ExamResult'
 import TranslationScreen from './screens/TranslationScreen'
@@ -118,10 +117,13 @@ export default function App() {
           <Route path="/reading-comprehension" element={<ReadingComprehensionScreen session={session} />} />
           <Route path="/profile" element={<ProfileScreen session={session} />} />
           <Route path="/settings" element={<SettingsScreen session={session} />} />
-          <Route path="/exam" element={<ExamListScreen session={session} />} />
-          <Route path="/exam/:examId" element={<ExamSectionSelect session={session} />} />
-          <Route path="/exam/:examId/:sectionId" element={<ExamRunner session={session} />} />
-          <Route path="/exam/:examId/:sectionId/results" element={<ExamResult session={session} />} />
+          {/* No /:sectionId segment: every generated paper has exactly
+              one section (see each backend/study/exam_*_gen.py), so it
+              was a parameter with one legal value and a picker screen
+              that only ever offered one choice. */}
+          <Route path="/exam" element={<ExamScreen session={session} />} />
+          <Route path="/exam/:examId" element={<ExamRunner session={session} />} />
+          <Route path="/exam/:examId/results" element={<ExamResult session={session} />} />
           <Route path="/translation" element={<TranslationScreen session={session} />} />
           <Route path="/daruma" element={<DarumaScreen session={session} />} />
           <Route path="/storehouse" element={<StorehouseScreen session={session} />} />

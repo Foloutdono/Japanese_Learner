@@ -2,9 +2,9 @@
 # Self-migrating, same pattern routes/decks.py's _ensure_deck_schema
 # uses. A generated paper is materialized once (exam_papers) rather
 # than regenerated per request: getExam() is called independently by
-# ExamSectionSelect, ExamRunner, and again inside submitAttempt to
-# score — a generate-on-every-call design would grade a learner's
-# answers against a different paper than the one they took. Attempts
+# ExamRunner, by ExamResult on the reload path, and again inside
+# submitAttempt to score — a generate-on-every-call design would grade
+# a learner's answers against a different paper than they took. Attempts
 # (exam_attempts) are persisted so the result screen survives a reload
 # instead of depending only on React Router's in-memory location.state.
 from core.db import db_conn

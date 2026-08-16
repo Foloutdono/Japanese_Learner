@@ -10,7 +10,6 @@ from core.db import db_conn
 from core.auth import get_user_id
 from study.exam_schema import ensure_exam_schema
 from study.exam_scoring import flatten_questions, score_attempt
-from study.exam_stub import STUB_EXAM_ID, STUB_PAPER
 from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_gen_utils import GenerationFailed
 from study.exam_vocab_gen import generate_vocabulary_paper
@@ -52,8 +51,14 @@ _KIND_META = {
 # papers made by an older version of a given generator instead of
 # silently serving them forever. kind/level are needed by list_exams()
 # to describe a not-yet-materialized exam without generating it.
+#
+# study/exam_stub.py's hand-written preview paper is deliberately NOT
+# registered here anymore: it existed to prove the generation pipe end
+# to end before any real generator existed ("once the real generator
+# lands, this stops being registered" — its own module docstring), and
+# with all four real generators shipped it was just a fifth, fake entry
+# cluttering every learner's exam picker.
 EXAM_GENERATORS = {
-    STUB_EXAM_ID: ("stub-1", "stub", "N5", lambda seed: STUB_PAPER),
     **{
         # "-vocab-01", not "-kanji-01": this generator now covers the
         # whole vocabulary section (漢字読み/表記/文脈規定/言い換え類義/
@@ -157,9 +162,11 @@ def _get_or_create_paper(exam_id: str) -> dict | None:
 
             # INSERT ... ON CONFLICT DO NOTHING + re-SELECT: two
             # concurrent requests for the same never-before-seen
-            # exam_id (ExamSectionSelect and ExamRunner both fetch on
-            # mount) can never materialize two different papers — the
-            # loser of the race just reads back the winner's row.
+            # exam_id can never materialize two different papers — the
+            # loser of the race just reads back the winner's row. Still
+            # reachable with one screen fewer than when this was
+            # written: a learner opening the paper in two tabs, or
+            # ExamRunner's fetch racing submit_attempt's own.
             question_count = len(flatten_questions(paper))
             cur.execute(
                 """
@@ -195,42 +202,33 @@ def list_exams(user_id: str = Depends(get_user_id)):
     # target counts instead, and generation only actually happens when a
     # user opens that specific exam (GET /api/exams/{exam_id} below).
     out = []
-    for exam_id, (_generator_version, kind, level, generate) in EXAM_GENERATORS.items():
-        if kind == "stub":
-            # Free/instant/no LLM -- fine to materialize (and cache) at
-            # list time same as before, no reason to special-case it away.
-            paper = _get_or_create_paper(exam_id)
-            out.append({
-                "id": exam_id,
-                "level": paper["level"],
-                "title": paper["title"],
-                "titleJp": paper["titleJp"],
-                "sectionCount": len(paper["sections"]),
-                "questionCount": len(flatten_questions(paper)),
-            })
-            continue
-
+    for exam_id, (_generator_version, kind, level, _generate) in EXAM_GENERATORS.items():
+        label, label_jp, _types = _KIND_META[kind]
         paper = _get_cached_paper(exam_id)
         if paper is not None:
-            out.append({
-                "id": exam_id,
+            entry = {
                 "level": paper["level"],
                 "title": paper["title"],
                 "titleJp": paper["titleJp"],
-                "sectionCount": len(paper["sections"]),
                 "questionCount": len(flatten_questions(paper)),
-            })
-            continue
-
-        label, label_jp, _types = _KIND_META[kind]
-        out.append({
-            "id": exam_id,
-            "level": level,
-            "title": f"{level} {label}",
-            "titleJp": f"{level} {label_jp}",
-            "sectionCount": 1,
-            "questionCount": _expected_question_count(level, kind),
-        })
+                "generated": True,
+            }
+        else:
+            entry = {
+                "level": level,
+                "title": f"{level} {label}",
+                "titleJp": f"{level} {label_jp}",
+                "questionCount": _expected_question_count(level, kind),
+                # False means "opening this will generate it", which is
+                # slow (minutes, for the LLM-backed kinds) -- the picker
+                # screen warns before the learner commits to waiting
+                # rather than dropping them on a silent spinner.
+                "generated": False,
+            }
+        # `kind` travels explicitly so the client can group/label by it
+        # without parsing exam_id -- the "{level}-{kind}-01" id scheme is
+        # this module's business, not the frontend's.
+        out.append({"id": exam_id, "kind": kind, **entry})
     return out
 
 

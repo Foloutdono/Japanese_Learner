@@ -11,9 +11,9 @@ import { apiFetch } from '../lib/api'
 // to ship (n5-2024-07.exam.json) was a transcription of a real JLPT
 // paper and has been removed — every exam this app offers is
 // generated from data the project actually owns, never copied from a
-// past paper. See backend/routes/exams.py's EXAM_SOURCES for what's
-// currently registered (today: one hand-written stub paper, ahead of
-// the real generator).
+// past paper. See backend/routes/exams.py's EXAM_GENERATORS for what's
+// registered: four generated papers (vocabulary, grammar, reading,
+// listening) at each of the five levels.
 
 /** List available exams (id, title, level, counts) for the picker screen. */
 export async function listExams(session) {

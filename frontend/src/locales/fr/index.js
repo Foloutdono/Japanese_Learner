@@ -719,9 +719,9 @@ const decks = {
 // ── Examen blanc ──────────────────────────────────────────
 // N'était pas du tout traduit — chaque chaîne ci-dessous ne
 // s'affichait que via son propre repli `?? 'texte anglais'` (voir
-// ExamListScreen/ExamSectionSelect/ExamRunner/ExamResult/
-// QuestionRenderer), si bien qu'un utilisateur francophone voyait ce
-// texte en anglais alors que le reste de l'app restait en français.
+// ExamScreen/ExamRunner/ExamResult/QuestionRenderer), si bien qu'un
+// utilisateur francophone voyait ce texte en anglais alors que le
+// reste de l'app restait en français.
 // examListTitle garde les mêmes glyphes japonais dans les deux
 // langues, même convention que appTitle.
 //
@@ -736,20 +736,47 @@ const exam = {
   examEyebrow:         'Examen blanc',
   examListTitle:       '模擬試験モード',
   examListSubtitle:    "Des examens générés selon le vrai format JLPT — vocabulaire, grammaire, lecture et écoute, avec une estimation de note non officielle. Aucune affiliation avec la JEES ou la Japan Foundation.",
-  examSections:        'sections',
   examQuestions:       'questions',
   examNoneAvailable:   'Aucun examen disponible pour le moment.',
-  examSectionSubtitle: 'Choisissez une section pour commencer. Chaque section est corrigée indépendamment.',
+
+  // ── Types d'épreuve ──
+  // Les quatre générateurs (backend/study/exam_*_gen.py), nommés dans
+  // la langue du lecteur avec le japonais conservé en spécimen — le
+  // sélecteur n'affichait que « N5 語彙 », ce qui ne disait rien à un
+  // débutant sur le contenu de la carte.
+  examKindVocab:       'Vocabulaire',
+  examKindGrammar:     'Grammaire',
+  examKindReading:     'Lecture',
+  examKindListening:   'Écoute',
+  examNotGeneratedYet: 'Rédigé à la première ouverture',
+  examGenerating:      'Rédaction de votre examen…',
+  examGeneratingHint:  "Les questions sont générées à la première ouverture d'une épreuve — comptez une à deux minutes. Ensuite elle se charge instantanément et reste identique.",
+  examLoadFailed:      "Cette épreuve n'a pas pu être générée pour le moment.",
+  examLoadFailedHint:  'Le rédacteur de questions est peut-être momentanément indisponible. Réessayez dans un instant.',
+  examRetry:           'Réessayer',
+
   examSectionEmpty:    'Cette section ne contient encore aucune question.',
   examAnswered:        'répondu',
-  examFinishSection:   'Terminer la section',
+  examFinishSection:   'Terminer',
   examQuestionAbbrev:  'Q',
-  examResultMissing:   "Ce résultat n'est plus disponible — recommencez la section.",
-  examBackToSections:  'Retour aux sections',
-  examRetrySection:    'Recommencer la section',
+  examResultMissing:   "Ce résultat n'est plus disponible — recommencez l'examen.",
+  examBackToExams:     'Retour aux examens',
+  examRetrySection:    'Recommencer',
   examStarHint:        "Quel élément va à la position marquée d'une étoile ?",
   examFullSentence:    'Phrase complète :',
   examAudioPending:    "Extrait audio pas encore généré pour cette question.",
+
+  // ── Résultat ──
+  // Ne jamais appeler cela une note JLPT. La vraie est un 尺度得点
+  // calibré par IRT à partir de paramètres d'items officiels dont
+  // aucun tiers ne dispose : l'honnête est d'afficher la proportion
+  // brute de bonnes réponses et un objectif d'entraînement, en le
+  // disant clairement.
+  examScoreCorrect:    'correctes',
+  examPracticeTarget:  "Objectif d'entraînement",
+  examUnofficialNote:  'Score non officiel — proportion brute de bonnes réponses, pas une note JLPT calibrée.',
+  examReviewTitle:     'Revoir vos réponses',
+  examReviewHint:      'Touchez une question pour la revoir avec la bonne réponse.',
 }
 
 // ── 達磨堂 — le Hall des Daruma ────────────────────────────
