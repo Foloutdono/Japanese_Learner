@@ -1,6 +1,7 @@
 import hashlib
 import json
 import logging
+from functools import partial
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -10,24 +11,24 @@ from core.auth import get_user_id
 from study.exam_schema import ensure_exam_schema
 from study.exam_scoring import flatten_questions, score_attempt
 from study.exam_stub import STUB_EXAM_ID, STUB_PAPER
+from study.exam_kanji_gen import generate_kanji_paper, GenerationFailed
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# Bumped whenever a change to the generator (or, today, the stub
-# paper) means an exam_id already in exam_papers should be treated as
-# stale — nothing currently reads this, but it's stored per-row now so
-# a future migration can find and regenerate outdated papers instead
-# of silently serving them forever.
-GENERATOR_VERSION = "stub-1"
+# id -> (generator_version, callable(seed) -> paper). generator_version
+# is stored per row in exam_papers — nothing reads it back yet, but a
+# future migration can use it to find and regenerate papers made by an
+# older version of a given generator instead of silently serving them
+# forever.
+_LEVELS = ["N5", "N4", "N3", "N2", "N1"]
 
-# Static catalog. Keyed exactly like the old frontend LOCAL_EXAMS
-# registry was, so examService.js's contract doesn't change shape.
-# Phase 2 replaces this with real generated papers dispatched from
-# backend/study/exam_blueprint.py's per-level spec — EXAM_SOURCES
-# becomes a function of (level, variant) rather than a fixed dict.
-EXAM_SOURCES = {
-    STUB_EXAM_ID: STUB_PAPER,
+EXAM_GENERATORS = {
+    STUB_EXAM_ID: ("stub-1", lambda seed: STUB_PAPER),
+    **{
+        f"{level.lower()}-kanji-01": ("kanji-gen-1", partial(generate_kanji_paper, level))
+        for level in _LEVELS
+    },
 }
 
 ensure_exam_schema()
@@ -41,9 +42,10 @@ def _seed_for(exam_id: str) -> int:
 
 
 def _get_or_create_paper(exam_id: str) -> dict | None:
-    source = EXAM_SOURCES.get(exam_id)
-    if source is None:
+    entry = EXAM_GENERATORS.get(exam_id)
+    if entry is None:
         return None
+    generator_version, generate = entry
 
     conn = db_conn()
     try:
@@ -53,12 +55,19 @@ def _get_or_create_paper(exam_id: str) -> dict | None:
             if row:
                 return row[0]
 
+            seed = _seed_for(exam_id)
+            try:
+                paper = generate(seed)
+            except GenerationFailed as e:
+                logger.error("Exam generation failed for %s: %s", exam_id, e)
+                raise HTTPException(status_code=503, detail=f"Could not generate exam: {exam_id}")
+
             # INSERT ... ON CONFLICT DO NOTHING + re-SELECT: two
             # concurrent requests for the same never-before-seen
             # exam_id (ExamSectionSelect and ExamRunner both fetch on
             # mount) can never materialize two different papers — the
             # loser of the race just reads back the winner's row.
-            question_count = len(flatten_questions(source))
+            question_count = len(flatten_questions(paper))
             cur.execute(
                 """
                 INSERT INTO exam_papers
@@ -67,8 +76,8 @@ def _get_or_create_paper(exam_id: str) -> dict | None:
                 ON CONFLICT (exam_id) DO NOTHING
                 """,
                 (
-                    exam_id, source["level"], _seed_for(exam_id), GENERATOR_VERSION,
-                    json.dumps(source), len(source["sections"]), question_count,
+                    exam_id, paper["level"], seed, generator_version,
+                    json.dumps(paper), len(paper["sections"]), question_count,
                 ),
             )
             cur.execute("SELECT paper FROM exam_papers WHERE exam_id = %s", (exam_id,))
@@ -81,17 +90,18 @@ def _get_or_create_paper(exam_id: str) -> dict | None:
 
 @router.get("/api/exams")
 def list_exams(user_id: str = Depends(get_user_id)):
-    return [
-        {
+    out = []
+    for exam_id in EXAM_GENERATORS:
+        paper = _get_or_create_paper(exam_id)
+        out.append({
             "id": exam_id,
-            "level": source["level"],
-            "title": source["title"],
-            "titleJp": source["titleJp"],
-            "sectionCount": len(source["sections"]),
-            "questionCount": len(flatten_questions(source)),
-        }
-        for exam_id, source in EXAM_SOURCES.items()
-    ]
+            "level": paper["level"],
+            "title": paper["title"],
+            "titleJp": paper["titleJp"],
+            "sectionCount": len(paper["sections"]),
+            "questionCount": len(flatten_questions(paper)),
+        })
+    return out
 
 
 @router.get("/api/exams/{exam_id}")
