@@ -26,6 +26,15 @@
 # N1/N2 number their 大問 continuously 1-14 across the whole booklet
 # (vocab/grammar/reading share one number line) while N3-N5 restart
 # numbering at each administered section.
+#
+# `questions_per_passage` (reading-passage mondai only) is NOT an
+# official JLPT number — the public guideline tables give item counts,
+# not passage counts, and how a 中文/長文 mondai's items split across
+# separate passages isn't confirmed by any primary source this project
+# found. 1 for 短文 (each short passage stands alone) and roughly 3 for
+# 中文/長文/主張理解 (each passage carries several questions) are a
+# reasonable, JLPT-plausible inference exam_reading_gen.py builds
+# from — not a verified fact the way the item counts themselves are.
 
 # 得点区分 (scoring sections) — NOT the same grouping as the
 # administered TIMING sections in LEVEL_BLUEPRINT below. N1-N3 score
@@ -76,8 +85,8 @@ LEVEL_BLUEPRINT = {
                 {"id": "bunpou_1", "official_number": 1, "name_jp": "文の文法1",       "type": "grammar-fill",    "count": 9, "scoring_section": "vocabulary_grammar_reading"},
                 {"id": "bunpou_2", "official_number": 2, "name_jp": "文の文法2",       "type": "sentence-order",  "count": 4, "scoring_section": "vocabulary_grammar_reading"},
                 {"id": "bunpou_3", "official_number": 3, "name_jp": "文章の文法",       "type": "cloze-passage",   "count": 4, "scoring_section": "vocabulary_grammar_reading"},
-                {"id": "dokkai_4", "official_number": 4, "name_jp": "内容理解（短文）", "type": "reading-passage", "count": 2, "scoring_section": "vocabulary_grammar_reading", "passage_chars": 80},
-                {"id": "dokkai_5", "official_number": 5, "name_jp": "内容理解（中文）", "type": "reading-passage", "count": 2, "scoring_section": "vocabulary_grammar_reading", "passage_chars": 250},
+                {"id": "dokkai_4", "official_number": 4, "name_jp": "内容理解（短文）", "type": "reading-passage", "count": 2, "scoring_section": "vocabulary_grammar_reading", "passage_chars": 80, "questions_per_passage": 1},
+                {"id": "dokkai_5", "official_number": 5, "name_jp": "内容理解（中文）", "type": "reading-passage", "count": 2, "scoring_section": "vocabulary_grammar_reading", "passage_chars": 250, "questions_per_passage": 2},
                 {"id": "dokkai_6", "official_number": 6, "name_jp": "情報検索",        "type": "table-reading",   "count": 1, "scoring_section": "vocabulary_grammar_reading", "passage_chars": 250},
             ]},
             {"id": "listening", "labelJp": "聴解", "timeLimitMin": 30, "mondai": [
@@ -101,8 +110,8 @@ LEVEL_BLUEPRINT = {
                 {"id": "bunpou_1", "official_number": 1, "name_jp": "文の文法1",       "type": "grammar-fill",    "count": 13, "scoring_section": "vocabulary_grammar_reading"},
                 {"id": "bunpou_2", "official_number": 2, "name_jp": "文の文法2",       "type": "sentence-order",  "count": 4, "scoring_section": "vocabulary_grammar_reading"},
                 {"id": "bunpou_3", "official_number": 3, "name_jp": "文章の文法",       "type": "cloze-passage",   "count": 4, "scoring_section": "vocabulary_grammar_reading"},
-                {"id": "dokkai_4", "official_number": 4, "name_jp": "内容理解（短文）", "type": "reading-passage", "count": 3, "scoring_section": "vocabulary_grammar_reading", "passage_chars": 150},
-                {"id": "dokkai_5", "official_number": 5, "name_jp": "内容理解（中文）", "type": "reading-passage", "count": 3, "scoring_section": "vocabulary_grammar_reading", "passage_chars": 450},
+                {"id": "dokkai_4", "official_number": 4, "name_jp": "内容理解（短文）", "type": "reading-passage", "count": 3, "scoring_section": "vocabulary_grammar_reading", "passage_chars": 150, "questions_per_passage": 1},
+                {"id": "dokkai_5", "official_number": 5, "name_jp": "内容理解（中文）", "type": "reading-passage", "count": 3, "scoring_section": "vocabulary_grammar_reading", "passage_chars": 450, "questions_per_passage": 3},
                 {"id": "dokkai_6", "official_number": 6, "name_jp": "情報検索",        "type": "table-reading",   "count": 2, "scoring_section": "vocabulary_grammar_reading", "passage_chars": 400},
             ]},
             {"id": "listening", "labelJp": "聴解", "timeLimitMin": 35, "mondai": [
@@ -126,9 +135,9 @@ LEVEL_BLUEPRINT = {
                 {"id": "bunpou_1", "official_number": 1, "name_jp": "文の文法1",       "type": "grammar-fill",    "count": 13, "scoring_section": "grammar_reading"},
                 {"id": "bunpou_2", "official_number": 2, "name_jp": "文の文法2",       "type": "sentence-order",  "count": 5, "scoring_section": "grammar_reading"},
                 {"id": "bunpou_3", "official_number": 3, "name_jp": "文章の文法",       "type": "cloze-passage",   "count": 5, "scoring_section": "grammar_reading"},
-                {"id": "dokkai_4", "official_number": 4, "name_jp": "内容理解（短文）", "type": "reading-passage", "count": 4, "scoring_section": "grammar_reading", "passage_chars": 175},
-                {"id": "dokkai_5", "official_number": 5, "name_jp": "内容理解（中文）", "type": "reading-passage", "count": 6, "scoring_section": "grammar_reading", "passage_chars": 350},
-                {"id": "dokkai_6", "official_number": 6, "name_jp": "内容理解（長文）", "type": "reading-passage", "count": 4, "scoring_section": "grammar_reading", "passage_chars": 550},
+                {"id": "dokkai_4", "official_number": 4, "name_jp": "内容理解（短文）", "type": "reading-passage", "count": 4, "scoring_section": "grammar_reading", "passage_chars": 175, "questions_per_passage": 1},
+                {"id": "dokkai_5", "official_number": 5, "name_jp": "内容理解（中文）", "type": "reading-passage", "count": 6, "scoring_section": "grammar_reading", "passage_chars": 350, "questions_per_passage": 3},
+                {"id": "dokkai_6", "official_number": 6, "name_jp": "内容理解（長文）", "type": "reading-passage", "count": 4, "scoring_section": "grammar_reading", "passage_chars": 550, "questions_per_passage": 4},
                 {"id": "dokkai_7", "official_number": 7, "name_jp": "情報検索",        "type": "table-reading",   "count": 2, "scoring_section": "grammar_reading", "passage_chars": 600},
             ]},
             {"id": "listening", "labelJp": "聴解", "timeLimitMin": 40, "mondai": [
@@ -152,10 +161,10 @@ LEVEL_BLUEPRINT = {
                 {"id": "bunpou_7", "official_number": 7, "name_jp": "文の文法1",     "type": "grammar-fill",      "count": 12, "scoring_section": "grammar_reading"},
                 {"id": "bunpou_8", "official_number": 8, "name_jp": "文の文法2",     "type": "sentence-order",    "count": 5, "scoring_section": "grammar_reading"},
                 {"id": "bunpou_9", "official_number": 9, "name_jp": "文章の文法",    "type": "cloze-passage",     "count": 5, "scoring_section": "grammar_reading"},
-                {"id": "dokkai_10", "official_number": 10, "name_jp": "内容理解（短文）", "type": "reading-passage",       "count": 5, "scoring_section": "grammar_reading", "passage_chars": 200},
-                {"id": "dokkai_11", "official_number": 11, "name_jp": "内容理解（中文）", "type": "reading-passage",       "count": 9, "scoring_section": "grammar_reading", "passage_chars": 500},
+                {"id": "dokkai_10", "official_number": 10, "name_jp": "内容理解（短文）", "type": "reading-passage",       "count": 5, "scoring_section": "grammar_reading", "passage_chars": 200, "questions_per_passage": 1},
+                {"id": "dokkai_11", "official_number": 11, "name_jp": "内容理解（中文）", "type": "reading-passage",       "count": 9, "scoring_section": "grammar_reading", "passage_chars": 500, "questions_per_passage": 3},
                 {"id": "dokkai_12", "official_number": 12, "name_jp": "統合理解",       "type": "integrated-comparison",  "count": 2, "scoring_section": "grammar_reading", "passage_chars": 600},
-                {"id": "dokkai_13", "official_number": 13, "name_jp": "主張理解（長文）", "type": "reading-passage",       "count": 3, "scoring_section": "grammar_reading", "passage_chars": 900},
+                {"id": "dokkai_13", "official_number": 13, "name_jp": "主張理解（長文）", "type": "reading-passage",       "count": 3, "scoring_section": "grammar_reading", "passage_chars": 900, "questions_per_passage": 3},
                 {"id": "dokkai_14", "official_number": 14, "name_jp": "情報検索",       "type": "table-reading",          "count": 2, "scoring_section": "grammar_reading", "passage_chars": 700},
             ]},
             {"id": "listening", "labelJp": "聴解", "timeLimitMin": 50, "mondai": [
@@ -177,11 +186,11 @@ LEVEL_BLUEPRINT = {
                 {"id": "bunpou_5", "official_number": 5, "name_jp": "文の文法1",     "type": "grammar-fill",      "count": 10, "scoring_section": "grammar_reading"},
                 {"id": "bunpou_6", "official_number": 6, "name_jp": "文の文法2",     "type": "sentence-order",    "count": 5, "scoring_section": "grammar_reading"},
                 {"id": "bunpou_7", "official_number": 7, "name_jp": "文章の文法",    "type": "cloze-passage",     "count": 5, "scoring_section": "grammar_reading"},
-                {"id": "dokkai_8", "official_number": 8, "name_jp": "内容理解（短文）", "type": "reading-passage",       "count": 4, "scoring_section": "grammar_reading", "passage_chars": 200},
-                {"id": "dokkai_9", "official_number": 9, "name_jp": "内容理解（中文）", "type": "reading-passage",       "count": 9, "scoring_section": "grammar_reading", "passage_chars": 500},
-                {"id": "dokkai_10", "official_number": 10, "name_jp": "内容理解（長文）", "type": "reading-passage",      "count": 4, "scoring_section": "grammar_reading", "passage_chars": 1000},
+                {"id": "dokkai_8", "official_number": 8, "name_jp": "内容理解（短文）", "type": "reading-passage",       "count": 4, "scoring_section": "grammar_reading", "passage_chars": 200, "questions_per_passage": 1},
+                {"id": "dokkai_9", "official_number": 9, "name_jp": "内容理解（中文）", "type": "reading-passage",       "count": 9, "scoring_section": "grammar_reading", "passage_chars": 500, "questions_per_passage": 3},
+                {"id": "dokkai_10", "official_number": 10, "name_jp": "内容理解（長文）", "type": "reading-passage",      "count": 4, "scoring_section": "grammar_reading", "passage_chars": 1000, "questions_per_passage": 4},
                 {"id": "dokkai_11", "official_number": 11, "name_jp": "統合理解",       "type": "integrated-comparison", "count": 3, "scoring_section": "grammar_reading", "passage_chars": 600},
-                {"id": "dokkai_12", "official_number": 12, "name_jp": "主張理解（長文）", "type": "reading-passage",      "count": 4, "scoring_section": "grammar_reading", "passage_chars": 1000},
+                {"id": "dokkai_12", "official_number": 12, "name_jp": "主張理解（長文）", "type": "reading-passage",      "count": 4, "scoring_section": "grammar_reading", "passage_chars": 1000, "questions_per_passage": 4},
                 {"id": "dokkai_13", "official_number": 13, "name_jp": "情報検索",       "type": "table-reading",         "count": 2, "scoring_section": "grammar_reading", "passage_chars": 700},
             ]},
             {"id": "listening", "labelJp": "聴解", "timeLimitMin": 55, "mondai": [

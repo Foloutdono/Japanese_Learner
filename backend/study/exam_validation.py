@@ -6,11 +6,7 @@
 # well-formed and still a bad exam. A paper that fails any of these
 # should be regenerated (retry the failing mondai, not the whole
 # paper — see exam_kanji_gen.py), never served as-is.
-#
-# Scoped to what today's generators actually produce (mcq-text
-# questions, no passages, no LLM) — passage-length and kanji-gate
-# re-verification land with the reading/grammar generators that need
-# them.
+from study.llm_shared import sentence_kanji_ok
 
 # A generator that always puts the correct answer in the same slot is
 # a bug, even though it never emits an outright-wrong item; on a paper
@@ -71,10 +67,34 @@ def validate_no_duplicate_targets(questions: list[dict]) -> list[str]:
     return errors
 
 
-def validate_questions(questions: list[dict]) -> list[str]:
+def validate_passage_length(text: str, target_chars: int, tolerance: float = 0.2) -> list[str]:
+    length = len(text)
+    lo, hi = target_chars * (1 - tolerance), target_chars * (1 + tolerance)
+    if not (lo <= length <= hi):
+        return [f"passage length {length} outside target {target_chars} ({lo:.0f}-{hi:.0f})"]
+    return []
+
+
+def validate_kanji_gate(text: str, level: str) -> list[str]:
+    # LLM-generated text drifts from instructions often enough that this
+    # is worth re-checking rather than trusting the prompt constraint —
+    # same caution routes/reading.py's own comments already document.
+    if not sentence_kanji_ok(text, level):
+        return [f"text contains kanji outside {level}'s allowed set: {text[:60]!r}..."]
+    return []
+
+
+def validate_questions(questions: list[dict], check_duplicates: bool = True) -> list[str]:
+    # check_duplicates=False for reading-comprehension questions: their
+    # promptJp is the QUESTION text ("what does the author mean by
+    # X?"), not a test-item identity the way a vocab/kanji target word
+    # is — the real JLPT itself reuses boilerplate question phrasing
+    # ("which of the following matches the passage") across different
+    # passages, so flagging that as a duplicate would reject fine content.
     errors = []
     for q in questions:
         errors.extend(validate_mcq_question(q))
     errors.extend(validate_answer_balance(questions))
-    errors.extend(validate_no_duplicate_targets(questions))
+    if check_duplicates:
+        errors.extend(validate_no_duplicate_targets(questions))
     return errors

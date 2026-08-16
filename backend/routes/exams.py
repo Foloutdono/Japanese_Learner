@@ -11,7 +11,9 @@ from core.auth import get_user_id
 from study.exam_schema import ensure_exam_schema
 from study.exam_scoring import flatten_questions, score_attempt
 from study.exam_stub import STUB_EXAM_ID, STUB_PAPER
-from study.exam_vocab_gen import generate_vocabulary_paper, GenerationFailed
+from study.exam_gen_utils import GenerationFailed
+from study.exam_vocab_gen import generate_vocabulary_paper
+from study.exam_reading_gen import generate_reading_paper
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -34,6 +36,14 @@ EXAM_GENERATORS = {
         f"{level.lower()}-vocab-01": ("vocab-gen-1", partial(generate_vocabulary_paper, level))
         for level in _LEVELS
     },
+    **{
+        # A separate paper from "-vocab-01" at every level, including
+        # N1/N2 where the real exam presents vocab/grammar/reading in
+        # one booklet — accepted simplification, see
+        # exam_reading_gen.py's module docstring.
+        f"{level.lower()}-reading-01": ("reading-gen-1", partial(generate_reading_paper, level))
+        for level in _LEVELS
+    },
 }
 
 ensure_exam_schema()
@@ -47,6 +57,13 @@ def _seed_for(exam_id: str) -> int:
 
 
 def _get_or_create_paper(exam_id: str) -> dict | None:
+    """None means the id isn't registered at all (-> 404 upstream).
+    Raises GenerationFailed if the id IS registered but generation
+    currently can't produce a valid paper (e.g. an LLM-dependent
+    generator with no API key configured) — deliberately NOT converted
+    to an HTTPException here, since list_exams and get_exam need to
+    react to that differently (see their own call sites): one missing
+    exam shouldn't 503 the whole catalog listing."""
     entry = EXAM_GENERATORS.get(exam_id)
     if entry is None:
         return None
@@ -61,11 +78,7 @@ def _get_or_create_paper(exam_id: str) -> dict | None:
                 return row[0]
 
             seed = _seed_for(exam_id)
-            try:
-                paper = generate(seed)
-            except GenerationFailed as e:
-                logger.error("Exam generation failed for %s: %s", exam_id, e)
-                raise HTTPException(status_code=503, detail=f"Could not generate exam: {exam_id}")
+            paper = generate(seed)  # GenerationFailed propagates to the caller
 
             # INSERT ... ON CONFLICT DO NOTHING + re-SELECT: two
             # concurrent requests for the same never-before-seen
@@ -97,7 +110,14 @@ def _get_or_create_paper(exam_id: str) -> dict | None:
 def list_exams(user_id: str = Depends(get_user_id)):
     out = []
     for exam_id in EXAM_GENERATORS:
-        paper = _get_or_create_paper(exam_id)
+        try:
+            paper = _get_or_create_paper(exam_id)
+        except GenerationFailed as e:
+            # One exam currently failing to generate (e.g. an
+            # LLM-dependent one with no API key configured) must not
+            # break the whole catalog — omit it, loudly, and keep going.
+            logger.warning("Omitting %s from the exam list: %s", exam_id, e)
+            continue
         out.append({
             "id": exam_id,
             "level": paper["level"],
@@ -111,7 +131,11 @@ def list_exams(user_id: str = Depends(get_user_id)):
 
 @router.get("/api/exams/{exam_id}")
 def get_exam(exam_id: str, user_id: str = Depends(get_user_id)):
-    paper = _get_or_create_paper(exam_id)
+    try:
+        paper = _get_or_create_paper(exam_id)
+    except GenerationFailed as e:
+        logger.error("Exam generation failed for %s: %s", exam_id, e)
+        raise HTTPException(status_code=503, detail=f"Could not generate exam: {exam_id}")
     if paper is None:
         raise HTTPException(status_code=404, detail=f"Unknown exam id: {exam_id}")
     return paper
@@ -126,7 +150,11 @@ class SubmitAttemptPayload(BaseModel):
 
 @router.post("/api/exams/{exam_id}/attempts")
 def submit_attempt(exam_id: str, payload: SubmitAttemptPayload, user_id: str = Depends(get_user_id)):
-    paper = _get_or_create_paper(exam_id)
+    try:
+        paper = _get_or_create_paper(exam_id)
+    except GenerationFailed as e:
+        logger.error("Exam generation failed for %s: %s", exam_id, e)
+        raise HTTPException(status_code=503, detail=f"Could not generate exam: {exam_id}")
     if paper is None:
         raise HTTPException(status_code=404, detail=f"Unknown exam id: {exam_id}")
 
