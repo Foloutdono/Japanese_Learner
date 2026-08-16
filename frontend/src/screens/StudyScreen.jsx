@@ -17,7 +17,7 @@ import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
 import { DrawingQuiz, DrawingOverlay } from '../components/study/DrawingCanvas'
-import { speakJapanese } from '../lib/audio'
+import { speakJapanese, playUi } from '../lib/audio'
 import { vocabKanjiModes, kanjiModes, grammarModePicker, usesWritingDrill } from '../domain/quizModes'
 import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession } from '../hooks/useCardSession'
@@ -39,6 +39,68 @@ const FETCH_TIMEOUT_MS = 8000
 function allModeMeta(t) {
   const list = [...vocabKanjiModes(t), ...kanjiModes(t), ...grammarModePicker(t)]
   return Object.fromEntries(list.map(m => [m.key, m]))
+}
+
+// ── The merged recall modes ────────────────────────────────────
+// A deck used to offer "MCQ → meaning", "MCQ → word", "Flashcard →
+// meaning" and "Flashcard → word" as four separate entries, which is
+// two questions asked twice: the *direction* is the question, and
+// multiple-choice vs. bare recall is only how much help you get
+// answering it. They're one entry per direction now, and the help
+// level is a switch inside the session (see `assisted`) that a learner
+// can flip on the card in front of them — the point at which they
+// actually know whether they need the options.
+//
+// The session runs on the flashcard-flavoured key of the pair, for a
+// concrete reason: custom hand-written cards are only eligible for
+// flashcard-flavoured modes (see decks.py's _eligible — a front/back
+// pair has no distractors), so keying a mixed deck's session on the
+// qcm side would silently drop every card the learner wrote
+// themselves. decks.py attaches the qcm counterpart's choices to
+// app-sourced cards so the switch has something to show.
+//
+// One key means one SRS track, one set of stats and one review_preview
+// — no progress is split or double-counted by flipping. That's sound
+// rather than merely convenient: what an SRS review consumes is the
+// learner's own 1-4 self-rating from RatingBar, which means the same
+// thing whether or not four options were on screen when they recalled it.
+const MERGED_MODES = {
+  'flashcard-kj-m': 'qcm-kj-m',
+  'flashcard-m-kj': 'qcm-m-kj',
+  flashcard: 'mcq',
+}
+
+/** Collapse the raw mode list from the API into the merged entries. */
+function mergeModes(keys, meta, t) {
+  const present = new Set(keys)
+  // A qcm-flavoured key is only absorbed when the flashcard partner
+  // that would absorb it is actually in the list. Absorbing
+  // unconditionally would make a deck offering (hypothetically) just
+  // 'qcm-kj-m' show no entry for it at all — dropped rather than merged.
+  const absorbed = new Set(
+    Object.entries(MERGED_MODES)
+      .filter(([flashcardKey]) => present.has(flashcardKey))
+      .map(([, qcmKey]) => qcmKey),
+  )
+  return keys
+    .filter(key => !absorbed.has(key))
+    .map(key => {
+      const partner = MERGED_MODES[key]
+      const canMerge = partner && keys.includes(partner)
+      return {
+        key,
+        label: canMerge ? (meta[key]?.mergedLabel ?? mergedLabelFor(key, t)) : (meta[key]?.label ?? key),
+        desc: canMerge ? t.modeRecallDesc : (meta[key]?.desc ?? ''),
+      }
+    })
+}
+
+// The direction, named without the format that used to be glued to the
+// front of it ("MCQ (word → meaning)" becomes "Word → meaning").
+function mergedLabelFor(key, t) {
+  if (key === 'flashcard-kj-m') return t.modeRecallKjM
+  if (key === 'flashcard-m-kj') return t.modeRecallMKj
+  return t.modeRecallGrammar
 }
 
 // The written form to quiz/display on — mirrors VocabScreen's own
@@ -74,11 +136,7 @@ export default function StudyScreen({ session }) {
       .then(r => r.json())
       .then(data => {
         const keys = data.modes?.length ? data.modes : []
-        setAvailableModes(keys.map(key => ({
-          key,
-          label: MODE_META[key]?.label ?? key,
-          desc:  MODE_META[key]?.desc ?? '',
-        })))
+        setAvailableModes(mergeModes(keys, MODE_META, t))
         setComposition(data.composition ?? null)
       })
       .catch(() => setAvailableModes([]))
@@ -87,6 +145,11 @@ export default function StudyScreen({ session }) {
   }, [deck_id, session])
 
   const [answered, setAnswered]       = useState(false)
+  // The help level inside a merged mode: true = show the four choices,
+  // false = recall it cold and self-grade. Session-wide rather than
+  // per-card so it stays where the learner put it, but switchable at
+  // any moment — including mid-card, before answering.
+  const [assisted, setAssisted]       = useState(false)
   // Grammar's own flip state — unlike Kanji/Vocab, its flashcard mode
   // doesn't use the shared <Flashcard> component (see renderGrammarPrompt).
   const [flipped, setFlipped]         = useState(false)
@@ -207,8 +270,16 @@ export default function StudyScreen({ session }) {
 
   function startSession(m) {
     setMode(m)
+    // Start unassisted: the merged mode's whole point is that you try
+    // to recall first and reach for the choices when you actually need
+    // them, not the other way round.
+    setAssisted(false)
     loadProgress(m)
   }
+
+  // Is the running mode one of the merged pairs (and so eligible for
+  // the assist switch at all)? 'write'/'fill' are not.
+  const isMerged = mode != null && mode in MERGED_MODES
 
   function checkAdvance() {
     if (pendingGatesRef.current.size === 0 && !advancedRef.current) {
@@ -370,8 +441,17 @@ export default function StudyScreen({ session }) {
     )
   }
 
-  const currentModeLabel = MODE_META[mode]?.label ?? mode
+  const currentModeLabel = isMerged ? mergedLabelFor(mode, t) : (MODE_META[mode]?.label ?? mode)
   const isKjToM = card?.direction === 'kj-m'
+
+  // Whether THIS card can offer the assisted view: it needs the
+  // distractors decks.py attaches to app-sourced cards. A custom
+  // hand-written card never has them (nothing to build them from), so
+  // in a mixed deck the switch simply doesn't apply to those cards and
+  // the control says so rather than sitting there dead.
+  const cardCanAssist = isMerged && Array.isArray(card?.choices) && card.choices.length > 0
+  // What the card should actually render as, right now.
+  const shownFormat = cardCanAssist && assisted ? 'qcm' : card?.format
 
   // ── Per-source prompt renderers (rendered inside CardTransition) ──
   // Deliberately NOT collapsed into one generic front/back layout —
@@ -432,7 +512,7 @@ export default function StudyScreen({ session }) {
     }
     return (
       <PromptCard>
-        {c.format === 'flashcard' && (
+        {shownFormat === 'flashcard' && (
           <Flashcard
             t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
             front={isKjToM ? <CharDisplay char={c.kanji} size={100} /> : <MeaningDisplay meaning={c.meaning} size={44} />}
@@ -446,7 +526,7 @@ export default function StudyScreen({ session }) {
             onReplaySound={() => speakJapanese(c.kana)}
           />
         )}
-        {c.format === 'qcm' && (
+        {shownFormat === 'qcm' && (
           <>
             <InlineReveal
               t={t} kana={c.kana} revealed={answered}
@@ -464,7 +544,7 @@ export default function StudyScreen({ session }) {
   function renderVocabPrompt(c) {
     return (
       <PromptCard>
-        {c.format === 'flashcard' && (
+        {shownFormat === 'flashcard' && (
           <Flashcard
             t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
             front={<CharDisplay char={isKjToM ? wordForm(c) : formatGlossLine(c.meaning)} size={72} />}
@@ -480,7 +560,7 @@ export default function StudyScreen({ session }) {
             onReplaySound={() => speakJapanese(c.kana)}
           />
         )}
-        {c.format === 'qcm' && (
+        {shownFormat === 'qcm' && (
           <>
             <InlineReveal
               t={t} kana={c.kanji ? c.kana : null} revealed={answered}
@@ -496,13 +576,18 @@ export default function StudyScreen({ session }) {
   }
 
   function renderGrammarPrompt(c) {
+    // grammarAssisted: the merged grammar mode ('flashcard') showing its
+    // choices. Grammar's flip is bespoke (not the shared <Flashcard>),
+    // so it reads the switch directly rather than through shownFormat.
+    const grammarAssisted = mode === 'flashcard' && cardCanAssist && assisted
+    const isFlip = mode === 'flashcard' && !grammarAssisted
     return (
       <PromptCard className="grammar-prompt">
         <div className="grammar-glyph">{c.grammar}</div>
-        {mode === 'flashcard' && !flipped && <div className="grammar-hint">{t.revealMeaning}</div>}
-        {mode === 'flashcard' && flipped && <div className="grammar-meaning"><GlossList meaning={c.meaning} /></div>}
-        {mode !== 'flashcard' && (
-          <div className="grammar-reveal-hint">{mode === 'mcq' ? t.revealMeaning : t.revealSentence}</div>
+        {isFlip && !flipped && <div className="grammar-hint">{t.revealMeaning}</div>}
+        {isFlip && flipped && <div className="grammar-meaning"><GlossList meaning={c.meaning} /></div>}
+        {!isFlip && (
+          <div className="grammar-reveal-hint">{mode === 'fill' ? t.revealSentence : t.revealMeaning}</div>
         )}
       </PromptCard>
     )
@@ -541,6 +626,32 @@ export default function StudyScreen({ session }) {
 
         {card && !loading && (
           <>
+            {/* The help switch, on the card rather than back on the
+                mode picker: you only find out whether you needed the
+                options once you're looking at the prompt. Flipping it
+                mid-card is the point, so it stays live until the card
+                is rated (`locked`). A custom hand-written card has no
+                distractors to show, so on those it explains its own
+                absence instead of appearing dead. */}
+            {isMerged && (
+              <div className="study-assist">
+                {cardCanAssist ? (
+                  <button
+                    type="button"
+                    className={`study-assist__toggle${assisted ? ' study-assist__toggle--on' : ''}`}
+                    onClick={() => { playUi('click-mode-selection'); setAssisted(a => !a) }}
+                    disabled={locked}
+                    aria-pressed={assisted}
+                  >
+                    <LightbulbIcon size={14} />
+                    {assisted ? t.assistOn : t.assistOff}
+                  </button>
+                ) : (
+                  <span className="study-assist__na">{t.assistUnavailable}</span>
+                )}
+              </div>
+            )}
+
             <CardTransition
               cardKey={`${card.card_id}:${cardNonce}`}
               stamp={cardStamp}
@@ -570,16 +681,21 @@ export default function StudyScreen({ session }) {
               </div>
             )}
 
-            {/* Grammar flashcard reveal */}
-            {card.source === 'builtin_grammar' && mode === 'flashcard' && !flipped && (
+            {/* Grammar flashcard reveal — hidden while the merged mode
+                is showing its choices instead. */}
+            {card.source === 'builtin_grammar' && mode === 'flashcard'
+              && !(cardCanAssist && assisted) && !flipped && (
               <button onClick={onGrammarFlashcardReveal} className="reveal-btn">
                 {t.revealMeaningBtn}
               </button>
             )}
 
             {/* Grammar MCQ — choices are plain meaning strings, unlike
-                Kanji/Vocab's {kanji,meaning} choice objects below. */}
-            {card.source === 'builtin_grammar' && mode === 'mcq' && (
+                Kanji/Vocab's {kanji,meaning} choice objects below.
+                Reached either as the standalone 'mcq' mode or as the
+                assisted half of the merged 'flashcard' one. */}
+            {card.source === 'builtin_grammar'
+              && (mode === 'mcq' || (mode === 'flashcard' && cardCanAssist && assisted)) && (
               <MCQGrid choices={card.choices} correct={card.meaning}
                 formatChoice={formatGlossLine}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
@@ -614,7 +730,7 @@ export default function StudyScreen({ session }) {
 
             {/* Kanji/Vocab MCQ — choices are {kanji,(kana,)meaning}
                 objects, flattened to whichever side isn't the prompt. */}
-            {(card.source === 'builtin_kanji' || card.source === 'builtin_vocab') && card.format === 'qcm' && (
+            {(card.source === 'builtin_kanji' || card.source === 'builtin_vocab') && shownFormat === 'qcm' && (
               <MCQGrid
                 choices={card.choices.map(c => isKjToM ? c.meaning : wordForm(c))}
                 correct={isKjToM ? card.meaning : wordForm(card)}

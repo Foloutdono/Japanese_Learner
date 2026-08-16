@@ -9,7 +9,7 @@ import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
 import BrowseCardsMenu from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
-import { PlayIcon, ImportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIcon, PencilIcon, TrashIcon, CardIcon } from '../components/ui/Icons'
+import { PlayIcon, ImportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIcon, PencilIcon, TrashIcon, CardIcon, LightbulbIcon } from '../components/ui/Icons'
 
 // Mirrors decks.py's SOURCE_FOR_TYPE / _allowed_sources / _allows_custom
 // exactly — kept in sync by hand since it's this small. This is only
@@ -17,6 +17,16 @@ import { PlayIcon, ImportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIc
 // tabs); decks.py enforces the real rule server-side regardless of
 // what the frontend shows.
 const RESTRICTED_SOURCES_BY_TYPE = { kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'] }
+
+// A browsed-in card is tagged with the pigment of the section it came
+// from — the same colours components/decks/deckTypes.js gives the deck
+// types, so "this card is from 漢字" reads identically wherever it's
+// shown.
+const SOURCE_COLOR = {
+  kanji: 'var(--line-kanji)',
+  vocab: 'var(--line-vocab)',
+  grammar: 'var(--line-grammar)',
+}
 
 function allowedSourcesFor(type) {
   if (type in RESTRICTED_SOURCES_BY_TYPE) return RESTRICTED_SOURCES_BY_TYPE[type]
@@ -333,48 +343,53 @@ export default function DeckDetailScreen({ session }) {
                     </div>
                   )}
 
+                  {/* A card, not a database row. This was five
+                      "Label / value" pairs laid out side by side —
+                      "Front", "Back / Meaning", "かな", "Hint",
+                      "Notes" — repeated down the page, so the labels
+                      outnumbered the Japanese and every entry read as
+                      a record rather than something to study. The
+                      front is now the entry, at the size the app shows
+                      Japanese everywhere else; the reading sits under
+                      it the way furigana does; the meaning follows;
+                      and hint/notes are quiet annotations at the end.
+                      Only the two optional ones still name themselves,
+                      because those genuinely aren't self-evident. */}
                   <div className="deckdetail-card-content">
-                    <div className="deckdetail-card-fields">
-                      <div>
-                        <div className="deckdetail-field-label">
-                          {t.frontPlaceholder}
-                          {/* App-sourced cards (browsed in from kanji/vocab/
-                              grammar) carry their own SRS progress shared
-                              with the rest of the app — see decks.py's
-                              _build_pool — so they're shown read-only here,
-                              tagged by source, instead of an editable form. */}
-                          {card.origin === 'app' && (
-                            <span className="deckdetail-source-badge">
-                              {' '}· {{ kanji: t.kanjiType, vocab: t.vocabType, grammar: t.grammarType }[card.source] ?? card.source}{card.level ? ` ${card.level}` : ''}
-                            </span>
-                          )}
-                        </div>
-                        <div className="deckdetail-field-value deckdetail-field-value--jp">{card.front}</div>
-                      </div>
-                      {card.kana && (
-                        <div>
-                          <div className="deckdetail-field-label">かな</div>
-                          <div className="deckdetail-field-value">{card.kana}</div>
-                        </div>
-                      )}
-                      <div>
-                        <div className="deckdetail-field-label">{t.backPlaceholder}</div>
-                        <div className="deckdetail-field-value">{card.back}</div>
-                      </div>
-                      {card.hint && (
-                        <div>
-                          <div className="deckdetail-field-label">{t.hintPlaceholder}</div>
-                          <div className="deckdetail-field-value deckdetail-field-value--hint">{card.hint}</div>
-                        </div>
-                      )}
-                      {card.notes && (
-                        <div>
-                          <div className="deckdetail-field-label">{t.notesPlaceholder}</div>
-                          <div className="deckdetail-field-value deckdetail-field-value--notes">{card.notes}</div>
-                        </div>
-                      )}
+                    <div className="deckdetail-entry">
+                      <span className="deckdetail-entry__front" lang="ja">{card.front}</span>
+                      {card.kana && <span className="deckdetail-entry__kana" lang="ja">{card.kana}</span>}
                     </div>
+                    <div className="deckdetail-entry__back">{card.back}</div>
+                    {(card.hint || card.notes) && (
+                      <div className="deckdetail-entry__notes">
+                        {card.hint && (
+                          <span className="deckdetail-entry__note">
+                            <LightbulbIcon size={12} /> {card.hint}
+                          </span>
+                        )}
+                        {card.notes && (
+                          <span className="deckdetail-entry__note deckdetail-entry__note--muted">{card.notes}</span>
+                        )}
+                      </div>
+                    )}
                   </div>
+
+                  {/* App-sourced cards (browsed in from kanji/vocab/
+                      grammar) carry their own SRS progress shared with
+                      the rest of the app — see decks.py's _build_pool —
+                      so they're read-only here, tagged by where they
+                      came from. The tag wears that section's own
+                      pigment, same as the deck-type roundel. */}
+                  {card.origin === 'app' && (
+                    <span
+                      className="deckdetail-source-badge"
+                      style={{ '--rail': SOURCE_COLOR[card.source] ?? 'var(--text-secondary)' }}
+                    >
+                      {{ kanji: t.kanjiType, vocab: t.vocabType, grammar: t.grammarType }[card.source] ?? card.source}
+                      {card.level ? ` · ${card.level}` : ''}
+                    </span>
+                  )}
 
                   {!selectMode && card.origin === 'custom' && (
                     <button onClick={() => startEdit(card)} className="deckdetail-edit-btn" aria-label={t.edit} title={t.edit}>

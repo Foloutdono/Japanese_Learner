@@ -240,6 +240,19 @@ const quiz = {
   modeFcMKj:         (noun) => `Flashcard (meaning → ${noun})`,
   modeFcMKjDesc:     (noun) => `The meaning alone. Recall the ${noun}, then check.`,
 
+  // ── Merged recall modes (deck study) ──
+  // A deck offers one entry per direction instead of an MCQ one and a
+  // flashcard one, because those were the same question asked with two
+  // different amounts of help — and the help is now a switch on the
+  // card itself. See StudyScreen's MERGED_MODES.
+  modeRecallKjM:     'Word → meaning',
+  modeRecallMKj:     'Meaning → word',
+  modeRecallGrammar: 'Pattern → meaning',
+  modeRecallDesc:    'Recall it, or show four choices — switch at any time.',
+  assistOff:         'Show choices',
+  assistOn:          'Hide choices',
+  assistUnavailable: 'Your own card — recall and grade yourself',
+
   modeFcKanaDesc:     'The kana alone. Say the sound, then check.',
   modeQcmKanaDesc:    'The kana is shown. Pick its sound from four.',
   modeWriteKanaDesc:   'The sound is given. Draw the kana.',

@@ -3315,6 +3315,42 @@ input:focus { border-color: var(--accent2); }
   color: var(--text-secondary);
 }
 
+/* ── The help switch inside a merged recall mode ───────────
+   Sits above the card, right-aligned and quiet: it is an offer, not
+   the main event. The whole design of the merged mode is "try to
+   recall first", so the control that hands you the answers should
+   never out-shout the prompt. */
+.study-assist {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 30px;
+  margin-bottom: 10px;
+}
+.study-assist__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  padding: 6px 12px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-line);
+}
+.study-assist__toggle--on {
+  background: color-mix(in srgb, var(--accent2) 18%, var(--bg-card));
+  border-color: color-mix(in srgb, var(--accent2) 45%, transparent);
+  color: var(--accent2);
+}
+.study-assist__toggle:disabled { opacity: 0.4; cursor: default; }
+/* A hand-written card has no distractors to offer, so it says why
+   rather than showing a control that would do nothing. */
+.study-assist__na {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
 /* ── Quiz screen shells ───────────────────────────────────── */
 .screen {
   min-height: 100vh;   /* fallback for browsers without dvh support */
@@ -7741,10 +7777,24 @@ input:focus { border-color: var(--accent2); }
 .decks-create-card__title { font-size: 15px; font-weight: bold; margin-bottom: 16px; }
 .decks-create-input { width: 100%; padding: 10px 14px; font-size: 15px; margin-bottom: 12px; }
 
-.decks-type-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+/* An even grid, not a wrapping row of content-sized chips. Sized to
+   content, the five types wrapped 3-then-2 at ragged widths with their
+   descriptions centred under left-aligned labels — five different
+   shapes for five equivalent choices. */
+.decks-type-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+/* A surface, not the ink panel. --bg-panel is the app's dark panel in
+   BOTH themes (see the calendar's own note on that token), so five of
+   these side by side came out as five near-black boxes on light paper —
+   right for a solid action button like "Study", wrong for a row of
+   options you are meant to read and compare before choosing. */
 .decks-type-btn {
-  background: var(--bg-panel);
-  color: var(--text-on-panel-soft);
+  background: var(--surface);
+  color: var(--text-primary);
   font-size: 13px;
   padding: 8px 16px;
 }
@@ -7753,28 +7803,36 @@ input:focus { border-color: var(--accent2); }
    .dict-level-badge, so picking a deck type doesn't read as 5
    different loud, competing-colour buttons in a row. */
 .decks-type-btn--active {
-  background: color-mix(in srgb, var(--type-color, var(--deck-action)) 20%, var(--bg-panel));
+  background: color-mix(in srgb, var(--type-color, var(--deck-action)) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--type-color, var(--deck-action)) 55%, transparent);
   color: var(--type-color, var(--deck-action));
 }
+.decks-type-btn--active .decks-type-btn__desc { color: inherit; opacity: 0.85; }
 /* The type's one-character name, sized to sit in the same chip as the
    label rather than above it. */
 .decks-type-btn {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 2px 9px;
+  height: 100%;
+  padding: 10px 14px;
   /* Buttons centre their text by default, which left the description
      line floating under a left-aligned label. */
   text-align: left;
+  border: 1px solid var(--surface-line);
 }
+.decks-type-btn__desc { color: var(--text-secondary); }
 .decks-type-btn__glyph {
+  grid-row: span 2;
   font-family: var(--font-jp);
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 700;
+  line-height: 1;
   color: var(--type-color, var(--text-secondary));
 }
-.decks-type-btn__label { font-weight: 600; }
-.decks-type-btn__desc { flex-basis: 100%; font-size: 10px; opacity: 0.8; }
+.decks-type-btn__label { font-weight: 600; font-size: 13px; }
+.decks-type-btn__desc { font-size: 10.5px; line-height: 1.45; opacity: 0.75; }
 
 .decks-create-submit { width: 100%; }
 
@@ -7910,13 +7968,20 @@ input:focus { border-color: var(--accent2); }
 .deckdetail-card-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  border-left: 3px solid transparent;
-  background: var(--bg-card);
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: 6px;
   transition: background 0.15s, border-color 0.15s;
 }
 .deckdetail-card-row--selectable { cursor: pointer; }
-.deckdetail-card-row--selected { border-left-color: var(--accent); background: var(--bg-panel);  color: var(--text-on-panel);}
+.deckdetail-card-row--selectable:hover { border-color: var(--deck-action); }
+/* Selected reads as the deck line picking the row out, not as the
+   quiz screens' "correct answer" accent. */
+.deckdetail-card-row--selected {
+  border-color: var(--deck-action);
+  background: color-mix(in srgb, var(--deck-action) 12%, var(--surface));
+}
 
 .deckdetail-checkbox {
   width: 20px;
@@ -7929,19 +7994,70 @@ input:focus { border-color: var(--accent2); }
   align-items: center;
   justify-content: center;
 }
-.deckdetail-checkbox--checked { border-color: var(--accent); background: var(--accent); }
+.deckdetail-checkbox--checked { border-color: var(--deck-action); background: var(--deck-action); }
 .deckdetail-checkbox__mark { color: var(--text-on-panel); font-size: 12px; line-height: 1; }
 
-.deckdetail-card-content { flex: 1; }
-.deckdetail-card-fields { display: flex; gap: 24px; flex-wrap: wrap; }
-.deckdetail-field-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
-.deckdetail-source-badge { text-transform: uppercase; letter-spacing: 0.02em; opacity: 0.8; }
-.deckdetail-field-value {
-  font-size: 20px;
+/* ── One card in the list ──
+   The front is the entry and carries the Japanese face at reading
+   size; the reading sits under it the way furigana does; the meaning
+   follows. Only hint/notes still name themselves — everything else was
+   labelled ("Front", "Back / Meaning", "かな") in a row of columns,
+   which made the labels outnumber the content and turned a deck into a
+   spreadsheet. */
+.deckdetail-card-content { flex: 1; min-width: 0; }
+.deckdetail-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.deckdetail-field-value--jp { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
-.deckdetail-field-value--hint { color: var(--warning); }
-.deckdetail-field-value--notes { color: var(--text-secondary); }
+.deckdetail-entry__front {
+  font-family: var(--font-jp);
+  font-size: 24px;
+  line-height: 1.35;
+}
+.deckdetail-entry__kana {
+  font-family: var(--font-jp);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.deckdetail-entry__back {
+  margin-top: 2px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+.deckdetail-entry__notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 7px;
+}
+.deckdetail-entry__note {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--warning);
+}
+.deckdetail-entry__note--muted { color: var(--text-secondary); }
+
+/* Where a browsed-in card came from, in that section's own pigment —
+   a quiet tag at the end of the row rather than a word wedged into a
+   "Front" label. */
+.deckdetail-source-badge {
+  flex-shrink: 0;
+  align-self: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--rail) 40%, transparent);
+  background: color-mix(in srgb, var(--rail) 12%, transparent);
+  color: var(--rail);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
 
 .deckdetail-edit-btn {
   background: var(--bg-panel);

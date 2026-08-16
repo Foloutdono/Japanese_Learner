@@ -800,6 +800,29 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
     return pool
 
 
+# flashcard-flavoured mode -> the qcm-flavoured mode covering the same
+# material in the same direction. StudyScreen lets a learner flip
+# between "show me the choices" and "recall it cold" on the card in
+# front of them (see its MODE_PAIR), which means an app-sourced card
+# has to arrive carrying its distractors even when the session itself
+# is flashcard-keyed. Custom cards have no counterpart and appear here
+# for exactly the reason _eligible spells out below: a hand-written
+# front/back pair has no distractors to offer.
+#
+# The session stays on ONE mode either way — the flashcard-flavoured
+# one, since that's the only key custom cards are eligible for, and a
+# mixed deck without its own hand-written cards would be a strange
+# thing to hand back. Nothing about the flip re-keys the SRS: the
+# grade an SRS review actually consumes is the learner's own 1-4
+# self-rating from RatingBar, which means the same thing whether or
+# not four options happened to be on screen.
+QCM_COUNTERPART = {
+    "flashcard-kj-m": "qcm-kj-m",
+    "flashcard-m-kj": "qcm-m-kj",
+    "flashcard": "mcq",  # grammar
+}
+
+
 def _eligible(pool_entry: dict, mode: str) -> bool:
     # Custom cards are a plain front/back pair — no MCQ distractors, no
     # kanji to draw, no fill-in-the-blank sentence — so they can only
@@ -883,6 +906,20 @@ def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr"
             card = cfg["build"](raw_id, p["entry"], p["level"], level_list, mode, lang, stage, preview)
             card["card_id"] = raw_id
             card["source"]  = f"builtin_{p['source']}"
+
+            # Attach the distractors the qcm-flavoured counterpart would
+            # have built, so StudyScreen can flip this card to multiple
+            # choice without another round trip. Built through the same
+            # cfg["build"] as a real qcm card rather than duplicating the
+            # distractor logic here, so the choices a flipped card shows
+            # are the exact ones it would show in a qcm session.
+            counterpart = QCM_COUNTERPART.get(mode)
+            if counterpart and counterpart in cfg["valid_modes"] and "choices" not in card:
+                alt = cfg["build"](raw_id, p["entry"], p["level"], level_list,
+                                   counterpart, lang, stage, preview)
+                if alt.get("choices"):
+                    card["choices"] = alt["choices"]
+
             cards.append(card)
 
     logger.info(

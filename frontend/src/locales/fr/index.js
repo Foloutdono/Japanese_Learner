@@ -228,6 +228,19 @@ const quiz = {
   modeFcMKj:         (noun) => `Carte (sens → ${noun})`,
   modeFcMKjDesc:     (noun) => `Le sens seul. Rappelez le ${noun}, puis vérifiez.`,
 
+  // ── Modes de rappel fusionnés (étude d'un deck) ──
+  // Un deck propose une entrée par sens plutôt qu'une en QCM et une en
+  // flashcard : c'était la même question posée avec deux niveaux
+  // d'aide — et l'aide est désormais un bouton sur la carte elle-même.
+  // Voir MERGED_MODES dans StudyScreen.
+  modeRecallKjM:     'Mot → sens',
+  modeRecallMKj:     'Sens → mot',
+  modeRecallGrammar: 'Structure → sens',
+  modeRecallDesc:    'Rappelez-vous, ou affichez quatre choix — à tout moment.',
+  assistOff:         'Afficher les choix',
+  assistOn:          'Masquer les choix',
+  assistUnavailable: 'Votre carte — rappelez-vous et auto-évaluez',
+
   modeFcKanaDesc:     'Le kana seul. Dites le son, puis vérifiez.',
   modeQcmKanaDesc:    'Le kana est affiché. Choisissez son son parmi quatre.',
   modeWriteKanaDesc:  'Le son est donné. Tracez le kana.',
