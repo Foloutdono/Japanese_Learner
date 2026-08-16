@@ -71,6 +71,17 @@ export function flattenQuestions(exam) {
       pushMondaiQuestions(section, mondai, out)
     }
   }
+
+  // Renumber continuously per section — see exam_scoring.py's
+  // flatten_questions for why: every generator numbers its own
+  // mondai's items starting at 1 in isolation, so without this pass
+  // three mondai in one paper each show a "Q1".
+  const nextNumber = {}
+  for (const q of out) {
+    nextNumber[q.sectionId] = (nextNumber[q.sectionId] ?? 0) + 1
+    q.number = nextNumber[q.sectionId]
+  }
+
   return out
 }
 

@@ -20,6 +20,22 @@ def flatten_questions(exam: dict) -> list[dict]:
     for section in exam["sections"]:
         for mondai in section["mondai"]:
             _push_mondai_questions(section, mondai, out)
+
+    # Renumber continuously per section, overriding whatever "number" a
+    # generator set on each question (every generator numbers its own
+    # mondai's items starting at 1, since a mondai is built in
+    # isolation from its neighbors — matching the real exam's own
+    # numbering, which runs continuously through a whole section and
+    # only resets between different sections, needs a pass over the
+    # complete flattened list). Two Q1s and a Q2 on one result screen,
+    # from three different mondai that each restarted at 1, was the
+    # bug this fixes.
+    next_number: dict[str, int] = {}
+    for q in out:
+        sid = q["sectionId"]
+        next_number[sid] = next_number.get(sid, 0) + 1
+        q["number"] = next_number[sid]
+
     return out
 
 

@@ -14,6 +14,7 @@ from study.exam_stub import STUB_EXAM_ID, STUB_PAPER
 from study.exam_gen_utils import GenerationFailed
 from study.exam_vocab_gen import generate_vocabulary_paper
 from study.exam_reading_gen import generate_reading_paper
+from study.exam_grammar_gen import generate_grammar_paper
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -42,6 +43,13 @@ EXAM_GENERATORS = {
         # one booklet — accepted simplification, see
         # exam_reading_gen.py's module docstring.
         f"{level.lower()}-reading-01": ("reading-gen-1", partial(generate_reading_paper, level))
+        for level in _LEVELS
+    },
+    **{
+        # Same accepted simplification as "-reading-01": its own paper
+        # at every level rather than merged into the real exam's
+        # combined booklet at N1/N2.
+        f"{level.lower()}-grammar-01": ("grammar-gen-1", partial(generate_grammar_paper, level))
         for level in _LEVELS
     },
 }

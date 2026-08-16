@@ -34,17 +34,59 @@ def validate_mcq_question(question: dict) -> list[str]:
     return errors
 
 
+def validate_sentence_order_question(question: dict) -> list[str]:
+    # Sentence-order (文の文法2 / SentenceOrderBlock) questions have a
+    # different shape entirely: {pieces, order, starIndex, answer} —
+    # no "choices" field at all. validate_mcq_question would reject
+    # every one of these as "0 choices, expected 4"; this is the
+    # shape-correct equivalent.
+    errors = []
+    pieces = question.get("pieces") or []
+    if len(pieces) != 4:
+        errors.append(f"{question.get('id')}: expected 4 pieces, got {len(pieces)}")
+        return errors
+
+    texts = [p.get("textJp") for p in pieces]
+    if len(set(texts)) != len(texts):
+        errors.append(f"{question.get('id')}: duplicate piece text {texts}")
+
+    ids = {p.get("id") for p in pieces}
+    order = question.get("order") or []
+    if set(order) != ids or len(order) != 4:
+        errors.append(f"{question.get('id')}: order {order} doesn't match piece ids {ids}")
+
+    star_index = question.get("starIndex")
+    if not isinstance(star_index, int) or not (0 <= star_index < 4):
+        errors.append(f"{question.get('id')}: invalid starIndex {star_index!r}")
+    elif order and order[star_index] != question.get("answer"):
+        errors.append(f"{question.get('id')}: answer {question.get('answer')!r} doesn't match order[starIndex]")
+
+    if question.get("answer") not in ids:
+        errors.append(f"{question.get('id')}: answer {question.get('answer')!r} not among piece ids {ids}")
+
+    return errors
+
+
+def _answer_position(question: dict) -> int | None:
+    """0-3 index of the correct option within whichever list the
+    question actually offers (choices, or pieces for sentence-order),
+    or None if it can't be determined."""
+    options = question.get("choices") or question.get("pieces") or []
+    for i, o in enumerate(options):
+        if o.get("id") == question.get("answer"):
+            return i
+    return None
+
+
 def validate_answer_balance(questions: list[dict]) -> list[str]:
     if len(questions) < MIN_QUESTIONS_FOR_BALANCE_CHECK:
         return []
 
     positions: dict[str, int] = {}
     for q in questions:
-        choices = q.get("choices") or []
-        for i, c in enumerate(choices):
-            if c.get("id") == q.get("answer"):
-                positions[str(i)] = positions.get(str(i), 0) + 1
-                break
+        i = _answer_position(q)
+        if i is not None:
+            positions[str(i)] = positions.get(str(i), 0) + 1
 
     total = sum(positions.values())
     if total == 0:
@@ -85,15 +127,20 @@ def validate_kanji_gate(text: str, level: str) -> list[str]:
 
 
 def validate_questions(questions: list[dict], check_duplicates: bool = True) -> list[str]:
-    # check_duplicates=False for reading-comprehension questions: their
-    # promptJp is the QUESTION text ("what does the author mean by
-    # X?"), not a test-item identity the way a vocab/kanji target word
-    # is — the real JLPT itself reuses boilerplate question phrasing
-    # ("which of the following matches the passage") across different
-    # passages, so flagging that as a duplicate would reject fine content.
+    # check_duplicates=False for reading-comprehension and grammar
+    # questions: their promptJp is the QUESTION/SENTENCE text, not a
+    # test-item identity the way a vocab/kanji target word is — the
+    # real JLPT itself reuses boilerplate phrasing across different
+    # items, so flagging that as a duplicate would reject fine content.
     errors = []
     for q in questions:
-        errors.extend(validate_mcq_question(q))
+        # Shape-dispatch: sentence-order questions ({pieces, order,
+        # starIndex}) have no "choices" field at all, so
+        # validate_mcq_question would reject every one of them.
+        if "pieces" in q:
+            errors.extend(validate_sentence_order_question(q))
+        else:
+            errors.extend(validate_mcq_question(q))
     errors.extend(validate_answer_balance(questions))
     if check_duplicates:
         errors.extend(validate_no_duplicate_targets(questions))
