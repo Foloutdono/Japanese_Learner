@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { playUi, playSfx } from '../lib/audio'
+import { playUi, playCorrect } from '../lib/audio'
 import QuestionRenderer from '../exam/QuestionRenderer'
 import EmptyState from '../components/ui/EmptyState'
 import { flattenQuestions } from '../exam/examService'
@@ -38,7 +38,7 @@ export default function ExamResult() {
   const sectionStats = summary.perSection[sectionId] ?? { correct: 0, total: 0 }
 
   const passed = summary.scorePct >= 60
-  if (passed) playSfx('success')
+  if (passed) playCorrect()
 
   function toggle(id) {
     playUi('click-mode-selection')

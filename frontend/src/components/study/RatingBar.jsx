@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useLang } from '../../LangContext'
-import { playSfx } from '../../lib/audio'
+import { playCorrect, playWrong } from '../../lib/audio'
 
 export default function RatingBar({ onRate, active }) {
   const { t } = useLang()
@@ -23,9 +23,9 @@ export default function RatingBar({ onRate, active }) {
   // so a rating fired either way gets the same tap feedback.
   function handleRate(q) {
     if (q > 2)
-      playSfx('success')
+      playCorrect()
     else
-      playSfx('failure')
+      playWrong()
     onRate(q)
   }
 

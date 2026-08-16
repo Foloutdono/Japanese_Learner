@@ -18,6 +18,8 @@ import { isMuted } from './settings'
 // public/sounds/README.md.
 const GATE_CHIME = '/sounds/ui/gate-chime.mp3'
 const DOOR_CHIME = '/sounds/ui/door-chime.mp3'
+const CORRECT = '/sounds/ui/correct.mp3'
+const WRONG = '/sounds/ui/wrong.mp3'
 const CLICK = '/sounds/ui/click.mp3'
 const TOGGLE = '/sounds/ui/toggle.mp3'
 const FARE_TICK = '/sounds/ui/fare-tick.mp3'
@@ -71,6 +73,29 @@ const CLICK_BLIPS = [
 const TOGGLE_BLIPS = [
   { freq: 987.77,  at: 0,     dur: 0.030, peak: 0.15 },  // B5
   { freq: 1318.51, at: 0.038, dur: 0.045, peak: 0.15 },  // E6
+]
+
+// ── Marking an answer ─────────────────────────────────────
+// These replace sfx/success.mp3 and sfx/failure.mp3, which were a
+// 68KB and a 42KB sample and — the actual complaint — loud enough that
+// the XP tick landing a beat later could not be heard under them. A
+// sound that masks the reward it is announcing is working against the
+// thing it exists for.
+//
+// Both are short and sit deliberately below the fare tick, and both
+// stay inside the station's vocabulary: a clean confirming pair for
+// correct, a soft double thud for wrong. Neither buzzes. A buzzer is
+// what a gate does when it *rejects* you, and getting a card wrong in
+// a study app is not that — it is the next card.
+const CORRECT_BLIPS = [
+  { freq: 1046.5, at: 0,     dur: 0.09, peak: 0.17 },  // C6
+  { freq: 1568.0, at: 0.055, dur: 0.16, peak: 0.15 },  // G6, a fifth up
+]
+
+// Low, dull, and over quickly — felt more than heard.
+const WRONG_BLIPS = [
+  { freq: 196.0, at: 0,    dur: 0.12, peak: 0.20 },  // G3
+  { freq: 146.8, at: 0.09, dur: 0.20, peak: 0.17 },  // D3
 ]
 
 // 到着 — arriving. Played when a session finishes, which in this app
@@ -335,6 +360,16 @@ export function playFlapClatter() {
       else { assetMissing.add(FLAP_CLATTER); synthesiseClatter(ctx) }
     })
     .catch(() => { assetMissing.add(FLAP_CLATTER); synthesiseClatter(ctx) })
+}
+
+/** A card answered right. */
+export function playCorrect() {
+  playChime(CORRECT, 'correct', CORRECT_BLIPS)
+}
+
+/** A card answered wrong. Not a buzzer — see the note above. */
+export function playWrong() {
+  playChime(WRONG, 'wrong', WRONG_BLIPS)
 }
 
 /** 到着 — a session finished. */

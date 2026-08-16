@@ -12914,7 +12914,15 @@ html { scrollbar-gutter: stable; }
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 50.5%;   /* the half-pixel is the overlap on the seam */
+  /* Exactly half, plus a half-pixel each so no hairline of the screen
+     behind shows through at odd viewport widths.
+     It was 50.5% each — a full 1% overlap, about 19px at 1920 — and
+     since the right leaf comes later in the DOM it painted over the
+     left one. Its border-left then landed half a percent *left* of
+     true centre, which is what read as one door sitting on top of the
+     other. At 0.5px the overlap is sub-pixel and the join is dead
+     centre. */
+  width: calc(50% + 0.5px);
   /* Brushed grain over the panel gradient. Barely there at 2% — at
      any more it stops being a surface and starts being a pattern. */
   background:
@@ -12929,22 +12937,26 @@ html { scrollbar-gutter: stable; }
   transition: transform calc(560ms * var(--door-x)) cubic-bezier(0.36, 0.02, 0.16, 1);
   will-change: transform;
 }
-/* The inner edge is lit and throws a shadow into the opening, so the
-   leaves read as solid things moving in front of the screen rather
-   than as two panels being faded out. */
+/* Mirror images of each other, deliberately: the inner edge is lit and
+   throws a shadow into the opening, so the leaves read as solid things
+   moving in front of the screen rather than two panels fading out.
+   The borders that used to sit here are gone — an overlapping border
+   is exactly what made one leaf look stacked on the other. The seal
+   (::after, further down) draws the join instead, half on each leaf,
+   so it splits down the middle as they part. */
 .door__leaf--l {
   left: 0;
-  border-right: 1px solid color-mix(in srgb, var(--text-primary) 26%, transparent);
   box-shadow:
-    inset -2px 0 0 color-mix(in srgb, var(--bg-main) 60%, transparent),
-    10px 0 34px rgba(0, 0, 0, 0.3);
+    inset -2px 0 0 color-mix(in srgb, var(--bg-main) 55%, transparent),
+    inset -3px 0 10px -4px rgba(0, 0, 0, 0.5),
+    14px 0 40px rgba(0, 0, 0, 0.32);
 }
 .door__leaf--r {
   right: 0;
-  border-left: 1px solid color-mix(in srgb, var(--text-primary) 26%, transparent);
   box-shadow:
-    inset 2px 0 0 color-mix(in srgb, var(--bg-main) 60%, transparent),
-    -10px 0 34px rgba(0, 0, 0, 0.3);
+    inset 2px 0 0 color-mix(in srgb, var(--bg-main) 55%, transparent),
+    inset 3px 0 10px -4px rgba(0, 0, 0, 0.5),
+    -14px 0 40px rgba(0, 0, 0, 0.32);
 }
 .door--open .door__leaf--l { transform: translateX(-100%); }
 .door--open .door__leaf--r { transform: translateX(100%); }
@@ -13048,29 +13060,89 @@ html { scrollbar-gutter: stable; }
 .door__leaf--l .door__plate { left: 15%; }
 .door__leaf--r .door__plate { right: 15%; }
 
-/* The rubber seal, carried by each leaf rather than drawn once down
-   the centre of the screen. As a standalone element pinned at
-   left: 50% it stayed exactly where it was while the leaves travelled
-   away from it — a grey bar hanging in the middle of the opening,
-   fading out on its own long after the doors had passed it. Half the
-   seal on each leaf goes when the leaf goes. */
+/* ── The doorway the leaves sit in ─────────────────────────
+   Two sliding panels and nothing else read as two rectangles moving.
+   A real doorway has a car body around it, and giving the leaves
+   something to come *out of* is most of what makes them read as doors
+   — the header rail they hang from and the threshold plate they run
+   along stay put while the leaves travel, which is the cue that says
+   they are moving and the frame is not.
+
+   Both are on .door itself, above the leaves, so they are never
+   dragged along by the transform. */
+.door::before,
+.door::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+/* The header: the rail the leaves hang from, with the car body above
+   it catching light. */
+.door::before {
+  top: 0;
+  height: clamp(26px, 5vh, 44px);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--surface) 72%, var(--text-primary)) 0%,
+      color-mix(in srgb, var(--surface) 86%, var(--text-primary)) 62%,
+      color-mix(in srgb, var(--text-primary) 34%, transparent) 100%);
+  box-shadow: 0 3px 10px -2px rgba(0, 0, 0, 0.45);
+}
+/* The threshold: the sill plate, with the tactile warning strip a
+   real platform edge carries in the line's own colour. */
+.door::after {
+  bottom: 0;
+  height: clamp(20px, 3.6vh, 32px);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--text-primary) 34%, transparent) 0%,
+      color-mix(in srgb, var(--surface) 78%, var(--text-primary)) 26%,
+      color-mix(in srgb, var(--surface) 62%, var(--text-primary)) 100%),
+    repeating-linear-gradient(90deg,
+      color-mix(in srgb, var(--line-color, var(--accent)) 45%, transparent) 0 8px,
+      transparent 8px 18px);
+  background-size: 100% 100%, 100% 3px;
+  background-position: top, bottom;
+  background-repeat: no-repeat, repeat-x;
+  box-shadow: 0 -3px 10px -2px rgba(0, 0, 0, 0.45);
+}
+
+/* The pressure seal. Two rubber lips meeting under load: a hard dark
+   line where they touch, and a thin lit edge on each side of it where
+   the light catches the compressed rubber. Drawn half on each leaf so
+   it splits exactly down the middle as they part — which is the whole
+   point of "like a depression chamber". */
 .door__leaf::after {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 3px;
-  background: linear-gradient(90deg,
-    color-mix(in srgb, var(--text-primary) 10%, transparent) 0%,
-    color-mix(in srgb, var(--text-primary) 44%, transparent) 100%);
+  width: 5px;
+  z-index: 2;
 }
-.door__leaf--l::after { right: 0; }
+.door__leaf--l::after {
+  right: 0;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--bg-main) 40%, transparent) 0%,
+    color-mix(in srgb, var(--text-primary) 12%, transparent) 45%,
+    color-mix(in srgb, var(--text-primary) 52%, transparent) 100%);
+}
 .door__leaf--r::after {
   left: 0;
   background: linear-gradient(90deg,
-    color-mix(in srgb, var(--text-primary) 44%, transparent) 0%,
-    color-mix(in srgb, var(--text-primary) 10%, transparent) 100%);
+    color-mix(in srgb, var(--text-primary) 52%, transparent) 0%,
+    color-mix(in srgb, var(--text-primary) 12%, transparent) 55%,
+    color-mix(in srgb, var(--bg-main) 40%, transparent) 100%);
 }
+
+/* A panel is not flat: it falls away slightly toward its outer edge.
+   Mirrored per leaf so the pair reads as one surface split, not two
+   identical rectangles. */
+.door__leaf--l { background-position: right center; }
+.door__leaf--r { background-position: left center; }
 
 /* A phone is tall and narrow: the window has to give back some height
    or the glass swallows the whole leaf and the livery falls off the

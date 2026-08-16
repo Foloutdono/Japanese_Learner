@@ -11,7 +11,7 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
-import { playSfx } from '../lib/audio'
+import { playCorrect } from '../lib/audio'
 import { FireIcon, EyeOffIcon, CrossIcon } from '../components/ui/Icons'
 
 const STATUS_COLORS = {
@@ -316,7 +316,7 @@ export default function ReadingScreen({ session }) {
       const next = isCorrect ? s + 1 : 0
       return next
     })
-    if (isCorrect) playSfx('success')
+    if (isCorrect) playCorrect()
 
     apiFetch('/api/reading/result', session, {
       method: 'POST',

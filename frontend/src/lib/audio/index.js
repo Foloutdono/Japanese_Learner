@@ -27,7 +27,7 @@ export { preload } from './context'
 // silent. See the note in chimes.js.
 export { playKana, playSfx, playUi, playAnnouncement } from './playback'
 export {
-  playClick, playToggle,
+  playClick, playToggle, playCorrect, playWrong,
   playGateChime, playDoorChime, playDoorSlide, playFareTick, playFlapClatter, playStationMelody,
   playArrival,
 } from './chimes'

@@ -9,7 +9,7 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
-import { playSfx } from '../lib/audio'
+import { playCorrect } from '../lib/audio'
 import { FireIcon } from '../components/ui/Icons'
 
 const DEFAULT_TIER_SIZE = 200
@@ -210,7 +210,7 @@ export default function TranslationScreen({ session }) {
     setFeedback(f => ({ ...f, correct: isCorrect }))
     setScore(s => ({ correct: s.correct + (isCorrect ? 1 : 0), total: s.total + 1 }))
     setStreak(s => (isCorrect ? s + 1 : 0))
-    if (isCorrect) playSfx('success')
+    if (isCorrect) playCorrect()
 
     apiFetch('/api/translation/result', session, {
       method: 'POST',

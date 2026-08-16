@@ -42,6 +42,8 @@ to a synthesised tick.
 | File | Where | Notes |
 |---|---|---|
 | `ui/click.mp3` | 31 sites | The generic press. Keep it **very** short and quiet — 30–60ms. At this frequency the gap between "present" and "irritating" is about thirty milliseconds. Synthesised now as a single G6. |
+| `ui/correct.mp3` | a card answered right | Replaces `sfx/success.mp3`, which was 68KB and loud enough to mask the XP tick landing a beat later. Keep it under ~250ms and clearly below the fare tick — a sound that drowns the reward it announces is working against itself. Synthesised now as C6 → G6. |
+| `ui/wrong.mp3` | a card answered wrong | Replaces `sfx/failure.mp3`. Low, dull, over quickly — felt more than heard. **Not a buzzer**: a buzzer is what a gate does when it rejects you, and getting a card wrong in a study app is not that, it is the next card. Synthesised now as G3 → D3. |
 | `ui/toggle.mp3` | settings switches | A state change, not a press: two steps, drier and lower than the click. Synthesised now as B5 → E6. |
 
 ## Wanted — the station's own sounds
@@ -94,3 +96,38 @@ Mono is fine for everything except the ambiance loops. Normalise to
 around −16 LUFS: the mixer applies its own gain per channel, so
 material that arrives already loud only removes headroom from the
 sliders.
+
+---
+
+## かな — the syllable recordings
+
+102 files under `kanas/`. Measured across the whole set by decoding
+every one of them:
+
+| | |
+|---|---|
+| loudness spread | **25.2 dB** between quietest and loudest |
+| leading silence | up to **294ms** on 47 files (median 38ms) |
+| clipping | **40 files** at or above 0dBFS, one at 1.03 |
+| format | 48kHz, mixed mono and stereo, 0.29–1.57s |
+
+Two of those three are corrected at playback and need no new audio:
+`playKana` analyses each buffer once on decode and plays it from where
+the speech actually starts, with a gain pulling it toward a common
+loudness. Measured result: **spread 25.2 dB → 0.9 dB**, and the lag
+before a syllable sounds is now a fixed 12ms pre-roll instead of up to
+294ms.
+
+**The clipping cannot be fixed at playback** — the distortion is baked
+into the sample — and it is the reason the set still wants
+re-recording rather than only re-mixing.
+
+If you do re-record: one voice, one session, 48kHz mono, peak no
+higher than −3 dBFS, trimmed to the syllable with ~20ms of air each
+side. The playback correction stays useful — a file already on target
+gets gain 1 and offset 0, so a good set simply needs less of it.
+
+Speech synthesis was considered and rejected: a lone mora gives a TTS
+engine no prosody to work with, and it reads as a letter name rather
+than a sound. The correction above plus a clean set is the better
+answer.

@@ -78,7 +78,7 @@ onSettingsChange(applySettings)
  * loop) can, and disconnects itself on end so a long session doesn't
  * accumulate dead nodes hanging off the graph.
  */
-export function playBuffer(buffer, category, soundName, { when = 0, loop = false, fadeIn = 0 } = {}) {
+export function playBuffer(buffer, category, soundName, { when = 0, loop = false, fadeIn = 0, offset = 0, gain = 1 } = {}) {
   const ctx = getAudioContext()
   if (!ctx || !buffer) return null
 
@@ -90,14 +90,18 @@ export function playBuffer(buffer, category, soundName, { when = 0, loop = false
   source.loop = loop
 
   const trim = ctx.createGain()
-  const level = trimFor(category, soundName)
+  // `gain` is a per-play correction on top of the sound's own trim —
+  // used by playKana to even out a recorded set whose levels span 25dB.
+  const level = trimFor(category, soundName) * gain
   trim.gain.value = fadeIn > 0 ? 0 : level
 
   source.connect(trim)
   trim.connect(bus)
 
   const startAt = when || ctx.currentTime
-  source.start(startAt)
+  // `offset` skips into the buffer — used to drop leading silence so a
+  // sample fires on the tap rather than a fifth of a second later.
+  source.start(startAt, offset)
   if (fadeIn > 0) {
     trim.gain.setValueAtTime(0, startAt)
     trim.gain.linearRampToValueAtTime(level, startAt + fadeIn)
