@@ -36,6 +36,12 @@
 # reasonable, JLPT-plausible inference exam_reading_gen.py builds
 # from — not a verified fact the way the item counts themselves are.
 
+# `choice_count` (listening mondai only, default 4 where absent) IS a
+# verified format fact, not an inference: 発話表現/即時応答 present only
+# 3 spoken response options, unlike every other JLPT mondai type's 4 —
+# a well-documented real exam convention. 概要理解 (listening-gist)
+# keeps the default 4 despite also being audio-only.
+
 # 得点区分 (scoring sections) — NOT the same grouping as the
 # administered TIMING sections in LEVEL_BLUEPRINT below. N1-N3 score
 # vocabulary/grammar+reading/listening separately despite vocabulary
@@ -92,8 +98,8 @@ LEVEL_BLUEPRINT = {
             {"id": "listening", "labelJp": "聴解", "timeLimitMin": 30, "mondai": [
                 {"id": "choukai_1", "official_number": 1, "name_jp": "課題理解",   "type": "listening-mcq",         "count": 7, "scoring_section": "listening"},
                 {"id": "choukai_2", "official_number": 2, "name_jp": "ポイント理解", "type": "listening-mcq",       "count": 6, "scoring_section": "listening"},
-                {"id": "choukai_3", "official_number": 3, "name_jp": "発話表現",   "type": "listening-situational", "count": 5, "scoring_section": "listening", "choice_mode": "audio-only"},
-                {"id": "choukai_4", "official_number": 4, "name_jp": "即時応答",   "type": "listening-response",    "count": 6, "scoring_section": "listening", "choice_mode": "audio-only"},
+                {"id": "choukai_3", "official_number": 3, "name_jp": "発話表現",   "type": "listening-situational", "count": 5, "scoring_section": "listening", "choice_mode": "audio-only", "choice_count": 3},
+                {"id": "choukai_4", "official_number": 4, "name_jp": "即時応答",   "type": "listening-response",    "count": 6, "scoring_section": "listening", "choice_mode": "audio-only", "choice_count": 3},
             ]},
         ],
     },
@@ -117,8 +123,8 @@ LEVEL_BLUEPRINT = {
             {"id": "listening", "labelJp": "聴解", "timeLimitMin": 35, "mondai": [
                 {"id": "choukai_1", "official_number": 1, "name_jp": "課題理解",   "type": "listening-mcq",         "count": 8, "scoring_section": "listening"},
                 {"id": "choukai_2", "official_number": 2, "name_jp": "ポイント理解", "type": "listening-mcq",       "count": 7, "scoring_section": "listening"},
-                {"id": "choukai_3", "official_number": 3, "name_jp": "発話表現",   "type": "listening-situational", "count": 5, "scoring_section": "listening", "choice_mode": "audio-only"},
-                {"id": "choukai_4", "official_number": 4, "name_jp": "即時応答",   "type": "listening-response",    "count": 8, "scoring_section": "listening", "choice_mode": "audio-only"},
+                {"id": "choukai_3", "official_number": 3, "name_jp": "発話表現",   "type": "listening-situational", "count": 5, "scoring_section": "listening", "choice_mode": "audio-only", "choice_count": 3},
+                {"id": "choukai_4", "official_number": 4, "name_jp": "即時応答",   "type": "listening-response",    "count": 8, "scoring_section": "listening", "choice_mode": "audio-only", "choice_count": 3},
             ]},
         ],
     },
@@ -144,8 +150,8 @@ LEVEL_BLUEPRINT = {
                 {"id": "choukai_1", "official_number": 1, "name_jp": "課題理解",   "type": "listening-mcq",         "count": 6, "scoring_section": "listening"},
                 {"id": "choukai_2", "official_number": 2, "name_jp": "ポイント理解", "type": "listening-mcq",       "count": 6, "scoring_section": "listening"},
                 {"id": "choukai_3", "official_number": 3, "name_jp": "概要理解",   "type": "listening-gist",        "count": 3, "scoring_section": "listening", "choice_mode": "audio-only"},
-                {"id": "choukai_4", "official_number": 4, "name_jp": "発話表現",   "type": "listening-situational", "count": 4, "scoring_section": "listening", "choice_mode": "audio-only"},
-                {"id": "choukai_5", "official_number": 5, "name_jp": "即時応答",   "type": "listening-response",    "count": 9, "scoring_section": "listening", "choice_mode": "audio-only"},
+                {"id": "choukai_4", "official_number": 4, "name_jp": "発話表現",   "type": "listening-situational", "count": 4, "scoring_section": "listening", "choice_mode": "audio-only", "choice_count": 3},
+                {"id": "choukai_5", "official_number": 5, "name_jp": "即時応答",   "type": "listening-response",    "count": 9, "scoring_section": "listening", "choice_mode": "audio-only", "choice_count": 3},
             ]},
         ],
     },
@@ -171,7 +177,7 @@ LEVEL_BLUEPRINT = {
                 {"id": "choukai_1", "official_number": 1, "name_jp": "課題理解",   "type": "listening-mcq",         "count": 5, "scoring_section": "listening"},
                 {"id": "choukai_2", "official_number": 2, "name_jp": "ポイント理解", "type": "listening-mcq",       "count": 6, "scoring_section": "listening"},
                 {"id": "choukai_3", "official_number": 3, "name_jp": "概要理解",   "type": "listening-gist",        "count": 5, "scoring_section": "listening", "choice_mode": "audio-only"},
-                {"id": "choukai_4", "official_number": 4, "name_jp": "即時応答",   "type": "listening-response",    "count": 12, "scoring_section": "listening", "choice_mode": "audio-only"},
+                {"id": "choukai_4", "official_number": 4, "name_jp": "即時応答",   "type": "listening-response",    "count": 12, "scoring_section": "listening", "choice_mode": "audio-only", "choice_count": 3},
                 {"id": "choukai_5", "official_number": 5, "name_jp": "統合理解",   "type": "listening-integrated",  "count": 4, "scoring_section": "listening"},
             ]},
         ],
@@ -197,7 +203,7 @@ LEVEL_BLUEPRINT = {
                 {"id": "choukai_1", "official_number": 1, "name_jp": "課題理解",   "type": "listening-mcq",         "count": 5, "scoring_section": "listening"},
                 {"id": "choukai_2", "official_number": 2, "name_jp": "ポイント理解", "type": "listening-mcq",       "count": 6, "scoring_section": "listening"},
                 {"id": "choukai_3", "official_number": 3, "name_jp": "概要理解",   "type": "listening-gist",        "count": 5, "scoring_section": "listening", "choice_mode": "audio-only"},
-                {"id": "choukai_4", "official_number": 4, "name_jp": "即時応答",   "type": "listening-response",    "count": 11, "scoring_section": "listening", "choice_mode": "audio-only"},
+                {"id": "choukai_4", "official_number": 4, "name_jp": "即時応答",   "type": "listening-response",    "count": 11, "scoring_section": "listening", "choice_mode": "audio-only", "choice_count": 3},
                 {"id": "choukai_5", "official_number": 5, "name_jp": "統合理解",   "type": "listening-integrated",  "count": 3, "scoring_section": "listening"},
             ]},
         ],

@@ -11,6 +11,12 @@ pykakasi
 requests>=2.31.0
 fugashi
 unidic-lite
+# study/exam_tts.py's listening-audio synthesis -- a thin async client
+# for Microsoft Edge's free consumer "Read Aloud" service (the same
+# free voices freetts.org's own /api/tts widget proxies), not a paid
+# API and not a locally-hosted model. Free, no API key, no vendor
+# account.
+edge-tts>=7.0.0
 # main.py loads backend/.env through this. It arrives transitively
 # with uvicorn[standard] today, which is not something to rely on.
 python-dotenv

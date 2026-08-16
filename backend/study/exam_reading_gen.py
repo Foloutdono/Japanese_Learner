@@ -50,13 +50,33 @@ _STYLE_OPINION = (
 _PASSAGE_PROMPT = """You are writing one JLPT {level} reading-comprehension \
 passage ({mondai_name} style), with its own questions.
 
-Write a self-contained Japanese text of approximately {chars} characters \
-(stay within 20% of this target) using vocabulary and grammar appropriate \
-for JLPT {level}. Any kanji you use MUST come from this list:
+Write a self-contained Japanese text of approximately {chars} characters. \
+This is a STRICT limit, not a suggestion: count as you write, and if you \
+are unsure whether you are over, write LESS rather than more -- text that \
+is too long is the most common way this task fails. {chars} characters is \
+short: roughly {sentence_estimate}. Do not try to fit a full story with a \
+beginning, middle, and end into that space -- a single moment, a short \
+notice, or one small observation is enough.
+
+Use vocabulary and grammar appropriate for JLPT {level}. Any kanji you use \
+MUST come from this list, with NO exceptions:
 {allowed_kanji}
-(use hiragana instead for anything else). The text should read naturally \
--- a short story, notice, letter, article, or description, whichever suits \
-the length and topic.
+(use hiragana instead for anything else -- check every character, \
+including in names). The text should read naturally -- a short story, \
+notice, letter, article, or description, whichever suits the length and \
+topic.
+
+Every character matters, not just whole words: if an otherwise-common word \
+has ONE kanji outside the allowed list, write just that one character in \
+hiragana and keep the rest in kanji (e.g. if 達 is not allowed, write 友だち \
+instead of 友達 rather than avoiding the word or picking a wrong kanji). \
+This applies to names too: if you name a person, either spell the name \
+entirely in hiragana/katakana (e.g. たなかさん, ゆき) or use only kanji from \
+the allowed list -- do NOT default to a common textbook surname like 田中 \
+or 山田 without checking every one of its characters (田 is a frequent \
+culprit and is often NOT in the allowed list). When in doubt, prefer not \
+naming anyone at all: わたし (I), 友だち (a friend), 先生 (the teacher), \
+男の子/女の子 (a boy/girl) are always safe and need no name at all.
 
 Then write exactly {question_count} multiple-choice questions about the \
 text, each with exactly 4 Japanese answer choices.
@@ -72,9 +92,19 @@ _READING_INSTRUCTIONS_JP = "つぎの　ぶんしょうを　よんで、しつ�
 
 
 def _call_llm_passage(level: str, mondai_name: str, chars: int, question_count: int, style_guidance: str) -> dict:
+    # Live-diagnosed 2026-08: told only "approximately N characters",
+    # the model consistently overshot short targets by 1.5-2x (N5's
+    # 80-character 短文 came back at 120-200 characters every time,
+    # apparently defaulting toward a small narrative arc regardless of
+    # the stated limit) -- spelling out roughly how many sentences that
+    # actually is gives it a concrete unit to count against instead of
+    # an abstract character budget.
+    sentence_count = max(1, round(chars / 22))
+    sentence_estimate = f"{sentence_count} short sentence" + ("s" if sentence_count != 1 else "")
     prompt = _PASSAGE_PROMPT.format(
         level=level, mondai_name=mondai_name, chars=chars, question_count=question_count,
         allowed_kanji=allowed_kanji_for_level(level), style_guidance=style_guidance,
+        sentence_estimate=sentence_estimate,
     )
     content = chat([
         {"role": "system", "content": prompt},

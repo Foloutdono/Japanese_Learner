@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
+import { api } from '../lib/api'
 import { ImageIcon, SpeakerOffIcon, StarIcon } from '../components/ui/Icons'
 
 // ── QuestionRenderer ─────────────────────────────────────────
@@ -304,9 +305,13 @@ function AudioBar({ src, audioRef, t }) {
       </div>
     )
   }
+  // src is backend-relative ("/exam-audio/<hash>.mp3", see
+  // study/exam_tts.py) -- api() resolves it against VITE_API_URL the
+  // same way DrawingCanvas.jsx's kanjivg src does, since the audio
+  // file lives on the backend, not wherever the frontend is served from.
   return (
     <div className="exam-audio-bar">
-      <audio ref={audioRef} controls src={src} />
+      <audio ref={audioRef} controls src={api(src)} />
     </div>
   )
 }

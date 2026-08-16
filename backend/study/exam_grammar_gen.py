@@ -412,7 +412,16 @@ def _generate_grammar_paper_once(level: str) -> dict:
                 built = _build_cloze_mondai(spec, level)
             else:
                 continue
-        except GenerationFailed as e:
+        except (RuntimeError, GenerationFailed) as e:
+            # RuntimeError: _build_cloze_mondai has no per-item retry loop
+            # of its own (unlike the other two builders, which already
+            # catch RuntimeError internally per-item) -- a raw chat()
+            # failure (e.g. every model rate-limited/out of credit)
+            # otherwise propagated uncaught past this function AND past
+            # generate_grammar_paper's own except GenerationFailed below,
+            # surfacing as a raw 500 instead of routes/exams.py's intended
+            # 503 -- live-diagnosed 2026-08 when OpenRouter's free-tier
+            # quota and paid credit ran out mid-testing.
             logger.warning("Skipping %s: %s", spec["id"], e)
             continue
         mondai.append(built)

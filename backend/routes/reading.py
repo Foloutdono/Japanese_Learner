@@ -25,17 +25,29 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-3.5-haiku")
+# 2026-08: switched primary off the paid anthropic/claude-haiku-4.5 —
+# mirrors the same change and live catalog check in study/llm_shared.py.
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "nvidia/nemotron-3.5-lightning:free")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Still used by Reading Comprehension below (LLM-generated) — untouched
 # by the 2026-08 phrase-mode rewrite.
+#
+# 2026-08 fix: the primary model and two of the four fallbacks
+# (meta-llama/llama-3.3-70b-instruct:free, openrouter/owl-alpha) had
+# been quietly removed from OpenRouter's catalog — confirmed live
+# against GET /api/v1/models, which returns 404 "No endpoints found"
+# for both. Every single call to this endpoint was wasting 2 requests'
+# worth of latency on the dead primary alone before falling through to
+# a model that actually still exists. Replaced with IDs verified
+# present in the live catalog at fix time; OpenRouter's catalog is a
+# moving target, so this will drift again eventually.
 MODELS = [
     OPENROUTER_MODEL,                     # Primary
     "nvidia/nemotron-3-super-120b-a12b:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
+    "openai/gpt-oss-20b:free",
     "google/gemma-4-31b-it:free",
-    "openrouter/owl-alpha",
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
 ]
 
 _kakasi = pykakasi.kakasi()
@@ -94,7 +106,14 @@ def _allowed_kanji_for_level(level: str) -> str:
     return get_kanji_string(allowed_levels)
 
 
-def _chat(messages, timeout=60):
+def _chat(messages, timeout=60, max_tokens=3000):
+    # max_tokens explicit rather than left to OpenRouter's own default
+    # (64000, live-diagnosed 2026-08): this endpoint generates one
+    # bounded passage + a handful of questions, never an open-ended
+    # completion, and the unset default was large enough to 402 on the
+    # account's available credit on every single call, forcing every
+    # request onto the free-tier fallbacks instead of the primary model
+    # — see study/llm_shared.chat's matching fix and comment.
     last_error = None
     SESSION = requests.Session()
 
@@ -110,6 +129,11 @@ def _chat(messages, timeout=60):
                     json={
                         "model": model,
                         "messages": messages,
+                        "max_tokens": max_tokens,
+                        # nemotron-3.5-lightning (the new primary) is a
+                        # reasoning model -- see study/llm_shared.chat's
+                        # matching comment for why this stays on.
+                        "reasoning": {"enabled": True},
                     },
                     timeout=timeout,
                 )

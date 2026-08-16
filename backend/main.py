@@ -48,6 +48,13 @@ app = FastAPI()
 
 app.mount("/kanjivg", StaticFiles(directory="kanjivg"), name="kanjivg")
 
+# Server-synthesized listening-section audio (study/exam_tts.py) --
+# same mount pattern as kanjivg above. Directory is created on first
+# use by exam_tts.py itself (os.makedirs), so it may not exist yet on a
+# fresh checkout; check_dir=False lets StaticFiles mount successfully
+# regardless and just 404 individual files until something's written.
+app.mount("/exam-audio", StaticFiles(directory="datas/exam_audio", check_dir=False), name="exam-audio")
+
 # ── CORS ──────────────────────────────────────────────────────
 # The deployed frontend, plus anything CORS_ORIGINS adds — a
 # comma-separated list, set in backend/.env so a local Vite server can

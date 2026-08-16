@@ -16,3 +16,6 @@ datas/vocab/vocab_jmdict_meanings.json
 datas/vocab/vocab_jmdict_frequency.json
 datas/vocab/vocab_meanings.json
 datas/jlpt/
+# Server-generated TTS output, not owned/tracked source data -- same
+# reasoning as datas/jlpt/ above, see study/exam_tts.py.
+datas/exam_audio/

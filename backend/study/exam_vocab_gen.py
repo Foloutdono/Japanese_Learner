@@ -229,6 +229,41 @@ exactly this schema:
 {{"sentenceJp": "...【...】...", "choices": ["...", "...", "...", "..."], "correctIndex": 0}}
 """
 
+# Live-diagnosed 2026-08: asking a model to generate BOTH a paraphrase
+# item and grade its own correctness produces a real, reproducible
+# error rate that survived a model upgrade — メートル (meters) "paraphrased"
+# as センチ (centimeters), おいしい (tasty) as あまい (sweet) — thematically
+# related, not actually interchangeable in meaning. Exactly the failure
+# mode the original plan called a second-model self-consistency check
+# for; this is that check, applied specifically here since this is
+# where live testing actually caught a wrong-answer problem (as
+# opposed to exam_grammar_gen.py's star-question claim, which is
+# checked by a direct substring match in code, no second call needed).
+_VERIFY_PARAPHRASE_PROMPT = """In this Japanese sentence: {sentence}
+The bracketed word is "{target}". Someone claims that "{claimed}" could \
+naturally replace it here, keeping (nearly) the same meaning -- a genuine \
+near-synonym or paraphrase, not just a related or associated word.
+
+Be skeptical by default: a claimed paraphrase is often wrong even when it \
+sounds plausible -- e.g. claiming センチ (centimeters) paraphrases メートル \
+(meters) is wrong (different units, not synonyms), and claiming あまい \
+(sweet) paraphrases おいしい (tasty) is wrong (a taste, not a general \
+judgment of quality) -- both are merely related, not substitutable.
+
+Respond with ONLY JSON (no markdown fences, no commentary): \
+{{"valid": true or false}}
+"""
+
+
+def _verify_paraphrase_answer(sentence: str, target: str, claimed: str) -> bool:
+    prompt = _VERIFY_PARAPHRASE_PROMPT.format(sentence=sentence, target=target, claimed=claimed)
+    try:
+        data = _call_llm_json(prompt)
+    except (RuntimeError, GenerationFailed):
+        return False  # can't verify -> don't trust the claim
+    return data.get("valid") is True
+
+
 _USAGE_PROMPT = """You are writing one JLPT {level} vocabulary question \
 (用法 style: choose the sentence that uses the target word correctly).
 
@@ -292,6 +327,10 @@ def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set
         if not all(isinstance(c, str) and c.strip() for c in choices_text) or len(set(choices_text)) != 4:
             continue
         if not isinstance(correct_index, int) or not (0 <= correct_index < 4):
+            continue
+
+        if not _verify_paraphrase_answer(clean, bracketed, choices_text[correct_index]):
+            logger.warning("paraphrase self-check rejected %r -> %r for %s", bracketed, choices_text[correct_index], display)
             continue
 
         ids = ["c1", "c2", "c3", "c4"]

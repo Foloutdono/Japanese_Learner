@@ -109,7 +109,16 @@ def validate_no_duplicate_targets(questions: list[dict]) -> list[str]:
     return errors
 
 
-def validate_passage_length(text: str, target_chars: int, tolerance: float = 0.2) -> list[str]:
+def validate_passage_length(text: str, target_chars: int, tolerance: float | None = None) -> list[str]:
+    # A flat ±20% is unreasonably tight in absolute terms on a short
+    # target (N5's 80-character 短文 gets only ±16 characters) even
+    # though it's generous on a long one (N1's 1000-character passage
+    # gets ±200) — live-diagnosed 2026-08 as part of the SAME
+    # short-target overshoot exam_reading_gen.py's prompt now warns
+    # about explicitly; this is the safety-net half of that fix, not a
+    # replacement for prompting the model to actually aim shorter.
+    if tolerance is None:
+        tolerance = max(0.2, 40 / target_chars)
     length = len(text)
     lo, hi = target_chars * (1 - tolerance), target_chars * (1 + tolerance)
     if not (lo <= length <= hi):

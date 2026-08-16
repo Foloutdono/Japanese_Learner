@@ -25,15 +25,24 @@ from content.kanji_data import get_kanji_string
 logger = logging.getLogger(__name__)
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-3.5-haiku")
+# 2026-08: switched primary off the paid anthropic/claude-haiku-4.5 —
+# confirmed live against GET /api/v1/models that nvidia/nemotron-3.5-
+# lightning:free still exists on OpenRouter's catalog before adopting
+# it, same discipline as the earlier stale-model fix below.
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "nvidia/nemotron-3.5-lightning:free")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
+# 2026-08: mirrors the same fix in routes/reading.py's own MODELS list
+# — the original primary and two of four fallbacks had been removed
+# from OpenRouter's catalog (confirmed live against GET /api/v1/models,
+# 404 "No endpoints found" on both), wasting 2 requests' latency on the
+# dead primary alone before ever reaching a model that still exists.
 MODELS = [
     OPENROUTER_MODEL,
     "nvidia/nemotron-3-super-120b-a12b:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
+    "openai/gpt-oss-20b:free",
     "google/gemma-4-31b-it:free",
-    "openrouter/owl-alpha",
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
 ]
 
 LEVEL_HIERARCHY = {
@@ -66,7 +75,7 @@ def sentence_kanji_ok(text: str, level: str) -> bool:
     return all(not is_kanji(c) or c in allowed for c in text)
 
 
-def chat(messages: list[dict], timeout: int = 60) -> str:
+def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000) -> str:
     """Multi-model fallback chat completion, identical discipline to
     reading.py's _chat: try each model in MODELS, retry once per model
     on a network error, move to the next model on a 429/500/502/503/504
@@ -74,7 +83,18 @@ def chat(messages: list[dict], timeout: int = 60) -> str:
     auth error — retrying that across every model wastes calls on a
     failure no model will fix). Raises RuntimeError (not HTTPException)
     on total failure, including when no API key is configured at all
-    — callers decide how that becomes a user-facing error."""
+    — callers decide how that becomes a user-facing error.
+
+    max_tokens defaults to 3000 rather than being left unset: every
+    caller in this codebase generates one bounded JSON blob (a passage,
+    a handful of MCQ choices), never an open-ended completion, and
+    OpenRouter's own unset-max_tokens default turned out to be 64000 —
+    live-diagnosed 2026-08 when the primary model 402'd on every single
+    call ("requested up to 64000 tokens, but can only afford 8000")
+    despite the account having real credit, forcing every request onto
+    the free-tier fallbacks and burning through their daily quota in
+    one testing session. An explicit, generous-but-bounded cap avoids
+    asking for far more than any of these tasks could ever need."""
     if not OPENROUTER_API_KEY:
         raise RuntimeError("OPENROUTER_API_KEY is not configured")
 
@@ -90,7 +110,20 @@ def chat(messages: list[dict], timeout: int = 60) -> str:
                         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                         "Content-Type": "application/json",
                     },
-                    json={"model": model, "messages": messages},
+                    json={
+                        "model": model, "messages": messages, "max_tokens": max_tokens,
+                        # nemotron-3.5-lightning (the new primary) is a
+                        # reasoning model; letting it think before
+                        # answering matters more here than for a plain
+                        # chat model, since every call in this codebase
+                        # is one constrained JSON blob (kanji-gated
+                        # sentence, exactly-4-choices schema) that has to
+                        # get several constraints right at once. content
+                        # still carries the final answer with this on —
+                        # reasoning output is a separate field we don't
+                        # read, not a replacement for it.
+                        "reasoning": {"enabled": True},
+                    },
                     timeout=timeout,
                 )
             except requests.RequestException as e:
@@ -98,6 +131,7 @@ def chat(messages: list[dict], timeout: int = 60) -> str:
                 continue
 
             if response.ok:
+                logger.info("Using model %s", model)
                 try:
                     return response.json()["choices"][0]["message"]["content"]
                 except (KeyError, IndexError):
