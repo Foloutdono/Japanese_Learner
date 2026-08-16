@@ -627,6 +627,10 @@ const decks = {
   deckNamePlaceholder: 'Nom du deck...',
   noDecks:           'Aucun deck pour l\'instant.',
   createFirstDeck:   'Créez votre premier deck ci-dessus.',
+  // Posée directement sur la carte / la barre plutôt que par la
+  // boîte confirm() du navigateur — courte, puisqu'elle est en ligne.
+  deleteDeckConfirm: 'Supprimer ce deck ?',
+  deleteCardsConfirm: 'Supprimer la sélection ?',
   study:             'Étudier',
   addCard:           '+ Ajouter',
   newCard:           'Nouvelle carte',

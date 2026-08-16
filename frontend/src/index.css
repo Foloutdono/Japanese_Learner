@@ -62,11 +62,19 @@
   --font-display:   'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
   --font-jp:        'Yu Gothic', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  /* Fixed "primary action" purple used by deck/study flows (Study,
-     Create deck, Start session…) — independent of the per-deck-type
-     accent colors, which stay data-driven via --type-color. Works as
-     a fill with --text-on-panel text in both themes. */
-  --action-purple:  #6c5ce7;
+  /* The deck/study subsystem's primary action fill (Study, Create
+     deck, Start session, Import…) — independent of the per-deck-type
+     colours, which stay data-driven via --type-color.
+
+     This was a fixed #6c5ce7 tech-purple, the last colour in the app
+     from before the --line-* pigments existed. It sat directly under
+     the 教材 station plate, which is 蘇芳 — so the one screen showed
+     two unrelated colour languages at once and broke the rule every
+     other section follows ("one line, one colour", see
+     SelectionScreen). Pointing it at the deck line's own pigment fixes
+     the plate, the cards, the study flow and the import/browse menus
+     in one move, since all of them already referenced this variable. */
+  --deck-action:    var(--line-decks);
 
   /* ── Daruma pigments (達磨) ──
      A separate family from the accent palette on purpose: these are
@@ -7710,12 +7718,12 @@ input:focus { border-color: var(--accent2); }
   letter-spacing: 0.08em;
 }
 
-/* ── Shared "primary purple" action button ────────────────── */
-.btn-primary-purple {
-  background: var(--action-purple);
+/* ── The deck subsystem's primary action button ───────────── */
+.btn-deck-primary {
+  background: var(--deck-action);
   color: var(--text-on-panel);
 }
-.btn-primary-purple:disabled { opacity: 0.6; }
+.btn-deck-primary:disabled { opacity: 0.6; }
 
 /* ── Shared loading block ─────────────────────────────────── */
 .loading-block {
@@ -7745,40 +7753,126 @@ input:focus { border-color: var(--accent2); }
    .dict-level-badge, so picking a deck type doesn't read as 5
    different loud, competing-colour buttons in a row. */
 .decks-type-btn--active {
-  background: color-mix(in srgb, var(--type-color, var(--action-purple)) 20%, var(--bg-panel));
-  color: var(--type-color, var(--action-purple));
+  background: color-mix(in srgb, var(--type-color, var(--deck-action)) 20%, var(--bg-panel));
+  color: var(--type-color, var(--deck-action));
 }
-.decks-type-btn__desc { font-size: 10px; opacity: 0.8; }
+/* The type's one-character name, sized to sit in the same chip as the
+   label rather than above it. */
+.decks-type-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  /* Buttons centre their text by default, which left the description
+     line floating under a left-aligned label. */
+  text-align: left;
+}
+.decks-type-btn__glyph {
+  font-family: var(--font-jp);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--type-color, var(--text-secondary));
+}
+.decks-type-btn__label { font-weight: 600; }
+.decks-type-btn__desc { flex-basis: 100%; font-size: 10px; opacity: 0.8; }
 
 .decks-create-submit { width: 100%; }
 
-.deck-card {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* ── Deck card ──
+   A .platform-card (see the block near the top of this file) rather
+   than a bespoke card: same rail, same roundel, same body, so a deck
+   reads as the same kind of object as a level, a mode or an exam
+   paper. Only the parts a deck has and a platform card doesn't —
+   per-card actions and the delete affordance — are defined here. */
+.decks-grid { padding-top: 0; }
+.deck-card { align-items: stretch; }
+/* The roundel carries the type's kanji, not a number: which pile of
+   cards this is matters, its position in the list doesn't. */
+.deck-card__glyph {
+  font-family: var(--font-jp);
+  font-size: 1.05rem;
 }
-.deck-card__header { display: flex; justify-content: space-between; align-items: flex-start; }
-.deck-card__name { font-size: 16px; font-weight: bold; }
-.deck-card__type { font-size: 11px; color: var(--type-color, var(--text-secondary)); margin-top: 2px; }
-.deck-card__delete { background: transparent; color: var(--danger); font-size: 16px; padding: 4px 8px; }
-.deck-card__count { font-size: 13px; color: var(--text-secondary); }
-.deck-card__actions { display: flex; gap: 8px; margin-top: auto; }
-.deck-card__edit-btn { background: var(--bg-panel); color: var(--text-on-panel); flex: 1; font-size: 13px; }
-/* Same colour DeckDetailScreen's own "Study" button uses
-   (.deckdetail-btn--study) — was a 5-way rotating --type-color fill,
-   so a grid of several decks showed that many different-coloured
-   buttons all competing at once, and disagreed with its own sibling
-   screen's single colour for the same action. */
-.deck-card__study-btn { background: var(--action-purple); color: var(--text-on-panel); flex: 1; font-size: 13px; }
+.deck-card__body { gap: 6px; }
+/* The type reads in its own pigment inside an otherwise muted desc
+   line, so the colour that identifies the deck appears twice — on the
+   rail and on the word — the way a line colour and its name do. */
+.deck-card__type { color: var(--rail); font-weight: 600; }
+.deck-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.deck-card__btn {
+  flex: 1;
+  font-size: 13px;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+}
+.deck-card__btn--study {
+  background: var(--deck-action);
+  color: var(--text-on-panel);
+}
+/* Destructive and secondary, so it sits out of the reading path in
+   the corner — not a third button in the action row. */
+.deck-card__delete {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 4px 6px;
+  opacity: 0.55;
+  transition: color 0.16s ease, opacity 0.16s ease;
+}
+.deck-card:hover .deck-card__delete { opacity: 1; }
+.deck-card__delete:hover { color: var(--danger); }
+/* The in-place "delete?" prompt that replaced confirm(). Occupies the
+   action row rather than floating over the card. */
+.deck-card__btn--danger { background: var(--danger); color: var(--text-on-panel); }
+.deck-card__btn--muted { flex: 0 0 auto; background: transparent; color: var(--text-secondary); }
+.deck-card__confirm-q {
+  flex: 1;
+  align-self: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
 
 /* ── Deck detail screen ───────────────────────────────────── */
+/* The deck named on its own page, in the same roundel + pigment its
+   card wears in the grid — /decks/:id has no station entry of its own
+   (it's one deck, not a place), so this is what tells you where you
+   are once the auto-hiding TopBar has scrolled away. */
+.deckdetail-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 0 22px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--surface-line);
+}
+.deckdetail-identity__glyph {
+  flex-shrink: 0;
+  font-family: var(--font-jp);
+  font-size: 1.05rem;
+}
+.deckdetail-identity__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.deckdetail-identity__name {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+  line-height: 1.25;
+}
+.deckdetail-identity__meta { font-size: 0.85rem; color: var(--text-secondary); }
+.deckdetail-identity__type { color: var(--rail); font-weight: 600; }
+
 .deckdetail-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 24px;
 }
 .deckdetail-count { color: var(--text-secondary); font-size: 13px; }
+.deckdetail-confirm-q { font-size: 13px; color: var(--text-secondary); }
 
 .deckdetail-actions { display: flex; gap: 8px; }
 .deckdetail-actions--select { align-items: center; }
@@ -7786,7 +7880,7 @@ input:focus { border-color: var(--accent2); }
 
 .deckdetail-btn { font-size: 13px; background: var(--bg-panel); color: var(--text-on-panel); }
 .deckdetail-btn--muted { color: var(--text-secondary); }
-.deckdetail-btn--study { background: var(--action-purple); color: var(--text-on-panel); }
+.deckdetail-btn--study { background: var(--deck-action); color: var(--text-on-panel); }
 .deckdetail-btn--danger { background: var(--danger); color: var(--text-on-panel); }
 .deckdetail-btn--danger-disabled { background: var(--bg-panel); color: var(--text-on-panel-soft); opacity: 0.5; }
 
@@ -7808,7 +7902,7 @@ input:focus { border-color: var(--accent2); }
 .deckdetail-form__fields { display: flex; flex-direction: column; gap: 10px; }
 .deckdetail-form__input { padding: 10px 14px; font-size: 15px; }
 .deckdetail-form__actions { display: flex; gap: 8px; margin-top: 16px; }
-.deckdetail-form__save { background: var(--action-purple); color: var(--text-on-panel); flex: 1; }
+.deckdetail-form__save { background: var(--deck-action); color: var(--text-on-panel); flex: 1; }
 .deckdetail-form__cancel { background: var(--bg-panel); color: var(--text-on-panel-soft); flex: 1; }
 
 .deckdetail-list { display: flex; flex-direction: column; gap: 8px; }
@@ -8605,7 +8699,7 @@ input:focus { border-color: var(--accent2); }
   padding: 14px 20px;
   font-size: 14px;
 }
-.study-mode-btn--active { background: var(--action-purple); color: var(--text-on-panel); }
+.study-mode-btn--active { background: var(--deck-action); color: var(--text-on-panel); }
 
 .study-level-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .study-level-btn {
@@ -8764,7 +8858,7 @@ input:focus { border-color: var(--accent2); }
   color: var(--text-on-panel-soft);
   font-size: 14px;
 }
-.import-footer__submit--active { background: var(--action-purple); color: var(--text-on-panel); }
+.import-footer__submit--active { background: var(--deck-action); color: var(--text-on-panel); }
 .import-footer__submit--importing { opacity: 0.7; }
 
 @media (max-width: 900px) {
@@ -8786,7 +8880,7 @@ input:focus { border-color: var(--accent2); }
   background: var(--bg-panel);
   color: var(--text-on-panel-soft);
 }
-.browse-source-tab--active { background: var(--action-purple); color: var(--text-on-panel); }
+.browse-source-tab--active { background: var(--deck-action); color: var(--text-on-panel); }
 
 .browse-level-row { margin-bottom: 14px; }
 
@@ -9011,6 +9105,12 @@ input:focus { border-color: var(--accent2); }
   .platform-card__body { padding: 14px 10px 14px 14px; }
   .platform-card__title { font-size: 1.08rem; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  /* A deck card carries two buttons the other platform cards don't,
+     and at this width their labels were wrapping under their own
+     icons ("Modifier" on a second line). The row gives up the trailing
+     gutter it doesn't need and the labels stay on one line. */
+  .deck-card__body { padding-right: 14px; }
+  .deck-card__btn { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
   /* The title needs the whole line on a phone, and it is frequently a
      whole journey ("漢字 N5 — MCQ"), so the reading above it goes. */
   .top-bar__inner { padding: 10px 14px 11px; gap: 10px; }

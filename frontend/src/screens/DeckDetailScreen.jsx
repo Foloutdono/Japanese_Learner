@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
+import { playUi } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
 import EmptyState from '../components/ui/EmptyState'
 import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
 import BrowseCardsMenu from '../components/decks/BrowseCardsMenu'
+import { deckTypeOf } from '../components/decks/deckTypes'
 import { PlayIcon, ImportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIcon, PencilIcon, TrashIcon, CardIcon } from '../components/ui/Icons'
 
 // Mirrors decks.py's SOURCE_FOR_TYPE / _allowed_sources / _allows_custom
@@ -50,6 +52,7 @@ export default function DeckDetailScreen({ session }) {
 
   const allowedSources = allowedSourcesFor(deck?.type)
   const allowCustom    = allowsCustomFor(deck?.type)
+  const dt             = deckTypeOf(deck?.type, t)
 
   const [cards, setCards]           = useState([])
   const [loading, setLoading]       = useState(true)
@@ -61,6 +64,7 @@ export default function DeckDetailScreen({ session }) {
   const [showBrowse, setShowBrowse] = useState(false)
   const [selectMode, setSelectMode] = useState(false)
   const [selected, setSelected]     = useState(new Set())
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -144,10 +148,14 @@ export default function DeckDetailScreen({ session }) {
     setSelected(selected.size === cards.length ? new Set() : new Set(cards.map(cardKey)))
   }
 
-  function exitSelectMode() { setSelectMode(false); setSelected(new Set()) }
+  function exitSelectMode() { setSelectMode(false); setSelected(new Set()); setConfirmingDelete(false) }
 
   async function deleteSelected() {
-    if (!confirm(`${t.delete} ${selected.size} ${t.cards}?`)) return
+    // Asked inline in the toolbar (see confirmingDelete) rather than
+    // through the browser's confirm() dialog, which was the last
+    // OS-native surface in the app.
+    playUi('click-screen-selection')
+    setConfirmingDelete(false)
     for (const card of cards) {
       if (!selected.has(cardKey(card))) continue
       await deleteCard(card)
@@ -174,35 +182,47 @@ export default function DeckDetailScreen({ session }) {
 
       <div className="container page-pad">
 
+        {/* The deck, named on its own page. The name used to live only
+            in the TopBar — which auto-hides on scroll — and the type
+            wasn't shown at all, so a deck that was clearly "Kanji" in
+            the grid became anonymous the moment you opened it. Same
+            roundel, glyph and pigment as its card in DecksScreen. */}
+        <div className="deckdetail-identity" style={{ '--rail': dt.color }}>
+          <span className="platform-card__no deckdetail-identity__glyph" lang="ja" aria-hidden="true">{dt.glyph}</span>
+          <span className="deckdetail-identity__text">
+            <span className="deckdetail-identity__name">{deck?.name ?? t.deckFallbackTitle}</span>
+            <span className="deckdetail-identity__meta">
+              <span className="deckdetail-identity__type">{dt.label}</span>
+              {' · '}{cards.length} {t.cards}
+            </span>
+          </span>
+        </div>
+
         {/* Header row */}
         <div className="deckdetail-header">
-          <div className="deckdetail-count">
-            {cards.length} {t.cards}
-          </div>
-
           {!selectMode && (
             <div className="deckdetail-actions">
-              <button onClick={() => navigate(`/decks/${deck_id}/study`, { state: { deck } })}
+              <button onClick={() => { playUi('click-screen-selection'); navigate(`/decks/${deck_id}/study`, { state: { deck } }) }}
                 className="deckdetail-btn deckdetail-btn--study">
                 <PlayIcon size={14} /> {t.study}
               </button>
               {allowCustom && (
-                <button onClick={startAdd} className="deckdetail-btn">
+                <button onClick={() => { playUi('click-mode-selection'); startAdd() }} className="deckdetail-btn">
                   {t.addCard}
                 </button>
               )}
               {allowedSources.length > 0 && (
-                <button onClick={() => setShowBrowse(true)} className="deckdetail-btn">
+                <button onClick={() => { playUi('click-mode-selection'); setShowBrowse(true) }} className="deckdetail-btn">
                   {t.browseBtn}
                 </button>
               )}
               {cards.length > 0 && (
-                <button onClick={() => setSelectMode(true)} className="deckdetail-btn deckdetail-btn--muted">
+                <button onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }} className="deckdetail-btn deckdetail-btn--muted">
                   <CheckboxIcon size={14} /> {t.select}
                 </button>
               )}
               {allowCustom && (
-                <button onClick={() => setShowImport(true)} className="deckdetail-btn">
+                <button onClick={() => { playUi('click-mode-selection'); setShowImport(true) }} className="deckdetail-btn">
                   <ImportIcon size={14} /> {t.import}
                 </button>
               )}
@@ -214,18 +234,32 @@ export default function DeckDetailScreen({ session }) {
               <span className="deckdetail-select-count">
                 {selected.size} {t.cards}
               </span>
-              <button onClick={toggleSelectAll} className="deckdetail-btn">
+              <button onClick={() => { playUi('click-mode-selection'); toggleSelectAll() }} className="deckdetail-btn">
                 {selected.size === cards.length ? t.deselectAll : t.selectAll}
               </button>
-              <button
-                onClick={deleteSelected}
-                disabled={selected.size === 0}
-                className={`deckdetail-btn ${selected.size > 0 ? 'deckdetail-btn--danger' : 'deckdetail-btn--danger-disabled'}`}>
-                <TrashIcon size={14} /> {t.delete} ({selected.size})
-              </button>
-              <button onClick={exitSelectMode} className="deckdetail-btn deckdetail-btn--muted">
-                {t.cancel}
-              </button>
+              {confirmingDelete ? (
+                <>
+                  <span className="deckdetail-confirm-q">{t.deleteCardsConfirm}</span>
+                  <button onClick={deleteSelected} className="deckdetail-btn deckdetail-btn--danger">
+                    <TrashIcon size={14} /> {t.delete} ({selected.size})
+                  </button>
+                  <button onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(false) }} className="deckdetail-btn deckdetail-btn--muted">
+                    {t.cancel}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(true) }}
+                    disabled={selected.size === 0}
+                    className={`deckdetail-btn ${selected.size > 0 ? 'deckdetail-btn--danger' : 'deckdetail-btn--danger-disabled'}`}>
+                    <TrashIcon size={14} /> {t.delete} ({selected.size})
+                  </button>
+                  <button onClick={() => { playUi('click-mode-selection'); exitSelectMode() }} className="deckdetail-btn deckdetail-btn--muted">
+                    {t.cancel}
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>

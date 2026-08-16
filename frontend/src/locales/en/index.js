@@ -634,6 +634,10 @@ const decks = {
   deckNamePlaceholder: 'Deck name...',
   noDecks:           'No decks yet.',
   createFirstDeck:   'Create your first deck above.',
+  // Asked in place on the card/toolbar rather than through the
+  // browser's own confirm() dialog — short, because it sits inline.
+  deleteDeckConfirm: 'Delete this deck?',
+  deleteCardsConfirm: 'Delete selected?',
   study:             'Study',
   addCard:           '+ Add card',
   newCard:           'New card',
