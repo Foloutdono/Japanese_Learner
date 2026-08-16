@@ -45,6 +45,18 @@
   color: var(--text-secondary);
   letter-spacing: 0.03em;
 }
+.exam-shell__meta-right {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.exam-shell__timer {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--timer-color, var(--text-secondary));
+  letter-spacing: 0.03em;
+}
 
 /* ── Mondai instructions strip ── */
 .exam-mondai-instructions {
