@@ -570,6 +570,53 @@ const misc = {
   hintSentencesHide:  'Masquer la phrase',
   hintFuriganaShow:   'Afficher les furigana',
   hintFuriganaHide:   'Masquer les furigana',
+
+  // ── Modes d'étude (domain/studyModes.js) ──
+  // Un libellé et une description par clé de mode. Le préfixe par source
+  // rend le paramètre `noun` inutile : l'ancienne forme modeQcmKjM(noun)
+  // existait parce que `flashcard-kj-m` voulait dire « kanji » sur un
+  // écran et « mot » sur un autre, une seule clé devant servir les deux.
+  mode_kana_flashcard_f2b:        'Kana → romaji',
+  mode_kana_flashcard_f2b_desc:   'Le kana est affiché. Rappelez-vous son son.',
+  mode_kana_flashcard_b2f:        'Romaji → kana',
+  mode_kana_flashcard_b2f_desc:   'Le son est donné. Rappelez-vous le kana.',
+  mode_kana_write_romaji:         'Écrire le romaji',
+  mode_kana_write_romaji_desc:    'Le kana est affiché. Tapez son son.',
+  mode_kana_write_kana:           'Tracer le kana',
+  mode_kana_write_kana_desc:      'Le son est donné. Tracez le kana à la main.',
+
+  mode_kanji_flashcard_f2b:       'Kanji → sens',
+  mode_kanji_flashcard_f2b_desc:  'Le kanji est affiché. Rappelez-vous son sens.',
+  mode_kanji_flashcard_b2f:       'Sens → kanji',
+  mode_kanji_flashcard_b2f_desc:  'Le sens est affiché. Rappelez-vous le kanji.',
+  mode_kanji_write_kanji:         'Tracer le kanji',
+  mode_kanji_write_kanji_desc:    'Le sens est donné. Tracez le kanji à la main.',
+  mode_kanji_readings:            'Lectures',
+  mode_kanji_readings_desc:       "Le kanji est affiché. Tapez ses lectures on'yomi et kun'yomi.",
+  mode_kanji_radical:             'Radical',
+  mode_kanji_radical_desc:        'Le kanji est affiché. Rappelez-vous son radical.',
+
+  mode_vocab_flashcard_f2b:       'Mot → sens',
+  mode_vocab_flashcard_f2b_desc:  'Le mot est affiché. Rappelez-vous son sens.',
+  mode_vocab_flashcard_b2f:       'Sens → mot',
+  mode_vocab_flashcard_b2f_desc:  'Le sens est affiché. Rappelez-vous le mot.',
+  mode_vocab_word_reading:        'Lecture',
+  mode_vocab_word_reading_desc:   'Le mot est affiché. Rappelez-vous sa lecture en kana.',
+
+  mode_grammar_flashcard_f2b:      'Structure → sens',
+  mode_grammar_flashcard_f2b_desc: 'La structure est affichée. Rappelez-vous son emploi.',
+  mode_grammar_flashcard_b2f:      'Sens → structure',
+  mode_grammar_flashcard_b2f_desc: 'Le sens est affiché. Rappelez-vous la structure.',
+  mode_grammar_fill_in:            'Nommer la règle',
+  mode_grammar_fill_in_desc:       'Une phrase japonaise, sans traduction. Nommez la structure employée.',
+
+  mode_standard_flashcard_f2b:      'Recto → verso',
+  mode_standard_flashcard_f2b_desc: "Votre carte, telle que vous l'avez écrite.",
+  mode_standard_flashcard_b2f:      'Verso → recto',
+  mode_standard_flashcard_b2f_desc: "Votre carte, dans l'autre sens.",
+
+  mode_fast_review:                'Révision rapide',
+  mode_fast_review_desc:           "Parcourez ce que vous avez déjà étudié. Rien n'est noté.",
   retry:     'Réessayer',
   sessionLoadFailed: 'Impossible de charger vos cartes.',
 }

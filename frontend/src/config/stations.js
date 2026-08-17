@@ -29,6 +29,7 @@
 // name from, so it keeps its own.
 
 import { getNavLinks, getProfileHalls } from './navLinks'
+import { serviceKeyFor } from '../domain/studyModes'
 
 // path -> { code, kana }
 //   code   two letters, the way a real line is coded (JY, G, T…). It
@@ -150,32 +151,19 @@ const SERVICES = {
   review:  { jp: '復習',     stops: 0 },
 }
 
-// Keyed by the mode keys in domain/quizModes.js. Anything not in the
-// table (the study-source pickers reuse this same list component for
-// "by level" / "by theme", which aren't services at all) simply gets
-// no badge, rather than a wrong one.
-const SERVICE = {
-  // Recognition + choices: the form is shown, the answer is on screen.
-  'qcm':             'local',
-  'mcq':             'local',
-  'qcm-kj-m':        'local',
-
-  // One support removed, from either direction.
-  'qcm-m-kj':        'rapid',   // recall, but the choices confirm it
-  'flashcard':       'rapid',   // recognition, but nothing to pick from
-  'flashcard-kj-m':  'rapid',
-
-  // Retrieved from memory and self-graded.
-  'flashcard-m-kj':  'express',
-  'fill':            'express',
-
-  // Produced by hand.
-  'write':           'ltd',
-
-  'review':          'review',
-}
-
+// The mode-key -> service mapping used to live here as its own SERVICE
+// map, hand-synced with domain/quizModes.js. It was one of four places
+// the mode key space was enumerated, and the quietest: an unmapped key
+// made serviceFor() return null, and ModeSelector then fell back to a
+// 番線 platform number — so a mode card silently rendered as if it were
+// a source picker, with no error anywhere. The badge now comes from the
+// one registry that defines the modes, and a test asserts every key
+// names a rung (backend/tests/test_mode_parity.py).
+//
+// Anything that isn't a mode still returns null and keeps the numbered
+// fallback, which is what the "by level" / "by theme" / "by frequency"
+// source pickers rely on.
 export function serviceFor(modeKey) {
-  const key = SERVICE[modeKey]
+  const key = serviceKeyFor(modeKey)
   return key ? { key, ...SERVICES[key] } : null
 }
