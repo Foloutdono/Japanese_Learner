@@ -6,6 +6,7 @@ from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
 from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from study.quiz_modes import KANA_MODES
+from study.modes import KANA, Mode, require_mode
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -160,7 +161,9 @@ def _select_cards(set_name: str, mode: str, count: int, exclude_ids: set[str], u
 
 
 @router.get("/api/kana/card")
-def get_kana_card(set_name: str, mode: str, user_id: str = Depends(get_user_id)):
+def get_kana_card(set_name: str, m: Mode = Depends(require_mode(KANA)),
+                   user_id: str = Depends(get_user_id)):
+    mode = m.key
     kana_list, cards = _select_cards(set_name, mode, count=1, exclude_ids=set(), user_id=user_id)
     if kana_list is None:
         print(f"Unknown set: {set_name}")
@@ -172,7 +175,8 @@ def get_kana_card(set_name: str, mode: str, user_id: str = Depends(get_user_id))
 
 
 @router.get("/api/kana/cards")
-def get_kana_cards(set_name: str, mode: str, count: int = 10, exclude: str = "",
+def get_kana_cards(set_name: str, count: int = 10, exclude: str = "",
+                    m: Mode = Depends(require_mode(KANA)),
                     user_id: str = Depends(get_user_id)):
     """
     Batch version of /api/kana/card — returns up to `count` cards at
@@ -181,6 +185,7 @@ def get_kana_cards(set_name: str, mode: str, count: int = 10, exclude: str = "",
     of raw (unprefixed) card ids the client already has queued but
     hasn't reviewed yet.
     """
+    mode = m.key
     kana_list, cards = _select_cards(
         set_name, mode,
         count=max(1, min(count, MAX_BATCH)),
@@ -193,13 +198,15 @@ def get_kana_cards(set_name: str, mode: str, count: int = 10, exclude: str = "",
 
 
 @router.get("/api/kana/stats")
-def get_kana_stats(set_name: str, mode: str, user_id: str = Depends(get_user_id)):
+def get_kana_stats(set_name: str, m: Mode = Depends(require_mode(KANA)),
+                    user_id: str = Depends(get_user_id)):
     """
     Lightweight, per-set/mode progress (à apprendre / en cours / maîtrisé).
     Unlike /api/stats (which recomputes every category for the whole user),
     this only touches the card_ids for this one set and does a single
     bulk-state lookup, so it's cheap enough to call after every review.
     """
+    mode = m.key
     kana_list = KANA_SETS.get(set_name)
     if not kana_list:
         return {"error": "Unknown set"}
