@@ -19,9 +19,10 @@ import ThemeSelector from '../components/selection/ThemeSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
+import HintBar from '../components/study/HintBar'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
-import { speakJapanese } from '../lib/audio'
+import { speakJapanese, playUi } from '../lib/audio'
 import { vocabKanjiModes, reviewMode } from '../domain/quizModes'
 import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
@@ -74,6 +75,21 @@ export default function VocabScreen({ session }) {
   const [xpToast, setXpToast]         = useState(null)
   const [cardStamp, setCardStamp]     = useState(null)
   const [locked, setLocked]           = useState(false)
+  // ── Hint state (indice_1/2/3) ──
+  // Session-wide rather than per-card: a display preference should stay
+  // where the learner put it. See components/study/HintBar.jsx for why a
+  // hint is a switch on the card and not a mode of its own.
+  const [activeHints, setActiveHints] = useState(() => new Set())
+  function toggleHint(key) {
+    playUi('click-mode-selection')
+    setActiveHints(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
   const [reviewing, setReviewing]     = useState(false)
   const [reviewCards, setReviewCards] = useState([])
   const [reviewLoading, setReviewLoading] = useState(false)
@@ -171,7 +187,7 @@ export default function VocabScreen({ session }) {
   // that's also how the backend's vocab translation map is keyed.
   function translateCard(cardToTranslate, targetLang) {
     if (!cardToTranslate) return
-    const words = [wordForm(cardToTranslate), ...(cardToTranslate.choices ?? []).map(wordForm)]
+    const words = [wordForm(cardToTranslate), ...(cardToTranslate.hints?.indice_1 ?? []).map(wordForm)]
     const unique = [...new Set(words.filter(Boolean))]
     Promise.all(unique.map(word =>
       apiFetch(`/api/translation/vocab?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
@@ -485,7 +501,12 @@ export default function VocabScreen({ session }) {
   }
 
   // ── Quiz ──
-  const isKjToM = card?.direction === 'kj-m'
+  const isKjToM = card?.direction === 'f2b'
+  // Only the hints this card could actually build — a mode may declare
+  // indice_1 while a particular card has no distractors to offer.
+  const availableHints = Object.keys(card?.hints ?? {})
+  const showChoices = activeHints.has('indice_1') && Array.isArray(card?.hints?.indice_1)
+
   const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
   const sourceLabel =
     studyBy === 'level' ? level
@@ -507,6 +528,8 @@ export default function VocabScreen({ session }) {
         {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>
+            <HintBar available={availableHints} active={activeHints}
+                     onToggle={toggleHint} disabled={locked} />
             <CardTransition
               className="vocab-card-boost"
               cardKey={card.card_id}
@@ -520,7 +543,7 @@ export default function VocabScreen({ session }) {
               }}
             >
               <PromptCard>
-                {card.format === 'flashcard' && (
+                {!showChoices && (
                   <Flashcard
                     t={t}
                     resetKey={card.card_id}
@@ -547,7 +570,7 @@ export default function VocabScreen({ session }) {
                   />
                 )}
 
-                {card.format === 'qcm' && (
+                {showChoices && (
                   <>
                     <InlineReveal
                       t={t}
@@ -573,9 +596,9 @@ export default function VocabScreen({ session }) {
               </PromptCard>
             </CardTransition>
 
-            {card.format === 'qcm' && (
+            {showChoices && (
               <MCQGrid
-                choices={card.choices.map(c => isKjToM ? c.meaning : wordForm(c))}
+                choices={(card.hints?.indice_1 ?? []).map(c => isKjToM ? c.meaning : wordForm(c))}
                 correct={isKjToM ? card.meaning : wordForm(card)}
                 formatChoice={isKjToM ? formatGlossLine : undefined}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}

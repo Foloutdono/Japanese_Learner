@@ -558,6 +558,17 @@ const misc = {
   // Shown by components/study/SessionError when a study session has
   // nothing to show AND the last fetch failed — previously this state
   // rendered an empty box with no explanation and no way to recover.
+  // ── Hints (indice_1/2/3) ──
+  // A hint is opt-in per card and never forks the SRS — see
+  // components/study/HintBar.jsx. These replace the old "MCQ mode"
+  // labels, because multiple choice is a help level now, not an
+  // exercise.
+  hintChoicesShow:    'Show choices',
+  hintChoicesHide:    'Hide choices',
+  hintSentencesShow:  'Show a sentence',
+  hintSentencesHide:  'Hide the sentence',
+  hintFuriganaShow:   'Show furigana',
+  hintFuriganaHide:   'Hide furigana',
   retry:              'Try again',
   sessionLoadFailed:  "Couldn't load your cards.",
 }

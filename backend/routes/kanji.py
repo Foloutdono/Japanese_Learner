@@ -8,6 +8,7 @@ from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from translations import get_meaning
 from content.kanji_meanings import KANJI_FR
 from study.quiz_modes import QCM_FLASHCARD_MODES, KANJI_MODES
+from study.modes import KANJI, INDICE_CHOICES, Mode, require_mode
 from study.mcq import pick_distractors
 from pydantic import BaseModel
 
@@ -89,12 +90,26 @@ def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) ->
     }
 
 
-def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], mode: str, lang: str, stage: str | None,
+def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], m: Mode, lang: str, stage: str | None,
                        preview: dict[int, dict] | None = None) -> dict:
+    """
+    Takes a resolved Mode, not a mode string.
+
+    The old `format` field ('qcm' | 'flashcard') is gone. It encoded "are
+    the choices on screen", which is not a property of the exercise — it
+    is how much help the learner wants on the card in front of them. So
+    the choices now ride in `hints.indice_1` whenever the mode offers that
+    hint, and the client decides whether to show them. That also removes
+    the `QCM_FLASHCARD_MODES[mode]` lookup that would KeyError on any key
+    outside that dict.
+    """
     meaning = get_meaning(entry, lang, FR_MAP)
     payload = {
         "card_id":      raw_id,
-        "mode":         mode,
+        "mode":         m.key,
+        # f2b: the kanji is shown, recall the meaning.
+        # b2f: the meaning is shown, recall the kanji.
+        "direction":    m.direction,
         "kanji":        entry.get("kanji", ""),
         "kana":         entry.get("kana", ""),
         "meaning":      meaning,
@@ -108,21 +123,18 @@ def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], mode: st
         # guess or wait on a round trip to know what just happened —
         # see preview_reviews_bulk's docstring for the full reasoning.
         "review_preview": _build_review_preview(stage, preview),
+        "hints": {},
     }
 
-    if mode == "write":
-        return payload
-
-    fmt, direction = QCM_FLASHCARD_MODES[mode]
-    payload["format"]    = fmt
-    payload["direction"] = direction
-
-    if fmt == "qcm":
+    if INDICE_CHOICES in m.hints:
+        # Built unconditionally for a hint-capable mode, because the
+        # learner can ask for them mid-card and a second round trip at
+        # that moment would stall the card.
         choice_entries = pick_distractors(
             kanji_list, lambda k: get_meaning(k, lang, FR_MAP), meaning,
         ) + [entry]
         random.shuffle(choice_entries)
-        payload["choices"] = [
+        payload["hints"][INDICE_CHOICES] = [
             {"kanji": c.get("kanji", ""), "meaning": get_meaning(c, lang, FR_MAP)}
             for c in choice_entries
         ]
@@ -130,7 +142,7 @@ def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], mode: st
     return payload
 
 
-def _select_cards(level: str, mode: str, lang: str, count: int, exclude_ids: set[str], user_id: str):
+def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str):
     """
     Shared by /api/kanji/card and /api/kanji/cards. Returns
     (kanji_list, cards) — kanji_list is None for an unknown level or
@@ -138,8 +150,11 @@ def _select_cards(level: str, mode: str, lang: str, count: int, exclude_ids: set
     error messages).
     """
     kanji_list = KANJI_BY_LEVEL.get(level)
-    if not kanji_list or mode not in VALID_MODES:
+    if not kanji_list:
         return None, None
+    # Mode validity is settled upstream by require_mode, so the only
+    # remaining failure here is an unknown level.
+    mode = m.key
 
     raw_ids   = [kanji_to_id(k, level) for k in kanji_list]
     card_ids  = prefixed(raw_ids, user_id)
@@ -169,7 +184,7 @@ def _select_cards(level: str, mode: str, lang: str, count: int, exclude_ids: set
         raw_id = unprefixed(card_id, user_id)
         entry = next((k for k in kanji_list if kanji_to_id(k, level) == raw_id), None)
         if entry is not None:
-            cards.append(_build_kanji_card(raw_id, entry, kanji_list, mode, lang, states.get(card_id), previews.get(card_id)))
+            cards.append(_build_kanji_card(raw_id, entry, kanji_list, m, lang, states.get(card_id), previews.get(card_id)))
 
     logger.info(
         "kanji study request level=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
@@ -179,13 +194,13 @@ def _select_cards(level: str, mode: str, lang: str, count: int, exclude_ids: set
 
 
 @router.get("/api/kanji/card")
-def get_kanji_card(level: str, mode: str, lang: str = "fr",
+def get_kanji_card(level: str, lang: str = "fr",
+                   m: Mode = Depends(require_mode(KANJI)),
                    user_id: str = Depends(get_user_id)):
-    kanji_list, cards = _select_cards(level, mode, lang, count=1, exclude_ids=set(), user_id=user_id)
+    mode = m.key
+    kanji_list, cards = _select_cards(level, m, lang, count=1, exclude_ids=set(), user_id=user_id)
     if kanji_list is None:
-        if level not in KANJI_BY_LEVEL:
-            return {"error": "Unknown level"}
-        return {"error": "Invalid mode"}
+        return {"error": "Unknown level"}
     if not cards:
         logger.warning("kanji study exhausted level=%s mode=%s user_id=%s", level, mode, user_id)
         return {"done": True}
@@ -193,7 +208,8 @@ def get_kanji_card(level: str, mode: str, lang: str = "fr",
 
 
 @router.get("/api/kanji/cards")
-def get_kanji_cards(level: str, mode: str, lang: str = "fr", count: int = 10, exclude: str = "",
+def get_kanji_cards(level: str, lang: str = "fr", count: int = 10, exclude: str = "",
+                    m: Mode = Depends(require_mode(KANJI)),
                     user_id: str = Depends(get_user_id)):
     """
     Batch version of /api/kanji/card — returns up to `count` cards at
@@ -203,15 +219,13 @@ def get_kanji_cards(level: str, mode: str, lang: str = "fr", count: int = 10, ex
     hasn't reviewed yet.
     """
     kanji_list, cards = _select_cards(
-        level, mode, lang,
+        level, m, lang,
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
     )
     if kanji_list is None:
-        if level not in KANJI_BY_LEVEL:
-            return {"error": "Unknown level"}
-        return {"error": "Invalid mode"}
+        return {"error": "Unknown level"}
     return {"cards": cards}
 
 
@@ -278,7 +292,8 @@ def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id
 
 
 @router.get("/api/kanji/stats")
-def get_kanji_stats(level: str, mode: str, user_id: str = Depends(get_user_id)):
+def get_kanji_stats(level: str, m: Mode = Depends(require_mode(KANJI)),
+                     user_id: str = Depends(get_user_id)):
     """
     Lightweight, per-level/mode progress (à apprendre / en cours / maîtrisé).
     Scoped to a single level+mode (unlike /api/stats, which recomputes
@@ -288,8 +303,7 @@ def get_kanji_stats(level: str, mode: str, user_id: str = Depends(get_user_id)):
     kanji_list = KANJI_BY_LEVEL.get(level)
     if not kanji_list:
         return {"error": "Unknown level"}
-    if mode not in VALID_MODES:
-        return {"error": "Invalid mode"}
+    mode = m.key
 
     raw_ids  = [kanji_to_id(k, level) for k in kanji_list]
     card_ids = prefixed(raw_ids, user_id)

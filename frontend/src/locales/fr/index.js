@@ -559,6 +559,17 @@ const misc = {
   // rien à montrer ET que la dernière requête a échoué — cet état
   // n'affichait auparavant qu'un cadre vide, sans explication ni moyen
   // de reprendre.
+  // ── Indices (indice_1/2/3) ──
+  // Un indice s'active carte par carte et ne scinde jamais le SRS —
+  // voir components/study/HintBar.jsx. Ils remplacent les anciens
+  // libellés « QCM », le choix multiple étant désormais un niveau
+  // d'aide et non un exercice.
+  hintChoicesShow:    'Afficher les choix',
+  hintChoicesHide:    'Masquer les choix',
+  hintSentencesShow:  'Afficher une phrase',
+  hintSentencesHide:  'Masquer la phrase',
+  hintFuriganaShow:   'Afficher les furigana',
+  hintFuriganaHide:   'Masquer les furigana',
   retry:     'Réessayer',
   sessionLoadFailed: 'Impossible de charger vos cartes.',
 }

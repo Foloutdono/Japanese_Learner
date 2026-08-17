@@ -23,6 +23,11 @@ from content.kanji_meanings import KANJI_FR
 from routes.kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
 from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
 from routes.grammar import VALID_MODES as GRAMMAR_VALID_MODES, _build_grammar_card
+from study.modes import (
+    KANJI as MODE_KANJI,
+    VOCAB as MODE_VOCAB,
+    resolve_for_source,
+)
 import psycopg2.extras
 
 router = APIRouter()
@@ -61,12 +66,25 @@ MAX_BATCH = 25
 #     source (e.g. "dictionary") reusing _build_vocab_card the same
 #     way.
 
+# The kanji/vocab builders take a resolved Mode now rather than a mode
+# string (see _build_kanji_card's docstring for why `format` went away).
+# A deck's session still arrives carrying whatever key get_deck_modes
+# advertised, so resolve it here against the source it belongs to —
+# which also means a legacy key keeps working through LEGACY_ALIASES
+# while the frontend catches up. Restructuring decks.py's own mode
+# handling is the deck-structures phase, not this one.
 def _wrap_kanji(raw_id, entry, level, level_list, mode, lang, stage, preview):
-    return _build_kanji_card(raw_id, entry, level_list, mode, lang, stage, preview)
+    m = resolve_for_source(MODE_KANJI, mode)
+    if m is None:
+        raise HTTPException(status_code=400, detail=f"Invalid kanji mode: {mode!r}")
+    return _build_kanji_card(raw_id, entry, level_list, m, lang, stage, preview)
 
 
 def _wrap_vocab(raw_id, entry, level, level_list, mode, lang, stage, preview):
-    return _build_vocab_card(raw_id, entry, level_list, mode, lang, stage, preview)
+    m = resolve_for_source(MODE_VOCAB, mode)
+    if m is None:
+        raise HTTPException(status_code=400, detail=f"Invalid vocab mode: {mode!r}")
+    return _build_vocab_card(raw_id, entry, level_list, m, lang, stage, preview)
 
 
 def _wrap_grammar(raw_id, entry, level, level_list, mode, lang, stage, preview):
@@ -800,29 +818,6 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
     return pool
 
 
-# flashcard-flavoured mode -> the qcm-flavoured mode covering the same
-# material in the same direction. StudyScreen lets a learner flip
-# between "show me the choices" and "recall it cold" on the card in
-# front of them (see its MODE_PAIR), which means an app-sourced card
-# has to arrive carrying its distractors even when the session itself
-# is flashcard-keyed. Custom cards have no counterpart and appear here
-# for exactly the reason _eligible spells out below: a hand-written
-# front/back pair has no distractors to offer.
-#
-# The session stays on ONE mode either way — the flashcard-flavoured
-# one, since that's the only key custom cards are eligible for, and a
-# mixed deck without its own hand-written cards would be a strange
-# thing to hand back. Nothing about the flip re-keys the SRS: the
-# grade an SRS review actually consumes is the learner's own 1-4
-# self-rating from RatingBar, which means the same thing whether or
-# not four options happened to be on screen.
-QCM_COUNTERPART = {
-    "flashcard-kj-m": "qcm-kj-m",
-    "flashcard-m-kj": "qcm-m-kj",
-    "flashcard": "mcq",  # grammar
-}
-
-
 def _eligible(pool_entry: dict, mode: str) -> bool:
     # Custom cards are a plain front/back pair — no MCQ distractors, no
     # kanji to draw, no fill-in-the-blank sentence — so they can only
@@ -907,19 +902,12 @@ def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr"
             card["card_id"] = raw_id
             card["source"]  = f"builtin_{p['source']}"
 
-            # Attach the distractors the qcm-flavoured counterpart would
-            # have built, so StudyScreen can flip this card to multiple
-            # choice without another round trip. Built through the same
-            # cfg["build"] as a real qcm card rather than duplicating the
-            # distractor logic here, so the choices a flipped card shows
-            # are the exact ones it would show in a qcm session.
-            counterpart = QCM_COUNTERPART.get(mode)
-            if counterpart and counterpart in cfg["valid_modes"] and "choices" not in card:
-                alt = cfg["build"](raw_id, p["entry"], p["level"], level_list,
-                                   counterpart, lang, stage, preview)
-                if alt.get("choices"):
-                    card["choices"] = alt["choices"]
-
+            # No counterpart lookup any more: the builders attach the
+            # distractors themselves as hints.indice_1 whenever the mode
+            # offers that hint (see _build_kanji_card), so the flip to
+            # multiple choice needs nothing extra here. The QCM_COUNTERPART
+            # table existed only because `format` used to decide whether
+            # choices were built at all.
             cards.append(card)
 
     logger.info(

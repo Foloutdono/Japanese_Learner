@@ -8,6 +8,7 @@ from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from study.quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO, VOCAB_MODES
+from study.modes import VOCAB, INDICE_CHOICES, Mode, require_mode
 from study.mcq import pick_distractors
 from pydantic import BaseModel
 
@@ -76,16 +77,21 @@ def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) ->
     }
 
 
-def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], mode: str, lang: str, stage: str | None,
+def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], m: Mode, lang: str, stage: str | None,
                        preview: dict[int, dict] | None = None) -> dict:
+    """
+    Takes a resolved Mode. See _build_kanji_card for why `format` is gone
+    and the choices moved into `hints.indice_1`. This builder is also
+    where the unguarded `MODE_INFO[mode]` lookup used to live — the one
+    that 500'd on any key outside that dict, with no `write`-style escape
+    hatch of its own.
+    """
     meaning = get_meaning(word, lang, FR_MAP)
-    fmt, direction = MODE_INFO[mode]
 
     payload = {
         "card_id":   raw_id,
-        "mode":      mode,
-        "format":    fmt,
-        "direction": direction,
+        "mode":      m.key,
+        "direction": m.direction,
         "kanji":     word.get("kanji", ""),
         "kana":      word.get("kana", ""),
         "meaning":   meaning,
@@ -98,14 +104,15 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], mode: str
         # guess or wait on a round trip to know what just happened —
         # see preview_reviews_bulk's docstring for the full reasoning.
         "review_preview": _build_review_preview(stage, preview),
+        "hints": {},
     }
 
-    if fmt == "qcm":
+    if INDICE_CHOICES in m.hints:
         choice_entries = pick_distractors(
             vocab_list, lambda w: get_meaning(w, lang, FR_MAP), meaning,
         ) + [word]
         random.shuffle(choice_entries)
-        payload["choices"] = [
+        payload["hints"][INDICE_CHOICES] = [
             {
                 "kanji":   c.get("kanji", ""),
                 "kana":    c.get("kana", ""),
@@ -117,7 +124,7 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], mode: str
     return payload
 
 
-def _select_cards(level: str, mode: str, lang: str, count: int, exclude_ids: set[str], user_id: str):
+def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str):
     """
     Shared by /api/vocab/card and /api/vocab/cards. Returns
     (vocab_list, cards) — vocab_list is None for an unknown level or
@@ -125,8 +132,11 @@ def _select_cards(level: str, mode: str, lang: str, count: int, exclude_ids: set
     error messages).
     """
     vocab_list = VOCAB_BY_LEVEL.get(level)
-    if not vocab_list or mode not in MODE_INFO:
+    if not vocab_list:
         return None, None
+    # Mode validity is settled upstream by require_mode, so the only
+    # remaining failure here is an unknown level.
+    mode = m.key
 
     raw_ids   = [vocab_to_id(w, level) for w in vocab_list]
     card_ids  = prefixed(raw_ids, user_id)
@@ -156,7 +166,7 @@ def _select_cards(level: str, mode: str, lang: str, count: int, exclude_ids: set
         raw_id = unprefixed(card_id, user_id)
         word = next((w for w in vocab_list if vocab_to_id(w, level) == raw_id), None)
         if word is not None:
-            cards.append(_build_vocab_card(raw_id, word, vocab_list, mode, lang, states.get(card_id), previews.get(card_id)))
+            cards.append(_build_vocab_card(raw_id, word, vocab_list, m, lang, states.get(card_id), previews.get(card_id)))
 
     logger.info(
         "vocab study request level=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
@@ -166,13 +176,13 @@ def _select_cards(level: str, mode: str, lang: str, count: int, exclude_ids: set
 
 
 @router.get("/api/vocab/card")
-def get_vocab_card(level: str, mode: str, lang: str = "fr",
+def get_vocab_card(level: str, lang: str = "fr",
+                   m: Mode = Depends(require_mode(VOCAB)),
                    user_id: str = Depends(get_user_id)):
-    vocab_list, cards = _select_cards(level, mode, lang, count=1, exclude_ids=set(), user_id=user_id)
+    mode = m.key
+    vocab_list, cards = _select_cards(level, m, lang, count=1, exclude_ids=set(), user_id=user_id)
     if vocab_list is None:
-        if level not in VOCAB_BY_LEVEL:
-            return {"error": "Unknown level"}
-        return {"error": "Invalid mode"}
+        return {"error": "Unknown level"}
     if not cards:
         logger.warning("vocab study exhausted level=%s mode=%s user_id=%s", level, mode, user_id)
         return {"done": True}
@@ -180,7 +190,8 @@ def get_vocab_card(level: str, mode: str, lang: str = "fr",
 
 
 @router.get("/api/vocab/cards")
-def get_vocab_cards(level: str, mode: str, lang: str = "fr", count: int = 10, exclude: str = "",
+def get_vocab_cards(level: str, lang: str = "fr", count: int = 10, exclude: str = "",
+                    m: Mode = Depends(require_mode(VOCAB)),
                     user_id: str = Depends(get_user_id)):
     """
     Batch version of /api/vocab/card — returns up to `count` cards at
@@ -190,15 +201,13 @@ def get_vocab_cards(level: str, mode: str, lang: str = "fr", count: int = 10, ex
     hasn't reviewed yet.
     """
     vocab_list, cards = _select_cards(
-        level, mode, lang,
+        level, m, lang,
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
     )
     if vocab_list is None:
-        if level not in VOCAB_BY_LEVEL:
-            return {"error": "Unknown level"}
-        return {"error": "Invalid mode"}
+        return {"error": "Unknown level"}
     return {"cards": cards}
 
 
@@ -266,7 +275,8 @@ def post_vocab_review(payload: ReviewPayload, user_id: str = Depends(get_user_id
 
 
 @router.get("/api/vocab/stats")
-def get_vocab_stats(level: str, mode: str, user_id: str = Depends(get_user_id)):
+def get_vocab_stats(level: str, m: Mode = Depends(require_mode(VOCAB)),
+                     user_id: str = Depends(get_user_id)):
     """
     Lightweight, per-level/mode progress (à apprendre / en cours / maîtrisé).
     Scoped to a single level+mode (unlike /api/stats, which recomputes
@@ -276,8 +286,7 @@ def get_vocab_stats(level: str, mode: str, user_id: str = Depends(get_user_id)):
     vocab_list = VOCAB_BY_LEVEL.get(level)
     if not vocab_list:
         return {"error": "Unknown level"}
-    if mode not in MODE_INFO:
-        return {"error": "Invalid mode"}
+    mode = m.key
 
     raw_ids  = [vocab_to_id(w, level) for w in vocab_list]
     card_ids = prefixed(raw_ids, user_id)

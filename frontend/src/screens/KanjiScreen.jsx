@@ -18,10 +18,11 @@ import TierSelector from '../components/selection/TierSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
+import HintBar from '../components/study/HintBar'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import {DrawingQuiz, DrawingOverlay} from '../components/study/DrawingCanvas'
-import { speakJapanese } from '../lib/audio'
+import { speakJapanese, playUi } from '../lib/audio'
 import { kanjiModes, reviewMode, usesWritingDrill } from '../domain/quizModes'
 import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
@@ -70,6 +71,21 @@ export default function KanjiScreen({ session }) {
   const [xpToast, setXpToast]         = useState(null)
   const [cardStamp, setCardStamp]     = useState(null)
   const [locked, setLocked]           = useState(false)
+  // ── Hint state (indice_1/2/3) ──
+  // Session-wide rather than per-card: a display preference should stay
+  // where the learner put it. See components/study/HintBar.jsx for why a
+  // hint is a switch on the card and not a mode of its own.
+  const [activeHints, setActiveHints] = useState(() => new Set())
+  function toggleHint(key) {
+    playUi('click-mode-selection')
+    setActiveHints(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
   const [reviewing, setReviewing]     = useState(false)
   const [reviewCards, setReviewCards] = useState([])
   const [reviewLoading, setReviewLoading] = useState(false)
@@ -173,7 +189,7 @@ export default function KanjiScreen({ session }) {
 
   function translateCard(cardToTranslate, targetLang) {
     if (!cardToTranslate) return
-    const words = [cardToTranslate.kanji, ...(cardToTranslate.choices ?? []).map(c => c.kanji)]
+    const words = [cardToTranslate.kanji, ...(cardToTranslate.hints?.indice_1 ?? []).map(c => c.kanji)]
     const unique = [...new Set(words.filter(Boolean))]
     Promise.all(unique.map(word =>
       apiFetch(`/api/translation/kanji?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
@@ -259,7 +275,7 @@ export default function KanjiScreen({ session }) {
     // Struggling to recall the kanji from its meaning is exactly when a
     // quick writing drill helps most — recognition-direction modes and
     // the writing mode itself don't need this extra step.
-    const needTraining = quality <= 3 && card?.direction === 'm-kj' && drawingEnabled
+    const needTraining = quality <= 3 && card?.direction === 'b2f' && drawingEnabled
 
     loadProgress(studyBy === 'level' ? { level } : { tier, tierSize }, mode)
 
@@ -434,7 +450,12 @@ export default function KanjiScreen({ session }) {
   }
 
   // ── Quiz ──
-  const isKjToM = card?.direction === 'kj-m'
+  const isKjToM = card?.direction === 'f2b'
+  // Only the hints this card could actually build — a mode may declare
+  // indice_1 while a particular card has no distractors to offer.
+  const availableHints = Object.keys(card?.hints ?? {})
+  const showChoices = activeHints.has('indice_1') && Array.isArray(card?.hints?.indice_1)
+
   const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
   const sourceLabel = studyBy === 'level' ? level : tierLabel
 
@@ -467,6 +488,8 @@ export default function KanjiScreen({ session }) {
 
         {card && !loading && (
           <>
+            <HintBar available={availableHints} active={activeHints}
+                     onToggle={toggleHint} disabled={locked} />
             <CardTransition
               cardKey={card.card_id}
               contentKey={`${card.card_id}:${card.lang ?? ''}`}
@@ -480,7 +503,7 @@ export default function KanjiScreen({ session }) {
             >
               {mode !== 'write' ? (
                 <PromptCard>
-                  {card.format === 'flashcard' && (
+                  {!showChoices && (
                     <Flashcard
                       t={t}
                       resetKey={card.card_id}
@@ -509,7 +532,7 @@ export default function KanjiScreen({ session }) {
                     />
                   )}
 
-                  {card.format === 'qcm' && (
+                  {showChoices && (
                     <>
                       <InlineReveal
                         t={t}
@@ -552,9 +575,9 @@ export default function KanjiScreen({ session }) {
               )}
             </CardTransition>
 
-            {card.format === 'qcm' && (
+            {showChoices && (
               <MCQGrid
-                choices={card.choices.map(c => isKjToM ? c.meaning : c.kanji)}
+                choices={(card.hints?.indice_1 ?? []).map(c => isKjToM ? c.meaning : c.kanji)}
                 correct={isKjToM ? card.meaning : card.kanji}
                 formatChoice={isKjToM ? formatGlossLine : undefined}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}

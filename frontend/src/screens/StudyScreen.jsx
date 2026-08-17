@@ -325,7 +325,7 @@ export default function StudyScreen({ session }) {
       // carry direction 'm-kj' from a kanji source, so this naturally
       // never fires for them.
       const needTraining =
-        quality <= 3 && card.source === 'builtin_kanji' && card.direction === 'm-kj' && drawingEnabled
+        quality <= 3 && card.source === 'builtin_kanji' && card.direction === 'b2f' && drawingEnabled
 
       loadProgress(mode)
 
@@ -456,16 +456,22 @@ export default function StudyScreen({ session }) {
   }
 
   const currentModeLabel = isMerged ? mergedLabelFor(mode, t) : (MODE_META[mode]?.label ?? mode)
-  const isKjToM = card?.direction === 'kj-m'
+  const isKjToM = card?.direction === 'f2b'
 
-  // Whether THIS card can offer the assisted view: it needs the
-  // distractors decks.py attaches to app-sourced cards. A custom
-  // hand-written card never has them (nothing to build them from), so
-  // in a mixed deck the switch simply doesn't apply to those cards and
-  // the control says so rather than sitting there dead.
-  const cardCanAssist = isMerged && Array.isArray(card?.choices) && card.choices.length > 0
-  // What the card should actually render as, right now.
-  const shownFormat = cardCanAssist && assisted ? 'qcm' : card?.format
+  // Whether THIS card can offer the assisted view. The distractors now
+  // arrive as hints.indice_1, built by the card builder itself for any
+  // mode that offers that hint — decks.py no longer has to attach a
+  // qcm counterpart's choices by hand. A custom hand-written card still
+  // has none (nothing to build them from), so the switch doesn't apply
+  // to those and the control says so rather than sitting there dead.
+  // hints.indice_1 for the migrated sources; card.choices is grammar's
+  // pre-migration shape, kept until routes/grammar.py moves over too.
+  const cardChoices = card?.hints?.indice_1 ?? card?.choices
+  const cardCanAssist = isMerged && Array.isArray(cardChoices) && cardChoices.length > 0
+  // What the card should render as right now. `format` is gone from the
+  // payload — a flashcard is the default presentation and the choices
+  // are the opt-in, rather than two different card "formats".
+  const shownFormat = cardCanAssist && assisted ? 'qcm' : 'flashcard'
 
   // ── Per-source prompt renderers (rendered inside CardTransition) ──
   // Deliberately NOT collapsed into one generic front/back layout —
@@ -747,7 +753,7 @@ export default function StudyScreen({ session }) {
                 objects, flattened to whichever side isn't the prompt. */}
             {(card.source === 'builtin_kanji' || card.source === 'builtin_vocab') && shownFormat === 'qcm' && (
               <MCQGrid
-                choices={card.choices.map(c => isKjToM ? c.meaning : wordForm(c))}
+                choices={(cardChoices ?? []).map(c => isKjToM ? c.meaning : wordForm(c))}
                 correct={isKjToM ? card.meaning : wordForm(card)}
                 formatChoice={isKjToM ? formatGlossLine : undefined}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
