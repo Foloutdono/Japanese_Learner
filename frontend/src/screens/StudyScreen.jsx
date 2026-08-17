@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -16,14 +16,19 @@ import { CardTransition } from '../components/study/CardTransition'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
+import SessionError from '../components/study/SessionError'
 import { DrawingQuiz, DrawingOverlay } from '../components/study/DrawingCanvas'
 import { speakJapanese, playUi } from '../lib/audio'
 import { vocabKanjiModes, kanjiModes, grammarModePicker, usesWritingDrill } from '../domain/quizModes'
 import { applyXpGain } from '../stores/profileSummary'
-import { useCardSession } from '../hooks/useCardSession'
+import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 import { ChevronIcon, PencilIcon, LightbulbIcon } from '../components/ui/Icons'
 
-const FETCH_TIMEOUT_MS = 8000
+// The 8s fetch timeout that used to live here is gone: useCardSession
+// owns the abort signal and the timeout now (10s, matched to the cold
+// start it was always meant to bridge), so the five screens no longer
+// each hand-roll a controller that only ever timed out and never
+// aborted on unmount.
 
 // A deck can hold cards from any of these sources at once, so its mode
 // picker needs labels/descriptions for every key any of them might
@@ -225,28 +230,37 @@ export default function StudyScreen({ session }) {
   // before either change has a shape this screen no longer expects,
   // and useCardSession has no way to know that on its own; bumping the
   // key is what makes it fetch fresh instead of resuming stale data.
-  const storageKey = mode ? `jp-session:deck:v2:${deck_id}:${mode}` : 'idle'
+  // The v2 segment this key used to carry by hand is now the shared
+  // CACHE_VERSION inside sessionKey() — every screen gets it, not just
+  // this one, which is what stops a payload change from feeding a stale
+  // shape to a renderer on the other four.
+  const storageKey = mode ? sessionKey('deck', deck_id, mode) : IDLE_KEY
 
-  const fetchBatch = useCallback((count, excludeIds) => {
-    if (!mode) return Promise.resolve([])
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-    const allExcluded = Array.from(new Set([...excludeIds, ...recentlyReviewedRef.current.keys()]))
-    return apiFetch(
-      `/api/decks/${deck_id}/study?mode=${mode}&lang=${lang}&count=${count}&exclude=${allExcluded.join(',')}`,
+  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+    if (!mode) return []
+    const data = await apiJson(
+      `/api/decks/${deck_id}/study?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`,
       session,
-      { signal: controller.signal },
+      { signal },
     )
-      .then(r => r.json())
-      .then(data => data.cards ?? [])
-      .finally(() => clearTimeout(timer))
+    return data.cards ?? []
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deck_id, mode, lang, session])
 
-  const { current: card, loading, done, advance } = useCardSession({
+  // The just-reviewed set is merged into the exclude list by the hook
+  // itself now (extraExcludeIds), so every screen gets the protection
+  // this one had hand-rolled inside its own fetchBatch.
+  const extraExcludeIds = useCallback(
+    () => Array.from(recentlyReviewedRef.current.keys()),
+    [],
+  )
+
+  const { current: card, loading, done, error, retry, advance } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
+    mode,
+    extraExcludeIds,
   })
 
   useEffect(() => {
@@ -622,6 +636,7 @@ export default function StudyScreen({ session }) {
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
+        {error && !card && <SessionError error={error} onRetry={retry} />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
 
         {card && !loading && (

@@ -5,11 +5,63 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 // long, big enough that a burst of fast answers doesn't outrun it.
 const REFILL_AT = 4
 
-function loadCache(storageKey) {
+// Bump when the shape of a cached card changes. Every storageKey built
+// by sessionKey() carries this, so a bump orphans (and then sweeps) the
+// old caches instead of feeding a stale shape to a renderer that no
+// longer understands it. Only the deck-study screen used to version its
+// key; the other four had no version at all, which is why a payload
+// change could hand `choices.map` an undefined.
+const CACHE_VERSION = 'v3'
+
+const KEY_PREFIX = 'jp-session'
+
+/**
+ * Build a session storage key. Screens must use this rather than
+ * assembling the string themselves, so the version segment can never be
+ * forgotten on one screen and present on another.
+ *
+ *   sessionKey('kanji', level, mode) -> 'jp-session:v3:kanji:N5:kanji.flashcard.f2b'
+ */
+export function sessionKey(...parts) {
+  return [KEY_PREFIX, CACHE_VERSION, ...parts].join(':')
+}
+
+/** The placeholder key used while a screen's selection is incomplete. */
+export const IDLE_KEY = 'idle'
+
+// A cached entry has to be an array of card-shaped objects, and every
+// card has to belong to the mode we're about to render it in. Without
+// this check a queue cached under an older payload shape reaches a
+// renderer that assumes fields it doesn't have.
+function isUsableQueue(value, mode) {
+  if (!Array.isArray(value)) return false
+  return value.every(card => (
+    card !== null
+    && typeof card === 'object'
+    && typeof card.card_id === 'string'
+    && card.card_id.length > 0
+    && (mode == null || card.mode == null || card.mode === mode)
+  ))
+}
+
+function loadCache(storageKey, mode, validateCard) {
   try {
     const raw = window.localStorage.getItem(storageKey)
-    return raw ? JSON.parse(raw) : []
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!isUsableQueue(parsed, mode)) {
+      window.localStorage.removeItem(storageKey)
+      return []
+    }
+    if (validateCard && !parsed.every(validateCard)) {
+      window.localStorage.removeItem(storageKey)
+      return []
+    }
+    return parsed
   } catch {
+    // Unparseable — drop it rather than leaving a poison entry that
+    // fails again on every future mount.
+    try { window.localStorage.removeItem(storageKey) } catch { /* ignore */ }
     return []
   }
 }
@@ -23,6 +75,26 @@ function saveCache(storageKey, queue) {
   }
 }
 
+// Delete session caches left behind by an older CACHE_VERSION. Runs
+// once per page load; without it every taxonomy or payload change leaves
+// its dead caches in localStorage forever.
+let sweptThisLoad = false
+function sweepStaleCaches() {
+  if (sweptThisLoad) return
+  sweptThisLoad = true
+  try {
+    const keep = `${KEY_PREFIX}:${CACHE_VERSION}:`
+    const doomed = []
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const key = window.localStorage.key(i)
+      if (key && key.startsWith(`${KEY_PREFIX}:`) && !key.startsWith(keep)) doomed.push(key)
+    }
+    doomed.forEach(key => window.localStorage.removeItem(key))
+  } catch {
+    // Storage unavailable — nothing to sweep.
+  }
+}
+
 /**
  * Maintains a local queue of cards for one study session (one deck +
  * mode) and answers "what's the next card" out of that queue instead
@@ -30,112 +102,206 @@ function saveCache(storageKey, queue) {
  * network round trip. The queue refills itself in the background
  * before it runs dry.
  *
- * @param {string} storageKey - scopes the session, e.g.
- *   `jp-session:kana:hiragana_basic:qcm`. Changing it (switching
- *   deck/mode) starts a fresh session seeded from whatever was last
- *   cached under the new key, rather than continuing the old queue
- *   under a new name.
- * @param {(count: number, excludeIds: string[]) => Promise<object[]>} fetchBatch
- *   Must resolve to an array of card objects, each with a `card_id`.
- *   `excludeIds` are ids already sitting unreviewed in the queue, so
- *   the server doesn't hand back a card the user hasn't answered yet
- *   — this is what actually prevents the same-card-twice bug, not
- *   just the local queueing. Implementations should apply their own
- *   timeout (e.g. via AbortController) so a cold-starting backend
- *   doesn't hang a refill indefinitely — see usage note below.
+ * @param {string} storageKey  built with sessionKey(); changing it
+ *   starts a fresh session for the new key.
+ * @param {(count: number, excludeIds: string[], signal: AbortSignal) => Promise<object[]>} fetchBatch
+ *   Resolves to card objects, each with a `card_id`. Must THROW on a
+ *   failed request rather than resolving to [] — see `done` below.
+ *   The `signal` is aborted on unmount and on key change; the hook also
+ *   applies its own timeout, so implementations no longer need one.
  * @param {number} [batchSize=10]
+ * @param {string} [mode]  the mode these cards belong to; used to reject
+ *   a cache written for a different mode.
+ * @param {(card: object) => boolean} [validateCard]  extra per-mode
+ *   shape check for cached cards, e.g. asserting an MCQ-hinted mode's
+ *   cards actually carry choices.
+ * @param {() => string[]} [extraExcludeIds]  ids to exclude on top of
+ *   the queued ones — the just-reviewed set, so a fire-and-forget review
+ *   POST that hasn't landed yet can't have its card handed straight back.
+ * @param {number} [fetchTimeoutMs=10000]
  *
- * The localStorage mirror is what bridges a backend cold start: on
- * mount, the queue is seeded synchronously from the last cached
- * batch for this key, so a page load during the ~20s restart window
- * shows the last known cards immediately instead of a spinner, while
- * a background refill quietly retries the real backend underneath.
- * If that fetch fails or times out, the existing (possibly
- * cache-seeded) queue is left untouched and the next refill attempt
- * happens once the queue next drops to REFILL_AT — no error surfaces
- * to the screen unless the queue is *also* empty.
+ * ── On failure ──
+ * `error` is set only when a fetch fails AND the queue is empty, so a
+ * cache-seeded queue still degrades silently the way it always has. The
+ * hook then retries on its own with exponential backoff, because the
+ * localStorage mirror was only ever a partial answer to a cold-starting
+ * backend: it helps a returning user and does nothing at all for a first
+ * visit. `retry()` is exposed for an explicit user-facing button.
  *
- * Example fetchBatch, wired to a batch endpoint that takes
- * `count` + comma-separated `exclude`:
- *
- *   function makeFetchBatch(session, path) {
- *     return async (count, excludeIds) => {
- *       const controller = new AbortController()
- *       const timer = setTimeout(() => controller.abort(), 8000)
- *       try {
- *         const res = await apiFetch(
- *           `${path}&count=${count}&exclude=${excludeIds.join(',')}`,
- *           session,
- *           { signal: controller.signal },
- *         )
- *         const data = await res.json()
- *         return data.cards ?? []
- *       } finally {
- *         clearTimeout(timer)
- *       }
- *     }
- *   }
+ * `done` is set ONLY on a successful empty response. A failed request can
+ * no longer masquerade as an exhausted deck — which is what used to make
+ * an expired token play the "quiz complete" fanfare.
  */
-export function useCardSession({ storageKey, fetchBatch, batchSize = 10 }) {
-  const [queue, setQueue] = useState(() => loadCache(storageKey))
+export function useCardSession({
+  storageKey,
+  fetchBatch,
+  batchSize = 10,
+  mode,
+  validateCard,
+  extraExcludeIds,
+  fetchTimeoutMs = 10000,
+}) {
+  sweepStaleCaches()
+
+  const [queue, setQueue] = useState(() => loadCache(storageKey, mode, validateCard))
   const [done, setDone] = useState(false)
   const [fetching, setFetching] = useState(queue.length === 0)
-  const refillingRef = useRef(false)
+  const [error, setError] = useState(null)
+
+  // Monotonic session generation. Bumped whenever storageKey changes.
+  //
+  // This replaces the old single `refillingRef` boolean, which was the
+  // cause of the worst loading bug in the app: switching mode while a
+  // refill was in flight left the boolean true, so the NEW session's
+  // refill bailed out immediately; then the old response's `finally`
+  // cleared the flag with nothing left to re-trigger the effect (its
+  // deps were all unchanged), and the screen stayed blank forever.
+  //
+  // With a generation counter there is nothing to re-arm: a refill is
+  // in flight for this session iff refillGenRef === genRef, so a new
+  // generation is automatically free to fetch.
+  const genRef = useRef(0)
+  const refillGenRef = useRef(-1)
+  const abortRef = useRef(null)
+  const retryTimerRef = useRef(null)
+  const attemptsRef = useRef(0)
+  // Read inside refill() so the callback doesn't have to depend on
+  // `queue` — depending on it made refill a new function on every single
+  // answer, which is half of why the old trigger effect was so fragile.
+  // Synced in an effect rather than during render; effects run in
+  // declaration order, so this lands before the refill trigger below.
+  const queueRef = useRef(queue)
+  useEffect(() => { queueRef.current = queue }, [queue])
+
   const activeKeyRef = useRef(storageKey)
+
+  const clearRetry = useCallback(() => {
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current)
+      retryTimerRef.current = null
+    }
+  }, [])
 
   // Deck/mode changed — start a fresh session for the new key instead
   // of refilling the old queue under a new name.
   useEffect(() => {
     if (activeKeyRef.current === storageKey) return
     activeKeyRef.current = storageKey
-    const cached = loadCache(storageKey)
+    genRef.current += 1
+    clearRetry()
+    attemptsRef.current = 0
+    abortRef.current?.abort()
+    abortRef.current = null
+
+    const cached = loadCache(storageKey, mode, validateCard)
     setQueue(cached)
     setDone(false)
+    setError(null)
     setFetching(cached.length === 0)
-  }, [storageKey])
+    // validateCard is a fresh closure on most renders; the guard above
+    // means only a real key change gets past the early return anyway.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey, mode, clearRetry])
+
+  // Abort whatever is in flight when the component goes away.
+  useEffect(() => () => {
+    genRef.current += 1
+    abortRef.current?.abort()
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
+  }, [])
 
   const refill = useCallback(async () => {
-    if (refillingRef.current || done) return
-    refillingRef.current = true
-    if (queue.length === 0) setFetching(true)
+    const gen = genRef.current
+    if (refillGenRef.current === gen) return
+    if (storageKey === IDLE_KEY) return
+    refillGenRef.current = gen
+
+    const controller = new AbortController()
+    abortRef.current = controller
+    const timer = setTimeout(() => controller.abort(), fetchTimeoutMs)
+
+    const queued = queueRef.current
+    if (queued.length === 0) setFetching(true)
 
     try {
-      const excludeIds = queue.map((c) => c.card_id)
-      const fresh = await fetchBatch(batchSize, excludeIds)
+      const excludeIds = [
+        ...queued.map(c => c.card_id),
+        ...(extraExcludeIds ? extraExcludeIds() : []),
+      ]
+      const fresh = await fetchBatch(batchSize, excludeIds, controller.signal)
 
-      // The deck/mode moved on while this was in flight — drop the
-      // response rather than merging stale cards into the new session.
-      if (activeKeyRef.current !== storageKey) return
+      // The session moved on while this was in flight — drop the
+      // response rather than merging stale cards into the new one.
+      if (gen !== genRef.current) return
 
-      if (fresh.length === 0 && queue.length === 0) {
-        setDone(true)
-      } else if (fresh.length > 0) {
-        setQueue((q) => {
-          const merged = [...q, ...fresh]
+      attemptsRef.current = 0
+      setError(null)
+
+      if (fresh.length === 0) {
+        // Only a SUCCESSFUL empty response means the deck is finished.
+        if (queueRef.current.length === 0) setDone(true)
+      } else {
+        setQueue(q => {
+          // De-dup by card_id: the old blind append could seat the same
+          // card twice when a refill raced a key change.
+          const seen = new Set(q.map(c => c.card_id))
+          const merged = [...q, ...fresh.filter(c => !seen.has(c.card_id))]
           saveCache(storageKey, merged)
           return merged
         })
       }
-    } catch {
-      // Network hiccup or cold-start timeout — leave the existing
-      // (possibly localStorage-seeded) queue exactly as it is; the
-      // effect below will try again once the queue is next low.
+    } catch (e) {
+      if (gen !== genRef.current) return
+      // A cache-seeded queue keeps playing; only a genuinely empty
+      // session surfaces the failure.
+      if (queueRef.current.length === 0) {
+        setError(e)
+        // Back off and retry — a cold-starting backend recovers on its
+        // own without the user having to tap anything.
+        const attempt = attemptsRef.current
+        attemptsRef.current = attempt + 1
+        if (attempt < 4) {
+          clearRetry()
+          retryTimerRef.current = setTimeout(() => {
+            retryTimerRef.current = null
+            if (gen === genRef.current) {
+              refillGenRef.current = -1
+              setError(null)
+            }
+          }, 1000 * 2 ** attempt)
+        }
+      }
     } finally {
-      refillingRef.current = false
-      setFetching(false)
+      clearTimeout(timer)
+      if (abortRef.current === controller) abortRef.current = null
+      // Generation-guarded: clearing this for a session that has already
+      // been replaced is exactly what stranded the new one.
+      if (gen === genRef.current) {
+        refillGenRef.current = -1
+        setFetching(false)
+      }
     }
-  }, [queue, done, fetchBatch, batchSize, storageKey])
+  }, [storageKey, fetchBatch, batchSize, extraExcludeIds, fetchTimeoutMs, clearRetry])
 
   useEffect(() => {
-    if (!done && queue.length <= REFILL_AT) refill()
+    if (!done && !error && queue.length <= REFILL_AT) refill()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queue.length, storageKey, done])
+  }, [queue.length, storageKey, done, error])
+
+  /** Explicit user-facing retry, for the error panel's button. */
+  const retry = useCallback(() => {
+    clearRetry()
+    attemptsRef.current = 0
+    refillGenRef.current = -1
+    setError(null)
+    setDone(false)
+  }, [clearRetry])
 
   // Pop the front card off — call this once a review has been
   // recorded (fire-and-forget, same as today) and the next card
   // should show. No fetch happens here; the card is already in hand.
   const advance = useCallback(() => {
-    setQueue((q) => {
+    setQueue(q => {
       const next = q.slice(1)
       saveCache(storageKey, next)
       return next
@@ -147,7 +313,7 @@ export function useCardSession({ storageKey, fetchBatch, batchSize = 10 }) {
   // language change. `updater` is either a partial object to merge
   // in, or a function old -> new (mirrors setState's two forms).
   const updateCurrent = useCallback((updater) => {
-    setQueue((q) => {
+    setQueue(q => {
       if (q.length === 0) return q
       const [head, ...rest] = q
       const nextHead = typeof updater === 'function' ? updater(head) : { ...head, ...updater }
@@ -165,6 +331,12 @@ export function useCardSession({ storageKey, fetchBatch, batchSize = 10 }) {
     // even while a refill is quietly running behind it.
     loading: fetching && queue.length === 0,
     done,
+    // Non-null only when there is nothing to show AND the last fetch
+    // failed. Screens must render an error state for this, or a failed
+    // session shows an empty pane with no explanation (which is what it
+    // used to do).
+    error,
+    retry,
     advance,
     updateCurrent,
   }

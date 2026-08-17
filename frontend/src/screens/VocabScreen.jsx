@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -19,13 +19,18 @@ import ThemeSelector from '../components/selection/ThemeSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
+import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import { speakJapanese } from '../lib/audio'
 import { vocabKanjiModes, reviewMode } from '../domain/quizModes'
 import { applyXpGain } from '../stores/profileSummary'
-import { useCardSession } from '../hooks/useCardSession'
+import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
-const FETCH_TIMEOUT_MS = 8000
+// The 8s fetch timeout that used to live here is gone: useCardSession
+// owns the abort signal and the timeout now (10s, matched to the cold
+// start it was always meant to bridge), so the five screens no longer
+// each hand-roll a controller that only ever timed out and never
+// aborted on unmount.
 
 export default function VocabScreen({ session }) {
   const navigate    = useNavigate()
@@ -105,37 +110,34 @@ export default function VocabScreen({ session }) {
   // language mid-session re-translates in place (see the effect
   // below) rather than starting a new session.
   const storageKey =
-    studyBy === 'level' && level && mode ? `jp-session:vocab:${level}:${mode}`
-    : studyBy === 'theme' && theme && mode ? `jp-session:vocab:theme:${theme}:${mode}`
-    : studyBy === 'frequency' && tier && mode ? `jp-session:vocab:freq:${freqDomain}:${tier}:${tierSize}:${mode}`
-    : 'idle'
+    studyBy === 'level' && level && mode ? sessionKey('vocab', level, mode)
+    : studyBy === 'theme' && theme && mode ? sessionKey('vocab', 'theme', theme, mode)
+    : studyBy === 'frequency' && tier && mode ? sessionKey('vocab', 'freq', freqDomain, tier, tierSize, mode)
+    : IDLE_KEY
 
-  const fetchBatch = useCallback((count, excludeIds) => {
-    if (studyBy === 'level' && (!level || !mode)) return Promise.resolve([])
-    if (studyBy === 'theme' && (!theme || !mode)) return Promise.resolve([])
-    if (studyBy === 'frequency' && (!tier || !mode)) return Promise.resolve([])
-    if (!studyBy || !mode) return Promise.resolve([])
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+    if (studyBy === 'level' && (!level || !mode)) return []
+    if (studyBy === 'theme' && (!theme || !mode)) return []
+    if (studyBy === 'frequency' && (!tier || !mode)) return []
+    if (!studyBy || !mode) return []
     const url = studyBy === 'level'
       ? `/api/vocab/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : studyBy === 'theme'
       ? `/api/vocab/theme/${theme}/cards?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : `/api/frequency/${freqDomain}/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-    return apiFetch(url, session, { signal: controller.signal })
-      .then(r => r.json())
-      .then(data => (data.cards ?? []).map(c => ({ ...c, lang })))
-      .finally(() => clearTimeout(timer))
+    const data = await apiJson(url, session, { signal })
+    return (data.cards ?? []).map(c => ({ ...c, lang }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studyBy, freqDomain, level, theme, tier, tierSize, mode, session])
   // (lang deliberately excluded above: changing lang shouldn't change
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
 
-  const { current: card, loading, done, advance, updateCurrent } = useCardSession({
+  const { current: card, loading, done, error, retry, advance, updateCurrent } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
+    mode,
   })
 
   // Re-translate the card in hand when the UI language changes, or
@@ -501,6 +503,7 @@ export default function VocabScreen({ session }) {
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
+        {error && !card && <SessionError error={error} onRetry={retry} />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>

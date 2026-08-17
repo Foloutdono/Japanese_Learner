@@ -555,7 +555,11 @@ const misc = {
   kunyomi: "Kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'word',
-    retry:     'Retry',
+  // Shown by components/study/SessionError when a study session has
+  // nothing to show AND the last fetch failed — previously this state
+  // rendered an empty box with no explanation and no way to recover.
+  retry:              'Try again',
+  sessionLoadFailed:  "Couldn't load your cards.",
 }
 
 // ── Profile ───────────────────────────────────────────────

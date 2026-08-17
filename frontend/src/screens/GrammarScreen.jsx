@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -14,13 +14,18 @@ import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
+import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import { grammarModePicker, reviewMode } from '../domain/quizModes'
 import { ChevronIcon } from '../components/ui/Icons'
 import { applyXpGain } from '../stores/profileSummary'
-import { useCardSession } from '../hooks/useCardSession'
+import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
-const FETCH_TIMEOUT_MS = 8000
+// The 8s fetch timeout that used to live here is gone: useCardSession
+// owns the abort signal and the timeout now (10s, matched to the cold
+// start it was always meant to bridge), so the five screens no longer
+// each hand-roll a controller that only ever timed out and never
+// aborted on unmount.
 
 export default function GrammarScreen({ session }) {
   const navigate = useNavigate()
@@ -67,27 +72,24 @@ export default function GrammarScreen({ session }) {
   // /api/grammar/cards for the batch endpoint this replaced the old
   // one-card-per-fetch /api/grammar/card flow with).
   const storageKey = level && mode
-    ? `jp-session:grammar:${level}:${mode}`
-    : 'idle'
+    ? sessionKey('grammar', level, mode)
+    : IDLE_KEY
 
-  const fetchBatch = useCallback((count, excludeIds) => {
-    if (!level || !mode) return Promise.resolve([])
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-    return apiFetch(
+  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+    if (!level || !mode) return []
+    const data = await apiJson(
       `/api/grammar/cards?level=${encodeURIComponent(level)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}`,
       session,
-      { signal: controller.signal },
+      { signal },
     )
-      .then(r => r.json())
-      .then(data => data.cards ?? [])
-      .finally(() => clearTimeout(timer))
+    return data.cards ?? []
   }, [level, mode, session])
 
-  const { current: card, loading, done, advance } = useCardSession({
+  const { current: card, loading, done, error, retry, advance } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
+    mode,
   })
 
   // Reset per-card UI state whenever the card in hand changes —
@@ -282,6 +284,7 @@ export default function GrammarScreen({ session }) {
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
+        {error && !card && <SessionError error={error} onRetry={retry} />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
 
         {card && !loading && (

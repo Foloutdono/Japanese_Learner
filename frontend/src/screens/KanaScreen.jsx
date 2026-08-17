@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -17,12 +17,17 @@ import PromptCard from '../components/study/PromptCard'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import ModeSelector from '../components/selection/ModeSelector'
 import ReviewDeck from '../components/study/ReviewDeck'
+import SessionError from '../components/study/SessionError'
 import { playKana } from '../lib/audio'
 import { kanaModePicker, reviewMode } from '../domain/quizModes'
 import { applyXpGain } from '../stores/profileSummary'
-import { useCardSession } from '../hooks/useCardSession'
+import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
-const FETCH_TIMEOUT_MS = 8000
+// The 8s fetch timeout that used to live here is gone: useCardSession
+// owns the abort signal and the timeout now (10s, matched to the cold
+// start it was always meant to bridge), so the five screens no longer
+// each hand-roll a controller that only ever timed out and never
+// aborted on unmount.
 
 export default function KanaScreen({ session }) {
   const navigate    = useNavigate()
@@ -88,27 +93,28 @@ export default function KanaScreen({ session }) {
   // hook itself is always called (rules of hooks), it just has
   // nothing to fetch yet.
   const storageKey = selectedSet && mode
-    ? `jp-session:kana:${selectedSet.slug}:${mode}`
-    : 'idle'
+    ? sessionKey('kana', selectedSet.slug, mode)
+    : IDLE_KEY
 
-  const fetchBatch = useCallback((count, excludeIds) => {
-    if (!selectedSet || !mode) return Promise.resolve([])
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-    return apiFetch(
+  // apiJson, not apiFetch: a non-2xx now throws instead of resolving to
+  // a body with no `cards` key, which the hook used to read as "deck
+  // finished" and celebrate. The hook owns the abort signal and the
+  // timeout, so there's no controller to hand-roll here any more.
+  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+    if (!selectedSet || !mode) return []
+    const data = await apiJson(
       `/api/kana/cards?set_name=${encodeURIComponent(selectedSet.slug)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}`,
       session,
-      { signal: controller.signal },
+      { signal },
     )
-      .then(r => r.json())
-      .then(data => data.cards ?? [])
-      .finally(() => clearTimeout(timer))
+    return data.cards ?? []
   }, [selectedSet, mode, session])
 
-  const { current: card, loading, done, advance } = useCardSession({
+  const { current: card, loading, done, error, retry, advance } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
+    mode,
   })
 
   // Reset per-card UI state whenever the card in hand changes —
@@ -319,6 +325,7 @@ export default function KanaScreen({ session }) {
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
+        {error && !card && <SessionError error={error} onRetry={retry} />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>

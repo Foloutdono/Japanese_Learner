@@ -555,7 +555,12 @@ const misc = {
   kunyomi: "Lectures kun'yomi (japonaises)",
   kanjiNoun: 'kanji',
   wordNoun:  'mot',
+  // Affiché par components/study/SessionError quand une session n'a
+  // rien à montrer ET que la dernière requête a échoué — cet état
+  // n'affichait auparavant qu'un cadre vide, sans explication ni moyen
+  // de reprendre.
   retry:     'Réessayer',
+  sessionLoadFailed: 'Impossible de charger vos cartes.',
 }
 
 // ── Profile ───────────────────────────────────────────────
