@@ -2,7 +2,7 @@
 Study endpoints for thematic decks ("fruits", "jobs", "body parts", ...) —
 the theme counterpart to vocab.py's level-based /api/vocab/card|cards|stats,
 and structurally identical to it on purpose: same SRS plumbing
-(srs.ensure_cards / get_due_cards / get_new_cards / preview_reviews_bulk),
+(srs.get_due_cards / get_new_cards / preview_reviews_bulk),
 same MAX_BATCH, same review-preview/stage-promotion helpers. The only real
 difference is where the word pool and card ids come from — theme_data.py's
 DB-backed theme_entries()/theme_card_ids() instead of
@@ -26,7 +26,7 @@ from fastapi import APIRouter, Depends
 
 from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
-from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
+from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from study.quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO
@@ -101,7 +101,11 @@ def _select_theme_cards(theme: str, mode: str, lang: str, count: int, exclude_id
 
     card_ids  = prefixed(list(by_card_id.keys()), user_id)
     cache_key = batch_key("user", user_id, mode, f"theme:{theme}")
-    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode), version=card_ids)
+    # No pre-materialisation. get_new_cards selects over the ids passed
+    # here rather than joining `cards`, so nothing has to exist in
+    # card_modes before a card can be served — a scheduler row is written
+    # on first review instead. This call used to write one row per deck
+    # card per mode (3,476 of them for N1 vocab) on the first request.
 
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(

@@ -3,7 +3,7 @@ import random
 from fastapi import APIRouter, Depends
 from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
-from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
+from srs.batch_cache import key as batch_key, pick_ids
 from content.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
 from study.quiz_modes import GRAMMAR_MODES
 from study.mcq import pick_distractors
@@ -130,7 +130,7 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], mode:
 def _select_cards(level: str, mode: str, count: int, exclude_ids: set[str], user_id: str):
     """
     Shared by /api/grammar/card and /api/grammar/cards: resolves the
-    level, makes sure the cards/card_modes rows exist, picks up to
+    level, picks up to
     `count` due/new card ids (excluding anything already sitting
     unreviewed in the caller's queue), and builds the full payload for
     each. Returns (grammar_list, cards) — grammar_list is None for an
@@ -145,7 +145,11 @@ def _select_cards(level: str, mode: str, count: int, exclude_ids: set[str], user
     raw_ids   = [grammar_to_id(g, level) for g in grammar_list]
     card_ids  = prefixed(raw_ids, user_id)
     cache_key = batch_key("user", user_id, mode, level)
-    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode), version=card_ids)
+    # No pre-materialisation. get_new_cards selects over the ids passed
+    # here rather than joining `cards`, so nothing has to exist in
+    # card_modes before a card can be served — a scheduler row is written
+    # on first review instead. This call used to write one row per deck
+    # card per mode (3,476 of them for N1 vocab) on the first request.
 
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(

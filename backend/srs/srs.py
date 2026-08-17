@@ -187,27 +187,17 @@ class SRSEngine:
             self._log_sql("ensure_card", sql, (card_id,))
             cur.execute(sql, (card_id,))
 
-    def ensure_cards(self, card_ids: list[str], mode: str | None = None) -> None:
-        if not card_ids:
-            return
-        with self.storage.cursor() as cur:
-            sql_cards = "INSERT INTO cards(id) VALUES (%s) ON CONFLICT(id) DO NOTHING"
-            self._log_sql("ensure_cards_bulk", sql_cards, [(card_id,) for card_id in card_ids])
-            cur.executemany(sql_cards, [(card_id,) for card_id in card_ids])
-            if mode:
-                sql_modes = """
-                        INSERT INTO card_modes(
-                            card_id, mode, difficulty, stability, interval_days,
-                            repetitions, lapses, learning_step, is_learning,
-                            next_review, total_reviews, correct_reviews, last_quality
-                        )
-                        SELECT c.id, %s, 2.5, 0.0, 0, 0, 0, 0, TRUE, NOW(), 0, 0, -1
-                        FROM cards c
-                        WHERE c.id = ANY(%s)
-                        ON CONFLICT(card_id, mode) DO NOTHING
-                    """
-                self._log_sql("ensure_cards_modes", sql_modes, (mode, card_ids))
-                cur.execute(sql_modes, (mode, card_ids))
+    # ensure_cards(card_ids, mode) used to live here. It bulk-inserted a
+    # `cards` row and a 13-column `card_modes` row per deck card per mode,
+    # purely so get_new_cards' old `FROM cards` JOIN had rows to find —
+    # 3,476 + 3,476 inserts to open N1 vocab and serve ten cards.
+    #
+    # Both halves are gone. get_new_cards now selects over the id list its
+    # caller already has, so nothing needs materialising to be served, and
+    # `_ensure_card` above covers the one row the FK genuinely requires,
+    # on the review that creates the scheduler state. Removed rather than
+    # kept unused: a bulk row-writer sitting on the engine with no callers
+    # is an invitation to put the pre-write back.
 
     def _state_from_row(self, row: Any) -> CardState:
         return CardState(
@@ -442,20 +432,57 @@ class SRSEngine:
         return [row[0] for row in rows]
 
     def get_new_cards(self, mode: str, limit: int = 20, card_ids: list[str] | None = None) -> list[str]:
+        """
+        Cards in this mode the user has never actually reviewed.
+
+        When `card_ids` is given — which every production caller does, one
+        per study endpoint — the caller's own deck list IS the universe, so
+        this no longer reads the `cards` table at all. That matters because
+        `FROM cards` was the ONLY reason the read path needed rows to exist
+        up front: every study endpoint used to call
+        `ensure_cards(card_ids, mode)` before selecting, writing one `cards`
+        row and one 13-column `card_modes` row per deck card per mode purely
+        so this JOIN would find something. Opening N1 vocab meant 3,476 +
+        3,476 inserts for a single mode, on a request that then served ten
+        cards. Selecting over the passed ids instead makes "new" a *negative*
+        fact — no reviewed row exists — so nothing has to be materialised
+        before a card can be served, and a row is written on first review
+        instead (see review() -> _save_state).
+
+        `total_reviews > 0` rather than `= 0` inside the NOT EXISTS: a row
+        that exists but has never been reviewed still counts as new, which
+        keeps the pre-existing rows in the database behaving exactly as they
+        did before this change.
+
+        The `card_ids is None` branch keeps the old whole-table scan. Its
+        only callers are build_session and get_due_count, neither of which
+        is reachable from a route today.
+        """
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
-                    SELECT c.id
-                    FROM cards c
-                    LEFT JOIN card_modes cm
-                      ON cm.card_id = c.id AND cm.mode = %s
-                    WHERE (cm.card_id IS NULL OR cm.total_reviews = 0)
-                """
-                params: list[Any] = [mode]
                 if card_ids:
-                    sql += " AND c.id = ANY(%s)"
-                    params.append(card_ids)
-                sql += " ORDER BY random()"
+                    sql = """
+                        SELECT ids.id
+                        FROM unnest(%s::text[]) AS ids(id)
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM card_modes cm
+                            WHERE cm.card_id = ids.id
+                              AND cm.mode = %s
+                              AND cm.total_reviews > 0
+                        )
+                        ORDER BY random()
+                    """
+                    params: list[Any] = [card_ids, mode]
+                else:
+                    sql = """
+                        SELECT c.id
+                        FROM cards c
+                        LEFT JOIN card_modes cm
+                          ON cm.card_id = c.id AND cm.mode = %s
+                        WHERE (cm.card_id IS NULL OR cm.total_reviews = 0)
+                        ORDER BY random()
+                    """
+                    params = [mode]
                 if limit is not None:
                     sql += " LIMIT %s"
                     params.append(limit)
@@ -566,11 +593,11 @@ class SRSEngine:
         return result
 
     def _load_states_bulk(self, card_ids: list[str], mode: str) -> dict[str, CardState]:
-        """Like _load_state, but for many cards in one query. Any id
-        with no row yet (shouldn't normally happen here, since callers
-        run ensure_cards() over the whole deck before picking cards to
-        return) falls back to the same default CardState _load_state
-        itself would hand back."""
+        """Like _load_state, but for many cards in one query. An id with no
+        row yet falls back to the same default CardState _load_state itself
+        would hand back — which is now the COMMON case, not the exception:
+        callers no longer pre-materialise the deck, so a card carries no
+        card_modes row until its first review."""
         if not card_ids:
             return {}
         with self.storage.cursor() as cur:

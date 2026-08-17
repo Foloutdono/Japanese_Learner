@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from core.auth import get_user_id, prefixed, unprefixed
 from core.db import db_conn
 from core.srs_instance import srs
-from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
+from srs.batch_cache import key as batch_key, pick_ids
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from content.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
@@ -860,7 +860,11 @@ def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr"
     raw_ids   = list(by_raw.keys())
     card_ids  = prefixed(raw_ids, user_id)
     cache_key = batch_key("user", user_id, "deck", deck_id, mode)
-    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode), version=card_ids)
+    # No pre-materialisation. get_new_cards selects over the ids passed
+    # here rather than joining `cards`, so nothing has to exist in
+    # card_modes before a card can be served — a scheduler row is written
+    # on first review instead. This call used to write one row per deck
+    # card per mode (3,476 of them for N1 vocab) on the first request.
 
     due = srs.get_due_cards(mode, card_ids=card_ids)
     exclude_ids = {f"{user_id}:{rid}" for rid in exclude.split(",") if rid}

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from content.kana_data import KANA_SETS, kana_to_id
 from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
-from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
+from srs.batch_cache import key as batch_key, pick_ids
 from study.quiz_modes import KANA_MODES
 from study.modes import KANA, Mode, require_mode
 from pydantic import BaseModel
@@ -114,7 +114,7 @@ def _build_kana_card(kana_entry: dict, kana_list: list[dict], mode: str, stage: 
 def _select_cards(set_name: str, mode: str, count: int, exclude_ids: set[str], user_id: str):
     """
     Shared by /api/kana/card and /api/kana/cards: resolves the set,
-    makes sure the cards/card_modes rows exist, picks up to `count`
+    picks up to `count`
     due/new card ids (excluding anything already sitting unreviewed
     in the caller's queue), and builds the full payload for each.
     Returns (kana_list, cards) — kana_list is None for an unknown set.
@@ -126,7 +126,11 @@ def _select_cards(set_name: str, mode: str, count: int, exclude_ids: set[str], u
     raw_ids   = [kana_to_id(k) for k in kana_list]
     card_ids  = prefixed(raw_ids, user_id)
     cache_key = batch_key("user", user_id, mode, set_name)
-    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode), version=card_ids)
+    # No pre-materialisation. get_new_cards selects over the ids passed
+    # here rather than joining `cards`, so nothing has to exist in
+    # card_modes before a card can be served — a scheduler row is written
+    # on first review instead. This call used to write one row per deck
+    # card per mode (3,476 of them for N1 vocab) on the first request.
 
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(
