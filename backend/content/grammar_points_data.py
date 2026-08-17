@@ -26,3 +26,19 @@ GRAMMAR_POINTS_BY_LEVEL: dict[str, list[dict]] = {
 
 def get_grammar_points(level: str) -> list[dict]:
     return GRAMMAR_POINTS_BY_LEVEL.get(level, [])
+
+
+def grammar_to_id(entry: dict, level: str) -> str:
+    """
+    The card id for a grammar point, matching kana_to_id/kanji_to_id/
+    vocab_to_id's convention of "{category}_{...}" with no ":" (core.auth
+    prefixes ids as "{user_id}:{raw_id}" and splits on the first one).
+
+    This lived in the scraped grammar_data.py, where it read
+    entry['grammar'] -- the field name that file happens to use. It moved
+    here with the data it actually formats, and reads 'pattern'. Every
+    grammar card id therefore changes, which is one of the two
+    independent reasons the SRS wipe is required (the other being the
+    retired mode keys). See tests/test_grammar_points.py.
+    """
+    return f"grammar_{level}_{entry['pattern']}"
