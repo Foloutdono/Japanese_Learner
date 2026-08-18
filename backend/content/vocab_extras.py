@@ -67,6 +67,7 @@ import re
 from functools import lru_cache
 
 from study import morphology
+from study.furigana import align_deck
 from content.vocab_data import VOCAB_BY_LEVEL
 
 try:
@@ -971,21 +972,41 @@ def _target_span(sentence: str, kanji: str, kana: str):
     return None
 
 
+def _expand_furigana(text: str, reading: str | None, highlight: bool) -> list:
+    """One segment -> one-or-more {text, reading, highlight}.
+
+    _tokenize_furigana hands back one reading per morpheme/run, so a
+    multi-kanji core (心配 -> しんぱい) would render as a single <ruby>
+    spanning both characters. study.furigana.align_deck is the same
+    per-kanji splitter the vocab screen's indice_3 hint already uses
+    (rendaku/gemination-aware); reusing it here instead of the frontend's
+    weaker anchor-only split means an example sentence divides furigana
+    exactly like the flashcard for the same word does. Falls back to the
+    single block when it can't divide, same as align_deck always does.
+    """
+    if not reading or len(text) < 2:
+        return [{"text": text, "reading": reading, "highlight": highlight}]
+    parts = align_deck(text, reading)
+    if len(parts) < 2:
+        return [{"text": text, "reading": reading, "highlight": highlight}]
+    return [{"text": p["text"], "reading": p.get("reading"), "highlight": highlight} for p in parts]
+
+
 def _annotate_sentence(sentence: str, kanji: str, kana: str) -> list:
     span = _target_span(sentence, kanji, kana)
     segments = _tokenize_furigana(sentence)
     if not span:
-        return [
-            {"text": seg["text"], "reading": seg["reading"], "highlight": False}
-            for seg in segments
-        ]
+        out = []
+        for seg in segments:
+            out.extend(_expand_furigana(seg["text"], seg["reading"], False))
+        return out
 
     span_start, span_end = span
     out = []
     for seg in segments:
         s_start, s_end = seg["start"], seg["end"]
         if s_end <= span_start or s_start >= span_end:
-            out.append({"text": seg["text"], "reading": seg["reading"], "highlight": False})
+            out.extend(_expand_furigana(seg["text"], seg["reading"], False))
             continue
         if seg["reading"] is not None:
             # Kanji run carrying its own furigana — splitting it mid-way
@@ -993,8 +1014,9 @@ def _annotate_sentence(sentence: str, kanji: str, kana: str) -> list:
             # run's own boundaries already line up with the matched span
             # (both come from the same "run of consecutive kanji" logic),
             # so it's either fully inside the span or not overlapping at
-            # all; keep it whole either way.
-            out.append({"text": seg["text"], "reading": seg["reading"], "highlight": True})
+            # all; keep it whole either way. _expand_furigana still
+            # divides it per-kanji — just never at the span's own edge.
+            out.extend(_expand_furigana(seg["text"], seg["reading"], True))
             continue
         # Plain kana run: _tokenize_furigana merges every consecutive
         # non-kanji character into one segment regardless of word

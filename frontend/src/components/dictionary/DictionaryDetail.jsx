@@ -4,7 +4,7 @@ import { shortDate } from '../../lib/formatDate'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
 import { apiFetch } from '../../lib/api'
-import { Readings, Furigana } from '../study/Readings'
+import { Readings, FuriganaParts } from '../study/Readings'
 import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageBadge } from '../study/StageBadge'
 import { GlossList, firstGloss } from '../study/gloss'
@@ -48,8 +48,11 @@ function ExampleSentence({ ex, senseNumber }) {
               // segments but never inside one, so a word never gets
               // split with a single trailing kanji/kana stranded alone
               // on the next line.
+              // Already split per kanji by the backend (see
+              // content/vocab_extras.py's _expand_furigana), so this
+              // renders the segment as-is rather than re-splitting it.
               const content = seg.reading
-                ? <Furigana text={seg.text} reading={seg.reading} />
+                ? <ruby>{seg.text}<rt>{seg.reading}</rt></ruby>
                 : seg.text
               return seg.highlight
                 ? <mark key={j} className="dict-example__hl dict-example__seg">{content}</mark>
@@ -324,12 +327,10 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
   // Only for vocab: a kana-only entry has nothing to annotate, and a
   // single kanji's on'yomi/kun'yomi split (shown under the headword on
   // the plate via <Readings>) is already the more complete picture
-  // than picking one reading to sit above it.
-  // vocab_data.py can pack several readings into entry.kana separated
-  // by "/" — the headline furigana uses just the first, primary one.
-  const headwordReading = entry.type === 'vocab' && entry.kanji && entry.kana
-    ? entry.kana.split('/')[0].trim() || null
-    : null
+  // than picking one reading to sit above it. Computed backend-side
+  // (routes/dictionary.py's _word_furigana) so a multi-kanji headword
+  // divides per kanji instead of one blanket reading.
+  const headwordFurigana = entry.type === 'vocab' ? entry.furigana : null
 
   const [strokeSvgFailed, setStrokeSvgFailed] = useState(false)
   useEffect(() => { setStrokeSvgFailed(false) }, [entry.svg_url])
@@ -407,8 +408,8 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
         </div>
 
         <div className="dict-detail__char">
-          {headwordReading
-            ? <Furigana text={entry.kanji} reading={headwordReading} />
+          {headwordFurigana?.length
+            ? <FuriganaParts parts={headwordFurigana} />
             : (entry.kanji || entry.kana)}
         </div>
 
@@ -530,7 +531,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
                   className="dict-vocab-example-row"
                 >
                   <span className="dict-vocab-example-row__word">
-                    {w.kana ? <Furigana text={w.kanji} reading={w.kana.split('/')[0].trim()} /> : w.kanji}
+                    {w.furigana?.length ? <FuriganaParts parts={w.furigana} /> : w.kanji}
                   </span>
                   <span className="dict-vocab-example-row__meaning">
                     {firstGloss(w.meaning)}

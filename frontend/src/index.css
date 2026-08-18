@@ -7389,7 +7389,7 @@ input:focus { border-color: var(--accent2); }
   line-height: 1.15;
   text-align: center;
 }
-/* Furigana over the headline word (vocab only — see headwordReading in
+/* Furigana over the headline word (vocab only — see headwordFurigana in
    DictionaryDetail.jsx). Sized relative to the headline itself (em)
    so it scales together with it at every breakpoint. */
 .dict-detail__char ruby { ruby-position: over; }

@@ -15,6 +15,7 @@ from translations.fr.vocab_fr import VOCAB_FR
 from core.auth import get_user_id
 from core.srs_instance import srs
 from study.card_lookup import card_stats, VOCAB_STATUS_MODE, KANJI_STATUS_MODE, is_kanji
+from study.furigana import align_deck
 
 router = APIRouter()
 
@@ -97,6 +98,19 @@ _KANJI_TO_VOCAB = _build_kanji_to_vocab_index()
 _MAX_KANJI_VOCAB_EXAMPLES = 4
 
 
+def _word_furigana(kanji: str, kana: str) -> list[dict]:
+    """Per-kanji furigana for a headword, computed once here rather than
+    left to the frontend's weaker anchor-only splitter — same algorithm
+    (study.furigana) the vocab screen's indice_3 hint already renders
+    with. `kana` may pack several readings with "/"; only the first,
+    primary one is annotated, matching how the dictionary panel's
+    headline furigana already picks it."""
+    if not kanji or not kana:
+        return []
+    primary = kana.split("/")[0].strip()
+    return align_deck(kanji, primary) if primary else []
+
+
 def _vocab_examples_for_kanji(char: str, lang: str) -> list[dict]:
     """Up to _MAX_KANJI_VOCAB_EXAMPLES real vocab words containing `char`,
     most-common level first. Multi-character compounds are listed before
@@ -114,10 +128,11 @@ def _vocab_examples_for_kanji(char: str, lang: str) -> list[dict]:
             continue
         seen.add(key)
         out.append({
-            "kanji":   w.get("kanji", ""),
-            "kana":    w.get("kana", ""),
-            "meaning": get_meaning(w, lang, VOCAB_FR_MAP),
-            "level":   level,
+            "kanji":    w.get("kanji", ""),
+            "kana":     w.get("kana", ""),
+            "meaning":  get_meaning(w, lang, VOCAB_FR_MAP),
+            "level":    level,
+            "furigana": _word_furigana(w.get("kanji", ""), w.get("kana", "")),
         })
         if len(out) >= _MAX_KANJI_VOCAB_EXAMPLES:
             break
@@ -221,6 +236,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 "level":    None,
                 "senses":   extras["senses"],
                 "examples": extras["examples"],
+                "furigana": _word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
                 "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),
             })
         return {
@@ -334,6 +350,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 # dictionary picture instead of only the one meaning.
                 "senses":   extras["senses"],
                 "examples": extras["examples"],
+                "furigana": _word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
                 "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),
             })
         else:  # hiragana or katakana

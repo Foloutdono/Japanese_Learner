@@ -29,57 +29,18 @@ export function splitReadingTokens(kana) {
     .filter(Boolean)
 }
 
-// ── Per-kanji furigana alignment ────────────────────────────
-// A term's reading comes in as one flat kana string covering the
-// whole thing (e.g. "食べる" → "たべる"), but any kana already
-// written in the term itself (okurigana like べる, or the お/い in
-// お願い) is identical to the reading, so putting the *entire*
-// reading above the *entire* term duplicates that part: べる shows
-// up both as furigana above and as plain text below. Real furigana
-// only sits over the kanji portion — this splits `text` into its
-// kanji/kana runs and, using the kana runs as fixed anchors, works
-// out which slice of `reading` belongs over each kanji run, so a
-// mixed term gets furigana positioned per kanji run instead of one
-// blanket label spanning kana that already speaks for itself.
-// A term that's a single unbroken kanji run (one kanji, or a
-// compound with no kana anywhere, e.g. 大学) has no kana anchor to
-// split on — there's no reliable way to say where だい ends and がく
-// begins without per-kanji data we don't have — so that case keeps
-// the traditional single reading over the whole span.
-function alignFurigana(text, reading) {
-  if (!text) return []
-  if (!reading || !/[\u4e00-\u9faf]/.test(text)) return [{ text }]
-
-  const runs = text.match(/[\u4e00-\u9faf]+|[^\u4e00-\u9faf]+/g) || [text]
-  if (runs.length === 1) return [{ text, reading }]
-
-  let pattern = '^'
-  const kanjiRunIdx = []
-  runs.forEach((run, i) => {
-    if (/[\u4e00-\u9faf]/.test(run)) {
-      kanjiRunIdx.push(i)
-      pattern += '(.+?)'
-    } else {
-      pattern += run.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    }
-  })
-  const match = reading.match(new RegExp(pattern + '$'))
-  // Reading didn't line up with the term's kana anchors (rare, but
-  // possible with irregular entries) — fall back to one block rather
-  // than showing something wrong.
-  if (!match) return [{ text, reading }]
-
-  return runs.map((run, i) => {
-    const kIdx = kanjiRunIdx.indexOf(i)
-    return kIdx === -1 ? { text: run } : { text: run, reading: match[kIdx + 1] }
-  })
-}
-
-// Renders `text` with `reading` as furigana, split per kanji run (see
-// alignFurigana above) instead of one <ruby> spanning the whole term.
-// Drop-in replacement for `<ruby>{text}<rt>{reading}</rt></ruby>`.
-export function Furigana({ text, reading, className }) {
-  return alignFurigana(text, reading).map((part, i) => part.reading
+// ── Per-kanji furigana ───────────────────────────────────────
+// The backend (study/furigana.py) already splits a term's flat
+// reading into one slice per kanji — rendaku/gemination/on-kun-script
+// aware, which the client-side anchor-only split this used to do here
+// never could (a kana-free compound like 大学 has no kana anchor to
+// split on at all, but the backend's per-kanji reading data still
+// divides it だい|がく). This just renders whatever list of
+// {text, reading?} parts it was handed; nothing here computes an
+// alignment anymore.
+export function FuriganaParts({ parts, className }) {
+  if (!parts?.length) return null
+  return parts.map((part, i) => part.reading
     ? <ruby key={i} className={className}>{part.text}<rt>{part.reading}</rt></ruby>
     : <span key={i} className={className}>{part.text}</span>
   )
