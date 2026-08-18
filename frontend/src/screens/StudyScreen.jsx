@@ -765,15 +765,15 @@ export default function StudyScreen({ session }) {
   }
 
   const title = modeLabel(t, mode)
-  // Two structures put a capped-width panel directly under the prompt
-  // (readings' form, write's drawing board) — matching the prompt's
-  // width to theirs keeps the two reading as one card and its
-  // interaction. Vocab/grammar get the same wider card their own
-  // screens give them; a single kanji glyph or plain front/back reads
-  // fine at the container's default width.
+  // Write puts a capped-width drawing board directly under the prompt —
+  // matching the prompt's width to it keeps the two reading as one card
+  // and its interaction. Readings' own form (ReadingsInput) is full
+  // width like a flashcard's own card, so it needs no narrowing here.
+  // Vocab/grammar get the same wider card their own screens give them;
+  // a single kanji glyph or plain front/back reads fine at the
+  // container's default width.
   const cardStageClassName =
-    renderer === RENDER.TYPE ? 'quiz-card-stage--form'
-    : renderer === RENDER.DRAW ? 'quiz-card-stage--narrow'
+    renderer === RENDER.DRAW ? 'quiz-card-stage--narrow'
     : structureKey === 'vocab' ? 'vocab-card-boost'
     : structureKey === 'grammar' ? 'grammar-card-boost'
     : undefined

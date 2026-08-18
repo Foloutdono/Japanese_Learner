@@ -3597,24 +3597,33 @@ input:focus { border-color: var(--accent2); }
    single-class selectors of equal specificity are settled by source
    order — so a bare `.readings-input { overflow: visible }` here lost
    silently and the card stayed an inner scroll area. Same for
-   .drawing-quiz__card below. */
+   .drawing-quiz__card below.
+
+   The CARD itself is now full width, same as every flashcard mode's
+   own .prompt-card -- capping it at 520px made this the one mode whose
+   card visibly shrank next to the others sitting above/below it in the
+   same session. The FORM inside stays comfortably narrow regardless
+   (see .readings-input__group / __submit below), centered in the wider
+   card rather than stretched edge to edge -- a "kana or romaji" input
+   900px wide would be its own kind of ugly. */
 .prompt-card.readings-input {
   text-align: left;
   --card-pad-y: 28px;
   --card-pad-x: 26px;
   --card-pad-top: 28px;
-  /* width + max-width, not max-width alone: this is a direct child of
-     the column-flex .quiz-area, where an auto cross-axis margin
-     suppresses `align-self: stretch` and the card would otherwise
-     shrink to fit its widest row instead of filling to the cap. Same
-     trap as .quiz-card-stage--form / .grammar-card-boost. */
-  width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
   max-height: none;
   overflow: visible;
 }
 
+/* Centered and capped independently of the now full-width card around
+   them — a row of kana/romaji inputs reads as a form, not a banner,
+   only at roughly this width. */
+.readings-input__group,
+.readings-input__submit {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
 .readings-input__group + .readings-input__group { margin-top: 22px; }
 /* A hairline between 音読み and 訓読み now that both groups share one
    card — without it the second group's label reads as more of the
@@ -4329,9 +4338,18 @@ input:focus { border-color: var(--accent2); }
    Only ever applied from the first flip onward (see `flips` in
    Flashcard): on the very first paint the whole card is already
    animating in from CardTransition, and two entrances at once stutter. */
+/* No `both`/`forwards` fill-mode, and no `backface-visibility` -- both
+   were left over from a two-sided-card mental model this component
+   doesn't use (only one face is ever in the DOM at a time, so there is
+   no back face to hide). `forwards` held the LAST keyframe's transform
+   permanently applied after the 300ms ended: rotateX(0) reads as "no
+   rotation" but its computed value is a matrix3d(...), not `none`, and
+   that permanent 3D transform is what was pushing .prompt-card's own
+   `overflow: auto` into showing a scrollbar with nothing to scroll to.
+   Dropping the fill mode lets the element fall back to its own
+   (transform: none) the instant the animation ends. */
 .flashcard__face--turned {
-  animation: flashcard-face-turn 300ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
-  backface-visibility: hidden;
+  animation: flashcard-face-turn 300ms cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 @keyframes flashcard-face-turn {
   0%   { opacity: 0; transform: perspective(900px) rotateX(-42deg) translateY(10px); }
@@ -4340,7 +4358,7 @@ input:focus { border-color: var(--accent2); }
 }
 @media (prefers-reduced-motion: reduce) {
   .flashcard__face--turned {
-    animation: flashcard-face-fade 140ms ease both;
+    animation: flashcard-face-fade 140ms ease;
   }
   @keyframes flashcard-face-fade {
     from { opacity: 0; }
@@ -4670,11 +4688,14 @@ input:focus { border-color: var(--accent2); }
   position: relative;
 }
 
-/* Two modes put a capped-width panel of their own directly under the
-   prompt — write's drawing board and readings' answer form — and a
-   full-width prompt over a 520/660px panel reads as two unrelated
-   boxes rather than as one card and its interaction. These match the
-   prompt to the panel below it.
+/* Write mode puts a capped-width drawing board of its own directly
+   under the prompt, and a full-width prompt over a 660px panel reads as
+   two unrelated boxes rather than as one card and its interaction. This
+   matches the prompt to the panel below it. (Readings mode used to get
+   the same treatment via .quiz-card-stage--form, capped at 520px — that
+   made it the one mode whose card visibly shrank next to every other
+   flashcard-style card in the same session; its own form narrows itself
+   internally now instead, see .readings-input__group.)
 
    `width: 100%` is not redundant next to `margin: 0 auto`, it is what
    makes the pair work at all: .quiz-area is a COLUMN flex container,
@@ -4683,13 +4704,11 @@ input:focus { border-color: var(--accent2); }
    collapse to fit-content instead of filling the row and then being
    capped. (That exact omission is what left the grammar card barely
    wider than a single kana; see .grammar-card-boost.) */
-.quiz-card-stage--narrow,
-.quiz-card-stage--form {
+.quiz-card-stage--narrow {
   width: 100%;
   margin: 0 auto;
+  max-width: 660px;
 }
-.quiz-card-stage--narrow { max-width: 660px; }
-.quiz-card-stage--form   { max-width: 520px; }
 
 /* ── Permanent stage seal ──────────────────────────────────
    A small hanko permanently sitting in the corner of every quiz
@@ -5697,10 +5716,14 @@ input:focus { border-color: var(--accent2); }
    inner scroll area, which is what was clipping the canvas against
    its own rounded border. */
 .prompt-card.drawing-quiz__card {
-  --card-pad-y: 26px;
-  --card-pad-x: 22px;
-  --card-pad-top: 26px;
-  max-width: 660px;
+  /* Was 26/22 -- tighter than every other quiz card's own padding
+     (40/24 base, 56-64 on vocab/grammar's boosted ones), so this read
+     as the one cramped surface in the app. Matched closer to the
+     boosted cards' own numbers instead. */
+  --card-pad-y: 44px;
+  --card-pad-x: 36px;
+  --card-pad-top: 44px;
+  max-width: 700px;
   margin: 0 auto;
   max-height: none;
   overflow: visible;
@@ -5708,7 +5731,7 @@ input:focus { border-color: var(--accent2); }
 
 .drawing-quiz__panels {
   display: flex;
-  gap: 20px;
+  gap: 32px;
   justify-content: center;
   align-items: flex-start;
   flex-wrap: wrap;
@@ -5748,8 +5771,8 @@ input:focus { border-color: var(--accent2); }
   /* Matched to the card above it rather than to the panels inside it,
      so the button reads as belonging to the card instead of being a
      narrower, unrelated bar floating under one edge of it. */
-  max-width: 660px;
-  margin: 20px auto 0;
+  max-width: 700px;
+  margin: 24px auto 0;
   display: block;
   font-size: 15px;
   padding: 14px;

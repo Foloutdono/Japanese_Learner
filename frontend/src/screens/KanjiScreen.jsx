@@ -515,16 +515,13 @@ export default function KanjiScreen({ session }) {
             <HintBar available={availableHints} active={activeHints}
                      onToggle={toggleHint} disabled={locked} />
             <CardTransition
-              /* readings and write both put a capped-width panel under
-                 the prompt (a form, a drawing board). Matching the
-                 prompt's width to theirs keeps the two reading as one
-                 card and its interaction rather than two unrelated
-                 panels of different widths. */
-              className={
-                renderer === RENDER.TYPE ? 'quiz-card-stage--form'
-                : renderer === RENDER.DRAW ? 'quiz-card-stage--narrow'
-                : undefined
-              }
+              /* Write puts a capped-width drawing board under the
+                 prompt — matching the prompt's width to it keeps the
+                 two reading as one card and its interaction rather than
+                 two unrelated panels of different widths. Readings'
+                 own form (ReadingsInput, below) is full width like a
+                 flashcard's own card, so no narrowing here for it. */
+              className={renderer === RENDER.DRAW ? 'quiz-card-stage--narrow' : undefined}
               cardKey={card.card_id}
               contentKey={`${card.card_id}:${card.lang ?? ''}`}
               stamp={cardStamp}
