@@ -231,6 +231,8 @@ const quiz = {
   // grammar b2f: the meaning is shown, recall the rule.
   revealGrammarRule:   'Which rule is this?',
   revealGrammarBtn:    'Show the rule',
+  standardType:        'Standard',
+  standardDesc:        'A front and a back, written by you.',
   // ── 読み入力 (kanji.readings) ──
   readingsOn:          'On (Chinese-derived)',
   readingsKun:         'Kun (native Japanese)',

@@ -218,6 +218,8 @@ const quiz = {
   // grammaire b2f : le sens est affiché, retrouver la règle.
   revealGrammarRule:   "Quelle règle est-ce ?",
   revealGrammarBtn:    'Afficher la règle',
+  standardType:        'Standard',
+  standardDesc:        'Un recto et un verso, écrits par vous.',
   // ── 読み入力 (kanji.readings) ──
   readingsOn:          'On (lecture sino-japonaise)',
   readingsKun:         'Kun (lecture japonaise)',

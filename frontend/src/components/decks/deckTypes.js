@@ -12,27 +12,35 @@
 // thing named twice in two colours. config/navLinks.js documents that
 // exact mistake as the reason the --line-* family exists.
 //
-// The two types with no section behind them don't borrow one: a mixed
-// deck takes the deck line's own 蘇芳, and a pure hand-written
-// flashcard deck takes the neutral rail .platform-card--local and
-// --review already use for "no service type".
+// `standard` has no section behind it, so it takes the neutral rail
+// .platform-card--local and --review already use for "no service type".
 //
 // `glyph` is the type's name in one character, for the card roundel —
 // the same way every section in navLinks.js is identified by its kanji
 // rather than an icon. Deck types are data, not copy, so the glyph and
 // colour live here while the label/description stay in the locales.
+//
+// ── A deck has ONE STRUCTURE ──
+// 'mixed' is gone. A mixed deck had to union two sources' study modes and
+// then answer what a kanji-only mode means for a grammar card sitting
+// beside it — a question one structure per deck removes rather than
+// answers. 'flashcard' is renamed 'standard', matching what the study-mode
+// registry calls the same thing (domain/studyModes.js).
+//
+// The structure now decides what a deck can hold BOTH ways: app cards
+// browsed in from its source, and personal cards written in its shape. The
+// old model had that backwards for personal cards — a kanji deck accepted
+// app kanji and no hand-written cards at all, making it the one place a
+// personal kanji card could not go.
 export function deckTypes(t) {
   return [
-    { value: 'mixed',     label: t.mixedType,     desc: t.mixedDesc,       glyph: '混', color: 'var(--line-decks)' },
-    { value: 'flashcard', label: t.flashcardType, desc: t.flashcardDesc,   glyph: '札', color: 'var(--text-secondary)' },
-    { value: 'vocab',     label: t.vocabType,     desc: t.deckVocabDesc,   glyph: '単', color: 'var(--line-vocab)' },
-    { value: 'kanji',     label: t.kanjiType,     desc: t.deckKanjiDesc,   glyph: '漢', color: 'var(--line-kanji)' },
-    { value: 'grammar',   label: t.grammarType,   desc: t.deckGrammarDesc, glyph: '文', color: 'var(--line-grammar)' },
+    { value: 'standard', label: t.standardType, desc: t.standardDesc,     glyph: '札', color: 'var(--text-secondary)' },
+    { value: 'vocab',    label: t.vocabType,    desc: t.deckVocabDesc,    glyph: '単', color: 'var(--line-vocab)' },
+    { value: 'kanji',    label: t.kanjiType,    desc: t.deckKanjiDesc,    glyph: '漢', color: 'var(--line-kanji)' },
+    { value: 'grammar',  label: t.grammarType,  desc: t.deckGrammarDesc,  glyph: '文', color: 'var(--line-grammar)' },
   ]
 }
 
-/** The one type entry for a deck, falling back to a mixed-looking
- *  default for a legacy/unknown type rather than rendering blank. */
 export function deckTypeOf(type, t) {
   return deckTypes(t).find(d => d.value === type)
     ?? { value: type, label: type, glyph: '教', color: 'var(--line-decks)' }

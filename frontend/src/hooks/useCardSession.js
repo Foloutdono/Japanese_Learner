@@ -11,7 +11,11 @@ const REFILL_AT = 4
 // longer understands it. Only the deck-study screen used to version its
 // key; the other four had no version at all, which is why a payload
 // change could hand `choices.map` an undefined.
-const CACHE_VERSION = 'v3'
+// v4: the study-mode taxonomy changed, so a v3 entry's storage key
+// names a retired mode ('qcm-kj-m', 'flashcard'). sweepStaleCaches
+// deletes them; without the bump they would refetch under a key the
+// backend no longer serves.
+const CACHE_VERSION = 'v4'
 
 const KEY_PREFIX = 'jp-session'
 

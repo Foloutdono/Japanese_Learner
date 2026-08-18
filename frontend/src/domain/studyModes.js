@@ -6,7 +6,6 @@
 // This file replaces FOUR separate enumerations of the mode key space,
 // each of which failed silently in its own way when it fell out of step:
 //
-//   - domain/quizModes.js       the pickers' labels
 //   - domain/statsModel.js      FORMAT/DIRECTION maps; an unknown key
 //                               became its own format bucket and was
 //                               mislabelled "recognition"
@@ -221,35 +220,9 @@ export function modePickerEntries(t, source) {
   }))
 }
 
-// ── Legacy keys, for the badge only ───────────────────────────
-// The pickers still emit the old key space: switching them over requires
-// each screen's render branches (and kana.py's card builder) to move in
-// the same step, which is its own piece of work. Until then serviceFor()
-// has to recognise both, or every mode card falls through to
-// ModeSelector's 番線 platform-number fallback — silently, which is
-// exactly the failure this registry exists to end.
-//
-// Unlike the backend's LEGACY_ALIASES this needs no source to
-// disambiguate, because it only decides which of four badges to draw:
-// kana's `flashcard` and grammar's `flashcard` are different exercises
-// but sit on the same rung, so collapsing them here is harmless.
-// DELETE together with the pickers' migration.
-const LEGACY_SERVICE = {
-  qcm: SERVICE.RAPID,
-  mcq: SERVICE.RAPID,
-  'qcm-kj-m': SERVICE.RAPID,
-  'qcm-m-kj': SERVICE.EXPRESS,
-  flashcard: SERVICE.RAPID,
-  'flashcard-kj-m': SERVICE.RAPID,
-  'flashcard-m-kj': SERVICE.EXPRESS,
-  fill: SERVICE.EXPRESS,
-  write: SERVICE.LTD,
-  review: SERVICE.REVIEW,
-}
-
 /** The 種別 badge for a mode — replaces stations.js's own SERVICE map. */
 export function serviceKeyFor(key) {
-  return MODES[key]?.service ?? LEGACY_SERVICE[key] ?? null
+  return MODES[key]?.service ?? null
 }
 
 export const usesDrawing = key => MODES[key]?.renderer === RENDER.DRAW

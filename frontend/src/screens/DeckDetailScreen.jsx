@@ -16,7 +16,12 @@ import { PlayIcon, ImportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIc
 // ever used to shape the UI (hide/show buttons, restrict the Browse
 // tabs); decks.py enforces the real rule server-side regardless of
 // what the frontend shows.
-const RESTRICTED_SOURCES_BY_TYPE = { kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'] }
+//
+// A deck has ONE STRUCTURE, and it decides both halves: which app cards
+// can be browsed in, and which personal cards can be written. `standard`
+// is a plain front/back pair with no app source behind it.
+const SOURCE_FOR_TYPE = { kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'] }
+const STRUCTURES = ['standard', 'kanji', 'vocab', 'grammar']
 
 // A browsed-in card is tagged with the pigment of the section it came
 // from — the same colours components/decks/deckTypes.js gives the deck
@@ -29,13 +34,16 @@ const SOURCE_COLOR = {
 }
 
 function allowedSourcesFor(type) {
-  if (type in RESTRICTED_SOURCES_BY_TYPE) return RESTRICTED_SOURCES_BY_TYPE[type]
-  if (type === 'flashcard') return []
-  return ['kanji', 'vocab', 'grammar'] // 'mixed', or a legacy/unknown type
+  return SOURCE_FOR_TYPE[type] ?? []
 }
 
+// EVERY structure accepts hand-written cards — of its own structure.
+// This used to be the inverse: it returned false for kanji/vocab/grammar,
+// so "Add card" was hidden on precisely the decks where a personal card
+// of that kind belongs. A kanji deck was the one place you could not
+// write your own kanji card.
 function allowsCustomFor(type) {
-  return !(type in RESTRICTED_SOURCES_BY_TYPE)
+  return STRUCTURES.includes(type)
 }
 
 export default function DeckDetailScreen({ session }) {

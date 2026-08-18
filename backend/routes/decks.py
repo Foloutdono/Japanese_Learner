@@ -26,6 +26,8 @@ from routes.kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
 from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
 from routes.grammar import _build_grammar_card
 from study.modes import (
+    MODES,
+    FLASHCARD as BASE_FLASHCARD,
     GRAMMAR as MODE_GRAMMAR,
     STANDARD as MODE_STANDARD,
     KANJI as MODE_KANJI,
@@ -122,40 +124,63 @@ SOURCES = {
     },
 }
 
-# What a deck's `type` actually restricts it to — this is what makes
-# the type picker on DecksScreen mean something instead of every type
-# behaving identically once a deck exists. 'mixed' (and legacy decks
-# with an unrecognized/missing type — see _allowed_sources) is the
-# only one with no restriction at all.
-#   - a type naming one of SOURCES ('kanji'/'vocab'/'grammar') only
-#     ever accepts app-sourced cards from that one source, and no
-#     custom (hand-typed) cards at all
-#   - 'flashcard' is the mirror image: custom cards only, no app
-#     sources
-# Enforced in add_card/import_cards (custom cards) and
-# add_app_cards/browse_app_cards (app-sourced cards) below.
+# ── A deck has ONE STRUCTURE ──────────────────────────────────
+# `type` is the deck's structure, and it decides everything: which app
+# cards can be browsed in, which personal cards can be written, and which
+# study modes the deck offers. There is no 'mixed' any more.
+#
+# Mixed decks were dropped because they made every other question harder
+# for no gain. A deck holding kanji and grammar had to union two sources'
+# modes, and then answer what a mode means for a card from the other
+# source -- which is how a hand-written pair ended up eligible for a
+# grammar session (see _eligible). One structure per deck makes the deck's
+# modes simply the structure's modes.
+#
+# The old model also had this exactly backwards for personal cards: a
+# kanji-typed deck accepted app kanji and NO hand-written cards at all,
+# so a kanji deck was the one place a personal kanji card could not go.
+# Now every structure accepts personal cards OF ITS OWN STRUCTURE, which
+# is what makes "write your own kanji card" a thing that exists.
+STRUCTURES = ("standard", "kanji", "vocab", "grammar")
+
+# Structure -> the one app source it browses in. `standard` is a plain
+# front/back pair with no app source behind it.
 SOURCE_FOR_TYPE = {
     "kanji":   {"kanji"},
     "vocab":   {"vocab"},
     "grammar": {"grammar"},
 }
 
+# Structure -> the registry source its cards study under. A personal
+# kanji-structure card gets kanji's modes, which is the whole point of
+# giving personal cards a structure.
+REGISTRY_SOURCE_FOR_TYPE = {
+    "standard": MODE_STANDARD,
+    "kanji":    MODE_KANJI,
+    "vocab":    MODE_VOCAB,
+    "grammar":  MODE_GRAMMAR,
+}
+
 
 def _allowed_sources(deck_type: str) -> set[str]:
-    """App sources a deck of this type accepts — empty set means
-    'custom cards only, no app sources' (type == 'flashcard'); None
-    would mean unrestricted, but callers use `_allows_custom` /
-    membership checks instead of a sentinel, so 'mixed' and any
-    unrecognized/legacy type just fall through to every source."""
-    if deck_type in SOURCE_FOR_TYPE:
-        return SOURCE_FOR_TYPE[deck_type]
-    if deck_type == "flashcard":
-        return set()
-    return set(SOURCES.keys())  # 'mixed' and any legacy/unknown type
+    """App sources this structure browses in; empty for `standard`."""
+    return SOURCE_FOR_TYPE.get(deck_type, set())
 
 
 def _allows_custom(deck_type: str) -> bool:
-    return deck_type not in SOURCE_FOR_TYPE
+    """
+    Every structure accepts hand-written cards -- of its own structure.
+
+    This used to return False for kanji/vocab/grammar, hiding "Add card"
+    on exactly the decks where a personal card of that kind belongs.
+    """
+    return deck_type in REGISTRY_SOURCE_FOR_TYPE
+
+
+def _registry_source(deck_type: str) -> str:
+    """The study-mode source for a deck, falling back to `standard`."""
+    return REGISTRY_SOURCE_FOR_TYPE.get(deck_type, MODE_STANDARD)
+
 
 # Card stage promotions worth a visual "stamp" on the frontend — same
 # rule as kana.py/kanji.py/vocab.py/grammar.py's own copy.
@@ -235,7 +260,7 @@ def _ensure_deck_schema() -> None:
                     id BIGSERIAL PRIMARY KEY,
                     user_id TEXT NOT NULL,
                     name TEXT NOT NULL,
-                    type TEXT NOT NULL DEFAULT 'mixed',
+                    type TEXT NOT NULL DEFAULT 'standard',
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
@@ -319,13 +344,10 @@ _ensure_deck_schema()
 
 class DeckPayload(BaseModel):
     name: str
-    # Historic values ('flashcard'/'vocab'/'kanji') are kept for
-    # backward compatibility with existing decks, but a deck's real
-    # composition — what's actually in custom_cards/deck_cards — is
-    # what decides its available study modes now (see get_deck_modes),
-    # not this field. 'mixed' is the honest default for a deck that
-    # can hold anything.
-    type: str = "mixed"
+    # The deck's STRUCTURE, which decides what it can hold and which
+    # modes it offers (see STRUCTURES). `standard` -- a plain front/back
+    # pair -- is the default, being the only one that needs nothing.
+    type: str = "standard"
 
 
 class CardPayload(BaseModel):
@@ -356,7 +378,10 @@ class AddAppCardsPayload(BaseModel):
     cards: list[AppCardRef]
 
 
-DECK_TYPES = ("flashcard", "vocab", "kanji", "grammar", "mixed")
+# One structure per deck. 'mixed' and 'flashcard' are gone: 'mixed' was
+# dropped outright, and 'flashcard' is now called 'standard' to match the
+# study-mode registry's name for the same thing.
+DECK_TYPES = STRUCTURES
 
 
 # ── DECK CRUD ─────────────────────────────────────────────
@@ -736,20 +761,27 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
 @router.get("/api/decks/{deck_id}/modes")
 def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
     """
-    What study modes this deck can actually offer right now, derived
-    from what's in it rather than a fixed deck `type`: 'flashcard' as
-    soon as there's at least one card of any kind, plus each present
-    source's own modes (e.g. a deck with kanji cards in it picks up
-    kk-s/k-k/s-k/write, one with grammar cards picks up fill, ...).
-    StudyScreen's mode picker reads this instead of hardcoding modes
-    off deck.type.
+    The study modes this deck offers: its STRUCTURE's modes, from the
+    registry, provided it has at least one card.
+
+    This used to union the modes of every source present in the deck,
+    which is what made mixed decks expensive. Two sources meant two mode
+    sets, and then a question the union could not answer -- what a
+    kanji-only mode should do with a grammar card sitting in the same
+    deck. One structure per deck removes the question rather than
+    answering it.
+
+    `composition` is still returned because the write-practice toggle and
+    the empty-deck copy read it, but it no longer decides anything.
     """
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            if not cur.fetchone():
+            cur.execute("SELECT type FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
+            row = cur.fetchone()
+            if not row:
                 raise HTTPException(status_code=404, detail="Deck not found")
+            deck_type = row["type"]
             cur.execute(
                 "SELECT COUNT(*) AS n FROM custom_cards WHERE deck_id = %s AND user_id = %s",
                 (deck_id, user_id),
@@ -764,22 +796,12 @@ def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
     finally:
         conn.close()
 
-    modes = set()
-    if custom_count:
-        # A hand-written card is a front/back pair, which the registry
-        # calls the `standard` source. Still advertised under the legacy
-        # key because StudyScreen -- the only consumer -- has not migrated
-        # yet; _eligible below accepts both, so the switch there is a
-        # one-line change rather than a coordinated deploy.
-        # TODO(studyscreen): emit GRADED_FOR_SOURCE[MODE_STANDARD] instead.
-        modes.add("flashcard")
-    for source, count in source_counts.items():
-        cfg = SOURCES.get(source)
-        if cfg and count:
-            modes |= cfg["valid_modes"]
+    total = custom_count + sum(source_counts.values())
+    modes = sorted(GRADED_FOR_SOURCE[_registry_source(deck_type)]) if total else []
 
     return {
-        "modes": sorted(modes),
+        "modes": modes,
+        "structure": deck_type,
         "composition": {"custom": custom_count, **source_counts},
     }
 
@@ -837,42 +859,60 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
     return pool
 
 
-# The flashcard-flavoured keys a custom card used to be admitted to. Drop
-# with LEGACY_ALIASES once StudyScreen emits registry keys.
-_LEGACY_CUSTOM_MODES = frozenset({"flashcard", "flashcard-kj-m", "flashcard-m-kj"})
+def _deck_type(deck_id: str, user_id: str) -> str | None:
+    """The deck's structure, or None when it is not this user's deck."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT type FROM decks WHERE id = %s AND user_id = %s",
+                        (deck_id, user_id))
+            row = cur.fetchone()
+            return row[0] if row else None
+    finally:
+        conn.close()
 
 
-def _eligible(pool_entry: dict, mode: str) -> bool:
-    # A hand-written card is a plain front/back pair: no distractors to
-    # build, no kanji to draw, no sentence to name a rule in. It belongs
-    # to the registry's `standard` source and to nothing else.
-    #
-    # This used to be `return "flashcard" in mode` -- a SUBSTRING test,
-    # which is why the registry namespaces its keys. It matched
-    # 'flashcard', 'flashcard-kj-m' and 'flashcard-m-kj' alike, so a
-    # custom card was silently pulled into a kanji or vocab session and
-    # rendered by whichever branch that session's mode selected. Explicit
-    # set membership now, against exactly one source's keys.
+def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
+    """
+    Whether this card can be served in this mode, for a deck of this
+    structure.
+
+    One rule now, because a deck has one structure: the mode must belong
+    to that structure's registry source, and the card must be either a
+    hand-written card (of that structure) or an app card from the source
+    the structure browses in.
+
+    What this replaces was `return "flashcard" in mode` for custom cards
+    -- a substring test that namespacing quietly broke, since
+    'grammar.flashcard.f2b' contains "flashcard" too, so a front/back pair
+    could be handed to the branch that renders a rule and its example
+    sentences.
+    """
+    if mode not in GRADED_FOR_SOURCE[_registry_source(deck_type)]:
+        return False
+
     if pool_entry["source"] == "custom":
-        # Both key spaces during the transition, with the legacy set
-        # stated EXPLICITLY rather than matched by substring.
+        # A personal card is front/back today, so it can only answer the
+        # mode that asks front/back. Its structure's other modes need
+        # fields custom_cards does not have -- a kanji deck offers
+        # kanji.readings and kanji.radical, and serving a hand-written
+        # pair into those gives a card with nothing to answer, which reads
+        # as a broken deck rather than a missing feature.
         #
-        # `return "flashcard" in mode` was deliberate once: a hand-written
-        # card was meant to join kanji/vocab's flashcard sessions in a
-        # mixed deck. Namespaced keys broke that quietly, because
-        # 'grammar.flashcard.f2b' contains "flashcard" too -- so a
-        # front/back pair would be pulled into a grammar session and handed
-        # to the branch that renders a rule and its example sentences.
-        # Substring tests over a key space cannot survive the key space
-        # growing, which is the whole reason for namespacing it.
-        return (mode in GRADED_FOR_SOURCE[MODE_STANDARD]
-                or mode in _LEGACY_CUSTOM_MODES)
-    cfg = SOURCES.get(pool_entry["source"])
-    return bool(cfg) and mode in cfg["valid_modes"]
+        # Keyed on BASE, not renderer: kanji.radical renders as a flashcard
+        # but asks which radical the kanji is filed under, which a
+        # front/back pair cannot answer either. What the mode ASKS is the
+        # axis; how it draws is not.
+        # TODO(structures): once custom_cards carries the structured
+        # fields (readings, radical number, ...), check the CARD for what
+        # the mode needs rather than restricting by base.
+        return MODES[mode].base == BASE_FLASHCARD
+
+    return pool_entry["source"] in _allowed_sources(deck_type)
 
 
 @router.get("/api/decks/{deck_id}/study")
-def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr",
+def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lang: str = "fr",
                          count: int = 10, exclude: str = "",
                          user_id: str = Depends(get_user_id)):
     """
@@ -882,16 +922,11 @@ def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr"
     filled the same way it does for the built-in decks instead of
     fetching one card at a time.
     """
-    conn = db_conn()
-    try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            if not cur.fetchone():
-                raise HTTPException(status_code=404, detail="Deck not found")
-    finally:
-        conn.close()
+    deck_type = _deck_type(deck_id, user_id)
+    if deck_type is None:
+        raise HTTPException(status_code=404, detail="Deck not found")
 
-    pool = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode)]
+    pool = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode, deck_type)]
     if not pool:
         return {"cards": []}
 
@@ -987,9 +1022,12 @@ def review_deck_card(deck_id: str, payload: ReviewPayload,
 
 
 @router.get("/api/decks/{deck_id}/stats")
-def get_deck_stats(deck_id: str, mode: str = "flashcard",
+def get_deck_stats(deck_id: str, mode: str = "standard.flashcard.f2b",
                    user_id: str = Depends(get_user_id)):
-    pool     = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode)]
+    deck_type = _deck_type(deck_id, user_id)
+    if deck_type is None:
+        raise HTTPException(status_code=404, detail="Deck not found")
+    pool     = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode, deck_type)]
     card_ids = prefixed([p["raw_id"] for p in pool], user_id)
 
     if not card_ids:
