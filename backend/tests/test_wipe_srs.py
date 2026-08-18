@@ -84,5 +84,43 @@ class WipePlanTests(unittest.TestCase):
                 self.assertIn("user_id = %(user)s", clause, table)
 
 
+
+class ScriptEnvTests(unittest.TestCase):
+    """
+    Scripts are run by hand from a shell that has sourced nothing, unlike
+    the API which loads .env in main.py. core/db.py reads DATABASE_URL at
+    module scope, so the load has to happen BEFORE that import or it does
+    nothing at all -- and the symptom is psycopg2's "fe_sendauth: no
+    password supplied", which reads like a Postgres auth problem rather
+    than an unset variable. Reported from a real run.
+    """
+
+    SCRIPTS = ["wipe_srs.py", "generate_grammar_sentences.py"]
+
+    def _source(self, name):
+        from pathlib import Path
+        path = Path(__file__).resolve().parents[1] / "scripts" / name
+        return path.read_text(encoding="utf-8")
+
+    def test_env_is_imported_before_anything_reads_it(self) -> None:
+        for name in self.SCRIPTS:
+            src = self._source(name)
+            self.assertIn("import scripts._env", src, name)
+            env_at = src.index("import scripts._env")
+            # Every import that pulls in a module reading os.environ at
+            # module scope must come after it.
+            for later in ("from core.", "from study.", "from content."):
+                if later in src:
+                    self.assertLess(env_at, src.index(later),
+                                    f"{name}: scripts._env must precede {later!r}")
+
+    def test_the_ordering_is_explained_where_it_could_be_reordered(self) -> None:
+        # An import sorter would happily move it and silently reintroduce
+        # the bug, so the reason sits on the line itself.
+        for name in self.SCRIPTS:
+            line = next(l for l in self._source(name).splitlines()
+                        if "import scripts._env" in l)
+            self.assertIn("noqa", line, name)
+
 if __name__ == "__main__":
     unittest.main()

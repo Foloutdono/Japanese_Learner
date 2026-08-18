@@ -52,6 +52,8 @@ import argparse
 import logging
 import sys
 
+import scripts._env  # noqa: F401  -- must precede core.db, which reads
+#                       DATABASE_URL at module scope. See scripts/_env.py.
 from core.db import db_conn
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")

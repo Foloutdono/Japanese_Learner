@@ -16,6 +16,8 @@ import logging
 import sys
 import time
 
+import scripts._env  # noqa: F401  -- must precede the study imports, which
+#                       read OPENROUTER_API_KEY at module scope.
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from study import grammar_sentence_store as store
 from study.grammar_sentence_gen import (
