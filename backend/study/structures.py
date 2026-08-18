@@ -23,8 +23,13 @@ from dataclasses import dataclass, field
 @dataclass(frozen=True)
 class Field:
     key: str
-    # 'text' | 'number' | 'lines' -- what the generated form renders.
-    # 'lines' is a repeatable text row (grammar's sentences).
+    # 'text' | 'number' | 'lines' | 'readings' -- what the generated form
+    # renders. 'lines' is a repeatable text row (grammar's sentences).
+    # 'readings' is TWO repeatable groups, on'yomi and kun'yomi -- the
+    # same shape kanji.readings itself asks the learner to produce, so a
+    # personal kanji card can be studied that way too. See ReadingsField
+    # (DeckDetailScreen.jsx) for the editable form and ReadingsInput
+    # (components/study/ReadingsInput.jsx) for the quiz that consumes it.
     kind: str = "text"
     required: bool = False
     # For 'number': the picker to open instead of a bare input.
@@ -58,7 +63,7 @@ STRUCTURES: dict[str, Structure] = {
         fields=(
             Field("kanji", required=True),
             Field("meaning", required=True),
-            Field("readings", required=True),
+            Field("readings", kind="readings", required=True),
             # The Kangxi radical number. A picker rather than a free
             # number: 214 of them, and nobody remembers that 言 is 149.
             Field("radical", kind="number", required=True, picker="radical"),
@@ -88,9 +93,39 @@ STRUCTURES: dict[str, Structure] = {
 
 ALL_KEYS = tuple(STRUCTURES)
 
+# Same cap ReadingsInput.jsx enforces on the quiz side (see that
+# component's own comment) -- not a scoring rule, just a stop against a
+# form growing without bound. Applied on save so it holds regardless of
+# which client wrote the card.
+MAX_READINGS = 15
+
 
 def structure_for(key: str) -> Structure:
     return STRUCTURES.get(key) or STRUCTURES["standard"]
+
+
+def decode_readings(value) -> dict:
+    """
+    A 'readings' field as {"on": [...], "kun": [...]}, from whatever shape
+    is actually stored.
+
+    Cards written before this field existed as two groups hold one
+    ・-joined string (e.g. "ケン・いぬ", the old free-text convention) --
+    those are re-split by SCRIPT the exact same way the deck's own packed
+    readings are (content/kanji_readings.split_readings), so a card
+    written before this change still studies and displays correctly
+    without a data migration or ever losing what was typed.
+    """
+    if isinstance(value, dict):
+        return {
+            "on":  [str(v).strip() for v in (value.get("on") or []) if str(v).strip()],
+            "kun": [str(v).strip() for v in (value.get("kun") or []) if str(v).strip()],
+        }
+    if isinstance(value, str) and value.strip():
+        from content.kanji_readings import split_readings
+
+        return split_readings(value)
+    return {"on": [], "kun": []}
 
 
 def normalise(key: str, raw: dict) -> dict:
@@ -108,6 +143,21 @@ def normalise(key: str, raw: dict) -> dict:
         if f.kind == "lines":
             items = value if isinstance(value, list) else ([value] if value else [])
             out[f.key] = [str(v).strip() for v in items if str(v).strip()]
+        elif f.kind == "readings":
+            readings = decode_readings(value)
+            # The cap is on the COMBINED count, same as the quiz form --
+            # on'yomi and kun'yomi share one budget, not 15 each. Trimmed
+            # from the end of kun first, then on, so a card that's over
+            # loses its LAST-added entries rather than an arbitrary mix.
+            over = len(readings["on"]) + len(readings["kun"]) - MAX_READINGS
+            if over > 0:
+                cut_kun = min(over, len(readings["kun"]))
+                if cut_kun:
+                    readings["kun"] = readings["kun"][:-cut_kun]
+                over -= cut_kun
+                if over > 0:
+                    readings["on"] = readings["on"][:max(0, len(readings["on"]) - over)]
+            out[f.key] = readings
         elif f.kind == "number":
             try:
                 out[f.key] = int(value)
@@ -126,7 +176,11 @@ def missing_required(key: str, fields: dict) -> list[str]:
         if not f.required:
             continue
         value = fields.get(f.key)
-        if value is None or (isinstance(value, (str, list)) and not value):
+        if f.kind == "readings":
+            readings = decode_readings(value)
+            if not readings["on"] and not readings["kun"]:
+                missing.append(f.key)
+        elif value is None or (isinstance(value, (str, list)) and not value):
             missing.append(f.key)
     return missing
 

@@ -2,6 +2,7 @@ import json
 import logging
 import csv
 import io
+import random
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from core.auth import get_user_id, prefixed, unprefixed
@@ -16,6 +17,9 @@ from content.grammar_points_data import (
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from content.kanji_meanings import KANJI_FR
+from content.radical_data import RADICAL_BY_NUMBER, siblings_by_stroke
+from content.kanji_readings import display_reading
+from study.furigana import align_deck as align_furigana
 
 # Reuse the exact same MCQ/choice-building + review-preview logic the
 # Kanji/Vocab/Grammar screens use, instead of a second copy living
@@ -28,6 +32,7 @@ from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
 from routes.grammar import _build_grammar_card
 from study.structures import (
     ALL_KEYS as STRUCTURE_KEYS,
+    decode_readings,
     describe as describe_structures,
     missing_required,
     normalise as normalise_fields,
@@ -458,9 +463,20 @@ def get_decks(user_id: str = Depends(get_user_id)):
         conn.close()
 
 
+def _packed_kana(fields: dict) -> str:
+    """
+    A kanji card's readings, packed into the single ・-joined display
+    string every other reading-showing surface in the app already reads
+    (Readings/InlineReveal, DeckDetailScreen's own entry row) -- built
+    from the canonical {on, kun} shape rather than stored twice.
+    """
+    readings = decode_readings(fields.get("readings"))
+    return "・".join(readings["on"] + readings["kun"])
+
+
 def _with_display(row: dict) -> dict:
     """
-    Adds front/back to a stored personal card, derived from its
+    Adds front/back/kana to a stored personal card, derived from its
     structure's own field names.
 
     Every consumer (the card list, the study builder, the CSV export)
@@ -468,13 +484,28 @@ def _with_display(row: dict) -> dict:
     have to know that a kanji card calls those `kanji` and `meaning` while
     a grammar card calls them `rule` and `meaning`. Derived here, once,
     rather than in each renderer.
+
+    `fields.readings` is also normalised to its canonical {on, kun} shape
+    here -- the one place a card written before that shape existed (a
+    single ・-joined string) gets upgraded on the way out, so every
+    consumer downstream (the edit form, the study builder) only ever
+    sees the current shape. See decode_readings for how the old data is
+    read without being lost.
     """
     spec = structure_for(row.get("structure", "standard"))
-    fields = row.get("fields") or {}
+    fields = dict(row.get("fields") or {})
+    kana = ""
+    if spec.key == "kanji":
+        fields["readings"] = decode_readings(fields.get("readings"))
+        kana = _packed_kana(fields)
+    elif spec.key == "vocab":
+        kana = fields.get("reading") or ""
     return {
         **row,
+        "fields": fields,
         "front": fields.get(spec.front_key, ""),
         "back":  fields.get(spec.back_key, ""),
+        "kana":  kana,
     }
 
 
@@ -992,6 +1023,73 @@ _MODE_NEEDS = {
 }
 
 
+def _custom_card_extras(spec, fields: dict, mode) -> dict:
+    """
+    Everything a personal card's payload needs BEYOND front/back/direction
+    for the mode it's about to be served in — the same extra shape the
+    builtin _build_*_card functions attach for their own sources, so the
+    renderer treats a personal card exactly like an app one and never has
+    to ask "is this custom?" to know where to find its readings/radical/
+    furigana. Empty for a base this doesn't apply to.
+    """
+    out: dict = {}
+
+    if spec.key == "kanji":
+        readings = decode_readings(fields.get("readings"))
+        # Packed for InlineReveal/Readings, which split ON/KUN by SCRIPT
+        # (see content/kanji_readings.py) — matches how a builtin kanji
+        # card's own `kana` field already works, so the flashcard/radical
+        # renderers need no custom-card branch to show it.
+        out["kana"] = "・".join(readings["on"] + readings["kun"])
+        if mode.base == "readings":
+            out["readings"] = {
+                kind: [{"reading": r, "display": display_reading(r)} for r in vals]
+                for kind, vals in readings.items()
+            }
+        elif mode.base == "radical":
+            rad = RADICAL_BY_NUMBER.get(fields.get("radical"))
+            if rad is not None:
+                out["radical"] = rad
+                # Same distractor rule as the builtin mode (routes/kanji.py):
+                # same stroke-count bucket, because a 1-stroke radical
+                # against a 12-stroke one isn't a real discrimination.
+                pool = siblings_by_stroke(rad["number"])
+                picks = random.sample(pool, min(3, len(pool)))
+                options = [RADICAL_BY_NUMBER[n] for n in picks] + [rad]
+                random.shuffle(options)
+                out["hints"] = {
+                    "indice_1": [
+                        {"number": o["number"], "char": o["char"], "stroke_count": o["stroke_count"]}
+                        for o in options
+                    ],
+                }
+
+    elif spec.key == "vocab":
+        word, reading = fields.get("word") or "", fields.get("reading") or ""
+        if reading:
+            out["kana"] = reading
+            # align_furigana degrades to a single unreadinged part for a
+            # kana-only word on its own (see furigana.align()), so this
+            # needs no extra branch for that case.
+            parts = align_furigana(word, reading)
+            out["furigana"] = parts
+            # Only where the registry actually offers indice_3 (the two
+            # flashcard directions) — word_reading reads `furigana`
+            # directly above as the ANSWER, not an opt-in hint.
+            if "indice_3" in (mode.hints or ()):
+                out.setdefault("hints", {})["indice_3"] = parts
+
+    elif spec.key == "grammar" and mode.base == "fill_in":
+        # _eligible already required at least one usable sentence before
+        # a personal card reaches fill_in at all (see _card_answers) — a
+        # random pick among them, same as _build_grammar_card's own.
+        sentences = usable_sentences(fields)
+        if sentences:
+            out["fill_sentence"] = {"jp": random.choice(sentences)}
+
+    return out
+
+
 def _card_answers(entry: dict, m) -> bool:
     """Whether a personal card carries what this mode asks of it."""
     fields = entry.get("fields") or {}
@@ -1000,6 +1098,15 @@ def _card_answers(entry: dict, m) -> bool:
         # rule is at work, so a sentence that does not contain its own rule
         # makes the question unanswerable. Verified, not assumed.
         return bool(usable_sentences(fields))
+    if m.base == "word_reading":
+        # Stricter than "has a reading": the prompt shows `word`, so a
+        # kana-only word (no kanji at all) would print its own answer —
+        # the exact case the builtin mode's own eligible_for() excludes
+        # for the app's deck (see routes/vocab.py's _select_cards).
+        from study.furigana import is_kanji
+
+        word = fields.get("word") or ""
+        return bool(fields.get("reading")) and any(is_kanji(c) for c in word)
     return all(fields.get(k) for k in _MODE_NEEDS.get(m.base, ()))
 
 
@@ -1094,6 +1201,12 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
             m = MODES.get(mode)
             spec   = structure_for(c.get("structure", "standard"))
             fields = c.get("fields") or {}
+            # readings/radical/furigana/fill_sentence, and (for kanji) the
+            # packed `kana` every flashcard/InlineReveal render already
+            # expects — see _custom_card_extras. Merged in rather than
+            # inlined so this stays one dict literal per source, matching
+            # the flat shape a builtin card's own payload has.
+            extras = _custom_card_extras(spec, fields, m) if m else {}
             cards.append({
                 "card_id": raw_id, "source": "custom",
                 "structure": spec.key,
@@ -1106,14 +1219,15 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
                 "notes": c.get("notes", ""), "mode": mode,
                 # f2b shows the front and asks for the back; b2f is the
                 # other way up. Every other source's payload carries this,
-                # and the renderer reads it rather than the mode string.
+                # and the renderer reads it rather than the mode string —
+                # which used to be ignored entirely on the custom-card
+                # path, so a "meaning → word" session always showed the
+                # word first regardless of what it asked for.
                 "direction": m.direction if m else None,
-                # No hints: a hand-written pair has nothing to build
-                # distractors from, and HintBar renders from what is
-                # actually present, so the control simply does not appear.
                 "hints": {},
                 "stage": stage,
                 "review_preview": _build_review_preview(stage, preview),
+                **extras,
             })
         else:
             cfg = SOURCES[p["source"]]

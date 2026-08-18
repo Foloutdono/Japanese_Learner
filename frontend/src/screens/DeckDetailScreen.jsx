@@ -104,6 +104,87 @@ function RadicalField({ label, value, onChange, session }) {
   )
 }
 
+// Same combined cap study/structures.py enforces on save (kanji.readings'
+// own quiz-side ReadingsInput.jsx carries the identical number for the
+// same reason — see that component's comment) — checked here too so the
+// form itself stops offering "+" before a save would silently trim the
+// overflow instead.
+const MAX_READINGS = 15
+
+// ── The readings field (personal kanji cards) ─────────────────
+// Two groups the learner grows one row at a time, mirroring
+// kanji.readings' own quiz widget (components/study/ReadingsInput.jsx)
+// almost exactly — this is the WRITE side of that same shape, so a
+// personal kanji card can be studied with kanji.readings the same way
+// an app one is: type every on'yomi/kun'yomi you know, submit, see
+// what you got. `value` is {on: string[], kun: string[]}; `onChange`
+// always receives the whole object back.
+function ReadingsField({ label, value, onChange }) {
+  const { t } = useLang()
+  const on  = value?.on  ?? []
+  const kun = value?.kun ?? []
+  const total = on.length + kun.length
+  const full  = total >= MAX_READINGS
+
+  function setRow(kind, i, v) {
+    const rows = kind === 'on' ? on : kun
+    onChange({ on, kun, [kind]: rows.map((r, j) => (j === i ? v : r)) })
+  }
+  function addRow(kind) {
+    if (full) return
+    const rows = kind === 'on' ? on : kun
+    onChange({ on, kun, [kind]: [...rows, ''] })
+  }
+  function removeRow(kind, i) {
+    const rows = kind === 'on' ? on : kun
+    onChange({ on, kun, [kind]: rows.filter((_, j) => j !== i) })
+  }
+
+  const GROUPS = [
+    { kind: 'on',  label: t.readingsOn,  jp: '音読み', rows: on },
+    { kind: 'kun', label: t.readingsKun, jp: '訓読み', rows: kun },
+  ]
+
+  return (
+    <div className="deckdetail-form__group">
+      <div className="deckdetail-form__label">{label} *</div>
+      {GROUPS.map(g => (
+        <div key={g.kind} className="readings-field__group">
+          <div className="readings-field__label">
+            <span lang="ja">{g.jp}</span> <span>{g.label}</span>
+          </div>
+          {g.rows.map((v, i) => (
+            <div key={i} className="readings-field__row">
+              <input
+                value={v}
+                onChange={e => setRow(g.kind, i, e.target.value)}
+                placeholder={t.readingsPlaceholder}
+                className="deckdetail-form__input"
+                lang="ja"
+              />
+              <button
+                type="button"
+                onClick={() => removeRow(g.kind, i)}
+                className="readings-field__remove"
+                aria-label={t.delete}
+                title={t.delete}
+              >
+                <CrossIcon size={12} />
+              </button>
+            </div>
+          ))}
+          {!full && (
+            <button type="button" onClick={() => addRow(g.kind)} className="deckdetail-form__addline">
+              + {g.label}
+            </button>
+          )}
+        </div>
+      ))}
+      {full && <div className="readings-field__cap">{t.readingsCap}</div>}
+    </div>
+  )
+}
+
 export default function DeckDetailScreen({ session }) {
   const navigate        = useNavigate()
   const { deck_id }     = useParams()
@@ -199,7 +280,11 @@ export default function DeckDetailScreen({ session }) {
 
   function blankForm(spec) {
     const out = {}
-    for (const f of spec?.fields ?? []) out[f.key] = f.kind === 'lines' ? [''] : ''
+    for (const f of spec?.fields ?? []) {
+      if (f.kind === 'lines') out[f.key] = ['']
+      else if (f.kind === 'readings') out[f.key] = { on: [''], kun: [''] }
+      else out[f.key] = ''
+    }
     return out
   }
 
@@ -219,6 +304,9 @@ export default function DeckDetailScreen({ session }) {
     return (structure?.fields ?? []).every(f => {
       if (!f.required) return true
       const v = form[f.key]
+      if (f.kind === 'readings') {
+        return (v?.on ?? []).some(x => x.trim()) || (v?.kun ?? []).some(x => x.trim())
+      }
       return Array.isArray(v) ? v.some(x => x.trim()) : String(v ?? '').trim()
     })
   }
@@ -429,6 +517,12 @@ export default function DeckDetailScreen({ session }) {
                 if (f.picker === 'radical') {
                   return (
                     <RadicalField key={f.key} label={label} session={session}
+                      value={form[f.key]} onChange={v => setField(f.key, v)} />
+                  )
+                }
+                if (f.kind === 'readings') {
+                  return (
+                    <ReadingsField key={f.key} label={label}
                       value={form[f.key]} onChange={v => setField(f.key, v)} />
                   )
                 }
