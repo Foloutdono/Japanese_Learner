@@ -333,11 +333,17 @@ export default function GrammarScreen({ session }) {
             <HintBar available={availableHints} active={activeHints}
                      onToggle={toggleHint} disabled={locked} />
 
-            <CardTransition cardKey={card.card_id} stamp={cardStamp} stage={card.stage} onStampDone={() => {
-              setCardStamp(null)
-              pendingGatesRef.current.delete('stamp')
-              checkAdvance()
-            }}>
+            <CardTransition
+              className="grammar-card-boost"
+              cardKey={card.card_id}
+              stamp={cardStamp}
+              stage={card.stage}
+              onStampDone={() => {
+                setCardStamp(null)
+                pendingGatesRef.current.delete('stamp')
+                checkAdvance()
+              }}
+            >
               {isFill ? (
                 /* fill_in — the sentence is the whole question, so there is
                    no flip: naming the rule (via the choices below) IS the

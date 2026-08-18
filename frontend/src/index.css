@@ -9110,12 +9110,86 @@ input:focus { border-color: var(--accent2); }
 /* Bigger card for Vocab only — scoped through this wrapper rather than
    changing .prompt-card itself, so Kanji/Kana keep their existing
    card size. Vocab words run longer than a single kanji, so the box
-   gets more breathing room, not just a bigger glyph. */
+   gets more breathing room, not just a bigger glyph.
+
+   --card-pad-top is set here too, not left to fall back to the base
+   rule's `var(--card-pad-y)` — each custom property cascades on its
+   OWN specificity, so on a narrow viewport the 480px media query's
+   plain `.prompt-card { --card-pad-top: 46px }` (below) would win for
+   -top while this rule's higher-specificity -y/-x still won for the
+   other two, leaving .flashcard's negative margin asymmetric
+   (-46px top vs -64px bottom). On a flex-centered card that shifts
+   the flashcard's clickable box instead of growing it evenly, so a
+   tap in the now-uncovered strip of padding missed it entirely. */
 .vocab-card-boost .prompt-card {
   --card-pad-y: 64px;
   --card-pad-x: 32px;
+  --card-pad-top: 64px;
   min-height: 220px;
   display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* On every OTHER screen .flashcard is a plain block child, and a
+   block element's auto width already solves negative side margins by
+   growing the box to fill them — that's the whole mechanism the
+   negative-margin trick above (see .flashcard's own rule) leans on.
+   Here .prompt-card is display:flex, and flex's own width algorithm
+   does not do that: a flex item's box stays exactly as wide as its
+   `width` says regardless of its margins, so "Marcher" sized to its
+   own text, centered by justify-content, and offset outward by
+   negative margin still painted as a NARROW box with the negative
+   margin only pushed its unchanged-size box sideways — leaving 60-plus
+   unclickable pixels of padding down each side, more on a wider
+   screen. calc() sizes it explicitly to the full padded width instead
+   of counting on an auto-width solve that flex doesn't do, and
+   centers its own front/back content in-house since justify-content
+   on the parent has nothing left to center once this fills the row. */
+.vocab-card-boost .flashcard {
+  width: calc(100% + 2 * var(--card-pad-x, 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Grammar only — same shape of fix as vocab-card-boost above, for a
+   different reason. .prompt-card's width tracks .container's, which
+   caps at 1100px: a kanji glyph or a vocab word is big enough to read
+   as a deliberate card even at that width, but a grammar rule (5-ish
+   characters average, small type by necessity — see GrammarRule)
+   sitting alone in an 1100×~130px box on a wide screen reads as a
+   thin, mostly-empty banner, not a flashcard. Capping the width and
+   raising the min-height gives it the same "sized to its content"
+   proportions Kanji/Vocab get for free from their own bigger glyphs.
+   Applies to both the flip card and the plain fill_in prompt, since
+   both sit under one CardTransition in GrammarScreen.jsx and share
+   the same "thin banner" problem.
+
+   The max-width/margin sit on .grammar-card-boost itself (the
+   `.quiz-card-stage` CardTransition renders, not .prompt-card) because
+   .stage-badge (the "新" hanko seal) is `position: absolute` against
+   `.quiz-card-stage` — capping only .prompt-card would narrow the
+   visible card but leave the seal anchored to the old, wider box,
+   floating off to the side of a card no longer as wide as its parent. */
+.grammar-card-boost {
+  max-width: 560px;
+  margin: 0 auto;
+}
+.grammar-card-boost .prompt-card {
+  --card-pad-y: 56px;
+  --card-pad-x: 32px;
+  --card-pad-top: 56px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.grammar-card-boost .flashcard {
+  width: calc(100% + 2 * var(--card-pad-x, 32px));
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -9192,6 +9266,18 @@ input:focus { border-color: var(--accent2); }
 .import-preview-row__arrow { color: var(--text-secondary); }
 .import-preview-row__back { color: var(--text-secondary); }
 .import-preview-row__hint { color: var(--accent2); }
+/* The "・" between packed readings (see DottedReadings in
+   BrowseCardsMenu.jsx) — bigger and bolder than the surrounding 13px
+   row text, which renders the bare character as a near-invisible
+   speck. Muted rather than the readings' own accent color, so it
+   reads as punctuation separating them, not a fourth reading. */
+.browse-reading-dot {
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 1.4em;
+  margin: 0 1px;
+  vertical-align: -1px;
+}
 .import-preview__more { color: var(--text-secondary); font-size: 12px; padding: 4px 14px; }
 
 .import-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }

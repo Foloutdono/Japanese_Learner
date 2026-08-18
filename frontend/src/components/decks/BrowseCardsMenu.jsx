@@ -38,6 +38,21 @@ function allowedSourcesFor(type) {
   return SOURCE_FOR_TYPE[type] ?? []
 }
 
+// A kanji's packed reading ("ド・ト・つち") separates entries with 、
+// which at row text-size renders as a barely-there dot easy to miss
+// entirely — readings run together instead of reading as a list. Split
+// it out and give the separator its own, bigger, bolder styling
+// instead of leaning on the raw glyph at the surrounding text's size.
+function DottedReadings({ text }) {
+  const parts = (text || '').split('・')
+  return parts.map((part, i) => (
+    <span key={i}>
+      {i > 0 && <span className="browse-reading-dot" aria-hidden="true">・</span>}
+      {part}
+    </span>
+  ))
+}
+
 export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, onClose }) {
   const { t } = useLang()
 
@@ -188,7 +203,7 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
                     </div>
                     <div className="import-preview-row__front">{r.front}</div>
                     {r.kana && r.kana !== r.front && (
-                      <div className="import-preview-row__hint">{r.kana}</div>
+                      <div className="import-preview-row__hint"><DottedReadings text={r.kana} /></div>
                     )}
                     <div className="import-preview-row__arrow"><ChevronIcon direction="right" size={13} /></div>
                     <div className="import-preview-row__back">{r.meaning}</div>
