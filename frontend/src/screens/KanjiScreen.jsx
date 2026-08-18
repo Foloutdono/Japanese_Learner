@@ -692,6 +692,9 @@ export default function KanjiScreen({ session }) {
             {renderer === RENDER.DRAW && card.kanji && (
               <DrawingQuiz
                 kanji={card.kanji}
+                // Without this the canvas keeps the previous card's ink:
+                // Canvas clears on resetKey changing, and nothing else.
+                resetKey={card.card_id}
                 meaning={formatGlossLine(card.meaning)}
                 onValidate={() => {
                   setAnswered(true)
@@ -706,6 +709,9 @@ export default function KanjiScreen({ session }) {
             {showDrawing && (
               <DrawingOverlay
                 kanji={card.kanji}
+                // Without this the canvas keeps the previous card's ink:
+                // Canvas clears on resetKey changing, and nothing else.
+                resetKey={card.card_id}
                 meaning={formatGlossLine(card.meaning)}
                 onDone={() => {
                   setShowDrawing(false)

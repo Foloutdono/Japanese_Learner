@@ -455,8 +455,9 @@ class SRSEngine:
         did before this change.
 
         The `card_ids is None` branch keeps the old whole-table scan. Its
-        only callers are build_session and get_due_count, neither of which
-        is reachable from a route today.
+        only caller is build_session, which is not reachable from a route
+        today. (get_due_count was the other, and was deleted: it counted
+        every user's due cards with no scoping at all.)
         """
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -490,21 +491,6 @@ class SRSEngine:
                 cur.execute(sql, tuple(params))
                 rows = cur.fetchall()
         return [row[0] for row in rows]
-
-    def get_due_count(self, mode: str) -> int:
-        with self.storage.connection() as conn:
-            with conn.cursor() as cur:
-                sql = """
-                    SELECT COUNT(*)
-                    FROM card_modes
-                    WHERE mode = %s
-                      AND total_reviews > 0
-                      AND next_review <= NOW()
-                """
-                self._log_sql("get_due_count", sql, (mode,))
-                cur.execute(sql, (mode,))
-                row = cur.fetchone()
-        return int(row[0]) if row else 0
 
     def delete_cards(self, card_ids: list[str]) -> None:
         if not card_ids:
