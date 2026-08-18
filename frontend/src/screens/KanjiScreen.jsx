@@ -42,16 +42,42 @@ import { PencilIcon } from '../components/ui/Icons'
 // and stroke count small beneath. The number is what makes the answer
 // checkable — several radicals share a shape at a glance (⺅ 亻 人), so
 // the glyph alone leaves the learner unsure whether they were right.
+//
+// The 部首 caption is not decoration. A third of the deck is filed under
+// a radical that IS the kanji (八 under 八, 山 under 山), so prompt and
+// answer are the same glyph and, unlabelled, the card reads as if it
+// had failed to reveal anything. The caption is what says which of the
+// two glyphs on screen is the one being asked for.
 function RadicalAnswer({ radical, t }) {
   if (!radical) return null
   return (
     <div className="radical-answer">
+      <div className="radical-answer__label">
+        <span lang="ja">部首</span> <span>{t.radicalNumber}</span>
+      </div>
       <div className="radical-answer__char" lang="ja">{radical.char}</div>
       <div className="radical-answer__meta">
         {t.radicalNumber} {radical.number} · {radical.stroke_count} {t.strokes}
       </div>
     </div>
   )
+}
+
+// The choice rows carry the Kangxi number beside the glyph for the same
+// reason RadicalAnswer does: at row size ⺅ / 亻 / 人 are one smudge, and
+// the distractors are drawn from the SAME stroke-count bucket on
+// purpose (see content/radical_data.py's siblings_by_stroke), so a row
+// showing only the glyph is often four near-identical marks.
+function radicalChoiceRenderer(options) {
+  return char => {
+    const o = options.find(c => c.char === char)
+    return (
+      <span className="radical-choice">
+        <span className="radical-choice__char" lang="ja">{char}</span>
+        {o && <span className="radical-choice__num">{o.number}</span>}
+      </span>
+    )
+  }
 }
 
 export default function KanjiScreen({ session }) {
@@ -529,6 +555,16 @@ export default function KanjiScreen({ session }) {
             <HintBar available={availableHints} active={activeHints}
                      onToggle={toggleHint} disabled={locked} />
             <CardTransition
+              /* readings and write both put a capped-width panel under
+                 the prompt (a form, a drawing board). Matching the
+                 prompt's width to theirs keeps the two reading as one
+                 card and its interaction rather than two unrelated
+                 panels of different widths. */
+              className={
+                renderer === RENDER.TYPE ? 'quiz-card-stage--form'
+                : renderer === RENDER.DRAW ? 'quiz-card-stage--narrow'
+                : undefined
+              }
               cardKey={card.card_id}
               contentKey={`${card.card_id}:${card.lang ?? ''}`}
               stamp={cardStamp}
@@ -566,7 +602,17 @@ export default function KanjiScreen({ session }) {
                       resetKey={card.card_id}
                       onReveal={onFlashcardReveal}
                       front={<CharDisplay char={card.kanji} size={100} />}
-                      back={<RadicalAnswer radical={card.radical} t={t} />}
+                      back={
+                        /* The kanji stays on the back, dimmed. Flipping
+                           it away left the answer with nothing to be an
+                           answer ABOUT — and on the cards where the
+                           radical is the kanji, an unchanged-looking
+                           card. */
+                        <div className="radical-reveal">
+                          <div className="radical-reveal__kanji" lang="ja">{card.kanji}</div>
+                          <RadicalAnswer radical={card.radical} t={t} />
+                        </div>
+                      }
                       dictTerm={card.kanji}
                       dictCategory="kanji"
                       session={session}
@@ -667,6 +713,7 @@ export default function KanjiScreen({ session }) {
               <MCQGrid
                 choices={(card.hints?.indice_1 ?? []).map(c => c.char)}
                 correct={card.radical?.char}
+                formatChoice={radicalChoiceRenderer(card.hints?.indice_1 ?? [])}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}

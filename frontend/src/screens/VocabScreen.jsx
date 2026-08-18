@@ -9,6 +9,7 @@ import {
   MCQGrid, DoneMessage, DeckProgress,
   InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
 } from '../components/study/QuizComponents'
+import { FuriganaWord } from '../components/study/Readings'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { XpToast } from '../components/rewards/XpToast'
@@ -522,15 +523,7 @@ export default function VocabScreen({ session }) {
 
   /** The word, with furigana when the hint is on and the card has it. */
   function wordDisplay(size) {
-    if (furigana?.length) {
-      return (
-        <div className="furigana-word" style={{ '--furigana-size': `${size}px` }}>
-          {furigana.map((part, i) => part.reading
-            ? <ruby key={i}>{part.text}<rt>{part.reading}</rt></ruby>
-            : <span key={i}>{part.text}</span>)}
-        </div>
-      )
-    }
+    if (furigana?.length) return <FuriganaWord parts={furigana} size={size} />
     return <CharDisplay char={wordForm(card)} size={size} />
   }
   const isWordReading = STUDY_MODES[mode]?.base === 'word_reading'
@@ -583,9 +576,27 @@ export default function VocabScreen({ session }) {
                     onReveal={onFlashcardReveal}
                     front={<CharDisplay char={card.kanji} size={72} />}
                     back={
+                      /* The answer is the reading, so it is shown ON the
+                         word it belongs to (see `furigana` on the payload,
+                         built by study/furigana.py) rather than as a
+                         separate kana line underneath — which is what
+                         makes it legible WHICH kanji takes which reading,
+                         the entire point of the drill. The packed kana
+                         field still follows when the word has more than
+                         one accepted reading, since furigana can only
+                         carry the first. */
                       <div>
-                        <CharDisplay char={card.kanji} size={56} />
-                        <div className="flashcard-answer" lang="ja">{card.kana}</div>
+                        {card.furigana?.length
+                          ? <FuriganaWord parts={card.furigana} size={64} answer />
+                          : (
+                            <>
+                              <CharDisplay char={card.kanji} size={56} />
+                              <div className="flashcard-answer" lang="ja">{card.kana}</div>
+                            </>
+                          )}
+                        {card.furigana?.length > 0 && card.kana?.includes('/') && (
+                          <div className="flashcard-alt-reading" lang="ja">{card.kana}</div>
+                        )}
                       </div>
                     }
                     dictTerm={wordForm(card)}

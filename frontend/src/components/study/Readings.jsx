@@ -46,6 +46,25 @@ export function FuriganaParts({ parts, className }) {
   )
 }
 
+// The whole word, rendered at prompt size with its furigana on top.
+// Two callers want exactly this box and were each building it inline:
+// vocab's indice_3 hint, and word_reading's own reveal (where the
+// reading is not a hint at all but the answer being shown).
+// `answer` tints the ruby with the success colour so a revealed reading
+// reads as the answer rather than as decoration over the prompt.
+export function FuriganaWord({ parts, size = 72, answer = false }) {
+  if (!parts?.length) return null
+  return (
+    <div
+      className={`furigana-word${answer ? ' furigana-word--answer' : ''}`}
+      style={{ '--furigana-size': `${size}px` }}
+      lang="ja"
+    >
+      <FuriganaParts parts={parts} />
+    </div>
+  )
+}
+
 export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false }) {
   if (!readings.length) return null
   const style = {

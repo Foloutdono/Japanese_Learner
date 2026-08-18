@@ -7,7 +7,7 @@ import { TopBar } from '../components/ui/TopBar'
 import RatingBar from '../components/study/RatingBar'
 import {
   MCQGrid, DoneMessage, DeckProgress,
-  Flashcard, InlineReveal, MeaningDisplay,
+  Flashcard, MeaningDisplay,
 } from '../components/study/QuizComponents'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
@@ -46,6 +46,20 @@ function GrammarRule({ text, size = 48 }) {
   return (
     <div className="grammar-rule" style={{ '--rule-size': `${Math.round(size * scale)}px` }} lang="ja">
       {text}
+    </div>
+  )
+}
+
+// Rule + its structure line + what it means — the three things that
+// together ARE the answer, in one block. Every mode on this screen
+// reveals exactly this, so they share it rather than each assembling
+// the same three elements in a slightly different order.
+function GrammarAnswer({ card, size = 44, divided = false }) {
+  return (
+    <div className={`grammar-answer${divided ? ' grammar-answer--divided' : ''}`}>
+      <GrammarRule text={card.grammar} size={size} />
+      {card.structure && <div className="grammar-structure">{card.structure}</div>}
+      <MeaningDisplay meaning={card.meaning} size={24} color="var(--success)" />
     </div>
   )
 }
@@ -305,12 +319,20 @@ export default function GrammarScreen({ session }) {
   )
   const choicesOn   = activeHints.includes(HINTS.CHOICES) && Array.isArray(cardHints[HINTS.CHOICES])
   const sentencesOn = activeHints.includes(HINTS.SENTENCES) && Array.isArray(cardHints[HINTS.SENTENCES])
-  // fill_in always shows its options: "which rule is at work" with no
-  // candidates is a free-recall question the mode never claimed to be.
-  const showChoices = isFill || choicesOn
+  // The choices are a hint here exactly as they are everywhere else —
+  // fill_in used to force them on, which made it the one mode you could
+  // not answer from memory, and made its indice_1 switch a control that
+  // visibly did nothing. Naming the rule with no options is a perfectly
+  // good free-recall question; the flip below is its reveal.
+  const showChoices = choicesOn
 
+  // One hint at a time. Grammar is the only source offering two
+  // (choices and example sentences) and both at once put an MCQ list
+  // AND a sentence list under the card, pushing the card itself off
+  // the top of the screen. Switching one on switches the other off,
+  // so reaching for a different kind of help is one tap, not two.
   function toggleHint(key) {
-    setActiveHints(hs => (hs.includes(key) ? hs.filter(h => h !== key) : [...hs, key]))
+    setActiveHints(hs => (hs.includes(key) ? [] : [key]))
   }
 
   // ── Quiz ──
@@ -344,81 +366,82 @@ export default function GrammarScreen({ session }) {
                 checkAdvance()
               }}
             >
-              {isFill ? (
-                /* fill_in — the sentence is the whole question, so there is
-                   no flip: naming the rule (via the choices below) IS the
-                   reveal, same as Kanji's readings/radical modes. */
-                <PromptCard className="grammar-prompt">
-                  <div className="grammar-fill-sentence" lang="ja">
-                    {card.fill_sentence?.jp}
-                  </div>
-                  {answered && (
-                    <div className="grammar-meaning">
-                      <GrammarRule text={card.grammar} size={40} />
-                      <MeaningDisplay meaning={card.meaning} size={22} />
-                    </div>
-                  )}
-                </PromptCard>
-              ) : (
-                <PromptCard className="grammar-prompt">
-                  {!choicesOn && (
-                    <Flashcard
-                      t={t}
-                      resetKey={card.card_id}
-                      onReveal={onFlashcardReveal}
-                      front={
-                        isB2F
-                          ? <MeaningDisplay meaning={card.meaning} size={32} />
+              <PromptCard className="grammar-prompt">
+                {/* Every mode here is the same card with a different
+                    front: a rule, a meaning, or a sentence. The flip is
+                    the reveal in all three, and switching the choices on
+                    replaces the flip rather than sitting beside it (two
+                    reveal affordances on one card) — the same resolution
+                    Kanji and Vocab use for their own indice_1. */}
+                {!choicesOn ? (
+                  <Flashcard
+                    t={t}
+                    resetKey={card.card_id}
+                    onReveal={onFlashcardReveal}
+                    front={
+                      isFill
+                        ? <div className="grammar-fill-sentence" lang="ja">{card.fill_sentence?.jp}</div>
+                        : isB2F
+                          ? <MeaningDisplay meaning={card.meaning} size={34} />
                           : (
                             <>
-                              <GrammarRule text={card.grammar} size={48} />
+                              <GrammarRule text={card.grammar} size={52} />
                               {card.structure && (
                                 <div className="grammar-structure">{card.structure}</div>
                               )}
                             </>
                           )
-                      }
-                      back={
-                        <InlineReveal
-                          t={t}
-                          main={
-                            isB2F
-                              ? (
-                                <>
-                                  <GrammarRule text={card.grammar} size={40} />
-                                  {card.structure && (
-                                    <div className="grammar-structure">{card.structure}</div>
-                                  )}
-                                </>
-                              )
-                              : <MeaningDisplay meaning={card.meaning} size={28} />
-                          }
-                        />
-                      }
-                    />
-                  )}
-
-                  {/* Options showing — a flip and a choice list are two
-                      reveal affordances on one card, so the flip is
-                      replaced rather than sitting alongside it (same
-                      resolution Kanji/Vocab use for their own choices
-                      hint). The prompt itself doesn't change: the
-                      answer is whichever MCQ row lights up green below,
-                      not a swapped face here. */}
-                  {choicesOn && (
-                    isB2F
-                      ? <MeaningDisplay meaning={card.meaning} size={32} />
-                      : (
-                        <>
-                          <GrammarRule text={card.grammar} size={48} />
-                          {card.structure && (
-                            <div className="grammar-structure">{card.structure}</div>
-                          )}
-                        </>
-                      )
-                  )}
-                </PromptCard>
-              )}
+                    }
+                    back={
+                      isFill
+                        ? (
+                          /* The sentence stays on the back, dimmed: the
+                             answer is which rule is at work IN IT, and
+                             reading the rule with the sentence gone
+                             makes it a bare fact instead of an
+                             observation about the sentence. */
+                          <>
+                            <div className="grammar-fill-sentence grammar-fill-sentence--echo" lang="ja">
+                              {card.fill_sentence?.jp}
+                            </div>
+                            <GrammarAnswer card={card} size={40} />
+                          </>
+                        )
+                        : isB2F
+                          ? (
+                            <>
+                              <GrammarRule text={card.grammar} size={44} />
+                              {card.structure && (
+                                <div className="grammar-structure">{card.structure}</div>
+                              )}
+                            </>
+                          )
+                          : <MeaningDisplay meaning={card.meaning} size={30} color="var(--success)" />
+                    }
+                  />
+                ) : (
+                  /* Choices on — the prompt does NOT swap: the answer is
+                     whichever MCQ row lights up below, not a second face
+                     here. fill_in is the exception, because its own
+                     prompt is the sentence and the rule named below is
+                     worth seeing spelled out next to it. */
+                  <>
+                    {isFill
+                      ? <div className="grammar-fill-sentence" lang="ja">{card.fill_sentence?.jp}</div>
+                      : isB2F
+                        ? <MeaningDisplay meaning={card.meaning} size={34} />
+                        : (
+                          <>
+                            <GrammarRule text={card.grammar} size={52} />
+                            {card.structure && (
+                              <div className="grammar-structure">{card.structure}</div>
+                            )}
+                          </>
+                        )}
+                    {isFill && answered && <GrammarAnswer card={card} size={36} divided />}
+                  </>
+                )}
+              </PromptCard>
             </CardTransition>
 
             {/* Options: meanings for a flashcard, rules for fill_in. */}

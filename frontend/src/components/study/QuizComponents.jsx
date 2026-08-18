@@ -523,6 +523,14 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCa
   // "but show the front again".
   const [revealed, setRevealed]       = useState(false)
   const [showingBack, setShowingBack] = useState(false)
+  // How many times this card has been turned over. Drives the face
+  // animation below: it has to be a counter rather than `showingBack`
+  // because React reconciles two <div>s of the same type without
+  // remounting, and a CSS animation only replays on a fresh element.
+  // Starting at 0 also keeps the very first paint still — the card is
+  // already animating in from CardTransition at that moment, and two
+  // entrance animations at once read as a stutter.
+  const [flips, setFlips]             = useState(0)
 
   // When the caller moves on to a new card (e.g. passes the card's id
   // as resetKey), snap back to the unrevealed front instead of
@@ -530,6 +538,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCa
   useEffect(() => {
     setRevealed(false)
     setShowingBack(false)
+    setFlips(0)
   }, [resetKey])
 
   // First tap reveals the back and fires onReveal once (so the parent
@@ -539,6 +548,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCa
   // after seeing the back is a completely normal thing to want mid-review.
   const handleClick = () => {
     playClick()
+    setFlips(n => n + 1)
     if (!revealed) {
       setRevealed(true)
       setShowingBack(true)
@@ -578,7 +588,11 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCa
         sound={sound}
         onReplaySound={onReplaySound}
       />
-      {showingBack ? back : front}
+      {/* Keyed on the flip count so each turn mounts a fresh element and
+          the face animation actually replays — see `flips` above. */}
+      <div key={flips} className={`flashcard__face${flips > 0 ? ' flashcard__face--turned' : ''}`}>
+        {showingBack ? back : front}
+      </div>
       <div className="flashcard__hint">
         {!revealed && (t.tapToReveal)}
       </div>

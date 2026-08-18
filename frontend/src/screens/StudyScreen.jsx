@@ -614,6 +614,9 @@ export default function StudyScreen({ session }) {
             />
 
             <CardTransition
+              /* See KanaScreen for why the prompt matches the drawing
+                 board's own capped width in write mode. */
+              className={renderer === RENDER.DRAW ? 'quiz-card-stage--narrow' : undefined}
               cardKey={`${card.card_id}:${cardNonce}`}
               stamp={cardStamp}
               stage={card.stage}

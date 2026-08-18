@@ -3583,7 +3583,37 @@ input:focus { border-color: var(--accent2); }
    overlaps kana the learner is still reading. Colours come from the
    line pigment the section handed down, same as every other study
    control -- nothing here picks its own hue. */
-.readings-input { text-align: left; }
+/* Sized to the form, not to the container. .prompt-card's own width
+   tracks .container (up to 1100px), which stretched a column of short
+   kana fields across the whole screen; and its 40px card padding is
+   tuned for a single big glyph, not for a stack of labelled rows.
+   max-height/overflow are cleared for the same reason: two groups of
+   several rows each pass 60vh easily, and the base clamp turned the
+   card into an inner scroll area — which cropped the submit button
+   behind the card's own rounded edge and scrolled the answer list out
+   from under the rows it belongs to. */
+/* .prompt-card is compounded in on purpose. The base .prompt-card rule
+   (max-height: 60vh; overflow: auto) lives LATER in this file, and two
+   single-class selectors of equal specificity are settled by source
+   order — so a bare `.readings-input { overflow: visible }` here lost
+   silently and the card stayed an inner scroll area. Same for
+   .drawing-quiz__card below. */
+.prompt-card.readings-input {
+  text-align: left;
+  --card-pad-y: 28px;
+  --card-pad-x: 26px;
+  --card-pad-top: 28px;
+  /* width + max-width, not max-width alone: this is a direct child of
+     the column-flex .quiz-area, where an auto cross-axis margin
+     suppresses `align-self: stretch` and the card would otherwise
+     shrink to fit its widest row instead of filling to the cap. Same
+     trap as .quiz-card-stage--form / .grammar-card-boost. */
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  max-height: none;
+  overflow: visible;
+}
 
 .readings-input__group + .readings-input__group { margin-top: 22px; }
 /* A hairline between 音読み and 訓読み now that both groups share one
@@ -3594,7 +3624,12 @@ input:focus { border-color: var(--accent2); }
   border-top: 1px solid var(--border);
 }
 
-.readings-input__submit { margin-top: 22px; }
+/* Sits below a hairline of its own: it is the action for the whole
+   form, not for whichever group happens to be last above it. */
+.readings-input__submit {
+  margin-top: 26px;
+  padding-top: 0;
+}
 
 .readings-input__label {
   display: flex;
@@ -3644,11 +3679,26 @@ input:focus { border-color: var(--accent2); }
   align-items: baseline;
 }
 .readings-input__answer-label { color: var(--text-secondary); }
+/* A wrapping FLEX row, not a run of inline text. Japanese allows a line
+   break between almost any two characters, so as plain text this list
+   broke mid-reading — のぼ.り split across two lines reads as two
+   different readings, which is the one thing a list of readings must
+   not do. Making each entry a flex item moves the break opportunities
+   to the gaps between entries, where they belong.
+   (`white-space: nowrap` alone did NOT work and is why this is a flex
+   row: the entries are rendered adjacent with no whitespace between
+   them, so suppressing breaks inside each one left the whole list with
+   no break opportunity at all and it ran 1218px off the card.) */
 .readings-input__answer-list {
   font-family: var(--font-jp);
   font-size: 17px;
   color: var(--text-primary);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  row-gap: 4px;
 }
+.readings-input__answer-list .reading-sep-item { white-space: nowrap; }
 
 .readings-input__cap {
   margin-top: 8px;
@@ -3681,11 +3731,49 @@ input:focus { border-color: var(--accent2); }
   padding: 4px 0 10px;
 }
 
+/* The same sentence carried onto the back of the card, stepped back so
+   the rule below it is unmistakably the answer and the sentence is
+   context. Separated by a hairline for the same reason the radical
+   reveal is. */
+.grammar-fill-sentence--echo {
+  font-size: 19px;
+  color: var(--text-secondary);
+  opacity: 0.75;
+  padding-bottom: 16px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
 .grammar-structure {
   font-size: 13px;
   color: var(--text-secondary);
   text-align: center;
   margin-top: 4px;
+}
+
+/* Rule + structure + meaning, revealed together (see GrammarAnswer).
+   The three used to be assembled inline per mode with their own
+   spacing each time, which is why the same reveal looked different
+   depending on which grammar mode you were in. */
+.grammar-answer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.grammar-answer .grammar-rule {
+  margin: 4px 0 0;
+  color: var(--success);
+}
+.grammar-answer .meaning-display { margin-top: 14px; }
+/* Used where the answer follows the prompt directly with no flip
+   between them (fill_in with the choices hint on) — the flipped face
+   already gets its separation from .grammar-fill-sentence--echo. */
+.grammar-answer--divided {
+  width: 100%;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
 }
 
 /* ── Furigana over the kanji it belongs to (indice_3) ──────
@@ -3704,6 +3792,25 @@ input:focus { border-color: var(--accent2); }
   font-size: 0.32em;
   color: var(--text-secondary);
   letter-spacing: 0.02em;
+}
+
+/* word_reading's reveal — there the ruby is not a supporting hint over
+   a prompt, it IS the answer, so it takes the answer colour and enough
+   weight to be read as the thing that was just uncovered. */
+.furigana-word--answer rt {
+  color: var(--success);
+  font-weight: 600;
+}
+
+/* The packed kana field, shown under the ruby only when the word has
+   more than one accepted reading — furigana can only carry the first,
+   and silently dropping the others would mark a correct answer wrong
+   in the learner's own head. */
+.flashcard-alt-reading {
+  font-family: var(--font-jp);
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-top: 10px;
 }
 
 /* ── The radical picker (personal kanji cards) ─────────────
@@ -3771,15 +3878,76 @@ input:focus { border-color: var(--accent2); }
   align-items: center;
   gap: 4px;
 }
+/* Same caption treatment as ReadingsInput's 音読み/訓読み labels — this
+   is the same kind of thing (a small Japanese section name over the
+   content it names), so it reads the same way. */
+.radical-answer__label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.radical-answer__label [lang="ja"] {
+  font-family: var(--font-jp);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--line, var(--accent));
+}
 .radical-answer__char {
   font-family: var(--font-jp);
   font-size: 72px;
   line-height: 1.1;
-  color: var(--text-primary);
+  color: var(--success);
 }
 .radical-answer__meta {
   font-size: 13px;
   color: var(--text-secondary);
+}
+
+/* The flipped radical card: the kanji that was asked about, kept on
+   screen but stepped back, then the radical as the answer. The
+   hairline is what separates "what you were shown" from "what it is
+   filed under" on the many cards where those are the same glyph. */
+.radical-reveal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.radical-reveal__kanji {
+  font-family: var(--font-jp);
+  font-size: 56px;
+  line-height: 1.1;
+  color: var(--text-secondary);
+  opacity: 0.65;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  min-width: 140px;
+}
+
+/* A radical choice row: glyph, then its Kangxi number pushed to the
+   right of the row so the numbers line up as a readable column
+   instead of trailing each glyph at a different offset. */
+.radical-choice {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+}
+.radical-choice__char {
+  font-family: var(--font-jp);
+  font-size: 24px;
+  line-height: 1.2;
+}
+.radical-choice__num {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .mode-toggle {
@@ -4100,6 +4268,38 @@ input:focus { border-color: var(--accent2); }
     calc(-1 * var(--card-pad-y, 40px));
   padding: var(--card-pad-top, 40px) var(--card-pad-x, 24px) var(--card-pad-y, 40px);
   box-sizing: border-box;
+}
+
+/* ── Turning the card over ─────────────────────────────────
+   A revealed answer used to appear as a hard cut: the two faces swap
+   in the same frame, which reads as a re-render rather than as the
+   card being turned. This tips the incoming face up toward the reader
+   on the X axis — the axis a card held in one hand actually turns on
+   — so the reveal has a direction. Perspective is on the keyframe
+   rather than the parent so nothing else in the card is dragged into
+   a 3D context (a `transform-style` on the container would put
+   .reveal-actions and the stage seal on their own composited planes).
+
+   Only ever applied from the first flip onward (see `flips` in
+   Flashcard): on the very first paint the whole card is already
+   animating in from CardTransition, and two entrances at once stutter. */
+.flashcard__face--turned {
+  animation: flashcard-face-turn 300ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  backface-visibility: hidden;
+}
+@keyframes flashcard-face-turn {
+  0%   { opacity: 0; transform: perspective(900px) rotateX(-42deg) translateY(10px); }
+  55%  { opacity: 1; }
+  100% { opacity: 1; transform: perspective(900px) rotateX(0deg) translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flashcard__face--turned {
+    animation: flashcard-face-fade 140ms ease both;
+  }
+  @keyframes flashcard-face-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
 }
 
 .flashcard__hint {
@@ -4423,6 +4623,27 @@ input:focus { border-color: var(--accent2); }
 .quiz-card-stage {
   position: relative;
 }
+
+/* Two modes put a capped-width panel of their own directly under the
+   prompt — write's drawing board and readings' answer form — and a
+   full-width prompt over a 520/660px panel reads as two unrelated
+   boxes rather than as one card and its interaction. These match the
+   prompt to the panel below it.
+
+   `width: 100%` is not redundant next to `margin: 0 auto`, it is what
+   makes the pair work at all: .quiz-area is a COLUMN flex container,
+   and an auto margin on a flex item's cross axis suppresses
+   `align-self: stretch` — so with the margin alone the stage would
+   collapse to fit-content instead of filling the row and then being
+   capped. (That exact omission is what left the grammar card barely
+   wider than a single kana; see .grammar-card-boost.) */
+.quiz-card-stage--narrow,
+.quiz-card-stage--form {
+  width: 100%;
+  margin: 0 auto;
+}
+.quiz-card-stage--narrow { max-width: 660px; }
+.quiz-card-stage--form   { max-width: 520px; }
 
 /* ── Permanent stage seal ──────────────────────────────────
    A small hanko permanently sitting in the corner of every quiz
@@ -4818,7 +5039,6 @@ input:focus { border-color: var(--accent2); }
    clean crop instead of an overlap. */
 .card-transition {
   position: relative;
-  overflow: hidden;
   transition: height 260ms cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
@@ -5422,9 +5642,27 @@ input:focus { border-color: var(--accent2); }
 
 .drawing-quiz { width: 100%; }
 
+/* Same treatment as .readings-input above, and for the same two
+   reasons. The panels inside already cap at 600px, so without a cap
+   here the card was a 1100px-wide box with a 600px drawing area
+   floating in the middle of it. And the base .prompt-card clamp
+   (max-height: 60vh) is well under what a 260px canvas plus its label
+   plus the stroke-order panel need on a phone — the card became an
+   inner scroll area, which is what was clipping the canvas against
+   its own rounded border. */
+.prompt-card.drawing-quiz__card {
+  --card-pad-y: 26px;
+  --card-pad-x: 22px;
+  --card-pad-top: 26px;
+  max-width: 660px;
+  margin: 0 auto;
+  max-height: none;
+  overflow: visible;
+}
+
 .drawing-quiz__panels {
   display: flex;
-  gap: 24px;
+  gap: 20px;
   justify-content: center;
   align-items: flex-start;
   flex-wrap: wrap;
@@ -5461,7 +5699,10 @@ input:focus { border-color: var(--accent2); }
   background: var(--accent);
   color: var(--text-on-panel);
   width: 100%;
-  max-width: 600px;
+  /* Matched to the card above it rather than to the panels inside it,
+     so the button reads as belonging to the card instead of being a
+     narrower, unrelated bar floating under one edge of it. */
+  max-width: 660px;
   margin: 20px auto 0;
   display: block;
   font-size: 15px;
@@ -8406,21 +8647,34 @@ input:focus { border-color: var(--accent2); }
   font-size: 13px;
 }
 
-.grammar-examples { margin-top: 16px; }
+/* The sentence hint's own block. Ordered list-then-toggle in the DOM,
+   but the toggle is what the learner reaches for next, so it is pinned
+   under the list with its own spacing rather than floating between two
+   equally-weighted stacks. */
+.grammar-examples {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
 .grammar-examples__list {
-  margin-top: 12px;
+  margin-top: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
+  max-width: 620px;
 }
 
 .grammar-example-card {
   background: var(--bg-card);
-  border-radius: 8px;
-  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px;
   text-align: left;
 }
-.grammar-example-card__jp { font-size: 16px; font-family: 'Yu Gothic', sans-serif; margin-bottom: 4px; }
+.grammar-example-card__jp { font-size: 17px; font-family: var(--font-jp); line-height: 1.7; margin-bottom: 4px; }
 .grammar-example-card__romaji { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
 .grammar-example-card__en { font-size: 13px; color: var(--text-primary); }
 
@@ -9201,35 +9455,34 @@ input:focus { border-color: var(--accent2); }
   justify-content: center;
 }
 
-/* Grammar only — same shape of fix as vocab-card-boost above, for a
-   different reason. .prompt-card's width tracks .container's, which
-   caps at 1100px: a kanji glyph or a vocab word is big enough to read
-   as a deliberate card even at that width, but a grammar rule (5-ish
-   characters average, small type by necessity — see GrammarRule)
-   sitting alone in an 1100×~130px box on a wide screen reads as a
-   thin, mostly-empty banner, not a flashcard. Capping the width and
-   raising the min-height gives it the same "sized to its content"
-   proportions Kanji/Vocab get for free from their own bigger glyphs.
-   Applies to both the flip card and the plain fill_in prompt, since
-   both sit under one CardTransition in GrammarScreen.jsx and share
-   the same "thin banner" problem.
+/* Grammar — the same generous card Vocab gets, for the same reason: a
+   rule plus its structure line plus its meaning is more content than a
+   single kanji, and it needs the room.
 
-   The max-width/margin sit on .grammar-card-boost itself (the
-   `.quiz-card-stage` CardTransition renders, not .prompt-card) because
-   .stage-badge (the "新" hanko seal) is `position: absolute` against
-   `.quiz-card-stage` — capping only .prompt-card would narrow the
-   visible card but leave the seal anchored to the old, wider box,
-   floating off to the side of a card no longer as wide as its parent. */
-.grammar-card-boost {
-  max-width: 560px;
-  margin: 0 auto;
-}
+   This used to cap the width at 560px and centre it with `margin: 0
+   auto`, which produced the opposite of what it intended. `.quiz-area`
+   is a COLUMN flex container, and an auto margin on a flex item's cross
+   axis suppresses `align-self: stretch` outright — so the card stopped
+   filling the row and collapsed to fit-content instead, leaving a
+   one-character rule like は in a card barely wider than the glyph
+   while every other section's card spanned the container. Grammar is
+   full-width like the rest now, and the cap is gone rather than
+   repaired: the "thin banner on a wide screen" it was guarding against
+   is what min-height is for, and Kanji has never needed a cap for it.
+
+   flex-direction is COLUMN, not the default row. .prompt-card is a flex
+   container here so its single child can be centred vertically against
+   min-height — but the choices-on branch renders the rule and its
+   structure line as two SEPARATE children, and in a row they laid out
+   side by side: the pattern wrapped mid-word down the left of the card
+   with its structure squeezed into a column beside it. */
 .grammar-card-boost .prompt-card {
   --card-pad-y: 56px;
   --card-pad-x: 32px;
   --card-pad-top: 56px;
-  min-height: 200px;
+  min-height: 220px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }

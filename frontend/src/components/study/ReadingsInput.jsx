@@ -37,9 +37,13 @@ function matches(typed, entries) {
 // disappears, and the readings read as one run-on string instead of a
 // list. Same fix as BrowseCardsMenu's DottedReadings: split it out and
 // give the separator its own larger, bolder styling.
+// Each reading is its own nowrap unit: a kanji like 上 has fifteen kun
+// readings, the list wraps over three lines, and without this the break
+// lands INSIDE a reading — のぼ.り split across two lines reads as two
+// different readings, which is the one thing this list must not do.
 function DottedList({ entries }) {
   return entries.map((e, i) => (
-    <span key={i}>
+    <span key={i} className="reading-sep-item">
       {i > 0 && <span className="reading-sep-dot" aria-hidden="true">・</span>}
       {e.reading}
     </span>

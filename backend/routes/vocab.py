@@ -125,6 +125,18 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], m: Mode, 
             word["kanji"], (word.get("kana") or "").split("/")[0].strip(),
         )
 
+    if m.base == WORD_READING and word.get("kanji"):
+        # Not a hint — the reading IS the answer in this mode, so the
+        # reveal shows it over the kanji it belongs to rather than as a
+        # separate kana line underneath the word. Same per-kanji split
+        # indice_3 uses (study/furigana.py); a word whose reading will
+        # not divide comes back as one part carrying the whole reading,
+        # which renders as a single ruby over the word — the previous
+        # behaviour, not nothing.
+        payload["furigana"] = align_furigana(
+            word["kanji"], (word.get("kana") or "").split("/")[0].strip(),
+        )
+
     if INDICE_CHOICES in m.hints:
         choice_entries = pick_distractors(
             vocab_list, lambda w: get_meaning(w, lang, FR_MAP), meaning,

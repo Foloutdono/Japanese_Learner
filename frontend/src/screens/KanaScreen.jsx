@@ -392,7 +392,13 @@ export default function KanaScreen({ session }) {
               onToggle={toggleHint}
               disabled={locked}
             />
-            <CardTransition cardKey={card.card_id} stamp={cardStamp} stage={card.stage} onStampDone={() => {
+            {/* The drawing board below is capped to its own content
+                width; without matching the prompt to it the two read as
+                two unrelated panels of different widths stacked on the
+                same screen. */}
+            <CardTransition
+              className={renderer === RENDER.DRAW ? 'quiz-card-stage--narrow' : undefined}
+              cardKey={card.card_id} stamp={cardStamp} stage={card.stage} onStampDone={() => {
               setCardStamp(null)
               pendingGatesRef.current.delete('stamp')
               checkAdvance()
