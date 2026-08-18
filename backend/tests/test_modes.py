@@ -79,29 +79,31 @@ class ModeRegistryTests(unittest.TestCase):
         for source in modes.SOURCES:
             self.assertIsNone(modes.resolve_for_source(source, modes.FAST_REVIEW))
 
-    def test_every_legacy_alias_points_at_a_real_graded_key(self) -> None:
-        for (source, old), new in modes.LEGACY_ALIASES.items():
-            self.assertIn(source, modes.SOURCES, f"alias {(source, old)} has unknown source")
-            self.assertIn(new, modes.SRS_MODES, f"alias {(source, old)} -> {new!r} is not graded")
-            self.assertIn(new, modes.GRADED_FOR_SOURCE[source],
-                          f"alias {(source, old)} -> {new!r} belongs to another source")
+    def test_the_old_flat_key_space_is_rejected(self) -> None:
+        """
+        The retired keys must 400 now, not resolve.
 
-    def test_legacy_aliases_cover_the_whole_old_key_space(self) -> None:
-        # The nine keys quiz_modes.py actually persisted. Missing one would
-        # mean that mode 400s for anyone whose client hasn't reloaded yet.
-        old_by_source = {
+        They were accepted through a LEGACY_ALIASES table while the
+        frontend caught up. Keeping that table would have kept writing
+        rows under the ambiguity it existed to retire -- 'flashcard' meant
+        three different exercises depending on the section, which is the
+        whole reason the keys are namespaced.
+        """
+        retired = {
             "kana": ["qcm", "flashcard", "write"],
             "kanji": ["qcm-kj-m", "qcm-m-kj", "flashcard-kj-m", "flashcard-m-kj", "write"],
             "vocab": ["qcm-kj-m", "qcm-m-kj", "flashcard-kj-m", "flashcard-m-kj"],
             "grammar": ["flashcard", "mcq", "fill"],
         }
-        for source, keys in old_by_source.items():
+        for source, keys in retired.items():
             for old in keys:
-                self.assertIsNotNone(
+                self.assertIsNone(
                     modes.resolve_for_source(source, old),
-                    f"legacy {source}/{old} no longer resolves",
+                    f"{source}/{old!r} still resolves",
                 )
 
+    def test_no_alias_table_survives(self) -> None:
+        self.assertFalse(hasattr(modes, "LEGACY_ALIASES"))
     def test_word_reading_excludes_kana_only_entries(self) -> None:
         # 1,097 of 8,405 vocab entries are kana-only; serving one would
         # show the same string as prompt and answer.

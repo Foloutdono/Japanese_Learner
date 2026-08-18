@@ -30,6 +30,12 @@ export default function HintBar({ available = [], active = [], onToggle, disable
 
   const isOn = key => (active instanceof Set ? active.has(key) : active.includes(key))
 
+  // Sorted by their own numbering rather than left in whatever order the
+  // payload happened to build them. indice_1/2/3 is a stated order, and a
+  // control that moves depending on which card you are looking at is a
+  // control you have to re-find every time.
+  const ordered = [...available].sort()
+
   const LABELS = {
     indice_1: [t.hintChoicesShow, t.hintChoicesHide],
     indice_2: [t.hintSentencesShow, t.hintSentencesHide],
@@ -38,7 +44,7 @@ export default function HintBar({ available = [], active = [], onToggle, disable
 
   return (
     <div className="study-assist">
-      {available.map(key => {
+      {ordered.map(key => {
         const on = isOn(key)
         const [showLabel, hideLabel] = LABELS[key] ?? [key, key]
         return (

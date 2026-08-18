@@ -3679,6 +3679,24 @@ input:focus { border-color: var(--accent2); }
   margin-top: 4px;
 }
 
+/* ── Furigana over the kanji it belongs to (indice_3) ──────
+   The reading sits on <rt> per kanji, so a compound shows だい over 大
+   and がく over 学 rather than one label spanning both. Sized off the
+   word so the ruby scales with the prompt. */
+.furigana-word {
+  font-family: var(--font-jp);
+  font-size: var(--furigana-size, 72px);
+  line-height: 1.9;
+  text-align: center;
+  color: var(--text-primary);
+}
+.furigana-word ruby { ruby-position: over; }
+.furigana-word rt {
+  font-size: 0.32em;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
 /* ── The radical picker (personal kanji cards) ─────────────
    Glyphs to tap, the Kangxi number stored. Grouped by stroke count the
    same way the dictionary's browse-by-radical grid is, since it is the

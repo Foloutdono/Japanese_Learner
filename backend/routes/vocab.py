@@ -9,8 +9,10 @@ from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from study.quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO, VOCAB_MODES
 from study.modes import (
-    VOCAB, INDICE_CHOICES, WORD_READING, Mode, eligible_for, require_mode,
+    VOCAB, INDICE_CHOICES, INDICE_FURIGANA, WORD_READING, Mode,
+    eligible_for, require_mode,
 )
+from study.furigana import align_deck as align_furigana
 from study.mcq import pick_distractors
 from pydantic import BaseModel
 
@@ -108,6 +110,20 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], m: Mode, 
         "review_preview": _build_review_preview(stage, preview),
         "hints": {},
     }
+
+    if INDICE_FURIGANA in m.hints and word.get("kanji"):
+        # Furigana over the kanji it belongs to, not one blanket reading
+        # over the whole word. Computed here because the per-kanji reading
+        # data lives on this side (content/kanji_readings.py); the client
+        # renders the parts rather than guessing at the split.
+        #
+        # A word whose reading will not divide cleanly comes back as one
+        # part carrying the whole reading, which is exactly what the old
+        # rendering did -- so the hint degrades to the previous behaviour
+        # rather than to nothing.
+        payload["hints"][INDICE_FURIGANA] = align_furigana(
+            word["kanji"], (word.get("kana") or "").split("/")[0].strip(),
+        )
 
     if INDICE_CHOICES in m.hints:
         choice_entries = pick_distractors(

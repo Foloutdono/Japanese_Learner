@@ -249,45 +249,6 @@ def eligible_for(mode: Mode, entry: dict) -> bool:
     return True
 
 
-# ── Legacy aliases ───────────────────────────────────────────
-# Keyed by (source, old_key), because the old key space was ambiguous on
-# its own: `flashcard` was shared by kana, grammar AND personal cards,
-# and `write` by kana and kanji. The source disambiguates, and
-# require_mode() already knows it.
-#
-# This exists so the taxonomy switch does not have to be an atomic
-# front-and-back deploy: the backend accepts both key sets for one phase
-# while the frontend catches up. DELETE THIS once the frontend ships the
-# new keys — a permanent alias table would quietly keep the old ambiguity
-# alive in the database.
-#
-# Note that `qcm-*` and `flashcard-*` collapse onto the SAME new key.
-# That is the whole point of the rework: they were one exercise at two
-# help levels, and the help level is now indice_1.
-LEGACY_ALIASES: dict[tuple[str, str], str] = {
-    (KANA, "qcm"): "kana.flashcard.f2b",
-    (KANA, "flashcard"): "kana.flashcard.f2b",
-    (KANA, "write"): "kana.write_kana",
-
-    (KANJI, "qcm-kj-m"): "kanji.flashcard.f2b",
-    (KANJI, "flashcard-kj-m"): "kanji.flashcard.f2b",
-    (KANJI, "qcm-m-kj"): "kanji.flashcard.b2f",
-    (KANJI, "flashcard-m-kj"): "kanji.flashcard.b2f",
-    (KANJI, "write"): "kanji.write_kanji",
-
-    (VOCAB, "qcm-kj-m"): "vocab.flashcard.f2b",
-    (VOCAB, "flashcard-kj-m"): "vocab.flashcard.f2b",
-    (VOCAB, "qcm-m-kj"): "vocab.flashcard.b2f",
-    (VOCAB, "flashcard-m-kj"): "vocab.flashcard.b2f",
-
-    (GRAMMAR, "flashcard"): "grammar.flashcard.f2b",
-    (GRAMMAR, "mcq"): "grammar.flashcard.f2b",
-    (GRAMMAR, "fill"): "grammar.fill_in",
-
-    (STANDARD, "flashcard"): "standard.flashcard.f2b",
-}
-
-
 def resolve_for_source(source: str, key: str) -> Mode | None:
     """
     The lookup every router should use: accepts a current key belonging
@@ -298,9 +259,6 @@ def resolve_for_source(source: str, key: str) -> Mode | None:
     mode = MODES.get(key)
     if mode is not None and mode.key in GRADED_FOR_SOURCE.get(source, frozenset()):
         return mode
-    aliased = LEGACY_ALIASES.get((source, key))
-    if aliased is not None:
-        return MODES.get(aliased)
     return None
 
 
@@ -325,8 +283,13 @@ def require_mode(source: str):
       frontend read as "deck exhausted" and celebrated — see the
       companion fix in lib/api.js.
 
-    Legacy keys for the same source are still accepted while the frontend
-    catches up; see LEGACY_ALIASES.
+    The old flat key space ('qcm-m-kj', 'flashcard', 'fill') is no longer
+    accepted. It was, through a LEGACY_ALIASES table, for exactly as long
+    as the frontend needed to catch up -- every screen now emits registry
+    keys, useCardSession's CACHE_VERSION retires any session that still
+    held an old one, and the SRS wipe cleared the rows written under them.
+    A permanent alias table would have kept the ambiguity it existed to
+    retire quietly alive in the database.
     """
     from fastapi import HTTPException, Query  # local: keeps this module importable without FastAPI
 

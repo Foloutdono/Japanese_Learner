@@ -514,6 +514,24 @@ export default function VocabScreen({ session }) {
   // indice_1 while a particular card has no distractors to offer.
   const availableHints = Object.keys(card?.hints ?? {})
   const showChoices = activeHints.has('indice_1') && Array.isArray(card?.hints?.indice_1)
+  // indice_3 — furigana, already split per kanji by the backend (see
+  // study/furigana.py), so this renders parts rather than guessing where
+  // だい ends and がく begins.
+  const furigana = activeHints.has('indice_3') ? card?.hints?.indice_3 : null
+
+  /** The word, with furigana when the hint is on and the card has it. */
+  function wordDisplay(size) {
+    if (furigana?.length) {
+      return (
+        <div className="furigana-word" style={{ '--furigana-size': `${size}px` }}>
+          {furigana.map((part, i) => part.reading
+            ? <ruby key={i}>{part.text}<rt>{part.reading}</rt></ruby>
+            : <span key={i}>{part.text}</span>)}
+        </div>
+      )
+    }
+    return <CharDisplay char={wordForm(card)} size={size} />
+  }
   const isWordReading = STUDY_MODES[mode]?.base === 'word_reading'
 
   const title = modeLabel(t, mode)
@@ -582,7 +600,9 @@ export default function VocabScreen({ session }) {
                     resetKey={card.card_id}
                     onReveal={onFlashcardReveal}
                     front={
-                      <CharDisplay char={isKjToM ? wordForm(card) : formatGlossLine(card.meaning)} size={72} />
+                      isKjToM
+                        ? wordDisplay(72)
+                        : <CharDisplay char={formatGlossLine(card.meaning)} size={72} />
                     }
                     back={
                       <InlineReveal
