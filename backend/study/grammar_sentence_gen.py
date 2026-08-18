@@ -171,8 +171,21 @@ def check_sentence(jp: str, en: str, pattern: str, level: str) -> str | None:
     if jp[-1] not in "。！？":
         return "not a complete sentence (must end in 。)"
     if not sentence_kanji_ok(jp, level):
-        bad = sorted({c for c in jp if "一" <= c <= "鿿" and not sentence_kanji_ok(c, level)})
-        return "uses kanji above " + level + ": " + "".join(bad)
+        # A kanji that is part of the PATTERN ITSELF is exempt. 〜次第だ is
+        # an N3 point whose own 第 is not an N3 deck kanji, so no sentence
+        # demonstrating it could ever pass a strict gate -- and writing it
+        # as しだい stops demonstrating the pattern at all. The learner is
+        # being taught 次第 on this very card; seeing it is the point.
+        # Same for 〜に違いない, 〜際に and the others whose citation form
+        # outruns their level's kanji set.
+        allowed_extra = set(pattern)
+        bad = sorted({
+            c for c in jp
+            if "一" <= c <= "鿿" and c not in allowed_extra
+            and not sentence_kanji_ok(c, level)
+        })
+        if bad:
+            return "uses kanji above " + level + ": " + "".join(bad)
     if verifiable(pattern) and not contains_pattern(jp, pattern):
         return "does not contain " + pattern
     return None

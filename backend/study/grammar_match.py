@@ -28,7 +28,21 @@ import re
 _UNVERIFIABLE = {
     "は", "が", "を", "に", "で", "と", "も", "の", "へ", "や", "か", "ね", "よ",
     "です／だ", "い形容詞／な形容詞", "自動詞／他動詞",
+    # A CIRCUMFIX: the pattern wraps the verb (お + stem + になる) rather
+    # than following it, so neither half is a substring of the result --
+    # お持ちします contains neither "お〜する" nor "する". Checking only the
+    # tail would match any plain になる instead.
+    "お〜になる／お〜する",
 }
+
+# A pattern written as 〜形 names a CONJUGATION CLASS, not a fixed string,
+# and its surface depends on the verb group: the causative of 読む is
+# 読ませる, which contains ませ and not the させる the catalogue cites.
+# Likewise 書ける for 可能形, 帰ろう for 意向形, 歌われる for 受身形. A
+# substring test cannot check these -- it rejected four perfectly correct
+# sentences before this was noticed -- so they are reported unverifiable
+# rather than silently failed.
+_CONJUGATION_LABEL = re.compile(r"形\s*〜")
 
 # Trailing inflection to strip so the stem survives conjugation. 〜べきだ
 # appears as べきです / べきではない; 〜そうだ as そうです; and the catalogue
@@ -42,8 +56,18 @@ _TAIL = re.compile(
 
 
 def _strip_label(pattern: str) -> str:
-    """Drops a leading Japanese grammatical label: 使役形 〜させる."""
-    return pattern.rsplit("〜", 1)[-1] if "〜" in pattern else pattern
+    """
+    Drops a leading Japanese grammatical label: 使役形 〜させる -> させる.
+
+    Keyed on the SPACE, which is how the catalogue writes a label, rather
+    than on the 〜 itself. Splitting at the last 〜 unconditionally also ate
+    the first half of a two-part pattern -- 〜しか〜ない became just ない,
+    which matches any negative sentence ever written, and から〜まで became
+    まで. The distinctive half is the one worth checking.
+    """
+    if " " in pattern and "〜" in pattern:
+        return pattern.split(" ", 1)[1].lstrip("〜")
+    return pattern
 
 
 def alternatives(pattern: str) -> list[str]:
@@ -62,6 +86,11 @@ def alternatives(pattern: str) -> list[str]:
     out = []
     for part in parts:
         p = _strip_label(part).strip()
+        # A LEADING 〜 only marks "something attaches here" and is never
+        # part of the surface form. An INTERIOR one separates the two
+        # halves of a pattern like 〜しか〜ない and is kept, so stems() can
+        # pick whichever half is distinctive.
+        p = p.lstrip("〜").strip()
         p = p.split("(")[0].split("（")[0].strip()
         if p:
             out.append(p)
@@ -92,9 +121,24 @@ def stems(pattern: str) -> list[str]:
         stripped = _TAIL.sub("", piece).strip()
         if stripped and stripped != piece:
             candidates.append(stripped)
+        # An auxiliary in the citation form conjugates like any verb:
+        # 〜てしまう occurs as てしまいました, 〜ようと思う as ようと思います.
+        # Dropping the final う-row mora leaves the part that stays put.
         for base in list(candidates):
-            if len(base) > 2 and base[-1] in "るい":
+            if len(base) > 2 and base[-1] in "うくぐすつぬぶむるい":
                 candidates.append(base[:-1])
+        # ── te-form voicing ──
+        # A pattern is written with て/た because that is the te-form's
+        # citation shape, but after a verb stem ending in ぬ/ぶ/む/ぐ it
+        # voices: 読む -> 読んで, not 読んて. So 〜てください really does
+        # occur as 読んでください, and 〜たら as 死んだら. Without this the
+        # matcher rejects perfectly correct Japanese -- it was throwing out
+        # 「この本を読んでください。」 as not containing 〜てください.
+        for base in list(candidates):
+            if base.startswith("て"):
+                candidates.append("で" + base[1:])
+            elif base.startswith("た"):
+                candidates.append("だ" + base[1:])
         out.extend(c for c in candidates if len(c) >= 2)
     # Longest first: the strongest evidence is tried before the loosest.
     return sorted(dict.fromkeys(out), key=len, reverse=True)
@@ -110,6 +154,8 @@ def verifiable(pattern: str) -> bool:
     receive a True that was never checked.
     """
     if pattern.strip() in _UNVERIFIABLE:
+        return False
+    if _CONJUGATION_LABEL.search(pattern):
         return False
     return any(len(s) >= 2 for s in stems(pattern))
 

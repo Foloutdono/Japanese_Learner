@@ -155,3 +155,67 @@ class PromptTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AuthoredSentenceTests(unittest.TestCase):
+    """
+    content/grammar_sentences.json is hand-written, which means it is
+    hand-breakable. This runs the generator's own gate over every entry,
+    so an edit that introduces a kanji above its level, drops the pattern
+    out of its own example, or leaves a fragment fails the build rather
+    than reaching a learner who by definition cannot spot the error --
+    they are reading the example because they do not know the pattern yet.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        from content.grammar_sentences_data import SENTENCES_BY_LEVEL
+        cls.data = SENTENCES_BY_LEVEL
+
+    def test_every_catalogue_point_has_sentences(self) -> None:
+        for level, entries in GRAMMAR_POINTS_BY_LEVEL.items():
+            have = self.data.get(level, {})
+            missing = [e["pattern"] for e in entries if not have.get(e["pattern"])]
+            self.assertEqual(missing, [], f"{level} missing: {missing}")
+
+    def test_no_orphan_patterns(self) -> None:
+        # A sentence filed under a pattern the catalogue dropped would sit
+        # there unreachable and unnoticed.
+        for level, entries in GRAMMAR_POINTS_BY_LEVEL.items():
+            catalogue = {e["pattern"] for e in entries}
+            orphans = sorted(set(self.data.get(level, {})) - catalogue)
+            self.assertEqual(orphans, [], f"{level} orphans: {orphans}")
+
+    def test_two_sentences_each(self) -> None:
+        for level, points in self.data.items():
+            for pattern, sentences in points.items():
+                self.assertEqual(len(sentences), 2, f"{level} {pattern}")
+
+    def test_every_sentence_passes_the_generator_gate(self) -> None:
+        failures = []
+        for level, points in self.data.items():
+            for pattern, sentences in points.items():
+                for s in sentences:
+                    why = check_sentence(s["jp"], s["en"], pattern, level)
+                    if why:
+                        failures.append((level, pattern, s["jp"], why))
+        self.assertEqual(failures, [], f"{len(failures)} bad sentence(s): {failures[:5]}")
+
+    def test_the_two_sentences_differ(self) -> None:
+        for level, points in self.data.items():
+            for pattern, sentences in points.items():
+                self.assertNotEqual(sentences[0]["jp"], sentences[1]["jp"], f"{level} {pattern}")
+
+    def test_translations_are_english_not_placeholders(self) -> None:
+        for level, points in self.data.items():
+            for pattern, sentences in points.items():
+                for s in sentences:
+                    self.assertRegex(s["en"], r"[A-Za-z]{3}", f"{level} {pattern}: {s['en']!r}")
+                    self.assertGreater(len(s["en"]), 8, f"{level} {pattern}: {s['en']!r}")
+
+    def test_no_cjk_leaks_into_a_translation(self) -> None:
+        for level, points in self.data.items():
+            for pattern, sentences in points.items():
+                for s in sentences:
+                    stray = [c for c in s["en"] if "\u3040" <= c <= "\u9fff"]
+                    self.assertEqual(stray, [], f"{level} {pattern}: {s['en']!r}")
