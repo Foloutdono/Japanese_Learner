@@ -27,6 +27,7 @@ from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
 from routes.grammar import _build_grammar_card
 from study.modes import (
     GRAMMAR as MODE_GRAMMAR,
+    STANDARD as MODE_STANDARD,
     KANJI as MODE_KANJI,
     VOCAB as MODE_VOCAB,
     GRADED_FOR_SOURCE,
@@ -765,6 +766,12 @@ def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
 
     modes = set()
     if custom_count:
+        # A hand-written card is a front/back pair, which the registry
+        # calls the `standard` source. Still advertised under the legacy
+        # key because StudyScreen -- the only consumer -- has not migrated
+        # yet; _eligible below accepts both, so the switch there is a
+        # one-line change rather than a coordinated deploy.
+        # TODO(studyscreen): emit GRADED_FOR_SOURCE[MODE_STANDARD] instead.
         modes.add("flashcard")
     for source, count in source_counts.items():
         cfg = SOURCES.get(source)
@@ -830,16 +837,36 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
     return pool
 
 
+# The flashcard-flavoured keys a custom card used to be admitted to. Drop
+# with LEGACY_ALIASES once StudyScreen emits registry keys.
+_LEGACY_CUSTOM_MODES = frozenset({"flashcard", "flashcard-kj-m", "flashcard-m-kj"})
+
+
 def _eligible(pool_entry: dict, mode: str) -> bool:
-    # Custom cards are a plain front/back pair — no MCQ distractors, no
-    # kanji to draw, no fill-in-the-blank sentence — so they can only
-    # ever render as a simple flashcard (see StudyScreen's
-    # renderCustomPrompt). They join any *flashcard-flavored* session
-    # ('flashcard' itself, or kanji/vocab's 'flashcard-kj-m'/
-    # 'flashcard-m-kj') but sit out qcm-*/write/mcq/fill, which need
-    # data only an app-sourced card has.
+    # A hand-written card is a plain front/back pair: no distractors to
+    # build, no kanji to draw, no sentence to name a rule in. It belongs
+    # to the registry's `standard` source and to nothing else.
+    #
+    # This used to be `return "flashcard" in mode` -- a SUBSTRING test,
+    # which is why the registry namespaces its keys. It matched
+    # 'flashcard', 'flashcard-kj-m' and 'flashcard-m-kj' alike, so a
+    # custom card was silently pulled into a kanji or vocab session and
+    # rendered by whichever branch that session's mode selected. Explicit
+    # set membership now, against exactly one source's keys.
     if pool_entry["source"] == "custom":
-        return "flashcard" in mode
+        # Both key spaces during the transition, with the legacy set
+        # stated EXPLICITLY rather than matched by substring.
+        #
+        # `return "flashcard" in mode` was deliberate once: a hand-written
+        # card was meant to join kanji/vocab's flashcard sessions in a
+        # mixed deck. Namespaced keys broke that quietly, because
+        # 'grammar.flashcard.f2b' contains "flashcard" too -- so a
+        # front/back pair would be pulled into a grammar session and handed
+        # to the branch that renders a rule and its example sentences.
+        # Substring tests over a key space cannot survive the key space
+        # growing, which is the whole reason for namespacing it.
+        return (mode in GRADED_FOR_SOURCE[MODE_STANDARD]
+                or mode in _LEGACY_CUSTOM_MODES)
     cfg = SOURCES.get(pool_entry["source"])
     return bool(cfg) and mode in cfg["valid_modes"]
 
@@ -903,11 +930,20 @@ def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr"
 
         if p["source"] == "custom":
             c = p["entry"]
+            m = resolve_for_source(MODE_STANDARD, mode)
             cards.append({
                 "card_id": raw_id, "source": "custom",
                 "front": c["front"], "back": c["back"],
                 "kana": c.get("kana", ""), "hint": c.get("hint", ""),
                 "notes": c.get("notes", ""), "mode": mode,
+                # f2b shows the front and asks for the back; b2f is the
+                # other way up. Every other source's payload carries this,
+                # and the renderer reads it rather than the mode string.
+                "direction": m.direction if m else None,
+                # No hints: a hand-written pair has nothing to build
+                # distractors from, and HintBar renders from what is
+                # actually present, so the control simply does not appear.
+                "hints": {},
                 "stage": stage,
                 "review_preview": _build_review_preview(stage, preview),
             })
