@@ -212,6 +212,8 @@ const quiz = {
   modeFill:          'Compléter',
   // Extended mode labels used by vocab/kanji screens
   modeWrite:         'Écriture',
+  // Axe « format » des stats : saisi au clavier, par opposition à tracé.
+  modeType:          'Saisie',
   modeWriteDesc:     'Le sens seul. Tracez le caractère, trait par trait.',
   // Paramétré sur le nom de l'élément étudié ("kanji" ou "mot" — voir
   // kanjiNoun/wordNoun plus bas et vocabKanjiModes dans quizModes.js).

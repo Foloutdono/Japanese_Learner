@@ -23,7 +23,10 @@ import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import {DrawingQuiz, DrawingOverlay} from '../components/study/DrawingCanvas'
 import { speakJapanese, playUi } from '../lib/audio'
-import { kanjiModes, reviewMode, usesWritingDrill } from '../domain/quizModes'
+import {
+  MODES as STUDY_MODES, RENDER, FAST_REVIEW,
+  modePickerEntries, modeLabel, usesWritingDrill,
+} from '../domain/studyModes'
 import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 import { PencilIcon } from '../components/ui/Icons'
@@ -39,7 +42,7 @@ export default function KanjiScreen({ session }) {
   const { t, lang } = useLang()
   const [searchParams] = useSearchParams()
 
-  const MODES = kanjiModes(t)
+  const MODES = modePickerEntries(t, 'kanji')
 
   // studyBy picks which selection path is active: 'level' (JLPT N5…N1,
   // the original behaviour) or 'frequency' (Top 200 / 201-400 / ...,
@@ -168,10 +171,18 @@ export default function KanjiScreen({ session }) {
   // Deep-link support: if level/mode are given in the URL (e.g. from the
   // Stats screen's "due now" button), jump straight into that session
   // instead of making the user pick again.
+  //
+  // The mode is validated against the registry, which it never used to
+  // be: any string in ?mode= was passed straight into a session. A stale
+  // bookmark from before the taxonomy change carries a retired key, and
+  // an unvalidated one would start a session whose renderer lookup misses
+  // and whose every fetch 400s — a blank quiz with no explanation. An
+  // unknown mode now falls back to the picker, which is where someone
+  // with a broken link wants to end up anyway.
   useEffect(() => {
     const lvl = searchParams.get('level')
     const m   = searchParams.get('mode')
-    if (lvl && m) {
+    if (lvl && m && m !== FAST_REVIEW && STUDY_MODES[m]?.source === 'kanji') {
       startLevelSession(lvl, m)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -404,7 +415,13 @@ export default function KanjiScreen({ session }) {
     const backTitle = studyBy === 'level' ? `${t.kanjiTitle} ${level}` : `${t.kanjiTitle} ${tierLabel}`
     // Review only exists for the JLPT-level path today (see
     // startReview) — the frequency-tier path keeps the plain mode list.
-    const modesWithReview = studyBy === 'level' ? [...MODES, reviewMode(t)] : MODES
+    // The registry already puts the ungraded browse last for every
+    // source; the frequency-tier path is the one place it doesn't apply
+    // (see startReview — there is no tier-scoped review-cards endpoint),
+    // so that path drops it rather than the level path adding it.
+    const modesWithReview = studyBy === 'level'
+      ? MODES
+      : MODES.filter(m => m.key !== FAST_REVIEW)
     return (
       <div className="screen">
         <TopBar onBack={() => (studyBy === 'level' ? setLevel(null) : setTier(null))} title={backTitle} autoHide />
@@ -412,7 +429,7 @@ export default function KanjiScreen({ session }) {
           <ModeSelector
             modes={modesWithReview}
             onSelect={m => {
-              if (m === 'review') { startReview(); return }
+              if (m === FAST_REVIEW) { startReview(); return }
               board(() => {
                 if (studyBy === 'level') startLevelSession(level, m)
                 else startFrequencySession(tier, tierLabel, m)
@@ -456,14 +473,17 @@ export default function KanjiScreen({ session }) {
   const availableHints = Object.keys(card?.hints ?? {})
   const showChoices = activeHints.has('indice_1') && Array.isArray(card?.hints?.indice_1)
 
-  const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
+  const title = modeLabel(t, mode)
   const sourceLabel = studyBy === 'level' ? level : tierLabel
+  // Which UI this mode needs, from the registry rather than a string
+  // comparison against one key ('write') that used to stand in for it.
+  const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
 
   return (
     <div className="screen">
       <TopBar
         onBack={() => setMode(null)}
-        title={`${t.kanjiTitle} ${sourceLabel} — ${modeLabel}`}
+        title={`${t.kanjiTitle} ${sourceLabel} — ${title}`}
         autoHide
         actions={usesWritingDrill(mode) ? (
           <button
@@ -501,7 +521,7 @@ export default function KanjiScreen({ session }) {
                 checkAdvance()
               }}
             >
-              {mode !== 'write' ? (
+              {renderer !== RENDER.DRAW ? (
                 <PromptCard>
                   {!showChoices && (
                     <Flashcard
@@ -584,7 +604,7 @@ export default function KanjiScreen({ session }) {
               />
             )}
 
-            {mode === 'write' && card.kanji && (
+            {renderer === RENDER.DRAW && card.kanji && (
               <DrawingQuiz
                 kanji={card.kanji}
                 meaning={formatGlossLine(card.meaning)}

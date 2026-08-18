@@ -146,12 +146,18 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer, format
 }
 
 // ── Type input + submit + result ──────────────────────────
+// `isCorrect` is optional and overrides the built-in comparison, which is
+// a plain case-insensitive string match. Japanese needs more than that:
+// several romanisations are equally standard, so kana typing passes a
+// lenient comparator (see lib/romaji.js) rather than telling a learner who
+// typed "si" for し that they were wrong. Callers with a single unambiguous
+// answer can keep omitting it.
 export function TypeInput({
   value, onChange, onSubmit, submitted, answer,
-  placeholder, inputStyle = {}, wrongExtra = null,
+  placeholder, inputStyle = {}, wrongExtra = null, isCorrect: isCorrectProp,
 }) {
   const { t } = useLang()
-  const isCorrect = value.trim().toLowerCase() === answer?.toLowerCase()
+  const isCorrect = isCorrectProp ?? (value.trim().toLowerCase() === answer?.toLowerCase())
 
   return (
     <div>

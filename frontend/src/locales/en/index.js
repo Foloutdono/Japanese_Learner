@@ -225,6 +225,8 @@ const quiz = {
   modeFill:          'Fill in',
   // Extended mode labels used by vocab/kanji screens
   modeWrite:         'Writing',
+  // Stats format axis: typed on a keyboard, as against drawn by hand.
+  modeType:          'Typing',
   modeWriteDesc:     'Meaning only. Draw the character stroke by stroke.',
   // Parameterised on what the studied item is called ("kanji" or
   // "word" — see kanjiNoun/wordNoun below and vocabKanjiModes in

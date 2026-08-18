@@ -23,7 +23,7 @@ import HintBar from '../components/study/HintBar'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import { speakJapanese, playUi } from '../lib/audio'
-import { vocabKanjiModes, reviewMode } from '../domain/quizModes'
+import { FAST_REVIEW, modePickerEntries, modeLabel } from '../domain/studyModes'
 import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
@@ -37,7 +37,7 @@ export default function VocabScreen({ session }) {
   const navigate    = useNavigate()
   const { t, lang } = useLang()
 
-  const MODES = vocabKanjiModes(t, t.wordNoun)
+  const MODES = modePickerEntries(t, 'vocab')
 
   // See KanjiScreen for the full rationale — studyBy picks 'level'
   // (JLPT N5…N1), 'theme' (Fruits / Jobs / Body parts / ...), or
@@ -451,7 +451,7 @@ export default function VocabScreen({ session }) {
     }
     const startMode = m => {
       // Review is a browse, not a session — it does not board.
-      if (m === 'review') { startReview(); return }
+      if (m === FAST_REVIEW) { startReview(); return }
       board(() => {
         if (studyBy === 'level') startLevelSession(level, m)
         else if (studyBy === 'theme') startThemeSession(theme, themeLabel, m)
@@ -460,7 +460,13 @@ export default function VocabScreen({ session }) {
     }
     // Review only exists for the JLPT-level path today (see
     // startReview) — theme/frequency decks keep the plain mode list.
-    const modesWithReview = studyBy === 'level' ? [...MODES, reviewMode(t)] : MODES
+    // The registry already puts the ungraded browse last for every
+    // source; the frequency-tier path is the one place it doesn't apply
+    // (see startReview), so that path drops it rather than the level
+    // path adding it.
+    const modesWithReview = studyBy === 'level'
+      ? MODES
+      : MODES.filter(m => m.key !== FAST_REVIEW)
     return (
       <div className="screen">
         <TopBar onBack={goBack} title={backTitle} autoHide />
@@ -507,7 +513,7 @@ export default function VocabScreen({ session }) {
   const availableHints = Object.keys(card?.hints ?? {})
   const showChoices = activeHints.has('indice_1') && Array.isArray(card?.hints?.indice_1)
 
-  const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
+  const title = modeLabel(t, mode)
   const sourceLabel =
     studyBy === 'level' ? level
     : studyBy === 'theme' ? themeLabel
@@ -515,7 +521,7 @@ export default function VocabScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${sourceLabel} — ${modeLabel}`} autoHide />
+      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${sourceLabel} — ${title}`} autoHide />
       <XpToast toast={xpToast} onDone={() => {
         setXpToast(null)
         pendingGatesRef.current.delete('toast')
