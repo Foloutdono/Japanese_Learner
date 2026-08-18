@@ -3322,10 +3322,10 @@ input:focus { border-color: var(--accent2); }
    never out-shout the prompt. */
 .study-assist {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   min-height: 30px;
-  margin-bottom: 10px;
+  gap: 10px;
 }
 .study-assist__toggle {
   display: inline-flex;
@@ -3386,8 +3386,8 @@ input:focus { border-color: var(--accent2); }
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 22px;
-  padding: 32px 24px max(32px, 25vh);
+  gap: 25px;
+  padding: 40px 24px max(32px, 25vh);
   text-align: center;
 }
 
@@ -3565,7 +3565,7 @@ input:focus { border-color: var(--accent2); }
 
 .quiz-submit {
   background: var(--accent);
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   width: 100%;
 }
 
@@ -4039,8 +4039,29 @@ input:focus { border-color: var(--accent2); }
    absolutely-positioned .reveal-actions skip past it to .prompt-card
    (still `position: relative`, see below), so the buttons stay pinned
    to the actual card corner no matter how the content inside is sized
-   or centered. */
-.flashcard { cursor: pointer; }
+   or centered.
+
+   .flashcard owns the click-to-reveal handler, but it only sits in the
+   *content* box of .prompt-card — the padding around that content is
+   outside it, so a click landing there never reached .flashcard's
+   onClick. Pulling .flashcard out with a negative margin equal to that
+   padding, then adding the same amount back as its own padding, makes
+   its box overlap the padding area exactly (same visual spacing as
+   before) while making that whole area part of its own clickable box.
+   Reads --card-pad-y/x from .prompt-card (its parent — custom
+   properties inherit down the DOM regardless of stylesheet order), so
+   every screen that uses Flashcard (kana, kanji, vocab, grammar) gets
+   a fully clickable card surface from one rule instead of this having
+   to be special-cased per screen the way vocab's own copy once was. */
+.flashcard {
+  cursor: pointer;
+  margin:
+    calc(-1 * var(--card-pad-top, 40px))
+    calc(-1 * var(--card-pad-x, 24px))
+    calc(-1 * var(--card-pad-y, 40px));
+  padding: var(--card-pad-top, 40px) var(--card-pad-x, 24px) var(--card-pad-y, 40px);
+  box-sizing: border-box;
+}
 
 .flashcard__hint {
   font-size: 12px;
@@ -8273,6 +8294,20 @@ input:focus { border-color: var(--accent2); }
   margin-bottom: 8px;
 }
 
+/* The graded flashcard's own rule display (see GrammarRule in
+   GrammarScreen.jsx) — var(--font-jp), and WRAPPING rather than
+   .char-display's fixed-height nowrap: a grammar pattern runs from
+   one character to sixteen, and clipping the long end the way
+   .char-display would is worse than wrapping the rare long one. */
+.grammar-rule {
+  font-family: var(--font-jp);
+  font-size: var(--rule-size, 40px);
+  color: var(--text-primary);
+  line-height: 1.3;
+  text-align: center;
+  margin: 20px 0 4px;
+}
+
 .grammar-hint { color: var(--text-secondary); font-size: 14px; margin-top: 8px; }
 .grammar-reveal-hint { font-size: 15px; color: var(--text-secondary); margin-top: 8px; }
 .grammar-meaning { font-size: 20px; color: var(--success); margin-top: 12px; }
@@ -9053,11 +9088,21 @@ input:focus { border-color: var(--accent2); }
 
 /* ── PromptCard component ─────────────────────────────────── */
 /* The card's surface itself is a cosmetic (紙, see the Storehouse
-   block at the end of this file, which owns background/border here). */
+   block at the end of this file, which owns background/border here).
+   --card-pad-y/x drive .flashcard's own padding-filling trick below —
+   defined here so the two can never drift out of sync the way the old
+   vocab-only duplicate (hardcoded -64px/-32px in one place, 64px/32px
+   in another) eventually would have. */
 .prompt-card {
+  --card-pad-y: 40px;
+  --card-pad-x: 24px;
+  /* Split out from --card-pad-y so the mobile media query below can
+     give .reveal-actions extra headroom on top without also padding
+     the bottom/sides to match (see that query's own comment). */
+  --card-pad-top: var(--card-pad-y);
   position: relative;
   border-radius: 12px;
-  padding: 40px 24px;
+  padding: var(--card-pad-top) var(--card-pad-x) var(--card-pad-y);
   max-height: 60vh;
   overflow: auto;
 }
@@ -9067,26 +9112,12 @@ input:focus { border-color: var(--accent2); }
    card size. Vocab words run longer than a single kanji, so the box
    gets more breathing room, not just a bigger glyph. */
 .vocab-card-boost .prompt-card {
-  padding: 64px 32px;
+  --card-pad-y: 64px;
+  --card-pad-x: 32px;
   min-height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* .flashcard owns the click-to-reveal handler, but it only sits in the
-   *content* box of .prompt-card — the padding above is outside it, so
-   clicks landing there never reach .flashcard's onClick. Pulling
-   .flashcard out with a negative margin equal to that padding, then
-   adding the same amount back as its own padding, makes its box
-   overlap the padding area exactly (same visual spacing as before)
-   while making that whole area part of its own clickable box. Scoped
-   to vocab-card-boost only, so the shared .flashcard rule used on
-   other screens is untouched. */
-.vocab-card-boost .flashcard {
-  margin: -64px -32px;
-  padding: 64px 32px;
-  box-sizing: border-box;
 }
 
 /* ── EmptyState component ─────────────────────────────────── */
@@ -9331,7 +9362,7 @@ input:focus { border-color: var(--accent2); }
   .landing-feature-grid { grid-template-columns: 1fr; }
   .landing-pros-item { gap: 14px; padding: 22px 4px; }
   .landing-pros-item__glyph { min-width: 40px; }
-  .quiz-area { padding: 32px 24px max(32px, 14vh);}
+  .quiz-area { padding: 32px 24px max(32px, 14vh); gap: 18px;}
   .flashcard__hint { margin-top: 2px;}
 
   /* The Explorer's group header is five columns wide by design; at
@@ -9450,18 +9481,25 @@ input:focus { border-color: var(--accent2); }
 }
 
 @media (max-width: 480px) {
-  .quiz-card, 
-  .prompt-card, 
-  .flashcard {
+  .quiz-card {
     padding: 5px;
     border-radius: 10px;
   }
 
   /* Extra headroom so .reveal-actions (top:10/left:10, anchored to
      .prompt-card) never overlaps the char/word below it once the
-     card's own padding has shrunk to almost nothing. */
+     card's own padding has shrunk to almost nothing. --card-pad-top
+     carries that headroom into .flashcard's own clickable box too
+     (see its rule), so the padding shrinking here can't reopen the
+     dead-click-zone the vars exist to close. */
   .prompt-card {
-    padding-top: 46px;
+    --card-pad-y: 5px;
+    --card-pad-x: 5px;
+    --card-pad-top: 46px;
+    border-radius: 10px;
+  }
+  .flashcard {
+    border-radius: 10px;
   }
 
   .inline-reveal {

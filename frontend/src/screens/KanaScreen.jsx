@@ -386,6 +386,12 @@ export default function KanaScreen({ session }) {
         {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>
+            <HintBar
+              available={availableHints}
+              active={activeHints}
+              onToggle={toggleHint}
+              disabled={locked}
+            />
             <CardTransition cardKey={card.card_id} stamp={cardStamp} stage={card.stage} onStampDone={() => {
               setCardStamp(null)
               pendingGatesRef.current.delete('stamp')
@@ -472,13 +478,6 @@ export default function KanaScreen({ session }) {
                 </PromptCard>
               )}
             </CardTransition>
-
-            <HintBar
-              available={availableHints}
-              active={activeHints}
-              onToggle={toggleHint}
-              disabled={locked}
-            />
 
             {renderer === RENDER.FLASHCARD && choicesOn && (
               <MCQGrid choices={cardHints[HINTS.CHOICES]} correct={answer}

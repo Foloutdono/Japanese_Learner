@@ -5,7 +5,10 @@ import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
 import RatingBar from '../components/study/RatingBar'
-import { MCQGrid, DoneMessage, DeckProgress } from '../components/study/QuizComponents'
+import {
+  MCQGrid, DoneMessage, DeckProgress,
+  Flashcard, InlineReveal, MeaningDisplay,
+} from '../components/study/QuizComponents'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { XpToast } from '../components/rewards/XpToast'
@@ -31,6 +34,22 @@ import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 // each hand-roll a controller that only ever timed out and never
 // aborted on unmount.
 
+// A grammar pattern runs anywhere from one character to sixteen
+// (〜はじめる／〜おわる／〜つづける) — CharDisplay's fixed-size, no-wrap
+// treatment (built for a single kanji or a short vocab compound) just
+// clips the long end of that range. This wraps instead, and shrinks
+// as the pattern grows so a short rule still reads as a headline
+// while a long one still fits the card.
+function GrammarRule({ text, size = 48 }) {
+  const n = (text || '').length
+  const scale = n <= 4 ? 1 : n <= 8 ? 0.8 : n <= 12 ? 0.62 : 0.5
+  return (
+    <div className="grammar-rule" style={{ '--rule-size': `${Math.round(size * scale)}px` }} lang="ja">
+      {text}
+    </div>
+  )
+}
+
 export default function GrammarScreen({ session }) {
   const navigate = useNavigate()
   const { t }    = useLang()
@@ -39,7 +58,6 @@ export default function GrammarScreen({ session }) {
 
   const [level, setLevel]           = useState(null)
   const [mode, setMode]             = useState(null)
-  const [flipped, setFlipped]       = useState(false)
   const [answered, setAnswered]     = useState(false)
   const [selected, setSelected]     = useState(null)
   const [showRating, setShowRating] = useState(false)
@@ -104,7 +122,6 @@ export default function GrammarScreen({ session }) {
   // advance() is a synchronous local pop now, so there's no fetch
   // callback to hang this reset off of like there used to be.
   useEffect(() => {
-    setFlipped(false)
     setAnswered(false)
     setSelected(null)
     setShowRating(false)
@@ -211,7 +228,8 @@ export default function GrammarScreen({ session }) {
   }
 
   function onFlashcardReveal() {
-    setFlipped(true)
+    if (answered) return
+    setAnswered(true)
     setShowRating(true)
   }
 
@@ -312,61 +330,90 @@ export default function GrammarScreen({ session }) {
 
         {card && !loading && (
           <>
+            <HintBar available={availableHints} active={activeHints}
+                     onToggle={toggleHint} disabled={locked} />
+
             <CardTransition cardKey={card.card_id} stamp={cardStamp} stage={card.stage} onStampDone={() => {
               setCardStamp(null)
               pendingGatesRef.current.delete('stamp')
               checkAdvance()
             }}>
-              {/* The prompt. fill_in shows a sentence and asks which rule
-                  is at work; the flashcards show one side of the pair. */}
-              <PromptCard className="grammar-prompt">
-                {isFill ? (
+              {isFill ? (
+                /* fill_in — the sentence is the whole question, so there is
+                   no flip: naming the rule (via the choices below) IS the
+                   reveal, same as Kanji's readings/radical modes. */
+                <PromptCard className="grammar-prompt">
                   <div className="grammar-fill-sentence" lang="ja">
                     {card.fill_sentence?.jp}
                   </div>
-                ) : (
-                  <>
-                    <div className="grammar-glyph">
-                      {isB2F ? <GlossList meaning={card.meaning} /> : card.grammar}
+                  {answered && (
+                    <div className="grammar-meaning">
+                      <GrammarRule text={card.grammar} size={40} />
+                      <MeaningDisplay meaning={card.meaning} size={22} />
                     </div>
-                    {card.structure && !isB2F && (
-                      <div className="grammar-structure">{card.structure}</div>
-                    )}
-                  </>
-                )}
+                  )}
+                </PromptCard>
+              ) : (
+                <PromptCard className="grammar-prompt">
+                  {!choicesOn && (
+                    <Flashcard
+                      t={t}
+                      resetKey={card.card_id}
+                      onReveal={onFlashcardReveal}
+                      front={
+                        isB2F
+                          ? <MeaningDisplay meaning={card.meaning} size={32} />
+                          : (
+                            <>
+                              <GrammarRule text={card.grammar} size={48} />
+                              {card.structure && (
+                                <div className="grammar-structure">{card.structure}</div>
+                              )}
+                            </>
+                          )
+                      }
+                      back={
+                        <InlineReveal
+                          t={t}
+                          main={
+                            isB2F
+                              ? (
+                                <>
+                                  <GrammarRule text={card.grammar} size={40} />
+                                  {card.structure && (
+                                    <div className="grammar-structure">{card.structure}</div>
+                                  )}
+                                </>
+                              )
+                              : <MeaningDisplay meaning={card.meaning} size={28} />
+                          }
+                        />
+                      }
+                    />
+                  )}
 
-                {!isFill && !flipped && (
-                  <div className="grammar-hint">
-                    {isB2F ? t.revealGrammarRule : t.revealMeaning}
-                  </div>
-                )}
-                {!isFill && flipped && (
-                  <div className="grammar-meaning">
-                    {isB2F
-                      ? <><div className="grammar-glyph">{card.grammar}</div>
-                          <div className="grammar-structure">{card.structure}</div></>
-                      : <GlossList meaning={card.meaning} />}
-                  </div>
-                )}
-                {isFill && answered && (
-                  <div className="grammar-meaning">
-                    <div className="grammar-glyph">{card.grammar}</div>
-                    <GlossList meaning={card.meaning} />
-                  </div>
-                )}
-              </PromptCard>
+                  {/* Options showing — a flip and a choice list are two
+                      reveal affordances on one card, so the flip is
+                      replaced rather than sitting alongside it (same
+                      resolution Kanji/Vocab use for their own choices
+                      hint). The prompt itself doesn't change: the
+                      answer is whichever MCQ row lights up green below,
+                      not a swapped face here. */}
+                  {choicesOn && (
+                    isB2F
+                      ? <MeaningDisplay meaning={card.meaning} size={32} />
+                      : (
+                        <>
+                          <GrammarRule text={card.grammar} size={48} />
+                          {card.structure && (
+                            <div className="grammar-structure">{card.structure}</div>
+                          )}
+                        </>
+                      )
+                  )}
+                </PromptCard>
+              )}
             </CardTransition>
-
-            <HintBar available={availableHints} active={activeHints}
-                     onToggle={toggleHint} disabled={locked} />
-
-            {/* Flashcard reveal — hidden while the options are showing,
-                since two reveal affordances on one card compete. */}
-            {!isFill && !flipped && !choicesOn && (
-              <button onClick={onFlashcardReveal} className="reveal-btn">
-                {isB2F ? t.revealGrammarBtn : t.revealMeaningBtn}
-              </button>
-            )}
 
             {/* Options: meanings for a flashcard, rules for fill_in. */}
             {showChoices && (
