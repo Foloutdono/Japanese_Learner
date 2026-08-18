@@ -1,3 +1,4 @@
+import json
 import logging
 import csv
 import io
@@ -6,10 +7,12 @@ from pydantic import BaseModel
 from core.auth import get_user_id, prefixed, unprefixed
 from core.db import db_conn
 from core.srs_instance import srs
-from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
+from srs.batch_cache import key as batch_key, pick_ids
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from content.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
+from content.grammar_points_data import (
+    GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, grammar_to_id,
+)
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from content.kanji_meanings import KANJI_FR
@@ -22,7 +25,25 @@ from content.kanji_meanings import KANJI_FR
 # to the right one per card. See SOURCES below.
 from routes.kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
 from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
-from routes.grammar import VALID_MODES as GRAMMAR_VALID_MODES, _build_grammar_card
+from routes.grammar import _build_grammar_card
+from study.structures import (
+    ALL_KEYS as STRUCTURE_KEYS,
+    describe as describe_structures,
+    missing_required,
+    normalise as normalise_fields,
+    structure_for,
+    usable_sentences,
+)
+from study.modes import (
+    MODES,
+    FLASHCARD as BASE_FLASHCARD,
+    GRAMMAR as MODE_GRAMMAR,
+    STANDARD as MODE_STANDARD,
+    KANJI as MODE_KANJI,
+    VOCAB as MODE_VOCAB,
+    GRADED_FOR_SOURCE,
+    resolve_for_source,
+)
 import psycopg2.extras
 
 router = APIRouter()
@@ -61,16 +82,32 @@ MAX_BATCH = 25
 #     source (e.g. "dictionary") reusing _build_vocab_card the same
 #     way.
 
+# The kanji/vocab builders take a resolved Mode now rather than a mode
+# string (see _build_kanji_card's docstring for why `format` went away).
+# A deck's session still arrives carrying whatever key get_deck_modes
+# advertised, so resolve it here against the source it belongs to —
+# which also means a legacy key keeps working through LEGACY_ALIASES
+# while the frontend catches up. Restructuring decks.py's own mode
+# handling is the deck-structures phase, not this one.
 def _wrap_kanji(raw_id, entry, level, level_list, mode, lang, stage, preview):
-    return _build_kanji_card(raw_id, entry, level_list, mode, lang, stage, preview)
+    m = resolve_for_source(MODE_KANJI, mode)
+    if m is None:
+        raise HTTPException(status_code=400, detail=f"Invalid kanji mode: {mode!r}")
+    return _build_kanji_card(raw_id, entry, level_list, m, lang, stage, preview)
 
 
 def _wrap_vocab(raw_id, entry, level, level_list, mode, lang, stage, preview):
-    return _build_vocab_card(raw_id, entry, level_list, mode, lang, stage, preview)
+    m = resolve_for_source(MODE_VOCAB, mode)
+    if m is None:
+        raise HTTPException(status_code=400, detail=f"Invalid vocab mode: {mode!r}")
+    return _build_vocab_card(raw_id, entry, level_list, m, lang, stage, preview)
 
 
 def _wrap_grammar(raw_id, entry, level, level_list, mode, lang, stage, preview):
-    card = _build_grammar_card(entry, level, level_list, mode, stage, preview)
+    m = resolve_for_source(MODE_GRAMMAR, mode)
+    if m is None:
+        raise HTTPException(status_code=400, detail=f"Invalid grammar mode: {mode!r}")
+    card = _build_grammar_card(entry, level, level_list, m, stage, preview)
     card["card_id"] = raw_id
     return card
 
@@ -91,45 +128,68 @@ SOURCES = {
     "grammar": {
         "by_level":    GRAMMAR_BY_LEVEL,
         "to_id":       grammar_to_id,
-        "valid_modes": GRAMMAR_VALID_MODES,
+        "valid_modes": set(GRADED_FOR_SOURCE[MODE_GRAMMAR]),
         "build":       _wrap_grammar,
     },
 }
 
-# What a deck's `type` actually restricts it to — this is what makes
-# the type picker on DecksScreen mean something instead of every type
-# behaving identically once a deck exists. 'mixed' (and legacy decks
-# with an unrecognized/missing type — see _allowed_sources) is the
-# only one with no restriction at all.
-#   - a type naming one of SOURCES ('kanji'/'vocab'/'grammar') only
-#     ever accepts app-sourced cards from that one source, and no
-#     custom (hand-typed) cards at all
-#   - 'flashcard' is the mirror image: custom cards only, no app
-#     sources
-# Enforced in add_card/import_cards (custom cards) and
-# add_app_cards/browse_app_cards (app-sourced cards) below.
+# ── A deck has ONE STRUCTURE ──────────────────────────────────
+# `type` is the deck's structure, and it decides everything: which app
+# cards can be browsed in, which personal cards can be written, and which
+# study modes the deck offers. There is no 'mixed' any more.
+#
+# Mixed decks were dropped because they made every other question harder
+# for no gain. A deck holding kanji and grammar had to union two sources'
+# modes, and then answer what a mode means for a card from the other
+# source -- which is how a hand-written pair ended up eligible for a
+# grammar session (see _eligible). One structure per deck makes the deck's
+# modes simply the structure's modes.
+#
+# The old model also had this exactly backwards for personal cards: a
+# kanji-typed deck accepted app kanji and NO hand-written cards at all,
+# so a kanji deck was the one place a personal kanji card could not go.
+# Now every structure accepts personal cards OF ITS OWN STRUCTURE, which
+# is what makes "write your own kanji card" a thing that exists.
+STRUCTURES = ("standard", "kanji", "vocab", "grammar")
+
+# Structure -> the one app source it browses in. `standard` is a plain
+# front/back pair with no app source behind it.
 SOURCE_FOR_TYPE = {
     "kanji":   {"kanji"},
     "vocab":   {"vocab"},
     "grammar": {"grammar"},
 }
 
+# Structure -> the registry source its cards study under. A personal
+# kanji-structure card gets kanji's modes, which is the whole point of
+# giving personal cards a structure.
+REGISTRY_SOURCE_FOR_TYPE = {
+    "standard": MODE_STANDARD,
+    "kanji":    MODE_KANJI,
+    "vocab":    MODE_VOCAB,
+    "grammar":  MODE_GRAMMAR,
+}
+
 
 def _allowed_sources(deck_type: str) -> set[str]:
-    """App sources a deck of this type accepts — empty set means
-    'custom cards only, no app sources' (type == 'flashcard'); None
-    would mean unrestricted, but callers use `_allows_custom` /
-    membership checks instead of a sentinel, so 'mixed' and any
-    unrecognized/legacy type just fall through to every source."""
-    if deck_type in SOURCE_FOR_TYPE:
-        return SOURCE_FOR_TYPE[deck_type]
-    if deck_type == "flashcard":
-        return set()
-    return set(SOURCES.keys())  # 'mixed' and any legacy/unknown type
+    """App sources this structure browses in; empty for `standard`."""
+    return SOURCE_FOR_TYPE.get(deck_type, set())
 
 
 def _allows_custom(deck_type: str) -> bool:
-    return deck_type not in SOURCE_FOR_TYPE
+    """
+    Every structure accepts hand-written cards -- of its own structure.
+
+    This used to return False for kanji/vocab/grammar, hiding "Add card"
+    on exactly the decks where a personal card of that kind belongs.
+    """
+    return deck_type in REGISTRY_SOURCE_FOR_TYPE
+
+
+def _registry_source(deck_type: str) -> str:
+    """The study-mode source for a deck, falling back to `standard`."""
+    return REGISTRY_SOURCE_FOR_TYPE.get(deck_type, MODE_STANDARD)
+
 
 # Card stage promotions worth a visual "stamp" on the frontend — same
 # rule as kana.py/kanji.py/vocab.py/grammar.py's own copy.
@@ -180,7 +240,12 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
     lighter than a full study-card payload (no choices, no SRS state),
     just enough to show what an entry is before/after it's added."""
     if source == "grammar":
-        return {"front": entry.get("grammar", ""), "kana": "", "meaning": entry.get("meaning", "")}
+        # The owned catalogue names this field `pattern`; the scraped
+        # one said `grammar`. Both are read so a deck row written
+        # before the switch still renders instead of showing a blank
+        # front until the wipe clears it.
+        return {"front": entry.get("pattern") or entry.get("grammar", ""),
+                "kana": "", "meaning": entry.get("meaning", "")}
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
     meaning = get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
@@ -204,7 +269,7 @@ def _ensure_deck_schema() -> None:
                     id BIGSERIAL PRIMARY KEY,
                     user_id TEXT NOT NULL,
                     name TEXT NOT NULL,
-                    type TEXT NOT NULL DEFAULT 'mixed',
+                    type TEXT NOT NULL DEFAULT 'standard',
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
@@ -229,6 +294,37 @@ def _ensure_deck_schema() -> None:
                 CREATE INDEX IF NOT EXISTS idx_custom_cards_deck
                 ON custom_cards(deck_id, user_id)
             """)
+            # ── Personal cards gain a STRUCTURE ──
+            # Additive and idempotent, not DROP/CREATE: this runs on every
+            # startup, so a recreate would empty the table each time the
+            # API restarts.
+            #
+            # front/back/kana move into `fields` keyed by the structure's
+            # own names, because a kanji card's four fields do not fit
+            # two columns and one column per structure would be sparse and
+            # rigid. See study/structures.py.
+            cur.execute("""
+                ALTER TABLE custom_cards
+                    ADD COLUMN IF NOT EXISTS structure TEXT NOT NULL DEFAULT 'standard',
+                    ADD COLUMN IF NOT EXISTS fields JSONB NOT NULL DEFAULT '{}'::jsonb
+            """)
+            # Backfill any pre-structure row from the old columns, once:
+            # only rows whose `fields` is still the empty default.
+            cur.execute("""
+                UPDATE custom_cards
+                   SET fields = jsonb_build_object(
+                           'front', COALESCE(front, ''),
+                           'back',  COALESCE(back, ''))
+                 WHERE fields = '{}'::jsonb
+                   AND (front IS NOT NULL OR back IS NOT NULL)
+            """)
+            # `hint` was shown mid-quiz, which makes it help the learner
+            # never asked for -- the thing HintBar exists to make opt-in.
+            # `notes` stays as its own column: free-form, never shown
+            # during a card.
+            cur.execute("ALTER TABLE custom_cards DROP COLUMN IF EXISTS hint")
+            for col in ("front", "back", "kana"):
+                cur.execute(f"ALTER TABLE custom_cards ALTER COLUMN {col} DROP NOT NULL")
             # decks now exists before this runs (same transaction,
             # created just above), so this can safely FK to it — no
             # more "may import before decks exists" concern.
@@ -288,21 +384,26 @@ _ensure_deck_schema()
 
 class DeckPayload(BaseModel):
     name: str
-    # Historic values ('flashcard'/'vocab'/'kanji') are kept for
-    # backward compatibility with existing decks, but a deck's real
-    # composition — what's actually in custom_cards/deck_cards — is
-    # what decides its available study modes now (see get_deck_modes),
-    # not this field. 'mixed' is the honest default for a deck that
-    # can hold anything.
-    type: str = "mixed"
+    # The deck's STRUCTURE, which decides what it can hold and which
+    # modes it offers (see STRUCTURES). `standard` -- a plain front/back
+    # pair -- is the default, being the only one that needs nothing.
+    type: str = "standard"
 
 
 class CardPayload(BaseModel):
-    front: str
-    back:  str
-    kana:  str = ""
-    hint:  str = ""
-    notes: str = ""
+    # The card's fields, keyed by its deck structure's own names (see
+    # study/structures.py). front/back are still accepted so a `standard`
+    # card can be posted the old way.
+    fields: dict = {}
+    notes:  str = ""
+    front:  str | None = None
+    back:   str | None = None
+
+    def resolved(self) -> dict:
+        """fields, falling back to a bare front/back post."""
+        if self.fields:
+            return self.fields
+        return {"front": self.front or "", "back": self.back or ""}
 
 
 class ReviewPayload(BaseModel):
@@ -325,7 +426,10 @@ class AddAppCardsPayload(BaseModel):
     cards: list[AppCardRef]
 
 
-DECK_TYPES = ("flashcard", "vocab", "kanji", "grammar", "mixed")
+# One structure per deck. 'mixed' and 'flashcard' are gone: 'mixed' was
+# dropped outright, and 'flashcard' is now called 'standard' to match the
+# study-mode registry's name for the same thing.
+DECK_TYPES = STRUCTURES
 
 
 # ── DECK CRUD ─────────────────────────────────────────────
@@ -352,6 +456,46 @@ def get_decks(user_id: str = Depends(get_user_id)):
         return {"decks": decks}
     finally:
         conn.close()
+
+
+def _with_display(row: dict) -> dict:
+    """
+    Adds front/back to a stored personal card, derived from its
+    structure's own field names.
+
+    Every consumer (the card list, the study builder, the CSV export)
+    wants "the Japanese side and the meaning side" and none of them should
+    have to know that a kanji card calls those `kanji` and `meaning` while
+    a grammar card calls them `rule` and `meaning`. Derived here, once,
+    rather than in each renderer.
+    """
+    spec = structure_for(row.get("structure", "standard"))
+    fields = row.get("fields") or {}
+    return {
+        **row,
+        "front": fields.get(spec.front_key, ""),
+        "back":  fields.get(spec.back_key, ""),
+    }
+
+
+@router.get("/api/decks/structures")
+def get_structures():
+    """
+    What a personal card looks like, per deck structure.
+
+    Served rather than duplicated so the add-card form is GENERATED from
+    the same definition the API validates against. The alternative --
+    a hand-synced frontend copy -- is the exact shape of drift this
+    project has already paid for twice (the four mode enumerations, and
+    the two allowsCustomFor twins).
+
+    Declared BEFORE every /api/decks/{deck_id} route on purpose:
+    FastAPI matches in declaration order, so "structures" was being read
+    as a deck id and reaching Postgres as `WHERE d.id = 'structures'`.
+
+    Static: no deck id, no user, no query. See study/structures.py.
+    """
+    return {"structures": describe_structures()}
 
 
 @router.get("/api/decks/{deck_id}")
@@ -455,12 +599,12 @@ def get_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user_id
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
-                SELECT id, front, back, kana, hint, notes, created_at
+                SELECT id, structure, fields, notes, created_at
                 FROM custom_cards
                 WHERE deck_id = %s AND user_id = %s
                 ORDER BY created_at ASC
             """, (deck_id, user_id))
-            custom = [dict(row) for row in cur.fetchall()]
+            custom = [_with_display(dict(row)) for row in cur.fetchall()]
             cur.execute("""
                 SELECT source, level, raw_id, added_at
                 FROM deck_cards
@@ -503,17 +647,25 @@ def add_card(deck_id: str, payload: CardPayload, user_id: str = Depends(get_user
             if not deck:
                 raise HTTPException(status_code=404, detail="Deck not found")
             if not _allows_custom(deck["type"]):
+                raise HTTPException(status_code=400, detail="This deck does not accept written cards")
+            # The card takes the DECK's structure -- a deck holds one
+            # shape, so there is nothing for the caller to choose and
+            # nothing to disagree about.
+            structure = deck["type"] if deck["type"] in STRUCTURE_KEYS else "standard"
+            fields = normalise_fields(structure, payload.resolved())
+            missing = missing_required(structure, fields)
+            if missing:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"This deck only accepts {deck['type']} cards — browse and add some instead",
+                    detail=f"A {structure} card needs: {', '.join(missing)}",
                 )
             cur.execute("""
-                INSERT INTO custom_cards (deck_id, user_id, front, back, kana, hint, notes)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING id, front, back, kana, hint, notes, created_at
-            """, (deck_id, user_id, payload.front, payload.back,
-                  payload.kana, payload.hint, payload.notes))
-            card = dict(cur.fetchone())
+                INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id, structure, fields, notes, created_at
+            """, (deck_id, user_id, structure, json.dumps(fields, ensure_ascii=False),
+                  payload.notes))
+            card = _with_display(dict(cur.fetchone()))
         conn.commit()
         card["origin"] = "custom"
         return card
@@ -560,15 +712,28 @@ def update_card(deck_id: str, card_id: str, payload: CardPayload,
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
-                UPDATE custom_cards
-                SET front = %s, back = %s, kana = %s, hint = %s, notes = %s
+                SELECT structure FROM custom_cards
                 WHERE id = %s AND deck_id = %s AND user_id = %s
-                RETURNING id, front, back, kana, hint, notes
-            """, (payload.front, payload.back, payload.kana, payload.hint,
-                  payload.notes, card_id, deck_id, user_id))
-            card = cur.fetchone()
-            if not card:
+            """, (card_id, deck_id, user_id))
+            existing = cur.fetchone()
+            if not existing:
                 raise HTTPException(status_code=404, detail="Card not found")
+            structure = existing["structure"]
+            fields = normalise_fields(structure, payload.resolved())
+            missing = missing_required(structure, fields)
+            if missing:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"A {structure} card needs: {', '.join(missing)}",
+                )
+            cur.execute("""
+                UPDATE custom_cards
+                SET fields = %s, notes = %s
+                WHERE id = %s AND deck_id = %s AND user_id = %s
+                RETURNING id, structure, fields, notes
+            """, (json.dumps(fields, ensure_ascii=False), payload.notes,
+                  card_id, deck_id, user_id))
+            card = _with_display(dict(cur.fetchone()))
         conn.commit()
         return dict(card)
     finally:
@@ -705,20 +870,27 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
 @router.get("/api/decks/{deck_id}/modes")
 def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
     """
-    What study modes this deck can actually offer right now, derived
-    from what's in it rather than a fixed deck `type`: 'flashcard' as
-    soon as there's at least one card of any kind, plus each present
-    source's own modes (e.g. a deck with kanji cards in it picks up
-    kk-s/k-k/s-k/write, one with grammar cards picks up fill, ...).
-    StudyScreen's mode picker reads this instead of hardcoding modes
-    off deck.type.
+    The study modes this deck offers: its STRUCTURE's modes, from the
+    registry, provided it has at least one card.
+
+    This used to union the modes of every source present in the deck,
+    which is what made mixed decks expensive. Two sources meant two mode
+    sets, and then a question the union could not answer -- what a
+    kanji-only mode should do with a grammar card sitting in the same
+    deck. One structure per deck removes the question rather than
+    answering it.
+
+    `composition` is still returned because the write-practice toggle and
+    the empty-deck copy read it, but it no longer decides anything.
     """
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            if not cur.fetchone():
+            cur.execute("SELECT type FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
+            row = cur.fetchone()
+            if not row:
                 raise HTTPException(status_code=404, detail="Deck not found")
+            deck_type = row["type"]
             cur.execute(
                 "SELECT COUNT(*) AS n FROM custom_cards WHERE deck_id = %s AND user_id = %s",
                 (deck_id, user_id),
@@ -733,16 +905,12 @@ def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
     finally:
         conn.close()
 
-    modes = set()
-    if custom_count:
-        modes.add("flashcard")
-    for source, count in source_counts.items():
-        cfg = SOURCES.get(source)
-        if cfg and count:
-            modes |= cfg["valid_modes"]
+    total = custom_count + sum(source_counts.values())
+    modes = sorted(GRADED_FOR_SOURCE[_registry_source(deck_type)]) if total else []
 
     return {
-        "modes": sorted(modes),
+        "modes": modes,
+        "structure": deck_type,
         "composition": {"custom": custom_count, **source_counts},
     }
 
@@ -762,7 +930,7 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
-                SELECT id, front, back, kana, hint, notes
+                SELECT id, structure, fields, notes
                 FROM custom_cards WHERE deck_id = %s AND user_id = %s
             """, (deck_id, user_id))
             custom = [dict(row) for row in cur.fetchall()]
@@ -800,45 +968,77 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
     return pool
 
 
-# flashcard-flavoured mode -> the qcm-flavoured mode covering the same
-# material in the same direction. StudyScreen lets a learner flip
-# between "show me the choices" and "recall it cold" on the card in
-# front of them (see its MODE_PAIR), which means an app-sourced card
-# has to arrive carrying its distractors even when the session itself
-# is flashcard-keyed. Custom cards have no counterpart and appear here
-# for exactly the reason _eligible spells out below: a hand-written
-# front/back pair has no distractors to offer.
-#
-# The session stays on ONE mode either way — the flashcard-flavoured
-# one, since that's the only key custom cards are eligible for, and a
-# mixed deck without its own hand-written cards would be a strange
-# thing to hand back. Nothing about the flip re-keys the SRS: the
-# grade an SRS review actually consumes is the learner's own 1-4
-# self-rating from RatingBar, which means the same thing whether or
-# not four options happened to be on screen.
-QCM_COUNTERPART = {
-    "flashcard-kj-m": "qcm-kj-m",
-    "flashcard-m-kj": "qcm-m-kj",
-    "flashcard": "mcq",  # grammar
+def _deck_type(deck_id: str, user_id: str) -> str | None:
+    """The deck's structure, or None when it is not this user's deck."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT type FROM decks WHERE id = %s AND user_id = %s",
+                        (deck_id, user_id))
+            row = cur.fetchone()
+            return row[0] if row else None
+    finally:
+        conn.close()
+
+
+# What each mode base needs from a personal card, beyond the front/back
+# every structure has. A base absent here needs nothing extra.
+_MODE_NEEDS = {
+    "readings":     ("readings",),
+    "radical":      ("radical",),
+    "write_kanji":  ("kanji",),
+    "word_reading": ("reading",),
+    "fill_in":      ("sentences",),
 }
 
 
-def _eligible(pool_entry: dict, mode: str) -> bool:
-    # Custom cards are a plain front/back pair — no MCQ distractors, no
-    # kanji to draw, no fill-in-the-blank sentence — so they can only
-    # ever render as a simple flashcard (see StudyScreen's
-    # renderCustomPrompt). They join any *flashcard-flavored* session
-    # ('flashcard' itself, or kanji/vocab's 'flashcard-kj-m'/
-    # 'flashcard-m-kj') but sit out qcm-*/write/mcq/fill, which need
-    # data only an app-sourced card has.
+def _card_answers(entry: dict, m) -> bool:
+    """Whether a personal card carries what this mode asks of it."""
+    fields = entry.get("fields") or {}
+    if m.base == "fill_in":
+        # Stricter than "has sentences": fill_in shows one and asks which
+        # rule is at work, so a sentence that does not contain its own rule
+        # makes the question unanswerable. Verified, not assumed.
+        return bool(usable_sentences(fields))
+    return all(fields.get(k) for k in _MODE_NEEDS.get(m.base, ()))
+
+
+def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
+    """
+    Whether this card can be served in this mode, for a deck of this
+    structure.
+
+    One rule now, because a deck has one structure: the mode must belong
+    to that structure's registry source, and the card must be either a
+    hand-written card (of that structure) or an app card from the source
+    the structure browses in.
+
+    What this replaces was `return "flashcard" in mode` for custom cards
+    -- a substring test that namespacing quietly broke, since
+    'grammar.flashcard.f2b' contains "flashcard" too, so a front/back pair
+    could be handed to the branch that renders a rule and its example
+    sentences.
+    """
+    if mode not in GRADED_FOR_SOURCE[_registry_source(deck_type)]:
+        return False
+
     if pool_entry["source"] == "custom":
-        return "flashcard" in mode
-    cfg = SOURCES.get(pool_entry["source"])
-    return bool(cfg) and mode in cfg["valid_modes"]
+        # Ask the CARD whether it carries what this mode needs, rather
+        # than assuming a personal card is always a bare pair. A
+        # kanji-structure card has readings and a radical number, so it can
+        # answer kanji.readings and kanji.radical; a card missing an
+        # optional field cannot, and is left out rather than served a
+        # question with no answer.
+        #
+        # Keyed on what the mode ASKS (its base), not how it draws:
+        # kanji.radical renders as a flashcard but wants a radical number.
+        return _card_answers(pool_entry.get("entry") or {}, MODES[mode])
+
+    return pool_entry["source"] in _allowed_sources(deck_type)
 
 
 @router.get("/api/decks/{deck_id}/study")
-def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr",
+def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lang: str = "fr",
                          count: int = 10, exclude: str = "",
                          user_id: str = Depends(get_user_id)):
     """
@@ -848,16 +1048,11 @@ def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr"
     filled the same way it does for the built-in decks instead of
     fetching one card at a time.
     """
-    conn = db_conn()
-    try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            if not cur.fetchone():
-                raise HTTPException(status_code=404, detail="Deck not found")
-    finally:
-        conn.close()
+    deck_type = _deck_type(deck_id, user_id)
+    if deck_type is None:
+        raise HTTPException(status_code=404, detail="Deck not found")
 
-    pool = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode)]
+    pool = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode, deck_type)]
     if not pool:
         return {"cards": []}
 
@@ -865,7 +1060,11 @@ def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr"
     raw_ids   = list(by_raw.keys())
     card_ids  = prefixed(raw_ids, user_id)
     cache_key = batch_key("user", user_id, "deck", deck_id, mode)
-    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode), version=card_ids)
+    # No pre-materialisation. get_new_cards selects over the ids passed
+    # here rather than joining `cards`, so nothing has to exist in
+    # card_modes before a card can be served — a scheduler row is written
+    # on first review instead. This call used to write one row per deck
+    # card per mode (3,476 of them for N1 vocab) on the first request.
 
     due = srs.get_due_cards(mode, card_ids=card_ids)
     exclude_ids = {f"{user_id}:{rid}" for rid in exclude.split(",") if rid}
@@ -892,11 +1091,27 @@ def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr"
 
         if p["source"] == "custom":
             c = p["entry"]
+            m = MODES.get(mode)
+            spec   = structure_for(c.get("structure", "standard"))
+            fields = c.get("fields") or {}
             cards.append({
                 "card_id": raw_id, "source": "custom",
-                "front": c["front"], "back": c["back"],
-                "kana": c.get("kana", ""), "hint": c.get("hint", ""),
+                "structure": spec.key,
+                # front/back derived from the structure's own field names,
+                # so the renderer needs to know nothing about structures:
+                # a kanji card fronts its kanji, a grammar card its rule.
+                "front": fields.get(spec.front_key, ""),
+                "back":  fields.get(spec.back_key, ""),
+                "fields": fields,
                 "notes": c.get("notes", ""), "mode": mode,
+                # f2b shows the front and asks for the back; b2f is the
+                # other way up. Every other source's payload carries this,
+                # and the renderer reads it rather than the mode string.
+                "direction": m.direction if m else None,
+                # No hints: a hand-written pair has nothing to build
+                # distractors from, and HintBar renders from what is
+                # actually present, so the control simply does not appear.
+                "hints": {},
                 "stage": stage,
                 "review_preview": _build_review_preview(stage, preview),
             })
@@ -907,19 +1122,12 @@ def get_deck_study_cards(deck_id: str, mode: str = "flashcard", lang: str = "fr"
             card["card_id"] = raw_id
             card["source"]  = f"builtin_{p['source']}"
 
-            # Attach the distractors the qcm-flavoured counterpart would
-            # have built, so StudyScreen can flip this card to multiple
-            # choice without another round trip. Built through the same
-            # cfg["build"] as a real qcm card rather than duplicating the
-            # distractor logic here, so the choices a flipped card shows
-            # are the exact ones it would show in a qcm session.
-            counterpart = QCM_COUNTERPART.get(mode)
-            if counterpart and counterpart in cfg["valid_modes"] and "choices" not in card:
-                alt = cfg["build"](raw_id, p["entry"], p["level"], level_list,
-                                   counterpart, lang, stage, preview)
-                if alt.get("choices"):
-                    card["choices"] = alt["choices"]
-
+            # No counterpart lookup any more: the builders attach the
+            # distractors themselves as hints.indice_1 whenever the mode
+            # offers that hint (see _build_kanji_card), so the flip to
+            # multiple choice needs nothing extra here. The QCM_COUNTERPART
+            # table existed only because `format` used to decide whether
+            # choices were built at all.
             cards.append(card)
 
     logger.info(
@@ -947,9 +1155,12 @@ def review_deck_card(deck_id: str, payload: ReviewPayload,
 
 
 @router.get("/api/decks/{deck_id}/stats")
-def get_deck_stats(deck_id: str, mode: str = "flashcard",
+def get_deck_stats(deck_id: str, mode: str = "standard.flashcard.f2b",
                    user_id: str = Depends(get_user_id)):
-    pool     = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode)]
+    deck_type = _deck_type(deck_id, user_id)
+    if deck_type is None:
+        raise HTTPException(status_code=404, detail="Deck not found")
+    pool     = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode, deck_type)]
     card_ids = prefixed([p["raw_id"] for p in pool], user_id)
 
     if not card_ids:
@@ -1008,12 +1219,15 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
                 if not front or not back:
                     errors.append(f"Row {i}: missing front/back — skipped")
                     continue
+                # CSV import writes `standard` cards: a spreadsheet of
+                # front/back columns is exactly that shape, and asking a
+                # CSV to carry a kanji card's four fields would need a
+                # per-structure column contract nobody has asked for.
                 cur.execute("""
-                    INSERT INTO custom_cards (deck_id, user_id, front, back, kana, hint, notes)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (deck_id, user_id, front, back,
-                      row.get('kana', '').strip(),
-                      row.get('hint', '').strip(),
+                    INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
+                    VALUES (%s, %s, 'standard', %s, %s)
+                """, (deck_id, user_id,
+                      json.dumps({"front": front, "back": back}, ensure_ascii=False),
                       row.get('notes', '').strip()))
                 inserted += 1
         conn.commit()

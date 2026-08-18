@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -18,22 +18,48 @@ import TierSelector from '../components/selection/TierSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
+import HintBar from '../components/study/HintBar'
+import ReadingsInput from '../components/study/ReadingsInput'
+import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import {DrawingQuiz, DrawingOverlay} from '../components/study/DrawingCanvas'
-import { speakJapanese } from '../lib/audio'
-import { kanjiModes, reviewMode, usesWritingDrill } from '../domain/quizModes'
+import { speakJapanese, playUi } from '../lib/audio'
+import {
+  MODES as STUDY_MODES, RENDER, FAST_REVIEW,
+  modePickerEntries, modeLabel, usesWritingDrill,
+} from '../domain/studyModes'
 import { applyXpGain } from '../stores/profileSummary'
-import { useCardSession } from '../hooks/useCardSession'
+import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 import { PencilIcon } from '../components/ui/Icons'
 
-const FETCH_TIMEOUT_MS = 8000
+// The 8s fetch timeout that used to live here is gone: useCardSession
+// owns the abort signal and the timeout now (10s, matched to the cold
+// start it was always meant to bridge), so the five screens no longer
+// each hand-roll a controller that only ever timed out and never
+// aborted on unmount.
+
+// The radical a kanji is filed under: the glyph large, its Kangxi number
+// and stroke count small beneath. The number is what makes the answer
+// checkable — several radicals share a shape at a glance (⺅ 亻 人), so
+// the glyph alone leaves the learner unsure whether they were right.
+function RadicalAnswer({ radical, t }) {
+  if (!radical) return null
+  return (
+    <div className="radical-answer">
+      <div className="radical-answer__char" lang="ja">{radical.char}</div>
+      <div className="radical-answer__meta">
+        {t.radicalNumber} {radical.number} · {radical.stroke_count} {t.strokes}
+      </div>
+    </div>
+  )
+}
 
 export default function KanjiScreen({ session }) {
   const navigate    = useNavigate()
   const { t, lang } = useLang()
   const [searchParams] = useSearchParams()
 
-  const MODES = kanjiModes(t)
+  const MODES = modePickerEntries(t, 'kanji')
 
   // studyBy picks which selection path is active: 'level' (JLPT N5…N1,
   // the original behaviour) or 'frequency' (Top 200 / 201-400 / ...,
@@ -65,6 +91,21 @@ export default function KanjiScreen({ session }) {
   const [xpToast, setXpToast]         = useState(null)
   const [cardStamp, setCardStamp]     = useState(null)
   const [locked, setLocked]           = useState(false)
+  // ── Hint state (indice_1/2/3) ──
+  // Session-wide rather than per-card: a display preference should stay
+  // where the learner put it. See components/study/HintBar.jsx for why a
+  // hint is a switch on the card and not a mode of its own.
+  const [activeHints, setActiveHints] = useState(() => new Set())
+  function toggleHint(key) {
+    playUi('click-mode-selection')
+    setActiveHints(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
   const [reviewing, setReviewing]     = useState(false)
   const [reviewCards, setReviewCards] = useState([])
   const [reviewLoading, setReviewLoading] = useState(false)
@@ -102,38 +143,35 @@ export default function KanjiScreen({ session }) {
   // language mid-session re-translates in place (see the effect
   // below) rather than starting a new session.
   const storageKey =
-    studyBy === 'level' && level && mode ? `jp-session:kanji:${level}:${mode}`
-    : studyBy === 'frequency' && tier && mode ? `jp-session:kanji:freq:${tier}:${tierSize}:${mode}`
-    : 'idle'
+    studyBy === 'level' && level && mode ? sessionKey('kanji', level, mode)
+    : studyBy === 'frequency' && tier && mode ? sessionKey('kanji', 'freq', tier, tierSize, mode)
+    : IDLE_KEY
 
   // Same batching contract as before (see useCardSession) — only the
   // URL differs, since /api/frequency/kanji/cards is a drop-in sibling
   // of /api/kanji/cards that swaps level for tier (see frequency.py's
   // module docstring: cards, ids and review submission are otherwise
   // identical between the two paths).
-  const fetchBatch = useCallback((count, excludeIds) => {
-    if (studyBy === 'level' && (!level || !mode)) return Promise.resolve([])
-    if (studyBy === 'frequency' && (!tier || !mode)) return Promise.resolve([])
-    if (!studyBy || !mode) return Promise.resolve([])
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+    if (studyBy === 'level' && (!level || !mode)) return []
+    if (studyBy === 'frequency' && (!tier || !mode)) return []
+    if (!studyBy || !mode) return []
     const url = studyBy === 'level'
       ? `/api/kanji/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : `/api/frequency/kanji/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-    return apiFetch(url, session, { signal: controller.signal })
-      .then(r => r.json())
-      .then(data => (data.cards ?? []).map(c => ({ ...c, lang })))
-      .finally(() => clearTimeout(timer))
+    const data = await apiJson(url, session, { signal })
+    return (data.cards ?? []).map(c => ({ ...c, lang }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studyBy, level, tier, tierSize, mode, session])
   // (lang deliberately excluded above: changing lang shouldn't change
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
 
-  const { current: card, loading, done, advance, updateCurrent } = useCardSession({
+  const { current: card, loading, done, error, retry, advance, updateCurrent } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
+    mode,
   })
 
   // Re-translate the card in hand when the UI language changes, or
@@ -150,10 +188,18 @@ export default function KanjiScreen({ session }) {
   // Deep-link support: if level/mode are given in the URL (e.g. from the
   // Stats screen's "due now" button), jump straight into that session
   // instead of making the user pick again.
+  //
+  // The mode is validated against the registry, which it never used to
+  // be: any string in ?mode= was passed straight into a session. A stale
+  // bookmark from before the taxonomy change carries a retired key, and
+  // an unvalidated one would start a session whose renderer lookup misses
+  // and whose every fetch 400s — a blank quiz with no explanation. An
+  // unknown mode now falls back to the picker, which is where someone
+  // with a broken link wants to end up anyway.
   useEffect(() => {
     const lvl = searchParams.get('level')
     const m   = searchParams.get('mode')
-    if (lvl && m) {
+    if (lvl && m && m !== FAST_REVIEW && STUDY_MODES[m]?.source === 'kanji') {
       startLevelSession(lvl, m)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -171,7 +217,7 @@ export default function KanjiScreen({ session }) {
 
   function translateCard(cardToTranslate, targetLang) {
     if (!cardToTranslate) return
-    const words = [cardToTranslate.kanji, ...(cardToTranslate.choices ?? []).map(c => c.kanji)]
+    const words = [cardToTranslate.kanji, ...(cardToTranslate.hints?.indice_1 ?? []).map(c => c.kanji)]
     const unique = [...new Set(words.filter(Boolean))]
     Promise.all(unique.map(word =>
       apiFetch(`/api/translation/kanji?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
@@ -257,7 +303,7 @@ export default function KanjiScreen({ session }) {
     // Struggling to recall the kanji from its meaning is exactly when a
     // quick writing drill helps most — recognition-direction modes and
     // the writing mode itself don't need this extra step.
-    const needTraining = quality <= 3 && card?.direction === 'm-kj' && drawingEnabled
+    const needTraining = quality <= 3 && card?.direction === 'b2f' && drawingEnabled
 
     loadProgress(studyBy === 'level' ? { level } : { tier, tierSize }, mode)
 
@@ -386,7 +432,13 @@ export default function KanjiScreen({ session }) {
     const backTitle = studyBy === 'level' ? `${t.kanjiTitle} ${level}` : `${t.kanjiTitle} ${tierLabel}`
     // Review only exists for the JLPT-level path today (see
     // startReview) — the frequency-tier path keeps the plain mode list.
-    const modesWithReview = studyBy === 'level' ? [...MODES, reviewMode(t)] : MODES
+    // The registry already puts the ungraded browse last for every
+    // source; the frequency-tier path is the one place it doesn't apply
+    // (see startReview — there is no tier-scoped review-cards endpoint),
+    // so that path drops it rather than the level path adding it.
+    const modesWithReview = studyBy === 'level'
+      ? MODES
+      : MODES.filter(m => m.key !== FAST_REVIEW)
     return (
       <div className="screen">
         <TopBar onBack={() => (studyBy === 'level' ? setLevel(null) : setTier(null))} title={backTitle} autoHide />
@@ -394,7 +446,7 @@ export default function KanjiScreen({ session }) {
           <ModeSelector
             modes={modesWithReview}
             onSelect={m => {
-              if (m === 'review') { startReview(); return }
+              if (m === FAST_REVIEW) { startReview(); return }
               board(() => {
                 if (studyBy === 'level') startLevelSession(level, m)
                 else startFrequencySession(tier, tierLabel, m)
@@ -432,15 +484,24 @@ export default function KanjiScreen({ session }) {
   }
 
   // ── Quiz ──
-  const isKjToM = card?.direction === 'kj-m'
-  const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
+  const isKjToM = card?.direction === 'f2b'
+  // Only the hints this card could actually build — a mode may declare
+  // indice_1 while a particular card has no distractors to offer.
+  const availableHints = Object.keys(card?.hints ?? {})
+  const showChoices = activeHints.has('indice_1') && Array.isArray(card?.hints?.indice_1)
+
+  const title = modeLabel(t, mode)
   const sourceLabel = studyBy === 'level' ? level : tierLabel
+  // Which UI this mode needs, from the registry rather than a string
+  // comparison against one key ('write') that used to stand in for it.
+  const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
+  const isRadical = STUDY_MODES[mode]?.base === 'radical'
 
   return (
     <div className="screen">
       <TopBar
         onBack={() => setMode(null)}
-        title={`${t.kanjiTitle} ${sourceLabel} — ${modeLabel}`}
+        title={`${t.kanjiTitle} ${sourceLabel} — ${title}`}
         autoHide
         actions={usesWritingDrill(mode) ? (
           <button
@@ -460,10 +521,13 @@ export default function KanjiScreen({ session }) {
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
+        {error && !card && <SessionError error={error} onRetry={retry} />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
 
         {card && !loading && (
           <>
+            <HintBar available={availableHints} active={activeHints}
+                     onToggle={toggleHint} disabled={locked} />
             <CardTransition
               cardKey={card.card_id}
               contentKey={`${card.card_id}:${card.lang ?? ''}`}
@@ -475,9 +539,59 @@ export default function KanjiScreen({ session }) {
                 checkAdvance()
               }}
             >
-              {mode !== 'write' ? (
+              {renderer === RENDER.TYPE ? (
+                /* readings — the kanji is shown, every reading is typed
+                   into ReadingsInput below. No flip: the answer is not one
+                   thing to uncover but a set the learner produces. */
                 <PromptCard>
-                  {card.format === 'flashcard' && (
+                  <CharDisplay char={card.kanji} size={100} />
+                  <RevealActions
+                    t={t}
+                    revealed={answered}
+                    resetKey={card.card_id}
+                    dictTerm={card.kanji}
+                    dictCategory="kanji"
+                    session={session}
+                    onReplaySound={() => speakJapanese(card.kana)}
+                  />
+                </PromptCard>
+              ) : isRadical ? (
+                /* radical — the kanji is shown, the radical it is filed
+                   under is the answer. Same flip/choices split as the
+                   meaning flashcards above it. */
+                <PromptCard>
+                  {!showChoices && (
+                    <Flashcard
+                      t={t}
+                      resetKey={card.card_id}
+                      onReveal={onFlashcardReveal}
+                      front={<CharDisplay char={card.kanji} size={100} />}
+                      back={<RadicalAnswer radical={card.radical} t={t} />}
+                      dictTerm={card.kanji}
+                      dictCategory="kanji"
+                      session={session}
+                      onReplaySound={() => speakJapanese(card.kana)}
+                    />
+                  )}
+                  {showChoices && (
+                    <>
+                      <CharDisplay char={card.kanji} size={100} />
+                      {answered && <RadicalAnswer radical={card.radical} t={t} />}
+                      <RevealActions
+                        t={t}
+                        revealed={answered}
+                        resetKey={card.card_id}
+                        dictTerm={card.kanji}
+                        dictCategory="kanji"
+                        session={session}
+                        onReplaySound={() => speakJapanese(card.kana)}
+                      />
+                    </>
+                  )}
+                </PromptCard>
+              ) : renderer !== RENDER.DRAW ? (
+                <PromptCard>
+                  {!showChoices && (
                     <Flashcard
                       t={t}
                       resetKey={card.card_id}
@@ -506,7 +620,7 @@ export default function KanjiScreen({ session }) {
                     />
                   )}
 
-                  {card.format === 'qcm' && (
+                  {showChoices && (
                     <>
                       <InlineReveal
                         t={t}
@@ -549,18 +663,38 @@ export default function KanjiScreen({ session }) {
               )}
             </CardTransition>
 
-            {card.format === 'qcm' && (
+            {showChoices && isRadical && (
               <MCQGrid
-                choices={card.choices.map(c => isKjToM ? c.meaning : c.kanji)}
+                choices={(card.hints?.indice_1 ?? []).map(c => c.char)}
+                correct={card.radical?.char}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer}
+              />
+            )}
+
+            {showChoices && !isRadical && (
+              <MCQGrid
+                choices={(card.hints?.indice_1 ?? []).map(c => isKjToM ? c.meaning : c.kanji)}
                 correct={isKjToM ? card.meaning : card.kanji}
                 formatChoice={isKjToM ? formatGlossLine : undefined}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}
 
-            {mode === 'write' && card.kanji && (
+            {renderer === RENDER.TYPE && (
+              <ReadingsInput
+                key={card.card_id}
+                readings={card.readings}
+                submitted={answered}
+                onSubmit={onFlashcardReveal}
+              />
+            )}
+
+            {renderer === RENDER.DRAW && card.kanji && (
               <DrawingQuiz
                 kanji={card.kanji}
+                // Without this the canvas keeps the previous card's ink:
+                // Canvas clears on resetKey changing, and nothing else.
+                resetKey={card.card_id}
                 meaning={formatGlossLine(card.meaning)}
                 onValidate={() => {
                   setAnswered(true)
@@ -575,6 +709,9 @@ export default function KanjiScreen({ session }) {
             {showDrawing && (
               <DrawingOverlay
                 kanji={card.kanji}
+                // Without this the canvas keeps the previous card's ink:
+                // Canvas clears on resetKey changing, and nothing else.
+                resetKey={card.card_id}
                 meaning={formatGlossLine(card.meaning)}
                 onDone={() => {
                   setShowDrawing(false)

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -16,14 +16,23 @@ import { CardTransition } from '../components/study/CardTransition'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
+import SessionError from '../components/study/SessionError'
 import { DrawingQuiz, DrawingOverlay } from '../components/study/DrawingCanvas'
-import { speakJapanese, playUi } from '../lib/audio'
-import { vocabKanjiModes, kanjiModes, grammarModePicker, usesWritingDrill } from '../domain/quizModes'
+import { speakJapanese } from '../lib/audio'
+import {
+  MODES as STUDY_MODES, RENDER, HINTS,
+  modeLabel, modeDesc, usesWritingDrill,
+} from '../domain/studyModes'
+import HintBar from '../components/study/HintBar'
 import { applyXpGain } from '../stores/profileSummary'
-import { useCardSession } from '../hooks/useCardSession'
+import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 import { ChevronIcon, PencilIcon, LightbulbIcon } from '../components/ui/Icons'
 
-const FETCH_TIMEOUT_MS = 8000
+// The 8s fetch timeout that used to live here is gone: useCardSession
+// owns the abort signal and the timeout now (10s, matched to the cold
+// start it was always meant to bridge), so the five screens no longer
+// each hand-roll a controller that only ever timed out and never
+// aborted on unmount.
 
 // A deck can hold cards from any of these sources at once, so its mode
 // picker needs labels/descriptions for every key any of them might
@@ -36,72 +45,23 @@ const FETCH_TIMEOUT_MS = 8000
 // flashcard experience — custom cards reuse the same key/label for
 // their own much simpler flashcard rendering (see renderCustomPrompt)
 // without needing a mode of their own.
-function allModeMeta(t) {
-  const list = [...vocabKanjiModes(t), ...kanjiModes(t), ...grammarModePicker(t)]
-  return Object.fromEntries(list.map(m => [m.key, m]))
-}
-
-// ── The merged recall modes ────────────────────────────────────
-// A deck used to offer "MCQ → meaning", "MCQ → word", "Flashcard →
-// meaning" and "Flashcard → word" as four separate entries, which is
-// two questions asked twice: the *direction* is the question, and
-// multiple-choice vs. bare recall is only how much help you get
-// answering it. They're one entry per direction now, and the help
-// level is a switch inside the session (see `assisted`) that a learner
-// can flip on the card in front of them — the point at which they
-// actually know whether they need the options.
+// ── Deck modes come from the deck's STRUCTURE ──────────────
+// A deck has one structure, so /api/decks/{id}/modes returns that
+// structure's registry keys directly and this screen renders them with
+// the registry's own labels.
 //
-// The session runs on the flashcard-flavoured key of the pair, for a
-// concrete reason: custom hand-written cards are only eligible for
-// flashcard-flavoured modes (see decks.py's _eligible — a front/back
-// pair has no distractors), so keying a mixed deck's session on the
-// qcm side would silently drop every card the learner wrote
-// themselves. decks.py attaches the qcm counterpart's choices to
-// app-sourced cards so the switch has something to show.
+// What used to live here was MERGED_MODES + mergeModes + mergedLabelFor:
+// machinery to collapse "MCQ → meaning" and "Flashcard → meaning" back
+// into one entry at runtime, because the API offered them as two. They
+// were never two exercises -- the direction is the question, and multiple
+// choice is only how much help you get answering it -- so the registry
+// makes them one key with indice_1 as an opt-in hint, and the collapse has
+// nothing left to do.
 //
-// One key means one SRS track, one set of stats and one review_preview
-// — no progress is split or double-counted by flipping. That's sound
-// rather than merely convenient: what an SRS review consumes is the
-// learner's own 1-4 self-rating from RatingBar, which means the same
-// thing whether or not four options were on screen when they recalled it.
-const MERGED_MODES = {
-  'flashcard-kj-m': 'qcm-kj-m',
-  'flashcard-m-kj': 'qcm-m-kj',
-  flashcard: 'mcq',
-}
-
-/** Collapse the raw mode list from the API into the merged entries. */
-function mergeModes(keys, meta, t) {
-  const present = new Set(keys)
-  // A qcm-flavoured key is only absorbed when the flashcard partner
-  // that would absorb it is actually in the list. Absorbing
-  // unconditionally would make a deck offering (hypothetically) just
-  // 'qcm-kj-m' show no entry for it at all — dropped rather than merged.
-  const absorbed = new Set(
-    Object.entries(MERGED_MODES)
-      .filter(([flashcardKey]) => present.has(flashcardKey))
-      .map(([, qcmKey]) => qcmKey),
-  )
-  return keys
-    .filter(key => !absorbed.has(key))
-    .map(key => {
-      const partner = MERGED_MODES[key]
-      const canMerge = partner && keys.includes(partner)
-      return {
-        key,
-        label: canMerge ? (meta[key]?.mergedLabel ?? mergedLabelFor(key, t)) : (meta[key]?.label ?? key),
-        desc: canMerge ? t.modeRecallDesc : (meta[key]?.desc ?? ''),
-      }
-    })
-}
-
-// The direction, named without the format that used to be glued to the
-// front of it ("MCQ (word → meaning)" becomes "Word → meaning").
-function mergedLabelFor(key, t) {
-  if (key === 'flashcard-kj-m') return t.modeRecallKjM
-  if (key === 'flashcard-m-kj') return t.modeRecallMKj
-  return t.modeRecallGrammar
-}
+// One key still means one SRS track, one set of stats and one
+// review_preview. That is sound rather than merely convenient: what a
+// review consumes is the learner's own 1-4 self-rating, which means the
+// same thing whether or not four options were on screen.
 
 // The written form to quiz/display on — mirrors VocabScreen's own
 // wordForm: some vocab entries are kana-only (no kanji), and this
@@ -118,7 +78,6 @@ export default function StudyScreen({ session }) {
   const { state }    = useLocation()
   const deck         = state?.deck
 
-  const MODE_META = allModeMeta(t)
 
   // A deck's available modes come from what's actually inside it
   // (custom cards + whatever kanji/vocab/grammar cards were browsed
@@ -136,7 +95,11 @@ export default function StudyScreen({ session }) {
       .then(r => r.json())
       .then(data => {
         const keys = data.modes?.length ? data.modes : []
-        setAvailableModes(mergeModes(keys, MODE_META, t))
+        setAvailableModes(keys.map(key => ({
+          key,
+          label: modeLabel(t, key),
+          desc: modeDesc(t, key),
+        })))
         setComposition(data.composition ?? null)
       })
       .catch(() => setAvailableModes([]))
@@ -145,11 +108,13 @@ export default function StudyScreen({ session }) {
   }, [deck_id, session])
 
   const [answered, setAnswered]       = useState(false)
-  // The help level inside a merged mode: true = show the four choices,
-  // false = recall it cold and self-grade. Session-wide rather than
-  // per-card so it stays where the learner put it, but switchable at
-  // any moment — including mid-card, before answering.
-  const [assisted, setAssisted]       = useState(false)
+  // Hints switched on for the card in hand. Session-wide, so it stays
+  // where the learner put it, and switchable mid-card — the point at
+  // which they actually know whether they need the options.
+  const [activeHints, setActiveHints] = useState([])
+  function toggleHint(key) {
+    setActiveHints(hs => (hs.includes(key) ? hs.filter(h => h !== key) : [...hs, key]))
+  }
   // Grammar's own flip state — unlike Kanji/Vocab, its flashcard mode
   // doesn't use the shared <Flashcard> component (see renderGrammarPrompt).
   const [flipped, setFlipped]         = useState(false)
@@ -225,28 +190,37 @@ export default function StudyScreen({ session }) {
   // before either change has a shape this screen no longer expects,
   // and useCardSession has no way to know that on its own; bumping the
   // key is what makes it fetch fresh instead of resuming stale data.
-  const storageKey = mode ? `jp-session:deck:v2:${deck_id}:${mode}` : 'idle'
+  // The v2 segment this key used to carry by hand is now the shared
+  // CACHE_VERSION inside sessionKey() — every screen gets it, not just
+  // this one, which is what stops a payload change from feeding a stale
+  // shape to a renderer on the other four.
+  const storageKey = mode ? sessionKey('deck', deck_id, mode) : IDLE_KEY
 
-  const fetchBatch = useCallback((count, excludeIds) => {
-    if (!mode) return Promise.resolve([])
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-    const allExcluded = Array.from(new Set([...excludeIds, ...recentlyReviewedRef.current.keys()]))
-    return apiFetch(
-      `/api/decks/${deck_id}/study?mode=${mode}&lang=${lang}&count=${count}&exclude=${allExcluded.join(',')}`,
+  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+    if (!mode) return []
+    const data = await apiJson(
+      `/api/decks/${deck_id}/study?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`,
       session,
-      { signal: controller.signal },
+      { signal },
     )
-      .then(r => r.json())
-      .then(data => data.cards ?? [])
-      .finally(() => clearTimeout(timer))
+    return data.cards ?? []
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deck_id, mode, lang, session])
 
-  const { current: card, loading, done, advance } = useCardSession({
+  // The just-reviewed set is merged into the exclude list by the hook
+  // itself now (extraExcludeIds), so every screen gets the protection
+  // this one had hand-rolled inside its own fetchBatch.
+  const extraExcludeIds = useCallback(
+    () => Array.from(recentlyReviewedRef.current.keys()),
+    [],
+  )
+
+  const { current: card, loading, done, error, retry, advance } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
+    mode,
+    extraExcludeIds,
   })
 
   useEffect(() => {
@@ -270,16 +244,11 @@ export default function StudyScreen({ session }) {
 
   function startSession(m) {
     setMode(m)
-    // Start unassisted: the merged mode's whole point is that you try
-    // to recall first and reach for the choices when you actually need
-    // them, not the other way round.
-    setAssisted(false)
+    // Start with no hints: the point is to try recalling first and reach
+    // for the options when you actually need them, not the other way round.
+    setActiveHints([])
     loadProgress(m)
   }
-
-  // Is the running mode one of the merged pairs (and so eligible for
-  // the assist switch at all)? 'write'/'fill' are not.
-  const isMerged = mode != null && mode in MERGED_MODES
 
   function checkAdvance() {
     if (pendingGatesRef.current.size === 0 && !advancedRef.current) {
@@ -311,7 +280,7 @@ export default function StudyScreen({ session }) {
       // carry direction 'm-kj' from a kanji source, so this naturally
       // never fires for them.
       const needTraining =
-        quality <= 3 && card.source === 'builtin_kanji' && card.direction === 'm-kj' && drawingEnabled
+        quality <= 3 && card.source === 'builtin_kanji' && card.direction === 'b2f' && drawingEnabled
 
       loadProgress(mode)
 
@@ -441,17 +410,22 @@ export default function StudyScreen({ session }) {
     )
   }
 
-  const currentModeLabel = isMerged ? mergedLabelFor(mode, t) : (MODE_META[mode]?.label ?? mode)
-  const isKjToM = card?.direction === 'kj-m'
+  const currentModeLabel = modeLabel(t, mode)
+  const isKjToM = card?.direction === 'f2b'
+  const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
 
-  // Whether THIS card can offer the assisted view: it needs the
-  // distractors decks.py attaches to app-sourced cards. A custom
-  // hand-written card never has them (nothing to build them from), so
-  // in a mixed deck the switch simply doesn't apply to those cards and
-  // the control says so rather than sitting there dead.
-  const cardCanAssist = isMerged && Array.isArray(card?.choices) && card.choices.length > 0
-  // What the card should actually render as, right now.
-  const shownFormat = cardCanAssist && assisted ? 'qcm' : card?.format
+  // Hints this CARD can offer, not the ones the mode declares. A
+  // hand-written pair has no distractors to build from, so its hints map
+  // is empty and HintBar renders no control at all rather than a dead one.
+  const cardHints = card?.hints ?? {}
+  const availableHints = Object.keys(cardHints).filter(
+    k => Array.isArray(cardHints[k]) && cardHints[k].length > 0,
+  )
+  const cardChoices = cardHints[HINTS.CHOICES]
+  const choicesOn = activeHints.includes(HINTS.CHOICES) && Array.isArray(cardChoices)
+  // With the options up, the card shows the prompt and the grid instead
+  // of a flip card: two reveal affordances on one card compete.
+  const shownFormat = choicesOn ? 'qcm' : 'flashcard'
 
   // ── Per-source prompt renderers (rendered inside CardTransition) ──
   // Deliberately NOT collapsed into one generic front/back layout —
@@ -499,7 +473,7 @@ export default function StudyScreen({ session }) {
   }
 
   function renderKanjiPrompt(c) {
-    if (mode === 'write') {
+    if (renderer === RENDER.DRAW) {
       return (
         <PromptCard>
           <MeaningDisplay meaning={c.meaning} size={32} />
@@ -576,18 +550,16 @@ export default function StudyScreen({ session }) {
   }
 
   function renderGrammarPrompt(c) {
-    // grammarAssisted: the merged grammar mode ('flashcard') showing its
-    // choices. Grammar's flip is bespoke (not the shared <Flashcard>),
-    // so it reads the switch directly rather than through shownFormat.
-    const grammarAssisted = mode === 'flashcard' && cardCanAssist && assisted
-    const isFlip = mode === 'flashcard' && !grammarAssisted
+    // Grammar's flip is bespoke (not the shared <Flashcard>), so it reads
+    // the hint switch directly rather than through shownFormat.
+    const isFlip = renderer === RENDER.FLASHCARD && !choicesOn
     return (
       <PromptCard className="grammar-prompt">
         <div className="grammar-glyph">{c.grammar}</div>
         {isFlip && !flipped && <div className="grammar-hint">{t.revealMeaning}</div>}
         {isFlip && flipped && <div className="grammar-meaning"><GlossList meaning={c.meaning} /></div>}
         {!isFlip && (
-          <div className="grammar-reveal-hint">{mode === 'fill' ? t.revealSentence : t.revealMeaning}</div>
+          <div className="grammar-reveal-hint">{renderer === RENDER.FILL ? t.revealSentence : t.revealMeaning}</div>
         )}
       </PromptCard>
     )
@@ -622,6 +594,7 @@ export default function StudyScreen({ session }) {
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
+        {error && !card && <SessionError error={error} onRetry={retry} />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
 
         {card && !loading && (
@@ -633,24 +606,12 @@ export default function StudyScreen({ session }) {
                 is rated (`locked`). A custom hand-written card has no
                 distractors to show, so on those it explains its own
                 absence instead of appearing dead. */}
-            {isMerged && (
-              <div className="study-assist">
-                {cardCanAssist ? (
-                  <button
-                    type="button"
-                    className={`study-assist__toggle${assisted ? ' study-assist__toggle--on' : ''}`}
-                    onClick={() => { playUi('click-mode-selection'); setAssisted(a => !a) }}
-                    disabled={locked}
-                    aria-pressed={assisted}
-                  >
-                    <LightbulbIcon size={14} />
-                    {assisted ? t.assistOn : t.assistOff}
-                  </button>
-                ) : (
-                  <span className="study-assist__na">{t.assistUnavailable}</span>
-                )}
-              </div>
-            )}
+            <HintBar
+              available={availableHints}
+              active={activeHints}
+              onToggle={toggleHint}
+              disabled={locked}
+            />
 
             <CardTransition
               cardKey={`${card.card_id}:${cardNonce}`}
@@ -669,7 +630,7 @@ export default function StudyScreen({ session }) {
             </CardTransition>
 
             {/* Grammar's fill-in example sentence — 'fill' mode only */}
-            {card.source === 'builtin_grammar' && mode === 'fill' && card.fill_example && (
+            {card.source === 'builtin_grammar' && renderer === RENDER.FILL && card.fill_sentence && (
               <div className="grammar-fill-example">
                 <div className="grammar-fill-example__jp">
                   {answered ? card.fill_example.jp_full : card.fill_example.jp_blanked}
@@ -683,8 +644,8 @@ export default function StudyScreen({ session }) {
 
             {/* Grammar flashcard reveal — hidden while the merged mode
                 is showing its choices instead. */}
-            {card.source === 'builtin_grammar' && mode === 'flashcard'
-              && !(cardCanAssist && assisted) && !flipped && (
+            {card.source === 'builtin_grammar' && renderer === RENDER.FLASHCARD
+              && !choicesOn && !flipped && (
               <button onClick={onGrammarFlashcardReveal} className="reveal-btn">
                 {t.revealMeaningBtn}
               </button>
@@ -693,16 +654,16 @@ export default function StudyScreen({ session }) {
             {/* Grammar MCQ — choices are plain meaning strings, unlike
                 Kanji/Vocab's {kanji,meaning} choice objects below.
                 Reached either as the standalone 'mcq' mode or as the
-                assisted half of the merged 'flashcard' one. */}
+                choices half of the flashcard mode. */}
             {card.source === 'builtin_grammar'
-              && (mode === 'mcq' || (mode === 'flashcard' && cardCanAssist && assisted)) && (
+              && (choicesOn || renderer === RENDER.FILL) && (
               <MCQGrid choices={card.choices} correct={card.meaning}
                 formatChoice={formatGlossLine}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
 
             {/* Grammar fill reveal */}
-            {card.source === 'builtin_grammar' && mode === 'fill' && !answered && (
+            {card.source === 'builtin_grammar' && renderer === RENDER.FILL && !answered && (
               <button onClick={onFillReveal} className="grammar-fill-reveal-btn">
                 {t.revealAnswer}
               </button>
@@ -732,7 +693,7 @@ export default function StudyScreen({ session }) {
                 objects, flattened to whichever side isn't the prompt. */}
             {(card.source === 'builtin_kanji' || card.source === 'builtin_vocab') && shownFormat === 'qcm' && (
               <MCQGrid
-                choices={card.choices.map(c => isKjToM ? c.meaning : wordForm(c))}
+                choices={(cardChoices ?? []).map(c => isKjToM ? c.meaning : wordForm(c))}
                 correct={isKjToM ? card.meaning : wordForm(card)}
                 formatChoice={isKjToM ? formatGlossLine : undefined}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
@@ -740,9 +701,12 @@ export default function StudyScreen({ session }) {
             )}
 
             {/* Kanji write mode */}
-            {card.source === 'builtin_kanji' && mode === 'write' && card.kanji && (
+            {card.source === 'builtin_kanji' && renderer === RENDER.DRAW && card.kanji && (
               <DrawingQuiz
                 kanji={card.kanji}
+                // Without this the canvas keeps the previous card's ink:
+                // Canvas clears on resetKey changing, and nothing else.
+                resetKey={card.card_id}
                 meaning={formatGlossLine(card.meaning)}
                 onValidate={() => {
                   setAnswered(true)
@@ -757,6 +721,9 @@ export default function StudyScreen({ session }) {
             {showDrawing && (
               <DrawingOverlay
                 kanji={card.kanji}
+                // Without this the canvas keeps the previous card's ink:
+                // Canvas clears on resetKey changing, and nothing else.
+                resetKey={card.card_id}
                 meaning={formatGlossLine(card.meaning)}
                 onDone={() => {
                   setShowDrawing(false)

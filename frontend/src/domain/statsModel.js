@@ -17,23 +17,62 @@
 export const CATEGORIES = ['kana', 'vocab', 'kanji', 'grammar']
 
 // ── The two axes the mode key is really carrying ──────────
-// A mode key like 'qcm-m-kj' encodes two independent things: how the
-// question is asked (multiple choice) and which way round it runs
-// (meaning → form). Splitting them turns one twelve-value dimension
-// nobody can hold in their head into two four-value ones that answer
-// real questions: "am I better at recognising than recalling?" is the
-// single most useful thing this dataset can tell you, and the old
+// A mode key encodes two independent things: how the question is asked
+// and which way round it runs. Splitting them turns one twelve-value
+// dimension nobody can hold in their head into two smaller ones that
+// answer real questions: "am I better at recognising than recalling?" is
+// the single most useful thing this dataset can tell you, and the old
 // screen couldn't express it at all.
-const FORMAT = {
-  'qcm': 'choice',
-  'mcq': 'choice',
-  'qcm-kj-m': 'choice',
-  'qcm-m-kj': 'choice',
+//
+// Both axes now come from domain/studyModes.js. They used to be two maps
+// right here — the third and fourth copies of the mode key space — and
+// their failure mode was quiet: an unlisted key fell through
+// `FORMAT[mode] ?? mode` to become its own one-row "format" bucket, and
+// through `DIRECTION[mode] ?? 'recognition'` to be labelled recognition
+// whatever it actually was. A mode could therefore be mis-reported for
+// as long as nobody happened to compare the numbers by hand.
+//
+// `choice` is gone as a format. Multiple choice is a hint now (see
+// HintBar), so a flashcard is a flashcard whether or not the learner
+// asked for the options — which is also the honest thing to report,
+// since both used to write to separate SRS tracks for the same
+// knowledge and split every statistic in two.
+export { FORMATS, DIRECTIONS } from './studyModes'
+
+import {
+  MODES as STUDY_MODES, FORMATS as _FORMATS,
+  modeLabel as registryLabel,
+} from './studyModes'
+
+// Legacy fallbacks, for rows written before the taxonomy change. They can
+// go when the SRS wipe lands and card_modes holds only registry keys.
+const LEGACY_FORMAT = {
+  'qcm': 'flashcard', 'mcq': 'flashcard',
+  'qcm-kj-m': 'flashcard', 'qcm-m-kj': 'flashcard',
   'flashcard': 'flashcard',
-  'flashcard-kj-m': 'flashcard',
-  'flashcard-m-kj': 'flashcard',
-  'write': 'writing',
-  'fill': 'fill',
+  'flashcard-kj-m': 'flashcard', 'flashcard-m-kj': 'flashcard',
+  'write': 'writing', 'fill': 'fill',
+}
+const LEGACY_DIRECTION = {
+  'qcm': 'recognition', 'mcq': 'recognition', 'flashcard': 'recognition',
+  'qcm-kj-m': 'recognition', 'flashcard-kj-m': 'recognition',
+  'qcm-m-kj': 'recall', 'flashcard-m-kj': 'recall', 'fill': 'recall',
+  'write': 'production',
+}
+
+/**
+ * The format/direction pair for a mode key, registry first, then the
+ * legacy table. An unknown key falls back to the FIRST declared format
+ * rather than becoming its own bucket, so a stray key can no longer
+ * invent a column in the Explorer.
+ */
+function axesFor(mode) {
+  const m = STUDY_MODES[mode]
+  if (m) return { format: m.format, direction: m.statsDirection }
+  return {
+    format: LEGACY_FORMAT[mode] ?? _FORMATS[0],
+    direction: LEGACY_DIRECTION[mode] ?? 'recognition',
+  }
 }
 
 // Recognition: the form is in front of you, produce the meaning.
@@ -41,20 +80,6 @@ const FORMAT = {
 // memory, but only enough to pick or check it. Production: write it
 // stroke by stroke with nothing to lean on. That's a real difficulty
 // ladder, and a user's numbers almost always fall down it.
-const DIRECTION = {
-  'qcm': 'recognition',
-  'flashcard': 'recognition',
-  'mcq': 'recognition',
-  'qcm-kj-m': 'recognition',
-  'flashcard-kj-m': 'recognition',
-  'qcm-m-kj': 'recall',
-  'flashcard-m-kj': 'recall',
-  'fill': 'recall',
-  'write': 'production',
-}
-
-export const FORMATS = ['choice', 'flashcard', 'writing', 'fill']
-export const DIRECTIONS = ['recognition', 'recall', 'production']
 
 // ── Labels ────────────────────────────────────────────────
 export function categoryLabel(t, category) {
@@ -68,8 +93,8 @@ export function categoryLabel(t, category) {
 
 export function formatLabel(t, format) {
   return {
-    choice: t.modeQCM,
     flashcard: t.modeFlashcard,
+    typing: t.modeType,
     writing: t.modeWrite,
     fill: t.modeFill,
   }[format] ?? format
@@ -83,11 +108,17 @@ export function directionLabel(t, direction) {
   }[direction] ?? direction
 }
 
-// The per-category mode label, which is the one place the noun
-// genuinely matters: 'qcm-m-kj' is "→ word" under vocab and "→ kanji"
-// under kanji, and calling both the same thing is how the old screen's
-// labels drifted.
+// The mode label. The `category` argument is retained because this screen
+// still reads whatever keys are in card_modes, which for pre-taxonomy rows
+// are the un-namespaced legacy ones where the same string meant different
+// things per section ('flashcard-m-kj' was "→ word" under vocab and
+// "→ kanji" under kanji). A registry key names its own source, so the
+// noun is no longer needed to disambiguate — but old rows survive in the
+// DB until the wipe, and they still have to read sensibly.
 export function modeLabel(t, category, mode) {
+  const fromRegistry = registryLabel(t, mode)
+  if (fromRegistry !== mode) return fromRegistry
+
   const noun = category === 'kanji' ? t.kanjiNoun : t.wordNoun
   return {
     'qcm': t.modeQCM,
@@ -121,13 +152,14 @@ export function flattenStats(stats, t) {
     for (const [group, modes] of Object.entries(section)) {
       for (const [mode, s] of Object.entries(modes)) {
         if (!s) continue
+        const { format, direction } = axesFor(mode)
         rows.push({
           id: `${category}/${group}/${mode}`,
           category,
           group,
           mode,
-          format: FORMAT[mode] ?? mode,
-          direction: DIRECTION[mode] ?? 'recognition',
+          format,
+          direction,
           label: modeLabel(t, category, mode),
           total: s.total ?? 0,
           new: s.new ?? 0,

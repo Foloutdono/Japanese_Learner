@@ -3,17 +3,34 @@ import random
 from fastapi import APIRouter, Depends
 from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
-from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
-from content.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
-from study.quiz_modes import GRAMMAR_MODES
+from srs.batch_cache import key as batch_key, pick_ids
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
+from content.grammar_sentences_data import get_sentences
+from study.modes import (
+    GRAMMAR, GRADED_FOR_SOURCE, INDICE_CHOICES, INDICE_SENTENCES,
+    Mode, eligible_for, require_mode,
+)
+from study.grammar_match import verifiable
 from study.mcq import pick_distractors
 from pydantic import BaseModel
+
+# The grammar section now runs on content/grammar_points.json -- the
+# project's own 205-point catalogue -- rather than content/grammar_data.py,
+# which is scraped from jlptsensei.com and carries a detail_url back to
+# every page it came from. Example sentences come from the hand-written
+# content/grammar_sentences.json beside it.
+#
+# This is the switch every grammar card id depends on: the owned catalogue
+# names its field `pattern` where the scraped one said `grammar`, so
+# grammar_to_id now formats grammar_{level}_{pattern}. Every pre-existing
+# grammar row in card_modes is therefore orphaned, which is one of the two
+# reasons the SRS wipe has to follow this commit.
+GRAMMAR_BY_LEVEL = GRAMMAR_POINTS_BY_LEVEL
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 MAX_BATCH = 25
-VALID_MODES = set(GRAMMAR_MODES)
 
 
 class ReviewPayload(BaseModel):
@@ -84,53 +101,97 @@ def get_grammar_levels():
     return {"levels": list(GRAMMAR_BY_LEVEL.keys())}
 
 
-def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], mode: str,
+def _fill_ok(level: str, pattern: str) -> bool:
+    """
+    Whether fill_in can ask "which rule is at work here?" about this point
+    and have exactly one right answer.
+
+    Needs a sentence, obviously. But it also needs a pattern that a
+    sentence can point at UNIQUELY, and a bare particle is not one:
+    「毎あさパンを食べます。」 demonstrates を, and also ます, and also
+    〜ています' absence -- asking which rule it shows has several defensible
+    answers. That is the same ambiguity that ruled out blanking the rule
+    out of the sentence, arriving from the other direction.
+
+    grammar_match.verifiable() already draws exactly this line for exactly
+    this reason, so it is reused rather than restated.
+    """
+    return verifiable(pattern) and bool(get_sentences(level, pattern))
+
+
+def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mode,
                          stage: str | None = None, preview: dict[int, dict] | None = None) -> dict:
-    # MCQ: choose 3 wrong meanings + 1 correct. The candidates already
-    # *are* meanings here, hence the identity accessor.
-    choices = pick_distractors(
-        [g["meaning"] for g in grammar_list], lambda m: m, entry["meaning"],
-    ) + [entry["meaning"]]
-    random.shuffle(choices)
+    """
+    Takes a resolved Mode, matching kana/kanji/vocab. The flat `choices`
+    list and the `format`-style mode string are gone: the options are a
+    hint the learner switches on, not a property of the exercise.
 
-    # Fill-in: pick a random example and blank out the grammar point
-    fill_example = None
-    if entry["examples"] and mode == "fill":
-        ex = random.choice(entry["examples"])
-        blanked = ex["jp"].replace(
-            entry["grammar"].split('・')[0],
-            '＿＿＿'
-        )
-        fill_example = {
-            "jp_blanked": blanked,
-            "jp_full":    ex["jp"],
-            "romaji":     ex["romaji"],
-            "en":         ex["en"],
-        }
+    `explanation` and the scraped `examples` are gone with the source
+    switch. The owned catalogue holds pattern / structure / gloss, and the
+    sentences come from grammar_sentences.json.
+    """
+    pattern   = entry["pattern"]
+    sentences = get_sentences(level, pattern)
 
-    return {
-        "card_id":      grammar_to_id(entry, level),
-        "grammar":      entry["grammar"],
-        "meaning":      entry["meaning"],
-        "explanation":  entry["explanation"],
-        "examples":     entry["examples"],
-        "choices":      choices,
-        "fill_example": fill_example,
-        "mode":         mode,
-        # Current SRS stage, so the client can hand it straight back
-        # as ReviewPayload.prev_stage without another lookup.
-        "stage":        stage,
-        # Exact xp/level/stage-up outcome for every possible rating,
-        # precomputed now so postReview on the frontend never has to
-        # guess or wait on a round trip to know what just happened.
+    payload = {
+        "card_id":   grammar_to_id(entry, level),
+        "mode":      m.key,
+        # f2b: the pattern is shown, recall what it means.
+        # b2f: the meaning is shown, recall the pattern.
+        "direction": m.direction,
+        "grammar":   pattern,
+        "structure": entry["structure"],
+        "meaning":   entry["meaning"],
+        # Current SRS stage, so the client can hand it straight back as
+        # ReviewPayload.prev_stage without another lookup.
+        "stage":     stage,
+        # Exact xp/level/stage-up outcome for every possible rating, so
+        # postReview never has to guess or wait on a round trip.
         "review_preview": _build_review_preview(stage, preview),
+        "hints": {},
     }
 
+    if INDICE_CHOICES in m.hints:
+        # Built unconditionally for a hint-capable mode: the learner can
+        # ask for the options mid-card, and a round trip at that moment
+        # would stall the card.
+        #
+        # fill_in shows the sentence and asks WHICH RULE is at work, so its
+        # options are patterns; the flashcards ask what a rule means, so
+        # theirs are meanings.
+        if m.base == "fill_in":
+            choices = pick_distractors(
+                [g["pattern"] for g in grammar_list if verifiable(g["pattern"])],
+                lambda p: p, pattern,
+            ) + [pattern]
+        else:
+            choices = pick_distractors(
+                [g["meaning"] for g in grammar_list], lambda x: x, entry["meaning"],
+            ) + [entry["meaning"]]
+        random.shuffle(choices)
+        payload["hints"][INDICE_CHOICES] = choices
 
-def _select_cards(level: str, mode: str, count: int, exclude_ids: set[str], user_id: str):
+    if INDICE_SENTENCES in m.hints and sentences:
+        # The translation travels with the sentence but the CLIENT keeps it
+        # hidden until asked for -- that is the whole shape of indice_2.
+        # Sending it up front costs nothing and means revealing it is
+        # instant rather than another request mid-card.
+        payload["hints"][INDICE_SENTENCES] = sentences
+
+    if m.base == "fill_in":
+        # Shown INTACT, with no translation. Blanking the rule out has no
+        # unique answer -- 食べて＿＿＿ takes いる, から, もいい and はいけない
+        # alike -- so the question is "which rule is at work here", which
+        # always has exactly one right answer.
+        payload["fill_sentence"] = {"jp": sentences[0]["jp"], "en": sentences[0]["en"]}
+
+    return payload
+
+
+def _select_cards(level: str, m: Mode, count: int, exclude_ids: set[str], user_id: str):
     """
     Shared by /api/grammar/card and /api/grammar/cards: resolves the
-    level, makes sure the cards/card_modes rows exist, picks up to
+    level, picks up to
     `count` due/new card ids (excluding anything already sitting
     unreviewed in the caller's queue), and builds the full payload for
     each. Returns (grammar_list, cards) — grammar_list is None for an
@@ -139,13 +200,31 @@ def _select_cards(level: str, mode: str, count: int, exclude_ids: set[str], user
     kanji.py's _select_cards.
     """
     grammar_list = GRAMMAR_BY_LEVEL.get(level)
-    if not grammar_list or mode not in VALID_MODES:
+    if not grammar_list:
         return None, None
+    # Mode validity is settled upstream by require_mode; an unknown level
+    # is the only failure left here.
+    mode = m.key
 
-    raw_ids   = [grammar_to_id(g, level) for g in grammar_list]
+    # fill_in needs a sentence that verifiably contains its rule, so a
+    # point with none is removed from the POOL rather than skipped at build
+    # time -- an ineligible entry left in the pool is still selectable and
+    # comes back as a missing card the client reads as "deck exhausted".
+    pool = [
+        g for g in grammar_list
+        if eligible_for(m, {**g, "fill_ok": _fill_ok(level, g["pattern"])})
+    ]
+    if not pool:
+        return grammar_list, []
+
+    raw_ids   = [grammar_to_id(g, level) for g in pool]
     card_ids  = prefixed(raw_ids, user_id)
     cache_key = batch_key("user", user_id, mode, level)
-    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode), version=card_ids)
+    # No pre-materialisation. get_new_cards selects over the ids passed
+    # here rather than joining `cards`, so nothing has to exist in
+    # card_modes before a card can be served — a scheduler row is written
+    # on first review instead. This call used to write one row per deck
+    # card per mode (3,476 of them for N1 vocab) on the first request.
 
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(
@@ -168,9 +247,9 @@ def _select_cards(level: str, mode: str, count: int, exclude_ids: set[str], user
     cards = []
     for card_id in picked:
         raw_id = unprefixed(card_id, user_id)
-        entry = next((g for g in grammar_list if grammar_to_id(g, level) == raw_id), None)
+        entry = next((g for g in pool if grammar_to_id(g, level) == raw_id), None)
         if entry is not None:
-            cards.append(_build_grammar_card(entry, level, grammar_list, mode, states.get(card_id), previews.get(card_id)))
+            cards.append(_build_grammar_card(entry, level, grammar_list, m, states.get(card_id), previews.get(card_id)))
 
     logger.info(
         "grammar study request level=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
@@ -180,13 +259,12 @@ def _select_cards(level: str, mode: str, count: int, exclude_ids: set[str], user
 
 
 @router.get("/api/grammar/card")
-def get_grammar_card(level: str, mode: str = "flashcard",
+def get_grammar_card(level: str, m: Mode = Depends(require_mode(GRAMMAR)),
                      user_id: str = Depends(get_user_id)):
-    grammar_list, cards = _select_cards(level, mode, count=1, exclude_ids=set(), user_id=user_id)
+    mode = m.key
+    grammar_list, cards = _select_cards(level, m, count=1, exclude_ids=set(), user_id=user_id)
     if grammar_list is None:
-        if level not in GRAMMAR_BY_LEVEL:
-            return {"error": "Unknown level"}
-        return {"error": "Invalid mode"}
+        return {"error": "Unknown level"}
     if not cards:
         logger.warning("grammar study exhausted level=%s mode=%s user_id=%s", level, mode, user_id)
         return {"done": True}
@@ -194,7 +272,8 @@ def get_grammar_card(level: str, mode: str = "flashcard",
 
 
 @router.get("/api/grammar/cards")
-def get_grammar_cards(level: str, mode: str = "flashcard", count: int = 10, exclude: str = "",
+def get_grammar_cards(level: str, count: int = 10, exclude: str = "",
+                       m: Mode = Depends(require_mode(GRAMMAR)),
                        user_id: str = Depends(get_user_id)):
     """
     Batch version of /api/grammar/card — returns up to `count` cards at
@@ -204,15 +283,13 @@ def get_grammar_cards(level: str, mode: str = "flashcard", count: int = 10, excl
     already has queued but hasn't reviewed yet.
     """
     grammar_list, cards = _select_cards(
-        level, mode,
+        level, m,
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
     )
     if grammar_list is None:
-        if level not in GRAMMAR_BY_LEVEL:
-            return {"error": "Unknown level"}
-        return {"error": "Invalid mode"}
+        return {"error": "Unknown level"}
     return {"cards": cards}
 
 
@@ -232,20 +309,21 @@ def get_grammar_review_cards(level: str, user_id: str = Depends(get_user_id)):
 
     raw_ids  = [grammar_to_id(g, level) for g in grammar_list]
     card_ids = prefixed(raw_ids, user_id)
-    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in GRAMMAR_MODES}
+    graded = sorted(GRADED_FOR_SOURCE[GRAMMAR])
+    per_mode_states = {k: srs.get_bulk_stats(card_ids, k) for k in graded}
 
     cards = []
     for entry, card_id in zip(grammar_list, card_ids):
-        stages = [per_mode_states[m].get(card_id, "new") for m in GRAMMAR_MODES]
+        stages = [per_mode_states[k].get(card_id, "new") for k in graded]
         stage = "mastered" if "mastered" in stages else "learning" if "learning" in stages else "new"
         if stage == "new":
             continue
         cards.append({
-            "card_id":     grammar_to_id(entry, level),
-            "grammar":     entry["grammar"],
-            "meaning":     entry["meaning"],
-            "explanation": entry["explanation"],
-            "stage":       stage,
+            "card_id":   grammar_to_id(entry, level),
+            "grammar":   entry["pattern"],
+            "structure": entry["structure"],
+            "meaning":   entry["meaning"],
+            "stage":     stage,
         })
 
     logger.info(
@@ -295,7 +373,7 @@ def get_grammar_level_stats(level: str, mode: str, user_id: str = Depends(get_us
     grammar_list = GRAMMAR_BY_LEVEL.get(level)
     if not grammar_list:
         return {"error": "Unknown level"}
-    if mode not in VALID_MODES:
+    if mode not in GRADED_FOR_SOURCE[GRAMMAR]:
         return {"error": "Invalid mode"}
 
     raw_ids  = [grammar_to_id(g, level) for g in grammar_list]
@@ -326,6 +404,6 @@ def get_grammar_stats(user_id: str = Depends(get_user_id)):
                 "mastered": sum(1 for s in srs.get_bulk_stats(prefixed(raw_ids, user_id), mode).values() if s == "mastered"),
                 "due_now":  sum(1 for cid in prefixed(raw_ids, user_id) if cid in set(srs.get_due_cards(mode))),
             }
-            for mode in GRAMMAR_MODES
+            for mode in sorted(GRADED_FOR_SOURCE[GRAMMAR])
         }
     return result

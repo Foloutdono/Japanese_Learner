@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -19,19 +19,27 @@ import ThemeSelector from '../components/selection/ThemeSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
+import HintBar from '../components/study/HintBar'
+import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
-import { speakJapanese } from '../lib/audio'
-import { vocabKanjiModes, reviewMode } from '../domain/quizModes'
+import { speakJapanese, playUi } from '../lib/audio'
+import {
+  MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries, modeLabel,
+} from '../domain/studyModes'
 import { applyXpGain } from '../stores/profileSummary'
-import { useCardSession } from '../hooks/useCardSession'
+import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
-const FETCH_TIMEOUT_MS = 8000
+// The 8s fetch timeout that used to live here is gone: useCardSession
+// owns the abort signal and the timeout now (10s, matched to the cold
+// start it was always meant to bridge), so the five screens no longer
+// each hand-roll a controller that only ever timed out and never
+// aborted on unmount.
 
 export default function VocabScreen({ session }) {
   const navigate    = useNavigate()
   const { t, lang } = useLang()
 
-  const MODES = vocabKanjiModes(t, t.wordNoun)
+  const MODES = modePickerEntries(t, 'vocab')
 
   // See KanjiScreen for the full rationale — studyBy picks 'level'
   // (JLPT N5…N1), 'theme' (Fruits / Jobs / Body parts / ...), or
@@ -69,6 +77,21 @@ export default function VocabScreen({ session }) {
   const [xpToast, setXpToast]         = useState(null)
   const [cardStamp, setCardStamp]     = useState(null)
   const [locked, setLocked]           = useState(false)
+  // ── Hint state (indice_1/2/3) ──
+  // Session-wide rather than per-card: a display preference should stay
+  // where the learner put it. See components/study/HintBar.jsx for why a
+  // hint is a switch on the card and not a mode of its own.
+  const [activeHints, setActiveHints] = useState(() => new Set())
+  function toggleHint(key) {
+    playUi('click-mode-selection')
+    setActiveHints(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
   const [reviewing, setReviewing]     = useState(false)
   const [reviewCards, setReviewCards] = useState([])
   const [reviewLoading, setReviewLoading] = useState(false)
@@ -105,37 +128,34 @@ export default function VocabScreen({ session }) {
   // language mid-session re-translates in place (see the effect
   // below) rather than starting a new session.
   const storageKey =
-    studyBy === 'level' && level && mode ? `jp-session:vocab:${level}:${mode}`
-    : studyBy === 'theme' && theme && mode ? `jp-session:vocab:theme:${theme}:${mode}`
-    : studyBy === 'frequency' && tier && mode ? `jp-session:vocab:freq:${freqDomain}:${tier}:${tierSize}:${mode}`
-    : 'idle'
+    studyBy === 'level' && level && mode ? sessionKey('vocab', level, mode)
+    : studyBy === 'theme' && theme && mode ? sessionKey('vocab', 'theme', theme, mode)
+    : studyBy === 'frequency' && tier && mode ? sessionKey('vocab', 'freq', freqDomain, tier, tierSize, mode)
+    : IDLE_KEY
 
-  const fetchBatch = useCallback((count, excludeIds) => {
-    if (studyBy === 'level' && (!level || !mode)) return Promise.resolve([])
-    if (studyBy === 'theme' && (!theme || !mode)) return Promise.resolve([])
-    if (studyBy === 'frequency' && (!tier || !mode)) return Promise.resolve([])
-    if (!studyBy || !mode) return Promise.resolve([])
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+    if (studyBy === 'level' && (!level || !mode)) return []
+    if (studyBy === 'theme' && (!theme || !mode)) return []
+    if (studyBy === 'frequency' && (!tier || !mode)) return []
+    if (!studyBy || !mode) return []
     const url = studyBy === 'level'
       ? `/api/vocab/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : studyBy === 'theme'
       ? `/api/vocab/theme/${theme}/cards?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : `/api/frequency/${freqDomain}/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-    return apiFetch(url, session, { signal: controller.signal })
-      .then(r => r.json())
-      .then(data => (data.cards ?? []).map(c => ({ ...c, lang })))
-      .finally(() => clearTimeout(timer))
+    const data = await apiJson(url, session, { signal })
+    return (data.cards ?? []).map(c => ({ ...c, lang }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studyBy, freqDomain, level, theme, tier, tierSize, mode, session])
   // (lang deliberately excluded above: changing lang shouldn't change
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
 
-  const { current: card, loading, done, advance, updateCurrent } = useCardSession({
+  const { current: card, loading, done, error, retry, advance, updateCurrent } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
+    mode,
   })
 
   // Re-translate the card in hand when the UI language changes, or
@@ -169,7 +189,7 @@ export default function VocabScreen({ session }) {
   // that's also how the backend's vocab translation map is keyed.
   function translateCard(cardToTranslate, targetLang) {
     if (!cardToTranslate) return
-    const words = [wordForm(cardToTranslate), ...(cardToTranslate.choices ?? []).map(wordForm)]
+    const words = [wordForm(cardToTranslate), ...(cardToTranslate.hints?.indice_1 ?? []).map(wordForm)]
     const unique = [...new Set(words.filter(Boolean))]
     Promise.all(unique.map(word =>
       apiFetch(`/api/translation/vocab?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
@@ -433,7 +453,7 @@ export default function VocabScreen({ session }) {
     }
     const startMode = m => {
       // Review is a browse, not a session — it does not board.
-      if (m === 'review') { startReview(); return }
+      if (m === FAST_REVIEW) { startReview(); return }
       board(() => {
         if (studyBy === 'level') startLevelSession(level, m)
         else if (studyBy === 'theme') startThemeSession(theme, themeLabel, m)
@@ -442,7 +462,13 @@ export default function VocabScreen({ session }) {
     }
     // Review only exists for the JLPT-level path today (see
     // startReview) — theme/frequency decks keep the plain mode list.
-    const modesWithReview = studyBy === 'level' ? [...MODES, reviewMode(t)] : MODES
+    // The registry already puts the ungraded browse last for every
+    // source; the frequency-tier path is the one place it doesn't apply
+    // (see startReview), so that path drops it rather than the level
+    // path adding it.
+    const modesWithReview = studyBy === 'level'
+      ? MODES
+      : MODES.filter(m => m.key !== FAST_REVIEW)
     return (
       <div className="screen">
         <TopBar onBack={goBack} title={backTitle} autoHide />
@@ -483,8 +509,32 @@ export default function VocabScreen({ session }) {
   }
 
   // ── Quiz ──
-  const isKjToM = card?.direction === 'kj-m'
-  const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
+  const isKjToM = card?.direction === 'f2b'
+  // Only the hints this card could actually build — a mode may declare
+  // indice_1 while a particular card has no distractors to offer.
+  const availableHints = Object.keys(card?.hints ?? {})
+  const showChoices = activeHints.has('indice_1') && Array.isArray(card?.hints?.indice_1)
+  // indice_3 — furigana, already split per kanji by the backend (see
+  // study/furigana.py), so this renders parts rather than guessing where
+  // だい ends and がく begins.
+  const furigana = activeHints.has('indice_3') ? card?.hints?.indice_3 : null
+
+  /** The word, with furigana when the hint is on and the card has it. */
+  function wordDisplay(size) {
+    if (furigana?.length) {
+      return (
+        <div className="furigana-word" style={{ '--furigana-size': `${size}px` }}>
+          {furigana.map((part, i) => part.reading
+            ? <ruby key={i}>{part.text}<rt>{part.reading}</rt></ruby>
+            : <span key={i}>{part.text}</span>)}
+        </div>
+      )
+    }
+    return <CharDisplay char={wordForm(card)} size={size} />
+  }
+  const isWordReading = STUDY_MODES[mode]?.base === 'word_reading'
+
+  const title = modeLabel(t, mode)
   const sourceLabel =
     studyBy === 'level' ? level
     : studyBy === 'theme' ? themeLabel
@@ -492,7 +542,7 @@ export default function VocabScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${sourceLabel} — ${modeLabel}`} autoHide />
+      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${sourceLabel} — ${title}`} autoHide />
       <XpToast toast={xpToast} onDone={() => {
         setXpToast(null)
         pendingGatesRef.current.delete('toast')
@@ -501,9 +551,12 @@ export default function VocabScreen({ session }) {
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
+        {error && !card && <SessionError error={error} onRetry={retry} />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>
+            <HintBar available={availableHints} active={activeHints}
+                     onToggle={toggleHint} disabled={locked} />
             <CardTransition
               className="vocab-card-boost"
               cardKey={card.card_id}
@@ -517,13 +570,39 @@ export default function VocabScreen({ session }) {
               }}
             >
               <PromptCard>
-                {card.format === 'flashcard' && (
+                {/* word_reading — the written word is shown and the answer
+                    is how it is read. The backend has already removed the
+                    kana-only entries from the pool, since for those the
+                    prompt would print its own answer. No meaning on either
+                    face: this drill is about reading, not knowing. */}
+                {isWordReading && (
+                  <Flashcard
+                    t={t}
+                    resetKey={card.card_id}
+                    onReveal={onFlashcardReveal}
+                    front={<CharDisplay char={card.kanji} size={72} />}
+                    back={
+                      <div>
+                        <CharDisplay char={card.kanji} size={56} />
+                        <div className="flashcard-answer" lang="ja">{card.kana}</div>
+                      </div>
+                    }
+                    dictTerm={wordForm(card)}
+                    dictCategory="vocab"
+                    session={session}
+                    onReplaySound={() => speakJapanese(card.kana)}
+                  />
+                )}
+
+                {!isWordReading && !showChoices && (
                   <Flashcard
                     t={t}
                     resetKey={card.card_id}
                     onReveal={onFlashcardReveal}
                     front={
-                      <CharDisplay char={isKjToM ? wordForm(card) : formatGlossLine(card.meaning)} size={72} />
+                      isKjToM
+                        ? wordDisplay(72)
+                        : <CharDisplay char={formatGlossLine(card.meaning)} size={72} />
                     }
                     back={
                       <InlineReveal
@@ -544,7 +623,7 @@ export default function VocabScreen({ session }) {
                   />
                 )}
 
-                {card.format === 'qcm' && (
+                {!isWordReading && showChoices && (
                   <>
                     <InlineReveal
                       t={t}
@@ -570,9 +649,9 @@ export default function VocabScreen({ session }) {
               </PromptCard>
             </CardTransition>
 
-            {card.format === 'qcm' && (
+            {!isWordReading && showChoices && (
               <MCQGrid
-                choices={card.choices.map(c => isKjToM ? c.meaning : wordForm(c))}
+                choices={(card.hints?.indice_1 ?? []).map(c => isKjToM ? c.meaning : wordForm(c))}
                 correct={isKjToM ? card.meaning : wordForm(card)}
                 formatChoice={isKjToM ? formatGlossLine : undefined}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}

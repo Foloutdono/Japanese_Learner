@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
 import RatingBar from '../components/study/RatingBar'
 import {
   CharDisplay, MCQGrid, DoneMessage,
-  DeckProgress, Flashcard, RevealActions, MeaningDisplay,
+  DeckProgress, Flashcard, RevealActions, TypeInput,
 } from '../components/study/QuizComponents'
+import HintBar from '../components/study/HintBar'
 import { DrawingQuiz } from '../components/study/DrawingCanvas'
 import { Loading } from '../components/ui/Loading'
 import { XpToast } from '../components/rewards/XpToast'
@@ -17,12 +18,21 @@ import PromptCard from '../components/study/PromptCard'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import ModeSelector from '../components/selection/ModeSelector'
 import ReviewDeck from '../components/study/ReviewDeck'
+import SessionError from '../components/study/SessionError'
 import { playKana } from '../lib/audio'
-import { kanaModePicker, reviewMode } from '../domain/quizModes'
+import {
+  MODES as STUDY_MODES, RENDER, HINTS, FAST_REVIEW,
+  modePickerEntries, modeLabel,
+} from '../domain/studyModes'
+import { romajiEquals } from '../lib/romaji'
 import { applyXpGain } from '../stores/profileSummary'
-import { useCardSession } from '../hooks/useCardSession'
+import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
-const FETCH_TIMEOUT_MS = 8000
+// The 8s fetch timeout that used to live here is gone: useCardSession
+// owns the abort signal and the timeout now (10s, matched to the cold
+// start it was always meant to bridge), so the five screens no longer
+// each hand-roll a controller that only ever timed out and never
+// aborted on unmount.
 
 export default function KanaScreen({ session }) {
   const navigate    = useNavigate()
@@ -43,12 +53,19 @@ export default function KanaScreen({ session }) {
     { label: t.katakanaCombinations, slug: 'katakana_combos', sample: 'キャ キュ キョ' },
   ]
 
-  const MODES = kanaModePicker(t)
+  // Straight from the registry — one definition of what kana offers,
+  // shared with the backend's own (see domain/studyModes.js).
+  const MODES = modePickerEntries(t, 'kana')
 
   const [selectedSet, setSelectedSet] = useState(null) // { label, slug }
   const [mode, setMode]               = useState(null)
   const [answered, setAnswered]       = useState(false)
   const [selected, setSelected]       = useState(null)
+  // Hints switched on for the card in hand. Reset per card, so asking for
+  // the options on one hard card doesn't quietly turn the rest of the
+  // session into multiple choice.
+  const [activeHints, setActiveHints] = useState([])
+  const [typed, setTyped]             = useState('')
   const [showRating, setShowRating]   = useState(false)
   const [progress, setProgress]       = useState(null)
   const [xpToast, setXpToast]         = useState(null)
@@ -88,27 +105,28 @@ export default function KanaScreen({ session }) {
   // hook itself is always called (rules of hooks), it just has
   // nothing to fetch yet.
   const storageKey = selectedSet && mode
-    ? `jp-session:kana:${selectedSet.slug}:${mode}`
-    : 'idle'
+    ? sessionKey('kana', selectedSet.slug, mode)
+    : IDLE_KEY
 
-  const fetchBatch = useCallback((count, excludeIds) => {
-    if (!selectedSet || !mode) return Promise.resolve([])
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-    return apiFetch(
+  // apiJson, not apiFetch: a non-2xx now throws instead of resolving to
+  // a body with no `cards` key, which the hook used to read as "deck
+  // finished" and celebrate. The hook owns the abort signal and the
+  // timeout, so there's no controller to hand-roll here any more.
+  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+    if (!selectedSet || !mode) return []
+    const data = await apiJson(
       `/api/kana/cards?set_name=${encodeURIComponent(selectedSet.slug)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}`,
       session,
-      { signal: controller.signal },
+      { signal },
     )
-      .then(r => r.json())
-      .then(data => data.cards ?? [])
-      .finally(() => clearTimeout(timer))
+    return data.cards ?? []
   }, [selectedSet, mode, session])
 
-  const { current: card, loading, done, advance } = useCardSession({
+  const { current: card, loading, done, error, retry, advance } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
+    mode,
   })
 
   // Reset per-card UI state whenever the card in hand changes —
@@ -118,6 +136,8 @@ export default function KanaScreen({ session }) {
     setAnswered(false)
     setSelected(null)
     setShowRating(false)
+    setActiveHints([])
+    setTyped('')
   }, [card?.card_id])
 
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
@@ -242,6 +262,18 @@ export default function KanaScreen({ session }) {
     playKana(card.romaji)
   }
 
+  // write_romaji. The comparison in lib/romaji is FEEDBACK only — the
+  // rating bar still opens either way, and what the SRS records is the
+  // learner's own 1-4 self-rating. Nothing here decides anything: typing
+  // "si" for し is not a mistake, and a grader confident enough to fail
+  // it would be wrong more often than the learner.
+  function onTypeSubmit() {
+    if (answered || !typed.trim()) return
+    setAnswered(true)
+    setShowRating(true)
+    playKana(card.romaji)
+  }
+
   // ── Set selection ──
   if (!selectedSet) {
     return (
@@ -264,8 +296,8 @@ export default function KanaScreen({ session }) {
         <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} autoHide />
         <SelectionScreen>
           <ModeSelector
-            modes={[...MODES, reviewMode(t)]}
-            onSelect={m => (m === 'review' ? startReview() : board(() => startMode(m)))}
+            modes={MODES}
+            onSelect={m => (m === FAST_REVIEW ? startReview() : board(() => startMode(m)))}
           />
         </SelectionScreen>
       </div>
@@ -277,7 +309,7 @@ export default function KanaScreen({ session }) {
     const dictCategory = selectedSet.slug.startsWith('hiragana') ? 'hiragana' : 'katakana'
     return (
       <div className="screen">
-        <TopBar onBack={() => setReviewing(false)} title={`${selectedSet.label} — ${t.modeReview}`} autoHide />
+        <TopBar onBack={() => setReviewing(false)} title={`${selectedSet.label} — ${modeLabel(t, FAST_REVIEW)}`} autoHide />
         <div className="container quiz-area">
           <ReviewDeck
             cards={reviewCards}
@@ -302,15 +334,46 @@ export default function KanaScreen({ session }) {
   }
 
   // ── Quiz ──
-  const modeLabel = MODES.find(m => m.key === mode)?.label ?? mode
+  const title = modeLabel(t, mode)
   // Both hiragana sets (basic/combos) and both katakana sets share one
   // dictionary category each — the dictionary itself doesn't
   // distinguish combos from the base set.
   const dictCategory = selectedSet.slug.startsWith('hiragana') ? 'hiragana' : 'katakana'
 
+  // ── What this card renders as ──
+  // Driven by the registry plus the card's own direction, not by a chain
+  // of string comparisons against mode keys. Adding a mode is a registry
+  // entry and a renderer, not an edit to every conditional on the screen.
+  const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
+  // b2f shows the romaji and asks for the kana; f2b is the other way up.
+  const isB2F    = card?.direction === 'b2f'
+  const prompt   = isB2F ? card?.romaji : card?.kana
+  const answer   = isB2F ? card?.kana   : card?.romaji
+
+  // Hints the CARD can actually offer, not the ones the mode declares:
+  // a mode that offers choices still can't show them for a set too small
+  // to draw distractors from, and a dead control is worse than none.
+  const cardHints  = card?.hints ?? {}
+  const availableHints = Object.keys(cardHints).filter(
+    k => Array.isArray(cardHints[k]) ? cardHints[k].length > 0 : cardHints[k] != null,
+  )
+  const choicesOn = activeHints.includes(HINTS.CHOICES)
+                    && Array.isArray(cardHints[HINTS.CHOICES])
+
+  function toggleHint(key) {
+    setActiveHints(hs => (hs.includes(key) ? hs.filter(h => h !== key) : [...hs, key]))
+  }
+
+  // The romaji side of a card, as a prompt. NOT MeaningDisplay, which is
+  // for glosses and sentence-cases what it is given: it rendered "ba" as
+  // "Ba", so the b2f prompt disagreed with the same reading shown
+  // lowercase everywhere else, including in its own answer. CharDisplay
+  // under 60px inherits the Latin font rather than the JP one.
+  const romajiPrompt = text => <CharDisplay char={text} size={44} />
+
   return (
     <div className="screen">
-      <TopBar onBack={() => setMode(null)} title={`${selectedSet.label} — ${modeLabel}`} autoHide/>
+      <TopBar onBack={() => setMode(null)} title={`${selectedSet.label} — ${title}`} autoHide/>
       <XpToast toast={xpToast} onDone={() => {
         setXpToast(null)
         pendingGatesRef.current.delete('toast')
@@ -319,6 +382,7 @@ export default function KanaScreen({ session }) {
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
+        {error && !card && <SessionError error={error} onRetry={retry} />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
         {card && !loading && (
           <>
@@ -327,17 +391,28 @@ export default function KanaScreen({ session }) {
               pendingGatesRef.current.delete('stamp')
               checkAdvance()
             }}>
-              {mode === 'flashcard' && (
+              {/* Flashcard, either direction. With the choices hint on it
+                  renders as prompt + options instead of a flip card: two
+                  reveal affordances on one card compete, so the hint
+                  replaces the flip rather than sitting beside it. Same
+                  resolution the merged deck modes use in StudyScreen. */}
+              {renderer === RENDER.FLASHCARD && !choicesOn && (
                 <PromptCard>
                   <Flashcard
                     t={t}
                     resetKey={card.card_id}
                     onReveal={onFlashcardReveal}
-                    front={<CharDisplay char={card.kana} />}
+                    front={isB2F
+                      ? romajiPrompt(prompt)
+                      : <CharDisplay char={prompt} />}
                     back={
                       <div>
-                        <CharDisplay char={card.kana} />
-                        <div className="flashcard-answer">{card.romaji}</div>
+                        {isB2F
+                          ? romajiPrompt(prompt)
+                          : <CharDisplay char={prompt} />}
+                        <div className="flashcard-answer">
+                          {isB2F ? <CharDisplay char={answer} /> : answer}
+                        </div>
                       </div>
                     }
                     dictTerm={card.kana}
@@ -348,7 +423,25 @@ export default function KanaScreen({ session }) {
                 </PromptCard>
               )}
 
-              {mode === 'qcm' && (
+              {renderer === RENDER.FLASHCARD && choicesOn && (
+                <PromptCard>
+                  {isB2F
+                    ? romajiPrompt(prompt)
+                    : <CharDisplay char={prompt} />}
+                  <RevealActions
+                    t={t}
+                    revealed={answered}
+                    resetKey={card.card_id}
+                    dictTerm={card.kana}
+                    dictCategory={dictCategory}
+                    session={session}
+                    onReplaySound={() => playKana(card.romaji)}
+                  />
+                </PromptCard>
+              )}
+
+              {/* write_romaji — the kana is shown, type its reading. */}
+              {renderer === RENDER.TYPE && (
                 <PromptCard>
                   <CharDisplay char={card.kana} />
                   <RevealActions
@@ -363,9 +456,10 @@ export default function KanaScreen({ session }) {
                 </PromptCard>
               )}
 
-              {mode === 'write' && (
+              {/* write_kana — the reading is shown, draw the kana. */}
+              {renderer === RENDER.DRAW && (
                 <PromptCard>
-                  <MeaningDisplay meaning={card.romaji} size={40} />
+                  {romajiPrompt(card.romaji)}
                   <RevealActions
                     t={t}
                     revealed={answered}
@@ -379,11 +473,28 @@ export default function KanaScreen({ session }) {
               )}
             </CardTransition>
 
-            {mode === 'qcm' && (
-              <MCQGrid choices={card.choices} correct={card.romaji}
+            <HintBar
+              available={availableHints}
+              active={activeHints}
+              onToggle={toggleHint}
+              disabled={locked}
+            />
+
+            {renderer === RENDER.FLASHCARD && choicesOn && (
+              <MCQGrid choices={cardHints[HINTS.CHOICES]} correct={answer}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
-            {mode === 'write' && (
+            {renderer === RENDER.TYPE && (
+              <TypeInput
+                value={typed}
+                onChange={setTyped}
+                onSubmit={onTypeSubmit}
+                submitted={answered}
+                answer={card.romaji}
+                isCorrect={romajiEquals(typed, card.romaji)}
+              />
+            )}
+            {renderer === RENDER.DRAW && (
               <DrawingQuiz
                 kanji={card.kana}
                 meaning={card.romaji}

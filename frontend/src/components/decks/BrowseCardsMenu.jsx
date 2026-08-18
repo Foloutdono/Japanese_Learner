@@ -28,12 +28,14 @@ const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
 const SEARCH_DEBOUNCE_MS = 300
 
-const RESTRICTED_SOURCES_BY_TYPE = { kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'] }
+// A deck has ONE STRUCTURE, and it browses only its own source.
+// Second hand-synced copy of decks.py's SOURCE_FOR_TYPE — see
+// DeckDetailScreen for the same table and why it is duplicated.
+// 'standard' has no app source, so its Browse menu offers nothing.
+const SOURCE_FOR_TYPE = { kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'] }
 
 function allowedSourcesFor(type) {
-  if (type in RESTRICTED_SOURCES_BY_TYPE) return RESTRICTED_SOURCES_BY_TYPE[type]
-  if (type === 'flashcard') return []
-  return ['kanji', 'vocab', 'grammar']
+  return SOURCE_FOR_TYPE[type] ?? []
 }
 
 export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, onClose }) {

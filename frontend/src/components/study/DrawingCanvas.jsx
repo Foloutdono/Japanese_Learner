@@ -50,8 +50,10 @@ function applyBrush(ctx) {
   return width
 }
 
-function kanjiToSvgUrl(kanji) {
-  const codepoint = kanji.codePointAt(0).toString(16).padStart(5, '0')
+// KanjiVG files are one per CHARACTER, so this takes a character, not a
+// string. See StrokeRef for why that distinction is load-bearing.
+function charToSvgUrl(char) {
+  const codepoint = char.codePointAt(0).toString(16).padStart(5, '0')
   return `${API_BASE}/kanjivg/${codepoint}.svg`
 }
 
@@ -145,28 +147,49 @@ function Canvas({ canvasRef, onClear, resetKey }) {
 }
 
 // ── Stroke order reference panel ──────────────────────────
-function StrokeRef({ kanji, meaning, showMeaning = true }) {
+// One character's stroke-order animation, owning its own failure state so
+// one missing glyph in a combination doesn't blank the others.
+function StrokeGlyph({ char }) {
   const { t } = useLang()
   const [failed, setFailed] = useState(false)
 
-  // Resets the failed flag whenever the kanji itself changes, so a
-  // previous glyph's fetch failure doesn't stick around and hide a
-  // later glyph that would have loaded fine.
-  useEffect(() => { setFailed(false) }, [kanji])
+  // Resets whenever the character changes, so a previous glyph's fetch
+  // failure doesn't stick around and hide a later one that would load.
+  useEffect(() => { setFailed(false) }, [char])
+
+  if (failed) {
+    return <div className="stroke-ref__fallback" style={{ display: 'flex' }}>{t.notAvailable}</div>
+  }
+  return (
+    <StrokeOrderAnimation
+      src={charToSvgUrl(char)}
+      loop
+      className="stroke-ref__img"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
+function StrokeRef({ kanji, meaning, showMeaning = true }) {
+  const { t } = useLang()
+
+  // ── One animation per character, not per string ──
+  // 81 of the 224 kana entries are combinations — きゃ, しゅ, ジョ — two
+  // characters each. The old code took codePointAt(0) of the whole string
+  // and asked for that one file, so a third of all kana cards animated き
+  // while the card said きゃ. Nothing errored: a valid SVG for the wrong
+  // character loads perfectly, and the learner has no way to notice they
+  // are being taught the wrong strokes.
+  //
+  // Spread, not split(''), so a character outside the BMP stays intact
+  // rather than being torn into surrogate halves.
+  const chars = [...(kanji ?? '')]
 
   return (
     <div className="stroke-ref">
       <div className="stroke-ref__label">{t.strokeOrder}</div>
-      <div className="stroke-ref__frame">
-        {!failed && (
-          <StrokeOrderAnimation
-            src={kanjiToSvgUrl(kanji)}
-            loop
-            className="stroke-ref__img"
-            onError={() => setFailed(true)}
-          />
-        )}
-        {failed && <div className="stroke-ref__fallback" style={{ display: 'flex' }}>{t.notAvailable}</div>}
+      <div className={`stroke-ref__frame${chars.length > 1 ? ' stroke-ref__frame--multi' : ''}`}>
+        {chars.map((c, i) => <StrokeGlyph key={`${c}-${i}`} char={c} />)}
       </div>
       {showMeaning && (
         <div className="stroke-ref__meaning-wrap">

@@ -225,6 +225,33 @@ const quiz = {
   modeFill:          'Fill in',
   // Extended mode labels used by vocab/kanji screens
   modeWrite:         'Writing',
+  // Stats format axis: typed on a keyboard, as against drawn by hand.
+  modeType:          'Typing',
+  radicalNumber:       'Radical',
+  // grammar b2f: the meaning is shown, recall the rule.
+  revealGrammarRule:   'Which rule is this?',
+  revealGrammarBtn:    'Show the rule',
+  standardType:        'Standard',
+  standardDesc:        'A front and a back, written by you.',
+  // ── Personal card fields (generated form, see study/structures.py) ──
+  field_front:      'Front',
+  field_back:       'Back',
+  field_kanji:      'Kanji',
+  field_meaning:    'Meaning',
+  field_readings:   'Readings',
+  field_radical:    'Radical',
+  field_word:       'Word',
+  field_reading:    'Reading',
+  field_rule:       'Grammar rule',
+  field_sentences:  'Example sentence',
+  pickRadical:      'Choose a radical',
+  // ── 読み入力 (kanji.readings) ──
+  readingsOn:          'On (Chinese-derived)',
+  readingsKun:         'Kun (native Japanese)',
+  readingsAdd:         'add a reading',
+  readingsAll:         'All readings:',
+  readingsPlaceholder: 'kana or romaji',
+  readingsCap:         '15 readings is the most this card will take.',
   modeWriteDesc:     'Meaning only. Draw the character stroke by stroke.',
   // Parameterised on what the studied item is called ("kanji" or
   // "word" — see kanjiNoun/wordNoun below and vocabKanjiModes in
@@ -555,7 +582,70 @@ const misc = {
   kunyomi: "Kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'word',
-    retry:     'Retry',
+  // Shown by components/study/SessionError when a study session has
+  // nothing to show AND the last fetch failed — previously this state
+  // rendered an empty box with no explanation and no way to recover.
+  // ── Hints (indice_1/2/3) ──
+  // A hint is opt-in per card and never forks the SRS — see
+  // components/study/HintBar.jsx. These replace the old "MCQ mode"
+  // labels, because multiple choice is a help level now, not an
+  // exercise.
+  hintChoicesShow:    'Show choices',
+  hintChoicesHide:    'Hide choices',
+  hintSentencesShow:  'Show a sentence',
+  hintSentencesHide:  'Hide the sentence',
+  hintFuriganaShow:   'Show furigana',
+  hintFuriganaHide:   'Hide furigana',
+
+  // ── Study modes (domain/studyModes.js) ──
+  // One label + description per mode key. Namespacing means these need no
+  // `noun` parameter: the old modeQcmKjM(noun) shape existed because
+  // `flashcard-kj-m` meant "kanji" on one screen and "word" on another,
+  // and a single translation key had to serve both — which it could only
+  // ever get right for one of them.
+  mode_kana_flashcard_f2b:        'Kana → romaji',
+  mode_kana_flashcard_f2b_desc:   'The kana is shown. Recall how it sounds.',
+  mode_kana_flashcard_b2f:        'Romaji → kana',
+  mode_kana_flashcard_b2f_desc:   'The sound is given. Recall the kana.',
+  mode_kana_write_romaji:         'Write the romaji',
+  mode_kana_write_romaji_desc:    'The kana is shown. Type how it sounds.',
+  mode_kana_write_kana:           'Draw the kana',
+  mode_kana_write_kana_desc:      'The sound is given. Draw the kana by hand.',
+
+  mode_kanji_flashcard_f2b:       'Kanji → meaning',
+  mode_kanji_flashcard_f2b_desc:  'The kanji is shown. Recall what it means.',
+  mode_kanji_flashcard_b2f:       'Meaning → kanji',
+  mode_kanji_flashcard_b2f_desc:  'The meaning is shown. Recall the kanji.',
+  mode_kanji_write_kanji:         'Draw the kanji',
+  mode_kanji_write_kanji_desc:    'The meaning is given. Draw the kanji by hand.',
+  mode_kanji_readings:            'Readings',
+  mode_kanji_readings_desc:       "The kanji is shown. Type its on'yomi and kun'yomi.",
+  mode_kanji_radical:             'Radical',
+  mode_kanji_radical_desc:        'The kanji is shown. Recall which radical it is built on.',
+
+  mode_vocab_flashcard_f2b:       'Word → meaning',
+  mode_vocab_flashcard_f2b_desc:  'The word is shown. Recall what it means.',
+  mode_vocab_flashcard_b2f:       'Meaning → word',
+  mode_vocab_flashcard_b2f_desc:  'The meaning is shown. Recall the word.',
+  mode_vocab_word_reading:        'Reading',
+  mode_vocab_word_reading_desc:   'The word is shown. Recall how it reads in kana.',
+
+  mode_grammar_flashcard_f2b:      'Rule → meaning',
+  mode_grammar_flashcard_f2b_desc: 'The pattern is shown. Recall what it does.',
+  mode_grammar_flashcard_b2f:      'Meaning → rule',
+  mode_grammar_flashcard_b2f_desc: 'The meaning is shown. Recall the pattern.',
+  mode_grammar_fill_in:            'Name the rule',
+  mode_grammar_fill_in_desc:       'A Japanese sentence, no translation. Name the pattern at work in it.',
+
+  mode_standard_flashcard_f2b:      'Front → back',
+  mode_standard_flashcard_f2b_desc: 'Your card, the way you wrote it.',
+  mode_standard_flashcard_b2f:      'Back → front',
+  mode_standard_flashcard_b2f_desc: 'Your card, the other way round.',
+
+  mode_fast_review:                'Fast review',
+  mode_fast_review_desc:           'Flip through what you have already studied. Nothing is graded.',
+  retry:              'Try again',
+  sessionLoadFailed:  "Couldn't load your cards.",
 }
 
 // ── Profile ───────────────────────────────────────────────

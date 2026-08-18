@@ -4,7 +4,9 @@ from core.db import db_conn
 from content.kana_data import KANA_SETS, kana_to_id
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from content.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
+from content.grammar_points_data import (
+    GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, grammar_to_id,
+)
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from study.quiz_modes import (
@@ -208,17 +210,47 @@ def get_extra_stats(tz_offset: int = 0, user_id: str = Depends(get_user_id)):
 
 @router.delete("/api/stats/reset")
 def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None = None):
-    logger.info("Resetting stats for user_id=%s", user_id)
-    if card_ids is None:
-        conn = db_conn()
-        try:
-            with conn.cursor() as cur:
-                cur.execute("SELECT DISTINCT card_id FROM card_modes WHERE card_id LIKE %s", (f"{user_id}:%",))
-                keys_to_delete = [row[0] for row in cur.fetchall()]
-        finally:
-            conn.close()
-        srs.delete_cards(keys_to_delete)
-    else:
-        prefixed_ids = prefixed(card_ids, user_id)
-        srs.delete_cards(prefixed_ids)
+    """
+    Reset this user's progress.
+
+    Two different requests share this endpoint, and they mean different
+    things about history:
+
+    * card_ids GIVEN -- put those specific cards back to "new". Their
+      review_log rows are LEFT ALONE deliberately: the learner earned that
+      XP, and re-learning a card is not grounds for clawing it back.
+    * card_ids OMITTED -- reset everything, and that has to include
+      review_log. srs.delete_cards only touches card_modes and cards, so
+      the old version left XP, level, streak, leaderboard standing and
+      daruma progress fully intact while reporting {"ok": true} -- a
+      "reset" that reset the schedule and nothing a learner would look at.
+      streak_mends goes too, since a bought-back day outliving its reviews
+      keeps a phantom "showed up" alive (see srs._studied_days).
+
+    See scripts/wipe_srs.py for the same operation across every user.
+    """
+    logger.info("Resetting stats for user_id=%s scoped=%s", user_id, card_ids is not None)
+    if card_ids is not None:
+        srs.delete_cards(prefixed(card_ids, user_id))
+        return {"ok": True}
+
+    prefix = f"{user_id}:%"
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT DISTINCT card_id FROM card_modes WHERE card_id LIKE %s", (prefix,))
+            keys_to_delete = [row[0] for row in cur.fetchall()]
+            # Deleted first, and in one transaction with nothing else, so a
+            # failure cannot leave the schedule cleared while the history
+            # that explains it survives.
+            cur.execute("DELETE FROM review_log WHERE card_id LIKE %s", (prefix,))
+            cur.execute("DELETE FROM xp_ledger WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM streak_mends WHERE user_id = %s", (user_id,))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+    srs.delete_cards(keys_to_delete)
     return {"ok": True}

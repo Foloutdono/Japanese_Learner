@@ -75,7 +75,7 @@ def sentence_kanji_ok(text: str, level: str) -> bool:
     return all(not is_kanji(c) or c in allowed for c in text)
 
 
-def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000) -> str:
+def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000, reasoning: bool = True) -> str:
     """Multi-model fallback chat completion, identical discipline to
     reading.py's _chat: try each model in MODELS, retry once per model
     on a network error, move to the next model on a 429/500/502/503/504
@@ -122,7 +122,21 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000) -> str
                         # still carries the final answer with this on —
                         # reasoning output is a separate field we don't
                         # read, not a replacement for it.
-                        "reasoning": {"enabled": True},
+                        # Default True: the exam generators each ask for
+                        # one constrained JSON blob and benefit from the
+                        # model thinking first.
+                        #
+                        # Pass False for BATCHED output. Measured on the
+                        # grammar sentence generator, 8 points per call:
+                        # with reasoning on, this model spent 1,588-1,781
+                        # tokens reasoning, hit the max_tokens cap, and
+                        # returned the prompt's own placeholders or nothing
+                        # -- 0 usable sentences across repeated runs. With
+                        # it off, the same prompt cost ~500 completion
+                        # tokens and produced real sentences. The reasoning
+                        # budget crowds out the answer when the answer is
+                        # long.
+                        "reasoning": {"enabled": reasoning},
                     },
                     timeout=timeout,
                 )

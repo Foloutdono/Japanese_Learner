@@ -4,8 +4,10 @@ from fastapi import APIRouter, Depends
 from content.kana_data import KANA_SETS, kana_to_id
 from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
-from srs.batch_cache import ensure_initialized, key as batch_key, pick_ids
-from study.quiz_modes import KANA_MODES
+from srs.batch_cache import key as batch_key, pick_ids
+from study.modes import (
+    B2F, GRADED_FOR_SOURCE, INDICE_CHOICES, KANA, Mode, require_mode,
+)
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -87,17 +89,30 @@ def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) ->
     }
 
 
-def _build_kana_card(kana_entry: dict, kana_list: list[dict], mode: str, stage: str | None,
+def _build_kana_card(kana_entry: dict, kana_list: list[dict], m: Mode, stage: str | None,
                       preview: dict[int, dict] | None = None) -> dict:
-    all_romaji = [k["romaji"] for k in kana_list if k["romaji"] != kana_entry["romaji"]]
-    choices    = random.sample(all_romaji, min(3, len(all_romaji))) + [kana_entry["romaji"]]
-    random.shuffle(choices)
-    return {
+    """
+    Takes a resolved Mode, not a mode string — same shape kanji.py and
+    vocab.py already emit.
+
+    The flat top-level `choices` list is gone. It encoded "the options are
+    on screen", which is not a property of the exercise but of how much
+    help the learner wants on the card in front of them, so the options
+    ride in `hints.indice_1` and the client decides whether to show them.
+
+    Choices are DIRECTION-AWARE, which the old builder was not: it always
+    sampled romaji, so asking for the options on a b2f card (romaji shown,
+    recall the kana) would have offered four romaji as candidate answers to
+    a romaji prompt. The answer side is whatever the direction hides.
+    """
+    payload = {
         "card_id": kana_to_id(kana_entry),
+        "mode":    m.key,
+        # f2b: the kana is shown, recall the romaji.
+        # b2f: the romaji is shown, recall the kana.
+        "direction": m.direction,
         "kana":    kana_entry["kana"],
         "romaji":  kana_entry["romaji"],
-        "choices": choices,
-        "mode":    mode,
         # Current SRS stage, so the client can hand it straight back
         # as ReviewPayload.prev_stage without another lookup — see the
         # comment on that field for why that matters.
@@ -107,17 +122,32 @@ def _build_kana_card(kana_entry: dict, kana_list: list[dict], mode: str, stage: 
         # guess or wait on a round trip to know what just happened —
         # see preview_reviews_bulk's docstring for the full reasoning.
         "review_preview": _build_review_preview(stage, preview),
+        "hints": {},
     }
 
+    if INDICE_CHOICES in m.hints:
+        # Built unconditionally for a hint-capable mode, because the
+        # learner can ask for them mid-card and a second round trip at
+        # that moment would stall the card.
+        field    = "kana" if m.direction == B2F else "romaji"
+        answer   = kana_entry[field]
+        pool     = [k[field] for k in kana_list if k[field] != answer]
+        choices  = random.sample(pool, min(3, len(pool))) + [answer]
+        random.shuffle(choices)
+        payload["hints"][INDICE_CHOICES] = choices
 
-def _select_cards(set_name: str, mode: str, count: int, exclude_ids: set[str], user_id: str):
+    return payload
+
+
+def _select_cards(set_name: str, m: Mode, count: int, exclude_ids: set[str], user_id: str):
     """
     Shared by /api/kana/card and /api/kana/cards: resolves the set,
-    makes sure the cards/card_modes rows exist, picks up to `count`
+    picks up to `count`
     due/new card ids (excluding anything already sitting unreviewed
     in the caller's queue), and builds the full payload for each.
     Returns (kana_list, cards) — kana_list is None for an unknown set.
     """
+    mode = m.key
     kana_list = KANA_SETS.get(set_name)
     if not kana_list:
         return None, None
@@ -125,7 +155,11 @@ def _select_cards(set_name: str, mode: str, count: int, exclude_ids: set[str], u
     raw_ids   = [kana_to_id(k) for k in kana_list]
     card_ids  = prefixed(raw_ids, user_id)
     cache_key = batch_key("user", user_id, mode, set_name)
-    ensure_initialized(cache_key, lambda: srs.ensure_cards(card_ids, mode), version=card_ids)
+    # No pre-materialisation. get_new_cards selects over the ids passed
+    # here rather than joining `cards`, so nothing has to exist in
+    # card_modes before a card can be served — a scheduler row is written
+    # on first review instead. This call used to write one row per deck
+    # card per mode (3,476 of them for N1 vocab) on the first request.
 
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(
@@ -150,7 +184,7 @@ def _select_cards(set_name: str, mode: str, count: int, exclude_ids: set[str], u
         raw_id = unprefixed(card_id, user_id)
         kana_entry = next((k for k in kana_list if kana_to_id(k) == raw_id), None)
         if kana_entry is not None:
-            cards.append(_build_kana_card(kana_entry, kana_list, mode, states.get(card_id), previews.get(card_id)))
+            cards.append(_build_kana_card(kana_entry, kana_list, m, states.get(card_id), previews.get(card_id)))
 
     logger.info(
         "kana study request set_name=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
@@ -160,8 +194,10 @@ def _select_cards(set_name: str, mode: str, count: int, exclude_ids: set[str], u
 
 
 @router.get("/api/kana/card")
-def get_kana_card(set_name: str, mode: str, user_id: str = Depends(get_user_id)):
-    kana_list, cards = _select_cards(set_name, mode, count=1, exclude_ids=set(), user_id=user_id)
+def get_kana_card(set_name: str, m: Mode = Depends(require_mode(KANA)),
+                   user_id: str = Depends(get_user_id)):
+    mode = m.key
+    kana_list, cards = _select_cards(set_name, m, count=1, exclude_ids=set(), user_id=user_id)
     if kana_list is None:
         print(f"Unknown set: {set_name}")
         return {"error": "Unknown set"}
@@ -172,7 +208,8 @@ def get_kana_card(set_name: str, mode: str, user_id: str = Depends(get_user_id))
 
 
 @router.get("/api/kana/cards")
-def get_kana_cards(set_name: str, mode: str, count: int = 10, exclude: str = "",
+def get_kana_cards(set_name: str, count: int = 10, exclude: str = "",
+                    m: Mode = Depends(require_mode(KANA)),
                     user_id: str = Depends(get_user_id)):
     """
     Batch version of /api/kana/card — returns up to `count` cards at
@@ -182,7 +219,7 @@ def get_kana_cards(set_name: str, mode: str, count: int = 10, exclude: str = "",
     hasn't reviewed yet.
     """
     kana_list, cards = _select_cards(
-        set_name, mode,
+        set_name, m,
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
@@ -193,13 +230,15 @@ def get_kana_cards(set_name: str, mode: str, count: int = 10, exclude: str = "",
 
 
 @router.get("/api/kana/stats")
-def get_kana_stats(set_name: str, mode: str, user_id: str = Depends(get_user_id)):
+def get_kana_stats(set_name: str, m: Mode = Depends(require_mode(KANA)),
+                    user_id: str = Depends(get_user_id)):
     """
     Lightweight, per-set/mode progress (à apprendre / en cours / maîtrisé).
     Unlike /api/stats (which recomputes every category for the whole user),
     this only touches the card_ids for this one set and does a single
     bulk-state lookup, so it's cheap enough to call after every review.
     """
+    mode = m.key
     kana_list = KANA_SETS.get(set_name)
     if not kana_list:
         return {"error": "Unknown set"}
@@ -222,26 +261,30 @@ def get_kana_stats(set_name: str, mode: str, user_id: str = Depends(get_user_id)
 @router.get("/api/kana/review-cards")
 def get_kana_review_cards(set_name: str, user_id: str = Depends(get_user_id)):
     """
-    Every card in this set the user has already studied, in ANY mode
-    (qcm/flashcard/write) — not just due ones — for a self-paced,
-    ungraded browse of "cards I already know" instead of an SRS-driven
-    session. `stage` is the most advanced stage reached across those
-    modes (mastered beats learning beats new): progress is tracked per
-    (card, mode) pair, and someone browsing what they've learned
-    shouldn't have to pick which specific drill type's progress to
-    check first.
+    Every card in this set the user has already studied, in ANY graded
+    mode — not just due ones — for a self-paced, ungraded browse of
+    "cards I already know" instead of an SRS-driven session. `stage` is
+    the most advanced stage reached across those modes (mastered beats
+    learning beats new): progress is tracked per (card, mode) pair, and
+    someone browsing what they've learned shouldn't have to pick which
+    specific drill type's progress to check first.
+
+    The mode list comes from the registry rather than a hand-kept
+    constant, so a mode added to this source is browsed automatically
+    instead of being silently absent from everyone's review deck.
     """
     kana_list = KANA_SETS.get(set_name)
     if not kana_list:
         return {"error": "Unknown set"}
 
+    graded   = sorted(GRADED_FOR_SOURCE[KANA])
     raw_ids  = [kana_to_id(k) for k in kana_list]
     card_ids = prefixed(raw_ids, user_id)
-    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in KANA_MODES}
+    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in graded}
 
     cards = []
     for kana_entry, card_id in zip(kana_list, card_ids):
-        stages = [per_mode_states[m].get(card_id, "new") for m in KANA_MODES]
+        stages = [per_mode_states[m].get(card_id, "new") for m in graded]
         stage = "mastered" if "mastered" in stages else "learning" if "learning" in stages else "new"
         if stage == "new":
             continue

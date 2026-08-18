@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -14,19 +14,28 @@ import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
+import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
-import { grammarModePicker, reviewMode } from '../domain/quizModes'
+import {
+  MODES as STUDY_MODES, RENDER, HINTS, FAST_REVIEW,
+  modePickerEntries, modeLabel,
+} from '../domain/studyModes'
+import HintBar from '../components/study/HintBar'
 import { ChevronIcon } from '../components/ui/Icons'
 import { applyXpGain } from '../stores/profileSummary'
-import { useCardSession } from '../hooks/useCardSession'
+import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
-const FETCH_TIMEOUT_MS = 8000
+// The 8s fetch timeout that used to live here is gone: useCardSession
+// owns the abort signal and the timeout now (10s, matched to the cold
+// start it was always meant to bridge), so the five screens no longer
+// each hand-roll a controller that only ever timed out and never
+// aborted on unmount.
 
 export default function GrammarScreen({ session }) {
   const navigate = useNavigate()
   const { t }    = useLang()
 
-  const MODES = grammarModePicker(t)
+  const MODES = modePickerEntries(t, 'grammar')
 
   const [level, setLevel]           = useState(null)
   const [mode, setMode]             = useState(null)
@@ -35,6 +44,10 @@ export default function GrammarScreen({ session }) {
   const [selected, setSelected]     = useState(null)
   const [showRating, setShowRating] = useState(false)
   const [showEx, setShowEx]         = useState(false)
+  // Hints switched on for the card in hand, reset per card -- reaching for
+  // the options on one hard rule should not turn the rest of the session
+  // into multiple choice.
+  const [activeHints, setActiveHints] = useState([])
   const [progress, setProgress]     = useState(null)
   const [xpToast, setXpToast]       = useState(null)
   const [cardStamp, setCardStamp]   = useState(null)
@@ -67,27 +80,24 @@ export default function GrammarScreen({ session }) {
   // /api/grammar/cards for the batch endpoint this replaced the old
   // one-card-per-fetch /api/grammar/card flow with).
   const storageKey = level && mode
-    ? `jp-session:grammar:${level}:${mode}`
-    : 'idle'
+    ? sessionKey('grammar', level, mode)
+    : IDLE_KEY
 
-  const fetchBatch = useCallback((count, excludeIds) => {
-    if (!level || !mode) return Promise.resolve([])
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-    return apiFetch(
+  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+    if (!level || !mode) return []
+    const data = await apiJson(
       `/api/grammar/cards?level=${encodeURIComponent(level)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}`,
       session,
-      { signal: controller.signal },
+      { signal },
     )
-      .then(r => r.json())
-      .then(data => data.cards ?? [])
-      .finally(() => clearTimeout(timer))
+    return data.cards ?? []
   }, [level, mode, session])
 
-  const { current: card, loading, done, advance } = useCardSession({
+  const { current: card, loading, done, error, retry, advance } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
+    mode,
   })
 
   // Reset per-card UI state whenever the card in hand changes —
@@ -99,6 +109,7 @@ export default function GrammarScreen({ session }) {
     setSelected(null)
     setShowRating(false)
     setShowEx(false)
+    setActiveHints([])
   }, [card?.card_id])
 
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
@@ -204,11 +215,6 @@ export default function GrammarScreen({ session }) {
     setShowRating(true)
   }
 
-  function onFillReveal() {
-    setAnswered(true)
-    setShowRating(true)
-  }
-
   // ── Level selection ──
   if (!level) {
     return (
@@ -232,8 +238,8 @@ export default function GrammarScreen({ session }) {
         <TopBar onBack={() => setLevel(null)} title={`${t.grammarTitle} ${level}`} autoHide />
         <SelectionScreen>
           <ModeSelector
-            modes={[...MODES, reviewMode(t)]}
-            onSelect={m => (m === 'review' ? startReview() : board(() => startSession(level, m)))}
+            modes={MODES}
+            onSelect={m => (m === FAST_REVIEW ? startReview() : board(() => startSession(level, m)))}
           />
         </SelectionScreen>
       </div>
@@ -256,8 +262,8 @@ export default function GrammarScreen({ session }) {
               <div>
                 <div className="grammar-glyph">{c.grammar}</div>
                 <div className="grammar-meaning"><GlossList meaning={c.meaning} /></div>
-                {c.explanation && (
-                  <div className="review-grammar-explanation">{c.explanation}</div>
+                {c.structure && (
+                  <div className="review-grammar-explanation">{c.structure}</div>
                 )}
               </div>
             )}
@@ -268,7 +274,26 @@ export default function GrammarScreen({ session }) {
     )
   }
 
-  const currentModeLabel = MODES.find(m => m.key === mode)?.label ?? mode
+  const currentModeLabel = modeLabel(t, mode)
+  // Driven by the registry, not by comparing against mode-key strings.
+  const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
+  const isFill   = renderer === RENDER.FILL
+  // b2f shows the meaning and asks for the rule; f2b is the other way up.
+  const isB2F    = card?.direction === 'b2f'
+
+  const cardHints = card?.hints ?? {}
+  const availableHints = Object.keys(cardHints).filter(
+    k => Array.isArray(cardHints[k]) && cardHints[k].length > 0,
+  )
+  const choicesOn   = activeHints.includes(HINTS.CHOICES) && Array.isArray(cardHints[HINTS.CHOICES])
+  const sentencesOn = activeHints.includes(HINTS.SENTENCES) && Array.isArray(cardHints[HINTS.SENTENCES])
+  // fill_in always shows its options: "which rule is at work" with no
+  // candidates is a free-recall question the mode never claimed to be.
+  const showChoices = isFill || choicesOn
+
+  function toggleHint(key) {
+    setActiveHints(hs => (hs.includes(key) ? hs.filter(h => h !== key) : [...hs, key]))
+  }
 
   // ── Quiz ──
   return (
@@ -282,6 +307,7 @@ export default function GrammarScreen({ session }) {
       <div className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
+        {error && !card && <SessionError error={error} onRetry={retry} />}
         {done    && <DoneMessage onBack={() => setMode(null)} />}
 
         {card && !loading && (
@@ -291,81 +317,85 @@ export default function GrammarScreen({ session }) {
               pendingGatesRef.current.delete('stamp')
               checkAdvance()
             }}>
-              {/* Grammar point card */}
+              {/* The prompt. fill_in shows a sentence and asks which rule
+                  is at work; the flashcards show one side of the pair. */}
               <PromptCard className="grammar-prompt">
-                <div className="grammar-glyph">
-                  {card.grammar}
-                </div>
-                {mode === 'flashcard' && !flipped && (
-                  <div className="grammar-hint">{t.revealMeaning}</div>
+                {isFill ? (
+                  <div className="grammar-fill-sentence" lang="ja">
+                    {card.fill_sentence?.jp}
+                  </div>
+                ) : (
+                  <>
+                    <div className="grammar-glyph">
+                      {isB2F ? <GlossList meaning={card.meaning} /> : card.grammar}
+                    </div>
+                    {card.structure && !isB2F && (
+                      <div className="grammar-structure">{card.structure}</div>
+                    )}
+                  </>
                 )}
-                {mode === 'flashcard' && flipped && (
-                  <div className="grammar-meaning"><GlossList meaning={card.meaning} /></div>
+
+                {!isFill && !flipped && (
+                  <div className="grammar-hint">
+                    {isB2F ? t.revealGrammarRule : t.revealMeaning}
+                  </div>
                 )}
-                {mode !== 'flashcard' && (
-                  <div className="grammar-reveal-hint">
-                    {mode === 'mcq' ? t.revealMeaning : t.revealSentence}
+                {!isFill && flipped && (
+                  <div className="grammar-meaning">
+                    {isB2F
+                      ? <><div className="grammar-glyph">{card.grammar}</div>
+                          <div className="grammar-structure">{card.structure}</div></>
+                      : <GlossList meaning={card.meaning} />}
+                  </div>
+                )}
+                {isFill && answered && (
+                  <div className="grammar-meaning">
+                    <div className="grammar-glyph">{card.grammar}</div>
+                    <GlossList meaning={card.meaning} />
                   </div>
                 )}
               </PromptCard>
             </CardTransition>
 
-            {/* Fill example sentence */}
-            {mode === 'fill' && card.fill_example && (
-              <div className="grammar-fill-example">
-                <div className="grammar-fill-example__jp">
-                  {answered ? card.fill_example.jp_full : card.fill_example.jp_blanked}
-                </div>
-                <div className="grammar-fill-example__en">{card.fill_example.en}</div>
-                {answered && (
-                  <div className="grammar-fill-example__romaji">
-                    {card.fill_example.romaji}
-                  </div>
-                )}
-              </div>
-            )}
+            <HintBar available={availableHints} active={activeHints}
+                     onToggle={toggleHint} disabled={locked} />
 
-            {/* Flashcard reveal */}
-            {mode === 'flashcard' && !flipped && (
+            {/* Flashcard reveal — hidden while the options are showing,
+                since two reveal affordances on one card compete. */}
+            {!isFill && !flipped && !choicesOn && (
               <button onClick={onFlashcardReveal} className="reveal-btn">
-                {t.revealMeaningBtn}
+                {isB2F ? t.revealGrammarBtn : t.revealMeaningBtn}
               </button>
             )}
 
-            {/* MCQ */}
-            {mode === 'mcq' && (
-              <MCQGrid choices={card.choices} correct={card.meaning}
-                formatChoice={formatGlossLine}
+            {/* Options: meanings for a flashcard, rules for fill_in. */}
+            {showChoices && (
+              <MCQGrid
+                choices={cardHints[HINTS.CHOICES] ?? []}
+                correct={isFill || isB2F ? card.grammar : card.meaning}
+                formatChoice={isFill || isB2F ? undefined : formatGlossLine}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
 
-            {/* Fill reveal */}
-            {mode === 'fill' && !answered && (
-              <button onClick={onFillReveal} className="grammar-fill-reveal-btn">
-                {t.revealAnswer}
-              </button>
-            )}
-
-            {/* Examples toggle */}
-            {(flipped || answered) && card.examples?.length > 0 && (
+            {/* indice_2 — example sentences, translation hidden until asked
+                for. That reveal is the point of the hint, so it is a second
+                switch inside it rather than shown alongside. */}
+            {sentencesOn && (
               <div className="grammar-examples">
-                <button
-                  onClick={() => setShowEx(e => !e)}
-                  className="grammar-examples-toggle"
-                >
-                  <ChevronIcon direction={showEx ? 'up' : 'down'} size={14} /> {showEx ? t.hideExamples : t.showExamples}
+                <div className="grammar-examples__list">
+                  {cardHints[HINTS.SENTENCES].map((ex, i) => (
+                    <div key={i} className="grammar-example-card">
+                      <div className="grammar-example-card__jp" lang="ja">{ex.jp}</div>
+                      {showEx
+                        ? <div className="grammar-example-card__en">{ex.en}</div>
+                        : null}
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => setShowEx(e => !e)} className="grammar-examples-toggle">
+                  <ChevronIcon direction={showEx ? 'up' : 'down'} size={14} />
+                  {showEx ? t.hideTranslation : t.showTranslation}
                 </button>
-                {showEx && (
-                  <div className="grammar-examples__list">
-                    {card.examples.slice(0, 3).map((ex, i) => (
-                      <div key={i} className="grammar-example-card">
-                        <div className="grammar-example-card__jp">{ex.jp}</div>
-                        <div className="grammar-example-card__romaji">{ex.romaji}</div>
-                        <div className="grammar-example-card__en">{ex.en}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
 
