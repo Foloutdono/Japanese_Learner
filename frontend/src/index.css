@@ -4688,28 +4688,6 @@ input:focus { border-color: var(--accent2); }
   position: relative;
 }
 
-/* Write mode puts a capped-width drawing board of its own directly
-   under the prompt, and a full-width prompt over a 660px panel reads as
-   two unrelated boxes rather than as one card and its interaction. This
-   matches the prompt to the panel below it. (Readings mode used to get
-   the same treatment via .quiz-card-stage--form, capped at 520px — that
-   made it the one mode whose card visibly shrank next to every other
-   flashcard-style card in the same session; its own form narrows itself
-   internally now instead, see .readings-input__group.)
-
-   `width: 100%` is not redundant next to `margin: 0 auto`, it is what
-   makes the pair work at all: .quiz-area is a COLUMN flex container,
-   and an auto margin on a flex item's cross axis suppresses
-   `align-self: stretch` — so with the margin alone the stage would
-   collapse to fit-content instead of filling the row and then being
-   capped. (That exact omission is what left the grammar card barely
-   wider than a single kana; see .grammar-card-boost.) */
-.quiz-card-stage--narrow {
-  width: 100%;
-  margin: 0 auto;
-  max-width: 660px;
-}
-
 /* ── Permanent stage seal ──────────────────────────────────
    A small hanko permanently sitting in the corner of every quiz
    card — see StageBadge.jsx. Sits well under the celebratory
