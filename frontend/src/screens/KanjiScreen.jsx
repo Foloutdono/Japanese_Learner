@@ -19,6 +19,7 @@ import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
 import HintBar from '../components/study/HintBar'
+import ReadingsInput from '../components/study/ReadingsInput'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import {DrawingQuiz, DrawingOverlay} from '../components/study/DrawingCanvas'
@@ -36,6 +37,22 @@ import { PencilIcon } from '../components/ui/Icons'
 // start it was always meant to bridge), so the five screens no longer
 // each hand-roll a controller that only ever timed out and never
 // aborted on unmount.
+
+// The radical a kanji is filed under: the glyph large, its Kangxi number
+// and stroke count small beneath. The number is what makes the answer
+// checkable — several radicals share a shape at a glance (⺅ 亻 人), so
+// the glyph alone leaves the learner unsure whether they were right.
+function RadicalAnswer({ radical, t }) {
+  if (!radical) return null
+  return (
+    <div className="radical-answer">
+      <div className="radical-answer__char" lang="ja">{radical.char}</div>
+      <div className="radical-answer__meta">
+        {t.radicalNumber} {radical.number} · {radical.stroke_count} {t.strokes}
+      </div>
+    </div>
+  )
+}
 
 export default function KanjiScreen({ session }) {
   const navigate    = useNavigate()
@@ -478,6 +495,7 @@ export default function KanjiScreen({ session }) {
   // Which UI this mode needs, from the registry rather than a string
   // comparison against one key ('write') that used to stand in for it.
   const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
+  const isRadical = STUDY_MODES[mode]?.base === 'radical'
 
   return (
     <div className="screen">
@@ -521,7 +539,57 @@ export default function KanjiScreen({ session }) {
                 checkAdvance()
               }}
             >
-              {renderer !== RENDER.DRAW ? (
+              {renderer === RENDER.TYPE ? (
+                /* readings — the kanji is shown, every reading is typed
+                   into ReadingsInput below. No flip: the answer is not one
+                   thing to uncover but a set the learner produces. */
+                <PromptCard>
+                  <CharDisplay char={card.kanji} size={100} />
+                  <RevealActions
+                    t={t}
+                    revealed={answered}
+                    resetKey={card.card_id}
+                    dictTerm={card.kanji}
+                    dictCategory="kanji"
+                    session={session}
+                    onReplaySound={() => speakJapanese(card.kana)}
+                  />
+                </PromptCard>
+              ) : isRadical ? (
+                /* radical — the kanji is shown, the radical it is filed
+                   under is the answer. Same flip/choices split as the
+                   meaning flashcards above it. */
+                <PromptCard>
+                  {!showChoices && (
+                    <Flashcard
+                      t={t}
+                      resetKey={card.card_id}
+                      onReveal={onFlashcardReveal}
+                      front={<CharDisplay char={card.kanji} size={100} />}
+                      back={<RadicalAnswer radical={card.radical} t={t} />}
+                      dictTerm={card.kanji}
+                      dictCategory="kanji"
+                      session={session}
+                      onReplaySound={() => speakJapanese(card.kana)}
+                    />
+                  )}
+                  {showChoices && (
+                    <>
+                      <CharDisplay char={card.kanji} size={100} />
+                      {answered && <RadicalAnswer radical={card.radical} t={t} />}
+                      <RevealActions
+                        t={t}
+                        revealed={answered}
+                        resetKey={card.card_id}
+                        dictTerm={card.kanji}
+                        dictCategory="kanji"
+                        session={session}
+                        onReplaySound={() => speakJapanese(card.kana)}
+                      />
+                    </>
+                  )}
+                </PromptCard>
+              ) : renderer !== RENDER.DRAW ? (
                 <PromptCard>
                   {!showChoices && (
                     <Flashcard
@@ -595,12 +663,29 @@ export default function KanjiScreen({ session }) {
               )}
             </CardTransition>
 
-            {showChoices && (
+            {showChoices && isRadical && (
+              <MCQGrid
+                choices={(card.hints?.indice_1 ?? []).map(c => c.char)}
+                correct={card.radical?.char}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer}
+              />
+            )}
+
+            {showChoices && !isRadical && (
               <MCQGrid
                 choices={(card.hints?.indice_1 ?? []).map(c => isKjToM ? c.meaning : c.kanji)}
                 correct={isKjToM ? card.meaning : card.kanji}
                 formatChoice={isKjToM ? formatGlossLine : undefined}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
+              />
+            )}
+
+            {renderer === RENDER.TYPE && (
+              <ReadingsInput
+                key={card.card_id}
+                readings={card.readings}
+                submitted={answered}
+                onSubmit={onFlashcardReveal}
               />
             )}
 

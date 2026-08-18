@@ -8,7 +8,9 @@ from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from study.quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO, VOCAB_MODES
-from study.modes import VOCAB, INDICE_CHOICES, Mode, require_mode
+from study.modes import (
+    VOCAB, INDICE_CHOICES, WORD_READING, Mode, eligible_for, require_mode,
+)
 from study.mcq import pick_distractors
 from pydantic import BaseModel
 
@@ -138,7 +140,17 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     # remaining failure here is an unknown level.
     mode = m.key
 
-    raw_ids   = [vocab_to_id(w, level) for w in vocab_list]
+    # `word_reading` shows the word and asks for its kana reading, so a
+    # kana-only entry would print the answer as the prompt. 1,129 of the
+    # 8,405 deck entries are kana-only; they are removed from the POOL
+    # rather than skipped at build time, because an entry left in the pool
+    # is still selectable and comes back as a missing card that reads
+    # to the client as "deck exhausted".
+    pool = [w for w in vocab_list if eligible_for(m, w)]
+    if not pool:
+        return vocab_list, []
+
+    raw_ids   = [vocab_to_id(w, level) for w in pool]
     card_ids  = prefixed(raw_ids, user_id)
     cache_key = batch_key("user", user_id, mode, level)
     # No pre-materialisation. get_new_cards selects over the ids passed
@@ -168,7 +180,7 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     cards = []
     for card_id in picked:
         raw_id = unprefixed(card_id, user_id)
-        word = next((w for w in vocab_list if vocab_to_id(w, level) == raw_id), None)
+        word = next((w for w in pool if vocab_to_id(w, level) == raw_id), None)
         if word is not None:
             cards.append(_build_vocab_card(raw_id, word, vocab_list, m, lang, states.get(card_id), previews.get(card_id)))
 

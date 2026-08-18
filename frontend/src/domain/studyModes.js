@@ -112,15 +112,18 @@ const LIST = [
     renderer: RENDER.DRAW, service: SERVICE.LTD,
     format: 'writing', statsDirection: 'production',
   }),
-  // Needs ja_on/ja_kun on the card payload and the two-group input.
+  // The deck packs every reading into one string; the payload splits
+  // them by script into readings.on / readings.kun (see
+  // content/kanji_readings.py) and the input takes them as two groups.
   mode('kanji.readings', 'kanji', 'readings', {
     renderer: RENDER.TYPE, service: SERVICE.EXPRESS,
-    format: 'typing', statsDirection: 'production', implemented: false,
+    format: 'typing', statsDirection: 'production',
   }),
-  // Needs the radical number/glyph on the card payload.
+  // Choices come from the same stroke-count bucket, so the answer can't
+  // be picked out by shape alone.
   mode('kanji.radical', 'kanji', 'radical', {
-    service: SERVICE.RAPID, format: 'flashcard',
-    statsDirection: 'recognition', implemented: false,
+    hints: C, service: SERVICE.RAPID, format: 'flashcard',
+    statsDirection: 'recognition',
   }),
 
   // ── vocab ──
@@ -132,10 +135,11 @@ const LIST = [
     direction: 'b2f', hints: CF, service: SERVICE.EXPRESS,
     format: 'flashcard', statsDirection: 'recall',
   }),
-  // Needs the kanji-bearing-only pool filter on the backend.
+  // Kana-only entries are filtered out of the pool on the backend --
+  // the prompt would otherwise print the answer.
   mode('vocab.word_reading', 'vocab', 'word_reading', {
-    service: SERVICE.RAPID, format: 'flashcard',
-    statsDirection: 'recognition', implemented: false,
+    service: SERVICE.EXPRESS, format: 'flashcard',
+    statsDirection: 'recall',
   }),
 
   // ── grammar ──

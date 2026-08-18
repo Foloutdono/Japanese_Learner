@@ -3577,6 +3577,94 @@ input:focus { border-color: var(--accent2); }
 .quiz-result--correct { color: var(--success); }
 .quiz-result--wrong   { color: var(--danger); }
 
+/* ── 読み入力 (kanji.readings) ──────────────────────────────
+   Two labelled groups, each growing a row at a time. The rows sit in a
+   flex row with the tick OUTSIDE the field, so a correct mark never
+   overlaps kana the learner is still reading. Colours come from the
+   line pigment the section handed down, same as every other study
+   control -- nothing here picks its own hue. */
+.readings-input { margin-top: 4px; }
+
+.readings-input__group + .readings-input__group { margin-top: 18px; }
+
+.readings-input__label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.readings-input__label [lang="ja"] {
+  font-family: var(--font-jp);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--line, var(--accent));
+}
+
+.readings-input__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.readings-input__row .readings-input__field { margin-bottom: 8px; }
+.readings-input__row svg { flex: none; color: var(--success); }
+
+.readings-input__field--ok   { border-color: var(--success); }
+.readings-input__field--miss { border-color: var(--border); }
+
+.readings-input__add {
+  background: none;
+  border: none;
+  padding: 2px 0 0;
+  font-size: 13px;
+  color: var(--line, var(--accent));
+  cursor: pointer;
+}
+.readings-input__add:hover { text-decoration: underline; }
+
+.readings-input__answer {
+  margin-top: 6px;
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+}
+.readings-input__answer-label { color: var(--text-secondary); }
+.readings-input__answer-list {
+  font-family: var(--font-jp);
+  font-size: 17px;
+  color: var(--text-primary);
+}
+
+.readings-input__cap {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ── Radical answer (kanji.radical) ───────────────────────── */
+.radical-answer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.radical-answer__char {
+  font-family: var(--font-jp);
+  font-size: 72px;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+.radical-answer__meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
 .mode-toggle {
   display: flex;
   gap: 12px;

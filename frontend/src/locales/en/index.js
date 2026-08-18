@@ -227,6 +227,14 @@ const quiz = {
   modeWrite:         'Writing',
   // Stats format axis: typed on a keyboard, as against drawn by hand.
   modeType:          'Typing',
+  radicalNumber:       'Radical',
+  // ── 読み入力 (kanji.readings) ──
+  readingsOn:          'On (Chinese-derived)',
+  readingsKun:         'Kun (native Japanese)',
+  readingsAdd:         'add a reading',
+  readingsAll:         'All readings:',
+  readingsPlaceholder: 'kana or romaji',
+  readingsCap:         '15 readings is the most this card will take.',
   modeWriteDesc:     'Meaning only. Draw the character stroke by stroke.',
   // Parameterised on what the studied item is called ("kanji" or
   // "word" — see kanjiNoun/wordNoun below and vocabKanjiModes in

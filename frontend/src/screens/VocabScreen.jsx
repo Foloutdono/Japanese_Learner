@@ -23,7 +23,9 @@ import HintBar from '../components/study/HintBar'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import { speakJapanese, playUi } from '../lib/audio'
-import { FAST_REVIEW, modePickerEntries, modeLabel } from '../domain/studyModes'
+import {
+  MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries, modeLabel,
+} from '../domain/studyModes'
 import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
@@ -512,6 +514,7 @@ export default function VocabScreen({ session }) {
   // indice_1 while a particular card has no distractors to offer.
   const availableHints = Object.keys(card?.hints ?? {})
   const showChoices = activeHints.has('indice_1') && Array.isArray(card?.hints?.indice_1)
+  const isWordReading = STUDY_MODES[mode]?.base === 'word_reading'
 
   const title = modeLabel(t, mode)
   const sourceLabel =
@@ -549,7 +552,31 @@ export default function VocabScreen({ session }) {
               }}
             >
               <PromptCard>
-                {!showChoices && (
+                {/* word_reading — the written word is shown and the answer
+                    is how it is read. The backend has already removed the
+                    kana-only entries from the pool, since for those the
+                    prompt would print its own answer. No meaning on either
+                    face: this drill is about reading, not knowing. */}
+                {isWordReading && (
+                  <Flashcard
+                    t={t}
+                    resetKey={card.card_id}
+                    onReveal={onFlashcardReveal}
+                    front={<CharDisplay char={card.kanji} size={72} />}
+                    back={
+                      <div>
+                        <CharDisplay char={card.kanji} size={56} />
+                        <div className="flashcard-answer" lang="ja">{card.kana}</div>
+                      </div>
+                    }
+                    dictTerm={wordForm(card)}
+                    dictCategory="vocab"
+                    session={session}
+                    onReplaySound={() => speakJapanese(card.kana)}
+                  />
+                )}
+
+                {!isWordReading && !showChoices && (
                   <Flashcard
                     t={t}
                     resetKey={card.card_id}
@@ -576,7 +603,7 @@ export default function VocabScreen({ session }) {
                   />
                 )}
 
-                {showChoices && (
+                {!isWordReading && showChoices && (
                   <>
                     <InlineReveal
                       t={t}
@@ -602,7 +629,7 @@ export default function VocabScreen({ session }) {
               </PromptCard>
             </CardTransition>
 
-            {showChoices && (
+            {!isWordReading && showChoices && (
               <MCQGrid
                 choices={(card.hints?.indice_1 ?? []).map(c => isKjToM ? c.meaning : wordForm(c))}
                 correct={isKjToM ? card.meaning : wordForm(card)}

@@ -214,6 +214,14 @@ const quiz = {
   modeWrite:         'Écriture',
   // Axe « format » des stats : saisi au clavier, par opposition à tracé.
   modeType:          'Saisie',
+  radicalNumber:       'Clé',
+  // ── 読み入力 (kanji.readings) ──
+  readingsOn:          'On (lecture sino-japonaise)',
+  readingsKun:         'Kun (lecture japonaise)',
+  readingsAdd:         'ajouter une lecture',
+  readingsAll:         'Toutes les lectures :',
+  readingsPlaceholder: 'kana ou romaji',
+  readingsCap:         "15 lectures, c'est le maximum pour cette carte.",
   modeWriteDesc:     'Le sens seul. Tracez le caractère, trait par trait.',
   // Paramétré sur le nom de l'élément étudié ("kanji" ou "mot" — voir
   // kanjiNoun/wordNoun plus bas et vocabKanjiModes dans quizModes.js).

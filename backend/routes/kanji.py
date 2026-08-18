@@ -8,8 +8,12 @@ from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
 from content.kanji_meanings import KANJI_FR
 from study.quiz_modes import QCM_FLASHCARD_MODES, KANJI_MODES
-from study.modes import KANJI, INDICE_CHOICES, Mode, require_mode
+from study.modes import (
+    KANJI, INDICE_CHOICES, RADICAL, READINGS, Mode, eligible_for, require_mode,
+)
 from study.mcq import pick_distractors
+from content.kanji_readings import split_readings, display_reading
+from content.radical_data import radical_for, siblings_by_stroke, RADICAL_BY_NUMBER
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -90,6 +94,12 @@ def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) ->
     }
 
 
+def _radical_number(entry: dict) -> int | None:
+    """The radical number for eligible_for; None when uncovered."""
+    rad = radical_for(entry.get("kanji", ""))
+    return None if rad is None else rad["number"]
+
+
 def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], m: Mode, lang: str, stage: str | None,
                        preview: dict[int, dict] | None = None) -> dict:
     """
@@ -139,6 +149,39 @@ def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], m: Mode,
             for c in choice_entries
         ]
 
+    if m.base == READINGS:
+        # The deck packs every reading into one ・-separated string; the
+        # mode asks for them by type, so they are split here rather than
+        # on the client. See content/kanji_readings.py for why splitting
+        # by script is the convention and not a guess.
+        #
+        # Both the stored and the display form travel: "ま.ず" marks where
+        # the okurigana starts, which matters for showing the answer, but
+        # a learner typing "まず" has not made a mistake, so the comparison
+        # needs the dotless form too.
+        split = split_readings(entry.get("kana"))
+        payload["readings"] = {
+            kind: [{"reading": r, "display": display_reading(r)} for r in readings]
+            for kind, readings in split.items()
+        }
+
+    if m.base == RADICAL:
+        # Distractors come from the SAME stroke-count bucket. Drawn from
+        # all 214 the mode would be trivial by accident -- a 1-stroke
+        # radical against three 12-stroke ones is a shape-recognition
+        # task, not a radical one.
+        rad = radical_for(entry.get("kanji", ""))
+        if rad is not None:
+            payload["radical"] = rad
+            pool = siblings_by_stroke(rad["number"])
+            picks = random.sample(pool, min(3, len(pool)))
+            options = [RADICAL_BY_NUMBER[n] for n in picks] + [RADICAL_BY_NUMBER[rad["number"]]]
+            random.shuffle(options)
+            payload["hints"][INDICE_CHOICES] = [
+                {"number": o["number"], "char": o["char"], "stroke_count": o["stroke_count"]}
+                for o in options
+            ]
+
     return payload
 
 
@@ -156,7 +199,17 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     # remaining failure here is an unknown level.
     mode = m.key
 
-    raw_ids   = [kanji_to_id(k, level) for k in kanji_list]
+    # Not every entry can be served in every mode -- `radical` needs a
+    # radical number, which the KANJIDIC2 dump happens to have for 100% of
+    # this deck but is not guaranteed to. Filtering the POOL rather than
+    # skipping at build time matters: an ineligible entry left in the pool
+    # is still selectable, still counts toward the deck total, and comes
+    # back as a silently missing card that reads as "deck exhausted".
+    pool = [k for k in kanji_list if eligible_for(m, {**k, "radical": _radical_number(k)})]
+    if not pool:
+        return kanji_list, []
+
+    raw_ids   = [kanji_to_id(k, level) for k in pool]
     card_ids  = prefixed(raw_ids, user_id)
     cache_key = batch_key("user", user_id, mode, level)
     # No pre-materialisation. get_new_cards selects over the ids passed
@@ -186,7 +239,7 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     cards = []
     for card_id in picked:
         raw_id = unprefixed(card_id, user_id)
-        entry = next((k for k in kanji_list if kanji_to_id(k, level) == raw_id), None)
+        entry = next((k for k in pool if kanji_to_id(k, level) == raw_id), None)
         if entry is not None:
             cards.append(_build_kanji_card(raw_id, entry, kanji_list, m, lang, states.get(card_id), previews.get(card_id)))
 
