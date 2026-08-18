@@ -4,7 +4,9 @@ from core.db import db_conn
 from content.kana_data import KANA_SETS, kana_to_id
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from content.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
+from content.grammar_points_data import (
+    GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, grammar_to_id,
+)
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from study.quiz_modes import (

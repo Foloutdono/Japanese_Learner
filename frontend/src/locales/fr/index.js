@@ -215,6 +215,9 @@ const quiz = {
   // Axe « format » des stats : saisi au clavier, par opposition à tracé.
   modeType:          'Saisie',
   radicalNumber:       'Clé',
+  // grammaire b2f : le sens est affiché, retrouver la règle.
+  revealGrammarRule:   "Quelle règle est-ce ?",
+  revealGrammarBtn:    'Afficher la règle',
   // ── 読み入力 (kanji.readings) ──
   readingsOn:          'On (lecture sino-japonaise)',
   readingsKun:         'Kun (lecture japonaise)',

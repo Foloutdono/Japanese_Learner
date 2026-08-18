@@ -9,7 +9,9 @@ from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from content.grammar_data import GRAMMAR_BY_LEVEL, grammar_to_id
+from content.grammar_points_data import (
+    GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, grammar_to_id,
+)
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from content.kanji_meanings import KANJI_FR
@@ -22,10 +24,12 @@ from content.kanji_meanings import KANJI_FR
 # to the right one per card. See SOURCES below.
 from routes.kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
 from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
-from routes.grammar import VALID_MODES as GRAMMAR_VALID_MODES, _build_grammar_card
+from routes.grammar import _build_grammar_card
 from study.modes import (
+    GRAMMAR as MODE_GRAMMAR,
     KANJI as MODE_KANJI,
     VOCAB as MODE_VOCAB,
+    GRADED_FOR_SOURCE,
     resolve_for_source,
 )
 import psycopg2.extras
@@ -88,7 +92,10 @@ def _wrap_vocab(raw_id, entry, level, level_list, mode, lang, stage, preview):
 
 
 def _wrap_grammar(raw_id, entry, level, level_list, mode, lang, stage, preview):
-    card = _build_grammar_card(entry, level, level_list, mode, stage, preview)
+    m = resolve_for_source(MODE_GRAMMAR, mode)
+    if m is None:
+        raise HTTPException(status_code=400, detail=f"Invalid grammar mode: {mode!r}")
+    card = _build_grammar_card(entry, level, level_list, m, stage, preview)
     card["card_id"] = raw_id
     return card
 
@@ -109,7 +116,7 @@ SOURCES = {
     "grammar": {
         "by_level":    GRAMMAR_BY_LEVEL,
         "to_id":       grammar_to_id,
-        "valid_modes": GRAMMAR_VALID_MODES,
+        "valid_modes": set(GRADED_FOR_SOURCE[MODE_GRAMMAR]),
         "build":       _wrap_grammar,
     },
 }
@@ -198,7 +205,12 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
     lighter than a full study-card payload (no choices, no SRS state),
     just enough to show what an entry is before/after it's added."""
     if source == "grammar":
-        return {"front": entry.get("grammar", ""), "kana": "", "meaning": entry.get("meaning", "")}
+        # The owned catalogue names this field `pattern`; the scraped
+        # one said `grammar`. Both are read so a deck row written
+        # before the switch still renders instead of showing a blank
+        # front until the wipe clears it.
+        return {"front": entry.get("pattern") or entry.get("grammar", ""),
+                "kana": "", "meaning": entry.get("meaning", "")}
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
     meaning = get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}

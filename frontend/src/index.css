@@ -3647,6 +3647,27 @@ input:focus { border-color: var(--accent2); }
   color: var(--text-secondary);
 }
 
+/* ── fill_in: the sentence, shown intact ───────────────────
+   Large enough to read as the PROMPT rather than as a supporting
+   example, because in this mode it is the question. No translation is
+   rendered here at all -- the learner names the rule from the Japanese,
+   which is the whole exercise. */
+.grammar-fill-sentence {
+  font-family: var(--font-jp);
+  font-size: 26px;
+  line-height: 1.7;
+  text-align: center;
+  color: var(--text-primary);
+  padding: 4px 0 10px;
+}
+
+.grammar-structure {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 4px;
+}
+
 /* ── Radical answer (kanji.radical) ───────────────────────── */
 .radical-answer {
   display: flex;

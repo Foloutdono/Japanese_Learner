@@ -228,6 +228,9 @@ const quiz = {
   // Stats format axis: typed on a keyboard, as against drawn by hand.
   modeType:          'Typing',
   radicalNumber:       'Radical',
+  // grammar b2f: the meaning is shown, recall the rule.
+  revealGrammarRule:   'Which rule is this?',
+  revealGrammarBtn:    'Show the rule',
   // ── 読み入力 (kanji.readings) ──
   readingsOn:          'On (Chinese-derived)',
   readingsKun:         'Kun (native Japanese)',

@@ -143,24 +143,23 @@ const LIST = [
   }),
 
   // ── grammar ──
-  // Registered but not yet offered: grammar still runs on its legacy keys
-  // until content/grammar_points.json is expanded to the full catalogue,
-  // because switching it now would cut the section from 205 points to 96.
+  // Runs on the project's own 205-point catalogue and its hand-written
+  // example sentences (content/grammar_sentences.json), not the scraped
+  // source. indice_2 shows those sentences with the translation hidden.
   mode('grammar.flashcard.f2b', 'grammar', 'flashcard', {
     direction: 'f2b', hints: CS, service: SERVICE.RAPID,
-    format: 'flashcard', statsDirection: 'recognition', implemented: false,
+    format: 'flashcard', statsDirection: 'recognition',
   }),
   mode('grammar.flashcard.b2f', 'grammar', 'flashcard', {
     direction: 'b2f', hints: CS, service: SERVICE.EXPRESS,
-    format: 'flashcard', statsDirection: 'recall', implemented: false,
+    format: 'flashcard', statsDirection: 'recall',
   }),
   // The sentence is shown INTACT and the learner names the rule at work.
   // Blanking the rule out has no unique answer — 食べて＿＿＿ takes いる,
   // から, もいい and はいけない alike — so it could not be graded fairly.
-  // Needs generated sentences.
   mode('grammar.fill_in', 'grammar', 'fill_in', {
     hints: C, renderer: RENDER.FILL, service: SERVICE.EXPRESS,
-    format: 'fill', statsDirection: 'recall', implemented: false,
+    format: 'fill', statsDirection: 'recall',
   }),
 
   // ── standard (a hand-authored front/back card) ──
