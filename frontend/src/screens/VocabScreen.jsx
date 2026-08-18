@@ -576,27 +576,21 @@ export default function VocabScreen({ session }) {
                     onReveal={onFlashcardReveal}
                     front={<CharDisplay char={card.kanji} size={72} />}
                     back={
-                      /* The answer is the reading, so it is shown ON the
-                         word it belongs to (see `furigana` on the payload,
-                         built by study/furigana.py) rather than as a
-                         separate kana line underneath — which is what
-                         makes it legible WHICH kanji takes which reading,
-                         the entire point of the drill. The packed kana
-                         field still follows when the word has more than
-                         one accepted reading, since furigana can only
-                         carry the first. */
+                      /* Both halves of the answer, and both are needed.
+                         The furigana (see `furigana` on the payload, built
+                         by study/furigana.py) is what says WHICH kanji
+                         takes which part of the reading — the entire point
+                         of this drill; the plain kana below is the reading
+                         as one word, which is what the learner was
+                         actually asked to produce. Showing only the ruby
+                         leaves them assembling the answer from pieces;
+                         showing only the kana is the version this
+                         replaced. */
                       <div>
                         {card.furigana?.length
                           ? <FuriganaWord parts={card.furigana} size={64} answer />
-                          : (
-                            <>
-                              <CharDisplay char={card.kanji} size={56} />
-                              <div className="flashcard-answer" lang="ja">{card.kana}</div>
-                            </>
-                          )}
-                        {card.furigana?.length > 0 && card.kana?.includes('/') && (
-                          <div className="flashcard-alt-reading" lang="ja">{card.kana}</div>
-                        )}
+                          : <CharDisplay char={card.kanji} size={56} />}
+                        <div className="flashcard-reading" lang="ja">{card.kana}</div>
                       </div>
                     }
                     dictTerm={wordForm(card)}
