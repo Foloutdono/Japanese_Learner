@@ -233,6 +233,18 @@ const quiz = {
   revealGrammarBtn:    'Show the rule',
   standardType:        'Standard',
   standardDesc:        'A front and a back, written by you.',
+  // ── Personal card fields (generated form, see study/structures.py) ──
+  field_front:      'Front',
+  field_back:       'Back',
+  field_kanji:      'Kanji',
+  field_meaning:    'Meaning',
+  field_readings:   'Readings',
+  field_radical:    'Radical',
+  field_word:       'Word',
+  field_reading:    'Reading',
+  field_rule:       'Grammar rule',
+  field_sentences:  'Example sentence',
+  pickRadical:      'Choose a radical',
   // ── 読み入力 (kanji.readings) ──
   readingsOn:          'On (Chinese-derived)',
   readingsKun:         'Kun (native Japanese)',

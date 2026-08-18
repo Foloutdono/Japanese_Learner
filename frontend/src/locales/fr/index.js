@@ -220,6 +220,18 @@ const quiz = {
   revealGrammarBtn:    'Afficher la règle',
   standardType:        'Standard',
   standardDesc:        'Un recto et un verso, écrits par vous.',
+  // ── Champs des cartes personnelles (formulaire généré) ──
+  field_front:      'Recto',
+  field_back:       'Verso',
+  field_kanji:      'Kanji',
+  field_meaning:    'Sens',
+  field_readings:   'Lectures',
+  field_radical:    'Clé',
+  field_word:       'Mot',
+  field_reading:    'Lecture',
+  field_rule:       'Règle de grammaire',
+  field_sentences:  'Phrase d’exemple',
+  pickRadical:      'Choisir une clé',
   // ── 読み入力 (kanji.readings) ──
   readingsOn:          'On (lecture sino-japonaise)',
   readingsKun:         'Kun (lecture japonaise)',

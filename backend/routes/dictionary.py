@@ -125,22 +125,30 @@ def _vocab_examples_for_kanji(char: str, lang: str) -> list[dict]:
 
 
 @router.get("/api/dictionary/radicals")
-def get_radical_grid():
+def get_radical_grid(all: bool = False):
     """
     Radical tiles for the 'browse by radical' picker, grouped by stroke
     count (1 stroke, 2 strokes, ...) — exactly what a tappable grid needs.
-    Only radicals with at least one kanji in the app's own deck are
-    included.
+
+    By default only radicals with at least one kanji in the app's own deck
+    are included: there is no point offering a tile that leads to zero
+    results a learner can study.
+
+    `all=true` returns all 214. That is for the personal-card form, where
+    the learner is filing THEIR OWN kanji under a radical — which may
+    easily be one the app's 2,235-kanji deck never uses. Silently
+    truncating the list there would make a correct answer unselectable.
     """
     by_stroke = defaultdict(list)
-    for number, entries in _APP_RADICAL_KANJI.items():
+    numbers = RADICAL_BY_NUMBER.keys() if all else _APP_RADICAL_KANJI.keys()
+    for number in numbers:
         r = RADICAL_BY_NUMBER.get(number)
         if r is None:
             continue
         by_stroke[r["stroke_count"]].append({
             "number":      number,
             "char":        r["char"],
-            "kanji_count": len(entries),
+            "kanji_count": len(_APP_RADICAL_KANJI.get(number, ())),
         })
 
     groups = [

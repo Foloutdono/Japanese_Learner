@@ -1,3 +1,4 @@
+import json
 import logging
 import csv
 import io
@@ -25,6 +26,14 @@ from content.kanji_meanings import KANJI_FR
 from routes.kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
 from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
 from routes.grammar import _build_grammar_card
+from study.structures import (
+    ALL_KEYS as STRUCTURE_KEYS,
+    describe as describe_structures,
+    missing_required,
+    normalise as normalise_fields,
+    structure_for,
+    usable_sentences,
+)
 from study.modes import (
     MODES,
     FLASHCARD as BASE_FLASHCARD,
@@ -285,6 +294,37 @@ def _ensure_deck_schema() -> None:
                 CREATE INDEX IF NOT EXISTS idx_custom_cards_deck
                 ON custom_cards(deck_id, user_id)
             """)
+            # ── Personal cards gain a STRUCTURE ──
+            # Additive and idempotent, not DROP/CREATE: this runs on every
+            # startup, so a recreate would empty the table each time the
+            # API restarts.
+            #
+            # front/back/kana move into `fields` keyed by the structure's
+            # own names, because a kanji card's four fields do not fit
+            # two columns and one column per structure would be sparse and
+            # rigid. See study/structures.py.
+            cur.execute("""
+                ALTER TABLE custom_cards
+                    ADD COLUMN IF NOT EXISTS structure TEXT NOT NULL DEFAULT 'standard',
+                    ADD COLUMN IF NOT EXISTS fields JSONB NOT NULL DEFAULT '{}'::jsonb
+            """)
+            # Backfill any pre-structure row from the old columns, once:
+            # only rows whose `fields` is still the empty default.
+            cur.execute("""
+                UPDATE custom_cards
+                   SET fields = jsonb_build_object(
+                           'front', COALESCE(front, ''),
+                           'back',  COALESCE(back, ''))
+                 WHERE fields = '{}'::jsonb
+                   AND (front IS NOT NULL OR back IS NOT NULL)
+            """)
+            # `hint` was shown mid-quiz, which makes it help the learner
+            # never asked for -- the thing HintBar exists to make opt-in.
+            # `notes` stays as its own column: free-form, never shown
+            # during a card.
+            cur.execute("ALTER TABLE custom_cards DROP COLUMN IF EXISTS hint")
+            for col in ("front", "back", "kana"):
+                cur.execute(f"ALTER TABLE custom_cards ALTER COLUMN {col} DROP NOT NULL")
             # decks now exists before this runs (same transaction,
             # created just above), so this can safely FK to it — no
             # more "may import before decks exists" concern.
@@ -351,11 +391,19 @@ class DeckPayload(BaseModel):
 
 
 class CardPayload(BaseModel):
-    front: str
-    back:  str
-    kana:  str = ""
-    hint:  str = ""
-    notes: str = ""
+    # The card's fields, keyed by its deck structure's own names (see
+    # study/structures.py). front/back are still accepted so a `standard`
+    # card can be posted the old way.
+    fields: dict = {}
+    notes:  str = ""
+    front:  str | None = None
+    back:   str | None = None
+
+    def resolved(self) -> dict:
+        """fields, falling back to a bare front/back post."""
+        if self.fields:
+            return self.fields
+        return {"front": self.front or "", "back": self.back or ""}
 
 
 class ReviewPayload(BaseModel):
@@ -408,6 +456,46 @@ def get_decks(user_id: str = Depends(get_user_id)):
         return {"decks": decks}
     finally:
         conn.close()
+
+
+def _with_display(row: dict) -> dict:
+    """
+    Adds front/back to a stored personal card, derived from its
+    structure's own field names.
+
+    Every consumer (the card list, the study builder, the CSV export)
+    wants "the Japanese side and the meaning side" and none of them should
+    have to know that a kanji card calls those `kanji` and `meaning` while
+    a grammar card calls them `rule` and `meaning`. Derived here, once,
+    rather than in each renderer.
+    """
+    spec = structure_for(row.get("structure", "standard"))
+    fields = row.get("fields") or {}
+    return {
+        **row,
+        "front": fields.get(spec.front_key, ""),
+        "back":  fields.get(spec.back_key, ""),
+    }
+
+
+@router.get("/api/decks/structures")
+def get_structures():
+    """
+    What a personal card looks like, per deck structure.
+
+    Served rather than duplicated so the add-card form is GENERATED from
+    the same definition the API validates against. The alternative --
+    a hand-synced frontend copy -- is the exact shape of drift this
+    project has already paid for twice (the four mode enumerations, and
+    the two allowsCustomFor twins).
+
+    Declared BEFORE every /api/decks/{deck_id} route on purpose:
+    FastAPI matches in declaration order, so "structures" was being read
+    as a deck id and reaching Postgres as `WHERE d.id = 'structures'`.
+
+    Static: no deck id, no user, no query. See study/structures.py.
+    """
+    return {"structures": describe_structures()}
 
 
 @router.get("/api/decks/{deck_id}")
@@ -511,12 +599,12 @@ def get_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user_id
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
-                SELECT id, front, back, kana, hint, notes, created_at
+                SELECT id, structure, fields, notes, created_at
                 FROM custom_cards
                 WHERE deck_id = %s AND user_id = %s
                 ORDER BY created_at ASC
             """, (deck_id, user_id))
-            custom = [dict(row) for row in cur.fetchall()]
+            custom = [_with_display(dict(row)) for row in cur.fetchall()]
             cur.execute("""
                 SELECT source, level, raw_id, added_at
                 FROM deck_cards
@@ -559,17 +647,25 @@ def add_card(deck_id: str, payload: CardPayload, user_id: str = Depends(get_user
             if not deck:
                 raise HTTPException(status_code=404, detail="Deck not found")
             if not _allows_custom(deck["type"]):
+                raise HTTPException(status_code=400, detail="This deck does not accept written cards")
+            # The card takes the DECK's structure -- a deck holds one
+            # shape, so there is nothing for the caller to choose and
+            # nothing to disagree about.
+            structure = deck["type"] if deck["type"] in STRUCTURE_KEYS else "standard"
+            fields = normalise_fields(structure, payload.resolved())
+            missing = missing_required(structure, fields)
+            if missing:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"This deck only accepts {deck['type']} cards — browse and add some instead",
+                    detail=f"A {structure} card needs: {', '.join(missing)}",
                 )
             cur.execute("""
-                INSERT INTO custom_cards (deck_id, user_id, front, back, kana, hint, notes)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING id, front, back, kana, hint, notes, created_at
-            """, (deck_id, user_id, payload.front, payload.back,
-                  payload.kana, payload.hint, payload.notes))
-            card = dict(cur.fetchone())
+                INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id, structure, fields, notes, created_at
+            """, (deck_id, user_id, structure, json.dumps(fields, ensure_ascii=False),
+                  payload.notes))
+            card = _with_display(dict(cur.fetchone()))
         conn.commit()
         card["origin"] = "custom"
         return card
@@ -616,15 +712,28 @@ def update_card(deck_id: str, card_id: str, payload: CardPayload,
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
-                UPDATE custom_cards
-                SET front = %s, back = %s, kana = %s, hint = %s, notes = %s
+                SELECT structure FROM custom_cards
                 WHERE id = %s AND deck_id = %s AND user_id = %s
-                RETURNING id, front, back, kana, hint, notes
-            """, (payload.front, payload.back, payload.kana, payload.hint,
-                  payload.notes, card_id, deck_id, user_id))
-            card = cur.fetchone()
-            if not card:
+            """, (card_id, deck_id, user_id))
+            existing = cur.fetchone()
+            if not existing:
                 raise HTTPException(status_code=404, detail="Card not found")
+            structure = existing["structure"]
+            fields = normalise_fields(structure, payload.resolved())
+            missing = missing_required(structure, fields)
+            if missing:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"A {structure} card needs: {', '.join(missing)}",
+                )
+            cur.execute("""
+                UPDATE custom_cards
+                SET fields = %s, notes = %s
+                WHERE id = %s AND deck_id = %s AND user_id = %s
+                RETURNING id, structure, fields, notes
+            """, (json.dumps(fields, ensure_ascii=False), payload.notes,
+                  card_id, deck_id, user_id))
+            card = _with_display(dict(cur.fetchone()))
         conn.commit()
         return dict(card)
     finally:
@@ -821,7 +930,7 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
-                SELECT id, front, back, kana, hint, notes
+                SELECT id, structure, fields, notes
                 FROM custom_cards WHERE deck_id = %s AND user_id = %s
             """, (deck_id, user_id))
             custom = [dict(row) for row in cur.fetchall()]
@@ -872,6 +981,28 @@ def _deck_type(deck_id: str, user_id: str) -> str | None:
         conn.close()
 
 
+# What each mode base needs from a personal card, beyond the front/back
+# every structure has. A base absent here needs nothing extra.
+_MODE_NEEDS = {
+    "readings":     ("readings",),
+    "radical":      ("radical",),
+    "write_kanji":  ("kanji",),
+    "word_reading": ("reading",),
+    "fill_in":      ("sentences",),
+}
+
+
+def _card_answers(entry: dict, m) -> bool:
+    """Whether a personal card carries what this mode asks of it."""
+    fields = entry.get("fields") or {}
+    if m.base == "fill_in":
+        # Stricter than "has sentences": fill_in shows one and asks which
+        # rule is at work, so a sentence that does not contain its own rule
+        # makes the question unanswerable. Verified, not assumed.
+        return bool(usable_sentences(fields))
+    return all(fields.get(k) for k in _MODE_NEEDS.get(m.base, ()))
+
+
 def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
     """
     Whether this card can be served in this mode, for a deck of this
@@ -892,21 +1023,16 @@ def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
         return False
 
     if pool_entry["source"] == "custom":
-        # A personal card is front/back today, so it can only answer the
-        # mode that asks front/back. Its structure's other modes need
-        # fields custom_cards does not have -- a kanji deck offers
-        # kanji.readings and kanji.radical, and serving a hand-written
-        # pair into those gives a card with nothing to answer, which reads
-        # as a broken deck rather than a missing feature.
+        # Ask the CARD whether it carries what this mode needs, rather
+        # than assuming a personal card is always a bare pair. A
+        # kanji-structure card has readings and a radical number, so it can
+        # answer kanji.readings and kanji.radical; a card missing an
+        # optional field cannot, and is left out rather than served a
+        # question with no answer.
         #
-        # Keyed on BASE, not renderer: kanji.radical renders as a flashcard
-        # but asks which radical the kanji is filed under, which a
-        # front/back pair cannot answer either. What the mode ASKS is the
-        # axis; how it draws is not.
-        # TODO(structures): once custom_cards carries the structured
-        # fields (readings, radical number, ...), check the CARD for what
-        # the mode needs rather than restricting by base.
-        return MODES[mode].base == BASE_FLASHCARD
+        # Keyed on what the mode ASKS (its base), not how it draws:
+        # kanji.radical renders as a flashcard but wants a radical number.
+        return _card_answers(pool_entry.get("entry") or {}, MODES[mode])
 
     return pool_entry["source"] in _allowed_sources(deck_type)
 
@@ -965,11 +1091,18 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
 
         if p["source"] == "custom":
             c = p["entry"]
-            m = resolve_for_source(MODE_STANDARD, mode)
+            m = MODES.get(mode)
+            spec   = structure_for(c.get("structure", "standard"))
+            fields = c.get("fields") or {}
             cards.append({
                 "card_id": raw_id, "source": "custom",
-                "front": c["front"], "back": c["back"],
-                "kana": c.get("kana", ""), "hint": c.get("hint", ""),
+                "structure": spec.key,
+                # front/back derived from the structure's own field names,
+                # so the renderer needs to know nothing about structures:
+                # a kanji card fronts its kanji, a grammar card its rule.
+                "front": fields.get(spec.front_key, ""),
+                "back":  fields.get(spec.back_key, ""),
+                "fields": fields,
                 "notes": c.get("notes", ""), "mode": mode,
                 # f2b shows the front and asks for the back; b2f is the
                 # other way up. Every other source's payload carries this,
@@ -1086,12 +1219,15 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
                 if not front or not back:
                     errors.append(f"Row {i}: missing front/back — skipped")
                     continue
+                # CSV import writes `standard` cards: a spreadsheet of
+                # front/back columns is exactly that shape, and asking a
+                # CSV to carry a kanji card's four fields would need a
+                # per-structure column contract nobody has asked for.
                 cur.execute("""
-                    INSERT INTO custom_cards (deck_id, user_id, front, back, kana, hint, notes)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (deck_id, user_id, front, back,
-                      row.get('kana', '').strip(),
-                      row.get('hint', '').strip(),
+                    INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
+                    VALUES (%s, %s, 'standard', %s, %s)
+                """, (deck_id, user_id,
+                      json.dumps({"front": front, "back": back}, ensure_ascii=False),
                       row.get('notes', '').strip()))
                 inserted += 1
         conn.commit()

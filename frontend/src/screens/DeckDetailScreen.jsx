@@ -46,6 +46,64 @@ function allowsCustomFor(type) {
   return STRUCTURES.includes(type)
 }
 
+// ── The radical field ─────────────────────────────────────────
+// A kanji card carries the Kangxi radical NUMBER, and nobody remembers
+// that 言 is 149 — so this shows the glyphs and stores the number.
+//
+// Reuses GET /api/dictionary/radicals, which the dictionary's browse-by-
+// radical grid already serves, grouped by stroke count. That endpoint is
+// scoped to radicals with at least one kanji in the app's own deck; a
+// personal card may well use one outside that subset, so it is asked with
+// ?all=true and falls back to whatever it returns.
+function RadicalField({ label, value, onChange, session }) {
+  const { t } = useLang()
+  const [groups, setGroups] = useState(null)
+  const [open, setOpen]     = useState(false)
+
+  useEffect(() => {
+    apiFetch('/api/dictionary/radicals?all=true', session)
+      .then(r => r.json())
+      .then(d => setGroups(d.groups ?? []))
+      .catch(() => setGroups([]))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const chosen = groups
+    ?.flatMap(g => g.radicals)
+    .find(r => r.number === Number(value))
+
+  return (
+    <div className="deckdetail-form__group">
+      <div className="deckdetail-form__label">{label} *</div>
+      <button type="button" onClick={() => setOpen(o => !o)}
+        className="deckdetail-form__input deckdetail-form__radical-btn">
+        {chosen
+          ? <span><span lang="ja">{chosen.char}</span> · {chosen.number}</span>
+          : <span className="deckdetail-form__placeholder">{t.pickRadical}</span>}
+      </button>
+      {open && (
+        <div className="radical-picker">
+          {(groups ?? []).map(g => (
+            <div key={g.stroke_count} className="radical-picker__group">
+              <div className="radical-picker__strokes">{g.stroke_count}</div>
+              <div className="radical-picker__row">
+                {g.radicals.map(r => (
+                  <button key={r.number} type="button" lang="ja"
+                    title={`${r.number}`}
+                    className={`radical-picker__cell${Number(value) === r.number ? ' radical-picker__cell--on' : ''}`}
+                    onClick={() => { onChange(r.number); setOpen(false) }}>
+                    {r.char}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function DeckDetailScreen({ session }) {
   const navigate        = useNavigate()
   const { deck_id }     = useParams()
@@ -76,7 +134,13 @@ export default function DeckDetailScreen({ session }) {
   const [loading, setLoading]       = useState(true)
   const [adding, setAdding]         = useState(false)
   const [editing, setEditing]       = useState(null)
-  const [form, setForm]             = useState({ front: '', back: '', hint: '', notes: '' })
+  const [form, setForm]             = useState({})
+  const [notes, setNotes]           = useState('')
+  // The card shapes, fetched rather than duplicated: the add-card form is
+  // GENERATED from the same spec the API validates against, so a field
+  // added on the backend appears here without a matching edit. See
+  // study/structures.py and GET /api/decks/structures.
+  const [structures, setStructures] = useState(null)
   const [showImport, setShowImport] = useState(false)
   const [importResult, setImportResult] = useState(null)
   const [showBrowse, setShowBrowse] = useState(false)
@@ -119,22 +183,62 @@ export default function DeckDetailScreen({ session }) {
     return apiFetch(`/api/decks/${deck_id}/cards/${card.id}`, session, { method: 'DELETE' })
   }
 
-  function resetForm() { setForm({ front: '', back: '', hint: '', notes: '' }) }
+  // The spec for THIS deck, or null until it arrives. A deck holds one
+  // structure, so there is nothing for the learner to pick.
+  const structure = structures?.find(x => x.key === (deck?.type ?? 'standard'))
+    ?? structures?.find(x => x.key === 'standard')
+    ?? null
+
+  useEffect(() => {
+    apiFetch('/api/decks/structures', session)
+      .then(r => r.json())
+      .then(d => setStructures(d.structures ?? []))
+      .catch(() => setStructures([]))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function blankForm(spec) {
+    const out = {}
+    for (const f of spec?.fields ?? []) out[f.key] = f.kind === 'lines' ? [''] : ''
+    return out
+  }
+
+  function resetForm() { setForm(blankForm(structure)); setNotes('') }
+
+  function setField(key, value) { setForm(f => ({ ...f, [key]: value })) }
+
+  function setLine(key, i, value) {
+    setForm(f => ({ ...f, [key]: (f[key] ?? []).map((v, j) => (j === i ? value : v)) }))
+  }
+
+  function addLine(key) { setForm(f => ({ ...f, [key]: [...(f[key] ?? []), ''] })) }
+
+  /** Whether every required field carries something — mirrors
+   *  structures.missing_required, which is what actually enforces it. */
+  function formComplete() {
+    return (structure?.fields ?? []).every(f => {
+      if (!f.required) return true
+      const v = form[f.key]
+      return Array.isArray(v) ? v.some(x => x.trim()) : String(v ?? '').trim()
+    })
+  }
 
   function startAdd() { resetForm(); setEditing(null); setAdding(true) }
 
   function startEdit(card) {
-    setForm({ front: card.front, back: card.back, hint: card.hint || '', notes: card.notes || '' })
+    setForm({ ...blankForm(structure), ...(card.fields ?? {}) })
+    setNotes(card.notes || '')
     setEditing(card.id)
     setAdding(true)
   }
 
   function saveCard() {
-    if (!form.front.trim() || !form.back.trim()) return
+    if (!formComplete()) return
+    const body = JSON.stringify({ fields: form, notes })
     if (editing) {
       apiFetch(`/api/decks/${deck_id}/cards/${editing}`, session, {
         method: 'PUT',
-        body: JSON.stringify(form),
+        body,
       })
         .then(r => r.json())
         .then(updated => {
@@ -146,7 +250,7 @@ export default function DeckDetailScreen({ session }) {
     } else {
       apiFetch(`/api/decks/${deck_id}/cards`, session, {
         method: 'POST',
-        body: JSON.stringify(form),
+        body,
       })
         .then(r => r.json())
         .then(card => { setCards(prev => [...prev, card]); resetForm() })
@@ -301,22 +405,51 @@ export default function DeckDetailScreen({ session }) {
               {editing ? t.editCard : t.newCard}
             </div>
             <div className="deckdetail-form__fields">
-              <input value={form.front} onChange={e => setForm(f => ({ ...f, front: e.target.value }))}
-                placeholder={deck?.type === 'kanji' ? t.kanjiFrontPlaceholder : t.frontPlaceholder}
-                className="deckdetail-form__input" />
-              <input value={form.back} onChange={e => setForm(f => ({ ...f, back: e.target.value }))}
-                placeholder={t.backPlaceholder}
-                className="deckdetail-form__input" />
-              <input value={form.hint} onChange={e => setForm(f => ({ ...f, hint: e.target.value }))}
-                placeholder={t.hintPlaceholder}
-                className="deckdetail-form__input" />
-              <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+              {/* One input per field the structure declares. A kanji card
+                  asks for four things and a standard card for two, from
+                  one definition rather than a branch per deck type. */}
+              {(structure?.fields ?? []).map(f => {
+                const label = t[`field_${f.key}`] ?? f.key
+                if (f.kind === 'lines') {
+                  const rows = form[f.key] ?? ['']
+                  return (
+                    <div key={f.key} className="deckdetail-form__group">
+                      <div className="deckdetail-form__label">{label}</div>
+                      {rows.map((v, i) => (
+                        <input key={i} value={v}
+                          onChange={e => setLine(f.key, i, e.target.value)}
+                          placeholder={label}
+                          className="deckdetail-form__input" />
+                      ))}
+                      <button type="button" onClick={() => addLine(f.key)}
+                        className="deckdetail-form__addline">+ {label}</button>
+                    </div>
+                  )
+                }
+                if (f.picker === 'radical') {
+                  return (
+                    <RadicalField key={f.key} label={label} session={session}
+                      value={form[f.key]} onChange={v => setField(f.key, v)} />
+                  )
+                }
+                return (
+                  <input key={f.key} value={form[f.key] ?? ''}
+                    onChange={e => setField(f.key, e.target.value)}
+                    placeholder={f.required ? `${label} *` : label}
+                    className="deckdetail-form__input" />
+                )
+              })}
+              {/* notes is on every structure and never shown during a
+                  card — unlike the `hint` it replaces, which appeared
+                  mid-quiz as help nobody asked for. */}
+              <input value={notes} onChange={e => setNotes(e.target.value)}
                 placeholder={t.notesPlaceholder}
                 onKeyDown={e => e.key === 'Enter' && saveCard()}
                 className="deckdetail-form__input" />
             </div>
             <div className="deckdetail-form__actions">
-              <button onClick={saveCard} className="deckdetail-form__save">
+              <button onClick={saveCard} disabled={!formComplete()}
+                className="deckdetail-form__save">
                 {editing ? t.save : t.addCard}
               </button>
               <button onClick={() => { setAdding(false); setEditing(null); resetForm() }}

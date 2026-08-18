@@ -3679,6 +3679,64 @@ input:focus { border-color: var(--accent2); }
   margin-top: 4px;
 }
 
+/* ── The radical picker (personal kanji cards) ─────────────
+   Glyphs to tap, the Kangxi number stored. Grouped by stroke count the
+   same way the dictionary's browse-by-radical grid is, since it is the
+   same data and the same question. */
+.deckdetail-form__group { display: flex; flex-direction: column; gap: 6px; }
+.deckdetail-form__label {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.deckdetail-form__addline {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 2px 0;
+  font-size: 13px;
+  color: var(--line, var(--accent));
+  cursor: pointer;
+}
+.deckdetail-form__radical-btn { text-align: left; cursor: pointer; }
+.deckdetail-form__placeholder { color: var(--text-secondary); }
+
+.radical-picker {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+}
+.radical-picker__group { display: flex; gap: 8px; align-items: flex-start; }
+.radical-picker__group + .radical-picker__group { margin-top: 6px; }
+.radical-picker__strokes {
+  flex: none;
+  width: 22px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding-top: 6px;
+  text-align: right;
+}
+.radical-picker__row { display: flex; flex-wrap: wrap; gap: 4px; }
+.radical-picker__cell {
+  font-family: var(--font-jp);
+  font-size: 18px;
+  line-height: 1;
+  padding: 5px 7px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.radical-picker__cell:hover { border-color: var(--border); }
+.radical-picker__cell--on {
+  border-color: var(--line, var(--accent));
+  color: var(--line, var(--accent));
+}
+
 /* ── Radical answer (kanji.radical) ───────────────────────── */
 .radical-answer {
   display: flex;
