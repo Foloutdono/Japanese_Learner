@@ -260,25 +260,31 @@ export function DrawingQuiz({ kanji, meaning, onValidate, resetKey }) {
 
   return (
     <div className="drawing-quiz">
-      <div className="drawing-quiz__panels">
-        {/* Drawing side */}
-        <div className="drawing-quiz__side">
-          <div className="stroke-ref__label">{t.yourDrawing}</div>
-          <Canvas canvasRef={canvasRef} resetKey={key} />
-        </div>
+      {/* .prompt-card gives this the exact same elevated surface every
+          other quiz interaction sits on — without it this floated
+          straight on the page background, the one card-less screen in
+          the app. */}
+      <div className="prompt-card drawing-quiz__card">
+        <div className="drawing-quiz__panels">
+          {/* Drawing side */}
+          <div className="drawing-quiz__side">
+            <div className="stroke-ref__label">{t.yourDrawing}</div>
+            <Canvas canvasRef={canvasRef} resetKey={key} />
+          </div>
 
-        {/* Correction side — hidden until validated */}
-        <div className="drawing-quiz__correction">
-          {!revealed ? (
-            <>
-              <div className="stroke-ref__label">{t.strokeOrder}</div>
-              <div className="drawing-quiz__placeholder">
-                <span className="drawing-quiz__placeholder-mark">?</span>
-              </div>
-            </>
-          ) : (
-            <StrokeRef kanji={kanji} meaning={meaning} showMeaning={false} />
-          )}
+          {/* Correction side — hidden until validated */}
+          <div className="drawing-quiz__correction">
+            {!revealed ? (
+              <>
+                <div className="stroke-ref__label">{t.strokeOrder}</div>
+                <div className="drawing-quiz__placeholder">
+                  <span className="drawing-quiz__placeholder-mark">?</span>
+                </div>
+              </>
+            ) : (
+              <StrokeRef kanji={kanji} meaning={meaning} showMeaning={false} />
+            )}
+          </div>
         </div>
       </div>
 

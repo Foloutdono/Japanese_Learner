@@ -47,7 +47,7 @@ function DottedReadings({ text }) {
   const parts = (text || '').split('・')
   return parts.map((part, i) => (
     <span key={i}>
-      {i > 0 && <span className="browse-reading-dot" aria-hidden="true">・</span>}
+      {i > 0 && <span className="reading-sep-dot" aria-hidden="true">・</span>}
       {part}
     </span>
   ))

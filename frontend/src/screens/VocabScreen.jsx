@@ -497,8 +497,9 @@ export default function VocabScreen({ session }) {
             renderBack={c => (
               <InlineReveal
                 t={t}
+                stacked
                 kana={c.kanji ? c.kana : null}
-                main={<MeaningDisplay meaning={c.meaning} size={28} color="var(--accent2)" center={false} />}
+                main={<MeaningDisplay meaning={c.meaning} size={28} color="var(--accent2)" />}
               />
             )}
             onExit={() => setReviewing(false)}
@@ -609,9 +610,10 @@ export default function VocabScreen({ session }) {
                         t={t}
                         kana={card.kanji ? card.kana : null}
                         isLarge={isKjToM}
+                        stacked={isKjToM}
                         main={
                           isKjToM
-                            ? <MeaningDisplay meaning={card.meaning} size={28} color="var(--accent2)" center={false} />
+                            ? <MeaningDisplay meaning={card.meaning} size={28} color="var(--accent2)" />
                             : <CharDisplay char={wordForm(card)} size={72} />
                         }
                       />

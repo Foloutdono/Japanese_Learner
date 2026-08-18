@@ -326,13 +326,20 @@ export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', c
 }
 
 // ── Inline reveal panel ──────────────────────────────────
-// Single-box layout: main content on the left, readings on the right,
+// Single-box layout: main content on one side, readings on the other,
 // no divider line. Used when the "answer" is already conveyed some
 // other way (e.g. the highlighted MCQ choice) so we don't repeat it —
 // `main` is just whatever should sit next to the readings, decided by
 // the caller (unchanged prompt for QCM, swapped-to-answer for
 // Flashcard).
-export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false }) {
+//
+// `stacked` puts the panel BELOW `main` instead of beside it — Vocab's
+// meaning can run two lines (primary + secondary gloss, see
+// MeaningDisplay), and a single reading sitting to the right ends up
+// pinned to the primary line's height, visually orphaned from the
+// secondary line under it. Kanji's on'yomi/kun'yomi block is often
+// wider than it is tall, so it keeps the side-by-side default.
+export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false, stacked = false }) {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
@@ -344,7 +351,10 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
   }, [revealed])
 
   return (
-    <div className="inline-reveal" style={{ '--reveal-gap': `${gap}px` }}>
+    <div
+      className={`inline-reveal${stacked ? ' inline-reveal--stacked' : ''}`}
+      style={{ '--reveal-gap': `${gap}px` }}
+    >
       {/* Capped width + wrapping keeps long meanings (e.g. multi-clause
           definitions) from stretching the row and shoving the readings
           off to the side. */}

@@ -397,11 +397,15 @@ export default function KanaScreen({ session }) {
               pendingGatesRef.current.delete('stamp')
               checkAdvance()
             }}>
-              {/* Flashcard, either direction. With the choices hint on it
-                  renders as prompt + options instead of a flip card: two
-                  reveal affordances on one card compete, so the hint
-                  replaces the flip rather than sitting beside it. Same
-                  resolution the merged deck modes use in StudyScreen. */}
+              {/* Flashcard, either direction — one face is the kana, the
+                  other is its romaji, same as Kanji's card shows the
+                  character on one face and the meaning on the other
+                  rather than stacking the answer under a repeat of the
+                  prompt. With the choices hint on it renders as prompt +
+                  options instead of a flip card: two reveal affordances
+                  on one card compete, so the hint replaces the flip
+                  rather than sitting beside it. Same resolution the
+                  merged deck modes use in StudyScreen. */}
               {renderer === RENDER.FLASHCARD && !choicesOn && (
                 <PromptCard>
                   <Flashcard
@@ -411,16 +415,9 @@ export default function KanaScreen({ session }) {
                     front={isB2F
                       ? romajiPrompt(prompt)
                       : <CharDisplay char={prompt} />}
-                    back={
-                      <div>
-                        {isB2F
-                          ? romajiPrompt(prompt)
-                          : <CharDisplay char={prompt} />}
-                        <div className="flashcard-answer">
-                          {isB2F ? <CharDisplay char={answer} /> : answer}
-                        </div>
-                      </div>
-                    }
+                    back={isB2F
+                      ? <CharDisplay char={answer} />
+                      : romajiPrompt(answer)}
                     dictTerm={card.kana}
                     dictCategory={dictCategory}
                     session={session}

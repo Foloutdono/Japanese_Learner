@@ -32,6 +32,20 @@ function matches(typed, entries) {
   )
 }
 
+// The full reading list joins with "・" (see readings-input__answer-list
+// below) — at that row's text size the bare character all but
+// disappears, and the readings read as one run-on string instead of a
+// list. Same fix as BrowseCardsMenu's DottedReadings: split it out and
+// give the separator its own larger, bolder styling.
+function DottedList({ entries }) {
+  return entries.map((e, i) => (
+    <span key={i}>
+      {i > 0 && <span className="reading-sep-dot" aria-hidden="true">・</span>}
+      {e.reading}
+    </span>
+  ))
+}
+
 // Reset between cards is by REMOUNT, not by an effect: the parent renders
 // this with key={card.card_id}, so a new card gets a genuinely new
 // component rather than an old one racing to clear itself. Resetting in an
@@ -66,9 +80,15 @@ export default function ReadingsInput({ readings, submitted, onSubmit }) {
   ].filter(g => g.entries.length > 0)
 
   return (
-    <div className="readings-input">
-      {GROUPS.map(g => (
-        <div key={g.kind} className="readings-input__group">
+    // .prompt-card gives this the same elevated surface every other
+    // quiz interaction sits on — it used to float straight on the page
+    // background under the kanji's own (properly carded) prompt.
+    <div className="prompt-card readings-input">
+      {GROUPS.map((g, gi) => (
+        <div
+          key={g.kind}
+          className={`readings-input__group${gi > 0 ? ' readings-input__group--sep' : ''}`}
+        >
           <div className="readings-input__label">
             <span lang="ja">{g.jp}</span> <span>{g.label}</span>
           </div>
@@ -103,7 +123,7 @@ export default function ReadingsInput({ readings, submitted, onSubmit }) {
             <div className="readings-input__answer">
               <span className="readings-input__answer-label">{t.readingsAll}</span>
               <span className="readings-input__answer-list" lang="ja">
-                {g.entries.map(e => e.reading).join('・')}
+                <DottedList entries={g.entries} />
               </span>
             </div>
           )}
@@ -111,7 +131,7 @@ export default function ReadingsInput({ readings, submitted, onSubmit }) {
       ))}
 
       {!submitted && (
-        <button onClick={() => { playClick(); onSubmit() }} className="quiz-submit">
+        <button onClick={() => { playClick(); onSubmit() }} className="quiz-submit readings-input__submit">
           {t.submit}
         </button>
       )}
