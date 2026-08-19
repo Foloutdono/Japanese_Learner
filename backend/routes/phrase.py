@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import os
@@ -51,6 +52,119 @@ SYSTEM_PROMPT = """You are a Japanese language tutor. Given a Japanese phrase, s
 """
 
 
+# ── The breakdown cache ───────────────────────────────────────
+# Reading practice fires this endpoint for EVERY phrase it shows, in the
+# background, so the breakdown is ready the moment the reader asks (see
+# ReadingScreen.jsx's fetchAnalysis). That was one LLM call per phrase
+# read, per reader, forever -- and the analysis of a given sentence is a
+# property of the sentence, not of who is reading it or when.
+#
+# It matters far more now than it did: reading practice draws from a
+# curated bank of ~220 hand-written sentences (content/reading_sentences),
+# so the SAME sentences come round constantly. Cached, the whole bank
+# costs at most 220 calls once, shared across every user, instead of one
+# per phrase per session. The phrase-analyzer screen's own free-text
+# lookups hit the same cache and get the same benefit whenever two people
+# (or the same person twice) ask about the same phrase.
+#
+# Keyed by SHA-256 of the phrase rather than the phrase itself: the raw
+# text is stored alongside for debuggability, but the hash is what gets
+# the unique index -- Postgres btree entries are capped at ~2704 bytes
+# and a pasted paragraph in UTF-8 Japanese can exceed that, which would
+# make the insert fail rather than merely miss.
+#
+# No expiry. The analysis of a fixed string does not go stale; if the
+# prompt or the model changes enough to matter, bump CACHE_VERSION and
+# every entry becomes a miss without a migration.
+CACHE_VERSION = 1
+
+
+def _phrase_key(phrase: str) -> str:
+    material = f"v{CACHE_VERSION}:{phrase}"
+    return hashlib.sha256(material.encode("utf-8")).hexdigest()
+
+
+def _init_cache() -> None:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS phrase_analysis_cache (
+                    phrase_key TEXT PRIMARY KEY,
+                    phrase TEXT NOT NULL,
+                    result JSONB NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+                """
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+try:
+    _init_cache()
+except Exception:  # pragma: no cover - a missing DB must not stop import
+    logger.exception("phrase_analysis_cache could not be initialised")
+
+
+def _cached_analysis(phrase: str) -> dict | None:
+    """The stored LLM result for `phrase`, or None.
+
+    A cache miss must never be an error: a failed lookup falls through to
+    the model, which is the behaviour this whole layer is an optimisation
+    over.
+    """
+    try:
+        conn = db_conn()
+    except Exception:
+        return None
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT result FROM phrase_analysis_cache WHERE phrase_key = %s",
+                (_phrase_key(phrase),),
+            )
+            row = cur.fetchone()
+    except Exception:
+        logger.exception("phrase cache read failed")
+        return None
+    finally:
+        conn.close()
+
+    if not row:
+        return None
+    result = row[0]
+    return json.loads(result) if isinstance(result, str) else result
+
+
+def _store_analysis(phrase: str, result: dict) -> None:
+    """Best-effort write. ON CONFLICT DO NOTHING rather than an upsert:
+    two readers reaching the same uncached phrase at once both call the
+    model and both try to store it; either answer is equally good and
+    neither should raise."""
+    try:
+        conn = db_conn()
+    except Exception:
+        return
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO phrase_analysis_cache (phrase_key, phrase, result)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (phrase_key) DO NOTHING
+                """,
+                (_phrase_key(phrase), phrase, json.dumps(result, ensure_ascii=False)),
+            )
+        conn.commit()
+    except Exception:
+        logger.exception("phrase cache write failed")
+    finally:
+        conn.close()
+
+
 class PhraseRequest(BaseModel):
     phrase: str
     # False for callers that just want the AI breakdown without adding
@@ -88,6 +202,15 @@ def _call_llm(phrase: str) -> dict:
                             {"role": "system", "content": SYSTEM_PROMPT},
                             {"role": "user", "content": phrase},
                         ],
+                        # A word-by-word breakdown of one sentence plus a
+                        # 2-4 sentence note. 1200 is generous for the
+                        # longest phrase the app serves (an N1 reading
+                        # sentence caps at 80 characters) and stops a
+                        # model that decides to write an essay from
+                        # billing for it -- the request was previously
+                        # uncapped. Matches the cap study/llm_shared.py
+                        # already puts on its own calls.
+                        "max_tokens": 1200,
                     },
                     timeout=30,
                 )
@@ -146,7 +269,14 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
     if not phrase:
         raise HTTPException(status_code=400, detail="Phrase is required")
 
-    llm_result = _call_llm(phrase)
+    # The model's own words/explanation only. Everything below this line
+    # is per-user (SRS state) and is recomputed on a cache hit -- the
+    # cached half is the expensive, user-independent half.
+    llm_result = _cached_analysis(phrase)
+    if llm_result is None:
+        llm_result = _call_llm(phrase)
+        _store_analysis(phrase, llm_result)
+
     states = srs.get_user_states(user_id)
 
     enriched_words = []

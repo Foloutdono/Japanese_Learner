@@ -18,6 +18,8 @@ from study.card_lookup import find_segments_in_text, attach_stats_to_segments, V
 from content.kanji_data import get_kanji_string
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content import vocab_extras
+from content import reading_sentences
+from study import difficulty
 import content.vocab_jmdict_data as jmdict_db
 import content.frequency_data as freq
 
@@ -246,7 +248,7 @@ _MASTERY_MIN_KNOWN_WORDS = 3
 
 # How many candidate words to try (across level/frequency-vocab sources)
 # before giving up on finding `count` sentences whose kanji all fit the
-# target level — see _sentence_kanji_ok. Needs to be generous: a word's
+# target level — see _sentence_fits_level. Needs to be generous: a word's
 # OWN kanji being N5 says nothing about the kanji in ITS example
 # sentences (JMdict/Tatoeba examples aren't difficulty-graded — see the
 # 2026-08 "sentences too hard for the level" fix below), so several
@@ -257,37 +259,24 @@ _LEVEL_CANDIDATE_SCAN_CAP = 80
 
 # ── Difficulty gate: real example sentences aren't graded by level ──
 #
-# 2026-08 fix. A word being N5 (kanji_to_id-level, VOCAB_BY_LEVEL) only
-# constrains THAT word — its example sentences are real, natural
-# Japanese pulled from JMdict/Tatoeba, which were never curated for
-# JLPT difficulty. A perfectly ordinary N5 word like 彼 ("he") can have
-# an example sentence built around 濡れる ("to get wet") or other N2/N1
-# vocabulary, producing a "N5" sentence a beginner has no chance of
-# reading. Reuses the same allowed-kanji-per-level machinery the (now
-# removed) LLM prompt used to constrain generation with
-# (_allowed_kanji_for_level/LEVEL_HIERARCHY, still used by Reading
-# Comprehension) — except now it FILTERS real sentences instead of
-# constraining generation.
+# ── Is a sentence actually at the level it is being served for? ──
+# This used to be a kanji-character check and nothing else, and its own
+# comment said why: a word-level check "would need to resolve each
+# recognized segment back to a specific vocab entry's level ... worth
+# revisiting with a word-level check later if that turns out to matter
+# in practice". It mattered. A kanji gate passes any sentence spelled in
+# easy characters however hard its grammar is, so N5 was being served
+# 〜ようとする and 〜んです constructions all day.
 #
-# Deliberately kanji-character-level, not word-level: checking "is
-# every word in this sentence at or below the target JLPT level" would
-# need to resolve each recognized segment back to a specific vocab
-# entry's level, which depends on find_segments_in_text's exact segment
-# shape (kanji/kana per segment) that this file doesn't otherwise rely
-# on today. A kanji-character check is simpler, doesn't depend on that
-# shape, and catches the common failure mode (an unexpectedly advanced
-# kanji dragging the whole sentence out of reach) — the residual gap is
-# purely-kana advanced VOCABULARY (an obscure verb spelled entirely in
-# hiragana), which this does not catch. Worth revisiting with a
-# word-level check later if that turns out to matter in practice.
-@lru_cache(maxsize=None)
-def _kanji_set_for_level(level: str) -> frozenset:
-    return frozenset(_allowed_kanji_for_level(level))
-
-
-def _sentence_kanji_ok(jp: str, level: str) -> bool:
-    allowed = _kanji_set_for_level(level)
-    return all(not _is_kanji(c) or c in allowed for c in jp)
+# study/difficulty grades kanji, GRAMMAR and vocabulary together now;
+# see that module for the measurement that motivated it. fits_loosely is
+# the Tatoeba-facing gate — kanji + grammar + length, no vocabulary, for
+# the reason given there. The curated bank (content/reading_sentences)
+# does not pass through here at all: every sentence in it is graded by
+# the full report at test time, so re-checking per request would be work
+# already done.
+def _sentence_fits_level(jp: str, level: str) -> bool:
+    return difficulty.fits_loosely(jp, level)
 
 
 def _is_kanji(c: str) -> bool:
@@ -303,15 +292,28 @@ def _pick_example_within_level(kanji: str, kana: str, level: str) -> dict | None
     examples = extras["examples"]
     random.shuffle(examples)
     for example in examples:
-        if _sentence_kanji_ok(example["jp"], level):
+        if _sentence_fits_level(example["jp"], level):
             return example
     return None
+
+
+def _pick_curated_phrases(level: str, count: int, exclude: set[str]) -> list[dict]:
+    """`count` sentences from the hand-written bank for `level`.
+
+    Drawn without replacement from a shuffled copy, so a single batch
+    never repeats itself, and `exclude` (what the session has already
+    shown) is honoured so a long sitting works through the bank rather
+    than circling the same handful.
+    """
+    pool = [row for row in reading_sentences.BY_LEVEL.get(level, []) if row["jp"] not in exclude]
+    random.shuffle(pool)
+    return pool[:count]
 
 
 def _pick_level_appropriate_phrases(word_pool: list[tuple[str, str, str]], level: str, count: int, scan_cap: int = _LEVEL_CANDIDATE_SCAN_CAP) -> list[tuple[str, str, str, dict]]:
     """Scans `word_pool` (already shuffled by the caller) for up to
     `count` (kanji, kana, level, example) tuples whose example sentence
-    passes _sentence_kanji_ok. May return fewer than `count` if the pool
+    passes _sentence_fits_level. May return fewer than `count` if the pool
     or scan cap runs out first — callers already tolerate a shorter
     batch than requested."""
     picked = []
@@ -494,7 +496,8 @@ def _pick_words_mastery(user_id: str, count: int) -> list[tuple[str, str, str | 
     return picked
 
 
-def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None) -> dict:
+def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
+                   grammar: str | None = None) -> dict:
     """
     NOTE (2026-08): this used to also attach a `segments` field, built
     per-request via find_segments_in_text/attach_stats_to_segments (the
@@ -513,7 +516,7 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None) -
     — that's a cheap bulk filter, not something worth an LLM call per
     candidate sentence.
     """
-    return {
+    phrase = {
         "phrase": jp,
         "romaji": phrase_to_romaji(jp),
         "translation": en,
@@ -521,6 +524,14 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None) -
         "display_seconds": _display_seconds(jp),
         "source_word": {"kanji": kanji, "kana": kana, "level": level},
     }
+    # Only a curated sentence carries this: it was written to demonstrate
+    # exactly this point (and a test proves it contains it), so the
+    # screen can name the grammar the reader is looking at. A corpus
+    # sentence uses whatever it uses and gets no label rather than a
+    # guessed one.
+    if grammar:
+        phrase["grammar"] = grammar
+    return phrase
 
 
 def _source_label(source: str, level: str | None, domain: str | None, tier: int | None) -> str:
@@ -542,6 +553,10 @@ def get_reading_batch(
     tier_size: int = freq.DEFAULT_TIER_SIZE,
     count: int = DEFAULT_BATCH,
     lang: str = "en",
+    # Sentences this session has already shown, comma-separated. Only the
+    # curated bank uses it (see _pick_curated_phrases) -- the Tatoeba path
+    # varies by shuffling a pool of thousands and does not need it.
+    exclude: str = "",
     user_id: str = Depends(get_user_id),
 ):
     """
@@ -566,7 +581,7 @@ def get_reading_batch(
 
     NOTE on difficulty: for source="level" and source="frequency" with
     domain="vocab", every returned sentence is checked against
-    _sentence_kanji_ok — no kanji outside the target level's allowed
+    _sentence_fits_level — no kanji outside the target level's allowed
     set. source="frequency" with domain="vocab_jmdict" has no such gate:
     JMdict-pool words carry no JLPT level to check kanji against, so a
     sentence there can still contain arbitrarily advanced kanji even
@@ -574,16 +589,30 @@ def get_reading_batch(
     per-word gate (see _pick_words_mastery) and needs nothing extra.
     """
     count = max(MIN_BATCH, min(MAX_BATCH, count))
+    exclude_seen = {p for p in exclude.split("|") if p}
 
     if source == "level":
         if not level:
             raise HTTPException(status_code=400, detail="level is required for source=level")
-        word_pool = _pick_words_level(level, _LEVEL_CANDIDATE_SCAN_CAP)
-        picked = _pick_level_appropriate_phrases(word_pool, level, count)
+        # The hand-written bank first, the Tatoeba pool for whatever is
+        # left. Not a fallback in the "if the good path fails" sense --
+        # the bank is finite (30-55 sentences a level) and a long sitting
+        # will exhaust it, at which point real corpus sentences that pass
+        # the gate are exactly what should come next. Ordering it this
+        # way means the first thing a beginner ever reads is a sentence
+        # written for them.
+        curated = _pick_curated_phrases(level, count, exclude_seen)
         phrases = [
-            _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl)
-            for kanji, kana, lvl, example in picked
+            _finish_phrase(row["jp"], row["en"], row["focus"], "", level, grammar=row["grammar"])
+            for row in curated
         ]
+        if len(phrases) < count:
+            word_pool = _pick_words_level(level, _LEVEL_CANDIDATE_SCAN_CAP)
+            picked = _pick_level_appropriate_phrases(word_pool, level, count - len(phrases))
+            phrases.extend(
+                _finish_phrase(example["jp"], example.get("en", ""), kanji, kana, lvl)
+                for kanji, kana, lvl, example in picked
+            )
     elif source == "frequency":
         if domain is None or tier is None:
             raise HTTPException(status_code=400, detail="domain and tier are required for source=frequency")

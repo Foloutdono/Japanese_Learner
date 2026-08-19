@@ -461,6 +461,7 @@ const reading = {
   // have enough learning/mastered vocabulary yet for a full sentence.
   notEnoughMasteryWords: 'Not enough words in learning or mastered state yet — keep studying and check back for this mode.',
 
+  readingGrammarPoint: 'Grammar point',
   readingFetchError:    "Couldn't load a phrase. Try again.",
   writeWhatYouSaw:      'Write what you saw, in romaji',
   romajiPlaceholder:    'e.g. konnichiwa',

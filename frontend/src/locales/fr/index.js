@@ -457,6 +457,7 @@ const reading = {
   // pour une phrase complète.
   notEnoughMasteryWords: "Pas encore assez de mots en cours ou maîtrisés — continuez à étudier et revenez pour ce mode.",
 
+  readingGrammarPoint: 'Point de grammaire',
   readingFetchError:    "Impossible de charger une phrase. Veuillez réessayer.",
   writeWhatYouSaw:      'Écrivez ce que vous avez vu, en romaji',
   romajiPlaceholder:    'e.g. konnichiwa',

@@ -9223,6 +9223,35 @@ input:focus { border-color: var(--accent2); }
 .rdg-feedback-translation { font-size: 15px; color: var(--text-primary); margin-top: 4px; }
 .rdg-feedback-your-answer { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
 
+/* The grammar point a curated sentence was written to demonstrate. A
+   chip rather than another line of the feedback stack: it is not a
+   result of what the reader just did, it is what the sentence was
+   FOR — so it reads as a label on the sentence, the way the level
+   badge does on a dictionary entry. */
+.rdg-feedback-grammar {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 5px 12px;
+  border: 1px solid var(--surface-line);
+  border-radius: 999px;
+  background: var(--surface);
+}
+.rdg-feedback-grammar__label {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.rdg-feedback-grammar__pattern {
+  font-family: var(--font-jp);
+  font-size: 14px;
+  color: var(--line-rikai, var(--accent2));
+}
+
 .rdg-feedback-actions { margin-top: 16px; }
 .rdg-grade-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .rdg-grade-btn--wrong { background: var(--danger); color: var(--text-on-panel); padding: 10px 24px; font-size: 15px; }

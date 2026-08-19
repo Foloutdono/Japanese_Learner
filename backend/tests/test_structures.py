@@ -96,9 +96,25 @@ class MissingRequiredTests(unittest.TestCase):
     def test_radical_zero_is_not_treated_as_missing(self) -> None:
         # There is no radical 0, but a falsy-but-present number must not be
         # mistaken for absence -- that class of bug outlives the data.
+        # `readings` is the two-group {on, kun} shape now (see
+        # structures.decode_readings); the bare string it used to be is
+        # still accepted and re-split, which the test below covers.
         self.assertEqual(missing_required("kanji", {
-            "kanji": "x", "meaning": "y", "readings": "z", "radical": 0,
+            "kanji": "x", "meaning": "y",
+            "readings": {"on": ["ケン"], "kun": ["いぬ"]}, "radical": 0,
         }), [])
+
+    def test_readings_written_before_the_two_group_shape_still_count(self) -> None:
+        # A card saved when `readings` was one ・-joined string must not
+        # read back as "no readings" and become invalid on next edit.
+        self.assertEqual(missing_required("kanji", {
+            "kanji": "x", "meaning": "y", "readings": "ケン・いぬ", "radical": 94,
+        }), [])
+
+    def test_a_kanji_card_with_no_readings_at_all_is_incomplete(self) -> None:
+        self.assertEqual(missing_required("kanji", {
+            "kanji": "x", "meaning": "y", "readings": {"on": [], "kun": []}, "radical": 94,
+        }), ["readings"])
 
 
 class UsableSentenceTests(unittest.TestCase):
@@ -144,7 +160,7 @@ class DescribeTests(unittest.TestCase):
         for s in describe():
             for f in s["fields"]:
                 self.assertIn("key", f)
-                self.assertIn(f["kind"], ("text", "number", "lines"), f)
+                self.assertIn(f["kind"], ("text", "number", "lines", "readings"), f)
                 self.assertIsInstance(f["required"], bool)
 
 

@@ -166,16 +166,28 @@ export default function ReadingScreen({ session }) {
     return 'mastery'
   }
 
+  // Every sentence this session has already served, so the backend can
+  // work through its curated bank rather than reshuffling the same
+  // handful (see reading.py's _pick_curated_phrases). '|' rather than
+  // ',' because a Japanese sentence may well contain a comma — 、 is a
+  // different character, but the English translations and the corpus
+  // sentences are not guaranteed to be that tidy.
+  const seenRef = useRef([])
+
   function batchUrl(count) {
     const params = new URLSearchParams({ source, count, lang })
     if (source === 'level') params.set('level', level)
     if (source === 'frequency') { params.set('domain', domain); params.set('tier', tier) }
+    // Capped: the curated bank is 30-55 sentences a level, so anything
+    // past that is a query string growing without bound for no effect.
+    if (seenRef.current.length) params.set('exclude', seenRef.current.slice(-60).join('|'))
     return `/api/reading/batch?${params.toString()}`
   }
 
   function startSession() {
     setScore({ correct: 0, total: 0 })
     setStreak(0)
+    seenRef.current = []
     queueRef.current = []
     setStage('loading')
     setError(null)
@@ -200,7 +212,11 @@ export default function ReadingScreen({ session }) {
         if (!r.ok) throw new Error('Request failed')
         return r.json()
       })
-      .then(d => d.phrases || [])
+      .then(d => {
+        const phrases = d.phrases || []
+        seenRef.current = [...seenRef.current, ...phrases.map(p => p.phrase)]
+        return phrases
+      })
       .catch(() => [])
       .finally(() => { fetchingRef.current = false })
   }
@@ -587,6 +603,17 @@ function SessionView({
                           translation_lang note — so this is labelled
                           explicitly instead of implying it matches `lang`. */}
                       {data.translation_lang === 'en' ? (t.translationEnglish ?? 'EN') : t.translation}: {data.translation}
+                    </div>
+                  )}
+                  {/* Only a curated sentence carries this: it was written
+                      to demonstrate exactly this point, and a test proves
+                      it contains it (see content/reading_sentences.py).
+                      A corpus sentence gets no label rather than a
+                      guessed one. */}
+                  {data.grammar && (
+                    <div className="rdg-feedback-grammar">
+                      <span className="rdg-feedback-grammar__label">{t.readingGrammarPoint}</span>
+                      <span className="rdg-feedback-grammar__pattern" lang="ja">{data.grammar}</span>
                     </div>
                   )}
                   <div className="rdg-feedback-your-answer">
