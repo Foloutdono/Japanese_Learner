@@ -1976,10 +1976,165 @@ input:focus { border-color: var(--accent2); }
 .station__platform {
   flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  /* A column since the platform gained a second child: the service
+     leaving now sits above the board of everywhere you could go. As a
+     row they sat side by side and the board lost half its width. */
+  flex-direction: column;
+  align-items: center;
   padding: 36px 24px 28px;
+  gap: 16px;
 }
+
+/* ── 本日の運行 — the service leaving now ─────────────────────
+   Held to the board's own column (--board-w) so it reads as the top of
+   the same object rather than a banner floating above it. It is a
+   button when something is due and a plain strip when nothing is: a
+   control that does nothing when tapped is worse than no control, and
+   "next review in 3 hours" is information, not an action. */
+.next-service {
+  width: min(var(--board-w), 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 18px;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent2) 7%, var(--bg-panel));
+  border: 1px solid color-mix(in srgb, var(--accent2) 26%, transparent);
+  border-left: 3px solid var(--accent2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 140ms ease, transform 140ms ease, border-color 140ms ease;
+}
+.next-service:hover {
+  background: color-mix(in srgb, var(--accent2) 12%, var(--bg-panel));
+  border-color: color-mix(in srgb, var(--accent2) 44%, transparent);
+}
+.next-service:active { transform: translateY(1px); }
+
+/* Nothing due: same strip, no affordance, muted. */
+.next-service--clear {
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  cursor: default;
+  background: transparent;
+  border-color: color-mix(in srgb, var(--border) 80%, transparent);
+  border-left-color: color-mix(in srgb, var(--success) 60%, transparent);
+}
+.next-service--clear:hover { background: transparent; }
+
+.next-service__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.next-service__jp {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+}
+.next-service__count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent2);
+}
+.next-service__clear {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--success);
+}
+.next-service__when {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* The lanes waiting, as chips. Scrolls rather than wraps: three chips
+   on one line is the shape of a summary, and a wrapped third line makes
+   this compete with the board it is supposed to sit above. */
+.next-service__lanes {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.next-service__lanes::-webkit-scrollbar { display: none; }
+
+.next-service__lane {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--lane-color, var(--accent2)) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lane-color, var(--accent2)) 30%, transparent);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.next-service__lane-where { font-weight: 700; color: var(--lane-color, var(--accent2)); }
+.next-service__lane-mode  { color: var(--text-dim); }
+.next-service__lane-due {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ── The queue screen itself ─────────────────────────────────── */
+
+/* Which part of the day's study this card came from. A section screen
+   has a header saying where you are; a mixed queue has to say it per
+   card or a kanji writing prompt after a grammar question reads as the
+   app losing its place. */
+.today-lane {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  /* Deliberately NOT uppercased: this line carries user-authored deck
+     names ("Mots du boulot"), and shouting someone's own words back at
+     them reads as a system label rather than as theirs. */
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.today-remaining {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent2) 16%, transparent);
+  color: var(--accent2);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.today-clear {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 20px;
+  text-align: center;
+}
+.today-clear__mark {
+  font-size: 44px;
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--success) 70%, transparent);
+}
+.today-clear__title { margin: 0; font-size: 22px; }
+.today-clear__body  { margin: 0; color: var(--text-dim); }
+.today-clear__next  { margin: 0 0 8px; color: var(--text-dim); font-size: 14px; }
 
 .board {
   position: relative;
@@ -10160,7 +10315,9 @@ input:focus { border-color: var(--accent2); }
 
 @media (max-width: 560px) {
   .station__concourse { padding: 14px 16px; }
-  .station__platform { padding: 20px 12px 24px; }
+  .station__platform { padding: 20px 12px 24px; gap: 12px; }
+  .next-service { padding: 12px 14px; }
+  .next-service__count { font-size: 18px; }
 
   /* 備考 is the first thing to go: the destination and the platform
      number are what you are actually scanning for. */

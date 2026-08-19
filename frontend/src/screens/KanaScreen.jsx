@@ -25,6 +25,7 @@ import {
   modePickerEntries, modeLabel,
 } from '../domain/studyModes'
 import { romajiEquals } from '../lib/romaji'
+import { kanaSets } from '../domain/kanaSets'
 import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
@@ -46,12 +47,7 @@ export default function KanaScreen({ session }) {
   // shows it, in the script you came here to learn, and needs no
   // translating into either language the app speaks. It's the 停車駅
   // strip under a destination — the stops this service actually makes.
-  const SETS = [
-    { label: t.hiraganaBase,         slug: 'hiragana_basic',  sample: 'あ い う え お' },
-    { label: t.hiraganaCombinations, slug: 'hiragana_combos', sample: 'きゃ きゅ きょ' },
-    { label: t.katakanaBase,         slug: 'katakana_basic',  sample: 'ア イ ウ エ オ' },
-    { label: t.katakanaCombinations, slug: 'katakana_combos', sample: 'キャ キュ キョ' },
-  ]
+  const SETS = kanaSets(t)
 
   // Straight from the registry — one definition of what kana offers,
   // shared with the backend's own (see domain/studyModes.js).

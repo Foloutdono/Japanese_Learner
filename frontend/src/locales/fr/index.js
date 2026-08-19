@@ -317,6 +317,17 @@ const quiz = {
 // ── Stats ─────────────────────────────────────────────────
 const stats = {
   statistics:         'Statistiques',
+  // ── 本日の運行 — la file du jour (screens/TodayScreen) ──────
+  todayTitle:         'Service du jour',
+  todayBoard:         "Aujourd'hui",
+  todayDue:           n => `${n} à réviser`,
+  todayNothingDueShort: 'À jour',
+  todayRemaining:     'Restant dans ce service',
+  todayClearTitle:    'Service terminé',
+  todayClearedCount:  n => `${n} révision${n === 1 ? '' : 's'} faite${n === 1 ? '' : 's'}. Plus rien à réviser.`,
+  todayNothingDue:    'Rien à réviser pour le moment.',
+  todayNextReview:    when => `Prochaine révision ${when}.`,
+  backToStation:      'Retour à la gare',
   resetStats:         'Tout réinitialiser',
   resetConfirm:       'Effacer TOUTE la progression ? Cette action est irréversible.',
   kana:               'Kana',

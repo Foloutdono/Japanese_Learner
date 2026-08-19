@@ -248,7 +248,11 @@ def get_today_cards(count: int = 10, exclude: str = "", lang: str = "fr",
             _, deck_id, deck_name, _ = key
             card = build_personal_card(personal[raw_id], raw_id, mode, stage, preview)
             if card is not None:
-                card["source"] = "personal"
+                # `source` stays "custom", as decks.py set it: the
+                # frontend's structureKeyOf reads that exact string to
+                # know a card carries its fields under `fields` keyed by
+                # its structure's own names. Which DECK it came from is
+                # display information and rides alongside.
                 card["deck"] = deck_name
                 card["deck_id"] = deck_id
 

@@ -8,6 +8,7 @@ import { playAnnouncement, startAmbiance, stopAmbiance } from '../lib/audio'
 import { beginDeparture } from '../stores/departure'
 import { HOME_STATION } from '../config/stations'
 import { DepartureBoard } from '../components/station/DepartureBoard'
+import NextService from '../components/station/NextService'
 import { useStationClock } from '../components/station/useStationClock'
 import { FlameIcon, GearIcon } from '../components/ui/Icons'
 
@@ -119,7 +120,7 @@ function ICCard() {
   )
 }
 
-export default function HomeScreen() {
+export default function HomeScreen({ session }) {
   const navigate = useNavigate()
   const { t }    = useLang()
 
@@ -177,6 +178,10 @@ export default function HomeScreen() {
       </div>
 
       <main className="station__platform">
+        {/* The service leaving now, above the board rather than in it —
+            see NextService for why it is not a thirteenth row. */}
+        <NextService session={session} />
+
         <DepartureBoard
           sections={sections}
           station={HOME_STATION}

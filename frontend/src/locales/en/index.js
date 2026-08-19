@@ -330,6 +330,17 @@ const quiz = {
 // ── Stats ─────────────────────────────────────────────────
 const stats = {
   statistics:        'Statistics',
+  // ── 本日の運行 — the daily queue (screens/TodayScreen) ──────
+  todayTitle:         "Today's run",
+  todayBoard:         'Today',
+  todayDue:           n => `${n} due`,
+  todayNothingDueShort: 'All clear',
+  todayRemaining:     'Left in this run',
+  todayClearTitle:    'Run complete',
+  todayClearedCount:  n => `${n} ${n === 1 ? 'review' : 'reviews'} cleared. Nothing else is due.`,
+  todayNothingDue:    'Nothing is due right now.',
+  todayNextReview:    when => `Next review ${when}.`,
+  backToStation:      'Back to the station',
   resetStats:        'Reset all',
   resetConfirm:      'Erase ALL progress? This action is irreversible.',
   kana:              'Kana',

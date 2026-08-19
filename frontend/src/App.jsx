@@ -13,6 +13,7 @@ import { LangProvider } from './LangContext'
 import LandingScreen from './screens/LandingScreen'
 import AuthScreen  from './screens/AuthScreen'
 import HomeScreen  from './screens/HomeScreen'
+import TodayScreen from './screens/TodayScreen'
 import KanaScreen  from './screens/KanaScreen'
 import VocabScreen from './screens/VocabScreen'
 import KanjiScreen from './screens/KanjiScreen'
@@ -103,6 +104,8 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/"                     element={<HomeScreen session={session} />} />
+          {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
+          <Route path="/today"                element={<TodayScreen session={session} />} />
           <Route path="/kana"                 element={<KanaScreen session={session} />} />
           <Route path="/vocab"                element={<VocabScreen session={session} />} />
           <Route path="/kanji"                element={<KanjiScreen session={session} />} />

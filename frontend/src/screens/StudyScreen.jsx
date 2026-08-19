@@ -5,13 +5,7 @@ import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
 import RatingBar from '../components/study/RatingBar'
-import {
-  MCQGrid, DoneMessage, DeckProgress,
-  InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
-} from '../components/study/QuizComponents'
-import { FuriganaWord } from '../components/study/Readings'
-import { GrammarRule, GrammarAnswer } from '../components/study/GrammarPieces'
-import { RadicalAnswer } from '../components/study/RadicalPieces'
+import { MCQGrid, DoneMessage, DeckProgress } from '../components/study/QuizComponents'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
@@ -19,7 +13,12 @@ import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
-import PromptCard from '../components/study/PromptCard'
+// The card faces themselves live beside the other study components now,
+// because the daily queue (screens/TodayScreen) renders the same five
+// structures and a second copy of them is how two payload shapes drift
+// apart. See CardPrompt's own note.
+import CardPrompt from '../components/study/CardPrompt'
+import { wordForm, structureKeyOf, normalizeCard } from '../domain/cardShape'
 import SessionError from '../components/study/SessionError'
 import ReadingsInput from '../components/study/ReadingsInput'
 import { DrawingQuiz, DrawingOverlay } from '../components/study/DrawingCanvas'
@@ -50,80 +49,6 @@ import { ChevronIcon, PencilIcon } from '../components/ui/Icons'
 // review_preview. What a review consumes is the learner's own 1-4
 // self-rating, which means the same thing whether or not a hint
 // happened to be on screen.
-
-// The written form to quiz/display on — mirrors Kanji/VocabScreen's own
-// wordForm: some vocab entries are kana-only (no kanji), and this also
-// doubles as "the kanji itself" for kanji entries/choices, which always
-// have a `kanji` field.
-function wordForm(entry) {
-  return entry?.kanji || entry?.kana || ''
-}
-
-// ── Which structure a card is actually studying as ──────────────
-// A browsed-in app card already carries this as its source
-// ('builtin_kanji' → 'kanji'); a personal card carries it directly as
-// `structure` (see study/structures.py — a deck has ONE structure, and
-// every personal card in it takes that shape). One function so the
-// render body never has to spell out the `source === 'custom' ? … :
-// …` branch itself more than once.
-function structureKeyOf(card) {
-  if (!card) return null
-  return card.source === 'custom' ? card.structure : card.source?.replace('builtin_', '')
-}
-
-// A kanji-range test, not a script one — used only to tell a personal
-// vocab card's kana-only word ("ねこ") apart from one with kanji in it
-// ("猫"), the same distinction eligible_for()/wordForm() make for the
-// app's own deck.
-const KANJI_RANGE = /[㐀-鿿]/
-
-// ── Field-name adapter ───────────────────────────────────────────
-// A browsed-in app card already has kanji/kana/meaning (or grammar/
-// structure) at the top level of its payload; a personal card of the
-// matching structure carries the same information under `card.fields`,
-// keyed by THAT structure's own field names (a kanji card calls them
-// kanji/meaning, a grammar card calls them rule/meaning — see
-// study/structures.py). This projects a personal card onto the exact
-// shape its app-sourced counterpart already has, so every renderer
-// below reads `card.kanji`/`card.meaning`/`card.grammar` regardless of
-// where the card actually came from, instead of branching on
-// card.source at every single field access — which is what let the
-// direction bug hide here in the first place: renderCustomPrompt used
-// to read `card.front`/`card.back` UNCONDITIONALLY, so a "meaning →
-// word" session always showed the word first no matter what the mode
-// asked for, because nothing here ever looked at `card.direction` for
-// a personal card.
-//
-// readings/radical/furigana/hints/kana — the mode-specific extras — are
-// already attached at the top level by decks.py for BOTH sources (see
-// _custom_card_extras there), so nothing here needs to touch those.
-function normalizeCard(card) {
-  if (!card || card.source !== 'custom') return card
-  const f = card.fields || {}
-  if (card.structure === 'kanji') {
-    return { ...card, kanji: f.kanji ?? '', meaning: f.meaning ?? '' }
-  }
-  if (card.structure === 'vocab') {
-    const word = f.word ?? ''
-    const hasKanji = KANJI_RANGE.test(word)
-    return {
-      ...card,
-      kanji: hasKanji ? word : '',
-      // decks.py sets `kana` from the optional `reading` field when one
-      // was given; a kana-only word is already its own reading.
-      kana: card.kana || (hasKanji ? '' : word),
-      meaning: f.meaning ?? '',
-    }
-  }
-  if (card.structure === 'grammar') {
-    // `structure` on the raw payload is the DECK's structure key
-    // ('grammar') — GrammarAnswer wants the explanation TEXT there
-    // instead (a personal card has none to give), so it is overwritten
-    // rather than read.
-    return { ...card, grammar: f.rule ?? '', structure: '', meaning: f.meaning ?? '' }
-  }
-  return card // 'standard' needs no projection — front/back already are its own fields
-}
 
 export default function StudyScreen({ session }) {
   const { t, lang } = useLang()
@@ -477,7 +402,6 @@ export default function StudyScreen({ session }) {
   )
   const choicesOn   = activeHints.includes(HINTS.CHOICES) && Array.isArray(cardHints[HINTS.CHOICES])
   const sentencesOn = activeHints.includes(HINTS.SENTENCES) && Array.isArray(cardHints[HINTS.SENTENCES])
-  const furiganaOn  = activeHints.includes(HINTS.FURIGANA) && Array.isArray(cardHints[HINTS.FURIGANA])
   // fill_in's own reveal is the flip, same as every other mode here —
   // choicesOn is what actually decides whether the flip is replaced by
   // the options grid instead (see the grammar renderer below).
@@ -494,273 +418,6 @@ export default function StudyScreen({ session }) {
       if (hs.includes(key)) return structureKey === 'grammar' ? [] : hs.filter(h => h !== key)
       return structureKey === 'grammar' ? [key] : [...hs, key]
     })
-  }
-
-  /** The vocab word, with furigana when the hint is on and the card has it. */
-  function wordDisplay(c, size) {
-    const parts = furiganaOn ? cardHints[HINTS.FURIGANA] : null
-    if (parts?.length) return <FuriganaWord parts={parts} size={size} />
-    return <CharDisplay char={wordForm(c)} size={size} />
-  }
-
-  // ── Per-structure prompt renderers (rendered inside CardTransition) ──
-  // Deliberately not collapsed into one generic front/back layout — a
-  // kanji, vocab, grammar or standard card each have their own actual
-  // UI in this app (shared <Flashcard> for most, Kanji's radical/
-  // readings/write modes their own), reproduced here exactly as their
-  // own screen renders them, reading from the SAME normalized shape
-  // regardless of whether `c` came from the app's own deck or was
-  // hand-written into this one.
-
-  function renderKanjiPrompt(c) {
-    if (renderer === RENDER.TYPE) {
-      // readings — the kanji is shown, every reading is typed into
-      // ReadingsInput below. No flip: the answer is not one thing to
-      // uncover but a set the learner produces.
-      return (
-        <PromptCard>
-          <CharDisplay char={c.kanji} size={100} />
-          <RevealActions
-            t={t} revealed={answered} resetKey={`${c.card_id}:${cardNonce}`}
-            dictTerm={c.kanji} dictCategory="kanji" session={session}
-            onReplaySound={() => speakJapanese(c.kana)}
-          />
-        </PromptCard>
-      )
-    }
-    if (isRadical) {
-      // radical — the kanji is shown, the radical it is filed under is
-      // the answer. Same flip/choices split as the meaning flashcards.
-      return (
-        <PromptCard>
-          {!showChoices && (
-            <Flashcard
-              t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
-              front={<CharDisplay char={c.kanji} size={100} />}
-              back={
-                /* The kanji stays on the back, dimmed — the answer needs
-                   something to be an answer ABOUT, and on the cards
-                   where the radical IS the kanji, an unchanged-looking
-                   card otherwise. */
-                <div className="radical-reveal">
-                  <div className="radical-reveal__kanji" lang="ja">{c.kanji}</div>
-                  <RadicalAnswer radical={c.radical} t={t} />
-                </div>
-              }
-              dictTerm={c.kanji} dictCategory="kanji" session={session}
-              onReplaySound={() => speakJapanese(c.kana)}
-            />
-          )}
-          {showChoices && (
-            <>
-              <CharDisplay char={c.kanji} size={100} />
-              {answered && <RadicalAnswer radical={c.radical} t={t} />}
-              <RevealActions
-                t={t} revealed={answered} resetKey={`${c.card_id}:${cardNonce}`}
-                dictTerm={c.kanji} dictCategory="kanji" session={session}
-                onReplaySound={() => speakJapanese(c.kana)}
-              />
-            </>
-          )}
-        </PromptCard>
-      )
-    }
-    if (renderer === RENDER.DRAW) {
-      return (
-        <PromptCard>
-          <MeaningDisplay meaning={c.meaning} size={32} />
-          {c.kana && <div className="quiz-subtitle">({c.kana})</div>}
-          <RevealActions
-            t={t} revealed={answered} resetKey={`${c.card_id}:${cardNonce}`}
-            dictTerm={c.kanji} dictCategory="kanji" session={session}
-            onReplaySound={() => speakJapanese(c.kana)}
-          />
-        </PromptCard>
-      )
-    }
-    return (
-      <PromptCard>
-        {!showChoices && (
-          <Flashcard
-            t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
-            front={isF2B ? <CharDisplay char={c.kanji} size={100} /> : <MeaningDisplay meaning={c.meaning} size={44} />}
-            back={
-              <InlineReveal
-                t={t} kana={c.kana} isLarge={isF2B}
-                main={isF2B ? <MeaningDisplay meaning={c.meaning} size={28} /> : <CharDisplay char={c.kanji} size={72} />}
-              />
-            }
-            dictTerm={c.kanji} dictCategory="kanji" session={session}
-            onReplaySound={() => speakJapanese(c.kana)}
-          />
-        )}
-        {showChoices && (
-          <>
-            <InlineReveal
-              t={t} kana={c.kana} revealed={answered}
-              main={isF2B ? <CharDisplay char={c.kanji} size={100} /> : <MeaningDisplay meaning={c.meaning} size={44} />}
-            />
-            <RevealActions
-              t={t} revealed={answered} resetKey={`${c.card_id}:${cardNonce}`}
-              dictTerm={c.kanji} dictCategory="kanji" session={session}
-              onReplaySound={() => speakJapanese(c.kana)}
-            />
-          </>
-        )}
-      </PromptCard>
-    )
-  }
-
-  function renderVocabPrompt(c) {
-    const isWordReading = STUDY_MODES[mode]?.base === 'word_reading'
-    return (
-      <PromptCard>
-        {isWordReading && (
-          /* word_reading — the written word is shown and the answer is
-             how it is read. No meaning on either face: this drill is
-             about reading, not knowing. */
-          <Flashcard
-            t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
-            front={<CharDisplay char={c.kanji} size={72} />}
-            back={
-              /* Both halves of the answer, and both are needed. The
-                 furigana says WHICH kanji takes which part of the
-                 reading; the plain kana below is the reading as one
-                 word, which is what was actually asked for. */
-              <div>
-                {c.furigana?.length
-                  ? <FuriganaWord parts={c.furigana} size={64} answer />
-                  : <CharDisplay char={c.kanji} size={56} />}
-                <div className="flashcard-reading" lang="ja">{c.kana}</div>
-              </div>
-            }
-            dictTerm={wordForm(c)} dictCategory="vocab" session={session}
-            onReplaySound={() => speakJapanese(c.kana)}
-          />
-        )}
-
-        {!isWordReading && !showChoices && (
-          <Flashcard
-            t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
-            front={isF2B ? wordDisplay(c, 72) : <CharDisplay char={formatGlossLine(c.meaning)} size={72} />}
-            back={
-              <InlineReveal
-                t={t} kana={c.kanji ? c.kana : null} isLarge={isF2B} stacked={isF2B}
-                main={isF2B
-                  ? <MeaningDisplay meaning={c.meaning} size={28} color="var(--accent2)" />
-                  : <CharDisplay char={wordForm(c)} size={72} />}
-              />
-            }
-            dictTerm={wordForm(c)} dictCategory="vocab" session={session}
-            onReplaySound={() => speakJapanese(c.kana)}
-          />
-        )}
-
-        {!isWordReading && showChoices && (
-          <>
-            <InlineReveal
-              t={t} kana={c.kanji ? c.kana : null} revealed={answered}
-              main={isF2B ? <CharDisplay char={wordForm(c)} size={72} /> : <CharDisplay char={formatGlossLine(c.meaning)} size={72} />}
-            />
-            <RevealActions
-              t={t} revealed={answered} resetKey={`${c.card_id}:${cardNonce}`}
-              dictTerm={wordForm(c)} dictCategory="vocab" session={session}
-              onReplaySound={() => speakJapanese(c.kana)}
-            />
-          </>
-        )}
-      </PromptCard>
-    )
-  }
-
-  function renderGrammarPrompt(c) {
-    return (
-      <PromptCard className="grammar-prompt">
-        {/* Every mode here is the same card with a different front: a
-            rule, a meaning, or a sentence. The flip is the reveal in
-            all three, and switching the choices on replaces the flip
-            rather than sitting beside it — same resolution Kanji/Vocab
-            use for their own indice_1. */}
-        {!choicesOn ? (
-          <Flashcard
-            t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
-            front={
-              isFill
-                ? <div className="grammar-fill-sentence" lang="ja">{c.fill_sentence?.jp}</div>
-                : isF2B
-                  ? (
-                    <>
-                      <GrammarRule text={c.grammar} size={52} />
-                      {c.structure && <div className="grammar-structure">{c.structure}</div>}
-                    </>
-                  )
-                  : <MeaningDisplay meaning={c.meaning} size={34} />
-            }
-            back={
-              isFill
-                ? (
-                  /* The sentence stays on the back, dimmed: the answer
-                     is which rule is at work IN IT. */
-                  <>
-                    <div className="grammar-fill-sentence grammar-fill-sentence--echo" lang="ja">
-                      {c.fill_sentence?.jp}
-                    </div>
-                    <GrammarAnswer card={c} size={40} />
-                  </>
-                )
-                : isF2B
-                  ? <MeaningDisplay meaning={c.meaning} size={30} color="var(--success)" />
-                  : (
-                    <>
-                      <GrammarRule text={c.grammar} size={44} />
-                      {c.structure && <div className="grammar-structure">{c.structure}</div>}
-                    </>
-                  )
-            }
-          />
-        ) : (
-          /* Choices on — the prompt does NOT swap: the answer is
-             whichever MCQ row lights up below, not a second face here.
-             fill_in is the exception, since its own prompt is the
-             sentence and the rule named below is worth seeing spelled
-             out next to it. */
-          <>
-            {isFill
-              ? <div className="grammar-fill-sentence" lang="ja">{c.fill_sentence?.jp}</div>
-              : isF2B
-                ? (
-                  <>
-                    <GrammarRule text={c.grammar} size={52} />
-                    {c.structure && <div className="grammar-structure">{c.structure}</div>}
-                  </>
-                )
-                : <MeaningDisplay meaning={c.meaning} size={34} />}
-            {isFill && answered && <GrammarAnswer card={c} size={36} divided />}
-          </>
-        )}
-      </PromptCard>
-    )
-  }
-
-  function renderStandardPrompt(c) {
-    return (
-      <PromptCard>
-        <Flashcard
-          t={t} resetKey={`${c.card_id}:${cardNonce}`} onReveal={onFlashcardReveal}
-          front={
-            <div className="study-front-text" style={{ '--front-size': (isF2B ? c.front : c.back)?.length === 1 ? '80px' : '32px' }}>
-              {isF2B ? c.front : c.back}
-            </div>
-          }
-          back={
-            <div className="study-front-text" style={{ '--front-size': '28px' }}>
-              {isF2B ? c.back : c.front}
-            </div>
-          }
-          dictTerm={c.front} dictCategory="vocab" session={session}
-        />
-      </PromptCard>
-    )
   }
 
   const title = modeLabel(t, mode)
@@ -828,10 +485,11 @@ export default function StudyScreen({ session }) {
                 checkAdvance()
               }}
             >
-              {structureKey === 'kanji'    && renderKanjiPrompt(nc)}
-              {structureKey === 'vocab'    && renderVocabPrompt(nc)}
-              {structureKey === 'grammar'  && renderGrammarPrompt(nc)}
-              {structureKey === 'standard' && renderStandardPrompt(nc)}
+              <CardPrompt
+                card={nc} t={t} session={session}
+                answered={answered} cardNonce={cardNonce}
+                activeHints={activeHints} onFlashcardReveal={onFlashcardReveal}
+              />
             </CardTransition>
 
             {/* Kanji radical MCQ — {char, stroke_count} distractor rows,

@@ -122,6 +122,14 @@ function sweepStaleCaches() {
  * @param {() => string[]} [extraExcludeIds]  ids to exclude on top of
  *   the queued ones — the just-reviewed set, so a fire-and-forget review
  *   POST that hasn't landed yet can't have its card handed straight back.
+ * @param {(card: object) => string} [cardKey]  what makes a card unique
+ *   within this session, for the exclude list and the de-dup on refill.
+ *   Defaults to its `card_id`, which is right for every session with ONE
+ *   mode. The daily queue is mixed-mode and can legitimately hold the
+ *   same card under two of them — 土 as a flashcard and 土 as a writing
+ *   drill — so it passes `${card_id}|${mode}`. With the default, the
+ *   refill de-dup below would silently drop whichever of the two arrived
+ *   second, and the learner would never be asked it.
  * @param {number} [fetchTimeoutMs=10000]
  *
  * ── On failure ──
@@ -143,6 +151,7 @@ export function useCardSession({
   mode,
   validateCard,
   extraExcludeIds,
+  cardKey = c => c.card_id,
   fetchTimeoutMs = 10000,
 }) {
   sweepStaleCaches()
@@ -229,7 +238,7 @@ export function useCardSession({
 
     try {
       const excludeIds = [
-        ...queued.map(c => c.card_id),
+        ...queued.map(cardKey),
         ...(extraExcludeIds ? extraExcludeIds() : []),
       ]
       const fresh = await fetchBatch(batchSize, excludeIds, controller.signal)
@@ -246,10 +255,11 @@ export function useCardSession({
         if (queueRef.current.length === 0) setDone(true)
       } else {
         setQueue(q => {
-          // De-dup by card_id: the old blind append could seat the same
-          // card twice when a refill raced a key change.
-          const seen = new Set(q.map(c => c.card_id))
-          const merged = [...q, ...fresh.filter(c => !seen.has(c.card_id))]
+          // De-dup by the session's own card identity (see cardKey):
+          // the old blind append could seat the same card twice when a
+          // refill raced a key change.
+          const seen = new Set(q.map(cardKey))
+          const merged = [...q, ...fresh.filter(c => !seen.has(cardKey(c)))]
           saveCache(storageKey, merged)
           return merged
         })
@@ -285,7 +295,7 @@ export function useCardSession({
         setFetching(false)
       }
     }
-  }, [storageKey, fetchBatch, batchSize, extraExcludeIds, fetchTimeoutMs, clearRetry])
+  }, [storageKey, fetchBatch, batchSize, extraExcludeIds, cardKey, fetchTimeoutMs, clearRetry])
 
   useEffect(() => {
     if (!done && !error && queue.length <= REFILL_AT) refill()
