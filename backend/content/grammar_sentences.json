@@ -1,2063 +1,3563 @@
 {
- "_meta": "Example sentences for content/grammar_points.json, written by hand for this project -- not generated, and not taken from content/grammar_data.py or any other source. Two per grammar point, each with a literal English translation.\n\nWhy they are authored rather than generated: study/grammar_sentence_gen.py does generate these, cheaply, and the generator is kept for regenerating or extending them. But the free model available to this project produced roughly one flawed sentence in three -- wrong translations, and Japanese that was ungrammatical in ways no automatic check can see (a sentence can contain its pattern, stay within the level's kanji and still be wrong). Example sentences are the one place a learner cannot spot the error themselves: they are reading them precisely because they do not yet know the pattern.\n\nEvery sentence here passes the same gate the generator applies -- study.grammar_sentence_gen.check_sentence -- which enforces that the sentence visibly uses its own pattern (study/grammar_match.py), stays within the level's kanji set, and is a complete sentence rather than a noun phrase. tests/test_grammar_sentences.py runs that gate over this whole file, so an edit that breaks one of those rules fails the build.\n\nLevel placement follows grammar_points.json. Kanji are held to the level's own deck, with one deliberate exemption: a kanji belonging to the PATTERN being taught is always allowed, since 〜次第だ cannot be demonstrated without 第 and writing it as しだい would stop demonstrating it at all.",
- "N5": {
-  "です／だ": [
-   {
-    "jp": "わたしは学生です。",
-    "en": "I am a student."
-   },
-   {
-    "jp": "あの人は日本語の先生です。",
-    "en": "That person is a Japanese teacher."
-   }
-  ],
-  "は": [
-   {
-    "jp": "今日は天気がいいです。",
-    "en": "The weather is good today."
-   },
-   {
-    "jp": "この本はとてもおもしろいです。",
-    "en": "This book is very interesting."
-   }
-  ],
-  "が": [
-   {
-    "jp": "花がきれいです。",
-    "en": "The flowers are pretty."
-   },
-   {
-    "jp": "電車が来ました。",
-    "en": "The train came."
-   }
-  ],
-  "を": [
-   {
-    "jp": "毎あさパンを食べます。",
-    "en": "I eat bread every morning."
-   },
-   {
-    "jp": "つめたい水を飲みました。",
-    "en": "I drank cold water."
-   }
-  ],
-  "に": [
-   {
-    "jp": "七時におきます。",
-    "en": "I get up at seven."
-   },
-   {
-    "jp": "友だちにてがみを書きました。",
-    "en": "I wrote a letter to my friend."
-   }
-  ],
-  "で": [
-   {
-    "jp": "駅で友だちに会いました。",
-    "en": "I met a friend at the station."
-   },
-   {
-    "jp": "電車で学校へ行きます。",
-    "en": "I go to school by train."
-   }
-  ],
-  "と": [
-   {
-    "jp": "父と山へ行きました。",
-    "en": "I went to the mountain with my father."
-   },
-   {
-    "jp": "本とノートを買いました。",
-    "en": "I bought a book and a notebook."
-   }
-  ],
-  "も": [
-   {
-    "jp": "わたしも学生です。",
-    "en": "I am a student too."
-   },
-   {
-    "jp": "母も日本語を話します。",
-    "en": "My mother speaks Japanese too."
-   }
-  ],
-  "の": [
-   {
-    "jp": "これはわたしの本です。",
-    "en": "This is my book."
-   },
-   {
-    "jp": "日本語の先生は女の人です。",
-    "en": "The Japanese teacher is a woman."
-   }
-  ],
-  "から〜まで": [
-   {
-    "jp": "九時から五時まではたらきます。",
-    "en": "I work from nine to five."
-   },
-   {
-    "jp": "学校から駅まであるきます。",
-    "en": "I walk from school to the station."
-   }
-  ],
-  "〜ます／〜ません": [
-   {
-    "jp": "毎日ぎゅうにゅうを飲みます。",
-    "en": "I drink milk every day."
-   },
-   {
-    "jp": "おさけは飲みません。",
-    "en": "I do not drink alcohol."
-   }
-  ],
-  "〜ました／〜ませんでした": [
-   {
-    "jp": "きのう、本を読みました。",
-    "en": "I read a book yesterday."
-   },
-   {
-    "jp": "先週はどこへも行きませんでした。",
-    "en": "I did not go anywhere last week."
-   }
-  ],
-  "〜たいです": [
-   {
-    "jp": "いつか日本へ行きたいです。",
-    "en": "I want to go to Japan some day."
-   },
-   {
-    "jp": "つめたい水が飲みたいです。",
-    "en": "I want to drink cold water."
-   }
-  ],
-  "〜てください": [
-   {
-    "jp": "この本を読んでください。",
-    "en": "Please read this book."
-   },
-   {
-    "jp": "ここに名前を書いてください。",
-    "en": "Please write your name here."
-   }
-  ],
-  "〜ています": [
-   {
-    "jp": "母は今りょうりをつくっています。",
-    "en": "My mother is cooking now."
-   },
-   {
-    "jp": "父は会社ではたらいています。",
-    "en": "My father works at a company."
-   }
-  ],
-  "〜てもいいです": [
-   {
-    "jp": "ここでしゃしんをとってもいいです。",
-    "en": "You may take photos here."
-   },
-   {
-    "jp": "この水を飲んでもいいですか。",
-    "en": "May I drink this water?"
-   }
-  ],
-  "〜てはいけません": [
-   {
-    "jp": "この川でおよいではいけません。",
-    "en": "You must not swim in this river."
-   },
-   {
-    "jp": "ここに車をとめてはいけません。",
-    "en": "You must not park a car here."
-   }
-  ],
-  "〜ことができます": [
-   {
-    "jp": "わたしは日本語を話すことができます。",
-    "en": "I can speak Japanese."
-   },
-   {
-    "jp": "この店ではカードをつかうことができます。",
-    "en": "You can use a card at this shop."
-   }
-  ],
-  "〜ないでください": [
-   {
-    "jp": "大きなこえで話さないでください。",
-    "en": "Please do not speak in a loud voice."
-   },
-   {
-    "jp": "ここにごみをすてないでください。",
-    "en": "Please do not throw rubbish here."
-   }
-  ],
-  "〜なければなりません": [
-   {
-    "jp": "毎日学校へ行かなければなりません。",
-    "en": "I must go to school every day."
-   },
-   {
-    "jp": "六時に出なければなりません。",
-    "en": "I must leave at six."
-   }
-  ],
-  "へ": [
-   {
-    "jp": "来週、山へ行きます。",
-    "en": "I am going to the mountain next week."
-   },
-   {
-    "jp": "母は店へ出かけました。",
-    "en": "My mother went out to the shop."
-   }
-  ],
-  "や": [
-   {
-    "jp": "つくえの上に本やノートがあります。",
-    "en": "There are books and notebooks on the desk."
-   },
-   {
-    "jp": "店で魚や花を買いました。",
-    "en": "I bought fish and flowers at the shop."
-   }
-  ],
-  "か": [
-   {
-    "jp": "あなたは学生ですか。",
-    "en": "Are you a student?"
-   },
-   {
-    "jp": "おちゃかコーヒーを飲みますか。",
-    "en": "Will you drink tea or coffee?"
-   }
-  ],
-  "ね": [
-   {
-    "jp": "今日はいい天気ですね。",
-    "en": "It is nice weather today, isn't it?"
-   },
-   {
-    "jp": "この花はきれいですね。",
-    "en": "These flowers are pretty, aren't they?"
-   }
-  ],
-  "よ": [
-   {
-    "jp": "あしたは休みですよ。",
-    "en": "Tomorrow is a holiday, you know."
-   },
-   {
-    "jp": "この店のパンはおいしいですよ。",
-    "en": "The bread at this shop is delicious, you know."
-   }
-  ],
-  "〜から": [
-   {
-    "jp": "雨がふっているから、今日は行きません。",
-    "en": "Because it is raining, I am not going today."
-   },
-   {
-    "jp": "時間がないから、いそぎましょう。",
-    "en": "Since there is no time, let's hurry."
-   }
-  ],
-  "〜ませんか": [
-   {
-    "jp": "いっしょにごはんを食べませんか。",
-    "en": "Won't you eat a meal with me?"
-   },
-   {
-    "jp": "あした、山へ行きませんか。",
-    "en": "Won't you go to the mountain tomorrow?"
-   }
-  ],
-  "〜ましょう": [
-   {
-    "jp": "いっしょに行きましょう。",
-    "en": "Let's go together."
-   },
-   {
-    "jp": "少し休みましょう。",
-    "en": "Let's rest a little."
-   }
-  ],
-  "〜ましょうか": [
-   {
-    "jp": "まどをあけましょうか。",
-    "en": "Shall I open the window?"
-   },
-   {
-    "jp": "にもつをもちましょうか。",
-    "en": "Shall I carry your luggage?"
-   }
-  ],
-  "〜があります／います": [
-   {
-    "jp": "駅の前に店があります。",
-    "en": "There is a shop in front of the station."
-   },
-   {
-    "jp": "へやに男の子がいます。",
-    "en": "There is a boy in the room."
-   }
-  ],
-  "い形容詞／な形容詞": [
-   {
-    "jp": "高い山が見えます。",
-    "en": "A tall mountain is visible."
-   },
-   {
-    "jp": "ここはしずかな店です。",
-    "en": "This is a quiet shop."
-   }
-  ],
-  "〜くて／〜で": [
-   {
-    "jp": "このパンは安くておいしいです。",
-    "en": "This bread is cheap and delicious."
-   },
-   {
-    "jp": "この山は高くてきれいです。",
-    "en": "This mountain is tall and beautiful."
-   }
-  ],
-  "〜くなる／〜になる": [
-   {
-    "jp": "子どもは大きくなりました。",
-    "en": "The child has grown big."
-   },
-   {
-    "jp": "友だちは日本語の先生になりました。",
-    "en": "My friend became a Japanese teacher."
-   }
-  ],
-  "〜より〜のほうが": [
-   {
-    "jp": "電車より車のほうがはやいです。",
-    "en": "A car is faster than a train."
-   },
-   {
-    "jp": "魚よりにくのほうがすきです。",
-    "en": "I like meat more than fish."
-   }
-  ],
-  "〜で〜がいちばん": [
-   {
-    "jp": "日本でこの山がいちばん高いです。",
-    "en": "This mountain is the tallest in Japan."
-   },
-   {
-    "jp": "この店でこのパンがいちばん安いです。",
-    "en": "This bread is the cheapest in this shop."
-   }
-  ],
-  "〜ほうがいいです": [
-   {
-    "jp": "はやく休んだほうがいいです。",
-    "en": "You had better rest early."
-   },
-   {
-    "jp": "雨だから、行かないほうがいいです。",
-    "en": "Since it is raining, you had better not go."
-   }
-  ],
-  "〜なくてもいいです": [
-   {
-    "jp": "あしたは来なくてもいいです。",
-    "en": "You do not have to come tomorrow."
-   },
-   {
-    "jp": "お金ははらわなくてもいいです。",
-    "en": "You do not have to pay."
-   }
-  ],
-  "〜てから": [
-   {
-    "jp": "ごはんを食べてから、店へ行きました。",
-    "en": "After eating, I went to the shop."
-   },
-   {
-    "jp": "手をあらってから、食べてください。",
-    "en": "Please eat after washing your hands."
-   }
-  ],
-  "〜まえに": [
-   {
-    "jp": "ねるまえに、本を読みます。",
-    "en": "I read a book before sleeping."
-   },
-   {
-    "jp": "学校へ行くまえに、母と話しました。",
-    "en": "I talked with my mother before going to school."
-   }
-  ],
-  "〜あとで": [
-   {
-    "jp": "しごとのあとで、友だちに会います。",
-    "en": "I will meet a friend after work."
-   },
-   {
-    "jp": "ごはんを食べたあとで、少し休みます。",
-    "en": "I rest a little after eating."
-   }
-  ],
-  "〜とき": [
-   {
-    "jp": "学生のとき、よく山へ行きました。",
-    "en": "When I was a student, I often went to the mountains."
-   },
-   {
-    "jp": "日本へ行くとき、この本を買いました。",
-    "en": "When I went to Japan, I bought this book."
-   }
-  ]
- },
- "N4": {
-  "〜たら": [
-   {
-    "jp": "雨がふったら、家にいます。",
-    "en": "If it rains, I will stay at home."
-   },
-   {
-    "jp": "駅に着いたら、電話してください。",
-    "en": "When you arrive at the station, please call me."
-   }
-  ],
-  "〜ば": [
-   {
-    "jp": "時間があれば、映画を見に行きます。",
-    "en": "If I have time, I will go and see a movie."
-   },
-   {
-    "jp": "安ければ、この本を買います。",
-    "en": "If it is cheap, I will buy this book."
-   }
-  ],
-  "〜なら": [
-   {
-    "jp": "旅行に行くなら、この本がやくに立ちます。",
-    "en": "If you are going travelling, this book will be useful."
-   },
-   {
-    "jp": "犬がすきなら、うちに来てください。",
-    "en": "If you like dogs, please come to my house."
-   }
-  ],
-  "〜ので": [
-   {
-    "jp": "あたまがいたいので、今日は休みます。",
-    "en": "Because I have a headache, I will rest today."
-   },
-   {
-    "jp": "お金がないので、旅行に行きません。",
-    "en": "Because I have no money, I am not going travelling."
-   }
-  ],
-  "〜のに": [
-   {
-    "jp": "たくさん勉強したのに、答えをまちがえました。",
-    "en": "Even though I studied a lot, I got the answer wrong."
-   },
-   {
-    "jp": "春なのに、まださむいです。",
-    "en": "Even though it is spring, it is still cold."
-   }
-  ],
-  "〜てあげる／てくれる／てもらう": [
-   {
-    "jp": "友だちがにもつを持ってくれました。",
-    "en": "My friend carried my luggage for me."
-   },
-   {
-    "jp": "弟に日本語を教えてあげました。",
-    "en": "I taught my younger brother Japanese."
-   }
-  ],
-  "〜そうです": [
-   {
-    "jp": "この料理はおいしそうです。",
-    "en": "This dish looks delicious."
-   },
-   {
-    "jp": "今にも雨がふりそうです。",
-    "en": "It looks like it will rain at any moment."
-   }
-  ],
-  "〜ようです": [
-   {
-    "jp": "父は元気になったようです。",
-    "en": "It seems my father has got better."
-   },
-   {
-    "jp": "だれか来たようです。",
-    "en": "It seems that someone has come."
-   }
-  ],
-  "使役形 〜させる": [
-   {
-    "jp": "母は妹に野さいを食べさせました。",
-    "en": "My mother made my younger sister eat vegetables."
-   },
-   {
-    "jp": "先生は学生に本を読ませました。",
-    "en": "The teacher had the students read a book."
-   }
-  ],
-  "受身形 〜られる": [
-   {
-    "jp": "先生に名前をよばれました。",
-    "en": "I was called by name by the teacher."
-   },
-   {
-    "jp": "この歌は世界中で歌われています。",
-    "en": "This song is sung all over the world."
-   }
-  ],
-  "〜てしまう": [
-   {
-    "jp": "大切な物をなくしてしまいました。",
-    "en": "I have lost something important."
-   },
-   {
-    "jp": "その本はもう読んでしまいました。",
-    "en": "I have already finished reading that book."
-   }
-  ],
-  "〜ておく": [
-   {
-    "jp": "旅行の前にきっぷを買っておきます。",
-    "en": "I will buy the ticket in advance before the trip."
-   },
-   {
-    "jp": "パンを買っておきました。",
-    "en": "I bought bread in advance."
-   }
-  ],
-  "〜ことがある": [
-   {
-    "jp": "北海道へ行ったことがあります。",
-    "en": "I have been to Hokkaido before."
-   },
-   {
-    "jp": "その映画は見たことがありません。",
-    "en": "I have never seen that film."
-   }
-  ],
-  "〜ようになる": [
-   {
-    "jp": "漢字が読めるようになりました。",
-    "en": "I have become able to read kanji."
-   },
-   {
-    "jp": "朝早く起きるようになりました。",
-    "en": "I have come to get up early in the morning."
-   }
-  ],
-  "〜ことにする": [
-   {
-    "jp": "毎朝走ることにしました。",
-    "en": "I have decided to run every morning."
-   },
-   {
-    "jp": "おさけは飲まないことにしています。",
-    "en": "I make it a rule not to drink alcohol."
-   }
-  ],
-  "〜つもりです": [
-   {
-    "jp": "来年、日本へ行くつもりです。",
-    "en": "I intend to go to Japan next year."
-   },
-   {
-    "jp": "その仕事はやめるつもりです。",
-    "en": "I intend to quit that job."
-   }
-  ],
-  "〜という": [
-   {
-    "jp": "山田という人が来ました。",
-    "en": "A person called Yamada came."
-   },
-   {
-    "jp": "さくらという店に行きました。",
-    "en": "I went to a shop called Sakura."
-   }
-  ],
-  "〜はずです": [
-   {
-    "jp": "兄は今日来るはずです。",
-    "en": "My older brother is supposed to come today."
-   },
-   {
-    "jp": "この時間なら、店は開いているはずです。",
-    "en": "At this hour, the shop should be open."
-   }
-  ],
-  "〜かもしれません": [
-   {
-    "jp": "あしたはゆきがふるかもしれません。",
-    "en": "It might snow tomorrow."
-   },
-   {
-    "jp": "姉はもう帰ったかもしれません。",
-    "en": "My older sister might have already gone home."
-   }
-  ],
-  "〜まま": [
-   {
-    "jp": "くつをはいたまま、家に入らないでください。",
-    "en": "Please do not enter the house with your shoes on."
-   },
-   {
-    "jp": "電気をつけたままねてしまいました。",
-    "en": "I fell asleep with the light left on."
-   }
-  ],
-  "可能形 〜(ら)れる": [
-   {
-    "jp": "私は漢字が書けます。",
-    "en": "I can write kanji."
-   },
-   {
-    "jp": "この魚は生で食べられます。",
-    "en": "This fish can be eaten raw."
-   }
-  ],
-  "意向形 〜(よ)う": [
-   {
-    "jp": "そろそろ帰ろう。",
-    "en": "Let's head home soon."
-   },
-   {
-    "jp": "今日は早くねよう。",
-    "en": "I think I'll go to bed early today."
-   }
-  ],
-  "〜ようと思う": [
-   {
-    "jp": "来週から運動しようと思います。",
-    "en": "I am thinking of exercising from next week."
-   },
-   {
-    "jp": "弟に日本語を教えようと思っています。",
-    "en": "I am thinking of teaching my younger brother Japanese."
-   }
-  ],
-  "〜と": [
-   {
-    "jp": "春になると、さくらがさきます。",
-    "en": "When spring comes, the cherry blossoms bloom."
-   },
-   {
-    "jp": "このボタンをおすと、きっぷが出ます。",
-    "en": "If you press this button, a ticket comes out."
-   }
-  ],
-  "〜ながら": [
-   {
-    "jp": "音楽を聞きながら勉強します。",
-    "en": "I study while listening to music."
-   },
-   {
-    "jp": "歩きながら話しましょう。",
-    "en": "Let's talk while walking."
-   }
-  ],
-  "〜たり〜たり": [
-   {
-    "jp": "日曜日は本を読んだり音楽を聞いたりします。",
-    "en": "On Sundays I read books and listen to music."
-   },
-   {
-    "jp": "休みの日はそうじしたりせんたくしたりしました。",
-    "en": "On my day off I cleaned and did the laundry."
-   }
-  ],
-  "〜すぎる": [
-   {
-    "jp": "夕べは飲みすぎました。",
-    "en": "I drank too much last night."
-   },
-   {
-    "jp": "この問題はむずかしすぎます。",
-    "en": "This problem is too difficult."
-   }
-  ],
-  "〜やすい／〜にくい": [
-   {
-    "jp": "この本は字が大きくて読みやすいです。",
-    "en": "This book has large characters and is easy to read."
-   },
-   {
-    "jp": "この漢字はおぼえにくいです。",
-    "en": "This kanji is hard to remember."
-   }
-  ],
-  "〜はじめる／〜おわる／〜つづける": [
-   {
-    "jp": "三時から雨がふりはじめました。",
-    "en": "It started raining from three o'clock."
-   },
-   {
-    "jp": "兄は一時間も歌いつづけました。",
-    "en": "My older brother kept singing for a whole hour."
-   }
-  ],
-  "〜ていく／〜てくる": [
-   {
-    "jp": "これからさむくなっていくでしょう。",
-    "en": "It will probably keep getting colder from now on."
-   },
-   {
-    "jp": "パンを買ってくる。",
-    "en": "I will go and buy some bread."
-   }
-  ],
-  "〜てみる": [
-   {
-    "jp": "この服を着てみてもいいですか。",
-    "en": "May I try wearing these clothes?"
-   },
-   {
-    "jp": "新しい店で食べてみました。",
-    "en": "I tried eating at the new shop."
-   }
-  ],
-  "〜てある": [
-   {
-    "jp": "かべに地図がはってあります。",
-    "en": "A map is put up on the wall."
-   },
-   {
-    "jp": "お茶が用意してあります。",
-    "en": "The tea has been prepared."
-   }
-  ],
-  "〜らしい": [
-   {
-    "jp": "となりの家に新しい人が来たらしいです。",
-    "en": "Apparently a new person has come to the house next door."
-   },
-   {
-    "jp": "あの店の魚は安いらしいです。",
-    "en": "I gather the fish at that shop is cheap."
-   }
-  ],
-  "〜みたいだ": [
-   {
-    "jp": "あの人は先生みたいだ。",
-    "en": "That person seems to be a teacher."
-   },
-   {
-    "jp": "外はもうくらいみたいだ。",
-    "en": "It seems it is already dark outside."
-   }
-  ],
-  "自動詞／他動詞": [
-   {
-    "jp": "風でドアが開きました。",
-    "en": "The door opened in the wind."
-   },
-   {
-    "jp": "私はゆっくりドアを開けました。",
-    "en": "I opened the door slowly."
-   }
-  ],
-  "〜ことになる": [
-   {
-    "jp": "来月から東京ではたらくことになりました。",
-    "en": "It has been decided that I will work in Tokyo from next month."
-   },
-   {
-    "jp": "旅行は来週になることになりました。",
-    "en": "It has been decided that the trip will be next week."
-   }
-  ],
-  "〜ようにする": [
-   {
-    "jp": "毎日野さいを食べるようにしています。",
-    "en": "I make a point of eating vegetables every day."
-   },
-   {
-    "jp": "夜おそくまで起きないようにします。",
-    "en": "I will see to it that I do not stay up late."
-   }
-  ],
-  "〜かどうか": [
-   {
-    "jp": "兄が来るかどうか分かりません。",
-    "en": "I do not know whether my older brother is coming."
-   },
-   {
-    "jp": "この答えが正しいかどうか教えてください。",
-    "en": "Please tell me whether this answer is correct."
-   }
-  ],
-  "〜しか〜ない": [
-   {
-    "jp": "さいふに百円しかありません。",
-    "en": "I have only a hundred yen in my wallet."
-   },
-   {
-    "jp": "日本語しか話せません。",
-    "en": "I can only speak Japanese."
-   }
-  ],
-  "〜ても": [
-   {
-    "jp": "雨がふっても、私は歩いて行きます。",
-    "en": "Even if it rains, I will walk there."
-   },
-   {
-    "jp": "いくら考えても分かりません。",
-    "en": "No matter how much I think, I do not understand."
-   }
-  ],
-  "お〜になる／お〜する": [
-   {
-    "jp": "先生はもうお帰りになりました。",
-    "en": "The teacher has already gone home."
-   },
-   {
-    "jp": "私がにもつをお持ちします。",
-    "en": "I will carry your luggage."
-   }
-  ]
- },
- "N3": {
-  "〜ばかり": [
-   {
-    "jp": "今、家に帰ったばかりです。",
-    "en": "I have just got home now."
-   },
-   {
-    "jp": "さっき昼ご飯を食べたばかりです。",
-    "en": "I ate lunch just a moment ago."
-   }
-  ],
-  "〜おかげで": [
-   {
-    "jp": "先生のおかげで、試験に合格できました。",
-    "en": "Thanks to my teacher, I was able to pass the exam."
-   },
-   {
-    "jp": "雨のおかげで、庭の花が元気になりました。",
-    "en": "Thanks to the rain, the flowers in the garden have perked up."
-   }
-  ],
-  "〜せいで": [
-   {
-    "jp": "雨のせいで、試合は中止になりました。",
-    "en": "Because of the rain, the match was cancelled."
-   },
-   {
-    "jp": "寝不足のせいで、頭が痛いです。",
-    "en": "Because of lack of sleep, my head hurts."
-   }
-  ],
-  "〜わけではない": [
-   {
-    "jp": "お金があれば幸せになるわけではない。",
-    "en": "Having money does not necessarily mean you will be happy."
-   },
-   {
-    "jp": "彼が悪いと言っているわけではない。",
-    "en": "I am not saying that he is at fault."
-   }
-  ],
-  "〜わけがない": [
-   {
-    "jp": "こんな難しい問題が子どもに解けるわけがない。",
-    "en": "There is no way a child could solve such a difficult problem."
-   },
-   {
-    "jp": "あの人がうそをつくわけがない。",
-    "en": "There is no way that person would tell a lie."
-   }
-  ],
-  "〜に違いない": [
-   {
-    "jp": "電気が消えているから、留守に違いない。",
-    "en": "The lights are off, so they must be out."
-   },
-   {
-    "jp": "この字を見れば、彼が書いたに違いない。",
-    "en": "Looking at this handwriting, he must have written it."
-   }
-  ],
-  "〜べきだ": [
-   {
-    "jp": "約束は守るべきだ。",
-    "en": "You ought to keep your promises."
-   },
-   {
-    "jp": "もっと早く相談するべきでした。",
-    "en": "I should have consulted you sooner."
-   }
-  ],
-  "〜ようとする": [
-   {
-    "jp": "家を出ようとしたとき、電話が鳴った。",
-    "en": "Just as I was about to leave the house, the phone rang."
-   },
-   {
-    "jp": "赤ちゃんは何度も起きようとしています。",
-    "en": "The baby is trying to get up again and again."
-   }
-  ],
-  "〜たとたんに": [
-   {
-    "jp": "電気を消したとたんに、部屋が真っ暗になった。",
-    "en": "The moment I turned off the light, the room went pitch dark."
-   },
-   {
-    "jp": "彼は席に着いたとたんに眠ってしまった。",
-    "en": "The moment he sat down, he fell asleep."
-   }
-  ],
-  "〜に対して": [
-   {
-    "jp": "先生に対して失礼な口をきいてはいけない。",
-    "en": "You must not speak rudely towards a teacher."
-   },
-   {
-    "jp": "この問題に対して、いくつかの意見が出ました。",
-    "en": "Several opinions were raised in regard to this problem."
-   }
-  ],
-  "〜として": [
-   {
-    "jp": "彼は医者として世界中で働いてきた。",
-    "en": "He has worked all over the world as a doctor."
-   },
-   {
-    "jp": "この建物は今、図書館として使われている。",
-    "en": "This building is now used as a library."
-   }
-  ],
-  "〜に関して": [
-   {
-    "jp": "この問題に関して、長い説明があった。",
-    "en": "There was a long explanation regarding this problem."
-   },
-   {
-    "jp": "その件に関しては、まだ何も決まっていない。",
-    "en": "Regarding that matter, nothing has been decided yet."
-   }
-  ],
-  "〜通りに": [
-   {
-    "jp": "説明書の通りに組み立ててください。",
-    "en": "Please assemble it according to the instructions."
-   },
-   {
-    "jp": "先生に言われた通りにやってみました。",
-    "en": "I tried doing it just as the teacher told me."
-   }
-  ],
-  "〜たびに": [
-   {
-    "jp": "この歌を聞くたびに、母を思い出す。",
-    "en": "Every time I hear this song, I remember my mother."
-   },
-   {
-    "jp": "彼は会うたびに背が高くなっている。",
-    "en": "He is taller every time I meet him."
-   }
-  ],
-  "〜末に": [
-   {
-    "jp": "長い間考えた末に、留学を決めました。",
-    "en": "After thinking about it for a long time, I decided to study abroad."
-   },
-   {
-    "jp": "何度も話し合った末に、計画は中止になった。",
-    "en": "After discussing it many times, the plan was called off in the end."
-   }
-  ],
-  "〜一方で": [
-   {
-    "jp": "兄は仕事が忙しい一方で、家族との時間も大切にしている。",
-    "en": "While my brother is busy with work, he also values time with his family."
-   },
-   {
-    "jp": "この町は便利な一方で、部屋の値段がとても高い。",
-    "en": "This town is convenient, but on the other hand room prices are very high."
-   }
-  ],
-  "〜ものの": [
-   {
-    "jp": "大学は出たものの、まだ仕事が見つからない。",
-    "en": "Although I graduated from university, I still cannot find a job."
-   },
-   {
-    "jp": "約束はしたものの、行けるかどうか分からない。",
-    "en": "Although I promised, I do not know whether I can go."
-   }
-  ],
-  "〜おそれがある": [
-   {
-    "jp": "台風が近づいているので、電車が止まるおそれがある。",
-    "en": "A typhoon is approaching, so there is a risk the trains will stop."
-   },
-   {
-    "jp": "このままでは川の水があふれるおそれがあります。",
-    "en": "At this rate there is a danger that the river will overflow."
-   }
-  ],
-  "〜つつある": [
-   {
-    "jp": "この町の人口は少しずつ変わりつつある。",
-    "en": "The population of this town is gradually changing."
-   },
-   {
-    "jp": "彼の病気は少しずつ良くなりつつある。",
-    "en": "His illness is gradually getting better."
-   }
-  ],
-  "〜次第だ": [
-   {
-    "jp": "向こうに着き次第、電話します。",
-    "en": "I will call you as soon as I arrive over there."
-   },
-   {
-    "jp": "試合をするかどうかは天気次第だ。",
-    "en": "Whether we play the match depends on the weather."
-   }
-  ],
-  "使役受身形 〜させられる": [
-   {
-    "jp": "子どものころ、毎日ピアノを習わせられた。",
-    "en": "As a child, I was made to learn the piano every day."
-   },
-   {
-    "jp": "父にきらいな野さいを食べさせられました。",
-    "en": "I was made by my father to eat vegetables I dislike."
-   }
-  ],
-  "〜そうだ（伝聞）": [
-   {
-    "jp": "天気予報によると、明日は雪が降るそうだ。",
-    "en": "According to the forecast, they say it will snow tomorrow."
-   },
-   {
-    "jp": "彼は来月、国へ帰るそうだ。",
-    "en": "I hear that he is going back to his country next month."
-   }
-  ],
-  "〜について": [
-   {
-    "jp": "日本の文化について研究しています。",
-    "en": "I am doing research about Japanese culture."
-   },
-   {
-    "jp": "その事件についてよく調べてください。",
-    "en": "Please look into that incident thoroughly."
-   }
-  ],
-  "〜によって": [
-   {
-    "jp": "この家は百年前に木によって作られた。",
-    "en": "This house was made of wood a hundred years ago."
-   },
-   {
-    "jp": "習慣は国によって違います。",
-    "en": "Customs differ depending on the country."
-   }
-  ],
-  "〜において": [
-   {
-    "jp": "会議は大きな部屋において行われます。",
-    "en": "The meeting will be held in the large room."
-   },
-   {
-    "jp": "この町において、その話を知らない人はいない。",
-    "en": "In this town, there is no one who does not know that story."
-   }
-  ],
-  "〜にとって": [
-   {
-    "jp": "この写真は私にとって大切な思い出です。",
-    "en": "This photograph is a precious memory for me."
-   },
-   {
-    "jp": "子どもにとって遊びは勉強と同じくらい大切だ。",
-    "en": "For children, play is as important as study."
-   }
-  ],
-  "〜につれて": [
-   {
-    "jp": "年をとるにつれて、体力が落ちてきた。",
-    "en": "As I have got older, my physical strength has declined."
-   },
-   {
-    "jp": "山を登るにつれて、空気が冷たくなった。",
-    "en": "As we climbed the mountain, the air grew colder."
-   }
-  ],
-  "〜にしたがって": [
-   {
-    "jp": "係員の指示にしたがって、外へ出てください。",
-    "en": "Please go outside in accordance with the staff's instructions."
-   },
-   {
-    "jp": "時間がたつにしたがって、痛みは少なくなった。",
-    "en": "As time passed, the pain lessened."
-   }
-  ],
-  "〜とともに": [
-   {
-    "jp": "家族とともに新しい町へ引っ越しました。",
-    "en": "I moved to a new town together with my family."
-   },
-   {
-    "jp": "町が大きくなるとともに、生活も変わった。",
-    "en": "As the town grew, life changed along with it."
-   }
-  ],
-  "〜うちに": [
-   {
-    "jp": "熱いうちに食べてください。",
-    "en": "Please eat it while it is still hot."
-   },
-   {
-    "jp": "明るいうちに家へ帰りましょう。",
-    "en": "Let's go home while it is still light."
-   }
-  ],
-  "〜最中に": [
-   {
-    "jp": "食事の最中に電話が鳴った。",
-    "en": "The phone rang right in the middle of the meal."
-   },
-   {
-    "jp": "会議の最中に電話が鳴った。",
-    "en": "The phone rang right in the middle of the meeting."
-   }
-  ],
-  "〜際に": [
-   {
-    "jp": "お降りの際に、足元にご注意ください。",
-    "en": "When getting off, please watch your step."
-   },
-   {
-    "jp": "申し込みの際には、この用紙が必要です。",
-    "en": "This form is required when applying."
-   }
-  ],
-  "〜くせに": [
-   {
-    "jp": "彼は何も知らないくせに、えらそうに話す。",
-    "en": "He talks as if he were important, even though he knows nothing."
-   },
-   {
-    "jp": "約束したくせに、また忘れたのですか。",
-    "en": "You promised, and yet you forgot again?"
-   }
-  ],
-  "〜わりに": [
-   {
-    "jp": "この店は値段のわりに味がいい。",
-    "en": "This restaurant tastes good considering the price."
-   },
-   {
-    "jp": "彼は年のわりに若く見える。",
-    "en": "He looks young for his age."
-   }
-  ],
-  "〜だらけ": [
-   {
-    "jp": "子どもたちは土だらけになって帰ってきた。",
-    "en": "The children came home covered in dirt."
-   },
-   {
-    "jp": "この作文は間違いだらけです。",
-    "en": "This composition is full of mistakes."
-   }
-  ],
-  "〜がち": [
-   {
-    "jp": "冬は病気になりがちだ。",
-    "en": "I tend to fall ill in winter."
-   },
-   {
-    "jp": "彼は最近、会議を休みがちです。",
-    "en": "He has been prone to missing meetings recently."
-   }
-  ],
-  "〜っぽい": [
-   {
-    "jp": "この料理は水っぽくて味がしない。",
-    "en": "This dish is watery and has no taste."
-   },
-   {
-    "jp": "彼は忘れっぽくて、いつもかぎをなくす。",
-    "en": "He is forgetful and always loses his keys."
-   }
-  ],
-  "〜ば〜ほど": [
-   {
-    "jp": "日本語は勉強すればするほど面白くなる。",
-    "en": "The more you study Japanese, the more interesting it becomes."
-   },
-   {
-    "jp": "値段は安ければ安いほどいい。",
-    "en": "The cheaper the price, the better."
-   }
-  ],
-  "〜さえ": [
-   {
-    "jp": "忙しくて、食事をする時間さえない。",
-    "en": "I am so busy that I do not even have time to eat."
-   },
-   {
-    "jp": "その漢字は子どもさえ読める。",
-    "en": "Even a child can read that kanji."
-   }
-  ],
-  "〜しかない": [
-   {
-    "jp": "終電がないから、歩いて帰るしかない。",
-    "en": "There is no last train, so there is nothing to do but walk home."
-   },
-   {
-    "jp": "こうなったら、みんなでやるしかない。",
-    "en": "Now that it has come to this, we have no choice but to all do it."
-   }
-  ],
-  "〜わけだ": [
-   {
-    "jp": "十年も住んでいたのか。日本語が上手なわけだ。",
-    "en": "So you lived there for ten years. That's why your Japanese is good."
-   },
-   {
-    "jp": "窓が開いている。寒いわけだ。",
-    "en": "The window is open. No wonder it is cold."
-   }
-  ]
- },
- "N2": {
-  "〜にもかかわらず": [
-   {
-    "jp": "大雨にもかかわらず、試合は行われた。",
-    "en": "Despite the heavy rain, the match was held."
-   },
-   {
-    "jp": "何度も注意したにもかかわらず、彼は同じ失敗をした。",
-    "en": "In spite of being warned many times, he made the same mistake."
-   }
-  ],
-  "〜ざるを得ない": [
-   {
-    "jp": "台風のため、旅行を中止せざるを得なかった。",
-    "en": "Because of the typhoon, we had no choice but to cancel the trip."
-   },
-   {
-    "jp": "この数字を見れば、失敗を認めざるを得ない。",
-    "en": "Looking at these figures, one cannot but admit the failure."
-   }
-  ],
-  "〜つつも": [
-   {
-    "jp": "体に悪いと知りつつも、たばこをやめられない。",
-    "en": "Even while knowing it is bad for my health, I cannot quit smoking."
-   },
-   {
-    "jp": "悪いと思いつつも、まだあやまっていない。",
-    "en": "Although I feel bad about it, I still have not apologised."
-   }
-  ],
-  "〜あげくに": [
-   {
-    "jp": "長い間迷ったあげくに、彼は会社を辞めた。",
-    "en": "After hesitating for a long time, he ended up quitting the company."
-   },
-   {
-    "jp": "何時間も話し合ったあげくに、答えは出なかった。",
-    "en": "After discussing for hours, in the end no answer emerged."
-   }
-  ],
-  "〜に伴って": [
-   {
-    "jp": "人口の増加に伴って、住宅の問題も大きくなった。",
-    "en": "Along with the increase in population, the housing problem also grew."
-   },
-   {
-    "jp": "気温が上がるに伴って、雪が解け始めた。",
-    "en": "As the temperature rose, the snow began to melt."
-   }
-  ],
-  "〜に基づいて": [
-   {
-    "jp": "この映画は実際の事件に基づいて作られた。",
-    "en": "This film was made based on a real incident."
-   },
-   {
-    "jp": "調査に基づいて、計画を立て直した。",
-    "en": "We rebuilt the plan based on the survey."
-   }
-  ],
-  "〜からといって": [
-   {
-    "jp": "値段が高いからといって、品質がいいとは限らない。",
-    "en": "Just because the price is high does not mean the quality is good."
-   },
-   {
-    "jp": "若いからといって、むりをしてはいけない。",
-    "en": "Just because you are young does not mean you should overdo it."
-   }
-  ],
-  "〜どころか": [
-   {
-    "jp": "彼は漢字どころか、ひらがなも読めない。",
-    "en": "Far from kanji, he cannot even read hiragana."
-   },
-   {
-    "jp": "雨は止むどころか、ますます強くなった。",
-    "en": "Far from stopping, the rain grew even stronger."
-   }
-  ],
-  "〜にすぎない": [
-   {
-    "jp": "私が知っているのは、ほんの一部にすぎない。",
-    "en": "What I know is nothing more than a small part."
-   },
-   {
-    "jp": "それはただの言いのがれにすぎない。",
-    "en": "That is merely an evasion."
-   }
-  ],
-  "〜を問わず": [
-   {
-    "jp": "この仕事は経験を問わず、だれでも申し込める。",
-    "en": "Regardless of experience, anyone can apply for this job."
-   },
-   {
-    "jp": "昼夜を問わず、工場は動いている。",
-    "en": "The factory runs regardless of day or night."
-   }
-  ],
-  "〜はもとより": [
-   {
-    "jp": "彼は英語はもとより、中国語も話せる。",
-    "en": "He can speak Chinese, not to mention English."
-   },
-   {
-    "jp": "この店は味はもとより、値段も安い。",
-    "en": "This restaurant is cheap, not to mention the taste."
-   }
-  ],
-  "〜ものだ": [
-   {
-    "jp": "子どものころ、よくこの川で泳いだものだ。",
-    "en": "When I was a child, I used to swim in this river a lot."
-   },
-   {
-    "jp": "学生時代はよく先生に注意されたものだ。",
-    "en": "In my student days I used to get warned by teachers a lot."
-   }
-  ],
-  "〜てからでないと": [
-   {
-    "jp": "よく調べてからでないと、返事はできません。",
-    "en": "I cannot answer unless I look into it properly first."
-   },
-   {
-    "jp": "係の人に聞いてからでないと、中には入れません。",
-    "en": "You cannot go inside until after you ask the attendant."
-   }
-  ],
-  "〜がたい": [
-   {
-    "jp": "彼が犯人だとは信じがたい。",
-    "en": "It is hard to believe that he is the culprit."
-   },
-   {
-    "jp": "あの日のことは忘れがたい思い出だ。",
-    "en": "What happened that day is a memory hard to forget."
-   }
-  ],
-  "〜かねない": [
-   {
-    "jp": "そんな運転をしていては、大けがをしかねない。",
-    "en": "Driving like that could well cause a serious injury."
-   },
-   {
-    "jp": "この問題を放っておくと、大きな損害になりかねない。",
-    "en": "If we leave this problem alone, it might result in serious damage."
-   }
-  ],
-  "〜きり": [
-   {
-    "jp": "彼とは去年会ったきり、一度も会っていない。",
-    "en": "I met him last year and have not seen him once since."
-   },
-   {
-    "jp": "父は朝出かけたきり、まだ帰らない。",
-    "en": "My father went out in the morning and still has not come back."
-   }
-  ],
-  "〜ぬきで": [
-   {
-    "jp": "朝食ぬきで学校へ行くのは体に悪い。",
-    "en": "Going to school without breakfast is bad for your health."
-   },
-   {
-    "jp": "今日はかたい話ぬきで楽しみましょう。",
-    "en": "Let us enjoy ourselves today without the formal talk."
-   }
-  ],
-  "〜からには": [
-   {
-    "jp": "引き受けたからには、最後までやり通します。",
-    "en": "Now that I have taken it on, I will see it through to the end."
-   },
-   {
-    "jp": "約束したからには、守らなければならない。",
-    "en": "Since you have made a promise, you must keep it."
-   }
-  ],
-  "〜ずにはいられない": [
-   {
-    "jp": "あの映画を見ると、なかずにはいられない。",
-    "en": "When I watch that film, I cannot help but cry."
-   },
-   {
-    "jp": "彼の話を聞いて、笑わずにはいられなかった。",
-    "en": "Hearing his story, I could not help laughing."
-   }
-  ],
-  "〜ばかりか": [
-   {
-    "jp": "彼は日本語ばかりか、中国語も話せる。",
-    "en": "He can speak not only Japanese but Chinese as well."
-   },
-   {
-    "jp": "この部屋はせまいばかりか、暗くて寒い。",
-    "en": "This room is not only cramped but dark and cold."
-   }
-  ],
-  "〜ばかりに": [
-   {
-    "jp": "一言余計なことを言ったばかりに、彼を怒らせてしまった。",
-    "en": "Simply because I said one unnecessary word, I made him angry."
-   },
-   {
-    "jp": "道を間違えたばかりに、電車に乗り遅れた。",
-    "en": "Just because I took the wrong road, I missed the train."
-   }
-  ],
-  "〜のみならず": [
-   {
-    "jp": "この薬は大人のみならず、子どもにも効く。",
-    "en": "This medicine works not only on adults but on children too."
-   },
-   {
-    "jp": "彼は研究のみならず、教育にも力を入れている。",
-    "en": "He puts effort not only into research but into education as well."
-   }
-  ],
-  "〜に応じて": [
-   {
-    "jp": "料金は年齢に応じて変わります。",
-    "en": "The fee changes according to age."
-   },
-   {
-    "jp": "客の希望に応じて、料理を作ります。",
-    "en": "We prepare dishes in response to the customer wishes."
-   }
-  ],
-  "〜にかかわらず": [
-   {
-    "jp": "天候にかかわらず、大会は開かれる。",
-    "en": "Regardless of the weather, the tournament will be held."
-   },
-   {
-    "jp": "経験のあるなしにかかわらず、申し込めます。",
-    "en": "You may apply irrespective of whether you have experience."
-   }
-  ],
-  "〜に限らず": [
-   {
-    "jp": "この問題は日本に限らず、世界中で起きている。",
-    "en": "This problem occurs not only in Japan but all over the world."
-   },
-   {
-    "jp": "土曜日に限らず、いつでも開いています。",
-    "en": "It is open any time, not just on Saturdays."
-   }
-  ],
-  "〜にかけては": [
-   {
-    "jp": "走ることにかけては、彼にかなう者はいない。",
-    "en": "When it comes to running, no one can beat him."
-   },
-   {
-    "jp": "料理の早さにかけては自信があります。",
-    "en": "When it comes to speed of cooking, I am confident."
-   }
-  ],
-  "〜に加えて": [
-   {
-    "jp": "強い風に加えて、雨まで降り出した。",
-    "en": "In addition to the strong wind, it even started to rain."
-   },
-   {
-    "jp": "彼は実力に加えて、運にも助けられた。",
-    "en": "In addition to his ability, he was helped by luck as well."
-   }
-  ],
-  "〜に先立って": [
-   {
-    "jp": "開会に先立って、館長があいさつをした。",
-    "en": "Prior to the opening, the director gave a greeting."
-   },
-   {
-    "jp": "旅行に先立って、必要な物を買いそろえた。",
-    "en": "Ahead of the trip, I bought all the necessary things."
-   }
-  ],
-  "〜に反して": [
-   {
-    "jp": "予想に反して、試験はやさしかった。",
-    "en": "Contrary to expectations, the exam was easy."
-   },
-   {
-    "jp": "親の願いに反して、彼は音楽の道を選んだ。",
-    "en": "Contrary to his parents wishes, he chose the path of music."
-   }
-  ],
-  "〜にほかならない": [
-   {
-    "jp": "彼が勝ったのは、努力のたまものにほかならない。",
-    "en": "His victory is nothing other than the fruit of his effort."
-   },
-   {
-    "jp": "この失敗は準備不足にほかならない。",
-    "en": "This failure is nothing other than a lack of preparation."
-   }
-  ],
-  "〜をめぐって": [
-   {
-    "jp": "土地の使い方をめぐって、住民の意見が分かれた。",
-    "en": "Opinions among residents were divided over how to use the land."
-   },
-   {
-    "jp": "その発言をめぐって、大きな議論が起きた。",
-    "en": "A big argument arose surrounding that remark."
-   }
-  ],
-  "〜を通じて": [
-   {
-    "jp": "友人を通じて、その会社を知りました。",
-    "en": "I learned about that company through a friend."
-   },
-   {
-    "jp": "この地方は一年を通じて雨が多い。",
-    "en": "This region has a lot of rain throughout the year."
-   }
-  ],
-  "〜をはじめ": [
-   {
-    "jp": "校長先生をはじめ、多くの先生が集まった。",
-    "en": "Starting with the principal, many teachers gathered."
-   },
-   {
-    "jp": "東京をはじめ、大きな町では部屋代が高い。",
-    "en": "In big cities, starting with Tokyo, room costs are high."
-   }
-  ],
-  "〜をもとに": [
-   {
-    "jp": "この物語は古い伝説をもとに書かれた。",
-    "en": "This story was written on the basis of an old legend."
-   },
-   {
-    "jp": "調べた資料をもとに、発表の準備をした。",
-    "en": "I prepared my presentation working from the material I had researched."
-   }
-  ],
-  "〜得る／〜得ない": [
-   {
-    "jp": "そんなことは十分あり得る話だ。",
-    "en": "That is something that could quite possibly happen."
-   },
-   {
-    "jp": "彼がうそをつくとは考え得ない。",
-    "en": "It is unthinkable that he would tell a lie."
-   }
-  ],
-  "〜かねる": [
-   {
-    "jp": "その件については、お答えしかねます。",
-    "en": "I am unable to answer regarding that matter."
-   },
-   {
-    "jp": "その品は今、お売りしかねます。",
-    "en": "We are unable to sell that item at present."
-   }
-  ],
-  "〜ことなく": [
-   {
-    "jp": "彼は一度も休むことなく働き続けた。",
-    "en": "He kept working without ever taking a single break."
-   },
-   {
-    "jp": "機械は昼も夜も止まることなく動いている。",
-    "en": "The machine runs day and night without stopping."
-   }
-  ],
-  "〜ないことには": [
-   {
-    "jp": "実際に見ないことには、何とも言えない。",
-    "en": "Unless I actually see it, I cannot say anything."
-   },
-   {
-    "jp": "練習しないことには、上手にならない。",
-    "en": "Without practising, you will not get better."
-   }
-  ],
-  "〜ということだ": [
-   {
-    "jp": "彼は来月国へ帰るということだ。",
-    "en": "I hear that he is going back to his country next month."
-   },
-   {
-    "jp": "返事がないということは、断られたということだ。",
-    "en": "No reply means that we have been refused."
-   }
-  ],
-  "〜というより": [
-   {
-    "jp": "あの人はこわいというより、冷たい。",
-    "en": "That person is cold rather than frightening."
-   },
-   {
-    "jp": "これは食事というより、おやつだ。",
-    "en": "This is a snack rather than a meal."
-   }
-  ],
-  "〜わけにはいかない": [
-   {
-    "jp": "大切な会議だから、休むわけにはいかない。",
-    "en": "It is an important meeting, so I cannot very well take the day off."
-   },
-   {
-    "jp": "車で来たので、お酒を飲むわけにはいかない。",
-    "en": "I came by car, so drinking is not an option."
-   }
-  ]
- },
- "N1": {
-  "〜んばかりに": [
-   {
-    "jp": "彼は飛び上がらんばかりに喜んだ。",
-    "en": "He rejoiced as if he were about to leap into the air."
-   },
-   {
-    "jp": "彼女はあふれんばかりに涙をためていた。",
-    "en": "Her eyes were brimming as if the tears were about to overflow."
-   }
-  ],
-  "〜べからず": [
-   {
-    "jp": "この壁に落書きするべからず。",
-    "en": "No graffiti on this wall."
-   },
-   {
-    "jp": "ここに車を止めるべからず。",
-    "en": "Parking is forbidden here."
-   }
-  ],
-  "〜ゆえに": [
-   {
-    "jp": "若さゆえに、彼は大きな失敗をした。",
-    "en": "Because of his youth, he made a big mistake."
-   },
-   {
-    "jp": "貧しさゆえに、学校へ通えない子どもがいる。",
-    "en": "There are children who cannot attend school on account of poverty."
-   }
-  ],
-  "〜なくして(は)": [
-   {
-    "jp": "彼の助けなくしては、この仕事は終わらなかった。",
-    "en": "Without his help, this work would not have been finished."
-   },
-   {
-    "jp": "努力なくして成功はあり得ない。",
-    "en": "There can be no success without effort."
-   }
-  ],
-  "〜極まりない": [
-   {
-    "jp": "あの店の態度は失礼極まりない。",
-    "en": "The attitude at that shop is extremely rude."
-   },
-   {
-    "jp": "危険極まりない道を、彼は一人で歩いた。",
-    "en": "He walked alone along an extremely dangerous road."
-   }
-  ],
-  "〜きらいがある": [
-   {
-    "jp": "彼は物事を悪い方に考えるきらいがある。",
-    "en": "He tends to think of things in a negative way."
-   },
-   {
-    "jp": "この新聞は事実を大げさに書くきらいがある。",
-    "en": "This newspaper has a tendency to exaggerate the facts."
-   }
-  ],
-  "〜にたえない": [
-   {
-    "jp": "その事故の話は聞くにたえない。",
-    "en": "The account of that accident is unbearable to listen to."
-   },
-   {
-    "jp": "彼の下品な言葉は聞くにたえなかった。",
-    "en": "His vulgar words were unbearable to hear."
-   }
-  ],
-  "〜てやまない": [
-   {
-    "jp": "皆様のご成功を願ってやまない。",
-    "en": "I wish all of you success from the bottom of my heart."
-   },
-   {
-    "jp": "母は今も息子の帰りを待ってやまない。",
-    "en": "Even now my mother never stops waiting for her son to return."
-   }
-  ],
-  "〜まみれ": [
-   {
-    "jp": "子どもたちは泥まみれになって遊んでいた。",
-    "en": "The children were playing covered in mud."
-   },
-   {
-    "jp": "彼は油まみれの手で機械を直していた。",
-    "en": "He was repairing the machine with oil-covered hands."
-   }
-  ],
-  "〜だに": [
-   {
-    "jp": "そんな恐ろしいことは想像だにしなかった。",
-    "en": "I did not even imagine such a terrible thing."
-   },
-   {
-    "jp": "あの日のことは、思い出すだに恐ろしい。",
-    "en": "Even just remembering that day is frightening."
-   }
-  ],
-  "〜あっての": [
-   {
-    "jp": "お客様あっての商売だということを忘れるな。",
-    "en": "Do not forget that business exists only thanks to the customers."
-   },
-   {
-    "jp": "努力あっての成功であり、運だけではない。",
-    "en": "Success comes only thanks to effort, not luck alone."
-   }
-  ],
-  "〜なしに": [
-   {
-    "jp": "彼は何の説明もなしに会社を辞めた。",
-    "en": "He quit the company without any explanation at all."
-   },
-   {
-    "jp": "許しなしに部屋へ入ってはいけない。",
-    "en": "You must not enter the room without permission."
-   }
-  ],
-  "〜いかんによらず": [
-   {
-    "jp": "理由のいかんによらず、遅刻は認められない。",
-    "en": "Regardless of the reason, lateness is not accepted."
-   },
-   {
-    "jp": "天候のいかんによらず、大会は開かれる。",
-    "en": "Regardless of the weather, the tournament will be held."
-   }
-  ],
-  "〜をおいて": [
-   {
-    "jp": "この役を任せられるのは、彼をおいてほかにいない。",
-    "en": "There is no one but him who can be entrusted with this role."
-   },
-   {
-    "jp": "この町をおいて、これほど静かな場所はない。",
-    "en": "There is no place as quiet as this town, other than here."
-   }
-  ],
-  "〜たりとも": [
-   {
-    "jp": "一日たりとも君のことを忘れたことはない。",
-    "en": "There has not been a single day I forgot about you."
-   },
-   {
-    "jp": "一円たりともむだにはできない。",
-    "en": "We cannot waste even a single yen."
-   }
-  ],
-  "〜ないまでも": [
-   {
-    "jp": "毎日とは言わないまでも、週に一度は運動したい。",
-    "en": "If not every day, I would like to exercise once a week."
-   },
-   {
-    "jp": "完成しないまでも、ここまでは進めておきたい。",
-    "en": "Even if it is not finished, I want to get this far at least."
-   }
-  ],
-  "〜ずじまい": [
-   {
-    "jp": "結局、彼には会えずじまいだった。",
-    "en": "In the end I never did get to meet him."
-   },
-   {
-    "jp": "その本は買ったのに、読まずじまいになった。",
-    "en": "I bought that book but ended up never reading it."
-   }
-  ],
-  "〜が早いか": [
-   {
-    "jp": "彼はベルが鳴るが早いか、教室を飛び出した。",
-    "en": "No sooner had the bell rung than he dashed out of the classroom."
-   },
-   {
-    "jp": "子どもは家に着くが早いか、外へ遊びに行った。",
-    "en": "The moment the child got home, he went out to play."
-   }
-  ],
-  "〜や否や": [
-   {
-    "jp": "彼は席に着くや否や、話し始めた。",
-    "en": "No sooner had he sat down than he began to talk."
-   },
-   {
-    "jp": "その知らせを聞くや否や、母は泣き出した。",
-    "en": "The instant she heard the news, my mother burst into tears."
-   }
-  ],
-  "〜そばから": [
-   {
-    "jp": "習ったそばから忘れてしまう。",
-    "en": "No sooner do I learn it than I forget it."
-   },
-   {
-    "jp": "片づけるそばから、子どもが部屋を散らかす。",
-    "en": "No sooner do I tidy up than the child messes the room again."
-   }
-  ],
-  "〜なり": [
-   {
-    "jp": "彼は部屋に入るなり、窓を大きく開けた。",
-    "en": "The moment he entered the room, he threw the window wide open."
-   },
-   {
-    "jp": "母はその手紙を読むなり、黙ってしまった。",
-    "en": "The instant my mother read that letter, she fell silent."
-   }
-  ],
-  "〜がてら": [
-   {
-    "jp": "散歩がてら、駅前の本屋に寄った。",
-    "en": "While out for a walk, I dropped by the bookshop in front of the station."
-   },
-   {
-    "jp": "買い物がてら、友人の家を訪ねた。",
-    "en": "I visited a friend while out shopping."
-   }
-  ],
-  "〜かたわら": [
-   {
-    "jp": "彼は会社で働くかたわら、小説を書いている。",
-    "en": "Alongside working at a company, he writes novels."
-   },
-   {
-    "jp": "母は家事のかたわら、近所の子どもに英語を教えている。",
-    "en": "Alongside the housework, my mother teaches English to neighbourhood children."
-   }
-  ],
-  "〜ごとき／〜ごとく": [
-   {
-    "jp": "彼のごとき人物は、二度と現れないだろう。",
-    "en": "A person like him will probably never appear again."
-   },
-   {
-    "jp": "時は矢のごとく過ぎていった。",
-    "en": "Time passed by like an arrow."
-   }
-  ],
-  "〜ずくめ": [
-   {
-    "jp": "今年はいいことずくめの一年だった。",
-    "en": "This year was a year full of nothing but good things."
-   },
-   {
-    "jp": "黒ずくめの男が門の前に立っていた。",
-    "en": "A man dressed all in black was standing in front of the gate."
-   }
-  ],
-  "〜めく": [
-   {
-    "jp": "三月に入ると、日ざしが春めく。",
-    "en": "Once March arrives, the sunlight takes on the air of spring."
-   },
-   {
-    "jp": "彼の言い方はいつも皮肉めく。",
-    "en": "His way of speaking always takes on a sarcastic air."
-   }
-  ],
-  "〜まじき": [
-   {
-    "jp": "それは教師にあるまじき行いだ。",
-    "en": "That is conduct unbecoming of a teacher."
-   },
-   {
-    "jp": "公務員にあるまじき発言だと批判された。",
-    "en": "He was criticised for a remark unbefitting a public servant."
-   }
-  ],
-  "〜べく": [
-   {
-    "jp": "彼は医者になるべく、必死に勉強した。",
-    "en": "He studied desperately in order to become a doctor."
-   },
-   {
-    "jp": "約束を果たすべく、彼は再びこの町に戻った。",
-    "en": "He returned to this town in order to fulfil his promise."
-   }
-  ],
-  "〜てしかるべきだ": [
-   {
-    "jp": "これだけ働いたのだから、報われてしかるべきだ。",
-    "en": "Having worked this much, he ought properly to be rewarded."
-   },
-   {
-    "jp": "被害者にはもっと説明があってしかるべきだ。",
-    "en": "The victims ought properly to be given more explanation."
-   }
-  ],
-  "〜ならでは": [
-   {
-    "jp": "この味は、この店ならではのものだ。",
-    "en": "This flavour is something distinctive to this shop."
-   },
-   {
-    "jp": "祭りの熱気は、この町ならではだ。",
-    "en": "The excitement of the festival is unique to this town."
-   }
-  ],
-  "〜ならいざ知らず": [
-   {
-    "jp": "子どもならいざ知らず、大人がそんなことを言うとは。",
-    "en": "I could not say about a child, but for an adult to say such a thing."
-   },
-   {
-    "jp": "昔ならいざ知らず、今はそんなやり方は通じない。",
-    "en": "Perhaps in the old days, but such a method does not work now."
-   }
-  ],
-  "〜とはいえ": [
-   {
-    "jp": "春とはいえ、朝晩はまだ冷える。",
-    "en": "Although it is spring, mornings and evenings are still cold."
-   },
-   {
-    "jp": "休みとはいえ、やることが山ほどある。",
-    "en": "Even though it is a holiday, I have a mountain of things to do."
-   }
-  ],
-  "〜といえども": [
-   {
-    "jp": "子どもといえども、約束は守るべきだ。",
-    "en": "Even a child should keep a promise."
-   },
-   {
-    "jp": "専門家といえども、間違えることはある。",
-    "en": "Even an expert can make a mistake."
-   }
-  ],
-  "〜とばかりに": [
-   {
-    "jp": "彼は今がチャンスとばかりに立ち上がった。",
-    "en": "He stood up as if to say that now was his chance."
-   },
-   {
-    "jp": "早く帰れとばかりに、店の明かりが消された。",
-    "en": "The shop lights were turned off as if to say go home already."
-   }
-  ],
-  "〜をものともせず": [
-   {
-    "jp": "彼は足の痛みをものともせず、最後まで走り切った。",
-    "en": "Undaunted by the pain in his leg, he ran all the way to the end."
-   },
-   {
-    "jp": "激しい風雨をものともせず、船は港を出た。",
-    "en": "Undaunted by the fierce wind and rain, the ship left the harbour."
-   }
-  ],
-  "〜を余儀なくされる": [
-   {
-    "jp": "台風のため、大会は中止を余儀なくされた。",
-    "en": "Because of the typhoon, the tournament was forced into cancellation."
-   },
-   {
-    "jp": "けがのため、彼は引退を余儀なくされた。",
-    "en": "Owing to injury, he was forced to retire."
-   }
-  ],
-  "〜を皮切りに": [
-   {
-    "jp": "東京を皮切りに、全国十か所で公演が行われる。",
-    "en": "Starting with Tokyo, performances will be held in ten places nationwide."
-   },
-   {
-    "jp": "その事件を皮切りに、次々と問題が明るみに出た。",
-    "en": "Starting with that incident, problems came to light one after another."
-   }
-  ],
-  "〜に至る": [
-   {
-    "jp": "長い話し合いの末、ついに合意に至った。",
-    "en": "After long discussions, we finally reached an agreement."
-   },
-   {
-    "jp": "小さな誤解が、大きな争いに至った。",
-    "en": "A small misunderstanding culminated in a large dispute."
-   }
-  ],
-  "〜の極み": [
-   {
-    "jp": "こんなに立派な賞をいただき、光栄の極みです。",
-    "en": "To receive such a splendid award is the height of honour."
-   },
-   {
-    "jp": "連日の残業で、疲労の極みに達した。",
-    "en": "With overtime day after day, I reached the utmost of exhaustion."
-   }
-  ],
-  "〜はおろか": [
-   {
-    "jp": "彼は漢字はおろか、ひらがなも書けない。",
-    "en": "Let alone kanji, he cannot even write hiragana."
-   },
-   {
-    "jp": "外国はおろか、隣の町へも行ったことがない。",
-    "en": "Let alone abroad, I have never even been to the next town."
-   }
-  ],
-  "〜もさることながら": [
-   {
-    "jp": "味もさることながら、この店は雰囲気がすばらしい。",
-    "en": "The taste goes without saying, but this restaurant has a wonderful atmosphere."
-   },
-   {
-    "jp": "値段もさることながら、品質が問題だ。",
-    "en": "The price goes without saying, but the quality is the real issue."
-   }
-  ]
- }
+  "_meta": "Example sentences for content/grammar_points.json, written by hand for this project -- not generated, and not taken from content/grammar_data.py or any other source. Two per grammar point, each with a literal English translation.\n\nWhy they are authored rather than generated: study/grammar_sentence_gen.py does generate these, cheaply, and the generator is kept for regenerating or extending them. But the free model available to this project produced roughly one flawed sentence in three -- wrong translations, and Japanese that was ungrammatical in ways no automatic check can see (a sentence can contain its pattern, stay within the level's kanji and still be wrong). Example sentences are the one place a learner cannot spot the error themselves: they are reading them precisely because they do not yet know the pattern.\n\nEvery sentence here passes the same gate the generator applies -- study.grammar_sentence_gen.check_sentence -- which enforces that the sentence visibly uses its own pattern (study/grammar_match.py), stays within the level's kanji set, and is a complete sentence rather than a noun phrase. tests/test_grammar_sentences.py runs that gate over this whole file, so an edit that breaks one of those rules fails the build.\n\nLevel placement follows grammar_points.json. Kanji are held to the level's own deck, with one deliberate exemption: a kanji belonging to the PATTERN being taught is always allowed, since 〜次第だ cannot be demonstrated without 第 and writing it as しだい would stop demonstrating it at all.",
+  "N5": {
+    "です／だ": [
+      {
+        "jp": "わたしは学生です。",
+        "en": "I am a student."
+      },
+      {
+        "jp": "あの人は日本語の先生です。",
+        "en": "That person is a Japanese teacher."
+      }
+    ],
+    "は": [
+      {
+        "jp": "今日は天気がいいです。",
+        "en": "The weather is good today."
+      },
+      {
+        "jp": "この本はとてもおもしろいです。",
+        "en": "This book is very interesting."
+      }
+    ],
+    "が": [
+      {
+        "jp": "花がきれいです。",
+        "en": "The flowers are pretty."
+      },
+      {
+        "jp": "電車が来ました。",
+        "en": "The train came."
+      }
+    ],
+    "を": [
+      {
+        "jp": "毎あさパンを食べます。",
+        "en": "I eat bread every morning."
+      },
+      {
+        "jp": "つめたい水を飲みました。",
+        "en": "I drank cold water."
+      }
+    ],
+    "に": [
+      {
+        "jp": "七時におきます。",
+        "en": "I get up at seven."
+      },
+      {
+        "jp": "友だちにてがみを書きました。",
+        "en": "I wrote a letter to my friend."
+      }
+    ],
+    "で": [
+      {
+        "jp": "駅で友だちに会いました。",
+        "en": "I met a friend at the station."
+      },
+      {
+        "jp": "電車で学校へ行きます。",
+        "en": "I go to school by train."
+      }
+    ],
+    "と": [
+      {
+        "jp": "父と山へ行きました。",
+        "en": "I went to the mountain with my father."
+      },
+      {
+        "jp": "本とノートを買いました。",
+        "en": "I bought a book and a notebook."
+      }
+    ],
+    "も": [
+      {
+        "jp": "わたしも学生です。",
+        "en": "I am a student too."
+      },
+      {
+        "jp": "母も日本語を話します。",
+        "en": "My mother speaks Japanese too."
+      }
+    ],
+    "の": [
+      {
+        "jp": "これはわたしの本です。",
+        "en": "This is my book."
+      },
+      {
+        "jp": "日本語の先生は女の人です。",
+        "en": "The Japanese teacher is a woman."
+      }
+    ],
+    "から〜まで": [
+      {
+        "jp": "九時から五時まではたらきます。",
+        "en": "I work from nine to five."
+      },
+      {
+        "jp": "学校から駅まであるきます。",
+        "en": "I walk from school to the station."
+      }
+    ],
+    "〜ます／〜ません": [
+      {
+        "jp": "毎日ぎゅうにゅうを飲みます。",
+        "en": "I drink milk every day."
+      },
+      {
+        "jp": "おさけは飲みません。",
+        "en": "I do not drink alcohol."
+      }
+    ],
+    "〜ました／〜ませんでした": [
+      {
+        "jp": "きのう、本を読みました。",
+        "en": "I read a book yesterday."
+      },
+      {
+        "jp": "先週はどこへも行きませんでした。",
+        "en": "I did not go anywhere last week."
+      }
+    ],
+    "〜たいです": [
+      {
+        "jp": "いつか日本へ行きたいです。",
+        "en": "I want to go to Japan some day."
+      },
+      {
+        "jp": "つめたい水が飲みたいです。",
+        "en": "I want to drink cold water."
+      }
+    ],
+    "〜てください": [
+      {
+        "jp": "この本を読んでください。",
+        "en": "Please read this book."
+      },
+      {
+        "jp": "ここに名前を書いてください。",
+        "en": "Please write your name here."
+      }
+    ],
+    "〜ています": [
+      {
+        "jp": "母は今りょうりをつくっています。",
+        "en": "My mother is cooking now."
+      },
+      {
+        "jp": "父は会社ではたらいています。",
+        "en": "My father works at a company."
+      }
+    ],
+    "〜てもいいです": [
+      {
+        "jp": "ここでしゃしんをとってもいいです。",
+        "en": "You may take photos here."
+      },
+      {
+        "jp": "この水を飲んでもいいですか。",
+        "en": "May I drink this water?"
+      }
+    ],
+    "〜てはいけません": [
+      {
+        "jp": "この川でおよいではいけません。",
+        "en": "You must not swim in this river."
+      },
+      {
+        "jp": "ここに車をとめてはいけません。",
+        "en": "You must not park a car here."
+      }
+    ],
+    "〜ことができます": [
+      {
+        "jp": "わたしは日本語を話すことができます。",
+        "en": "I can speak Japanese."
+      },
+      {
+        "jp": "この店ではカードをつかうことができます。",
+        "en": "You can use a card at this shop."
+      }
+    ],
+    "〜ないでください": [
+      {
+        "jp": "大きなこえで話さないでください。",
+        "en": "Please do not speak in a loud voice."
+      },
+      {
+        "jp": "ここにごみをすてないでください。",
+        "en": "Please do not throw rubbish here."
+      }
+    ],
+    "〜なければなりません": [
+      {
+        "jp": "毎日学校へ行かなければなりません。",
+        "en": "I must go to school every day."
+      },
+      {
+        "jp": "六時に出なければなりません。",
+        "en": "I must leave at six."
+      }
+    ],
+    "へ": [
+      {
+        "jp": "来週、山へ行きます。",
+        "en": "I am going to the mountain next week."
+      },
+      {
+        "jp": "母は店へ出かけました。",
+        "en": "My mother went out to the shop."
+      }
+    ],
+    "や": [
+      {
+        "jp": "つくえの上に本やノートがあります。",
+        "en": "There are books and notebooks on the desk."
+      },
+      {
+        "jp": "店で魚や花を買いました。",
+        "en": "I bought fish and flowers at the shop."
+      }
+    ],
+    "か": [
+      {
+        "jp": "あなたは学生ですか。",
+        "en": "Are you a student?"
+      },
+      {
+        "jp": "おちゃかコーヒーを飲みますか。",
+        "en": "Will you drink tea or coffee?"
+      }
+    ],
+    "ね": [
+      {
+        "jp": "今日はいい天気ですね。",
+        "en": "It is nice weather today, isn't it?"
+      },
+      {
+        "jp": "この花はきれいですね。",
+        "en": "These flowers are pretty, aren't they?"
+      }
+    ],
+    "よ": [
+      {
+        "jp": "あしたは休みですよ。",
+        "en": "Tomorrow is a holiday, you know."
+      },
+      {
+        "jp": "この店のパンはおいしいですよ。",
+        "en": "The bread at this shop is delicious, you know."
+      }
+    ],
+    "〜から": [
+      {
+        "jp": "雨がふっているから、今日は行きません。",
+        "en": "Because it is raining, I am not going today."
+      },
+      {
+        "jp": "時間がないから、いそぎましょう。",
+        "en": "Since there is no time, let's hurry."
+      }
+    ],
+    "〜ませんか": [
+      {
+        "jp": "いっしょにごはんを食べませんか。",
+        "en": "Won't you eat a meal with me?"
+      },
+      {
+        "jp": "あした、山へ行きませんか。",
+        "en": "Won't you go to the mountain tomorrow?"
+      }
+    ],
+    "〜ましょう": [
+      {
+        "jp": "いっしょに行きましょう。",
+        "en": "Let's go together."
+      },
+      {
+        "jp": "少し休みましょう。",
+        "en": "Let's rest a little."
+      }
+    ],
+    "〜ましょうか": [
+      {
+        "jp": "まどをあけましょうか。",
+        "en": "Shall I open the window?"
+      },
+      {
+        "jp": "にもつをもちましょうか。",
+        "en": "Shall I carry your luggage?"
+      }
+    ],
+    "〜があります／います": [
+      {
+        "jp": "駅の前に店があります。",
+        "en": "There is a shop in front of the station."
+      },
+      {
+        "jp": "へやに男の子がいます。",
+        "en": "There is a boy in the room."
+      }
+    ],
+    "い形容詞／な形容詞": [
+      {
+        "jp": "高い山が見えます。",
+        "en": "A tall mountain is visible."
+      },
+      {
+        "jp": "ここはしずかな店です。",
+        "en": "This is a quiet shop."
+      }
+    ],
+    "〜くて／〜で": [
+      {
+        "jp": "このパンは安くておいしいです。",
+        "en": "This bread is cheap and delicious."
+      },
+      {
+        "jp": "この山は高くてきれいです。",
+        "en": "This mountain is tall and beautiful."
+      }
+    ],
+    "〜くなる／〜になる": [
+      {
+        "jp": "子どもは大きくなりました。",
+        "en": "The child has grown big."
+      },
+      {
+        "jp": "友だちは日本語の先生になりました。",
+        "en": "My friend became a Japanese teacher."
+      }
+    ],
+    "〜より〜のほうが": [
+      {
+        "jp": "電車より車のほうがはやいです。",
+        "en": "A car is faster than a train."
+      },
+      {
+        "jp": "魚よりにくのほうがすきです。",
+        "en": "I like meat more than fish."
+      }
+    ],
+    "〜で〜がいちばん": [
+      {
+        "jp": "日本でこの山がいちばん高いです。",
+        "en": "This mountain is the tallest in Japan."
+      },
+      {
+        "jp": "この店でこのパンがいちばん安いです。",
+        "en": "This bread is the cheapest in this shop."
+      }
+    ],
+    "〜ほうがいいです": [
+      {
+        "jp": "はやく休んだほうがいいです。",
+        "en": "You had better rest early."
+      },
+      {
+        "jp": "雨だから、行かないほうがいいです。",
+        "en": "Since it is raining, you had better not go."
+      }
+    ],
+    "〜なくてもいいです": [
+      {
+        "jp": "あしたは来なくてもいいです。",
+        "en": "You do not have to come tomorrow."
+      },
+      {
+        "jp": "お金ははらわなくてもいいです。",
+        "en": "You do not have to pay."
+      }
+    ],
+    "〜てから": [
+      {
+        "jp": "ごはんを食べてから、店へ行きました。",
+        "en": "After eating, I went to the shop."
+      },
+      {
+        "jp": "手をあらってから、食べてください。",
+        "en": "Please eat after washing your hands."
+      }
+    ],
+    "〜まえに": [
+      {
+        "jp": "ねるまえに、本を読みます。",
+        "en": "I read a book before sleeping."
+      },
+      {
+        "jp": "学校へ行くまえに、母と話しました。",
+        "en": "I talked with my mother before going to school."
+      }
+    ],
+    "〜あとで": [
+      {
+        "jp": "しごとのあとで、友だちに会います。",
+        "en": "I will meet a friend after work."
+      },
+      {
+        "jp": "ごはんを食べたあとで、少し休みます。",
+        "en": "I rest a little after eating."
+      }
+    ],
+    "〜とき": [
+      {
+        "jp": "学生のとき、よく山へ行きました。",
+        "en": "When I was a student, I often went to the mountains."
+      },
+      {
+        "jp": "日本へ行くとき、この本を買いました。",
+        "en": "When I went to Japan, I bought this book."
+      }
+    ],
+    "〜が好きです": [
+      {
+        "jp": "母は花が好きです。",
+        "en": "My mother likes flowers."
+      },
+      {
+        "jp": "わたしは魚が好きです。",
+        "en": "I like fish."
+      }
+    ],
+    "〜がきらいです": [
+      {
+        "jp": "わたしは雨がきらいです。",
+        "en": "I dislike the rain."
+      },
+      {
+        "jp": "あの人は魚がきらいです。",
+        "en": "That person dislikes fish."
+      }
+    ],
+    "〜が上手です／下手です": [
+      {
+        "jp": "あの人は日本語が上手です。",
+        "en": "That person is good at Japanese."
+      },
+      {
+        "jp": "わたしは日本語が下手です。",
+        "en": "I am poor at Japanese."
+      }
+    ],
+    "〜がほしいです": [
+      {
+        "jp": "新しい車がほしいです。",
+        "en": "I want a new car."
+      },
+      {
+        "jp": "わたしは新しい本がほしいです。",
+        "en": "I want a new book."
+      }
+    ],
+    "〜でしょう": [
+      {
+        "jp": "あしたは雨でしょう。",
+        "en": "It will probably rain tomorrow."
+      },
+      {
+        "jp": "あの店は高いでしょう。",
+        "en": "That shop is probably expensive."
+      }
+    ],
+    "まだ〜ていません": [
+      {
+        "jp": "まだごはんを食べていません。",
+        "en": "I have not eaten yet."
+      },
+      {
+        "jp": "まだその本を読んでいません。",
+        "en": "I have not read that book yet."
+      }
+    ],
+    "もう〜ました": [
+      {
+        "jp": "もうごはんを食べました。",
+        "en": "I have already eaten."
+      },
+      {
+        "jp": "もう学校へ行きました。",
+        "en": "I have already gone to school."
+      }
+    ],
+    "〜くらい／〜ぐらい": [
+      {
+        "jp": "駅まで十分くらいです。",
+        "en": "It is about ten minutes to the station."
+      },
+      {
+        "jp": "本を五さつぐらい買いました。",
+        "en": "I bought about five books."
+      }
+    ],
+    "〜ごろ": [
+      {
+        "jp": "三時ごろに来てください。",
+        "en": "Please come at around three."
+      },
+      {
+        "jp": "毎日、七時ごろに出ます。",
+        "en": "I leave at about seven every day."
+      }
+    ],
+    "〜ずつ": [
+      {
+        "jp": "花を三本ずつ買いました。",
+        "en": "I bought three flowers each."
+      },
+      {
+        "jp": "少しずつ日本語を話します。",
+        "en": "I speak Japanese little by little."
+      }
+    ],
+    "〜だけ": [
+      {
+        "jp": "水だけ飲みました。",
+        "en": "I drank only water."
+      },
+      {
+        "jp": "時間が少しだけあります。",
+        "en": "I have only a little time."
+      }
+    ],
+    "〜など": [
+      {
+        "jp": "本や新聞などを読みます。",
+        "en": "I read books, newspapers and so on."
+      },
+      {
+        "jp": "花や木などを見ました。",
+        "en": "I looked at flowers, trees and the like."
+      }
+    ],
+    "〜でも": [
+      {
+        "jp": "お水でも飲みませんか。",
+        "en": "Won't you have some water or something?"
+      },
+      {
+        "jp": "本でも読みましょう。",
+        "en": "Let's read a book or something."
+      }
+    ],
+    "〜と思います": [
+      {
+        "jp": "あしたは雨だと思います。",
+        "en": "I think it will rain tomorrow."
+      },
+      {
+        "jp": "この店は安いと思います。",
+        "en": "I think this shop is cheap."
+      }
+    ],
+    "〜と言います": [
+      {
+        "jp": "先生は来ると言いました。",
+        "en": "The teacher said he would come."
+      },
+      {
+        "jp": "あの人は行かないと言います。",
+        "en": "That person says he will not go."
+      }
+    ],
+    "〜のが好きです": [
+      {
+        "jp": "本を読むのが好きです。",
+        "en": "I like reading books."
+      },
+      {
+        "jp": "山へ行くのが好きです。",
+        "en": "I like going to the mountains."
+      }
+    ],
+    "〜ないで": [
+      {
+        "jp": "今日は休まないで来ました。",
+        "en": "I came today without taking a rest."
+      },
+      {
+        "jp": "話さないで聞いてください。",
+        "en": "Please listen without talking."
+      }
+    ],
+    "〜をください": [
+      {
+        "jp": "つめたい水をください。",
+        "en": "Please give me some cold water."
+      },
+      {
+        "jp": "あの新しい本をください。",
+        "en": "Please give me that new book."
+      }
+    ],
+    "〜が分かります": [
+      {
+        "jp": "日本語が分かります。",
+        "en": "I understand Japanese."
+      },
+      {
+        "jp": "先生の話が分かりました。",
+        "en": "I understood what the teacher said."
+      }
+    ],
+    "〜ができます": [
+      {
+        "jp": "わたしは日本語ができます。",
+        "en": "I can speak Japanese."
+      },
+      {
+        "jp": "ここで買いものができます。",
+        "en": "You can do your shopping here."
+      }
+    ],
+    "〜たくないです": [
+      {
+        "jp": "今日は行きたくないです。",
+        "en": "I do not want to go today."
+      },
+      {
+        "jp": "その魚は食べたくないです。",
+        "en": "I do not want to eat that fish."
+      }
+    ],
+    "〜くありません": [
+      {
+        "jp": "この店は安くありません。",
+        "en": "This shop is not cheap."
+      },
+      {
+        "jp": "今日は天気がよくありません。",
+        "en": "The weather is not good today."
+      }
+    ],
+    "〜じゃありません": [
+      {
+        "jp": "これはわたしの本じゃありません。",
+        "en": "This is not my book."
+      },
+      {
+        "jp": "あの人は先生じゃありません。",
+        "en": "That person is not a teacher."
+      }
+    ],
+    "〜かったです": [
+      {
+        "jp": "きのうは天気がよかったです。",
+        "en": "The weather was good yesterday."
+      },
+      {
+        "jp": "その本はおもしろかったです。",
+        "en": "That book was interesting."
+      }
+    ],
+    "〜でした": [
+      {
+        "jp": "きのうは雨でした。",
+        "en": "It was raining yesterday."
+      },
+      {
+        "jp": "あの店は休みでした。",
+        "en": "That shop was closed."
+      }
+    ],
+    "〜の中で": [
+      {
+        "jp": "四人の中で、わたしがいちばん小さいです。",
+        "en": "Of the four of us, I am the smallest."
+      },
+      {
+        "jp": "この店の中で、この本がいちばん高いです。",
+        "en": "In this shop, this book is the most expensive."
+      }
+    ],
+    "そして": [
+      {
+        "jp": "本を読みました。そして、外へ出ました。",
+        "en": "I read a book. Then I went outside."
+      },
+      {
+        "jp": "ごはんを食べました。そして、少し休みました。",
+        "en": "I ate, and then rested a little."
+      }
+    ],
+    "それから": [
+      {
+        "jp": "学校へ行きます。それから、友だちに会います。",
+        "en": "I go to school. After that, I meet a friend."
+      },
+      {
+        "jp": "水を飲みました。それから、本を読みました。",
+        "en": "I drank some water, and after that I read a book."
+      }
+    ],
+    "しかし": [
+      {
+        "jp": "安いです。しかし、あまりよくありません。",
+        "en": "It is cheap. However, it is not very good."
+      },
+      {
+        "jp": "行きたいです。しかし、時間がありません。",
+        "en": "I want to go. However, I have no time."
+      }
+    ],
+    "〜に行きます": [
+      {
+        "jp": "魚を買いに行きます。",
+        "en": "I am going to buy fish."
+      },
+      {
+        "jp": "友だちに会いに行きます。",
+        "en": "I am going to meet a friend."
+      }
+    ]
+  },
+  "N4": {
+    "〜たら": [
+      {
+        "jp": "雨がふったら、家にいます。",
+        "en": "If it rains, I will stay at home."
+      },
+      {
+        "jp": "駅に着いたら、電話してください。",
+        "en": "When you arrive at the station, please call me."
+      }
+    ],
+    "〜ば": [
+      {
+        "jp": "時間があれば、映画を見に行きます。",
+        "en": "If I have time, I will go and see a movie."
+      },
+      {
+        "jp": "安ければ、この本を買います。",
+        "en": "If it is cheap, I will buy this book."
+      }
+    ],
+    "〜なら": [
+      {
+        "jp": "旅行に行くなら、この本がやくに立ちます。",
+        "en": "If you are going travelling, this book will be useful."
+      },
+      {
+        "jp": "犬がすきなら、うちに来てください。",
+        "en": "If you like dogs, please come to my house."
+      }
+    ],
+    "〜ので": [
+      {
+        "jp": "あたまがいたいので、今日は休みます。",
+        "en": "Because I have a headache, I will rest today."
+      },
+      {
+        "jp": "お金がないので、旅行に行きません。",
+        "en": "Because I have no money, I am not going travelling."
+      }
+    ],
+    "〜のに": [
+      {
+        "jp": "たくさん勉強したのに、答えをまちがえました。",
+        "en": "Even though I studied a lot, I got the answer wrong."
+      },
+      {
+        "jp": "春なのに、まださむいです。",
+        "en": "Even though it is spring, it is still cold."
+      }
+    ],
+    "〜てあげる／てくれる／てもらう": [
+      {
+        "jp": "友だちがにもつを持ってくれました。",
+        "en": "My friend carried my luggage for me."
+      },
+      {
+        "jp": "弟に日本語を教えてあげました。",
+        "en": "I taught my younger brother Japanese."
+      }
+    ],
+    "〜そうです": [
+      {
+        "jp": "この料理はおいしそうです。",
+        "en": "This dish looks delicious."
+      },
+      {
+        "jp": "今にも雨がふりそうです。",
+        "en": "It looks like it will rain at any moment."
+      }
+    ],
+    "〜ようです": [
+      {
+        "jp": "父は元気になったようです。",
+        "en": "It seems my father has got better."
+      },
+      {
+        "jp": "だれか来たようです。",
+        "en": "It seems that someone has come."
+      }
+    ],
+    "使役形 〜させる": [
+      {
+        "jp": "母は妹に野さいを食べさせました。",
+        "en": "My mother made my younger sister eat vegetables."
+      },
+      {
+        "jp": "先生は学生に本を読ませました。",
+        "en": "The teacher had the students read a book."
+      }
+    ],
+    "受身形 〜られる": [
+      {
+        "jp": "先生に名前をよばれました。",
+        "en": "I was called by name by the teacher."
+      },
+      {
+        "jp": "この歌は世界中で歌われています。",
+        "en": "This song is sung all over the world."
+      }
+    ],
+    "〜てしまう": [
+      {
+        "jp": "大切な物をなくしてしまいました。",
+        "en": "I have lost something important."
+      },
+      {
+        "jp": "その本はもう読んでしまいました。",
+        "en": "I have already finished reading that book."
+      }
+    ],
+    "〜ておく": [
+      {
+        "jp": "旅行の前にきっぷを買っておきます。",
+        "en": "I will buy the ticket in advance before the trip."
+      },
+      {
+        "jp": "パンを買っておきました。",
+        "en": "I bought bread in advance."
+      }
+    ],
+    "〜ことがある": [
+      {
+        "jp": "北海道へ行ったことがあります。",
+        "en": "I have been to Hokkaido before."
+      },
+      {
+        "jp": "その映画は見たことがありません。",
+        "en": "I have never seen that film."
+      }
+    ],
+    "〜ようになる": [
+      {
+        "jp": "漢字が読めるようになりました。",
+        "en": "I have become able to read kanji."
+      },
+      {
+        "jp": "朝早く起きるようになりました。",
+        "en": "I have come to get up early in the morning."
+      }
+    ],
+    "〜ことにする": [
+      {
+        "jp": "毎朝走ることにしました。",
+        "en": "I have decided to run every morning."
+      },
+      {
+        "jp": "おさけは飲まないことにしています。",
+        "en": "I make it a rule not to drink alcohol."
+      }
+    ],
+    "〜つもりです": [
+      {
+        "jp": "来年、日本へ行くつもりです。",
+        "en": "I intend to go to Japan next year."
+      },
+      {
+        "jp": "その仕事はやめるつもりです。",
+        "en": "I intend to quit that job."
+      }
+    ],
+    "〜という": [
+      {
+        "jp": "山田という人が来ました。",
+        "en": "A person called Yamada came."
+      },
+      {
+        "jp": "さくらという店に行きました。",
+        "en": "I went to a shop called Sakura."
+      }
+    ],
+    "〜はずです": [
+      {
+        "jp": "兄は今日来るはずです。",
+        "en": "My older brother is supposed to come today."
+      },
+      {
+        "jp": "この時間なら、店は開いているはずです。",
+        "en": "At this hour, the shop should be open."
+      }
+    ],
+    "〜かもしれません": [
+      {
+        "jp": "あしたはゆきがふるかもしれません。",
+        "en": "It might snow tomorrow."
+      },
+      {
+        "jp": "姉はもう帰ったかもしれません。",
+        "en": "My older sister might have already gone home."
+      }
+    ],
+    "〜まま": [
+      {
+        "jp": "くつをはいたまま、家に入らないでください。",
+        "en": "Please do not enter the house with your shoes on."
+      },
+      {
+        "jp": "電気をつけたままねてしまいました。",
+        "en": "I fell asleep with the light left on."
+      }
+    ],
+    "可能形 〜(ら)れる": [
+      {
+        "jp": "私は漢字が書けます。",
+        "en": "I can write kanji."
+      },
+      {
+        "jp": "この魚は生で食べられます。",
+        "en": "This fish can be eaten raw."
+      }
+    ],
+    "意向形 〜(よ)う": [
+      {
+        "jp": "そろそろ帰ろう。",
+        "en": "Let's head home soon."
+      },
+      {
+        "jp": "今日は早くねよう。",
+        "en": "I think I'll go to bed early today."
+      }
+    ],
+    "〜ようと思う": [
+      {
+        "jp": "来週から運動しようと思います。",
+        "en": "I am thinking of exercising from next week."
+      },
+      {
+        "jp": "弟に日本語を教えようと思っています。",
+        "en": "I am thinking of teaching my younger brother Japanese."
+      }
+    ],
+    "〜と": [
+      {
+        "jp": "春になると、さくらがさきます。",
+        "en": "When spring comes, the cherry blossoms bloom."
+      },
+      {
+        "jp": "このボタンをおすと、きっぷが出ます。",
+        "en": "If you press this button, a ticket comes out."
+      }
+    ],
+    "〜ながら": [
+      {
+        "jp": "音楽を聞きながら勉強します。",
+        "en": "I study while listening to music."
+      },
+      {
+        "jp": "歩きながら話しましょう。",
+        "en": "Let's talk while walking."
+      }
+    ],
+    "〜たり〜たり": [
+      {
+        "jp": "日曜日は本を読んだり音楽を聞いたりします。",
+        "en": "On Sundays I read books and listen to music."
+      },
+      {
+        "jp": "休みの日はそうじしたりせんたくしたりしました。",
+        "en": "On my day off I cleaned and did the laundry."
+      }
+    ],
+    "〜すぎる": [
+      {
+        "jp": "夕べは飲みすぎました。",
+        "en": "I drank too much last night."
+      },
+      {
+        "jp": "この問題はむずかしすぎます。",
+        "en": "This problem is too difficult."
+      }
+    ],
+    "〜やすい／〜にくい": [
+      {
+        "jp": "この本は字が大きくて読みやすいです。",
+        "en": "This book has large characters and is easy to read."
+      },
+      {
+        "jp": "この漢字はおぼえにくいです。",
+        "en": "This kanji is hard to remember."
+      }
+    ],
+    "〜はじめる／〜おわる／〜つづける": [
+      {
+        "jp": "三時から雨がふりはじめました。",
+        "en": "It started raining from three o'clock."
+      },
+      {
+        "jp": "兄は一時間も歌いつづけました。",
+        "en": "My older brother kept singing for a whole hour."
+      }
+    ],
+    "〜ていく／〜てくる": [
+      {
+        "jp": "これからさむくなっていくでしょう。",
+        "en": "It will probably keep getting colder from now on."
+      },
+      {
+        "jp": "パンを買ってくる。",
+        "en": "I will go and buy some bread."
+      }
+    ],
+    "〜てみる": [
+      {
+        "jp": "この服を着てみてもいいですか。",
+        "en": "May I try wearing these clothes?"
+      },
+      {
+        "jp": "新しい店で食べてみました。",
+        "en": "I tried eating at the new shop."
+      }
+    ],
+    "〜てある": [
+      {
+        "jp": "かべに地図がはってあります。",
+        "en": "A map is put up on the wall."
+      },
+      {
+        "jp": "お茶が用意してあります。",
+        "en": "The tea has been prepared."
+      }
+    ],
+    "〜らしい": [
+      {
+        "jp": "となりの家に新しい人が来たらしいです。",
+        "en": "Apparently a new person has come to the house next door."
+      },
+      {
+        "jp": "あの店の魚は安いらしいです。",
+        "en": "I gather the fish at that shop is cheap."
+      }
+    ],
+    "〜みたいだ": [
+      {
+        "jp": "あの人は先生みたいだ。",
+        "en": "That person seems to be a teacher."
+      },
+      {
+        "jp": "外はもうくらいみたいだ。",
+        "en": "It seems it is already dark outside."
+      }
+    ],
+    "自動詞／他動詞": [
+      {
+        "jp": "風でドアが開きました。",
+        "en": "The door opened in the wind."
+      },
+      {
+        "jp": "私はゆっくりドアを開けました。",
+        "en": "I opened the door slowly."
+      }
+    ],
+    "〜ことになる": [
+      {
+        "jp": "来月から東京ではたらくことになりました。",
+        "en": "It has been decided that I will work in Tokyo from next month."
+      },
+      {
+        "jp": "旅行は来週になることになりました。",
+        "en": "It has been decided that the trip will be next week."
+      }
+    ],
+    "〜ようにする": [
+      {
+        "jp": "毎日野さいを食べるようにしています。",
+        "en": "I make a point of eating vegetables every day."
+      },
+      {
+        "jp": "夜おそくまで起きないようにします。",
+        "en": "I will see to it that I do not stay up late."
+      }
+    ],
+    "〜かどうか": [
+      {
+        "jp": "兄が来るかどうか分かりません。",
+        "en": "I do not know whether my older brother is coming."
+      },
+      {
+        "jp": "この答えが正しいかどうか教えてください。",
+        "en": "Please tell me whether this answer is correct."
+      }
+    ],
+    "〜しか〜ない": [
+      {
+        "jp": "さいふに百円しかありません。",
+        "en": "I have only a hundred yen in my wallet."
+      },
+      {
+        "jp": "日本語しか話せません。",
+        "en": "I can only speak Japanese."
+      }
+    ],
+    "〜ても": [
+      {
+        "jp": "雨がふっても、私は歩いて行きます。",
+        "en": "Even if it rains, I will walk there."
+      },
+      {
+        "jp": "いくら考えても分かりません。",
+        "en": "No matter how much I think, I do not understand."
+      }
+    ],
+    "お〜になる／お〜する": [
+      {
+        "jp": "先生はもうお帰りになりました。",
+        "en": "The teacher has already gone home."
+      },
+      {
+        "jp": "私がにもつをお持ちします。",
+        "en": "I will carry your luggage."
+      }
+    ],
+    "〜んです／〜のです": [
+      {
+        "jp": "時間がないんです。",
+        "en": "The thing is, I have no time."
+      },
+      {
+        "jp": "急いでいるんです。",
+        "en": "It's just that I'm in a hurry."
+      }
+    ],
+    "〜てほしい": [
+      {
+        "jp": "もう少し待ってほしいです。",
+        "en": "I want you to wait a little longer."
+      },
+      {
+        "jp": "この手紙を読んでほしい。",
+        "en": "I want you to read this letter."
+      }
+    ],
+    "〜たがる": [
+      {
+        "jp": "弟はいつも外に出たがる。",
+        "en": "My little brother always wants to go outside."
+      },
+      {
+        "jp": "子どもは新しい服を着たがります。",
+        "en": "Children want to wear new clothes."
+      }
+    ],
+    "〜そうにない": [
+      {
+        "jp": "今日は雨がやみそうにない。",
+        "en": "The rain does not look like stopping today."
+      },
+      {
+        "jp": "この仕事は早く終わりそうにない。",
+        "en": "This work shows no sign of finishing early."
+      }
+    ],
+    "〜なくてはいけない": [
+      {
+        "jp": "明日までに出さなくてはいけない。",
+        "en": "I have to hand it in by tomorrow."
+      },
+      {
+        "jp": "毎日、水を飲まなくてはいけません。",
+        "en": "I must drink water every day."
+      }
+    ],
+    "〜なきゃ／〜なくちゃ": [
+      {
+        "jp": "そろそろ帰らなきゃ。",
+        "en": "I'd better be heading home."
+      },
+      {
+        "jp": "もう行かなくちゃ、時間がない。",
+        "en": "I have to go now, there's no time."
+      }
+    ],
+    "〜ないといけない": [
+      {
+        "jp": "お金をはらわないといけない。",
+        "en": "I have to pay the money."
+      },
+      {
+        "jp": "早く起きないといけません。",
+        "en": "I have to get up early."
+      }
+    ],
+    "〜し": [
+      {
+        "jp": "安いし、近いし、この店にします。",
+        "en": "It's cheap and it's close, so I'll go with this shop."
+      },
+      {
+        "jp": "雨は強いし、風もあるし、出かけたくない。",
+        "en": "The rain is heavy and it's windy, so I don't want to go out."
+      }
+    ],
+    "〜だろう": [
+      {
+        "jp": "明日はいい天気だろう。",
+        "en": "The weather will probably be fine tomorrow."
+      },
+      {
+        "jp": "今日はもう家に着いただろう。",
+        "en": "He has probably arrived home by now."
+      }
+    ],
+    "〜かな": [
+      {
+        "jp": "あの人は来るかな。",
+        "en": "I wonder if that person will come."
+      },
+      {
+        "jp": "この道でいいのかな。",
+        "en": "I wonder if this is the right road."
+      }
+    ],
+    "〜のは〜だ": [
+      {
+        "jp": "大切なのは毎日習うことだ。",
+        "en": "What matters is studying every day."
+      },
+      {
+        "jp": "いちばん楽しいのは音楽です。",
+        "en": "What I enjoy most is music."
+      }
+    ],
+    "〜こと": [
+      {
+        "jp": "走ることは体にいいです。",
+        "en": "Running is good for the body."
+      },
+      {
+        "jp": "外国語を習うことは楽しい。",
+        "en": "Learning a foreign language is fun."
+      }
+    ],
+    "〜の": [
+      {
+        "jp": "本を読むのは楽しいです。",
+        "en": "Reading books is enjoyable."
+      },
+      {
+        "jp": "歩くのは体にいいです。",
+        "en": "Walking is good for you."
+      }
+    ],
+    "〜ばよかった": [
+      {
+        "jp": "もっと早く出ればよかった。",
+        "en": "I should have left earlier."
+      },
+      {
+        "jp": "あの本を買えばよかったです。",
+        "en": "I should have bought that book."
+      }
+    ],
+    "〜たらどうですか": [
+      {
+        "jp": "先生に聞いたらどうですか。",
+        "en": "Why don't you ask the teacher?"
+      },
+      {
+        "jp": "少し休んだらどうですか。",
+        "en": "Why don't you take a short rest?"
+      }
+    ],
+    "〜ずに": [
+      {
+        "jp": "朝ごはんを食べずに出かけた。",
+        "en": "I went out without eating breakfast."
+      },
+      {
+        "jp": "何も言わずに帰ってしまった。",
+        "en": "He went home without saying anything."
+      }
+    ],
+    "〜あいだに": [
+      {
+        "jp": "父が出かけているあいだに、そうじをした。",
+        "en": "I cleaned while my father was out."
+      },
+      {
+        "jp": "夏休みのあいだに、本を十さつ読んだ。",
+        "en": "I read ten books during the summer holiday."
+      }
+    ],
+    "〜あいだ": [
+      {
+        "jp": "わたしが待っているあいだ、だれも来なかった。",
+        "en": "Nobody came the whole time I was waiting."
+      },
+      {
+        "jp": "夏のあいだ、毎日海へ行った。",
+        "en": "I went to the sea every day throughout the summer."
+      }
+    ],
+    "〜ところだ": [
+      {
+        "jp": "今から出かけるところだ。",
+        "en": "I am just about to go out."
+      },
+      {
+        "jp": "ちょうど食事が終わったところです。",
+        "en": "I have just this moment finished eating."
+      }
+    ],
+    "〜たばかり": [
+      {
+        "jp": "この店は先月開いたばかりです。",
+        "en": "This shop only opened last month."
+      },
+      {
+        "jp": "日本へ来たばかりで、まだよく分かりません。",
+        "en": "I have only just come to Japan, so I don't know much yet."
+      }
+    ],
+    "〜させてください": [
+      {
+        "jp": "この仕事をわたしにさせてください。",
+        "en": "Please let me do this job."
+      },
+      {
+        "jp": "少し考えさせてください。",
+        "en": "Please let me think about it a little."
+      }
+    ],
+    "〜なさい": [
+      {
+        "jp": "もっと早く起きなさい。",
+        "en": "Get up earlier."
+      },
+      {
+        "jp": "この字をよく見なさい。",
+        "en": "Take a good look at this character."
+      }
+    ],
+    "〜ために": [
+      {
+        "jp": "日本語を習うために、学校へ行きます。",
+        "en": "I go to school in order to learn Japanese."
+      },
+      {
+        "jp": "家族のために時間を使います。",
+        "en": "I spend my time for my family."
+      }
+    ],
+    "〜ように": [
+      {
+        "jp": "よく見えるように、前に立った。",
+        "en": "I stood at the front so that I could see well."
+      },
+      {
+        "jp": "後で分かるように、紙に書いた。",
+        "en": "I wrote it on paper so it would be clear later."
+      }
+    ],
+    "〜方": [
+      {
+        "jp": "この漢字の読み方が分かりません。",
+        "en": "I do not know how to read this kanji."
+      },
+      {
+        "jp": "料理の作り方を教えてください。",
+        "en": "Please teach me how to cook the dish."
+      }
+    ],
+    "〜出す": [
+      {
+        "jp": "子どもが急に走り出す。",
+        "en": "The child suddenly starts running."
+      },
+      {
+        "jp": "風が強くなると、雨がふり出す。",
+        "en": "When the wind picks up, it starts to rain."
+      }
+    ],
+    "〜直す": [
+      {
+        "jp": "この作文をもう一度書き直す。",
+        "en": "I will write this composition over again."
+      },
+      {
+        "jp": "明日、はじめからやり直す。",
+        "en": "Tomorrow I will do it over from the start."
+      }
+    ],
+    "〜てもらえませんか": [
+      {
+        "jp": "この本を持ってもらえませんか。",
+        "en": "Could you carry this book for me?"
+      },
+      {
+        "jp": "もう一度、書いてもらえませんか。",
+        "en": "Could you write it once more?"
+      }
+    ],
+    "〜がする": [
+      {
+        "jp": "へやからいいにおいがする。",
+        "en": "There is a nice smell coming from the room."
+      },
+      {
+        "jp": "外で大きな音がする。",
+        "en": "There is a loud noise outside."
+      }
+    ],
+    "〜までに": [
+      {
+        "jp": "五時までに帰ってください。",
+        "en": "Please be back by five."
+      },
+      {
+        "jp": "来週までに答えを出します。",
+        "en": "I will give an answer by next week."
+      }
+    ]
+  },
+  "N3": {
+    "〜ばかり": [
+      {
+        "jp": "今、家に帰ったばかりです。",
+        "en": "I have just got home now."
+      },
+      {
+        "jp": "さっき昼ご飯を食べたばかりです。",
+        "en": "I ate lunch just a moment ago."
+      }
+    ],
+    "〜おかげで": [
+      {
+        "jp": "先生のおかげで、試験に合格できました。",
+        "en": "Thanks to my teacher, I was able to pass the exam."
+      },
+      {
+        "jp": "雨のおかげで、庭の花が元気になりました。",
+        "en": "Thanks to the rain, the flowers in the garden have perked up."
+      }
+    ],
+    "〜せいで": [
+      {
+        "jp": "雨のせいで、試合は中止になりました。",
+        "en": "Because of the rain, the match was cancelled."
+      },
+      {
+        "jp": "寝不足のせいで、頭が痛いです。",
+        "en": "Because of lack of sleep, my head hurts."
+      }
+    ],
+    "〜わけではない": [
+      {
+        "jp": "お金があれば幸せになるわけではない。",
+        "en": "Having money does not necessarily mean you will be happy."
+      },
+      {
+        "jp": "彼が悪いと言っているわけではない。",
+        "en": "I am not saying that he is at fault."
+      }
+    ],
+    "〜わけがない": [
+      {
+        "jp": "こんな難しい問題が子どもに解けるわけがない。",
+        "en": "There is no way a child could solve such a difficult problem."
+      },
+      {
+        "jp": "あの人がうそをつくわけがない。",
+        "en": "There is no way that person would tell a lie."
+      }
+    ],
+    "〜に違いない": [
+      {
+        "jp": "電気が消えているから、留守に違いない。",
+        "en": "The lights are off, so they must be out."
+      },
+      {
+        "jp": "この字を見れば、彼が書いたに違いない。",
+        "en": "Looking at this handwriting, he must have written it."
+      }
+    ],
+    "〜べきだ": [
+      {
+        "jp": "約束は守るべきだ。",
+        "en": "You ought to keep your promises."
+      },
+      {
+        "jp": "もっと早く相談するべきでした。",
+        "en": "I should have consulted you sooner."
+      }
+    ],
+    "〜ようとする": [
+      {
+        "jp": "家を出ようとしたとき、電話が鳴った。",
+        "en": "Just as I was about to leave the house, the phone rang."
+      },
+      {
+        "jp": "赤ちゃんは何度も起きようとしています。",
+        "en": "The baby is trying to get up again and again."
+      }
+    ],
+    "〜たとたんに": [
+      {
+        "jp": "電気を消したとたんに、部屋が真っ暗になった。",
+        "en": "The moment I turned off the light, the room went pitch dark."
+      },
+      {
+        "jp": "彼は席に着いたとたんに眠ってしまった。",
+        "en": "The moment he sat down, he fell asleep."
+      }
+    ],
+    "〜に対して": [
+      {
+        "jp": "先生に対して失礼な口をきいてはいけない。",
+        "en": "You must not speak rudely towards a teacher."
+      },
+      {
+        "jp": "この問題に対して、いくつかの意見が出ました。",
+        "en": "Several opinions were raised in regard to this problem."
+      }
+    ],
+    "〜として": [
+      {
+        "jp": "彼は医者として世界中で働いてきた。",
+        "en": "He has worked all over the world as a doctor."
+      },
+      {
+        "jp": "この建物は今、図書館として使われている。",
+        "en": "This building is now used as a library."
+      }
+    ],
+    "〜に関して": [
+      {
+        "jp": "この問題に関して、長い説明があった。",
+        "en": "There was a long explanation regarding this problem."
+      },
+      {
+        "jp": "その件に関しては、まだ何も決まっていない。",
+        "en": "Regarding that matter, nothing has been decided yet."
+      }
+    ],
+    "〜通りに": [
+      {
+        "jp": "説明書の通りに組み立ててください。",
+        "en": "Please assemble it according to the instructions."
+      },
+      {
+        "jp": "先生に言われた通りにやってみました。",
+        "en": "I tried doing it just as the teacher told me."
+      }
+    ],
+    "〜たびに": [
+      {
+        "jp": "この歌を聞くたびに、母を思い出す。",
+        "en": "Every time I hear this song, I remember my mother."
+      },
+      {
+        "jp": "彼は会うたびに背が高くなっている。",
+        "en": "He is taller every time I meet him."
+      }
+    ],
+    "〜末に": [
+      {
+        "jp": "長い間考えた末に、留学を決めました。",
+        "en": "After thinking about it for a long time, I decided to study abroad."
+      },
+      {
+        "jp": "何度も話し合った末に、計画は中止になった。",
+        "en": "After discussing it many times, the plan was called off in the end."
+      }
+    ],
+    "〜一方で": [
+      {
+        "jp": "兄は仕事が忙しい一方で、家族との時間も大切にしている。",
+        "en": "While my brother is busy with work, he also values time with his family."
+      },
+      {
+        "jp": "この町は便利な一方で、部屋の値段がとても高い。",
+        "en": "This town is convenient, but on the other hand room prices are very high."
+      }
+    ],
+    "〜ものの": [
+      {
+        "jp": "大学は出たものの、まだ仕事が見つからない。",
+        "en": "Although I graduated from university, I still cannot find a job."
+      },
+      {
+        "jp": "約束はしたものの、行けるかどうか分からない。",
+        "en": "Although I promised, I do not know whether I can go."
+      }
+    ],
+    "〜おそれがある": [
+      {
+        "jp": "台風が近づいているので、電車が止まるおそれがある。",
+        "en": "A typhoon is approaching, so there is a risk the trains will stop."
+      },
+      {
+        "jp": "このままでは川の水があふれるおそれがあります。",
+        "en": "At this rate there is a danger that the river will overflow."
+      }
+    ],
+    "〜つつある": [
+      {
+        "jp": "この町の人口は少しずつ変わりつつある。",
+        "en": "The population of this town is gradually changing."
+      },
+      {
+        "jp": "彼の病気は少しずつ良くなりつつある。",
+        "en": "His illness is gradually getting better."
+      }
+    ],
+    "〜次第だ": [
+      {
+        "jp": "向こうに着き次第、電話します。",
+        "en": "I will call you as soon as I arrive over there."
+      },
+      {
+        "jp": "試合をするかどうかは天気次第だ。",
+        "en": "Whether we play the match depends on the weather."
+      }
+    ],
+    "使役受身形 〜させられる": [
+      {
+        "jp": "子どものころ、毎日ピアノを習わせられた。",
+        "en": "As a child, I was made to learn the piano every day."
+      },
+      {
+        "jp": "父にきらいな野さいを食べさせられました。",
+        "en": "I was made by my father to eat vegetables I dislike."
+      }
+    ],
+    "〜そうだ（伝聞）": [
+      {
+        "jp": "天気予報によると、明日は雪が降るそうだ。",
+        "en": "According to the forecast, they say it will snow tomorrow."
+      },
+      {
+        "jp": "彼は来月、国へ帰るそうだ。",
+        "en": "I hear that he is going back to his country next month."
+      }
+    ],
+    "〜について": [
+      {
+        "jp": "日本の文化について研究しています。",
+        "en": "I am doing research about Japanese culture."
+      },
+      {
+        "jp": "その事件についてよく調べてください。",
+        "en": "Please look into that incident thoroughly."
+      }
+    ],
+    "〜によって": [
+      {
+        "jp": "この家は百年前に木によって作られた。",
+        "en": "This house was made of wood a hundred years ago."
+      },
+      {
+        "jp": "習慣は国によって違います。",
+        "en": "Customs differ depending on the country."
+      }
+    ],
+    "〜において": [
+      {
+        "jp": "会議は大きな部屋において行われます。",
+        "en": "The meeting will be held in the large room."
+      },
+      {
+        "jp": "この町において、その話を知らない人はいない。",
+        "en": "In this town, there is no one who does not know that story."
+      }
+    ],
+    "〜にとって": [
+      {
+        "jp": "この写真は私にとって大切な思い出です。",
+        "en": "This photograph is a precious memory for me."
+      },
+      {
+        "jp": "子どもにとって遊びは勉強と同じくらい大切だ。",
+        "en": "For children, play is as important as study."
+      }
+    ],
+    "〜につれて": [
+      {
+        "jp": "年をとるにつれて、体力が落ちてきた。",
+        "en": "As I have got older, my physical strength has declined."
+      },
+      {
+        "jp": "山を登るにつれて、空気が冷たくなった。",
+        "en": "As we climbed the mountain, the air grew colder."
+      }
+    ],
+    "〜にしたがって": [
+      {
+        "jp": "係員の指示にしたがって、外へ出てください。",
+        "en": "Please go outside in accordance with the staff's instructions."
+      },
+      {
+        "jp": "時間がたつにしたがって、痛みは少なくなった。",
+        "en": "As time passed, the pain lessened."
+      }
+    ],
+    "〜とともに": [
+      {
+        "jp": "家族とともに新しい町へ引っ越しました。",
+        "en": "I moved to a new town together with my family."
+      },
+      {
+        "jp": "町が大きくなるとともに、生活も変わった。",
+        "en": "As the town grew, life changed along with it."
+      }
+    ],
+    "〜うちに": [
+      {
+        "jp": "熱いうちに食べてください。",
+        "en": "Please eat it while it is still hot."
+      },
+      {
+        "jp": "明るいうちに家へ帰りましょう。",
+        "en": "Let's go home while it is still light."
+      }
+    ],
+    "〜最中に": [
+      {
+        "jp": "食事の最中に電話が鳴った。",
+        "en": "The phone rang right in the middle of the meal."
+      },
+      {
+        "jp": "会議の最中に電話が鳴った。",
+        "en": "The phone rang right in the middle of the meeting."
+      }
+    ],
+    "〜際に": [
+      {
+        "jp": "お降りの際に、足元にご注意ください。",
+        "en": "When getting off, please watch your step."
+      },
+      {
+        "jp": "申し込みの際には、この用紙が必要です。",
+        "en": "This form is required when applying."
+      }
+    ],
+    "〜くせに": [
+      {
+        "jp": "彼は何も知らないくせに、えらそうに話す。",
+        "en": "He talks as if he were important, even though he knows nothing."
+      },
+      {
+        "jp": "約束したくせに、また忘れたのですか。",
+        "en": "You promised, and yet you forgot again?"
+      }
+    ],
+    "〜わりに": [
+      {
+        "jp": "この店は値段のわりに味がいい。",
+        "en": "This restaurant tastes good considering the price."
+      },
+      {
+        "jp": "彼は年のわりに若く見える。",
+        "en": "He looks young for his age."
+      }
+    ],
+    "〜だらけ": [
+      {
+        "jp": "子どもたちは土だらけになって帰ってきた。",
+        "en": "The children came home covered in dirt."
+      },
+      {
+        "jp": "この作文は間違いだらけです。",
+        "en": "This composition is full of mistakes."
+      }
+    ],
+    "〜がち": [
+      {
+        "jp": "冬は病気になりがちだ。",
+        "en": "I tend to fall ill in winter."
+      },
+      {
+        "jp": "彼は最近、会議を休みがちです。",
+        "en": "He has been prone to missing meetings recently."
+      }
+    ],
+    "〜っぽい": [
+      {
+        "jp": "この料理は水っぽくて味がしない。",
+        "en": "This dish is watery and has no taste."
+      },
+      {
+        "jp": "彼は忘れっぽくて、いつもかぎをなくす。",
+        "en": "He is forgetful and always loses his keys."
+      }
+    ],
+    "〜ば〜ほど": [
+      {
+        "jp": "日本語は勉強すればするほど面白くなる。",
+        "en": "The more you study Japanese, the more interesting it becomes."
+      },
+      {
+        "jp": "値段は安ければ安いほどいい。",
+        "en": "The cheaper the price, the better."
+      }
+    ],
+    "〜さえ": [
+      {
+        "jp": "忙しくて、食事をする時間さえない。",
+        "en": "I am so busy that I do not even have time to eat."
+      },
+      {
+        "jp": "その漢字は子どもさえ読める。",
+        "en": "Even a child can read that kanji."
+      }
+    ],
+    "〜しかない": [
+      {
+        "jp": "終電がないから、歩いて帰るしかない。",
+        "en": "There is no last train, so there is nothing to do but walk home."
+      },
+      {
+        "jp": "こうなったら、みんなでやるしかない。",
+        "en": "Now that it has come to this, we have no choice but to all do it."
+      }
+    ],
+    "〜わけだ": [
+      {
+        "jp": "十年も住んでいたのか。日本語が上手なわけだ。",
+        "en": "So you lived there for ten years. That's why your Japanese is good."
+      },
+      {
+        "jp": "窓が開いている。寒いわけだ。",
+        "en": "The window is open. No wonder it is cold."
+      }
+    ],
+    "〜ようがない": [
+      {
+        "jp": "行き先が分からないので、知らせようがない。",
+        "en": "I don't know where they went, so there is no way of telling them."
+      },
+      {
+        "jp": "こわれ方がひどくて、直しようがない。",
+        "en": "It's so badly broken that there is no fixing it."
+      }
+    ],
+    "〜っぱなし": [
+      {
+        "jp": "電気をつけっぱなしで出かけてしまった。",
+        "en": "I went out and left the light on."
+      },
+      {
+        "jp": "一日中、立ちっぱなしで足が痛い。",
+        "en": "My legs ache from standing all day."
+      }
+    ],
+    "〜かける": [
+      {
+        "jp": "読みかけの本がテーブルの上にある。",
+        "en": "There is a half-read book on the table."
+      },
+      {
+        "jp": "言いかけてやめるのはよくない。",
+        "en": "It is not good to start saying something and stop."
+      }
+    ],
+    "〜ぬく": [
+      {
+        "jp": "苦しくても、最後まで走りぬく。",
+        "en": "However hard it is, I run through to the very end."
+      },
+      {
+        "jp": "この問題は自分で考えぬく。",
+        "en": "I will think this problem through by myself."
+      }
+    ],
+    "〜きる": [
+      {
+        "jp": "大きなケーキを一人で食べきる。",
+        "en": "I finish off a whole big cake by myself."
+      },
+      {
+        "jp": "この本は一日で読みきる。",
+        "en": "I will read this book right through in a day."
+      }
+    ],
+    "〜こむ": [
+      {
+        "jp": "急に人が部屋に入りこむ。",
+        "en": "People suddenly barge into the room."
+      },
+      {
+        "jp": "大切な言葉をノートに書きこむ。",
+        "en": "I write the important words into my notebook."
+      }
+    ],
+    "〜あう": [
+      {
+        "jp": "二人で長い時間、話しあう。",
+        "en": "The two of them talk it over at length."
+      },
+      {
+        "jp": "困ったときは助けあうことが大切だ。",
+        "en": "It is important to help one another in hard times."
+      }
+    ],
+    "〜っこない": [
+      {
+        "jp": "そんな話、だれも信じっこない。",
+        "en": "Nobody is going to believe a story like that."
+      },
+      {
+        "jp": "一日で全部覚えられっこない。",
+        "en": "There's no way of memorising it all in a day."
+      }
+    ],
+    "〜ものだから": [
+      {
+        "jp": "道がこんでいたものだから、遅れました。",
+        "en": "The roads were busy, which is why I was late."
+      },
+      {
+        "jp": "急いでいたものだから、かさを忘れた。",
+        "en": "I was in a hurry, so I forgot my umbrella."
+      }
+    ],
+    "〜もので": [
+      {
+        "jp": "子どもが小さいもので、夜は出られません。",
+        "en": "My children are small, so I can't go out in the evening."
+      },
+      {
+        "jp": "初めてのもので、よく分かりません。",
+        "en": "It's my first time, so I don't really understand."
+      }
+    ],
+    "〜からこそ": [
+      {
+        "jp": "大事な友だちだからこそ、本当のことを言う。",
+        "en": "It is precisely because he is a dear friend that I tell him the truth."
+      },
+      {
+        "jp": "苦労したからこそ、今のよろこびがある。",
+        "en": "It is exactly because it was hard that today feels so good."
+      }
+    ],
+    "〜以上": [
+      {
+        "jp": "引き受けた以上、最後までやります。",
+        "en": "Now that I have taken it on, I will see it through."
+      },
+      {
+        "jp": "約束した以上、守らなければならない。",
+        "en": "Having promised, I must keep my word."
+      }
+    ],
+    "〜上で": [
+      {
+        "jp": "よく調べた上で、返事をします。",
+        "en": "I will reply after looking into it properly."
+      },
+      {
+        "jp": "家族と話し合った上で決めたい。",
+        "en": "I want to decide after talking it over with my family."
+      }
+    ],
+    "〜限り": [
+      {
+        "jp": "体が動く限り、働きたいと思う。",
+        "en": "I want to keep working for as long as my body holds out."
+      },
+      {
+        "jp": "私が知る限り、彼はうそをつかない。",
+        "en": "As far as I know, he does not lie."
+      }
+    ],
+    "〜はずがない": [
+      {
+        "jp": "あの人がそんなことを言うはずがない。",
+        "en": "There is no way that person would say such a thing."
+      },
+      {
+        "jp": "こんな時間に店が開いているはずがない。",
+        "en": "The shop cannot possibly be open at this hour."
+      }
+    ],
+    "〜てはいられない": [
+      {
+        "jp": "時間がないので、休んではいられない。",
+        "en": "There's no time, so I can't afford to rest."
+      },
+      {
+        "jp": "こんな所でゆっくりしてはいられない。",
+        "en": "I can't afford to take it easy in a place like this."
+      }
+    ],
+    "〜てたまらない": [
+      {
+        "jp": "朝から何も食べていなくて、おなかがすいてたまらない。",
+        "en": "I've eaten nothing since morning and I'm unbearably hungry."
+      },
+      {
+        "jp": "国の家族に会いたくてたまらない。",
+        "en": "I miss my family back home terribly."
+      }
+    ],
+    "〜てしかたがない": [
+      {
+        "jp": "試験の点が気になってしかたがない。",
+        "en": "I can't stop worrying about my exam mark."
+      },
+      {
+        "jp": "この部屋はうるさくてしかたがない。",
+        "en": "This room is unbearably noisy."
+      }
+    ],
+    "〜ようなら": [
+      {
+        "jp": "熱が下がらないようなら、病院へ行きなさい。",
+        "en": "If the fever doesn't seem to come down, go to the hospital."
+      },
+      {
+        "jp": "間に合わないようなら、電話をください。",
+        "en": "If it looks like you won't make it, give me a call."
+      }
+    ],
+    "〜としたら": [
+      {
+        "jp": "もし今から出るとしたら、何時に着きますか。",
+        "en": "Supposing we left now, what time would we arrive?"
+      },
+      {
+        "jp": "この計画を進めるとしたら、お金が必要だ。",
+        "en": "If we were to go ahead with this plan, we would need money."
+      }
+    ],
+    "〜とすれば": [
+      {
+        "jp": "彼が正しいとすれば、私が間違っている。",
+        "en": "If we take it that he is right, then I am wrong."
+      },
+      {
+        "jp": "全員参加するとすれば、部屋が足りない。",
+        "en": "If everyone attends, there won't be enough room."
+      }
+    ],
+    "〜にしては": [
+      {
+        "jp": "初めてにしては、よくできています。",
+        "en": "For a first attempt, it is very well done."
+      },
+      {
+        "jp": "六月にしては、ずいぶん寒い朝だ。",
+        "en": "It is a remarkably cold morning for June."
+      }
+    ],
+    "〜にしても": [
+      {
+        "jp": "行くにしても、用意に時間がかかる。",
+        "en": "Even if we go, getting ready will take time."
+      },
+      {
+        "jp": "安いにしても、質が悪ければ買わない。",
+        "en": "Even if it's cheap, I won't buy it if the quality is poor."
+      }
+    ],
+    "〜どころではない": [
+      {
+        "jp": "仕事が忙しくて、旅行どころではない。",
+        "en": "Work is so busy that a trip is out of the question."
+      },
+      {
+        "jp": "熱があって、勉強どころではなかった。",
+        "en": "I had a fever and was in no state to study."
+      }
+    ],
+    "〜ばかりでなく": [
+      {
+        "jp": "彼は英語ばかりでなく、中国語も話せる。",
+        "en": "He speaks not only English but Chinese as well."
+      },
+      {
+        "jp": "この店は安いばかりでなく、品物もいい。",
+        "en": "This shop is not only cheap; the goods are good too."
+      }
+    ],
+    "〜も〜ば〜も": [
+      {
+        "jp": "彼は歌も歌えば、絵もかく。",
+        "en": "He both sings and paints."
+      },
+      {
+        "jp": "この町は海もあれば、山もある。",
+        "en": "This town has both the sea and the mountains."
+      }
+    ],
+    "〜やら〜やら": [
+      {
+        "jp": "休みの日は、そうじやら買い物やらで忙しい。",
+        "en": "On my days off, what with cleaning and shopping, I'm busy."
+      },
+      {
+        "jp": "うれしいやら悲しいやら、変な気持ちだ。",
+        "en": "What with joy and sadness, I feel strange."
+      }
+    ],
+    "〜とか": [
+      {
+        "jp": "休みの日は本を読むとか、音楽を聞くとかしています。",
+        "en": "On my days off I do things like read and listen to music."
+      },
+      {
+        "jp": "この店にはパンとかケーキとかがあります。",
+        "en": "This shop has things like bread and cake."
+      }
+    ],
+    "〜こそ": [
+      {
+        "jp": "今年こそ、日本語の試験に合格したい。",
+        "en": "This year above all, I want to pass the Japanese exam."
+      },
+      {
+        "jp": "今度こそ、うまくやってみせる。",
+        "en": "This time for sure, I will pull it off."
+      }
+    ],
+    "〜さえ〜ば": [
+      {
+        "jp": "この薬さえ飲めば、すぐによくなります。",
+        "en": "Provided you take this medicine, you'll get better soon."
+      },
+      {
+        "jp": "時間さえあれば、もっと勉強できるのに。",
+        "en": "If only I had the time, I could study more."
+      }
+    ]
+  },
+  "N2": {
+    "〜にもかかわらず": [
+      {
+        "jp": "大雨にもかかわらず、試合は行われた。",
+        "en": "Despite the heavy rain, the match was held."
+      },
+      {
+        "jp": "何度も注意したにもかかわらず、彼は同じ失敗をした。",
+        "en": "In spite of being warned many times, he made the same mistake."
+      }
+    ],
+    "〜ざるを得ない": [
+      {
+        "jp": "台風のため、旅行を中止せざるを得なかった。",
+        "en": "Because of the typhoon, we had no choice but to cancel the trip."
+      },
+      {
+        "jp": "この数字を見れば、失敗を認めざるを得ない。",
+        "en": "Looking at these figures, one cannot but admit the failure."
+      }
+    ],
+    "〜つつも": [
+      {
+        "jp": "体に悪いと知りつつも、たばこをやめられない。",
+        "en": "Even while knowing it is bad for my health, I cannot quit smoking."
+      },
+      {
+        "jp": "悪いと思いつつも、まだあやまっていない。",
+        "en": "Although I feel bad about it, I still have not apologised."
+      }
+    ],
+    "〜あげくに": [
+      {
+        "jp": "長い間迷ったあげくに、彼は会社を辞めた。",
+        "en": "After hesitating for a long time, he ended up quitting the company."
+      },
+      {
+        "jp": "何時間も話し合ったあげくに、答えは出なかった。",
+        "en": "After discussing for hours, in the end no answer emerged."
+      }
+    ],
+    "〜に伴って": [
+      {
+        "jp": "人口の増加に伴って、住宅の問題も大きくなった。",
+        "en": "Along with the increase in population, the housing problem also grew."
+      },
+      {
+        "jp": "気温が上がるに伴って、雪が解け始めた。",
+        "en": "As the temperature rose, the snow began to melt."
+      }
+    ],
+    "〜に基づいて": [
+      {
+        "jp": "この映画は実際の事件に基づいて作られた。",
+        "en": "This film was made based on a real incident."
+      },
+      {
+        "jp": "調査に基づいて、計画を立て直した。",
+        "en": "We rebuilt the plan based on the survey."
+      }
+    ],
+    "〜からといって": [
+      {
+        "jp": "値段が高いからといって、品質がいいとは限らない。",
+        "en": "Just because the price is high does not mean the quality is good."
+      },
+      {
+        "jp": "若いからといって、むりをしてはいけない。",
+        "en": "Just because you are young does not mean you should overdo it."
+      }
+    ],
+    "〜どころか": [
+      {
+        "jp": "彼は漢字どころか、ひらがなも読めない。",
+        "en": "Far from kanji, he cannot even read hiragana."
+      },
+      {
+        "jp": "雨は止むどころか、ますます強くなった。",
+        "en": "Far from stopping, the rain grew even stronger."
+      }
+    ],
+    "〜にすぎない": [
+      {
+        "jp": "私が知っているのは、ほんの一部にすぎない。",
+        "en": "What I know is nothing more than a small part."
+      },
+      {
+        "jp": "それはただの言いのがれにすぎない。",
+        "en": "That is merely an evasion."
+      }
+    ],
+    "〜を問わず": [
+      {
+        "jp": "この仕事は経験を問わず、だれでも申し込める。",
+        "en": "Regardless of experience, anyone can apply for this job."
+      },
+      {
+        "jp": "昼夜を問わず、工場は動いている。",
+        "en": "The factory runs regardless of day or night."
+      }
+    ],
+    "〜はもとより": [
+      {
+        "jp": "彼は英語はもとより、中国語も話せる。",
+        "en": "He can speak Chinese, not to mention English."
+      },
+      {
+        "jp": "この店は味はもとより、値段も安い。",
+        "en": "This restaurant is cheap, not to mention the taste."
+      }
+    ],
+    "〜ものだ": [
+      {
+        "jp": "子どものころ、よくこの川で泳いだものだ。",
+        "en": "When I was a child, I used to swim in this river a lot."
+      },
+      {
+        "jp": "学生時代はよく先生に注意されたものだ。",
+        "en": "In my student days I used to get warned by teachers a lot."
+      }
+    ],
+    "〜てからでないと": [
+      {
+        "jp": "よく調べてからでないと、返事はできません。",
+        "en": "I cannot answer unless I look into it properly first."
+      },
+      {
+        "jp": "係の人に聞いてからでないと、中には入れません。",
+        "en": "You cannot go inside until after you ask the attendant."
+      }
+    ],
+    "〜がたい": [
+      {
+        "jp": "彼が犯人だとは信じがたい。",
+        "en": "It is hard to believe that he is the culprit."
+      },
+      {
+        "jp": "あの日のことは忘れがたい思い出だ。",
+        "en": "What happened that day is a memory hard to forget."
+      }
+    ],
+    "〜かねない": [
+      {
+        "jp": "そんな運転をしていては、大けがをしかねない。",
+        "en": "Driving like that could well cause a serious injury."
+      },
+      {
+        "jp": "この問題を放っておくと、大きな損害になりかねない。",
+        "en": "If we leave this problem alone, it might result in serious damage."
+      }
+    ],
+    "〜きり": [
+      {
+        "jp": "彼とは去年会ったきり、一度も会っていない。",
+        "en": "I met him last year and have not seen him once since."
+      },
+      {
+        "jp": "父は朝出かけたきり、まだ帰らない。",
+        "en": "My father went out in the morning and still has not come back."
+      }
+    ],
+    "〜ぬきで": [
+      {
+        "jp": "朝食ぬきで学校へ行くのは体に悪い。",
+        "en": "Going to school without breakfast is bad for your health."
+      },
+      {
+        "jp": "今日はかたい話ぬきで楽しみましょう。",
+        "en": "Let us enjoy ourselves today without the formal talk."
+      }
+    ],
+    "〜からには": [
+      {
+        "jp": "引き受けたからには、最後までやり通します。",
+        "en": "Now that I have taken it on, I will see it through to the end."
+      },
+      {
+        "jp": "約束したからには、守らなければならない。",
+        "en": "Since you have made a promise, you must keep it."
+      }
+    ],
+    "〜ずにはいられない": [
+      {
+        "jp": "あの映画を見ると、なかずにはいられない。",
+        "en": "When I watch that film, I cannot help but cry."
+      },
+      {
+        "jp": "彼の話を聞いて、笑わずにはいられなかった。",
+        "en": "Hearing his story, I could not help laughing."
+      }
+    ],
+    "〜ばかりか": [
+      {
+        "jp": "彼は日本語ばかりか、中国語も話せる。",
+        "en": "He can speak not only Japanese but Chinese as well."
+      },
+      {
+        "jp": "この部屋はせまいばかりか、暗くて寒い。",
+        "en": "This room is not only cramped but dark and cold."
+      }
+    ],
+    "〜ばかりに": [
+      {
+        "jp": "一言余計なことを言ったばかりに、彼を怒らせてしまった。",
+        "en": "Simply because I said one unnecessary word, I made him angry."
+      },
+      {
+        "jp": "道を間違えたばかりに、電車に乗り遅れた。",
+        "en": "Just because I took the wrong road, I missed the train."
+      }
+    ],
+    "〜のみならず": [
+      {
+        "jp": "この薬は大人のみならず、子どもにも効く。",
+        "en": "This medicine works not only on adults but on children too."
+      },
+      {
+        "jp": "彼は研究のみならず、教育にも力を入れている。",
+        "en": "He puts effort not only into research but into education as well."
+      }
+    ],
+    "〜に応じて": [
+      {
+        "jp": "料金は年齢に応じて変わります。",
+        "en": "The fee changes according to age."
+      },
+      {
+        "jp": "客の希望に応じて、料理を作ります。",
+        "en": "We prepare dishes in response to the customer wishes."
+      }
+    ],
+    "〜にかかわらず": [
+      {
+        "jp": "天候にかかわらず、大会は開かれる。",
+        "en": "Regardless of the weather, the tournament will be held."
+      },
+      {
+        "jp": "経験のあるなしにかかわらず、申し込めます。",
+        "en": "You may apply irrespective of whether you have experience."
+      }
+    ],
+    "〜に限らず": [
+      {
+        "jp": "この問題は日本に限らず、世界中で起きている。",
+        "en": "This problem occurs not only in Japan but all over the world."
+      },
+      {
+        "jp": "土曜日に限らず、いつでも開いています。",
+        "en": "It is open any time, not just on Saturdays."
+      }
+    ],
+    "〜にかけては": [
+      {
+        "jp": "走ることにかけては、彼にかなう者はいない。",
+        "en": "When it comes to running, no one can beat him."
+      },
+      {
+        "jp": "料理の早さにかけては自信があります。",
+        "en": "When it comes to speed of cooking, I am confident."
+      }
+    ],
+    "〜に加えて": [
+      {
+        "jp": "強い風に加えて、雨まで降り出した。",
+        "en": "In addition to the strong wind, it even started to rain."
+      },
+      {
+        "jp": "彼は実力に加えて、運にも助けられた。",
+        "en": "In addition to his ability, he was helped by luck as well."
+      }
+    ],
+    "〜に先立って": [
+      {
+        "jp": "開会に先立って、館長があいさつをした。",
+        "en": "Prior to the opening, the director gave a greeting."
+      },
+      {
+        "jp": "旅行に先立って、必要な物を買いそろえた。",
+        "en": "Ahead of the trip, I bought all the necessary things."
+      }
+    ],
+    "〜に反して": [
+      {
+        "jp": "予想に反して、試験はやさしかった。",
+        "en": "Contrary to expectations, the exam was easy."
+      },
+      {
+        "jp": "親の願いに反して、彼は音楽の道を選んだ。",
+        "en": "Contrary to his parents wishes, he chose the path of music."
+      }
+    ],
+    "〜にほかならない": [
+      {
+        "jp": "彼が勝ったのは、努力のたまものにほかならない。",
+        "en": "His victory is nothing other than the fruit of his effort."
+      },
+      {
+        "jp": "この失敗は準備不足にほかならない。",
+        "en": "This failure is nothing other than a lack of preparation."
+      }
+    ],
+    "〜をめぐって": [
+      {
+        "jp": "土地の使い方をめぐって、住民の意見が分かれた。",
+        "en": "Opinions among residents were divided over how to use the land."
+      },
+      {
+        "jp": "その発言をめぐって、大きな議論が起きた。",
+        "en": "A big argument arose surrounding that remark."
+      }
+    ],
+    "〜を通じて": [
+      {
+        "jp": "友人を通じて、その会社を知りました。",
+        "en": "I learned about that company through a friend."
+      },
+      {
+        "jp": "この地方は一年を通じて雨が多い。",
+        "en": "This region has a lot of rain throughout the year."
+      }
+    ],
+    "〜をはじめ": [
+      {
+        "jp": "校長先生をはじめ、多くの先生が集まった。",
+        "en": "Starting with the principal, many teachers gathered."
+      },
+      {
+        "jp": "東京をはじめ、大きな町では部屋代が高い。",
+        "en": "In big cities, starting with Tokyo, room costs are high."
+      }
+    ],
+    "〜をもとに": [
+      {
+        "jp": "この物語は古い伝説をもとに書かれた。",
+        "en": "This story was written on the basis of an old legend."
+      },
+      {
+        "jp": "調べた資料をもとに、発表の準備をした。",
+        "en": "I prepared my presentation working from the material I had researched."
+      }
+    ],
+    "〜得る／〜得ない": [
+      {
+        "jp": "そんなことは十分あり得る話だ。",
+        "en": "That is something that could quite possibly happen."
+      },
+      {
+        "jp": "彼がうそをつくとは考え得ない。",
+        "en": "It is unthinkable that he would tell a lie."
+      }
+    ],
+    "〜かねる": [
+      {
+        "jp": "その件については、お答えしかねます。",
+        "en": "I am unable to answer regarding that matter."
+      },
+      {
+        "jp": "その品は今、お売りしかねます。",
+        "en": "We are unable to sell that item at present."
+      }
+    ],
+    "〜ことなく": [
+      {
+        "jp": "彼は一度も休むことなく働き続けた。",
+        "en": "He kept working without ever taking a single break."
+      },
+      {
+        "jp": "機械は昼も夜も止まることなく動いている。",
+        "en": "The machine runs day and night without stopping."
+      }
+    ],
+    "〜ないことには": [
+      {
+        "jp": "実際に見ないことには、何とも言えない。",
+        "en": "Unless I actually see it, I cannot say anything."
+      },
+      {
+        "jp": "練習しないことには、上手にならない。",
+        "en": "Without practising, you will not get better."
+      }
+    ],
+    "〜ということだ": [
+      {
+        "jp": "彼は来月国へ帰るということだ。",
+        "en": "I hear that he is going back to his country next month."
+      },
+      {
+        "jp": "返事がないということは、断られたということだ。",
+        "en": "No reply means that we have been refused."
+      }
+    ],
+    "〜というより": [
+      {
+        "jp": "あの人はこわいというより、冷たい。",
+        "en": "That person is cold rather than frightening."
+      },
+      {
+        "jp": "これは食事というより、おやつだ。",
+        "en": "This is a snack rather than a meal."
+      }
+    ],
+    "〜わけにはいかない": [
+      {
+        "jp": "大切な会議だから、休むわけにはいかない。",
+        "en": "It is an important meeting, so I cannot very well take the day off."
+      },
+      {
+        "jp": "車で来たので、お酒を飲むわけにはいかない。",
+        "en": "I came by car, so drinking is not an option."
+      }
+    ],
+    "〜に際して": [
+      {
+        "jp": "出発に際して、荷物をよく確認してください。",
+        "en": "Please check your luggage carefully before departure."
+      },
+      {
+        "jp": "開会に際して、一言ごあいさつ申し上げます。",
+        "en": "On the occasion of the opening, allow me to say a few words."
+      }
+    ],
+    "〜にあたって": [
+      {
+        "jp": "試験を受けるにあたって、計画を立てた。",
+        "en": "With the exam coming up, I made a plan."
+      },
+      {
+        "jp": "出発にあたって、家族に手紙を書いた。",
+        "en": "On the occasion of my departure, I wrote to my family."
+      }
+    ],
+    "〜をもって": [
+      {
+        "jp": "本日をもって、この店は閉店いたします。",
+        "en": "As of today, this shop closes for good."
+      },
+      {
+        "jp": "彼は実力をもって、周囲を認めさせた。",
+        "en": "He made those around him acknowledge him by sheer ability."
+      }
+    ],
+    "〜のもとで": [
+      {
+        "jp": "先生のもとで、三年間研究を続けた。",
+        "en": "I continued my research for three years under my professor."
+      },
+      {
+        "jp": "新しい社長のもとで、会社は大きく変わった。",
+        "en": "Under the new president, the company changed greatly."
+      }
+    ],
+    "〜に沿って": [
+      {
+        "jp": "川に沿って、細い道が続いている。",
+        "en": "A narrow path runs along the river."
+      },
+      {
+        "jp": "計画に沿って、作業を進めています。",
+        "en": "We are proceeding with the work in line with the plan."
+      }
+    ],
+    "〜をきっかけに": [
+      {
+        "jp": "入院をきっかけに、たばこをやめた。",
+        "en": "Being hospitalised was what made me give up smoking."
+      },
+      {
+        "jp": "留学をきっかけに、彼の考え方が変わった。",
+        "en": "Studying abroad was the thing that changed his outlook."
+      }
+    ],
+    "〜を契機に": [
+      {
+        "jp": "入学を契機に、生活が大きく変わった。",
+        "en": "Starting school was the turning point at which life changed greatly."
+      },
+      {
+        "jp": "病気を契機に、生活を見直した。",
+        "en": "Illness was the trigger for rethinking how I live."
+      }
+    ],
+    "〜反面": [
+      {
+        "jp": "この方法は速い反面、費用が高い。",
+        "en": "This method is fast, but on the other hand it is expensive."
+      },
+      {
+        "jp": "都会は便利な反面、物の値段が高い。",
+        "en": "Cities are convenient, while prices are high."
+      }
+    ],
+    "〜一方だ": [
+      {
+        "jp": "この町の人口は減る一方だ。",
+        "en": "The population of this town only keeps falling."
+      },
+      {
+        "jp": "物の値段は上がる一方です。",
+        "en": "Prices just keep on rising."
+      }
+    ],
+    "〜ばかりだ": [
+      {
+        "jp": "けがの具合は悪くなるばかりだ。",
+        "en": "The injury is only getting worse."
+      },
+      {
+        "jp": "待っていても、不安は増すばかりだった。",
+        "en": "Waiting only made the anxiety grow."
+      }
+    ],
+    "〜まい": [
+      {
+        "jp": "二度と同じ失敗はするまいと決めた。",
+        "en": "I resolved never to make the same mistake again."
+      },
+      {
+        "jp": "この雨では、彼は来るまい。",
+        "en": "In this rain, he surely will not come."
+      }
+    ],
+    "〜ことはない": [
+      {
+        "jp": "そんなに心配することはない。",
+        "en": "There is no need to worry so much."
+      },
+      {
+        "jp": "一度の失敗で、あきらめることはない。",
+        "en": "There's no call to give up over one failure."
+      }
+    ],
+    "〜ものがある": [
+      {
+        "jp": "彼の話には、人を引きつけるものがある。",
+        "en": "There is something about the way he talks that draws people in."
+      },
+      {
+        "jp": "その言葉には、心を動かすものがある。",
+        "en": "There is something in those words that moves the heart."
+      }
+    ],
+    "〜ものなら": [
+      {
+        "jp": "行けるものなら、今すぐ国へ帰りたい。",
+        "en": "If I could, I would go home to my country this instant."
+      },
+      {
+        "jp": "やり直せるものなら、やり直したい。",
+        "en": "If it were possible to start over, I would."
+      }
+    ],
+    "〜ものか": [
+      {
+        "jp": "あんな店に、二度と行くものか。",
+        "en": "As if I would ever go to that shop again!"
+      },
+      {
+        "jp": "彼の言うことなど、信じるものか。",
+        "en": "As if I would believe anything he says!"
+      }
+    ],
+    "〜だけあって": [
+      {
+        "jp": "長年練習しただけあって、とても上手だ。",
+        "en": "Having practised for years, he is very good, as one would expect."
+      },
+      {
+        "jp": "有名な店だけあって、味は確かだ。",
+        "en": "It's a famous restaurant, and sure enough the food is good."
+      }
+    ],
+    "〜だけに": [
+      {
+        "jp": "期待が大きかっただけに、失望も大きい。",
+        "en": "The hopes were high, and the disappointment is all the greater for it."
+      },
+      {
+        "jp": "初めての土地だけに、不安も感じた。",
+        "en": "It being unfamiliar country, I felt all the more uneasy."
+      }
+    ],
+    "〜たところ": [
+      {
+        "jp": "先生に相談したところ、すぐに解決した。",
+        "en": "When I consulted my teacher, it was resolved at once."
+      },
+      {
+        "jp": "店に問い合わせたところ、まだ在庫があった。",
+        "en": "When I enquired at the shop, they still had stock."
+      }
+    ],
+    "〜たところで": [
+      {
+        "jp": "今から急いだところで、間に合わない。",
+        "en": "Even if we hurried now, we would not make it."
+      },
+      {
+        "jp": "今さら言ったところで、何も変わらない。",
+        "en": "Saying it now would change nothing."
+      }
+    ],
+    "〜てはならない": [
+      {
+        "jp": "この場所に車を止めてはならない。",
+        "en": "Vehicles must not be parked in this place."
+      },
+      {
+        "jp": "約束を軽く考えてはならない。",
+        "en": "A promise must not be taken lightly."
+      }
+    ],
+    "〜かのようだ": [
+      {
+        "jp": "彼はすべてを知っているかのように話す。",
+        "en": "He talks as though he knows everything."
+      },
+      {
+        "jp": "その部屋は時が止まったかのようだった。",
+        "en": "The room was as if time had stopped in it."
+      }
+    ],
+    "〜同然": [
+      {
+        "jp": "この家は新品同然だ。",
+        "en": "This house is as good as new."
+      },
+      {
+        "jp": "彼は家族も同然の親しい友人だ。",
+        "en": "He is a close friend, practically family."
+      }
+    ],
+    "〜に相違ない": [
+      {
+        "jp": "この字を見れば、彼が書いたに相違ない。",
+        "en": "Looking at this hand, there can be no doubt he wrote it."
+      },
+      {
+        "jp": "あの様子から見て、うまくいったに相違ない。",
+        "en": "From the look of things, it must surely have gone well."
+      }
+    ],
+    "〜に決まっている": [
+      {
+        "jp": "あんな安い品物は、質が悪いに決まっている。",
+        "en": "Goods that cheap are bound to be poor quality."
+      },
+      {
+        "jp": "今から出ても、遅れるに決まっている。",
+        "en": "Even leaving now, we're bound to be late."
+      }
+    ],
+    "〜ようでは": [
+      {
+        "jp": "こんな成績を取るようでは、合格できない。",
+        "en": "If you're going to get marks like these, you won't pass."
+      },
+      {
+        "jp": "すぐにあきらめるようでは、上達しない。",
+        "en": "If you give up that quickly, you will not improve."
+      }
+    ],
+    "〜くらいなら": [
+      {
+        "jp": "あんな店で待つくらいなら、歩いて帰る。",
+        "en": "Sooner than wait at that shop, I'll walk home."
+      },
+      {
+        "jp": "捨てるくらいなら、私にください。",
+        "en": "Rather than throw it away, give it to me."
+      }
+    ],
+    "〜あまり": [
+      {
+        "jp": "うれしさのあまり、涙が出た。",
+        "en": "I was so overjoyed that tears came."
+      },
+      {
+        "jp": "心配のあまり、夜も眠れなかった。",
+        "en": "So great was my worry that I could not sleep at night."
+      }
+    ],
+    "〜からして": [
+      {
+        "jp": "その言い方からして、彼は怒っている。",
+        "en": "Judging even from the way he said it, he is angry."
+      },
+      {
+        "jp": "見た目からして、この料理はおいしそうだ。",
+        "en": "Going by its appearance alone, this dish looks delicious."
+      }
+    ],
+    "〜からすると": [
+      {
+        "jp": "これまでの経験からすると、うまくいくだろう。",
+        "en": "Going by experience so far, it should go well."
+      },
+      {
+        "jp": "この足あとからすると、犯人は大きな男だ。",
+        "en": "From these footprints, the culprit is a large man."
+      }
+    ],
+    "〜にしろ〜にしろ": [
+      {
+        "jp": "行くにしろ行かないにしろ、早く決めてください。",
+        "en": "Whether you go or not, please decide soon."
+      },
+      {
+        "jp": "雨にしろ雪にしろ、明日は出発します。",
+        "en": "Rain or snow, we set off tomorrow."
+      }
+    ]
+  },
+  "N1": {
+    "〜んばかりに": [
+      {
+        "jp": "彼は飛び上がらんばかりに喜んだ。",
+        "en": "He rejoiced as if he were about to leap into the air."
+      },
+      {
+        "jp": "彼女はあふれんばかりに涙をためていた。",
+        "en": "Her eyes were brimming as if the tears were about to overflow."
+      }
+    ],
+    "〜べからず": [
+      {
+        "jp": "この壁に落書きするべからず。",
+        "en": "No graffiti on this wall."
+      },
+      {
+        "jp": "ここに車を止めるべからず。",
+        "en": "Parking is forbidden here."
+      }
+    ],
+    "〜ゆえに": [
+      {
+        "jp": "若さゆえに、彼は大きな失敗をした。",
+        "en": "Because of his youth, he made a big mistake."
+      },
+      {
+        "jp": "貧しさゆえに、学校へ通えない子どもがいる。",
+        "en": "There are children who cannot attend school on account of poverty."
+      }
+    ],
+    "〜なくして(は)": [
+      {
+        "jp": "彼の助けなくしては、この仕事は終わらなかった。",
+        "en": "Without his help, this work would not have been finished."
+      },
+      {
+        "jp": "努力なくして成功はあり得ない。",
+        "en": "There can be no success without effort."
+      }
+    ],
+    "〜極まりない": [
+      {
+        "jp": "あの店の態度は失礼極まりない。",
+        "en": "The attitude at that shop is extremely rude."
+      },
+      {
+        "jp": "危険極まりない道を、彼は一人で歩いた。",
+        "en": "He walked alone along an extremely dangerous road."
+      }
+    ],
+    "〜きらいがある": [
+      {
+        "jp": "彼は物事を悪い方に考えるきらいがある。",
+        "en": "He tends to think of things in a negative way."
+      },
+      {
+        "jp": "この新聞は事実を大げさに書くきらいがある。",
+        "en": "This newspaper has a tendency to exaggerate the facts."
+      }
+    ],
+    "〜にたえない": [
+      {
+        "jp": "その事故の話は聞くにたえない。",
+        "en": "The account of that accident is unbearable to listen to."
+      },
+      {
+        "jp": "彼の下品な言葉は聞くにたえなかった。",
+        "en": "His vulgar words were unbearable to hear."
+      }
+    ],
+    "〜てやまない": [
+      {
+        "jp": "皆様のご成功を願ってやまない。",
+        "en": "I wish all of you success from the bottom of my heart."
+      },
+      {
+        "jp": "母は今も息子の帰りを待ってやまない。",
+        "en": "Even now my mother never stops waiting for her son to return."
+      }
+    ],
+    "〜まみれ": [
+      {
+        "jp": "子どもたちは泥まみれになって遊んでいた。",
+        "en": "The children were playing covered in mud."
+      },
+      {
+        "jp": "彼は油まみれの手で機械を直していた。",
+        "en": "He was repairing the machine with oil-covered hands."
+      }
+    ],
+    "〜だに": [
+      {
+        "jp": "そんな恐ろしいことは想像だにしなかった。",
+        "en": "I did not even imagine such a terrible thing."
+      },
+      {
+        "jp": "あの日のことは、思い出すだに恐ろしい。",
+        "en": "Even just remembering that day is frightening."
+      }
+    ],
+    "〜あっての": [
+      {
+        "jp": "お客様あっての商売だということを忘れるな。",
+        "en": "Do not forget that business exists only thanks to the customers."
+      },
+      {
+        "jp": "努力あっての成功であり、運だけではない。",
+        "en": "Success comes only thanks to effort, not luck alone."
+      }
+    ],
+    "〜なしに": [
+      {
+        "jp": "彼は何の説明もなしに会社を辞めた。",
+        "en": "He quit the company without any explanation at all."
+      },
+      {
+        "jp": "許しなしに部屋へ入ってはいけない。",
+        "en": "You must not enter the room without permission."
+      }
+    ],
+    "〜いかんによらず": [
+      {
+        "jp": "理由のいかんによらず、遅刻は認められない。",
+        "en": "Regardless of the reason, lateness is not accepted."
+      },
+      {
+        "jp": "天候のいかんによらず、大会は開かれる。",
+        "en": "Regardless of the weather, the tournament will be held."
+      }
+    ],
+    "〜をおいて": [
+      {
+        "jp": "この役を任せられるのは、彼をおいてほかにいない。",
+        "en": "There is no one but him who can be entrusted with this role."
+      },
+      {
+        "jp": "この町をおいて、これほど静かな場所はない。",
+        "en": "There is no place as quiet as this town, other than here."
+      }
+    ],
+    "〜たりとも": [
+      {
+        "jp": "一日たりとも君のことを忘れたことはない。",
+        "en": "There has not been a single day I forgot about you."
+      },
+      {
+        "jp": "一円たりともむだにはできない。",
+        "en": "We cannot waste even a single yen."
+      }
+    ],
+    "〜ないまでも": [
+      {
+        "jp": "毎日とは言わないまでも、週に一度は運動したい。",
+        "en": "If not every day, I would like to exercise once a week."
+      },
+      {
+        "jp": "完成しないまでも、ここまでは進めておきたい。",
+        "en": "Even if it is not finished, I want to get this far at least."
+      }
+    ],
+    "〜ずじまい": [
+      {
+        "jp": "結局、彼には会えずじまいだった。",
+        "en": "In the end I never did get to meet him."
+      },
+      {
+        "jp": "その本は買ったのに、読まずじまいになった。",
+        "en": "I bought that book but ended up never reading it."
+      }
+    ],
+    "〜が早いか": [
+      {
+        "jp": "彼はベルが鳴るが早いか、教室を飛び出した。",
+        "en": "No sooner had the bell rung than he dashed out of the classroom."
+      },
+      {
+        "jp": "子どもは家に着くが早いか、外へ遊びに行った。",
+        "en": "The moment the child got home, he went out to play."
+      }
+    ],
+    "〜や否や": [
+      {
+        "jp": "彼は席に着くや否や、話し始めた。",
+        "en": "No sooner had he sat down than he began to talk."
+      },
+      {
+        "jp": "その知らせを聞くや否や、母は泣き出した。",
+        "en": "The instant she heard the news, my mother burst into tears."
+      }
+    ],
+    "〜そばから": [
+      {
+        "jp": "習ったそばから忘れてしまう。",
+        "en": "No sooner do I learn it than I forget it."
+      },
+      {
+        "jp": "片づけるそばから、子どもが部屋を散らかす。",
+        "en": "No sooner do I tidy up than the child messes the room again."
+      }
+    ],
+    "〜なり": [
+      {
+        "jp": "彼は部屋に入るなり、窓を大きく開けた。",
+        "en": "The moment he entered the room, he threw the window wide open."
+      },
+      {
+        "jp": "母はその手紙を読むなり、黙ってしまった。",
+        "en": "The instant my mother read that letter, she fell silent."
+      }
+    ],
+    "〜がてら": [
+      {
+        "jp": "散歩がてら、駅前の本屋に寄った。",
+        "en": "While out for a walk, I dropped by the bookshop in front of the station."
+      },
+      {
+        "jp": "買い物がてら、友人の家を訪ねた。",
+        "en": "I visited a friend while out shopping."
+      }
+    ],
+    "〜かたわら": [
+      {
+        "jp": "彼は会社で働くかたわら、小説を書いている。",
+        "en": "Alongside working at a company, he writes novels."
+      },
+      {
+        "jp": "母は家事のかたわら、近所の子どもに英語を教えている。",
+        "en": "Alongside the housework, my mother teaches English to neighbourhood children."
+      }
+    ],
+    "〜ごとき／〜ごとく": [
+      {
+        "jp": "彼のごとき人物は、二度と現れないだろう。",
+        "en": "A person like him will probably never appear again."
+      },
+      {
+        "jp": "時は矢のごとく過ぎていった。",
+        "en": "Time passed by like an arrow."
+      }
+    ],
+    "〜ずくめ": [
+      {
+        "jp": "今年はいいことずくめの一年だった。",
+        "en": "This year was a year full of nothing but good things."
+      },
+      {
+        "jp": "黒ずくめの男が門の前に立っていた。",
+        "en": "A man dressed all in black was standing in front of the gate."
+      }
+    ],
+    "〜めく": [
+      {
+        "jp": "三月に入ると、日ざしが春めく。",
+        "en": "Once March arrives, the sunlight takes on the air of spring."
+      },
+      {
+        "jp": "彼の言い方はいつも皮肉めく。",
+        "en": "His way of speaking always takes on a sarcastic air."
+      }
+    ],
+    "〜まじき": [
+      {
+        "jp": "それは教師にあるまじき行いだ。",
+        "en": "That is conduct unbecoming of a teacher."
+      },
+      {
+        "jp": "公務員にあるまじき発言だと批判された。",
+        "en": "He was criticised for a remark unbefitting a public servant."
+      }
+    ],
+    "〜べく": [
+      {
+        "jp": "彼は医者になるべく、必死に勉強した。",
+        "en": "He studied desperately in order to become a doctor."
+      },
+      {
+        "jp": "約束を果たすべく、彼は再びこの町に戻った。",
+        "en": "He returned to this town in order to fulfil his promise."
+      }
+    ],
+    "〜てしかるべきだ": [
+      {
+        "jp": "これだけ働いたのだから、報われてしかるべきだ。",
+        "en": "Having worked this much, he ought properly to be rewarded."
+      },
+      {
+        "jp": "被害者にはもっと説明があってしかるべきだ。",
+        "en": "The victims ought properly to be given more explanation."
+      }
+    ],
+    "〜ならでは": [
+      {
+        "jp": "この味は、この店ならではのものだ。",
+        "en": "This flavour is something distinctive to this shop."
+      },
+      {
+        "jp": "祭りの熱気は、この町ならではだ。",
+        "en": "The excitement of the festival is unique to this town."
+      }
+    ],
+    "〜ならいざ知らず": [
+      {
+        "jp": "子どもならいざ知らず、大人がそんなことを言うとは。",
+        "en": "I could not say about a child, but for an adult to say such a thing."
+      },
+      {
+        "jp": "昔ならいざ知らず、今はそんなやり方は通じない。",
+        "en": "Perhaps in the old days, but such a method does not work now."
+      }
+    ],
+    "〜とはいえ": [
+      {
+        "jp": "春とはいえ、朝晩はまだ冷える。",
+        "en": "Although it is spring, mornings and evenings are still cold."
+      },
+      {
+        "jp": "休みとはいえ、やることが山ほどある。",
+        "en": "Even though it is a holiday, I have a mountain of things to do."
+      }
+    ],
+    "〜といえども": [
+      {
+        "jp": "子どもといえども、約束は守るべきだ。",
+        "en": "Even a child should keep a promise."
+      },
+      {
+        "jp": "専門家といえども、間違えることはある。",
+        "en": "Even an expert can make a mistake."
+      }
+    ],
+    "〜とばかりに": [
+      {
+        "jp": "彼は今がチャンスとばかりに立ち上がった。",
+        "en": "He stood up as if to say that now was his chance."
+      },
+      {
+        "jp": "早く帰れとばかりに、店の明かりが消された。",
+        "en": "The shop lights were turned off as if to say go home already."
+      }
+    ],
+    "〜をものともせず": [
+      {
+        "jp": "彼は足の痛みをものともせず、最後まで走り切った。",
+        "en": "Undaunted by the pain in his leg, he ran all the way to the end."
+      },
+      {
+        "jp": "激しい風雨をものともせず、船は港を出た。",
+        "en": "Undaunted by the fierce wind and rain, the ship left the harbour."
+      }
+    ],
+    "〜を余儀なくされる": [
+      {
+        "jp": "台風のため、大会は中止を余儀なくされた。",
+        "en": "Because of the typhoon, the tournament was forced into cancellation."
+      },
+      {
+        "jp": "けがのため、彼は引退を余儀なくされた。",
+        "en": "Owing to injury, he was forced to retire."
+      }
+    ],
+    "〜を皮切りに": [
+      {
+        "jp": "東京を皮切りに、全国十か所で公演が行われる。",
+        "en": "Starting with Tokyo, performances will be held in ten places nationwide."
+      },
+      {
+        "jp": "その事件を皮切りに、次々と問題が明るみに出た。",
+        "en": "Starting with that incident, problems came to light one after another."
+      }
+    ],
+    "〜に至る": [
+      {
+        "jp": "長い話し合いの末、ついに合意に至った。",
+        "en": "After long discussions, we finally reached an agreement."
+      },
+      {
+        "jp": "小さな誤解が、大きな争いに至った。",
+        "en": "A small misunderstanding culminated in a large dispute."
+      }
+    ],
+    "〜の極み": [
+      {
+        "jp": "こんなに立派な賞をいただき、光栄の極みです。",
+        "en": "To receive such a splendid award is the height of honour."
+      },
+      {
+        "jp": "連日の残業で、疲労の極みに達した。",
+        "en": "With overtime day after day, I reached the utmost of exhaustion."
+      }
+    ],
+    "〜はおろか": [
+      {
+        "jp": "彼は漢字はおろか、ひらがなも書けない。",
+        "en": "Let alone kanji, he cannot even write hiragana."
+      },
+      {
+        "jp": "外国はおろか、隣の町へも行ったことがない。",
+        "en": "Let alone abroad, I have never even been to the next town."
+      }
+    ],
+    "〜もさることながら": [
+      {
+        "jp": "味もさることながら、この店は雰囲気がすばらしい。",
+        "en": "The taste goes without saying, but this restaurant has a wonderful atmosphere."
+      },
+      {
+        "jp": "値段もさることながら、品質が問題だ。",
+        "en": "The price goes without saying, but the quality is the real issue."
+      }
+    ],
+    "〜であれ": [
+      {
+        "jp": "理由が何であれ、暴力は許されない。",
+        "en": "Whatever the reason, violence is not permitted."
+      },
+      {
+        "jp": "どんな仕事であれ、全力で取り組む。",
+        "en": "Whatever the job, I give it everything."
+      }
+    ],
+    "〜といったらない": [
+      {
+        "jp": "その日の忙しさといったらなかった。",
+        "en": "The busyness of that day was beyond describing."
+      },
+      {
+        "jp": "あの店の対応の悪さといったらない。",
+        "en": "The rudeness of that shop's service is beyond words."
+      }
+    ],
+    "〜ともなると": [
+      {
+        "jp": "責任者ともなると、休みも取れない。",
+        "en": "Once you become the person in charge, you can't even take a day off."
+      },
+      {
+        "jp": "週末ともなると、この道は大変込む。",
+        "en": "Come the weekend, this road gets terribly crowded."
+      }
+    ],
+    "〜ともなく": [
+      {
+        "jp": "見るともなく窓の外をながめていた。",
+        "en": "I was gazing absently out of the window."
+      },
+      {
+        "jp": "聞くともなく聞いた話が、後で役に立った。",
+        "en": "Something I overheard without listening came in useful later."
+      }
+    ],
+    "〜つ〜つ": [
+      {
+        "jp": "二人の走者は、抜きつ抜かれつの接戦だった。",
+        "en": "The two runners fought it out, first one ahead and then the other."
+      },
+      {
+        "jp": "駅前を行きつ戻りつして、彼を待った。",
+        "en": "I paced back and forth outside the station waiting for him."
+      }
+    ],
+    "〜んがため": [
+      {
+        "jp": "生きんがために、彼は必死で働いた。",
+        "en": "He worked desperately in order to live."
+      },
+      {
+        "jp": "勝たんがための努力が実を結んだ。",
+        "en": "The effort made purely in order to win bore fruit."
+      }
+    ],
+    "〜べくもない": [
+      {
+        "jp": "この結果は、だれにも予想すべくもなかった。",
+        "en": "This outcome was something nobody could possibly have foreseen."
+      },
+      {
+        "jp": "素人の私には、比べるべくもない。",
+        "en": "For an amateur like me, there is no comparison to be made."
+      }
+    ],
+    "〜すべがない": [
+      {
+        "jp": "連絡先を知らないので、知らせるすべがない。",
+        "en": "I do not know how to reach them, so there is no way of telling them."
+      },
+      {
+        "jp": "今となっては、確かめるすべがない。",
+        "en": "At this point there is no means left of checking."
+      }
+    ],
+    "〜こととて": [
+      {
+        "jp": "慣れぬこととて、失礼があったかもしれません。",
+        "en": "Being unaccustomed to it, I may have been rude."
+      },
+      {
+        "jp": "急なこととて、十分な用意ができませんでした。",
+        "en": "It being so sudden, I could not prepare properly."
+      }
+    ],
+    "〜とあって": [
+      {
+        "jp": "連休とあって、どこも人でいっぱいだ。",
+        "en": "It being a long weekend, everywhere is packed."
+      },
+      {
+        "jp": "有名な歌手が来るとあって、会場は満員だ。",
+        "en": "With a famous singer coming, the hall is full."
+      }
+    ],
+    "〜とあれば": [
+      {
+        "jp": "子どものためとあれば、どんな苦労もいとわない。",
+        "en": "If it is for my child, I will bear any hardship."
+      },
+      {
+        "jp": "必要とあれば、すぐにでも向かいます。",
+        "en": "If it proves necessary, I will set off at once."
+      }
+    ],
+    "〜たるもの": [
+      {
+        "jp": "教師たるもの、常に学び続けるべきだ。",
+        "en": "One who is a teacher ought always to go on learning."
+      },
+      {
+        "jp": "責任者たるもの、逃げてはならない。",
+        "en": "A person in charge must not run away."
+      }
+    ],
+    "〜にして": [
+      {
+        "jp": "百歳にして、なお創作を続けている。",
+        "en": "At a hundred years of age, he is still creating."
+      },
+      {
+        "jp": "三度目にして、ようやく成功した。",
+        "en": "It was only on the third attempt that it finally succeeded."
+      }
+    ],
+    "〜にあって": [
+      {
+        "jp": "この厳しい状況にあって、彼は冷静だった。",
+        "en": "Placed in these harsh circumstances, he stayed calm."
+      },
+      {
+        "jp": "戦後の混乱期にあって、人々は助け合った。",
+        "en": "In the chaos of the postwar years, people helped one another."
+      }
+    ],
+    "〜をよそに": [
+      {
+        "jp": "親の心配をよそに、彼は旅に出た。",
+        "en": "Paying no heed to his parents' worry, he set off travelling."
+      },
+      {
+        "jp": "周囲の反対をよそに、計画は進められた。",
+        "en": "In disregard of the opposition around it, the plan went ahead."
+      }
+    ],
+    "〜かたがた": [
+      {
+        "jp": "お礼かたがた、ごあいさつに伺いました。",
+        "en": "I have called to pay my respects and to thank you."
+      },
+      {
+        "jp": "散歩かたがた、郵便局に寄ってきた。",
+        "en": "I dropped by the post office while out for a walk."
+      }
+    ],
+    "〜しまつだ": [
+      {
+        "jp": "何度も注意したのに、とうとうけんかを始めるしまつだ。",
+        "en": "I warned him again and again, and in the end he started a fight."
+      },
+      {
+        "jp": "遅刻を重ねたあげく、だまって休むしまつだ。",
+        "en": "After repeated lateness, it came to him taking days off without a word."
+      }
+    ],
+    "〜ずにはおかない": [
+      {
+        "jp": "あの映画は、見る者を感動させずにはおかない。",
+        "en": "That film cannot fail to move those who see it."
+      },
+      {
+        "jp": "この発言は、議論を呼ばずにはおかないだろう。",
+        "en": "This remark is bound to provoke debate."
+      }
+    ],
+    "〜てはばからない": [
+      {
+        "jp": "彼は自分が一番だと言ってはばからない。",
+        "en": "He says without a qualm that he is the best."
+      },
+      {
+        "jp": "その政治家は批判を口にしてはばからない。",
+        "en": "That politician voices criticism without hesitation."
+      }
+    ],
+    "〜なりに": [
+      {
+        "jp": "子どもは子どもなりに、よく考えている。",
+        "en": "Children think it through in their own childlike way."
+      },
+      {
+        "jp": "私なりに努力したつもりです。",
+        "en": "I did make an effort, in my own way."
+      }
+    ],
+    "〜ながらに": [
+      {
+        "jp": "彼女は涙ながらに、当時のことを語った。",
+        "en": "She spoke of those days with tears in her eyes."
+      },
+      {
+        "jp": "生まれながらに、すぐれた才能を持っていた。",
+        "en": "He possessed outstanding talent from birth."
+      }
+    ],
+    "〜にかたくない": [
+      {
+        "jp": "彼の失望は想像にかたくない。",
+        "en": "His disappointment is not hard to imagine."
+      },
+      {
+        "jp": "結果は予想にかたくなかった。",
+        "en": "The outcome was easy enough to predict."
+      }
+    ],
+    "〜にとどまらず": [
+      {
+        "jp": "被害は一つの町にとどまらず、県全体に広がった。",
+        "en": "The damage was not confined to one town but spread across the prefecture."
+      },
+      {
+        "jp": "彼の活動は国内にとどまらず、海外にも及ぶ。",
+        "en": "His work does not stop at home but extends abroad."
+      }
+    ],
+    "〜にひきかえ": [
+      {
+        "jp": "兄が明るいのにひきかえ、弟は口が重い。",
+        "en": "In contrast to his cheerful older brother, the younger one is taciturn."
+      },
+      {
+        "jp": "去年の不作にひきかえ、今年は豊作だ。",
+        "en": "Set against last year's poor harvest, this year's is abundant."
+      }
+    ],
+    "〜のなんのって": [
+      {
+        "jp": "あの日の寒さのなんのって、耳が痛かった。",
+        "en": "The cold that day was something else; my ears hurt."
+      },
+      {
+        "jp": "その量のなんのって、とても食べきれない。",
+        "en": "The sheer quantity was absurd; I could never finish it."
+      }
+    ],
+    "〜はさておき": [
+      {
+        "jp": "費用のことはさておき、まず計画を立てよう。",
+        "en": "Leaving the cost aside for now, let's first make a plan."
+      },
+      {
+        "jp": "冗談はさておき、本題に入りましょう。",
+        "en": "Joking aside, let us get to the main point."
+      }
+    ],
+    "〜までのことだ": [
+      {
+        "jp": "だめなら、また一からやり直すまでのことだ。",
+        "en": "If it fails, we simply start again from scratch."
+      },
+      {
+        "jp": "断られたら、他をあたるまでのことだ。",
+        "en": "If they refuse, we just try somewhere else."
+      }
+    ],
+    "〜を禁じ得ない": [
+      {
+        "jp": "その知らせに、驚きを禁じ得なかった。",
+        "en": "I could not suppress my astonishment at the news."
+      },
+      {
+        "jp": "あの光景には、涙を禁じ得ない。",
+        "en": "One cannot hold back tears at that sight."
+      }
+    ],
+    "〜ばこそ": [
+      {
+        "jp": "君のことを思えばこそ、厳しく言うのだ。",
+        "en": "It is precisely because I care about you that I speak harshly."
+      },
+      {
+        "jp": "努力があればこそ、今の成功がある。",
+        "en": "It is only because of the effort that today's success exists."
+      }
+    ],
+    "〜ようが〜まいが": [
+      {
+        "jp": "みんなが信じようが信じまいが、これは事実だ。",
+        "en": "Whether everyone believes it or not, this is a fact."
+      },
+      {
+        "jp": "彼が来ようが来まいが、私は始める。",
+        "en": "Whether he comes or not, I shall begin."
+      }
+    ]
+  }
 }

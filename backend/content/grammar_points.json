@@ -1,218 +1,1788 @@
 {
-  "_meta": "Original curation, not derived from content/grammar_data.py (the scraped-from-jlptsensei.com file -- see THIRD_PARTY_NOTICES.md and the JLPT mock-exam plan for why). There is no official JLPT grammar list published by JEES/the Japan Foundation; every study site's list is its own independent observation of patterns that recur on real papers, which is why they overlap heavily without copying one another. This file is that same kind of independent curation, cross-checked against multiple such sources during construction rather than lifted from any one of them, holding only the grammar-point identity (pattern name, its attachment structure, a short original gloss, and its conventional level) -- the facts about which patterns exist and roughly where they're taught, not any site's explanations or example sentences. Used by study/exam_grammar_gen.py as the checklist a per-item LLM call generates ORIGINAL example sentences and distractors from; the meaning/structure fields here are deliberately short (a one-line gloss, not an explanation) to stay clearly on the facts side of the line.\n\n205 entries, 41 per level. Level placement follows the modern five-level syllabus (2010-), cross-checked so that each pattern appears at the same level on at least two independently maintained lists. Note that the widely mirrored tanos.co.uk/Wikibooks inventories are the PRE-2010 four-level 出題基準: their '2級' predates N3, which was later carved out of the gap between old 2級 and old 3級, so roughly a third of what they file under 2級 is N3 today. They are useful for confirming that a pattern is examined at all, not for deciding which of N3/N2 it belongs to.\n\nPatterns are deliberately allowed to coincide with grammar_data.py's -- which patterns exist is a fact about the language, not anyone's expression of it. What must never coincide is the wording of structure/meaning, and tests/test_grammar_points.py asserts that verbatim-disjointness on every entry.",
+  "_meta": "Original curation, not derived from content/grammar_data.py (the scraped-from-jlptsensei.com file -- see THIRD_PARTY_NOTICES.md and the JLPT mock-exam plan for why). There is no official JLPT grammar list published by JEES/the Japan Foundation; every study site's list is its own independent observation of patterns that recur on real papers, which is why they overlap heavily without copying one another. This file is that same kind of independent curation, cross-checked against multiple such sources during construction rather than lifted from any one of them, holding only the grammar-point identity (pattern name, its attachment structure, a short original gloss, and its conventional level) -- the facts about which patterns exist and roughly where they're taught, not any site's explanations or example sentences. Used by study/exam_grammar_gen.py as the checklist a per-item LLM call generates ORIGINAL example sentences and distractors from; the meaning/structure fields here are deliberately short (a one-line gloss, not an explanation) to stay clearly on the facts side of the line.\n\n355 entries, 71 per level (originally 205 at 41 per level; the second pass added 30 more to each). Every level carries the same number on purpose -- a level with visibly fewer points reads to a learner as \"there is less to know here\", which is not what a thinner list means, and tests/test_grammar_points.py enforces the equality rather than a fixed count so the catalogue can keep growing. Level placement follows the modern five-level syllabus (2010-), cross-checked so that each pattern appears at the same level on at least two independently maintained lists. Note that the widely mirrored tanos.co.uk/Wikibooks inventories are the PRE-2010 four-level 出題基準: their '2級' predates N3, which was later carved out of the gap between old 2級 and old 3級, so roughly a third of what they file under 2級 is N3 today. They are useful for confirming that a pattern is examined at all, not for deciding which of N3/N2 it belongs to.\n\nPatterns are deliberately allowed to coincide with grammar_data.py's -- which patterns exist is a fact about the language, not anyone's expression of it. What must never coincide is the wording of structure/meaning, and tests/test_grammar_points.py asserts that verbatim-disjointness on every entry.",
   "N5": [
-    {"pattern": "です／だ", "structure": "Noun/な-adj + です・だ", "meaning": "the copula: is/am/are"},
-    {"pattern": "は", "structure": "topic + は", "meaning": "marks the sentence topic"},
-    {"pattern": "が", "structure": "subject + が", "meaning": "marks the grammatical subject"},
-    {"pattern": "を", "structure": "object + を", "meaning": "marks the direct object"},
-    {"pattern": "に", "structure": "noun + に", "meaning": "time, destination, or indirect object"},
-    {"pattern": "で", "structure": "noun + で", "meaning": "location of an action, or means/method"},
-    {"pattern": "と", "structure": "noun + と + noun", "meaning": "and (nouns); also with, together with"},
-    {"pattern": "も", "structure": "noun + も, replacing は or が", "meaning": "also, too"},
-    {"pattern": "の", "structure": "noun + の + noun", "meaning": "possessive, or links two nouns"},
-    {"pattern": "から〜まで", "structure": "noun + から〜noun + まで", "meaning": "from ... to ..."},
-    {"pattern": "〜ます／〜ません", "structure": "verb stem + ます・ません", "meaning": "polite present/future, affirmative and negative"},
-    {"pattern": "〜ました／〜ませんでした", "structure": "verb stem + ました・ませんでした", "meaning": "polite past, affirmative and negative"},
-    {"pattern": "〜たいです", "structure": "verb stem + たいです", "meaning": "want to do something"},
-    {"pattern": "〜てください", "structure": "verb て-form + ください", "meaning": "please do"},
-    {"pattern": "〜ています", "structure": "verb て-form + います", "meaning": "ongoing action, or a resulting state"},
-    {"pattern": "〜てもいいです", "structure": "verb て-form + もいいです", "meaning": "it's okay to / may I"},
-    {"pattern": "〜てはいけません", "structure": "verb て-form + はいけません", "meaning": "must not do"},
-    {"pattern": "〜ことができます", "structure": "verb dictionary form + ことができます", "meaning": "can do, is able to"},
-    {"pattern": "〜ないでください", "structure": "verb ない-form + でください", "meaning": "please don't do"},
-    {"pattern": "〜なければなりません", "structure": "verb ない-form (drop い) + ければなりません", "meaning": "must do"},
-    {"pattern": "へ", "structure": "noun + へ", "meaning": "direction of movement: to, toward"},
-    {"pattern": "や", "structure": "noun + や + noun", "meaning": "and — an open-ended list, unlike と"},
-    {"pattern": "か", "structure": "sentence + か", "meaning": "turns a statement into a question; also 'or' between nouns"},
-    {"pattern": "ね", "structure": "sentence + ね", "meaning": "seeks agreement: right?, isn't it?"},
-    {"pattern": "よ", "structure": "sentence + よ", "meaning": "asserts something the listener may not know yet"},
-    {"pattern": "〜から", "structure": "plain/polite form + から", "meaning": "because, since (gives the reason first)"},
-    {"pattern": "〜ませんか", "structure": "verb stem + ませんか", "meaning": "won't you? — an invitation"},
-    {"pattern": "〜ましょう", "structure": "verb stem + ましょう", "meaning": "let's do"},
-    {"pattern": "〜ましょうか", "structure": "verb stem + ましょうか", "meaning": "shall I?, shall we?"},
-    {"pattern": "〜があります／います", "structure": "noun + が + あります・います", "meaning": "there is/are — あります for things, います for the living"},
-    {"pattern": "い形容詞／な形容詞", "structure": "い-adj + noun / な-adj + な + noun", "meaning": "the two adjective classes, and how each attaches to a noun"},
-    {"pattern": "〜くて／〜で", "structure": "い-adj (drop い) + くて / な-adj + で", "meaning": "joins two adjectives or clauses: and"},
-    {"pattern": "〜くなる／〜になる", "structure": "い-adj (drop い) + くなる / noun・な-adj + になる", "meaning": "become, turn into"},
-    {"pattern": "〜より〜のほうが", "structure": "noun + より + noun + のほうが + adjective", "meaning": "comparison: the second one is more ..."},
-    {"pattern": "〜で〜がいちばん", "structure": "group + で + noun + が + いちばん + adjective", "meaning": "the most ... within a group"},
-    {"pattern": "〜ほうがいいです", "structure": "verb た-form/ない-form + ほうがいいです", "meaning": "had better, it would be better to"},
-    {"pattern": "〜なくてもいいです", "structure": "verb ない-form (drop い) + くてもいいです", "meaning": "don't have to, need not"},
-    {"pattern": "〜てから", "structure": "verb て-form + から", "meaning": "after doing, and then"},
-    {"pattern": "〜まえに", "structure": "verb dictionary form / noun + の + まえに", "meaning": "before doing"},
-    {"pattern": "〜あとで", "structure": "verb た-form / noun + の + あとで", "meaning": "after doing"},
-    {"pattern": "〜とき", "structure": "plain form / noun + の + とき", "meaning": "when, at the time of"}
+    {
+      "pattern": "です／だ",
+      "structure": "Noun/な-adj + です・だ",
+      "meaning": "the copula: is/am/are"
+    },
+    {
+      "pattern": "は",
+      "structure": "topic + は",
+      "meaning": "marks the sentence topic"
+    },
+    {
+      "pattern": "が",
+      "structure": "subject + が",
+      "meaning": "marks the grammatical subject"
+    },
+    {
+      "pattern": "を",
+      "structure": "object + を",
+      "meaning": "marks the direct object"
+    },
+    {
+      "pattern": "に",
+      "structure": "noun + に",
+      "meaning": "time, destination, or indirect object"
+    },
+    {
+      "pattern": "で",
+      "structure": "noun + で",
+      "meaning": "location of an action, or means/method"
+    },
+    {
+      "pattern": "と",
+      "structure": "noun + と + noun",
+      "meaning": "and (nouns); also with, together with"
+    },
+    {
+      "pattern": "も",
+      "structure": "noun + も, replacing は or が",
+      "meaning": "also, too"
+    },
+    {
+      "pattern": "の",
+      "structure": "noun + の + noun",
+      "meaning": "possessive, or links two nouns"
+    },
+    {
+      "pattern": "から〜まで",
+      "structure": "noun + から〜noun + まで",
+      "meaning": "from ... to ..."
+    },
+    {
+      "pattern": "〜ます／〜ません",
+      "structure": "verb stem + ます・ません",
+      "meaning": "polite present/future, affirmative and negative"
+    },
+    {
+      "pattern": "〜ました／〜ませんでした",
+      "structure": "verb stem + ました・ませんでした",
+      "meaning": "polite past, affirmative and negative"
+    },
+    {
+      "pattern": "〜たいです",
+      "structure": "verb stem + たいです",
+      "meaning": "want to do something"
+    },
+    {
+      "pattern": "〜てください",
+      "structure": "verb て-form + ください",
+      "meaning": "please do"
+    },
+    {
+      "pattern": "〜ています",
+      "structure": "verb て-form + います",
+      "meaning": "ongoing action, or a resulting state"
+    },
+    {
+      "pattern": "〜てもいいです",
+      "structure": "verb て-form + もいいです",
+      "meaning": "it's okay to / may I"
+    },
+    {
+      "pattern": "〜てはいけません",
+      "structure": "verb て-form + はいけません",
+      "meaning": "must not do"
+    },
+    {
+      "pattern": "〜ことができます",
+      "structure": "verb dictionary form + ことができます",
+      "meaning": "can do, is able to"
+    },
+    {
+      "pattern": "〜ないでください",
+      "structure": "verb ない-form + でください",
+      "meaning": "please don't do"
+    },
+    {
+      "pattern": "〜なければなりません",
+      "structure": "verb ない-form (drop い) + ければなりません",
+      "meaning": "must do"
+    },
+    {
+      "pattern": "へ",
+      "structure": "noun + へ",
+      "meaning": "direction of movement: to, toward"
+    },
+    {
+      "pattern": "や",
+      "structure": "noun + や + noun",
+      "meaning": "and — an open-ended list, unlike と"
+    },
+    {
+      "pattern": "か",
+      "structure": "sentence + か",
+      "meaning": "turns a statement into a question; also 'or' between nouns"
+    },
+    {
+      "pattern": "ね",
+      "structure": "sentence + ね",
+      "meaning": "seeks agreement: right?, isn't it?"
+    },
+    {
+      "pattern": "よ",
+      "structure": "sentence + よ",
+      "meaning": "asserts something the listener may not know yet"
+    },
+    {
+      "pattern": "〜から",
+      "structure": "plain/polite form + から",
+      "meaning": "because, since (gives the reason first)"
+    },
+    {
+      "pattern": "〜ませんか",
+      "structure": "verb stem + ませんか",
+      "meaning": "won't you? — an invitation"
+    },
+    {
+      "pattern": "〜ましょう",
+      "structure": "verb stem + ましょう",
+      "meaning": "let's do"
+    },
+    {
+      "pattern": "〜ましょうか",
+      "structure": "verb stem + ましょうか",
+      "meaning": "shall I?, shall we?"
+    },
+    {
+      "pattern": "〜があります／います",
+      "structure": "noun + が + あります・います",
+      "meaning": "there is/are — あります for things, います for the living"
+    },
+    {
+      "pattern": "い形容詞／な形容詞",
+      "structure": "い-adj + noun / な-adj + な + noun",
+      "meaning": "the two adjective classes, and how each attaches to a noun"
+    },
+    {
+      "pattern": "〜くて／〜で",
+      "structure": "い-adj (drop い) + くて / な-adj + で",
+      "meaning": "joins two adjectives or clauses: and"
+    },
+    {
+      "pattern": "〜くなる／〜になる",
+      "structure": "い-adj (drop い) + くなる / noun・な-adj + になる",
+      "meaning": "become, turn into"
+    },
+    {
+      "pattern": "〜より〜のほうが",
+      "structure": "noun + より + noun + のほうが + adjective",
+      "meaning": "comparison: the second one is more ..."
+    },
+    {
+      "pattern": "〜で〜がいちばん",
+      "structure": "group + で + noun + が + いちばん + adjective",
+      "meaning": "the most ... within a group"
+    },
+    {
+      "pattern": "〜ほうがいいです",
+      "structure": "verb た-form/ない-form + ほうがいいです",
+      "meaning": "had better, it would be better to"
+    },
+    {
+      "pattern": "〜なくてもいいです",
+      "structure": "verb ない-form (drop い) + くてもいいです",
+      "meaning": "don't have to, need not"
+    },
+    {
+      "pattern": "〜てから",
+      "structure": "verb て-form + から",
+      "meaning": "after doing, and then"
+    },
+    {
+      "pattern": "〜まえに",
+      "structure": "verb dictionary form / noun + の + まえに",
+      "meaning": "before doing"
+    },
+    {
+      "pattern": "〜あとで",
+      "structure": "verb た-form / noun + の + あとで",
+      "meaning": "after doing"
+    },
+    {
+      "pattern": "〜とき",
+      "structure": "plain form / noun + の + とき",
+      "meaning": "when, at the time of"
+    },
+    {
+      "pattern": "〜が好きです",
+      "structure": "Noun + が好きです",
+      "meaning": "like something"
+    },
+    {
+      "pattern": "〜がきらいです",
+      "structure": "Noun + がきらいです",
+      "meaning": "dislike something"
+    },
+    {
+      "pattern": "〜が上手です／下手です",
+      "structure": "Noun + が上手です・が下手です",
+      "meaning": "be skilled at / poor at"
+    },
+    {
+      "pattern": "〜がほしいです",
+      "structure": "Noun + がほしいです",
+      "meaning": "want to have a thing"
+    },
+    {
+      "pattern": "〜でしょう",
+      "structure": "plain form + でしょう",
+      "meaning": "probably, I expect"
+    },
+    {
+      "pattern": "まだ〜ていません",
+      "structure": "まだ + verb て-form + いません",
+      "meaning": "has not done it yet"
+    },
+    {
+      "pattern": "もう〜ました",
+      "structure": "もう + verb stem + ました",
+      "meaning": "has already done it"
+    },
+    {
+      "pattern": "〜くらい／〜ぐらい",
+      "structure": "quantity + くらい・ぐらい",
+      "meaning": "roughly that much"
+    },
+    {
+      "pattern": "〜ごろ",
+      "structure": "point in time + ごろ",
+      "meaning": "at about that time"
+    },
+    {
+      "pattern": "〜ずつ",
+      "structure": "quantity + ずつ",
+      "meaning": "that many apiece"
+    },
+    {
+      "pattern": "〜だけ",
+      "structure": "noun/quantity + だけ",
+      "meaning": "nothing more than that"
+    },
+    {
+      "pattern": "〜など",
+      "structure": "noun + など",
+      "meaning": "and things of that sort"
+    },
+    {
+      "pattern": "〜でも",
+      "structure": "noun + でも",
+      "meaning": "or something along those lines"
+    },
+    {
+      "pattern": "〜と思います",
+      "structure": "plain form + と思います",
+      "meaning": "I think that"
+    },
+    {
+      "pattern": "〜と言います",
+      "structure": "quoted words + と言います",
+      "meaning": "says that"
+    },
+    {
+      "pattern": "〜のが好きです",
+      "structure": "verb dictionary form + のが好きです",
+      "meaning": "enjoy doing something"
+    },
+    {
+      "pattern": "〜ないで",
+      "structure": "verb ない-form + で",
+      "meaning": "without doing it"
+    },
+    {
+      "pattern": "〜をください",
+      "structure": "Noun + をください",
+      "meaning": "asking to be given something"
+    },
+    {
+      "pattern": "〜が分かります",
+      "structure": "Noun + が分かります",
+      "meaning": "grasp or understand something"
+    },
+    {
+      "pattern": "〜ができます",
+      "structure": "Noun + ができます",
+      "meaning": "be capable of something"
+    },
+    {
+      "pattern": "〜たくないです",
+      "structure": "verb stem + たくないです",
+      "meaning": "have no wish to do"
+    },
+    {
+      "pattern": "〜くありません",
+      "structure": "い-adj (drop い) + くありません",
+      "meaning": "polite negative of an い-adjective"
+    },
+    {
+      "pattern": "〜じゃありません",
+      "structure": "Noun/な-adj + じゃありません",
+      "meaning": "polite negative of a noun or な-adjective"
+    },
+    {
+      "pattern": "〜かったです",
+      "structure": "い-adj (drop い) + かったです",
+      "meaning": "polite past of an い-adjective"
+    },
+    {
+      "pattern": "〜でした",
+      "structure": "Noun/な-adj + でした",
+      "meaning": "polite past of a noun or な-adjective"
+    },
+    {
+      "pattern": "〜の中で",
+      "structure": "group + の中で",
+      "meaning": "within a given set"
+    },
+    {
+      "pattern": "そして",
+      "structure": "sentence + 。 そして + sentence",
+      "meaning": "and then, joining two statements"
+    },
+    {
+      "pattern": "それから",
+      "structure": "sentence + 。 それから + sentence",
+      "meaning": "after that, next"
+    },
+    {
+      "pattern": "しかし",
+      "structure": "sentence + 。 しかし + sentence",
+      "meaning": "but, marking a reversal"
+    },
+    {
+      "pattern": "〜に行きます",
+      "structure": "verb stem + に行きます",
+      "meaning": "go somewhere in order to do"
+    }
   ],
   "N4": [
-    {"pattern": "〜たら", "structure": "verb た-form + ら", "meaning": "conditional: if/when"},
-    {"pattern": "〜ば", "structure": "verb ば-form", "meaning": "conditional: if"},
-    {"pattern": "〜なら", "structure": "noun/plain form + なら", "meaning": "conditional: if it's the case that"},
-    {"pattern": "〜ので", "structure": "plain form + ので", "meaning": "because (more objective/polite than から)"},
-    {"pattern": "〜のに", "structure": "plain form + のに", "meaning": "although, even though (often with surprise/complaint)"},
-    {"pattern": "〜てあげる／てくれる／てもらう", "structure": "verb て-form + あげる・くれる・もらう", "meaning": "giving and receiving an action as a favor"},
-    {"pattern": "〜そうです", "structure": "verb stem / adjective stem + そうです", "meaning": "looks like, appears to be (visual impression)"},
-    {"pattern": "〜ようです", "structure": "plain form + ようです", "meaning": "seems like, appears that (inference)"},
-    {"pattern": "使役形 〜させる", "structure": "verb causative stem + させる", "meaning": "make or let someone do"},
-    {"pattern": "受身形 〜られる", "structure": "verb passive stem + られる", "meaning": "be done to, have something done to oneself"},
-    {"pattern": "〜てしまう", "structure": "verb て-form + しまう", "meaning": "completion, or regret at having done"},
-    {"pattern": "〜ておく", "structure": "verb て-form + おく", "meaning": "do in advance, or leave as is"},
-    {"pattern": "〜ことがある", "structure": "verb た-form + ことがある", "meaning": "have done before (experience)"},
-    {"pattern": "〜ようになる", "structure": "verb dictionary form + ようになる", "meaning": "come to do, reach the point of doing"},
-    {"pattern": "〜ことにする", "structure": "verb dictionary/ない form + ことにする", "meaning": "decide to"},
-    {"pattern": "〜つもりです", "structure": "verb dictionary form + つもりです", "meaning": "intend to"},
-    {"pattern": "〜という", "structure": "noun/plain form + という", "meaning": "called ..., that is said to be"},
-    {"pattern": "〜はずです", "structure": "plain form + はずです", "meaning": "should be, expected to be"},
-    {"pattern": "〜かもしれません", "structure": "plain form + かもしれません", "meaning": "might, maybe"},
-    {"pattern": "〜まま", "structure": "た-form/noun + の + まま", "meaning": "as is, while remaining in a state"},
-    {"pattern": "可能形 〜(ら)れる", "structure": "verb potential stem + る・られる", "meaning": "can do, be able to — the conjugated potential"},
-    {"pattern": "意向形 〜(よ)う", "structure": "verb volitional form", "meaning": "let's, I think I'll — the plain counterpart of ましょう"},
-    {"pattern": "〜ようと思う", "structure": "verb volitional form + と思う", "meaning": "be thinking of doing, plan to"},
-    {"pattern": "〜と", "structure": "plain form + と", "meaning": "conditional: whenever A happens, B follows (automatic result)"},
-    {"pattern": "〜ながら", "structure": "verb stem + ながら", "meaning": "while doing — two actions at once, one subject"},
-    {"pattern": "〜たり〜たり", "structure": "verb た-form + り + verb た-form + り + する", "meaning": "doing this and that, alternating between"},
-    {"pattern": "〜すぎる", "structure": "verb stem / adjective stem + すぎる", "meaning": "too much, excessively"},
-    {"pattern": "〜やすい／〜にくい", "structure": "verb stem + やすい・にくい", "meaning": "easy to do / hard to do"},
-    {"pattern": "〜はじめる／〜おわる／〜つづける", "structure": "verb stem + はじめる・おわる・つづける", "meaning": "start, finish, or keep on doing"},
-    {"pattern": "〜ていく／〜てくる", "structure": "verb て-form + いく・くる", "meaning": "movement or change heading away from / toward the speaker"},
-    {"pattern": "〜てみる", "structure": "verb て-form + みる", "meaning": "try doing and see how it turns out"},
-    {"pattern": "〜てある", "structure": "verb て-form + ある", "meaning": "has been done and stays that way (someone did it deliberately)"},
-    {"pattern": "〜らしい", "structure": "plain form / noun + らしい", "meaning": "apparently, I gather that (from an outside source)"},
-    {"pattern": "〜みたいだ", "structure": "plain form / noun + みたいだ", "meaning": "seems like, looks like — the colloquial ようだ"},
-    {"pattern": "自動詞／他動詞", "structure": "intransitive: noun + が + verb / transitive: noun + を + verb", "meaning": "paired verbs: one thing happens, the other is done to something"},
-    {"pattern": "〜ことになる", "structure": "verb dictionary/ない form + ことになる", "meaning": "it has been decided that, it works out that"},
-    {"pattern": "〜ようにする", "structure": "verb dictionary/ない form + ようにする", "meaning": "make a point of, see to it that"},
-    {"pattern": "〜かどうか", "structure": "plain form + かどうか", "meaning": "whether or not"},
-    {"pattern": "〜しか〜ない", "structure": "noun + しか + negative verb", "meaning": "only, nothing but"},
-    {"pattern": "〜ても", "structure": "verb て-form + も / adjective + ても", "meaning": "even if, no matter"},
-    {"pattern": "お〜になる／お〜する", "structure": "お + verb stem + になる (respectful)・する (humble)", "meaning": "keigo: raises the other person, or lowers oneself"}
+    {
+      "pattern": "〜たら",
+      "structure": "verb た-form + ら",
+      "meaning": "conditional: if/when"
+    },
+    {
+      "pattern": "〜ば",
+      "structure": "verb ば-form",
+      "meaning": "conditional: if"
+    },
+    {
+      "pattern": "〜なら",
+      "structure": "noun/plain form + なら",
+      "meaning": "conditional: if it's the case that"
+    },
+    {
+      "pattern": "〜ので",
+      "structure": "plain form + ので",
+      "meaning": "because (more objective/polite than から)"
+    },
+    {
+      "pattern": "〜のに",
+      "structure": "plain form + のに",
+      "meaning": "although, even though (often with surprise/complaint)"
+    },
+    {
+      "pattern": "〜てあげる／てくれる／てもらう",
+      "structure": "verb て-form + あげる・くれる・もらう",
+      "meaning": "giving and receiving an action as a favor"
+    },
+    {
+      "pattern": "〜そうです",
+      "structure": "verb stem / adjective stem + そうです",
+      "meaning": "looks like, appears to be (visual impression)"
+    },
+    {
+      "pattern": "〜ようです",
+      "structure": "plain form + ようです",
+      "meaning": "seems like, appears that (inference)"
+    },
+    {
+      "pattern": "使役形 〜させる",
+      "structure": "verb causative stem + させる",
+      "meaning": "make or let someone do"
+    },
+    {
+      "pattern": "受身形 〜られる",
+      "structure": "verb passive stem + られる",
+      "meaning": "be done to, have something done to oneself"
+    },
+    {
+      "pattern": "〜てしまう",
+      "structure": "verb て-form + しまう",
+      "meaning": "completion, or regret at having done"
+    },
+    {
+      "pattern": "〜ておく",
+      "structure": "verb て-form + おく",
+      "meaning": "do in advance, or leave as is"
+    },
+    {
+      "pattern": "〜ことがある",
+      "structure": "verb た-form + ことがある",
+      "meaning": "have done before (experience)"
+    },
+    {
+      "pattern": "〜ようになる",
+      "structure": "verb dictionary form + ようになる",
+      "meaning": "come to do, reach the point of doing"
+    },
+    {
+      "pattern": "〜ことにする",
+      "structure": "verb dictionary/ない form + ことにする",
+      "meaning": "decide to"
+    },
+    {
+      "pattern": "〜つもりです",
+      "structure": "verb dictionary form + つもりです",
+      "meaning": "intend to"
+    },
+    {
+      "pattern": "〜という",
+      "structure": "noun/plain form + という",
+      "meaning": "called ..., that is said to be"
+    },
+    {
+      "pattern": "〜はずです",
+      "structure": "plain form + はずです",
+      "meaning": "should be, expected to be"
+    },
+    {
+      "pattern": "〜かもしれません",
+      "structure": "plain form + かもしれません",
+      "meaning": "might, maybe"
+    },
+    {
+      "pattern": "〜まま",
+      "structure": "た-form/noun + の + まま",
+      "meaning": "as is, while remaining in a state"
+    },
+    {
+      "pattern": "可能形 〜(ら)れる",
+      "structure": "verb potential stem + る・られる",
+      "meaning": "can do, be able to — the conjugated potential"
+    },
+    {
+      "pattern": "意向形 〜(よ)う",
+      "structure": "verb volitional form",
+      "meaning": "let's, I think I'll — the plain counterpart of ましょう"
+    },
+    {
+      "pattern": "〜ようと思う",
+      "structure": "verb volitional form + と思う",
+      "meaning": "be thinking of doing, plan to"
+    },
+    {
+      "pattern": "〜と",
+      "structure": "plain form + と",
+      "meaning": "conditional: whenever A happens, B follows (automatic result)"
+    },
+    {
+      "pattern": "〜ながら",
+      "structure": "verb stem + ながら",
+      "meaning": "while doing — two actions at once, one subject"
+    },
+    {
+      "pattern": "〜たり〜たり",
+      "structure": "verb た-form + り + verb た-form + り + する",
+      "meaning": "doing this and that, alternating between"
+    },
+    {
+      "pattern": "〜すぎる",
+      "structure": "verb stem / adjective stem + すぎる",
+      "meaning": "too much, excessively"
+    },
+    {
+      "pattern": "〜やすい／〜にくい",
+      "structure": "verb stem + やすい・にくい",
+      "meaning": "easy to do / hard to do"
+    },
+    {
+      "pattern": "〜はじめる／〜おわる／〜つづける",
+      "structure": "verb stem + はじめる・おわる・つづける",
+      "meaning": "start, finish, or keep on doing"
+    },
+    {
+      "pattern": "〜ていく／〜てくる",
+      "structure": "verb て-form + いく・くる",
+      "meaning": "movement or change heading away from / toward the speaker"
+    },
+    {
+      "pattern": "〜てみる",
+      "structure": "verb て-form + みる",
+      "meaning": "try doing and see how it turns out"
+    },
+    {
+      "pattern": "〜てある",
+      "structure": "verb て-form + ある",
+      "meaning": "has been done and stays that way (someone did it deliberately)"
+    },
+    {
+      "pattern": "〜らしい",
+      "structure": "plain form / noun + らしい",
+      "meaning": "apparently, I gather that (from an outside source)"
+    },
+    {
+      "pattern": "〜みたいだ",
+      "structure": "plain form / noun + みたいだ",
+      "meaning": "seems like, looks like — the colloquial ようだ"
+    },
+    {
+      "pattern": "自動詞／他動詞",
+      "structure": "intransitive: noun + が + verb / transitive: noun + を + verb",
+      "meaning": "paired verbs: one thing happens, the other is done to something"
+    },
+    {
+      "pattern": "〜ことになる",
+      "structure": "verb dictionary/ない form + ことになる",
+      "meaning": "it has been decided that, it works out that"
+    },
+    {
+      "pattern": "〜ようにする",
+      "structure": "verb dictionary/ない form + ようにする",
+      "meaning": "make a point of, see to it that"
+    },
+    {
+      "pattern": "〜かどうか",
+      "structure": "plain form + かどうか",
+      "meaning": "whether or not"
+    },
+    {
+      "pattern": "〜しか〜ない",
+      "structure": "noun + しか + negative verb",
+      "meaning": "only, nothing but"
+    },
+    {
+      "pattern": "〜ても",
+      "structure": "verb て-form + も / adjective + ても",
+      "meaning": "even if, no matter"
+    },
+    {
+      "pattern": "お〜になる／お〜する",
+      "structure": "お + verb stem + になる (respectful)・する (humble)",
+      "meaning": "keigo: raises the other person, or lowers oneself"
+    },
+    {
+      "pattern": "〜んです／〜のです",
+      "structure": "plain form + んです・のです",
+      "meaning": "framing a statement as an explanation"
+    },
+    {
+      "pattern": "〜てほしい",
+      "structure": "verb て-form + ほしい",
+      "meaning": "want someone else to do"
+    },
+    {
+      "pattern": "〜たがる",
+      "structure": "verb stem + たがる",
+      "meaning": "someone else shows they want to"
+    },
+    {
+      "pattern": "〜そうにない",
+      "structure": "verb stem + そうにない",
+      "meaning": "shows no sign of happening"
+    },
+    {
+      "pattern": "〜なくてはいけない",
+      "structure": "verb ない-form (drop い) + くてはいけない",
+      "meaning": "obliged to do"
+    },
+    {
+      "pattern": "〜なきゃ／〜なくちゃ",
+      "structure": "verb ない-form (drop い) + きゃ・くちゃ",
+      "meaning": "the spoken short form of must"
+    },
+    {
+      "pattern": "〜ないといけない",
+      "structure": "verb ない-form + といけない",
+      "meaning": "it won't do unless you"
+    },
+    {
+      "pattern": "〜し",
+      "structure": "plain form + し",
+      "meaning": "listing reasons, with more implied"
+    },
+    {
+      "pattern": "〜だろう",
+      "structure": "plain form + だろう",
+      "meaning": "the plain counterpart of でしょう"
+    },
+    {
+      "pattern": "〜かな",
+      "structure": "plain form + かな",
+      "meaning": "wondering to oneself"
+    },
+    {
+      "pattern": "〜のは〜だ",
+      "structure": "clause + のは + noun + だ",
+      "meaning": "singling one element out as the point"
+    },
+    {
+      "pattern": "〜こと",
+      "structure": "verb dictionary form + こと",
+      "meaning": "turning a verb into a noun"
+    },
+    {
+      "pattern": "〜の",
+      "structure": "verb dictionary form + の",
+      "meaning": "the spoken nominaliser"
+    },
+    {
+      "pattern": "〜ばよかった",
+      "structure": "verb ば-form + よかった",
+      "meaning": "regret at not having done"
+    },
+    {
+      "pattern": "〜たらどうですか",
+      "structure": "verb た-form + らどうですか",
+      "meaning": "suggesting a course of action"
+    },
+    {
+      "pattern": "〜ずに",
+      "structure": "verb ない-stem + ずに",
+      "meaning": "the written form of without doing"
+    },
+    {
+      "pattern": "〜あいだに",
+      "structure": "clause/noun + の + あいだに",
+      "meaning": "at some point within a span"
+    },
+    {
+      "pattern": "〜あいだ",
+      "structure": "clause/noun + の + あいだ",
+      "meaning": "throughout a span"
+    },
+    {
+      "pattern": "〜ところだ",
+      "structure": "verb dictionary/た-form + ところだ",
+      "meaning": "right at that stage of an action"
+    },
+    {
+      "pattern": "〜たばかり",
+      "structure": "verb た-form + ばかり",
+      "meaning": "only just finished doing"
+    },
+    {
+      "pattern": "〜させてください",
+      "structure": "verb causative stem + せてください",
+      "meaning": "asking to be allowed to do"
+    },
+    {
+      "pattern": "〜なさい",
+      "structure": "verb stem + なさい",
+      "meaning": "a firm but gentle order"
+    },
+    {
+      "pattern": "〜ために",
+      "structure": "verb dictionary form / noun + の + ために",
+      "meaning": "for the sake of, in order to"
+    },
+    {
+      "pattern": "〜ように",
+      "structure": "verb potential/ない form + ように",
+      "meaning": "so that a state comes about"
+    },
+    {
+      "pattern": "〜方",
+      "structure": "verb stem + 方",
+      "meaning": "the way of doing something"
+    },
+    {
+      "pattern": "〜出す",
+      "structure": "verb stem + 出す",
+      "meaning": "break into an action abruptly"
+    },
+    {
+      "pattern": "〜直す",
+      "structure": "verb stem + 直す",
+      "meaning": "do it over again"
+    },
+    {
+      "pattern": "〜てもらえませんか",
+      "structure": "verb て-form + もらえませんか",
+      "meaning": "a polite request for a favour"
+    },
+    {
+      "pattern": "〜がする",
+      "structure": "sensation noun + がする",
+      "meaning": "a smell, sound or taste is perceived"
+    },
+    {
+      "pattern": "〜までに",
+      "structure": "time/event + までに",
+      "meaning": "no later than that point"
+    }
   ],
   "N3": [
-    {"pattern": "〜ばかり", "structure": "verb た-form + ばかり", "meaning": "just did, only just"},
-    {"pattern": "〜おかげで", "structure": "plain form + おかげで", "meaning": "thanks to"},
-    {"pattern": "〜せいで", "structure": "plain form + せいで", "meaning": "because of (blaming a negative outcome on)"},
-    {"pattern": "〜わけではない", "structure": "plain form + わけではない", "meaning": "doesn't necessarily mean that"},
-    {"pattern": "〜わけがない", "structure": "plain form + わけがない", "meaning": "there's no way that, impossible that"},
-    {"pattern": "〜に違いない", "structure": "plain form + に違いない", "meaning": "must be, surely is (confident conclusion)"},
-    {"pattern": "〜べきだ", "structure": "verb dictionary form + べきだ", "meaning": "should, ought to"},
-    {"pattern": "〜ようとする", "structure": "verb volitional form + とする", "meaning": "try to, be about to"},
-    {"pattern": "〜たとたんに", "structure": "verb た-form + とたんに", "meaning": "the moment that, right after"},
-    {"pattern": "〜に対して", "structure": "noun + に対して", "meaning": "towards, in regard to"},
-    {"pattern": "〜として", "structure": "noun + として", "meaning": "as, in the capacity of"},
-    {"pattern": "〜に関して", "structure": "noun + に関して", "meaning": "regarding, concerning"},
-    {"pattern": "〜通りに", "structure": "noun/verb dictionary form + 通りに", "meaning": "as, according to, in line with"},
-    {"pattern": "〜たびに", "structure": "verb dictionary form/noun + の + たびに", "meaning": "every time, on each occasion"},
-    {"pattern": "〜末に", "structure": "verb た-form/noun + の + 末に", "meaning": "after ..., in the end (following a process)"},
-    {"pattern": "〜一方で", "structure": "plain form + 一方で", "meaning": "on the other hand, while also"},
-    {"pattern": "〜ものの", "structure": "plain form + ものの", "meaning": "although, even though"},
-    {"pattern": "〜おそれがある", "structure": "verb dictionary form/noun + の + おそれがある", "meaning": "there is a risk/concern that"},
-    {"pattern": "〜つつある", "structure": "verb stem + つつある", "meaning": "in the process of, gradually doing"},
-    {"pattern": "〜次第だ", "structure": "verb た-form + 次第だ", "meaning": "as soon as; also: it depends on"},
-    {"pattern": "使役受身形 〜させられる", "structure": "verb causative-passive stem + られる", "meaning": "be made to do something one didn't want to"},
-    {"pattern": "〜そうだ（伝聞）", "structure": "plain form + そうだ", "meaning": "I hear that, they say that"},
-    {"pattern": "〜について", "structure": "noun + について", "meaning": "about, concerning"},
-    {"pattern": "〜によって", "structure": "noun + によって", "meaning": "by means of; depending on; also marks the agent in a passive"},
-    {"pattern": "〜において", "structure": "noun + において", "meaning": "in, at — a formal で"},
-    {"pattern": "〜にとって", "structure": "noun + にとって", "meaning": "for, from the standpoint of"},
-    {"pattern": "〜につれて", "structure": "verb dictionary form / noun + につれて", "meaning": "as one thing changes, another changes with it"},
-    {"pattern": "〜にしたがって", "structure": "verb dictionary form / noun + にしたがって", "meaning": "in accordance with, following"},
-    {"pattern": "〜とともに", "structure": "noun / verb dictionary form + とともに", "meaning": "together with; also: as ... progresses"},
-    {"pattern": "〜うちに", "structure": "plain form / noun + の + うちに", "meaning": "while the condition still holds"},
-    {"pattern": "〜最中に", "structure": "verb ている-form / noun + の + 最中に", "meaning": "right in the middle of"},
-    {"pattern": "〜際に", "structure": "verb dictionary/た form / noun + の + 際に", "meaning": "on the occasion of, when (formal)"},
-    {"pattern": "〜くせに", "structure": "plain form + くせに", "meaning": "even though — with reproach"},
-    {"pattern": "〜わりに", "structure": "plain form / noun + の + わりに", "meaning": "considering, for — against what you would expect"},
-    {"pattern": "〜だらけ", "structure": "noun + だらけ", "meaning": "full of, covered in (usually unwelcome)"},
-    {"pattern": "〜がち", "structure": "verb stem / noun + がち", "meaning": "prone to, apt to — a tendency"},
-    {"pattern": "〜っぽい", "structure": "noun / verb stem + っぽい", "meaning": "-ish, with a touch of"},
-    {"pattern": "〜ば〜ほど", "structure": "verb ば-form + verb dictionary form + ほど", "meaning": "the more ..., the more ..."},
-    {"pattern": "〜さえ", "structure": "noun + さえ", "meaning": "even — an extreme example"},
-    {"pattern": "〜しかない", "structure": "verb dictionary form + しかない", "meaning": "there is nothing to do but"},
-    {"pattern": "〜わけだ", "structure": "plain form + わけだ", "meaning": "that's why, it follows that"}
+    {
+      "pattern": "〜ばかり",
+      "structure": "verb た-form + ばかり",
+      "meaning": "just did, only just"
+    },
+    {
+      "pattern": "〜おかげで",
+      "structure": "plain form + おかげで",
+      "meaning": "thanks to"
+    },
+    {
+      "pattern": "〜せいで",
+      "structure": "plain form + せいで",
+      "meaning": "because of (blaming a negative outcome on)"
+    },
+    {
+      "pattern": "〜わけではない",
+      "structure": "plain form + わけではない",
+      "meaning": "doesn't necessarily mean that"
+    },
+    {
+      "pattern": "〜わけがない",
+      "structure": "plain form + わけがない",
+      "meaning": "there's no way that, impossible that"
+    },
+    {
+      "pattern": "〜に違いない",
+      "structure": "plain form + に違いない",
+      "meaning": "must be, surely is (confident conclusion)"
+    },
+    {
+      "pattern": "〜べきだ",
+      "structure": "verb dictionary form + べきだ",
+      "meaning": "should, ought to"
+    },
+    {
+      "pattern": "〜ようとする",
+      "structure": "verb volitional form + とする",
+      "meaning": "try to, be about to"
+    },
+    {
+      "pattern": "〜たとたんに",
+      "structure": "verb た-form + とたんに",
+      "meaning": "the moment that, right after"
+    },
+    {
+      "pattern": "〜に対して",
+      "structure": "noun + に対して",
+      "meaning": "towards, in regard to"
+    },
+    {
+      "pattern": "〜として",
+      "structure": "noun + として",
+      "meaning": "as, in the capacity of"
+    },
+    {
+      "pattern": "〜に関して",
+      "structure": "noun + に関して",
+      "meaning": "regarding, concerning"
+    },
+    {
+      "pattern": "〜通りに",
+      "structure": "noun/verb dictionary form + 通りに",
+      "meaning": "as, according to, in line with"
+    },
+    {
+      "pattern": "〜たびに",
+      "structure": "verb dictionary form/noun + の + たびに",
+      "meaning": "every time, on each occasion"
+    },
+    {
+      "pattern": "〜末に",
+      "structure": "verb た-form/noun + の + 末に",
+      "meaning": "after ..., in the end (following a process)"
+    },
+    {
+      "pattern": "〜一方で",
+      "structure": "plain form + 一方で",
+      "meaning": "on the other hand, while also"
+    },
+    {
+      "pattern": "〜ものの",
+      "structure": "plain form + ものの",
+      "meaning": "although, even though"
+    },
+    {
+      "pattern": "〜おそれがある",
+      "structure": "verb dictionary form/noun + の + おそれがある",
+      "meaning": "there is a risk/concern that"
+    },
+    {
+      "pattern": "〜つつある",
+      "structure": "verb stem + つつある",
+      "meaning": "in the process of, gradually doing"
+    },
+    {
+      "pattern": "〜次第だ",
+      "structure": "verb た-form + 次第だ",
+      "meaning": "as soon as; also: it depends on"
+    },
+    {
+      "pattern": "使役受身形 〜させられる",
+      "structure": "verb causative-passive stem + られる",
+      "meaning": "be made to do something one didn't want to"
+    },
+    {
+      "pattern": "〜そうだ（伝聞）",
+      "structure": "plain form + そうだ",
+      "meaning": "I hear that, they say that"
+    },
+    {
+      "pattern": "〜について",
+      "structure": "noun + について",
+      "meaning": "about, concerning"
+    },
+    {
+      "pattern": "〜によって",
+      "structure": "noun + によって",
+      "meaning": "by means of; depending on; also marks the agent in a passive"
+    },
+    {
+      "pattern": "〜において",
+      "structure": "noun + において",
+      "meaning": "in, at — a formal で"
+    },
+    {
+      "pattern": "〜にとって",
+      "structure": "noun + にとって",
+      "meaning": "for, from the standpoint of"
+    },
+    {
+      "pattern": "〜につれて",
+      "structure": "verb dictionary form / noun + につれて",
+      "meaning": "as one thing changes, another changes with it"
+    },
+    {
+      "pattern": "〜にしたがって",
+      "structure": "verb dictionary form / noun + にしたがって",
+      "meaning": "in accordance with, following"
+    },
+    {
+      "pattern": "〜とともに",
+      "structure": "noun / verb dictionary form + とともに",
+      "meaning": "together with; also: as ... progresses"
+    },
+    {
+      "pattern": "〜うちに",
+      "structure": "plain form / noun + の + うちに",
+      "meaning": "while the condition still holds"
+    },
+    {
+      "pattern": "〜最中に",
+      "structure": "verb ている-form / noun + の + 最中に",
+      "meaning": "right in the middle of"
+    },
+    {
+      "pattern": "〜際に",
+      "structure": "verb dictionary/た form / noun + の + 際に",
+      "meaning": "on the occasion of, when (formal)"
+    },
+    {
+      "pattern": "〜くせに",
+      "structure": "plain form + くせに",
+      "meaning": "even though — with reproach"
+    },
+    {
+      "pattern": "〜わりに",
+      "structure": "plain form / noun + の + わりに",
+      "meaning": "considering, for — against what you would expect"
+    },
+    {
+      "pattern": "〜だらけ",
+      "structure": "noun + だらけ",
+      "meaning": "full of, covered in (usually unwelcome)"
+    },
+    {
+      "pattern": "〜がち",
+      "structure": "verb stem / noun + がち",
+      "meaning": "prone to, apt to — a tendency"
+    },
+    {
+      "pattern": "〜っぽい",
+      "structure": "noun / verb stem + っぽい",
+      "meaning": "-ish, with a touch of"
+    },
+    {
+      "pattern": "〜ば〜ほど",
+      "structure": "verb ば-form + verb dictionary form + ほど",
+      "meaning": "the more ..., the more ..."
+    },
+    {
+      "pattern": "〜さえ",
+      "structure": "noun + さえ",
+      "meaning": "even — an extreme example"
+    },
+    {
+      "pattern": "〜しかない",
+      "structure": "verb dictionary form + しかない",
+      "meaning": "there is nothing to do but"
+    },
+    {
+      "pattern": "〜わけだ",
+      "structure": "plain form + わけだ",
+      "meaning": "that's why, it follows that"
+    },
+    {
+      "pattern": "〜ようがない",
+      "structure": "verb stem + ようがない",
+      "meaning": "there is no means of doing it"
+    },
+    {
+      "pattern": "〜っぱなし",
+      "structure": "verb stem + っぱなし",
+      "meaning": "left in that state, usually carelessly"
+    },
+    {
+      "pattern": "〜かける",
+      "structure": "verb stem + かける",
+      "meaning": "started and left unfinished"
+    },
+    {
+      "pattern": "〜ぬく",
+      "structure": "verb stem + ぬく",
+      "meaning": "carry through to the very end"
+    },
+    {
+      "pattern": "〜きる",
+      "structure": "verb stem + きる",
+      "meaning": "do it fully, to exhaustion"
+    },
+    {
+      "pattern": "〜こむ",
+      "structure": "verb stem + こむ",
+      "meaning": "move or press inward"
+    },
+    {
+      "pattern": "〜あう",
+      "structure": "verb stem + あう",
+      "meaning": "do it to one another"
+    },
+    {
+      "pattern": "〜っこない",
+      "structure": "verb stem + っこない",
+      "meaning": "there is no chance of it"
+    },
+    {
+      "pattern": "〜ものだから",
+      "structure": "plain form + ものだから",
+      "meaning": "offering a reason as an excuse"
+    },
+    {
+      "pattern": "〜もので",
+      "structure": "plain form + もので",
+      "meaning": "since — a softened reason"
+    },
+    {
+      "pattern": "〜からこそ",
+      "structure": "plain form + からこそ",
+      "meaning": "for exactly that reason and no other"
+    },
+    {
+      "pattern": "〜以上",
+      "structure": "plain form + 以上",
+      "meaning": "given that it is so, it follows that"
+    },
+    {
+      "pattern": "〜上で",
+      "structure": "verb た-form / noun + の + 上で",
+      "meaning": "after completing a first step"
+    },
+    {
+      "pattern": "〜限り",
+      "structure": "plain form + 限り",
+      "meaning": "for as long as the condition holds"
+    },
+    {
+      "pattern": "〜はずがない",
+      "structure": "plain form + はずがない",
+      "meaning": "it cannot possibly be so"
+    },
+    {
+      "pattern": "〜てはいられない",
+      "structure": "verb て-form + はいられない",
+      "meaning": "cannot afford to stay as one is"
+    },
+    {
+      "pattern": "〜てたまらない",
+      "structure": "て-form of adjective/verb + たまらない",
+      "meaning": "unbearably so"
+    },
+    {
+      "pattern": "〜てしかたがない",
+      "structure": "て-form of adjective/verb + しかたがない",
+      "meaning": "there is no helping how strongly"
+    },
+    {
+      "pattern": "〜ようなら",
+      "structure": "plain form + ようなら",
+      "meaning": "if it turns out to look that way"
+    },
+    {
+      "pattern": "〜としたら",
+      "structure": "plain form + としたら",
+      "meaning": "supposing that were so"
+    },
+    {
+      "pattern": "〜とすれば",
+      "structure": "plain form + とすれば",
+      "meaning": "if we take it as given"
+    },
+    {
+      "pattern": "〜にしては",
+      "structure": "plain form / noun + にしては",
+      "meaning": "surprisingly, for something of that kind"
+    },
+    {
+      "pattern": "〜にしても",
+      "structure": "plain form / noun + にしても",
+      "meaning": "granting that, even so"
+    },
+    {
+      "pattern": "〜どころではない",
+      "structure": "noun / verb dictionary form + どころではない",
+      "meaning": "the situation does not allow it"
+    },
+    {
+      "pattern": "〜ばかりでなく",
+      "structure": "noun / plain form + ばかりでなく",
+      "meaning": "and not merely that"
+    },
+    {
+      "pattern": "〜も〜ば〜も",
+      "structure": "noun + も + verb ば-form + noun + も",
+      "meaning": "both this and that alike"
+    },
+    {
+      "pattern": "〜やら〜やら",
+      "structure": "noun + やら + noun + やら",
+      "meaning": "what with one thing and another"
+    },
+    {
+      "pattern": "〜とか",
+      "structure": "noun + とか + noun + とか",
+      "meaning": "such as, giving loose examples"
+    },
+    {
+      "pattern": "〜こそ",
+      "structure": "noun + こそ",
+      "meaning": "this one above all"
+    },
+    {
+      "pattern": "〜さえ〜ば",
+      "structure": "noun + さえ + verb ば-form",
+      "meaning": "provided only that"
+    }
   ],
   "N2": [
-    {"pattern": "〜にもかかわらず", "structure": "plain form/noun + にもかかわらず", "meaning": "despite, in spite of"},
-    {"pattern": "〜ざるを得ない", "structure": "verb ない-stem + ざるを得ない", "meaning": "have no choice but to"},
-    {"pattern": "〜つつも", "structure": "verb stem + つつも", "meaning": "while doing, despite doing (contrast)"},
-    {"pattern": "〜あげくに", "structure": "verb た-form/noun + の + あげくに", "meaning": "after all that (leading to a bad outcome)"},
-    {"pattern": "〜に伴って", "structure": "noun/verb dictionary form + に伴って", "meaning": "as, along with (a change)"},
-    {"pattern": "〜に基づいて", "structure": "noun + に基づいて", "meaning": "based on"},
-    {"pattern": "〜からといって", "structure": "plain form + からといって", "meaning": "just because ... (doesn't mean)"},
-    {"pattern": "〜どころか", "structure": "plain form/noun + どころか", "meaning": "far from, let alone"},
-    {"pattern": "〜にすぎない", "structure": "plain form + にすぎない", "meaning": "is nothing more than, merely"},
-    {"pattern": "〜を問わず", "structure": "noun + を問わず", "meaning": "regardless of"},
-    {"pattern": "〜はもとより", "structure": "noun + はもとより", "meaning": "not to mention, needless to say"},
-    {"pattern": "〜ものだ", "structure": "verb た-form + ものだ", "meaning": "used to (reminiscing); also: it's only natural that"},
-    {"pattern": "〜てからでないと", "structure": "verb て-form + からでないと", "meaning": "not until after, unless ... first"},
-    {"pattern": "〜がたい", "structure": "verb stem + がたい", "meaning": "hard to do, difficult to"},
-    {"pattern": "〜かねない", "structure": "verb stem + かねない", "meaning": "might result in (something undesirable)"},
-    {"pattern": "〜きり", "structure": "verb た-form/noun + きり", "meaning": "only, ever since (and nothing since)"},
-    {"pattern": "〜ぬきで", "structure": "noun + ぬきで", "meaning": "excluding, without"},
-    {"pattern": "〜からには", "structure": "plain form + からには", "meaning": "now that, since (implies obligation)"},
-    {"pattern": "〜ずにはいられない", "structure": "verb ない-stem + ずにはいられない", "meaning": "can't help but do"},
-    {"pattern": "〜ばかりか", "structure": "plain form / noun + ばかりか", "meaning": "not only that, but also"},
-    {"pattern": "〜ばかりに", "structure": "plain form + ばかりに", "meaning": "simply because — and it went badly"},
-    {"pattern": "〜のみならず", "structure": "plain form / noun + のみならず", "meaning": "not only but also (formal)"},
-    {"pattern": "〜に応じて", "structure": "noun + に応じて", "meaning": "in response to, varying with"},
-    {"pattern": "〜にかかわらず", "structure": "noun / plain form + にかかわらず", "meaning": "regardless of, irrespective of"},
-    {"pattern": "〜に限らず", "structure": "noun + に限らず", "meaning": "not limited to, and not only"},
-    {"pattern": "〜にかけては", "structure": "noun + にかけては", "meaning": "when it comes to — where someone excels"},
-    {"pattern": "〜に加えて", "structure": "noun + に加えて", "meaning": "in addition to, on top of"},
-    {"pattern": "〜に先立って", "structure": "noun / verb dictionary form + に先立って", "meaning": "prior to, ahead of"},
-    {"pattern": "〜に反して", "structure": "noun + に反して", "meaning": "contrary to, against"},
-    {"pattern": "〜にほかならない", "structure": "noun + にほかならない", "meaning": "is nothing other than"},
-    {"pattern": "〜をめぐって", "structure": "noun + をめぐって", "meaning": "surrounding, over (a contested matter)"},
-    {"pattern": "〜を通じて", "structure": "noun + を通じて", "meaning": "through, by way of; also: throughout"},
-    {"pattern": "〜をはじめ", "structure": "noun + をはじめ", "meaning": "starting with, and others of its kind"},
-    {"pattern": "〜をもとに", "structure": "noun + をもとに", "meaning": "on the basis of, working from"},
-    {"pattern": "〜得る／〜得ない", "structure": "verb stem + 得る・得ない", "meaning": "can possibly / cannot possibly (formal)"},
-    {"pattern": "〜かねる", "structure": "verb stem + かねる", "meaning": "cannot bring oneself to, is unable to"},
-    {"pattern": "〜ことなく", "structure": "verb dictionary form + ことなく", "meaning": "without ever doing (formal)"},
-    {"pattern": "〜ないことには", "structure": "verb ない-form + ことには", "meaning": "unless you first, without doing"},
-    {"pattern": "〜ということだ", "structure": "plain form + ということだ", "meaning": "it amounts to; also: I hear that"},
-    {"pattern": "〜というより", "structure": "plain form / noun + というより", "meaning": "rather than saying, more ... than"},
-    {"pattern": "〜わけにはいかない", "structure": "verb dictionary form + わけにはいかない", "meaning": "cannot very well, is not an option"}
+    {
+      "pattern": "〜にもかかわらず",
+      "structure": "plain form/noun + にもかかわらず",
+      "meaning": "despite, in spite of"
+    },
+    {
+      "pattern": "〜ざるを得ない",
+      "structure": "verb ない-stem + ざるを得ない",
+      "meaning": "have no choice but to"
+    },
+    {
+      "pattern": "〜つつも",
+      "structure": "verb stem + つつも",
+      "meaning": "while doing, despite doing (contrast)"
+    },
+    {
+      "pattern": "〜あげくに",
+      "structure": "verb た-form/noun + の + あげくに",
+      "meaning": "after all that (leading to a bad outcome)"
+    },
+    {
+      "pattern": "〜に伴って",
+      "structure": "noun/verb dictionary form + に伴って",
+      "meaning": "as, along with (a change)"
+    },
+    {
+      "pattern": "〜に基づいて",
+      "structure": "noun + に基づいて",
+      "meaning": "based on"
+    },
+    {
+      "pattern": "〜からといって",
+      "structure": "plain form + からといって",
+      "meaning": "just because ... (doesn't mean)"
+    },
+    {
+      "pattern": "〜どころか",
+      "structure": "plain form/noun + どころか",
+      "meaning": "far from, let alone"
+    },
+    {
+      "pattern": "〜にすぎない",
+      "structure": "plain form + にすぎない",
+      "meaning": "is nothing more than, merely"
+    },
+    {
+      "pattern": "〜を問わず",
+      "structure": "noun + を問わず",
+      "meaning": "regardless of"
+    },
+    {
+      "pattern": "〜はもとより",
+      "structure": "noun + はもとより",
+      "meaning": "not to mention, needless to say"
+    },
+    {
+      "pattern": "〜ものだ",
+      "structure": "verb た-form + ものだ",
+      "meaning": "used to (reminiscing); also: it's only natural that"
+    },
+    {
+      "pattern": "〜てからでないと",
+      "structure": "verb て-form + からでないと",
+      "meaning": "not until after, unless ... first"
+    },
+    {
+      "pattern": "〜がたい",
+      "structure": "verb stem + がたい",
+      "meaning": "hard to do, difficult to"
+    },
+    {
+      "pattern": "〜かねない",
+      "structure": "verb stem + かねない",
+      "meaning": "might result in (something undesirable)"
+    },
+    {
+      "pattern": "〜きり",
+      "structure": "verb た-form/noun + きり",
+      "meaning": "only, ever since (and nothing since)"
+    },
+    {
+      "pattern": "〜ぬきで",
+      "structure": "noun + ぬきで",
+      "meaning": "excluding, without"
+    },
+    {
+      "pattern": "〜からには",
+      "structure": "plain form + からには",
+      "meaning": "now that, since (implies obligation)"
+    },
+    {
+      "pattern": "〜ずにはいられない",
+      "structure": "verb ない-stem + ずにはいられない",
+      "meaning": "can't help but do"
+    },
+    {
+      "pattern": "〜ばかりか",
+      "structure": "plain form / noun + ばかりか",
+      "meaning": "not only that, but also"
+    },
+    {
+      "pattern": "〜ばかりに",
+      "structure": "plain form + ばかりに",
+      "meaning": "simply because — and it went badly"
+    },
+    {
+      "pattern": "〜のみならず",
+      "structure": "plain form / noun + のみならず",
+      "meaning": "not only but also (formal)"
+    },
+    {
+      "pattern": "〜に応じて",
+      "structure": "noun + に応じて",
+      "meaning": "in response to, varying with"
+    },
+    {
+      "pattern": "〜にかかわらず",
+      "structure": "noun / plain form + にかかわらず",
+      "meaning": "regardless of, irrespective of"
+    },
+    {
+      "pattern": "〜に限らず",
+      "structure": "noun + に限らず",
+      "meaning": "not limited to, and not only"
+    },
+    {
+      "pattern": "〜にかけては",
+      "structure": "noun + にかけては",
+      "meaning": "when it comes to — where someone excels"
+    },
+    {
+      "pattern": "〜に加えて",
+      "structure": "noun + に加えて",
+      "meaning": "in addition to, on top of"
+    },
+    {
+      "pattern": "〜に先立って",
+      "structure": "noun / verb dictionary form + に先立って",
+      "meaning": "prior to, ahead of"
+    },
+    {
+      "pattern": "〜に反して",
+      "structure": "noun + に反して",
+      "meaning": "contrary to, against"
+    },
+    {
+      "pattern": "〜にほかならない",
+      "structure": "noun + にほかならない",
+      "meaning": "is nothing other than"
+    },
+    {
+      "pattern": "〜をめぐって",
+      "structure": "noun + をめぐって",
+      "meaning": "surrounding, over (a contested matter)"
+    },
+    {
+      "pattern": "〜を通じて",
+      "structure": "noun + を通じて",
+      "meaning": "through, by way of; also: throughout"
+    },
+    {
+      "pattern": "〜をはじめ",
+      "structure": "noun + をはじめ",
+      "meaning": "starting with, and others of its kind"
+    },
+    {
+      "pattern": "〜をもとに",
+      "structure": "noun + をもとに",
+      "meaning": "on the basis of, working from"
+    },
+    {
+      "pattern": "〜得る／〜得ない",
+      "structure": "verb stem + 得る・得ない",
+      "meaning": "can possibly / cannot possibly (formal)"
+    },
+    {
+      "pattern": "〜かねる",
+      "structure": "verb stem + かねる",
+      "meaning": "cannot bring oneself to, is unable to"
+    },
+    {
+      "pattern": "〜ことなく",
+      "structure": "verb dictionary form + ことなく",
+      "meaning": "without ever doing (formal)"
+    },
+    {
+      "pattern": "〜ないことには",
+      "structure": "verb ない-form + ことには",
+      "meaning": "unless you first, without doing"
+    },
+    {
+      "pattern": "〜ということだ",
+      "structure": "plain form + ということだ",
+      "meaning": "it amounts to; also: I hear that"
+    },
+    {
+      "pattern": "〜というより",
+      "structure": "plain form / noun + というより",
+      "meaning": "rather than saying, more ... than"
+    },
+    {
+      "pattern": "〜わけにはいかない",
+      "structure": "verb dictionary form + わけにはいかない",
+      "meaning": "cannot very well, is not an option"
+    },
+    {
+      "pattern": "〜に際して",
+      "structure": "noun / verb dictionary form + に際して",
+      "meaning": "at the moment of undertaking"
+    },
+    {
+      "pattern": "〜にあたって",
+      "structure": "noun / verb dictionary form + にあたって",
+      "meaning": "on the occasion of something significant"
+    },
+    {
+      "pattern": "〜をもって",
+      "structure": "noun + をもって",
+      "meaning": "by means of; also: as of a stated date"
+    },
+    {
+      "pattern": "〜のもとで",
+      "structure": "noun + のもとで",
+      "meaning": "under the guidance or conditions of"
+    },
+    {
+      "pattern": "〜に沿って",
+      "structure": "noun + に沿って",
+      "meaning": "keeping to a line or a policy"
+    },
+    {
+      "pattern": "〜をきっかけに",
+      "structure": "noun + をきっかけに",
+      "meaning": "with that as the thing that set it off"
+    },
+    {
+      "pattern": "〜を契機に",
+      "structure": "noun + を契機に",
+      "meaning": "taking that as the turning point"
+    },
+    {
+      "pattern": "〜反面",
+      "structure": "plain form + 反面",
+      "meaning": "while the opposite is also true"
+    },
+    {
+      "pattern": "〜一方だ",
+      "structure": "verb dictionary form + 一方だ",
+      "meaning": "the trend only continues in one direction"
+    },
+    {
+      "pattern": "〜ばかりだ",
+      "structure": "verb dictionary form + ばかりだ",
+      "meaning": "gets steadily more so, and only that"
+    },
+    {
+      "pattern": "〜まい",
+      "structure": "verb dictionary form + まい",
+      "meaning": "surely not; also: I have no intention of"
+    },
+    {
+      "pattern": "〜ことはない",
+      "structure": "verb dictionary form + ことはない",
+      "meaning": "there is no call for it"
+    },
+    {
+      "pattern": "〜ものがある",
+      "structure": "plain form + ものがある",
+      "meaning": "there is something distinctly ... about it"
+    },
+    {
+      "pattern": "〜ものなら",
+      "structure": "verb potential form + ものなら",
+      "meaning": "if such a thing were possible at all"
+    },
+    {
+      "pattern": "〜ものか",
+      "structure": "plain form + ものか",
+      "meaning": "a flat refusal to accept it"
+    },
+    {
+      "pattern": "〜だけあって",
+      "structure": "plain form / noun + だけあって",
+      "meaning": "and it shows, as one would expect"
+    },
+    {
+      "pattern": "〜だけに",
+      "structure": "plain form / noun + だけに",
+      "meaning": "and all the more so because of it"
+    },
+    {
+      "pattern": "〜たところ",
+      "structure": "verb た-form + ところ",
+      "meaning": "and upon doing so, this followed"
+    },
+    {
+      "pattern": "〜たところで",
+      "structure": "verb た-form + ところで",
+      "meaning": "even doing so would change nothing"
+    },
+    {
+      "pattern": "〜てはならない",
+      "structure": "verb て-form + はならない",
+      "meaning": "a formal prohibition"
+    },
+    {
+      "pattern": "〜かのようだ",
+      "structure": "plain form + かのようだ",
+      "meaning": "just as though it were so"
+    },
+    {
+      "pattern": "〜同然",
+      "structure": "noun / verb た-form + も + 同然",
+      "meaning": "as good as, in all but name"
+    },
+    {
+      "pattern": "〜に相違ない",
+      "structure": "plain form + に相違ない",
+      "meaning": "there can be no doubt of it"
+    },
+    {
+      "pattern": "〜に決まっている",
+      "structure": "plain form + に決まっている",
+      "meaning": "it is bound to turn out that way"
+    },
+    {
+      "pattern": "〜ようでは",
+      "structure": "plain form + ようでは",
+      "meaning": "if that is how it is going, then"
+    },
+    {
+      "pattern": "〜くらいなら",
+      "structure": "verb dictionary form + くらいなら",
+      "meaning": "sooner than put up with that"
+    },
+    {
+      "pattern": "〜あまり",
+      "structure": "noun + の + あまり",
+      "meaning": "carried too far by a feeling"
+    },
+    {
+      "pattern": "〜からして",
+      "structure": "noun + からして",
+      "meaning": "judging even from that one part"
+    },
+    {
+      "pattern": "〜からすると",
+      "structure": "noun + からすると",
+      "meaning": "seen from that position"
+    },
+    {
+      "pattern": "〜にしろ〜にしろ",
+      "structure": "noun + にしろ + noun + にしろ",
+      "meaning": "whichever of the two it turns out to be"
+    }
   ],
   "N1": [
-    {"pattern": "〜んばかりに", "structure": "verb ない-stem + んばかりに", "meaning": "as if about to, practically doing"},
-    {"pattern": "〜べからず", "structure": "verb dictionary form + べからず", "meaning": "must not (formal, literary/signage)"},
-    {"pattern": "〜ゆえに", "structure": "plain form/noun + ゆえに", "meaning": "because of, on account of (formal)"},
-    {"pattern": "〜なくして(は)", "structure": "noun + なくして(は)", "meaning": "without (formal)"},
-    {"pattern": "〜極まりない", "structure": "な-adjective stem + 極まりない", "meaning": "extremely, in the extreme"},
-    {"pattern": "〜きらいがある", "structure": "verb dictionary form/noun + の + きらいがある", "meaning": "tend to (a negative tendency)"},
-    {"pattern": "〜にたえない", "structure": "noun + にたえない", "meaning": "can't bear to, unable to endure"},
-    {"pattern": "〜てやまない", "structure": "verb て-form + やまない", "meaning": "never stop doing, deeply and continuously"},
-    {"pattern": "〜まみれ", "structure": "noun + まみれ", "meaning": "covered in, smeared with"},
-    {"pattern": "〜だに", "structure": "verb dictionary form/noun + だに", "meaning": "even (emphatic, formal)"},
-    {"pattern": "〜あっての", "structure": "noun + あっての + noun", "meaning": "exists only thanks to, made possible by"},
-    {"pattern": "〜なしに", "structure": "noun + なしに", "meaning": "without (formal)"},
-    {"pattern": "〜いかんによらず", "structure": "noun + いかんによらず", "meaning": "regardless of"},
-    {"pattern": "〜をおいて", "structure": "noun + をおいて", "meaning": "except for, other than"},
-    {"pattern": "〜たりとも", "structure": "counter/noun + たりとも", "meaning": "not even (a single ...)"},
-    {"pattern": "〜ないまでも", "structure": "verb ない-form + までも", "meaning": "even if not quite, if not necessarily"},
-    {"pattern": "〜ずじまい", "structure": "verb ない-stem + ずじまい", "meaning": "ended up never doing (despite intending to)"},
-    {"pattern": "〜が早いか", "structure": "verb dictionary form + が早いか", "meaning": "no sooner than, the instant"},
-    {"pattern": "〜や否や", "structure": "verb dictionary form + や否や", "meaning": "as soon as, hardly ... when"},
-    {"pattern": "〜そばから", "structure": "verb dictionary/た form + そばから", "meaning": "no sooner done than it comes undone again"},
-    {"pattern": "〜なり", "structure": "verb dictionary form + なり", "meaning": "immediately upon doing (literary)"},
-    {"pattern": "〜がてら", "structure": "verb stem / noun + がてら", "meaning": "while also, taking the chance to"},
-    {"pattern": "〜かたわら", "structure": "verb dictionary form / noun + の + かたわら", "meaning": "alongside one's main occupation"},
-    {"pattern": "〜ごとき／〜ごとく", "structure": "noun + の + ごとき・ごとく", "meaning": "like, as if — an archaic ような・ように"},
-    {"pattern": "〜ずくめ", "structure": "noun + ずくめ", "meaning": "entirely, nothing but"},
-    {"pattern": "〜めく", "structure": "noun + めく", "meaning": "take on the air of, turn ...-like"},
-    {"pattern": "〜まじき", "structure": "verb dictionary form + まじき + noun", "meaning": "unbecoming, not befitting a role"},
-    {"pattern": "〜べく", "structure": "verb dictionary form + べく", "meaning": "in order to, so as to (formal)"},
-    {"pattern": "〜てしかるべきだ", "structure": "verb て-form + しかるべきだ", "meaning": "ought properly to be, only right that"},
-    {"pattern": "〜ならでは", "structure": "noun + ならでは", "meaning": "distinctive to, possible only for"},
-    {"pattern": "〜ならいざ知らず", "structure": "noun / plain form + ならいざ知らず", "meaning": "I couldn't say about that, but ..."},
-    {"pattern": "〜とはいえ", "structure": "plain form / noun + とはいえ", "meaning": "even so, that said"},
-    {"pattern": "〜といえども", "structure": "plain form / noun + といえども", "meaning": "even though, granted that"},
-    {"pattern": "〜とばかりに", "structure": "quoted phrase / plain form + とばかりに", "meaning": "as if to say, as though declaring"},
-    {"pattern": "〜をものともせず", "structure": "noun + をものともせず", "meaning": "undaunted by, in defiance of"},
-    {"pattern": "〜を余儀なくされる", "structure": "noun + を余儀なくされる", "meaning": "be forced into, left with no other choice"},
-    {"pattern": "〜を皮切りに", "structure": "noun + を皮切りに", "meaning": "starting from, with ... as the opening"},
-    {"pattern": "〜に至る", "structure": "verb dictionary form / noun + に至る", "meaning": "reach the point of, culminate in"},
-    {"pattern": "〜の極み", "structure": "noun + の極み", "meaning": "the height of, the utmost"},
-    {"pattern": "〜はおろか", "structure": "noun + はおろか", "meaning": "let alone, far from even"},
-    {"pattern": "〜もさることながら", "structure": "noun + もさることながら", "meaning": "that goes without saying, but even more so"}
+    {
+      "pattern": "〜んばかりに",
+      "structure": "verb ない-stem + んばかりに",
+      "meaning": "as if about to, practically doing"
+    },
+    {
+      "pattern": "〜べからず",
+      "structure": "verb dictionary form + べからず",
+      "meaning": "must not (formal, literary/signage)"
+    },
+    {
+      "pattern": "〜ゆえに",
+      "structure": "plain form/noun + ゆえに",
+      "meaning": "because of, on account of (formal)"
+    },
+    {
+      "pattern": "〜なくして(は)",
+      "structure": "noun + なくして(は)",
+      "meaning": "without (formal)"
+    },
+    {
+      "pattern": "〜極まりない",
+      "structure": "な-adjective stem + 極まりない",
+      "meaning": "extremely, in the extreme"
+    },
+    {
+      "pattern": "〜きらいがある",
+      "structure": "verb dictionary form/noun + の + きらいがある",
+      "meaning": "tend to (a negative tendency)"
+    },
+    {
+      "pattern": "〜にたえない",
+      "structure": "noun + にたえない",
+      "meaning": "can't bear to, unable to endure"
+    },
+    {
+      "pattern": "〜てやまない",
+      "structure": "verb て-form + やまない",
+      "meaning": "never stop doing, deeply and continuously"
+    },
+    {
+      "pattern": "〜まみれ",
+      "structure": "noun + まみれ",
+      "meaning": "covered in, smeared with"
+    },
+    {
+      "pattern": "〜だに",
+      "structure": "verb dictionary form/noun + だに",
+      "meaning": "even (emphatic, formal)"
+    },
+    {
+      "pattern": "〜あっての",
+      "structure": "noun + あっての + noun",
+      "meaning": "exists only thanks to, made possible by"
+    },
+    {
+      "pattern": "〜なしに",
+      "structure": "noun + なしに",
+      "meaning": "without (formal)"
+    },
+    {
+      "pattern": "〜いかんによらず",
+      "structure": "noun + いかんによらず",
+      "meaning": "regardless of"
+    },
+    {
+      "pattern": "〜をおいて",
+      "structure": "noun + をおいて",
+      "meaning": "except for, other than"
+    },
+    {
+      "pattern": "〜たりとも",
+      "structure": "counter/noun + たりとも",
+      "meaning": "not even (a single ...)"
+    },
+    {
+      "pattern": "〜ないまでも",
+      "structure": "verb ない-form + までも",
+      "meaning": "even if not quite, if not necessarily"
+    },
+    {
+      "pattern": "〜ずじまい",
+      "structure": "verb ない-stem + ずじまい",
+      "meaning": "ended up never doing (despite intending to)"
+    },
+    {
+      "pattern": "〜が早いか",
+      "structure": "verb dictionary form + が早いか",
+      "meaning": "no sooner than, the instant"
+    },
+    {
+      "pattern": "〜や否や",
+      "structure": "verb dictionary form + や否や",
+      "meaning": "as soon as, hardly ... when"
+    },
+    {
+      "pattern": "〜そばから",
+      "structure": "verb dictionary/た form + そばから",
+      "meaning": "no sooner done than it comes undone again"
+    },
+    {
+      "pattern": "〜なり",
+      "structure": "verb dictionary form + なり",
+      "meaning": "immediately upon doing (literary)"
+    },
+    {
+      "pattern": "〜がてら",
+      "structure": "verb stem / noun + がてら",
+      "meaning": "while also, taking the chance to"
+    },
+    {
+      "pattern": "〜かたわら",
+      "structure": "verb dictionary form / noun + の + かたわら",
+      "meaning": "alongside one's main occupation"
+    },
+    {
+      "pattern": "〜ごとき／〜ごとく",
+      "structure": "noun + の + ごとき・ごとく",
+      "meaning": "like, as if — an archaic ような・ように"
+    },
+    {
+      "pattern": "〜ずくめ",
+      "structure": "noun + ずくめ",
+      "meaning": "entirely, nothing but"
+    },
+    {
+      "pattern": "〜めく",
+      "structure": "noun + めく",
+      "meaning": "take on the air of, turn ...-like"
+    },
+    {
+      "pattern": "〜まじき",
+      "structure": "verb dictionary form + まじき + noun",
+      "meaning": "unbecoming, not befitting a role"
+    },
+    {
+      "pattern": "〜べく",
+      "structure": "verb dictionary form + べく",
+      "meaning": "in order to, so as to (formal)"
+    },
+    {
+      "pattern": "〜てしかるべきだ",
+      "structure": "verb て-form + しかるべきだ",
+      "meaning": "ought properly to be, only right that"
+    },
+    {
+      "pattern": "〜ならでは",
+      "structure": "noun + ならでは",
+      "meaning": "distinctive to, possible only for"
+    },
+    {
+      "pattern": "〜ならいざ知らず",
+      "structure": "noun / plain form + ならいざ知らず",
+      "meaning": "I couldn't say about that, but ..."
+    },
+    {
+      "pattern": "〜とはいえ",
+      "structure": "plain form / noun + とはいえ",
+      "meaning": "even so, that said"
+    },
+    {
+      "pattern": "〜といえども",
+      "structure": "plain form / noun + といえども",
+      "meaning": "even though, granted that"
+    },
+    {
+      "pattern": "〜とばかりに",
+      "structure": "quoted phrase / plain form + とばかりに",
+      "meaning": "as if to say, as though declaring"
+    },
+    {
+      "pattern": "〜をものともせず",
+      "structure": "noun + をものともせず",
+      "meaning": "undaunted by, in defiance of"
+    },
+    {
+      "pattern": "〜を余儀なくされる",
+      "structure": "noun + を余儀なくされる",
+      "meaning": "be forced into, left with no other choice"
+    },
+    {
+      "pattern": "〜を皮切りに",
+      "structure": "noun + を皮切りに",
+      "meaning": "starting from, with ... as the opening"
+    },
+    {
+      "pattern": "〜に至る",
+      "structure": "verb dictionary form / noun + に至る",
+      "meaning": "reach the point of, culminate in"
+    },
+    {
+      "pattern": "〜の極み",
+      "structure": "noun + の極み",
+      "meaning": "the height of, the utmost"
+    },
+    {
+      "pattern": "〜はおろか",
+      "structure": "noun + はおろか",
+      "meaning": "let alone, far from even"
+    },
+    {
+      "pattern": "〜もさることながら",
+      "structure": "noun + もさることながら",
+      "meaning": "that goes without saying, but even more so"
+    },
+    {
+      "pattern": "〜であれ",
+      "structure": "noun / question word + であれ",
+      "meaning": "no matter which it is"
+    },
+    {
+      "pattern": "〜といったらない",
+      "structure": "noun / い-adj + といったらない",
+      "meaning": "beyond anything one could say"
+    },
+    {
+      "pattern": "〜ともなると",
+      "structure": "noun + ともなると",
+      "meaning": "once it reaches that stage, naturally"
+    },
+    {
+      "pattern": "〜ともなく",
+      "structure": "verb dictionary form + ともなく",
+      "meaning": "without meaning to, absently"
+    },
+    {
+      "pattern": "〜つ〜つ",
+      "structure": "verb stem + つ + opposite verb stem + つ",
+      "meaning": "alternating back and forth"
+    },
+    {
+      "pattern": "〜んがため",
+      "structure": "verb ない-stem + んがため",
+      "meaning": "with the express aim of"
+    },
+    {
+      "pattern": "〜べくもない",
+      "structure": "verb dictionary form + べくもない",
+      "meaning": "there is no possibility of it whatever"
+    },
+    {
+      "pattern": "〜すべがない",
+      "structure": "verb dictionary form + すべがない",
+      "meaning": "no method remains open"
+    },
+    {
+      "pattern": "〜こととて",
+      "structure": "plain form / noun + の + こととて",
+      "meaning": "seeing that it is so, formally offered"
+    },
+    {
+      "pattern": "〜とあって",
+      "structure": "plain form / noun + とあって",
+      "meaning": "the situation being what it is"
+    },
+    {
+      "pattern": "〜とあれば",
+      "structure": "plain form / noun + とあれば",
+      "meaning": "if that is truly the case, then"
+    },
+    {
+      "pattern": "〜たるもの",
+      "structure": "noun + たるもの",
+      "meaning": "one who holds that position ought to"
+    },
+    {
+      "pattern": "〜にして",
+      "structure": "noun + にして",
+      "meaning": "only at that stage; also: being that very thing"
+    },
+    {
+      "pattern": "〜にあって",
+      "structure": "noun + にあって",
+      "meaning": "placed in that situation"
+    },
+    {
+      "pattern": "〜をよそに",
+      "structure": "noun + をよそに",
+      "meaning": "paying it no regard"
+    },
+    {
+      "pattern": "〜かたがた",
+      "structure": "noun + かたがた",
+      "meaning": "and taking the occasion to, formally"
+    },
+    {
+      "pattern": "〜しまつだ",
+      "structure": "plain form + しまつだ",
+      "meaning": "and it came to this sorry pass"
+    },
+    {
+      "pattern": "〜ずにはおかない",
+      "structure": "verb ない-stem + ずにはおかない",
+      "meaning": "it cannot but bring that about"
+    },
+    {
+      "pattern": "〜てはばからない",
+      "structure": "verb て-form + はばからない",
+      "meaning": "says or does it without a qualm"
+    },
+    {
+      "pattern": "〜なりに",
+      "structure": "noun + なりに",
+      "meaning": "in the way proper to what it is"
+    },
+    {
+      "pattern": "〜ながらに",
+      "structure": "noun / verb stem + ながらに",
+      "meaning": "staying just as it was"
+    },
+    {
+      "pattern": "〜にかたくない",
+      "structure": "noun / verb dictionary form + にかたくない",
+      "meaning": "one can readily do so"
+    },
+    {
+      "pattern": "〜にとどまらず",
+      "structure": "noun + にとどまらず",
+      "meaning": "and it does not stop there"
+    },
+    {
+      "pattern": "〜にひきかえ",
+      "structure": "noun / plain form + の + にひきかえ",
+      "meaning": "set against that, by contrast"
+    },
+    {
+      "pattern": "〜のなんのって",
+      "structure": "plain form + のなんのって",
+      "meaning": "to an absurd degree"
+    },
+    {
+      "pattern": "〜はさておき",
+      "structure": "noun + はさておき",
+      "meaning": "setting that aside for now"
+    },
+    {
+      "pattern": "〜までのことだ",
+      "structure": "verb dictionary form + までのことだ",
+      "meaning": "then that is all there is to do"
+    },
+    {
+      "pattern": "〜を禁じ得ない",
+      "structure": "emotion noun + を禁じ得ない",
+      "meaning": "one cannot hold the feeling back"
+    },
+    {
+      "pattern": "〜ばこそ",
+      "structure": "verb ば-form + こそ",
+      "meaning": "it is only because of that"
+    },
+    {
+      "pattern": "〜ようが〜まいが",
+      "structure": "verb volitional form + が + verb dictionary form + まいが",
+      "meaning": "whether it happens or not"
+    }
   ]
 }

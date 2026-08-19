@@ -265,16 +265,38 @@ EXTRA_MARKERS: dict[str, tuple[str, ...]] = {
 }
 
 
+# Catalogue points whose surface is also an ordinary everyday string, so
+# finding it says nothing about which grammar is at work. They stay in the
+# catalogue -- they are real points and the Grammar section teaches them --
+# they just cannot serve as EVIDENCE here.
+#
+# This is the same line grammar_match._UNVERIFIABLE draws for bare
+# particles, one step further out: those cannot be checked at all, these
+# can be checked and are simply wrong too often to trust.
+#
+#   〜にして    inside ようにして, にしては, っぱなしにして
+#   〜あまり    あまり is the everyday adverb "not much"
+#   〜上で      「机の上で」 is "on the desk"
+#   〜出す      出す is a plain verb, "to take out"
+#   〜直す      直す is a plain verb, "to fix"
+#   〜にあって  「そこにあって」 is just "being there"
+GATE_BLIND: frozenset[str] = frozenset({
+    "〜にして", "〜あまり", "〜上で", "〜出す", "〜直す", "〜にあって",
+})
+
+
 @lru_cache(maxsize=1)
 def _checkable_points() -> list[tuple[str, str, tuple[str, ...]]]:
     """(level, pattern, stems) for every catalogue point a substring test
     can honestly check. See grammar_match.verifiable for what it excludes
-    and why -- a bare particle matches everything and proves nothing."""
+    and why -- a bare particle matches everything and proves nothing --
+    and GATE_BLIND above for the points this module additionally declines
+    to draw conclusions from."""
     out = []
     for level in LEVELS:
         for point in GRAMMAR_POINTS_BY_LEVEL.get(level, []):
             pattern = point.get("pattern", "")
-            if not pattern or not verifiable(pattern):
+            if not pattern or pattern in GATE_BLIND or not verifiable(pattern):
                 continue
             found = tuple(s for s in stems(pattern) if len(s) >= 2)
             if found:

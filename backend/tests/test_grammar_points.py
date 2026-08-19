@@ -7,7 +7,14 @@ from content.grammar_points_data import (
 )
 
 LEVELS = ["N5", "N4", "N3", "N2", "N1"]
-PER_LEVEL = 41
+# The catalogue is deliberately the SAME SIZE at every level rather than
+# a fixed number here: a level with visibly fewer points than its
+# neighbours reads to a learner as "there is less to know at N2", which
+# is not what a thinner list means. The count is read off N5 and every
+# other level is required to match it, so growing the catalogue is one
+# edit to the data and none to this file.
+PER_LEVEL = len(GRAMMAR_POINTS_BY_LEVEL["N5"])
+MIN_PER_LEVEL = 41  # what shipped; the catalogue may grow, never shrink
 FIELDS = {"pattern", "structure", "meaning"}
 
 
@@ -26,6 +33,7 @@ def _all_entries():
 class GrammarPointsShapeTests(unittest.TestCase):
     def test_every_level_is_present_and_full(self) -> None:
         self.assertEqual(sorted(GRAMMAR_POINTS_BY_LEVEL), sorted(LEVELS))
+        self.assertGreaterEqual(PER_LEVEL, MIN_PER_LEVEL)
         for level in LEVELS:
             self.assertEqual(
                 len(GRAMMAR_POINTS_BY_LEVEL[level]), PER_LEVEL,
