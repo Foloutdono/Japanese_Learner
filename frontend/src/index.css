@@ -8702,7 +8702,6 @@ input:focus { border-color: var(--accent2); }
    filter that selects it wears the same one. */
 .decks-filter-row {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
   gap: 6px;
   min-width: 0;
@@ -8724,6 +8723,8 @@ input:focus { border-color: var(--accent2); }
   white-space: nowrap;
   cursor: pointer;
   transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+  flex: auto;
+  justify-content: center;
 }
 /* The "All" chip carries no glyph, so its left padding matches its
    right instead of reserving room for a roundel that isn't there. */
@@ -8905,6 +8906,7 @@ input:focus { border-color: var(--accent2); }
 .decks-grid {
   padding-top: 0;
   grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  gap: 12px;
 }
 .deck-card { align-items: stretch; }
 /* The roundel carries the type's kanji, not a number: which pile of
@@ -13832,13 +13834,16 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
      nothing before a `flex-shrink: 0` sibling gives up a pixel, so
      side by side the field always lost — and the placeholder was cut
      mid-word right against the number. */
-  .dict-console .dict-index-bar { flex-wrap: wrap; padding: 4px 14px 8px; row-gap: 0; }
-  .dict-index-bar__input { padding: 12px 0 4px; }
+  .dict-console .dict-index-bar { flex-wrap: wrap; padding: 8px 14px 8px; row-gap: 0; }
+  .dict-index-bar__input { padding: 4px 0; }
   .dict-index-bar__count {
     flex: 1 0 100%;
     text-align: right;
     padding-bottom: 4px;
   }
+  .dict-console { margin-bottom: 20px; }
+
+  .station-header { margin-bottom: 30px;}
 }
 
 /* ── Closing the dock ──
