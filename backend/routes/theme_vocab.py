@@ -20,7 +20,6 @@ run, and so this can be dropped entirely if themes are ever pulled —
 mirrors why frequency.py (tiers) isn't merged into vocab.py either.
 """
 import logging
-import random
 
 from fastapi import APIRouter, Depends
 
@@ -29,10 +28,11 @@ from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
-from study.quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO
-from study.mcq import pick_distractors
+from study.modes import VOCAB, Mode, eligible_for, require_mode
 from content import theme_data
-from routes.vocab import _build_review_preview, MAX_BATCH  # reuse, don't duplicate
+# reuse, don't duplicate -- a theme card and a level card are rendered by
+# the same component, so they are built by the same function.
+from routes.vocab import _build_vocab_card, MAX_BATCH
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -62,40 +62,36 @@ def _entry_meaning(entry: dict, lang: str) -> str:
     return entry["meaning"]
 
 
-def _build_theme_card(card_id: str, entry: dict, pool: list[dict], mode: str, lang: str,
+def _build_theme_card(card_id: str, entry: dict, pool: list[dict], m: Mode, lang: str,
                        stage: str | None, preview: dict[int, dict] | None = None) -> dict:
-    meaning = _entry_meaning(entry, lang)
-    fmt, direction = MODE_INFO[mode]
+    """
+    vocab.py's builder plus the one field a theme card has that a level
+    card does not: the word's NATIVE JLPT level (None for a word that
+    only exists in the JMdict pool), which the theme UI shows as a badge.
 
-    payload = {
-        "card_id":   card_id,
-        "mode":      mode,
-        "format":    fmt,
-        "direction": direction,
-        "kanji":     entry["kanji"],
-        "kana":      entry["kana"],
-        "meaning":   meaning,
-        "level":     entry["level"],  # native JLPT level, or None for a JMdict-pool word
-        "stage":     stage,
-        "review_preview": _build_review_preview(stage, preview),
-    }
-
-    if fmt == "qcm":
-        choice_entries = pick_distractors(
-            pool, lambda e: _entry_meaning(e, lang), meaning,
-        ) + [entry]
-        random.shuffle(choice_entries)
-        payload["choices"] = [
-            {"kanji": c["kanji"], "kana": c["kana"], "meaning": _entry_meaning(c, lang)}
-            for c in choice_entries
-        ]
-
+    This was a third independent copy of the vocab payload, and it was
+    still emitting the retired `format`/`choices` shape -- so every theme
+    card arrived without the `hints` key the client reads, on top of
+    MODE_INFO[mode] raising KeyError for every current mode key.
+    """
+    payload = _build_vocab_card(
+        card_id, entry, pool, m, lang, stage, preview,
+        meaning_of=lambda e: _entry_meaning(e, lang),
+    )
+    payload["level"] = entry["level"]
     return payload
 
 
-def _select_theme_cards(theme: str, mode: str, lang: str, count: int, exclude_ids: set[str], user_id: str):
+def _select_theme_cards(theme: str, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str):
     pool = theme_data.theme_entries(theme)
-    if not pool or mode not in MODE_INFO:
+    if not pool:
+        return None, None
+
+    mode = m.key
+    # vocab.word_reading cannot serve a kana-only word -- the prompt
+    # would be the answer. See modes.eligible_for.
+    pool = [e for e in pool if eligible_for(m, e)]
+    if not pool:
         return None, None
     by_card_id = {e["card_id"]: e for e in pool}
 
@@ -122,7 +118,7 @@ def _select_theme_cards(theme: str, mode: str, lang: str, count: int, exclude_id
         raw_id = unprefixed(card_id, user_id)
         entry = by_card_id.get(raw_id)
         if entry is not None:
-            cards.append(_build_theme_card(raw_id, entry, pool, mode, lang, states.get(card_id), previews.get(card_id)))
+            cards.append(_build_theme_card(raw_id, entry, pool, m, lang, states.get(card_id), previews.get(card_id)))
 
     logger.info(
         "theme study request theme=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
@@ -140,12 +136,13 @@ def get_themes():
 
 
 @router.get("/api/vocab/theme/{theme}/card")
-def get_theme_card(theme: str, mode: str, lang: str = "fr", user_id: str = Depends(get_user_id)):
-    pool, cards = _select_theme_cards(theme, mode, lang, count=1, exclude_ids=set(), user_id=user_id)
+def get_theme_card(theme: str, lang: str = "fr",
+                   m: Mode = Depends(require_mode(VOCAB)),
+                   user_id: str = Depends(get_user_id)):
+    mode = m.key
+    pool, cards = _select_theme_cards(theme, m, lang, count=1, exclude_ids=set(), user_id=user_id)
     if pool is None:
-        if not theme_data.theme_entries(theme):
-            return {"error": "Unknown theme"}
-        return {"error": "Invalid mode"}
+        return {"error": "Unknown theme"}
     if not cards:
         logger.warning("theme study exhausted theme=%s mode=%s user_id=%s", theme, mode, user_id)
         return {"done": True}
@@ -153,28 +150,34 @@ def get_theme_card(theme: str, mode: str, lang: str = "fr", user_id: str = Depen
 
 
 @router.get("/api/vocab/theme/{theme}/cards")
-def get_theme_cards(theme: str, mode: str, lang: str = "fr", count: int = 10, exclude: str = "",
+def get_theme_cards(theme: str, lang: str = "fr", count: int = 10, exclude: str = "",
+                    m: Mode = Depends(require_mode(VOCAB)),
                     user_id: str = Depends(get_user_id)):
     pool, cards = _select_theme_cards(
-        theme, mode, lang,
+        theme, m, lang,
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
     )
     if pool is None:
-        if not theme_data.theme_entries(theme):
-            return {"error": "Unknown theme"}
-        return {"error": "Invalid mode"}
+        return {"error": "Unknown theme"}
     return {"cards": cards}
 
 
 @router.get("/api/vocab/theme/{theme}/stats")
-def get_theme_stats(theme: str, mode: str, user_id: str = Depends(get_user_id)):
+def get_theme_stats(theme: str,
+                    m: Mode = Depends(require_mode(VOCAB)),
+                    user_id: str = Depends(get_user_id)):
+    mode = m.key
     pool = theme_data.theme_entries(theme)
     if not pool:
         return {"error": "Unknown theme"}
-    if mode not in MODE_INFO:
-        return {"error": "Invalid mode"}
+
+    # Eligibility-filtered so `total` is reachable -- see the same note
+    # on routes/frequency.py's stats endpoint.
+    pool = [e for e in pool if eligible_for(m, e)]
+    if not pool:
+        return {"error": "Unknown theme"}
 
     card_ids = prefixed([e["card_id"] for e in pool], user_id)
     states  = srs.get_bulk_stats(card_ids, mode)

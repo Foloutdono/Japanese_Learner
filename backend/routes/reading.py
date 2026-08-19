@@ -14,7 +14,9 @@ from pydantic import BaseModel
 from core.db import db_conn
 from core.auth import get_user_id, unprefixed
 from core.srs_instance import srs
-from study.card_lookup import find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODE
+from study.card_lookup import (
+    find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODES,
+)
 from content.kanji_data import get_kanji_string
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content import vocab_extras
@@ -398,16 +400,21 @@ def _known_words_for_mastery(user_id: str) -> list[tuple[str, str, str | None]]:
     "state", not "status". card_modes also tracks progress separately
     PER QUIZ MODE (flashcard/qcm/write/...), not per word — so "is this
     word learning/mastered" isn't single-valued in general. This uses
-    VOCAB_STATUS_MODE (the same mode dictionary.py already reads for its
-    own "is this word known" badge) as the canonical mode for that
-    question, for consistency with the rest of the app rather than
-    inventing a separate "any mode counts" rule here.
+    VOCAB_STATUS_MODES -- every graded vocab mode, the same set
+    dictionary.py reads for its own "is this word known" badge -- and
+    counts a word as known once ANY of them reaches learning/mastered.
+
+    That "any" is the rule the whole app now uses (see card_lookup's
+    STATUS_MODES block); it replaced a single canonical mode, "qcm-kj-m",
+    which the mode registry retired. Nothing writes that key any more, so
+    this loop matched zero rows and the filter silently passed every
+    word through as unknown.
     """
     states = srs.get_user_states(user_id)
     known = []
 
     for (card_id, mode), state in states.items():
-        if mode != VOCAB_STATUS_MODE:
+        if mode not in VOCAB_STATUS_MODES:
             continue
         if state["state"] not in ("learning", "mastered"):
             continue

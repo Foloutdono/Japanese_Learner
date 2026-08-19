@@ -25,7 +25,6 @@ touching (and re-risking) those already-working endpoints. Worth
 consolidating into one shared module later if the three files drift.
 """
 import logging
-import random
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -35,8 +34,16 @@ from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
 from content.kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
-from study.quiz_modes import QCM_FLASHCARD_MODES, KANJI_MODES
-from study.mcq import pick_distractors
+from study.modes import KANJI, VOCAB, Mode, eligible_for, resolve_for_source
+# The payload builders themselves, not copies of them. KanjiScreen and
+# VocabScreen treat /api/frequency/{domain}/cards as a drop-in sibling
+# of /api/{domain}/cards and render both with the same component, so
+# two independent builders would be two things free to drift apart --
+# which is exactly what happened: this module was still emitting the
+# retired `format`/`choices` shape long after the sections moved to
+# `hints.indice_1`.
+from routes.kanji import _build_kanji_card, _radical_number
+from routes.vocab import _build_vocab_card
 
 import content.frequency_data as freq
 from core.frequency_store_instance import frequency_store
@@ -91,57 +98,54 @@ def _require_domain(domain: str) -> None:
         raise HTTPException(status_code=404, detail=f"Unknown domain: {domain!r}")
 
 
-def _valid_modes(domain: str) -> set[str]:
-    return set(KANJI_MODES) if domain == "kanji" else set(QCM_FLASHCARD_MODES)
+# domain is a PATH parameter here, so modes.require_mode() -- which is
+# built per source at import time -- cannot be used as a dependency the
+# way the section routers use it. Same contract, resolved per request.
+_SOURCE_FOR_DOMAIN = {"kanji": KANJI, "vocab": VOCAB, "vocab_jmdict": VOCAB}
+
+
+def _resolve_mode(domain: str, mode: str) -> Mode:
+    """
+    Raises 400 rather than returning {"error": ...} with a 200, which is
+    what this did before. lib/api.js only treats a non-ok response as an
+    error; a 200 carrying an error body reached the screens as
+    `data.cards ?? []`, i.e. as "deck exhausted", and fired the
+    completion fanfare instead. Every frequency-tier session did exactly
+    that from the moment the mode registry landed, because every key the
+    client sends ("kanji.flashcard.f2b") was outside the old table.
+    """
+    resolved = resolve_for_source(_SOURCE_FOR_DOMAIN[domain], mode)
+    if resolved is None:
+        raise HTTPException(
+            status_code=400, detail=f"Invalid mode for {domain}: {mode!r}",
+        )
+    return resolved
+
+
+def _augment(domain: str, entry: dict) -> dict:
+    """The extra fact eligible_for() asks about for kanji.radical, which
+    is not on the deck entry itself. Mirrors study/card_index._augment."""
+    if domain == "kanji":
+        return {**entry, "radical": _radical_number(entry)}
+    return entry
 
 
 def _fr_map(domain: str) -> dict:
     return KANJI_FR if domain == "kanji" else VOCAB_FR
 
 
-def _build_card(domain: str, raw_id: str, entry: dict, pool: list[dict], mode: str, lang: str,
+def _build_card(domain: str, raw_id: str, entry: dict, pool: list[dict], m: Mode, lang: str,
                  stage: str | None, preview: dict | None) -> dict:
-    fr_map = _fr_map(domain)
-    meaning = get_meaning(entry, lang, fr_map)
-
-    payload = {
-        "card_id": raw_id,
-        "mode": mode,
-        "kanji": entry.get("kanji", ""),
-        "kana": entry.get("kana", ""),
-        "meaning": meaning,
-        "stage": stage,
-        "review_preview": _build_review_preview(stage, preview),
-    }
+    """Delegates to the section's own builder so a frequency card and a
+    level card are byte-for-byte the same shape. `pool` stands in for the
+    level deck as the distractor source, which is the point of the tier:
+    wrong answers drawn from words of comparable frequency."""
     if domain == "kanji":
-        payload["stroke_count"] = entry.get("stroke_count", "")
-        if mode == "write":
-            return payload
-
-    fmt, direction = QCM_FLASHCARD_MODES[mode]
-    payload["format"] = fmt
-    payload["direction"] = direction
-
-    if fmt == "qcm":
-        choice_entries = pick_distractors(
-            pool, lambda e: get_meaning(e, lang, fr_map), meaning,
-        ) + [entry]
-        random.shuffle(choice_entries)
-        if domain == "kanji":
-            payload["choices"] = [
-                {"kanji": c.get("kanji", ""), "meaning": get_meaning(c, lang, fr_map)}
-                for c in choice_entries
-            ]
-        else:
-            payload["choices"] = [
-                {"kanji": c.get("kanji", ""), "kana": c.get("kana", ""), "meaning": get_meaning(c, lang, fr_map)}
-                for c in choice_entries
-            ]
-
-    return payload
+        return _build_kanji_card(raw_id, entry, pool, m, lang, stage, preview)
+    return _build_vocab_card(raw_id, entry, pool, m, lang, stage, preview)
 
 
-def _select_cards(domain: str, tier: int, mode: str, lang: str, count: int, exclude_ids: set[str], user_id: str,
+def _select_cards(domain: str, tier: int, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str,
                    tier_size: int = freq.DEFAULT_TIER_SIZE):
     """Mirrors kanji.py/vocab.py's _select_cards, but the candidate pool
     is a frequency tier (native_level, entry) list instead of a single
@@ -155,6 +159,21 @@ def _select_cards(domain: str, tier: int, mode: str, lang: str, count: int, excl
     keys = freq.tier_keys(domain, tier, tier_size=tier_size, overrides=overrides)
     resolved = [(key, freq.resolve(domain, key)) for key in keys]
     resolved = [(key, r) for key, r in resolved if r is not None]
+    if not resolved:
+        return [], []
+
+    mode = m.key
+
+    # Not every entry can be served in every mode -- vocab.word_reading
+    # needs a kanji in the word, kanji.radical needs a radical number.
+    # Filtering the POOL rather than skipping at build time matters: an
+    # ineligible entry left in the pool is still selectable and comes
+    # back as a silently missing card, which reads as "tier exhausted".
+    # The section routers have always done this; this one never did.
+    resolved = [
+        (key, r) for key, r in resolved
+        if eligible_for(m, _augment(domain, r[1]))
+    ]
     if not resolved:
         return [], []
 
@@ -185,7 +204,7 @@ def _select_cards(domain: str, tier: int, mode: str, lang: str, count: int, excl
         raw_id = unprefixed(card_id, user_id)
         entry = by_raw_id.get(raw_id)
         if entry is not None:
-            cards.append(_build_card(domain, raw_id, entry, pool, mode, lang, states.get(card_id), previews.get(card_id)))
+            cards.append(_build_card(domain, raw_id, entry, pool, m, lang, states.get(card_id), previews.get(card_id)))
 
     logger.info(
         "frequency study request domain=%s tier=%d tier_size=%d mode=%s user_id=%s requested=%d due_count=%d picked=%d",
@@ -248,10 +267,9 @@ def get_tier_items(domain: str, tier: int, lang: str = "fr", tier_size: int = fr
 def get_frequency_card(domain: str, tier: int, mode: str, lang: str = "fr", tier_size: int = freq.DEFAULT_TIER_SIZE,
                        user_id: str = Depends(get_user_id)):
     _require_domain(domain)
-    if mode not in _valid_modes(domain):
-        return {"error": "Invalid mode"}
+    m = _resolve_mode(domain, mode)
 
-    pool, cards = _select_cards(domain, tier, mode, lang, count=1, exclude_ids=set(), user_id=user_id, tier_size=tier_size)
+    pool, cards = _select_cards(domain, tier, m, lang, count=1, exclude_ids=set(), user_id=user_id, tier_size=tier_size)
     if not pool:
         return {"error": "Empty tier"}
     if not cards:
@@ -264,11 +282,10 @@ def get_frequency_card(domain: str, tier: int, mode: str, lang: str = "fr", tier
 def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", count: int = 10, exclude: str = "",
                         tier_size: int = freq.DEFAULT_TIER_SIZE, user_id: str = Depends(get_user_id)):
     _require_domain(domain)
-    if mode not in _valid_modes(domain):
-        return {"error": "Invalid mode"}
+    m = _resolve_mode(domain, mode)
 
     pool, cards = _select_cards(
-        domain, tier, mode, lang,
+        domain, tier, m, lang,
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
@@ -283,13 +300,28 @@ def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", cou
 def get_frequency_stats(domain: str, tier: int, mode: str, tier_size: int = freq.DEFAULT_TIER_SIZE,
                         user_id: str = Depends(get_user_id)):
     _require_domain(domain)
-    if mode not in _valid_modes(domain):
-        return {"error": "Invalid mode"}
+    m = _resolve_mode(domain, mode)
 
     overrides = frequency_store.get_overrides(user_id, domain)
     keys = freq.tier_keys(domain, tier, tier_size=tier_size, overrides=overrides)
-    raw_ids = [freq.to_id(domain, key) for key in keys]
-    raw_ids = [rid for rid in raw_ids if rid is not None]
+
+    # Eligibility-filtered, so `total` is a number this mode can actually
+    # finish. Counting the whole tier when word_reading can only serve
+    # the kanji-bearing part of it puts a ceiling below 100% on the
+    # progress bar and reads as a stalled learner. Same rule the card
+    # pool above applies, and the same one study/card_index applies to
+    # the level bars on the stats screen.
+    raw_ids = []
+    for key in keys:
+        r = freq.resolve(domain, key)
+        if r is None:
+            continue
+        if not eligible_for(m, _augment(domain, r[1])):
+            continue
+        rid = freq.to_id(domain, key)
+        if rid is not None:
+            raw_ids.append(rid)
+
     if not raw_ids:
         return {"error": "Empty tier"}
 

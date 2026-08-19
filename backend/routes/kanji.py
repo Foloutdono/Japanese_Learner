@@ -7,9 +7,9 @@ from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
 from content.kanji_meanings import KANJI_FR
-from study.quiz_modes import QCM_FLASHCARD_MODES, KANJI_MODES
 from study.modes import (
-    KANJI, INDICE_CHOICES, RADICAL, READINGS, Mode, eligible_for, require_mode,
+    KANJI, GRADED_FOR_SOURCE, INDICE_CHOICES, RADICAL, READINGS,
+    Mode, eligible_for, require_mode,
 )
 from study.mcq import pick_distractors
 from content.kanji_readings import split_readings, display_reading
@@ -70,7 +70,6 @@ def _stage_demotion(prev_stage: str | None, new_stage: str | None) -> str | None
     return STAGE_DEMOTIONS.get((prev_stage, new_stage))
 
 FR_MAP = KANJI_FR
-VALID_MODES = set(KANJI_MODES)
 MAX_BATCH = 25
 
 
@@ -302,11 +301,12 @@ def get_kanji_review_cards(level: str, lang: str = "fr", user_id: str = Depends(
 
     raw_ids  = [kanji_to_id(k, level) for k in kanji_list]
     card_ids = prefixed(raw_ids, user_id)
-    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in KANJI_MODES}
+    graded = sorted(GRADED_FOR_SOURCE[KANJI])
+    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in graded}
 
     cards = []
     for entry, card_id in zip(kanji_list, card_ids):
-        stages = [per_mode_states[m].get(card_id, "new") for m in KANJI_MODES]
+        stages = [per_mode_states[m].get(card_id, "new") for m in graded]
         stage = "mastered" if "mastered" in stages else "learning" if "learning" in stages else "new"
         if stage == "new":
             continue

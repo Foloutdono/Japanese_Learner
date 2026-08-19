@@ -27,8 +27,8 @@ from study.furigana import align_deck as align_furigana
 # how to shape one card payload (choices, fill-in blanks, review
 # previews, ...) for its own mode set — decks.py just needs to route
 # to the right one per card. See SOURCES below.
-from routes.kanji import VALID_MODES as KANJI_VALID_MODES, _build_kanji_card
-from routes.vocab import MODE_INFO as VOCAB_MODE_INFO, _build_vocab_card
+from routes.kanji import _build_kanji_card
+from routes.vocab import _build_vocab_card
 from routes.grammar import _build_grammar_card
 from study.structures import (
     ALL_KEYS as STRUCTURE_KEYS,
@@ -121,13 +121,13 @@ SOURCES = {
     "kanji": {
         "by_level":    KANJI_BY_LEVEL,
         "to_id":       kanji_to_id,
-        "valid_modes": KANJI_VALID_MODES,
+        "valid_modes": set(GRADED_FOR_SOURCE[MODE_KANJI]),
         "build":       _wrap_kanji,
     },
     "vocab": {
         "by_level":    VOCAB_BY_LEVEL,
         "to_id":       vocab_to_id,
-        "valid_modes": set(VOCAB_MODE_INFO.keys()),
+        "valid_modes": set(GRADED_FOR_SOURCE[MODE_VOCAB]),
         "build":       _wrap_vocab,
     },
     "grammar": {

@@ -14,7 +14,7 @@ from core.auth import get_user_id
 from core.srs_instance import srs
 from study.card_lookup import (
     find_vocab_match, find_kanji_matches, serializable_entry, card_stats,
-    VOCAB_STATUS_MODE, KANJI_STATUS_MODE,
+    VOCAB_STATUS_MODES, KANJI_STATUS_MODES,
 )
 
 router = APIRouter()
@@ -300,7 +300,7 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
                 "level": level,
                 "raw_id": raw_id,
                 "entry": serializable_entry(entry),
-                "stats": card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),
+                "stats": card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
             }
 
         for char, level, entry, raw_id in kanji_matches:
@@ -309,7 +309,7 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
                 "level": level,
                 "raw_id": raw_id,
                 "entry": serializable_entry(entry),
-                "stats": card_stats(states, user_id, raw_id, KANJI_STATUS_MODE),
+                "stats": card_stats(states, user_id, raw_id, KANJI_STATUS_MODES),
             })
 
         enriched_words.append(word_entry)

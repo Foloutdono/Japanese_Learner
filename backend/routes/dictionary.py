@@ -14,18 +14,13 @@ from content.kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
 from core.auth import get_user_id
 from core.srs_instance import srs
-from study.card_lookup import card_stats, VOCAB_STATUS_MODE, KANJI_STATUS_MODE, is_kanji
+from study.card_lookup import (
+    card_stats, VOCAB_STATUS_MODES, KANJI_STATUS_MODES, KANA_STATUS_MODES, is_kanji,
+)
 from study.furigana import align_deck
 
 router = APIRouter()
 
-# NOTE: card_lookup.py wasn't available while wiring this up, so this is
-# a best guess at the mode string kana progress is actually tracked
-# under (mirroring KANJI_STATUS_MODE/VOCAB_STATUS_MODE's naming). Check
-# it against however card_lookup.py defines status modes for kana's own
-# quiz modes ('flashcard' / 'qcm' / 'write' — see kanaModePicker) and
-# adjust if it doesn't match.
-KANA_STATUS_MODE = "flashcard"
 
 KANJI_FR_MAP = KANJI_FR
 VOCAB_FR_MAP = VOCAB_FR
@@ -290,7 +285,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 "senses":   extras["senses"],
                 "examples": extras["examples"],
                 "furigana": _word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
-                "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),
+                "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
             })
         return {
             "results":  results,
@@ -379,7 +374,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 "radical":      info["radical"] if info else None,
                 "level":        level,
                 "svg_url":      f"/kanjivg/{codepoint}.svg",
-                "status":       card_stats(states, user_id, raw_id, KANJI_STATUS_MODE),
+                "status":       card_stats(states, user_id, raw_id, KANJI_STATUS_MODES),
                 "vocab_examples": _vocab_examples_for_kanji(entry["kanji"], lang),
             })
         elif kind == "vocab":
@@ -404,7 +399,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 "senses":   extras["senses"],
                 "examples": extras["examples"],
                 "furigana": _word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
-                "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODE),
+                "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
             })
         else:  # hiragana or katakana
             raw_id = kana_to_id(entry)
@@ -425,7 +420,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr"
                 # this field to lay out the classic a-i-u-e-o chart.
                 "group":   entry.get("group", ""),
                 "svg_url": f"/kanjivg/{codepoint}.svg",
-                "status":  card_stats(states, user_id, raw_id, KANA_STATUS_MODE),
+                "status":  card_stats(states, user_id, raw_id, KANA_STATUS_MODES),
             })
 
     return {

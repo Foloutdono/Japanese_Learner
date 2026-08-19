@@ -7,10 +7,9 @@ from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
-from study.quiz_modes import QCM_FLASHCARD_MODES as MODE_INFO, VOCAB_MODES
 from study.modes import (
-    VOCAB, INDICE_CHOICES, INDICE_FURIGANA, WORD_READING, Mode,
-    eligible_for, require_mode,
+    VOCAB, GRADED_FOR_SOURCE, INDICE_CHOICES, INDICE_FURIGANA, WORD_READING,
+    Mode, eligible_for, require_mode,
 )
 from study.furigana import align_deck as align_furigana
 from study.mcq import pick_distractors
@@ -82,7 +81,7 @@ def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) ->
 
 
 def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], m: Mode, lang: str, stage: str | None,
-                       preview: dict[int, dict] | None = None) -> dict:
+                       preview: dict[int, dict] | None = None, meaning_of=None) -> dict:
     """
     Takes a resolved Mode. See _build_kanji_card for why `format` is gone
     and the choices moved into `hints.indice_1`. This builder is also
@@ -90,7 +89,15 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], m: Mode, 
     that 500'd on any key outside that dict, with no `write`-style escape
     hatch of its own.
     """
-    meaning = get_meaning(word, lang, FR_MAP)
+    # `meaning_of` exists for the theme router, whose pool mixes deck
+    # words with JMdict-pool ones. The default lookup keys the French
+    # gloss table by surface form, and 44 theme entries share a surface
+    # with a deck word of a DIFFERENT sense -- 子 is "enfant" in the deck
+    # and "the Rat" in the zodiac theme. Letting the caller say how a
+    # meaning is resolved keeps that right for the prompt AND for the
+    # distractors, which a post-hoc correction of the payload could not.
+    resolve_meaning = meaning_of or (lambda e: get_meaning(e, lang, FR_MAP))
+    meaning = resolve_meaning(word)
 
     payload = {
         "card_id":   raw_id,
@@ -139,14 +146,14 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], m: Mode, 
 
     if INDICE_CHOICES in m.hints:
         choice_entries = pick_distractors(
-            vocab_list, lambda w: get_meaning(w, lang, FR_MAP), meaning,
+            vocab_list, resolve_meaning, meaning,
         ) + [word]
         random.shuffle(choice_entries)
         payload["hints"][INDICE_CHOICES] = [
             {
                 "kanji":   c.get("kanji", ""),
                 "kana":    c.get("kana", ""),
-                "meaning": get_meaning(c, lang, FR_MAP),
+                "meaning": resolve_meaning(c),
             }
             for c in choice_entries
         ]
@@ -271,11 +278,12 @@ def get_vocab_review_cards(level: str, lang: str = "fr", user_id: str = Depends(
 
     raw_ids  = [vocab_to_id(w, level) for w in vocab_list]
     card_ids = prefixed(raw_ids, user_id)
-    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in VOCAB_MODES}
+    graded = sorted(GRADED_FOR_SOURCE[VOCAB])
+    per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in graded}
 
     cards = []
     for word, card_id in zip(vocab_list, card_ids):
-        stages = [per_mode_states[m].get(card_id, "new") for m in VOCAB_MODES]
+        stages = [per_mode_states[m].get(card_id, "new") for m in graded]
         stage = "mastered" if "mastered" in stages else "learning" if "learning" in stages else "new"
         if stage == "new":
             continue

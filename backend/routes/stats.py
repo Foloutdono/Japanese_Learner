@@ -1,72 +1,24 @@
 import logging
 from fastapi import APIRouter, Depends
 from core.db import db_conn
-from content.kana_data import KANA_SETS, kana_to_id
-from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from content.grammar_points_data import (
-    GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, grammar_to_id,
-)
-from core.auth import get_user_id, prefixed
+from core.auth import get_user_id
 from core.srs_instance import srs
-from study.quiz_modes import (
-    KANA_MODES,
-    VOCAB_MODES as VOCAB_PHASE_KEYS,
-    KANJI_MODES as KANJI_PHASE_KEYS,
-    GRAMMAR_MODES as GRAMMAR_PHASE_KEYS,
-)
+from study import card_index
+from study.modes import KANA, KANJI, VOCAB, GRAMMAR, GRADED_FOR_SOURCE
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-KANA_IDS = {
-    set_name: [kana_to_id(k) for k in kana_list]
-    for set_name, kana_list in KANA_SETS.items()
-}
+# The four sections this screen reports on, in the order the frontend
+# renders them. `source` is the registry's own name for the section
+# (study/modes.py), which is also the key the response is shaped by, so
+# there is no second vocabulary to keep in step.
+SECTIONS = (KANA, VOCAB, KANJI, GRAMMAR)
 
-VOCAB_IDS = {
-    level: [vocab_to_id(v, level) for v in vocab_list]
-    for level, vocab_list in VOCAB_BY_LEVEL.items()
-}
-
-KANJI_IDS = {
-    level: [kanji_to_id(k, level) for k in kanji_list]
-    for level, kanji_list in KANJI_BY_LEVEL.items()
-}
-
-GRAMMAR_IDS = {
-    level: [grammar_to_id(g, level) for g in grammar_list]
-    for level, grammar_list in GRAMMAR_BY_LEVEL.items()
-}
-
-
-def _build_reverse_index():
-    """
-    Computed once at import time (the content universe is static).
-
-    Returns:
-        index:  (raw_id, mode) -> (category, key)
-        totals: (category, key) -> total number of items
-    """
-    index = {}
-    totals = {}
-
-    for category, ids_map, modes in (
-        ("kana", KANA_IDS, KANA_MODES),
-        ("vocab", VOCAB_IDS, VOCAB_PHASE_KEYS),
-        ("kanji", KANJI_IDS, KANJI_PHASE_KEYS),
-        ("grammar", GRAMMAR_IDS, GRAMMAR_PHASE_KEYS),
-    ):
-        for key, ids in ids_map.items():
-            totals[(category, key)] = len(ids)
-            for raw_id in ids:
-                for mode in modes:
-                    index[(raw_id, mode)] = (category, key)
-
-    return index, totals
-
-
-_ID_MODE_INDEX, _CATEGORY_TOTALS = _build_reverse_index()
+# Modes per section, read off the registry rather than a local list.
+# This is the whole reason the screen was blank: the local list said
+# "qcm-kj-m" and every row in the database says "kanji.flashcard.f2b".
+SECTION_MODES = {source: sorted(GRADED_FOR_SOURCE[source]) for source in SECTIONS}
 
 
 def _empty_bucket(total: int) -> dict:
@@ -89,27 +41,23 @@ def get_stats(user_id: str = Depends(get_user_id)):
 
     cache = srs.get_user_states(user_id)
 
-    kana_stats = {
-        set_name: {mode: _empty_bucket(len(ids)) for mode in KANA_MODES}
-        for set_name, ids in KANA_IDS.items()
+    # Every (section, deck, mode) triple starts fully "new", sized by
+    # what the mode can actually REACH -- card_index applies the same
+    # eligibility filter the card pools do, so a mastery bar's
+    # denominator is a number the learner can finish. Scoring
+    # vocab.word_reading out of all 8,405 words when only 7,308 contain
+    # a kanji made 100% unreachable by construction.
+    buckets = {
+        source: {
+            deck_key: {
+                mode: _empty_bucket(card_index.total(source, deck_key, mode))
+                for mode in SECTION_MODES[source]
+            }
+            for deck_key in card_index.deck_keys(source)
+        }
+        for source in SECTIONS
     }
 
-    vocab_stats = {
-        level: {mode: _empty_bucket(len(ids)) for mode in VOCAB_PHASE_KEYS}
-        for level, ids in VOCAB_IDS.items()
-    }
-
-    kanji_stats = {
-        level: {mode: _empty_bucket(len(ids)) for mode in KANJI_PHASE_KEYS}
-        for level, ids in KANJI_IDS.items()
-    }
-
-    grammar_stats = {
-        level: {mode: _empty_bucket(len(ids)) for mode in GRAMMAR_PHASE_KEYS}
-        for level, ids in GRAMMAR_IDS.items()
-    }
-
-    buckets = {"kana": kana_stats, "vocab": vocab_stats, "kanji": kanji_stats, "grammar": grammar_stats}
     prefix_len = len(user_id) + 1  # strip "user_id:" from the stored card_id
 
     # Only iterate over what the user has actually touched, not the whole
@@ -118,14 +66,18 @@ def get_stats(user_id: str = Depends(get_user_id)):
     for (full_card_id, mode), item in cache.items():
 
         raw_id = full_card_id[prefix_len:]
-        loc = _ID_MODE_INDEX.get((raw_id, mode))
+        loc = card_index.locate(raw_id, mode)
 
         if loc is None:
-            # Stale or unknown id (e.g. content removed since reviewed).
+            # A personal card (custom_...), or content removed since it
+            # was reviewed. Personal cards are deliberately not folded
+            # into a section's bars -- they are not part of that
+            # section's deck, so counting them would make the
+            # denominator lie in the other direction.
             continue
 
-        category, key = loc
-        bucket = buckets[category][key][mode]
+        source, deck_key = loc
+        bucket = buckets[source][deck_key][mode]
 
         state = item["state"]
         if state != "new":
@@ -138,12 +90,7 @@ def get_stats(user_id: str = Depends(get_user_id)):
         bucket["reviews"] += item["total_reviews"]
         bucket["correct"] += item["correct_reviews"]
 
-    return {
-        "kana": kana_stats,
-        "vocab": vocab_stats,
-        "kanji": kanji_stats,
-        "grammar": grammar_stats,
-    }
+    return buckets
 
 
 # A year of days plus a few, so the practice calendar always has 53
@@ -190,7 +137,7 @@ def get_extra_stats(tz_offset: int = 0, user_id: str = Depends(get_user_id)):
     weakest = []
     for entry in weakest_raw:
         raw_id = entry["card_id"][prefix_len:]
-        loc = _ID_MODE_INDEX.get((raw_id, entry["mode"]))
+        loc = card_index.locate(raw_id, entry["mode"])
         category, key = loc if loc else (None, None)
         weakest.append({
             **entry,

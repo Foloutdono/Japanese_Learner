@@ -6,13 +6,22 @@ phrase analyzer and the reading-practice mode.
 
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from study.quiz_modes import STATUS_MODE
+from study.modes import KANA, KANJI, VOCAB, STATUS_MODES
 from content import vocab_extras
 from study import morphology
-# Representative mode used to gauge "do I know this word/kanji" for the
-# clickable badges — see quiz_modes.py for the reasoning. Vocab and
-# kanji both use the same mode here, but they're kept as separate names
-# since nothing requires them to always match.
+# What "do I already know this?" means for the clickable badges.
+#
+# This used to be ONE representative mode, STATUS_MODE = "qcm-kj-m" --
+# recognition with the answer among four choices. That key no longer
+# exists (MCQ became a hint rather than a mode), so the badges were
+# reading a mode nothing writes and no word could ever come back known.
+#
+# Its nearest survivor, <source>.flashcard.f2b, is strictly HARDER than
+# what it replaced -- nothing is offered to pick from -- so silently
+# swapping it in would have raised the bar for "known" without saying
+# so. Instead the question is answered across every graded mode of that
+# source (study/modes.STATUS_MODES) and the best answer wins, which is
+# both more forgiving and closer to what the badge actually claims.
 #
 # NOTE (2026-08): grammar-point lookup (GRAMMAR_STATUS_MODE, the old
 # _grammar_hits/_index_grammar_by_surface machinery) was removed
@@ -22,8 +31,9 @@ from study import morphology
 # morphology-only heuristic layered on top of that. If per-grammar-point
 # SRS tracking is wanted again later, it belongs in the AI segmentation
 # result, not resurrected here.
-VOCAB_STATUS_MODE = STATUS_MODE
-KANJI_STATUS_MODE = STATUS_MODE
+VOCAB_STATUS_MODES = STATUS_MODES[VOCAB]
+KANJI_STATUS_MODES = STATUS_MODES[KANJI]
+KANA_STATUS_MODES = STATUS_MODES[KANA]
 
 # Used to pick between multiple deck entries that share the same surface
 # form (e.g. 歩 is both the everyday word "marcher"/"pas" and the shogi
@@ -188,10 +198,44 @@ def serializable_entry(entry: dict) -> dict:
     return {k: v for k, v in entry.items() if isinstance(v, (str, int, float, bool)) or v is None}
 
 
-def card_stats(states: dict, user_id: str, raw_id: str, mode: str) -> dict:
-    """Full per-card SRS stats for a detail panel, not just a status label."""
-    item = states.get((f"{user_id}:{raw_id}", mode))
-    if item is None:
+# Best-first, so max() over this ordering answers "how well is this
+# known across every mode it can be studied in".
+_STATUS_RANK = {"not_started": 0, "new": 1, "learning": 2, "mastered": 3}
+
+
+def card_stats(states: dict, user_id: str, raw_id: str, modes) -> dict:
+    """
+    Full per-card SRS stats for a detail panel, not just a status label.
+
+    `modes` is the tuple of graded modes the card can be studied in (see
+    the STATUS_MODES block above); a bare string is accepted for the one
+    caller that still has a single mode in hand.
+
+    Progress is tracked per (card, mode) pair, so "is this word known"
+    is not single-valued -- it is answered here by merging across modes
+    rather than by picking one and calling it canonical:
+
+      status          the best reached in any mode
+      reviews         summed, because they all happened
+      accuracy        recomputed from those sums, never averaged
+                      (averaging percentages weights a 2-review mode
+                      the same as a 50-review one)
+      due             true if ANY mode is due, since that is what the
+                      badge is telling you to go and do
+      interval_days   the longest, matching `status`
+      next_review     the EARLIEST, which is when this card next wants
+                      attention -- the opposite end from interval_days,
+                      and correct for the same reason `due` is an any.
+    """
+    if isinstance(modes, str):
+        modes = (modes,)
+
+    items = [
+        item for item in (states.get((f"{user_id}:{raw_id}", m)) for m in modes)
+        if item is not None
+    ]
+
+    if not items:
         return {
             "status": "not_started",
             "total_reviews": 0,
@@ -201,16 +245,20 @@ def card_stats(states: dict, user_id: str, raw_id: str, mode: str) -> dict:
             "interval_days": None,
             "next_review": None,
         }
-    total = item["total_reviews"]
-    accuracy = round(item["correct_reviews"] / total * 100, 1) if total > 0 else None
+
+    total = sum(i["total_reviews"] for i in items)
+    correct = sum(i["correct_reviews"] for i in items)
+    intervals = [i["interval_days"] for i in items if i["interval_days"] is not None]
+    next_reviews = [i["next_review"] for i in items if i["next_review"] is not None]
+
     return {
-        "status": item["state"],
+        "status": max((i["state"] for i in items), key=lambda s: _STATUS_RANK.get(s, 0)),
         "total_reviews": total,
-        "correct_reviews": item["correct_reviews"],
-        "accuracy": accuracy,
-        "due": item["due"],
-        "interval_days": item["interval_days"],
-        "next_review": item["next_review"],
+        "correct_reviews": correct,
+        "accuracy": round(correct / total * 100, 1) if total > 0 else None,
+        "due": any(i["due"] for i in items),
+        "interval_days": max(intervals) if intervals else None,
+        "next_review": min(next_reviews) if next_reviews else None,
     }
 
 
@@ -632,12 +680,12 @@ def _find_segments_legacy(text: str):
 
 def attach_stats_to_segments(segments: list, states: dict, user_id: str) -> list:
     """Add a "stats" dict to each non-plain segment, using the right mode per type."""
-    modes = {"vocab": VOCAB_STATUS_MODE}
+    modes = {"vocab": VOCAB_STATUS_MODES}
     enriched = []
     for seg in segments:
         if seg["type"] == "plain":
             enriched.append(seg)
             continue
-        mode = modes.get(seg["type"], KANJI_STATUS_MODE)
-        enriched.append({**seg, "stats": card_stats(states, user_id, seg["raw_id"], mode)})
+        seg_modes = modes.get(seg["type"], KANJI_STATUS_MODES)
+        enriched.append({**seg, "stats": card_stats(states, user_id, seg["raw_id"], seg_modes)})
     return enriched
