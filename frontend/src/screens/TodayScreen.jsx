@@ -76,10 +76,10 @@ function laneTypeOf(lane) {
 function laneTypeDefs(t) {
   return [
     { value: 'kana',     label: t.kanaTitle,    glyph: 'あ',   color: LINE_COLOR.kana },
-    { value: 'vocab',    label: t.vocabTitle,   glyph: '単語', color: LINE_COLOR.vocab },
-    { value: 'kanji',    label: t.kanjiTitle,   glyph: '漢字', color: LINE_COLOR.kanji },
-    { value: 'grammar',  label: t.grammarTitle, glyph: '文法', color: LINE_COLOR.grammar },
-    { value: 'personal', label: t.decksTitle,   glyph: '教材', color: LINE_COLOR.personal },
+    { value: 'vocab',    label: t.vocabTitle,   glyph: '単', color: LINE_COLOR.vocab },
+    { value: 'kanji',    label: t.kanjiTitle,   glyph: '漢', color: LINE_COLOR.kanji },
+    { value: 'grammar',  label: t.grammarTitle, glyph: '文', color: LINE_COLOR.grammar },
+    { value: 'personal', label: t.decksTitle,   glyph: '私', color: LINE_COLOR.personal },
   ]
 }
 
@@ -438,8 +438,6 @@ export default function TodayScreen({ session }) {
               which was the one place in the app still naming its own
               station instead of asking StationHeader for it. */}
           <StationHeader />
-
-          <p className="today-picker__hint">{t.todayPickHint}</p>
 
           {/* Same console the deck shelf opens with (see .decks-console
               on DecksScreen) -- search across what a lane studies and

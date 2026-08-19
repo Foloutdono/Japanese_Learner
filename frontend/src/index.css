@@ -2119,12 +2119,6 @@ input:focus { border-color: var(--accent2); }
   padding-top: 8px;
 }
 
-/* The masthead used to be drawn here by hand (a bare "本日の運行 /
-   TODAY'S RUN" pair); it is <StationHeader/> now, the same plate every
-   other screen opens with, so only the instruction line below it is
-   still this screen's own. */
-.today-picker__hint { font-size: 13px; color: var(--text-dim); margin: 2px 0 -4px; }
-
 /* The console below is .decks-console, reused rather than redrawn (see
    the JSX comment on why) -- these three rules retint its two
    decks-specific accents to the picker's OWN identity colour, so
@@ -8710,7 +8704,7 @@ input:focus { border-color: var(--accent2); }
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 6px 12px 6px 8px;
+  padding: 6px 12px;
   border: 1px solid var(--surface-line);
   border-radius: 999px;
   background: transparent;
@@ -8759,7 +8753,6 @@ input:focus { border-color: var(--accent2); }
   align-items: center;
   gap: 6px;
   flex: none;
-  padding: 7px 15px;
   border: none;
   border-radius: 999px;
   background: var(--deck-action);
@@ -10540,6 +10533,7 @@ input:focus { border-color: var(--accent2); }
      needs for the title beside it. */
   .platform-grid { grid-template-columns: 1fr; gap: 12px; padding: 30px 14px 24px; }
   .decks-grid { grid-template-columns: 1fr; gap: 12px; padding: 0; }
+  .decks-console { margin-bottom: 20px; }
   .selection-screen .level-selector { padding: 24px 14px 24px; }
   .selection-screen .level-selector .platform-grid { padding: 18px 0 0; }
   .platform-card__lead { width: 64px; padding: 16px 4px 16px 12px; }
