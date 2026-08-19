@@ -2032,10 +2032,30 @@ input:focus { border-color: var(--accent2); }
   justify-content: space-between;
   gap: 12px;
 }
+/* Japanese and plain language as one unit, the pairing every station
+   plate and section header in the app already uses. Baseline-aligned
+   rather than stacked: this strip is one line tall by design, and a
+   two-line name would make it as big as a board row. */
+.next-service__name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+}
 .next-service__jp {
   font-size: 13px;
   letter-spacing: 0.16em;
   color: var(--text-dim);
+  white-space: nowrap;
+}
+.next-service__latin {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-dim) 72%, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .next-service__count {
   display: inline-flex;
@@ -2085,6 +2105,161 @@ input:focus { border-color: var(--accent2); }
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   color: var(--text);
+}
+
+/* ── The picker ──────────────────────────────────────────────
+   Between the strip and the queue: everything due is the right default
+   but not the only thing anyone wants, and a learner with ten minutes
+   and sixty cards due needs to be able to say "just the kanji". */
+.today-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 620px;
+  padding-top: 8px;
+}
+
+.today-picker__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+.today-picker__jp {
+  font-size: 22px;
+  letter-spacing: 0.14em;
+}
+.today-picker__latin {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.today-picker__bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.today-picker__hint { font-size: 13px; color: var(--text-dim); }
+.today-picker__all {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.today-picker__all:hover { color: var(--text); border-color: var(--text-dim); }
+
+.today-picker__lanes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* A row rather than a checkbox in a list: the whole row is the target,
+   which is what a thumb expects and what the deck and board rows in
+   this app already are. */
+.today-lane-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  background: var(--bg-panel);
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-left: 3px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 130ms ease, background 130ms ease, opacity 130ms ease;
+  /* Off is dimmed, not hidden: the count still has to be readable, or
+     you cannot tell what you are choosing to skip. */
+  opacity: 0.5;
+}
+.today-lane-row--on {
+  opacity: 1;
+  border-left-color: var(--lane-color, var(--accent2));
+  background: color-mix(in srgb, var(--lane-color, var(--accent2)) 8%, var(--bg-panel));
+}
+.today-lane-row:hover { border-color: color-mix(in srgb, var(--lane-color, var(--accent2)) 40%, transparent); }
+
+.today-lane-row__tick {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+  border: 1.5px solid color-mix(in srgb, var(--text-dim) 60%, transparent);
+  position: relative;
+}
+.today-lane-row--on .today-lane-row__tick {
+  background: var(--lane-color, var(--accent2));
+  border-color: var(--lane-color, var(--accent2));
+}
+.today-lane-row--on .today-lane-row__tick::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.today-lane-row__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.today-lane-row__where {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--lane-color, var(--accent2));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.today-lane-row__mode { font-size: 12px; color: var(--text-dim); }
+.today-lane-row__due {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* Stuck to the bottom, because the lane list is as long as the number
+   of things the learner has been studying — sixteen rows on a normal
+   day — and a start button below sixteen rows is a start button nobody
+   sees. The count on it changes as lanes are toggled, so it has to stay
+   visible for the toggling to have visible feedback at all. */
+.today-picker__go {
+  position: sticky;
+  bottom: 12px;
+  margin-top: 6px;
+  z-index: 1;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+}
+.today-picker__go:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+/* Room under the last row so the sticky button never rests on it, and
+   clearance for the mobile XP bar. */
+.today-picker { padding-bottom: 16px; }
+@media (max-width: 720px) {
+  .today-picker { padding-bottom: 76px; }
 }
 
 /* ── The queue screen itself ─────────────────────────────────── */
@@ -14302,6 +14477,168 @@ html { scrollbar-gutter: stable; }
    everything on top of that: the grain, the recess around the glass,
    the light crossing it, and the shadow each leaf throws into the
    opening as it goes. */
+/* ── 特急 — the limited express ────────────────────────────
+   The daily queue's transition. Not a gate and not a door: nothing
+   opens, something goes PAST. See components/station/ExpressPass.jsx
+   for why the queue gets its own, and why it is the quickest of the
+   three rather than the grandest.
+
+   The rake is one long strip translated across the viewport in a single
+   transform — seven identical cars, because a passing express really is
+   the same window strobing over and over, and that repetition is what
+   reads as speed rather than as a vehicle sliding by. */
+.express {
+  --express-x: 1;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  overflow: hidden;
+  pointer-events: none;
+  /* The platform darkening under the train's own shadow. Short: the
+     veil is here to hide the route swap at 300ms, not to be looked at. */
+  background: rgba(0, 0, 0, 0);
+  animation: express-veil calc(520ms * var(--express-x)) ease-out forwards;
+}
+@keyframes express-veil {
+  0%   { background: rgba(0, 0, 0, 0); }
+  18%  { background: rgba(0, 0, 0, 0.82); }
+  62%  { background: rgba(0, 0, 0, 0.82); }
+  100% { background: rgba(0, 0, 0, 0); }
+}
+
+/* Headlight on the platform before the nose is. */
+.express__glare {
+  position: absolute;
+  top: 50%;
+  right: -40vw;
+  width: 60vw;
+  height: 60vh;
+  transform: translateY(-50%);
+  background: radial-gradient(closest-side,
+    color-mix(in srgb, var(--accent2) 55%, white) 0%,
+    color-mix(in srgb, var(--accent2) 22%, transparent) 45%,
+    transparent 100%);
+  opacity: 0;
+  animation: express-glare calc(300ms * var(--express-x)) ease-out forwards;
+}
+@keyframes express-glare {
+  0%   { opacity: 0;    transform: translate(0, -50%); }
+  40%  { opacity: 0.85; transform: translate(-30vw, -50%); }
+  100% { opacity: 0;    transform: translate(-120vw, -50%); }
+}
+
+/* Right to left, matching the glare that announced it. `will-change`
+   because this is the one element in the app that genuinely moves a
+   full viewport width inside 300ms. */
+.express__rake {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  display: flex;
+  align-items: stretch;
+  height: min(38vh, 260px);
+  transform: translateY(-50%);
+  will-change: transform;
+  animation: express-run calc(420ms * var(--express-x)) cubic-bezier(0.2, 0, 0.35, 1) forwards;
+}
+@keyframes express-run {
+  /* Measured against the VIEWPORT plus the rake's own width, not as a
+     percentage of the rake alone. The rake's width is a clamp() over
+     seven cars, so a fixed percentage is a guess at how far it has to
+     go -- and the first guess (-340%) over-travelled by more than
+     double: the tail had cleared the screen 187ms into a 420ms
+     animation, and the remaining 230ms played to nobody.
+
+     `left: 100%` puts the nose exactly at the right edge, so -100vw
+     brings the nose to the left edge and a further -100% takes the tail
+     with it. The extra 10% is the margin that guarantees the last car
+     is gone rather than resting on the boundary. */
+  from { transform: translate(0, -50%); }
+  to   { transform: translate(calc(-100vw - 110%), -50%); }
+}
+
+.express__nose {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(90px, 12vw, 170px);
+  background: linear-gradient(100deg,
+    color-mix(in srgb, var(--accent2) 70%, #fff) 0%,
+    var(--accent2) 42%,
+    color-mix(in srgb, var(--accent2) 55%, #000) 100%);
+  /* The raked front of a 特急 set, cut rather than drawn. */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 34% 100%);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+}
+.express__headboard {
+  font-size: clamp(15px, 2vw, 22px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.express__car {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(150px, 20vw, 300px);
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, #fff 16%, var(--bg-panel)) 0%,
+    var(--bg-panel) 38%,
+    color-mix(in srgb, #000 34%, var(--bg-panel)) 100%);
+  border-radius: 3px;
+}
+/* Lit windows — the actual strobe. */
+.express__window {
+  width: 34%;
+  height: 34%;
+  border-radius: 3px;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent2) 40%, #fff) 0%,
+    color-mix(in srgb, var(--accent2) 30%, transparent) 100%);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--accent2) 45%, transparent);
+}
+/* The livery stripe running the length of the train. */
+.express__belt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22%;
+  height: 6px;
+  background: var(--accent2);
+  opacity: 0.75;
+}
+
+/* Draught pulled along behind. Without it the rake reads as a panel
+   sliding rather than as something moving at speed. */
+.express__draught {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg,
+    transparent 0 60px,
+    color-mix(in srgb, #fff 8%, transparent) 60px 62px);
+  opacity: 0;
+  animation: express-draught calc(440ms * var(--express-x)) linear forwards;
+}
+@keyframes express-draught {
+  0%   { opacity: 0;    transform: translateX(30vw); }
+  30%  { opacity: 0.55; }
+  100% { opacity: 0;    transform: translateX(-70vw); }
+}
+
+/* Nothing moves once the tail is gone — the veil lift is the whole of
+   the exit, and a rake still animating under it costs frames for
+   something nobody can see. */
+.express--clear .express__rake,
+.express--clear .express__draught,
+.express--clear .express__glare { display: none; }
+
 .door {
   --door-x: 1;
   position: fixed;

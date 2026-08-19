@@ -142,18 +142,57 @@ class InterleaveTests(unittest.TestCase):
         self.assertEqual([rid for _, rid in picked], ["oldest", "newer", "newest"])
 
 
+class LaneIdTests(unittest.TestCase):
+    """The learner picks which lanes to run, so a lane needs a name the
+    client can hand back and the server can resolve to the same lane."""
+
+    def test_a_section_lane_id_round_trips(self) -> None:
+        key = (SECTION, "kanji", "N4", "kanji.write_kanji")
+        self.assertEqual(daily_queue.lane_id(key), "s~kanji~N4~kanji.write_kanji")
+        lanes = {key: ["a"], (SECTION, "vocab", "N5", "vocab.word_reading"): ["b"]}
+        kept = daily_queue.keep_lanes(lanes, {daily_queue.lane_id(key)})
+        self.assertEqual(list(kept), [key])
+
+    def test_a_personal_lane_is_addressed_by_deck_id_not_name(self) -> None:
+        # A deck name is free text -- it can contain the separator, or
+        # change between rendering the picker and starting the session.
+        key = (PERSONAL, 7, "Mots ~ du ~ boulot", "vocab.flashcard.f2b")
+        self.assertEqual(daily_queue.lane_id(key), "p~7~vocab.flashcard.f2b")
+        self.assertEqual(daily_queue.lane_id(key).count("~"), 2)
+
+    def test_no_choice_means_the_whole_queue(self) -> None:
+        # An empty filter is "everything", never "nothing" -- a session
+        # started straight off the home strip sends no lanes at all.
+        lanes = {(SECTION, "kanji", "N5", "kanji.flashcard.f2b"): ["a"]}
+        self.assertEqual(daily_queue.keep_lanes(lanes, daily_queue.parse_lane_ids("")), lanes)
+
+    def test_an_id_matching_nothing_is_ignored_not_fatal(self) -> None:
+        # The lane may have been cleared since the picker was rendered.
+        key = (SECTION, "kanji", "N5", "kanji.flashcard.f2b")
+        lanes = {key: ["a"]}
+        kept = daily_queue.keep_lanes(lanes, {daily_queue.lane_id(key), "s~gone~N5~x.y"})
+        self.assertEqual(list(kept), [key])
+
+    def test_every_lane_label_carries_its_own_id(self) -> None:
+        for key in [(SECTION, "kanji", "N4", "kanji.write_kanji"),
+                    (PERSONAL, 7, "Mots du boulot", "vocab.flashcard.f2b")]:
+            with self.subTest(key=key):
+                self.assertEqual(daily_queue.label(key)["id"], daily_queue.lane_id(key))
+
+
 class LabelTests(unittest.TestCase):
     def test_a_section_lane_names_its_source_deck_and_mode(self) -> None:
         self.assertEqual(
             daily_queue.label((SECTION, "kanji", "N4", "kanji.write_kanji")),
-            {"kind": SECTION, "source": "kanji", "deck": "N4", "mode": "kanji.write_kanji"},
+            {"id": "s~kanji~N4~kanji.write_kanji", "kind": SECTION,
+             "source": "kanji", "deck": "N4", "mode": "kanji.write_kanji"},
         )
 
     def test_a_personal_lane_names_its_deck(self) -> None:
         self.assertEqual(
             daily_queue.label((PERSONAL, 7, "Mots du boulot", "vocab.flashcard.f2b")),
-            {"kind": PERSONAL, "deck_id": 7, "deck_name": "Mots du boulot",
-             "mode": "vocab.flashcard.f2b"},
+            {"id": "p~7~vocab.flashcard.f2b", "kind": PERSONAL, "deck_id": 7,
+             "deck_name": "Mots du boulot", "mode": "vocab.flashcard.f2b"},
         )
 
     def test_the_mode_is_always_the_last_element_of_a_lane_key(self) -> None:

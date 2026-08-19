@@ -320,6 +320,11 @@ const stats = {
   // ── 本日の運行 — la file du jour (screens/TodayScreen) ──────
   todayTitle:         'Service du jour',
   todayBoard:         "Aujourd'hui",
+  todayPickHint:      'Choisissez votre service',
+  todaySelectAll:     'Tout sélectionner',
+  todaySelectNone:    'Tout désélectionner',
+  todayPickSomething: 'Choisissez au moins une ligne',
+  todayStart:         n => `Réviser ${n} carte${n === 1 ? '' : 's'}`,
   todayDue:           n => `${n} à réviser`,
   todayNothingDueShort: 'À jour',
   todayRemaining:     'Restant dans ce service',

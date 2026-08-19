@@ -101,15 +101,63 @@ def interleave(all_lanes, count: int) -> list[tuple]:
     return out
 
 
+# ── Addressing a lane ─────────────────────────────────────────
+# The learner can choose which lanes to run (see routes/today.py), so a
+# lane needs a name the client can hand back. Composed rather than
+# hashed: a request carrying `s~kanji~N5~kanji.write_kanji` says what it
+# asked for in the server log, which an opaque digest would not.
+#
+# `~` separates because no component can contain one -- a source and a
+# mode key come from the registry, a deck key is a JLPT level or a kana
+# set slug, and a personal lane is addressed by its numeric deck id
+# rather than by the deck's NAME, which the user is free to type
+# anything into.
+LANE_SEP = "~"
+
+
+def lane_id(key: tuple) -> str:
+    if key[0] == SECTION:
+        _, source, deck_key, mode = key
+        return LANE_SEP.join(("s", source, deck_key, mode))
+    _, deck_id, _name, mode = key
+    return LANE_SEP.join(("p", str(deck_id), mode))
+
+
+def parse_lane_ids(raw: str) -> set:
+    """"a,b,c" -> {a, b, c}. Empty means "no filter", which is the whole
+    queue -- NOT "nothing", since a session started without a choice has
+    to run everything."""
+    return {part for part in raw.split(",") if part}
+
+
+def keep_lanes(all_lanes, wanted: set):
+    """Restrict to the chosen lanes. An empty `wanted` keeps everything.
+
+    A wanted id matching no lane is ignored rather than an error: the
+    lane may simply have been cleared since the picker was rendered, and
+    failing the request over that would end a session the learner is
+    halfway through.
+    """
+    if not wanted:
+        return all_lanes
+    kept = OrderedDict()
+    for key, ids in all_lanes.items():
+        if lane_id(key) in wanted:
+            kept[key] = ids
+    return kept
+
+
 def label(key: tuple) -> dict:
     """What the queue shows above a card so the learner knows which part
     of their study it came from. A section screen has a header for this;
     a mixed queue has to carry it per card."""
     if key[0] == SECTION:
         _, source, deck_key, mode = key
-        return {"kind": SECTION, "source": source, "deck": deck_key, "mode": mode}
+        return {"id": lane_id(key), "kind": SECTION, "source": source,
+                "deck": deck_key, "mode": mode}
     _, deck_id, deck_name, mode = key
-    return {"kind": PERSONAL, "deck_id": deck_id, "deck_name": deck_name, "mode": mode}
+    return {"id": lane_id(key), "kind": PERSONAL, "deck_id": deck_id,
+            "deck_name": deck_name, "mode": mode}
 
 
 def parse_exclude(exclude: str) -> set:

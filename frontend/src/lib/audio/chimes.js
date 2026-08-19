@@ -27,6 +27,7 @@ const FLAP_CLATTER = '/sounds/ui/flap-clatter.mp3'
 const STATION_MELODY = '/sounds/ui/station-melody.mp3'
 const ARRIVAL = '/sounds/ui/arrival.mp3'
 const DOOR_SLIDE = '/sounds/sfx/door-slide.mp3'
+const EXPRESS_PASS = '/sounds/sfx/express-pass.mp3'
 
 // getBuffer deliberately evicts failed fetches so a dropped request
 // can retry — correct in general, wrong for an asset that is *known*
@@ -275,6 +276,79 @@ export function playDoorSlide() {
     })
     .catch(() => { assetMissing.add(DOOR_SLIDE); synthesiseSlide(ctx) })
 }
+
+// ── 特急 — the limited express going through ──────────────
+// Not a door and not a gate: nothing opens, something goes PAST. The
+// shape is a doppler — a rising approach, a hard slam as the nose
+// arrives, then a falling tail as the rake runs away — which is what
+// separates it by ear from the two sounds that mean "you may proceed".
+function synthesiseExpress(ctx) {
+  const bus = busFor('sfx')
+  if (!bus) return
+
+  const now = ctx.currentTime
+  const dur = 0.72
+
+  const frames = Math.floor(ctx.sampleRate * dur)
+  const buffer = ctx.createBuffer(1, frames, ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1
+
+  const src = ctx.createBufferSource()
+  src.buffer = buffer
+
+  // The doppler itself: the band sweeps UP as it comes on and DOWN
+  // as it leaves, crossing at the moment of passing. A single ramp
+  // either way would read as a gust of wind instead of a train.
+  const band = ctx.createBiquadFilter()
+  band.type = 'bandpass'
+  band.Q.setValueAtTime(1.1, now)
+  band.frequency.setValueAtTime(240, now)
+  band.frequency.exponentialRampToValueAtTime(2100, now + dur * 0.34)
+  band.frequency.exponentialRampToValueAtTime(300, now + dur)
+
+  const env = ctx.createGain()
+  env.gain.setValueAtTime(0.0001, now)
+  env.gain.exponentialRampToValueAtTime(0.19, now + dur * 0.30)
+  env.gain.exponentialRampToValueAtTime(0.0001, now + dur)
+
+  src.connect(band); band.connect(env); env.connect(bus)
+  src.start(now)
+  src.onended = () => { env.disconnect(); band.disconnect(); src.disconnect() }
+
+  // The pressure wave off the nose — the thump you feel rather than
+  // hear when an express takes a platform at line speed.
+  const boom = ctx.createOscillator()
+  const bEnv = ctx.createGain()
+  boom.type = 'sine'
+  boom.frequency.setValueAtTime(130, now + dur * 0.24)
+  boom.frequency.exponentialRampToValueAtTime(52, now + dur * 0.52)
+  bEnv.gain.setValueAtTime(0.0001, now + dur * 0.24)
+  bEnv.gain.exponentialRampToValueAtTime(0.20, now + dur * 0.31)
+  bEnv.gain.exponentialRampToValueAtTime(0.0001, now + dur * 0.62)
+  boom.connect(bEnv); bEnv.connect(bus)
+  boom.start(now + dur * 0.24)
+  boom.stop(now + dur * 0.66)
+  boom.onended = () => { bEnv.disconnect(); boom.disconnect() }
+}
+
+/** 特急 — the express going through without stopping. */
+export function playExpressPass() {
+  if (isMuted()) return
+  const ctx = getAudioContext()
+  if (!ctx) return
+
+  if (assetMissing.has(EXPRESS_PASS)) { synthesiseExpress(ctx); return }
+
+  getBuffer(EXPRESS_PASS)
+    .then(buffer => {
+      if (isMuted()) return
+      if (buffer) playBuffer(buffer, 'sfx', 'express-pass')
+      else { assetMissing.add(EXPRESS_PASS); synthesiseExpress(ctx) }
+    })
+    .catch(() => { assetMissing.add(EXPRESS_PASS); synthesiseExpress(ctx) })
+}
+
 
 function playChime(path, name, blips) {
   if (isMuted()) return

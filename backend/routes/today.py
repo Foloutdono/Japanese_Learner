@@ -190,7 +190,7 @@ def get_today(user_id: str = Depends(get_user_id)):
 
 
 @router.get("/api/today/cards")
-def get_today_cards(count: int = 10, exclude: str = "", lang: str = "fr",
+def get_today_cards(count: int = 10, exclude: str = "", lanes: str = "", lang: str = "fr",
                     user_id: str = Depends(get_user_id)):
     """
     The queue itself: up to `count` due cards, mixed across sections and
@@ -211,11 +211,12 @@ def get_today_cards(count: int = 10, exclude: str = "", lang: str = "fr",
 
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id)
-    lanes = daily_queue.drop_seen(
+    chosen = daily_queue.keep_lanes(
         daily_queue.lanes(user_id, due_rows, personal),
-        daily_queue.parse_exclude(exclude),
+        daily_queue.parse_lane_ids(lanes),
     )
-    picked = daily_queue.interleave(lanes, count)
+    chosen = daily_queue.drop_seen(chosen, daily_queue.parse_exclude(exclude))
+    picked = daily_queue.interleave(chosen, count)
     if not picked:
         return {"cards": []}
 
@@ -264,8 +265,8 @@ def get_today_cards(count: int = 10, exclude: str = "", lang: str = "fr",
             cards.append(card)
 
     logger.info(
-        "today queue user_id=%s lanes=%d requested=%d served=%d",
-        user_id, len(lanes), count, len(cards),
+        "today queue user_id=%s lanes=%d chosen=%s requested=%d served=%d",
+        user_id, len(chosen), lanes or "all", count, len(cards),
     )
     return {"cards": cards}
 

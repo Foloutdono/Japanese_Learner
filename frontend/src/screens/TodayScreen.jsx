@@ -18,7 +18,8 @@ import { ChevronIcon } from '../components/ui/Icons'
 import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { kanaSetLabel } from '../domain/kanaSets'
-import { useCardSession, sessionKey } from '../hooks/useCardSession'
+import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
+import { runExpress } from '../stores/express'
 import { applyXpGain } from '../stores/profileSummary'
 import { formatGlossLine } from '../components/study/gloss'
 import { romajiEquals } from '../lib/romaji'
@@ -48,6 +49,17 @@ function laneWhere(lane, t) {
   return lane.source === 'kana' ? kanaSetLabel(t, lane.deck) : lane.deck
 }
 
+// The line colour each section already owns everywhere else it appears
+// (see config/navLinks.js), so a lane is recognisably "the kanji one"
+// at a glance. Same table as the concourse strip's.
+const LINE_COLOR = {
+  kana:     'var(--line-kana)',
+  vocab:    'var(--line-vocab)',
+  kanji:    'var(--line-kanji)',
+  grammar:  'var(--line-grammar)',
+  personal: 'var(--line-decks)',
+}
+
 function laneTitle(lane, t) {
   if (!lane) return ''
   return `${laneWhere(lane, t)} · ${modeLabel(t, lane.mode)}`
@@ -71,6 +83,13 @@ export default function TodayScreen({ session }) {
   const { t, lang } = useLang()
 
   const [summary, setSummary] = useState(null)
+  // Which lanes this run covers. `null` means "the picker has not been
+  // answered yet"; a Set means it has, even if empty. Distinguishing
+  // those matters because an empty selection must disable the start
+  // button rather than silently run everything, which is what the
+  // backend does with an empty `lanes` param (see keep_lanes).
+  const [chosen, setChosen] = useState(null)
+  const [started, setStarted] = useState(false)
   const [answered, setAnswered] = useState(false)
   const [selected, setSelected] = useState(null)
   const [showRating, setShowRating] = useState(false)
@@ -99,7 +118,13 @@ export default function TodayScreen({ session }) {
 
   useEffect(() => {
     apiJson('/api/today', session)
-      .then(setSummary)
+      .then(data => {
+        setSummary(data)
+        // Everything selected by default: the common case is "clear the
+        // day", and a picker that starts empty makes the learner do work
+        // to get the behaviour they came for.
+        setChosen(new Set((data.lanes ?? []).map(l => l.id)))
+      })
       .catch(() => setSummary(null))
   }, [session])
 
@@ -108,14 +133,25 @@ export default function TodayScreen({ session }) {
   // here even though they share an id. See useCardSession's cardKey.
   const cardKey = useCallback(c => `${c.card_id}|${c.mode}`, [])
 
+  // Sorted so the same selection always produces the same string —
+  // otherwise Set iteration order could change the session key between
+  // renders and restart the session for no reason.
+  const laneParam = chosen ? [...chosen].sort().join(',') : ''
+  const allChosen = !!(summary && chosen && chosen.size === (summary.lanes?.length ?? 0))
+
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
     const data = await apiJson(
-      `/api/today/cards?lang=${lang}&count=${count}&exclude=${encodeURIComponent(excludeIds.join(','))}`,
+      `/api/today/cards?lang=${lang}&count=${count}`
+      + `&exclude=${encodeURIComponent(excludeIds.join(','))}`
+      // Omitted when everything is chosen: an empty `lanes` already
+      // means the whole queue on the backend, and sending the full list
+      // would make the session key churn as lanes empty out mid-run.
+      + (allChosen ? '' : `&lanes=${encodeURIComponent(laneParam)}`),
       session,
       { signal },
     )
     return data.cards ?? []
-  }, [lang, session])
+  }, [lang, session, laneParam, allChosen])
 
   const extraExcludeIds = useCallback(
     () => Array.from(recentlyReviewedRef.current.keys()),
@@ -123,7 +159,10 @@ export default function TodayScreen({ session }) {
   )
 
   const { current: card, loading, done, error, retry, advance } = useCardSession({
-    storageKey: sessionKey('today'),
+    // The choice is part of the key: picking different lanes is a
+    // different session, and resuming the previous one's cached queue
+    // would serve cards from lanes the learner just switched off.
+    storageKey: started ? sessionKey('today', allChosen ? 'all' : laneParam) : IDLE_KEY,
     fetchBatch,
     batchSize: 10,
     cardKey,
@@ -259,6 +298,111 @@ export default function TodayScreen({ session }) {
 
   const remaining = Math.max(0, (summary?.total ?? 0) - cleared)
 
+  const lanes = summary?.lanes ?? []
+  const chosenDue = lanes
+    .filter(l => chosen?.has(l.id))
+    .reduce((n, l) => n + l.due, 0)
+
+  function toggleLane(id) {
+    setChosen(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  // ── The picker ────────────────────────────────────────────
+  // Between the home strip and the queue, because "everything due" is
+  // the right default and not the only thing anyone ever wants: a
+  // learner with ten minutes and 60 cards due needs to be able to say
+  // "just the kanji". Selecting nothing is not a way to start a run,
+  // so the button disables rather than quietly running everything.
+  if (!started) {
+    if (!summary) {
+      return (
+        <div className="screen">
+          <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
+          <div className="container quiz-area"><Loading /></div>
+        </div>
+      )
+    }
+
+    if (lanes.length === 0) {
+      const when = untilNext(summary.next_due, lang)
+      return (
+        <div className="screen">
+          <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
+          <div className="container quiz-area">
+            <div className="today-clear">
+              <div className="today-clear__mark" lang="ja" aria-hidden="true">完了</div>
+              <h2 className="today-clear__title">{t.todayClearTitle}</h2>
+              <p className="today-clear__body">{t.todayNothingDue}</p>
+              {when && <p className="today-clear__next">{t.todayNextReview(when)}</p>}
+              <button className="btn-primary" onClick={() => navigate('/')}>{t.backToStation}</button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="screen">
+        <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
+        <div className="container today-picker">
+          <div className="today-picker__head">
+            <span className="today-picker__jp" lang="ja">本日の運行</span>
+            <span className="today-picker__latin">{t.todayTitle}</span>
+          </div>
+
+          <div className="today-picker__bar">
+            <span className="today-picker__hint">{t.todayPickHint}</span>
+            <button
+              type="button"
+              className="today-picker__all"
+              onClick={() => setChosen(allChosen ? new Set() : new Set(lanes.map(l => l.id)))}
+            >
+              {allChosen ? t.todaySelectNone : t.todaySelectAll}
+            </button>
+          </div>
+
+          <ul className="today-picker__lanes">
+            {lanes.map(lane => {
+              const on = chosen?.has(lane.id)
+              return (
+                <li key={lane.id}>
+                  <button
+                    type="button"
+                    className={`today-lane-row ${on ? 'today-lane-row--on' : ''}`}
+                    style={{ '--lane-color': LINE_COLOR[lane.kind === 'personal' ? 'personal' : lane.source] }}
+                    aria-pressed={on}
+                    onClick={() => toggleLane(lane.id)}
+                  >
+                    <span className="today-lane-row__tick" aria-hidden="true" />
+                    <span className="today-lane-row__body">
+                      <span className="today-lane-row__where">{laneWhere(lane, t)}</span>
+                      <span className="today-lane-row__mode">{modeLabel(t, lane.mode)}</span>
+                    </span>
+                    <span className="today-lane-row__due">{lane.due}</span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+
+          <button
+            type="button"
+            className="btn-primary today-picker__go"
+            disabled={chosenDue === 0}
+            onClick={() => runExpress(() => setStarted(true))}
+          >
+            {chosenDue > 0 ? t.todayStart(chosenDue) : t.todayPickSomething}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (error && !card) {
     return (
       <div className="screen">
@@ -319,6 +463,18 @@ export default function TodayScreen({ session }) {
                 question. */}
             <div className="today-lane">{laneTitle(card.lane, t)}</div>
 
+            {/* The help switch sits directly under the lane label and
+                above the card, which is where the section screens put
+                it. Below the card it was past the fold on a drawing
+                mode, so the one control that rescues a card you cannot
+                answer was hidden exactly when you needed it. */}
+            {availableHints.length > 0 && (
+              <HintBar
+                available={availableHints} active={activeHints}
+                onToggle={toggleHint} disabled={locked}
+              />
+            )}
+
             <CardTransition
               cardKey={`${card.card_id}:${card.mode}:${cardNonce}`}
               stamp={cardStamp}
@@ -335,13 +491,6 @@ export default function TodayScreen({ session }) {
                 activeHints={activeHints} onFlashcardReveal={reveal}
               />
             </CardTransition>
-
-            {availableHints.length > 0 && (
-              <HintBar
-                available={availableHints} active={activeHints}
-                onToggle={toggleHint} disabled={locked}
-              />
-            )}
 
             {/* Every MCQ block below mirrors the section screens exactly
                 — the choices are flattened to whichever side is not the

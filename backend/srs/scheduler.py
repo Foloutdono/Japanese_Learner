@@ -12,6 +12,21 @@ LEARNING_STEPS = [
 MIN_DIFFICULTY = 1.5
 MAX_DIFFICULTY = 3.5
 
+# The ceiling on how far ahead a card can be pushed.
+#
+# Growth here is multiplicative and was unbounded, so a card answered
+# well enough for long enough overflowed: `now + timedelta(days=...)`
+# raises OverflowError past roughly 2.7 million days, which is a 500 on
+# the review endpoint -- the single action the whole app is built
+# around. Reached in about fourteen consecutive strong reviews of one
+# card, which is a normal thing for a learner to do, not an exotic one.
+#
+# 100 years is the conventional cap and is well clear of the overflow
+# with room for the largest growth step. It is not a compromise on the
+# scheduling either: past a few years "due" has stopped being a
+# meaningful claim about a human being's memory.
+MAX_INTERVAL_DAYS = 36500
+
 
 class Scheduler:
 
@@ -110,9 +125,9 @@ class Scheduler:
         ease = MIN_DIFFICULTY + MAX_DIFFICULTY - state.difficulty
         growth = max(1.0, ease * bonus * stability_factor)
 
-        state.interval_days = max(
-            1,
-            round(state.interval_days * growth)
+        state.interval_days = min(
+            MAX_INTERVAL_DAYS,
+            max(1, round(state.interval_days * growth)),
         )
 
         state.stability = max(1.0, state.stability + quality * 0.25)

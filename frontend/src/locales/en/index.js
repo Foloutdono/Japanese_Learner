@@ -333,6 +333,11 @@ const stats = {
   // ── 本日の運行 — the daily queue (screens/TodayScreen) ──────
   todayTitle:         "Today's run",
   todayBoard:         'Today',
+  todayPickHint:      'Choose what to run',
+  todaySelectAll:     'Select all',
+  todaySelectNone:    'Select none',
+  todayPickSomething: 'Pick at least one',
+  todayStart:         n => `Run ${n} ${n === 1 ? 'card' : 'cards'}`,
   todayDue:           n => `${n} due`,
   todayNothingDueShort: 'All clear',
   todayRemaining:     'Left in this run',

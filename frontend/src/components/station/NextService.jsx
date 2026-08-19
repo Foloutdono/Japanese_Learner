@@ -74,7 +74,10 @@ export default function NextService({ session }) {
   if (due === 0) {
     return (
       <div className="next-service next-service--clear">
-        <span className="next-service__jp" lang="ja">本日の運行</span>
+        <span className="next-service__name">
+          <span className="next-service__jp" lang="ja">本日の運行</span>
+          <span className="next-service__latin">{t.todayTitle}</span>
+        </span>
         <span className="next-service__clear">{t.todayNothingDueShort}</span>
         {when && <span className="next-service__when">{t.todayNextReview(when)}</span>}
       </div>
@@ -93,7 +96,14 @@ export default function NextService({ session }) {
       aria-label={t.todayDue(due)}
     >
       <span className="next-service__head">
-        <span className="next-service__jp" lang="ja">本日の運行</span>
+        {/* Japanese above/beside, plain language under — the same
+            pairing the board masthead, every station plate and every
+            section header already use. The strip was the one place
+            naming itself only in kanji. */}
+        <span className="next-service__name">
+          <span className="next-service__jp" lang="ja">本日の運行</span>
+          <span className="next-service__latin">{t.todayTitle}</span>
+        </span>
         <span className="next-service__count">
           <BoltIcon size={13} /> {due}
         </span>
