@@ -8908,6 +8908,7 @@ input:focus { border-color: var(--accent2); }
   grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
   gap: 12px;
 }
+.platform-grid .decks-grid { grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); padding: 0;}
 .deck-card { align-items: stretch; }
 /* The roundel carries the type's kanji, not a number: which pile of
    cards this is matters, its position in the list doesn't. */
