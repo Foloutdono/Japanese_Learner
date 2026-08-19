@@ -246,7 +246,7 @@ export default function DecksScreen({ session }) {
              rail, the roundel, then the name. A deck used to be a plain
              web card in a rigid 3-column grid — the one list in the app
              that didn't look like the app. */
-          <div className="decks-grid">
+          <div className="platform-grid decks-grid">
             {shown.map(deck => {
               const dt = deckTypeOf(deck.type, t)
               return (
