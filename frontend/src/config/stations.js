@@ -28,7 +28,7 @@
 // exception is 日本語駅 itself, which has no board row to borrow a
 // name from, so it keeps its own.
 
-import { getNavLinks, getProfileHalls } from './navLinks'
+import { getAllSections } from './navLinks'
 import { serviceKeyFor } from '../domain/studyModes'
 
 // path -> { code, kana }
@@ -62,6 +62,12 @@ const STATIONS = {
   '/stats':                 { code: 'TO', kana: 'とうけい' },
   '/daruma':                { code: 'DR', kana: 'だるま' },
   '/storehouse':            { code: 'KR', kana: 'くら' },
+
+  // 本日 — the daily queue. Not a board row (see navLinks.js's own
+  // note on why /today is scope: 'today'), but every other screen it
+  // opens through — the concourse strip, its own gate, its own top
+  // bar — still needs a plate to name.
+  '/today':                 { code: 'HN', kana: 'ほんじつ' },
 }
 
 const UNKNOWN = { code: '??', kana: '' }
@@ -86,12 +92,15 @@ export function stationFor(path) {
 export const HOME_STATION = STATIONS['/']
 
 // ── Which station am I standing in? ───────────────────────
-// Two registries hold sections — the board's and the profile's halls
-// — and every caller that wanted "the section for this path" was
+// Two registries used to hold sections — the board's and the profile's
+// halls — and every caller that wanted "the section for this path" was
 // spreading both itself. StationHeader did it; the top bar needed the
-// same answer to know what colour its line is. One lookup, so a new
-// station is added in one place and every masthead in the app finds
-// it.
+// same answer to know what colour its line is. One lookup now, over
+// getAllSections (every scope, not just the two that render a browsable
+// list) — /today needed a third scope that is neither a board row nor
+// a profile hall, and a lookup narrowed to the first two would silently
+// have no answer for it. A new station is still added in one place and
+// every masthead in the app finds it.
 //
 // Falls back to the longest matching prefix so a nested route
 // (/decks/<id>) still knows which line it is on, and returns null —
@@ -100,7 +109,12 @@ export const HOME_STATION = STATIONS['/']
 // through to that null by design: they are not stations, and asking
 // this function for one is how a caller finds that out.
 export function sectionFor(path, t) {
-  const all = [...getNavLinks(t), ...getProfileHalls(t)]
+  // Every section regardless of scope -- getNavLinks/getProfileHalls
+  // are deliberately narrower lists (what the board and the profile
+  // screen each render), and /today belongs to neither, but it still
+  // needs a colour and a title wherever this function is asked for one
+  // (StationHeader, TopBar, the gate, the door).
+  const all = getAllSections(t)
   const exact = all.find(s => s.path === path)
   if (exact) return exact
 

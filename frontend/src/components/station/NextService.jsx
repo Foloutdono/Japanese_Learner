@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { apiJson } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { BoltIcon } from '../ui/Icons'
 import { modeLabel } from '../../domain/studyModes'
 import { kanaSetLabel } from '../../domain/kanaSets'
+import { sectionFor } from '../../config/stations'
+import { beginDeparture } from '../../stores/departure'
+import { playAnnouncement } from '../../lib/audio'
 
 // ── 本日の運行 — the next service ────────────────────────────
 // A real departure board's top row is the train leaving NOW; the rest
@@ -49,7 +51,6 @@ const LINE_COLOR = {
 }
 
 export default function NextService({ session }) {
-  const navigate = useNavigate()
   const { t, lang } = useLang()
   const [today, setToday] = useState(null)
   const [failed, setFailed] = useState(false)
@@ -88,11 +89,23 @@ export default function NextService({ session }) {
   // waiting", not a second stats screen. The rest is on /today.
   const lanes = [...(today.lanes ?? [])].sort((a, b) => b.due - a.due).slice(0, 3)
 
+  // Same tap the board's own rows make (see HomeScreen's depart()):
+  // the announcement, then the gate. /today has no clip in
+  // public/sounds/announcements (it is not a board row -- see
+  // navLinks.js), so playAnnouncement plays the jingle alone and
+  // degrades exactly the way it is built to; the gate itself is
+  // unaffected either way.
+  function depart() {
+    const section = sectionFor('/today', t)
+    playAnnouncement('today')
+    beginDeparture(section)
+  }
+
   return (
     <button
       type="button"
       className="next-service"
-      onClick={() => navigate('/today')}
+      onClick={depart}
       aria-label={t.todayDue(due)}
     >
       <span className="next-service__head">

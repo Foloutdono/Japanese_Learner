@@ -35,7 +35,6 @@ import TranslationScreen from './screens/TranslationScreen'
 import DarumaScreen from './screens/DarumaScreen'
 import StorehouseScreen from './screens/StorehouseScreen'
 import { CosmeticTheme } from './stores/cosmetics'
-import { ExpressPass } from './components/station/ExpressPass'
 import { preload } from './lib/audio'
 
 export default function App() {
@@ -149,13 +148,6 @@ export default function App() {
             selection branch would be unmounted by the very state
             change it is covering. See stores/boarding. */}
         <TrainDoor />
-
-        {/* 特急 — the express through, on starting the daily queue.
-            Outside <Routes/> for boarding's reason exactly: what it
-            covers is the queue screen deciding to render a different
-            tree, so a component inside that tree would be unmounted by
-            the change it is covering. See stores/express. */}
-        <ExpressPass />
       </BrowserRouter>
     </LangProvider>
   )

@@ -1,9 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
+import { playUi } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
+import { StationHeader } from '../components/station/StationHeader'
 import { Loading } from '../components/ui/Loading'
+import EmptyState from '../components/ui/EmptyState'
 import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
 import { MCQGrid, TypeInput } from '../components/study/QuizComponents'
@@ -14,12 +17,13 @@ import HintBar from '../components/study/HintBar'
 import SessionError from '../components/study/SessionError'
 import CardPrompt from '../components/study/CardPrompt'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
-import { ChevronIcon } from '../components/ui/Icons'
+import { SearchIcon } from '../components/dictionary/DictionaryDetail'
+import { ChevronIcon, CrossIcon } from '../components/ui/Icons'
 import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { kanaSetLabel } from '../domain/kanaSets'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
-import { runExpress } from '../stores/express'
+import { board } from '../stores/boarding'
 import { applyXpGain } from '../stores/profileSummary'
 import { formatGlossLine } from '../components/study/gloss'
 import { romajiEquals } from '../lib/romaji'
@@ -60,6 +64,25 @@ const LINE_COLOR = {
   personal: 'var(--line-decks)',
 }
 
+/** What a lane IS, for grouping and filtering: 'kana'/'vocab'/'kanji'/
+ *  'grammar' for a section lane, 'personal' for anyone's own deck. */
+function laneTypeOf(lane) {
+  return lane.kind === 'personal' ? 'personal' : lane.source
+}
+
+// Same shape as components/decks/deckTypes.js's DECK_TYPES -- value,
+// label, glyph, color -- because the picker's filter chips are that
+// same widget, reused rather than re-invented (see the console below).
+function laneTypeDefs(t) {
+  return [
+    { value: 'kana',     label: t.kanaTitle,    glyph: 'あ',   color: LINE_COLOR.kana },
+    { value: 'vocab',    label: t.vocabTitle,   glyph: '単語', color: LINE_COLOR.vocab },
+    { value: 'kanji',    label: t.kanjiTitle,   glyph: '漢字', color: LINE_COLOR.kanji },
+    { value: 'grammar',  label: t.grammarTitle, glyph: '文法', color: LINE_COLOR.grammar },
+    { value: 'personal', label: t.decksTitle,   glyph: '教材', color: LINE_COLOR.personal },
+  ]
+}
+
 function laneTitle(lane, t) {
   if (!lane) return ''
   return `${laneWhere(lane, t)} · ${modeLabel(t, lane.mode)}`
@@ -90,6 +113,11 @@ export default function TodayScreen({ session }) {
   // backend does with an empty `lanes` param (see keep_lanes).
   const [chosen, setChosen] = useState(null)
   const [started, setStarted] = useState(false)
+  // The picker's own search + type filter -- narrows which lanes are
+  // LISTED, never which are CHOSEN. See toggleVisible/filteredLanes.
+  const [query, setQuery] = useState('')
+  const [typeFilter, setTypeFilter] = useState('all')
+  const searchRef = useRef(null)
   const [answered, setAnswered] = useState(false)
   const [selected, setSelected] = useState(null)
   const [showRating, setShowRating] = useState(false)
@@ -298,7 +326,15 @@ export default function TodayScreen({ session }) {
 
   const remaining = Math.max(0, (summary?.total ?? 0) - cleared)
 
-  const lanes = summary?.lanes ?? []
+  // Memoized rather than `summary?.lanes ?? []` inline: that fallback
+  // allocates a new empty array every render, which made every useMemo
+  // below that depends on `lanes` recompute on every render regardless
+  // of whether the summary had actually changed.
+  const lanes = useMemo(() => summary?.lanes ?? [], [summary])
+  // Over the FULL lane list, not the filtered view -- the search field
+  // and the type chips are a lens for finding a row faster, not a
+  // restriction on what a run actually covers. A card checked while
+  // filtered to "kanji" stays checked once the filter is cleared.
   const chosenDue = lanes
     .filter(l => chosen?.has(l.id))
     .reduce((n, l) => n + l.due, 0)
@@ -310,6 +346,53 @@ export default function TodayScreen({ session }) {
       else next.add(id)
       return next
     })
+  }
+
+  // ── Finding a lane, on a day with sixteen of them ─────────────
+  // Same instrument the deck shelf and the dictionary open with (see
+  // .decks-console): a search field plus type chips, chips limited to
+  // types actually present the way DecksScreen limits itself to types
+  // actually owned. Filtering happens entirely client-side -- the
+  // whole day's lane list is already in hand from GET /api/today, so a
+  // second round trip to re-sort ten-to-twenty rows would be pure
+  // overhead.
+  const presentLaneTypes = useMemo(() => {
+    const owned = new Set(lanes.map(laneTypeOf))
+    return laneTypeDefs(t).filter(lt => owned.has(lt.value))
+  }, [lanes, t])
+
+  const filteredLanes = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return lanes.filter(l => {
+      if (typeFilter !== 'all' && laneTypeOf(l) !== typeFilter) return false
+      if (!q) return true
+      // The deck/level/set name and the mode both, so "writing" finds
+      // every writing-drill lane whatever it studies, reachable
+      // without leaving the field -- same rule the deck shelf's own
+      // search applies to a deck's name and its type label.
+      return laneWhere(l, t).toLowerCase().includes(q)
+        || modeLabel(t, l.mode).toLowerCase().includes(q)
+    })
+  }, [lanes, query, typeFilter, t])
+
+  const allVisibleChosen = filteredLanes.length > 0
+    && filteredLanes.every(l => chosen?.has(l.id))
+
+  function toggleVisible() {
+    playUi('click-mode-selection')
+    const ids = filteredLanes.map(l => l.id)
+    setChosen(prev => {
+      const next = new Set(prev)
+      ids.forEach(id => (allVisibleChosen ? next.delete(id) : next.add(id)))
+      return next
+    })
+  }
+
+  function clearLaneFilters() {
+    playUi('click-mode-selection')
+    setQuery('')
+    setTypeFilter('all')
+    searchRef.current?.focus()
   }
 
   // ── The picker ────────────────────────────────────────────
@@ -350,51 +433,116 @@ export default function TodayScreen({ session }) {
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
         <div className="container today-picker">
-          <div className="today-picker__head">
-            <span className="today-picker__jp" lang="ja">本日の運行</span>
-            <span className="today-picker__latin">{t.todayTitle}</span>
-          </div>
+          {/* Same plate every other screen opens with, in place of a
+              hand-rolled masthead the picker used to draw itself --
+              which was the one place in the app still naming its own
+              station instead of asking StationHeader for it. */}
+          <StationHeader />
 
-          <div className="today-picker__bar">
-            <span className="today-picker__hint">{t.todayPickHint}</span>
-            <button
-              type="button"
-              className="today-picker__all"
-              onClick={() => setChosen(allChosen ? new Set() : new Set(lanes.map(l => l.id)))}
-            >
-              {allChosen ? t.todaySelectNone : t.todaySelectAll}
-            </button>
-          </div>
+          <p className="today-picker__hint">{t.todayPickHint}</p>
 
-          <ul className="today-picker__lanes">
-            {lanes.map(lane => {
-              const on = chosen?.has(lane.id)
-              return (
-                <li key={lane.id}>
+          {/* Same console the deck shelf opens with (see .decks-console
+              on DecksScreen) -- search across what a lane studies and
+              what mode it studies it in, chips for the types actually
+              present today, reused rather than redrawn. The one
+              deliberate repurposing: DecksScreen's top-right button
+              CREATES something; here there is nothing to create, so
+              the same slot toggles the visible lanes on or off
+              instead. */}
+          <div className="decks-console">
+            <div className="decks-console__top">
+              <div className="decks-filter-row">
+                <button
+                  onClick={() => { playUi('click-mode-selection'); setTypeFilter('all') }}
+                  style={{ '--tab-color': 'var(--accent2)' }}
+                  className={`decks-filter-btn${typeFilter === 'all' ? ' decks-filter-btn--active' : ''}`}
+                >
+                  {t.todayAllTypes}
+                </button>
+                {presentLaneTypes.map(lt => (
                   <button
-                    type="button"
-                    className={`today-lane-row ${on ? 'today-lane-row--on' : ''}`}
-                    style={{ '--lane-color': LINE_COLOR[lane.kind === 'personal' ? 'personal' : lane.source] }}
-                    aria-pressed={on}
-                    onClick={() => toggleLane(lane.id)}
+                    key={lt.value}
+                    onClick={() => { playUi('click-mode-selection'); setTypeFilter(lt.value) }}
+                    style={{ '--tab-color': lt.color }}
+                    className={`decks-filter-btn${typeFilter === lt.value ? ' decks-filter-btn--active' : ''}`}
                   >
-                    <span className="today-lane-row__tick" aria-hidden="true" />
-                    <span className="today-lane-row__body">
-                      <span className="today-lane-row__where">{laneWhere(lane, t)}</span>
-                      <span className="today-lane-row__mode">{modeLabel(t, lane.mode)}</span>
-                    </span>
-                    <span className="today-lane-row__due">{lane.due}</span>
+                    <span className="decks-filter-glyph" lang="ja" aria-hidden="true">{lt.glyph}</span>
+                    {lt.label}
                   </button>
-                </li>
-              )
-            })}
-          </ul>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={toggleVisible}
+                className="decks-console__new"
+              >
+                {allVisibleChosen ? t.todaySelectNone : t.todaySelectAll}
+              </button>
+            </div>
+
+            <div className="decks-index-bar">
+              <SearchIcon />
+              <input
+                ref={searchRef}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder={t.todaySearchPlaceholder}
+                className="decks-index-bar__input"
+              />
+              {query && (
+                <button
+                  onClick={() => { setQuery(''); searchRef.current?.focus() }}
+                  className="decks-index-bar__clear"
+                  aria-label={t.cancel}
+                  title={t.cancel}
+                >
+                  <CrossIcon size={12} />
+                </button>
+              )}
+              <div className="decks-index-bar__count">{t.todayLaneCount(filteredLanes.length)}</div>
+            </div>
+          </div>
+
+          {filteredLanes.length === 0 && (
+            <EmptyState
+              message={t.todayNoMatch}
+              hint={t.todayNoMatchHint}
+              action={{ label: t.todayClearFilters, onClick: clearLaneFilters }}
+            />
+          )}
+
+          {filteredLanes.length > 0 && (
+            <ul className="today-picker__lanes">
+              {filteredLanes.map(lane => {
+                const on = chosen?.has(lane.id)
+                return (
+                  <li key={lane.id}>
+                    <button
+                      type="button"
+                      className={`today-lane-row ${on ? 'today-lane-row--on' : ''}`}
+                      style={{ '--lane-color': LINE_COLOR[laneTypeOf(lane)] }}
+                      aria-pressed={on}
+                      onClick={() => toggleLane(lane.id)}
+                    >
+                      <span className="today-lane-row__tick" aria-hidden="true" />
+                      <span className="today-lane-row__body">
+                        <span className="today-lane-row__where">{laneWhere(lane, t)}</span>
+                        <span className="today-lane-row__mode">{modeLabel(t, lane.mode)}</span>
+                      </span>
+                      <span className="today-lane-row__due">{lane.due}</span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
 
           <button
             type="button"
             className="btn-primary today-picker__go"
             disabled={chosenDue === 0}
-            onClick={() => runExpress(() => setStarted(true))}
+            onClick={() => board(() => setStarted(true))}
           >
             {chosenDue > 0 ? t.todayStart(chosenDue) : t.todayPickSomething}
           </button>

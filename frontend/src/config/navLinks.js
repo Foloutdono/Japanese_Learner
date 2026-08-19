@@ -60,6 +60,20 @@ function sections(t) {
     // false` keeps it off the landing page, where it has never been
     // advertised — a stats screen sells nobody on learning Japanese.
     { icon: '統計', title: t.statistics, desc: t.statsDesc, path: '/stats', color: 'var(--accent8)', scope: 'profile', showcase: false },
+
+    // 本日 — the daily queue (see screens/TodayScreen). Deliberately
+    // scope: 'today' rather than 'home': it is the strip ABOVE the
+    // departure board (see components/station/NextService), not a row
+    // ON it — a thirteenth destination competing with the other twelve
+    // is exactly the framing that made the queue invisible before this
+    // existed. The entry still has to live here, because sectionFor()
+    // below is what gives it a station plate, a line colour for
+    // StationHeader/TopBar, and a gate to depart through — the same
+    // three things every other section gets from this file. --accent2
+    // rather than a --line-* pigment: those eleven are all claimed by
+    // board rows, and accent2 is already the colour NextService itself
+    // paints the strip in.
+    { icon: '本日', title: t.todayTitle, desc: t.todayDesc, path: '/today', color: 'var(--accent2)', scope: 'today', showcase: false },
   ]
 }
 
@@ -76,4 +90,16 @@ export function getProfileHalls(t) {
 /** Everything worth advertising — the landing page's feature grid. */
 export function getShowcase(t) {
   return sections(t).filter(s => s.showcase !== false)
+}
+
+/**
+ * Every section regardless of scope — for sectionFor() in
+ * config/stations.js, the one consumer that needs to resolve a path to
+ * its colour/title/icon whether or not that section is meant to be
+ * BROWSED to (a board row, a profile hall). /today is scope: 'today'
+ * precisely so getNavLinks/getProfileHalls never surface it, so this
+ * is the only list it appears in.
+ */
+export function getAllSections(t) {
+  return sections(t)
 }

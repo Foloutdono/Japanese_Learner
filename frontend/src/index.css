@@ -2119,42 +2119,21 @@ input:focus { border-color: var(--accent2); }
   padding-top: 8px;
 }
 
-.today-picker__head {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-}
-.today-picker__jp {
-  font-size: 22px;
-  letter-spacing: 0.14em;
-}
-.today-picker__latin {
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-}
+/* The masthead used to be drawn here by hand (a bare "本日の運行 /
+   TODAY'S RUN" pair); it is <StationHeader/> now, the same plate every
+   other screen opens with, so only the instruction line below it is
+   still this screen's own. */
+.today-picker__hint { font-size: 13px; color: var(--text-dim); margin: 2px 0 -4px; }
 
-.today-picker__bar {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+/* The console below is .decks-console, reused rather than redrawn (see
+   the JSX comment on why) -- these three rules retint its two
+   decks-specific accents to the picker's OWN identity colour, so
+   "today" does not borrow 教材's maroon by mistake. Scoped to
+   .today-picker so DecksScreen's own console is untouched. */
+.today-picker .decks-index-bar:focus-within {
+  background: color-mix(in srgb, var(--accent2) 7%, transparent);
 }
-.today-picker__hint { font-size: 13px; color: var(--text-dim); }
-.today-picker__all {
-  font: inherit;
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
-  background: transparent;
-  color: var(--text-dim);
-  cursor: pointer;
-}
-.today-picker__all:hover { color: var(--text); border-color: var(--text-dim); }
+.today-picker .decks-console__new { background: var(--accent2); }
 
 .today-picker__lanes {
   list-style: none;
@@ -2200,7 +2179,14 @@ input:focus { border-color: var(--accent2); }
   height: 17px;
   border-radius: 5px;
   border: 1.5px solid color-mix(in srgb, var(--text-dim) 60%, transparent);
-  position: relative;
+  /* Flex-centers the checkmark rather than placing it with hand-tuned
+     left/top pixels -- those were eyeballed against ONE box size and
+     never actually landed centred (visibly off toward the top-left in
+     the box's own 17px square). Centring the layout is exact by
+     construction and stays exact if the box is ever resized. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .today-lane-row--on .today-lane-row__tick {
   background: var(--lane-color, var(--accent2));
@@ -2208,14 +2194,16 @@ input:focus { border-color: var(--accent2); }
 }
 .today-lane-row--on .today-lane-row__tick::after {
   content: '';
-  position: absolute;
-  left: 5px;
-  top: 1px;
-  width: 4px;
+  width: 5px;
   height: 9px;
   border: solid #fff;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+  /* The mark's own visual weight trails down-right of its unrotated
+     box (the long stroke is the bottom-right two sides of an "L"), so
+     flex-centring the box alone still reads a hair low. One pixel up
+     is the standard correction for this exact border-trick checkmark. */
+  margin-top: -1px;
 }
 
 .today-lane-row__body {
@@ -2249,17 +2237,34 @@ input:focus { border-color: var(--accent2); }
 .today-picker__go {
   position: sticky;
   bottom: 12px;
+  width: 100%;
   margin-top: 6px;
   z-index: 1;
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
 }
 .today-picker__go:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 
-/* Room under the last row so the sticky button never rests on it, and
-   clearance for the mobile XP bar. */
+/* Room under the last row so the sticky button never rests on it. */
 .today-picker { padding-bottom: 16px; }
-@media (max-width: 720px) {
-  .today-picker { padding-bottom: 76px; }
+
+/* .mobile-level-bar is `position: fixed` along the bottom edge below
+   768px (z-index 30) and reserves no space of its own -- it simply
+   sits on top of whatever the page's last rows are. A STICKY element's
+   `bottom` offset is measured from the true edge of the viewport, the
+   same edge that bar occupies, so `bottom: 12px` put the button
+   directly BEHIND it: the button has no fixed position of its own and
+   the bar draws over it every time the picker is scrolled to its end,
+   which on a list of ten-plus lanes is most of the time.
+
+   56px clears the bar's own box (8px pad + 6px track + 8px pad + its
+   border, the same figure .dict-page's clearance uses for the same
+   bar) with a little breathing room on top; the safe-area inset is
+   added again on top of that rather than relied on to already be
+   included, because the bar reserves its OWN copy for its own padding
+   and this offset is independent of it. */
+@media (max-width: 768px) {
+  .today-picker { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  .today-picker__go { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ── The queue screen itself ─────────────────────────────────── */
@@ -14477,168 +14482,6 @@ html { scrollbar-gutter: stable; }
    everything on top of that: the grain, the recess around the glass,
    the light crossing it, and the shadow each leaf throws into the
    opening as it goes. */
-/* ── 特急 — the limited express ────────────────────────────
-   The daily queue's transition. Not a gate and not a door: nothing
-   opens, something goes PAST. See components/station/ExpressPass.jsx
-   for why the queue gets its own, and why it is the quickest of the
-   three rather than the grandest.
-
-   The rake is one long strip translated across the viewport in a single
-   transform — seven identical cars, because a passing express really is
-   the same window strobing over and over, and that repetition is what
-   reads as speed rather than as a vehicle sliding by. */
-.express {
-  --express-x: 1;
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  overflow: hidden;
-  pointer-events: none;
-  /* The platform darkening under the train's own shadow. Short: the
-     veil is here to hide the route swap at 300ms, not to be looked at. */
-  background: rgba(0, 0, 0, 0);
-  animation: express-veil calc(520ms * var(--express-x)) ease-out forwards;
-}
-@keyframes express-veil {
-  0%   { background: rgba(0, 0, 0, 0); }
-  18%  { background: rgba(0, 0, 0, 0.82); }
-  62%  { background: rgba(0, 0, 0, 0.82); }
-  100% { background: rgba(0, 0, 0, 0); }
-}
-
-/* Headlight on the platform before the nose is. */
-.express__glare {
-  position: absolute;
-  top: 50%;
-  right: -40vw;
-  width: 60vw;
-  height: 60vh;
-  transform: translateY(-50%);
-  background: radial-gradient(closest-side,
-    color-mix(in srgb, var(--accent2) 55%, white) 0%,
-    color-mix(in srgb, var(--accent2) 22%, transparent) 45%,
-    transparent 100%);
-  opacity: 0;
-  animation: express-glare calc(300ms * var(--express-x)) ease-out forwards;
-}
-@keyframes express-glare {
-  0%   { opacity: 0;    transform: translate(0, -50%); }
-  40%  { opacity: 0.85; transform: translate(-30vw, -50%); }
-  100% { opacity: 0;    transform: translate(-120vw, -50%); }
-}
-
-/* Right to left, matching the glare that announced it. `will-change`
-   because this is the one element in the app that genuinely moves a
-   full viewport width inside 300ms. */
-.express__rake {
-  position: absolute;
-  top: 50%;
-  left: 100%;
-  display: flex;
-  align-items: stretch;
-  height: min(38vh, 260px);
-  transform: translateY(-50%);
-  will-change: transform;
-  animation: express-run calc(420ms * var(--express-x)) cubic-bezier(0.2, 0, 0.35, 1) forwards;
-}
-@keyframes express-run {
-  /* Measured against the VIEWPORT plus the rake's own width, not as a
-     percentage of the rake alone. The rake's width is a clamp() over
-     seven cars, so a fixed percentage is a guess at how far it has to
-     go -- and the first guess (-340%) over-travelled by more than
-     double: the tail had cleared the screen 187ms into a 420ms
-     animation, and the remaining 230ms played to nobody.
-
-     `left: 100%` puts the nose exactly at the right edge, so -100vw
-     brings the nose to the left edge and a further -100% takes the tail
-     with it. The extra 10% is the margin that guarantees the last car
-     is gone rather than resting on the boundary. */
-  from { transform: translate(0, -50%); }
-  to   { transform: translate(calc(-100vw - 110%), -50%); }
-}
-
-.express__nose {
-  position: relative;
-  flex: 0 0 auto;
-  width: clamp(90px, 12vw, 170px);
-  background: linear-gradient(100deg,
-    color-mix(in srgb, var(--accent2) 70%, #fff) 0%,
-    var(--accent2) 42%,
-    color-mix(in srgb, var(--accent2) 55%, #000) 100%);
-  /* The raked front of a 特急 set, cut rather than drawn. */
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 34% 100%);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 10px;
-}
-.express__headboard {
-  font-size: clamp(15px, 2vw, 22px);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-.express__car {
-  position: relative;
-  flex: 0 0 auto;
-  width: clamp(150px, 20vw, 300px);
-  margin-left: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  background: linear-gradient(180deg,
-    color-mix(in srgb, #fff 16%, var(--bg-panel)) 0%,
-    var(--bg-panel) 38%,
-    color-mix(in srgb, #000 34%, var(--bg-panel)) 100%);
-  border-radius: 3px;
-}
-/* Lit windows — the actual strobe. */
-.express__window {
-  width: 34%;
-  height: 34%;
-  border-radius: 3px;
-  background: linear-gradient(180deg,
-    color-mix(in srgb, var(--accent2) 40%, #fff) 0%,
-    color-mix(in srgb, var(--accent2) 30%, transparent) 100%);
-  box-shadow: 0 0 22px color-mix(in srgb, var(--accent2) 45%, transparent);
-}
-/* The livery stripe running the length of the train. */
-.express__belt {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 22%;
-  height: 6px;
-  background: var(--accent2);
-  opacity: 0.75;
-}
-
-/* Draught pulled along behind. Without it the rake reads as a panel
-   sliding rather than as something moving at speed. */
-.express__draught {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(90deg,
-    transparent 0 60px,
-    color-mix(in srgb, #fff 8%, transparent) 60px 62px);
-  opacity: 0;
-  animation: express-draught calc(440ms * var(--express-x)) linear forwards;
-}
-@keyframes express-draught {
-  0%   { opacity: 0;    transform: translateX(30vw); }
-  30%  { opacity: 0.55; }
-  100% { opacity: 0;    transform: translateX(-70vw); }
-}
-
-/* Nothing moves once the tail is gone — the veil lift is the whole of
-   the exit, and a rake still animating under it costs frames for
-   something nobody can see. */
-.express--clear .express__rake,
-.express--clear .express__draught,
-.express--clear .express__glare { display: none; }
-
 .door {
   --door-x: 1;
   position: fixed;

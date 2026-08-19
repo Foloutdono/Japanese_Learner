@@ -28,7 +28,7 @@ export { preload } from './context'
 export { playKana, playSfx, playUi, playAnnouncement } from './playback'
 export {
   playClick, playToggle, playCorrect, playWrong,
-  playGateChime, playDoorChime, playDoorSlide, playExpressPass, playFareTick, playFlapClatter, playStationMelody,
+  playGateChime, playDoorChime, playDoorSlide, playFareTick, playFlapClatter, playStationMelody,
   playArrival,
 } from './chimes'
 export { startAmbiance, stopAmbiance } from './ambiance'
