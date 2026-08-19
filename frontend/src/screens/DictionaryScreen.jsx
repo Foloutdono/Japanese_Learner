@@ -94,6 +94,18 @@ export default function DictionaryScreen({ session }) {
 		return () => observerRef.current?.disconnect()
 	}, [hasMore, loadingMore, loading, page, query, category, selectedRadical])
 
+	// Below 1100px the dock is not a dock at all — it becomes a centred
+	// modal, and full-screen below 700px (see .dict-dock's own media
+	// queries). Preselecting there would drop a sheet over the chart the
+	// moment the tab opened, so the learner would have to dismiss the
+	// panel before they could see what it was a panel ABOUT. There is no
+	// empty space to fill at those widths either, which is the only
+	// reason the preselect exists.
+	function hasSideDock() {
+		return typeof window !== 'undefined'
+			&& window.matchMedia('(min-width: 1100px)').matches
+	}
+
 	function fetchPage(p, q, cat, rad, autoSelectChar) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
@@ -123,6 +135,17 @@ export default function DictionaryScreen({ session }) {
 				if (autoSelectChar) {
 					const match = newResults.find(e => e.kanji === autoSelectChar)
 					if (match) setSelected(match)
+				} else if (p === 0 && (cat === 'hiragana' || cat === 'katakana')
+				           && newResults.length && hasSideDock()) {
+					// The syllabary charts are five columns wide and no wider,
+					// so beside them the reading dock opened onto empty space
+					// until something was clicked. A chart of 71 fixed cells
+					// has an obvious first cell — あ / ア — so it starts there
+					// and the panel is doing its job from the first frame.
+					// Only the FIRST page, and only when nothing else asked
+					// for a selection, so it can never steal one the learner
+					// already made.
+					setSelected(newResults[0])
 				}
 			})
 	}

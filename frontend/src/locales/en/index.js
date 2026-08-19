@@ -737,6 +737,17 @@ const decks = {
   deckNamePlaceholder: 'Deck name...',
   noDecks:           'No decks yet.',
   createFirstDeck:   'Create your first deck above.',
+  // The shelf's own index — a search field and a row of type filters
+  // (DecksScreen.jsx), modelled on the dictionary's console. `{n}` is
+  // the count that survived both filters, following the same
+  // placeholder convention browseSelectedCount uses.
+  decksSearchPlaceholder: 'Find a deck...',
+  decksAllTypes:     'All',
+  decksCount:        '{n} decks',
+  decksCountOne:     '1 deck',
+  decksNoMatch:      'No deck matches that.',
+  decksNoMatchHint:  'Try another name, or clear the filters.',
+  decksClearFilters: 'Clear filters',
   // Asked in place on the card/toolbar rather than through the
   // browser's own confirm() dialog — short, because it sits inline.
   deleteDeckConfirm: 'Delete this deck?',

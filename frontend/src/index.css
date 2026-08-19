@@ -746,6 +746,15 @@ input:focus { border-color: var(--accent2); }
   padding-top: 24px;
   padding-bottom: 40px;
 }
+/* .mobile-level-bar is `position: fixed` below 768px, so it reserves
+   no space and simply sits on top of whatever the page's last rows
+   are — 40px was not enough to clear it, and the final deck card on
+   the shelf went behind it. Sized off the bar's own box: 8px + 6px
+   track + 8px + border, plus its safe-area inset, plus a row of
+   breathing room. Same reasoning as .dict-page's own clearance. */
+@media (max-width: 768px) {
+  .page-pad { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+}
 
 /* Section header — serif-JP title + a short seal-red stroke instead
    of a full-width hairline (a single deliberate mark, not a line
@@ -756,6 +765,7 @@ input:focus { border-color: var(--accent2); }
   text-align: left;
 }
 .section-header:first-child { margin-top: 0; }
+
 
 .section-header__title {
   font-family: 'Noto Serif JP', serif;
@@ -8322,8 +8332,165 @@ input:focus { border-color: var(--accent2); }
 .loading-block--lg { padding: 80px; }
 
 /* ── Decks screen ─────────────────────────────────────────── */
-.decks-toolbar { display: flex; justify-content: flex-end; margin-bottom: 24px; }
-.decks-toolbar__btn { font-size: 14px; }
+
+/* ── 目録 — the shelf's index ──────────────────────────────
+   Built from the dictionary's own console (see .dict-console): the
+   same card material, the same two-deck construction — what you are
+   looking through along the top edge, the field itself across the
+   bottom. A shelf and a catalogue are the same kind of object, so
+   they get the same instrument rather than two different ones.
+
+   What this replaces was a single right-aligned "Create deck" button
+   floating over an otherwise bare page: the only control on the
+   screen, with nothing to say what the grid under it was or any way
+   to get at one deck out of twenty. */
+.decks-console {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 26px;
+}
+.decks-console__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--surface-line);
+}
+
+/* The type chips. Same roundel-and-word construction as the
+   dictionary's collection tabs, in each type's own pigment — a deck
+   is already identified by that colour on its card's rail, so the
+   filter that selects it wears the same one. */
+.decks-filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.decks-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 8px;
+  border: 1px solid var(--surface-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+/* The "All" chip carries no glyph, so its left padding matches its
+   right instead of reserving room for a roundel that isn't there. */
+.decks-filter-btn:not(:has(.decks-filter-glyph)) { padding-left: 12px; }
+.decks-filter-btn:hover { color: var(--text-primary); border-color: var(--tab-color, var(--line-decks)); }
+.decks-filter-btn--active {
+  color: var(--tab-color, var(--line-decks));
+  border-color: color-mix(in srgb, var(--tab-color, var(--line-decks)) 55%, transparent);
+  background: color-mix(in srgb, var(--tab-color, var(--line-decks)) 12%, transparent);
+}
+.decks-filter-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-family: var(--font-jp);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--tab-color, var(--text-secondary));
+}
+
+/* The one control here that CREATES rather than finds, so it is
+   filled where the filters are outlines — the difference has to be
+   visible at a glance or it reads as a sixth filter. */
+.decks-console__new {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 7px 15px;
+  border: none;
+  border-radius: 999px;
+  background: var(--deck-action);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.decks-console__new--open {
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+}
+
+/* The field runs the console's full width and carries no border of
+   its own — the console is its frame. Mirrors .dict-console's own
+   .dict-index-bar treatment exactly. */
+.decks-index-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+}
+.decks-index-bar:focus-within {
+  background: color-mix(in srgb, var(--line-decks) 7%, transparent);
+}
+.decks-index-bar__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  padding: 6px 0;
+  color: var(--text-primary);
+  font-size: 1.02rem;
+}
+.decks-index-bar__input:focus { border: none; outline: none; }
+.decks-index-bar__input::placeholder { color: color-mix(in srgb, var(--text-secondary) 80%, transparent); }
+.decks-index-bar__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.decks-index-bar__clear:hover { color: var(--text-primary); }
+.decks-index-bar__count {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
 
 .decks-create-card { margin-bottom: 24px; }
 .decks-create-card__title { font-size: 15px; font-weight: bold; margin-bottom: 16px; }
@@ -8394,7 +8561,16 @@ input:focus { border-color: var(--accent2); }
    reads as the same kind of object as a level, a mode or an exam
    paper. Only the parts a deck has and a platform card doesn't —
    per-card actions and the delete affordance — are defined here. */
-.decks-grid { padding-top: 0; }
+/* .platform-grid's own minimum is 440px, sized for a mode card with a
+   service badge and a two-line description. A deck card is a name, a
+   type and two buttons — it reads perfectly well narrower, and on a
+   phone that 440px minimum is wider than the viewport, which is what
+   made the whole grid overflow sideways rather than sit in one
+   column. min() clamps the track to whatever room there actually is. */
+.decks-grid {
+  padding-top: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+}
 .deck-card { align-items: stretch; }
 /* The roundel carries the type's kanji, not a number: which pile of
    cards this is matters, its position in the list doesn't. */
@@ -8407,13 +8583,27 @@ input:focus { border-color: var(--accent2); }
    line, so the colour that identifies the deck appears twice — on the
    rail and on the word — the way a line colour and its name do. */
 .deck-card__type { color: var(--rail); font-weight: 600; }
+/* Wraps. A deck card carries two actions the other platform cards
+   don't, and in the narrow column a two-up grid gives it they had
+   nowhere to go: `flex: 1` on a nowrap row makes each button as wide
+   as the row allows and no narrower than its own label, so past a
+   certain name length the pair simply overflowed the card's right
+   edge. Wrapping is what the row should have done from the start —
+   two buttons side by side when they fit, stacked when they don't. */
 .deck-card__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
 }
 .deck-card__btn {
-  flex: 1;
+  /* flex-basis 0 rather than auto, so the two buttons split the row
+     evenly instead of sizing to their own labels — "Study" and
+     "Modifier" are different lengths and used to come out different
+     widths. min-width lets a button shrink below its content and wrap
+     to its own line rather than pushing the row wider than the card. */
+  flex: 1 1 0;
+  min-width: 96px;
   font-size: 13px;
   background: var(--bg-panel);
   color: var(--text-on-panel);
@@ -8439,9 +8629,13 @@ input:focus { border-color: var(--accent2); }
 /* The in-place "delete?" prompt that replaced confirm(). Occupies the
    action row rather than floating over the card. */
 .deck-card__btn--danger { background: var(--danger); color: var(--text-on-panel); }
-.deck-card__btn--muted { flex: 0 0 auto; background: transparent; color: var(--text-secondary); }
+.deck-card__btn--muted { flex: 0 0 auto; min-width: 0; background: transparent; color: var(--text-secondary); }
+/* The question takes the whole first line of the wrapped row, with
+   its two answers underneath — it is a sentence, and squeezing it
+   into a third of the width beside them broke it over three lines of
+   two words each. */
 .deck-card__confirm-q {
-  flex: 1;
+  flex: 1 0 100%;
   align-self: center;
   font-size: 12px;
   color: var(--text-secondary);
@@ -9660,24 +9854,126 @@ input:focus { border-color: var(--accent2); }
 }
 .browse-source-tab--active { background: var(--deck-action); color: var(--text-on-panel); }
 
+/* Shown instead of the source tabs when the deck's structure leaves
+   nothing to choose. It had no styling at all, so it rendered as a
+   full-size bold sentence directly under the subtitle — two headings
+   where the second is a footnote. A quiet rule-chip instead: it states
+   a constraint, which is what the tabs it replaces would have shown. */
+.browse-only-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 5px 11px;
+  border: 1px solid var(--surface-line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 .browse-level-row { margin-bottom: 14px; }
 
 .browse-search-input { width: 100%; margin-bottom: 16px; box-sizing: border-box; }
 
-.browse-results__list { max-height: 320px; }
+/* Taller than the import preview's own 200px: this is the working
+   surface of the whole menu, not a preview of something already
+   decided, and four visible rows out of sixty is a keyhole. */
+.browse-results__list { max-height: min(46vh, 420px); }
 
+/* ── A browsed entry ───────────────────────────────────────
+   A GRID, not the five-column flex row this used to be. Every part
+   sized itself off its own content there, so a kanji with three
+   packed readings ("ド・ト・つち") took a narrow column and wrapped
+   down it while the meaning beside it wrapped down another — two
+   ragged paragraphs and a chevron, at a different shape on every row.
+   Fixed tracks mean the headwords line up down the list and every
+   meaning starts at the same x.
+
+   It also stopped borrowing .deckdetail-card-row, which is the deck
+   LIST's row and gets its padding from the .card class that row also
+   carries — this one never had that class, so it had no padding at
+   all and its contents sat flush against the border. */
 .browse-result-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 13.5rem) minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
-  cursor: pointer;
+  gap: 6px 16px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: 8px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.browse-result-row--selectable { cursor: pointer; }
+.browse-result-row--selectable:hover { border-color: var(--deck-action); }
+.browse-result-row--selected {
+  border-color: var(--deck-action);
+  background: color-mix(in srgb, var(--deck-action) 12%, var(--surface));
 }
 .browse-result-row--in-deck { opacity: 0.55; cursor: default; }
+
+/* Headword and reading as one block: the reading sits under the word
+   it reads, the way it does on every card in the app. */
+.browse-result-row__entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.browse-result-row__front {
+  font-family: var(--font-jp);
+  font-size: 1.05rem;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+.browse-result-row__kana {
+  font-family: var(--font-jp);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--accent2);
+}
+.browse-result-row__meaning {
+  min-width: 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+/* The JLPT level, in the same plate the dictionary gives it. */
+.browse-result-row__level {
+  justify-self: end;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-line);
+  border-radius: 4px;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
 .browse-result-row__tag {
-  margin-left: auto;
+  grid-column: 2 / -1;
   font-size: 11px;
   color: var(--text-secondary);
   white-space: nowrap;
+}
+
+/* On a phone the entry and its meaning stack: 12rem of headword plus
+   a readable meaning does not fit beside a checkbox at 360px, and the
+   grid was the thing forcing the meaning into a two-character column. */
+@media (max-width: 560px) {
+  .browse-result-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  /* Pinned to the headword's own row rather than left to flow: as a
+     plain grid item it landed on a line of its own under the meaning,
+     hard left, reading as a fourth field of the entry instead of the
+     corner label it is. */
+  .browse-result-row__level { grid-column: 3; grid-row: 1; }
+  .browse-result-row__meaning { grid-column: 2 / -1; }
+  .browse-result-row__tag { grid-column: 2 / -1; }
 }
 
 /* Auto-hide on scroll — opt-in via the `autoHide` prop on <TopBar/>,
@@ -9889,6 +10185,18 @@ input:focus { border-color: var(--accent2); }
      gutter it doesn't need and the labels stay on one line. */
   .deck-card__body { padding-right: 14px; }
   .deck-card__btn { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+
+  /* The console stacks: the filter chips get the full width to wrap
+     across (four of them plus "All" never fit one phone line beside a
+     button), and "Create deck" spans underneath rather than being
+     squeezed to a two-word column at the end of the chip row. */
+  .decks-console__top { flex-direction: column; align-items: stretch; gap: 10px; }
+  .decks-console__new { justify-content: center; width: 100%; }
+  .decks-index-bar { padding: 6px 12px; gap: 10px; }
+  .decks-index-bar__input { font-size: 1rem; }
+  /* The count is the first thing to go: the number of decks is already
+     visible as the number of cards below it. */
+  .decks-index-bar__count { display: none; }
   /* The title needs the whole line on a phone, and it is frequently a
      whole journey ("漢字 N5 — MCQ"), so the reading above it goes. */
   .top-bar__inner { padding: 10px 14px 11px; gap: 10px; }
@@ -9901,7 +10209,15 @@ input:focus { border-color: var(--accent2); }
   .selector-header__title { font-size: 1.7rem; }
 
   .stats-container { padding: 40px 16px 72px; }
-  .section-header { margin: 56px 0 24px; }
+  /* A heading and the thing it names have to read as one block, and on
+     a phone 24px of gap under the title was enough for them to stop
+     doing that — what followed started looking like the next section
+     rather than this one's content. (This rule used to make the gap
+     BIGGER on mobile than the 22px it is on desktop, which is exactly
+     backwards: less width means less room to spend on separation.) The
+     gap ABOVE stays large — that one separates two sections from each
+     other and is doing real work. */
+  .section-header { margin: 44px 0 12px; }
   .plaque { padding: 18px 14px 14px; }
   .calendar-panel,
   .forecast { padding: 16px 14px 12px; }
@@ -13096,6 +13412,22 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
   .dict-console .dict-index-bar { padding: 2px 12px; gap: 10px; }
   .dict-index-bar__input { font-size: 1rem; }
   .dict-index-bar__key { display: none; }
+}
+
+/* ── Clearing the XP bar ───────────────────────────────────
+   .mobile-level-bar is `position: fixed` along the bottom edge below
+   768px, so it is outside the flow and reserves no space — it simply
+   sits on top of whatever the page's last rows happen to be. On most
+   screens the page's own bottom padding was already deep enough to
+   hide that; the dictionary's was 24px, so the last row of the 五十音
+   chart (and the foot of the reading dock under it) went behind the
+   bar with no way to scroll them clear.
+
+   Sized off the bar's own box rather than a round number: 8px top pad
+   + 6px track + 8px bottom pad + its border, plus the safe-area inset
+   it also honours, plus a row of breathing room on top. */
+@media (max-width: 768px) {
+  .dict-page { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ── The console on a phone ────────────────────────────────

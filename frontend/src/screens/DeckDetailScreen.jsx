@@ -4,6 +4,7 @@ import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
+import { StationHeader } from '../components/station/StationHeader'
 import EmptyState from '../components/ui/EmptyState'
 import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
@@ -391,6 +392,12 @@ export default function DeckDetailScreen({ session }) {
       <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? t.deckFallbackTitle} autoHide />
 
       <div className="container page-pad">
+        {/* Same plate every other screen in the app opens with — this
+            was one of the last two 教材 screens still starting on a bare
+            container, which is exactly what made them read as a
+            different app. It names the STATION; the identity block
+            below it names the deck. */}
+        <StationHeader />
 
         {/* The deck, named on its own page. The name used to live only
             in the TopBar — which auto-hides on scroll — and the type

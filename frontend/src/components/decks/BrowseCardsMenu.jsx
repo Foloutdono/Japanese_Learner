@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
-import { CrossIcon, CheckIcon, ChevronIcon } from '../ui/Icons'
+import { CrossIcon, CheckIcon } from '../ui/Icons'
 
 // ── Browse & add existing app cards into a custom deck ─────
 //
@@ -193,21 +193,42 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
               {results.map(r => {
                 const isSel = selected.has(r.raw_id)
                 return (
+                  /* An entry, not five columns of flex fighting over the
+                     width. The headword and its reading are ONE thing —
+                     the reading belongs over/under the word it reads, the
+                     way it does everywhere else in the app — so they
+                     stack into a single column, and the meaning gets the
+                     whole rest of the row instead of whatever a wrapped
+                     reading column left it. The chevron that used to sit
+                     between them is gone: it separated two things that
+                     were already separated, and was the widest piece of
+                     nothing in the row. */
                   <div
                     key={r.raw_id}
                     onClick={() => !r.in_deck && toggle(r.raw_id)}
-                    className={`deckdetail-card-row browse-result-row${r.in_deck ? ' browse-result-row--in-deck' : ' deckdetail-card-row--selectable'}${isSel ? ' deckdetail-card-row--selected' : ''}`}
+                    className={`browse-result-row${r.in_deck ? ' browse-result-row--in-deck' : ' browse-result-row--selectable'}${isSel ? ' browse-result-row--selected' : ''}`}
                   >
                     <div className={`deckdetail-checkbox${isSel || r.in_deck ? ' deckdetail-checkbox--checked' : ''}`}>
                       {(isSel || r.in_deck) && <span className="deckdetail-checkbox__mark"><CheckIcon size={12} /></span>}
                     </div>
-                    <div className="import-preview-row__front">{r.front}</div>
-                    {r.kana && r.kana !== r.front && (
-                      <div className="import-preview-row__hint"><DottedReadings text={r.kana} /></div>
-                    )}
-                    <div className="import-preview-row__arrow"><ChevronIcon direction="right" size={13} /></div>
-                    <div className="import-preview-row__back">{r.meaning}</div>
-                    {r.in_deck && <div className="browse-result-row__tag">{t.alreadyAdded}</div>}
+
+                    <div className="browse-result-row__entry">
+                      <span className="browse-result-row__front" lang="ja">{r.front}</span>
+                      {r.kana && r.kana !== r.front && (
+                        <span className="browse-result-row__kana" lang="ja">
+                          <DottedReadings text={r.kana} />
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="browse-result-row__meaning">{r.meaning}</div>
+
+                    {/* The level the entry is filed under — the same
+                        thing the level row above filters on, so a result
+                        says which of those buckets it came out of
+                        instead of leaving "All" ambiguous. */}
+                    {r.level && <span className="browse-result-row__level">{r.level}</span>}
+                    {r.in_deck && <span className="browse-result-row__tag">{t.alreadyAdded}</span>}
                   </div>
                 )
               })}

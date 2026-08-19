@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
-import { getNavLinks } from '../../config/navLinks'
-import { stationFor } from '../../config/stations'
+import { sectionFor, stationFor } from '../../config/stations'
 import { StationSign } from '../station/StationSign'
 import { useStationClock } from '../station/useStationClock'
 import { startAmbiance, stopAmbiance } from '../../lib/audio'
@@ -21,17 +20,17 @@ import { PlatformCountContext } from './platformCount'
  * rather than a set of screens.
  *
  * The plate is derived from the URL rather than passed in: every
- * selection screen lives at its own section's path, so nothing has to
- * be threaded through eleven callers, and a path with no station
- * (a custom deck's study setup, say) simply doesn't get one — and
- * keeps its full eyebrow/heading/subtitle header instead, since it
- * has no plate to say any of that for it.
+ * selection screen lives at its own section's path (or under it — see
+ * sectionFor/stationFor, which both fall back to the longest matching
+ * prefix, so a custom deck's own study setup at /decks/<id>/study is
+ * recognised as standing in 教材 station), so nothing has to be threaded
+ * through eleven callers.
  *
  * Props:
- *   eyebrow, heading, subtitle — optional page header. Rendered only
- *     on screens with no station match (see above); a plated screen's
- *     name is already on the sign overhead, so repeating it as a
- *     second heading underneath was the redundant one.
+ *   eyebrow, heading, subtitle — optional page header, for a screen
+ *     mounted at a path with no station at all. A plated screen's name
+ *     is already on the sign overhead, so repeating it as a second
+ *     heading underneath was the redundant one.
  *   maxWidth — max-width for the content column. Left unset by every
  *     caller today; the two defaults live in CSS instead, because a
  *     plated screen and a bare one want different ones.
@@ -99,7 +98,12 @@ export default function SelectionScreen({
   // under a MemoryRouter (tests, previews) without silently deciding
   // it's on some other page.
   const { pathname } = useLocation()
-  const section = getNavLinks(t).find(link => link.path === pathname)
+  // sectionFor, not an exact getNavLinks match: it falls back to the
+  // longest matching prefix, so a custom deck's own study setup
+  // (/decks/<id>/study) is finally recognised as standing in 教材 station
+  // instead of falling through to the bare "Choose your training mode"
+  // heading — the one selection screen in the app that had no plate.
+  const section = sectionFor(pathname, t)
   const station = stationFor(pathname)
 
   // The section's pigment becomes the line colour for everything

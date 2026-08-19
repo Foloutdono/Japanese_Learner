@@ -66,8 +66,20 @@ const STATIONS = {
 
 const UNKNOWN = { code: '??', kana: '' }
 
+// Falls back to the longest matching prefix, the same way sectionFor
+// below does and for the same reason: a nested route (/decks/<id>,
+// /decks/<id>/study) is still standing in that section's station, and
+// returning UNKNOWN there printed a "??" roundel over an empty kana
+// line — a plate that said nothing, on a screen that does have an
+// answer. Exact match still wins, so nothing that had a plate changes.
 export function stationFor(path) {
-  return STATIONS[path] ?? UNKNOWN
+  const exact = STATIONS[path]
+  if (exact) return exact
+
+  const prefix = Object.keys(STATIONS)
+    .filter(p => p !== '/' && path.startsWith(`${p}/`))
+    .sort((a, b) => b.length - a.length)[0]
+  return prefix ? STATIONS[prefix] : UNKNOWN
 }
 
 /** The origin — the station the home screen itself is standing in. */

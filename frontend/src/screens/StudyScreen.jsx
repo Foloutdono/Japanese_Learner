@@ -434,12 +434,11 @@ export default function StudyScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? t.deckFallbackTitle} autoHide />
-        {/* Custom decks live at /decks/:id/study — a path with no
-            station plate (see config/stations.js), so this is one of
-            the few screens where SelectionScreen's own heading is
-            still doing real work rather than repeating a sign
-            overhead. */}
-        <SelectionScreen heading={t.selectMode}>
+        {/* No `heading` — /decks/:id/study resolves to 教材 station by
+            prefix now (see config/stations.js), so the plate names the
+            screen and a "Choose your training mode" title under it
+            would just be saying it twice. */}
+        <SelectionScreen>
           {!modesLoaded && <Loading />}
           {modesLoaded && availableModes.length === 0 && (
             <div className="quiz-done">{t.noCards}</div>

@@ -730,6 +730,15 @@ const decks = {
   deckNamePlaceholder: 'Nom du deck...',
   noDecks:           'Aucun deck pour l\'instant.',
   createFirstDeck:   'Créez votre premier deck ci-dessus.',
+  // Voir la version anglaise — l'index de l'étagère, calqué sur la
+  // console du dictionnaire.
+  decksSearchPlaceholder: 'Chercher un deck...',
+  decksAllTypes:     'Tous',
+  decksCount:        '{n} decks',
+  decksCountOne:     '1 deck',
+  decksNoMatch:      'Aucun deck ne correspond.',
+  decksNoMatchHint:  'Essayez un autre nom, ou effacez les filtres.',
+  decksClearFilters: 'Effacer les filtres',
   // Posée directement sur la carte / la barre plutôt que par la
   // boîte confirm() du navigateur — courte, puisqu'elle est en ligne.
   deleteDeckConfirm: 'Supprimer ce deck ?',

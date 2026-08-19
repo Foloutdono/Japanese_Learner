@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -8,7 +8,8 @@ import { StationHeader } from '../components/station/StationHeader'
 import EmptyState from '../components/ui/EmptyState'
 import { Loading } from '../components/ui/Loading'
 import { deckTypes, deckTypeOf } from '../components/decks/deckTypes'
-import { TrashIcon, PencilIcon, PlayIcon, BooksIcon } from '../components/ui/Icons'
+import { SearchIcon } from '../components/dictionary/DictionaryDetail'
+import { TrashIcon, PencilIcon, PlayIcon, BooksIcon, CrossIcon } from '../components/ui/Icons'
 
 export default function DecksScreen({ session }) {
   const navigate  = useNavigate()
@@ -24,10 +25,21 @@ export default function DecksScreen({ session }) {
   const [loading, setLoading]   = useState(true)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName]   = useState('')
-  const [newType, setNewType]   = useState('mixed')
+  // 'mixed' no longer exists as a structure (see deckTypes.js), so a
+  // form defaulting to it offered a type the backend would reject.
+  const [newType, setNewType]   = useState('standard')
   // Which deck is currently asking "delete?" in place. Replaces the
   // native confirm() this screen used to throw.
   const [confirmingId, setConfirmingId] = useState(null)
+
+  // ── The shelf's index ──────────────────────────────────────
+  // Filtering happens entirely in the browser: /api/decks returns the
+  // whole shelf in one request (it is one row per deck, not per card),
+  // so a search endpoint would be a round trip to re-sort a list
+  // already in hand. No debounce needed for the same reason.
+  const [query, setQuery]     = useState('')
+  const [typeFilter, setTypeFilter] = useState('all')
+  const searchRef = useRef(null)
 
   useEffect(() => {
     const saved = window.localStorage.getItem('jp-theme')
@@ -70,6 +82,36 @@ export default function DecksScreen({ session }) {
       .then(() => setDecks(prev => prev.filter(d => d.id !== id)))
   }
 
+  // Only the types actually on the shelf get a chip. A filter for a
+  // structure you own no decks of is a control that can only ever
+  // return nothing — and on a shelf of two decks it would be three
+  // dead chips out of four.
+  const presentTypes = useMemo(() => {
+    const owned = new Set(decks.map(d => d.type))
+    return DECK_TYPES.filter(dt => owned.has(dt.value))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [decks, t])
+
+  const shown = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return decks.filter(d => {
+      if (typeFilter !== 'all' && d.type !== typeFilter) return false
+      if (!q) return true
+      // Name and type label both, so "kanji" finds every kanji deck
+      // whatever its name — the same thing the type chips do, reachable
+      // without leaving the field.
+      const label = deckTypeOf(d.type, t).label.toLowerCase()
+      return d.name.toLowerCase().includes(q) || label.includes(q)
+    })
+  }, [decks, query, typeFilter, t])
+
+  function clearFilters() {
+    playUi('click-mode-selection')
+    setQuery('')
+    setTypeFilter('all')
+    searchRef.current?.focus()
+  }
+
   return (
     <div className="screen">
       <TopBar onBack={() => navigate('/')} title={t.decks} autoHide />
@@ -77,13 +119,74 @@ export default function DecksScreen({ session }) {
       <div className="container page-pad">
         <StationHeader />
 
-        <div className="decks-toolbar">
-          <button
-            onClick={() => { playUi('click-mode-selection'); setCreating(c => !c) }}
-            className="btn-deck-primary decks-toolbar__btn"
-          >
-            {creating ? t.cancel : t.createDeck}
-          </button>
+        {/* ── 目録 — the shelf's index ────────────────────────
+            One console, the same instrument the dictionary opens with
+            (see .dict-console): what you are looking through along the
+            top, the field itself across the bottom, and the one action
+            that creates rather than finds pinned to the right of the
+            top edge where it can't be mistaken for a filter.
+
+            The "Create deck" button used to be a lone right-aligned
+            button floating over an otherwise bare page — the only
+            control on the screen, and nothing to say what the list
+            under it was. */}
+        <div className="decks-console">
+          <div className="decks-console__top">
+            <div className="decks-filter-row">
+              <button
+                onClick={() => { playUi('click-mode-selection'); setTypeFilter('all') }}
+                className={`decks-filter-btn${typeFilter === 'all' ? ' decks-filter-btn--active' : ''}`}
+              >
+                {t.decksAllTypes}
+              </button>
+              {presentTypes.map(dt => (
+                <button
+                  key={dt.value}
+                  onClick={() => { playUi('click-mode-selection'); setTypeFilter(dt.value) }}
+                  style={{ '--tab-color': dt.color }}
+                  className={`decks-filter-btn${typeFilter === dt.value ? ' decks-filter-btn--active' : ''}`}
+                >
+                  <span className="decks-filter-glyph" lang="ja" aria-hidden="true">{dt.glyph}</span>
+                  {dt.label}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => { playUi('click-mode-selection'); setCreating(c => !c) }}
+              className={`decks-console__new${creating ? ' decks-console__new--open' : ''}`}
+            >
+              {creating ? <><CrossIcon size={12} /> {t.cancel}</> : <>+ {t.createDeck}</>}
+            </button>
+          </div>
+
+          <div className="decks-index-bar">
+            <SearchIcon />
+            <input
+              ref={searchRef}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder={t.decksSearchPlaceholder}
+              className="decks-index-bar__input"
+            />
+            {query && (
+              <button
+                onClick={() => { setQuery(''); searchRef.current?.focus() }}
+                className="decks-index-bar__clear"
+                aria-label={t.cancel}
+                title={t.cancel}
+              >
+                <CrossIcon size={12} />
+              </button>
+            )}
+            {!loading && (
+              <div className="decks-index-bar__count">
+                {shown.length === 1
+                  ? t.decksCountOne
+                  : t.decksCount.replace('{n}', shown.length)}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Create form */}
@@ -124,14 +227,27 @@ export default function DecksScreen({ session }) {
           <EmptyState icon={<BooksIcon size={40} />} message={t.noDecks} hint={t.createFirstDeck} />
         )}
 
-        {!loading && decks.length > 0 && (
+        {/* An empty SHELF and an empty RESULT are different situations
+            and used to give the same "no decks yet" message — which,
+            with two decks sitting behind a filter, was simply untrue.
+            This one offers the way out instead of advice. */}
+        {!loading && decks.length > 0 && shown.length === 0 && (
+          <EmptyState
+            icon={<BooksIcon size={40} />}
+            message={t.decksNoMatch}
+            hint={t.decksNoMatchHint}
+            action={{ label: t.decksClearFilters, onClick: clearFilters }}
+          />
+        )}
+
+        {!loading && shown.length > 0 && (
           /* Same grid and the same card object as every other choice in
              the app (see ModeSelector / .platform-card): a coloured
              rail, the roundel, then the name. A deck used to be a plain
              web card in a rigid 3-column grid — the one list in the app
              that didn't look like the app. */
           <div className="platform-grid decks-grid">
-            {decks.map(deck => {
+            {shown.map(deck => {
               const dt = deckTypeOf(deck.type, t)
               return (
               <div

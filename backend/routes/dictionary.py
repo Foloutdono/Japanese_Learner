@@ -111,31 +111,84 @@ def _word_furigana(kanji: str, kana: str) -> list[dict]:
     return align_deck(kanji, primary) if primary else []
 
 
+def _reading_of(char: str, furigana: list[dict]) -> str | None:
+    """Which reading of `char` a word actually uses, from its own furigana.
+
+    Only counted when the aligner isolated the character on its own — a
+    part covering a whole unsegmented run ("生活" → せいかつ) says nothing
+    about which half is which, so it comes back None and the caller
+    treats the word as "reading unknown" rather than inventing one.
+    """
+    for part in furigana:
+        if part.get("text") == char:
+            return part.get("reading")
+    return None
+
+
 def _vocab_examples_for_kanji(char: str, lang: str) -> list[dict]:
     """Up to _MAX_KANJI_VOCAB_EXAMPLES real vocab words containing `char`,
-    most-common level first. Multi-character compounds are listed before
-    the bare single-character word itself — a kanji's card should show how
-    it combines with others, not just repeat itself."""
+    chosen to show as MANY DIFFERENT READINGS of it as the deck can.
+
+    Ordering within a reading is unchanged — most-common level first, and
+    multi-character compounds before the bare single-character word, since
+    a kanji's card should show how it combines with others rather than
+    just repeat itself. What is new is the pass across readings on top of
+    that: the four slots are filled one reading at a time before any
+    reading is allowed a second word.
+
+    This matters most on exactly the kanji a learner most needs it for.
+    生 has six readings in the deck; by level alone its four examples came
+    out 先生・学生・生活・人生 — セイ, four times, teaching a quarter of the
+    character. Round-robin gives セイ, い(きる), う(まれる), なま instead.
+    Kanji with only one reading are unaffected: one bucket, same order it
+    always had.
+    """
     candidates = _KANJI_TO_VOCAB.get(char, [])
     compounds = sorted((c for c in candidates if len(c[1].get("kanji", "")) > 1), key=lambda c: _level_rank(c[0]))
     singles   = sorted((c for c in candidates if len(c[1].get("kanji", "")) <= 1), key=lambda c: _level_rank(c[0]))
 
-    seen = set()
-    out = []
+    # Bucket by the reading each word gives `char`, keeping insertion
+    # order so both the buckets themselves and the words inside them stay
+    # in the compounds-then-singles, common-level-first order above.
+    # `None` (the aligner could not isolate the character) is a bucket
+    # like any other, drawn from last — a word that cannot say which
+    # reading it demonstrates is the weakest example, not a wrong one.
+    seen: set[tuple[str, str]] = set()
+    by_reading: dict[str | None, list[dict]] = {}
     for level, w in compounds + singles:
         key = (w.get("kanji", ""), w.get("kana", ""))
         if key in seen:
             continue
         seen.add(key)
-        out.append({
+        furigana = _word_furigana(w.get("kanji", ""), w.get("kana", ""))
+        entry = {
             "kanji":    w.get("kanji", ""),
             "kana":     w.get("kana", ""),
             "meaning":  get_meaning(w, lang, VOCAB_FR_MAP),
             "level":    level,
-            "furigana": _word_furigana(w.get("kanji", ""), w.get("kana", "")),
-        })
-        if len(out) >= _MAX_KANJI_VOCAB_EXAMPLES:
+            "furigana": furigana,
+        }
+        by_reading.setdefault(_reading_of(char, furigana), []).append(entry)
+
+    # Round-robin: one word per reading per pass, so four slots cover four
+    # readings when four exist and fall back to the plain order when they
+    # do not. Nones last within each pass.
+    ordered = sorted(by_reading, key=lambda r: r is None)
+    out: list[dict] = []
+    depth = 0
+    while len(out) < _MAX_KANJI_VOCAB_EXAMPLES:
+        added = False
+        for reading in ordered:
+            words = by_reading[reading]
+            if depth >= len(words):
+                continue
+            out.append(words[depth])
+            added = True
+            if len(out) >= _MAX_KANJI_VOCAB_EXAMPLES:
+                break
+        if not added:
             break
+        depth += 1
     return out
 
 
