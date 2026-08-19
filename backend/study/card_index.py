@@ -94,21 +94,23 @@ def _build():
     consumer wants the whole thing rather than one lookup.
 
     Returns:
-        index:  (raw_id, mode key) -> (source, deck key)
-        totals: (source, deck key, mode key) -> reachable card count
-        ids:    (source, deck key, mode key) -> [raw_id, ...] in deck order
+        index:   (raw_id, mode key) -> (source, deck key)
+        totals:  (source, deck key, mode key) -> reachable card count
+        ids:     (source, deck key, mode key) -> [raw_id, ...] in deck order
+        entries: (source, raw_id) -> the deck entry itself
     """
     index: dict[tuple[str, str], tuple[str, str]] = {}
     totals: dict[tuple[str, str, str], int] = {}
     ids: dict[tuple[str, str, str], list[str]] = {}
+    entries: dict[tuple[str, str], dict] = {}
 
     for source, decks, to_id in _DECKS:
         for mode_key in sorted(GRADED_FOR_SOURCE[source]):
             mode = MODES[mode_key]
-            for deck_key, entries in decks.items():
+            for deck_key, deck_entries in decks.items():
                 pool = [
                     to_id(entry, deck_key)
-                    for entry in entries
+                    for entry in deck_entries
                     if eligible_for(mode, _augment(source, deck_key, entry))
                 ]
                 totals[(source, deck_key, mode_key)] = len(pool)
@@ -116,10 +118,17 @@ def _build():
                 for raw_id in pool:
                     index[(raw_id, mode_key)] = (source, deck_key)
 
-    return index, totals, ids
+        # The entries themselves, so a caller holding only a stored
+        # card_id can rebuild the card without rescanning the deck. Stored
+        # by reference, not copied.
+        for deck_key, deck_entries in decks.items():
+            for entry in deck_entries:
+                entries[(source, to_id(entry, deck_key))] = entry
+
+    return index, totals, ids, entries
 
 
-_INDEX, _TOTALS, _IDS = _build()
+_INDEX, _TOTALS, _IDS, _ENTRIES = _build()
 
 
 def locate(raw_id: str, mode_key: str) -> tuple[str, str] | None:
@@ -145,3 +154,9 @@ def deck_keys(source: str) -> list[str]:
         if src == source:
             return list(decks)
     return []
+
+
+def entry_for(source: str, raw_id: str) -> dict | None:
+    """The deck entry a stored card id refers to, or None if the content
+    it named is gone. Saves every caller a linear scan of the level."""
+    return _ENTRIES.get((source, raw_id))

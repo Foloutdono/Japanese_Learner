@@ -948,6 +948,54 @@ def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
 
 # ── STUDY ─────────────────────────────────────────────────
 
+def build_personal_card(row: dict, raw_id: str, mode: str,
+                        stage: str | None, preview: dict | None) -> dict:
+    """
+    One hand-written card's payload.
+
+    Public and extracted from the deck study endpoint because the daily
+    queue (routes/today.py) serves personal cards alongside app ones, and
+    a second copy of this would be a second thing free to drift -- the
+    exact failure that put a retired payload shape in frequency.py and
+    theme_vocab.py.
+
+    `row` is a custom_cards row: id / structure / fields / notes. Extra
+    columns are ignored, so a caller that joined on decks for a name can
+    pass what it already has.
+    """
+    m = MODES.get(mode)
+    spec   = structure_for(row.get("structure", "standard"))
+    fields = row.get("fields") or {}
+    # readings/radical/furigana/fill_sentence, and (for kanji) the
+    # packed `kana` every flashcard/InlineReveal render already
+    # expects — see _custom_card_extras. Merged in rather than
+    # inlined so this stays one dict literal per source, matching
+    # the flat shape a builtin card's own payload has.
+    extras = _custom_card_extras(spec, fields, m) if m else {}
+    return {
+        "card_id": raw_id, "source": "custom",
+        "structure": spec.key,
+        # front/back derived from the structure's own field names,
+        # so the renderer needs to know nothing about structures:
+        # a kanji card fronts its kanji, a grammar card its rule.
+        "front": fields.get(spec.front_key, ""),
+        "back":  fields.get(spec.back_key, ""),
+        "fields": fields,
+        "notes": row.get("notes", ""), "mode": mode,
+        # f2b shows the front and asks for the back; b2f is the
+        # other way up. Every other source's payload carries this,
+        # and the renderer reads it rather than the mode string —
+        # which used to be ignored entirely on the custom-card
+        # path, so a "meaning → word" session always showed the
+        # word first regardless of what it asked for.
+        "direction": m.direction if m else None,
+        "hints": {},
+        "stage": stage,
+        "review_preview": _build_review_preview(stage, preview),
+        **extras,
+    }
+
+
 def _build_pool(deck_id: str, user_id: str) -> list[dict]:
     """Every card belonging to this deck — custom and app-sourced
     alike — as a flat pool ready to be filtered/picked from. App-
@@ -1197,38 +1245,7 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
         preview = previews.get(card_id)
 
         if p["source"] == "custom":
-            c = p["entry"]
-            m = MODES.get(mode)
-            spec   = structure_for(c.get("structure", "standard"))
-            fields = c.get("fields") or {}
-            # readings/radical/furigana/fill_sentence, and (for kanji) the
-            # packed `kana` every flashcard/InlineReveal render already
-            # expects — see _custom_card_extras. Merged in rather than
-            # inlined so this stays one dict literal per source, matching
-            # the flat shape a builtin card's own payload has.
-            extras = _custom_card_extras(spec, fields, m) if m else {}
-            cards.append({
-                "card_id": raw_id, "source": "custom",
-                "structure": spec.key,
-                # front/back derived from the structure's own field names,
-                # so the renderer needs to know nothing about structures:
-                # a kanji card fronts its kanji, a grammar card its rule.
-                "front": fields.get(spec.front_key, ""),
-                "back":  fields.get(spec.back_key, ""),
-                "fields": fields,
-                "notes": c.get("notes", ""), "mode": mode,
-                # f2b shows the front and asks for the back; b2f is the
-                # other way up. Every other source's payload carries this,
-                # and the renderer reads it rather than the mode string —
-                # which used to be ignored entirely on the custom-card
-                # path, so a "meaning → word" session always showed the
-                # word first regardless of what it asked for.
-                "direction": m.direction if m else None,
-                "hints": {},
-                "stage": stage,
-                "review_preview": _build_review_preview(stage, preview),
-                **extras,
-            })
+            cards.append(build_personal_card(p["entry"], raw_id, mode, stage, preview))
         else:
             cfg = SOURCES[p["source"]]
             level_list = cfg["by_level"].get(p["level"], [])

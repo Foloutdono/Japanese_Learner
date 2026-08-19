@@ -931,6 +931,69 @@ class SRSEngine:
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
+    def get_due_rows(self, user_id: str, limit: int | None = None) -> list[dict[str, Any]]:
+        """
+        Every (card, mode) this user owes a review on right now, most
+        overdue first, across every section at once.
+
+        get_due_cards answers the same question one mode and one deck at
+        a time, which is what a section session needs and what made a
+        cross-section view impossible without 17 round trips. This is one
+        query over the user's own rows; the caller maps each card_id back
+        to its section with study/card_index.
+
+        `total_reviews > 0` matches get_due_cards: a card that has never
+        been answered is NEW, not due. Nothing owes you a review on
+        something you have not met -- that distinction is the whole
+        reason "today" is a finite number rather than the deck size.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        now = datetime.now(timezone.utc)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT card_id, mode, next_review, interval_days, lapses
+                    FROM card_modes
+                    WHERE card_id LIKE %s
+                      AND total_reviews > 0
+                      AND next_review <= %s
+                    ORDER BY next_review ASC
+                """
+                params: list[Any] = [pattern, now]
+                if limit is not None:
+                    sql += " LIMIT %s"
+                    params.append(limit)
+                self._log_sql("get_due_rows", sql, tuple(params))
+                cur.execute(sql, tuple(params))
+                rows = cur.fetchall()
+        return [
+            {
+                "card_id": card_id, "mode": mode, "next_review": next_review,
+                "interval_days": interval_days, "lapses": lapses,
+            }
+            for card_id, mode, next_review, interval_days, lapses in rows
+        ]
+
+    def get_next_due_at(self, user_id: str):
+        """When the soonest not-yet-due card comes due, or None if the
+        user has nothing scheduled ahead. Lets a cleared queue say "next
+        review in 3 hours" instead of just "nothing due", which is the
+        difference between a finished day and an empty app."""
+        pattern = self._user_prefix_pattern(user_id)
+        now = datetime.now(timezone.utc)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT MIN(next_review) FROM card_modes
+                    WHERE card_id LIKE %s
+                      AND total_reviews > 0
+                      AND next_review > %s
+                """
+                self._log_sql("get_next_due_at", sql, (pattern, now))
+                cur.execute(sql, (pattern, now))
+                row = cur.fetchone()
+        return row[0] if row else None
+
     def get_mastered_count(self, user_id: str) -> int:
         """Mastered (card, mode) pairs across every category — a
         simpler, unscoped version of the per-category counts /api/stats
