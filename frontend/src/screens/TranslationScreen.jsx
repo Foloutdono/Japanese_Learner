@@ -90,16 +90,27 @@ export default function TranslationScreen({ session }) {
     return 'mastery'
   }
 
+  // Every sentence this session has already served, so the backend can
+  // work through its curated bank rather than reshuffling the same
+  // handful. Same mechanism ReadingScreen uses -- both modes draw from
+  // the same picker (translation.py delegates to reading.py wholesale),
+  // so both need to tell it what they have already shown.
+  const seenRef = useRef([])
+
   function batchUrl(count) {
     const params = new URLSearchParams({ source, count, lang })
     if (source === 'level') params.set('level', level)
     if (source === 'frequency') { params.set('domain', domain); params.set('tier', tier) }
+    // Capped: the bank is 30-55 sentences a level, so anything past that
+    // is a query string growing without bound for no effect.
+    if (seenRef.current.length) params.set('exclude', seenRef.current.slice(-60).join('|'))
     return `/api/translation/batch?${params.toString()}`
   }
 
   function startSession() {
     setScore({ correct: 0, total: 0 })
     setStreak(0)
+    seenRef.current = []
     queueRef.current = []
     setStage('loading')
     setError(null)
@@ -121,7 +132,11 @@ export default function TranslationScreen({ session }) {
         if (!r.ok) throw new Error('Request failed')
         return r.json()
       })
-      .then(d => d.phrases || [])
+      .then(d => {
+        const phrases = d.phrases || []
+        seenRef.current = [...seenRef.current, ...phrases.map(p => p.phrase)]
+        return phrases
+      })
       .catch(() => [])
       .finally(() => { fetchingRef.current = false })
   }
@@ -180,6 +195,10 @@ export default function TranslationScreen({ session }) {
         target_phrase: phraseData.phrase,
         target_romaji: phraseData.romaji,
         user_answer: userAnswer,
+        // Only a curated sentence has one. The backend adds a line to
+        // the tutor prompt when it is present and says nothing when it
+        // is not, rather than guessing what a corpus sentence is "for".
+        grammar: phraseData.grammar ?? '',
         lang,
       }),
     })
@@ -430,6 +449,17 @@ function SessionView({
                   {data.phrase}
                 </div>
                 <div className="trn-feedback-romaji">{data.romaji}</div>
+
+                {/* What this sentence was chosen to practise. Only a
+                    curated sentence carries it, and a test proves the
+                    sentence contains the point it names -- see
+                    content/reading_sentences.py. */}
+                {data.grammar && (
+                  <div className="rdg-feedback-grammar">
+                    <span className="rdg-feedback-grammar__label">{t.readingGrammarPoint}</span>
+                    <span className="rdg-feedback-grammar__pattern" lang="ja">{data.grammar}</span>
+                  </div>
+                )}
 
                 <div className="trn-analysis-wrap">
                   <div className="trn-analysis-label">

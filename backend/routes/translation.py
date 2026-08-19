@@ -81,11 +81,18 @@ def get_translation_batch(
     tier_size: int = reading.freq.DEFAULT_TIER_SIZE,
     count: int = reading.DEFAULT_BATCH,
     lang: str = "en",
+    # Sentences this session has already served, "|"-separated. Passed
+    # straight through: the curated bank is finite (30-55 sentences a
+    # level), and without this the picker reshuffles the same pool every
+    # batch and a learner meets 何を買いたいですか three times in a
+    # sitting. See reading._pick_curated_phrases.
+    exclude: str = "",
     user_id: str = Depends(get_user_id),
 ):
     return reading.get_reading_batch(
         source=source, level=level, domain=domain, tier=tier,
-        tier_size=tier_size, count=count, lang=lang, user_id=user_id,
+        tier_size=tier_size, count=count, lang=lang, exclude=exclude,
+        user_id=user_id,
     )
 
 
@@ -105,6 +112,11 @@ class AnalyzePayload(BaseModel):
     target_romaji: str
     user_answer: str          # the learner's own Japanese attempt
     lang: str = "en"
+    # The grammar point the reference sentence was written to
+    # demonstrate, when it has one -- every curated sentence carries it
+    # (see content/reading_sentences.py) and a corpus-sourced one does
+    # not. Empty means "no reliable claim", not "no grammar".
+    grammar: str = ""
 
 
 ANALYSIS_PROMPT_TEMPLATE = """You are a friendly, encouraging Japanese teacher helping a learner self-assess their own translation attempt.
@@ -122,7 +134,7 @@ Write a short analysis (3-5 sentences, in {lang_name}) that helps the learner ju
 - Point out what their attempt got right (grammar, vocabulary, nuance).
 - Note any meaningful differences from the reference (wrong particle, wrong verb form/conjugation, missing or added nuance, unnatural phrasing, wrong word/kanji choice) — but a DIFFERENT phrasing that is still natural and correct Japanese is not a mistake, say so explicitly if that's the case.
 - Say whether a native speaker would understand what they meant, even if imperfect.
-
+{grammar_note}
 Be specific and reference actual words from their attempt rather than speaking in generalities. Keep the tone encouraging but honest. Respond with plain text only — no markdown formatting, no JSON, no preamble like "Here's my analysis"."""
 
 
@@ -134,12 +146,33 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
         raise HTTPException(status_code=400, detail="user_answer is required")
 
     lang_name = reading.LANG_NAMES.get(payload.lang, payload.lang)
+    # The one thing this endpoint knows that the learner does not, and
+    # that the reference sentence alone does not say: WHY this sentence
+    # was chosen. A curated sentence exists to demonstrate one grammar
+    # point (content/reading_sentences.py names it, and a test proves the
+    # sentence contains it), so the analysis can tell the learner whether
+    # they reached for that construction or worked around it -- which is
+    # the difference between "you were understood" and "you practised the
+    # thing this exercise was for".
+    #
+    # Only added when the phrase actually carries a point. A guess about
+    # what a Tatoeba sentence is "for" would be exactly the kind of
+    # confident-but-unfounded instruction this app avoids elsewhere.
+    grammar_note = ""
+    if payload.grammar.strip():
+        grammar_note = (
+            "- This sentence was chosen to practise the grammar point "
+            f"{payload.grammar.strip()}. Say whether the learner used it, and if "
+            "they expressed the same idea another way, show them how the "
+            "sentence would look using it.\n"
+        )
     prompt = ANALYSIS_PROMPT_TEMPLATE.format(
         lang_name=lang_name,
         translation_prompt=payload.translation_prompt,
         target_phrase=payload.target_phrase,
         target_romaji=payload.target_romaji,
         user_answer=payload.user_answer,
+        grammar_note=grammar_note,
     )
 
     # reading._chat already handles the multi-model fallback chain and
