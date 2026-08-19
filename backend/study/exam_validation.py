@@ -6,6 +6,17 @@
 # well-formed and still a bad exam. A paper that fails any of these
 # should be regenerated (retry the failing mondai, not the whole
 # paper — see exam_kanji_gen.py), never served as-is.
+#
+# One check here, validate_answer_balance, is different in kind from
+# every other: it's a property of the whole set's SHUFFLE (which
+# on-screen position the correct choice lands in across many
+# questions), not of any individual question's content. Every other
+# check can only be satisfied by generating different text — this one
+# can be satisfied by re-shuffling text that's already fine. See
+# repair_answer_balance below, which every generate_*_paper() retry
+# loop now calls before paying for a full LLM regeneration.
+import random
+
 from study.llm_shared import sentence_kanji_ok
 
 # A generator that always puts the correct answer in the same slot is
@@ -135,12 +146,15 @@ def validate_kanji_gate(text: str, level: str) -> list[str]:
     return []
 
 
-def validate_questions(questions: list[dict], check_duplicates: bool = True) -> list[str]:
-    # check_duplicates=False for reading-comprehension and grammar
-    # questions: their promptJp is the QUESTION/SENTENCE text, not a
-    # test-item identity the way a vocab/kanji target word is — the
-    # real JLPT itself reuses boilerplate phrasing across different
-    # items, so flagging that as a duplicate would reject fine content.
+def validate_content(questions: list[dict], check_duplicates: bool = True) -> list[str]:
+    """Every validate_questions check EXCEPT validate_answer_balance —
+    i.e. every check that can only be satisfied by generating
+    DIFFERENT content. Split out from validate_questions so a caller
+    can tell apart "this paper needs new content" (worth spending more
+    LLM calls on) from "this paper's content is fine, only the
+    on-screen shuffle is skewed" (fixable for free — see
+    repair_answer_balance). check_duplicates has the same meaning as
+    on validate_questions."""
     errors = []
     for q in questions:
         # Shape-dispatch: sentence-order questions ({pieces, order,
@@ -150,7 +164,74 @@ def validate_questions(questions: list[dict], check_duplicates: bool = True) -> 
             errors.extend(validate_sentence_order_question(q))
         else:
             errors.extend(validate_mcq_question(q))
-    errors.extend(validate_answer_balance(questions))
     if check_duplicates:
         errors.extend(validate_no_duplicate_targets(questions))
     return errors
+
+
+def validate_questions(questions: list[dict], check_duplicates: bool = True) -> list[str]:
+    # check_duplicates=False for reading-comprehension and grammar
+    # questions: their promptJp is the QUESTION/SENTENCE text, not a
+    # test-item identity the way a vocab/kanji target word is — the
+    # real JLPT itself reuses boilerplate phrasing across different
+    # items, so flagging that as a duplicate would reject fine content.
+    return validate_content(questions, check_duplicates) + validate_answer_balance(questions)
+
+
+def _reshuffle_options(question: dict, rng: random.Random) -> None:
+    """Re-randomizes ON-SCREEN POSITION only, in place — every option's
+    text and which one is correct are unchanged, so this never affects
+    validate_content's checks, only validate_answer_balance's.
+
+    Sentence-order questions keep their correct sequence in "order" /
+    "starIndex" / "answer" independent of display order, so reshuffling
+    just their "pieces" display list is enough — nothing else needs
+    updating. MCQ-shaped questions ("choices" + "answer") don't have
+    that separation, so this rebuilds the choice list in a new random
+    order and re-points "answer" at whichever id now holds the text
+    that was previously correct."""
+    if "pieces" in question:
+        rng.shuffle(question["pieces"])
+        return
+
+    choices = question.get("choices")
+    if not choices:
+        return
+    correct_text = next((c["textJp"] for c in choices if c["id"] == question.get("answer")), None)
+    if correct_text is None:
+        return  # already malformed — validate_content will catch it, nothing to repair here
+
+    ids = [c["id"] for c in choices]  # canonical id order (e.g. c1..c4), positions are what we're re-randomizing
+    texts = [c["textJp"] for c in choices]
+    rng.shuffle(texts)
+    question["choices"] = [{"id": i, "textJp": t} for i, t in zip(ids, texts)]
+    question["answer"] = next(i for i, t in zip(ids, texts) if t == correct_text)
+
+
+def repair_answer_balance(questions: list[dict], rng: random.Random, max_tries: int = 25) -> bool:
+    """Tries to satisfy validate_answer_balance by re-shuffling each
+    question's on-screen option order — no content changes, no LLM
+    calls. Mutates `questions` in place (each item is a live reference
+    into the paper dict a caller already built) and returns True the
+    moment the balance check passes, leaving that fix applied. Returns
+    False (having still tried, and left the LAST attempted shuffle in
+    place) if max_tries is exhausted without reaching balance — at
+    that point the caller should fall back to a real regeneration.
+
+    This exists because validate_answer_balance is the one check a
+    paper can fail for a reason that has nothing to do with any
+    individual question's quality. Every generate_*_paper() used to
+    throw away and re-generate EVERY question in a section — burning a
+    full LLM call per question all over again — whenever this was the
+    ONLY thing wrong, which is exactly the outcome of a model's own
+    tendency to favor certain answer positions when writing
+    correctIndex itself, not a sign of anything actually being poorly
+    written."""
+    if not validate_answer_balance(questions):
+        return True
+    for _ in range(max_tries):
+        for q in questions:
+            _reshuffle_options(q, rng)
+        if not validate_answer_balance(questions):
+            return True
+    return False

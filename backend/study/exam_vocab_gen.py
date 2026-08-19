@@ -38,9 +38,9 @@ import re
 from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import get_vocab_extras, word_category
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_validation import validate_questions
-from study.exam_gen_utils import GenerationFailed, make_choices
-from study.llm_shared import chat, allowed_kanji_for_level, sentence_kanji_ok, OPENROUTER_API_KEY
+from study.exam_validation import validate_content, repair_answer_balance
+from study.exam_gen_utils import GenerationFailed, make_choices, kanji_instruction
+from study.llm_shared import chat, sentence_kanji_ok, OPENROUTER_API_KEY
 import study.exam_kanji_gen as exam_kanji_gen
 
 logger = logging.getLogger(__name__)
@@ -205,27 +205,66 @@ def _call_llm_json(prompt: str) -> dict:
         raise GenerationFailed(f"LLM returned unparseable JSON: {content!r}")
 
 
-_PARAPHRASE_PROMPT = """You are writing one JLPT {level} vocabulary question \
-(言い換え類義 style: choose the word or phrase closest in meaning to the \
-underlined one).
+def _call_llm_json_batch(prompt: str) -> list:
+    """Same contract as _call_llm_json, but for a prompt that asks for N
+    items back in one array. Batching divides the fixed cost every
+    single-item call used to pay unconditionally (the kanji-gate list/
+    instruction block, resent from scratch on every call) by the batch
+    size instead of paying it once per word.
 
-Target word: {display} ({kana}), meaning: "{meaning}".
+    reasoning=False: same empirical finding as exam_grammar_gen.py's
+    batch helper (see study/llm_shared.py's chat() docstring) -- with
+    reasoning on, a multi-item array prompt burns its completion budget
+    on the reasoning trace and returns nothing usable; off, the same
+    prompt reliably returns real content for a fraction of the tokens.
+    Single-item prompts elsewhere in this module keep reasoning on."""
+    content = chat([
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": "Generate the questions."},
+    ], reasoning=False)
+    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        raise GenerationFailed(f"LLM returned unparseable JSON array: {content!r}")
+    if not isinstance(data, list):
+        raise GenerationFailed(f"expected a JSON array of items, got {type(data).__name__}")
+    return data
 
-Write ONE short, natural Japanese sentence that uses this target word \
-(inflected form is fine, e.g. 食べた for 食べる). Mark the target word by \
-wrapping it in 【 】 brackets, exactly once. Any kanji you use, other than \
-kanji already in the target word itself, MUST come from this list:
+
+def _words_block(words: list[dict]) -> str:
+    return "\n".join(
+        f"{i + 1}. {_display(w)} ({_first_reading(w)}) -- meaning: \"{w.get('meaning', '')}\""
+        for i, w in enumerate(words)
+    )
+
+
+_PARAPHRASE_BATCH_SIZE = 6
+
+_PARAPHRASE_PROMPT_BATCH = """You are writing {n} separate JLPT {level} \
+vocabulary questions (言い換え類義 style: choose the word or phrase \
+closest in meaning to the underlined one) -- one question per target word \
+below, each independent of the others.
+
+Target words, in order:
+{words_block}
+
+For EACH target word, write ONE short, natural Japanese sentence that \
+uses it (inflected form is fine, e.g. 食べた for 食べる). Mark the target \
+word by wrapping it in 【 】 brackets, exactly once. Any kanji you use, \
+other than kanji already in the target word itself, MUST come from this \
+list:
 {allowed_kanji}
 (use hiragana instead for anything else).
 
 Then give exactly 4 short answer choices in Japanese (each a word or short \
 phrase). Exactly ONE choice could naturally replace the bracketed word in \
-the sentence with (nearly) the same meaning. The other THREE must be \
+that sentence with (nearly) the same meaning. The other THREE must be \
 different enough in meaning to be clearly wrong, but still plausible words \
 a learner could confuse it with.
 
-Respond with ONLY JSON (no markdown fences, no commentary), matching \
-exactly this schema:
+Respond with ONLY JSON (no markdown fences, no commentary): a JSON array \
+of exactly {n} objects, ONE PER WORD IN THE SAME ORDER, each matching:
 {{"sentenceJp": "...【...】...", "choices": ["...", "...", "...", "..."], "correctIndex": 0}}
 """
 
@@ -239,10 +278,16 @@ exactly this schema:
 # where live testing actually caught a wrong-answer problem (as
 # opposed to exam_grammar_gen.py's star-question claim, which is
 # checked by a direct substring match in code, no second call needed).
-_VERIFY_PARAPHRASE_PROMPT = """In this Japanese sentence: {sentence}
-The bracketed word is "{target}". Someone claims that "{claimed}" could \
-naturally replace it here, keeping (nearly) the same meaning -- a genuine \
-near-synonym or paraphrase, not just a related or associated word.
+#
+# Batched the same way as generation: one call verifies every claim
+# from a whole paraphrase batch, instead of one verify call per claim
+# — this was previously 2 LLM calls per word (1 generate + 1 verify);
+# now it's 2 calls per _PARAPHRASE_BATCH_SIZE words.
+_VERIFY_PARAPHRASE_PROMPT_BATCH = """For each of the following {n} \
+Japanese paraphrase claims, decide whether the claimed replacement \
+genuinely keeps (nearly) the same meaning as the bracketed word in its \
+sentence -- a real near-synonym or paraphrase, not just a related or \
+associated word. Judge each claim independently of the others.
 
 Be skeptical by default: a claimed paraphrase is often wrong even when it \
 sounds plausible -- e.g. claiming センチ (centimeters) paraphrases メートル \
@@ -250,43 +295,84 @@ sounds plausible -- e.g. claiming センチ (centimeters) paraphrases メート�
 (sweet) paraphrases おいしい (tasty) is wrong (a taste, not a general \
 judgment of quality) -- both are merely related, not substitutable.
 
-Respond with ONLY JSON (no markdown fences, no commentary): \
-{{"valid": true or false}}
+Claims, in order:
+{claims_block}
+
+Respond with ONLY JSON (no markdown fences, no commentary): a JSON array \
+of exactly {n} booleans, ONE PER CLAIM IN THE SAME ORDER, \
+e.g. [true, false, ...].
 """
 
 
-def _verify_paraphrase_answer(sentence: str, target: str, claimed: str) -> bool:
-    prompt = _VERIFY_PARAPHRASE_PROMPT.format(sentence=sentence, target=target, claimed=claimed)
+def _verify_paraphrase_answers_batch(claims: list[tuple[str, str, str]]) -> list[bool]:
+    """claims: [(sentence, target, claimed), ...]. Returns one bool per
+    claim, same order. On any failure (network, bad JSON, wrong-length
+    array) every claim in the batch is treated as unverified -> False,
+    the same fail-closed behavior the old per-item version had."""
+    claims_block = "\n".join(
+        f'{i + 1}. Sentence: {sentence} | bracketed word: "{target}" | claimed replacement: "{claimed}"'
+        for i, (sentence, target, claimed) in enumerate(claims)
+    )
+    prompt = _VERIFY_PARAPHRASE_PROMPT_BATCH.format(n=len(claims), claims_block=claims_block)
     try:
-        data = _call_llm_json(prompt)
-    except (RuntimeError, GenerationFailed):
-        return False  # can't verify -> don't trust the claim
-    return data.get("valid") is True
+        content = chat([
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": "Verify the claims."},
+        ], reasoning=False)
+        cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+        data = json.loads(cleaned)
+    except (RuntimeError, json.JSONDecodeError):
+        return [False] * len(claims)  # can't verify -> don't trust any claim in the batch
+    if not isinstance(data, list) or len(data) != len(claims):
+        return [False] * len(claims)
+    return [d is True for d in data]
 
 
-_USAGE_PROMPT = """You are writing one JLPT {level} vocabulary question \
-(用法 style: choose the sentence that uses the target word correctly).
+_USAGE_BATCH_SIZE = 4
 
-Target word: {display} ({kana}), meaning: "{meaning}".
+_USAGE_PROMPT_BATCH = """You are writing {n} separate JLPT {level} \
+vocabulary questions (用法 style: choose the sentence that uses the \
+target word correctly) -- one question per target word below, each \
+independent of the others.
 
-Write exactly 4 short, natural Japanese sentences, each using this exact \
-target word once (inflected form is fine). In each sentence, mark the \
-target word by wrapping it in 【 】 brackets, exactly once per sentence. \
-Any kanji you use, other than kanji already in the target word itself, \
-MUST come from this list:
+Target words, in order:
+{words_block}
+
+For EACH target word, write exactly 4 short, natural Japanese sentences, \
+each using that exact word once (inflected form is fine). In each \
+sentence, mark the target word by wrapping it in 【 】 brackets, exactly \
+once per sentence. Any kanji you use, other than kanji already in the \
+target word itself, MUST come from this list:
 {allowed_kanji}
 (use hiragana instead for anything else).
 
-Exactly ONE of the 4 sentences must use the target word correctly and \
-naturally. The other THREE must each be subtly wrong for this word — \
+For each word, exactly ONE of its 4 sentences must use the word correctly \
+and naturally. The other THREE must each be subtly wrong for that word — \
 either the wrong meaning/nuance for that context, or grammatically wrong \
-for this word's part of speech — while still looking plausible to a \
-learner who doesn't know the word well.
+for its part of speech — while still looking plausible to a learner who \
+doesn't know the word well.
 
-Respond with ONLY JSON (no markdown fences, no commentary), matching \
-exactly this schema:
+Respond with ONLY JSON (no markdown fences, no commentary): a JSON array \
+of exactly {n} objects, ONE PER WORD IN THE SAME ORDER, each matching:
 {{"sentences": ["...【...】...", "...", "...", "..."], "correctIndex": 0}}
 """
+
+
+def _pick_batch(candidates: list[dict], pos: int, batch_size: int,
+                 used_words: set, used_prompts: set) -> tuple[list[dict], int]:
+    """Walks `candidates` from `pos`, skipping words already used
+    elsewhere in the paper, collecting up to `batch_size` fresh ones.
+    Returns (batch, new_pos)."""
+    batch = []
+    while pos < len(candidates) and len(batch) < batch_size:
+        word = candidates[pos]
+        pos += 1
+        key = (word["kanji"], word["kana"])
+        display = _display(word)
+        if key in used_words or not display or display in used_prompts:
+            continue
+        batch.append(word)
+    return batch, pos
 
 
 def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set,
@@ -294,59 +380,76 @@ def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set
     questions = []
     candidates = list(pool)
     rng.shuffle(candidates)
-    allowed_kanji = allowed_kanji_for_level(level)
+    allowed_kanji = kanji_instruction(level)
 
-    for word in candidates:
-        if len(questions) >= spec["count"]:
-            break
-        key = (word["kanji"], word["kana"])
-        display = _display(word)
-        if key in used_words or not display or display in used_prompts:
+    pos = 0
+    while len(questions) < spec["count"] and pos < len(candidates):
+        batch, pos = _pick_batch(candidates, pos, _PARAPHRASE_BATCH_SIZE, used_words, used_prompts)
+        if not batch:
             continue
 
-        prompt = _PARAPHRASE_PROMPT.format(
-            level=level, display=display, kana=_first_reading(word),
-            meaning=word.get("meaning", ""), allowed_kanji=allowed_kanji,
+        prompt = _PARAPHRASE_PROMPT_BATCH.format(
+            n=len(batch), level=level, words_block=_words_block(batch), allowed_kanji=allowed_kanji,
         )
         try:
-            data = _call_llm_json(prompt)
+            items = _call_llm_json_batch(prompt)
         except (RuntimeError, GenerationFailed) as e:
-            logger.warning("paraphrase generation failed for %s: %s", display, e)
+            logger.warning("paraphrase batch of %d failed: %s", len(batch), e)
             continue
 
-        sentence = data.get("sentenceJp")
-        choices_text = data.get("choices")
-        correct_index = data.get("correctIndex")
-        if not isinstance(sentence, str) or sentence.count("【") != 1 or sentence.count("】") != 1:
-            continue
-        clean, bracketed = _extract_bracket(sentence)
-        if clean is None or not sentence_kanji_ok(clean, level):
-            continue
-        if not isinstance(choices_text, list) or len(choices_text) != 4:
-            continue
-        if not all(isinstance(c, str) and c.strip() for c in choices_text) or len(set(choices_text)) != 4:
-            continue
-        if not isinstance(correct_index, int) or not (0 <= correct_index < 4):
+        # Pass 1: shape-validate each item (no LLM call yet) and collect
+        # the ones worth verifying.
+        pending = []  # (word, display, clean, bracketed, choices, answer_id)
+        for word, item in zip(batch, items):
+            display = _display(word)
+            if not isinstance(item, dict):
+                continue
+            sentence = item.get("sentenceJp")
+            choices_text = item.get("choices")
+            correct_index = item.get("correctIndex")
+            if not isinstance(sentence, str) or sentence.count("【") != 1 or sentence.count("】") != 1:
+                continue
+            clean, bracketed = _extract_bracket(sentence)
+            if clean is None or not sentence_kanji_ok(clean, level):
+                continue
+            if not isinstance(choices_text, list) or len(choices_text) != 4:
+                continue
+            if not all(isinstance(c, str) and c.strip() for c in choices_text) or len(set(choices_text)) != 4:
+                continue
+            if not isinstance(correct_index, int) or not (0 <= correct_index < 4):
+                continue
+            pending.append((word, display, clean, bracketed, choices_text, correct_index))
+
+        if not pending:
             continue
 
-        if not _verify_paraphrase_answer(clean, bracketed, choices_text[correct_index]):
-            logger.warning("paraphrase self-check rejected %r -> %r for %s", bracketed, choices_text[correct_index], display)
-            continue
+        # Pass 2: ONE verification call for every claim in this batch,
+        # instead of one call per word (see _verify_paraphrase_answers_batch).
+        claims = [(clean, bracketed, choices_text[correct_index])
+                  for _w, _d, clean, bracketed, choices_text, correct_index in pending]
+        verified = _verify_paraphrase_answers_batch(claims)
 
-        ids = ["c1", "c2", "c3", "c4"]
-        choices = [{"id": ids[i], "textJp": t} for i, t in enumerate(choices_text)]
-        answer_id = ids[correct_index]
+        for (word, display, clean, bracketed, choices_text, correct_index), ok in zip(pending, verified):
+            if len(questions) >= spec["count"]:
+                break
+            if not ok:
+                logger.warning("paraphrase self-check rejected %r -> %r for %s", bracketed, choices_text[correct_index], display)
+                continue
 
-        used_words.add(key)
-        used_prompts.add(display)
-        questions.append({
-            "id": f"{spec['id']}_q{len(questions) + 1}",
-            "number": len(questions) + 1,
-            "promptJp": clean,
-            "underlineJp": bracketed,
-            "choices": choices,
-            "answer": answer_id,
-        })
+            ids = ["c1", "c2", "c3", "c4"]
+            choices = [{"id": ids[i], "textJp": t} for i, t in enumerate(choices_text)]
+            answer_id = ids[correct_index]
+
+            used_words.add((word["kanji"], word["kana"]))
+            used_prompts.add(display)
+            questions.append({
+                "id": f"{spec['id']}_q{len(questions) + 1}",
+                "number": len(questions) + 1,
+                "promptJp": clean,
+                "underlineJp": bracketed,
+                "choices": choices,
+                "answer": answer_id,
+            })
 
     if len(questions) < spec["count"]:
         raise GenerationFailed(f"{spec['id']}: only found {len(questions)}/{spec['count']} valid paraphrase items")
@@ -366,60 +469,63 @@ def _build_vocab_usage_mondai(spec: dict, pool: list[dict], used_words: set, use
     questions = []
     candidates = list(pool)
     rng.shuffle(candidates)
-    allowed_kanji = allowed_kanji_for_level(level)
+    allowed_kanji = kanji_instruction(level)
 
-    for word in candidates:
-        if len(questions) >= spec["count"]:
-            break
-        key = (word["kanji"], word["kana"])
-        display = _display(word)
-        if key in used_words or not display or display in used_prompts:
+    pos = 0
+    while len(questions) < spec["count"] and pos < len(candidates):
+        batch, pos = _pick_batch(candidates, pos, _USAGE_BATCH_SIZE, used_words, used_prompts)
+        if not batch:
             continue
 
-        prompt = _USAGE_PROMPT.format(
-            level=level, display=display, kana=_first_reading(word),
-            meaning=word.get("meaning", ""), allowed_kanji=allowed_kanji,
+        prompt = _USAGE_PROMPT_BATCH.format(
+            n=len(batch), level=level, words_block=_words_block(batch), allowed_kanji=allowed_kanji,
         )
         try:
-            data = _call_llm_json(prompt)
+            items = _call_llm_json_batch(prompt)
         except (RuntimeError, GenerationFailed) as e:
-            logger.warning("usage generation failed for %s: %s", display, e)
+            logger.warning("usage batch of %d failed: %s", len(batch), e)
             continue
 
-        sentences = data.get("sentences")
-        correct_index = data.get("correctIndex")
-        if not isinstance(sentences, list) or len(sentences) != 4:
-            continue
-        if not isinstance(correct_index, int) or not (0 <= correct_index < 4):
-            continue
-
-        cleaned = []
-        valid = True
-        for s in sentences:
-            if not isinstance(s, str) or s.count("【") != 1 or s.count("】") != 1:
-                valid = False
+        for word, item in zip(batch, items):
+            if len(questions) >= spec["count"]:
                 break
-            clean, _bracketed = _extract_bracket(s)
-            if clean is None or not sentence_kanji_ok(clean, level):
-                valid = False
-                break
-            cleaned.append(clean)
-        if not valid or len(set(cleaned)) != 4:
-            continue
+            display = _display(word)
+            if not isinstance(item, dict):
+                continue
+            sentences = item.get("sentences")
+            correct_index = item.get("correctIndex")
+            if not isinstance(sentences, list) or len(sentences) != 4:
+                continue
+            if not isinstance(correct_index, int) or not (0 <= correct_index < 4):
+                continue
 
-        ids = ["c1", "c2", "c3", "c4"]
-        choices = [{"id": ids[i], "textJp": t} for i, t in enumerate(cleaned)]
-        answer_id = ids[correct_index]
+            cleaned = []
+            valid = True
+            for s in sentences:
+                if not isinstance(s, str) or s.count("【") != 1 or s.count("】") != 1:
+                    valid = False
+                    break
+                clean, _bracketed = _extract_bracket(s)
+                if clean is None or not sentence_kanji_ok(clean, level):
+                    valid = False
+                    break
+                cleaned.append(clean)
+            if not valid or len(set(cleaned)) != 4:
+                continue
 
-        used_words.add(key)
-        used_prompts.add(display)
-        questions.append({
-            "id": f"{spec['id']}_q{len(questions) + 1}",
-            "number": len(questions) + 1,
-            "promptJp": display,
-            "choices": choices,
-            "answer": answer_id,
-        })
+            ids = ["c1", "c2", "c3", "c4"]
+            choices = [{"id": ids[i], "textJp": t} for i, t in enumerate(cleaned)]
+            answer_id = ids[correct_index]
+
+            used_words.add((word["kanji"], word["kana"]))
+            used_prompts.add(display)
+            questions.append({
+                "id": f"{spec['id']}_q{len(questions) + 1}",
+                "number": len(questions) + 1,
+                "promptJp": display,
+                "choices": choices,
+                "answer": answer_id,
+            })
 
     if len(questions) < spec["count"]:
         raise GenerationFailed(f"{spec['id']}: only found {len(questions)}/{spec['count']} valid usage items")
@@ -534,10 +640,14 @@ def generate_vocabulary_paper(level: str, seed: int) -> dict:
             continue
 
         all_questions = [q for m in paper["sections"][0]["mondai"] for q in m["questions"]]
-        errors = validate_questions(all_questions)
-        if not errors:
+        content_errors = validate_content(all_questions)
+        # If the content is fine and the ONLY remaining problem is an
+        # answer-position skew, fix that in place (a pure reshuffle —
+        # no LLM calls) instead of paying for a full regeneration of
+        # every kanji/vocab/paraphrase/usage item just to fix a shuffle.
+        if not content_errors and repair_answer_balance(all_questions, random.Random(seed + attempt)):
             return paper
-        last_errors = errors
+        last_errors = content_errors or ["answer position skewed across the paper (could not repair by reshuffling)"]
 
     raise GenerationFailed(
         f"Could not generate a valid {level} vocabulary paper after {_MAX_GENERATION_ATTEMPTS} attempts: {last_errors}"

@@ -20,13 +20,14 @@
 # exam_vocab_gen.py already skips 語形成 ("no generator yet").
 import json
 import logging
+import random
 import re
 
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_validation import validate_questions
-from study.exam_gen_utils import GenerationFailed
+from study.exam_validation import validate_content, repair_answer_balance
+from study.exam_gen_utils import GenerationFailed, kanji_instruction
 from study.exam_tts import synthesize_dialogue, TTSFailed
-from study.llm_shared import chat, allowed_kanji_for_level, sentence_kanji_ok, OPENROUTER_API_KEY
+from study.llm_shared import chat, sentence_kanji_ok, OPENROUTER_API_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -43,28 +44,59 @@ def _call_llm_json(prompt: str) -> dict:
         raise GenerationFailed(f"LLM returned unparseable JSON: {content!r}")
 
 
-# ── 課題理解 / ポイント理解: listening-mcq ────────────────────────
-_LISTENING_MCQ_PROMPT = """You are writing one JLPT {level} listening \
-comprehension question ({name_jp} style). A learner will HEAR this as \
-audio, not read it -- the dialogue and question are spoken aloud; only \
-the 4 answer choices are shown printed on the page.
+def _call_llm_json_batch(prompt: str) -> list:
+    """Same contract as _call_llm_json, but for a prompt asking for N
+    dialogues back in one array. Batching divides the fixed cost every
+    single-item call used to pay unconditionally (the kanji-gate list/
+    instructions, resent from scratch on every call) by the batch size.
+    TTS synthesis still happens per question afterward -- that part
+    isn't an LLM token cost and doesn't batch the same way.
 
-Write a short, natural Japanese dialogue between two people (labeled \
-"A" and "B") about a task, plan, or arrangement -- for example deciding \
-what to buy, arranging when/where to meet, or working out what to do \
-next -- such that after hearing it, a listener could answer a concrete \
-question about what needs to be done, by whom, or when. Any vocabulary \
-you use should be appropriate for a JLPT {level} learner; kanji you use \
-MUST come from this list:
+    reasoning=False: same empirical finding as the other exam_*_gen.py
+    batch helpers (see study/llm_shared.py's chat() docstring) -- with
+    reasoning on, a multi-item array prompt burns its completion budget
+    on the reasoning trace and returns nothing usable; off, the same
+    prompt reliably returns real content for a fraction of the tokens."""
+    content = chat([
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": "Generate the questions."},
+    ], reasoning=False)
+    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        raise GenerationFailed(f"LLM returned unparseable JSON array: {content!r}")
+    if not isinstance(data, list):
+        raise GenerationFailed(f"expected a JSON array of items, got {type(data).__name__}")
+    return data
+
+
+# ── 課題理解 / ポイント理解: listening-mcq ────────────────────────
+_LISTENING_MCQ_BATCH_SIZE = 3
+
+_LISTENING_MCQ_PROMPT_BATCH = """You are writing {n} separate JLPT {level} \
+listening comprehension questions ({name_jp} style), each independent of \
+the others. A learner will HEAR each as audio, not read it -- the \
+dialogue and question are spoken aloud; only the 4 answer choices are \
+shown printed on the page.
+
+For EACH of the {n} questions, write a short, natural Japanese dialogue \
+between two people (labeled "A" and "B") about a task, plan, or \
+arrangement -- for example deciding what to buy, arranging when/where to \
+meet, or working out what to do next -- such that after hearing it, a \
+listener could answer a concrete question about what needs to be done, \
+by whom, or when. Vary the topic across the {n} questions so they don't \
+resemble each other. Any vocabulary you use should be appropriate for a \
+JLPT {level} learner; kanji you use MUST come from this list:
 {allowed_kanji}
 (use hiragana instead for anything else).
 
-Then write ONE spoken comprehension question about the dialogue, and \
+Then write ONE spoken comprehension question about that dialogue, and \
 exactly 4 short printed answer choices: one correct, three plausible- \
 but-wrong.
 
-Respond with ONLY JSON (no markdown fences, no commentary), matching \
-exactly this schema:
+Respond with ONLY JSON (no markdown fences, no commentary): a JSON array \
+of exactly {n} objects, each matching:
 {{"contextJp": "one short scene-setting line the narrator reads first, \
 e.g. '女の人と男の人が話しています。'",
   "turns": [{{"speaker": "A", "textJp": "..."}}, {{"speaker": "B", "textJp": "..."}}, ...],
@@ -73,15 +105,19 @@ e.g. '女の人と男の人が話しています。'",
 """
 
 
-def _build_one_listening_mcq_question(level: str, name_jp: str, q_id: str, number: int) -> dict:
-    prompt = _LISTENING_MCQ_PROMPT.format(level=level, name_jp=name_jp, allowed_kanji=allowed_kanji_for_level(level))
-    data = _call_llm_json(prompt)
+def _validate_listening_mcq_item(item, q_id: str) -> tuple[str, list, str, list, int]:
+    """Same validation _build_one_listening_mcq_question used to do
+    inline (up through TTS), split out so it can be applied to each
+    element of a batch response without re-issuing the LLM call.
+    Returns (context, turns, question_jp, choices_text, correct_index)."""
+    if not isinstance(item, dict):
+        raise GenerationFailed(f"{q_id}: item is not an object")
 
-    context = data.get("contextJp", "")
-    turns_raw = data.get("turns")
-    question_jp = data.get("questionJp")
-    choices_text = data.get("choices")
-    correct_index = data.get("correctIndex")
+    context = item.get("contextJp", "")
+    turns_raw = item.get("turns")
+    question_jp = item.get("questionJp")
+    choices_text = item.get("choices")
+    correct_index = item.get("correctIndex")
 
     if not isinstance(context, str):
         raise GenerationFailed(f"{q_id}: contextJp missing")
@@ -101,6 +137,12 @@ def _build_one_listening_mcq_question(level: str, name_jp: str, q_id: str, numbe
         raise GenerationFailed(f"{q_id}: invalid or duplicate choices")
     if not isinstance(correct_index, int) or not (0 <= correct_index < 4):
         raise GenerationFailed(f"{q_id}: invalid correctIndex")
+
+    return context, turns, question_jp, choices_text, correct_index
+
+
+def _build_one_listening_mcq_question(item, level: str, q_id: str, number: int) -> dict:
+    context, turns, question_jp, choices_text, correct_index = _validate_listening_mcq_item(item, q_id)
 
     full_text = context + "".join(t["textJp"] for t in turns) + question_jp
     if not sentence_kanji_ok(full_text, level):
@@ -140,8 +182,8 @@ def _build_one_listening_mcq_question(level: str, name_jp: str, q_id: str, numbe
 
 # A finite word/pattern catalog backs kanji/vocab/grammar items (a
 # specific target word or grammar point); listening-mcq dialogues have
-# no such catalog to draw candidates from -- each attempt is an
-# independent free generation, so the retry loop is a flat attempt
+# no such catalog to draw candidates from -- each batch is an
+# independent free generation, so the retry loop is a flat batch
 # budget rather than "candidates remaining in a pool".
 _ATTEMPTS_PER_ITEM = 3
 
@@ -151,14 +193,30 @@ def _build_listening_mcq_mondai(spec: dict, level: str) -> dict:
     attempts = 0
     max_attempts = spec["count"] * _ATTEMPTS_PER_ITEM
     while len(questions) < spec["count"] and attempts < max_attempts:
-        attempts += 1
-        q_id = f"{spec['id']}_q{len(questions) + 1}"
+        batch_n = min(_LISTENING_MCQ_BATCH_SIZE, max_attempts - attempts)
+        attempts += batch_n
+        prompt = _LISTENING_MCQ_PROMPT_BATCH.format(
+            n=batch_n, level=level, name_jp=spec["name_jp"], allowed_kanji=kanji_instruction(level),
+        )
         try:
-            q = _build_one_listening_mcq_question(level, spec["name_jp"], q_id, len(questions) + 1)
+            items = _call_llm_json_batch(prompt)
         except (RuntimeError, GenerationFailed) as e:
-            logger.warning("Listening-mcq item for %s failed: %s", spec["id"], e)
+            logger.warning("Listening-mcq batch of %d for %s failed: %s", batch_n, spec["id"], e)
             continue
-        questions.append(q)
+
+        # TTS is still per-question here (unaffected by batching the LLM
+        # call above) -- synthesize_dialogue is a free, content-keyed,
+        # idempotent call per question, not part of the token budget.
+        for item in items:
+            if len(questions) >= spec["count"]:
+                break
+            q_id = f"{spec['id']}_q{len(questions) + 1}"
+            try:
+                q = _build_one_listening_mcq_question(item, level, q_id, len(questions) + 1)
+            except (RuntimeError, GenerationFailed) as e:
+                logger.warning("Listening-mcq item for %s failed: %s", spec["id"], e)
+                continue
+            questions.append(q)
 
     if len(questions) < spec["count"]:
         raise GenerationFailed(f"{spec['id']}: only found {len(questions)}/{spec['count']} valid listening-mcq items")
@@ -245,10 +303,15 @@ def generate_listening_paper(level: str, seed: int) -> dict:
         # duplicate of the first if left on. Same reasoning as
         # exam_reading_gen.py/exam_grammar_gen.py's own check_duplicates=False.
         flat_questions = [q for m in paper["sections"][0]["mondai"] for q in m["questions"]]
-        errors = validate_questions(flat_questions, check_duplicates=False)
-        if not errors:
+        content_errors = validate_content(flat_questions, check_duplicates=False)
+        # Same reasoning as exam_vocab_gen.py's generate_vocabulary_paper:
+        # an answer-position skew is a shuffle problem, not a content
+        # problem — fix it by reshuffling in place rather than paying
+        # for a full LLM + TTS re-generation (each item is one LLM call
+        # AND one synthesize_dialogue call) just to fix a shuffle.
+        if not content_errors and repair_answer_balance(flat_questions, random.Random(seed + attempt)):
             return paper
-        last_errors = errors
+        last_errors = content_errors or ["answer position skewed across the paper (could not repair by reshuffling)"]
 
     raise GenerationFailed(
         f"Could not generate a valid {level} listening paper after {_MAX_GENERATION_ATTEMPTS} attempts: {last_errors}"

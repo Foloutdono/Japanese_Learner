@@ -42,9 +42,9 @@ import re
 
 from content.grammar_points_data import get_grammar_points
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_validation import validate_questions, validate_passage_length, validate_kanji_gate
-from study.exam_gen_utils import GenerationFailed
-from study.llm_shared import chat, allowed_kanji_for_level, sentence_kanji_ok, OPENROUTER_API_KEY
+from study.exam_validation import validate_content, repair_answer_balance, validate_passage_length, validate_kanji_gate
+from study.exam_gen_utils import GenerationFailed, kanji_instruction
+from study.llm_shared import chat, sentence_kanji_ok, OPENROUTER_API_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +61,42 @@ def _call_llm_json(prompt: str) -> dict:
         raise GenerationFailed(f"LLM returned unparseable JSON: {content!r}")
 
 
+def _call_llm_json_batch(prompt: str) -> list:
+    """Same contract as _call_llm_json, but for a prompt that asks for N
+    items back in one array -- used by the *_BATCH_SIZE builders below.
+    Batching amortizes the fixed cost every single-item call pays
+    unconditionally (the full kanji-gate list/instruction block, which
+    at N5-N3 alone is ~100-650 characters -- see exam_gen_utils.py) over
+    several items instead of paying it once per item.
+
+    reasoning=False: live-diagnosed 2026-08 on exactly this shape (~8
+    grammar points asked for in one call, per study/llm_shared.py's own
+    chat() docstring) -- with reasoning on, the model spends its whole
+    completion budget on the reasoning trace and returns nothing usable
+    for a multi-item array; off, the same prompt reliably returns real
+    content at a fraction of the tokens. Single-item prompts elsewhere
+    in this module are unaffected and keep the default (reasoning on)."""
+    content = chat([
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": "Generate the questions."},
+    ], reasoning=False)
+    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        raise GenerationFailed(f"LLM returned unparseable JSON array: {content!r}")
+    if not isinstance(data, list):
+        raise GenerationFailed(f"expected a JSON array of items, got {type(data).__name__}")
+    return data
+
+
+def _points_block(points: list[dict]) -> str:
+    return "\n".join(
+        f"{i + 1}. {p['pattern']} ({p['structure']}) -- meaning: {p['meaning']}"
+        for i, p in enumerate(points)
+    )
+
+
 def _pattern_core(pattern: str) -> str:
     # Reduces a catalog pattern to one checkable substring: the text
     # after the last 〜 (some entries carry a leading Japanese label
@@ -75,41 +111,51 @@ def _pattern_core(pattern: str) -> str:
 
 
 # ── 文の文法1: grammar-fill ──────────────────────────────────
-_FILL_PROMPT = """You are writing one JLPT {level} grammar question \
-(文の文法1 style: fill in the blank with the correct grammatical form).
+# Batched N points per call (was 1 call per point): every call pays the
+# same fixed overhead regardless of batch size (the full kanji-gate
+# list/instruction plus the style instructions), so asking for
+# _FILL_BATCH_SIZE items at once divides that fixed cost by the batch
+# size instead of paying it once per grammar point.
+_FILL_BATCH_SIZE = 8
 
-Grammar point to test: {pattern} ({structure}) -- meaning: {meaning}
+_FILL_PROMPT_BATCH = """You are writing {n} separate JLPT {level} grammar \
+questions (文の文法1 style: fill in the blank with the correct \
+grammatical form) -- one question per grammar point below, each \
+independent of the others.
 
-Write ONE natural Japanese sentence that uses this grammar point, with the \
-grammar point itself replaced by a blank marker "＿＿＿＿". Any kanji you \
-use elsewhere in the sentence MUST come from this list:
+Grammar points to test, in order:
+{points_block}
+
+For EACH point, write ONE natural Japanese sentence that uses that \
+point's grammar, with the grammar point itself replaced by a blank \
+marker "＿＿＿＿". Any kanji you use elsewhere in a sentence MUST come \
+from this list:
 {allowed_kanji}
 (use hiragana instead for anything else).
 
-Then give exactly 4 answer choices for the blank: one is this exact \
-grammar point's own form as it fits the blank; the other three are \
-DIFFERENT grammar forms or particles a JLPT {level} learner might \
-plausibly confuse it with -- near-miss by grammatical category, not \
-random words.
+Then give exactly 4 answer choices for that blank: one is the point's own \
+form as it fits the blank; the other three are DIFFERENT grammar forms or \
+particles a JLPT {level} learner might plausibly confuse it with -- \
+near-miss by grammatical category, not random words.
 
-Respond with ONLY JSON (no markdown fences, no commentary), matching \
-exactly this schema:
+Respond with ONLY JSON (no markdown fences, no commentary): a JSON array \
+of exactly {n} objects, ONE PER POINT IN THE SAME ORDER, each matching:
 {{"sentenceJp": "...＿＿＿＿...", "choices": ["...", "...", "...", "..."], "correctIndex": 0}}
 """
 
 _FILL_INSTRUCTIONS_JP = "＿＿＿＿に　なにを　いれますか。1・2・3・4から　いちばん　いい　ものを　一つ　えらんで　ください。"
 
 
-def _build_one_fill_question(point: dict, level: str, q_id: str, number: int) -> dict:
-    prompt = _FILL_PROMPT.format(
-        level=level, pattern=point["pattern"], structure=point["structure"], meaning=point["meaning"],
-        allowed_kanji=allowed_kanji_for_level(level),
-    )
-    data = _call_llm_json(prompt)
+def _validate_fill_item(item, level: str, q_id: str, number: int) -> dict:
+    """Same validation _build_one_fill_question used to do inline,
+    split out so it can be applied to each element of a batch response
+    without re-issuing the LLM call."""
+    if not isinstance(item, dict):
+        raise GenerationFailed(f"{q_id}: item is not an object")
 
-    sentence = data.get("sentenceJp")
-    choices_text = data.get("choices")
-    correct_index = data.get("correctIndex")
+    sentence = item.get("sentenceJp")
+    choices_text = item.get("choices")
+    correct_index = item.get("correctIndex")
 
     if not isinstance(sentence, str) or sentence.count("＿＿＿＿") != 1:
         raise GenerationFailed(f"{q_id}: sentence missing exactly one blank marker")
@@ -138,17 +184,35 @@ def _build_grammar_fill_mondai(spec: dict, level: str, points: list[dict], used_
     rng.shuffle(candidates)
 
     questions = []
-    for point in candidates:
-        if len(questions) >= spec["count"]:
-            break
-        q_id = f"{spec['id']}_q{len(questions) + 1}"
+    pos = 0
+    while len(questions) < spec["count"] and pos < len(candidates):
+        batch = candidates[pos:pos + _FILL_BATCH_SIZE]
+        pos += len(batch)
+        prompt = _FILL_PROMPT_BATCH.format(
+            n=len(batch), level=level, points_block=_points_block(batch),
+            allowed_kanji=kanji_instruction(level),
+        )
         try:
-            q = _build_one_fill_question(point, level, q_id, len(questions) + 1)
+            items = _call_llm_json_batch(prompt)
         except (RuntimeError, GenerationFailed) as e:
-            logger.warning("Grammar-fill item for %s failed: %s", point["pattern"], e)
+            logger.warning("Grammar-fill batch of %d failed: %s", len(batch), e)
             continue
-        used_patterns.add(point["pattern"])
-        questions.append(q)
+
+        # zip stops at the shorter list if the model returned fewer
+        # items than asked for -- those trailing points are simply not
+        # marked used and stay candidates for a later batch, same as a
+        # per-item failure used to just move on to the next point.
+        for point, item in zip(batch, items):
+            if len(questions) >= spec["count"]:
+                break
+            q_id = f"{spec['id']}_q{len(questions) + 1}"
+            try:
+                q = _validate_fill_item(item, level, q_id, len(questions) + 1)
+            except GenerationFailed as e:
+                logger.warning("Grammar-fill item for %s failed: %s", point["pattern"], e)
+                continue
+            used_patterns.add(point["pattern"])
+            questions.append(q)
 
     if len(questions) < spec["count"]:
         raise GenerationFailed(f"{spec['id']}: only found {len(questions)}/{spec['count']} valid grammar-fill items")
@@ -162,44 +226,51 @@ def _build_grammar_fill_mondai(spec: dict, level: str, points: list[dict], used_
 
 
 # ── 文の文法2: star / sentence-order ─────────────────────────
-_STAR_PROMPT = """You are writing one JLPT {level} grammar question \
-(文の文法2 style: put the scrambled pieces of a sentence in the correct \
-order).
+# Same batching rationale as grammar-fill above: N grammar points asked
+# for in one call instead of N separate calls, each of which used to
+# resend the full kanji-gate list/instructions on its own.
+_STAR_BATCH_SIZE = 8
 
-Grammar point to use: {pattern} ({structure}) -- meaning: {meaning}
+_STAR_PROMPT_BATCH = """You are writing {n} separate JLPT {level} grammar \
+questions (文の文法2 style: put the scrambled pieces of a sentence in the \
+correct order) -- one question per grammar point below, each independent \
+of the others.
 
-Write ONE natural, complete Japanese sentence that uses this grammar \
-point, ending in a natural sentence-final form (。or か). Any kanji you \
-use MUST come from this list:
+Grammar points to use, in order:
+{points_block}
+
+For EACH point, write ONE natural, complete Japanese sentence that uses \
+that point's grammar, ending in a natural sentence-final form (。or か). \
+Any kanji you use MUST come from this list:
 {allowed_kanji}
 (use hiragana instead for anything else).
 
-Then split the ENTIRE sentence into exactly 4 consecutive pieces at \
+Then split that ENTIRE sentence into exactly 4 consecutive pieces at \
 natural phrase boundaries (each piece a short phrase of a few words, not \
 a single character and not a whole clause), by inserting a full-width \
 slash ／ between each piece -- the 4 pieces joined back together must \
 reproduce the sentence exactly, with nothing before the first piece or \
 after the last one. Separately, give any short scene-setting text that \
-comes BEFORE this sentence, if any (contextJp; empty string is fine). \
-Exactly one of the 4 pieces must contain the grammar point given above -- \
-tell me which one (0-indexed).
+comes BEFORE that sentence, if any (contextJp; empty string is fine). \
+Exactly one of the 4 pieces must contain the grammar point it was \
+written for -- tell me which one (0-indexed).
 
-Respond with ONLY JSON (no markdown fences, no commentary), matching \
-exactly this schema:
+Respond with ONLY JSON (no markdown fences, no commentary): a JSON array \
+of exactly {n} objects, ONE PER POINT IN THE SAME ORDER, each matching:
 {{"contextJp": "...", "sentenceWithSlashes": "piece1／piece2／piece3／piece4", "grammarPieceIndex": 0}}
 """
 
 
-def _build_one_star_question(point: dict, level: str, q_id: str, number: int, rng: random.Random) -> dict:
-    prompt = _STAR_PROMPT.format(
-        level=level, pattern=point["pattern"], structure=point["structure"], meaning=point["meaning"],
-        allowed_kanji=allowed_kanji_for_level(level),
-    )
-    data = _call_llm_json(prompt)
+def _validate_star_item(point: dict, item, level: str, q_id: str, number: int, rng: random.Random) -> dict:
+    """Same validation _build_one_star_question used to do inline,
+    split out so it can be applied to each element of a batch response
+    without re-issuing the LLM call."""
+    if not isinstance(item, dict):
+        raise GenerationFailed(f"{q_id}: item is not an object")
 
-    context = data.get("contextJp", "")
-    raw = data.get("sentenceWithSlashes")
-    claimed_index = data.get("grammarPieceIndex")
+    context = item.get("contextJp", "")
+    raw = item.get("sentenceWithSlashes")
+    claimed_index = item.get("grammarPieceIndex")
 
     if not isinstance(context, str):
         raise GenerationFailed(f"{q_id}: contextJp missing")
@@ -253,17 +324,31 @@ def _build_sentence_order_mondai(spec: dict, level: str, points: list[dict], use
     rng.shuffle(candidates)
 
     questions = []
-    for point in candidates:
-        if len(questions) >= spec["count"]:
-            break
-        q_id = f"{spec['id']}_q{len(questions) + 1}"
+    pos = 0
+    while len(questions) < spec["count"] and pos < len(candidates):
+        batch = candidates[pos:pos + _STAR_BATCH_SIZE]
+        pos += len(batch)
+        prompt = _STAR_PROMPT_BATCH.format(
+            n=len(batch), level=level, points_block=_points_block(batch),
+            allowed_kanji=kanji_instruction(level),
+        )
         try:
-            q = _build_one_star_question(point, level, q_id, len(questions) + 1, rng)
+            items = _call_llm_json_batch(prompt)
         except (RuntimeError, GenerationFailed) as e:
-            logger.warning("Sentence-order item for %s failed: %s", point["pattern"], e)
+            logger.warning("Sentence-order batch of %d failed: %s", len(batch), e)
             continue
-        used_patterns.add(point["pattern"])
-        questions.append(q)
+
+        for point, item in zip(batch, items):
+            if len(questions) >= spec["count"]:
+                break
+            q_id = f"{spec['id']}_q{len(questions) + 1}"
+            try:
+                q = _validate_star_item(point, item, level, q_id, len(questions) + 1, rng)
+            except GenerationFailed as e:
+                logger.warning("Sentence-order item for %s failed: %s", point["pattern"], e)
+                continue
+            used_patterns.add(point["pattern"])
+            questions.append(q)
 
     if len(questions) < spec["count"]:
         raise GenerationFailed(f"{spec['id']}: only found {len(questions)}/{spec['count']} valid sentence-order items")
@@ -304,7 +389,7 @@ exactly this schema:
 def _build_cloze_mondai(spec: dict, level: str) -> dict:
     blank_count = spec["count"]
     chars = spec.get("passage_chars", 150)
-    prompt = _CLOZE_PROMPT.format(level=level, chars=chars, blank_count=blank_count, allowed_kanji=allowed_kanji_for_level(level))
+    prompt = _CLOZE_PROMPT.format(level=level, chars=chars, blank_count=blank_count, allowed_kanji=kanji_instruction(level))
     data = _call_llm_json(prompt)
 
     title = data.get("titleJp")
@@ -458,10 +543,15 @@ def generate_grammar_paper(level: str, seed: int) -> dict:
             continue
 
         flat = _flatten_grammar_questions(paper["sections"][0]["mondai"])
-        errors = validate_questions(flat, check_duplicates=False)
-        if not errors:
+        content_errors = validate_content(flat, check_duplicates=False)
+        # Same reasoning as exam_vocab_gen.py's generate_vocabulary_paper:
+        # an answer-position skew is a shuffle problem, not a content
+        # problem — fix it by reshuffling in place rather than paying
+        # for a full LLM regeneration of every grammar-fill/star/cloze
+        # item just to fix a shuffle.
+        if not content_errors and repair_answer_balance(flat, random.Random()):
             return paper
-        last_errors = errors
+        last_errors = content_errors or ["answer position skewed across the paper (could not repair by reshuffling)"]
 
     raise GenerationFailed(
         f"Could not generate a valid {level} grammar paper after {_MAX_GENERATION_ATTEMPTS} attempts: {last_errors}"

@@ -25,12 +25,13 @@
 # when no key is configured.
 import json
 import logging
+import random
 import re
 
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_validation import validate_questions, validate_passage_length, validate_kanji_gate
-from study.exam_gen_utils import GenerationFailed
-from study.llm_shared import chat, allowed_kanji_for_level, OPENROUTER_API_KEY
+from study.exam_validation import validate_content, repair_answer_balance, validate_passage_length, validate_kanji_gate
+from study.exam_gen_utils import GenerationFailed, kanji_instruction
+from study.llm_shared import chat, OPENROUTER_API_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +104,7 @@ def _call_llm_passage(level: str, mondai_name: str, chars: int, question_count: 
     sentence_estimate = f"{sentence_count} short sentence" + ("s" if sentence_count != 1 else "")
     prompt = _PASSAGE_PROMPT.format(
         level=level, mondai_name=mondai_name, chars=chars, question_count=question_count,
-        allowed_kanji=allowed_kanji_for_level(level), style_guidance=style_guidance,
+        allowed_kanji=kanji_instruction(level), style_guidance=style_guidance,
         sentence_estimate=sentence_estimate,
     )
     content = chat([
@@ -290,10 +291,15 @@ def generate_reading_paper(level: str, seed: int) -> dict:
         # like a vocab/kanji target word -- the real exam itself reuses
         # boilerplate question phrasing across different passages.
         flat_questions = [q for m in paper["sections"][0]["mondai"] for p in m["passages"] for q in p["questions"]]
-        errors = validate_questions(flat_questions, check_duplicates=False)
-        if not errors:
+        content_errors = validate_content(flat_questions, check_duplicates=False)
+        # Same reasoning as exam_vocab_gen.py's generate_vocabulary_paper:
+        # an answer-position skew is a shuffle problem, not a content
+        # problem — fix it by reshuffling in place rather than paying
+        # for a full LLM re-generation (one call PER PASSAGE) just to
+        # fix a shuffle.
+        if not content_errors and repair_answer_balance(flat_questions, random.Random(seed + attempt)):
             return paper
-        last_errors = errors
+        last_errors = content_errors or ["answer position skewed across the paper (could not repair by reshuffling)"]
 
     raise GenerationFailed(
         f"Could not generate a valid {level} reading paper after {_MAX_GENERATION_ATTEMPTS} attempts: {last_errors}"
