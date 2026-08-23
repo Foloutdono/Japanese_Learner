@@ -38,8 +38,8 @@ import re
 from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import get_vocab_extras, word_category
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_validation import validate_content, repair_answer_balance
-from study.exam_gen_utils import GenerationFailed, make_choices, kanji_instruction
+from study.exam_gen_utils import GenerationFailed, make_choices, kanji_instruction, call_llm_json_batch
+from study.exam_pipeline import generate_paper
 from study.llm_shared import chat, sentence_kanji_ok, OPENROUTER_API_KEY
 import study.exam_kanji_gen as exam_kanji_gen
 
@@ -193,43 +193,9 @@ def _extract_bracket(sentence: str) -> tuple[str, str] | tuple[None, None]:
     return clean, word
 
 
-def _call_llm_json(prompt: str) -> dict:
-    content = chat([
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": "Generate the question."},
-    ])
-    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        raise GenerationFailed(f"LLM returned unparseable JSON: {content!r}")
-
-
-def _call_llm_json_batch(prompt: str) -> list:
-    """Same contract as _call_llm_json, but for a prompt that asks for N
-    items back in one array. Batching divides the fixed cost every
-    single-item call used to pay unconditionally (the kanji-gate list/
-    instruction block, resent from scratch on every call) by the batch
-    size instead of paying it once per word.
-
-    reasoning=False: same empirical finding as exam_grammar_gen.py's
-    batch helper (see study/llm_shared.py's chat() docstring) -- with
-    reasoning on, a multi-item array prompt burns its completion budget
-    on the reasoning trace and returns nothing usable; off, the same
-    prompt reliably returns real content for a fraction of the tokens.
-    Single-item prompts elsewhere in this module keep reasoning on."""
-    content = chat([
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": "Generate the questions."},
-    ], reasoning=False)
-    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-    try:
-        data = json.loads(cleaned)
-    except json.JSONDecodeError:
-        raise GenerationFailed(f"LLM returned unparseable JSON array: {content!r}")
-    if not isinstance(data, list):
-        raise GenerationFailed(f"expected a JSON array of items, got {type(data).__name__}")
-    return data
+# call_llm_json/call_llm_json_batch (study/exam_gen_utils.py) replace
+# this module's former private copies -- the single-item variant was
+# defined here but never actually called; only the batch form was.
 
 
 def _words_block(words: list[dict]) -> str:
@@ -392,7 +358,7 @@ def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set
             n=len(batch), level=level, words_block=_words_block(batch), allowed_kanji=allowed_kanji,
         )
         try:
-            items = _call_llm_json_batch(prompt)
+            items = call_llm_json_batch(prompt)
         except (RuntimeError, GenerationFailed) as e:
             logger.warning("paraphrase batch of %d failed: %s", len(batch), e)
             continue
@@ -481,7 +447,7 @@ def _build_vocab_usage_mondai(spec: dict, pool: list[dict], used_words: set, use
             n=len(batch), level=level, words_block=_words_block(batch), allowed_kanji=allowed_kanji,
         )
         try:
-            items = _call_llm_json_batch(prompt)
+            items = call_llm_json_batch(prompt)
         except (RuntimeError, GenerationFailed) as e:
             logger.warning("usage batch of %d failed: %s", len(batch), e)
             continue
@@ -630,25 +596,16 @@ def _generate_vocabulary_paper_once(level: str, seed: int) -> dict:
     }
 
 
+def _flatten_vocab_questions(mondai_list: list[dict]) -> list[dict]:
+    return [q for m in mondai_list for q in m["questions"]]
+
+
 def generate_vocabulary_paper(level: str, seed: int) -> dict:
-    last_errors: list[str] = []
-    for attempt in range(_MAX_GENERATION_ATTEMPTS):
-        try:
-            paper = _generate_vocabulary_paper_once(level, seed + attempt)
-        except GenerationFailed as e:
-            last_errors = [str(e)]
-            continue
-
-        all_questions = [q for m in paper["sections"][0]["mondai"] for q in m["questions"]]
-        content_errors = validate_content(all_questions)
-        # If the content is fine and the ONLY remaining problem is an
-        # answer-position skew, fix that in place (a pure reshuffle —
-        # no LLM calls) instead of paying for a full regeneration of
-        # every kanji/vocab/paraphrase/usage item just to fix a shuffle.
-        if not content_errors and repair_answer_balance(all_questions, random.Random(seed + attempt)):
-            return paper
-        last_errors = content_errors or ["answer position skewed across the paper (could not repair by reshuffling)"]
-
-    raise GenerationFailed(
-        f"Could not generate a valid {level} vocabulary paper after {_MAX_GENERATION_ATTEMPTS} attempts: {last_errors}"
+    return generate_paper(
+        generate_once=_generate_vocabulary_paper_once,
+        flatten=_flatten_vocab_questions,
+        level=level, seed=seed,
+        max_attempts=_MAX_GENERATION_ATTEMPTS,
+        check_duplicates=True,
+        paper_label="vocabulary",
     )

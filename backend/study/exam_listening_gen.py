@@ -18,57 +18,15 @@
 # that. All four are deliberately NOT built here; _generate_listening_
 # paper_once skips them with a loud log message, the same way
 # exam_vocab_gen.py already skips 語形成 ("no generator yet").
-import json
 import logging
-import random
-import re
 
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_validation import validate_content, repair_answer_balance
-from study.exam_gen_utils import GenerationFailed, kanji_instruction
+from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json_batch
+from study.exam_pipeline import generate_paper
 from study.exam_tts import synthesize_dialogue, TTSFailed
-from study.llm_shared import chat, sentence_kanji_ok, OPENROUTER_API_KEY
+from study.llm_shared import sentence_kanji_ok, OPENROUTER_API_KEY
 
 logger = logging.getLogger(__name__)
-
-
-def _call_llm_json(prompt: str) -> dict:
-    content = chat([
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": "Generate the question."},
-    ])
-    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        raise GenerationFailed(f"LLM returned unparseable JSON: {content!r}")
-
-
-def _call_llm_json_batch(prompt: str) -> list:
-    """Same contract as _call_llm_json, but for a prompt asking for N
-    dialogues back in one array. Batching divides the fixed cost every
-    single-item call used to pay unconditionally (the kanji-gate list/
-    instructions, resent from scratch on every call) by the batch size.
-    TTS synthesis still happens per question afterward -- that part
-    isn't an LLM token cost and doesn't batch the same way.
-
-    reasoning=False: same empirical finding as the other exam_*_gen.py
-    batch helpers (see study/llm_shared.py's chat() docstring) -- with
-    reasoning on, a multi-item array prompt burns its completion budget
-    on the reasoning trace and returns nothing usable; off, the same
-    prompt reliably returns real content for a fraction of the tokens."""
-    content = chat([
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": "Generate the questions."},
-    ], reasoning=False)
-    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-    try:
-        data = json.loads(cleaned)
-    except json.JSONDecodeError:
-        raise GenerationFailed(f"LLM returned unparseable JSON array: {content!r}")
-    if not isinstance(data, list):
-        raise GenerationFailed(f"expected a JSON array of items, got {type(data).__name__}")
-    return data
 
 
 # ── 課題理解 / ポイント理解: listening-mcq ────────────────────────
@@ -199,7 +157,7 @@ def _build_listening_mcq_mondai(spec: dict, level: str) -> dict:
             n=batch_n, level=level, name_jp=spec["name_jp"], allowed_kanji=kanji_instruction(level),
         )
         try:
-            items = _call_llm_json_batch(prompt)
+            items = call_llm_json_batch(prompt)
         except (RuntimeError, GenerationFailed) as e:
             logger.warning("Listening-mcq batch of %d for %s failed: %s", batch_n, spec["id"], e)
             continue
@@ -286,33 +244,23 @@ def _generate_listening_paper_once(level: str, seed: int) -> dict:
     }
 
 
+def _flatten_listening_questions(mondai_list: list[dict]) -> list[dict]:
+    return [q for m in mondai_list for q in m["questions"]]
+
+
 def generate_listening_paper(level: str, seed: int) -> dict:
-    last_errors: list[str] = []
-    for attempt in range(_MAX_GENERATION_ATTEMPTS):
-        try:
-            paper = _generate_listening_paper_once(level, seed + attempt)
-        except GenerationFailed as e:
-            last_errors = [str(e)]
-            continue
-
-        # check_duplicates=False: questionPromptJp here is the spoken
-        # comprehension question's own text, not a test-item identity
-        # the way a vocab/kanji target word is -- and this generator
-        # doesn't even populate the field validate_no_duplicate_targets
-        # actually reads (promptJp), so it would flag every item as a
-        # duplicate of the first if left on. Same reasoning as
-        # exam_reading_gen.py/exam_grammar_gen.py's own check_duplicates=False.
-        flat_questions = [q for m in paper["sections"][0]["mondai"] for q in m["questions"]]
-        content_errors = validate_content(flat_questions, check_duplicates=False)
-        # Same reasoning as exam_vocab_gen.py's generate_vocabulary_paper:
-        # an answer-position skew is a shuffle problem, not a content
-        # problem — fix it by reshuffling in place rather than paying
-        # for a full LLM + TTS re-generation (each item is one LLM call
-        # AND one synthesize_dialogue call) just to fix a shuffle.
-        if not content_errors and repair_answer_balance(flat_questions, random.Random(seed + attempt)):
-            return paper
-        last_errors = content_errors or ["answer position skewed across the paper (could not repair by reshuffling)"]
-
-    raise GenerationFailed(
-        f"Could not generate a valid {level} listening paper after {_MAX_GENERATION_ATTEMPTS} attempts: {last_errors}"
+    # check_duplicates=False: questionPromptJp here is the spoken
+    # comprehension question's own text, not a test-item identity the
+    # way a vocab/kanji target word is -- and this generator doesn't
+    # even populate the field validate_no_duplicate_targets actually
+    # reads (promptJp), so it would flag every item as a duplicate of
+    # the first if left on. Same reasoning as exam_reading_gen.py/
+    # exam_grammar_gen.py's own check_duplicates=False.
+    return generate_paper(
+        generate_once=_generate_listening_paper_once,
+        flatten=_flatten_listening_questions,
+        level=level, seed=seed,
+        max_attempts=_MAX_GENERATION_ATTEMPTS,
+        check_duplicates=False,
+        paper_label="listening",
     )

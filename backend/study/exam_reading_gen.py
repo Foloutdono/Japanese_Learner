@@ -23,15 +23,13 @@
 # here is LLM-generated — see study/llm_shared.py's OPENROUTER_API_KEY
 # check for how this degrades (skips, doesn't fail the whole paper)
 # when no key is configured.
-import json
 import logging
-import random
-import re
 
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_validation import validate_content, repair_answer_balance, validate_passage_length, validate_kanji_gate
-from study.exam_gen_utils import GenerationFailed, kanji_instruction
-from study.llm_shared import chat, OPENROUTER_API_KEY
+from study.exam_validation import validate_passage_length, validate_kanji_gate
+from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json
+from study.exam_pipeline import generate_paper
+from study.llm_shared import OPENROUTER_API_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -107,15 +105,7 @@ def _call_llm_passage(level: str, mondai_name: str, chars: int, question_count: 
         allowed_kanji=kanji_instruction(level), style_guidance=style_guidance,
         sentence_estimate=sentence_estimate,
     )
-    content = chat([
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": "Generate the passage and questions."},
-    ])
-    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        raise GenerationFailed(f"LLM returned unparseable JSON: {content!r}")
+    return call_llm_json(prompt, "Generate the passage and questions.")
 
 
 def _build_one_passage(level: str, mondai_name: str, chars: int, question_count: int,
@@ -220,7 +210,7 @@ def build_reading_passage_mondai(spec: dict, level: str) -> dict:
 # exam_vocab_gen.py's vocabulary paper for N1/N2 -- a real
 # simplification (the official exam presents them in one booklet for
 # those two levels) accepted to keep this generator self-contained.
-_MAX_GENERATION_ATTEMPTS = 3  # LLM calls are slow/costly -- fewer retries than the deterministic generators
+_MAX_GENERATION_ATTEMPTS = 3  # one LLM call per passage; a full retry re-authors every passage in the paper
 _MINUTES_PER_QUESTION = 2  # reading items run slower than vocab/kanji ones; a simple, honest per-item estimate
 
 
@@ -277,30 +267,20 @@ def _generate_reading_paper_once(level: str, seed: int) -> dict:
     }
 
 
+def _flatten_reading_questions(mondai_list: list[dict]) -> list[dict]:
+    return [q for m in mondai_list for p in m["passages"] for q in p["questions"]]
+
+
 def generate_reading_paper(level: str, seed: int) -> dict:
-    last_errors: list[str] = []
-    for attempt in range(_MAX_GENERATION_ATTEMPTS):
-        try:
-            paper = _generate_reading_paper_once(level, seed + attempt)
-        except GenerationFailed as e:
-            last_errors = [str(e)]
-            continue
-
-        # check_duplicates=False: promptJp here is a question's own text
-        # ("what does the author mean by X?"), not a test-item identity
-        # like a vocab/kanji target word -- the real exam itself reuses
-        # boilerplate question phrasing across different passages.
-        flat_questions = [q for m in paper["sections"][0]["mondai"] for p in m["passages"] for q in p["questions"]]
-        content_errors = validate_content(flat_questions, check_duplicates=False)
-        # Same reasoning as exam_vocab_gen.py's generate_vocabulary_paper:
-        # an answer-position skew is a shuffle problem, not a content
-        # problem — fix it by reshuffling in place rather than paying
-        # for a full LLM re-generation (one call PER PASSAGE) just to
-        # fix a shuffle.
-        if not content_errors and repair_answer_balance(flat_questions, random.Random(seed + attempt)):
-            return paper
-        last_errors = content_errors or ["answer position skewed across the paper (could not repair by reshuffling)"]
-
-    raise GenerationFailed(
-        f"Could not generate a valid {level} reading paper after {_MAX_GENERATION_ATTEMPTS} attempts: {last_errors}"
+    # check_duplicates=False: promptJp here is a question's own text
+    # ("what does the author mean by X?"), not a test-item identity
+    # like a vocab/kanji target word -- the real exam itself reuses
+    # boilerplate question phrasing across different passages.
+    return generate_paper(
+        generate_once=_generate_reading_paper_once,
+        flatten=_flatten_reading_questions,
+        level=level, seed=seed,
+        max_attempts=_MAX_GENERATION_ATTEMPTS,
+        check_duplicates=False,
+        paper_label="reading",
     )

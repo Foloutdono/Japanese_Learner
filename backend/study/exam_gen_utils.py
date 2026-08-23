@@ -2,9 +2,11 @@
 # Small pieces every exam_*_gen.py module needs, factored out once a
 # second generator (exam_vocab_gen.py) needed the same
 # GenerationFailed/make_choices exam_kanji_gen.py already had.
+import json
 import random
+import re
 
-from study.llm_shared import allowed_kanji_for_level
+from study.llm_shared import allowed_kanji_for_level, chat
 
 
 class GenerationFailed(Exception):
@@ -72,3 +74,55 @@ def kanji_instruction(level: str) -> str:
     if level in _FULL_LIST_LEVELS:
         return allowed_kanji_for_level(level)
     return _N1N2_KANJI_INSTRUCTION
+
+
+# ── Shared LLM-JSON call ─────────────────────────────────────────
+# One call → one JSON blob: strip the markdown fence a model sometimes
+# wraps its answer in, parse it, and turn a parse failure into
+# GenerationFailed rather than a raw JSONDecodeError, so every
+# exam_*_gen.py builder and exam_pipeline.py's retry loop only ever
+# have to catch the one exception. Was three byte-identical private
+# copies (exam_grammar_gen.py, exam_vocab_gen.py, exam_listening_gen.py)
+# plus a fourth near-copy inlined in exam_reading_gen.py's
+# _call_llm_passage, despite this module's own reason for existing
+# being exactly "factored out once a second generator needed the same
+# piece" (see the header above).
+def call_llm_json(prompt: str, user_message: str = "Generate the question.") -> dict:
+    content = chat([
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": user_message},
+    ])
+    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        raise GenerationFailed(f"LLM returned unparseable JSON: {content!r}")
+
+
+def call_llm_json_batch(prompt: str, user_message: str = "Generate the questions.") -> list:
+    """Same contract as call_llm_json, but for a prompt that asks for N
+    items back in one array. Batching amortizes the fixed cost every
+    single-item call pays unconditionally (the kanji-gate list/
+    instruction block — ~100-650 characters at N5-N3, see
+    kanji_instruction above) over several items instead of paying it
+    once per item.
+
+    reasoning=False: live-diagnosed 2026-08 on this shape (a handful of
+    items asked for in one call) — with reasoning on, the model spends
+    its whole completion budget on the reasoning trace and returns
+    nothing usable for a multi-item array; off, the same prompt
+    reliably returns real content at a fraction of the tokens.
+    Single-item calls (call_llm_json) are unaffected and keep the
+    default (reasoning on)."""
+    content = chat([
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": user_message},
+    ], reasoning=False)
+    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        raise GenerationFailed(f"LLM returned unparseable JSON array: {content!r}")
+    if not isinstance(data, list):
+        raise GenerationFailed(f"expected a JSON array of items, got {type(data).__name__}")
+    return data

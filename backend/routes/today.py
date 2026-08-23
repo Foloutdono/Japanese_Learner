@@ -67,6 +67,26 @@ from routes.grammar import _build_grammar_card        # noqa: E402
 from routes.decks import build_personal_card          # noqa: E402
 
 
+# One adapter per section, each closing over that builder's own argument
+# order so _build_section_card can call all four the same way. The
+# builders' own signatures stay untouched on purpose -- kana.py/kanji.py/
+# vocab.py/grammar.py each call their own builder directly too, and none
+# of them has a use for the params this table exists to route (a kana or
+# grammar card doesn't take raw_id/lang at all; grammar's "level" arg is
+# this queue's deck_key under another name). Only the daily queue needs
+# to dispatch across sources, so only this table knows the mapping.
+_SECTION_BUILDERS = {
+    KANA:    lambda raw_id, entry, deck_key, deck_list, m, lang, stage, preview:
+        _build_kana_card(entry, deck_list, m, stage, preview),
+    KANJI:   lambda raw_id, entry, deck_key, deck_list, m, lang, stage, preview:
+        _build_kanji_card(raw_id, entry, deck_list, m, lang, stage, preview),
+    VOCAB:   lambda raw_id, entry, deck_key, deck_list, m, lang, stage, preview:
+        _build_vocab_card(raw_id, entry, deck_list, m, lang, stage, preview),
+    GRAMMAR: lambda raw_id, entry, deck_key, deck_list, m, lang, stage, preview:
+        _build_grammar_card(entry, deck_key, deck_list, m, stage, preview),
+}
+
+
 def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview):
     """One card, built by its own section's builder.
 
@@ -74,6 +94,10 @@ def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview):
     builders draw MCQ distractors out of -- so a hint on a queued card
     offers the same plausible wrong answers it would in the section.
     """
+    build = _SECTION_BUILDERS.get(source)
+    if build is None:
+        return None
+
     entry = card_index.entry_for(source, raw_id)
     if entry is None:
         return None
@@ -85,20 +109,13 @@ def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview):
     ]
     deck_list = [e for e in deck_list if e is not None]
 
-    if source == KANA:
-        card = _build_kana_card(entry, deck_list, m, stage, preview)
-    elif source == KANJI:
-        card = _build_kanji_card(raw_id, entry, deck_list, m, lang, stage, preview)
-    elif source == VOCAB:
-        card = _build_vocab_card(raw_id, entry, deck_list, m, lang, stage, preview)
-    elif source == GRAMMAR:
-        card = _build_grammar_card(entry, deck_key, deck_list, m, stage, preview)
-    else:
-        return None
-
-    # kana and grammar builders key off the entry rather than an id, so
-    # they do not set card_id themselves.
-    card["card_id"] = raw_id
+    card = build(raw_id, entry, deck_key, deck_list, m, lang, stage, preview)
+    # Every builder already sets its own card_id (kana/grammar derive it
+    # from `entry` the same way card_index just did to find it -- see
+    # kana_to_id/grammar_to_id -- kanji/vocab take it as raw_id directly).
+    # source/deck are genuinely queue-only context: a section's own
+    # /cards endpoint never adds them because which section and level a
+    # card came from is implied by which endpoint you called.
     card["source"] = source
     card["deck"] = deck_key
     return card

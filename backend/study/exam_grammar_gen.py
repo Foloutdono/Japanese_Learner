@@ -35,59 +35,18 @@
 # claimed piece's text for a real substring of the pattern, and
 # rejected outright if the check fails. The LLM proposes; the code
 # decides.
-import json
 import logging
 import random
 import re
 
 from content.grammar_points_data import get_grammar_points
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_validation import validate_content, repair_answer_balance, validate_passage_length, validate_kanji_gate
-from study.exam_gen_utils import GenerationFailed, kanji_instruction
-from study.llm_shared import chat, sentence_kanji_ok, OPENROUTER_API_KEY
+from study.exam_validation import validate_passage_length, validate_kanji_gate
+from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json, call_llm_json_batch
+from study.exam_pipeline import generate_paper
+from study.llm_shared import sentence_kanji_ok, OPENROUTER_API_KEY
 
 logger = logging.getLogger(__name__)
-
-
-def _call_llm_json(prompt: str) -> dict:
-    content = chat([
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": "Generate the question."},
-    ])
-    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        raise GenerationFailed(f"LLM returned unparseable JSON: {content!r}")
-
-
-def _call_llm_json_batch(prompt: str) -> list:
-    """Same contract as _call_llm_json, but for a prompt that asks for N
-    items back in one array -- used by the *_BATCH_SIZE builders below.
-    Batching amortizes the fixed cost every single-item call pays
-    unconditionally (the full kanji-gate list/instruction block, which
-    at N5-N3 alone is ~100-650 characters -- see exam_gen_utils.py) over
-    several items instead of paying it once per item.
-
-    reasoning=False: live-diagnosed 2026-08 on exactly this shape (~8
-    grammar points asked for in one call, per study/llm_shared.py's own
-    chat() docstring) -- with reasoning on, the model spends its whole
-    completion budget on the reasoning trace and returns nothing usable
-    for a multi-item array; off, the same prompt reliably returns real
-    content at a fraction of the tokens. Single-item prompts elsewhere
-    in this module are unaffected and keep the default (reasoning on)."""
-    content = chat([
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": "Generate the questions."},
-    ], reasoning=False)
-    cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-    try:
-        data = json.loads(cleaned)
-    except json.JSONDecodeError:
-        raise GenerationFailed(f"LLM returned unparseable JSON array: {content!r}")
-    if not isinstance(data, list):
-        raise GenerationFailed(f"expected a JSON array of items, got {type(data).__name__}")
-    return data
 
 
 def _points_block(points: list[dict]) -> str:
@@ -193,7 +152,7 @@ def _build_grammar_fill_mondai(spec: dict, level: str, points: list[dict], used_
             allowed_kanji=kanji_instruction(level),
         )
         try:
-            items = _call_llm_json_batch(prompt)
+            items = call_llm_json_batch(prompt)
         except (RuntimeError, GenerationFailed) as e:
             logger.warning("Grammar-fill batch of %d failed: %s", len(batch), e)
             continue
@@ -333,7 +292,7 @@ def _build_sentence_order_mondai(spec: dict, level: str, points: list[dict], use
             allowed_kanji=kanji_instruction(level),
         )
         try:
-            items = _call_llm_json_batch(prompt)
+            items = call_llm_json_batch(prompt)
         except (RuntimeError, GenerationFailed) as e:
             logger.warning("Sentence-order batch of %d failed: %s", len(batch), e)
             continue
@@ -390,7 +349,7 @@ def _build_cloze_mondai(spec: dict, level: str) -> dict:
     blank_count = spec["count"]
     chars = spec.get("passage_chars", 150)
     prompt = _CLOZE_PROMPT.format(level=level, chars=chars, blank_count=blank_count, allowed_kanji=kanji_instruction(level))
-    data = _call_llm_json(prompt)
+    data = call_llm_json(prompt)
 
     title = data.get("titleJp")
     template = data.get("textTemplateJp")
@@ -475,8 +434,13 @@ def _flatten_grammar_questions(mondai_list: list[dict]) -> list[dict]:
     return out
 
 
-def _generate_grammar_paper_once(level: str) -> dict:
-    rng = random.Random()  # unseeded: candidate-order only, no reproducibility claim -- same reasoning as exam_reading_gen.py
+def _generate_grammar_paper_once(level: str, seed: int) -> dict:
+    # seed unused here on purpose, same reasoning as exam_reading_gen.py:
+    # nothing here is locally sampled in a way that needs reproducibility,
+    # and an LLM call is non-deterministic regardless of any local seed.
+    # Accepted anyway for interface symmetry with exam_pipeline.generate_
+    # paper's uniform generate_once(level, seed) contract.
+    rng = random.Random()  # unseeded: candidate-order only, no reproducibility claim
     specs = _grammar_specs_for_level(level)
     points = get_grammar_points(level)
 
@@ -530,29 +494,11 @@ def _generate_grammar_paper_once(level: str) -> dict:
 
 
 def generate_grammar_paper(level: str, seed: int) -> dict:
-    # `seed` unused, same as exam_reading_gen.py: nothing here is
-    # locally sampled in a way that needs reproducibility, and an LLM
-    # call is non-deterministic regardless of any local seed. Kept for
-    # interface symmetry with the deterministic generators.
-    last_errors: list[str] = []
-    for _attempt in range(_MAX_GENERATION_ATTEMPTS):
-        try:
-            paper = _generate_grammar_paper_once(level)
-        except GenerationFailed as e:
-            last_errors = [str(e)]
-            continue
-
-        flat = _flatten_grammar_questions(paper["sections"][0]["mondai"])
-        content_errors = validate_content(flat, check_duplicates=False)
-        # Same reasoning as exam_vocab_gen.py's generate_vocabulary_paper:
-        # an answer-position skew is a shuffle problem, not a content
-        # problem — fix it by reshuffling in place rather than paying
-        # for a full LLM regeneration of every grammar-fill/star/cloze
-        # item just to fix a shuffle.
-        if not content_errors and repair_answer_balance(flat, random.Random()):
-            return paper
-        last_errors = content_errors or ["answer position skewed across the paper (could not repair by reshuffling)"]
-
-    raise GenerationFailed(
-        f"Could not generate a valid {level} grammar paper after {_MAX_GENERATION_ATTEMPTS} attempts: {last_errors}"
+    return generate_paper(
+        generate_once=_generate_grammar_paper_once,
+        flatten=_flatten_grammar_questions,
+        level=level, seed=seed,
+        max_attempts=_MAX_GENERATION_ATTEMPTS,
+        check_duplicates=False,
+        paper_label="grammar",
     )
