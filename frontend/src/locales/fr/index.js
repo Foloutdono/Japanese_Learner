@@ -893,6 +893,11 @@ const exam = {
   examGeneratingHint:  "Les questions sont générées à la première ouverture d'une épreuve — comptez une à deux minutes. Ensuite elle se charge instantanément et reste identique.",
   examLoadFailed:      "Cette épreuve n'a pas pu être générée pour le moment.",
   examLoadFailedHint:  'Le rédacteur de questions est peut-être momentanément indisponible. Réessayez dans un instant.',
+  // Affiché à la place de examLoadFailedHint (et du bouton Réessayer)
+  // pendant que le serveur refuse de nouvelles tentatives : relancer
+  // une génération coûte plusieurs minutes et des dizaines d'appels.
+  examLoadFailedCooldown: (minutes) =>
+    `Le rédacteur de questions fait une pause après un échec. Réessayez dans environ ${minutes} minute${minutes === 1 ? '' : 's'}.`,
   examRetry:           'Réessayer',
 
   examSectionEmpty:    'Cette section ne contient encore aucune question.',

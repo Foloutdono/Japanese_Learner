@@ -2,6 +2,7 @@ import unittest
 
 from study.exam_gen_utils import GenerationFailed
 from study.exam_pipeline import generate_paper
+from study.llm_shared import LLMUnavailable
 
 
 def _mcq(qid: str, prompt: str, answer_id: str = "c1") -> dict:
@@ -43,6 +44,25 @@ class GeneratePaperTests(unittest.TestCase):
         )
         self.assertEqual(calls, [42])  # no retry needed
         self.assertEqual(len(paper["sections"][0]["mondai"][0]["questions"]), 2)
+
+    def test_provider_failure_is_not_retried(self) -> None:
+        # GenerationFailed means "this content came out wrong", which a
+        # retry can genuinely fix. LLMUnavailable means no model could be
+        # reached at all, which it cannot -- and retrying it re-pays the
+        # whole section's generation cost for a guaranteed second
+        # failure. It must fly straight out of the retry loop.
+        attempts = []
+
+        def generate_once(level, seed):
+            attempts.append(seed)
+            raise LLMUnavailable("no models reachable")
+
+        with self.assertRaises(LLMUnavailable):
+            generate_paper(
+                generate_once=generate_once, flatten=_flatten,
+                level="N5", seed=7, max_attempts=3, check_duplicates=True, paper_label="test",
+            )
+        self.assertEqual(attempts, [7])  # one attempt, not three
 
     def test_retries_past_a_generation_failure_then_succeeds(self) -> None:
         attempts = []

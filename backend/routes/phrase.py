@@ -24,15 +24,31 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openrouter/owl-alpha")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-MODELS = [
+# dict.fromkeys, not a plain list: OPENROUTER_MODEL defaults to
+# openrouter/owl-alpha, which was ALSO spelled out as the last fallback
+# -- so on the default configuration every call tried the same model
+# twice, and when that model was unavailable it paid the full retry
+# backoff below for it both times. Order-preserving dedupe keeps an
+# explicit override from silently colliding with a fallback too.
+MODELS = list(dict.fromkeys([
     OPENROUTER_MODEL,                     # Primary
     "nvidia/nemotron-3-super-120b-a12b:free",
     "meta-llama/llama-3.3-70b-instruct:free",
     "google/gemma-4-31b-it:free",
     "openrouter/owl-alpha",
-]
+]))
 
 RETRY_STATUS = {429, 500, 502, 503, 504}
+
+# Mirrors study/llm_shared.py's _DEAD_MODELS (see that module for the
+# full reasoning): a model that answers with a PERMANENT error is
+# remembered and skipped for the rest of the process rather than costing
+# a doomed round trip -- and here, up to 7 seconds of retry backoff --
+# on every subsequent call. This module reads the same OPENROUTER_MODEL
+# env var into the same MODELS[0] slot and so had the same bug.
+_DEAD_MODELS: set[str] = set()
+_ACCOUNT_ERROR_STATUSES = {401, 403}
+_PERMANENT_MODEL_STATUSES = {400, 402, 404}
 
 SYSTEM_PROMPT = """You are a Japanese language tutor. Given a Japanese phrase, segment it into words and respond with ONLY a single JSON object (no markdown fences, no commentary) matching exactly this schema:
 
@@ -188,9 +204,14 @@ def _call_llm(phrase: str) -> dict:
         "Content-Type": "application/json",
     }
 
-    last_error = None
+    live_models = [m for m in MODELS if m not in _DEAD_MODELS]
+    if not live_models:
+        raise HTTPException(
+            status_code=503,
+            detail="The AI service is temporarily unavailable. Please try again in a few moments.",
+        )
 
-    for model in MODELS:
+    for model in live_models:
         for attempt in range(3):
             try:
                 response = requests.post(
@@ -228,19 +249,31 @@ def _call_llm(phrase: str) -> dict:
                     response.text,
                 )
 
-                last_error = response
-
                 # Retry only temporary failures
                 if response.status_code in RETRY_STATUS:
                     time.sleep(2 ** attempt)   # 1s, 2s, 4s
                     continue
 
+                if response.status_code in _ACCOUNT_ERROR_STATUSES:
+                    # Account-level, not model-level: walking the rest of
+                    # the list just repeats the same rejection.
+                    raise HTTPException(
+                        status_code=503,
+                        detail="The AI service is temporarily unavailable. Please try again in a few moments.",
+                    )
+
+                if response.status_code in _PERMANENT_MODEL_STATUSES:
+                    _DEAD_MODELS.add(model)
+                    logger.error(
+                        "Dropping model %s for the rest of this process: permanent error %s. %s",
+                        model, response.status_code, response.text[:300],
+                    )
+
                 # Permanent error -> next model
                 break
 
-            except requests.RequestException as e:
+            except requests.RequestException:
                 logger.exception("Network error with model %s", model)
-                last_error = e
                 time.sleep(2 ** attempt)
 
         logger.info("Falling back to next model...")

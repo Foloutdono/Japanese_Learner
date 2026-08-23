@@ -908,6 +908,12 @@ const exam = {
   examGeneratingHint:  'Questions are generated fresh the first time a paper is opened — this takes a minute or two. Afterwards it loads instantly and stays the same every time.',
   examLoadFailed:      "This paper couldn't be generated right now.",
   examLoadFailedHint:  'The question writer may be temporarily unavailable. Try again in a moment.',
+  // Shown instead of examLoadFailedHint (and instead of the retry
+  // button) while the server is refusing new attempts: a paper that
+  // just failed costs minutes and dozens of model calls to retry, so
+  // the wait is deliberate rather than something to click through.
+  examLoadFailedCooldown: (minutes) =>
+    `The question writer is taking a break after a failed attempt. Try again in about ${minutes} minute${minutes === 1 ? '' : 's'}.`,
   examRetry:           'Try again',
 
   examSectionEmpty:    'This section has no questions yet.',

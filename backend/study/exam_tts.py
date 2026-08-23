@@ -102,7 +102,7 @@ def _content_key(turns: list[dict]) -> str:
     # Keyed by the turns' own content, not by exam_id/question_id: no
     # generator today gets its own exam_id passed down (routes/exams.py
     # calls every generator as generate(seed), exam_id stays private to
-    # _get_or_create_paper) -- deriving the cache key from content itself
+    # the route layer) -- deriving the cache key from content itself
     # sidesteps threading exam_id through every generator's call
     # signature, and as a bonus de-duplicates identical dialogue text for
     # free (same script -> same audio file, even across different
@@ -133,10 +133,10 @@ def synthesize_dialogue(turns: list[dict]) -> str:
 
     Idempotent by design: returns the existing URL without any network
     call at all if this exact turn content has been synthesized before.
-    Necessary because routes/exams.py's _get_or_create_paper() only
-    persists a paper to exam_papers once ALL its mondai succeed -- a
-    retry after a later mondai fails validation shouldn't re-synthesize
-    audio an earlier, otherwise-discarded attempt already produced.
+    Necessary because routes/exams.py's generation worker only persists
+    a paper to exam_papers once ALL its mondai succeed -- a retry after
+    a later mondai fails validation shouldn't re-synthesize audio an
+    earlier, otherwise-discarded attempt already produced.
     """
     os.makedirs(_AUDIO_DIR, exist_ok=True)
     key = _content_key(turns)

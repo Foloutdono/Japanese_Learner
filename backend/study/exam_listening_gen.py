@@ -24,13 +24,18 @@ from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json_batch
 from study.exam_pipeline import generate_paper
 from study.exam_tts import synthesize_dialogue, TTSFailed
-from study.llm_shared import sentence_kanji_ok, OPENROUTER_API_KEY
+from study.llm_shared import soften_kanji, OPENROUTER_API_KEY
 
 logger = logging.getLogger(__name__)
 
 
 # ── 課題理解 / ポイント理解: listening-mcq ────────────────────────
-_LISTENING_MCQ_BATCH_SIZE = 3
+# 4, not 3: the per-call fixed cost (the N5-N3 kanji list, ~100-650
+# characters, re-sent every call) amortizes better, and the completion
+# budget now scales with the batch size (call_llm_json_batch's
+# expected_items) instead of sharing one flat 3000-token cap, which is
+# what made a larger batch risky before.
+_LISTENING_MCQ_BATCH_SIZE = 4
 
 _LISTENING_MCQ_PROMPT_BATCH = """You are writing {n} separate JLPT {level} \
 listening comprehension questions ({name_jp} style), each independent of \
@@ -99,15 +104,37 @@ def _validate_listening_mcq_item(item, q_id: str) -> tuple[str, list, str, list,
     return context, turns, question_jp, choices_text, correct_index
 
 
+def _soften_or_fail(text: str, level: str, q_id: str, what: str) -> str:
+    softened = soften_kanji(text, level)
+    if softened is None:
+        raise GenerationFailed(f"{q_id}: {what} has kanji outside {level}'s allowed set that could not be read as kana")
+    return softened
+
+
 def _build_one_listening_mcq_question(item, level: str, q_id: str, number: int) -> dict:
     context, turns, question_jp, choices_text, correct_index = _validate_listening_mcq_item(item, q_id)
 
-    full_text = context + "".join(t["textJp"] for t in turns) + question_jp
-    if not sentence_kanji_ok(full_text, level):
-        raise GenerationFailed(f"{q_id}: dialogue/question has kanji outside {level}'s allowed set")
-    for c in choices_text:
-        if not sentence_kanji_ok(c, level):
-            raise GenerationFailed(f"{q_id}: a choice has kanji outside {level}'s allowed set")
+    # Out-of-level kanji is SOFTENED to kana here rather than rejected.
+    # Every string below is either spoken aloud (context/turns/question)
+    # or printed as a short N5-style choice, and in both cases the kana
+    # spelling is what a real paper at this level would show anyway --
+    # see soften_kanji's own docstring for why rejecting instead used to
+    # kill every single generated item at N5.
+    context = _soften_or_fail(context, level, q_id, "the scene-setting line") if context else context
+    turns = [
+        {"speaker": t["speaker"], "textJp": _soften_or_fail(t["textJp"], level, q_id, "a dialogue turn")}
+        for t in turns
+    ]
+    question_jp = _soften_or_fail(question_jp, level, q_id, "the question")
+    choices_text = [_soften_or_fail(c, level, q_id, "a choice") for c in choices_text]
+
+    # Re-check what _validate_listening_mcq_item already checked on the
+    # raw text: two choices that differed only in kanji spelling (時間 vs
+    # 時かん) collapse into the same string once softened, which would
+    # otherwise ship a question with a duplicate -- and, if the duplicate
+    # includes the correct answer, two right answers.
+    if len(set(choices_text)) != 4:
+        raise GenerationFailed(f"{q_id}: choices collapsed into duplicates once softened to kana")
 
     # Narrator reads the scene-setting line and the question; A/B read
     # the dialogue itself -- three distinct voices, matching how a real
@@ -141,24 +168,37 @@ def _build_one_listening_mcq_question(item, level: str, q_id: str, number: int) 
 # A finite word/pattern catalog backs kanji/vocab/grammar items (a
 # specific target word or grammar point); listening-mcq dialogues have
 # no such catalog to draw candidates from -- each batch is an
-# independent free generation, so the retry loop is a flat batch
-# budget rather than "candidates remaining in a pool".
-_ATTEMPTS_PER_ITEM = 3
+# independent free generation, so the budget is a flat cap on LLM CALLS
+# rather than "candidates remaining in a pool".
+#
+# Counting calls, not items: the previous version added the requested
+# batch size to an item budget of count*3, which meant a mondai wanting
+# 7 items allowed 21 "attempts" that a hard-failing model consumed in 7
+# calls -- a budget whose name and whose behaviour disagreed. One spare
+# call past the minimum is the real intent: enough to re-ask for the
+# handful of items a batch dropped, not enough to grind.
+_SPARE_BATCH_CALLS = 1
 
 
 def _build_listening_mcq_mondai(spec: dict, level: str) -> dict:
     questions = []
-    attempts = 0
-    max_attempts = spec["count"] * _ATTEMPTS_PER_ITEM
-    while len(questions) < spec["count"] and attempts < max_attempts:
-        batch_n = min(_LISTENING_MCQ_BATCH_SIZE, max_attempts - attempts)
-        attempts += batch_n
+    calls = 0
+    max_calls = -(-spec["count"] // _LISTENING_MCQ_BATCH_SIZE) + _SPARE_BATCH_CALLS
+    while len(questions) < spec["count"] and calls < max_calls:
+        batch_n = min(_LISTENING_MCQ_BATCH_SIZE, spec["count"] - len(questions))
+        calls += 1
         prompt = _LISTENING_MCQ_PROMPT_BATCH.format(
             n=batch_n, level=level, name_jp=spec["name_jp"], allowed_kanji=kanji_instruction(level),
         )
+        # LLMUnavailable deliberately NOT caught: no model could be
+        # reached at all, which no amount of re-asking fixes. Letting it
+        # fly past this loop, past _generate_listening_paper_once, and
+        # past exam_pipeline's retry loop (which only catches
+        # GenerationFailed) is what makes a provider outage cost one
+        # request instead of the whole cascade.
         try:
-            items = call_llm_json_batch(prompt)
-        except (RuntimeError, GenerationFailed) as e:
+            items = call_llm_json_batch(prompt, expected_items=batch_n)
+        except GenerationFailed as e:
             logger.warning("Listening-mcq batch of %d for %s failed: %s", batch_n, spec["id"], e)
             continue
 
@@ -171,7 +211,7 @@ def _build_listening_mcq_mondai(spec: dict, level: str) -> dict:
             q_id = f"{spec['id']}_q{len(questions) + 1}"
             try:
                 q = _build_one_listening_mcq_question(item, level, q_id, len(questions) + 1)
-            except (RuntimeError, GenerationFailed) as e:
+            except GenerationFailed as e:
                 logger.warning("Listening-mcq item for %s failed: %s", spec["id"], e)
                 continue
             questions.append(q)
@@ -188,7 +228,13 @@ def _build_listening_mcq_mondai(spec: dict, level: str) -> dict:
 
 
 # ── Section orchestrator ─────────────────────────────────────────
-_MAX_GENERATION_ATTEMPTS = 3
+# 2, not 3: an outer attempt re-runs EVERY mondai from scratch, so it
+# multiplies the whole section's LLM spend, while the batch loop above
+# already retries the thing that actually needed retrying. Two leaves a
+# genuine second chance for the paper-level checks exam_pipeline runs
+# (validate_content / answer-position balance) without a third full
+# re-generation on top.
+_MAX_GENERATION_ATTEMPTS = 2
 _SECONDS_PER_ITEM = 45  # listening items run slower than any text mondai: dialogue + narration + question, all read aloud
 
 

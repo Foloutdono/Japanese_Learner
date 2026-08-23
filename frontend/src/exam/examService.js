@@ -22,9 +22,37 @@ export async function listExams(session) {
   return res.json()
 }
 
-/** Fetch one exam in full (all sections/mondai/questions). */
+/**
+ * Error thrown when a paper's last generation attempt failed and the
+ * server is in its cooldown window. `retryAfter` is the number of
+ * seconds until another attempt is allowed — the screen shows it rather
+ * than offering a retry button that would only get the same 503 back.
+ */
+export class ExamGenerationError extends Error {
+  constructor(message, retryAfter) {
+    super(message)
+    this.name = 'ExamGenerationError'
+    this.retryAfter = retryAfter
+  }
+}
+
+/**
+ * Fetch one exam in full (all sections/mondai/questions), or
+ * `{ generating: true }` if the server is still building it.
+ *
+ * An LLM-backed paper takes minutes to generate, so the backend does
+ * that on its own thread and answers 202 until it's ready (see
+ * backend/routes/exams.py's get_exam) — callers poll. `apiFetch` rather
+ * than `apiJson` deliberately, despite the project's usual preference:
+ * this is precisely the call that needs to branch on the raw status.
+ */
 export async function getExam(examId, session) {
   const res = await apiFetch(`/api/exams/${examId}`, session)
+  if (res.status === 202) return { generating: true }
+  if (res.status === 503) {
+    const body = await res.json().catch(() => ({}))
+    throw new ExamGenerationError(body.error || 'Generation failed', body.retryAfter ?? 0)
+  }
   if (!res.ok) throw new Error(`Unknown exam id: ${examId}`)
   return res.json()
 }

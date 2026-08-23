@@ -54,6 +54,18 @@ MODELS = [
     "nvidia/nemotron-3-ultra-550b-a55b:free",
 ]
 
+# Mirrors study/llm_shared.py's _DEAD_MODELS (see that module for the
+# full reasoning): a model that answers with a PERMANENT error -- gone
+# from the catalog, not available on this account's plan, request shape
+# rejected -- is remembered and skipped for the rest of the process,
+# instead of costing a doomed round trip on every subsequent call. This
+# module reads the same OPENROUTER_MODEL env var into the same MODELS[0]
+# slot and so had exactly the same bug.
+_DEAD_MODELS: set[str] = set()
+_ACCOUNT_ERROR_STATUSES = (401, 403)
+_PERMANENT_MODEL_STATUSES = (400, 402, 404)
+_RETRYABLE_STATUSES = (429, 500, 502, 503, 504)
+
 _kakasi = pykakasi.kakasi()
 
 # Display time scales with phrase length, clamped to a sane range. Tune freely.
@@ -118,10 +130,17 @@ def _chat(messages, timeout=60, max_tokens=3000):
     # account's available credit on every single call, forcing every
     # request onto the free-tier fallbacks instead of the primary model
     # — see study/llm_shared.chat's matching fix and comment.
-    last_error = None
+    live_models = [m for m in MODELS if m not in _DEAD_MODELS]
+    if not live_models:
+        raise HTTPException(
+            503,
+            detail=f"Every configured model failed permanently earlier this run: {sorted(_DEAD_MODELS)}",
+        )
+
+    last_status = None
     SESSION = requests.Session()
 
-    for model in MODELS:
+    for model in live_models:
         for attempt in range(2):
             try:
                 response = SESSION.post(
@@ -150,25 +169,35 @@ def _chat(messages, timeout=60, max_tokens=3000):
                 try:
                     return response.json()["choices"][0]["message"]["content"]
                 except (KeyError, IndexError):
-                    logger.error(response.text)
+                    last_status = response.status_code
+                    logger.error("%s returned an unexpected body: %s", model, response.text[:300])
                 continue
 
-            logger.warning(
-                "%s failed (%s): %s",
-                model,
-                response.status_code,
-                response.text[:300],
-            )
+            status = response.status_code
+            last_status = status
+            logger.warning("%s failed (%s): %s", model, status, response.text[:300])
 
-            last_error = response
-
+            if status in _ACCOUNT_ERROR_STATUSES:
+                # An account-level rejection; asking a different model
+                # cannot fix it, so don't walk the rest of the list.
+                raise HTTPException(503, detail=f"OpenRouter rejected the credentials ({status})")
+            if status in _PERMANENT_MODEL_STATUSES:
+                _DEAD_MODELS.add(model)
+                logger.error(
+                    "Dropping model %s for the rest of this process: permanent error %s. %s",
+                    model, status, response.text[:300],
+                )
+                break
             # only try another model for temporary failures
-            if response.status_code not in (429, 500, 502, 503, 504):
+            if status not in _RETRYABLE_STATUSES:
                 break
 
+    # last_status, not response.status_code: `response` is unbound if
+    # every attempt raised a RequestException instead of answering, so
+    # reporting the failure used to raise NameError on top of it.
     raise HTTPException(
         503,
-        detail=f"All LLM providers failed. Last error: {response.status_code}"
+        detail=f"All LLM providers failed. Last error: {last_status or 'no response'}"
     )
 
 

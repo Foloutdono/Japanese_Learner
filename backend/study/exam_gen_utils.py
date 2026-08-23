@@ -99,13 +99,28 @@ def call_llm_json(prompt: str, user_message: str = "Generate the question.") -> 
         raise GenerationFailed(f"LLM returned unparseable JSON: {content!r}")
 
 
-def call_llm_json_batch(prompt: str, user_message: str = "Generate the questions.") -> list:
+# Room for one item in a batch response, plus a fixed allowance for the
+# array's own scaffolding. Japanese tokenizes expensively (roughly a
+# token per kana), and a listening item is a multi-turn dialogue plus a
+# question plus four choices — chat()'s flat 3000 default is a batch of
+# three away from truncating, which surfaces confusingly as "LLM
+# returned unparseable JSON array" rather than as a length problem.
+_TOKENS_PER_BATCH_ITEM = 900
+_BATCH_TOKEN_OVERHEAD = 600
+
+
+def call_llm_json_batch(prompt: str, user_message: str = "Generate the questions.",
+                        expected_items: int | None = None) -> list:
     """Same contract as call_llm_json, but for a prompt that asks for N
     items back in one array. Batching amortizes the fixed cost every
     single-item call pays unconditionally (the kanji-gate list/
     instruction block — ~100-650 characters at N5-N3, see
     kanji_instruction above) over several items instead of paying it
     once per item.
+
+    expected_items: how many items the prompt asks for, used to size the
+    completion budget. Omit it to keep chat()'s own default — correct
+    for a small batch, too tight once a batch grows.
 
     reasoning=False: live-diagnosed 2026-08 on this shape (a handful of
     items asked for in one call) — with reasoning on, the model spends
@@ -114,10 +129,13 @@ def call_llm_json_batch(prompt: str, user_message: str = "Generate the questions
     reliably returns real content at a fraction of the tokens.
     Single-item calls (call_llm_json) are unaffected and keep the
     default (reasoning on)."""
+    kwargs = {}
+    if expected_items:
+        kwargs["max_tokens"] = _TOKENS_PER_BATCH_ITEM * expected_items + _BATCH_TOKEN_OVERHEAD
     content = chat([
         {"role": "system", "content": prompt},
         {"role": "user", "content": user_message},
-    ], reasoning=False)
+    ], reasoning=False, **kwargs)
     cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
     try:
         data = json.loads(cleaned)

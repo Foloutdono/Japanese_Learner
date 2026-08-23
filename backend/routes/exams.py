@@ -1,9 +1,11 @@
 import hashlib
 import json
 import logging
+import threading
 from functools import partial
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from core.db import db_conn
@@ -12,6 +14,7 @@ from study.exam_schema import ensure_exam_schema
 from study.exam_scoring import flatten_questions, score_attempt
 from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_gen_utils import GenerationFailed
+from study.llm_shared import LLMUnavailable
 from study.exam_vocab_gen import generate_vocabulary_paper
 from study.exam_reading_gen import generate_reading_paper
 from study.exam_grammar_gen import generate_grammar_paper
@@ -112,11 +115,11 @@ def _expected_question_count(level: str, kind: str) -> int:
 
 def _get_cached_paper(exam_id: str) -> dict | None:
     """Read-only: returns the already-materialized paper for exam_id, or
-    None if it hasn't been generated yet. Never generates -- list_exams()
-    uses this instead of _get_or_create_paper() specifically so browsing
-    the catalog can't trigger full LLM generation of every registered
-    exam (up to 15 LLM-dependent papers, each several slow calls) inside
-    one HTTP request. See list_exams()'s own comment for how the
+    None if it hasn't been generated yet. Never generates -- both
+    list_exams() and submit_attempt() use this specifically so neither
+    browsing the catalog nor scoring an attempt can trigger full LLM
+    generation (up to 15 LLM-dependent papers, each several slow calls)
+    inside one HTTP request. See list_exams()'s own comment for how the
     original plan already called this out: "static catalog, no
     materialization needed to list.\""""
     conn = db_conn()
@@ -136,38 +139,92 @@ def _seed_for(exam_id: str) -> int:
     return int(hashlib.sha256(exam_id.encode()).hexdigest(), 16) % (2**63)
 
 
-def _get_or_create_paper(exam_id: str) -> dict | None:
-    """None means the id isn't registered at all (-> 404 upstream).
-    Raises GenerationFailed if the id IS registered but generation
-    currently can't produce a valid paper (e.g. an LLM-dependent
-    generator with no API key configured) — deliberately NOT converted
-    to an HTTPException here, since list_exams and get_exam need to
-    react to that differently (see their own call sites): one missing
-    exam shouldn't 503 the whole catalog listing."""
-    entry = EXAM_GENERATORS.get(exam_id)
-    if entry is None:
-        return None
-    generator_version, _kind, _level, generate = entry
+# ── Background generation ────────────────────────────────────────
+# Generating an LLM-backed paper takes minutes and dozens of model
+# calls. It used to run synchronously inside the request handler, which
+# meant the handler occupied one of the threadpool's limited worker
+# slots AND held a Postgres connection open for the entire time, while
+# the browser sat on a request that would very often time out before it
+# finished. Now the request only ever claims (or reads) a job row and
+# returns immediately; the generation runs on its own thread and writes
+# the finished paper to exam_papers, which the client picks up by
+# polling.
+#
+# A plain daemon thread rather than FastAPI's BackgroundTasks: those run
+# after the response is sent but still inside the request's threadpool
+# slot and lifecycle, so a client that disconnects mid-generation would
+# take the generation with it -- exactly the case this needs to survive,
+# since the whole point is that the work outlives the request.
+
+# How long a failed generation is remembered before a retry is allowed
+# to pay for another attempt.
+_FAILED_COOLDOWN_SECONDS = 300
+# Longer for a provider-level failure (no key, no reachable model, auth
+# rejected): a content failure might genuinely come out differently on
+# the next roll of the dice, but nothing about the account changes
+# within five minutes, so retrying that quickly is pure waste.
+_UNAVAILABLE_COOLDOWN_SECONDS = 900
+# A 'running' row older than this is assumed abandoned -- the worker's
+# process was restarted mid-generation. Without this, one restart at the
+# wrong moment would wedge that exam id as permanently "generating".
+_STALE_RUNNING_SECONDS = 900
+
+
+def _mark_job_failed(exam_id: str, error: str, cooldown_seconds: int) -> None:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE exam_generation_jobs
+                   SET status = 'failed',
+                       error = %s,
+                       retry_after = NOW() + make_interval(secs => %s),
+                       updated_at = NOW()
+                 WHERE exam_id = %s
+                """,
+                (error[:2000], cooldown_seconds, exam_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _generation_worker(exam_id: str) -> None:
+    """Runs off-request. Owns the job row from 'running' through to
+    either deleted (success) or 'failed' (with a cooldown)."""
+    generator_version, _kind, _level, generate = EXAM_GENERATORS[exam_id]
+    seed = _seed_for(exam_id)
+    try:
+        # No DB connection is held across this call -- it is the slow
+        # part, and an idle-in-transaction connection for its whole
+        # duration was the other half of the old synchronous design's
+        # cost.
+        paper = generate(seed)
+    except LLMUnavailable as e:
+        logger.error("Exam generation for %s hit a provider failure: %s", exam_id, e)
+        _mark_job_failed(exam_id, str(e), _UNAVAILABLE_COOLDOWN_SECONDS)
+        return
+    except GenerationFailed as e:
+        logger.error("Exam generation failed for %s: %s", exam_id, e)
+        _mark_job_failed(exam_id, str(e), _FAILED_COOLDOWN_SECONDS)
+        return
+    except Exception as e:  # pragma: no cover - defensive
+        # Nothing else is going to catch this: an uncaught exception on
+        # a worker thread would leave the job row 'running' until the
+        # stale reaper picks it up, i.e. the screen spins for 15 minutes.
+        logger.exception("Unexpected error generating %s", exam_id)
+        _mark_job_failed(exam_id, f"unexpected error: {e}", _FAILED_COOLDOWN_SECONDS)
+        return
 
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT paper FROM exam_papers WHERE exam_id = %s", (exam_id,))
-            row = cur.fetchone()
-            if row:
-                return row[0]
-
-            seed = _seed_for(exam_id)
-            paper = generate(seed)  # GenerationFailed propagates to the caller
-
-            # INSERT ... ON CONFLICT DO NOTHING + re-SELECT: two
-            # concurrent requests for the same never-before-seen
-            # exam_id can never materialize two different papers — the
-            # loser of the race just reads back the winner's row. Still
-            # reachable with one screen fewer than when this was
-            # written: a learner opening the paper in two tabs, or
-            # ExamRunner's fetch racing submit_attempt's own.
-            question_count = len(flatten_questions(paper))
+            # ON CONFLICT DO NOTHING preserves the invariant the old
+            # synchronous path documented here: two workers can never
+            # materialize two different papers for one id. The job-row
+            # claim below should already make that impossible; this is
+            # the cheap belt to that braces.
             cur.execute(
                 """
                 INSERT INTO exam_papers
@@ -177,23 +234,106 @@ def _get_or_create_paper(exam_id: str) -> dict | None:
                 """,
                 (
                     exam_id, paper["level"], seed, generator_version,
-                    json.dumps(paper), len(paper["sections"]), question_count,
+                    json.dumps(paper), len(paper["sections"]), len(flatten_questions(paper)),
                 ),
             )
-            cur.execute("SELECT paper FROM exam_papers WHERE exam_id = %s", (exam_id,))
-            row = cur.fetchone()
+            # The paper row IS the success record, so the job row's work
+            # is done -- see exam_schema.py's note on why there is no
+            # 'done' status.
+            cur.execute("DELETE FROM exam_generation_jobs WHERE exam_id = %s", (exam_id,))
         conn.commit()
-        return row[0]
+        logger.info("Exam %s generated and materialized", exam_id)
     finally:
         conn.close()
+
+
+def _claim_generation(exam_id: str) -> tuple[str, dict | None]:
+    """Decides, in one transaction, what should happen for an exam id
+    with no materialized paper. Returns (outcome, detail):
+
+      'claimed'   -- this caller won the right to generate; spawn a worker
+      'running'   -- someone else is already generating it
+      'cooldown'  -- the last attempt failed recently; detail says why
+
+    The INSERT ... ON CONFLICT DO NOTHING is the lock: whichever caller
+    comes back with rowcount 1 is the only one that generates. This is
+    what makes the retry button, a refresh, and a second tab cost
+    nothing instead of each starting their own full cascade."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO exam_generation_jobs (exam_id, status)
+                VALUES (%s, 'running')
+                ON CONFLICT (exam_id) DO NOTHING
+                """,
+                (exam_id,),
+            )
+            if cur.rowcount == 1:
+                conn.commit()
+                return "claimed", None
+
+            cur.execute(
+                """
+                SELECT status,
+                       error,
+                       GREATEST(0, EXTRACT(EPOCH FROM (retry_after - NOW())))::int,
+                       updated_at < NOW() - make_interval(secs => %s)
+                  FROM exam_generation_jobs
+                 WHERE exam_id = %s
+                 FOR UPDATE
+                """,
+                (_STALE_RUNNING_SECONDS, exam_id),
+            )
+            row = cur.fetchone()
+            if row is None:
+                # The row was deleted between the INSERT and this SELECT
+                # -- a worker finished successfully just now. Report it
+                # as running; the caller reads the real paper on its next
+                # poll.
+                conn.commit()
+                return "running", None
+
+            status, error, retry_after, is_stale = row
+            reclaimable = (
+                (status == "failed" and retry_after <= 0)
+                or (status == "running" and is_stale)
+            )
+            if reclaimable:
+                cur.execute(
+                    """
+                    UPDATE exam_generation_jobs
+                       SET status = 'running', error = NULL, retry_after = NULL,
+                           started_at = NOW(), updated_at = NOW()
+                     WHERE exam_id = %s
+                    """,
+                    (exam_id,),
+                )
+                conn.commit()
+                return "claimed", None
+
+            conn.commit()
+            if status == "failed":
+                return "cooldown", {"error": error, "retryAfter": retry_after}
+            return "running", None
+    finally:
+        conn.close()
+
+
+def _start_generation(exam_id: str) -> None:
+    threading.Thread(
+        target=_generation_worker, args=(exam_id,),
+        name=f"exam-gen:{exam_id}", daemon=True,
+    ).start()
 
 
 @router.get("/api/exams")
 def list_exams(user_id: str = Depends(get_user_id)):
     # Static catalog, not a materialization trigger -- per the original
     # plan ("GET /api/exams -- static catalog, no materialization needed
-    # to list"). This used to call _get_or_create_paper() for every
-    # registered id, which meant the FIRST catalog request after a fresh
+    # to list"). This used to generate on demand for every registered
+    # id, which meant the FIRST catalog request after a fresh
     # deploy synchronously generated all ~15 LLM-dependent papers (each
     # several slow model calls) before returning anything -- live-
     # diagnosed 2026-08 when a single GET /api/exams call hung for
@@ -234,14 +374,34 @@ def list_exams(user_id: str = Depends(get_user_id)):
 
 @router.get("/api/exams/{exam_id}")
 def get_exam(exam_id: str, user_id: str = Depends(get_user_id)):
-    try:
-        paper = _get_or_create_paper(exam_id)
-    except GenerationFailed as e:
-        logger.error("Exam generation failed for %s: %s", exam_id, e)
-        raise HTTPException(status_code=503, detail=f"Could not generate exam: {exam_id}")
-    if paper is None:
+    """200 + the paper once it exists; 202 while it is being generated;
+    503 for a short cooldown after a failed attempt. The client polls
+    this (see frontend/src/screens/ExamRunner.jsx) rather than holding
+    one request open for the minutes a generation takes."""
+    if exam_id not in EXAM_GENERATORS:
         raise HTTPException(status_code=404, detail=f"Unknown exam id: {exam_id}")
-    return paper
+
+    paper = _get_cached_paper(exam_id)
+    if paper is not None:
+        return paper
+
+    outcome, detail = _claim_generation(exam_id)
+    if outcome == "claimed":
+        _start_generation(exam_id)
+    if outcome == "cooldown":
+        # The error text is the generator's own, safe to show: it names
+        # what could not be produced, not anything about the account.
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "failed",
+                "examId": exam_id,
+                "error": detail["error"],
+                "retryAfter": detail["retryAfter"],
+            },
+            headers={"Retry-After": str(detail["retryAfter"])},
+        )
+    return JSONResponse(status_code=202, content={"status": "generating", "examId": exam_id})
 
 
 class SubmitAttemptPayload(BaseModel):
@@ -253,13 +413,21 @@ class SubmitAttemptPayload(BaseModel):
 
 @router.post("/api/exams/{exam_id}/attempts")
 def submit_attempt(exam_id: str, payload: SubmitAttemptPayload, user_id: str = Depends(get_user_id)):
-    try:
-        paper = _get_or_create_paper(exam_id)
-    except GenerationFailed as e:
-        logger.error("Exam generation failed for %s: %s", exam_id, e)
-        raise HTTPException(status_code=503, detail=f"Could not generate exam: {exam_id}")
-    if paper is None:
+    if exam_id not in EXAM_GENERATORS:
         raise HTTPException(status_code=404, detail=f"Unknown exam id: {exam_id}")
+
+    # Reads, never generates. A learner cannot have just taken a paper
+    # that was never materialized, so arriving here with no row means the
+    # paper was deleted (or this is a stray request) -- and triggering a
+    # multi-minute generation to score answers that could not have come
+    # from it would both block the submit and score against different
+    # content than the learner saw.
+    paper = _get_cached_paper(exam_id)
+    if paper is None:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Exam {exam_id} has not been generated; cannot score an attempt against it.",
+        )
 
     summary = score_attempt(paper, payload.answers)
 

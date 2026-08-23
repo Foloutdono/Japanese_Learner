@@ -10,6 +10,12 @@ import { paperTitle } from '../exam/examKinds'
 import QuestionRenderer from '../exam/QuestionRenderer'
 import { PageIcon, ChevronIcon } from '../components/ui/Icons'
 
+// Poll cadence while the server generates a paper (it answers 202 until
+// the paper exists). Starts responsive, backs off geometrically so a
+// slow generation isn't polled dozens of times.
+const POLL_START_MS = 3000
+const POLL_MAX_MS = 10000
+
 // ── Mid-exam draft persistence ─────────────────────────────────
 // Same load/save-wrapped-in-try/catch convention as
 // hooks/useCardSession.js's loadCache/saveCache — a reload losing
@@ -113,17 +119,45 @@ function RunnerScene({ session, examId, onRetry }) {
 
   const submitting = useRef(false)
 
+  // Seconds until another generation attempt is allowed, when the last
+  // one failed. 0 means "retry freely".
+  const [retryAfter, setRetryAfter] = useState(0)
+
+  // Generation runs on the server's own thread and answers 202 until
+  // the paper exists, so this polls rather than holding one request
+  // open for the minutes a paper takes to build. Backing off from 3s to
+  // 10s keeps the first-ready case snappy without hammering a
+  // generation that turns out to be a long one.
   useEffect(() => {
     let alive = true
-    getExam(examId, session)
-      .then(e => { if (alive) setExam(e) })
-      // An LLM-backed paper can genuinely fail to generate (the writer
-      // being rate-limited or out of credit is a 503 from
-      // routes/exams.py, not a bug). This used to leave setExam never
-      // called, so the screen sat on its spinner forever with no way
-      // out — now it says what happened and offers a retry.
-      .catch(() => { if (alive) setExam(false) })
-    return () => { alive = false }
+    let timer = null
+    let delay = POLL_START_MS
+
+    const poll = () => {
+      getExam(examId, session)
+        .then(e => {
+          if (!alive) return
+          if (e?.generating) {
+            timer = setTimeout(poll, delay)
+            delay = Math.min(delay * 1.5, POLL_MAX_MS)
+            return
+          }
+          setExam(e)
+        })
+        // An LLM-backed paper can genuinely fail to generate (the writer
+        // being rate-limited or out of credit is a 503 from
+        // routes/exams.py, not a bug). This used to leave setExam never
+        // called, so the screen sat on its spinner forever with no way
+        // out — now it says what happened and offers a retry.
+        .catch(err => {
+          if (!alive) return
+          setRetryAfter(err?.retryAfter ?? 0)
+          setExam(false)
+        })
+    }
+
+    poll()
+    return () => { alive = false; if (timer) clearTimeout(timer) }
   }, [examId, session])
 
   const questions = useMemo(() => (exam ? flattenQuestions(exam) : []), [exam])
@@ -174,7 +208,12 @@ function RunnerScene({ session, examId, onRetry }) {
   }
 
   // ── Generation failed ──
+  // The retry button is withheld while the server is in its cooldown
+  // window: a click during it can only get the same 503 back, and this
+  // button used to be an unguarded trigger for a full multi-minute,
+  // dozens-of-model-calls generation cascade.
   if (exam === false) {
+    const waitMinutes = Math.ceil(retryAfter / 60)
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
@@ -182,8 +221,8 @@ function RunnerScene({ session, examId, onRetry }) {
           <EmptyState
             icon={<PageIcon size={40} />}
             message={t.examLoadFailed}
-            hint={t.examLoadFailedHint}
-            action={{ label: t.examRetry, onClick: onRetry }}
+            hint={retryAfter > 0 ? t.examLoadFailedCooldown(waitMinutes) : t.examLoadFailedHint}
+            action={retryAfter > 0 ? undefined : { label: t.examRetry, onClick: onRetry }}
           />
         </div>
       </div>
