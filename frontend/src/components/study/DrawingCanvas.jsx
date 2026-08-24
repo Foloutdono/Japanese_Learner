@@ -255,11 +255,12 @@ export function DrawingQuiz({ kanji, meaning, onValidate, resetKey }) {
       kanji={kanji}
       meaning={meaning}
       onValidate={onValidate}
+      resetKey={resetKey}
     />
   )
 }
 
-function DrawingQuizCard({ kanji, meaning, onValidate }) {
+function DrawingQuizCard({ kanji, meaning, onValidate, resetKey }) {
   const { t }          = useLang()
   const canvasRef      = useRef(null)
   const [revealed, setRevealed] = useState(false)
@@ -281,7 +282,7 @@ function DrawingQuizCard({ kanji, meaning, onValidate }) {
           {/* Drawing side */}
           <div className="drawing-quiz__side">
             <div className="stroke-ref__label">{t.yourDrawing}</div>
-            <Canvas canvasRef={canvasRef} resetKey={kanji} />
+            <Canvas canvasRef={canvasRef} resetKey={resetKey ?? kanji} />
           </div>
 
           {/* Correction side — hidden until validated */}
