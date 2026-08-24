@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from core.db import db_conn
 from core.auth import get_user_id
 import routes.reading as reading  # reused wholesale below — see get_translation_batch's docstring
+from study.llm_shared import llm_configured
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -140,8 +141,8 @@ Be specific and reference actual words from their attempt rather than speaking i
 
 @router.post("/api/translation/analyze")
 def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get_user_id)):
-    if not reading.OPENROUTER_API_KEY:
-        raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured")
+    if not llm_configured():
+        raise HTTPException(status_code=500, detail="No LLM provider is configured")
     if not payload.user_answer.strip():
         raise HTTPException(status_code=400, detail="user_answer is required")
 

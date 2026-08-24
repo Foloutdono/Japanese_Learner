@@ -17,14 +17,14 @@ import sys
 import time
 
 import scripts._env  # noqa: F401  -- must precede the study imports, which
-#                       read OPENROUTER_API_KEY at module scope.
+#                       read the provider API keys at module scope.
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from study import grammar_sentence_store as store
 from study.grammar_sentence_gen import (
     BATCH_SIZE, GENERATOR_VERSION, SENTENCES_PER_POINT, batches,
     generate_for_points,
 )
-from study.llm_shared import OPENROUTER_API_KEY
+from study.llm_shared import llm_configured
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("grammar-sentences")
@@ -89,8 +89,8 @@ def main() -> int:
 
     if not args.level and not args.all:
         ap.error("pass --level or --all")
-    if not args.dry_run and not OPENROUTER_API_KEY:
-        logger.error("OPENROUTER_API_KEY not configured")
+    if not args.dry_run and not llm_configured():
+        logger.error("No LLM provider is configured (set NVIDIA_API_KEY or OPENROUTER_API_KEY)")
         return 1
 
     if not args.dry_run:

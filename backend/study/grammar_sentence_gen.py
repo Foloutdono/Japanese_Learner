@@ -36,7 +36,7 @@ import logging
 import re
 
 from study.grammar_match import contains_pattern, verifiable
-from study.llm_shared import chat, sentence_kanji_ok, OPENROUTER_API_KEY
+from study.llm_shared import chat, sentence_kanji_ok, llm_configured
 
 logger = logging.getLogger(__name__)
 
@@ -199,8 +199,8 @@ def generate_for_points(points: list[dict], level: str,
     treat a missing entry as "no sentences yet" and the mode hides
     accordingly, rather than showing a wrong example.
     """
-    if not OPENROUTER_API_KEY:
-        raise RuntimeError("OPENROUTER_API_KEY not configured")
+    if not llm_configured():
+        raise RuntimeError("No LLM provider is configured (set NVIDIA_API_KEY or OPENROUTER_API_KEY)")
     if not points:
         return {}
 

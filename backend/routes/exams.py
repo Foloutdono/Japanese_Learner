@@ -88,7 +88,7 @@ EXAM_GENERATORS = {
     },
     **{
         # Same accepted simplification as "-reading-01"/"-grammar-01".
-        # Needs OPENROUTER_API_KEY (dialogue text) -- audio synthesis
+        # Needs an LLM provider configured (dialogue text) -- audio synthesis
         # itself needs no credential at all, see exam_tts.py.
         f"{level.lower()}-listening-01": ("listening-gen-1", "listening", level, partial(generate_listening_paper, level))
         for level in _LEVELS

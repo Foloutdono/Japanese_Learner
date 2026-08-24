@@ -24,7 +24,7 @@ from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json_batch
 from study.exam_pipeline import generate_paper
 from study.exam_tts import synthesize_dialogue, TTSFailed
-from study.llm_shared import soften_kanji, OPENROUTER_API_KEY
+from study.llm_shared import soften_kanji, llm_configured
 
 logger = logging.getLogger(__name__)
 
@@ -262,8 +262,8 @@ def _generate_listening_paper_once(level: str, seed: int) -> dict:
         if spec["type"] != "listening-mcq":
             logger.info("Skipping %s (%s): no generator yet (needs a ChoiceList audio-only branch first)", spec["id"], spec["type"])
             continue
-        if not OPENROUTER_API_KEY:
-            logger.warning("Skipping %s (listening-mcq): OPENROUTER_API_KEY not configured", spec["id"])
+        if not llm_configured():
+            logger.warning("Skipping %s (listening-mcq): no LLM provider is configured", spec["id"])
             continue
         try:
             built = _build_listening_mcq_mondai(spec, level)

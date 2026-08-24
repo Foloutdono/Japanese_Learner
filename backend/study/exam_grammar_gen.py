@@ -44,7 +44,7 @@ from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_validation import validate_passage_length, validate_kanji_gate
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json, call_llm_json_batch
 from study.exam_pipeline import generate_paper
-from study.llm_shared import sentence_kanji_ok, OPENROUTER_API_KEY
+from study.llm_shared import sentence_kanji_ok, llm_configured
 
 logger = logging.getLogger(__name__)
 
@@ -449,8 +449,8 @@ def _generate_grammar_paper_once(level: str, seed: int) -> dict:
     included_items = 0
 
     for spec in specs:
-        if not OPENROUTER_API_KEY:
-            logger.warning("Skipping %s (%s): OPENROUTER_API_KEY not configured", spec["id"], spec["type"])
+        if not llm_configured():
+            logger.warning("Skipping %s (%s): no LLM provider is configured", spec["id"], spec["type"])
             continue
         try:
             if spec["type"] == "grammar-fill":

@@ -1,12 +1,10 @@
 import json
 import logging
-import os
 import random
 import re
 import unicodedata
 from functools import lru_cache
 
-import requests
 import pykakasi
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -22,49 +20,21 @@ from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content import vocab_extras
 from content import reading_sentences
 from study import difficulty
+from study.llm_shared import chat, llm_configured, LLMUnavailable
 import content.vocab_jmdict_data as jmdict_db
 import content.frequency_data as freq
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
-# 2026-08: switched primary off the paid anthropic/claude-haiku-4.5 —
-# mirrors the same change and live catalog check in study/llm_shared.py.
-OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "nvidia/nemotron-3.5-lightning:free")
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-
-# Still used by Reading Comprehension below (LLM-generated) — untouched
-# by the 2026-08 phrase-mode rewrite.
-#
-# 2026-08 fix: the primary model and two of the four fallbacks
-# (meta-llama/llama-3.3-70b-instruct:free, openrouter/owl-alpha) had
-# been quietly removed from OpenRouter's catalog — confirmed live
-# against GET /api/v1/models, which returns 404 "No endpoints found"
-# for both. Every single call to this endpoint was wasting 2 requests'
-# worth of latency on the dead primary alone before falling through to
-# a model that actually still exists. Replaced with IDs verified
-# present in the live catalog at fix time; OpenRouter's catalog is a
-# moving target, so this will drift again eventually.
-MODELS = [
-    OPENROUTER_MODEL,                     # Primary
-    "nvidia/nemotron-3-super-120b-a12b:free",
-    "openai/gpt-oss-20b:free",
-    "google/gemma-4-31b-it:free",
-    "nvidia/nemotron-3-ultra-550b-a55b:free",
-]
-
-# Mirrors study/llm_shared.py's _DEAD_MODELS (see that module for the
-# full reasoning): a model that answers with a PERMANENT error -- gone
-# from the catalog, not available on this account's plan, request shape
-# rejected -- is remembered and skipped for the rest of the process,
-# instead of costing a doomed round trip on every subsequent call. This
-# module reads the same OPENROUTER_MODEL env var into the same MODELS[0]
-# slot and so had exactly the same bug.
-_DEAD_MODELS: set[str] = set()
-_ACCOUNT_ERROR_STATUSES = (401, 403)
-_PERMANENT_MODEL_STATUSES = (400, 402, 404)
-_RETRYABLE_STATUSES = (429, 500, 502, 503, 504)
+# Model selection, provider fallback and the dead-model/dead-provider
+# bookkeeping all live in study/llm_shared.py now -- this module used to
+# carry its own byte-near-identical copy of that loop. Consolidated
+# 2026-08 when a SECOND provider (NVIDIA) was added: llm_shared's header
+# named exactly this condition for revisiting the deliberate
+# duplication, and keeping three copies of the provider list would have
+# meant Reading Comprehension silently staying on the exhausted
+# OpenRouter account while everything else failed over.
 
 _kakasi = pykakasi.kakasi()
 
@@ -123,82 +93,20 @@ def _allowed_kanji_for_level(level: str) -> str:
 
 
 def _chat(messages, timeout=60, max_tokens=3000):
-    # max_tokens explicit rather than left to OpenRouter's own default
-    # (64000, live-diagnosed 2026-08): this endpoint generates one
-    # bounded passage + a handful of questions, never an open-ended
-    # completion, and the unset default was large enough to 402 on the
-    # account's available credit on every single call, forcing every
-    # request onto the free-tier fallbacks instead of the primary model
-    # — see study/llm_shared.chat's matching fix and comment.
-    live_models = [m for m in MODELS if m not in _DEAD_MODELS]
-    if not live_models:
-        raise HTTPException(
-            503,
-            detail=f"Every configured model failed permanently earlier this run: {sorted(_DEAD_MODELS)}",
-        )
+    """Thin adapter over study/llm_shared.chat -- kept as a local name so
+    this module's many call sites are unchanged, and so the shared
+    function's LLMUnavailable becomes the HTTPException(503) they already
+    expect. Everything else (multi-provider fallback, per-model retry,
+    remembering what is dead) is llm_shared's job.
 
-    last_status = None
-    SESSION = requests.Session()
-
-    for model in live_models:
-        for attempt in range(2):
-            try:
-                response = SESSION.post(
-                    OPENROUTER_URL,
-                    headers={
-                        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "model": model,
-                        "messages": messages,
-                        "max_tokens": max_tokens,
-                        # nemotron-3.5-lightning (the new primary) is a
-                        # reasoning model -- see study/llm_shared.chat's
-                        # matching comment for why this stays on.
-                        "reasoning": {"enabled": True},
-                    },
-                    timeout=timeout,
-                )
-            except requests.RequestException as e:
-                logger.warning("%s network error: %s", model, e)
-                continue
-
-            if response.ok:
-                logger.info("Using model %s", model)
-                try:
-                    return response.json()["choices"][0]["message"]["content"]
-                except (KeyError, IndexError):
-                    last_status = response.status_code
-                    logger.error("%s returned an unexpected body: %s", model, response.text[:300])
-                continue
-
-            status = response.status_code
-            last_status = status
-            logger.warning("%s failed (%s): %s", model, status, response.text[:300])
-
-            if status in _ACCOUNT_ERROR_STATUSES:
-                # An account-level rejection; asking a different model
-                # cannot fix it, so don't walk the rest of the list.
-                raise HTTPException(503, detail=f"OpenRouter rejected the credentials ({status})")
-            if status in _PERMANENT_MODEL_STATUSES:
-                _DEAD_MODELS.add(model)
-                logger.error(
-                    "Dropping model %s for the rest of this process: permanent error %s. %s",
-                    model, status, response.text[:300],
-                )
-                break
-            # only try another model for temporary failures
-            if status not in _RETRYABLE_STATUSES:
-                break
-
-    # last_status, not response.status_code: `response` is unbound if
-    # every attempt raised a RequestException instead of answering, so
-    # reporting the failure used to raise NameError on top of it.
-    raise HTTPException(
-        503,
-        detail=f"All LLM providers failed. Last error: {last_status or 'no response'}"
-    )
+    reasoning stays on: this endpoint asks for ONE passage plus a handful
+    of questions in a single constrained blob, which is the shape
+    llm_shared documents reasoning as helping with -- unlike the batched
+    generators, which pass reasoning=False."""
+    try:
+        return chat(messages, timeout=timeout, max_tokens=max_tokens)
+    except LLMUnavailable as e:
+        raise HTTPException(503, detail=str(e))
 
 
 def _display_seconds(phrase: str) -> float:
@@ -838,8 +746,8 @@ class ComprehensionAnswersPayload(BaseModel):
 
 
 def _call_llm_comprehension(level: str, lang: str) -> dict:
-    if not OPENROUTER_API_KEY:
-        raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured")
+    if not llm_configured():
+        raise HTTPException(status_code=500, detail="No LLM provider is configured")
 
     spec = COMPREHENSION_SPECS.get(level, DEFAULT_COMPREHENSION_SPEC)
     lang_name = LANG_NAMES.get(lang, lang)

@@ -20,7 +20,7 @@
 # skipping 語形成.
 #
 # Unlike exam_kanji_gen.py's 100%-owned-data techniques, everything
-# here is LLM-generated — see study/llm_shared.py's OPENROUTER_API_KEY
+# here is LLM-generated — see study/llm_shared.py's llm_configured()
 # check for how this degrades (skips, doesn't fail the whole paper)
 # when no key is configured.
 import logging
@@ -29,7 +29,7 @@ from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_validation import validate_passage_length, validate_kanji_gate
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json
 from study.exam_pipeline import generate_paper
-from study.llm_shared import OPENROUTER_API_KEY
+from study.llm_shared import llm_configured
 
 logger = logging.getLogger(__name__)
 
@@ -239,8 +239,8 @@ def _generate_reading_paper_once(level: str, seed: int) -> dict:
     included_items = 0
 
     for spec in specs:
-        if not OPENROUTER_API_KEY:
-            logger.warning("Skipping %s (reading-passage): OPENROUTER_API_KEY not configured", spec["id"])
+        if not llm_configured():
+            logger.warning("Skipping %s (reading-passage): no LLM provider is configured", spec["id"])
             continue
         try:
             built = build_reading_passage_mondai(spec, level)

@@ -22,7 +22,7 @@
 # study/llm_shared.chat().
 #
 # Degrades gracefully rather than failing the whole paper: if
-# OPENROUTER_API_KEY isn't configured, or a specific mondai's
+# no LLM provider is configured, or a specific mondai's
 # generation doesn't clear enough valid items, that ONE mondai is
 # skipped (loudly logged) and every other mondai still ships — a
 # partial vocabulary section is honest; an empty one because one
@@ -40,7 +40,7 @@ from content.vocab_extras import get_vocab_extras, word_category
 from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_gen_utils import GenerationFailed, make_choices, kanji_instruction, call_llm_json_batch
 from study.exam_pipeline import generate_paper
-from study.llm_shared import chat, sentence_kanji_ok, OPENROUTER_API_KEY
+from study.llm_shared import chat, sentence_kanji_ok, llm_configured
 import study.exam_kanji_gen as exam_kanji_gen
 
 logger = logging.getLogger(__name__)
@@ -548,8 +548,8 @@ def _generate_vocabulary_paper_once(level: str, seed: int) -> dict:
                 logger.warning("Skipping %s (%s): %s", spec["id"], mtype, e)
 
         elif mtype == "vocab-paraphrase":
-            if not OPENROUTER_API_KEY:
-                logger.warning("Skipping %s (%s): OPENROUTER_API_KEY not configured", spec["id"], mtype)
+            if not llm_configured():
+                logger.warning("Skipping %s (%s): no LLM provider is configured", spec["id"], mtype)
                 continue
             try:
                 mondai.append(_build_vocab_paraphrase_mondai(spec, vocab_pool, used_words, used_prompts, rng, level))
@@ -558,8 +558,8 @@ def _generate_vocabulary_paper_once(level: str, seed: int) -> dict:
                 logger.warning("Skipping %s (%s): %s", spec["id"], mtype, e)
 
         elif mtype == "vocab-usage":
-            if not OPENROUTER_API_KEY:
-                logger.warning("Skipping %s (%s): OPENROUTER_API_KEY not configured", spec["id"], mtype)
+            if not llm_configured():
+                logger.warning("Skipping %s (%s): no LLM provider is configured", spec["id"], mtype)
                 continue
             try:
                 mondai.append(_build_vocab_usage_mondai(spec, vocab_pool, used_words, used_prompts, rng, level))

@@ -28,11 +28,10 @@ import sys
 import time
 
 import scripts._env  # noqa: F401  -- must precede the route import, which
-#                       reads OPENROUTER_API_KEY at module scope.
+#                       reads the provider API keys at module scope.
 from content.reading_sentences import BY_LEVEL
-from routes.phrase import (
-    OPENROUTER_API_KEY, _cached_analysis, _call_llm, _store_analysis,
-)
+from routes.phrase import _cached_analysis, _call_llm, _store_analysis
+from study.llm_shared import llm_configured
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("prewarm-phrases")
@@ -74,8 +73,8 @@ def main() -> int:
             logger.info("  MISS %s  %s", level, jp)
         return 0
 
-    if not OPENROUTER_API_KEY:
-        logger.error("OPENROUTER_API_KEY is not set -- nothing to call.")
+    if not llm_configured():
+        logger.error("No LLM provider is configured -- nothing to call.")
         return 2
 
     done = failed = 0
