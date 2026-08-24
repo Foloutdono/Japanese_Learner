@@ -27,14 +27,21 @@ class _PooledConnection:
     """
 
     def __init__(self, pool, conn):
-        self._pool = pool
-        self._conn = conn
+        # object.__setattr__ bypasses our own override below -- these two
+        # must land on the wrapper itself, and _conn doesn't exist yet on
+        # the first assignment (our __setattr__ would try to proxy to it
+        # and blow up).
+        object.__setattr__(self, "_pool", pool)
+        object.__setattr__(self, "_conn", conn)
 
     def close(self):
         self._pool.putconn(self._conn)
 
     def __getattr__(self, name):
         return getattr(self._conn, name)
+
+    def __setattr__(self, name, value):
+        setattr(self._conn, name, value)
 
 
 def db_conn():

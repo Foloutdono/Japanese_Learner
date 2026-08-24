@@ -56,3 +56,12 @@ class DbConnPoolTests(unittest.TestCase):
             self.assertTrue(hasattr(conn, "rollback"))
         finally:
             conn.close()
+
+    def test_attribute_assignment_reaches_real_connection(self) -> None:
+        conn = db_conn()
+        try:
+            conn.autocommit = True
+            self.assertTrue(conn._conn.autocommit)  # not just conn.autocommit -- that would pass even with the bug
+        finally:
+            conn.autocommit = False  # restore before returning to the pool
+            conn.close()
