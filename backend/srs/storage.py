@@ -1,4 +1,4 @@
-from psycopg2.pool import SimpleConnectionPool
+from psycopg2.pool import ThreadedConnectionPool
 from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
 
@@ -7,7 +7,7 @@ class Storage:
 
     def __init__(self, database_url: str):
 
-        self.pool = SimpleConnectionPool(
+        self.pool = ThreadedConnectionPool(
             1,
             20,
             database_url
