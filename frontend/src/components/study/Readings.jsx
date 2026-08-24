@@ -22,6 +22,7 @@ function isOnyomiToken(token) {
 // splits on the exact same separators instead of drifting out of
 // sync with what Readings actually recognizes — kanji readings use
 // '・'/';', vocab readings (packed by vocab_data.py) use '/'.
+// eslint-disable-next-line react-refresh/only-export-components -- splitReadingTokens is a plain string-splitting helper shared with DictionaryScreen's shortKana truncation; it must stay a co-located export, not a component.
 export function splitReadingTokens(kana) {
   return (kana || '')
     .split(/[・;/]/)

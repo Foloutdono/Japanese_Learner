@@ -83,6 +83,7 @@ function capitalizeFirst(text) {
 // Semicolons win when present (the kanji convention); otherwise commas
 // separate (the vocab convention). Never both: no entry in either deck
 // mixes the two as separators, so whichever is in use is unambiguous.
+// eslint-disable-next-line react-refresh/only-export-components -- splitGlosses is the base string-parsing helper other exports in this file build on; not a component.
 export function splitGlosses(meaning) {
   if (!meaning) return []
   const sep = meaning.includes(';') ? ';' : ','
@@ -92,6 +93,7 @@ export function splitGlosses(meaning) {
 // The glosses with the leading one sentence-cased — the array form,
 // for callers that lay the parts out themselves rather than taking a
 // ready-made line (MeaningDisplay's big primary + muted rest).
+// eslint-disable-next-line react-refresh/only-export-components -- glossParts is a data helper used by QuizComponents.jsx and this file's own firstGloss/formatGlossLine; not a component.
 export function glossParts(meaning) {
   const parts = splitGlosses(meaning)
   return parts.length > 0 ? [capitalizeFirst(parts[0]), ...parts.slice(1)] : parts
@@ -99,6 +101,7 @@ export function glossParts(meaning) {
 
 // The single most representative gloss, for places with room for only
 // one line — a dictionary result card, a vocab-example row.
+// eslint-disable-next-line react-refresh/only-export-components -- firstGloss is a string helper used by DictionaryDetail.jsx/DictionaryScreen.jsx for single-line summaries; not a component.
 export function firstGloss(meaning) {
   return glossParts(meaning)[0] ?? ''
 }
@@ -106,6 +109,7 @@ export function firstGloss(meaning) {
 // The whole list as one normalised plain string. For contexts that need
 // a real string rather than elements — an MCQ answer row, a stroke
 // reference's subtitle — where GlossList's markup can't go.
+// eslint-disable-next-line react-refresh/only-export-components -- formatGlossLine is a plain-string formatter used by CardPrompt.jsx and several screens (GrammarScreen, KanjiScreen, StudyScreen, VocabScreen, TodayScreen); not a component.
 export function formatGlossLine(meaning) {
   return glossParts(meaning).join(' · ')
 }

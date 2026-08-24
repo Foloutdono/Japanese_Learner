@@ -81,6 +81,7 @@ function ExampleSentence({ ex, senseNumber }) {
 // verdigris) instead of arbitrary hex, so — like every other colour
 // in the app — these correctly flip between the dark and light theme
 // rather than staying fixed regardless of `data-theme`.
+// eslint-disable-next-line react-refresh/only-export-components -- TYPE_META is a plain colour/label lookup consumed by DictionaryScreen.jsx; not a component.
 export const TYPE_META = {
   kanji:    { color: 'var(--accent4)', fallback: 'Kanji' },
   vocab:    { color: 'var(--accent6)', fallback: 'Vocabulaire' },
@@ -106,6 +107,7 @@ const TYPE_MARK = {
 // instead of a reading list, the stroke-order panel), so call sites
 // check this instead of repeating the type === 'hiragana' ||
 // type === 'katakana' pair everywhere.
+// eslint-disable-next-line react-refresh/only-export-components -- isKanaType is a plain predicate used by DictionaryScreen.jsx to branch shared detail-panel logic; not a component.
 export function isKanaType(type) {
   return type === 'hiragana' || type === 'katakana'
 }
@@ -119,6 +121,7 @@ export function isKanaType(type) {
 // "jmdict"), where every entry has level: null and homographs are far
 // more common — so kana is always folded in too, not just used as a
 // fallback when kanji is absent.
+// eslint-disable-next-line react-refresh/only-export-components -- entryKey is a plain identity-string helper used by DictionaryScreen.jsx for React keys/selection comparisons; not a component.
 export function entryKey(entry) {
   return `${entry.type}:${entry.level ?? '_'}:${entry.kanji || ''}:${entry.kana || ''}`
 }
@@ -128,6 +131,7 @@ export function entryKey(entry) {
 // for a pure text utility would be backwards (same reasoning as
 // Readings.jsx being its own module).
 
+// eslint-disable-next-line react-refresh/only-export-components -- speakJapanese is a speech-synthesis side-effect helper re-exported for QuizComponents.jsx's DictionaryLookupSheet; not a component.
 export function speakJapanese(text) {
   if (!text) return
   window.speechSynthesis.cancel()

@@ -26,6 +26,7 @@ export function LangProvider({ children }) {
     )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- useLang is the standard companion hook for this Context; splitting it into its own file would ripple across every importer for no behavioral benefit.
 export function useLang() {
     return useContext(LangContext)
 }

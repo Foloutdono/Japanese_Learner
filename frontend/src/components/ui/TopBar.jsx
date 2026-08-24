@@ -30,6 +30,7 @@ const REVEAL_DURATION    = 2000  // ms the bar stays visible after a reveal
  * `const hidden = useAutoHideTopBar(...)` to
  * `const { hidden, reveal } = useAutoHideTopBar(...)` there too.
  */
+// eslint-disable-next-line react-refresh/only-export-components -- useAutoHideTopBar is a reusable hook consumed by screens that roll their own header markup instead of <TopBar/>; not a component.
 export function useAutoHideTopBar(active = true) {
   const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT
   const [hidden, setHidden] = useState(() => active && isMobile())
