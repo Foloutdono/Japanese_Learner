@@ -35,7 +35,13 @@ import edge_tts
 logger = logging.getLogger(__name__)
 
 _BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-_AUDIO_DIR = os.path.join(_BASE_DIR, "datas", "exam_audio")
+# On Render, EXAM_AUDIO_DIR points at the mounted persistent disk
+# (render.yaml mounts it at /data) so generated audio survives a deploy --
+# the container filesystem outside that mount is wiped on every deploy,
+# but the URL naming this file is stored permanently in exam_papers.
+# Unset locally, this falls back to the old in-repo path, which is fine
+# for dev since nothing there needs to survive a restart.
+_AUDIO_DIR = os.environ.get("EXAM_AUDIO_DIR") or os.path.join(_BASE_DIR, "datas", "exam_audio")
 
 
 class TTSFailed(Exception):
