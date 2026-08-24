@@ -54,7 +54,11 @@ app.mount("/kanjivg", StaticFiles(directory="kanjivg"), name="kanjivg")
 # use by exam_tts.py itself (os.makedirs), so it may not exist yet on a
 # fresh checkout; check_dir=False lets StaticFiles mount successfully
 # regardless and just 404 individual files until something's written.
-app.mount("/exam-audio", StaticFiles(directory="datas/exam_audio", check_dir=False), name="exam-audio")
+app.mount(
+    "/exam-audio",
+    StaticFiles(directory=os.environ.get("EXAM_AUDIO_DIR") or "datas/exam_audio", check_dir=False),
+    name="exam-audio",
+)
 
 # ── CORS ──────────────────────────────────────────────────────
 # The deployed frontend, plus anything CORS_ORIGINS adds — a
