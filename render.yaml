@@ -9,3 +9,7 @@ services:
       name: srs-data
       mountPath: /data
       sizeGB: 1
+    # EXAM_AUDIO_DIR must be set to /data/exam_audio in the Render service's
+    # environment variables (dashboard, not this file) so generated exam
+    # audio survives deploys — see backend/.env.example and
+    # backend/study/exam_tts.py.
