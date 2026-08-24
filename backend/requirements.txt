@@ -11,6 +11,7 @@ pykakasi
 requests>=2.31.0
 fugashi
 unidic-lite
+pytest>=9.0
 # study/exam_tts.py's listening-audio synthesis -- a thin async client
 # for Microsoft Edge's free consumer "Read Aloud" service (the same
 # free voices freetts.org's own /api/tts widget proxies), not a paid
