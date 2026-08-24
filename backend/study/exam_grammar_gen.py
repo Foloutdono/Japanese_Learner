@@ -41,6 +41,7 @@ import re
 
 from content.grammar_points_data import get_grammar_points
 from study.exam_blueprint import LEVEL_BLUEPRINT
+from study.exam_topics import READING_TOPICS, pick_topics
 from study.exam_validation import validate_passage_length, validate_kanji_gate
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json, call_llm_json_batch
 from study.exam_pipeline import generate_paper
@@ -326,8 +327,8 @@ _CLOZE_PROMPT = """You are writing one JLPT {level} grammar cloze passage \
 testing a grammar form, particle, or connecting word).
 
 Write a short, coherent Japanese passage (approximately {chars} \
-characters, stay within 20% of this) on any everyday topic, appropriate \
-for JLPT {level}. Any kanji you use MUST come from this list:
+characters, stay within 20% of this), appropriate \
+for JLPT {level}, about: {topic}. Any kanji you use MUST come from this list:
 {allowed_kanji}
 (use hiragana instead for anything else). Include exactly {blank_count} \
 blanks in the passage, marked 【1】【2】...【{blank_count}】 in that order, \
@@ -345,10 +346,16 @@ exactly this schema:
 """
 
 
-def _build_cloze_mondai(spec: dict, level: str) -> dict:
+def _build_cloze_mondai(spec: dict, level: str, rng: random.Random) -> dict:
     blank_count = spec["count"]
     chars = spec.get("passage_chars", 150)
-    prompt = _CLOZE_PROMPT.format(level=level, chars=chars, blank_count=blank_count, allowed_kanji=kanji_instruction(level))
+    # "on any everyday topic" is what the other two prompts in this file
+    # DON'T say -- they name real grammar points from the catalog, and
+    # they vary because of it. This one had nothing item-specific in it
+    # at all; see study/exam_topics.py's header for what that produced.
+    topic = pick_topics(READING_TOPICS, 1, rng)[0]
+    prompt = _CLOZE_PROMPT.format(level=level, chars=chars, blank_count=blank_count,
+                                  allowed_kanji=kanji_instruction(level), topic=topic)
     data = call_llm_json(prompt)
 
     title = data.get("titleJp")
@@ -435,12 +442,12 @@ def _flatten_grammar_questions(mondai_list: list[dict]) -> list[dict]:
 
 
 def _generate_grammar_paper_once(level: str, seed: int) -> dict:
-    # seed unused here on purpose, same reasoning as exam_reading_gen.py:
-    # nothing here is locally sampled in a way that needs reproducibility,
-    # and an LLM call is non-deterministic regardless of any local seed.
-    # Accepted anyway for interface symmetry with exam_pipeline.generate_
-    # paper's uniform generate_once(level, seed) contract.
-    rng = random.Random()  # unseeded: candidate-order only, no reproducibility claim
+    # Seeded now that the rng also picks the cloze passage's topic
+    # (study/exam_topics.py): two revisions of the same paper must be
+    # asked for different subjects, not left to differ by chance. It
+    # still drives candidate ORDER for the other two mondai, where no
+    # reproducibility is claimed either way.
+    rng = random.Random(seed)
     specs = _grammar_specs_for_level(level)
     points = get_grammar_points(level)
 
@@ -458,7 +465,7 @@ def _generate_grammar_paper_once(level: str, seed: int) -> dict:
             elif spec["type"] == "sentence-order":
                 built = _build_sentence_order_mondai(spec, level, points, used_patterns, rng)
             elif spec["type"] == "cloze-passage":
-                built = _build_cloze_mondai(spec, level)
+                built = _build_cloze_mondai(spec, level, rng)
             else:
                 continue
         except (RuntimeError, GenerationFailed) as e:

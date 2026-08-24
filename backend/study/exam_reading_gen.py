@@ -24,12 +24,16 @@
 # check for how this degrades (skips, doesn't fail the whole paper)
 # when no key is configured.
 import logging
+import random
 
 from study.exam_blueprint import LEVEL_BLUEPRINT
-from study.exam_validation import validate_passage_length, validate_kanji_gate
+from study.exam_topics import OPINION_TOPICS, READING_TOPICS, pick_topics
+from study.exam_validation import (
+    passage_length_bounds, validate_passage_length, validate_kanji_gate,
+)
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json
 from study.exam_pipeline import generate_paper
-from study.llm_shared import llm_configured
+from study.llm_shared import llm_configured, soften_kanji
 
 logger = logging.getLogger(__name__)
 
@@ -49,13 +53,12 @@ _STYLE_OPINION = (
 _PASSAGE_PROMPT = """You are writing one JLPT {level} reading-comprehension \
 passage ({mondai_name} style), with its own questions.
 
-Write a self-contained Japanese text of approximately {chars} characters. \
-This is a STRICT limit, not a suggestion: count as you write, and if you \
-are unsure whether you are over, write LESS rather than more -- text that \
-is too long is the most common way this task fails. {chars} characters is \
-short: roughly {sentence_estimate}. Do not try to fit a full story with a \
-beginning, middle, and end into that space -- a single moment, a short \
-notice, or one small observation is enough.
+The text should be about: {topic}.
+
+Write a self-contained Japanese text of {lo} to {hi} characters, aiming for \
+{chars}. This is a STRICT range, not a suggestion, and it is checked by \
+counting characters: a text outside it is rejected outright. \
+{length_guidance}
 
 Use vocabulary and grammar appropriate for JLPT {level}. Any kanji you use \
 MUST come from this list, with NO exceptions:
@@ -85,53 +88,101 @@ text, each with exactly 4 Japanese answer choices.
 Respond with ONLY JSON (no markdown fences, no commentary), matching \
 exactly this schema:
 {{"textJp": "...", "questions": [{{"promptJp": "...", "choices": ["...", "...", "...", "..."], "correctIndex": 0}}, ...]}}
-"""
+{feedback}"""
+
+# ── Length guidance, scaled to the target ───────────────────────
+# Live-diagnosed 2026-08, twice, in opposite directions.
+#
+# First: told only "approximately N characters", the model overshot
+# short targets by 1.5-2x (N5's 80-character 短文 came back at 120-200
+# every time, apparently defaulting toward a small narrative arc
+# regardless of the stated limit). The fix was to push hard toward
+# brevity and spell out roughly how many sentences the budget really is.
+#
+# Then that push was applied UNCONDITIONALLY, including to N5's
+# 250-character 中文 slot -- "write LESS rather than more", "{chars}
+# characters is short", "do not try to fit a full story" -- and the
+# model dutifully wrote 114-141 characters for a slot whose accepted
+# window starts at 200. Every single dokkai_5 passage failed, which took
+# the whole mondai with it and then the whole paper ("no reading mondai
+# could be generated at all").
+#
+# So the guidance now depends on which way the target actually errs. A
+# short slot needs the brevity push; a long one needs the opposite, and
+# telling it "this is short" is simply false.
+_SHORT_TARGET_CHARS = 150
+
+_SHORT_LENGTH_GUIDANCE = (
+    "If you are unsure whether you are over, write LESS rather than more -- "
+    "text that is too long is the most common way this task fails. {chars} "
+    "characters is short: roughly {sentence_estimate}. Do not try to fit a "
+    "full story with a beginning, middle, and end into that space -- a single "
+    "moment, a short notice, or one small observation is enough."
+)
+_LONG_LENGTH_GUIDANCE = (
+    "This is NOT a short text: {chars} characters is roughly "
+    "{sentence_estimate}, so develop the subject properly rather than "
+    "stopping after two or three lines -- a text that is too SHORT is the "
+    "most common way this task fails. Keep writing until you have passed "
+    "{lo} characters."
+)
 
 _READING_INSTRUCTIONS_JP = "つぎの　ぶんしょうを　よんで、しつもんに　こたえて　ください。"
 
 
-def _call_llm_passage(level: str, mondai_name: str, chars: int, question_count: int, style_guidance: str) -> dict:
-    # Live-diagnosed 2026-08: told only "approximately N characters",
-    # the model consistently overshot short targets by 1.5-2x (N5's
-    # 80-character 短文 came back at 120-200 characters every time,
-    # apparently defaulting toward a small narrative arc regardless of
-    # the stated limit) -- spelling out roughly how many sentences that
-    # actually is gives it a concrete unit to count against instead of
-    # an abstract character budget.
+def _call_llm_passage(level: str, mondai_name: str, chars: int, question_count: int,
+                       style_guidance: str, topic: str, feedback: str = "") -> dict:
+    # Spelling out roughly how many sentences the budget is gives the
+    # model a concrete unit to count against instead of an abstract
+    # character budget — it counts sentences far better than characters,
+    # in both directions (see the guidance constants above).
     sentence_count = max(1, round(chars / 22))
     sentence_estimate = f"{sentence_count} short sentence" + ("s" if sentence_count != 1 else "")
+    lo, hi = passage_length_bounds(chars)
+    guidance = _SHORT_LENGTH_GUIDANCE if chars <= _SHORT_TARGET_CHARS else _LONG_LENGTH_GUIDANCE
     prompt = _PASSAGE_PROMPT.format(
         level=level, mondai_name=mondai_name, chars=chars, question_count=question_count,
         allowed_kanji=kanji_instruction(level), style_guidance=style_guidance,
-        sentence_estimate=sentence_estimate,
+        topic=topic, lo=lo, hi=hi, feedback=feedback,
+        length_guidance=guidance.format(chars=chars, sentence_estimate=sentence_estimate, lo=lo),
     )
     return call_llm_json(prompt, "Generate the passage and questions.")
 
 
-def _build_one_passage(level: str, mondai_name: str, chars: int, question_count: int,
-                        style_guidance: str, passage_id: str, start_number: int) -> dict:
-    data = _call_llm_passage(level, mondai_name, chars, question_count, style_guidance)
+# One LLM call per passage was never retried: a passage that failed the
+# length or kanji gate was logged and dropped, and once enough dropped
+# the mondai -- and then the paper -- failed outright. The paper-level
+# retry in exam_pipeline.py doesn't help here, because it re-runs the
+# SAME prompt and the model has no idea what was wrong with the last
+# one. Retrying here, with the failure fed back in, is the only loop
+# that actually carries information from one attempt to the next.
+_PASSAGE_ATTEMPTS = 3
 
-    text = data.get("textJp")
-    questions_raw = data.get("questions")
+_FEEDBACK_HEADER = (
+    "\nYour previous attempt was REJECTED for the following reasons. "
+    "Fix them exactly; everything else about it was fine.\n"
+)
 
-    errors = []
-    if not isinstance(text, str) or not text.strip():
-        errors.append("missing textJp")
-    else:
-        errors.extend(validate_passage_length(text, chars))
-        errors.extend(validate_kanji_gate(text, level))
-    if not isinstance(questions_raw, list) or len(questions_raw) != question_count:
-        got = len(questions_raw) if isinstance(questions_raw, list) else "n/a"
-        errors.append(f"expected {question_count} questions, got {got}")
-    if errors:
-        raise GenerationFailed("; ".join(errors))
 
+def _soften_best_effort(text: str, level: str) -> str:
+    """Kana-ify out-of-level kanji if that can be done reliably, else
+    leave the text alone. Used for question and choice text, which no
+    gate has ever checked -- so an N5 answer choice could print 教室
+    even though the passage above it could not. This is a strict
+    improvement with no new failure mode: it never rejects anything."""
+    return soften_kanji(text, level) or text
+
+
+def _build_questions(questions_raw: list, level: str, passage_id: str, start_number: int) -> list[dict]:
+    """Validated question objects, or GenerationFailed naming the first
+    problem. Raises rather than returning errors because a malformed
+    question list means the whole response is unusable — the caller
+    turns that into another attempt just like a failed text gate."""
     questions = []
     for i, q in enumerate(questions_raw):
-        prompt = q.get("promptJp")
-        choices_text = q.get("choices")
-        correct_index = q.get("correctIndex")
+        prompt = q.get("promptJp") if isinstance(q, dict) else None
+        choices_text = q.get("choices") if isinstance(q, dict) else None
+        correct_index = q.get("correctIndex") if isinstance(q, dict) else None
         if not isinstance(prompt, str) or not prompt.strip():
             raise GenerationFailed(f"{passage_id} question {i}: missing promptJp")
         if not isinstance(choices_text, list) or len(choices_text) != 4:
@@ -142,7 +193,14 @@ def _build_one_passage(level: str, mondai_name: str, chars: int, question_count:
             raise GenerationFailed(f"{passage_id} question {i}: invalid correctIndex")
 
         ids = ["c1", "c2", "c3", "c4"]
-        choices = [{"id": ids[j], "textJp": t} for j, t in enumerate(choices_text)]
+        softened = [_soften_best_effort(t, level) for t in choices_text]
+        # Softening can collapse two distinct choices into the same kana
+        # (診察 and 診察 written out are identical strings); keep the
+        # originals in that case rather than shipping duplicate choices,
+        # which validate_mcq_question would reject anyway.
+        if len(set(softened)) != 4:
+            softened = choices_text
+        choices = [{"id": ids[j], "textJp": t} for j, t in enumerate(softened)]
         questions.append({
             "id": f"{passage_id}_q{i + 1}",
             # Continues across passages within the mondai (item 1 of
@@ -152,12 +210,81 @@ def _build_one_passage(level: str, mondai_name: str, chars: int, question_count:
             # per passage (an earlier version of this code did) made two
             # different questions both show as "Q1" on the result screen.
             "number": start_number + i,
-            "promptJp": prompt,
+            "promptJp": _soften_best_effort(prompt, level),
             "choices": choices,
             "answer": ids[correct_index],
         })
+    return questions
 
-    return {"id": passage_id, "textJp": text, "questions": questions}
+
+def _build_one_passage(level: str, mondai_name: str, chars: int, question_count: int,
+                        style_guidance: str, topic: str, passage_id: str, start_number: int) -> dict:
+    feedback = ""
+    last_errors: list[str] = []
+
+    for attempt in range(_PASSAGE_ATTEMPTS):
+        last_attempt = attempt == _PASSAGE_ATTEMPTS - 1
+        data = _call_llm_passage(level, mondai_name, chars, question_count,
+                                 style_guidance, topic, feedback)
+
+        text = data.get("textJp")
+        questions_raw = data.get("questions")
+
+        # Kanji failures are kept apart from the rest because they are
+        # the one kind that can be SALVAGED without another LLM call:
+        # soften_kanji rewrites the offending words to their kana
+        # reading, which is exactly what a real low-level JLPT passage
+        # does with a word whose kanji the learner hasn't met yet. A
+        # length or shape failure has no such repair.
+        hard_errors: list[str] = []
+        kanji_errors: list[str] = []
+        if not isinstance(text, str) or not text.strip():
+            hard_errors.append("missing textJp")
+        else:
+            hard_errors.extend(validate_passage_length(text, chars))
+            kanji_errors.extend(validate_kanji_gate(text, level))
+        if not isinstance(questions_raw, list) or len(questions_raw) != question_count:
+            got = len(questions_raw) if isinstance(questions_raw, list) else "n/a"
+            hard_errors.append(f"expected {question_count} questions, got {got}")
+
+        if not hard_errors and kanji_errors and last_attempt:
+            softened = soften_kanji(text, level)
+            if softened is not None:
+                logger.info("Passage %s: softened out-of-level kanji rather than dropping it", passage_id)
+                text, kanji_errors = softened, []
+
+        if not hard_errors and not kanji_errors:
+            try:
+                questions = _build_questions(questions_raw, level, passage_id, start_number)
+            except GenerationFailed as e:
+                last_errors = [str(e)]
+                feedback = _FEEDBACK_HEADER + f"- {e}\n"
+                continue
+            return {"id": passage_id, "textJp": text, "questions": questions}
+
+        last_errors = hard_errors + kanji_errors
+        feedback = _FEEDBACK_HEADER + "".join(
+            f"- {_as_feedback(e, text, chars)}\n" for e in last_errors
+        )
+
+    raise GenerationFailed("; ".join(last_errors))
+
+
+def _as_feedback(error: str, text, chars: int) -> str:
+    """Turns a validator message into an instruction. The validators
+    describe what is wrong for a log reader; the model needs to be told
+    what to DO, and in the kanji case the specific characters to replace
+    (validate_kanji_gate already names them)."""
+    if error.startswith("passage length"):
+        lo, hi = passage_length_bounds(chars)
+        direction = "too SHORT -- write more" if len(text) < lo else "too LONG -- write less"
+        return (f"Your text was {len(text)} characters, which is {direction}. "
+                f"It must be between {lo} and {hi} characters.")
+    if "outside" in error and "allowed set" in error:
+        return (f"{error} Rewrite those specific characters in hiragana, keeping the rest "
+                f"of each word in kanji, and check every remaining character against the "
+                f"allowed list before answering.")
+    return error
 
 
 def _passage_question_counts(total: int, questions_per_passage: int) -> list[int]:
@@ -169,10 +296,15 @@ def _passage_question_counts(total: int, questions_per_passage: int) -> list[int
     return [base + (1 if i < remainder else 0) for i in range(passage_count) if base + (1 if i < remainder else 0) > 0]
 
 
-def build_reading_passage_mondai(spec: dict, level: str) -> dict:
+def build_reading_passage_mondai(spec: dict, level: str, rng: random.Random) -> dict:
     qpp = spec.get("questions_per_passage", 1)
     counts = _passage_question_counts(spec["count"], qpp)
-    style_guidance = _STYLE_OPINION if "主張" in spec["name_jp"] else _STYLE_COMPREHENSION
+    # The same 主張 test that picks the style guidance picks the topic
+    # pool: an opinion passage needs something to hold an opinion ABOUT,
+    # and "a note left on the fridge" gives it nothing to argue.
+    is_opinion = "主張" in spec["name_jp"]
+    style_guidance = _STYLE_OPINION if is_opinion else _STYLE_COMPREHENSION
+    topics = pick_topics(OPINION_TOPICS if is_opinion else READING_TOPICS, len(counts), rng)
 
     passages = []
     next_number = 1
@@ -180,7 +312,7 @@ def build_reading_passage_mondai(spec: dict, level: str) -> dict:
         passage_id = f"{spec['id']}_p{i + 1}"
         try:
             passage = _build_one_passage(level, spec["name_jp"], spec["passage_chars"], qc,
-                                          style_guidance, passage_id, next_number)
+                                          style_guidance, topics[i], passage_id, next_number)
         except (RuntimeError, GenerationFailed) as e:
             logger.warning("Passage %s (%d/%d) for %s failed: %s", passage_id, i + 1, len(counts), spec["id"], e)
             continue
@@ -225,14 +357,16 @@ def _reading_specs_for_level(level: str) -> list[dict]:
 
 
 def _generate_reading_paper_once(level: str, seed: int) -> dict:
-    # `seed` is unused here on purpose: unlike exam_kanji_gen.py/
-    # exam_vocab_gen.py's context mondai, nothing in this module locally
-    # samples or shuffles anything -- the LLM authors the passage and
-    # questions directly, and an LLM call is inherently non-deterministic
-    # regardless of any local seed. Reproducibility for what actually
-    # gets SERVED comes from routes/exams.py's materialize-once-in-DB
-    # caching, not from this function being pure; kept as a parameter
-    # only for interface symmetry with the other generators.
+    # `seed` drives TOPIC selection (study/exam_topics.py). It used to be
+    # ignored entirely, on the reasoning that an LLM call is
+    # non-deterministic anyway -- true, but it meant the prompt itself
+    # was byte-identical for every paper at a level, and the model
+    # answered a topic-less prompt with the same handful of subjects
+    # every time. What the seed buys is not reproducibility (the DB
+    # caching in routes/exams.py still provides that); it is that two
+    # papers, or two revisions of one paper, are asked for DIFFERENT
+    # things rather than being left to differ by chance.
+    rng = random.Random(seed)
     specs = _reading_specs_for_level(level)
 
     mondai = []
@@ -243,7 +377,7 @@ def _generate_reading_paper_once(level: str, seed: int) -> dict:
             logger.warning("Skipping %s (reading-passage): no LLM provider is configured", spec["id"])
             continue
         try:
-            built = build_reading_passage_mondai(spec, level)
+            built = build_reading_passage_mondai(spec, level, rng)
         except GenerationFailed as e:
             logger.warning("Skipping %s: %s", spec["id"], e)
             continue

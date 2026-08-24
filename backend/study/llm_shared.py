@@ -230,6 +230,20 @@ def sentence_kanji_ok(text: str, level: str) -> bool:
     return all(not is_kanji(c) or c in allowed for c in text)
 
 
+def offending_kanji(text: str, level: str) -> str:
+    """The characters that make sentence_kanji_ok() false, in order of
+    first appearance and without repeats — "" when the text passes.
+
+    Exists so a rejection can tell the model WHICH characters it must
+    replace. The allowed list is already in every prompt (see
+    exam_gen_utils.kanji_instruction), so restating it on a retry adds
+    tokens and no information; the handful of characters it actually got
+    wrong is the part it doesn't have."""
+    allowed = kanji_set_for_level(level)
+    seen = dict.fromkeys(c for c in text if is_kanji(c) and c not in allowed)
+    return "".join(seen)
+
+
 def soften_kanji(text: str, level: str) -> str | None:
     """Rewrite out-of-level kanji to their hiragana reading, or None if
     that can't be done reliably.

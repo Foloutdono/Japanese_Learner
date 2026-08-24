@@ -37,11 +37,16 @@ import { useReportPlatformCount } from './platformCount'
  * which already names the section on the station plate overhead.
  *
  * Props:
- *   modes    — array of { key, label, desc?, sample?, color? }
+ *   modes    — array of { key, label, desc?, sample?, color?, action? }
  *     sample — optional Japanese specimen line (the characters a set
  *       actually contains, say), set in the Japanese face. It is the
  *       停車駅 strip under a destination: what this one actually stops
  *       at.
+ *     action — optional { label, title?, onClick } secondary action for
+ *       this one card. Rendered as a SIBLING of the card button, not
+ *       inside it: the card is a <button>, and a button inside a button
+ *       is invalid HTML that browsers resolve by dropping one of them.
+ *       The wrapper below exists only to position the two.
  *   onSelect(key) — called when a card is chosen
  */
 export default function ModeSelector({ modes, onSelect }) {
@@ -52,9 +57,8 @@ export default function ModeSelector({ modes, onSelect }) {
     <div className="platform-grid">
       {modes.map((m, i) => {
         const service = serviceFor(m.key)
-        return (
+        const card = (
           <button
-            key={m.key}
             type="button"
             onClick={() => { playUi('click-mode-selection'); onSelect(m.key) }}
             className={`platform-card${service ? ` platform-card--${service.key}` : ''}`}
@@ -94,6 +98,20 @@ export default function ModeSelector({ modes, onSelect }) {
 
             <span className="platform-card__go" aria-hidden="true">▶</span>
           </button>
+        )
+        if (!m.action) return <div className="platform-slot" key={m.key}>{card}</div>
+        return (
+          <div className="platform-slot" key={m.key}>
+            {card}
+            <button
+              type="button"
+              className="platform-slot__action"
+              title={m.action.title}
+              onClick={() => { playUi('click-mode-selection'); m.action.onClick() }}
+            >
+              {m.action.label}
+            </button>
+          </div>
         )
       })}
     </div>

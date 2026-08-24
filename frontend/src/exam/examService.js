@@ -45,9 +45,26 @@ export class ExamGenerationError extends Error {
  * backend/routes/exams.py's get_exam) — callers poll. `apiFetch` rather
  * than `apiJson` deliberately, despite the project's usual preference:
  * this is precisely the call that needs to branch on the raw status.
+ *
+ * One exam id has several papers behind it, and the resolved paper
+ * carries its own `revision` — needed on submit, and to key the saved
+ * draft. Which one comes back is the server's decision (the lowest
+ * revision this learner hasn't already sat), steered by two options:
+ *
+ *   exclude  — a revision NOT to serve, i.e. "give me a different
+ *              paper". Revisions already attempted are skipped anyway;
+ *              this covers a paper opened and abandoned, which left no
+ *              attempt behind to be skipped by.
+ *   revision — one exact paper, whatever the rule would say. Only the
+ *              result screen wants this: an old attempt has to be shown
+ *              against the paper it was taken on.
  */
-export async function getExam(examId, session) {
-  const res = await apiFetch(`/api/exams/${examId}`, session)
+export async function getExam(examId, session, { exclude, revision } = {}) {
+  const query = new URLSearchParams()
+  if (revision != null) query.set('revision', revision)
+  else if (exclude != null && exclude !== '') query.set('exclude', exclude)
+  const suffix = query.toString() ? `?${query}` : ''
+  const res = await apiFetch(`/api/exams/${examId}${suffix}`, session)
   if (res.status === 202) return { generating: true }
   if (res.status === 503) {
     const body = await res.json().catch(() => ({}))
@@ -63,11 +80,12 @@ export async function getExam(examId, session) {
  * client-computed score, since a generated exam's content isn't
  * guaranteed to still match whatever the client last fetched.
  */
-export async function submitAttempt(examId, { sectionId, answers, startedAt, finishedAt }, session) {
+export async function submitAttempt(examId, { sectionId, revision, answers, startedAt, finishedAt }, session) {
   const res = await apiFetch(`/api/exams/${examId}/attempts`, session, {
     method: 'POST',
     body: JSON.stringify({
       section_id: sectionId,
+      revision,
       answers,
       started_at: startedAt,
       finished_at: finishedAt,

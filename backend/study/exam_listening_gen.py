@@ -19,8 +19,10 @@
 # paper_once skips them with a loud log message, the same way
 # exam_vocab_gen.py already skips 語形成 ("no generator yet").
 import logging
+import random
 
 from study.exam_blueprint import LEVEL_BLUEPRINT
+from study.exam_topics import LISTENING_TOPICS, pick_topics
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json_batch
 from study.exam_pipeline import generate_paper
 from study.exam_tts import synthesize_dialogue, TTSFailed
@@ -43,13 +45,17 @@ the others. A learner will HEAR each as audio, not read it -- the \
 dialogue and question are spoken aloud; only the 4 answer choices are \
 shown printed on the page.
 
+Each question has an ASSIGNED subject, and you must use the one given:
+{topic_block}
+
 For EACH of the {n} questions, write a short, natural Japanese dialogue \
-between two people (labeled "A" and "B") about a task, plan, or \
-arrangement -- for example deciding what to buy, arranging when/where to \
-meet, or working out what to do next -- such that after hearing it, a \
-listener could answer a concrete question about what needs to be done, \
-by whom, or when. Vary the topic across the {n} questions so they don't \
-resemble each other. Any vocabulary you use should be appropriate for a \
+between two people (labeled "A" and "B") about that question's assigned \
+subject, such that after hearing it, a listener could answer a concrete \
+question about what needs to be done, by whom, when, or which one was \
+chosen. Do not drift from the assigned subject onto a different one, and \
+in particular do not fall back on arranging a meeting time or a scene at \
+a station unless that is what the subject actually says. Any vocabulary \
+you use should be appropriate for a \
 JLPT {level} learner; kanji you use MUST come from this list:
 {allowed_kanji}
 (use hiragana instead for anything else).
@@ -180,15 +186,24 @@ def _build_one_listening_mcq_question(item, level: str, q_id: str, number: int) 
 _SPARE_BATCH_CALLS = 1
 
 
-def _build_listening_mcq_mondai(spec: dict, level: str) -> dict:
+def _build_listening_mcq_mondai(spec: dict, level: str, rng: random.Random) -> dict:
     questions = []
     calls = 0
     max_calls = -(-spec["count"] // _LISTENING_MCQ_BATCH_SIZE) + _SPARE_BATCH_CALLS
     while len(questions) < spec["count"] and calls < max_calls:
         batch_n = min(_LISTENING_MCQ_BATCH_SIZE, spec["count"] - len(questions))
         calls += 1
+        # Fresh topics per CALL, not per mondai: a retry batch re-asks
+        # for the items the previous one dropped, and re-sending the
+        # subjects that just failed to produce a usable item is the one
+        # thing least likely to work. Drawing from the shared paper-level
+        # rng also keeps the two listening mondai from covering the same
+        # ground as each other.
+        topics = pick_topics(LISTENING_TOPICS, batch_n, rng)
+        topic_block = "\n".join(f"{i + 1}. {t}" for i, t in enumerate(topics))
         prompt = _LISTENING_MCQ_PROMPT_BATCH.format(
             n=batch_n, level=level, name_jp=spec["name_jp"], allowed_kanji=kanji_instruction(level),
+            topic_block=topic_block,
         )
         # LLMUnavailable deliberately NOT caught: no model could be
         # reached at all, which no amount of re-asking fixes. Letting it
@@ -249,10 +264,15 @@ def _listening_specs_for_level(level: str) -> list[dict]:
 
 
 def _generate_listening_paper_once(level: str, seed: int) -> dict:
-    # `seed` unused, same reasoning as exam_reading_gen.py/
-    # exam_grammar_gen.py: an LLM call is non-deterministic regardless
-    # of any local seed; reproducibility for what's actually SERVED
-    # comes from routes/exams.py's materialize-once-in-DB caching.
+    # `seed` drives topic selection (study/exam_topics.py) -- see
+    # exam_reading_gen._generate_reading_paper_once for the full
+    # reasoning. It matters more here than anywhere else in the project:
+    # this prompt used to name three example scenarios inline and ask
+    # the model to "vary the topic", which varies topics within one
+    # batch of four and not at all between batches or between papers,
+    # and the observed result was a paper where nearly every item was
+    # either arranging a meeting time or a scene at a station.
+    rng = random.Random(seed)
     specs = _listening_specs_for_level(level)
 
     mondai = []
@@ -266,7 +286,7 @@ def _generate_listening_paper_once(level: str, seed: int) -> dict:
             logger.warning("Skipping %s (listening-mcq): no LLM provider is configured", spec["id"])
             continue
         try:
-            built = _build_listening_mcq_mondai(spec, level)
+            built = _build_listening_mcq_mondai(spec, level, rng)
         except GenerationFailed as e:
             logger.warning("Skipping %s: %s", spec["id"], e)
             continue

@@ -557,6 +557,41 @@ button:focus-visible {
 .selection-screen .level-selector { padding: 40px 22px 32px; }
 .selection-screen .level-selector .platform-grid { padding: 26px 0 0; }
 
+/* The grid's cell, so a card with a secondary action beside it still
+   occupies exactly one column. Only the exam picker uses the action
+   today (a 別の問題 "different paper" link); every other caller renders
+   a bare card into this same wrapper, which costs nothing. */
+.platform-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* A separate button rather than a corner of the card: it does something
+   different from opening the exam (it asks the server for another
+   paper), and nesting it inside the card would be a button inside a
+   button. Understated on purpose — the card is the destination, this is
+   the small print under it. */
+.platform-slot__action {
+  align-self: flex-end;
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-jp);
+  font-size: 0.72rem;
+  line-height: 1.3;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.platform-slot__action:hover,
+.platform-slot__action:focus-visible {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
 .platform-card {
   --rail: var(--row-color, var(--accent));
   position: relative;

@@ -49,11 +49,18 @@ _KIND_META = {
 }
 
 # id -> (generator_version, kind, level, callable(seed) -> paper).
-# generator_version is stored per row in exam_papers — nothing reads it
-# back yet, but a future migration can use it to find and regenerate
-# papers made by an older version of a given generator instead of
-# silently serving them forever. kind/level are needed by list_exams()
-# to describe a not-yet-materialized exam without generating it.
+# generator_version is stored per row in exam_papers AND filtered on
+# when a paper is served (see _select_paper): bumping the string here
+# retires every paper an older generator produced, in one edit, without
+# deleting a thing -- past attempts still render against the revision
+# they were taken on, and nothing new is ever served from the old
+# prompt. That is what the reading/listening/grammar "-gen-2" bumps
+# below are for: the papers generated before study/exam_topics.py
+# existed all drew on the same handful of subjects, and the reading
+# ones frequently failed to generate at all.
+#
+# kind/level are needed by list_exams() to describe a not-yet-
+# materialized exam without generating it.
 #
 # study/exam_stub.py's hand-written preview paper is deliberately NOT
 # registered here anymore: it existed to prove the generation pipe end
@@ -76,21 +83,21 @@ EXAM_GENERATORS = {
         # N1/N2 where the real exam presents vocab/grammar/reading in
         # one booklet — accepted simplification, see
         # exam_reading_gen.py's module docstring.
-        f"{level.lower()}-reading-01": ("reading-gen-1", "reading", level, partial(generate_reading_paper, level))
+        f"{level.lower()}-reading-01": ("reading-gen-2", "reading", level, partial(generate_reading_paper, level))
         for level in _LEVELS
     },
     **{
         # Same accepted simplification as "-reading-01": its own paper
         # at every level rather than merged into the real exam's
         # combined booklet at N1/N2.
-        f"{level.lower()}-grammar-01": ("grammar-gen-1", "grammar", level, partial(generate_grammar_paper, level))
+        f"{level.lower()}-grammar-01": ("grammar-gen-2", "grammar", level, partial(generate_grammar_paper, level))
         for level in _LEVELS
     },
     **{
         # Same accepted simplification as "-reading-01"/"-grammar-01".
         # Needs an LLM provider configured (dialogue text) -- audio synthesis
         # itself needs no credential at all, see exam_tts.py.
-        f"{level.lower()}-listening-01": ("listening-gen-1", "listening", level, partial(generate_listening_paper, level))
+        f"{level.lower()}-listening-01": ("listening-gen-2", "listening", level, partial(generate_listening_paper, level))
         for level in _LEVELS
     },
 }
@@ -113,30 +120,111 @@ def _expected_question_count(level: str, kind: str) -> int:
     )
 
 
-def _get_cached_paper(exam_id: str) -> dict | None:
-    """Read-only: returns the already-materialized paper for exam_id, or
-    None if it hasn't been generated yet. Never generates -- both
-    list_exams() and submit_attempt() use this specifically so neither
-    browsing the catalog nor scoring an attempt can trigger full LLM
-    generation (up to 15 LLM-dependent papers, each several slow calls)
-    inside one HTTP request. See list_exams()'s own comment for how the
-    original plan already called this out: "static catalog, no
-    materialization needed to list.\""""
+def _select_paper(exam_id: str, user_id: str, exclude: tuple[int, ...] = ()) -> tuple[int, dict] | None:
+    """The paper this user should be served for exam_id, as
+    (revision, paper) -- or None if they need a new one generated.
+
+    Read-only: never generates. list_exams() and submit_attempt() both
+    go through here specifically so neither browsing the catalog nor
+    scoring an attempt can trigger full LLM generation (up to 15
+    LLM-dependent papers, each several slow calls) inside one HTTP
+    request. See list_exams()'s own comment for how the original plan
+    already called this out: "static catalog, no materialization needed
+    to list."
+
+    The selection rule is the whole design (see study/exam_schema.py's
+    header): the LOWEST revision of the CURRENT generator_version that
+    this user has not already attempted. Papers are global, so a
+    revision another learner paid to generate is served to this one for
+    free, and a learner who has sat every existing revision -- and only
+    then -- causes a new one to be generated. `exclude` drops a specific
+    revision on top of that, which is how "give me a different paper"
+    works for someone who opened a paper but never submitted it (no
+    attempt row exists to exclude them by)."""
+    generator_version = EXAM_GENERATORS[exam_id][0]
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT paper FROM exam_papers WHERE exam_id = %s", (exam_id,))
+            cur.execute(
+                """
+                SELECT revision, paper
+                  FROM exam_papers p
+                 WHERE exam_id = %s
+                   AND generator_version = %s
+                   AND NOT (revision = ANY(%s))
+                   AND NOT EXISTS (
+                        SELECT 1 FROM exam_attempts a
+                         WHERE a.exam_id = p.exam_id
+                           AND a.revision = p.revision
+                           AND a.user_id = %s)
+                 ORDER BY revision
+                 LIMIT 1
+                """,
+                (exam_id, generator_version, list(exclude), user_id),
+            )
+            row = cur.fetchone()
+            return (row[0], row[1]) if row else None
+    finally:
+        conn.close()
+
+
+def _load_paper(exam_id: str, revision: int) -> dict | None:
+    """One exact revision, whoever has attempted it. Scoring and the
+    result screen use this rather than _select_paper: an attempt must be
+    graded against the paper the learner actually sat, which by
+    definition is one _select_paper would no longer offer them."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT paper FROM exam_papers WHERE exam_id = %s AND revision = %s",
+                (exam_id, revision),
+            )
             row = cur.fetchone()
             return row[0] if row else None
     finally:
         conn.close()
 
 
-def _seed_for(exam_id: str) -> int:
-    # Deterministic from the id alone, so the id is the whole
-    # reproducibility key — no seed needs to be passed around or
-    # stored anywhere else to regenerate/verify a paper later.
-    return int(hashlib.sha256(exam_id.encode()).hexdigest(), 16) % (2**63)
+def _next_revision(exam_id: str) -> int:
+    """One past the highest revision that exists for this exam id, at
+    ANY generator_version. Numbering continues across a version bump
+    rather than restarting, so a revision number is unique per exam id
+    for the lifetime of the database -- an attempt row's (exam_id,
+    revision) can then never come to mean a different paper than the one
+    it was taken on."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COALESCE(MAX(revision), 0) + 1 FROM exam_papers WHERE exam_id = %s", (exam_id,))
+            return cur.fetchone()[0]
+    finally:
+        conn.close()
+
+
+def _parse_exclude(exclude: str | None) -> tuple[int, ...]:
+    """Query-string revisions to skip, ignoring anything unparseable —
+    a malformed `exclude` should cost the learner a less-specific paper
+    choice, never a 422 on the screen they were trying to open."""
+    if not exclude:
+        return ()
+    out = []
+    for part in exclude.split(","):
+        try:
+            out.append(int(part))
+        except ValueError:
+            continue
+    return tuple(out)
+
+
+def _seed_for(exam_id: str, revision: int) -> int:
+    # Deterministic from the id and revision, so those two are the whole
+    # reproducibility key — no seed needs to be passed around or stored
+    # anywhere else to regenerate/verify a paper later. The revision is
+    # in the hash and not just the row: it is what makes two revisions
+    # of one exam draw different topics from study/exam_topics.py
+    # instead of asking the model for the same thing twice.
+    return int(hashlib.sha256(f"{exam_id}:{revision}".encode()).hexdigest(), 16) % (2**63)
 
 
 # ── Background generation ────────────────────────────────────────
@@ -190,11 +278,11 @@ def _mark_job_failed(exam_id: str, error: str, cooldown_seconds: int) -> None:
         conn.close()
 
 
-def _generation_worker(exam_id: str) -> None:
+def _generation_worker(exam_id: str, revision: int) -> None:
     """Runs off-request. Owns the job row from 'running' through to
     either deleted (success) or 'failed' (with a cooldown)."""
     generator_version, _kind, _level, generate = EXAM_GENERATORS[exam_id]
-    seed = _seed_for(exam_id)
+    seed = _seed_for(exam_id, revision)
     try:
         # No DB connection is held across this call -- it is the slow
         # part, and an idle-in-transaction connection for its whole
@@ -228,12 +316,12 @@ def _generation_worker(exam_id: str) -> None:
             cur.execute(
                 """
                 INSERT INTO exam_papers
-                    (exam_id, level, seed, generator_version, paper, section_count, question_count)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (exam_id) DO NOTHING
+                    (exam_id, revision, level, seed, generator_version, paper, section_count, question_count)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (exam_id, revision) DO NOTHING
                 """,
                 (
-                    exam_id, paper["level"], seed, generator_version,
+                    exam_id, revision, paper["level"], seed, generator_version,
                     json.dumps(paper), len(paper["sections"]), len(flatten_questions(paper)),
                 ),
             )
@@ -242,12 +330,12 @@ def _generation_worker(exam_id: str) -> None:
             # 'done' status.
             cur.execute("DELETE FROM exam_generation_jobs WHERE exam_id = %s", (exam_id,))
         conn.commit()
-        logger.info("Exam %s generated and materialized", exam_id)
+        logger.info("Exam %s revision %d generated and materialized", exam_id, revision)
     finally:
         conn.close()
 
 
-def _claim_generation(exam_id: str) -> tuple[str, dict | None]:
+def _claim_generation(exam_id: str, revision: int) -> tuple[str, dict | None]:
     """Decides, in one transaction, what should happen for an exam id
     with no materialized paper. Returns (outcome, detail):
 
@@ -264,11 +352,11 @@ def _claim_generation(exam_id: str) -> tuple[str, dict | None]:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO exam_generation_jobs (exam_id, status)
-                VALUES (%s, 'running')
+                INSERT INTO exam_generation_jobs (exam_id, revision, status)
+                VALUES (%s, %s, 'running')
                 ON CONFLICT (exam_id) DO NOTHING
                 """,
-                (exam_id,),
+                (exam_id, revision),
             )
             if cur.rowcount == 1:
                 conn.commit()
@@ -305,10 +393,10 @@ def _claim_generation(exam_id: str) -> tuple[str, dict | None]:
                     """
                     UPDATE exam_generation_jobs
                        SET status = 'running', error = NULL, retry_after = NULL,
-                           started_at = NOW(), updated_at = NOW()
+                           revision = %s, started_at = NOW(), updated_at = NOW()
                      WHERE exam_id = %s
                     """,
-                    (exam_id,),
+                    (revision, exam_id),
                 )
                 conn.commit()
                 return "claimed", None
@@ -321,10 +409,10 @@ def _claim_generation(exam_id: str) -> tuple[str, dict | None]:
         conn.close()
 
 
-def _start_generation(exam_id: str) -> None:
+def _start_generation(exam_id: str, revision: int) -> None:
     threading.Thread(
-        target=_generation_worker, args=(exam_id,),
-        name=f"exam-gen:{exam_id}", daemon=True,
+        target=_generation_worker, args=(exam_id, revision),
+        name=f"exam-gen:{exam_id}:r{revision}", daemon=True,
     ).start()
 
 
@@ -344,14 +432,20 @@ def list_exams(user_id: str = Depends(get_user_id)):
     out = []
     for exam_id, (_generator_version, kind, level, _generate) in EXAM_GENERATORS.items():
         label, label_jp, _types = _KIND_META[kind]
-        paper = _get_cached_paper(exam_id)
-        if paper is not None:
+        # The revision THIS user would be served, not "the" paper: the
+        # picker needs it both to say whether opening the exam costs a
+        # wait, and to pass as `exclude` when they ask for a different
+        # paper than the one they are being offered.
+        selected = _select_paper(exam_id, user_id)
+        if selected is not None:
+            revision, paper = selected
             entry = {
                 "level": paper["level"],
                 "title": paper["title"],
                 "titleJp": paper["titleJp"],
                 "questionCount": len(flatten_questions(paper)),
                 "generated": True,
+                "revision": revision,
             }
         else:
             entry = {
@@ -362,8 +456,12 @@ def list_exams(user_id: str = Depends(get_user_id)):
                 # False means "opening this will generate it", which is
                 # slow (minutes, for the LLM-backed kinds) -- the picker
                 # screen warns before the learner commits to waiting
-                # rather than dropping them on a silent spinner.
+                # rather than dropping them on a silent spinner. Note it
+                # can be False for an exam that HAS papers: this learner
+                # has sat all of them, so the next one is a generation
+                # for them even though the row count is not zero.
                 "generated": False,
+                "revision": None,
             }
         # `kind` travels explicitly so the client can group/label by it
         # without parsing exam_id -- the "{level}-{kind}-01" id scheme is
@@ -373,21 +471,46 @@ def list_exams(user_id: str = Depends(get_user_id)):
 
 
 @router.get("/api/exams/{exam_id}")
-def get_exam(exam_id: str, user_id: str = Depends(get_user_id)):
+def get_exam(exam_id: str, revision: int | None = None, exclude: str | None = None,
+             user_id: str = Depends(get_user_id)):
     """200 + the paper once it exists; 202 while it is being generated;
     503 for a short cooldown after a failed attempt. The client polls
     this (see frontend/src/screens/ExamRunner.jsx) rather than holding
-    one request open for the minutes a generation takes."""
+    one request open for the minutes a generation takes.
+
+    `exclude` is a comma-separated list of revisions not to serve — how
+    "give me a different paper" is asked for. Revisions this user has
+    already ATTEMPTED are excluded unconditionally and need not be
+    listed; `exclude` covers the other case, a paper they opened and
+    abandoned without submitting. `revision` overrides all of that and
+    asks for one exact paper."""
     if exam_id not in EXAM_GENERATORS:
         raise HTTPException(status_code=404, detail=f"Unknown exam id: {exam_id}")
 
-    paper = _get_cached_paper(exam_id)
-    if paper is not None:
-        return paper
+    # An exact revision, asked for by the result screen on the reload
+    # path: it must render an old attempt against the paper that attempt
+    # was taken on, which is precisely the paper the selection rule
+    # below would refuse to hand back. Never generates -- a revision
+    # nobody has is a 404, not a two-minute wait.
+    if revision is not None:
+        paper = _load_paper(exam_id, revision)
+        if paper is None:
+            raise HTTPException(status_code=404, detail=f"Unknown revision {revision} for {exam_id}")
+        return {**paper, "revision": revision}
 
-    outcome, detail = _claim_generation(exam_id)
+    selected = _select_paper(exam_id, user_id, _parse_exclude(exclude))
+    if selected is not None:
+        revision, paper = selected
+        # The revision travels with the paper because the client needs
+        # to send it back on submit (so the attempt is scored against
+        # the paper actually sat, not whichever one the selection rule
+        # would pick at submit time) and to key its saved draft.
+        return {**paper, "revision": revision}
+
+    revision = _next_revision(exam_id)
+    outcome, detail = _claim_generation(exam_id, revision)
     if outcome == "claimed":
-        _start_generation(exam_id)
+        _start_generation(exam_id, revision)
     if outcome == "cooldown":
         # The error text is the generator's own, safe to show: it names
         # what could not be produced, not anything about the account.
@@ -409,6 +532,11 @@ class SubmitAttemptPayload(BaseModel):
     answers: dict[str, str]
     started_at: int   # epoch ms, matches Date.now() on the client
     finished_at: int
+    # Which revision the learner actually sat. Optional so a client that
+    # loaded a paper before this shipped can still submit; omitted, the
+    # server falls back to the selection rule, which for a learner mid-
+    # attempt still resolves to the paper they were given.
+    revision: int | None = None
 
 
 @router.post("/api/exams/{exam_id}/attempts")
@@ -422,7 +550,16 @@ def submit_attempt(exam_id: str, payload: SubmitAttemptPayload, user_id: str = D
     # multi-minute generation to score answers that could not have come
     # from it would both block the submit and score against different
     # content than the learner saw.
-    paper = _get_cached_paper(exam_id)
+    #
+    # By exact revision when the client names one: _select_paper would
+    # be wrong here for the same reason it is right everywhere else --
+    # it deliberately skips papers this user has already attempted, and
+    # on a re-submit that is the very paper being scored.
+    if payload.revision is not None:
+        revision, paper = payload.revision, _load_paper(exam_id, payload.revision)
+    else:
+        selected = _select_paper(exam_id, user_id)
+        revision, paper = selected if selected else (None, None)
     if paper is None:
         raise HTTPException(
             status_code=409,
@@ -437,12 +574,12 @@ def submit_attempt(exam_id: str, payload: SubmitAttemptPayload, user_id: str = D
             cur.execute(
                 """
                 INSERT INTO exam_attempts
-                    (user_id, exam_id, section_id, answers, review, per_section, correct, total, started_at, finished_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, to_timestamp(%s), to_timestamp(%s))
+                    (user_id, exam_id, revision, section_id, answers, review, per_section, correct, total, started_at, finished_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, to_timestamp(%s), to_timestamp(%s))
                 RETURNING id
                 """,
                 (
-                    user_id, exam_id, payload.section_id,
+                    user_id, exam_id, revision, payload.section_id,
                     json.dumps(payload.answers), json.dumps(summary["review"]), json.dumps(summary["perSection"]),
                     summary["correct"], summary["total"],
                     payload.started_at / 1000, payload.finished_at / 1000,
@@ -453,7 +590,7 @@ def submit_attempt(exam_id: str, payload: SubmitAttemptPayload, user_id: str = D
     finally:
         conn.close()
 
-    return {"attemptId": attempt_id, "examId": exam_id, **summary}
+    return {"attemptId": attempt_id, "examId": exam_id, "revision": revision, **summary}
 
 
 @router.get("/api/exams/{exam_id}/attempts/{attempt_id}")
@@ -463,7 +600,7 @@ def get_attempt(exam_id: str, attempt_id: int, user_id: str = Depends(get_user_i
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT section_id, answers, review, per_section, correct, total
+                SELECT section_id, answers, review, per_section, correct, total, revision
                 FROM exam_attempts
                 WHERE id = %s AND user_id = %s AND exam_id = %s
                 """,
@@ -476,10 +613,15 @@ def get_attempt(exam_id: str, attempt_id: int, user_id: str = Depends(get_user_i
     if row is None:
         raise HTTPException(status_code=404, detail="Unknown attempt")
 
-    section_id, answers, review, per_section, correct, total = row
+    section_id, answers, review, per_section, correct, total, revision = row
     return {
         "attemptId": attempt_id,
         "examId": exam_id,
+        # The result screen re-fetches the paper on a reload; without
+        # this it would fetch whichever revision the learner should be
+        # served NEXT and render an old result against the wrong
+        # questions.
+        "revision": revision,
         "sectionId": section_id,
         "answers": answers,
         "review": review,

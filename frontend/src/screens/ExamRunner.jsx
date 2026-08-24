@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
@@ -21,31 +21,36 @@ const POLL_MAX_MS = 10000
 // hooks/useCardSession.js's loadCache/saveCache — a reload losing
 // nothing is worth more than a rare storage failure being anything
 // other than silent, since the exam itself works fine without it.
-function draftKey(examId) {
-  return `jp-exam-draft:${examId}`
+//
+// Keyed by REVISION as well as exam id: one exam id now has several
+// papers behind it (see backend/study/exam_schema.py), and a draft
+// restored onto a different revision would put answers against question
+// ids that paper doesn't contain.
+function draftKey(examId, revision) {
+  return `jp-exam-draft:${examId}:${revision}`
 }
 
-function loadDraft(examId) {
+function loadDraft(examId, revision) {
   try {
-    const raw = window.localStorage.getItem(draftKey(examId))
+    const raw = window.localStorage.getItem(draftKey(examId, revision))
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
   }
 }
 
-function saveDraft(examId, draft) {
+function saveDraft(examId, revision, draft) {
   try {
-    window.localStorage.setItem(draftKey(examId), JSON.stringify(draft))
+    window.localStorage.setItem(draftKey(examId, revision), JSON.stringify(draft))
   } catch {
     // Storage full/disabled — a reload just won't restore progress,
     // nothing else about the current attempt is affected.
   }
 }
 
-function clearDraft(examId) {
+function clearDraft(examId, revision) {
   try {
-    window.localStorage.removeItem(draftKey(examId))
+    window.localStorage.removeItem(draftKey(examId, revision))
   } catch {
     // best effort
   }
@@ -66,15 +71,22 @@ function formatTime(totalSeconds) {
 // initializers just run again.
 export default function ExamRunner({ session }) {
   const { examId } = useParams()
+  // ?exclude=<revision> — "not that paper, I've seen it". Part of the
+  // key below so arriving from the picker's fresh-paper action while
+  // already on this route mounts a new scene rather than reusing one
+  // holding the paper being excluded.
+  const [searchParams] = useSearchParams()
+  const exclude = searchParams.get('exclude')
   // Retrying a failed generation bumps this, which remounts the scene
   // — the same keyed-remount trick as switching papers, rather than an
   // effect that reaches back in and resets the scene's own state.
   const [attempt, setAttempt] = useState(0)
   return (
     <RunnerScene
-      key={`${examId}:${attempt}`}
+      key={`${examId}:${exclude ?? ''}:${attempt}`}
       session={session}
       examId={examId}
+      exclude={exclude}
       onRetry={() => setAttempt(n => n + 1)}
     />
   )
@@ -94,7 +106,7 @@ export default function ExamRunner({ session }) {
 // `devMode` is wired to a query flag (?dev=1), purely so whoever is
 // QAing generated audio can check a question without spoiling it for
 // real learners.
-function RunnerScene({ session, examId, onRetry }) {
+function RunnerScene({ session, examId, exclude, onRetry }) {
   const navigate = useNavigate()
   const { t } = useLang()
   const devMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === '1'
@@ -103,10 +115,13 @@ function RunnerScene({ session, examId, onRetry }) {
   // below); anything else is the paper itself.
   const [exam, setExam] = useState(null)
 
-  const [draftSnapshot] = useState(() => loadDraft(examId))
-  const [answers, setAnswers] = useState(() => draftSnapshot?.answers ?? {})
-  const [index, setIndex] = useState(() => draftSnapshot?.index ?? 0)
-  const [startedAt] = useState(() => draftSnapshot?.startedAt ?? Date.now())
+  // Restored when the paper arrives, not at mount: which draft belongs
+  // to this session depends on the paper's revision, and that isn't
+  // known until the fetch resolves. Until then there is nothing to
+  // restore anyway — the generating screen is what's on display.
+  const [answers, setAnswers] = useState({})
+  const [index, setIndex] = useState(0)
+  const [startedAt, setStartedAt] = useState(null)
 
   // A heartbeat, not a clock: its value is never read, only its change
   // forces a re-render each second so the derived `timeLeft` below gets
@@ -134,7 +149,7 @@ function RunnerScene({ session, examId, onRetry }) {
     let delay = POLL_START_MS
 
     const poll = () => {
-      getExam(examId, session)
+      getExam(examId, session, { exclude })
         .then(e => {
           if (!alive) return
           if (e?.generating) {
@@ -142,6 +157,10 @@ function RunnerScene({ session, examId, onRetry }) {
             delay = Math.min(delay * 1.5, POLL_MAX_MS)
             return
           }
+          const draft = loadDraft(examId, e.revision)
+          setAnswers(draft?.answers ?? {})
+          setIndex(draft?.index ?? 0)
+          setStartedAt(draft?.startedAt ?? Date.now())
           setExam(e)
         })
         // An LLM-backed paper can genuinely fail to generate (the writer
@@ -158,7 +177,7 @@ function RunnerScene({ session, examId, onRetry }) {
 
     poll()
     return () => { alive = false; if (timer) clearTimeout(timer) }
-  }, [examId, session])
+  }, [examId, session, exclude])
 
   const questions = useMemo(() => (exam ? flattenQuestions(exam) : []), [exam])
 
@@ -166,13 +185,13 @@ function RunnerScene({ session, examId, onRetry }) {
 
   // Derived, not stored: recomputed every render (the tick heartbeat
   // above is what makes "every render" include "every second").
-  const deadline = section ? startedAt + section.timeLimitMin * 60 * 1000 : null
+  const deadline = section && startedAt ? startedAt + section.timeLimitMin * 60 * 1000 : null
   const timeLeft = deadline !== null ? Math.max(0, (deadline - Date.now()) / 1000) : null
   const isTimeUp = timeLeft !== null && timeLeft <= 0
 
   useEffect(() => {
-    if (!exam) return
-    saveDraft(examId, { answers, index, startedAt })
+    if (!exam || !startedAt) return
+    saveDraft(examId, exam.revision, { answers, index, startedAt })
   }, [exam, examId, answers, index, startedAt])
 
   useEffect(() => {
@@ -274,10 +293,14 @@ function RunnerScene({ session, examId, onRetry }) {
     playUi('click-screen-selection')
     const summary = await submitAttempt(
       examId,
-      { sectionId: section.id, answers, startedAt, finishedAt: Date.now() },
+      // The revision travels with the submission so the server scores
+      // against the paper actually sat — by then it is one the server's
+      // own selection rule would no longer offer, precisely because
+      // this attempt is about to exist.
+      { sectionId: section.id, revision: exam.revision, answers, startedAt, finishedAt: Date.now() },
       session,
     )
-    clearDraft(examId)
+    clearDraft(examId, exam.revision)
     // attempt id in the URL (not just router state) is what makes a
     // reloaded result page recoverable — see ExamResult.
     navigate(`/exam/${examId}/results?attempt=${summary.attemptId}`, { state: { summary, exam } })

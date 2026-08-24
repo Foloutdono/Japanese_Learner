@@ -91,6 +91,20 @@ export default function ExamScreen({ session }) {
           exam.generated ? null : t.examNotGeneratedYet,
         ].filter(Boolean).join(' · '),
         sample: meta?.jp,
+        // Only where there IS a paper to be different from. Asking for
+        // a fresh one means excluding the revision on offer, which the
+        // catalog entry carries for exactly this purpose — the server
+        // then serves another existing paper if it has one, and only
+        // generates when it doesn't. A learner who has already sat every
+        // revision arrives here with generated:false and no action:
+        // opening it is already a fresh paper.
+        action: exam.generated
+          ? {
+              label: t.examFreshPaper,
+              title: t.examFreshPaperHint,
+              onClick: () => board(() => navigate(`/exam/${exam.id}?exclude=${exam.revision}`)),
+            }
+          : undefined,
       }
     })
 

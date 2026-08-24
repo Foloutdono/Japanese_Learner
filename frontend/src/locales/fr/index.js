@@ -890,7 +890,7 @@ const exam = {
   examKindListening:   'Écoute',
   examNotGeneratedYet: 'Rédigé à la première ouverture',
   examGenerating:      'Rédaction de votre examen…',
-  examGeneratingHint:  "Les questions sont générées à la première ouverture d'une épreuve — comptez une à deux minutes. Ensuite elle se charge instantanément et reste identique.",
+  examGeneratingHint:  "Les questions sont rédigées quand aucune épreuve que vous n'avez pas déjà passée n'existe — comptez une à deux minutes. Une fois écrite, elle se charge instantanément, pour vous comme pour les autres.",
   examLoadFailed:      "Cette épreuve n'a pas pu être générée pour le moment.",
   examLoadFailedHint:  'Le rédacteur de questions est peut-être momentanément indisponible. Réessayez dans un instant.',
   // Affiché à la place de examLoadFailedHint (et du bouton Réessayer)
@@ -907,6 +907,12 @@ const exam = {
   examResultMissing:   "Ce résultat n'est plus disponible — recommencez l'examen.",
   examBackToExams:     'Retour aux examens',
   examRetrySection:    'Recommencer',
+  // L'action secondaire de chaque épreuve dans le sélecteur, et
+  // l'action principale de l'écran de résultat. Les deux demandent une
+  // AUTRE épreuve, pas la même — voir backend/study/exam_schema.py.
+  examFreshPaper:      'Autre épreuve',
+  examFreshPaperHint:  "Remplacer cette épreuve par une autre. Si personne n'en a encore écrit, comptez une à deux minutes.",
+  examNewPaper:        'Nouvelle épreuve',
   examStarHint:        "Quel élément va à la position marquée d'une étoile ?",
   examFullSentence:    'Phrase complète :',
   examAudioPending:    "Extrait audio pas encore généré pour cette question.",

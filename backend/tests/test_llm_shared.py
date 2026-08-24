@@ -15,7 +15,7 @@ from unittest import mock
 
 from study import llm_shared
 from study.llm_shared import (
-    LLMUnavailable, Provider, sentence_kanji_ok, soften_kanji,
+    LLMUnavailable, Provider, offending_kanji, sentence_kanji_ok, soften_kanji,
 )
 
 
@@ -291,6 +291,29 @@ class SoftenKanjiTest(unittest.TestCase):
         result = soften_kanji("資料を印刷して配布する必要があります。", "N5")
         if result is not None:
             self.assertTrue(sentence_kanji_ok(result, "N5"))
+
+
+class OffendingKanjiTest(unittest.TestCase):
+    """What a rejection tells the model to fix. The allowed list is
+    already in every prompt, so a retry that just repeats it carries no
+    new information -- the characters it actually got wrong do."""
+
+    def test_names_only_the_disallowed_characters(self):
+        # 駅 and 見 are N5; 色 is not.
+        self.assertEqual(offending_kanji("駅で色を見た", "N5"), "色")
+
+    def test_empty_when_the_text_passes(self):
+        self.assertEqual(offending_kanji("駅へ行く", "N5"), "")
+        self.assertEqual(offending_kanji("ひらがなだけ", "N5"), "")
+
+    def test_deduplicates_and_keeps_first_appearance_order(self):
+        self.assertEqual(offending_kanji("教室で色、色、教室", "N5"), "教室色")
+
+    def test_agrees_with_the_gate(self):
+        for text in ("駅で色を見た", "駅へ行く", "資料を印刷する"):
+            with self.subTest(text=text):
+                self.assertEqual(bool(offending_kanji(text, "N5")),
+                                 not sentence_kanji_ok(text, "N5"))
 
 
 if __name__ == "__main__":

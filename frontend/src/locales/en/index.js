@@ -905,7 +905,7 @@ const exam = {
   examKindListening:   'Listening',
   examNotGeneratedYet: 'Written on first open',
   examGenerating:      'Writing your exam…',
-  examGeneratingHint:  'Questions are generated fresh the first time a paper is opened — this takes a minute or two. Afterwards it loads instantly and stays the same every time.',
+  examGeneratingHint:  'Questions are written fresh when nobody has a paper you haven’t already sat — this takes a minute or two. Once it exists it loads instantly, for you and for everyone else.',
   examLoadFailed:      "This paper couldn't be generated right now.",
   examLoadFailedHint:  'The question writer may be temporarily unavailable. Try again in a moment.',
   // Shown instead of examLoadFailedHint (and instead of the retry
@@ -923,6 +923,12 @@ const exam = {
   examResultMissing:   "This result isn't available — start the exam again.",
   examBackToExams:     'Back to exams',
   examRetrySection:    'Try again',
+  // The picker's per-paper secondary action, and the primary action on
+  // the result screen. Both ask for a DIFFERENT paper rather than the
+  // same one again — see backend/study/exam_schema.py on revisions.
+  examFreshPaper:      'Different paper',
+  examFreshPaperHint:  'Swap this paper for another one. If nobody has written one yet, it takes a minute or two.',
+  examNewPaper:        'New paper',
   examStarHint:        'Which piece belongs in the starred position?',
   examFullSentence:    'Full sentence:',
   examAudioPending:    'Audio clip not generated yet for this question.',

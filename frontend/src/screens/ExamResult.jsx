@@ -46,11 +46,19 @@ export default function ExamResult({ session }) {
 
   const attemptId = searchParams.get('attempt')
 
+  // Sequential, not Promise.all: an exam id has several papers behind
+  // it now, and the only one that can render THIS attempt is the
+  // revision it was sat on — which the attempt row is what knows. Asked
+  // for in parallel, the paper fetch would return whichever revision
+  // this learner should be served NEXT, and the review below would map
+  // the attempt's question ids onto a paper that doesn't contain them.
   useEffect(() => {
     if (loaded || !attemptId) return
     let alive = true
-    Promise.all([getExam(examId, session), getAttempt(examId, attemptId, session)])
-      .then(([exam, summary]) => { if (alive) setLoaded({ exam, summary }) })
+    getAttempt(examId, attemptId, session)
+      .then(summary =>
+        getExam(examId, session, { revision: summary.revision })
+          .then(exam => { if (alive) setLoaded({ exam, summary }) }))
       .catch(() => { if (alive) setLoaded(false) })
     return () => { alive = false }
   }, [loaded, attemptId, examId, session])
@@ -150,12 +158,23 @@ export default function ExamResult({ session }) {
           <button type="button" className="exam-nav-btn" onClick={() => { playUi('click-screen-selection'); navigate('/exam') }}>
             {t.examBackToExams}
           </button>
+          {/* A NEW paper, not this one again. Re-sitting a paper whose
+              answers you have just read through tests recall of those
+              answers rather than the language, so the server is asked
+              for a different revision — another existing one where it
+              has one (free), a freshly generated one where it doesn't.
+              The excluded revision is the one just sat; the server
+              would skip it anyway on the strength of the attempt now
+              recorded, and saying so explicitly costs nothing. */}
           <button
             type="button"
             className="exam-nav-btn exam-nav-btn--primary"
-            onClick={() => { playUi('click-screen-selection'); navigate(`/exam/${examId}`, { replace: true }) }}
+            onClick={() => {
+              playUi('click-screen-selection')
+              navigate(`/exam/${examId}?exclude=${exam.revision}`, { replace: true })
+            }}
           >
-            {t.examRetrySection}
+            {t.examNewPaper}
           </button>
         </div>
       </div>

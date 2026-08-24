@@ -17,7 +17,7 @@
 # loop now calls before paying for a full LLM regeneration.
 import random
 
-from study.llm_shared import sentence_kanji_ok
+from study.llm_shared import offending_kanji
 
 # A generator that always puts the correct answer in the same slot is
 # a bug, even though it never emits an outright-wrong item; on a paper
@@ -120,20 +120,33 @@ def validate_no_duplicate_targets(questions: list[dict]) -> list[str]:
     return errors
 
 
-def validate_passage_length(text: str, target_chars: int, tolerance: float | None = None) -> list[str]:
-    # A flat ±20% is unreasonably tight in absolute terms on a short
-    # target (N5's 80-character 短文 gets only ±16 characters) even
-    # though it's generous on a long one (N1's 1000-character passage
-    # gets ±200) — live-diagnosed 2026-08 as part of the SAME
-    # short-target overshoot exam_reading_gen.py's prompt now warns
-    # about explicitly; this is the safety-net half of that fix, not a
-    # replacement for prompting the model to actually aim shorter.
+def passage_length_bounds(target_chars: int, tolerance: float | None = None) -> tuple[int, int]:
+    """The accepted character window for a passage written to
+    `target_chars`. Split out of validate_passage_length so the PROMPT
+    can state the same numbers the validator enforces — before this,
+    exam_reading_gen.py's prompt described the limit in its own words
+    ("approximately N characters", "write LESS rather than more") while
+    the gate below computed something else, and the two drifted: the
+    prompt pushed hard toward brevity for every target because it had
+    been tuned on the shortest one, and a 250-character 中文 slot came
+    back at 114 characters, every time.
+
+    A flat ±20% is unreasonably tight in absolute terms on a short
+    target (N5's 80-character 短文 gets only ±16 characters) even
+    though it's generous on a long one (N1's 1000-character passage
+    gets ±200) — live-diagnosed 2026-08 as part of the SAME
+    short-target overshoot; this is the safety-net half of that fix, not
+    a replacement for prompting the model to actually aim shorter."""
     if tolerance is None:
         tolerance = max(0.2, 40 / target_chars)
+    return round(target_chars * (1 - tolerance)), round(target_chars * (1 + tolerance))
+
+
+def validate_passage_length(text: str, target_chars: int, tolerance: float | None = None) -> list[str]:
+    lo, hi = passage_length_bounds(target_chars, tolerance)
     length = len(text)
-    lo, hi = target_chars * (1 - tolerance), target_chars * (1 + tolerance)
     if not (lo <= length <= hi):
-        return [f"passage length {length} outside target {target_chars} ({lo:.0f}-{hi:.0f})"]
+        return [f"passage length {length} outside target {target_chars} ({lo}-{hi})"]
     return []
 
 
@@ -141,8 +154,17 @@ def validate_kanji_gate(text: str, level: str) -> list[str]:
     # LLM-generated text drifts from instructions often enough that this
     # is worth re-checking rather than trusting the prompt constraint —
     # same caution routes/reading.py's own comments already document.
-    if not sentence_kanji_ok(text, level):
-        return [f"text contains kanji outside {level}'s allowed set: {text[:60]!r}..."]
+    #
+    # The offending characters are named, not just the fact that there
+    # were some: this message is fed straight back to the model as retry
+    # feedback (exam_reading_gen.py's _build_one_passage), and "you used
+    # 色 and 教室, which are not allowed" is actionable in a way that
+    # "your text contains kanji outside the allowed set" is not — the
+    # model has already read the full allowed list once and still
+    # reached for those, so repeating the list achieves nothing.
+    bad = offending_kanji(text, level)
+    if bad:
+        return [f"text contains kanji outside {level}'s allowed set ({bad}): {text[:60]!r}..."]
     return []
 
 
