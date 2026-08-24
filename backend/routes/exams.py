@@ -590,7 +590,23 @@ def submit_attempt(exam_id: str, payload: SubmitAttemptPayload, user_id: str = D
     finally:
         conn.close()
 
-    return {"attemptId": attempt_id, "examId": exam_id, "revision": revision, **summary}
+    return {
+        "attemptId": attempt_id,
+        "examId": exam_id,
+        "revision": revision,
+        # Echoed back rather than left to the caller: the result screen
+        # reads startedAt/finishedAt off this response on the fast path
+        # and off get_attempt on a reload, and the two have to agree.
+        "startedAt": payload.started_at,
+        "finishedAt": payload.finished_at,
+        **summary,
+    }
+
+
+def _epoch_ms(value):
+    """A TIMESTAMPTZ column as epoch milliseconds, the unit the exam
+    API speaks everywhere else (see SubmitAttemptPayload)."""
+    return int(value.timestamp() * 1000) if value is not None else None
 
 
 @router.get("/api/exams/{exam_id}/attempts/{attempt_id}")
@@ -600,7 +616,8 @@ def get_attempt(exam_id: str, attempt_id: int, user_id: str = Depends(get_user_i
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT section_id, answers, review, per_section, correct, total, revision
+                SELECT section_id, answers, review, per_section, correct, total, revision,
+                       started_at, finished_at
                 FROM exam_attempts
                 WHERE id = %s AND user_id = %s AND exam_id = %s
                 """,
@@ -613,7 +630,7 @@ def get_attempt(exam_id: str, attempt_id: int, user_id: str = Depends(get_user_i
     if row is None:
         raise HTTPException(status_code=404, detail="Unknown attempt")
 
-    section_id, answers, review, per_section, correct, total, revision = row
+    section_id, answers, review, per_section, correct, total, revision, started_at, finished_at = row
     return {
         "attemptId": attempt_id,
         "examId": exam_id,
@@ -628,4 +645,13 @@ def get_attempt(exam_id: str, attempt_id: int, user_id: str = Depends(get_user_i
         "perSection": per_section,
         "correct": correct,
         "total": total,
+        # Already recorded on submit, just never handed back — which is
+        # why a reloaded result page could not show how long the paper
+        # took while the one navigated to directly could.
+        # Epoch ms, matching what submit_attempt takes in and hands
+        # back. These are TIMESTAMPTZ columns, so returning them raw
+        # would make this endpoint answer with ISO strings while the
+        # submit path answered with numbers, for the same two fields.
+        "startedAt": _epoch_ms(started_at),
+        "finishedAt": _epoch_ms(finished_at),
     }

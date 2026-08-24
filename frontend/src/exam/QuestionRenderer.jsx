@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
-import { api } from '../lib/api'
-import { ImageIcon, SpeakerOffIcon, StarIcon } from '../components/ui/Icons'
+import AudioPlayer from './AudioPlayer'
+import { ImageIcon, StarIcon } from '../components/ui/Icons'
 
 // ── QuestionRenderer ─────────────────────────────────────────
 // Takes ONE flattened question (see examService.flattenQuestions) and
@@ -50,34 +50,112 @@ function selectWithSound(onSelect, id) {
 // ── Shared choice list ───────────────────────────────────────
 // Renders both text and image choices with the app's existing
 // mcq-row language (see index.css `.mcq-list`/`.mcq-row`).
-function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed, answer }) {
+//
+// EVERY question type goes through here, including sentence-order —
+// which used to carry its own hand-inlined copy of this loop over
+// `pieces`. That duplicate is why the missing-selected-state bug below
+// shipped twice, so the pieces are mapped to the choice shape at the
+// call site instead and there is once again one row implementation.
+//
+// Two states, not one. `--selected` is what the learner picks DURING
+// the exam and is the whole point of a control that can be pressed:
+// without it, tapping an answer changed a counter and nothing at all
+// on the thing actually tapped. `--correct`/`--wrong` are the graded
+// verdict and only exist once `revealed` — during a live exam nothing
+// may hint at the answer, which is exactly why the two are separate
+// classes rather than one shared "active" look.
+function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed, answer, label }) {
+  const { t } = useLang()
+  const listRef = useRef(null)
+
+  // A radiogroup has to honour the arrow keys it advertises: assistive
+  // tech announces "radio, 2 of 4" precisely because Left/Right move
+  // between and check the options. ExamRunner binds those same keys to
+  // "previous/next question" globally, so without this a screen-reader
+  // user pressing Right to reach choice 3 would land on a different
+  // question instead. Handled here, and ExamRunner skips any arrow that
+  // came from inside a radiogroup.
+  //
+  // Roving tabindex for the same reason — a radiogroup is ONE tab stop,
+  // not four.
+  const activeIndex = Math.max(0, choices.findIndex(c => c.id === selected))
+
+  function onKeyDown(e) {
+    const delta = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1
+      : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1
+      : 0
+    if (!delta) return
+    e.preventDefault()
+    e.stopPropagation()
+    const next = (activeIndex + delta + choices.length) % choices.length
+    selectWithSound(onSelect, choices[next].id)
+    listRef.current?.querySelectorAll('.mcq-row')[next]?.focus()
+  }
+
   return (
-    <div className="mcq-list">
-      {choices.map((choice, i) => {
-        const isSelected = selected === choice.id
-        const isCorrect = revealed && choice.id === answer
-        const isWrong = revealed && isSelected && choice.id !== answer
-        const rowClass = ['mcq-row', isCorrect && 'mcq-row--correct', isWrong && 'mcq-row--wrong'].filter(Boolean).join(' ')
-        return (
-          <button
-            key={choice.id}
-            type="button"
-            className={rowClass}
-            disabled={revealed}
-            aria-pressed={isSelected}
-            onClick={() => selectWithSound(onSelect, choice.id)}
-          >
-            <span className="mcq-row__accent" />
-            <span className="mcq-row__index">{i + 1}</span>
-            {choiceType === 'image' ? (
-              <ImagePlaceholder alt={choice.imageAlt} compact />
-            ) : (
-              <span className="mcq-row__text" lang="ja">{choice.textJp}</span>
-            )}
-          </button>
-        )
-      })}
-    </div>
+    <>
+      {/* A live question is a single-choice group, so it is a radiogroup
+          — `aria-pressed` (what these rows used to carry) describes an
+          independent toggle and tells a screen-reader user nothing
+          about the other three options. Once revealed nothing is
+          selectable, so the rows go back to being plain disabled
+          buttons rather than radios that lie about being settable. */}
+      <div
+        ref={listRef}
+        className="mcq-list"
+        role={revealed ? undefined : 'radiogroup'}
+        aria-label={revealed ? undefined : label}
+        onKeyDown={revealed ? undefined : onKeyDown}
+      >
+        {choices.map((choice, i) => {
+          const isSelected = selected === choice.id
+          const isCorrect = revealed && choice.id === answer
+          const isWrong = revealed && isSelected && choice.id !== answer
+          const rowClass = [
+            'mcq-row',
+            !revealed && isSelected && 'mcq-row--selected',
+            isCorrect && 'mcq-row--correct',
+            isWrong && 'mcq-row--wrong',
+          ].filter(Boolean).join(' ')
+
+          // Said in words, not only in red and green: on a correct
+          // answer the picked row and the right row are the SAME row,
+          // and a learner reading two colours alone can't tell whether
+          // they got it right or are being shown what they missed.
+          let tag = null
+          if (isCorrect) tag = isSelected ? `${t.examYourAnswer} · ${t.examCorrectAnswer}` : t.examCorrectAnswer
+          else if (isWrong) tag = t.examYourAnswer
+
+          return (
+            <button
+              key={choice.id}
+              type="button"
+              className={rowClass}
+              disabled={revealed}
+              role={revealed ? undefined : 'radio'}
+              aria-checked={revealed ? undefined : isSelected}
+              tabIndex={revealed ? undefined : i === activeIndex ? 0 : -1}
+              onClick={() => selectWithSound(onSelect, choice.id)}
+            >
+              <span className="mcq-row__accent" aria-hidden="true" />
+              <span className="mcq-row__index">{i + 1}</span>
+              {choiceType === 'image' ? (
+                <ImagePlaceholder alt={choice.imageAlt} compact />
+              ) : (
+                <span className="mcq-row__text" lang="ja">{choice.textJp}</span>
+              )}
+              {tag && <span className="mcq-row__tag">{tag}</span>}
+            </button>
+          )
+        })}
+      </div>
+      {/* A blank scores the same as a wrong answer but isn't one, and
+          the review used to render the two identically — nothing
+          highlighted, the row simply looking unengaged. */}
+      {revealed && selected == null && (
+        <p className="exam-question__blank-note">{t.examNotAnswered}</p>
+      )}
+    </>
   )
 }
 
@@ -112,6 +190,7 @@ function McqBlock({ question, selected, onSelect, revealed }) {
         onSelect={onSelect}
         revealed={revealed}
         answer={question.answer}
+        label={question.promptJp}
       />
     </div>
   )
@@ -147,21 +226,17 @@ function SentenceOrderBlock({ question, selected, onSelect, revealed }) {
         ))}
       </div>
       <p className="exam-question__hint">{t.examStarHint}</p>
-      <div className="mcq-list">
-        {pieces.map((piece, i) => {
-          const isSelected = selected === piece.id
-          const isCorrect = revealed && piece.id === question.answer
-          const isWrong = revealed && isSelected && piece.id !== question.answer
-          const rowClass = ['mcq-row', isCorrect && 'mcq-row--correct', isWrong && 'mcq-row--wrong'].filter(Boolean).join(' ')
-          return (
-            <button key={piece.id} type="button" className={rowClass} disabled={revealed} aria-pressed={isSelected} onClick={() => selectWithSound(onSelect, piece.id)}>
-              <span className="mcq-row__accent" />
-              <span className="mcq-row__index">{i + 1}</span>
-              <span className="mcq-row__text" lang="ja">{piece.textJp}</span>
-            </button>
-          )
-        })}
-      </div>
+      {/* Pieces already carry `{id, textJp}` — the same shape a choice
+          has — so they go through the shared row list rather than a
+          second copy of it. */}
+      <ChoiceList
+        choices={pieces}
+        selected={selected}
+        onSelect={onSelect}
+        revealed={revealed}
+        answer={question.answer}
+        label={t.examStarHint}
+      />
       {revealed && (
         <p className="exam-order-solution" lang="ja">
           {t.examFullSentence} {order.map(id => byId[id].textJp).join(' ')}
@@ -183,7 +258,14 @@ function ClozeBlock({ question, selected, onSelect, revealed }) {
       <p className="exam-passage__text" lang="ja">
         <ClozeText template={passage.textTemplateJp} activeNumber={number} />
       </p>
-      <ChoiceList choices={question.choices} selected={selected} onSelect={onSelect} revealed={revealed} answer={question.answer} />
+      <ChoiceList
+        choices={question.choices}
+        selected={selected}
+        onSelect={onSelect}
+        revealed={revealed}
+        answer={question.answer}
+        label={passage.titleJp}
+      />
     </div>
   )
 }
@@ -214,7 +296,7 @@ function ReadingPassageBlock({ question, selected, onSelect, revealed }) {
         <p className="exam-passage__text" lang="ja">{passage.textJp}</p>
         {passage.memoJp && (
           <div className="exam-memo" lang="ja">
-            {passage.memoJp.split('\n').map((line, i) => <div key={i}>{line || '\u00A0'}</div>)}
+            {passage.memoJp.split('\n').map((line, i) => <div key={i}>{line || ' '}</div>)}
           </div>
         )}
       </div>
@@ -226,12 +308,18 @@ function ReadingPassageBlock({ question, selected, onSelect, revealed }) {
         onSelect={onSelect}
         revealed={revealed}
         answer={question.answer}
+        label={question.promptJp}
       />
     </div>
   )
 }
 
 // もんだい6 (reading) — flyer/table reading.
+//
+// No generator emits `table-reading` yet, on purpose: exam_reading_gen.py
+// names generalizing this block's hardcoded flyer schema as the
+// prerequisite for writing one. It stays here as the target of that
+// work rather than being cleared away as unreachable code.
 function TableReadingBlock({ question, selected, onSelect, revealed }) {
   const { flyer } = question
   return (
@@ -256,7 +344,14 @@ function TableReadingBlock({ question, selected, onSelect, revealed }) {
         </div>
       </div>
       <p className="exam-question__prompt" lang="ja">{question.promptJp}</p>
-      <ChoiceList choices={question.choices} selected={selected} onSelect={onSelect} revealed={revealed} answer={question.answer} />
+      <ChoiceList
+        choices={question.choices}
+        selected={selected}
+        onSelect={onSelect}
+        revealed={revealed}
+        answer={question.answer}
+        label={question.promptJp}
+      />
     </div>
   )
 }
@@ -264,14 +359,19 @@ function TableReadingBlock({ question, selected, onSelect, revealed }) {
 // ── Listening (もんだい1-4) ──────────────────────────────────
 // AUDIO NOTE: `question.audioSrc` is null until per-question clips are
 // dropped in (see README). The player degrades to a clearly-labelled
-// "audio pending" bar rather than silently doing nothing, and the
-// transcript stays hidden from real learners — it only ever appears
-// behind the `devMode` toggle passed down from ExamRunner, for the
-// person wiring up/QAing the clips.
+// "audio pending" bar rather than silently doing nothing.
+//
+// The transcript is withheld during the exam and offered in review:
+// `scriptJp` ships inside every paper already (study/exam_tts.py builds
+// the clip FROM it), and a listening question you got wrong is
+// unlearnable without it. The separate `devMode` toggle stays for
+// whoever is QAing generated clips against their script BEFORE sitting
+// the paper — the one case where it has to be visible while the
+// question is still live, and so the one case that still has to be
+// kept away from real learners.
 function ListeningBlock({ question, selected, onSelect, revealed, devMode }) {
   const { t } = useLang()
   const [showScript, setShowScript] = useState(false)
-  const audioRef = useRef(null)
   const choices = question.choices
   const choiceType = question.choiceType || 'text'
 
@@ -280,9 +380,9 @@ function ListeningBlock({ question, selected, onSelect, revealed, devMode }) {
       {question.questionPromptJp && <p className="exam-question__prompt" lang="ja">{question.questionPromptJp}</p>}
       {question.imageAlt && <ImagePlaceholder alt={question.imageAlt} />}
 
-      <AudioBar src={question.audioSrc} audioRef={audioRef} t={t} />
+      <AudioPlayer src={question.audioSrc} />
 
-      {devMode && (
+      {devMode && !revealed && (
         <div className="exam-dev-panel">
           <button type="button" className="exam-dev-panel__toggle" onClick={() => setShowScript(s => !s)}>
             {showScript ? 'Hide script (dev)' : 'Show script (dev)'}
@@ -291,27 +391,22 @@ function ListeningBlock({ question, selected, onSelect, revealed, devMode }) {
         </div>
       )}
 
-      <ChoiceList choices={choices} choiceType={choiceType} selected={selected} onSelect={onSelect} revealed={revealed} answer={question.answer} />
-    </div>
-  )
-}
+      <ChoiceList
+        choices={choices}
+        choiceType={choiceType}
+        selected={selected}
+        onSelect={onSelect}
+        revealed={revealed}
+        answer={question.answer}
+        label={question.questionPromptJp}
+      />
 
-function AudioBar({ src, audioRef, t }) {
-  if (!src) {
-    return (
-      <div className="exam-audio-bar exam-audio-bar--pending">
-        <SpeakerOffIcon size={16} />
-        <span>{t.examAudioPending}</span>
-      </div>
-    )
-  }
-  // src is backend-relative ("/exam-audio/<hash>.mp3", see
-  // study/exam_tts.py) -- api() resolves it against VITE_API_URL the
-  // same way DrawingCanvas.jsx's kanjivg src does, since the audio
-  // file lives on the backend, not wherever the frontend is served from.
-  return (
-    <div className="exam-audio-bar">
-      <audio ref={audioRef} controls src={api(src)} />
+      {revealed && question.scriptJp && (
+        <details className="exam-transcript">
+          <summary className="exam-transcript__summary">{t.examTranscript}</summary>
+          <p className="exam-transcript__text" lang="ja">{question.scriptJp}</p>
+        </details>
+      )}
     </div>
   )
 }

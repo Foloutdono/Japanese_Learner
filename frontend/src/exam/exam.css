@@ -103,17 +103,6 @@
   font-weight: 600;
   font-size: 1.1rem;
 }
-.exam-shell__count {
-  font-family: var(--font-display);
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  letter-spacing: 0.03em;
-}
-.exam-shell__meta-right {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
 .exam-shell__timer {
   font-family: var(--font-display);
   font-size: 0.8rem;
@@ -154,6 +143,27 @@
   letter-spacing: 0.08em;
   color: var(--accent);
 }
+.exam-mondai-instructions__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+/* Opens on the first question of a mondai and folds away after: the
+   instructions are byte-identical for every question inside one, and
+   redrawing four lines of kana above each of them pushed the question
+   itself below the fold on a phone. */
+.exam-mondai-instructions__toggle {
+  padding: 2px 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.exam-mondai-instructions__toggle:hover { color: var(--accent); }
 .exam-mondai-instructions__text {
   font-size: 0.88rem;
   line-height: 1.6;
@@ -319,9 +329,8 @@
 .exam-flyer__weekly { margin-top: 8px; }
 
 /* ── Audio bar (listening) ── */
-.exam-audio-bar { margin-bottom: 16px; }
-.exam-audio-bar audio { width: 100%; }
 .exam-audio-bar--pending {
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -370,11 +379,6 @@
   color: var(--text-on-panel);
 }
 .exam-nav-btn:disabled { opacity: 0.4; cursor: default; }
-.exam-nav-buttons__hint {
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
 
 /* ── Result screen ── */
 .exam-result-header {
@@ -387,14 +391,6 @@
   background: var(--bg-card);
   border-radius: var(--radius);
 }
-.exam-result-header__pct {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 3.2rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--success);
-}
-.exam-result-header--low .exam-result-header__pct { color: var(--danger); }
 .exam-result-header__score {
   font-family: var(--font-display);
   font-size: 0.95rem;
@@ -474,17 +470,423 @@
   .exam-card.prompt-card { padding: 22px 16px; }
   .exam-flyer__dates { min-width: 0; }
   .exam-generating { padding: 44px 12px; }
-  /* The three-across nav bar (prev · counter · next) is the one row
-     that genuinely doesn't fit a narrow phone — the counter goes under
-     the buttons rather than squeezing all three. */
-  .exam-nav-buttons {
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-  .exam-nav-buttons__hint {
-    order: 1;
-    width: 100%;
-    text-align: center;
-    padding-top: 4px;
-  }
+}
+
+/* ── Live-region text ──
+   Timer warnings are spoken, not drawn — the pulsing red clock only
+   reaches somebody already watching that corner of the screen. */
+.exam-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* An unknown question type used to render as unstyled body text — the
+   class was in the JSX with no rule behind it. Scaffolding-looking on
+   purpose: this is a bug report, not a UI state. */
+.exam-unsupported {
+  padding: 16px;
+  border: 1.5px dashed var(--danger);
+  border-radius: 10px;
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+/* Shown under a graded question that was left blank. */
+.exam-question__blank-note {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* ── Audio player (listening) ──
+   Replaces the browser's own <audio controls>, which rendered a
+   light-grey bar that ignored the theme entirely, looked different in
+   every browser, and couldn't show a play count. */
+.exam-audio-player {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--overlay-hover);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.exam-audio-player__play {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--text-on-panel);
+}
+.exam-audio-player__track {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.exam-audio-player__clock {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+/* A range input styled down to a scrub bar. The two vendor thumb rules
+   are deliberately NOT comma-joined — a selector one engine can't
+   parse invalidates the whole rule for that engine. */
+.exam-audio-player__range {
+  width: 100%;
+  height: 4px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--border);
+  accent-color: var(--accent);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.exam-audio-player__range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.exam-audio-player__range::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.exam-audio-player__replay {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+.exam-audio-player__replay:hover { color: var(--accent); }
+/* Replay is allowed here (the real JLPT plays each clip once, but this
+   is practice), so the count is shown rather than the replay withheld
+   — an honest record of how much help was taken. */
+.exam-audio-player__plays {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+}
+
+/* ── Transcript (review only) ──
+   Every listening question already carries its script; it was thrown
+   away outside dev mode, and a missed listening question can't be
+   learned from without it. */
+.exam-transcript {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.exam-transcript__summary {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.exam-transcript__summary:hover { color: var(--accent); }
+.exam-transcript__text {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--overlay-hover);
+  border-radius: 8px;
+  font-family: var(--font-jp);
+  font-size: 0.88rem;
+  line-height: 1.9;
+  white-space: pre-line;
+}
+
+/* ── Flag ("come back to this one") ── */
+.exam-flag-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+.exam-flag-btn:hover { color: var(--accent2); }
+.exam-flag-btn--on {
+  background: color-mix(in srgb, var(--accent2) 16%, var(--bg-card));
+  color: var(--accent2);
+}
+
+/* ── Answer sheet ──
+   The numbered grid that replaced a linear Prev/Next walk and a
+   "3 / 21 answered" string which named a count but never which ones. */
+.exam-sheet {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+}
+.exam-sheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-bottom: 12px;
+}
+.exam-sheet__title {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.exam-sheet__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+.exam-sheet__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.exam-sheet__swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  border: 1.5px solid var(--border);
+}
+.exam-sheet__swatch--answered {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.exam-sheet__legend-flag { color: var(--accent2); }
+.exam-sheet__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.exam-sheet__chip {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+.exam-sheet__chip:hover { border-color: var(--accent); color: var(--accent); }
+.exam-sheet__chip--answered {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-panel);
+}
+.exam-sheet__chip--answered:hover { color: var(--text-on-panel); }
+/* A corner mark rather than a colour swap, so a flagged chip still
+   reads as answered or blank — the two facts are independent. */
+.exam-sheet__chip--flagged::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent2);
+  border: 2px solid var(--bg-card);
+}
+.exam-sheet__chip--current {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* ── Finish ──
+   Available on every question, not only the last: skipping question 3
+   used to mean no way to submit short of walking to the end. */
+.exam-finish-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  background: var(--accent);
+  color: var(--text-on-panel);
+  font-weight: 700;
+}
+.exam-finish-btn:disabled { opacity: 0.6; cursor: default; }
+
+/* ── Inline confirm / error panels ──
+   Not window.confirm: it can't be themed, can't be translated by the
+   app's own locale, and is suppressed outright in some embedded
+   webviews — which for the leave-guard would mean silently losing the
+   guard rather than silently keeping it. */
+.exam-confirm {
+  margin-top: 16px;
+  padding: 16px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+}
+.exam-confirm--error { border-color: var(--danger); }
+.exam-confirm__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 6px;
+}
+.exam-confirm--error .exam-confirm__title { color: var(--danger); }
+.exam-confirm__body {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.exam-confirm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.exam-confirm__actions .exam-nav-btn { flex: 1 1 auto; }
+
+/* ── Score ring ──
+   A bare red 48% says you did badly without saying badly against what.
+   The target is a tick on the ring, so the comparison is seen rather
+   than read off two numbers. */
+.exam-score-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.exam-score-ring__track { stroke: var(--border); }
+.exam-score-ring__arc {
+  stroke: var(--success);
+  transition: stroke-dashoffset 0.6s ease;
+}
+.exam-result-header--low .exam-score-ring__arc { stroke: var(--danger); }
+.exam-score-ring__target { stroke: var(--text-secondary); }
+.exam-result-header__pct {
+  position: absolute;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--success);
+}
+.exam-result-header__pct--low { color: var(--danger); }
+@media (prefers-reduced-motion: reduce) {
+  .exam-score-ring__arc { transition: none; }
+}
+
+/* ── Review: filter + mondai grouping ── */
+.exam-review__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.exam-review__filter {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.exam-review__filter[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--text-on-panel);
+}
+.exam-review__perfect {
+  padding: 22px 0 28px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--success);
+}
+.exam-review-group { margin-top: 18px; }
+.exam-review-group__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.exam-review-group__score {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+/* Blank is a third outcome, not a shade of wrong: it scores the same
+   and means something entirely different (ran out of time, or skipped
+   and never came back). */
+.exam-review-row--blank .exam-review-row__icon { color: var(--text-secondary); }
+.exam-review-row__blank {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.exam-nav-buttons--result { margin-top: 28px; }
+
+@media (max-width: 560px) {
+  .exam-sheet { padding: 12px; }
+  .exam-sheet__chip { width: 34px; height: 34px; font-size: 0.75rem; }
+  .exam-audio-player { gap: 10px; padding: 10px 12px; }
+  .exam-confirm__actions .exam-nav-btn { flex-basis: 100%; }
+  .mcq-row__tag { font-size: 0.62rem; padding: 2px 7px; }
 }

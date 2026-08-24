@@ -281,6 +281,33 @@ export function PlayIcon({ size = 14, className }) {
   )
 }
 
+// Paired with PlayIcon for the exam's audio player — same filled,
+// stroke-less treatment so play and pause read as one control that
+// swaps its face rather than two different-weight glyphs.
+export function PauseIcon({ size = 14, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" />
+      <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+// "Come back to this one" in the exam's answer sheet. Outlined when
+// the question isn't flagged, filled when it is — so the state lives
+// in the glyph itself and not only in the colour around it.
+export function FlagIcon({ size = 16, filled = false, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M5.5 21V3.8" />
+      <path
+        d="M5.5 4.2h11.8l-2.4 4.1 2.4 4.1H5.5z"
+        fill={filled ? 'currentColor' : 'none'}
+      />
+    </svg>
+  )
+}
+
 export function StarIcon({ size = 16, className }) {
   return (
     <svg {...base} width={size} height={size} className={className} strokeLinejoin="round">

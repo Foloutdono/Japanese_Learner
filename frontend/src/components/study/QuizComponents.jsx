@@ -6,6 +6,7 @@ import { glossParts } from './gloss'
 import { Loading } from '../ui/Loading'
 import { DictionaryLookupSheet, SearchIcon, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
 import { CheckCircleIcon, XCircleIcon, ChevronIcon } from '../ui/Icons'
+import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -87,11 +88,6 @@ export function MCQButton({ choice, display, correct, selected, answered, onClic
   )
 }
 
-// Digit row shortcuts for the first 4 choices. On an AZERTY keyboard
-// the unshifted number row types &é"' rather than 1234, so both sets
-// are mapped to the same indices — whichever layout someone's on,
-// the physical top-row keys 1-4 answer choices 1-4.
-const CHOICE_KEY_INDEX = { '1': 0, '2': 1, '3': 2, '4': 3, '&': 0, 'é': 1, '"': 2, "'": 3 }
 
 // ── MCQ choices list ───────────────────────────────────────
 // `formatChoice` is an optional display transform for the choice text

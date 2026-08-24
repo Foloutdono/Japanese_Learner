@@ -877,8 +877,7 @@ const decks = {
 // rendered through its own inline `?? 'English default'` fallback
 // (see ExamScreen/ExamRunner/ExamResult/QuestionRenderer), so a
 // French-language user saw English exam text while the rest of the app
-// stayed in French. examListTitle keeps the literal Japanese glyphs in
-// both locales, same convention as appTitle.
+// stayed in French.
 //
 // This app has no affiliation with JEES or the Japan Foundation and
 // makes no claim to reproduce or score against their official
@@ -888,9 +887,6 @@ const decks = {
 const exam = {
   examTitle:           'Mock Exam',
   examDesc:            'Full-length practice exams, timed and scored\nVocabulary, grammar, reading, listening\nBuilt to the official JLPT format — unofficial scoring',
-  examEyebrow:         'Mock Exam',
-  examListTitle:       '模擬試験モード',
-  examListSubtitle:    'Practice exams generated to match the real JLPT format — vocabulary, grammar, reading, and listening, with an unofficial estimated score. Not affiliated with JEES or the Japan Foundation.',
   examQuestions:       'questions',
   examNoneAvailable:   'No exams available yet.',
 
@@ -922,7 +918,6 @@ const exam = {
   examQuestionAbbrev:  'Q',
   examResultMissing:   "This result isn't available — start the exam again.",
   examBackToExams:     'Back to exams',
-  examRetrySection:    'Try again',
   // The picker's per-paper secondary action, and the primary action on
   // the result screen. Both ask for a DIFFERENT paper rather than the
   // same one again — see backend/study/exam_schema.py on revisions.
@@ -943,6 +938,81 @@ const exam = {
   examUnofficialNote:  'Unofficial practice score — raw proportion correct, not a JLPT scaled score.',
   examReviewTitle:     'Review your answers',
   examReviewHint:      'Tap a question to see it again with the correct answer.',
+  // Wrong answers are what a review is for, so that's what opens by
+  // default — a 21-question paper otherwise lists 21 identical rows to
+  // click through before finding the two that went wrong.
+  examShowWrongOnly:   'Missed only',
+  examShowAll:         'All questions',
+  examAllCorrect:      'Nothing missed — every question correct.',
+  // Colour alone can't carry which row was picked and which was right
+  // (they're the same row on a correct answer, and ~8% of learners
+  // can't separate the two hues), so both are said in words.
+  examYourAnswer:      'Your answer',
+  examCorrectAnswer:   'Correct answer',
+  examNotAnswered:     'Left blank',
+  examTimeTaken:       'Time taken',
+  // The listening script ships inside every paper already (see
+  // exam_listening_gen.py) and is exactly what makes a missed
+  // listening question learnable — withheld during the exam, offered
+  // in review.
+  examTranscript:      'Transcript',
+
+  // ── Answer sheet ──
+  // The numbered grid under the question. Named for the real thing it
+  // stands in for: on a paper JLPT the answer sheet is what tells you
+  // at a glance what you still owe.
+  examSheetTitle:      'Answer sheet',
+  examSheetBlank:      'blank',
+  examSheetFlagged:    'flagged',
+  // aria-label for one chip — the visual states (fill, outline, corner
+  // mark) are meaningless to a screen reader, so each chip spells out
+  // its own.
+  examSheetChip: (n, answered, flagged) =>
+    `Question ${n}, ${answered ? 'answered' : 'blank'}${flagged ? ', flagged' : ''}`,
+  examFlag:            'Flag for review',
+  examUnflag:          'Remove flag',
+
+  // ── Finishing ──
+  // Submitting with blanks scores them wrong, so it asks first and
+  // says how many — and offers to go to them rather than only offering
+  // to go through with it.
+  examConfirmTitle:    'Finish with unanswered questions?',
+  examConfirmBody: (n) =>
+    `${n} question${n === 1 ? ' is' : 's are'} still blank. Blank answers are scored as wrong.`,
+  examReviewBlanks:    'Go to first blank',
+  examSubmitAnyway:    'Finish anyway',
+  examKeepGoing:       'Keep working',
+  // A failed submit used to strand a finished exam with no message and
+  // no way out. The draft is kept until the POST succeeds, so a retry
+  // is genuinely a retry.
+  examSubmitFailed:    "Couldn't submit your answers — your progress is safe.",
+  examSubmitRetry:     'Try submitting again',
+  examSubmitting:      'Submitting…',
+
+  // ── Leaving mid-exam ──
+  examLeaveTitle:      'Leave this exam?',
+  examLeaveBody:       'Your answers and the clock are saved — reopening this paper picks up where you left off.',
+  examLeaveConfirm:    'Leave',
+  examLeaveStay:       'Stay',
+
+  // ── Per-question chrome ──
+  // The mondai instructions are identical for every question inside a
+  // mondai, so they open on the first one and collapse behind this
+  // afterwards rather than re-reading the same four lines of kana each
+  // time.
+  examShowInstructions: 'Show instructions',
+  examHideInstructions: 'Hide instructions',
+  // Announced, not just coloured — a learner who isn't watching the
+  // corner gets no warning at all today.
+  examTimeWarning: (minutes) =>
+    `${minutes} minute${minutes === 1 ? '' : 's'} remaining.`,
+
+  // ── Audio player ──
+  examAudioPlay:       'Play',
+  examAudioPause:      'Pause',
+  examAudioReplay:     'Play from the start',
+  examAudioPlayed: (n) => `Played ${n}×`,
+  examAudioProgress:   'Audio position',
 }
 
 // ── 達磨堂 — the Daruma Hall ───────────────────────────────

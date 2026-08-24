@@ -862,8 +862,6 @@ const decks = {
 // ExamScreen/ExamRunner/ExamResult/QuestionRenderer), si bien qu'un
 // utilisateur francophone voyait ce texte en anglais alors que le
 // reste de l'app restait en français.
-// examListTitle garde les mêmes glyphes japonais dans les deux
-// langues, même convention que appTitle.
 //
 // Cette app n'est affiliée ni à la JEES ni à la Japan Foundation et ne
 // prétend reproduire ni corriger sur leur barème officiel — chaque
@@ -873,9 +871,6 @@ const decks = {
 const exam = {
   examTitle:           'Examen blanc',
   examDesc:            "Examens complets, chronométrés et notés\nVocabulaire, grammaire, lecture, écoute\nAu format JLPT officiel — notation non officielle",
-  examEyebrow:         'Examen blanc',
-  examListTitle:       '模擬試験モード',
-  examListSubtitle:    "Des examens générés selon le vrai format JLPT — vocabulaire, grammaire, lecture et écoute, avec une estimation de note non officielle. Aucune affiliation avec la JEES ou la Japan Foundation.",
   examQuestions:       'questions',
   examNoneAvailable:   'Aucun examen disponible pour le moment.',
 
@@ -906,7 +901,6 @@ const exam = {
   examQuestionAbbrev:  'Q',
   examResultMissing:   "Ce résultat n'est plus disponible — recommencez l'examen.",
   examBackToExams:     'Retour aux examens',
-  examRetrySection:    'Recommencer',
   // L'action secondaire de chaque épreuve dans le sélecteur, et
   // l'action principale de l'écran de résultat. Les deux demandent une
   // AUTRE épreuve, pas la même — voir backend/study/exam_schema.py.
@@ -928,6 +922,81 @@ const exam = {
   examUnofficialNote:  'Score non officiel — proportion brute de bonnes réponses, pas une note JLPT calibrée.',
   examReviewTitle:     'Revoir vos réponses',
   examReviewHint:      'Touchez une question pour la revoir avec la bonne réponse.',
+  // Une correction sert d'abord aux erreurs : c'est donc ce qui est
+  // ouvert par défaut — sinon une épreuve de 21 questions affiche 21
+  // lignes identiques à dérouler avant de trouver les deux ratées.
+  examShowWrongOnly:   'Erreurs seules',
+  examShowAll:         'Toutes les questions',
+  examAllCorrect:      'Aucune erreur — toutes les réponses sont bonnes.',
+  // La couleur seule ne peut pas dire quelle ligne a été choisie et
+  // laquelle était juste (c'est la même sur une bonne réponse, et ~8 %
+  // des gens ne distinguent pas les deux teintes) : les deux sont donc
+  // écrites en toutes lettres.
+  examYourAnswer:      'Votre réponse',
+  examCorrectAnswer:   'Bonne réponse',
+  examNotAnswered:     'Laissée vide',
+  examTimeTaken:       'Temps passé',
+  // Le script d'écoute est déjà dans chaque épreuve (voir
+  // exam_listening_gen.py) et c'est exactement ce qui rend une
+  // question d'écoute ratée exploitable — caché pendant l'épreuve,
+  // proposé à la correction.
+  examTranscript:      'Transcription',
+
+  // ── Feuille de réponses ──
+  // La grille numérotée sous la question. Nommée d'après ce qu'elle
+  // remplace : sur un JLPT papier, c'est la feuille de réponses qui
+  // dit d'un coup d'œil ce qu'il reste à faire.
+  examSheetTitle:      'Feuille de réponses',
+  examSheetBlank:      'vide',
+  examSheetFlagged:    'marquée',
+  // aria-label d'une case — les états visuels (rempli, contour, coin
+  // marqué) ne veulent rien dire pour un lecteur d'écran : chaque case
+  // énonce donc le sien.
+  examSheetChip: (n, answered, flagged) =>
+    `Question ${n}, ${answered ? 'répondue' : 'vide'}${flagged ? ', marquée' : ''}`,
+  examFlag:            'Marquer à revoir',
+  examUnflag:          'Retirer la marque',
+
+  // ── Terminer ──
+  // Rendre une copie avec des vides les compte comme fausses : on
+  // prévient donc, avec le nombre — et on propose d'y aller plutôt que
+  // seulement de passer outre.
+  examConfirmTitle:    'Terminer avec des questions sans réponse ?',
+  examConfirmBody: (n) =>
+    `${n} question${n === 1 ? ' est encore vide' : 's sont encore vides'}. Une réponse vide est comptée comme fausse.`,
+  examReviewBlanks:    'Aller à la première vide',
+  examSubmitAnyway:    'Terminer quand même',
+  examKeepGoing:       'Continuer',
+  // Un envoi échoué laissait une copie terminée sans message ni
+  // recours. Le brouillon est conservé jusqu'à la réussite de l'envoi :
+  // réessayer est donc un vrai réessai.
+  examSubmitFailed:    "Impossible d'envoyer vos réponses — votre progression est conservée.",
+  examSubmitRetry:     "Réessayer l'envoi",
+  examSubmitting:      'Envoi…',
+
+  // ── Quitter en cours d'épreuve ──
+  examLeaveTitle:      'Quitter cette épreuve ?',
+  examLeaveBody:       'Vos réponses et le chronomètre sont enregistrés — rouvrir cette épreuve reprend où vous en étiez.',
+  examLeaveConfirm:    'Quitter',
+  examLeaveStay:       'Rester',
+
+  // ── Habillage de la question ──
+  // La consigne du mondai est identique pour toutes ses questions :
+  // elle s'ouvre sur la première puis se replie ici, au lieu de
+  // relire les quatre mêmes lignes de kana à chaque fois.
+  examShowInstructions: 'Afficher la consigne',
+  examHideInstructions: 'Masquer la consigne',
+  // Annoncé, pas seulement coloré — aujourd'hui, qui ne regarde pas le
+  // coin de l'écran n'est prévenu de rien.
+  examTimeWarning: (minutes) =>
+    `${minutes} minute${minutes === 1 ? '' : 's'} restante${minutes === 1 ? '' : 's'}.`,
+
+  // ── Lecteur audio ──
+  examAudioPlay:       'Lire',
+  examAudioPause:      'Pause',
+  examAudioReplay:     'Relire depuis le début',
+  examAudioPlayed: (n) => `Écouté ${n}×`,
+  examAudioProgress:   "Position dans l'audio",
 }
 
 // ── 達磨堂 — le Hall des Daruma ────────────────────────────

@@ -4,17 +4,23 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
 import { CardTransition } from '../components/study/CardTransition'
+import { CHOICE_KEY_INDEX } from '../domain/choiceKeys'
 import EmptyState from '../components/ui/EmptyState'
 import { getExam, flattenQuestions, submitAttempt } from '../exam/examService'
 import { paperTitle } from '../exam/examKinds'
 import QuestionRenderer from '../exam/QuestionRenderer'
-import { PageIcon, ChevronIcon } from '../components/ui/Icons'
+import AnswerSheet from '../exam/AnswerSheet'
+import { PageIcon, ChevronIcon, FlagIcon, WarningIcon } from '../components/ui/Icons'
 
 // Poll cadence while the server generates a paper (it answers 202 until
 // the paper exists). Starts responsive, backs off geometrically so a
 // slow generation isn't polled dozens of times.
 const POLL_START_MS = 3000
 const POLL_MAX_MS = 10000
+
+// Minutes-remaining marks that get spoken aloud. The red pulsing timer
+// only helps someone already looking at the corner of the screen.
+const TIME_WARNINGS = [5, 1]
 
 // ── Mid-exam draft persistence ─────────────────────────────────
 // Same load/save-wrapped-in-try/catch convention as
@@ -93,9 +99,11 @@ export default function ExamRunner({ session }) {
 }
 
 // Route: /exam/:examId
-// Renders one question at a time, in order, via CardTransition so
-// moving between questions gets the same crossfade Kana/Kanji/Vocab
-// already use — no new animation language.
+// Renders one question at a time via CardTransition so moving between
+// questions gets the same crossfade Kana/Kanji/Vocab already use — no
+// new animation language. Order is the learner's, not the screen's:
+// the answer sheet below the card jumps to any question, which is how
+// a paper exam is actually worked.
 //
 // The section is read off the paper rather than the URL: every
 // generator emits exactly one section (see each backend/study/
@@ -122,6 +130,20 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   const [answers, setAnswers] = useState({})
   const [index, setIndex] = useState(0)
   const [startedAt, setStartedAt] = useState(null)
+  // "Come back to this one." A Set of question ids, saved into the
+  // draft as an array — JSON.stringify turns a Set into `{}`, so
+  // persisting it directly would restore every flag as empty.
+  const [flagged, setFlagged] = useState(() => new Set())
+
+  // Which mondai's instructions the learner has explicitly opened. The
+  // first question of each mondai shows them regardless (see
+  // `instructionsOpen` below); this is only the manual override for
+  // the questions after it.
+  const [openMondai, setOpenMondai] = useState(null)
+
+  // 'idle' | 'confirming' (unanswered questions) | 'sending' | 'error'
+  const [submitState, setSubmitState] = useState('idle')
+  const [leaving, setLeaving] = useState(false)
 
   // A heartbeat, not a clock: its value is never read, only its change
   // forces a re-render each second so the derived `timeLeft` below gets
@@ -161,6 +183,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
           setAnswers(draft?.answers ?? {})
           setIndex(draft?.index ?? 0)
           setStartedAt(draft?.startedAt ?? Date.now())
+          setFlagged(new Set(draft?.flagged ?? []))
           setExam(e)
         })
         // An LLM-backed paper can genuinely fail to generate (the writer
@@ -188,11 +211,18 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   const deadline = section && startedAt ? startedAt + section.timeLimitMin * 60 * 1000 : null
   const timeLeft = deadline !== null ? Math.max(0, (deadline - Date.now()) / 1000) : null
   const isTimeUp = timeLeft !== null && timeLeft <= 0
+  const minutesLeft = timeLeft !== null ? Math.ceil(timeLeft / 60) : null
+  // Derived, not stored. An aria-live region announces when its text
+  // CHANGES, so text that is present for exactly the minute it
+  // describes is spoken exactly once — which is what a warning wants,
+  // and needs neither state nor an effect to arrange.
+  const announcement =
+    minutesLeft !== null && TIME_WARNINGS.includes(minutesLeft) ? t.examTimeWarning(minutesLeft) : ''
 
   useEffect(() => {
     if (!exam || !startedAt) return
-    saveDraft(examId, exam.revision, { answers, index, startedAt })
-  }, [exam, examId, answers, index, startedAt])
+    saveDraft(examId, exam.revision, { answers, index, startedAt, flagged: [...flagged] })
+  }, [exam, examId, answers, index, startedAt, flagged])
 
   useEffect(() => {
     if (isTimeUp) finish()
@@ -200,6 +230,45 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     // only when isTimeUp itself flips — it isn't a real missing dep.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTimeUp])
+
+  const current = questions[index] ?? null
+  // `pieces` for sentence-order, `choices` for everything else — the
+  // keyboard shortcut needs whichever list the renderer will draw.
+  const currentOptions = current ? current.choices ?? current.pieces ?? [] : null
+
+  // Digits pick an answer, arrows move, `f` flags. Same binding the
+  // study quiz has had all along (CHOICE_KEY_INDEX is imported from it
+  // rather than retyped, AZERTY row and all) — the exam simply never
+  // got it, so the one screen where somebody answers twenty questions
+  // in a row was the one screen that required a mouse for every one.
+  useEffect(() => {
+    if (!current || submitState !== 'idle' || leaving) return
+    const handler = e => {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
+      const tag = e.target?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+
+      const idx = CHOICE_KEY_INDEX[e.key]
+      if (idx !== undefined && idx < currentOptions.length) {
+        e.preventDefault()
+        playUi('click-mode-selection')
+        setAnswers(prev => ({ ...prev, [current.id]: currentOptions[idx].id }))
+        return
+      }
+      // Arrows inside the choice list belong to the radiogroup — moving
+      // between options is what a radio advertises, and QuestionRenderer
+      // implements it. Only arrows from outside change question.
+      const inChoices = typeof e.target?.closest === 'function' && e.target.closest('[role="radiogroup"]')
+      if (e.key === 'ArrowRight') { if (inChoices) return; e.preventDefault(); jumpTo(index + 1) }
+      else if (e.key === 'ArrowLeft') { if (inChoices) return; e.preventDefault(); jumpTo(index - 1) }
+      else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFlag() }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+    // jumpTo/toggleFlag are re-created every render and close over the
+    // current index — the deps that matter are what they read.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, currentOptions, index, questions.length, submitState, leaving])
 
   // ── Generating ──
   // Not the shared <Loading/>: opening a never-before-seen paper runs
@@ -248,7 +317,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     )
   }
 
-  if (questions.length === 0) {
+  if (questions.length === 0 || !current) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
@@ -263,25 +332,61 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     )
   }
 
-  const current = questions[index]
-  const mondai = section.mondai.find(m => m.id === current.mondaiId)
-  const isLast = index === questions.length - 1
+  // A paper whose flattened questions name a mondai the section doesn't
+  // carry is malformed, but reading `.number` off the undefined that
+  // `.find` returns turned that into a blank screen for the whole exam.
+  const mondai = section.mondai.find(m => m.id === current.mondaiId) ?? null
   const selected = answers[current.id] ?? null
   const answeredCount = Object.keys(answers).length
-  const progressPct = Math.round(((index + 1) / questions.length) * 100)
+  const unansweredCount = questions.length - answeredCount
+  // Answered, not position. A bar that fills as you walk PAST unanswered
+  // questions claims progress the learner hasn't made — and position is
+  // what the answer sheet shows anyway.
+  const progressPct = Math.round((answeredCount / questions.length) * 100)
+  const isFlagged = flagged.has(current.id)
+
+  // Instructions are byte-identical for every question inside a mondai,
+  // so they open on its first question and fold away after — they were
+  // four lines of kana redrawn above every single question, taking the
+  // top of the viewport before the learner reached what was being asked.
+  const isFirstOfMondai = questions.findIndex(q => q.mondaiId === current.mondaiId) === index
+  const instructionsOpen = isFirstOfMondai || openMondai === current.mondaiId
+
+  function jumpTo(i) {
+    if (i < 0 || i >= questions.length || i === index) return
+    playUi('click-mode-selection')
+    setIndex(i)
+  }
 
   function select(choiceId) {
     setAnswers(prev => ({ ...prev, [current.id]: choiceId }))
   }
 
-  function goNext() {
+  function toggleFlag() {
     playUi('click-mode-selection')
-    setIndex(i => i + 1)
+    setFlagged(prev => {
+      const next = new Set(prev)
+      if (next.has(current.id)) next.delete(current.id)
+      else next.add(current.id)
+      return next
+    })
   }
 
-  function goBack() {
-    playUi('click-mode-selection')
-    setIndex(i => i - 1)
+  // Finish is available on every question, not only the last: someone
+  // who skipped question 3 used to have no way to submit without
+  // walking to the end of the paper. Blanks are scored wrong, so it
+  // asks first — and offers to go to them rather than only offering to
+  // go through with it.
+  function requestFinish() {
+    playUi('click-screen-selection')
+    if (unansweredCount > 0) setSubmitState('confirming')
+    else finish()
+  }
+
+  function goToFirstBlank() {
+    const i = questions.findIndex(q => answers[q.id] == null)
+    setSubmitState('idle')
+    if (i !== -1) jumpTo(i)
   }
 
   async function finish() {
@@ -290,49 +395,88 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     // exam_attempts rows for one attempt.
     if (submitting.current) return
     submitting.current = true
-    playUi('click-screen-selection')
-    const summary = await submitAttempt(
-      examId,
-      // The revision travels with the submission so the server scores
-      // against the paper actually sat — by then it is one the server's
-      // own selection rule would no longer offer, precisely because
-      // this attempt is about to exist.
-      { sectionId: section.id, revision: exam.revision, answers, startedAt, finishedAt: Date.now() },
-      session,
-    )
-    clearDraft(examId, exam.revision)
-    // attempt id in the URL (not just router state) is what makes a
-    // reloaded result page recoverable — see ExamResult.
-    navigate(`/exam/${examId}/results?attempt=${summary.attemptId}`, { state: { summary, exam } })
+    setSubmitState('sending')
+    const finishedAt = Date.now()
+    try {
+      const summary = await submitAttempt(
+        examId,
+        // The revision travels with the submission so the server scores
+        // against the paper actually sat — by then it is one the server's
+        // own selection rule would no longer offer, precisely because
+        // this attempt is about to exist.
+        { sectionId: section.id, revision: exam.revision, answers, startedAt, finishedAt },
+        session,
+      )
+      // Only once the answers are safely on the server. Clearing it
+      // before the POST resolved would destroy the one copy of a
+      // finished exam whenever the request failed.
+      clearDraft(examId, exam.revision)
+      // attempt id in the URL (not just router state) is what makes a
+      // reloaded result page recoverable — see ExamResult.
+      navigate(`/exam/${examId}/results?attempt=${summary.attemptId}`, { state: { summary, exam } })
+    } catch {
+      // This path used to not exist: a failed submit left the guard ref
+      // latched true forever, so a finished exam sat on screen with no
+      // message, no navigation and no second attempt possible.
+      submitting.current = false
+      setSubmitState('error')
+    }
   }
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/exam')} title={paperTitle(exam, t)} autoHide />
+      {/* Walking out of a timed exam is worth a question — and the
+          answer ("your progress is saved") is something the learner
+          otherwise has no way to know. */}
+      <TopBar onBack={() => setLeaving(true)} title={paperTitle(exam, t)} autoHide />
       <div className="container exam-shell">
-        <div className="exam-progress-bar" role="progressbar" aria-valuenow={progressPct} aria-valuemin={0} aria-valuemax={100}>
+        <div
+          className="exam-progress-bar"
+          role="progressbar"
+          aria-valuenow={progressPct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={t.examSheetTitle}
+        >
           <div className="exam-progress-bar__fill" style={{ width: `${progressPct}%` }} />
         </div>
 
         <div className="exam-shell__meta">
           <span className="exam-shell__section" lang="ja">{section.labelJp}</span>
-          <span className="exam-shell__meta-right">
-            {timeLeft !== null && (
-              <span
-                className={`exam-shell__timer${timeLeft < 60 ? ' exam-shell__timer--low' : ''}`}
-                role="timer"
-              >
-                {formatTime(timeLeft)}
-              </span>
-            )}
-            <span className="exam-shell__count">{index + 1} / {questions.length}</span>
-          </span>
+          {timeLeft !== null && (
+            <span
+              className={`exam-shell__timer${timeLeft < 60 ? ' exam-shell__timer--low' : ''}`}
+              role="timer"
+            >
+              {formatTime(timeLeft)}
+            </span>
+          )}
         </div>
 
-        <div className="exam-mondai-instructions">
-          <span className="exam-mondai-instructions__label" lang="ja">もんだい{mondai.number}</span>
-          <p className="exam-mondai-instructions__text" lang="ja">{mondai.instructionsJp}</p>
-        </div>
+        {/* Spoken at 5:00 and 1:00. The pulsing red timer only reaches
+            somebody already watching the corner of the screen. */}
+        <p className="exam-visually-hidden" role="status" aria-live="polite">{announcement}</p>
+
+        {mondai && (
+          <div className="exam-mondai-instructions">
+            <div className="exam-mondai-instructions__head">
+              <span className="exam-mondai-instructions__label" lang="ja">もんだい{mondai.number}</span>
+              {!isFirstOfMondai && (
+                <button
+                  type="button"
+                  className="exam-mondai-instructions__toggle"
+                  aria-expanded={instructionsOpen}
+                  onClick={() => setOpenMondai(instructionsOpen ? null : current.mondaiId)}
+                >
+                  {instructionsOpen ? t.examHideInstructions : t.examShowInstructions}
+                </button>
+              )}
+            </div>
+            {instructionsOpen && (
+              <p className="exam-mondai-instructions__text" lang="ja">{mondai.instructionsJp}</p>
+            )}
+          </div>
+        )}
 
         <CardTransition cardKey={current.id} className="exam-card-stage">
           <div className="prompt-card exam-card">
@@ -345,20 +489,93 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
               mode) rather than inventing a third "back"/"next" pair —
               t.back is a bare icon-only button made for TopBar's compact
               style, not a fit here. */}
-          <button type="button" className="exam-nav-btn" disabled={index === 0} onClick={goBack}>
+          <button type="button" className="exam-nav-btn" disabled={index === 0} onClick={() => jumpTo(index - 1)}>
             <ChevronIcon direction="left" size={14} /> {t.reviewPrev}
           </button>
-          <span className="exam-nav-buttons__hint">{answeredCount} / {questions.length} {t.examAnswered}</span>
-          {isLast ? (
-            <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={finish}>
-              {t.examFinishSection}
-            </button>
-          ) : (
-            <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={goNext}>
-              {t.reviewNext} <ChevronIcon direction="right" size={14} />
-            </button>
-          )}
+          <button
+            type="button"
+            className={`exam-flag-btn${isFlagged ? ' exam-flag-btn--on' : ''}`}
+            onClick={toggleFlag}
+            aria-pressed={isFlagged}
+            aria-label={isFlagged ? t.examUnflag : t.examFlag}
+            title={isFlagged ? t.examUnflag : t.examFlag}
+          >
+            <FlagIcon size={16} filled={isFlagged} />
+          </button>
+          <button
+            type="button"
+            className="exam-nav-btn exam-nav-btn--primary"
+            disabled={index === questions.length - 1}
+            onClick={() => jumpTo(index + 1)}
+          >
+            {t.reviewNext} <ChevronIcon direction="right" size={14} />
+          </button>
         </div>
+
+        <AnswerSheet
+          questions={questions}
+          answers={answers}
+          flagged={flagged}
+          index={index}
+          onJump={jumpTo}
+        />
+
+        {submitState === 'confirming' && (
+          <div className="exam-confirm" role="alertdialog" aria-label={t.examConfirmTitle}>
+            <p className="exam-confirm__title">
+              <WarningIcon size={16} /> {t.examConfirmTitle}
+            </p>
+            <p className="exam-confirm__body">{t.examConfirmBody(unansweredCount)}</p>
+            <div className="exam-confirm__actions">
+              <button type="button" className="exam-nav-btn" onClick={() => setSubmitState('idle')}>
+                {t.examKeepGoing}
+              </button>
+              <button type="button" className="exam-nav-btn" onClick={goToFirstBlank}>
+                {t.examReviewBlanks}
+              </button>
+              <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={finish}>
+                {t.examSubmitAnyway}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {submitState === 'error' && (
+          <div className="exam-confirm exam-confirm--error" role="alert">
+            <p className="exam-confirm__title">
+              <WarningIcon size={16} /> {t.examSubmitFailed}
+            </p>
+            <div className="exam-confirm__actions">
+              <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={finish}>
+                {t.examSubmitRetry}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {leaving && (
+          <div className="exam-confirm" role="alertdialog" aria-label={t.examLeaveTitle}>
+            <p className="exam-confirm__title">{t.examLeaveTitle}</p>
+            <p className="exam-confirm__body">{t.examLeaveBody}</p>
+            <div className="exam-confirm__actions">
+              <button type="button" className="exam-nav-btn" onClick={() => setLeaving(false)}>
+                {t.examLeaveStay}
+              </button>
+              <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={() => navigate('/exam')}>
+                {t.examLeaveConfirm}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          className="exam-finish-btn"
+          onClick={requestFinish}
+          disabled={submitState === 'sending'}
+        >
+          {submitState === 'sending' ? t.examSubmitting : t.examFinishSection}
+        </button>
       </div>
     </div>
   )
