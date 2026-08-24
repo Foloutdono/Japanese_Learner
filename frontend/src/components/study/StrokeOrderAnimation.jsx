@@ -29,6 +29,7 @@ export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, 
   // aborted on unmount or if `src` changes again before it resolves,
   // so a fast kanji-to-kanji swap can't apply a stale response.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing `svgText` to the `svgText` prop, or clearing it to show nothing while a new `src` fetch is in flight; the fetch itself (below) is the real side effect this reset kicks off alongside, not an id-keyed reset a key-remount could replace.
     if (svgTextProp) { setSvgText(svgTextProp); return }
     if (!src) return
     const controller = new AbortController()

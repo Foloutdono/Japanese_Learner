@@ -202,6 +202,7 @@ export default function StudyScreen({ session }) {
   })
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- id-keyed reset in shape, but `showRating`/`answered` are also set mid-flow elsewhere in this screen (hidden/toggled immediately on user action, independent of the card actually changing) — see the other setShowRating/setAnswered call sites below. Moving this into a key-remounted child would need that mid-flow logic threaded back down too, a bigger restructure than this reset justifies.
     setAnswered(false)
     setSelected(null)
     setShowRating(false)

@@ -81,6 +81,7 @@ function ExampleSentence({ ex, senseNumber }) {
 // verdigris) instead of arbitrary hex, so — like every other colour
 // in the app — these correctly flip between the dark and light theme
 // rather than staying fixed regardless of `data-theme`.
+// eslint-disable-next-line react-refresh/only-export-components -- TYPE_META is a plain colour/label lookup consumed by DictionaryScreen.jsx; not a component.
 export const TYPE_META = {
   kanji:    { color: 'var(--accent4)', fallback: 'Kanji' },
   vocab:    { color: 'var(--accent6)', fallback: 'Vocabulaire' },
@@ -106,6 +107,7 @@ const TYPE_MARK = {
 // instead of a reading list, the stroke-order panel), so call sites
 // check this instead of repeating the type === 'hiragana' ||
 // type === 'katakana' pair everywhere.
+// eslint-disable-next-line react-refresh/only-export-components -- isKanaType is a plain predicate used by DictionaryScreen.jsx to branch shared detail-panel logic; not a component.
 export function isKanaType(type) {
   return type === 'hiragana' || type === 'katakana'
 }
@@ -119,6 +121,7 @@ export function isKanaType(type) {
 // "jmdict"), where every entry has level: null and homographs are far
 // more common — so kana is always folded in too, not just used as a
 // fallback when kanji is absent.
+// eslint-disable-next-line react-refresh/only-export-components -- entryKey is a plain identity-string helper used by DictionaryScreen.jsx for React keys/selection comparisons; not a component.
 export function entryKey(entry) {
   return `${entry.type}:${entry.level ?? '_'}:${entry.kanji || ''}:${entry.kana || ''}`
 }
@@ -128,6 +131,7 @@ export function entryKey(entry) {
 // for a pure text utility would be backwards (same reasoning as
 // Readings.jsx being its own module).
 
+// eslint-disable-next-line react-refresh/only-export-components -- speakJapanese is a speech-synthesis side-effect helper re-exported for QuizComponents.jsx's DictionaryLookupSheet; not a component.
 export function speakJapanese(text) {
   if (!text) return
   window.speechSynthesis.cancel()
@@ -290,6 +294,33 @@ export function TagChip({ tag }) {
   )
 }
 
+// The stroke-order diagram plus its own failure fallback. Owns
+// `failed` itself and is remounted (via the `key={entry.svg_url}` its
+// caller passes) whenever the entry changes, so a previous entry's
+// load failure can never stick around and hide a diagram that would
+// otherwise load fine for the new one — no reset effect needed since
+// a fresh mount already starts from `failed: false`.
+function StrokeFrame({ src, notAvailableLabel }) {
+  const [failed, setFailed] = useState(false)
+  return (
+    <div className="dict-detail__stroke-frame">
+      {!failed && (
+        <StrokeOrderAnimation
+          src={src}
+          loop
+          className="dict-detail__stroke-img"
+          onError={() => setFailed(true)}
+        />
+      )}
+      {failed && (
+        <div className="dict-detail__stroke-fallback" style={{ display: 'block' }}>
+          {notAvailableLabel}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Detail panel ──────────────────────────────────────────
 // Renders one entry's full detail. `onRadicalClick`/`onKanjiClick` are
 // optional — DictionaryScreen passes real handlers so its radical link
@@ -331,9 +362,6 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
   // (routes/dictionary.py's _word_furigana) so a multi-kanji headword
   // divides per kanji instead of one blanket reading.
   const headwordFurigana = entry.type === 'vocab' ? entry.furigana : null
-
-  const [strokeSvgFailed, setStrokeSvgFailed] = useState(false)
-  useEffect(() => { setStrokeSvgFailed(false) }, [entry.svg_url])
 
   // Every JMdict sense (from get_vocab_extras) and the example
   // sentences that illustrate each one. Split into "nested under a
@@ -555,21 +583,11 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
             </div>
             <div className="dict-detail__form-grid">
               {entry.svg_url && (
-                <div className="dict-detail__stroke-frame">
-                  {!strokeSvgFailed && (
-                    <StrokeOrderAnimation
-                      src={`${API_BASE}${entry.svg_url}`}
-                      loop
-                      className="dict-detail__stroke-img"
-                      onError={() => setStrokeSvgFailed(true)}
-                    />
-                  )}
-                  {strokeSvgFailed && (
-                    <div className="dict-detail__stroke-fallback" style={{ display: 'block' }}>
-                      {t.notAvailable}
-                    </div>
-                  )}
-                </div>
+                <StrokeFrame
+                  key={entry.svg_url}
+                  src={`${API_BASE}${entry.svg_url}`}
+                  notAvailableLabel={t.notAvailable}
+                />
               )}
               {(entry.stroke_count || hasRadicalLink) && (
                 <div className="dict-stat-grid dict-detail__form-stats">
@@ -648,6 +666,7 @@ function useDictionaryLookup(session, term, category, lang, active) {
   useEffect(() => {
     if (!active || !term || !category) return
     let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- this setState is the "start of the fetch" reset (clears any previous term's stale result and flips on the loading spinner) that has to happen synchronously with kicking off the fetch below; it's inseparable from the network call, not a standalone "reset on id change" this could be replaced by a key-remount for.
     setState({ entry: null, loading: true, error: false })
 
     const params = new URLSearchParams({ q: term, page: 0, limit: 10, lang: lang ?? '', category })

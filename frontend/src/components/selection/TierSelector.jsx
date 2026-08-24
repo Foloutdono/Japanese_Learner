@@ -58,6 +58,7 @@ export default function TierSelector({ domain, session, onSelect, color }) {
 
   useEffect(() => {
     let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset (clears the previous tier_size's list and error flag so the "loading" state shows immediately) that must happen synchronously with kicking off the fetch below; not a standalone id-keyed reset.
     setTiers(null)
     setFailed(false)
     apiFetch(`/api/frequency/${domain}/tiers?tier_size=${tierSize}`, session)

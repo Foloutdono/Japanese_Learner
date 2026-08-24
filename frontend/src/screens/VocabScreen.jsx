@@ -159,26 +159,6 @@ export default function VocabScreen({ session }) {
     mode,
   })
 
-  // Re-translate the card in hand when the UI language changes, or
-  // when a newly-current card (just advanced to) still carries the
-  // language it was originally fetched in — the latter matters now
-  // that cards are prefetched ahead of time, so a card sitting a few
-  // slots deep in the queue when the user switches language would
-  // otherwise show stale text until it's re-fetched.
-  useEffect(() => {
-    if (card && card.lang !== lang) translateCard(card, lang)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card, lang])
-
-  // Reset per-card UI state whenever the card in hand changes —
-  // advance() is a synchronous local pop now, so there's no fetch
-  // callback to hang this reset off of like there used to be.
-  useEffect(() => {
-    setAnswered(false)
-    setSelected(null)
-    setShowRating(false)
-  }, [card?.card_id])
-
   // The written form to quiz on — some vocab entries are kana-only (no
   // kanji), so fall back to kana for both the prompt and the choices.
   function wordForm(entry) {
@@ -206,6 +186,27 @@ export default function VocabScreen({ session }) {
       }))
     })
   }
+
+  // Re-translate the card in hand when the UI language changes, or
+  // when a newly-current card (just advanced to) still carries the
+  // language it was originally fetched in — the latter matters now
+  // that cards are prefetched ahead of time, so a card sitting a few
+  // slots deep in the queue when the user switches language would
+  // otherwise show stale text until it's re-fetched.
+  useEffect(() => {
+    if (card && card.lang !== lang) translateCard(card, lang)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [card, lang])
+
+  // Reset per-card UI state whenever the card in hand changes —
+  // advance() is a synchronous local pop now, so there's no fetch
+  // callback to hang this reset off of like there used to be.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- id-keyed reset in shape, but `showRating`/`answered` are also set mid-flow elsewhere in this screen (hidden/toggled immediately on user action, independent of the card actually changing) — see the other setShowRating/setAnswered call sites below. Moving this into a key-remounted child would need that mid-flow logic threaded back down too, a bigger restructure than this reset justifies.
+    setAnswered(false)
+    setSelected(null)
+    setShowRating(false)
+  }, [card?.card_id])
 
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
   // level+mode. Fetched independently from the card so it never blocks

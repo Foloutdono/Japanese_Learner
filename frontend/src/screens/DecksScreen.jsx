@@ -48,8 +48,6 @@ export default function DecksScreen({ session }) {
     }
   }, [])
 
-  useEffect(() => { fetchDecks() }, [])
-
   function fetchDecks() {
     setLoading(true)
     apiFetch('/api/decks', session)
@@ -60,6 +58,11 @@ export default function DecksScreen({ session }) {
       // an empty list (→ the "no decks yet" EmptyState) instead.
       .catch(() => setLoading(false))
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetchDecks() is a real network fetch (the shelf's initial load), not a state reset; its setLoading/setDecks calls are the point of this mount-time effect, not something a key-remount could replace.
+    fetchDecks()
+  }, [])
 
   function createDeck() {
     if (!newName.trim()) return

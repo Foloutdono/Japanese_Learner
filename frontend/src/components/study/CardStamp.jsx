@@ -130,20 +130,27 @@ function PetalShower() {
 }
 
 export function CardStamp({ transition, onDone }) {
+  if (!transition) return null
+  // `transition.id` is generated fresh per promotion (see the doc
+  // comment above), so keying on it here remounts CardStampInner for
+  // every new stamp — its `phase` state starts at 'active' for free
+  // on that fresh mount, no reset-on-change effect needed, and two
+  // promotions back-to-back replay cleanly instead of one instance
+  // being reused with 'phase' having to be forced back.
+  return <CardStampInner key={transition.id} transition={transition} onDone={onDone} />
+}
+
+function CardStampInner({ transition, onDone }) {
   // Same active/leaving split as XpToast: 'active' covers the strike
   // and hold, 'leaving' is the dissolve. onDone only fires off the
   // real animationend for the fade, never a guessed timer.
   const [phase, setPhase] = useState('active')
 
   useEffect(() => {
-    if (!transition) return
-    setPhase('active')
     const holdMs = transition.demoted ? DEMOTED_HOLD_MS : (HOLD_MS[transition.to] ?? 1000)
     const timer = setTimeout(() => setPhase('leaving'), holdMs)
     return () => clearTimeout(timer)
   }, [transition])
-
-  if (!transition) return null
 
   const mastered = transition.to === 'mastered'
   const demoted  = !!transition.demoted

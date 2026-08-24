@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useLang } from '../../LangContext'
 import { playClick } from '../../lib/audio'
 import { CrossIcon, ChevronIcon } from '../ui/Icons'
@@ -10,7 +10,6 @@ export default function ImportCardsMenu({ onImport, onClose }) {
   const [cardSep, setCardSep]       = useState('newline')
   const [customTerm, setCustomTerm] = useState('')
   const [customCard, setCustomCard] = useState('')
-  const [preview, setPreview]       = useState([])
   const [importing, setImporting]   = useState(false)
 
   function getTermSep() {
@@ -47,9 +46,15 @@ export default function ImportCardsMenu({ onImport, onClose }) {
       .filter(c => c.front && c.back)
   }
 
-  useEffect(() => {
-    setPreview(parse(importText))
-  }, [importText, termSep, cardSep, customTerm, customCard])
+  // Pure derivation of importText/separators — previously stored via
+  // useState+useEffect (a stale-then-corrected render each keystroke),
+  // now computed directly during render so the preview is correct on
+  // the very first render after any input changes.
+  const preview = useMemo(
+    () => parse(importText),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- parse() closes over termSep/cardSep/customTerm/customCard, listed explicitly below instead of depending on the parse function identity.
+    [importText, termSep, cardSep, customTerm, customCard],
+  )
 
   async function handleImport() {
     if (preview.length === 0 || importing) return

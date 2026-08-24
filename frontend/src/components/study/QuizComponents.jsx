@@ -339,6 +339,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
   const [show, setShow] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- not an id-keyed reset: `show` is a two-phase CSS-transition trigger (mount closed, then flip open one frame later so the transition actually plays), which needs the rAF subscription below regardless.
     if (!revealed) { setShow(false); return }
     // Mount hidden, then flip open on the next frame — flipping straight
     // to open on mount would skip the transition entirely.
@@ -421,12 +422,27 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 // a `position: relative` card (PromptCard/.flashcard), not out in the
 // surrounding page flow.
 export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, session, sound, onReplaySound }) {
-  const [showDictionary, setShowDictionary] = useState(false)
+  // Same as Flashcard's own reset — a caller reusing this across cards
+  // (passing the card's id as resetKey) shouldn't carry a dictionary
+  // sheet left open from the previous card into the next. Handled by
+  // remounting the actual stateful part on `resetKey` rather than an
+  // effect, so `showDictionary` starts fresh for free.
+  return (
+    <RevealActionsPanel
+      key={resetKey}
+      t={t}
+      revealed={revealed}
+      dictTerm={dictTerm}
+      dictCategory={dictCategory}
+      session={session}
+      sound={sound}
+      onReplaySound={onReplaySound}
+    />
+  )
+}
 
-  // Same as Flashcard's own reset — a caller reusing this across
-  // cards (passing the card's id as resetKey) shouldn't carry a
-  // dictionary sheet left open from the previous card into the next.
-  useEffect(() => { setShowDictionary(false) }, [resetKey])
+function RevealActionsPanel({ t, revealed, dictTerm, dictCategory, session, sound, onReplaySound }) {
+  const [showDictionary, setShowDictionary] = useState(false)
 
   const speakText = sound ?? dictTerm
   const canLookUp = revealed && dictTerm && dictCategory && session
@@ -508,6 +524,29 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictCategory, s
 // dictTerm/dictCategory/session/sound/onReplaySound are all opt-in —
 // see RevealActions above — and pass straight through to it.
 export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCategory, session, sound, onReplaySound }) {
+  // When the caller moves on to a new card (e.g. passes the card's id
+  // as resetKey), snap back to the unrevealed front instead of
+  // carrying over the previous card's flip state — done by remounting
+  // the actual stateful card on `resetKey` rather than an effect, so
+  // `revealed`/`showingBack`/`flips` all start fresh for free.
+  return (
+    <FlashcardFace
+      key={resetKey}
+      front={front}
+      back={back}
+      onReveal={onReveal}
+      t={t}
+      resetKey={resetKey}
+      dictTerm={dictTerm}
+      dictCategory={dictCategory}
+      session={session}
+      sound={sound}
+      onReplaySound={onReplaySound}
+    />
+  )
+}
+
+function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictCategory, session, sound, onReplaySound }) {
   // `revealed` — has this card been shown at least once. Permanent
   // for the card's lifetime: it's what unlocks the dictionary lookup/
   // sound-replay row below and fires `onReveal` (once), same as
@@ -527,15 +566,6 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictCa
   // already animating in from CardTransition at that moment, and two
   // entrance animations at once read as a stutter.
   const [flips, setFlips]             = useState(0)
-
-  // When the caller moves on to a new card (e.g. passes the card's id
-  // as resetKey), snap back to the unrevealed front instead of
-  // carrying over the previous card's flip state.
-  useEffect(() => {
-    setRevealed(false)
-    setShowingBack(false)
-    setFlips(0)
-  }, [resetKey])
 
   // First tap reveals the back and fires onReveal once (so the parent
   // can start the rating flow / log the card as seen). Every tap

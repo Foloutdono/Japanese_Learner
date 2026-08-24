@@ -96,6 +96,16 @@ export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage,
   // overwritten by the incoming one. `liveRef` still points at the
   // *old* DOM node at this point — the swap hasn't committed yet —
   // so this is also the one moment we can read its real height.
+  //
+  // Deliberate "adjust state during render" (React docs pattern):
+  // reads liveRef.current before the DOM swap commits to capture the
+  // outgoing card's real height, avoiding a one-frame flash. Rewriting
+  // this into a useEffect reintroduces that flash. Flagged by the
+  // newer react-hooks/refs rule (added for future React Compiler
+  // compatibility) but correct under React's current runtime
+  // semantics. Revisit only alongside an actual React Compiler
+  // adoption decision — see plans/007-frontend-lint-triage.md.
+  /* eslint-disable react-hooks/refs */
   if (cardKey !== liveKey) {
     prevHeightRef.current = liveRef.current?.offsetHeight ?? null
     setOutgoing({ key: liveKey, content: lastChildrenRef.current })
@@ -110,6 +120,7 @@ export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage,
     setLiveContentKey(effectiveContentKey)
   }
   lastChildrenRef.current = children
+  /* eslint-enable react-hooks/refs */
 
   // Once the live card has actually rendered, animate the container
   // from whatever height the previous card left behind to this one's
