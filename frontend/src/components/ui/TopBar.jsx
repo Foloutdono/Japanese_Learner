@@ -68,6 +68,7 @@ export function useAutoHideTopBar(active = true) {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- this effect's whole point is subscribing to the window scroll listener below; these setHidden calls establish its starting visibility for that subscription (active vs. inactive, mobile vs. desktop), not a standalone id-keyed reset.
     if (!active) { setHidden(false); return }
 
     setHidden(isMobile())

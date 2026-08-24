@@ -75,6 +75,7 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
   // Selection is per (source, raw_id) — cleared whenever the source
   // tab changes, since raw ids from different sources aren't
   // comparable and a browse switch is a natural "start over" point.
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- `selected` can't be moved to a key-remounted child without also threading `results`/`runSearch`/`deckId`/`session`/`onAdded` through it (addSelected and the header/footer both read/write `selected` alongside those), which would restructure this component for one 3-line reset; not a clean split.
   useEffect(() => { setSelected(new Set()) }, [source])
 
   const debounceRef = useRef(null)

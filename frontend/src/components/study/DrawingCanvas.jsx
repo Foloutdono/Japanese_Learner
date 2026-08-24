@@ -153,9 +153,10 @@ function StrokeGlyph({ char }) {
   const { t } = useLang()
   const [failed, setFailed] = useState(false)
 
-  // Resets whenever the character changes, so a previous glyph's fetch
-  // failure doesn't stick around and hide a later one that would load.
-  useEffect(() => { setFailed(false) }, [char])
+  // No reset effect needed: the caller (StrokeRef below) already keys
+  // each StrokeGlyph by `${c}-${i}`, which embeds the character itself
+  // — so a changed `char` always means a fresh mount, and `failed`
+  // starts back at false for free instead of needing to be reset.
 
   if (failed) {
     return <div className="stroke-ref__fallback" style={{ display: 'flex' }}>{t.notAvailable}</div>
@@ -239,18 +240,29 @@ export function DrawingOverlay({ kanji, meaning, onDone, resetKey }) {
 // Shows the prompt, user draws, clicks validate, sees correction, then rates.
 // onValidate() → parent shows RatingBar.
 export function DrawingQuiz({ kanji, meaning, onValidate, resetKey }) {
+  // A fresh card must snap back to the undrawn/unrevealed state —
+  // without this, DrawingQuiz kept reusing the same component instance
+  // across cards (React doesn't remount it just because the props
+  // changed), so `revealed` stayed true and the canvas kept whatever
+  // was drawn for the very first card, which is exactly the "only
+  // works for the first card" bug. Rather than an effect resetting
+  // state, the interactive part is a child keyed on the card's own
+  // identity — a fresh mount's `useState(false)` already starts
+  // correctly, no reset needed.
+  return (
+    <DrawingQuizCard
+      key={resetKey ?? kanji}
+      kanji={kanji}
+      meaning={meaning}
+      onValidate={onValidate}
+    />
+  )
+}
+
+function DrawingQuizCard({ kanji, meaning, onValidate }) {
   const { t }          = useLang()
   const canvasRef      = useRef(null)
   const [revealed, setRevealed] = useState(false)
-  const key = resetKey ?? kanji
-
-  // Snap back to the undrawn/unrevealed state whenever a new card
-  // comes in — without this, DrawingQuiz kept reusing the same
-  // component instance across cards (React doesn't remount it just
-  // because the props changed), so `revealed` stayed true and the
-  // canvas kept whatever was drawn for the very first card, which is
-  // exactly the "only works for the first card" bug.
-  useEffect(() => { setRevealed(false) }, [key])
 
   function handleValidate() {
     playClick()
@@ -269,7 +281,7 @@ export function DrawingQuiz({ kanji, meaning, onValidate, resetKey }) {
           {/* Drawing side */}
           <div className="drawing-quiz__side">
             <div className="stroke-ref__label">{t.yourDrawing}</div>
-            <Canvas canvasRef={canvasRef} resetKey={key} />
+            <Canvas canvasRef={canvasRef} resetKey={kanji} />
           </div>
 
           {/* Correction side — hidden until validated */}

@@ -298,6 +298,7 @@ export function useCardSession({
   }, [storageKey, fetchBatch, batchSize, extraExcludeIds, cardKey, fetchTimeoutMs, clearRetry])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- refill() is a real network fetch (batched card refill), not a state reset; its own setFetching(true)/setState-on-response calls are the point of this effect, driven by whether the queue has run low. Not an id-keyed reset a key-remount could replace.
     if (!done && !error && queue.length <= REFILL_AT) refill()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queue.length, storageKey, done, error])

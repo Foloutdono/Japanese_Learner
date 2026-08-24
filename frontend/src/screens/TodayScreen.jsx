@@ -198,6 +198,7 @@ export default function TodayScreen({ session }) {
   })
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- this is an id-keyed reset in shape, but `showRating` (and to a lesser extent `answered`) is also set mid-flow by postReview() below, independent of a card actually changing (it hides the rating bar the instant a rating is tapped, before checkAdvance()'s gates clear and the card actually swaps) — moving these into a key-remounted child would need postReview's mid-review-flow state changes threaded back down into that child too, which is a bigger restructure than this reset justifies. See postReview below.
     setAnswered(false)
     setSelected(null)
     setShowRating(false)
