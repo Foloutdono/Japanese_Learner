@@ -98,12 +98,6 @@ export default function ProfileScreen({ session }) {
   const [leaderboard, setLeaderboard] = useState(null)
   const [stale, setStale]             = useState(false)
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   useEffect(() => {
     apiFetch('/api/profile', session)

@@ -156,12 +156,6 @@ export default function StudyScreen({ session }) {
     setTimeout(() => recentlyReviewedRef.current.delete(cardId), 8000)
   }
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   useEffect(() => () => {
     if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current)

@@ -4,6 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>frontend</title>
+    <!-- Resolves the theme before first paint. Deliberately a blocking
+         inline script and not a React component: anything that runs in
+         React runs after the first paint, which is exactly the flash
+         this exists to prevent. Keep the 'jp-theme' key and the
+         light/dark values in step with components/ui/NavControls.jsx. -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('jp-theme')
+          var theme = (saved === 'light' || saved === 'dark')
+            ? saved
+            : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          document.documentElement.setAttribute('data-theme', theme)
+        } catch (e) {
+          /* localStorage can throw in private-mode/blocked-cookie contexts.
+             Falling through leaves the :root default (dark) in place, which
+             is a working app, so there is nothing to recover here. */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

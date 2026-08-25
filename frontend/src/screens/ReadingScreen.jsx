@@ -105,12 +105,6 @@ export default function ReadingScreen({ session }) {
     typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
   )
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT)

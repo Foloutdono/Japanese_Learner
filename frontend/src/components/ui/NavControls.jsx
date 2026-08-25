@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useLang } from '../../LangContext'
 import { LANGUAGES } from '../../i18n'
 import {
@@ -12,6 +12,12 @@ const THEME_KEY = 'jp-theme'
 
 function getInitialTheme() {
   if (typeof window === 'undefined') return 'dark'
+  // index.html's blocking script has already resolved saved-or-OS
+  // preference onto <html data-theme> before React ever ran, so the
+  // attribute is the source of truth. Falling back to the localStorage
+  // read only covers the case where that script was blocked.
+  const attr = document.documentElement.getAttribute('data-theme')
+  if (attr === 'light' || attr === 'dark') return attr
   const saved = window.localStorage.getItem(THEME_KEY)
   if (saved === 'light' || saved === 'dark') return saved
   return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
@@ -90,15 +96,20 @@ export function ThemeToggle() {
   const { t } = useLang()
   const [theme, setTheme] = useState(getInitialTheme)
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    window.localStorage.setItem(THEME_KEY, theme)
-  }, [theme])
+  // Applies the theme, but only for changes made here. The initial
+  // value is already on <html> (see index.html) — writing it back on
+  // mount is what used to freeze a detected OS preference into an
+  // explicit saved choice, so later OS changes stopped being honoured.
+  function apply(next) {
+    setTheme(next)
+    document.documentElement.setAttribute('data-theme', next)
+    window.localStorage.setItem(THEME_KEY, next)
+  }
 
   const isDark = theme === 'dark'
 
   function handleClick() {
-    setTheme(th => (th === 'dark' ? 'light' : 'dark'))
+    apply(isDark ? 'light' : 'dark')
     playToggle()
   }
 

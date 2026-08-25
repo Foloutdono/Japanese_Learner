@@ -41,12 +41,6 @@ export default function StatsScreen({ session }) {
   const [stats, setStats] = useState(null)
   const [extra, setExtra] = useState(null)
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   useEffect(() => {
     apiFetch('/api/stats', session)

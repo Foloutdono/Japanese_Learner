@@ -61,12 +61,6 @@ export default function TranslationScreen({ session }) {
   const [analysis, setAnalysis] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   const fetchingRef = useRef(false) // guards against duplicate concurrent prefetches
   const queueRef = useRef([])       // upcoming phrases, prefetched (not rendered, so a ref is fine)
