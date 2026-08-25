@@ -70,12 +70,6 @@ export default function GrammarScreen({ session }) {
   // screens' own comment on this for the full race it prevents.
   const advancedRef = useRef(false)
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   // One session per level+mode — batched and cached so answering never
   // waits on a fetch, and a backend cold start doesn't blank the

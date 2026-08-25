@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useLang } from '../LangContext'
 import { getShowcase } from '../config/navLinks'
 import { LightbulbIcon } from '../components/ui/Icons'
@@ -40,12 +39,6 @@ export default function LandingScreen({ onContinue }) {
     { glyph: '自由', title: t.landingPro5Title, desc: t.landingPro5Desc },
   ]
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   return (
     <div className="landing-screen">

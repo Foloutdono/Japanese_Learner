@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { supabase } from '../lib/supabase'
@@ -10,12 +9,6 @@ export default function SettingsScreen() {
   const navigate = useNavigate()
   const { t } = useLang()
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   return (
     <div className="screen">

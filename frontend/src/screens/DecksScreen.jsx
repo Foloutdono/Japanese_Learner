@@ -41,12 +41,6 @@ export default function DecksScreen({ session }) {
   const [typeFilter, setTypeFilter] = useState('all')
   const searchRef = useRef(null)
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   function fetchDecks() {
     setLoading(true)

@@ -63,12 +63,6 @@ function ICCard() {
   const { t }    = useLang()
   const summary  = useProfileSummary()
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   if (!summary) {
     return (

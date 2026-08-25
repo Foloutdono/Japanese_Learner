@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -16,12 +16,6 @@ export default function AuthScreen({ onBack } = {}) {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(null)
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   async function handleSubmit() {
     setError(null)

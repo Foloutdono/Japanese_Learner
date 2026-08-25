@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TopBar } from '../components/ui/TopBar'
 import { SectionHeader } from '../components/ui/SectionHeader'
@@ -34,16 +34,6 @@ export default function RewardsPreview() {
   const navigate = useNavigate()
   const [toast, setToast] = useState(null)
 
-  // Every screen in the app repaints <html data-theme> from storage on
-  // mount. Without it this one rendered in whatever theme the previous
-  // screen left behind — which for a tool whose whole job is judging
-  // how a reward looks in *both* themes is worse than useless.
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   const fire = payload => {
     // Remount every time: the animations only play on mount, so

@@ -230,12 +230,6 @@ export default function DeckDetailScreen({ session }) {
   const [selected, setSelected]     = useState(new Set())
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('jp-theme')
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved)
-    }
-  }, [])
 
   useEffect(() => { fetchCards() }, [])
 
