@@ -10,10 +10,8 @@ from core.db import db_conn
 from core.auth import get_user_id
 from core.srs_instance import srs
 from study.llm_shared import chat, LLMUnavailable
-from study.card_lookup import (
-    find_vocab_match, find_kanji_matches, serializable_entry, card_stats,
-    VOCAB_STATUS_MODES, KANJI_STATUS_MODES,
-)
+from study.analysis import analyze_local, attach_user_state, merge_deep
+from routes.reading import LANG_NAMES
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -27,21 +25,26 @@ logger = logging.getLogger(__name__)
 # both times. Consolidated 2026-08 when a SECOND provider (NVIDIA) was
 # added; the shared retry policy replaces the local backoff.
 
-SYSTEM_PROMPT = """You are a Japanese language tutor. Given a Japanese phrase, segment it into words and respond with ONLY a single JSON object (no markdown fences, no commentary) matching exactly this schema:
+# {lang_name} is the one substitution point: everything else about the
+# schema is fixed. Added 2026-08 -- before this, the prompt never named
+# a language at all, so "explanation" (and every word's "meaning") came
+# back in whatever language the model defaulted to, in practice English,
+# regardless of what language the learner's UI was in.
+SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese phrase, segment it into words and respond with ONLY a single JSON object (no markdown fences, no commentary) matching exactly this schema:
 
-{
+{{
   "words": [
-    {"surface": "...", "base": "...", "reading": "...", "meaning": "...", "pos": "..."}
+    {{"surface": "...", "base": "...", "reading": "...", "meaning": "...", "pos": "..."}}
   ],
   "explanation": "..."
-}
+}}
 
 - "surface" is the word exactly as it appears in the phrase.
 - "base" is its dictionary/base form (same as surface if already in base form).
 - "reading" is the reading in hiragana.
-- "meaning" is what the word means IN THE CONTEXT of this specific phrase, not just a generic dictionary gloss.
-- "pos" is a short part-of-speech label (noun, verb, particle, adjective, etc).
-- "explanation" is 2-4 sentences explaining the grammar and nuance of the whole phrase.
+- "meaning" is what the word means IN THE CONTEXT of this specific phrase, not just a generic dictionary gloss. Write it in {lang_name}.
+- "pos" is a short part-of-speech label (noun, verb, particle, adjective, etc), in {lang_name}.
+- "explanation" is 2-4 sentences, in {lang_name}, explaining the grammar and nuance of the whole phrase.
 """
 
 
@@ -69,11 +72,17 @@ SYSTEM_PROMPT = """You are a Japanese language tutor. Given a Japanese phrase, s
 # No expiry. The analysis of a fixed string does not go stale; if the
 # prompt or the model changes enough to matter, bump CACHE_VERSION and
 # every entry becomes a miss without a migration.
-CACHE_VERSION = 1
+#
+# v2 (2026-08): the prompt now names a language (see SYSTEM_PROMPT_TEMPLATE
+# above), so `lang` joined CACHE_VERSION in the key material -- without
+# it, whichever learner asked first would permanently poison the cache
+# for every other language, since the SAME phrase in French and in
+# English would otherwise hash to the SAME row.
+CACHE_VERSION = 2
 
 
-def _phrase_key(phrase: str) -> str:
-    material = f"v{CACHE_VERSION}:{phrase}"
+def _phrase_key(phrase: str, lang: str) -> str:
+    material = f"v{CACHE_VERSION}:{lang}:{phrase}"
     return hashlib.sha256(material.encode("utf-8")).hexdigest()
 
 
@@ -102,8 +111,8 @@ except Exception:  # pragma: no cover - a missing DB must not stop import
     logger.exception("phrase_analysis_cache could not be initialised")
 
 
-def _cached_analysis(phrase: str) -> dict | None:
-    """The stored LLM result for `phrase`, or None.
+def _cached_analysis(phrase: str, lang: str) -> dict | None:
+    """The stored LLM result for `phrase` in `lang`, or None.
 
     A cache miss must never be an error: a failed lookup falls through to
     the model, which is the behaviour this whole layer is an optimisation
@@ -117,7 +126,7 @@ def _cached_analysis(phrase: str) -> dict | None:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT result FROM phrase_analysis_cache WHERE phrase_key = %s",
-                (_phrase_key(phrase),),
+                (_phrase_key(phrase, lang),),
             )
             row = cur.fetchone()
     except Exception:
@@ -132,7 +141,7 @@ def _cached_analysis(phrase: str) -> dict | None:
     return json.loads(result) if isinstance(result, str) else result
 
 
-def _store_analysis(phrase: str, result: dict) -> None:
+def _store_analysis(phrase: str, lang: str, result: dict) -> None:
     """Best-effort write. ON CONFLICT DO NOTHING rather than an upsert:
     two readers reaching the same uncached phrase at once both call the
     model and both try to store it; either answer is equally good and
@@ -149,7 +158,7 @@ def _store_analysis(phrase: str, result: dict) -> None:
                 VALUES (%s, %s, %s)
                 ON CONFLICT (phrase_key) DO NOTHING
                 """,
-                (_phrase_key(phrase), phrase, json.dumps(result, ensure_ascii=False)),
+                (_phrase_key(phrase, lang), phrase, json.dumps(result, ensure_ascii=False)),
             )
         conn.commit()
     except Exception:
@@ -167,9 +176,17 @@ class PhraseRequest(BaseModel):
     # the breakdown is ready the moment the reader wants it, and
     # shouldn't flood /api/phrase/history with one row per phrase read.
     save: bool = True
+    # The deep tier (contextual gloss + prose explanation) is bought
+    # explicitly, per call. Default False so the common path makes no
+    # model call at all -- see docs/adr/0001-two-tier-sentence-analysis.md.
+    deep: bool = False
+    # The deep tier's language. Absent before 2026-08, which meant every
+    # learner got whatever language the model defaulted to (in practice
+    # English) regardless of their UI language.
+    lang: str = "en"
 
 
-def _call_llm(phrase: str) -> dict:
+def _call_llm(phrase: str, lang: str) -> dict:
     """One word-by-word breakdown, via the shared multi-provider client.
 
     max_tokens=1200: a segmentation of one sentence plus a 2-4 sentence
@@ -181,10 +198,11 @@ def _call_llm(phrase: str) -> dict:
     caller already has, not one that benefits from a thinking pass --
     and llm_shared documents the reasoning budget crowding out the
     answer when the answer is long."""
+    lang_name = LANG_NAMES.get(lang, lang)
     try:
         content = chat(
             [
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": SYSTEM_PROMPT_TEMPLATE.format(lang_name=lang_name)},
                 {"role": "user", "content": phrase},
             ],
             timeout=30, max_tokens=1200, reasoning=False,
@@ -214,56 +232,45 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
     if not phrase:
         raise HTTPException(status_code=400, detail="Phrase is required")
 
-    # The model's own words/explanation only. Everything below this line
-    # is per-user (SRS state) and is recomputed on a cache hit -- the
-    # cached half is the expensive, user-independent half.
-    llm_result = _cached_analysis(phrase)
-    if llm_result is None:
-        llm_result = _call_llm(phrase)
-        _store_analysis(phrase, llm_result)
+    # The default path: local tier only. No database read beyond the
+    # user's own SRS state, no LLM call, no 503 when no provider is
+    # configured at all -- this is the whole point of the two-tier split,
+    # see docs/adr/0001-two-tier-sentence-analysis.md. llm_configured()
+    # is deliberately never checked here.
+    analysis = analyze_local(phrase)
+
+    if payload.deep:
+        # The deep tier is bought explicitly, per call. The cached half
+        # (llm_result) is the expensive, user-independent half -- see
+        # the cache header comment above -- everything from
+        # attach_user_state onward is per-user and recomputed every time.
+        llm_result = _cached_analysis(phrase, payload.lang)
+        if llm_result is None:
+            llm_result = _call_llm(phrase, payload.lang)
+            _store_analysis(phrase, payload.lang, llm_result)
+        analysis = merge_deep(analysis, llm_result.get("words", []), llm_result.get("explanation", ""))
 
     states = srs.get_user_states(user_id)
-
-    enriched_words = []
-    for word in llm_result.get("words", []):
-        surface = word.get("surface", "")
-        base = word.get("base", surface)
-        reading = word.get("reading", "")
-
-        vocab_match = find_vocab_match(surface, base, reading)
-        kanji_matches = find_kanji_matches(surface)
-
-        word_entry = {
-            **word,
-            "vocab_match": None,
-            "kanji_matches": [],
-        }
-
-        if vocab_match:
-            level, entry, raw_id = vocab_match
-            word_entry["vocab_match"] = {
-                "level": level,
-                "raw_id": raw_id,
-                "entry": serializable_entry(entry),
-                "stats": card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
-            }
-
-        for char, level, entry, raw_id in kanji_matches:
-            word_entry["kanji_matches"].append({
-                "kanji": char,
-                "level": level,
-                "raw_id": raw_id,
-                "entry": serializable_entry(entry),
-                "stats": card_stats(states, user_id, raw_id, KANJI_STATUS_MODES),
-            })
-
-        enriched_words.append(word_entry)
+    analysis = attach_user_state(analysis, states, user_id)
 
     result = {
         "phrase": phrase,
-        "explanation": llm_result.get("explanation", ""),
-        "words": enriched_words,
+        "explanation": analysis.get("explanation", ""),
+        # Deprecated alias for the pre-2026-08 "words" shape both
+        # PhraseAnalyzerScreen.jsx and ReadingScreen.jsx still read.
+        # Points at the SAME list as "tokens" rather than a copy.
+        # Removed once plan 016 moves both screens onto "tokens".
+        "words": analysis["tokens"],
+        "tokens": analysis["tokens"],
+        "grammar": analysis["grammar"],
+        "level": analysis["level"],
+        "grade": analysis["grade"],
+        "available": analysis["available"],
+        "unknown_count": analysis.get("unknown_count"),
+        "off_deck_count": analysis.get("off_deck_count"),
     }
+    if "deep_dropped" in analysis:
+        result["deep_dropped"] = analysis["deep_dropped"]
 
     if not payload.save:
         return {**result, "id": None, "created_at": None}

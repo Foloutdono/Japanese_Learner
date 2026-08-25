@@ -231,7 +231,7 @@ export default function ReadingScreen({ session }) {
     setAnalysisLoading(true)
     apiFetch('/api/phrase/analyze', session, {
       method: 'POST',
-      body: JSON.stringify({ phrase: phraseText, save: false }),
+      body: JSON.stringify({ phrase: phraseText, save: false, deep: true, lang }),
     })
       .then(r => (r.ok ? r.json() : null))
       .then(d => {

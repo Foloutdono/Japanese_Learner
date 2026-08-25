@@ -181,3 +181,49 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
         "unknown_count": unknown_count,
         "off_deck_count": off_deck_count,
     }
+
+
+def merge_deep(analysis: dict, llm_words: list[dict], explanation: str) -> dict:
+    """Fold the deep tier's per-word glosses and prose explanation onto
+    Tokens the local tier already verified.
+
+    The tokenizer is the authority on segmentation: only `meaning` is
+    copied from an LLM word onto its matched Token. Everything else --
+    surface, reading, pos, offsets, vocab_match, kanji_matches -- comes
+    from the local tier and wins. An LLM word matching no Token is a
+    hallucinated boundary and is DROPPED rather than shown; the count of
+    drops is returned as "deep_dropped" so a caller can see it happened
+    (see docs/adr/0001-two-tier-sentence-analysis.md).
+
+    Matching walks both lists forward by surface text, so a repeated
+    word (e.g. two occurrences of は) binds to occurrences in order
+    rather than every occurrence binding to the first match.
+
+    Returns a NEW dict; does not mutate `analysis` -- the local analysis
+    is cacheable and may be shared with a caller that never buys the
+    deep tier.
+    """
+    tokens = [dict(t) for t in analysis.get("tokens", [])]
+    used = [False] * len(tokens)
+    dropped = 0
+
+    for word in llm_words:
+        surface = word.get("surface", "")
+        meaning = word.get("meaning")
+        matched = False
+        for i, tok in enumerate(tokens):
+            if not used[i] and tok["surface"] == surface:
+                if meaning:
+                    tok["meaning"] = meaning
+                used[i] = True
+                matched = True
+                break
+        if not matched:
+            dropped += 1
+
+    return {
+        **analysis,
+        "tokens": tokens,
+        "explanation": explanation,
+        "deep_dropped": dropped,
+    }

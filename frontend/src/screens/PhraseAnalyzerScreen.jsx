@@ -34,7 +34,7 @@ function wordColor(word) {
 
 export default function PhraseAnalyzerScreen({ session }) {
   const navigate = useNavigate()
-  const { t }    = useLang()
+  const { t, lang } = useLang()
 
   const [phrase, setPhrase]     = useState('')
   const [result, setResult]     = useState(null)
@@ -64,7 +64,7 @@ export default function PhraseAnalyzerScreen({ session }) {
 
     apiFetch('/api/phrase/analyze', session, {
       method: 'POST',
-      body: JSON.stringify({ phrase: trimmed }),
+      body: JSON.stringify({ phrase: trimmed, deep: true, lang }),
     })
       .then(r => {
         if (!r.ok) throw new Error('Request failed')
