@@ -21,7 +21,102 @@ see `git log` for `Merge plan 001` through `Merge plan 011`.
 | 006 | [Responsive breakpoint tokens](006-responsive-breakpoint-tokens.md) | P3 | M | — | DONE |
 | 007 | [Reduced-motion coverage](007-reduced-motion-coverage.md) | P3 | M | 006 (weak) | DONE |
 
+### Follow-up wave (written 2026-08-25, after reviewing all 7 execution reports)
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|------|-------|----------|--------|------------|--------|
+| 008 | [Browser test environment](008-browser-test-environment.md) | P1 | M | — | TODO |
+| 009 | [Dev-env Supabase credentials](009-dev-env-supabase-credentials.md) | P1 | S | — | TODO |
+| 010 | [Card-stamp ripple + stale comment](010-card-stamp-ripple-and-stale-comment.md) | P2 | S | — | TODO |
+| 011 | [Locale-parity test](011-locale-parity-test.md) | P2 | S | — | TODO |
+
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
+
+## Follow-up analysis (all 7 reports, 2026-08-25)
+
+Every deferral, correction, and incidental find across the seven execution
+reports was collected and then **re-verified against the live code** — not
+taken from the reports. That verification changed the answer in both
+directions: it confirmed two real defects nobody had planned for, and it
+closed five "follow-ups" that turned out to be already done.
+
+**The dominant signal**: five of seven plans (002, 003, 004, 006, 007) each
+deferred a specific regression test to *"once a DOM test environment exists"*,
+and the tooling for it (`playwright`, `@vitest/browser-playwright`) has been
+sitting installed and unused in `devDependencies` the whole time. That is
+plan 008, and it is the highest-leverage item in this wave by a distance.
+
+**The second signal**: live verification failed or was impossible on five of
+seven plans, always for the same reason — `npm run dev` cannot authenticate
+because the Supabase credentials live in a tracked `.env.production` that Vite
+never loads in dev mode, and the gitignored local override does not propagate
+to git worktrees. That is plan 009. It is a four-line fix for something that
+cost real time repeatedly.
+
+### Verified already done — do NOT re-plan these
+
+Each was listed as "deferred" in a report but is in fact complete in `main`:
+
+- **`aria-expanded` on the burger toggle** — present at `BurgerMenu.jsx:193`.
+- **`aria-current` on the active nav link** — present at `BurgerMenu.jsx:49`.
+  (Plans 003 and 004 both deferred these; both had already landed.)
+- **`exam.css` focus handling** (deferred by plan 005) — `exam.css` has zero
+  `outline: none`, so nothing was removed, and its keyboard-critical surface
+  (the arrow-key-navigable MCQ rows) is covered by
+  `.mcq-row:not(:disabled):focus-visible` in `index.css`.
+- **`exam.css` reduced motion** (deferred by plan 007) — 2 keyframes,
+  3 reduced-motion rules. Already covered.
+- **The "long transform transitions" pass** (deferred by plan 007) — a sweep
+  found exactly **one** transition over 300ms with a transform: the 560ms
+  train-door leaf. `TrainDoor.jsx:86` returns `null` under
+  `prefersReducedMotion()`, so it never mounts and the transition never runs.
+  `DepartureGate` delegates to `TicketGate`, which does the same, plus a
+  belt-and-braces `.gate { display: none }` in a reduced-motion block. Closed.
+- **Dead keyframe cleanup** (deferred by plan 007) — plan 007's own executor
+  found zero genuinely dead keyframes. Closed.
+
+### Still deferred, not yet planned
+
+Real, but either lower-leverage or blocked on a decision:
+
+- **Per-screen heading test, reduced-motion settle test, visual-regression
+  snapshots at 560/768** — all three become small and independent once plan
+  008 lands. Deliberately not written yet; the environment comes first.
+- **A CI check that every `animation-name` has a matching `@keyframes`** —
+  would have caught plan 010's defect the moment it was introduced. Best
+  written on top of plan 008. Strongest single follow-on this wave implies.
+- **`.stage-footlights` 480px → 560px** — the one clear breakpoint-drift case
+  plan 006 identified but could not migrate (its Step 3 was gated by the STOP
+  condition). Verified still present and still decorative-only (particle count
+  and strip height). Needs the three-width visual check, so it wants plan 009's
+  working dev env first. Small.
+- **`<h1>` for the four screens that have none** — `SettingsScreen`,
+  `PhraseAnalyzerScreen`, `ExamRunner`, `ExamResult`. Confirmed still true
+  (0 `<h1>`, `<main id="main-content">` present on each). **This is a product
+  question, not an engineering one**: either these screens get a short in-body
+  label, or the decision is that their `TopBar` title suffices. Needs an answer
+  before a plan can be written.
+- **OS theme-change listener while the app is open** (plan 001) — needs a
+  decision first: should an explicit user choice ever be overridden by an OS
+  change? Small once decided.
+- **Contrast ratio of the focus ring against the nine cosmetic papers**
+  (plan 005) — WCAG 1.4.11 wants 3:1 for non-text. `--accent2` is comfortable
+  on the default surface; the nine "paper" cosmetics change that surface.
+  Genuinely its own audit.
+- **Native `<dialog>` / `showModal()` migration** (plan 004) — the better
+  long-term shape, but it changes stacking and backdrop across six hand-tuned
+  overlays at once. Plan 004's own note says revisit if the overlay CSS is
+  reworked anyway.
+- **Splitting `index.css`** (plan 006) — the largest maintainability issue in
+  the frontend at 15K+ lines, and the root cause of the breakpoint drift plan
+  006 documented. Must come **after** visual-regression coverage exists, not
+  before. Note also that plan 010 documents a cascade dependency between two
+  physically distant blocks in this file — a split must not separate them.
+- **`<meta name="description">` / Open Graph tags** (plan 002) — needs product
+  input on the copy.
+- **Whether `VITE_SUPABASE_ANON_KEY` should be tracked at all** — it is a
+  publishable-by-design key, so this is not an incident, but a reviewer may
+  prefer build-time injection. Deployment-process decision, flagged in plan 009.
 
 ## Dependency notes
 
