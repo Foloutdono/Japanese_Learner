@@ -37,6 +37,17 @@ const T = { clickForDetails: 'Click for details' }
 // CardTransition (used by the stepper layout) renders StageBadge, which
 // calls useLang() -- so every render needs a real LangProvider ancestor,
 // not just the tests that exercise the stepper layout directly.
+// LangProvider itself fetches /api/translations/{kanji,vocab} on mount
+// (LangContext.jsx's getTranslations, for contentMaps -- unrelated to
+// the `t`/`lang` this suite actually reads), so `fetch` is stubbed
+// module-wide to keep these tests offline, same pattern as
+// lib/api.test.js's mockFetchOnce.
+globalThis.fetch = vi.fn().mockResolvedValue({
+  ok: true,
+  status: 200,
+  json: async () => ({}),
+})
+
 function withLang(children) {
   return <LangProvider>{children}</LangProvider>
 }
@@ -116,5 +127,23 @@ describe('SentenceBreakdown', () => {
     ))
     document.querySelector('.phrase-word-card__surface-wrap').click()
     expect(onTokenClick).not.toHaveBeenCalled()
+  })
+
+  it('a furigana part with no reading renders no <rt> (okurigana already writes its own kana)', async () => {
+    const token = tokenFixture({
+      surface: '食べる',
+      furigana: [{ text: '食', reading: 'た' }, { text: 'べる' }],
+    })
+    const analysis = { tokens: [token], explanation: '' }
+    await render(withLang(
+      <SentenceBreakdown analysis={analysis} t={T} layout="list" onTokenClick={() => {}} onKanjiClick={() => {}} />
+    ))
+    // One <ruby><rt> for 食/た, and 'べる' rendered as bare text with no <rt>.
+    const rubies = document.querySelectorAll('ruby')
+    expect(rubies.length).toBeGreaterThan(0)
+    const rts = document.querySelectorAll('rt')
+    expect([...rts].some(rt => rt.textContent === 'た')).toBe(true)
+    expect([...rts].some(rt => rt.textContent === 'べる')).toBe(false)
+    expect(document.body.textContent).toContain('べる')
   })
 })

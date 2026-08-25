@@ -82,3 +82,59 @@ def test_words_alias_matches_tokens(client):
     response = client.post("/api/phrase/analyze", json={"phrase": "私は学生です。"})
     body = response.json()
     assert body["words"] == body["tokens"]
+
+
+def test_multi_sentence_passage_returns_one_entry_per_sentence(client):
+    response = client.post(
+        "/api/phrase/analyze",
+        json={"phrase": "私は学生です。今日は暑い！明日は?"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body["sentences"]) == 3
+    assert body["sentences"][0]["text"] == "私は学生です。"
+    assert body["truncated"] == 0
+
+
+def test_history_round_trip_reflects_live_srs_state_not_anything_stored(client, monkeypatch):
+    # The defect docs/adr/0002 exists to fix: phrase_history no longer
+    # stores stats at all (only `phrase` + provenance), so the only way
+    # this test can pass is if the GET genuinely recomputes from live
+    # SRS state. Force a distinctive value ("mastered") that nothing in
+    # the database could possibly have produced on its own.
+    phrase = "大学に行きます。"
+    post_resp = client.post("/api/phrase/analyze", json={"phrase": phrase})
+    assert post_resp.status_code == 200
+    entry_id = post_resp.json()["id"]
+    assert entry_id is not None
+
+    raw_id = "vocab_N5_大学_だいがく"
+
+    class _FakeSRS:
+        def get_user_states(self, user_id):
+            return {
+                (f"{user_id}:{raw_id}", "vocab.flashcard.f2b"): {
+                    "state": "mastered", "total_reviews": 5, "correct_reviews": 5,
+                    "interval_days": 30, "due": False, "next_review": None,
+                },
+            }
+
+    monkeypatch.setattr(phrase_module, "srs", _FakeSRS())
+    get_resp = client.get(f"/api/phrase/history/{entry_id}")
+    assert get_resp.status_code == 200
+    body = get_resp.json()
+    daigaku = next(t for t in body["tokens"] if t["surface"] == "大学")
+    assert daigaku["vocab_match"]["stats"]["status"] == "mastered"
+
+
+def test_history_get_makes_no_llm_call(client, monkeypatch):
+    phrase = "私は学生です。"
+    post_resp = client.post("/api/phrase/analyze", json={"phrase": phrase})
+    entry_id = post_resp.json()["id"]
+
+    def _boom(*args, **kwargs):
+        raise AssertionError("chat() must not be called when reopening history")
+
+    monkeypatch.setattr(phrase_module, "chat", _boom)
+    get_resp = client.get(f"/api/phrase/history/{entry_id}")
+    assert get_resp.status_code == 200

@@ -444,6 +444,16 @@ const phraseAnalyzer = {
   status_new:          'Nouveau',
   status_not_started:  'Pas dans le deck',
   status_due:          'À réviser',
+  sentenceLevel:       'Niveau estimé',
+  unknownWords:        'mots inconnus',
+  offDeckWords:        'non enseignés par l\'application',
+  iPlusOne:            'À une étape de votre niveau',
+  grammarSpotted:      'Grammaire repérée',
+  explainSentence:     'Expliquer',
+  explaining:          'Explication en cours…',
+  noExplanationYet:    'Pas encore d\'explication — appuyez sur Expliquer',
+  passageTruncated:    n => `Seules les ${n} premières ${n === 1 ? 'phrase a été analysée' : 'phrases ont été analysées'}.`,
+  analysisUnavailable: 'Analyse temporairement indisponible pour cette phrase.',
 }
 
 // ── Reading ───────────────────────────────────────────────

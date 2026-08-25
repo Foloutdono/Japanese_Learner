@@ -11,6 +11,7 @@ from core.auth import get_user_id
 from core.srs_instance import srs
 from study.llm_shared import chat, LLMUnavailable
 from study.analysis import analyze_local, attach_user_state, merge_deep
+from study.sentences import split_sentences, MAX_SENTENCES
 from routes.reading import LANG_NAMES
 
 router = APIRouter()
@@ -109,6 +110,44 @@ try:
     _init_cache()
 except Exception:  # pragma: no cover - a missing DB must not stop import
     logger.exception("phrase_analysis_cache could not be initialised")
+
+
+# ── phrase_history becomes the Sentence bank ─────────────────────
+# Was: one INSERT per analysis, storing the WHOLE enriched result
+# (including per-user SRS `stats`, frozen at analysis time) as a JSONB
+# blob. Reopen an entry from last month and a word mastered since still
+# reads "New" -- the stored stats are a snapshot of a value that changes
+# every review. See docs/adr/0002-sentence-bank-stores-text-not-results.md.
+#
+# Now: only `phrase` (the Passage text) and provenance (`source`,
+# `source_ref`) are stored. GET /api/phrase/history/{id} re-derives the
+# analysis through the same local (+cached deep) pipeline every time, so
+# badges always reflect CURRENT SRS state.
+#
+# Additive and idempotent -- same pattern decks.py's _ensure_deck_schema
+# uses -- not a destructive migration: `result` is made nullable rather
+# than dropped, and existing rows keep whatever they already have. They
+# are simply never read again; see the module's own note on this.
+def _migrate_history_schema() -> None:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("ALTER TABLE phrase_history ALTER COLUMN result DROP NOT NULL")
+            cur.execute(
+                "ALTER TABLE phrase_history ADD COLUMN IF NOT EXISTS source TEXT NOT NULL DEFAULT 'typed'"
+            )
+            cur.execute(
+                "ALTER TABLE phrase_history ADD COLUMN IF NOT EXISTS source_ref TEXT NOT NULL DEFAULT ''"
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+try:
+    _migrate_history_schema()
+except Exception:  # pragma: no cover - a missing DB must not stop import
+    logger.exception("phrase_history schema migration failed")
 
 
 def _cached_analysis(phrase: str, lang: str) -> dict | None:
@@ -226,6 +265,79 @@ def _parse_llm_json(content: str) -> dict:
         raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
 
 
+def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: str,
+                       allow_llm_call: bool = True) -> dict:
+    """One Sentence through the full local (+ optional deep) pipeline,
+    with per-user SRS state attached. Shared by the live analyze path
+    and the history re-derive path (Step 3) so the two can never drift.
+
+    `allow_llm_call=False` is the history re-derive path's whole point:
+    opening a saved entry is a local-tier operation and must never call
+    a model. When the deep tier was bought earlier, `phrase_analysis_cache`
+    is permanent and keyed by (phrase, lang), so a cache HIT still merges
+    in -- only a cache MISS is treated differently: skipped instead of
+    escalated to _call_llm.
+    """
+    analysis = analyze_local(text)
+
+    if deep:
+        # The deep tier is bought explicitly, per call, per Sentence --
+        # never for a whole Passage at once (see PhraseRequest.deep and
+        # docs/adr/0001). The cached half (llm_result) is the expensive,
+        # user-independent half; everything from attach_user_state
+        # onward is per-user and recomputed every time.
+        llm_result = _cached_analysis(text, lang)
+        if llm_result is None and allow_llm_call:
+            llm_result = _call_llm(text, lang)
+            _store_analysis(text, lang, llm_result)
+        if llm_result is not None:
+            analysis = merge_deep(analysis, llm_result.get("words", []), llm_result.get("explanation", ""))
+
+    return attach_user_state(analysis, states, user_id)
+
+
+def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
+                      allow_llm_call: bool = True) -> dict:
+    """A Passage split into Sentences and each analyzed independently.
+    No LLM call happens here unless `deep` is set -- see _analyze_sentence."""
+    all_sentences = split_sentences(passage)
+    truncated = max(0, len(all_sentences) - MAX_SENTENCES)
+    kept = all_sentences[:MAX_SENTENCES]
+
+    states = srs.get_user_states(user_id)
+    sentences = [
+        _analyze_sentence(s["text"], deep, lang, states, user_id, allow_llm_call)
+        for s in kept
+    ]
+
+    result = {"passage": passage, "sentences": sentences, "truncated": truncated}
+
+    # Backward compatibility: a single-Sentence Passage (every call
+    # ReadingScreen.jsx makes, and most analyzer calls) mirrors its one
+    # Sentence's fields at the top level, exactly as the endpoint's
+    # pre-multi-sentence shape did.
+    if len(sentences) == 1:
+        only = sentences[0]
+        result.update({
+            "explanation": only.get("explanation", ""),
+            # Deprecated alias for the pre-2026-08 "words" shape both
+            # PhraseAnalyzerScreen.jsx and ReadingScreen.jsx still read.
+            # Points at the SAME list as "tokens" rather than a copy.
+            "words": only["tokens"],
+            "tokens": only["tokens"],
+            "grammar": only["grammar"],
+            "level": only["level"],
+            "grade": only["grade"],
+            "available": only["available"],
+            "unknown_count": only.get("unknown_count"),
+            "off_deck_count": only.get("off_deck_count"),
+        })
+        if "deep_dropped" in only:
+            result["deep_dropped"] = only["deep_dropped"]
+
+    return result
+
+
 @router.post("/api/phrase/analyze")
 def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
     phrase = payload.phrase.strip()
@@ -237,40 +349,7 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
     # configured at all -- this is the whole point of the two-tier split,
     # see docs/adr/0001-two-tier-sentence-analysis.md. llm_configured()
     # is deliberately never checked here.
-    analysis = analyze_local(phrase)
-
-    if payload.deep:
-        # The deep tier is bought explicitly, per call. The cached half
-        # (llm_result) is the expensive, user-independent half -- see
-        # the cache header comment above -- everything from
-        # attach_user_state onward is per-user and recomputed every time.
-        llm_result = _cached_analysis(phrase, payload.lang)
-        if llm_result is None:
-            llm_result = _call_llm(phrase, payload.lang)
-            _store_analysis(phrase, payload.lang, llm_result)
-        analysis = merge_deep(analysis, llm_result.get("words", []), llm_result.get("explanation", ""))
-
-    states = srs.get_user_states(user_id)
-    analysis = attach_user_state(analysis, states, user_id)
-
-    result = {
-        "phrase": phrase,
-        "explanation": analysis.get("explanation", ""),
-        # Deprecated alias for the pre-2026-08 "words" shape both
-        # PhraseAnalyzerScreen.jsx and ReadingScreen.jsx still read.
-        # Points at the SAME list as "tokens" rather than a copy.
-        # Removed once plan 016 moves both screens onto "tokens".
-        "words": analysis["tokens"],
-        "tokens": analysis["tokens"],
-        "grammar": analysis["grammar"],
-        "level": analysis["level"],
-        "grade": analysis["grade"],
-        "available": analysis["available"],
-        "unknown_count": analysis.get("unknown_count"),
-        "off_deck_count": analysis.get("off_deck_count"),
-    }
-    if "deep_dropped" in analysis:
-        result["deep_dropped"] = analysis["deep_dropped"]
+    result = _analyze_passage(phrase, payload.deep, payload.lang, user_id)
 
     if not payload.save:
         return {**result, "id": None, "created_at": None}
@@ -278,9 +357,14 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
         with conn.cursor() as cur:
+            # source/source_ref take their column defaults ('typed'/'')
+            # here -- this endpoint has no notion of provenance yet.
+            # Plans 018 (photo input) and 019 (video) are what actually
+            # populate them; the columns exist now with defaults so
+            # neither needs a further migration.
             cur.execute(
-                "INSERT INTO phrase_history(user_id, phrase, result) VALUES (%s, %s, %s) RETURNING id, created_at",
-                (user_id, phrase, json.dumps(result)),
+                "INSERT INTO phrase_history(user_id, phrase) VALUES (%s, %s) RETURNING id, created_at",
+                (user_id, phrase),
             )
             row_id, created_at = cur.fetchone()
         conn.commit()
@@ -296,7 +380,7 @@ def get_phrase_history(user_id: str = Depends(get_user_id), limit: int = Query(5
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, phrase, created_at FROM phrase_history "
+                "SELECT id, phrase, source, created_at FROM phrase_history "
                 "WHERE user_id = %s ORDER BY created_at DESC LIMIT %s",
                 (user_id, limit),
             )
@@ -305,18 +389,24 @@ def get_phrase_history(user_id: str = Depends(get_user_id), limit: int = Query(5
         conn.close()
 
     return [
-        {"id": row_id, "phrase": phrase, "created_at": created_at.isoformat()}
-        for row_id, phrase, created_at in rows
+        {"id": row_id, "phrase": phrase, "source": source, "created_at": created_at.isoformat()}
+        for row_id, phrase, source, created_at in rows
     ]
 
 
 @router.get("/api/phrase/history/{entry_id}")
-def get_phrase_history_entry(entry_id: int, user_id: str = Depends(get_user_id)):
+def get_phrase_history_entry(entry_id: int, lang: str = "en", user_id: str = Depends(get_user_id)):
+    # Re-derives the analysis from the stored `phrase` text every time --
+    # see the _migrate_history_schema note above (docs/adr/0002). This is
+    # a local-tier operation: allow_llm_call=False means a Sentence whose
+    # deep tier was never bought (or was bought in a different `lang`)
+    # simply comes back local-only, rather than triggering a fresh model
+    # call just because the learner reopened an old entry.
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT result, created_at FROM phrase_history WHERE id = %s AND user_id = %s",
+                "SELECT phrase, created_at FROM phrase_history WHERE id = %s AND user_id = %s",
                 (entry_id, user_id),
             )
             row = cur.fetchone()
@@ -326,9 +416,8 @@ def get_phrase_history_entry(entry_id: int, user_id: str = Depends(get_user_id))
     if row is None:
         raise HTTPException(status_code=404, detail="Not found")
 
-    result, created_at = row
-    if isinstance(result, str):
-        result = json.loads(result)
+    phrase, created_at = row
+    result = _analyze_passage(phrase, deep=True, lang=lang, user_id=user_id, allow_llm_call=False)
     return {**result, "id": entry_id, "created_at": created_at.isoformat()}
 
 

@@ -64,11 +64,22 @@ CREATE TABLE user_profiles (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- The Sentence bank: what the learner submitted, plus where it came
+-- from. Does NOT store the analysis itself -- badges would go stale the
+-- moment SRS state changes underneath a stored snapshot. Re-derived on
+-- read instead; see routes/phrase.py's get_phrase_history_entry and
+-- docs/adr/0002-sentence-bank-stores-text-not-results.md.
+--
+-- `result` is nullable and unused by any code path (routes/phrase.py's
+-- _migrate_history_schema drops its NOT NULL at import time) -- kept
+-- rather than dropped so pre-2026-08 rows are left alone.
 CREATE TABLE phrase_history (
     id BIGSERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
     phrase TEXT NOT NULL,
-    result JSONB NOT NULL,
+    result JSONB,
+    source TEXT NOT NULL DEFAULT 'typed',
+    source_ref TEXT NOT NULL DEFAULT '',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

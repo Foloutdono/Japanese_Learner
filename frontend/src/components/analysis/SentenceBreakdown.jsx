@@ -1,6 +1,9 @@
 import { CardTransition } from '../study/CardTransition'
+import { FuriganaParts } from '../study/Readings'
 import { STATUS_COLORS, wordColor } from './status'
 import { TokenCard } from './TokenCard'
+import { GrammarChips } from './GrammarChips'
+import { LevelBadge } from './LevelBadge'
 
 // Real stroke-based chevron rather than `‹`/`›` text glyphs, whose
 // optical centering varies by font/OS. `display: block` avoids the few
@@ -75,11 +78,20 @@ export function SentenceBreakdown({
               className={`word-span rdg-breakdown-line__word${i === index ? ' rdg-breakdown-line__word--active' : ''}`}
               style={{ '--word-color': wordColor(w) }}
               title={t.jumpToWord ?? 'Jump to this word'}
+              lang="ja"
             >
-              {w.surface}
+              <FuriganaParts parts={w.furigana ?? [{ text: w.surface }]} />
             </span>
           ))}
         </div>
+
+        <LevelBadge
+          level={analysis.level}
+          unknownCount={analysis.unknown_count}
+          offDeckCount={analysis.off_deck_count}
+          t={t}
+        />
+        <GrammarChips grammar={analysis.grammar} t={t} />
 
         {analysis.explanation && (
           <div className="phrase-explanation rdg-breakdown-explanation">
@@ -136,11 +148,19 @@ export function SentenceBreakdown({
               className={`word-span${w.vocab_match ? ' word-span--clickable' : ''}`}
               style={{ '--word-color': wordColor(w) }}
               title={w.vocab_match ? (t.clickForDetails) : undefined}
+              lang="ja"
             >
-              {w.surface}
+              <FuriganaParts parts={w.furigana ?? [{ text: w.surface }]} />
             </span>
           ))}
         </div>
+        <LevelBadge
+          level={analysis.level}
+          unknownCount={analysis.unknown_count}
+          offDeckCount={analysis.off_deck_count}
+          t={t}
+        />
+        <GrammarChips grammar={analysis.grammar} t={t} />
         <div className="phrase-explanation">
           {analysis.explanation}
         </div>

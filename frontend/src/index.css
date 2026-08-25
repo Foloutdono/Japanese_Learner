@@ -9490,6 +9490,52 @@ textarea:focus-visible {
   text-underline-offset: 4px;
 }
 
+/* ── Sentence-level badges: estimated JLPT level, unknown/off-deck
+   word counts, and grammar points spotted by the local analysis tier
+   (see components/analysis/LevelBadge.jsx, GrammarChips.jsx). New in
+   plan 016 -- additive only, nothing above this block was touched. */
+.analysis-level-badge {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 10px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.analysis-level-badge__level { color: var(--text-primary); }
+.analysis-level-badge__unknown--i-plus-one {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.analysis-grammar-chips { margin: 10px 0; }
+.analysis-grammar-chips__label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.analysis-grammar-chips__row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.analysis-grammar-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.analysis-grammar-chip__pattern { font-family: var(--font-jp); }
+.analysis-grammar-chip__level {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
 /* ── Shared slide-up / slide-in detail panel ─────────────── */
 .detail-overlay-sheet {
   position: fixed;
@@ -9572,8 +9618,28 @@ textarea:focus-visible {
   font-size: 15px;
 }
 .phrase-history-delete { background: none; color: var(--danger); font-size: 12px; padding: 2px 8px; }
+.phrase-history-source {
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
 
 .phrase-error-card { padding: 16px; color: var(--danger); margin-bottom: 24px; }
+
+/* ── Per-Sentence Explain control (plan 016) -- the deep tier is bought
+   one Sentence at a time, never for the whole Passage. Additive only. */
+.phrase-explain-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -12px 0 24px;
+  padding: 0 4px;
+}
+.phrase-explain-hint { font-size: 13px; color: var(--text-secondary); }
 
 .phrase-result-card { margin-bottom: 24px; padding: 20px 24px; }
 .phrase-line {

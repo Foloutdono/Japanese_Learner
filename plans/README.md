@@ -75,7 +75,7 @@ YouTube video's subtitles.
 | 013 | [Local analysis tier](013-local-analysis-tier.md) | P1 | M | 012 | DONE |
 | 014 | [Two-tier phrase API](014-two-tier-phrase-api.md) | P1 | M | 013 | DONE |
 | 015 | [Shared analysis components](015-shared-analysis-components.md) | P1 | M | 014 | DONE |
-| 016 | [Analyzer local-first + Sentence bank](016-analyzer-local-first-and-sentence-bank.md) | P1 | M | 015 | TODO |
+| 016 | [Analyzer local-first + Sentence bank](016-analyzer-local-first-and-sentence-bank.md) | P1 | M | 015 | DONE |
 | 017 | [Mine sentences into decks](017-mine-sentences-into-decks.md) | P1 | M | 016 | TODO |
 | 018 | [Image / camera input](018-image-and-camera-input.md) | P2 | M | 016 | TODO |
 | 019 | [Video subtitle study mode](019-video-subtitle-study-mode.md) | P2 | L | 017 | TODO |
