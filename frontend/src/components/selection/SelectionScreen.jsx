@@ -129,7 +129,7 @@ export default function SelectionScreen({
         ) : (eyebrow || heading || subtitle) && (
           <div className="selector-header">
             {eyebrow && <div className="selector-header__eyebrow">{eyebrow}</div>}
-            {heading && <div className="selector-header__title">{heading}</div>}
+            {heading && <h1 className="selector-header__title">{heading}</h1>}
             {subtitle && <div className="selector-header__subtitle">{subtitle}</div>}
           </div>
         )}
