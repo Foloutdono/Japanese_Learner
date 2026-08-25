@@ -2555,6 +2555,13 @@ textarea:focus-visible {
   animation: board-tick 2s steps(1, end) infinite;
 }
 @keyframes board-tick { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0.15; } }
+/* A blinking colon is decoration, not the clock's content (the digits
+   themselves change on their own re-render cadence). Dropping the
+   blink leaves it steady at full opacity — no base opacity is set
+   outside the animation, so it settles fully visible, not half-dim. */
+@media (prefers-reduced-motion: reduce) {
+  .board-clock__colon { animation: none; }
+}
 
 .board__rows { display: flex; flex-direction: column; }
 
@@ -11048,6 +11055,14 @@ textarea:focus-visible {
   0%, 100% { transform: scaleY(1)    scaleX(1);    opacity: 0.95; }
   35%      { transform: scaleY(1.12) scaleX(0.94); opacity: 1; }
   68%      { transform: scaleY(0.94) scaleX(1.05); opacity: 0.85; }
+}
+/* The flicker is the whole point of the flame icon, but it is still
+   decoration layered on a static shape (.flame__body) that already
+   reads as "fire" on its own. Dropping the animation leaves the core
+   at its natural, unscaled fill — no opacity/transform is set outside
+   the keyframes, so nothing goes invisible. */
+@media (prefers-reduced-motion: reduce) {
+  .flame__core { animation: none; }
 }
 
 /* ── The hall ─────────────────────────────────────────────── */
