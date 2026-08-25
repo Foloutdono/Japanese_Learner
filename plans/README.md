@@ -19,7 +19,7 @@ see `git log` for `Merge plan 001` through `Merge plan 011`.
 | 004 | [Modal dialog accessibility](004-modal-dialog-accessibility.md) | P2 | M | — | DONE |
 | 005 | [Restore focus indicators](005-restore-focus-indicators.md) | P2 | S | — | DONE |
 | 006 | [Responsive breakpoint tokens](006-responsive-breakpoint-tokens.md) | P3 | M | — | DONE |
-| 007 | [Reduced-motion coverage](007-reduced-motion-coverage.md) | P3 | M | 006 (weak) | TODO |
+| 007 | [Reduced-motion coverage](007-reduced-motion-coverage.md) | P3 | M | 006 (weak) | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 

@@ -1515,6 +1515,14 @@ textarea:focus-visible {
   margin-bottom: 44px;
   animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
+/* Missed by the shared arrive->arrive-soft block near the top of the
+   file — that block only lists the screens sharing the exact same
+   arrive rule, and this header (used on screens outside that list)
+   was never added to it. Same fix: drop the translateY, keep the
+   fade so the header still announces itself as newly arrived. */
+@media (prefers-reduced-motion: reduce) {
+  .station-header { animation: arrive-soft 0.2s linear backwards; }
+}
 .station-header .station-sign--sm { padding: 0 0 0 0; }
 .station-header .station-sign__stripe { margin: 0; }
 
@@ -2547,6 +2555,13 @@ textarea:focus-visible {
   animation: board-tick 2s steps(1, end) infinite;
 }
 @keyframes board-tick { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0.15; } }
+/* A blinking colon is decoration, not the clock's content (the digits
+   themselves change on their own re-render cadence). Dropping the
+   blink leaves it steady at full opacity — no base opacity is set
+   outside the animation, so it settles fully visible, not half-dim. */
+@media (prefers-reduced-motion: reduce) {
+  .board-clock__colon { animation: none; }
+}
 
 .board__rows { display: flex; flex-direction: column; }
 
@@ -3321,6 +3336,16 @@ textarea:focus-visible {
   0%   { opacity: 1; }
   60%  { opacity: 0.85; }
   100% { opacity: 0; }
+}
+/* TopBar's MobileLevelBar clears its gain highlight from
+   onAnimationEnd (`setGain(null)`), so this cannot be switched to
+   animation: none — with no animation there is no animationend event,
+   and the highlight would sit there forever instead of settling into
+   the base fill. Collapsing the duration keeps the same animation
+   name and still fires a real animationend, just almost immediately,
+   the same trick used for .fare-tick/.level-board/.reissue below. */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-level-bar__gain { animation-duration: 1ms; }
 }
 .mobile-level-bar__xp {
   font-family: var(--font-display);
@@ -9630,6 +9655,15 @@ textarea:focus-visible {
   0%   { transform: scale(0.85); opacity: 0.4; }
   100% { transform: scale(1); opacity: 1; }
 }
+/* Pure entrance flourish — the streak count is already text content,
+   the pop just announces the badge. No base opacity/transform is set
+   outside the animation, so dropping it entirely still renders the
+   badge fully visible at its natural scale. Covers .trn-streak too
+   (translation screen's identical badge, further down, shares this
+   keyframe). */
+@media (prefers-reduced-motion: reduce) {
+  .rdg-streak, .trn-streak { animation: none; }
+}
 
 .rdg-error-card { padding: 16px; color: var(--danger); }
 .rdg-retry-wrap { margin-top: 12px; }
@@ -11031,6 +11065,14 @@ textarea:focus-visible {
   0%, 100% { transform: scaleY(1)    scaleX(1);    opacity: 0.95; }
   35%      { transform: scaleY(1.12) scaleX(0.94); opacity: 1; }
   68%      { transform: scaleY(0.94) scaleX(1.05); opacity: 0.85; }
+}
+/* The flicker is the whole point of the flame icon, but it is still
+   decoration layered on a static shape (.flame__body) that already
+   reads as "fire" on its own. Dropping the animation leaves the core
+   at its natural, unscaled fill — no opacity/transform is set outside
+   the keyframes, so nothing goes invisible. */
+@media (prefers-reduced-motion: reduce) {
+  .flame__core { animation: none; }
 }
 
 /* ── The hall ─────────────────────────────────────────────── */
@@ -13005,6 +13047,14 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
   from { transform: translateX(100%); }
   to   { transform: translateX(0); }
 }
+/* The drawer travels its own full width — the same shape of motion as
+   .burger-drawer above, and the same fix: it still has to announce
+   itself, so it fades in place instead of not animating at all. The
+   overlay's own fade (quick-drawer-fade) is untouched, it was never
+   more than an opacity change. */
+@media (prefers-reduced-motion: reduce) {
+  .quick-drawer { animation: quick-drawer-fade 160ms ease forwards; }
+}
 
 .quick-drawer__head {
   display: flex;
@@ -13669,6 +13719,13 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
   border: 1px solid var(--surface-line);
   border-radius: var(--surface-radius);
   animation: arrive 0.28s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+/* The desktop-width sticky dock (>1099px) still had the plain `arrive`
+   slide — only the two narrower layouts below (the centred modal and
+   the full-screen mobile sheet) had been given a reduced-motion
+   fallback. Same treatment: fade in place, no translateY. */
+@media (prefers-reduced-motion: reduce) {
+  .dict-dock { animation: arrive-soft 0.2s linear backwards; }
 }
 .dict-dock__scrim { display: none; }
 
