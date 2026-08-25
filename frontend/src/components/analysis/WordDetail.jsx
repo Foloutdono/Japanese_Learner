@@ -3,6 +3,7 @@ import { useDialog } from '../../hooks/useDialog'
 import { shortDate } from '../../lib/formatDate'
 import { CrossIcon } from '../ui/Icons'
 import { StatusBadge } from './StatusBadge'
+import { MineButton } from './MineButton'
 
 function Label({ children }) {
   return (
@@ -41,12 +42,16 @@ function StatRow({ label, value }) {
 // width (the analyzer, today) gets exactly the bottom-sheet-only
 // behavior it always had — useDialog's focus trap and Escape handling
 // are the only thing that changes for it, and both are additive.
-export function WordDetail({ detail, t, isMobile = true, onClose }) {
+//
+// `mining` (see plan 017 / useMining.js) is optional. `detail.rawId` /
+// `detail.kind` / `detail.source` are only set by callers that built
+// this MineButton support in -- absent, MineButton renders nothing.
+export function WordDetail({ detail, t, isMobile = true, onClose, mining }) {
   // `t` arrives as a prop but the locale itself does not, and the
   // review date needs it — reading the context here beats threading a
   // second argument through every caller.
   const { lang } = useLang()
-  const { title, reading, contextMeaning, entry, stats, level } = detail
+  const { title, reading, contextMeaning, entry, stats, level, rawId, kind, source } = detail
   const dialogRef = useDialog(onClose)
 
   const content = (
@@ -86,6 +91,16 @@ export function WordDetail({ detail, t, isMobile = true, onClose }) {
         <div className="detail-badges">
           <StatusBadge status={stats.status} t={t} />
           {stats.due && <StatusBadge status="due" t={t} />}
+          {kind && (
+            <MineButton
+              mining={mining}
+              kind={kind}
+              disabled={!rawId}
+              disabledReason={t.cannotMineOffDeck ?? 'Not in the app deck'}
+              onMine={rawId ? deckId => mining.mineApp({ deckId, source, level, rawId, kind }) : undefined}
+              t={t}
+            />
+          )}
         </div>
         <StatRow label={t.totalReviews} value={stats.total_reviews} />
         <StatRow label={t.correctReviews} value={stats.correct_reviews} />

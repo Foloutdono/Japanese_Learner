@@ -468,7 +468,16 @@ const phraseAnalyzer = {
   explaining:          'Explaining…',
   noExplanationYet:    'No explanation yet — tap Explain',
   passageTruncated:    n => `Only the first ${n} ${n === 1 ? 'sentence was' : 'sentences were'} analyzed.`,
-  analysisUnavailable: 'Analysis is temporarily unavailable for this sentence.',
+  sentenceAnalysisUnavailable: 'Analysis is temporarily unavailable for this sentence.',
+  mineToDeck:          'Mine',
+  inDeck:              'In deck',
+  alreadyInDeck:       'Already there',
+  chooseDeck:          'Choose a deck',
+  noDeckOfType:        'No deck of this type yet',
+  makeCloze:           'Make a cloze',
+  clozeCreated:        'Cloze card created',
+  mineFailed:          "Couldn't add this card. Try again.",
+  cannotMineOffDeck:   'Not in the app deck',
 }
 
 // ── Reading ───────────────────────────────────────────────

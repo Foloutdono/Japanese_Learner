@@ -30,6 +30,16 @@ function ChevronIcon({ direction = 'left' }) {
   )
 }
 
+// Mirrors study/analysis.py's _CONTENT_POS + unknown_count predicate
+// exactly, so "the single unknown Token" identified here for i+1
+// emphasis is provably the same one the backend counted.
+const CONTENT_POS = new Set(['noun', 'verb', 'adjective', 'adverb'])
+function isUnknownToken(tok) {
+  return CONTENT_POS.has(tok.pos)
+    && tok.vocab_match
+    && ['not_started', 'new'].includes(tok.vocab_match.stats?.status)
+}
+
 export function Legend({ t }) {
   return (
     <div className="status-legend">
@@ -59,7 +69,7 @@ export function Legend({ t }) {
 // caller (see ReadingScreen.jsx) so they can be reset to 0 whenever a
 // new phrase is shown.
 export function SentenceBreakdown({
-  analysis, t, layout = 'list', index = 0, setIndex, onTokenClick, onKanjiClick,
+  analysis, t, layout = 'list', index = 0, setIndex, onTokenClick, onKanjiClick, mining,
 }) {
   const tokens = analysis.tokens ?? analysis.words ?? []
 
@@ -91,7 +101,7 @@ export function SentenceBreakdown({
           offDeckCount={analysis.off_deck_count}
           t={t}
         />
-        <GrammarChips grammar={analysis.grammar} t={t} />
+        <GrammarChips grammar={analysis.grammar} t={t} mining={mining} />
 
         {analysis.explanation && (
           <div className="phrase-explanation rdg-breakdown-explanation">
@@ -117,6 +127,8 @@ export function SentenceBreakdown({
               extraClassName="rdg-breakdown-card"
               onWordClick={onTokenClick}
               onKanjiClick={onKanjiClick}
+              mining={mining}
+              sentenceText={analysis.text}
             />
           </CardTransition>
 
@@ -160,7 +172,7 @@ export function SentenceBreakdown({
           offDeckCount={analysis.off_deck_count}
           t={t}
         />
-        <GrammarChips grammar={analysis.grammar} t={t} />
+        <GrammarChips grammar={analysis.grammar} t={t} mining={mining} />
         <div className="phrase-explanation">
           {analysis.explanation}
         </div>
@@ -170,7 +182,20 @@ export function SentenceBreakdown({
 
       <div className="phrase-words-list">
         {tokens.map((w, i) => (
-          <TokenCard key={i} word={w} t={t} onWordClick={onTokenClick} onKanjiClick={onKanjiClick} />
+          <TokenCard
+            key={i}
+            word={w}
+            t={t}
+            onWordClick={onTokenClick}
+            onKanjiClick={onKanjiClick}
+            mining={mining}
+            sentenceText={analysis.text}
+            // i+1 (docs/adr/0001, CONTEXT.md): a Sentence with exactly
+            // one unknown Token is the single highest-value thing to
+            // study, so ITS mine control is emphasized -- that word is
+            // the entire reason this Sentence is worth keeping.
+            emphasize={analysis.unknown_count === 1 && isUnknownToken(w)}
+          />
         ))}
       </div>
     </>

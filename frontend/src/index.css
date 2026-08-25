@@ -9536,6 +9536,40 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 
+/* ── Mining controls (plan 017) -- turning a matched word/kanji/
+   grammar point/cloze into a Card. Additive only. */
+.analysis-mine-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.analysis-mine-btn--disabled {
+  opacity: 0.5;
+  cursor: default;
+  display: inline-block;
+}
+.analysis-mine-status {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 2px 8px;
+}
+.analysis-mine-status--added { color: var(--success); }
+
+/* The one Token an i+1 Sentence (exactly one unknown word) is worth
+   studying FOR -- its mine control is the whole point, so its card
+   stands out from the rest of the list. */
+.phrase-word-card--i-plus-one { border: 1px solid var(--success); }
+.phrase-word-card__i-plus-one-flag {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--success);
+  margin-bottom: 6px;
+}
+
 /* ── Shared slide-up / slide-in detail panel ─────────────── */
 .detail-overlay-sheet {
   position: fixed;

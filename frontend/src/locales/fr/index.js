@@ -453,7 +453,16 @@ const phraseAnalyzer = {
   explaining:          'Explication en cours…',
   noExplanationYet:    'Pas encore d\'explication — appuyez sur Expliquer',
   passageTruncated:    n => `Seules les ${n} premières ${n === 1 ? 'phrase a été analysée' : 'phrases ont été analysées'}.`,
-  analysisUnavailable: 'Analyse temporairement indisponible pour cette phrase.',
+  sentenceAnalysisUnavailable: 'Analyse temporairement indisponible pour cette phrase.',
+  mineToDeck:          'Ajouter',
+  inDeck:              'Dans le deck',
+  alreadyInDeck:       'Déjà présent',
+  chooseDeck:          'Choisir un deck',
+  noDeckOfType:        'Aucun deck de ce type pour le moment',
+  makeCloze:           'Créer une carte à trous',
+  clozeCreated:        'Carte à trous créée',
+  mineFailed:          "Impossible d'ajouter cette carte. Veuillez réessayer.",
+  cannotMineOffDeck:   "N'est pas dans le deck de l'application",
 }
 
 // ── Reading ───────────────────────────────────────────────

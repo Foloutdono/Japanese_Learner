@@ -6,10 +6,12 @@ import { TopBar } from '../components/ui/TopBar'
 import { CrossIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
+import { useMining } from '../components/analysis/useMining'
 
 export default function PhraseAnalyzerScreen({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
+  const mining = useMining(session)
 
   const [phrase, setPhrase]     = useState('')
   // One entry per Sentence in the analyzed Passage -- see
@@ -134,6 +136,9 @@ export default function PhraseAnalyzerScreen({ session }) {
       entry: word.vocab_match.entry,
       stats: word.vocab_match.stats,
       level: word.vocab_match.level,
+      rawId: word.vocab_match.raw_id,
+      kind: 'vocab',
+      source: 'vocab',
     })
   }
 
@@ -143,6 +148,9 @@ export default function PhraseAnalyzerScreen({ session }) {
       entry: k.entry,
       stats: k.stats,
       level: k.level,
+      rawId: k.raw_id,
+      kind: 'kanji',
+      source: 'kanji',
     })
   }
 
@@ -226,7 +234,7 @@ export default function PhraseAnalyzerScreen({ session }) {
           <Fragment key={i}>
             {s.available === false ? (
               <div className="card phrase-error-card">
-                {t.analysisUnavailable ?? 'Analysis unavailable'}
+                {t.sentenceAnalysisUnavailable ?? 'Analysis unavailable'}
               </div>
             ) : (
               <>
@@ -236,6 +244,7 @@ export default function PhraseAnalyzerScreen({ session }) {
                   layout="list"
                   onTokenClick={openVocabDetail}
                   onKanjiClick={openKanjiDetail}
+                  mining={mining}
                 />
                 {!s.explanation && (
                   <div className="phrase-explain-row">
