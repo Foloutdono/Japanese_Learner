@@ -14,7 +14,7 @@ export default function SettingsScreen() {
     <div className="screen">
       <TopBar onBack={() => navigate('/')} title={t.settings} autoHide />
 
-      <div className="container settings-container">
+      <main id="main-content" className="container settings-container">
         <SectionHeader jp="環境設定" title={t.preferences} />
         <div className="card settings-card">
           <div className="settings-row">
@@ -43,7 +43,7 @@ export default function SettingsScreen() {
             </button>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

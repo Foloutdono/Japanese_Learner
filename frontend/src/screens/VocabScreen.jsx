@@ -369,23 +369,25 @@ export default function VocabScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.vocabulary} autoHide />
-        <SelectionScreen>
-          <ModeSelector
-            modes={[
-              { key: 'level', label: t.byLevel, desc: t.byLevelDesc },
-              { key: 'theme', label: t.byTheme, desc: t.byThemeDesc },
-              { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
-              {
-                key: 'jmdict',
-                label: t.byJmdict ?? (lang === 'fr' ? 'Hors-JLPT' : 'Beyond JLPT'),
-                desc: t.byJmdictDesc ?? (lang === 'fr'
-                  ? 'Tout le vocabulaire JMdict hors programme JLPT, classé par fréquence'
-                  : 'Every JMdict word outside the JLPT curriculum, ranked by frequency'),
-              },
-            ]}
-            onSelect={selectStudySource}
-          />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <ModeSelector
+              modes={[
+                { key: 'level', label: t.byLevel, desc: t.byLevelDesc },
+                { key: 'theme', label: t.byTheme, desc: t.byThemeDesc },
+                { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
+                {
+                  key: 'jmdict',
+                  label: t.byJmdict ?? (lang === 'fr' ? 'Hors-JLPT' : 'Beyond JLPT'),
+                  desc: t.byJmdictDesc ?? (lang === 'fr'
+                    ? 'Tout le vocabulaire JMdict hors programme JLPT, classé par fréquence'
+                    : 'Every JMdict word outside the JLPT curriculum, ranked by frequency'),
+                },
+              ]}
+              onSelect={selectStudySource}
+            />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -395,9 +397,11 @@ export default function VocabScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} JLPT`} autoHide />
-        <SelectionScreen>
-          <LevelSelector onSelect={setLevel} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <LevelSelector onSelect={setLevel} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -407,12 +411,14 @@ export default function VocabScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} — ${t.byTheme}`} autoHide />
-        <SelectionScreen>
-          <ThemeSelector
-            session={session}
-            onSelect={(th, label) => { setTheme(th); setThemeLabel(label) }}
-          />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <ThemeSelector
+              session={session}
+              onSelect={(th, label) => { setTheme(th); setThemeLabel(label) }}
+            />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -425,13 +431,15 @@ export default function VocabScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setStudyBy(null)} title={tierTitle} autoHide />
-        <SelectionScreen>
-          <TierSelector
-            domain={freqDomain}
-            session={session}
-            onSelect={(tr, label, ts) => { setTier(tr); setTierLabel(label); setTierSize(ts) }}
-          />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <TierSelector
+              domain={freqDomain}
+              session={session}
+              onSelect={(tr, label, ts) => { setTier(tr); setTierLabel(label); setTierSize(ts) }}
+            />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -468,9 +476,11 @@ export default function VocabScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={goBack} title={backTitle} autoHide />
-        <SelectionScreen>
-          <ModeSelector modes={modesWithReview} onSelect={startMode} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <ModeSelector modes={modesWithReview} onSelect={startMode} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -480,7 +490,7 @@ export default function VocabScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setReviewing(false)} title={`${t.vocabulary} ${level} — ${t.modeReview}`} autoHide />
-        <div className="container quiz-area">
+        <main id="main-content" className="container quiz-area">
           <ReviewDeck
             cards={reviewCards}
             loading={reviewLoading}
@@ -500,7 +510,7 @@ export default function VocabScreen({ session }) {
             )}
             onExit={() => setReviewing(false)}
           />
-        </div>
+        </main>
       </div>
     )
   }
@@ -537,7 +547,7 @@ export default function VocabScreen({ session }) {
         pendingGatesRef.current.delete('toast')
         checkAdvance()
       }} />
-      <div className="container quiz-area">
+      <main id="main-content" className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
@@ -663,7 +673,7 @@ export default function VocabScreen({ session }) {
             <RatingBar active={showRating && !locked} onRate={postReview} />
           </>
         )}
-      </div>
+      </main>
     </div>
   )
 }

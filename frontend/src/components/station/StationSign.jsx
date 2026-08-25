@@ -32,6 +32,12 @@
 // was a 90px object anchored to the left edge of a 1040px panel with
 // the rest of the width simply unused. See SelectionScreen for what
 // goes in it.
+//
+// The `__name` line is rendered as an `<h1>`: the plate *is* how this
+// app names the screen you are currently on, so it is the screen's
+// own heading, not decoration. The kana reading and the romaji beside
+// it are alternate renderings of that same name, not separate
+// headings, so they stay plain spans.
 export function StationSign({ station, name, latin, color, aside, size = 'lg' }) {
   return (
     <div className={`station-sign station-sign--${size}`} style={{ '--line-color': color }}>
@@ -42,7 +48,7 @@ export function StationSign({ station, name, latin, color, aside, size = 'lg' })
           )}
           <span className="station-sign__stack">
             <span className="station-sign__kana" lang="ja">{station.kana}</span>
-            <span className="station-sign__name" lang="ja">{name}</span>
+            <h1 className="station-sign__name" lang="ja">{name}</h1>
             {latin && <span className="station-sign__romaji">{latin}</span>}
           </span>
         </div>

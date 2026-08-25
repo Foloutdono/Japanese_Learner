@@ -52,6 +52,7 @@ const landing = {
 const nav = {
   menu:              'Menu',
   back:              'Back',
+  skipToContent:     'Skip to content',
   cancel:            'Cancel',
   save:              'Save',
   delete:            'Delete',

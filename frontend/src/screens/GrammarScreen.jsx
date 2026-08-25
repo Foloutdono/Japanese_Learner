@@ -222,9 +222,11 @@ export default function GrammarScreen({ session }) {
             (defaulting to t.selectLevel) via SelectionScreen's bare
             layout shell, same as Kanji/Vocab. Passing subtitle here
             too used to render that header twice. */}
-        <SelectionScreen>
-          <LevelSelector onSelect={setLevel} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <LevelSelector onSelect={setLevel} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -234,12 +236,14 @@ export default function GrammarScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setLevel(null)} title={`${t.grammarTitle} ${level}`} autoHide />
-        <SelectionScreen>
-          <ModeSelector
-            modes={MODES}
-            onSelect={m => (m === FAST_REVIEW ? startReview() : board(() => startSession(level, m)))}
-          />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <ModeSelector
+              modes={MODES}
+              onSelect={m => (m === FAST_REVIEW ? startReview() : board(() => startSession(level, m)))}
+            />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -249,7 +253,7 @@ export default function GrammarScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setReviewing(false)} title={`${t.grammarTitle} ${level} — ${t.modeReview}`} autoHide />
-        <div className="container quiz-area">
+        <main id="main-content" className="container quiz-area">
           <ReviewDeck
             cards={reviewCards}
             loading={reviewLoading}
@@ -267,7 +271,7 @@ export default function GrammarScreen({ session }) {
             )}
             onExit={() => setReviewing(false)}
           />
-        </div>
+        </main>
       </div>
     )
   }
@@ -310,7 +314,7 @@ export default function GrammarScreen({ session }) {
         pendingGatesRef.current.delete('toast')
         checkAdvance()
       }} />
-      <div className="container quiz-area">
+      <main id="main-content" className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
@@ -444,7 +448,7 @@ export default function GrammarScreen({ session }) {
             <RatingBar active={showRating && !locked} onRate={postReview} />
           </>
         )}
-      </div>
+      </main>
     </div>
   )
 }

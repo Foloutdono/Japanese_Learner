@@ -63,12 +63,12 @@ export default function LandingScreen({ onContinue }) {
         </button>
       </header>
 
-      <main className="landing-main">
+      <main id="main-content" className="landing-main">
         <div className="container">
 
           <section className="landing-section">
             <div className="section-header">
-              <div className="section-header__title">{t.landingFeaturesTitle}</div>
+              <h2 className="section-header__title">{t.landingFeaturesTitle}</h2>
               <div className="section-header__rule" aria-hidden="true" />
             </div>
             <p className="landing-section__intro">{t.landingFeaturesIntro}</p>
@@ -76,7 +76,7 @@ export default function LandingScreen({ onContinue }) {
               {features.map(f => (
                 <div key={f.path} className="landing-feature" style={{ '--row-color': f.color }}>
                   <span className="landing-feature__glyph" aria-hidden="true">{f.icon}</span>
-                  <span className="landing-feature__title">{f.title}</span>
+                  <h3 className="landing-feature__title">{f.title}</h3>
                   <span className="landing-feature__desc">{f.desc}</span>
                 </div>
               ))}
@@ -85,7 +85,7 @@ export default function LandingScreen({ onContinue }) {
 
           <section className="landing-section">
             <div className="section-header">
-              <div className="section-header__title">{t.landingWhyTitle}</div>
+              <h2 className="section-header__title">{t.landingWhyTitle}</h2>
               <div className="section-header__rule" aria-hidden="true" />
             </div>
             <ul className="landing-pros-list">
@@ -103,7 +103,7 @@ export default function LandingScreen({ onContinue }) {
 
           <section className="landing-section">
             <div className="section-header">
-              <div className="section-header__title">{t.landingTechTitle}</div>
+              <h2 className="section-header__title">{t.landingTechTitle}</h2>
               <div className="section-header__rule" aria-hidden="true" />
             </div>
             <div className="landing-tech">
@@ -115,7 +115,7 @@ export default function LandingScreen({ onContinue }) {
 
           <section className="landing-section">
             <div className="section-header">
-              <div className="section-header__title">{t.landingCreatorTitle}</div>
+              <h2 className="section-header__title">{t.landingCreatorTitle}</h2>
               <div className="section-header__rule" aria-hidden="true" />
             </div>
             <div className="landing-creator card">

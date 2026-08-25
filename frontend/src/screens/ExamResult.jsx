@@ -128,7 +128,7 @@ export default function ExamResult({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
-        <Loading />
+        <main id="main-content"><Loading /></main>
       </div>
     )
   }
@@ -137,13 +137,13 @@ export default function ExamResult({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
-        <div className="container exam-shell">
+        <main id="main-content" className="container exam-shell">
           <EmptyState
             icon={<PageIcon size={40} />}
             message={t.examResultMissing}
             action={{ label: t.examBackToExams, onClick: () => navigate('/exam') }}
           />
-        </div>
+        </main>
       </div>
     )
   }
@@ -159,7 +159,7 @@ export default function ExamResult({ session }) {
   return (
     <div className="screen">
       <TopBar onBack={() => navigate('/exam')} title={paperTitle(exam, t)} autoHide />
-      <div className="container exam-shell">
+      <main id="main-content" className="container exam-shell">
         <div className={`exam-result-header${metTarget ? '' : ' exam-result-header--low'}`}>
           <ScoreRing pct={sectionStats.pct} metTarget={metTarget} />
           <span className="exam-result-header__score">
@@ -270,7 +270,7 @@ export default function ExamResult({ session }) {
             {t.examNewPaper}
           </button>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

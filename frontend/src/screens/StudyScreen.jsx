@@ -358,15 +358,17 @@ export default function StudyScreen({ session }) {
             prefix now (see config/stations.js), so the plate names the
             screen and a "Choose your training mode" title under it
             would just be saying it twice. */}
-        <SelectionScreen>
-          {!modesLoaded && <Loading />}
-          {modesLoaded && availableModes.length === 0 && (
-            <div className="quiz-done">{t.noCards}</div>
-          )}
-          {modesLoaded && availableModes.length > 0 && (
-            <ModeSelector modes={availableModes} onSelect={m => board(() => startSession(m))} />
-          )}
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            {!modesLoaded && <Loading />}
+            {modesLoaded && availableModes.length === 0 && (
+              <div className="quiz-done">{t.noCards}</div>
+            )}
+            {modesLoaded && availableModes.length > 0 && (
+              <ModeSelector modes={availableModes} onSelect={m => board(() => startSession(m))} />
+            )}
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -449,7 +451,7 @@ export default function StudyScreen({ session }) {
         pendingGatesRef.current.delete('toast')
         checkAdvance()
       }} />
-      <div className="container quiz-area">
+      <main id="main-content" className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
@@ -597,7 +599,7 @@ export default function StudyScreen({ session }) {
             )}
           </>
         )}
-      </div>
+      </main>
     </div>
   )
 }

@@ -16,13 +16,15 @@
 //
 // `count` is an optional tally set to the right — "3 of 6" over a badge
 // grid. A separate slot rather than glued onto `title`, so it can be
-// typeset as data (tracked, tabular) while the title stays a heading.
+// typeset as data (tracked, tabular) while the title stays a heading —
+// literally now: `title` renders as an `<h2>`, the in-page section
+// divider under the screen's own `<h1>`.
 export function SectionHeader({ jp, title, count }) {
   return (
     <div className={`section-header${jp ? ' section-header--paired' : ''}`}>
       <div className="section-header__mark">
         {jp && <span className="section-header__jp" lang="ja">{jp}</span>}
-        <span className="section-header__title">{title}</span>
+        <h2 className="section-header__title">{title}</h2>
       </div>
       {count != null && <div className="section-header__count">{count}</div>}
       <div className="section-header__rule" />

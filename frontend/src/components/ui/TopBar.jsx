@@ -236,6 +236,11 @@ export function TopBar({
 
   return (
     <>
+      {/* First thing in the tab order on every screen that has chrome.
+          Visually hidden until focused — see .skip-link in index.css.
+          Targets #main-content, which each screen's <main> carries. */}
+      <a href="#main-content" className="skip-link">{t.skipToContent}</a>
+
       <div
         className={[
           'top-bar',

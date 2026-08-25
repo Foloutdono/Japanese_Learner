@@ -124,7 +124,7 @@ export default function ProfileScreen({ session }) {
       {loading && <Loading />}
 
       {!loading && (
-        <div className="container profile-container">
+        <main id="main-content" className="container profile-container">
           {/* No 駅名標 here. This screen used to open with a plate
               announcing your arrival at "定期券 station" and then, four
               lines down, draw your actual 定期券 — the same object
@@ -179,7 +179,7 @@ export default function ProfileScreen({ session }) {
               <Leaderboard leaderboard={leaderboard} t={t} />
             </section>
           </div>
-        </div>
+        </main>
       )}
     </div>
   )

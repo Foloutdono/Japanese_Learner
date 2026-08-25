@@ -36,7 +36,12 @@ export function CommuterPass({ profile, t, children }) {
           <span className="pass__wave" aria-hidden="true"><span /><span /><span /></span>
           <span className="pass__brand-names">
             <span className="pass__brand-jp" lang="ja">定期券</span>
-            <span className="pass__brand-sub">{t.passLabel}</span>
+            {/* This screen's own <h1> — no station plate here (see
+                ProfileScreen's comment), but TopBar already treats this
+                route as "your pass" rather than a place (see its own
+                identity-route comment), so the pass label is exactly
+                this screen's name. */}
+            <h1 className="pass__brand-sub">{t.passLabel}</h1>
           </span>
         </span>
 

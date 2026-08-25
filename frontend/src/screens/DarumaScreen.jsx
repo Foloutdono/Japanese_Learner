@@ -114,7 +114,7 @@ export default function DarumaScreen({ session }) {
     <div className="screen">
       <TopBar onBack={() => navigate('/')} title={t.darumaTitle} autoHide />
 
-      <div className="container daruma-container">
+      <main id="main-content" className="container daruma-container">
         <StationHeader />
         {error && (
           <div className="profile-stale-notice" role="status">
@@ -149,7 +149,7 @@ export default function DarumaScreen({ session }) {
             <Shelf shelf={hall.shelf} t={t} />
           </>
         )}
-      </div>
+      </main>
 
       {/* Keyed so a second 満願 in the same session remounts and
           replays its animations instead of reusing a settled one. */}

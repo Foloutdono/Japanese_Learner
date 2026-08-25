@@ -267,9 +267,11 @@ export default function TranslationScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.translationTitle ?? 'Translation'} />
-        <SelectionScreen heading={t.selectStudySource}>
-          <ModeSelector modes={SOURCES} onSelect={setSource} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen heading={t.selectStudySource}>
+            <ModeSelector modes={SOURCES} onSelect={setSource} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -279,9 +281,11 @@ export default function TranslationScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
-        <SelectionScreen heading={t.selectLevel}>
-          <LevelSelector onSelect={setLevel} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen heading={t.selectLevel}>
+            <LevelSelector onSelect={setLevel} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -291,9 +295,11 @@ export default function TranslationScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
-        <SelectionScreen heading={t.selectDomain}>
-          <ModeSelector modes={DOMAINS} onSelect={setDomain} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen heading={t.selectDomain}>
+            <ModeSelector modes={DOMAINS} onSelect={setDomain} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -302,9 +308,11 @@ export default function TranslationScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setDomain(null)} title={t.translationTitle ?? 'Translation'} />
-        <SelectionScreen heading={t.selectTier}>
-          <TierPicker session={session} domain={domain} onSelect={setTier} t={t} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen heading={t.selectTier}>
+            <TierPicker session={session} domain={domain} onSelect={setTier} t={t} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -364,7 +372,7 @@ function SessionView({
         title={`${t.translationTitle ?? 'Translation'} — ${titleSuffix}`}
         autoHide
       />
-      <div className="container quiz-area trn-area">
+      <main id="main-content" className="container quiz-area trn-area">
 
         <div className="trn-score-row">
           <div className="trn-score">
@@ -503,7 +511,7 @@ function SessionView({
             </div>
           </>
         )}
-      </div>
+      </main>
     </div>
   )
 }

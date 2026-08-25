@@ -56,7 +56,7 @@ export default function RewardsPreview() {
     <div className="screen">
       <TopBar onBack={() => navigate('/')} title="Rewards preview" />
 
-      <div className="container preview-container">
+      <main id="main-content" className="container preview-container">
         <p className="preview-lede">
           Development only — this route is not registered in a production build.
           Each row fires the real component with the real tier logic.
@@ -131,7 +131,7 @@ export default function RewardsPreview() {
             </div>
           ))}
         </div>
-      </div>
+      </main>
 
       <XpToast toast={toast} onDone={() => setToast(null)} />
     </div>

@@ -171,7 +171,7 @@ export default function HomeScreen({ session }) {
         </div>
       </div>
 
-      <main className="station__platform">
+      <main id="main-content" className="station__platform">
         {/* The service leaving now, above the board rather than in it —
             see NextService for why it is not a thirteenth row. */}
         <NextService session={session} />

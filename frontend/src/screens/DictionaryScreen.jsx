@@ -287,7 +287,7 @@ export default function DictionaryScreen({ session }) {
 		<div className="screen">
 			<TopBar onBack={() => navigate('/')} title={t.dictionaryTitle} />
 
-			<div className="container dict-page">
+			<main id="main-content" className="container dict-page">
 				<StationHeader />
 
 				{/* No heading block here: TopBar above already names the
@@ -451,7 +451,7 @@ export default function DictionaryScreen({ session }) {
 						/>
 					)
 				)}
-			</div>
+			</main>
 		</div>
 	)
 }

@@ -136,9 +136,11 @@ export default function ReadingComprehensionScreen({ session }) {
         {/* No subtitle here — LevelSelector supplies its own header
             (defaults to t.selectLevel), same convention as Kanji/Vocab;
             passing subtitle too used to render the header twice. */}
-        <SelectionScreen>
-          <LevelSelector onSelect={startSession} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <LevelSelector onSelect={startSession} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -148,12 +150,12 @@ export default function ReadingComprehensionScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} autoHide />
-        <div className="comp-loading-wrap">
+        <main id="main-content" className="comp-loading-wrap">
           <Loading />
           <div className="comp-loading-text">
             {t.comprehensionGenerating}
           </div>
-        </div>
+        </main>
       </div>
     )
   }
@@ -163,12 +165,12 @@ export default function ReadingComprehensionScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} autoHide />
-        <div className="container comp-error-page">
+        <main id="main-content" className="container comp-error-page">
           <div className="card comp-error-card">{error}</div>
           <button onClick={() => startSession(level)} className="comp-retry-btn">
             {t.retry}
           </button>
-        </div>
+        </main>
       </div>
     )
   }
@@ -180,7 +182,7 @@ export default function ReadingComprehensionScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => { clearTimer(); setStage('selecting') }} title={`${t.comprehensionTitle} — ${level}`} autoHide />
-        <div className="container comp-reading-page">
+        <main id="main-content" className="container comp-reading-page">
 
           <div className="comp-reading-header">
             <div className="comp-time-remaining">
@@ -226,7 +228,7 @@ export default function ReadingComprehensionScreen({ session }) {
             </div>
           )}
 
-        </div>
+        </main>
       </div>
     )
   }
@@ -239,7 +241,7 @@ export default function ReadingComprehensionScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} autoHide />
-        <div className="container quiz-area">
+        <main id="main-content" className="container quiz-area">
 
           {stage === 'submitting' ? (
             <Loading />
@@ -282,7 +284,7 @@ export default function ReadingComprehensionScreen({ session }) {
               </button>
             </>
           )}
-        </div>
+        </main>
       </div>
     )
   }
@@ -295,7 +297,7 @@ export default function ReadingComprehensionScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} autoHide />
-        <div className="container page-pad">
+        <main id="main-content" className="container page-pad">
 
           <div className="card comp-score-card">
             <div>
@@ -363,7 +365,7 @@ export default function ReadingComprehensionScreen({ session }) {
             </button>
           </div>
 
-        </div>
+        </main>
       </div>
     )
   }

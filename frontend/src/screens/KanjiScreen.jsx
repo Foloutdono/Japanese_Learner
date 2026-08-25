@@ -367,15 +367,17 @@ export default function KanjiScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.kanjiTitle} autoHide />
-        <SelectionScreen>
-          <ModeSelector
-            modes={[
-              { key: 'level', label: t.byLevel, desc: t.byLevelDesc },
-              { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
-            ]}
-            onSelect={setStudyBy}
-          />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <ModeSelector
+              modes={[
+                { key: 'level', label: t.byLevel, desc: t.byLevelDesc },
+                { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
+              ]}
+              onSelect={setStudyBy}
+            />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -385,9 +387,11 @@ export default function KanjiScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setStudyBy(null)} title={t.kanjiTitle} autoHide />
-        <SelectionScreen>
-          <LevelSelector onSelect={setLevel} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <LevelSelector onSelect={setLevel} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -397,13 +401,15 @@ export default function KanjiScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setStudyBy(null)} title={t.kanjiTitle} autoHide />
-        <SelectionScreen>
-          <TierSelector
-            domain="kanji"
-            session={session}
-            onSelect={(tr, label, ts) => { setTier(tr); setTierLabel(label); setTierSize(ts) }}
-          />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <TierSelector
+              domain="kanji"
+              session={session}
+              onSelect={(tr, label, ts) => { setTier(tr); setTierLabel(label); setTierSize(ts) }}
+            />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -423,18 +429,20 @@ export default function KanjiScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => (studyBy === 'level' ? setLevel(null) : setTier(null))} title={backTitle} autoHide />
-        <SelectionScreen>
-          <ModeSelector
-            modes={modesWithReview}
-            onSelect={m => {
-              if (m === FAST_REVIEW) { startReview(); return }
-              board(() => {
-                if (studyBy === 'level') startLevelSession(level, m)
-                else startFrequencySession(tier, tierLabel, m)
-              })
-            }}
-          />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <ModeSelector
+              modes={modesWithReview}
+              onSelect={m => {
+                if (m === FAST_REVIEW) { startReview(); return }
+                board(() => {
+                  if (studyBy === 'level') startLevelSession(level, m)
+                  else startFrequencySession(tier, tierLabel, m)
+                })
+              }}
+            />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -444,7 +452,7 @@ export default function KanjiScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setReviewing(false)} title={`${t.kanjiTitle} ${level} — ${t.modeReview}`} autoHide />
-        <div className="container quiz-area">
+        <main id="main-content" className="container quiz-area">
           <ReviewDeck
             cards={reviewCards}
             loading={reviewLoading}
@@ -459,7 +467,7 @@ export default function KanjiScreen({ session }) {
             )}
             onExit={() => setReviewing(false)}
           />
-        </div>
+        </main>
       </div>
     )
   }
@@ -499,7 +507,7 @@ export default function KanjiScreen({ session }) {
         pendingGatesRef.current.delete('toast')
         checkAdvance()
       }} />
-      <div className="container quiz-area">
+      <main id="main-content" className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
@@ -714,7 +722,7 @@ export default function KanjiScreen({ session }) {
             )}
           </>
         )}
-      </div>
+      </main>
     </div>
   )
 }
