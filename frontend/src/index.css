@@ -1515,6 +1515,14 @@ textarea:focus-visible {
   margin-bottom: 44px;
   animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
+/* Missed by the shared arrive->arrive-soft block near the top of the
+   file — that block only lists the screens sharing the exact same
+   arrive rule, and this header (used on screens outside that list)
+   was never added to it. Same fix: drop the translateY, keep the
+   fade so the header still announces itself as newly arrived. */
+@media (prefers-reduced-motion: reduce) {
+  .station-header { animation: arrive-soft 0.2s linear backwards; }
+}
 .station-header .station-sign--sm { padding: 0 0 0 0; }
 .station-header .station-sign__stripe { margin: 0; }
 
@@ -13669,6 +13677,13 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
   border: 1px solid var(--surface-line);
   border-radius: var(--surface-radius);
   animation: arrive 0.28s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+/* The desktop-width sticky dock (>1099px) still had the plain `arrive`
+   slide — only the two narrower layouts below (the centred modal and
+   the full-screen mobile sheet) had been given a reduced-motion
+   fallback. Same treatment: fade in place, no translateY. */
+@media (prefers-reduced-motion: reduce) {
+  .dict-dock { animation: arrive-soft 0.2s linear backwards; }
 }
 .dict-dock__scrim { display: none; }
 
