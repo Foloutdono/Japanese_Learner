@@ -71,7 +71,7 @@ YouTube video's subtitles.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 012 | [Learner-level resolver](012-learner-level-resolver.md) | P1 | S | — | TODO |
+| 012 | [Learner-level resolver](012-learner-level-resolver.md) | P1 | S | — | DONE |
 | 013 | [Local analysis tier](013-local-analysis-tier.md) | P1 | M | 012 | TODO |
 | 014 | [Two-tier phrase API](014-two-tier-phrase-api.md) | P1 | M | 013 | TODO |
 | 015 | [Shared analysis components](015-shared-analysis-components.md) | P1 | M | 014 | TODO |

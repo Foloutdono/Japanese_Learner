@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from core.db import db_conn
 from core.auth import get_user_id, unprefixed
 from core.srs_instance import srs
+from core.user_level import resolve_level
 from study.card_lookup import (
     find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODES,
 )
@@ -791,7 +792,8 @@ def _call_llm_comprehension(level: str, lang: str) -> dict:
 
 
 @router.get("/api/reading/comprehension")
-def get_comprehension_text(level: str, lang: str = "en", user_id: str = Depends(get_user_id)):
+def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: str = Depends(get_user_id)):
+    level = resolve_level(user_id, level)
     data = _call_llm_comprehension(level, lang)
     spec = COMPREHENSION_SPECS.get(level, DEFAULT_COMPREHENSION_SPEC)
     return {
