@@ -5384,6 +5384,17 @@ textarea:focus-visible {
   opacity: 0;
   animation: hanko-ink-bleed 560ms ease-out 420ms forwards;
 }
+/* Restored from commit 8f28dc1. The hanko-* -> card-stamp-* rename in
+   11877a8 deleted this keyframe, and 0756427 later re-introduced a
+   reference to it on .card-stamp::after — leaving a `forwards`
+   animation pointing at nothing, so the ring sat at its declared
+   opacity: 0 forever and the ripple never rendered at all.
+   A transient bleed, not a persistent ring: it ends at opacity 0,
+   which is why the base rule starts there too. */
+@keyframes hanko-ink-bleed {
+  0%   { opacity: 0.5; transform: scale(0.3); }
+  100% { opacity: 0;   transform: scale(2.2); }
+}
 .card-stamp__glyph {
   font-size: clamp(26px, 6vw, 44px);
   font-weight: 700;
