@@ -1,36 +1,12 @@
-import { useState, useEffect } from 'react'
-import { shortDate } from '../lib/formatDate'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
 import { Loading } from '../components/ui/Loading'
 import { CrossIcon } from '../components/ui/Icons'
-
-const STATUS_COLORS = {
-  mastered:     'var(--success)',
-  learning:     'var(--accent2)',
-  new:          'var(--warning)',
-  not_started:  'var(--text-secondary)',
-  due:          'var(--accent)',
-}
-
-const STATUS_LABELS = {
-  mastered:     'Mastered',
-  learning:     'Learning',
-  new:          'New',
-  not_started:  'Not in deck',
-  due:          'Due now',
-}
-
-// Best-effort color for a word in the phrase line: prefer its vocab status;
-// if the word itself isn't in the deck but some of its kanji are, show an
-// "accent3" hint color so partial knowledge is still visible at a glance.
-function wordColor(word) {
-  if (word.vocab_match) return STATUS_COLORS[word.vocab_match.stats.status] || STATUS_COLORS.not_started
-  if (word.kanji_matches?.length > 0) return 'var(--accent3)'
-  return 'var(--text-secondary)'
-}
+import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
+import { WordDetail } from '../components/analysis/WordDetail'
 
 export default function PhraseAnalyzerScreen({ session }) {
   const navigate = useNavigate()
@@ -43,6 +19,12 @@ export default function PhraseAnalyzerScreen({ session }) {
   const [history, setHistory]   = useState([])
   const [showHistory, setShowHistory] = useState(false)
   const [detail, setDetail]     = useState(null) // { title, entry, stats }
+  // Stable so WordDetail's useDialog doesn't re-run its focus-on-open
+  // effect (and steal focus) on every render of this screen while the
+  // detail sheet is open -- see ReadingScreen.jsx's closeDetail for the
+  // same fix, and plans/README.md's plan-004 note for the bug class
+  // this avoids.
+  const closeDetail = useCallback(() => setDetail(null), [])
 
 
   useEffect(() => { fetchHistory() }, [])
@@ -187,200 +169,19 @@ export default function PhraseAnalyzerScreen({ session }) {
         )}
 
         {result && !loading && (
-          <>
-            <div className="card phrase-result-card">
-              <div className="phrase-line">
-                {result.words.map((w, i) => (
-                  <span
-                    key={i}
-                    onClick={() => openVocabDetail(w)}
-                    className={`word-span${w.vocab_match ? ' word-span--clickable' : ''}`}
-                    style={{ '--word-color': wordColor(w) }}
-                    title={w.vocab_match ? (t.clickForDetails) : undefined}
-                  >
-                    {w.surface}
-                  </span>
-                ))}
-              </div>
-              <div className="phrase-explanation">
-                {result.explanation}
-              </div>
-            </div>
-
-            <Legend t={t} />
-
-            <div className="phrase-words-list">
-              {result.words.map((w, i) => (
-                <WordCard key={i} word={w} onVocabClick={() => openVocabDetail(w)} onKanjiClick={openKanjiDetail} />
-              ))}
-            </div>
-          </>
+          <SentenceBreakdown
+            analysis={result}
+            t={t}
+            layout="list"
+            onTokenClick={openVocabDetail}
+            onKanjiClick={openKanjiDetail}
+          />
         )}
       </main>
 
       {detail && (
-        <DetailPanel detail={detail} t={t} onClose={() => setDetail(null)} />
+        <WordDetail detail={detail} t={t} onClose={closeDetail} />
       )}
-    </div>
-  )
-}
-
-function Legend({ t }) {
-  return (
-    <div className="status-legend">
-      {Object.entries(STATUS_LABELS).map(([status, label]) => (
-        <span key={status} className="status-legend__item">
-          <span className="status-legend__dot" style={{ '--dot-color': STATUS_COLORS[status] }} />
-          {t[`status_${status}`] || label}
-        </span>
-      ))}
-    </div>
-  )
-}
-
-function WordCard({ word, onVocabClick, onKanjiClick }) {
-  return (
-    <div className="card phrase-word-card">
-      <div className="phrase-word-card__top">
-        <div
-          onClick={onVocabClick}
-          className={`phrase-word-card__surface-wrap${word.vocab_match ? ' phrase-word-card__surface-wrap--clickable' : ''}`}
-        >
-          <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(word) }}>
-            {word.surface}
-          </span>
-          {word.reading && (
-            <span className="phrase-word-card__reading">({word.reading})</span>
-          )}
-          {word.pos && (
-            <span className="phrase-word-card__pos">
-              {word.pos}
-            </span>
-          )}
-        </div>
-        {word.vocab_match && <StatusBadge status={word.vocab_match.stats.status} />}
-      </div>
-
-      <div className="phrase-word-card__meaning">{word.meaning}</div>
-
-      {word.kanji_matches?.length > 0 && (
-        <div className="phrase-word-card__kanji-row">
-          {word.kanji_matches.map(k => (
-            <div
-              key={k.raw_id}
-              onClick={() => onKanjiClick(k)}
-              className="phrase-kanji-chip"
-            >
-              <span className="phrase-kanji-chip__char" style={{ '--word-color': STATUS_COLORS[k.stats.status] }}>
-                {k.kanji}
-              </span>
-              <span className="phrase-kanji-chip__level">{k.level}</span>
-              <StatusBadge status={k.stats.status} small />
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function StatusBadge({ status, small }) {
-  const color = STATUS_COLORS[status] || STATUS_COLORS.not_started
-  const label = STATUS_LABELS[status] || status
-  return (
-    <span className={`status-pill${small ? ' status-pill--sm' : ''}`} style={{ '--pill-color': color }}>
-      {label}
-    </span>
-  )
-}
-
-// Slide-up panel showing the app's own definition (from the matched deck
-// entry) plus the user's real SRS stats for that card.
-function DetailPanel({ detail, t, onClose }) {
-  // `t` arrives as a prop but the locale itself does not, and the
-  // review date needs it — reading the context here beats threading
-  // a second argument through every caller.
-  const { lang } = useLang()
-  const { title, reading, contextMeaning, entry, stats, level } = detail
-
-  return (
-    <div
-      onClick={onClose}
-      className="detail-overlay-sheet"
-    >
-      <div
-        onClick={e => e.stopPropagation()}
-        className="card detail-sheet"
-      >
-        <div className="detail-header">
-          <div className="detail-title">{title}</div>
-          <button onClick={onClose} className="detail-close-btn" aria-label={t.close}><CrossIcon size={16} /></button>
-        </div>
-
-        {level && (
-          <div className="detail-level">{level}</div>
-        )}
-
-        {contextMeaning && (
-          <div className="detail-section">
-            <Label>{t.inThisPhrase}</Label>
-            <div className="detail-context-value">{contextMeaning} {reading && `(${reading})`}</div>
-          </div>
-        )}
-
-        {entry && Object.keys(entry).length > 0 && (
-          <div className="detail-section">
-            <Label>{t.appDefinition}</Label>
-            <div className="detail-entry-list">
-              {Object.entries(entry).map(([key, value]) => (
-                <div key={key} className="detail-entry-row">
-                  <span className="detail-entry-row__key">{key}</span>
-                  <span>{String(value)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="detail-section">
-          <Label>{t.cardStats}</Label>
-          <div className="detail-badges">
-            <StatusBadge status={stats.status} />
-            {stats.due && <StatusBadge status="due" />}
-          </div>
-          <StatRow label={t.totalReviews} value={stats.total_reviews} />
-          <StatRow label={t.correctReviews} value={stats.correct_reviews} />
-          <StatRow
-            label={t.accuracy}
-            value={stats.accuracy !== null ? `${stats.accuracy}%` : '—'}
-          />
-          <StatRow
-            label={t.interval}
-            value={stats.interval_days !== null ? `${stats.interval_days} ${t.days}` : '—'}
-          />
-          <StatRow
-            label={t.nextReview}
-            value={shortDate(stats.next_review, lang) ?? '—'}
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function Label({ children }) {
-  return (
-    <div className="detail-label">
-      {children}
-    </div>
-  )
-}
-
-function StatRow({ label, value }) {
-  return (
-    <div className="stat-row">
-      <span className="stat-row__label">{label}</span>
-      <span>{value}</span>
     </div>
   )
 }

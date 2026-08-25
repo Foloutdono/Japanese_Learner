@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { shortDate } from '../lib/formatDate'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -12,16 +11,9 @@ import PromptCard from '../components/study/PromptCard'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
 import { playCorrect } from '../lib/audio'
-import { FireIcon, EyeOffIcon, CrossIcon } from '../components/ui/Icons'
-import { useDialog } from '../hooks/useDialog'
-
-const STATUS_COLORS = {
-  mastered:     'var(--success)',
-  learning:     'var(--accent2)',
-  new:          'var(--warning)',
-  not_started:  'var(--text-secondary)',
-  due:          'var(--accent)',
-}
+import { FireIcon, EyeOffIcon } from '../components/ui/Icons'
+import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
+import { WordDetail } from '../components/analysis/WordDetail'
 
 const MOBILE_BREAKPOINT = 768
 
@@ -36,15 +28,6 @@ const MOBILE_BREAKPOINT = 768
 // streak.
 
 const DEFAULT_TIER_SIZE = 200
-
-// Best-effort color for a word chip in the AI breakdown line: prefer
-// its vocab status; if the word itself isn't in the deck but some of
-// its kanji are, hint at partial knowledge with accent3.
-function wordColor(word) {
-  if (word.vocab_match) return STATUS_COLORS[word.vocab_match.stats.status] || STATUS_COLORS.not_started
-  if (word.kanji_matches?.length > 0) return 'var(--accent3)'
-  return 'var(--text-secondary)'
-}
 
 export default function ReadingScreen({ session }) {
   const navigate = useNavigate()
@@ -84,7 +67,7 @@ export default function ReadingScreen({ session }) {
   const [streak, setStreak] = useState(0)
   const [error, setError]   = useState(null)
   const [detail, setDetail] = useState(null) // { title, level, entry, stats } for the clicked vocab/kanji
-  // Stable so DetailPanel's useDialog doesn't re-run its focus-on-open
+  // Stable so WordDetail's useDialog doesn't re-run its focus-on-open
   // effect (and steal focus) on every render of this screen while the
   // detail sheet is open.
   const closeDetail = useCallback(() => setDetail(null), [])
@@ -101,9 +84,9 @@ export default function ReadingScreen({ session }) {
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
   // Which word/kanji card the single-card breakdown carousel is
-  // currently showing — see AnalysisBreakdown. Reset to 0 every time a
-  // new phrase is shown (showPhrase) so the reader always starts at the
-  // first word of a fresh breakdown.
+  // currently showing — see SentenceBreakdown's 'stepper' layout. Reset
+  // to 0 every time a new phrase is shown (showPhrase) so the reader
+  // always starts at the first word of a fresh breakdown.
   const [breakdownIndex, setBreakdownIndex] = useState(0)
 
   const [isMobile, setIsMobile] = useState(
@@ -117,13 +100,13 @@ export default function ReadingScreen({ session }) {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  // DetailPanel just needs {title, level, entry, stats} — sourced from
+  // WordDetail just needs {title, level, entry, stats} — sourced from
   // the AI breakdown's word/kanji shape (the backend no longer returns
   // a morphology-based `segments` field at all, see reading.py's
   // _finish_phrase note). Mirrors PhraseAnalyzerScreen's
-  // openVocabDetail/openKanjiDetail, kept separate rather than shared
-  // since the two screens' surrounding layout differs enough not to be
-  // worth a shared component yet.
+  // openVocabDetail/openKanjiDetail; kept as its own small function
+  // here rather than importing those directly since the two screens'
+  // detail shapes differ slightly (this one has no contextMeaning).
   function openAnalysisWordDetail(word) {
     if (!word.vocab_match) return
     setDetail({
@@ -644,12 +627,13 @@ function SessionView({
                   </button>
 
                   {showBreakdown && analysis && (
-                    <AnalysisBreakdown
+                    <SentenceBreakdown
                       analysis={analysis}
+                      layout="stepper"
                       index={breakdownIndex}
                       setIndex={setBreakdownIndex}
                       t={t}
-                      onWordClick={openAnalysisWordDetail}
+                      onTokenClick={openAnalysisWordDetail}
                       onKanjiClick={openAnalysisKanjiDetail}
                     />
                   )}
@@ -687,153 +671,7 @@ function SessionView({
       </main>
 
       {detail && (
-        <DetailPanel detail={detail} t={t} isMobile={isMobile} onClose={closeDetail} />
-      )}
-    </div>
-  )
-}
-
-// Simple stroke-based chevron — real vector paths instead of the
-// `‹`/`›` text glyphs this used to render, whose optical centering
-// varies by font/OS. `display: block` avoids the few px of inline
-// descender space an <svg> gets by default, so it sits dead-center in
-// the round nav button regardless.
-function ChevronIcon({ direction = 'left' }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      style={{ display: 'block' }}
-    >
-      {direction === 'left'
-        ? <polyline points="15 5 8 12 15 19" />
-        : <polyline points="9 5 16 12 9 19" />}
-    </svg>
-  )
-}
-
-// AI breakdown panel shown once the reader taps "Show breakdown" — same
-// data shape phrase.py's /api/phrase/analyze returns (words[] with
-// vocab_match/kanji_matches, plus a short explanation), same visual
-// language PhraseAnalyzerScreen uses for it (word-colored phrase line +
-// per-word cards), reused here on the AI's OWN segmentation instead of
-// the old morphology-based scan — see reading.py's _finish_phrase note.
-//
-// One word/kanji card at a time (not a scrolling list) — the overview
-// line up top doubles as a jump-to-word index (tap any word chip to
-// jump straight to its card), and the prev/next arrows step through
-// them in order. `index`/`setIndex` live in the parent (ReadingScreen)
-// so they can be reset to 0 whenever a new phrase is shown.
-function AnalysisBreakdown({ analysis, index, setIndex, t, onWordClick, onKanjiClick }) {
-  const words = analysis.words
-  const current = words[Math.min(index, words.length - 1)]
-  const canPrev = index > 0
-  const canNext = index < words.length - 1
-
-  return (
-    <div className="rdg-breakdown">
-      <div className="phrase-line rdg-breakdown-line">
-        {words.map((w, i) => (
-          <span
-            key={i}
-            onClick={() => setIndex(i)}
-            className={`word-span rdg-breakdown-line__word${i === index ? ' rdg-breakdown-line__word--active' : ''}`}
-            style={{ '--word-color': wordColor(w) }}
-            title={t.jumpToWord ?? 'Jump to this word'}
-          >
-            {w.surface}
-          </span>
-        ))}
-      </div>
-
-      {analysis.explanation && (
-        <div className="phrase-explanation rdg-breakdown-explanation">
-          {analysis.explanation}
-        </div>
-      )}
-
-      <div className="rdg-breakdown-card-row">
-        <button
-          onClick={() => setIndex(i => Math.max(0, i - 1))}
-          disabled={!canPrev}
-          className="rdg-breakdown-nav rdg-breakdown-nav--prev"
-          aria-label={t.previousWord ?? 'Previous word'}
-        >
-          <ChevronIcon direction="left" />
-        </button>
-
-        <CardTransition cardKey={index} className="rdg-breakdown-card-stage">
-          <BreakdownWordCard word={current} t={t} onWordClick={onWordClick} onKanjiClick={onKanjiClick} />
-        </CardTransition>
-
-        <button
-          onClick={() => setIndex(i => Math.min(words.length - 1, i + 1))}
-          disabled={!canNext}
-          className="rdg-breakdown-nav rdg-breakdown-nav--next"
-          aria-label={t.nextWord ?? 'Next word'}
-        >
-          <ChevronIcon direction="right" />
-        </button>
-      </div>
-
-      <div className="rdg-breakdown-counter">
-        {index + 1} / {words.length}
-      </div>
-    </div>
-  )
-}
-
-// A single word's card. `phrase-word-card__surface-wrap--clickable` and
-// `phrase-kanji-chip--clickable` (see index.css) both carry a visible
-// affordance now — a dashed underline + tap hint on the word, a lifted
-// hover/press state on kanji chips — rather than relying on cursor:
-// pointer alone, which is easy to miss on a card that otherwise reads
-// as plain text.
-function BreakdownWordCard({ word, t, onWordClick, onKanjiClick }) {
-  return (
-    <div className="card phrase-word-card rdg-breakdown-card">
-      <div className="phrase-word-card__top">
-        <div
-          onClick={() => onWordClick(word)}
-          className={`phrase-word-card__surface-wrap${word.vocab_match ? ' phrase-word-card__surface-wrap--clickable' : ''}`}
-          title={word.vocab_match ? (t.clickForDetails) : undefined}
-        >
-          <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(word) }}>
-            {word.surface}
-          </span>
-          {word.reading && (
-            <span className="phrase-word-card__reading">({word.reading})</span>
-          )}
-          {word.pos && (
-            <span className="phrase-word-card__pos">{word.pos}</span>
-          )}
-        </div>
-      </div>
-
-      <div className="phrase-word-card__meaning">{word.meaning}</div>
-
-      {word.kanji_matches?.length > 0 && (
-        <div className="phrase-word-card__kanji-row">
-          {word.kanji_matches.map(k => (
-            <div
-              key={k.raw_id}
-              onClick={() => onKanjiClick(k)}
-              className="phrase-kanji-chip"
-            >
-              <span className="phrase-kanji-chip__char" style={{ '--word-color': STATUS_COLORS[k.stats.status] }}>
-                {k.kanji}
-              </span>
-              <span className="phrase-kanji-chip__level">{k.level}</span>
-            </div>
-          ))}
-        </div>
+        <WordDetail detail={detail} t={t} isMobile={isMobile} onClose={closeDetail} />
       )}
     </div>
   )
@@ -897,107 +735,3 @@ function TierPicker({ session, domain, onSelect, t }) {
   )
 }
 
-function DetailPanel({ detail, t, isMobile, onClose }) {
-  // `t` arrives as a prop but the locale does not, and the review date
-  // needs it — reading the context here beats threading a second
-  // argument through every caller.
-  const { lang } = useLang()
-  const { title, level, entry, stats } = detail
-  const dialogRef = useDialog(onClose)
-
-  const content = (
-    <>
-      <div className="detail-header">
-        <div className="detail-title" id="reading-detail-title">{title}</div>
-        <button onClick={onClose} className="detail-close-btn" aria-label={t.close}><CrossIcon size={16} /></button>
-      </div>
-
-      {level && (
-        <div className="detail-level">{level}</div>
-      )}
-
-      {entry && Object.keys(entry).length > 0 && (
-        <div className="detail-section">
-          <Label>{t.appDefinition}</Label>
-          <div className="detail-entry-list">
-            {Object.entries(entry).map(([key, value]) => (
-              <div key={key} className="detail-entry-row">
-                <span className="detail-entry-row__key">{key}</span>
-                <span>{String(value)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="detail-section">
-        <Label>{t.cardStats}</Label>
-        <div className="detail-badges">
-          <StatusBadge status={stats.status} t={t} />
-          {stats.due && <StatusBadge status="due" t={t} />}
-        </div>
-        <StatRow label={t.totalReviews} value={stats.total_reviews} />
-        <StatRow label={t.correctReviews} value={stats.correct_reviews} />
-        <StatRow
-          label={t.accuracy}
-          value={stats.accuracy !== null ? `${stats.accuracy}%` : '—'}
-        />
-        <StatRow
-          label={t.interval}
-          value={stats.interval_days !== null ? `${stats.interval_days} ${t.days}` : '—'}
-        />
-        <StatRow
-          label={t.nextReview}
-          value={shortDate(stats.next_review, lang) ?? '—'}
-        />
-      </div>
-    </>
-  )
-
-  if (isMobile) {
-    return (
-      <div onClick={onClose} className="detail-overlay-sheet">
-        <div ref={dialogRef} onClick={e => e.stopPropagation()} className="card detail-sheet"
-             role="dialog" aria-modal="true" aria-labelledby="reading-detail-title">
-          {content}
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div onClick={onClose} className="detail-overlay-side">
-      <div ref={dialogRef} onClick={e => e.stopPropagation()} className="card detail-side"
-           role="dialog" aria-modal="true" aria-labelledby="reading-detail-title">
-        {content}
-      </div>
-    </div>
-  )
-}
-
-function Label({ children }) {
-  return (
-    <div className="detail-label">
-      {children}
-    </div>
-  )
-}
-
-function StatRow({ label, value }) {
-  return (
-    <div className="stat-row">
-      <span className="stat-row__label">{label}</span>
-      <span>{value}</span>
-    </div>
-  )
-}
-
-function StatusBadge({ status, t }) {
-  const color = STATUS_COLORS[status] || STATUS_COLORS.not_started
-  const label = t[`status_${status}`] || status
-  return (
-    <span className="status-pill" style={{ '--pill-color': color }}>
-      {label}
-    </span>
-  )
-}

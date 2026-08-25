@@ -1,0 +1,158 @@
+import { CardTransition } from '../study/CardTransition'
+import { STATUS_COLORS, wordColor } from './status'
+import { TokenCard } from './TokenCard'
+
+// Real stroke-based chevron rather than `‹`/`›` text glyphs, whose
+// optical centering varies by font/OS. `display: block` avoids the few
+// px of inline descender space an <svg> gets by default, so it sits
+// dead-center in the round nav button regardless.
+function ChevronIcon({ direction = 'left' }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      style={{ display: 'block' }}
+    >
+      {direction === 'left'
+        ? <polyline points="15 5 8 12 15 19" />
+        : <polyline points="9 5 16 12 9 19" />}
+    </svg>
+  )
+}
+
+export function Legend({ t }) {
+  return (
+    <div className="status-legend">
+      {Object.keys(STATUS_COLORS).map(status => (
+        <span key={status} className="status-legend__item">
+          <span className="status-legend__dot" style={{ '--dot-color': STATUS_COLORS[status] }} />
+          {(t && t[`status_${status}`]) || status}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+// The sentence breakdown, in one of two layouts:
+//
+//   'list'    — every Token as a scrolling list of cards (the phrase
+//               analyzer's shape): a colour-coded phrase line up top,
+//               the explanation, a status legend, then one TokenCard
+//               per Token.
+//   'stepper' — one Token at a time in a carousel (reading practice's
+//               shape): the same colour-coded phrase line doubles as a
+//               jump-to-word index, prev/next arrows step through
+//               Tokens, no legend (reading practice's own screen
+//               explains status colour elsewhere).
+//
+// `index`/`setIndex` are only used by 'stepper' and are owned by the
+// caller (see ReadingScreen.jsx) so they can be reset to 0 whenever a
+// new phrase is shown.
+export function SentenceBreakdown({
+  analysis, t, layout = 'list', index = 0, setIndex, onTokenClick, onKanjiClick,
+}) {
+  const tokens = analysis.tokens ?? analysis.words ?? []
+
+  if (layout === 'stepper') {
+    const current = tokens[Math.min(index, tokens.length - 1)]
+    const canPrev = index > 0
+    const canNext = index < tokens.length - 1
+
+    return (
+      <div className="rdg-breakdown">
+        <div className="phrase-line rdg-breakdown-line">
+          {tokens.map((w, i) => (
+            <span
+              key={i}
+              onClick={() => setIndex(i)}
+              className={`word-span rdg-breakdown-line__word${i === index ? ' rdg-breakdown-line__word--active' : ''}`}
+              style={{ '--word-color': wordColor(w) }}
+              title={t.jumpToWord ?? 'Jump to this word'}
+            >
+              {w.surface}
+            </span>
+          ))}
+        </div>
+
+        {analysis.explanation && (
+          <div className="phrase-explanation rdg-breakdown-explanation">
+            {analysis.explanation}
+          </div>
+        )}
+
+        <div className="rdg-breakdown-card-row">
+          <button
+            onClick={() => setIndex(i => Math.max(0, i - 1))}
+            disabled={!canPrev}
+            className="rdg-breakdown-nav rdg-breakdown-nav--prev"
+            aria-label={t.previousWord ?? 'Previous word'}
+          >
+            <ChevronIcon direction="left" />
+          </button>
+
+          <CardTransition cardKey={index} className="rdg-breakdown-card-stage">
+            <TokenCard
+              word={current}
+              t={t}
+              compact
+              extraClassName="rdg-breakdown-card"
+              onWordClick={onTokenClick}
+              onKanjiClick={onKanjiClick}
+            />
+          </CardTransition>
+
+          <button
+            onClick={() => setIndex(i => Math.min(tokens.length - 1, i + 1))}
+            disabled={!canNext}
+            className="rdg-breakdown-nav rdg-breakdown-nav--next"
+            aria-label={t.nextWord ?? 'Next word'}
+          >
+            <ChevronIcon direction="right" />
+          </button>
+        </div>
+
+        <div className="rdg-breakdown-counter">
+          {index + 1} / {tokens.length}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="card phrase-result-card">
+        <div className="phrase-line">
+          {tokens.map((w, i) => (
+            <span
+              key={i}
+              onClick={() => onTokenClick(w)}
+              className={`word-span${w.vocab_match ? ' word-span--clickable' : ''}`}
+              style={{ '--word-color': wordColor(w) }}
+              title={w.vocab_match ? (t.clickForDetails) : undefined}
+            >
+              {w.surface}
+            </span>
+          ))}
+        </div>
+        <div className="phrase-explanation">
+          {analysis.explanation}
+        </div>
+      </div>
+
+      <Legend t={t} />
+
+      <div className="phrase-words-list">
+        {tokens.map((w, i) => (
+          <TokenCard key={i} word={w} t={t} onWordClick={onTokenClick} onKanjiClick={onKanjiClick} />
+        ))}
+      </div>
+    </>
+  )
+}
