@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
@@ -8,6 +8,7 @@ import { SLOTS } from '../../stores/cosmetics'
 import { CosmeticSwatch } from './CosmeticSwatch'
 import { CrossIcon } from '../ui/Icons'
 import { playUi, playClick } from '../../lib/audio'
+import { useDialog } from '../../hooks/useDialog'
 
 // ── 蔵 — the front counter ─────────────────────────────────
 // The storehouse is a room you had to walk to. That was fine when it
@@ -28,6 +29,14 @@ export function QuickChange() {
   const [open, setOpen] = useState(false)
   const summary = useProfileSummary()
 
+  // Stable so QuickDrawer's useDialog (via its own `close`) doesn't
+  // re-run its focus-on-open effect every render — QuickChange
+  // re-renders on every useProfileSummary() update, which fires on
+  // every cosmetic equip while the drawer is open (equipCosmetic ->
+  // refreshSummary -> the profileSummary store's listeners), so an
+  // inline arrow here would yank focus back mid-interaction each time.
+  const closeDrawer = useCallback(() => setOpen(false), [])
+
   // The dot is the same "something is waiting" signal the hall card
   // and the home badge use: unopened unlocks, which live behind this
   // button now as much as behind the storehouse screen.
@@ -46,7 +55,7 @@ export function QuickChange() {
         {unseen > 0 && <span className="quick-drawer-btn__dot" aria-hidden="true" />}
       </button>
 
-      {open && <QuickDrawer onClose={() => setOpen(false)} t={t} />}
+      {open && <QuickDrawer onClose={closeDrawer} t={t} />}
     </>
   )
 }
@@ -61,18 +70,14 @@ function QuickDrawer({ onClose, t }) {
     loadStorehouse().catch(() => setError(true))
   }, [])
 
-  // Escape closes it, the same as the burger drawer — this can be open
-  // over a live quiz and the keyboard is already where your hands are.
-  useEffect(() => {
-    const onKey = e => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
-  function close() {
+  const close = useCallback(() => {
     playUi('click-close-menu')
     onClose()
-  }
+  }, [onClose])
+
+  // Escape closes it, the same as the burger drawer — this can be open
+  // over a live quiz and the keyboard is already where your hands are.
+  const dialogRef = useDialog(close)
 
   function equip(slot, item) {
     if (item.equipped || busy) return
@@ -88,7 +93,8 @@ function QuickDrawer({ onClose, t }) {
 
   return createPortal(
     <div className="quick-drawer-overlay" onClick={close}>
-      <div className="quick-drawer" onClick={e => e.stopPropagation()} role="dialog" aria-label={t.quickChange}>
+      <div ref={dialogRef} className="quick-drawer" onClick={e => e.stopPropagation()}
+           role="dialog" aria-modal="true" aria-label={t.quickChange}>
         <div className="quick-drawer__head">
           <span className="quick-drawer__glyph" lang="ja" aria-hidden="true">蔵</span>
           <span className="quick-drawer__title">{t.quickChange}</span>

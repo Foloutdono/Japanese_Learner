@@ -2,9 +2,11 @@ import { useState, useMemo } from 'react'
 import { useLang } from '../../LangContext'
 import { playClick } from '../../lib/audio'
 import { CrossIcon, ChevronIcon } from '../ui/Icons'
+import { useDialog } from '../../hooks/useDialog'
 
 export default function ImportCardsMenu({ onImport, onClose }) {
   const { t } = useLang()
+  const dialogRef = useDialog(onClose)
   const [importText, setImportText] = useState('')
   const [termSep, setTermSep]       = useState('comma')
   const [cardSep, setCardSep]       = useState('newline')
@@ -64,12 +66,13 @@ export default function ImportCardsMenu({ onImport, onClose }) {
   }
 
   return (
-    <div className="import-overlay">
-      <div className="import-modal">
+    <div className="import-overlay" onClick={onClose}>
+      <div ref={dialogRef} className="import-modal" onClick={e => e.stopPropagation()}
+           role="dialog" aria-modal="true" aria-labelledby="import-cards-title">
 
         {/* Header */}
         <div className="import-header">
-          <div className="import-header__title">{t.importTitle}</div>
+          <div className="import-header__title" id="import-cards-title">{t.importTitle}</div>
           <button onClick={() => { playClick(); onClose() }} className="import-header__close" aria-label={t.close}>
             <CrossIcon size={16} />
           </button>
