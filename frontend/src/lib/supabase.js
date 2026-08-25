@@ -17,3 +17,16 @@ export const supabase = createClient(
   SUPABASE_URL || 'https://placeholder.supabase.co',
   SUPABASE_ANON_KEY || 'placeholder-anon-key',
 )
+
+// A missing URL in `npm run dev` is nearly always the .env trap:
+// the real values live in the tracked .env.production, which Vite
+// does not load in development. Warn loudly rather than letting the
+// placeholder fail later as an opaque ERR_NAME_NOT_RESOLVED on the
+// first auth call. See .env.example.
+if (import.meta.env.DEV && !SUPABASE_URL) {
+  console.warn(
+    '[supabase] VITE_SUPABASE_URL is unset — using a placeholder project. ' +
+    'Auth will fail. See frontend/.env.example: copy the VITE_SUPABASE_ ' +
+    'lines from .env.production into .env.development.local.',
+  )
+}
