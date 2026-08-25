@@ -407,7 +407,7 @@ export default function TodayScreen({ session }) {
       return (
         <div className="screen">
           <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
-          <div className="container quiz-area"><Loading /></div>
+          <main id="main-content" className="container quiz-area"><Loading /></main>
         </div>
       )
     }
@@ -417,7 +417,7 @@ export default function TodayScreen({ session }) {
       return (
         <div className="screen">
           <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
-          <div className="container quiz-area">
+          <main id="main-content" className="container quiz-area">
             <div className="today-clear">
               <div className="today-clear__mark" lang="ja" aria-hidden="true">完了</div>
               <h2 className="today-clear__title">{t.todayClearTitle}</h2>
@@ -425,7 +425,7 @@ export default function TodayScreen({ session }) {
               {when && <p className="today-clear__next">{t.todayNextReview(when)}</p>}
               <button className="btn-primary" onClick={() => navigate('/')}>{t.backToStation}</button>
             </div>
-          </div>
+          </main>
         </div>
       )
     }
@@ -433,7 +433,7 @@ export default function TodayScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
-        <div className="container today-picker">
+        <main id="main-content" className="container today-picker">
           {/* Same plate every other screen opens with, in place of a
               hand-rolled masthead the picker used to draw itself --
               which was the one place in the app still naming its own
@@ -545,7 +545,7 @@ export default function TodayScreen({ session }) {
           >
             {chosenDue > 0 ? t.todayStart(chosenDue) : t.todayPickSomething}
           </button>
-        </div>
+        </main>
       </div>
     )
   }
@@ -554,9 +554,9 @@ export default function TodayScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
-        <div className="container quiz-area">
+        <main id="main-content" className="container quiz-area">
           <SessionError error={error} onRetry={retry} />
-        </div>
+        </main>
       </div>
     )
   }
@@ -566,7 +566,7 @@ export default function TodayScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
-        <div className="container quiz-area">
+        <main id="main-content" className="container quiz-area">
           <div className="today-clear">
             <div className="today-clear__mark" lang="ja" aria-hidden="true">完了</div>
             <h2 className="today-clear__title">{t.todayClearTitle}</h2>
@@ -578,7 +578,7 @@ export default function TodayScreen({ session }) {
               {t.backToStation ?? t.home}
             </button>
           </div>
-        </div>
+        </main>
       </div>
     )
   }
@@ -599,7 +599,7 @@ export default function TodayScreen({ session }) {
         checkAdvance()
       }} />
 
-      <div className="container quiz-area">
+      <main id="main-content" className="container quiz-area">
         {loading && !card && <Loading />}
 
         {card && (
@@ -749,7 +749,7 @@ export default function TodayScreen({ session }) {
             <RatingBar active={showRating && !locked} onRate={postReview} />
           </>
         )}
-      </div>
+      </main>
     </div>
   )
 }

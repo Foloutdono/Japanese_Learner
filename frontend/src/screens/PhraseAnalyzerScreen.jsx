@@ -132,7 +132,7 @@ export default function PhraseAnalyzerScreen({ session }) {
     <div className="screen">
       <TopBar onBack={() => navigate('/')} title={t.phraseAnalyzer} />
 
-      <div className="container page-pad">
+      <main id="main-content" className="container page-pad">
 
         <div className="card phrase-input-card">
           <textarea
@@ -222,7 +222,7 @@ export default function PhraseAnalyzerScreen({ session }) {
             </div>
           </>
         )}
-      </div>
+      </main>
 
       {detail && (
         <DetailPanel detail={detail} t={t} onClose={() => setDetail(null)} />

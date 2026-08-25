@@ -280,7 +280,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
-        <div className="container exam-shell">
+        <main id="main-content" className="container exam-shell">
           <div className="exam-generating">
             <div className="exam-generating__brush" aria-hidden="true">
               <span className="exam-generating__stroke" />
@@ -290,7 +290,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
             <p className="exam-generating__title">{t.examGenerating}</p>
             <p className="exam-generating__hint">{t.examGeneratingHint}</p>
           </div>
-        </div>
+        </main>
       </div>
     )
   }
@@ -305,14 +305,14 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
-        <div className="container exam-shell">
+        <main id="main-content" className="container exam-shell">
           <EmptyState
             icon={<PageIcon size={40} />}
             message={t.examLoadFailed}
             hint={retryAfter > 0 ? t.examLoadFailedCooldown(waitMinutes) : t.examLoadFailedHint}
             action={retryAfter > 0 ? undefined : { label: t.examRetry, onClick: onRetry }}
           />
-        </div>
+        </main>
       </div>
     )
   }
@@ -321,13 +321,13 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
-        <div className="container exam-shell">
+        <main id="main-content" className="container exam-shell">
           <EmptyState
             icon={<PageIcon size={40} />}
             message={t.examSectionEmpty}
             action={{ label: t.examBackToExams, onClick: () => navigate('/exam') }}
           />
-        </div>
+        </main>
       </div>
     )
   }
@@ -429,7 +429,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
           answer ("your progress is saved") is something the learner
           otherwise has no way to know. */}
       <TopBar onBack={() => setLeaving(true)} title={paperTitle(exam, t)} autoHide />
-      <div className="container exam-shell">
+      <main id="main-content" className="container exam-shell">
         <div
           className="exam-progress-bar"
           role="progressbar"
@@ -576,7 +576,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
         >
           {submitState === 'sending' ? t.examSubmitting : t.examFinishSection}
         </button>
-      </div>
+      </main>
     </div>
   )
 }

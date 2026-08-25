@@ -101,7 +101,7 @@ export default function StorehouseScreen({ session }) {
     <div className="screen">
       <TopBar onBack={() => navigate('/')} title={t.storehouseTitle} autoHide />
 
-      <div className="container storehouse-container">
+      <main id="main-content" className="container storehouse-container">
         <StationHeader />
         {error && (
           <div className="profile-stale-notice" role="status">
@@ -136,7 +136,7 @@ export default function StorehouseScreen({ session }) {
             ))}
           </>
         )}
-      </div>
+      </main>
 
       <CosmeticUnlock items={queue} onDone={clearQueue} />
     </div>

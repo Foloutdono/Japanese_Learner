@@ -391,7 +391,7 @@ export default function DeckDetailScreen({ session }) {
     <div className="screen">
       <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? t.deckFallbackTitle} autoHide />
 
-      <div className="container page-pad">
+      <main id="main-content" className="container page-pad">
         {/* Same plate every other screen in the app opens with — this
             was one of the last two 教材 screens still starting on a bare
             container, which is exactly what made them read as a
@@ -648,7 +648,7 @@ export default function DeckDetailScreen({ session }) {
             })}
           </div>
         )}
-      </div>
+      </main>
 
       {showImport && (
         <ImportCardsMenu onImport={handleImport} onClose={() => setShowImport(false)} />

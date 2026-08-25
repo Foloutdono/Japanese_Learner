@@ -89,7 +89,7 @@ export default function StatsScreen({ session }) {
       {!stats && <Loading />}
 
       {stats && (
-        <div className="container stats-container">
+        <main id="main-content" className="container stats-container">
           <StationHeader />
           <Headline totals={totals} streak={extra?.streak} dueToday={dueToday} t={t} />
 
@@ -120,7 +120,7 @@ export default function StatsScreen({ session }) {
               <TroubleList weakest={extra.weakest} onStartReview={startReview} />
             </>
           )}
-        </div>
+        </main>
       )}
     </div>
   )

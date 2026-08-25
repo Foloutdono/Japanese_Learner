@@ -50,7 +50,10 @@ export function DepartureBoard({ sections, station, name, onDepart }) {
           )}
           <span className="board__station-names">
             <span className="board__kana" lang="ja">{station.kana}</span>
-            <span className="board__name" lang="ja">{name}</span>
+            {/* The home screen's own <h1> — same reasoning as
+                StationSign's __name: this board's masthead is how the
+                app names the screen you're standing on. */}
+            <h1 className="board__name" lang="ja">{name}</h1>
             <span className="board__romaji">{station.latin}</span>
           </span>
         </span>

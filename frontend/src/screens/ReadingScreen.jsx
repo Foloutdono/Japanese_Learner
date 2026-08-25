@@ -375,15 +375,17 @@ export default function ReadingScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.readingTitle} />
-        <SelectionScreen heading={t.selectStudySource}>
-          {/* 'mastery' needs no further choice, so choosing it is the
-              last step and boards straight away. The other two each
-              have one more list after this one. */}
-          <ModeSelector
-            modes={SOURCES}
-            onSelect={key => (key === 'mastery' ? board(() => setSource(key)) : setSource(key))}
-          />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen heading={t.selectStudySource}>
+            {/* 'mastery' needs no further choice, so choosing it is the
+                last step and boards straight away. The other two each
+                have one more list after this one. */}
+            <ModeSelector
+              modes={SOURCES}
+              onSelect={key => (key === 'mastery' ? board(() => setSource(key)) : setSource(key))}
+            />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -393,9 +395,11 @@ export default function ReadingScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
-        <SelectionScreen heading={t.selectLevel}>
-          <LevelSelector onSelect={lvl => board(() => setLevel(lvl))} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen heading={t.selectLevel}>
+            <LevelSelector onSelect={lvl => board(() => setLevel(lvl))} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -405,9 +409,11 @@ export default function ReadingScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
-        <SelectionScreen heading={t.selectDomain}>
-          <ModeSelector modes={DOMAINS} onSelect={setDomain} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen heading={t.selectDomain}>
+            <ModeSelector modes={DOMAINS} onSelect={setDomain} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -416,9 +422,11 @@ export default function ReadingScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setDomain(null)} title={t.readingTitle} />
-        <SelectionScreen heading={t.selectTier}>
-          <TierPicker session={session} domain={domain} onSelect={tr => board(() => setTier(tr))} t={t} />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen heading={t.selectTier}>
+            <TierPicker session={session} domain={domain} onSelect={tr => board(() => setTier(tr))} t={t} />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -493,7 +501,7 @@ function SessionView({
         title={`${t.readingTitle} — ${titleSuffix}`}
         autoHide
       />
-      <div className="container quiz-area rdg-area">
+      <main id="main-content" className="container quiz-area rdg-area">
 
         <div className="rdg-score-row">
           <div className="rdg-score">
@@ -677,7 +685,7 @@ function SessionView({
             </div>
           </>
         )}
-      </div>
+      </main>
 
       {detail && (
         <DetailPanel detail={detail} t={t} isMobile={isMobile} onClose={closeDetail} />

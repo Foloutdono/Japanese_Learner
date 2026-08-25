@@ -119,7 +119,7 @@ export default function DecksScreen({ session }) {
     <div className="screen">
       <TopBar onBack={() => navigate('/')} title={t.decks} autoHide />
 
-      <div className="container page-pad">
+      <main id="main-content" className="container page-pad">
         <StationHeader />
 
         {/* ── 目録 — the shelf's index ────────────────────────
@@ -323,7 +323,7 @@ export default function DecksScreen({ session }) {
             })}
           </div>
         )}
-      </div>
+      </main>
     </div>
   )
 }

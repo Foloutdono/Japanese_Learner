@@ -60,13 +60,15 @@ export default function ExamScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.examTitle} autoHide />
-        <SelectionScreen>
-          {exams === null && <Loading />}
-          {exams?.length === 0 && (
-            <EmptyState icon={<PageIcon size={40} />} message={t.examNoneAvailable} />
-          )}
-          {exams?.length > 0 && <LevelSelector onSelect={setLevel} />}
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            {exams === null && <Loading />}
+            {exams?.length === 0 && (
+              <EmptyState icon={<PageIcon size={40} />} message={t.examNoneAvailable} />
+            )}
+            {exams?.length > 0 && <LevelSelector onSelect={setLevel} />}
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -111,15 +113,17 @@ export default function ExamScreen({ session }) {
   return (
     <div className="screen">
       <TopBar onBack={() => setLevel(null)} title={`${t.examTitle} ${level}`} autoHide />
-      <SelectionScreen>
-        <ModeSelector
-          modes={modes}
-          onSelect={examId => {
-            playUi('click-screen-selection')
-            board(() => navigate(`/exam/${examId}`))
-          }}
-        />
-      </SelectionScreen>
+      <main id="main-content">
+        <SelectionScreen>
+          <ModeSelector
+            modes={modes}
+            onSelect={examId => {
+              playUi('click-screen-selection')
+              board(() => navigate(`/exam/${examId}`))
+            }}
+          />
+        </SelectionScreen>
+      </main>
     </div>
   )
 }

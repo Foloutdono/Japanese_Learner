@@ -73,12 +73,13 @@ export default function AuthScreen({ onBack } = {}) {
         </button>
       )}
 
-      <div className="auth-header">
-        <div className="auth-header__glyph">{t.appTitle}</div>
-        <div className="auth-header__title">{t.learnJapanese}</div>
-      </div>
+      <main id="main-content">
+        <div className="auth-header">
+          <div className="auth-header__glyph">{t.appTitle}</div>
+          <h1 className="auth-header__title">{t.learnJapanese}</h1>
+        </div>
 
-      <div className="card auth-card">
+        <div className="card auth-card">
         <div className="auth-mode-toggle">
           {[['login', t.login], ['signup', t.signup]].map(([m, label]) => (
             <button
@@ -127,7 +128,8 @@ export default function AuthScreen({ onBack } = {}) {
         <button onClick={handleSubmit} disabled={loading} className="auth-submit">
           {loading ? t.loading : mode === 'login' ? t.loginBtn : t.signupBtn}
         </button>
-      </div>
+        </div>
+      </main>
     </div>
   )
 }

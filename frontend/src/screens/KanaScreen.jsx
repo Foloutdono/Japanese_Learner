@@ -276,12 +276,14 @@ export default function KanaScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => navigate('/')} title={t.kana} autoHide />
-        <SelectionScreen>
-          <ModeSelector
-            modes={SETS.map(s => ({ key: s.slug, label: s.label, sample: s.sample }))}
-            onSelect={slug => startSession(SETS.find(s => s.slug === slug))}
-          />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <ModeSelector
+              modes={SETS.map(s => ({ key: s.slug, label: s.label, sample: s.sample }))}
+              onSelect={slug => startSession(SETS.find(s => s.slug === slug))}
+            />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -291,12 +293,14 @@ export default function KanaScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} autoHide />
-        <SelectionScreen>
-          <ModeSelector
-            modes={MODES}
-            onSelect={m => (m === FAST_REVIEW ? startReview() : board(() => startMode(m)))}
-          />
-        </SelectionScreen>
+        <main id="main-content">
+          <SelectionScreen>
+            <ModeSelector
+              modes={MODES}
+              onSelect={m => (m === FAST_REVIEW ? startReview() : board(() => startMode(m)))}
+            />
+          </SelectionScreen>
+        </main>
       </div>
     )
   }
@@ -307,7 +311,7 @@ export default function KanaScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setReviewing(false)} title={`${selectedSet.label} — ${modeLabel(t, FAST_REVIEW)}`} autoHide />
-        <div className="container quiz-area">
+        <main id="main-content" className="container quiz-area">
           <ReviewDeck
             cards={reviewCards}
             loading={reviewLoading}
@@ -325,7 +329,7 @@ export default function KanaScreen({ session }) {
             )}
             onExit={() => setReviewing(false)}
           />
-        </div>
+        </main>
       </div>
     )
   }
@@ -376,7 +380,7 @@ export default function KanaScreen({ session }) {
         pendingGatesRef.current.delete('toast')
         checkAdvance()
       }} />
-      <div className="container quiz-area">
+      <main id="main-content" className="container quiz-area">
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
@@ -499,7 +503,7 @@ export default function KanaScreen({ session }) {
             <RatingBar active={showRating && !locked} onRate={postReview} />
           </>
         )}
-      </div>
+      </main>
     </div>
   )
 }
