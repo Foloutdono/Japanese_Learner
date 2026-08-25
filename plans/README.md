@@ -27,7 +27,7 @@ see `git log` for `Merge plan 001` through `Merge plan 011`.
 |------|-------|----------|--------|------------|--------|
 | 008 | [Browser test environment](008-browser-test-environment.md) | P1 | M | — | DONE |
 | 009 | [Dev-env Supabase credentials](009-dev-env-supabase-credentials.md) | P1 | S | — | DONE |
-| 010 | [Card-stamp ripple + stale comment](010-card-stamp-ripple-and-stale-comment.md) | P2 | S | — | TODO |
+| 010 | [Card-stamp ripple + stale comment](010-card-stamp-ripple-and-stale-comment.md) | P2 | S | — | DONE |
 | 011 | [Locale-parity test](011-locale-parity-test.md) | P2 | S | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
