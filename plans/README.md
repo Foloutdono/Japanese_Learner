@@ -121,6 +121,37 @@ cause a wrong turn:
   on these four, or decide they're fine without one. Not blocking; these four
   screens are exactly as accessible as before on this specific point, and
   every other screen in the app now has a real `<h1>`.
+- **Plan 004's first pass left one live focus-steal bug in `QuickChange.jsx`
+  (2026-08-25)**: the executor correctly stabilized `onClose` at 5 of 6 dialog
+  call sites (and caught 3 extra sites outside the literal scope list that
+  needed the same fix), but `QuickChange.jsx:50`'s
+  `<QuickDrawer onClose={() => setOpen(false)} .../>` was left as an inline
+  arrow. Traced through source to a real, repeating bug: `QuickDrawer`'s
+  `equip()` calls `equipCosmetic()` → `refreshSummary()` → the
+  `profileSummary` store's `listeners.forEach` → every mounted
+  `useProfileSummary()` consumer re-renders, including `QuickChange` itself —
+  so every single cosmetic equip inside the open drawer recreated the inline
+  `onClose`, gave `QuickDrawer`'s `close` a new identity via its own
+  `useCallback([onClose])`, and re-fired `useDialog`'s focus-on-open effect,
+  yanking keyboard focus back to the first control mid-interaction. Sent back
+  as REVISE with the exact fix (mirroring the `useCallback` pattern already
+  correct in `BurgerMenu`/`DeckDetailScreen`/`ReadingScreen`); executor applied
+  it in one commit, re-ran the full gate, confirmed scope stayed to that one
+  file. Verified independently before merge — the fix is mechanical
+  (`useCallback(fn, [])` has a permanently stable identity by React's
+  contract) rather than live-tested, since this environment has no path to an
+  authenticated session for browser verification. Worth remembering for any
+  future `useDialog`-style hook: the stability requirement applies transitively
+  through every wrapping `useCallback` up to the actual `<Component open={...}
+  onClose={...}>` call site — checking only the immediate call site inside the
+  dialog component itself is not enough.
+- **Plan 004 also surfaced an untracked-to-tracked drift in `plans/` itself**:
+  between the plan 003 merge and the plan 004 dispatch, `plans/` was committed
+  to git as tracked content (commit `955b351`, message
+  "feat(a11y): add plan 007...") — not something done as part of this advisor
+  session's own actions, which had deliberately kept `plans/` untracked
+  throughout. Left as-is (benign content, doesn't touch source) rather than
+  reverted, but flagged to the operator rather than silently absorbed.
 
 ## Findings considered and rejected
 
