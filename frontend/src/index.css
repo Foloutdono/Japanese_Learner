@@ -3337,6 +3337,16 @@ textarea:focus-visible {
   60%  { opacity: 0.85; }
   100% { opacity: 0; }
 }
+/* TopBar's MobileLevelBar clears its gain highlight from
+   onAnimationEnd (`setGain(null)`), so this cannot be switched to
+   animation: none — with no animation there is no animationend event,
+   and the highlight would sit there forever instead of settling into
+   the base fill. Collapsing the duration keeps the same animation
+   name and still fires a real animationend, just almost immediately,
+   the same trick used for .fare-tick/.level-board/.reissue below. */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-level-bar__gain { animation-duration: 1ms; }
+}
 .mobile-level-bar__xp {
   font-family: var(--font-display);
   font-size: 11px;
