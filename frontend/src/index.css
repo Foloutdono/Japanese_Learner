@@ -816,6 +816,23 @@ textarea:focus-visible {
   padding-top: 24px;
   padding-bottom: 40px;
 }
+/* ── Breakpoints ──────────────────────────────────────────
+   Two, and they are the whole scale:
+
+     560px — phone.  Below this, single column everywhere.
+     768px — tablet. Also the boundary the top bar's auto-hide
+             uses (MOBILE_BREAKPOINT in components/ui/TopBar.jsx —
+             the two must move together).
+
+   Anything else in this file is a specific component's own
+   constraint, and if you add one it needs a comment saying which
+   component and why. A one-off with no reason attached is how this
+   file ended up with thirteen of them.
+
+   The 1099/1100 pair below is deliberate: complementary bounds for
+   the dictionary's docked panel, written as integers so they never
+   both match. */
+
 /* .mobile-level-bar is `position: fixed` below 768px, so it reserves
    no space and simply sits on top of whatever the page's last rows
    are — 40px was not enough to clear it, and the final deck card on
