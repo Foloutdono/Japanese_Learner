@@ -5180,15 +5180,19 @@ textarea:focus-visible {
    silently overridden by it — worth flagging since that's an easy
    trap either way.
 
-   Two of the animations below (xp-toast-arrive, xp-toast-fall,
-   level-up-banner-settle) are also the exact ones XpToast.jsx
-   listens to via onAnimationEnd to know when to advance — so instead
-   of just disabling them, they're redeclared here as near-instant,
-   motion-free versions that keep the *same* animation-name and still
-   fire a real animationend. That's what lets the component's timing
-   stay driven entirely by real CSS completion events in both motion
-   modes, rather than needing a separate reduced-motion code path in
-   the JS. */
+   XpToast.jsx drives its own timing off real animationend events —
+   it listens for fare-tick-out, level-board-out and reissue-out (see
+   onExitEnd there). Those exit animations are declared on the
+   --leaving modifier classes further down this file, and the
+   reduced-motion block near them sets animation-duration: 1ms on the
+   *base* classes (.fare-tick/.level-board/.reissue). Same specificity,
+   later in source order, so duration is overridden while
+   animation-name survives from the --leaving shorthand: the animation
+   still runs and still fires a real animationend with the right
+   animationName, just almost instantly. That is what keeps the
+   component's timing identical in both motion modes with no
+   reduced-motion branch in the JS -- and it is why moving either of
+   those two blocks relative to the other would break it silently. */
 @media (prefers-reduced-motion: reduce) {
   .kumadori-streak { animation: none; opacity: 0; }
 
