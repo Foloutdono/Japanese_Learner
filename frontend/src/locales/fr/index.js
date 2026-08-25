@@ -54,6 +54,7 @@ const landing = {
 const nav = {
   menu:              'Menu',
   back:              'Retour',
+  skipToContent:     'Aller au contenu',
   cancel:            'Annuler',
   save:              'Enregistrer',
   delete:            'Supprimer',

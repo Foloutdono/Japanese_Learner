@@ -761,6 +761,26 @@ input {
 input:focus { border-color: var(--accent2); }
 
 /* ── Utility classes ── */
+
+/* Visually hidden until focused, then pinned to the top-left. The one
+   control in the app that must be reachable before anything else and
+   invisible until it is. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--accent2);
+  border-radius: 0 0 8px 0;
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 0;
+}
+
 .container {
   width: 100%;
   max-width: var(--max-w);
@@ -1544,6 +1564,7 @@ input:focus { border-color: var(--accent2); }
   letter-spacing: 0.14em;
 }
 .pass__brand-sub {
+  margin: 0;
   font-family: var(--font-display);
   font-size: 0.55rem;
   font-weight: 700;
@@ -2423,6 +2444,7 @@ input:focus { border-color: var(--accent2); }
   opacity: 0.55;
 }
 .board__name {
+  margin: 0;
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2rem);
@@ -5798,6 +5820,7 @@ input:focus { border-color: var(--accent2); }
 }
 
 .landing-feature__title {
+  margin: 0;
   color: var(--text-primary);
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
@@ -5948,10 +5971,10 @@ input:focus { border-color: var(--accent2); }
 }
 
 .auth-header__title {
+  margin: 8px 0 0;
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: 1.25rem;
-  margin-top: 8px;
 }
 
 .auth-card {
