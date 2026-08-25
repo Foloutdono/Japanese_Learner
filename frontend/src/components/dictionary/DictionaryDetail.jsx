@@ -9,6 +9,7 @@ import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageBadge } from '../study/StageBadge'
 import { GlossList, firstGloss } from '../study/gloss'
 import { BoltIcon } from '../ui/Icons'
+import { useDialog } from '../../hooks/useDialog'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -696,10 +697,12 @@ function useDictionaryLookup(session, term, category, lang, active) {
 export function DictionaryLookupSheet({ term, category, session, onClose }) {
   const { t, lang } = useLang()
   const { entry, loading, error } = useDictionaryLookup(session, term, category, lang, true)
+  const dialogRef = useDialog(onClose)
 
   return createPortal(
     <div onClick={onClose} className="dict-sheet__scrim">
-      <div onClick={e => e.stopPropagation()} className="dict-sheet">
+      <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet"
+           role="dialog" aria-modal="true" aria-label={`${t.dictionaryTitle}: ${term}`}>
         {loading && (
           <div className="quiz-loading">{t.loadingDictionary}</div>
         )}

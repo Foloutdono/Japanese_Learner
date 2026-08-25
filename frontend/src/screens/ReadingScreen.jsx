@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { shortDate } from '../lib/formatDate'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
@@ -13,6 +13,7 @@ import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
 import { playCorrect } from '../lib/audio'
 import { FireIcon, EyeOffIcon, CrossIcon } from '../components/ui/Icons'
+import { useDialog } from '../hooks/useDialog'
 
 const STATUS_COLORS = {
   mastered:     'var(--success)',
@@ -83,6 +84,10 @@ export default function ReadingScreen({ session }) {
   const [streak, setStreak] = useState(0)
   const [error, setError]   = useState(null)
   const [detail, setDetail] = useState(null) // { title, level, entry, stats } for the clicked vocab/kanji
+  // Stable so DetailPanel's useDialog doesn't re-run its focus-on-open
+  // effect (and steal focus) on every render of this screen while the
+  // detail sheet is open.
+  const closeDetail = useCallback(() => setDetail(null), [])
 
   // AI breakdown of the current phrase — fetched in the background the
   // moment the phrase is shown (see showPhrase), using the exact same
@@ -458,7 +463,7 @@ export default function ReadingScreen({ session }) {
       retry={retry}
       openAnalysisWordDetail={openAnalysisWordDetail}
       openAnalysisKanjiDetail={openAnalysisKanjiDetail}
-      closeDetail={() => setDetail(null)}
+      closeDetail={closeDetail}
     />
   )
 }
@@ -898,11 +903,12 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
   // argument through every caller.
   const { lang } = useLang()
   const { title, level, entry, stats } = detail
+  const dialogRef = useDialog(onClose)
 
   const content = (
     <>
       <div className="detail-header">
-        <div className="detail-title">{title}</div>
+        <div className="detail-title" id="reading-detail-title">{title}</div>
         <button onClick={onClose} className="detail-close-btn" aria-label={t.close}><CrossIcon size={16} /></button>
       </div>
 
@@ -951,7 +957,8 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
   if (isMobile) {
     return (
       <div onClick={onClose} className="detail-overlay-sheet">
-        <div onClick={e => e.stopPropagation()} className="card detail-sheet">
+        <div ref={dialogRef} onClick={e => e.stopPropagation()} className="card detail-sheet"
+             role="dialog" aria-modal="true" aria-labelledby="reading-detail-title">
           {content}
         </div>
       </div>
@@ -960,7 +967,8 @@ function DetailPanel({ detail, t, isMobile, onClose }) {
 
   return (
     <div onClick={onClose} className="detail-overlay-side">
-      <div onClick={e => e.stopPropagation()} className="card detail-side">
+      <div ref={dialogRef} onClick={e => e.stopPropagation()} className="card detail-side"
+           role="dialog" aria-modal="true" aria-labelledby="reading-detail-title">
         {content}
       </div>
     </div>

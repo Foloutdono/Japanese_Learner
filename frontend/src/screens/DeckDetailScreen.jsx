@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -232,6 +232,12 @@ export default function DeckDetailScreen({ session }) {
 
 
   useEffect(() => { fetchCards() }, [])
+
+  // Stable identities so ImportCardsMenu/BrowseCardsMenu's useDialog
+  // doesn't re-run its focus-on-open effect (and steal focus) on every
+  // re-render of this screen while one of them is open.
+  const closeImport = useCallback(() => setShowImport(false), [])
+  const closeBrowse = useCallback(() => setShowBrowse(false), [])
 
   function fetchCards() {
     apiFetch(`/api/decks/${deck_id}/cards`, session)
@@ -645,7 +651,7 @@ export default function DeckDetailScreen({ session }) {
       </main>
 
       {showImport && (
-        <ImportCardsMenu onImport={handleImport} onClose={() => setShowImport(false)} />
+        <ImportCardsMenu onImport={handleImport} onClose={closeImport} />
       )}
 
       {showBrowse && (
@@ -654,7 +660,7 @@ export default function DeckDetailScreen({ session }) {
           deckType={deck?.type}
           session={session}
           onAdded={fetchCards}
-          onClose={() => setShowBrowse(false)}
+          onClose={closeBrowse}
         />
       )}
     </div>

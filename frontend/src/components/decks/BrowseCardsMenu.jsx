@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { CrossIcon, CheckIcon } from '../ui/Icons'
+import { useDialog } from '../../hooks/useDialog'
 
 // ── Browse & add existing app cards into a custom deck ─────
 //
@@ -126,12 +127,14 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
   }
 
   const sourceLabel = SOURCE_TABS.find(s => s.key === source)?.label ?? source
+  const dialogRef = useDialog(onClose)
 
   return (
     <div className="import-overlay" onClick={onClose}>
-      <div className="import-modal" onClick={e => e.stopPropagation()}>
+      <div ref={dialogRef} className="import-modal" onClick={e => e.stopPropagation()}
+           role="dialog" aria-modal="true" aria-labelledby="browse-cards-title">
         <div className="import-header">
-          <div className="import-header__title">{t.browseTitle}</div>
+          <div className="import-header__title" id="browse-cards-title">{t.browseTitle}</div>
           <button onClick={onClose} className="import-header__close" aria-label={t.close}><CrossIcon size={16} /></button>
         </div>
         <div className="import-subtitle">{t.browseSubtitle}</div>

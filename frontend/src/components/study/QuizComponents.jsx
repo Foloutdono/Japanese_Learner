@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLang } from '../../LangContext'
 import { playClick, playArrival } from '../../lib/audio'
 import { Readings, ReadingGroup } from './Readings'
@@ -448,17 +448,21 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictCategory, session, soun
   const canLookUp = revealed && dictTerm && dictCategory && session
   const canPlaySound = revealed && (onReplaySound || speakText)
 
+  // Stable so DictionaryLookupSheet's useDialog doesn't re-run its
+  // focus-on-open effect (and steal focus) on every render of this
+  // panel while the sheet is open. Declared before the early return
+  // below so hook order stays fixed across renders.
+  const closeDictionary = useCallback((e) => {
+    e?.stopPropagation?.()
+    setShowDictionary(false)
+  }, [])
+
   if (!canLookUp && !canPlaySound) return null
 
   function openDictionary(e) {
     e?.stopPropagation?.()
     playClick()
     setShowDictionary(true)
-  }
-
-  function closeDictionary(e) {
-    e?.stopPropagation?.()
-    setShowDictionary(false)
   }
 
   function replaySound(e) {
