@@ -21,3 +21,11 @@ edge-tts>=7.0.0
 # main.py loads backend/.env through this. It arrives transitively
 # with uvicorn[standard] today, which is not something to rely on.
 python-dotenv
+# study/captions.py's best-effort YouTube caption fetch. Scrapes
+# YouTube's own timedtext endpoints rather than calling an official API
+# (YouTube publishes none for this) -- expected to fail with IpBlocked/
+# RequestBlocked from a datacenter IP, which is exactly what this
+# backend deploys on (Render). See docs/adr/0003-source-agnostic-
+# caption-pipeline.md: the upload path exists precisely because of this,
+# not as a fallback bolted on afterwards.
+youtube-transcript-api>=1.2.0
