@@ -513,7 +513,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
         {flatExamples.length > 0 && (
           <div className="dict-detail__examples">
             <div className="dict-detail__examples-label">
-              {t.examples ?? 'Exemples'}
+              {t.examples}
             </div>
             {flatExamples.map((ex, i) => (
               <ExampleSentence key={i} ex={ex} senseNumber={senses.length > 0 ? ex.sense_number : null} />

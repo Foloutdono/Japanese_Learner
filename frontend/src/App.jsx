@@ -1,6 +1,8 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { DepartureGate } from './components/station/DepartureGate'
 import { TrainDoor } from './components/station/TrainDoor'
+import { sectionFor } from './config/stations'
+import { identityFor } from './config/identity'
 // Development-only. Vite statically replaces import.meta.env.DEV with
 // `false` in a production build, so this import and the route below
 // are both dropped by tree-shaking — the screen is not merely
@@ -8,7 +10,7 @@ import { TrainDoor } from './components/station/TrainDoor'
 import RewardsPreview from './screens/RewardsPreview'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
-import { LangProvider } from './LangContext'
+import { LangProvider, useLang } from './LangContext'
 
 import LandingScreen from './screens/LandingScreen'
 import AuthScreen  from './screens/AuthScreen'
@@ -36,6 +38,29 @@ import DarumaScreen from './screens/DarumaScreen'
 import StorehouseScreen from './screens/StorehouseScreen'
 import { CosmeticTheme } from './stores/cosmetics'
 import { preload } from './lib/audio'
+
+// Renders nothing — keeps <html lang> and document.title in step with
+// the current route and language. Beside <Routes/> rather than inside
+// it for the same reason DepartureGate is: every screen would otherwise
+// need to remember to set its own title, and the six that forgot the
+// theme snippet are the evidence for how that goes.
+//
+// The route's own title comes from the same pair TopBar uses —
+// sectionFor for stations, identityFor for the two pass routes — so a
+// new station added to stations.js gets a document title for free.
+function DocumentHead() {
+  const { t } = useLang()
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    const identity = identityFor(pathname, t)
+    const section = identity ? null : sectionFor(pathname, t)
+    const screen = identity?.title ?? section?.title
+    document.title = screen ? `${screen} — ${t.appTitle}` : t.appTitle
+  }, [pathname, t])
+
+  return null
+}
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -134,6 +159,8 @@ export default function App() {
             <Route path="/dev/rewards" element={<RewardsPreview />} />
           )}
         </Routes>
+
+        <DocumentHead />
 
         {/* 改札 — the departure cutscene. Beside <Routes/>, never
             inside it: the gate has to keep playing across the very

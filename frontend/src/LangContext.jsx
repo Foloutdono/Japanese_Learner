@@ -17,6 +17,12 @@ export function LangProvider({ children }) {
         localStorage.setItem('lang', code)
     }
 
+    // <html lang> drives which voice a screen reader uses. It has to
+    // follow the UI language, not sit at the index.html default.
+    useEffect(() => {
+        document.documentElement.lang = lang
+    }, [lang])
+
     const t = translations[lang] ?? translations.fr
 
     return (
