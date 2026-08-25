@@ -161,6 +161,42 @@ _PROVIDER_CATALOG = {
     ),
 }
 
+# ── Vision capability: checked, not present ────────────────────
+# Plan 018 (photo/OCR input) needed to know whether ANY of the models
+# above could read an image before building a vision-escalation tier on
+# top of one. Checked live 2026-08 via
+# `python -m scripts.check_llm_models --vision` (sends one request per
+# model with a locally-rendered PNG of real Japanese text as an
+# image_url content part):
+#
+#   nvidia/nemotron-3-super-120b-a12b       400 "multimodal processing
+#                                            is not enabled"
+#   nvidia/nemotron-3-ultra-550b-a55b       400/404 (inconsistent
+#                                            status, same underlying
+#                                            "not multimodal" cause)
+#   nvidia/nemotron-3.5-lightning-30b-a3b   400, same as above
+#   nvidia/nemotron-3.5-lightning:free      404 "No endpoints found
+#                                            that support image input"
+#   nvidia/nemotron-3-super-120b-a12b:free  404, same message
+#   nvidia/nemotron-3-ultra-550b-a55b:free  404, same message
+#   google/gemma-4-31b-it:free              429, persistently
+#                                            rate-limited upstream
+#                                            (Google AI Studio's free
+#                                            tier) across three retries
+#                                            with backoff -- INCONCLUSIVE,
+#                                            not a confirmed "no", but
+#                                            also not usable in
+#                                            production on this tier
+#                                            even if it turned out to
+#                                            work
+#
+# Verdict: no model on either configured provider is confirmed
+# vision-capable. Plan 018's OCR feature ships local-only (tesseract.js
+# in the browser); its vision-escalation tier is BLOCKED on this, not
+# implemented. Do not add a `vision` flag or a vision model entry here
+# without re-running the probe first -- see plans/018-image-and-
+# camera-input.md and docs/adr/0004-ocr-runs-client-first.md.
+
 # NVIDIA first by default: OpenRouter is the account that ran out of
 # credit, and this ordering is what the fallback is for. Overridable
 # without a code change -- LLM_PROVIDER_ORDER=openrouter,nvidia in

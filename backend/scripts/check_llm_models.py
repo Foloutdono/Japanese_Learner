@@ -3,6 +3,7 @@ Check every configured LLM model against its provider's live catalog.
 
     python -m scripts.check_llm_models
     python -m scripts.check_llm_models --smoke
+    python -m scripts.check_llm_models --vision
 
 Model catalogs drift. This project has been bitten by that twice now --
 once when OpenRouter retired the primary and two of four fallbacks
@@ -12,7 +13,7 @@ a model that had moved off the free tier. Both were only found by
 reading server logs during an unrelated failure.
 
 Run this after changing study/llm_shared.py's PROVIDERS, or when
-generation starts failing for no obvious reason. It answers two
+generation starts failing for no obvious reason. It answers three
 different questions:
 
   (no flag)  Does this model id still EXIST for this account?
@@ -24,12 +25,25 @@ different questions:
              either passes or soften_kanji can salvage. Costs one
              completion per model, so it is opt-in.
 
+  --vision   Can it read an IMAGE at all? Sends one request per model
+             with a small generated PNG (real Japanese glyphs, rendered
+             locally via Pillow + a system CJK font -- see
+             _generate_probe_image) as an image_url content part, and
+             checks whether the model echoes back the pictured text
+             rather than rejecting the request shape outright. This is
+             plan 018 (photo/OCR input)'s Step 1: none of the models in
+             PROVIDERS below were added for their vision ability, so
+             nothing should be built on top of one until this has
+             actually said yes.
+
 A model can pass the first check and fail the second -- that is exactly
 what happened with NVIDIA's Nemotron models, which are listed and
 callable but return their reasoning trace instead of JSON unless
 thinking is explicitly disabled.
 """
 import argparse
+import base64
+import io
 import json
 import logging
 import re
@@ -185,10 +199,115 @@ def _verdict(response) -> str:
     return "OK"
 
 
+# The exact text drawn into the probe image -- what a vision-capable
+# model is expected to echo back (loosely; see _vision_verdict).
+_VISION_PROBE_TEXT = "日本語"
+
+# Windows system fonts with real CJK glyph coverage, tried in order.
+# MS Gothic is present on every Windows install; the others are
+# fallbacks for environments where it isn't. If none is found, the
+# probe is skipped entirely with an explanation rather than silently
+# testing with tofu-box glyphs, which would prove nothing.
+_CJK_FONT_CANDIDATES = (
+    r"C:\Windows\Fonts\msgothic.ttc",
+    r"C:\Windows\Fonts\meiryo.ttc",
+    r"C:\Windows\Fonts\YuGothM.ttc",
+)
+
+
+def _generate_probe_image() -> str | None:
+    """A small PNG (real rendered Japanese glyphs, not a stock photo or
+    a remote fetch) as a base64 data URI, or None if no CJK-capable font
+    could be found to render it with."""
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:
+        print("  ! Pillow is not installed -- cannot generate a probe image")
+        return None
+
+    font = None
+    for path in _CJK_FONT_CANDIDATES:
+        try:
+            font = ImageFont.truetype(path, 36)
+            break
+        except OSError:
+            continue
+    if font is None:
+        print(f"  ! no CJK font found among {_CJK_FONT_CANDIDATES} -- cannot generate a probe image")
+        return None
+
+    img = Image.new("RGB", (200, 80), "white")
+    ImageDraw.Draw(img).text((10, 20), _VISION_PROBE_TEXT, font=font, fill="black")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    encoded = base64.b64encode(buf.getvalue()).decode()
+    return f"data:image/png;base64,{encoded}"
+
+
+def _vision_verdict(response) -> str:
+    if response.status_code == 400:
+        return "NOT-VISION (400)"
+    if response.status_code == 404 and "image input" in response.text.lower():
+        # OpenRouter's own way of saying the same thing NVIDIA says with
+        # a 400 -- confirmed live: {"error":{"message":"No endpoints
+        # found that support image input","code":404}}.
+        return "NOT-VISION (404)"
+    if not response.ok:
+        return f"HTTP {response.status_code}: {response.text[:150]}"
+    try:
+        content = response.json()["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, ValueError):
+        return "BAD-BODY"
+    if not content:
+        return "NULL"
+    if _VISION_PROBE_TEXT in content:
+        return f"OK (echoed): {content[:80]!r}"
+    if re.search(r"[ぁ-んァ-ン一-龯]", content):
+        return f"OK (some JP, not exact): {content[:80]!r}"
+    return f"UNCLEAR: {content[:80]!r}"
+
+
+def _check_vision(provider, data_uri: str) -> int:
+    """One request per model with an image_url content part. Returns
+    the number that did NOT look vision-capable."""
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "What Japanese text is written in this image? Reply with only the text."},
+                {"type": "image_url", "image_url": {"url": data_uri}},
+            ],
+        }
+    ]
+    failed = 0
+    for model in provider.models:
+        body = {"model": model, "messages": messages, "max_tokens": 100, **provider.body_for(False)}
+        try:
+            response = requests.post(
+                provider.url,
+                headers={"Authorization": f"Bearer {provider.api_key}",
+                         "Content-Type": "application/json"},
+                json=body, timeout=_SMOKE_TIMEOUT,
+            )
+        except requests.RequestException as e:
+            failed += 1
+            print(f"    FAIL    {model}: {type(e).__name__}")
+            continue
+
+        verdict = _vision_verdict(response)
+        if not verdict.startswith("OK"):
+            failed += 1
+        print(f"    {verdict}  {model}")
+    return failed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--smoke", action="store_true",
                         help="also send one real completion per model (costs tokens)")
+    parser.add_argument("--vision", action="store_true",
+                        help="probe each model with a generated image (costs tokens); "
+                             "plan 018 Step 1 -- see this file's docstring")
     args = parser.parse_args()
 
     if not PROVIDERS:
@@ -198,6 +317,13 @@ def main() -> int:
         )
         return 1
 
+    vision_data_uri = None
+    if args.vision:
+        vision_data_uri = _generate_probe_image()
+        if vision_data_uri is None:
+            logger.error("Cannot run --vision: no probe image could be generated (see above).")
+            return 1
+
     problems = 0
     for provider in PROVIDERS:
         print(f"\n=== {provider.name} ({provider.url}) ===")
@@ -205,6 +331,9 @@ def main() -> int:
         if args.smoke:
             print("  smoke test (one completion each):")
             problems += _smoke(provider)
+        if args.vision:
+            print("  vision probe (one image request each):")
+            problems += _check_vision(provider, vision_data_uri)
 
     print()
     if problems:
