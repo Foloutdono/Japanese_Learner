@@ -25,7 +25,7 @@ touching (and re-risking) those already-working endpoints. Worth
 consolidating into one shared module later if the three files drift.
 """
 import logging
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from core.auth import get_user_id, prefixed, unprefixed
@@ -279,7 +279,7 @@ def get_frequency_card(domain: str, tier: int, mode: str, lang: str = "fr", tier
 
 
 @router.get("/api/frequency/{domain}/cards")
-def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", count: int = 10, exclude: str = "",
+def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
                         tier_size: int = freq.DEFAULT_TIER_SIZE, user_id: str = Depends(get_user_id)):
     _require_domain(domain)
     m = _resolve_mode(domain, mode)

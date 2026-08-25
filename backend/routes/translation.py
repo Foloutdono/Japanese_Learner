@@ -1,7 +1,7 @@
 import logging
 import re
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from core.db import db_conn
@@ -232,7 +232,7 @@ def post_translation_result(payload: ResultPayload, user_id: str = Depends(get_u
 
 
 @router.get("/api/translation/history")
-def get_translation_history(user_id: str = Depends(get_user_id), limit: int = 50):
+def get_translation_history(user_id: str = Depends(get_user_id), limit: int = Query(50, ge=1, le=200)):
     conn = db_conn()
     try:
         with conn.cursor() as cur:

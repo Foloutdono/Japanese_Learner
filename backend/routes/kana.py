@@ -1,6 +1,6 @@
 import logging
 import random
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from content.kana_data import KANA_SETS, kana_to_id
 from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
@@ -208,7 +208,7 @@ def get_kana_card(set_name: str, m: Mode = Depends(require_mode(KANA)),
 
 
 @router.get("/api/kana/cards")
-def get_kana_cards(set_name: str, count: int = 10, exclude: str = "",
+def get_kana_cards(set_name: str, count: int = Query(10, ge=1, le=100), exclude: str = "",
                     m: Mode = Depends(require_mode(KANA)),
                     user_id: str = Depends(get_user_id)):
     """

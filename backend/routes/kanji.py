@@ -1,6 +1,6 @@
 import logging
 import random
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
@@ -264,7 +264,7 @@ def get_kanji_card(level: str, lang: str = "fr",
 
 
 @router.get("/api/kanji/cards")
-def get_kanji_cards(level: str, lang: str = "fr", count: int = 10, exclude: str = "",
+def get_kanji_cards(level: str, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
                     m: Mode = Depends(require_mode(KANJI)),
                     user_id: str = Depends(get_user_id)):
     """

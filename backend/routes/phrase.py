@@ -3,7 +3,7 @@ import json
 import logging
 import re
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from core.db import db_conn
@@ -284,7 +284,7 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
 
 
 @router.get("/api/phrase/history")
-def get_phrase_history(user_id: str = Depends(get_user_id), limit: int = 50):
+def get_phrase_history(user_id: str = Depends(get_user_id), limit: int = Query(50, ge=1, le=200)):
     conn = db_conn()
     try:
         with conn.cursor() as cur:

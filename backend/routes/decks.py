@@ -3,7 +3,7 @@ import logging
 import csv
 import io
 import random
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from pydantic import BaseModel
 from core.auth import get_user_id, prefixed, unprefixed
 from core.db import db_conn
@@ -794,7 +794,7 @@ def delete_card(deck_id: str, card_id: str, user_id: str = Depends(get_user_id))
 
 @router.get("/api/decks/{deck_id}/browse")
 def browse_app_cards(deck_id: str, source: str, level: str = "", query: str = "",
-                     limit: int = 40, lang: str = "fr",
+                     limit: int = Query(40, ge=1, le=200), lang: str = "fr",
                      user_id: str = Depends(get_user_id)):
     """
     Search the app's own built-in decks for cards to pull into a
@@ -1194,7 +1194,7 @@ def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
 
 @router.get("/api/decks/{deck_id}/study")
 def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lang: str = "fr",
-                         count: int = 10, exclude: str = "",
+                         count: int = Query(10, ge=1, le=100), exclude: str = "",
                          user_id: str = Depends(get_user_id)):
     """
     Batched session endpoint — same shape (`{"cards": [...]}`, `count`

@@ -6,7 +6,7 @@ import unicodedata
 from functools import lru_cache
 
 import pykakasi
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from core.db import db_conn
@@ -639,7 +639,7 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
 
 
 @router.get("/api/reading/history")
-def get_reading_history(user_id: str = Depends(get_user_id), limit: int = 50):
+def get_reading_history(user_id: str = Depends(get_user_id), limit: int = Query(50, ge=1, le=200)):
     conn = db_conn()
     try:
         with conn.cursor() as cur:

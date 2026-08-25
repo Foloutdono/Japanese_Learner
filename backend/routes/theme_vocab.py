@@ -21,7 +21,7 @@ mirrors why frequency.py (tiers) isn't merged into vocab.py either.
 """
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
@@ -150,7 +150,7 @@ def get_theme_card(theme: str, lang: str = "fr",
 
 
 @router.get("/api/vocab/theme/{theme}/cards")
-def get_theme_cards(theme: str, lang: str = "fr", count: int = 10, exclude: str = "",
+def get_theme_cards(theme: str, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
                     m: Mode = Depends(require_mode(VOCAB)),
                     user_id: str = Depends(get_user_id)):
     pool, cards = _select_theme_cards(
