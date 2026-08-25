@@ -816,6 +816,23 @@ textarea:focus-visible {
   padding-top: 24px;
   padding-bottom: 40px;
 }
+/* ── Breakpoints ──────────────────────────────────────────
+   Two, and they are the whole scale:
+
+     560px — phone.  Below this, single column everywhere.
+     768px — tablet. Also the boundary the top bar's auto-hide
+             uses (MOBILE_BREAKPOINT in components/ui/TopBar.jsx —
+             the two must move together).
+
+   Anything else in this file is a specific component's own
+   constraint, and if you add one it needs a comment saying which
+   component and why. A one-off with no reason attached is how this
+   file ended up with thirteen of them.
+
+   The 1099/1100 pair below is deliberate: complementary bounds for
+   the dictionary's docked panel, written as integers so they never
+   both match. */
+
 /* .mobile-level-bar is `position: fixed` below 768px, so it reserves
    no space and simply sits on top of whatever the page's last rows
    are — 40px was not enough to clear it, and the final deck card on
@@ -1966,6 +1983,11 @@ textarea:focus-visible {
   grid-template-columns: 1fr;
   gap: 40px;
 }
+/* .profile-pair: not 768px. Each half holds a .records grid that is
+   itself 2 columns (see .profile-pair .records below) — going to
+   2-up at the tablet breakpoint would nest a 4-column layout into a
+   tablet-width row and squeeze every figure. 1000px is the point
+   where each half still has room for its own 2-column grid. */
 @media (min-width: 1000px) {
   .profile-pair { grid-template-columns: 1fr 1fr; gap: 40px 44px; }
 }
@@ -10590,6 +10612,13 @@ textarea:focus-visible {
 
 }
 
+/* Third tier between 768px tablet and 560px phone, for the landing
+   page / explorer / board-row / profile-card group specifically:
+   .landing-feature-grid needs a step down from 2 columns before it
+   goes to 1 (see the 768px block above), and .explorer__control's
+   row-of-chips layout (below) genuinely breaks — six lines of chrome
+   for three controls — if it waits until 560px to stack. Collapsing
+   this into 560px would reintroduce exactly that. */
 @media (max-width: 640px) {
   .board-row { grid-template-columns: 72px 1fr 1fr 20px; gap: 12px; }
   .landing-hero { padding: 72px 20px 60px; }
