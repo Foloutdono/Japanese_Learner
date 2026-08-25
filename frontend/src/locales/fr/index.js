@@ -11,7 +11,6 @@ const auth = {
   signupBtn:         "S'inscrire",
   signupSuccess:     'Vérifiez vos emails pour confirmer votre compte.',
   signOut:           'Déconnexion',
-  switchLang:        'Changer la langue',
   usernameOptional:  "Nom d'utilisateur (optionnel)",
   usernameInvalid:   "Le nom d'utilisateur doit contenir 3 à 20 caractères (lettres, chiffres, underscore).",
   usernameTaken:     'Ce nom d\'utilisateur est déjà pris.',
@@ -451,12 +450,6 @@ const phraseAnalyzer = {
 const reading = {
   readingTitle:         'Entraînement à la lecture',
   readingDesc:          'De vraies phrases, à votre niveau\nPar grade, par fréquence, ou depuis vos cartes\nLire d\'abord, vérifier ensuite',
-  readingHiragana:      'Hiragana uniquement',
-  readingHiraganaDesc:  'Phrases écrites uniquement en hiragana',
-  readingKatakana:      'Katakana uniquement',
-  readingKatakanaDesc:  'Phrases écrites uniquement en katakana',
-  readingMixed:         'Tout',
-  readingMixedDesc:     'Japonais naturel avec kanji et kana',
 
   // Source de fréquence : quelle liste de mots (byLevel/byFrequency/
   // byMastery, selectStudySource, selectTier, loadError vivent dans
@@ -509,7 +502,6 @@ const reading = {
 const readingComprehension = {
   readingComprehensionTitle: 'Compréhension lecture',
   readingComprehensionDesc:  'Des textes courts, puis des questions\nLa moitié lecture de l\'examen, répétée\nDe N5 à N1',
-  readingComprehensionFetchError: "Impossible de charger un passage. Veuillez réessayer.",
   question:                   'Question',
   yourAnswer:                 'Votre réponse',
   gradeCorrect:               'J\'ai eu juste',

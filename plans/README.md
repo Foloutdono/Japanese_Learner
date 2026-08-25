@@ -28,7 +28,7 @@ see `git log` for `Merge plan 001` through `Merge plan 011`.
 | 008 | [Browser test environment](008-browser-test-environment.md) | P1 | M | — | DONE |
 | 009 | [Dev-env Supabase credentials](009-dev-env-supabase-credentials.md) | P1 | S | — | DONE |
 | 010 | [Card-stamp ripple + stale comment](010-card-stamp-ripple-and-stale-comment.md) | P2 | S | — | DONE |
-| 011 | [Locale-parity test](011-locale-parity-test.md) | P2 | S | — | TODO |
+| 011 | [Locale-parity test](011-locale-parity-test.md) | P2 | S | — | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
@@ -283,13 +283,20 @@ cause a wrong turn:
 
 Recorded so they are not re-audited next run:
 
-- **9 French-only locale keys** (`switchLang`, `homeDesc`'s siblings,
-  `readingHiragana`/`readingKatakana`/`readingMixed` and their `*Desc`
-  variants, `readingComprehensionFetchError`): these read as missing English
-  translations, but **none of them has any consumer in the codebase**. Dead
-  keys, not a user-facing bug. Left in place deliberately — deleting them is a
-  trivial cleanup with no user benefit, and plan 002 explicitly tells its
-  executor not to.
+- **8 French-only locale keys** (`switchLang`, `readingHiragana`/
+  `readingKatakana`/`readingMixed` and their `*Desc` variants,
+  `readingComprehensionFetchError`): read as missing English translations, but
+  had zero consumers in the codebase. Originally left in place by plan 002 on
+  the strength of a static grep alone — insufficient in this codebase, which
+  builds locale keys dynamically at **eight** call sites (`studyModes.js` ×2,
+  `ThemeSelector.jsx`, `NavControls.jsx`, `Rhythm.jsx`, `DeckDetailScreen.jsx`,
+  `PhraseAnalyzerScreen.jsx`, `ReadingScreen.jsx` — `mode_*`/`theme*`/
+  `volume*`/`interval*`/`field_*`/`status_*` prefixes only, none matching
+  these 8 names). Deadness re-established accounting for all of them, and the
+  8 keys were **deleted in plan 011**, which also added a locale-parity test
+  (`frontend/src/locales/locales.test.js`) so a future one-sided key add fails
+  `npm test` immediately instead of silently drifting. Keep this dynamic-site
+  list current if a new one appears.
 - **The ~40 `t.X ?? 'literal'` fallback sites**: audited by resolving every key
   against both locale tables. Only **two** ever actually fire, and both are
   fixed by plan 002. The rest are dead defensive code. Removing them is a
