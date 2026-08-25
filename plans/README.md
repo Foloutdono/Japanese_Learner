@@ -18,7 +18,7 @@ see `git log` for `Merge plan 001` through `Merge plan 011`.
 | 003 | [Heading hierarchy & landmarks](003-heading-hierarchy-and-landmarks.md) | P1 | M | — | DONE |
 | 004 | [Modal dialog accessibility](004-modal-dialog-accessibility.md) | P2 | M | — | DONE |
 | 005 | [Restore focus indicators](005-restore-focus-indicators.md) | P2 | S | — | DONE |
-| 006 | [Responsive breakpoint tokens](006-responsive-breakpoint-tokens.md) | P3 | M | — | TODO |
+| 006 | [Responsive breakpoint tokens](006-responsive-breakpoint-tokens.md) | P3 | M | — | DONE |
 | 007 | [Reduced-motion coverage](007-reduced-motion-coverage.md) | P3 | M | 006 (weak) | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
@@ -35,6 +35,16 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
   width value and 007's for its motion value. Running 006 first means 007 sees
   the final width. Not a hard blocker; 007's plan says to leave the width alone
   either way.
+- **006's outcome**: investigation (Step 2) found that 6 of the 8 one-off
+  breakpoints it set out to migrate are genuine, well-documented component
+  constraints (the dictionary dock's 700px full-screen tier, the storehouse
+  grid's 820px, `.profile-pair`'s 1000px, the landing/explorer 640px tier,
+  plus the pre-known 900px pair) rather than drift — tripping the plan's own
+  "more than four genuine constraints" STOP condition. Per the plan, only the
+  documentation (the `── Breakpoints ──` block in `index.css` and constraint
+  comments on the surviving one-offs, plus the `TopBar.jsx` cross-reference)
+  was landed; no breakpoint *values* were migrated. The 700px width at
+  `index.css:13658` above is therefore unchanged.
 - **003, 004, 005 are fully independent** of everything and of each other.
   003 and 004 are both accessibility work but touch disjoint files (003:
   title/landmark elements; 004: overlay components). They can run in parallel.
