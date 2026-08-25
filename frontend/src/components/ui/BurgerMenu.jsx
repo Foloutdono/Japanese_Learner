@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
@@ -8,6 +8,7 @@ import { stationFor } from '../../config/stations'
 import { PassWave } from '../profile/PassWave'
 import { playUi } from '../../lib/audio'
 import { CrossIcon, FlameIcon, GearIcon } from './Icons'
+import { useDialog } from '../../hooks/useDialog'
 
 // ── 路線図 — the network map ───────────────────────────────
 // The nav drawer was a list of icon+label rows on a dark panel: the
@@ -158,22 +159,18 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
   const navigate = useNavigate()
   const { t } = useLang()
 
-  const setOpenAndNotify = (next) => {
+  const setOpenAndNotify = useCallback((next) => {
     setOpen(next)
     onOpenChange?.(next)
-  }
+  }, [onOpenChange])
 
-  const close = () => setOpenAndNotify(false)
-
-  // Escape closes it. The QuickChange drawer already did this and its
-  // comment claimed this one did too; it didn't.
-  useEffect(() => {
-    if (!open) return
-    const onKey = e => { if (e.key === 'Escape') { playUi('click-close-menu'); close() } }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+  // Stable so useDialog (see the drawer below) doesn't re-run its
+  // focus-on-open effect every render — an inline arrow here would
+  // make the drawer steal focus continuously while it's open.
+  const close = useCallback(() => {
+    playUi('click-close-menu')
+    setOpenAndNotify(false)
+  }, [setOpenAndNotify])
 
   // Every stop, the pass and the settings entry all funnel through
   // here — one place to hang the click sound on rather than wiring
@@ -203,49 +200,68 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
         </span>
       </button>
 
-      {open && createPortal(
-        <div className="burger-overlay" onClick={() => { playUi('click-close-menu'); close() }}>
-          <div className="burger-drawer" onClick={e => e.stopPropagation()}>
-            <div className="burger-drawer__header">
-              <span className="burger-drawer__heading">
-                <span className="burger-drawer__jp" lang="ja">路線図</span>
-                <span className="burger-drawer__sub">{t.menu}</span>
-              </span>
-              <button
-                className="burger-drawer__close"
-                onClick={() => { playUi('click-close-menu'); close() }}
-                aria-label={t.close}
-              >
-                <CrossIcon size={14} />
-              </button>
-            </div>
-
-            <nav className="burger-drawer__nav">
-              {links.map((link, i) => (
-                <MapStop
-                  key={link.path}
-                  path={link.path}
-                  color={link.color}
-                  glyph={link.icon}
-                  title={link.title}
-                  active={currentPath === link.path}
-                  first={i === 0}
-                  last={i === links.length - 1}
-                  onClick={() => go(link.path)}
-                />
-              ))}
-            </nav>
-
-            {/* Pinned below the scrollable run rather than inside it,
-                so the pass stays in your pocket however many sections
-                the line grows to. */}
-            <div className="burger-drawer__pocket">
-              <PassStub go={go} t={t} activePath={currentPath} />
-            </div>
-          </div>
-        </div>,
-        document.body
+      {open && (
+        <BurgerDrawer
+          onClose={close}
+          t={t}
+          links={links}
+          currentPath={currentPath}
+          go={go}
+        />
       )}
     </>
+  )
+}
+
+// Split out from BurgerMenu so useDialog — and the Escape/focus-trap
+// listener it attaches — only lives while the drawer is actually
+// mounted, the same way QuickChange separates its trigger button from
+// QuickDrawer.
+function BurgerDrawer({ onClose, t, links, currentPath, go }) {
+  const dialogRef = useDialog(onClose)
+
+  return createPortal(
+    <div className="burger-overlay" onClick={onClose}>
+      <div ref={dialogRef} className="burger-drawer" onClick={e => e.stopPropagation()}
+           role="dialog" aria-modal="true" aria-label={t.menu}>
+        <div className="burger-drawer__header">
+          <span className="burger-drawer__heading">
+            <span className="burger-drawer__jp" lang="ja">路線図</span>
+            <span className="burger-drawer__sub">{t.menu}</span>
+          </span>
+          <button
+            className="burger-drawer__close"
+            onClick={onClose}
+            aria-label={t.close}
+          >
+            <CrossIcon size={14} />
+          </button>
+        </div>
+
+        <nav className="burger-drawer__nav">
+          {links.map((link, i) => (
+            <MapStop
+              key={link.path}
+              path={link.path}
+              color={link.color}
+              glyph={link.icon}
+              title={link.title}
+              active={currentPath === link.path}
+              first={i === 0}
+              last={i === links.length - 1}
+              onClick={() => go(link.path)}
+            />
+          ))}
+        </nav>
+
+        {/* Pinned below the scrollable run rather than inside it,
+            so the pass stays in your pocket however many sections
+            the line grows to. */}
+        <div className="burger-drawer__pocket">
+          <PassStub go={go} t={t} activePath={currentPath} />
+        </div>
+      </div>
+    </div>,
+    document.body
   )
 }
