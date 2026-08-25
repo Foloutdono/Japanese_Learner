@@ -33,6 +33,22 @@ npm run lint
 npm test          # vitest
 ```
 
+### Frontend env vars
+
+`frontend/.env.production` is tracked (Vercel reads it), but **Vite does not
+load it for `npm run dev`** — dev mode reads `.env.local` /
+`.env.development.local`, which are gitignored. Without them the app falls back
+to a placeholder Supabase project and every auth call fails with
+`ERR_NAME_NOT_RESOLVED`.
+
+One-time setup in a fresh clone or a new git worktree:
+
+```bash
+cd frontend && grep -E '^VITE_SUPABASE' .env.production > .env.development.local
+```
+
+See `frontend/.env.example` for the full variable list.
+
 ## Auth in local dev
 
 Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user with no token check (see `backend/core/auth.py`). This is opt-in only — it must never be set in a deployed environment, and the backend prints a loud warning banner on startup when it's active. Without it, `SUPABASE_URL`/`SUPABASE_SERVICE_KEY` are required and every request does a round trip to Supabase to verify the bearer token.
