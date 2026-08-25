@@ -545,6 +545,7 @@ const dictionary = {
   reading:           'Lecture',
   romaji:            'Romaji',
   meaning:           'Sens',
+  examples:          'Exemples',
   level:             'Niveau',
   listen:            'Écouter',
   loadingDictionary: 'Chargement...',
