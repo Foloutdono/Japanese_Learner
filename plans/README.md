@@ -17,7 +17,7 @@ see `git log` for `Merge plan 001` through `Merge plan 011`.
 | 002 | [Document language & title](002-document-language-and-title.md) | P1 | S | 001 (file overlap only) | DONE |
 | 003 | [Heading hierarchy & landmarks](003-heading-hierarchy-and-landmarks.md) | P1 | M | — | DONE |
 | 004 | [Modal dialog accessibility](004-modal-dialog-accessibility.md) | P2 | M | — | DONE |
-| 005 | [Restore focus indicators](005-restore-focus-indicators.md) | P2 | S | — | TODO |
+| 005 | [Restore focus indicators](005-restore-focus-indicators.md) | P2 | S | — | DONE |
 | 006 | [Responsive breakpoint tokens](006-responsive-breakpoint-tokens.md) | P3 | M | — | TODO |
 | 007 | [Reduced-motion coverage](007-reduced-motion-coverage.md) | P3 | M | 006 (weak) | TODO |
 
@@ -121,6 +121,27 @@ cause a wrong turn:
   on these four, or decide they're fine without one. Not blocking; these four
   screens are exactly as accessible as before on this specific point, and
   every other screen in the app now has a real `<h1>`.
+- **Plan 005's Step 4 mouse-check wording was wrong for text fields
+  (2026-08-25)**: the plan asserted "`:focus-visible` excludes mouse focus in
+  every current browser" and treated a ring appearing on mouse click as a
+  STOP condition. The executor found, and the coordinator independently
+  reproduced with a real (non-synthetic) mouse click, that this is false for
+  text-editable elements specifically: `input[type=text/email/password]`,
+  `textarea`, and contenteditable are spec-permitted (CSS Selectors Level 4)
+  to always match `:focus-visible` on click in every evergreen browser,
+  because a focus indicator is considered useful right before typing
+  regardless of input modality. It does **not** apply to non-text controls —
+  the existing `button:focus-visible` house pattern was verified to still
+  correctly suppress the ring on mouse click, confirming the CSS added by
+  plan 005 (`input:focus-visible`, `textarea:focus-visible`,
+  `.import-textarea:focus-visible`) is correct as written and not a defect.
+  This is a flaw in the plan's own Step 4 wording, not in the executed work —
+  the outcome (a legible, spec-compliant ring on text fields on click too) is
+  arguably a feature, and there is no better alternative selector (`:focus`
+  would be strictly worse; detecting "keyboard-only" needs JS). Worth
+  remembering for any future plan writing a mouse-vs-keyboard STOP condition:
+  scope the "`:focus-visible` excludes mouse" claim to non-text-editable
+  controls only.
 
 ## Findings considered and rejected
 
