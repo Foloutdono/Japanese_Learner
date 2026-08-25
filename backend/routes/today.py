@@ -41,7 +41,7 @@ Two things have to be right that a single-section session gets for free:
 import logging
 from collections import defaultdict
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 import psycopg2.extras
@@ -207,7 +207,7 @@ def get_today(user_id: str = Depends(get_user_id)):
 
 
 @router.get("/api/today/cards")
-def get_today_cards(count: int = 10, exclude: str = "", lanes: str = "", lang: str = "fr",
+def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "", lanes: str = "", lang: str = "fr",
                     user_id: str = Depends(get_user_id)):
     """
     The queue itself: up to `count` due cards, mixed across sections and

@@ -1,6 +1,6 @@
 import logging
 import random
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
@@ -272,7 +272,7 @@ def get_grammar_card(level: str, m: Mode = Depends(require_mode(GRAMMAR)),
 
 
 @router.get("/api/grammar/cards")
-def get_grammar_cards(level: str, count: int = 10, exclude: str = "",
+def get_grammar_cards(level: str, count: int = Query(10, ge=1, le=100), exclude: str = "",
                        m: Mode = Depends(require_mode(GRAMMAR)),
                        user_id: str = Depends(get_user_id)):
     """

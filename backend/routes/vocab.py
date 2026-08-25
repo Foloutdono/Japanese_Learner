@@ -1,6 +1,6 @@
 import logging
 import random
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from core.auth import get_user_id, prefixed, unprefixed
 from core.srs_instance import srs
@@ -241,7 +241,7 @@ def get_vocab_card(level: str, lang: str = "fr",
 
 
 @router.get("/api/vocab/cards")
-def get_vocab_cards(level: str, lang: str = "fr", count: int = 10, exclude: str = "",
+def get_vocab_cards(level: str, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
                     m: Mode = Depends(require_mode(VOCAB)),
                     user_id: str = Depends(get_user_id)):
     """

@@ -3,7 +3,7 @@ import random
 import re
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from psycopg2 import errors as pg_errors
 from pydantic import BaseModel, field_validator
 
@@ -266,7 +266,7 @@ def update_profile(payload: UsernamePayload, user_id: str = Depends(get_user_id)
 
 
 @router.get("/api/leaderboard")
-def get_leaderboard(limit: int = 20, user_id: str = Depends(get_user_id)):
+def get_leaderboard(limit: int = Query(20, ge=1, le=200), user_id: str = Depends(get_user_id)):
     top = srs.get_leaderboard(limit=limit)
     names = _usernames_for([e["user_id"] for e in top])
 

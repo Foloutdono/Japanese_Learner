@@ -2,7 +2,7 @@ import json
 import os
 from collections import defaultdict
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 import content.vocab_jmdict_data as jmdict_db
@@ -222,7 +222,7 @@ def get_radical_grid(all: bool = False):
 
 
 @router.get("/api/dictionary")
-def get_dictionary(q: str = "", page: int = 0, limit: int = 50, lang: str = "fr",
+def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=200), lang: str = "fr",
                     category: str = "all", radical: int | None = None,
                     user_id: str = Depends(get_user_id)):
     """
