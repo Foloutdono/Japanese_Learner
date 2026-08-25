@@ -956,7 +956,7 @@ def _target_span(sentence: str, kanji: str, kana: str):
     # real tokenizer's own per-token reading to recognize the
     # equivalence instead of insisting on this card's exact kanji.
     # `auxiliary_use` is excluded for the same reason card_lookup.py's
-    # _resolve_kana excludes it: reading alone can't tell 要る from
+    # resolve_kana excludes it: reading alone can't tell 要る from
     # 居る (both いる), and 居る-as-~ている-progressive-marker is common
     # enough in ordinary text that trusting reading equivalence there
     # would misidentify that marker as an unrelated card's headword.

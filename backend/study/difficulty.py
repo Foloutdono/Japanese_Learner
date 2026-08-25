@@ -380,6 +380,41 @@ def grammar_over_level(sentence: str, level: str) -> list[tuple[str, str]]:
     return out
 
 
+def points_in(sentence: str) -> list[tuple[str, str, int, int]]:
+    """(pattern, level, start, end) for every catalogue point `sentence`
+    visibly uses, at ANY level -- unlike grammar_over_level, which only
+    reports points above a given level. Built for study/analysis.py's
+    local tier: every hit here becomes a clickable grammar chip, so this
+    answers "what grammar is present", not "is this sentence too hard".
+
+    Two differences from grammar_over_level, both deliberate:
+
+    - _distinctive() is applied to EVERY point, not just above-level
+      ones. grammar_over_level only needs it on the above-level branch
+      because a loose at-or-below match only widens the span an
+      above-level hit has to escape (the conservative direction there).
+      Here every hit becomes a rendered chip, so a two-character
+      all-hiragana stem producing a false chip on uncurated text (OCR
+      output, auto-generated video captions) is a real defect, not a
+      merely-loose match.
+    - _extra_points() (EXTRA_MARKERS) are excluded. Those are bare
+      surface markers with no catalogue entry behind them, so they have
+      no grammar_to_id and nothing for a chip to link to.
+
+    Sorted by start, then by longer span first, so a caller rendering
+    underlays gets a stable order.
+    """
+    hits: list[tuple[str, str, int, int]] = []
+    for point_level, pattern, needles in _checkable_points():
+        strong = tuple(n for n in needles if _distinctive(n))
+        if not strong:
+            continue
+        for start, end in _spans(sentence, strong):
+            hits.append((pattern, point_level, start, end))
+    hits.sort(key=lambda h: (h[2], -(h[3] - h[2])))
+    return hits
+
+
 # ── Length ────────────────────────────────────────────────────
 # Characters, counting kana and kanji alike. Not a difficulty measure on
 # its own -- a long sentence of N5 words is still N5 -- but reading
@@ -423,6 +458,19 @@ def report(sentence: str, level: str, segments=None, allow_kanji: str = "") -> d
 def fits(sentence: str, level: str, segments=None) -> bool:
     """Whether `sentence` is at or below `level` on all four counts."""
     return report(sentence, level, segments)["ok"]
+
+
+def estimate_level(sentence: str, segments=None) -> str | None:
+    """The easiest level `sentence` fits, or None if it fits none of them.
+
+    Walks LEVELS in order (N5 first) and returns the first one report()
+    says "ok" for. Does not re-derive the ordering -- LEVELS is already
+    easiest-first, so the first match is the lowest by construction.
+    """
+    for level in LEVELS:
+        if report(sentence, level, segments)["ok"]:
+            return level
+    return None
 
 
 # ── The loosest useful gate ───────────────────────────────────

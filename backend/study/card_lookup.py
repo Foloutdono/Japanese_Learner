@@ -6,7 +6,7 @@ phrase analyzer and the reading-practice mode.
 
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from study.modes import KANA, KANJI, VOCAB, STATUS_MODES
+from study.modes import KANA, KANJI, VOCAB, GRAMMAR, STATUS_MODES
 from content import vocab_extras
 from study import morphology
 # What "do I already know this?" means for the clickable badges.
@@ -34,6 +34,11 @@ from study import morphology
 VOCAB_STATUS_MODES = STATUS_MODES[VOCAB]
 KANJI_STATUS_MODES = STATUS_MODES[KANJI]
 KANA_STATUS_MODES = STATUS_MODES[KANA]
+# Restored 2026-08 for study/analysis.py's local tier -- see that
+# module's grammar handling and the note above about grammar lookup
+# having been removed here in favour of AI segmentation. This constant
+# is the piece that note said belonged in the new analysis result.
+GRAMMAR_STATUS_MODES = STATUS_MODES[GRAMMAR]
 
 # Used to pick between multiple deck entries that share the same surface
 # form (e.g. 歩 is both the everyday word "marcher"/"pas" and the shogi
@@ -445,7 +450,7 @@ _VOCAB_BY_LEMMA = _index_vocab_by_lemma()
 _VOCAB_BY_KANA = _index_vocab_by_kana()
 
 
-def _resolve_lemma(lemma: str, reading: str):
+def resolve_lemma(lemma: str, reading: str):
     """(level, entry, raw_id) for the deck entry whose kanji field is
     `lemma`, disambiguated by `reading` when several entries share that
     lemma text (see _index_vocab_by_lemma), or None."""
@@ -460,7 +465,7 @@ def _resolve_lemma(lemma: str, reading: str):
     return level, entry, vocab_to_id(entry, level)
 
 
-def _resolve_kana(reading: str, pos: str, auxiliary_use: bool):
+def resolve_kana(reading: str, pos: str, auxiliary_use: bool):
     """Fallback for when lemma-TEXT matching finds nothing (see
     _index_vocab_by_kana for why that happens even for words that ARE
     in the deck): match by reading instead. Gated to content-word POS
@@ -515,7 +520,7 @@ def _find_segments_morphological(text: str):
         if i + 1 < len(morphemes):
             m2 = morphemes[i + 1]
             merged = m.surface + m2.surface
-            hit = _resolve_lemma(merged, "")
+            hit = resolve_lemma(merged, "")
             if hit:
                 level, entry, raw_id = hit
                 vocab_hits.append((m.start, m2.end, level, entry, raw_id))
@@ -524,7 +529,7 @@ def _find_segments_morphological(text: str):
                 i += 2
                 continue
 
-        hit = _resolve_lemma(m.lemma, m.lemma_reading) or _resolve_kana(m.lemma_reading, m.pos, m.auxiliary_use)
+        hit = resolve_lemma(m.lemma, m.lemma_reading) or resolve_kana(m.lemma_reading, m.pos, m.auxiliary_use)
         if hit:
             level, entry, raw_id = hit
             vocab_hits.append((m.start, m.end, level, entry, raw_id))
