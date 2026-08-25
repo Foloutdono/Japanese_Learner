@@ -10,6 +10,8 @@ import { QuickChange } from '../rewards/QuickChange'
 import { playClick } from '../../lib/audio'
 import { ChevronIcon } from './Icons'
 
+// Must stay in step with the 768px tablet breakpoint documented in
+// index.css's "── Breakpoints ──" block. If one moves, both move.
 const MOBILE_BREAKPOINT = 768
 const SCROLL_THRESHOLD   = 2     // px of scroll before reacting — just enough to ignore jitter
 const REVEAL_DURATION    = 2000  // ms the bar stays visible after a reveal
