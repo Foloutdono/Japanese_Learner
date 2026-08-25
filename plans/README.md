@@ -16,7 +16,7 @@ see `git log` for `Merge plan 001` through `Merge plan 011`.
 | 001 | [Centralize theme init](001-centralize-theme-init.md) | P1 | S | — | DONE |
 | 002 | [Document language & title](002-document-language-and-title.md) | P1 | S | 001 (file overlap only) | DONE |
 | 003 | [Heading hierarchy & landmarks](003-heading-hierarchy-and-landmarks.md) | P1 | M | — | DONE |
-| 004 | [Modal dialog accessibility](004-modal-dialog-accessibility.md) | P2 | M | — | TODO |
+| 004 | [Modal dialog accessibility](004-modal-dialog-accessibility.md) | P2 | M | — | DONE |
 | 005 | [Restore focus indicators](005-restore-focus-indicators.md) | P2 | S | — | TODO |
 | 006 | [Responsive breakpoint tokens](006-responsive-breakpoint-tokens.md) | P3 | M | — | TODO |
 | 007 | [Reduced-motion coverage](007-reduced-motion-coverage.md) | P3 | M | 006 (weak) | TODO |
