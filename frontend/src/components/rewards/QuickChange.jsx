@@ -29,6 +29,14 @@ export function QuickChange() {
   const [open, setOpen] = useState(false)
   const summary = useProfileSummary()
 
+  // Stable so QuickDrawer's useDialog (via its own `close`) doesn't
+  // re-run its focus-on-open effect every render — QuickChange
+  // re-renders on every useProfileSummary() update, which fires on
+  // every cosmetic equip while the drawer is open (equipCosmetic ->
+  // refreshSummary -> the profileSummary store's listeners), so an
+  // inline arrow here would yank focus back mid-interaction each time.
+  const closeDrawer = useCallback(() => setOpen(false), [])
+
   // The dot is the same "something is waiting" signal the hall card
   // and the home badge use: unopened unlocks, which live behind this
   // button now as much as behind the storehouse screen.
@@ -47,7 +55,7 @@ export function QuickChange() {
         {unseen > 0 && <span className="quick-drawer-btn__dot" aria-hidden="true" />}
       </button>
 
-      {open && <QuickDrawer onClose={() => setOpen(false)} t={t} />}
+      {open && <QuickDrawer onClose={closeDrawer} t={t} />}
     </>
   )
 }
