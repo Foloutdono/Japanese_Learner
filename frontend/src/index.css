@@ -760,6 +760,20 @@ input {
 }
 input:focus { border-color: var(--accent2); }
 
+/* Keep the border tint — it is a nice ambient cue on mouse focus —
+   but add the same ring every button gets, on :focus-visible only, so
+   keyboard focus is as legible on a field as it is on a control.
+   The outline suppression above is what made this necessary. */
+input:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
+
+textarea:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
+
 /* ── Utility classes ── */
 
 /* Visually hidden until focused, then pinned to the top-left. The one
@@ -3604,6 +3618,19 @@ input:focus { border-color: var(--accent2); }
   border: 2px solid var(--bg-card);
   box-shadow: 0 1px 4px rgba(0,0,0,0.35);
   cursor: pointer;
+}
+
+/* The thumb is the control, so the ring goes on the thumb — an outline
+   on the input itself would draw a rectangle around the whole track. */
+.master-volume-slider-wrap input[type="range"]:focus-visible::-webkit-slider-thumb,
+.vol-slider-wrap input[type="range"]:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
+.master-volume-slider-wrap input[type="range"]:focus-visible::-moz-range-thumb,
+.vol-slider-wrap input[type="range"]:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
 }
 
 /* Disabled */
@@ -10257,6 +10284,11 @@ input:focus { border-color: var(--accent2); }
   resize: vertical;
   font-family: monospace;
   outline: none;
+}
+
+.import-textarea:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
 }
 
 .import-sep-row { display: flex; gap: 48px; margin-top: 20px; flex-wrap: wrap; }
