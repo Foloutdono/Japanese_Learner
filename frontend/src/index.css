@@ -9638,6 +9638,15 @@ textarea:focus-visible {
   0%   { transform: scale(0.85); opacity: 0.4; }
   100% { transform: scale(1); opacity: 1; }
 }
+/* Pure entrance flourish — the streak count is already text content,
+   the pop just announces the badge. No base opacity/transform is set
+   outside the animation, so dropping it entirely still renders the
+   badge fully visible at its natural scale. Covers .trn-streak too
+   (translation screen's identical badge, further down, shares this
+   keyframe). */
+@media (prefers-reduced-motion: reduce) {
+  .rdg-streak, .trn-streak { animation: none; }
+}
 
 .rdg-error-card { padding: 16px; color: var(--danger); }
 .rdg-retry-wrap { margin-top: 12px; }
@@ -13012,6 +13021,14 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
 @keyframes quick-drawer-slide {
   from { transform: translateX(100%); }
   to   { transform: translateX(0); }
+}
+/* The drawer travels its own full width — the same shape of motion as
+   .burger-drawer above, and the same fix: it still has to announce
+   itself, so it fades in place instead of not animating at all. The
+   overlay's own fade (quick-drawer-fade) is untouched, it was never
+   more than an opacity change. */
+@media (prefers-reduced-motion: reduce) {
+  .quick-drawer { animation: quick-drawer-fade 160ms ease forwards; }
 }
 
 .quick-drawer__head {
