@@ -478,6 +478,16 @@ const phraseAnalyzer = {
   clozeCreated:        'Cloze card created',
   mineFailed:          "Couldn't add this card. Try again.",
   cannotMineOffDeck:   'Not in the app deck',
+  takePhoto:           'Take a photo',
+  chooseImage:         'Choose an image',
+  verticalText:        'Vertical text',
+  ocrLoading:          'Loading the reader…',
+  ocrRecognizing:      'Reading the image…',
+  ocrConfidenceLow:    "This didn't come out clear.",
+  tryHarder:           'Try harder',
+  ocrCheckText:        'Check the text before analyzing — OCR is not always right.',
+  ocrFailed:           "Couldn't read this image. Try another, or type it in.",
+  imageTooLarge:       'This image is too large.',
 }
 
 // ── Reading ───────────────────────────────────────────────

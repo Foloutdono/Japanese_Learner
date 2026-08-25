@@ -463,6 +463,16 @@ const phraseAnalyzer = {
   clozeCreated:        'Carte à trous créée',
   mineFailed:          "Impossible d'ajouter cette carte. Veuillez réessayer.",
   cannotMineOffDeck:   "N'est pas dans le deck de l'application",
+  takePhoto:           'Prendre une photo',
+  chooseImage:         'Choisir une image',
+  verticalText:        'Texte vertical',
+  ocrLoading:          'Chargement du lecteur…',
+  ocrRecognizing:      "Lecture de l'image…",
+  ocrConfidenceLow:    "Le résultat n'est pas très net.",
+  tryHarder:           'Réessayer en mieux',
+  ocrCheckText:        "Vérifiez le texte avant d'analyser — l'OCR n'est pas toujours fiable.",
+  ocrFailed:           "Impossible de lire cette image. Essayez-en une autre, ou tapez le texte.",
+  imageTooLarge:       'Cette image est trop volumineuse.',
 }
 
 // ── Reading ───────────────────────────────────────────────

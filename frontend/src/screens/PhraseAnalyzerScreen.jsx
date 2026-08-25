@@ -7,6 +7,7 @@ import { CrossIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
 import { useMining } from '../components/analysis/useMining'
+import { ImageInput } from '../components/analysis/ImageInput'
 
 export default function PhraseAnalyzerScreen({ session }) {
   const navigate = useNavigate()
@@ -14,6 +15,13 @@ export default function PhraseAnalyzerScreen({ session }) {
   const mining = useMining(session)
 
   const [phrase, setPhrase]     = useState('')
+  // Whether the current textarea content came from OCR rather than
+  // being typed -- sent as the Passage's `source` on analyze (plan
+  // 016's Sentence bank provenance). Reset on any direct edit to the
+  // textarea, since a full retype is no longer "from a photo"; a
+  // correction made through ImageInput's own flow is still the same
+  // image's text and keeps it.
+  const [fromImage, setFromImage] = useState(false)
   // One entry per Sentence in the analyzed Passage -- see
   // study/analysis.py's per-Sentence shape, mirrored by
   // /api/phrase/analyze's `sentences` array. null before the first
@@ -59,7 +67,7 @@ export default function PhraseAnalyzerScreen({ session }) {
 
     apiFetch('/api/phrase/analyze', session, {
       method: 'POST',
-      body: JSON.stringify({ phrase: trimmed, lang }),
+      body: JSON.stringify({ phrase: trimmed, lang, source: fromImage ? 'image' : 'typed' }),
     })
       .then(r => {
         if (!r.ok) throw new Error('Request failed')
@@ -161,13 +169,20 @@ export default function PhraseAnalyzerScreen({ session }) {
       <main id="main-content" className="container page-pad">
 
         <div className="card phrase-input-card">
+          <ImageInput
+            t={t}
+            onTextReady={text => { setPhrase(text); setFromImage(true) }}
+          />
           <textarea
             value={phrase}
-            onChange={e => setPhrase(e.target.value)}
+            onChange={e => { setPhrase(e.target.value); setFromImage(false) }}
             placeholder={t.phrasePlaceholder}
             rows={3}
             className="phrase-textarea"
           />
+          {fromImage && (
+            <div className="analysis-image-input__hint">{t.ocrCheckText ?? 'Check the text before analyzing.'}</div>
+          )}
           <div className="phrase-input-actions">
             <button
               onClick={() => setShowHistory(s => !s)}

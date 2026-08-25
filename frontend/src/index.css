@@ -9675,6 +9675,54 @@ textarea:focus-visible {
 }
 .phrase-explain-hint { font-size: 13px; color: var(--text-secondary); }
 
+/* ── Photo input (plan 018) -- pick/shoot an image, OCR it locally.
+   Additive only. */
+.analysis-image-input { margin-bottom: 16px; }
+.analysis-image-input__row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.analysis-image-input__vertical-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.analysis-image-input__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+.analysis-image-input__progress {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.analysis-image-input__error {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--danger);
+}
+.analysis-image-input__low-confidence {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--warning);
+}
+.analysis-image-input__hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 .phrase-result-card { margin-bottom: 24px; padding: 20px 24px; }
 .phrase-line {
   font-size: 28px;

@@ -223,6 +223,12 @@ class PhraseRequest(BaseModel):
     # learner got whatever language the model defaulted to (in practice
     # English) regardless of their UI language.
     lang: str = "en"
+    # Provenance for the Sentence bank (docs/adr/0002) -- 'typed' is the
+    # default and matches phrase_history.source's own column default, so
+    # a caller that never mentions this (ReadingScreen.jsx, most direct
+    # analyzer use) writes exactly what it always wrote. Plan 018 (photo
+    # input) sends 'image'; plan 019 (video) will send 'video'.
+    source: str = "typed"
 
 
 def _call_llm(phrase: str, lang: str) -> dict:
@@ -357,14 +363,12 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            # source/source_ref take their column defaults ('typed'/'')
-            # here -- this endpoint has no notion of provenance yet.
-            # Plans 018 (photo input) and 019 (video) are what actually
-            # populate them; the columns exist now with defaults so
-            # neither needs a further migration.
+            # source_ref still takes its column default ('') -- no
+            # caller has a reference to attach yet. A video timestamp
+            # (plan 019) is what will actually populate it.
             cur.execute(
-                "INSERT INTO phrase_history(user_id, phrase) VALUES (%s, %s) RETURNING id, created_at",
-                (user_id, phrase),
+                "INSERT INTO phrase_history(user_id, phrase, source) VALUES (%s, %s, %s) RETURNING id, created_at",
+                (user_id, phrase, payload.source),
             )
             row_id, created_at = cur.fetchone()
         conn.commit()

@@ -127,6 +127,24 @@ def test_history_round_trip_reflects_live_srs_state_not_anything_stored(client, 
     assert daigaku["vocab_match"]["stats"]["status"] == "mastered"
 
 
+def test_analyze_stores_the_given_source(client):
+    response = client.post(
+        "/api/phrase/analyze",
+        json={"phrase": "写真から読んだ文です。", "source": "image"},
+    )
+    assert response.status_code == 200
+    history = client.get("/api/phrase/history").json()
+    entry = next(h for h in history if h["id"] == response.json()["id"])
+    assert entry["source"] == "image"
+
+
+def test_analyze_defaults_source_to_typed(client):
+    response = client.post("/api/phrase/analyze", json={"phrase": "普通に打った文です。"})
+    history = client.get("/api/phrase/history").json()
+    entry = next(h for h in history if h["id"] == response.json()["id"])
+    assert entry["source"] == "typed"
+
+
 def test_history_get_makes_no_llm_call(client, monkeypatch):
     phrase = "私は学生です。"
     post_resp = client.post("/api/phrase/analyze", json={"phrase": phrase})

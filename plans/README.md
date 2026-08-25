@@ -77,7 +77,7 @@ YouTube video's subtitles.
 | 015 | [Shared analysis components](015-shared-analysis-components.md) | P1 | M | 014 | DONE |
 | 016 | [Analyzer local-first + Sentence bank](016-analyzer-local-first-and-sentence-bank.md) | P1 | M | 015 | DONE |
 | 017 | [Mine sentences into decks](017-mine-sentences-into-decks.md) | P1 | M | 016 | DONE |
-| 018 | [Image / camera input](018-image-and-camera-input.md) | P2 | M | 016 | TODO |
+| 018 | [Image / camera input](018-image-and-camera-input.md) | P2 | M | 016 | DONE (Step 4 blocked — see note) |
 | 019 | [Video subtitle study mode](019-video-subtitle-study-mode.md) | P2 | L | 017 | TODO |
 | 020 | [Schema-file drift](020-schema-file-drift.md) | P2 | S | — | TODO |
 
@@ -191,6 +191,33 @@ and expensive after:
   cap is a documented choice (`backend/routes/phrase.py:172-183`). Multi-sentence
   input is solved by splitting the Passage, never by asking for a bigger answer.
 
+## Execution notes (added as each plan lands)
+
+- **Plan 018's Step 4 (vision-model escalation) is blocked, per the plan's own
+  STOP condition (2026-08-26).** Ran `python -m scripts.check_llm_models
+  --vision` live against both configured providers (7 models). Six answered
+  with an explicit "not multimodal" / "no endpoints support image input"
+  error; the seventh (`google/gemma-4-31b-it:free`) was persistently
+  rate-limited on OpenRouter's free tier across three retries — inconclusive,
+  not a confirmed capability either way. No model is confirmed vision-capable
+  on either provider. The full result is recorded in
+  `backend/study/llm_shared.py` next to the model catalog. Steps 1, 2, 3, 5
+  and 6 landed in full — the client-side `tesseract.js` OCR tier is complete
+  and is the entire feature today; there is no server vision escalation and
+  no `POST /api/ocr` endpoint. Re-run the probe before attempting Step 4
+  again; do not add a paid vision provider without the operator's say-so (the
+  plan is explicit about this).
+- **Plan 016 left two silent locale-key collisions**, found and fixed while
+  building plan 017: `analysisUnavailable` (added by 016 for the analyzer)
+  collided with a pre-existing key of the same name under `translationMode`,
+  and the later spread in `locales/*/index.js`'s final export silently won —
+  the analyzer's own message was dead code from the moment it was added.
+  Renamed to `sentenceAnalysisUnavailable`. `createDeck` (planned for 017) was
+  found to already exist with the exact right meaning and was reused instead
+  of duplicated. Worth checking `grep -c "^\s*KEY:" locales/en/index.js` for
+  every new locale key before adding it, not just before the parity test —
+  the test only catches keys missing from one side, not a collision that
+  exists on both.
 
 ---
 
