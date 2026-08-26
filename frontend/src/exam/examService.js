@@ -58,6 +58,14 @@ export class ExamGenerationError extends Error {
  *   revision — one exact paper, whatever the rule would say. Only the
  *              result screen wants this: an old attempt has to be shown
  *              against the paper it was taken on.
+ *
+ * RETURNS TWO SHAPES. A 202 (paper still being generated) resolves to
+ * `{generating: true}` -- truthy, and WITHOUT `sections`/`revision`.
+ * Every caller must check `.generating` before reading any paper field.
+ * `exam?.sections[0]` is NOT enough: the `?.` guards `exam`, not
+ * `sections`, so the index step still throws. That exact line
+ * white-screened the result screen in production -- see
+ * plans/022-exam-generating-shape-crash.md.
  */
 export async function getExam(examId, session, { exclude, revision } = {}) {
   const query = new URLSearchParams()

@@ -38,3 +38,10 @@ shot*.mjs
 sweep*.mjs
 probe*.mjs
 shots/
+
+# Vitest browser-lane artifacts. The browser project (see
+# vite.config.js) captures a screenshot on failure and writes it next to
+# the test; both directories are regenerated per run and are never worth
+# committing.
+.vitest-attachments/
+**/__screenshots__/

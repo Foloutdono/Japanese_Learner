@@ -158,7 +158,7 @@ is the wave's most important plan.
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
 | 021 | [Supabase JWKS endpoint](021-supabase-jwks-endpoint.md) | P0 | S | — | DONE |
-| 022 | [Exam `{generating}` shape crash](022-exam-generating-shape-crash.md) | P0 | S | — | TODO |
+| 022 | [Exam `{generating}` shape crash](022-exam-generating-shape-crash.md) | P0 | S | — | DONE |
 | 023 | [Vision-model OCR backend](023-vision-ocr-backend.md) | P0 | M | — | TODO |
 | 024 | [Image capture UX](024-image-capture-ux.md) | P0 | M | 023 | TODO |
 | 025 | [Paste-transcript ingest](025-paste-transcript-ingest.md) | P0 | M | — | TODO |
@@ -304,6 +304,24 @@ and expensive after:
   input is solved by splitting the Passage, never by asking for a bigger answer.
 
 ## Execution notes (added as each plan lands)
+
+- **Plan 022 landed, and the reported production crash was reproduced in a test
+  before being fixed.** Reverting `ExamResult.jsx` to its original form makes
+  the new test fail with the caret pointing straight at
+  `const section = exam?.sections[0] ?? null` — the same
+  `Cannot read properties of undefined (reading '0')` seen in production. That
+  check mattered here more than usual: **either half of the fix alone would
+  have made the test pass**, since the added `?.[0]` prevents the throw even
+  without the `generating` guard. Only reverting *both* proves the test targets
+  the real defect.
+  Two test-infra notes for the next browser test: `vi.mock('../lib/audio', ...)`
+  must spread `importOriginal()` rather than returning a bare factory (other
+  modules in the import graph pull further names like `playClick` out of it,
+  and a partial mock breaks their imports), and Vitest's browser lane can fail
+  a first run with `Failed to fetch dynamically imported module` when Vite
+  optimises a new dep (`react-router-dom`) mid-run — it passes on re-run once
+  the dep is cached. Frontend suite: 41 passed (was 39); lint unchanged at
+  0 errors / 18 pre-existing warnings.
 
 - **Plan 021 landed; the ES256 STOP condition was checked and cleared.** The
   live key set at `/auth/v1/.well-known/jwks.json` is a single

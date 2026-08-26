@@ -204,7 +204,11 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
 
   const questions = useMemo(() => (exam ? flattenQuestions(exam) : []), [exam])
 
-  const section = exam ? exam.sections[0] : null
+  // `?.` on sections too, not just a truthiness check on exam: getExam's
+  // 202 shape ({generating: true}) is truthy with no sections. The poll
+  // above early-returns on it today, so this is defence against that
+  // guard being moved, not a live bug -- see plans/022.
+  const section = exam?.sections?.[0] ?? null
 
   // Derived, not stored: recomputed every render (the tick heartbeat
   // above is what makes "every render" include "every second").

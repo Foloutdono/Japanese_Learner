@@ -77,14 +77,28 @@ export default function ExamResult({ session }) {
     getAttempt(examId, attemptId, session)
       .then(summary =>
         getExam(examId, session, { revision: summary.revision })
-          .then(exam => { if (alive) setLoaded({ exam, summary }) }))
+          .then(exam => {
+            if (!alive) return
+            // getExam returns {generating: true} on a 202 -- truthy, and
+            // with no `sections`. Storing it would crash the render below
+            // on exam.sections[0]. A result screen has nothing useful to
+            // show for a paper that isn't materialized yet, so this is
+            // the same "couldn't load" state as a failure.
+            if (exam?.generating) { setLoaded(false); return }
+            setLoaded({ exam, summary })
+          }))
       .catch(() => { if (alive) setLoaded(false) })
     return () => { alive = false }
   }, [loaded, attemptId, examId, session])
 
   const { summary, exam } = loaded || {}
-  const section = exam?.sections[0] ?? null
-  const sectionStats = section ? summary?.perSection[section.id] ?? null : null
+  // `?.` on sections and perSection too, not just on their parents: the
+  // `?.` before a bracket guards the object, never the index step, so
+  // `exam?.sections[0]` still throws when sections is undefined. That
+  // exact line white-screened this screen in production -- see
+  // plans/022-exam-generating-shape-crash.md.
+  const section = exam?.sections?.[0] ?? null
+  const sectionStats = section ? summary?.perSection?.[section.id] ?? null : null
   const metTarget = (sectionStats?.pct ?? 0) >= PRACTICE_TARGET_PCT
 
   // Grouped into the mondai they came from, so the result reads as
