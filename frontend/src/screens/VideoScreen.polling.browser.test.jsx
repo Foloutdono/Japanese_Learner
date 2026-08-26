@@ -54,14 +54,17 @@ function renderScreen() {
   )
 }
 
-async function startFromUrl(screen) {
-  const input = screen.container.querySelector('input[type="text"]')
-  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-  setter.call(input, 'https://youtu.be/AAAAAAAAAAA')
-  input.dispatchEvent(new Event('input', { bubbles: true }))
-  const load = [...screen.container.querySelectorAll('button')]
-    .find(b => b.className.includes('phrase-analyze-btn'))
-  load.click()
+// Start the way the screen is actually driven now: pick a subtitle
+// file. Loading captions from a URL was removed 2026-08-26 -- a server
+// cannot fetch them from YouTube -- so there is no "Load" button left to
+// click. See docs/adr/0003's amendment.
+async function startFromFile(screen) {
+  const input = screen.container.querySelector('input[type="file"]')
+  const dt = new DataTransfer()
+  const srt = ['1', '00:00:01,000 --> 00:00:04,000', '猫', ''].join('\n')
+  dt.items.add(new File([srt], 'x.srt', { type: 'text/plain' }))
+  input.files = dt.files
+  input.dispatchEvent(new Event('change', { bubbles: true }))
 }
 
 const settle = async (ms = 60) => new Promise(r => setTimeout(r, ms))
@@ -75,12 +78,11 @@ describe('VideoScreen polling', () => {
   it('does not crash while the session is still generating (HTTP 202)', async () => {
     // POST -> 202 with a session id, then a GET that resolves with the
     // 202 payload: no `sentences` key at all.
-    apiJson
-      .mockResolvedValueOnce({ sessionId: 1, status: 'generating' })
-      .mockResolvedValue({ status: 'generating' })
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockResolvedValue({ status: 'generating' })
 
     const screen = await renderScreen()
-    await startFromUrl(screen)
+    await startFromFile(screen)
     await settle(120)
 
     // Before the fix this threw during render and React unmounted the
@@ -91,8 +93,8 @@ describe('VideoScreen polling', () => {
   })
 
   it('renders the transcript once real sentences arrive', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
     apiJson
-      .mockResolvedValueOnce({ sessionId: 1, status: 'generating' })
       .mockResolvedValueOnce({ status: 'generating' })
       .mockResolvedValue({
         status: 'ready', source: 'upload', sourceRef: 'x.srt',
@@ -104,47 +106,27 @@ describe('VideoScreen polling', () => {
       })
 
     const screen = await renderScreen()
-    await startFromUrl(screen)
+    await startFromFile(screen)
     await settle(2000)
 
     expect(screen.container.textContent).toContain('猫が好き')
   })
 
-  it('shows the paste handoff when the fetch is blocked', async () => {
-    apiJson
-      .mockResolvedValueOnce({ sessionId: 1, status: 'generating' })
-      .mockRejectedValue(Object.assign(new Error('blocked'), {
-        status: 503,
-        body: { error: 'Could not fetch captions for this video (RequestBlocked).', isYoutube: true },
-      }))
+  it('surfaces a parse failure with the reason and a way back', async () => {
+    // The ONLY way to fail now: a file or paste we could not parse.
+    // Nothing is fetched, so nothing can be IP-blocked.
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockRejectedValue(Object.assign(new Error('bad'), {
+      status: 503,
+      body: { error: 'No cue timestamps found in VTT content' },
+    }))
 
     const screen = await renderScreen()
-    await startFromUrl(screen)
+    await startFromFile(screen)
     await settle(120)
 
-    // The failure state must offer the ingest that actually works,
-    // rather than dead-ending.
-    const textarea = screen.container.querySelector('textarea')
-    expect(textarea).not.toBeNull()
-
-    // And the URL must still be carried, so the learner retypes nothing.
-    // It lives in state rather than in a visible field here, so assert
-    // the behaviour that matters: submitting the pasted transcript posts
-    // the URL that was originally typed.
-    const setter = Object.getOwnPropertyDescriptor(
-      window.HTMLTextAreaElement.prototype, 'value').set
-    setter.call(textarea, '0:00 これはテストです。')
-    textarea.dispatchEvent(new Event('input', { bubbles: true }))
-
-    apiJson.mockClear()
-    apiJson.mockResolvedValue({ sessionId: 2, status: 'generating' })
-    ;[...screen.container.querySelectorAll('button')]
-      .find(b => b.className.includes('phrase-analyze-btn') && !b.disabled)
-      .click()
-    await settle(60)
-
-    const body = JSON.parse(apiJson.mock.calls[0][2].body)
-    expect(body.url).toContain('AAAAAAAAAAA')
-    expect(body.transcript).toContain('これはテストです')
+    expect(screen.container.textContent).toContain('No cue timestamps')
+    // And a control to get back to the setup form rather than a dead end.
+    expect(screen.container.querySelector('.phrase-analyze-btn')).not.toBeNull()
   })
 })

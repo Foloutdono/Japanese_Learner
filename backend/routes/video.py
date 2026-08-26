@@ -28,8 +28,7 @@ from core.auth import get_user_id
 from core.srs_instance import srs
 from study.analysis import analyze_local, attach_user_state
 from study.captions import (
-    parse_track, parse_pasted_transcript, parse_video_id, fetch_youtube_track,
-    CaptionParseError, CaptionsUnavailable,
+    parse_track, parse_pasted_transcript, parse_video_id, CaptionParseError,
 )
 from study.cue_sentences import sentences_from_cues
 from study.sentences import MAX_SENTENCES
@@ -75,9 +74,15 @@ def _ensure_video_schema() -> None:
                     error         TEXT,
                     sentences     JSONB,
                     truncated     INTEGER NOT NULL DEFAULT 0,
+                    video_id      TEXT,
                     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            # Additive, for databases created before video_id existed.
+            # A session's video is independent of where its captions came
+            # from now: you can upload an .srt AND name a video to play
+            # alongside it. NULL means "transcript only, no player".
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS video_id TEXT")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_video_sessions_user
                 ON video_sessions(user_id, created_at DESC)
@@ -134,22 +139,16 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
     see docs/adr/0001), and materializes the result. Owns the job row
     from 'running' through to either deleted (success) or 'failed'."""
     try:
-        if source == "upload":
-            cues = parse_track(content, filename or "upload.srt")
-        elif source == "paste":
-            # No network call at all -- see the route's comment on why
-            # this never falls back to the fetch.
+        # Both ingests are purely local -- no request leaves this server
+        # while building a Track. The YouTube fetch that used to be the
+        # third branch was removed 2026-08-26; see study/captions.py's
+        # module docstring for the measurements behind that.
+        if source == "paste":
             cues = parse_pasted_transcript(content or "")
         else:
-            cues = fetch_youtube_track(source_ref)
+            cues = parse_track(content, filename or "upload.srt")
     except CaptionParseError as e:
         logger.warning("Subtitle parse failed for session %s: %s", session_id, e)
-        _fail_session(session_id, str(e))
-        return
-    except CaptionsUnavailable as e:
-        # Expected in production (see the module docstring) -- warning,
-        # not error, so this does not train anyone to ignore the log.
-        logger.warning("YouTube caption fetch failed for session %s: %s", session_id, e)
         _fail_session(session_id, str(e))
         return
     except Exception as e:  # pragma: no cover - defensive
@@ -220,6 +219,9 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             raise HTTPException(status_code=400, detail="Subtitle file must be UTF-8 text")
         source = "upload"
         source_ref = upload.filename or "upload"
+        # Optional, and NEVER fetched from -- it only names a video to
+        # embed alongside the transcript. See the JSON branch below.
+        video_id = parse_video_id(form.get("url") or "")
         try:
             window_start = float(form.get("start", 0))
             window_end = float(form.get("end", 0))
@@ -231,26 +233,25 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             body = await request.json()
         except Exception:
             raise HTTPException(status_code=400, detail="Expected a JSON body or a multipart upload")
-        url = body.get("url")
-        if not url:
-            raise HTTPException(status_code=400, detail="url is required")
-        video_id = parse_video_id(url)
-        if video_id is None:
-            raise HTTPException(status_code=400, detail="Not a recognized YouTube URL")
-        # A pasted transcript takes over completely -- no request leaves
-        # this server on that path, which is the entire point (YouTube
-        # blocks datacenter IPs, see docs/adr/0003 and plans/025). It is
-        # deliberately NOT "try the fetch, fall back to the paste": the
-        # fetch's failure is the expected case in production, and paying
-        # for it on every request would be latency for nothing.
-        #
-        # `url` stays required even here: it carries the video id the
-        # player embeds, and the IFrame API runs in the learner's browser
-        # on their own IP, so playback works where the fetch does not.
+        # JSON means "a pasted transcript". The transcript is the
+        # REQUIRED part; `url` is optional and is used for exactly one
+        # thing -- naming a video to embed alongside it. Nothing is ever
+        # fetched from it. (Until 2026-08-26 a bare URL meant "fetch the
+        # captions yourself"; that path is gone, because a server cannot
+        # get them -- see study/captions.py's module docstring.)
         pasted = (body.get("transcript") or "").strip()
-        source = "paste" if pasted else "youtube"
-        content = pasted or None
-        source_ref = video_id
+        if not pasted:
+            raise HTTPException(
+                status_code=400,
+                detail="A pasted transcript is required. Upload a subtitle file instead if you have one.",
+            )
+        url = body.get("url") or ""
+        video_id = parse_video_id(url)
+        if url and video_id is None:
+            raise HTTPException(status_code=400, detail="Not a recognized YouTube URL")
+        source = "paste"
+        content = pasted
+        source_ref = video_id or "paste"
         filename = None
         try:
             window_start = float(body.get("start", 0))
@@ -271,11 +272,11 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             cur.execute(
                 """
                 INSERT INTO video_sessions
-                    (user_id, source, source_ref, window_start, window_end, window_capped)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                    (user_id, source, source_ref, window_start, window_end, window_capped, video_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
-                (user_id, source, source_ref, window_start, window_end, window_capped),
+                (user_id, source, source_ref, window_start, window_end, window_capped, video_id),
             )
             (session_id,) = cur.fetchone()
             cur.execute(
@@ -300,7 +301,7 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
             cur.execute(
                 """
                 SELECT source, source_ref, window_start, window_end, window_capped,
-                       status, error, sentences, truncated, created_at
+                       status, error, sentences, truncated, created_at, video_id
                   FROM video_sessions WHERE id = %s AND user_id = %s
                 """,
                 (session_id, user_id),
@@ -311,12 +312,12 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
     if row is None:
         return None
     (source, source_ref, window_start, window_end, window_capped,
-     status, error, sentences, truncated, created_at) = row
+     status, error, sentences, truncated, created_at, video_id) = row
     return {
         "source": source, "source_ref": source_ref,
         "window_start": window_start, "window_end": window_end, "window_capped": window_capped,
         "status": status, "error": error, "sentences": sentences, "truncated": truncated,
-        "created_at": created_at,
+        "created_at": created_at, "video_id": video_id,
     }
 
 
@@ -393,6 +394,9 @@ def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
         "status": "ready",
         "source": session["source"],
         "sourceRef": session["source_ref"],
+        # None when there is no video to play -- a subtitle file studied
+        # on its own is a perfectly normal session.
+        "videoId": session["video_id"],
         "windowStart": session["window_start"],
         "windowEnd": session["window_end"],
         "windowCapped": session["window_capped"],

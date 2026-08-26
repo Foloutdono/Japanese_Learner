@@ -4,7 +4,6 @@
 import time
 
 import routes.video as video_module
-from study.captions import CaptionsUnavailable
 from core.db import db_conn
 
 _SRT = (
@@ -23,12 +22,20 @@ def _poll_until_settled(client, session_id, timeout=10.0):
     raise AssertionError(f"session {session_id} never left 'generating' within {timeout}s")
 
 
-def test_upload_produces_a_ready_transcript_with_no_youtube_call(client, monkeypatch):
-    def _boom(video_id):
-        raise AssertionError("fetch_youtube_track must not be called for an upload")
+def test_no_caption_fetch_exists_at_all() -> None:
+    """The YouTube caption fetch was removed 2026-08-26: a server cannot
+    get captions from YouTube (datacenter IPs are blocked AND the
+    endpoint needs a player-generated token). Both remaining ingests are
+    purely local. This guards against it being reintroduced, since a
+    reintroduced fetch would look like it works in dev and fail only in
+    production -- which is exactly how it wasted a release cycle."""
+    import study.captions as captions_module
+    assert not hasattr(captions_module, "fetch_youtube_track")
+    assert not hasattr(video_module, "fetch_youtube_track")
+    assert not hasattr(captions_module, "_PROXY_CONFIG")
 
-    monkeypatch.setattr(video_module, "fetch_youtube_track", _boom)
 
+def test_upload_produces_a_ready_transcript(client):
     post_resp = client.post(
         "/api/video/session",
         files={"file": ("test.srt", _SRT, "text/plain")},
@@ -74,36 +81,25 @@ def test_window_over_five_minutes_is_capped_and_reported(client):
     assert final.json()["windowEnd"] == 300.0
 
 
-def test_youtube_url_creates_a_session_and_a_fetch_failure_names_the_upload_path(client, monkeypatch):
-    def _fail(video_id):
-        raise CaptionsUnavailable(
-            "Could not fetch captions for this video (RequestBlocked). "
-            "Upload a subtitle file instead."
-        )
-
-    monkeypatch.setattr(video_module, "fetch_youtube_track", _fail)
-
-    post_resp = client.post(
+def test_a_bare_url_with_no_transcript_is_rejected(client):
+    """A URL alone used to mean "fetch the captions yourself". It cannot
+    any more, so asking for that is a 400 with a message naming what to
+    do instead -- not a session that fails minutes later."""
+    response = client.post(
         "/api/video/session",
         json={"url": "https://youtu.be/dQw4w9WgXcQ", "start": 0, "end": 30},
     )
-    assert post_resp.status_code == 202
-    session_id = post_resp.json()["sessionId"]
-
-    final = _poll_until_settled(client, session_id)
-    assert final.status_code == 503
-    body = final.json()
-    assert body["status"] == "failed"
-    assert "upload" in body["error"].lower()
-    assert body["isYoutube"] is True
-    # Not a raw stack trace -- the CaptionsUnavailable message verbatim.
-    assert "Traceback" not in body["error"]
+    assert response.status_code == 400
+    assert "transcript" in response.json()["detail"].lower()
 
 
 def test_non_youtube_url_returns_400(client):
+    # Supplied but unrecognizable -- worth rejecting, since the learner
+    # clearly meant to name a video.
     response = client.post(
         "/api/video/session",
-        json={"url": "https://example.com/not-youtube", "start": 0, "end": 30},
+        json={"url": "https://example.com/not-youtube",
+              "transcript": "0:00 これはテストです。", "start": 0, "end": 30},
     )
     assert response.status_code == 400
 
@@ -192,15 +188,10 @@ def test_uses_a_daemon_thread_not_fastapis_background_task_helper() -> None:
 _PASTE = "0:00 犬が走っています。\n0:04 空はとても青いですね。"
 
 
-def test_pasted_transcript_never_calls_youtube(client, monkeypatch):
+def test_pasted_transcript_never_calls_youtube(client):
     """The single most important test in plan 025: the paste path must
     not touch the network, because the network is exactly what fails in
     production."""
-    def _boom(video_id):
-        raise AssertionError("fetch_youtube_track must not be called for a paste")
-
-    monkeypatch.setattr(video_module, "fetch_youtube_track", _boom)
-
     response = client.post(
         "/api/video/session",
         json={"url": "https://youtu.be/abcdefghijk", "transcript": _PASTE,
@@ -215,11 +206,9 @@ def test_pasted_transcript_never_calls_youtube(client, monkeypatch):
     assert len(body["sentences"]) >= 1
 
 
-def test_pasted_transcript_reports_paste_source_and_keeps_the_video_id(client, monkeypatch):
+def test_pasted_transcript_reports_paste_source_and_keeps_the_video_id(client):
     # source_ref must stay the video id: VideoScreen embeds the player
     # from it, and playback is not blocked even though the fetch is.
-    monkeypatch.setattr(video_module, "fetch_youtube_track",
-                        lambda v: (_ for _ in ()).throw(AssertionError("no fetch")))
     response = client.post(
         "/api/video/session",
         json={"url": "https://www.youtube.com/watch?v=abcdefghijk",
@@ -228,20 +217,25 @@ def test_pasted_transcript_reports_paste_source_and_keeps_the_video_id(client, m
     final = _poll_until_settled(client, response.json()["sessionId"])
     body = final.json()
     assert body["source"] == "paste"
-    assert body["sourceRef"] == "abcdefghijk"
+    assert body["videoId"] == "abcdefghijk"
 
 
-def test_transcript_without_a_url_is_rejected(client):
+def test_transcript_without_a_url_is_accepted(client):
+    """Inverted 2026-08-26. `url` used to be required because it was the
+    caption SOURCE. It is now only the optional name of a video to embed,
+    so a transcript on its own is a perfectly normal session -- it just
+    has no player."""
     response = client.post(
         "/api/video/session",
         json={"transcript": "0:00 これはテストです。", "start": 0, "end": 60},
     )
-    assert response.status_code == 400
+    assert response.status_code == 202
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    assert final.status_code == 200
+    assert final.json()["videoId"] is None
 
 
-def test_unparseable_transcript_fails_the_session_with_a_reason(client, monkeypatch):
-    monkeypatch.setattr(video_module, "fetch_youtube_track",
-                        lambda v: (_ for _ in ()).throw(AssertionError("no fetch")))
+def test_unparseable_transcript_fails_the_session_with_a_reason(client):
     response = client.post(
         "/api/video/session",
         json={"url": "https://youtu.be/abcdefghijk",
@@ -253,9 +247,7 @@ def test_unparseable_transcript_fails_the_session_with_a_reason(client, monkeypa
     assert "0:18" in final.json()["error"]
 
 
-def test_window_cap_applies_to_the_paste_path_too(client, monkeypatch):
-    monkeypatch.setattr(video_module, "fetch_youtube_track",
-                        lambda v: (_ for _ in ()).throw(AssertionError("no fetch")))
+def test_window_cap_applies_to_the_paste_path_too(client):
     response = client.post(
         "/api/video/session",
         json={"url": "https://youtu.be/abcdefghijk", "transcript": _PASTE,
@@ -357,3 +349,31 @@ def test_a_running_job_still_reports_generating(client, monkeypatch):
     result = client.get(f"/api/video/session/{session_id}")
     assert result.status_code == 202
     assert result.json()["status"] == "generating"
+
+
+# ── The video is now independent of the captions ──────────────────
+# Until 2026-08-26 a session's video came from the same URL its captions
+# were fetched from, so `source` implied whether there was a player. The
+# fetch is gone; a video id is just an optional extra on any session.
+def test_upload_can_name_a_video_to_play_alongside_it(client):
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("test.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "60", "url": "https://youtu.be/dQw4w9WgXcQ"},
+    )
+    assert response.status_code == 202
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    body = final.json()
+    assert body["source"] == "upload"
+    assert body["sourceRef"] == "test.srt"    # still names the FILE
+    assert body["videoId"] == "dQw4w9WgXcQ"   # and separately the video
+
+
+def test_upload_without_a_url_has_no_video(client):
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("test.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "60"},
+    )
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    assert final.json()["videoId"] is None

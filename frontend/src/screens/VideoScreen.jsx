@@ -56,7 +56,6 @@ export default function VideoScreen({ session }) {
   const [windowEnd, setWindowEnd] = useState('180')
   const [transcript, setTranscript] = useState('')
   const [error, setError] = useState(null)
-  const [isYoutubeError, setIsYoutubeError] = useState(false)
 
   const [sessionId, setSessionId] = useState(null)
   const [sessionInfo, setSessionInfo] = useState(null) // { source, sourceRef, windowCapped, truncated }
@@ -67,29 +66,15 @@ export default function VideoScreen({ session }) {
   const closeDetail = useCallback(() => setDetail(null), [])
 
   // ── Session creation ──────────────────────────────────────
-  async function startFromUrl() {
-    if (!url.trim()) return
-    setStage('loading')
-    setError(null)
-    try {
-      const data = await apiJson('/api/video/session', session, {
-        method: 'POST',
-        body: JSON.stringify({ url: url.trim(), start: Number(windowStart), end: Number(windowEnd) }),
-      })
-      setSessionId(data.sessionId)
-    } catch (e) {
-      setStage('setup')
-      setError(e.message || t.captionsUnavailable)
-    }
-  }
-
-  // The ingest that cannot be IP-blocked. YouTube blocks datacenter IPs
-  // for its caption endpoints and this backend deploys to Render, so the
-  // URL path above fails in production for reasons nothing here can fix
-  // -- but the learner's own browser already rendered the transcript, so
-  // pasting it works every time. See plans/025 and docs/adr/0003.
+  // There is no "load from URL" any more. A server cannot get captions
+  // from YouTube -- datacenter IPs are blocked AND the endpoint needs a
+  // token YouTube's own player generates -- so both ingests below are
+  // local, and `url` is only ever the optional name of a video to play
+  // alongside them. See docs/adr/0003's 2026-08-26 amendment.
+  // Paste ingest: the learner's own browser already rendered the
+  // transcript, so this needs no network call from the server.
   async function startFromTranscript() {
-    if (!url.trim() || transcript.trim().length < MIN_TRANSCRIPT_CHARS) {
+    if (transcript.trim().length < MIN_TRANSCRIPT_CHARS) {
       setError(t.transcriptTooShort)
       return
     }
@@ -99,7 +84,10 @@ export default function VideoScreen({ session }) {
       const data = await apiJson('/api/video/session', session, {
         method: 'POST',
         body: JSON.stringify({
-          url: url.trim(), transcript: transcript.trim(),
+          transcript: transcript.trim(),
+          // Optional: omitted entirely when blank, so a transcript can
+          // be studied on its own with no player.
+          ...(url.trim() ? { url: url.trim() } : {}),
           start: Number(windowStart), end: Number(windowEnd),
         }),
       })
@@ -122,6 +110,9 @@ export default function VideoScreen({ session }) {
       formData.append('file', file)
       formData.append('start', String(Number(windowStart)))
       formData.append('end', String(Number(windowEnd)))
+      // Optional, and never fetched from -- it just tells the player
+      // which video to embed next to the subtitles.
+      if (url.trim()) formData.append('url', url.trim())
       const data = await apiUpload('/api/video/session', session, formData)
       setSessionId(data.sessionId)
     } catch (e) {
@@ -157,7 +148,7 @@ export default function VideoScreen({ session }) {
           return
         }
         setSessionInfo({
-          source: data.source, sourceRef: data.sourceRef,
+          source: data.source, sourceRef: data.sourceRef, videoId: data.videoId,
           windowCapped: data.windowCapped, truncated: data.truncated,
         })
         setSentences(data.sentences)
@@ -166,7 +157,6 @@ export default function VideoScreen({ session }) {
         if (cancelled) return
         setStage('failed')
         setError((e.body && e.body.error) || e.message)
-        setIsYoutubeError(Boolean(e.body && e.body.isYoutube))
       }
     }
     poll()
@@ -265,7 +255,7 @@ export default function VideoScreen({ session }) {
         <div className="phrase-input-actions">
           <button
             onClick={startFromTranscript}
-            disabled={!url.trim() || !transcript.trim()}
+            disabled={!transcript.trim()}
             className="phrase-analyze-btn"
           >
             {t.useTranscript}
@@ -277,6 +267,16 @@ export default function VideoScreen({ session }) {
 
   const active = sentences?.[activeIndex]
   const parsedVideoId = videoIdFrom(url)
+  // Shown so "how do I get a JAPANESE .srt" is answered on the screen
+  // rather than being left as an exercise. --sub-langs ja is the whole
+  // point: it is what stops YouTube handing over an English translation.
+  const ytdlpTarget = parsedVideoId ? `https://youtu.be/${parsedVideoId}` : '<video URL>'
+  // One line, deliberately: it is meant to be copied and pasted, and a
+  // backslash-continued command breaks when pasted into PowerShell.
+  const ytdlpCommand =
+    'yt-dlp --skip-download --write-subs --write-auto-subs ' +
+    `--sub-langs ja --convert-subs srt "${ytdlpTarget}"`
+  const ytdlpListCommand = `yt-dlp --list-subs "${ytdlpTarget}"`
 
   return (
     <div className="screen">
@@ -286,7 +286,31 @@ export default function VideoScreen({ session }) {
 
         {stage === 'setup' && (
           <div className="card phrase-input-card">
-            <label className="video-setup__label">{t.pasteVideoUrl ?? 'Paste a YouTube link'}</label>
+
+            {/* The subtitle file is the primary ingest and is listed
+                first on purpose. Fetching captions from a URL was removed
+                2026-08-26 -- a server cannot get them from YouTube at all
+                (see docs/adr/0003's amendment), and the paste path gave
+                learners English rather than Japanese, because YouTube's
+                transcript panel defaults to a translation. A file names
+                its own language, so it cannot go wrong that way. */}
+            <label className="video-setup__label">{t.uploadSubtitles}</label>
+            <input
+              type="file"
+              accept=".srt,.vtt,.ass,.ssa"
+              onChange={e => startFromFile(e.target.files?.[0])}
+            />
+
+            <details className="video-setup__how">
+              <summary>{t.howToGetSubs}</summary>
+              <div className="video-setup__how-lead">{t.howToGetSubsLead}</div>
+              <pre className="video-setup__cmd">{ytdlpCommand}</pre>
+              <div className="video-setup__how-lead">{t.howToGetSubsList}</div>
+              <pre className="video-setup__cmd">{ytdlpListCommand}</pre>
+              <div className="video-setup__how-lead">{t.howToGetSubsNote}</div>
+            </details>
+
+            <label className="video-setup__label">{t.videoUrlOptional}</label>
             <input
               type="text"
               value={url}
@@ -294,6 +318,8 @@ export default function VideoScreen({ session }) {
               placeholder="https://youtu.be/…"
               className="phrase-textarea"
             />
+            <div className="video-setup__hint">{t.videoUrlOptionalHint}</div>
+
             <div className="video-setup__window-row">
               <label>
                 {t.windowStart ?? 'Start (seconds)'}
@@ -304,25 +330,14 @@ export default function VideoScreen({ session }) {
                 <input type="number" min="0" value={windowEnd} onChange={e => setWindowEnd(e.target.value)} />
               </label>
             </div>
-            <div className="phrase-input-actions">
-              <button onClick={startFromUrl} disabled={!url.trim()} className="phrase-analyze-btn">
-                {t.loadVideo ?? 'Load'}
-              </button>
-            </div>
 
-            {/* Paste sits directly under the URL box, above upload, on
-                purpose: it is the path that actually works in production
-                (see plans/025), so the ordering says so. */}
-            {pastePanel()}
-
-            <label className="video-setup__label video-setup__label--upload">
-              {t.uploadSubtitles ?? 'Or upload a subtitle file'}
-            </label>
-            <input
-              type="file"
-              accept=".srt,.vtt,.ass,.ssa"
-              onChange={e => startFromFile(e.target.files?.[0])}
-            />
+            {/* Paste is kept as a second option -- it needs no tooling at
+                all -- but demoted below the file, because it is the one
+                that hands you the wrong language. */}
+            <details className="video-setup__paste">
+              <summary>{t.pasteTranscript}</summary>
+              {pastePanel()}
+            </details>
 
             {error && <div className="card phrase-error-card">{error}</div>}
           </div>
@@ -332,38 +347,19 @@ export default function VideoScreen({ session }) {
           <div className="card phrase-input-card">{t.analyzing ?? 'Analyzing the subtitles…'}</div>
         )}
 
-        {/* Not a dead end. The server cannot fetch captions from a
-            datacenter IP -- that is about WHERE the request came from,
-            not about the video -- and the paste ingest right here works
-            every time. The URL is deliberately NOT cleared, so the
-            learner retypes nothing. See plans/026. */}
+        {/* The only way to fail now is a subtitle file or a paste we
+            could not parse -- nothing is fetched, so nothing can be
+            blocked. The message is the parser's own, which says what was
+            actually wrong with the input. */}
         {stage === 'failed' && (
           <div className="card phrase-input-card">
-            <div className="video-failed__lead">
-              {isYoutubeError ? t.captionsServerBlocked : t.captionsUnavailable}
-            </div>
+            <div className="video-failed__lead">{t.captionsUnavailable}</div>
             {error && <div className="video-failed__detail">{error}</div>}
-
-            {isYoutubeError ? (
-              <>
-                <div className="video-failed__keep-url">{t.captionsTryPaste}</div>
-                {pastePanel()}
-                <label className="video-setup__label video-setup__label--upload">
-                  {t.uploadSubtitles}
-                </label>
-                <input
-                  type="file"
-                  accept=".srt,.vtt,.ass,.ssa"
-                  onChange={e => startFromFile(e.target.files?.[0])}
-                />
-              </>
-            ) : (
-              <div className="phrase-input-actions">
-                <button onClick={() => setStage('setup')} className="phrase-analyze-btn">
-                  {t.back ?? '←'}
-                </button>
-              </div>
-            )}
+            <div className="phrase-input-actions">
+              <button onClick={() => setStage('setup')} className="phrase-analyze-btn">
+                {t.back ?? '←'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -385,8 +381,8 @@ export default function VideoScreen({ session }) {
                 in the learner's browser on their own IP -- only the
                 server-side caption FETCH is datacenter-blocked, never
                 playback. 'upload' is the one source with no video. */}
-            {(sessionInfo?.source === 'youtube' || sessionInfo?.source === 'paste') && (
-              <VideoPlayer ref={playerRef} videoId={sessionInfo.sourceRef} onTimeUpdate={handleTimeUpdate} />
+            {sessionInfo?.videoId && (
+              <VideoPlayer ref={playerRef} videoId={sessionInfo.videoId} onTimeUpdate={handleTimeUpdate} />
             )}
 
             {active && (

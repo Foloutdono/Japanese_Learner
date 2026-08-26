@@ -9809,6 +9809,42 @@ textarea:focus-visible {
 
 .video-setup__how-steps li { margin: 2px 0; }
 
+/* File-first video setup (2026-08-26). The yt-dlp help and the paste
+   fallback are <details>, so the default view is just "pick a file". */
+.video-setup__how,
+.video-setup__paste {
+  margin: 10px 0;
+  border: 1px solid var(--line, rgba(128,128,128,0.3));
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.video-setup__how > summary,
+.video-setup__paste > summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.video-setup__cmd {
+  margin: 6px 0 10px;
+  padding: 8px 10px;
+  border-radius: 5px;
+  background: var(--surface-2, rgba(128,128,128,0.12));
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  /* A long command must scroll inside its own box rather than widening
+     the page. */
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.video-setup__hint {
+  margin: 2px 0 8px;
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+
 /* The failure state is a handoff, not a dead end (plans/026). */
 .video-failed__lead {
   font-weight: 600;

@@ -227,7 +227,7 @@ ON deck_cards(deck_id, user_id);
 CREATE TABLE video_sessions (
     id            BIGSERIAL PRIMARY KEY,
     user_id       TEXT NOT NULL,
-    source        TEXT NOT NULL,               -- 'youtube' | 'upload'
+    source        TEXT NOT NULL,               -- 'upload' | 'paste'
     source_ref    TEXT NOT NULL,                -- video id, or the uploaded filename
     window_start  DOUBLE PRECISION NOT NULL,
     window_end    DOUBLE PRECISION NOT NULL,
@@ -236,6 +236,10 @@ CREATE TABLE video_sessions (
     error         TEXT,
     sentences     JSONB,
     truncated     INTEGER NOT NULL DEFAULT 0,
+    -- Optional YouTube id to embed alongside the transcript. Independent
+    -- of `source`: an uploaded .srt can name a video to play too. NULL
+    -- means transcript-only, with no player.
+    video_id      TEXT,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

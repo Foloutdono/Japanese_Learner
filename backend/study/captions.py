@@ -1,22 +1,27 @@
-# ── Cue ingest: subtitle files and YouTube ────────────────────────
+# ── Cue ingest: subtitle files and pasted transcripts ─────────────
 # A Track is an ordered list of Cues (start, end, text). This module's
 # whole job is producing one, from either source, so that everything
 # downstream (study/cue_sentences.py, routes/video.py) can treat them
 # identically -- see docs/adr/0003-source-agnostic-caption-pipeline.md.
 #
-# The two ingest functions differ sharply in reliability: parse_track
-# (a file the learner uploaded) always works. fetch_youtube_track hits
-# a third party that actively blocks datacenter IPs, and is EXPECTED to
-# fail in production. Neither is a fallback for the other; they are two
-# equally first-class ways to get a Track.
+# BOTH ingests are purely local: a file the learner uploaded, or text
+# they pasted. Neither makes a network call, so both work identically
+# from a laptop and from a datacenter.
+#
+# There used to be a third -- fetching YouTube's own caption track --
+# removed 2026-08-26 after it proved unusable in production. YouTube
+# blocks datacenter IPs AND requires a proof-of-origin token its own
+# player generates, so a server cannot get captions for free by any
+# route. Measured, not assumed: the timedtext endpoint answers a
+# third-party browser with 200 and an EMPTY body, and answers Render
+# with RequestBlocked. See docs/adr/0003's 2026-08-26 amendment.
+#
+# parse_video_id survives because a URL is still useful for ONE thing:
+# naming which video to embed in the player. The player runs in the
+# learner's own browser and was never blocked.
 import logging
 import re
 
-import os
-
-from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api._errors import YouTubeTranscriptApiException, NoTranscriptFound
-from youtube_transcript_api.proxies import GenericProxyConfig, WebshareProxyConfig
 
 logger = logging.getLogger(__name__)
 
@@ -25,14 +30,6 @@ class CaptionParseError(Exception):
     """A subtitle file could not be parsed. Carries what failed, since
     the caller (routes/video.py) shows this to the learner rather than
     guessing at what went wrong."""
-
-
-class CaptionsUnavailable(Exception):
-    """The YouTube fetch failed, for ANY reason -- blocked IP, no
-    Japanese track, disabled captions, a bad video id. Deliberately one
-    exception type rather than several: every case has the exact same
-    remedy (upload the file instead), so the caller does not need to
-    tell them apart."""
 
 
 # ── Markup stripping ──────────────────────────────────────────────
@@ -241,42 +238,8 @@ def parse_track(content: str, filename: str) -> list[dict]:
 # YouTube blocks datacenter IPs, so from Render every caption fetch
 # fails -- see the module docstring and plans/026. A residential proxy
 # is the only thing that changes that.
-#
-# It is deliberately OPT-IN. This app must deploy and work with no proxy
-# at all (the upload and paste ingests never need one), and nobody
-# should be surprised by outbound traffic through a third party they did
-# not configure. Two ways, checked in this order:
-#
-#   WEBSHARE_PROXY_USERNAME + WEBSHARE_PROXY_PASSWORD
-#       -> WebshareProxyConfig, the library's own supported path
-#   YOUTUBE_HTTP_PROXY [+ YOUTUBE_HTTPS_PROXY]
-#       -> GenericProxyConfig, for any other provider
-#
-# Neither set: no proxy, and fetch_youtube_track behaves exactly as it
-# always has. Built once at import rather than per request, and the
-# credentials are never logged.
-def _proxy_config():
-    username = os.environ.get("WEBSHARE_PROXY_USERNAME")
-    password = os.environ.get("WEBSHARE_PROXY_PASSWORD")
-    if username and password:
-        return WebshareProxyConfig(proxy_username=username, proxy_password=password)
 
-    http_url = os.environ.get("YOUTUBE_HTTP_PROXY")
-    https_url = os.environ.get("YOUTUBE_HTTPS_PROXY") or http_url
-    if http_url:
-        return GenericProxyConfig(http_url=http_url, https_url=https_url)
-
-    return None
-
-
-_PROXY_CONFIG = _proxy_config()
-
-if _PROXY_CONFIG is not None:
-    # Type name only -- never the credentials.
-    logger.info("YouTube caption fetches will use %s", type(_PROXY_CONFIG).__name__)
-
-
-# ── YouTube fetch (best-effort) ────────────────────────────────
+# ── YouTube URL parsing (for the PLAYER, not for fetching) ────────
 # `.search`, not `.match`, so m.youtube.com / music.youtube.com and a
 # trailing ?si=... or &t=90s all work without their own patterns. The
 # {11} id length is what keeps these from matching arbitrary paths.
@@ -302,49 +265,6 @@ def parse_video_id(url: str) -> str | None:
         if match:
             return match.group(1)
     return None
-
-
-def fetch_youtube_track(video_id: str) -> list[dict]:
-    """Cues from YouTube's own Japanese caption track.
-
-    Best-effort ONLY -- see the module docstring and
-    docs/adr/0003-source-agnostic-caption-pipeline.md. Expected to raise
-    CaptionsUnavailable from a datacenter IP (Render, where this deploys)
-    even for a video that genuinely has Japanese captions. Every failure
-    mode collapses to the same one exception type, because the remedy is
-    always the same: upload the file instead.
-    """
-    try:
-        transcript_list = YouTubeTranscriptApi(proxy_config=_PROXY_CONFIG).list(video_id)
-        # A manually created track is more likely to be punctuated and
-        # accurate than an auto-generated one; prefer it when both exist.
-        try:
-            transcript = transcript_list.find_manually_created_transcript(["ja"])
-        except NoTranscriptFound:
-            transcript = transcript_list.find_generated_transcript(["ja"])
-        fetched = transcript.fetch()
-    except YouTubeTranscriptApiException as e:
-        # Not an error from this backend's point of view -- from Render,
-        # this is the EXPECTED case (IpBlocked/RequestBlocked), not an
-        # incident. Logging it as an error would train everyone to
-        # ignore the log the one time it's something else.
-        logger.warning("YouTube caption fetch failed for %s: %s", video_id, e)
-        # Names the cause but NOT the remedy: the UI offers paste and
-        # upload side by side now (plans/025, plans/026), and this
-        # message used to prescribe upload alone -- which then sat
-        # directly above copy recommending paste.
-        raise CaptionsUnavailable(
-            f"Could not fetch captions for this video ({type(e).__name__})."
-        ) from e
-
-    cues = [
-        {"start": s.start, "end": s.start + s.duration, "text": _strip_markup(s.text)}
-        for s in fetched
-        if _strip_markup(s.text)
-    ]
-    if not cues:
-        raise CaptionsUnavailable("The fetched Japanese track had no usable text.")
-    return _merge_duplicate_consecutive(cues)
 
 
 # ── Pasted transcript (YouTube's own "Show transcript" panel) ──────

@@ -115,3 +115,50 @@ which is precisely why nothing depends on it.
 session to get past the block. It attaches a real person's logged-in identity
 to automated fetches, is against the terms in a way pasting is not, and breaks
 constantly.
+
+## Amendment, 2026-08-26 (second): the YouTube fetch is removed
+
+The URL ingest is gone. Not deprioritised — deleted, along with
+`fetch_youtube_track`, the optional proxy, and the `youtube-transcript-api`
+dependency.
+
+**Why: a server cannot get YouTube captions for free, by any route.** Two
+independent walls, both measured rather than assumed:
+
+1. **Datacenter IPs are blocked.** From Render, every fetch returns
+   `RequestBlocked`. The same call from a residential IP succeeds.
+2. **The endpoint needs a player-generated token.** This one is new, and it
+   invalidates the reasoning in the *first* amendment above. That amendment said
+   a browser-side fetch was impossible because of CORS. **CORS is no longer the
+   blocker** — measured from a third-party origin, `api/timedtext` answers with
+   `type: "cors"` and HTTP 200. But the body is **empty**, for every variant
+   tried (signed URL, unsigned, `fmt=json3`, `fmt=srv3`). YouTube now requires a
+   proof-of-origin token its own player mints on the page, which a third-party
+   site cannot produce.
+
+So the wall moved rather than fell, and the conclusion survives for a different
+reason than the one previously recorded. Anyone re-deriving "we could just fetch
+it from the browser now that CORS is open" will get 200s and nothing in them.
+
+**The remaining ingests are both purely local**: a subtitle file, or a pasted
+transcript. Neither makes a network call, so both behave identically on a laptop
+and on Render — which is what the source-agnostic decision was for, and it is why
+removing an entire ingest touched nothing downstream of `Cue`.
+
+**A URL is still accepted, for one thing only: naming a video to embed.** The
+IFrame player runs in the learner's own browser and was never blocked. That is
+now modelled honestly — `video_sessions.video_id` is its own nullable column,
+independent of `source`, so an uploaded `.srt` can name a video to play beside
+it, and a transcript with no video is a normal session with no player.
+
+**The file is now the primary path, and the UI says so.** Two reasons beyond
+reliability: a subtitle file names its own language, whereas YouTube's transcript
+panel defaults to a *translation* — learners kept getting English for Japanese
+videos — and the panel is genuinely hard to find. The screen now shows the
+`yt-dlp` command (with `--sub-langs ja`, which is the part that prevents an
+English translation) so obtaining a Japanese `.srt` is answered in place rather
+than left as an exercise.
+
+**Rejected, restated:** proxies (cost, and an arms race nothing should depend
+on), YouTube cookies (attaches a real identity to automated fetches, against the
+terms in a way pasting is not), and self-hosted ASR.
