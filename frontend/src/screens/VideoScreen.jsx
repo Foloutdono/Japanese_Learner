@@ -135,10 +135,27 @@ export default function VideoScreen({ session }) {
     if (sessionId == null) return
     let cancelled = false
 
+    let timer = null
+
     async function poll() {
       try {
         const data = await apiJson(`/api/video/session/${sessionId}`, session)
         if (cancelled) return
+        // "Still generating" arrives as HTTP 202 -- which is a SUCCESS
+        // status, so apiJson RESOLVES with {status: 'generating'} and
+        // the catch below never sees it. This used to be handled as
+        // `catch (e) { if (e.status === 202) ... }`, which was dead code:
+        // the happy path ran instead, setSentences(undefined) landed,
+        // and the next render threw
+        // "Cannot read properties of undefined (reading '0')" on
+        // sentences[activeIndex]. It never showed on an upload (the
+        // worker finishes in milliseconds, so the FIRST poll is already
+        // 200) and always showed on a YouTube URL, where the fetch takes
+        // seconds. Discriminate on the payload, not on a throw.
+        if (data.status === 'generating' || !Array.isArray(data.sentences)) {
+          timer = setTimeout(poll, POLL_MS)
+          return
+        }
         setSessionInfo({
           source: data.source, sourceRef: data.sourceRef,
           windowCapped: data.windowCapped, truncated: data.truncated,
@@ -147,17 +164,13 @@ export default function VideoScreen({ session }) {
         setStage('ready')
       } catch (e) {
         if (cancelled) return
-        if (e.status === 202) {
-          setTimeout(poll, POLL_MS)
-          return
-        }
         setStage('failed')
         setError((e.body && e.body.error) || e.message)
         setIsYoutubeError(Boolean(e.body && e.body.isYoutube))
       }
     }
     poll()
-    return () => { cancelled = true }
+    return () => { cancelled = true; if (timer) clearTimeout(timer) }
   }, [sessionId, session])
 
   // ── Playback sync ─────────────────────────────────────────
@@ -262,7 +275,7 @@ export default function VideoScreen({ session }) {
     )
   }
 
-  const active = sentences[activeIndex]
+  const active = sentences?.[activeIndex]
   const parsedVideoId = videoIdFrom(url)
 
   return (

@@ -329,9 +329,12 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
         # incident. Logging it as an error would train everyone to
         # ignore the log the one time it's something else.
         logger.warning("YouTube caption fetch failed for %s: %s", video_id, e)
+        # Names the cause but NOT the remedy: the UI offers paste and
+        # upload side by side now (plans/025, plans/026), and this
+        # message used to prescribe upload alone -- which then sat
+        # directly above copy recommending paste.
         raise CaptionsUnavailable(
-            f"Could not fetch captions for this video ({type(e).__name__}). "
-            "Upload a subtitle file instead."
+            f"Could not fetch captions for this video ({type(e).__name__})."
         ) from e
 
     cues = [

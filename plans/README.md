@@ -306,6 +306,32 @@ and expensive after:
 
 ## Execution notes (added as each plan lands)
 
+- **The YouTube path still white-screened after the wave shipped, and the cause
+  was in plan 019's original poll loop, not in anything 025/026 changed.**
+  Reported as *"the youtube feature still doesn't work"* with the familiar
+  `Cannot read properties of undefined (reading '0')`.
+  "Still generating" arrives as **HTTP 202 — a SUCCESS status** — so `apiJson`
+  (which throws only on non-2xx) *resolves* with `{status: 'generating'}`. The
+  poll's `catch (e) { if (e.status === 202) ... }` was therefore **dead code**:
+  the happy path ran on a 202 instead, `setSentences(undefined)` landed,
+  `setStage('ready')` followed, and the next render threw on
+  `sentences[activeIndex]` — with `activeIndex` 0, literally `undefined[0]`.
+  **The asymmetry is why it survived every test and reached production**: a
+  subtitle upload's worker finishes in milliseconds, so the first poll is
+  already 200 and the 202 branch never runs. A YouTube fetch takes seconds, so
+  it runs every time. Every automated and manual check in plans 019/025/026 used
+  uploads or already-complete sessions.
+  Fixed by discriminating on the payload rather than on a throw, plus
+  `sentences?.[activeIndex]` as defence in depth and a `clearTimeout` the poll
+  was leaking. Pinned by `VideoScreen.polling.browser.test.jsx`, verified to
+  reproduce the exact production error against the old code (2 of 3 tests fail
+  with `reading '0'`).
+  Also stopped `fetch_youtube_track`'s message prescribing "Upload a subtitle
+  file instead" — it predates the paste ingest and was rendering directly above
+  copy recommending paste.
+  Lesson worth keeping: **a 202 is not an error.** Any `catch` branch inspecting
+  a 2xx status is unreachable. Frontend 67 passed; backend 392 passed.
+
 - **Plan 024 landed; the wave is complete.** Photo input is now
   pick -> crop -> recognize -> editable text, with the server's vision tier as
   the default and tesseract one tap away as "read on my device".
