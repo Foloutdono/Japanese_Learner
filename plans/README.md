@@ -157,7 +157,7 @@ is the wave's most important plan.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 021 | [Supabase JWKS endpoint](021-supabase-jwks-endpoint.md) | P0 | S | — | TODO |
+| 021 | [Supabase JWKS endpoint](021-supabase-jwks-endpoint.md) | P0 | S | — | DONE |
 | 022 | [Exam `{generating}` shape crash](022-exam-generating-shape-crash.md) | P0 | S | — | TODO |
 | 023 | [Vision-model OCR backend](023-vision-ocr-backend.md) | P0 | M | — | TODO |
 | 024 | [Image capture UX](024-image-capture-ux.md) | P0 | M | 023 | TODO |
@@ -304,6 +304,30 @@ and expensive after:
   input is solved by splitting the Passage, never by asking for a bigger answer.
 
 ## Execution notes (added as each plan lands)
+
+- **Plan 021 landed; the ES256 STOP condition was checked and cleared.** The
+  live key set at `/auth/v1/.well-known/jwks.json` is a single
+  `alg=ES256 kty=EC crv=P-256 use=sig` key, so `get_user_id`'s
+  `algorithms=["ES256"]` is correct and no algorithm widening was needed — that
+  check mattered, because a mismatch resolves a key successfully and then fails
+  the decode as an `InvalidTokenError`, which is a hard 401 with **no fallback**
+  (i.e. every user locked out). The regression tests were confirmed to actually
+  bite by temporarily restoring the old URL: 2 of 4 failed, as intended.
+- **A pre-existing race in `routes/video.py` surfaced while running plan 021's
+  full-suite check** — unrelated to the JWKS change, and flagged rather than
+  fixed in-scope. `test_window_over_five_minutes_is_capped_and_reported` failed
+  once during a slow run (43s vs the usual 13s) with `KeyError: 'windowCapped'`,
+  and the captured log showed `Video session 17 ready: 2 sentences` immediately
+  followed by that session's GET returning **503**. Cause: `_video_worker`
+  commits `status='ready'` and the `video_session_jobs` delete in one
+  transaction, but `get_video_session` reads the session and the job row on
+  **two separate connections**. If the worker commits between them, GET sees
+  `generating` + no job row and takes the
+  `age = row[0] if row else True  # no job row left -> treat as stale/lost`
+  branch, reporting "Generation stalled" for a session that succeeded. Passes on
+  re-run and in isolation, which is exactly why it reads as flake rather than as
+  the production bug it is — a loaded server widens the window. Spun off as its
+  own task.
 
 - **Live browser verification of VideoScreen (2026-08-26, post-merge) found
   two real bugs the test suite had not caught**, since it exercises the

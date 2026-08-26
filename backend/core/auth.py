@@ -12,12 +12,27 @@ SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 
 # Local JWT verification (see get_user_id below): Supabase's newer
 # projects sign tokens asymmetrically and publish the public verification
-# key at this JWKS endpoint -- no secret to configure, the key is public
-# by design. PyJWKClient fetches and caches it lazily; constructing it
-# here does NOT make a network call (the first fetch happens on first use
-# in get_user_id), so this is safe even when DEV_USER_ID means the path
+# key set as JWKS -- no secret to configure, these keys verify signatures
+# and cannot create them, which is why the endpoint needs no auth.
+#
+# The path matters. Supabase exposes TWO JWKS-ish routes:
+#   /auth/v1/.well-known/jwks.json  -> 200, public, what we want
+#   /auth/v1/jwks                   -> 401 unless an apikey header is sent,
+#                                      which PyJWKClient does not send
+# This pointed at the second one until 2026-08-26, so local verification
+# never once succeeded in production: every request 401'd here, logged a
+# traceback, and fell through to the httpx round trip below. Two network
+# calls per request where zero were intended.
+#
+# PyJWKClient fetches and caches lazily; constructing it here does NOT
+# make a network call (the first fetch happens on first use in
+# get_user_id), so this is safe even when DEV_USER_ID means the path
 # below is never exercised.
-_jwks_client = jwt.PyJWKClient(f"{SUPABASE_URL}/auth/v1/jwks") if SUPABASE_URL else None
+_jwks_client = (
+    jwt.PyJWKClient(f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json")
+    if SUPABASE_URL
+    else None
+)
 
 # ── Local development ─────────────────────────────────────────
 # Identity comes from an HTTP round trip to Supabase on every request,
