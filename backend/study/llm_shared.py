@@ -81,6 +81,12 @@ class Provider:
     url: str
     api_key: str | None
     models: tuple[str, ...]
+    # Image-capable models, in preference order. Separate from `models`
+    # because the two sets do not overlap: a text model 400s on an
+    # image_url content part, and the vision models are not tuned for
+    # the bounded-JSON tasks `models` exists for. Empty means this
+    # provider is skipped entirely for vision work (see chat(vision=True)).
+    vision_models: tuple[str, ...] = ()
     # reasoning-flag -> extra top-level request-body keys.
     reasoning_body: object = field(default=None)
 
@@ -108,6 +114,36 @@ _PROVIDER_CATALOG = {
             "nvidia/nemotron-3-super-120b-a12b",      # ~5s, cleanest JSON
             "nvidia/nemotron-3-ultra-550b-a55b",      # ~5s
             "nvidia/nemotron-3.5-lightning-30b-a3b",  # ~8s
+        ),
+        # Vision -- FALLBACKS ONLY. See the openrouter entry below for
+        # the primary, and the note above _DEFAULT_PROVIDER_ORDER for why
+        # vision walks providers in a different order than text.
+        #
+        # This list was nvidia/nemotron-nano-12b-v2-vl (3/3, 2/2, 3/3 --
+        # the best free model measured) plus
+        # nvidia/llama-3.1-nemotron-nano-vl-8b-v1. BOTH reached end of
+        # life at 2026-08-26T09:00:00Z, hours after being benchmarked,
+        # and now return HTTP 410 "Gone". The catalog dropped 95 -> 83
+        # models the same day. That is how fast this churns, and it is
+        # why the probe script exists.
+        #
+        # What is left on NVIDIA, benchmarked with OCR_PROMPT on the same
+        # three images (clean / degraded / vertical tategaki):
+        #
+        #   meta/llama-3.2-90b-vision-instruct   3/3, 2/2, 0/3
+        #   meta/llama-3.2-11b-vision-instruct   3/3, 1/2, 0/3
+        #
+        # Both are fine on horizontal text and BOTH SCORE ZERO on
+        # vertical -- llama-3.2-90b answered "There is no Japanese text
+        # in the image", even with the orientation prompt. Manga and
+        # novels are vertical, so these cannot be the primary.
+        #
+        # Also checked and unusable: nvidia/nemotron-nano-3-30b-a3b and
+        # microsoft/phi-3-vision-128k-instruct both 404 on an image
+        # request for this account.
+        vision_models=(
+            "meta/llama-3.2-90b-vision-instruct",
+            "meta/llama-3.2-11b-vision-instruct",
         ),
         # NVIDIA has no equivalent of OpenRouter's `reasoning` field. Its
         # Nemotron models take chat_template_kwargs.thinking instead --
@@ -139,6 +175,34 @@ _PROVIDER_CATALOG = {
             "google/gemma-4-31b-it:free",
             "nvidia/nemotron-3-ultra-550b-a55b:free",
         ),
+        # Vision PRIMARY, and free. Benchmarked 2026-08-26 with
+        # OCR_PROMPT on three Japanese images (clean / degraded /
+        # vertical tategaki):
+        #
+        #   nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+        #       3/3, 2/2, 3/3   -- and 5/6 calls succeeded across a
+        #                          repeat run (one malformed body)
+        #
+        # It is the ONLY free model measured that reads vertical
+        # (tategaki) Japanese, which is manga and novels -- every NVIDIA
+        # option scores 0/3 there. That is why vision walks OpenRouter
+        # FIRST while text still walks NVIDIA first; see
+        # _VISION_PROVIDER_PREFERENCE below.
+        #
+        # Other free vision models on this account, all rejected:
+        # minimax/minimax-m3:free and google/gemma-4-26b-a4b-it:free and
+        # google/gemma-4-31b-it:free rate-limit (429) on essentially
+        # every attempt, thinkingmachines/inkling:free 403s, and
+        # dots-studio/dots-3-note-preview:free scored 0/3 on vertical.
+        #
+        # PAID models are deliberately absent -- this project is
+        # free-tools-only. If a budget ever appears,
+        # qwen/qwen3-vl-30b-a3b-instruct and qwen/qwen2.5-vl-72b-instruct
+        # both scored 3/3 on the same vertical image at ~$0.0002/image
+        # and are verified.
+        vision_models=(
+            "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        ),
         # nemotron-3.5-lightning (the OpenRouter primary) is a reasoning
         # model; letting it think before answering matters more here than
         # for a plain chat model, since every call in this codebase is one
@@ -161,47 +225,57 @@ _PROVIDER_CATALOG = {
     ),
 }
 
-# ── Vision capability: checked, not present ────────────────────
-# Plan 018 (photo/OCR input) needed to know whether ANY of the models
-# above could read an image before building a vision-escalation tier on
-# top of one. Checked live 2026-08 via
-# `python -m scripts.check_llm_models --vision` (sends one request per
-# model with a locally-rendered PNG of real Japanese text as an
-# image_url content part):
+# ── Vision capability: checked, present, and CORRECTED ─────────
+# Plan 018 (photo/OCR input) probed this in 2026-08 and concluded "no
+# model on either configured provider is confirmed vision-capable", so
+# its vision tier was never built and OCR shipped as tesseract.js only
+# -- which returned unusable character soup on real photographs.
 #
-#   nvidia/nemotron-3-super-120b-a12b       400 "multimodal processing
-#                                            is not enabled"
-#   nvidia/nemotron-3-ultra-550b-a55b       400/404 (inconsistent
-#                                            status, same underlying
-#                                            "not multimodal" cause)
-#   nvidia/nemotron-3.5-lightning-30b-a3b   400, same as above
-#   nvidia/nemotron-3.5-lightning:free      404 "No endpoints found
-#                                            that support image input"
-#   nvidia/nemotron-3-super-120b-a12b:free  404, same message
-#   nvidia/nemotron-3-ultra-550b-a55b:free  404, same message
-#   google/gemma-4-31b-it:free              429, persistently
-#                                            rate-limited upstream
-#                                            (Google AI Studio's free
-#                                            tier) across three retries
-#                                            with backoff -- INCONCLUSIVE,
-#                                            not a confirmed "no", but
-#                                            also not usable in
-#                                            production on this tier
-#                                            even if it turned out to
-#                                            work
+# THAT CONCLUSION WAS WRONG, and the mistake is worth naming because it
+# is easy to repeat: the probe only tested the seven models already
+# listed in `models` above, all of them text-only. It never asked either
+# provider which of its models accept images. "The text models I tried
+# are text models" was reported as "no vision capability exists".
 #
-# Verdict: no model on either configured provider is confirmed
-# vision-capable. Plan 018's OCR feature ships local-only (tesseract.js
-# in the browser); its vision-escalation tier is BLOCKED on this, not
-# implemented. Do not add a `vision` flag or a vision model entry here
-# without re-running the probe first -- see plans/018-image-and-
-# camera-input.md and docs/adr/0004-ocr-runs-client-first.md.
+# Re-probed 2026-08-26. NVIDIA serves four working vision models on the
+# same key (see `vision_models` on the nvidia entry above for the
+# per-model scores); OpenRouter serves 250 image-capable models, all the
+# good ones paid.
+#
+# Two lessons encoded in `scripts/check_llm_models.py --vision`:
+#
+#   1. A 429, a 500 or a timeout are QUOTA and RELIABILITY signals, never
+#      capability signals. google/gemma-4-31b-it:free rate-limited on
+#      every attempt in both 2026-08 probes; plan 018 read that as
+#      evidence of no capability. It is evidence of a busy free tier.
+#      Capability is disproved only by a 400/404 on an image request, or
+#      by garbled output that survives retries.
+#   2. Probe with the SAME prompt the app sends, on HARD images. Every
+#      candidate scored 3/3 on clean text; only degraded and vertical
+#      images separated them.
 
 # NVIDIA first by default: OpenRouter is the account that ran out of
 # credit, and this ordering is what the fallback is for. Overridable
 # without a code change -- LLM_PROVIDER_ORDER=openrouter,nvidia in
 # backend/.env puts it back.
 _DEFAULT_PROVIDER_ORDER = "nvidia,openrouter"
+
+# Vision walks providers in a DIFFERENT order than text, because the
+# best free text models and the only free vertical-capable vision model
+# happen to live on different accounts: OpenRouter serves
+# nemotron-3-nano-omni (3/3 on tategaki), while every NVIDIA vision
+# option scores 0/3 there. Text ordering is unchanged.
+#
+# Names not in this tuple keep their relative position, after the ones
+# that are -- so adding a third provider needs no edit here.
+_VISION_PROVIDER_PREFERENCE = ("openrouter", "nvidia")
+
+
+def _providers_for(vision: bool) -> list[Provider]:
+    if not vision:
+        return PROVIDERS
+    rank = {name: i for i, name in enumerate(_VISION_PROVIDER_PREFERENCE)}
+    return sorted(PROVIDERS, key=lambda p: rank.get(p.name, len(rank)))
 
 
 def _build_providers() -> list[Provider]:
@@ -357,7 +431,8 @@ _PERMANENT_MODEL_STATUSES = (400, 404)
 _RETRYABLE_STATUSES = (429, 500, 502, 503, 504)
 
 
-def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000, reasoning: bool = True) -> str:
+def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
+         reasoning: bool = True, *, vision: bool = False) -> str:
     """Multi-provider, multi-model fallback chat completion.
 
     Walks PROVIDERS in order and, within each, its models in order:
@@ -382,6 +457,14 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000, reason
     only once EVERY provider is exhausted -- callers decide how that
     becomes a user-facing error.
 
+    vision=True walks each provider's `vision_models` instead of its
+    `models`, for requests whose `messages` carry image content parts
+    (OpenAI-style {"type": "image_url", ...}). `messages` is already
+    arbitrary, so no transport change is involved -- the two lists exist
+    only because a text model 400s on an image. A provider with no
+    vision models is skipped; if NONE has any, this raises
+    LLMUnavailable naming the probe script rather than failing per-model.
+
     max_tokens defaults to 3000 rather than being left unset: every
     caller in this codebase generates one bounded JSON blob (a passage,
     a handful of MCQ choices), never an open-ended completion, and
@@ -397,13 +480,25 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000, reason
             "No LLM provider is configured (set NVIDIA_API_KEY or OPENROUTER_API_KEY)"
         )
 
+    # The ONLY thing `vision` changes is which model tuple is walked.
+    # Everything else -- retry, the 400/404-vs-401/402/403 split, the
+    # dead-model and dead-provider memory -- is shared deliberately: a
+    # vision model goes stale exactly the way a text model does, and the
+    # primary here fails transiently often enough that the retry matters
+    # MORE, not less. A provider with an empty tuple is skipped rather
+    # than tried and failed.
     attempts = [
         (provider, model)
-        for provider in PROVIDERS
+        for provider in _providers_for(vision)
         if provider.name not in _DEAD_PROVIDERS
-        for model in provider.models
+        for model in (provider.vision_models if vision else provider.models)
         if (provider.name, model) not in _DEAD_MODELS
     ]
+    if vision and not any(p.vision_models for p in PROVIDERS):
+        raise LLMUnavailable(
+            "No configured provider has a vision-capable model. "
+            "Run `python -m scripts.check_llm_models --vision`."
+        )
     if not attempts:
         # Not a request that happens to fail — a request not worth
         # sending at all. Everything configured has already told us it

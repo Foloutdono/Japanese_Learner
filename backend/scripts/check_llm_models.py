@@ -28,7 +28,7 @@ different questions:
   --vision   Can it read an IMAGE at all? Sends one request per model
              with a small generated PNG (real Japanese glyphs, rendered
              locally via Pillow + a system CJK font -- see
-             _generate_probe_image) as an image_url content part, and
+             _generate_probe_cases) as an image_url content part, and
              checks whether the model echoes back the pictured text
              rather than rejecting the request shape outright. This is
              plan 018 (photo/OCR input)'s Step 1: none of the models in
@@ -46,6 +46,7 @@ import base64
 import io
 import json
 import logging
+import random
 import re
 import sys
 
@@ -53,6 +54,7 @@ import requests
 
 import scripts._env  # noqa: F401  -- must precede the study import, which
 #                       reads the provider API keys at module scope.
+from study.ocr_prompt import OCR_PROMPT
 from study.llm_shared import (
     PROVIDERS, allowed_kanji_for_level, sentence_kanji_ok, soften_kanji,
 )
@@ -199,89 +201,129 @@ def _verdict(response) -> str:
     return "OK"
 
 
-# The exact text drawn into the probe image -- what a vision-capable
-# model is expected to echo back (loosely; see _vision_verdict).
-_VISION_PROBE_TEXT = "日本語"
-
-# Windows system fonts with real CJK glyph coverage, tried in order.
-# MS Gothic is present on every Windows install; the others are
-# fallbacks for environments where it isn't. If none is found, the
-# probe is skipped entirely with an explanation rather than silently
-# testing with tofu-box glyphs, which would prove nothing.
+# ── Vision probe ──────────────────────────────────────────────────
+# Rewritten 2026-08-26 after the 2026-08 run produced a FALSE NEGATIVE
+# that cost the OCR feature a release. Three bugs, all fixed here:
+#
+#   1. It looped `provider.models` -- the TEXT models. It never asked
+#      which models accept images, then reported "no vision capability
+#      exists" when what it had measured was "the text models I tried
+#      are text models". It now walks `provider.vision_models`.
+#   2. It used its own short prompt. Probing with a prompt the app never
+#      sends measures the wrong thing -- and for OCR_PROMPT that is not
+#      a technicality: its orientation clauses are worth 0/3 -> 3/3 on
+#      vertical text.
+#   3. One clean image. Every candidate scores 3/3 on clean text; only
+#      degraded and vertical images separate them.
+#
+# And the lesson that made the false negative stick: a 429, a 500 or a
+# timeout are QUOTA and RELIABILITY signals, NEVER capability signals.
+# Capability is disproved by a 400/404 on an image request, or by
+# garbled output that survives a retry -- nothing else. The vision
+# primary fails transiently about 1 call in 5, so a probe without a
+# retry would keep re-deriving the same wrong conclusion.
 _CJK_FONT_CANDIDATES = (
     r"C:\Windows\Fonts\msgothic.ttc",
     r"C:\Windows\Fonts\meiryo.ttc",
     r"C:\Windows\Fonts\YuGothM.ttc",
 )
 
+_VISION_RETRIES = 1
 
-def _generate_probe_image() -> str | None:
-    """A small PNG (real rendered Japanese glyphs, not a stock photo or
-    a remote fetch) as a base64 data URI, or None if no CJK-capable font
-    could be found to render it with."""
-    try:
-        from PIL import Image, ImageDraw, ImageFont
-    except ImportError:
-        print("  ! Pillow is not installed -- cannot generate a probe image")
-        return None
 
-    font = None
+def _load_cjk_font(size: int):
+    from PIL import ImageFont
     for path in _CJK_FONT_CANDIDATES:
         try:
-            font = ImageFont.truetype(path, 36)
-            break
+            return ImageFont.truetype(path, size)
         except OSError:
             continue
-    if font is None:
-        print(f"  ! no CJK font found among {_CJK_FONT_CANDIDATES} -- cannot generate a probe image")
+    return None
+
+
+def _data_uri(img, fmt="PNG", **save_kwargs) -> str:
+    buf = io.BytesIO()
+    img.save(buf, format=fmt, **save_kwargs)
+    mime = "image/jpeg" if fmt == "JPEG" else "image/png"
+    return f"data:{mime};base64," + base64.b64encode(buf.getvalue()).decode()
+
+
+def _generate_probe_cases() -> list[tuple[str, str, list[str]]] | None:
+    """(name, data_uri, expected_lines) for three images of increasing
+    difficulty, or None if no CJK font is available to render them --
+    in which case the probe is skipped with an explanation rather than
+    silently testing tofu boxes, which would prove nothing."""
+    try:
+        from PIL import Image, ImageDraw, ImageFilter
+    except ImportError:
+        print("  ! Pillow is not installed -- cannot generate probe images")
         return None
 
-    img = Image.new("RGB", (200, 80), "white")
-    ImageDraw.Draw(img).text((10, 20), _VISION_PROBE_TEXT, font=font, fill="black")
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    encoded = base64.b64encode(buf.getvalue()).decode()
-    return f"data:image/png;base64,{encoded}"
+    font = _load_cjk_font(34)
+    if font is None:
+        print(f"  ! no CJK font found among {_CJK_FONT_CANDIDATES} -- skipping vision probe")
+        return None
+
+    cases = []
+
+    # 1. Clean. Everything passes this; it is the floor, not the test.
+    clean_lines = ["猫が公園を歩いています。", "日本語の勉強は毎日続けます。"]
+    img = Image.new("RGB", (700, 140), "white")
+    d = ImageDraw.Draw(img)
+    for i, line in enumerate(clean_lines):
+        d.text((20, 20 + i * 55), line, font=font, fill="black")
+    cases.append(("clean", _data_uri(img), clean_lines))
+
+    # 2. Degraded: rotation, downscale, sensor noise, blur, JPEG
+    # artifacts -- an approximation of a bad phone photo.
+    hard_lines = ["図書館で新しい小説を借りました。"]
+    img = Image.new("RGB", (900, 110), "white")
+    d = ImageDraw.Draw(img)
+    d.text((20, 25), hard_lines[0], font=font, fill=(40, 40, 40))
+    img = img.rotate(-2.0, expand=True, fillcolor="white").resize((520, 80))
+    px = img.load()
+    rnd = random.Random(7)
+    for _ in range(3000):
+        x, y = rnd.randrange(img.width), rnd.randrange(img.height)
+        v = rnd.randint(-60, 60)
+        r, g, b = px[x, y]
+        px[x, y] = (max(0, min(255, r + v)), max(0, min(255, g + v)), max(0, min(255, b + v)))
+    img = img.filter(ImageFilter.GaussianBlur(0.4))
+    cases.append(("degraded", _data_uri(img, "JPEG", quality=35), hard_lines))
+
+    # 3. Vertical (tategaki). THE case that separates the models, and the
+    # one the orientation prompt exists for.
+    vfont = _load_cjk_font(30)
+    vertical_lines = ["吾輩は猫である", "名前はまだ無い"]
+    img = Image.new("RGB", (300, 400), (250, 248, 242))
+    d = ImageDraw.Draw(img)
+    x = 230
+    for col in vertical_lines:
+        y = 25
+        for ch in col:
+            d.text((x, y), ch, font=vfont, fill=(20, 20, 20))
+            y += 34
+        x -= 70
+    cases.append(("vertical", _data_uri(img, "JPEG", quality=50), vertical_lines))
+
+    return cases
 
 
-def _vision_verdict(response) -> str:
-    if response.status_code == 400:
-        return "NOT-VISION (400)"
-    if response.status_code == 404 and "image input" in response.text.lower():
-        # OpenRouter's own way of saying the same thing NVIDIA says with
-        # a 400 -- confirmed live: {"error":{"message":"No endpoints
-        # found that support image input","code":404}}.
-        return "NOT-VISION (404)"
-    if not response.ok:
-        return f"HTTP {response.status_code}: {response.text[:150]}"
-    try:
-        content = response.json()["choices"][0]["message"]["content"]
-    except (KeyError, IndexError, ValueError):
-        return "BAD-BODY"
-    if not content:
-        return "NULL"
-    if _VISION_PROBE_TEXT in content:
-        return f"OK (echoed): {content[:80]!r}"
-    if re.search(r"[ぁ-んァ-ン一-龯]", content):
-        return f"OK (some JP, not exact): {content[:80]!r}"
-    return f"UNCLEAR: {content[:80]!r}"
+def _vision_call(provider, model, data_uri):
+    """One request, retried once on a transient failure. Returns
+    (content, note) -- content is None when the model could not be
+    reached, and `note` explains why."""
+    messages = [{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": OCR_PROMPT},
+            {"type": "image_url", "image_url": {"url": data_uri}},
+        ],
+    }]
+    body = {"model": model, "messages": messages, "max_tokens": 400,
+            "temperature": 0.0, **provider.body_for(False)}
 
-
-def _check_vision(provider, data_uri: str) -> int:
-    """One request per model with an image_url content part. Returns
-    the number that did NOT look vision-capable."""
-    messages = [
-        {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "What Japanese text is written in this image? Reply with only the text."},
-                {"type": "image_url", "image_url": {"url": data_uri}},
-            ],
-        }
-    ]
-    failed = 0
-    for model in provider.models:
-        body = {"model": model, "messages": messages, "max_tokens": 100, **provider.body_for(False)}
+    for attempt in range(_VISION_RETRIES + 1):
         try:
             response = requests.post(
                 provider.url,
@@ -290,14 +332,52 @@ def _check_vision(provider, data_uri: str) -> int:
                 json=body, timeout=_SMOKE_TIMEOUT,
             )
         except requests.RequestException as e:
-            failed += 1
-            print(f"    FAIL    {model}: {type(e).__name__}")
-            continue
+            if attempt < _VISION_RETRIES:
+                continue
+            return None, f"transient ({type(e).__name__}) -- NOT a capability result"
 
-        verdict = _vision_verdict(response)
-        if not verdict.startswith("OK"):
+        if response.status_code == 400:
+            return None, "NOT-VISION (400)"
+        if response.status_code == 404 and "image input" in response.text.lower():
+            return None, "NOT-VISION (404)"
+        if response.status_code == 429:
+            return None, "quota (429) -- NOT a capability result"
+        if response.status_code >= 500 or not response.ok:
+            if attempt < _VISION_RETRIES:
+                continue
+            return None, f"transient (HTTP {response.status_code}) -- NOT a capability result"
+        try:
+            return response.json()["choices"][0]["message"]["content"] or "", None
+        except (KeyError, IndexError, ValueError):
+            return None, "BAD-BODY"
+    return None, "unreachable"
+
+
+def _check_vision(provider, cases) -> int:
+    """One request per (vision model, case). Returns the number of models
+    that read NOTHING correctly anywhere -- a model that merely scored
+    badly on the hard cases is reported, not counted as a failure."""
+    if not provider.vision_models:
+        print("    (no vision models listed for this provider -- skipped)")
+        return 0
+
+    failed = 0
+    for model in provider.vision_models:
+        scores = []
+        for name, data_uri, expected in cases:
+            content, note = _vision_call(provider, model, data_uri)
+            if content is None:
+                scores.append(f"{name}=--({note})")
+                continue
+            hits = sum(1 for line in expected if line in content)
+            scores.append(f"{name}={hits}/{len(expected)}")
+        exact_total = sum(
+            int(s.split("=")[1].split("/")[0])
+            for s in scores if "/" in s
+        )
+        if exact_total == 0:
             failed += 1
-        print(f"    {verdict}  {model}")
+        print(f"    {'FAIL' if exact_total == 0 else ' OK '}  {model}: " + "  ".join(scores))
     return failed
 
 
@@ -317,10 +397,10 @@ def main() -> int:
         )
         return 1
 
-    vision_data_uri = None
+    vision_cases = None
     if args.vision:
-        vision_data_uri = _generate_probe_image()
-        if vision_data_uri is None:
+        vision_cases = _generate_probe_cases()
+        if vision_cases is None:
             logger.error("Cannot run --vision: no probe image could be generated (see above).")
             return 1
 
@@ -332,8 +412,8 @@ def main() -> int:
             print("  smoke test (one completion each):")
             problems += _smoke(provider)
         if args.vision:
-            print("  vision probe (one image request each):")
-            problems += _check_vision(provider, vision_data_uri)
+            print("  vision probe (clean / degraded / vertical, one request each):")
+            problems += _check_vision(provider, vision_cases)
 
     print()
     if problems:

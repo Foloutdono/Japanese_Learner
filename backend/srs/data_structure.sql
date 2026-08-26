@@ -412,3 +412,14 @@ CREATE TABLE user_loadout (
     brush     TEXT,
     mcq       TEXT
 );
+-- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
+-- endpoint. Nothing here costs money (NVIDIA's vision models are on the
+-- free tier), so this bounds draw on the SHARED free quota that the
+-- analyzer's deep tier and exam generation also depend on: one client
+-- in a retry loop would otherwise degrade those too.
+CREATE TABLE ocr_usage (
+    user_id  TEXT NOT NULL,
+    day      DATE NOT NULL,
+    count    INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, day)
+);

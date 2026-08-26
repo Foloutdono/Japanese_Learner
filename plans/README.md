@@ -160,7 +160,7 @@ is the wave's most important plan.
 |------|-------|----------|--------|------------|--------|
 | 021 | [Supabase JWKS endpoint](021-supabase-jwks-endpoint.md) | P0 | S | — | DONE |
 | 022 | [Exam `{generating}` shape crash](022-exam-generating-shape-crash.md) | P0 | S | — | DONE |
-| 023 | [Vision-model OCR backend](023-vision-ocr-backend.md) | P0 | M | — | TODO |
+| 023 | [Vision-model OCR backend](023-vision-ocr-backend.md) | P0 | M | — | DONE |
 | 024 | [Image capture UX](024-image-capture-ux.md) | P0 | M | 023 | TODO |
 | 025 | [Paste-transcript ingest](025-paste-transcript-ingest.md) | P0 | M | — | DONE |
 | 026 | [YouTube URL honesty + proxy](026-youtube-url-honesty-and-proxy.md) | P1 | M | 025 | DONE |
@@ -305,6 +305,42 @@ and expensive after:
   input is solved by splitting the Passage, never by asking for a bigger answer.
 
 ## Execution notes (added as each plan lands)
+
+- **Plan 023 landed, and the model churn it warned about happened DURING the
+  plan.** The two best free vision models —
+  `nvidia/nemotron-nano-12b-v2-vl` (3/3, 2/2, 3/3, the best measured) and
+  `nvidia/llama-3.1-nemotron-nano-vl-8b-v1` — were benchmarked in the morning
+  and returned **HTTP 410 "has reached its end of life on 2026-08-26T09:00:00Z"**
+  by the afternoon. NVIDIA's visible catalog dropped 95 → 83 models in between.
+  The rewritten probe caught it on its first run, which is the whole reason the
+  plan insisted on rewriting it.
+  What was left on NVIDIA (`meta/llama-3.2-90b/11b-vision-instruct`) reads
+  horizontal Japanese fine and scores **0/3 on vertical** — llama-3.2-90b
+  answered *"There is no Japanese text in the image"* even with the orientation
+  prompt. Since manga and novels are vertical, that could not be the primary,
+  and the plan's STOP condition forbids reaching for OpenRouter's paid list.
+  Searching OpenRouter's **free** vision models found the answer:
+  `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` scores **3/3 clean, 2/2
+  degraded, 3/3 vertical**, still free. It is the only free model measured that
+  reads tategaki. Every other free candidate was rejected on evidence
+  (429 rate-limits, a 403, or 0/3 vertical).
+  That forced one addition beyond the plan's "vision only changes which tuple is
+  walked": the best free vision model and the best free text models live on
+  **different providers**, so `_providers_for(vision)` gives vision its own
+  provider order (OpenRouter first) while text keeps NVIDIA first. Getting this
+  backwards would silently cost vertical, because the NVIDIA fallback answers
+  confidently and wrongly rather than erroring — so it has its own test.
+  Verified live end to end through `POST /api/ocr`: degraded horizontal and
+  vertical tategaki both returned character-for-character exact text, and the
+  logs show the primary hitting a transient 502 with **the fallback chain
+  recovering** — the load-bearing chain proving itself in the one run that
+  mattered.
+  Two small deviations, both recorded in code: the response omits `model`
+  (chat() returns only content, and threading the winner out would change its
+  signature for every caller — it is already logged), and `OCR_PROMPT` lives in
+  its own `study/ocr_prompt.py` so the probe can send the app's exact prompt
+  without importing `routes/ocr.py` and therefore needing a live DATABASE_URL.
+  Backend 389 passed.
 
 - **Plan 026 landed; the URL box is no longer a dead end, and no proxy was
   bought.** The failure state now says the *server* cannot fetch captions
