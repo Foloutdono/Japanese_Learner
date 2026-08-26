@@ -15,8 +15,10 @@
 
 - **Priority**: P0
 - **Effort**: M
-- **Risk**: MEDIUM — adds a paid call on a user-triggered path; the cost cap in
-  Step 5 is not optional
+- **Risk**: MEDIUM — no cost (NVIDIA free tier), but it puts user-triggered load
+  on the shared quota the analyzer and exams also use; the cap in Step 5 is not
+  optional. The chosen model is accurate but fails transiently ~1 call in 5, so
+  the fallback chain is load-bearing.
 - **Depends on**: —
 - **Blocks**: `plans/024-image-capture-ux.md` (hard — that plan calls this
   endpoint)
@@ -45,31 +47,78 @@ plan.** The probe only tested the 7 models already hardcoded in
 which models *do* accept images. It reported "no vision capability available"
 when the real finding was "the seven text models I tried are text models."
 
-Re-probed live on 2026-08-26 against the key already in `backend/.env`:
+Re-probed live on 2026-08-26 against the keys already in `backend/.env`.
 
-- OpenRouter serves **417 models, 250 of them image-capable**.
-- Five candidates were benchmarked on a deliberately degraded Japanese image
-  (rotated 1.2°, downscaled to 530×190, one line in low-contrast grey — chosen
-  to approximate a bad phone photo):
+### This project is free-tools-only, so NVIDIA is the target
 
-  | Model | Exact lines | Prompt $/tok |
-  |---|---|---|
-  | `qwen/qwen3-vl-8b-instruct` | **3/3** | 0.000000117 |
-  | `qwen/qwen3-vl-30b-a3b-instruct` | **3/3** | 0.00000013 |
-  | `mistralai/mistral-small-3.2-24b-instruct` | **3/3** | 0.000000075 |
-  | `qwen/qwen2.5-vl-72b-instruct` | **3/3** | 0.00000025 |
-  | `qwen/qwen3-vl-235b-a22b-instruct` | **3/3** | 0.00000021 |
-  | `google/gemma-4-31b-it:free` | HTTP 429 | free |
+OpenRouter has 250 image-capable models, but the good ones are **paid** and its
+one usable free model (`google/gemma-4-31b-it:free`) returns HTTP 429 on every
+attempt — the same symptom `plans/018` saw, which was always a **quota** signal
+and never a capability one.
 
-  "Exact lines" = the model's output contained the source line **character for
-  character**, including punctuation. Five of six scored perfect.
+**NVIDIA's `integrate.api.nvidia.com` — the endpoint this backend already uses
+for text, on the key already configured — serves vision models at no cost.**
+Five candidates exist; four work. All accept the standard OpenAI
+`image_url` content part, so **no transport change is needed anywhere**.
 
-The free-tier Gemma rate-limited again — the same symptom `plans/018` saw. That
-was always a **quota** signal, never a capability one.
+Benchmarked across three images of increasing difficulty. "Score" = output
+contained the source line **character for character**:
 
-At roughly 1–1.5k tokens per image, a recognition costs on the order of
-**$0.0002**. The deep-tier explanation this app already buys per sentence costs
-more.
+| Model (NVIDIA, free) | clean | hard horizontal¹ | vertical² |
+|---|---|---|---|
+| **`nvidia/nemotron-nano-12b-v2-vl`** | **3/3** | **2/2** | **3/3** |
+| `nvidia/llama-3.1-nemotron-nano-vl-8b-v1` | 3/3 | 1/2 | 2/3 |
+| `meta/llama-3.2-90b-vision-instruct` | 3/3 | **2/2** | **0/3** |
+| `meta/llama-3.2-11b-vision-instruct` | 3/3 | 1/2 | 0/3 |
+| `microsoft/phi-3-vision-128k-instruct` | HTTP 404 — not served on this account |
+
+¹ rotated 2°, downscaled to 470×120, sensor noise, blur, JPEG quality 32.
+² vertical *tategaki*, three columns, JPEG quality 45, **with the orientation
+prompt from Step 4** — see below.
+
+**`nvidia/nemotron-nano-12b-v2-vl` matches the paid OpenRouter models on every
+case**, verified against `qwen/qwen3-vl-30b-a3b-instruct` and
+`qwen/qwen2.5-vl-72b-instruct` as controls (both 3/3 on the same vertical
+image, confirming the test image was fair rather than illegible).
+
+### Vertical text is a prompt problem, not a model problem
+
+With a plain *"transcribe this"* prompt, **every** model scored 0/3 on vertical
+text. They read the characters and scrambled the column order;
+`meta/llama-3.2-90b-vision-instruct` replied *"There is no Japanese text in the
+image. The text appears to be written in a different language, possibly Chinese
+or Korean."*
+
+Adding explicit instructions — text may be vertical, read columns top-to-bottom
+and order them right-to-left — took `nemotron-nano-12b-v2-vl` from **0/3 to
+3/3**, with no change to its horizontal accuracy. That prompt is specified in
+Step 4 and is **load-bearing**, not a nicety: manga and novels are a core use
+case for this app, and without it they silently fail.
+
+`meta/llama-3.2-90b-vision-instruct` stayed at 0/3 even with the hint — it is
+genuinely weak at Japanese, and is listed last for that reason.
+
+### Reliability: accurate when it answers, flaky about answering
+
+`nvidia/nemotron-nano-12b-v2-vl` fails transiently more than a paid endpoint
+would. Measured over 6 identical back-to-back calls on the hard horizontal
+image: **5 succeeded, 1 timed out**, and every success scored **2/2**. Two
+HTTP 500s were also seen during earlier probing.
+
+So roughly **one call in five needs a retry**, and accuracy is *not* the
+variable — when it answers, it answers correctly.
+
+This is exactly what `chat()` already does: retry once per model on a network
+error, move to the next model on a 5xx. **The fallback chain is therefore
+load-bearing here in a way it is not for the text models** — do not collapse
+`vision_models` to a single entry, and do not remove the retry.
+
+### Cost
+
+**Zero.** This runs on NVIDIA's free API alongside the text models already in
+use. There is no paid dependency anywhere in this plan, and no OpenRouter
+vision model is used — see Step 1's note on why the paid list is recorded but
+left empty.
 
 ### The consequence for ADR-0004
 
@@ -166,40 +215,54 @@ simply never gets tried:
     vision_models: tuple[str, ...] = ()
 ```
 
-Populate OpenRouter with the **benchmarked** list, cheapest-capable first, and
-record the evidence the way every other entry in this file does:
+Populate **NVIDIA** with the benchmarked list, best-first, recording the
+evidence the way every other entry in this file does:
 
 ```python
-        # Vision. Benchmarked live 2026-08-26 against a deliberately
-        # degraded Japanese image (rotated 1.2 degrees, downscaled to
-        # 530x190, one line in low-contrast grey -- an approximation of a
-        # bad phone photo). Scored by exact character-for-character line
-        # match. All four below scored 3/3; ordered cheapest-first, since
-        # accuracy did not separate them and price does.
+        # Vision. Benchmarked live 2026-08-26 on three Japanese images of
+        # increasing difficulty (clean; rotated+noisy+blurred+JPEG-q32 at
+        # 470x120; vertical tategaki at q45), scored by exact
+        # character-for-character line match. Ordered by measured
+        # accuracy, NOT by size.
         #
-        # google/gemma-4-31b-it:free is deliberately ABSENT: it is
-        # image-capable, but rate-limited (429) on every attempt across
-        # two separate sessions. That same 429 is what made plans/018
-        # conclude no vision model existed at all -- a quota signal
-        # misread as a capability one. Do not re-add it as a primary.
+        #   nemotron-nano-12b-v2-vl        3/3, 2/2, 3/3   <- matches the
+        #       paid OpenRouter models on every case (controlled against
+        #       qwen3-vl-30b and qwen2.5-vl-72b, both 3/3 on the same
+        #       vertical image, so the test was fair).
+        #   llama-3.1-nemotron-nano-vl-8b  3/3, 1/2, 2/3
+        #   meta/llama-3.2-90b-vision      3/3, 2/2, 0/3   <- fine on
+        #       horizontal, hopeless on vertical even WITH the
+        #       orientation prompt; it answered "There is no Japanese
+        #       text in the image". Last on purpose.
+        #
+        # meta/llama-3.2-11b-vision-instruct is omitted: strictly worse
+        # than the 90b on every case. microsoft/phi-3-vision-128k-instruct
+        # is omitted: 404s on this account.
+        #
+        # The chain is load-bearing. The primary fails transiently about
+        # 1 call in 5 (measured: 5/6 success over 6 identical calls, one
+        # timeout; two HTTP 500s seen while probing) -- but scores
+        # perfectly whenever it answers. Do NOT reduce this to one model.
         vision_models=(
-            "mistralai/mistral-small-3.2-24b-instruct",
-            "qwen/qwen3-vl-8b-instruct",
-            "qwen/qwen3-vl-30b-a3b-instruct",
-            "qwen/qwen2.5-vl-72b-instruct",
+            "nvidia/nemotron-nano-12b-v2-vl",
+            "nvidia/llama-3.1-nemotron-nano-vl-8b-v1",
+            "meta/llama-3.2-90b-vision-instruct",
         ),
 ```
 
-For NVIDIA, leave `vision_models=()` **for now** with this comment:
+For **OpenRouter**, leave `vision_models=()` with the reason recorded, so nobody
+re-derives the search:
 
 ```python
-        # No vision models listed until probed. GET /v1/models shows
-        # candidates (nvidia/nemotron-nano-12b-v2-vl,
-        # meta/llama-3.2-90b-vision-instruct,
-        # nvidia/llama-3.1-nemotron-nano-vl-8b-v1), but "in the catalog"
-        # is not "reads Japanese" -- the mistake plans/018 made. Run
-        # `python -m scripts.check_llm_models --vision` and add only what
-        # actually scores.
+        # Deliberately empty: this project is free-tools-only. OpenRouter
+        # serves 250 image-capable models and several are excellent at
+        # Japanese (qwen/qwen3-vl-30b-a3b-instruct and
+        # qwen/qwen2.5-vl-72b-instruct both scored 3/3 on the same hard
+        # vertical image, ~$0.0002/image) -- but they are PAID, and the
+        # one free option (google/gemma-4-31b-it:free) returns 429 on
+        # every attempt. NVIDIA's free vision models above match them, so
+        # there is nothing to buy here. If a paid budget ever appears,
+        # this is where it goes and the two qwen ids above are verified.
         vision_models=(),
 ```
 
@@ -212,7 +275,13 @@ for n,p in C.items(): print(n, '->', p.vision_models)
 "
 ```
 
-Expected: openrouter lists 4 models; nvidia lists none.
+Expected: nvidia lists 3 models; openrouter lists none.
+
+**Provider order matters here and is the opposite of the text path's
+assumption.** Confirm `_build_providers()` yields NVIDIA before OpenRouter for
+vision, or that a provider with an empty `vision_models` is skipped rather than
+ending the walk (Step 2). If NVIDIA is not first, vision requests will find no
+model at all.
 
 ### Step 2 — Let `chat()` select the vision list
 
@@ -255,14 +324,24 @@ Rewrite `check_llm_models.py`'s `--vision` mode so it probes
 `provider.vision_models` (and, with `--vision-discover`, asks each provider's
 `/models` endpoint which ids advertise image input). It must:
 
-- render the probe image with Pillow + MS Gothic as it already does,
-- send it as a `data:` URL image content part,
-- score the reply by **exact line match** against the known source lines,
-- print a per-model `n/3` score,
-- exit non-zero only if **every** model fails.
+- render the probe images with Pillow + MS Gothic as it already does, but
+  generate **three** cases, not one — a clean line, a degraded one (rotate,
+  downscale, noise, JPEG quality ~32), and a **vertical** one. A single clean
+  image cannot tell these models apart: all four scored 3/3 on clean text and
+  only the hard cases separated them.
+- send each as a `data:` URL image content part, using the **same
+  `_OCR_PROMPT`** the route uses — probing with a different prompt would
+  measure something the app never runs,
+- score by **exact line match** against the known source lines,
+- print a per-model, per-case `n/N` score,
+- **retry once** on a 5xx/timeout before recording a failure, and report the
+  retry count — the primary fails transiently about 1 call in 5, and a probe
+  that reports that as "broken" would be as misleading as plan 018's 429,
+- exit non-zero only if **every** model fails **every** case.
 
-Add a comment stating plainly that a 429 is a quota result, not a capability
-result, and must not be recorded as "not vision-capable".
+Add a comment stating plainly that a 429, a 500 or a timeout are **quota and
+reliability** results, not capability results, and must never be recorded as
+"not vision-capable". That single confusion cost this feature a release cycle.
 
 **Verify:**
 
@@ -270,12 +349,9 @@ result, and must not be recorded as "not vision-capable".
 cd backend && python -m scripts.check_llm_models --vision
 ```
 
-Expected: at least one OpenRouter model scores 3/3. Record the full output in
-the execution note.
-
-Then probe the NVIDIA candidates named in Step 1's comment. **Add to
-`vision_models` only those that actually score**; leave the tuple empty if none
-do, and say so in the note.
+Expected: `nvidia/nemotron-nano-12b-v2-vl` scores full marks on all three
+cases, possibly after one retry. Record the full output in the execution note —
+it is the baseline any future model swap gets compared against.
 
 ### Step 4 — The endpoint
 
@@ -299,11 +375,28 @@ Requirements:
   memory where practical. Name the constant `_MAX_IMAGE_BYTES`.
 - **Type check**: accept only `image/png`, `image/jpeg`, `image/webp`. Do not
   trust the client's `content_type` alone — verify by magic bytes.
-- **Prompt**: instruct transcription only, no translation, no commentary,
-  preserve line breaks, and return an empty string when there is no Japanese
-  text. `vertical` only appends a hint that the text may be written
-  vertically — the model does not need a separate mode, which is why plan 024
-  can drop the toggle.
+- **Prompt**: use the exact orientation-aware prompt below. It is
+  **load-bearing and measured** — the same models score 0/3 on vertical text
+  without these instructions and 3/3 with them, while horizontal accuracy is
+  unaffected. Do not "tidy" it down to *"transcribe this image"*.
+
+  ```python
+  _OCR_PROMPT = (
+      "Transcribe ALL Japanese text in this image exactly.\n"
+      "The text may be written HORIZONTALLY (yokogaki) or VERTICALLY (tategaki).\n"
+      "If it is vertical, read each column TOP to BOTTOM and order the columns "
+      "RIGHT to LEFT.\n"
+      "If it is horizontal, read each line LEFT to RIGHT, top to bottom.\n"
+      "Output only the transcribed text, one line per line or column. "
+      "No commentary, no translation.\n"
+      "If there is no Japanese text, output nothing."
+  )
+  ```
+
+  Because this single prompt covers both orientations, the `vertical` form
+  field is **advisory only** — append at most a one-line nudge when it is set.
+  It exists so plan 024 can drop its toggle without losing the capability; it
+  must never select a different prompt or a different model.
 - **Post-process**: reuse the same normalisation the client does — collapse
   inter-CJK spaces and blank lines. Put it in
   `backend/study/text_normalize.py` so `routes/ocr.py` and any future caller
@@ -328,11 +421,16 @@ print([r.path for r in app.routes if 'ocr' in r.path])
 
 Expected: `['/api/ocr']`.
 
-### Step 5 — Cost cap (not optional)
+### Step 5 — Usage cap (still not optional)
 
-An authenticated endpoint that spends money per call needs a ceiling. Add a
-per-user daily counter using the codebase's self-migration pattern (copy the
-shape from `routes/decks.py::_ensure_deck_schema`):
+Nothing here costs money, but the cap stays — the resource being protected is
+just different. NVIDIA's free tier is a **shared, rate-limited quota for the
+whole deployment**: one client in a retry loop degrades OCR for every user and,
+because the same account serves the text models, would take the analyzer's deep
+tier and exam generation down with it.
+
+Add a per-user daily counter using the codebase's self-migration pattern (copy
+the shape from `routes/decks.py::_ensure_deck_schema`):
 
 ```sql
 CREATE TABLE IF NOT EXISTS ocr_usage (
@@ -350,7 +448,8 @@ CREATE TABLE IF NOT EXISTS ocr_usage (
   deliberate, because a retry loop on a failing model is exactly what a cap
   exists to stop.
 - Comment why the limit is what it is: 60 images/day is far beyond real study
-  use and still bounds a runaway client to a few cents.
+  use, and it bounds a runaway client's draw on the shared free quota that the
+  analyzer and exam generation also depend on.
 
 **Declare the table in `backend/srs/data_structure.sql`** with an owning-module
 comment. `tests/test_schema_declared.py` (plan 020) will fail if you forget —
@@ -418,11 +517,18 @@ since that is exactly the property ADR-0004 originally chose to protect.
 ## STOP conditions
 
 - **Every benchmarked vision model fails the probe in Step 3.** Do not ship a
-  route that 503s. Report the probe output; the account may be out of credit
-  (a 402 is a *provider* signal, unlike 429).
-- **The only models that pass are `:free` ones.** They rate-limit under any real
-  use; a feature built on them will look broken again. Report and ask before
-  proceeding.
+  route that 503s. Report the probe output. Distinguish the signals before
+  concluding anything: a **402** means the account is out of credit (a provider
+  problem), a **429** means quota, a **500 or timeout** means flakiness — and
+  **none of the three is evidence about capability**. Only a 400/404 on an
+  image request, or consistently garbled output across retries, is.
+- **The vertical case scores 0/3 across every model.** Check you are sending
+  `_OCR_PROMPT` verbatim — orientation instructions are the difference between
+  0/3 and 3/3, and a probe that drops them will look like a model failure.
+- **You are about to add a paid model to make this work.** This project is
+  free-tools-only. NVIDIA's free vision models were measured as sufficient; if
+  they have stopped being so, STOP and report rather than reaching for
+  OpenRouter's paid list — that is the operator's call, not the executor's.
 - **`chat()` would need its retry or dead-model logic changed** to support
   vision. It should not — if it does, the vision list is being wired in at the
   wrong layer. Stop and re-read Step 2.
@@ -449,14 +555,21 @@ Model catalogues churn. `vision_models` will rot exactly like `models` has
 twice before (see the dated comments in `_PROVIDER_CATALOG`). The probe script
 is the defence — run `--vision` after touching either list.
 
-Two traps for review:
-- **Never conclude "no vision capability" from a 429.** That single misreading
-  cost this feature an entire release cycle.
+Three traps for review:
+- **Never conclude "no vision capability" from a 429, a 500, or a timeout.**
+  That single misreading cost this feature an entire release cycle. Capability
+  is proved or disproved by a 400/404 on an image request, or by garbled output
+  that survives retries — nothing else.
 - **Never let `vision_models` and `models` merge.** A text model sent an image
   400s, and `chat()` will faithfully burn one attempt per model discovering it.
+- **Never shorten `_OCR_PROMPT`.** It reads like boilerplate and is not: the
+  orientation clauses are worth 0/3 → 3/3 on vertical text, which is manga and
+  novels — a core use case that would fail silently.
 
-Cost scales linearly with images. If usage grows past the daily cap being
-meaningful, the next move is caching by image hash — the same
-content-addressed trick `phrase_analysis_cache` already uses, and the reason
-Step 4 returns `chars` and `model` in the response (both useful for a future
-cache key and for spotting a model quietly degrading).
+The free tier is the constraint to watch, not money. NVIDIA's quota is shared
+across OCR, the analyzer's deep tier and exam generation, so OCR load shows up
+as *other features* getting slower or 429ing. If that starts happening, the
+next move is caching by image hash — the same content-addressed trick
+`phrase_analysis_cache` already uses, and the reason Step 4 returns `chars` and
+`model` in the response (both useful for a future cache key, and for spotting a
+model quietly degrading after a provider-side swap).

@@ -112,7 +112,7 @@ Four root causes, all confirmed live — none of them speculative:
 |---|---|---|---|
 | 1 | Render log full of tracebacks; every request slow | JWKS client points at `/auth/v1/jwks`, which **401s** (needs an `apikey` header PyJWKClient never sends). The public set is at `/auth/v1/.well-known/jwks.json`. Local JWT verification has **never worked**; every request pays two Supabase round trips | [021](021-supabase-jwks-endpoint.md) |
 | 2 | White-screen `Cannot read properties of undefined (reading '0')` | `getExam` returns `{generating: true}` on a 202 — truthy, no `sections`. `ExamRunner` guards it; **`ExamResult` does not** and crashes on `exam?.sections[0]` | [022](022-exam-generating-shape-crash.md) |
-| 3 | Photos return character soup | Tesseract.js on raw photographs, with no preprocessing and no crop. The vision tier that was meant to rescue it was never built, because **plan 018's probe was wrong** | [023](023-vision-ocr-backend.md), [024](024-image-capture-ux.md) |
+| 3 | Photos return character soup | Tesseract.js on raw photographs, with no preprocessing and no crop. The vision tier meant to rescue it was never built, because **plan 018's probe was wrong** — NVIDIA's **free** API serves vision models that read this correctly | [023](023-vision-ocr-backend.md), [024](024-image-capture-ux.md) |
 | 4 | Every YouTube link fails | Render is a datacenter; YouTube blocks datacenter IPs for caption endpoints. The code is **correct** — identical calls succeed from a residential IP | [025](025-paste-transcript-ingest.md), [026](026-youtube-url-honesty-and-proxy.md) |
 
 ## The two findings that reframe the wave
@@ -120,13 +120,29 @@ Four root causes, all confirmed live — none of them speculative:
 **Plan 018's vision probe produced a false negative.** It concluded *"No model
 is confirmed vision-capable on either provider"* — but it only tested the seven
 models already hardcoded in `_PROVIDER_CATALOG`, all of them text-only. It never
-asked either provider which models accept images. Re-probed 2026-08-26 with the
-key already in `backend/.env`: OpenRouter serves **417 models, 250 of them
-image-capable**. Five candidates were benchmarked on a deliberately degraded
-Japanese image (rotated, downscaled, low contrast); **five scored 3/3 exact
-character-for-character lines**, at roughly **$0.0002 per image**. The one
-failure was a `:free` model returning HTTP 429 — a *quota* signal, which is
-exactly what plan 018 misread as a capability signal.
+asked either provider which models accept images.
+
+Re-probed 2026-08-26 with the keys already in `backend/.env`. **NVIDIA's free
+API — the one this backend already uses for text — serves working vision
+models.** Benchmarked on three Japanese images of increasing difficulty (clean;
+rotated + noisy + blurred + JPEG-q32; vertical *tategaki*):
+
+| Model (NVIDIA, free) | clean | hard horizontal | vertical |
+|---|---|---|---|
+| **`nvidia/nemotron-nano-12b-v2-vl`** | **3/3** | **2/2** | **3/3** |
+| `nvidia/llama-3.1-nemotron-nano-vl-8b-v1` | 3/3 | 1/2 | 2/3 |
+| `meta/llama-3.2-90b-vision-instruct` | 3/3 | 2/2 | 0/3 |
+
+The winner **matches the paid OpenRouter models on every case** (controlled
+against `qwen/qwen3-vl-30b-a3b-instruct` and `qwen/qwen2.5-vl-72b-instruct`,
+both 3/3 on the same vertical image). It fails transiently about **1 call in 5**
+but scores perfectly whenever it answers — which is what `chat()`'s existing
+retry-and-fall-back chain is for.
+
+Two things plan 018 got wrong, both worth remembering: a **429 is a quota
+signal, not a capability signal**, and **vertical text is a prompt problem, not
+a model problem** — every model scored 0/3 on *tategaki* until told to read
+columns top-to-bottom, right-to-left, then 3/3.
 
 **Only YouTube's caption *fetch* is blocked — the *player* is not.** The IFrame
 API runs in the learner's own browser on their own IP and embeds fine.
@@ -157,13 +173,22 @@ live white-screen plus a per-request performance and log-noise problem.
 **025 alone makes video work** without touching OCR. **023 + 024 together** make
 photos work; neither half is useful without the other.
 
-## Cost, stated plainly
+## Cost: zero
 
-This wave is the first to put a paid call on a user-triggered path. Vision OCR
-runs about **$0.0002 per image**; plan 023 Step 5 adds a per-user daily cap
-(default 60/day) before shipping it, so a runaway client costs cents rather
-than being unbounded. The video side costs **nothing** — paste and upload need
-no third party at all, and the proxy in plan 026 is opt-in and off by default.
+**This wave adds no paid dependency.** Vision OCR runs on NVIDIA's free API,
+the same account already serving the text models. Video needs no third party at
+all — paste and upload are pure local parsing — and the proxy in plan 026 is
+opt-in and off by default.
+
+The constraint that replaces cost is **shared free quota**. NVIDIA's tier is
+per-account, so OCR load competes with the analyzer's deep tier and exam
+generation; heavy OCR use would show up as *those* features slowing or 429ing.
+Plan 023 Step 5 therefore keeps a per-user daily cap (default 60 images/day) —
+not to bound spending, but to stop one client degrading everything else.
+
+Paid vision models are recorded in plan 023 (two verified OpenRouter ids, about
+$0.0002/image) purely so the option is documented if a budget ever appears.
+Nothing uses them, and an executor reaching for them is a named STOP condition.
 
 ## What this wave deliberately does not do
 

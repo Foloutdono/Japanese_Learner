@@ -64,10 +64,21 @@ and cuts upload time on mobile data.
 
 Two simplifications also fall out of 023:
 
-- **The vertical-text toggle can go.** It exists because Tesseract needs a
-  different traineddata (`jpn` vs `jpn_vert`). A vision model reads vertical
-  Japanese without being told. Keeping a checkbox that no longer does anything
-  is worse than removing it.
+- **The vertical-text toggle can go — but not for the reason you'd assume.**
+  It exists because Tesseract needs different traineddata (`jpn` vs
+  `jpn_vert`). Vision models do **not** transparently handle vertical Japanese:
+  measured 2026-08-26, every candidate scored **0/3** on a vertical (tategaki)
+  sample with a plain "transcribe this" prompt — they read the characters but
+  scrambled the column order, and one model confidently replied *"There is no
+  Japanese text in the image."*
+
+  What fixes it is the **prompt**, not a mode: telling the model that text may
+  be vertical and to read columns top-to-bottom, right-to-left took the best
+  model from 0/3 to **3/3**. Plan 023's prompt carries those instructions for
+  **both** orientations, and the same prompt still reads horizontal text
+  correctly — so the learner never has to classify their own photo, which is
+  the actual UX win. Do not add a toggle back; if vertical results disappoint,
+  the fix is in 023's prompt.
 - **`onEscalate` can go.** It was a hook for a tier that now *is* the default.
 
 ## Current state
