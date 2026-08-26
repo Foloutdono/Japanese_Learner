@@ -1,3 +1,5 @@
+import { apiUpload } from './api'
+
 // ── In-browser OCR (tesseract.js) ─────────────────────────────
 // Tier 1 of the photo-input feature (docs/adr/0004-ocr-runs-client-
 // first.md): runs entirely on the learner's device, costs nothing, and
@@ -71,4 +73,28 @@ export async function recognize(file, { vertical = false, onProgress } = {}) {
     // and the loaded traineddata in memory.
     await worker.terminate()
   }
+}
+
+
+/**
+ * Recognize Japanese text by sending the image to the backend's vision
+ * tier (POST /api/ocr, see plans/023). This is the DEFAULT path: it is
+ * dramatically more accurate on photographs than the local tesseract
+ * tier above, and it is the only one of the two that reads VERTICAL
+ * (tategaki) text at all -- i.e. manga and novels.
+ *
+ * The image LEAVES THE DEVICE on this path. That is a deliberate
+ * reversal of docs/adr/0004's original position -- see its 2026-08
+ * amendment. The local tier stays available for anyone who would rather
+ * keep the image on their machine and accept much worse results.
+ *
+ * `vertical` is a hint only: the server prompt already handles both
+ * orientations, so this never selects a different model or mode.
+ */
+export async function recognizeRemote(blob, session, { vertical = false } = {}) {
+  const form = new FormData()
+  form.append('file', blob, 'capture.jpg')
+  form.append('vertical', String(vertical))
+  const data = await apiUpload('/api/ocr', session, form)
+  return { text: data.text, chars: data.chars, remote: true }
 }

@@ -9,11 +9,11 @@ Two efforts live in this file:
   reading.
 - **Wave 3 — Sentence analysis** (plans 012–020, all DONE). A feature wave,
   planned 2026-08-26 at commit `d4911a6`. Jump to it below.
-- **Wave 4 — Making image and video actually work** (plans 021–026; 021, 022,
-  025 and 026 DONE, 023–024 TODO). A repair wave, planned 2026-08-26 at commit
-  `2552915`, after wave 3 shipped and its two headline features were found not
-  to work in production. **Video works now** (paste ingest); photos still need
-  023–024. Its table and diagnosis are below.
+- **Wave 4 — Making image and video actually work** (plans 021–026, all DONE).
+  A repair wave, planned 2026-08-26 at commit `2552915`, after wave 3 shipped
+  and its two headline features were found not to work in production. Both work
+  now: video via the paste ingest, photos via a free vision tier. Its table and
+  diagnosis are below.
 
 Each executor: read your plan fully before starting, honor its STOP
 conditions, and update your row when done.
@@ -161,7 +161,7 @@ is the wave's most important plan.
 | 021 | [Supabase JWKS endpoint](021-supabase-jwks-endpoint.md) | P0 | S | — | DONE |
 | 022 | [Exam `{generating}` shape crash](022-exam-generating-shape-crash.md) | P0 | S | — | DONE |
 | 023 | [Vision-model OCR backend](023-vision-ocr-backend.md) | P0 | M | — | DONE |
-| 024 | [Image capture UX](024-image-capture-ux.md) | P0 | M | 023 | TODO |
+| 024 | [Image capture UX](024-image-capture-ux.md) | P0 | M | 023 | DONE |
 | 025 | [Paste-transcript ingest](025-paste-transcript-ingest.md) | P0 | M | — | DONE |
 | 026 | [YouTube URL honesty + proxy](026-youtube-url-honesty-and-proxy.md) | P1 | M | 025 | DONE |
 
@@ -305,6 +305,31 @@ and expensive after:
   input is solved by splitting the Passage, never by asking for a bigger answer.
 
 ## Execution notes (added as each plan lands)
+
+- **Plan 024 landed; the wave is complete.** Photo input is now
+  pick -> crop -> recognize -> editable text, with the server's vision tier as
+  the default and tesseract one tap away as "read on my device".
+  The `capture="environment"` bug is fixed with **two** file inputs rather than
+  one: `capture` sends a phone straight to the camera and hides the gallery, so
+  a single input could never honour a UI that offered both. A test pins that
+  exactly one input carries the attribute — the phone behaviour itself is not
+  verifiable here, which is why the plan's manual test insists on a real device.
+  Two lint errors caught real design smells rather than style nits, and both
+  were fixed properly instead of suppressed: `rectToNatural` exported from a
+  component file broke fast-refresh (moved to `lib/image.js`, where a geometry
+  helper belongs anyway), and a `useEffect` calling `setState` synchronously was
+  simply redundant — `onImageLoad` already clears the rect when a new `src`
+  loads.
+  The riskiest code here is the canvas crop: `drawImage`'s eight-argument form
+  silently produces a plausible image of the WRONG region if the source and
+  destination pairs are swapped — no error, just recognizing text the learner
+  did not select. Unit tests cannot see that, so `image.browser.test.jsx` runs
+  in real chromium against a real canvas: build a two-tone image, crop to one
+  half, read the pixels back. That is the test worth keeping if any here are.
+  Also retired four locale keys the rewrite orphaned (`verticalText`,
+  `tryHarder`, `ocrConfidenceLow`, `ocrLoading`) and reused five that already
+  existed rather than duplicating them. Frontend 64 passed (was 41); backend
+  389 passed; build clean, lint 0 errors.
 
 - **Plan 023 landed, and the model churn it warned about happened DURING the
   plan.** The two best free vision models —

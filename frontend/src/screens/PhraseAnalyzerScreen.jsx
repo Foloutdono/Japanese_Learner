@@ -171,6 +171,7 @@ export default function PhraseAnalyzerScreen({ session }) {
         <div className="card phrase-input-card">
           <ImageInput
             t={t}
+            session={session}
             onTextReady={text => { setPhrase(text); setFromImage(true) }}
           />
           <textarea
