@@ -458,8 +458,20 @@ and expensive after:
   `age = row[0] if row else True  # no job row left -> treat as stale/lost`
   branch, reporting "Generation stalled" for a session that succeeded. Passes on
   re-run and in isolation, which is exactly why it reads as flake rather than as
-  the production bug it is — a loaded server widens the window. Spun off as its
-  own task.
+  the production bug it is — a loaded server widens the window.
+  **FIXED 2026-08-26** (commit on `fix/video-session-get-race`). The fix turns
+  the job-row check into three states rather than a boolean, because `missing`
+  and `stale` were never the same thing: a missing row means *either* the worker
+  died *or* it just succeeded. Observing the row **gone** proves the worker's
+  transaction committed, so re-reading the session is then guaranteed to see the
+  final status — which is what the handler now does before declaring failure.
+  Pinned by three tests that force the interleaving via `_load_session` rather
+  than racing for it (a timing-based test would be flaky in exactly the way the
+  bug was): a finished session must return 200, a genuinely lost worker must
+  still return 503, and a live job row must still return 202. Verified the first
+  fails against the original conflation — it returns 200 then 503 for the same
+  session — while the other two pass under both, confirming the test targets
+  this defect and not the branch in general.
 
 - **Live browser verification of VideoScreen (2026-08-26, post-merge) found
   two real bugs the test suite had not caught**, since it exercises the

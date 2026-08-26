@@ -320,6 +320,28 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
     }
 
 
+def _job_state(session_id: int) -> str:
+    """'running' | 'stale' | 'missing' for a session's claim-lock row.
+
+    Three states, not a boolean: 'missing' and 'stale' both used to
+    collapse into "treat as lost", and they are not the same thing --
+    see get_video_session's comment on the race that distinction fixes.
+    """
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT updated_at < NOW() - make_interval(secs => %s) FROM video_session_jobs WHERE session_id = %s",
+                (_STALE_RUNNING_SECONDS, session_id),
+            )
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    if row is None:
+        return "missing"
+    return "stale" if row[0] else "running"
+
+
 @router.get("/api/video/session/{session_id}")
 def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
     session = _load_session(session_id, user_id)
@@ -327,24 +349,33 @@ def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
         raise HTTPException(status_code=404, detail="Session not found")
 
     if session["status"] == "generating":
-        age = None
-        conn = db_conn()
-        try:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT updated_at < NOW() - make_interval(secs => %s) FROM video_session_jobs WHERE session_id = %s",
-                    (_STALE_RUNNING_SECONDS, session_id),
+        job = _job_state(session_id)
+        if job == "missing":
+            # AMBIGUOUS, and this was a real bug: a missing job row means
+            # EITHER the worker died, OR it just succeeded. _video_worker
+            # deletes this row in the SAME transaction that sets
+            # status='ready', while the session read above happened on a
+            # DIFFERENT connection a moment earlier -- so a session that
+            # had already finished could be reported as
+            # "Generation stalled", losing it for the learner. Caught
+            # 2026-08-26 as a flaky test on a slow run; a loaded server
+            # widens the window rather than narrowing it.
+            #
+            # Observing the row GONE proves that transaction committed,
+            # so re-reading now is guaranteed to see the final status.
+            session = _load_session(session_id, user_id) or session
+            if session["status"] == "generating":
+                # Still generating with no job row: the worker really is
+                # lost (it never wrote one, or it was cleaned up under
+                # us). That is the case this branch was written for.
+                job = "stale"
+        if session["status"] == "generating":
+            if job == "stale":
+                return JSONResponse(
+                    status_code=503,
+                    content={"status": "failed", "error": "Generation stalled -- please try again."},
                 )
-                row = cur.fetchone()
-                age = row[0] if row else True  # no job row left -> treat as stale/lost
-        finally:
-            conn.close()
-        if age:
-            return JSONResponse(
-                status_code=503,
-                content={"status": "failed", "error": "Generation stalled -- please try again."},
-            )
-        return JSONResponse(status_code=202, content={"status": "generating"})
+            return JSONResponse(status_code=202, content={"status": "generating"})
 
     if session["status"] == "failed":
         return JSONResponse(

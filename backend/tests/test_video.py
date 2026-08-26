@@ -264,3 +264,96 @@ def test_window_cap_applies_to_the_paste_path_too(client, monkeypatch):
     assert response.json()["windowCapped"] is True
     final = _poll_until_settled(client, response.json()["sessionId"])
     assert final.json()["windowEnd"] == 300.0
+
+
+# ── The finished-session-reported-as-stalled race ─────────────────
+# _video_worker sets status='ready' and deletes the job row in ONE
+# transaction; get_video_session read the session and the job row on TWO
+# connections. A worker committing between those two reads made a
+# succeeded session report 503 "Generation stalled".
+#
+# Pinned by forcing the interleaving rather than by timing: the real
+# thing only appeared as a flaky failure on a slow run, and a test that
+# reproduces it by racing would be flaky in exactly the same way.
+def test_finished_session_is_not_reported_as_stalled(client, monkeypatch):
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("test.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "60"},
+    )
+    session_id = response.json()["sessionId"]
+    settled = _poll_until_settled(client, session_id)
+    assert settled.status_code == 200, "precondition: the session really did succeed"
+
+    # The DB now holds status='ready' with no job row -- exactly the
+    # state the worker leaves behind. Hand the handler the stale
+    # 'generating' snapshot it would have read a moment before the
+    # worker's commit, once.
+    real_load = video_module._load_session
+    calls = {"n": 0}
+
+    def _stale_first(sid, user_id):
+        calls["n"] += 1
+        loaded = real_load(sid, user_id)
+        if calls["n"] == 1 and loaded is not None:
+            return {**loaded, "status": "generating", "sentences": None}
+        return loaded
+
+    monkeypatch.setattr(video_module, "_load_session", _stale_first)
+
+    result = client.get(f"/api/video/session/{session_id}")
+    assert result.status_code == 200, (
+        f"a finished session was reported as {result.status_code}: {result.json()}"
+    )
+    assert result.json()["status"] == "ready"
+    assert result.json()["sentences"]
+    # It must have re-read rather than trusted the first snapshot.
+    assert calls["n"] >= 2
+
+
+def test_a_genuinely_lost_worker_is_still_reported_as_stalled(client, monkeypatch):
+    """The re-read must not swallow the case the branch exists for: a
+    session stuck in 'generating' with no job row really is lost."""
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("test.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "60"},
+    )
+    session_id = response.json()["sessionId"]
+    _poll_until_settled(client, session_id)
+
+    # Every read says 'generating', and the job row is already gone.
+    real_load = video_module._load_session
+
+    def _always_generating(sid, user_id):
+        loaded = real_load(sid, user_id)
+        return None if loaded is None else {**loaded, "status": "generating"}
+
+    monkeypatch.setattr(video_module, "_load_session", _always_generating)
+
+    result = client.get(f"/api/video/session/{session_id}")
+    assert result.status_code == 503
+    assert "stalled" in result.json()["error"].lower()
+
+
+def test_a_running_job_still_reports_generating(client, monkeypatch):
+    """A live job row must mean 202, not 503 -- otherwise every poll
+    during normal generation would fail the session."""
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("test.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "60"},
+    )
+    session_id = response.json()["sessionId"]
+    _poll_until_settled(client, session_id)
+
+    real_load = video_module._load_session
+    monkeypatch.setattr(
+        video_module, "_load_session",
+        lambda sid, uid: (lambda r: None if r is None else {**r, "status": "generating"})(real_load(sid, uid)),
+    )
+    monkeypatch.setattr(video_module, "_job_state", lambda sid: "running")
+
+    result = client.get(f"/api/video/session/{session_id}")
+    assert result.status_code == 202
+    assert result.json()["status"] == "generating"
