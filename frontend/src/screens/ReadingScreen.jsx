@@ -103,7 +103,7 @@ export default function ReadingScreen({ session }) {
   // WordDetail just needs {title, level, entry, stats} — sourced from
   // the AI breakdown's word/kanji shape (the backend no longer returns
   // a morphology-based `segments` field at all, see reading.py's
-  // _finish_phrase note). Mirrors PhraseAnalyzerScreen's
+  // _finish_phrase note). Mirrors AnalyzerScreen's
   // openVocabDetail/openKanjiDetail; kept as its own small function
   // here rather than importing those directly since the two screens'
   // detail shapes differ slightly (this one has no contextMeaning).

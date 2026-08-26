@@ -421,6 +421,44 @@ const stats = {
 
 // ── Phrases analyser ────────────────────────────────────────────
 const phraseAnalyzer = {
+  // 解析駅 — l'analyseur fusionné (plan 027). Une gare, trois voies :
+  // 文字 / 写真 / 動画. Les clés phraseAnalyzer* ci-dessous sont
+  // conservées : elles nomment encore la section partout où l'ancien
+  // texte n'a pas été retiré.
+  analyzerTitle:       'Analyseur',
+  analyzerDesc:        "Tout ce que vous croisez en japonais\nTapé, photographié ou sous-titré\nDécortiqué mot à mot",
+  sourceText:          'Texte',
+  sourcePhoto:         'Photo',
+  sourceVideo:         'Vidéo',
+  sourceTextHint:      'Tapez ou collez du japonais',
+  sourcePhotoHint:     'Photographiez ou importez une image',
+  sourceVideoHint:     'Sous-titres ou transcription',
+  platformUnit:        'Voie',
+  // 路線図 (plan 028) — le Passage dessiné comme une ligne dont les
+  // arrêts sont ses Phrases, une seule ouverte à la fois.
+  routeMap:            'Plan de ligne',
+  currentStop:         'Arrêt actuel',
+  nextStop:            'Suivant',
+  stopsInPassage:      n => `${n} phrase${n === 1 ? '' : 's'}`,
+  jumpToStop:          'Aller à cette phrase',
+  // 改札口 (plan 029) — les trois entrées.
+  intakeTextLead:      'Tapez ou collez du japonais.',
+  intakePhotoLead:     'Une page, un panneau, une capture — tout ce qui porte du japonais.',
+  intakeVideoLead:     'Un fichier de sous-titres, ou une transcription collée.',
+  shootPhoto:          'Photographier',
+  pickPhoto:           'Choisir',
+  charCount:           n => `${n} caractères`,
+  dropSubtitles:       'Déposez un fichier .srt, .vtt ou .ass ici, ou choisissez-en un',
+  // Doit correspondre à routes/video.py:50 (_MAX_UPLOAD_BYTES = 1 Mo).
+  subtitleAccepted:    'SRT, VTT et ASS · jusqu\'à 1 Mo',
+  windowLabel:         'Extrait',
+  windowFrom:          'De',
+  windowTo:            'À',
+  windowHint:          m => `${m} sur 5:00 maximum`,
+  windowFormatHint:    'mm:ss ou secondes',
+  ingestFile:          'Fichier de sous-titres',
+  ingestPaste:         'Coller une transcription',
+  historyTitle:        'Récent',
   phraseAnalyzerTitle: 'Analyseur de phrases',
   phraseAnalyzerDesc:  'Collez une phrase, voyez-la démontée\nChaque mot, sa lecture, votre historique\nPour celle que vous avez presque comprise',
   phraseAnalyzer:      'Analyseur de phrases',
@@ -503,7 +541,6 @@ const video = {
   windowCapped:        'La fenêtre a été limitée à 5 minutes.',
   analyzing:           'Analyse des sous-titres…',
   captionsUnavailable: "Impossible de récupérer les sous-titres de cette vidéo.",
-  noCaptionTrack:      'Cette vidéo n\'a pas de sous-titres japonais.',
   subtitleTooLarge:    'Ce fichier de sous-titres est trop volumineux.',
   breakThisDown:       'Décomposer cette phrase',
   transcript:          'Transcription',

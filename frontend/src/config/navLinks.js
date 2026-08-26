@@ -36,11 +36,12 @@ function sections(t) {
     // type the Japanese translation; the deck's reference translation
     // plus an LLM analysis help you judge your own attempt.
     { icon: '翻訳', title: t.translationTitle || 'Translation', desc: t.translationDesc || 'Translate into Japanese', path: '/translation', color: 'var(--line-honyaku)', scope: 'home' },
-    { icon: '解析', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: 'var(--line-kaiseki)', scope: 'home' },
-    // Study a YouTube video's (or an uploaded subtitle file's) Japanese
-    // captions live, with the same local-tier breakdown and mining the
-    // analyzer offers -- see screens/VideoScreen.jsx.
-    { icon: '動画', title: t.videoTitle || 'Video', desc: t.videoDesc || 'Study a video\'s Japanese subtitles', path: '/video', color: 'var(--line-douga)', scope: 'home' },
+    // 解析 — one station, three platforms: typed text, a photo, a video's
+    // subtitles. Was two board rows (/phrase-analyzer and /video) until
+    // plan 027; they always produced the same thing — a Passage of
+    // Sentences — and CONTEXT.md's own definition of Passage lists all
+    // three sources as one act. See screens/AnalyzerScreen.jsx.
+    { icon: '解析', title: t.analyzerTitle, desc: t.analyzerDesc, path: '/analyzer', color: 'var(--line-kaiseki)', scope: 'home' },
     { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: 'var(--line-jisho)',   scope: 'home' },
     { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: 'var(--line-decks)',   scope: 'home' },
     // Generated mock exams (vocab/grammar/reading/listening, built to

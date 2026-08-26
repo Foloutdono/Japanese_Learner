@@ -436,6 +436,44 @@ const stats = {
 
 // ── Phrases analyser ────────────────────────────────────────────
 const phraseAnalyzer = {
+  // 解析駅 — the merged analyser (plan 027). One station, three
+  // platforms: 文字 / 写真 / 動画. The phraseAnalyzer* keys below are
+  // kept for now; they still name the section wherever the old copy
+  // has not been retired yet.
+  analyzerTitle:       'Analyzer',
+  analyzerDesc:        'Anything Japanese you ran into\nTyped, photographed, or captioned\nTaken apart word by word',
+  sourceText:          'Text',
+  sourcePhoto:         'Photo',
+  sourceVideo:         'Video',
+  sourceTextHint:      'Type or paste Japanese',
+  sourcePhotoHint:     'Shoot or upload a picture',
+  sourceVideoHint:     'Subtitles or a transcript',
+  platformUnit:        'Platform',
+  // 路線図 (plan 028) — the Passage drawn as a line whose stops are its
+  // Sentences, one of them open at a time.
+  routeMap:            'Route map',
+  currentStop:         'Current stop',
+  nextStop:            'Next',
+  stopsInPassage:      n => `${n} ${n === 1 ? 'sentence' : 'sentences'}`,
+  jumpToStop:          'Go to this sentence',
+  // 改札口 (plan 029) — the three intakes.
+  intakeTextLead:      'Type or paste anything Japanese.',
+  intakePhotoLead:     'A page, a sign, a screenshot — anything with Japanese on it.',
+  intakeVideoLead:     'A subtitle file, or a transcript you pasted.',
+  shootPhoto:          'Shoot',
+  pickPhoto:           'Choose',
+  charCount:           n => `${n} characters`,
+  dropSubtitles:       'Drop a .srt, .vtt or .ass file here, or choose one',
+  // Must agree with routes/video.py:50 (_MAX_UPLOAD_BYTES = 1 MB).
+  subtitleAccepted:    'SRT, VTT and ASS · up to 1 MB',
+  windowLabel:         'Section',
+  windowFrom:          'From',
+  windowTo:            'To',
+  windowHint:          m => `${m} of a 5:00 maximum`,
+  windowFormatHint:    'mm:ss or seconds',
+  ingestFile:          'Subtitle file',
+  ingestPaste:         'Paste a transcript',
+  historyTitle:        'Recent',
   phraseAnalyzerTitle: 'Phrase analyzer',
   phraseAnalyzerDesc:  'Paste a sentence, see it taken apart\nEvery word, its reading, your history with it\nFor the one you almost understood',
   phraseAnalyzer:      'Phrase analyzer',
@@ -518,7 +556,6 @@ const video = {
   windowCapped:        'The window was capped at 5 minutes.',
   analyzing:           'Analyzing the subtitles…',
   captionsUnavailable: "Couldn't get this video's captions.",
-  noCaptionTrack:      'This video has no Japanese captions.',
   subtitleTooLarge:    'This subtitle file is too large.',
   breakThisDown:       'Break this down',
   transcript:          'Transcript',

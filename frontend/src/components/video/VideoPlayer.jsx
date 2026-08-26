@@ -7,7 +7,7 @@ import { loadYouTubeIframeAPI } from '../../lib/youtubePlayer'
 const POLL_MS = 250
 
 // Thin wrapper around the official YouTube IFrame Player. Exposes
-// seekTo/pause/play imperatively (VideoScreen drives these -- e.g.
+// seekTo/pause/play imperatively (AnalyzerScreen drives these -- e.g.
 // pausing when the learner taps a word) and reports the current
 // playback time upward via onTimeUpdate, polled rather than push-driven
 // since the IFrame API has no time-update event of its own.

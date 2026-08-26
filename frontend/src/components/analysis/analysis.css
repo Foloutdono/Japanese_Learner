@@ -1,0 +1,802 @@
+/* ══ 解析 — the analyser ═══════════════════════════════════
+   Everything the 解析 station owns: the platform rail, the three
+   intakes, the 路線図, and the responsive layout that stands the
+   line up beside the stage or lies it down as a strip.
+
+   Its own file, imported from index.css, for the reason
+   src/exam/exam.css already is one: a feature this size is easier to
+   read, and to delete, when it is not 800 lines buried in a 16,000
+   line sheet. Tokens (--bg-panel, --line-kaiseki, --surface...) still
+   come from index.css's :root, so this file defines no colours of its
+   own -- one palette, one place.
+
+   Written by plans 027-030; each block below names its plan. */
+
+/* ── 解析 — the analyser (plan 027) ────────────────────────
+   ONE rhythm for the whole screen, and one rule: a stack's parent
+   owns the gap. Children carry no margins for spacing, and nothing
+   here uses a negative margin.
+
+   The screen this replaces had six paddings for one card object
+   (.phrase-input-card 20/24, .phrase-history-card 16/24,
+   .phrase-result-card 20/24, .phrase-word-card 16/20,
+   .phrase-error-card 16, and .card itself 15/24) plus a -12px margin
+   correcting the box above it. That is what padding drift looks
+   like, and tokens are how it stops.
+
+   The clamps scale continuously instead of stepping at a
+   breakpoint, so there is no width at which the screen looks
+   half-adjusted. */
+.analyzer {
+  --anl-gap:          clamp(16px, 1.2vw + 10px, 24px);
+  --anl-pad-inline:   clamp(16px, 1.6vw + 10px, 28px);
+  --anl-pad-block:    clamp(18px, 1.2vw + 12px, 26px);
+  --anl-radius:       var(--surface-radius);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--anl-gap);
+}
+
+/* The intake cards still carry their own pre-merge margins (plan 029
+   retires them). Until then, zero the bottom margin inside .analyzer
+   so the parent's gap is the only thing setting the rhythm -- two
+   spacing systems stacked is exactly the drift this block exists to
+   end. */
+.analyzer > *,
+.analyzer .card { margin-bottom: 0; }
+
+/* Every panel on this screen is the same piece of material. */
+.anl-panel {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  padding: var(--anl-pad-block) var(--anl-pad-inline);
+}
+
+/* ── のりば — the platform rail ──
+   Three signs at the head of three platforms. Same four registers as
+   a 駅名標 (number, kana, kanji, plain language), because it is the
+   same signage system — see components/station/StationSign.jsx. */
+.anl-rail {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(8px, 0.8vw + 4px, 14px);
+}
+.anl-rail__sign {
+  --sign: var(--line-color, var(--line-kaiseki));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: clamp(12px, 1vw + 8px, 18px) 10px 0;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius) var(--anl-radius) 0 0;
+  color: var(--text-secondary);
+  text-align: center;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+.anl-rail__sign[aria-selected="true"] { color: var(--text-primary); }
+.anl-rail__sign:hover { background: var(--bg-card-hover); }
+
+.anl-rail__no {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--sign);
+}
+.anl-rail__kana {
+  font-family: var(--font-jp);
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+}
+.anl-rail__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: clamp(1.1rem, 0.7rem + 1.4vw, 1.55rem);
+  letter-spacing: 0.1em;
+  text-indent: 0.1em;
+  line-height: 1.2;
+}
+.anl-rail__latin {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  text-transform: uppercase;
+}
+/* The stripe is the sign's bottom edge, exactly as on a station
+   plate — full-bleed to the sign's own width, not inset. */
+.anl-rail__stripe {
+  width: 100%;
+  height: 4px;
+  margin-top: clamp(8px, 0.6vw + 5px, 12px);
+  background: var(--surface-line);
+  border-radius: 0 0 2px 2px;
+  transition: background 0.2s ease;
+}
+.anl-rail__sign[aria-selected="true"] .anl-rail__stripe { background: var(--sign); }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-rail__sign,
+  .anl-rail__stripe { transition: none; }
+}
+
+/* ── 路線図 — the Passage as a line (plan 028) ─────────────
+   Every Sentence is a stop, in order, on one rail. Same drawing as
+   LevelSelector's JLPT line and for the same stated reason: a list
+   says "pick one of these", a line says "this is how far it goes".
+
+   Tighter than that one on purpose — a JLPT line has five stops and
+   a five-minute video window can have fifty. */
+.anl-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--anl-gap);
+}
+.anl-stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--anl-gap);
+  min-width: 0;
+}
+
+.anl-line {
+  --route-gap: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--route-gap);
+}
+
+.anl-stop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px 10px 44px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--anl-radius);
+  color: var(--text-secondary);
+  text-align: left;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.anl-stop:hover { background: var(--overlay-hover); color: var(--text-primary); }
+
+/* Drawn per stop and bled into the gap above and below, so the line
+   stays unbroken between them — the technique .route-stop__rail
+   uses, and the reason a single rail behind the list will not do:
+   this list scrolls independently of the page. */
+.anl-stop__rail {
+  position: absolute;
+  left: 19px;
+  top: calc(-1px - var(--route-gap));
+  bottom: calc(-1px - var(--route-gap));
+  width: 3px;
+  background: color-mix(in srgb, var(--line-color, var(--line-kaiseki)) 45%, transparent);
+}
+.anl-stop--first .anl-stop__rail { top: 50%; border-radius: 2px 2px 0 0; }
+.anl-stop--last  .anl-stop__rail { bottom: 50%; border-radius: 0 0 2px 2px; }
+
+.anl-stop__marker {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 3px solid var(--line-color, var(--line-kaiseki));
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+/* 現在地 — you are here. The one filled marker on the line. */
+.anl-stop[aria-current="true"] {
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--line-color, var(--line-kaiseki)) 50%, var(--surface-line));
+  color: var(--text-primary);
+}
+.anl-stop[aria-current="true"] .anl-stop__marker {
+  background: var(--line-color, var(--line-kaiseki));
+  transform: scale(1.25);
+}
+
+.anl-stop__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-jp);
+  font-size: 0.9rem;
+}
+
+/* 鶯色 — the video source's own colour, spent on the one piece of
+   data only a video Sentence has. See the --line-douga note in the
+   token block. */
+.anl-stop__time {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--line-douga);
+}
+
+.anl-stop__iplus {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
+}
+
+/* The Explain control. Replaces .phrase-explain-row, whose
+   `margin: -12px 0 24px` was hand-correcting the box above it — this
+   one sits in .anl-stage, whose parent owns the gap, so there is
+   nothing left for a negative margin to correct. */
+.anl-explain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.anl-explain__hint { font-size: 0.82rem; color: var(--text-secondary); }
+
+/* 次は — the in-car next-stop display. */
+.anl-next {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+  padding: var(--anl-pad-block) var(--anl-pad-inline);
+  background: var(--bg-panel);
+  border: none;
+  border-radius: var(--anl-radius);
+  color: var(--text-on-panel);
+  text-align: left;
+}
+.anl-next__jp {
+  flex-shrink: 0;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  color: var(--text-on-panel-soft);
+}
+.anl-next__latin {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.anl-next__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-jp);
+}
+.anl-next__go { flex-shrink: 0; color: var(--line-kaiseki); }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-stop,
+  .anl-stop__marker { transition: none; }
+}
+
+/* ── 改札口 — the intakes (plan 029) ───────────────────────
+   One material, one rhythm. Every padding here is a token from the
+   .analyzer block; if you find yourself typing a px pair, stop and
+   ask which token you meant. */
+.anl-intake__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: var(--anl-gap);
+}
+.anl-intake__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+}
+.anl-intake__lead { color: var(--text-secondary); font-size: 0.86rem; }
+
+/* The analyser's primary action. NOT .phrase-analyze-btn, which is
+   --accent shu-iro and is also used by DeckPicker and ImageCropper:
+   a vermillion button under a 葡萄色 plate is two colour languages on
+   one screen, which is the exact defect --deck-action was created to
+   fix for 教材 (see its note in the token block). */
+.anl-action {
+  background: var(--line-kaiseki);
+  color: var(--text-on-panel);
+  border: none;
+  border-radius: 4px;
+  padding: 9px 22px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  transition: filter 0.16s ease;
+}
+.anl-action:hover:not(:disabled) { filter: brightness(1.15); }
+.anl-action:disabled { opacity: 0.45; cursor: default; }
+
+/* 文字 — the writing slip. Sumi ink, the app's one high-contrast
+   structural surface (see the --bg-panel note in the token block),
+   so the thing you are about to hand over reads as a physical slip
+   rather than as another panel. */
+.anl-slip {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--anl-pad-block) var(--anl-pad-inline);
+  background: var(--bg-panel);
+  border-radius: var(--anl-radius);
+}
+.anl-slip__field {
+  width: 100%;
+  min-height: 6.5rem;
+  max-height: 40vh;
+  padding: 0;
+  background: none;
+  border: none;
+  resize: none;
+  overflow-y: auto;
+  color: var(--text-on-panel);
+  font-family: var(--font-jp);
+  font-size: clamp(1rem, 0.85rem + 0.5vw, 1.2rem);
+  line-height: 1.9;
+}
+.anl-slip__field::placeholder { color: var(--text-on-panel-soft); }
+.anl-slip__field:focus { outline: none; }
+/* The ring goes on the slip, not the borderless field inside it —
+   otherwise focus is invisible, which plan 005 exists to prevent. */
+.anl-slip:focus-within {
+  outline: 2px solid var(--line-kaiseki);
+  outline-offset: 2px;
+}
+.anl-slip__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.anl-slip__count {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel-soft);
+}
+.anl-slip__provenance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-on-panel-soft);
+}
+/* 写 — a seal, not a word: the provenance badge says "this came from
+   a photo" in one character, the way a stamp would. */
+.anl-slip__stamp {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  color: var(--accent);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+/* 写真 — the two intake tiles. Side by side, stacked on a phone. */
+.anl-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--anl-gap);
+  margin-bottom: var(--anl-gap);
+}
+.anl-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: clamp(18px, 2vw + 10px, 30px) 12px;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  color: var(--text-primary);
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.anl-tile:hover:not(:disabled) {
+  background: var(--bg-card-hover);
+  border-color: color-mix(in srgb, var(--line-kaiseki) 45%, var(--surface-line));
+}
+.anl-tile:disabled { opacity: 0.5; cursor: default; }
+.anl-tile__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+.anl-tile__latin {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* 動画 — the two ingests, as peers rather than nested disclosures. */
+.anl-ingest {
+  display: flex;
+  gap: 6px;
+  margin-bottom: var(--anl-gap);
+  border-bottom: 1px solid var(--surface-line);
+}
+/* Stacked, not side by side: the French labels are long
+   ("FICHIER DE SOUS-TITRES"), and set on one line with the Japanese
+   they wrapped the KANJI mid-word — 字幕フ / ァイル — on a phone.
+   The Japanese never wraps; the plain-language line under it may. */
+.anl-ingest__tab {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.anl-ingest__jp {
+  font-family: var(--font-jp);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+.anl-ingest__tab[aria-selected="true"] {
+  color: var(--text-primary);
+  border-bottom-color: var(--line-kaiseki);
+}
+.anl-ingest__latin {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* The dock's drop target — a real one, replacing the raw
+   <input type="file"> that was the only piece of OS chrome on a
+   screen that draws its own station plates. */
+.anl-drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: clamp(24px, 3vw + 12px, 44px) var(--anl-pad-inline);
+  border: 1px dashed color-mix(in srgb, var(--line-kaiseki) 50%, var(--surface-line));
+  border-radius: var(--anl-radius);
+  background: var(--surface);
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.anl-drop--over {
+  background: var(--bg-card-hover);
+  border-color: var(--line-kaiseki);
+  border-style: solid;
+}
+.anl-drop__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  color: var(--line-kaiseki);
+}
+.anl-drop__lead { font-size: 0.88rem; }
+.anl-drop__note { font-size: 0.74rem; color: var(--text-secondary); }
+/* Clipped, not display:none — the latter takes it out of the
+   accessibility tree. Same pattern as .analysis-image-input__file. */
+.anl-drop__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+.anl-drop:focus-within {
+  outline: 2px solid var(--line-kaiseki);
+  outline-offset: 2px;
+}
+
+/* A real single-line field. Was .phrase-textarea — an 18px textarea
+   rule, resize: vertical and all, on an <input type="text">. */
+.anl-field {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--anl-radius);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+}
+.anl-field--bad { border-color: var(--danger); }
+.anl-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: var(--anl-gap);
+}
+
+/* 区間 — the window. Two time fields and a readout, not two number
+   spinners labelled "(seconds)". */
+.anl-window {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--anl-gap);
+  flex-wrap: wrap;
+  margin-top: var(--anl-gap);
+}
+.anl-window__field { display: flex; flex-direction: column; gap: 4px; min-width: 92px; }
+.anl-window__label {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-window__readout {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+/* 案内 — an on-screen notice (the yt-dlp help, the paste steps). */
+.anl-notice {
+  margin-top: var(--anl-gap);
+  padding: var(--anl-pad-block) var(--anl-pad-inline);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+.anl-notice > summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.anl-notice__lead { color: var(--text-secondary); margin: 10px 0 6px; }
+.anl-notice__steps { margin: 6px 0 0; padding-left: 20px; color: var(--text-secondary); }
+.anl-notice__steps li { margin: 2px 0; }
+.anl-notice__cmd {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--bg-panel);
+  border-radius: 4px;
+  color: var(--text-on-panel);
+  font-size: 0.76rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-x: auto;
+}
+
+/* 運行履歴 — past services. */
+.anl-history { display: flex; flex-direction: column; }
+.anl-history__empty { color: var(--text-secondary); font-size: 0.86rem; }
+.anl-history__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--surface-line);
+}
+.anl-history__row:last-child { border-bottom: none; }
+.anl-history__open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 4px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  text-align: left;
+}
+.anl-history__open:hover { color: var(--line-kaiseki); }
+.anl-history__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-jp);
+  font-size: 0.92rem;
+}
+.anl-history__source {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--surface-line);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.64rem;
+}
+.anl-history__delete {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 4px 6px;
+}
+.anl-history__delete:hover { color: var(--danger); }
+
+/* Status lines — analysing, capped window, truncated Passage, a
+   failure. One box, one rhythm, instead of .phrase-error-card's own
+   16px padding and 24px bottom margin. */
+.anl-status { font-size: 0.9rem; color: var(--text-secondary); }
+.anl-status--bad { color: var(--danger); }
+
+@media (max-width: 560px) {
+  .anl-tiles { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anl-tile,
+  .anl-drop,
+  .anl-action,
+  .anl-ingest__tab { transition: none; }
+}
+
+/* ── 車内案内 — the responsive layout (plan 030) ────────────
+   Panels arrive the way every other object in this app does. NOT the
+   stops: the nth-child stagger at the top of this file is sized for
+   lists of five to eight, and a fifty-stop Passage staggered at 30ms
+   takes a second and a half to finish drawing — the last stops would
+   land after the reader has already started scrolling. */
+.anl-panel,
+.anl-results { animation: arrive 0.28s cubic-bezier(0.22, 0.68, 0.32, 1) backwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-panel,
+  .anl-results { animation: arrive-soft 0.2s linear backwards; }
+}
+
+/* ── The stage and the line, side by side ──
+   ONE one-off breakpoint, per the rule in the Breakpoints block near
+   the top of this file: the component is .anl-results, and the reason
+   is that the route rail plus a readable breakdown need ~1040px of
+   content before they stop fighting for the same column. 1100/1099 is
+   the same complementary integer pair .dict-dock uses, written as
+   integers so both bounds can never match. */
+@media (min-width: 1100px) {
+  .anl-results {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--anl-gap);
+  }
+
+  /* The scroll lives on the rail itself. A sticky column pinned to the
+     viewport with no overflow of its own cannot hold a fifty-stop
+     Passage — that is the mistake .dict-dock's own comment records,
+     and it is the same mistake here. */
+  .anl-line {
+    flex: 0 0 clamp(260px, 24vw, 340px);
+    position: sticky;
+    top: 24px;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 4px;   /* room for the scrollbar, so no stop sits under it */
+  }
+
+  .anl-stage {
+    flex: 1;
+    /* Without this a long unbroken Japanese line refuses to shrink
+       (a flex item's min-width is auto) and pushes the rail off screen. */
+    min-width: 0;
+  }
+}
+
+/* ── 停車駅案内 — the stopping-pattern strip ──
+   The band above a train door: the same stops, laid along the
+   direction of travel, with where-you-are lit. Sticky like
+   .stroke-rail and for the same stated reason — a route map you can
+   only jump from is half a route map. */
+@media (max-width: 1099px) {
+  /* ONE number governs both sticky siblings. The strip is pinned to it
+     with min-height and the player offsets by it, so they cannot drift
+     apart -- which they had: the player was written against an assumed
+     64px strip and the real one measures 92px (video stops carry a
+     timestamp under the text), so the player overlapped its bottom
+     28px whenever both were stuck. Two hand-kept numbers is how that
+     happens; one token is how it stops. */
+  .anl-results { --anl-strip-h: 92px; }
+
+  .anl-line--strip {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    flex-direction: row;
+    gap: 0;
+    min-height: var(--anl-strip-h);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    padding: 10px 0 12px;
+    background: linear-gradient(180deg,
+      var(--bg-main) 0%, var(--bg-main) 78%, transparent 100%);
+  }
+  .anl-line--strip .anl-stop {
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 88px;
+    padding: 22px 6px 8px;
+  }
+  /* The rail runs left-right now, threaded through the markers. */
+  .anl-line--strip .anl-stop__rail {
+    left: -50%;
+    right: -50%;
+    top: 12px;
+    bottom: auto;
+    width: auto;
+    height: 3px;
+  }
+  .anl-line--strip .anl-stop--first .anl-stop__rail { left: 50%; }
+  .anl-line--strip .anl-stop--last  .anl-stop__rail { right: 50%; }
+  .anl-line--strip .anl-stop__marker { left: 50%; top: 6px; margin: 0 0 0 -6px; }
+  .anl-line--strip .anl-stop__text {
+    width: 100%;
+    text-align: center;
+    font-size: 0.78rem;
+  }
+
+  /* Under the strip, not over it, and below it in z. Offset by the
+     strip's own height token above rather than a second hand-kept
+     number. */
+  .anl-player {
+    position: sticky;
+    top: var(--anl-strip-h);
+    z-index: 4;
+    background: var(--bg-main);
+    padding-bottom: 8px;
+  }
+}

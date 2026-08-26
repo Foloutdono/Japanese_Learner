@@ -44,8 +44,13 @@ const STATIONS = {
   '/reading':               { code: 'DS', kana: 'どくしょ' },
   '/reading-comprehension': { code: 'RK', kana: 'りかい' },
   '/translation':           { code: 'HY', kana: 'ほんやく' },
-  '/phrase-analyzer':       { code: 'KS', kana: 'かいせき' },
-  '/video':                 { code: 'DG', kana: 'どうが' },
+  // 解析 — one station, three platforms (文字 / 写真 / 動画). Was two
+  // entries, /phrase-analyzer and /video (DG どうが), until plan 027
+  // merged them: both produced the same thing, a Passage of Sentences.
+  // The old paths still resolve — App.jsx redirects them here — but they
+  // are deliberately absent from this registry, because they are not
+  // places any more.
+  '/analyzer':              { code: 'KS', kana: 'かいせき' },
   '/dictionary':            { code: 'JS', kana: 'じしょ' },
   '/decks':                 { code: 'KZ', kana: 'きょうざい' },
   '/exam':                  { code: 'MS', kana: 'もし' },

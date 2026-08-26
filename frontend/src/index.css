@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Serif+JP:wght@600;700&display=swap');
 @import url('./exam/exam.css');
+@import url('./components/analysis/analysis.css');
 
 /* ── Design system, light + dark ──────────────────────────────
    Same variable names in both themes — only the values differ under
@@ -204,6 +205,11 @@
   --line-jisho:     #c99a3e;  /* 山吹色   yamabuki,    kerria gold */
   --line-decks:     #9c4a5e;  /* 蘇芳     suou,        sappanwood  */
   --line-exam:      #8a6b4f;  /* 茶色     cha-iro,     tea brown   */
+  /* 鶯色 uguisu — no longer a board line (plan 027 merged 動画 into
+     解析). Kept, and reserved for exactly one thing: the timestamp
+     chips on video Sentences, the only data that exists for that
+     source and no other. Do not reuse it for a section without
+     reading the note at the top of this block. */
   --line-douga:     #7a8a3f;  /* 鶯色     uguisu-iro,  bush warbler */
   /* Not a line — the pass's ink. /profile and /settings were given
      line colours when they were modelled as stations; they are the
@@ -293,6 +299,7 @@
   --line-jisho:     #a97a25;
   --line-decks:     #853d4e;
   --line-exam:      #7a5c40;
+  /* Retired as a board line by plan 027 — see the dark-theme value. */
   --line-douga:     #6a7a35;
   --pass-ink:       #4c6072;
 
@@ -9457,7 +9464,7 @@ textarea:focus-visible {
 .grammar-example-card__en { font-size: 13px; color: var(--text-primary); }
 
 /* ── Shared status pill / legend / word coloring ─────────────
-   Used by PhraseAnalyzerScreen and ReadingScreen: both color
+   Used by AnalyzerScreen and ReadingScreen: both color
    words/kanji by SRS status and show a click-through detail panel. */
 .status-pill {
   font-size: 12px;
@@ -9623,25 +9630,13 @@ textarea:focus-visible {
 .stat-row__label { color: var(--text-secondary); }
 
 /* ── Phrase analyzer screen ───────────────────────────────── */
-.phrase-input-card { margin-bottom: 24px; padding: 20px 24px; }
 
-.phrase-textarea {
-  width: 100%;
-  font-size: 18px;
-  padding: 12px;
-  border-radius: 8px;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border: 1px solid var(--border);
-  resize: vertical;
-}
 
 .phrase-input-actions { display: flex; justify-content: space-between; margin-top: 12px; }
 
 .phrase-history-toggle { background: var(--chip-bg); color: var(--text-primary); font-size: 13px; }
 .phrase-analyze-btn { background: var(--accent); color: var(--text-on-panel); font-size: 14px; padding: 8px 20px; }
 
-.phrase-history-card { margin-bottom: 24px; padding: 16px 24px; }
 .phrase-history-empty { color: var(--text-secondary); font-size: 14px; }
 
 .phrase-history-row {
@@ -9653,29 +9648,16 @@ textarea:focus-visible {
   cursor: pointer;
   font-size: 15px;
 }
-.phrase-history-delete { background: none; color: var(--danger); font-size: 12px; padding: 2px 8px; }
-.phrase-history-source {
-  margin-left: 8px;
-  font-size: 11px;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1px 6px;
-}
 
 .phrase-error-card { padding: 16px; color: var(--danger); margin-bottom: 24px; }
 
-/* ── Per-Sentence Explain control (plan 016) -- the deep tier is bought
-   one Sentence at a time, never for the whole Passage. Additive only. */
-.phrase-explain-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: -12px 0 24px;
-  padding: 0 4px;
-}
-.phrase-explain-hint { font-size: 13px; color: var(--text-secondary); }
+/* The per-Sentence Explain control (plan 016) lived here as
+   .phrase-explain-row until plan 028. Its `margin: -12px 0 24px` was a
+   hard-coded correction for the margin on the box above it, and its
+   only consumer was the per-Sentence map that plan 028 deleted. See
+   .anl-explain in components/analysis/analysis.css, which sits in a
+   parent that owns its own gap. */
+
 
 /* ── Photo input (plan 018) -- pick/shoot an image, OCR it locally.
    Additive only. */
@@ -9728,20 +9710,6 @@ textarea:focus-visible {
   color: inherit;
 }
 
-.analysis-image-input__row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.analysis-image-input__vertical-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
 .analysis-image-input__file {
   position: absolute;
   width: 1px;
@@ -9759,125 +9727,29 @@ textarea:focus-visible {
   font-size: 13px;
   color: var(--danger);
 }
-.analysis-image-input__low-confidence {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  color: var(--warning);
-}
-.analysis-image-input__hint {
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
 
-/* ── Video study mode (plan 019) -- player + transcript + live
-   breakdown. Additive only. */
-.video-setup__label {
-  display: block;
-  margin: 12px 0 6px;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-.video-setup__label--upload { margin-top: 20px; }
+/* ── The YouTube player frame (plan 019) ──
+   All that is left of the video screen's own styles: plan 027 merged
+   it into 解析, plan 028 replaced its flat transcript with the 路線図,
+   and plan 029 replaced its setup form with the dock. The player is
+   the one part that was never a layout problem. */
 
-/* Paste-transcript ingest (plans/025). Sits above upload in the DOM
-   because it is the path that works in production -- YouTube blocks
-   this backend's datacenter IP for caption fetches, never the player. */
-.video-setup__label--paste { margin-top: 20px; }
 
-.video-setup__how {
-  margin: 6px 0 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: var(--surface-2, rgba(127, 127, 127, 0.08));
-  font-size: 0.86rem;
-  line-height: 1.45;
-}
 
-.video-setup__how-lead {
-  margin-bottom: 6px;
-  opacity: 0.85;
-}
 
-.video-setup__how-steps {
-  margin: 0;
-  padding-left: 1.2em;
-}
 
-.video-setup__how-steps li { margin: 2px 0; }
 
 /* File-first video setup (2026-08-26). The yt-dlp help and the paste
    fallback are <details>, so the default view is just "pick a file". */
-.video-setup__how,
-.video-setup__paste {
-  margin: 10px 0;
-  border: 1px solid var(--line, rgba(128,128,128,0.3));
-  border-radius: 6px;
-  padding: 8px 10px;
-}
 
-.video-setup__how > summary,
-.video-setup__paste > summary {
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
 
-.video-setup__cmd {
-  margin: 6px 0 10px;
-  padding: 8px 10px;
-  border-radius: 5px;
-  background: var(--surface-2, rgba(128,128,128,0.12));
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.78rem;
-  /* A long command must scroll inside its own box rather than widening
-     the page. */
-  overflow-x: auto;
-  white-space: pre;
-}
 
-.video-setup__hint {
-  margin: 2px 0 8px;
-  font-size: 0.82rem;
-  opacity: 0.75;
-}
 
 /* The failure state is a handoff, not a dead end (plans/026). */
-.video-failed__lead {
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.video-failed__detail {
-  font-size: 0.85rem;
-  opacity: 0.75;
-  margin-bottom: 10px;
-}
-
-.video-failed__keep-url {
-  margin: 4px 0 2px;
-  font-size: 0.9rem;
-}
 
 
-.video-setup__window-row {
-  display: flex;
-  gap: 20px;
-  margin: 10px 0;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-.video-setup__window-row label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.video-setup__window-row input {
-  width: 100px;
-}
+
+
 
 .video-player__frame {
   position: relative;
@@ -9897,42 +9769,6 @@ textarea:focus-visible {
   height: 100%;
 }
 
-.video-transcript-label {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin: 20px 0 8px;
-}
-.video-transcript {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  max-height: 320px;
-  overflow-y: auto;
-}
-.video-transcript__row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-.video-transcript__row:hover { background: var(--bg-card); }
-.video-transcript__row--active {
-  background: var(--bg-card);
-  border: 1px solid var(--accent);
-}
-.video-transcript__i-plus-one {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--success);
-  border: 1px solid var(--success);
-  border-radius: 4px;
-  padding: 1px 4px;
-  flex-shrink: 0;
-}
-.video-transcript__text { font-family: var(--font-jp); }
 
 .phrase-result-card { margin-bottom: 24px; padding: 20px 24px; }
 .phrase-line {
@@ -9980,7 +9816,7 @@ textarea:focus-visible {
 
 .phrase-word-card__kanji-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 /* Same affordance treatment as the surface wrap above — a chip that's
-   always clickable (both here and in PhraseAnalyzerScreen), so it gets
+   always clickable (both here and in AnalyzerScreen), so it gets
    a permanent hover/press state rather than a modifier class. */
 .phrase-kanji-chip {
   display: flex;

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { DepartureGate } from './components/station/DepartureGate'
 import { TrainDoor } from './components/station/TrainDoor'
 import { sectionFor } from './config/stations'
@@ -25,8 +25,7 @@ import DecksScreen      from './screens/DecksScreen'
 import DeckDetailScreen from './screens/DeckDetailScreen'
 import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
-import PhraseAnalyzerScreen from './screens/PhraseAnalyzerScreen'
-import VideoScreen from './screens/VideoScreen'
+import AnalyzerScreen from './screens/AnalyzerScreen'
 import ReadingScreen from './screens/ReadingScreen'
 import ReadingComprehensionScreen from './screens/ReadingComprehensionScreen'
 import ProfileScreen from './screens/ProfileScreen'
@@ -141,8 +140,14 @@ export default function App() {
           <Route path="/decks/:deck_id"       element={<DeckDetailScreen session={session} />} />
           <Route path="/decks/:deck_id/study" element={<StudyScreen session={session} />} />
           <Route path="/grammar"              element={<GrammarScreen session={session} />} />
-          <Route path="/phrase-analyzer"      element={<PhraseAnalyzerScreen session={session} />} />
-          <Route path="/video"                element={<VideoScreen session={session} />} />
+          <Route path="/analyzer"             element={<AnalyzerScreen session={session} />} />
+          {/* Merged into /analyzer by plan 027. Kept as redirects, not
+              deleted: both paths have been live, are in browser history
+              and may be bookmarked, and a 404 on a URL that used to work
+              is the worst possible outcome of a rename. `replace` so Back
+              from the analyzer goes home rather than back to the redirect. */}
+          <Route path="/phrase-analyzer"      element={<Navigate to="/analyzer" replace />} />
+          <Route path="/video"                element={<Navigate to="/analyzer" replace />} />
           <Route path="/reading"              element={<ReadingScreen session={session} />} />
           <Route path="/reading-comprehension" element={<ReadingComprehensionScreen session={session} />} />
           <Route path="/profile" element={<ProfileScreen session={session} />} />

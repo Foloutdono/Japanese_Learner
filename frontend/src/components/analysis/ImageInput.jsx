@@ -118,22 +118,29 @@ export function ImageInput({ t, session, onTextReady }) {
 
   return (
     <div className="analysis-image-input">
-      <div className="analysis-image-input__row">
+      {/* Two intake tiles (plan 029). These were .phrase-history-toggle
+          -- the HISTORY class, borrowed as a generic secondary button --
+          which is how a class name stops meaning anything. */}
+      <div className="anl-tiles">
         <button
           type="button"
           onClick={() => cameraRef.current?.click()}
           disabled={busy}
-          className="phrase-history-toggle"
+          className="anl-tile"
+          title={t.takePhoto}
         >
-          {t.takePhoto}
+          <span className="anl-tile__jp" lang="ja">撮影</span>
+          <span className="anl-tile__latin">{t.shootPhoto}</span>
         </button>
         <button
           type="button"
           onClick={() => galleryRef.current?.click()}
           disabled={busy}
-          className="phrase-history-toggle"
+          className="anl-tile"
+          title={t.chooseImage}
         >
-          {t.chooseImage}
+          <span className="anl-tile__jp" lang="ja">選択</span>
+          <span className="anl-tile__latin">{t.pickPhoto}</span>
         </button>
       </div>
 

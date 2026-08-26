@@ -14,6 +14,11 @@ Two efforts live in this file:
   and its two headline features were found not to work in production. Both work
   now: video via the paste ingest, photos via a free vision tier. Its table and
   diagnosis are below.
+- **Wave 5 — 解析駅, the merged analyser** (plans 027–030, all DONE). A design
+  wave, planned 2026-08-26 at commit `de78f11` and executed 2026-08-26/27.
+  Merged the phrase analyser and the video screen into one station with three
+  platforms, and redesigned the result. Frontend only. Its table, its design
+  brief and its execution notes are below.
 
 Each executor: read your plan fully before starting, honor its STOP
 conditions, and update your row when done.
@@ -598,6 +603,302 @@ and expensive after:
   suite (all green), and a manual trace of the prop wiring end to end. A
   reviewer with real credentials should click through the happy path once
   before this ships.
+
+---
+
+# Wave 5 — 解析駅, the merged analyser (2026-08-26)
+
+Planned at commit `de78f11`, from a direct design brief rather than an audit:
+*merge the phrase analyser and the video screen into one Analyzer with a
+three-way source selector, and make the result beautiful, responsive and
+reconciled with the app's artistic direction.*
+
+**Frontend only.** No backend file, no schema, no endpoint changes.
+`/api/phrase/*` and `/api/video/*` keep their names — `CONTEXT.md` already
+records why renaming them costs a migration and buys nothing visible.
+
+## The idea in one paragraph
+
+`PhraseAnalyzerScreen` and `VideoScreen` do one job through two screens: take
+Japanese from the world, split it into Sentences, and take each apart. They
+already share `SentenceBreakdown`, `WordDetail`, `useMining` and the deep tier,
+and they duplicate the rest verbatim — including the comment explaining why
+`closeDetail` is a `useCallback`. `CONTEXT.md`'s own definition of **Passage**
+lists typed text, a photo and a video window as one act with a `source` field.
+So: **解析駅 becomes a station with three platforms** — 1番線 文字, 2番線 写真,
+3番線 動画 — and the Passage it produces is drawn as a **路線図**, a line whose
+stops are its Sentences, with the i+1 ones marked on the map and one stop
+focused at a time. For video the focused stop is the train's position and the
+線 has timestamps; for text and photo it is reading order. `次は` — the in-car
+next-stop display — is how you read straight through.
+
+## Execution order & status
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|------|-------|----------|--------|------------|--------|
+| 027 | [One station, three platforms](027-analyzer-one-station-three-platforms.md) | P0 | L | — | DONE |
+| 028 | [路線図 — the Passage as a line](028-passage-as-a-line.md) | P0 | L | 027 (hard) | DONE |
+| 029 | [改札口 — the three intakes](029-the-three-intakes.md) | P1 | L | 027 (hard) | DONE |
+| 030 | [車内案内 — responsive & the gate](030-analyzer-responsive-and-gate.md) | P1 | M | 027, 028, 029 (hard) | DONE |
+
+**027 is the gate for the whole wave** — it creates the screen the other three
+edit. **028 and 029 are independent of each other** (results half vs. intake
+half) and can run in parallel, but both edit `AnalyzerScreen.jsx`, so land one
+and rebase the other rather than merging blind. **030 is last by construction**:
+it lays out components the other two create.
+
+If only part of the wave gets executed: **027 alone is already worth shipping** —
+one board row instead of two, one poll implementation instead of two, and the
+station plate those screens never had. **027 + 028** is the wave's actual
+argument. 029 and 030 are polish that the brief explicitly asked for.
+
+## Decisions this wave embodies
+
+These were put to the maintainer before planning and are cheap to reverse *now*,
+expensive after:
+
+- **Focused Sentence + route diagram**, not the stacked list. Chosen over
+  keeping the stacked list for text/photo, and over adding an "expand all"
+  toggle. The stacked list is what makes a ten-Sentence photo a wall — and it
+  renders the status legend once per Sentence (`SentenceBreakdown.jsx:181`,
+  `.status-legend` at 20px bottom margin), so ten Sentences print the same six
+  swatches ten times.
+- **The name is "Analyzer"**, American spelling, matching `t.analyze`, the
+  existing codebase spelling and the `phrase-analyzer.wav` clip. The station
+  keeps 解析 / KS / かいせき regardless — that is a place name, not copy.
+- **The route is `/analyzer`**, with `/phrase-analyzer` and `/video` kept as
+  redirects. Both have been live and may be bookmarked.
+- **History stays text-and-photo.** `routes/video.py` has no index endpoint —
+  only a session by id — so a unified 運行履歴 needs backend work this wave
+  deliberately excludes. `AnalyzerHistory.jsx` carries a comment saying so, so
+  the absence does not read as a bug.
+- **One line, one colour.** 解析 keeps `--line-kaiseki` for everything
+  structural. `--line-douga` is retired as a board line and spent on exactly one
+  thing: the timestamp chips on video Sentences — the only data that exists for
+  that source and no other. The `--line-*` block's rule is not bent.
+
+## Traps worth knowing before you start
+
+- **The route path is the announcement filename.** `HomeScreen.jsx:144` does
+  `playAnnouncement(section.path.slice(1))` and `playback.js:15` resolves that to
+  `/sounds/announcements/<name>.wav`. Renaming the route without `git mv`-ing the
+  clip silently removes the station's voice, and nothing tests for silence. (The
+  動画 row never had a `video.wav` at all — it has always played the jingle and
+  then nothing.)
+- **A 202 is a success.** `apiJson` resolves on it. The poll must discriminate on
+  the payload, never on a throw. This is the bug that white-screened production;
+  `AnalyzerScreen.polling.browser.test.jsx` is its only guard and **must survive
+  the merge**.
+- **`focusIndex` must be clamped on every read.** A Passage can be replaced under
+  it by a new analysis or a history entry. A stale index into a shorter array is
+  the same failure class as the 202 crash.
+- **`.phrase-analyze-btn`, `.phrase-history-toggle`, `.phrase-input-actions`,
+  `.phrase-history-row` and `.phrase-history-empty` are used by `DeckPicker.jsx`
+  and `ImageCropper.jsx`.** A dead-class sweep that deletes them unstyles the
+  deck picker inside the mining flow.
+- **`SentenceBreakdown`, `TokenCard`, `WordDetail`, `MineButton`,
+  `GrammarChips`, `LevelBadge` are shared with `ReadingScreen`.** No plan in this
+  wave restyles them. The duplicated-legend defect is fixed by rendering one
+  Sentence, not by editing the component.
+- **A sticky column with no overflow of its own cannot hold a long list.**
+  `.dict-dock`'s comment records this as an already-made mistake. The route rail
+  must carry `max-height` + `overflow-y`.
+- **`--surface-2` does not exist.** It is referenced twice in `index.css` and
+  defined zero times, so both rules fall back — to two *different* greys. Plan
+  029 replaces the references with `--surface`; do not define the token.
+
+## Execution notes (added as each plan lands)
+
+- **027 landed 2026-08-26.** Suite 68/68, lint 0 errors (17 warnings, down from
+  18 — one belonged to a deleted screen), build clean. The board is 11 rows and
+  the `.wav` moved as a git rename, so the station kept its voice.
+  Three things worth recording:
+  - **The polling test's `apiFetch` mock was a bare `vi.fn()`**, returning
+    `undefined`. `VideoScreen` never called `apiFetch`; the merged hook does, for
+    運行履歴 — so the history fetch threw on `.then` inside the mount effect and
+    took down all four cases for a reason unrelated to polling. Fixed by mocking
+    a real resolved `Response`. Any future screen-level test that mounts
+    `useAnalyzerSession` needs the same.
+  - **Two browser-test traps, both about React rather than the app**: only the
+    active tabpanel is in the DOM, so a test must `await` a tick after clicking a
+    platform before querying inside it; and assigning `el.value` on a controlled
+    field never reaches state — the prototype's `value` setter does. Both are
+    documented in helpers at the top of
+    `AnalyzerScreen.polling.browser.test.jsx`.
+  - **Deleting the two screens made five comments elsewhere name files that no
+    longer exist** (`VideoPlayer.jsx`, `lib/ocr.js`, `ReadingScreen.jsx`, and two
+    in `index.css`). Repointed at `AnalyzerScreen`. The "lifted from / merged
+    from" comments in `components/analysis/` were left alone — those are true
+    statements about provenance, not directions to a live file.
+  - **The live click-through DID happen**, against the real stack — and it is
+    worth recording that it was possible, because wave 4 concluded it was not.
+    The blocker it named (no Supabase credentials) had already been removed:
+    `frontend/.env.development.local` exists, `DEV_USER_ID` is set in
+    `backend/.env`, and Postgres is running on 5432 outside Docker. `uvicorn
+    main:app --port 8000` plus `npm run dev` is the whole setup. Verified on
+    `/analyzer`: a two-Sentence typed Passage (furigana, N5/N2 grading, 〜らしい
+    and 〜ができます grammar chips, mining controls); the Passage surviving a
+    platform switch; ArrowRight/End driving the rail with focus following;
+    `/phrase-analyzer` and `/video` both redirecting; and a two-cue `.srt`
+    upload producing a transcript through the 202 poll. Only the 写真 OCR path
+    was not exercised (it needs a real photo, and plan 027 does not touch it).
+  - **Plan 028's premise measured live, not inferred**: a two-Sentence Passage
+    renders `document.querySelectorAll('.status-legend').length === 2`. Ten
+    Sentences would render ten legends.
+
+- **028 landed 2026-08-27.** Suite 70/70, lint 0 errors, build clean. Verified
+  live against the real stack: a three-Sentence typed Passage draws three stops
+  and **one** legend (was three), `1 / 3` on the stage, 次は naming the next
+  Sentence; clicking stop 3 moves the marker to `3 / 3` and 次は disappears
+  rather than going inert; a two-cue `.srt` puts `0:01` / `1:05` on the stops in
+  鶯色, minute rollover included; a one-Sentence Passage draws **no line** at all.
+  Two things worth recording:
+  - **The old `Transcript` fixture had `tokens: []`**, because that component
+    printed `s.text` directly. `SentenceBreakdown` rebuilds the Sentence *from*
+    its tokens, so an empty list now renders an empty stage — the fixture was
+    shaped for a component that no longer exists. Fixed by making it realistic
+    (two Sentences with tokens), not by loosening the assertion.
+  - **One assertion had quietly gone vacuous.** The "still generating" case
+    asserted `.video-transcript-label` was null; this plan deletes that class, so
+    it had become "null is null" and would have passed against a completely
+    broken screen. Re-pointed at `.anl-stage`. Worth a look whenever a plan
+    deletes a class an existing test asserts the *absence* of.
+  - **Deleting a file mid-session desyncs Vite's dev server.** Removing
+    `components/video/Transcript.jsx` left the running dev server's module graph
+    holding it, and HMR failed with a 500 on three modules while the build and
+    the whole suite stayed green. Restarting the dev server clears it; it is not
+    a code defect, and it will look like one to the next person who hits it.
+
+- **029 landed 2026-08-27.** Suite 80/80 (10 new in `lib/timecode.test.js`),
+  lint 0 errors, build clean. `--surface-2` is gone, `noCaptionTrack` is gone,
+  and **31 orphaned CSS rules** went with them. Verified live: `2:30`→`4:00`
+  reads "1:30 sur 5:00 maximum"; `2:75` marks the field bad and falls back to
+  the format hint instead of silently becoming 195; the dock's file input is
+  clipped behind a real drop target; an upload through it still produces stops
+  with correct timestamps. Four things worth recording:
+  - **The wave's own colour finding, fixed.** `.phrase-analyze-btn` is
+    `--accent` shu-iro and is shared with `DeckPicker`/`ImageCropper`, so the
+    analyser got its own `.anl-action` on `--line-kaiseki` rather than a
+    repoint. A vermillion button under a 葡萄色 plate was the same defect
+    `--deck-action` was created to fix for 教材.
+  - **A layout defect only a screenshot caught.** The two ingest tabs set their
+    Japanese and their plain-language label on one line; with the French
+    ("FICHIER DE SOUS-TITRES") that wrapped the *kanji* mid-word — 字幕フ /
+    ァイル — at phone width. Stacked, with `white-space: nowrap` on the
+    Japanese. Neither lint, the build, nor 80 tests can see this; only looking
+    at it can.
+  - **Two defects this plan introduced in 027 and closed here**: the header
+    comment still said the results were "the old markup" after 028 replaced
+    them, and `onError` on the video intake was wired to `() => {}`, so a paste
+    below `MIN_TRANSCRIPT_CHARS` failed silently. The hook now exposes
+    `fail(message)` so an intake surfaces a pre-request problem through the same
+    channel as a server failure.
+  - **The sweep must be run twice.** Deleting the old markup orphaned rules the
+    first pass could not see (`.phrase-textarea`,
+    `.analysis-image-input__row/__hint`), because a *comment* naming a class
+    makes `grep -rl` report a consumer. Grep for the class in a `className`, not
+    anywhere in the file.
+
+- **030 landed 2026-08-27 — the wave is complete.** Suite 87/87, lint 0 errors,
+  build clean. The breakpoint contract held: **one** one-off pair (1100/1099),
+  carrying the required "which component and why" comment, and it is the same
+  pair `.dict-dock` already uses. Every `.anl-*` rule that moves has a
+  `prefers-reduced-motion` guard — audited by script, not by eye. Verified at
+  1440 / 1100 / 1099 / 414 / 360 in both themes: two columns above the bound
+  with the rail sticky, scrolling internally, and `min-width: 0` keeping a long
+  Japanese line from pushing it off screen; the strip below it; nothing
+  overflowing the viewport at 360; no page-level horizontal scroll anywhere.
+  Two findings worth recording:
+  - **The plan's own magic number was wrong, and the fix was to stop having
+    two.** `.anl-player` was specified as `top: 64px` against an assumed strip
+    height; the strip actually measures **92px** (a video stop carries a
+    timestamp under its text), so the two sticky siblings overlapped by 28px
+    whenever both were stuck. Now `--anl-strip-h` governs both — the strip is
+    pinned to it with `min-height` and the player offsets by it — so they cannot
+    drift apart. Two hand-kept numbers is how that bug happens.
+  - **DevTools viewport emulation does not fire `resize` or a MediaQueryList
+    `change`.** Resizing the pane from 1099 to 1400 updated every CSS media
+    query while `window.__mqLog` stayed empty, so the JS-driven orientation
+    switch looked broken and was not — it is correct on mount at every width,
+    and a real window resize fires both events. Because the emulator cannot
+    exercise the flip, it is pinned instead in
+    `src/hooks/useMediaQuery.browser.test.jsx` against a controllable fake
+    (first-render correctness, the flip, and unsubscribe on unmount). Do not
+    "fix" this hook based on what an emulated resize appears to do.
+
+## Post-wave quality audit (2026-08-27)
+
+A strict structural review of the whole wave, run after 030 landed. Five findings
+fixed; suite 91/91, lint 0 errors, build clean. Worth reading as a record of what
+a four-plan wave leaves behind even when every plan is green.
+
+- **800 lines went into a 16,700-line stylesheet when the codebase already had
+  the pattern to avoid it.** `index.css:2` has always been
+  `@import url('./exam/exam.css')` — an 892-line per-feature sheet. The
+  analyser's rules now live in `src/components/analysis/analysis.css`, imported
+  the same way; `index.css` is back under 16,000. **If you add rules for this
+  screen, they go in that file.**
+- **The source key space was enumerated four times** — `SourceRail`'s own array,
+  three `source === '...'` branches, and a `source !== 'video'` special case.
+  `config/stations.js` documents this codebase being bitten by exactly that
+  drift. Now one registry (`components/analysis/sources.js`) plus the second half
+  of that file's own prescription: a parity test asserting every key has locale
+  strings and mounts a panel with controls. **The test was verified to fail** by
+  adding a phantom 音声 platform — it caught both the missing locale keys and the
+  empty panel.
+- **`role="listitem"` on a `<button>` silently voided the fix `PassageLine`
+  exists for.** `role` overrides the implicit one, so assistive tech announced
+  the stops as list items, not controls — while the comment beside it claimed
+  control semantics and four a11y assertions passed, because they checked
+  `button.anl-stop` in the DOM rather than the computed role. Now `role="group"`
+  with the count in its label; the accessibility tree confirms
+  `button "Aller à cette phrase"`. **Assert on the a11y tree, not the tag name.**
+- **Plan 029's headline colour fix only landed on half the buttons.** The Explain
+  control in the stage still wore `.phrase-analyze-btn` (shu-iro) under a 葡萄色
+  plate — the exact defect 029 claimed to close. Both are `.anl-action` now.
+- **Two timecode formatters.** Plan 028 wrote a private one in `PassageLine`;
+  029 wrote `lib/timecode.js`'s `formatTimecode` with ten tests. Nothing joined
+  them. The private copy is gone.
+
+Left deliberately unfixed, and worth doing next: `IntakeText` and `IntakePhoto`
+are the same component with a camera bolted on; the Passage still answers "is
+this video?" three ways (`videoSessionId != null`, `passage.videoId`,
+`cue_start != null`) that genuinely differ but are nowhere reconciled;
+`loadHistoryEntry` both sets `passage.text` and returns it, and nothing reads the
+field; and four near-identical status banners are hand-rolled in the render where
+a notices model belongs.
+
+## Findings considered and rejected
+
+- **A backend `GET /api/video/sessions` so history covers all three sources**:
+  real, and out of scope for a frontend design wave. Written up as the wave's one
+  open question rather than smuggled in.
+- **Three platform colours (a transfer-station look)**: authentic — a real
+  junction station does serve differently-coloured lines — but it would put two
+  more pigments on a screen whose section identity is one colour, and the
+  `--line-*` block exists precisely because sections picking leftover pigments
+  produced confusable pairs. Rejected in favour of one colour plus distinct
+  signage.
+- **A video timeline scrubber with per-Sentence ticks**: redundant with the route
+  diagram, which already shows position and extent. Cut before it was planned.
+- **Unifying `.card`'s six paddings app-wide**: a genuine finding (`.card` 15/24
+  against five overrides), and it touches every screen in the app. The analyser
+  gets its own token scale instead; the global fix needs its own plan and its own
+  regression pass.
+- **Renaming `phrase_history` / `/api/phrase/*` to the Sentence vocabulary**:
+  already rejected in wave 3 for the same reason. Still rejected.
+
+## Open questions, not yet settled
+
+- **Unified history.** Video sessions are not listed anywhere. If 運行履歴 should
+  cover them, that is a backend plan: an index endpoint, a merged model, and a
+  decision about whether a video session without a video is worth re-opening.
+- **The Sentence bank.** Plan 016 built provenance into `phrase_history` and this
+  wave surfaces it as a history drawer, but "keep this Sentence" as a first-class
+  action is still not on the screen. The route diagram is the natural home for
+  it — a stop you can pin — and it is deliberately not in this wave.
+- **`t.noCaptionTrack`** is deleted by plan 029 as dead. If a future ingest can
+  fail that way again, it comes back with a call site.
 
 ---
 

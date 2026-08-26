@@ -8,7 +8,7 @@ import { apiUpload } from './api'
 // `tesseract.js` itself is imported DYNAMICALLY, inside recognize()
 // below, rather than with a static top-level import -- a static import
 // would put the whole package in whatever chunk imports this module
-// (i.e. the main bundle, since PhraseAnalyzerScreen.jsx is not itself
+// (i.e. the main bundle, since AnalyzerScreen.jsx is not itself
 // lazy-loaded), which is exactly what plan 018 says not to do. The
 // dynamic import gives it its own chunk, fetched only when a learner
 // actually picks an image. The `jpn`/`jpn_vert` traineddata (15-25 MB)
