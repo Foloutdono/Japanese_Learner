@@ -76,6 +76,26 @@ class PointsInTests(unittest.TestCase):
         starts = [h[2] for h in hits]
         self.assertEqual(starts, sorted(starts))
 
+    def test_no_duplicate_hit_for_one_occurrence_of_a_pattern(self) -> None:
+        # Live-verified 2026-08-26 via VideoScreen: "猫が公園を歩いています。"
+        # produced two (pattern, level, start, end) hits for 〜ています at
+        # the SAME start -- one from the needle "ています", one from its
+        # shorter stem "ていま" (see grammar_match.stems) -- because both
+        # matched at the same position. study/analysis.py turned that into
+        # two grammar chips sharing one raw_id, a duplicate React key.
+        # One real occurrence of a pattern must be exactly one hit.
+        hits = points_in("猫が公園を歩いています。")
+        seen = [(pattern, level, start) for pattern, level, start, _end in hits]
+        self.assertEqual(len(seen), len(set(seen)), f"duplicate hits at the same start: {hits}")
+
+    def test_two_separate_occurrences_of_the_same_pattern_both_count(self) -> None:
+        # The dedup must only collapse OVERLAPPING same-pattern spans,
+        # not every hit of a pattern sentence-wide -- two genuinely
+        # distinct occurrences of 〜ています should still yield two hits.
+        sentence = "猫が歩いています。犬も走っています。"
+        hits = [h for h in points_in(sentence) if h[0] == "〜ています"]
+        self.assertEqual(len(hits), 2, f"expected 2 distinct occurrences, got: {hits}")
+
 
 if __name__ == "__main__":
     unittest.main()

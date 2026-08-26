@@ -193,6 +193,38 @@ and expensive after:
 
 ## Execution notes (added as each plan lands)
 
+- **Live browser verification of VideoScreen (2026-08-26, post-merge) found
+  two real bugs the test suite had not caught**, since it exercises the
+  actual configured LLM provider rather than a mock:
+  1. **The deep-tier explanation silently vanished for non-English
+     learners.** `nvidia/nemotron-3-super-120b-a12b` (one of the two
+     configured providers) translates the JSON *key* itself into the
+     target language for a French request — `"explication"` instead of
+     the schema's fixed `"explanation"` — despite `SYSTEM_PROMPT_TEMPLATE`
+     pinning key names to English. `llm_result.get("explanation", "")`
+     found nothing and the prose was dropped with no error anywhere.
+     Prompt-only fixes didn't hold (verified live: the model kept doing
+     it), so the real fix is defensive: `phrase.py`'s new
+     `_normalize_explanation_key` recovers the value from any other
+     non-empty string key when `"explanation"` is absent, applied where
+     `llm_result` is consumed rather than where it's parsed — that also
+     self-heals rows already sitting in `phrase_analysis_cache` (no
+     expiry) from before the fix, with no `CACHE_VERSION` bump needed.
+  2. **Duplicate grammar chips with a duplicate React key.** A single
+     real occurrence of `〜ています` produced two hits from
+     `difficulty.points_in` — one from the full-form needle, one from a
+     shorter truncated stem (`grammar_match.stems`) matching at the same
+     start position — which `study/analysis.py` turned into two chips
+     sharing one `raw_id`. Fixed at the source: `points_in` now collapses
+     overlapping same-pattern spans to the widest one, while two
+     genuinely separate occurrences of the same pattern elsewhere in a
+     sentence still both count (covered by a dedicated test). Also
+     hardened `GrammarChips.jsx`'s key to `raw_id_start` as defense in
+     depth. Confirmed fixed by re-running the exact live scenario end to
+     end: `POST /api/video/session/{id}/sentence/{n}/explain` on
+     "猫が公園を歩いています。" now returns exactly two distinct grammar
+     entries and a populated French `explanation`. Full suites re-run
+     clean after both fixes: 338 backend tests, 39 frontend tests.
 - **Plan 020 found `backend/srs/data_structure.sql` missing 12 tables, not
   just the ones the plan's own literal grep scope (`routes/*.py srs/*.py`)
   would have found.** `study/exam_schema.py` (`exam_papers`,

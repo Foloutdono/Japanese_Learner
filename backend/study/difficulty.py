@@ -403,6 +403,17 @@ def points_in(sentence: str) -> list[tuple[str, str, int, int]]:
 
     Sorted by start, then by longer span first, so a caller rendering
     underlays gets a stable order.
+
+    One catalogue point's `needles` includes both a full form and its
+    truncated stems (see grammar_match.stems), which routinely nest --
+    "ています" and its stem "ていま" both match starting at the same
+    position. Without dedup that is two hits for one real occurrence,
+    which study/analysis.py turns into two grammar chips with the same
+    raw_id (a duplicate React key, caught live 2026-08-26 verifying
+    VideoScreen). Collapsed here to the single widest span per
+    (pattern, level) at each position a hit starts covering -- a SECOND,
+    non-overlapping occurrence of the same pattern elsewhere in a longer
+    sentence is a real second hit and stays.
     """
     hits: list[tuple[str, str, int, int]] = []
     for point_level, pattern, needles in _checkable_points():
@@ -412,7 +423,16 @@ def points_in(sentence: str) -> list[tuple[str, str, int, int]]:
         for start, end in _spans(sentence, strong):
             hits.append((pattern, point_level, start, end))
     hits.sort(key=lambda h: (h[2], -(h[3] - h[2])))
-    return hits
+
+    deduped: list[tuple[str, str, int, int]] = []
+    covered_spans: dict[tuple[str, str], list[tuple[int, int]]] = {}
+    for pattern, point_level, start, end in hits:
+        spans = covered_spans.setdefault((pattern, point_level), [])
+        if any(s <= start and end <= e for s, e in spans):
+            continue
+        spans.append((start, end))
+        deduped.append((pattern, point_level, start, end))
+    return deduped
 
 
 # ── Length ────────────────────────────────────────────────────

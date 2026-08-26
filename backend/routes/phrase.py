@@ -46,6 +46,11 @@ SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese 
 - "meaning" is what the word means IN THE CONTEXT of this specific phrase, not just a generic dictionary gloss. Write it in {lang_name}.
 - "pos" is a short part-of-speech label (noun, verb, particle, adjective, etc), in {lang_name}.
 - "explanation" is 2-4 sentences, in {lang_name}, explaining the grammar and nuance of the whole phrase.
+
+The JSON key names ("words", "surface", "base", "reading", "meaning", "pos",
+"explanation") must stay exactly as shown, in English, no matter what
+{lang_name} is -- only the VALUES you write for "meaning", "pos" and
+"explanation" go in {lang_name}.
 """
 
 
@@ -79,7 +84,7 @@ SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese 
 # it, whichever learner asked first would permanently poison the cache
 # for every other language, since the SAME phrase in French and in
 # English would otherwise hash to the SAME row.
-CACHE_VERSION = 2
+CACHE_VERSION = 3
 
 
 def _phrase_key(phrase: str, lang: str) -> str:
@@ -271,6 +276,30 @@ def _parse_llm_json(content: str) -> dict:
         raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
 
 
+# Some models translate the JSON KEY itself into the target language
+# (e.g. "explication" for a French request) despite SYSTEM_PROMPT_TEMPLATE
+# pinning the key names to English -- verified live against
+# nvidia/nemotron-3-super-120b-a12b, which does this consistently even
+# with that instruction present. The schema has exactly one other
+# top-level key ("words"), so any additional string-valued key is
+# unambiguously the mistranslated "explanation".
+#
+# Applied where llm_result is consumed (_analyze_sentence), not where
+# it's parsed -- a bad key can already be sitting in phrase_analysis_cache
+# from before this fix existed (no expiry, see that table's own comment),
+# and normalizing only on the fresh-call path would leave every such row
+# permanently broken. Doing it here self-heals cache hits too, with no
+# CACHE_VERSION bump needed.
+def _normalize_explanation_key(parsed: dict) -> dict:
+    if not isinstance(parsed, dict) or parsed.get("explanation") or "words" not in parsed:
+        return parsed
+    for key, value in parsed.items():
+        if key not in ("words", "explanation") and isinstance(value, str) and value:
+            parsed["explanation"] = value
+            break
+    return parsed
+
+
 def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: str,
                        allow_llm_call: bool = True) -> dict:
     """One Sentence through the full local (+ optional deep) pipeline,
@@ -297,6 +326,7 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
             llm_result = _call_llm(text, lang)
             _store_analysis(text, lang, llm_result)
         if llm_result is not None:
+            llm_result = _normalize_explanation_key(llm_result)
             analysis = merge_deep(analysis, llm_result.get("words", []), llm_result.get("explanation", ""))
 
     return attach_user_state(analysis, states, user_id)

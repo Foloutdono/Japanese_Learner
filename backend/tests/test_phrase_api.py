@@ -156,3 +156,28 @@ def test_history_get_makes_no_llm_call(client, monkeypatch):
     monkeypatch.setattr(phrase_module, "chat", _boom)
     get_resp = client.get(f"/api/phrase/history/{entry_id}")
     assert get_resp.status_code == 200
+
+
+# Live-verified 2026-08-26 against nvidia/nemotron-3-super-120b-a12b: for
+# a non-English `lang`, this model translates the JSON KEY itself (e.g.
+# "explication" for French) despite SYSTEM_PROMPT_TEMPLATE pinning key
+# names to English -- silently dropping the prose explanation, since
+# llm_result.get("explanation", "") found nothing. _normalize_explanation_key
+# is the defensive fallback: the schema has exactly one other top-level
+# key ("words"), so any other non-empty string value is unambiguously
+# the mistranslated explanation.
+def test_normalize_explanation_key_recovers_a_translated_key():
+    parsed = {"words": [{"surface": "猫"}], "explication": "Une phrase à propos d'un chat."}
+    normalized = phrase_module._normalize_explanation_key(parsed)
+    assert normalized["explanation"] == "Une phrase à propos d'un chat."
+
+
+def test_normalize_explanation_key_leaves_a_correct_key_alone():
+    parsed = {"words": [], "explanation": "The correct key."}
+    normalized = phrase_module._normalize_explanation_key(parsed)
+    assert normalized["explanation"] == "The correct key."
+
+
+def test_normalize_explanation_key_is_a_noop_without_words():
+    parsed = {"something": "else"}
+    assert phrase_module._normalize_explanation_key(parsed) == parsed
