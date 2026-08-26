@@ -70,3 +70,48 @@ Fetching caption tracks is outside what YouTube's API is for, even though
 playback stays in the official player and nothing is downloaded. The upload
 path is unambiguously clean, and that is a reason it is a first-class ingest
 rather than a fallback bolted on afterwards.
+
+## Amendment, 2026-08-26 (plans/025, plans/026)
+
+Three corrections after this shipped and was used in production.
+
+**"Expect it to fail intermittently" was wrong. From Render it fails
+totally.** Measured 2026-08-26: `YouTubeTranscriptApi().list(...)` succeeds from
+a residential IP — returning, for one test video, `[('en', False),
+('de-DE', False), ('ja', False), ...]` including a manually created Japanese
+track — and fails from the deployed backend for the same video. The code is
+correct; the environment is the whole story. Calling it *intermittent*
+understated it and left the URL box looking like the primary route when it
+never works there. The user's report was blunt: *"Every link i try doesnt
+work."*
+
+**The decision itself was right, and this is the evidence.** A third ingest —
+a transcript pasted from YouTube's own "Show transcript" panel — was added in
+plans/025 with **no change to anything downstream of `Cue`**:
+`cue_sentences.py`, `analysis.py`, the job worker, `SentenceBreakdown` and
+mining were all untouched. That is what ingesting Cues rather than YouTube
+bought.
+
+**"Client-side fetch is not possible without an extension" was true but drew
+the wrong conclusion.** CORS does block a browser from *fetching* the caption
+track. It does not stop the learner from **copying text their browser has
+already rendered**. Pasting cannot be IP-blocked, needs no proxy, key or
+cookie, works for any video they can watch, and is unambiguously within terms
+in a way the fetch is not — the learner is copying their own screen. It is now
+a first-class ingest alongside upload.
+
+Note also that **only the fetch was ever blocked, never playback**: the IFrame
+player runs in the learner's browser on their own IP and always worked. So a
+pasted transcript still gets a synced player, because `source_ref` still
+carries the video id.
+
+**Consequently the URL path is now positioned as a convenience that may work**,
+not as the primary route. Paste and upload are primary. A proxy is supported
+(`WEBSHARE_PROXY_USERNAME`/`_PASSWORD`, or `YOUTUBE_HTTP_PROXY`), opt-in, off by
+default, and never assumed — it is expected to degrade as YouTube escalates,
+which is precisely why nothing depends on it.
+
+**Still rejected, and now explicitly:** supplying YouTube cookies or an account
+session to get past the block. It attaches a real person's logged-in identity
+to automated fetches, is against the terms in a way pasting is not, and breaks
+constantly.

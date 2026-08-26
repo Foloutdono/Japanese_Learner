@@ -9,10 +9,11 @@ Two efforts live in this file:
   reading.
 - **Wave 3 — Sentence analysis** (plans 012–020, all DONE). A feature wave,
   planned 2026-08-26 at commit `d4911a6`. Jump to it below.
-- **Wave 4 — Making image and video actually work** (plans 021–026, TODO).
-  A repair wave, planned 2026-08-26 at commit `2552915`, after wave 3 shipped
-  and its two headline features were found not to work in production. Its
-  table and diagnosis are below.
+- **Wave 4 — Making image and video actually work** (plans 021–026; 021, 022,
+  025 and 026 DONE, 023–024 TODO). A repair wave, planned 2026-08-26 at commit
+  `2552915`, after wave 3 shipped and its two headline features were found not
+  to work in production. **Video works now** (paste ingest); photos still need
+  023–024. Its table and diagnosis are below.
 
 Each executor: read your plan fully before starting, honor its STOP
 conditions, and update your row when done.
@@ -162,7 +163,7 @@ is the wave's most important plan.
 | 023 | [Vision-model OCR backend](023-vision-ocr-backend.md) | P0 | M | — | TODO |
 | 024 | [Image capture UX](024-image-capture-ux.md) | P0 | M | 023 | TODO |
 | 025 | [Paste-transcript ingest](025-paste-transcript-ingest.md) | P0 | M | — | DONE |
-| 026 | [YouTube URL honesty + proxy](026-youtube-url-honesty-and-proxy.md) | P1 | M | 025 | TODO |
+| 026 | [YouTube URL honesty + proxy](026-youtube-url-honesty-and-proxy.md) | P1 | M | 025 | DONE |
 
 **021, 022, 023 and 025 are independent** and can run in any order or in
 parallel. **024 hard-depends on 023** (it calls the endpoint 023 builds);
@@ -304,6 +305,31 @@ and expensive after:
   input is solved by splitting the Passage, never by asking for a bigger answer.
 
 ## Execution notes (added as each plan lands)
+
+- **Plan 026 landed; the URL box is no longer a dead end, and no proxy was
+  bought.** The failure state now says the *server* cannot fetch captions
+  (about where the request comes from, not about the video), keeps the typed
+  URL, and drops the learner straight into the paste panel with a direct
+  "Open on YouTube" link. `pastePanel()` is shared between the setup and
+  failure states rather than duplicated, so the two cannot drift.
+  Proxy support is wired but **off by default** — verified `_PROXY_CONFIG is
+  None` with no env set, `WebshareProxyConfig` with the Webshare pair, and
+  `GenericProxyConfig` with `YOUTUBE_HTTP_PROXY`. Only commented placeholders
+  went into `.env.example`; nothing was added to `render.yaml`, deliberately, so
+  there is no tracked file inviting a pasted credential.
+  Added `youtube.com/live/` and `/embed/` URL shapes (premieres and copied embed
+  snippets), plus tests for `m.youtube.com` and `?si=` share links which already
+  worked via `.search`. Deleted `captionsBlockedHint`, now dead — plan 025's
+  rework left it referenced by nothing, and the locale-parity test does not
+  catch a key that is merely unused.
+  One self-inflicted bug worth recording twice, because it happened twice:
+  writing JSX through a Python heredoc collapsed a backslash-n escape inside a
+  placeholder string into a real newline, producing `Parsing error:
+  Unterminated string constant` and a failed build — and then did it again
+  while writing *this note*. Lint caught the first; `npm test` alone did not.
+  Prefer the editing tools over heredocs for any file containing escape
+  sequences. Backend 368 passed; frontend 41 passed, build clean, lint
+  0 errors.
 
 - **Plan 025's "don't guess the paste format" STOP condition fired, and it was
   the difference between a working feature and a broken one.** The planned

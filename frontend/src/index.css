@@ -9761,6 +9761,24 @@ textarea:focus-visible {
 
 .video-setup__how-steps li { margin: 2px 0; }
 
+/* The failure state is a handoff, not a dead end (plans/026). */
+.video-failed__lead {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.video-failed__detail {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin-bottom: 10px;
+}
+
+.video-failed__keep-url {
+  margin: 4px 0 2px;
+  font-size: 0.9rem;
+}
+
+
 .video-setup__window-row {
   display: flex;
   gap: 20px;

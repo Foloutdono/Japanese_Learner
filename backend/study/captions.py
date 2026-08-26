@@ -12,8 +12,11 @@
 import logging
 import re
 
+import os
+
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import YouTubeTranscriptApiException, NoTranscriptFound
+from youtube_transcript_api.proxies import GenericProxyConfig, WebshareProxyConfig
 
 logger = logging.getLogger(__name__)
 
@@ -234,9 +237,57 @@ def parse_track(content: str, filename: str) -> list[dict]:
     return _merge_duplicate_consecutive(cues)
 
 
+# ── Optional proxy (opt-in, off by default) ───────────────────────
+# YouTube blocks datacenter IPs, so from Render every caption fetch
+# fails -- see the module docstring and plans/026. A residential proxy
+# is the only thing that changes that.
+#
+# It is deliberately OPT-IN. This app must deploy and work with no proxy
+# at all (the upload and paste ingests never need one), and nobody
+# should be surprised by outbound traffic through a third party they did
+# not configure. Two ways, checked in this order:
+#
+#   WEBSHARE_PROXY_USERNAME + WEBSHARE_PROXY_PASSWORD
+#       -> WebshareProxyConfig, the library's own supported path
+#   YOUTUBE_HTTP_PROXY [+ YOUTUBE_HTTPS_PROXY]
+#       -> GenericProxyConfig, for any other provider
+#
+# Neither set: no proxy, and fetch_youtube_track behaves exactly as it
+# always has. Built once at import rather than per request, and the
+# credentials are never logged.
+def _proxy_config():
+    username = os.environ.get("WEBSHARE_PROXY_USERNAME")
+    password = os.environ.get("WEBSHARE_PROXY_PASSWORD")
+    if username and password:
+        return WebshareProxyConfig(proxy_username=username, proxy_password=password)
+
+    http_url = os.environ.get("YOUTUBE_HTTP_PROXY")
+    https_url = os.environ.get("YOUTUBE_HTTPS_PROXY") or http_url
+    if http_url:
+        return GenericProxyConfig(http_url=http_url, https_url=https_url)
+
+    return None
+
+
+_PROXY_CONFIG = _proxy_config()
+
+if _PROXY_CONFIG is not None:
+    # Type name only -- never the credentials.
+    logger.info("YouTube caption fetches will use %s", type(_PROXY_CONFIG).__name__)
+
+
 # ── YouTube fetch (best-effort) ────────────────────────────────
+# `.search`, not `.match`, so m.youtube.com / music.youtube.com and a
+# trailing ?si=... or &t=90s all work without their own patterns. The
+# {11} id length is what keeps these from matching arbitrary paths.
 _YOUTUBE_URL_RES = (
-    re.compile(r"(?:youtube\.com/watch\?(?:.*&)?v=|youtube\.com/shorts/)([A-Za-z0-9_-]{11})"),
+    re.compile(
+        r"(?:youtube\.com/watch\?(?:.*&)?v="
+        r"|youtube\.com/shorts/"
+        r"|youtube\.com/live/"      # premieres and streams keep this path after ending
+        r"|youtube\.com/embed/"     # what a copied embed snippet contains
+        r")([A-Za-z0-9_-]{11})"
+    ),
     re.compile(r"youtu\.be/([A-Za-z0-9_-]{11})"),
 )
 
@@ -264,7 +315,7 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
     always the same: upload the file instead.
     """
     try:
-        transcript_list = YouTubeTranscriptApi().list(video_id)
+        transcript_list = YouTubeTranscriptApi(proxy_config=_PROXY_CONFIG).list(video_id)
         # A manually created track is more likely to be punctuated and
         # accurate than an auto-generated one; prefer it when both exist.
         try:

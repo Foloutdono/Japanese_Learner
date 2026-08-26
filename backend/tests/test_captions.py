@@ -81,7 +81,7 @@ class ParseTrackTests(unittest.TestCase):
 
 
 class ParseVideoIdTests(unittest.TestCase):
-    """parse_video_id recognizes the three YouTube URL shapes and
+    """parse_video_id recognizes every YouTube URL shape we've seen and
     rejects everything else, without ever raising."""
 
     def test_watch_url(self) -> None:
@@ -96,6 +96,30 @@ class ParseVideoIdTests(unittest.TestCase):
     def test_shorts_url(self) -> None:
         self.assertEqual(
             parse_video_id("https://www.youtube.com/shorts/dQw4w9WgXcQ"), "dQw4w9WgXcQ"
+        )
+
+    def test_live_url(self) -> None:
+        # Premieres and streams keep /live/ even after they end.
+        self.assertEqual(
+            parse_video_id("https://www.youtube.com/live/dQw4w9WgXcQ"), "dQw4w9WgXcQ"
+        )
+
+    def test_embed_url(self) -> None:
+        # What a copied embed snippet contains.
+        self.assertEqual(
+            parse_video_id("https://www.youtube.com/embed/dQw4w9WgXcQ"), "dQw4w9WgXcQ"
+        )
+
+    def test_mobile_url(self) -> None:
+        # Works via .search rather than its own pattern.
+        self.assertEqual(
+            parse_video_id("https://m.youtube.com/watch?v=dQw4w9WgXcQ"), "dQw4w9WgXcQ"
+        )
+
+    def test_share_link_with_si_suffix(self) -> None:
+        # The shape YouTube's own Share button produces today.
+        self.assertEqual(
+            parse_video_id("https://youtu.be/dQw4w9WgXcQ?si=AbCdEfGhIjKl"), "dQw4w9WgXcQ"
         )
 
     def test_non_youtube_url_returns_none(self) -> None:

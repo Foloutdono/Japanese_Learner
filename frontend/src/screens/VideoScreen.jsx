@@ -215,6 +215,53 @@ export default function VideoScreen({ session }) {
       })
   }
 
+  // One implementation, two call sites: the setup stage offers paste as
+  // a first-class option, and the failure state below drops the learner
+  // straight into it with their URL still filled in. Duplicating the
+  // markup would let the two drift.
+  function pastePanel() {
+    return (
+      <>
+        <label className="video-setup__label video-setup__label--paste">
+          {t.pasteTranscript}
+        </label>
+        <div className="video-setup__how">
+          <div className="video-setup__how-lead">{t.pasteTranscriptHow}</div>
+          <ol className="video-setup__how-steps">
+            <li>
+              {t.pasteTranscriptStep1}
+              {parsedVideoId && (
+                <> — <a
+                  href={`https://www.youtube.com/watch?v=${parsedVideoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >{t.openOnYoutube}</a></>
+              )}
+            </li>
+            <li>{t.pasteTranscriptStep2}</li>
+            <li>{t.pasteTranscriptStep3}</li>
+          </ol>
+        </div>
+        <textarea
+          value={transcript}
+          onChange={e => setTranscript(e.target.value)}
+          rows={5}
+          className="phrase-textarea"
+          placeholder={'0:00\n…'}
+        />
+        <div className="phrase-input-actions">
+          <button
+            onClick={startFromTranscript}
+            disabled={!url.trim() || !transcript.trim()}
+            className="phrase-analyze-btn"
+          >
+            {t.useTranscript}
+          </button>
+        </div>
+      </>
+    )
+  }
+
   const active = sentences[activeIndex]
   const parsedVideoId = videoIdFrom(url)
 
@@ -253,42 +300,7 @@ export default function VideoScreen({ session }) {
             {/* Paste sits directly under the URL box, above upload, on
                 purpose: it is the path that actually works in production
                 (see plans/025), so the ordering says so. */}
-            <label className="video-setup__label video-setup__label--paste">
-              {t.pasteTranscript}
-            </label>
-            <div className="video-setup__how">
-              <div className="video-setup__how-lead">{t.pasteTranscriptHow}</div>
-              <ol className="video-setup__how-steps">
-                <li>
-                  {t.pasteTranscriptStep1}
-                  {parsedVideoId && (
-                    <> — <a
-                      href={`https://www.youtube.com/watch?v=${parsedVideoId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >{t.openOnYoutube}</a></>
-                  )}
-                </li>
-                <li>{t.pasteTranscriptStep2}</li>
-                <li>{t.pasteTranscriptStep3}</li>
-              </ol>
-            </div>
-            <textarea
-              value={transcript}
-              onChange={e => setTranscript(e.target.value)}
-              rows={5}
-              className="phrase-textarea"
-              placeholder={"0:00\n…"}
-            />
-            <div className="phrase-input-actions">
-              <button
-                onClick={startFromTranscript}
-                disabled={!url.trim() || !transcript.trim()}
-                className="phrase-analyze-btn"
-              >
-                {t.useTranscript}
-              </button>
-            </div>
+            {pastePanel()}
 
             <label className="video-setup__label video-setup__label--upload">
               {t.uploadSubtitles ?? 'Or upload a subtitle file'}
@@ -307,11 +319,38 @@ export default function VideoScreen({ session }) {
           <div className="card phrase-input-card">{t.analyzing ?? 'Analyzing the subtitles…'}</div>
         )}
 
+        {/* Not a dead end. The server cannot fetch captions from a
+            datacenter IP -- that is about WHERE the request came from,
+            not about the video -- and the paste ingest right here works
+            every time. The URL is deliberately NOT cleared, so the
+            learner retypes nothing. See plans/026. */}
         {stage === 'failed' && (
-          <div className="card phrase-error-card">
-            <div>{t.captionsUnavailable ?? "Couldn't get this video's captions."}</div>
-            {isYoutubeError && <div>{t.captionsBlockedHint}</div>}
-            {error && <div>{error}</div>}
+          <div className="card phrase-input-card">
+            <div className="video-failed__lead">
+              {isYoutubeError ? t.captionsServerBlocked : t.captionsUnavailable}
+            </div>
+            {error && <div className="video-failed__detail">{error}</div>}
+
+            {isYoutubeError ? (
+              <>
+                <div className="video-failed__keep-url">{t.captionsTryPaste}</div>
+                {pastePanel()}
+                <label className="video-setup__label video-setup__label--upload">
+                  {t.uploadSubtitles}
+                </label>
+                <input
+                  type="file"
+                  accept=".srt,.vtt,.ass,.ssa"
+                  onChange={e => startFromFile(e.target.files?.[0])}
+                />
+              </>
+            ) : (
+              <div className="phrase-input-actions">
+                <button onClick={() => setStage('setup')} className="phrase-analyze-btn">
+                  {t.back ?? '←'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
