@@ -7,8 +7,12 @@ Two efforts live in this file:
   commit `39511f8`. Its table is immediately below; its retrospective, traps
   and deferrals are in the second half of this file and are still worth
   reading.
-- **Wave 3 — Sentence analysis** (plans 012–020, TODO). A feature wave,
+- **Wave 3 — Sentence analysis** (plans 012–020, all DONE). A feature wave,
   planned 2026-08-26 at commit `d4911a6`. Jump to it below.
+- **Wave 4 — Making image and video actually work** (plans 021–026, TODO).
+  A repair wave, planned 2026-08-26 at commit `2552915`, after wave 3 shipped
+  and its two headline features were found not to work in production. Its
+  table and diagnosis are below.
 
 Each executor: read your plan fully before starting, honor its STOP
 conditions, and update your row when done.
@@ -93,6 +97,89 @@ If only part of the wave gets executed: 012-014 already fix two live defects
 no LLM provider) and are worth landing alone. 015-017 are where the feature
 becomes worth having.
 
+---
+
+# Wave 4 — Making image and video actually work
+
+Planned 2026-08-26 at commit `2552915`, from a live diagnosis rather than an
+audit. Wave 3 shipped photo input and video subtitles; **both were unusable in
+production**, reported as *"every link i try doesnt work, every picture return
+either a complete mess of characters or wrongs ones."*
+
+Four root causes, all confirmed live — none of them speculative:
+
+| # | Symptom | Root cause | Plan |
+|---|---|---|---|
+| 1 | Render log full of tracebacks; every request slow | JWKS client points at `/auth/v1/jwks`, which **401s** (needs an `apikey` header PyJWKClient never sends). The public set is at `/auth/v1/.well-known/jwks.json`. Local JWT verification has **never worked**; every request pays two Supabase round trips | [021](021-supabase-jwks-endpoint.md) |
+| 2 | White-screen `Cannot read properties of undefined (reading '0')` | `getExam` returns `{generating: true}` on a 202 — truthy, no `sections`. `ExamRunner` guards it; **`ExamResult` does not** and crashes on `exam?.sections[0]` | [022](022-exam-generating-shape-crash.md) |
+| 3 | Photos return character soup | Tesseract.js on raw photographs, with no preprocessing and no crop. The vision tier that was meant to rescue it was never built, because **plan 018's probe was wrong** | [023](023-vision-ocr-backend.md), [024](024-image-capture-ux.md) |
+| 4 | Every YouTube link fails | Render is a datacenter; YouTube blocks datacenter IPs for caption endpoints. The code is **correct** — identical calls succeed from a residential IP | [025](025-paste-transcript-ingest.md), [026](026-youtube-url-honesty-and-proxy.md) |
+
+## The two findings that reframe the wave
+
+**Plan 018's vision probe produced a false negative.** It concluded *"No model
+is confirmed vision-capable on either provider"* — but it only tested the seven
+models already hardcoded in `_PROVIDER_CATALOG`, all of them text-only. It never
+asked either provider which models accept images. Re-probed 2026-08-26 with the
+key already in `backend/.env`: OpenRouter serves **417 models, 250 of them
+image-capable**. Five candidates were benchmarked on a deliberately degraded
+Japanese image (rotated, downscaled, low contrast); **five scored 3/3 exact
+character-for-character lines**, at roughly **$0.0002 per image**. The one
+failure was a `:free` model returning HTTP 429 — a *quota* signal, which is
+exactly what plan 018 misread as a capability signal.
+
+**Only YouTube's caption *fetch* is blocked — the *player* is not.** The IFrame
+API runs in the learner's own browser on their own IP and embeds fine.
+`VideoPlayer.jsx` already works. So the missing piece is only caption *text*,
+and the learner's browser already has it: YouTube's own "Show transcript" panel
+is plain selectable text. Pasting it cannot be IP-blocked, needs no proxy or
+key, works for any video they can watch, and lands in the same `Cue` shape as
+the other two ingests — so nothing downstream changes. That is plan 025, and it
+is the wave's most important plan.
+
+## Execution order & status
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|------|-------|----------|--------|------------|--------|
+| 021 | [Supabase JWKS endpoint](021-supabase-jwks-endpoint.md) | P0 | S | — | TODO |
+| 022 | [Exam `{generating}` shape crash](022-exam-generating-shape-crash.md) | P0 | S | — | TODO |
+| 023 | [Vision-model OCR backend](023-vision-ocr-backend.md) | P0 | M | — | TODO |
+| 024 | [Image capture UX](024-image-capture-ux.md) | P0 | M | 023 | TODO |
+| 025 | [Paste-transcript ingest](025-paste-transcript-ingest.md) | P0 | M | — | TODO |
+| 026 | [YouTube URL honesty + proxy](026-youtube-url-honesty-and-proxy.md) | P1 | M | 025 | TODO |
+
+**021, 022, 023 and 025 are independent** and can run in any order or in
+parallel. **024 hard-depends on 023** (it calls the endpoint 023 builds);
+**026 hard-depends on 025** (its failure state hands off to 025's paste panel).
+
+If only part of the wave gets executed: **021 and 022 are near-free** and fix a
+live white-screen plus a per-request performance and log-noise problem.
+**025 alone makes video work** without touching OCR. **023 + 024 together** make
+photos work; neither half is useful without the other.
+
+## Cost, stated plainly
+
+This wave is the first to put a paid call on a user-triggered path. Vision OCR
+runs about **$0.0002 per image**; plan 023 Step 5 adds a per-user daily cap
+(default 60/day) before shipping it, so a runaway client costs cents rather
+than being unbounded. The video side costs **nothing** — paste and upload need
+no third party at all, and the proxy in plan 026 is opt-in and off by default.
+
+## What this wave deliberately does not do
+
+- **No YouTube cookies or account sessions.** Attaching a real person's
+  logged-in identity to automated fetches is against YouTube's terms in a way
+  the paste ingest is not, and it breaks constantly. Named as a STOP condition
+  in plan 026.
+- **No scraping of YouTube's markup.** That recreates exactly the coupling the
+  paste ingest removes.
+- **Tesseract is not deleted.** It stays as the offline/private option, which
+  preserves what ADR-0004 originally chose to protect — now stated as a choice
+  rather than as the only path.
+- **No self-hosted ASR.** Unchanged from ADR-0003.
+
+---
+
 ## Decisions this wave embodies
 
 Recorded properly in `docs/adr/`; summarised so the table above makes sense.
@@ -101,8 +188,8 @@ Recorded properly in `docs/adr/`; summarised so the table above makes sense.
 |---|---|
 | [0001](../docs/adr/0001-two-tier-sentence-analysis.md) | Analysis is two-tiered; the local tier is the default and needs no model |
 | [0002](../docs/adr/0002-sentence-bank-stores-text-not-results.md) | The Sentence bank stores text + provenance, and re-derives the analysis on open |
-| [0003](../docs/adr/0003-source-agnostic-caption-pipeline.md) | Video ingests Cues, not YouTube; upload is a first-class path; no self-hosted ASR |
-| [0004](../docs/adr/0004-ocr-runs-client-first.md) | OCR runs in the browser first, escalating to a vision model |
+| [0003](../docs/adr/0003-source-agnostic-caption-pipeline.md) | Video ingests Cues, not YouTube; upload is a first-class path; no self-hosted ASR — **amended by plan 026**: the datacenter block is total, not intermittent |
+| [0004](../docs/adr/0004-ocr-runs-client-first.md) | OCR runs in the browser first, escalating to a vision model — **amended by plan 023**: the vision tier becomes the default; Tesseract stays as the private option |
 | [0005](../docs/adr/0005-learner-level-behind-a-resolver.md) | The learner's JLPT level is read through a resolver, ready for onboarding |
 | [0006](../docs/adr/0006-browser-speech-for-study-audio.md) | Study audio uses browser speech synthesis; edge-tts stays for exams |
 
