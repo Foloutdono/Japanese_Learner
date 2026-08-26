@@ -182,3 +182,85 @@ def test_uses_a_daemon_thread_not_fastapis_background_task_helper() -> None:
     with open("routes/video.py", encoding="utf-8") as f:
         content = f.read()
     assert "threading.Thread" in content
+
+
+# ── Pasted transcript ingest (plan 025) ───────────────────────────
+# The one path that cannot be IP-blocked. Uses a phrase not used
+# elsewhere in this suite: phrase_analysis_cache has no expiry and is
+# keyed only by (phrase, lang), so reusing another test's sentence can
+# silently read back ITS cached deep tier.
+_PASTE = "0:00 犬が走っています。\n0:04 空はとても青いですね。"
+
+
+def test_pasted_transcript_never_calls_youtube(client, monkeypatch):
+    """The single most important test in plan 025: the paste path must
+    not touch the network, because the network is exactly what fails in
+    production."""
+    def _boom(video_id):
+        raise AssertionError("fetch_youtube_track must not be called for a paste")
+
+    monkeypatch.setattr(video_module, "fetch_youtube_track", _boom)
+
+    response = client.post(
+        "/api/video/session",
+        json={"url": "https://youtu.be/abcdefghijk", "transcript": _PASTE,
+              "start": 0, "end": 60},
+    )
+    assert response.status_code == 202
+
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    assert final.status_code == 200
+    body = final.json()
+    assert body["status"] == "ready"
+    assert len(body["sentences"]) >= 1
+
+
+def test_pasted_transcript_reports_paste_source_and_keeps_the_video_id(client, monkeypatch):
+    # source_ref must stay the video id: VideoScreen embeds the player
+    # from it, and playback is not blocked even though the fetch is.
+    monkeypatch.setattr(video_module, "fetch_youtube_track",
+                        lambda v: (_ for _ in ()).throw(AssertionError("no fetch")))
+    response = client.post(
+        "/api/video/session",
+        json={"url": "https://www.youtube.com/watch?v=abcdefghijk",
+              "transcript": "0:00 猫は寝ています。", "start": 0, "end": 60},
+    )
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    body = final.json()
+    assert body["source"] == "paste"
+    assert body["sourceRef"] == "abcdefghijk"
+
+
+def test_transcript_without_a_url_is_rejected(client):
+    response = client.post(
+        "/api/video/session",
+        json={"transcript": "0:00 これはテストです。", "start": 0, "end": 60},
+    )
+    assert response.status_code == 400
+
+
+def test_unparseable_transcript_fails_the_session_with_a_reason(client, monkeypatch):
+    monkeypatch.setattr(video_module, "fetch_youtube_track",
+                        lambda v: (_ for _ in ()).throw(AssertionError("no fetch")))
+    response = client.post(
+        "/api/video/session",
+        json={"url": "https://youtu.be/abcdefghijk",
+              "transcript": "no timestamps anywhere in here", "start": 0, "end": 60},
+    )
+    assert response.status_code == 202
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    assert final.status_code == 503
+    assert "0:18" in final.json()["error"]
+
+
+def test_window_cap_applies_to_the_paste_path_too(client, monkeypatch):
+    monkeypatch.setattr(video_module, "fetch_youtube_track",
+                        lambda v: (_ for _ in ()).throw(AssertionError("no fetch")))
+    response = client.post(
+        "/api/video/session",
+        json={"url": "https://youtu.be/abcdefghijk", "transcript": _PASTE,
+              "start": 0, "end": 600},  # 10 minutes, cap is 5
+    )
+    assert response.json()["windowCapped"] is True
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    assert final.json()["windowEnd"] == 300.0

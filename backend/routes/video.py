@@ -27,7 +27,10 @@ from core.db import db_conn
 from core.auth import get_user_id
 from core.srs_instance import srs
 from study.analysis import analyze_local, attach_user_state
-from study.captions import parse_track, parse_video_id, fetch_youtube_track, CaptionParseError, CaptionsUnavailable
+from study.captions import (
+    parse_track, parse_pasted_transcript, parse_video_id, fetch_youtube_track,
+    CaptionParseError, CaptionsUnavailable,
+)
 from study.cue_sentences import sentences_from_cues
 from study.sentences import MAX_SENTENCES
 # _analyze_sentence already bundles local + optional-deep + per-user
@@ -133,6 +136,10 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
     try:
         if source == "upload":
             cues = parse_track(content, filename or "upload.srt")
+        elif source == "paste":
+            # No network call at all -- see the route's comment on why
+            # this never falls back to the fetch.
+            cues = parse_pasted_transcript(content or "")
         else:
             cues = fetch_youtube_track(source_ref)
     except CaptionParseError as e:
@@ -230,9 +237,20 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         video_id = parse_video_id(url)
         if video_id is None:
             raise HTTPException(status_code=400, detail="Not a recognized YouTube URL")
-        source = "youtube"
+        # A pasted transcript takes over completely -- no request leaves
+        # this server on that path, which is the entire point (YouTube
+        # blocks datacenter IPs, see docs/adr/0003 and plans/025). It is
+        # deliberately NOT "try the fetch, fall back to the paste": the
+        # fetch's failure is the expected case in production, and paying
+        # for it on every request would be latency for nothing.
+        #
+        # `url` stays required even here: it carries the video id the
+        # player embeds, and the IFrame API runs in the learner's browser
+        # on their own IP, so playback works where the fetch does not.
+        pasted = (body.get("transcript") or "").strip()
+        source = "paste" if pasted else "youtube"
+        content = pasted or None
         source_ref = video_id
-        content = None
         filename = None
         try:
             window_start = float(body.get("start", 0))

@@ -11,6 +11,29 @@ import { Transcript } from '../components/video/Transcript'
 
 const POLL_MS = 1200
 
+// Enough to be a real transcript rather than a stray line, low enough
+// that a short clip still qualifies. Guards the obvious mistake of
+// pasting only the URL into both fields.
+const MIN_TRANSCRIPT_CHARS = 12
+
+// Client-side twin of study/captions.py's _YOUTUBE_URL_RES, used only to
+// build the "Open on YouTube" convenience link next to the paste
+// instructions. The BACKEND remains the authority on whether a URL is
+// acceptable -- this never gates submission, so the two drifting apart
+// costs a missing link, not a rejected video.
+const YOUTUBE_ID_RES = [
+  /(?:youtube\.com\/watch\?(?:.*&)?v=|youtube\.com\/shorts\/)([A-Za-z0-9_-]{11})/,
+  /youtu\.be\/([A-Za-z0-9_-]{11})/,
+]
+
+function videoIdFrom(url) {
+  for (const re of YOUTUBE_ID_RES) {
+    const m = re.exec(url)
+    if (m) return m[1]
+  }
+  return null
+}
+
 // The single unknown Token in an i+1 Sentence -- mirrors
 // study/analysis.py's _CONTENT_POS + unknown_count predicate exactly,
 // same as components/analysis/SentenceBreakdown.jsx's own
@@ -31,6 +54,7 @@ export default function VideoScreen({ session }) {
   const [url, setUrl] = useState('')
   const [windowStart, setWindowStart] = useState('0')
   const [windowEnd, setWindowEnd] = useState('180')
+  const [transcript, setTranscript] = useState('')
   const [error, setError] = useState(null)
   const [isYoutubeError, setIsYoutubeError] = useState(false)
 
@@ -56,6 +80,36 @@ export default function VideoScreen({ session }) {
     } catch (e) {
       setStage('setup')
       setError(e.message || t.captionsUnavailable)
+    }
+  }
+
+  // The ingest that cannot be IP-blocked. YouTube blocks datacenter IPs
+  // for its caption endpoints and this backend deploys to Render, so the
+  // URL path above fails in production for reasons nothing here can fix
+  // -- but the learner's own browser already rendered the transcript, so
+  // pasting it works every time. See plans/025 and docs/adr/0003.
+  async function startFromTranscript() {
+    if (!url.trim() || transcript.trim().length < MIN_TRANSCRIPT_CHARS) {
+      setError(t.transcriptTooShort)
+      return
+    }
+    setStage('loading')
+    setError(null)
+    try {
+      const data = await apiJson('/api/video/session', session, {
+        method: 'POST',
+        body: JSON.stringify({
+          url: url.trim(), transcript: transcript.trim(),
+          start: Number(windowStart), end: Number(windowEnd),
+        }),
+      })
+      setSessionId(data.sessionId)
+    } catch (e) {
+      setStage('setup')
+      // Surface the parser's own message: it says what was wrong with
+      // the paste, which is the useful thing. A generic failure here
+      // would leave the learner with nothing to act on.
+      setError((e.body && e.body.detail) || e.message)
     }
   }
 
@@ -162,6 +216,7 @@ export default function VideoScreen({ session }) {
   }
 
   const active = sentences[activeIndex]
+  const parsedVideoId = videoIdFrom(url)
 
   return (
     <div className="screen">
@@ -192,6 +247,46 @@ export default function VideoScreen({ session }) {
             <div className="phrase-input-actions">
               <button onClick={startFromUrl} disabled={!url.trim()} className="phrase-analyze-btn">
                 {t.loadVideo ?? 'Load'}
+              </button>
+            </div>
+
+            {/* Paste sits directly under the URL box, above upload, on
+                purpose: it is the path that actually works in production
+                (see plans/025), so the ordering says so. */}
+            <label className="video-setup__label video-setup__label--paste">
+              {t.pasteTranscript}
+            </label>
+            <div className="video-setup__how">
+              <div className="video-setup__how-lead">{t.pasteTranscriptHow}</div>
+              <ol className="video-setup__how-steps">
+                <li>
+                  {t.pasteTranscriptStep1}
+                  {parsedVideoId && (
+                    <> — <a
+                      href={`https://www.youtube.com/watch?v=${parsedVideoId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >{t.openOnYoutube}</a></>
+                  )}
+                </li>
+                <li>{t.pasteTranscriptStep2}</li>
+                <li>{t.pasteTranscriptStep3}</li>
+              </ol>
+            </div>
+            <textarea
+              value={transcript}
+              onChange={e => setTranscript(e.target.value)}
+              rows={5}
+              className="phrase-textarea"
+              placeholder={"0:00\n…"}
+            />
+            <div className="phrase-input-actions">
+              <button
+                onClick={startFromTranscript}
+                disabled={!url.trim() || !transcript.trim()}
+                className="phrase-analyze-btn"
+              >
+                {t.useTranscript}
               </button>
             </div>
 
@@ -233,7 +328,12 @@ export default function VideoScreen({ session }) {
               </div>
             )}
 
-            {sessionInfo?.source === 'youtube' && (
+            {/* 'paste' embeds the player too: a pasted transcript still
+                carries the video id in sourceRef, and the IFrame API runs
+                in the learner's browser on their own IP -- only the
+                server-side caption FETCH is datacenter-blocked, never
+                playback. 'upload' is the one source with no video. */}
+            {(sessionInfo?.source === 'youtube' || sessionInfo?.source === 'paste') && (
               <VideoPlayer ref={playerRef} videoId={sessionInfo.sourceRef} onTimeUpdate={handleTimeUpdate} />
             )}
 

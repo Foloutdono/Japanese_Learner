@@ -291,3 +291,163 @@ def fetch_youtube_track(video_id: str) -> list[dict]:
     if not cues:
         raise CaptionsUnavailable("The fetched Japanese track had no usable text.")
     return _merge_duplicate_consecutive(cues)
+
+
+# ── Pasted transcript (YouTube's own "Show transcript" panel) ──────
+# The one ingest that cannot be IP-blocked: the learner's browser
+# already rendered this text and they paste it, so no request leaves
+# this server and it works identically from a laptop and from Render.
+# See plans/025 and docs/adr/0003.
+#
+# THE FORMAT IS NOT WHAT YOU WOULD GUESS. Captured from a real
+# select-all-copy of the panel on 2026-08-26 (fixture:
+# tests/fixtures/youtube_transcript_panel_fr_ui.txt):
+#
+#   Transcription
+#
+#   Rechercher dans la transcription
+#   0:011 seconde[♪♪♪]
+#   0:1818 secondes♪ We're no strangers to love ♪
+#   1:091 minute et 9 secondes♪ Inside we both know ♪
+#
+# One line per cue, and between the timestamp and the text sits a
+# screen-reader duration label with NO separator on either side --
+# "0:18" + "18 secondes" + the caption. The label is a localized,
+# humanized rendering of the timestamp ("1 minute et 9 secondes"),
+# so it cannot be matched by a fixed pattern across UI languages.
+#
+# It CAN be stripped reliably, because it is derived from the timestamp
+# we already parsed: the non-zero hour/minute/second components appear
+# in order, each followed by a unit word. _strip_duration_label rebuilds
+# that expectation from the timestamp and only strips on an exact match,
+# so a UI in any language works and an unrecognised shape is left
+# untouched rather than mangled.
+_TIMESTAMP_LINE_RE = re.compile(r"^\s*(?:(\d{1,2}):)?(\d{1,3}):([0-5]\d)(.*)$")
+
+# What the last cue gets, having no successor to bound it. Only affects
+# the tail of the window, and only by a few seconds.
+_TRAILING_CUE_SECONDS = 5.0
+
+# Characters a duration label's unit word may be built from, beyond
+# Latin letters and spaces: the CJK units a Japanese UI renders
+# ("1分9秒"). Deliberately just these three -- widening it to "any CJK"
+# would let the label eat the caption's first characters.
+_CJK_DURATION_UNITS = "時分秒"
+
+
+def _is_unit_char(ch: str) -> bool:
+    if ch.isspace():
+        return True
+    if ch in _CJK_DURATION_UNITS:
+        return True
+    # Latin letters only: "minute", "minutes", "et", "and", "seconds".
+    return ch.isalpha() and ch.isascii()
+
+
+def _duration_components(total_seconds: int) -> list[int]:
+    """The numbers a humanized duration for `total_seconds` will contain,
+    in the order they appear. Zero components are omitted, which is what
+    the panel does -- 1:00 renders as "1 minute", not "1 minute and 0
+    seconds"."""
+    hours, rest = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(rest, 60)
+    parts = [n for n in (hours, minutes, seconds) if n]
+    return parts or [0]
+
+
+def _strip_duration_label(remainder: str, total_seconds: int) -> str:
+    """Remove the panel's screen-reader duration label from the front of
+    `remainder`, or return it unchanged when there isn't one.
+
+    Only strips on a full match against the label the timestamp itself
+    implies, so this is safe in any UI language and safe when the paste
+    has no label at all (a plain "0:18 text" line). Requires at least one
+    unit character, which is what stops a caption that merely BEGINS with
+    the same number ("0:18" + "18歳です") from being eaten.
+    """
+    if not remainder or not remainder[0].isdigit():
+        return remainder
+
+    pos = 0
+    unit_chars = 0
+    for component in _duration_components(total_seconds):
+        end = pos
+        while end < len(remainder) and remainder[end].isdigit():
+            end += 1
+        if remainder[pos:end] != str(component):
+            return remainder
+        pos = end
+        while pos < len(remainder) and _is_unit_char(remainder[pos]):
+            if not remainder[pos].isspace():
+                unit_chars += 1
+            pos += 1
+
+    if unit_chars == 0:
+        return remainder
+    return remainder[pos:]
+
+
+def parse_pasted_transcript(text: str) -> list[dict]:
+    """Cues from text copied out of YouTube's "Show transcript" panel.
+
+    Tolerant of the three shapes seen in the wild, because this input is
+    hand-assembled by a person:
+      - panel copy:   "0:1818 secondes<text>"   (see the module comment)
+      - inline:       "0:18 <text>"
+      - split lines:  "0:18" then <text> on following lines
+
+    Raises CaptionParseError when no timestamp is found at all, rather
+    than returning [] -- an empty transcript surfaces to the learner as a
+    mystery, and naming the problem is the whole reason this ingest has
+    its own error type.
+    """
+    cues: list[dict] = []
+    current: dict | None = None
+
+    for raw_line in text.splitlines():
+        match = _TIMESTAMP_LINE_RE.match(raw_line)
+        if match:
+            hours, minutes, seconds, remainder = match.groups()
+            start = int(hours or 0) * 3600 + int(minutes) * 60 + int(seconds)
+            remainder = _strip_duration_label(remainder, start)
+            if current is not None:
+                cues.append(current)
+            current = {"start": float(start), "end": None, "text": remainder.strip()}
+        elif current is not None:
+            # A continuation line of the cue we're building. Lines BEFORE
+            # the first timestamp are dropped on purpose: that is the
+            # panel's own header ("Transcription", the search box label,
+            # sometimes the video title).
+            extra = raw_line.strip()
+            if extra:
+                current["text"] = f"{current['text']} {extra}".strip()
+
+    if current is not None:
+        cues.append(current)
+
+    if not cues:
+        raise CaptionParseError(
+            "No timestamps found. Copy the whole transcript panel from YouTube "
+            "(each line should start with a time like 0:18)."
+        )
+
+    # Forgiving with input a human assembled by hand: a paste that got
+    # reordered is sorted rather than rejected.
+    cues.sort(key=lambda c: c["start"])
+
+    cleaned = []
+    for cue in cues:
+        cue["text"] = _strip_markup(cue["text"])
+        if cue["text"]:
+            cleaned.append(cue)
+
+    if not cleaned:
+        raise CaptionParseError("The pasted transcript had timestamps but no text.")
+
+    for index, cue in enumerate(cleaned):
+        following = cleaned[index + 1]["start"] if index + 1 < len(cleaned) else None
+        cue["end"] = following if following is not None else cue["start"] + _TRAILING_CUE_SECONDS
+
+    # A pasted AUTO-generated transcript carries the same rolling-window
+    # duplication as a fetched one; reuse the merge that already exists.
+    return _merge_duplicate_consecutive(cleaned)

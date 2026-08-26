@@ -9734,6 +9734,33 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 .video-setup__label--upload { margin-top: 20px; }
+
+/* Paste-transcript ingest (plans/025). Sits above upload in the DOM
+   because it is the path that works in production -- YouTube blocks
+   this backend's datacenter IP for caption fetches, never the player. */
+.video-setup__label--paste { margin-top: 20px; }
+
+.video-setup__how {
+  margin: 6px 0 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface-2, rgba(127, 127, 127, 0.08));
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.video-setup__how-lead {
+  margin-bottom: 6px;
+  opacity: 0.85;
+}
+
+.video-setup__how-steps {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.video-setup__how-steps li { margin: 2px 0; }
+
 .video-setup__window-row {
   display: flex;
   gap: 20px;

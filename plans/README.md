@@ -161,7 +161,7 @@ is the wave's most important plan.
 | 022 | [Exam `{generating}` shape crash](022-exam-generating-shape-crash.md) | P0 | S | — | DONE |
 | 023 | [Vision-model OCR backend](023-vision-ocr-backend.md) | P0 | M | — | TODO |
 | 024 | [Image capture UX](024-image-capture-ux.md) | P0 | M | 023 | TODO |
-| 025 | [Paste-transcript ingest](025-paste-transcript-ingest.md) | P0 | M | — | TODO |
+| 025 | [Paste-transcript ingest](025-paste-transcript-ingest.md) | P0 | M | — | DONE |
 | 026 | [YouTube URL honesty + proxy](026-youtube-url-honesty-and-proxy.md) | P1 | M | 025 | TODO |
 
 **021, 022, 023 and 025 are independent** and can run in any order or in
@@ -304,6 +304,33 @@ and expensive after:
   input is solved by splitting the Passage, never by asking for a bigger answer.
 
 ## Execution notes (added as each plan lands)
+
+- **Plan 025's "don't guess the paste format" STOP condition fired, and it was
+  the difference between a working feature and a broken one.** The planned
+  parser assumed `0:18` followed by the caption. A real select-all-copy of
+  YouTube's transcript panel (captured 2026-08-26 via the browser, committed
+  verbatim as `backend/tests/fixtures/youtube_transcript_panel_fr_ui.txt`) is
+  nothing like that — one line per cue, with a **screen-reader duration label
+  wedged between the timestamp and the text and no separator on either side**:
+
+  ```
+  0:1818 secondes♪ We're no strangers to love ♪
+  1:091 minute et 9 secondes♪ Inside we both know ♪
+  ```
+
+  Worse, that label is a *localized humanized duration* ("1 minute et 9
+  secondes", "1分9秒"), so no fixed pattern matches it across UI languages. The
+  planned parser would have mangled every single line.
+  The fix is self-verifying rather than pattern-matching: the label is derived
+  from the timestamp, so `_strip_duration_label` rebuilds the expected component
+  numbers **from the timestamp it just parsed** and strips only on an exact
+  match. That works in any UI language, leaves an unrecognised shape untouched
+  instead of mangling it, and requires at least one unit character consumed —
+  which is what stops a caption legitimately starting with the same number
+  (`0:18` + `18歳です`) from being eaten. Both are pinned by tests.
+  Also verified the two headline STOP-condition tests actually bite: forcing the
+  paste path to fall through to `fetch_youtube_track` fails 4 tests. Backend
+  364 passed; frontend 41 passed, build clean, lint 0 errors.
 
 - **Plan 022 landed, and the reported production crash was reproduced in a test
   before being fixed.** Reverting `ExamResult.jsx` to its original form makes
