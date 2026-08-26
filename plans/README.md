@@ -78,7 +78,7 @@ YouTube video's subtitles.
 | 016 | [Analyzer local-first + Sentence bank](016-analyzer-local-first-and-sentence-bank.md) | P1 | M | 015 | DONE |
 | 017 | [Mine sentences into decks](017-mine-sentences-into-decks.md) | P1 | M | 016 | DONE |
 | 018 | [Image / camera input](018-image-and-camera-input.md) | P2 | M | 016 | DONE (Step 4 blocked — see note) |
-| 019 | [Video subtitle study mode](019-video-subtitle-study-mode.md) | P2 | L | 017 | TODO |
+| 019 | [Video subtitle study mode](019-video-subtitle-study-mode.md) | P2 | L | 017 | DONE |
 | 020 | [Schema-file drift](020-schema-file-drift.md) | P2 | S | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
@@ -218,6 +218,28 @@ and expensive after:
   every new locale key before adding it, not just before the parity test —
   the test only catches keys missing from one side, not a collision that
   exists on both.
+- **Plan 017 left `WordDetail`'s mine control unreachable from the analyzer**,
+  found and fixed while building plan 019: `PhraseAnalyzerScreen.jsx`'s
+  `<WordDetail>` call site never passed `mining`, so `MineButton` (which
+  renders nothing when `mining` is undefined — the exact behaviour meant for
+  `ReadingScreen.jsx`, which deliberately never creates one) silently did the
+  same thing on the ONE screen that does have a `useMining` instance. Fixed
+  by passing it through. `ReadingScreen.jsx` is unaffected and correctly still
+  shows no mine control there.
+- **Plan 019's live-YouTube path was verified for real**, not just mocked:
+  `fetch_youtube_track` was run against a real video from this dev
+  environment (not blocked here) and returned 59 real, correctly-parsed
+  Cues — confirms the code path works; the production failure mode is
+  specific to Render's IP range, not a defect. The full upload -> job ->
+  ready -> explain flow was also verified end-to-end via `TestClient`,
+  including the phrase_history video-provenance write.
+- **Live-browser verification of `VideoScreen.jsx` (the YouTube player
+  rendering, live subtitle sync) was not possible this session** -- the
+  frontend gates every route behind a real Supabase session, and no login
+  credentials were available. Verified instead via: full lint/build/test
+  suite (all green), and a manual trace of the prop wiring end to end. A
+  reviewer with real credentials should click through the happy path once
+  before this ships.
 
 ---
 

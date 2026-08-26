@@ -490,6 +490,26 @@ const phraseAnalyzer = {
   imageTooLarge:       'This image is too large.',
 }
 
+// ── Video ─────────────────────────────────────────────────
+const video = {
+  videoTitle:          'Video',
+  videoDesc:           "Study a video's Japanese subtitles\nLive, colour-coded by what you already know\nA photo of the world with a soundtrack",
+  pasteVideoUrl:       'Paste a YouTube link',
+  uploadSubtitles:     'Or upload a subtitle file',
+  loadVideo:           'Load',
+  windowStart:         'Start (seconds)',
+  windowEnd:           'End (seconds)',
+  windowCapped:        'The window was capped at 5 minutes.',
+  analyzing:           'Analyzing the subtitles…',
+  captionsUnavailable: "Couldn't get this video's captions.",
+  captionsBlockedHint: "YouTube often blocks caption fetches from a server. Upload a subtitle file (.srt/.vtt/.ass) for this video instead.",
+  noCaptionTrack:      'This video has no Japanese captions.',
+  subtitleTooLarge:    'This subtitle file is too large.',
+  breakThisDown:       'Break this down',
+  transcript:          'Transcript',
+  seekToSentence:      'Jump to this sentence',
+}
+
 // ── Reading ───────────────────────────────────────────────
 const reading = {
   readingTitle:         'Reading practice',
@@ -1465,6 +1485,7 @@ export default {
   ...quiz,
   ...stats,
   ...phraseAnalyzer,
+  ...video,
   ...reading,
   ...readingComprehension,
   ...translationMode,

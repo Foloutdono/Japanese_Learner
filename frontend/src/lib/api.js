@@ -82,3 +82,21 @@ export async function apiJsonWithTimeout(path, session, { timeoutMs = 10000, sig
     if (signal) signal.removeEventListener('abort', onOuterAbort)
   }
 }
+
+/**
+ * POST a FormData body (a file upload), throwing ApiError on any
+ * non-2xx -- the multipart sibling of apiJson.
+ *
+ * Not built on apiFetch: that sets Content-Type: application/json
+ * unconditionally, which would break a multipart body (the browser has
+ * to set Content-Type itself, WITH the multipart boundary, which only
+ * happens when the header is left unset entirely). First real need:
+ * routes/video.py's subtitle upload (plan 019).
+ */
+export async function apiUpload(path, session, formData) {
+  const headers = session ? { Authorization: `Bearer ${session.access_token}` } : {}
+  const response = await fetch(api(path), { method: 'POST', body: formData, headers })
+  const body = await readJson(response)
+  if (!response.ok) throw new ApiError(response.status, body, path)
+  return body
+}

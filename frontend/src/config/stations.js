@@ -45,6 +45,7 @@ const STATIONS = {
   '/reading-comprehension': { code: 'RK', kana: 'りかい' },
   '/translation':           { code: 'HY', kana: 'ほんやく' },
   '/phrase-analyzer':       { code: 'KS', kana: 'かいせき' },
+  '/video':                 { code: 'DG', kana: 'どうが' },
   '/dictionary':            { code: 'JS', kana: 'じしょ' },
   '/decks':                 { code: 'KZ', kana: 'きょうざい' },
   '/exam':                  { code: 'MS', kana: 'もし' },

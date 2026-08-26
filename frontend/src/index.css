@@ -204,6 +204,7 @@
   --line-jisho:     #c99a3e;  /* 山吹色   yamabuki,    kerria gold */
   --line-decks:     #9c4a5e;  /* 蘇芳     suou,        sappanwood  */
   --line-exam:      #8a6b4f;  /* 茶色     cha-iro,     tea brown   */
+  --line-douga:     #7a8a3f;  /* 鶯色     uguisu-iro,  bush warbler */
   /* Not a line — the pass's ink. /profile and /settings were given
      line colours when they were modelled as stations; they are the
      定期券 now (see config/identity.js), so one pigment is left and it
@@ -279,7 +280,7 @@
   --burger-menu-border: #605947;
   --level-up-overlay-before: rgba(234, 173, 50, 0.14);
 
-  /* Same eleven, deepened a shade so each still reads as text and as a
+  /* Same twelve, deepened a shade so each still reads as text and as a
      2.5px ring on paper rather than only as a fill on ink. */
   --line-kana:      #b7402a;
   --line-vocab:     #375b78;
@@ -292,6 +293,7 @@
   --line-jisho:     #a97a25;
   --line-decks:     #853d4e;
   --line-exam:      #7a5c40;
+  --line-douga:     #6a7a35;
   --pass-ink:       #4c6072;
 
   --medal-gold:     #a97a25;
@@ -9722,6 +9724,86 @@ textarea:focus-visible {
   font-size: 12px;
   color: var(--text-secondary);
 }
+
+/* ── Video study mode (plan 019) -- player + transcript + live
+   breakdown. Additive only. */
+.video-setup__label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.video-setup__label--upload { margin-top: 20px; }
+.video-setup__window-row {
+  display: flex;
+  gap: 20px;
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.video-setup__window-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.video-setup__window-row input {
+  width: 100px;
+}
+
+.video-player__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 20px;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.video-player__frame > div {
+  position: absolute;
+  inset: 0;
+}
+.video-player__frame iframe {
+  width: 100%;
+  height: 100%;
+}
+
+.video-transcript-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 20px 0 8px;
+}
+.video-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.video-transcript__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.video-transcript__row:hover { background: var(--bg-card); }
+.video-transcript__row--active {
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+}
+.video-transcript__i-plus-one {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--success);
+  border: 1px solid var(--success);
+  border-radius: 4px;
+  padding: 1px 4px;
+  flex-shrink: 0;
+}
+.video-transcript__text { font-family: var(--font-jp); }
 
 .phrase-result-card { margin-bottom: 24px; padding: 20px 24px; }
 .phrase-line {

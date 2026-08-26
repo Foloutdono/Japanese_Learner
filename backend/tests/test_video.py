@@ -1,0 +1,184 @@
+# Plain pytest-style functions with the `client`/`monkeypatch` fixtures
+# -- same reason test_http_smoke.py and test_phrase_api.py deviate from
+# this suite's usual unittest.TestCase style.
+import time
+
+import routes.video as video_module
+from study.captions import CaptionsUnavailable
+from core.db import db_conn
+
+_SRT = (
+    "1\n00:00:01,000 --> 00:00:04,000\n私は学生です。\n\n"
+    "2\n00:00:05,000 --> 00:00:08,000\n今日は暑い！\n"
+).encode("utf-8")
+
+
+def _poll_until_settled(client, session_id, timeout=10.0):
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        response = client.get(f"/api/video/session/{session_id}")
+        if response.json().get("status") != "generating":
+            return response
+        time.sleep(0.1)
+    raise AssertionError(f"session {session_id} never left 'generating' within {timeout}s")
+
+
+def test_upload_produces_a_ready_transcript_with_no_youtube_call(client, monkeypatch):
+    def _boom(video_id):
+        raise AssertionError("fetch_youtube_track must not be called for an upload")
+
+    monkeypatch.setattr(video_module, "fetch_youtube_track", _boom)
+
+    post_resp = client.post(
+        "/api/video/session",
+        files={"file": ("test.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    assert post_resp.status_code == 202
+    session_id = post_resp.json()["sessionId"]
+    assert post_resp.json()["windowCapped"] is False
+
+    final = _poll_until_settled(client, session_id)
+    assert final.status_code == 200
+    body = final.json()
+    assert body["status"] == "ready"
+    assert len(body["sentences"]) == 2
+    assert body["sentences"][0]["text"] == "私は学生です。"
+    assert body["sentences"][0]["cue_start"] == 1.0
+    assert body["sentences"][0]["cue_end"] == 4.0
+    assert body["sentences"][0]["available"] is True
+    assert body["truncated"] == 0
+
+
+def test_oversized_upload_returns_413(client):
+    huge = b"1\n00:00:01,000 --> 00:00:02,000\nx\n" * 100_000  # well over 1MB
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("huge.srt", huge, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    assert response.status_code == 413
+
+
+def test_window_over_five_minutes_is_capped_and_reported(client):
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("test.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "600"},  # 10 minutes, cap is 5
+    )
+    assert response.status_code == 202
+    assert response.json()["windowCapped"] is True
+
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    assert final.json()["windowCapped"] is True
+    assert final.json()["windowEnd"] == 300.0
+
+
+def test_youtube_url_creates_a_session_and_a_fetch_failure_names_the_upload_path(client, monkeypatch):
+    def _fail(video_id):
+        raise CaptionsUnavailable(
+            "Could not fetch captions for this video (RequestBlocked). "
+            "Upload a subtitle file instead."
+        )
+
+    monkeypatch.setattr(video_module, "fetch_youtube_track", _fail)
+
+    post_resp = client.post(
+        "/api/video/session",
+        json={"url": "https://youtu.be/dQw4w9WgXcQ", "start": 0, "end": 30},
+    )
+    assert post_resp.status_code == 202
+    session_id = post_resp.json()["sessionId"]
+
+    final = _poll_until_settled(client, session_id)
+    assert final.status_code == 503
+    body = final.json()
+    assert body["status"] == "failed"
+    assert "upload" in body["error"].lower()
+    assert body["isYoutube"] is True
+    # Not a raw stack trace -- the CaptionsUnavailable message verbatim.
+    assert "Traceback" not in body["error"]
+
+
+def test_non_youtube_url_returns_400(client):
+    response = client.post(
+        "/api/video/session",
+        json={"url": "https://example.com/not-youtube", "start": 0, "end": 30},
+    )
+    assert response.status_code == 400
+
+
+def test_get_unknown_session_returns_404(client):
+    response = client.get("/api/video/session/999999999")
+    assert response.status_code == 404
+
+
+def test_explain_endpoint_buys_deep_tier_and_records_video_provenance(client, monkeypatch):
+    # A sentence unique to THIS test: phrase_analysis_cache has no
+    # expiry and is keyed only by (phrase, lang) -- reusing a phrase
+    # another test already bought the deep tier for (e.g.
+    # test_phrase_api.py's "私は学生です。") would silently return that
+    # test's cached explanation instead of exercising this call at all.
+    srt = (
+        "1\n00:00:01,000 --> 00:00:04,000\n猫は可愛い動物です。\n\n"
+        "2\n00:00:05,000 --> 00:00:08,000\n犬も好きです。\n"
+    ).encode("utf-8")
+
+    post_resp = client.post(
+        "/api/video/session",
+        files={"file": ("prov.srt", srt, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    session_id = post_resp.json()["sessionId"]
+    _poll_until_settled(client, session_id)
+
+    def _fake_chat(messages, timeout=30, max_tokens=1200, reasoning=False):
+        return (
+            '{"words": [{"surface": "猫", "meaning": "cat"}], '
+            '"explanation": "An introduction."}'
+        )
+
+    monkeypatch.setattr("routes.phrase.chat", _fake_chat)
+
+    response = client.post(f"/api/video/session/{session_id}/sentence/0/explain", json={"lang": "en"})
+    assert response.status_code == 200
+    assert response.json()["explanation"] == "An introduction."
+
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT source, source_ref FROM phrase_history WHERE phrase = %s ORDER BY id DESC LIMIT 1",
+                ("猫は可愛い動物です。",),
+            )
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    assert row is not None
+    source, source_ref = row
+    assert source == "video"
+    assert source_ref.startswith("prov.srt@")
+
+
+def test_explain_out_of_range_index_returns_404(client):
+    post_resp = client.post(
+        "/api/video/session",
+        files={"file": ("range.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    session_id = post_resp.json()["sessionId"]
+    _poll_until_settled(client, session_id)
+
+    response = client.post(f"/api/video/session/{session_id}/sentence/99/explain", json={})
+    assert response.status_code == 404
+
+
+def test_uses_a_daemon_thread_not_fastapis_background_task_helper() -> None:
+    # A plain daemon thread, matching routes/exams.py -- see that
+    # module's own comment on why a request-scoped async task helper is
+    # the wrong tool for work that must outlive the request.
+    import routes.video as vm
+    assert not hasattr(vm, "BackgroundTasks")
+    with open("routes/video.py", encoding="utf-8") as f:
+        content = f.read()
+    assert "threading.Thread" in content

@@ -26,6 +26,7 @@ import DeckDetailScreen from './screens/DeckDetailScreen'
 import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
 import PhraseAnalyzerScreen from './screens/PhraseAnalyzerScreen'
+import VideoScreen from './screens/VideoScreen'
 import ReadingScreen from './screens/ReadingScreen'
 import ReadingComprehensionScreen from './screens/ReadingComprehensionScreen'
 import ProfileScreen from './screens/ProfileScreen'
@@ -141,6 +142,7 @@ export default function App() {
           <Route path="/decks/:deck_id/study" element={<StudyScreen session={session} />} />
           <Route path="/grammar"              element={<GrammarScreen session={session} />} />
           <Route path="/phrase-analyzer"      element={<PhraseAnalyzerScreen session={session} />} />
+          <Route path="/video"                element={<VideoScreen session={session} />} />
           <Route path="/reading"              element={<ReadingScreen session={session} />} />
           <Route path="/reading-comprehension" element={<ReadingComprehensionScreen session={session} />} />
           <Route path="/profile" element={<ProfileScreen session={session} />} />

@@ -37,6 +37,10 @@ function sections(t) {
     // plus an LLM analysis help you judge your own attempt.
     { icon: '翻訳', title: t.translationTitle || 'Translation', desc: t.translationDesc || 'Translate into Japanese', path: '/translation', color: 'var(--line-honyaku)', scope: 'home' },
     { icon: '解析', title: t.phraseAnalyzerTitle, desc: t.phraseAnalyzerDesc, path: '/phrase-analyzer', color: 'var(--line-kaiseki)', scope: 'home' },
+    // Study a YouTube video's (or an uploaded subtitle file's) Japanese
+    // captions live, with the same local-tier breakdown and mining the
+    // analyzer offers -- see screens/VideoScreen.jsx.
+    { icon: '動画', title: t.videoTitle || 'Video', desc: t.videoDesc || 'Study a video\'s Japanese subtitles', path: '/video', color: 'var(--line-douga)', scope: 'home' },
     { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary', color: 'var(--line-jisho)',   scope: 'home' },
     { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/decks',      color: 'var(--line-decks)',   scope: 'home' },
     // Generated mock exams (vocab/grammar/reading/listening, built to

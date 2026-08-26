@@ -282,7 +282,7 @@ export default function PhraseAnalyzerScreen({ session }) {
       </main>
 
       {detail && (
-        <WordDetail detail={detail} t={t} onClose={closeDetail} />
+        <WordDetail detail={detail} t={t} onClose={closeDetail} mining={mining} />
       )}
     </div>
   )

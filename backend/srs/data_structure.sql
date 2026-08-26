@@ -203,3 +203,39 @@ CREATE TABLE deck_cards (
 
 CREATE INDEX idx_deck_cards_deck
 ON deck_cards(deck_id, user_id);
+
+-- One row per video/subtitle analysis request. `sentences` holds the
+-- LOCAL tier only (study/analysis.py's analyze_local, no per-user
+-- stats) -- routes/video.py's GET attaches live SRS state at read
+-- time, same principle as docs/adr/0002. created and updated by
+-- routes/video.py; see that module's _migrate_video_schema.
+CREATE TABLE video_sessions (
+    id            BIGSERIAL PRIMARY KEY,
+    user_id       TEXT NOT NULL,
+    source        TEXT NOT NULL,               -- 'youtube' | 'upload'
+    source_ref    TEXT NOT NULL,                -- video id, or the uploaded filename
+    window_start  DOUBLE PRECISION NOT NULL,
+    window_end    DOUBLE PRECISION NOT NULL,
+    window_capped BOOLEAN NOT NULL DEFAULT FALSE,
+    status        TEXT NOT NULL DEFAULT 'generating',  -- 'generating' | 'ready' | 'failed'
+    error         TEXT,
+    sentences     JSONB,
+    truncated     INTEGER NOT NULL DEFAULT 0,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_video_sessions_user
+ON video_sessions(user_id, created_at DESC);
+
+-- The claim lock -- same pattern as exam_generation_jobs
+-- (study/exam_schema.py), one row per session while work is running or
+-- has recently failed, deleted on success. See routes/exams.py's
+-- comment on why the primary key IS the lock.
+CREATE TABLE video_session_jobs (
+    session_id  BIGINT PRIMARY KEY REFERENCES video_sessions(id) ON DELETE CASCADE,
+    status      TEXT NOT NULL,
+    error       TEXT,
+    retry_after TIMESTAMPTZ,
+    started_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

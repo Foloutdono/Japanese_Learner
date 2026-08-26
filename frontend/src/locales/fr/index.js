@@ -475,6 +475,26 @@ const phraseAnalyzer = {
   imageTooLarge:       'Cette image est trop volumineuse.',
 }
 
+// ── Video ─────────────────────────────────────────────────
+const video = {
+  videoTitle:          'Vidéo',
+  videoDesc:           "Étudiez les sous-titres japonais d'une vidéo\nEn direct, colorés selon ce que vous savez déjà\nUne photo du monde avec une bande-son",
+  pasteVideoUrl:       'Collez un lien YouTube',
+  uploadSubtitles:     'Ou téléversez un fichier de sous-titres',
+  loadVideo:           'Charger',
+  windowStart:         'Début (secondes)',
+  windowEnd:           'Fin (secondes)',
+  windowCapped:        'La fenêtre a été limitée à 5 minutes.',
+  analyzing:           'Analyse des sous-titres…',
+  captionsUnavailable: "Impossible de récupérer les sous-titres de cette vidéo.",
+  captionsBlockedHint: "YouTube bloque souvent la récupération des sous-titres depuis un serveur. Téléversez plutôt un fichier de sous-titres (.srt/.vtt/.ass) pour cette vidéo.",
+  noCaptionTrack:      'Cette vidéo n\'a pas de sous-titres japonais.',
+  subtitleTooLarge:    'Ce fichier de sous-titres est trop volumineux.',
+  breakThisDown:       'Décomposer cette phrase',
+  transcript:          'Transcription',
+  seekToSentence:      'Aller à cette phrase',
+}
+
 // ── Reading ───────────────────────────────────────────────
 const reading = {
   readingTitle:         'Entraînement à la lecture',
@@ -1437,6 +1457,7 @@ export default {
   ...progress,
   ...misc,
   ...phraseAnalyzer,
+  ...video,
   ...reading,
   ...readingComprehension,
   ...translationMode,
