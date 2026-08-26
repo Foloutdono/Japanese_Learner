@@ -1,3 +1,13 @@
+-- This file is NOT the source of truth for the schema -- every table
+-- here is self-migrated at import time by the module that owns it
+-- (CREATE TABLE IF NOT EXISTS, run on every startup; see the
+-- comments throughout this file for which module owns which table).
+-- It exists as a fast way to stand up a fresh dev/test database in
+-- one shot (see CLAUDE.md's Local Postgres section) and as a single
+-- place to read the whole schema at a glance. backend/tests/
+-- test_schema_declared.py keeps it honest: it fails if a table any
+-- module creates isn't declared here.
+
 CREATE TABLE cards (
     id TEXT PRIMARY KEY
 );
@@ -166,15 +176,20 @@ ON decks(user_id);
 -- holds *references* into the read-only app decks — never a copy of
 -- them — so this table is the one place actual card content the user
 -- typed lives.
+-- front/back/kana are legacy (pre-structure) columns, kept nullable
+-- for old rows; a card's real content lives in `fields`, keyed by
+-- `structure`'s own field names -- see study/structures.py and
+-- routes/decks.py:302's migration comment for why.
 CREATE TABLE custom_cards (
     id BIGSERIAL PRIMARY KEY,
     deck_id BIGINT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
     user_id TEXT NOT NULL,
-    front TEXT NOT NULL,
-    back TEXT NOT NULL,
-    kana TEXT NOT NULL DEFAULT '',
-    hint TEXT NOT NULL DEFAULT '',
+    front TEXT,
+    back TEXT,
+    kana TEXT,
     notes TEXT NOT NULL DEFAULT '',
+    structure TEXT NOT NULL DEFAULT 'standard',
+    fields JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -238,4 +253,162 @@ CREATE TABLE video_session_jobs (
     retry_after TIMESTAMPTZ,
     started_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Owned by routes/daruma.py -- the Daruma gamification feature's
+-- per-user token balance and per-period goal-claim state.
+CREATE TABLE daruma_state (
+    user_id TEXT PRIMARY KEY,
+    tokens INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE daruma_goals (
+    user_id     TEXT NOT NULL,
+    goal_id     TEXT NOT NULL,
+    period_key  TEXT NOT NULL,
+    vowed_at    TIMESTAMPTZ,
+    claimed_at  TIMESTAMPTZ,
+    reward_xp   INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, goal_id, period_key)
+);
+
+CREATE INDEX idx_daruma_goals_user
+ON daruma_goals(user_id, claimed_at);
+
+-- Owned by study/exam_schema.py -- generated mock exams (one row per
+-- exam_id/revision, papers regenerated wholesale rather than patched),
+-- learner attempts against a specific revision, and the claim-lock job
+-- table for exam generation (same pattern as video_session_jobs above).
+CREATE TABLE exam_papers (
+    exam_id           TEXT NOT NULL,
+    revision          INT NOT NULL DEFAULT 1,
+    level             TEXT NOT NULL,
+    seed              BIGINT NOT NULL,
+    generator_version TEXT NOT NULL,
+    paper             JSONB NOT NULL,
+    section_count     INTEGER NOT NULL,
+    question_count    INTEGER NOT NULL,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (exam_id, revision)
+);
+
+CREATE TABLE exam_attempts (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    exam_id     TEXT NOT NULL,
+    revision    INT NOT NULL DEFAULT 1,
+    section_id  TEXT NOT NULL,
+    answers     JSONB NOT NULL,
+    review      JSONB NOT NULL,
+    per_section JSONB NOT NULL,
+    correct     INTEGER NOT NULL,
+    total       INTEGER NOT NULL,
+    started_at  TIMESTAMPTZ NOT NULL,
+    finished_at TIMESTAMPTZ NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT exam_attempts_paper_fkey
+        FOREIGN KEY (exam_id, revision)
+        REFERENCES exam_papers(exam_id, revision)
+);
+
+CREATE INDEX idx_exam_attempts_user
+ON exam_attempts(user_id, created_at DESC);
+
+CREATE TABLE exam_generation_jobs (
+    exam_id     TEXT PRIMARY KEY,
+    revision    INT NOT NULL DEFAULT 1,
+    status      TEXT NOT NULL,
+    error       TEXT,
+    retry_after TIMESTAMPTZ,
+    started_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Owned by study/grammar_sentence_store.py -- generated example
+-- sentences for one grammar point, cached wholesale per (level,
+-- pattern) and regenerated in full rather than patched.
+CREATE TABLE grammar_sentences (
+    level             TEXT NOT NULL,
+    pattern           TEXT NOT NULL,
+    sentences         JSONB NOT NULL,
+    generator_version TEXT NOT NULL,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (level, pattern)
+);
+
+-- Owned by routes/phrase.py -- the deep-tier (LLM) analysis cache for
+-- the phrase analyzer, keyed by phrase+lang (see _phrase_key /
+-- CACHE_VERSION). No expiry: permanent and shared across all callers
+-- of the same (phrase, lang) pair.
+CREATE TABLE phrase_analysis_cache (
+    phrase_key TEXT PRIMARY KEY,
+    phrase     TEXT NOT NULL,
+    result     JSONB NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Owned by srs/srs.py -- xp_ledger is the append-only source of truth
+-- for XP awards (source/ref identify what earned it, e.g. a review or
+-- a Daruma goal claim); streak_mends records days a broken streak was
+-- repaired with a mend, for streak-calculation purposes only.
+CREATE TABLE xp_ledger (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    source      TEXT NOT NULL,
+    ref         TEXT,
+    xp          INTEGER NOT NULL,
+    awarded_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_xp_ledger_user
+ON xp_ledger(user_id);
+
+CREATE TABLE streak_mends (
+    user_id   TEXT NOT NULL,
+    mend_day  DATE NOT NULL,
+    mended_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, mend_day)
+);
+
+-- Owned by routes/translation.py -- translation-mode study log,
+-- mirrors reading_log/comprehension_log's shape for the same feature
+-- family.
+CREATE TABLE translation_log (
+    id                  BIGSERIAL PRIMARY KEY,
+    user_id             TEXT NOT NULL,
+    level               TEXT NOT NULL DEFAULT '',
+    phase               TEXT NOT NULL,
+    translation_prompt  TEXT NOT NULL,
+    phrase              TEXT NOT NULL,
+    romaji              TEXT NOT NULL,
+    answer              TEXT NOT NULL,
+    correct             BOOLEAN NOT NULL,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Owned by routes/cosmetics.py -- unlocked cosmetic items and the
+-- currently-equipped item per slot. user_loadout's slot columns are
+-- generated from cosmetics.SLOTS in code (one nullable TEXT column
+-- per slot); listed here as of the slots that exist today -- adding a
+-- slot there requires adding the matching column here too, since this
+-- file's own migration is a plain CREATE, not the ALTER loop
+-- routes/cosmetics.py runs for existing rows.
+CREATE TABLE user_cosmetics (
+    user_id      TEXT NOT NULL,
+    cosmetic_id  TEXT NOT NULL,
+    unlocked_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    seen         BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (user_id, cosmetic_id)
+);
+
+CREATE TABLE user_loadout (
+    user_id   TEXT PRIMARY KEY,
+    paper     TEXT,
+    ring      TEXT,
+    seal      TEXT,
+    title     TEXT,
+    backdrop  TEXT,
+    flourish  TEXT,
+    brush     TEXT,
+    mcq       TEXT
 );

@@ -79,7 +79,7 @@ YouTube video's subtitles.
 | 017 | [Mine sentences into decks](017-mine-sentences-into-decks.md) | P1 | M | 016 | DONE |
 | 018 | [Image / camera input](018-image-and-camera-input.md) | P2 | M | 016 | DONE (Step 4 blocked — see note) |
 | 019 | [Video subtitle study mode](019-video-subtitle-study-mode.md) | P2 | L | 017 | DONE |
-| 020 | [Schema-file drift](020-schema-file-drift.md) | P2 | S | — | TODO |
+| 020 | [Schema-file drift](020-schema-file-drift.md) | P2 | S | — | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
@@ -193,6 +193,26 @@ and expensive after:
 
 ## Execution notes (added as each plan lands)
 
+- **Plan 020 found `backend/srs/data_structure.sql` missing 12 tables, not
+  just the ones the plan's own literal grep scope (`routes/*.py srs/*.py`)
+  would have found.** `study/exam_schema.py` (`exam_papers`,
+  `exam_attempts`, `exam_generation_jobs`) and `study/grammar_sentence_store.py`
+  (`grammar_sentences`) also self-migrate tables via `CREATE TABLE IF NOT
+  EXISTS`, and were invisible to both the fix and the regression test under
+  the plan's literal scope. Widened scope to include `study/*.py` as well —
+  this only reads Python source for `CREATE TABLE IF NOT EXISTS` calls, it
+  doesn't touch any Python CREATE/ALTER logic, so it stays within the plan's
+  "no Python schema-logic changes" boundary while actually delivering on the
+  new test's stated purpose ("a new table cannot be invisible"). Also fixed
+  `custom_cards`'s declaration (it had drifted from `routes/decks.py`'s real
+  migration: `hint` was dropped, `structure`/`fields` were added,
+  `front`/`back`/`kana` lost their `NOT NULL`). Verified by dropping and
+  recreating a fresh Postgres schema from `data_structure.sql` alone (25
+  tables, applies cleanly) and running the full backend suite against it —
+  333 passed. `backend/tests/test_schema_declared.py`'s negative-control
+  probe (a table declared only in code, never in the SQL file) was confirmed
+  to actually fail the check before being cleaned up, so the regression test
+  is proven to bite.
 - **Plan 018's Step 4 (vision-model escalation) is blocked, per the plan's own
   STOP condition (2026-08-26).** Ran `python -m scripts.check_llm_models
   --vision` live against both configured providers (7 models). Six answered

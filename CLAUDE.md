@@ -17,7 +17,7 @@ pytest                        # run all tests
 pytest tests/test_scheduler.py            # single file
 pytest tests/test_scheduler.py::test_name # single test
 ```
-Local Postgres (schema is `backend/srs/data_structure.sql`):
+Local Postgres (schema is `backend/srs/data_structure.sql` — a reference snapshot kept honest by `backend/tests/test_schema_declared.py`; the real source of truth is each module's own `CREATE TABLE IF NOT EXISTS` self-migration, run at import time):
 ```bash
 docker run -d --name jp-db -e POSTGRES_PASSWORD=dev -p 5432:5432 postgres:16
 docker exec -i jp-db psql -U postgres -c "CREATE DATABASE jp;"
