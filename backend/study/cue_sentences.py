@@ -20,51 +20,56 @@
 # is still a usable study unit, and their rolling-window duplication is
 # already handled upstream (captions._merge_duplicate_consecutive).
 #
-# So: one Cue in, one or more Sentences out -- more only when the Cue's
-# OWN text carries punctuation to split on. Never fewer, and never a
-# merge across Cues.
-from study.sentences import split_sentences
+# So: one Cue in, exactly one Sentence out. Not split either -- a
+# subtitle line is what is on screen, and splitting it on an internal ？
+# produced stops that no longer matched the file and shared a timestamp
+# with their other half.
+#
+# Nothing is ever DROPPED. A line with no Japanese is flagged, not
+# removed: filtering it out silently deletes part of the track the
+# learner is reading along with.
 from study.text_normalize import japanese_ratio
 
 
-def _has_japanese(text: str) -> bool:
+def is_japanese(text: str) -> bool:
     """Any Japanese script at all. Deliberately not a tuned ratio: on
     real mixed-language subtitles the split is absolute -- Japanese
-    lines score 0.4-1.0 and Korean/English/numeric lines score exactly
-    0.0 -- so "contains some Japanese" separates them without a
-    threshold to maintain. Measured against the mosi-mosi .vtt, whose
-    Korean verses were being furigana'd as though they were Japanese."""
-    return japanese_ratio(text) > 0.0 and text.strip() != ""
+    lines score 0.4-1.0 on japanese_ratio and Korean/English/numeric
+    lines score exactly 0.0 -- so "contains some Japanese" separates
+    them without a threshold to maintain."""
+    return bool(text.strip()) and japanese_ratio(text) > 0.0
 
 
 def sentences_from_cues(cues: list[dict], start: float | None,
                         end: float | None) -> list[dict]:
-    """Cues overlapping the Window [start, end) as Sentences, each
-    {"text", "cue_start", "cue_end"} -- the last two in seconds.
+    """Every Cue overlapping the Window [start, end) as a Sentence, each
+    {"text", "cue_start", "cue_end", "japanese"}.
+
+    EVERY Cue, in file order, one Sentence each. This is a subtitle
+    track: the learner is reading along with it, so a line that is
+    missing from the list is a line they cannot find, and a line that
+    has been split or merged no longer matches what is on screen. The
+    output is meant to be an enhanced copy of the file, not a filtered
+    one.
+
+    `japanese` is False for a line with no Japanese in it -- a Korean
+    verse, an English ad-lib. Those are KEPT and flagged, not dropped:
+    the caller shows them as-is and skips the breakdown, so the learner
+    still sees the whole song and simply gets told which lines this app
+    cannot take apart.
 
     Either bound may be None, meaning "no bound that side"; both None
     (the default) is the whole Track. The number of Sentences is capped
     by the caller via MAX_SENTENCES, which is what actually bounds the
-    analysis work -- see docs/adr/0003's amendment on why the Window
-    stopped being a second cap on the same thing.
-
-    A Cue with no Japanese in it is dropped: this app cannot teach a
-    Korean lyric or an English ad-lib, and analyzing one produces a
-    Sentence of pure off-deck noise.
+    analysis work -- see docs/adr/0003's amendment.
     """
-    selected = [
-        c for c in cues
-        if (start is None or c["end"] > start) and (end is None or c["start"] < end)
+    return [
+        {
+            "text": cue["text"],
+            "cue_start": cue["start"],
+            "cue_end": cue["end"],
+            "japanese": is_japanese(cue["text"]),
+        }
+        for cue in cues
+        if (start is None or cue["end"] > start) and (end is None or cue["start"] < end)
     ]
-
-    result: list[dict] = []
-    for cue in selected:
-        if not _has_japanese(cue["text"]):
-            continue
-        for sentence in split_sentences(cue["text"]):
-            result.append({
-                "text": sentence["text"],
-                "cue_start": cue["start"],
-                "cue_end": cue["end"],
-            })
-    return result

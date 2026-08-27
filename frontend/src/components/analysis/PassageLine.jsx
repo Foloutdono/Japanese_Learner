@@ -26,6 +26,25 @@ import { formatTimecode } from '../../lib/timecode'
 
 export function PassageLine({ sentences, activeIndex, onSelect, t, orientation = 'vertical' }) {
   const activeRef = useRef(null)
+  const lineRef = useRef(null)
+
+  // The strip and the video player are two sticky siblings, so the
+  // player has to sit exactly one strip-height down or it covers the
+  // bottom of the line. That offset was a hand-kept 92px and was wrong
+  // the moment a stop grew a badge -- measured here instead, and
+  // published as a custom property the player's rule reads. One source
+  // of truth, and it cannot go stale.
+  useEffect(() => {
+    const el = lineRef.current
+    if (!el || orientation !== 'strip') return undefined
+    const target = el.parentElement
+    if (!target) return undefined
+    const publish = () => target.style.setProperty('--anl-strip-h', `${Math.ceil(el.offsetHeight)}px`)
+    publish()
+    const ro = new ResizeObserver(publish)
+    ro.observe(el)
+    return () => { ro.disconnect(); target.style.removeProperty('--anl-strip-h') }
+  }, [orientation])
 
   // Playback moves the active stop without a click, so the line has to
   // follow. 'nearest' is what makes this correct in BOTH orientations --
@@ -40,6 +59,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
 
   return (
     <div
+      ref={lineRef}
       className={`anl-line${orientation === 'strip' ? ' anl-line--strip' : ''}`}
       // role="group", NOT role="list". A list wants role="listitem"
       // children, and putting that on a <button> OVERRIDES the button
@@ -79,7 +99,13 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
                 character count cuts mid-grapheme and mangles Japanese. */}
             <span className="anl-stop__text" lang="ja">{s.text}</span>
 
-            {s.unknown_count === 1 && (
+            {s.foreign ? (
+              /* Flagged, not hidden: the learner can see this line is in
+                 the track and that the app has nothing to say about it. */
+              <span className="anl-stop__foreign" title={t.notJapaneseLine}>
+                {t.notJapaneseShort}
+              </span>
+            ) : s.unknown_count === 1 && (
               <span className="anl-stop__iplus" title={t.iPlusOne}>i+1</span>
             )}
 

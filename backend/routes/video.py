@@ -185,7 +185,19 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
 
     analyzed = []
     for s in kept:
-        analysis = analyze_local(s["text"])
+        if s["japanese"]:
+            analysis = analyze_local(s["text"])
+        else:
+            # Kept, not dropped. A Korean verse or an English ad-lib is
+            # part of the track the learner is reading along with, so it
+            # stays in the list and simply says what it is. Shaped like
+            # an analyze_local result so nothing downstream needs a
+            # second branch; `foreign` is what the UI keys off.
+            analysis = {
+                "text": s["text"], "tokens": [], "grammar": [],
+                "level": None, "grade": None, "available": True,
+                "foreign": True,
+            }
         analysis["cue_start"] = s["cue_start"]
         analysis["cue_end"] = s["cue_end"]
         analyzed.append(analysis)

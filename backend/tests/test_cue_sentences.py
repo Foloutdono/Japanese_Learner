@@ -35,22 +35,23 @@ class SentencesFromCuesTests(unittest.TestCase):
         # terminators" path and the "one per Cue" fallback and produce
         # 200-character blocks spanning a dozen unrelated lines.
         cues = [
-            {"start": 0.0, "end": 1.0, "text": "ないしらせは 良いしらせ"},
-            {"start": 1.0, "end": 2.0, "text": "南極しらせは お幸せ"},
-            {"start": 2.0, "end": 3.0, "text": "にっちもさっちもいかない"},
-            {"start": 3.0, "end": 4.0, "text": "聞こえてる？"},
+            {"start": 0.0, "end": 1.0, "text": "今日はいい天気ですね"},
+            {"start": 1.0, "end": 2.0, "text": "駅前に喫茶店ができた"},
+            {"start": 2.0, "end": 3.0, "text": "コーヒーが美味しいらしい"},
+            {"start": 3.0, "end": 4.0, "text": "行きましょうか？"},
         ]
         result = sentences_from_cues(cues, 0.0, 10.0)
         self.assertEqual(len(result), 4)
         self.assertTrue(all(len(s["text"]) < 20 for s in result))
 
-    def test_a_cue_splits_further_on_its_own_punctuation(self) -> None:
-        cues = [{"start": 0.0, "end": 1.0, "text": "もしもーし、（なに？）聞こえてる？（はーい！）"}]
+    def test_a_cue_is_never_split_either(self) -> None:
+        """A subtitle line is what is on screen. Splitting it on an
+        internal ？ produced two stops that no longer matched the file
+        and shared a timestamp with each other."""
+        cues = [{"start": 0.0, "end": 1.0, "text": "もしもし、（なに？）聞こえてる？"}]
         result = sentences_from_cues(cues, 0.0, 10.0)
-        self.assertGreater(len(result), 1)
-        # Every piece keeps the Cue's own timing -- they are the same
-        # moment of the video.
-        self.assertTrue(all(s["cue_start"] == 0.0 and s["cue_end"] == 1.0 for s in result))
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["text"], "もしもし、（なに？）聞こえてる？")
 
     def test_unpunctuated_cues_stay_one_sentence_each(self) -> None:
         # The auto-caption case: no 。！？ anywhere. Still one Sentence
@@ -64,19 +65,22 @@ class SentencesFromCuesTests(unittest.TestCase):
         self.assertEqual(result[0]["text"], "あ" * 70)
         self.assertEqual(result[1]["cue_end"], 4.0)
 
-    def test_cues_with_no_japanese_are_dropped(self) -> None:
-        # Real input: this Track's second verse is Korean, with English
-        # ad-libs. Analyzing those produces a Sentence of pure off-deck
-        # noise and furigana over Hangul.
+    def test_cues_with_no_japanese_are_kept_and_flagged(self) -> None:
+        """NOT dropped. A Korean verse or an English ad-lib is part of
+        the track the learner is reading along with; removing it means a
+        line they can see on screen is missing from the list. It is
+        flagged instead, and the caller skips the breakdown for it."""
         cues = [
-            {"start": 0.0, "end": 1.0, "text": "電波 電波の怪電波"},
-            {"start": 1.0, "end": 2.0, "text": "여보세요, 사사짱?"},
+            {"start": 0.0, "end": 1.0, "text": "こんにちは"},
+            {"start": 1.0, "end": 2.0, "text": "여보세요"},
             {"start": 2.0, "end": 3.0, "text": "I miss you"},
             {"start": 3.0, "end": 4.0, "text": "4season"},
-            {"start": 4.0, "end": 5.0, "text": "君にCHU"},
+            {"start": 4.0, "end": 5.0, "text": "また明日"},
         ]
         result = sentences_from_cues(cues, 0.0, 10.0)
-        self.assertEqual([s["text"] for s in result], ["電波 電波の怪電波", "君にCHU"])
+        self.assertEqual(len(result), 5, "every Cue must survive")
+        self.assertEqual([r["japanese"] for r in result],
+                         [True, False, False, False, True])
 
     def test_window_selects_only_overlapping_cues(self) -> None:
         cues = [

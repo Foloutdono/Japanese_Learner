@@ -747,6 +747,11 @@
      timestamp under the text), so the player overlapped its bottom
      28px whenever both were stuck. Two hand-kept numbers is how that
      happens; one token is how it stops. */
+  /* A FALLBACK only. PassageLine measures the strip and publishes the
+     real height as --anl-strip-h on this element (ResizeObserver), so
+     the player's offset tracks a stop that grows a badge instead of
+     covering the bottom of the line -- which a hand-kept number did,
+     twice. */
   .anl-results { --anl-strip-h: 92px; }
 
   .anl-line--strip {
@@ -874,4 +879,73 @@
 @media (prefers-reduced-motion: reduce) {
   .anl-reopen,
   .anl-mine__options { transition: none; }
+}
+
+/* ── A line the app cannot take apart ──────────────────────
+   Shown as it appears in the subtitles, with a note instead of a
+   breakdown. Kept deliberately quiet: it is context the learner is
+   reading past, not something demanding attention. */
+.anl-foreign {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--anl-pad-block) var(--anl-pad-inline);
+  background: var(--surface);
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--anl-radius);
+}
+.anl-foreign__text {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.35rem);
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+.anl-foreign__note { margin: 0; font-size: 0.78rem; color: var(--text-secondary); }
+
+/* Its marker on the route line, so the learner sees which stops have no
+   breakdown before opening them. */
+.anl-stop__foreign {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-line);
+  white-space: nowrap;
+}
+
+/* ── The deck picker ───────────────────────────────────────
+   Shares WordDetail's sheet chrome, not its type. It used to borrow
+   .detail-title -- 40px, sized for a single-kanji specimen -- which
+   wrapped the dialog's own title onto two lines. */
+.anl-deckpicker__title {
+  margin: 0;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.anl-deckpicker__deck {
+  display: block;
+  width: 100%;
+  padding: 11px 4px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--surface-line);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  text-align: left;
+  transition: color 0.16s ease;
+}
+.anl-deckpicker__deck:last-child { border-bottom: none; }
+.anl-deckpicker__deck:hover { color: var(--line-kaiseki); }
+.anl-deckpicker__create { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.anl-deckpicker__create .anl-field { flex: 1; min-width: 160px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-deckpicker__deck { transition: none; }
 }

@@ -452,8 +452,6 @@ const phraseAnalyzer = {
   // 路線図 (plan 028) — the Passage drawn as a line whose stops are its
   // Sentences, one of them open at a time.
   routeMap:            'Route map',
-  currentStop:         'Current stop',
-  nextStop:            'Next',
   stopsInPassage:      n => `${n} ${n === 1 ? 'sentence' : 'sentences'}`,
   jumpToStop:          'Go to this sentence',
   // 改札口 (plan 029) — the three intakes.
@@ -475,6 +473,8 @@ const phraseAnalyzer = {
   // 改札口 / mining copy (2026-08-27). "Mine" and "cloze" were both
   // jargon on the primary action of the screen; these say what the
   // buttons do instead.
+  notJapaneseLine:     'Not Japanese — shown as it appears in the subtitles, with no breakdown.',
+  notJapaneseShort:    'not Japanese',
   addToDeck:           'Add to deck',
   cardOptions:         'Options',
   clozeExplain:        'A fill-in-the-blank card hides this word in the sentence, so you recall it from context rather than from a list.',

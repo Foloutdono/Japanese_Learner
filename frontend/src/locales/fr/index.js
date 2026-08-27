@@ -437,8 +437,6 @@ const phraseAnalyzer = {
   // 路線図 (plan 028) — le Passage dessiné comme une ligne dont les
   // arrêts sont ses Phrases, une seule ouverte à la fois.
   routeMap:            'Plan de ligne',
-  currentStop:         'Arrêt actuel',
-  nextStop:            'Suivant',
   stopsInPassage:      n => `${n} phrase${n === 1 ? '' : 's'}`,
   jumpToStop:          'Aller à cette phrase',
   // 改札口 (plan 029) — les trois entrées.
@@ -460,6 +458,8 @@ const phraseAnalyzer = {
   // 改札口 / copie du minage (2026-08-27). « Mine » et « cloze » étaient
   // deux jargons sur l'action principale de l'écran ; ces libellés
   // disent ce que font les boutons.
+  notJapaneseLine:     "Pas du japonais — affiché tel quel dans les sous-titres, sans décomposition.",
+  notJapaneseShort:    'pas du japonais',
   addToDeck:           'Ajouter au deck',
   cardOptions:         'Options',
   clozeExplain:        "Une carte à trou masque ce mot dans la phrase, pour que vous le retrouviez par le contexte plutôt que dans une liste.",

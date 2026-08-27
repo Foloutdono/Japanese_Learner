@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
 import { StationHeader } from '../components/station/StationHeader'
-import { SectionHeader } from '../components/ui/SectionHeader'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
 import { useMining } from '../components/analysis/useMining'
@@ -13,7 +12,6 @@ import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
 import { IntakeVideo } from '../components/analysis/IntakeVideo'
 import { PassageLine } from '../components/analysis/PassageLine'
-import { NextStop } from '../components/analysis/NextStop'
 import { AnalyzerHistory } from '../components/analysis/AnalyzerHistory'
 import { sourceFor, DEFAULT_SOURCE } from '../components/analysis/sources'
 import { useMediaQuery } from '../hooks/useMediaQuery'
@@ -331,16 +329,18 @@ export default function AnalyzerScreen({ session }) {
                 </div>
               )}
 
-              <SectionHeader
-                jp="現在の停車駅"
-                title={t.currentStop}
-                count={sentences.length > 1
-                  ? `${focusIndex + 1} / ${sentences.length}`
-                  : t.stopsInPassage(sentences.length)}
-              />
-
-              {focused.available === false ? (
-                <div className="card phrase-error-card">{t.sentenceAnalysisUnavailable}</div>
+              {/* A line the app cannot take apart -- a Korean verse, an
+                  English ad-lib. It is still part of the track the
+                  learner is reading along with, so it is shown as it
+                  appears in the file and simply says why there is no
+                  breakdown under it. */}
+              {focused.foreign ? (
+                <div className="anl-foreign">
+                  <p className="anl-foreign__text">{focused.text}</p>
+                  <p className="anl-foreign__note">{t.notJapaneseLine}</p>
+                </div>
+              ) : focused.available === false ? (
+                <div className="anl-panel anl-status anl-status--bad">{t.sentenceAnalysisUnavailable}</div>
               ) : (
                 <>
                   {/* One Token at a time, ← / → to step -- the same
@@ -371,12 +371,6 @@ export default function AnalyzerScreen({ session }) {
                 </>
               )}
 
-              <NextStop
-                sentences={sentences}
-                activeIndex={focusIndex}
-                onAdvance={() => goToStop(focusIndex + 1)}
-                t={t}
-              />
             </div>
           </div>
         )}

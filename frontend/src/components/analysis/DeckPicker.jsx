@@ -7,9 +7,11 @@ import { CrossIcon } from '../ui/Icons'
 // DECK_TYPE_FOR_KIND) -- a mismatched deck would make add_app_cards
 // silently skip the card, which reads as "nothing happened".
 //
-// Reuses the existing detail-overlay-sheet / detail-sheet / phrase-*
-// classes rather than introducing new CSS, matching plan 015's
-// established convention for this feature area.
+// The sheet chrome is shared with WordDetail; the CONTENTS are not.
+// This used to borrow .detail-title too -- a 40px rule meant for a
+// single-kanji headline -- which wrapped "Choisir un deck" onto two
+// lines and made the dialog look broken. A dialog title is not a
+// specimen, so it has its own modest size now.
 export function DeckPicker({ decks, t, onClose, onSelect, onCreate }) {
   const dialogRef = useDialog(onClose)
   const [creating, setCreating] = useState(false)
@@ -32,38 +34,44 @@ export function DeckPicker({ decks, t, onClose, onSelect, onCreate }) {
         aria-labelledby="deck-picker-title"
       >
         <div className="detail-header">
-          <div className="detail-title" id="deck-picker-title">{t.chooseDeck ?? 'Choose a deck'}</div>
+          <h2 className="anl-deckpicker__title" id="deck-picker-title">{t.chooseDeck}</h2>
           <button onClick={onClose} className="detail-close-btn" aria-label={t.close}><CrossIcon size={16} /></button>
         </div>
 
         <div className="detail-section">
           {decks.length === 0 && (
-            <div className="phrase-history-empty">{t.noDeckOfType ?? 'No deck of this type yet'}</div>
+            <div className="anl-history__empty">{t.noDeckOfType}</div>
           )}
           {decks.map(d => (
-            <div key={d.id} onClick={() => onSelect(d.id)} className="phrase-history-row">
-              <span>{d.name}</span>
-            </div>
+            <button
+              key={d.id}
+              type="button"
+              onClick={() => onSelect(d.id)}
+              className="anl-deckpicker__deck"
+            >
+              {d.name}
+            </button>
           ))}
         </div>
 
         <div className="detail-section">
           {creating ? (
-            <div className="phrase-input-actions">
+            <div className="anl-deckpicker__create">
               <input
+                className="anl-field"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && submitCreate()}
-                placeholder={t.createDeck ?? 'New deck name'}
+                placeholder={t.createDeck}
                 autoFocus
               />
-              <button onClick={submitCreate} disabled={!name.trim()} className="phrase-analyze-btn">
-                {t.createDeck ?? 'Create'}
+              <button onClick={submitCreate} disabled={!name.trim()} className="anl-action">
+                {t.createDeck}
               </button>
             </div>
           ) : (
-            <button onClick={() => setCreating(true)} className="phrase-history-toggle">
-              {t.createDeck ?? 'Create a deck'}
+            <button onClick={() => setCreating(true)} className="anl-mine__options">
+              {t.createDeck}
             </button>
           )}
         </div>
