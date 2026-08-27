@@ -288,6 +288,7 @@
   flex-wrap: wrap;
 }
 .anl-explain__hint { font-size: 0.82rem; color: var(--text-secondary); }
+.anl-explain__hint--bad { color: var(--danger); }
 
 @media (prefers-reduced-motion: reduce) {
   .anl-stop,

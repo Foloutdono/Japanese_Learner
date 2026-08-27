@@ -190,6 +190,43 @@ def test_explain_endpoint_buys_deep_tier_and_records_video_provenance(client, mo
     assert source_ref.startswith("prov.srt@")
 
 
+def test_explain_keeps_cue_times(client, monkeypatch):
+    # analyze_local builds from TEXT alone and knows nothing about cues
+    # (it must stay pure -- see study/analysis.py). The route used to
+    # return that bare analysis, deleting cue_start/cue_end from the
+    # stored Sentence and permanently breaking playback sync for it.
+    srt = (
+        "1\n00:00:01,000 --> 00:00:04,000\n猫は可愛い動物です。\n\n"
+        "2\n00:00:05,000 --> 00:00:08,000\n犬も好きです。\n"
+    ).encode("utf-8")
+
+    post_resp = client.post(
+        "/api/video/session",
+        files={"file": ("cue.srt", srt, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    session_id = post_resp.json()["sessionId"]
+    ready = _poll_until_settled(client, session_id)
+    stored = ready.json()["sentences"][0]
+    assert stored["cue_start"] == 1.0
+    assert stored["cue_end"] == 4.0
+
+    def _fake_chat(messages, timeout=30, max_tokens=1200, reasoning=False):
+        return (
+            '{"words": [{"surface": "猫", "meaning": "cat"}], '
+            '"explanation": "An introduction."}'
+        )
+
+    monkeypatch.setattr("routes.phrase.chat", _fake_chat)
+
+    response = client.post(f"/api/video/session/{session_id}/sentence/0/explain", json={"lang": "en"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["cue_start"] == 1.0
+    assert body["cue_end"] == 4.0
+    assert body["explanation"] == "An introduction."
+
+
 def test_explain_out_of_range_index_returns_404(client):
     post_resp = client.post(
         "/api/video/session",

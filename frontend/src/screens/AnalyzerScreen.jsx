@@ -94,7 +94,7 @@ export default function AnalyzerScreen({ session }) {
   // keyboard user's next Tab restarts from the top of the page.
   const resultsRef = useRef(null)
 
-  const { passage, sentences, status, error, focusIndex, explaining } = analyzer
+  const { passage, sentences, status, error, focusIndex, explaining, explainError } = analyzer
   const busy = status === 'working'
   const ready = status === 'ready' && Boolean(analyzer.focused)
 
@@ -302,7 +302,9 @@ export default function AnalyzerScreen({ session }) {
   // things that need announcing are the transitions -- work started,
   // and a Passage arrived with this many Sentences.
   const announcement =
-    busy ? t[platform.busy]
+    explaining[focusIndex] ? t.explaining
+    : explainError[focusIndex] ? explainError[focusIndex]
+    : busy ? t[platform.busy]
     : status === 'failed' ? t.analysisFailed
     : ready ? t.passageReady(sentences.length)
     : t[platform.lead]
@@ -471,18 +473,32 @@ export default function AnalyzerScreen({ session }) {
                     onKanjiClick={openKanjiDetail}
                     mining={mining}
                   />
-                  {!focused.explanation && (
-                    <div className="anl-explain">
-                      <span className="anl-explain__hint">{t.noExplanationYet}</span>
-                      <button
-                        onClick={() => analyzer.explain(focusIndex)}
-                        disabled={!!explaining[focusIndex]}
-                        className="anl-action"
-                      >
-                        {explaining[focusIndex] ? t.explaining : t.explainSentence}
-                      </button>
-                    </div>
-                  )}
+                  {/* The control does not disappear once an explanation
+                      exists. The backend caches per (phrase, lang), so a
+                      learner who switches interface language can get the
+                      explanation in the new one -- and it used to be
+                      unreachable, because the only affordance was gated
+                      on `!focused.explanation`. */}
+                  <div className="anl-explain">
+                    <span className={`anl-explain__hint${explainError[focusIndex] ? ' anl-explain__hint--bad' : ''}`}>
+                      {explainError[focusIndex]
+                        ? explainError[focusIndex]
+                        : focused.explanation
+                          ? t.explanationBought
+                          : t.noExplanationYet}
+                    </span>
+                    <button
+                      onClick={() => analyzer.explain(focusIndex)}
+                      disabled={!!explaining[focusIndex]}
+                      className="anl-action"
+                    >
+                      {explaining[focusIndex]
+                        ? t.explaining
+                        : focused.explanation
+                          ? t.explainAgain
+                          : t.explainSentence}
+                    </button>
+                  </div>
                 </>
               )}
 

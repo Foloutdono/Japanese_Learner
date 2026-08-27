@@ -238,4 +238,135 @@ describe('AnalyzerScreen polling', () => {
 
     expect(screen.container.textContent).toContain('猫が好き')
   })
+
+  // Plan 035: the deep tier used to be swapped in WHOLESALE, and
+  // _analyze_sentence builds from text alone -- so buying the deep tier
+  // for a subtitle line deleted that line's cue_start/cue_end and broke
+  // playback sync for it permanently. useAnalyzerSession now MERGES the
+  // explained result onto the Sentence it already had.
+  it('keeps a Sentence cue when it is explained', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockImplementation(async url => {
+      if (url.includes('/explain')) {
+        return { explanation: 'An introduction.', words: [] }
+      }
+      return {
+        status: 'ready', source: 'upload', sourceRef: 'x.srt',
+        windowCapped: false, truncated: 0,
+        sentences: [
+          {
+            text: '猫が好き', cue_start: 0, cue_end: 2, grammar: [],
+            unknown_count: 1, available: true,
+            tokens: [{ surface: '猫が好き', pos: 'noun' }],
+          },
+          {
+            text: '犬も好き', cue_start: 2, cue_end: 4, grammar: [],
+            unknown_count: 0, available: true,
+            tokens: [{ surface: '犬も好き', pos: 'noun' }],
+          },
+        ],
+      }
+    })
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await settle(2000)
+
+    expect(screen.container.querySelectorAll('.anl-stop__time').length).toBe(2)
+
+    screen.container.querySelector('.anl-action').click()
+    await settle(500)
+
+    expect(screen.container.querySelectorAll('.anl-stop__time').length).toBe(2)
+  })
+
+  it('reports a failed explanation', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockImplementation(async url => {
+      if (url.includes('/explain')) {
+        return Promise.reject(Object.assign(new Error('boom'), { status: 500 }))
+      }
+      return {
+        status: 'ready', source: 'upload', sourceRef: 'x.srt',
+        windowCapped: false, truncated: 0,
+        sentences: [{
+          text: '猫が好き', cue_start: 0, cue_end: 2, grammar: [],
+          unknown_count: 0, available: true,
+          tokens: [{ surface: '猫が好き', pos: 'noun' }],
+        }],
+      }
+    })
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await settle(2000)
+
+    const button = screen.container.querySelector('.anl-action')
+    button.click()
+    await settle(500)
+
+    expect(screen.container.querySelector('.anl-explain__hint--bad')).not.toBeNull()
+    expect(button.disabled).toBe(false)
+  })
+
+  it('says so when the provider is down', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockImplementation(async url => {
+      if (url.includes('/explain')) {
+        return Promise.reject(Object.assign(new Error('The AI service is temporarily unavailable.'), { status: 503 }))
+      }
+      return {
+        status: 'ready', source: 'upload', sourceRef: 'x.srt',
+        windowCapped: false, truncated: 0,
+        sentences: [{
+          text: '猫が好き', cue_start: 0, cue_end: 2, grammar: [],
+          unknown_count: 0, available: true,
+          tokens: [{ surface: '猫が好き', pos: 'noun' }],
+        }],
+      }
+    })
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await settle(2000)
+
+    screen.container.querySelector('.anl-action').click()
+    await settle(500)
+
+    expect(screen.container.textContent).toContain('The AI service is temporarily unavailable.')
+  })
+
+  it('offers to explain again once explained', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockImplementation(async url => {
+      if (url.includes('/explain')) {
+        return { explanation: 'An introduction.', words: [] }
+      }
+      return {
+        status: 'ready', source: 'upload', sourceRef: 'x.srt',
+        windowCapped: false, truncated: 0,
+        sentences: [{
+          text: '猫が好き', cue_start: 0, cue_end: 2, grammar: [],
+          unknown_count: 0, available: true,
+          tokens: [{ surface: '猫が好き', pos: 'noun' }],
+        }],
+      }
+    })
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await settle(2000)
+
+    const button = screen.container.querySelector('.anl-action')
+    button.click()
+    await settle(1500)
+
+    // Locale-agnostic: this environment's LangProvider defaults to
+    // French, not English. The control stays present after an
+    // explanation exists (it used to vanish, gated on
+    // `!focused.explanation`), and its hint switches to "explained".
+    expect(screen.container.querySelector('.anl-explain')).not.toBeNull()
+    expect(screen.container.querySelector('.anl-action')).not.toBeNull()
+    expect(screen.container.querySelector('.anl-explain__hint--bad')).toBeNull()
+  })
 })

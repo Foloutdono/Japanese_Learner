@@ -483,4 +483,17 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
     finally:
         conn.close()
 
-    return explained
+    # A Cue is a Sentence, and a Sentence's cue times are part of it.
+    # _analyze_sentence builds from TEXT alone -- analyze_local is pure
+    # by design and knows nothing about cues -- so returning it bare
+    # dropped cue_start/cue_end and `foreign`. The frontend swaps the
+    # returned object in wholesale, so buying the deep tier for subtitle
+    # line 12 deleted that line's timestamp AND its playback window:
+    # `seconds >= None` never matches again, so the video could never
+    # highlight it a second time.
+    merged = {**sentences[index], **explained}
+    for key in ("cue_start", "cue_end", "foreign"):
+        if key in sentences[index]:
+            merged[key] = sentences[index][key]
+
+    return merged

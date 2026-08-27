@@ -36,6 +36,13 @@ export function useAnalyzerSession(session) {
   const [error, setError]       = useState(null)
   const [focusIndex, setFocus]  = useState(0)
   const [explaining, setExplaining] = useState({})
+  // The failure of the one PAID action on this screen used to be an
+  // empty catch: the button greyed out, came back, and nothing changed.
+  // A provider outage arrives as a 503 with a usable `detail` (see
+  // routes/phrase.py's LLMUnavailable handler); everything else is a
+  // generic failure. Both are now reported per-Sentence, so a failure
+  // on stop 12 does not blank the whole Passage's status.
+  const [explainError, setExplainError] = useState({})
   const [history, setHistory]   = useState([])
 
   // The id of the video session currently being polled. Kept in state
@@ -65,6 +72,7 @@ export function useAnalyzerSession(session) {
     setStatus('working')
     setError(null)
     setExplaining({})
+    setExplainError({})
     return runIdRef.current
   }
 
@@ -76,6 +84,7 @@ export function useAnalyzerSession(session) {
     setError(null)
     setFocus(0)
     setExplaining({})
+    setExplainError({})
   }
 
   // Lets an intake surface a problem it can detect BEFORE a request --
@@ -266,6 +275,7 @@ export function useAnalyzerSession(session) {
     if (!sentence || explaining[index]) return
 
     setExplaining(prev => ({ ...prev, [index]: true }))
+    setExplainError(prev => ({ ...prev, [index]: null }))
     const run = runIdRef.current
     try {
       const explained = videoSessionId != null
@@ -281,10 +291,23 @@ export function useAnalyzerSession(session) {
 
       if (run !== runIdRef.current) return
       setPassage(prev => (prev
-        ? { ...prev, sentences: prev.sentences.map((s, i) => (i === index ? explained : s)) }
+        ? {
+            ...prev,
+            // MERGE, never replace. The backend now preserves the cue
+            // fields too (routes/video.py), but the client keeping the
+            // Sentence it already had as the base means a future field
+            // added upstream cannot be silently dropped here either.
+            sentences: prev.sentences.map((s, i) => (i === index ? { ...s, ...explained } : s)),
+          }
         : prev))
-    } catch {
-      /* The Sentence keeps its local tier; nothing to undo. */
+    } catch (e) {
+      if (run !== runIdRef.current) return
+      setExplainError(prev => ({
+        ...prev,
+        // 503 is the provider being down, which is temporary and worth
+        // saying so. Anything else is a generic failure.
+        [index]: e?.status === 503 ? (e.message || t.explainUnavailable) : t.explainFailed,
+      }))
     } finally {
       setExplaining(prev => ({ ...prev, [index]: false }))
     }
@@ -312,6 +335,7 @@ export function useAnalyzerSession(session) {
     setFocusIndex: setFocus,
     focused: sentences[safeIndex] ?? null,
     explaining,
+    explainError,
     analyzeText,
     startVideoFromFile,
     startVideoFromTranscript,
