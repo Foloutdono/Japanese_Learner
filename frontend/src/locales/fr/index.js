@@ -561,6 +561,9 @@ const video = {
   passageReady:        n => `${n} ${n === 1 ? 'phrase prête' : 'phrases prêtes'}`,
   analysisFailed:      'Cela n\'a pas fonctionné',
   noticeDismiss:       'Fermer',
+  analysisResult:      'Analyse',
+  clearPassage:        'Effacer',
+  clearPassageHint:    'Vider l\'analyseur et recommencer',
 }
 
 // ── Reading ───────────────────────────────────────────────
