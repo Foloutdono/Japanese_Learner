@@ -25,13 +25,14 @@
 //   label    locale key for the plain-language name (the lowest register)
 //   hint     locale key for the tooltip / tablist description
 //   lead     locale key for the one line the intake panel opens with
+//   busy     locale key for the line shown while THIS platform is working
 //   history  whether 運行履歴 applies. Only false for 動画, and not as a
 //            preference: routes/video.py exposes a session by id and
 //            nothing that enumerates them, so there is no list to show.
 export const SOURCES = [
-  { key: 'text',  no: 1, jp: '文字', kana: 'もじ',     label: 'sourceText',  hint: 'sourceTextHint',  lead: 'intakeTextLead',  history: true },
-  { key: 'photo', no: 2, jp: '写真', kana: 'しゃしん', label: 'sourcePhoto', hint: 'sourcePhotoHint', lead: 'intakePhotoLead', history: true },
-  { key: 'video', no: 3, jp: '動画', kana: 'どうが',   label: 'sourceVideo', hint: 'sourceVideoHint', lead: 'intakeVideoLead', history: false },
+  { key: 'text',  no: 1, jp: '文字', kana: 'もじ',     label: 'sourceText',  hint: 'sourceTextHint',  lead: 'intakeTextLead',  busy: 'analyzingText',  history: true },
+  { key: 'photo', no: 2, jp: '写真', kana: 'しゃしん', label: 'sourcePhoto', hint: 'sourcePhotoHint', lead: 'intakePhotoLead', busy: 'analyzingPhoto', history: true },
+  { key: 'video', no: 3, jp: '動画', kana: 'どうが',   label: 'sourceVideo', hint: 'sourceVideoHint', lead: 'intakeVideoLead', busy: 'analyzingVideo', history: false },
 ]
 
 /** The platform the learner is standing on. Never undefined for a key

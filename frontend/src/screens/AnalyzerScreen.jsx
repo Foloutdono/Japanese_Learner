@@ -12,6 +12,7 @@ import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
 import { IntakeVideo } from '../components/analysis/IntakeVideo'
 import { PassageLine } from '../components/analysis/PassageLine'
+import { Notices } from '../components/analysis/Notices'
 import { AnalyzerHistory } from '../components/analysis/AnalyzerHistory'
 import { sourceFor, DEFAULT_SOURCE } from '../components/analysis/sources'
 import { useMediaQuery } from '../hooks/useMediaQuery'
@@ -155,7 +156,7 @@ export default function AnalyzerScreen({ session }) {
     })
   }, [sentences, analyzer])
 
-  // The line, the stage, 次は and the player are four views of ONE
+  // The line, the stage, and the player are three views of ONE
   // position, so they all move through here. A video Passage seeks; a
   // typed or photographed one has no cue times and simply changes stop.
   function goToStop(index) {
@@ -207,6 +208,27 @@ export default function AnalyzerScreen({ session }) {
   }
 
   const focused = analyzer.focused
+
+  // One place maps state to copy, so a fifth notice is one entry here
+  // rather than a fifth <div> in the render. `tone` is load-bearing: a
+  // capped Window and a truncated Passage are FACTS about what was
+  // analysed, not failures, and used to be drawn in --danger alongside
+  // a real error.
+  const notices = []
+  if (busy) notices.push({ id: 'busy', tone: 'info', text: t[platform.busy] })
+  if (status === 'failed' && error) notices.push({ id: 'failed', tone: 'bad', text: error })
+  if (passage?.windowCapped) notices.push({ id: 'capped', tone: 'info', text: t.windowCapped })
+  if (passage?.truncated > 0) notices.push({ id: 'truncated', tone: 'info', text: t.passageTruncated(sentences.length) })
+
+  // What a screen reader hears. Deliberately NOT the notice text: the
+  // notices are on screen and can be read at leisure, while the two
+  // things that need announcing are the transitions -- work started,
+  // and a Passage arrived with this many Sentences.
+  const announcement =
+    busy ? t[platform.busy]
+    : status === 'failed' ? t.analysisFailed
+    : ready ? t.passageReady(sentences.length)
+    : ''
 
   return (
     <div className="screen">
@@ -282,25 +304,7 @@ export default function AnalyzerScreen({ session }) {
           )}
         </div>
 
-        {busy && (
-          <div className="anl-panel anl-status">{t.analyzing}</div>
-        )}
-
-        {status === 'failed' && error && (
-          <div className="anl-panel anl-status anl-status--bad">{error}</div>
-        )}
-
-        {passage?.windowCapped && (
-          <div className="anl-panel anl-status anl-status--bad">{t.windowCapped}</div>
-        )}
-
-        {passage?.truncated > 0 && (
-          <div className="anl-panel anl-status anl-status--bad">
-            {typeof t.passageTruncated === 'function'
-              ? t.passageTruncated(sentences.length)
-              : t.passageTruncated}
-          </div>
-        )}
+        <Notices notices={notices} announcement={announcement} t={t} />
 
         {/* ── 路線図 — the Passage as a line ──
             One drawing for all three sources (plan 028). The line is
@@ -340,7 +344,7 @@ export default function AnalyzerScreen({ session }) {
                   <p className="anl-foreign__note">{t.notJapaneseLine}</p>
                 </div>
               ) : focused.available === false ? (
-                <div className="anl-panel anl-status anl-status--bad">{t.sentenceAnalysisUnavailable}</div>
+                <div className="anl-panel anl-notice-line anl-notice-line--bad">{t.sentenceAnalysisUnavailable}</div>
               ) : (
                 <>
                   {/* One Token at a time, ← / → to step -- the same

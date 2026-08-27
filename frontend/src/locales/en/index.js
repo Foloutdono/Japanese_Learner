@@ -563,12 +563,22 @@ const video = {
   windowStart:         'Start (seconds)',
   windowEnd:           'End (seconds)',
   windowCapped:        'The window was capped at 5 minutes.',
-  analyzing:           'Analyzing the subtitles…',
+  // The busy line is per-source: the same string said "Analyzing the
+  // subtitles…" over a typed Sentence, because a 動画 string was being
+  // rendered for all three platforms.
+  analyzingText:       'Reading what you wrote…',
+  analyzingPhoto:      'Reading the text from your photo…',
+  analyzingVideo:      'Analyzing the subtitles…',
   captionsUnavailable: "Couldn't get this video's captions.",
   subtitleTooLarge:    'This subtitle file is too large.',
   breakThisDown:       'Break this down',
   transcript:          'Transcript',
   seekToSentence:      'Jump to this sentence',
+  // 案内表示 — the notices under the intake. An `info` notice is a fact
+  // about the Passage, not a failure, and must never wear --danger.
+  passageReady:        n => `${n} ${n === 1 ? 'sentence' : 'sentences'} ready`,
+  analysisFailed:      'That did not work',
+  noticeDismiss:       'Dismiss',
 }
 
 // ── Reading ───────────────────────────────────────────────

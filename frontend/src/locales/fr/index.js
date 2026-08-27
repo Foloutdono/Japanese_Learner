@@ -548,12 +548,19 @@ const video = {
   windowStart:         'Début (secondes)',
   windowEnd:           'Fin (secondes)',
   windowCapped:        'La fenêtre a été limitée à 5 minutes.',
-  analyzing:           'Analyse des sous-titres…',
+  analyzingText:       'Lecture de votre texte…',
+  analyzingPhoto:      'Lecture du texte de la photo…',
+  analyzingVideo:      'Analyse des sous-titres…',
   captionsUnavailable: "Impossible de récupérer les sous-titres de cette vidéo.",
   subtitleTooLarge:    'Ce fichier de sous-titres est trop volumineux.',
   breakThisDown:       'Décomposer cette phrase',
   transcript:          'Transcription',
   seekToSentence:      'Aller à cette phrase',
+  // 案内表示 — the notices under the intake. An `info` notice is a fact
+  // about the Passage, not a failure, and must never wear --danger.
+  passageReady:        n => `${n} ${n === 1 ? 'phrase prête' : 'phrases prêtes'}`,
+  analysisFailed:      'Cela n\'a pas fonctionné',
+  noticeDismiss:       'Fermer',
 }
 
 // ── Reading ───────────────────────────────────────────────

@@ -34,7 +34,7 @@ const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 describe('the source registry', () => {
   it('names locale keys that exist in BOTH tables', () => {
     for (const s of SOURCES) {
-      for (const field of ['label', 'hint', 'lead']) {
+      for (const field of ['label', 'hint', 'lead', 'busy']) {
         expect(en[s[field]], `en is missing ${s[field]} (${s.key}.${field})`).toBeTruthy()
         expect(fr[s[field]], `fr is missing ${s[field]} (${s.key}.${field})`).toBeTruthy()
       }
