@@ -166,10 +166,10 @@ describe('AnalyzerScreen polling', () => {
     // ...one stop is open, and it is the first...
     expect(screen.container.querySelector('.anl-stop[aria-current="true"]').textContent)
       .toContain('猫が好き')
-    // ...and the stage shows exactly one breakdown, with ONE legend.
-    // Ten Sentences used to mean ten legends; that is the defect this
-    // plan removes, so it is worth an assertion rather than a comment.
-    expect(screen.container.querySelectorAll('.status-legend').length).toBe(1)
+    // ...and the stage shows exactly ONE breakdown. (The status legend
+    // that used to be asserted here belongs to the 'list' layout; the
+    // stage steps through Tokens one at a time now, so there is none.)
+    expect(screen.container.querySelectorAll('.rdg-breakdown').length).toBe(1)
   })
 
   it('surfaces a parse failure with the reason and a way back', async () => {
@@ -192,13 +192,37 @@ describe('AnalyzerScreen polling', () => {
     expect(screen.container.querySelector('.anl-drop')).not.toBeNull()
   })
 
+  // A Sentence CAN come back with no tokens -- an unavailable analysis,
+  // a line of pure punctuation. The stepper reads tokens[index], and
+  // with an empty list that is tokens[-1] === undefined, which TokenCard
+  // dereferences and takes the whole screen down with. Same failure
+  // class as the 202 crash above: an out-of-range index read.
+  it('survives a Sentence with no tokens at all', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockResolvedValue({
+      status: 'ready', source: 'upload', sourceRef: 'x.srt',
+      windowCapped: false, truncated: 0,
+      sentences: [{ text: '、、、', tokens: [], grammar: [], unknown_count: 0, available: true }],
+    })
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await settle(2000)
+
+    expect(screen.container.querySelector('main')).not.toBeNull()
+    expect(screen.container.querySelector('.anl-stage')).not.toBeNull()
+  })
+
   // The one behaviour the merge makes possible to break, and which
   // nothing else covers: the Passage belongs to useAnalyzerSession, not
   // to a platform, so walking to another platform to check something
   // must not throw a finished analysis away.
   it('keeps a finished Passage when the learner switches platform and back', async () => {
     apiJson.mockResolvedValue({
-      sentences: [{ text: '猫が好き', tokens: [], grammar: [], unknown_count: 0, available: true }],
+      sentences: [{
+        text: '猫が好き', grammar: [], unknown_count: 0, available: true,
+        tokens: [{ surface: '猫が好き', pos: 'noun' }],
+      }],
       truncated: 0,
     })
 

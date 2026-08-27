@@ -162,3 +162,59 @@ than left as an exercise.
 **Rejected, restated:** proxies (cost, and an arms race nothing should depend
 on), YouTube cookies (attaches a real identity to automated fetches, against the
 terms in a way pasting is not), and self-hosted ASR.
+
+---
+
+## Amendment, 2026-08-27 — a Cue *is* a Sentence
+
+The Consequences above closed with:
+
+> Cue boundaries are not Sentence boundaries, and Japanese auto-captions arrive
+> with no punctuation at all. Reconstructing Sentences from Cues and mapping them
+> back to time ranges is a real component, not a formatting step.
+
+The first half of that is **withdrawn**. It was a reasonable guess about
+auto-captions, generalised to every Track, and a real file disproved it.
+
+**The evidence.** A 47-cue authored `.vtt` of song lyrics came back as five walls
+of text — one of them 200+ characters spanning a dozen unrelated lines, Japanese
+and Korean mixed together with furigana drawn over the Hangul. The learner's
+report was exactly right: *"a big mess of text instead of the phrase by phrase
+structure of the vtt file."*
+
+**The mechanism** is worth recording, because the module was not obviously wrong.
+It concatenated the Window and ran `split_sentences`, with a fallback to
+one-Sentence-per-Cue when the *whole Window* produced a single Sentence. Lyrics
+carry a little punctuation — a `？` here, a `！` there — so the Track landed
+between the two cases: enough terminators that the fallback never fired, far too
+few to produce readable units. The failure needed *some* punctuation, which is
+why an unpunctuated auto-caption sample never showed it.
+
+**The correction.** An authored `.srt`/`.vtt` Cue is not a display artifact. It
+is a line somebody chose to put on screen together, which is precisely the unit a
+learner wants to study. So one Cue in, one or more Sentences out — more only when
+the Cue's own text carries punctuation — and never a merge across Cues.
+
+Auto-caption Cues are rougher, and this does mean a phrase-sized Sentence rather
+than a reconstructed one. That is an acceptable trade: a rough one-phrase
+Sentence is still a usable study unit, their rolling-window duplication is
+already handled upstream by `_merge_duplicate_consecutive`, and the alternative
+demonstrably produces garbage on the input people actually have. If
+fragmentation on auto-captions becomes a real complaint, that is a separate
+change with its own evidence — not a reason to keep this one.
+
+**Cues with no Japanese are now dropped.** The Korean verses of that Track were
+being segmented, furigana'd and graded as though they were Japanese. The app
+cannot teach them, so they are not Sentences. The test is "contains any Japanese
+at all" rather than a tuned ratio: on real mixed-language subtitles the split is
+absolute — Japanese lines score 0.4–1.0 on `japanese_ratio`, Korean and English
+lines score exactly 0.0.
+
+**The Window is now optional and uncapped** (it was 5 minutes). It was protecting
+against unbounded analysis work, and `MAX_SENTENCES` already does that — the
+Window was a second, blunter cap on the same thing, and one the learner had to
+think about. See `routes/video.py`.
+
+`_build_concatenation`, `_owning_cue` and the character offsets they produced are
+gone with the old model. Nothing outside the module's own tests ever read those
+offsets; `_video_worker` only ever wanted `text`, `cue_start` and `cue_end`.

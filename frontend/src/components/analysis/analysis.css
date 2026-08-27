@@ -800,3 +800,78 @@
     padding-bottom: 8px;
   }
 }
+
+/* ── Mining controls (2026-08-27) ──────────────────────────
+   One plain action plus a disclosure, replacing the two jargon buttons
+   ("Mine" / "Make a cloze") that used to sit side by side. */
+.anl-mine { display: flex; flex-direction: column; gap: 8px; }
+.anl-mine__row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.anl-mine__options {
+  background: none;
+  border: 1px solid var(--surface-line);
+  border-radius: 4px;
+  padding: 2px 9px;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.anl-mine__options:hover { color: var(--text-primary); border-color: var(--line-kaiseki); }
+.anl-mine__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--overlay-hover);
+  border-radius: var(--anl-radius);
+}
+.anl-mine__explain {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* ── The folded intake ──
+   Once a Passage is on screen the intake collapses to this bar, so the
+   breakdown gets the height a full writing slip was taking. */
+.anl-reopen {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  color: var(--text-secondary);
+  text-align: left;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.anl-reopen:hover { color: var(--text-primary); border-color: var(--line-kaiseki); }
+.anl-reopen__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  color: var(--line-kaiseki);
+}
+.anl-reopen__label { flex: 1; font-size: 0.86rem; }
+.anl-reopen__go { flex-shrink: 0; color: var(--line-kaiseki); }
+
+/* The 区間 disclosure — optional, and blank means the whole Track. */
+.anl-window-set > summary {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-window-set .anl-window { margin-top: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-reopen,
+  .anl-mine__options { transition: none; }
+}

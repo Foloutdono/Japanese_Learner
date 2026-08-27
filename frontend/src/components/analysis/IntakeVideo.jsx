@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { playUi } from '../../lib/audio'
 import { parseTimecode, formatTimecode } from '../../lib/timecode'
+import { parseVideoId } from '../../lib/youtube'
 import { WritingSlip } from './WritingSlip'
 
 // ── 3番線 動画 — the subtitle dock ────────────────────────
@@ -15,39 +16,23 @@ import { WritingSlip } from './WritingSlip'
 // pasting only the URL into both fields.
 const MIN_TRANSCRIPT_CHARS = 12
 
-// Client-side twin of study/captions.py's _YOUTUBE_URL_RES, used only to
-// build the "Open on YouTube" convenience link next to the paste
-// instructions. The BACKEND remains the authority on whether a URL is
-// acceptable -- this never gates submission, so the two drifting apart
-// costs a missing link, not a rejected video.
-const YOUTUBE_ID_RES = [
-  /(?:youtube\.com\/watch\?(?:.*&)?v=|youtube\.com\/shorts\/)([A-Za-z0-9_-]{11})/,
-  /youtu\.be\/([A-Za-z0-9_-]{11})/,
-]
-
-function videoIdFrom(url) {
-  for (const re of YOUTUBE_ID_RES) {
-    const m = re.exec(url)
-    if (m) return m[1]
-  }
-  return null
-}
-
 const INGESTS = [
   { key: 'file',  jp: '字幕ファイル', label: 'ingestFile' },
   { key: 'paste', jp: '貼り付け',     label: 'ingestPaste' },
 ]
 
-export function IntakeVideo({ t, onStartFromFile, onStartFromTranscript, onError }) {
+export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromTranscript, onError }) {
   const [ingest, setIngest] = useState('file')
-  const [url, setUrl] = useState('')
-  const [from, setFrom] = useState('0:00')
-  const [to, setTo] = useState('3:00')
+  // The Window is OPTIONAL and blank by default -- the whole Track is
+  // the sensible thing to study, and MAX_SENTENCES already bounds the
+  // work. See docs/adr/0003's 2026-08-27 amendment.
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
   const [transcript, setTranscript] = useState('')
   const [dragging, setDragging] = useState(false)
   const fileRef = useRef(null)
 
-  const parsedVideoId = videoIdFrom(url)
+  const parsedVideoId = parseVideoId(url)
   // Shown so "how do I get a JAPANESE .srt" is answered on the screen
   // rather than being left as an exercise. --sub-langs ja is the whole
   // point: it is what stops YouTube handing over an English translation.
@@ -59,13 +44,17 @@ export function IntakeVideo({ t, onStartFromFile, onStartFromTranscript, onError
     `--sub-langs ja --convert-subs srt "${ytdlpTarget}"`
   const ytdlpListCommand = `yt-dlp --list-subs "${ytdlpTarget}"`
 
-  // Parsed at the edge, sent as numbers: routes/video.py does
-  // float(form.get("start", 0)) and 400s on anything else.
+  // Parsed at the edge; the API takes numbers or nothing at all. A blank
+  // field is not an error -- it means "no bound that side".
   const startSec = parseTimecode(from)
   const endSec = parseTimecode(to)
-  const windowValid = startSec != null && endSec != null && endSec > startSec
-  const span = windowValid ? formatTimecode(endSec - startSec) : null
-  const windowOpts = { url, start: startSec ?? 0, end: endSec ?? 0 }
+  const startBad = from.trim() !== '' && startSec == null
+  const endBad = to.trim() !== '' && endSec == null
+  const backwards = startSec != null && endSec != null && endSec <= startSec
+  const span = startSec != null && endSec != null && !backwards
+    ? formatTimecode(endSec - startSec)
+    : null
+  const windowOpts = { url, start: startSec, end: endSec }
 
   function startFromTranscript() {
     if (transcript.trim().length < MIN_TRANSCRIPT_CHARS) {
@@ -183,41 +172,47 @@ export function IntakeVideo({ t, onStartFromFile, onStartFromTranscript, onError
           type="text"
           className="anl-field"
           value={url}
-          onChange={e => setUrl(e.target.value)}
+          onChange={e => onUrlChange(e.target.value)}
           placeholder="https://youtu.be/…"
         />
         <span className="anl-window__readout">{t.videoUrlOptionalHint}</span>
       </label>
 
-      {/* 区間 — the window. Time fields, not number spinners labelled
-          "(seconds)": nobody knows the bit they want starts at 154. */}
-      <div className="anl-window">
-        <label className="anl-window__field">
-          <span className="anl-window__label">{t.windowFrom}</span>
-          <input
-            type="text"
-            inputMode="numeric"
-            className={`anl-field${startSec == null ? ' anl-field--bad' : ''}`}
-            value={from}
-            onChange={e => setFrom(e.target.value)}
-            placeholder="0:00"
-          />
-        </label>
-        <label className="anl-window__field">
-          <span className="anl-window__label">{t.windowTo}</span>
-          <input
-            type="text"
-            inputMode="numeric"
-            className={`anl-field${endSec == null ? ' anl-field--bad' : ''}`}
-            value={to}
-            onChange={e => setTo(e.target.value)}
-            placeholder="3:00"
-          />
-        </label>
-        <span className="anl-window__readout">
-          {windowValid ? t.windowHint(span) : t.windowFormatHint}
-        </span>
-      </div>
+      {/* 区間 — optional. Blank means the whole Track, which is what
+          almost everybody wants; MAX_SENTENCES bounds the work either
+          way. It used to be two required fields with a 5-minute cap the
+          learner had to reason about. Folded into a disclosure so it is
+          available without being in the way. */}
+      <details className="anl-notice anl-window-set">
+        <summary>{t.windowLabel}</summary>
+        <div className="anl-window">
+          <label className="anl-window__field">
+            <span className="anl-window__label">{t.windowFrom}</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              className={`anl-field${startBad ? ' anl-field--bad' : ''}`}
+              value={from}
+              onChange={e => setFrom(e.target.value)}
+              placeholder={t.windowWhole}
+            />
+          </label>
+          <label className="anl-window__field">
+            <span className="anl-window__label">{t.windowTo}</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              className={`anl-field${endBad || backwards ? ' anl-field--bad' : ''}`}
+              value={to}
+              onChange={e => setTo(e.target.value)}
+              placeholder={t.windowWhole}
+            />
+          </label>
+          <span className="anl-window__readout">
+            {backwards ? t.windowBackwards : (span ? t.windowSpan(span) : t.windowFormatHint)}
+          </span>
+        </div>
+      </details>
     </>
   )
 }

@@ -1,6 +1,7 @@
 import { STATUS_COLORS, wordColor } from './status'
 import { StatusBadge } from './StatusBadge'
 import { MineButton } from './MineButton'
+import { MineControls } from './MineControls'
 import { buildCloze } from './useMining'
 
 // Content-word POS classes -- matches study/analysis.py's _CONTENT_POS,
@@ -33,7 +34,6 @@ export function TokenCard({
   word, t, compact = false, extraClassName = '', onWordClick, onKanjiClick, mining, sentenceText, emphasize = false,
 }) {
   const showVocabMine = word.vocab_match || CONTENT_POS.has(word.pos)
-  const canCloze = Boolean(word.vocab_match) && Boolean(sentenceText)
 
   return (
     <div
@@ -62,31 +62,16 @@ export function TokenCard({
         </div>
         {!compact && word.vocab_match && <StatusBadge status={word.vocab_match.stats.status} t={t} />}
         {showVocabMine && (
-          <MineButton
+          <MineControls
             mining={mining}
-            kind="vocab"
-            disabled={!word.vocab_match}
-            disabledReason={t.cannotMineOffDeck ?? 'Not in the app deck'}
-            onMine={word.vocab_match
-              ? deckId => mining.mineApp({
-                  deckId, source: 'vocab', level: word.vocab_match.level,
-                  rawId: word.vocab_match.raw_id, kind: 'vocab',
-                })
-              : undefined}
             t={t}
-          />
-        )}
-        {canCloze && (
-          <MineButton
-            mining={mining}
-            kind="cloze"
-            label={t.makeCloze ?? 'Make a cloze'}
-            successLabel={t.clozeCreated ?? 'Cloze card created'}
-            onMine={deckId => {
-              const { front, back, notes } = buildCloze(sentenceText, word)
-              return mining.mineCloze({ deckId, front, back, notes })
-            }}
-            t={t}
+            word={word}
+            sentenceText={sentenceText}
+            buildCloze={buildCloze}
+            onMineVocab={deckId => mining.mineApp({
+              deckId, source: 'vocab', level: word.vocab_match.level,
+              rawId: word.vocab_match.raw_id, kind: 'vocab',
+            })}
           />
         )}
       </div>

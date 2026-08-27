@@ -74,7 +74,14 @@ export function SentenceBreakdown({
   const tokens = analysis.tokens ?? analysis.words ?? []
 
   if (layout === 'stepper') {
-    const current = tokens[Math.min(index, tokens.length - 1)]
+    // Clamped BOTH ways. With no tokens at all, `tokens.length - 1` is
+    // -1 and Math.min hands back tokens[-1] === undefined, which TokenCard
+    // then dereferences and takes the whole screen down with it. A
+    // Sentence can legitimately have no tokens (an unavailable analysis,
+    // a line of pure punctuation), and that must render as "nothing to
+    // step through", not as a white screen. Same failure class as the
+    // 202 crash in plans/README.md: a stale/out-of-range index read.
+    const current = tokens.length ? tokens[Math.min(index, tokens.length - 1)] : null
     const canPrev = index > 0
     const canNext = index < tokens.length - 1
 
@@ -120,7 +127,7 @@ export function SentenceBreakdown({
           </button>
 
           <CardTransition cardKey={index} className="rdg-breakdown-card-stage">
-            <TokenCard
+            {current && <TokenCard
               word={current}
               t={t}
               compact
@@ -129,7 +136,7 @@ export function SentenceBreakdown({
               onKanjiClick={onKanjiClick}
               mining={mining}
               sentenceText={analysis.text}
-            />
+            />}
           </CardTransition>
 
           <button
@@ -142,9 +149,11 @@ export function SentenceBreakdown({
           </button>
         </div>
 
-        <div className="rdg-breakdown-counter">
-          {index + 1} / {tokens.length}
-        </div>
+        {tokens.length > 0 && (
+          <div className="rdg-breakdown-counter">
+            {index + 1} / {tokens.length}
+          </div>
+        )}
       </div>
     )
   }

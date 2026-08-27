@@ -44,7 +44,10 @@ logger = logging.getLogger(__name__)
 # 5 minutes. Analysis cost scales with the Window, so it is bounded
 # rather than the Sentence count alone -- a capped MAX_SENTENCES over an
 # unbounded Window would still let a caller ask for hours of captions.
-_MAX_WINDOW_SECONDS = 300.0
+# The Window used to be capped at 5 minutes. It was protecting against
+# unbounded analysis work, and MAX_SENTENCES already does that -- it was
+# a second, blunter cap on the same thing, and one the learner had to
+# think about. Removed 2026-08-27; see docs/adr/0003's amendment.
 # Subtitle files are plain text; 1 MB is already generous (a feature-
 # length film's SRT is a few hundred KB).
 _MAX_UPLOAD_BYTES = 1 * 1024 * 1024
@@ -55,6 +58,21 @@ _MAX_UPLOAD_BYTES = 1 * 1024 * 1024
 # would cost more than the duplication (see plan 019's own scope notes).
 _FAILED_COOLDOWN_SECONDS = 300
 _STALE_RUNNING_SECONDS = 900
+
+
+
+def _optional_seconds(raw, field: str) -> float | None:
+    """A Window bound the learner may simply not have given. Absent or
+    blank is None ("no bound"), which is the common case -- not 0.0,
+    which would silently mean "from the very start" for `end`."""
+    if raw is None:
+        return None
+    if isinstance(raw, str) and not raw.strip():
+        return None
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=400, detail=f"{field} must be a number")
 
 
 def _ensure_video_schema() -> None:
@@ -83,6 +101,11 @@ def _ensure_video_schema() -> None:
             # from now: you can upload an .srt AND name a video to play
             # alongside it. NULL means "transcript only, no player".
             cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS video_id TEXT")
+            # The Window is optional now (NULL = unbounded), so the two
+            # bounds can no longer be NOT NULL. Additive and idempotent,
+            # like video_id above.
+            cur.execute("ALTER TABLE video_sessions ALTER COLUMN window_start DROP NOT NULL")
+            cur.execute("ALTER TABLE video_sessions ALTER COLUMN window_end DROP NOT NULL")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_video_sessions_user
                 ON video_sessions(user_id, created_at DESC)
@@ -133,7 +156,7 @@ def _fail_session(session_id: int, message: str) -> None:
 
 
 def _video_worker(session_id: int, source: str, source_ref: str, content: str | None,
-                   filename: str | None, window_start: float, window_end: float) -> None:
+                   filename: str | None, window_start: float | None, window_end: float | None) -> None:
     """Runs off-request. Parses/fetches the Track, reconstructs
     Sentences, analyzes each with the LOCAL tier only (never a model --
     see docs/adr/0001), and materializes the result. Owns the job row
@@ -187,7 +210,7 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
 
 
 def _start_worker(session_id: int, source: str, source_ref: str, content: str | None,
-                   filename: str | None, window_start: float, window_end: float) -> None:
+                   filename: str | None, window_start: float | None, window_end: float | None) -> None:
     threading.Thread(
         target=_video_worker,
         args=(session_id, source, source_ref, content, filename, window_start, window_end),
@@ -223,8 +246,8 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         # embed alongside the transcript. See the JSON branch below.
         video_id = parse_video_id(form.get("url") or "")
         try:
-            window_start = float(form.get("start", 0))
-            window_end = float(form.get("end", 0))
+            window_start = _optional_seconds(form.get("start"), "start")
+            window_end = _optional_seconds(form.get("end"), "end")
         except (TypeError, ValueError):
             raise HTTPException(status_code=400, detail="start/end must be numbers")
         filename = upload.filename
@@ -254,17 +277,20 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         source_ref = video_id or "paste"
         filename = None
         try:
-            window_start = float(body.get("start", 0))
-            window_end = float(body.get("end", 0))
+            window_start = _optional_seconds(body.get("start"), "start")
+            window_end = _optional_seconds(body.get("end"), "end")
         except (TypeError, ValueError):
             raise HTTPException(status_code=400, detail="start/end must be numbers")
 
-    if window_end <= window_start:
+    # Only a Window with BOTH bounds can be back-to-front. One bound on
+    # its own ("from 2:30 on", "up to 4:00") is a perfectly good Window,
+    # and no bounds at all is the default.
+    if window_start is not None and window_end is not None and window_end <= window_start:
         raise HTTPException(status_code=400, detail="end must be after start")
 
-    window_capped = (window_end - window_start) > _MAX_WINDOW_SECONDS
-    if window_capped:
-        window_end = window_start + _MAX_WINDOW_SECONDS
+    # Kept in the row and the response so old sessions still read back,
+    # but nothing sets it any more -- the Window is uncapped.
+    window_capped = False
 
     conn = db_conn()
     try:

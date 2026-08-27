@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
@@ -17,6 +17,7 @@ import { NextStop } from '../components/analysis/NextStop'
 import { AnalyzerHistory } from '../components/analysis/AnalyzerHistory'
 import { sourceFor, DEFAULT_SOURCE } from '../components/analysis/sources'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { parseVideoId } from '../lib/youtube'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 
 // ── 解析駅 — one station, three platforms ─────────────────
@@ -59,6 +60,20 @@ export default function AnalyzerScreen({ session }) {
   // flow is still the same image's text and keeps it.
   const [fromImage, setFromImage] = useState(false)
 
+  // The optional video link. Held HERE, not in the video intake, so the
+  // player can read it live: a learner who uploads a file and pastes the
+  // link afterwards used to get no player at all, because the session
+  // had already been created without a video_id and nothing re-read it.
+  const [videoUrl, setVideoUrl] = useState('')
+
+  // Once a Passage is ready the intake folds away, giving the breakdown
+  // the screen. Reopened on demand; reset whenever a new Passage lands.
+  const [intakeOpen, setIntakeOpen] = useState(true)
+
+  // Which Token of the focused Sentence the stepper is showing. Reset on
+  // every change of Sentence, or you land on token 7 of a 3-token line.
+  const [tokenIndex, setTokenIndex] = useState(0)
+
   const [detail, setDetail] = useState(null) // { title, entry, stats }
   // Stable so WordDetail's useDialog doesn't re-run its focus-on-open
   // effect (and steal focus) on every render of this screen while the
@@ -69,6 +84,12 @@ export default function AnalyzerScreen({ session }) {
 
   const { passage, sentences, status, error, focusIndex, explaining } = analyzer
   const busy = status === 'working'
+  const ready = status === 'ready' && Boolean(analyzer.focused)
+
+  // The player needs an id, not a session: prefer the link the learner
+  // has typed right now, fall back to whatever the session was created
+  // with. This is what makes a link pasted AFTER an upload work.
+  const playerVideoId = parseVideoId(videoUrl) ?? passage?.videoId ?? null
   // The platform standing on. Everything about it -- its name, its
   // panel's opening line, whether 運行履歴 applies -- comes from the one
   // registry, so a fourth source is one entry there rather than five
@@ -82,6 +103,39 @@ export default function AnalyzerScreen({ session }) {
   // the same complementary integer pair .dict-dock uses -- see the
   // @media block in index.css for why it earns a one-off.
   const wide = useMediaQuery('(min-width: 1100px)')
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- id-keyed reset: a new Sentence starts at its first Token, or you land on token 7 of a 3-token line.
+    setTokenIndex(0)
+  }, [focusIndex, passage])
+
+  useEffect(() => {
+    if (status !== 'ready') return
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a Passage ARRIVING folds the intake away; keyed off a status transition, not off a render-time value.
+    setIntakeOpen(false)
+  }, [status, passage])
+
+  // ← / → step through the focused Sentence's Tokens, the way reading
+  // practice does. Ignored while typing, or the arrow keys would fight
+  // the caret in the writing slip.
+  useEffect(() => {
+    if (!ready) return undefined
+    function onKey(e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+      const el = document.activeElement
+      const tag = el?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || el?.isContentEditable) return
+      // The platform rail owns its own arrows (roving tabindex).
+      if (el?.getAttribute?.('role') === 'tab') return
+      e.preventDefault()
+      const last = (analyzer.focused?.tokens?.length ?? 1) - 1
+      setTokenIndex(i => e.key === 'ArrowRight'
+        ? Math.min(last, i + 1)
+        : Math.max(0, i - 1))
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [ready, analyzer.focused])
 
   function editDraft(text) {
     setDraft(text)
@@ -165,12 +219,28 @@ export default function AnalyzerScreen({ session }) {
 
         <SourceRail value={source} onChange={setSource} t={t} />
 
+        {/* Folded once a Passage is ready: the breakdown is what the
+            learner came for, and a full-height writing slip above it was
+            pushing the result off the screen. */}
+        {ready && !intakeOpen && (
+          <button
+            type="button"
+            className="anl-panel anl-reopen"
+            onClick={() => setIntakeOpen(true)}
+          >
+            <span className="anl-reopen__jp" lang="ja">{platform.jp}</span>
+            <span className="anl-reopen__label">{t.changeSource}</span>
+            <span className="anl-reopen__go" aria-hidden="true">▾</span>
+          </button>
+        )}
+
         <div
           id={`anl-panel-${source}`}
           role="tabpanel"
           aria-labelledby={`anl-tab-${source}`}
           tabIndex={-1}
           className="anl-panel"
+          hidden={ready && !intakeOpen}
         >
           {/* The panel and its head are the same object on all three
               platforms, so they live here and take their name and their
@@ -205,6 +275,8 @@ export default function AnalyzerScreen({ session }) {
           {source === 'video' && (
             <IntakeVideo
               t={t}
+              url={videoUrl}
+              onUrlChange={setVideoUrl}
               onStartFromFile={(file, opts) => analyzer.startVideoFromFile(file, opts)}
               onStartFromTranscript={(text, opts) => analyzer.startVideoFromTranscript(text, opts)}
               onError={analyzer.fail}
@@ -253,9 +325,9 @@ export default function AnalyzerScreen({ session }) {
             )}
 
             <div className="anl-stage">
-              {passage.videoId && (
+              {playerVideoId && (
                 <div className="anl-player">
-                  <VideoPlayer ref={playerRef} videoId={passage.videoId} onTimeUpdate={handleTimeUpdate} />
+                  <VideoPlayer ref={playerRef} videoId={playerVideoId} onTimeUpdate={handleTimeUpdate} />
                 </div>
               )}
 
@@ -271,10 +343,15 @@ export default function AnalyzerScreen({ session }) {
                 <div className="card phrase-error-card">{t.sentenceAnalysisUnavailable}</div>
               ) : (
                 <>
+                  {/* One Token at a time, ← / → to step -- the same
+                      carousel reading practice uses, instead of a wall
+                      of Token cards under every Sentence. */}
                   <SentenceBreakdown
                     analysis={focused}
                     t={t}
-                    layout="list"
+                    layout="stepper"
+                    index={tokenIndex}
+                    setIndex={setTokenIndex}
                     onTokenClick={openVocabDetail}
                     onKanjiClick={openKanjiDetail}
                     mining={mining}

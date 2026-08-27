@@ -229,8 +229,14 @@ CREATE TABLE video_sessions (
     user_id       TEXT NOT NULL,
     source        TEXT NOT NULL,               -- 'upload' | 'paste'
     source_ref    TEXT NOT NULL,                -- video id, or the uploaded filename
-    window_start  DOUBLE PRECISION NOT NULL,
-    window_end    DOUBLE PRECISION NOT NULL,
+    -- Both nullable: NULL means "no bound that side", and both NULL
+    -- (the default) is the whole Track. The Window used to be required
+    -- and capped at 5 minutes; MAX_SENTENCES already bounds the work,
+    -- so it was a second cap on the same thing. See docs/adr/0003's
+    -- 2026-08-27 amendment.
+    window_start  DOUBLE PRECISION,
+    window_end    DOUBLE PRECISION,
+    -- Retained so existing rows read back; nothing sets it any more.
     window_capped BOOLEAN NOT NULL DEFAULT FALSE,
     status        TEXT NOT NULL DEFAULT 'generating',  -- 'generating' | 'ready' | 'failed'
     error         TEXT,

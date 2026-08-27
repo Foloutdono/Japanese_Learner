@@ -1,16 +1,22 @@
 import unittest
 
-from study.cue_sentences import sentences_from_cues, _build_concatenation, UNPUNCTUATED_FALLBACK_CHAR_THRESHOLD
+from study.cue_sentences import sentences_from_cues
 
 
 class SentencesFromCuesTests(unittest.TestCase):
-    """sentences_from_cues reconstructs Sentences from Cues: punctuated
-    input splits on real sentence boundaries (not Cue boundaries),
-    unpunctuated input (the common auto-caption case) falls back to one
-    Sentence per Cue, and every offset is checkable against the
-    module's own single-space Cue join."""
+    """sentences_from_cues turns each Cue into one or more Sentences.
 
-    def test_punctuated_cues_split_on_sentence_boundaries_not_cue_boundaries(self) -> None:
+    A Cue is a Sentence: it is a line somebody chose to put on screen
+    together, which is the unit a learner studies. It splits FURTHER on
+    its own punctuation, and never merges with its neighbours. Cues with
+    no Japanese in them are dropped.
+
+    This is the reverse of the original contract (concatenate the whole
+    Window, split on punctuation) -- see the module docstring and
+    docs/adr/0003's 2026-08-27 amendment for why it was reversed.
+    """
+
+    def test_each_cue_becomes_its_own_sentence(self) -> None:
         cues = [
             {"start": 0.0, "end": 1.0, "text": "私は"},
             {"start": 1.0, "end": 2.0, "text": "学生です。"},
@@ -18,43 +24,59 @@ class SentencesFromCuesTests(unittest.TestCase):
             {"start": 3.0, "end": 4.0, "text": "暑い！"},
         ]
         result = sentences_from_cues(cues, 0.0, 10.0)
-        # Two Sentences (one per terminator), not four (one per Cue).
-        self.assertEqual(len(result), 2)
-        self.assertTrue(result[0]["text"].endswith("。"))
-        self.assertTrue(result[1]["text"].endswith("！"))
+        self.assertEqual([s["text"] for s in result],
+                         ["私は", "学生です。", "今日は", "暑い！"])
+        self.assertEqual(result[0]["cue_start"], 0.0)
+        self.assertEqual(result[0]["cue_end"], 1.0)
 
-    def test_a_sentence_spanning_multiple_cues_gets_the_first_start_and_last_end(self) -> None:
+    def test_a_cue_never_merges_with_its_neighbours(self) -> None:
+        # The reported bug: authored lyric lines carry a little
+        # punctuation, which used to put the Track between the "split on
+        # terminators" path and the "one per Cue" fallback and produce
+        # 200-character blocks spanning a dozen unrelated lines.
         cues = [
-            {"start": 0.0, "end": 1.0, "text": "これは"},
-            {"start": 1.0, "end": 2.0, "text": "三つの"},
-            {"start": 2.0, "end": 3.0, "text": "文です。"},
+            {"start": 0.0, "end": 1.0, "text": "ないしらせは 良いしらせ"},
+            {"start": 1.0, "end": 2.0, "text": "南極しらせは お幸せ"},
+            {"start": 2.0, "end": 3.0, "text": "にっちもさっちもいかない"},
+            {"start": 3.0, "end": 4.0, "text": "聞こえてる？"},
         ]
         result = sentences_from_cues(cues, 0.0, 10.0)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["cue_start"], 0.0)
-        self.assertEqual(result[0]["cue_end"], 3.0)
+        self.assertEqual(len(result), 4)
+        self.assertTrue(all(len(s["text"]) < 20 for s in result))
 
-    def test_unpunctuated_input_falls_back_to_one_sentence_per_cue(self) -> None:
-        # Built long enough (concatenation > threshold) that the
-        # single-giant-Sentence result from split_sentences is
-        # abandoned. No 。！？ anywhere, matching real auto-captions.
-        long_text_a = "あ" * 70
-        long_text_b = "い" * 70
+    def test_a_cue_splits_further_on_its_own_punctuation(self) -> None:
+        cues = [{"start": 0.0, "end": 1.0, "text": "もしもーし、（なに？）聞こえてる？（はーい！）"}]
+        result = sentences_from_cues(cues, 0.0, 10.0)
+        self.assertGreater(len(result), 1)
+        # Every piece keeps the Cue's own timing -- they are the same
+        # moment of the video.
+        self.assertTrue(all(s["cue_start"] == 0.0 and s["cue_end"] == 1.0 for s in result))
+
+    def test_unpunctuated_cues_stay_one_sentence_each(self) -> None:
+        # The auto-caption case: no 。！？ anywhere. Still one Sentence
+        # per Cue, which is what it always should have produced.
         cues = [
-            {"start": 0.0, "end": 2.0, "text": long_text_a},
-            {"start": 2.0, "end": 4.0, "text": long_text_b},
+            {"start": 0.0, "end": 2.0, "text": "あ" * 70},
+            {"start": 2.0, "end": 4.0, "text": "い" * 70},
         ]
-        concatenation, _ = _build_concatenation(cues)
-        self.assertGreater(len(concatenation), UNPUNCTUATED_FALLBACK_CHAR_THRESHOLD)
-
         result = sentences_from_cues(cues, 0.0, 10.0)
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[0]["text"], long_text_a)
-        self.assertEqual(result[0]["cue_start"], 0.0)
-        self.assertEqual(result[0]["cue_end"], 2.0)
-        self.assertEqual(result[1]["text"], long_text_b)
-        self.assertEqual(result[1]["cue_start"], 2.0)
+        self.assertEqual(result[0]["text"], "あ" * 70)
         self.assertEqual(result[1]["cue_end"], 4.0)
+
+    def test_cues_with_no_japanese_are_dropped(self) -> None:
+        # Real input: this Track's second verse is Korean, with English
+        # ad-libs. Analyzing those produces a Sentence of pure off-deck
+        # noise and furigana over Hangul.
+        cues = [
+            {"start": 0.0, "end": 1.0, "text": "電波 電波の怪電波"},
+            {"start": 1.0, "end": 2.0, "text": "여보세요, 사사짱?"},
+            {"start": 2.0, "end": 3.0, "text": "I miss you"},
+            {"start": 3.0, "end": 4.0, "text": "4season"},
+            {"start": 4.0, "end": 5.0, "text": "君にCHU"},
+        ]
+        result = sentences_from_cues(cues, 0.0, 10.0)
+        self.assertEqual([s["text"] for s in result], ["電波 電波の怪電波", "君にCHU"])
 
     def test_window_selects_only_overlapping_cues(self) -> None:
         cues = [
@@ -65,17 +87,6 @@ class SentencesFromCuesTests(unittest.TestCase):
         result = sentences_from_cues(cues, 4.0, 7.0)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["text"], "範囲内")
-
-    def test_offsets_satisfy_the_slice_invariant_against_the_module_own_join(self) -> None:
-        cues = [
-            {"start": 0.0, "end": 1.0, "text": "一つ目。"},
-            {"start": 1.0, "end": 2.0, "text": "二つ目。"},
-            {"start": 2.0, "end": 3.0, "text": "三つ目。"},
-        ]
-        concatenation, _ = _build_concatenation(cues)
-        result = sentences_from_cues(cues, 0.0, 10.0)
-        for sentence in result:
-            self.assertEqual(concatenation[sentence["start"]:sentence["end"]], sentence["text"])
 
     def test_no_overlapping_cues_returns_empty_list(self) -> None:
         cues = [{"start": 0.0, "end": 1.0, "text": "テスト"}]

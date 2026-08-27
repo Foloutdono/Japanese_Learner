@@ -165,7 +165,10 @@ export function useAnalyzerSession(session) {
           // Omitted entirely when blank, so a transcript can be studied
           // on its own with no player.
           ...(url?.trim() ? { url: url.trim() } : {}),
-          start: Number(start), end: Number(end),
+          // Omitted entirely when unbounded. Number(null) is 0, which
+          // the API would read as a real bound rather than "no bound".
+          ...(start != null ? { start } : {}),
+          ...(end != null ? { end } : {}),
         }),
       })
       if (run !== runIdRef.current) return
@@ -186,8 +189,9 @@ export function useAnalyzerSession(session) {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('start', String(Number(start)))
-      formData.append('end', String(Number(end)))
+      // Same rule as the JSON ingest: an absent bound is absent, not 0.
+      if (start != null) formData.append('start', String(start))
+      if (end != null) formData.append('end', String(end))
       // Optional, and never fetched from -- it just tells the player
       // which video to embed next to the subtitles.
       if (url?.trim()) formData.append('url', url.trim())

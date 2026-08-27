@@ -67,18 +67,52 @@ def test_oversized_upload_returns_413(client):
     assert response.status_code == 413
 
 
-def test_window_over_five_minutes_is_capped_and_reported(client):
+def test_a_long_window_is_honoured_not_capped(client):
+    """The Window used to be clamped to 5 minutes. It was a second,
+    blunter cap on what MAX_SENTENCES already bounds, and one the learner
+    had to reason about -- see docs/adr/0003's 2026-08-27 amendment."""
     response = client.post(
         "/api/video/session",
         files={"file": ("test.srt", _SRT, "text/plain")},
-        data={"start": "0", "end": "600"},  # 10 minutes, cap is 5
+        data={"start": "0", "end": "600"},  # 10 minutes: kept as asked
     )
     assert response.status_code == 202
-    assert response.json()["windowCapped"] is True
+    assert response.json()["windowCapped"] is False
 
     final = _poll_until_settled(client, response.json()["sessionId"])
-    assert final.json()["windowCapped"] is True
-    assert final.json()["windowEnd"] == 300.0
+    assert final.json()["windowCapped"] is False
+    assert final.json()["windowEnd"] == 600.0
+
+
+def test_a_session_needs_no_window_at_all(client):
+    """The common case, and the default the UI now sends: no bounds,
+    meaning the whole Track. This used to be a 400 ("end must be after
+    start"), because an absent bound was read as 0."""
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("test.srt", _SRT, "text/plain")},
+    )
+    assert response.status_code == 202
+
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    body = final.json()
+    assert body["status"] == "ready"
+    assert body["windowStart"] is None and body["windowEnd"] is None
+    assert len(body["sentences"]) > 0
+
+
+def test_one_bound_on_its_own_is_a_valid_window(client):
+    """"From 0:02 onward" is a perfectly good Window. Only a Window with
+    BOTH bounds can be back-to-front."""
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("test.srt", _SRT, "text/plain")},
+        data={"start": "2"},
+    )
+    assert response.status_code == 202
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    assert final.json()["windowStart"] == 2.0
+    assert final.json()["windowEnd"] is None
 
 
 def test_a_bare_url_with_no_transcript_is_rejected(client):
@@ -247,15 +281,22 @@ def test_unparseable_transcript_fails_the_session_with_a_reason(client):
     assert "0:18" in final.json()["error"]
 
 
-def test_window_cap_applies_to_the_paste_path_too(client):
+def test_the_paste_path_is_also_uncapped_and_window_optional(client):
     response = client.post(
         "/api/video/session",
         json={"url": "https://youtu.be/abcdefghijk", "transcript": _PASTE,
-              "start": 0, "end": 600},  # 10 minutes, cap is 5
+              "start": 0, "end": 600},  # 10 minutes: kept as asked
     )
-    assert response.json()["windowCapped"] is True
+    assert response.json()["windowCapped"] is False
     final = _poll_until_settled(client, response.json()["sessionId"])
-    assert final.json()["windowEnd"] == 300.0
+    assert final.json()["windowEnd"] == 600.0
+
+    bare = client.post(
+        "/api/video/session",
+        json={"url": "https://youtu.be/abcdefghijk", "transcript": _PASTE},
+    )
+    assert bare.status_code == 202
+    assert _poll_until_settled(client, bare.json()["sessionId"]).json()["windowEnd"] is None
 
 
 # ── The finished-session-reported-as-stalled race ─────────────────

@@ -1,87 +1,70 @@
 # ── Reconstructing Sentences from Cues ────────────────────────────
-# The heart of this plan. Cue boundaries are a DISPLAY artifact (how
-# long a line stays on screen) and do not correspond to Sentence
-# boundaries -- and Japanese auto-captions arrive with NO PUNCTUATION
-# AT ALL, so the usual split_sentences (plan 016) approach needs a
-# fallback for the common case where it finds nothing to split on.
+# A Cue is a Sentence. That is a REVERSAL of what this module used to
+# do, and of what docs/adr/0003 originally claimed; see that ADR's
+# 2026-08-27 amendment for the evidence.
+#
+# The old model concatenated every Cue in the Window into one string and
+# ran split_sentences over it, on the theory that Cue boundaries are a
+# display artifact and Japanese auto-captions carry no punctuation to
+# split on. It had a fallback to one-Sentence-per-Cue, but only when the
+# WHOLE Window produced a single Sentence -- so a Track with a little
+# punctuation (song lyrics: a ？ here, a ！ there) fell between the two
+# cases and produced a handful of 200-character blocks, each spanning a
+# dozen unrelated lines. Reported against a real .vtt whose 47 authored
+# lyric lines came back as five walls of text.
+#
+# The premise was wrong for the input that matters. An authored .srt/
+# .vtt Cue is not a display artifact -- it is a line somebody chose to
+# put on screen together, which is exactly the unit a learner wants to
+# study. Auto-caption Cues are rougher, but a rough one-phrase Sentence
+# is still a usable study unit, and their rolling-window duplication is
+# already handled upstream (captions._merge_duplicate_consecutive).
+#
+# So: one Cue in, one or more Sentences out -- more only when the Cue's
+# OWN text carries punctuation to split on. Never fewer, and never a
+# merge across Cues.
 from study.sentences import split_sentences
-
-# When split_sentences finds no terminator across an entire Window, it
-# (correctly) returns one giant Sentence spanning everything -- which is
-# useless as a study unit. Above this many characters, that single
-# Sentence is abandoned in favour of one Sentence per Cue instead. A
-# heuristic standing in for punctuation that Japanese auto-captions
-# simply don't have; expect to tune it against real videos (see the
-# plan's maintenance notes).
-UNPUNCTUATED_FALLBACK_CHAR_THRESHOLD = 120
+from study.text_normalize import japanese_ratio
 
 
-def _build_concatenation(cues: list[dict]) -> tuple[str, list[tuple[int, int]]]:
-    """Every Cue's text joined with a single space, plus each Cue's own
-    (char_start, char_end) span within that joined string. The single-
-    space join is part of this module's contract -- callers (and tests)
-    reconstructing offsets rely on it."""
-    concatenation = ""
-    spans = []
-    for cue in cues:
-        if concatenation:
-            concatenation += " "
-        char_start = len(concatenation)
-        concatenation += cue["text"]
-        spans.append((char_start, len(concatenation)))
-    return concatenation, spans
+def _has_japanese(text: str) -> bool:
+    """Any Japanese script at all. Deliberately not a tuned ratio: on
+    real mixed-language subtitles the split is absolute -- Japanese
+    lines score 0.4-1.0 and Korean/English/numeric lines score exactly
+    0.0 -- so "contains some Japanese" separates them without a
+    threshold to maintain. Measured against the mosi-mosi .vtt, whose
+    Korean verses were being furigana'd as though they were Japanese."""
+    return japanese_ratio(text) > 0.0 and text.strip() != ""
 
 
-def _owning_cue(char_index: int, spans: list[tuple[int, int]]) -> int:
-    """Index into `spans` (and therefore into the Cue list) that owns
-    `char_index`. A character landing in a JOIN separator (the space
-    between two Cues) is attributed to the following Cue; one landing
-    past the end of everything is attributed to the last Cue."""
-    for i, (start, end) in enumerate(spans):
-        if start <= char_index < end:
-            return i
-    for i, (start, _end) in enumerate(spans):
-        if char_index < start:
-            return i
-    return len(spans) - 1
-
-
-def sentences_from_cues(cues: list[dict], start: float, end: float) -> list[dict]:
+def sentences_from_cues(cues: list[dict], start: float | None,
+                        end: float | None) -> list[dict]:
     """Cues overlapping the Window [start, end) as Sentences, each
-    {"text", "start", "end", "cue_start", "cue_end"} -- the first two
-    are character offsets into this call's internal Cue concatenation
-    (see _build_concatenation), the last two are seconds.
+    {"text", "cue_start", "cue_end"} -- the last two in seconds.
+
+    Either bound may be None, meaning "no bound that side"; both None
+    (the default) is the whole Track. The number of Sentences is capped
+    by the caller via MAX_SENTENCES, which is what actually bounds the
+    analysis work -- see docs/adr/0003's amendment on why the Window
+    stopped being a second cap on the same thing.
+
+    A Cue with no Japanese in it is dropped: this app cannot teach a
+    Korean lyric or an English ad-lib, and analyzing one produces a
+    Sentence of pure off-deck noise.
     """
-    selected = [c for c in cues if c["end"] > start and c["start"] < end]
-    if not selected:
-        return []
+    selected = [
+        c for c in cues
+        if (start is None or c["end"] > start) and (end is None or c["start"] < end)
+    ]
 
-    concatenation, spans = _build_concatenation(selected)
-    raw_sentences = split_sentences(concatenation)
-
-    if len(raw_sentences) <= 1 and len(concatenation) > UNPUNCTUATED_FALLBACK_CHAR_THRESHOLD:
-        # No usable punctuation across the whole Window -- fall back to
-        # one Sentence per Cue rather than shipping one unreadable block.
-        return [
-            {
-                "text": selected[i]["text"],
-                "start": char_start,
-                "end": char_end,
-                "cue_start": selected[i]["start"],
-                "cue_end": selected[i]["end"],
-            }
-            for i, (char_start, char_end) in enumerate(spans)
-        ]
-
-    result = []
-    for sentence in raw_sentences:
-        first_cue = _owning_cue(sentence["start"], spans)
-        last_cue = _owning_cue(sentence["end"] - 1, spans)
-        result.append({
-            "text": sentence["text"],
-            "start": sentence["start"],
-            "end": sentence["end"],
-            "cue_start": selected[first_cue]["start"],
-            "cue_end": selected[last_cue]["end"],
-        })
+    result: list[dict] = []
+    for cue in selected:
+        if not _has_japanese(cue["text"]):
+            continue
+        for sentence in split_sentences(cue["text"]):
+            result.append({
+                "text": sentence["text"],
+                "cue_start": cue["start"],
+                "cue_end": cue["end"],
+            })
     return result
