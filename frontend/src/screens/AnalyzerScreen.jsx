@@ -81,6 +81,12 @@ export default function AnalyzerScreen({ session }) {
   // this avoids.
   const closeDetail = useCallback(() => setDetail(null), [])
 
+  // Focus lands here when a Passage arrives. It has to be a real focus
+  // move, not just a scroll: the Analyze button lives INSIDE the panel
+  // that folds away, so hiding it blurs the document to <body> and a
+  // keyboard user's next Tab restarts from the top of the page.
+  const resultsRef = useRef(null)
+
   const { passage, sentences, status, error, focusIndex, explaining } = analyzer
   const busy = status === 'working'
   const ready = status === 'ready' && Boolean(analyzer.focused)
@@ -112,6 +118,19 @@ export default function AnalyzerScreen({ session }) {
     if (status !== 'ready') return
     // eslint-disable-next-line react-hooks/set-state-in-effect -- a Passage ARRIVING folds the intake away; keyed off a status transition, not off a render-time value.
     setIntakeOpen(false)
+    // Next frame: the results region does not exist in the DOM until
+    // this render commits, and focusing a node that is not there yet is
+    // a silent no-op.
+    const id = requestAnimationFrame(() => {
+      // Never pull focus out of an open dialog. Step 2a removes the one
+      // path that could leave one open across a new Passage, so this is
+      // belt-and-braces -- but a focus move that fights a focus trap is
+      // the kind of bug that is invisible until someone is navigating by
+      // keyboard, and the guard costs one query.
+      if (document.querySelector('[role="dialog"]')) return
+      resultsRef.current?.focus()
+    })
+    return () => cancelAnimationFrame(id)
   }, [status, passage])
 
   // ← / → step through the focused Sentence's Tokens, the way reading
@@ -146,6 +165,24 @@ export default function AnalyzerScreen({ session }) {
     analyzer.analyzeText(draft, { source: fromImage ? 'image' : 'typed' })
   }
 
+  // Every route into a new Passage closes the open detail sheet, not
+  // just this one. A WordDetail describes a Token of the Passage that
+  // was on screen when it was opened; once a NEW Passage arrives it is
+  // describing content the learner has already replaced. analyzeDraft
+  // has always done this; the two video ingests did not, which is the
+  // only path by which a dialog could still be open when the arrival
+  // effect below moves focus to the result -- stealing focus out of a
+  // live dialog and silently defeating useDialog's Tab-wrap trap.
+  function startVideoFromFile(file, opts) {
+    setDetail(null)
+    analyzer.startVideoFromFile(file, opts)
+  }
+
+  function startVideoFromTranscript(text, opts) {
+    setDetail(null)
+    analyzer.startVideoFromTranscript(text, opts)
+  }
+
   // Changing platform ALWAYS reopens the gate. Without this the panel
   // stays `hidden` after a result, so clicking 写真 selected a tab whose
   // aria-controls target was hidden and changed two characters in a
@@ -154,6 +191,18 @@ export default function AnalyzerScreen({ session }) {
   // so checking another platform never throws away a finished analysis.
   function changeSource(key) {
     setSource(key)
+    setIntakeOpen(true)
+  }
+
+  // 出場 -- leaving the gate. `reset()` has existed on the hook since
+  // the merge and has never had a caller, so the only way back to an
+  // empty analyser was to navigate away and return. It also clears the
+  // draft and the detail sheet, which the hook cannot see.
+  function clearPassage() {
+    analyzer.reset()
+    setDetail(null)
+    setDraft('')
+    setFromImage(false)
     setIntakeOpen(true)
   }
 
@@ -239,7 +288,7 @@ export default function AnalyzerScreen({ session }) {
     busy ? t[platform.busy]
     : status === 'failed' ? t.analysisFailed
     : ready ? t.passageReady(sentences.length)
-    : ''
+    : t[platform.lead]
 
   return (
     <div className="screen">
@@ -254,15 +303,26 @@ export default function AnalyzerScreen({ session }) {
             learner came for, and a full-height writing slip above it was
             pushing the result off the screen. */}
         {ready && !intakeOpen && (
-          <button
-            type="button"
-            className="anl-panel anl-reopen"
-            onClick={() => setIntakeOpen(true)}
-          >
-            <span className="anl-reopen__jp" lang="ja">{platform.jp}</span>
-            <span className="anl-reopen__label">{t.changeSource}</span>
-            <span className="anl-reopen__go" aria-hidden="true">▾</span>
-          </button>
+          <div className="anl-reopen-row">
+            <button
+              type="button"
+              className="anl-panel anl-reopen"
+              onClick={() => setIntakeOpen(true)}
+            >
+              <span className="anl-reopen__jp" lang="ja">{platform.jp}</span>
+              <span className="anl-reopen__label">{t.changeSource}</span>
+              <span className="anl-reopen__go" aria-hidden="true">▾</span>
+            </button>
+            <button
+              type="button"
+              className="anl-clear"
+              onClick={clearPassage}
+              title={t.clearPassageHint}
+            >
+              <span className="anl-clear__jp" lang="ja">出場</span>
+              <span className="anl-clear__label">{t.clearPassage}</span>
+            </button>
+          </div>
         )}
 
         <div
@@ -308,8 +368,8 @@ export default function AnalyzerScreen({ session }) {
               t={t}
               url={videoUrl}
               onUrlChange={setVideoUrl}
-              onStartFromFile={(file, opts) => analyzer.startVideoFromFile(file, opts)}
-              onStartFromTranscript={(text, opts) => analyzer.startVideoFromTranscript(text, opts)}
+              onStartFromFile={startVideoFromFile}
+              onStartFromTranscript={startVideoFromTranscript}
               onError={analyzer.fail}
             />
           )}
@@ -323,7 +383,16 @@ export default function AnalyzerScreen({ session }) {
             standing at. A video Passage additionally carries the player,
             whose clock moves the same position the line reads from. */}
         {status === 'ready' && focused && (
-          <div className="anl-results">
+          <div
+            ref={resultsRef}
+            className="anl-results"
+            // -1, not 0: this is a focus TARGET for the arrival
+            // transition, not a tab stop the learner should have to
+            // walk past on every pass through the screen.
+            tabIndex={-1}
+            role="region"
+            aria-label={t.analysisResult}
+          >
             {/* A route diagram of one stop is a joke at the reader's
                 expense -- below the threshold the stage takes the column
                 on its own. */}
