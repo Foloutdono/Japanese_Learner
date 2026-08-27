@@ -146,6 +146,17 @@ export default function AnalyzerScreen({ session }) {
     analyzer.analyzeText(draft, { source: fromImage ? 'image' : 'typed' })
   }
 
+  // Changing platform ALWAYS reopens the gate. Without this the panel
+  // stays `hidden` after a result, so clicking 写真 selected a tab whose
+  // aria-controls target was hidden and changed two characters in a
+  // fold-away label -- a large, prominent control that appeared to do
+  // nothing. The Passage itself is untouched: it belongs to the hook,
+  // so checking another platform never throws away a finished analysis.
+  function changeSource(key) {
+    setSource(key)
+    setIntakeOpen(true)
+  }
+
   // ── Playback sync ─────────────────────────────────────────
   const handleTimeUpdate = useCallback(seconds => {
     analyzer.setFocusIndex(prev => {
@@ -237,7 +248,7 @@ export default function AnalyzerScreen({ session }) {
       <main id="main-content" className="container page-pad analyzer">
         <StationHeader />
 
-        <SourceRail value={source} onChange={setSource} t={t} />
+        <SourceRail value={source} onChange={changeSource} t={t} />
 
         {/* Folded once a Passage is ready: the breakdown is what the
             learner came for, and a full-height writing slip above it was
