@@ -449,6 +449,7 @@ const phraseAnalyzer = {
   sourcePhotoHint:     'Shoot or upload a picture',
   sourceVideoHint:     'Subtitles or a transcript',
   platformUnit:        'Platform',
+  platformNumber:      n => `platform ${n}`,
   // 路線図 (plan 028) — the Passage drawn as a line whose stops are its
   // Sentences, one of them open at a time.
   routeMap:            'Route map',
@@ -628,9 +629,11 @@ const reading = {
   showBreakdown:        'Show breakdown',
   hideBreakdown:        'Hide breakdown',
   preparingBreakdown:   'Preparing breakdown…',
-  jumpToWord:           'Jump to this word',
   previousWord:         'Previous word',
   nextWord:             'Next word',
+  jumpToTokenNamed:      s => `Go to ${s}`,
+  detailsForToken:       s => `Details for ${s}`,
+  detailsForKanji:       k => `Details for the kanji ${k}`,
 }
 // ── Reading comprehension ────────────────────────────────────────────
 const readingComprehension = {

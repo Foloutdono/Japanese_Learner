@@ -89,16 +89,25 @@ export function SentenceBreakdown({
       <div className="rdg-breakdown">
         <div className="phrase-line rdg-breakdown-line">
           {tokens.map((w, i) => (
-            <span
+            <button
               key={i}
+              type="button"
               onClick={() => setIndex(i)}
               className={`word-span rdg-breakdown-line__word${i === index ? ' rdg-breakdown-line__word--active' : ''}`}
               style={{ '--word-color': wordColor(w) }}
-              title={t.jumpToWord ?? 'Jump to this word'}
+              // The line doubles as a jump-to-Token index, so each entry
+              // says WHICH Token it goes to rather than repeating one
+              // generic tooltip N times.
+              aria-label={t.jumpToTokenNamed(w.surface)}
+              // The pressed one is the Token on the stage. aria-pressed,
+              // not aria-current: these are toggles into a single
+              // selection, not steps along a route -- the route is
+              // PassageLine, one level up.
+              aria-pressed={i === index}
               lang="ja"
             >
               <FuriganaParts parts={w.furigana ?? [{ text: w.surface }]} />
-            </span>
+            </button>
           ))}
         </div>
 
@@ -162,18 +171,23 @@ export function SentenceBreakdown({
     <>
       <div className="card phrase-result-card">
         <div className="phrase-line">
-          {tokens.map((w, i) => (
-            <span
+          {tokens.map((w, i) => (w.vocab_match ? (
+            <button
               key={i}
+              type="button"
               onClick={() => onTokenClick(w)}
-              className={`word-span${w.vocab_match ? ' word-span--clickable' : ''}`}
+              className="word-span word-span--clickable"
               style={{ '--word-color': wordColor(w) }}
-              title={w.vocab_match ? (t.clickForDetails) : undefined}
+              aria-label={t.detailsForToken(w.surface)}
               lang="ja"
             >
               <FuriganaParts parts={w.furigana ?? [{ text: w.surface }]} />
+            </button>
+          ) : (
+            <span key={i} className="word-span" style={{ '--word-color': wordColor(w) }} lang="ja">
+              <FuriganaParts parts={w.furigana ?? [{ text: w.surface }]} />
             </span>
-          ))}
+          )))}
         </div>
         <LevelBadge
           level={analysis.level}

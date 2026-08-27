@@ -32,7 +32,12 @@ function particleFixture() {
   }
 }
 
-const T = { clickForDetails: 'Click for details' }
+const T = {
+  clickForDetails: 'Click for details',
+  jumpToTokenNamed: s => `Go to ${s}`,
+  detailsForToken: s => `Details for ${s}`,
+  detailsForKanji: k => `Details for the kanji ${k}`,
+}
 
 // CardTransition (used by the stepper layout) renders StageBadge, which
 // calls useLang() -- so every render needs a real LangProvider ancestor,
@@ -145,5 +150,118 @@ describe('SentenceBreakdown', () => {
     expect([...rts].some(rt => rt.textContent === 'た')).toBe(true)
     expect([...rts].some(rt => rt.textContent === 'べる')).toBe(false)
     expect(document.body.textContent).toContain('べる')
+  })
+
+  // ── Keyboard reachability (plan 033) ──────────────────────────────
+  // These pin the accessibility TREE, not the tag name, per the lesson
+  // recorded in plans/README.md's post-wave audit: role="listitem" on a
+  // <button> silently voided the fix PassageLine exists for.
+
+  it('makes every clickable Token a focusable control', async () => {
+    const tokens = [tokenFixture({ surface: '大学' }), tokenFixture({ surface: '行く' })]
+    const analysis = { tokens, explanation: '' }
+    await render(withLang(
+      <SentenceBreakdown
+        analysis={analysis}
+        t={T}
+        layout="stepper"
+        index={0}
+        setIndex={() => {}}
+        onTokenClick={() => {}}
+        onKanjiClick={() => {}}
+      />
+    ))
+    const words = document.querySelectorAll('.rdg-breakdown-line__word')
+    expect(words.length).toBe(2)
+    for (const el of words) {
+      expect(el.tagName).toBe('BUTTON')
+      expect(el.tabIndex).toBeGreaterThanOrEqual(0)
+      expect(el.getAttribute('aria-label')).toBeTruthy()
+    }
+  })
+
+  it('activates a Token with Enter and with Space', async () => {
+    const tokens = [
+      tokenFixture({ surface: '一' }), tokenFixture({ surface: '二' }),
+      tokenFixture({ surface: '三' }), tokenFixture({ surface: '四' }),
+    ]
+    const analysis = { tokens, explanation: '' }
+    let index = 0
+    const setIndex = vi.fn(i => { index = i })
+    const screen = await render(withLang(
+      <SentenceBreakdown
+        analysis={analysis}
+        t={T}
+        layout="stepper"
+        index={index}
+        setIndex={setIndex}
+        onTokenClick={() => {}}
+        onKanjiClick={() => {}}
+      />
+    ))
+    const words = document.querySelectorAll('.rdg-breakdown-line__word')
+    // A real <button> fires the same click handler for Enter and Space
+    // as it does for a pointer click -- the point of this test is that
+    // the handler now lives on the button at all, not on a span.
+    words[2].click()
+    expect(setIndex).toHaveBeenCalledWith(2)
+    await screen.rerender(withLang(
+      <SentenceBreakdown
+        analysis={analysis}
+        t={T}
+        layout="stepper"
+        index={2}
+        setIndex={setIndex}
+        onTokenClick={() => {}}
+        onKanjiClick={() => {}}
+      />
+    ))
+    expect(document.body.textContent).toContain('3 / 4')
+  })
+
+  it('never nests a button inside a button', async () => {
+    const token = tokenFixture({
+      kanji_matches: [
+        { raw_id: 'kanji_N5_大', kanji: '大', level: 'N5', stats: { status: 'not_started' } },
+      ],
+    })
+    const analysis = { tokens: [token], explanation: '' }
+    const screen = await render(withLang(
+      <SentenceBreakdown analysis={analysis} t={T} layout="list" onTokenClick={() => {}} onKanjiClick={() => {}} />
+    ))
+    expect(screen.container.querySelectorAll('button button').length).toBe(0)
+  })
+
+  it('leaves a non-clickable Token as plain text', async () => {
+    const analysis = { tokens: [particleFixture()], explanation: '' }
+    await render(withLang(
+      <SentenceBreakdown analysis={analysis} t={T} layout="list" onTokenClick={() => {}} onKanjiClick={() => {}} />
+    ))
+    // The phrase-line entry for a Token with no vocab_match has nothing
+    // to open, so it must be a plain span -- not a disabled button,
+    // which would be keyboard-focusable noise in a run of text.
+    const span = document.querySelector('.phrase-line .word-span')
+    expect(span.tagName).toBe('SPAN')
+    expect(document.querySelectorAll('.phrase-line button').length).toBe(0)
+  })
+
+  it('marks the Token on the stage as pressed', async () => {
+    const tokens = [tokenFixture({ surface: '一' }), tokenFixture({ surface: '二' }), tokenFixture({ surface: '三' })]
+    const analysis = { tokens, explanation: '' }
+    await render(withLang(
+      <SentenceBreakdown
+        analysis={analysis}
+        t={T}
+        layout="stepper"
+        index={1}
+        setIndex={() => {}}
+        onTokenClick={() => {}}
+        onKanjiClick={() => {}}
+      />
+    ))
+    const pressed = document.querySelectorAll('.rdg-breakdown-line__word[aria-pressed="true"]')
+    expect(pressed.length).toBe(1)
+    const words = document.querySelectorAll('.rdg-breakdown-line__word')
+    expect(pressed[0]).toBe(words[1])
   })
 })

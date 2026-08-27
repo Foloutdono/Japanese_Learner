@@ -9491,6 +9491,27 @@ textarea:focus-visible {
   background: var(--dot-color, var(--text-secondary));
 }
 
+/* These four were <span>/<div> with onClick and are real <button>s now
+   (they were unreachable by keyboard, invisible to a screen reader and
+   inert to voice control). The reset is what keeps that change
+   invisible: a bare <button> brings its own background, border, font
+   and centred text, none of which these ever had. The focus ring is
+   NOT reset -- index.css's `button:focus-visible` is exactly what this
+   conversion buys. */
+.word-span,
+.phrase-word-card__surface-wrap,
+.phrase-kanji-chip__char,
+.rdg-breakdown-line__word {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  line-height: inherit;
+}
+
 .word-span { color: var(--word-color, var(--text-primary)); }
 .word-span--clickable {
   cursor: pointer;
@@ -9822,7 +9843,6 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   gap: 6px;
-  cursor: pointer;
   background: var(--bg-panel);
   border: 1px solid transparent;
   border-radius: 6px;
@@ -9831,8 +9851,17 @@ textarea:focus-visible {
   color: var(--text-on-panel);
 }
 .phrase-kanji-chip:hover { border-color: var(--border); }
-.phrase-kanji-chip:active { transform: scale(0.95); }
-.phrase-kanji-chip__char { font-size: 16px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.phrase-kanji-chip__char {
+  font-size: 16px;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* WCAG 2.5.8 — 24x24 CSS px minimum for a pointer target. The chip
+     around it is bigger, but the chip is no longer the control. */
+  min-width: 24px;
+  min-height: 24px;
+  cursor: pointer;
+}
+.phrase-kanji-chip__char:hover { text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; }
+.phrase-kanji-chip__char:active { transform: scale(0.9); }
 .phrase-kanji-chip__level { font-size: 11px; color: var(--text-secondary); }
 
 /* ── Reading practice screen ──────────────────────────────── */
@@ -9873,6 +9902,7 @@ textarea:focus-visible {
    keyframe). */
 @media (prefers-reduced-motion: reduce) {
   .rdg-streak, .trn-streak { animation: none; }
+  .phrase-kanji-chip__char:active { transform: none; }
 }
 
 .rdg-error-card { padding: 16px; color: var(--danger); }

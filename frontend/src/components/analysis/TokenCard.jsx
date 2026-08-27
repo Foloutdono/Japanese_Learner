@@ -35,6 +35,25 @@ export function TokenCard({
 }) {
   const showVocabMine = word.vocab_match || CONTENT_POS.has(word.pos)
 
+  // Written once, rendered from either branch below (a real <button>
+  // when the Token has a vocab_match to open, a plain <div> when there
+  // is nothing to open) so the two never drift apart.
+  const surfaceContent = (
+    <>
+      <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(word) }}>
+        {word.surface}
+      </span>
+      {word.reading && (
+        <span className="phrase-word-card__reading">({word.reading})</span>
+      )}
+      {word.pos && (
+        <span className="phrase-word-card__pos">
+          {word.pos}
+        </span>
+      )}
+    </>
+  )
+
   return (
     <div
       className={`card phrase-word-card${extraClassName ? ' ' + extraClassName : ''}${emphasize ? ' phrase-word-card--i-plus-one' : ''}`}
@@ -43,23 +62,18 @@ export function TokenCard({
         <div className="phrase-word-card__i-plus-one-flag">{t.iPlusOne ?? 'One step beyond you'}</div>
       )}
       <div className="phrase-word-card__top">
-        <div
-          onClick={() => word.vocab_match && onWordClick(word)}
-          className={`phrase-word-card__surface-wrap${word.vocab_match ? ' phrase-word-card__surface-wrap--clickable' : ''}`}
-          title={word.vocab_match ? (t.clickForDetails) : undefined}
-        >
-          <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(word) }}>
-            {word.surface}
-          </span>
-          {word.reading && (
-            <span className="phrase-word-card__reading">({word.reading})</span>
-          )}
-          {word.pos && (
-            <span className="phrase-word-card__pos">
-              {word.pos}
-            </span>
-          )}
-        </div>
+        {word.vocab_match ? (
+          <button
+            type="button"
+            onClick={() => onWordClick(word)}
+            className="phrase-word-card__surface-wrap phrase-word-card__surface-wrap--clickable"
+            aria-label={t.detailsForToken(word.surface)}
+          >
+            {surfaceContent}
+          </button>
+        ) : (
+          <div className="phrase-word-card__surface-wrap">{surfaceContent}</div>
+        )}
         {!compact && word.vocab_match && <StatusBadge status={word.vocab_match.stats.status} t={t} />}
         {showVocabMine && (
           <MineControls
@@ -81,14 +95,22 @@ export function TokenCard({
       {word.kanji_matches?.length > 0 && (
         <div className="phrase-word-card__kanji-row">
           {word.kanji_matches.map(k => (
-            <div
-              key={k.raw_id}
-              onClick={() => onKanjiClick(k)}
-              className="phrase-kanji-chip"
-            >
-              <span className="phrase-kanji-chip__char" style={{ '--word-color': STATUS_COLORS[k.stats.status] }}>
+            // The chip is NOT the control. It holds a MineButton, and a
+            // <button> inside a <button> is invalid HTML with undefined
+            // focus behaviour -- so the character carries the click and
+            // the chip is a plain container. This is why the chip lost
+            // its own cursor: pointer.
+            <div key={k.raw_id} className="phrase-kanji-chip">
+              <button
+                type="button"
+                onClick={() => onKanjiClick(k)}
+                className="phrase-kanji-chip__char"
+                style={{ '--word-color': STATUS_COLORS[k.stats.status] }}
+                aria-label={t.detailsForKanji(k.kanji)}
+                lang="ja"
+              >
                 {k.kanji}
-              </span>
+              </button>
               <span className="phrase-kanji-chip__level">{k.level}</span>
               {!compact && <StatusBadge status={k.stats.status} small t={t} />}
               <MineButton

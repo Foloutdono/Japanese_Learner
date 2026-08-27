@@ -66,15 +66,22 @@ export function SourceRail({ value, onChange, t }) {
             // Roving tabindex: one stop for the whole rail, then the
             // arrow keys move within it.
             tabIndex={active ? 0 : -1}
-            title={t[s.hint]}
+            // The sign carries four registers of 駅名標 typography, and
+            // concatenated they announce as "1 番線 もじ 文字 Text".
+            // The name is the plain-language one; the number is a
+            // separate fact; the hint is a real description instead of
+            // a `title` that never appears on touch.
+            aria-label={`${t[s.label]} — ${t.platformNumber(s.no)}`}
+            aria-describedby={`anl-tab-hint-${s.key}`}
             className="anl-rail__sign"
             onClick={() => select(s.key)}
           >
-            <span className="anl-rail__no">{s.no}<span lang="ja">番線</span></span>
-            <span className="anl-rail__kana" lang="ja">{s.kana}</span>
-            <span className="anl-rail__jp" lang="ja">{s.jp}</span>
-            <span className="anl-rail__latin">{t[s.label]}</span>
+            <span className="anl-rail__no" aria-hidden="true">{s.no}<span lang="ja">番線</span></span>
+            <span className="anl-rail__kana" lang="ja" aria-hidden="true">{s.kana}</span>
+            <span className="anl-rail__jp" lang="ja" aria-hidden="true">{s.jp}</span>
+            <span className="anl-rail__latin" aria-hidden="true">{t[s.label]}</span>
             <span className="anl-rail__stripe" aria-hidden="true" />
+            <span id={`anl-tab-hint-${s.key}`} className="anl-sr-only">{t[s.hint]}</span>
           </button>
         )
       })}
