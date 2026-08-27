@@ -73,6 +73,13 @@ export default function AnalyzerScreen({ session }) {
   // every change of Sentence, or you land on token 7 of a 3-token line.
   const [tokenIndex, setTokenIndex] = useState(0)
 
+  // 追従 — whether the line follows the video's clock. On by default,
+  // because watching along is the point. Off the moment the learner
+  // picks a stop by hand while the video is running: they have said
+  // where they want to be, and being dragged back to the playhead
+  // mid-sentence is the defect this closes.
+  const [followPlayback, setFollowPlayback] = useState(true)
+
   const [detail, setDetail] = useState(null) // { title, entry, stats }
   // Stable so WordDetail's useDialog doesn't re-run its focus-on-open
   // effect (and steal focus) on every render of this screen while the
@@ -143,8 +150,11 @@ export default function AnalyzerScreen({ session }) {
       const el = document.activeElement
       const tag = el?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || el?.isContentEditable) return
-      // The platform rail owns its own arrows (roving tabindex).
+      // The platform rail owns its own arrows (roving tabindex), and so
+      // does the route map -- both are roving-tabindex widgets where the
+      // arrow keys mean "move within me".
       if (el?.getAttribute?.('role') === 'tab') return
+      if (el?.closest?.('.anl-line')) return
       e.preventDefault()
       const last = (analyzer.focused?.tokens?.length ?? 1) - 1
       setTokenIndex(i => e.key === 'ArrowRight'
@@ -208,23 +218,30 @@ export default function AnalyzerScreen({ session }) {
 
   // ── Playback sync ─────────────────────────────────────────
   const handleTimeUpdate = useCallback(seconds => {
+    if (!followPlayback) return
     analyzer.setFocusIndex(prev => {
       const idx = sentences.findIndex(s => seconds >= s.cue_start && seconds < s.cue_end)
       // -1 during the silence between cues: hold the current stop
       // rather than snapping back to the first one.
       return idx === -1 ? prev : idx
     })
-  }, [sentences, analyzer])
+  }, [sentences, analyzer, followPlayback])
 
   // The line, the stage, and the player are three views of ONE
   // position, so they all move through here. A video Passage seeks; a
   // typed or photographed one has no cue times and simply changes stop.
+  //
+  // Two intents, deliberately separated. Selecting a stop moves the
+  // marker and seeks; it does NOT start playback, because clicking a
+  // Sentence to read it is not a request to watch. `play()` is left to
+  // the player's own control.
   function goToStop(index) {
     analyzer.setFocusIndex(index)
+    // Choosing by hand means the learner has taken the wheel.
+    setFollowPlayback(false)
     const target = sentences[index]
     if (target?.cue_start != null && playerRef.current) {
       playerRef.current.seekTo(target.cue_start)
-      playerRef.current.play()
     }
   }
 
@@ -402,6 +419,11 @@ export default function AnalyzerScreen({ session }) {
                 activeIndex={focusIndex}
                 onSelect={goToStop}
                 orientation={wide ? 'vertical' : 'strip'}
+                // Only auto-scroll when something OTHER than the learner
+                // is moving the marker. A stop they just clicked is
+                // already under their pointer; scrolling it "into view"
+                // moves the list out from under them.
+                scrollOnChange={playerVideoId ? followPlayback : false}
                 t={t}
               />
             )}
@@ -409,6 +431,15 @@ export default function AnalyzerScreen({ session }) {
             <div className="anl-stage">
               {playerVideoId && (
                 <div className="anl-player">
+                  <button
+                    type="button"
+                    className={`anl-follow${followPlayback ? ' anl-follow--on' : ''}`}
+                    aria-pressed={followPlayback}
+                    onClick={() => setFollowPlayback(f => !f)}
+                  >
+                    <span className="anl-follow__jp" lang="ja">追従</span>
+                    <span className="anl-follow__label">{t.followPlayback}</span>
+                  </button>
                   <VideoPlayer ref={playerRef} videoId={playerVideoId} onTimeUpdate={handleTimeUpdate} />
                 </div>
               )}

@@ -8,12 +8,13 @@ import { PassageLine } from './PassageLine'
 // current, and i+1 marked on exactly the ones that are i+1. The fourth
 // is new, and pins the accessibility defect the old component had.
 const T = {
-  jumpToStop: 'Go to this sentence',
   iPlusOne: 'One step beyond you',
   routeMap: 'Route map',
   // The group's label carries the count a role="list" would have
   // announced -- see the role note in PassageLine.
   stopsInPassage: n => `${n} sentences`,
+  stopNumber: (i, n) => `Sentence ${i} of ${n}`,
+  notJapaneseShort: 'not Japanese',
 }
 
 function sentenceFixture(overrides = {}) {
@@ -85,5 +86,106 @@ describe('PassageLine', () => {
       />
     )
     expect(withoutTime.container.querySelector('.anl-stop__time')).toBeNull()
+  })
+
+  // Plan 034: a 47-cue subtitle track used to put 47 tab stops between
+  // the platform rail and the breakdown. Roving tabindex makes the line
+  // ONE tab stop, whatever its length.
+  it('is one tab stop, whatever the length', async () => {
+    const sentences = Array.from({ length: 20 }, (_, i) => sentenceFixture({ text: `文${i}` }))
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={7} onSelect={() => {}} t={T} />
+    )
+    const stops = screen.container.querySelectorAll('.anl-stop')
+    expect(stops.length).toBe(20)
+    const zeroTabbable = Array.from(stops).filter(el => el.tabIndex === 0)
+    expect(zeroTabbable.length).toBe(1)
+    expect(zeroTabbable[0]).toBe(stops[7])
+    Array.from(stops).forEach((el, i) => {
+      if (i !== 7) expect(el.tabIndex).toBe(-1)
+    })
+  })
+
+  it('moves along the line with the arrow keys', async () => {
+    const onSelect = vi.fn()
+    const sentences = Array.from({ length: 5 }, (_, i) => sentenceFixture({ text: `文${i}` }))
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={2} onSelect={onSelect} t={T} />
+    )
+    const stops = screen.container.querySelectorAll('.anl-stop')
+    stops[2].focus()
+    stops[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }))
+    expect(onSelect).toHaveBeenCalledWith(3)
+  })
+
+  it('jumps to the termini with Home and End', async () => {
+    const onSelect = vi.fn()
+    const sentences = Array.from({ length: 5 }, (_, i) => sentenceFixture({ text: `文${i}` }))
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={2} onSelect={onSelect} t={T} />
+    )
+    const stops = screen.container.querySelectorAll('.anl-stop')
+    stops[2].focus()
+    stops[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }))
+    expect(onSelect).toHaveBeenCalledWith(4)
+
+    onSelect.mockClear()
+    stops[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }))
+    expect(onSelect).toHaveBeenCalledWith(0)
+  })
+
+  it('steps ten with PageDown', async () => {
+    const onSelect = vi.fn()
+    const sentences = Array.from({ length: 20 }, (_, i) => sentenceFixture({ text: `文${i}` }))
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={onSelect} t={T} />
+    )
+    const stops = screen.container.querySelectorAll('.anl-stop')
+    stops[0].focus()
+    stops[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true, cancelable: true }))
+    expect(onSelect).toHaveBeenCalledWith(10)
+  })
+
+  // Regression guard for the Token-stepper conflict: the screen installs
+  // a WINDOW-level ArrowLeft/ArrowRight handler, and without
+  // stopPropagation the line's own arrow handling would leak up to it.
+  it('stops the arrow event from reaching the window', async () => {
+    const sentences = Array.from({ length: 5 }, (_, i) => sentenceFixture({ text: `文${i}` }))
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={2} onSelect={() => {}} t={T} />
+    )
+    const stops = screen.container.querySelectorAll('.anl-stop')
+    const spy = vi.fn()
+    window.addEventListener('keydown', spy)
+    try {
+      stops[2].focus()
+      stops[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))
+      expect(spy).not.toHaveBeenCalled()
+    } finally {
+      window.removeEventListener('keydown', spy)
+    }
+  })
+
+  it('names each stop with its position', async () => {
+    const sentences = Array.from({ length: 20 }, (_, i) => sentenceFixture({ text: `文${i}` }))
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} />
+    )
+    const stops = screen.container.querySelectorAll('.anl-stop')
+    expect(stops[2].getAttribute('aria-label').startsWith(T.stopNumber(3, 20))).toBe(true)
+  })
+
+  it('does not scroll when scrollOnChange is false', async () => {
+    const spy = vi.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => {})
+    const sentences = [sentenceFixture({ text: 'A' }), sentenceFixture({ text: 'B' })]
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} scrollOnChange={false} />
+    )
+    spy.mockClear()
+    await screen.rerender(
+      <PassageLine sentences={sentences} activeIndex={1} onSelect={() => {}} t={T} scrollOnChange={false} />
+    )
+    expect(spy).not.toHaveBeenCalled()
+    spy.mockRestore()
   })
 })

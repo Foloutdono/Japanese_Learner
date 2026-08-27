@@ -439,7 +439,9 @@ const phraseAnalyzer = {
   // arrêts sont ses Phrases, une seule ouverte à la fois.
   routeMap:            'Plan de ligne',
   stopsInPassage:      n => `${n} phrase${n === 1 ? '' : 's'}`,
-  jumpToStop:          'Aller à cette phrase',
+  stopNumber:          (i, n) => `Phrase ${i} sur ${n}`,
+  // 追従 (plan 034) — suivre l'horloge de la vidéo le long de la ligne.
+  followPlayback:      'Suivre la vidéo',
   // 改札口 (plan 029) — les trois entrées.
   intakeTextLead:      'Tapez ou collez du japonais.',
   intakePhotoLead:     'Une page, un panneau, une capture — tout ce qui porte du japonais.',

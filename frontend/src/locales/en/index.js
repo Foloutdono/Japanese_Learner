@@ -454,7 +454,9 @@ const phraseAnalyzer = {
   // Sentences, one of them open at a time.
   routeMap:            'Route map',
   stopsInPassage:      n => `${n} ${n === 1 ? 'sentence' : 'sentences'}`,
-  jumpToStop:          'Go to this sentence',
+  stopNumber:          (i, n) => `Sentence ${i} of ${n}`,
+  // 追従 (plan 034) — following the video's clock along the line.
+  followPlayback:      'Follow the video',
   // 改札口 (plan 029) — the three intakes.
   intakeTextLead:      'Type or paste anything Japanese.',
   intakePhotoLead:     'A page, a sign, a screenshot — anything with Japanese on it.',
