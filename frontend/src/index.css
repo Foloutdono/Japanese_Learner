@@ -8533,7 +8533,17 @@ textarea:focus-visible {
   inset: 0;
   animation: card-burn-clear 300ms ease-in 950ms forwards;
 }
-.ember {
+/* 焼き印 — the burn's own sparks.
+   Namespaced, and deliberately: these used to be a bare `.ember`, the
+   same class the footlight strip (StageFootlights, further up) already
+   owned. Two (0,1,0) rules for two unrelated features means the later
+   one wins everywhere, and this was the later one — the footlights'
+   embers were quietly inheriting this one-shot burn: fired once instead
+   of looping, sway animation gone, --ember-rise dead, and lit in this
+   block's hardcoded orange rather than the ceremony's own colour. The
+   keyframe below is renamed for the same reason; there were two global
+   keyframes named "ember-rise" and only the last one existed. */
+.card-stamp__ember {
   position: absolute;
   bottom: 6%;
   left: var(--ember-x, 50%);
@@ -8542,9 +8552,9 @@ textarea:focus-visible {
   border-radius: 50%;
   background: radial-gradient(circle, #ffe0a8, #ff7a2e 60%, transparent 100%);
   opacity: 0;
-  animation: ember-rise var(--ember-dur, 900ms) ease-out var(--ember-delay, 0ms) forwards;
+  animation: card-stamp-ember-rise var(--ember-dur, 900ms) ease-out var(--ember-delay, 0ms) forwards;
 }
-@keyframes ember-rise {
+@keyframes card-stamp-ember-rise {
   0%   { opacity: 0; transform: translate(0, 0) scale(0.6); }
   15%  { opacity: 1; }
   100% { opacity: 0; transform: translate(var(--ember-drift, 6px), -130px) scale(0.3); }
@@ -8657,7 +8667,7 @@ textarea:focus-visible {
   .card-stamp__brush,
   .card-stamp-burn__char,
   .card-stamp-burn__embers,
-  .ember,
+  .card-stamp__ember,
   .kumadori-streak,
   .petal { animation: none; opacity: 0; }
   .card-stamp-overlay--leaving { animation-duration: 180ms; }

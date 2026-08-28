@@ -79,7 +79,7 @@ function CardBurn() {
         {EMBER_LAYOUT.map((e, i) => (
           <span
             key={i}
-            className="ember"
+            className="card-stamp__ember"
             style={{
               '--ember-x': `${e.x}%`,
               '--ember-delay': `${e.delay}ms`,
