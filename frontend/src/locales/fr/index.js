@@ -499,6 +499,7 @@ const phraseAnalyzer = {
   unknownWords:        'mots inconnus',
   offDeckWords:        'non enseignés par l\'application',
   iPlusOne:            'À une étape de votre niveau',
+  alreadyExplained:    'déjà expliquée',
   grammarSpotted:      'Grammaire repérée',
   explainSentence:     'Expliquer',
   explainAgain:        'Expliquer à nouveau',

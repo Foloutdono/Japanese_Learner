@@ -514,6 +514,7 @@ const phraseAnalyzer = {
   unknownWords:        'unknown words',
   offDeckWords:        'not taught by the app',
   iPlusOne:            'One step beyond you',
+  alreadyExplained:    'already explained',
   grammarSpotted:      'Grammar spotted',
   explainSentence:     'Explain',
   explainAgain:        'Explain again',

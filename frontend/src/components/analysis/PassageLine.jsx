@@ -128,6 +128,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
               s.text,
               s.foreign ? t.notJapaneseShort : null,
               !s.foreign && s.unknown_count === 1 ? t.iPlusOne : null,
+              s.explanation ? t.alreadyExplained : null,
               s.cue_start != null ? formatTimecode(s.cue_start) : null,
             ].filter(Boolean).join(' — ')}
             className={[
@@ -154,6 +155,24 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
               </span>
             ) : s.unknown_count === 1 && (
               <span className="anl-stop__iplus" title={t.iPlusOne} aria-hidden="true">i+1</span>
+            )}
+
+            {/* 済 — already explained. The deep tier is the one thing on
+                this screen that costs a model call (docs/adr/0001), and
+                nothing recorded what had been bought: on a 47-stop
+                subtitle track the only way to know was to open each stop.
+                No new pigment -- the wave's colour rule spends
+                --line-douga on the timestamp chip and nothing else, and
+                --success is already i+1's. This is shape and weight.
+
+                Session-local for a video Passage: the explain endpoint
+                does not write back into video_sessions.sentences, so a
+                reloaded session loses the marks even though the
+                explanations themselves are still cached server-side. A
+                typed or photographed Passage keeps them, because the
+                history re-derive merges the cache back in. */}
+            {s.explanation && (
+              <span className="anl-stop__done" lang="ja" aria-hidden="true">済</span>
             )}
 
             {/* The one place 鶯色 is spent: the only data a video

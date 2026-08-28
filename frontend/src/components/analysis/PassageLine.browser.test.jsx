@@ -15,6 +15,7 @@ const T = {
   stopsInPassage: n => `${n} sentences`,
   stopNumber: (i, n) => `Sentence ${i} of ${n}`,
   notJapaneseShort: 'not Japanese',
+  alreadyExplained: 'already explained',
 }
 
 function sentenceFixture(overrides = {}) {
@@ -173,6 +174,46 @@ describe('PassageLine', () => {
     )
     const stops = screen.container.querySelectorAll('.anl-stop')
     expect(stops[2].getAttribute('aria-label').startsWith(T.stopNumber(3, 20))).toBe(true)
+  })
+
+  // Plan 038: the route map should show which stops already carry an
+  // explanation from a prior deep-tier call.
+  it('marks a stop that carries an explanation', async () => {
+    const sentences = [
+      sentenceFixture({ text: 'A' }),
+      sentenceFixture({ text: 'B', explanation: 'これは説明です。' }),
+      sentenceFixture({ text: 'C' }),
+    ]
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} />
+    )
+    const marks = screen.container.querySelectorAll('.anl-stop__done')
+    expect(marks.length).toBe(1)
+    const stops = screen.container.querySelectorAll('.anl-stop')
+    expect(stops[1].contains(marks[0])).toBe(true)
+  })
+
+  it('says so in the stop name', async () => {
+    const sentences = [
+      sentenceFixture({ text: 'A' }),
+      sentenceFixture({ text: 'B', explanation: 'これは説明です。' }),
+      sentenceFixture({ text: 'C' }),
+    ]
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} />
+    )
+    const stops = screen.container.querySelectorAll('.anl-stop')
+    expect(stops[1].getAttribute('aria-label')).toContain(T.alreadyExplained)
+    expect(stops[0].getAttribute('aria-label')).not.toContain(T.alreadyExplained)
+    expect(stops[2].getAttribute('aria-label')).not.toContain(T.alreadyExplained)
+  })
+
+  it('marks nothing when nothing is explained', async () => {
+    const sentences = [sentenceFixture({ text: 'A' }), sentenceFixture({ text: 'B' })]
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} />
+    )
+    expect(screen.container.querySelectorAll('.anl-stop__done').length).toBe(0)
   })
 
   it('does not scroll when scrollOnChange is false', async () => {

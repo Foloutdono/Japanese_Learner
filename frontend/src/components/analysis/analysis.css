@@ -276,6 +276,20 @@
   border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
 }
 
+/* 済 — already explained. Deliberately the quietest badge on the stop:
+   i+1 is a recommendation and gets --success, the timestamp is unique
+   data and gets 鶯色, and this is a memory aid. No new pigment. */
+.anl-stop__done {
+  flex-shrink: 0;
+  font-family: var(--font-jp);
+  font-size: 0.68rem;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-line);
+}
+
 /* The Explain control. Replaces .phrase-explain-row, whose
    `margin: -12px 0 24px` was hand-correcting the box above it — this
    one sits in .anl-stage, whose parent owns the gap, so there is
@@ -818,6 +832,12 @@
     text-align: center;
     font-size: 0.78rem;
   }
+  /* The strip stacks text, the foreign/i+1 badge, and the timestamp
+     vertically already in an 88px column -- a fourth stacked badge
+     reads as clutter in a band whose job is "where am I", not "what
+     have I read". The vertical route map is where scanning for 済
+     happens; hide it here rather than shrink everyone else. */
+  .anl-line--strip .anl-stop__done { display: none; }
 
   /* Under the strip, not over it, and below it in z. Offset by the
      strip's own height token above rather than a second hand-kept
