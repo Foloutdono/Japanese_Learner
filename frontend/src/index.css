@@ -5041,7 +5041,7 @@ textarea:focus-visible {
   padding: 14px 18px;
   text-align: left;
   font: inherit;
-  color: var(--text);
+  color: var(--text-primary);
   background: color-mix(in srgb, var(--accent2) 7%, var(--bg-panel));
   border: 1px solid color-mix(in srgb, var(--accent2) 26%, transparent);
   border-left: 3px solid var(--accent2);
@@ -5087,14 +5087,14 @@ textarea:focus-visible {
 .next-service__jp {
   font-size: 13px;
   letter-spacing: 0.16em;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 .next-service__latin {
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--text-dim) 72%, transparent);
+  color: color-mix(in srgb, var(--text-secondary) 72%, transparent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5115,7 +5115,7 @@ textarea:focus-visible {
 }
 .next-service__when {
   font-size: 13px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 /* The lanes waiting, as chips. Scrolls rather than wraps: three chips
@@ -5142,11 +5142,11 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 .next-service__lane-where { font-weight: 700; color: var(--lane-color, var(--accent2)); }
-.next-service__lane-mode  { color: var(--text-dim); }
+.next-service__lane-mode  { color: var(--text-secondary); }
 .next-service__lane-due {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: var(--text);
+  color: var(--text-primary);
 }
 
 /* ── 新規 — the day's new-item gauge ─────────────────────────
@@ -5183,7 +5183,7 @@ textarea:focus-visible {
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 .next-service__pace-bar {
   flex: 1;
@@ -5208,7 +5208,7 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: 0.85rem;
 }
-.next-service__pace-sep { color: var(--text-dim); font-weight: 400; }
+.next-service__pace-sep { color: var(--text-secondary); font-weight: 400; }
 /* Target met: the onboarding's gold pill (.onb-reco-badge), flowed
    inline at the row's end instead of floating over a card corner. */
 .next-service__pace-met {
@@ -5261,7 +5261,7 @@ textarea:focus-visible {
   padding: 11px 14px;
   font: inherit;
   text-align: left;
-  color: var(--text);
+  color: var(--text-primary);
   background: var(--bg-panel);
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   border-left: 3px solid transparent;
@@ -5284,7 +5284,7 @@ textarea:focus-visible {
   width: 17px;
   height: 17px;
   border-radius: 5px;
-  border: 1.5px solid color-mix(in srgb, var(--text-dim) 60%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--text-secondary) 60%, transparent);
   /* Flex-centers the checkmark rather than placing it with hand-tuned
      left/top pixels -- those were eyeballed against ONE box size and
      never actually landed centred (visibly off toward the top-left in
@@ -5327,7 +5327,7 @@ textarea:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.today-lane-row__mode { font-size: 12px; color: var(--text-dim); }
+.today-lane-row__mode { font-size: 12px; color: var(--text-secondary); }
 .today-lane-row__due {
   flex: 0 0 auto;
   font-variant-numeric: tabular-nums;
@@ -5386,7 +5386,7 @@ textarea:focus-visible {
   /* Deliberately NOT uppercased: this line carries user-authored deck
      names ("Mots du boulot"), and shouting someone's own words back at
      them reads as a system label rather than as theirs. */
-  color: var(--text-dim);
+  color: var(--text-secondary);
   margin-bottom: 10px;
 }
 
@@ -5419,8 +5419,8 @@ textarea:focus-visible {
   color: color-mix(in srgb, var(--success) 70%, transparent);
 }
 .today-clear__title { margin: 0; font-size: 22px; }
-.today-clear__body  { margin: 0; color: var(--text-dim); }
-.today-clear__next  { margin: 0 0 8px; color: var(--text-dim); font-size: 14px; }
+.today-clear__body  { margin: 0; color: var(--text-secondary); }
+.today-clear__next  { margin: 0 0 8px; color: var(--text-secondary); font-size: 14px; }
 
 .board {
   position: relative;
