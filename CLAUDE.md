@@ -64,6 +64,14 @@ npm run lint
 npm test          # vitest
 ```
 
+`npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,
+ratcheted against a checked-in baseline) and `npm run lint:scale` (a
+source-level ratchet on font-size/border-radius/gap/padding literals against
+`frontend/src/design-scale.json`) both run in CI right after `npm run lint`.
+See `frontend/README.md`, "Design conformance guards", for what each one
+catches and why violations are baselined/allowlisted rather than fixed
+outright.
+
 ### Frontend env vars
 
 `frontend/.env.production` is tracked (Vercel reads it), but **Vite does not
