@@ -54,6 +54,9 @@ jobs:
       - name: Lint CSS
         working-directory: frontend
         run: npm run lint:css
+      - name: Check design scale
+        working-directory: frontend
+        run: npm run lint:scale
       - name: Test
         working-directory: frontend
         run: npm test

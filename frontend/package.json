@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "lint:css": "node scripts/stylelint-ratchet.mjs",
     "lint:css:report": "stylelint \"src/**/*.css\"",
+    "lint:scale": "node scripts/check-design-scale.mjs",
     "preview": "vite preview",
     "test": "vitest run"
   },
