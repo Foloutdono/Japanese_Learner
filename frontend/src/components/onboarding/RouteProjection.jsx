@@ -4,18 +4,20 @@ import { projectJourney } from '../../domain/journeyProjection'
 
 // ── 路線図 — the journey ahead, drawn as a line ──────────────────
 // The projection rendered the way this app draws every ordered thing:
-// a line with stations on it. The x-axis is the next twelve months,
-// the rising line is everything learned at the chosen pace, and each
-// level's completion is a station marker ON the line — the same
-// white-filled, line-stroked marker LevelSelector's route diagram
-// uses, because it is the same idea: a stop you will reach.
+// a vertical line with stations on it, the same visual grammar as
+// LevelSelector's route diagram. Each stop is a level completed at the
+// chosen pace; the spacing between stops still encodes time (a fast
+// pace bunches them, a slow one spreads them), and a journey that
+// outruns the twelve-month horizon ends in a dashed "line continues"
+// stop rather than pretending to finish.
 //
-// The SVG is decorative (aria-hidden); the real content is the
-// milestone list rendered as text below it, one row per station, plus
-// the honest-assumption line. No chart library — the house idiom is
-// hand SVG (see PassHolder's XP ring).
-
-const CHART = { w: 720, h: 210, left: 34, right: 700, top: 22, bottom: 168 }
+// This replaced an SVG chart deliberately: the chart's line was
+// mathematically straight (the model is linear by design, see
+// domain/journeyProjection.js), and its HTML overlays were positioned
+// by raw percentage with no clamping — the pinned test fixture itself
+// put milestones at 91–94% of the width, one narrow viewport away
+// from clipping. Block-flow rows cannot clip at an edge, so the fix
+// is structural, not a defensive Math.min.
 
 export default function RouteProjection({ volumes, startLevel, perDay, includeKana = false, months = 12 }) {
   const { t, lang } = useLang()
@@ -26,98 +28,79 @@ export default function RouteProjection({ volumes, startLevel, perDay, includeKa
   )
   const monthName = useMemo(() => {
     const fmt = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { month: 'long' })
-    const short = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { month: 'short' })
-    return {
-      long: idx => fmt.format(monthDate(idx)),
-      short: idx => short.format(monthDate(idx)),
-    }
+    return idx => fmt.format(monthDate(idx))
   }, [lang])
 
-  const { points, milestones, totalItems, horizonItems } = journey
-  const maxY = Math.max(horizonItems, 1)
+  const { milestones, totalItems, horizonItems } = journey
+  // Everything the app teaches from this level fits inside the
+  // horizon: the line genuinely terminates, and says so, instead of
+  // leaving "flat because done" indistinguishable from "still going".
+  const finished = horizonItems >= totalItems
 
-  const x = m => CHART.left + (m / months) * (CHART.right - CHART.left)
-  const y = items => CHART.bottom - (Math.min(items, maxY) / maxY) * (CHART.bottom - CHART.top)
+  // Spacing encodes elapsed time between stops, clamped so no pace
+  // can crush rows together or push one off into the distance.
+  const gapFor = delta => `${Math.round(Math.min(90, Math.max(14, delta * 18)))}px`
 
-  const polyline = points.map(p => `${x(p.monthIndex).toFixed(1)},${y(p.cumulativeItems).toFixed(1)}`).join(' ')
-
-  const tickMonths = [0, 3, 6, 9, 12].filter(m => m <= months)
+  const numberFmt = lang === 'fr' ? 'fr-FR' : 'en'
 
   return (
     <div className="onb-map">
-      {/* The month labels live in HTML, absolutely positioned at the
-          same x the SVG ticks use — SVG text scales down with the
-          viewBox and was ~5px on a phone; HTML text stays readable at
-          every width. */}
-      <div className="onb-map__wrap" aria-hidden="true">
-        <svg className="onb-map__chart" viewBox={`0 0 ${CHART.w} ${CHART.h}`}>
-        {/* Baseline rail with a tick per quarter. */}
-        <line className="onb-map__baseline" x1={CHART.left} y1={CHART.bottom} x2={CHART.right} y2={CHART.bottom} />
-        {tickMonths.map(m => (
-          <line key={m} className="onb-map__tick" x1={x(m)} y1={CHART.bottom} x2={x(m)} y2={CHART.bottom + 5} />
-        ))}
+      <p className="onb-map__total">{t.onbMapTotal(horizonItems, totalItems)}</p>
 
-        {/* The travelled line, drawing itself out of the origin the
-            way the pass ring fills — pathLength=1 so the CSS dash
-            trick needs no measured length (reduced motion shows it
-            complete, see onboarding.css). */}
-        <polyline className="onb-map__line" points={polyline} pathLength="1" />
-
-        {/* Level-completion stations on the line, arriving in order
-            just behind the line that reaches them. */}
-        {milestones.map((ms, i) => (
-          <g key={ms.level} className="onb-map__station" style={{ '--stop-i': i }}>
-            <line
-              className="onb-map__drop"
-              x1={x(ms.monthIndex)} y1={y(ms.items)}
-              x2={x(ms.monthIndex)} y2={CHART.bottom}
-            />
-            <circle className="onb-map__stop" cx={x(ms.monthIndex)} cy={y(ms.items)} r="6" />
-          </g>
-        ))}
-        </svg>
-
-        {/* HTML overlays on the chart: station plates at each level's
-            crossing, month labels under the baseline ticks. Positions
-            are percentages of the same coordinate space the SVG draws
-            in, so they cannot drift from it. */}
-        {milestones.map((ms, i) => (
-          <span
-            key={ms.level}
-            className="onb-map__plate onb-map__station"
-            style={{
-              '--stop-i': i,
-              left: `${(x(ms.monthIndex) / CHART.w) * 100}%`,
-              top: `${(y(ms.items) / CHART.h) * 100}%`,
-            }}
-          >
-            {ms.level}
+      <div className="onb-route">
+        {/* The origin — where the learner stands today. */}
+        <div className="onb-route__stop onb-route__stop--now" style={{ '--stop-i': 0, '--stop-gap': gapFor(milestones[0]?.monthIndex ?? 1) }}>
+          <span className="onb-route__rail" aria-hidden="true" />
+          <span className="onb-route__marker" aria-hidden="true" />
+          <span className="onb-route__body">
+            <span className="onb-route__level">{t.onbMapNow}</span>
+            <span className="onb-route__when">{t.onbMapDeparting(startLevel)}</span>
           </span>
-        ))}
-        {tickMonths.map(m => (
-          <span
-            key={m}
-            className="onb-map__month"
-            style={{ left: `${(x(m) / CHART.w) * 100}%` }}
-          >
-            {m === 0 ? t.onbMapNow : monthName.short(m)}
-          </span>
-        ))}
+        </div>
+
+        {milestones.map((ms, i) => {
+          const next = milestones[i + 1]
+          const last = i === milestones.length - 1
+          return (
+            <div
+              key={ms.level}
+              className={[
+                'onb-route__stop',
+                last && finished && 'onb-route__stop--complete',
+              ].filter(Boolean).join(' ')}
+              style={{
+                '--stop-i': i + 1,
+                '--stop-gap': last ? (finished ? '0px' : gapFor(months - ms.monthIndex)) : gapFor(next.monthIndex - ms.monthIndex),
+              }}
+            >
+              <span className="onb-route__rail" aria-hidden="true" />
+              <span className="onb-route__marker" aria-hidden="true" />
+              <span className="onb-route__body">
+                <span className="onb-route__level">{ms.level}</span>
+                <span className="onb-route__when">{t.onbMapReached(monthName(Math.ceil(ms.monthIndex)))}</span>
+                <span className="onb-route__items">{t.onbMapKnown(ms.items.toLocaleString(numberFmt))}</span>
+              </span>
+            </div>
+          )
+        })}
+
+        {/* Past the horizon: the line keeps going — drawn as a dashed
+            stop and a rail that fades out, never as a false terminus. */}
+        {!finished && (
+          <div className="onb-route__stop onb-route__stop--horizon" style={{ '--stop-i': milestones.length + 1 }}>
+            <span className="onb-route__continues" aria-hidden="true" />
+            <span className="onb-route__marker" aria-hidden="true" />
+            <span className="onb-route__body">
+              <span className="onb-route__when">
+                {milestones.length === 0
+                  ? t.onbMapNoMilestone
+                  : t.onbMapContinues(horizonItems.toLocaleString(numberFmt))}
+              </span>
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* The same information as text — the SVG above is decoration. */}
-      <p className="onb-map__total">{t.onbMapTotal(horizonItems, totalItems)}</p>
-      <ul className="onb-map__milestones">
-        {milestones.map(ms => (
-          <li key={ms.level} className="onb-map__milestone">
-            <span className="onb-map__milestone-marker" aria-hidden="true" />
-            <span>{t.onbMapMilestone(ms.level, ms.items, monthName.long(Math.ceil(ms.monthIndex)))}</span>
-          </li>
-        ))}
-        {milestones.length === 0 && (
-          <li className="onb-map__milestone">{t.onbMapNoMilestone}</li>
-        )}
-      </ul>
       <p className="onb-map__assumption">{t.onbMapAssumption}</p>
     </div>
   )

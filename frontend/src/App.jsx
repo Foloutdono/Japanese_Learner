@@ -10,6 +10,7 @@ import { apiJsonWithTimeout } from './lib/api'
 // are both dropped by tree-shaking — the screen is not merely
 // unreachable in production, it is not in the bundle.
 import RewardsPreview from './screens/RewardsPreview'
+import OnboardingPreview from './screens/OnboardingPreview'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { LangProvider, useLang } from './LangContext'
@@ -118,18 +119,21 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // The reward preview renders synthetic props and touches no user
-  // data, so it is deliberately outside the auth gate: requiring a
+  // The dev workbenches render synthetic props and touch no user
+  // data, so they are deliberately outside the auth gate: requiring a
   // sign-in to look at a reward would mean the one tool built to avoid
-  // levelling an account needs an account. Dev-only, like the route
-  // itself — import.meta.env.DEV is false in a production build, so
-  // this whole branch is dropped.
-  if (import.meta.env.DEV && window.location.pathname === '/dev/rewards') {
+  // levelling an account needs an account, and /dev/onboarding exists
+  // precisely to replay the office without an onboarding-armed
+  // profile (its dryRun never writes). Dev-only, like the routes
+  // themselves — import.meta.env.DEV is false in a production build,
+  // so this whole branch is dropped.
+  if (import.meta.env.DEV && window.location.pathname.startsWith('/dev/')) {
     return (
       <LangProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/dev/rewards" element={<RewardsPreview />} />
+            <Route path="/dev/onboarding" element={<OnboardingPreview />} />
           </Routes>
         </BrowserRouter>
       </LangProvider>

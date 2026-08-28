@@ -139,6 +139,11 @@
   font-size: 1.35rem;
   font-weight: 700;
 }
+/* The heading receives programmatic focus on every step change (see
+   OnboardingFlow's step effect) purely so the transition is announced
+   and the scroll anchors — it is tabIndex={-1}, unreachable by Tab, so
+   the ring would only ever flash uninvited on a non-control. */
+.onb-step__title:focus { outline: none; }
 .onb-step__body,
 .onb-step__hint {
   margin: 0;
@@ -150,6 +155,8 @@
 .onb-step__actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
   margin-top: 6px;
 }
 
@@ -184,14 +191,19 @@
 
 .onb-back { align-self: flex-start; margin-bottom: 10px; }
 
+/* The escape hatch, not a third answer: a hairline above and a size
+   step down keep it from competing with the step's real choices. */
 .onb-footer {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  margin-top: 34px;
+  margin-top: 48px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
 }
-.onb-skip__hint { color: var(--text-secondary); font-size: 0.75rem; }
+.onb-skip { font-size: 0.78rem; opacity: 0.85; }
+.onb-skip__hint { color: var(--text-secondary); font-size: 0.72rem; }
 
 .onb-error {
   color: var(--danger);
@@ -237,6 +249,27 @@
 }
 .onb-alt__name { font-weight: 700; }
 .onb-alt__hint { color: var(--text-secondary); font-size: 0.8rem; }
+
+/* "Test me" opens a whole sub-flow, so it must not weigh the same as
+   the one-tap dashed answer above it: solid tinted border, a whisper
+   of fill, and the ▶ every "this leads onward" control in the app
+   already carries (see .route-stop__go). */
+.onb-alt--test {
+  position: relative;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  padding-right: 38px;
+}
+.onb-alt--test::after {
+  content: '▶';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent);
+  font-size: 0.7rem;
+}
 
 /* ── Placement test ───────────────────────────────────────── */
 .onb-test { display: flex; flex-direction: column; gap: 14px; }
@@ -307,6 +340,8 @@
   gap: 12px;
 }
 .onb-pace {
+  /* relative: anchors the .onb-reco-badge on the recommended card. */
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -360,100 +395,14 @@
 .onb-pace__per-day { font-weight: 700; font-size: 0.95rem; }
 .onb-pace__hint { color: var(--text-secondary); font-size: 0.8rem; line-height: 1.45; }
 
-/* ── 路線図 — the projection ──────────────────────────────── */
-.onb-map { display: flex; flex-direction: column; gap: 12px; }
-.onb-map__wrap { position: relative; }
-.onb-map__chart {
-  display: block;
-  width: 100%;
-  height: auto;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--surface-radius);
-}
-/* HTML overlays — real text at real sizes, positioned in the SVG's
-   own percentage space (see RouteProjection.jsx). */
-.onb-map__month {
-  position: absolute;
-  bottom: 4px;
-  transform: translateX(-50%);
-  font-size: 0.68rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-.onb-map__plate {
-  position: absolute;
-  transform: translate(-50%, calc(-100% - 9px));
-  padding: 1px 7px;
-  background: var(--bg-card);
-  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
-  border-radius: 4px;
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 0.8rem;
-  white-space: nowrap;
-}
-.onb-map__baseline {
-  stroke: var(--border);
-  stroke-width: 2;
-}
-.onb-map__tick { stroke: var(--border); stroke-width: 1.5; }
-.onb-map__line {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 3.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  /* pathLength="1" on the polyline makes one dash cover the whole
-     line regardless of its measured length — the draw-in needs no JS. */
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: onb-map-draw 1.1s cubic-bezier(0.4, 0, 0.3, 1) 0.15s forwards;
-}
-@keyframes onb-map-draw {
-  to { stroke-dashoffset: 0; }
-}
-/* Stations arrive in line order, just after the line reaches them. */
-.onb-map__station {
-  opacity: 0;
-  animation: arrive-soft 0.4s ease forwards;
-  animation-delay: calc(0.45s + var(--stop-i, 0) * 0.3s);
-}
-.onb-map__drop {
-  stroke: color-mix(in srgb, var(--accent) 35%, transparent);
-  stroke-width: 1.5;
-  stroke-dasharray: 3 4;
-}
-/* The same object as .route-stop__marker: a station on a line. */
-.onb-map__stop {
-  fill: var(--bg-card);
-  stroke: var(--accent);
-  stroke-width: 4;
-}
+/* ── 路線図 — the projection, as a route diagram ───────────
+   Vertical line, one stop per completed level — the same grammar as
+   LevelSelector's .route. Replaced the old SVG chart + absolutely-
+   positioned overlays: block rows cannot clip at a container edge,
+   which is what the chart's unclamped percentage plates could do.
+   --stop-gap (set inline per stop) is elapsed time as spacing. */
+.onb-map { display: flex; flex-direction: column; gap: 16px; }
 .onb-map__total { margin: 0; font-weight: 700; }
-.onb-map__milestones {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.onb-map__milestone {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-.onb-map__milestone-marker {
-  flex-shrink: 0;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--bg-card);
-  border: 3px solid var(--accent);
-}
 .onb-map__assumption {
   margin: 0;
   color: var(--text-secondary);
@@ -461,17 +410,142 @@
   font-style: italic;
 }
 
-/* ── 沿線案内 — the tour ──────────────────────────────────── */
-.onb-tour { display: flex; flex-direction: column; gap: 10px; }
+.onb-route {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 4px;
+}
+.onb-route__stop {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding-bottom: var(--stop-gap, 22px);
+  /* The same staggered arrival the flow's other pieces use. */
+  opacity: 0;
+  animation: arrive-soft 0.4s ease forwards;
+  animation-delay: calc(0.1s + var(--stop-i, 0) * 0.22s);
+}
+.onb-route__stop:last-child { padding-bottom: 0; }
+.onb-route__rail {
+  position: absolute;
+  left: 9px;
+  top: 20px;
+  bottom: -2px;
+  width: 3px;
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.onb-route__stop:last-child .onb-route__rail { display: none; }
+/* The same object as .route-stop__marker: a station on a line. */
+.onb-route__marker {
+  flex-shrink: 0;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 3px solid var(--accent);
+  z-index: 1;
+}
+.onb-route__stop--now .onb-route__marker { background: var(--accent); }
+.onb-route__stop--complete .onb-route__marker {
+  background: var(--success);
+  border-color: var(--success);
+}
+.onb-route__stop--horizon .onb-route__marker {
+  border-style: dashed;
+  border-color: var(--border);
+  background: transparent;
+}
+.onb-route__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 1px;
+  min-width: 0;
+}
+.onb-route__level {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  line-height: 1.15;
+}
+.onb-route__when {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+.onb-route__items {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+/* Past the horizon the rail fades out instead of stopping — the
+   journey continues, the map just ends. Runs BELOW the dashed marker,
+   so the horizon stop reserves the room it fades through. */
+.onb-route__stop--horizon { padding-bottom: 28px; }
+.onb-route__continues {
+  position: absolute;
+  left: 9px;
+  top: 20px;
+  width: 3px;
+  height: 26px;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--accent) 40%, transparent),
+    transparent);
+}
+
+/* ── 沿線案内 — the tour ──────────────────────────────────
+   Each card is a head row (roundel + copy) over a live demo region
+   holding the REAL study component with sample data — see TourStep.
+   The demo panel wears a "try it" pill on its shoulder so the
+   interactivity is an invitation, not an easter egg. */
+.onb-tour { display: flex; flex-direction: column; gap: 14px; }
 .onb-tour__card {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 16px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 14px 16px 16px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: 4px solid var(--row-color, var(--accent));
   border-radius: 6px;
+}
+.onb-tour__head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.onb-tour__demo {
+  position: relative;
+  padding: 18px 14px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.onb-tour__try {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  padding: 1px 8px;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--row-color, var(--accent)) 45%, var(--border));
+  border-radius: 999px;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* The flashcard cancels its host's padding via --card-pad-* (see
+   .flashcard in index.css) — matching the vars to this wrapper's own
+   padding seats it flush, with real padding inside the tappable card. */
+.onb-tour__flashcard {
+  padding: 18px 14px;
+  --card-pad-top: 18px;
+  --card-pad-x: 14px;
+  --card-pad-y: 18px;
+}
+.onb-tour__again {
+  display: block;
+  margin: 8px auto 0;
 }
 .onb-tour__roundel {
   flex-shrink: 0;
@@ -542,11 +616,197 @@
 .onb-pass__wave { margin-left: auto; }
 .onb-action--board { align-self: center; }
 
-/* ── The same controls on the Settings screen's 学習 card ── */
-.settings-seg { flex-wrap: wrap; }
-.settings-seg .onb-seg__btn { flex: 0 1 auto; padding: 8px 12px; font-size: 0.85rem; }
+/* ── Shared visual language ─────────────────────────────────
+   Two devices, one accent, defined once and reused wherever the
+   onboarding's vocabulary appears:
+   - .onb-reco-badge: the gold "recommended / achieved" pill for
+     card-shaped contexts (PaceStep's 快速 card, NextService's
+     target-met mark). Same --accent2 as .onb-seg__btn--reco's ◈,
+     so one colour keeps meaning one concept at two sizes.
+   - .settings-card--onb: the identity frame Settings' 学習 card
+     wears — the same border-left device as .onb-tour__card, in
+     --accent (shu-iro) because Settings, like the office, is about
+     you and never claims a --line-* pigment. */
+.onb-reco-badge {
+  position: absolute;
+  top: -9px;
+  right: 12px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--accent2);
+  color: var(--text-on-fill);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* ── Settings' 学習 card ─────────────────────────────────────
+   Deliberately carries NONE of the office's own dress: the card uses
+   the Settings page's native rows and .lang-select controls (see
+   LearningCard's header comment). Only the inline retake flow below
+   borrows onboarding pieces, because it literally IS the placement
+   test. An earlier accent frame + segmented buttons here read as a
+   different app grafted into Settings and were removed on review. */
 .settings-redo-result { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 .settings-redo-actions { display: flex; align-items: center; gap: 16px; }
+
+/* ══ 到着 — the arrival cutscene ═══════════════════════════
+   The station family's third scene, and the first that means "you
+   have arrived": the scrim drops and the platform signboard slides
+   down into place over the tour. Onboarding-only (see TrainArrival's
+   header for why it is not in index.css's gate/door block), same
+   discipline: transform/opacity only, one --arrival-x speed dial
+   shared with the JS timers, skippable, and absent under reduced
+   motion — JS never mounts it, and the display:none below is the
+   same belt-and-braces the gate and door carry. */
+.arrival {
+  --arrival-x: 1;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: arrival-leave calc(150ms * var(--arrival-x)) linear calc(630ms * var(--arrival-x)) backwards;
+}
+@keyframes arrival-leave { to { opacity: 0; } }
+.arrival__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-main);
+  opacity: 0;
+  animation: arrival-scrim calc(160ms * var(--arrival-x)) ease-out forwards;
+}
+/* 0.995, not 1 — the gate's own documented fix for a light-theme
+   scrim reading cream-on-cream. Same value, same reason. */
+@keyframes arrival-scrim { to { opacity: 0.995; } }
+
+.arrival__board {
+  position: relative;
+  width: min(420px, 88vw);
+  padding: 22px 26px;
+  border-radius: 10px;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  transform: translateY(-140%);
+  animation: arrival-slide calc(260ms * var(--arrival-x)) cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+@keyframes arrival-slide { to { transform: translateY(0); } }
+/* The sign settles: one soft ring of the line colour, as the chime
+   lands (phase 'arrived', see TrainArrival's SIGN_MS). */
+.arrival--arrived .arrival__board {
+  transform: translateY(0);
+  animation: arrival-settle calc(320ms * var(--arrival-x)) ease-out;
+}
+@keyframes arrival-settle {
+  0% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  100% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 10px transparent; }
+}
+
+.arrival__eyebrow {
+  display: block;
+  font-family: var(--font-jp);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--accent2);
+  opacity: 0;
+  animation: arrival-fade calc(200ms * var(--arrival-x)) ease-out calc(300ms * var(--arrival-x)) forwards;
+}
+.arrival__dest {
+  display: block;
+  margin-top: 4px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.2;
+  opacity: 0;
+  animation: arrival-fade calc(220ms * var(--arrival-x)) ease-out calc(340ms * var(--arrival-x)) forwards;
+}
+.arrival__latin {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+  opacity: 0;
+  animation: arrival-fade calc(220ms * var(--arrival-x)) ease-out calc(380ms * var(--arrival-x)) forwards;
+}
+@keyframes arrival-fade { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* TrainArrival fires onDone immediately and never mounts this when
+     motion is unwelcome — belt and braces, like .gate and .door. */
+  .arrival { display: none; }
+}
+
+/* ── /dev/onboarding — the replay workbench ─────────────────
+   Dev-only chrome (the route is tree-shaken from production, the
+   styles are just bytes). Above the cutscenes' z-index 300 so the
+   replay control survives them — pressing it mid-cutscene also
+   skips the cutscene via its own pointerdown listener, which is
+   exactly right. */
+.onb-preview-bar {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-size: 0.8rem;
+}
+.onb-preview-bar__tag {
+  color: var(--accent2);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+}
+.onb-preview-bar__run {
+  color: var(--text-on-panel-soft);
+  font-variant-numeric: tabular-nums;
+}
+.onb-preview-bar button {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-on-panel);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.onb-preview-bar button:hover,
+.onb-preview-bar button:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+}
+.onb-preview-done {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+.onb-preview-done [lang="ja"] {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
 
 /* ── Responsive & reduced motion ──────────────────────────── */
 @media (max-width: 560px) {
@@ -565,13 +825,8 @@
   .onb-action:focus-visible,
   .onb-pace:hover,
   .onb-pace:focus-visible { transform: none; }
-  /* The map appears complete: no draw-in, no staggered stations. */
-  .onb-map__line {
-    animation: none;
-    stroke-dasharray: none;
-    stroke-dashoffset: 0;
-  }
-  .onb-map__station {
+  /* The route diagram appears complete: no staggered stops. */
+  .onb-route__stop {
     animation: none;
     opacity: 1;
   }

@@ -6,9 +6,12 @@
 // -mode keys and maps 特急 to 'ltd', and what is stored on the profile
 // is the integer perDay (user_profiles.daily_new_target), never a
 // tier id, so future paces are a row here and nothing else.
+// `recommended` backs the copy that already claimed it — the badge on
+// the pace card and the hint text must agree, and now they share one
+// source of truth instead of the hint asserting it alone.
 export const PACES = [
   { id: 'local',   jp: '各駅停車', perDay: 5 },
-  { id: 'rapid',   jp: '快速',     perDay: 10 },
+  { id: 'rapid',   jp: '快速',     perDay: 10, recommended: true },
   { id: 'express', jp: '特急',     perDay: 20 },
 ]
 

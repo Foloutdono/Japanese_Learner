@@ -2280,6 +2280,15 @@ textarea:focus-visible {
   font-size: 0.85rem;
 }
 .next-service__pace-sep { color: var(--text-dim); font-weight: 400; }
+/* Target met: the onboarding's gold pill (.onb-reco-badge), flowed
+   inline at the row's end instead of floating over a card corner. */
+.next-service__pace-met {
+  position: static;
+  flex-shrink: 0;
+  box-shadow: none;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
 
 /* ── The picker ──────────────────────────────────────────────
    Between the strip and the queue: everything due is the right default

@@ -26,6 +26,10 @@ Seven waves live in this file:
 - **Wave 7 — みどりの窓口, the onboarding** (2026-08-28, DONE). Designed and
   executed directly in one session rather than as numbered plan files, at the
   maintainer's choice; its record is at the bottom of this file.
+- **Wave 8 — みどりの窓口 UI/UX overhaul** (2026-08-28, DONE). Wave 7's flow
+  audited against live screenshots — twelve confirmed defects fixed, the tour
+  rebuilt around real tap-to-try demos, and a third station cutscene (到着,
+  the arrival) added to the gate/door family. Record at the bottom.
 
 Each executor: read your plan fully before starting, honor its STOP
 conditions, and update your row when done.
@@ -1577,3 +1581,138 @@ plates into HTML positioned in the SVG's own percentage space.
   gamification hooks exist and were deliberately left alone.
 - **The pace gauge could live on /today too** — the strip carries it; the
   queue screen itself still doesn't.
+
+---
+
+# Wave 8 — みどりの窓口 UI/UX overhaul (2026-08-28)
+
+Wave 7's flow, audited against the maintainer's live screenshots ("is this
+really what you call a great design? Spot all the bugs") and rebuilt.
+Three research passes confirmed twelve concrete defects in the shipped code
+before anything was redesigned; three decisions were confirmed with the
+maintainer up front (arrival cutscene once at tour entry; every tour card a
+real tap-to-try demo; scope extended to Settings and the concourse gauge).
+
+## The twelve bugs, all fixed
+
+1. **Scroll carryover between steps** — the flow never unmounts, so each
+   step swapped in at the previous step's scrollY; the office sign read as
+   "missing" when it had merely been scrolled past. Now every step change
+   scrolls to top and focuses the new heading (`tabIndex={-1}` on all
+   eight), which is also the screen-reader announcement that was missing
+   (bug 9, same fix).
+2. **"Recommended" pace was pure copy** — `PACES.rapid` now carries
+   `recommended: true` and the card wears the gold `.onb-reco-badge`.
+3. **The two level alternates were visually identical** — "Test me" (which
+   opens a 12-question sub-flow) now has a solid tinted border and the
+   house ▶; the Skip footer sits behind a hairline at reduced weight.
+4. **RouteProjection could clip its overlays and read as a flat XY chart**
+   — rewritten as a vertical route diagram in LevelSelector's own
+   `.route-stop` grammar. Block rows cannot clip at an edge (the fix is
+   structural, not a clamp); stop spacing still encodes elapsed time; a
+   journey that outruns twelve months ends in a dashed horizon stop and a
+   fading rail, a finished one in a green terminus. `journeyProjection.js`
+   and its tests: zero changes.
+5. **Settings 学習 card mismatched its page — twice.** The first fix
+   (accent frame + the office's segmented buttons + a red-bordered retake
+   button) was rejected on sight by the maintainer: it read as a different
+   app grafted into Settings, and five wrapping buttons orphaned N1/特急
+   onto ragged second rows at card width. The card now speaks the PAGE's
+   language instead: label-left rows with the exact `.lang-select` control
+   LangSwitcher wears three rows up (a select cannot wrap), and the retake
+   row mirrors the Sign-out row (descriptive label + `.btn-ghost`). Lesson
+   worth keeping: an identity surface matches its OWN page's controls;
+   exporting a feature's dress to another screen is how the "imported from
+   another design" smell starts. (En route, a cascade trap was found and
+   then made moot: onboarding.css is @imported above index.css, so its
+   single-class rules lose ties against index.css shorthands.)
+6. **Skip's label lied on four of six steps** — `onbSkip` is a function of
+   the level skip() will actually complete at.
+7. **back() destroyed a finished placement test** — the destructive null is
+   gone; backing re-shows the score, and a fresh test is an explicit
+   retake link on the result panel only.
+8. **Dead `paceFor()`** — now the lookup `PassStep` uses.
+9. (folded into 1.)
+10. **No document.title during onboarding** — `Guichet — 日本語` /
+    `Ticket Office — 日本語`.
+11. **The tour's "study lines" card wore kana's vermillion for four
+    different lines** — gone with the tour rewrite; every card keeps its
+    own `--line-*`.
+12. **StopPattern divide-by-zero guard** for a hypothetical 1-stop pattern.
+
+## 到着 — the third station cutscene
+
+`components/onboarding/TrainArrival.jsx`: the platform signboard sliding
+down over the tour's first entry — the family's first "you have arrived"
+(the gate means leaving, the door means boarding). Same discipline as its
+siblings, deliberately: one SPEED dial (1.4) shared with CSS via
+`--arrival-x`; callbacks in a ref so the single-run timeline never restarts;
+skip on any input; dual-layer reduced-motion (never mounts in JS,
+`display: none` in CSS as belt and braces); ~1.09s total, the gate/door
+budget. **No store and no shell** — the trigger (OnboardingFlow) never
+unmounts mid-cutscene, the same reasoning as App's direct TicketGate finale;
+`arrivalPlayedRef` guarantees once-only across back/re-entry, and the tour
+is mounted and interactive underneath from frame one. New chime:
+`playPlatformChime()` in `lib/audio/chimes.js` — a rising three-note
+arpeggio (A5→C#6→E6), an octave under the gate's blips, the opposite
+direction of the door's, and NOT `playArrival()`, which is already claimed
+by session completion and falls.
+
+## The tour, rebuilt as four working demos
+
+Words about a flashcard cannot compete with flipping one. Each card is the
+REAL production component fed a literal sample — the RewardsPreview
+technique (real component + literal payload + local state), now in
+production: 本日 renders a real `DeckProgress` bar; 単語 a real `Flashcard`
+(猫 → Cat) that flips; 解析 a real `SentenceBreakdown` in stepper layout
+(猫が好きです — live furigana, the ～が好きです grammar chip, the i+1
+badge, a working token carousel); 模試 a real `QuestionRenderer` mcq that
+grades the tap in place with a try-again link. Safety of the literal data
+was verified against source, not assumed: `MineButton`/`MineControls`
+genuinely render nothing without `mining`, and tokens without `vocab_match`
+take the honest neutral status colour.
+
+## Traps worth knowing
+
+- **The @import cascade order** (see bug 5): onboarding.css loads before
+  index.css's own rules; equal-specificity fights lose.
+- **The flashcard's negative-margin sizing**: `.flashcard` cancels its
+  host's padding via `--card-pad-*`; a wrapper that sets those vars to its
+  own padding seats it flush (`.onb-tour__flashcard`).
+- **Element.click() fires no pointerdown**, which is why the browser tests
+  can drive the flow underneath the arrival overlay — and why a real
+  user's first tap during the cutscene skips it rather than reaching the
+  tour, exactly like the gate and door.
+- **`onbMapMilestone` was deleted, not kept** — the plan said "reuse
+  unchanged," but the route diagram renders structured rows
+  (`onbMapReached`/`onbMapKnown`), and a key with no consumer is the exact
+  drift wave 3 warned about.
+
+## /dev/onboarding — the replay workbench
+
+The office can now be played on repeat without touching any profile:
+`screens/OnboardingPreview.jsx`, registered beside `/dev/rewards` in
+App.jsx's dev branch (outside the auth gate, tree-shaken from production —
+verified by grepping the built bundle). The real flow runs against the
+real dev backend (live placement paper, live volumes, the real TicketGate
+finale) under a new `dryRun` prop on OnboardingFlow that makes complete()
+hand over without POSTing; a fixed DEV bar (z-index 400, above the
+cutscenes) shows the run counter and remounts the flow fresh on ↺ Replay —
+arrival cutscene included, since the key bump resets `arrivalPlayedRef`.
+
+## Verification
+
+Frontend 174 tests (27 files; 12 new: 7 flow cases including
+back-preserves-result, once-only arrival, in-place demo grading; 3
+TrainArrival contracts; 3 RouteProjection shapes), lint 0 errors, build
+clean. Live against the real stack: scroll resets on every step, skip reads
+N5 then N2 after choosing N2, the test-me alt is solid-bordered, 快速 wears
+Recommandé, the route diagram shows 今日→N2 (2,234 items, April)→dashed
+horizon with zero overflow at 375px and desktop, the arrival cutscene
+mounts over an interactive tour and self-completes at ~1.1s, all four
+demos answer/flip/step in place. Settings verified live twice: the select
+saves round-trip through PATCH /api/profile/learning, and the rebuilt card
+uses the page's own `.lang-select`/`.btn-ghost` controls with no overflow.
+The workbench verified end to end: full dry run through the gate,
+"nothing was written" confirmed against the API, replay lands on a fresh
+welcome as run 2. Backend untouched.

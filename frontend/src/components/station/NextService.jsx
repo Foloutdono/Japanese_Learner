@@ -157,6 +157,7 @@ export default function NextService({ session }) {
 // is noise.
 function PaceGauge({ pace, t }) {
   const pct = Math.min(100, Math.round((100 * pace.newToday) / Math.max(1, pace.target)))
+  const met = pace.newToday >= pace.target
   return (
     <span className="next-service__pace" role="img" aria-label={t.paceGaugeAria(pace.newToday, pace.target)}>
       <span className="next-service__pace-name">
@@ -169,6 +170,11 @@ function PaceGauge({ pace, t }) {
       <span className="next-service__pace-count" aria-hidden="true">
         {pace.newToday}<span className="next-service__pace-sep"> / </span>{pace.target}
       </span>
+      {/* The day's target met — the same gold pill language the
+          onboarding uses for "recommended", meaning "this is the
+          good outcome" at a glance. Decorative; the aria-label above
+          already carries the numbers. */}
+      {met && <span className="onb-reco-badge next-service__pace-met" aria-hidden="true">済</span>}
     </span>
   )
 }

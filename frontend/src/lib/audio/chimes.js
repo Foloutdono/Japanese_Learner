@@ -26,6 +26,7 @@ const FARE_TICK = '/sounds/ui/fare-tick.mp3'
 const FLAP_CLATTER = '/sounds/ui/flap-clatter.mp3'
 const STATION_MELODY = '/sounds/ui/station-melody.mp3'
 const ARRIVAL = '/sounds/ui/arrival.mp3'
+const PLATFORM_CHIME = '/sounds/ui/platform-chime.mp3'
 const DOOR_SLIDE = '/sounds/sfx/door-slide.mp3'
 
 // getBuffer deliberately evicts failed fetches so a dropped request
@@ -105,6 +106,18 @@ const WRONG_BLIPS = [
 const ARRIVAL_NOTES = [
   { freq: 783.99, at: 0,    dur: 0.26, peak: 0.26 },  // G5
   { freq: 587.33, at: 0.17, dur: 0.55, peak: 0.24 },  // D5
+]
+
+// 到着ホーム — the platform sign landing as the train pulls in. Played
+// once, by the onboarding tour's arrival cutscene (TrainArrival.jsx).
+// A rising three-note arpeggio: an octave under the gate's two-note
+// blip pair, the opposite direction of the door's falling pair, and
+// not playArrival() — that one falls and means "session over", a
+// different moment entirely.
+const PLATFORM_BLIPS = [
+  { freq: 880.0,   at: 0,    dur: 0.16, peak: 0.26 },  // A5
+  { freq: 1108.73, at: 0.09, dur: 0.18, peak: 0.26 },  // C#6
+  { freq: 1318.51, at: 0.20, dur: 0.42, peak: 0.28 },  // E6, the settle
 ]
 
 // 発車メロディ — the short melody a Japanese platform plays as a train
@@ -375,6 +388,11 @@ export function playWrong() {
 /** 到着 — a session finished. */
 export function playArrival() {
   playChime(ARRIVAL, 'arrival', ARRIVAL_NOTES)
+}
+
+/** 到着ホーム — the platform sign landing. See PLATFORM_BLIPS. */
+export function playPlatformChime() {
+  playChime(PLATFORM_CHIME, 'platform-chime', PLATFORM_BLIPS)
 }
 
 /** 再発行 — the pass re-issued. The one that gets a melody. */

@@ -29,7 +29,7 @@ export { playKana, playSfx, playUi, playAnnouncement } from './playback'
 export {
   playClick, playToggle, playCorrect, playWrong,
   playGateChime, playDoorChime, playDoorSlide, playFareTick, playFlapClatter, playStationMelody,
-  playArrival,
+  playArrival, playPlatformChime,
 } from './chimes'
 export { startAmbiance, stopAmbiance } from './ambiance'
 export { speakJapanese } from './speech'

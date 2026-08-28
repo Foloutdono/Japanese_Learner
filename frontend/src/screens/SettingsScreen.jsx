@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { supabase } from '../lib/supabase'
 import { apiJson } from '../lib/api'
-import { playUi } from '../lib/audio'
+import { playClick, playUi } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components/ui/NavControls'
@@ -67,6 +67,14 @@ export default function SettingsScreen({ session }) {
 // placement test is the exact component the onboarding flow runs;
 // here its result is an offer ("switch to N3?"), never an automatic
 // write.
+//
+// The controls deliberately speak this PAGE's language, not the
+// onboarding's: the same label-left / compact-select-right rows the
+// Son/Thème/Langue card above uses (`.lang-select`, the exact classes
+// LangSwitcher wears three rows up), and the retake row mirrors the
+// Sign-out row below it. A first version imported the office's
+// segmented buttons and accent frame here and read as a different
+// app grafted into Settings.
 function LearningCard({ t, session }) {
   const summary = useProfileSummary()
   const [saving, setSaving] = useState(false)
@@ -83,62 +91,66 @@ function LearningCard({ t, session }) {
       .finally(() => setSaving(false))
   }
 
-  const currentLevel = summary?.jlptLevel ?? null
-  const currentPace = summary?.dailyNewTarget ?? null
+  const currentLevel = summary?.jlptLevel ?? ''
+  const currentPace = summary?.dailyNewTarget ?? ''
+  const knownPace = PACES.some(p => p.perDay === currentPace)
 
   return (
     <div className="card settings-card">
       <div className="settings-row">
         <span className="settings-row__label">{t.settingsJlptLevel}</span>
-        {/* Flat sibling buttons — never nested controls. */}
-        <div className="onb-seg settings-seg" role="group" aria-label={t.settingsJlptLevel}>
+        <select
+          className="btn-nav btn-nav--lang lang-select"
+          value={currentLevel}
+          disabled={saving}
+          aria-label={t.settingsJlptLevel}
+          onChange={e => { playClick(); save({ jlptLevel: e.target.value }) }}
+        >
+          {currentLevel === '' && <option value="" disabled>—</option>}
           {LEVELS.map(level => (
-            <button
-              key={level}
-              type="button"
-              className={['onb-seg__btn', level === currentLevel && 'onb-seg__btn--on'].filter(Boolean).join(' ')}
-              aria-pressed={level === currentLevel}
-              disabled={saving}
-              onClick={() => { playUi('click-mode-selection'); save({ jlptLevel: level }) }}
-            >
-              {level}
-            </button>
+            <option key={level} value={level}>{level}</option>
           ))}
-        </div>
+        </select>
       </div>
 
       <div className="settings-row">
         <span className="settings-row__label">{t.settingsPace}</span>
-        <div className="onb-seg settings-seg" role="group" aria-label={t.settingsPace}>
+        <select
+          className="btn-nav btn-nav--lang lang-select"
+          value={String(currentPace)}
+          disabled={saving}
+          aria-label={t.settingsPace}
+          onChange={e => { playClick(); save({ dailyNewTarget: Number(e.target.value) }) }}
+        >
+          {currentPace === '' && <option value="" disabled>—</option>}
+          {/* A pace set outside the three offered tiers (the column is
+              a free integer) still shows honestly instead of blank. */}
+          {currentPace !== '' && !knownPace && (
+            <option value={String(currentPace)} disabled>{currentPace}</option>
+          )}
           {PACES.map(pace => (
-            <button
-              key={pace.id}
-              type="button"
-              className={['onb-seg__btn', pace.perDay === currentPace && 'onb-seg__btn--on'].filter(Boolean).join(' ')}
-              aria-pressed={pace.perDay === currentPace}
-              disabled={saving}
-              onClick={() => { playUi('click-mode-selection'); save({ dailyNewTarget: pace.perDay }) }}
-            >
-              <span lang="ja">{pace.jp}</span> {pace.perDay}
-            </button>
+            <option key={pace.id} value={String(pace.perDay)}>{`${pace.jp} · ${pace.perDay}`}</option>
           ))}
-        </div>
+        </select>
       </div>
 
       {failed && <div className="settings-row"><span className="onb-error" role="alert">{t.onbPassError}</span></div>}
 
-      <div className="settings-row settings-row--stack">
-        {!testing && (
+      {!testing && (
+        <div className="settings-row">
+          <span className="settings-row__label">{t.settingsRedoDesc}</span>
           <button
             type="button"
             className="btn-ghost"
-            onClick={() => { playUi('click'); setTestResult(null); setTesting(true) }}
+            onClick={() => { playClick(); setTestResult(null); setTesting(true) }}
           >
-            {t.settingsRedoPlacement}
+            {t.onbTestRetake}
           </button>
-        )}
+        </div>
+      )}
 
-        {testing && !testResult && (
+      {testing && <div className="settings-row settings-row--stack">
+        {!testResult && (
           <PlacementTest
             session={session}
             onResult={setTestResult}
@@ -146,7 +158,7 @@ function LearningCard({ t, session }) {
           />
         )}
 
-        {testing && testResult && (
+        {testResult && (
           <div className="settings-redo-result">
             <p className="onb-step__body">
               {t.onbTestResult(testResult.recommendedLevel, testResult.correct, testResult.total)}
@@ -170,7 +182,7 @@ function LearningCard({ t, session }) {
             </div>
           </div>
         )}
-      </div>
+      </div>}
     </div>
   )
 }

@@ -196,4 +196,131 @@ describe('OnboardingFlow', () => {
     await settle()
     expect(stepOf(screen)).toBe('pace')
   })
+
+  it('skip names the level it will actually complete at, not always N5', async () => {
+    const { screen } = await renderFlow()
+    await settle()
+    clickButton(screen, '.onb-action')            // → level
+    await settle()
+    expect(screen.container.querySelector('.onb-skip').textContent).toContain('N5')
+
+    clickButton(screen, '.route-stop', 'N2')      // → pace, level chosen
+    await settle()
+    const skipBtn = screen.container.querySelector('.onb-skip')
+    expect(skipBtn.textContent).toContain('N2')
+    expect(skipBtn.textContent).not.toContain('N5')
+  })
+
+  it('back from pace redisplays the placement RESULT — never a fresh test', async () => {
+    apiJsonWithTimeout.mockImplementation(async path => {
+      if (path === '/api/onboarding/placement') {
+        return { seed: 7, questions: [question('q1', 'N5')] }
+      }
+      if (path === '/api/onboarding/placement/score') {
+        return { recommendedLevel: 'N4', correct: 1, total: 1, perLevel: { N5: { correct: 1, total: 1, pct: 100 } } }
+      }
+      throw new Error(`unexpected ${path}`)
+    })
+
+    const { screen } = await renderFlow()
+    await settle()
+    clickButton(screen, '.onb-action')            // → level
+    await settle()
+    clickButton(screen, '.onb-alt--test')         // → placement
+    await settle()
+    clickButton(screen, '.mcq-row', 'あ')
+    await settle(30)
+    clickButton(screen, '.onb-action')            // finish → score → result
+    await settle()
+    clickButton(screen, '.onb-action')            // continue → pace
+    await settle()
+    expect(stepOf(screen)).toBe('pace')
+
+    clickButton(screen, '.onb-back')              // ← back to placement
+    await settle()
+    // The score panel, with all its answers intact — not a re-fetch.
+    expect(screen.container.querySelector('.onb-result__levels')).not.toBeNull()
+    const paperFetches = apiJsonWithTimeout.mock.calls.filter(c => c[0] === '/api/onboarding/placement')
+    expect(paperFetches).toHaveLength(1)
+
+    // A fresh test IS reachable — through the explicit retake link only.
+    clickButton(screen, '.onb-result__retake')
+    await settle()
+    expect(screen.container.querySelector('.mcq-row')).not.toBeNull()
+    expect(apiJsonWithTimeout.mock.calls.filter(c => c[0] === '/api/onboarding/placement')).toHaveLength(2)
+  })
+
+  it('the rapid pace card carries the recommended badge', async () => {
+    const { screen } = await renderFlow()
+    await settle()
+    clickButton(screen, '.onb-action')            // → level
+    await settle()
+    clickButton(screen, '.route-stop', 'N4')      // → pace
+    await settle()
+    const badge = screen.container.querySelector('.onb-pace .onb-reco-badge')
+    expect(badge).not.toBeNull()
+    expect(badge.closest('.onb-pace').textContent).toContain('快速')
+  })
+
+  it('focus lands on the new step heading after advancing', async () => {
+    const { screen } = await renderFlow()
+    await settle()
+    clickButton(screen, '.onb-action')            // → level
+    await settle()
+    expect(document.activeElement?.className ?? '').toContain('onb-step__title')
+  })
+
+  it('the arrival cutscene plays on first tour entry, is skippable, and never replays', async () => {
+    const { screen } = await renderFlow()
+    await settle()
+    clickButton(screen, '.onb-action')            // → level
+    await settle()
+    clickButton(screen, '.route-stop', 'N4')      // → pace
+    await settle()
+    clickButton(screen, '.onb-pace', '快速')      // → projection
+    await settle()
+    clickButton(screen, '.onb-action')            // → tour: the arrival mounts
+    await settle(80)
+    expect(document.querySelector('.arrival')).not.toBeNull()
+    // The tour is interactive UNDERNEATH the overlay from frame one.
+    expect(screen.container.querySelector('.onb-tour')).not.toBeNull()
+
+    window.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    await settle(80)
+    expect(document.querySelector('.arrival')).toBeNull()
+
+    clickButton(screen, '.onb-action')            // tour → pass
+    await settle()
+    clickButton(screen, '.onb-back')              // ← back to tour
+    await settle(80)
+    expect(stepOf(screen)).toBe('tour')
+    expect(document.querySelector('.arrival')).toBeNull() // once means once
+  })
+
+  it('the tour demos answer and flip in place without advancing the step', async () => {
+    const { screen } = await renderFlow()
+    await settle()
+    clickButton(screen, '.onb-action')
+    await settle()
+    clickButton(screen, '.route-stop', 'N4')
+    await settle()
+    clickButton(screen, '.onb-pace', '快速')
+    await settle()
+    clickButton(screen, '.onb-action')            // → tour
+    window.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })) // skip the arrival
+    await settle(80)
+
+    // The exam demo grades the tap in place.
+    clickButton(screen, '.mcq-row', 'わたし')
+    await settle(30)
+    expect(screen.container.querySelector('.mcq-row--correct')).not.toBeNull()
+    expect(stepOf(screen)).toBe('tour')
+
+    // The vocab flashcard flips to its meaning.
+    screen.container.querySelector('.flashcard').click()
+    await settle(80)
+    expect(screen.container.querySelector('.meaning-display__primary')?.textContent ?? '')
+      .toMatch(/cat/i)
+    expect(stepOf(screen)).toBe('tour')
+  })
 })
