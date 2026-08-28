@@ -1,7 +1,2936 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Serif+JP:wght@600;700&display=swap');
-@import url('./exam/exam.css');
-@import url('./components/analysis/analysis.css');
-@import url('./components/onboarding/onboarding.css');
+/* ══════════════════════════════════════════════════════════════
+   Exam section — merged from src/exam/exam.css by plan 041. Pasted
+   here, immediately after the Google Fonts import rule and before this
+   file's own design-system body, because that is the exact position
+   the old import statement put it in the cascade: every rule below wins
+   over this section's at equal specificity, and moving this section would
+   silently invert those ties. Owns the .exam-* namespace. One named
+   exception: the .mcq-row__tag override inside the 560px query near
+   the end of this section is inert — see the comment on that
+   declaration. Ends where the 解析 section begins, below. ══════ */
+/* ── Exam feature styles ──────────────────────────────────────
+   Only what index.css doesn't already provide. Reuses existing
+   tokens (--bg-card, --border, --accent, --text-secondary, --success,
+   --danger, --font-jp, --font-display, --radius) so this reads as
+   part of the same design system rather than a bolted-on skin, and
+   flips correctly with the light/dark theme for free since every
+   colour here is a var(), never a literal hex. */
+
+/* Sits inside .container under a TopBar now, like every other screen
+   in the app — it used to be a bare full-page block with no masthead
+   at all, which is what made the exam feel like a different product
+   the moment you started one. .container already supplies the page
+   gutter, so this only sets the reading column and the bottom room. */
+.exam-shell {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+/* Compound selector on purpose, not plain `.exam-shell`. This section
+   sits at the very top of index.css, so at equal specificity
+   every rule here loses on source order to index.css's own — including
+   `.container { padding: 0 24px }`, which silently flattened this
+   element's vertical padding to zero when it was written as a
+   single-class rule. The side gutter still comes from .container; the
+   top gap under the TopBar and the bottom room are set here. */
+.exam-shell.container {
+  padding-top: 28px;
+  padding-bottom: 72px;
+}
+
+/* ── Generating ──
+   A never-before-opened paper is written on demand (several LLM calls
+   per mondai), so this can hold for a minute or two. Three brush
+   strokes drawing themselves in sequence — the app's own ink language,
+   not a third spinner — because the honest signal here is "something
+   is being written", not "something is loading". */
+.exam-generating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 64px 24px;
+}
+.exam-generating__brush {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 54px;
+  margin-bottom: 14px;
+}
+.exam-generating__stroke {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line-color, var(--accent));
+  transform-origin: left center;
+  animation: exam-brush 1.9s ease-in-out infinite;
+}
+.exam-generating__stroke:nth-child(2) { animation-delay: 0.22s; }
+.exam-generating__stroke:nth-child(3) { animation-delay: 0.44s; }
+@keyframes exam-brush {
+  0%, 70%, 100% { transform: scaleX(0); opacity: 0.25; }
+  25%, 45%      { transform: scaleX(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exam-generating__stroke { animation: none; transform: scaleX(1); opacity: 0.5; }
+}
+.exam-generating__title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.exam-generating__hint {
+  max-width: 380px;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+/* ── Progress bar ── */
+.exam-progress-bar {
+  width: 100%;
+  height: 3px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.exam-progress-bar__fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+
+.exam-shell__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.exam-shell__section {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.exam-shell__timer {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+/* Last minute. A class rather than the inline --timer-color the JSX
+   used to set, so the urgency is describable in one place — and can
+   pulse, which an inline colour couldn't. */
+.exam-shell__timer--low {
+  color: var(--danger);
+  font-weight: 700;
+  animation: exam-timer-pulse 1s ease-in-out infinite;
+}
+@keyframes exam-timer-pulse {
+  50% { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exam-shell__timer--low { animation: none; }
+}
+
+/* ── Mondai instructions strip ── */
+.exam-mondai-instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--accent);
+}
+.exam-mondai-instructions__label {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.exam-mondai-instructions__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+/* Opens on the first question of a mondai and folds away after: the
+   instructions are byte-identical for every question inside one, and
+   redrawing four lines of kana above each of them pushed the question
+   itself below the fold on a phone. */
+.exam-mondai-instructions__toggle {
+  padding: 2px 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.exam-mondai-instructions__toggle:hover { color: var(--accent); }
+.exam-mondai-instructions__text {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-line;
+}
+
+/* ── Question card ── */
+.exam-card-stage {
+  margin-bottom: 24px;
+}
+.exam-card.prompt-card {
+  max-height: none;
+  text-align: left;
+  padding: 28px 24px;
+}
+.exam-question__prompt {
+  font-family: var(--font-jp);
+  font-size: clamp(17px, 2.2vw, 20px);
+  line-height: 1.8;
+  white-space: pre-line;
+  margin-bottom: 18px;
+}
+.exam-question__prompt--context { margin-bottom: 12px; }
+.exam-question__hint {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.exam-underline {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  font-weight: 700;
+}
+
+/* ── Image placeholder ──
+   Stands in for exam illustrations until a real illustration set is
+   commissioned or generated. Deliberately looks like scaffolding
+   (dashed border, muted) rather than a finished UI element, so it's
+   obvious at a glance what's still pending. */
+.exam-image-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  background: var(--overlay-hover);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.exam-image-placeholder__icon { font-size: 1.1rem; flex-shrink: 0; }
+.exam-image-placeholder--compact {
+  flex: 1;
+  margin-bottom: 0;
+  padding: 8px 10px;
+  border-width: 1px;
+}
+
+/* ── Sentence-order slots (grammar もんだい2) ── */
+.exam-order-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.exam-order-slot {
+  min-width: 56px;
+  padding: 6px 10px;
+  text-align: center;
+  border-bottom: 2px solid var(--border);
+  font-family: var(--font-jp);
+  color: var(--text-secondary);
+}
+.exam-order-slot--star {
+  color: var(--accent);
+  font-weight: 700;
+  border-bottom-color: var(--accent);
+}
+.exam-order-solution {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* ── Cloze passage blanks (grammar もんだい3) ── */
+.exam-passage__title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: var(--text-secondary);
+}
+.exam-passage__text {
+  font-family: var(--font-jp);
+  font-size: clamp(16px, 2vw, 18px);
+  line-height: 2;
+  white-space: pre-line;
+  margin-bottom: 18px;
+}
+.exam-blank-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 6px;
+  margin: 0 2px;
+  border-radius: 6px;
+  background: var(--chip-bg);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.exam-blank-pill--active {
+  background: var(--accent);
+  color: var(--text-on-panel);
+}
+
+/* ── Reading passage / memo (reading もんだい4-5) ── */
+.exam-passage {
+  margin-bottom: 20px;
+  text-align: left;
+}
+.exam-memo {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--overlay-hover);
+  border-radius: 8px;
+  font-family: var(--font-jp);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+/* ── Flyer / table reading (reading もんだい6) ── */
+.exam-flyer {
+  margin-bottom: 20px;
+  text-align: left;
+}
+.exam-flyer__title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.3rem;
+  margin-bottom: 2px;
+}
+.exam-flyer__subtitle { color: var(--accent); font-weight: 700; margin-bottom: 8px; }
+.exam-flyer__hours { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 14px; }
+.exam-flyer__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+.exam-flyer__dates { font-weight: 700; min-width: 170px; }
+.exam-flyer__items { color: var(--text-secondary); }
+.exam-flyer__weekly { margin-top: 8px; }
+
+/* ── Audio bar (listening) ── */
+.exam-audio-bar--pending {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  background: var(--overlay-hover);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+/* ── Dev-only script reveal (listening QA) ── */
+.exam-dev-panel { margin-bottom: 16px; }
+.exam-dev-panel__toggle {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  padding: 6px 12px;
+}
+.exam-dev-panel__script {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--overlay-hover);
+  border-radius: 8px;
+  font-family: var(--font-jp);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+/* ── Bottom nav bar ── */
+.exam-nav-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+.exam-nav-btn {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+.exam-nav-btn--primary {
+  background: var(--accent);
+  color: var(--text-on-panel);
+}
+.exam-nav-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* ── Result screen ── */
+.exam-result-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 36px 20px 30px;
+  margin-bottom: 14px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+}
+.exam-result-header__score {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+/* The number the percentage is being judged against, stated plainly
+   next to it — a bare "48%" in red says you did badly without ever
+   saying badly against what. */
+.exam-result-header__target {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  opacity: 0.85;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+.exam-result-disclaimer {
+  margin-bottom: 28px;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+.exam-review__title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.exam-review__hint {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.exam-review-list {
+  border-top: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.exam-review-row {
+  border-bottom: 1px solid var(--border);
+}
+.exam-review-row__summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 6px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--text-primary);
+  text-align: left;
+}
+.exam-review-row__icon {
+  width: 22px;
+  text-align: center;
+  font-weight: 700;
+}
+.exam-review-row--correct .exam-review-row__icon { color: var(--success); }
+.exam-review-row--wrong .exam-review-row__icon { color: var(--danger); }
+.exam-review-row__number {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.exam-review-row__chevron { color: var(--text-secondary); }
+.exam-review-row__detail {
+  padding: 4px 6px 20px;
+}
+
+@media (max-width: 560px) {
+  .exam-shell.container { padding-top: 20px; padding-bottom: 56px; }
+  .exam-card.prompt-card { padding: 22px 16px; }
+  .exam-flyer__dates { min-width: 0; }
+  .exam-generating { padding: 44px 12px; }
+}
+
+/* ── Live-region text ──
+   Timer warnings are spoken, not drawn — the pulsing red clock only
+   reaches somebody already watching that corner of the screen. */
+.exam-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* An unknown question type used to render as unstyled body text — the
+   class was in the JSX with no rule behind it. Scaffolding-looking on
+   purpose: this is a bug report, not a UI state. */
+.exam-unsupported {
+  padding: 16px;
+  border: 1.5px dashed var(--danger);
+  border-radius: 10px;
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+/* Shown under a graded question that was left blank. */
+.exam-question__blank-note {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* ── Audio player (listening) ──
+   Replaces the browser's own <audio controls>, which rendered a
+   light-grey bar that ignored the theme entirely, looked different in
+   every browser, and couldn't show a play count. */
+.exam-audio-player {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--overlay-hover);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.exam-audio-player__play {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--text-on-panel);
+}
+.exam-audio-player__track {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.exam-audio-player__clock {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+/* A range input styled down to a scrub bar. The two vendor thumb rules
+   are deliberately NOT comma-joined — a selector one engine can't
+   parse invalidates the whole rule for that engine. */
+.exam-audio-player__range {
+  width: 100%;
+  height: 4px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--border);
+  accent-color: var(--accent);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.exam-audio-player__range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.exam-audio-player__range::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.exam-audio-player__replay {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+.exam-audio-player__replay:hover { color: var(--accent); }
+/* Replay is allowed here (the real JLPT plays each clip once, but this
+   is practice), so the count is shown rather than the replay withheld
+   — an honest record of how much help was taken. */
+.exam-audio-player__plays {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+}
+
+/* ── Transcript (review only) ──
+   Every listening question already carries its script; it was thrown
+   away outside dev mode, and a missed listening question can't be
+   learned from without it. */
+.exam-transcript {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.exam-transcript__summary {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.exam-transcript__summary:hover { color: var(--accent); }
+.exam-transcript__text {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--overlay-hover);
+  border-radius: 8px;
+  font-family: var(--font-jp);
+  font-size: 0.88rem;
+  line-height: 1.9;
+  white-space: pre-line;
+}
+
+/* ── Flag ("come back to this one") ── */
+.exam-flag-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+.exam-flag-btn:hover { color: var(--accent2); }
+.exam-flag-btn--on {
+  background: color-mix(in srgb, var(--accent2) 16%, var(--bg-card));
+  color: var(--accent2);
+}
+
+/* ── Answer sheet ──
+   The numbered grid that replaced a linear Prev/Next walk and a
+   "3 / 21 answered" string which named a count but never which ones. */
+.exam-sheet {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+}
+.exam-sheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-bottom: 12px;
+}
+.exam-sheet__title {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.exam-sheet__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+.exam-sheet__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.exam-sheet__swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  border: 1.5px solid var(--border);
+}
+.exam-sheet__swatch--answered {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.exam-sheet__legend-flag { color: var(--accent2); }
+.exam-sheet__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.exam-sheet__chip {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+.exam-sheet__chip:hover { border-color: var(--accent); color: var(--accent); }
+.exam-sheet__chip--answered {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-panel);
+}
+.exam-sheet__chip--answered:hover { color: var(--text-on-panel); }
+/* A corner mark rather than a colour swap, so a flagged chip still
+   reads as answered or blank — the two facts are independent. */
+.exam-sheet__chip--flagged::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent2);
+  border: 2px solid var(--bg-card);
+}
+.exam-sheet__chip--current {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* ── Finish ──
+   Available on every question, not only the last: skipping question 3
+   used to mean no way to submit short of walking to the end. */
+.exam-finish-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  background: var(--accent);
+  color: var(--text-on-panel);
+  font-weight: 700;
+}
+.exam-finish-btn:disabled { opacity: 0.6; cursor: default; }
+
+/* ── Inline confirm / error panels ──
+   Not window.confirm: it can't be themed, can't be translated by the
+   app's own locale, and is suppressed outright in some embedded
+   webviews — which for the leave-guard would mean silently losing the
+   guard rather than silently keeping it. */
+.exam-confirm {
+  margin-top: 16px;
+  padding: 16px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+}
+.exam-confirm--error { border-color: var(--danger); }
+.exam-confirm__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 6px;
+}
+.exam-confirm--error .exam-confirm__title { color: var(--danger); }
+.exam-confirm__body {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.exam-confirm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.exam-confirm__actions .exam-nav-btn { flex: 1 1 auto; }
+
+/* ── Score ring ──
+   A bare red 48% says you did badly without saying badly against what.
+   The target is a tick on the ring, so the comparison is seen rather
+   than read off two numbers. */
+.exam-score-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.exam-score-ring__track { stroke: var(--border); }
+.exam-score-ring__arc {
+  stroke: var(--success);
+  transition: stroke-dashoffset 0.6s ease;
+}
+.exam-result-header--low .exam-score-ring__arc { stroke: var(--danger); }
+.exam-score-ring__target { stroke: var(--text-secondary); }
+.exam-result-header__pct {
+  position: absolute;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--success);
+}
+.exam-result-header__pct--low { color: var(--danger); }
+@media (prefers-reduced-motion: reduce) {
+  .exam-score-ring__arc { transition: none; }
+}
+
+/* ── Review: filter + mondai grouping ── */
+.exam-review__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.exam-review__filter {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.exam-review__filter[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--text-on-panel);
+}
+.exam-review__perfect {
+  padding: 22px 0 28px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--success);
+}
+.exam-review-group { margin-top: 18px; }
+.exam-review-group__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.exam-review-group__score {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+/* Blank is a third outcome, not a shade of wrong: it scores the same
+   and means something entirely different (ran out of time, or skipped
+   and never came back). */
+.exam-review-row--blank .exam-review-row__icon { color: var(--text-secondary); }
+.exam-review-row__blank {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.exam-nav-buttons--result { margin-top: 28px; }
+
+@media (max-width: 560px) {
+  .exam-sheet { padding: 12px; }
+  .exam-sheet__chip { width: 34px; height: 34px; font-size: 0.75rem; }
+  .exam-audio-player { gap: 10px; padding: 10px 12px; }
+  .exam-confirm__actions .exam-nav-btn { flex-basis: 100%; }
+  /* Inert, and left inert deliberately. `.mcq-row__tag` is also declared
+     at top level further down this file (search for the "Your answer" /
+     "Correct answer" block), at the same (0,1,0) specificity; a media
+     query adds none, so the later rule wins and this shrink has never
+     reached a phone. It survived the four-sheet merge unchanged because
+     this merge is required to be pixel-neutral — promoting it to
+     `.exam-shell .mcq-row__tag` would make it apply for the first time,
+     which is a product decision and not a refactor. */
+  .mcq-row__tag { font-size: 0.62rem; padding: 2px 7px; }
+}
+/* ══════════════════════════════════════════════════════════════
+   解析 section — merged from src/components/analysis/analysis.css by
+   plan 041, pasted directly after the exam section for the same
+   cascade-order reason (see the note at the top of the exam section
+   above). Owns .analyzer and .anl-*. One named exception: a bare
+   .rdg-breakdown-badges rule borrows index.css's own rdg- namespace
+   further down this file — known, and a follow-up plan's job to
+   rename, not this one's. Ends where the onboarding section begins,
+   below. ══════════════════════════════════════════════════════ */
+/* ══ 解析 — the analyser ═══════════════════════════════════
+   Everything the 解析 station owns: the platform rail, the three
+   intakes, the 路線図, and the responsive layout that stands the
+   line up beside the stage or lies it down as a strip.
+
+   Once its own file, imported from index.css, for the reason
+   src/exam/exam.css once was one: a feature this size used to be
+   easier to read, and to delete, when it was not 800 lines buried in
+   a 16,000 line sheet. Merged into index.css by plan 041 -- see the
+   top of this file. Tokens (--bg-panel, --line-kaiseki,
+   --surface...) still come from index.css's :root, so this section
+   defines no colours of its own -- one palette, one place.
+
+   Written by plans 027-030; each block below names its plan. */
+
+/* ── 解析 — the analyser (plan 027) ────────────────────────
+   ONE rhythm for the whole screen, and one rule: a stack's parent
+   owns the gap. Children carry no margins for spacing, and nothing
+   here uses a negative margin.
+
+   The screen this replaces had six paddings for one card object
+   (.phrase-input-card 20/24, .phrase-history-card 16/24,
+   .phrase-result-card 20/24, .phrase-word-card 16/20,
+   .phrase-error-card 16, and .card itself 15/24) plus a -12px margin
+   correcting the box above it. That is what padding drift looks
+   like, and tokens are how it stops.
+
+   The clamps scale continuously instead of stepping at a
+   breakpoint, so there is no width at which the screen looks
+   half-adjusted. */
+.analyzer {
+  --anl-gap:          clamp(16px, 1.2vw + 10px, 24px);
+  --anl-pad-inline:   clamp(16px, 1.6vw + 10px, 28px);
+  --anl-pad-block:    clamp(18px, 1.2vw + 12px, 26px);
+  --anl-radius:       var(--surface-radius);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--anl-gap);
+}
+
+/* The intake cards still carry their own pre-merge margins (plan 029
+   retires them). Until then, zero the bottom margin inside .analyzer
+   so the parent's gap is the only thing setting the rhythm -- two
+   spacing systems stacked is exactly the drift this block exists to
+   end. */
+.analyzer > *,
+.analyzer .card { margin-bottom: 0; }
+
+/* Every panel on this screen is the same piece of material. */
+.anl-panel {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  padding: var(--anl-pad-block) var(--anl-pad-inline);
+}
+
+/* ── のりば — the platform rail ──
+   Three signs at the head of three platforms. Same four registers as
+   a 駅名標 (number, kana, kanji, plain language), because it is the
+   same signage system — see components/station/StationSign.jsx. */
+.anl-rail {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(8px, 0.8vw + 4px, 14px);
+}
+.anl-rail__sign {
+  --sign: var(--line-color, var(--line-kaiseki));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: clamp(12px, 1vw + 8px, 18px) 10px 0;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius) var(--anl-radius) 0 0;
+  color: var(--text-secondary);
+  text-align: center;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+.anl-rail__sign[aria-selected="true"] { color: var(--text-primary); }
+.anl-rail__sign:hover { background: var(--bg-card-hover); }
+
+.anl-rail__no {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--sign);
+}
+.anl-rail__kana {
+  font-family: var(--font-jp);
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+}
+.anl-rail__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: clamp(1.1rem, 0.7rem + 1.4vw, 1.55rem);
+  letter-spacing: 0.1em;
+  text-indent: 0.1em;
+  line-height: 1.2;
+}
+.anl-rail__latin {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  text-transform: uppercase;
+}
+/* The stripe is the sign's bottom edge, exactly as on a station
+   plate — full-bleed to the sign's own width, not inset. */
+.anl-rail__stripe {
+  width: 100%;
+  height: 4px;
+  margin-top: clamp(8px, 0.6vw + 5px, 12px);
+  background: var(--surface-line);
+  border-radius: 0 0 2px 2px;
+  transition: background 0.2s ease;
+}
+.anl-rail__sign[aria-selected="true"] .anl-rail__stripe { background: var(--sign); }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-rail__sign,
+  .anl-rail__stripe { transition: none; }
+}
+
+/* ── 路線図 — the Passage as a line (plan 028) ─────────────
+   Every Sentence is a stop, in order, on one rail. Same drawing as
+   LevelSelector's JLPT line and for the same stated reason: a list
+   says "pick one of these", a line says "this is how far it goes".
+
+   Tighter than that one on purpose — a JLPT line has five stops and
+   a five-minute video window can have fifty. */
+.anl-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--anl-gap);
+}
+/* A programmatic focus target, not a tab stop -- see AnalyzerScreen's
+   arrival effect. It still needs a ring: focus that lands somewhere
+   invisible is the same as focus that was lost. */
+.anl-results:focus-visible {
+  outline: 2px solid var(--line-kaiseki);
+  outline-offset: 4px;
+  border-radius: var(--anl-radius);
+}
+.anl-stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--anl-gap);
+  min-width: 0;
+}
+
+/* 追従 — follow the clock. A toggle, so it states its own state rather
+   than naming the action: pressed means the line is following. */
+.anl-follow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  min-height: 32px;
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  color: var(--text-secondary);
+  transition: color 0.14s ease, border-color 0.14s ease;
+}
+.anl-follow--on {
+  color: var(--line-kaiseki);
+  border-color: color-mix(in srgb, var(--line-kaiseki) 55%, transparent);
+}
+.anl-follow__jp { font-family: var(--font-jp); font-size: 0.8rem; white-space: nowrap; }
+.anl-follow__label { font-size: 0.78rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-follow { transition: none; }
+}
+
+.anl-line {
+  --route-gap: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--route-gap);
+}
+
+/* The stop and its 保存 pin are siblings (a <button> cannot contain
+   another <button>), so THIS row is the flex item .anl-line's gap now
+   separates -- .anl-stop keeps its own position:relative box for the
+   rail bleed below, and since it is always the taller of the two
+   children, the row's own height equals the stop's, so nothing about
+   the rail's top/bottom math changes. */
+.anl-stop-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.anl-stop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px 10px 44px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--anl-radius);
+  color: var(--text-secondary);
+  text-align: left;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.anl-stop:hover { background: var(--overlay-hover); color: var(--text-primary); }
+
+/* 保存 — the pin. A 24px target sitting beside the stop rather than
+   inside it (see the component comment on why it cannot nest). */
+.anl-keep {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  color: var(--text-secondary);
+  font-family: var(--font-jp);
+  font-size: 0.62rem;
+  line-height: 1;
+  transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+}
+.anl-keep:hover { background: var(--overlay-hover); color: var(--text-primary); }
+.anl-keep--on {
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-keep { transition: none; }
+}
+
+/* Drawn per stop and bled into the gap above and below, so the line
+   stays unbroken between them — the technique .route-stop__rail
+   uses, and the reason a single rail behind the list will not do:
+   this list scrolls independently of the page. */
+.anl-stop__rail {
+  position: absolute;
+  left: 19px;
+  top: calc(-1px - var(--route-gap));
+  bottom: calc(-1px - var(--route-gap));
+  width: 3px;
+  background: color-mix(in srgb, var(--line-color, var(--line-kaiseki)) 45%, transparent);
+}
+.anl-stop--first .anl-stop__rail { top: 50%; border-radius: 2px 2px 0 0; }
+.anl-stop--last  .anl-stop__rail { bottom: 50%; border-radius: 0 0 2px 2px; }
+
+.anl-stop__marker {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 3px solid var(--line-color, var(--line-kaiseki));
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+/* 現在地 — you are here. The one filled marker on the line. */
+.anl-stop[aria-current="true"] {
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--line-color, var(--line-kaiseki)) 50%, var(--surface-line));
+  color: var(--text-primary);
+}
+.anl-stop[aria-current="true"] .anl-stop__marker {
+  background: var(--line-color, var(--line-kaiseki));
+  transform: scale(1.25);
+}
+
+.anl-stop__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-jp);
+  font-size: 0.9rem;
+}
+
+/* 鶯色 — the video source's own colour, spent on the one piece of
+   data only a video Sentence has. See the --line-douga note in the
+   token block. */
+.anl-stop__time {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--line-douga);
+}
+
+.anl-stop__iplus {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
+}
+
+/* 済 — already explained. Deliberately the quietest badge on the stop:
+   i+1 is a recommendation and gets --success, the timestamp is unique
+   data and gets 鶯色, and this is a memory aid. No new pigment. */
+.anl-stop__done {
+  flex-shrink: 0;
+  font-family: var(--font-jp);
+  font-size: 0.68rem;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-line);
+}
+
+/* The Explain control. Replaces .phrase-explain-row, whose
+   `margin: -12px 0 24px` was hand-correcting the box above it — this
+   one sits in .anl-stage, whose parent owns the gap, so there is
+   nothing left for a negative margin to correct. */
+.anl-explain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.anl-explain__hint { font-size: 0.82rem; color: var(--text-secondary); }
+.anl-explain__hint--bad { color: var(--danger); }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-stop,
+  .anl-stop__marker { transition: none; }
+}
+
+/* ── 改札口 — the intakes (plan 029) ───────────────────────
+   One material, one rhythm. Every padding here is a token from the
+   .analyzer block; if you find yourself typing a px pair, stop and
+   ask which token you meant. */
+.anl-intake__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: var(--anl-gap);
+}
+.anl-intake__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+}
+.anl-intake__lead { color: var(--text-secondary); font-size: 0.86rem; }
+
+/* The analyser's primary action. NOT .phrase-analyze-btn, which is
+   --accent shu-iro and is also used by DeckPicker and ImageCropper:
+   a vermillion button under a 葡萄色 plate is two colour languages on
+   one screen, which is the exact defect --deck-action was created to
+   fix for 教材 (see its note in the token block). */
+.anl-action {
+  background: var(--line-kaiseki);
+  color: var(--text-on-panel);
+  border: none;
+  border-radius: 4px;
+  padding: 9px 22px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  transition: filter 0.16s ease;
+}
+.anl-action:hover:not(:disabled) { filter: brightness(1.15); }
+.anl-action:disabled { opacity: 0.45; cursor: default; }
+
+/* 文字 — the writing slip. Sumi ink, the app's one high-contrast
+   structural surface (see the --bg-panel note in the token block),
+   so the thing you are about to hand over reads as a physical slip
+   rather than as another panel. */
+.anl-slip {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--anl-pad-block) var(--anl-pad-inline);
+  background: var(--bg-panel);
+  border-radius: var(--anl-radius);
+}
+.anl-slip__field {
+  width: 100%;
+  min-height: 6.5rem;
+  max-height: 40vh;
+  padding: 0;
+  background: none;
+  border: none;
+  resize: none;
+  overflow-y: auto;
+  color: var(--text-on-panel);
+  font-family: var(--font-jp);
+  font-size: clamp(1rem, 0.85rem + 0.5vw, 1.2rem);
+  line-height: 1.9;
+}
+.anl-slip__field::placeholder { color: var(--text-on-panel-soft); }
+.anl-slip__field:focus { outline: none; }
+/* The ring goes on the slip, not the borderless field inside it —
+   otherwise focus is invisible, which plan 005 exists to prevent. */
+.anl-slip:focus-within {
+  outline: 2px solid var(--line-kaiseki);
+  outline-offset: 2px;
+}
+.anl-slip__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.anl-slip__count {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel-soft);
+}
+.anl-slip__provenance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-on-panel-soft);
+}
+/* 写 — a seal, not a word: the provenance badge says "this came from
+   a photo" in one character, the way a stamp would. */
+.anl-slip__stamp {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  color: var(--accent);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+/* 写真 — the two intake tiles. Side by side, stacked on a phone. */
+.anl-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--anl-gap);
+  margin-bottom: var(--anl-gap);
+}
+.anl-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: clamp(18px, 2vw + 10px, 30px) 12px;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  color: var(--text-primary);
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.anl-tile:hover:not(:disabled) {
+  background: var(--bg-card-hover);
+  border-color: color-mix(in srgb, var(--line-kaiseki) 45%, var(--surface-line));
+}
+.anl-tile:disabled { opacity: 0.5; cursor: default; }
+.anl-tile__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+.anl-tile__latin {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* 動画 — the two ingests, as peers rather than nested disclosures. */
+.anl-ingest {
+  display: flex;
+  gap: 6px;
+  margin-bottom: var(--anl-gap);
+  border-bottom: 1px solid var(--surface-line);
+}
+/* Stacked, not side by side: the French labels are long
+   ("FICHIER DE SOUS-TITRES"), and set on one line with the Japanese
+   they wrapped the KANJI mid-word — 字幕フ / ァイル — on a phone.
+   The Japanese never wraps; the plain-language line under it may. */
+.anl-ingest__tab {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.anl-ingest__jp {
+  font-family: var(--font-jp);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+.anl-ingest__tab[aria-selected="true"] {
+  color: var(--text-primary);
+  border-bottom-color: var(--line-kaiseki);
+}
+.anl-ingest__latin {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* The dock's drop target — a real one, replacing the raw
+   <input type="file"> that was the only piece of OS chrome on a
+   screen that draws its own station plates. */
+.anl-drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: clamp(24px, 3vw + 12px, 44px) var(--anl-pad-inline);
+  border: 1px dashed color-mix(in srgb, var(--line-kaiseki) 50%, var(--surface-line));
+  border-radius: var(--anl-radius);
+  background: var(--surface);
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.anl-drop--over {
+  background: var(--bg-card-hover);
+  border-color: var(--line-kaiseki);
+  border-style: solid;
+}
+.anl-drop__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  color: var(--line-kaiseki);
+}
+.anl-drop__lead { font-size: 0.88rem; }
+.anl-drop__note { font-size: 0.74rem; color: var(--text-secondary); }
+/* Clipped, not display:none — the latter takes it out of the
+   accessibility tree. Same pattern as .analysis-image-input__file. */
+.anl-drop__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+.anl-drop:focus-within {
+  outline: 2px solid var(--line-kaiseki);
+  outline-offset: 2px;
+}
+
+/* A real single-line field. Was .phrase-textarea — an 18px textarea
+   rule, resize: vertical and all, on an <input type="text">. */
+.anl-field {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--anl-radius);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+}
+.anl-field--bad { border-color: var(--danger); }
+.anl-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: var(--anl-gap);
+}
+
+/* 区間 — the window. Two time fields and a readout, not two number
+   spinners labelled "(seconds)". */
+.anl-window {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--anl-gap);
+  flex-wrap: wrap;
+  margin-top: var(--anl-gap);
+}
+.anl-window__field { display: flex; flex-direction: column; gap: 4px; min-width: 92px; }
+.anl-window__label {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-window__readout {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+/* 案内 — an on-screen notice (the yt-dlp help, the paste steps). */
+.anl-notice {
+  margin-top: var(--anl-gap);
+  padding: var(--anl-pad-block) var(--anl-pad-inline);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+.anl-notice > summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.anl-notice__lead { color: var(--text-secondary); margin: 10px 0 6px; }
+.anl-notice__steps { margin: 6px 0 0; padding-left: 20px; color: var(--text-secondary); }
+.anl-notice__steps li { margin: 2px 0; }
+.anl-notice__cmd {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--bg-panel);
+  border-radius: 4px;
+  color: var(--text-on-panel);
+  font-size: 0.76rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-x: auto;
+}
+
+/* 運行履歴 — past services. */
+.anl-history { display: flex; flex-direction: column; }
+.anl-history__empty { color: var(--text-secondary); font-size: 0.86rem; }
+.anl-history__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--surface-line);
+}
+.anl-history__row:last-child { border-bottom: none; }
+.anl-history__open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 4px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  text-align: left;
+}
+.anl-history__open:hover { color: var(--line-kaiseki); }
+.anl-history__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-jp);
+  font-size: 0.92rem;
+}
+.anl-history__source {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--surface-line);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.64rem;
+}
+/* 保存 stamp -- same shape as .anl-history__source's 写/動, but tinted
+   --success rather than neutral: this row is a kept Sentence, not
+   merely a visited one. */
+.anl-history__kept {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
+  border-radius: 3px;
+  color: var(--success);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.64rem;
+}
+/* A session's Sentence count -- a 47-line track and a 3-line one are
+   very different things to reopen (plan 040). */
+.anl-history__count {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+/* WCAG 2.5.8 wants 24x24 CSS px minimum for a pointer target; this was
+   a 13px icon in 4/6px padding, about 25x21. The icon stays small --
+   this is a quiet, secondary action -- and the HIT AREA grows around
+   it, which is the right way round. */
+.anl-history__delete {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  transition: color 0.14s ease, background 0.14s ease;
+}
+.anl-history__delete:hover { color: var(--danger); background: var(--overlay-hover); }
+
+/* 案内表示 — notices. Two tones, and the difference is not decorative:
+   a capped Window and a truncated Passage are true statements about
+   what was analysed, and used to be drawn in --danger beside a real
+   failure, which made a working analysis look broken. */
+.anl-notice-line { font-size: 0.9rem; color: var(--text-secondary); }
+.anl-notice-line--info {
+  border-left: 3px solid color-mix(in srgb, var(--line-kaiseki) 60%, transparent);
+}
+.anl-notice-line--bad {
+  color: var(--danger);
+  border-left: 3px solid color-mix(in srgb, var(--danger) 60%, transparent);
+}
+
+/* Clipped, not display:none — a hidden live region is never announced.
+   The analyser's own copy of the pattern rather than a second consumer
+   of .exam-visually-hidden, per the per-feature-stylesheet rule this
+   file exists to hold. */
+.anl-sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 560px) {
+  .anl-tiles { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anl-tile,
+  .anl-drop,
+  .anl-action,
+  .anl-ingest__tab { transition: none; }
+}
+
+/* ── 車内案内 — the responsive layout (plan 030) ────────────
+   Panels arrive the way every other object in this app does. NOT the
+   stops: the nth-child stagger at the top of this file is sized for
+   lists of five to eight, and a fifty-stop Passage staggered at 30ms
+   takes a second and a half to finish drawing — the last stops would
+   land after the reader has already started scrolling. */
+.anl-panel,
+.anl-results { animation: arrive 0.28s cubic-bezier(0.22, 0.68, 0.32, 1) backwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-panel,
+  .anl-results { animation: arrive-soft 0.2s linear backwards; }
+}
+
+/* ── The stage and the line, side by side ──
+   ONE one-off breakpoint, per the rule in the Breakpoints block near
+   the top of this file: the component is .anl-results, and the reason
+   is that the route rail plus a readable breakdown need ~1040px of
+   content before they stop fighting for the same column. 1100/1099 is
+   the same complementary integer pair .dict-dock uses, written as
+   integers so both bounds can never match. */
+@media (min-width: 1100px) {
+  .anl-results {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--anl-gap);
+  }
+
+  /* The scroll lives on the rail itself. A sticky column pinned to the
+     viewport with no overflow of its own cannot hold a fifty-stop
+     Passage — that is the mistake .dict-dock's own comment records,
+     and it is the same mistake here. */
+  .anl-line {
+    flex: 0 0 clamp(260px, 24vw, 340px);
+    position: sticky;
+    top: 24px;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 4px;   /* room for the scrollbar, so no stop sits under it */
+  }
+
+  .anl-stage {
+    flex: 1;
+    /* Without this a long unbroken Japanese line refuses to shrink
+       (a flex item's min-width is auto) and pushes the rail off screen. */
+    min-width: 0;
+  }
+}
+
+/* ── 停車駅案内 — the stopping-pattern strip ──
+   The band above a train door: the same stops, laid along the
+   direction of travel, with where-you-are lit. Sticky like
+   .stroke-rail and for the same stated reason — a route map you can
+   only jump from is half a route map. */
+@media (max-width: 1099px) {
+  /* ONE number governs both sticky siblings. The strip is pinned to it
+     with min-height and the player offsets by it, so they cannot drift
+     apart -- which they had: the player was written against an assumed
+     64px strip and the real one measures 92px (video stops carry a
+     timestamp under the text), so the player overlapped its bottom
+     28px whenever both were stuck. Two hand-kept numbers is how that
+     happens; one token is how it stops. */
+  /* A FALLBACK only. PassageLine measures the strip and publishes the
+     real height as --anl-strip-h on this element (ResizeObserver), so
+     the player's offset tracks a stop that grows a badge instead of
+     covering the bottom of the line -- which a hand-kept number did,
+     twice. */
+  .anl-results { --anl-strip-h: 92px; }
+
+  .anl-line--strip {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    flex-direction: row;
+    gap: 0;
+    min-height: var(--anl-strip-h);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    padding: 10px 0 12px;
+    background: linear-gradient(180deg,
+      var(--bg-main) 0%, var(--bg-main) 78%, transparent 100%);
+  }
+  /* The strip has no room for a 28px pin beside an 88px stop -- .anl-line
+     itself becomes the row axis here, so .anl-stop-row is the flex item
+     that needs the sizing .anl-stop used to carry alone. */
+  .anl-line--strip .anl-stop-row {
+    flex: 0 0 auto;
+  }
+  .anl-line--strip .anl-stop {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 88px;
+    padding: 22px 6px 8px;
+  }
+  /* Hidden, not removed: pinning still works by text when reopened
+     from the vertical route map or 運行履歴; the strip's job is
+     "where am I", the same reasoning .anl-stop__done below already
+     uses to hide itself here. */
+  .anl-line--strip .anl-keep { display: none; }
+  /* The rail runs left-right now, threaded through the markers. */
+  .anl-line--strip .anl-stop__rail {
+    left: -50%;
+    right: -50%;
+    top: 12px;
+    bottom: auto;
+    width: auto;
+    height: 3px;
+  }
+  .anl-line--strip .anl-stop--first .anl-stop__rail { left: 50%; }
+  .anl-line--strip .anl-stop--last  .anl-stop__rail { right: 50%; }
+  .anl-line--strip .anl-stop__marker { left: 50%; top: 6px; margin: 0 0 0 -6px; }
+  .anl-line--strip .anl-stop__text {
+    width: 100%;
+    text-align: center;
+    font-size: 0.78rem;
+  }
+  /* The strip stacks text, the foreign/i+1 badge, and the timestamp
+     vertically already in an 88px column -- a fourth stacked badge
+     reads as clutter in a band whose job is "where am I", not "what
+     have I read". The vertical route map is where scanning for 済
+     happens; hide it here rather than shrink everyone else. */
+  .anl-line--strip .anl-stop__done { display: none; }
+
+  /* Under the strip, not over it, and below it in z. Offset by the
+     strip's own height token above rather than a second hand-kept
+     number. */
+  .anl-player {
+    position: sticky;
+    top: var(--anl-strip-h);
+    z-index: 4;
+    background: var(--bg-main);
+    padding-bottom: 8px;
+  }
+}
+
+/* ── Mining controls (2026-08-27) ──────────────────────────
+   One plain action plus a disclosure, replacing the two jargon buttons
+   ("Mine" / "Make a cloze") that used to sit side by side. */
+.anl-mine { display: flex; flex-direction: column; gap: 8px; }
+.anl-mine__row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.anl-mine__options {
+  background: none;
+  border: 1px solid var(--surface-line);
+  border-radius: 4px;
+  padding: 2px 9px;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.anl-mine__options:hover { color: var(--text-primary); border-color: var(--line-kaiseki); }
+.anl-mine__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--overlay-hover);
+  border-radius: var(--anl-radius);
+}
+.anl-mine__explain {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* ── The folded intake ──
+   Once a Passage is on screen the intake collapses to this bar, so the
+   breakdown gets the height a full writing slip was taking. */
+.anl-reopen {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  color: var(--text-secondary);
+  text-align: left;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.anl-reopen:hover { color: var(--text-primary); border-color: var(--line-kaiseki); }
+.anl-reopen__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  color: var(--line-kaiseki);
+}
+.anl-reopen__label { flex: 1; font-size: 0.86rem; }
+.anl-reopen__go { flex-shrink: 0; color: var(--line-kaiseki); }
+
+.anl-reopen-row { display: flex; gap: 10px; align-items: stretch; }
+.anl-reopen-row .anl-reopen { flex: 1; }
+
+/* 出場 — leaving the gate. Secondary to 改札 by construction: clearing
+   is the rarer, more destructive of the two, so it is the quieter
+   control even though both sit on the same row. */
+.anl-clear {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--anl-pad-block) 14px;
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  color: var(--text-secondary);
+  /* WCAG 2.5.8: 24x24 CSS px minimum for a pointer target. This lands
+     well above it; do not shrink the padding without re-measuring. */
+  min-width: 64px;
+  min-height: 44px;
+  transition: color 0.14s ease, border-color 0.14s ease;
+}
+.anl-clear:hover { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
+.anl-clear__jp { font-family: var(--font-jp); font-size: 0.8rem; white-space: nowrap; }
+.anl-clear__label { font-family: var(--font-display); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-clear { transition: none; }
+}
+
+/* The 区間 disclosure — optional, and blank means the whole Track. */
+.anl-window-set > summary {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-window-set .anl-window { margin-top: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-reopen,
+  .anl-mine__options { transition: none; }
+}
+
+/* ── A line the app cannot take apart ──────────────────────
+   Shown as it appears in the subtitles, with a note instead of a
+   breakdown. Kept deliberately quiet: it is context the learner is
+   reading past, not something demanding attention. */
+.anl-foreign {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--anl-pad-block) var(--anl-pad-inline);
+  background: var(--surface);
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--anl-radius);
+}
+.anl-foreign__text {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.35rem);
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+.anl-foreign__note { margin: 0; font-size: 0.78rem; color: var(--text-secondary); }
+
+/* Its marker on the route line, so the learner sees which stops have no
+   breakdown before opening them. */
+.anl-stop__foreign {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-line);
+  white-space: nowrap;
+}
+
+/* ── The deck picker ───────────────────────────────────────
+   Shares WordDetail's sheet chrome, not its type. It used to borrow
+   .detail-title -- 40px, sized for a single-kanji specimen -- which
+   wrapped the dialog's own title onto two lines. */
+.anl-deckpicker__title {
+  margin: 0;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.anl-deckpicker__deck {
+  display: block;
+  width: 100%;
+  padding: 11px 4px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--surface-line);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  text-align: left;
+  transition: color 0.16s ease;
+}
+.anl-deckpicker__deck:last-child { border-bottom: none; }
+.anl-deckpicker__deck:hover { color: var(--line-kaiseki); }
+.anl-deckpicker__create { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.anl-deckpicker__create .anl-field { flex: 1; min-width: 160px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-deckpicker__deck { transition: none; }
+}
+
+/* 音声 — hear it. Two sizes: beside a Sentence's level badge, and on a
+   Token's card. Both clear WCAG 2.5.8's 24x24 minimum; the md size
+   clears the 44px comfort target as well. */
+.anl-speak {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  transition: color 0.14s ease, border-color 0.14s ease;
+}
+.anl-speak--md { width: 34px; height: 34px; }
+.anl-speak--sm { width: 26px; height: 26px; }
+.anl-speak:hover { color: var(--line-kaiseki); border-color: color-mix(in srgb, var(--line-kaiseki) 55%, transparent); }
+.anl-speak:active { transform: scale(0.92); }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-speak { transition: none; }
+  .anl-speak:active { transform: none; }
+}
+
+.rdg-breakdown-badges { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.anl-history__when {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+.anl-undo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+.anl-undo__text { flex: 1; min-width: 0; }
+.anl-undo__dismiss {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-history__delete { transition: none; }
+}
+/* ══════════════════════════════════════════════════════════════
+   みどりの窓口 section — merged from
+   src/components/onboarding/onboarding.css by plan 041, pasted
+   directly after the 解析 section for the same cascade-order reason.
+   Owns .onb-*. Named exceptions, left alone deliberately: the
+   un-prefixed .arrival family (7 rules, one more inside a
+   reduced-motion block, and 5 arrival-* keyframes) and the un-prefixed
+   .settings-redo-result / .settings-redo-actions pair. All are known
+   and are a follow-up plan's job — renaming them here would touch
+   JSX and break the bundle-identity gate this merge was built on.
+   Ends where this file's own design-system body begins, below. ══ */
+/* ── みどりの窓口 — the onboarding flow ─────────────────────
+   Per-feature section, merged into index.css the same way
+   the exam and 解析 sections above it were. Everything here is namespaced
+   .onb-*; the shared route-diagram classes (.route, .route-stop)
+   stay in index.css because six study screens use them.
+
+   The office is an identity surface, like /profile and /settings:
+   no --line-* pigment of its own. Where a rail or accent is needed
+   it falls back to shu-iro (--accent), which is exactly what
+   LevelSelector's own CSS does for a caller with no station. */
+
+.onb {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 18px 60px;
+}
+
+/* The office signboard — kana over name over latin, the station-plate
+   reading order, but framed as a window sign rather than a 駅名標:
+   this is not a place you travel to. */
+.onb-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 26px;
+  text-align: center;
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+.onb-header__kana {
+  font-size: 0.78rem;
+  letter-spacing: 0.35em;
+  color: var(--text-secondary);
+}
+.onb-header__jp {
+  margin: 0;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.onb-header__latin {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.5em;
+  /* Trailing letter-spacing skews centering; padding rebalances. */
+  padding-left: 0.5em;
+  color: var(--text-secondary);
+}
+/* The green window: the sign carries the office's own colour the way
+   the real みどりの窓口 sign does — the one green thing in the app,
+   an underline, not a pigment claimed for structure. */
+.onb-header::after {
+  content: '';
+  width: 68px;
+  height: 4px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: var(--success);
+}
+
+/* ── The flow's own stopping pattern ───────────────────────
+   Six stations under the office sign, current one marked — the
+   onboarding drawn as the short line it is. Markers echo
+   .route-stop__marker (white-filled, line-stroked circles); the rail
+   runs behind them. */
+.onb-line {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 520px;
+  margin-bottom: 30px;
+  padding: 0 8px;
+}
+.onb-line::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 5px;
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.onb-line__stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.onb-line__marker {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 3px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.onb-line__stop--past .onb-line__marker {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.onb-line__stop--now .onb-line__marker {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.onb-line__name {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+.onb-line__stop--now .onb-line__name {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.onb-body {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+}
+
+.onb-step {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+
+.onb-step__title {
+  margin: 0;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+/* The heading receives programmatic focus on every step change (see
+   OnboardingFlow's step effect) purely so the transition is announced
+   and the scroll anchors — it is tabIndex={-1}, unreachable by Tab, so
+   the ring would only ever flash uninvited on a non-control. */
+.onb-step__title:focus { outline: none; }
+.onb-step__body,
+.onb-step__hint {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.onb-step__hint { font-size: 0.85rem; }
+
+.onb-step__actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  margin-top: 6px;
+}
+
+/* The office's own action button — sumi panel like the app's other
+   seal-stamped primaries, not shu-iro under a green sign. */
+.onb-action {
+  padding: 12px 26px;
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border: 1px solid var(--border);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.onb-action:hover:not(:disabled),
+.onb-action:focus-visible { transform: translateY(-1px); filter: brightness(1.15); }
+.onb-action:disabled { opacity: 0.45; }
+
+.onb-link {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.onb-link:hover, .onb-link:focus-visible { color: var(--text-primary); }
+
+.onb-back { align-self: flex-start; margin-bottom: 10px; }
+
+/* The escape hatch, not a third answer: a hairline above and a size
+   step down keep it from competing with the step's real choices. */
+.onb-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 48px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.onb-skip { font-size: 0.78rem; opacity: 0.85; }
+.onb-skip__hint { color: var(--text-secondary); font-size: 0.72rem; }
+
+.onb-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+/* ── Welcome: the name on the pass ────────────────────────── */
+.onb-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--surface-radius);
+}
+.onb-name__label { color: var(--text-secondary); font-size: 0.85rem; }
+
+/* ── Boarding: the two non-station answers ────────────────── */
+.onb-alts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Indented past the diagram's rail: these hang OFF the line. */
+  margin: 4px 22px 0 66px;
+}
+.onb-alt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 13px 16px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.onb-alt:hover, .onb-alt:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+.onb-alt__name { font-weight: 700; }
+.onb-alt__hint { color: var(--text-secondary); font-size: 0.8rem; }
+
+/* "Test me" opens a whole sub-flow, so it must not weigh the same as
+   the one-tap dashed answer above it: solid tinted border, a whisper
+   of fill, and the ▶ every "this leads onward" control in the app
+   already carries (see .route-stop__go). */
+.onb-alt--test {
+  position: relative;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  padding-right: 38px;
+}
+.onb-alt--test::after {
+  content: '▶';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent);
+  font-size: 0.7rem;
+}
+
+/* ── Placement test ───────────────────────────────────────── */
+.onb-test { display: flex; flex-direction: column; gap: 14px; }
+.onb-test__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.onb-test__level {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.onb-test__progress { color: var(--text-secondary); font-size: 0.85rem; }
+.onb-test__instructions { color: var(--text-secondary); font-size: 0.9rem; }
+.onb-test__escape {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+}
+.onb-test__error { text-align: center; color: var(--text-secondary); }
+
+/* Result: per-level scoreboard + the override group. */
+.onb-result__levels {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.onb-result__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.onb-result__level { font-weight: 700; }
+.onb-result__score { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+.onb-seg { display: flex; gap: 8px; }
+.onb-seg__btn {
+  flex: 1;
+  padding: 10px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.onb-seg__btn--reco::after {
+  content: '◈';
+  margin-left: 5px;
+  color: var(--accent2);
+}
+.onb-seg__btn--on {
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-color: var(--bg-panel);
+}
+.onb-seg__btn:hover:not(.onb-seg__btn--on),
+.onb-seg__btn:focus-visible { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+
+/* ── Pace: the 種別 ladder ────────────────────────────────── */
+.onb-paces {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.onb-pace {
+  /* relative: anchors the .onb-reco-badge on the recommended card. */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: left;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.onb-pace:hover, .onb-pace:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+.onb-pace--on { border-color: var(--accent); }
+.onb-pace__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+/* The stopping-pattern diagram: which of six stations this service
+   calls at. Served stops are the house station marker; skipped ones
+   are the small dim dots a passed station is on a real 種別 board. */
+.onb-pace__pattern {
+  width: 100%;
+  max-width: 150px;
+  height: 16px;
+  margin: 2px 0;
+}
+.onb-pace__pattern-rail {
+  stroke: color-mix(in srgb, var(--accent) 45%, transparent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.onb-pace__pattern-stop {
+  fill: var(--bg-card);
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+.onb-pace__pattern-skip {
+  fill: var(--border);
+}
+.onb-pace__name {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.onb-pace__per-day { font-weight: 700; font-size: 0.95rem; }
+.onb-pace__hint { color: var(--text-secondary); font-size: 0.8rem; line-height: 1.45; }
+
+/* ── 路線図 — the projection, as a route diagram ───────────
+   Vertical line, one stop per completed level — the same grammar as
+   LevelSelector's .route. Replaced the old SVG chart + absolutely-
+   positioned overlays: block rows cannot clip at a container edge,
+   which is what the chart's unclamped percentage plates could do.
+   --stop-gap (set inline per stop) is elapsed time as spacing. */
+.onb-map { display: flex; flex-direction: column; gap: 16px; }
+.onb-map__total { margin: 0; font-weight: 700; }
+.onb-map__assumption {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.onb-route {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 4px;
+}
+.onb-route__stop {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding-bottom: var(--stop-gap, 22px);
+  /* The same staggered arrival the flow's other pieces use. */
+  opacity: 0;
+  animation: arrive-soft 0.4s ease forwards;
+  animation-delay: calc(0.1s + var(--stop-i, 0) * 0.22s);
+}
+.onb-route__stop:last-child { padding-bottom: 0; }
+.onb-route__rail {
+  position: absolute;
+  left: 9px;
+  top: 20px;
+  bottom: -2px;
+  width: 3px;
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.onb-route__stop:last-child .onb-route__rail { display: none; }
+/* The same object as .route-stop__marker: a station on a line. */
+.onb-route__marker {
+  flex-shrink: 0;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 3px solid var(--accent);
+  z-index: 1;
+}
+.onb-route__stop--now .onb-route__marker { background: var(--accent); }
+.onb-route__stop--complete .onb-route__marker {
+  background: var(--success);
+  border-color: var(--success);
+}
+.onb-route__stop--horizon .onb-route__marker {
+  border-style: dashed;
+  border-color: var(--border);
+  background: transparent;
+}
+.onb-route__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 1px;
+  min-width: 0;
+}
+.onb-route__level {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  line-height: 1.15;
+}
+.onb-route__when {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+.onb-route__items {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+/* Past the horizon the rail fades out instead of stopping — the
+   journey continues, the map just ends. Runs BELOW the dashed marker,
+   so the horizon stop reserves the room it fades through. */
+.onb-route__stop--horizon { padding-bottom: 28px; }
+.onb-route__continues {
+  position: absolute;
+  left: 9px;
+  top: 20px;
+  width: 3px;
+  height: 26px;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--accent) 40%, transparent),
+    transparent);
+}
+
+/* ── 沿線案内 — the tour ──────────────────────────────────
+   Each card is a head row (roundel + copy) over a live demo region
+   holding the REAL study component with sample data — see TourStep.
+   The demo panel wears a "try it" pill on its shoulder so the
+   interactivity is an invitation, not an easter egg. */
+.onb-tour { display: flex; flex-direction: column; gap: 14px; }
+.onb-tour__card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 14px 16px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--row-color, var(--accent));
+  border-radius: 6px;
+}
+.onb-tour__head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.onb-tour__demo {
+  position: relative;
+  padding: 18px 14px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.onb-tour__try {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  padding: 1px 8px;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--row-color, var(--accent)) 45%, var(--border));
+  border-radius: 999px;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* The flashcard cancels its host's padding via --card-pad-* (see
+   .flashcard in index.css) — matching the vars to this wrapper's own
+   padding seats it flush, with real padding inside the tappable card. */
+.onb-tour__flashcard {
+  padding: 18px 14px;
+  --card-pad-top: 18px;
+  --card-pad-x: 14px;
+  --card-pad-y: 18px;
+}
+.onb-tour__again {
+  display: block;
+  margin: 8px auto 0;
+}
+.onb-tour__roundel {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 46px;
+  height: 46px;
+  padding: 0 6px;
+  border-radius: 50%;
+  border: 3px solid var(--row-color, var(--accent));
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.onb-tour__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.onb-tour__title { font-weight: 700; }
+.onb-tour__desc { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
+/* ── 定期券 — the pass ────────────────────────────────────── */
+.onb-pass {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 420px;
+  width: 100%;
+  align-self: center;
+  padding: 20px 22px;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+.onb-pass__head {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-on-panel-soft);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+}
+.onb-pass__main {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.onb-pass__level {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent2);
+}
+.onb-pass__holder {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+}
+.onb-pass__foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--text-on-panel-soft);
+  font-size: 0.85rem;
+}
+/* The contactless arcs (see PassWave.jsx / .pass__wave) pushed to the
+   pass's corner — the same mark the gate reader is about to answer. */
+.onb-pass__wave { margin-left: auto; }
+.onb-action--board { align-self: center; }
+
+/* ── Shared visual language ─────────────────────────────────
+   Two devices, one accent, defined once and reused wherever the
+   onboarding's vocabulary appears:
+   - .onb-reco-badge: the gold "recommended / achieved" pill for
+     card-shaped contexts (PaceStep's 快速 card, NextService's
+     target-met mark). Same --accent2 as .onb-seg__btn--reco's ◈,
+     so one colour keeps meaning one concept at two sizes.
+   - .settings-card--onb: the identity frame Settings' 学習 card
+     wears — the same border-left device as .onb-tour__card, in
+     --accent (shu-iro) because Settings, like the office, is about
+     you and never claims a --line-* pigment. */
+.onb-reco-badge {
+  position: absolute;
+  top: -9px;
+  right: 12px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--accent2);
+  color: var(--text-on-fill);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* ── Settings' 学習 card ─────────────────────────────────────
+   Deliberately carries NONE of the office's own dress: the card uses
+   the Settings page's native rows and .lang-select controls (see
+   LearningCard's header comment). Only the inline retake flow below
+   borrows onboarding pieces, because it literally IS the placement
+   test. An earlier accent frame + segmented buttons here read as a
+   different app grafted into Settings and were removed on review. */
+.settings-redo-result { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.settings-redo-actions { display: flex; align-items: center; gap: 16px; }
+
+/* ══ 到着 — the arrival cutscene ═══════════════════════════
+   The station family's third scene, and the first that means "you
+   have arrived": the scrim drops and the platform signboard slides
+   down into place over the tour. Onboarding-only (see TrainArrival's
+   header for why it is not in index.css's gate/door block), same
+   discipline: transform/opacity only, one --arrival-x speed dial
+   shared with the JS timers, skippable, and absent under reduced
+   motion — JS never mounts it, and the display:none below is the
+   same belt-and-braces the gate and door carry. */
+.arrival {
+  --arrival-x: 1;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: arrival-leave calc(150ms * var(--arrival-x)) linear calc(630ms * var(--arrival-x)) backwards;
+}
+@keyframes arrival-leave { to { opacity: 0; } }
+.arrival__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-main);
+  opacity: 0;
+  animation: arrival-scrim calc(160ms * var(--arrival-x)) ease-out forwards;
+}
+/* 0.995, not 1 — the gate's own documented fix for a light-theme
+   scrim reading cream-on-cream. Same value, same reason. */
+@keyframes arrival-scrim { to { opacity: 0.995; } }
+
+.arrival__board {
+  position: relative;
+  width: min(420px, 88vw);
+  padding: 22px 26px;
+  border-radius: 10px;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  transform: translateY(-140%);
+  animation: arrival-slide calc(260ms * var(--arrival-x)) cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+@keyframes arrival-slide { to { transform: translateY(0); } }
+/* The sign settles: one soft ring of the line colour, as the chime
+   lands (phase 'arrived', see TrainArrival's SIGN_MS). */
+.arrival--arrived .arrival__board {
+  transform: translateY(0);
+  animation: arrival-settle calc(320ms * var(--arrival-x)) ease-out;
+}
+@keyframes arrival-settle {
+  0% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  100% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 10px transparent; }
+}
+
+.arrival__eyebrow {
+  display: block;
+  font-family: var(--font-jp);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--accent2);
+  opacity: 0;
+  animation: arrival-fade calc(200ms * var(--arrival-x)) ease-out calc(300ms * var(--arrival-x)) forwards;
+}
+.arrival__dest {
+  display: block;
+  margin-top: 4px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.2;
+  opacity: 0;
+  animation: arrival-fade calc(220ms * var(--arrival-x)) ease-out calc(340ms * var(--arrival-x)) forwards;
+}
+.arrival__latin {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+  opacity: 0;
+  animation: arrival-fade calc(220ms * var(--arrival-x)) ease-out calc(380ms * var(--arrival-x)) forwards;
+}
+@keyframes arrival-fade { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* TrainArrival fires onDone immediately and never mounts this when
+     motion is unwelcome — belt and braces, like .gate and .door. */
+  .arrival { display: none; }
+}
+
+/* ── /dev/onboarding — the replay workbench ─────────────────
+   Dev-only chrome (the route is tree-shaken from production, the
+   styles are just bytes). Above the cutscenes' z-index 300 so the
+   replay control survives them — pressing it mid-cutscene also
+   skips the cutscene via its own pointerdown listener, which is
+   exactly right. */
+.onb-preview-bar {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-size: 0.8rem;
+}
+.onb-preview-bar__tag {
+  color: var(--accent2);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+}
+.onb-preview-bar__run {
+  color: var(--text-on-panel-soft);
+  font-variant-numeric: tabular-nums;
+}
+.onb-preview-bar button {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-on-panel);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.onb-preview-bar button:hover,
+.onb-preview-bar button:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+}
+.onb-preview-done {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+.onb-preview-done [lang="ja"] {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ── Responsive & reduced motion ──────────────────────────── */
+@media (max-width: 560px) {
+  .onb-paces { grid-template-columns: 1fr; }
+  .onb-alts { margin-left: 22px; }
+  .onb-step__actions { justify-content: stretch; }
+  .onb-step__actions .onb-action { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onb-header,
+  .onb-step {
+    animation: arrive-soft 0.2s linear backwards;
+  }
+  .onb-action:hover:not(:disabled),
+  .onb-action:focus-visible,
+  .onb-pace:hover,
+  .onb-pace:focus-visible { transform: none; }
+  /* The route diagram appears complete: no staggered stops. */
+  .onb-route__stop {
+    animation: none;
+    opacity: 1;
+  }
+  .onb-line__marker { transition: none; }
+}
 
 /* ── Design system, light + dark ──────────────────────────────
    Same variable names in both themes — only the values differ under
@@ -4121,12 +7050,12 @@ textarea:focus-visible {
    paper is submitted, so between the tap and the score there was
    nothing at all to show for it.
 
-   Lives here rather than in exam/exam.css deliberately. It is a state
-   of THIS component, so it belongs beside its two siblings above —
-   and exam.css is @imported from the top of this file, which means a
-   single-class rule written over there loses on source order to the
-   `.mcq-row` background three rules up. See exam.css's own header note
-   on that trap.
+   Lives here rather than in the exam section above deliberately. It is
+   a state of THIS component, so it belongs beside its two siblings
+   above — and the exam section sits at the top of this file, which
+   means a single-class rule written there loses on source order to the
+   `.mcq-row` background three rules up. See the exam section's own
+   header note on that trap.
 
    Deliberately quieter than the graded states: the accent rail fills
    and the roundel fills, but the row keeps its own background tint low

@@ -2,11 +2,13 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { AnalyzerHistory } from './AnalyzerHistory'
 import { LangProvider } from '../../LangContext'
-// The component itself doesn't import its own stylesheet -- it's pulled
-// in globally via index.css in the real app. The target-size assertion
-// below needs the real rule, not the browser's unstyled button default,
-// so this test file imports it directly.
-import './analysis.css'
+// The component itself doesn't import a stylesheet -- in the real app
+// it's pulled in globally via index.css (analysis.css was merged into
+// index.css by plan 041 and no longer exists as its own file). The
+// target-size assertion below needs the real rule, not the browser's
+// unstyled button default, so this test file imports the one merged
+// sheet directly.
+import '../../index.css'
 
 // Plan 037: an instant, confirmation-free delete through a target under
 // WCAG's 24x24 floor, a date the API already sends but never renders,
