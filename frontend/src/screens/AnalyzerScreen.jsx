@@ -304,9 +304,15 @@ export default function AnalyzerScreen({ session }) {
   const announcement =
     explaining[focusIndex] ? t.explaining
     : explainError[focusIndex] ? explainError[focusIndex]
+    : mining.lastOutcome ? (
+        mining.lastOutcome.error ? (t.mineFailed ?? "Couldn't add this card.")
+        : mining.lastOutcome.count > 0 ? (t.mineAdded ?? 'Added to your deck')
+        : (t.mineAlready ?? 'That card was already in the deck')
+      )
     : busy ? t[platform.busy]
     : status === 'failed' ? t.analysisFailed
     : ready ? t.passageReady(sentences.length)
+    : analyzer.lastDeleted ? t.entryDeleted
     : t[platform.lead]
 
   return (
@@ -516,13 +522,19 @@ export default function AnalyzerScreen({ session }) {
             t={t}
             entries={analyzer.history}
             onOpen={loadHistoryEntry}
-            onDelete={id => analyzer.deleteHistoryEntry(id)}
+            onDelete={entry => analyzer.deleteHistoryEntry(entry)}
+            lastDeleted={analyzer.lastDeleted}
+            onUndo={analyzer.undoDelete}
+            onDismissUndo={analyzer.dismissUndo}
           />
         )}
       </main>
 
       {detail && (
-        <WordDetail detail={detail} t={t} onClose={closeDetail} mining={mining} />
+        // The screen has computed `wide` since plan 030; WordDetail has
+        // supported a side panel since the merge. They were never wired
+        // together, so a 27-inch monitor got a phone bottom sheet.
+        <WordDetail detail={detail} t={t} isMobile={!wide} onClose={closeDetail} mining={mining} />
       )}
     </div>
   )

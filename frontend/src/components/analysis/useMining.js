@@ -61,6 +61,10 @@ function writeStoredTarget(kind, deckId) {
 export function useMining(session) {
   const [decks, setDecks] = useState([])
   const [loaded, setLoaded] = useState(false)
+  // The last mine outcome across every control sharing this instance,
+  // so the screen (not MineButton, which is rendered many times over)
+  // can announce it through the one aria-live region it owns.
+  const [lastOutcome, setLastOutcome] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -109,12 +113,19 @@ export function useMining(session) {
   // distinct outcome ("already in this deck" or a stale raw_id), not a
   // failure and not silently the same as 1.
   async function mineApp({ deckId, source, level, rawId, kind }) {
-    const result = await apiJson(`/api/decks/${deckId}/cards/app`, session, {
-      method: 'POST',
-      body: JSON.stringify({ cards: [{ source, level, raw_id: rawId }] }),
-    })
-    if (kind) rememberTarget(kind, deckId)
-    return result.added ?? 0
+    try {
+      const result = await apiJson(`/api/decks/${deckId}/cards/app`, session, {
+        method: 'POST',
+        body: JSON.stringify({ cards: [{ source, level, raw_id: rawId }] }),
+      })
+      if (kind) rememberTarget(kind, deckId)
+      const added = result.added ?? 0
+      setLastOutcome({ kind, count: added })
+      return added
+    } catch (e) {
+      setLastOutcome({ kind, error: true })
+      throw e
+    }
   }
 
   async function mineCloze({ deckId, front, back, notes }) {
@@ -125,13 +136,19 @@ export function useMining(session) {
     if (!front?.trim() || !back?.trim()) {
       throw new Error('Cloze card needs both a front and a back')
     }
-    const card = await apiJson(`/api/decks/${deckId}/cards`, session, {
-      method: 'POST',
-      body: JSON.stringify({ front, back, notes }),
-    })
-    rememberTarget('cloze', deckId)
-    return card
+    try {
+      const card = await apiJson(`/api/decks/${deckId}/cards`, session, {
+        method: 'POST',
+        body: JSON.stringify({ front, back, notes }),
+      })
+      rememberTarget('cloze', deckId)
+      setLastOutcome({ kind: 'cloze', count: 1 })
+      return card
+    } catch (e) {
+      setLastOutcome({ kind: 'cloze', error: true })
+      throw e
+    }
   }
 
-  return { loaded, decksFor, targetFor, ensureDeck, mineApp, mineCloze, rememberTarget }
+  return { loaded, decksFor, targetFor, ensureDeck, mineApp, mineCloze, rememberTarget, lastOutcome }
 }

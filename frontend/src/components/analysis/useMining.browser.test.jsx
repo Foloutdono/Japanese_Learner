@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { useMining, buildCloze } from './useMining'
+import { MineButton } from './MineButton'
 
 // useMining is a hook, not a component -- same problem
 // useDialog.browser.test.jsx solves by mounting a tiny harness and
@@ -110,5 +111,77 @@ describe('useMining', () => {
       getMining().mineCloze({ deckId: 4, front: '＿＿＿を見た', back: '', notes: '猫を見た' })
     ).rejects.toThrow()
     expect(globalThis.fetch).not.toHaveBeenCalled()
+  })
+})
+
+// Plan 037: MineButton used to REPLACE itself with a status span the
+// moment a write succeeded, so a learner who mined one word into "N5
+// words" had no way to also add it to "Animals" without a reload.
+const MINE_T = {
+  mineToDeck: 'Mine',
+  addToAnotherDeck: 'Add to another deck',
+  inDeck: 'In deck',
+  alreadyInDeck: 'Already there',
+  mineFailed: "Couldn't add this card.",
+  chooseDeck: 'Choose a deck',
+  close: 'Close',
+}
+
+// MineButtonHarness mounts a real useMining instance (so targetFor/
+// localStorage behave exactly as in the app) alongside the button under
+// test.
+function MineButtonHarness({ session, onMine, kind = 'vocab' }) {
+  const mining = useMining(session)
+  if (!mining.loaded) return null
+  return <MineButton mining={mining} kind={kind} onMine={onMine} t={MINE_T} />
+}
+
+describe('MineButton (via useMining)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    localStorage.clear()
+  })
+
+  it('keeps the mine button after a successful add', async () => {
+    mockFetchOnce(200, { decks: ALL_TYPE_DECKS })
+    const onMine = vi.fn().mockResolvedValue(1)
+    const screen = await render(<MineButtonHarness session={null} onMine={onMine} />)
+
+    const button = screen.getByRole('button', { name: MINE_T.mineToDeck })
+    await button.click()
+
+    await vi.waitFor(() => {
+      expect(screen.container.querySelector('.analysis-mine-btn')).not.toBeNull()
+    })
+    expect(screen.container.querySelector('.analysis-mine-btn').textContent).toBe(MINE_T.addToAnotherDeck)
+  })
+
+  it('opens the picker on a second add rather than reusing the target', async () => {
+    // A remembered target for 'vocab', matching one of the seeded decks.
+    localStorage.setItem('jp-mine-target:vocab', '1')
+    mockFetchOnce(200, { decks: ALL_TYPE_DECKS })
+    const onMine = vi.fn().mockResolvedValue(1)
+    const screen = await render(<MineButtonHarness session={null} onMine={onMine} />)
+
+    await vi.waitFor(() => expect(screen.container.querySelector('.analysis-mine-btn')).not.toBeNull())
+
+    // First press: mines directly into the remembered deck, no dialog.
+    await screen.container.querySelector('.analysis-mine-btn').click()
+    await vi.waitFor(() => expect(onMine).toHaveBeenCalledTimes(1))
+    // Wait for the outcome/addedOnce state from that press to actually
+    // commit before pressing again, or the second click can land while
+    // the button still thinks no add has happened yet.
+    await vi.waitFor(() => {
+      expect(screen.container.querySelector('.analysis-mine-btn').textContent).toBe(MINE_T.addToAnotherDeck)
+    })
+    expect(screen.container.querySelector('[role="dialog"]')).toBeNull()
+
+    // Second press: a different deck is by definition a choice, so the
+    // picker opens rather than mining the same target again.
+    await screen.container.querySelector('.analysis-mine-btn').click()
+    await vi.waitFor(() => {
+      expect(screen.container.querySelector('[role="dialog"]')).not.toBeNull()
+    })
+    expect(onMine).toHaveBeenCalledTimes(1)
   })
 })

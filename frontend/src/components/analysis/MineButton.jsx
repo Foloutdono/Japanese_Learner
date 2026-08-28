@@ -24,6 +24,16 @@ export function MineButton({ mining, kind, disabled, disabledReason, label, succ
   // reference -- shown differently from a successful add); 'error' when
   // the request itself failed (network, validation), distinct from both.
   const [outcome, setOutcome] = useState(null)
+  // The outcome used to REPLACE the button, permanently. A learner who
+  // added 猫 to "N5 words" and then wanted it in "Animals" too had no
+  // control left to press until the page reloaded -- and useMining
+  // remembers the last target per kind, so the second add would have
+  // gone somewhere else on purpose.
+  //
+  // Now: the outcome sits next to a button that stays. Pressing again
+  // opens the deck picker rather than repeating the remembered target,
+  // because a second add is by definition a different deck.
+  const [addedOnce, setAddedOnce] = useState(false)
 
   if (!mining) return null
 
@@ -41,6 +51,7 @@ export function MineButton({ mining, kind, disabled, disabledReason, label, succ
     try {
       const count = await onMine(deckId)
       setOutcome(typeof count === 'number' ? count : 1)
+      setAddedOnce(true)
     } catch {
       setOutcome('error')
     } finally {
@@ -51,7 +62,10 @@ export function MineButton({ mining, kind, disabled, disabledReason, label, succ
   function handleClick(e) {
     e.stopPropagation()
     const target = mining.targetFor(kind)
-    if (target) {
+    // First press: the remembered deck, no dialog. Any press after a
+    // successful add: choose, because repeating the same deck is what
+    // just happened.
+    if (target && !addedOnce) {
       mine(target.id)
     } else {
       setShowPicker(true)
@@ -63,22 +77,21 @@ export function MineButton({ mining, kind, disabled, disabledReason, label, succ
     mine(deck.id)
   }
 
-  if (outcome === 'error') {
-    return <span className="analysis-mine-status">{t.mineFailed ?? "Couldn't add this card."}</span>
-  }
-  if (outcome !== null) {
-    return (
-      <span className={`analysis-mine-status${outcome > 0 ? ' analysis-mine-status--added' : ''}`}>
-        {outcome > 0 ? (successLabel ?? (t.inDeck ?? 'In deck')) : (t.alreadyInDeck ?? 'Already there')}
-      </span>
-    )
-  }
+  const outcomeText =
+    outcome === 'error' ? (t.mineFailed ?? "Couldn't add this card.")
+    : outcome > 0 ? (successLabel ?? (t.inDeck ?? 'In deck'))
+    : (t.alreadyInDeck ?? 'Already there')
+  const outcomeClassName =
+    `analysis-mine-status${outcome > 0 ? ' analysis-mine-status--added' : ''}`
 
   return (
     <>
       <button onClick={handleClick} disabled={pending} className="analysis-mine-btn">
-        {label ?? (t.mineToDeck ?? 'Mine')}
+        {addedOnce ? (t.addToAnotherDeck ?? 'Add to another deck') : (label ?? (t.mineToDeck ?? 'Mine'))}
       </button>
+      {outcome !== null && (
+        <span className={outcomeClassName}>{outcomeText}</span>
+      )}
       {showPicker && (
         <DeckPicker
           decks={mining.decksFor(kind)}

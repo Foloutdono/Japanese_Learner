@@ -38,10 +38,12 @@ function StatRow({ label, value }) {
 // complete one; the analyzer's extra section survives as an
 // additional, presence-gated block rather than being dropped.
 //
-// `isMobile` defaults to true so a caller that doesn't track viewport
-// width (the analyzer, today) gets exactly the bottom-sheet-only
-// behavior it always had — useDialog's focus trap and Escape handling
-// are the only thing that changes for it, and both are additive.
+// `isMobile` defaults to true so a caller that doesn't pass it gets
+// exactly the bottom-sheet-only behavior it always had — useDialog's
+// focus trap and Escape handling are the only thing that changes for
+// it, and both are additive. (The analyzer used to be such a caller;
+// it now passes the real value, computed from its own `wide` media
+// query.)
 //
 // `mining` (see plan 017 / useMining.js) is optional. `detail.rawId` /
 // `detail.kind` / `detail.source` are only set by callers that built

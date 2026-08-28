@@ -534,6 +534,11 @@ const phraseAnalyzer = {
   hearThis:            'Écouter',
   hearSentence:        'Écouter cette phrase',
   hearToken:           s => `Écouter ${s}`,
+  entryDeleted:        'Retiré de votre historique',
+  undo:                'Annuler',
+  addToAnotherDeck:    'Ajouter à un autre deck',
+  mineAdded:           'Ajouté à votre deck',
+  mineAlready:         'Cette carte était déjà dans le deck',
 }
 
 // ── Video ─────────────────────────────────────────────────

@@ -1,5 +1,7 @@
 import { SectionHeader } from '../ui/SectionHeader'
 import { CrossIcon } from '../ui/Icons'
+import { useLang } from '../../LangContext'
+import { shortDate } from '../../lib/formatDate'
 
 // ── 運行履歴 — past services ──────────────────────────────
 // Typed and photographed Passages only. Video sessions are NOT listed
@@ -13,10 +15,21 @@ import { CrossIcon } from '../ui/Icons'
 // justify-content: space-between row with the whole panel width of
 // nothing between them -- the same criticism ModeSelector.jsx already
 // makes of the layout it replaced.
-export function AnalyzerHistory({ t, entries, onOpen, onDelete }) {
+export function AnalyzerHistory({ t, entries, onOpen, onDelete, lastDeleted, onUndo, onDismissUndo }) {
+  const { lang } = useLang()
   return (
     <section className="anl-panel">
       <SectionHeader jp="運行履歴" title={t.historyTitle} count={entries.length || null} />
+
+      {lastDeleted && (
+        <div className="anl-undo">
+          <span className="anl-undo__text">{t.entryDeleted}</span>
+          <button type="button" className="anl-mine__options" onClick={onUndo}>{t.undo}</button>
+          <button type="button" className="anl-undo__dismiss" onClick={onDismissUndo} aria-label={t.noticeDismiss}>
+            <CrossIcon size={13} />
+          </button>
+        </div>
+      )}
 
       {entries.length === 0 && (
         <div className="anl-history__empty">{t.noHistory}</div>
@@ -32,13 +45,16 @@ export function AnalyzerHistory({ t, entries, onOpen, onDelete }) {
             >
               <span className="anl-history__text" lang="ja">{h.phrase}</span>
               {h.source && h.source !== 'typed' && (
-                <span className="anl-history__source" lang="ja">写</span>
+                <span className="anl-history__source" lang="ja" title={t.sourcePhoto} aria-label={t.sourcePhoto}>写</span>
+              )}
+              {h.created_at && (
+                <span className="anl-history__when">{shortDate(h.created_at, lang)}</span>
               )}
             </button>
             <button
               type="button"
               className="anl-history__delete"
-              onClick={() => onDelete(h.id)}
+              onClick={() => onDelete(h)}
               aria-label={t.delete}
             >
               <CrossIcon size={13} />

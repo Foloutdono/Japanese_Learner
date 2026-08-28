@@ -44,6 +44,9 @@ export function useAnalyzerSession(session) {
   // on stop 12 does not blank the whole Passage's status.
   const [explainError, setExplainError] = useState({})
   const [history, setHistory]   = useState([])
+  // The entry just removed from `history`, kept in hand so it can be
+  // put back. See deleteHistoryEntry/undoDelete below.
+  const [lastDeleted, setLastDeleted] = useState(null)
 
   // The id of the video session currently being polled. Kept in state
   // (not a ref) because the poll effect is keyed on it.
@@ -313,9 +316,38 @@ export function useAnalyzerSession(session) {
     }
   }
 
-  function deleteHistoryEntry(id) {
-    return apiFetch(`/api/phrase/history/${id}`, session, { method: 'DELETE' })
+  // Optimistic, with the row kept in hand. Deleting is frequent and
+  // low-stakes, so a confirmation dialog is friction; an undo is not.
+  //
+  // The restore goes through the ordinary analyze-and-save path because
+  // the DELETE is a hard delete -- there is no soft-delete column and
+  // this is a frontend plan. So what comes back is the Passage with its
+  // provenance, at a NEW id and a new timestamp. The copy says "Undo",
+  // not "Restore", for exactly that reason.
+  function deleteHistoryEntry(entry) {
+    setLastDeleted(entry)
+    setHistory(prev => prev.filter(h => h.id !== entry.id))
+    return apiFetch(`/api/phrase/history/${entry.id}`, session, { method: 'DELETE' })
       .then(fetchHistory)
+      .catch(() => { setLastDeleted(null); fetchHistory() })
+  }
+
+  async function undoDelete() {
+    const entry = lastDeleted
+    if (!entry) return
+    setLastDeleted(null)
+    try {
+      await apiJson('/api/phrase/analyze', session, {
+        method: 'POST',
+        body: JSON.stringify({ phrase: entry.phrase, lang, source: entry.source ?? 'typed' }),
+      })
+    } finally {
+      fetchHistory()
+    }
+  }
+
+  function dismissUndo() {
+    setLastDeleted(null)
   }
 
   const sentences = passage?.sentences ?? []
@@ -342,6 +374,9 @@ export function useAnalyzerSession(session) {
     explain,
     loadHistoryEntry,
     deleteHistoryEntry,
+    lastDeleted,
+    undoDelete,
+    dismissUndo,
     reset,
     fail,
   }
