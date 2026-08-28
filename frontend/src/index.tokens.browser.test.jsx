@@ -21,9 +21,10 @@ describe('the dimmed text register', () => {
     const latin = screen.container.querySelector('.next-service__latin')
 
     const primary = getComputedStyle(strip).color
-    // Regression guard for the undefined --text-dim token: an invalid
-    // var() on an inherited property makes the element inherit instead,
-    // which silently flattened every dim register onto the body colour.
+    // Regression guard for the formerly-undefined dim-text token: an
+    // invalid var() on an inherited property makes the element inherit
+    // instead, which silently flattened every dim register onto the body
+    // colour.
     expect(getComputedStyle(when).color).not.toBe(primary)
 
     // The color-mix() site is a separate failure mode -- one bad var()
@@ -34,9 +35,9 @@ describe('the dimmed text register', () => {
   })
 
   it('gives the Today tick a border colour of its own', async () => {
-    // index.css's .today-lane-row__tick mixes --text-dim inside a border
-    // shorthand; with the token undefined the whole color-mix() dropped
-    // and border-color fell back to currentColor.
+    // index.css's .today-lane-row__tick mixes the same dim-text token
+    // inside a border shorthand; with the token undefined the whole
+    // color-mix() dropped and border-color fell back to currentColor.
     const screen = await render(
       <div className="today-lane-row"><span className="today-lane-row__tick" /></div>
     )
