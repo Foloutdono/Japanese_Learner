@@ -437,6 +437,8 @@ export default function AnalyzerScreen({ session }) {
                 // moves the list out from under them.
                 scrollOnChange={playerVideoId ? followPlayback : false}
                 t={t}
+                kept={analyzer.kept}
+                onKeep={analyzer.keepSentence}
               />
             )}
 

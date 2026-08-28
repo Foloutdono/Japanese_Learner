@@ -144,6 +144,24 @@ def _migrate_history_schema() -> None:
             cur.execute(
                 "ALTER TABLE phrase_history ADD COLUMN IF NOT EXISTS source_ref TEXT NOT NULL DEFAULT ''"
             )
+            # 保存 -- a Sentence the learner chose to keep, as opposed to
+            # a Passage that merely passed through. Both live in this
+            # table because they are the same thing to ADR-0002 (text
+            # plus provenance, never results); `kept` is what tells them
+            # apart in the UI. Additive, idempotent, defaulted -- every
+            # existing row is history, not a pin, which is correct.
+            cur.execute(
+                "ALTER TABLE phrase_history ADD COLUMN IF NOT EXISTS kept BOOLEAN NOT NULL DEFAULT FALSE"
+            )
+            # A pin is idempotent: pinning the same Sentence twice must
+            # not make two rows. Partial index, so the constraint applies
+            # ONLY to kept rows -- ordinary history legitimately repeats
+            # (analyse the same sentence twice on two different days and
+            # both visits are real).
+            cur.execute("""
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_phrase_history_kept_unique
+                ON phrase_history(user_id, phrase) WHERE kept
+            """)
         conn.commit()
     finally:
         conn.close()
@@ -414,8 +432,8 @@ def get_phrase_history(user_id: str = Depends(get_user_id), limit: int = Query(5
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, phrase, source, created_at FROM phrase_history "
-                "WHERE user_id = %s ORDER BY created_at DESC LIMIT %s",
+                "SELECT id, phrase, source, kept, created_at FROM phrase_history "
+                "WHERE user_id = %s ORDER BY kept DESC, created_at DESC LIMIT %s",
                 (user_id, limit),
             )
             rows = cur.fetchall()
@@ -423,8 +441,14 @@ def get_phrase_history(user_id: str = Depends(get_user_id), limit: int = Query(5
         conn.close()
 
     return [
-        {"id": row_id, "phrase": phrase, "source": source, "created_at": created_at.isoformat()}
-        for row_id, phrase, source, created_at in rows
+        {
+            "id": row_id,
+            "phrase": phrase,
+            "source": source,
+            "kept": kept,
+            "created_at": created_at.isoformat(),
+        }
+        for row_id, phrase, source, kept, created_at in rows
     ]
 
 
@@ -467,4 +491,73 @@ def delete_phrase_history_entry(entry_id: int, user_id: str = Depends(get_user_i
         conn.commit()
     finally:
         conn.close()
+    return {"ok": True}
+
+
+class KeepRequest(BaseModel):
+    sentence: str
+    source: str = "typed"
+    source_ref: str = ""
+
+
+@router.post("/api/phrase/keep")
+def keep_sentence(payload: KeepRequest, user_id: str = Depends(get_user_id)):
+    """保存 -- keep ONE Sentence, with its provenance.
+
+    Text and provenance only, never the analysis: see
+    docs/adr/0002-sentence-bank-stores-text-not-results.md. Reopening a
+    kept Sentence re-derives it through the same local (+cached deep)
+    pipeline every other read uses, so its badges always reflect CURRENT
+    SRS state rather than a snapshot.
+
+    Idempotent by construction -- the partial unique index on
+    (user_id, phrase) WHERE kept means pinning twice updates rather than
+    duplicates. An ordinary history row for the same text is left alone:
+    the two are different facts (you passed through this / you chose to
+    keep this) and collapsing them would lose the visit.
+    """
+    sentence = payload.sentence.strip()
+    if not sentence:
+        raise HTTPException(status_code=400, detail="Sentence is required")
+
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO phrase_history(user_id, phrase, source, source_ref, kept) "
+                "VALUES (%s, %s, %s, %s, TRUE) "
+                "ON CONFLICT (user_id, phrase) WHERE kept "
+                "DO UPDATE SET source = EXCLUDED.source, source_ref = EXCLUDED.source_ref "
+                "RETURNING id, created_at",
+                (user_id, sentence, payload.source, payload.source_ref),
+            )
+            row_id, created_at = cur.fetchone()
+        conn.commit()
+    finally:
+        conn.close()
+
+    return {"id": row_id, "created_at": created_at.isoformat(), "kept": True}
+
+
+@router.delete("/api/phrase/keep/{entry_id}")
+def unkeep_sentence(entry_id: int, user_id: str = Depends(get_user_id)):
+    """Un-pin. Clears `kept` rather than deleting the row: the learner
+    kept this Sentence and then changed their mind about keeping it,
+    which is not the same as never having seen it. DELETE
+    /api/phrase/history/{id} is still how you remove it entirely."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE phrase_history SET kept = FALSE WHERE id = %s AND user_id = %s",
+                (entry_id, user_id),
+            )
+            rowcount = cur.rowcount
+        conn.commit()
+    finally:
+        conn.close()
+
+    if rowcount == 0:
+        raise HTTPException(status_code=404, detail="Not found")
+
     return {"ok": True}

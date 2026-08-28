@@ -24,7 +24,7 @@ import { formatTimecode } from '../../lib/timecode'
 // stopping-pattern band above a train door. Plan 030 chooses between
 // them responsively.
 
-export function PassageLine({ sentences, activeIndex, onSelect, t, orientation = 'vertical', scrollOnChange = true }) {
+export function PassageLine({ sentences, activeIndex, onSelect, t, orientation = 'vertical', scrollOnChange = true, kept, onKeep }) {
   const activeRef = useRef(null)
   const lineRef = useRef(null)
   const stopRefs = useRef({})
@@ -100,87 +100,106 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
     >
       {sentences.map((s, i) => {
         const active = i === activeIndex
+        const isKept = !!kept?.has(s.text)
         return (
-          <button
-            key={i}
-            // Roving tabindex: ONE tab stop for the whole line, then the
-            // arrow keys move within it. Without this a 47-cue subtitle
-            // track put 47 tab stops between the platform rail and the
-            // breakdown -- the exact pattern SourceRail one component up
-            // already uses, and which this component was written without.
-            tabIndex={active ? 0 : -1}
-            ref={el => {
-              stopRefs.current[i] = el
-              if (active) activeRef.current = el
-            }}
-            type="button"
-            // A control, not a div with an onClick -- which is what the
-            // transcript this replaces was, and why it was unreachable
-            // by keyboard and invisible to a screen reader. Carries no
-            // `role`: its own is the one that matters.
-            aria-current={active ? 'true' : undefined}
-            // One name per stop, not one tooltip repeated N times. The
-            // position is what a route diagram is FOR, so it leads; the
-            // Sentence text follows, and i+1 is called out because it is
-            // the app's highest-value signal.
-            aria-label={[
-              t.stopNumber(i + 1, sentences.length),
-              s.text,
-              s.foreign ? t.notJapaneseShort : null,
-              !s.foreign && s.unknown_count === 1 ? t.iPlusOne : null,
-              s.explanation ? t.alreadyExplained : null,
-              s.cue_start != null ? formatTimecode(s.cue_start) : null,
-            ].filter(Boolean).join(' — ')}
-            className={[
-              'anl-stop',
-              i === 0 ? 'anl-stop--first' : '',
-              i === sentences.length - 1 ? 'anl-stop--last' : '',
-            ].filter(Boolean).join(' ')}
-            onClick={() => onSelect(i)}
-          >
-            {/* Drawn per stop so the ends can be capped and the line
-                stays unbroken through the gap between them. */}
-            <span className="anl-stop__rail" aria-hidden="true" />
-            <span className="anl-stop__marker" aria-hidden="true" />
+          // Sibling, not child: the stop is a <button>, and a <button>
+          // inside a <button> is invalid HTML with undefined focus
+          // behaviour -- the same constraint TokenCard's kanji chip has.
+          // The row wraps both, so the roving tabindex, key handler, and
+          // rail-bleed technique on .anl-stop stay exactly as they were.
+          <div className="anl-stop-row" key={i}>
+            <button
+              // Roving tabindex: ONE tab stop for the whole line, then the
+              // arrow keys move within it. Without this a 47-cue subtitle
+              // track put 47 tab stops between the platform rail and the
+              // breakdown -- the exact pattern SourceRail one component up
+              // already uses, and which this component was written without.
+              tabIndex={active ? 0 : -1}
+              ref={el => {
+                stopRefs.current[i] = el
+                if (active) activeRef.current = el
+              }}
+              type="button"
+              // A control, not a div with an onClick -- which is what the
+              // transcript this replaces was, and why it was unreachable
+              // by keyboard and invisible to a screen reader. Carries no
+              // `role`: its own is the one that matters.
+              aria-current={active ? 'true' : undefined}
+              // One name per stop, not one tooltip repeated N times. The
+              // position is what a route diagram is FOR, so it leads; the
+              // Sentence text follows, and i+1 is called out because it is
+              // the app's highest-value signal.
+              aria-label={[
+                t.stopNumber(i + 1, sentences.length),
+                s.text,
+                s.foreign ? t.notJapaneseShort : null,
+                !s.foreign && s.unknown_count === 1 ? t.iPlusOne : null,
+                s.explanation ? t.alreadyExplained : null,
+                s.cue_start != null ? formatTimecode(s.cue_start) : null,
+              ].filter(Boolean).join(' — ')}
+              className={[
+                'anl-stop',
+                i === 0 ? 'anl-stop--first' : '',
+                i === sentences.length - 1 ? 'anl-stop--last' : '',
+              ].filter(Boolean).join(' ')}
+              onClick={() => onSelect(i)}
+            >
+              {/* Drawn per stop so the ends can be capped and the line
+                  stays unbroken through the gap between them. */}
+              <span className="anl-stop__rail" aria-hidden="true" />
+              <span className="anl-stop__marker" aria-hidden="true" />
 
-            {/* Truncated by CSS, never by slicing the string: a hard
-                character count cuts mid-grapheme and mangles Japanese. */}
-            <span className="anl-stop__text" lang="ja">{s.text}</span>
+              {/* Truncated by CSS, never by slicing the string: a hard
+                  character count cuts mid-grapheme and mangles Japanese. */}
+              <span className="anl-stop__text" lang="ja">{s.text}</span>
 
-            {s.foreign ? (
-              /* Flagged, not hidden: the learner can see this line is in
-                 the track and that the app has nothing to say about it. */
-              <span className="anl-stop__foreign" title={t.notJapaneseLine} aria-hidden="true">
-                {t.notJapaneseShort}
-              </span>
-            ) : s.unknown_count === 1 && (
-              <span className="anl-stop__iplus" title={t.iPlusOne} aria-hidden="true">i+1</span>
+              {s.foreign ? (
+                /* Flagged, not hidden: the learner can see this line is in
+                   the track and that the app has nothing to say about it. */
+                <span className="anl-stop__foreign" title={t.notJapaneseLine} aria-hidden="true">
+                  {t.notJapaneseShort}
+                </span>
+              ) : s.unknown_count === 1 && (
+                <span className="anl-stop__iplus" title={t.iPlusOne} aria-hidden="true">i+1</span>
+              )}
+
+              {/* 済 — already explained. The deep tier is the one thing on
+                  this screen that costs a model call (docs/adr/0001), and
+                  nothing recorded what had been bought: on a 47-stop
+                  subtitle track the only way to know was to open each stop.
+                  No new pigment -- the wave's colour rule spends
+                  --line-douga on the timestamp chip and nothing else, and
+                  --success is already i+1's. This is shape and weight.
+
+                  Session-local for a video Passage: the explain endpoint
+                  does not write back into video_sessions.sentences, so a
+                  reloaded session loses the marks even though the
+                  explanations themselves are still cached server-side. A
+                  typed or photographed Passage keeps them, because the
+                  history re-derive merges the cache back in. */}
+              {s.explanation && (
+                <span className="anl-stop__done" lang="ja" aria-hidden="true">済</span>
+              )}
+
+              {/* The one place 鶯色 is spent: the only data a video
+                  Sentence has that no other source does. */}
+              {s.cue_start != null && (
+                <span className="anl-stop__time" aria-hidden="true">{formatTimecode(s.cue_start)}</span>
+              )}
+            </button>
+            {onKeep && (
+              <button
+                type="button"
+                className={`anl-keep${isKept ? ' anl-keep--on' : ''}`}
+                aria-pressed={isKept}
+                aria-label={isKept ? t.unkeepSentence : t.keepSentence}
+                title={isKept ? t.unkeepSentence : t.keepSentence}
+                onClick={() => onKeep(i)}
+              >
+                <span lang="ja" aria-hidden="true">保存</span>
+              </button>
             )}
-
-            {/* 済 — already explained. The deep tier is the one thing on
-                this screen that costs a model call (docs/adr/0001), and
-                nothing recorded what had been bought: on a 47-stop
-                subtitle track the only way to know was to open each stop.
-                No new pigment -- the wave's colour rule spends
-                --line-douga on the timestamp chip and nothing else, and
-                --success is already i+1's. This is shape and weight.
-
-                Session-local for a video Passage: the explain endpoint
-                does not write back into video_sessions.sentences, so a
-                reloaded session loses the marks even though the
-                explanations themselves are still cached server-side. A
-                typed or photographed Passage keeps them, because the
-                history re-derive merges the cache back in. */}
-            {s.explanation && (
-              <span className="anl-stop__done" lang="ja" aria-hidden="true">済</span>
-            )}
-
-            {/* The one place 鶯色 is spent: the only data a video
-                Sentence has that no other source does. */}
-            {s.cue_start != null && (
-              <span className="anl-stop__time" aria-hidden="true">{formatTimecode(s.cue_start)}</span>
-            )}
-          </button>
+          </div>
         )
       })}
     </div>

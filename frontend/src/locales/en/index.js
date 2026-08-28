@@ -519,6 +519,10 @@ const phraseAnalyzer = {
   offDeckWords:        'not taught by the app',
   iPlusOne:            'One step beyond you',
   alreadyExplained:    'already explained',
+  // 保存 (plan 039) — pinning a Sentence into the bank.
+  keepSentence:        'Keep this sentence',
+  unkeepSentence:      'Stop keeping this sentence',
+  keptTitle:           'Kept',
   grammarSpotted:      'Grammar spotted',
   explainSentence:     'Explain',
   explainAgain:        'Explain again',

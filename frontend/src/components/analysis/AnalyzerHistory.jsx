@@ -43,6 +43,16 @@ export function AnalyzerHistory({ t, entries, onOpen, onDelete, lastDeleted, onU
               onClick={() => onOpen(h)}
             >
               <span className="anl-history__text" lang="ja">{h.label}</span>
+              {h.kind === 'passage' && h.kept && (
+                // 保存 stamp, inline beside 写/動 rather than a separate
+                // section: the client re-sorts this merged list by
+                // createdAt (plan 040), which already undoes the
+                // server's `kept DESC` ordering -- see plan 039's
+                // ISSUE 3. A stamp survives that re-sort; a "kept first"
+                // grouping would not without extra client-side work this
+                // plan does not take on.
+                <span className="anl-history__kept" lang="ja" title={t.keptTitle} aria-label={t.keptTitle}>保存</span>
+              )}
               {h.source && h.source !== 'typed' && h.kind !== 'session' && (
                 <span className="anl-history__source" lang="ja" title={t.sourcePhoto} aria-label={t.sourcePhoto}>写</span>
               )}

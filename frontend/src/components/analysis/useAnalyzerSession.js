@@ -44,6 +44,12 @@ export function useAnalyzerSession(session) {
   // on stop 12 does not blank the whole Passage's status.
   const [explainError, setExplainError] = useState({})
   const [history, setHistory]   = useState([])
+  // The set of Sentence texts this learner has kept. Kept as a Set of
+  // TEXTS rather than of indices, because a Passage's indices change
+  // under it (a new analysis, a history entry) and the identity of a
+  // kept Sentence is its text -- which is exactly what the bank stores
+  // (docs/adr/0002).
+  const [kept, setKept] = useState(() => new Set())
   // The entry just removed from `history`, kept in hand so it can be
   // put back. See deleteHistoryEntry/undoDelete below.
   const [lastDeleted, setLastDeleted] = useState(null)
@@ -85,6 +91,7 @@ export function useAnalyzerSession(session) {
           label: p.phrase,
           source: p.source,
           createdAt: p.created_at,
+          kept: p.kept,
         })),
         ...sessions.map(s => ({
           kind: 'session',
@@ -98,6 +105,9 @@ export function useAnalyzerSession(session) {
       ]
       merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       setHistory(merged)
+      setKept(new Set(
+        merged.filter(h => h.kind === 'passage' && h.kept).map(h => h.label),
+      ))
     }).catch(() => setHistory([]))
   }, [session])
 
@@ -363,6 +373,43 @@ export function useAnalyzerSession(session) {
     }
   }
 
+  // 保存 -- pin or unpin ONE Sentence. Optimistic: pinning is a small,
+  // reversible act and a spinner on it would cost more than the
+  // occasional revert.
+  async function keepSentence(index) {
+    const sentence = passage?.sentences?.[index]
+    if (!sentence) return
+    const alreadyKept = kept.has(sentence.text)
+    setKept(prev => {
+      const next = new Set(prev)
+      if (alreadyKept) next.delete(sentence.text)
+      else next.add(sentence.text)
+      return next
+    })
+    try {
+      if (alreadyKept) {
+        const row = history.find(h => h.kind === 'passage' && h.label === sentence.text && h.kept)
+        if (row) await apiFetch(`/api/phrase/keep/${row.id}`, session, { method: 'DELETE' })
+      } else {
+        await apiJson('/api/phrase/keep', session, {
+          method: 'POST',
+          body: JSON.stringify({
+            sentence: sentence.text,
+            source: passage.source ?? 'typed',
+            // A video Sentence's provenance is its cue -- the same
+            // "<ref>@<cue_start>" convention routes/video.py's explain
+            // endpoint already writes.
+            source_ref: sentence.cue_start != null
+              ? `${passage.sourceRef ?? ''}@${sentence.cue_start}`
+              : (passage.sourceRef ?? ''),
+          }),
+        })
+      }
+    } finally {
+      fetchHistory()
+    }
+  }
+
   // Optimistic, with the row kept in hand. Deleting is frequent and
   // low-stakes, so a confirmation dialog is friction; an undo is not.
   //
@@ -415,6 +462,8 @@ export function useAnalyzerSession(session) {
     focused: sentences[safeIndex] ?? null,
     explaining,
     explainError,
+    kept,
+    keepSentence,
     analyzeText,
     startVideoFromFile,
     startVideoFromTranscript,

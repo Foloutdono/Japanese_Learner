@@ -16,6 +16,8 @@ const T = {
   stopNumber: (i, n) => `Sentence ${i} of ${n}`,
   notJapaneseShort: 'not Japanese',
   alreadyExplained: 'already explained',
+  keepSentence: 'Keep this sentence',
+  unkeepSentence: 'Stop keeping this sentence',
 }
 
 function sentenceFixture(overrides = {}) {
@@ -228,5 +230,55 @@ describe('PassageLine', () => {
     )
     expect(spy).not.toHaveBeenCalled()
     spy.mockRestore()
+  })
+
+  // Plan 039: 保存 -- a pin beside every stop, given onKeep.
+  it('offers a pin on every stop when onKeep is given', async () => {
+    const sentences = [sentenceFixture({ text: 'A' }), sentenceFixture({ text: 'B' }), sentenceFixture({ text: 'C' })]
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} onKeep={() => {}} />
+    )
+    expect(screen.container.querySelectorAll('.anl-keep').length).toBe(sentences.length)
+  })
+
+  it('renders no pin without onKeep', async () => {
+    const sentences = [sentenceFixture({ text: 'A' }), sentenceFixture({ text: 'B' })]
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} />
+    )
+    expect(screen.container.querySelectorAll('.anl-keep').length).toBe(0)
+  })
+
+  // The most important test here: the stop is already a <button>, and a
+  // <button> nested inside a <button> is invalid HTML with undefined
+  // focus/activation behaviour. The pin must be a SIBLING.
+  it('never nests a button inside a button', async () => {
+    const sentences = [sentenceFixture({ text: 'A' }), sentenceFixture({ text: 'B' })]
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} onKeep={() => {}} />
+    )
+    expect(screen.container.querySelectorAll('button button').length).toBe(0)
+  })
+
+  it('marks a kept stop as pressed', async () => {
+    const sentences = [sentenceFixture({ text: 'A' }), sentenceFixture({ text: 'B' })]
+    const kept = new Set(['B'])
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} kept={kept} onKeep={() => {}} />
+    )
+    const pins = screen.container.querySelectorAll('.anl-keep')
+    expect(pins[0].getAttribute('aria-pressed')).toBe('false')
+    expect(pins[1].getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('gives the pin a 24px target', async () => {
+    const sentences = [sentenceFixture({ text: 'A' })]
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} onKeep={() => {}} />
+    )
+    const pin = screen.container.querySelector('.anl-keep')
+    const rect = pin.getBoundingClientRect()
+    expect(rect.width).toBeGreaterThanOrEqual(24)
+    expect(rect.height).toBeGreaterThanOrEqual(24)
   })
 })

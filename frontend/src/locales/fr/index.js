@@ -504,6 +504,10 @@ const phraseAnalyzer = {
   offDeckWords:        'non enseignés par l\'application',
   iPlusOne:            'À une étape de votre niveau',
   alreadyExplained:    'déjà expliquée',
+  // 保存 (plan 039) — épingler une phrase dans la banque.
+  keepSentence:        'Garder cette phrase',
+  unkeepSentence:      'Ne plus garder cette phrase',
+  keptTitle:           'Gardées',
   grammarSpotted:      'Grammaire repérée',
   explainSentence:     'Expliquer',
   explainAgain:        'Expliquer à nouveau',

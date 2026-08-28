@@ -83,6 +83,8 @@ CREATE TABLE user_profiles (
 -- `result` is nullable and unused by any code path (routes/phrase.py's
 -- _migrate_history_schema drops its NOT NULL at import time) -- kept
 -- rather than dropped so pre-2026-08 rows are left alone.
+-- `kept` marks a Sentence the learner deliberately pinned (保存), as
+-- opposed to a Passage/Sentence that merely passed through as history.
 CREATE TABLE phrase_history (
     id BIGSERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
@@ -90,11 +92,17 @@ CREATE TABLE phrase_history (
     result JSONB,
     source TEXT NOT NULL DEFAULT 'typed',
     source_ref TEXT NOT NULL DEFAULT '',
+    kept BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_phrase_history_user
 ON phrase_history(user_id, created_at DESC);
+
+-- Makes a pin idempotent: only one kept row per (user_id, phrase); an
+-- ordinary (non-kept) history row for the same text may still repeat.
+CREATE UNIQUE INDEX idx_phrase_history_kept_unique
+ON phrase_history(user_id, phrase) WHERE kept;
 
 CREATE TABLE reading_log (
     id BIGSERIAL PRIMARY KEY,

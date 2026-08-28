@@ -2,6 +2,8 @@
 # same reason test_http_smoke.py deviates from this suite's usual
 # unittest.TestCase style: TestClient and monkeypatch wire in more
 # naturally as plain functions.
+import uuid
+
 import routes.phrase as phrase_module
 from core.db import db_conn
 
@@ -181,3 +183,90 @@ def test_normalize_explanation_key_leaves_a_correct_key_alone():
 def test_normalize_explanation_key_is_a_noop_without_words():
     parsed = {"something": "else"}
     assert phrase_module._normalize_explanation_key(parsed) == parsed
+
+
+def test_keep_creates_a_kept_row(client):
+    sentence = "保存するべき文です。"
+    response = client.post("/api/phrase/keep", json={"sentence": sentence})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["kept"] is True
+    assert body["id"] is not None
+
+    history = client.get("/api/phrase/history").json()
+    entry = next(h for h in history if h["id"] == body["id"])
+    assert entry["kept"] is True
+    assert entry["phrase"] == sentence
+
+
+def test_keep_is_idempotent(client):
+    sentence = "二回保存しても一つの文です。"
+    first = client.post("/api/phrase/keep", json={"sentence": sentence})
+    second = client.post("/api/phrase/keep", json={"sentence": sentence})
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json()["id"] == second.json()["id"]
+
+    history = client.get("/api/phrase/history").json()
+    kept_rows = [h for h in history if h["phrase"] == sentence and h["kept"]]
+    assert len(kept_rows) == 1
+
+
+def test_keep_does_not_touch_an_existing_history_row(client):
+    # A distinct sentence per test run (a persistent test DB is not
+    # wiped between pytest invocations, and this test's assertion is an
+    # exact row count for one phrase -- a fixed literal would pass once
+    # and then fail forever after on a re-run against the same database).
+    sentence = f"先に分析してから保存する文です。{uuid.uuid4()}"
+    analyze_resp = client.post("/api/phrase/analyze", json={"phrase": sentence})
+    assert analyze_resp.status_code == 200
+
+    keep_resp = client.post("/api/phrase/keep", json={"sentence": sentence})
+    assert keep_resp.status_code == 200
+
+    history = client.get("/api/phrase/history").json()
+    rows = [h for h in history if h["phrase"] == sentence]
+    assert len(rows) == 2
+    kept_flags = sorted(h["kept"] for h in rows)
+    assert kept_flags == [False, True]
+
+
+def test_unkeep_clears_the_flag_without_deleting(client):
+    sentence = "保存してからやめる文です。"
+    keep_resp = client.post("/api/phrase/keep", json={"sentence": sentence})
+    entry_id = keep_resp.json()["id"]
+
+    unkeep_resp = client.delete(f"/api/phrase/keep/{entry_id}")
+    assert unkeep_resp.status_code == 200
+    assert unkeep_resp.json() == {"ok": True}
+
+    history = client.get("/api/phrase/history").json()
+    entry = next(h for h in history if h["id"] == entry_id)
+    assert entry["kept"] is False
+
+
+def test_unkeep_404s_for_another_users_row(client):
+    # Unique per run for the same reason as above: the partial unique
+    # index on (user_id, phrase) WHERE kept would otherwise collide with
+    # a row this same test left behind on a prior run.
+    sentence = f"他人の文です。{uuid.uuid4()}"
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO phrase_history(user_id, phrase, source, kept) "
+                "VALUES (%s, %s, %s, TRUE) RETURNING id",
+                ("someone-else", sentence, "typed"),
+            )
+            (other_id,) = cur.fetchone()
+        conn.commit()
+    finally:
+        conn.close()
+
+    response = client.delete(f"/api/phrase/keep/{other_id}")
+    assert response.status_code == 404
+
+
+def test_keep_rejects_a_blank_sentence(client):
+    response = client.post("/api/phrase/keep", json={"sentence": "   "})
+    assert response.status_code == 400
