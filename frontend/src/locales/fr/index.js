@@ -531,6 +531,9 @@ const phraseAnalyzer = {
   ocrCheckText:        "Vérifiez le texte avant d'analyser — l'OCR n'est pas toujours fiable.",
   ocrFailed:           "Impossible de lire cette image. Essayez-en une autre, ou tapez le texte.",
   imageTooLarge:       'Cette image est trop volumineuse.',
+  hearThis:            'Écouter',
+  hearSentence:        'Écouter cette phrase',
+  hearToken:           s => `Écouter ${s}`,
 }
 
 // ── Video ─────────────────────────────────────────────────

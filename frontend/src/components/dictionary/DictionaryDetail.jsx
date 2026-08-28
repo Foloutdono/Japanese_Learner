@@ -10,6 +10,7 @@ import { StageBadge } from '../study/StageBadge'
 import { GlossList, firstGloss } from '../study/gloss'
 import { BoltIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
+import { speakJapanese } from '../../lib/audio'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -132,15 +133,12 @@ export function entryKey(entry) {
 // for a pure text utility would be backwards (same reasoning as
 // Readings.jsx being its own module).
 
-// eslint-disable-next-line react-refresh/only-export-components -- speakJapanese is a speech-synthesis side-effect helper re-exported for QuizComponents.jsx's DictionaryLookupSheet; not a component.
-export function speakJapanese(text) {
-  if (!text) return
-  window.speechSynthesis.cancel()
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = 'ja-JP'
-  u.rate = 0.8
-  window.speechSynthesis.speak(u)
-}
+// The mixer-aware one, imported above. This module used to define its
+// own copy that ignored mute and the tts volume entirely, so a muted
+// app still spoke. Re-exported so QuizComponents.jsx's
+// DictionaryLookupSheet keeps its import path.
+// eslint-disable-next-line react-refresh/only-export-components -- re-exported for QuizComponents.jsx's DictionaryLookupSheet; not a component.
+export { speakJapanese }
 
 // JLPT level shown as a quiet index-tab: a left accent stroke plus a
 // lightly-tinted ground in the level's own colour, rather than a loud

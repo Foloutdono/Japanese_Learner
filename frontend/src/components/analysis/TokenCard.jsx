@@ -3,6 +3,7 @@ import { StatusBadge } from './StatusBadge'
 import { MineButton } from './MineButton'
 import { MineControls } from './MineControls'
 import { buildCloze } from './useMining'
+import { SpeakButton } from './SpeakButton'
 
 // Content-word POS classes -- matches study/analysis.py's _CONTENT_POS,
 // so the "can't mine, not in the app deck" control shows up on exactly
@@ -32,6 +33,7 @@ const CONTENT_POS = new Set(['noun', 'verb', 'adjective', 'adverb'])
 // reason the Sentence is worth studying, so its mine control stands out.
 export function TokenCard({
   word, t, compact = false, extraClassName = '', onWordClick, onKanjiClick, mining, sentenceText, emphasize = false,
+  speakable = false,
 }) {
   const showVocabMine = word.vocab_match || CONTENT_POS.has(word.pos)
 
@@ -75,6 +77,9 @@ export function TokenCard({
           <div className="phrase-word-card__surface-wrap">{surfaceContent}</div>
         )}
         {!compact && word.vocab_match && <StatusBadge status={word.vocab_match.stats.status} t={t} />}
+        {speakable && (
+          <SpeakButton text={word.surface} label={t.hearToken(word.surface)} size="sm" t={t} />
+        )}
         {showVocabMine && (
           <MineControls
             mining={mining}

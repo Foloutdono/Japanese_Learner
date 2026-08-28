@@ -4,6 +4,7 @@ import { STATUS_COLORS, wordColor } from './status'
 import { TokenCard } from './TokenCard'
 import { GrammarChips } from './GrammarChips'
 import { LevelBadge } from './LevelBadge'
+import { SpeakButton } from './SpeakButton'
 
 // Real stroke-based chevron rather than `‹`/`›` text glyphs, whose
 // optical centering varies by font/OS. `display: block` avoids the few
@@ -70,6 +71,7 @@ export function Legend({ t }) {
 // new phrase is shown.
 export function SentenceBreakdown({
   analysis, t, layout = 'list', index = 0, setIndex, onTokenClick, onKanjiClick, mining,
+  speakable = false,
 }) {
   const tokens = analysis.tokens ?? analysis.words ?? []
 
@@ -111,12 +113,17 @@ export function SentenceBreakdown({
           ))}
         </div>
 
-        <LevelBadge
-          level={analysis.level}
-          unknownCount={analysis.unknown_count}
-          offDeckCount={analysis.off_deck_count}
-          t={t}
-        />
+        <div className="rdg-breakdown-badges">
+          <LevelBadge
+            level={analysis.level}
+            unknownCount={analysis.unknown_count}
+            offDeckCount={analysis.off_deck_count}
+            t={t}
+          />
+          {speakable && (
+            <SpeakButton text={analysis.text} label={t.hearSentence} size="md" t={t} />
+          )}
+        </div>
         <GrammarChips grammar={analysis.grammar} t={t} mining={mining} />
 
         {analysis.explanation && (
@@ -145,6 +152,7 @@ export function SentenceBreakdown({
               onKanjiClick={onKanjiClick}
               mining={mining}
               sentenceText={analysis.text}
+              speakable={speakable}
             />}
           </CardTransition>
 
@@ -189,12 +197,17 @@ export function SentenceBreakdown({
             </span>
           )))}
         </div>
-        <LevelBadge
-          level={analysis.level}
-          unknownCount={analysis.unknown_count}
-          offDeckCount={analysis.off_deck_count}
-          t={t}
-        />
+        <div className="rdg-breakdown-badges">
+          <LevelBadge
+            level={analysis.level}
+            unknownCount={analysis.unknown_count}
+            offDeckCount={analysis.off_deck_count}
+            t={t}
+          />
+          {speakable && (
+            <SpeakButton text={analysis.text} label={t.hearSentence} size="md" t={t} />
+          )}
+        </div>
         <GrammarChips grammar={analysis.grammar} t={t} mining={mining} />
         <div className="phrase-explanation">
           {analysis.explanation}

@@ -996,3 +996,29 @@
 @media (prefers-reduced-motion: reduce) {
   .anl-deckpicker__deck { transition: none; }
 }
+
+/* 音声 — hear it. Two sizes: beside a Sentence's level badge, and on a
+   Token's card. Both clear WCAG 2.5.8's 24x24 minimum; the md size
+   clears the 44px comfort target as well. */
+.anl-speak {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  transition: color 0.14s ease, border-color 0.14s ease;
+}
+.anl-speak--md { width: 34px; height: 34px; }
+.anl-speak--sm { width: 26px; height: 26px; }
+.anl-speak:hover { color: var(--line-kaiseki); border-color: color-mix(in srgb, var(--line-kaiseki) 55%, transparent); }
+.anl-speak:active { transform: scale(0.92); }
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-speak { transition: none; }
+  .anl-speak:active { transform: none; }
+}
+
+.rdg-breakdown-badges { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }

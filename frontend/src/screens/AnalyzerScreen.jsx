@@ -472,6 +472,7 @@ export default function AnalyzerScreen({ session }) {
                     onTokenClick={openVocabDetail}
                     onKanjiClick={openKanjiDetail}
                     mining={mining}
+                    speakable
                   />
                   {/* The control does not disappear once an explanation
                       exists. The backend caches per (phrase, lang), so a
