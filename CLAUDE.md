@@ -6,6 +6,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Japanese-learning web app (kana, vocab, kanji, grammar, reading, listening, SRS review, mock exams). FastAPI backend + React/Vite frontend, Postgres storage, Supabase for auth.
 
+## Visual design
+
+**Before touching any CSS or building any screen, read `DESIGN.md`.** It is the
+single source of truth for the app's visual language: the station metaphor, the
+pigment rules, the bilingual pairing, and the size/space/radius/tracking scales.
+
+Two rules that cause the most damage when missed:
+
+- **All CSS lives in `frontend/src/index.css`.** One file, on purpose. Do not
+  create a per-feature stylesheet — that is how two features ended up inventing
+  private spacing token families. Namespace your selectors instead
+  (`.exam-*`, `.anl-*`, `.onb-*`).
+- **Never invent a size, space, radius or tracking value.** Use the tokens in
+  `:root`. If none fits, that is a design decision — raise it rather than
+  adding a 95th font size.
+
+See `DESIGN.md` for the full specification: colour families, type, surfaces,
+space, motion, structure and the density contract.
+
+## Plans
+
+`plans/` is intentionally untracked — the plan documents are large and have no
+runtime purpose. Two consequences worth knowing:
+
+- **Plan numbers are cited in source comments** (e.g. "Plan 034" in
+  `PassageLine.browser.test.jsx`), so they must never be reused.
+- **`git ls-tree HEAD plans/` under-reports which numbers are taken**, because
+  earlier plan files were lost to a working-tree cleanup. Numbers **001–045**
+  are used. When starting a new wave, begin at **046** or higher, and check
+  `plans/README.md` if it is present on disk.
+
 ## Commands
 
 ### Backend (`backend/`)
