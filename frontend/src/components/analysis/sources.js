@@ -26,13 +26,17 @@
 //   hint     locale key for the tooltip / tablist description
 //   lead     locale key for the one line the intake panel opens with
 //   busy     locale key for the line shown while THIS platform is working
-//   history  whether 運行履歴 applies. Only false for 動画, and not as a
-//            preference: routes/video.py exposes a session by id and
-//            nothing that enumerates them, so there is no list to show.
+//   history  whether 運行履歴 applies. True for all three platforms since
+//            plan 040 added GET /api/video/sessions; it was false for
+//            動画 only because a session was reachable by id and by
+//            nothing else. Kept as a field rather than dropped now that
+//            every entry is `true`: it is the seam a fourth source would
+//            use, and removing it would mean the screen hard-codes the
+//            panel's presence instead of reading it from the registry.
 export const SOURCES = [
   { key: 'text',  no: 1, jp: '文字', kana: 'もじ',     label: 'sourceText',  hint: 'sourceTextHint',  lead: 'intakeTextLead',  busy: 'analyzingText',  history: true },
   { key: 'photo', no: 2, jp: '写真', kana: 'しゃしん', label: 'sourcePhoto', hint: 'sourcePhotoHint', lead: 'intakePhotoLead', busy: 'analyzingPhoto', history: true },
-  { key: 'video', no: 3, jp: '動画', kana: 'どうが',   label: 'sourceVideo', hint: 'sourceVideoHint', lead: 'intakeVideoLead', busy: 'analyzingVideo', history: false },
+  { key: 'video', no: 3, jp: '動画', kana: 'どうが',   label: 'sourceVideo', hint: 'sourceVideoHint', lead: 'intakeVideoLead', busy: 'analyzingVideo', history: true },
 ]
 
 /** The platform the learner is standing on. Never undefined for a key

@@ -57,15 +57,48 @@ export function useAnalyzerSession(session) {
   // started another one cannot overwrite the newer result.
   const runIdRef = useRef(0)
 
-  // ── History (typed and photographed Passages only) ────────
-  // Video sessions are not listed: routes/video.py exposes a session by
-  // id and nothing that enumerates them. Deliberate scope for wave 5,
-  // not an omission -- see plans/README.md's open questions.
+  // ── History (all three platforms, plan 040) ────────────────
+  // 運行履歴 covers all three platforms now. Two endpoints rather than
+  // one, because the two live in different tables for good reasons --
+  // a Passage of typed text is text plus provenance (docs/adr/0002),
+  // a video session is a parsed Track with cue times and a job history.
+  // Merging them in the CLIENT keeps that separation while giving the
+  // learner one list, which is the only place the distinction does not
+  // matter.
+  //
+  // Each entry carries a `kind`: 'passage' or 'session'. That field is
+  // what decides how a row is reopened, and it is the ONLY place the
+  // difference shows.
   const fetchHistory = useCallback(() => {
-    apiFetch('/api/phrase/history', session)
-      .then(r => (r.ok ? r.json() : []))
-      .then(setHistory)
-      .catch(() => setHistory([]))
+    return Promise.all([
+      apiFetch('/api/phrase/history', session)
+        .then(r => (r.ok ? r.json() : []))
+        .catch(() => []),
+      apiFetch('/api/video/sessions', session)
+        .then(r => (r.ok ? r.json() : []))
+        .catch(() => []),
+    ]).then(([passages, sessions]) => {
+      const merged = [
+        ...passages.map(p => ({
+          kind: 'passage',
+          id: p.id,
+          label: p.phrase,
+          source: p.source,
+          createdAt: p.created_at,
+        })),
+        ...sessions.map(s => ({
+          kind: 'session',
+          id: s.id,
+          label: s.sourceRef,
+          source: s.source,
+          createdAt: s.createdAt,
+          sentenceCount: s.sentenceCount,
+          videoId: s.videoId,
+        })),
+      ]
+      merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      setHistory(merged)
+    }).catch(() => setHistory([]))
   }, [session])
 
   useEffect(() => { fetchHistory() }, [fetchHistory])
@@ -159,6 +192,20 @@ export function useAnalyzerSession(session) {
       if (run !== runIdRef.current) return
       setStatus('failed')
     }
+  }
+
+  // A single reopen dispatcher for the merged history list. `kind` is
+  // the only place the passage/session distinction shows on this side.
+  function openHistoryEntry(entry) {
+    if (entry.kind === 'session') {
+      // Reopening a ready session is exactly what the poll already
+      // does: the first GET returns 200 with sentences and the effect
+      // builds the Passage. One line, no second loader.
+      beginRun()
+      setVideoSessionId(entry.id)
+      return Promise.resolve(null)
+    }
+    return loadHistoryEntry(entry.id)
   }
 
   // ── video ─────────────────────────────────────────────────
@@ -326,7 +373,7 @@ export function useAnalyzerSession(session) {
   // not "Restore", for exactly that reason.
   function deleteHistoryEntry(entry) {
     setLastDeleted(entry)
-    setHistory(prev => prev.filter(h => h.id !== entry.id))
+    setHistory(prev => prev.filter(h => !(h.kind === entry.kind && h.id === entry.id)))
     return apiFetch(`/api/phrase/history/${entry.id}`, session, { method: 'DELETE' })
       .then(fetchHistory)
       .catch(() => { setLastDeleted(null); fetchHistory() })
@@ -339,7 +386,7 @@ export function useAnalyzerSession(session) {
     try {
       await apiJson('/api/phrase/analyze', session, {
         method: 'POST',
-        body: JSON.stringify({ phrase: entry.phrase, lang, source: entry.source ?? 'typed' }),
+        body: JSON.stringify({ phrase: entry.label, lang, source: entry.source ?? 'typed' }),
       })
     } finally {
       fetchHistory()
@@ -373,6 +420,7 @@ export function useAnalyzerSession(session) {
     startVideoFromTranscript,
     explain,
     loadHistoryEntry,
+    openHistoryEntry,
     deleteHistoryEntry,
     lastDeleted,
     undoDelete,

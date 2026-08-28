@@ -4,11 +4,10 @@ import { useLang } from '../../LangContext'
 import { shortDate } from '../../lib/formatDate'
 
 // ── 運行履歴 — past services ──────────────────────────────
-// Typed and photographed Passages only. Video sessions are NOT listed
-// here because the backend has no index for them -- routes/video.py
-// exposes a session by id and nothing that enumerates them. Deliberate
-// scope for wave 5, not an omission: see plans/README.md's open
-// questions, which carries the unified-history work as a follow-up.
+// All three platforms, since plan 040 added GET /api/video/sessions.
+// `entries` arrives already merged (useAnalyzerSession.fetchHistory):
+// each row carries `kind: 'passage' | 'session'`, which is the ONLY
+// place the two source tables show through to this component.
 //
 // Its own panel under its own heading, rather than a button sharing a
 // row with Analyze. Those two sat at opposite ends of a
@@ -37,28 +36,49 @@ export function AnalyzerHistory({ t, entries, onOpen, onDelete, lastDeleted, onU
 
       <div className="anl-history">
         {entries.map(h => (
-          <div key={h.id} className="anl-history__row">
+          <div key={`${h.kind}:${h.id}`} className="anl-history__row">
             <button
               type="button"
               className="anl-history__open"
-              onClick={() => onOpen(h.id)}
+              onClick={() => onOpen(h)}
             >
-              <span className="anl-history__text" lang="ja">{h.phrase}</span>
-              {h.source && h.source !== 'typed' && (
+              <span className="anl-history__text" lang="ja">{h.label}</span>
+              {h.source && h.source !== 'typed' && h.kind !== 'session' && (
                 <span className="anl-history__source" lang="ja" title={t.sourcePhoto} aria-label={t.sourcePhoto}>写</span>
               )}
-              {h.created_at && (
-                <span className="anl-history__when">{shortDate(h.created_at, lang)}</span>
+              {h.kind === 'session' && (
+                // 動 stamp for a video session, beside 写 for a photo.
+                // A session with no video (videoId null) is still shown
+                // here, unstamped-as-"no player" -- it is a transcript-
+                // only Passage, and the Sentences and their cue times are
+                // the study material regardless of whether a player comes
+                // along with them (see docs/adr/0003, plan 025). Hiding
+                // it would treat transcript-only study as second class,
+                // which it was never meant to be.
+                <span className="anl-history__source" lang="ja" title={t.sourceVideoShort} aria-label={t.sourceVideoShort}>動</span>
+              )}
+              {h.kind === 'session' && typeof h.sentenceCount === 'number' && (
+                <span className="anl-history__count">{t.sessionSentenceCount(h.sentenceCount)}</span>
+              )}
+              {h.createdAt && (
+                <span className="anl-history__when">{shortDate(h.createdAt, lang)}</span>
               )}
             </button>
-            <button
-              type="button"
-              className="anl-history__delete"
-              onClick={() => onDelete(h)}
-              aria-label={t.delete}
-            >
-              <CrossIcon size={13} />
-            </button>
+            {/* Delete is not offered on a session row: DELETE
+                /api/video/session/{id} does not exist and this plan does
+                not add it (deliberately -- see plan 040's scope notes).
+                Rendering the control anyway would offer a control the
+                backend cannot honour. */}
+            {h.kind !== 'session' && (
+              <button
+                type="button"
+                className="anl-history__delete"
+                onClick={() => onDelete(h)}
+                aria-label={t.delete}
+              >
+                <CrossIcon size={13} />
+              </button>
+            )}
           </div>
         ))}
       </div>

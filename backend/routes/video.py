@@ -19,7 +19,7 @@ import json
 import logging
 import threading
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -441,6 +441,55 @@ def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
         "truncated": session["truncated"],
         "sentences": sentences,
     }
+
+
+@router.get("/api/video/sessions")
+def list_video_sessions(user_id: str = Depends(get_user_id),
+                         limit: int = Query(20, ge=1, le=100)):
+    """運行履歴 for 動画. The one thing missing that kept video out of the
+    analyser's history panel entirely -- a session was reachable by id
+    and by nothing else, so closing the tab lost it.
+
+    `sentences` is DELIBERATELY not selected. It is a JSONB array that
+    can run to hundreds of entries, and a listing that pulled it would
+    ship the whole corpus of every session the learner has ever made to
+    render twenty rows. The count comes from jsonb_array_length instead,
+    computed server-side over the stored value.
+
+    Only `ready` sessions are listed. A 'generating' one has nothing to
+    reopen yet and a 'failed' one has nothing to reopen at all; both are
+    transient states the poll already surfaces where they happen.
+    """
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, source, source_ref, video_id, truncated, created_at,
+                       COALESCE(jsonb_array_length(sentences), 0) AS sentence_count
+                  FROM video_sessions
+                 WHERE user_id = %s AND status = 'ready'
+                 ORDER BY created_at DESC
+                 LIMIT %s
+                """,
+                (user_id, limit),
+            )
+            rows = cur.fetchall()
+    finally:
+        conn.close()
+
+    return [
+        {
+            "id": row_id,
+            "source": source,
+            "sourceRef": source_ref,
+            "videoId": video_id,
+            "sentenceCount": sentence_count,
+            "truncated": truncated,
+            "createdAt": created_at.isoformat(),
+        }
+        for row_id, source, source_ref, video_id, truncated, created_at, sentence_count in rows
+    ]
 
 
 class ExplainPayload(BaseModel):

@@ -666,6 +666,14 @@
   font-family: 'Noto Serif JP', serif;
   font-size: 0.64rem;
 }
+/* A session's Sentence count -- a 47-line track and a 3-line one are
+   very different things to reopen (plan 040). */
+.anl-history__count {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
 /* WCAG 2.5.8 wants 24x24 CSS px minimum for a pointer target; this was
    a 13px icon in 4/6px padding, about 25x21. The icon stays small --
    this is a quiet, secondary action -- and the HIT AREA grows around

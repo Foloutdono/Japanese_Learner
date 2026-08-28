@@ -455,3 +455,114 @@ def test_upload_without_a_url_has_no_video(client):
     )
     final = _poll_until_settled(client, response.json()["sessionId"])
     assert final.json()["videoId"] is None
+
+
+# ── The listing endpoint (plan 040) ────────────────────────────────
+# 運行履歴 for 動画: a session was reachable by id and by nothing else,
+# so closing the tab lost it. These tests guard the three things that
+# matter about the listing -- it excludes non-ready sessions, it never
+# ships the (potentially huge) `sentences` payload, and it is scoped to
+# the caller.
+def test_list_sessions_returns_ready_sessions(client):
+    first = client.post(
+        "/api/video/session",
+        files={"file": ("list-a.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    _poll_until_settled(client, first.json()["sessionId"])
+    second = client.post(
+        "/api/video/session",
+        files={"file": ("list-b.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    _poll_until_settled(client, second.json()["sessionId"])
+
+    response = client.get("/api/video/sessions")
+    assert response.status_code == 200
+    ids = [row["id"] for row in response.json()]
+    assert ids.index(second.json()["sessionId"]) < ids.index(first.json()["sessionId"])
+
+
+def test_list_sessions_omits_generating_and_failed(client, monkeypatch):
+    failing = client.post(
+        "/api/video/session",
+        json={"url": "https://youtu.be/abcdefghijk",
+              "transcript": "no timestamps anywhere in here", "start": 0, "end": 60},
+    )
+    failed_id = failing.json()["sessionId"]
+    _poll_until_settled(client, failed_id)
+
+    # Block the worker so this session stays 'generating' for the check.
+    monkeypatch.setattr(video_module, "_start_worker", lambda *a, **k: None)
+    stuck = client.post(
+        "/api/video/session",
+        files={"file": ("stuck.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    stuck_id = stuck.json()["sessionId"]
+
+    ids = [row["id"] for row in client.get("/api/video/sessions").json()]
+    assert failed_id not in ids
+    assert stuck_id not in ids
+
+
+def test_list_sessions_does_not_return_sentences(client):
+    created = client.post(
+        "/api/video/session",
+        files={"file": ("payload.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    session_id = created.json()["sessionId"]
+    _poll_until_settled(client, session_id)
+
+    rows = client.get("/api/video/sessions").json()
+    row = next(r for r in rows if r["id"] == session_id)
+    assert "sentences" not in row
+    assert row["sentenceCount"] == 2
+
+
+def test_list_sessions_is_scoped_to_the_user(client):
+    created = client.post(
+        "/api/video/session",
+        files={"file": ("mine.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    mine_id = created.json()["sessionId"]
+    _poll_until_settled(client, mine_id)
+
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO video_sessions
+                    (user_id, source, source_ref, status, sentences, video_id)
+                VALUES ('someone-else', 'upload', 'other.srt', 'ready', '[]'::jsonb, NULL)
+                RETURNING id
+                """,
+            )
+            (other_id,) = cur.fetchone()
+        conn.commit()
+    finally:
+        conn.close()
+
+    ids = [row["id"] for row in client.get("/api/video/sessions").json()]
+    assert mine_id in ids
+    assert other_id not in ids
+
+
+def test_list_sessions_respects_the_limit(client):
+    for name in ("limit-a.srt", "limit-b.srt"):
+        created = client.post(
+            "/api/video/session",
+            files={"file": (name, _SRT, "text/plain")},
+            data={"start": "0", "end": "30"},
+        )
+        _poll_until_settled(client, created.json()["sessionId"])
+
+    response = client.get("/api/video/sessions?limit=1")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+
+    assert client.get("/api/video/sessions?limit=0").status_code == 422
+    assert client.get("/api/video/sessions?limit=101").status_code == 422

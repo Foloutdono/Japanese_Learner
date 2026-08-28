@@ -433,6 +433,10 @@ const phraseAnalyzer = {
   sourceTextHint:      'Tapez ou collez du japonais',
   sourcePhotoHint:     'Photographiez ou importez une image',
   sourceVideoHint:     'Sous-titres ou transcription',
+  // 運行履歴 (plan 040) — le tampon et le compte pour une ligne de
+  // session dans la liste d'historique fusionnée.
+  sourceVideoShort:    'Depuis une vidéo',
+  sessionSentenceCount: n => `${n} ${n === 1 ? 'phrase' : 'phrases'}`,
   platformUnit:        'Voie',
   platformNumber:      n => `voie ${n}`,
   // 路線図 (plan 028) — le Passage dessiné comme une ligne dont les

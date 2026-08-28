@@ -277,9 +277,13 @@ export default function AnalyzerScreen({ session }) {
     })
   }
 
-  function loadHistoryEntry(id) {
+  function openHistoryEntry(entry) {
     setDetail(null)
-    analyzer.loadHistoryEntry(id).then(text => {
+    analyzer.openHistoryEntry(entry).then(text => {
+      // Only a passage entry resolves with its text (a session resolves
+      // with null -- see useAnalyzerSession's openHistoryEntry). The
+      // draft is the typed/photo intake's own state; a reopened session
+      // has no draft, it has a Passage the poll is already building.
       if (typeof text === 'string') { setDraft(text); setFromImage(false) }
     })
   }
@@ -515,13 +519,14 @@ export default function AnalyzerScreen({ session }) {
 
         {/* 運行履歴 — its own panel under its own heading, below the
             result rather than a button sharing a row with Analyze.
-            Hidden on 動画 because nothing lists video sessions; see
-            AnalyzerHistory.jsx. */}
+            Shown on all three platforms since plan 040 added
+            GET /api/video/sessions; the merged list is not filtered by
+            which platform is currently selected. See AnalyzerHistory.jsx. */}
         {platform.history && (
           <AnalyzerHistory
             t={t}
             entries={analyzer.history}
-            onOpen={loadHistoryEntry}
+            onOpen={openHistoryEntry}
             onDelete={entry => analyzer.deleteHistoryEntry(entry)}
             lastDeleted={analyzer.lastDeleted}
             onUndo={analyzer.undoDelete}

@@ -11,11 +11,17 @@ import './analysis.css'
 // Plan 037: an instant, confirmation-free delete through a target under
 // WCAG's 24x24 floor, a date the API already sends but never renders,
 // and a source stamp with no accessible name. These cases pin the fix.
+//
+// Plan 040 added the merged passage/session shape: `kind`, `label` and
+// `createdAt` replace the raw phrase_history field names the component
+// used to read directly.
 const T = {
   historyTitle: 'Recent',
   noHistory: 'No phrases analyzed yet.',
   delete: 'Delete',
   sourcePhoto: 'Photo',
+  sourceVideoShort: 'From a video',
+  sessionSentenceCount: n => `${n} ${n === 1 ? 'sentence' : 'sentences'}`,
   entryDeleted: 'Removed from your history',
   undo: 'Undo',
   noticeDismiss: 'Dismiss',
@@ -37,14 +43,21 @@ function withLang(children) {
 }
 
 function entryFixture(overrides = {}) {
-  return { id: 1, phrase: 'テスト', source: 'typed', ...overrides }
+  return { kind: 'passage', id: 1, label: 'テスト', source: 'typed', ...overrides }
+}
+
+function sessionFixture(overrides = {}) {
+  return {
+    kind: 'session', id: 1, label: 'clip.srt', source: 'upload',
+    sentenceCount: 3, videoId: null, ...overrides,
+  }
 }
 
 describe('AnalyzerHistory', () => {
   it('renders the date of each entry', async () => {
     const entries = [
-      entryFixture({ id: 1, created_at: '2026-08-20T00:00:00Z' }),
-      entryFixture({ id: 2, created_at: null }),
+      entryFixture({ id: 1, createdAt: '2026-08-20T00:00:00Z' }),
+      entryFixture({ id: 2, createdAt: null }),
     ]
     const screen = await render(
       withLang(<AnalyzerHistory t={T} entries={entries} onOpen={() => {}} onDelete={() => {}} />)
@@ -55,7 +68,7 @@ describe('AnalyzerHistory', () => {
 
   it('hands the whole entry to onDelete', async () => {
     const onDelete = vi.fn()
-    const entry = entryFixture({ id: 42, phrase: '猫' })
+    const entry = entryFixture({ id: 42, label: '猫' })
     const screen = await render(
       withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={onDelete} />)
     )
@@ -67,7 +80,7 @@ describe('AnalyzerHistory', () => {
 
   it('offers an undo after a delete', async () => {
     const onUndo = vi.fn()
-    const deleted = entryFixture({ id: 7, phrase: '犬' })
+    const deleted = entryFixture({ id: 7, label: '犬' })
     const screen = await render(withLang(
       <AnalyzerHistory
         t={T}
@@ -103,5 +116,36 @@ describe('AnalyzerHistory', () => {
     const stamp = screen.container.querySelector('.anl-history__source')
     expect(stamp).not.toBeNull()
     expect(stamp.getAttribute('aria-label')).toBeTruthy()
+  })
+
+  // ── Plan 040: video sessions in the merged list ──────────────
+  it('renders a session row with its sentence count', async () => {
+    const entry = sessionFixture({ sentenceCount: 5 })
+    const screen = await render(
+      withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={() => {}} />)
+    )
+    expect(screen.container.querySelector('.anl-history__count').textContent).toBe('5 sentences')
+    const stamp = screen.container.querySelector('.anl-history__source')
+    expect(stamp).not.toBeNull()
+    expect(stamp.getAttribute('aria-label')).toBeTruthy()
+  })
+
+  it('offers no delete on a session row', async () => {
+    const entry = sessionFixture()
+    const screen = await render(
+      withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={() => {}} />)
+    )
+    expect(screen.container.querySelector('.anl-history__delete')).toBeNull()
+  })
+
+  it('lists a session with no video', async () => {
+    // A transcript-only session (videoId null) is still worth reopening
+    // -- the Sentences and their cue times are the study material, and
+    // the video was always optional. It must not be hidden.
+    const entry = sessionFixture({ videoId: null, label: 'no-video.srt' })
+    const screen = await render(
+      withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={() => {}} />)
+    )
+    expect(screen.container.querySelector('.anl-history__text').textContent).toBe('no-video.srt')
   })
 })

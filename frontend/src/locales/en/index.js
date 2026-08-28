@@ -448,6 +448,10 @@ const phraseAnalyzer = {
   sourceTextHint:      'Type or paste Japanese',
   sourcePhotoHint:     'Shoot or upload a picture',
   sourceVideoHint:     'Subtitles or a transcript',
+  // 運行履歴 (plan 040) — the stamp and count for a session row in the
+  // merged history list.
+  sourceVideoShort:    'From a video',
+  sessionSentenceCount: n => `${n} ${n === 1 ? 'sentence' : 'sentences'}`,
   platformUnit:        'Platform',
   platformNumber:      n => `platform ${n}`,
   // 路線図 (plan 028) — the Passage drawn as a line whose stops are its
