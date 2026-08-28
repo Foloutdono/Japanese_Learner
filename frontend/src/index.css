@@ -913,11 +913,11 @@
    解析 section — merged from src/components/analysis/analysis.css by
    plan 041, pasted directly after the exam section for the same
    cascade-order reason (see the note at the top of the exam section
-   above). Owns .analyzer and .anl-*. One named exception: a bare
-   .rdg-breakdown-badges rule borrows index.css's own rdg- namespace
-   further down this file — known, and a follow-up plan's job to
-   rename, not this one's. Ends where the onboarding section begins,
-   below. ══════════════════════════════════════════════════════ */
+   above). Owns .analyzer and .anl-*. Plan 041 left one named
+   exception here: a lone rdg-breakdown-family rule that belonged with
+   its seven siblings rather than in this section. Plan 042 moved it
+   back to sit beside them, further down this file. Ends where the
+   onboarding section begins, below. ═══════════════════════════════ */
 /* ══ 解析 — the analyser ═══════════════════════════════════
    Everything the 解析 station owns: the platform rail, the three
    intakes, the 路線図, and the responsive layout that stands the
@@ -985,7 +985,7 @@
   gap: clamp(8px, 0.8vw + 4px, 14px);
 }
 .anl-rail__sign {
-  --sign: var(--line-color, var(--line-kaiseki));
+  --anl-sign: var(--line-color, var(--line-kaiseki));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1006,7 +1006,7 @@
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: var(--sign);
+  color: var(--anl-sign);
 }
 .anl-rail__kana {
   font-family: var(--font-jp);
@@ -1040,7 +1040,7 @@
   border-radius: 0 0 2px 2px;
   transition: background 0.2s ease;
 }
-.anl-rail__sign[aria-selected="true"] .anl-rail__stripe { background: var(--sign); }
+.anl-rail__sign[aria-selected="true"] .anl-rail__stripe { background: var(--anl-sign); }
 
 @media (prefers-reduced-motion: reduce) {
   .anl-rail__sign,
@@ -2050,8 +2050,6 @@
   .anl-speak:active { transform: none; }
 }
 
-.rdg-breakdown-badges { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-
 .anl-history__when {
   flex-shrink: 0;
   font-family: var(--font-display);
@@ -2090,12 +2088,11 @@
    みどりの窓口 section — merged from
    src/components/onboarding/onboarding.css by plan 041, pasted
    directly after the 解析 section for the same cascade-order reason.
-   Owns .onb-*. Named exceptions, left alone deliberately: the
-   un-prefixed .arrival family (7 rules, one more inside a
-   reduced-motion block, and 5 arrival-* keyframes) and the un-prefixed
-   .settings-redo-result / .settings-redo-actions pair. All are known
-   and are a follow-up plan's job — renaming them here would touch
-   JSX and break the bundle-identity gate this merge was built on.
+   Owns .onb-*. Plan 041 left two named exceptions here: an un-prefixed
+   arrival-cutscene family, and a Settings-retake pair that belonged in
+   the Settings section rather than this one. Both were plan 042's job:
+   the cutscene is properly namespaced now, and the retake pair moved
+   to sit beside its own family in the Settings section below.
    Ends where this file's own design-system body begins, below. ══ */
 /* ── みどりの窓口 — the onboarding flow ─────────────────────
    Per-feature section, merged into index.css the same way
@@ -2742,27 +2739,17 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
-/* ── Settings' 学習 card ─────────────────────────────────────
-   Deliberately carries NONE of the office's own dress: the card uses
-   the Settings page's native rows and .lang-select controls (see
-   LearningCard's header comment). Only the inline retake flow below
-   borrows onboarding pieces, because it literally IS the placement
-   test. An earlier accent frame + segmented buttons here read as a
-   different app grafted into Settings and were removed on review. */
-.settings-redo-result { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-.settings-redo-actions { display: flex; align-items: center; gap: 16px; }
-
 /* ══ 到着 — the arrival cutscene ═══════════════════════════
    The station family's third scene, and the first that means "you
    have arrived": the scrim drops and the platform signboard slides
    down into place over the tour. Onboarding-only (see TrainArrival's
    header for why it is not in index.css's gate/door block), same
-   discipline: transform/opacity only, one --arrival-x speed dial
+   discipline: transform/opacity only, one --onb-arrival-x speed dial
    shared with the JS timers, skippable, and absent under reduced
    motion — JS never mounts it, and the display:none below is the
    same belt-and-braces the gate and door carry. */
-.arrival {
-  --arrival-x: 1;
+.onb-arrival {
+  --onb-arrival-x: 1;
   position: fixed;
   inset: 0;
   z-index: 300;
@@ -2770,21 +2757,21 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  animation: arrival-leave calc(150ms * var(--arrival-x)) linear calc(630ms * var(--arrival-x)) backwards;
+  animation: onb-arrival-leave calc(150ms * var(--onb-arrival-x)) linear calc(630ms * var(--onb-arrival-x)) backwards;
 }
-@keyframes arrival-leave { to { opacity: 0; } }
-.arrival__scrim {
+@keyframes onb-arrival-leave { to { opacity: 0; } }
+.onb-arrival__scrim {
   position: absolute;
   inset: 0;
   background: var(--bg-main);
   opacity: 0;
-  animation: arrival-scrim calc(160ms * var(--arrival-x)) ease-out forwards;
+  animation: onb-arrival-scrim calc(160ms * var(--onb-arrival-x)) ease-out forwards;
 }
 /* 0.995, not 1 — the gate's own documented fix for a light-theme
    scrim reading cream-on-cream. Same value, same reason. */
-@keyframes arrival-scrim { to { opacity: 0.995; } }
+@keyframes onb-arrival-scrim { to { opacity: 0.995; } }
 
-.arrival__board {
+.onb-arrival__board {
   position: relative;
   width: min(420px, 88vw);
   padding: 22px 26px;
@@ -2794,30 +2781,30 @@
   border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
   transform: translateY(-140%);
-  animation: arrival-slide calc(260ms * var(--arrival-x)) cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation: onb-arrival-slide calc(260ms * var(--onb-arrival-x)) cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
 }
-@keyframes arrival-slide { to { transform: translateY(0); } }
+@keyframes onb-arrival-slide { to { transform: translateY(0); } }
 /* The sign settles: one soft ring of the line colour, as the chime
    lands (phase 'arrived', see TrainArrival's SIGN_MS). */
-.arrival--arrived .arrival__board {
+.onb-arrival--arrived .onb-arrival__board {
   transform: translateY(0);
-  animation: arrival-settle calc(320ms * var(--arrival-x)) ease-out;
+  animation: onb-arrival-settle calc(320ms * var(--onb-arrival-x)) ease-out;
 }
-@keyframes arrival-settle {
+@keyframes onb-arrival-settle {
   0% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
   100% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 10px transparent; }
 }
 
-.arrival__eyebrow {
+.onb-arrival__eyebrow {
   display: block;
   font-family: var(--font-jp);
   font-size: 0.7rem;
   letter-spacing: 0.3em;
   color: var(--accent2);
   opacity: 0;
-  animation: arrival-fade calc(200ms * var(--arrival-x)) ease-out calc(300ms * var(--arrival-x)) forwards;
+  animation: onb-arrival-fade calc(200ms * var(--onb-arrival-x)) ease-out calc(300ms * var(--onb-arrival-x)) forwards;
 }
-.arrival__dest {
+.onb-arrival__dest {
   display: block;
   margin-top: 4px;
   font-family: 'Noto Serif JP', serif;
@@ -2825,9 +2812,9 @@
   font-weight: 700;
   line-height: 1.2;
   opacity: 0;
-  animation: arrival-fade calc(220ms * var(--arrival-x)) ease-out calc(340ms * var(--arrival-x)) forwards;
+  animation: onb-arrival-fade calc(220ms * var(--onb-arrival-x)) ease-out calc(340ms * var(--onb-arrival-x)) forwards;
 }
-.arrival__latin {
+.onb-arrival__latin {
   display: block;
   margin-top: 2px;
   font-family: var(--font-display);
@@ -2836,14 +2823,14 @@
   text-transform: uppercase;
   color: var(--text-on-panel-soft);
   opacity: 0;
-  animation: arrival-fade calc(220ms * var(--arrival-x)) ease-out calc(380ms * var(--arrival-x)) forwards;
+  animation: onb-arrival-fade calc(220ms * var(--onb-arrival-x)) ease-out calc(380ms * var(--onb-arrival-x)) forwards;
 }
-@keyframes arrival-fade { to { opacity: 1; } }
+@keyframes onb-arrival-fade { to { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
   /* TrainArrival fires onDone immediately and never mounts this when
      motion is unwelcome — belt and braces, like .gate and .door. */
-  .arrival { display: none; }
+  .onb-arrival { display: none; }
 }
 
 /* ── /dev/onboarding — the replay workbench ─────────────────
@@ -6522,6 +6509,18 @@ textarea:focus-visible {
   color: var(--text-on-panel);
   filter: none;
 }
+
+/* ── Settings' 学習 card ─────────────────────────────────────
+   Deliberately carries NONE of the office's own dress: the card uses
+   the Settings page's native rows and .lang-select controls (see
+   LearningCard's header comment). Only the inline retake flow below
+   borrows onboarding pieces, because it literally IS the placement
+   test. An earlier accent frame + segmented buttons here read as a
+   different app grafted into Settings and were removed on review.
+   Lived in onboarding.css until plan 042; it is the Settings page's
+   own family and belongs beside it. */
+.settings-redo-result { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.settings-redo-actions { display: flex; align-items: center; gap: 16px; }
 
 /* ═══════════════════════════════════════════════════════════
    Sound mixer — filled-track redesign
@@ -13117,6 +13116,7 @@ textarea:focus-visible {
 .rdg-breakdown { margin-top: 14px; }
 
 .rdg-breakdown-line { justify-content: center; margin-bottom: 12px; gap: 4px 10px; }
+.rdg-breakdown-badges { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .rdg-breakdown-line__word {
   cursor: pointer;
   border-radius: 6px;

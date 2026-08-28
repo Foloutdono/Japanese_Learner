@@ -281,20 +281,20 @@ describe('OnboardingFlow', () => {
     await settle()
     clickButton(screen, '.onb-action')            // → tour: the arrival mounts
     await settle(80)
-    expect(document.querySelector('.arrival')).not.toBeNull()
+    expect(document.querySelector('.onb-arrival')).not.toBeNull()
     // The tour is interactive UNDERNEATH the overlay from frame one.
     expect(screen.container.querySelector('.onb-tour')).not.toBeNull()
 
     window.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
     await settle(80)
-    expect(document.querySelector('.arrival')).toBeNull()
+    expect(document.querySelector('.onb-arrival')).toBeNull()
 
     clickButton(screen, '.onb-action')            // tour → pass
     await settle()
     clickButton(screen, '.onb-back')              // ← back to tour
     await settle(80)
     expect(stepOf(screen)).toBe('tour')
-    expect(document.querySelector('.arrival')).toBeNull() // once means once
+    expect(document.querySelector('.onb-arrival')).toBeNull() // once means once
   })
 
   it('the tour demos answer and flip in place without advancing the step', async () => {
