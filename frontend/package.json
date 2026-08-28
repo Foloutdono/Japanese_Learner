@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "lint:css": "node scripts/stylelint-ratchet.mjs",
+    "lint:css:report": "stylelint \"src/**/*.css\"",
     "preview": "vite preview",
     "test": "vitest run"
   },
@@ -30,6 +32,8 @@
     "globals": "^17.6.0",
     "playwright": "^1.61.1",
     "prop-types": "^15.8.1",
+    "stylelint": "^17.14.1",
+    "stylelint-config-standard": "^40.0.0",
     "vite": "^8.0.12",
     "vitest": "^4.1.10",
     "vitest-browser-react": "^2.2.0"
