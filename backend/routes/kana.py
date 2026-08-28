@@ -3,6 +3,7 @@ import random
 from fastapi import APIRouter, Depends, Query
 from content.kana_data import KANA_SETS, kana_to_id
 from core.auth import get_user_id, prefixed, unprefixed
+from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from study.modes import (
@@ -139,7 +140,8 @@ def _build_kana_card(kana_entry: dict, kana_list: list[dict], m: Mode, stage: st
     return payload
 
 
-def _select_cards(set_name: str, m: Mode, count: int, exclude_ids: set[str], user_id: str):
+def _select_cards(set_name: str, m: Mode, count: int, exclude_ids: set[str], user_id: str,
+                  new_limit: int | None = None):
     """
     Shared by /api/kana/card and /api/kana/cards: resolves the set,
     picks up to `count`
@@ -165,7 +167,7 @@ def _select_cards(set_name: str, m: Mode, count: int, exclude_ids: set[str], use
     picked = pick_ids(
         cache_key, due,
         lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
-        count, exclude_ids,
+        count, exclude_ids, new_limit=new_limit,
     )
 
     # One bulk-stats call for just the handful of cards actually being
@@ -209,6 +211,7 @@ def get_kana_card(set_name: str, m: Mode = Depends(require_mode(KANA)),
 
 @router.get("/api/kana/cards")
 def get_kana_cards(set_name: str, count: int = Query(10, ge=1, le=100), exclude: str = "",
+                    beyond_target: bool = Query(False),
                     m: Mode = Depends(require_mode(KANA)),
                     user_id: str = Depends(get_user_id)):
     """
@@ -216,17 +219,20 @@ def get_kana_cards(set_name: str, count: int = Query(10, ge=1, le=100), exclude:
     once so the frontend can keep a session queue filled instead of
     fetching one card per answer. `exclude` is a comma-separated list
     of raw (unprefixed) card ids the client already has queued but
-    hasn't reviewed yet.
+    hasn't reviewed yet. `beyond_target` is the 臨時列車: the learner
+    explicitly asking for new cards past today's pace (core/pace.py).
     """
+    pace = resolve_pace(user_id)
     kana_list, cards = _select_cards(
         set_name, m,
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
+        new_limit=new_card_limit(pace, beyond_target),
     )
     if kana_list is None:
         return {"error": "Unknown set"}
-    return {"cards": cards}
+    return {"cards": cards, "pace": pace.payload() if pace else None}
 
 
 @router.get("/api/kana/stats")

@@ -29,6 +29,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from core.auth import get_user_id, prefixed, unprefixed
+from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
@@ -146,7 +147,8 @@ def _build_card(domain: str, raw_id: str, entry: dict, pool: list[dict], m: Mode
 
 
 def _select_cards(domain: str, tier: int, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str,
-                   tier_size: int = freq.DEFAULT_TIER_SIZE):
+                   tier_size: int = freq.DEFAULT_TIER_SIZE,
+                   new_limit: int | None = None):
     """Mirrors kanji.py/vocab.py's _select_cards, but the candidate pool
     is a frequency tier (native_level, entry) list instead of a single
     KANJI_BY_LEVEL[level]/VOCAB_BY_LEVEL[level] slice. `tier` (together
@@ -193,7 +195,7 @@ def _select_cards(domain: str, tier: int, m: Mode, lang: str, count: int, exclud
     picked = pick_ids(
         cache_key, due,
         lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
-        count, exclude_ids,
+        count, exclude_ids, new_limit=new_limit,
     )
 
     states = srs.get_bulk_stats(picked, mode)
@@ -280,20 +282,24 @@ def get_frequency_card(domain: str, tier: int, mode: str, lang: str = "fr", tier
 
 @router.get("/api/frequency/{domain}/cards")
 def get_frequency_cards(domain: str, tier: int, mode: str, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
-                        tier_size: int = freq.DEFAULT_TIER_SIZE, user_id: str = Depends(get_user_id)):
+                        tier_size: int = freq.DEFAULT_TIER_SIZE,
+                        beyond_target: bool = Query(False),
+                        user_id: str = Depends(get_user_id)):
     _require_domain(domain)
     m = _resolve_mode(domain, mode)
 
+    pace = resolve_pace(user_id)
     pool, cards = _select_cards(
         domain, tier, m, lang,
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
         tier_size=tier_size,
+        new_limit=new_card_limit(pace, beyond_target),
     )
     if not pool:
         return {"error": "Empty tier"}
-    return {"cards": cards}
+    return {"cards": cards, "pace": pace.payload() if pace else None}
 
 
 @router.get("/api/frequency/{domain}/stats")

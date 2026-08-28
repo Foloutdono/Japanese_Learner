@@ -48,6 +48,7 @@ import psycopg2.extras
 
 from core.auth import get_user_id, prefixed, unprefixed
 from core.db import db_conn
+from core.pace import resolve_pace
 from core.srs_instance import srs
 from study import card_index, daily_queue
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES, try_resolve
@@ -192,6 +193,7 @@ def get_today(user_id: str = Depends(get_user_id)):
         "today summary user_id=%s due_rows=%d served=%d lanes=%d",
         user_id, len(due_rows), total, len(lanes),
     )
+    pace = resolve_pace(user_id)
     return {
         # Counted from the lanes rather than from len(due_rows): rows
         # naming content that no longer exists are dropped above, and
@@ -203,6 +205,10 @@ def get_today(user_id: str = Depends(get_user_id)):
         # Only when nothing is due -- "next review in 3 hours" is what
         # turns an empty queue into a finished day.
         "next_due": next_due.isoformat() if next_due else None,
+        # The day's new-item gauge for the concourse strip. This queue
+        # itself never serves new cards (see the module docstring); the
+        # pace here is information, spent by the section endpoints.
+        "pace": pace.payload() if pace else None,
     }
 
 

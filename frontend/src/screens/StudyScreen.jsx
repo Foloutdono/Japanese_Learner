@@ -6,6 +6,7 @@ import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
 import RatingBar from '../components/study/RatingBar'
 import { MCQGrid, DoneMessage, DeckProgress } from '../components/study/QuizComponents'
+import { usePace } from '../components/study/usePace'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
@@ -168,16 +169,18 @@ export default function StudyScreen({ session }) {
   // of fetching a corrected one.
   const storageKey = mode ? sessionKey('deck', deck_id, mode) : IDLE_KEY
 
+  const paceCtl = usePace(storageKey)
+
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
     if (!mode) return []
-    const data = await apiJson(
-      `/api/decks/${deck_id}/study?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`,
+    const data = paceCtl.capture(await apiJson(
+      `/api/decks/${deck_id}/study?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}${paceCtl.query}`,
       session,
       { signal },
-    )
+    ))
     return data.cards ?? []
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deck_id, mode, lang, session])
+  }, [deck_id, mode, lang, session, paceCtl.query, paceCtl.capture])
 
   // The just-reviewed set is merged into the exclude list by the hook
   // itself now (extraExcludeIds), so every screen gets the protection
@@ -455,7 +458,8 @@ export default function StudyScreen({ session }) {
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
-        {done    && <DoneMessage onBack={() => setMode(null)} />}
+        {done    && <DoneMessage onBack={() => setMode(null)} pace={paceCtl.pace}
+          onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
 
         {nc && !loading && (
           <>

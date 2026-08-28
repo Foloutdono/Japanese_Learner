@@ -44,6 +44,7 @@ from routes.exams           import router as exams_router
 from routes.today           import router as today_router
 from routes.video           import router as video_router
 from routes.ocr             import router as ocr_router
+from routes.onboarding      import router as onboarding_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -100,6 +101,7 @@ app.include_router(cosmetics_router)
 app.include_router(exams_router)
 app.include_router(video_router)
 app.include_router(ocr_router)
+app.include_router(onboarding_router)
 
 @app.get("/")
 def root():

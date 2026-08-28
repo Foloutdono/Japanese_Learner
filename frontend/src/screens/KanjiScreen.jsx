@@ -9,6 +9,7 @@ import {
   MCQGrid, DoneMessage, DeckProgress,
   InlineReveal, Flashcard, MeaningDisplay, CharDisplay, RevealActions,
 } from '../components/study/QuizComponents'
+import { usePace } from '../components/study/usePace'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { XpToast } from '../components/rewards/XpToast'
@@ -132,6 +133,8 @@ export default function KanjiScreen({ session }) {
   // of /api/kanji/cards that swaps level for tier (see frequency.py's
   // module docstring: cards, ids and review submission are otherwise
   // identical between the two paths).
+  const paceCtl = usePace(storageKey)
+
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
     if (studyBy === 'level' && (!level || !mode)) return []
     if (studyBy === 'frequency' && (!tier || !mode)) return []
@@ -139,10 +142,10 @@ export default function KanjiScreen({ session }) {
     const url = studyBy === 'level'
       ? `/api/kanji/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : `/api/frequency/kanji/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-    const data = await apiJson(url, session, { signal })
+    const data = paceCtl.capture(await apiJson(url + paceCtl.query, session, { signal }))
     return (data.cards ?? []).map(c => ({ ...c, lang }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studyBy, level, tier, tierSize, mode, session])
+  }, [studyBy, level, tier, tierSize, mode, session, paceCtl.query, paceCtl.capture])
   // (lang deliberately excluded above: changing lang shouldn't change
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
@@ -511,7 +514,8 @@ export default function KanjiScreen({ session }) {
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
-        {done    && <DoneMessage onBack={() => setMode(null)} />}
+        {done    && <DoneMessage onBack={() => setMode(null)} pace={paceCtl.pace}
+          onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
 
         {card && !loading && (
           <>

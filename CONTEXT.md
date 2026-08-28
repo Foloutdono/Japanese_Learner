@@ -32,10 +32,18 @@ word" is answered by merging across every graded mode rather than picking one.
   exists) of the learner.
 - **XP level** — the gamification level from `srs/xp.py`. Unrelated to JLPT.
 
-**Learner level** — the user's own JLPT level. Does **not** exist yet; a
-future onboarding flow will set it, by self-declaration or a placement test.
-Until then it is resolved per request. Always read it through the resolver
-seam rather than assuming a constant — see `docs/adr/0005`.
+**Learner level** — the user's own JLPT level, stored in
+`user_profiles.jlpt_level`. Set by the onboarding flow (みどりの窓口 —
+self-declaration or the placement test), adjustable from Settings. Always
+read it through the resolver seam (`core/user_level.resolve_level`) rather
+than the column: an explicit per-request choice still beats the stored
+value — see `docs/adr/0005`.
+
+**Pace** — the learner's chosen number of NEW items per day
+(`user_profiles.daily_new_target`), set at onboarding as a service type
+(各駅停車 5 / 快速 10 / 特急 20) and adjustable from Settings. Today it
+feeds only the onboarding projection; nothing schedules by it yet — say so
+rather than implying otherwise.
 
 ---
 

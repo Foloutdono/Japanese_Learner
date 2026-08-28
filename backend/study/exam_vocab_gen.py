@@ -136,8 +136,10 @@ def build_vocab_context_distractors(word: dict, pool: list[dict], rng: random.Ra
     return candidates
 
 
-def _build_vocab_context_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set,
-                                 rng: random.Random, level: str) -> dict:
+# Public (no leading underscore) since study/placement.py builds its
+# cross-level placement paper from the same deterministic primitive.
+def build_vocab_context_mondai(spec: dict, pool: list[dict], used_words: set, used_prompts: set,
+                               rng: random.Random, level: str) -> dict:
     questions = []
     for word in pool:
         if len(questions) >= spec["count"]:
@@ -542,7 +544,7 @@ def _generate_vocabulary_paper_once(level: str, seed: int) -> dict:
 
         elif mtype == "vocab-context":
             try:
-                mondai.append(_build_vocab_context_mondai(spec, vocab_pool, used_words, used_prompts, rng, level))
+                mondai.append(build_vocab_context_mondai(spec, vocab_pool, used_words, used_prompts, rng, level))
                 included_items += spec["count"]
             except GenerationFailed as e:
                 logger.warning("Skipping %s (%s): %s", spec["id"], mtype, e)

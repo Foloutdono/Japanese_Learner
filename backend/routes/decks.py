@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from pydantic import BaseModel
 from core.auth import get_user_id, prefixed, unprefixed
 from core.db import db_conn
+from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
@@ -1195,21 +1196,24 @@ def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
 @router.get("/api/decks/{deck_id}/study")
 def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lang: str = "fr",
                          count: int = Query(10, ge=1, le=100), exclude: str = "",
+                         beyond_target: bool = Query(False),
                          user_id: str = Depends(get_user_id)):
     """
     Batched session endpoint — same shape (`{"cards": [...]}`, `count`
     + `exclude`) as /api/kanji/cards, /api/vocab/cards and
     /api/grammar/cards, so useCardSession can keep a deck's queue
     filled the same way it does for the built-in decks instead of
-    fetching one card at a time.
+    fetching one card at a time. `beyond_target` is the 臨時列車: new
+    cards past today's pace, on explicit request (core/pace.py).
     """
     deck_type = _deck_type(deck_id, user_id)
     if deck_type is None:
         raise HTTPException(status_code=404, detail="Deck not found")
 
+    pace = resolve_pace(user_id)
     pool = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode, deck_type)]
     if not pool:
-        return {"cards": []}
+        return {"cards": [], "pace": pace.payload() if pace else None}
 
     by_raw    = {p["raw_id"]: p for p in pool}
     raw_ids   = list(by_raw.keys())
@@ -1227,10 +1231,11 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
         cache_key, due,
         lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
         max(1, min(count, MAX_BATCH)), exclude_ids,
+        new_limit=new_card_limit(pace, beyond_target),
     )
 
     if not picked:
-        return {"cards": []}
+        return {"cards": [], "pace": pace.payload() if pace else None}
 
     states   = srs.get_bulk_stats(picked, mode)
     previews = srs.preview_reviews_bulk(picked, mode, user_id)
@@ -1265,7 +1270,7 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
         "deck study request deck_id=%s mode=%s user_id=%s pool=%d due=%d picked=%d",
         deck_id, mode, user_id, len(pool), len(due), len(cards),
     )
-    return {"cards": cards}
+    return {"cards": cards, "pace": pace.payload() if pace else None}
 
 
 @router.post("/api/decks/{deck_id}/review")

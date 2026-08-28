@@ -71,7 +71,15 @@ ON review_log(card_id, reviewed_at);
 CREATE TABLE user_profiles (
     user_id TEXT PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- Onboarding (routes/onboarding.py): the learner's own JLPT level
+    -- ('N5'..'N1' — validated in code, read through core/user_level.py's
+    -- resolver per docs/adr/0005), their chosen daily new-item pace, and
+    -- when they completed the flow. All NULL until onboarding runs;
+    -- NULL onboarded_at is the signal that shows the flow.
+    jlpt_level TEXT,
+    daily_new_target INTEGER,
+    onboarded_at TIMESTAMPTZ
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came

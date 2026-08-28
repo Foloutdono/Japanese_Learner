@@ -9,6 +9,7 @@ import {
   MCQGrid, DoneMessage, DeckProgress,
   InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
 } from '../components/study/QuizComponents'
+import { usePace } from '../components/study/usePace'
 import { FuriganaWord } from '../components/study/Readings'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
@@ -128,6 +129,8 @@ export default function VocabScreen({ session }) {
     : studyBy === 'frequency' && tier && mode ? sessionKey('vocab', 'freq', freqDomain, tier, tierSize, mode)
     : IDLE_KEY
 
+  const paceCtl = usePace(storageKey)
+
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
     if (studyBy === 'level' && (!level || !mode)) return []
     if (studyBy === 'theme' && (!theme || !mode)) return []
@@ -138,10 +141,10 @@ export default function VocabScreen({ session }) {
       : studyBy === 'theme'
       ? `/api/vocab/theme/${theme}/cards?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : `/api/frequency/${freqDomain}/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-    const data = await apiJson(url, session, { signal })
+    const data = paceCtl.capture(await apiJson(url + paceCtl.query, session, { signal }))
     return (data.cards ?? []).map(c => ({ ...c, lang }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studyBy, freqDomain, level, theme, tier, tierSize, mode, session])
+  }, [studyBy, freqDomain, level, theme, tier, tierSize, mode, session, paceCtl.query, paceCtl.capture])
   // (lang deliberately excluded above: changing lang shouldn't change
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
@@ -551,7 +554,8 @@ export default function VocabScreen({ session }) {
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
-        {done    && <DoneMessage onBack={() => setMode(null)} />}
+        {done    && <DoneMessage onBack={() => setMode(null)} pace={paceCtl.pace}
+          onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
         {card && !loading && (
           <>
             <HintBar available={availableHints} active={activeHints}

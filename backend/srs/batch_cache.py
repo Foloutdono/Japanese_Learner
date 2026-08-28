@@ -77,7 +77,8 @@ def take_next(cache_key: str, fetch_fn, limit: int = 10) -> str | None:
 
 
 def pick_ids(cache_key: str, due_ids: list[str], new_fetch_fn, count: int,
-             exclude_ids: set[str] | None = None) -> list[str]:
+             exclude_ids: set[str] | None = None,
+             new_limit: int | None = None) -> list[str]:
     """
     Select up to `count` card ids for one card/batch response: due ids
     first (already-reviewed cards whose next_review has passed),
@@ -91,6 +92,12 @@ def pick_ids(cache_key: str, due_ids: list[str], new_fetch_fn, count: int,
     need the same treatment: take_batch already removes them from the
     shared pool the moment they're popped, whether or not the client
     has reviewed them yet.
+
+    `new_limit` caps the NEW top-up only — due cards are never
+    withheld. None means unlimited; 0 means reviews only. This is how
+    the daily pace (core/pace.py) is enforced: a session past today's
+    new-item target keeps serving everything due and simply stops
+    introducing material.
     """
     exclude_ids = exclude_ids or set()
     pool = [c for c in due_ids if c not in exclude_ids]
@@ -98,6 +105,8 @@ def pick_ids(cache_key: str, due_ids: list[str], new_fetch_fn, count: int,
     picked = pool[:count]
 
     remaining = count - len(picked)
+    if new_limit is not None:
+        remaining = min(remaining, max(0, new_limit))
     if remaining > 0:
         picked += take_batch(cache_key, new_fetch_fn, count=remaining)
 

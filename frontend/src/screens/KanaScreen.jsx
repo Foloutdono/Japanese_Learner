@@ -9,6 +9,7 @@ import {
   CharDisplay, MCQGrid, DoneMessage,
   DeckProgress, Flashcard, RevealActions, TypeInput,
 } from '../components/study/QuizComponents'
+import { usePace } from '../components/study/usePace'
 import HintBar from '../components/study/HintBar'
 import { DrawingQuiz } from '../components/study/DrawingCanvas'
 import { Loading } from '../components/ui/Loading'
@@ -102,15 +103,18 @@ export default function KanaScreen({ session }) {
   // a body with no `cards` key, which the hook used to read as "deck
   // finished" and celebrate. The hook owns the abort signal and the
   // timeout, so there's no controller to hand-roll here any more.
+  const paceCtl = usePace(storageKey)
+  const { capture: capturePace, query: paceQuery } = paceCtl
+
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
     if (!selectedSet || !mode) return []
-    const data = await apiJson(
-      `/api/kana/cards?set_name=${encodeURIComponent(selectedSet.slug)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}`,
+    const data = capturePace(await apiJson(
+      `/api/kana/cards?set_name=${encodeURIComponent(selectedSet.slug)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}${paceQuery}`,
       session,
       { signal },
-    )
+    ))
     return data.cards ?? []
-  }, [selectedSet, mode, session])
+  }, [selectedSet, mode, session, paceQuery, capturePace])
 
   const { current: card, loading, done, error, retry, advance } = useCardSession({
     storageKey,
@@ -378,7 +382,8 @@ export default function KanaScreen({ session }) {
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
-        {done    && <DoneMessage onBack={() => setMode(null)} />}
+        {done    && <DoneMessage onBack={() => setMode(null)} pace={paceCtl.pace}
+          onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
         {card && !loading && (
           <>
             <HintBar

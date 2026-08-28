@@ -9,6 +9,7 @@ import {
   MCQGrid, DoneMessage, DeckProgress,
   Flashcard, MeaningDisplay,
 } from '../components/study/QuizComponents'
+import { usePace } from '../components/study/usePace'
 import { GrammarRule, GrammarAnswer } from '../components/study/GrammarPieces'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
@@ -80,15 +81,18 @@ export default function GrammarScreen({ session }) {
     ? sessionKey('grammar', level, mode)
     : IDLE_KEY
 
+  const paceCtl = usePace(storageKey)
+  const { capture: capturePace, query: paceQuery } = paceCtl
+
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
     if (!level || !mode) return []
-    const data = await apiJson(
-      `/api/grammar/cards?level=${encodeURIComponent(level)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}`,
+    const data = capturePace(await apiJson(
+      `/api/grammar/cards?level=${encodeURIComponent(level)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}${paceQuery}`,
       session,
       { signal },
-    )
+    ))
     return data.cards ?? []
-  }, [level, mode, session])
+  }, [level, mode, session, paceQuery, capturePace])
 
   const { current: card, loading, done, error, retry, advance } = useCardSession({
     storageKey,
@@ -318,7 +322,8 @@ export default function GrammarScreen({ session }) {
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
-        {done    && <DoneMessage onBack={() => setMode(null)} />}
+        {done    && <DoneMessage onBack={() => setMode(null)} pace={paceCtl.pace}
+          onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
 
         {card && !loading && (
           <>

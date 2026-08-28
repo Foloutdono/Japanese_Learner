@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Serif+JP:wght@600;700&display=swap');
 @import url('./exam/exam.css');
 @import url('./components/analysis/analysis.css');
+@import url('./components/onboarding/onboarding.css');
 
 /* ── Design system, light + dark ──────────────────────────────
    Same variable names in both themes — only the values differ under
@@ -2219,6 +2220,67 @@ textarea:focus-visible {
   color: var(--text);
 }
 
+/* ── 新規 — the day's new-item gauge ─────────────────────────
+   The onboarding pace made visible on the concourse: a thin fill bar
+   in the strip's own accent2, new items introduced today against the
+   chosen daily target. Absent entirely (no markup) for accounts with
+   no stored pace. */
+.next-service__pace {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--accent2) 18%, transparent);
+}
+.next-service--clear .next-service__pace {
+  /* In the cleared strip (a baseline-wrapped row) the gauge takes the
+     line's remaining width so the bar has something to be a bar in. */
+  flex: 1 1 220px;
+  border-top: none;
+  padding-top: 0;
+}
+.next-service__pace-name {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.next-service__pace-jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.next-service__pace-latin {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.next-service__pace-bar {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent2) 18%, transparent);
+  overflow: hidden;
+}
+.next-service__pace-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent2);
+  transition: width 300ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .next-service__pace-fill { transition: none; }
+}
+.next-service__pace-count {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.next-service__pace-sep { color: var(--text-dim); font-weight: 400; }
+
 /* ── The picker ──────────────────────────────────────────────
    Between the strip and the queue: everything due is the right default
    but not the only thing anyone wants, and a learner with ten minutes
@@ -2816,6 +2878,29 @@ textarea:focus-visible {
   color: var(--text-secondary);
   font-size: 0.85rem;
   line-height: 1.5;
+}
+
+/* ── 現在地 — the learner's own station ─────────────────────
+   Once onboarding stores a JLPT level (user_profiles.jlpt_level),
+   LevelSelector marks that stop the way a station map marks where
+   you are standing: a filled marker and a small text tag. Text, not
+   colour alone — the mark must survive both themes and colour
+   vision. Picking any other stop still works exactly as before;
+   the stored level is a landmark, never a lock (docs/adr/0005). */
+.route-stop--current .route-stop__marker {
+  background: var(--line-color, var(--accent));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color, var(--accent)) 30%, transparent);
+}
+.route-stop__here {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line-color, var(--accent)) 55%, var(--border));
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 /* ── Ghost / panel button utilities ──────────────────────── */
 .btn-ghost {
@@ -4575,6 +4660,38 @@ textarea:focus-visible {
   line-height: 1.4;
 }
 .quiz-done .btn-panel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── 終着 — the paced terminus ───────────────────────────────
+   The session ended because today's new-item target is met, not
+   because the deck ran dry. A quiet vertical banner names it in the
+   signage register; the 臨時列車 button is the explicit way past it. */
+.quiz-done__banner {
+  margin: 0;
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.3em;
+  color: var(--text-secondary);
+}
+.quiz-done__sub {
+  margin: 0;
+  max-width: 420px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.quiz-done__row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.quiz-done__extra [lang="ja"] { margin-right: 6px; }
+.quiz-done__row .btn-ghost {
   display: inline-flex;
   align-items: center;
   gap: 8px;

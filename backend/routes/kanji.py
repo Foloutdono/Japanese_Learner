@@ -3,6 +3,7 @@ import random
 from fastapi import APIRouter, Depends, Query
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from core.auth import get_user_id, prefixed, unprefixed
+from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
@@ -184,7 +185,8 @@ def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], m: Mode,
     return payload
 
 
-def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str):
+def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str,
+                  new_limit: int | None = None):
     """
     Shared by /api/kanji/card and /api/kanji/cards. Returns
     (kanji_list, cards) — kanji_list is None for an unknown level or
@@ -221,7 +223,7 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     picked = pick_ids(
         cache_key, due,
         lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
-        count, exclude_ids,
+        count, exclude_ids, new_limit=new_limit,
     )
 
     # One bulk-stats call for just the handful of cards actually being
@@ -265,6 +267,7 @@ def get_kanji_card(level: str, lang: str = "fr",
 
 @router.get("/api/kanji/cards")
 def get_kanji_cards(level: str, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
+                    beyond_target: bool = Query(False),
                     m: Mode = Depends(require_mode(KANJI)),
                     user_id: str = Depends(get_user_id)):
     """
@@ -272,17 +275,20 @@ def get_kanji_cards(level: str, lang: str = "fr", count: int = Query(10, ge=1, l
     once so the frontend can keep a session queue filled instead of
     fetching one card per answer. `exclude` is a comma-separated list
     of raw (unprefixed) card ids the client already has queued but
-    hasn't reviewed yet.
+    hasn't reviewed yet. `beyond_target` is the 臨時列車: the learner
+    explicitly asking for new cards past today's pace (core/pace.py).
     """
+    pace = resolve_pace(user_id)
     kanji_list, cards = _select_cards(
         level, m, lang,
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
+        new_limit=new_card_limit(pace, beyond_target),
     )
     if kanji_list is None:
         return {"error": "Unknown level"}
-    return {"cards": cards}
+    return {"cards": cards, "pace": pace.payload() if pace else None}
 
 
 @router.get("/api/kanji/review-cards")

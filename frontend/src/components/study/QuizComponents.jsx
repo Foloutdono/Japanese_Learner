@@ -209,18 +209,48 @@ export function ModeToggle({ mode, onChange, modes }) {
 }
 
 // ── Done message ──────────────────────────────────────────
-export function DoneMessage({ onBack }) {
+// Two endings, one component. The plain one means the deck is
+// genuinely exhausted. The paced one (pace + onExtra) means the
+// session ended because today's new-item target is met — the deck has
+// more, the day's quota doesn't. Framed as a terminus announcement
+// rather than an achievement-with-an-asterisk: the target WAS the
+// plan (the onboarding projection was drawn from it), so meeting it
+// is arrival, and the 臨時列車 button is how a learner who wants more
+// boards the extra train anyway — the cap is a default, never a lock.
+export function DoneMessage({ onBack, pace, onExtra }) {
   const { t } = useLang()
 
   // The end of a session had no sound at all — the one moment in a
   // study run that is unambiguously an achievement. Guarded against
   // StrictMode's double effect, which would otherwise flam it.
+  // Reaching the day's target keeps the same arrival: it IS the day's
+  // scheduled terminus.
   const sounded = useRef(false)
   useEffect(() => {
     if (sounded.current) return
     sounded.current = true
     playArrival()
   }, [])
+
+  if (pace && onExtra) {
+    return (
+      <div className="quiz-done quiz-done--pace">
+        <p className="quiz-done__banner" lang="ja" aria-hidden="true">本日の目標達成</p>
+        <p className="quiz-done__msg">
+          <CheckCircleIcon size={22} /> {t.paceDoneTitle}
+        </p>
+        <p className="quiz-done__sub">{t.paceDoneBody(pace.newToday, pace.target)}</p>
+        <div className="quiz-done__row">
+          <button onClick={() => { playClick(); onExtra() }} className="btn-panel quiz-done__extra">
+            <span lang="ja">臨時列車</span> {t.paceExtraTrain}
+          </button>
+          <button onClick={() => { playClick(); onBack() }} className="btn-ghost">
+            <ChevronIcon direction="left" size={14} /> {t.backToMenu}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="quiz-done">

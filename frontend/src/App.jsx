@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { DepartureGate } from './components/station/DepartureGate'
 import { TrainDoor } from './components/station/TrainDoor'
-import { sectionFor } from './config/stations'
+import { TicketGate } from './components/station/TicketGate'
+import { sectionFor, HOME_STATION } from './config/stations'
 import { identityFor } from './config/identity'
+import { apiJsonWithTimeout } from './lib/api'
 // Development-only. Vite statically replaces import.meta.env.DEV with
 // `false` in a production build, so this import and the route below
 // are both dropped by tree-shaking — the screen is not merely
@@ -14,6 +16,7 @@ import { LangProvider, useLang } from './LangContext'
 
 import LandingScreen from './screens/LandingScreen'
 import AuthScreen  from './screens/AuthScreen'
+import OnboardingFlow from './screens/OnboardingFlow'
 import HomeScreen  from './screens/HomeScreen'
 import TodayScreen from './screens/TodayScreen'
 import KanaScreen  from './screens/KanaScreen'
@@ -65,6 +68,40 @@ function DocumentHead() {
 export default function App() {
   const [session, setSession] = useState(undefined)
   const [showLanding, setShowLanding] = useState(true)
+  // The onboarding gate: undefined = still asking, 'needed' = show the
+  // ticket office instead of the router, 'finishing' = the router is
+  // up with the TicketGate cutscene playing over it, 'done' = normal.
+  // Gated on a dedicated fetch rather than stores/profileSummary — the
+  // store's silent .catch and 30s TTL make it exactly wrong for a
+  // decision this binary (an outage would spin forever; a stale
+  // pre-onboarding cache would flash 窓口 at a veteran).
+  //
+  // The answer is stored WITH the user id it belongs to and derived
+  // against the current session below, instead of being reset in the
+  // effect: no synchronous setState in an effect, a signout/signin as
+  // someone else can never leak the previous account's answer, and a
+  // Supabase token refresh (new session object, same user) neither
+  // flashes the loading state nor re-gates anyone.
+  const [gate, setGate] = useState(null) // { userId, state, profile }
+
+  useEffect(() => {
+    if (!session) return
+    let cancelled = false
+    const userId = session.user?.id ?? null
+    apiJsonWithTimeout('/api/profile', session, { timeoutMs: 8000 })
+      .then(p => {
+        if (cancelled) return
+        setGate({ userId, state: p.onboardedAt ? 'done' : 'needed', profile: p })
+      })
+      // FAIL OPEN. A flaky network must never lock someone out of an
+      // app they already use; the flow re-offers itself next launch.
+      .catch(() => { if (!cancelled) setGate({ userId, state: 'done', profile: null }) })
+    return () => { cancelled = true }
+  }, [session])
+
+  const onboarding = gate && gate.userId === (session?.user?.id ?? null) ? gate.state : undefined
+  const onboardingProfile = gate?.profile ?? null
+  const setOnboarding = state => setGate(g => (g ? { ...g, state } : g))
 
   // Decode the two sounds whose first play must not be late: the UI
   // click, which is the very first interaction, and the level-up
@@ -115,6 +152,36 @@ export default function App() {
         {showLanding
           ? <LandingScreen onContinue={() => setShowLanding(false)} />
           : <AuthScreen onBack={() => setShowLanding(true)} />}
+      </LangProvider>
+    )
+  }
+
+  // Signed in, but the profile hasn't answered "onboarded?" yet — the
+  // same centered wait as the session check above, for the same reason:
+  // flashing the wrong screen for 200ms is worse than a beat of quiet.
+  if (onboarding === undefined) {
+    return (
+      <LangProvider>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ color: 'var(--text-secondary)' }}>Chargement...</div>
+        </div>
+      </LangProvider>
+    )
+  }
+
+  // みどりの窓口 — the ticket office, instead of the router: the same
+  // continuum Landing → Auth uses. No route, no station; see
+  // screens/OnboardingFlow.jsx for why. onComplete goes through
+  // 'finishing' so the TicketGate below plays over the mounted router.
+  if (onboarding === 'needed') {
+    return (
+      <LangProvider>
+        <CosmeticTheme />
+        <OnboardingFlow
+          session={session}
+          initialProfile={onboardingProfile}
+          onComplete={() => setOnboarding('finishing')}
+        />
       </LangProvider>
     )
   }
@@ -182,6 +249,23 @@ export default function App() {
             selection branch would be unmounted by the very state
             change it is covering. See stores/boarding. */}
         <TrainDoor />
+
+        {/* The onboarding finale: the learner's FIRST pass through the
+            改札, played over the already-mounted router (HomeScreen is
+            under the scrim from frame one) — rendered here and not by
+            OnboardingFlow, which has just unmounted and would take the
+            cutscene down mid-wipe with it. onNavigate is a no-op
+            because '/' is already where the router mounts. Under
+            prefers-reduced-motion TicketGate fires both callbacks
+            synchronously and renders nothing, per house rule. */}
+        {onboarding === 'finishing' && (
+          <TicketGate
+            section={{ icon: '日本語', title: HOME_STATION.latin }}
+            station={HOME_STATION}
+            onNavigate={() => {}}
+            onDone={() => setOnboarding('done')}
+          />
+        )}
       </BrowserRouter>
     </LangProvider>
   )

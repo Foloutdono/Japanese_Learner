@@ -1,5 +1,6 @@
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
+import { useProfileSummary } from '../../stores/profileSummary'
 import { useReportPlatformCount } from './platformCount'
 
 /**
@@ -55,6 +56,16 @@ export default function LevelSelector({
   const lineStyle = color ? { '--line-color': color } : undefined
   useReportPlatformCount(levels.length)
 
+  // 現在地 — the learner's own stored JLPT level, from onboarding
+  // (user_profiles.jlpt_level via /api/profile). Read here rather
+  // than passed in so all six screens that render this diagram get
+  // the mark with zero caller changes. Null (no level stored yet, or
+  // the summary's silent fetch failed) renders exactly as before.
+  // The mark is a landmark, never a lock: every stop stays a plain
+  // button, because an explicit choice beats the stored level by
+  // design (docs/adr/0005).
+  const currentLevel = useProfileSummary()?.jlptLevel ?? null
+
   return (
     <div className="route" style={lineStyle}>
       {levels.map((level, i) => (
@@ -66,6 +77,7 @@ export default function LevelSelector({
             'route-stop',
             i === 0 ? 'route-stop--first' : '',
             i === levels.length - 1 ? 'route-stop--last' : '',
+            level === currentLevel ? 'route-stop--current' : '',
           ].filter(Boolean).join(' ')}
         >
           {/* The rail, drawn per stop so the first and last ends can
@@ -87,6 +99,9 @@ export default function LevelSelector({
           <span className="route-stop__body">
             <span className="route-stop__name">{level}</span>
             <span className="route-stop__hint">{LEVEL_HINTS[level]}</span>
+            {level === currentLevel && (
+              <span className="route-stop__here">{t.levelCurrentMark}</span>
+            )}
           </span>
 
           <span className="route-stop__go" aria-hidden="true">▶</span>

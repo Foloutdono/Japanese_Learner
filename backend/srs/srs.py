@@ -1140,6 +1140,32 @@ class SRSEngine:
                 rows = cur.fetchall()
         return [{"days": int(days), "count": int(count)} for days, count in rows]
 
+    def get_new_items_today(self, user_id: str) -> int:
+        """
+        Distinct ITEMS (card ids, not card×mode pairs) whose first-ever
+        review happened today — the number the onboarding pace
+        (user_profiles.daily_new_target, see core/pace.py) is spent
+        against, and the same "new" the daruma daily_new goals count
+        (get_daruma_facts' new_cards_today uses this exact shape).
+        Day boundary is UTC, matching get_reviews_today / get_streak /
+        the stats screen — "today" means one thing app-wide.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    WITH firsts AS (
+                        SELECT card_id, MIN(reviewed_at) AS first_at
+                        FROM review_log WHERE card_id LIKE %s GROUP BY card_id
+                    )
+                    SELECT COUNT(*) FROM firsts
+                    WHERE first_at >= date_trunc('day', NOW())
+                """
+                self._log_sql("get_new_items_today", sql, (pattern,))
+                cur.execute(sql, (pattern,))
+                (count,) = cur.fetchone()
+        return int(count)
+
     # ── Daruma goal facts ─────────────────────────────────────
     # Everything srs/daruma.py's goal catalogue can be measured against,
     # in four round trips rather than one per goal — the pool is sampled

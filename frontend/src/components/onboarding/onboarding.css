@@ -1,0 +1,579 @@
+/* ── みどりの窓口 — the onboarding flow ─────────────────────
+   Per-feature sheet, imported from index.css the same way
+   exam.css and analysis.css are. Everything here is namespaced
+   .onb-*; the shared route-diagram classes (.route, .route-stop)
+   stay in index.css because six study screens use them.
+
+   The office is an identity surface, like /profile and /settings:
+   no --line-* pigment of its own. Where a rail or accent is needed
+   it falls back to shu-iro (--accent), which is exactly what
+   LevelSelector's own CSS does for a caller with no station. */
+
+.onb {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 18px 60px;
+}
+
+/* The office signboard — kana over name over latin, the station-plate
+   reading order, but framed as a window sign rather than a 駅名標:
+   this is not a place you travel to. */
+.onb-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 26px;
+  text-align: center;
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+.onb-header__kana {
+  font-size: 0.78rem;
+  letter-spacing: 0.35em;
+  color: var(--text-secondary);
+}
+.onb-header__jp {
+  margin: 0;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.onb-header__latin {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.5em;
+  /* Trailing letter-spacing skews centering; padding rebalances. */
+  padding-left: 0.5em;
+  color: var(--text-secondary);
+}
+/* The green window: the sign carries the office's own colour the way
+   the real みどりの窓口 sign does — the one green thing in the app,
+   an underline, not a pigment claimed for structure. */
+.onb-header::after {
+  content: '';
+  width: 68px;
+  height: 4px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: var(--success);
+}
+
+/* ── The flow's own stopping pattern ───────────────────────
+   Six stations under the office sign, current one marked — the
+   onboarding drawn as the short line it is. Markers echo
+   .route-stop__marker (white-filled, line-stroked circles); the rail
+   runs behind them. */
+.onb-line {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 520px;
+  margin-bottom: 30px;
+  padding: 0 8px;
+}
+.onb-line::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 5px;
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.onb-line__stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.onb-line__marker {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 3px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.onb-line__stop--past .onb-line__marker {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.onb-line__stop--now .onb-line__marker {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.onb-line__name {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+.onb-line__stop--now .onb-line__name {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.onb-body {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+}
+
+.onb-step {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+
+.onb-step__title {
+  margin: 0;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+.onb-step__body,
+.onb-step__hint {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.onb-step__hint { font-size: 0.85rem; }
+
+.onb-step__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+/* The office's own action button — sumi panel like the app's other
+   seal-stamped primaries, not shu-iro under a green sign. */
+.onb-action {
+  padding: 12px 26px;
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border: 1px solid var(--border);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.onb-action:hover:not(:disabled),
+.onb-action:focus-visible { transform: translateY(-1px); filter: brightness(1.15); }
+.onb-action:disabled { opacity: 0.45; }
+
+.onb-link {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.onb-link:hover, .onb-link:focus-visible { color: var(--text-primary); }
+
+.onb-back { align-self: flex-start; margin-bottom: 10px; }
+
+.onb-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 34px;
+}
+.onb-skip__hint { color: var(--text-secondary); font-size: 0.75rem; }
+
+.onb-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+/* ── Welcome: the name on the pass ────────────────────────── */
+.onb-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--surface-radius);
+}
+.onb-name__label { color: var(--text-secondary); font-size: 0.85rem; }
+
+/* ── Boarding: the two non-station answers ────────────────── */
+.onb-alts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Indented past the diagram's rail: these hang OFF the line. */
+  margin: 4px 22px 0 66px;
+}
+.onb-alt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 13px 16px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.onb-alt:hover, .onb-alt:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+.onb-alt__name { font-weight: 700; }
+.onb-alt__hint { color: var(--text-secondary); font-size: 0.8rem; }
+
+/* ── Placement test ───────────────────────────────────────── */
+.onb-test { display: flex; flex-direction: column; gap: 14px; }
+.onb-test__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.onb-test__level {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.onb-test__progress { color: var(--text-secondary); font-size: 0.85rem; }
+.onb-test__instructions { color: var(--text-secondary); font-size: 0.9rem; }
+.onb-test__escape {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+}
+.onb-test__error { text-align: center; color: var(--text-secondary); }
+
+/* Result: per-level scoreboard + the override group. */
+.onb-result__levels {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.onb-result__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.onb-result__level { font-weight: 700; }
+.onb-result__score { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+.onb-seg { display: flex; gap: 8px; }
+.onb-seg__btn {
+  flex: 1;
+  padding: 10px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.onb-seg__btn--reco::after {
+  content: '◈';
+  margin-left: 5px;
+  color: var(--accent2);
+}
+.onb-seg__btn--on {
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-color: var(--bg-panel);
+}
+.onb-seg__btn:hover:not(.onb-seg__btn--on),
+.onb-seg__btn:focus-visible { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+
+/* ── Pace: the 種別 ladder ────────────────────────────────── */
+.onb-paces {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.onb-pace {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: left;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.onb-pace:hover, .onb-pace:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+.onb-pace--on { border-color: var(--accent); }
+.onb-pace__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+/* The stopping-pattern diagram: which of six stations this service
+   calls at. Served stops are the house station marker; skipped ones
+   are the small dim dots a passed station is on a real 種別 board. */
+.onb-pace__pattern {
+  width: 100%;
+  max-width: 150px;
+  height: 16px;
+  margin: 2px 0;
+}
+.onb-pace__pattern-rail {
+  stroke: color-mix(in srgb, var(--accent) 45%, transparent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.onb-pace__pattern-stop {
+  fill: var(--bg-card);
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+.onb-pace__pattern-skip {
+  fill: var(--border);
+}
+.onb-pace__name {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.onb-pace__per-day { font-weight: 700; font-size: 0.95rem; }
+.onb-pace__hint { color: var(--text-secondary); font-size: 0.8rem; line-height: 1.45; }
+
+/* ── 路線図 — the projection ──────────────────────────────── */
+.onb-map { display: flex; flex-direction: column; gap: 12px; }
+.onb-map__wrap { position: relative; }
+.onb-map__chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--surface-radius);
+}
+/* HTML overlays — real text at real sizes, positioned in the SVG's
+   own percentage space (see RouteProjection.jsx). */
+.onb-map__month {
+  position: absolute;
+  bottom: 4px;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.onb-map__plate {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 9px));
+  padding: 1px 7px;
+  background: var(--bg-card);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  border-radius: 4px;
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.onb-map__baseline {
+  stroke: var(--border);
+  stroke-width: 2;
+}
+.onb-map__tick { stroke: var(--border); stroke-width: 1.5; }
+.onb-map__line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* pathLength="1" on the polyline makes one dash cover the whole
+     line regardless of its measured length — the draw-in needs no JS. */
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: onb-map-draw 1.1s cubic-bezier(0.4, 0, 0.3, 1) 0.15s forwards;
+}
+@keyframes onb-map-draw {
+  to { stroke-dashoffset: 0; }
+}
+/* Stations arrive in line order, just after the line reaches them. */
+.onb-map__station {
+  opacity: 0;
+  animation: arrive-soft 0.4s ease forwards;
+  animation-delay: calc(0.45s + var(--stop-i, 0) * 0.3s);
+}
+.onb-map__drop {
+  stroke: color-mix(in srgb, var(--accent) 35%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 4;
+}
+/* The same object as .route-stop__marker: a station on a line. */
+.onb-map__stop {
+  fill: var(--bg-card);
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+.onb-map__total { margin: 0; font-weight: 700; }
+.onb-map__milestones {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.onb-map__milestone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.onb-map__milestone-marker {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 3px solid var(--accent);
+}
+.onb-map__assumption {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+/* ── 沿線案内 — the tour ──────────────────────────────────── */
+.onb-tour { display: flex; flex-direction: column; gap: 10px; }
+.onb-tour__card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--row-color, var(--accent));
+  border-radius: 6px;
+}
+.onb-tour__roundel {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 46px;
+  height: 46px;
+  padding: 0 6px;
+  border-radius: 50%;
+  border: 3px solid var(--row-color, var(--accent));
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.onb-tour__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.onb-tour__title { font-weight: 700; }
+.onb-tour__desc { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
+/* ── 定期券 — the pass ────────────────────────────────────── */
+.onb-pass {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 420px;
+  width: 100%;
+  align-self: center;
+  padding: 20px 22px;
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+.onb-pass__head {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-on-panel-soft);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+}
+.onb-pass__main {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.onb-pass__level {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent2);
+}
+.onb-pass__holder {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+}
+.onb-pass__foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--text-on-panel-soft);
+  font-size: 0.85rem;
+}
+/* The contactless arcs (see PassWave.jsx / .pass__wave) pushed to the
+   pass's corner — the same mark the gate reader is about to answer. */
+.onb-pass__wave { margin-left: auto; }
+.onb-action--board { align-self: center; }
+
+/* ── The same controls on the Settings screen's 学習 card ── */
+.settings-seg { flex-wrap: wrap; }
+.settings-seg .onb-seg__btn { flex: 0 1 auto; padding: 8px 12px; font-size: 0.85rem; }
+.settings-redo-result { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.settings-redo-actions { display: flex; align-items: center; gap: 16px; }
+
+/* ── Responsive & reduced motion ──────────────────────────── */
+@media (max-width: 560px) {
+  .onb-paces { grid-template-columns: 1fr; }
+  .onb-alts { margin-left: 22px; }
+  .onb-step__actions { justify-content: stretch; }
+  .onb-step__actions .onb-action { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onb-header,
+  .onb-step {
+    animation: arrive-soft 0.2s linear backwards;
+  }
+  .onb-action:hover:not(:disabled),
+  .onb-action:focus-visible,
+  .onb-pace:hover,
+  .onb-pace:focus-visible { transform: none; }
+  /* The map appears complete: no draw-in, no staggered stations. */
+  .onb-map__line {
+    animation: none;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+  .onb-map__station {
+    animation: none;
+    opacity: 1;
+  }
+  .onb-line__marker { transition: none; }
+}

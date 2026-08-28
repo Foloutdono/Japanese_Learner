@@ -24,6 +24,7 @@ import logging
 from fastapi import APIRouter, Depends, Query
 
 from core.auth import get_user_id, prefixed, unprefixed
+from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
@@ -82,7 +83,8 @@ def _build_theme_card(card_id: str, entry: dict, pool: list[dict], m: Mode, lang
     return payload
 
 
-def _select_theme_cards(theme: str, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str):
+def _select_theme_cards(theme: str, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str,
+                        new_limit: int | None = None):
     pool = theme_data.theme_entries(theme)
     if not pool:
         return None, None
@@ -107,7 +109,7 @@ def _select_theme_cards(theme: str, m: Mode, lang: str, count: int, exclude_ids:
     picked = pick_ids(
         cache_key, due,
         lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
-        count, exclude_ids,
+        count, exclude_ids, new_limit=new_limit,
     )
 
     states = srs.get_bulk_stats(picked, mode)
@@ -151,17 +153,20 @@ def get_theme_card(theme: str, lang: str = "fr",
 
 @router.get("/api/vocab/theme/{theme}/cards")
 def get_theme_cards(theme: str, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
+                    beyond_target: bool = Query(False),
                     m: Mode = Depends(require_mode(VOCAB)),
                     user_id: str = Depends(get_user_id)):
+    pace = resolve_pace(user_id)
     pool, cards = _select_theme_cards(
         theme, m, lang,
         count=max(1, min(count, MAX_BATCH)),
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
+        new_limit=new_card_limit(pace, beyond_target),
     )
     if pool is None:
         return {"error": "Unknown theme"}
-    return {"cards": cards}
+    return {"cards": cards, "pace": pace.payload() if pace else None}
 
 
 @router.get("/api/vocab/theme/{theme}/stats")

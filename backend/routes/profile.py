@@ -10,6 +10,7 @@ from pydantic import BaseModel, field_validator
 from core.db import db_conn
 from core.auth import get_user_id
 from core.srs_instance import srs
+from core.user_level import LEVELS, note_stored_level
 from srs import daruma
 from srs.xp import level_progress
 from routes.cosmetics import summary_for as cosmetics_summary
@@ -29,9 +30,29 @@ def _init_db() -> None:
                 CREATE TABLE IF NOT EXISTS user_profiles (
                     user_id TEXT PRIMARY KEY,
                     username TEXT NOT NULL UNIQUE,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    jlpt_level TEXT,
+                    daily_new_target INTEGER,
+                    onboarded_at TIMESTAMPTZ
                 )
             """)
+            # And the same columns again as ALTERs, because the table
+            # already exists for every current user: CREATE TABLE IF
+            # NOT EXISTS is a no-op on them, so onboarding's fields
+            # would otherwise only exist for brand-new installs.
+            # jlpt_level is the learner's own JLPT level (N5..N1) — a
+            # different concept from the XP level this module also
+            # serves; see core/user_level.py and docs/adr/0005. All
+            # three stay NULL until the onboarding flow completes;
+            # NULL onboarded_at is what makes the frontend show it.
+            for col, typ in (
+                ("jlpt_level", "TEXT"),
+                ("daily_new_target", "INTEGER"),
+                ("onboarded_at", "TIMESTAMPTZ"),
+            ):
+                cur.execute(
+                    f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
+                )
         conn.commit()
     finally:
         conn.close()
@@ -78,6 +99,35 @@ def _get_or_create_username(user_id: str) -> str:
         conn.close()
 
 
+def ensure_profile_row(user_id: str) -> str:
+    """Public seam for other route modules (routes/onboarding.py): make
+    sure a user_profiles row exists before UPDATEing it, and get the
+    username back. Same lazy-seeding as GET /api/profile itself."""
+    return _get_or_create_username(user_id)
+
+
+def _profile_row(user_id: str) -> tuple:
+    """(username, jlpt_level, daily_new_target, onboarded_at) — seeding
+    the row lazily like _get_or_create_username, whose creation path it
+    reuses. The three onboarding fields are NULL until the flow runs."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT username, jlpt_level, daily_new_target, onboarded_at
+                FROM user_profiles WHERE user_id = %s
+                """,
+                (user_id,),
+            )
+            row = cur.fetchone()
+            if row:
+                return row
+    finally:
+        conn.close()
+    return (_get_or_create_username(user_id), None, None, None)
+
+
 def _usernames_for(user_ids: list[str]) -> dict[str, str]:
     if not user_ids:
         return {}
@@ -101,6 +151,30 @@ class UsernamePayload(BaseModel):
     def valid_username(cls, v: str) -> str:
         if not USERNAME_RE.match(v):
             raise ValueError("3-20 characters: letters, numbers, underscore only")
+        return v
+
+
+class LearningPayload(BaseModel):
+    """Settings' partial update of the onboarding fields. Both optional;
+    a PATCH sending neither is a caller bug and 422s. Deliberately never
+    touches onboarded_at — changing your level later is not re-onboarding."""
+    jlptLevel: str | None = None
+    dailyNewTarget: int | None = None
+
+    @field_validator("jlptLevel")
+    @classmethod
+    def valid_level(cls, v: str | None) -> str | None:
+        if v is not None and v not in LEVELS:
+            raise ValueError(f"must be one of {', '.join(LEVELS)}")
+        return v
+
+    @field_validator("dailyNewTarget")
+    @classmethod
+    def valid_target(cls, v: int | None) -> int | None:
+        # The UI offers 5/10/20, but the column is a free integer knob;
+        # the bound only keeps out nonsense, not future paces.
+        if v is not None and not (1 <= v <= 100):
+            raise ValueError("must be between 1 and 100")
         return v
 
 
@@ -215,7 +289,7 @@ def _badges(facts: dict) -> list[dict]:
 # ── Routes ────────────────────────────────────────────────────
 @router.get("/api/profile")
 def get_profile(user_id: str = Depends(get_user_id)):
-    username = _get_or_create_username(user_id)
+    username, jlpt_level, daily_new_target, onboarded_at = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     streak = srs.get_streak(user_id)
@@ -224,6 +298,13 @@ def get_profile(user_id: str = Depends(get_user_id)):
     return {
         "username": username,
         **progress,
+        # The learner's own JLPT level — deliberately NOT "level", which
+        # is the XP level spread in from `progress` above. NULL until
+        # onboarding completes; null onboardedAt is what tells App.jsx
+        # to show the flow. See core/user_level.py and docs/adr/0005.
+        "jlptLevel": jlpt_level,
+        "dailyNewTarget": daily_new_target,
+        "onboardedAt": onboarded_at.isoformat() if onboarded_at else None,
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": facts["total_reviews"],
@@ -263,6 +344,35 @@ def update_profile(payload: UsernamePayload, user_id: str = Depends(get_user_id)
     finally:
         conn.close()
     return {"username": payload.username}
+
+
+@router.patch("/api/profile/learning")
+def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id)):
+    if payload.jlptLevel is None and payload.dailyNewTarget is None:
+        raise HTTPException(status_code=422, detail="Nothing to update")
+    _get_or_create_username(user_id)  # ensure a row exists to update
+    sets, args = [], []
+    if payload.jlptLevel is not None:
+        sets.append("jlpt_level = %s")
+        args.append(payload.jlptLevel)
+    if payload.dailyNewTarget is not None:
+        sets.append("daily_new_target = %s")
+        args.append(payload.dailyNewTarget)
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"UPDATE user_profiles SET {', '.join(sets)} WHERE user_id = %s",
+                (*args, user_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    if payload.jlptLevel is not None:
+        # Write-through so this worker's resolver answers with the new
+        # level immediately rather than after its TTL.
+        note_stored_level(user_id, payload.jlptLevel)
+    return {"jlptLevel": payload.jlptLevel, "dailyNewTarget": payload.dailyNewTarget}
 
 
 @router.get("/api/leaderboard")

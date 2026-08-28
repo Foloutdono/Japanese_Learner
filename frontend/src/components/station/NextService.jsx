@@ -81,6 +81,7 @@ export default function NextService({ session }) {
         </span>
         <span className="next-service__clear">{t.todayNothingDueShort}</span>
         {when && <span className="next-service__when">{t.todayNextReview(when)}</span>}
+        {today.pace && <PaceGauge pace={today.pace} t={t} />}
       </div>
     )
   }
@@ -139,6 +140,35 @@ export default function NextService({ session }) {
           </span>
         ))}
       </span>
+
+      {today.pace && <PaceGauge pace={today.pace} t={t} />}
     </button>
+  )
+}
+
+// ── 新規 — the day's new-item gauge ──────────────────────────
+// The onboarding pace (user_profiles.daily_new_target), spent live:
+// how many new items today's study has introduced against the target
+// the learner chose at the ticket office. Renders nothing for an
+// account with no stored pace (today.pace is null) — the strip looks
+// exactly as it always has. The bar is progress toward the target;
+// past it (the 臨時列車 ran) the count keeps counting while the bar
+// stays full, because "12 / 10" is information and a bar over 100%
+// is noise.
+function PaceGauge({ pace, t }) {
+  const pct = Math.min(100, Math.round((100 * pace.newToday) / Math.max(1, pace.target)))
+  return (
+    <span className="next-service__pace" role="img" aria-label={t.paceGaugeAria(pace.newToday, pace.target)}>
+      <span className="next-service__pace-name">
+        <span className="next-service__pace-jp" lang="ja">新規</span>
+        <span className="next-service__pace-latin">{t.paceGaugeLabel}</span>
+      </span>
+      <span className="next-service__pace-bar" aria-hidden="true">
+        <span className="next-service__pace-fill" style={{ width: `${pct}%` }} />
+      </span>
+      <span className="next-service__pace-count" aria-hidden="true">
+        {pace.newToday}<span className="next-service__pace-sep"> / </span>{pace.target}
+      </span>
+    </span>
   )
 }
