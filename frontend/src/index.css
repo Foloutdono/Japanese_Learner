@@ -2971,6 +2971,81 @@
   --surface-line:   color-mix(in srgb, var(--text-primary) 15%, var(--border));
   --surface-radius: 6px;
 
+  /* ── 文字寸法 — the type scale ────────────────────────────
+     Nine sizes, because the app already has nine; it just spelled
+     them seventy-eight ways. Every rung below is a value one of the
+     reference screens already sets, so migrating a call site onto a
+     token changes nothing on screen. px and rem were both in use for
+     the same visual size — 13px and 0.8rem are the same thing — so
+     the scale is rem throughout and px is retired from type.
+
+     Tracking runs inversely to size (see --tr-* below): the smaller
+     and more uppercase a line is, the wider it is set. */
+  --fs-caption-xs:  0.62rem;   /* section-header title, .board-clock label   */
+  --fs-caption:     0.72rem;   /* 駅名標 romaji, board kana reading          */
+  --fs-sm:          0.82rem;   /* plate kana, pass XP figure                 */
+  --fs-body:        0.95rem;   /* card description, body prose               */
+  --fs-lead:        1.12rem;   /* board destination, the JP term in a row    */
+  --fs-title:       1.25rem;   /* platform-card title                        */
+  --fs-heading:     1.70rem;   /* 記録 record value, 段位 figure             */
+  --fs-display:     2.50rem;   /* 駅名標 station name                        */
+
+  /* The three that must breathe with the viewport. These are the
+     existing clamps lifted verbatim from the reference screens, so
+     they are tokens for what is already there, not new behaviour. */
+  --fs-heading-fluid: clamp(1.35rem, 1.1rem + 1vw, 1.75rem);
+  --fs-board-fluid:   clamp(1.5rem, 1.1rem + 1.4vw, 2rem);
+  --fs-display-fluid: clamp(1.9rem, 1.4rem + 2.2vw, 3.1rem);
+
+  /* ── 字間 — tracking ──────────────────────────────────────
+     Four values, assigned by register rather than by taste. Any line
+     using --tr-reading or --tr-caption on a left-flush or centred
+     axis must also set `text-indent` to the same value, to cancel the
+     trailing space the last letter's tracking adds — the file already
+     does this at .station-sign__kana, .board__romaji and .top-bar__kana. */
+  --tr-term:        0.06em;    /* body-scale Japanese                        */
+  --tr-name:        0.14em;    /* hero Japanese names                        */
+  --tr-caption:     0.18em;    /* uppercase Latin captions                   */
+  --tr-reading:     0.30em;    /* kana readings set above a name             */
+
+  /* ── 間隔 — the spacing scale ─────────────────────────────
+     Measured off the reference screens rather than imposed: 22px is
+     the platform grid's gap, 28px the card's padding, 44px a
+     component's own bottom margin and 52px the screen-level block
+     rhythm the profile applies. Not a strict 4px grid, because the
+     app is not on one and pretending otherwise would move things. */
+  --sp-1:            4px;
+  --sp-2:            6px;
+  --sp-3:            8px;
+  --sp-4:           12px;
+  --sp-5:           16px;
+  --sp-6:           22px;      /* .platform-grid gap                         */
+  --sp-7:           28px;      /* card padding, pass padding                 */
+  --sp-8:           44px;      /* a component's own block rhythm             */
+  --sp-9:           52px;      /* screen-level block rhythm                  */
+
+  /* ── 角丸 — radii, assigned by weight of object ──────────
+     The app already rations these correctly; it just spells them as
+     literals. --r-card is the same 6px as --surface-radius, which
+     stays as the name the surface trio uses. */
+  --r-flat:          0;        /* the hairline lattice, board rows           */
+  --r-plate:         4px;      /* the hanging 駅名標                         */
+  --r-card:          6px;      /* cards and panels                           */
+  --r-panel:         8px;      /* 発車標 and the next-service strip          */
+  --r-identity:     10px;      /* 定期券 and the IC card                     */
+  --r-pill:        999px;      /* pills, roundels, segmented toggles         */
+
+  /* ── 影 — elevation, deliberately rationed ────────────────
+     Two shadows in the whole app, and both mean "this object hangs".
+     Everything else is flat and separates by --surface-line alone. */
+  --elev-hang:     0 10px 26px rgba(0, 0, 0, 0.22);   /* the 駅名標 plate    */
+  --elev-board:    0 24px 60px rgba(0, 0, 0, 0.34);   /* the 発車標          */
+
+  /* The serif face, which was hardcoded 57 times across the four
+     stylesheets and had no token at all. Names and headings only —
+     --font-jp carries readings, units, badges and specimens. */
+  --font-serif:     'Noto Serif JP', serif;
+
   /* The station's column. The departure board, the concourse band
      above it and the notice strip below it are all one object seen in
      three pieces, so they share one width rather than three literals
