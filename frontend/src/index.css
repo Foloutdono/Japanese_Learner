@@ -7827,7 +7827,14 @@ textarea:focus-visible {
   .kumadori-streak { animation: none; opacity: 0; }
 }
 
-.deck-progress { max-width: 480px; margin: 0 auto; }
+/* Plan 049 -- tracks the same column as the card below it (--card-w,
+   defined on :root, see its own comment there) rather than its own
+   480px literal. Before this the screen stacked three different
+   widths: a 480px bar, a ~1052px card, a 640px MCQ list/rating bar --
+   now the bar and the card share one number by construction, so a
+   future change to --card-w can't quietly leave this the odd one out
+   again. */
+.deck-progress { max-width: var(--card-w); margin: 0 auto; }
 
 .deck-progress__bar {
   display: flex;
