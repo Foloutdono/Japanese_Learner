@@ -8,8 +8,7 @@ import { StationHeader } from '../components/station/StationHeader'
 import EmptyState from '../components/ui/EmptyState'
 import { Loading } from '../components/ui/Loading'
 import { deckTypes, deckTypeOf } from '../components/decks/deckTypes'
-import { SearchIcon } from '../components/dictionary/DictionaryDetail'
-import { TrashIcon, PencilIcon, PlayIcon, BooksIcon, CrossIcon } from '../components/ui/Icons'
+import { TrashIcon, PencilIcon, PlayIcon, BooksIcon, CrossIcon, SearchIcon } from '../components/ui/Icons'
 
 export default function DecksScreen({ session }) {
   const navigate  = useNavigate()
@@ -168,7 +167,7 @@ export default function DecksScreen({ session }) {
           </div>
 
           <div className="decks-index-bar">
-            <SearchIcon />
+            <SearchIcon className="decks-index-bar__icon" />
             <input
               ref={searchRef}
               value={query}

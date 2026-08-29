@@ -9,12 +9,12 @@ import { splitReadingTokens } from '../components/study/Readings'
 import { firstGloss } from '../components/study/gloss'
 import {
 	TYPE_META, isKanaType, entryKey,
-	SearchIcon, DictionaryDetail, LevelBadge,
+	DictionaryDetail, LevelBadge,
 } from '../components/dictionary/DictionaryDetail'
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { StageBadge } from '../components/study/StageBadge'
-import { ChevronIcon } from '../components/ui/Icons'
+import { ChevronIcon, SearchIcon } from '../components/ui/Icons'
 
 const LIMIT = 50
 
@@ -365,7 +365,7 @@ export default function DictionaryScreen({ session }) {
 				    for the syllabary categories (nothing to search on a fixed chart) */}
 				{!showingRadicalGrid && !isSyllabary && (
 					<div className="dict-index-bar">
-						<SearchIcon />
+						<SearchIcon className="dict-index-bar__icon" />
 						<input
 							ref={searchRef}
 							value={query}

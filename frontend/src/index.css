@@ -12480,6 +12480,17 @@ textarea:focus-visible {
 .decks-index-bar:focus-within {
   background: color-mix(in srgb, var(--line-color, var(--line-decks)) 7%, transparent);
 }
+/* The console's search glyph. Until 052 this bar's icon was styled by
+   `.dict-index-bar__icon` -- SearchIcon hardcoded that class, so Decks
+   and Today were reaching into the dictionary's namespace for a size
+   and a colour, and no `.decks-index-bar__icon` rule existed at all.
+   Same four declarations, under this bar's own name. */
+.decks-index-bar__icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
 .decks-index-bar__input {
   flex: 1;
   min-width: 0;

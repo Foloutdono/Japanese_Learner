@@ -4,8 +4,8 @@ import { playClick, playArrival } from '../../lib/audio'
 import { Readings, ReadingGroup } from './Readings'
 import { glossParts } from './gloss'
 import { Loading } from '../ui/Loading'
-import { DictionaryLookupSheet, SearchIcon, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
-import { CheckCircleIcon, XCircleIcon, ChevronIcon } from '../ui/Icons'
+import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
+import { CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from '../ui/Icons'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 
 // ── Is the page actually cramped? ──────────────────────────
@@ -558,6 +558,15 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictCategory, session, soun
             title={t.openDictionary}
             aria-label={t.openDictionary}
           >
+            {/* No className, deliberately. This glyph used to carry
+                `dict-index-bar__icon`, baked into SearchIcon itself,
+                whose `color: var(--text-secondary)` overrode the
+                button's own colour -- so alone among the reveal
+                actions it stayed muted and did NOT turn accent on
+                hover the way the SpeakIcon above it does. Inheriting
+                is the fix, not an oversight. Size is unchanged:
+                `.reveal-action-btn svg` sets 15px, and a CSS rule
+                beats the width/height attribute. */}
             <SearchIcon />
           </button>
         )}

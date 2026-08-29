@@ -1,6 +1,6 @@
 // ── Shared icon set ────────────────────────────────────────
 // Drawn glyphs, not emoji — same convention DictionaryDetail.jsx's
-// SpeakIcon/CloseIcon/SearchIcon and NavControls.jsx's volume/theme
+// SpeakIcon/CloseIcon and NavControls.jsx's volume/theme
 // icons already established (24x24 viewBox, stroke=currentColor,
 // round caps/joins) before this file existed. Centralized here so
 // every screen that needs a trash can, a pencil, a chevron, etc.
@@ -172,6 +172,24 @@ export function SpeakerOffIcon({ size = 18, className }) {
       <polygon points="4 9 8 9 12 5 12 19 8 15 4 15" fill="currentColor" stroke="none" />
       <line x1="16" y1="9" x2="21" y2="14" />
       <line x1="21" y1="9" x2="16" y2="14" />
+    </svg>
+  )
+}
+
+// Moved here from DictionaryDetail.jsx in plan 052. It had no props at
+// all and hardcoded `className="dict-index-bar__icon"` -- which only
+// one of its four call sites actually wanted. The other three were
+// borrowing a dictionary class: two inside `.decks-index-bar` (Decks
+// and Today) where it was the only thing supplying a size and colour,
+// and one inside `.reveal-action-btn`, where it was overriding the
+// button's own colour. `size = 16` because 16 is what three of the
+// four render; every site that has a CSS rule for the glyph still wins
+// over the attribute, so all three of those stayed pixel-identical.
+export function SearchIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M21 21l-4.35-4.35" />
     </svg>
   )
 }
