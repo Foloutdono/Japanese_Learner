@@ -120,7 +120,6 @@
   "property-no-vendor-prefix::Vendor-prefixed property \"-webkit-appearance\"": 6,
   "property-no-vendor-prefix::Vendor-prefixed property \"-moz-appearance\"": 1,
   "shorthand-property-no-redundant-values::Expected \"0 0 8px 0\" to be \"0 0 8px\"": 1,
-  "shorthand-property-no-redundant-values::Expected \"0 0 0 0\" to be \"0\"": 1,
   "shorthand-property-no-redundant-values::Expected \"20px 12px 24px 12px\" to be \"20px 12px 24px\"": 1,
   "shorthand-property-no-redundant-values::Expected \"0 60% 0 60%\" to be \"0 60%\"": 1,
   "shorthand-property-no-redundant-values::Expected \"14px 14px\" to be \"14px\"": 1,
