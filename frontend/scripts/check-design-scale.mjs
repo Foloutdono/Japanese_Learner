@@ -20,13 +20,12 @@
 // Plan 047 added two more surfaces the four `font-size`/`border-radius`/
 // `gap`/`padding` scans above cannot see:
 //
-//   - `custom-property-length` -- a CSS custom property whose *value* is a
-//     bare px/rem/em length, e.g. `--card-pad-y: 40px;`. This is classified
-//     by VALUE, not by name: any `--whatever: <length>` counts, because
-//     names drift (`--card-pad-y`, `--char-size`, `--ember-drift`, ...) but
-//     a length is a length regardless of what it's called. `var(...)`,
-//     `calc(...)`, `clamp(...)` and colours never match -- only a bare
-//     number+unit does.
+//   - a CSS custom property whose *value* is a bare px/rem/em length, e.g.
+//     `--card-pad-y: 40px;`. This is classified by VALUE, not by name: any
+//     `--whatever: <length>` counts, because names drift (`--card-pad-y`,
+//     `--char-size`, `--ember-drift`, ...) but a length is a length
+//     regardless of what it's called. `var(...)`, `calc(...)`, `clamp(...)`
+//     and colours never match -- only a bare number+unit does.
 //   - `js-inline-length` -- the same kind of length, but written from
 //     `.jsx`/`.js` as a custom-property value: a template literal
 //     (`` `${size}px` ``) or a string literal (`'80px'`) assigned to a
@@ -43,6 +42,35 @@
 // the CSS scan above (a JS-aware stripper for `.jsx`/`.js`, since `//` line
 // comments and string/template contents need different handling than CSS's
 // `/* */`-only comments).
+//
+// Plan 050 split the custom-property-length surface in two, because
+// classifying every `--name: <length>` the same way made the ratchet count
+// the design system's own token definitions (`--fs-caption: 0.72rem`,
+// `--sp-6: 22px`) as violations -- 74 of the 101 occurrences on d842142,
+// 73% of a number meant to measure distance FROM the design system. Worse:
+// minting a token failed the build (plans 046 and 049 both hit this; 049's
+// executor had to step over an explicit STOP condition to do the obviously
+// right thing).
+//
+//   - `design-token` -- a `--name: <length>` declaration whose enclosing
+//     rule's selector list is a `:root` block: bare `:root`, or `:root`
+//     with an attribute selector such as `:root[data-theme="light"]`, per
+//     plan 050. This is the scale itself. Reported for visibility (a token
+//     appearing in a diff is exactly the signal a reviewer wants) but
+//     NEVER fails the build -- adding a token is a deliberate design act,
+//     not debt.
+//   - `custom-property-length` -- the identical declaration shape anywhere
+//     else: a component overriding geometry with a literal instead of
+//     `var(...)`. This is the real target and stays fully ratcheted: a
+//     rise fails the build, exactly as before.
+//
+// The enclosing selector is found by brace-matching backward from the
+// declaration to the `{` that opens its block, then reading the prelude up
+// to the previous `;`/`}`/`{` -- never inferred from indentation. A
+// cosmetics block like `:root[data-seal="x"], [data-seal-preview="x"] {
+// --seal-radius: 6px; }` still counts as `design-token`: its second
+// selector only replays the same declaration for a live-preview attribute,
+// but the block's home is :root.
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -52,10 +80,16 @@ const FRONTEND_DIR = join(SCRIPT_DIR, '..')
 const SRC_DIR = join(FRONTEND_DIR, 'src')
 const SCALE_PATH = join(SRC_DIR, 'design-scale.json')
 const PROPERTIES = ['font-size', 'border-radius', 'gap', 'padding']
+const DESIGN_TOKEN = 'design-token'
 const CUSTOM_PROPERTY_LENGTH = 'custom-property-length'
 const JS_INLINE_LENGTH = 'js-inline-length'
 // All classes whose allowlist and occurrence count live in design-scale.json.
-const ALL_CLASSES = [...PROPERTIES, CUSTOM_PROPERTY_LENGTH, JS_INLINE_LENGTH]
+const ALL_CLASSES = [...PROPERTIES, DESIGN_TOKEN, CUSTOM_PROPERTY_LENGTH, JS_INLINE_LENGTH]
+// Classes where a rise in the occurrence count, or a new distinct literal,
+// fails the build. `design-token` is deliberately excluded -- see the file
+// header (plan 050). It is still tracked in ALL_CLASSES so its count is
+// written to design-scale.json and reported every run.
+const RATCHETED_CLASSES = new Set([...PROPERTIES, CUSTOM_PROPERTY_LENGTH, JS_INLINE_LENGTH])
 const LITERAL_EXEMPT = new Set(['inherit', 'initial', 'unset', '0'])
 // A bare px/rem/em length with no other characters -- not var()/calc()/
 // clamp(), not a colour, not a multi-value shorthand.
@@ -172,6 +206,43 @@ function findDeclarations(text, property) {
   return out
 }
 
+// Brace-match backward from `index` to the `{` that opens the block
+// directly containing it, then return that block's prelude -- the text
+// since the previous `;`, `}`, or `{` (whichever is nearer), which for a
+// style rule is its selector list and for an at-rule is its prelude. This
+// is how a `:root` token definition is told apart from a component
+// override with the same declaration shape (plan 050); never inferred from
+// indentation. Returns '' if `index` is at the top level.
+function enclosingPrelude(text, index) {
+  let depth = 0
+  let i = index - 1
+  while (i >= 0) {
+    const ch = text[i]
+    if (ch === '}') depth++
+    else if (ch === '{') {
+      if (depth === 0) break
+      depth--
+    }
+    i--
+  }
+  if (i < 0) return ''
+  const openBrace = i
+  let j = openBrace - 1
+  while (j >= 0 && text[j] !== '}' && text[j] !== ';' && text[j] !== '{') j--
+  return text.slice(j + 1, openBrace).trim().replace(/\s+/g, ' ')
+}
+
+// True if `prelude` is a `:root` block per plan 050: the FIRST selector in
+// the (possibly comma-separated) list is bare `:root` or
+// `:root[attr="value"]`. A cosmetics block such as
+// `:root[data-seal="x"], [data-seal-preview="x"] { --seal-radius: 6px; }`
+// still counts -- its second, live-preview selector only replays the same
+// declaration for a preview attribute; the block's home selector is :root.
+const ROOT_PRELUDE_RE = /^:root(\[[^\]]*\])?\s*(,|$)/
+function isRootPrelude(prelude) {
+  return ROOT_PRELUDE_RE.test(prelude)
+}
+
 // Every custom-property declaration (`--anything: <value>;`) whose value is
 // a bare px/rem/em length -- classified by VALUE, never by name, per plan
 // 047: `--card-pad-y: 40px` is a padding, `--char-size: 72px` is a type
@@ -180,6 +251,10 @@ function findDeclarations(text, property) {
 // BARE_LENGTH_RE and are correctly ignored. Same boundary rule as
 // findDeclarations (preceded by start/`;`/`{`/whitespace) so this never
 // matches inside a longer identifier.
+//
+// Each match is further classified `design-token` vs `custom-property-length`
+// by where it's declared -- see enclosingPrelude/isRootPrelude above and
+// the file header (plan 050).
 function findCustomPropertyLengths(text) {
   const re = /(?:^|[;{\s])(--[A-Za-z0-9_-]+)\s*:\s*([^;{}]+?)\s*(?=[;}])/g
   const lineAt = makeLineFinder(text)
@@ -187,7 +262,10 @@ function findCustomPropertyLengths(text) {
   let m
   while ((m = re.exec(text))) {
     const value = normalizeValue(m[2])
-    if (BARE_LENGTH_RE.test(value)) out.push({ name: m[1], value, line: lineAt(m.index) })
+    if (BARE_LENGTH_RE.test(value)) {
+      const cls = isRootPrelude(enclosingPrelude(text, m.index)) ? DESIGN_TOKEN : CUSTOM_PROPERTY_LENGTH
+      out.push({ name: m[1], value, line: lineAt(m.index), cls })
+    }
   }
   return out
 }
@@ -379,13 +457,19 @@ function main() {
     }
 
     const cplAllow = new Set(scale.allow[CUSTOM_PROPERTY_LENGTH] ?? [])
-    for (const { name, value, line } of findCustomPropertyLengths(text)) {
-      occurrences[CUSTOM_PROPERTY_LENGTH]++
-      if (cplAllow.has(value)) continue
+    const dtAllow = new Set(scale.allow[DESIGN_TOKEN] ?? [])
+    for (const { name, value, line, cls } of findCustomPropertyLengths(text)) {
+      occurrences[cls]++
+      const allow = cls === DESIGN_TOKEN ? dtAllow : cplAllow
+      if (allow.has(value)) continue
       if (write) {
-        newAllow[CUSTOM_PROPERTY_LENGTH].add(value)
+        newAllow[cls].add(value)
         continue
       }
+      // design-token is informational only -- see the file header (plan
+      // 050) -- so a value new to its allowlist is never a violation, only
+      // custom-property-length (component debt) is.
+      if (cls === DESIGN_TOKEN) continue
       violations.push(`${rel}:${line}  ${name}: ${value}  (custom-property-length)`)
     }
   }
@@ -416,7 +500,7 @@ function main() {
     writeFileSync(SCALE_PATH, JSON.stringify(scale, null, 2) + '\n')
     const total = PROPERTIES.reduce((a, p) => a + scale.allow[p].length, 0)
     const totalOccurrences = ALL_CLASSES.reduce((a, c) => a + occurrences[c], 0)
-    console.log(`design-scale.json allow[] written: ${total} entries across ${PROPERTIES.length} properties, plus ${scale.allow[CUSTOM_PROPERTY_LENGTH].length} custom-property-length and ${scale.allow[JS_INLINE_LENGTH].length} js-inline-length. ${totalOccurrences} occurrences recorded across all ${ALL_CLASSES.length} classes.`)
+    console.log(`design-scale.json allow[] written: ${total} entries across ${PROPERTIES.length} properties, plus ${scale.allow[DESIGN_TOKEN].length} design-token, ${scale.allow[CUSTOM_PROPERTY_LENGTH].length} custom-property-length and ${scale.allow[JS_INLINE_LENGTH].length} js-inline-length. ${totalOccurrences} occurrences recorded across all ${ALL_CLASSES.length} classes.`)
     process.exit(0)
   }
 
@@ -427,6 +511,7 @@ function main() {
   // see step 1b in plan 047.
   const storedCounts = scale.counts ?? {}
   for (const cls of ALL_CLASSES) {
+    if (!RATCHETED_CLASSES.has(cls)) continue
     const stored = storedCounts[cls] ?? 0
     if (occurrences[cls] > stored) {
       violations.push(`(counts)  ${cls}: occurrence count rose from ${stored} to ${occurrences[cls]} -- an already-allowlisted literal now appears more often somewhere. Falling is fine and needs no allowlist change; rising means re-run --write only after confirming the rise is intentional.`)
@@ -488,10 +573,12 @@ function main() {
 
   const totalAllow = PROPERTIES.reduce((a, p) => a + (scale.allow[p]?.length ?? 0), 0)
   const totalOldOccurrences = PROPERTIES.reduce((a, p) => a + occurrences[p], 0)
+  const dtAllowCount = scale.allow[DESIGN_TOKEN]?.length ?? 0
   const cplAllowCount = scale.allow[CUSTOM_PROPERTY_LENGTH]?.length ?? 0
   const jilAllowCount = scale.allow[JS_INLINE_LENGTH]?.length ?? 0
   console.log(`Guard 3 (design scale): no new violations.`)
   console.log(`  ${totalAllow} literals still on the allowlist across ${PROPERTIES.length} properties (${totalOldOccurrences} occurrences).`)
+  console.log(`  design-token: ${dtAllowCount} literals recorded (${occurrences[DESIGN_TOKEN]} occurrences) -- informational only, never fails the build.`)
   console.log(`  custom-property-length: ${cplAllowCount} literals on the allowlist (${occurrences[CUSTOM_PROPERTY_LENGTH]} occurrences).`)
   console.log(`  js-inline-length: ${jilAllowCount} literals on the allowlist (${occurrences[JS_INLINE_LENGTH]} occurrences).`)
   process.exit(0)
