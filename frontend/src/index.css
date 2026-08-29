@@ -5388,10 +5388,10 @@ textarea:focus-visible {
   text-align: left;
   color: var(--text-primary);
   /* The same raised card every other selectable row in the app is
-     (.deckdetail-card-row, .dict-entry-card, .daruma-card) --
-     --bg-panel is the sumi ink DESIGN.md reserves for chrome (the top
-     bar, the nav drawer), and painting a row of content in it made the
-     picker read as frame rather than as a list of choices. */
+     (.deckdetail-card-row, .dict-entry-card, .daruma-card) -- this
+     used to sit on the sumi ink DESIGN.md reserves for chrome (the
+     top bar, the nav drawer), which made the picker read as frame
+     rather than as a list of choices. */
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-left: 3px solid transparent;
@@ -5407,8 +5407,8 @@ textarea:focus-visible {
   border-left-color: var(--lane-color, var(--accent2));
   /* No whole-row tint here on purpose: the left rail and the filled
      tick already both carry --lane-color, and a third statement of
-     the same pigment across the row was tuned against --bg-panel ink
-     that this row no longer sits on. */
+     the same pigment across the row was tuned against the sumi-ink
+     background this row no longer sits on. */
 }
 .today-lane-row:hover { border-color: color-mix(in srgb, var(--lane-color, var(--accent2)) 40%, transparent); }
 
