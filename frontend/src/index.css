@@ -4578,7 +4578,7 @@ textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .station-header { animation: arrive-soft 0.2s linear backwards; }
 }
-.station-header .station-sign--sm { padding: 0 0 0 0; }
+.station-header .station-sign--sm { padding: 0; }
 .station-header .station-sign__stripe { margin: 0; }
 
 /* Those screens open straight onto the plate now, so they no longer
