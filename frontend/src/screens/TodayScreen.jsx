@@ -17,8 +17,7 @@ import HintBar from '../components/study/HintBar'
 import SessionError from '../components/study/SessionError'
 import CardPrompt from '../components/study/CardPrompt'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
-import { SearchIcon } from '../components/dictionary/DictionaryDetail'
-import { ChevronIcon, CrossIcon, CheckIcon } from '../components/ui/Icons'
+import { ChevronIcon, CrossIcon, CheckIcon, SearchIcon } from '../components/ui/Icons'
 import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { kanaSetLabel } from '../domain/kanaSets'
@@ -503,7 +502,7 @@ export default function TodayScreen({ session }) {
             </div>
 
             <div className="decks-index-bar">
-              <SearchIcon />
+              <SearchIcon className="decks-index-bar__icon" />
               <input
                 ref={searchRef}
                 value={query}
