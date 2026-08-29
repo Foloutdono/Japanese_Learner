@@ -14283,10 +14283,20 @@ textarea:focus-visible {
     overflow: hidden; /* prevent scrolling */
   }
 
+  /* .quiz-area's own side padding, just below, already keeps the
+     pill's radius clear of the screen edge -- sticky only changes the
+     bar's vertical behaviour, so that horizontal gutter still applies.
+     What a 640px pill pinned to the bottom edge still needs on its
+     own: the safe-area inset, so it doesn't tuck itself under a
+     phone's home-indicator bar, and a background plus a little
+     headroom above it so it reads as a deliberate floating instrument
+     rather than the card's last line getting silently sliced off. */
   .rating-bar {
     position: sticky;
-    bottom: 0;
+    bottom: env(safe-area-inset-bottom, 0);
     z-index: 10;
+    padding-top: var(--sp-3);
+    background: var(--bg-main);
   }
   .quiz-area { padding: 32px 24px max(32px, 12vh);}
 
