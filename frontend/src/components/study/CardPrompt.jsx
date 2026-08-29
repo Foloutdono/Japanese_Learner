@@ -70,7 +70,7 @@ export default function CardPrompt({
       // write_romaji — the kana is shown, type its reading.
       return (
         <PromptCard>
-          <CharDisplay char={c.kana} />
+          <CharDisplay char={c.kana} variant="glyph" />
           <RevealActions
             t={t} revealed={answered} resetKey={resetKey}
             dictTerm={c.kana} dictCategory={dictCategory} session={session}
@@ -96,14 +96,14 @@ export default function CardPrompt({
         {!showChoices ? (
           <Flashcard
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
-            front={isB2F ? romajiPrompt(prompt) : <CharDisplay char={prompt} />}
-            back={isB2F ? <CharDisplay char={answer} /> : romajiPrompt(answer)}
+            front={isB2F ? romajiPrompt(prompt) : <CharDisplay char={prompt} variant="glyph" />}
+            back={isB2F ? <CharDisplay char={answer} variant="glyph" /> : romajiPrompt(answer)}
             dictTerm={c.kana} dictCategory={dictCategory} session={session}
             onReplaySound={() => playKana(c.romaji)}
           />
         ) : (
           <>
-            {isB2F ? romajiPrompt(prompt) : <CharDisplay char={prompt} />}
+            {isB2F ? romajiPrompt(prompt) : <CharDisplay char={prompt} variant="glyph" />}
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}
               dictTerm={c.kana} dictCategory={dictCategory} session={session}

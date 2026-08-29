@@ -34,39 +34,48 @@ function useIsCramped() {
 // ── Big kana/kanji display ────────────────────────────────
 // `variant` is the study specimen's two rungs (see --fs-specimen-glyph/
 // -word in index.css): 'glyph' for one character, kana or kanji, 'word'
-// for a vocab word or short phrase. Plan 048 replaced the 25 numeric
-// `size` props CardPrompt.jsx used to pass here -- each turned into a
-// bare px string on --char-size -- with these two tokens, because the
-// content only ever needed two sizes and the numbers were drifting for
-// no stated reason (kana at 110px, kanji at 100px, no one had decided
-// they should differ).
+// for a vocab word or short phrase. Plan 048 replaced the numeric `size`
+// props CardPrompt.jsx used to pass here -- each turned into a bare px
+// string on --char-size -- with these two tokens, because the content
+// only ever needed two sizes and the numbers were drifting for no
+// stated reason (kana at 110px, kanji at 100px, no one had decided they
+// should differ).
 //
-// `size` survives as an explicit escape hatch for the one caller that
-// isn't a Japanese specimen at all: the kana screen's romaji prompt,
-// plain Latin text in the UI font, at whatever size that context wants.
-// Forcing it onto glyph/word would be the third rung plan 048 explicitly
-// argues against minting -- the whole point of exactly two is that they
-// match what the SPECIMEN needs, and romaji isn't the specimen.
+// CharDisplay is shared well beyond CardPrompt.jsx -- KanaScreen,
+// KanjiScreen, VocabScreen and OnboardingFlow all import it directly
+// with their own numeric `size` props, none of it plan 048's to touch.
+// `variant` is opt-in, not a new default, precisely so those callers
+// are byte-for-byte unaffected: no `variant` (the only shape they pass)
+// falls through to the exact old `size ?? 110` / `isLargeSize` behaviour
+// below. Only CardPrompt.jsx's specimen call sites pass `variant` now.
 const SPECIMEN_SIZE = {
   glyph: 'var(--fs-specimen-glyph)',
   word: 'var(--fs-specimen-word)',
 }
 
-export function CharDisplay({ char, variant = 'glyph', size }) {
-  if (size != null) {
+export function CharDisplay({ char, variant, size }) {
+  if (variant) {
     return (
       <div
         className="char-display"
-        style={{ fontSize: size, fontFamily: size >= 60 ? 'var(--font-jp)' : 'inherit' }}
+        style={{ '--char-size': SPECIMEN_SIZE[variant], '--char-font': 'var(--font-jp)' }}
       >
         {char}
       </div>
     )
   }
+  // `height` is set explicitly too, not left to the class's own
+  // `calc(var(--char-size, 110px) * 1.15)` -- this path never sets
+  // --char-size, so that calc() would silently fall back to 110px
+  // regardless of `s` (a real bug the first draft of this had: every
+  // non-variant caller's box height stopped tracking its font size).
+  // Same 1.15 multiplier as the class default, so a plain <CharDisplay
+  // size={N}/> box scales exactly like a variant one.
+  const s = size ?? 110
   return (
     <div
       className="char-display"
-      style={{ '--char-size': SPECIMEN_SIZE[variant], '--char-font': 'var(--font-jp)' }}
+      style={{ fontSize: s, height: s * 1.15, fontFamily: s >= 60 ? 'var(--font-jp)' : 'inherit' }}
     >
       {char}
     </div>
