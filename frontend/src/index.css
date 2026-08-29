@@ -8821,73 +8821,94 @@ textarea:focus-visible {
 
 
 /* ── Rating bar (SRS quality scale) ──────────────────────────
-   A hanko-grid, not a row of flat-UI pills: six panels sit flush
-   against each other behind 1px hairlines — the same shoji-screen
-   logic as the home screen's nav cards — each marked by a thin
-   seal-colour stroke along its top edge rather than a full colour
-   fill, echoing .type-badge and the MCQ row's accent bar ("the
-   accent marks it, it doesn't drown it"). Blackout (q0) gets the
-   one true void: no colour at all, sumi ink instead, since the
-   answer drew a blank. */
+   DESIGN.md calls this out by name: the app's most-used control is
+   one continuous instrument, not a row of flat-UI buttons. A single
+   pill, its six segments divided by a hairline (border-left, never a
+   gap, so the ramp reads as one object rather than the old hanko-grid
+   of flush panels) at every width -- there is no narrower layout that
+   breaks it back into rows. Runs worst to best, left to right;
+   RatingBar.jsx renders a reversed COPY of the scale to get that
+   order, so the underlying array -- and the keyboard handler that
+   indexes it -- stays best-first. The digit shortcut still counts
+   "1" as Perfect and "6" as Blackout even though the bar itself now
+   reads the other way; see the component for why that must never
+   change.
+
+   Colour is reduced to a 3px rule inside each segment -- matcha
+   through amber to vermillion, the same escalation the SRS stages
+   and the 種別 ladder use, so "how did that go" reads the same way
+   wherever it is asked -- at 55% strength; hover/focus brings it to
+   full and fills the segment with its own colour at ~14%. The bar has
+   no persisted "selected" state (a rating submits immediately, there
+   is nothing left to stay selected), so hover/focus-visible is this
+   control's nearest equivalent and stands in for it. Blackout (q0)
+   keeps the one true void: no colour at all, sumi ink instead, since
+   the answer drew a blank. */
 .rating-bar { margin-top: 0; }
 
 .rating-bar__buttons {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: 5px;
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
   overflow: hidden;
-  max-width: 480px;
+  max-width: 640px;
   margin: 0 auto;
 }
 
 .rating-bar__btn {
   display: flex;
+  flex: 1 1 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  min-height: 64px;
-  padding: 14px 6px;
-  background: var(--bg-card);
+  gap: var(--sp-1);
+  min-height: 56px; /* a hit target, not a spacing rung -- the one literal this block keeps */
+  padding: var(--sp-3);
+  background: none;
   border: none;
-  border-bottom: 3px solid var(--rating-color, transparent);
-  border-radius: 0;
+  border-left: 1px solid var(--surface-line);
+  border-bottom: 3px solid color-mix(in srgb, var(--rating-color, transparent) 55%, transparent);
   color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.25;
   text-align: center;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
-.rating-bar__btn:hover,
-.rating-bar__btn:focus-visible { background: var(--overlay-hover); }
+.rating-bar__btn:first-child { border-left: none; }
 
-.rating-bar__btn-index {
-  font-family: var(--font-display);
-  font-size: 10px;
+.rating-bar__btn:hover,
+.rating-bar__btn:focus-visible {
+  background: color-mix(in srgb, var(--rating-color, transparent) 14%, transparent);
+  border-bottom-color: var(--rating-color, transparent);
+}
+/* Blackout has no ink to fill with -- the same neutral hover chip
+   every other flat control in the app uses stands in for a colour
+   tint that doesn't exist. */
+.rating-bar__btn--q0:hover,
+.rating-bar__btn--q0:focus-visible { background: var(--overlay-hover); }
+
+.rating-bar__btn-jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tr-term);
+  text-indent: var(--tr-term);
+}
+
+.rating-bar__btn-label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
   color: var(--text-secondary);
 }
 
-.rating-bar__btn-label { color: var(--rating-color, var(--text-primary)); }
-
-/* Matcha through amber to vermillion — the same escalation the SRS
-   stages and the 種別 ladder use, so "how did that go" reads the same
-   way wherever it is asked. */
 .rating-bar__btn--q5 { --rating-color: var(--success); }
 .rating-bar__btn--q4 { --rating-color: var(--teal); }
 .rating-bar__btn--q3 { --rating-color: var(--warning); }
 .rating-bar__btn--q2 { --rating-color: var(--rust); }
 .rating-bar__btn--q1 { --rating-color: var(--accent); }
-.rating-bar__btn--q0 .rating-bar__btn-label { color: var(--text-secondary); }
-
-@media (min-width: 560px) {
-  .rating-bar__buttons { grid-template-columns: repeat(6, 1fr); max-width: 640px; }
-}
 
 /* ── Shared nav control button (mute / lang switcher) ─────── */
 /* Consolidated — this used to be defined twice (here and further
@@ -9469,10 +9490,13 @@ textarea:focus-visible {
    go from light-mid tiles that want dark text to mid-dark tiles that
    want light text. --accent2/--accent6/--danger etc. stay dark-toned
    in both themes, so their paired --text-on-fill/--text-on-panel
-   choice never needs to change — only these do. */
+   choice never needs to change — only these do.
+   .rating-bar__btn--q5 dropped by plan 045: the rebuilt bar no longer
+   tints its label text with --rating-color (colour is a 3px rule and
+   a ~14% hover fill now, never a text colour), so there is no q5 text
+   left that needs an on-fill override here. */
 :root[data-theme="light"] .rating-btn--fill-success,
 :root[data-theme="light"] .rating-btn--fill-warning,
-:root[data-theme="light"] .rating-bar__btn--q5,
 :root[data-theme="light"] .btn-writing-toggle--on,
 :root[data-theme="light"] .drawing-overlay__continue,
 :root[data-theme="light"] .study-drawing-toggle--active,
