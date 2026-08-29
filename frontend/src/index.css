@@ -5220,23 +5220,28 @@ textarea:focus-visible {
   gap: 9px;
   min-width: 0;
 }
+/* The bilingual pair, on the two inks DESIGN.md gives it: the Japanese
+   is the heading and the Latin is its caption in secondary ink. That is
+   also what .next-service__pace-jp / __pace-latin five rules below have
+   always done -- pace-jp inherits the block's ink, pace-latin takes the
+   soft one -- so the strip's two pairs now read the same way.
+
+   Neither is a mix toward `transparent` any more. Such a mix composites
+   toward the GROUND rather than the ink, so it costs contrast in both
+   themes at once: this caption was 2.09:1 on the sumi and still only
+   4.01:1 in DARK theme, where nothing else in the app failed. The dim
+   step does not need it -- two inks and a 1.3x size drop carry it. */
 .next-service__jp {
   font-size: 13px;
   letter-spacing: 0.16em;
-  color: var(--ns-ink-soft);
+  color: var(--ns-ink);
   white-space: nowrap;
 }
 .next-service__latin {
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  /* 90%, not 72%: a mix toward `transparent` composites toward the
-     ground, so it costs contrast on a dark ground and on a light one
-     alike. 72% measured 2.09:1 on the sumi and 4.01:1 even in dark
-     theme. 90% is the deepest cut that still clears the floor on both
-     of this strip's grounds, and it stays translucent, which is what
-     index.tokens.browser.test.jsx asserts about this rule. */
-  color: color-mix(in srgb, var(--ns-ink-soft) 90%, transparent);
+  color: var(--ns-ink-soft);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -12,11 +12,13 @@ describe('the dimmed text register', () => {
   it('renders a strictly different colour from the primary one', async () => {
     const screen = await render(
       <div className="next-service">
+        <span className="next-service__jp" lang="ja">本日の運行</span>
         <span className="next-service__when">3h</span>
         <span className="next-service__latin">Today</span>
       </div>
     )
     const strip = screen.container.querySelector('.next-service')
+    const jp    = screen.container.querySelector('.next-service__jp')
     const when  = screen.container.querySelector('.next-service__when')
     const latin = screen.container.querySelector('.next-service__latin')
 
@@ -27,11 +29,22 @@ describe('the dimmed text register', () => {
     // colour.
     expect(getComputedStyle(when).color).not.toBe(primary)
 
-    // The color-mix() site is a separate failure mode -- one bad var()
-    // invalidates the whole function -- so it gets its own assertion.
-    // A real mix against `transparent` is translucent; the inherited
-    // fallback never is.
-    expect(getComputedStyle(latin).color).toMatch(/rgba|\/\s*0?\./)
+    // The caption used to be a color-mix() against `transparent`, and this
+    // asserted the result was translucent -- translucency being the visible
+    // proof that the mix had resolved rather than collapsing to an inherited
+    // fallback. The mix is gone: it composited toward the GROUND, not the
+    // ink, so it cost contrast in both themes and failed at 4.01:1 in dark.
+    // The failure mode it guarded has not gone anywhere, so the guard moves
+    // rather than being deleted. .next-service__jp now takes the block's own
+    // ink, so an unresolved --ns-ink-soft would make the caption inherit and
+    // land on exactly jp's colour -- which is what this catches.
+    expect(getComputedStyle(latin).color).not.toBe(getComputedStyle(jp).color)
+
+    // And the inverse of the old assertion, because the rule is now absolute:
+    // no ink in this strip may be a mix toward `transparent`.
+    for (const el of [jp, when, latin]) {
+      expect(getComputedStyle(el).color).not.toMatch(/rgba|\/\s*0?\./)
+    }
   })
 
   it('gives the Today tick a border colour of its own', async () => {
