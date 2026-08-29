@@ -106,6 +106,14 @@ It is never a card background, and it is **never on chrome**. The top bar
 carries no line colour at all: it is sumi ink and two registers of text. The
 frame stays quiet so the content can speak.
 
+**A second standing exception, decided deliberately**: the **primary button**
+is a filled use of a line pigment — see *The primary button* under Surfaces.
+It applies to **the one action on a screen**, and to nothing else. It is not
+precedent for filling a card, a row, a chip, a header or a second button; a
+screen with two filled buttons has misidentified which one is the action.
+Like the cosmetics exception, it is allowed to exist *because* the rule is
+otherwise absolute.
+
 ### The pigment is injected once
 
 A screen shell sets `--line-color` / `--row-color`; everything below reads
@@ -196,6 +204,38 @@ panel at `--r-panel`, two rows split by a `1px --surface-line` hairline. Row 1
 holds the filter chips, with the single primary action pinned right. Row 2
 holds search, with the result count pinned right. One console everywhere, not
 three — a screen that needs filtering reaches for this, not a bespoke bar.
+
+### The primary button
+
+One screen, one filled action — `.btn-primary`, the only class in the app that
+fills with a line pigment. Everything beside it is a ghost: transparent, a
+`--surface-line` border, `--text-primary`.
+
+```css
+background: color-mix(in srgb, var(--line-color, var(--accent)) 88%, var(--bg-panel));
+color: var(--text-on-panel);
+/* :hover lifts the fill to 97% — lighter, not a brightness filter */
+```
+
+The fill is **the section's own pigment, deepened 12% toward the panel ink**,
+so a button on Decks is 蘇芳 and one on Today is 朱色 without either screen
+inventing a colour. The deepening is not decoration: the raw pigment does not
+carry the ink at 15.2px/600. Hover goes **lighter**, never darker — a `filter:
+brightness()` is not the hover, and must be turned off where the bare `button`
+rule supplies one. Disabled is `opacity: 0.45`, and there is only one disabled
+treatment.
+
+**The ink is chosen by the fill's lightness, not fixed.** A fill darker than
+roughly 40% luminance takes `--text-on-panel`; one lighter than that takes
+`--text-on-fill`. 山吹色 gold and 黄丹 safflower are the light ones — gold on
+the paper ink is **2.19:1**, and deepening does not save it, because a deepened
+yellow turns olive before it will carry a light ink. Gold takes the dark ink.
+
+Assuming one ink for all twelve pigments is exactly what produced the defect
+this section was written for: the button shipped at 3.48:1 and every guard and
+every test passed. **Nothing in the app checks contrast.** Measure the pair
+before filling a button in a new section — 4.5:1 is the floor, and the mockups
+themselves do not always clear it.
 
 ## Space
 
