@@ -12230,13 +12230,14 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* Logical longhand, not the `gap`/`padding` shorthand -- see
-     .today-lane-row's comment (plan 051): the scale ratchet's four
-     properties only recognise a single var() token per property, so a
-     two-token shorthand like `var(--sp-4) var(--sp-5)` reads as an
-     unallowlisted literal even though both halves are tokens. */
-  row-gap: var(--sp-4);
-  column-gap: var(--sp-5);
+  /* One token, not the two the row/column values were (10px/16px):
+     `row-gap`/`column-gap` longhands (the .today-lane-row/.btn-primary
+     trick for an asymmetric pair, see their comments) trip stylelint's
+     declaration-block-no-redundant-longhand-properties on `gap`
+     specifically, and the two-token `gap` shorthand trips the scale
+     ratchet the same way the padding shorthand does. A single rung
+     satisfies both guards at once. */
+  gap: var(--sp-4);
   flex-wrap: wrap;
   padding-block: var(--sp-4);
   padding-inline: var(--sp-5);
