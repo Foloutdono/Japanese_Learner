@@ -5414,15 +5414,12 @@ textarea:focus-visible {
 
 .today-lane-row__tick {
   flex: 0 0 auto;
-  width: 17px;
-  height: 17px;
-  border-radius: 5px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--r-plate);
   border: 1.5px solid color-mix(in srgb, var(--text-secondary) 60%, transparent);
   /* Flex-centers the checkmark rather than placing it with hand-tuned
-     left/top pixels -- those were eyeballed against ONE box size and
-     never actually landed centred (visibly off toward the top-left in
-     the box's own 17px square). Centring the layout is exact by
-     construction and stays exact if the box is ever resized. */
+     left/top pixels. */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5431,18 +5428,12 @@ textarea:focus-visible {
   background: var(--lane-color, var(--accent2));
   border-color: var(--lane-color, var(--accent2));
 }
-.today-lane-row--on .today-lane-row__tick::after {
-  content: '';
-  width: 5px;
-  height: 9px;
-  border: solid #fff;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  /* The mark's own visual weight trails down-right of its unrotated
-     box (the long stroke is the bottom-right two sides of an "L"), so
-     flex-centring the box alone still reads a hair low. One pixel up
-     is the standard correction for this exact border-trick checkmark. */
-  margin-top: -1px;
+/* The mark itself is the shared CheckIcon (components/ui/Icons.jsx),
+   rendered by TodayScreen only when the row is on -- not a hand-drawn
+   rotated-border ::after any more. currentColor is what CheckIcon's
+   stroke reads, so setting `color` here is the whole job. */
+.today-lane-row__check {
+  color: var(--bg-main);
 }
 
 .today-lane-row__body {

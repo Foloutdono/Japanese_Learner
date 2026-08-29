@@ -18,7 +18,7 @@ import SessionError from '../components/study/SessionError'
 import CardPrompt from '../components/study/CardPrompt'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 import { SearchIcon } from '../components/dictionary/DictionaryDetail'
-import { ChevronIcon, CrossIcon } from '../components/ui/Icons'
+import { ChevronIcon, CrossIcon, CheckIcon } from '../components/ui/Icons'
 import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { kanaSetLabel } from '../domain/kanaSets'
@@ -524,7 +524,9 @@ export default function TodayScreen({ session }) {
                       aria-pressed={on}
                       onClick={() => toggleLane(lane.id)}
                     >
-                      <span className="today-lane-row__tick" aria-hidden="true" />
+                      <span className="today-lane-row__tick" aria-hidden="true">
+                        {on && <CheckIcon size={14} className="today-lane-row__check" />}
+                      </span>
                       <span className="today-lane-row__body">
                         <span className="today-lane-row__where">{laneWhere(lane, t)}</span>
                         <span className="today-lane-row__mode">{modeLabel(t, lane.mode)}</span>
