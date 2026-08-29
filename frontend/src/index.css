@@ -5371,17 +5371,31 @@ textarea:focus-visible {
    this app already are. */
 .today-lane-row {
   width: 100%;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 14px;
+  gap: var(--sp-4);
+  /* Logical longhand, not the `padding` shorthand: the scale ratchet's
+     four properties (font-size/border-radius/gap/padding) only
+     recognise a single var() as an on-scale value, so a two-token
+     shorthand like `var(--sp-4) var(--sp-5)` reads as a brand-new
+     literal it has never seen and fails the build even though every
+     value in it is a token. Two longhands, each an exact single-token
+     match, are the same rendered padding with nothing new to allow. */
+  padding-block: var(--sp-4);
+  padding-inline: var(--sp-5);
   font: inherit;
   text-align: left;
   color: var(--text-primary);
-  background: var(--bg-panel);
-  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  /* The same raised card every other selectable row in the app is
+     (.deckdetail-card-row, .dict-entry-card, .daruma-card) --
+     --bg-panel is the sumi ink DESIGN.md reserves for chrome (the top
+     bar, the nav drawer), and painting a row of content in it made the
+     picker read as frame rather than as a list of choices. */
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
   border-left: 3px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--r-card);
   cursor: pointer;
   transition: border-color 130ms ease, background 130ms ease, opacity 130ms ease;
   /* Off is dimmed, not hidden: the count still has to be readable, or
@@ -5391,7 +5405,10 @@ textarea:focus-visible {
 .today-lane-row--on {
   opacity: 1;
   border-left-color: var(--lane-color, var(--accent2));
-  background: color-mix(in srgb, var(--lane-color, var(--accent2)) 8%, var(--bg-panel));
+  /* No whole-row tint here on purpose: the left rail and the filled
+     tick already both carry --lane-color, and a third statement of
+     the same pigment across the row was tuned against --bg-panel ink
+     that this row no longer sits on. */
 }
 .today-lane-row:hover { border-color: color-mix(in srgb, var(--lane-color, var(--accent2)) 40%, transparent); }
 
@@ -5433,22 +5450,22 @@ textarea:focus-visible {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--sp-1);
 }
 .today-lane-row__where {
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--fs-sm);
   color: var(--lane-color, var(--accent2));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.today-lane-row__mode { font-size: 12px; color: var(--text-secondary); }
+.today-lane-row__mode { font-size: var(--fs-caption); color: var(--text-secondary); }
 .today-lane-row__due {
   flex: 0 0 auto;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  font-size: 15px;
+  font-size: var(--fs-body);
 }
 
 /* Stuck to the bottom, because the lane list is as long as the number
@@ -5983,7 +6000,12 @@ textarea:focus-visible {
   gap: var(--sp-3);
   box-sizing: border-box;
   min-height: 44px; /* a hit target, not a spacing rung */
-  padding: var(--sp-4) var(--sp-6);
+  /* Logical longhand -- see .today-lane-row's own comment on why: the
+     scale ratchet's `padding` scan only recognises a single var() as
+     on-scale, so this asymmetric pad is two exact-token longhands
+     rather than a two-token shorthand it has never allowlisted. */
+  padding-block: var(--sp-4);
+  padding-inline: var(--sp-6);
   border-radius: var(--r-card);
   background: var(--line-color, var(--accent));
   color: var(--text-on-fill);
