@@ -218,17 +218,40 @@ const Fixture = () => (
       </div>
     </div>
 
-    {/* DecksScreen.jsx:259 -- the delete affordance and the confirm row */}
+    {/* DecksScreen.jsx:259 -- the deck shelf as plan 055 rebuilt it. The card
+        carries TWO block classes, `platform-card deck-card`, and the ground
+        comes from .platform-card while the inks are named on .deck-card__*.
+        Guard 5 keys on one block at a time and cannot follow that, so these
+        are measured here instead. */}
     <div className="platform-grid decks-grid">
       <div className="platform-card deck-card">
         <span className="platform-card__body deck-card__body">
+          <span className="deck-card__text">
+            <span className="platform-card__title">漢字</span>
+            <span className="platform-card__desc">
+              <span className="deck-card__type">Kanji</span>
+            </span>
+          </span>
           <span className="deck-card__actions">
             <span className="deck-card__confirm-q">Supprimer ce paquet ?</span>
             <button className="deck-card__btn deck-card__btn--muted">Annuler</button>
           </span>
         </span>
+        <span className="deck-card__count">
+          <span className="deck-card__count-fig">42</span>
+          <span className="deck-card__count-cap">cartes</span>
+        </span>
         <button className="deck-card__delete" aria-label="delete">🗑</button>
       </div>
+    </div>
+
+    {/* DecksScreen.jsx:215 -- the type chooser, also plan 055 */}
+    <div className="decks-type-row">
+      <button className="decks-type-btn">
+        <span className="decks-type-btn__glyph" lang="ja">語</span>
+        <span className="decks-type-btn__label">Vocabulaire</span>
+        <span className="decks-type-btn__desc">Mots et expressions</span>
+      </button>
     </div>
 
     {/* DeckDetailScreen.jsx:424 */}
@@ -288,6 +311,13 @@ const SITES = [
   ['.phrase-word-card__reading', 'token card reading'],
   ['.phrase-word-card__pos', 'token card part of speech'],
   ['.comp-option-btn__letter', 'comprehension option letter'],
+
+  // Plan 055's deck shelf, merged in after the guards were written.
+  ['.deck-card__count-cap', 'deck card count caption'],
+  ['.deck-card__count-fig', 'deck card count figure'],
+  ['.deck-card__type', 'deck card type label'],
+  ['.decks-type-btn__desc', 'deck type chooser description'],
+  ['.decks-type-btn__label', 'deck type chooser label'],
 ]
 
 // Composite every non-transparent background from <html> down to the element.
