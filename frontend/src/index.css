@@ -5355,7 +5355,21 @@ textarea:focus-visible {
 .today-picker .decks-index-bar:focus-within {
   background: color-mix(in srgb, var(--accent2) 7%, transparent);
 }
-.today-picker .decks-console__new { background: var(--accent2); color: var(--text-on-fill); justify-content: center; }
+/* The gold deepened 40% toward the panel ink so it can carry a LIGHT
+   label. Black-on-gold passed contrast (6.88:1) and was what
+   Today.dc.html:118 drew, but the maintainer saw it built and ruled
+   against it; this supersedes the mockup. Raw 山吹色 cannot take
+   --text-on-panel (2.19:1), so the fill had to darken with it. 60% is
+   the first rung clearing 4.5:1 in BOTH themes and the least departure
+   from gold -- and it works here, where DESIGN.md's "deepening does not
+   save gold" note applies to .btn-primary's fixed 88%, not to a mix
+   free to go this far. --bg-panel is dark in both themes, which is why
+   one figure holds for both. */
+.today-picker .decks-console__new {
+  background: color-mix(in srgb, var(--accent2) 60%, var(--bg-panel));
+  color: var(--text-on-panel);
+  justify-content: center;
+}
 
 .today-picker__lanes {
   list-style: none;
@@ -5473,6 +5487,45 @@ textarea:focus-visible {
 }
 .today-picker__go:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 
+/* Lane rows used to scroll AROUND the sticky button -- visible in the
+   clearance below it and in the gap above its top edge, which reads as
+   a rendering bug rather than as a pinned control. The button already
+   sets `z-index: 1` and so is a stacking context of its own; a
+   ::before at `z-index: -1` therefore paints ABOVE the rows and BELOW
+   the button's own face.
+
+   The insets are structural, not spacing, and every one of them is
+   the negative of a length that already exists:
+
+   -24px is .container's own `padding: 0 24px`, cancelled so the
+   backdrop reaches the content column's true edges (that padding has
+   no responsive override, so the figure holds at every width).
+
+   -20px is the 14px flex gap of .today-picker plus the button's own
+   6px margin-top -- the whole space a row can show through above the
+   button, not part of it.
+
+   The bottom inset is the sticky `bottom` offset NEGATED, so the
+   backdrop covers exactly the clearance between the button and the
+   viewport floor and stops there. It must NOT be a viewport-sized
+   overhang: an absolutely positioned pseudo-element still contributes
+   scrollable overflow, and `bottom: -100vh` added ~884px of empty
+   scroll past the end of the list and let the button scroll away with
+   it. Every inset here stays inside .today-picker's own padding box,
+   so the page's scroll height is unchanged.
+
+   .mobile-level-bar is z-index 30 and still draws on top, correctly. */
+.today-picker__go::before {
+  content: '';
+  position: absolute;
+  /* top | left-and-right | bottom -- the three-value `inset`, which is
+     what stylelint's redundant-longhand rule asks for here and what
+     plan 053 taught this file to prefer. */
+  inset: -20px -24px -12px;
+  background: var(--bg-main);
+  z-index: -1;
+}
+
 /* Room under the last row so the sticky button never rests on it. */
 .today-picker { padding-bottom: 16px; }
 
@@ -5494,6 +5547,12 @@ textarea:focus-visible {
 @media (max-width: 768px) {
   .today-picker { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
   .today-picker__go { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+  /* The backdrop's bottom inset tracks the sticky offset above, so the
+     strip the mobile bar leaves between the button and the viewport
+     floor is covered here too. The picker's 72px + inset of bottom
+     padding is larger than this 56px + inset, so it still overflows
+     nothing. */
+  .today-picker__go::before { bottom: calc(-56px - env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ── The queue screen itself ─────────────────────────────────── */
@@ -12331,6 +12390,35 @@ textarea:focus-visible {
   border-radius: var(--r-panel);
   overflow: hidden;
   margin-bottom: 26px;
+  /* The console is ONE pattern on two screens of very different
+     widths -- 教材's column is 1040px, 本日's picker is 620px -- so
+     what decides its row layout has to be the CONSOLE's own width,
+     not the viewport's. See the @container rule below. Safe here: no
+     descendant is absolutely positioned, and the panel's width comes
+     from its parent, never from its contents. */
+  container-type: inline-size;
+}
+
+/* Chips and the pinned action share one line only while one line can
+   actually hold them; below that the action takes a full-width row of
+   its own instead of floating against the middle of a wrapped chip
+   block. That float was the "messy" the maintainer saw: on 本日 the
+   chips need 699px and the row offers 538px, so they wrapped to three
+   rows while the button sat centred beside row two.
+
+   One rule, both screens, each answering to the space it really has:
+   教材 at desktop keeps its single row (its mockup draws no wrap at
+   all), 本日 stacks at any width, and both stack on a phone -- which
+   is what the old `@media (max-width: 768px)` pair did, and why that
+   pair is gone. 800px is just above 教材's measured one-line
+   requirement -- 575px of chips + 24px of gaps + 12px + a 147px
+   button is 758px inside a row that gives up 32px to its own padding,
+   so the console has to be ~790px wide to hold it -- which makes the
+   rule flip exactly when the row stops fitting rather than at a
+   guessed viewport. */
+@container (max-width: 800px) {
+  .decks-console__top { flex-direction: column; align-items: stretch; }
+  .decks-console__new { justify-content: center; width: 100%; }
 }
 .decks-console__top {
   display: flex;
@@ -12376,7 +12464,13 @@ textarea:focus-visible {
   background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
+  /* --fs-caption (11.52px), not --fs-caption-xs: at 0.62rem these
+     rendered at 9.92px, and uppercase tracked Latin that small stops
+     being a label and becomes texture. Decks.dc.html sets its console
+     chip at 0.72rem. (Today.dc.html's own .tab says 0.62rem -- the two
+     mockups disagree, and the built screen showed which one was
+     right.) */
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
@@ -12406,7 +12500,21 @@ textarea:focus-visible {
    had rather than a silent invalid value. */
 .decks-filter-btn:hover { color: var(--text-primary); border-color: var(--tab-color, var(--line-color, var(--line-decks))); }
 .decks-filter-btn--active {
-  color: var(--tab-color, var(--line-color, var(--line-decks)));
+  /* The raw pigment as LABEL ink failed WCAG on its own tinted chip:
+     measured, in dark, 2.33:1 (decks) / 2.46 (vocab) / 2.70 (kana) /
+     2.79 (kanji) / 3.33 (grammar) -- five of the six chips. Only the
+     gold "all" chip passed. Lightening the pigment 40% toward
+     --text-primary is the mirror of what .btn-primary does in the
+     other direction (deepen a pigment toward the panel ink so it can
+     CARRY ink); here the pigment IS the ink, so it moves toward the
+     text colour instead. It works in both themes for the same reason:
+     --text-primary is always the end of the scale furthest from the
+     surface behind it. 60% is the most pigment that still clears
+     4.5:1 everywhere -- measured worst case 4.65 dark, 4.61 light,
+     across both screens that render this console. The border and the
+     glyph roundel keep the pigment UNMIXED; they are edges, not text,
+     and carry no contrast duty. */
+  color: color-mix(in srgb, var(--tab-color, var(--line-color, var(--line-decks))) 60%, var(--text-primary));
   border-color: color-mix(in srgb, var(--tab-color, var(--line-color, var(--line-decks))) 55%, transparent);
   background: color-mix(in srgb, var(--tab-color, var(--line-color, var(--line-decks))) 12%, transparent);
 }
@@ -14526,9 +14634,12 @@ textarea:focus-visible {
   /* The console stacks: the filter chips get the full width to wrap
      across (four of them plus "All" never fit one phone line beside a
      button), and "Create deck" spans underneath rather than being
-     squeezed to a two-word column at the end of the chip row. */
-  .decks-console__top { flex-direction: column; align-items: stretch; gap: 10px; }
-  .decks-console__new { justify-content: center; width: 100%; }
+     squeezed to a two-word column at the end of the chip row.
+
+     The stacking itself now lives in the @container rule beside
+     .decks-console, which reaches this case and the 620px picker
+     both; only the tightened gap is still viewport business. */
+  .decks-console__top { gap: 10px; }
   .decks-index-bar { padding: 6px 12px; gap: 10px; }
   .decks-index-bar__input { font-size: 1rem; }
   /* The count is the first thing to go: the number of decks is already
