@@ -373,6 +373,14 @@ export default function TodayScreen({ session }) {
 
   const filteredLanes = useMemo(() => {
     const q = query.trim().toLowerCase()
+    // Grouped by type, because the left-rail pigment is what tells one
+    // lane from another and the backend's order interleaves them --
+    // five colours alternating down the list read as noise rather than
+    // as five sections. laneTypeDefs is the canonical order and the one
+    // the filter chips above are already in, so the list and the chips
+    // agree. NO headings: the clustered rail colours ARE the grouping
+    // (DESIGN.md, "say less").
+    const order = new Map(laneTypeDefs(t).map((lt, i) => [lt.value, i]))
     return lanes.filter(l => {
       if (typeFilter !== 'all' && laneTypeOf(l) !== typeFilter) return false
       if (!q) return true
@@ -383,6 +391,11 @@ export default function TodayScreen({ session }) {
       return laneWhere(l, t).toLowerCase().includes(q)
         || modeLabel(t, l.mode).toLowerCase().includes(q)
     })
+      // Stable (ES2019 guarantees it), so the backend's order WITHIN a
+      // type survives -- that order is meaningful and is not ours to
+      // reshuffle. An unknown type sorts last rather than to the front.
+      .sort((a, b) =>
+        (order.get(laneTypeOf(a)) ?? order.size) - (order.get(laneTypeOf(b)) ?? order.size))
   }, [lanes, query, typeFilter, t])
 
   const allVisibleChosen = filteredLanes.length > 0
