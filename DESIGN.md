@@ -249,7 +249,9 @@ Two rules the guard exists to keep, both learned by measurement:
   that and read at 2.80:1. Anything sitting on `--bg-panel`, or on a tint
   mixed into it, takes `--text-on-panel(-soft)`. Where one element has both
   grounds, name the pair once on the block and let the children read it (see
-  `--ns-ink` / `--ns-ink-soft` on `.next-service`).
+  `--ns-ink` / `--ns-ink-soft` on `.next-service`). Guard 5 (`npm run
+  lint:ink`) enforces this one across the whole sheet, without needing a
+  fixture — it is the rule that dark theme cannot show you is broken.
 - **A mix toward `transparent` costs contrast in *both* themes.** It
   composites toward the ground, not toward the ink, so it is not a way to
   make a dim register — it is a way to fail dark mode too. Reach for a

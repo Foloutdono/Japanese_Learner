@@ -11,12 +11,13 @@ npm run build
 npm run lint       # JS/JSX
 npm run lint:css   # CSS -- see "Design conformance guards" below
 npm run lint:scale # design-token scale ratchet -- see below
+npm run lint:ink   # ink/ground structural rule -- see below
 npm test           # vitest, two lanes (node + browser)
 ```
 
 ## Design conformance guards
 
-Four guards, run by CI on every PR, exist because this project has 19,000
+Five guards, run by CI on every PR, exist because this project has 19,000
 lines of CSS and no other tool looks at any of it. They do not enforce
 taste; they enforce that a decision already made stays made.
 
@@ -193,6 +194,42 @@ taste; they enforce that a decision already made stays made.
    transitions forced off — `.decks-filter-btn` transitions `color` and
    `.next-service` transitions `background`, so an immediate read returns a
    mid-animation colour that is on screen at no resting moment.
+
+5. **The ink/ground rule** (`npm run lint:ink`) — the structural half of
+   Guard 4. Guard 4 measures, but it can only measure what it has been
+   shown: its site sweep renders a curated fixture, so it covers a sample of
+   the app. This one covers the whole sheet, and asks a narrower question
+   that needs no colour maths: *is this rule using an ink that belongs to a
+   different ground than the one it sits on?*
+
+   The sheet has two ink families and they are not interchangeable.
+   `--text-primary`/`--text-secondary` flip with the theme;
+   `--text-on-panel`/`-soft` never do, because sumi is dark in both. Put an
+   ambient ink on sumi and **dark theme hides it completely** — it reads
+   ~7:1 there — while light theme flips it dark-on-dark. That is how the
+   Today strip shipped at 2.80:1 and two buttons at 3.04:1: every one of
+   them looks correct to a reviewer working in dark mode.
+
+   What makes this tractable statically, when "what is behind this element"
+   generally is not, is that BEM naming already encodes containment. `.X--m`
+   is the *same box* as `.X`; `.X__e` is inside it. So a block whose own rule
+   paints a ground hands that ground to its modifiers and elements. The
+   nearest painted ground wins — the rule's own, then the element's from any
+   rule naming it, then the block's — and grounds are read from resting-state
+   selectors only, since a `:hover` overlay is a tint on a ground rather than
+   a different one.
+
+   Two things it deliberately does not judge. A **pigment fill** is a third
+   ground whose ink depends on the fill's lightness (DESIGN.md, "The primary
+   button"); that is a measurement, so it belongs to Guard 4. And
+   **indirection through a custom property** is invisible on purpose: where
+   one element genuinely has two grounds, the fix is to name the pair once on
+   the block and let children read it (`--ns-ink`/`--ns-ink-soft` on
+   `.next-service`), and those children resolve to neither family by name.
+   That is the intended escape hatch, not a hole.
+
+   Allowlisted through `src/design-ink-ground.json`, entries removable only:
+   a stale one fails, so a fix cannot leave debt behind it.
 
 If a guard fires on a change you believe is correct, change the baseline or
 the allowlist in the same commit and say why in the message. The guards are

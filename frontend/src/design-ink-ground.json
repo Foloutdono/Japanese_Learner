@@ -1,0 +1,4 @@
+{
+  "_": "Guard 5's allowlist; see scripts/check-ink-ground.mjs. Each entry is `selector|family-on-ground` for a rule that names one ink family while its BEM block paints the other ground. Entries may only be removed -- a stale one fails the guard, so a fix cannot leave debt behind it. Nothing may be added without a note here saying why the rule genuinely needs the other family's ink.",
+  "allow": []
+}
