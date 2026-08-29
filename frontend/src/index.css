@@ -7285,9 +7285,9 @@ textarea:focus-visible {
    900px wide would be its own kind of ugly. */
 .prompt-card.readings-input {
   text-align: left;
-  --card-pad-y: 28px;
-  --card-pad-x: 26px;
-  --card-pad-top: 28px;
+  --card-pad-y: var(--sp-7);
+  --card-pad-x: var(--sp-7);
+  --card-pad-top: var(--sp-7);
   max-height: none;
   overflow: visible;
 }
@@ -9466,12 +9466,13 @@ textarea:focus-visible {
    its own rounded border. */
 .prompt-card.drawing-quiz__card {
   /* Was 26/22 -- tighter than every other quiz card's own padding
-     (40/24 base, 56-64 on vocab/grammar's boosted ones), so this read
+     (44/24 base, 52-56 on vocab/grammar's boosted ones), so this read
      as the one cramped surface in the app. Matched closer to the
-     boosted cards' own numbers instead. */
-  --card-pad-y: 44px;
-  --card-pad-x: 36px;
-  --card-pad-top: 44px;
+     boosted cards' own numbers instead -- x stays nearer their 32 than
+     the base's 24, y matches them outright. */
+  --card-pad-y: var(--sp-8);
+  --card-pad-x: var(--sp-7);
+  --card-pad-top: var(--sp-8);
   max-width: 700px;
   margin: 0 auto;
   max-height: none;
@@ -13656,7 +13657,7 @@ textarea:focus-visible {
    vocab-only duplicate (hardcoded -64px/-32px in one place, 64px/32px
    in another) eventually would have. */
 .prompt-card {
-  --card-pad-y: 40px;
+  --card-pad-y: var(--sp-8);
   --card-pad-x: 24px;
   /* Split out from --card-pad-y so the mobile media query below can
      give .reveal-actions extra headroom on top without also padding
@@ -13677,16 +13678,16 @@ textarea:focus-visible {
    --card-pad-top is set here too, not left to fall back to the base
    rule's `var(--card-pad-y)` — each custom property cascades on its
    OWN specificity, so on a narrow viewport the 480px media query's
-   plain `.prompt-card { --card-pad-top: 46px }` (below) would win for
+   plain `.prompt-card { --card-pad-top: 44px }` (below) would win for
    -top while this rule's higher-specificity -y/-x still won for the
    other two, leaving .flashcard's negative margin asymmetric
-   (-46px top vs -64px bottom). On a flex-centered card that shifts
+   (-44px top vs -52px bottom). On a flex-centered card that shifts
    the flashcard's clickable box instead of growing it evenly, so a
    tap in the now-uncovered strip of padding missed it entirely. */
 .vocab-card-boost .prompt-card {
-  --card-pad-y: 64px;
+  --card-pad-y: var(--sp-9);
   --card-pad-x: 32px;
-  --card-pad-top: 64px;
+  --card-pad-top: var(--sp-9);
   min-height: 220px;
   display: flex;
   align-items: center;
@@ -14280,9 +14281,9 @@ textarea:focus-visible {
      (see its rule), so the padding shrinking here can't reopen the
      dead-click-zone the vars exist to close. */
   .prompt-card {
-    --card-pad-y: 5px;
-    --card-pad-x: 5px;
-    --card-pad-top: 46px;
+    --card-pad-y: var(--sp-1);
+    --card-pad-x: var(--sp-1);
+    --card-pad-top: var(--sp-8);
     border-radius: 10px;
   }
   .flashcard {
