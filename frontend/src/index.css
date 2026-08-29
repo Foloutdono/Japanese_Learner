@@ -186,7 +186,16 @@
 .exam-card-stage {
   margin-bottom: 24px;
 }
+/* Plan 049 -- explicit rather than accidental. This element carries
+   class "prompt-card" too, so the base .prompt-card rule
+   (index.css:13659) already matches it and would hand it the ambient
+   --card-w (640px) even without a line here. Writing it down anyway:
+   an exam question plus its MCQ rows is denser than a flashcard, not
+   sparser, so it earns no more room than the rest of the study card
+   column -- 640 is the right number on purpose, not a default nobody
+   chose. */
 .exam-card.prompt-card {
+  --card-w: 640px;
   max-height: none;
   text-align: left;
   padding: 28px 24px;
@@ -2951,6 +2960,17 @@
 
   --radius:         12px;
   --max-w:          1100px;
+  /* The quiz card's own column -- narrower than --max-w on purpose
+     (plan 049). Lives here, not on .prompt-card itself, because
+     .deck-progress needs the exact same number and sits BESIDE the
+     card in the DOM (a sibling under .quiz-area), not inside it -- a
+     custom property declared only on .prompt-card would never reach
+     it. .prompt-card (index.css:13659) and .deck-progress
+     (index.css:7808) both just consume var(--card-w); an exception
+     (.prompt-card.drawing-quiz__card, .exam-card.prompt-card)
+     overrides --card-w on its own more specific selector rather than
+     fighting max-width directly. */
+  --card-w:         640px;
   --gap:            24px;
 
   /* ── The card surface ────────────────────────────────────
@@ -7260,15 +7280,13 @@ textarea:focus-visible {
    overlaps kana the learner is still reading. Colours come from the
    line pigment the section handed down, same as every other study
    control -- nothing here picks its own hue. */
-/* Sized to the form, not to the container. .prompt-card's own width
-   tracks .container (up to 1100px), which stretched a column of short
-   kana fields across the whole screen; and its 40px card padding is
-   tuned for a single big glyph, not for a stack of labelled rows.
-   max-height/overflow are cleared for the same reason: two groups of
-   several rows each pass 60vh easily, and the base clamp turned the
-   card into an inner scroll area — which cropped the submit button
-   behind the card's own rounded edge and scrolled the answer list out
-   from under the rows it belongs to. */
+/* Sized to the form, not to the container. Padding tuned for a single
+   big glyph doesn't fit a stack of labelled rows, so this widens it to
+   --sp-7 on every side. max-height/overflow are cleared for the same
+   kind of reason: two groups of several rows each pass 60vh easily,
+   and the base clamp turned the card into an inner scroll area —
+   which cropped the submit button behind the card's own rounded edge
+   and scrolled the answer list out from under the rows it belongs to. */
 /* .prompt-card is compounded in on purpose. The base .prompt-card rule
    (max-height: 60vh; overflow: auto) lives LATER in this file, and two
    single-class selectors of equal specificity are settled by source
@@ -7276,13 +7294,17 @@ textarea:focus-visible {
    silently and the card stayed an inner scroll area. Same for
    .drawing-quiz__card below.
 
-   The CARD itself is now full width, same as every flashcard mode's
-   own .prompt-card -- capping it at 520px made this the one mode whose
+   Plan 049 -- no width override here any more. This used to argue for
+   staying full width: capping it at 520px made this the one mode whose
    card visibly shrank next to the others sitting above/below it in the
-   same session. The FORM inside stays comfortably narrow regardless
-   (see .readings-input__group / __submit below), centered in the wider
-   card rather than stretched edge to edge -- a "kana or romaji" input
-   900px wide would be its own kind of ugly. */
+   same session. That objection was about capping THIS MODE ALONE, not
+   about caps in general -- and a UNIVERSAL cap (every .prompt-card now
+   tracks --card-w, 640px, see index.css:13659) satisfies it exactly,
+   since nothing shrinks relative to anything else any more. The FORM
+   inside still stays comfortably narrow regardless (see
+   .readings-input__group / __submit below), centered in the card
+   rather than stretched edge to edge -- a "kana or romaji" input 640px
+   wide would still be its own kind of ugly. */
 .prompt-card.readings-input {
   text-align: left;
   --card-pad-y: var(--sp-7);
@@ -9456,14 +9478,22 @@ textarea:focus-visible {
 
 .drawing-quiz { width: 100%; }
 
-/* Same treatment as .readings-input above, and for the same two
-   reasons. The panels inside already cap at 600px, so without a cap
-   here the card was a 1100px-wide box with a 600px drawing area
-   floating in the middle of it. And the base .prompt-card clamp
-   (max-height: 60vh) is well under what a 260px canvas plus its label
-   plus the stroke-order panel need on a phone — the card became an
-   inner scroll area, which is what was clipping the canvas against
-   its own rounded border. */
+/* Same second reason as .readings-input above (max-height/overflow
+   compounding). WIDTH is different here rather than dissolved, though
+   -- plan 049 put every other .prompt-card on the universal --card-w
+   (640px), but this card's own panels (.drawing-quiz__panels below)
+   cap at 600px combined, and this rule's own padding (--card-pad-x,
+   28px on each side) takes 56px off the content box: 600 + 56 = 656px
+   is the floor a cap here must clear. At the universal 640 the content
+   box would be 640 - 56 = 584px, under that floor, and the panels
+   would wrap -- the drawing surface stacking above its stroke
+   reference instead of beside it, which is the whole point of this
+   layout. --card-w: 700px keeps headroom above the 656px floor without
+   drifting far past it. And the base .prompt-card clamp (max-height:
+   60vh) is well under what a 260px canvas plus its label plus the
+   stroke-order panel need on a phone — the card became an inner
+   scroll area, which is what was clipping the canvas against its own
+   rounded border. */
 .prompt-card.drawing-quiz__card {
   /* Was 26/22 -- tighter than every other quiz card's own padding
      (44/24 base, 52-56 on vocab/grammar's boosted ones), so this read
@@ -9473,7 +9503,7 @@ textarea:focus-visible {
   --card-pad-y: var(--sp-8);
   --card-pad-x: var(--sp-7);
   --card-pad-top: var(--sp-8);
-  max-width: 700px;
+  --card-w: 700px;
   margin: 0 auto;
   max-height: none;
   overflow: visible;
@@ -13658,16 +13688,26 @@ textarea:focus-visible {
    in another) eventually would have. */
 .prompt-card {
   --card-pad-y: var(--sp-8);
-  --card-pad-x: 24px;
+  --card-pad-x: var(--sp-6);
   /* Split out from --card-pad-y so the mobile media query below can
      give .reveal-actions extra headroom on top without also padding
      the bottom/sides to match (see that query's own comment). */
   --card-pad-top: var(--card-pad-y);
   position: relative;
-  border-radius: 12px;
+  border-radius: var(--r-panel);
   padding: var(--card-pad-top) var(--card-pad-x) var(--card-pad-y);
   max-height: 60vh;
   overflow: auto;
+  /* Plan 049 -- this card had no width of its own: it tracked
+     .container (up to 1100px), so a single word like 渡す sat in a
+     slab about 1052px wide, next to a 480px progress bar and a 640px
+     MCQ list/rating bar. One column now: --card-w (a :root token, see
+     its own comment there for why) sets it, and an exception
+     overrides --card-w rather than re-fighting max-width at a
+     matching or higher specificity -- see
+     .prompt-card.drawing-quiz__card and .exam-card.prompt-card. */
+  max-width: var(--card-w);
+  margin-inline: auto;
 }
 
 /* Bigger card for Vocab only — scoped through this wrapper rather than
