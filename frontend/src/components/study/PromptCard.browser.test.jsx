@@ -81,11 +81,18 @@ const READINGS = {
 }
 
 // Reproduces the real ancestor every one of the 8 screens renders this
-// card inside — <main className="container quiz-area"> — so the
-// "before" measurement matches the plan's own ~1052px, rather than
-// whatever the bare test viewport happens to be.
+// card inside -- <main className="container quiz-area">, not just
+// .container -- for a reason beyond matching the plan's ~1052px
+// prediction: .quiz-area is display:flex, and ReadingsInput renders
+// `.prompt-card.readings-input` as a DIRECT flex child of it (unlike
+// CardPrompt's card, which sits inside CardTransition's block DIVs).
+// A flex item's auto cross-axis margin suppresses stretch per spec,
+// so a .container-only wrapper here would pass even if .prompt-card's
+// `width: 100%` regressed back to a bare `max-width` -- the shrink-
+// to-content bug that width:100% exists to prevent (found live, not
+// by this test, the first time -- see index.css:13710's own comment).
 function Contained({ children }) {
-  return <div className="container">{children}</div>
+  return <div className="container quiz-area">{children}</div>
 }
 
 async function promptCardWidth(node, selector = '.prompt-card') {
