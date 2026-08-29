@@ -12978,7 +12978,32 @@ textarea:focus-visible {
 .deckdetail-count { color: var(--text-secondary); font-size: 13px; }
 .deckdetail-confirm-q { font-size: 13px; color: var(--text-secondary); }
 
-.deckdetail-actions { display: flex; gap: 8px; }
+/* flex-wrap is not cosmetic here. This row holds up to five buttons and
+   sits inside `.deckdetail-header`, which is `justify-content: flex-end`.
+   A flex row that cannot wrap and overflows a flex-end container
+   overflows it LEFTWARD — the items escape past the container's left
+   edge, at a negative `left`. A page scrolls right, never left, so that
+   overflow is not merely ugly: it is unreachable. Measured on the
+   French UI before this line changed, at three phone widths, with
+   `document.scrollingElement.scrollWidth` equal to the viewport at all
+   three (so there was nothing to scroll to):
+
+     375px — row 515px wide at left -164; Étudier and Ajouter both had
+             their centres off-screen and failed `elementFromPoint`
+     400px — left -139; same two unreachable
+     414px — left -125; Étudier unreachable
+
+   "Étudier" is this screen's primary action and it was the first item
+   in the row, so it was the first thing lost. Wrapping is the fix, and
+   the row carries its own `justify-content: flex-end` so a wrapped
+   second line stays on the same edge as the first rather than falling
+   back to flex-start. */
+.deckdetail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
 .deckdetail-actions--select { align-items: center; }
 .deckdetail-select-count { font-size: 13px; color: var(--text-secondary); }
 
