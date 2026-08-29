@@ -260,8 +260,13 @@ So:
   station plate, the departure board, or the pass. A plated screen never prints
   a second heading.
 - Section headings are `<h2>` inside the paired `SectionHeader`.
-- Three column widths: `--board-w` (1040px) for the station column,
-  `min(1240px, 100%)` for a plated selection screen, 720px for unplated prose.
+- Four column widths: `--board-w` (1040px) for the station column,
+  `min(1240px, 100%)` for a plated selection screen, 720px for unplated prose,
+  and `--card-w` (640px) for the study card column — the quiz prompt card,
+  its progress bar, its MCQ list and its rating bar all share this one
+  number, narrower than any of the other three on purpose (a single kana or
+  kanji does not need a 1100px-wide slab). The drawing quiz is the one
+  deliberate exception, at 700px, so its two side-by-side panels don't wrap.
 - Japanese text carries `lang="ja"`. Always — it selects the right font
   fallbacks and it is how a screen reader knows.
 - A chevron terminating a card or row is centred against the **full height**
