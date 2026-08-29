@@ -60,6 +60,13 @@ jobs:
       - name: Check ink/ground
         working-directory: frontend
         run: npm run lint:ink
+      # vitest runs two lanes; the browser one (28 files, including Guard 4)
+      # needs a real chromium, which npm ci does not fetch. Without this the
+      # lane silently does not run -- the step still fails, but only after
+      # reporting "6 passed (34)", which reads like a pass at a glance.
+      - name: Install Playwright chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
       - name: Test
         working-directory: frontend
         run: npm test
