@@ -88,7 +88,11 @@ describe('TodayScreen — the primary button (plan 051)', () => {
     // all -> transparent) and not a leftover default.
     expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
     expect(style.backgroundColor).not.toBe('transparent')
-    // The app's own display face, not the page's inherited Segoe UI.
+    // The app's own display face. Plan 056 made --font-display the
+    // document default, so this no longer distinguishes the button's
+    // own rule from what it inherits — it now only catches the face
+    // being lost outright (a failed font load, or the default being
+    // 'fixed' back to a platform stack).
     expect(style.fontFamily).toContain('Space Grotesk')
   })
 
