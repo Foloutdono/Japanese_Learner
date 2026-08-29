@@ -8877,8 +8877,13 @@ textarea:focus-visible {
 .rating-bar__btn {
   display: flex;
   flex: 1 1 0;
+  min-width: 0; /* flex items refuse to shrink below their text's intrinsic
+                   width by default -- six unbreakable captions would push
+                   the pill wider than its container instead of compressing */
   flex-direction: column;
-  align-items: center;
+  align-items: stretch; /* not center -- the JP term and caption need a
+                            bounded width to ellipsize into instead of
+                            wrapping a CJK word one character per line */
   justify-content: center;
   gap: var(--sp-1);
   min-height: 56px; /* a hit target, not a spacing rung -- the one literal this block keeps */
@@ -8903,6 +8908,13 @@ textarea:focus-visible {
    tint that doesn't exist. */
 .rating-bar__btn--q0:hover,
 .rating-bar__btn--q0:focus-visible { background: var(--overlay-hover); }
+
+.rating-bar__btn-jp,
+.rating-bar__btn-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 
 .rating-bar__btn-jp {
   font-family: var(--font-jp);
@@ -14298,6 +14310,15 @@ textarea:focus-visible {
     padding-top: var(--sp-3);
     background: var(--bg-main);
   }
+  /* Six segments across a phone width is tight -- .rating-bar__btn's
+     ellipsis rule (see the main block) is the safety net, but a
+     smaller pad and a smaller JP-term size buys back enough room that
+     the ramp mostly reads without truncating. The caption can still
+     clip on the longest words ("Difficult", "Blackout") at the very
+     narrowest widths; the Japanese term is the primary name here (see
+     DESIGN.md's pairing rule) and that one keeps its room. */
+  .rating-bar__btn { padding: var(--sp-1); }
+  .rating-bar__btn-jp { font-size: var(--fs-sm); }
   .quiz-area { padding: 32px 24px max(32px, 12vh);}
 
   /* Two plaques per row rather than one tall column of six. */
