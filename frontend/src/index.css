@@ -5998,13 +5998,45 @@ textarea:focus-visible {
   padding-block: var(--sp-4);
   padding-inline: var(--sp-6);
   border-radius: var(--r-card);
-  background: var(--line-color, var(--accent));
-  color: var(--text-on-fill);
+  /* The fill and the ink, both per Controls.dc.html's PRIMARY specimen:
+     a section-pigment fill inked --text-on-panel, going *lighter* on
+     hover. 051 used --text-on-fill (#1c1811) here, which is documented
+     two thousand lines up for *light* fills -- on the vermillion that
+     measured 3.48:1 dark / 3.18:1 light, under the 4.5:1 floor this
+     15.2px/600 text needs.
+
+     The 88% deepens the pigment 12% toward the panel ink, which lifts
+     朱色 from the mockup's own 4.33:1 to 5.14:1 and 蘇芳 to 5.90:1
+     while shifting the hue too little for a reader to call it a
+     different colour. --bg-panel is an existing token, so no new
+     colour literal enters the file.
+
+     The ink is NOT a constant: it is chosen by the fill's lightness.
+     A fill lighter than roughly 40% luminance takes --text-on-fill
+     instead -- 山吹色 gold is 2.19:1 against this ink and deepening
+     does not save it (a deepened yellow turns olive before it carries
+     a light ink), which is why the gold pill at the console keeps the
+     dark ink. Assuming one ink for all twelve pigments is precisely
+     what produced this rule. Check the ratio before filling a button
+     in a new section. */
+  background: color-mix(in srgb, var(--line-color, var(--accent)) 88%, var(--bg-panel));
+  color: var(--text-on-panel);
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: 600;
 }
-.btn-primary:hover { filter: brightness(1.15); }
+/* The mockup's hover is a lighter *fill*, not the bare `button` rule's
+   blanket brightness filter -- so that filter is turned off here rather
+   than left to compound. 97% is a 1.14-1.19x luminance lift over the
+   88% rest state, visibly lighter exactly as Controls.dc.html draws it,
+   and still 4.52:1 at its worst (朱色, dark). The mockup's own literal
+   hover, #cf5a42, is 3.44:1 -- *less* contrast than its rest state,
+   which is backwards; a hover must not drop below the floor the rest
+   state clears. */
+.btn-primary:hover {
+  filter: none;
+  background: color-mix(in srgb, var(--line-color, var(--accent)) 97%, var(--bg-panel));
+}
 .btn-primary:focus-visible {
   outline: 2px solid var(--accent2);
   outline-offset: 2px;

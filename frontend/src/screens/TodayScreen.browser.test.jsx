@@ -39,6 +39,28 @@ const { default: TodayScreen } = await import('./TodayScreen')
 
 const settle = (ms = 50) => new Promise(r => setTimeout(r, ms))
 
+// Plan 052 — Chromium serialises a resolved `color-mix(in srgb, ...)`
+// as `color(srgb 0.673569 0.241255 0.160784)`, at float precision, not
+// as the `rgb(172, 62, 41)` an 8-bit hex would give. Both forms have to
+// be read, and the float one must not be rounded before it is measured.
+function rgbOf(str) {
+  const nums = str.match(/[\d.]+/g).slice(0, 3).map(Number)
+  return str.startsWith('color(') ? nums.map(n => n * 255) : nums
+}
+
+// WCAG 2.x relative luminance and contrast ratio.
+function contrast(a, b) {
+  const lum = c => {
+    const [r, g, bl] = c.map(v => {
+      const s = v / 255
+      return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl
+  }
+  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
+
 describe('TodayScreen — the primary button (plan 051)', () => {
   it('renders .btn-primary as a real filled button, not the bare-button default', async () => {
     // The emptiest shape that reaches a `.btn-primary`: no lanes due at
@@ -100,13 +122,23 @@ describe('TodayScreen — the primary button (plan 051)', () => {
 
     // --text-on-panel #f3ecdf, the mockup's ink at every primary swatch
     // -- NOT --text-on-fill #1c1811, which 051 used.
-    expect(style.color).toBe('rgb(243, 236, 223)')
+    expect(rgbOf(style.color)).toEqual([243, 236, 223])
 
     // The fill is the section pigment deepened 12% toward --bg-panel:
     // color-mix(in srgb, #c1442c 88%, #100e13) = #ac3e29. Asserting the
-    // exact mix (rather than "not transparent") is what makes a silent
-    // return to the raw pigment -- 4.33:1, below the floor -- fail here.
-    expect(style.backgroundColor).toBe('rgb(172, 62, 41)')
+    // mix (rather than "not transparent") is what makes a silent return
+    // to the raw pigment -- 4.33:1, below the floor -- fail here.
+    const fill = rgbOf(style.backgroundColor)
+    expect(fill[0]).toBeCloseTo(171.76, 0)
+    expect(fill[1]).toBeCloseTo(61.52, 0)
+    expect(fill[2]).toBeCloseTo(41.0, 0)
+
+    // And the thing all of the above is *for*. Nothing else in the app
+    // checks contrast -- no guard does either -- so the floor the whole
+    // plan turns on is asserted here directly rather than implied by a
+    // hex. 5.17:1 as written; 4.33:1 if the deepening is dropped,
+    // 3.48:1 if the ink goes back to --text-on-fill.
+    expect(contrast(fill, rgbOf(style.color))).toBeGreaterThanOrEqual(4.5)
   })
 })
 
