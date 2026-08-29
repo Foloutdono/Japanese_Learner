@@ -67,6 +67,42 @@ taste; they enforce that a decision already made stays made.
    inside `@media (prefers-reduced-motion: reduce)` on purpose, and only a
    same-name pair sharing the *same* at-rule context is a real collision.
 
+   **Two more surfaces (plan 047), because the four properties above missed
+   most of the study screen's real type and space scale:**
+   - `custom-property-length` — a CSS **custom property** whose *value* is a
+     bare `px`/`rem`/`em` length, e.g. `--card-pad-y: 40px;`. Classified by
+     value, not by name (`--card-pad-y`, `--char-size`, `--ember-drift`, ...
+     — names drift, a length doesn't stop being one). `var(...)`,
+     `calc(...)`, `clamp(...)` and colours never match. This also, correctly,
+     catches the scale's own token *definitions* in `:root` (e.g.
+     `--fs-caption-xs: 0.62rem;`) — those are permanent, legitimate
+     allowlist residents, not something to migrate away.
+   - `js-inline-length` — the same kind of length, but written from
+     `.jsx`/`.js` into a custom property: `style={{'--char-size':
+     \`${size}px\`}}` (template literal) or `style={{'--front-size':
+     '80px'}}` (string literal), including one buried inside a ternary
+     (`'--front-size': (isF2B ? c.front : c.back)?.length === 1 ? '80px' :
+     '32px'` reports both branches). **Deliberately out of reach**: a
+     numeric prop like `size={100}` that is only *passed* to a component and
+     becomes a px string somewhere else, in a different file. Tracing a prop
+     back to its origin needs real dataflow analysis and isn't worth it --
+     every one of those props eventually flows through a site of exactly the
+     shape this scan already catches, so catching it there is enough. This
+     boundary is deliberate, not an oversight; see the header comment in
+     `check-design-scale.mjs`.
+
+   **Occurrence counts, not just distinct values.** Each of the six classes
+   above (the original four properties plus these two) is tracked two ways:
+   the allowlist (distinct values) and a **count** of how many times, in
+   total, an off-scale value for that class occurs in the source. The
+   allowlist only shrinks when the *last* use of a value disappears, so a
+   migration that halves a value's occurrences without eliminating it
+   entirely would otherwise look like no progress at all. The occurrence
+   count catches that: it must never rise (a second `border-radius: 5px`
+   added anywhere fails the guard even though `5px` was already
+   allowlisted), and falling needs no allowlist edit at all. `npm run
+   lint:scale` prints both numbers for every class; `--write` re-seeds both.
+
 If a guard fires on a change you believe is correct, change the baseline or
 the allowlist in the same commit and say why in the message. The guards are
 a ratchet, not a wall — the only thing they forbid is doing it silently.
