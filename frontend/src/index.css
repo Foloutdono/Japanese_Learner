@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Serif+JP:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Serif+JP:wght@600;700&display=swap');
 /* ══════════════════════════════════════════════════════════════
    Exam section — merged from src/exam/exam.css by plan 041. Pasted
    here, immediately after the Google Fonts import rule and before this
@@ -3356,10 +3356,27 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* The app's default face is the display face, not the platform's.
+   DESIGN.md, Type: "--font-display (Space Grotesk) carries all Latin and
+   all figures." Set here so an unstyled string is already correct rather
+   than needing a rule to name the face; the 183 rules that do name it are
+   now restating the default, not correcting it. Japanese is unaffected —
+   Space Grotesk carries no Japanese glyphs, so JP text falls through this
+   stack to Yu Gothic exactly as before, and --font-jp/--font-serif still
+   override where a job calls for them.
+
+   Do not "fix" this back to 'Segoe UI'. If it looks wrong, the font failed
+   to load and you are seeing the fallback — check
+   document.fonts.check('16px "Space Grotesk"').
+
+   The @import at the top of this file must keep weight 400 for this rule to
+   mean what it says: with only 500 and 700 loaded, CSS font matching
+   resolves an unstyled 400 up to 500 and every default string silently
+   gains weight. */
 html, body, #root {
   background: var(--bg-main);
   color: var(--text-primary);
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--font-display);
   transition: background 0.2s ease, color 0.2s ease;
 }
 html, body { height: 100%; }
