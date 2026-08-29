@@ -113,7 +113,17 @@ export default function DecksScreen({ session }) {
     <div className="screen">
       <TopBar onBack={() => navigate('/')} title={t.decks} autoHide />
 
-      <main id="main-content" className="container page-pad">
+      {/* 蘇芳 is injected here, on the content shell, per DESIGN.md's
+          "the pigment is injected once": everything below reads
+          var(--line-color) rather than naming --line-decks itself.
+          StationHeader below is self-closing and a *sibling* of the
+          rest, so it tints only itself — without this, the screen's
+          primary button would fall back to 仮名's red. It goes on
+          <main> rather than on .screen deliberately: the top bar
+          carries no line colour at all, and scoping it here makes
+          that structural rather than a thing to remember. */}
+      <main id="main-content" className="container page-pad"
+        style={{ '--line-color': 'var(--line-decks)' }}>
         <StationHeader />
 
         {/* ── 目録 — the shelf's index ────────────────────────

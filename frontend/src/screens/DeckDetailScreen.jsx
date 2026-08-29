@@ -391,7 +391,10 @@ export default function DeckDetailScreen({ session }) {
     <div className="screen">
       <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? t.deckFallbackTitle} autoHide />
 
-      <main id="main-content" className="container page-pad">
+      {/* 蘇芳, injected once for the whole screen — see DecksScreen's
+          own comment on why it sits on <main> and not on .screen. */}
+      <main id="main-content" className="container page-pad"
+        style={{ '--line-color': 'var(--line-decks)' }}>
         {/* Same plate every other screen in the app opens with — this
             was one of the last two 教材 screens still starting on a bare
             container, which is exactly what made them read as a

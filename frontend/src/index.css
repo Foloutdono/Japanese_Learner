@@ -12313,11 +12313,27 @@ textarea:focus-visible {
 /* The "All" chip carries no glyph, so its left padding matches its
    right instead of reserving room for a roundel that isn't there. */
 .decks-filter-btn:not(:has(.decks-filter-glyph)) { padding-left: 12px; }
-.decks-filter-btn:hover { color: var(--text-primary); border-color: var(--tab-color, var(--line-decks)); }
+/* --line-color, not --line-decks: the screen shell injects the pigment
+   (DecksScreen.jsx's <main>), and no component below it should name a
+   line token itself -- DESIGN.md, "the pigment is injected once". The
+   --tab-color override in front is unchanged; it is the per-deck-type
+   tint, and the section pigment is only what it falls back to.
+
+   --line-color still needs a fallback of its own, and lint:scale will
+   fail the build without one: the token is declared in no stylesheet
+   at all -- it is set exclusively by JSX inline styles -- so a bare
+   var(--line-color) is a reference to a property "declared nowhere".
+   That is also why it must be --line-decks and not nothing: this row
+   is the SHARED console, rendered by TodayScreen.jsx:478 as well,
+   where no --line-color exists above it. Today sets --tab-color on
+   every chip it renders, so it never reaches the fallback -- but if a
+   chip is ever added there without one, 蘇芳 is the colour it already
+   had rather than a silent invalid value. */
+.decks-filter-btn:hover { color: var(--text-primary); border-color: var(--tab-color, var(--line-color, var(--line-decks))); }
 .decks-filter-btn--active {
-  color: var(--tab-color, var(--line-decks));
-  border-color: color-mix(in srgb, var(--tab-color, var(--line-decks)) 55%, transparent);
-  background: color-mix(in srgb, var(--tab-color, var(--line-decks)) 12%, transparent);
+  color: var(--tab-color, var(--line-color, var(--line-decks)));
+  border-color: color-mix(in srgb, var(--tab-color, var(--line-color, var(--line-decks))) 55%, transparent);
+  background: color-mix(in srgb, var(--tab-color, var(--line-color, var(--line-decks))) 12%, transparent);
 }
 .decks-filter-glyph {
   display: inline-flex;
@@ -12375,8 +12391,19 @@ textarea:focus-visible {
   gap: 12px;
   padding: 8px 16px;
 }
+/* The fallback is load-bearing, not defensive habit. Despite the
+   `decks-` prefix this is the SHARED console (DESIGN.md, "the console,
+   one everywhere") and TodayScreen.jsx:505 renders it too -- with no
+   --line-color anywhere above it. A bare var(--line-color) there is
+   invalid at computed-value time, so the focus tint would silently
+   vanish on Today rather than fall back to anything. --line-decks
+   keeps Today exactly as it paints today; the Decks shell now drives
+   it through --line-color instead.
+   (Today's console wearing the decks pigment at all is a real
+   disagreement with Today.dc.html, but it predates this plan and
+   belongs to whichever plan owns that console.) */
 .decks-index-bar:focus-within {
-  background: color-mix(in srgb, var(--line-decks) 7%, transparent);
+  background: color-mix(in srgb, var(--line-color, var(--line-decks)) 7%, transparent);
 }
 .decks-index-bar__input {
   flex: 1;
