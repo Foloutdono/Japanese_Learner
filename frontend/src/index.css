@@ -2990,13 +2990,21 @@
   --fs-heading:     1.70rem;   /* 記録 record value, 段位 figure             */
   --fs-display:     2.50rem;   /* 駅名標 station name                        */
 
-  /* The study card's Japanese, and nothing else. The card is the object a
-     learner looks at hundreds of times a day, so it earns a rung above the
-     scale — the app sets it at 72px today, which is off every other ladder in
-     this block. Do not reach for this anywhere but the study specimen: if a
-     second caller appears, the scale is wrong and this rung should be
-     reconsidered rather than shared. */
-  --fs-specimen:    4rem;
+  /* The study card's Japanese, and nothing else. Two rungs, not one — a
+     lone kana or kanji reads as one glyph and can fill the card; a vocab
+     word or grammar sentence is several characters and cannot share that
+     size without shrinking the card around it. --fs-specimen-glyph
+     collapses today's separate kana (110px) and kanji (100px) sizes into
+     one number — both move by about 5%, imperceptible, and it ends the
+     situation where the two differed for no stated reason.
+     --fs-specimen-word is exactly today's word size (72px). Both are a
+     rung above the scale below, on purpose: the card is the object a
+     learner looks at hundreds of times a day. Do not reach for either
+     anywhere but the study specimen: if a second caller appears, the
+     scale is wrong and these rungs should be reconsidered rather than
+     shared. */
+  --fs-specimen-glyph: 6.5rem;   /* 104px — ONE character, kana or kanji */
+  --fs-specimen-word:  4.5rem;   /* 72px  — a word or a short phrase     */
 
   /* The three that must breathe with the viewport. These are the
      existing clamps lifted verbatim from the reference screens, so

@@ -133,6 +133,10 @@ headings that must breathe.
 this scale exists to stop. `rem` only — `px` is retired from type, because
 `13px` and `0.8rem` are the same size written two ways and the app used both.
 
+One rung sits above the nine, for one object only: `--fs-specimen-glyph`
+(104px, a single kana or kanji) and `--fs-specimen-word` (72px, a word or
+short phrase) size the study card's Japanese specimen and nothing else.
+
 ### Tracking runs inversely to size
 
 Small uppercase captions are set widest (`--tr-caption`), kana readings wider
