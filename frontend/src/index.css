@@ -2990,6 +2990,14 @@
   --fs-heading:     1.70rem;   /* 記録 record value, 段位 figure             */
   --fs-display:     2.50rem;   /* 駅名標 station name                        */
 
+  /* The study card's Japanese, and nothing else. The card is the object a
+     learner looks at hundreds of times a day, so it earns a rung above the
+     scale — the app sets it at 72px today, which is off every other ladder in
+     this block. Do not reach for this anywhere but the study specimen: if a
+     second caller appears, the scale is wrong and this rung should be
+     reconsidered rather than shared. */
+  --fs-specimen:    4rem;
+
   /* The three that must breathe with the viewport. These are the
      existing clamps lifted verbatim from the reference screens, so
      they are tokens for what is already there, not new behaviour. */

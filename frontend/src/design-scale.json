@@ -10,6 +10,7 @@
       "var(--fs-title)",
       "var(--fs-heading)",
       "var(--fs-display)",
+      "var(--fs-specimen)",
       "var(--fs-heading-fluid)",
       "var(--fs-board-fluid)",
       "var(--fs-display-fluid)"
