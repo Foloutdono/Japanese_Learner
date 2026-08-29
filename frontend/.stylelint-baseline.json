@@ -56,7 +56,6 @@
   "no-descending-specificity::Expected selector \".decks-index-bar\" to come before selector \".today-picker .decks-index-bar:focus-within\", at line N": 1,
   "no-descending-specificity::Expected selector \".decks-index-bar:focus-within\" to come before selector \".today-picker .decks-index-bar:focus-within\", at line N": 1,
   "no-descending-specificity::Expected selector \".decks-type-btn__desc\" to come before selector \".decks-type-btn--active .decks-type-btn__desc\", at line N": 2,
-  "no-descending-specificity::Expected selector \".deck-card__delete:hover\" to come before selector \".deck-card:hover .deck-card__delete\", at line N": 1,
   "no-descending-specificity::Expected selector \".deckdetail-form__input\" to come before selector \".readings-field__row .deckdetail-form__input\", at line N": 1,
   "no-descending-specificity::Expected selector \".grammar-rule\" to come before selector \".grammar-answer .grammar-rule\", at line N": 1,
   "no-descending-specificity::Expected selector \".phrase-word-card__surface\" to come before selector \".phrase-word-card__surface-wrap--clickable .phrase-word-card__surface\", at line N": 1,

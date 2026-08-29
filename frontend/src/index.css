@@ -12666,12 +12666,33 @@ textarea:focus-visible {
    "colour carries the meaning, background stays quiet" language as
    .dict-level-badge, so picking a deck type doesn't read as 5
    different loud, competing-colour buttons in a row. */
+/* The ink is the pigment carried HALF-WAY to --text-primary, not the
+   raw pigment. Measured on the built screen, the raw pigment on this
+   14% tint does not carry at 13px/600 — all four types, both themes:
+
+     dark   standard 4.42  vocab 2.41  kanji 2.73  grammar 3.25
+     light  standard 3.63  vocab 4.43  kanji 3.64  grammar 3.30
+
+   Seven of the eight are under the 4.5:1 floor and the worst is 2.41.
+   At 50% every one of the eight clears it, the minimum being 5.48
+   (vocab, dark); 65% was tried first and still left vocab at 4.35.
+   The hue survives the mix, so the chip still reads as its type —
+   and the pigment is still on the border and the glyph at full
+   strength, which is where DESIGN.md says colour belongs anyway
+   ("an edge, a ring, or a numeral"), rather than in text you have to
+   read. */
 .decks-type-btn--active {
   background: color-mix(in srgb, var(--type-color, var(--deck-action)) 14%, var(--surface));
   border-color: color-mix(in srgb, var(--type-color, var(--deck-action)) 55%, transparent);
-  color: var(--type-color, var(--deck-action));
+  color: color-mix(in srgb, var(--type-color, var(--deck-action)) 50%, var(--text-primary));
 }
-.decks-type-btn--active .decks-type-btn__desc { color: inherit; opacity: 0.85; }
+/* The description takes the mixed ink too. It used to be dimmed to
+   0.85 here, which spent most of what the mix above buys back: at
+   0.85 it measured 4.41 (vocab, dark) and 4.43 (grammar, light),
+   still under the floor, while the label beside it sat at 5.48+.
+   See the base rule below for why no opacity is left anywhere on
+   this line. */
+.decks-type-btn--active .decks-type-btn__desc { color: inherit; }
 /* The type's one-character name, sized to sit in the same chip as the
    label rather than above it. */
 .decks-type-btn {
@@ -12696,7 +12717,14 @@ textarea:focus-visible {
   color: var(--type-color, var(--text-secondary));
 }
 .decks-type-btn__label { font-weight: 600; font-size: 13px; }
-.decks-type-btn__desc { font-size: 10.5px; line-height: 1.45; opacity: 0.75; }
+/* No opacity. This line was dimmed to 0.75 on top of already being
+   --text-secondary and already being 10.5px against the label's 13px
+   — three dimmings for one "this is the quieter half", and the third
+   was the one nothing could see past: measured, the inactive chip's
+   description came out at 3.80:1 dark and 2.79:1 light, worse than
+   the active state 055 was sent here to fix. Size and ink say
+   "secondary" on their own; opacity only ever subtracts contrast. */
+.decks-type-btn__desc { font-size: 10.5px; line-height: 1.45; }
 
 .decks-create-submit { width: 100%; }
 
@@ -12706,15 +12734,24 @@ textarea:focus-visible {
    reads as the same kind of object as a level, a mode or an exam
    paper. Only the parts a deck has and a platform card doesn't —
    per-card actions and the delete affordance — are defined here. */
-/* .platform-grid's own minimum is 440px, sized for a mode card with a
-   service badge and a two-line description. A deck card is a name, a
-   type and two buttons — it reads perfectly well narrower, and on a
-   phone that 440px minimum is wider than the viewport, which is what
-   made the whole grid overflow sideways rather than sit in one
-   column. min() clamps the track to whatever room there actually is. */
+/* .platform-grid's own minimum is 440px, and Decks.dc.html draws this
+   grid at exactly that — two columns across the 1040px board.
+   The track was narrowed to 340px when a deck card was a name, a type
+   and two buttons, which did read perfectly well narrower. It no
+   longer is: since 055 it carries a three-control action row and a
+   right-hand figure column, and at 340px the row could not hold
+   44 + Edit + Study on one line — every card wrapped. Widening it
+   back is also what DESIGN.md's density rule asks for, from the other
+   direction: a card over ~440px must earn its width with a right-hand
+   column, and this one now has one.
+
+   The min() stays. On a phone a bare 440px minimum is wider than the
+   viewport, which is what made the whole grid overflow sideways
+   rather than sit in one column; min() clamps the track to whatever
+   room there actually is. */
 .decks-grid {
   padding: 0;
-  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr));
   gap: 12px;
 }
 .deck-card { align-items: stretch; }
@@ -12724,58 +12761,158 @@ textarea:focus-visible {
   font-family: var(--font-jp);
   font-size: 1.05rem;
 }
-.deck-card__body { gap: 6px; }
-/* The type reads in its own pigment inside an otherwise muted desc
-   line, so the colour that identifies the deck appears twice — on the
-   rail and on the word — the way a line colour and its name do. */
-.deck-card__type { color: var(--rail); font-weight: 600; }
-/* Wraps. A deck card carries two actions the other platform cards
-   don't, and in the narrow column a two-up grid gives it they had
-   nowhere to go: `flex: 1` on a nowrap row makes each button as wide
-   as the row allows and no narrower than its own label, so past a
-   certain name length the pair simply overflowed the card's right
-   edge. Wrapping is what the row should have done from the start —
-   two buttons side by side when they fit, stacked when they don't. */
+/* Decks.dc.html's .dbody -- the text block at the top, the action row
+   at the bottom, whatever height the row settles at. That is the
+   visible half of DESIGN.md's density rule: cards in a grid share a
+   height, so their action rows must land on the same line rather than
+   floating wherever each card's own description happens to end. */
+.deck-card__body {
+  justify-content: space-between;
+  gap: var(--sp-5);
+}
+/* .dtext. The title/description pair keeps its own tighter rhythm
+   than the gap that separates it from the buttons -- one `gap` on the
+   body cannot say both. */
+.deck-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+/* The type used to read in its own pigment here, so the colour that
+   identifies a deck appeared twice — on the roundel and on the word.
+   Measured on the built screen it does not carry: against --surface
+   the four pigments come out at 2.72:1 (単語), 3.16:1 (漢字), 3.85:1
+   (文法) and 5.59:1 (standard, which is --text-secondary and is the
+   only one that ever passed). Under the 4.5:1 floor, and 055 made it
+   worse by moving the card count out — the pigmented word became the
+   whole description line rather than one word of it.
+
+   So the line is muted, which is also how Decks.dc.html draws it. The
+   identity is not lost: .platform-card__no's 2.5px ring is the same
+   pigment, and DESIGN.md is explicit that colour is "an edge, a ring,
+   or a numeral" — a coloured word is none of the three. */
+.deck-card__type { font-weight: 600; }
+/* Decks.dc.html's .dacts: the delete control first, then the ghost,
+   then the primary. It wraps rather than shrinking — 44px is a hit
+   target, not a spacing rung, so a width that cannot hold three of
+   them side by side gets two lines instead of three short buttons.
+
+   Wrapping is also what the row should have done from the start:
+   `flex: 1` on a nowrap row makes each button as wide as the row
+   allows and no narrower than its own label, so past a certain name
+   length the pair simply overflowed the card's right edge. */
 .deck-card__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  gap: var(--sp-3);
 }
-.deck-card__btn {
-  /* flex-basis 0 rather than auto, so the two buttons split the row
-     evenly instead of sizing to their own labels — "Study" and
-     "Modifier" are different lengths and used to come out different
-     widths. min-width lets a button shrink below its content and wrap
-     to its own line rather than pushing the row wider than the card. */
+/* .dbtn. The buttons themselves are the shared family (`.btn-primary`
+   / `.btn-secondary`, see "The primary button" far above): this class
+   says only how they divide the row. It replaces `.deck-card__btn`
+   and `.deck-card__btn--study`, a private pair that painted Study as
+   a 37px raw-蘇芳 platform-face button — under the 44px minimum, on
+   the same screen as the 44px primary 052 landed.
+
+   flex-basis 0 rather than auto, so the two split the row evenly
+   instead of sizing to their own labels — "Study" and "Modifier" are
+   different lengths and used to come out different widths. min-width
+   lets one wrap to its own line rather than push the row wider than
+   the card. */
+.deck-card__act {
   flex: 1 1 0;
   min-width: 96px;
-  font-size: 13px;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
 }
-.deck-card__btn--study {
-  background: var(--deck-action);
-  color: var(--text-on-panel);
-}
-/* Destructive and secondary, so it sits out of the reading path in
-   the corner — not a third button in the action row. */
+/* The confirm row's Delete is the shared primary with the danger
+   pigment substituted for the line's, so the family's own fill and
+   hover formulas (88% → 97% toward the panel ink) apply unchanged
+   instead of a second filled idiom being invented for one row. */
+.deck-card__act--danger { --line-color: var(--danger); }
+/* Decks.dc.html's .dtrash. It used to float in the card's top-right
+   corner at 55% opacity, over the deck's own title — which the
+   maintainer flagged, and which made a destructive action something
+   you had to hover to see properly. It is now the first cell of the
+   action row: a real bordered control at the same 44px as the two
+   beside it, icon-only, and in tab order with them.
+
+   44px is written as a literal here for the same reason .btn-primary
+   writes it: it is a hit target, not a rung of the space scale. */
 .deck-card__delete {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0;
   background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
   color: var(--text-secondary);
-  padding: 4px 6px;
-  opacity: 0.55;
-  transition: color 0.16s ease, opacity 0.16s ease;
+  transition: color 0.16s ease, border-color 0.16s ease;
 }
-.deck-card:hover .deck-card__delete { opacity: 1; }
-.deck-card__delete:hover { color: var(--danger); }
-/* The in-place "delete?" prompt that replaced confirm(). Occupies the
-   action row rather than floating over the card. */
-.deck-card__btn--danger { background: var(--danger); color: var(--text-on-panel); }
-.deck-card__btn--muted { flex: 0 0 auto; min-width: 0; background: transparent; color: var(--text-secondary); }
+/* Hover goes to danger — but to danger carried half-way to
+   --text-primary, not the raw token. Measured against --surface, raw
+   --danger is 2.11:1 in dark: hovering the control made its glyph
+   HARDER to see than the 5.60:1 it rests at, which is the same
+   backwards hover DESIGN.md calls out for .btn-primary ("a hover must
+   not drop below the floor the rest state clears"). The mix lands at
+   5.33:1 dark and 9.03:1 light — level with the rest state in both —
+   while staying unmistakably red. 60% was tried first and left dark
+   at 4.46:1, just under. Same 50% figure as .decks-type-btn--active
+   above, and for the same reason.
+
+   filter: none for the same reason .btn-primary:hover carries it: the
+   bare `button:hover` rule near the top of this file supplies a
+   blanket brightness(1.15), and a brightness filter is not the hover.
+   The :focus-visible half is not optional either — "every :hover rule
+   needs a matching :focus-visible". */
+.deck-card__delete:hover,
+.deck-card__delete:focus-visible {
+  filter: none;
+  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
+  border-color: currentcolor;
+}
+/* Decks.dc.html's .dcount. DESIGN.md: "a card wider than ~440px must
+   earn its width with a right-hand column (meta, a figure, a
+   status)". The count used to be the tail of the description
+   sentence — "Kanji · 42 cards" — where it had to be read to be
+   found; as a figure in its own column it is seen instead, which is
+   "say less" applied to a number.
+
+   The drawing also shows a due count ("Kanji · 8 due"). There is no
+   such field: GET /api/decks returns card_count only, the sum of
+   custom_count and app_count (backend/routes/decks.py). It is not
+   invented here. */
+.deck-card__count {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--sp-1);
+  padding-right: var(--sp-6);
+}
+/* DESIGN.md's figure rule, and the first consumer --fs-heading has
+   had: display face, 700, line-height 1, tabular figures. */
+.deck-card__count-fig {
+  font-family: var(--font-display);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+/* The caption half of the fixed pair. No text-indent: the rule that
+   cancels a tracked line's trailing space applies to a left-flush or
+   centred axis, and this column is flush RIGHT, where the same indent
+   would push the caption off its own edge. */
+.deck-card__count-cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
 /* The question takes the whole first line of the wrapped row, with
    its two answers underneath — it is a sentence, and squeezing it
    into a third of the width beside them broke it over three lines of
@@ -14624,12 +14761,21 @@ textarea:focus-visible {
   .platform-card__body { padding: 14px 10px 14px 14px; }
   .platform-card__title { font-size: 1.08rem; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
-  /* A deck card carries two buttons the other platform cards don't,
-     and at this width their labels were wrapping under their own
-     icons ("Modifier" on a second line). The row gives up the trailing
-     gutter it doesn't need and the labels stay on one line. */
-  .deck-card__body { padding-right: 14px; }
-  .deck-card__btn { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+  /* A deck card carries three controls the other platform cards
+     don't, and at this width their labels were wrapping under their
+     own icons ("Modifier" on a second line). The row gives up the
+     trailing gutter it doesn't need and the labels stay on one line.
+     The shared family's --sp-6 inline pad is the one thing that gives
+     here; its 44px height is not, so a width that still cannot hold
+     all three lets the row wrap instead. */
+  .deck-card__body { padding-right: var(--sp-4); }
+  .deck-card__act {
+    padding-inline: var(--sp-3);
+    white-space: nowrap;
+  }
+  /* The count column keeps its figure but gives up the gutter the
+     body just gave up, so the three action controls keep the width. */
+  .deck-card__count { padding-right: var(--sp-4); }
 
   /* The console stacks: the filter chips get the full width to wrap
      across (four of them plus "All" never fit one phone line beside a
