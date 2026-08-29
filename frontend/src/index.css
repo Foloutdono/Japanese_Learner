@@ -5220,21 +5220,24 @@ textarea:focus-visible {
   gap: 9px;
   min-width: 0;
 }
-/* The bilingual pair, on the two inks DESIGN.md gives it: the Japanese
-   is the heading and the Latin is its caption in secondary ink. That is
-   also what .next-service__pace-jp / __pace-latin five rules below have
-   always done -- pace-jp inherits the block's ink, pace-latin takes the
-   soft one -- so the strip's two pairs now read the same way.
+/* Both halves of this pair sit in the SOFT ink, and the pairing is
+   carried by the 1.3x size drop, the uppercase and the tracking rather
+   than by a second colour. That is deliberate and it is not what
+   .next-service__pace-jp / __pace-latin five rules below do -- those
+   put the Japanese on the block's full ink. This strip's name is the
+   quieter register of the two on purpose: it is a standing label on a
+   control, not the heading of a screen.
 
-   Neither is a mix toward `transparent` any more. Such a mix composites
-   toward the GROUND rather than the ink, so it costs contrast in both
-   themes at once: this caption was 2.09:1 on the sumi and still only
-   4.01:1 in DARK theme, where nothing else in the app failed. The dim
-   step does not need it -- two inks and a 1.3x size drop carry it. */
+   Neither half is a mix toward `transparent` any more. Such a mix
+   composites toward the GROUND rather than the ink, so it costs
+   contrast in both themes at once: this caption was 2.09:1 on the sumi
+   and still only 4.01:1 in DARK theme, where nothing else in the app
+   failed. Dropping it costs the pair nothing that size and case were
+   not already carrying. */
 .next-service__jp {
   font-size: 13px;
   letter-spacing: 0.16em;
-  color: var(--ns-ink);
+  color: var(--ns-ink-soft);
   white-space: nowrap;
 }
 .next-service__latin {

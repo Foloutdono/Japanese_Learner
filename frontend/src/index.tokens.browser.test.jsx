@@ -23,22 +23,23 @@ describe('the dimmed text register', () => {
     const latin = screen.container.querySelector('.next-service__latin')
 
     const primary = getComputedStyle(strip).color
-    // Regression guard for the formerly-undefined dim-text token: an
-    // invalid var() on an inherited property makes the element inherit
-    // instead, which silently flattened every dim register onto the body
-    // colour.
-    expect(getComputedStyle(when).color).not.toBe(primary)
-
-    // The caption used to be a color-mix() against `transparent`, and this
-    // asserted the result was translucent -- translucency being the visible
-    // proof that the mix had resolved rather than collapsing to an inherited
-    // fallback. The mix is gone: it composited toward the GROUND, not the
-    // ink, so it cost contrast in both themes and failed at 4.01:1 in dark.
-    // The failure mode it guarded has not gone anywhere, so the guard moves
-    // rather than being deleted. .next-service__jp now takes the block's own
-    // ink, so an unresolved --ns-ink-soft would make the caption inherit and
-    // land on exactly jp's colour -- which is what this catches.
-    expect(getComputedStyle(latin).color).not.toBe(getComputedStyle(jp).color)
+    // Regression guard for the formerly-undefined dim-text token: an invalid
+    // var() on an inherited property makes the element inherit instead, which
+    // silently flattened every dim register onto the body colour. All three
+    // of these read --ns-ink-soft while the strip itself is --ns-ink, so an
+    // unresolved token lands each of them on exactly `primary`.
+    //
+    // The caption used to be checked a different way: it was a color-mix()
+    // against `transparent`, and the test asserted the result was
+    // translucent -- translucency being the visible proof that the mix had
+    // resolved rather than collapsing to that same inherited fallback. The
+    // mix is gone (it composited toward the GROUND rather than the ink, so
+    // it cost contrast in both themes and failed at 4.01:1 in dark), so the
+    // caption is now guarded the same way as its neighbours instead.
+    for (const [name, el] of [['jp', jp], ['when', when], ['latin', latin]]) {
+      expect(getComputedStyle(el).color, `${name} fell back to the inherited ink`)
+        .not.toBe(primary)
+    }
 
     // And the inverse of the old assertion, because the rule is now absolute:
     // no ink in this strip may be a mix toward `transparent`.
