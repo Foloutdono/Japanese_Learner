@@ -5375,13 +5375,12 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   gap: var(--sp-4);
-  /* Logical longhand, not the `padding` shorthand: the scale ratchet's
-     four properties (font-size/border-radius/gap/padding) only
-     recognise a single var() as an on-scale value, so a two-token
-     shorthand like `var(--sp-4) var(--sp-5)` reads as a brand-new
-     literal it has never seen and fails the build even though every
-     value in it is a token. Two longhands, each an exact single-token
-     match, are the same rendered padding with nothing new to allow. */
+  /* An asymmetric pad, block one rung tighter than inline, so the row
+     reads as a row rather than a card. Written as logical longhands,
+     which is now purely a style choice: plan 053 taught the scale
+     ratchet to match `padding`/`gap`/`border-radius` per component, so
+     `padding: var(--sp-4) var(--sp-5)` passes just as well and renders
+     the same. Reach for whichever reads better. */
   padding-block: var(--sp-4);
   padding-inline: var(--sp-5);
   font: inherit;
@@ -6022,10 +6021,11 @@ textarea:focus-visible {
   gap: var(--sp-3);
   box-sizing: border-box;
   min-height: 44px; /* a hit target, not a spacing rung */
-  /* Logical longhand -- see .today-lane-row's own comment on why: the
-     scale ratchet's `padding` scan only recognises a single var() as
-     on-scale, so this asymmetric pad is two exact-token longhands
-     rather than a two-token shorthand it has never allowlisted. */
+  /* An asymmetric pad, block tighter than inline -- see
+     .today-lane-row's own comment. The longhands are a style choice,
+     not a guard workaround: since plan 053 the scale ratchet matches
+     `padding` per component, so `padding: var(--sp-4) var(--sp-6)`
+     would pass too. */
   padding-block: var(--sp-4);
   padding-inline: var(--sp-6);
   border-radius: var(--r-card);
@@ -12336,13 +12336,14 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* One token, not the two the row/column values were (10px/16px):
-     `row-gap`/`column-gap` longhands (the .today-lane-row/.btn-primary
-     trick for an asymmetric pair, see their comments) trip stylelint's
-     declaration-block-no-redundant-longhand-properties on `gap`
-     specifically, and the two-token `gap` shorthand trips the scale
-     ratchet the same way the padding shorthand does. A single rung
-     satisfies both guards at once. */
+  /* One token, not the two the row/column values were (10px/16px).
+     Note that `gap` cannot take the logical-longhand route `padding`
+     can: `row-gap`/`column-gap` trip stylelint's
+     declaration-block-no-redundant-longhand-properties, which is
+     baselined for exactly one `gap` in this file. An asymmetric pair
+     therefore has to be the shorthand -- legal since plan 053 taught
+     the scale ratchet to match it per component -- but a single rung
+     was the right value here anyway. */
   gap: var(--sp-4);
   flex-wrap: wrap;
   padding-block: var(--sp-4);
