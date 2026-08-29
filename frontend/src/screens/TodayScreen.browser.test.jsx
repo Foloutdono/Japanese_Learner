@@ -69,6 +69,45 @@ describe('TodayScreen — the primary button (plan 051)', () => {
     // The app's own display face, not the page's inherited Segoe UI.
     expect(style.fontFamily).toContain('Space Grotesk')
   })
+
+  // Plan 052 — 051 fixed the missing rule but inked it with
+  // --text-on-fill (#1c1811, a near-black documented for *light* fills)
+  // where every primary swatch in Controls.dc.html uses --text-on-panel
+  // (#f3ecdf). On the vermillion that measured 3.48:1 dark / 3.18:1
+  // light, against a 4.5:1 floor for 15.2px/600 text. Nothing in the
+  // suite checks colour, and no guard checks contrast, which is exactly
+  // how the defect shipped. This pins the ink and the fill so it cannot
+  // silently regress again.
+  it('inks .btn-primary with the paper ink on a deepened pigment fill (plan 052)', async () => {
+    apiJson.mockReset()
+    apiJson.mockImplementation(async url => {
+      if (url === '/api/today') return { lanes: [], total: 0, next_due: null }
+      return {}
+    })
+
+    const screen = await render(
+      <LangProvider>
+        <MemoryRouter>
+          <TodayScreen session={{ access_token: 'tok' }} />
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(200)
+
+    const btn = screen.container.querySelector('.btn-primary')
+    expect(btn).toBeTruthy()
+    const style = getComputedStyle(btn)
+
+    // --text-on-panel #f3ecdf, the mockup's ink at every primary swatch
+    // -- NOT --text-on-fill #1c1811, which 051 used.
+    expect(style.color).toBe('rgb(243, 236, 223)')
+
+    // The fill is the section pigment deepened 12% toward --bg-panel:
+    // color-mix(in srgb, #c1442c 88%, #100e13) = #ac3e29. Asserting the
+    // exact mix (rather than "not transparent") is what makes a silent
+    // return to the raw pigment -- 4.33:1, below the floor -- fail here.
+    expect(style.backgroundColor).toBe('rgb(172, 62, 41)')
+  })
 })
 
 // Plan 051, step 7 — TodayScreen.jsx:156 used to catch a failed
