@@ -12855,7 +12855,11 @@ textarea:focus-visible {
 .deckdetail-select-count { font-size: 13px; color: var(--text-secondary); }
 
 .deckdetail-btn { font-size: 13px; background: var(--bg-panel); color: var(--text-on-panel); }
-.deckdetail-btn--muted { color: var(--text-secondary); }
+/* Sumi ground (--bg-panel, inked --text-on-panel just above), so the
+   quiet variant takes the sumi dim ink -- exactly what
+   --danger-disabled two lines down already does. The ambient
+   --text-secondary flips dark in light theme and measured 2.66:1. */
+.deckdetail-btn--muted { color: var(--text-on-panel-soft); }
 .deckdetail-btn--study { background: var(--deck-action); color: var(--text-on-panel); }
 .deckdetail-btn--danger { background: var(--danger); color: var(--text-on-panel); }
 .deckdetail-btn--danger-disabled { background: var(--bg-panel); color: var(--text-on-panel-soft); opacity: 0.5; }
@@ -13970,7 +13974,9 @@ textarea:focus-visible {
   transition: background 0.15s;
 }
 .comp-option-btn:hover { background: var(--bg-hover, rgba(255, 255, 255, 0.08)); }
-.comp-option-btn__letter { color: var(--text-secondary); margin-right: 12px; font-weight: bold; }
+/* Inside .comp-option-btn, which is sumi and inks --text-on-panel: the
+   letter is a dim register on that ground, not on the page. */
+.comp-option-btn__letter { color: var(--text-on-panel-soft); margin-right: 12px; font-weight: bold; }
 
 .comp-reread-btn { margin-top: 24px; background: none; color: var(--text-secondary); font-size: 13px; text-decoration: underline; }
 

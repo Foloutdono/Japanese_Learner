@@ -191,6 +191,64 @@ const Fixture = () => (
       <span className="phrase-kanji-chip__char">水</span>
       <span className="phrase-kanji-chip__level">N5</span>
     </div>
+
+    {/* The rest are rules a block-level scan flagged as *possibly* putting an
+        ambient ink on sumi, because somewhere in their block a rule paints
+        --bg-panel. A selector cannot answer that -- only the ancestor chain
+        can, and several of these turned out to be siblings of the sumi
+        element rather than children. They are here so the question is
+        settled by measurement and stays settled. */}
+
+    {/* ProfileScreen.jsx:447 */}
+    <div className="banzuke">
+      <div className="banzuke__rows">
+        <div className="leaderboard-row">
+          <span className="leaderboard-row__rank">1</span>
+          <span className="leaderboard-row__name">Aoi</span>
+          <span className="leaderboard-row__level">Niveau 12</span>
+          <span className="leaderboard-row__xp">4,210 XP</span>
+        </div>
+        <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
+      </div>
+    </div>
+
+    {/* DecksScreen.jsx:259 -- the delete affordance and the confirm row */}
+    <div className="platform-grid decks-grid">
+      <div className="platform-card deck-card">
+        <span className="platform-card__body deck-card__body">
+          <span className="deck-card__actions">
+            <span className="deck-card__confirm-q">Supprimer ce paquet ?</span>
+            <button className="deck-card__btn deck-card__btn--muted">Annuler</button>
+          </span>
+        </span>
+        <button className="deck-card__delete" aria-label="delete">🗑</button>
+      </div>
+    </div>
+
+    {/* DeckDetailScreen.jsx:424 */}
+    <div className="deckdetail-actions">
+      <button className="deckdetail-btn deckdetail-btn--muted">Sélectionner</button>
+    </div>
+
+    {/* TokenCard.jsx:60 -- reading/pos sit in the wrap, whose sumi
+        background belongs to the --clickable :hover state only. */}
+    <div className="card phrase-word-card">
+      <div className="phrase-word-card__top">
+        <div className="phrase-word-card__surface-wrap">
+          <span className="phrase-word-card__surface">水</span>
+          <span className="phrase-word-card__reading">(みず)</span>
+          <span className="phrase-word-card__pos">noun</span>
+        </div>
+      </div>
+    </div>
+
+    {/* ReadingComprehensionScreen.jsx:264 */}
+    <div className="comp-options">
+      <button className="comp-option-btn">
+        <span className="comp-option-btn__letter">A.</span>
+        answer
+      </button>
+    </div>
   </div>
 )
 
@@ -212,6 +270,18 @@ const SITES = [
   // colour of its own that the host input's computed style does not show.
   ['.decks-index-bar__input::placeholder', 'decks console search placeholder'],
   ['.dict-index-bar__input::placeholder', 'dictionary search placeholder'],
+
+  // Settled by measurement rather than by reading a selector -- see the
+  // comment beside their markup above.
+  ['.leaderboard-row__level', 'leaderboard row level'],
+  ['.leaderboard-row__gap', 'leaderboard elision row'],
+  ['.deck-card__delete', 'deck card delete affordance'],
+  ['.deck-card__btn--muted', 'deck card cancel button'],
+  ['.deck-card__confirm-q', 'deck card delete question'],
+  ['.deckdetail-btn--muted', 'deck detail muted button'],
+  ['.phrase-word-card__reading', 'token card reading'],
+  ['.phrase-word-card__pos', 'token card part of speech'],
+  ['.comp-option-btn__letter', 'comprehension option letter'],
 ]
 
 // Composite every non-transparent background from <html> down to the element.
