@@ -7016,17 +7016,26 @@ textarea:focus-visible {
    can never grow past its intended size no matter what ends up in
    `char` — a stray newline or extra whitespace just gets clipped
    instead of adding phantom blank lines that push the card (and its
-   scrollable parent) far taller than the glyph actually needs. */
+   scrollable parent) far taller than the glyph actually needs.
+
+   The box used to be 1.4x the font size (a 40% band with nothing in
+   it — line-height, two lines below, already accounts for the glyph's
+   own ascender/descender room) stacked under 28px of margin each side.
+   That is the dead space the density rule forbids: at 100px that read
+   as a 140px box inside 56px of margin before the card's own padding
+   even starts. height now matches line-height exactly, and margin is
+   one rung of the space scale, not two stacked paddings pretending to
+   be one. */
 .char-display {
   font-family: var(--char-font, var(--font-jp));
   font-size: var(--char-size, 110px);
-  height: calc(var(--char-size, 110px) * 1.4);
+  height: calc(var(--char-size, 110px) * 1.15);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-primary);
-  margin: 28px 0;
-  line-height: 1.1;
+  margin: var(--sp-4) 0;
+  line-height: 1.15;
   letter-spacing: 0.02em;
   overflow: hidden;
   white-space: nowrap;
