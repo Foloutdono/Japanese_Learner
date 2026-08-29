@@ -106,6 +106,14 @@ export default function TodayScreen({ session }) {
   const { t, lang } = useLang()
 
   const [summary, setSummary] = useState(null)
+  // A failed GET /api/today used to be indistinguishable from still
+  // loading: the catch below set `summary` to the same `null` it
+  // starts at, so a network blip left the picker spinning forever with
+  // no error, no retry. Tracked separately so the picker can tell the
+  // two apart; `summaryReload` is bumped by the retry button to re-run
+  // the effect below without duplicating the fetch call.
+  const [summaryError, setSummaryError] = useState(null)
+  const [summaryReload, setSummaryReload] = useState(0)
   // Which lanes this run covers. `null` means "the picker has not been
   // answered yet"; a Set means it has, even if empty. Distinguishing
   // those matters because an empty selection must disable the start
@@ -145,6 +153,8 @@ export default function TodayScreen({ session }) {
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset (clears a previous failure so a retry shows loading again) that must happen synchronously with kicking off the fetch below; not a standalone id-keyed reset.
+    setSummaryError(null)
     apiJson('/api/today', session)
       .then(data => {
         setSummary(data)
@@ -153,8 +163,8 @@ export default function TodayScreen({ session }) {
         // to get the behaviour they came for.
         setChosen(new Set((data.lanes ?? []).map(l => l.id)))
       })
-      .catch(() => setSummary(null))
-  }, [session])
+      .catch(err => setSummaryError(err))
+  }, [session, summaryReload])
 
   // A card is identified by (id, mode) throughout: the same kanji can be
   // due as a flashcard AND as a writing drill, and those are two cards
@@ -404,6 +414,18 @@ export default function TodayScreen({ session }) {
   // so the button disables rather than quietly running everything.
   if (!started) {
     if (!summary) {
+      // A rejected GET /api/today gets its own branch rather than
+      // falling through to the spinner below -- see summaryError above.
+      if (summaryError) {
+        return (
+          <div className="screen">
+            <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
+            <main id="main-content" className="container quiz-area">
+              <SessionError error={summaryError} onRetry={() => setSummaryReload(n => n + 1)} />
+            </main>
+          </div>
+        )
+      }
       return (
         <div className="screen">
           <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
