@@ -3318,7 +3318,15 @@
   --daruma-blank:    #c2b7a0;
 
   --text-primary:   #221d15;
-  --text-secondary: #6f6552;
+  /* Deepened from #6f6552 for the same reason --indigo/--teal/--rust are
+     deepened here: paper needs a darker pigment than sumi does. #6f6552
+     was measured at 4.29:1 on --surface and 4.14:1 on --bg-card-hover,
+     under the 4.5:1 floor, and --surface is the material every raised
+     object in the app is made of. Same nezumi: hue 39.3deg -> 38.6deg,
+     saturation 15.0% -> 15.9%, lightness 37.8% -> 34.5%. Worst paper
+     ground is now 4.75:1. The dark value is untouched -- it was never
+     the one at risk. */
+  --text-secondary: #665c4a;
   /* Sumi-nezumi (墨鼠) — charcoal grey. Deepened independently for
      paper, same reasoning as the dark-theme value above. */
   --state-new:      #1a1812;
@@ -5157,7 +5165,16 @@ textarea:focus-visible {
   padding: 14px 18px;
   text-align: left;
   font: inherit;
-  color: var(--text-primary);
+  /* This strip has TWO grounds: it is sumi when something is due, and
+     --clear below makes it transparent over the page when nothing is.
+     One ink cannot serve both -- the ambient pair flips dark in light
+     theme and was measured at 2.80:1 on the sumi, while the panel pair
+     is 1.83:1 on paper. So the ground picks the ink here, once, and
+     every child below reads --ns-ink/--ns-ink-soft instead of naming a
+     token directly. */
+  --ns-ink:      var(--text-on-panel);
+  --ns-ink-soft: var(--text-on-panel-soft);
+  color: var(--ns-ink);
   background: color-mix(in srgb, var(--accent2) 7%, var(--bg-panel));
   border: 1px solid color-mix(in srgb, var(--accent2) 26%, transparent);
   border-left: 3px solid var(--accent2);
@@ -5179,6 +5196,9 @@ textarea:focus-visible {
   gap: 10px;
   cursor: default;
   background: transparent;
+  /* Transparent, so the ground is the page: the ambient pair, not sumi. */
+  --ns-ink:      var(--text-primary);
+  --ns-ink-soft: var(--text-secondary);
   border-color: color-mix(in srgb, var(--border) 80%, transparent);
   border-left-color: color-mix(in srgb, var(--success) 60%, transparent);
 }
@@ -5203,14 +5223,20 @@ textarea:focus-visible {
 .next-service__jp {
   font-size: 13px;
   letter-spacing: 0.16em;
-  color: var(--text-secondary);
+  color: var(--ns-ink-soft);
   white-space: nowrap;
 }
 .next-service__latin {
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--text-secondary) 72%, transparent);
+  /* 90%, not 72%: a mix toward `transparent` composites toward the
+     ground, so it costs contrast on a dark ground and on a light one
+     alike. 72% measured 2.09:1 on the sumi and 4.01:1 even in dark
+     theme. 90% is the deepest cut that still clears the floor on both
+     of this strip's grounds, and it stays translucent, which is what
+     index.tokens.browser.test.jsx asserts about this rule. */
+  color: color-mix(in srgb, var(--ns-ink-soft) 90%, transparent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5231,7 +5257,7 @@ textarea:focus-visible {
 }
 .next-service__when {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--ns-ink-soft);
 }
 
 /* The lanes waiting, as chips. Scrolls rather than wraps: three chips
@@ -5258,11 +5284,11 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 .next-service__lane-where { font-weight: 700; color: var(--lane-color, var(--accent2)); }
-.next-service__lane-mode  { color: var(--text-secondary); }
+.next-service__lane-mode  { color: var(--ns-ink-soft); }
 .next-service__lane-due {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--ns-ink);
 }
 
 /* ── 新規 — the day's new-item gauge ─────────────────────────
@@ -5299,7 +5325,7 @@ textarea:focus-visible {
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--ns-ink-soft);
 }
 .next-service__pace-bar {
   flex: 1;
@@ -5324,7 +5350,7 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: 0.85rem;
 }
-.next-service__pace-sep { color: var(--text-secondary); font-weight: 400; }
+.next-service__pace-sep { color: var(--ns-ink-soft); font-weight: 400; }
 /* Target met: the onboarding's gold pill (.onb-reco-badge), flowed
    inline at the row's end instead of floating over a card corner. */
 .next-service__pace-met {
@@ -13469,7 +13495,10 @@ textarea:focus-visible {
 }
 .phrase-kanji-chip__char:hover { text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; }
 .phrase-kanji-chip__char:active { transform: scale(0.9); }
-.phrase-kanji-chip__level { font-size: 11px; color: var(--text-secondary); }
+/* Inside .phrase-kanji-chip, which paints --bg-panel and inks
+   --text-on-panel: sumi in both themes, so the dim register here is the
+   sumi one. The ambient --text-secondary measured 3.04:1 in light. */
+.phrase-kanji-chip__level { font-size: 11px; color: var(--text-on-panel-soft); }
 
 /* ── Reading practice screen ──────────────────────────────── */
 .rdg-area { width: 100%; max-width: 640px; margin: 0 auto; box-sizing: border-box; }

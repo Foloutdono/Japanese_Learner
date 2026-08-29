@@ -181,6 +181,11 @@ const Fixture = () => (
       <span className="record__unit">days</span>
     </div>
 
+    {/* DictionaryScreen -- the same index bar on its own ground */}
+    <div className="dict-index-bar">
+      <input className="dict-index-bar__input" placeholder="search" />
+    </div>
+
     {/* PhraseScreen -- a sumi chip */}
     <div className="phrase-kanji-chip">
       <span className="phrase-kanji-chip__char">水</span>
@@ -202,6 +207,11 @@ const SITES = [
   ['.record__label', 'record label'],
   ['.record__unit', 'record unit'],
   ['.phrase-kanji-chip__level', 'kanji chip level (sumi)'],
+  // Placeholders are text and carry the same floor. Measured through
+  // getComputedStyle's pseudo-element argument, since ::placeholder has a
+  // colour of its own that the host input's computed style does not show.
+  ['.decks-index-bar__input::placeholder', 'decks console search placeholder'],
+  ['.dict-index-bar__input::placeholder', 'dictionary search placeholder'],
 ]
 
 // Composite every non-transparent background from <html> down to the element.
@@ -278,13 +288,14 @@ describe('Guard 4: contrast', () => {
     for (const theme of THEMES) {
       setTheme(theme)
       for (const [selector, label] of SITES) {
-        const el = root.querySelector(selector)
-        expect(el, `fixture is missing ${selector} -- the markup drifted from the component`).toBeTruthy()
+        const [host, pseudo] = selector.split('::')
+        const el = root.querySelector(host)
+        expect(el, `fixture is missing ${host} -- the markup drifted from the component`).toBeTruthy()
         const bg = effectiveGround(el)
         ctx.clearRect(0, 0, 4, 4)
         ctx.fillStyle = hex(bg)
         ctx.fillRect(0, 0, 4, 4)
-        ctx.fillStyle = getComputedStyle(el).color
+        ctx.fillStyle = getComputedStyle(el, pseudo ? `::${pseudo}` : undefined).color
         ctx.fillRect(0, 0, 4, 4)
         const fg = readPixel()
         const ratio = contrast(fg, bg)

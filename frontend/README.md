@@ -16,7 +16,7 @@ npm test           # vitest, two lanes (node + browser)
 
 ## Design conformance guards
 
-Three guards, run by CI on every PR, exist because this project has 19,000
+Four guards, run by CI on every PR, exist because this project has 19,000
 lines of CSS and no other tool looks at any of it. They do not enforce
 taste; they enforce that a decision already made stays made.
 
@@ -168,6 +168,31 @@ taste; they enforce that a decision already made stays made.
    (1,951), and the **stored ceiling** in `counts`. Say which one you
    mean. `--write` only ever unions, so the allowlist can never shrink on
    its own — any claim that it fell is a deliberate hand edit.
+
+4. **Contrast** (`src/contrast.browser.test.jsx`) — the check DESIGN.md
+   spent a section saying did not exist. Also in the chromium lane, and that
+   is deliberate: the other text-scanning guards cannot answer "what colour
+   is this". Every ground in the sheet is a `color-mix()` over tokens, which
+   Chrome serialises as `color(srgb ...)`, so a script would have to
+   reimplement CSS Color 4 mixing to find out what is on screen — and a
+   guard that gets that subtly wrong is worse than none: it is the 3.48:1
+   button passing again. Here Chromium resolves the colour and a canvas
+   paint composites it, alpha and all.
+
+   Two parts, because there are two ways to fail. The **contract matrix**
+   measures the intended pairings (ambient inks on paper grounds, panel inks
+   on sumi) and catches a token drifting under the floor. The **site sweep**
+   renders real markup and walks real ancestors, which is the only way to
+   catch a rule putting the *wrong* ink on a ground — a pair the contract
+   does not contain, and the defect that had the Today strip at 2.80:1 in
+   light theme while dark measured a healthy 6.51:1.
+
+   Ratcheted against `src/design-contrast.json` like the others, with one
+   extra move: an allowlisted pair that *clears* the floor also fails, so a
+   fix cannot leave stale debt behind it. Theme flips are measured with
+   transitions forced off — `.decks-filter-btn` transitions `color` and
+   `.next-service` transitions `background`, so an immediate read returns a
+   mid-animation colour that is on screen at no resting moment.
 
 If a guard fires on a change you believe is correct, change the baseline or
 the allowlist in the same commit and say why in the message. The guards are
