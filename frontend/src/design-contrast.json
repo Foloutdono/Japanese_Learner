@@ -1,0 +1,25 @@
+{
+  "_": "Guard 4's baseline; see contrast.browser.test.jsx. `allow` lists ink/ground pairs known to sit below `floor`, each with the ratio measured when it was recorded. A listed pair may never get worse, and must be REMOVED once it clears the floor -- the guard fails either way. Nothing may be ADDED without a note here saying why the pair cannot be fixed. Keys are `theme|ink|ground` for the contract matrix and `theme|@selector` for a real call site.",
+  "floor": 4.5,
+  "_allow": "Recorded on the sheet as it stood when the guard was written, so the guard lands green and every later change is measured against it. Three separate defects, all pre-existing: (1) --text-secondary has no headroom on paper -- it clears the floor on --bg-main and --bg-card and fails on the two darker card grounds; (2) the Today strip and the kanji chip are sumi in BOTH themes but use the ambient ink, which flips dark in light theme; (3) the dim/placeholder registers mix their ink toward `transparent`, which composites toward the ground and fails in BOTH themes.",
+  "allow": {
+    "light|--text-secondary|--surface": 4.29,
+    "light|--text-secondary|--bg-card-hover": 4.14,
+
+    "dark|@.ns-plain-latin": 4.01,
+    "dark|@.ns-clear-latin": 4.07,
+
+    "light|@.decks-filter-btn": 4.29,
+    "light|@.decks-index-bar__count": 4.29,
+    "light|@.station-sign__kana": 4.29,
+    "light|@.station-sign__romaji": 4.29,
+    "light|@.record__label": 4.29,
+    "light|@.record__unit": 4.29,
+
+    "light|@.ns-plain-jp": 2.8,
+    "light|@.ns-plain-when": 2.8,
+    "light|@.ns-plain-latin": 2.09,
+    "light|@.ns-clear-latin": 2.95,
+    "light|@.phrase-kanji-chip__level": 3.04
+  }
+}
