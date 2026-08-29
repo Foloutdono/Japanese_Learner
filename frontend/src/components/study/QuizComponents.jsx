@@ -32,15 +32,41 @@ function useIsCramped() {
 }
 
 // ── Big kana/kanji display ────────────────────────────────
-export function CharDisplay({ char, size = 110 }) {
-  const isLargeSize = size >= 60
+// `variant` is the study specimen's two rungs (see --fs-specimen-glyph/
+// -word in index.css): 'glyph' for one character, kana or kanji, 'word'
+// for a vocab word or short phrase. Plan 048 replaced the 25 numeric
+// `size` props CardPrompt.jsx used to pass here -- each turned into a
+// bare px string on --char-size -- with these two tokens, because the
+// content only ever needed two sizes and the numbers were drifting for
+// no stated reason (kana at 110px, kanji at 100px, no one had decided
+// they should differ).
+//
+// `size` survives as an explicit escape hatch for the one caller that
+// isn't a Japanese specimen at all: the kana screen's romaji prompt,
+// plain Latin text in the UI font, at whatever size that context wants.
+// Forcing it onto glyph/word would be the third rung plan 048 explicitly
+// argues against minting -- the whole point of exactly two is that they
+// match what the SPECIMEN needs, and romaji isn't the specimen.
+const SPECIMEN_SIZE = {
+  glyph: 'var(--fs-specimen-glyph)',
+  word: 'var(--fs-specimen-word)',
+}
+
+export function CharDisplay({ char, variant = 'glyph', size }) {
+  if (size != null) {
+    return (
+      <div
+        className="char-display"
+        style={{ fontSize: size, fontFamily: size >= 60 ? 'var(--font-jp)' : 'inherit' }}
+      >
+        {char}
+      </div>
+    )
+  }
   return (
     <div
       className="char-display"
-      style={{
-        '--char-size': `${size}px`,
-        '--char-font': isLargeSize ? 'var(--font-jp)' : 'inherit',
-      }}
+      style={{ '--char-size': SPECIMEN_SIZE[variant], '--char-font': 'var(--font-jp)' }}
     >
       {char}
     </div>
