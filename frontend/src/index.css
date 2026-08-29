@@ -5355,7 +5355,7 @@ textarea:focus-visible {
 .today-picker .decks-index-bar:focus-within {
   background: color-mix(in srgb, var(--accent2) 7%, transparent);
 }
-.today-picker .decks-console__new { background: var(--accent2); flex: auto; justify-content: center; }
+.today-picker .decks-console__new { background: var(--accent2); color: var(--text-on-fill); flex: auto; justify-content: center; }
 
 .today-picker__lanes {
   list-style: none;
