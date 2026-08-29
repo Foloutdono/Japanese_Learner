@@ -206,7 +206,14 @@ Nine rungs, `--sp-1` … `--sp-9`. The upper rungs carry meaning:
 - `--sp-8` (44px) — a component's bottom margin
 - `--sp-9` (52px) — the rhythm between blocks on a screen
 
-**Never write a padding or gap literal.**
+**Never write a padding or gap literal.** That includes hiding one inside a
+custom property (`--card-pad-x: 14px` on a component rule is as much a
+literal as `padding: 14px`) — `npm run lint:scale` catches both. Its
+`custom-property-length` count is the honest harmonisation metric for this
+rule: component-level lengths that should be tokens but aren't yet, distinct
+from the scale's own `--sp-*`/`--fs-*`/etc. definitions in `:root`, which the
+guard reports separately as `design-token` and never treats as debt. See
+`frontend/README.md`, "Design conformance guards", for the full split.
 
 ### The density contract
 

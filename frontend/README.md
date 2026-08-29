@@ -69,14 +69,31 @@ taste; they enforce that a decision already made stays made.
 
    **Two more surfaces (plan 047), because the four properties above missed
    most of the study screen's real type and space scale:**
-   - `custom-property-length` — a CSS **custom property** whose *value* is a
-     bare `px`/`rem`/`em` length, e.g. `--card-pad-y: 40px;`. Classified by
-     value, not by name (`--card-pad-y`, `--char-size`, `--ember-drift`, ...
-     — names drift, a length doesn't stop being one). `var(...)`,
-     `calc(...)`, `clamp(...)` and colours never match. This also, correctly,
-     catches the scale's own token *definitions* in `:root` (e.g.
-     `--fs-caption-xs: 0.62rem;`) — those are permanent, legitimate
-     allowlist residents, not something to migrate away.
+   - a CSS **custom property** whose *value* is a bare `px`/`rem`/`em`
+     length, e.g. `--card-pad-y: 40px;`. Classified by value, not by name
+     (`--card-pad-y`, `--char-size`, `--ember-drift`, ... — names drift, a
+     length doesn't stop being one). `var(...)`, `calc(...)`, `clamp(...)`
+     and colours never match. Plan 047 reported every one of these as a
+     single `custom-property-length` class, which meant it counted the
+     scale's *own* token definitions (`--fs-caption-xs: 0.62rem`, `--sp-6:
+     22px`) as violations — 74 of 101 occurrences on the commit plan 050
+     measured it. Plan 050 split it by where the declaration lives:
+     - **`design-token`** — declared inside a `:root` block: bare `:root`,
+       or `:root` with an attribute selector, e.g.
+       `:root[data-theme="light"]` or a cosmetics block like
+       `:root[data-seal="seal_shu"], [data-seal-preview="seal_shu"] {
+       --seal-radius: 6px; }`. This *is* the scale (and its per-cosmetic
+       overrides). Reported every run, for visibility in a diff, but
+       **never fails the build** — minting a token is a deliberate design
+       act, not debt.
+     - **`custom-property-length`** — the identical declaration shape
+       anywhere else: a component overriding geometry with a literal
+       instead of `var(...)`. This is the real target and stays fully
+       ratcheted, exactly as the four properties above.
+
+     **A rise in `design-token` is a new token and is fine. A rise in any
+     other class is new debt and fails the build. Never widen a list to
+     make a check pass.**
    - `js-inline-length` — the same kind of length, but written from
      `.jsx`/`.js` into a custom property: `style={{'--char-size':
      \`${size}px\`}}` (template literal) or `style={{'--front-size':
@@ -91,17 +108,28 @@ taste; they enforce that a decision already made stays made.
      boundary is deliberate, not an oversight; see the header comment in
      `check-design-scale.mjs`.
 
-   **Occurrence counts, not just distinct values.** Each of the six classes
-   above (the original four properties plus these two) is tracked two ways:
-   the allowlist (distinct values) and a **count** of how many times, in
-   total, an off-scale value for that class occurs in the source. The
-   allowlist only shrinks when the *last* use of a value disappears, so a
-   migration that halves a value's occurrences without eliminating it
-   entirely would otherwise look like no progress at all. The occurrence
-   count catches that: it must never rise (a second `border-radius: 5px`
-   added anywhere fails the guard even though `5px` was already
-   allowlisted), and falling needs no allowlist edit at all. `npm run
-   lint:scale` prints both numbers for every class; `--write` re-seeds both.
+   **Occurrence counts, not just distinct values.** Each of the seven
+   classes above (the original four properties, `design-token`,
+   `custom-property-length`, `js-inline-length`) is tracked two ways: the
+   allowlist (distinct values) and a **count** of how many times, in total,
+   an off-scale value for that class occurs in the source. The allowlist
+   only shrinks when the *last* use of a value disappears, so a migration
+   that halves a value's occurrences without eliminating it entirely would
+   otherwise look like no progress at all. The occurrence count catches
+   that: for every class **except `design-token`**, it must never rise (a
+   second `border-radius: 5px` added anywhere fails the guard even though
+   `5px` was already allowlisted), and falling needs no allowlist edit at
+   all. `design-token`'s count is reported the same way but is purely
+   informational — it rises every time a token is minted, and that is
+   expected, not a violation. `npm run lint:scale` prints both numbers for
+   every class; `--write` re-seeds all of them, including `design-token`.
+
+   **The honest harmonisation metric, after plan 050**: 27
+   `custom-property-length` occurrences (component-level lengths that
+   should be tokens), 21 `js-inline-length` occurrences, and 1,966 plain-CSS
+   property occurrences across the four scale-ratcheted properties — all
+   three can genuinely go to zero. `design-token`'s 74 cannot and must not:
+   it's the scale itself.
 
 If a guard fires on a change you believe is correct, change the baseline or
 the allowlist in the same commit and say why in the message. The guards are
