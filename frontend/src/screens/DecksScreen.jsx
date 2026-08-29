@@ -270,10 +270,14 @@ export default function DecksScreen({ session }) {
                 </span>
 
                 <span className="platform-card__body deck-card__body">
-                  <span className="platform-card__title">{deck.name}</span>
-                  <span className="platform-card__desc">
-                    <span className="deck-card__type">{dt.label}</span>
-                    {' · '}{deck.card_count} {t.cards}
+                  <span className="deck-card__text">
+                    <span className="platform-card__title">{deck.name}</span>
+                    {/* The type alone. The count used to be the tail of
+                        this sentence and is now the card's right-hand
+                        column — a figure you see rather than read. */}
+                    <span className="platform-card__desc">
+                      <span className="deck-card__type">{dt.label}</span>
+                    </span>
                   </span>
 
                   {/* The delete question takes over the action row it
@@ -283,44 +287,53 @@ export default function DecksScreen({ session }) {
                   {confirmingId === deck.id ? (
                     <span className="deck-card__actions">
                       <span className="deck-card__confirm-q">{t.deleteDeckConfirm}</span>
-                      <button onClick={() => deleteDeck(deck.id)} className="deck-card__btn deck-card__btn--danger">
+                      <button
+                        onClick={() => deleteDeck(deck.id)}
+                        className="btn-primary deck-card__act deck-card__act--danger">
                         <TrashIcon size={14} /> {t.delete}
                       </button>
                       <button
                         onClick={() => { playUi('click-mode-selection'); setConfirmingId(null) }}
-                        className="deck-card__btn deck-card__btn--muted">
+                        className="btn-secondary deck-card__act">
                         {t.cancel}
                       </button>
                     </span>
                   ) : (
                     <span className="deck-card__actions">
+                      {/* Deletion leads the row as a real bordered
+                          control rather than hiding in the corner. It
+                          is the only icon-only control here, so its
+                          aria-label/title is all a screen reader gets
+                          — it does not survive being unlabelled. */}
+                      <button
+                        onClick={() => { playUi('click-mode-selection'); setConfirmingId(deck.id) }}
+                        className="deck-card__delete"
+                        aria-label={t.delete}
+                        title={t.delete}
+                      >
+                        <TrashIcon size={16} />
+                      </button>
                       <button
                         onClick={() => { playUi('click-mode-selection'); navigate(`/decks/${deck.id}`, { state: { deck } }) }}
-                        className="deck-card__btn">
+                        className="btn-secondary deck-card__act">
                         <PencilIcon size={14} /> {t.edit}
                       </button>
                       <button
                         onClick={() => { playUi('click-screen-selection'); navigate(`/decks/${deck.id}/study`, { state: { deck } }) }}
-                        className="deck-card__btn deck-card__btn--study">
+                        className="btn-primary deck-card__act">
                         <PlayIcon size={14} /> {t.study}
                       </button>
                     </span>
                   )}
                 </span>
 
-                {/* Destructive, so it stays a quiet icon in the corner
-                    rather than a third button competing with Study.
-                    Hidden while its own question is on screen. */}
-                {confirmingId !== deck.id && (
-                  <button
-                    onClick={() => { playUi('click-mode-selection'); setConfirmingId(deck.id) }}
-                    className="deck-card__delete"
-                    aria-label={t.delete}
-                    title={t.delete}
-                  >
-                    <TrashIcon size={16} />
-                  </button>
-                )}
+                {/* The width a card over ~440px has to earn: the count
+                    as a figure with its caption beneath, right-aligned
+                    and centred against the card's full height. */}
+                <span className="deck-card__count">
+                  <span className="deck-card__count-fig">{deck.card_count}</span>
+                  <span className="deck-card__count-cap">{t.cards}</span>
+                </span>
               </div>
               )
             })}
