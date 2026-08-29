@@ -6,6 +6,12 @@ records decisions, `plans/` holds the work — this file says what the app
 
 Read this before writing any CSS or building any screen.
 
+A visual reference exists too — 22 artboards covering the element library and
+all 16 screens, at
+`https://claude.ai/code/artifact/0b6dadc8-6b40-4f83-9238-69dd19b5e30e`. The
+canvas is the **picture**; this file is the **rule**. Where they disagree,
+this file wins — a canvas cannot be grepped and does not travel with a clone.
+
 ## The idea
 
 The app is a Japanese railway station. Learning is a journey: sections are
@@ -39,6 +45,21 @@ transliteration**. `解析` pairs with `ANALYZER`, not with `KAISEKI`.
 
 Where a screen has no real Japanese term, it gets no pair — do not invent one,
 and do not fall back to the unpaired serif heading, which is a retired form.
+
+There is a second top-level rule, below, that outranks this one where they
+collide — see "Say less."
+
+## The second rule above all others
+
+**Say less.** On screens, avoid unnecessary text and titles. Things should
+speak for themselves and the layout should guide the user. Do not caption a
+figure that adjacent content already explains. Do not label a button whose
+action is obvious from where it sits. Do not add a heading where the content
+is self-evident.
+
+**This outranks the pairing rule where the two collide.** The pair names a
+*place* — a station, a section, a line. It does not caption every number on
+the screen.
 
 ## Colour
 
@@ -164,6 +185,14 @@ Two shadows exist, and both mean **this object hangs**: `--elev-hang` for the
 station plate, `--elev-board` for the departure board. Nothing else has a
 shadow. Separation comes from `--surface-line`.
 
+### The console, one everywhere
+
+Decks, Dictionary and Today share **one console pattern**: a single surface
+panel at `--r-panel`, two rows split by a `1px --surface-line` hairline. Row 1
+holds the filter chips, with the single primary action pinned right. Row 2
+holds search, with the result count pinned right. One console everywhere, not
+three — a screen that needs filtering reaches for this, not a bespoke bar.
+
 ## Space
 
 Nine rungs, `--sp-1` … `--sp-9`. The upper rungs carry meaning:
@@ -177,15 +206,19 @@ Nine rungs, `--sp-1` … `--sp-9`. The upper rungs carry meaning:
 
 ### The density contract
 
-*This is the one rule below that is a correction to the current app rather than
-a description of it.* The reference screens are the best thing in the app and
-they share one weakness: cards are taller than their content needs, and wide
-cards leave their right half empty.
+*This is now half correction to the current app, half the maintainer's own
+ruling — the first bullet below was reversed once already, after review on the
+mockups showed the original rule was wrong in practice.* The reference screens
+are the best thing in the app and they share one weakness: cards are taller
+than their content needs, and wide cards leave their right half empty. The
+test throughout is **best use of the space available**.
 
 So:
 
-- A card's height is its content plus `2 × --sp-7`. Do not set a min-height to
-  make a grid look even — let the grid stretch or let the cards differ.
+- Cards in a grid **share a height** — uneven cards break the flow of the page.
+  But the fix for a short card is to give it **content**, never padding. If a
+  card cannot fill the shared height with something real, the whole row is too
+  tall: tighten it. Dead space is the failure, not unevenness.
 - A card wider than ~440px must **earn** its width with a right-hand column
   (meta, a figure, a status). If it has nothing to put there, it should be
   narrower or the grid should have more columns.
@@ -204,6 +237,19 @@ So:
 - Every `:hover` rule needs a matching `:focus-visible`. Keyboard users get the
   same affordance, not just the global ring.
 
+### Controls
+
+- **The rating bar** — the most-used control in the app — is **one continuous
+  instrument**, not a row of buttons. A single pill, its segments divided by
+  hairlines rather than gaps, the Japanese quality term primary with the plain
+  term beneath it. Colour is reduced to a `3px` bottom rule per segment,
+  forming one ramp across the whole bar; only the selected segment fills, at
+  ~14%.
+- **The streak is a スタンプラリー stamp rally**, not a flame — a row of
+  eki-stamp marks, one per day, today's freshly inked. It says what the
+  learner *did* rather than decorating a number, and it is on-metaphor for a
+  station.
+
 ## Structure
 
 - **One `<h1>` per screen**, and it is the object that names the place — the
@@ -214,6 +260,8 @@ So:
   `min(1240px, 100%)` for a plated selection screen, 720px for unplated prose.
 - Japanese text carries `lang="ja"`. Always — it selects the right font
   fallbacks and it is how a screen reader knows.
+- A chevron terminating a card or row is centred against the **full height**
+  of that card, never against its first line of text.
 
 ## What not to do
 
