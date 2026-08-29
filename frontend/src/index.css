@@ -5974,16 +5974,46 @@ textarea:focus-visible {
    entire point of the Today screen) fell through to the bare `button`
    rule above and painted as the browser's own default control.
 
-   The app had already grown four other one-off filled-primary idioms
-   by then (`.btn-deck-primary`, `.decks-console__new`,
-   `.exam-nav-btn--primary`, `.deckdetail-btn--study` /
-   `.deckdetail-form__save`), none of which declares its own font,
-   size, radius, padding or hit target — they all lean on the bare
-   `button` rule's defaults above. This is the one shared family going
-   forward: a screen tints it with its own `--line-color` rather than
-   inventing a fifth private variant. The other four are not repointed
-   at it here — that reaches into Decks, Exam and DeckDetail, out of
-   scope for this plan (052). */
+   The app had already grown five other one-off filled-primary idioms
+   by then. This is the one shared family going forward: a screen tints
+   it with its own `--line-color` rather than inventing a sixth private
+   variant.
+
+   052 re-inked the family to match Controls.dc.html (see the fill's own
+   comment below) and retired two of the five onto it. Where each went,
+   and why — so the next author does not re-derive this:
+
+   RETIRED in 052, both colour-only with a single call site and no
+   row-mates to desynchronise:
+     `.btn-deck-primary`      -> DecksScreen's create-deck submit
+     `.deckdetail-form__save` -> with `.deckdetail-form__cancel` moved
+                                 to `.btn-secondary` in the same commit,
+                                 since they split one flex row
+
+   DEFERRED, each needing its whole family moved at once:
+     `.decks-console__new` — a different idiom, not a lesser one. An
+       11px uppercase tracked pill at `border-radius: 999px`, specified
+       by role in DESIGN.md as the console's pinned action and shared
+       by Decks and Today, with an `--open` state that changes its box.
+       Merging it re-litigates the `.today-picker` overrides 051 landed.
+     `.exam-nav-btn--primary` — never appears without `.exam-nav-btn`;
+       repointing one variant puts three heights in one flex row. It
+       moves with the family in the Exam plan, which must inject
+       `--line-exam` at the shell first: `var(--line-exam)` has
+       **zero** consumers in this file today, while the exam block
+       reaches for `var(--accent)` throughout, so 模試 currently wears
+       仮名's red rather than its own 煤竹.
+     `.deckdetail-btn--study` — one modifier of five (`--muted`,
+       `--study`, `--danger`, `--danger-disabled`) across a ten-button
+       toolbar whose base sets `font-size: 13px` and inherits the
+       platform face. Repointing it alone puts one --fs-body Space
+       Grotesk button at a 44px hit target beside nine that are
+       neither.
+
+   NB: the sentence that stood here until 052 claimed none of the five
+   declares its own font, size, radius, padding or hit target. That was
+   false of `.decks-console__new`, which declares four of the five, and
+   it is the reason that one looked mergeable. */
 .btn-primary,
 .btn-secondary {
   display: inline-flex;
@@ -12435,17 +12465,18 @@ textarea:focus-visible {
   gap: 12px;
   padding: 8px 16px;
 }
-/* The fallback is load-bearing, not defensive habit. Despite the
-   `decks-` prefix this is the SHARED console (DESIGN.md, "the console,
-   one everywhere") and TodayScreen.jsx:505 renders it too -- with no
-   --line-color anywhere above it. A bare var(--line-color) there is
-   invalid at computed-value time, so the focus tint would silently
-   vanish on Today rather than fall back to anything. --line-decks
-   keeps Today exactly as it paints today; the Decks shell now drives
-   it through --line-color instead.
-   (Today's console wearing the decks pigment at all is a real
-   disagreement with Today.dc.html, but it predates this plan and
-   belongs to whichever plan owns that console.) */
+/* The fallback is required, not defensive habit: --line-color is
+   declared in no stylesheet at all (JSX inline styles are its only
+   source), so lint:scale fails a bare var(--line-color) as a reference
+   to a property "declared nowhere".
+
+   --line-decks is the right value for it because, despite the `decks-`
+   prefix, this is the SHARED console (DESIGN.md, "the console, one
+   everywhere") and TodayScreen renders it too, with no --line-color
+   above it. Today does not actually reach this rule -- 051 scoped
+   `.today-picker .decks-index-bar:focus-within` to --accent2 at a
+   higher specificity -- but any third screen adopting the console
+   would, and 蘇芳 is a colour rather than an invalid value. */
 .decks-index-bar:focus-within {
   background: color-mix(in srgb, var(--line-color, var(--line-decks)) 7%, transparent);
 }
