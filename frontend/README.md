@@ -124,12 +124,50 @@ taste; they enforce that a decision already made stays made.
    expected, not a violation. `npm run lint:scale` prints both numbers for
    every class; `--write` re-seeds all of them, including `design-token`.
 
-   **The honest harmonisation metric, after plan 050**: 27
+   **Shorthands are matched per component (plan 053).** `padding`, `gap`
+   and `border-radius` can legitimately hold several scale values at once,
+   but the scan compares a declaration's *whole* value against a set of
+   approved strings, so `padding: var(--sp-4) var(--sp-6)` — both halves
+   real tokens — read as one unrecognised literal and failed the build.
+   For those three properties only (never `font-size`, which is
+   single-valued), a value the whole-value check doesn't recognise is
+   split into top-level components and accepted if **every** component is
+   a token for that property, a top-level `/` (elliptical
+   `border-radius`), or `0`. Three things about that are deliberate:
+   - **`0` is the only non-token component accepted.** Not `0px` (`gap:
+     0px` is off-scale today and stays so), and not the CSS-wide
+     keywords a whole value may be — `padding: var(--sp-4) inherit`
+     doesn't parse, so component-exempt is a strictly narrower set than
+     value-exempt.
+   - **Allowlisted literals are NOT accepted as components.** This is the
+     tempting generalisation and it would erase 221 of 1,951 occurrences
+     — 46.4% of all padding — because `10px` and `14px` are each
+     separately allowlisted, so `padding: 10px 14px` would scan as
+     on-scale. Debt does not stop being debt by being written twice on
+     one line.
+   - **The splitter is paren-aware**, so `clamp(24px, 3vw + 12px, 44px)
+     var(--anl-pad-inline)` is two components, not five. No value in the
+     file distinguishes this from a naive whitespace split today, which
+     is exactly why it is worth stating.
+
+   Escaping the ratchet by writing `padding-top: 13px` still works:
+   `padding-block`, `padding-inline`, the physical padding longhands and
+   `row-gap`/`column-gap` are entirely unscanned. Closing that needs
+   `tokens[]` entries per property first, or it baselines correct
+   declarations as debt — it is its own job, and it will make the metric
+   jump *up* because measurement improved, not because debt grew.
+
+   **The honest harmonisation metric, after plans 050 and 053**: 27
    `custom-property-length` occurrences (component-level lengths that
-   should be tokens), 21 `js-inline-length` occurrences, and 1,966 plain-CSS
-   property occurrences across the four scale-ratcheted properties — all
-   three can genuinely go to zero. `design-token`'s 74 cannot and must not:
-   it's the scale itself.
+   should be tokens), 21 `js-inline-length` occurrences, and 1,951
+   plain-CSS property occurrences across the four scale-ratcheted
+   properties — all three can genuinely go to zero. `design-token`'s 74
+   cannot and must not: it's the scale itself. Three different numbers
+   circulate here and they are not interchangeable: the **allowlist
+   length** (433 distinct literals), the **live occurrence count**
+   (1,951), and the **stored ceiling** in `counts`. Say which one you
+   mean. `--write` only ever unions, so the allowlist can never shrink on
+   its own — any claim that it fell is a deliberate hand edit.
 
 If a guard fires on a change you believe is correct, change the baseline or
 the allowlist in the same commit and say why in the message. The guards are

@@ -90,7 +90,21 @@ const ALL_CLASSES = [...PROPERTIES, DESIGN_TOKEN, CUSTOM_PROPERTY_LENGTH, JS_INL
 // header (plan 050). It is still tracked in ALL_CLASSES so its count is
 // written to design-scale.json and reported every run.
 const RATCHETED_CLASSES = new Set([...PROPERTIES, CUSTOM_PROPERTY_LENGTH, JS_INLINE_LENGTH])
-const LITERAL_EXEMPT = new Set(['inherit', 'initial', 'unset', '0'])
+// What a WHOLE declaration value may be without counting as off-scale.
+const VALUE_EXEMPT = new Set(['inherit', 'initial', 'unset', '0'])
+// What a single COMPONENT of a shorthand may be. Deliberately narrower than
+// VALUE_EXEMPT and not derived from it: `padding: var(--sp-4) inherit` is
+// invalid CSS, so blessing the CSS-wide keywords at component level would
+// wave through declarations that don't parse. `0px`/`0rem` are absent for a
+// different reason -- `gap: 0px` is off-scale today and allowlisted as such
+// (design-scale.json), and it must stay that way.
+const COMPONENT_EXEMPT = new Set(['0'])
+// Properties whose value may legitimately be several scale components in a
+// row (`padding: var(--sp-4) var(--sp-6)`), and so are matched per
+// component when the whole value isn't recognised. `font-size` is
+// single-valued and is deliberately absent -- see per-component matching
+// below (plan 053).
+const SHORTHAND_PROPERTIES = new Set(['padding', 'gap', 'border-radius'])
 // A bare px/rem/em length with no other characters -- not var()/calc()/
 // clamp(), not a colour, not a multi-value shorthand.
 const BARE_LENGTH_RE = /^-?\d*\.?\d+(px|rem|em)$/
@@ -187,6 +201,66 @@ function makeLineFinder(text) {
 
 function normalizeValue(v) {
   return v.replace(/!important\s*$/i, '').trim().replace(/\s+/g, ' ')
+}
+
+// Split a normalised declaration value into its TOP-LEVEL components, so a
+// shorthand made of several scale tokens can be matched one token at a time
+// (plan 053).
+//
+// Paren depth is tracked, and this is not decoration: a `value.split(/\s+/)`
+// passes CI today -- every function-bearing declaration on these properties
+// is off-scale either way, so nothing changes colour -- while quietly
+// shredding `clamp(24px, 3vw + 12px, 44px) var(--anl-pad-inline)` into five
+// pieces and `var(--mcq-radius, 6px)` into two. The first future value that
+// pairs a token with a `calc()`/`max()`/`clamp()` would then be rejected for
+// no reason, reproducing the very defect this function exists to fix, in a
+// shape nobody is watching for. A function is ONE component.
+//
+// A top-level `/` is emitted as its own component: elliptical
+// `border-radius: var(--r-2) / var(--r-3)` is two radii separated by a
+// slash, and the caller accepts the slash the same way it accepts a token.
+// Values here are already whitespace-normalised by normalizeValue(), so a
+// single space is the only separator to look for.
+function splitTopLevelComponents(value) {
+  const out = []
+  let depth = 0
+  let current = ''
+  const flush = () => {
+    if (current) out.push(current)
+    current = ''
+  }
+  for (const ch of value) {
+    if (ch === '(') depth++
+    else if (ch === ')') depth = Math.max(0, depth - 1)
+    if (depth === 0 && ch === ' ') {
+      flush()
+      continue
+    }
+    if (depth === 0 && ch === '/') {
+      flush()
+      out.push('/')
+      continue
+    }
+    current += ch
+  }
+  flush()
+  return out
+}
+
+// True when `value` is a shorthand every one of whose components is already
+// on the scale -- the case the whole-value `tokens.has(value)` check above
+// cannot see, because `tokens.padding` holds single tokens and nothing else.
+//
+// `allow[]` is NEVER consulted here, and that omission is the whole point.
+// Accepting an allowlisted literal as a component looks like the natural
+// generalisation and silently erases 221 of 1952 occurrences -- 46.4% of all
+// padding -- because `10px` and `14px` are each individually allowlisted, so
+// `padding: 10px 14px` would read as perfectly on-scale. Debt does not stop
+// being debt by being written twice on one line.
+function everyComponentOnScale(value, tokens) {
+  const parts = splitTopLevelComponents(value)
+  if (parts.length < 2) return false
+  return parts.every(p => p === '/' || tokens.has(p) || COMPONENT_EXEMPT.has(p))
 }
 
 // Every `property: value` declaration for the four scale-ratcheted
@@ -445,7 +519,13 @@ function main() {
       const allow = new Set(scale.allow[property] ?? [])
       for (const { value, line } of findDeclarations(text, property)) {
         if (tokens.has(value)) continue
-        if (LITERAL_EXEMPT.has(value)) continue
+        if (VALUE_EXEMPT.has(value)) continue
+        // A shorthand of two or more scale tokens is on the scale. Checked
+        // before the occurrence count so an all-token `padding: var(--sp-4)
+        // var(--sp-6)` is not merely tolerated but invisible -- it is not
+        // debt, and counting it would make the harmonisation metric rise
+        // when an author does the right thing.
+        if (SHORTHAND_PROPERTIES.has(property) && everyComponentOnScale(value, tokens)) continue
         occurrences[property]++
         if (allow.has(value)) continue
         if (write) {
