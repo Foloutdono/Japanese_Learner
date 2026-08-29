@@ -5,13 +5,19 @@ import { playCorrect, playWrong } from '../../lib/audio'
 export default function RatingBar({ onRate, active }) {
   const { t } = useLang()
 
+  // Best-first, and it must STAY that way -- the keyboard handler below
+  // indexes this array positionally (QUALITY_BTNS[idx].q), so "1" means
+  // Perfect only as long as index 0 IS Perfect. The bar now renders
+  // worst-first (see the JSX below), but that's a display-only reversal;
+  // reversing this array instead would silently flip every digit
+  // shortcut. See RatingBar.browser.test.jsx, which pins this contract.
   const QUALITY_BTNS = [
-    { q: 5, label: t.perfect      },
-    { q: 4, label: t.correctHesit },
-    { q: 3, label: t.difficult    },
-    { q: 2, label: t.wrongSeen    },
-    { q: 1, label: t.wrongRated   },
-    { q: 0, label: t.blackout     },
+    { q: 5, key: 'perfect',      label: t.perfect      },
+    { q: 4, key: 'correctHesit', label: t.correctHesit },
+    { q: 3, key: 'difficult',    label: t.difficult    },
+    { q: 2, key: 'wrongSeen',    label: t.wrongSeen    },
+    { q: 1, key: 'wrongRated',   label: t.wrongRated   },
+    { q: 0, key: 'blackout',     label: t.blackout     },
   ]
 
   // Keys 1-6 map to the 6 quality buttons. On an AZERTY keyboard the
@@ -43,14 +49,19 @@ export default function RatingBar({ onRate, active }) {
 
   return (
     <div className="rating-bar">
+      {/* One continuous instrument, worst to best -- see index.css for
+          why. Rendered from a reversed COPY of QUALITY_BTNS, never the
+          array itself, so DOM order (and therefore tab order and screen
+          reader order) matches what's on screen while the keyboard
+          handler above keeps indexing the untouched original. */}
       <div className="rating-bar__buttons">
-        {QUALITY_BTNS.map(({ q, label }, i) => (
+        {[...QUALITY_BTNS].reverse().map(({ q, key, label }) => (
           <button
             key={q}
             onClick={() => handleRate(q)}
             className={`rating-bar__btn rating-bar__btn--q${q}`}
           >
-            <span className="rating-bar__btn-index">{String(i + 1).padStart(2, '0')}</span>
+            <span className="rating-bar__btn-jp" lang="ja">{t.ratingJp[key]}</span>
             <span className="rating-bar__btn-label">{label}</span>
           </button>
         ))}
