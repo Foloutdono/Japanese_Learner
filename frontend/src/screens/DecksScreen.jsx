@@ -222,7 +222,7 @@ export default function DecksScreen({ session }) {
                 </button>
               ))}
             </div>
-            <button onClick={createDeck} className="btn-deck-primary decks-create-submit">
+            <button onClick={createDeck} className="btn-primary decks-create-submit">
               {t.createDeck}
             </button>
           </div>

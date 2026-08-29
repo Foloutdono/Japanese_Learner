@@ -5984,7 +5984,8 @@ textarea:focus-visible {
    inventing a fifth private variant. The other four are not repointed
    at it here — that reaches into Decks, Exam and DeckDetail, out of
    scope for this plan (052). */
-.btn-primary {
+.btn-primary,
+.btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5998,32 +5999,35 @@ textarea:focus-visible {
   padding-block: var(--sp-4);
   padding-inline: var(--sp-6);
   border-radius: var(--r-card);
-  /* The fill and the ink, both per Controls.dc.html's PRIMARY specimen:
-     a section-pigment fill inked --text-on-panel, going *lighter* on
-     hover. 051 used --text-on-fill (#1c1811) here, which is documented
-     two thousand lines up for *light* fills -- on the vermillion that
-     measured 3.48:1 dark / 3.18:1 light, under the 4.5:1 floor this
-     15.2px/600 text needs.
-
-     The 88% deepens the pigment 12% toward the panel ink, which lifts
-     朱色 from the mockup's own 4.33:1 to 5.14:1 and 蘇芳 to 5.90:1
-     while shifting the hue too little for a reader to call it a
-     different colour. --bg-panel is an existing token, so no new
-     colour literal enters the file.
-
-     The ink is NOT a constant: it is chosen by the fill's lightness.
-     A fill lighter than roughly 40% luminance takes --text-on-fill
-     instead -- 山吹色 gold is 2.19:1 against this ink and deepening
-     does not save it (a deepened yellow turns olive before it carries
-     a light ink), which is why the gold pill at the console keeps the
-     dark ink. Assuming one ink for all twelve pigments is precisely
-     what produced this rule. Check the ratio before filling a button
-     in a new section. */
-  background: color-mix(in srgb, var(--line-color, var(--accent)) 88%, var(--bg-panel));
-  color: var(--text-on-panel);
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: 600;
+}
+
+/* The fill and the ink, both per Controls.dc.html's PRIMARY specimen:
+   a section-pigment fill inked --text-on-panel, going *lighter* on
+   hover. 051 used --text-on-fill (#1c1811) here, which is documented
+   two thousand lines up for *light* fills -- on the vermillion that
+   measured 3.48:1 dark / 3.18:1 light, under the 4.5:1 floor this
+   15.2px/600 text needs.
+
+   The 88% deepens the pigment 12% toward the panel ink, which lifts
+   朱色 from the mockup's own 4.33:1 to 5.14:1 and 蘇芳 to 5.90:1
+   while shifting the hue too little for a reader to call it a
+   different colour. --bg-panel is an existing token, so no new
+   colour literal enters the file.
+
+   The ink is NOT a constant: it is chosen by the fill's lightness.
+   A fill lighter than roughly 40% luminance takes --text-on-fill
+   instead -- 山吹色 gold is 2.19:1 against this ink and deepening
+   does not save it (a deepened yellow turns olive before it carries
+   a light ink), which is why the gold pill at the console keeps the
+   dark ink. Assuming one ink for all twelve pigments is precisely
+   what produced this rule. Check the ratio before filling a button
+   in a new section. */
+.btn-primary {
+  background: color-mix(in srgb, var(--line-color, var(--accent)) 88%, var(--bg-panel));
+  color: var(--text-on-panel);
 }
 /* The mockup's hover is a lighter *fill*, not the bare `button` rule's
    blanket brightness filter -- so that filter is turned off here rather
@@ -6041,7 +6045,47 @@ textarea:focus-visible {
   outline: 2px solid var(--accent2);
   outline-offset: 2px;
 }
-.btn-primary:disabled {
+
+/* The other half of the pair, from the same specimen board: "GHOST · a
+   secondary beside a primary" (Controls.dc.html:62-65) -- transparent,
+   a --surface-line hairline, --text-primary, and on hover the board's
+   own rgba(255,255,255,0.035), which is exactly --overlay-hover's dark
+   value and comes with a light-theme counterpart the mockup's literal
+   does not have. It shares the box above -- geometry, face and the one
+   disabled treatment -- and declares only what differs, because the
+   whole reason this family exists is that five screens each invented
+   their own.
+
+   It is NOT .btn-ghost, which is already taken and is a different
+   swatch: .btn-ghost is the board's PANEL button, for sumi surfaces,
+   at 12px on --text-on-panel-soft. Naming them apart is deliberate --
+   they sit on different grounds and are not interchangeable.
+
+   Introduced here because a ghost cannot be deferred: a primary that
+   grows to 44px beside a bare-`button` sibling in the same flex row
+   produces a visibly mismatched pair, which is worse than the
+   inconsistency being fixed. */
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  color: var(--text-primary);
+}
+.btn-secondary:hover {
+  filter: none;
+  background: var(--overlay-hover);
+  border-color: var(--text-secondary);
+}
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
+/* One disabled treatment for the family, not the eight now in use --
+   Controls.dc.html's note under the specimen board. It sits last so it
+   wins over both variants' own states, and so stylelint's
+   no-descending-specificity sees each base selector before its
+   pseudo-class. */
+.btn-primary:disabled,
+.btn-secondary:disabled {
   opacity: 0.45;
   cursor: not-allowed;
   filter: none;
@@ -12223,12 +12267,12 @@ textarea:focus-visible {
   letter-spacing: 0.08em;
 }
 
-/* ── The deck subsystem's primary action button ───────────── */
-.btn-deck-primary {
-  background: var(--deck-action);
-  color: var(--text-on-panel);
-}
-.btn-deck-primary:disabled { opacity: 0.6; }
+/* `.btn-deck-primary` was retired here in 052 onto the shared
+   `.btn-primary` family. Its one call site (the create-deck submit)
+   now reads `btn-primary decks-create-submit`, and the shell injects
+   蘇芳 as --line-color, so it paints the same pigment it always did --
+   with the family's geometry, hit target and 0.45 disabled opacity
+   instead of its own 0.6. */
 
 /* ── Shared loading block ─────────────────────────────────── */
 .loading-block {
@@ -12657,8 +12701,13 @@ textarea:focus-visible {
 .deckdetail-form__fields { display: flex; flex-direction: column; gap: 10px; }
 .deckdetail-form__input { padding: 10px 14px; font-size: 15px; }
 .deckdetail-form__actions { display: flex; gap: 8px; margin-top: 16px; }
-.deckdetail-form__save { background: var(--deck-action); color: var(--text-on-panel); flex: 1; }
-.deckdetail-form__cancel { background: var(--bg-panel); color: var(--text-on-panel-soft); flex: 1; }
+/* Both retired onto the shared family in 052 (`btn-primary` /
+   `btn-secondary` in the JSX). All that is left here is the one thing
+   the family cannot know: that these two split a row. The save button
+   keeps the same pigment it had -- --deck-action is a :root alias for
+   --line-decks, which is what the shell now injects as --line-color. */
+.deckdetail-form__save { flex: 1; }
+.deckdetail-form__cancel { flex: 1; }
 
 .deckdetail-list { display: flex; flex-direction: column; gap: 8px; }
 
