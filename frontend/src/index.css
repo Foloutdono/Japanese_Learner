@@ -6055,8 +6055,9 @@ textarea:focus-visible {
    variant.
 
    052 re-inked the family to match Controls.dc.html (see the fill's own
-   comment below) and retired two of the five onto it. Where each went,
-   and why — so the next author does not re-derive this:
+   comment below) and began retiring the five onto it; 057 took a third.
+   Where each went, and why — so the next author does not re-derive
+   this:
 
    RETIRED in 052, both colour-only with a single call site and no
    row-mates to desynchronise:
@@ -6065,7 +6066,18 @@ textarea:focus-visible {
                                  to `.btn-secondary` in the same commit,
                                  since they split one flex row
 
-   DEFERRED, each needing its whole family moved at once:
+   RETIRED in 057, the whole family at once — which is exactly what the
+   deferral it was listed under asked for:
+     `.deckdetail-btn` + `--muted` / `--study` / `--danger` /
+       `--danger-disabled` -> the deck-detail toolbar, all ten buttons
+       in one move. Repointing `--study` alone would have put one 44px
+       Space Grotesk button beside nine 37px platform-face ones, which
+       is why 052 left it; moving the whole toolbar does not have that
+       problem. The destructive one is this family's own primary with
+       `--line-color: var(--danger)` substituted, per 055, rather than
+       a second filled idiom.
+
+   STILL DEFERRED, each needing its whole family moved at once:
      `.decks-console__new` — a different idiom, not a lesser one. An
        11px uppercase tracked pill at `border-radius: 999px`, specified
        by role in DESIGN.md as the console's pinned action and shared
@@ -6078,12 +6090,6 @@ textarea:focus-visible {
        **zero** consumers in this file today, while the exam block
        reaches for `var(--accent)` throughout, so 模試 currently wears
        仮名's red rather than its own 煤竹.
-     `.deckdetail-btn--study` — one modifier of five (`--muted`,
-       `--study`, `--danger`, `--danger-disabled`) across a ten-button
-       toolbar whose base sets `font-size: 13px` and inherits the
-       platform face. Repointing it alone puts one --fs-body Space
-       Grotesk button at a 44px hit target beside nine that are
-       neither.
 
    NB: the sentence that stood here until 052 claimed none of the five
    declares its own font, size, radius, padding or hit target. That was
@@ -7772,13 +7778,34 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+/* `--line-color`, not `--line`. Nothing in the app has ever set
+   `--line` — grep it — so `var(--line, var(--accent))` has always
+   resolved to the fallback, which is 仮名's red. That put a kana
+   pigment on a 教材 form, against "one line, one colour", and measured
+   4.47:1 in light, under the floor. `--line-color` is what the screen
+   shell actually injects, so this now reads 蘇芳 like everything else
+   on the page. Six other rules in this file share the same dead
+   fallback; the three that belong to this screen are fixed here and
+   the rest are reported, since they paint the kanji quiz.
+
+   Carried half-way to --text-primary, though, not used raw. A line
+   pigment is "an edge, a ring, or a numeral" -- as 13px ink on the
+   surface 蘇芳 measures 2.82:1 in dark, and 仮名's red was 4.47:1 in
+   light; the mix lands at 6.58 dark / 9.40 light while still reading as
+   the section's colour. Same 50% figure and the same reason as 055's
+   `.decks-type-btn--active`.
+
+   min-height because it is a button: it was a 21px tap target. */
 .deckdetail-form__addline {
+  display: inline-flex;
   align-self: flex-start;
+  align-items: center;
+  min-height: 44px;
   background: none;
   border: none;
   padding: 2px 0;
   font-size: 13px;
-  color: var(--line, var(--accent));
+  color: color-mix(in srgb, var(--line-color, var(--accent)) 50%, var(--text-primary));
   cursor: pointer;
 }
 .deckdetail-form__radical-btn { text-align: left; cursor: pointer; }
@@ -7801,12 +7828,14 @@ textarea:focus-visible {
   color: var(--text-secondary);
   margin-bottom: 6px;
 }
+/* Same treatment as `.deckdetail-form__addline` above, and for the same
+   measured reason: the raw pigment is 2.82:1 on this surface in dark. */
 .readings-field__label [lang="ja"] {
   font-family: var(--font-jp);
   font-size: 13px;
   letter-spacing: 0.02em;
   text-transform: none;
-  color: var(--line, var(--accent));
+  color: color-mix(in srgb, var(--line-color, var(--accent)) 50%, var(--text-primary));
 }
 .readings-field__row {
   display: flex;
@@ -7815,20 +7844,32 @@ textarea:focus-visible {
   margin-bottom: 6px;
 }
 .readings-field__row .deckdetail-form__input { flex: 1; margin: 0; }
+/* 44px, not 30px -- it is a destructive button in a form, and it was
+   the smallest tap target on the screen. */
 .readings-field__remove {
   flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-card);
   background: none;
   border: 1px solid var(--border);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   cursor: pointer;
 }
-.readings-field__remove:hover { color: var(--danger); border-color: var(--danger); }
+/* Same 50% mix toward --text-primary as `.deckdetail-edit-btn--danger`
+   and 055's `.deck-card__delete`: raw --danger is 2.11:1 on the surface
+   in dark, so the old hover made this glyph harder to see than its rest
+   state. filter: none cancels the bare `button:hover` brightness, and
+   the :focus-visible half is not optional. */
+.readings-field__remove:hover,
+.readings-field__remove:focus-visible {
+  filter: none;
+  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
+  border-color: currentcolor;
+}
 .readings-field__cap { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
 
 .radical-picker {
@@ -7861,9 +7902,14 @@ textarea:focus-visible {
   cursor: pointer;
 }
 .radical-picker__cell:hover { border-color: var(--border); }
+/* The border keeps the raw pigment -- DESIGN.md's "colour is an edge, a
+   ring, or a numeral" -- but the glyph does not: at 18px the raw
+   pigment is 2.82:1 on this surface in dark. Same 50% mix toward
+   --text-primary as the two rules above, landing at 6.58 dark / 9.40
+   light. `--line-color` rather than `--line`, which nothing sets. */
 .radical-picker__cell--on {
-  border-color: var(--line, var(--accent));
-  color: var(--line, var(--accent));
+  border-color: var(--line-color, var(--accent));
+  color: color-mix(in srgb, var(--line-color, var(--accent)) 50%, var(--text-primary));
 }
 
 /* ── Radical answer (kanji.radical) ───────────────────────── */
@@ -13007,11 +13053,26 @@ textarea:focus-visible {
 .deckdetail-actions--select { align-items: center; }
 .deckdetail-select-count { font-size: 13px; color: var(--text-secondary); }
 
-.deckdetail-btn { font-size: 13px; background: var(--bg-panel); color: var(--text-on-panel); }
-.deckdetail-btn--muted { color: var(--text-secondary); }
-.deckdetail-btn--study { background: var(--deck-action); color: var(--text-on-panel); }
-.deckdetail-btn--danger { background: var(--danger); color: var(--text-on-panel); }
-.deckdetail-btn--danger-disabled { background: var(--bg-panel); color: var(--text-on-panel-soft); opacity: 0.5; }
+/* The toolbar is the shared family now (`.btn-primary` / `.btn-secondary`
+   in the JSX), the same move 055 made on the deck shelf. What stood here
+   was `.deckdetail-btn` and four modifiers across a ten-button toolbar:
+   a 13px platform-face button with no hit target, which wrapped at its
+   intrinsic 37-38px beside the 44px form buttons 052 had already
+   migrated ON THIS SAME SCREEN. `--study` filled with the raw pigment
+   rather than the family's deepened fill, and `--danger-disabled` was a
+   fifth private disabled treatment for a button that already carried the
+   `disabled` attribute.
+
+   Per DeckDetail.dc.html: Study is the one fill, everything else is a
+   ghost. The drawing additionally tints Select / Import / Export with
+   --text-secondary; they are left at --text-primary here, because that
+   token measures 4.29:1 on --surface in light theme app-wide and is
+   being changed elsewhere — a button label is not the place to lean on
+   ink that is under the floor.
+
+   Nothing is left to say about the row's members except which one is
+   destructive, so only that survives as a class. */
+.deckdetail-act--danger { --line-color: var(--danger); }
 
 .deckdetail-import-banner {
   background: var(--bg-card);
@@ -13024,21 +13085,57 @@ textarea:focus-visible {
   align-items: center;
 }
 .deckdetail-import-banner__text { color: var(--success); font-size: 14px; }
-.deckdetail-import-banner__close { background: transparent; color: var(--text-secondary); font-size: 11px; padding: 0; }
+/* Icon-only, so it needs a box of its own: it was `padding: 0` around a
+   14px glyph — a 14px tap target, and the only way out of this banner. */
+.deckdetail-import-banner__close {
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  color: var(--text-primary);
+}
 
 .deckdetail-form { margin-bottom: 24px; }
-.deckdetail-form__title { font-size: 14px; font-weight: bold; margin-bottom: 16px; }
+.deckdetail-form__title { font-size: var(--fs-body); font-weight: 700; margin-bottom: var(--sp-5); }
 .deckdetail-form__fields { display: flex; flex-direction: column; gap: 10px; }
-.deckdetail-form__input { padding: 10px 14px; font-size: 15px; }
-.deckdetail-form__actions { display: flex; gap: 8px; margin-top: 16px; }
-/* Both retired onto the shared family in 052 (`btn-primary` /
-   `btn-secondary` in the JSX). All that is left here is the one thing
-   the family cannot know: that these two split a row. The save button
-   keeps the same pigment it had -- --deck-action is a :root alias for
-   --line-decks, which is what the shell now injects as --line-color. */
-.deckdetail-form__save { flex: 1; }
-.deckdetail-form__cancel { flex: 1; }
+/* DeckDetail.dc.html's `.field`: 12/16 and a 44px floor. It was
+   `10px 14px` with no floor, which put the inputs at ~40px — two rungs
+   off the scale and under the minimum on the one screen where a learner
+   types. */
+.deckdetail-form__input {
+  padding: var(--sp-4) var(--sp-5);
+  font-size: var(--fs-body);
+  min-height: 44px;
+}
+/* The drawing (DeckDetail.dc.html:144-147) puts this row right-aligned
+   at natural width, not as two `flex: 1` halves, and 052 left the
+   disagreement for this plan. Taking the drawing's alignment: the pair
+   used to stretch to half the column each, which on the 1040px desktop
+   column is two ~500px buttons — the dead space DESIGN.md's density
+   contract is written against — and right-alignment now matches the
+   toolbar above it, so the screen has one action edge instead of two.
 
+   NOT taking the drawing's Cancel, which it draws borderless in
+   --text-secondary. That is a fourth button idiom the app does not
+   have, against DESIGN.md's "everything beside it is a ghost:
+   transparent, a --surface-line border, --text-primary" — and it would
+   put the control's ONLY affordance in a token measuring 4.29:1 in
+   light. Where the canvas and this file disagree, DESIGN.md says this
+   file wins. Cancel stays `.btn-secondary`.
+
+   flex-wrap for the same reason `.deckdetail-actions` above carries it:
+   if the two ever exceed the card, they wrap rather than overflow. */
+.deckdetail-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--sp-3);
+  margin-top: var(--sp-5);
+}
 .deckdetail-list { display: flex; flex-direction: column; gap: 8px; }
 
 .deckdetail-card-row {
@@ -13135,12 +13232,48 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
+/* DeckDetail.dc.html's `.iconbtn`, and the same control 055 built as
+   `.deck-card__delete` on the shelf: a real 44px bordered box on the
+   surface, not a 13px panel chip. It was `6px 12px` around a 15px glyph
+   — a ~29px target for the only way to edit or remove a card, sitting
+   in a row the finger is already aiming at.
+
+   It is icon-only, so the aria-label/title in the JSX is all a screen
+   reader gets; the box is what a thumb gets. */
 .deckdetail-edit-btn {
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  font-size: 13px;
-  padding: 6px 12px;
-  flex-shrink: 0;
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+/* The ghost hover from the shared family, so this control and the
+   `.btn-secondary`s above it answer a pointer the same way.
+   `filter: none` cancels the bare `button:hover` brightness, which
+   DESIGN.md says is not a hover; the :focus-visible half is not
+   optional ("every :hover rule needs a matching :focus-visible"). */
+.deckdetail-edit-btn:hover,
+.deckdetail-edit-btn:focus-visible {
+  filter: none;
+  background: var(--overlay-hover);
+  border-color: var(--text-secondary);
+}
+/* Only the destructive one goes red, and it goes to --danger carried
+   half-way to --text-primary rather than the raw token — 055 measured
+   raw --danger at 2.11:1 on --surface in dark, where hovering made the
+   glyph HARDER to see than its rest state, the backwards hover
+   DESIGN.md rules out. Same 50% mix, same reason. */
+.deckdetail-edit-btn--danger:hover,
+.deckdetail-edit-btn--danger:focus-visible {
+  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
+  border-color: currentcolor;
 }
 
 /* ── Grammar screen ───────────────────────────────────────── */
