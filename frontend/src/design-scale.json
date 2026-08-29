@@ -547,8 +547,10 @@
       "5px",
       "6.5rem",
       "62px",
+      "640px",
       "64px",
       "6px",
+      "700px",
       "8px",
       "90px",
       "92px",
@@ -590,10 +592,10 @@
   ],
   "counts": {
     "font-size": 778,
-    "border-radius": 303,
+    "border-radius": 302,
     "gap": 479,
     "padding": 407,
-    "custom-property-length": 99,
+    "custom-property-length": 101,
     "js-inline-length": 21
   }
 }
