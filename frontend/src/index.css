@@ -3151,6 +3151,16 @@
   --teal:            #4f7a72;
   /* Sabi-iro (錆色) — rust, the colour of oxidised iron */
   --rust:            #a8622f;
+  /* Enji-iro (臙脂色) — deep carmine, dedicated to the rating bar's q1
+     ("wrong") ink. Plan 045's mockup asks for exactly #b7402a here,
+     which is also --state-learning's value and, in light theme,
+     --line-kana's -- but DESIGN.md forbids both a state colour used
+     decoratively and a line pigment off its own section, so this is
+     its own named token rather than a reach for either of those. That
+     it lands on the same hex is the traditional palette being small,
+     not a hidden alias: --accent and --line-kana already coincide the
+     same way in dark theme, as two independently-named tokens. */
+  --rating-wrong:    #b7402a;
 
   /* Kinari (生成り) — raw silk, warm off-white */
   --text-primary:   #ece5d8;
@@ -3260,6 +3270,14 @@
   --indigo:         #33495d;
   --teal:           #43645f;
   --rust:           #8d5027;
+  /* Kept identical to its dark-theme value rather than deepened --
+     the same choice this file already makes for every --state-* token
+     (--state-learning, --state-mastered, --state-due all repeat their
+     dark value here unchanged). This one reads as a semantic "this
+     was wrong" signal, not a decorative accent, so it follows that
+     precedent instead of the paper-deepening one --teal/--rust just
+     above use. */
+  --rating-wrong:    #b7402a;
 
   --daruma-aka:      #b23425;
   --daruma-kin:      #a97a25;
@@ -8908,7 +8926,10 @@ textarea:focus-visible {
 .rating-bar__btn--q4 { --rating-color: var(--teal); }
 .rating-bar__btn--q3 { --rating-color: var(--warning); }
 .rating-bar__btn--q2 { --rating-color: var(--rust); }
-.rating-bar__btn--q1 { --rating-color: var(--accent); }
+/* q1's own dedicated ink -- not --accent, which is exactly --line-kana
+   in dark theme and exactly --line-kana/--state-learning in light
+   theme. See :root, above, for why this gets its own named colour. */
+.rating-bar__btn--q1 { --rating-color: var(--rating-wrong); }
 
 /* ── Shared nav control button (mute / lang switcher) ─────── */
 /* Consolidated — this used to be defined twice (here and further
