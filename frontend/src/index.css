@@ -5956,6 +5956,52 @@ textarea:focus-visible {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
+/* ── The primary button ───────────────────────────────────
+   `.btn-primary` was referenced by TodayScreen for months with no rule
+   anywhere in this file to answer it: the app's filled-action class
+   used to be `.btn-primary-purple`, renamed to `.btn-deck-primary` in
+   e9690b7, and TodayScreen was built afterwards reaching for a name
+   that had already gone. Nothing caught it, because nothing checks
+   that a referenced class exists — so the "Start N cards" button (the
+   entire point of the Today screen) fell through to the bare `button`
+   rule above and painted as the browser's own default control.
+
+   The app had already grown four other one-off filled-primary idioms
+   by then (`.btn-deck-primary`, `.decks-console__new`,
+   `.exam-nav-btn--primary`, `.deckdetail-btn--study` /
+   `.deckdetail-form__save`), none of which declares its own font,
+   size, radius, padding or hit target — they all lean on the bare
+   `button` rule's defaults above. This is the one shared family going
+   forward: a screen tints it with its own `--line-color` rather than
+   inventing a fifth private variant. The other four are not repointed
+   at it here — that reaches into Decks, Exam and DeckDetail, out of
+   scope for this plan (052). */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  box-sizing: border-box;
+  min-height: 44px; /* a hit target, not a spacing rung */
+  padding: var(--sp-4) var(--sp-6);
+  border-radius: var(--r-card);
+  background: var(--line-color, var(--accent));
+  color: var(--text-on-fill);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+.btn-primary:hover { filter: brightness(1.15); }
+.btn-primary:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+}
+
 /* ── Ghost / panel button utilities ──────────────────────── */
 .btn-ghost {
   background: rgba(255, 255, 255, 0.08);
