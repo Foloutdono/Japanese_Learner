@@ -212,14 +212,26 @@ const quiz = {
   quizComplete:      'All cards are up to date!',
   backToMenu:        'Back to menu',
 
-  // Rating bar
+  // Rating bar. The plain-language captions; the Japanese quality terms
+  // that pair with them (plan 045's rebuilt bar) are `ratingJp` below —
+  // same object shape as `cosmeticSlotJp`/`cosmeticSlot`. Plan 045's
+  // mockup restates wrongSeen as ALMOST (clearer against 惜しい than the
+  // original "Wrong (seen)"); wrongRated's WRONG already matched "Wrong".
   to:                'to',
   perfect:           'Perfect',
   correctHesit:      'Correct',
   difficult:         'Difficult',
-  wrongSeen:         'Wrong (seen)',
+  wrongSeen:         'Almost',
   wrongRated:        'Wrong',
   blackout:          'Blackout',
+  ratingJp: {
+    perfect:         '完璧',
+    correctHesit:    '正解',
+    difficult:       '難しい',
+    wrongSeen:       '惜しい',
+    wrongRated:      '不正解',
+    blackout:        '白紙',
+  },
 
   // Mode labels
   modeQCM:           'MCQ',

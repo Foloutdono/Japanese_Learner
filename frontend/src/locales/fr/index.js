@@ -197,14 +197,24 @@ const quiz = {
   quizComplete:      'Toutes les cartes sont à jour !',
   backToMenu:        'Retour au menu',
 
-  // Rating bar
+  // Rating bar. The Japanese quality terms that pair with these captions
+  // (plan 045's rebuilt bar) are `ratingJp` below -- the term itself,
+  // identical in every language, same convention as `cosmeticSlotJp`.
   to:                'à',
   perfect:           'Parfait',
   correctHesit:      'Correct',
   difficult:         'Difficile',
-  wrongSeen:         'Raté (vu)',
+  wrongSeen:         'Presque',
   wrongRated:        'Raté',
   blackout:          'Blackout',
+  ratingJp: {
+    perfect:         '完璧',
+    correctHesit:    '正解',
+    difficult:       '難しい',
+    wrongSeen:       '惜しい',
+    wrongRated:      '不正解',
+    blackout:        '白紙',
+  },
 
   // Mode labels
   modeQCM:           'QCM',
