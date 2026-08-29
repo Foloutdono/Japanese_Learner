@@ -7833,8 +7833,22 @@ textarea:focus-visible {
    widths: a 480px bar, a ~1052px card, a 640px MCQ list/rating bar --
    now the bar and the card share one number by construction, so a
    future change to --card-w can't quietly leave this the odd one out
-   again. */
-.deck-progress { max-width: var(--card-w); margin: 0 auto; }
+   again.
+
+   width: 100% is load-bearing, not decorative. .deck-progress is a
+   DIRECT child of .quiz-area (display: flex; flex-direction: column),
+   so it's a flex item on the CROSS axis -- and per the flexbox spec,
+   an auto cross-axis margin (this rule's own `margin: 0 auto`)
+   suppresses stretch outright, sizing the item to its CONTENT instead
+   (the legend text, ~328px) regardless of max-width. .prompt-card
+   never hits this: it's three plain block DIVs deep inside the flex
+   container (.quiz-card-stage > .card-transition >
+   .card-transition-live), where ordinary block width:auto already
+   fills the available space before max-width clamps it. Giving this a
+   definite width (100%) up front sidesteps the stretch-suppression
+   question entirely, so it clamps to --card-w and centers exactly
+   like the card does. */
+.deck-progress { width: 100%; max-width: var(--card-w); margin: 0 auto; }
 
 .deck-progress__bar {
   display: flex;
@@ -13712,7 +13726,20 @@ textarea:focus-visible {
      its own comment there for why) sets it, and an exception
      overrides --card-w rather than re-fighting max-width at a
      matching or higher specificity -- see
-     .prompt-card.drawing-quiz__card and .exam-card.prompt-card. */
+     .prompt-card.drawing-quiz__card and .exam-card.prompt-card.
+
+     width: 100% is load-bearing (see the identical note on
+     .deck-progress, index.css:7830). Most modes reach this element
+     through CardTransition's block DIVs, where width:auto already
+     fills the available space before max-width clamps it -- but
+     ReadingsInput renders `.prompt-card.readings-input` as a DIRECT
+     child of .quiz-area (display: flex; flex-direction: column), and
+     a flex item's auto cross-axis margin (margin-inline: auto, right
+     below) suppresses stretch per spec, sizing it to its own content
+     (a ~307px shrink-wrap around the narrower reading rows) instead
+     of --card-w. A definite width up front sidesteps that question
+     for every mode uniformly, whichever wrapper it lands in. */
+  width: 100%;
   max-width: var(--card-w);
   margin-inline: auto;
 }
