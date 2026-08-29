@@ -12636,7 +12636,13 @@ textarea:focus-visible {
   font-size: 1.02rem;
 }
 .decks-index-bar__input:focus { border: none; outline: none; }
-.decks-index-bar__input::placeholder { color: color-mix(in srgb, var(--text-secondary) 80%, transparent); }
+/* Opaque, not 80% toward transparent. A mix toward `transparent`
+   composites toward the GROUND, so it costs contrast in both themes at
+   once -- this read 3.31:1 on paper and still only 4.12:1 on sumi. The
+   dim register survives without it: the field itself is --text-primary
+   at 12.51:1, so --text-secondary at 4.91:1 is plainly the quieter of
+   the two. */
+.decks-index-bar__input::placeholder { color: var(--text-secondary); }
 .decks-index-bar__clear {
   display: inline-flex;
   align-items: center;
@@ -17908,7 +17914,7 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
   background: color-mix(in srgb, var(--line-jisho) 7%, transparent);
 }
 .dict-index-bar__input { font-size: 1.05rem; }
-.dict-index-bar__input::placeholder { color: color-mix(in srgb, var(--text-secondary) 80%, transparent); }
+.dict-index-bar__input::placeholder { color: var(--text-secondary); }
 
 /* The key that focuses the field, printed on the field. */
 .dict-index-bar__key {

@@ -1,11 +1,6 @@
 {
   "_": "Guard 4's baseline; see contrast.browser.test.jsx. `allow` lists ink/ground pairs known to sit below `floor`, each with the ratio measured when it was recorded. A listed pair may never get worse, and must be REMOVED once it clears the floor -- the guard fails either way. Nothing may be ADDED without a note here saying why the pair cannot be fixed. Keys are `theme|ink|ground` for the contract matrix and `theme|@selector` for a real call site.",
   "floor": 4.5,
-  "_allow": "The four survivors are one defect, deliberately left: the two search placeholders mix their ink toward `transparent`, and a mix toward transparent composites toward the GROUND, so it costs contrast in both themes at once -- which is why these fail in dark too, where nothing else does. No value of --text-secondary rescues them (at the deepest nezumi still recognisable as nezumi they reach 3.72:1), so the fix is to stop being translucent, and how dim a placeholder should read is a design decision, not a contrast one. Left recorded rather than silently omitted: a guard that skips a known failure is a guard that lies.",
-  "allow": {
-    "light|@.decks-index-bar__input::placeholder": 3.31,
-    "light|@.dict-index-bar__input::placeholder": 3.5,
-    "dark|@.decks-index-bar__input::placeholder": 4.12,
-    "dark|@.dict-index-bar__input::placeholder": 4.41
-  }
+  "_allow": "Empty, and that is the point: every pair the guard measures now clears the floor. An entry here is a known failure with a note saying why it cannot be fixed; a stale one fails the guard, so this shrinking is the only direction it can move on its own.",
+  "allow": {}
 }

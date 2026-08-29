@@ -181,9 +181,15 @@ const Fixture = () => (
       <span className="record__unit">days</span>
     </div>
 
-    {/* DictionaryScreen -- the same index bar on its own ground */}
-    <div className="dict-index-bar">
-      <input className="dict-index-bar__input" placeholder="search" />
+    {/* DictionaryScreen.jsx:313 -- the bar MUST stay wrapped in the console.
+        `.dict-console .dict-index-bar` sets `background: none`, so inside the
+        console the ground is the console's --surface, not the --bg-card the
+        bar paints when it stands alone. Rendered bare, this measured a ground
+        that appears nowhere in the app. */}
+    <div className="dict-console">
+      <div className="dict-index-bar">
+        <input className="dict-index-bar__input" placeholder="search" />
+      </div>
     </div>
 
     {/* PhraseScreen -- a sumi chip */}
