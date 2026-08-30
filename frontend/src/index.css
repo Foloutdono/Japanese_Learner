@@ -7593,12 +7593,34 @@ textarea:focus-visible {
   color: var(--text-secondary);
   margin-bottom: 8px;
 }
+/* `--line-color`, not `--line`. Plan 057 established this for the
+   DeckDetail form and reported the three that paint the kanji QUIZ;
+   plan 059 is those three (here, .readings-input__add below, and
+   .radical-answer__label further down). Nothing in the app has ever
+   set `--line`, so `var(--line, var(--accent))` always resolved to
+   the fallback -- 仮名's vermillion, on a card about 漢字, which is a
+   plain "one line, one colour" breach on the section that owns 藤色.
+
+   The fallback here is `--line-kanji` rather than `--accent` because
+   no screen that renders this component injects `--line-color` at all
+   (checked: Kanji, Study and Today all mount it inside a bare
+   `.container.quiz-area`; the eight injectors are the selection/
+   station components and the two Decks screens). Reading
+   `--line-color` first keeps DESIGN.md's "the pigment is injected
+   once" contract for the day a shell does inject one -- a personal
+   deck's kanji card would then correctly wear 蘇芳 -- while the
+   fallback names a real pigment instead of the wrong section's.
+
+   Mixed half-way to --text-primary, not used raw: 057 measured 藤色
+   as small text at 2.9-3.4:1 and DESIGN.md is explicit that a line
+   pigment is "an edge, a ring, or a numeral -- never a fill". Same
+   50% figure and the same reason as .deckdetail-form__addline. */
 .readings-input__label [lang="ja"] {
   font-family: var(--font-jp);
   font-size: 14px;
   letter-spacing: 0.04em;
   text-transform: none;
-  color: var(--line, var(--accent));
+  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
 }
 
 .readings-input__row {
@@ -7612,12 +7634,15 @@ textarea:focus-visible {
 .readings-input__field--ok   { border-color: var(--success); }
 .readings-input__field--miss { border-color: var(--border); }
 
+/* Plan 059 -- second of the three dead `--line` reads; see the note on
+   .readings-input__label [lang="ja"] above for why this is
+   `--line-color` with a 藤色 fallback, mixed toward the ink. */
 .readings-input__add {
   background: none;
   border: none;
   padding: 2px 0 0;
   font-size: 13px;
-  color: var(--line, var(--accent));
+  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
   cursor: pointer;
 }
 .readings-input__add:hover { text-decoration: underline; }
@@ -7784,9 +7809,13 @@ textarea:focus-visible {
    pigment on a 教材 form, against "one line, one colour", and measured
    4.47:1 in light, under the floor. `--line-color` is what the screen
    shell actually injects, so this now reads 蘇芳 like everything else
-   on the page. Six other rules in this file share the same dead
-   fallback; the three that belong to this screen are fixed here and
-   the rest are reported, since they paint the kanji quiz.
+   on the page. Three other rules shared the same dead fallback --
+   .readings-input__label [lang="ja"], .readings-input__add and
+   .radical-answer__label [lang="ja"], all on the kanji quiz -- which
+   057 reported rather than fixed and plan 059 has now closed. (057's
+   note here said "six"; it was counting the sites it had just fixed
+   twice. Grepping the file at its merge commit finds three.) No live
+   `var(--line,` is left in this stylesheet.
 
    Carried half-way to --text-primary, though, not used raw. A line
    pigment is "an edge, a ring, or a numeral" -- as 13px ink on the
@@ -7931,12 +7960,14 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+/* Plan 059 -- last of the three dead `--line` reads; see the note on
+   .readings-input__label [lang="ja"] for the reasoning. */
 .radical-answer__label [lang="ja"] {
   font-family: var(--font-jp);
   font-size: 13px;
   letter-spacing: 0.04em;
   text-transform: none;
-  color: var(--line, var(--accent));
+  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
 }
 .radical-answer__char {
   font-family: var(--font-jp);
@@ -8726,9 +8757,51 @@ textarea:focus-visible {
    the viewport. `.card-stamp-overlay` sits *outside* PromptCard's own
    `overflow: auto` (see .prompt-card), bled out a few px past its
    edges via inset, so the stamp is never clipped by the card's own
-   scroll box the way something rendered inside it would be. */
+   scroll box the way something rendered inside it would be.
+
+   Plan 059 -- "anchor to the card" was the intent above, but this box
+   was only `position: relative`, so it stretched to the FULL container
+   (measured 1052px at a 1280px viewport) while .prompt-card sat at
+   --card-w (640px). Everything anchored here was therefore anchored to
+   the wrong rectangle:
+
+     .stage-badge     `right: 8px` -> the seal's left edge landed
+                      164.7px past the card's right edge, floating in
+                      empty space beside it.
+     .card-stamp      `right: 6%` of the overlay -> the ROUTINE
+                      promotion stamp (the common one) overhung the
+                      card by 151.7px, i.e. the whole 108px seal was
+                      struck onto the page, not onto the card. Only
+                      the 'mastered' variant survived, because it is
+                      dead-centre and the card is centred in the
+                      container -- its centre X is 635 either way.
+     .card-stamp-wash `inset: 0` with its hot spot at 82%/12% -> the
+                      wash that is meant to read as the card's own
+                      surface reacting flooded a 1072px box and put
+                      its brightest point past the card's edge.
+
+   All three now measure inside the card. Same width/max-width/margin-inline trio
+   .prompt-card itself uses -- including `width: 100%`, load-bearing
+   for the same reason documented there: an auto inline margin on a
+   flex item suppresses stretch, so without it this shrink-wraps.
+
+   The two exclusions are named rather than pattern-matched because
+   CardTransition appends a caller's className to this one, and two
+   callers pass a stage that is deliberately NOT the study-card
+   column: .exam-card-stage (its card sets its own --card-w and is
+   already centred by .container) and .rdg-breakdown-card-stage (a
+   380px flex item inside a 480px row -- an auto inline margin there
+   would push the sentence breakdown's prev/next arrows back out to
+   the row's edges, the exact regression the comment on
+   .rdg-breakdown-card-row records fixing). Those two keep the bare
+   `position: relative` they already had. */
 .quiz-card-stage {
   position: relative;
+}
+.quiz-card-stage:not(.exam-card-stage, .rdg-breakdown-card-stage) {
+  width: 100%;
+  max-width: var(--card-w);
+  margin-inline: auto;
 }
 
 /* ── Permanent stage seal ──────────────────────────────────
@@ -16413,10 +16486,25 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
    construction, and no cosmetic can ever make the app unusable. */
 
 /* ── 紙 — the card surface ─────────────────────────────────── */
+/* Plan 059 -- the border's two `transparent`s used to be literal, so
+   an unequipped card resolved to `1px solid rgba(0,0,0,0)`: the app's
+   most-used surface had NO edge at all unless the learner had
+   unlocked and equipped a paper. The default was never considered.
+   Both slots now read --border, so:
+
+     no paper   color-mix(--border 45%, --border)  ==  var(--border)
+     a paper    the paper's edge, 45% of the way from --border
+
+   which is byte-for-byte the formula .cos-swatch--paper (below, in
+   the storehouse half of this block) has always used. That is the
+   point of the pairing this block's own header comment claims -- "one
+   definition, so a preview can never drift from what equipping it
+   actually does" -- and the two HAD drifted: the swatch drew an edge,
+   the real card it previews did not. */
 .prompt-card {
   background-color: color-mix(in srgb, var(--paper-tint, transparent) var(--paper-amt, 0%), var(--bg-card));
   background-image: var(--paper-img, none);
-  border: 1px solid color-mix(in srgb, var(--paper-edge, transparent) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--paper-edge, var(--border)) 45%, var(--border));
 }
 
 /* Plain handmade paper — the default, and deliberately an empty
