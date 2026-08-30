@@ -7507,6 +7507,34 @@ textarea:focus-visible {
   margin-bottom: 12px;
 }
 
+/* The study screens' submit — the sixth one-off filled-primary idiom
+   listed at .btn-primary, and STILL NOT RETIRED onto it.
+
+   Plan 060 tried, and stopped on a measurement. Retiring it means the
+   fill becomes the section's own pigment deepened 12% toward the
+   panel ink, and the shells above now inject a --line-color for it to
+   read. Four sections improve on what is written below: 仮名 4.33 ->
+   5.14, 藤色 -> 4.84, 藍色 -> 5.54, 蘇芳 -> 5.90 (dark, against
+   --text-on-panel at this 15.2px/600).
+
+   松葉色 does not. Grammar's button measures 4.05:1 deepened — BELOW
+   the 4.5:1 floor, and below the 4.33:1 this rule already ships. The
+   family's other ink does not rescue it either: --text-on-fill on the
+   same deepened green is 3.71:1. There is no ink at 88% that clears
+   the floor for 松葉色, so the fix is a design decision about the
+   deepening constant (81% clears it at 4.56:1) or about the pigment,
+   and DESIGN.md's own note says that constant was calibrated on 朱色
+   and 蘇芳. 黄丹 (理解) sits in the same place at 3.87:1, and will
+   matter the moment that screen grows a filled action.
+
+   So this keeps `var(--accent)` for now. Note what that is: --accent
+   and --line-kana are the same hex, so this button paints 仮名's
+   vermillion on kanji, grammar, vocab and personal decks alike, and
+   at 4.33:1 it is under the floor on all of them. Both halves of that
+   are pre-existing and unchanged by 060 — the shells inject the
+   pigment, but this rule does not read it. It is the one thing left
+   between the study screens and DESIGN.md's "the pigment is injected
+   once". */
 .quiz-submit {
   background: var(--accent);
   color: var(--text-on-panel);

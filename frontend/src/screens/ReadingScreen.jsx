@@ -483,7 +483,14 @@ function SessionView({
         title={`${t.readingTitle} — ${titleSuffix}`}
         autoHide
       />
-      <main id="main-content" className="container quiz-area rdg-area">
+      {/* 緑青, per DESIGN.md's "the pigment is injected once" — see
+          DecksScreen's comment for why it sits on <main> and not on
+          .screen. Nothing under this shell reads var(--line-color)
+          today (the rdg-* controls are all private classes), so this
+          changes no pixel yet; it is here so the next component put on
+          this screen inherits its section rather than 仮名's red. */}
+      <main id="main-content" className="container quiz-area rdg-area"
+        style={{ '--line-color': 'var(--line-reading)' }}>
 
         <div className="rdg-score-row">
           <div className="rdg-score">

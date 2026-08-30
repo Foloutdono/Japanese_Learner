@@ -5,6 +5,11 @@ import { BoltIcon } from '../ui/Icons'
 import { modeLabel } from '../../domain/studyModes'
 import { kanaSetLabel } from '../../domain/kanaSets'
 import { sectionFor } from '../../config/stations'
+// The line colour each section already owns everywhere else it appears
+// — so a lane chip is recognisably "the kanji one" at a glance rather
+// than a generic tag. Shared with TodayScreen, which paints the same
+// five lanes; it was a second identical copy here until plan 060.
+import { LINE_COLOR } from '../../config/navLinks'
 import { beginDeparture } from '../../stores/departure'
 import { playAnnouncement } from '../../lib/audio'
 
@@ -37,17 +42,6 @@ function untilNext(iso, lang) {
   const hours = Math.round(mins / 60)
   if (hours < 24) return rtf.format(hours, 'hour')
   return rtf.format(Math.round(hours / 24), 'day')
-}
-
-// The line colour each section already owns everywhere else it appears
-// (see config/navLinks.js) — so a lane chip is recognisably "the kanji
-// one" at a glance rather than a generic tag.
-const LINE_COLOR = {
-  kana:    'var(--line-kana)',
-  vocab:   'var(--line-vocab)',
-  kanji:   'var(--line-kanji)',
-  grammar: 'var(--line-grammar)',
-  personal: 'var(--line-decks)',
 }
 
 export default function NextService({ session }) {

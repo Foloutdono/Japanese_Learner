@@ -493,7 +493,11 @@ export default function VocabScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setReviewing(false)} title={`${t.vocabulary} ${level} — ${t.modeReview}`} autoHide />
-        <main id="main-content" className="container quiz-area">
+        {/* 藍色, per DESIGN.md's "the pigment is injected once" — see
+            DecksScreen's comment for why it sits on <main> and not on
+            .screen. Both study shells carry it, review and quiz alike. */}
+        <main id="main-content" className="container quiz-area"
+          style={{ '--line-color': 'var(--line-vocab)' }}>
           <ReviewDeck
             cards={reviewCards}
             loading={reviewLoading}
@@ -550,7 +554,8 @@ export default function VocabScreen({ session }) {
         pendingGatesRef.current.delete('toast')
         checkAdvance()
       }} />
-      <main id="main-content" className="container quiz-area">
+      <main id="main-content" className="container quiz-area"
+        style={{ '--line-color': 'var(--line-vocab)' }}>
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}

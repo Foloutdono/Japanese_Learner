@@ -372,7 +372,12 @@ function SessionView({
         title={`${t.translationTitle ?? 'Translation'} — ${titleSuffix}`}
         autoHide
       />
-      <main id="main-content" className="container quiz-area trn-area">
+      {/* 瑠璃色, per DESIGN.md's "the pigment is injected once" — see
+          DecksScreen's comment for why it sits on <main> and not on
+          .screen. As on ReadingScreen, nothing under here reads
+          var(--line-color) yet; the shell states the section anyway. */}
+      <main id="main-content" className="container quiz-area trn-area"
+        style={{ '--line-color': 'var(--line-honyaku)' }}>
 
         <div className="trn-score-row">
           <div className="trn-score">

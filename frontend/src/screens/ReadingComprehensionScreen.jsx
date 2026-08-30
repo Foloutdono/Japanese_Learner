@@ -241,7 +241,19 @@ export default function ReadingComprehensionScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} autoHide />
-        <main id="main-content" className="container quiz-area">
+        {/* 黄丹, per DESIGN.md's "the pigment is injected once" — see
+            DecksScreen's comment for why it sits on <main> and not on
+            .screen.
+
+            --line-rikai, NOT --line-reading: 理解 is its own board row
+            with its own pigment in config/navLinks.js, and "one line,
+            one colour" means it cannot borrow 読書's 緑青. Note for
+            whoever adds a filled action here — 黄丹 is one of the two
+            pigments DESIGN.md flags as too light for --text-on-panel,
+            so a .btn-primary under this shell needs its ratio measured
+            before it ships. Nothing here fills today. */}
+        <main id="main-content" className="container quiz-area"
+          style={{ '--line-color': 'var(--line-rikai)' }}>
 
           {stage === 'submitting' ? (
             <Loading />

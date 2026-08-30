@@ -309,7 +309,12 @@ export default function KanaScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setReviewing(false)} title={`${selectedSet.label} — ${modeLabel(t, FAST_REVIEW)}`} autoHide />
-        <main id="main-content" className="container quiz-area">
+        {/* 朱色, per DESIGN.md's "the pigment is injected once" — see
+            DecksScreen's comment for why it sits on <main> and not on
+            .screen. Both of this screen's study shells carry it, review
+            and quiz alike, or the pigment would flicker between them. */}
+        <main id="main-content" className="container quiz-area"
+          style={{ '--line-color': 'var(--line-kana)' }}>
           <ReviewDeck
             cards={reviewCards}
             loading={reviewLoading}
@@ -378,7 +383,8 @@ export default function KanaScreen({ session }) {
         pendingGatesRef.current.delete('toast')
         checkAdvance()
       }} />
-      <main id="main-content" className="container quiz-area">
+      <main id="main-content" className="container quiz-area"
+        style={{ '--line-color': 'var(--line-kana)' }}>
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}

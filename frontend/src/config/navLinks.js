@@ -108,3 +108,28 @@ export function getShowcase(t) {
 export function getAllSections(t) {
   return sections(t)
 }
+
+/**
+ * A lane's line colour, keyed by what the lane IS rather than by a
+ * route — 'kana'/'vocab'/'kanji'/'grammar' for a section lane,
+ * 'personal' for anyone's own deck.
+ *
+ * The daily queue does not navigate to a section, so it cannot reach
+ * these through sectionFor(); it needs the pigment for a lane row, a
+ * filter chip and (since plan 060) the card being answered. It lives
+ * HERE, beside the table it has to agree with, because it existed as
+ * two identical copies — TodayScreen.jsx and station/NextService.jsx
+ * — and a five-entry colour map duplicated across two files is a
+ * disagreement waiting to happen the next time a section is added.
+ *
+ * Values are `var(--line-*)` strings, not hex: they are written into
+ * a CSS custom property, so they must stay late-bound and follow the
+ * theme.
+ */
+export const LINE_COLOR = {
+  kana:     'var(--line-kana)',
+  vocab:    'var(--line-vocab)',
+  kanji:    'var(--line-kanji)',
+  grammar:  'var(--line-grammar)',
+  personal: 'var(--line-decks)',
+}
