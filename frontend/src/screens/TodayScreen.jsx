@@ -21,6 +21,7 @@ import { ChevronIcon, CrossIcon, CheckIcon, SearchIcon } from '../components/ui/
 import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { kanaSetLabel } from '../domain/kanaSets'
+import { LINE_COLOR } from '../config/navLinks'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 import { board } from '../stores/boarding'
 import { applyXpGain } from '../stores/profileSummary'
@@ -52,16 +53,11 @@ function laneWhere(lane, t) {
   return lane.source === 'kana' ? kanaSetLabel(t, lane.deck) : lane.deck
 }
 
-// The line colour each section already owns everywhere else it appears
-// (see config/navLinks.js), so a lane is recognisably "the kanji one"
-// at a glance. Same table as the concourse strip's.
-const LINE_COLOR = {
-  kana:     'var(--line-kana)',
-  vocab:    'var(--line-vocab)',
-  kanji:    'var(--line-kanji)',
-  grammar:  'var(--line-grammar)',
-  personal: 'var(--line-decks)',
-}
+// LINE_COLOR — the line colour each section already owns everywhere
+// else it appears — now comes from config/navLinks.js. It used to be
+// declared here AND, identically, in station/NextService.jsx; plan 060
+// lifted the one table into the file that already holds every other
+// section→pigment mapping.
 
 /** What a lane IS, for grouping and filtering: 'kana'/'vocab'/'kanji'/
  *  'grammar' for a section lane, 'personal' for anyone's own deck. */
@@ -635,7 +631,29 @@ export default function TodayScreen({ session }) {
         checkAdvance()
       }} />
 
-      <main id="main-content" className="container quiz-area">
+      {/* The pigment, per CARD — not per screen. Every other study
+          screen names one section, so its shell can state a colour
+          once; this queue draws a kanji card, then grammar, then a
+          personal deck, and a single shell pigment would be wrong for
+          two cards in three. It is the same statement the lane label
+          below makes in words.
+
+          Keyed off the card rather than wrapped around it: .quiz-area
+          is `display: flex; flex-direction: column; gap: 25px`, so a
+          <div> inserted here would collapse the whole stack —
+          progress, hint bar, card, rating bar — into ONE flex item and
+          take the rhythm between them with it. The shell is the only
+          element in this subtree that can carry the property without
+          being a layout participant, and reading it off `card` keeps
+          it per-card all the same.
+
+          No pigment while `card` is null: the loading spinner belongs
+          to no section, and 仮名's fallback red would be a claim. The
+          `card.lane &&` is not belt-and-braces — laneTitle() below
+          guards the same way, because a lane can be absent, and
+          laneTypeOf() reads .kind straight off it. */}
+      <main id="main-content" className="container quiz-area"
+        style={card?.lane ? { '--line-color': LINE_COLOR[laneTypeOf(card.lane)] } : undefined}>
         {loading && !card && <Loading />}
 
         {card && (

@@ -455,7 +455,14 @@ export default function KanjiScreen({ session }) {
     return (
       <div className="screen">
         <TopBar onBack={() => setReviewing(false)} title={`${t.kanjiTitle} ${level} — ${t.modeReview}`} autoHide />
-        <main id="main-content" className="container quiz-area">
+        {/* 藤色, per DESIGN.md's "the pigment is injected once" — see
+            DecksScreen's comment for why it sits on <main> and not on
+            .screen. This is the screen whose components were reaching
+            for var(--line-kanji) by name as a fallback (plan 059);
+            with the shell injecting, that fallback is now dead weight
+            rather than the thing doing the work. */}
+        <main id="main-content" className="container quiz-area"
+          style={{ '--line-color': 'var(--line-kanji)' }}>
           <ReviewDeck
             cards={reviewCards}
             loading={reviewLoading}
@@ -510,7 +517,8 @@ export default function KanjiScreen({ session }) {
         pendingGatesRef.current.delete('toast')
         checkAdvance()
       }} />
-      <main id="main-content" className="container quiz-area">
+      <main id="main-content" className="container quiz-area"
+        style={{ '--line-color': 'var(--line-kanji)' }}>
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}

@@ -454,7 +454,12 @@ export default function StudyScreen({ session }) {
         pendingGatesRef.current.delete('toast')
         checkAdvance()
       }} />
-      <main id="main-content" className="container quiz-area">
+      {/* 蘇芳 — a personal deck is 教材, so this screen wears the same
+          pigment as Decks and DeckDetail. Per DESIGN.md's "the pigment
+          is injected once"; see DecksScreen's comment for why it sits
+          on <main> and not on .screen. */}
+      <main id="main-content" className="container quiz-area"
+        style={{ '--line-color': 'var(--line-decks)' }}>
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
