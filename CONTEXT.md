@@ -109,3 +109,31 @@ source-agnostic; nothing downstream knows which it was. See `docs/adr/0003`.
 
 **Window** — the bounded time range of a video a learner asks to analyze.
 Bounded on purpose: analysis cost scales with it.
+
+---
+
+## Station and signage
+
+**発車標 (hassha-hyō)** — the departure board on the home screen. Lists every
+section as a service leaving from its own platform. `components/station/DepartureBoard.jsx`.
+
+**駅名標 (ekimei-hyō)** — the station plate that heads a screen: the hanging
+sign giving the screen's name in Japanese and Latin. `components/station/StationSign.jsx`.
+
+**のりば (noriba)** — the platform-count register on a plate, naming how many
+choices (platforms) a screen offers. `components/selection/SelectionScreen.jsx`.
+
+**番線 (bansen)** — a platform number on a choice card: the numeral identifying
+one option within a selection screen. `components/selection/ModeSelector.jsx`.
+
+**種別 (shubetsu)** — the service type a screen or mode belongs to (各駅停車 /
+快速 / 急行 / 特急). `config/stations.js:173-184`.
+
+**定期券 (teiki-ken)** — the commuter pass: the user's profile screen, styled as
+an IC/commuter card. `components/profile/CommuterPass.jsx`.
+
+**路線色 (rosen-shoku)** — the line pigments, one per section, that colour that
+section's stripes, rails, rings and numerals. `index.css:3189-3213`.
+
+**段位 (dan-i)** — the mastery rank ladder shown on the commuter pass.
+`components/profile/ProfileBlocks.jsx`.

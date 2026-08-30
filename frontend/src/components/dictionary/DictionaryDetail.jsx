@@ -194,23 +194,10 @@ export function CloseIcon() {
   )
 }
 
-export function SearchIcon() {
-  return (
-    <svg
-      className="dict-index-bar__icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="M21 21l-4.35-4.35" />
-    </svg>
-  )
-}
+// SearchIcon moved to components/ui/Icons.jsx in plan 052 — it was
+// used by three screens outside the dictionary, two of which were
+// getting their glyph's size and colour from a `dict-` class purely by
+// accident.
 
 // One number, named underneath it. The panel's unit of measurement —
 // used for both the form block's stroke count/radical (which sit

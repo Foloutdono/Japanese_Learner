@@ -48,11 +48,14 @@ export default function CardPrompt({
   // options grid instead.
   const showChoices = choicesOn
 
-  /** The vocab word, with furigana when the hint is on and the card has it. */
+  /** The vocab word, with furigana when the hint is on and the card has it.
+   *  `size` is FuriganaWord's own (unrelated to the specimen scale, see
+   *  Readings.jsx); the plain CharDisplay fallback is always the word
+   *  rung -- this is only ever called at the specimen's word size. */
   function wordDisplay(size) {
     const parts = furiganaOn ? cardHints[HINTS.FURIGANA] : null
     if (parts?.length) return <FuriganaWord parts={parts} size={size} />
-    return <CharDisplay char={wordForm(c)} size={size} />
+    return <CharDisplay char={wordForm(c)} variant="word" />
   }
 
   // ── kana ────────────────────────────────────────────────────
@@ -67,7 +70,7 @@ export default function CardPrompt({
       // write_romaji — the kana is shown, type its reading.
       return (
         <PromptCard>
-          <CharDisplay char={c.kana} />
+          <CharDisplay char={c.kana} variant="glyph" />
           <RevealActions
             t={t} revealed={answered} resetKey={resetKey}
             dictTerm={c.kana} dictCategory={dictCategory} session={session}
@@ -93,14 +96,14 @@ export default function CardPrompt({
         {!showChoices ? (
           <Flashcard
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
-            front={isB2F ? romajiPrompt(prompt) : <CharDisplay char={prompt} />}
-            back={isB2F ? <CharDisplay char={answer} /> : romajiPrompt(answer)}
+            front={isB2F ? romajiPrompt(prompt) : <CharDisplay char={prompt} variant="glyph" />}
+            back={isB2F ? <CharDisplay char={answer} variant="glyph" /> : romajiPrompt(answer)}
             dictTerm={c.kana} dictCategory={dictCategory} session={session}
             onReplaySound={() => playKana(c.romaji)}
           />
         ) : (
           <>
-            {isB2F ? romajiPrompt(prompt) : <CharDisplay char={prompt} />}
+            {isB2F ? romajiPrompt(prompt) : <CharDisplay char={prompt} variant="glyph" />}
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}
               dictTerm={c.kana} dictCategory={dictCategory} session={session}
@@ -120,7 +123,7 @@ export default function CardPrompt({
       // uncover but a set the learner produces.
       return (
         <PromptCard>
-          <CharDisplay char={c.kanji} size={100} />
+          <CharDisplay char={c.kanji} variant="glyph" />
           <RevealActions
             t={t} revealed={answered} resetKey={resetKey}
             dictTerm={c.kanji} dictCategory="kanji" session={session}
@@ -137,7 +140,7 @@ export default function CardPrompt({
           {!showChoices && (
             <Flashcard
               t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
-              front={<CharDisplay char={c.kanji} size={100} />}
+              front={<CharDisplay char={c.kanji} variant="glyph" />}
               back={
                 /* The kanji stays on the back, dimmed — the answer needs
                    something to be an answer ABOUT, and on the cards
@@ -154,7 +157,7 @@ export default function CardPrompt({
           )}
           {showChoices && (
             <>
-              <CharDisplay char={c.kanji} size={100} />
+              <CharDisplay char={c.kanji} variant="glyph" />
               {answered && <RadicalAnswer radical={c.radical} t={t} />}
               <RevealActions
                 t={t} revealed={answered} resetKey={resetKey}
@@ -184,11 +187,11 @@ export default function CardPrompt({
         {!showChoices && (
           <Flashcard
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
-            front={isF2B ? <CharDisplay char={c.kanji} size={100} /> : <MeaningDisplay meaning={c.meaning} size={44} />}
+            front={isF2B ? <CharDisplay char={c.kanji} variant="glyph" /> : <MeaningDisplay meaning={c.meaning} size={44} />}
             back={
               <InlineReveal
                 t={t} kana={c.kana} isLarge={isF2B}
-                main={isF2B ? <MeaningDisplay meaning={c.meaning} size={28} /> : <CharDisplay char={c.kanji} size={72} />}
+                main={isF2B ? <MeaningDisplay meaning={c.meaning} size={28} /> : <CharDisplay char={c.kanji} variant="word" />}
               />
             }
             dictTerm={c.kanji} dictCategory="kanji" session={session}
@@ -199,7 +202,7 @@ export default function CardPrompt({
           <>
             <InlineReveal
               t={t} kana={c.kana} revealed={answered}
-              main={isF2B ? <CharDisplay char={c.kanji} size={100} /> : <MeaningDisplay meaning={c.meaning} size={44} />}
+              main={isF2B ? <CharDisplay char={c.kanji} variant="glyph" /> : <MeaningDisplay meaning={c.meaning} size={44} />}
             />
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}
@@ -222,7 +225,7 @@ export default function CardPrompt({
              about reading, not knowing. */
           <Flashcard
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
-            front={<CharDisplay char={c.kanji} size={72} />}
+            front={<CharDisplay char={c.kanji} variant="word" />}
             back={
               /* Both halves of the answer, and both are needed. The
                  furigana says WHICH kanji takes which part of the
@@ -231,7 +234,10 @@ export default function CardPrompt({
               <div>
                 {c.furigana?.length
                   ? <FuriganaWord parts={c.furigana} size={64} answer />
-                  : <CharDisplay char={c.kanji} size={56} />}
+                  // 56 was the nearest the old numeric scale had; the
+                  // word rung (72px) is the closer of the two per plan
+                  // 048 (56 sits 16px from word, 48px from glyph).
+                  : <CharDisplay char={c.kanji} variant="word" />}
                 <div className="flashcard-reading" lang="ja">{c.kana}</div>
               </div>
             }
@@ -243,13 +249,13 @@ export default function CardPrompt({
         {!isWordReading && !showChoices && (
           <Flashcard
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
-            front={isF2B ? wordDisplay(72) : <CharDisplay char={formatGlossLine(c.meaning)} size={72} />}
+            front={isF2B ? wordDisplay(72) : <CharDisplay char={formatGlossLine(c.meaning)} variant="word" />}
             back={
               <InlineReveal
                 t={t} kana={c.kanji ? c.kana : null} isLarge={isF2B} stacked={isF2B}
                 main={isF2B
                   ? <MeaningDisplay meaning={c.meaning} size={28} color="var(--accent2)" />
-                  : <CharDisplay char={wordForm(c)} size={72} />}
+                  : <CharDisplay char={wordForm(c)} variant="word" />}
               />
             }
             dictTerm={wordForm(c)} dictCategory="vocab" session={session}
@@ -261,7 +267,7 @@ export default function CardPrompt({
           <>
             <InlineReveal
               t={t} kana={c.kanji ? c.kana : null} revealed={answered}
-              main={isF2B ? <CharDisplay char={wordForm(c)} size={72} /> : <CharDisplay char={formatGlossLine(c.meaning)} size={72} />}
+              main={isF2B ? <CharDisplay char={wordForm(c)} variant="word" /> : <CharDisplay char={formatGlossLine(c.meaning)} variant="word" />}
             />
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}

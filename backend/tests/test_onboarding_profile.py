@@ -1,5 +1,5 @@
 # ── Onboarding's profile fields and endpoints ─────────────────────
-# Route tests via the `client` fixture (DEV_USER_ID = "test-user").
+# Route tests via the `client` fixture, acting as DEV_USER_ID.
 # Every test that stamps onboarding state on the shared test user MUST
 # clear it again — resolve_level() reads user_profiles.jlpt_level, so a
 # leaked N2 here would silently change what reading-comprehension tests
@@ -8,6 +8,7 @@ import contextlib
 
 import core.user_level as user_level
 import routes.profile as profile_module
+from core.auth import DEV_USER_ID
 from core.db import db_conn
 
 
@@ -42,7 +43,7 @@ def test_init_db_is_idempotent():
 
 
 def test_profile_surfaces_onboarding_fields_null_before_set_after(client):
-    with _clean_onboarding_state("test-user"):
+    with _clean_onboarding_state(DEV_USER_ID):
         before = client.get("/api/profile").json()
         assert before["jlptLevel"] is None
         assert before["dailyNewTarget"] is None
@@ -69,12 +70,12 @@ def test_complete_creates_the_row_when_none_exists(client):
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("DELETE FROM user_profiles WHERE user_id = %s", ("test-user",))
+            cur.execute("DELETE FROM user_profiles WHERE user_id = %s", (DEV_USER_ID,))
         conn.commit()
     finally:
         conn.close()
 
-    with _clean_onboarding_state("test-user"):
+    with _clean_onboarding_state(DEV_USER_ID):
         done = client.post("/api/onboarding/complete",
                            json={"jlptLevel": "N5", "dailyNewTarget": 5})
         assert done.status_code == 200
@@ -83,7 +84,7 @@ def test_complete_creates_the_row_when_none_exists(client):
 
 
 def test_completing_twice_keeps_the_first_timestamp(client):
-    with _clean_onboarding_state("test-user"):
+    with _clean_onboarding_state(DEV_USER_ID):
         first = client.post("/api/onboarding/complete",
                             json={"jlptLevel": "N4", "dailyNewTarget": 10}).json()
         second = client.post("/api/onboarding/complete",
@@ -103,7 +104,7 @@ def test_complete_rejects_invalid_values(client):
 
 
 def test_patch_learning_updates_only_what_was_sent(client):
-    with _clean_onboarding_state("test-user"):
+    with _clean_onboarding_state(DEV_USER_ID):
         client.post("/api/onboarding/complete",
                     json={"jlptLevel": "N4", "dailyNewTarget": 10})
 

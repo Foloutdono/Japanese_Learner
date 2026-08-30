@@ -391,7 +391,10 @@ export default function DeckDetailScreen({ session }) {
     <div className="screen">
       <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? t.deckFallbackTitle} autoHide />
 
-      <main id="main-content" className="container page-pad">
+      {/* 蘇芳, injected once for the whole screen — see DecksScreen's
+          own comment on why it sits on <main> and not on .screen. */}
+      <main id="main-content" className="container page-pad"
+        style={{ '--line-color': 'var(--line-decks)' }}>
         {/* Same plate every other screen in the app opens with — this
             was one of the last two 教材 screens still starting on a bare
             container, which is exactly what made them read as a
@@ -549,12 +552,26 @@ export default function DeckDetailScreen({ session }) {
                 className="deckdetail-form__input" />
             </div>
             <div className="deckdetail-form__actions">
+              {/* Both keep their own class for `flex: 1` only; every
+                  other property now comes from the shared family, so
+                  the two sit at one height instead of drifting apart
+                  the moment one of them grows a 44px hit target.
+                  The treatments are Controls.dc.html's PRIMARY and
+                  GHOST swatches (:54, :62).
+
+                  Not fully the mockup yet, and deliberately so:
+                  DeckDetail.dc.html:144-147 draws THIS form's actions
+                  right-aligned at natural width, with a borderless
+                  Cancel in --text-secondary -- not two flex:1 halves.
+                  That is a layout change to a screen plan 052 only
+                  passes through, so the row is left as it is and the
+                  disagreement is left for the DeckDetail plan. */}
               <button onClick={saveCard} disabled={!formComplete()}
-                className="deckdetail-form__save">
+                className="btn-primary deckdetail-form__save">
                 {editing ? t.save : t.addCard}
               </button>
               <button onClick={() => { setAdding(false); setEditing(null); resetForm() }}
-                className="deckdetail-form__cancel">
+                className="btn-secondary deckdetail-form__cancel">
                 {t.cancel}
               </button>
             </div>

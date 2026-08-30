@@ -22,14 +22,14 @@ describe('TrainArrival', () => {
     await render(<TrainArrival jp="案内" title="Tour" onDone={onDone} />)
     await settle(50)
     expect(onDone).toHaveBeenCalledTimes(1)
-    expect(document.querySelector('.arrival')).toBeNull()
+    expect(document.querySelector('.onb-arrival')).toBeNull()
   })
 
   it('any input skips: the timeline clears and onDone fires exactly once', async () => {
     const onDone = vi.fn()
     await render(<TrainArrival jp="案内" title="Tour" onDone={onDone} />)
     await settle(50)
-    expect(document.querySelector('.arrival')).not.toBeNull()
+    expect(document.querySelector('.onb-arrival')).not.toBeNull()
     expect(onDone).not.toHaveBeenCalled()
 
     window.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))

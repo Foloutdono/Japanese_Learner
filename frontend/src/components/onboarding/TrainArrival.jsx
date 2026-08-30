@@ -73,12 +73,12 @@ export function TrainArrival({ jp, title, onDone }) {
   if (prefersReducedMotion()) return null
 
   return createPortal(
-    <div className={`arrival arrival--${phase}`} style={{ '--arrival-x': SPEED }} aria-hidden="true">
-      <div className="arrival__scrim" />
-      <div className="arrival__board">
-        <span className="arrival__eyebrow" lang="ja">ただいま到着</span>
-        <span className="arrival__dest" lang="ja">{jp}</span>
-        <span className="arrival__latin">{title}</span>
+    <div className={`onb-arrival onb-arrival--${phase}`} style={{ '--onb-arrival-x': SPEED }} aria-hidden="true">
+      <div className="onb-arrival__scrim" />
+      <div className="onb-arrival__board">
+        <span className="onb-arrival__eyebrow" lang="ja">ただいま到着</span>
+        <span className="onb-arrival__dest" lang="ja">{jp}</span>
+        <span className="onb-arrival__latin">{title}</span>
       </div>
     </div>,
     document.body,

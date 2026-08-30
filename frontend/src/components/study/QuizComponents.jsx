@@ -4,8 +4,8 @@ import { playClick, playArrival } from '../../lib/audio'
 import { Readings, ReadingGroup } from './Readings'
 import { glossParts } from './gloss'
 import { Loading } from '../ui/Loading'
-import { DictionaryLookupSheet, SearchIcon, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
-import { CheckCircleIcon, XCircleIcon, ChevronIcon } from '../ui/Icons'
+import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
+import { CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from '../ui/Icons'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 
 // ── Is the page actually cramped? ──────────────────────────
@@ -32,15 +32,50 @@ function useIsCramped() {
 }
 
 // ── Big kana/kanji display ────────────────────────────────
-export function CharDisplay({ char, size = 110 }) {
-  const isLargeSize = size >= 60
+// `variant` is the study specimen's two rungs (see --fs-specimen-glyph/
+// -word in index.css): 'glyph' for one character, kana or kanji, 'word'
+// for a vocab word or short phrase. Plan 048 replaced the numeric `size`
+// props CardPrompt.jsx used to pass here -- each turned into a bare px
+// string on --char-size -- with these two tokens, because the content
+// only ever needed two sizes and the numbers were drifting for no
+// stated reason (kana at 110px, kanji at 100px, no one had decided they
+// should differ).
+//
+// CharDisplay is shared well beyond CardPrompt.jsx -- KanaScreen,
+// KanjiScreen, VocabScreen and OnboardingFlow all import it directly
+// with their own numeric `size` props, none of it plan 048's to touch.
+// `variant` is opt-in, not a new default, precisely so those callers
+// are byte-for-byte unaffected: no `variant` (the only shape they pass)
+// falls through to the exact old `size ?? 110` / `isLargeSize` behaviour
+// below. Only CardPrompt.jsx's specimen call sites pass `variant` now.
+const SPECIMEN_SIZE = {
+  glyph: 'var(--fs-specimen-glyph)',
+  word: 'var(--fs-specimen-word)',
+}
+
+export function CharDisplay({ char, variant, size }) {
+  if (variant) {
+    return (
+      <div
+        className="char-display"
+        style={{ '--char-size': SPECIMEN_SIZE[variant], '--char-font': 'var(--font-jp)' }}
+      >
+        {char}
+      </div>
+    )
+  }
+  // `height` is set explicitly too, not left to the class's own
+  // `calc(var(--char-size, 110px) * 1.15)` -- this path never sets
+  // --char-size, so that calc() would silently fall back to 110px
+  // regardless of `s` (a real bug the first draft of this had: every
+  // non-variant caller's box height stopped tracking its font size).
+  // Same 1.15 multiplier as the class default, so a plain <CharDisplay
+  // size={N}/> box scales exactly like a variant one.
+  const s = size ?? 110
   return (
     <div
       className="char-display"
-      style={{
-        '--char-size': `${size}px`,
-        '--char-font': isLargeSize ? 'var(--font-jp)' : 'inherit',
-      }}
+      style={{ fontSize: s, height: s * 1.15, fontFamily: s >= 60 ? 'var(--font-jp)' : 'inherit' }}
     >
       {char}
     </div>
@@ -523,6 +558,15 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictCategory, session, soun
             title={t.openDictionary}
             aria-label={t.openDictionary}
           >
+            {/* No className, deliberately. This glyph used to carry
+                `dict-index-bar__icon`, baked into SearchIcon itself,
+                whose `color: var(--text-secondary)` overrode the
+                button's own colour -- so alone among the reveal
+                actions it stayed muted and did NOT turn accent on
+                hover the way the SpeakIcon above it does. Inheriting
+                is the fix, not an oversight. Size is unchanged:
+                `.reveal-action-btn svg` sets 15px, and a CSS rule
+                beats the width/height attribute. */}
             <SearchIcon />
           </button>
         )}

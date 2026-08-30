@@ -8,8 +8,7 @@ import { StationHeader } from '../components/station/StationHeader'
 import EmptyState from '../components/ui/EmptyState'
 import { Loading } from '../components/ui/Loading'
 import { deckTypes, deckTypeOf } from '../components/decks/deckTypes'
-import { SearchIcon } from '../components/dictionary/DictionaryDetail'
-import { TrashIcon, PencilIcon, PlayIcon, BooksIcon, CrossIcon } from '../components/ui/Icons'
+import { TrashIcon, PencilIcon, PlayIcon, BooksIcon, CrossIcon, SearchIcon } from '../components/ui/Icons'
 
 export default function DecksScreen({ session }) {
   const navigate  = useNavigate()
@@ -113,7 +112,17 @@ export default function DecksScreen({ session }) {
     <div className="screen">
       <TopBar onBack={() => navigate('/')} title={t.decks} autoHide />
 
-      <main id="main-content" className="container page-pad">
+      {/* 蘇芳 is injected here, on the content shell, per DESIGN.md's
+          "the pigment is injected once": everything below reads
+          var(--line-color) rather than naming --line-decks itself.
+          StationHeader below is self-closing and a *sibling* of the
+          rest, so it tints only itself — without this, the screen's
+          primary button would fall back to 仮名's red. It goes on
+          <main> rather than on .screen deliberately: the top bar
+          carries no line colour at all, and scoping it here makes
+          that structural rather than a thing to remember. */}
+      <main id="main-content" className="container page-pad"
+        style={{ '--line-color': 'var(--line-decks)' }}>
         <StationHeader />
 
         {/* ── 目録 — the shelf's index ────────────────────────
@@ -158,7 +167,7 @@ export default function DecksScreen({ session }) {
           </div>
 
           <div className="decks-index-bar">
-            <SearchIcon />
+            <SearchIcon className="decks-index-bar__icon" />
             <input
               ref={searchRef}
               value={query}
@@ -212,7 +221,7 @@ export default function DecksScreen({ session }) {
                 </button>
               ))}
             </div>
-            <button onClick={createDeck} className="btn-deck-primary decks-create-submit">
+            <button onClick={createDeck} className="btn-primary decks-create-submit">
               {t.createDeck}
             </button>
           </div>
@@ -261,10 +270,14 @@ export default function DecksScreen({ session }) {
                 </span>
 
                 <span className="platform-card__body deck-card__body">
-                  <span className="platform-card__title">{deck.name}</span>
-                  <span className="platform-card__desc">
-                    <span className="deck-card__type">{dt.label}</span>
-                    {' · '}{deck.card_count} {t.cards}
+                  <span className="deck-card__text">
+                    <span className="platform-card__title">{deck.name}</span>
+                    {/* The type alone. The count used to be the tail of
+                        this sentence and is now the card's right-hand
+                        column — a figure you see rather than read. */}
+                    <span className="platform-card__desc">
+                      <span className="deck-card__type">{dt.label}</span>
+                    </span>
                   </span>
 
                   {/* The delete question takes over the action row it
@@ -274,44 +287,53 @@ export default function DecksScreen({ session }) {
                   {confirmingId === deck.id ? (
                     <span className="deck-card__actions">
                       <span className="deck-card__confirm-q">{t.deleteDeckConfirm}</span>
-                      <button onClick={() => deleteDeck(deck.id)} className="deck-card__btn deck-card__btn--danger">
+                      <button
+                        onClick={() => deleteDeck(deck.id)}
+                        className="btn-primary deck-card__act deck-card__act--danger">
                         <TrashIcon size={14} /> {t.delete}
                       </button>
                       <button
                         onClick={() => { playUi('click-mode-selection'); setConfirmingId(null) }}
-                        className="deck-card__btn deck-card__btn--muted">
+                        className="btn-secondary deck-card__act">
                         {t.cancel}
                       </button>
                     </span>
                   ) : (
                     <span className="deck-card__actions">
+                      {/* Deletion leads the row as a real bordered
+                          control rather than hiding in the corner. It
+                          is the only icon-only control here, so its
+                          aria-label/title is all a screen reader gets
+                          — it does not survive being unlabelled. */}
+                      <button
+                        onClick={() => { playUi('click-mode-selection'); setConfirmingId(deck.id) }}
+                        className="deck-card__delete"
+                        aria-label={t.delete}
+                        title={t.delete}
+                      >
+                        <TrashIcon size={16} />
+                      </button>
                       <button
                         onClick={() => { playUi('click-mode-selection'); navigate(`/decks/${deck.id}`, { state: { deck } }) }}
-                        className="deck-card__btn">
+                        className="btn-secondary deck-card__act">
                         <PencilIcon size={14} /> {t.edit}
                       </button>
                       <button
                         onClick={() => { playUi('click-screen-selection'); navigate(`/decks/${deck.id}/study`, { state: { deck } }) }}
-                        className="deck-card__btn deck-card__btn--study">
+                        className="btn-primary deck-card__act">
                         <PlayIcon size={14} /> {t.study}
                       </button>
                     </span>
                   )}
                 </span>
 
-                {/* Destructive, so it stays a quiet icon in the corner
-                    rather than a third button competing with Study.
-                    Hidden while its own question is on screen. */}
-                {confirmingId !== deck.id && (
-                  <button
-                    onClick={() => { playUi('click-mode-selection'); setConfirmingId(deck.id) }}
-                    className="deck-card__delete"
-                    aria-label={t.delete}
-                    title={t.delete}
-                  >
-                    <TrashIcon size={16} />
-                  </button>
-                )}
+                {/* The width a card over ~440px has to earn: the count
+                    as a figure with its caption beneath, right-aligned
+                    and centred against the card's full height. */}
+                <span className="deck-card__count">
+                  <span className="deck-card__count-fig">{deck.card_count}</span>
+                  <span className="deck-card__count-cap">{t.cards}</span>
+                </span>
               </div>
               )
             })}
