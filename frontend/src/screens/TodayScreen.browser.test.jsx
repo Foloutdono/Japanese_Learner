@@ -128,19 +128,25 @@ describe('TodayScreen — the primary button (plan 051)', () => {
     // -- NOT --text-on-fill #1c1811, which 051 used.
     expect(rgbOf(style.color)).toEqual([243, 236, 223])
 
-    // The fill is the section pigment deepened 12% toward --bg-panel:
-    // color-mix(in srgb, #c1442c 88%, #100e13) = #ac3e29. Asserting the
-    // mix (rather than "not transparent") is what makes a silent return
-    // to the raw pigment -- 4.33:1, below the floor -- fail here.
+    // The fill is the section pigment deepened toward --bg-panel:
+    // color-mix(in srgb, #c1442c 70%, #100e13). Asserting the mix
+    // (rather than "not transparent") is what makes a silent return to
+    // the raw pigment -- 4.33:1, below the floor -- fail here.
+    //
+    // Was 88% until plan 060. That figure was calibrated on the only
+    // two pigments this button then wore, and did not survive the study
+    // screens: 松葉色 landed at 4.05:1 and 黄丹 at 3.87:1, both under
+    // the floor. 70/79 is the one pair that clears 4.5:1 on all twelve
+    // pigments in both themes and both states.
     const fill = rgbOf(style.backgroundColor)
-    expect(fill[0]).toBeCloseTo(171.76, 0)
-    expect(fill[1]).toBeCloseTo(61.52, 0)
-    expect(fill[2]).toBeCloseTo(41.0, 0)
+    expect(fill[0]).toBeCloseTo(139.9, 0)
+    expect(fill[1]).toBeCloseTo(51.8, 0)
+    expect(fill[2]).toBeCloseTo(36.5, 0)
 
     // And the thing all of the above is *for*. Nothing else in the app
     // checks contrast -- no guard does either -- so the floor the whole
     // plan turns on is asserted here directly rather than implied by a
-    // hex. 5.17:1 as written; 4.33:1 if the deepening is dropped,
+    // hex. 5.9:1 as written; 4.33:1 if the deepening is dropped,
     // 3.48:1 if the ink goes back to --text-on-fill.
     expect(contrast(fill, rgbOf(style.color))).toBeGreaterThanOrEqual(4.5)
   })

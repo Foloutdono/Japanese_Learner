@@ -203,7 +203,7 @@ export function TypeInput({
         style={inputStyle}
       />
       {!submitted && (
-        <button onClick={() => { playClick(); onSubmit() }} className="quiz-submit">
+        <button onClick={() => { playClick(); onSubmit() }} className="btn-primary quiz-submit">
           {t.submit}
         </button>
       )}

@@ -135,7 +135,7 @@ export default function ReadingsInput({ readings, submitted, onSubmit }) {
       ))}
 
       {!submitted && (
-        <button onClick={() => { playClick(); onSubmit() }} className="quiz-submit readings-input__submit">
+        <button onClick={() => { playClick(); onSubmit() }} className="btn-primary quiz-submit readings-input__submit">
           {t.submit}
         </button>
       )}
