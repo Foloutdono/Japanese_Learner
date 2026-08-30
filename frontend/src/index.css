@@ -4711,7 +4711,7 @@ textarea:focus-visible {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 /* A pass prints its class large in the corner. */
@@ -4727,7 +4727,7 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: 2.4rem;
   line-height: 0.95;
-  color: var(--pass-color);
+  color: color-mix(in srgb, var(--pass-color) 60%, var(--text-primary));
   font-variant-numeric: tabular-nums;
 }
 .pass__level-label {
@@ -4736,7 +4736,7 @@ textarea:focus-visible {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   margin-top: 5px;
 }
 
@@ -4795,7 +4795,7 @@ textarea:focus-visible {
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 /* 段位 — the other axis. Ringed rather than filled, so it reads as a
    stamp on the pass and not as a second level badge. */
@@ -4807,7 +4807,8 @@ textarea:focus-visible {
   font-family: var(--font-jp);
   font-size: 0.76rem;
   font-weight: 700;
-  color: var(--pass-color);
+    /* Mixed toward the ink; raw slate at this size measured 2.44:1 */
+color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 }
 .pass__dan--dan {
   border-color: var(--accent2);
@@ -4834,7 +4835,7 @@ textarea:focus-visible {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 .pass__track {
   height: 5px;
@@ -4892,7 +4893,7 @@ textarea:focus-visible {
 .week-day--empty .week-day__fill { min-height: 3px; background: color-mix(in srgb, var(--text-primary) 14%, transparent); }
 .week-day--today .week-day__fill { background: var(--pass-ink, var(--accent9)); }
 .week-day--today .week-day__dow {
-  color: var(--pass-ink, var(--accent9));
+  color: color-mix(in srgb, var(--pass-ink, var(--accent9)) 60%, var(--text-primary));
   border-color: currentColor;
 }
 .week-day__count {
@@ -4992,7 +4993,7 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: 1.5rem;
   letter-spacing: 0.06em;
-  color: var(--accent2);
+  color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary));
 }
 .dan__now-sub,
 .dan__count-label {
@@ -5036,7 +5037,7 @@ textarea:focus-visible {
 .dan__target {
   font-family: var(--font-jp);
   font-weight: 700;
-  color: var(--accent2);
+  color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
 }
 
 /* The tally beside a section title — data, so tracked and tabular
@@ -8947,7 +8948,12 @@ textarea:focus-visible {
   background: color-mix(in srgb, var(--seal-color) 15%, transparent);
   border: 1.5px solid color-mix(in srgb, var(--seal-color) 65%, transparent);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
-  color: var(--seal-color);
+  /* The seal sits on the card, which is sumi under it in both themes,
+     and the state colour raw measured 3.45:1 dark / 3.14:1 light at
+     12px. Mixed toward the PANEL ink, not the ambient one -- the same
+     ground rule the board and the gate follow. The 15% wash and the
+     65% ring stay raw: an edge and a tint, which DESIGN.md allows. */
+  color: color-mix(in srgb, var(--seal-color) 62%, var(--text-on-panel));
   font-family: var(--font-jp);
   font-weight: 700;
   font-size: clamp(12px, 2.4vw, 15px);
@@ -11045,7 +11051,7 @@ textarea:focus-visible {
   font-size: 0.95rem;
   line-height: 1.1;
   text-align: center;
-  color: var(--hall-color, var(--accent));
+  color: color-mix(in srgb, var(--hall-color, var(--accent)) 65%, var(--text-primary));
   background: color-mix(in srgb, var(--hall-color, var(--accent)) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--hall-color, var(--accent)) 30%, transparent);
 }
@@ -11152,7 +11158,7 @@ textarea:focus-visible {
   font-family: var(--font-jp);
   font-weight: 700;
   font-size: 0.9rem;
-  color: var(--accent2);
+  color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary));
 }
 
 /* Three running totals. --font-display for the numbers, same as every
@@ -17488,7 +17494,8 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
   border-radius: 8px;
   background: none;
   border: 1px solid transparent;
-  color: var(--text-secondary);
+    /* Panel ink, not ambient: the top bar is sumi in both themes */
+color: var(--text-on-panel-soft);
   font-family: var(--font-jp);
   font-size: 15px;
   font-weight: 700;
