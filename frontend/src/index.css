@@ -10268,14 +10268,20 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 .explorer-group__label {
-  width: 132px;
+  /* The same width as .explorer-leaf__name below, and the two columns
+     start within a pixel of each other (16 + caret + gap here, 40 of
+     padding there) — so a group's name and the names of the rows it
+     opens onto sit in one column. It is a fixed width rather than a
+     flexed one because the composition bars have to start at the same
+     x on every row to be comparable at a glance. */
+  width: 176px;
   flex-shrink: 0;
   font-weight: 700;
   font-size: 13.5px;
-  /* A flex item will not go below its longest unbreakable word, and
-     "hiragana_combos" is one word. Once the row also reserves a column
-     for the due badge, that pushed the whole header past a 320px
-     viewport. It truncates instead. */
+  /* A flex item will not go below its longest unbreakable word. Every
+     label here is a level ("N5") or a kana set name, so the ellipsis
+     is a backstop for a deck key added on the backend and not yet
+     named in the string tables — those arrive as one long slug. */
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -14849,11 +14855,37 @@ textarea:focus-visible {
   .quiz-area { padding: 32px 24px max(32px, 14vh); gap: 18px;}
   .flashcard__hint { margin-top: 2px;}
 
-  /* The Explorer's group header is five columns wide by design; at
-     this width the label and the composition bar are the two that
-     still say something, so the rest step aside rather than each
-     getting four legible characters. */
-  .explorer-group__label { width: auto; flex: 1; }
+  /* The Explorer's group header is five columns wide by design, and at
+     this width they stop fitting on one line. Sharing the leftovers
+     between the label and the composition bar — which is what this did
+     first — left the label 98px, four or five characters short of
+     "Hiragana (combinations)", so it was read as an ellipsis. The
+     header becomes two lines instead: the name takes the full width on
+     the first, the three figures keep a row of their own underneath,
+     indented to the label's own left edge so the bars still start at
+     one x down the table. */
+  .explorer-group__head {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-areas:
+      "caret label label label"
+      ".     pct   bar   due";
+    align-items: center;
+    gap: var(--sp-2) var(--sp-4);
+  }
+  .explorer-group__caret { grid-area: caret; justify-self: start; }
+  .explorer-group__label {
+    grid-area: label;
+    width: auto;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+  }
+  /* Left-flush under the name above it, not right-flush inside a 44px
+     column that would leave "9%" floating away from its own bar. */
+  .explorer-group__pct { grid-area: pct; text-align: left; }
+  .explorer-group__head .composition { grid-area: bar; }
+  .explorer-group__due { grid-area: due; }
   .explorer-group__counts { display: none; }
 
   /* The three control rows are the first thing on the panel and were
@@ -14870,6 +14902,14 @@ textarea:focus-visible {
   .explorer__chips { gap: 5px; }
   .explorer-leaf { padding-left: 24px; }
   .explorer-leaf__name { width: 132px; }
+  /* The leaf's first line carries the coordinates its group does not
+     name, and under the format/direction/exercise groupings that is
+     "Kana · Katakana (combinations)" — 173px of caption in a 132px
+     column. Widening the column is the wrong trade at this width: it
+     comes straight out of the composition bar, which is already at its
+     60px floor here. It wraps instead, so the row that needs a second
+     line takes one and the ellipsis goes back to being a backstop. */
+  .explorer-leaf__group { white-space: normal; }
   .explorer-leaf__acc, .explorer-leaf__size { display: none; }
   .forecast__chart { height: 130px; gap: 3px; }
   /* Fourteen numbers across a phone collide into one grey smear —

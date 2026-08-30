@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useLang } from '../../LangContext'
 import {
-  CATEGORIES, DIMENSIONS, categoryLabel, dimensionLabel,
+  CATEGORIES, DIMENSIONS, categoryLabel, dimensionLabel, groupLabel,
   groupRows, sortItems, sortLabel, sortArrow, sumRows, SORTS,
 } from '../../domain/statsModel'
 import { BoltIcon, ChevronIcon } from '../ui/Icons'
@@ -200,8 +200,8 @@ function GroupRow({ group, expanded, onToggle, sort, desc, onStartReview, t }) {
 function LeafRow({ row, dim, onStartReview, t }) {
   const kicker =
     dim === 'group'    ? categoryLabel(t, row.category) :
-    dim === 'category' ? row.group :
-    `${categoryLabel(t, row.category)} · ${row.group}`
+    dim === 'category' ? groupLabel(t, row.group) :
+    `${categoryLabel(t, row.category)} · ${groupLabel(t, row.group)}`
 
   return (
     <div className="explorer-leaf">
