@@ -13,6 +13,7 @@ import pytest
 import routes.ocr as ocr_module
 from study.llm_shared import LLMUnavailable
 from core.db import db_conn
+from conftest import TEST_USER_ID
 
 
 def _png_bytes() -> bytes:
@@ -35,7 +36,7 @@ def _reset_usage():
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("DELETE FROM ocr_usage WHERE user_id = %s", ("test-user",))
+            cur.execute("DELETE FROM ocr_usage WHERE user_id = %s", (TEST_USER_ID,))
         conn.commit()
     finally:
         conn.close()

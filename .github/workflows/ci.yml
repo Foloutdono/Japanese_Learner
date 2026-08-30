@@ -44,7 +44,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # 24, not 20: package-lock.json is written by npm 11, and
+          # npm 10 -- which is what Node 20 and Node 22 both ship --
+          # rejects it outright ("Missing: @emnapi/core from lock
+          # file", the unlisted peers of an optional wasm binding).
+          # Node 20 is also deprecated on the runners, and vite 8
+          # already asks for ^20.19 || >=22.12.
+          node-version: '24'
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
