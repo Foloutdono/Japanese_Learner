@@ -61,6 +61,8 @@ const nav = {
   close:             'Fermer',
   loading:           'Chargement...',
   import:            'Importer',
+  export:            'Exporter',
+  exportFailed:      "L'export a échoué",
   select:            'Sélectionner',
 }
 

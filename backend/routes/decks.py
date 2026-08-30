@@ -3,7 +3,8 @@ import logging
 import csv
 import io
 import random
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from urllib.parse import quote
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Response
 from pydantic import BaseModel
 from core.auth import get_user_id, prefixed, unprefixed
 from core.db import db_conn
@@ -620,6 +621,60 @@ def delete_deck(deck_id: str, user_id: str = Depends(get_user_id)):
 
 # ── CARD CRUD (custom cards) ──────────────────────────────
 
+def _listed_cards(conn, deck_id: str, user_id: str, lang: str = "fr") -> list[dict]:
+    """
+    Every card in a deck, custom and app-linked alike, normalised to the
+    same front/back/kana shape and in one stable order (custom by
+    creation, then linked by when they were added).
+
+    Extracted from get_cards so the CSV export can be *the same list*
+    rather than a second derivation of it. That mattered: `_with_display`
+    already knows a kanji card's Japanese side is called `kanji` and a
+    grammar card's is `rule`, and app-linked cards get their front/back
+    from `_meaning_preview` instead — three sources of "the Japanese side
+    and the meaning side" that an exporter re-deriving them would have to
+    copy and then keep in step. It takes the caller's connection so the
+    listing and any ownership check the caller has already done share
+    one.
+    """
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute("""
+            SELECT id, structure, fields, notes, created_at
+            FROM custom_cards
+            WHERE deck_id = %s AND user_id = %s
+            ORDER BY created_at ASC
+        """, (deck_id, user_id))
+        custom = [_with_display(dict(row)) for row in cur.fetchall()]
+        cur.execute("""
+            SELECT source, level, raw_id, added_at
+            FROM deck_cards
+            WHERE deck_id = %s AND user_id = %s
+            ORDER BY added_at ASC
+        """, (deck_id, user_id))
+        app_links = [dict(row) for row in cur.fetchall()]
+    cards = [{"origin": "custom", **c} for c in custom]
+
+    for link in app_links:
+        cfg = SOURCES.get(link["source"])
+        if not cfg:
+            continue
+        entry = next(
+            (e for e in cfg["by_level"].get(link["level"], [])
+             if cfg["to_id"](e, link["level"]) == link["raw_id"]),
+            None,
+        )
+        if entry is None:
+            continue
+        fields = _meaning_preview(link["source"], entry, lang)
+        cards.append({
+            "origin": "app", "source": link["source"], "level": link["level"],
+            "raw_id": link["raw_id"], "added_at": link["added_at"],
+            "front": fields["front"], "back": fields["meaning"], "kana": fields["kana"],
+        })
+
+    return cards
+
+
 @router.get("/api/decks/{deck_id}/cards")
 def get_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user_id)):
     """Combined listing for DeckDetailScreen: the user's own custom
@@ -629,42 +684,7 @@ def get_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user_id
     (which has no front/back to edit — just a remove action)."""
     conn = db_conn()
     try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("""
-                SELECT id, structure, fields, notes, created_at
-                FROM custom_cards
-                WHERE deck_id = %s AND user_id = %s
-                ORDER BY created_at ASC
-            """, (deck_id, user_id))
-            custom = [_with_display(dict(row)) for row in cur.fetchall()]
-            cur.execute("""
-                SELECT source, level, raw_id, added_at
-                FROM deck_cards
-                WHERE deck_id = %s AND user_id = %s
-                ORDER BY added_at ASC
-            """, (deck_id, user_id))
-            app_links = [dict(row) for row in cur.fetchall()]
-        cards = [{"origin": "custom", **c} for c in custom]
-
-        for link in app_links:
-            cfg = SOURCES.get(link["source"])
-            if not cfg:
-                continue
-            entry = next(
-                (e for e in cfg["by_level"].get(link["level"], [])
-                 if cfg["to_id"](e, link["level"]) == link["raw_id"]),
-                None,
-            )
-            if entry is None:
-                continue
-            fields = _meaning_preview(link["source"], entry, lang)
-            cards.append({
-                "origin": "app", "source": link["source"], "level": link["level"],
-                "raw_id": link["raw_id"], "added_at": link["added_at"],
-                "front": fields["front"], "back": fields["meaning"], "kana": fields["kana"],
-            })
-
-        return {"cards": cards}
+        return {"cards": _listed_cards(conn, deck_id, user_id, lang)}
     finally:
         conn.close()
 
@@ -1371,3 +1391,103 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
         conn.close()
 
     return {"inserted": inserted, "errors": errors, "ok": True}
+
+
+# ── EXPORT ────────────────────────────────────────────────
+#
+# A deck name is user-authored, frequently Japanese, and goes into a
+# response header — so it gets two forms, per RFC 6266/5987:
+#
+#   filename="..."       an ASCII-safe fallback, for clients that read
+#                        only the plain parameter
+#   filename*=UTF-8''..  percent-encoded, so 「京都の単語」 downloads under
+#                        its own name rather than as mojibake or "deck-7"
+#
+# The sanitising is not cosmetic. CR and LF in a header value are a
+# response-splitting vector, and a bare `"` ends the quoted string early;
+# `/` and `\` would let the name climb out of the download folder. All
+# three classes are removed rather than escaped, because a deck named
+# with them has no legitimate filename to preserve.
+_FILENAME_STRIP = '"\\/:*?<>|\r\n\t'
+_FILENAME_MAX = 80
+
+
+def _export_filename(name: str | None, deck_id: str) -> tuple[str, str]:
+    """(ascii_fallback, utf8_name) for a deck's CSV download."""
+    raw = (name or "").strip()
+    # Control characters (C0 and DEL) go first — they are invisible in a
+    # deck list and would otherwise survive into the header.
+    cleaned = "".join(
+        " " if ch in _FILENAME_STRIP else ch
+        for ch in raw
+        if ord(ch) >= 0x20 and ord(ch) != 0x7F
+    )
+    cleaned = "_".join(cleaned.split())             # collapse runs of space
+    cleaned = cleaned.strip("._")[:_FILENAME_MAX]   # Windows dislikes both at the edges
+    if not cleaned:
+        cleaned = f"deck-{deck_id}"
+
+    # The fallback keeps only what every filesystem and every header
+    # parser agrees on; a fully Japanese name leaves nothing behind, so
+    # it falls back to the deck id exactly as it should.
+    ascii_only = "".join(
+        ch for ch in cleaned if ch.isascii() and (ch.isalnum() or ch in "-_")
+    )
+    ascii_only = ascii_only.strip("-_") or f"deck-{deck_id}"
+    return f"{ascii_only}.csv", f"{cleaned}.csv"
+
+
+@router.get("/api/decks/{deck_id}/export")
+def export_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user_id)):
+    """
+    The deck as a CSV the import endpoint above can read back.
+
+    The format is deliberately the *import* contract and nothing more —
+    a `front,back` header and one row per card — so that export → import
+    round-trips. It is therefore lossy on purpose for a structured deck:
+    a kanji card's readings, a vocab card's reading and a card's notes do
+    not survive, because the CSV import writes `standard` cards and has
+    no column contract for anything else. Widening the format here would
+    produce a file the other half of the pair cannot read, which is the
+    one thing this endpoint must not do.
+
+    Ownership is checked explicitly rather than left to the per-user
+    WHERE clauses inside _listed_cards: those would return an empty list
+    for someone else's deck, and a silent empty CSV is a worse answer
+    than a 404 — it is indistinguishable from an empty deck of your own.
+    """
+    conn = db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT name, type FROM decks WHERE id = %s AND user_id = %s",
+                        (deck_id, user_id))
+            deck = cur.fetchone()
+            if not deck:
+                raise HTTPException(status_code=404, detail="Deck not found")
+        cards = _listed_cards(conn, deck_id, user_id, lang)
+    finally:
+        conn.close()
+
+    buf = io.StringIO()
+    # \r\n is csv's own default terminator and the one Excel expects.
+    writer = csv.writer(buf, lineterminator="\r\n")
+    writer.writerow(["front", "back"])
+    for card in cards:
+        writer.writerow([card.get("front", ""), card.get("back", "")])
+
+    # The BOM is the other half of import's `utf-8-sig` decode: without
+    # it Excel reads a UTF-8 CSV as the local codepage and every Japanese
+    # card in the file turns to mojibake. The import side already skips a
+    # BOM, so writing one costs nothing on the round trip.
+    body = ("\ufeff" + buf.getvalue()).encode("utf-8")
+
+    ascii_name, utf8_name = _export_filename(deck["name"], deck_id)
+    disposition = (
+        f'attachment; filename="{ascii_name}"; '
+        f"filename*=UTF-8''{quote(utf8_name, safe='')}"
+    )
+    return Response(
+        content=body,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": disposition},
+    )

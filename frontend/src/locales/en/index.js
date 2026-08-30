@@ -60,6 +60,8 @@ const nav = {
   close:             'Close',
   loading:           'Loading...',
   import:            'Import',
+  export:            'Export',
+  exportFailed:      'Export failed',
   select:            'Select',
 }
 
