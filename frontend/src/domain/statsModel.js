@@ -43,6 +43,7 @@ import {
   MODES as STUDY_MODES, FORMATS as _FORMATS,
   modeLabel as registryLabel,
 } from './studyModes'
+import { kanaSetLabel } from './kanaSets'
 
 // Legacy fallbacks, for rows written before the taxonomy change. They can
 // go when the SRS wipe lands and card_modes holds only registry keys.
@@ -89,6 +90,16 @@ export function categoryLabel(t, category) {
     kanji: t.kanji,
     grammar: t.grammarTitle,
   }[category] ?? category
+}
+
+// The deck a row sits in, as a person would name it. Most keys are
+// already the display string — 'N5' is what that level is called — but
+// the four kana sets are stored slugs, because card ids are built from
+// them, and 'hiragana_combos' was reaching the screen verbatim in a
+// column whose other rows read N5 and N4. Same helper the kana picker
+// and the daily queue use, so a set is named one way everywhere.
+export function groupLabel(t, key) {
+  return kanaSetLabel(t, key)
 }
 
 export function formatLabel(t, format) {
@@ -212,8 +223,8 @@ function bucketLabel(t, dim, key, rows) {
   if (dim === 'category') return categoryLabel(t, key)
   if (dim === 'format') return formatLabel(t, key)
   if (dim === 'direction') return directionLabel(t, key)
-  // 'group' keys are already display strings (N5, hiragana, …), and a
-  // mode key is only meaningful next to the category it came from.
+  if (dim === 'group') return groupLabel(t, key)
+  // A mode key is only meaningful next to the category it came from.
   if (dim === 'mode') return modeLabel(t, rows[0]?.category, key)
   return key
 }

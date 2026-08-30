@@ -12,26 +12,40 @@ describe('the dimmed text register', () => {
   it('renders a strictly different colour from the primary one', async () => {
     const screen = await render(
       <div className="next-service">
+        <span className="next-service__jp" lang="ja">本日の運行</span>
         <span className="next-service__when">3h</span>
         <span className="next-service__latin">Today</span>
       </div>
     )
     const strip = screen.container.querySelector('.next-service')
+    const jp    = screen.container.querySelector('.next-service__jp')
     const when  = screen.container.querySelector('.next-service__when')
     const latin = screen.container.querySelector('.next-service__latin')
 
     const primary = getComputedStyle(strip).color
-    // Regression guard for the formerly-undefined dim-text token: an
-    // invalid var() on an inherited property makes the element inherit
-    // instead, which silently flattened every dim register onto the body
-    // colour.
-    expect(getComputedStyle(when).color).not.toBe(primary)
+    // Regression guard for the formerly-undefined dim-text token: an invalid
+    // var() on an inherited property makes the element inherit instead, which
+    // silently flattened every dim register onto the body colour. All three
+    // of these read --ns-ink-soft while the strip itself is --ns-ink, so an
+    // unresolved token lands each of them on exactly `primary`.
+    //
+    // The caption used to be checked a different way: it was a color-mix()
+    // against `transparent`, and the test asserted the result was
+    // translucent -- translucency being the visible proof that the mix had
+    // resolved rather than collapsing to that same inherited fallback. The
+    // mix is gone (it composited toward the GROUND rather than the ink, so
+    // it cost contrast in both themes and failed at 4.01:1 in dark), so the
+    // caption is now guarded the same way as its neighbours instead.
+    for (const [name, el] of [['jp', jp], ['when', when], ['latin', latin]]) {
+      expect(getComputedStyle(el).color, `${name} fell back to the inherited ink`)
+        .not.toBe(primary)
+    }
 
-    // The color-mix() site is a separate failure mode -- one bad var()
-    // invalidates the whole function -- so it gets its own assertion.
-    // A real mix against `transparent` is translucent; the inherited
-    // fallback never is.
-    expect(getComputedStyle(latin).color).toMatch(/rgba|\/\s*0?\./)
+    // And the inverse of the old assertion, because the rule is now absolute:
+    // no ink in this strip may be a mix toward `transparent`.
+    for (const el of [jp, when, latin]) {
+      expect(getComputedStyle(el).color).not.toMatch(/rgba|\/\s*0?\./)
+    }
   })
 
   it('gives the Today tick a border colour of its own', async () => {

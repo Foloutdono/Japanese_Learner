@@ -233,9 +233,29 @@ yellow turns olive before it will carry a light ink. Gold takes the dark ink.
 
 Assuming one ink for all twelve pigments is exactly what produced the defect
 this section was written for: the button shipped at 3.48:1 and every guard and
-every test passed. **Nothing in the app checks contrast.** Measure the pair
-before filling a button in a new section — 4.5:1 is the floor, and the mockups
-themselves do not always clear it.
+every test passed, because nothing in the app checked contrast. **Guard 4 now
+does** (`src/contrast.browser.test.jsx`): it measures the intended ink/ground
+pairings in both themes and re-measures a set of real call sites through their
+real ancestors, ratcheted against `src/design-contrast.json`. It is not a
+substitute for measuring a *new* pair yourself — 4.5:1 is the floor, the
+mockups themselves do not always clear it, and the guard only knows the pairs
+it has been told about.
+
+Two rules the guard exists to keep, both learned by measurement:
+
+- **The ambient inks flip; the sumi inks do not.** `--text-primary` and
+  `--text-secondary` are paper inks in light theme, so putting either on a
+  sumi ground works in dark and fails in light — the Today strip did exactly
+  that and read at 2.80:1. Anything sitting on `--bg-panel`, or on a tint
+  mixed into it, takes `--text-on-panel(-soft)`. Where one element has both
+  grounds, name the pair once on the block and let the children read it (see
+  `--ns-ink` / `--ns-ink-soft` on `.next-service`). Guard 5 (`npm run
+  lint:ink`) enforces this one across the whole sheet, without needing a
+  fixture — it is the rule that dark theme cannot show you is broken.
+- **A mix toward `transparent` costs contrast in *both* themes.** It
+  composites toward the ground, not toward the ink, so it is not a way to
+  make a dim register — it is a way to fail dark mode too. Reach for a
+  dimmer token, not a lower alpha.
 
 ## Space
 

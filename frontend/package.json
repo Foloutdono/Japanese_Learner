@@ -10,6 +10,7 @@
     "lint:css": "node scripts/stylelint-ratchet.mjs",
     "lint:css:report": "stylelint \"src/**/*.css\"",
     "lint:scale": "node scripts/check-design-scale.mjs",
+    "lint:ink": "node scripts/check-ink-ground.mjs",
     "preview": "vite preview",
     "test": "vitest run"
   },
