@@ -5199,10 +5199,19 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    "next review in 3 hours" is information, not an action. */
 .next-service {
   width: min(var(--board-w), 100%);
+  /* ONE row, per Home.dc.html. It was a three-row stack -- name over
+     chips over the 新規 gauge -- with a 3px gold bar down its left edge,
+     and the maintainer's note on the artboard round was exactly that:
+     the stripe "feels out of place", and the whole thing should "feel
+     more like a shortcut". The artboard answers both. A shortcut is one
+     line you can read at a glance and press. */
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px 18px;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 15px 22px;
   text-align: left;
   font: inherit;
   /* This strip has TWO grounds: it is sumi when something is due, and
@@ -5212,19 +5221,23 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
      is 1.83:1 on paper. So the ground picks the ink here, once, and
      every child below reads --ns-ink/--ns-ink-soft instead of naming a
      token directly. */
-  --ns-ink:      var(--text-on-panel);
-  --ns-ink-soft: var(--text-on-panel-soft);
+  /* The artboard puts this strip on the app's standard card, not on a
+     tinted sumi panel -- so its ground now follows the theme and the
+     ink pair follows with it. The --ns-ink indirection stays: --clear
+     below still swaps the ground, and one name for "this strip's ink"
+     is what keeps the two states honest. */
+  --ns-ink:      var(--text-primary);
+  --ns-ink-soft: var(--text-secondary);
   color: var(--ns-ink);
-  background: color-mix(in srgb, var(--accent2) 7%, var(--bg-panel));
-  border: 1px solid color-mix(in srgb, var(--accent2) 26%, transparent);
-  border-left: 3px solid var(--accent2);
-  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
   cursor: pointer;
   transition: background 140ms ease, transform 140ms ease, border-color 140ms ease;
 }
 .next-service:hover {
-  background: color-mix(in srgb, var(--accent2) 12%, var(--bg-panel));
-  border-color: color-mix(in srgb, var(--accent2) 44%, transparent);
+  background: color-mix(in srgb, var(--surface) 92%, var(--text-primary));
+  border-color: color-mix(in srgb, var(--surface-line) 60%, var(--text-primary));
 }
 .next-service:active { transform: translateY(1px); }
 
@@ -5236,11 +5249,7 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   gap: 10px;
   cursor: default;
   background: transparent;
-  /* Transparent, so the ground is the page: the ambient pair, not sumi. */
-  --ns-ink:      var(--text-primary);
-  --ns-ink-soft: var(--text-secondary);
   border-color: color-mix(in srgb, var(--border) 80%, transparent);
-  border-left-color: color-mix(in srgb, var(--success) 60%, transparent);
 }
 .next-service--clear:hover { background: transparent; }
 
@@ -5296,7 +5305,11 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   font-size: 20px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--accent2);
+  /* Gold as a figure, now on a ground that follows the theme -- raw it
+     measured 2.85:1 on the light surface. Mixed toward the strip's own
+     ink, the same treatment every other pigment-as-text site here
+     takes. */
+  color: color-mix(in srgb, var(--accent2) 60%, var(--ns-ink));
 }
 .next-service__clear {
   font-size: 15px;

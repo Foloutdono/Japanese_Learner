@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { apiJson } from '../../lib/api'
 import { useLang } from '../../LangContext'
-import { BoltIcon } from '../ui/Icons'
+import { ChevronIcon } from '../ui/Icons'
 import { modeLabel } from '../../domain/studyModes'
 import { kanaSetLabel } from '../../domain/kanaSets'
 import { sectionFor } from '../../config/stations'
@@ -103,19 +103,17 @@ export default function NextService({ session }) {
       onClick={depart}
       aria-label={t.todayDue(due)}
     >
-      <span className="next-service__head">
-        {/* Japanese above/beside, plain language under — the same
-            pairing the board masthead, every station plate and every
-            section header already use. The strip was the one place
-            naming itself only in kanji. */}
-        <span className="next-service__name">
-          <span className="next-service__jp" lang="ja">本日の運行</span>
-          <span className="next-service__latin">{t.todayTitle}</span>
-        </span>
-        <span className="next-service__count">
-          <BoltIcon size={13} /> {due}
-        </span>
+      {/* Home.dc.html lays this out as ONE line: the name, the figure,
+          the lanes, and a chevron at the far end. It was a three-row
+          stack with a gold bar down its left edge until the artboard
+          round, where the maintainer called the stripe out of place and
+          asked for something that reads as a shortcut. No __head wrapper
+          now -- the row IS the layout. */}
+      <span className="next-service__name">
+        <span className="next-service__jp" lang="ja">本日の運行</span>
+        <span className="next-service__latin">{t.todayTitle}</span>
       </span>
+      <span className="next-service__count">{due}</span>
 
       <span className="next-service__lanes">
         {lanes.map(lane => (
@@ -135,7 +133,9 @@ export default function NextService({ session }) {
         ))}
       </span>
 
-      {today.pace && <PaceGauge pace={today.pace} t={t} />}
+      {/* The affordance the artboard ends the row with, and the thing
+          that makes it read as a shortcut rather than a readout. */}
+      <ChevronIcon direction="right" size={14} className="next-service__go" />
     </button>
   )
 }
