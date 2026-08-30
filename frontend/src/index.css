@@ -10173,7 +10173,7 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   font-weight: 700;
   font-size: clamp(1.6rem, 1.1rem + 1.5vw, 2.2rem);
   line-height: 1;
-  color: var(--plaque-color);
+  color: color-mix(in srgb, var(--plaque-color) 55%, var(--text-primary));
 }
 .headline__flame { margin-bottom: 2px; }
 
@@ -10193,7 +10193,7 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 }
 .plaque__icon {
   margin-left: auto;
-  color: var(--plaque-color);
+  color: color-mix(in srgb, var(--plaque-color) 55%, var(--text-primary));
   opacity: 0.45;
   line-height: 0;
 }
@@ -10304,7 +10304,7 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
-  color: var(--accent4);
+  color: color-mix(in srgb, var(--accent4) 55%, var(--text-primary));
 }
 .calendar-panel__scale {
   display: inline-flex;
@@ -10415,7 +10415,7 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   font-weight: 700;
   font-size: 1.15rem;
   line-height: 1;
-  color: var(--fig-color);
+  color: color-mix(in srgb, var(--fig-color) 55%, var(--text-primary));
 }
 .explorer__figure-label {
   font-family: var(--font-display);
@@ -10482,7 +10482,7 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 700;
-  color: var(--state-mastered);
+  color: color-mix(in srgb, var(--state-mastered) 55%, var(--text-primary));
 }
 .explorer-group__counts {
   flex-shrink: 0;
@@ -10658,7 +10658,7 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   font-size: 9.5px;
   color: var(--text-secondary);
 }
-.forecast__day--today .forecast__label { color: var(--accent); }
+.forecast__day--today .forecast__label { color: color-mix(in srgb, var(--accent) 55%, var(--text-primary)); }
 .forecast__date { opacity: 0.7; }
 
 .forecast__legend {
@@ -10922,7 +10922,7 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
-  color: var(--danger);
+  color: color-mix(in srgb, var(--danger) 55%, var(--text-primary));
 }
 .trouble__lapses {
   flex-shrink: 0;
