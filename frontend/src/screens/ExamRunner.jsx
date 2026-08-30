@@ -493,7 +493,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
               mode) rather than inventing a third "back"/"next" pair —
               t.back is a bare icon-only button made for TopBar's compact
               style, not a fit here. */}
-          <button type="button" className="exam-nav-btn" disabled={index === 0} onClick={() => jumpTo(index - 1)}>
+          <button type="button" className="btn-secondary exam-nav-btn" disabled={index === 0} onClick={() => jumpTo(index - 1)}>
             <ChevronIcon direction="left" size={14} /> {t.reviewPrev}
           </button>
           <button
@@ -508,7 +508,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
           </button>
           <button
             type="button"
-            className="exam-nav-btn exam-nav-btn--primary"
+            className="btn-primary exam-nav-btn"
             disabled={index === questions.length - 1}
             onClick={() => jumpTo(index + 1)}
           >
@@ -531,13 +531,13 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
             </p>
             <p className="exam-confirm__body">{t.examConfirmBody(unansweredCount)}</p>
             <div className="exam-confirm__actions">
-              <button type="button" className="exam-nav-btn" onClick={() => setSubmitState('idle')}>
+              <button type="button" className="btn-secondary exam-nav-btn" onClick={() => setSubmitState('idle')}>
                 {t.examKeepGoing}
               </button>
-              <button type="button" className="exam-nav-btn" onClick={goToFirstBlank}>
+              <button type="button" className="btn-secondary exam-nav-btn" onClick={goToFirstBlank}>
                 {t.examReviewBlanks}
               </button>
-              <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={finish}>
+              <button type="button" className="btn-primary exam-nav-btn" onClick={finish}>
                 {t.examSubmitAnyway}
               </button>
             </div>
@@ -550,7 +550,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
               <WarningIcon size={16} /> {t.examSubmitFailed}
             </p>
             <div className="exam-confirm__actions">
-              <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={finish}>
+              <button type="button" className="btn-primary exam-nav-btn" onClick={finish}>
                 {t.examSubmitRetry}
               </button>
             </div>
@@ -562,10 +562,10 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
             <p className="exam-confirm__title">{t.examLeaveTitle}</p>
             <p className="exam-confirm__body">{t.examLeaveBody}</p>
             <div className="exam-confirm__actions">
-              <button type="button" className="exam-nav-btn" onClick={() => setLeaving(false)}>
+              <button type="button" className="btn-secondary exam-nav-btn" onClick={() => setLeaving(false)}>
                 {t.examLeaveStay}
               </button>
-              <button type="button" className="exam-nav-btn exam-nav-btn--primary" onClick={() => navigate('/exam')}>
+              <button type="button" className="btn-primary exam-nav-btn" onClick={() => navigate('/exam')}>
                 {t.examLeaveConfirm}
               </button>
             </div>
@@ -574,7 +574,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
 
         <button
           type="button"
-          className="exam-finish-btn"
+          className="btn-primary exam-finish-btn"
           onClick={requestFinish}
           disabled={submitState === 'sending'}
         >

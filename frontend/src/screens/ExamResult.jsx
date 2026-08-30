@@ -262,7 +262,7 @@ export default function ExamResult({ session }) {
           })}
 
         <div className="exam-nav-buttons exam-nav-buttons--result">
-          <button type="button" className="exam-nav-btn" onClick={() => { playUi('click-screen-selection'); navigate('/exam') }}>
+          <button type="button" className="btn-secondary exam-nav-btn" onClick={() => { playUi('click-screen-selection'); navigate('/exam') }}>
             {t.examBackToExams}
           </button>
           {/* A NEW paper, not this one again. Re-sitting a paper whose
@@ -275,7 +275,7 @@ export default function ExamResult({ session }) {
               recorded, and saying so explicitly costs nothing. */}
           <button
             type="button"
-            className="exam-nav-btn exam-nav-btn--primary"
+            className="btn-primary exam-nav-btn"
             onClick={() => {
               playUi('click-screen-selection')
               navigate(`/exam/${examId}?exclude=${exam.revision}`, { replace: true })

@@ -26,6 +26,24 @@
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
+  /* 模試's own pigment, injected once for everything below -- DESIGN.md,
+     "the pigment is injected once". Until plan 061 this section reached
+     for var(--accent) twenty-five times, and --accent IS --line-kana, so
+     the exam wore 仮名's vermillion throughout while --line-exam sat at
+     zero consumers.
+
+     Declared in CSS rather than as a JSX style the way the study screens
+     do it, because .exam-shell is a class only these two screens use and
+     they render SIX shells between them (loading, error and live
+     branches). One rule covers all six; six inline styles would have
+     had to stay in step, and a missed branch makes the pigment flicker
+     between states.
+
+     The list screen at /exam needs nothing: it renders inside
+     <SelectionScreen>, which derives the pigment from the route
+     (sectionFor -> navLinks' `color: var(--line-exam)`), so it has been
+     correct all along. */
+  --line-color: var(--line-exam);
 }
 /* Compound selector on purpose, not plain `.exam-shell`. This section
    sits at the very top of index.css, so at equal specificity
@@ -63,7 +81,7 @@
 .exam-generating__stroke {
   height: 4px;
   border-radius: 999px;
-  background: var(--line-color, var(--accent));
+  background: var(--line-color, var(--line-exam));
   transform-origin: left center;
   animation: exam-brush 1.9s ease-in-out infinite;
 }
@@ -99,7 +117,7 @@
 }
 .exam-progress-bar__fill {
   height: 100%;
-  background: var(--accent);
+  background: var(--line-color, var(--line-exam));
   transition: width 0.25s ease;
 }
 
@@ -145,14 +163,14 @@
   margin-bottom: 20px;
   background: var(--bg-card);
   border-radius: var(--radius);
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--line-color, var(--line-exam));
 }
 .exam-mondai-instructions__label {
   font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--accent);
+  color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary));
 }
 .exam-mondai-instructions__head {
   display: flex;
@@ -174,7 +192,7 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.exam-mondai-instructions__toggle:hover { color: var(--accent); }
+.exam-mondai-instructions__toggle:hover { color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary)); }
 .exam-mondai-instructions__text {
   font-size: 0.88rem;
   line-height: 1.6;
@@ -215,7 +233,7 @@
 }
 .exam-underline {
   text-decoration: underline;
-  text-decoration-color: var(--accent);
+  text-decoration-color: var(--line-color, var(--line-exam));
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
   font-weight: 700;
@@ -263,9 +281,9 @@
   color: var(--text-secondary);
 }
 .exam-order-slot--star {
-  color: var(--accent);
+  color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary));
   font-weight: 700;
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--line-color, var(--line-exam));
 }
 .exam-order-solution {
   margin-top: 16px;
@@ -305,7 +323,7 @@
   font-weight: 700;
 }
 .exam-blank-pill--active {
-  background: var(--accent);
+  background: var(--line-color, var(--line-exam));
   color: var(--text-on-panel);
 }
 
@@ -334,7 +352,7 @@
   font-size: 1.3rem;
   margin-bottom: 2px;
 }
-.exam-flyer__subtitle { color: var(--accent); font-weight: 700; margin-bottom: 8px; }
+.exam-flyer__subtitle { color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary)); font-weight: 700; margin-bottom: 8px; }
 .exam-flyer__hours { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 14px; }
 .exam-flyer__row {
   display: flex;
@@ -390,15 +408,17 @@
   gap: 12px;
   margin-top: 8px;
 }
-.exam-nav-btn {
-  background: var(--bg-card);
-  color: var(--text-primary);
-}
-.exam-nav-btn--primary {
-  background: var(--accent);
-  color: var(--text-on-panel);
-}
-.exam-nav-btn:disabled { opacity: 0.4; cursor: default; }
+/* Only a layout hook now. Plan 061 moved this whole family onto the
+   shared buttons -- .btn-secondary for the plain ones, .btn-primary for
+   what was --primary -- so the fill, the ink, the 44px hit target and
+   the disabled treatment all come from there. The class survives because
+   .exam-confirm__actions and the phone query below both size by it.
+
+   The family moved TOGETHER on purpose. Plan 052 deferred this exact
+   migration because repointing only --primary would have put one 44px
+   button beside siblings still inheriting the bare `button` rule's ~37px
+   in the same flex row. */
+.exam-nav-btn { /* layout hook; see above */ }
 
 /* ── Result screen ── */
 .exam-result-header {
@@ -549,7 +569,7 @@
   height: 42px;
   padding: 0;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--line-color, var(--line-exam));
   color: var(--text-on-panel);
 }
 .exam-audio-player__track {
@@ -577,7 +597,7 @@
   border: none;
   border-radius: 999px;
   background: var(--border);
-  accent-color: var(--accent);
+  accent-color: var(--line-color, var(--line-exam));
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
@@ -589,14 +609,14 @@
   height: 13px;
   border: none;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--line-color, var(--line-exam));
 }
 .exam-audio-player__range::-moz-range-thumb {
   width: 13px;
   height: 13px;
   border: none;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--line-color, var(--line-exam));
 }
 .exam-audio-player__replay {
   position: relative;
@@ -611,7 +631,7 @@
   background: var(--bg-card);
   color: var(--text-secondary);
 }
-.exam-audio-player__replay:hover { color: var(--accent); }
+.exam-audio-player__replay:hover { color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary)); }
 /* Replay is allowed here (the real JLPT plays each clip once, but this
    is practice), so the count is shown rather than the replay withheld
    — an honest record of how much help was taken. */
@@ -623,7 +643,7 @@
   height: 17px;
   padding: 0 4px;
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--line-color, var(--line-exam));
   color: var(--text-on-panel);
   font-family: var(--font-display);
   font-size: 0.62rem;
@@ -647,7 +667,7 @@
   color: var(--text-secondary);
   cursor: pointer;
 }
-.exam-transcript__summary:hover { color: var(--accent); }
+.exam-transcript__summary:hover { color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary)); }
 .exam-transcript__text {
   margin-top: 10px;
   padding: 12px 14px;
@@ -665,8 +685,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  /* 44px, not the 40 this shipped at: it is icon-only, so the box IS
+     the target, and 40 is under the minimum. The circle is kept -- it is
+     what tells a toggle apart from the rectangular nav buttons beside
+     it. */
+  width: 44px;
+  height: 44px;
   padding: 0;
   border-radius: 50%;
   background: var(--bg-card);
@@ -722,8 +746,8 @@
   border: 1.5px solid var(--border);
 }
 .exam-sheet__swatch--answered {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--line-color, var(--line-exam));
+  border-color: var(--line-color, var(--line-exam));
 }
 .exam-sheet__legend-flag { color: var(--accent2); }
 .exam-sheet__grid {
@@ -746,10 +770,10 @@
   font-variant-numeric: tabular-nums;
   transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
 }
-.exam-sheet__chip:hover { border-color: var(--accent); color: var(--accent); }
+.exam-sheet__chip:hover { border-color: var(--line-color, var(--line-exam)); color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary)); }
 .exam-sheet__chip--answered {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--line-color, var(--line-exam));
+  border-color: var(--line-color, var(--line-exam));
   color: var(--text-on-panel);
 }
 .exam-sheet__chip--answered:hover { color: var(--text-on-panel); }
@@ -774,15 +798,13 @@
 /* ── Finish ──
    Available on every question, not only the last: skipping question 3
    used to mean no way to submit short of walking to the end. */
+/* Also on .btn-primary now, so only its placement lives here: it spans
+   the sheet and sits below it. Padding, weight, ink and the disabled
+   opacity come from the family. */
 .exam-finish-btn {
   width: 100%;
   margin-top: 16px;
-  padding: 14px;
-  background: var(--accent);
-  color: var(--text-on-panel);
-  font-weight: 700;
 }
-.exam-finish-btn:disabled { opacity: 0.6; cursor: default; }
 
 /* ── Inline confirm / error panels ──
    Not window.confirm: it can't be themed, can't be translated by the
@@ -793,7 +815,7 @@
   margin-top: 16px;
   padding: 16px 18px;
   background: var(--bg-card);
-  border: 1px solid var(--accent);
+  border: 1px solid var(--line-color, var(--line-exam));
   border-radius: var(--radius);
 }
 .exam-confirm--error { border-color: var(--danger); }
@@ -865,7 +887,7 @@
   font-weight: 700;
 }
 .exam-review__filter[aria-pressed="true"] {
-  background: var(--accent);
+  background: var(--line-color, var(--line-exam));
   color: var(--text-on-panel);
 }
 .exam-review__perfect {
@@ -7351,7 +7373,13 @@ textarea:focus-visible {
    as the stock row. Only --mcq-color is declared locally, because the
    correct/wrong states legitimately override it on the same element. */
 .mcq-row {
-  --mcq-color: var(--accent);
+  /* Follows whichever section the row is in. The MCQ row is shared --
+     the exam paper renders it, and so do the study screens -- and it
+     hard-coded --accent, which IS --line-kana, so a 漢字 or 模試 question
+     wore 仮名's vermillion. One variable feeds the whole component, so
+     one line moves all of it. --accent stays as the fallback for any
+     caller that injects no pigment. */
+  --mcq-color: var(--line-color, var(--accent));
   position: relative;
   display: flex;
   align-items: center;
@@ -7412,7 +7440,13 @@ textarea:focus-visible {
 .mcq-row:not(:disabled):hover .mcq-row__index,
 .mcq-row:not(:disabled):focus-visible .mcq-row__index {
   border-color: var(--mcq-color);
-  color: var(--mcq-color);
+  /* Mixed toward the ink, not the raw pigment: as 13px text on this card
+     the pigment measures 3.27:1 for 仮名, 3.40 for 茶色, 3.48 for 藤色 --
+     every section fails, and it was failing before this rule ever moved
+     off --accent. The border above stays raw, which DESIGN.md allows:
+     colour is an edge. Same 50% figure as every other pigment-as-text
+     site in this file. */
+  color: color-mix(in srgb, var(--mcq-color) 50%, var(--text-primary));
 }
 
 .mcq-row__text {
