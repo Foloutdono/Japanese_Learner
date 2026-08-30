@@ -7,6 +7,7 @@ import contextlib
 import unittest
 import uuid
 
+from core.auth import DEV_USER_ID
 from core.db import db_conn
 from core.pace import Pace, new_card_limit, resolve_pace
 from core.srs_instance import srs
@@ -141,11 +142,11 @@ class PickIdsNewLimitTests(unittest.TestCase):
 # ── Plumbing through a real endpoint ──────────────────────────────
 @contextlib.contextmanager
 def _test_user_target(target):
-    _set_target("test-user", target)
+    _set_target(DEV_USER_ID, target)
     try:
         yield
     finally:
-        _set_target("test-user", None)
+        _set_target(DEV_USER_ID, None)
 
 
 def test_batch_endpoint_reports_pace_and_accepts_beyond_target(client):
