@@ -10173,8 +10173,21 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   font-weight: 700;
   font-size: clamp(1.6rem, 1.1rem + 1.5vw, 2.2rem);
   line-height: 1;
-  color: color-mix(in srgb, var(--plaque-color) 55%, var(--text-primary));
+  /* Plain ink, per Stats.dc.html: its lattice sets every .fig in the
+     ambient ink and colours exactly ONE figure -- DUE TODAY. The
+     coloured figure is the exception that makes the day's workload
+     findable at a glance; six coloured figures is a palette, not a
+     signal, and it was also what dragged them all under the contrast
+     floor. The 2px --plaque-color rule along each cell's top edge still
+     carries the colour coding, which is where DESIGN.md wants it: an
+     edge, not a numeral. */
+  color: var(--text-primary);
 }
+/* The single coloured figure in Stats.dc.html's lattice -- mixed toward
+   the ink like every other state colour used as text, because raw it
+   measured 2.58:1 against the cell at 35px, under even the 3:1 a large
+   figure gets. */
+.plaque--due .plaque__value { color: color-mix(in srgb, var(--plaque-color) 55%, var(--text-primary)); }
 .headline__flame { margin-bottom: 2px; }
 
 .plaque__ring {
