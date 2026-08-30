@@ -5211,7 +5211,9 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   gap: 20px;
   min-height: 44px;
   box-sizing: border-box;
-  padding: 15px 22px;
+  /* --sp-5/--sp-6; the artboard's 15px is a pixel off the rung and
+     the rung is the one that has to win. */
+  padding: var(--sp-5) var(--sp-6);
   text-align: left;
   font: inherit;
   /* This strip has TWO grounds: it is sumi when something is due, and
@@ -6853,8 +6855,87 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 
 .settings-container {
   padding: 48px 24px 88px;
-  max-width: 640px;
+  /* 1040px, the width Settings.dc.html gives this page. It was 640,
+     which is the reading measure a prose column wants and the wrong
+     one for a control panel: the sound mixer is eight rows of
+     label + track + value and it was being asked to fit in half the
+     room the artboard gives it. */
+  max-width: 1040px;
   margin: 0 auto;
+}
+
+/* The environment, two-up: 表示 and 言語 stacked in a fixed column,
+   音 taking whatever is left. The side column is 320px because that is
+   what the artboard sets, and because both controls in it are
+   one-liners -- they do not grow with the window, so giving them a
+   share of it would only add space between a label and its control. */
+.settings-env {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: var(--sp-6);
+  align-items: start;
+}
+.settings-env__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-9);
+}
+.settings-sec {
+  display: flex;
+  flex-direction: column;
+}
+/* A card holding one control rather than a list of rows: .settings-row
+   carries the padding in the stacked cards, and there are no rows here. */
+.settings-card--pad { padding: var(--sp-7); }
+
+/* 暗 / 明 as a pair, per Settings.dc.html. Both options visible, the
+   current one filled -- a switch showing one icon has to be read twice
+   before it tells you anything, and this one was showing the
+   destination rather than the state. */
+.theme-choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+  width: 100%;
+}
+.theme-choice__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding-block: var(--sp-4);
+  padding-inline: var(--sp-5);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+.theme-choice__btn:hover { filter: none; color: var(--text-primary); }
+/* The chosen one is a filled slate, the pass's ink -- this page belongs
+   to the holder, not to a section, so it borrows no line colour. */
+.theme-choice__btn--on {
+  /* Deepened 30% toward the panel, the same formula .btn-primary uses
+     and for the same reason: the slate at full strength carries
+     --text-on-panel at only 4.32:1, under the floor for the 15px glyph
+     sitting on it. */
+  background: color-mix(in srgb, var(--pass-ink) 70%, var(--bg-panel));
+  border-color: color-mix(in srgb, var(--pass-ink) 70%, var(--bg-panel));
+  color: var(--text-on-panel);
+}
+.theme-choice__btn--on:hover { color: var(--text-on-panel); }
+.theme-choice__jp { font-family: var(--font-jp); font-size: var(--fs-body); }
+
+/* One column once the mixer can no longer keep its own width -- below
+   this the side column and the mixer would each be too narrow to read,
+   which is the state the 640px page was permanently in. */
+@media (max-width: 900px) {
+  .settings-env { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* Page header: même langage serif + trait-rouge que .section-header */
@@ -6965,12 +7046,14 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 }
 
 /* Sign out: hover inversé vermillon */
+/* Settings.dc.html draws this FILLED, not outlined: the danger colour
+   as the ground with the panel ink on it. As an outline it was danger
+   used as text and measured 2.11:1. It is .btn-primary now with the
+   pigment substituted, the same substitution the deck and exam delete
+   buttons make. */
 .settings-signout {
-  color: var(--danger);
-  border: 1px solid var(--danger);
-  background: transparent;
+  --line-color: var(--danger);
   font-size: 13px;
-  padding: 10px 20px;
   border-radius: 8px;
   font-family: inherit;
   font-weight: 600;

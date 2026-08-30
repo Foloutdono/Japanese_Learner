@@ -45,29 +45,7 @@ function IconVolumeOff({ size = 16 }) {
   )
 }
 
-function IconSun({ size = 16 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="5" />
-      <line x1="12" y1="1" x2="12" y2="3" />
-      <line x1="12" y1="21" x2="12" y2="23" />
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-      <line x1="1" y1="12" x2="3" y2="12" />
-      <line x1="21" y1="12" x2="23" y2="12" />
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-    </svg>
-  )
-}
 
-function IconMoon({ size = 16 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-  )
-}
 
 /* ── Composants exportés ────────────────────────────────── */
 
@@ -108,20 +86,34 @@ export function ThemeToggle() {
 
   const isDark = theme === 'dark'
 
-  function handleClick() {
-    apply(isDark ? 'light' : 'dark')
-    playToggle()
-  }
-
+  // Settings.dc.html draws this as a pair, not a switch: 暗 DARK and
+  // 明 LIGHT side by side with the current one filled. A lone icon
+  // button has to be read twice -- once to see which glyph it shows,
+  // again to work out whether that means "you are here" or "go here" --
+  // and it was showing the destination, not the state. Two buttons say
+  // both at once. This control lives only on the settings page now
+  // (the top bar carries the gear), so the pair costs nothing elsewhere.
   return (
-    <button
-      onClick={handleClick}
-      className="btn-nav btn-nav--icon"
-      title={isDark ? t.lightMode : t.darkMode}
-      aria-label={isDark ? t.lightMode : t.darkMode}
-    >
-      {isDark ? <IconSun /> : <IconMoon />}
-    </button>
+    <div className="theme-choice" role="group" aria-label={t.theme}>
+      <button
+        type="button"
+        onClick={() => { if (!isDark) { apply('dark'); playToggle() } }}
+        className={`theme-choice__btn${isDark ? ' theme-choice__btn--on' : ''}`}
+        aria-pressed={isDark}
+      >
+        <span className="theme-choice__jp" lang="ja">暗</span>
+        {t.darkMode}
+      </button>
+      <button
+        type="button"
+        onClick={() => { if (isDark) { apply('light'); playToggle() } }}
+        className={`theme-choice__btn${!isDark ? ' theme-choice__btn--on' : ''}`}
+        aria-pressed={!isDark}
+      >
+        <span className="theme-choice__jp" lang="ja">明</span>
+        {t.lightMode}
+      </button>
+    </div>
   )
 }
 

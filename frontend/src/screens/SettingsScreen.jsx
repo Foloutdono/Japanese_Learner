@@ -23,23 +23,42 @@ export default function SettingsScreen({ session }) {
       <TopBar onBack={() => navigate('/')} title={t.settings} autoHide />
 
       <main id="main-content" className="container settings-container">
-        <SectionHeader jp="環境設定" title={t.preferences} />
-        <div className="card settings-card">
-          <div className="settings-row">
-            <span className="settings-row__label">{t.sound}</span>
-            <MuteButton />
+        {/* Settings.dc.html splits the environment into three named
+            sections and lays them out two-up: 表示 and 言語 stacked in a
+            320px column, 音 beside them taking the rest. It was one
+            undifferentiated 環境設定 card in a 640px column, so the
+            mixer -- eight rows, the densest control in the app -- was
+            squeezed into half the width it wants while the two
+            one-line settings each had a row to themselves. */}
+        <div className="settings-env">
+          <div className="settings-env__side">
+            <section className="settings-sec">
+              <SectionHeader jp="表示" title={t.theme} />
+              <div className="card settings-card settings-card--pad">
+                <ThemeToggle />
+              </div>
+            </section>
+
+            <section className="settings-sec">
+              <SectionHeader jp="言語" title={t.language} />
+              <div className="card settings-card settings-card--pad">
+                <LangSwitcher />
+              </div>
+            </section>
           </div>
-          <div className="settings-row settings-row--stack">
-            <SoundMixer />
-          </div>
-          <div className="settings-row">
-            <span className="settings-row__label">{t.theme}</span>
-            <ThemeToggle />
-          </div>
-          <div className="settings-row">
-            <span className="settings-row__label">{t.language}</span>
-            <LangSwitcher />
-          </div>
+
+          <section className="settings-sec">
+            <SectionHeader jp="音" title={t.sound} />
+            <div className="card settings-card">
+              <div className="settings-row">
+                <span className="settings-row__label">{t.sound}</span>
+                <MuteButton />
+              </div>
+              <div className="settings-row settings-row--stack">
+                <SoundMixer />
+              </div>
+            </div>
+          </section>
         </div>
 
         <SectionHeader jp="学習" title={t.settingsLearning} />
@@ -49,7 +68,7 @@ export default function SettingsScreen({ session }) {
         <div className="card settings-card">
           <div className="settings-row">
             <span className="settings-row__label">{t.signOutDesc}</span>
-            <button type="button" className="btn-ghost settings-signout" onClick={() => supabase.auth.signOut()}>
+            <button type="button" className="btn-primary settings-signout" onClick={() => supabase.auth.signOut()}>
               {t.signOut}
             </button>
           </div>
@@ -141,7 +160,7 @@ function LearningCard({ t, session }) {
           <span className="settings-row__label">{t.settingsRedoDesc}</span>
           <button
             type="button"
-            className="btn-ghost"
+            className="btn-secondary"
             onClick={() => { playClick(); setTestResult(null); setTesting(true) }}
           >
             {t.onbTestRetake}
