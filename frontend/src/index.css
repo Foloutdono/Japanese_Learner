@@ -6888,6 +6888,19 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    carries the padding in the stacked cards, and there are no rows here. */
 .settings-card--pad { padding: var(--sp-7); }
 
+/* The artboard marks the sign-out row with a 3px danger bar down its
+   left edge -- the one destructive row on the page, called out the way
+   a rail calls out a row elsewhere in this app. */
+.settings-row--danger::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--danger);
+}
+
 /* 暗 / 明 as a pair, per Settings.dc.html. Both options visible, the
    current one filled -- a switch showing one icon has to be read twice
    before it tells you anything, and this one was showing the
@@ -6982,7 +6995,9 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px 16px;
-  padding: 18px 24px 18px 28px;
+  /* Uniform, per Settings.dc.html's .row -- it was 18/24/18/28, four
+     different numbers reading as a mistake rather than a rhythm. */
+  padding: var(--sp-7);
   transition: background 0.15s ease;
   overflow: hidden;
 }
@@ -7291,10 +7306,15 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   margin-inline: 15px;
 }
 
+/* A grid, not a flex row: Settings.dc.html's .vrow is
+   132px / 1fr / 44px, which is what makes eight labels, eight tracks and
+   eight values line up in three columns. Under flex each row sized to
+   its own label and the tracks started at eight different x positions. */
 .category-volume-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) 44px;
   align-items: center;
-  gap: 14px;
+  gap: var(--sp-5);
 }
 
 .category-volume-row__label {
@@ -7326,7 +7346,20 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    strips the native <select> chrome and draws a themed two-stroke
    arrow with currentColor, so it stays correct in both contexts and
    both themes without a separate icon asset. */
+/* The artboard's .sel: a real control box, not the browser's. Nothing in
+   this sheet styles a bare <select>, so this one was rendering at the
+   UA's 30px -- square corners, and under the 44px minimum target. */
 .lang-select {
+  box-sizing: border-box;
+  min-height: 44px;
+  padding-block: 0;
+  padding-inline: var(--sp-4);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--fs-body);
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;

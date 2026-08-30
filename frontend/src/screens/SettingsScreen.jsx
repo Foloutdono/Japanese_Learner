@@ -66,7 +66,7 @@ export default function SettingsScreen({ session }) {
 
         <SectionHeader jp="会員" title={t.account} />
         <div className="card settings-card">
-          <div className="settings-row">
+          <div className="settings-row settings-row--danger">
             <span className="settings-row__label">{t.signOutDesc}</span>
             <button type="button" className="btn-primary settings-signout" onClick={() => supabase.auth.signOut()}>
               {t.signOut}
@@ -119,7 +119,7 @@ function LearningCard({ t, session }) {
       <div className="settings-row">
         <span className="settings-row__label">{t.settingsJlptLevel}</span>
         <select
-          className="btn-nav btn-nav--lang lang-select"
+          className="lang-select"
           value={currentLevel}
           disabled={saving}
           aria-label={t.settingsJlptLevel}
@@ -135,7 +135,7 @@ function LearningCard({ t, session }) {
       <div className="settings-row">
         <span className="settings-row__label">{t.settingsPace}</span>
         <select
-          className="btn-nav btn-nav--lang lang-select"
+          className="lang-select"
           value={String(currentPace)}
           disabled={saving}
           aria-label={t.settingsPace}

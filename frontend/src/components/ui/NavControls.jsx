@@ -129,7 +129,10 @@ export function LangSwitcher() {
     <select
       value={lang}
       onChange={handleChange}
-      className="btn-nav btn-nav--lang lang-select"
+      // Not .btn-nav: that is a top-bar control and paints a white wash
+      // meant for sumi. This lives on the settings card now, where
+      // Settings.dc.html draws it as a select box on --bg-card.
+      className="lang-select"
       aria-label={t?.language}
     >
       {LANGUAGES.map(l => (
