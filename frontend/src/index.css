@@ -1120,7 +1120,7 @@
   transition: color 0.14s ease, border-color 0.14s ease;
 }
 .anl-follow--on {
-  color: var(--line-kaiseki);
+  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
   border-color: color-mix(in srgb, var(--line-kaiseki) 55%, transparent);
 }
 .anl-follow__jp { font-family: var(--font-jp); font-size: 0.8rem; white-space: nowrap; }
@@ -1257,7 +1257,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
-  color: var(--line-douga);
+  color: color-mix(in srgb, var(--line-douga) 65%, var(--text-primary));
 }
 
 .anl-stop__iplus {
@@ -1524,7 +1524,7 @@
   font-weight: 700;
   font-size: 1.15rem;
   letter-spacing: 0.1em;
-  color: var(--line-kaiseki);
+  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
 }
 .anl-drop__lead { font-size: 0.88rem; }
 .anl-drop__note { font-size: 0.74rem; color: var(--text-secondary); }
@@ -1935,7 +1935,7 @@
   font-weight: 700;
   font-size: 1.05rem;
   letter-spacing: 0.08em;
-  color: var(--line-kaiseki);
+  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
 }
 .anl-reopen__label { flex: 1; font-size: 0.86rem; }
 .anl-reopen__go { flex-shrink: 0; color: var(--line-kaiseki); }
@@ -3761,7 +3761,7 @@ button:focus-visible {
   font-weight: 700;
   font-size: 1.05rem;
   line-height: 1;
-  color: var(--rail);
+  color: color-mix(in srgb, var(--rail) 65%, var(--text-primary));
   font-variant-numeric: tabular-nums;
   transition: background 0.16s ease, color 0.16s ease;
 }
@@ -3782,7 +3782,7 @@ button:focus-visible {
   font-weight: 700;
   font-size: 0.74rem;
   line-height: 1.15;
-  color: var(--rail);
+  color: color-mix(in srgb, var(--rail) 65%, var(--text-primary));
   text-align: center;
   white-space: nowrap;
 }
@@ -3838,7 +3838,7 @@ button:focus-visible {
   flex-shrink: 0;
   padding-right: 14px;
   font-size: 0.7rem;
-  color: var(--rail, var(--line-color, var(--accent)));
+  color: color-mix(in srgb, var(--rail, var(--line-color, var(--accent))) 65%, var(--text-primary));
   opacity: 0;
   transform: translateX(-4px);
   transition: opacity 0.15s ease, transform 0.15s ease;
@@ -4465,7 +4465,7 @@ textarea:focus-visible {
   height: 34px;
   border-radius: 50%;
   border: 2.5px solid var(--line-color, var(--accent));
-  color: var(--line-color, var(--accent));
+  color: color-mix(in srgb, var(--line-color, var(--accent)) 65%, var(--text-primary));
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
@@ -4584,7 +4584,7 @@ textarea:focus-visible {
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1;
-  color: var(--line-color, var(--accent));
+  color: color-mix(in srgb, var(--line-color, var(--accent)) 65%, var(--text-primary));
   font-variant-numeric: tabular-nums;
 }
 .station-sign__label-sub {
@@ -5330,7 +5330,7 @@ textarea:focus-visible {
   font-size: 12px;
   white-space: nowrap;
 }
-.next-service__lane-where { font-weight: 700; color: var(--lane-color, var(--accent2)); }
+.next-service__lane-where { font-weight: 700; color: color-mix(in srgb, var(--lane-color, var(--accent2)) 55%, var(--ns-ink)); }
 .next-service__lane-mode  { color: var(--ns-ink-soft); }
 .next-service__lane-due {
   font-variant-numeric: tabular-nums;
@@ -5532,7 +5532,7 @@ textarea:focus-visible {
 .today-lane-row__where {
   font-weight: 700;
   font-size: var(--fs-sm);
-  color: var(--lane-color, var(--accent2));
+  color: color-mix(in srgb, var(--lane-color, var(--accent2)) 65%, var(--text-primary));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -5732,7 +5732,13 @@ textarea:focus-visible {
   padding: 0 7px;
   border-radius: 999px;
   border: 2px solid var(--accent2);
-  color: var(--accent2);
+  /* Lifted toward the panel ink, not used raw. The board is sumi in BOTH
+     themes, but --accent2 is not: light theme deepens it for paper, and
+     on this dark board that deepened gold measures 4.23:1. 85% keeps it
+     unmistakably gold and clears the floor either way (7.98 dark / 5.16
+     light). The 2px border above stays raw -- an edge, which DESIGN.md
+     allows, and 4.23:1 is well over the 3:1 a non-text edge needs. */
+  color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel));
   font-family: var(--font-display);
   font-size: 12px;
   font-weight: 700;
@@ -5786,7 +5792,11 @@ textarea:focus-visible {
   font-family: var(--font-jp);
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: color-mix(in srgb, var(--accent2) 85%, transparent);
+  /* Toward the panel ink, not transparent: thinning gold over sumi
+     lowers contrast rather than raising it. Same reason as
+     .board__roundel above. .board__label-sub and .board-clock__colon
+     inherit this. */
+  color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel));
 }
 .board__label-sub {
   font-family: var(--font-display);
@@ -5811,7 +5821,9 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: 1.15rem;
   letter-spacing: 0.06em;
-  color: var(--accent2);
+  /* Same lift as .board__roundel and .board__label -- the board is sumi
+     in both themes, --accent2 is not. The colon inherits this. */
+  color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel));
   font-variant-numeric: tabular-nums;
 }
 .board-clock__colon {
@@ -5876,7 +5888,7 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: 1.5rem;
   line-height: 1;
-  color: var(--line-color, var(--accent2));
+  color: color-mix(in srgb, var(--line-color, var(--accent2)) 55%, var(--text-on-panel));
   font-variant-numeric: tabular-nums;
 }
 .board-row__no-unit {
@@ -5900,7 +5912,7 @@ textarea:focus-visible {
   height: 30px;
   border-radius: 50%;
   border: 2px solid var(--line-color, var(--accent2));
-  color: var(--line-color, var(--accent2));
+  color: color-mix(in srgb, var(--line-color, var(--accent2)) 55%, var(--text-on-panel));
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
@@ -5952,7 +5964,7 @@ textarea:focus-visible {
 .board-row__go {
   justify-self: end;
   font-size: 0.7rem;
-  color: var(--line-color, var(--accent2));
+  color: color-mix(in srgb, var(--line-color, var(--accent2)) 55%, var(--text-on-panel));
   opacity: 0;
   transform: translateX(-4px);
   transition: opacity 0.15s ease, transform 0.15s ease;
@@ -9632,7 +9644,7 @@ textarea:focus-visible {
   font-family: var(--font-jp);
   font-size: 1.7rem;
   line-height: 1;
-  color: var(--row-color, var(--accent));
+  color: color-mix(in srgb, var(--row-color, var(--accent)) 65%, var(--text-primary));
 }
 
 .landing-feature__title {
@@ -12770,7 +12782,7 @@ textarea:focus-visible {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0;
-  color: var(--tab-color, var(--text-secondary));
+  color: color-mix(in srgb, var(--tab-color, var(--text-secondary)) 65%, var(--text-primary));
 }
 
 /* The one control here that CREATES rather than finds, so it is
@@ -13436,7 +13448,7 @@ textarea:focus-visible {
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--rail) 40%, transparent);
   background: color-mix(in srgb, var(--rail) 12%, transparent);
-  color: var(--rail);
+  color: color-mix(in srgb, var(--rail) 65%, var(--text-primary));
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -14151,7 +14163,7 @@ textarea:focus-visible {
 .rdg-feedback-grammar__pattern {
   font-family: var(--font-jp);
   font-size: 14px;
-  color: var(--line-rikai, var(--accent2));
+  color: color-mix(in srgb, var(--line-rikai, var(--accent2)) 65%, var(--text-primary));
 }
 
 .rdg-feedback-actions { margin-top: 16px; }
@@ -18378,7 +18390,7 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
   height: 24px;
   border-radius: 50%;
   border: 1.5px solid color-mix(in srgb, var(--tab-color, var(--accent)) 55%, transparent);
-  color: var(--tab-color, var(--accent));
+  color: color-mix(in srgb, var(--tab-color, var(--accent)) 65%, var(--text-primary));
   font-family: var(--font-jp);
   font-size: 12px;
   font-weight: 700;
@@ -18854,7 +18866,7 @@ button.syllabary-cell:focus-visible {
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--syl-accent, var(--line-kana));
+  color: color-mix(in srgb, var(--syl-accent, var(--line-kana)) 65%, var(--text-primary));
 }
 .syllabary-head__romaji {
   font-family: var(--font-display);
@@ -19044,7 +19056,7 @@ button.syllabary-cell:focus-visible {
   height: 30px;
   border-radius: 50%;
   border: 2px solid var(--line-color, var(--accent));
-  color: var(--line-color, var(--accent));
+  color: color-mix(in srgb, var(--line-color, var(--accent)) 55%, var(--text-on-panel));
   font-family: var(--font-display);
   font-size: 10px;
   font-weight: 700;
