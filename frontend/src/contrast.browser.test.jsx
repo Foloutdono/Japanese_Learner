@@ -254,9 +254,11 @@ const Fixture = () => (
       </button>
     </div>
 
-    {/* DeckDetailScreen.jsx:424 */}
+    {/* DeckDetailScreen.jsx:424. Plan 057 retired .deckdetail-btn and its
+        four modifiers -- the toolbar is the shared button family now, so
+        the quiet button this guard was measuring is a .btn-secondary. */}
     <div className="deckdetail-actions">
-      <button className="deckdetail-btn deckdetail-btn--muted">Sélectionner</button>
+      <button className="btn-secondary">Sélectionner</button>
     </div>
 
     {/* TokenCard.jsx:60 -- reading/pos sit in the wrap, whose sumi
@@ -307,7 +309,7 @@ const SITES = [
   ['.deck-card__delete', 'deck card delete affordance'],
   ['.deck-card__btn--muted', 'deck card cancel button'],
   ['.deck-card__confirm-q', 'deck card delete question'],
-  ['.deckdetail-btn--muted', 'deck detail muted button'],
+  ['.btn-secondary', 'deck detail ghost button (shared family)'],
   ['.phrase-word-card__reading', 'token card reading'],
   ['.phrase-word-card__pos', 'token card part of speech'],
   ['.comp-option-btn__letter', 'comprehension option letter'],

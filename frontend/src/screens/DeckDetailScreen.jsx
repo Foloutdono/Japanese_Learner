@@ -423,26 +423,26 @@ export default function DeckDetailScreen({ session }) {
           {!selectMode && (
             <div className="deckdetail-actions">
               <button onClick={() => { playUi('click-screen-selection'); navigate(`/decks/${deck_id}/study`, { state: { deck } }) }}
-                className="deckdetail-btn deckdetail-btn--study">
+                className="btn-primary">
                 <PlayIcon size={14} /> {t.study}
               </button>
               {allowCustom && (
-                <button onClick={() => { playUi('click-mode-selection'); startAdd() }} className="deckdetail-btn">
+                <button onClick={() => { playUi('click-mode-selection'); startAdd() }} className="btn-secondary">
                   {t.addCard}
                 </button>
               )}
               {allowedSources.length > 0 && (
-                <button onClick={() => { playUi('click-mode-selection'); setShowBrowse(true) }} className="deckdetail-btn">
+                <button onClick={() => { playUi('click-mode-selection'); setShowBrowse(true) }} className="btn-secondary">
                   {t.browseBtn}
                 </button>
               )}
               {cards.length > 0 && (
-                <button onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }} className="deckdetail-btn deckdetail-btn--muted">
+                <button onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }} className="btn-secondary">
                   <CheckboxIcon size={14} /> {t.select}
                 </button>
               )}
               {allowCustom && (
-                <button onClick={() => { playUi('click-mode-selection'); setShowImport(true) }} className="deckdetail-btn">
+                <button onClick={() => { playUi('click-mode-selection'); setShowImport(true) }} className="btn-secondary">
                   <ImportIcon size={14} /> {t.import}
                 </button>
               )}
@@ -454,16 +454,16 @@ export default function DeckDetailScreen({ session }) {
               <span className="deckdetail-select-count">
                 {selected.size} {t.cards}
               </span>
-              <button onClick={() => { playUi('click-mode-selection'); toggleSelectAll() }} className="deckdetail-btn">
+              <button onClick={() => { playUi('click-mode-selection'); toggleSelectAll() }} className="btn-secondary">
                 {selected.size === cards.length ? t.deselectAll : t.selectAll}
               </button>
               {confirmingDelete ? (
                 <>
                   <span className="deckdetail-confirm-q">{t.deleteCardsConfirm}</span>
-                  <button onClick={deleteSelected} className="deckdetail-btn deckdetail-btn--danger">
+                  <button onClick={deleteSelected} className="btn-primary deckdetail-act--danger">
                     <TrashIcon size={14} /> {t.delete} ({selected.size})
                   </button>
-                  <button onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(false) }} className="deckdetail-btn deckdetail-btn--muted">
+                  <button onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(false) }} className="btn-secondary">
                     {t.cancel}
                   </button>
                 </>
@@ -472,10 +472,10 @@ export default function DeckDetailScreen({ session }) {
                   <button
                     onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(true) }}
                     disabled={selected.size === 0}
-                    className={`deckdetail-btn ${selected.size > 0 ? 'deckdetail-btn--danger' : 'deckdetail-btn--danger-disabled'}`}>
+                    className="btn-primary deckdetail-act--danger">
                     <TrashIcon size={14} /> {t.delete} ({selected.size})
                   </button>
-                  <button onClick={() => { playUi('click-mode-selection'); exitSelectMode() }} className="deckdetail-btn deckdetail-btn--muted">
+                  <button onClick={() => { playUi('click-mode-selection'); exitSelectMode() }} className="btn-secondary">
                     {t.cancel}
                   </button>
                 </>
@@ -552,27 +552,20 @@ export default function DeckDetailScreen({ session }) {
                 className="deckdetail-form__input" />
             </div>
             <div className="deckdetail-form__actions">
-              {/* Both keep their own class for `flex: 1` only; every
-                  other property now comes from the shared family, so
-                  the two sit at one height instead of drifting apart
-                  the moment one of them grows a 44px hit target.
-                  The treatments are Controls.dc.html's PRIMARY and
-                  GHOST swatches (:54, :62).
-
-                  Not fully the mockup yet, and deliberately so:
-                  DeckDetail.dc.html:144-147 draws THIS form's actions
-                  right-aligned at natural width, with a borderless
-                  Cancel in --text-secondary -- not two flex:1 halves.
-                  That is a layout change to a screen plan 052 only
-                  passes through, so the row is left as it is and the
-                  disagreement is left for the DeckDetail plan. */}
-              <button onClick={saveCard} disabled={!formComplete()}
-                className="btn-primary deckdetail-form__save">
-                {editing ? t.save : t.addCard}
-              </button>
+              {/* Cancel first, Save last: the row is right-aligned now
+                  (see .deckdetail-form__actions), so the confirming
+                  action sits at the edge the eye and the thumb both end
+                  on, and the order matches DeckDetail.dc.html:144-147.
+                  Neither carries a class of its own any more — 052 left
+                  them one for `flex: 1`, and dropping the stretch left
+                  nothing this file needs to say about them. */}
               <button onClick={() => { setAdding(false); setEditing(null); resetForm() }}
-                className="btn-secondary deckdetail-form__cancel">
+                className="btn-secondary">
                 {t.cancel}
+              </button>
+              <button onClick={saveCard} disabled={!formComplete()}
+                className="btn-primary">
+                {editing ? t.save : t.addCard}
               </button>
             </div>
           </div>
@@ -656,7 +649,7 @@ export default function DeckDetailScreen({ session }) {
                     </button>
                   )}
                   {!selectMode && card.origin === 'app' && (
-                    <button onClick={() => deleteCard(card).then(fetchCards)} className="deckdetail-edit-btn" aria-label={t.delete} title={t.delete}>
+                    <button onClick={() => deleteCard(card).then(fetchCards)} className="deckdetail-edit-btn deckdetail-edit-btn--danger" aria-label={t.delete} title={t.delete}>
                       <TrashIcon size={15} />
                     </button>
                   )}

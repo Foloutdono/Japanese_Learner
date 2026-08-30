@@ -1,5 +1,5 @@
 import { useLang } from '../../LangContext'
-import { modeLabel, categoryLabel } from '../../domain/statsModel'
+import { modeLabel, categoryLabel, groupLabel } from '../../domain/statsModel'
 import { BoltIcon } from '../ui/Icons'
 
 // ── 弱点 — the trouble list ────────────────────────────────
@@ -32,7 +32,7 @@ export function TroubleList({ weakest, onStartReview }) {
             <span className="trouble__meta">
               <span className="trouble__where">
                 {w.category ? categoryLabel(t, w.category) : '—'}
-                {w.key ? ` · ${w.key}` : ''}
+                {w.key ? ` · ${groupLabel(t, w.key)}` : ''}
               </span>
               <span className="trouble__mode">{modeLabel(t, w.category, w.mode)}</span>
             </span>
