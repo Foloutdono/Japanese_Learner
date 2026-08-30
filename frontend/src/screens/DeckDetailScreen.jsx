@@ -10,7 +10,28 @@ import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
 import BrowseCardsMenu from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
-import { PlayIcon, ImportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIcon, PencilIcon, TrashIcon, CardIcon, LightbulbIcon } from '../components/ui/Icons'
+import { PlayIcon, ImportIcon, ExportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIcon, PencilIcon, TrashIcon, CardIcon, LightbulbIcon } from '../components/ui/Icons'
+
+// The name the export endpoint chose, out of its Content-Disposition.
+// Two forms arrive (RFC 6266): `filename*=UTF-8''...` percent-encoded,
+// and a plain ASCII `filename="..."` fallback. The encoded one is
+// preferred because a Japanese deck name survives only there — the
+// fallback deliberately degrades to the deck id. Returns null rather
+// than guessing, so the caller can name the file itself.
+function filenameFromDisposition(header) {
+  if (!header) return null
+  const encoded = /filename\*\s*=\s*UTF-8''([^;]+)/i.exec(header)
+  if (encoded) {
+    try {
+      return decodeURIComponent(encoded[1].trim())
+    } catch {
+      // A malformed percent-sequence should not lose the download; fall
+      // through to the ASCII parameter, which is always well-formed.
+    }
+  }
+  const plain = /filename\s*=\s*"([^"]*)"/i.exec(header)
+  return plain ? plain[1] : null
+}
 
 // Mirrors decks.py's SOURCE_FOR_TYPE / _allowed_sources / _allows_custom
 // exactly — kept in sync by hand since it's this small. This is only
@@ -190,7 +211,7 @@ export default function DeckDetailScreen({ session }) {
   const navigate        = useNavigate()
   const { deck_id }     = useParams()
   const { state }       = useLocation()
-  const { t }           = useLang()
+  const { t, lang }     = useLang()
 
   // Falls back to fetching the deck when opened without router state
   // (a refresh, a direct link) — needed now that a deck's `type`
@@ -238,6 +259,42 @@ export default function DeckDetailScreen({ session }) {
   // re-render of this screen while one of them is open.
   const closeImport = useCallback(() => setShowImport(false), [])
   const closeBrowse = useCallback(() => setShowBrowse(false), [])
+
+  // Fetched rather than linked: the endpoint needs the bearer token, and
+  // a bare <a href> to /api/... sends no Authorization header, so it
+  // would 401 — or, with DEV_USER_ID set locally, quietly succeed as the
+  // dev user and look like it worked everywhere it doesn't.
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState(false)
+
+  async function exportDeck() {
+    playUi('click-mode-selection')
+    setExportError(false)
+    setExporting(true)
+    try {
+      const res = await apiFetch(`/api/decks/${deck_id}/export?lang=${lang}`, session)
+      if (!res.ok) throw new Error(`export failed: ${res.status}`)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      // The server already sanitised this — a deck name is user-authored
+      // and frequently Japanese, so it arrives percent-encoded.
+      a.download = filenameFromDisposition(res.headers.get('Content-Disposition'))
+        || `deck-${deck_id}.csv`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      // Revoked on the next tick rather than immediately: Safari reads
+      // the href after click() returns, and revoking synchronously hands
+      // it a dead URL and a silently empty download.
+      setTimeout(() => URL.revokeObjectURL(url), 0)
+    } catch {
+      setExportError(true)
+    } finally {
+      setExporting(false)
+    }
+  }
 
   function fetchCards() {
     apiFetch(`/api/decks/${deck_id}/cards`, session)
@@ -446,6 +503,17 @@ export default function DeckDetailScreen({ session }) {
                   <ImportIcon size={14} /> {t.import}
                 </button>
               )}
+              {/* Gated on having cards, NOT on allowCustom the way Import
+                  is. Import writes `standard` cards, so it only makes
+                  sense where those are allowed; export only reads, and a
+                  vocab or kanji deck is just as worth taking a copy of.
+                  An empty deck is excluded because its export is a header
+                  row — a file that downloads and says nothing. */}
+              {cards.length > 0 && (
+                <button onClick={exportDeck} className="btn-secondary" disabled={exporting}>
+                  <ExportIcon size={14} /> {t.export}
+                </button>
+              )}
             </div>
           )}
 
@@ -491,6 +559,19 @@ export default function DeckDetailScreen({ session }) {
               <CheckCircleIcon size={15} /> {importResult.inserted} {t.cards}
             </div>
             <button onClick={() => setImportResult(null)} className="deckdetail-import-banner__close" aria-label={t.close}>
+              <CrossIcon size={14} />
+            </button>
+          </div>
+        )}
+
+        {/* A failed export is otherwise completely silent — the browser
+            simply never offers a file, which reads as a dead button. */}
+        {exportError && (
+          <div className="deckdetail-import-banner deckdetail-import-banner--error">
+            <div className="deckdetail-import-banner__text">
+              <CrossIcon size={15} /> {t.exportFailed}
+            </div>
+            <button onClick={() => setExportError(false)} className="deckdetail-import-banner__close" aria-label={t.close}>
               <CrossIcon size={14} />
             </button>
           </div>

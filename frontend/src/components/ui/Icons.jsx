@@ -51,6 +51,20 @@ export function ImportIcon({ size = 18, className }) {
   )
 }
 
+// The same tray, with the arrow leaving it instead of entering — so the
+// pair reads as one idea seen twice rather than two unrelated glyphs.
+// Deliberately mirrored on the horizontal only: the tray line stays put,
+// which is what makes the direction, not the shape, carry the meaning.
+export function ExportIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M12 15V3" />
+      <polyline points="7 8 12 3 17 8" />
+      <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+    </svg>
+  )
+}
+
 export function CheckboxIcon({ size = 18, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>

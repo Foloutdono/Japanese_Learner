@@ -13048,8 +13048,28 @@ textarea:focus-visible {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--sp-3);
 }
+/* Each button shares the row it lands on rather than sitting at its own
+   label's width. Without this, wrapping (which plan 057 added to stop the
+   row escaping leftward) strands whatever falls onto the last line beside
+   dead space — four buttons on one line and "Importer" alone on the next,
+   which is what the maintainer saw once Export made it six.
+
+   `flex-basis: auto`, not 0, so a long French label still sets a sensible
+   starting width before the growing happens; and no `min-width` override,
+   because a flex item's default `min-width: auto` is what keeps a label
+   from being crushed below its own text and pushes it to the next line
+   instead.
+
+   Named by class rather than as `> button`: the element selector trips
+   stylelint's no-descending-specificity against an earlier
+   `button:hover` rule, and naming the family is more honest anyway —
+   it is these two idioms that stretch, not any element that happens to
+   be a button. It also leaves the select-mode row's count `<span>`
+   alone, which must keep its natural width. */
+.deckdetail-actions > .btn-primary,
+.deckdetail-actions > .btn-secondary { flex: 1 1 auto; }
 .deckdetail-actions--select { align-items: center; }
 .deckdetail-select-count { font-size: 13px; color: var(--text-secondary); }
 
@@ -13085,6 +13105,15 @@ textarea:focus-visible {
   align-items: center;
 }
 .deckdetail-import-banner__text { color: var(--success); font-size: 14px; }
+/* The same banner, reporting a failure instead of a count. --danger is
+   mixed toward the ink rather than used raw, the treatment plans 055 and
+   057 settled on for danger-as-TEXT: raw --danger on this surface is
+   2.11:1 in dark. As a border it stays raw, which DESIGN.md allows —
+   colour is an edge. */
+.deckdetail-import-banner--error { border-left-color: var(--danger); }
+.deckdetail-import-banner--error .deckdetail-import-banner__text {
+  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
+}
 /* Icon-only, so it needs a box of its own: it was `padding: 0` around a
    14px glyph — a 14px tap target, and the only way out of this banner. */
 .deckdetail-import-banner__close {
