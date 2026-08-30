@@ -3318,7 +3318,15 @@
   --daruma-blank:    #c2b7a0;
 
   --text-primary:   #221d15;
-  --text-secondary: #6f6552;
+  /* Deepened from #6f6552 for the same reason --indigo/--teal/--rust are
+     deepened here: paper needs a darker pigment than sumi does. #6f6552
+     was measured at 4.29:1 on --surface and 4.14:1 on --bg-card-hover,
+     under the 4.5:1 floor, and --surface is the material every raised
+     object in the app is made of. Same nezumi: hue 39.3deg -> 38.6deg,
+     saturation 15.0% -> 15.9%, lightness 37.8% -> 34.5%. Worst paper
+     ground is now 4.75:1. The dark value is untouched -- it was never
+     the one at risk. */
+  --text-secondary: #665c4a;
   /* Sumi-nezumi (墨鼠) — charcoal grey. Deepened independently for
      paper, same reasoning as the dark-theme value above. */
   --state-new:      #1a1812;
@@ -5174,7 +5182,16 @@ textarea:focus-visible {
   padding: 14px 18px;
   text-align: left;
   font: inherit;
-  color: var(--text-primary);
+  /* This strip has TWO grounds: it is sumi when something is due, and
+     --clear below makes it transparent over the page when nothing is.
+     One ink cannot serve both -- the ambient pair flips dark in light
+     theme and was measured at 2.80:1 on the sumi, while the panel pair
+     is 1.83:1 on paper. So the ground picks the ink here, once, and
+     every child below reads --ns-ink/--ns-ink-soft instead of naming a
+     token directly. */
+  --ns-ink:      var(--text-on-panel);
+  --ns-ink-soft: var(--text-on-panel-soft);
+  color: var(--ns-ink);
   background: color-mix(in srgb, var(--accent2) 7%, var(--bg-panel));
   border: 1px solid color-mix(in srgb, var(--accent2) 26%, transparent);
   border-left: 3px solid var(--accent2);
@@ -5196,6 +5213,9 @@ textarea:focus-visible {
   gap: 10px;
   cursor: default;
   background: transparent;
+  /* Transparent, so the ground is the page: the ambient pair, not sumi. */
+  --ns-ink:      var(--text-primary);
+  --ns-ink-soft: var(--text-secondary);
   border-color: color-mix(in srgb, var(--border) 80%, transparent);
   border-left-color: color-mix(in srgb, var(--success) 60%, transparent);
 }
@@ -5217,17 +5237,31 @@ textarea:focus-visible {
   gap: 9px;
   min-width: 0;
 }
+/* Both halves of this pair sit in the SOFT ink, and the pairing is
+   carried by the 1.3x size drop, the uppercase and the tracking rather
+   than by a second colour. That is deliberate and it is not what
+   .next-service__pace-jp / __pace-latin five rules below do -- those
+   put the Japanese on the block's full ink. This strip's name is the
+   quieter register of the two on purpose: it is a standing label on a
+   control, not the heading of a screen.
+
+   Neither half is a mix toward `transparent` any more. Such a mix
+   composites toward the GROUND rather than the ink, so it costs
+   contrast in both themes at once: this caption was 2.09:1 on the sumi
+   and still only 4.01:1 in DARK theme, where nothing else in the app
+   failed. Dropping it costs the pair nothing that size and case were
+   not already carrying. */
 .next-service__jp {
   font-size: 13px;
   letter-spacing: 0.16em;
-  color: var(--text-secondary);
+  color: var(--ns-ink-soft);
   white-space: nowrap;
 }
 .next-service__latin {
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--text-secondary) 72%, transparent);
+  color: var(--ns-ink-soft);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5248,7 +5282,7 @@ textarea:focus-visible {
 }
 .next-service__when {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--ns-ink-soft);
 }
 
 /* The lanes waiting, as chips. Scrolls rather than wraps: three chips
@@ -5275,11 +5309,11 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 .next-service__lane-where { font-weight: 700; color: var(--lane-color, var(--accent2)); }
-.next-service__lane-mode  { color: var(--text-secondary); }
+.next-service__lane-mode  { color: var(--ns-ink-soft); }
 .next-service__lane-due {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--ns-ink);
 }
 
 /* ── 新規 — the day's new-item gauge ─────────────────────────
@@ -5316,7 +5350,7 @@ textarea:focus-visible {
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--ns-ink-soft);
 }
 .next-service__pace-bar {
   flex: 1;
@@ -5341,7 +5375,7 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: 0.85rem;
 }
-.next-service__pace-sep { color: var(--text-secondary); font-weight: 400; }
+.next-service__pace-sep { color: var(--ns-ink-soft); font-weight: 400; }
 /* Target met: the onboarding's gold pill (.onb-reco-badge), flowed
    inline at the row's end instead of floating over a card corner. */
 .next-service__pace-met {
@@ -12679,7 +12713,13 @@ textarea:focus-visible {
   font-size: 1.02rem;
 }
 .decks-index-bar__input:focus { border: none; outline: none; }
-.decks-index-bar__input::placeholder { color: color-mix(in srgb, var(--text-secondary) 80%, transparent); }
+/* Opaque, not 80% toward transparent. A mix toward `transparent`
+   composites toward the GROUND, so it costs contrast in both themes at
+   once -- this read 3.31:1 on paper and still only 4.12:1 on sumi. The
+   dim register survives without it: the field itself is --text-primary
+   at 12.51:1, so --text-secondary at 4.91:1 is plainly the quieter of
+   the two. */
+.decks-index-bar__input::placeholder { color: var(--text-secondary); }
 .decks-index-bar__clear {
   display: inline-flex;
   align-items: center;
@@ -13787,7 +13827,10 @@ textarea:focus-visible {
 }
 .phrase-kanji-chip__char:hover { text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; }
 .phrase-kanji-chip__char:active { transform: scale(0.9); }
-.phrase-kanji-chip__level { font-size: 11px; color: var(--text-secondary); }
+/* Inside .phrase-kanji-chip, which paints --bg-panel and inks
+   --text-on-panel: sumi in both themes, so the dim register here is the
+   sumi one. The ambient --text-secondary measured 3.04:1 in light. */
+.phrase-kanji-chip__level { font-size: 11px; color: var(--text-on-panel-soft); }
 
 /* ── Reading practice screen ──────────────────────────────── */
 .rdg-area { width: 100%; max-width: 640px; margin: 0 auto; box-sizing: border-box; }
@@ -14259,7 +14302,9 @@ textarea:focus-visible {
   transition: background 0.15s;
 }
 .comp-option-btn:hover { background: var(--bg-hover, rgba(255, 255, 255, 0.08)); }
-.comp-option-btn__letter { color: var(--text-secondary); margin-right: 12px; font-weight: bold; }
+/* Inside .comp-option-btn, which is sumi and inks --text-on-panel: the
+   letter is a dim register on that ground, not on the page. */
+.comp-option-btn__letter { color: var(--text-on-panel-soft); margin-right: 12px; font-weight: bold; }
 
 .comp-reread-btn { margin-top: 24px; background: none; color: var(--text-secondary); font-size: 13px; text-decoration: underline; }
 
@@ -18234,7 +18279,7 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
   background: color-mix(in srgb, var(--line-jisho) 7%, transparent);
 }
 .dict-index-bar__input { font-size: 1.05rem; }
-.dict-index-bar__input::placeholder { color: color-mix(in srgb, var(--text-secondary) 80%, transparent); }
+.dict-index-bar__input::placeholder { color: var(--text-secondary); }
 
 /* The key that focuses the field, printed on the field. */
 .dict-index-bar__key {

@@ -44,13 +44,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          # 24, not 20: package-lock.json is written by npm 11, and
-          # npm 10 -- which is what Node 20 and Node 22 both ship --
-          # rejects it outright ("Missing: @emnapi/core from lock
-          # file", the unlisted peers of an optional wasm binding).
-          # Node 20 is also deprecated on the runners, and vite 8
-          # already asks for ^20.19 || >=22.12.
-          node-version: '24'
+          node-version: '20'
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
@@ -63,6 +57,16 @@ jobs:
       - name: Check design scale
         working-directory: frontend
         run: npm run lint:scale
+      - name: Check ink/ground
+        working-directory: frontend
+        run: npm run lint:ink
+      # vitest runs two lanes; the browser one (28 files, including Guard 4)
+      # needs a real chromium, which npm ci does not fetch. Without this the
+      # lane silently does not run -- the step still fails, but only after
+      # reporting "6 passed (34)", which reads like a pass at a glance.
+      - name: Install Playwright chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
       - name: Test
         working-directory: frontend
         run: npm test

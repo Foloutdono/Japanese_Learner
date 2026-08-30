@@ -31,6 +31,34 @@ export default defineConfig({
         },
       },
       {
+        // Vite config for THIS project. The optimizer that matters here is
+        // the browser project's own -- a root-level optimizeDeps does not
+        // reach it, which was verified the hard way.
+        //
+        // `react-dom/client` is reached only from inside vitest-browser-react,
+        // so the initial scan of the test files never sees it and it was
+        // bundled AFTER the run had begun:
+        //
+        //     [optimizer] scanning dependencies...
+        //     dependency optimized: react-dom/client
+        //     optimized dependencies changed. reloading
+        //
+        // That reload re-evaluates a module graph that is already live, which
+        // leaves two copies of React in the page -- `Invalid hook call` and
+        // `Cannot read properties of null (reading 'useState')` out of tests
+        // that do nothing unusual. Which file loses varies between runs.
+        //
+        // It only ever bit a COLD cache, so it was invisible locally after the
+        // first run and permanent in CI, where every run is cold.
+        optimizeDeps: {
+          include: [
+            'react',
+            'react-dom',
+            'react-dom/client',
+            'react/jsx-dev-runtime',
+            'vitest-browser-react',
+          ],
+        },
         test: {
           name: 'browser',
           globals: false,

@@ -1,0 +1,6 @@
+{
+  "_": "Guard 4's baseline; see contrast.browser.test.jsx. `allow` lists ink/ground pairs known to sit below `floor`, each with the ratio measured when it was recorded. A listed pair may never get worse, and must be REMOVED once it clears the floor -- the guard fails either way. Nothing may be ADDED without a note here saying why the pair cannot be fixed. Keys are `theme|ink|ground` for the contract matrix and `theme|@selector` for a real call site.",
+  "floor": 4.5,
+  "_allow": "Empty, and that is the point: every pair the guard measures now clears the floor. An entry here is a known failure with a note saying why it cannot be fixed; a stale one fails the guard, so this shrinking is the only direction it can move on its own.",
+  "allow": {}
+}
