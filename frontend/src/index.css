@@ -3271,9 +3271,12 @@
   /* Not a line — the pass's ink. /profile and /settings were given
      line colours when they were modelled as stations; they are the
      定期券 now (see config/identity.js), so one pigment is left and it
-     belongs to the card rather than to a route. Slate: present, and
-     deliberately quieter than any section of the language itself. */
-  --pass-ink:       #5a7186;  /* 藍鼠     ainezumi,    slate       */
+     belongs to the card rather than to a route. Charcoal: present, and
+     deliberately quieter than any section of the language itself. Was
+     藍鼠 slate (#5a7186) until the wall-map mockup round put four
+     candidates side by side — 消炭 won because the darkest neutral is
+     the one that reads as a possession rather than another panel. */
+  --pass-ink:       #575060;  /* 消炭     keshizumi,   charcoal    */
 
   /* 金銀銅 — the podium. Its own three, because a medal is an
      identity and not a progress state. */
@@ -3374,7 +3377,7 @@
   --line-exam:      #7a5c40;
   /* Retired as a board line by plan 027 — see the dark-theme value. */
   --line-douga:     #6a7a35;
-  --pass-ink:       #4c6072;
+  --pass-ink:       #4a4452;
 
   --medal-gold:     #a97a25;
   --medal-silver:   #8d939b;
@@ -4216,7 +4219,12 @@ textarea:focus-visible {
      was forced out to 44 and the roundel came out an oval. */
   padding: 0;
   background: transparent;
-  border: 2px solid var(--pass-ink);
+  /* Lifted toward the panel ink, not raw: this bar is sumi in BOTH
+     themes and 消炭 charcoal is nearly sumi itself — raw it measures
+     ~2.5:1 dark / ~1.9:1 light against the bar, under the 3:1 a
+     non-text edge needs. Same treatment .board__roundel gives gold,
+     for the same reason. */
+  border: 2px solid color-mix(in srgb, var(--pass-ink) 70%, var(--text-on-panel));
   border-radius: var(--r-pill);
   transition: background 0.15s ease;
 }
@@ -4350,6 +4358,27 @@ textarea:focus-visible {
   gap: 10px;
 }
 
+/* ── 案内 — the notice, on the beam ────────────────────────
+   The tip used to close the page as an LED strip under the board.
+   Overhead is where a real concourse posts its notices, and carrying
+   it on the band gives the room its bottom edge back — the board is
+   now the last thing on the screen. Centred in the band's leftover
+   width, between the date and the card; on phones the band has no
+   room for a sentence, so the strip returns to the foot of the page
+   (see the 560px query, and .station__notice below). */
+.station__concourse-notice {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--sp-3);
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+  text-align: center;
+}
+
 /* 本日 — today, read the way a real information board reads a date:
    the Japanese weekday first and largest, the localized date beneath
    it — the same "label above, latin below" grammar the station plate
@@ -4403,11 +4432,19 @@ textarea:focus-visible {
   gap: 14px;
   padding: 10px 16px 10px 12px;
   border-radius: 10px;
+  /* The pass's own ink, not --accent6: this card IS the pass at pocket
+     size (see .pass, .pass-stub, .reissue__pass — all --pass-color),
+     and the verdigris it wore was the one People-family object still
+     borrowing an accent whose dark value coincides with
+     --line-reading. 34% rather than the 26% the verdigris used:
+     charcoal sits closer to the panel it is mixed into, so it needs
+     the deeper cut to read as a tint at all (the stub uses the same
+     34% for the same reason). */
   background:
     linear-gradient(122deg,
-      color-mix(in srgb, var(--accent6) 26%, var(--bg-panel)) 0%,
+      color-mix(in srgb, var(--pass-ink) 34%, var(--bg-panel)) 0%,
       var(--bg-panel) 58%);
-  border: 1px solid color-mix(in srgb, var(--accent6) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
   color: var(--text-on-panel);
   text-align: left;
   transition: transform 0.15s ease, border-color 0.15s ease;
@@ -4415,7 +4452,7 @@ textarea:focus-visible {
 .ic-card:hover,
 .ic-card:focus-visible {
   transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--accent6) 60%, transparent);
+  border-color: color-mix(in srgb, var(--pass-ink) 75%, transparent);
   filter: none;
 }
 .ic-card--blank { padding: 12px 18px; }
@@ -4914,7 +4951,8 @@ textarea:focus-visible {
   font-family: var(--font-jp);
   font-size: 0.76rem;
   font-weight: 700;
-    /* Mixed toward the ink; raw slate at this size measured 2.44:1 */
+    /* Mixed toward the ink; the raw pigment at this size measured
+       2.44:1 back when the pass was slate, and charcoal is darker */
 color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 }
 .pass__dan--dan {
@@ -6100,8 +6138,12 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 
 /* ── The notice strip ─────────────────────────────────────
    The LED band under a real board carries the notices, not the
-   timetable. */
+   timetable. The notice itself now rides the concourse band (see
+   .station__concourse-notice), so this footer form exists only for
+   phones, where the band is too short for a sentence — the 560px
+   query swaps which of the two shows. */
 .station__notice {
+  display: none;
   padding: 20px 24px 34px;
   color: var(--text-secondary);
   font-size: 0.75rem;
@@ -6755,7 +6797,7 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   /* The map's small marks — the code and the name of the stop you are
      standing at — take the line colour lifted toward the panel's own
      warm ink. On the sumi ground the darker pigments (indigo, grape,
-     slate) fall close to what they are printed on at 0.6rem; the hue
+     charcoal) fall close to what they are printed on at 0.6rem; the hue
      still identifies the line, it just clears the background. The
      rail and the marker keep the raw pigment: at 3px they carry. */
   --map-ink: color-mix(in srgb, var(--line-color, var(--accent2)) 74%, var(--text-on-panel));
@@ -7043,13 +7085,16 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   text-transform: uppercase;
 }
 .theme-choice__btn:hover { filter: none; color: var(--text-primary); }
-/* The chosen one is a filled slate, the pass's ink -- this page belongs
-   to the holder, not to a section, so it borrows no line colour. */
+/* The chosen one is a filled charcoal, the pass's ink -- this page
+   belongs to the holder, not to a section, so it borrows no line
+   colour. */
 .theme-choice__btn--on {
   /* Deepened 30% toward the panel, the same formula .btn-primary uses
-     and for the same reason: the slate at full strength carries
-     --text-on-panel at only 4.32:1, under the floor for the 15px glyph
-     sitting on it. */
+     and the reason it was adopted here: the pass's previous slate at
+     full strength carried --text-on-panel at only 4.32:1, under the
+     floor for the 15px glyph sitting on it. Charcoal would clear the
+     floor raw, but the fill stays on the family formula rather than
+     becoming a special case. */
   background: color-mix(in srgb, var(--pass-ink) 70%, var(--bg-panel));
   border-color: color-mix(in srgb, var(--pass-ink) 70%, var(--bg-panel));
   color: var(--text-on-panel);
@@ -15594,6 +15639,10 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 
 @media (max-width: 560px) {
   .station__concourse { padding: 14px 16px; }
+  /* The band holds the date and the card with nothing to spare — the
+     notice goes back to the foot of the page here. */
+  .station__concourse-notice { display: none; }
+  .station__notice { display: block; }
   .station__platform { padding: 20px 12px 24px; gap: 12px; }
   .next-service { padding: 12px 14px; }
   .next-service__count { font-size: 18px; }

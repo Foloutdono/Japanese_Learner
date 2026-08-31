@@ -156,6 +156,16 @@ export default function HomeScreen({ session }) {
       <div className="station__concourse">
         <div className="station__concourse-inner">
           <ConcourseToday />
+          {/* 案内 — the notice, posted overhead the way a real
+              concourse posts one. It rendered as an LED strip at the
+              foot of the page until the wall-map mockup round moved
+              it up here; the footer below still renders it for
+              phones, where this band has no room for a sentence, and
+              the 560px query decides which of the two shows. */}
+          <span className="station__concourse-notice">
+            <span className="station__notice-chime" aria-hidden="true">♪</span>
+            <span className="station__notice-text">{t.tip}</span>
+          </span>
           <div className="station__concourse-right">
             <ICCard />
             <button
@@ -185,9 +195,11 @@ export default function HomeScreen({ session }) {
       </main>
 
       {/* The LED strip under a real board, which carries the notices
-          rather than the timetable. Held to the board's own column so
-          the line it sets never runs wider than the panel it belongs
-          to. */}
+          rather than the timetable. Phones only, since the concourse
+          band took the notice over — CSS hides whichever copy the
+          viewport doesn't need (560px query). Held to the board's own
+          column so the line it sets never runs wider than the panel
+          it belongs to. */}
       <footer className="station__notice">
         <span className="station__notice-inner">
           <span className="station__notice-chime" aria-hidden="true">♪</span>

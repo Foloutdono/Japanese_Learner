@@ -68,7 +68,7 @@ the screen.
 | Family | Tokens | Means |
 |---|---|---|
 | **Places** | `--line-kana`, `--line-vocab`, … (11) | which section you are in |
-| **People** | `--pass-ink` (藍鼠 slate) | this is *yours* — pass, IC card, stub |
+| **People** | `--pass-ink` (消炭 charcoal) | this is *yours* — pass, IC card, stub |
 | **States** | `--success`, `--warning`, `--danger`, `--state-*` | correct, due, learning, mastered |
 
 An object about the user never wears a line colour. A figure about study state
