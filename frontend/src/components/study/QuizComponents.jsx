@@ -318,10 +318,21 @@ export function DeckProgress({ stats }) {
 
   const { total, new: toLearn, learning, mastered } = stats
 
+  // `color` paints the bar segment and stays at full strength -- it is a
+  // fill. `ink` is the same state colour used as the legend's FIGURE, so
+  // it follows R4-2 and mixes toward the paper ink where it needs to:
+  // --state-learning measures 2.99:1 raw and --state-mastered 4.35:1,
+  // both under the floor, while --state-new is already light enough to
+  // stand on its own. Per Study.dc.html, which mixes exactly these two.
   const segments = [
-    { key: 'new',      value: toLearn,  color: 'var(--state-new)',      label: t.progressNew },
-    { key: 'learning', value: learning, color: 'var(--state-learning)', label: t.progressLearning },
-    { key: 'mastered', value: mastered, color: 'var(--state-mastered)', label: t.progressMastered },
+    { key: 'new',      value: toLearn,  color: 'var(--state-new)',
+      ink: 'var(--state-new)', label: t.progressNew },
+    { key: 'learning', value: learning, color: 'var(--state-learning)',
+      ink: 'color-mix(in srgb, var(--state-learning) 65%, var(--text-primary))',
+      label: t.progressLearning },
+    { key: 'mastered', value: mastered, color: 'var(--state-mastered)',
+      ink: 'color-mix(in srgb, var(--state-mastered) 65%, var(--text-primary))',
+      label: t.progressMastered },
   ]
 
   return (
@@ -339,9 +350,13 @@ export function DeckProgress({ stats }) {
       </div>
       <div className="deck-progress__legend">
         {segments.map(s => (
+          // Study.dc.html: the figure carries the colour and the weight,
+          // the word stays in the dim register. No dot -- the coloured
+          // figure IS the key -- and no /total, which repeated the same
+          // denominator three times for no reader who needed it.
           <span key={s.key} className="deck-progress__legend-item">
-            <span className="deck-progress__dot" style={{ background: s.color }} />
-            {s.value}/{total} {s.label}
+            <span className="deck-progress__legend-figure" style={{ color: s.ink }}>{s.value}</span>
+            {' '}{s.label}
           </span>
         ))}
       </div>
@@ -370,11 +385,34 @@ export { Readings, ReadingGroup }
 // relieve" led with a bare "(v5r" as the headline meaning). It also
 // now shares the dictionary's sentence-casing, so the same word reads
 // the same way in a quiz as it does in its dictionary entry.
-export function MeaningDisplay({ meaning, size = 28, color = 'var(--accent3)', center = true }) {
+// Content-fitted sizing for the reveal, using the SAME thresholds
+// GrammarRule has been improvising alone (GrammarPieces.jsx:18): a short
+// answer is a headline, a long one still fits. Chosen from side-by-side
+// specimens judged on real cards -- the answer face had never been
+// specified and had grown eleven type sizes, of which this is now the
+// only one. Emitted as a variable so the sizing decision stays in CSS.
+function fitSize(text) {
+  const n = (text || '').length
+  return n <= 6 ? '2.5rem' : n <= 14 ? '1.7rem' : n <= 30 ? '1.25rem' : '1.12rem'
+}
+
+// `color` has NO default on purpose. It used to default to --accent3,
+// which meant --meaning-color was always set and the stylesheet's own
+// default could never apply -- removing the call sites' colour props
+// changed nothing on screen until this went too. Left undefined, the
+// variable is simply not emitted and .meaning-display__primary falls
+// back to the ambient ink, which is the reveal's decided treatment.
+// Pass a colour only where the answer genuinely needs to be graded
+// (right/wrong), never to decorate it.
+export function MeaningDisplay({ meaning, size = 28, color, center = true }) {
   const [primary, ...rest] = glossParts(meaning)
   if (!primary) return null
 
-  const style = { '--meaning-size': `${size}px`, '--meaning-color': color }
+  const style = {
+    '--meaning-size': `${size}px`,
+    '--meaning-fit': fitSize(primary),
+  }
+  if (color) style['--meaning-color'] = color
 
   return (
     <div className={`meaning-display${center ? ' meaning-display--center' : ''}`} style={style}>

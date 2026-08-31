@@ -45,10 +45,19 @@ export default function RatingBar({ onRate, active }) {
     return () => window.removeEventListener('keydown', handler)
   }, [active, onRate])
 
-  if (!active) return null
-
+  // Rendered even before the reveal, inert, so its space is RESERVED.
+  // Returning null here used to make the bar appear out of nowhere on
+  // reveal -- and because .quiz-area is a centred flex column, adding
+  // 58px of bar plus an 18px gap below the card pushed everything above
+  // it up by half that. Measured on a vocab card: the card shrinks 7px
+  // on reveal but moves up 34px, so the jump was almost entirely this.
+  //
+  // .rating-bar--idle is `visibility: hidden`, which (unlike opacity)
+  // also takes the six buttons out of the tab order and out of
+  // hit-testing, so nothing is reachable before there is a card to rate.
+  // The keyboard handler above is separately gated on `active`.
   return (
-    <div className="rating-bar">
+    <div className={`rating-bar${active ? '' : ' rating-bar--idle'}`} aria-hidden={!active}>
       {/* One continuous instrument, worst to best -- see index.css for
           why. `.map()` already returns a new array, so the `.reverse()`
           below sorts that copy and never QUALITY_BTNS itself; DOM order

@@ -171,6 +171,7 @@
       "var(--char-size, 110px)",
       "var(--front-size, 32px)",
       "var(--furigana-size, 72px)",
+      "var(--meaning-fit)",
       "var(--meaning-size, 28px)",
       "var(--reading-index-size, 13px)",
       "var(--reading-size, 18px)",

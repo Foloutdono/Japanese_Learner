@@ -254,7 +254,7 @@ export default function CardPrompt({
               <InlineReveal
                 t={t} kana={c.kanji ? c.kana : null} isLarge={isF2B} stacked={isF2B}
                 main={isF2B
-                  ? <MeaningDisplay meaning={c.meaning} size={28} color="var(--accent2)" />
+                  ? <MeaningDisplay meaning={c.meaning} size={28} />
                   : <CharDisplay char={wordForm(c)} variant="word" />}
               />
             }
@@ -317,7 +317,7 @@ export default function CardPrompt({
                   </>
                 )
                 : isF2B
-                  ? <MeaningDisplay meaning={c.meaning} size={30} color="var(--success)" />
+                  ? <MeaningDisplay meaning={c.meaning} size={30} />
                   : (
                     <>
                       <GrammarRule text={c.grammar} size={44} />

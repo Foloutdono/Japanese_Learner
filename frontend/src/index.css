@@ -4200,12 +4200,24 @@ textarea:focus-visible {
    desktop. Hidden on mobile in favour of .mobile-level-bar below —
    see the ≤768px query near the bottom of this file. */
 .topbar-profile-ring {
+  /* Study.dc.html draws this as a plain roundel: 32px, a 2px --pass-ink
+     ring, the level inside. It was an XP progress arc in --accent9 --
+     a line pigment on an object about the LEARNER, which DESIGN.md
+     reserves --pass-ink for. The XP figure it used to encode is still
+     one tap away on the pass, and still in this button's title. */
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
+  /* The bare `button` rule hands this 10px 20px. On a 32px border-box
+     that is 40px of horizontal padding in a 32px box, so the used width
+     was forced out to 44 and the roundel came out an oval. */
+  padding: 0;
   background: transparent;
-  padding: 2px 10px 2px 2px;
-  border-radius: 999px;
+  border: 2px solid var(--pass-ink);
+  border-radius: var(--r-pill);
   transition: background 0.15s ease;
 }
 .topbar-profile-ring:hover,
@@ -4229,7 +4241,8 @@ textarea:focus-visible {
 .topbar-profile-ring__level {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 13px;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
   color: var(--text-on-panel);
 }
 .button-set-choice {
@@ -7519,14 +7532,18 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   justify-content: center;
   align-items: center;
   min-height: 30px;
-  gap: 10px;
+  /* --sp-4, per Study.dc.html. Was 10px, on no rung. */
+  gap: var(--sp-4);
 }
 .study-assist__toggle {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  font-size: 12px;
+  /* Study.dc.html's .assist: 6px gap, --fs-caption, --r-card. Was 7px,
+     12px and 8px -- none of the three on a scale. */
+  gap: var(--sp-2);
+  font-size: var(--fs-caption);
   padding: 6px 12px;
+  border-radius: var(--r-card);
   background: var(--bg-card);
   color: var(--text-secondary);
   border: 1px solid var(--surface-line);
@@ -7580,7 +7597,8 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 25px;
+  /* --sp-6, per Study.dc.html. It was 25px, which is on no rung. */
+  gap: var(--sp-6);
   padding: 40px 24px max(32px, 25vh);
   text-align: center;
 }
@@ -7897,7 +7915,9 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   text-align: left;
   --card-pad-y: var(--sp-7);
   --card-pad-x: var(--sp-7);
-  --card-pad-top: var(--sp-7);
+  /* 44 top, per Study.dc.html -- the extra headroom is what the corner
+     buttons sit in. */
+  --card-pad-top: var(--sp-8);
   max-height: none;
   overflow: visible;
 }
@@ -8523,10 +8543,21 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 14px;
+  /* Study.dc.html: 16px between the three counts, --fs-caption. */
+  /* Study.dc.html: 16px between the three counts, --fs-caption. */
+  gap: var(--sp-5);
   margin-top: 8px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: var(--text-secondary);
+}
+
+/* The figure carries the colour and the weight; the word beside it stays
+   in the dim register. This replaced a coloured dot plus `n/total` -- the
+   dot duplicated what the figure's own colour says, and the denominator
+   was the same number three times over. */
+.deck-progress__legend-figure {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .deck-progress__legend-item {
@@ -8535,12 +8566,6 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   gap: 5px;
 }
 
-.deck-progress__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
 
 /* ── Review deck (self-paced, ungraded browse) ─────────────
    Counter + prev/next nav for ReviewDeck.jsx — sits where
@@ -8601,14 +8626,38 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   font-family: var(--reading-font, inherit);
 }
 
-.meaning-display { text-align: left; }
+.meaning-display {
+  text-align: left;
+  /* Declared here, set per card by MeaningDisplay. The default keeps
+     the sheet self-contained: if the JS ever stops emitting it, the
+     fitted reveal degrades to the normal size rather than to nothing. */
+  /* The reveal's size, computed per card by MeaningDisplay from the
+     primary gloss's length -- short answers read as a headline, long
+     ones still fit. The default keeps the sheet self-contained: if the
+     JS ever stops emitting it, the reveal degrades to the old fixed
+     size rather than to nothing. It only ever resolves to rungs of the
+     type scale, which is why design-scale.json allows it by name. */
+  --meaning-fit: var(--meaning-size, 28px);
+}
 .meaning-display--center { text-align: center; }
 
 .meaning-display__primary {
-  font-size: var(--meaning-size, 28px);
+  /* Chosen from side-by-side specimens, judged on real cards: the
+     answer's size steps with its length (--meaning-fit), and its ink is
+     the ambient one.
+
+     The answer face had never been specified -- no artboard drew it --
+     and had grown ELEVEN type sizes and FOUR inks for one role, one of
+     them --success, a state colour used decoratively, which DESIGN.md
+     forbids. The size is now one function of content, and the ink is
+     --text-primary unless a caller has a real reason to override it.
+     --accent3 was the old default and is what made a meaning read as
+     decoration rather than as the answer. */
+  font-size: var(--meaning-fit);
   font-weight: 800;
-  color: var(--meaning-color, var(--accent3));
+  color: var(--meaning-color, var(--text-primary));
   line-height: 1.2;
+  white-space: normal;
 }
 
 .meaning-display__secondary {
@@ -8805,9 +8854,13 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   justify-content: center;
   width: 30px;
   height: 30px;
-  background: var(--chip-bg);
+  flex: none; /* the row is a flex container; without this the 30px is a
+                 suggestion and the button stretched to 42px */
+  /* Study.dc.html's .revbtn is transparent -- the chip wash made two
+     filled discs sit on a card whose whole job is to be pressed. */
+  background: transparent;
   border: 1px solid var(--border);
-  border-radius: 50%;
+  border-radius: var(--r-pill);
   color: var(--text-primary);
   cursor: pointer;
   transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
@@ -9628,7 +9681,49 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    control's nearest equivalent and stands in for it. Blackout (q0)
    keeps the one true void: no colour at all, sumi ink instead, since
    the answer drew a blank. */
+/* ── the card's footer strip ───────────────────────────────
+   Study.dc.html closes the card with a hairline and two facts: what
+   this card is on the left, which direction you are studying it in on
+   the right. Both in the dim register -- it is a caption on the card,
+   not part of the prompt. */
+.prompt-card__foot {
+  border-top: 1px solid var(--border);
+  padding: var(--sp-4) var(--sp-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.prompt-card__foot > * {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* The strip is flush to the card's edges, so the card's own padding
+   moves onto the content instead. The layout rule itself lives further
+   down, after .vocab-card-boost .prompt-card -- see there for why. */
+.prompt-card__body {
+  padding: var(--card-pad-top) var(--card-pad-x) var(--card-pad-y);
+}
+
 .rating-bar { margin-top: 0; }
+
+/* Held, not hidden. RatingBar used to return null before the reveal, so
+   the bar appeared out of nowhere -- and because .quiz-area is a centred
+   flex column, adding 58px of bar plus an 18px gap below the card pushed
+   everything above it UP by half that. Measured on a vocab card: the card
+   shrinks 7px on reveal but moves up 34px, so the jump a learner sees is
+   almost entirely this, not the card resizing.
+
+   Rendering it inert from the start reserves the space, so revealing
+   changes what the card says and nothing about where it sits.
+   `visibility: hidden` (not opacity) is deliberate: it takes the six
+   buttons out of the tab order and out of hit-testing too, so nothing is
+   focusable or clickable before there is anything to rate. */
+.rating-bar--idle { visibility: hidden; }
 
 /* ── the rating bar ────────────────────────────────
    One instrument, six segments, worst to best. Two decisions here were
@@ -9676,6 +9771,12 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   background: none;
   border: none;
   border-left: 1px solid var(--surface-line);
+  /* The bare `button` rule gives every button 8px. Inherited here it
+     bent each segment's 1px hairline at all four corners, so the
+     dividers read as curved rather than as ruled lines -- most visible
+     once the bar wraps and the grid has interior corners. The container
+     keeps its own radius; the cells inside it are square. */
+  border-radius: 0;
   color: var(--text-primary);
   text-align: center;
   transition: background 0.15s ease;
@@ -9709,6 +9810,9 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   font-family: var(--font-display);
   font-size: var(--fs-sm);
   font-weight: 700;
+  /* Study.dc.html's .seg-word. Left at `normal` the label's own leading
+     pushed the ring off-centre against the segment's 56px box. */
+  line-height: 1;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -9738,9 +9842,30 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    --fs-caption-xs is a subtitle rung and is too small to carry a control
    on its own. The 1px hairline between segments does the separating that
    the padding used to. */
+
+/* Six segments across a phone is a squeeze at any width: at 375px each
+   is 54px, at 320px only 44px -- and Blackout alone needs 50px, so it
+   truncates. Truncating is not available here, because the label IS the
+   control: the word carries the meaning and the ring only reinforces
+   it, so falling back to ring-only would leave colour as the sole
+   channel.
+
+   So below 560px the instrument wraps to two rows of three. It stays
+   ONE object -- one container, one border, hairlines between segments --
+   and worst-to-best still reads left to right, top to bottom. Segments
+   go from 54px to ~109px at 375px, so the label needs no step-down at
+   all: an earlier pass shrank it to --fs-caption to survive six-across,
+   and there is no longer six across. Bigger targets and bigger type. */
 @media (max-width: 560px) {
-  .rating-bar__btn { padding-inline: 0; }
-  .rating-bar__btn-label { font-size: var(--fs-caption); }
+  .rating-bar__buttons { flex-wrap: wrap; }
+  .rating-bar__btn {
+    flex: 0 0 33.333%;
+    padding-inline: var(--sp-1);
+  }
+  /* Re-draw the hairlines for a grid: the first of each row has no
+     rule to its left, and the second row gains one above it. */
+  .rating-bar__btn:nth-child(3n + 1) { border-left: none; }
+  .rating-bar__btn:nth-child(n + 4) { border-top: 1px solid var(--surface-line); }
 }
 
 /* ── Shared nav control button (mute / lang switcher) ─────── */
@@ -14913,13 +15038,32 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    the flashcard's clickable box instead of growing it evenly, so a
    tap in the now-uncovered strip of padding missed it entirely. */
 .vocab-card-boost .prompt-card {
-  --card-pad-y: var(--sp-9);
-  --card-pad-x: 32px;
-  --card-pad-top: var(--sp-9);
+  /* Study.dc.html draws the study card at 44 / 28 / 28. This was
+     52 / 32, and 32 is on no rung. */
+  --card-pad-y: var(--sp-7);
+  --card-pad-x: var(--sp-7);
+  --card-pad-top: var(--sp-8);
   min-height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* A footed card stacks: body, then the strip flush to the edges.
+   .vocab-card-boost .prompt-card above sets display:flex with centred
+   items at the same specificity as `.prompt-card:has(...)`, so the tie
+   broke on source order and the footer rendered BESIDE the prompt. This
+   sits after it deliberately. */
+/* Two classes, to match `.vocab-card-boost .prompt-card`'s specificity --
+   one class loses to it outright no matter where it sits in the file, which
+   is what left align-items at `center` and the strip shrink-wrapped. Placed
+   after it so the tie breaks this way. */
+.prompt-card.prompt-card--footed {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
 }
 
 /* On every OTHER screen .flashcard is a plain block child, and a
@@ -15236,8 +15380,15 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    content simply fills the full height from the top. Hidden by
    default; a scroll-up reveals it as an overlay for a few seconds. */
 @media (max-width: 768px) {
-  /* Desktop's ring gives way to the fixed bottom HUD bar. */
-  .topbar-profile-ring { display: none; }
+  /* The ring stays on a phone now. It was hidden here because it used
+     to be a 32px arc PLUS a level label beside it, which was too wide
+     for a mobile top bar -- so the fixed bottom HUD carried level and
+     XP instead. Study.dc.html draws the ring as a plain 32px roundel
+     with the level inside it, and that fits, so the top bar shows what
+     the artboard shows.
+     The bottom bar is left in place: it also carries the XP figure,
+     which the roundel does not. If it should go, that frees the 72px
+     of page padding reserved for it. */
   .mobile-level-bar { display: flex; }
 
   .top-bar--autohide {
@@ -15350,7 +15501,12 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   .landing-feature-grid { grid-template-columns: 1fr; }
   .landing-pros-item { gap: 14px; padding: 22px 4px; }
   .landing-pros-item__glyph { min-width: 40px; }
-  .quiz-area { padding: 32px 24px max(32px, 14vh); gap: 18px;}
+  /* The column keeps --sp-6 between blocks on a phone too. It was 18px
+     here -- off every rung, and tighter than the desktop it is meant to
+     be a compression of -- which is what left the card's footer strip
+     sitting almost on the rating bar, and the assist buttons almost on
+     the card. */
+  .quiz-area { padding: 32px 24px max(32px, 14vh); gap: var(--sp-6); }
   .flashcard__hint { margin-top: 2px;}
 
   /* The Explorer's group header is five columns wide by design, and at

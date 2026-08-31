@@ -396,7 +396,7 @@ export default function GrammarScreen({ session }) {
                               )}
                             </>
                           )
-                          : <MeaningDisplay meaning={card.meaning} size={30} color="var(--success)" />
+                          : <MeaningDisplay meaning={card.meaning} size={30} />
                     }
                   />
                 ) : (
