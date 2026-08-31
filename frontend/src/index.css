@@ -14589,9 +14589,6 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 }
 
 .rdg-feedback-actions { margin-top: 16px; }
-.rdg-grade-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.rdg-grade-btn--wrong { background: var(--danger); color: var(--text-on-panel); padding: 10px 24px; font-size: 15px; }
-.rdg-grade-btn--right { background: var(--success); color: var(--text-on-panel); padding: 10px 24px; font-size: 15px; }
 .rdg-next-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
 
 /* AI breakdown panel (see ReadingScreen.jsx's AnalysisBreakdown) —
@@ -14826,9 +14823,6 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 .trn-analysis-text { font-size: 15px; color: var(--text-primary); line-height: 1.6; }
 
 .trn-feedback-actions { margin-top: 16px; }
-.trn-grade-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.trn-grade-btn--wrong { background: var(--danger); color: var(--text-on-panel); padding: 10px 24px; font-size: 15px; }
-.trn-grade-btn--right { background: var(--success); color: var(--text-on-panel); padding: 10px 24px; font-size: 15px; }
 .trn-next-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
 
 .trn-tier-jump {
@@ -15789,20 +15783,14 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 
   .rdg-area { max-width: 100%; }
   .rdg-answer-input { max-width: 100%; }
-  .rdg-grade-btn--wrong,
-  .rdg-grade-btn--right,
   .rdg-next-btn { width: 100%; }
-  .rdg-grade-row { flex-direction: column; }
   .rdg-breakdown-card-stage { max-width: 100%; }
   .rdg-breakdown-nav { width: 34px; height: 34px; }
   .rdg-breakdown-nav svg { width: 16px; height: 16px; }
 
   .trn-area { max-width: 100%; }
   .trn-answer-input { max-width: 100%; }
-  .trn-grade-btn--wrong,
-  .trn-grade-btn--right,
   .trn-next-btn { width: 100%; }
-  .trn-grade-row { flex-direction: column; }
   .trn-feedback-card .prompt-card { max-height: 75vh; }
 }
 
