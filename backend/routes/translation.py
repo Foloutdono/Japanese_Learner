@@ -2,7 +2,7 @@ import logging
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from core.db import db_conn
 from core.auth import get_user_id
@@ -40,9 +40,34 @@ def _init_db() -> None:
                     romaji TEXT NOT NULL,
                     answer TEXT NOT NULL,
                     correct BOOLEAN NOT NULL,
+                    quality SMALLINT,
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
                 """
+            )
+            # The screen grades with the app's six-segment rating bar, so
+            # the learner's answer carries more than pass/fail. `correct`
+            # stays -- it is what every existing reader and every row
+            # written before this understands -- and `quality` records the
+            # rating it was derived from, 0..5 worst-to-best, exactly as
+            # RatingBar emits it.
+            #
+            # NULLable on purpose: every row logged before this column
+            # existed genuinely has no rating, and a default would invent
+            # one. A reader has to treat NULL as "graded, resolution
+            # unknown" rather than as a score.
+            #
+            # ADD COLUMN IF NOT EXISTS for installs whose table predates
+            # this: the create above only fires when the table is absent,
+            # so it never revisits one that already exists. Same pattern
+            # as phrase.py's `source` and decks.py's `structure`/`fields`.
+            #
+            # (Deliberately not spelling the create statement out again
+            # here -- test_schema_declared.py greps this directory for
+            # that phrase to find every table the code creates, and the
+            # next word in a sentence would read as a table name.)
+            cur.execute(
+                "ALTER TABLE translation_log ADD COLUMN IF NOT EXISTS quality SMALLINT"
             )
             cur.execute(
                 """
@@ -200,6 +225,11 @@ class ResultPayload(BaseModel):
     romaji: str
     answer: str
     correct: bool
+    # 0..5, worst to best, as RatingBar emits it. Optional so an older
+    # client that still posts only `correct` keeps working; the bound is
+    # enforced here rather than by a CHECK so a bad value is a 422 the
+    # caller can read, not a 500 from the driver.
+    quality: int | None = Field(default=None, ge=0, le=5)
 
 
 @router.post("/api/translation/result")
@@ -216,19 +246,21 @@ def post_translation_result(payload: ResultPayload, user_id: str = Depends(get_u
             cur.execute(
                 """
                 INSERT INTO translation_log
-                    (user_id, level, phase, translation_prompt, phrase, romaji, answer, correct)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    (user_id, level, phase, translation_prompt, phrase, romaji,
+                     answer, correct, quality)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     user_id, level_for_log, payload.source, payload.translation_prompt,
                     payload.phrase, payload.romaji, payload.answer, payload.correct,
+                    payload.quality,
                 ),
             )
         conn.commit()
     finally:
         conn.close()
 
-    return {"correct": payload.correct}
+    return {"correct": payload.correct, "quality": payload.quality}
 
 
 @router.get("/api/translation/history")
@@ -238,7 +270,8 @@ def get_translation_history(user_id: str = Depends(get_user_id), limit: int = Qu
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT level, phase, translation_prompt, phrase, romaji, answer, correct, created_at
+                SELECT level, phase, translation_prompt, phrase, romaji, answer,
+                       correct, quality, created_at
                 FROM translation_log
                 WHERE user_id = %s
                 ORDER BY created_at DESC
@@ -254,7 +287,9 @@ def get_translation_history(user_id: str = Depends(get_user_id), limit: int = Qu
         {
             "level": level, "source": phase, "translation_prompt": translation_prompt,
             "phrase": phrase, "romaji": romaji, "answer": answer, "correct": correct,
+            "quality": quality,
             "created_at": created_at.isoformat(),
         }
-        for level, phase, translation_prompt, phrase, romaji, answer, correct, created_at in rows
+        for level, phase, translation_prompt, phrase, romaji, answer, correct, quality, created_at
+        in rows
     ]

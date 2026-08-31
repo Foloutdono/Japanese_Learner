@@ -217,7 +217,12 @@ export default function TranslationScreen({ session }) {
     fetchAnalysis(data, trimmed)
   }
 
-  function gradeAnswer(isCorrect) {
+  // `quality` is the learner's own rating, 0..5 worst to best, as
+  // RatingBar emits it. `isCorrect` stays the derived pass/fail, because
+  // it is what the score row, the streak and every existing reader of
+  // translation_log understand -- the rating is recorded alongside it,
+  // not instead of it.
+  function gradeAnswer(isCorrect, quality = null) {
     if (feedback?.correct !== null) return // already graded, ignore repeat clicks
 
     setFeedback(f => ({ ...f, correct: isCorrect }))
@@ -237,6 +242,7 @@ export default function TranslationScreen({ session }) {
         romaji: data.romaji,
         answer: answer.trim(),
         correct: isCorrect,
+        quality,
       }),
     }).catch(() => {
       // Logging failure shouldn't block the learner from continuing.
@@ -503,7 +509,7 @@ function SessionView({
                    RatingBar's own threshold decides correctness: q > 2
                    is a pass, which is the same line it draws between
                    playCorrect and playWrong. */
-                <RatingBar active onRate={q => gradeAnswer(q >= 3)} />
+                <RatingBar active onRate={q => gradeAnswer(q >= 3, q)} />
               ) : (
                 <button
                   onClick={next}
