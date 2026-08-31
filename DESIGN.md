@@ -6,8 +6,8 @@ records decisions, `plans/` holds the work — this file says what the app
 
 Read this before writing any CSS or building any screen.
 
-A visual reference exists too — 22 artboards covering the element library and
-all 16 screens, at
+A visual reference exists too — 29 artboards, 6 of the element library and 23
+of the screens, at
 `https://claude.ai/code/artifact/0b6dadc8-6b40-4f83-9238-69dd19b5e30e`. The
 canvas is the **picture**; this file is the **rule**. Where they disagree,
 this file wins — a canvas cannot be grepped and does not travel with a clone.
@@ -212,26 +212,35 @@ fills with a line pigment. Everything beside it is a ghost: transparent, a
 `--surface-line` border, `--text-primary`.
 
 ```css
-background: color-mix(in srgb, var(--line-color, var(--accent)) 88%, var(--bg-panel));
+background: color-mix(in srgb, var(--line-color, var(--accent)) 70%, var(--bg-panel));
 color: var(--text-on-panel);
-/* :hover lifts the fill to 97% — lighter, not a brightness filter */
+/* :hover lifts the fill to 79% — lighter, not a brightness filter */
 ```
 
-The fill is **the section's own pigment, deepened 12% toward the panel ink**,
+The fill is **the section's own pigment, deepened 30% toward the panel ink**,
 so a button on Decks is 蘇芳 and one on Today is 朱色 without either screen
 inventing a colour. The deepening is not decoration: the raw pigment does not
-carry the ink at 15.2px/600. Hover goes **lighter**, never darker — a `filter:
+carry the ink at 15.2px/600. It was 12% when this family was written, calibrated
+on the only two pigments the button then wore; 松葉色 and 黄丹 both landed under
+the floor when the study screens joined, so the whole family went deeper. **79%
+is the ceiling** — it is the hover's value, and above it 黄丹 fails. Hover goes **lighter**, never darker — a `filter:
 brightness()` is not the hover, and must be turned off where the bare `button`
 rule supplies one. Disabled is `opacity: 0.45`, and there is only one disabled
 treatment.
 
-**The ink is chosen by the fill's lightness, not fixed.** A fill darker than
-roughly 40% luminance takes `--text-on-panel`; one lighter than that takes
-`--text-on-fill`. 山吹色 gold and 黄丹 safflower are the light ones — gold on
-the paper ink is **2.19:1**, and deepening does not save it, because a deepened
-yellow turns olive before it will carry a light ink. Gold takes the dark ink.
+**The ink is chosen by the fill's lightness, not fixed.** At the 70/79
+deepening, **eleven of the twelve line pigments carry `--text-on-panel`** in both
+themes and both states; the worst of them, 黄丹 safflower, rests at 5.29:1 and
+hovers at 4.53:1.
 
-Assuming one ink for all twelve pigments is exactly what produced the defect
+**山吹色 gold is the twelfth, and it is the exception.** It reaches only 3.90:1
+resting and 3.24:1 hovering in dark theme, and no deepening within this family
+saves it — a deepened yellow turns olive before it will carry a light ink. Gold
+takes the dark ink, or a deeper mix of its own: the console's gold pill goes to
+60% and keeps `--text-on-fill`. Gold is the 辞書 and 蔵 sections, so **a filled
+action on either of those screens is not a plain `.btn-primary`.**
+
+Assuming one ink for every pigment is exactly what produced the defect
 this section was written for: the button shipped at 3.48:1 and every guard and
 every test passed, because nothing in the app checked contrast. **Guard 4 now
 does** (`src/contrast.browser.test.jsx`): it measures the intended ink/ground
