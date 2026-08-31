@@ -516,6 +516,39 @@ def _index_vocab_by_lemma():
     token's lemma is ever literally "二日" — see
     _resolve_numeral_compound below, which is the one place this index
     still needs the same variant-surface trick the legacy path uses.
+
+    Conventional kana spellings (御飯 -> ご飯, 食べ物 -> 食べもの) are keys
+    too, but ONLY the ones that still contain a kanji. A tokenizer
+    hands us whichever spelling the page used, and its lemma for ご飯
+    is ご飯, not the deck's 御飯 -- so without these keys the word is
+    simply missed, which is what the deleted find_vocab_match used to
+    cover (see the note above it).
+
+    The kanji filter is the whole safety story, and it is the same
+    distinction _vocab_candidates draws with its `risky` flag.
+    kana_spelling_variants reduces a one-character word to BARE kana
+    (事 -> こと, 物 -> もの, 時 -> とき, 方 -> ほう), and those are precisely
+    the nominalizers and formal nouns that carry no lexical weight in
+    running text. resolve_lemma is consulted before resolve_kana and is
+    ungated, so a bare-kana key here would resolve every grammatical
+    こと/もの/よう to a vocab card while bypassing the POS, length and
+    auxiliary_use guards resolve_kana applies for exactly that reason.
+    Requiring a kanji keeps the distinctive spellings and drops all of
+    them. It also admits some combinations nobody writes (時間 yields
+    とき間), which are harmless: no tokenizer will ever produce them as
+    a lemma, so they sit in the dict unmatched.
+
+    Variants are added in a SECOND pass, and only for keys the first
+    pass did not already claim, which makes them strictly additive:
+    they can turn a lookup that used to fail into a hit, never change
+    the answer to one that already succeeded. Three deck words carry
+    both spellings as separate entries at different levels (御馳走 N2
+    and ご馳走 N1, likewise 御無沙汰, 御手洗い); merging those
+    candidate lists would hand ご馳走 to _pick_best_candidate's
+    lowest-level tie-break and silently repoint the word from its N1
+    card to the N2 one, moving the badge off whatever SRS history the
+    learner already has. Whether the deck should hold the same word
+    twice is a separate question from this index.
     """
     index = {}
     for level, vocab_list in VOCAB_BY_LEVEL.items():
@@ -527,6 +560,17 @@ def _index_vocab_by_lemma():
             numeral = vocab_extras.numeral_variant(word)
             if numeral and numeral != word:
                 index.setdefault(numeral, []).append((level, entry))
+
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for entry in vocab_list:
+            word = entry.get("kanji") or entry.get("word") or entry.get("vocab") or ""
+            if not word:
+                continue
+            for variant in vocab_extras.kana_spelling_variants(word):
+                if variant == word or variant in index:
+                    continue
+                if any(is_kanji(c) for c in variant):
+                    index.setdefault(variant, []).append((level, entry))
     return index
 
 
