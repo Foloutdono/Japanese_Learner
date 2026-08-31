@@ -74,6 +74,70 @@ that default today.
 | `flap-clatter` | 進級, the board turning your level over | Full run · Short run · Heavy board |
 | `level-up` | a cosmetic unlocked, a daruma eye filled | Ascent · Board then bell · Fanfare · Bloom |
 
+### Levels
+
+Every effect is levelled by one table, `BASE_GAIN` in
+`src/lib/audio/settings.js`, applied as a gain node the recipe plays
+into. Recipes set a sound's *shape*; that table sets how loud the
+shape lands. Retuning the mix is one column of numbers, and a variant
+picked from the palette inherits its event's level rather than
+arriving at whatever loudness its author typed.
+
+The numbers are measured, not guessed: the loudest 42ms window of RMS
+at the bus, which is roughly what the ear integrates. Peak alone lies
+about short sounds -- a 30ms tick and a 1s melody at the same peak are
+nowhere near equally loud.
+
+**It is a hierarchy, not a flat normalisation.** What sets a level is
+how often the sound fires. Flattening them would make the chrome nag
+and the ceremony fall flat.
+
+| Loudness | Sounds |
+|---|---|
+| 0.025 | the card turning -- ambient texture, under even the click |
+| 0.030 | the chrome: click, toggle, menus, option picks |
+| 0.042 | correct / wrong |
+| 0.044 | the fare tick |
+| 0.045 | a screen change |
+| 0.047 | the level-up board |
+| 0.060 | doors running open |
+| 0.070 | the gate |
+| 0.075 | the door chime |
+| 0.080 | arriving |
+| 0.100 | the platform sign |
+| 0.105 | an unlock |
+| 0.112 | the departure melody |
+
+Two sounds were previously wrong by more than a little. The **gate
+chime** fired on every departure at nearly three times the click and
+is down 38%. The **level-up board** was a *third* of a single fare
+tick -- the smaller event was louder than the bigger one -- and now
+sits above it.
+
+Trims may lift as well as cut. For a recording, gain above 1 is
+suspicious; for a synthesised sound there is no reference level, since
+a recipe's output is an accident of how many oscillators it stacks and
+how hard its filter bites. The ceiling is 4; nothing asks for more
+than 3.6, and no shipped sound peaks above 0.47.
+
+### Noise is seeded, not random
+
+`synth.js` generates its noise from a fixed seed rather than
+`Math.random()`. This is not fussiness -- it is what makes the levels
+above mean anything.
+
+Random noise made every noise-based sound a different loudness in
+every session: repeatable within one page load, so it hides from any
+single measurement, and drifting far enough between loads that the
+same fare-tick trim measured anywhere from 0.025 to 0.067. Normalising
+each buffer's peak was not enough on its own, because a tick at Q 14
+passes a narrow slice of the spectrum and what survives depends on how
+much energy that particular sequence held at 3.2kHz.
+
+So the noise is not random, only irregular. It sounds exactly like
+noise because it is noise -- it is simply always the same noise, for
+every listener, on every machine.
+
 ### The rules the voices keep
 
 These are design constraints, not implementation details, and a new

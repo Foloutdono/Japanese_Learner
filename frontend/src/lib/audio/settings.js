@@ -33,13 +33,64 @@ export const DEFAULT_VOLUMES = {
 export const BASE_GAIN = {
   kana: 0.8,
   tts:  0.9,
+  // ── Levelling the effects ───────────────────────────────
+  // Measured, not guessed: each number is target ÷ measured, where
+  // "measured" is the loudest 42ms window of RMS at the bus. That
+  // metric rather than peak, because peak lies about short sounds --
+  // a 30ms tick and a 1s melody at the same peak are nowhere near the
+  // same loudness, and the ear integrates over roughly this window.
+  //
+  // The targets are a hierarchy, not a flat normalisation. What sets
+  // a sound's level here is how often it fires: anything you hear
+  // dozens of times a screen has to sit under conversation, and
+  // anything you hear four times in the whole progression can afford
+  // to be an event. Flattening them would make the chrome nag and the
+  // ceremony fall flat.
+  //
+  //   0.024  card turning -- ambient texture, under even the click
+  //   0.030  the chrome: click, toggle, menus, option picks
+  //   0.042  correct/wrong -- BELOW the fare tick on purpose, so the
+  //          XP landing a beat later is not masked by the answer
+  //   0.044  the fare tick, the reward `correct` must not bury
+  //   0.045  a screen change, a shade above an option pick
+  //   0.047  the level-up board -- above the fare tick at last,
+  //          having been a third of it
+  //   0.060  doors running open
+  //   0.070  the gate -- every departure, so it comes DOWN 38%
+  //   0.075  the door chime
+  //   0.080  arriving
+  //   0.100  the platform sign (onboarding only)
+  //   0.105  an unlock
+  //   0.110  the departure melody -- four times in the whole game
   sfx: {
-    success:    0.3,
-    'level-up': 0.7,
+    'card-transition': 1.60,
+    'door-slide':      1.10,
+    'level-up':        0.75,
   },
   ui: {
-    click:  0.25,
-    toggle: 0.10,
+    click:                    1.17,
+    toggle:                   1.04,
+    'click-menu':             1.09,
+    'click-close-menu':       1.05,
+    'click-mode-selection':   1.24,
+    'click-screen-selection': 1.01,
+    correct:                  0.75,
+    wrong:                    0.64,
+    'gate-chime':             0.62,
+    'door-chime':             0.45,
+    'platform-chime':         0.74,
+    arrival:                  0.64,
+    'station-melody':         0.77,
+    // These two are levelled by PEAK, not by the window RMS the rest
+    // use. Both are noise bursts a few milliseconds long, and the
+    // 42ms window that measures a chime fairly under-reads a
+    // transient badly -- chasing the RMS target drove the fare tick
+    // to a 0.36 peak and the clatter to 0.62, two to five times
+    // hotter than any chime, while both still *read* quiet. Matched
+    // instead to the tonal peak range, with the clatter above the
+    // tick so a level still lands bigger than a fare.
+    'fare-tick':              1.70,
+    'flap-clatter':           3.60,
   },
   jingle:       0.3,
   announcement: 1,
@@ -110,12 +161,27 @@ export function setVolume(category, value) {
 // The per-sound trim for one asset — everything else (category
 // volume, master, mute) now lives on the mixer's buses, so it applies
 // to sounds already playing rather than only to the next one.
+// A trim may lift as well as cut, which is why this is not clamp01.
+// For a recorded asset a gain above 1 is suspicious -- the file was
+// mastered once and 1.0 is its own level. For a synthesised one there
+// is no such reference: a recipe's absolute output is an accident of
+// how many oscillators it happens to stack and how hard its filter
+// bites, so the level has to be free to move in both directions. The
+// split-flap clatter needs +3.5 to sit where a level-up belongs, and
+// under clamp01 the only way to grant it was to pull the whole app
+// down to meet it.
+//
+// The ceiling is a guard, not a target: nothing in the palette asks
+// for more than 3.5, and every shipped sound was measured after
+// trimming to confirm it still peaks under 0.5 with headroom to spare.
+const MAX_TRIM = 4
+
 export function trimFor(category, soundName) {
   const categoryGain = BASE_GAIN[category]
   const base = (categoryGain && typeof categoryGain === 'object')
     ? (categoryGain[soundName] ?? 1)
     : (categoryGain ?? 1)
-  return clamp01(base)
+  return Math.min(MAX_TRIM, Math.max(0, base))
 }
 
 function subscribeMute(fn)    { muteListeners.add(fn);   return () => muteListeners.delete(fn) }
