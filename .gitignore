@@ -1,0 +1,12 @@
+# The plan documents. CLAUDE.md states that `plans/` is intentionally
+# untracked — the documents are large and have no runtime purpose — but
+# nothing enforced it, so thirty of them (001–030) were tracked anyway
+# until they were removed in bdb5ea16.
+#
+# README.md is the exception and stays tracked, because it is the only
+# authority on which plan numbers are spent: plan numbers are cited in
+# source comments (e.g. "Plan 034" in PassageLine.browser.test.jsx) and
+# must never be reused, and `git ls-tree HEAD plans/` cannot tell you
+# which are taken now that the documents themselves are ignored.
+plans/*.md
+!plans/README.md
