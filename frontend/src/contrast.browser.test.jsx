@@ -118,8 +118,11 @@ const AMBIENT_GROUNDS = ['--bg-main', '--bg-card', '--surface', '--bg-card-hover
 const PANEL_INKS = ['--text-on-panel', '--text-on-panel-soft']
 const PANEL_GROUNDS = [
   ['--bg-panel', 'var(--bg-panel)'],
-  // The Today strip paints its own sumi tint rather than the bare token.
-  ['next-service tint', 'color-mix(in srgb, var(--accent2) 7%, var(--bg-panel))'],
+  // The fare gate's gold fill is deliberately NOT in this matrix: the
+  // contract would pair it with the soft panel ink too, and nothing on
+  // that fill may ever use the soft ink (it measures 2.33:1 there —
+  // the 60%-gold ruling carries the FULL panel ink only). The real
+  // pairs are measured as call sites: .gc-depart-jp / .gc-depart-latin.
 ]
 
 function contractPairs() {
@@ -151,24 +154,51 @@ const Fixture = () => (
       </div>
     </div>
 
-    {/* NextService.jsx:105 -- the plain strip, sumi in BOTH themes */}
-    <button type="button" className="next-service">
-      <span className="next-service__head">
-        <span className="next-service__name">
-          <span className="next-service__jp ns-plain-jp" lang="ja">本日の運行</span>
-          <span className="next-service__latin ns-plain-latin">Today</span>
-        </span>
+    {/* GateCard.jsx -- the fare gate on --surface, its lane tint, and
+        the gold depart action (the wall-map redesign's one fill) */}
+    <div className="gate-card">
+      <span className="gate-card__latin gc-latin">Today</span>
+      <span className="gate-card__unit gc-unit" lang="ja">件</span>
+      <span className="gate-card__when gc-when">3h</span>
+      <span className="gate-lane" style={{ '--lane-color': 'var(--line-kanji)' }}>
+        <span className="gate-lane__where gc-where" lang="ja">漢字</span>
+        <span className="gate-lane__mode gc-mode">writing</span>
       </span>
-      <span className="next-service__when ns-plain-when">3h</span>
-    </button>
+      <button type="button" className="btn-depart">
+        <span className="btn-depart__jp gc-depart-jp" lang="ja">出発する</span>
+        <span className="btn-depart__latin gc-depart-latin">Depart</span>
+      </button>
+    </div>
 
-    {/* NextService.jsx:77 -- the --clear strip is background: transparent,
-        so the SAME child rules sit on the page ground instead. */}
-    <div className="next-service next-service--clear">
-      <span className="next-service__name">
-        <span className="next-service__jp ns-clear-jp" lang="ja">本日の運行</span>
-        <span className="next-service__latin ns-clear-latin">Today</span>
-      </span>
+    {/* WallMap.jsx -- the panel-ink registers on the sumi panel: line
+        captions, stop labels, due chips, group captions, facility
+        chips, practice-row remarks.
+
+        The real .board paints its sumi as a GRADIENT, and
+        effectiveGround() below composites backgroundColor only -- a
+        gradient contributes nothing, so without help these sites
+        would measure against the PAGE and pass/fail on the wrong
+        ground entirely (they reported kinari-on-washi at 1.04:1 in
+        light theme). The inline colour pins the ground to the
+        gradient's own midpoint token, which is what the panel
+        composites to within ±3%. */}
+    <div className="board" style={{ background: 'var(--bg-panel)' }}>
+      <button type="button" className="wmap-line" style={{ '--line-color': 'var(--line-vocab)' }}>
+        <span className="wmap-line__latin wm-latin">Vocabulary</span>
+        <span className="wmap-track">
+          <span className="wmap-track__label wm-stop">N5</span>
+        </span>
+        <span className="wmap-due wm-due">8<span className="wmap-due__unit" lang="ja">件</span></span>
+      </button>
+      <div className="wmap__caption">
+        <span className="wmap__caption-latin wm-caption">Practice</span>
+      </div>
+      <button type="button" className="wmap-row" style={{ '--line-color': 'var(--line-reading)' }}>
+        <span className="wmap-row__note wm-note">remark</span>
+      </button>
+      <button type="button" className="fac-chip" style={{ '--line-color': 'var(--line-jisho)' }}>
+        <span className="fac-chip__title wm-fac">Dictionary</span>
+      </button>
     </div>
 
     {/* --surface cards carrying secondary text */}
@@ -286,11 +316,19 @@ const Fixture = () => (
 const SITES = [
   ['.decks-filter-btn', 'decks/today console chip'],
   ['.decks-index-bar__count', 'decks/today console count'],
-  ['.ns-plain-jp', 'today strip, name (sumi)'],
-  ['.ns-plain-latin', 'today strip, romaji (sumi)'],
-  ['.ns-plain-when', 'today strip, time (sumi)'],
-  ['.ns-clear-jp', 'today strip cleared, name (paper)'],
-  ['.ns-clear-latin', 'today strip cleared, romaji (paper)'],
+  ['.gc-latin', 'fare gate caption'],
+  ['.gc-unit', 'fare gate unit'],
+  ['.gc-when', 'fare gate next-review line'],
+  ['.gc-where', 'gate lane name (tinted surface)'],
+  ['.gc-mode', 'gate lane mode (tinted surface)'],
+  ['.gc-depart-jp', 'depart button name (gold fill)'],
+  ['.gc-depart-latin', 'depart button caption (gold fill)'],
+  ['.wm-latin', 'map line caption (sumi)'],
+  ['.wm-stop', 'map stop label (sumi)'],
+  ['.wm-due', 'map due chip (sumi)'],
+  ['.wm-caption', 'map group caption (sumi)'],
+  ['.wm-note', 'practice row remark (sumi)'],
+  ['.wm-fac', 'facility chip label (sumi)'],
   ['.station-sign__kana', 'station sign kana'],
   ['.station-sign__romaji', 'station sign romaji'],
   ['.record__label', 'record label'],

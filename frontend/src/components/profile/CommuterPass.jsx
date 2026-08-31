@@ -16,7 +16,13 @@ import { DEFAULT_LOADOUT } from '../../stores/cosmetics'
 // has one), while 段位 tracks how much Japanese you actually hold. A
 // 称号 chosen in the storehouse outranks the automatic level title,
 // because choosing it was the point.
-export function CommuterPass({ profile, t, children }) {
+// `headingTag`: the pass label is the profile screen's own <h1>, but
+// the home hall mounts this same card under the wall map's masthead —
+// two h1s on one screen is exactly what DESIGN.md's "one <h1> per
+// screen" forbids, so the hall renders the label as a plain span.
+// `footer`: the hall pins the stamp rally and the 新規 gauge to the
+// bottom of the card; the profile keeps its own separate blocks.
+export function CommuterPass({ profile, t, children, footer = null, headingTag: Heading = 'h1' }) {
   const [, jpTitle, title] = levelTitle(profile.level)
 
   const span = Math.max(1, profile.xpForNext - profile.xpPrevLevel)
@@ -29,6 +35,10 @@ export function CommuterPass({ profile, t, children }) {
 
   return (
     <div className="pass">
+      {/* 案一 of the pass round: composed the way a real IC card is
+          printed — brand and issuer in the top corners, holder in the
+          middle, the balance along the bottom with the class printed
+          large beside it. */}
       <div className="pass__head">
         <span className="pass__brand">
           {/* The contactless mark every IC card in Japan is printed
@@ -41,43 +51,59 @@ export function CommuterPass({ profile, t, children }) {
                 route as "your pass" rather than a place (see its own
                 identity-route comment), so the pass label is exactly
                 this screen's name. */}
-            <h1 className="pass__brand-sub">{t.passLabel}</h1>
+            <Heading className="pass__brand-sub">{t.passLabel}</Heading>
           </span>
         </span>
 
-        <span className="pass__level">
-          <span className="pass__level-num">{profile.level}</span>
-          <span className="pass__level-label">{t.level}</span>
-        </span>
+        {/* The issuing station's mark — every card says who issued it. */}
+        <span className="pass__issuer" aria-hidden="true">JP</span>
       </div>
 
       <div className="pass__body">
         {children}
 
         <div className="pass__ranks">
-          <span className="pass__rank-jp" lang="ja">
-            {worn ? profile.cosmetics.titleJp : jpTitle}
+          {/* The title and the 段位 stamp share one line, centred on
+              each other — the stamp belongs to the rank it seconds,
+              not to a row of its own. */}
+          <span className="pass__rank-row">
+            <span className="pass__rank-jp" lang="ja">
+              {worn ? profile.cosmetics.titleJp : jpTitle}
+            </span>
+            {rank && (
+              <span className={`pass__dan${rank.isDan ? ' pass__dan--dan' : ''}`} title={t.masteryRank}>
+                <span lang="ja">{rank.label}</span>
+              </span>
+            )}
           </span>
           <span className="pass__rank-latin">
             {worn ? (t.cosmeticName?.[equipped] ?? '') : title}
           </span>
-          {rank && (
-            <span className={`pass__dan${rank.isDan ? ' pass__dan--dan' : ''}`} title={t.masteryRank}>
-              <span lang="ja">{rank.label}</span>
-            </span>
-          )}
         </div>
       </div>
 
       <div className="pass__balance">
-        <div className="pass__balance-row">
+        <div className="pass__balance-meter">
           <span className="pass__xp">{into.toLocaleString()} / {span.toLocaleString()} XP</span>
-          <span className="pass__next">{t.nextLevel}</span>
+          <div className="pass__track" aria-hidden="true">
+            <div className="pass__fill" style={{ width: `${pct}%` }} />
+          </div>
         </div>
-        <div className="pass__track" aria-hidden="true">
-          <div className="pass__fill" style={{ width: `${pct}%` }} />
-        </div>
+        {/* The class, printed large where a balance sits — beside the
+            bar that climbs toward the next one, which is what makes
+            the old "next level" caption redundant. */}
+        <span className="pass__level">
+          <span className="pass__level-num">{profile.level}</span>
+          <span className="pass__level-label">{t.level}</span>
+        </span>
       </div>
+
+      {footer && (
+        <div className="pass__footer">
+          <div className="pass__footer-rule" aria-hidden="true" />
+          {footer}
+        </div>
+      )}
     </div>
   )
 }

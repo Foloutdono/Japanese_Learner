@@ -54,7 +54,9 @@ describe('App onboarding gate', () => {
 
     expect(screen.container.querySelector('.onb')).not.toBeNull()
     // No router mounted: the flow replaces the app, it doesn't cover it.
-    expect(screen.container.querySelector('.board-row')).toBeNull()
+    // (.gatehall is the home screen's room — the wall-map redesign's
+    // successor to the departure board this assertion used to probe.)
+    expect(screen.container.querySelector('.gatehall')).toBeNull()
   })
 
   it('shows the app when the profile is already onboarded', async () => {

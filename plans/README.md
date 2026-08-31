@@ -30,6 +30,14 @@ Nine waves live in this file:
   audited against live screenshots — twelve confirmed defects fixed, the tour
   rebuilt around real tap-to-try demos, and a third station cutscene (到着,
   the arrival) added to the gate/door family. Record at the bottom.
+- **Wave 10 — 改札広間, the wall-map home** (2026-09-01, DONE). Designed and
+  executed directly in one session, wave-7 style: the departure board retired
+  and the home became the gate hall — 改札 fare-gate card, the CommuterPass in
+  the hall with the スタンプラリー streak, and the 路線図 wall map drawing real
+  per-level progress from /api/stats. Chosen off an interactive mockup round
+  (the artifact linked from DESIGN.md's sibling canvas note); the charcoal
+  pass ink and the concourse notice landed a session earlier from the same
+  round. Record at the very bottom.
 - **Wave 9 — 統一, the harmonisation** (plans 041–053; 041–051 DONE). Planned
   2026-08-28 at commit `32c1f40`, from the maintainer's request to merge the
   CSS back into one file and establish a single artistic direction that new
@@ -3360,3 +3368,63 @@ Two caveats on the plans themselves:
 - Plans **041** and **044** each open with a discrepancy block recording where
   the authoring brief did not survive contact with the repository. Those blocks
   are the honest record, not boilerplate — read them before Step 1.
+
+---
+
+# Wave 10 — 改札広間, the wall-map home (2026-09-01)
+
+Executed directly in one session at the maintainer's request ("implement the
+rest of the wall map redesign"), wave-7 style — no numbered plan files. The
+design was settled interactively first: a three-option mockup round, a hybrid
+round, then a final wall-map round with live pickers, all in one artifact the
+maintainer iterated on. Two picks (消炭 charcoal pass ink; the notice moving
+onto the concourse band) landed a session earlier; this wave is the rest.
+
+## What changed
+
+- **HomeScreen** is the gate hall: `.gatehall` (rail + map) replaces the
+  NextService strip + DepartureBoard stack. Both retired components are
+  deleted; `.board`'s sumi panel, masthead and stripe survive as the map's
+  shell — the class names the panel, not the timetable.
+- **GateCard** (改札) grows out of NextService: same /api/today data, same
+  quiet-failure and cleared-day manners, plus the screen's one filled action.
+  The gold follows the Today picker's own standing ruling (60% toward the
+  panel, LIGHT ink — black-on-gold was built once and ruled against); what
+  makes it THE action is scale and `--elev-action`, the app's third shadow,
+  minted with this wave and spent on this button alone (DESIGN.md updated).
+- **HallPass** mounts the profile's own CommuterPass (new `footer` /
+  `headingTag` props) with the スタンプラリー streak — DESIGN.md's ruling,
+  finally implemented; the concourse IC card's flame is gone — and the 新規
+  pace gauge. On phones the hall pass yields to the concourse IC card
+  (one identity object per viewport).
+- **WallMap** (路線図) draws three honest registers: four tracked lines
+  (kana sets / JLPT levels as stops, scored `mastered + learning/2 ∸ total`
+  per deck across modes — domain/lineProgress.js, unit-tested), four practice
+  rows (they schedule words, not levels — no fake tracks), three facility
+  chips labelled in the learner's language. Due chips ride from
+  /api/today's by_source; 教材's chip carries the personal-deck count.
+- **No backend changes.** /api/stats and /api/today already knew everything
+  the map needs; /api/profile already carried `week` for the stamps.
+
+## Traps hit, for the next executor
+
+- **A gradient ground is invisible to Guard 4's ancestor walk.**
+  `effectiveGround()` composites `backgroundColor` only, so fixture markup
+  sitting on the `.board` gradient measured against the PAGE (1.04:1 in
+  light theme, correctly failed). The fixture pins the panel to
+  `var(--bg-panel)` inline, with a comment.
+- **The contract matrix pairs BOTH panel inks with a ground.** Adding the
+  gold fill there failed on `--text-on-panel-soft` (2.33:1) — an ink the
+  button never uses. Grounds that carry exactly one ink belong in the SITES
+  list, not the contract.
+- **Guard 4 caught a real one:** `--text-secondary` on the gate lane's 10%
+  pigment tint measures 4.32:1 in light theme. The lane mode's ink is now
+  mixed 40% toward the primary; the pair is pinned as `.gc-mode`.
+- The onboarding gate test's generic apiJson mock feeds every call a
+  today-shaped object, so the map's progress math must treat any foreign
+  payload as "no progress yet" — pinned in both lineProgress.test.js and
+  HomeScreen.browser.test.jsx.
+
+Suites at landing: frontend 222 (37 files, +6 new), eslint 0 errors,
+stylelint ratchet SHRANK (the retired board rows carried a baselined
+violation), lint:scale no new violations, lint:ink clean, build clean.

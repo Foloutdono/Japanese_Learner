@@ -3094,7 +3094,12 @@
      Two shadows in the whole app, and both mean "this object hangs".
      Everything else is flat and separates by --surface-line alone. */
   --elev-hang:     0 10px 26px rgba(0, 0, 0, 0.22);   /* the 駅名標 plate    */
-  --elev-board:    0 24px 60px rgba(0, 0, 0, 0.34);   /* the 発車標          */
+  --elev-board:    0 24px 60px rgba(0, 0, 0, 0.34);   /* the 発車標/路線図   */
+  /* The third shadow, minted with the wall-map hall and spent on ONE
+     object: .btn-depart, the screen's filled action. The two above
+     mean "this hangs"; this one means "this is the thing to press".
+     A fourth meaning needs the same argument this one had. */
+  --elev-action:   0 4px 16px color-mix(in srgb, var(--accent2) 30%, transparent);
 
   /* The serif face, which was hardcoded 57 times across the four
      stylesheets and had no token at all. Names and headings only —
@@ -3488,7 +3493,7 @@ button:focus-visible {
 
 .platform-card,
 .route-stop,
-.board-row,
+.wmap-line,
 .deck-card,
 .daruma-card,
 .hall-card {
@@ -3497,14 +3502,14 @@ button:focus-visible {
 /* Capped at eight: past that the last rows are waiting on an
    animation instead of being read, and a board with thirty themes
    should not take a second to finish arriving. */
-.platform-card:nth-child(1),  .route-stop:nth-child(1),  .board-row:nth-child(1)  { animation-delay: 0.02s; }
-.platform-card:nth-child(2),  .route-stop:nth-child(2),  .board-row:nth-child(2)  { animation-delay: 0.05s; }
-.platform-card:nth-child(3),  .route-stop:nth-child(3),  .board-row:nth-child(3)  { animation-delay: 0.08s; }
-.platform-card:nth-child(4),  .route-stop:nth-child(4),  .board-row:nth-child(4)  { animation-delay: 0.11s; }
-.platform-card:nth-child(5),  .route-stop:nth-child(5),  .board-row:nth-child(5)  { animation-delay: 0.14s; }
-.platform-card:nth-child(6),  .route-stop:nth-child(6),  .board-row:nth-child(6)  { animation-delay: 0.17s; }
-.platform-card:nth-child(7),  .route-stop:nth-child(7),  .board-row:nth-child(7)  { animation-delay: 0.20s; }
-.platform-card:nth-child(n+8), .route-stop:nth-child(n+8), .board-row:nth-child(n+8) { animation-delay: 0.23s; }
+.platform-card:nth-child(1),  .route-stop:nth-child(1),  .wmap-line:nth-child(1)  { animation-delay: 0.02s; }
+.platform-card:nth-child(2),  .route-stop:nth-child(2),  .wmap-line:nth-child(2)  { animation-delay: 0.05s; }
+.platform-card:nth-child(3),  .route-stop:nth-child(3),  .wmap-line:nth-child(3)  { animation-delay: 0.08s; }
+.platform-card:nth-child(4),  .route-stop:nth-child(4),  .wmap-line:nth-child(4)  { animation-delay: 0.11s; }
+.platform-card:nth-child(5),  .route-stop:nth-child(5),  .wmap-line:nth-child(5)  { animation-delay: 0.14s; }
+.platform-card:nth-child(6),  .route-stop:nth-child(6),  .wmap-line:nth-child(6)  { animation-delay: 0.17s; }
+.platform-card:nth-child(7),  .route-stop:nth-child(7),  .wmap-line:nth-child(7)  { animation-delay: 0.20s; }
+.platform-card:nth-child(n+8), .route-stop:nth-child(n+8), .wmap-line:nth-child(n+8) { animation-delay: 0.23s; }
 
 /* An arriving card must not also be sliding: the two transforms fight
    and the row twitches. Fading alone still reads as arrival. */
@@ -3514,7 +3519,7 @@ button:focus-visible {
   .quiz-area,
   .platform-card,
   .route-stop,
-  .board-row,
+  .wmap-line,
   .deck-card,
   .daruma-card,
   .hall-card,
@@ -3893,7 +3898,8 @@ textarea:focus-visible {
    TWO GROUNDS, ONE OBJECT. Some fields sit on the card and some on
    sumi, and sumi is dark in BOTH themes -- so the ink cannot simply be
    --text-primary. The pair is named once here and read by everything
-   below, which is the same indirection --ns-ink uses on .next-service
+   below, which is the same indirection the retired Today strip's
+   --ns-ink pioneered (its .next-service died with the wall-map hall)
    and the escape hatch Guard 5 documents: a custom property is
    deliberately invisible to it, because this is exactly the case where
    one element legitimately has two grounds. Use .field--panel on sumi.
@@ -4427,7 +4433,12 @@ textarea:focus-visible {
    money in an account. */
 .ic-card {
   position: relative;
-  display: flex;
+  /* The phone's pass. Desktop draws the full CommuterPass in the hall
+     (see HallPass), and two identity objects on one viewport is one
+     too many — so this card hides until the 560px query, where the
+     hall pass yields to it. The pre-summary --blank state stays at
+     every width: it is the profile's doorway before the fetch lands. */
+  display: none;
   align-items: center;
   gap: 14px;
   padding: 10px 16px 10px 12px;
@@ -4455,7 +4466,7 @@ textarea:focus-visible {
   border-color: color-mix(in srgb, var(--pass-ink) 75%, transparent);
   filter: none;
 }
-.ic-card--blank { padding: 12px 18px; }
+.ic-card--blank { display: flex; padding: 12px 18px; }
 
 /* The contactless mark: three arcs, thickening outward. */
 .ic-card__wave {
@@ -4788,7 +4799,13 @@ textarea:focus-visible {
    that could have belonged to any app.
 
    Laid out the way a real pass is printed: issuer and class along the
-   top, holder in the middle, balance along the bottom. */
+   top, holder in the middle, balance along the bottom.
+
+   Charcoal in BOTH themes since the pass round settled on 案一: a
+   card is a physical object with its own material, the same call the
+   concourse's pocket IC card already makes — and it is what lets the
+   two read as one possession at two sizes. Sumi-family ground, so
+   every ink in here is the panel pair; Guard 5 polices exactly that. */
 .pass {
   --pass-color: var(--pass-ink, var(--accent9));
   position: relative;
@@ -4798,23 +4815,26 @@ textarea:focus-visible {
   padding: 26px 28px 24px;
   margin-bottom: 44px;
   background:
-    linear-gradient(122deg,
-      color-mix(in srgb, var(--pass-color) 20%, var(--surface)) 0%,
-      var(--surface) 62%);
-  border: 1px solid var(--surface-line);
+    linear-gradient(155deg,
+      color-mix(in srgb, var(--pass-color) 38%, var(--bg-panel)) 0%,
+      var(--bg-panel) 62%);
+  border: 1px solid color-mix(in srgb, var(--pass-color) 45%, transparent);
   border-radius: 10px;
   overflow: hidden;
+  color: var(--text-on-panel);
 }
-/* The magnetic stripe down the right edge — the one place the pass
-   carries its colour at full strength. */
+/* The diagonal light a plastic card catches — what replaced the
+   magnetic stripe when the ground went dark: a charcoal stripe on a
+   charcoal card said nothing, and a card's realism lives in its
+   sheen, not its stripe (the drawer stub and the reissue pass keep
+   theirs; their grounds still show it). */
 .pass::after {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 5px;
-  background: var(--pass-color);
+  inset: -40% 55% -40% -20%;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.045) 50%, transparent 70%);
+  transform: skewX(-12deg);
+  pointer-events: none;
 }
 
 .pass__head {
@@ -4832,8 +4852,8 @@ textarea:focus-visible {
   position: absolute;
   top: 50%;
   left: 1px;
-  border: 1.6px solid var(--text-primary);
-  border-color: transparent var(--text-primary) transparent transparent;
+  border: 1.6px solid var(--text-on-panel);
+  border-color: transparent var(--text-on-panel) transparent transparent;
   border-radius: 50%;
   opacity: 0.7;
 }
@@ -4855,23 +4875,44 @@ textarea:focus-visible {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-primary);
+  color: var(--text-on-panel);
 }
 
-/* A pass prints its class large in the corner. */
+/* The issuing station's roundel, in the corner every card prints its
+   issuer — the board masthead's own mark, at card size, with the same
+   gold-lifted-toward-the-panel-ink treatment it wears there. */
+.pass__issuer {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--accent2);
+  color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel));
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* A pass prints its class large beside the balance. */
 .pass__level {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   line-height: 1;
   padding-right: 10px;
+  flex-shrink: 0;
 }
 .pass__level-num {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 2.4rem;
   line-height: 0.95;
-  color: color-mix(in srgb, var(--pass-color) 60%, var(--text-primary));
+  color: var(--text-on-panel);
   font-variant-numeric: tabular-nums;
 }
 .pass__level-label {
@@ -4880,7 +4921,7 @@ textarea:focus-visible {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-primary);
+  color: var(--text-on-panel-soft);
   margin-top: 5px;
 }
 
@@ -4901,6 +4942,10 @@ textarea:focus-visible {
   letter-spacing: 0.01em;
   padding: 0;
   gap: 8px;
+  /* The card's own ink (kinari on charcoal), by inheritance from
+     .pass — the base .profile-card__name is a paper-ground rule and
+     would print sumi-dark on this card. */
+  color: inherit;
 }
 .pass__holder .profile-card__name .profile-card__edit-glyph { opacity: 0.45; }
 .pass__holder .profile-card__name:hover .profile-card__edit-glyph { opacity: 1; }
@@ -4913,19 +4958,27 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--pass-color) 16%, var(--bg-card));
+  background: color-mix(in srgb, var(--pass-color) 45%, var(--bg-panel));
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: 1.7rem;
-  color: var(--text-primary);
+  color: var(--text-on-panel);
 }
 
 .pass__ranks {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 3px;
+  gap: 4px;
   text-align: right;
+}
+/* The title and its 段位 stamp on one line, centred on each other —
+   the stamp used to sit on a row of its own with a 6px top margin,
+   which read as a third rank rather than as the seal on the second. */
+.pass__rank-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
 }
 .pass__rank-jp {
   font-family: var(--font-jp);
@@ -4939,33 +4992,43 @@ textarea:focus-visible {
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--text-primary);
+  color: var(--text-on-panel-soft);
 }
 /* 段位 — the other axis. Ringed rather than filled, so it reads as a
-   stamp on the pass and not as a second level badge. */
+   stamp on the pass and not as a second level badge. The ring is the
+   pass pigment lifted toward the panel ink — raw charcoal is the
+   card's own ground and drew an invisible border on it. */
 .pass__dan {
-  margin-top: 6px;
   padding: 3px 11px;
-  border: 1.5px solid color-mix(in srgb, var(--pass-color) 60%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--pass-color) 55%, var(--text-on-panel));
   border-radius: 999px;
   font-family: var(--font-jp);
   font-size: 0.76rem;
   font-weight: 700;
-    /* Mixed toward the ink; the raw pigment at this size measured
-       2.44:1 back when the pass was slate, and charcoal is darker */
-color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
+  color: var(--text-on-panel);
 }
+/* Gold lifted toward the panel ink, exactly as the board roundel
+   documents — raw 山吹 measures 4.23:1 on sumi, under this text's
+   floor. */
 .pass__dan--dan {
   border-color: var(--accent2);
-  color: var(--accent2);
+  color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel));
 }
 
-.pass__balance { display: flex; flex-direction: column; gap: 7px; }
-.pass__balance-row {
+/* The balance row: the bar climbing toward the next class on the
+   left, the class printed large beside it — which is what made the
+   old "next level" caption redundant (say less). */
+.pass__balance {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  align-items: flex-end;
+  gap: var(--sp-6);
+}
+.pass__balance-meter {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 .pass__xp {
   font-family: var(--font-display);
@@ -4974,23 +5037,17 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
 }
-.pass__next {
-  font-family: var(--font-display);
-  font-size: 0.55rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-primary);
-}
 .pass__track {
   height: 5px;
   border-radius: 3px;
-  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+  background: rgba(255, 255, 255, 0.16);
   overflow: hidden;
 }
+/* Gold, like the pocket card's — a charcoal fill on this ground was
+   the stripe problem over again. */
 .pass__fill {
   height: 100%;
-  background: var(--pass-color);
+  background: var(--accent2);
   transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
 }
 
@@ -5323,226 +5380,315 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 }
 
 
-/* ── 発車標 — the departure board ─────────────────────────── */
+/* ── The platform — the gate hall's room ──────────────────── */
 .station__platform {
   flex: 1;
   display: flex;
-  /* A column since the platform gained a second child: the service
-     leaving now sits above the board of everywhere you could go. As a
-     row they sat side by side and the board lost half its width. */
   flex-direction: column;
   align-items: center;
   padding: 36px 24px 28px;
   gap: 16px;
 }
 
-/* ── 本日の運行 — the service leaving now ─────────────────────
-   Held to the board's own column (--board-w) so it reads as the top of
-   the same object rather than a banner floating above it. It is a
-   button when something is due and a plain strip when nothing is: a
-   control that does nothing when tapped is worse than no control, and
-   "next review in 3 hours" is information, not an action. */
-.next-service {
+/* ── 改札広間 — the gate hall ─────────────────────────────────
+   The hall replaces the strip-over-board stack: your side of the room
+   on the left (the fare gate, then the pass), the wall map on the
+   right, one grid holding the board's old column width. The gate
+   leads the rail because it is the thing that changes between
+   visits; the pass under it is who the gate belongs to. */
+.gatehall {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: var(--sp-6);
   width: min(var(--board-w), 100%);
-  /* ONE row, per Home.dc.html. It was a three-row stack -- name over
-     chips over the 新規 gauge -- with a 3px gold bar down its left edge,
-     and the maintainer's note on the artboard round was exactly that:
-     the stripe "feels out of place", and the whole thing should "feel
-     more like a shortcut". The artboard answers both. A shortcut is one
-     line you can read at a glance and press. */
+  align-items: start;
+}
+.gatehall__rail {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-5);
+}
+
+/* ── 改札 — the fare gate ───────────────────────────────────
+   NextService's strip, grown into a card now that the hall gives it a
+   column of its own. Same manners as the strip it replaces: rendered
+   quiet (nothing at all) while the first fetch is in flight or after
+   it failed, and a cleared queue keeps the card — "next review in 3
+   hours" is what makes an empty gate read as a finished day. */
+.gate-card {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 20px;
-  min-height: 44px;
-  box-sizing: border-box;
-  /* --sp-5/--sp-6; the artboard's 15px is a pixel off the rung and
-     the rung is the one that has to win. */
-  padding: var(--sp-5) var(--sp-6);
-  text-align: left;
-  font: inherit;
-  /* This strip has TWO grounds: it is sumi when something is due, and
-     --clear below makes it transparent over the page when nothing is.
-     One ink cannot serve both -- the ambient pair flips dark in light
-     theme and was measured at 2.80:1 on the sumi, while the panel pair
-     is 1.83:1 on paper. So the ground picks the ink here, once, and
-     every child below reads --ns-ink/--ns-ink-soft instead of naming a
-     token directly. */
-  /* The artboard puts this strip on the app's standard card, not on a
-     tinted sumi panel -- so its ground now follows the theme and the
-     ink pair follows with it. The --ns-ink indirection stays: --clear
-     below still swaps the ground, and one name for "this strip's ink"
-     is what keeps the two states honest. */
-  --ns-ink:      var(--text-primary);
-  --ns-ink-soft: var(--text-secondary);
-  color: var(--ns-ink);
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-6);
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-panel);
-  cursor: pointer;
-  transition: background 140ms ease, transform 140ms ease, border-color 140ms ease;
 }
-.next-service:hover {
-  background: color-mix(in srgb, var(--surface) 92%, var(--text-primary));
-  border-color: color-mix(in srgb, var(--surface-line) 60%, var(--text-primary));
-}
-.next-service:active { transform: translateY(1px); }
-
-/* Nothing due: same strip, no affordance, muted. */
-.next-service--clear {
-  flex-direction: row;
+.gate-card--clear { gap: var(--sp-3); }
+.gate-card__head {
+  display: flex;
   align-items: baseline;
-  flex-wrap: wrap;
-  gap: 10px;
-  cursor: default;
-  background: transparent;
-  border-color: color-mix(in srgb, var(--border) 80%, transparent);
+  justify-content: space-between;
+  gap: var(--sp-4);
 }
-.next-service--clear:hover { background: transparent; }
+.gate-card__name { display: flex; flex-direction: column; }
+.gate-card__jp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  letter-spacing: var(--tr-name);
+}
+.gate-card__latin {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.gate-card__figure { display: flex; align-items: baseline; gap: var(--sp-2); }
+/* Gold as a figure, mixed toward the card's own ink — the same
+   treatment the strip's count wore, on the same reasoning: raw gold
+   on this ground does not carry. */
+.gate-card__count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-heading);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
+}
+.gate-card__unit { font-family: var(--font-jp); font-size: var(--fs-caption); color: var(--text-secondary); }
+.gate-card__clear { font-size: var(--fs-body); font-weight: 600; color: var(--success); }
+.gate-card__when { font-size: var(--fs-sm); color: var(--text-secondary); }
 
-.next-service__head {
+/* 内訳 — the phone's disclosure. Desktop never sees it: the lanes are
+   simply there. Under 560px the lanes collapse behind this toggle so
+   the phone's first screen is card, count, button, map. */
+.gate-card__toggle {
+  display: none;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.gate-card__toggle:hover,
+.gate-card__toggle:focus-visible { color: var(--text-primary); filter: none; }
+.gate-card__toggle-jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); }
+.gate-card__toggle-latin {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+.gate-card__chev { margin-left: auto; font-size: var(--fs-caption); transition: transform 0.15s ease; }
+.gate-card__toggle[aria-expanded="true"] .gate-card__chev { transform: rotate(180deg); }
+
+.gate-card__lanes { display: flex; flex-direction: column; gap: var(--sp-2); }
+.gate-lane {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-card);
+  border: 1px solid color-mix(in srgb, var(--lane-color, var(--accent2)) 30%, transparent);
+  background: color-mix(in srgb, var(--lane-color, var(--accent2)) 10%, transparent);
+  font-size: var(--fs-sm);
+}
+.gate-lane__rail {
+  width: 3px;
+  height: 14px;
+  border-radius: var(--r-pill);
+  background: var(--lane-color, var(--accent2));
+  flex-shrink: 0;
+}
+.gate-lane__where {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--lane-color, var(--accent2)) 45%, var(--text-primary));
+}
+/* Toward the primary ink, not bare --text-secondary: the lane's 10%
+   pigment tint is just enough ground for the secondary ink to miss
+   the floor in light theme (measured 4.32:1). Guard 4 pins this pair
+   (.gc-mode). */
+.gate-lane__mode { color: color-mix(in srgb, var(--text-secondary) 60%, var(--text-primary)); font-size: var(--fs-caption); }
+.gate-lane__due { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* The screen's one filled action. Gold, because Today is gold — and
+   gold follows its own standing ruling, not .btn-primary's: the 60%
+   mix toward the panel carrying the LIGHT ink is what the Today
+   picker's own primary settled on after black-on-gold was built and
+   ruled against (see .today-picker .decks-console__new). What makes
+   this one THE action is scale and --elev-action, the app's third
+   shadow, minted for exactly this button. Hover cannot go lighter —
+   more gold under a light ink falls below the floor — so the hover is
+   the lift and the glow, with the fill held. */
+.btn-depart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The caption may wrap under the name; the name itself never breaks
+     (Japanese has no spaces — a crushed column stacks 出発する one
+     character per line instead of overflowing, which is how the
+     tablet tier shipped broken once). */
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
+  /* Pinned to the card's foot when the rail stretches the pair to a
+     shared height — the slack lands above the action, not under it. */
+  margin-top: auto;
+  padding: var(--sp-4) var(--sp-5);
+  background: color-mix(in srgb, var(--accent2) 60%, var(--bg-panel));
+  color: var(--text-on-panel);
+  border: none;
+  border-radius: var(--r-card);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--elev-action);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-depart:hover,
+.btn-depart:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px color-mix(in srgb, var(--accent2) 42%, transparent);
+  filter: none;
+}
+.btn-depart:active { transform: translateY(1px); }
+.btn-depart__jp { font-family: var(--font-jp); font-size: var(--fs-lead); white-space: nowrap; }
+.btn-depart__latin {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.btn-depart__go { font-size: var(--fs-caption); opacity: 0.8; }
+
+/* ── The pass, in the hall ──────────────────────────────────
+   components/station/HallPass mounts the profile's own CommuterPass
+   here; these rules are only the hall's frame around it — the whole
+   card is a shortcut to the profile, and the standalone bottom margin
+   the profile gives it belongs to that page's rhythm, not this one. */
+.hall-pass {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.hall-pass:hover { filter: none; }
+.hall-pass .pass { margin-bottom: 0; transition: border-color 0.15s ease, transform 0.15s ease; }
+.hall-pass:hover .pass,
+.hall-pass:focus-visible .pass {
+  border-color: color-mix(in srgb, var(--pass-ink) 55%, var(--text-on-panel));
+  transform: translateY(-1px);
+}
+.hall-pass__holder {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-heading);
+  line-height: 1.1;
+}
+.pass__footer { display: flex; flex-direction: column; gap: var(--sp-4); }
+.pass__footer-rule { height: 1px; background: rgba(255, 255, 255, 0.12); }
+
+/* ── スタンプラリー — the streak as eki stamps ───────────────
+   DESIGN.md, Motion: the streak is a stamp rally, not a flame. Seven
+   days on the pass, each stamped in the daruma's own lacquer red —
+   the ink an eki stamp actually is — today's pressed a beat after
+   the card arrives. The pass is a charcoal card in both themes since
+   the 案一 round, so every ink here is the panel pair. */
+.stamp-rally {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--sp-4);
 }
-/* Japanese and plain language as one unit, the pairing every station
-   plate and section header in the app already uses. Baseline-aligned
-   rather than stacked: this strip is one line tall by design, and a
-   two-line name would make it as big as a board row. */
-.next-service__name {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 9px;
-  min-width: 0;
-}
-/* Both halves of this pair sit in the SOFT ink, and the pairing is
-   carried by the 1.3x size drop, the uppercase and the tracking rather
-   than by a second colour. That is deliberate and it is not what
-   .next-service__pace-jp / __pace-latin five rules below do -- those
-   put the Japanese on the block's full ink. This strip's name is the
-   quieter register of the two on purpose: it is a standing label on a
-   control, not the heading of a screen.
-
-   Neither half is a mix toward `transparent` any more. Such a mix
-   composites toward the GROUND rather than the ink, so it costs
-   contrast in both themes at once: this caption was 2.09:1 on the sumi
-   and still only 4.01:1 in DARK theme, where nothing else in the app
-   failed. Dropping it costs the pair nothing that size and case were
-   not already carrying. */
-.next-service__jp {
-  font-size: 13px;
-  letter-spacing: 0.16em;
-  color: var(--ns-ink-soft);
-  white-space: nowrap;
-}
-.next-service__latin {
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ns-ink-soft);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.next-service__count {
+.stamp-rally__row { display: flex; align-items: center; gap: var(--sp-2); }
+.stamp-rally__stamp {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-pill);
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 20px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  /* Gold as a figure, now on a ground that follows the theme -- raw it
-     measured 2.85:1 on the light surface. Mixed toward the strip's own
-     ink, the same treatment every other pigment-as-text site here
-     takes. */
-  color: color-mix(in srgb, var(--accent2) 60%, var(--ns-ink));
-}
-.next-service__clear {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--success);
-}
-.next-service__when {
-  font-size: 13px;
-  color: var(--ns-ink-soft);
-}
-
-/* The lanes waiting, as chips. Scrolls rather than wraps: three chips
-   on one line is the shape of a summary, and a wrapped third line makes
-   this compete with the board it is supposed to sit above. */
-.next-service__lanes {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.next-service__lanes::-webkit-scrollbar { display: none; }
-
-.next-service__lane {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 7px;
-  flex: 0 0 auto;
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--lane-color, var(--accent2)) 13%, transparent);
-  border: 1px solid color-mix(in srgb, var(--lane-color, var(--accent2)) 30%, transparent);
-  font-size: 12px;
-  white-space: nowrap;
-}
-.next-service__lane-where { font-weight: 700; color: color-mix(in srgb, var(--lane-color, var(--accent2)) 55%, var(--ns-ink)); }
-.next-service__lane-mode  { color: var(--ns-ink-soft); }
-.next-service__lane-due {
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  color: var(--ns-ink);
-}
-
-/* ── 新規 — the day's new-item gauge ─────────────────────────
-   The onboarding pace made visible on the concourse: a thin fill bar
-   in the strip's own accent2, new items introduced today against the
-   chosen daily target. Absent entirely (no markup) for accounts with
-   no stored pace. */
-.next-service__pace {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-top: 8px;
-  border-top: 1px solid color-mix(in srgb, var(--accent2) 18%, transparent);
-}
-.next-service--clear .next-service__pace {
-  /* In the cleared strip (a baseline-wrapped row) the gauge takes the
-     line's remaining width so the bar has something to be a bar in. */
-  flex: 1 1 220px;
-  border-top: none;
-  padding-top: 0;
-}
-.next-service__pace-name {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.next-service__pace-jp {
+  justify-content: center;
   font-family: var(--font-jp);
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
-  font-size: 0.85rem;
+  border: 1.5px solid color-mix(in srgb, var(--daruma-aka) 55%, transparent);
+  color: color-mix(in srgb, var(--daruma-aka) 70%, var(--text-on-panel));
+  background: color-mix(in srgb, var(--daruma-aka) 12%, transparent);
+  transform: rotate(var(--stamp-tilt, 0deg));
 }
-.next-service__pace-latin {
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
+.stamp-rally__stamp--missed {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: var(--text-on-panel-soft);
+  opacity: 0.6;
+}
+.stamp-rally__stamp--today {
+  border-width: 2px;
+  border-color: var(--daruma-aka);
+  background: color-mix(in srgb, var(--daruma-aka) 22%, transparent);
+  animation: stamp-press 0.45s ease-out backwards;
+  animation-delay: 0.4s;
+}
+@keyframes stamp-press {
+  0%   { transform: scale(1.8) rotate(var(--stamp-tilt, 0deg)); opacity: 0; }
+  60%  { transform: scale(0.92) rotate(var(--stamp-tilt, 0deg)); opacity: 1; }
+  100% { transform: scale(1) rotate(var(--stamp-tilt, 0deg)); }
+}
+.stamp-rally__label { display: flex; flex-direction: column; text-align: right; }
+.stamp-rally__count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+}
+.stamp-rally__unit { font-family: var(--font-jp); font-size: var(--fs-caption-xs); }
+.stamp-rally__caption {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
   text-transform: uppercase;
-  color: var(--ns-ink-soft);
+  color: var(--text-on-panel-soft);
 }
-.next-service__pace-bar {
+
+/* ── 新規 — the day's new-item gauge, now on the pass ────────
+   Moved from the retired concourse strip with its meaning intact. The
+   pass is a charcoal card in both themes (案一), so the inks are the
+   panel pair — the same closed system the strip's sumi always used. */
+.hall-pace { display: flex; align-items: center; gap: var(--sp-4); }
+.hall-pace__name { display: flex; align-items: baseline; gap: var(--sp-2); flex-shrink: 0; }
+.hall-pace__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); }
+.hall-pace__latin {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.hall-pace__bar {
   flex: 1;
   height: 5px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--accent2) 18%, transparent);
   overflow: hidden;
 }
-.next-service__pace-fill {
+.hall-pace__fill {
   display: block;
   height: 100%;
   border-radius: inherit;
@@ -5550,22 +5696,22 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   transition: width 300ms ease;
 }
 @media (prefers-reduced-motion: reduce) {
-  .next-service__pace-fill { transition: none; }
+  .hall-pace__fill { transition: none; }
+  .stamp-rally__stamp--today { animation: none; }
 }
-.next-service__pace-count {
+.hall-pace__count {
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
 }
-.next-service__pace-sep { color: var(--ns-ink-soft); font-weight: 400; }
-/* Target met: the onboarding's gold pill (.onb-reco-badge), flowed
-   inline at the row's end instead of floating over a card corner. */
-.next-service__pace-met {
+.hall-pace__sep { color: var(--text-on-panel-soft); font-weight: 400; }
+/* Target met: the onboarding's gold pill, flowed inline. */
+.hall-pace__met {
   position: static;
   flex-shrink: 0;
   box-shadow: none;
-  font-size: 0.68rem;
+  font-size: var(--fs-caption-xs);
   line-height: 1.4;
 }
 
@@ -5838,6 +5984,12 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 .today-clear__body  { margin: 0; color: var(--text-secondary); }
 .today-clear__next  { margin: 0 0 8px; color: var(--text-secondary); font-size: 14px; }
 
+/* ── The station's main panel ───────────────────────────────
+   Born as the 発車標 departure board; since the wall-map redesign the
+   same sumi panel carries the 路線図 (see WallMap.jsx). The material,
+   the masthead grammar and the gold stripe are exactly what they
+   were — only the rows under them changed, which is why the class
+   keeps its name: it names the panel, not the timetable. */
 .board {
   position: relative;
   width: min(var(--board-w), 100%);
@@ -5867,7 +6019,7 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    are standing in front of, in the three registers a 駅名標 always
    carries — reading, name, plain-language name. Right: what the panel
    is, and the time. The line stripe under it is the same one the
-   plate carries; below that, the trains. */
+   plate carries; below that, the lines. */
 .board__masthead {
   display: flex;
   align-items: flex-end;
@@ -6000,27 +6152,38 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   .board-clock__colon { animation: none; }
 }
 
-.board__rows { display: flex; flex-direction: column; }
-
-.board-row {
+/* ── 路線図 — the lines on the wall map ──────────────────────
+   Inside the board's own sumi panel, where the departure rows used to
+   run. Three registers, by what the app really knows about a place
+   (see WallMap.jsx): tracked lines, practice rows, facility chips.
+   Panel ground throughout — every ink below is the panel pair or a
+   pigment lifted toward it, never the ambient inks that flip. */
+.wmap__lines {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-4) var(--sp-4) var(--sp-3);
+}
+.wmap-line {
   position: relative;
   display: grid;
-  grid-template-columns: 82px minmax(0, auto) minmax(0, 1fr) 22px;
-  gap: 20px 24px;
+  grid-template-columns: 150px minmax(0, 1fr) 56px;
+  gap: var(--sp-5);
   align-items: center;
   width: 100%;
-  padding: 20px 22px;
+  padding: var(--sp-4) var(--sp-3);
   background: none;
   border: none;
-  border-radius: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--r-card);
   color: inherit;
   font: inherit;
   text-align: left;
+  cursor: pointer;
   transition: background 0.15s ease;
 }
-.board-row:last-child { border-bottom: none; }
-.board-row::before {
+/* The hover grammar every row in the app shares: the rail reveals,
+   the ground lifts a register, the roundel inverts, the ▶ slides. */
+.wmap-line::before,
+.wmap-row::before {
   content: '';
   position: absolute;
   left: 0;
@@ -6031,109 +6194,283 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   transform: scaleY(0);
   transition: transform 0.18s ease;
 }
-.board-row:hover::before,
-.board-row:focus-visible::before { transform: scaleY(1); }
-.board-row:hover,
-.board-row:focus-visible {
+.wmap-line:hover::before, .wmap-line:focus-visible::before,
+.wmap-row:hover::before,  .wmap-row:focus-visible::before { transform: scaleY(1); }
+.wmap-line:hover, .wmap-line:focus-visible,
+.wmap-row:hover,  .wmap-row:focus-visible {
   background: rgba(255, 255, 255, 0.055);
   filter: none;
 }
 
-.board-row__platform {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-.board-row__no {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: color-mix(in srgb, var(--line-color, var(--accent2)) 55%, var(--text-on-panel));
-  font-variant-numeric: tabular-nums;
-}
-.board-row__no-unit {
-  font-family: var(--font-jp);
-  font-size: 0.6rem;
-  opacity: 0.5;
-}
-
-.board-row__dest {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-.board-row__roundel {
+.wmap-roundel {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 30px;
   height: 30px;
-  border-radius: 50%;
+  border-radius: var(--r-pill);
   border: 2px solid var(--line-color, var(--accent2));
   color: color-mix(in srgb, var(--line-color, var(--accent2)) 55%, var(--text-on-panel));
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
+  transition: background 0.15s ease, color 0.15s ease;
 }
-.board-row__names {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
+.wmap-line:hover .wmap-roundel, .wmap-line:focus-visible .wmap-roundel,
+.wmap-row:hover .wmap-roundel,  .wmap-row:focus-visible .wmap-roundel,
+.fac-chip:hover .wmap-roundel,  .fac-chip:focus-visible .wmap-roundel {
+  background: var(--line-color, var(--accent2));
+  color: var(--text-on-panel);
 }
-.board-row__jp {
+.wmap-roundel--sm { width: 24px; height: 24px; }
+
+.wmap-line__id { display: flex; align-items: center; gap: var(--sp-4); min-width: 0; }
+.wmap-line__names,
+.wmap-row__names { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.wmap-line__jp,
+.wmap-row__jp {
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: 1.12rem;
+  font-size: var(--fs-lead);
   line-height: 1.2;
+  /* Ported with the board rows these replace, values and all. */
   letter-spacing: 0.04em;
-  /* 行 belongs to the name in front of it. Once the destination shares
-     a row with its own latin name (see the small-screen rules), the
-     two were free to break apart and leave a stranded 行 on its own
-     line under 読書. */
   white-space: nowrap;
 }
-/* 行 — "bound for". Set smaller than the destination itself, the way
-   it is on the board. */
-.board-row__bound {
-  margin-left: 4px;
-  font-size: 0.72rem;
-  opacity: 0.6;
-}
-.board-row__latin {
+/* 線 / 行 — "line" / "bound for", set smaller than the name the way
+   the board always set 行. */
+.wmap-line__sen { margin-left: var(--sp-1); font-size: var(--fs-caption); opacity: 0.6; }
+.wmap-line__latin,
+.wmap-row__latin {
   font-family: var(--font-display);
-  font-size: 0.66rem;
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   opacity: 0.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.board-row__note {
+/* ── The track: stops, the travelled portion, the train ──────
+   Geometry mirrors the stop count (see WallMap's Track): first stop
+   at 5%, last at 95%. The rail is the line's pigment at rest, the
+   travelled portion is it raw, and the marker is it lifted toward
+   the panel ink — colour as an edge and a marker, never a fill. */
+.wmap-track { position: relative; height: 30px; }
+.wmap-track__rail,
+.wmap-track__done {
+  position: absolute;
+  top: 9px;
+  left: 0;
+  height: 3px;
+  border-radius: var(--r-pill);
+}
+.wmap-track__rail { width: 100%; background: color-mix(in srgb, var(--line-color, var(--accent2)) 30%, transparent); }
+.wmap-track__done { background: var(--line-color, var(--accent2)); transition: width 0.6s ease; }
+.wmap-track__stop {
+  position: absolute;
+  top: 5px;
+  width: 11px;
+  height: 11px;
+  border-radius: var(--r-pill);
+  transform: translateX(-50%);
+  border: 2px solid color-mix(in srgb, var(--line-color, var(--accent2)) 55%, var(--bg-panel));
+  background: var(--bg-panel);
+}
+.wmap-track__stop--past {
+  background: var(--line-color, var(--accent2));
+  border-color: var(--line-color, var(--accent2));
+}
+.wmap-track__label {
+  position: absolute;
+  top: 19px;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.wmap-track__train {
+  position: absolute;
+  top: 2px;
+  width: 7px;
+  height: 17px;
+  border-radius: var(--r-pill);
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--line-color, var(--accent2)) 70%, var(--text-on-panel));
+}
+@media (prefers-reduced-motion: reduce) {
+  .wmap-track__done { transition: none; }
+}
+
+/* Due counts ride the map as state chips — --warning meaning "due",
+   an edge and a numeral, never a fill. */
+.wmap-line__due { justify-self: end; }
+.wmap-due {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
+  color: var(--warning);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.wmap-due__unit { font-family: var(--font-jp); font-weight: 500; font-size: var(--fs-caption-xs); opacity: 0.8; }
+
+/* ── 実践 / 施設 — the groups below the lines ────────────────ー */
+.wmap__group {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-2) var(--sp-4) var(--sp-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.wmap__caption { display: flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-3) var(--sp-3) var(--sp-2); }
+.wmap__caption-jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tr-name);
+  color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel));
+}
+.wmap__caption-latin {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.wmap-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px minmax(0, auto) minmax(0, 1fr) 22px;
+  gap: var(--sp-5);
+  align-items: center;
+  width: 100%;
+  padding: var(--sp-4) var(--sp-3);
+  background: none;
+  border: none;
+  border-radius: var(--r-card);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.wmap-row__note {
   text-align: right;
-  font-size: 0.78rem;
+  font-size: var(--fs-caption);
   line-height: 1.4;
   opacity: 0.72;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-.board-row__go {
+.wmap-row__go {
   justify-self: end;
-  font-size: 0.7rem;
+  font-size: var(--fs-caption-xs);
   color: color-mix(in srgb, var(--line-color, var(--accent2)) 55%, var(--text-on-panel));
   opacity: 0;
   transform: translateX(-4px);
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
-.board-row:hover .board-row__go,
-.board-row:focus-visible .board-row__go {
-  opacity: 1;
-  transform: translateX(0);
+.wmap-row:hover .wmap-row__go,
+.wmap-row:focus-visible .wmap-row__go { opacity: 1; transform: translateX(0); }
+@media (prefers-reduced-motion: reduce) {
+  .wmap-row__go { transition: opacity 0.15s ease; transform: none; }
+  .wmap-line::before, .wmap-row::before { transition: none; }
+}
+
+/* The halls you use rather than ride. Chips, labelled in the
+   learner's own language — a tool's name is a label, not a place
+   name; the roundel keeps the code and the pigment. */
+.wmap__facilities {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5) var(--sp-6);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.wmap__facilities .wmap__caption {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0;
+  margin-right: var(--sp-2);
+}
+.fac-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-2);
+  border-radius: var(--r-pill);
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.fac-chip:hover,
+.fac-chip:focus-visible {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: var(--line-color, var(--accent2));
+  filter: none;
+}
+.fac-chip__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* The hall folds to one column before the map's tracks crush; the
+   gate and the pass pair up above the full-width map. 900px is the
+   same bound the settings mixer folds at.
+
+   The rail's pair is auto-fit, not a hard 1fr 1fr: a fixed pair at
+   ~600px gave each card ~280px and the depart button's 出発する
+   wrapped one CHARACTER per line — Japanese has no spaces, so a
+   too-narrow column stacks a word vertically rather than overflowing
+   visibly. Below two comfortable columns the rail stacks on its own,
+   with no third breakpoint to keep honest. */
+@media (max-width: 900px) {
+  .gatehall { grid-template-columns: minmax(0, 1fr); }
+  .gatehall__rail {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    align-items: stretch;
+  }
+}
+
+/* The map strips fold well before the phone: at ~700px the unfolded
+   grid leaves the track ~300px and five stops crush into the train.
+   Identity and due count take the first line, the track the second at
+   full width — the same fold the 560px query used to hold, moved up
+   to where it is actually needed. */
+@media (max-width: 760px) {
+  .wmap-line { display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-4); }
+  .wmap-line__id { flex: 1 1 auto; }
+  .wmap-line__due { order: 2; }
+  .wmap-line .wmap-track { flex: 1 1 100%; order: 3; }
+  /* 備考 goes with the fold, exactly as it did on the board: the
+     destination is what you are scanning for. */
+  .wmap-row { grid-template-columns: 30px minmax(0, 1fr) 22px; }
+  .wmap-row__note { display: none; }
 }
 
 /* ── The notice strip ─────────────────────────────────────
@@ -11666,6 +12003,11 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   transform: rotate(-90deg);
 }
 .profile-card__ring-track { fill: none; stroke: var(--border); stroke-width: 4; }
+/* On the pass — a charcoal card in both themes since 案一 — the
+   shared --border token is a paper hairline and vanishes; the track
+   takes the card's own faint white instead. Placed after the base
+   rule it overrides, not beside .pass, per no-descending-specificity. */
+.pass .profile-card__ring-track { stroke: rgba(255, 255, 255, 0.14); }
 .profile-card__ring-fill {
   fill: none;
   stroke: var(--accent9);
@@ -15553,7 +15895,6 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    for three controls — if it waits until 560px to stack. Collapsing
    this into 560px would reintroduce exactly that. */
 @media (max-width: 640px) {
-  .board-row { grid-template-columns: 72px 1fr 1fr 20px; gap: 12px; }
   .landing-hero { padding: 72px 20px 60px; }
   .landing-hero__glyph { font-size: 3.6rem; }
   .landing-hero__title { font-size: 1.6rem; }
@@ -15644,22 +15985,18 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   .station__concourse-notice { display: none; }
   .station__notice { display: block; }
   .station__platform { padding: 20px 12px 24px; gap: 12px; }
-  .next-service { padding: 12px 14px; }
-  .next-service__count { font-size: 18px; }
+  /* One identity object per viewport: the hall's full pass yields to
+     the concourse's pocket card here (see .ic-card's own note). */
+  .hall-pass { display: none; }
+  .ic-card { display: flex; }
+  /* The gate folds its breakdown behind the 内訳 disclosure, so the
+     phone's first screen is card, count, button, map. */
+  .gate-card { padding: var(--sp-5); gap: var(--sp-4); }
+  .gate-card__lanes { display: none; }
+  .gate-card__lanes--open { display: flex; }
+  .gate-card__toggle { display: flex; }
 
-  /* 備考 is the first thing to go: the destination and the platform
-     number are what you are actually scanning for. */
-  .board-row { grid-template-columns: 54px 1fr 18px; gap: 10px; padding: 14px 14px; }
-  .board-row__note { display: none; }
-  .board-row__no { font-size: 1.2rem; }
-  .board-row__names {
-    flex: 1;
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .board-row__latin { text-align: right; }
+  /* The map strips already folded at 760px; nothing more to fold. */
 
   /* The masthead stacks: the station's name is the thing worth the
      width, so the panel label and clock drop under it rather than

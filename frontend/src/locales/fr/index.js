@@ -69,12 +69,20 @@ const nav = {
 // ── Home screen ───────────────────────────────────────────
 const home = {
   // ── 日本語駅 — la gare ────────────────────────────────────
-  // L'accueil est un quai et chaque section un train qui en part
-  // (voir config/stations.js). Les noms de stations et de services
-  // sont des noms propres japonais et vivent dans cette config,
-  // pas ici — voici les deux libellés qui se traduisent vraiment.
-  departures:  'Départs',
+  // L'accueil est le hall de la gare et chaque section une ligne sur
+  // son plan mural (voir config/stations.js et WallMap.jsx). Les noms
+  // de stations et de lignes sont des noms propres japonais et vivent
+  // dans cette config, pas ici — voici les libellés qui se traduisent
+  // vraiment. `routeMap` (la légende du bandeau) existe déjà plus
+  // bas, partagée avec le schéma de ligne de l'analyseur.
   platforms:   'Quais',
+  // Les deux légendes de groupe du plan mural : les lignes de
+  // pratique, et les services qu'on utilise sans les « prendre ».
+  mapPractice:   'Pratique',
+  mapFacilities: 'Services',
+  // L'action pleine du portillon, et son dépliant mobile.
+  depart:      'Embarquer',
+  breakdown:   'Détail',
   // Texte au survol d'un badge 種別. Volontairement pas
   // « Omnibus »/« Rapide » : c'est le mot ferroviaire pour les pastilles,
   // et le répéter n'explique rien à qui choisit un mode d'étude.
@@ -856,7 +864,6 @@ const profile = {
   noActivityWeek:    "Rien d'étudié cette semaine pour l'instant",
   profileTitle:      'Profil',
   profileStale:      "Impossible d'atteindre le serveur — affichage de vos dernières données connues.",
-  nextLevel:         'Niveau suivant',
   // Les portes du profil vers le Hall des daruma, le Grenier et les
   // statistiques — voir la portée 'profile' de config/navLinks.js.
   halls:             'Salles',

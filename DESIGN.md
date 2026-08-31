@@ -16,8 +16,12 @@ this file wins — a canvas cannot be grepped and does not travel with a clone.
 
 The app is a Japanese railway station. Learning is a journey: sections are
 **lines** (路線), screens are **stations**, choices are **platforms** (のりば),
-your profile is a **commuter pass** (定期券), and the home screen is a
-**departure board** (発車標).
+your profile is a **commuter pass** (定期券), and the home screen is the
+**gate hall**: the day's reviews at the **fare gate** (改札), your pass under
+them, and the **route map** (路線図) on the wall — every line of the app with
+your own train somewhere along it. (It was a departure board, 発車標, until
+the wall-map redesign; the map answers "how far have I come", which a board
+of equal departures never could.)
 
 This is not decoration. It is the reason the app can show eleven subjects
 without a menu that looks like a menu, and the reason a colour can mean
@@ -194,7 +198,11 @@ IC card) → `--r-pill`.
 ### Elevation is rationed
 
 Two shadows exist, and both mean **this object hangs**: `--elev-hang` for the
-station plate, `--elev-board` for the departure board. Nothing else has a
+station plate, `--elev-board` for the wall map's panel (the departure board's
+successor). A third exists since the wall-map redesign and means something
+else: `--elev-action`, a faint gold glow spent on `.btn-depart` alone — "this
+is the thing to press". One object, by ruling; a fourth shadow needs the same
+argument this one had. Nothing else has a
 shadow. Separation comes from `--surface-line`.
 
 ### The console, one everywhere
@@ -333,7 +341,7 @@ So:
 ## Structure
 
 - **One `<h1>` per screen**, and it is the object that names the place — the
-  station plate, the departure board, or the pass. A plated screen never prints
+  station plate, the wall map's masthead, or the pass. A plated screen never prints
   a second heading.
 - Section headings are `<h2>` inside the paired `SectionHeader`.
 - Four column widths: `--board-w` (1040px) for the station column,

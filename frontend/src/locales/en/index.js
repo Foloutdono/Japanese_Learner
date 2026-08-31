@@ -68,12 +68,20 @@ const nav = {
 // ── Home screen ───────────────────────────────────────────
 const home = {
   // ── 日本語駅 — the station ────────────────────────────────
-  // The home screen is a platform and every section is a service
-  // leaving it (see config/stations.js). Station and service names
-  // themselves are Japanese proper nouns and live in that config,
-  // not here — these are the two labels that genuinely translate.
-  departures:  'Departures',
+  // The home screen is the gate hall and every section is a line on
+  // its wall map (see config/stations.js and WallMap.jsx). Station
+  // and line names themselves are Japanese proper nouns and live in
+  // that config, not here — these are the labels that genuinely
+  // translate. `routeMap` (the masthead's caption) already exists
+  // further down, shared with the analyzer's route diagram.
   platforms:   'Platforms',
+  // The wall map's two group captions: the sentence-practice lines,
+  // and the halls you use rather than ride.
+  mapPractice:   'Practice',
+  mapFacilities: 'Facilities',
+  // The fare gate's filled action, and its phone-only disclosure.
+  depart:      'Depart',
+  breakdown:   'Breakdown',
   // Hover text on a 種別 badge. Deliberately not "Local"/"Rapid" —
   // that is the railway word for the pips, and repeating it explains
   // nothing to somebody choosing a study mode. Each one says what the
@@ -871,7 +879,6 @@ const profile = {
   profileTitle:      'Profile',
   profileStale:      "Couldn't reach the server — showing your last known data.",
   level:             'Level',
-  nextLevel:         'Next level',
   // The profile's doorways into the Daruma Hall, the Storehouse and
   // the statistics — see config/navLinks.js's 'profile' scope.
   halls:             'Halls',
