@@ -144,6 +144,16 @@ class LegacyRegistryTests(unittest.TestCase):
     # lookup that silently matches nothing.
     RETIRED = {"qcm-kj-m", "qcm-m-kj", "flashcard-kj-m", "flashcard-m-kj"}
 
+    # The one module allowed to use these as values rather than merely
+    # name them. scripts/migrate_legacy_modes.py exists to read rows that
+    # still carry these keys and rewrite them onto the registry, so it has
+    # to hold the mapping in code -- and it is the opposite of the defect
+    # this test guards: it is what makes the retired keys stop existing in
+    # the data, rather than a lookup that silently matches nothing. Delete
+    # the file and this exemption together once every deployment has run
+    # it.
+    MIGRATION = "scripts/migrate_legacy_modes.py"
+
     def test_no_module_still_uses_a_retired_mode_string(self) -> None:
         """Parsed rather than grepped, so the several files that
         legitimately NAME the retired keys while explaining why they were
@@ -152,6 +162,8 @@ class LegacyRegistryTests(unittest.TestCase):
         offenders = []
         for path in BACKEND.rglob("*.py"):
             if "__pycache__" in path.parts or path.name.startswith("test_"):
+                continue
+            if path.relative_to(BACKEND).as_posix() == self.MIGRATION:
                 continue
             tree = ast.parse(path.read_text(encoding="utf-8"))
 
@@ -173,6 +185,18 @@ class LegacyRegistryTests(unittest.TestCase):
                         f"{path.relative_to(BACKEND)}:{node.lineno}: {node.value}"
                     )
         self.assertEqual(offenders, [])
+
+    def test_the_migration_exemption_is_for_a_file_that_exists(self) -> None:
+        """An exemption pointing at a deleted file is a hole in the guard.
+
+        When the migration is retired, this fails and says so, instead of
+        leaving MIGRATION quietly excusing nothing -- or worse, excusing a
+        future file that happens to take the same path.
+        """
+        self.assertTrue(
+            (BACKEND / self.MIGRATION).is_file(),
+            f"{self.MIGRATION} is gone -- drop the exemption above with it",
+        )
 
 
 class CardStatsMergeTests(unittest.TestCase):

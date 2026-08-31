@@ -10,7 +10,7 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
-import { playCorrect } from '../lib/audio'
+import RatingBar from '../components/study/RatingBar'
 import { FireIcon, EyeOffIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
@@ -305,7 +305,12 @@ export default function ReadingScreen({ session }) {
     setStage('feedback')
   }
 
-  function gradeAnswer(isCorrect) {
+  // `quality` is the learner's own rating, 0..5 worst to best, as
+  // RatingBar emits it. `isCorrect` stays the derived pass/fail, because
+  // it is what the score row, the streak and every existing reader of
+  // reading_log understand -- the rating is recorded alongside it, not
+  // instead of it.
+  function gradeAnswer(isCorrect, quality = null) {
     if (feedback?.correct !== null) return // already graded, ignore repeat clicks
 
     setFeedback(f => ({ ...f, correct: isCorrect }))
@@ -314,7 +319,9 @@ export default function ReadingScreen({ session }) {
       const next = isCorrect ? s + 1 : 0
       return next
     })
-    if (isCorrect) playCorrect()
+    // No playCorrect here any more: RatingBar plays the tap itself, on
+    // both sides, and grading is only ever reached through it now --
+    // calling it here too doubled the sound on a correct answer.
 
     apiFetch('/api/reading/result', session, {
       method: 'POST',
@@ -325,6 +332,11 @@ export default function ReadingScreen({ session }) {
         romaji: data.romaji,
         answer: answer.trim(),
         correct: isCorrect,
+        quality,
+        // The word this sentence was chosen to practise. The endpoint
+        // resolves it to that word's SRS card so the rating schedules
+        // something, rather than only being written down.
+        source_word: data.source_word ?? null,
       }),
     }).catch(() => {
       // Logging failure shouldn't block the user from continuing.
@@ -652,20 +664,15 @@ function SessionView({
             </div>
             <div className="rdg-feedback-actions">
               {feedback.correct === null ? (
-                <div className="rdg-grade-row">
-                  <button
-                    onClick={() => gradeAnswer(false)}
-                    className="rdg-grade-btn--wrong"
-                  >
-                    {t.gradeIncorrect}
-                  </button>
-                  <button
-                    onClick={() => gradeAnswer(true)}
-                    className="rdg-grade-btn--right"
-                  >
-                    {t.gradeCorrect}
-                  </button>
-                </div>
+                /* Six-way rating rather than the two buttons this used
+                   to have, for the same reason TranslationScreen was
+                   changed: reading a sentence is rarely simply right or
+                   wrong, and the learner already knows how close they
+                   were -- the two buttons made them flatten that to a
+                   coin flip. RatingBar's own threshold decides
+                   correctness: q > 2 is a pass, the same line it draws
+                   between playCorrect and playWrong. */
+                <RatingBar active onRate={q => gradeAnswer(q >= 3, q)} />
               ) : (
                 <button
                   onClick={next}

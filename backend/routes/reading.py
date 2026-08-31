@@ -7,7 +7,7 @@ from functools import lru_cache
 
 import pykakasi
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from core.db import db_conn
 from core.auth import get_user_id, unprefixed
@@ -15,6 +15,7 @@ from core.srs_instance import srs
 from core.user_level import resolve_level
 from study.card_lookup import (
     find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODES,
+    vocab_card_id_for_word,
 )
 from content.kanji_data import get_kanji_string
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
@@ -27,6 +28,45 @@ import content.frequency_data as freq
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+# ── Schema ───────────────────────────────────────────────────────────
+#
+# reading_log is declared in srs/data_structure.sql and created only by
+# loading that file -- unlike translation_log, this module has never
+# owned its table. So this is an ALTER only, exactly as phrase.py does
+# for the equally schema-file-only phrase_history: adding a second
+# CREATE TABLE definition here would give the same table two
+# definitions free to drift, and would drag in reading_log's
+# `level TEXT NOT NULL` question that post_reading_result currently
+# dodges by coalescing to ''. That is a separate decision from adding
+# one column.
+#
+# The screen grades with the app's six-segment rating bar, so the
+# learner's answer carries more than pass/fail. `correct` stays -- it is
+# what every existing reader and every row written before this
+# understands -- and `quality` records the rating it was derived from,
+# 0..5 worst-to-best, exactly as RatingBar emits it.
+#
+# NULLable on purpose: every row logged before this column existed
+# genuinely has no rating, and a default would invent one. A reader has
+# to treat NULL as "graded, resolution unknown" rather than as a score.
+def _migrate_reading_log_schema() -> None:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "ALTER TABLE reading_log ADD COLUMN IF NOT EXISTS quality SMALLINT"
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+try:
+    _migrate_reading_log_schema()
+except Exception:  # pragma: no cover - a missing DB must not stop import
+    logger.exception("reading_log schema migration failed")
 
 # Model selection, provider fallback and the dead-model/dead-provider
 # bookkeeping all live in study/llm_shared.py now -- this module used to
@@ -84,6 +124,15 @@ class ResultPayload(BaseModel):
     romaji: str
     answer: str
     correct: bool
+    # 0..5, worst to best, as RatingBar emits it. Optional so an older
+    # client that still posts only `correct` keeps working; the bound is
+    # enforced here rather than by a CHECK so a bad value is a 422 the
+    # caller can read, not a 500 from the driver.
+    quality: int | None = Field(default=None, ge=0, le=5)
+    # The sentence's source word, straight from the batch payload, so the
+    # rating can reach that word's schedule. Optional: an older client
+    # does not send it, and an uncurated sentence has none.
+    source_word: dict | None = None
 
 
 def _allowed_kanji_for_level(level: str) -> str:
@@ -608,6 +657,36 @@ def get_reading_batch(
     }
 
 
+# ── Scheduling ───────────────────────────────────────────────────────
+#
+# A reading exercise has no card of its own -- the sentence bank is
+# curated content, not a deck -- but every sentence is CHOSEN to
+# practise one vocabulary word, and carries it as `source_word`. So the
+# thing being scheduled is that word, and reading its sentence is
+# evidence about it.
+#
+# The mode key is its own: card_modes is keyed (card_id, mode), so this
+# writes a schedule that sits BESIDE vocab's own flashcard modes rather
+# than overwriting them. A reading session must not silently advance the
+# intervals a vocab session owns.
+#
+# `sentence.` rather than a bare `reading`, following the
+# <source>.<base> shape study/modes.py sets out: the source really is
+# the curated sentence bank and not a deck, and the namespace keeps this
+# from being read as a sibling of `vocab.word_reading` or
+# `kanji.readings` -- two registered keys a bare "reading" sits
+# confusingly close to -- by anyone auditing card_modes later.
+#
+# It is deliberately NOT registered in study/modes.py. card_index.locate()
+# returns None for an unregistered mode and daily_queue skips such a row
+# (see its `else: continue`), which is what is being relied on here: 読書
+# runs its own session off the curated bank and has no renderer in Today.
+# Registering it would mean a Today lane, a frontend studyModes.js entry,
+# en+fr labels and four test updates -- a deliberate piece of work, not a
+# side effect of this one.
+SRS_MODE = "sentence.reading"
+
+
 @router.post("/api/reading/result")
 def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_id)):
     # Correctness is self-assessed by the user after seeing the reveal
@@ -627,16 +706,44 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO reading_log(user_id, level, phase, phrase, romaji, answer, correct)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO reading_log(user_id, level, phase, phrase, romaji,
+                                        answer, correct, quality)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """,
-                (user_id, level_for_log, payload.source, payload.phrase, payload.romaji, payload.answer, payload.correct),
+                (user_id, level_for_log, payload.source, payload.phrase, payload.romaji,
+                 payload.answer, payload.correct, payload.quality),
             )
         conn.commit()
     finally:
         conn.close()
 
-    return {"correct": payload.correct, "romaji": payload.romaji}
+    # Scheduling happens after the log is committed, and never instead
+    # of it: a rating is a fact about what the learner did, and it must
+    # survive even if the word cannot be resolved to a card.
+    scheduled = None
+    if payload.quality is not None:
+        card_id = vocab_card_id_for_word(payload.source_word, user_id)
+        if card_id:
+            state = srs.review(card_id, SRS_MODE, payload.quality)
+            scheduled = {
+                "card_id": card_id,
+                "mode": SRS_MODE,
+                "interval_days": state["interval_days"],
+                "next_review": state["next_review"],
+                "stage": state["stage"],
+                "xp_earned": state.get("xp_earned"),
+                "leveled_up": state.get("leveled_up"),
+                "new_level": state.get("new_level"),
+            }
+
+    return {
+        "correct": payload.correct,
+        "romaji": payload.romaji,
+        "quality": payload.quality,
+        # None when the rating scheduled nothing -- no quality given, or
+        # the sentence's word is not in the vocabulary list.
+        "scheduled": scheduled,
+    }
 
 
 @router.get("/api/reading/history")
@@ -646,7 +753,8 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = Query(
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT level, phase, phrase, romaji, answer, correct, created_at
+                SELECT level, phase, phrase, romaji, answer, correct, quality,
+                       created_at
                 FROM reading_log
                 WHERE user_id = %s
                 ORDER BY created_at DESC
@@ -661,9 +769,13 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = Query(
     return [
         {
             "source": phase, "phrase": phrase, "romaji": romaji,
-            "answer": answer, "correct": correct, "created_at": created_at.isoformat(),
+            "answer": answer, "correct": correct,
+            # NULL on every row written before the screen graded with the
+            # rating bar -- "graded, resolution unknown", not a zero.
+            "quality": quality,
+            "created_at": created_at.isoformat(),
         }
-        for level, phase, phrase, romaji, answer, correct, created_at in rows
+        for level, phase, phrase, romaji, answer, correct, quality, created_at in rows
     ]
 
 

@@ -308,6 +308,159 @@ def find_vocab_match(surface: str, base: str, reading: str):
     return level, entry, vocab_to_id(entry, level)
 
 
+# ── Sentence source words ────────────────────────────────────────────
+#
+# The reading and translation screens study a curated SENTENCE, but the
+# sentence was chosen to practise one vocabulary word, which it carries
+# as `source_word` (see routes/reading.py's _finish_phrase). Grading one
+# of those sentences is evidence about that word, so the rating is
+# scheduled against the word's own SRS card -- and that means turning a
+# source_word back into a real card id.
+#
+# Why an index and not a per-lookup deck scan: walking all five decks
+# and recomputing spelling variants per entry -- what the phrase
+# analyzer's find_vocab_match used to do, before the local tier left it
+# without callers -- was measured at 766 ms. That is fine for a one-off
+# lookup and far too slow for something on the review path, which runs
+# once per rating. This builds the index once instead: 0.002 ms per
+# lookup, at the cost of matching on exact spellings only.
+_LEVELS = ("N5", "N4", "N3", "N2", "N1")
+
+_vocab_lookup: dict[str, dict[str, dict]] | None = None
+
+
+def _vocab_index() -> dict[str, dict[str, dict]]:
+    """level -> lookup key -> vocab entry, built once on first use.
+
+    Three keys per entry: the kanji, each reading, and the pair. A
+    curated sentence names its focus word as a bare string with no
+    reading at all, and that string is sometimes the kana form of a
+    kanji-less entry (バス), so a kanji-only lookup would miss it.
+
+    Readings are split on "/" because an entry can carry more than one
+    (毎月 is "まいげつ/まいつき"), and a whole-field comparison matches
+    neither of them.
+
+    setdefault, not assignment: where two entries share a key the first
+    in the list wins, so the same word resolves the same way on every
+    request rather than depending on iteration luck.
+
+    A second pass adds conventional kana spellings from vocab_extras'
+    two generators -- kana_spelling_variants (買い物 -> 買いもの) and
+    trailing_kana_variants (子供 -> 子ども, 友達 -> 友だち) --
+    mirroring what _index_vocab_by_lemma does for the segmentation
+    path. It runs after the first so it can skip keys already claimed,
+    which makes it strictly additive: a variant can turn a failed
+    lookup into a hit, never change the answer to one that already
+    worked. The kanji filter is carried over from that function for
+    consistency, but it earns its place differently here -- the
+    nominalizer hazard it exists to prevent there cannot arise on this
+    index, which is fed explicit source_word dicts rather than a token
+    stream and already keys every entry by its bare reading anyway. All
+    it does here is keep combinatorial junk (時々 -> とき々) out.
+
+    Worth knowing before extending this: between them the two
+    generators take the curated focus words that fail to resolve from
+    17 down to 13, fixing 買いもの, 友だち and 子ども (which occurs
+    twice). The 13 that remain are NOT a spelling problem, and no
+    richer index will reach them -- 母, 父, 顔, 百円, 洋食, 大雨,
+    失礼, 説明書, 館内, 支援, 専門家, お客様 and 言い方 are absent
+    from the deck under every spelling (母 and 父 appear only as
+    お母さん / お父さん, which are different words, not variants). They
+    need deck entries or different focus words.
+    """
+    global _vocab_lookup
+    if _vocab_lookup is None:
+        built: dict[str, dict[str, dict]] = {}
+        for level in _LEVELS:
+            table: dict[str, dict] = {}
+            for entry in VOCAB_BY_LEVEL.get(level, []):
+                kanji = (entry.get("kanji") or "").strip()
+                kana = (entry.get("kana") or "").strip()
+                if kanji:
+                    table.setdefault(kanji, entry)
+                for reading in kana.split("/"):
+                    reading = reading.strip()
+                    if not reading:
+                        continue
+                    table.setdefault(reading, entry)
+                    if kanji:
+                        table.setdefault(f"{kanji}	{reading}", entry)
+            for entry in VOCAB_BY_LEVEL.get(level, []):
+                kanji = (entry.get("kanji") or "").strip()
+                if not kanji:
+                    continue
+                kana = (entry.get("kana") or "").strip()
+                variants = (
+                    *vocab_extras.kana_spelling_variants(kanji),
+                    *vocab_extras.trailing_kana_variants(kanji, kana),
+                )
+                for variant in variants:
+                    if variant == kanji or variant in table:
+                        continue
+                    if any(is_kanji(c) for c in variant):
+                        table.setdefault(variant, entry)
+            built[level] = table
+        _vocab_lookup = built
+    return _vocab_lookup
+
+
+def vocab_card_id_for_word(source_word: dict | None, user_id: str) -> str | None:
+    """The prefixed SRS card id for a sentence's source word, or None.
+
+    Resolved against the real vocabulary list rather than built straight
+    from the payload, because `source_word` does NOT carry a usable id:
+    it reports kana as "" for every curated sentence, so
+    vocab_to_id({"kanji": "駅", "kana": ""}) yields `vocab_N5_駅_` while
+    the card every vocab session actually uses is `vocab_N5_駅_えき`.
+    Trusting the payload would mint a phantom card next to the real one
+    and schedule reviews onto something nothing else ever reads.
+
+    The word's OWN level wins over the sentence's. A curated sentence
+    reports the level of the SENTENCE, and its focus word frequently
+    belongs to a different deck -- 本 is the focus of an N4 sentence but
+    is an N5 word, and the card is `vocab_N5_本_ほん`. Searching only the
+    declared level resolved 3 of 45 N4 sentences and 2 of 41 N2 ones;
+    falling back to the other levels resolves 206 of the bank's 223. The
+    declared level is still tried first, so a word that genuinely sits
+    in two decks schedules the one its sentence was built for.
+
+    None whenever the word cannot be resolved. Around twenty curated
+    sentences focus on an orthographic variant the deck spells
+    differently (子ども vs 子供, ごはん vs ご飯); matching those needs a
+    variant table, and guessing without one would schedule the wrong
+    card. Callers log the result either way -- only the scheduling is
+    skipped.
+    """
+    if not source_word:
+        return None
+    level = (source_word.get("level") or "").strip()
+    kanji = (source_word.get("kanji") or "").strip()
+    kana = (source_word.get("kana") or "").strip()
+    if not (kanji or kana):
+        return None
+
+    # Most specific key first, so an exact word+reading pair is never
+    # beaten by a bare homograph.
+    keys = []
+    if kanji and kana:
+        keys.append(f"{kanji}	{kana}")
+    if kanji:
+        keys.append(kanji)
+    if kana:
+        keys.append(kana)
+
+    index = _vocab_index()
+    order = ([level] if level in index else []) + [l for l in _LEVELS if l != level]
+    for lvl in order:
+        table = index[lvl]
+        for key in keys:
+            entry = table.get(key)
+            if entry is not None:
+                return f"{user_id}:{vocab_to_id(entry, lvl)}"
+    return None
+
+
 def _kanji_candidates_for(char: str):
     return [
         (level, entry)
