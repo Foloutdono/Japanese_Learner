@@ -243,6 +243,10 @@ export default function TranslationScreen({ session }) {
         answer: answer.trim(),
         correct: isCorrect,
         quality,
+        // The word this sentence was chosen to practise. The endpoint
+        // resolves it to that word's SRS card so the rating schedules
+        // something, rather than only being written down.
+        source_word: data.source_word ?? null,
       }),
     }).catch(() => {
       // Logging failure shouldn't block the learner from continuing.

@@ -6,7 +6,9 @@ from pydantic import BaseModel, Field
 
 from core.db import db_conn
 from core.auth import get_user_id
+from core.srs_instance import srs
 import routes.reading as reading  # reused wholesale below — see get_translation_batch's docstring
+from study.card_lookup import vocab_card_id_for_word
 from study.llm_shared import llm_configured
 
 router = APIRouter()
@@ -216,6 +218,36 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
     return {"analysis": cleaned}
 
 
+# ── Scheduling ───────────────────────────────────────────────────────
+#
+# A translation exercise has no card of its own -- the sentence bank is
+# curated content, not a deck -- but every sentence is CHOSEN to practise
+# one vocabulary word, and carries it as `source_word`. So the thing being
+# scheduled is that word, and translating its sentence is evidence about
+# it.
+#
+# The mode key is its own: card_modes is keyed (card_id, mode), so this
+# writes a schedule that sits BESIDE vocab's own flashcard/reading modes
+# rather than overwriting them. A translation session must not silently
+# advance the intervals a vocab session owns.
+#
+# `sentence.` rather than a bare `translation`, following the
+# <source>.<base> shape study/modes.py sets out. The source really is
+# the curated sentence bank and not a deck, and the namespace keeps the
+# key from being read as a sibling of `vocab.word_reading` or
+# `kanji.readings` by anyone auditing card_modes later. It is NOT in the
+# registry -- see below -- so nothing resolves it; the format is for the
+# human reading the table.
+#
+# It is deliberately not registered in study/modes.py. card_index.locate()
+# returns None for an unregistered mode and daily_queue skips such a row
+# (see its `else: continue`), which is exactly right for now: 翻訳 runs
+# its own session off the curated bank and has no renderer in Today. If
+# translation should ever surface there, that is the change to make --
+# registering the mode -- and it is a deliberate one, not a side effect.
+SRS_MODE = "sentence.translation"
+
+
 # ── Result logging (self-graded, same pattern as reading.py) ────────
 class ResultPayload(BaseModel):
     source: str                # compact source label — see reading._source_label()
@@ -230,6 +262,10 @@ class ResultPayload(BaseModel):
     # enforced here rather than by a CHECK so a bad value is a 422 the
     # caller can read, not a 500 from the driver.
     quality: int | None = Field(default=None, ge=0, le=5)
+    # The sentence's source word, straight from the batch payload, so the
+    # rating can reach that word's schedule. Optional: an older client
+    # does not send it, and an uncurated sentence has none.
+    source_word: dict | None = None
 
 
 @router.post("/api/translation/result")
@@ -260,7 +296,32 @@ def post_translation_result(payload: ResultPayload, user_id: str = Depends(get_u
     finally:
         conn.close()
 
-    return {"correct": payload.correct, "quality": payload.quality}
+    # Scheduling happens after the log is committed, and never instead
+    # of it: a rating is a fact about what the learner did, and it must
+    # survive even if the word cannot be resolved to a card.
+    scheduled = None
+    if payload.quality is not None:
+        card_id = vocab_card_id_for_word(payload.source_word, user_id)
+        if card_id:
+            state = srs.review(card_id, SRS_MODE, payload.quality)
+            scheduled = {
+                "card_id": card_id,
+                "mode": SRS_MODE,
+                "interval_days": state["interval_days"],
+                "next_review": state["next_review"],
+                "stage": state["stage"],
+                "xp_earned": state.get("xp_earned"),
+                "leveled_up": state.get("leveled_up"),
+                "new_level": state.get("new_level"),
+            }
+
+    return {
+        "correct": payload.correct,
+        "quality": payload.quality,
+        # None when the rating scheduled nothing -- no quality given, or
+        # the sentence's word is not in the vocabulary list.
+        "scheduled": scheduled,
+    }
 
 
 @router.get("/api/translation/history")
