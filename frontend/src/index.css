@@ -20649,3 +20649,117 @@ html { scrollbar-gutter: stable; }
   background-repeat: var(--mcq-img-repeat, repeat);
   border: 1px solid var(--mcq-border, var(--surface-line));
 }
+
+/* ── 音色 — the sound palette (/dev/sounds) ────────────────
+   The listening room for lib/audio/voices.js. Every sound the app
+   makes, its alternatives beside it, one press to hear and pick.
+
+   Laid out as a stack of events rather than a grid of voices: the
+   comparison that matters is between the three or four voices of ONE
+   event, and a grid would put the wrong things next to each other.
+   Each voice carries its own note, because "Wood block" and "Key tap"
+   do not tell you which one belongs on a button pressed thirty-one
+   times a screen -- the sentence under it does. */
+.sndp-warning {
+  margin: 0 0 var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-left: 3px solid var(--accent);
+  color: var(--text-primary);
+  font-size: var(--fs-caption);
+}
+.sndp-link {
+  color: var(--accent);
+  text-decoration: underline;
+  font-size: inherit;
+}
+.sndp-family { margin-bottom: var(--sp-6); }
+
+.sndp-event {
+  padding: var(--sp-4) 0 var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+}
+.sndp-event:last-child { border-bottom: none; }
+.sndp-event__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.sndp-event__label { font-weight: 600; color: var(--text-primary); }
+.sndp-event__jp {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  letter-spacing: var(--tr-term);
+}
+/* Which mixer bus -- and therefore which volume slider -- reaches
+   this sound. Set as data: tracked, uppercase, in the display face. */
+.sndp-event__bus {
+  margin-left: auto;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+.sndp-event__bus--ui  { background: color-mix(in srgb, var(--accent2) 20%, transparent); color: var(--accent2); }
+.sndp-event__bus--sfx { background: color-mix(in srgb, var(--accent) 20%, transparent);  color: var(--accent); }
+.sndp-event__where {
+  margin: var(--sp-1) 0 var(--sp-3);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.sndp-voices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--sp-2);
+}
+.sndp-voice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.sndp-voice:hover { background: var(--bg-card-hover); border-color: var(--accent2); filter: none; }
+/* The selected voice is marked on its left edge rather than by a fill:
+   a filled tile in a row of four reads as "disabled sibling", and the
+   siblings are the whole point of the row. */
+.sndp-voice--active {
+  border-color: var(--accent2);
+  box-shadow: inset 3px 0 0 var(--accent2);
+}
+.sndp-voice__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.sndp-voice__default {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.sndp-voice__note {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.sndp-actions {
+  display: flex;
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+}

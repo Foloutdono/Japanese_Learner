@@ -11,6 +11,7 @@ import { apiJsonWithTimeout } from './lib/api'
 // unreachable in production, it is not in the bundle.
 import RewardsPreview from './screens/RewardsPreview'
 import OnboardingPreview from './screens/OnboardingPreview'
+import SoundPalette from './screens/SoundPalette'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { LangProvider, useLang } from './LangContext'
@@ -41,7 +42,6 @@ import TranslationScreen from './screens/TranslationScreen'
 import DarumaScreen from './screens/DarumaScreen'
 import StorehouseScreen from './screens/StorehouseScreen'
 import { CosmeticTheme } from './stores/cosmetics'
-import { preload } from './lib/audio'
 
 // Renders nothing — keeps <html lang> and document.title in step with
 // the current route and language. Beside <Routes/> rather than inside
@@ -104,14 +104,15 @@ export default function App() {
   const onboardingProfile = gate?.profile ?? null
   const setOnboarding = state => setGate(g => (g ? { ...g, state } : g))
 
-  // Decode the two sounds whose first play must not be late: the UI
-  // click, which is the very first interaction, and the level-up
-  // chime, which fires under a full-screen celebration where a
-  // hundred milliseconds of fetch is plainly visible. Everything else
-  // can decode on demand.
-  useEffect(() => {
-    preload(['/sounds/ui/click.mp3', '/sounds/sfx/level-up.mp3'])
-  }, [])
+  // Nothing to preload any more: every effect and interface sound is
+  // synthesised at the moment it plays (lib/audio/voices.js), so there
+  // is no fetch and no decode to get ahead of. This used to warm the
+  // click and the level-up chime, the two whose first play must not be
+  // late — a few oscillator nodes are cheaper than either.
+  //
+  // The recorded sets — kana, announcements, ambiance — still decode
+  // on demand; they are large, and none of them fires on the first
+  // interaction.
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -134,6 +135,7 @@ export default function App() {
           <Routes>
             <Route path="/dev/rewards" element={<RewardsPreview />} />
             <Route path="/dev/onboarding" element={<OnboardingPreview />} />
+            <Route path="/dev/sounds" element={<SoundPalette />} />
           </Routes>
         </BrowserRouter>
       </LangProvider>
@@ -235,6 +237,9 @@ export default function App() {
           <Route path="/storehouse" element={<StorehouseScreen session={session} />} />
           {import.meta.env.DEV && (
             <Route path="/dev/rewards" element={<RewardsPreview />} />
+          )}
+          {import.meta.env.DEV && (
+            <Route path="/dev/sounds" element={<SoundPalette />} />
           )}
         </Routes>
 

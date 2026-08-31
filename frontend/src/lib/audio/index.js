@@ -6,6 +6,8 @@
 //   settings.js   mute + per-category volume, persisted. The model.
 //   context.js    the AudioContext and the decoded-buffer cache.
 //   mixer.js      source → trim → category bus → master → out.
+//   synth.js      oscillator and noise primitives.
+//   voices.js     every ui/sfx sound, its variants, and the choice.
 //   playback.js   one-shots: kana, sfx, ui, announcements.
 //   ambiance.js   the looping track, crossfades and tab visibility.
 //   speech.js     TTS, which the browser plays outside our graph.
@@ -22,9 +24,9 @@ import './mixer'
 
 export { SOUND_CATEGORIES, toggleMute, useMuted, setVolume, useVolumes } from './settings'
 export { preload } from './context'
-// playClick/playToggle come from chimes, not playback: those two
-// resolve to files that do not exist, so playback's versions are
-// silent. See the note in chimes.js.
+// playClick/playToggle come from chimes, not playback: chimes is the
+// station's vocabulary — the names the app calls moments by — and
+// each of those names resolves to a chosen voice in voices.js.
 export { playKana, playSfx, playUi, playAnnouncement } from './playback'
 export {
   playClick, playToggle, playCorrect, playWrong,
@@ -33,3 +35,8 @@ export {
 } from './chimes'
 export { startAmbiance, stopAmbiance } from './ambiance'
 export { speakJapanese } from './speech'
+// The palette itself is not part of the app's own surface — nothing
+// but the /dev/sounds screen picks a voice, and it imports voices.js
+// directly. Only `playVoice` is exported here, for a caller that
+// wants an event by name rather than through one of the wrappers.
+export { playVoice, hasVoice } from './voices'

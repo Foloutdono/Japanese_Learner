@@ -24,63 +24,109 @@ and each has its own volume slider on the Settings screen.
 
 ---
 
-## All synthesised today
+## All synthesised
 
-Nothing in this list is a blocker: every sound below is generated in
-`src/lib/audio/chimes.js` and works right now. Each one looks for its
-file first, so dropping a real recording in replaces the synthesised
-version automatically with no code change.
+Nothing in `ui/` or `sfx/` is a file any more, and no file is missing:
+every interface and effect sound is generated at the moment it plays,
+by `src/lib/audio/voices.js` on the primitives in `synth.js`.
 
-`ui/click.mp3` was the urgent one and is no longer urgent. It is
-referenced from **31 call sites** — the back button, the rating bar,
-the quiz rows, the storehouse, the daruma hall — and had never
-existed, so all 31 were silent *and* fired a 404 apiece (getBuffer
-evicts failed fetches so a retry stays possible, which for a
-permanently absent file means one request per tap). It now falls back
-to a synthesised tick.
+That started as a fallback for `ui/click.mp3`, which was referenced
+from **31 call sites** and had never existed — so all 31 were silent
+*and* fired a 404 apiece. It is now the whole system, for three
+reasons that turned out to matter more than fidelity:
 
-| File | Where | Notes |
+- **The files were not saying different things.** `click-menu`,
+  `click-close-menu`, `click-mode-selection` and
+  `click-screen-selection` were four names for one byte-identical
+  49KB file. Four distinct interactions made one sound.
+- **They cost 350KB** to say it, and needed a fetch and a decode
+  before the first tap could be heard. A handful of oscillator nodes
+  costs nothing and is ready immediately.
+- **A generated sound can have alternatives.** Which is the point of
+  the palette below.
+
+### The palette
+
+Each sound is an *event* — the moment it belongs to — carrying several
+*voices*, of which one is chosen. Run the app and open **`/dev/sounds`**
+to hear them side by side and pick; the choice is stored in
+localStorage and the whole app uses it immediately. "Copy my picks"
+gives you the block to paste back into `voices.js` if a choice should
+become the shipped default. The first voice listed for an event is
+that default today.
+
+| Event | Where | Voices |
 |---|---|---|
-| `ui/click.mp3` | 31 sites | The generic press. Keep it **very** short and quiet — 30–60ms. At this frequency the gap between "present" and "irritating" is about thirty milliseconds. Synthesised now as a single G6. |
-| `ui/correct.mp3` | a card answered right | Replaces `sfx/success.mp3`, which was 68KB and loud enough to mask the XP tick landing a beat later. Keep it under ~250ms and clearly below the fare tick — a sound that drowns the reward it announces is working against itself. Synthesised now as C6 → G6. |
-| `ui/wrong.mp3` | a card answered wrong | Replaces `sfx/failure.mp3`. Low, dull, over quickly — felt more than heard. **Not a buzzer**: a buzzer is what a gate does when it rejects you, and getting a card wrong in a study app is not that, it is the next card. Synthesised now as G3 → D3. |
-| `ui/toggle.mp3` | settings switches | A state change, not a press: two steps, drier and lower than the click. Synthesised now as B5 → E6. |
+| `click` | the generic press, 31 sites | Tick · Wood block · Key tap · Soft pad |
+| `toggle` | settings switches, the theme flip | Two step · Latch · Settle |
+| `click-menu` / `click-close-menu` | a menu opening, and its mirror | Open/close step · Drawer · Soft |
+| `click-mode-selection` | mode, level, theme, tier, filter rows | Pick · Ticket stamp · Two tap |
+| `click-screen-selection` | anything that navigates | Departure · Small gate · Turnstile |
+| `correct` / `wrong` | the rating bar | Octave · Rising fifth · Bell / Low double · Thud · Slump |
+| `card-transition` | between every card | Paper slip · Flick · Whisk away · Single flap |
+| `gate-chime` | 改札, a valid pass | Rising pair · Two pips · Three step |
+| `door-chime` | 扉, just before the doors part | Falling pair · Single bell · Three fall |
+| `door-slide` | the leaves actually running open | Pneumatic · Soft rush · On rollers |
+| `platform-chime` | 到着ホーム, the onboarding arrival | Arpeggio · Open fifth · Wide rise |
+| `arrival` | 到着, a session finished | Settle · Long settle · Warm pad |
+| `station-melody` | 発車メロディ, the pass re-issued | Yo scale rising · Yo scale falling · Two bars |
+| `fare-tick` | XP earned, no level | Coin · One flap · Soft tick |
+| `flap-clatter` | 進級, the board turning your level over | Full run · Short run · Heavy board |
+| `level-up` | a cosmetic unlocked, a daruma eye filled | Ascent · Board then bell · Fanfare · Bloom |
 
-## Wanted — the station's own sounds
+### The rules the voices keep
 
-`src/lib/audio/chimes.js` synthesises all five today, and that is
-deliberately a placeholder. Each looks for its file first and only
-falls back to generating it — drop the file in and it is used
-automatically, with no code change.
+These are design constraints, not implementation details, and a new
+voice has to keep them:
 
-The two chimes are written as mirror images and should stay that way:
-the gate **rises** ("accepted, go"), the door **falls** ("arrived,
-board"). If you generate them separately, generate them as a pair.
+- **The gate rises, the door falls.** 改札 means "accepted, go"; a door
+  chime means "arrived, board". Every variant of both keeps its
+  direction. If you generate them separately, generate them as a pair.
+- **`wrong` is not a buzzer.** A buzzer is what a gate does when it
+  *rejects* you, and getting a card wrong in a study app is not that —
+  it is the next card. Low, dull, over quickly.
+- **`correct` sits below the fare tick.** The old `sfx/success.mp3` was
+  loud enough to mask the XP landing a beat later; a sound that drowns
+  the reward it announces is working against the thing it exists for.
+- **The board is mechanical, not tonal.** `fare-tick` and
+  `flap-clatter` are both resonant filtered noise, never oscillators.
+  A tone there would both misdescribe the thing on screen and collide
+  with the chimes, which are tones and mean something else. The two no
+  longer describe the *same* object -- the shipped fare tick is a coin
+  into the fare box, the level clatter is the board turning -- which
+  is a deliberate choice; `one-flap` is the variant that reunites them
+  as one machine at two sizes.
+- **Frequent means quiet and short.** The click and the option pick
+  fire dozens of times a screen. At those frequencies the gap between
+  "present" and "irritating" is about thirty milliseconds and six
+  decibels.
 
-| File | Notes |
-|---|---|
-| `ui/gate-chime.mp3` | 改札, the instant the pass touches the reader (`TicketGate`, 420ms in). ~150–250ms. Fires on **every departure**, so err quiet and bright. A rising two-tone reads as "accepted"; anything buzzer-like reads as *rejected*. Synthesised now as B6 → E7. |
-| `ui/door-chime.mp3` | ピンポーン, just before the train doors part (`TrainDoor`, 170ms in). ~400–600ms — heard standing still rather than mid-stride, so softer and rounder than the gate's. Synthesised now as E6 → B5. |
-| `ui/fare-tick.mp3` | XP earned, no level (`XpToast`, fare tier). The most frequent sound in the app after the click — fires on nearly every review, so it has to be **very** short and quiet: ~80–140ms. **Not a tone**: the fare tick shows a split-flap board, so this is one drum turning — the same material as the clatter below, one tick instead of eight. A tone here both misdescribed the thing on screen and collided with the gate chime. Synthesised now as a single bandpassed noise tick. |
-| `ui/flap-clatter.mp3` | 進級, the board turning your level over (`XpToast`, level tier). ~250–350ms. **Not a tone** — a split-flap drum is plastic hitting a stop, so this wants a run of short mechanical ticks that bunch up as the drum settles. Synthesised now as eight bandpassed noise bursts falling from 2.6kHz. |
-| `ui/arrival.mp3` | 到着, a study session finished (`DoneMessage`). ~700–900ms. This is the end of a journey rather than a victory, so it steps **down** and settles — deliberately the inverse of the departure melody below. Synthesised now as G5 → D5. |
-| `ui/station-melody.mp3` | 発車メロディ, the pass re-issued (`XpToast`, rank tier). This one fires **four times in the whole progression**, so it is the only sound here that can afford ~1.5s and a real tune. A short pentatonic figure that rises and settles. Synthesised now as D5-E5-A5-B5-G5 in the yo scale. |
+### Dropping in a recording
 
-Optional:
+Still supported, and it takes two steps rather than one: add
+`/sounds/<channel>/<name>.mp3`, and add `file: '/sounds/...'` to that
+event in `voices.js`. From then on the event loads the recording and
+its synthesised variants stop being reachable.
 
-| File | Notes |
-|---|---|
-| `sfx/gate-open.mp3` | The gate flaps retracting — a short mechanical shhk, ~200ms, landing at 500ms. Still genuinely silent, unlike the door slide below. |
-| `sfx/door-slide.mp3` | The train doors running open (`TrainDoor`, from 350ms). ~600–700ms. Broadband rush rather than any pitch, opening up as the leaves gather speed and closing as they reach the stop, with a soft thump at the end of the travel. **No longer optional or silent** — it is wired and synthesised; a recording would simply be better. |
+The second step is not ceremony. **Probing for a file that is not
+there does not 404 — it succeeds.** Vite in dev and `vercel.json` in
+production both rewrite every unmatched path to `index.html`, so a
+missing sound came back `200` with a page of HTML in it, which then
+failed to decode and fell through to the synthesiser. Correct, but one
+wasted round trip per event, forever, for a file nobody had added. No
+event declares a file today, so nothing is fetched at all.
+
+A recording beats a synthesised sound on fidelity every time. It does
+not beat it on being changeable, which is why the default is the
+generated one.
 
 ---
 
 ## Present
 
-`ui/click-menu`, `click-close-menu`, `click-mode-selection`,
-`click-screen-selection` · `sfx/success`, `failure`, `level-up`,
-`card-transition` · `ambiant/home`, `selection` ·
-`announcements/` for all eleven sections plus `jingle` · `kanas/`.
+`ambiant/home`, `selection` · `announcements/` for all eleven sections
+plus `jingle` · `kanas/`. Nothing else — `ui/` and `sfx/` are empty by
+design.
 
 ---
 
