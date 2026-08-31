@@ -427,7 +427,7 @@ function SessionView({
                 onChange={e => setAnswer(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && submitAnswer()}
                 placeholder={t.japanesePlaceholder ?? 'Write it in Japanese…'}
-                className="trn-answer-input"
+                className="field field--panel trn-answer-input"
               />
               <div className="trn-submit-wrap">
                 <button
@@ -561,7 +561,7 @@ function TierPicker({ session, domain, onSelect, t }) {
           onChange={e => setJumpValue(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && jumpValue && onSelect(Number(jumpValue))}
           placeholder={t.jumpToTier}
-          className="trn-answer-input"
+          className="field field--panel trn-answer-input"
         />
         <button
           onClick={() => jumpValue && onSelect(Number(jumpValue))}

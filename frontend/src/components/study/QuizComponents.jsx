@@ -199,7 +199,7 @@ export function TypeInput({
         placeholder={placeholder ?? t.typeAnswer}
         disabled={submitted}
         autoFocus
-        className="quiz-input"
+        className="field quiz-input"
         style={inputStyle}
       />
       {!submitted && (

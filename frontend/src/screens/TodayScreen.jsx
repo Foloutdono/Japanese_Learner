@@ -517,7 +517,7 @@ export default function TodayScreen({ session }) {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder={t.todaySearchPlaceholder}
-                className="decks-index-bar__input"
+                className="field field--bare decks-index-bar__input"
               />
               {query && (
                 <button

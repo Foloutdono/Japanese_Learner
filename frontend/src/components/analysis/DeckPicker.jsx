@@ -58,7 +58,7 @@ export function DeckPicker({ decks, t, onClose, onSelect, onCreate }) {
           {creating ? (
             <div className="anl-deckpicker__create">
               <input
-                className="anl-field"
+                className="field field--panel anl-field"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && submitCreate()}

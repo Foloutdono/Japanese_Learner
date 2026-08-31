@@ -73,7 +73,7 @@ export function EditableUsername({ username, session, onChange, t }) {
           if (e.key === 'Enter') save()
           if (e.key === 'Escape') cancel()
         }}
-        className="profile-card__name-input"
+        className="field field--panel profile-card__name-input"
         disabled={saving}
       />
       <button type="button" onClick={save} disabled={saving} className="profile-card__name-save">

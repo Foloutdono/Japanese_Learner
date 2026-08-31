@@ -376,7 +376,7 @@ export default function DictionaryScreen({ session }) {
 									: (t.dictionaryPlaceholder)
 							}
 							autoFocus={mode === 'search'}
-							className="dict-index-bar__input"
+							className="field field--bare dict-index-bar__input"
 						/>
 						{/* The key that focuses this field, printed on it. A
 						    reference tool you use all day should tell you how

@@ -40,7 +40,7 @@ export function WritingSlip({
 
       <textarea
         ref={fieldRef}
-        className="anl-slip__field"
+        className="field field--panel field--bare field--multi anl-slip__field"
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}

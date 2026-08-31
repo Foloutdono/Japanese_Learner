@@ -50,18 +50,33 @@ export default function RatingBar({ onRate, active }) {
   return (
     <div className="rating-bar">
       {/* One continuous instrument, worst to best -- see index.css for
-          why. Rendered from a reversed COPY of QUALITY_BTNS, never the
-          array itself, so DOM order (and therefore tab order and screen
-          reader order) matches what's on screen while the keyboard
-          handler above keeps indexing the untouched original. */}
+          why. `.map()` already returns a new array, so the `.reverse()`
+          below sorts that copy and never QUALITY_BTNS itself; DOM order
+          (and therefore tab and screen-reader order) matches what is on
+          screen while the keyboard handler above keeps indexing the
+          untouched original. The digit is captured BEFORE the reverse,
+          which is the only place it can be read correctly. */}
       <div className="rating-bar__buttons">
-        {[...QUALITY_BTNS].reverse().map(({ q, key, label }) => (
+        {QUALITY_BTNS.map((b, i) => ({ ...b, digit: i + 1 })).reverse().map(({ q, label, digit }) => (
           <button
             key={q}
+            type="button"
             onClick={() => handleRate(q)}
             className={`rating-bar__btn rating-bar__btn--q${q}`}
+            /* The digits are deliberately NOT drawn (numeric indices are
+               noise on a control this size) and are deliberately NOT in
+               display order: QUALITY_BTNS is best-first, so "1" is Parfait at
+               the RIGHT end and "6" is Blackout at the left. Undiscoverable
+               and reversed is a bad pair, so the shortcut is at least
+               announced to assistive tech and shown on hover. */
+            aria-keyshortcuts={String(digit)}
+            title={`${label} (${digit})`}
           >
-            <span className="rating-bar__btn-jp" lang="ja">{t.ratingJp[key]}</span>
+            {/* The ring is the whole colour story now: unfilled at rest,
+                filled when this rating is the one chosen. Marked hidden
+                because it says nothing the label does not -- it is the
+                seal, and the word beside it is the name. */}
+            <span className="rating-bar__btn-ring" aria-hidden="true" />
             <span className="rating-bar__btn-label">{label}</span>
           </button>
         ))}

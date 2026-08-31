@@ -1356,13 +1356,11 @@
   background: var(--bg-panel);
   border-radius: var(--anl-radius);
 }
+/* .field--bare drops the ground and the border; .field--multi sets the
+   starting height. The slip keeps only its ceiling and its scroll. */
 .anl-slip__field {
   width: 100%;
-  min-height: 6.5rem;
   max-height: 40vh;
-  padding: 0;
-  background: none;
-  border: none;
   resize: none;
   overflow-y: auto;
   color: var(--text-on-panel);
@@ -1544,12 +1542,11 @@
 
 /* A real single-line field. Was .phrase-textarea — an 18px textarea
    rule, resize: vertical and all, on an <input type="text">. */
+/* .field field--panel carries the ground, the ink, the placeholder, the
+   radius and the 44px floor. What is left is the analyzer's own: full
+   width, and the type size this screen sets for a dense form. */
 .anl-field {
   width: 100%;
-  padding: 10px 12px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: var(--anl-radius);
   color: var(--text-on-panel);
   font-family: var(--font-display);
   font-size: 0.92rem;
@@ -3606,9 +3603,7 @@ button:focus-visible {
 
 .theme-selector__search {
   width: 100%;
-  padding: 10px 14px;
-  font-size: 0.95rem;
-  margin-bottom: 20px;
+  margin-bottom: var(--sp-6);
 }
 
 
@@ -3874,6 +3869,105 @@ input:focus-visible {
 textarea:focus-visible {
   outline: 2px solid var(--accent2);
   outline-offset: 2px;
+}
+
+/* ── .field — the app's one text field ────────────────────────
+   Chosen from side-by-side specimens: the "filled well". The field is
+   a step through the card rather than a box drawn on it, and it grows
+   an edge only when focused.
+
+   WHY THIS EXISTS. The bare `input` rule above declares a border, a
+   background and a radius and then says nothing about size, padding,
+   placeholder or press target -- so 28 fields invented the rest: 16
+   classes, 12 paddings, 11 font sizes, 5 backgrounds. Worse, only 3 of
+   the 28 styled ::placeholder, and Chromium's default is a FIXED
+   rgb(117,117,117) that does not flip with the theme: measured against
+   the four grounds it is 3.61 / 3.71 / 3.79 / 4.17:1, under the floor
+   everywhere, in both themes. On the forms where the placeholder is
+   also the only label, the name of the field was the least legible
+   thing in it.
+
+   TWO GROUNDS, ONE OBJECT. Some fields sit on the card and some on
+   sumi, and sumi is dark in BOTH themes -- so the ink cannot simply be
+   --text-primary. The pair is named once here and read by everything
+   below, which is the same indirection --ns-ink uses on .next-service
+   and the escape hatch Guard 5 documents: a custom property is
+   deliberately invisible to it, because this is exactly the case where
+   one element legitimately has two grounds. Use .field--panel on sumi.
+
+   ON THE WELL. --bg-main is the page under the card, so the field
+   reads as a hole through to it. Note the luminance flips: in dark the
+   well is darker than the card, in light it is lighter. The metaphor
+   is what holds -- you are seeing the page beneath -- not the
+   direction, and both were reviewed side by side before this landed. */
+.field {
+  --field-ink:  var(--text-primary);
+  --field-dim:  var(--text-secondary);
+  --field-well: var(--bg-main);
+  --field-edge: var(--accent);
+
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px; /* a hit target, not a spacing rung -- the one literal here */
+  padding: var(--sp-3) var(--sp-4);
+  font-family: inherit;
+  font-size: var(--fs-body);
+  color: var(--field-ink);
+  background: var(--field-well);
+  /* --r-card, not the bare rule's 8px: at --r-panel a field was rounder
+     than the card containing it, which reads as the wrong nesting. */
+  border-radius: var(--r-card);
+  /* transparent rather than none, so focus does not shift the box by 1px */
+  border: 1px solid transparent;
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.field::placeholder {
+  color: var(--field-dim);
+  opacity: 1; /* Firefox dims placeholders by default; the token already is the dim register */
+}
+
+.field:focus { border-color: var(--field-edge); }
+.field:focus-visible {
+  border-color: var(--field-edge);
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
+.field:disabled { opacity: 0.45; }
+
+/* The sumi variant. Not a different field -- the same object with the
+   panel pair, for the fields that genuinely sit on --bg-panel. The well
+   is a darkening of the panel rather than a token, because there is no
+   surface below sumi to show through. */
+.field--panel {
+  --field-ink:  var(--text-on-panel);
+  --field-dim:  var(--text-on-panel-soft);
+  --field-well: rgba(0, 0, 0, 0.28);
+  --field-edge: var(--accent2);
+}
+
+/* A field that sits INSIDE something which already draws the box -- the
+   console's search line, the analyzer's writing slip. Giving those a well
+   too would be a box inside a box, so the variant drops the ground, the
+   border and the radius and keeps everything that still matters: the ink,
+   the placeholder token, the type, and the 44px floor. That floor is the
+   point of putting them in the family at all -- the two index-bar searches
+   stood at 33px before this. */
+.field--bare {
+  --field-well: transparent;
+  border-color: transparent;
+  border-radius: 0;
+  padding-inline: 0;
+}
+.field--bare:focus { border-color: transparent; }
+
+/* A textarea is the same field, told how tall to start. */
+.field--multi {
+  min-height: 6.5rem;
+  resize: vertical;
+  line-height: 1.5;
 }
 
 /* ── Utility classes ── */
@@ -6216,12 +6310,18 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    the 4.33:1 the un-migrated button already shipped*. The lighter
    greens and oranges simply do not carry a light ink at 88%.
 
-   70% is the rest half of the one pair that clears 4.5:1 on all twelve
-   pigments, in both themes, in both states. Worst case is 黄丹 at
-   5.29:1 resting and 4.53:1 hovering. Every button in the app went a
-   shade deeper for it, which the maintainer chose deliberately over
-   twelve per-pigment constants. --bg-panel is an existing token, so no
-   new colour literal enters the file.
+   70% is the rest half of the one pair that clears 4.5:1 on ELEVEN of
+   the twelve pigments, in both themes, in both states. Worst case of
+   the eleven is 黄丹 at 5.29:1 resting and 4.53:1 hovering. The
+   twelfth is 山吹色 gold (--line-jisho / --accent2, the 辞書 and 蔵
+   sections) and NO deepening in this family saves it: 3.90:1 resting,
+   3.24:1 hovering, dark theme. Gold is the pigment that forces the ink
+   to be chosen rather than assumed -- see the ink note below.
+
+   Every button in the app went a shade deeper for it, which the
+   maintainer chose deliberately over twelve per-pigment constants.
+   --bg-panel is an existing token, so no new colour literal enters
+   the file.
 
    If you are tempted to lift this number back toward the pigment:
    79% is the ceiling, and it is the hover's value. Above it, 黄丹
@@ -7726,11 +7826,13 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    the answer, on every screen size, not just narrow ones. */
 .mcq-row + .mcq-row.mcq-row--filler { margin-top: 0; }
 
+/* The one size kept on purpose: this is the answer field on a study
+   card, and it is meant to sit a rung above body. 18px was off the scale;
+   --fs-lead is 17.92px, which is the same size with a name. */
 .quiz-input {
   width: 100%;
-  padding: 12px 20px;
-  font-size: 18px;
-  margin-bottom: 12px;
+  font-size: var(--fs-lead);
+  margin-bottom: var(--sp-4);
 }
 
 /* The study screens' submit. Retired onto .btn-primary in the JSX, so
@@ -9528,11 +9630,32 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    the answer drew a blank. */
 .rating-bar { margin-top: 0; }
 
+/* ── the rating bar ────────────────────────────────
+   One instrument, six segments, worst to best. Two decisions here were
+   the maintainer's, made from side-by-side specimens, and both reverse
+   what the kit's R3-2 originally drew:
+
+   1. NO JAPANESE. R3-2 set the Japanese quality term as the primary
+      register with the plain word as a caption beneath it. The bar now
+      carries the plain word alone, and that promotes it: it is no
+      longer a subtitle under something else, it IS the label. So it
+      comes off the 0.62rem tracked micro-caps rung -- a subtitle
+      treatment, and real work to read as the only thing there -- and up
+      to --fs-sm at weight 700 in the ambient ink.
+
+   2. NO PILL, AND NO BOTTOM RULE. --r-pill stretched across a 560px
+      instrument stopped reading as a shape and started reading as a
+      default, and its curve ate roughly the first and last 28px of the
+      colour ramp -- at exactly the two ratings pressed most. The
+      container takes --r-card, and the colour moves off the bottom edge
+      into a ring above each word: unfilled at rest, filled when that
+      rating is chosen. Colour above the type also leaves the six words
+      sharing one clean baseline. */
 .rating-bar__buttons {
   display: flex;
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-card);
   overflow: hidden;
   max-width: 640px;
   margin: 0 auto;
@@ -9542,62 +9665,57 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   display: flex;
   flex: 1 1 0;
   min-width: 0; /* flex items refuse to shrink below their text's intrinsic
-                   width by default -- six unbreakable captions would push
-                   the pill wider than its container instead of compressing */
+                   width by default -- six unbreakable words would push the
+                   bar wider than its container instead of compressing */
   flex-direction: column;
-  align-items: stretch; /* not center -- the JP term and caption need a
-                            bounded width to ellipsize into instead of
-                            wrapping a CJK word one character per line */
+  align-items: center;
   justify-content: center;
-  gap: var(--sp-1);
+  gap: var(--sp-2);
   min-height: 56px; /* a hit target, not a spacing rung -- the one literal this block keeps */
-  padding: var(--sp-3);
+  padding: var(--sp-3) var(--sp-1);
   background: none;
   border: none;
   border-left: 1px solid var(--surface-line);
-  border-bottom: 3px solid color-mix(in srgb, var(--rating-color, transparent) 55%, transparent);
   color: var(--text-primary);
   text-align: center;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease;
 }
 .rating-bar__btn:first-child { border-left: none; }
 
 .rating-bar__btn:hover,
 .rating-bar__btn:focus-visible {
   background: color-mix(in srgb, var(--rating-color, transparent) 14%, transparent);
-  border-bottom-color: var(--rating-color, transparent);
-}
-/* Blackout has no ink to fill with -- the same neutral hover chip
-   every other flat control in the app uses stands in for a colour
-   tint that doesn't exist. */
-.rating-bar__btn--q0:hover,
-.rating-bar__btn--q0:focus-visible { background: var(--overlay-hover); }
-
-.rating-bar__btn-jp,
-.rating-bar__btn-label {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
-.rating-bar__btn-jp {
-  font-family: var(--font-jp);
-  font-size: var(--fs-body);
-  font-weight: 700;
-  letter-spacing: var(--tr-term);
-  text-indent: var(--tr-term);
+/* The seal. Unfilled is the resting state and filled is the chosen one,
+   which is the same gesture as pressing a hanko -- and unlike a tint it
+   survives being glanced at. `flex: none` because a column flex item
+   shrinks to nothing next to a text run otherwise. */
+.rating-bar__btn-ring {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--rating-color, var(--text-secondary));
+  background: none;
+  flex: none;
+  transition: background 0.15s ease;
+}
+.rating-bar__btn:hover .rating-bar__btn-ring,
+.rating-bar__btn:focus-visible .rating-bar__btn-ring {
+  background: var(--rating-color, transparent);
 }
 
 .rating-bar__btn-label {
   font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
+  font-size: var(--fs-sm);
   font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-indent: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
+.rating-bar__btn--q0 { --rating-color: var(--danger); }
 .rating-bar__btn--q5 { --rating-color: var(--success); }
 .rating-bar__btn--q4 { --rating-color: var(--teal); }
 .rating-bar__btn--q3 { --rating-color: var(--warning); }
@@ -9606,6 +9724,24 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    in dark theme and exactly --line-kana/--state-learning in light
    theme. See :root, above, for why this gets its own named colour. */
 .rating-bar__btn--q1 { --rating-color: var(--rating-wrong); }
+
+/* On a 375px phone this bar spans ~320px, so each segment is 53.3px --
+   measured in the running app, not derived from the viewport, because the
+   screen's own padding takes more than you would guess. The longest label
+   is Blackout, NOT Difficile: 58px at --fs-sm and 50px at --fs-caption.
+   So the row steps down one rung AND gives the whole segment over to the
+   word; at 2px of side padding Blackout still overflowed by a hair.
+
+   The word is the entire label now, so ellipsizing it is not an option and
+   hiding it is not either -- there is nothing behind it. If a longer
+   locale string ever lands here, shorten the string rather than the type:
+   --fs-caption-xs is a subtitle rung and is too small to carry a control
+   on its own. The 1px hairline between segments does the separating that
+   the padding used to. */
+@media (max-width: 560px) {
+  .rating-bar__btn { padding-inline: 0; }
+  .rating-bar__btn-label { font-size: var(--fs-caption); }
+}
 
 /* ── Shared nav control button (mute / lang switcher) ─────── */
 /* Consolidated — this used to be defined twice (here and further
@@ -9967,10 +10103,10 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   gap: 12px;
 }
 
-.auth-input {
-  padding: 12px 16px;
-  font-size: 15px;
-}
+/* .field carries the box, the ink, the placeholder and the 44px floor
+   now; the two literals that used to live here (12px 16px, 15px) were
+   this field's own invention and are gone with them. The class stays
+   only as a hook -- .auth-fields spaces them. */
 
 .auth-message {
   font-size: 13px;
@@ -11426,14 +11562,15 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   flex-wrap: wrap;
   position: relative;
 }
+/* The name on the 定期券. It keeps the serif and its weight -- a pass carries
+   its holder's name in the serif, not the UI face -- and its 12ch width. The
+   box comes from .field field--panel, which is the same sumi ground it was
+   hand-rolling. The --accent9 border it used to draw at rest is gone: an
+   edge now appears on focus like every other field. */
 .profile-card__name-input {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 1.3rem;
-  padding: 4px 10px;
-  border: 1px solid var(--accent9);
-  background: var(--bg-panel-soft, var(--bg-panel));
-  color: var(--text-on-panel);
   min-width: 0;
   width: 12ch;
 }
@@ -12999,13 +13136,11 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   color: var(--text-secondary);
   flex-shrink: 0;
 }
+/* .field--bare supplies the ink, the placeholder token and the 44px
+   floor this search stood 11px under. Only the flex behaviour is its own. */
 .decks-index-bar__input {
   flex: 1;
   min-width: 0;
-  border: none;
-  background: none;
-  padding: 6px 0;
-  color: var(--text-primary);
   font-size: 1.02rem;
 }
 .decks-index-bar__input:focus { border: none; outline: none; }
@@ -13044,7 +13179,9 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 
 .decks-create-card { margin-bottom: 24px; }
 .decks-create-card__title { font-size: 15px; font-weight: bold; margin-bottom: 16px; }
-.decks-create-input { width: 100%; padding: 10px 14px; font-size: 15px; margin-bottom: 12px; }
+/* padding and font-size come from .field now; 10px 14px and 15px were
+   on neither scale. */
+.decks-create-input { width: 100%; margin-bottom: var(--sp-4); }
 
 /* An even grid, not a wrapping row of content-sized chips. Sized to
    content, the five types wrapped 3-then-2 at ragged widths with their
@@ -13477,11 +13614,12 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    `10px 14px` with no floor, which put the inputs at ~40px — two rungs
    off the scale and under the minimum on the one screen where a learner
    types. */
-.deckdetail-form__input {
-  padding: var(--sp-4) var(--sp-5);
-  font-size: var(--fs-body);
-  min-height: 44px;
-}
+/* .field carries the box, the ink, the placeholder and the 44px floor.
+   This was the ONE field in the app already on the space and type
+   scales, which is why it is the smallest diff of the set -- what it
+   loses here it was already saying twice. The class stays as a hook:
+   .deckdetail-form__radical-btn and .browse-search-input both build on
+   it, and the first is a <button> wearing a field's clothes. */
 /* The drawing (DeckDetail.dc.html:144-147) puts this row right-aligned
    at natural width, not as two `flex: 1` halves, and 052 left the
    disagreement for this plan. Taking the drawing's alignment: the pair
@@ -14251,19 +14389,17 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   width: 100%;
 }
 
+/* .field field--panel carries the ground, the ink, the placeholder, the
+   radius and the floor. The 22px stays: this is the one thing the learner
+   is typing on the screen, and it is deliberately a size above the family
+   default. It is off the type scale and stays on the ratchet's allowlist. */
 .rdg-answer-input {
   font-size: 22px;
-  padding: 12px;
-  border-radius: 8px;
   width: 100%;
   max-width: 360px;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border: 1px solid var(--border);
-  margin: 16px auto 0;
+  margin: var(--sp-5) auto 0;
   text-align: center;
   align-self: center;
-  box-sizing: border-box;
 }
 .rdg-submit-wrap { margin-top: 16px; display: flex; justify-content: center; }
 .rdg-submit-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
@@ -14481,20 +14617,16 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
   width: 100%;
   margin-top: 20px;
 }
+/* As .rdg-answer-input, plus the Japanese face: this field is typed INTO in
+   Japanese, so it names --font-jp rather than inheriting the display face. */
 .trn-answer-input {
   font-size: 22px;
-  padding: 12px;
-  border-radius: 8px;
   width: 100%;
   max-width: 360px;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border: 1px solid var(--border);
   margin: 0 auto;
   text-align: center;
   align-self: center;
-  box-sizing: border-box;
-  font-family: 'Yu Gothic', system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-jp);
 }
 .trn-submit-wrap { margin-top: 16px; display: flex; justify-content: center; }
 .trn-submit-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
@@ -14887,18 +15019,12 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 .import-header__close { background: transparent; color: var(--text-secondary); font-size: 20px; padding: 0 8px; }
 .import-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
 
+/* Paste target for CSV. Keeps its height and the monospace face, which is
+   what makes a separator visible; everything else is .field field--multi. */
 .import-textarea {
   width: 100%;
   height: 180px;
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px;
-  font-size: 14px;
-  resize: vertical;
   font-family: monospace;
-  outline: none;
 }
 
 .import-textarea:focus-visible {
@@ -14910,7 +15036,9 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 .import-sep-group__title { font-size: 13px; font-weight: bold; margin-bottom: 10px; }
 .import-sep-option { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; }
 .import-sep-option__label { font-size: 13px; }
-.import-sep-custom-input { padding: 4px 8px; font-size: 13px; width: 80px; }
+/* A two-character separator field. It keeps its width; the 44px floor
+   now comes from .field, which it stood well under. */
+.import-sep-custom-input { width: 80px; }
 
 .import-preview { margin-top: 24px; }
 .import-preview__title { font-size: 13px; font-weight: bold; margin-bottom: 8px; }
@@ -15470,15 +15598,11 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
     padding-top: var(--sp-3);
     background: var(--bg-main);
   }
-  /* Six segments across a phone width is tight -- .rating-bar__btn's
-     ellipsis rule (see the main block) is the safety net, but a
-     smaller pad and a smaller JP-term size buys back enough room that
-     the ramp mostly reads without truncating. The caption can still
-     clip on the longest words ("Difficult", "Blackout") at the very
-     narrowest widths; the Japanese term is the primary name here (see
-     DESIGN.md's pairing rule) and that one keeps its room. */
-  .rating-bar__btn { padding: var(--sp-1); }
-  .rating-bar__btn-jp { font-size: var(--fs-sm); }
+  /* The main block's own max-width:560px rule already steps the label
+     down a rung and trims the side padding, and it is measured against
+     the longest word rather than guessed. Nothing to add here: the
+     JP-term override that used to live at this spot is gone with the
+     term itself. */
   .quiz-area { padding: 32px 24px max(32px, 12vh);}
 
   /* Two plaques per row rather than one tall column of six. */

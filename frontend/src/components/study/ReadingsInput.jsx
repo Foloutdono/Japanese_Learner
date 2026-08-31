@@ -107,7 +107,7 @@ export default function ReadingsInput({ readings, submitted, onSubmit }) {
                   onKeyDown={e => { if (e.key === 'Enter' && !submitted) { playClick(); onSubmit() } }}
                   disabled={submitted}
                   autoFocus={i === 0 && g.kind === GROUPS[0].kind}
-                  className={`quiz-input readings-input__field${
+                  className={`field quiz-input readings-input__field${
                     submitted ? (ok ? ' readings-input__field--ok' : ' readings-input__field--miss') : ''}`}
                   placeholder={t.readingsPlaceholder}
                   lang="ja"
