@@ -845,6 +845,58 @@ def kana_spelling_variants(kanji: str) -> list[str]:
     return sorted(variants)
 
 
+def trailing_kana_variants(kanji: str, kana: str) -> list[str]:
+    """Spellings of `kanji` where a TRAILING kanji is written out as its
+    own reading instead: 子供 -> 子ども, 友達 -> 友だち, 見付ける ->
+    見つける. Complements kana_spelling_variants above, which can only
+    swap the eight hand-picked characters in _KANA_CONVENTIONAL_SPELLING
+    and so reaches none of these (供 and 達 are not on that list).
+
+    The split comes from align_deck, so which kana belong to the final
+    kanji is the furigana module's answer rather than a second guess at
+    the same question -- it already handles rendaku (達 is だち here,
+    not たち). A word align_deck cannot divide yields nothing.
+
+    Every candidate is then checked against _VOCAB_READING, and that
+    check is what makes this usable at all. Generating them blind gives
+    4,318 spellings across the deck, nearly all of which are things no
+    one writes (大学 -> 大がく, 写真 -> 写しん, 学生 -> 学せい); keeping
+    only the ones attested with THIS reading in the deck's own meanings
+    table or the JMdict pool leaves 108, which are the real ones
+    (久しぶり, 出かける, 先ほど, 引っかかる). The table is already built
+    at import for furigana, so the filter costs a dict lookup.
+
+    Variants that would come out as bare kana are dropped, for the
+    reason card_lookup's _index_vocab_by_lemma gives: a one-part word
+    reduces to its own reading, and in running text those are
+    overwhelmingly grammatical rather than lexical.
+    """
+    if not kanji or not kana or not any(_is_kanji(c) for c in kanji):
+        return []
+    readings = _readings(kana)
+    if not readings:
+        return []
+
+    variants = set()
+    for reading in readings:
+        parts = align_deck(kanji, reading)
+        if len(parts) < 2:
+            # Undivided: align_deck could not say which kana belong to
+            # which kanji, and the whole-word reading is bare kana.
+            continue
+        for i in range(len(parts) - 1, 0, -1):
+            if not parts[i].get("reading"):
+                continue
+            candidate = "".join(p["text"] for p in parts[:i]) + "".join(
+                p.get("reading") or p["text"] for p in parts[i:]
+            )
+            if candidate == kanji or not any(_is_kanji(c) for c in candidate):
+                continue
+            if _VOCAB_READING.get(candidate) == reading:
+                variants.add(candidate)
+    return sorted(variants)
+
+
 def is_usually_kana(kanji: str, kana: str) -> bool:
     """True if any JMdict sense for this word carries the "uk" tag
     ("word usually written using kana alone"). Used by card_lookup.py
