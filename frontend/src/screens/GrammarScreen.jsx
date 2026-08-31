@@ -285,6 +285,8 @@ export default function GrammarScreen({ session }) {
   }
 
   const currentModeLabel = modeLabel(t, mode)
+  // Study.dc.html's footer strip.
+  const cardFoot = { left: level ? `${level} 文法` : '文法', right: currentModeLabel }
   // Driven by the registry, not by comparing against mode-key strings.
   const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
   const isFill   = renderer === RENDER.FILL
@@ -346,7 +348,7 @@ export default function GrammarScreen({ session }) {
                 checkAdvance()
               }}
             >
-              <PromptCard className="grammar-prompt">
+              <PromptCard className="grammar-prompt" foot={cardFoot}>
                 {/* Every mode here is the same card with a different
                     front: a rule, a meaning, or a sentence. The flip is
                     the reveal in all three, and switching the choices on

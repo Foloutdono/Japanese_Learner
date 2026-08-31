@@ -406,7 +406,8 @@ function SessionView({
         {stage === 'writing' && data && (
           <>
             <CardTransition cardKey={data._uiKey}>
-              <PromptCard>
+              {/* Study.dc.html's footer strip. */}
+              <PromptCard foot={{ left: level ? `${level} 翻訳` : '翻訳' }}>
                 <div className="trn-prompt-label">
                   {/* Real example sentences only carry an English gloss
                       regardless of UI language — see reading.py's

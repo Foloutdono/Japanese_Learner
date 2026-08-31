@@ -519,7 +519,9 @@ function SessionView({
         {stage === 'reading' && data && (
           <>
             <CardTransition cardKey={data._uiKey}>
-              <PromptCard>
+              {/* Study.dc.html's footer strip. No mode concept here, so
+                  the right half stays empty rather than invented. */}
+              <PromptCard foot={{ left: level ? `${level} 読書` : '読書' }}>
                 <div className={`rdg-phrase-display${phraseCovered ? ' rdg-phrase-display--covered' : ''}`}>
                   {phraseCovered ? <EyeOffIcon size={34} /> : data.phrase}
                 </div>
