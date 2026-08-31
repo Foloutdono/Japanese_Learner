@@ -517,8 +517,14 @@ def _index_vocab_by_lemma():
     _resolve_numeral_compound below, which is the one place this index
     still needs the same variant-surface trick the legacy path uses.
 
-    Conventional kana spellings (御飯 -> ご飯, 食べ物 -> 食べもの) are keys
-    too, but ONLY the ones that still contain a kanji. A tokenizer
+    Conventional kana spellings are keys too, from vocab_extras' two
+    complementary generators: kana_spelling_variants swaps one of eight
+    hand-picked characters (御飯 -> ご飯, 食べ物 -> 食べもの), and
+    trailing_kana_variants writes a trailing kanji out as its own
+    reading (子供 -> 子ども, 友達 -> 友だち, 見付ける -> 見つける),
+    which the first cannot reach because 供 and 達 are not on its
+    list. Both are admitted ONLY when the result still contains a
+    kanji. A tokenizer
     hands us whichever spelling the page used, and its lemma for ご飯
     is ご飯, not the deck's 御飯 -- so without these keys the word is
     simply missed, which is what the deleted find_vocab_match used to
@@ -566,7 +572,12 @@ def _index_vocab_by_lemma():
             word = entry.get("kanji") or entry.get("word") or entry.get("vocab") or ""
             if not word:
                 continue
-            for variant in vocab_extras.kana_spelling_variants(word):
+            kana = entry.get("kana") or entry.get("reading") or ""
+            variants = (
+                *vocab_extras.kana_spelling_variants(word),
+                *vocab_extras.trailing_kana_variants(word, kana),
+            )
+            for variant in variants:
                 if variant == word or variant in index:
                     continue
                 if any(is_kanji(c) for c in variant):
