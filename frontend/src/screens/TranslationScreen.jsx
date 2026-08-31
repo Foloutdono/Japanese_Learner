@@ -369,7 +369,8 @@ function SessionView({
     <div className="screen">
       <TopBar
         onBack={onBack}
-        title={`${t.translationTitle ?? 'Translation'} — ${titleSuffix}`}
+        title={<span lang="ja">翻訳</span>}
+        tag={titleSuffix}
         autoHide
       />
       {/* 瑠璃色, per DESIGN.md's "the pigment is injected once" — see
@@ -406,8 +407,10 @@ function SessionView({
         {stage === 'writing' && data && (
           <>
             <CardTransition cardKey={data._uiKey}>
-              {/* Study.dc.html's footer strip. */}
-              <PromptCard foot={{ left: level ? `${level} 翻訳` : '翻訳' }}>
+              {/* No footer strip here: the level now sits in the top
+                  bar beside 翻訳, so repeating it under the card would
+                  say the same thing twice on one screen. */}
+              <PromptCard>
                 <div className="trn-prompt-label">
                   {/* Real example sentences only carry an English gloss
                       regardless of UI language — see reading.py's
@@ -434,7 +437,7 @@ function SessionView({
                 <button
                   onClick={submitAnswer}
                   disabled={!answer.trim()}
-                  className="trn-submit-btn"
+                  className="btn-primary trn-submit-btn"
                 >
                   {t.submit}
                 </button>
