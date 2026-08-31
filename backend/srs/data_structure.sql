@@ -409,6 +409,12 @@ CREATE TABLE translation_log (
     romaji              TEXT NOT NULL,
     answer              TEXT NOT NULL,
     correct             BOOLEAN NOT NULL,
+    -- The rating the learner gave on the six-segment bar, 0..5 worst to
+    -- best, as RatingBar emits it. NULL on every row written before the
+    -- screen graded that way -- which means "graded, resolution
+    -- unknown", not a score of zero. `correct` is derived from it
+    -- (q > 2 is a pass) and kept so existing readers still work.
+    quality             SMALLINT,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
