@@ -339,6 +339,9 @@ export default function KanaScreen({ session }) {
 
   // ── Quiz ──
   const title = modeLabel(t, mode)
+  // Study.dc.html's footer strip. Kana has no JLPT level -- the set
+  // the learner picked is what says which card this is.
+  const cardFoot = { left: selectedSet?.label ? `${selectedSet.label} あ` : 'あ', right: title }
   // Both hiragana sets (basic/combos) and both katakana sets share one
   // dictionary category each — the dictionary itself doesn't
   // distinguish combos from the base set.
@@ -414,7 +417,7 @@ export default function KanaScreen({ session }) {
                   rather than sitting beside it. Same resolution the
                   merged deck modes use in StudyScreen. */}
               {renderer === RENDER.FLASHCARD && !choicesOn && (
-                <PromptCard>
+                <PromptCard foot={cardFoot}>
                   <Flashcard
                     t={t}
                     resetKey={card.card_id}
@@ -434,7 +437,7 @@ export default function KanaScreen({ session }) {
               )}
 
               {renderer === RENDER.FLASHCARD && choicesOn && (
-                <PromptCard>
+                <PromptCard foot={cardFoot}>
                   {isB2F
                     ? romajiPrompt(prompt)
                     : <CharDisplay char={prompt} />}
@@ -452,7 +455,7 @@ export default function KanaScreen({ session }) {
 
               {/* write_romaji — the kana is shown, type its reading. */}
               {renderer === RENDER.TYPE && (
-                <PromptCard>
+                <PromptCard foot={cardFoot}>
                   <CharDisplay char={card.kana} />
                   <RevealActions
                     t={t}
@@ -468,7 +471,7 @@ export default function KanaScreen({ session }) {
 
               {/* write_kana — the reading is shown, draw the kana. */}
               {renderer === RENDER.DRAW && (
-                <PromptCard>
+                <PromptCard foot={cardFoot}>
                   {romajiPrompt(card.romaji)}
                   <RevealActions
                     t={t}

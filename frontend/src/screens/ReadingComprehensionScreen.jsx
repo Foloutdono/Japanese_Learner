@@ -266,7 +266,8 @@ export default function ReadingComprehensionScreen({ session }) {
                 </div>
               </div>
 
-              <PromptCard>
+              {/* Study.dc.html's footer strip. */}
+              <PromptCard foot={{ left: level ? `${level} 理解` : '理解' }}>
                 <QuestionTypeBadge type={q.type}/>
                 <div className="comp-question-text">
                   {q.question}

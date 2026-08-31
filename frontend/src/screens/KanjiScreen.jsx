@@ -490,6 +490,8 @@ export default function KanjiScreen({ session }) {
   const showChoices = activeHints.has('indice_1') && Array.isArray(card?.hints?.indice_1)
 
   const title = modeLabel(t, mode)
+  // Study.dc.html's footer strip.
+  const cardFoot = { left: level ? `${level} 漢字` : '漢字', right: title }
   const sourceLabel = studyBy === 'level' ? level : tierLabel
   // Which UI this mode needs, from the registry rather than a string
   // comparison against one key ('write') that used to stand in for it.
@@ -544,7 +546,7 @@ export default function KanjiScreen({ session }) {
                 /* readings — the kanji is shown, every reading is typed
                    into ReadingsInput below. No flip: the answer is not one
                    thing to uncover but a set the learner produces. */
-                <PromptCard>
+                <PromptCard foot={cardFoot}>
                   <CharDisplay char={card.kanji} size={100} />
                   <RevealActions
                     t={t}
@@ -560,7 +562,7 @@ export default function KanjiScreen({ session }) {
                 /* radical — the kanji is shown, the radical it is filed
                    under is the answer. Same flip/choices split as the
                    meaning flashcards above it. */
-                <PromptCard>
+                <PromptCard foot={cardFoot}>
                   {!showChoices && (
                     <Flashcard
                       t={t}
@@ -601,7 +603,7 @@ export default function KanjiScreen({ session }) {
                   )}
                 </PromptCard>
               ) : renderer !== RENDER.DRAW ? (
-                <PromptCard>
+                <PromptCard foot={cardFoot}>
                   {!showChoices && (
                     <Flashcard
                       t={t}
@@ -656,7 +658,7 @@ export default function KanjiScreen({ session }) {
                   )}
                 </PromptCard>
               ) : (
-                <PromptCard>
+                <PromptCard foot={cardFoot}>
                   <MeaningDisplay meaning={card.meaning} size={32} />
                   {card.kana && (
                     <div className="quiz-subtitle">({card.kana})</div>
