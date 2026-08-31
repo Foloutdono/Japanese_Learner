@@ -57,6 +57,42 @@ export function tones(ctx, bus, notes) {
   }
 }
 
+// ── Noise that is the same every time ─────────────────────
+// Math.random() made every noise-based sound — the fare tick, the
+// level clatter, the door slide, the card turn — a different loudness
+// in every session. Repeatable within one page load, so it hides from
+// any single measurement, and it drifted far enough between loads to
+// make levelling meaningless: a trim tuned in one session was wrong
+// in the next. Measured on the fare tick, the same trim produced
+// anywhere from 0.025 to 0.067.
+//
+// Normalising each buffer's peak was not enough on its own. A tick at
+// Q 14 passes a narrow slice of the spectrum, so what reaches the ear
+// depends on how much energy this particular random sequence happens
+// to hold at 3.2kHz — and that varies however the peak is scaled.
+//
+// So the noise is not random any more, only irregular: a fixed seed
+// through a small PRNG. Identical every load, for every listener, on
+// every machine. It sounds exactly like noise because it is noise;
+// it is simply always the *same* noise, which is what makes a level
+// something you can set once.
+function mulberry32(seed) {
+  return function () {
+    seed = (seed + 0x6D2B79F5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+const NOISE_SEED = 0x5EED   // any constant; this one is legible
+
+function normalise(data, peak) {
+  if (!peak) return
+  const scale = 1 / peak
+  for (let i = 0; i < data.length; i++) data[i] *= scale
+}
+
 // One decaying-noise buffer per context, reused by every tick — the
 // cost of building it is small but it is paid on a tap, and a tap is
 // the one place in the app where a few milliseconds are visible.
@@ -71,9 +107,13 @@ function tickNoise(ctx) {
   const data = buffer.getChannelData(0)
   // The squared decay is what stops each tick reading as a bare click:
   // a mechanical stop has a tail, however short.
+  const rand = mulberry32(NOISE_SEED)
+  let peak = 0
   for (let i = 0; i < frames; i++) {
-    data[i] = (Math.random() * 2 - 1) * (1 - i / frames) ** 2
+    data[i] = (rand() * 2 - 1) * (1 - i / frames) ** 2
+    if (Math.abs(data[i]) > peak) peak = Math.abs(data[i])
   }
+  normalise(data, peak)
   noiseCache.set(ctx, buffer)
   return buffer
 }
@@ -123,7 +163,15 @@ export function noiseSweep(ctx, bus, { at = 0, dur, peak, from, mid, to, midAt =
   const frames = Math.floor(ctx.sampleRate * dur)
   const buffer = ctx.createBuffer(1, frames, ctx.sampleRate)
   const data = buffer.getChannelData(0)
-  for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1
+  // Seeded per sweep length so a 0.62s door and a 0.17s card turn get
+  // different noise, but the same door sounds the same every time.
+  const rand = mulberry32(NOISE_SEED + frames)
+  let maxAbs = 0
+  for (let i = 0; i < frames; i++) {
+    data[i] = rand() * 2 - 1
+    if (Math.abs(data[i]) > maxAbs) maxAbs = Math.abs(data[i])
+  }
+  normalise(data, maxAbs)
 
   const src = ctx.createBufferSource()
   src.buffer = buffer

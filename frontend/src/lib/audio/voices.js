@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { getAudioContext, getBuffer } from './context'
 import { busFor, playBuffer } from './mixer'
-import { isMuted } from './settings'
+import { isMuted, trimFor } from './settings'
 import { tones, noiseTicks, noiseSweep, thump } from './synth'
 
 // ── The voice palette ─────────────────────────────────────
@@ -550,6 +550,38 @@ export function useVoiceKeys() { return useSyncExternalStore(subscribe, snapshot
 const assetMissing = new Set()
 
 /** Play one specific variant, ignoring the stored choice. For the palette. */
+/**
+ * The per-sound trim, as a node the recipe plays into.
+ *
+ * The recipes set the *shape* of a sound -- which notes, how long,
+ * how they sit against each other -- and this sets how loud that
+ * shape lands. Keeping the two apart is what makes levelling possible
+ * at all: retuning the mix is one table of numbers rather than an
+ * edit to fifty-seven recipes, and a variant swapped in from the
+ * palette inherits its event's level instead of arriving at whatever
+ * loudness its author happened to type.
+ *
+ * BASE_GAIN already described itself as "mastering, not user
+ * preference" and already had entries for click and toggle -- but it
+ * was only ever applied by playBuffer, on the file path, so for a
+ * synthesised sound it did nothing at all. Those two entries were
+ * dead code. They are live now.
+ *
+ * Disconnected on a timer because a synthesised voice has no `ended`
+ * to hang off: the primitives tear down their own oscillators and
+ * sources, and this is the one node above them. 3s clears the longest
+ * sound in the palette (the melody, at 1.76s) several times over.
+ */
+function trimNode(ctx, event) {
+  const bus = busFor(event.category)
+  if (!bus) return null
+  const trim = ctx.createGain()
+  trim.gain.value = trimFor(event.category, event.key)
+  trim.connect(bus)
+  setTimeout(() => { try { trim.disconnect() } catch { /* already gone */ } }, 3000)
+  return trim
+}
+
 export function playVariant(eventKey, variantKey) {
   const event = byKey.get(eventKey)
   if (!event || isMuted()) return
@@ -557,8 +589,8 @@ export function playVariant(eventKey, variantKey) {
   if (!variant) return
   const ctx = getAudioContext()
   if (!ctx) return
-  const bus = busFor(event.category)
-  if (bus) variant.play(ctx, bus)
+  const out = trimNode(ctx, event)
+  if (out) variant.play(ctx, out)
 }
 
 /** Play whichever voice is currently selected for this event. */
@@ -570,8 +602,8 @@ export function playVoice(eventKey) {
 
   const synth = () => {
     if (isMuted()) return
-    const bus = busFor(event.category)
-    if (bus) getVoice(eventKey).play(ctx, bus)
+    const out = trimNode(ctx, event)
+    if (out) getVoice(eventKey).play(ctx, out)
   }
 
   const path = event.file
