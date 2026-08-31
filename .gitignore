@@ -10,3 +10,20 @@
 # which are taken now that the documents themselves are ignored.
 plans/*.md
 !plans/README.md
+
+# Claude Code's project directory. launch.json is real project config --
+# it is how the preview tooling knows to start uvicorn on :8000 and vite
+# on :5173, and a teammate needs it -- so it is the one exception.
+#
+# Everything else here is per-machine or disposable: settings.local.json
+# is a local override by naming convention, scheduled_tasks.lock is a
+# lock, and worktrees/ holds agent worktrees, each a full checkout with
+# its own node_modules (17 of them at the time of writing -- large enough
+# that `du` on the directory does not finish inside two minutes).
+#
+# The pattern is `.claude/*` and not `.claude/`: git does not descend
+# into an ignored DIRECTORY, so the negation below would never be
+# reached. Matching the entries instead keeps launch.json recoverable.
+.claude/*
+!.claude/launch.json
+
