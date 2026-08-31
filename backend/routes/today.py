@@ -187,6 +187,17 @@ def get_today(user_id: str = Depends(get_user_id)):
     # the badge insisted something was still due. Both are served, and
     # the badge is the number the session will actually clear.
     total = sum(len(ids) for ids in lanes.values())
+    # The engine restricts this to servable MODES (see
+    # SRSEngine._servable_filter), which is what keeps the sentence
+    # screens' own tracks -- scheduled under a mode with no lane behind
+    # it -- from promising a review that will never be presented.
+    #
+    # Not a complete guarantee, and deliberately not described as one: a
+    # registered mode on content that has since been removed still
+    # answers here while daily_queue drops it (card_index.locate -> None),
+    # so a countdown can still outlive its card. Narrowing that further
+    # means asking the queue what it would actually build, which is a
+    # bigger change than this one.
     next_due = srs.get_next_due_at(user_id) if total == 0 else None
 
     logger.info(

@@ -14,11 +14,62 @@ logger = logging.getLogger(__name__)
 class SRSEngine:
     """Database-backed SRS engine that uses the scheduler and storage helpers."""
 
-    def __init__(self, database_url: str):
+    def __init__(self, database_url: str, servable_modes: list[str] | None = None):
         self.database_url = database_url
         self.storage = Storage(database_url)
         self.scheduler = Scheduler()
+        # The modes the app can actually put in front of a learner. See
+        # _servable_filter for what it is for and why it arrives as an
+        # argument rather than an import.
+        self._servable_modes = list(servable_modes) if servable_modes is not None else None
         self._init_db()
+
+    # -- Servable modes ----------------------------------------
+    #
+    # Not every row in card_modes has a session behind it. The reading
+    # and translation screens schedule the vocabulary word their
+    # sentence practises under a mode of their own (sentence.reading /
+    # sentence.translation) that no queue offers -- those tracks are
+    # cleared opportunistically, the next time a sentence happens to
+    # feature that word.
+    #
+    # /api/stats already dropped them from its per-section bars (its
+    # `if loc is None: continue`), so without this the same screen
+    # counted them in the interval ladder and not in the bars beside it,
+    # and mastery badges and daruma goals moved for progress the learner
+    # could neither see nor act on.
+    #
+    # The rule this draws, in two halves:
+    #
+    #   card_modes is DECK PROGRESS -- filtered to what can be served.
+    #
+    #   review_log is read for two different things, and only one of
+    #   them is ACTIVITY. What the learner DID (reviews, XP, streak,
+    #   best day, perfect runs) is not filtered: reading a sentence is
+    #   real study and counts everywhere effort counts. But the
+    #   first-ever-review query behind the daily new-card pace is not a
+    #   record of effort, it is a BUDGET the deck queue spends
+    #   (core/pace.py -> new_card_limit -> how many new cards vocab,
+    #   kanji, kana and grammar will introduce today). A sentence review
+    #   resolves to the very card id the vocab deck uses, so leaving it
+    #   unfiltered let one reading session zero a learner's new-card
+    #   allowance for the day -- and the tracks that spent it were
+    #   invisible in Today, the stats bars and the ladder. A budget is
+    #   filtered to whoever spends it.
+    #
+    # Passed in rather than imported because srs/ sits below study/ and
+    # imports nothing from it; core/srs_instance.py, the one place this
+    # engine is constructed, supplies study.modes.SRS_MODES. Left as
+    # None the engine counts every mode, which is the old behaviour.
+    def _servable_filter(self) -> tuple[str, tuple]:
+        """SQL fragment and params restricting a card_modes read.
+
+        Returns ("", ()) when no set was supplied, so a caller can splice
+        both in unconditionally.
+        """
+        if self._servable_modes is None:
+            return "", ()
+        return " AND mode = ANY(%s)", (self._servable_modes,)
 
     def _log_sql(self, label: str, sql: str, params: Any = None) -> None:
         # logger.info("SRS SQL %s sql=%s params=%r", label, sql, params)
@@ -680,7 +731,8 @@ class SRSEngine:
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
 
-                sql = """
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
                     SELECT
                         card_id,
                         mode,
@@ -689,7 +741,7 @@ class SRSEngine:
                         next_review,
                         correct_reviews
                     FROM card_modes
-                    WHERE card_id LIKE %s
+                    WHERE card_id LIKE %s{mode_sql}
                 """
 
                 pattern = self._user_prefix_pattern(user_id)
@@ -697,10 +749,10 @@ class SRSEngine:
                 self._log_sql(
                     "get_user_states",
                     sql,
-                    (pattern,)
+                    (pattern,) + mode_params
                 )
 
-                cur.execute(sql, (pattern,))
+                cur.execute(sql, (pattern,) + mode_params)
 
                 rows = cur.fetchall()
 
@@ -846,7 +898,8 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
                     WITH day_range AS (
                         SELECT generate_series(0, %s - 1) AS day_offset
                     ),
@@ -857,7 +910,7 @@ class SRSEngine:
                         FROM card_modes
                         WHERE card_id LIKE %s
                           AND total_reviews > 0
-                          AND next_review <= NOW() + (%s || ' days')::interval
+                          AND next_review <= NOW() + (%s || ' days')::interval{mode_sql}
                         GROUP BY 1
                     )
                     SELECT day_range.day_offset, COALESCE(due.cnt, 0)
@@ -865,8 +918,8 @@ class SRSEngine:
                     LEFT JOIN due ON due.day_offset = day_range.day_offset
                     ORDER BY day_range.day_offset ASC
                 """
-                self._log_sql("get_due_forecast", sql, (days, pattern, days))
-                cur.execute(sql, (days, pattern, days))
+                self._log_sql("get_due_forecast", sql, (days, pattern, days) + mode_params)
+                cur.execute(sql, (days, pattern, days) + mode_params)
                 rows = cur.fetchall()
 
         today = datetime.now(timezone.utc).date()
@@ -951,15 +1004,16 @@ class SRSEngine:
         now = datetime.now(timezone.utc)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
                     SELECT card_id, mode, next_review, interval_days, lapses
                     FROM card_modes
                     WHERE card_id LIKE %s
                       AND total_reviews > 0
-                      AND next_review <= %s
+                      AND next_review <= %s{mode_sql}
                     ORDER BY next_review ASC
                 """
-                params: list[Any] = [pattern, now]
+                params: list[Any] = [pattern, now, *mode_params]
                 if limit is not None:
                     sql += " LIMIT %s"
                     params.append(limit)
@@ -978,19 +1032,24 @@ class SRSEngine:
         """When the soonest not-yet-due card comes due, or None if the
         user has nothing scheduled ahead. Lets a cleared queue say "next
         review in 3 hours" instead of just "nothing due", which is the
-        difference between a finished day and an empty app."""
+        difference between a finished day and an empty app.
+
+        Restricted to servable modes (see _servable_filter): counting
+        the rest made a cleared Today promise "next review in 10
+        minutes" for a track it would never present."""
         pattern = self._user_prefix_pattern(user_id)
         now = datetime.now(timezone.utc)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
                     SELECT MIN(next_review) FROM card_modes
                     WHERE card_id LIKE %s
                       AND total_reviews > 0
-                      AND next_review > %s
+                      AND next_review > %s{mode_sql}
                 """
-                self._log_sql("get_next_due_at", sql, (pattern, now))
-                cur.execute(sql, (pattern, now))
+                self._log_sql("get_next_due_at", sql, (pattern, now) + mode_params)
+                cur.execute(sql, (pattern, now) + mode_params)
                 row = cur.fetchone()
         return row[0] if row else None
 
@@ -1001,12 +1060,14 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
                     SELECT COUNT(*) FROM card_modes
-                    WHERE card_id LIKE %s AND total_reviews > 0 AND interval_days >= 21
+                    WHERE card_id LIKE %s AND total_reviews > 0
+                      AND interval_days >= 21{mode_sql}
                 """
-                self._log_sql("get_mastered_count", sql, (pattern,))
-                cur.execute(sql, (pattern,))
+                self._log_sql("get_mastered_count", sql, (pattern,) + mode_params)
+                cur.execute(sql, (pattern,) + mode_params)
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
@@ -1041,16 +1102,17 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
                     SELECT card_id, mode, total_reviews, correct_reviews, lapses
                     FROM card_modes
                     WHERE card_id LIKE %s
-                      AND total_reviews > 0
+                      AND total_reviews > 0{mode_sql}
                     ORDER BY (correct_reviews::float / total_reviews) ASC, lapses DESC
                     LIMIT %s
                 """
-                self._log_sql("get_weakest_cards", sql, (pattern, limit))
-                cur.execute(sql, (pattern, limit))
+                self._log_sql("get_weakest_cards", sql, (pattern,) + mode_params + (limit,))
+                cur.execute(sql, (pattern,) + mode_params + (limit,))
                 rows = cur.fetchall()
         return [
             {
@@ -1127,16 +1189,17 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
                     SELECT interval_days, COUNT(*)
                     FROM card_modes
                     WHERE card_id LIKE %s
-                      AND total_reviews > 0
+                      AND total_reviews > 0{mode_sql}
                     GROUP BY 1
                     ORDER BY 1
                 """
-                self._log_sql("get_interval_histogram", sql, (pattern,))
-                cur.execute(sql, (pattern,))
+                self._log_sql("get_interval_histogram", sql, (pattern,) + mode_params)
+                cur.execute(sql, (pattern,) + mode_params)
                 rows = cur.fetchall()
         return [{"days": int(days), "count": int(count)} for days, count in rows]
 
@@ -1153,16 +1216,25 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                # Servable modes only: this is the deck queue's budget, not
+                # a record of effort. See the rule at the top of the class.
+                # Filtering inside `firsts` (rather than around it) is what
+                # makes a card's "first" mean its first review in a mode a
+                # deck actually serves -- so a word met first in a sentence
+                # still counts as new on the day its deck introduces it.
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
                     WITH firsts AS (
                         SELECT card_id, MIN(reviewed_at) AS first_at
-                        FROM review_log WHERE card_id LIKE %s GROUP BY card_id
+                        FROM review_log
+                        WHERE card_id LIKE %s{mode_sql}
+                        GROUP BY card_id
                     )
                     SELECT COUNT(*) FROM firsts
                     WHERE first_at >= date_trunc('day', NOW())
                 """
-                self._log_sql("get_new_items_today", sql, (pattern,))
-                cur.execute(sql, (pattern,))
+                self._log_sql("get_new_items_today", sql, (pattern,) + mode_params)
+                cur.execute(sql, (pattern,) + mode_params)
                 (count,) = cur.fetchone()
         return int(count)
 
@@ -1235,25 +1307,39 @@ class SRSEngine:
                 (reviews_today, xp_today, correct_today, cats_today, first_today,
                  last_today, reviews_week, xp_week, days_week, cats_week) = cur.fetchone()
 
-                cur.execute("""
+                # Same budget as get_new_items_today, same filter -- the
+                # daily_new/weekly_new daruma goals ask the learner to meet
+                # new CARDS, and must not be satisfiable by reading alone.
+                mode_sql, mode_params = self._servable_filter()
+                cur.execute(f"""
                     WITH firsts AS (
                         SELECT card_id, MIN(reviewed_at) AS first_at
-                        FROM review_log WHERE card_id LIKE %s GROUP BY card_id
+                        FROM review_log
+                        WHERE card_id LIKE %s{mode_sql}
+                        GROUP BY card_id
                     )
                     SELECT
                       COUNT(*) FILTER (WHERE first_at >= date_trunc('day', NOW())),
                       COUNT(*) FILTER (WHERE first_at >= date_trunc('week', NOW()))
                     FROM firsts
-                """, (pattern,))
+                """, (pattern,) + mode_params)
                 new_today, new_week = cur.fetchone()
 
-                cur.execute("""
+                cur.execute(f"""
                     SELECT
+                      -- review_log is activity: a sentence review is real
+                      -- study and counts here, unfiltered.
                       (SELECT COUNT(*) FROM review_log WHERE card_id LIKE %s),
+                      -- card_modes is deck progress: filtered to modes a
+                      -- queue can actually serve, so a goal like "clear
+                      -- what is due" cannot be pinned open by a track
+                      -- nothing offers.
                       (SELECT COUNT(*) FROM card_modes
-                        WHERE card_id LIKE %s AND total_reviews > 0 AND interval_days >= 21),
+                        WHERE card_id LIKE %s AND total_reviews > 0
+                          AND interval_days >= 21{mode_sql}),
                       (SELECT COUNT(*) FROM card_modes
-                        WHERE card_id LIKE %s AND total_reviews > 0 AND next_review <= NOW()),
+                        WHERE card_id LIKE %s AND total_reviews > 0
+                          AND next_review <= NOW(){mode_sql}),
                       (SELECT COUNT(*) FROM streak_mends WHERE user_id = %s),
                       -- Best single day ever, for the 韋駄天 title
                       -- (see srs/cosmetics.py). A lifetime high-water
@@ -1264,7 +1350,8 @@ class SRSEngine:
                           WHERE card_id LIKE %s
                           GROUP BY date_trunc('day', reviewed_at)
                        ) d)
-                """, (pattern, pattern, pattern, user_id, pattern))
+                """, (pattern, pattern, *mode_params, pattern, *mode_params,
+                      user_id, pattern))
                 reviews_total, mastered_total, due_now, rises_total, best_day = cur.fetchone()
 
                 run_today = self._perfect_run(cur, pattern, "day")
