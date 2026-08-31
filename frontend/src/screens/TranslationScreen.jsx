@@ -9,7 +9,7 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
-import { playCorrect } from '../lib/audio'
+import RatingBar from '../components/study/RatingBar'
 import { FireIcon } from '../components/ui/Icons'
 
 const DEFAULT_TIER_SIZE = 200
@@ -223,7 +223,9 @@ export default function TranslationScreen({ session }) {
     setFeedback(f => ({ ...f, correct: isCorrect }))
     setScore(s => ({ correct: s.correct + (isCorrect ? 1 : 0), total: s.total + 1 }))
     setStreak(s => (isCorrect ? s + 1 : 0))
-    if (isCorrect) playCorrect()
+    // No playCorrect here any more: RatingBar plays the tap itself, on
+    // both sides, and grading is only ever reached through it now --
+    // calling it here too doubled the sound on a correct answer.
 
     apiFetch('/api/translation/result', session, {
       method: 'POST',
@@ -369,7 +371,7 @@ function SessionView({
     <div className="screen">
       <TopBar
         onBack={onBack}
-        title={<span lang="ja">翻訳</span>}
+        title={t.translationTitle ?? 'Translation'}
         tag={titleSuffix}
         autoHide
       />
@@ -407,10 +409,8 @@ function SessionView({
         {stage === 'writing' && data && (
           <>
             <CardTransition cardKey={data._uiKey}>
-              {/* No footer strip here: the level now sits in the top
-                  bar beside 翻訳, so repeating it under the card would
-                  say the same thing twice on one screen. */}
-              <PromptCard>
+              {/* Study.dc.html's footer strip. */}
+              <PromptCard foot={{ left: level ? `${level} 翻訳` : '翻訳' }}>
                 <div className="trn-prompt-label">
                   {/* Real example sentences only carry an English gloss
                       regardless of UI language — see reading.py's
@@ -495,20 +495,15 @@ function SessionView({
 
             <div className="trn-feedback-actions">
               {feedback.correct === null ? (
-                <div className="trn-grade-row">
-                  <button
-                    onClick={() => gradeAnswer(false)}
-                    className="trn-grade-btn--wrong"
-                  >
-                    {t.gradeIncorrect}
-                  </button>
-                  <button
-                    onClick={() => gradeAnswer(true)}
-                    className="trn-grade-btn--right"
-                  >
-                    {t.gradeCorrect}
-                  </button>
-                </div>
+                /* The same six-segment instrument the study screens
+                   grade with, instead of a right/wrong pair. A
+                   translation is rarely simply right or wrong, and the
+                   learner already knows how close they were -- the two
+                   buttons made them flatten that to a coin flip.
+                   RatingBar's own threshold decides correctness: q > 2
+                   is a pass, which is the same line it draws between
+                   playCorrect and playWrong. */
+                <RatingBar active onRate={q => gradeAnswer(q >= 3)} />
               ) : (
                 <button
                   onClick={next}
