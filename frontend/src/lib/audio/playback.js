@@ -1,6 +1,7 @@
 import { getAudioContext, getBuffer } from './context'
 import { playBuffer } from './mixer'
 import { isMuted } from './settings'
+import { hasVoice, playVoice } from './voices'
 
 // ── One-shots ─────────────────────────────────────────────
 // Every sound goes through the mixer's category bus, so mute and the
@@ -82,8 +83,21 @@ export function playKana(romaji) {
     })
     .catch(() => { /* a missing asset is silence, not an error */ })
 }
-export function playSfx(name)    { play(SFX(name),   'sfx',  name) }
-export function playUi(name)     { play(UI(name),    'ui',   name) }
+// ── Named effects ─────────────────────────────────────────
+// Every name the app actually passes to these two now has a
+// synthesised voice behind it (voices.js), which also handles looking
+// for a recording first. The file path below is the fallback for a
+// name that is *not* in the palette — a one-off asset someone drops
+// in without registering it — rather than the normal route.
+export function playSfx(name) {
+  if (hasVoice(name)) { playVoice(name); return }
+  play(SFX(name), 'sfx', name)
+}
+
+export function playUi(name) {
+  if (hasVoice(name)) { playVoice(name); return }
+  play(UI(name), 'ui', name)
+}
 
 export function playClick()  { playUi('click') }
 export function playToggle() { playUi('toggle') }
