@@ -173,7 +173,7 @@ export default function DecksScreen({ session }) {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder={t.decksSearchPlaceholder}
-              className="decks-index-bar__input"
+              className="field field--bare decks-index-bar__input"
             />
             {query && (
               <button
@@ -205,7 +205,7 @@ export default function DecksScreen({ session }) {
               onKeyDown={e => e.key === 'Enter' && createDeck()}
               placeholder={t.deckNamePlaceholder}
               autoFocus
-              className="decks-create-input"
+              className="field decks-create-input"
             />
             <div className="decks-type-row">
               {DECK_TYPES.map(dt => (

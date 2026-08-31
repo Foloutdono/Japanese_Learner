@@ -94,7 +94,7 @@ export default function AuthScreen({ onBack } = {}) {
               value={username}
               onChange={e => setUsername(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-              className="auth-input"
+              className="field auth-input"
               maxLength={20}
             />
           )}
@@ -104,7 +104,7 @@ export default function AuthScreen({ onBack } = {}) {
             value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            className="auth-input"
+            className="field auth-input"
           />
           <input
             type="password"
@@ -112,7 +112,7 @@ export default function AuthScreen({ onBack } = {}) {
             value={password}
             onChange={e => setPassword(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            className="auth-input"
+            className="field auth-input"
           />
         </div>
 

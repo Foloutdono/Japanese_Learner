@@ -178,7 +178,7 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder={t.browseSearchPlaceholder}
-          className="deckdetail-form__input browse-search-input"
+          className="field deckdetail-form__input browse-search-input"
         />
 
         <div className="import-preview browse-results">

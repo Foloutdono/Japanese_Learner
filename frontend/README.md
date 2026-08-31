@@ -228,8 +228,54 @@ taste; they enforce that a decision already made stays made.
    `.next-service`), and those children resolve to neither family by name.
    That is the intended escape hatch, not a hole.
 
+   **One thing it cannot judge, as opposed to chooses not to.** The containment
+   model is BEM, so it only relates an ink to a ground when the names say they
+   meet. A **descendant selector spanning two unrelated blocks** — a ground
+   painted by one, an ink set by the other — is outside it, and nothing in
+   either name reveals the pairing. `.dict-entry-card .stage-badge` is the
+   worked example: `.stage-badge` inks toward `--text-on-panel` under a comment
+   asserting its host is sumi in both themes, which is true of the quiz card it
+   was written for and false of the dictionary card, which is `--surface` and
+   flips to pale washi. It measures **1.51:1 in light** and Guard 5 is clean on
+   it. When you write an ink into a cross-block descendant selector, check the
+   ground by hand — the guard will not.
+
    Allowlisted through `src/design-ink-ground.json`, entries removable only:
    a stale one fails, so a fix cannot leave debt behind it.
+
+6. **The artboards** (`npm run lint:artboards`) — the only guard that does
+   not watch the app. It watches the *mockups*, because the drift runs both
+   ways: by the time it was written the Stats board still drew a streak the
+   app had abandoned two rounds earlier, the Controls board still specified a
+   primary button at a deepening that had since moved 88% → 70%, and 159
+   pigment-as-text sites across the set sat under a contrast floor the app
+   itself had already cleared. A contract nobody checks stops being a
+   contract; the screens were being built to a picture that was quietly
+   wrong.
+
+   It measures three things, all of them true-or-false rather than matters of
+   taste: inline `color:` against its ground at 4.5:1 (3:1 for large text and
+   for icons, which are non-text content), font-size/gap/border-radius
+   literals against the kit's scales, and a raw hex in the body where a token
+   of that exact value is defined in the same file.
+
+   **The artboards are not in this repo** — they live in the canvas artifact
+   DESIGN.md links, and on disk only in whatever scratchpad holds them. So
+   this cannot run in CI. With no directory it skips and exits 0; point it at
+   the boards with `ARTBOARDS_DIR` or
+   `npm run lint:artboards -- /path/to/mockups`.
+
+   Judging a ground without a DOM is the hard part, and the failure mode is
+   inventing failures rather than missing them — four separate measuring
+   probes in the wave that produced this guard returned confident nonsense.
+   So it stays conservative: a colour is judged only against a background set
+   in the same style attribute, or the page card when that attribute sets
+   none; a panel ink with no inline ground is skipped, because its real
+   ground comes from a parent class; and a reading of exactly 1.00 is treated
+   as "wrong ground", never as invisible text, since nobody draws that on
+   purpose. Every run first proves the maths on white-on-black (must be
+   exactly 21) and 50% white on black (must be 128) before trusting it on a
+   pair whose answer is not known in advance.
 
 If a guard fires on a change you believe is correct, change the baseline or
 the allowlist in the same commit and say why in the message. The guards are

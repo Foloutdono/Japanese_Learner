@@ -11,6 +11,7 @@
     "lint:css:report": "stylelint \"src/**/*.css\"",
     "lint:scale": "node scripts/check-design-scale.mjs",
     "lint:ink": "node scripts/check-ink-ground.mjs",
+    "lint:artboards": "node scripts/check-artboards.mjs",
     "preview": "vite preview",
     "test": "vitest run"
   },

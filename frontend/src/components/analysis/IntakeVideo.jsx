@@ -170,7 +170,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromT
         <span className="anl-window__label">{t.videoUrlOptional}</span>
         <input
           type="text"
-          className="anl-field"
+          className="field field--panel anl-field"
           value={url}
           onChange={e => onUrlChange(e.target.value)}
           placeholder="https://youtu.be/…"
@@ -191,7 +191,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromT
             <input
               type="text"
               inputMode="numeric"
-              className={`anl-field${startBad ? ' anl-field--bad' : ''}`}
+              className={`field field--panel anl-field${startBad ? ' anl-field--bad' : ''}`}
               value={from}
               onChange={e => setFrom(e.target.value)}
               placeholder={t.windowWhole}
@@ -202,7 +202,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromT
             <input
               type="text"
               inputMode="numeric"
-              className={`anl-field${endBad || backwards ? ' anl-field--bad' : ''}`}
+              className={`field field--panel anl-field${endBad || backwards ? ' anl-field--bad' : ''}`}
               value={to}
               onChange={e => setTo(e.target.value)}
               placeholder={t.windowWhole}

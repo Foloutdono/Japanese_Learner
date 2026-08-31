@@ -98,7 +98,7 @@ function RadicalField({ label, value, onChange, session }) {
     <div className="deckdetail-form__group">
       <div className="deckdetail-form__label">{label} *</div>
       <button type="button" onClick={() => setOpen(o => !o)}
-        className="deckdetail-form__input deckdetail-form__radical-btn">
+        className="field deckdetail-form__input deckdetail-form__radical-btn">
         {chosen
           ? <span><span lang="ja">{chosen.char}</span> · {chosen.number}</span>
           : <span className="deckdetail-form__placeholder">{t.pickRadical}</span>}
@@ -181,7 +181,7 @@ function ReadingsField({ label, value, onChange }) {
                 value={v}
                 onChange={e => setRow(g.kind, i, e.target.value)}
                 placeholder={t.readingsPlaceholder}
-                className="deckdetail-form__input"
+                className="field deckdetail-form__input"
                 lang="ja"
               />
               <button
@@ -598,7 +598,7 @@ export default function DeckDetailScreen({ session }) {
                         <input key={i} value={v}
                           onChange={e => setLine(f.key, i, e.target.value)}
                           placeholder={label}
-                          className="deckdetail-form__input" />
+                          className="field deckdetail-form__input" />
                       ))}
                       <button type="button" onClick={() => addLine(f.key)}
                         className="deckdetail-form__addline">+ {label}</button>
@@ -621,7 +621,7 @@ export default function DeckDetailScreen({ session }) {
                   <input key={f.key} value={form[f.key] ?? ''}
                     onChange={e => setField(f.key, e.target.value)}
                     placeholder={f.required ? `${label} *` : label}
-                    className="deckdetail-form__input" />
+                    className="field deckdetail-form__input" />
                 )
               })}
               {/* notes is on every structure and never shown during a
@@ -630,7 +630,7 @@ export default function DeckDetailScreen({ session }) {
               <input value={notes} onChange={e => setNotes(e.target.value)}
                 placeholder={t.notesPlaceholder}
                 onKeyDown={e => e.key === 'Enter' && saveCard()}
-                className="deckdetail-form__input" />
+                className="field deckdetail-form__input" />
             </div>
             <div className="deckdetail-form__actions">
               {/* Cancel first, Save last: the row is right-aligned now

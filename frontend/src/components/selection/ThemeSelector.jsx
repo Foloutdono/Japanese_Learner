@@ -87,7 +87,7 @@ export default function ThemeSelector({ session, onSelect, color }) {
       {themes && themes.length > 8 && (
         <input
           type="text"
-          className="theme-selector__search"
+          className="field theme-selector__search"
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder={t.filterThemes ?? 'Filter…'}

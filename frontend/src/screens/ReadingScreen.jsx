@@ -548,7 +548,7 @@ function SessionView({
                 onChange={e => setAnswer(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && submitAnswer()}
                 placeholder={t.romajiPlaceholder}
-                className="rdg-answer-input"
+                className="field field--panel rdg-answer-input"
               />
               <div className="rdg-submit-wrap">
                 <button
@@ -728,7 +728,7 @@ function TierPicker({ session, domain, onSelect, t }) {
           onChange={e => setJumpValue(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && jumpValue && onSelect(Number(jumpValue))}
           placeholder={t.jumpToTier}
-          className="rdg-answer-input"
+          className="field field--panel rdg-answer-input"
         />
         <button
           onClick={() => jumpValue && onSelect(Number(jumpValue))}
