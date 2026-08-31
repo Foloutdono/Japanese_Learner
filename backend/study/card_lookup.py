@@ -140,34 +140,6 @@ def _right_boundary_ok(text: str, end: int) -> bool:
     return any(text.startswith(filler, end) for filler in _FILLER_WORDS)
 
 
-def _surface_variants(word: str, kana: str) -> list:
-    """Alternate real-world spellings of a deck word's `word` (kanji/
-    surface) field that an actual sentence — a JMdict/Tatoeba example,
-    or a real-word reading-practice phrase — commonly uses instead of
-    the deck's own dictionary-form spelling:
-
-      - Arabic-digit spelling of a kanji numeral (二日 -> 2日).
-      - The conventional partial-kana spelling for a small hand-picked
-        set of kanji (御飯 -> ご飯).
-      - The word's own kana reading, but only when JMdict tags it
-        "usually kana" — see vocab_extras.is_usually_kana for why this
-        isn't done for every kanji-having word.
-
-    Does not include `word` itself. See vocab_extras.py, which this
-    reuses rather than re-deriving the same logic here.
-    """
-    if not word:
-        return []
-    variants = []
-    numeral = vocab_extras.numeral_variant(word)
-    if numeral:
-        variants.append(numeral)
-    variants.extend(vocab_extras.kana_spelling_variants(word))
-    if kana and vocab_extras.is_usually_kana(word, kana):
-        variants.extend(r for r in _reading_variants(kana) if len(r) >= 2)
-    return variants
-
-
 def _pick_best_candidate(candidates: list, reading: str = None):
     """
     Disambiguate between multiple deck entries sharing the same surface
@@ -267,45 +239,26 @@ def card_stats(states: dict, user_id: str, raw_id: str, modes) -> dict:
     }
 
 
-def find_vocab_match(surface: str, base: str, reading: str):
-    """
-    Best-effort lookup of a single (already-segmented) word against the
-    vocab deck — used by the phrase analyzer, which gets word boundaries
-    from the LLM.
-
-    Several deck entries can share the same kanji surface (e.g. 歩 as the
-    everyday word "marcher" vs. the shogi piece "fu"/pawn) with different
-    readings and meanings. We disambiguate using the reading supplied by
-    the LLM rather than silently returning whichever entry happens to
-    come first in the deck; see _pick_best_candidate for the fallback
-    order when no reading matches.
-
-    NOTE: assumes vocab entries expose kanji/kana-ish fields similar to
-    kanji_data entries. Field names are a guess — adjust the .get(...)
-    calls below if vocab_data.py uses different keys.
-    """
-    kanji_candidates = []      # entries whose kanji field (or a known spelling variant) == surface/base
-    kana_only_candidates = []  # entries with no kanji field, or "usually kana" entries matched by reading alone
-
-    for level, vocab_list in VOCAB_BY_LEVEL.items():
-        for entry in vocab_list:
-            entry_word = entry.get("kanji") or entry.get("word") or entry.get("vocab") or ""
-            entry_kana = entry.get("kana") or entry.get("reading") or ""
-            if entry_word and (entry_word in (surface, base) or any(
-                v in (surface, base) for v in _surface_variants(entry_word, entry_kana)
-            )):
-                kanji_candidates.append((level, entry, entry_kana))
-            elif entry_kana and _reading_matches(entry_kana, reading) and (
-                not entry_word or vocab_extras.is_usually_kana(entry_word, entry_kana)
-            ):
-                kana_only_candidates.append((level, entry, entry_kana))
-
-    best = _pick_best_candidate(kanji_candidates, reading) or _pick_best_candidate(kana_only_candidates, reading)
-    if best is None:
-        return None
-
-    level, entry = best
-    return level, entry, vocab_to_id(entry, level)
+# NOTE (2026-08-31): find_vocab_match (plus its private
+# _surface_variants helper) lived here and was removed. It resolved ONE
+# already-segmented word -- the phrase analyzer's LLM-supplied
+# surface/base/reading triple -- by scanning all five decks and
+# recomputing spelling variants per entry on every call: ~790 ms a word,
+# so a ten-word sentence cost the better part of eight seconds. Its
+# caller went away in 3b9257e6 (2026-08-26), when the analyzer dropped to
+# the local tier and started resolving tokens through resolve_lemma /
+# resolve_kana below, which answer the same question off indexes built
+# once at import time (~0.006 ms) and keep the reading disambiguation and
+# lowest-JLPT tie-break intact via _pick_best_candidate.
+#
+# One thing did NOT survive: matching an alternate SPELLING with no
+# reading in hand. find_vocab_match resolved a bare "ご飯" to the deck's
+# 御飯, and ぬるい to 温い; resolve_lemma misses both, and resolve_kana
+# needs a reading (and a content-word POS) to cover them. If that is
+# wanted again -- routes reading/translation want it for the ~20 curated
+# sentences whose focus word is spelled the deck's other way -- it
+# belongs as extra keys in _index_vocab_by_lemma, next to the numeral
+# variants already there, not as a re-scan of the decks per lookup.
 
 
 # ── Sentence source words ────────────────────────────────────────────
