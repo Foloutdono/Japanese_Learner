@@ -1,5 +1,5 @@
 import { useLang } from '../../LangContext'
-import { LightbulbIcon } from '../ui/Icons'
+import { PlusIcon } from '../ui/Icons'
 
 // ── The hint switch ───────────────────────────────────────────
 // A hint is something you reach for on a card you are stuck on, so it
@@ -56,7 +56,9 @@ export default function HintBar({ available = [], active = [], onToggle, disable
             disabled={disabled}
             aria-pressed={on}
           >
-            <LightbulbIcon size={14} />
+            {/* Study.dc.html draws a plus, not a bulb: these ADD a
+                register to the card rather than offer a hint. */}
+            <PlusIcon size={14} />
             {on ? hideLabel : showLabel}
           </button>
         )

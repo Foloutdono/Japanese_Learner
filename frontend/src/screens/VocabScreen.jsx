@@ -512,7 +512,7 @@ export default function VocabScreen({ session }) {
                 t={t}
                 stacked
                 kana={c.kanji ? c.kana : null}
-                main={<MeaningDisplay meaning={c.meaning} size={28} color="var(--accent2)" />}
+                main={<MeaningDisplay meaning={c.meaning} size={28} />}
               />
             )}
             onExit={() => setReviewing(false)}
@@ -577,7 +577,9 @@ export default function VocabScreen({ session }) {
                 checkAdvance()
               }}
             >
-              <PromptCard>
+              {/* Study.dc.html's footer strip: what this card is, and
+                  which way round you are studying it. */}
+              <PromptCard foot={{ left: level ? `${level} 単語` : '単語', right: title }}>
                 {/* word_reading — the written word is shown and the answer
                     is how it is read. The backend has already removed the
                     kana-only entries from the pool, since for those the
@@ -632,7 +634,7 @@ export default function VocabScreen({ session }) {
                         stacked={isKjToM}
                         main={
                           isKjToM
-                            ? <MeaningDisplay meaning={card.meaning} size={28} color="var(--accent2)" />
+                            ? <MeaningDisplay meaning={card.meaning} size={28} />
                             : <CharDisplay char={wordForm(card)} size={72} />
                         }
                       />

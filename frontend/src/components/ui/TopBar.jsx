@@ -115,13 +115,11 @@ function TopBarProfileRing() {
   const summary = useProfileSummary()
   if (!summary) return null
 
+  // Still computed: the ring no longer draws an arc (see the roundel
+  // below) but the title still reports the figure, which is the only
+  // place it was ever readable as a number rather than an angle.
   const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)
   const into = Math.min(span, Math.max(0, summary.xp - summary.xpPrevLevel))
-  const pct  = Math.round((into / span) * 100)
-
-  const r = 16
-  const circumference = 2 * Math.PI * r
-  const dashoffset = circumference * (1 - pct / 100)
 
   return (
     <button
@@ -130,15 +128,11 @@ function TopBarProfileRing() {
       onClick={() => { playClick(); navigate('/profile') }}
       title={`${t.level} ${summary.level} — ${into}/${span} XP`}
     >
-      <svg className="topbar-profile-ring__svg" viewBox="0 0 40 40" aria-hidden="true">
-        <circle className="topbar-profile-ring__track" cx="20" cy="20" r={r} />
-        <circle
-          className="topbar-profile-ring__fill"
-          cx="20" cy="20" r={r}
-          strokeDasharray={circumference}
-          strokeDashoffset={dashoffset}
-        />
-      </svg>
+      {/* Study.dc.html draws this as a plain roundel with the level in
+          it, not an XP arc. The arc was stroked in --accent9 -- a line
+          pigment on an object about the LEARNER, which DESIGN.md
+          reserves --pass-ink for. The XP figure is still in the title
+          and still on the pass, one tap away. */}
       <span className="topbar-profile-ring__level">{summary.level}</span>
     </button>
   )

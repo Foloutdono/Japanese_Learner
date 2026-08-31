@@ -32,7 +32,7 @@ export function GrammarAnswer({ card, size = 44, divided = false }) {
     <div className={`grammar-answer${divided ? ' grammar-answer--divided' : ''}`}>
       <GrammarRule text={card.grammar} size={size} />
       {card.structure && <div className="grammar-structure">{card.structure}</div>}
-      <MeaningDisplay meaning={card.meaning} size={24} color="var(--success)" />
+      <MeaningDisplay meaning={card.meaning} size={24} />
     </div>
   )
 }
