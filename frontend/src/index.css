@@ -7498,8 +7498,21 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
    It no longer carries `flex: 1` — .top-bar__station owns the growth
    now, and the title has to be able to shrink inside it or a long
    composite pushes the clock and the back button off the bar. */
+/* The one fact that qualifies the station, beside its name rather than
+   glued to it with an em-dash. Dim and small on purpose: the name is
+   what you read, this is what you check. */
+.top-bar__tag {
+  margin-left: var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-caption-xs);
+  letter-spacing: var(--tr-caption);
+  color: var(--text-on-panel-soft);
+  vertical-align: 0.15em;
+}
+
 .top-bar__title {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 1rem;
   line-height: 1.3;
@@ -14744,17 +14757,26 @@ color: color-mix(in srgb, var(--pass-color) 55%, var(--text-primary));
 }
 /* As .rdg-answer-input, plus the Japanese face: this field is typed INTO in
    Japanese, so it names --font-jp rather than inheriting the display face. */
+/* No max-width: the mockup runs the answer field to the SAME width as
+   the prompt card above it, edge to edge. It was capped at 360px, which
+   left a 232px shortfall against a 592px card and read as two objects
+   that had nothing to do with each other. */
 .trn-answer-input {
   font-size: 22px;
   width: 100%;
-  max-width: 360px;
   margin: 0 auto;
   text-align: center;
   align-self: center;
   font-family: var(--font-jp);
 }
 .trn-submit-wrap { margin-top: 16px; display: flex; justify-content: center; }
-.trn-submit-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
+/* .btn-primary carries the fill, the ink, the radius and the 44px floor
+   now. The fill it paints is this screen's own 瑠璃色, deepened -- the
+   shell has been injecting --line-color all along (see TranslationScreen's
+   own comment saying nothing read it) and this button was the thing that
+   never did, painting 朱色 instead: kana's pigment on a translation
+   screen. */
+.trn-submit-btn { padding: 10px 28px; }
 
 /* .trn-feedback-card carries no styles of its own — it exists purely
    to scope the mobile max-height override further down (PromptCard

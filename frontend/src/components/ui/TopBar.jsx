@@ -217,6 +217,12 @@ function MobileLevelBar() {
 export function TopBar({
   onBack,
   title,
+  // A small chip after the name, for the one fact that qualifies the
+  // station rather than naming it -- the JLPT level on a study screen.
+  // It used to be glued to the title with an em-dash, which made the
+  // bar read as one long Latin string; as a chip the name stays the
+  // name and the qualifier sits beside it.
+  tag,
   autoHide = false,
   actions,
 }) {
@@ -258,7 +264,10 @@ export function TopBar({
                 : station.kana && (
                     <span className="top-bar__kana" lang="ja" aria-hidden="true">{station.kana}</span>
                   )}
-              <span className="top-bar__title">{title}</span>
+              <span className="top-bar__title">
+                {title}
+                {tag && <span className="top-bar__tag">{tag}</span>}
+              </span>
             </span>
           </span>
 
