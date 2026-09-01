@@ -116,6 +116,28 @@ function ICCard() {
   )
 }
 
+// The notice line's two tenants: the study tip, or — when a hall feed
+// has failed — the admission, which doubles as the retry. One
+// component because the line renders twice (concourse band ≥560px,
+// footer strip under it) and the two must never disagree about
+// whether the hall is broken.
+function HallNotice({ down, onRetry, t }) {
+  if (!down) {
+    return (
+      <>
+        <span className="station__notice-chime" aria-hidden="true">♪</span>
+        <span className="station__notice-text">{t.tip}</span>
+      </>
+    )
+  }
+  return (
+    <button type="button" className="station__notice-retry" onClick={onRetry}>
+      <span className="station__notice-chime station__notice-chime--warn" aria-hidden="true">!</span>
+      <span className="station__notice-text">{t.homeFeedDown}</span>
+    </button>
+  )
+}
+
 export default function HomeScreen({ session }) {
   const navigate = useNavigate()
   const { t }    = useLang()
@@ -129,17 +151,33 @@ export default function HomeScreen({ session }) {
   const [today, setToday] = useState(null)
   const [todayFailed, setTodayFailed] = useState(false)
   const [stats, setStats] = useState(null)
+  const [statsFailed, setStatsFailed] = useState(false)
+  // Bumped by the notice below; a refreshed session (new object) also
+  // re-runs this via [session], which is how lib/api's 401 recovery
+  // reaches this screen.
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     let live = true
+    // The failed flags clear on the success path, not synchronously
+    // here (no setState directly in an effect): the notice holds
+    // through a retry in flight and yields the line back to the tip
+    // only once a feed actually answers.
     apiJson('/api/today', session)
-      .then(data => { if (live) setToday(data) })
+      .then(data => { if (live) { setToday(data); setTodayFailed(false) } })
       .catch(() => { if (live) setTodayFailed(true) })
     apiJson('/api/stats', session)
-      .then(data => { if (live) setStats(data) })
-      .catch(() => {})
+      .then(data => { if (live) { setStats(data); setStatsFailed(false) } })
+      .catch(() => { if (live) setStatsFailed(true) })
     return () => { live = false }
-  }, [session])
+  }, [session, attempt])
+
+  // Quiet is still the manner — the gate card sits out and the map
+  // draws empty rather than shouting — but silence stopped short of
+  // honesty: a dead session rendered a hall identical to an empty
+  // account (seen on production, 2026-09-01). The notice line is the
+  // one place that owns up, and it doubles as the retry.
+  const feedDown = todayFailed || statsFailed
 
   useEffect(() => {
     startAmbiance('home')
@@ -174,8 +212,7 @@ export default function HomeScreen({ session }) {
               for phones, where this band has no room for a sentence;
               the 560px query decides which of the two shows. */}
           <span className="station__concourse-notice">
-            <span className="station__notice-chime" aria-hidden="true">♪</span>
-            <span className="station__notice-text">{t.tip}</span>
+            <HallNotice down={feedDown} onRetry={() => setAttempt(a => a + 1)} t={t} />
           </span>
           <div className="station__concourse-right">
             <ICCard />
@@ -221,8 +258,7 @@ export default function HomeScreen({ session }) {
           it belongs to. */}
       <footer className="station__notice">
         <span className="station__notice-inner">
-          <span className="station__notice-chime" aria-hidden="true">♪</span>
-          <span className="station__notice-text">{t.tip}</span>
+          <HallNotice down={feedDown} onRetry={() => setAttempt(a => a + 1)} t={t} />
         </span>
       </footer>
     </div>

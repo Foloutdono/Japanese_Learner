@@ -1,5 +1,8 @@
 {
   "rewrites": [
+    { "source": "/api/:path*", "destination": "https://japanese-learner.onrender.com/api/:path*" },
+    { "source": "/kanjivg/:path*", "destination": "https://japanese-learner.onrender.com/kanjivg/:path*" },
+    { "source": "/exam-audio/:path*", "destination": "https://japanese-learner.onrender.com/exam-audio/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

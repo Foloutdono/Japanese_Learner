@@ -163,6 +163,36 @@ describe('HomeScreen — the gate hall', () => {
     expect(beginDeparture.mock.calls[0][0]?.path).toBe('/today')
   })
 
+  it('owns up on the notice line when a hall feed fails, and the notice retries', async () => {
+    // Diagnosed on production: a session the backend rejects made
+    // every feed 401 and the hall rendered identical to an empty
+    // account. Quiet stays the manner — gate card out, map empty —
+    // but the notice line must admit it, and tapping it must refetch.
+    apiJson.mockRejectedValue(new Error('401'))
+    const screen = await mount()
+    await settle()
+
+    const root = screen.container
+    // Both notice hosts (band and footer) carry the admission; the
+    // 560px query decides which one is visible.
+    expect(root.querySelectorAll('.station__notice-retry')).toHaveLength(2)
+    expect(root.querySelector('.gate-card')).toBeNull()
+    // The map still draws — every destination stays reachable.
+    expect(root.querySelectorAll('.wmap-line')).toHaveLength(4)
+
+    // The feeds come back; the notice is the retry.
+    apiJson.mockImplementation(async url => {
+      if (url === '/api/today') return TODAY
+      if (url === '/api/stats') return STATS
+      return {}
+    })
+    root.querySelector('.station__notice-retry').click()
+    await settle()
+
+    expect(root.querySelectorAll('.station__notice-retry')).toHaveLength(0)
+    expect(root.querySelector('.gate-card__count').textContent).toBe('24')
+  })
+
   it('still draws the whole map from a failed or foreign stats payload', async () => {
     // The onboarding gate test's generic mock hands every apiJson call
     // a today-shaped object; the map must treat that as "no progress",

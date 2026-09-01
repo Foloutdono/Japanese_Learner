@@ -120,9 +120,16 @@ Card IDs are namespaced per user as `"{user_id}:{card_id}"` (`core/auth.py:prefi
 - `locales/` + `i18n.jsx` + `LangContext.jsx` — French/English string tables and language context.
 
 ### Data flow
-Frontend calls `/api/*`-proxied (dev) or `VITE_API_URL`-absolute (prod) FastAPI routes with a Supabase bearer token → `core/auth.get_user_id` resolves the user → routes use `core/srs_instance.srs` (the shared `SRSEngine`) and `study/` helpers to read/write per-user card state in Postgres, and static `content/` data for card content itself.
+Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite proxy in dev, Vercel rewrites in prod — `VITE_API_URL` is deliberately empty in `.env.production`; see Deployment below) with a Supabase bearer token → `core/auth.get_user_id` resolves the user → routes use `core/srs_instance.srs` (the shared `SRSEngine`) and `study/` helpers to read/write per-user card state in Postgres, and static `content/` data for card content itself.
 
 ## Deployment
 
 - Backend: Render (`render.yaml`), root `backend/`, persistent disk mounted at `/data` for SRS storage.
-- Frontend: Vercel (`frontend/vercel.json`), SPA rewrite to `index.html`.
+- Frontend: Vercel (`frontend/vercel.json`), SPA rewrite to `index.html`, plus
+  proxy rewrites for `/api`, `/kanjivg` and `/exam-audio` to the Render
+  backend. The browser never calls `onrender.com` directly — some mobile
+  carriers cannot reach that shared zone at all (diagnosed 2026-09-01: every
+  CORS preflight died in transit on 4G), and same-origin also removes the
+  preflight round trip. Keep `VITE_API_URL` empty in `.env.production`; a new
+  backend static mount needs a matching rewrite in `vercel.json` (and in
+  `vite.config.js`'s dev proxy).

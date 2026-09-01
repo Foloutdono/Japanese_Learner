@@ -6497,6 +6497,39 @@ textarea:focus-visible {
 }
 .station__notice-chime { color: var(--accent2); }
 
+/* The failure notice — the same line, owned up. Rendered by both
+   notice hosts (band and footer) when a hall feed has failed, and it
+   is a button because the notice IS the retry: quiet stays the manner
+   (the gate card sits out, the map draws empty), but the line that
+   normally carries the tip is the one place the hall admits something
+   didn't load. The warning pigment is rationed to the glyph — a whole
+   sentence of state colour would be the strip shouting, and --warning
+   on the page ground has no measured pairing. */
+.station__notice-retry {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: var(--text-primary);
+  text-align: center;
+  cursor: pointer;
+}
+/* The bare button rule's brightness filter is not this hover (see the
+   primary button's note in DESIGN.md); the affordance is the underline. */
+.station__notice-retry:hover,
+.station__notice-retry:focus-visible {
+  filter: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.station__notice-chime--warn { color: var(--warning); }
+
 /* ── 路線図 — the route diagram ────────────────────────────
    The stopping-pattern strip inside a train car, turned upright. One
    rail down the left, a marker at every station, and the level you

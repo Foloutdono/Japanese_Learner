@@ -1,4 +1,18 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
+
+// api.js reaches for supabase only to mend a refused session (the 401
+// recovery path); everything else in this file must run without it.
+const refreshSession = vi.fn()
+const signOut = vi.fn()
+vi.mock('./supabase', () => ({
+  supabase: {
+    auth: {
+      refreshSession: (...a) => refreshSession(...a),
+      signOut: (...a) => signOut(...a),
+    },
+  },
+}))
+
 import { apiJson, apiJsonWithTimeout, ApiError } from './api'
 
 function mockFetchOnce(status, body) {
@@ -48,6 +62,66 @@ describe('apiJson', () => {
       expect(err.message).toContain('500')
       expect(err.message).toContain('/api/exams')
     }
+  })
+})
+
+describe('401 recovery', () => {
+  // recoverAuth is fire-and-forget from the request path; give its
+  // microtasks a beat to run before asserting.
+  const flush = () => new Promise(r => setTimeout(r, 0))
+
+  beforeEach(() => {
+    refreshSession.mockReset()
+    signOut.mockReset()
+  })
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('leaves a sessionless 401 alone — that is the endpoint doing its job', async () => {
+    mockFetchOnce(401, { detail: 'Missing token' })
+    await expect(apiJson('/api/today', null)).rejects.toThrow(ApiError)
+    await flush()
+    expect(refreshSession).not.toHaveBeenCalled()
+    expect(signOut).not.toHaveBeenCalled()
+  })
+
+  it('signs out THIS device when a presented session cannot be refreshed', async () => {
+    // The production failure this path exists for: a stale session the
+    // app kept using while every screen quietly rendered empty.
+    mockFetchOnce(401, { detail: 'Invalid token' })
+    refreshSession.mockResolvedValue({ data: { session: null }, error: { message: 'refresh_token_not_found' } })
+    await expect(apiJson('/api/today', { access_token: 'stale' })).rejects.toThrow(ApiError)
+    await flush()
+    expect(refreshSession).toHaveBeenCalledTimes(1)
+    // scope local: the other devices' sessions are not the broken one.
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' })
+  })
+
+  it('runs one refresh for a screenful of parallel 401s, and no sign-out on success', async () => {
+    mockFetchOnce(401, { detail: 'Invalid token' })
+    let release
+    refreshSession.mockReturnValue(new Promise(r => { release = r }))
+    const a = apiJson('/api/today', { access_token: 'old' }).catch(() => {})
+    const b = apiJson('/api/stats', { access_token: 'old' }).catch(() => {})
+    await Promise.all([a, b])
+    release({ data: { session: { access_token: 'fresh' } }, error: null })
+    await flush()
+    expect(refreshSession).toHaveBeenCalledTimes(1)
+    expect(signOut).not.toHaveBeenCalled()
+  })
+
+  it('gives up on a session the backend rejects even freshly refreshed', async () => {
+    // The test above left a successful refresh moments ago; a 401 on
+    // the very next requests means the backend refuses fresh tokens
+    // too, and another refresh would just loop. Module state carries
+    // between these two tests on purpose — this IS the sequence a real
+    // rejection plays out in.
+    mockFetchOnce(401, { detail: 'Invalid token' })
+    await expect(apiJson('/api/today', { access_token: 'fresh' })).rejects.toThrow(ApiError)
+    await flush()
+    expect(refreshSession).not.toHaveBeenCalled()
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' })
   })
 })
 

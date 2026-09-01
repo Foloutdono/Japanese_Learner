@@ -1,6 +1,57 @@
+import { supabase } from './supabase'
+
 const BASE = import.meta.env.VITE_API_URL || ''
 
 export const api = (path) => `${BASE}${path}`
+
+// ── 401 recovery ──────────────────────────────────────────────
+// A session the backend rejects used to be invisible: supabase-js
+// keeps handing out its cached session, every request 401s, and each
+// screen's quiet-failure path renders the "nothing here" state — a
+// dead token was indistinguishable from an empty account, on every
+// screen at once. (Diagnosed live on production, 2026-09-01: the gate
+// hall renders, the map is empty, and seven 401s sit in the console
+// with nothing on screen admitting to any of them.)
+//
+// So a 401 on a request that DID carry a session now tries to mend the
+// session once: refresh, and if Supabase won't refresh, sign out —
+// which lands on the login screen instead of a hollow app. The caller
+// still gets its ApiError for the request that failed; recovery works
+// through the auth listener in App (a refreshed session is a new
+// session object, so every screen's [session] effect refetches).
+let recovery = null
+let lastRefreshAt = 0
+
+function recoverAuth() {
+  // Single-flight: a screen's worth of parallel 401s is one refresh.
+  if (recovery) return recovery
+  recovery = (async () => {
+    try {
+      // A token minted by a refresh moments ago is still being
+      // rejected — the backend refuses even fresh credentials, and
+      // another refresh would just loop. Drop the session instead.
+      if (Date.now() - lastRefreshAt < 15000) {
+        await supabase.auth.signOut({ scope: 'local' })
+        return
+      }
+      const { data, error } = await supabase.auth.refreshSession()
+      if (error || !data?.session) {
+        // 'local' on purpose: this device's session is the broken
+        // one; the default 'global' would also revoke the user's
+        // other devices.
+        await supabase.auth.signOut({ scope: 'local' })
+      } else {
+        lastRefreshAt = Date.now()
+      }
+    } catch {
+      // Offline, or the placeholder client — the ApiError already on
+      // its way to the caller is the honest report.
+    } finally {
+      recovery = null
+    }
+  })()
+  return recovery
+}
 
 export async function apiFetch(path, session, options = {}) {
   const headers = {
@@ -8,7 +59,11 @@ export async function apiFetch(path, session, options = {}) {
     ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
     ...options.headers,
   }
-  return fetch(api(path), { ...options, headers })
+  const response = await fetch(api(path), { ...options, headers })
+  // Only when a session was presented and refused — a 401 on a
+  // sessionless call is the endpoint doing its job.
+  if (response.status === 401 && session) recoverAuth()
+  return response
 }
 
 // ── Error-aware JSON fetch ────────────────────────────────────
@@ -96,6 +151,7 @@ export async function apiJsonWithTimeout(path, session, { timeoutMs = 10000, sig
 export async function apiUpload(path, session, formData) {
   const headers = session ? { Authorization: `Bearer ${session.access_token}` } : {}
   const response = await fetch(api(path), { method: 'POST', body: formData, headers })
+  if (response.status === 401 && session) recoverAuth()
   const body = await readJson(response)
   if (!response.ok) throw new ApiError(response.status, body, path)
   return body
