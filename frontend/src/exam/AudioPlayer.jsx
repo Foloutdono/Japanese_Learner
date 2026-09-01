@@ -87,10 +87,9 @@ export default function AudioPlayer({ src }) {
   return (
     <div className="exam-audio-player">
       {/* src is backend-relative ("/exam-audio/<hash>.mp3", see
-          study/exam_tts.py) — api() resolves it against VITE_API_URL
-          the same way DrawingCanvas.jsx's kanjivg src does, since the
-          audio file lives on the backend, not wherever the frontend is
-          served from. */}
+          study/exam_tts.py) — served same-origin like every other
+          backend path: the Vite proxy carries it in dev, vercel.json's
+          rewrite in prod. */}
       <audio
         ref={audioRef}
         src={api(src)}
