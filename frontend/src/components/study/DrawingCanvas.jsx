@@ -4,7 +4,7 @@ import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { playClick } from '../../lib/audio'
 import { UndoIcon, CheckIcon } from '../ui/Icons'
 
-const API_BASE = import.meta.env.VITE_API_URL || ''
+const API_BASE = ''  // same-origin, always — see lib/api.js
 
 // The board stays a fixed sumi slab: it's the writing surface, not a
 // cosmetic, and it has to stay dark enough for pale ink in either

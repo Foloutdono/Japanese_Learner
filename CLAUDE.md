@@ -120,7 +120,7 @@ Card IDs are namespaced per user as `"{user_id}:{card_id}"` (`core/auth.py:prefi
 - `locales/` + `i18n.jsx` + `LangContext.jsx` — French/English string tables and language context.
 
 ### Data flow
-Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite proxy in dev, Vercel rewrites in prod — `VITE_API_URL` is deliberately empty in `.env.production`; see Deployment below) with a Supabase bearer token → `core/auth.get_user_id` resolves the user → routes use `core/srs_instance.srs` (the shared `SRSEngine`) and `study/` helpers to read/write per-user card state in Postgres, and static `content/` data for card content itself.
+Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite proxy in dev, Vercel rewrites in prod; there is no backend-origin env var — see Deployment below) with a Supabase bearer token → `core/auth.get_user_id` resolves the user → routes use `core/srs_instance.srs` (the shared `SRSEngine`) and `study/` helpers to read/write per-user card state in Postgres, and static `content/` data for card content itself.
 
 ## Deployment
 
@@ -130,6 +130,8 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
   backend. The browser never calls `onrender.com` directly — some mobile
   carriers cannot reach that shared zone at all (diagnosed 2026-09-01: every
   CORS preflight died in transit on 4G), and same-origin also removes the
-  preflight round trip. Keep `VITE_API_URL` empty in `.env.production`; a new
-  backend static mount needs a matching rewrite in `vercel.json` (and in
-  `vite.config.js`'s dev proxy).
+  preflight round trip. `VITE_API_URL` is retired — the code no longer reads
+  it (a leftover copy in the Vercel dashboard once out-prioritised the tracked
+  `.env.production` and silently rebaked the direct URL). A new backend static
+  mount needs a matching rewrite in `vercel.json` (and in `vite.config.js`'s
+  dev proxy).

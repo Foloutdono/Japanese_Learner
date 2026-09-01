@@ -12,7 +12,7 @@ import { BoltIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { speakJapanese } from '../../lib/audio'
 
-const API_BASE = import.meta.env.VITE_API_URL || ''
+const API_BASE = ''  // same-origin, always — see lib/api.js
 
 // Small round "1 2 3..." markers for JMdict sense numbers — used both
 // on the senses list itself and on each example sentence, so a reader

@@ -1,8 +1,15 @@
 import { supabase } from './supabase'
 
-const BASE = import.meta.env.VITE_API_URL || ''
-
-export const api = (path) => `${BASE}${path}`
+// Same-origin, unconditionally. This used to resolve against
+// VITE_API_URL, until the deployed value pointed the browser straight
+// at onrender.com — a zone some mobile carriers cannot reach at all
+// (2026-09-01: every preflight died in transit) — and a leftover copy
+// of the variable in the Vercel dashboard silently out-prioritised the
+// tracked .env.production that had been emptied to fix it. The API is
+// reached through the app's own origin everywhere (Vite proxy in dev,
+// vercel.json rewrites in prod), so the knob only existed to
+// reintroduce the outage.
+export const api = (path) => path
 
 // ── 401 recovery ──────────────────────────────────────────────
 // A session the backend rejects used to be invisible: supabase-js
