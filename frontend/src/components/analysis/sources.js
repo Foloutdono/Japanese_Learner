@@ -26,13 +26,12 @@
 //   hint     locale key for the tooltip / tablist description
 //   lead     locale key for the one line the intake panel opens with
 //   busy     locale key for the line shown while THIS platform is working
-//   history  whether 運行履歴 applies. True for all three platforms since
-//            plan 040 added GET /api/video/sessions; it was false for
-//            動画 only because a session was reachable by id and by
-//            nothing else. Kept as a field rather than dropped now that
-//            every entry is `true`: it is the seam a fourth source would
-//            use, and removing it would mean the screen hard-codes the
-//            panel's presence instead of reading it from the registry.
+//   history  whether 運行履歴 applies. Currently UNREAD: the mockup
+//            round moved the one merged history list onto the
+//            selection-screen concourse, where it shows regardless of
+//            platform. Kept as a field rather than dropped: it is
+//            still the seam a fourth source whose passages should NOT
+//            appear in history would use.
 export const SOURCES = [
   { key: 'text',  no: 1, jp: '文字', kana: 'もじ',     label: 'sourceText',  hint: 'sourceTextHint',  lead: 'intakeTextLead',  busy: 'analyzingText',  history: true },
   { key: 'photo', no: 2, jp: '写真', kana: 'しゃしん', label: 'sourcePhoto', hint: 'sourcePhotoHint', lead: 'intakePhotoLead', busy: 'analyzingPhoto', history: true },

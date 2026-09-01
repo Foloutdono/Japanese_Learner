@@ -14,7 +14,8 @@
       "var(--fs-specimen-word)",
       "var(--fs-heading-fluid)",
       "var(--fs-board-fluid)",
-      "var(--fs-display-fluid)"
+      "var(--fs-display-fluid)",
+      "var(--fs-sentence-fluid)"
     ],
     "border-radius": [
       "var(--r-flat)",
@@ -259,6 +260,7 @@
       "var(--route-gap)"
     ],
     "padding": [
+      "0 0 1px",
       "0 18px",
       "0 1px",
       "0 24px",

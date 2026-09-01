@@ -41,6 +41,9 @@ const ALL_TYPE_DECKS = [
 describe('useMining', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    // ensureDeck remembers its target; a leftover key must not steer
+    // another case's targetFor.
+    localStorage.clear()
   })
 
   it('decksFor only returns decks whose type matches the kind', async () => {
@@ -103,6 +106,33 @@ describe('useMining', () => {
     expect(back).toBe('大学 (だいがく)')
   })
 
+  // The duplicate-deck bug this pins: "create" from the picker POSTed
+  // unconditionally, so typing an existing deck's name minted a clone —
+  // eleven identical « Mots du boulot » rows in the real account.
+  // ensureDeck now REUSES a same-type deck whose name matches
+  // (trimmed, case-insensitively) and only creates when none does.
+  it('ensureDeck reuses an existing same-name deck instead of minting a clone', async () => {
+    const getMining = await mountMining(ALL_TYPE_DECKS)
+    globalThis.fetch = vi.fn()
+
+    const deck = await getMining().ensureDeck('vocab', '  my vocab ')
+    expect(deck.id).toBe(1)
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+    // And it is now the remembered target for that kind.
+    expect(getMining().targetFor('vocab')?.id).toBe(1)
+  })
+
+  it('ensureDeck still creates when no deck of that type carries the name', async () => {
+    const getMining = await mountMining(ALL_TYPE_DECKS)
+    // "My Vocab" exists as type vocab — but a KANJI deck of that name
+    // does not, so the create must go through.
+    mockFetchOnce(200, { id: 9, name: 'My Vocab', type: 'kanji' })
+
+    const deck = await getMining().ensureDeck('kanji', 'My Vocab')
+    expect(deck.id).toBe(9)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+  })
+
   it('mineCloze rejects (and never calls fetch) when back would be empty', async () => {
     const getMining = await mountMining(ALL_TYPE_DECKS)
     globalThis.fetch = vi.fn()
@@ -143,6 +173,11 @@ describe('MineButton (via useMining)', () => {
   })
 
   it('keeps the mine button after a successful add', async () => {
+    // Seeded explicitly: this case is about what happens AFTER a
+    // direct add, so the remembered target must exist. (It used to
+    // pass on a key leaked by earlier test files in the same browser
+    // session — the ensureDeck cases' cleanup exposed that.)
+    localStorage.setItem('jp-mine-target:vocab', '1')
     mockFetchOnce(200, { decks: ALL_TYPE_DECKS })
     const onMine = vi.fn().mockResolvedValue(1)
     const screen = await render(<MineButtonHarness session={null} onMine={onMine} />)

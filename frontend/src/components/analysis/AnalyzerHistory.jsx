@@ -1,24 +1,50 @@
-import { SectionHeader } from '../ui/SectionHeader'
 import { CrossIcon } from '../ui/Icons'
 import { useLang } from '../../LangContext'
-import { shortDate } from '../../lib/formatDate'
+import { relativeDate } from '../../lib/formatDate'
 
 // ── 運行履歴 — past services ──────────────────────────────
-// All three platforms, since plan 040 added GET /api/video/sessions.
-// `entries` arrives already merged (useAnalyzerSession.fetchHistory):
-// each row carries `kind: 'passage' | 'session'`, which is the ONLY
-// place the two source tables show through to this component.
+// All three platforms in one merged list (plan 040 added
+// GET /api/video/sessions); each row carries `kind: 'passage' |
+// 'session'`, which is the ONLY place the two source tables show
+// through to this component.
 //
-// Its own panel under its own heading, rather than a button sharing a
-// row with Analyze. Those two sat at opposite ends of a
-// justify-content: space-between row with the whole panel width of
-// nothing between them -- the same criticism ModeSelector.jsx already
-// makes of the layout it replaced.
+// Since the mockup round this panel lives on the analyser's
+// selection-screen concourse, drawn the way that screen's other rows
+// are drawn: a numbered roundel names the platform the row came from
+// (1 文字, 2 写真, 3 動画 — the same numbers as the cards above it),
+// the recency is a relative date, and a ▶ slides in on approach.
+//
+// The head is Latin-first — "History 運行履歴", not the SectionHeader
+// pair. A deliberate, owner-directed exception to DESIGN.md's pairing
+// rule, consistent with the rest of this screen's navigation: the
+// plain-language word leads, the Japanese stays as the accent.
+
+// Which platform a row belongs to, as the number its roundel prints —
+// the same key space as the cards above (SOURCES order).
+function platformNo(h) {
+  if (h.kind === 'session') return 3
+  return h.source === 'image' ? 2 : 1
+}
+
+function platformLabel(h, t) {
+  if (h.kind === 'session') return t.sourceVideo
+  return h.source === 'image' ? t.sourcePhoto : t.sourceText
+}
+
+// The mockup's shape, exactly: a section head OUTSIDE the frame, then
+// the rows inside a bare bordered panel (.anl-hist) that carries no
+// padding of its own — each row is padded, the frame just clips them.
 export function AnalyzerHistory({ t, entries, onOpen, onDelete, lastDeleted, onUndo, onDismissUndo }) {
   const { lang } = useLang()
   return (
-    <section className="anl-panel">
-      <SectionHeader jp="運行履歴" title={t.historyTitle} count={entries.length || null} />
+    <section className="anl-history">
+      <div className="anl-history__head">
+        <h2 className="anl-history__title">{t.historyTitle}</h2>
+        <span className="anl-history__titlejp" lang="ja">運行履歴</span>
+        {entries.length > 0 && (
+          <span className="anl-history__total">{entries.length}</span>
+        )}
+      </div>
 
       {lastDeleted && (
         <div className="anl-undo">
@@ -34,7 +60,8 @@ export function AnalyzerHistory({ t, entries, onOpen, onDelete, lastDeleted, onU
         <div className="anl-history__empty">{t.noHistory}</div>
       )}
 
-      <div className="anl-history">
+      {entries.length > 0 && (
+      <div className="anl-hist">
         {entries.map(h => (
           <div key={`${h.kind}:${h.id}`} className="anl-history__row">
             <button
@@ -42,37 +69,33 @@ export function AnalyzerHistory({ t, entries, onOpen, onDelete, lastDeleted, onU
               className="anl-history__open"
               onClick={() => onOpen(h)}
             >
+              {/* The roundel carries the provenance the 写/動 stamps
+                  used to: same fact, now in the same drawing as the
+                  platform cards overhead, with the same accessible
+                  name the stamps had. */}
+              <span
+                className="anl-history__no"
+                role="img"
+                aria-label={platformLabel(h, t)}
+                title={platformLabel(h, t)}
+              >
+                {platformNo(h)}
+              </span>
               <span className="anl-history__text" lang="ja">{h.label}</span>
               {h.kind === 'passage' && h.kept && (
-                // 保存 stamp, inline beside 写/動 rather than a separate
-                // section: the client re-sorts this merged list by
-                // createdAt (plan 040), which already undoes the
-                // server's `kept DESC` ordering -- see plan 039's
-                // ISSUE 3. A stamp survives that re-sort; a "kept first"
-                // grouping would not without extra client-side work this
-                // plan does not take on.
+                // 保存 stamp, inline: the client re-sorts this merged
+                // list by createdAt (plan 040), which already undoes
+                // the server's `kept DESC` ordering — a stamp survives
+                // that re-sort; a "kept first" grouping would not.
                 <span className="anl-history__kept" lang="ja" title={t.keptTitle} aria-label={t.keptTitle}>保存</span>
-              )}
-              {h.source && h.source !== 'typed' && h.kind !== 'session' && (
-                <span className="anl-history__source" lang="ja" title={t.sourcePhoto} aria-label={t.sourcePhoto}>写</span>
-              )}
-              {h.kind === 'session' && (
-                // 動 stamp for a video session, beside 写 for a photo.
-                // A session with no video (videoId null) is still shown
-                // here, unstamped-as-"no player" -- it is a transcript-
-                // only Passage, and the Sentences and their cue times are
-                // the study material regardless of whether a player comes
-                // along with them (see docs/adr/0003, plan 025). Hiding
-                // it would treat transcript-only study as second class,
-                // which it was never meant to be.
-                <span className="anl-history__source" lang="ja" title={t.sourceVideoShort} aria-label={t.sourceVideoShort}>動</span>
               )}
               {h.kind === 'session' && typeof h.sentenceCount === 'number' && (
                 <span className="anl-history__count">{t.sessionSentenceCount(h.sentenceCount)}</span>
               )}
               {h.createdAt && (
-                <span className="anl-history__when">{shortDate(h.createdAt, lang)}</span>
+                <span className="anl-history__when">{relativeDate(h.createdAt, lang, t)}</span>
               )}
+              <span className="anl-history__go" aria-hidden="true">▶</span>
             </button>
             {/* Delete is not offered on a session row: DELETE
                 /api/video/session/{id} does not exist and this plan does
@@ -92,6 +115,7 @@ export function AnalyzerHistory({ t, entries, onOpen, onDelete, lastDeleted, onU
           </div>
         ))}
       </div>
+      )}
     </section>
   )
 }

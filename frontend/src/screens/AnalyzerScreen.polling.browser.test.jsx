@@ -43,35 +43,64 @@ vi.mock('../components/analysis/useMining', async importOriginal => ({
   useMining: () => ({ decks: [], mineApp: vi.fn(), mineCloze: vi.fn() }),
 }))
 
-// The player pulls in the YouTube IFrame API over the network.
-vi.mock('../components/video/VideoPlayer', () => ({
-  VideoPlayer: () => <div data-testid="player" />,
-}))
+// The player pulls in the YouTube IFrame API over the network. Mocked
+// as a forwardRef exposing spies, so the transport-bar cases can assert
+// WHAT the screen asked the player to do — the exported __playerSpies
+// are reset in beforeEach with the api mocks.
+vi.mock('../components/video/VideoPlayer', async () => {
+  const { forwardRef, useImperativeHandle } = await import('react')
+  const spies = { play: vi.fn(), pause: vi.fn(), seekTo: vi.fn() }
+  return {
+    __playerSpies: spies,
+    VideoPlayer: forwardRef(function MockVideoPlayer(props, ref) {
+      useImperativeHandle(ref, () => spies)
+      return <div data-testid="player" />
+    }),
+  }
+})
+
+// The screen now opens on the selection screen, and the platform choice
+// goes through the boarding store so TrainDoor can play over the commit.
+// The door lives in App, not in this tree, so an unmocked board() would
+// park the commit forever; committing synchronously is exactly what the
+// door itself does under prefers-reduced-motion.
+vi.mock('../stores/boarding', () => ({ board: commit => commit() }))
 
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: AnalyzerScreen } = await import('./AnalyzerScreen')
+const { __playerSpies: playerSpies } = await import('../components/video/VideoPlayer')
 
-function renderScreen() {
-  return render(
+// Renders AND boards: the workbench (rail, intakes) only mounts once a
+// platform card on the selection screen is chosen, so every case walks
+// through the gate first. The first card is 文字; cases that need 動画
+// still switch via the rail afterwards (goToPlatform below).
+async function renderScreen() {
+  const screen = await render(
     <LangProvider>
       <MemoryRouter>
         <AnalyzerScreen session={{}} />
       </MemoryRouter>
     </LangProvider>
   )
+  await settle(30)
+  screen.container.querySelector('.platform-card').click()
+  await settle(30)
+  return screen
 }
 
-// The three sources are three platforms at one station now (plan 027),
-// and the subtitle input only exists on 動画 -- so every case here has
-// to walk onto that platform first. Queried by accessible name rather
-// than by class: the rail is a real tablist, and that is the part worth
-// depending on.
-// Awaited, not fire-and-forget: only the ACTIVE panel is in the DOM
-// (which is what keeps focus out of a hidden one), so the subtitle input
-// does not exist until React has re-rendered after the click.
+// The three sources are three platforms at one station, and since the
+// mockup round retired the tab rail, the ONLY road between them runs
+// back through the selection-screen gate: the stub strip's Change
+// control, then the platform card. Cards render in registry order.
+// Awaited, not fire-and-forget: only the boarded platform's panel is
+// in the DOM (which is what keeps focus out of a hidden one), so the
+// subtitle input does not exist until React has re-rendered.
 async function goToPlatform(screen, key) {
-  screen.container.querySelector(`#anl-tab-${key}`).click()
+  screen.container.querySelector('.anl-stub__change').click()
+  await settle(30)
+  const idx = { text: 0, photo: 1, video: 2 }[key]
+  screen.container.querySelectorAll('.platform-card')[idx].click()
   await settle(30)
 }
 
@@ -105,6 +134,9 @@ const settle = async (ms = 60) => new Promise(r => setTimeout(r, ms))
 beforeEach(() => {
   apiJson.mockReset()
   apiUpload.mockReset()
+  playerSpies.play.mockReset()
+  playerSpies.pause.mockReset()
+  playerSpies.seekTo.mockReset()
 })
 
 describe('AnalyzerScreen polling', () => {
@@ -172,6 +204,41 @@ describe('AnalyzerScreen polling', () => {
     expect(screen.container.querySelectorAll('.rdg-breakdown').length).toBe(1)
   })
 
+  // The frozen-bar bug this pins: the transport is scaled to the
+  // Passage's cue WINDOW (a window opening at 0:36 on a track that
+  // starts at 0:00), so pressing play from before it left the readout
+  // clamped at 0:00 for thirty-six silent seconds — a player that
+  // looks dead while doing exactly what it was told. Play means "play
+  // the passage": from before its window, the bar seeks to the window
+  // start first, THEN plays.
+  it('play from before the passage window seeks to the window start first', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockResolvedValue({
+      status: 'ready', source: 'upload', sourceRef: 'x.srt',
+      videoId: 'dQw4w9WgXcQ', windowCapped: false, truncated: 0,
+      sentences: [
+        { text: '猫が好き', cue_start: 36, cue_end: 40, grammar: [], unknown_count: 0, available: true, tokens: [{ surface: '猫が好き', pos: 'noun' }] },
+        { text: '犬も好き', cue_start: 40, cue_end: 44, grammar: [], unknown_count: 0, available: true, tokens: [{ surface: '犬も好き', pos: 'noun' }] },
+      ],
+    })
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await settle(2000)
+
+    const playBtn = screen.container.querySelector('.anl-player__btn')
+    expect(playBtn).not.toBeNull()
+    playBtn.click()
+    await settle(60)
+
+    expect(playerSpies.seekTo).toHaveBeenCalledWith(36)
+    expect(playerSpies.play).toHaveBeenCalled()
+    // Seek FIRST, then play — the other order would start at 0:00 and
+    // jump, which is the visible glitch this exists to prevent.
+    expect(playerSpies.seekTo.mock.invocationCallOrder[0])
+      .toBeLessThan(playerSpies.play.mock.invocationCallOrder[0])
+  })
+
   it('surfaces a parse failure with the reason and a way back', async () => {
     // The ONLY way to fail now: a file or paste we could not parse.
     // Nothing is fetched, so nothing can be IP-blocked.
@@ -213,11 +280,12 @@ describe('AnalyzerScreen polling', () => {
     expect(screen.container.querySelector('.anl-stage')).not.toBeNull()
   })
 
-  // The one behaviour the merge makes possible to break, and which
-  // nothing else covers: the Passage belongs to useAnalyzerSession, not
-  // to a platform, so walking to another platform to check something
-  // must not throw a finished analysis away.
-  it('keeps a finished Passage when the learner switches platform and back', async () => {
+  // Switching MODES clears the analyser (owner-directed, 2026-09-01 —
+  // this reverses the merge-era rule this case used to pin): a Passage
+  // typed on 文字 does not follow the learner to 写真, and coming back
+  // does not resurrect it. The same-platform round trip that DOES keep
+  // the Passage is pinned in AnalyzerScreen.responsive.browser.test.jsx.
+  it('clears a finished Passage when the learner switches platform', async () => {
     apiJson.mockResolvedValue({
       sentences: [{
         text: '猫が好き', grammar: [], unknown_count: 0, available: true,
@@ -234,9 +302,11 @@ describe('AnalyzerScreen polling', () => {
     expect(screen.container.textContent).toContain('猫が好き')
 
     await goToPlatform(screen, 'photo')
+    expect(screen.container.querySelector('.anl-results')).toBeNull()
     await goToPlatform(screen, 'text')
 
-    expect(screen.container.textContent).toContain('猫が好き')
+    expect(screen.container.querySelector('.anl-results')).toBeNull()
+    expect(screen.container.textContent).not.toContain('猫が好き')
   })
 
   // Plan 035: the deep tier used to be swapped in WHOLESALE, and
@@ -274,7 +344,7 @@ describe('AnalyzerScreen polling', () => {
 
     expect(screen.container.querySelectorAll('.anl-stop__time').length).toBe(2)
 
-    screen.container.querySelector('.anl-action').click()
+    screen.container.querySelector('.anl-explain__btn').click()
     await settle(500)
 
     expect(screen.container.querySelectorAll('.anl-stop__time').length).toBe(2)
@@ -301,7 +371,7 @@ describe('AnalyzerScreen polling', () => {
     await startFromFile(screen)
     await settle(2000)
 
-    const button = screen.container.querySelector('.anl-action')
+    const button = screen.container.querySelector('.anl-explain__btn')
     button.click()
     await settle(500)
 
@@ -330,7 +400,7 @@ describe('AnalyzerScreen polling', () => {
     await startFromFile(screen)
     await settle(2000)
 
-    screen.container.querySelector('.anl-action').click()
+    screen.container.querySelector('.anl-explain__btn').click()
     await settle(500)
 
     expect(screen.container.textContent).toContain('The AI service is temporarily unavailable.')
@@ -357,7 +427,7 @@ describe('AnalyzerScreen polling', () => {
     await startFromFile(screen)
     await settle(2000)
 
-    const button = screen.container.querySelector('.anl-action')
+    const button = screen.container.querySelector('.anl-explain__btn')
     button.click()
     await settle(1500)
 
@@ -366,7 +436,7 @@ describe('AnalyzerScreen polling', () => {
     // explanation exists (it used to vanish, gated on
     // `!focused.explanation`), and its hint switches to "explained".
     expect(screen.container.querySelector('.anl-explain')).not.toBeNull()
-    expect(screen.container.querySelector('.anl-action')).not.toBeNull()
+    expect(screen.container.querySelector('.anl-explain__btn')).not.toBeNull()
     expect(screen.container.querySelector('.anl-explain__hint--bad')).toBeNull()
   })
 })

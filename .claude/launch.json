@@ -5,14 +5,12 @@
       "name": "backend",
       "runtimeExecutable": "python",
       "runtimeArgs": [
-        "-m",
-        "uvicorn",
-        "main:app",
-        "--port",
-        "8000"
+        "-c",
+        "import os, uvicorn; uvicorn.run('main:app', port=int(os.environ.get('PORT', '8000')))"
       ],
       "cwd": "backend",
-      "port": 8000
+      "port": 8000,
+      "autoPort": true
     },
     {
       "name": "frontend",
@@ -23,7 +21,7 @@
       ],
       "cwd": "frontend",
       "port": 5173,
-      "autoPort": false
+      "autoPort": true
     },
     {
       "name": "frontend-sounds",

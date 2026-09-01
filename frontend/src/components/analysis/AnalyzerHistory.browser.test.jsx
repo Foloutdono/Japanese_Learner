@@ -18,15 +18,19 @@ import '../../index.css'
 // `createdAt` replace the raw phrase_history field names the component
 // used to read directly.
 const T = {
-  historyTitle: 'Recent',
+  historyTitle: 'History',
   noHistory: 'No phrases analyzed yet.',
   delete: 'Delete',
+  sourceText: 'Text',
   sourcePhoto: 'Photo',
-  sourceVideoShort: 'From a video',
+  sourceVideo: 'Video',
   sessionSentenceCount: n => `${n} ${n === 1 ? 'sentence' : 'sentences'}`,
   entryDeleted: 'Removed from your history',
   undo: 'Undo',
   noticeDismiss: 'Dismiss',
+  dateToday: 'today',
+  dateYesterday: 'yesterday',
+  dateDaysAgo: n => `${n} days ago`,
 }
 
 // AnalyzerHistory calls useLang() (for `shortDate`'s locale), so it
@@ -110,14 +114,18 @@ describe('AnalyzerHistory', () => {
     expect(rect.height).toBeGreaterThanOrEqual(24)
   })
 
-  it('names the photo stamp', async () => {
+  // The roundel replaced the 写/動 stamps in the mockup round — same
+  // provenance fact, same accessible-name requirement, now drawn as
+  // the platform number the cards overhead use.
+  it('names the platform roundel of a photo row', async () => {
     const entry = entryFixture({ source: 'image' })
     const screen = await render(
       withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={() => {}} />)
     )
-    const stamp = screen.container.querySelector('.anl-history__source')
-    expect(stamp).not.toBeNull()
-    expect(stamp.getAttribute('aria-label')).toBeTruthy()
+    const roundel = screen.container.querySelector('.anl-history__no')
+    expect(roundel).not.toBeNull()
+    expect(roundel.textContent).toBe('2')
+    expect(roundel.getAttribute('aria-label')).toBeTruthy()
   })
 
   // ── Plan 040: video sessions in the merged list ──────────────
@@ -127,9 +135,10 @@ describe('AnalyzerHistory', () => {
       withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={() => {}} />)
     )
     expect(screen.container.querySelector('.anl-history__count').textContent).toBe('5 sentences')
-    const stamp = screen.container.querySelector('.anl-history__source')
-    expect(stamp).not.toBeNull()
-    expect(stamp.getAttribute('aria-label')).toBeTruthy()
+    const roundel = screen.container.querySelector('.anl-history__no')
+    expect(roundel).not.toBeNull()
+    expect(roundel.textContent).toBe('3')
+    expect(roundel.getAttribute('aria-label')).toBeTruthy()
   })
 
   it('offers no delete on a session row', async () => {

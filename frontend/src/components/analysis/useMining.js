@@ -96,8 +96,19 @@ export function useMining(session) {
     writeStoredTarget(kind, deckId)
   }
 
+  // Reuse before create: typing an existing deck's name into the
+  // picker used to POST unconditionally and mint a clone every time —
+  // eleven identical « Mots du boulot » decks in one real account. A
+  // same-type deck whose name matches (trimmed, case-insensitively) IS
+  // the deck the learner meant.
   async function ensureDeck(kind, name) {
     const type = DECK_TYPE_FOR_KIND[kind]
+    const wanted = name.trim().toLowerCase()
+    const existing = decksOfType(type).find(d => (d.name ?? '').trim().toLowerCase() === wanted)
+    if (existing) {
+      rememberTarget(kind, existing.id)
+      return existing
+    }
     const deck = await apiJson('/api/decks', session, {
       method: 'POST',
       body: JSON.stringify({ name, type }),

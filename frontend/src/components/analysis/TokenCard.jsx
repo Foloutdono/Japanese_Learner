@@ -4,6 +4,7 @@ import { MineButton } from './MineButton'
 import { MineControls } from './MineControls'
 import { buildCloze } from './useMining'
 import { SpeakButton } from './SpeakButton'
+import { FuriganaParts } from '../study/Readings'
 
 // Content-word POS classes -- matches study/analysis.py's _CONTENT_POS,
 // so the "can't mine, not in the app deck" control shows up on exactly
@@ -31,22 +32,37 @@ const CONTENT_POS = new Set(['noun', 'verb', 'adjective', 'adverb'])
 // `emphasize` marks the single unknown Token of an i+1 Sentence (see
 // SentenceBreakdown's isUnknownToken) -- that one word is the entire
 // reason the Sentence is worth studying, so its mine control stands out.
+// `stage` marks the analyser's grown card (the mockup round): its
+// kanji chips hold the glyph and its grade ONLY — the status badge and
+// the mine control that the list layout stuffs into each chip live in
+// the WordDetail the chip opens instead.
 export function TokenCard({
   word, t, compact = false, extraClassName = '', onWordClick, onKanjiClick, mining, sentenceText, emphasize = false,
-  speakable = false,
+  speakable = false, stage = false,
 }) {
   const showVocabMine = word.vocab_match || CONTENT_POS.has(word.pos)
 
   // Written once, rendered from either branch below (a real <button>
   // when the Token has a vocab_match to open, a plain <div> when there
-  // is nothing to open) so the two never drift apart.
-  const surfaceContent = (
+  // is nothing to open) so the two never drift apart. The stage card
+  // leaves the POS out of the surface block (the mockup sets it on the
+  // pos·state·action row under the meaning) and carries its reading as
+  // real RUBY over each kanji — the same drawing as the sentence pane
+  // above it — instead of the inline layouts' detached reading span.
+  const surfaceContent = stage ? (
+    <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(word) }} lang="ja">
+      <FuriganaParts parts={word.furigana ?? [{ text: word.surface }]} />
+    </span>
+  ) : (
     <>
       <span className="phrase-word-card__surface" style={{ '--word-color': wordColor(word) }}>
         {word.surface}
       </span>
       {word.reading && (
-        <span className="phrase-word-card__reading">({word.reading})</span>
+        // The parentheses are CSS (::before/::after on the base rule):
+        // presentation for the inline layouts; screen readers needn't
+        // announce punctuation.
+        <span className="phrase-word-card__reading">{word.reading}</span>
       )}
       {word.pos && (
         <span className="phrase-word-card__pos">
@@ -55,6 +71,12 @@ export function TokenCard({
       )}
     </>
   )
+
+  // What prints under the word: the deep tier's contextual gloss when
+  // it has been bought, otherwise (on the stage) the dictionary's own
+  // translation — the learner shouldn't need to buy an explanation to
+  // know what 電車 means.
+  const gloss = word.meaning ?? (stage ? word.vocab_match?.entry?.meaning : undefined)
 
   return (
     <div
@@ -76,11 +98,11 @@ export function TokenCard({
         ) : (
           <div className="phrase-word-card__surface-wrap">{surfaceContent}</div>
         )}
-        {!compact && word.vocab_match && <StatusBadge status={word.vocab_match.stats.status} t={t} />}
+        {!compact && !stage && word.vocab_match && <StatusBadge status={word.vocab_match.stats.status} t={t} />}
         {speakable && (
           <SpeakButton text={word.surface} label={t.hearToken(word.surface)} size="sm" t={t} />
         )}
-        {showVocabMine && (
+        {showVocabMine && !stage && (
           <MineControls
             mining={mining}
             t={t}
@@ -95,36 +117,78 @@ export function TokenCard({
         )}
       </div>
 
-      <div className="phrase-word-card__meaning">{word.meaning}</div>
+      <div className="phrase-word-card__meaning">{gloss}</div>
+
+      {/* The mockup's tok__row: pos · state · the ONE deck action, on
+          a single line under the meaning. No OPTIONS disclosure here —
+          the cloze variant lives with the full controls in WordDetail;
+          a card this clean offers one obvious act. */}
+      {stage && (
+        <div className="anl-tokrow">
+          {word.pos && <span className="phrase-word-card__pos">{word.pos}</span>}
+          {word.vocab_match && <StatusBadge status={word.vocab_match.stats.status} t={t} />}
+          {showVocabMine && (
+            <MineButton
+              mining={mining}
+              kind="vocab"
+              disabled={!word.vocab_match}
+              disabledReason={t.cannotMineOffDeck}
+              label={t.addToDeck}
+              onMine={word.vocab_match ? deckId => mining.mineApp({
+                deckId, source: 'vocab', level: word.vocab_match.level,
+                rawId: word.vocab_match.raw_id, kind: 'vocab',
+              }) : undefined}
+              t={t}
+            />
+          )}
+        </div>
+      )}
 
       {word.kanji_matches?.length > 0 && (
         <div className="phrase-word-card__kanji-row">
           {word.kanji_matches.map(k => (
-            // The chip is NOT the control. It holds a MineButton, and a
-            // <button> inside a <button> is invalid HTML with undefined
-            // focus behaviour -- so the character carries the click and
-            // the chip is a plain container. This is why the chip lost
-            // its own cursor: pointer.
-            <div key={k.raw_id} className="phrase-kanji-chip">
+            stage ? (
+              // The stage chip holds no inner control (badge and mine
+              // live in the detail it opens), so the WHOLE chip is the
+              // button — its full surface clicks, not just the glyph.
+              // It pairs the glyph with its MEANING (the mockup's
+              // 番 number); the grade waits in the detail sheet.
               <button
+                key={k.raw_id}
                 type="button"
+                className="phrase-kanji-chip"
                 onClick={() => onKanjiClick(k)}
-                className="phrase-kanji-chip__char"
-                style={{ '--word-color': STATUS_COLORS[k.stats.status] }}
                 aria-label={t.detailsForKanji(k.kanji)}
-                lang="ja"
               >
-                {k.kanji}
+                <span className="phrase-kanji-chip__char" lang="ja">{k.kanji}</span>
+                <span className="phrase-kanji-chip__level">{k.entry?.meaning ?? k.level}</span>
               </button>
-              <span className="phrase-kanji-chip__level">{k.level}</span>
-              {!compact && <StatusBadge status={k.stats.status} small t={t} />}
-              <MineButton
-                mining={mining}
-                kind="kanji"
-                onMine={deckId => mining.mineApp({ deckId, source: 'kanji', level: k.level, rawId: k.raw_id, kind: 'kanji' })}
-                t={t}
-              />
-            </div>
+            ) : (
+              // The list chip is NOT the control. It holds a MineButton,
+              // and a <button> inside a <button> is invalid HTML with
+              // undefined focus behaviour -- so the character carries
+              // the click and the chip is a plain container.
+              <div key={k.raw_id} className="phrase-kanji-chip">
+                <button
+                  type="button"
+                  onClick={() => onKanjiClick(k)}
+                  className="phrase-kanji-chip__char"
+                  style={{ '--word-color': STATUS_COLORS[k.stats.status] }}
+                  aria-label={t.detailsForKanji(k.kanji)}
+                  lang="ja"
+                >
+                  {k.kanji}
+                </button>
+                <span className="phrase-kanji-chip__level">{k.level}</span>
+                {!compact && <StatusBadge status={k.stats.status} small t={t} />}
+                <MineButton
+                  mining={mining}
+                  kind="kanji"
+                  onMine={deckId => mining.mineApp({ deckId, source: 'kanji', level: k.level, rawId: k.raw_id, kind: 'kanji' })}
+                  t={t}
+                />
+              </div>
+            )
           ))}
         </div>
       )}
