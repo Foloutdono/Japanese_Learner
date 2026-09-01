@@ -6,8 +6,12 @@ import { playwright } from '@vitest/browser-playwright';
 export default defineConfig({
   plugins: [react()],
   server: {
+    // Same three path families vercel.json proxies in production —
+    // the app is same-origin everywhere, and dev mirrors prod.
     proxy: {
-      '/api': 'http://localhost:8000'
+      '/api': 'http://localhost:8000',
+      '/kanjivg': 'http://localhost:8000',
+      '/exam-audio': 'http://localhost:8000'
     }
   },
   test: {
