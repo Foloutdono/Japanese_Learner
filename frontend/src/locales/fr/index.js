@@ -95,6 +95,7 @@ const home = {
     review:  'Parcours libre, sans note',
   },
   tip:               'Des sessions courtes (15-20 min) mais régulières — la SRS gère tout automatiquement.',
+  homeFeedDown:      'Les données du jour n’ont pas pu être chargées — appuyez pour réessayer.',
   start:             'Commencer',
   homeTitle:         'Accueil',
   homeDesc:          'Retour au menu principal',

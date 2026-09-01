@@ -94,6 +94,7 @@ const home = {
     review:  'Ungraded browse, at your own pace',
   },
   tip:               'Short sessions (15-20 min) but regular — SRS schedules everything automatically.',
+  homeFeedDown:      'Today’s data could not be loaded — tap to retry.',
   start:             'Start',
   homeTitle:         'Home',
   homeDesc:          'Back to the main menu',
