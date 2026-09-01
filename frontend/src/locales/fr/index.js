@@ -892,8 +892,6 @@ const settings = {
 
   // N'apparaît que comme texte title/aria-label (NavControls.jsx) —
   // le bouton visible est déjà une vraie icône SVG IconSun/IconMoon.
-  lightMode:         'Mode clair',
-  darkMode:          'Mode sombre',
 
   volumeMaster:       'Volume principal',
   volumeKana:         'Volume kana',
@@ -1639,6 +1637,37 @@ const onboarding = {
   settingsRedoDesc: 'Recalibrez votre niveau quand vous avez progressé.',
   settingsRedoApply: (level) => `Adopter ${level} ?`,
   levelCurrentMark: 'Vous êtes ici',
+
+  // ── 窓口 — les réglages au guichet ─────────────────────────
+  // Les intitulés des guichets, puis la seconde voix de chaque
+  // contrôle : ce que le bouton FAIT, en clair, sous son nom — sur un
+  // écran de paramètres, rien ne doit se deviner.
+  settingsEnvironment: 'Affichage & langue',
+  // Le mot court que porte un onglet du rail ; le bordereau imprime
+  // le titre complet.
+  settingsEnvShort: 'Affichage',
+  settingsData: 'Données',
+  themeDark: 'Sombre',
+  themeLight: 'Clair',
+  themeAuto: 'Système',
+  themeAutoHint: 'Suit le réglage de votre appareil',
+  // Chaque bouton porte sa propre légende — pas de libellé de rangée.
+  // Silencieux : ambiance, jingle, annonces ; les sons d'étude ne
+  // bougent jamais.
+  soundQuietPreset: 'ambiance coupée',
+  soundFullPreset: 'gare complète',
+  volumeMaster: 'Volume principal',
+  settingsPerDay: '/ jour',
+  settingsExport: 'Exporter votre progression',
+  settingsExportHint: 'Un fichier CSV — chaque carte, son échéance, ses révisions.',
+  settingsExportBtn: 'Exporter',
+  settingsReset: 'Réinitialiser la progression',
+  settingsResetHint: 'Efface toutes les révisions, vos XP et votre série. Vos paquets, votre niveau et vos réglages restent.',
+  settingsResetBtn: 'Réinitialiser',
+  settingsResetConfirmQ: 'Tout effacer ? Impossible à annuler.',
+  settingsResetYes: 'Tout effacer',
+  settingsResetDone: 'Progression réinitialisée. La carte repart de zéro.',
+  settingsIssuedTo: 'Carte émise à',
 }
 
 export default {

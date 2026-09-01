@@ -9,7 +9,17 @@ export function LangProvider({ children }) {
     const [contentMaps, setContentMaps] = useState({ kanji: {}, vocab: {} })
 
     useEffect(() => {
-        getTranslations(lang).then(setContentMaps)
+        // Swallowed on failure, deliberately: the content maps are an
+        // enhancement over the built-in strings, and a dropped network
+        // (or a fetch aborted by unmount — the browser test lane's
+        // teardown does exactly that, and the unhandled rejection
+        // flaked whole CI runs) must degrade to the empty maps, never
+        // throw past the component.
+        let live = true
+        getTranslations(lang)
+            .then(maps => { if (live) setContentMaps(maps) })
+            .catch(() => {})
+        return () => { live = false }
     }, [lang])
 
     function switchLang(code) {

@@ -7356,61 +7356,330 @@ textarea:focus-visible {
   margin: 0 auto;
 }
 
-/* The environment, two-up: 表示 and 言語 stacked in a fixed column,
-   音 taking whatever is left. The side column is 320px because that is
-   what the artboard sets, and because both controls in it are
-   one-liners -- they do not grow with the window, so giving them a
-   share of it would only add space between a label and its control. */
-.settings-env {
+/* ── 窓口 — settings as the service counter ──────────────────
+   案三 of the settings round: a rail of sections on the left, one slip
+   at a time on the right. The flat two-up page it replaces put the
+   eight-row mixer beside two one-line selects and had nowhere for a
+   sixth concern to go; the counter scales by adding a rail item.
+   Every pane reuses the same .settings-card / .settings-row material
+   the flat page already had — only the room around them changed. */
+.stg-counter {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: 230px minmax(0, 1fr);
   gap: var(--sp-6);
   align-items: start;
 }
-.settings-env__side {
+.stg-rail {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-9);
+  gap: var(--sp-2);
 }
-.settings-sec {
+.stg-rail__item {
   display: flex;
-  flex-direction: column;
-}
-/* A card holding one control rather than a list of rows: .settings-row
-   carries the padding in the stacked cards, and there are no rows here. */
-.settings-card--pad { padding: var(--sp-7); }
-
-/* The artboard marks the sign-out row with a 3px danger bar down its
-   left edge -- the one destructive row on the page, called out the way
-   a rail calls out a row elsewhere in this app. */
-.settings-row--danger::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--danger);
-}
-
-/* 暗 / 明 as a pair, per Settings.dc.html. Both options visible, the
-   current one filled -- a switch showing one icon has to be read twice
-   before it tells you anything, and this one was showing the
-   destination rather than the state. */
-.theme-choice {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  align-items: center;
   gap: var(--sp-3);
-  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid transparent;
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.stg-rail__item:hover,
+.stg-rail__item:focus-visible {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+  filter: none;
+}
+/* The open counter: filled surface, and the pass's own ink down its
+   edge — this screen belongs to the holder, so the rail marks itself
+   the way the leaderboard marks "you", never with a line pigment. */
+.stg-rail__item[aria-selected="true"] {
+  color: var(--text-primary);
+  background: var(--surface);
+  border-color: var(--surface-line);
+  box-shadow: inset 3px 0 0 var(--pass-ink);
+}
+.stg-rail__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-body); }
+.stg-rail__latin {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  opacity: 0.6;
+  text-align: right;
+}
+.stg-panes { min-width: 0; }
+
+/* ── The slip ───────────────────────────────────────────────
+   The card carries its own paired heading inside, exactly as the
+   artboard draws it — jp serif beside the plain-language h2, a
+   hairline under both — rather than a SectionHeader floating above a
+   bare card. Rows inside give up their side padding; the slip's own
+   frame provides it once. */
+.stg-slip { padding: var(--sp-6); }
+/* The slip is also .settings-card, whose display: flex OUTRANKS the
+   `hidden` attribute — author display always beats the UA's
+   [hidden] { display: none }. Without this rule every counter's slip
+   rendered at once and the rail looked dead. Pinned by computed style
+   in SettingsScreen.browser.test.jsx, because asserting the attribute
+   alone is exactly how it shipped broken. */
+.stg-slip[hidden] { display: none; }
+.stg-slip__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding-bottom: var(--sp-4);
+  margin-bottom: var(--sp-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--surface-line) 60%, transparent);
+}
+.stg-slip__jp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  letter-spacing: var(--tr-name);
+}
+.stg-slip__latin {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.stg-slip__aside { margin-left: auto; }
+.stg-slip .settings-row {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* A row whose control is wider than half the card (the three-way
+   theme choice, the preset pair) wraps under its label instead of
+   crushing it. */
+.stg-row--wrap { flex-wrap: wrap; }
+
+/* The second register every counter uses: what a control DOES, in
+   plain words under its name. A settings screen must say exactly
+   what a button will do. */
+.stg-hint {
+  display: block;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  font-weight: 400;
+  max-width: 46ch;
+}
+
+/* ── 音 — the presets over the mixer ──
+   A bare row of two, no label, per the artboard: each button carries
+   its own caption. */
+.stg-presets { display: flex; justify-content: flex-start; gap: var(--sp-3); flex-wrap: wrap; }
+.stg-preset {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.stg-preset:hover, .stg-preset:focus-visible {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+  filter: none;
+}
+.stg-preset--on {
+  border-color: color-mix(in srgb, var(--accent2) 55%, transparent);
+  background: color-mix(in srgb, var(--accent2) 10%, transparent);
+  color: var(--text-primary);
+}
+.stg-preset__jp { font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-primary); }
+
+/* ── 学習 — the level as the map's own five-stop strip ── */
+.stg-lvlstrip {
+  position: relative;
+  /* Basis 280 decides WHERE it lives (beside the label when the row
+     has room, on its own line when not); min-width 0 lets the strip
+     then shrink to the line it owns. A hard 280px MINIMUM was what
+     pushed N1 out of the card on phones — the stops sit at
+     percentages and work at any width. */
+  flex: 1 1 280px;
+  min-width: 0;
+  max-width: 460px;
+  height: 54px;
+  /* Half a stop of inset on each side, so the end stops' 28px circles
+     (and the N5/N1 captions under them) stay inside the strip instead
+     of clipping at the slip's edge on narrow screens. */
+  margin-inline: 14px;
+}
+.stg-lvlstrip__rail {
+  position: absolute;
+  top: 13px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--pass-ink) 55%, var(--border));
+}
+.stg-lvlstrip__slot {
+  position: absolute;
+  top: 0;
+  /* --stop-x is set inline per stop (SettingsScreen's LevelStrip);
+     the 0% fallback keeps a styleless slot at the first stop instead
+     of silently dropping the whole declaration. */
+  left: var(--stop-x, 0%);
+  transform: translateX(-50%);
+}
+.stg-lvlstrip__stop {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--pass-ink) 55%, var(--border));
+  background: var(--surface);
+  cursor: pointer;
+}
+.stg-lvlstrip__stop:hover,
+.stg-lvlstrip__stop:focus-visible { border-color: var(--text-secondary); filter: none; }
+/* 現在地 — the same red mark every LevelSelector already prints. */
+.stg-lvlstrip__stop[aria-checked="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.stg-lvlstrip__stop:disabled { opacity: 0.6; cursor: default; }
+.stg-lvlstrip__cap {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.stg-lvlstrip__stop[aria-checked="true"] .stg-lvlstrip__cap { color: var(--text-primary); }
+
+/* ── 学習 — the pace as the 種別 ladder ──
+   Three equal chips sharing the control column's full width (capped
+   to the level strip's own bound so the two rows align), never a
+   ragged 2+1 wrap. */
+.stg-paces {
+  display: flex;
+  gap: var(--sp-3);
+  /* Same wrap-then-shrink contract as the level strip above. */
+  flex: 1 1 280px;
+  min-width: 0;
+  max-width: 460px;
+}
+.stg-pace {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.stg-pace:hover, .stg-pace:focus-visible { border-color: var(--text-secondary); filter: none; }
+.stg-pace--on {
+  border-color: color-mix(in srgb, var(--accent2) 55%, transparent);
+  background: color-mix(in srgb, var(--accent2) 10%, transparent);
+}
+.stg-pace:disabled { opacity: 0.6; cursor: default; }
+.stg-pace__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); color: var(--text-primary); }
+.stg-pace__n {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.stg-pace--on .stg-pace__n { color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary)); }
+
+/* ── データ — the two-step reset and its outcomes ── */
+.stg-danger-btn {
+  padding: var(--sp-2) var(--sp-5);
+  border: 1px solid color-mix(in srgb, var(--danger) 60%, transparent);
+  border-radius: var(--r-card);
+  background: transparent;
+  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.stg-danger-btn:hover, .stg-danger-btn:focus-visible {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  filter: none;
+}
+/* When a row wraps, its control keeps the right edge instead of
+   falling under the first letter of the label — the row's grammar
+   (label left, control right) survives the fold. The stack row (the
+   mixer owns its whole line), the preset pair (a left-flush cluster)
+   and the level strip (whose inline margins ARE its clip guard) are
+   the three that must not take an auto margin. Placed after every
+   base rule it outranks, per no-descending-specificity. */
+.stg-slip .settings-row:not(.settings-row--stack, .stg-presets) > :last-child:not(:only-child, .stg-lvlstrip) {
+  margin-left: auto;
+}
+/* The presets are one cluster, left-flush — bare .settings-row's
+   space-between (a later rule, so it wins on source order) was
+   scattering the pair to opposite ends of the card. */
+.stg-slip .stg-presets { justify-content: flex-start; }
+
+.stg-confirm { display: inline-flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+.stg-confirm__q {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
+}
+.stg-done { font-size: var(--fs-sm); font-weight: 600; color: var(--success); }
+
+/* The destructive rows carry no rail: the red-outlined and red-filled
+   buttons already say danger, and the 3px bar this class used to draw
+   read as a stray stripe once the slips took the rows' side padding
+   away (removed on review of the 窓口 build). The class stays as the
+   semantic hook. */
+
+/* 暗 / 明 / 自動 with every option visible and the current one filled
+   -- a switch showing one icon has to be read twice before it tells
+   you anything, and the old control was showing the destination
+   rather than the state. The third segment is the 窓口 round's 自動:
+   follow the device, which is "no saved key" underneath (see
+   NavControls.ThemeToggle). */
+.theme-choice {
+  display: inline-flex;
+  gap: var(--sp-2);
 }
 .theme-choice__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--sp-2);
-  min-height: 44px;
-  padding-block: var(--sp-4);
-  padding-inline: var(--sp-5);
+  min-height: 38px;
+  padding-block: var(--sp-2);
+  padding-inline: var(--sp-4);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
   background: transparent;
@@ -7439,11 +7708,29 @@ textarea:focus-visible {
 .theme-choice__btn--on:hover { color: var(--text-on-panel); }
 .theme-choice__jp { font-family: var(--font-jp); font-size: var(--fs-body); }
 
-/* One column once the mixer can no longer keep its own width -- below
-   this the side column and the mixer would each be too narrow to read,
-   which is the state the 640px page was permanently in. */
+/* One column once the pane can no longer keep its width beside the
+   rail; the rail turns into a row of chips above the slip. The chips
+   keep the PLAIN-LANGUAGE word and drop the Japanese — settings must
+   be readable before the kanji are, and the slip's own paired heading
+   still carries both registers where there is room for the pair. */
 @media (max-width: 900px) {
-  .settings-env { grid-template-columns: minmax(0, 1fr); }
+  .stg-counter { grid-template-columns: minmax(0, 1fr); }
+  .stg-rail { flex-flow: row wrap; }
+  .stg-rail__item { flex: 1 1 auto; justify-content: center; }
+  .stg-rail__item[aria-selected="true"] { box-shadow: inset 0 -3px 0 var(--pass-ink); }
+  .stg-rail__jp { display: none; }
+  .stg-rail__latin { margin-left: 0; opacity: 1; font-size: var(--fs-caption); }
+}
+
+/* The small screen's buttons speak en/fr only — the bilingual pair
+   needs room, and a phone's segments have none. The kanji register
+   stays on the slip heads. The pace chips flatten to one line so the
+   figure that survives (10 / jour ★) reads as the whole label. */
+@media (max-width: 560px) {
+  .theme-choice__jp,
+  .stg-preset__jp,
+  .stg-pace__jp { display: none; }
+  .stg-pace { flex-direction: row; align-items: baseline; justify-content: center; gap: var(--sp-2); }
 }
 
 /* Page header: même langage serif + trait-rouge que .section-header */
@@ -7507,8 +7794,8 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--border);
 }
 
-/* Variante stack (sound mixer) — pas de barre latérale,
-   le master-volume card a déjà son propre cadre */
+/* Variante stack (sound mixer) — pas de barre latérale : la rangée
+   porte un instrument entier, pas une paire libellé/contrôle. */
 .settings-row--stack {
   flex-direction: column;
   align-items: stretch;
@@ -7520,10 +7807,15 @@ textarea:focus-visible {
   display: none;
 }
 
+/* The row's primary voice, on the scale: every label a counter prints
+   is this one rung, weight 600 — the same size the buttons beside it
+   speak, so nothing in a row is bigger without a reason. (15px/500
+   first, then --fs-body 600, both read off against everything else
+   in the slips; --fs-sm is where the row settles.) */
 .settings-row__label {
   color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--fs-sm);
+  font-weight: 600;
 }
 
 /* Labels de section ("Sound", "Theme", "Language") */
@@ -7590,72 +7882,26 @@ textarea:focus-visible {
 .settings-redo-actions { display: flex; align-items: center; gap: 16px; }
 
 /* ═══════════════════════════════════════════════════════════
-   Sound mixer — filled-track redesign
+   Sound mixer — eight uniform rows, master first
    ═══════════════════════════════════════════════════════════ */
 
-/* ── Master volume card ───────────────────────────────────── */
-.master-volume-card {
-  padding: 18px 20px;
-  background: var(--bg-panel);
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  margin-bottom: 4px;
-  transition: opacity 0.2s ease;
-}
-.master-volume-card--muted {
-  opacity: 0.55;
-}
-
-.master-volume-header {
+/* The 窓口 artboard draws the mixer as one column of identical rows
+   with the master leading it. The master used to be its own boxed
+   sumi card with bigger sliders and a hardcoded English title — a
+   dozen rules of exception for the row a learner touches least. */
+.sound-mixer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
+  flex-direction: column;
+  gap: var(--sp-5);
 }
 
-.master-volume-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-on-panel);
-}
-.master-volume-title svg {
-  color: var(--accent2);
-  flex-shrink: 0;
-}
-
-.master-volume-value {
-  font-size: 13px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  min-width: 38px;
-  text-align: right;
-}
-
-/* ── Shared slider wrappers ───────────────────────────────── */
-.master-volume-slider-wrap,
+/* ── The slider ───────────────────────────────────────────── */
 .vol-slider-wrap {
   position: relative;
   height: 28px;
   display: flex;
   align-items: center;
   flex: 1;
-}
-
-.master-volume-fill {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 6px;
-  border-radius: 999px;
-  pointer-events: none;
-  z-index: 1;
-  background: linear-gradient(90deg, var(--accent2), #dcb35a);
 }
 
 .vol-slider-fill {
@@ -7667,12 +7913,13 @@ textarea:focus-visible {
   border-radius: 999px;
   pointer-events: none;
   z-index: 1;
-  background: var(--accent3);
+  /* Gold, per the artboard — one fill colour for the whole bank. The
+     categories wore wisteria before, a second pigment the card never
+     needed once the master stopped being the only gold thing. */
+  background: var(--accent2);
   opacity: 0.9;
 }
 
-/* ── Inputs ───────────────────────────────────────────────── */
-.master-volume-slider-wrap input[type="range"],
 .vol-slider-wrap input[type="range"] {
   width: 100%;
   -webkit-appearance: none;
@@ -7685,34 +7932,10 @@ textarea:focus-visible {
   margin: 0;
 }
 
-/* WebKit track */
-.master-volume-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
-  height: 6px;
-  background: var(--border);
-  border-radius: 999px;
-}
 .vol-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   background: var(--bg-card-hover);
   border-radius: 999px;
-}
-
-/* WebKit thumb */
-.master-volume-slider-wrap input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent2);
-  border: 2px solid var(--text-on-panel);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  cursor: pointer;
-  margin-top: -6px;
-  transition: transform 0.1s;
-}
-.master-volume-slider-wrap input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
 }
 
 .vol-slider-wrap input[type="range"]::-webkit-slider-thumb {
@@ -7723,7 +7946,7 @@ textarea:focus-visible {
   border-radius: 50%;
   background: var(--text-secondary);
   border: 1px solid var(--bg-card);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   margin-top: -5px;
   transition: transform 0.1s, background 0.15s;
@@ -7733,78 +7956,49 @@ textarea:focus-visible {
   background: var(--text-primary);
 }
 
-/* Firefox track */
-.master-volume-slider-wrap input[type="range"]::-moz-range-track {
-  height: 6px;
-  background: var(--border);
-  border-radius: 999px;
-}
 .vol-slider-wrap input[type="range"]::-moz-range-track {
   height: 4px;
   background: var(--bg-card-hover);
   border-radius: 999px;
 }
 
-/* Firefox thumb */
-.master-volume-slider-wrap input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent2);
-  border: 1px solid var(--text-on-panel);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  cursor: pointer;
-}
 .vol-slider-wrap input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
   background: var(--text-secondary);
   border: 2px solid var(--bg-card);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   cursor: pointer;
 }
 
 /* The thumb is the control, so the ring goes on the thumb — an outline
    on the input itself would draw a rectangle around the whole track. */
-.master-volume-slider-wrap input[type="range"]:focus-visible::-webkit-slider-thumb,
 .vol-slider-wrap input[type="range"]:focus-visible::-webkit-slider-thumb {
   outline: 2px solid var(--accent2);
   outline-offset: 2px;
 }
-.master-volume-slider-wrap input[type="range"]:focus-visible::-moz-range-thumb,
 .vol-slider-wrap input[type="range"]:focus-visible::-moz-range-thumb {
   outline: 2px solid var(--accent2);
   outline-offset: 2px;
 }
 
-/* Disabled */
-.vol-slider-wrap input[type="range"]:disabled,
-.master-volume-slider-wrap input[type="range"]:disabled {
+.vol-slider-wrap input[type="range"]:disabled {
   cursor: not-allowed;
 }
-.vol-slider-wrap input[type="range"]:disabled::-webkit-slider-thumb,
-.master-volume-slider-wrap input[type="range"]:disabled::-webkit-slider-thumb {
+.vol-slider-wrap input[type="range"]:disabled::-webkit-slider-thumb {
   background: #555;
 }
-.vol-slider-wrap--disabled .vol-slider-fill,
-.master-volume-card--muted .master-volume-fill {
+.vol-slider-wrap--disabled .vol-slider-fill {
   opacity: 0.2;
 }
 
-/* ── Category rows ────────────────────────────────────────── */
-.sound-mixer__categories {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 20px;
-  margin-inline: 15px;
-}
-
+/* ── The rows ─────────────────────────────────────────────── */
 /* A grid, not a flex row: Settings.dc.html's .vrow is
-   132px / 1fr / 44px, which is what makes eight labels, eight tracks and
-   eight values line up in three columns. Under flex each row sized to
-   its own label and the tracks started at eight different x positions. */
+   132px / 1fr / 44px, which is what makes the labels, the tracks and
+   the values line up in three columns. Under flex each row sized to
+   its own label and the tracks started at eight different x
+   positions. */
 .category-volume-row {
   display: grid;
   grid-template-columns: 132px minmax(0, 1fr) 44px;
@@ -7813,26 +8007,21 @@ textarea:focus-visible {
 }
 
 .category-volume-row__label {
-  width: 90px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  flex-shrink: 0;
 }
+/* The master leads the bank in the full ink; everything under it is
+   a category of it. */
+.category-volume-row--master .category-volume-row__label { color: var(--text-primary); }
 
 .category-volume-row__value {
-  width: 36px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
+  font-weight: 700;
   text-align: right;
   font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-}
-
-/* Reset button spacing */
-.sound-mixer__reset {
-  margin-top: 18px;
 }
 
 /* ── Language dropdown ──────────────────────────────────────

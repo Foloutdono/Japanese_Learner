@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { LANGUAGES } from '../../i18n'
 import {
@@ -10,17 +10,24 @@ import {
 
 const THEME_KEY = 'jp-theme'
 
-function getInitialTheme() {
-  if (typeof window === 'undefined') return 'dark'
-  // index.html's blocking script has already resolved saved-or-OS
-  // preference onto <html data-theme> before React ever ran, so the
-  // attribute is the source of truth. Falling back to the localStorage
-  // read only covers the case where that script was blocked.
-  const attr = document.documentElement.getAttribute('data-theme')
-  if (attr === 'light' || attr === 'dark') return attr
-  const saved = window.localStorage.getItem(THEME_KEY)
-  if (saved === 'light' || saved === 'dark') return saved
+function osTheme() {
   return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+}
+
+// The learner's CHOICE, which is three-valued — 暗, 明, or 自動 — while
+// the <html data-theme> attribute stays two-valued (the stylesheet only
+// knows light and dark). 自動 is simply "no saved key": index.html's
+// blocking script already falls through to the OS preference when the
+// key is absent, so an auto choice needs no new bootstrap — only this
+// control has to stop freezing the OS answer into localStorage, which
+// is exactly the bug its old two-button form documented.
+function getInitialChoice() {
+  if (typeof window === 'undefined') return 'auto'
+  try {
+    const saved = window.localStorage.getItem(THEME_KEY)
+    if (saved === 'light' || saved === 'dark') return saved
+  } catch { /* private mode — treat as auto */ }
+  return 'auto'
 }
 
 /* ── Icônes SVG (remplacent les émojis) ─────────────────── */
@@ -72,47 +79,62 @@ export function MuteButton() {
 
 export function ThemeToggle() {
   const { t } = useLang()
-  const [theme, setTheme] = useState(getInitialTheme)
+  const [choice, setChoice] = useState(getInitialChoice)
 
-  // Applies the theme, but only for changes made here. The initial
+  // Applies a choice, but only for changes made here. The initial
   // value is already on <html> (see index.html) — writing it back on
   // mount is what used to freeze a detected OS preference into an
   // explicit saved choice, so later OS changes stopped being honoured.
   function apply(next) {
-    setTheme(next)
-    document.documentElement.setAttribute('data-theme', next)
-    window.localStorage.setItem(THEME_KEY, next)
+    setChoice(next)
+    try {
+      if (next === 'auto') window.localStorage.removeItem(THEME_KEY)
+      else window.localStorage.setItem(THEME_KEY, next)
+    } catch { /* private mode — the attribute below still applies */ }
+    document.documentElement.setAttribute(
+      'data-theme',
+      next === 'auto' ? osTheme() : next,
+    )
+    playToggle()
   }
 
-  const isDark = theme === 'dark'
+  // While the choice is 自動, a live OS flip must land without a
+  // reload — the blocking script only runs at load time.
+  useEffect(() => {
+    if (choice !== 'auto' || !window.matchMedia) return
+    const mq = window.matchMedia('(prefers-color-scheme: light)')
+    const follow = () => document.documentElement.setAttribute('data-theme', osTheme())
+    mq.addEventListener('change', follow)
+    return () => mq.removeEventListener('change', follow)
+  }, [choice])
 
-  // Settings.dc.html draws this as a pair, not a switch: 暗 DARK and
-  // 明 LIGHT side by side with the current one filled. A lone icon
-  // button has to be read twice -- once to see which glyph it shows,
-  // again to work out whether that means "you are here" or "go here" --
-  // and it was showing the destination, not the state. Two buttons say
-  // both at once. This control lives only on the settings page now
-  // (the top bar carries the gear), so the pair costs nothing elsewhere.
+  // Settings.dc.html drew this as a pair — 暗 and 明 side by side with
+  // the current one filled — because a lone icon button showed the
+  // destination, not the state. The 窓口 round added the third state
+  // the pair could never say: 自動, "follow the device". Radios rather
+  // than pressed-buttons now that there are three: exactly one is
+  // chosen, and that is the grammar a radio group announces.
+  const OPTIONS = [
+    { key: 'dark', jp: '暗', label: t.themeDark },
+    { key: 'light', jp: '明', label: t.themeLight },
+    { key: 'auto', jp: '自動', label: t.themeAuto, title: t.themeAutoHint },
+  ]
   return (
-    <div className="theme-choice" role="group" aria-label={t.theme}>
-      <button
-        type="button"
-        onClick={() => { if (!isDark) { apply('dark'); playToggle() } }}
-        className={`theme-choice__btn${isDark ? ' theme-choice__btn--on' : ''}`}
-        aria-pressed={isDark}
-      >
-        <span className="theme-choice__jp" lang="ja">暗</span>
-        {t.darkMode}
-      </button>
-      <button
-        type="button"
-        onClick={() => { if (isDark) { apply('light'); playToggle() } }}
-        className={`theme-choice__btn${!isDark ? ' theme-choice__btn--on' : ''}`}
-        aria-pressed={!isDark}
-      >
-        <span className="theme-choice__jp" lang="ja">明</span>
-        {t.lightMode}
-      </button>
+    <div className="theme-choice" role="radiogroup" aria-label={t.theme}>
+      {OPTIONS.map(opt => (
+        <button
+          key={opt.key}
+          type="button"
+          role="radio"
+          onClick={() => { if (choice !== opt.key) apply(opt.key) }}
+          className={`theme-choice__btn${choice === opt.key ? ' theme-choice__btn--on' : ''}`}
+          aria-checked={choice === opt.key}
+          title={opt.title}
+        >
+          <span className="theme-choice__jp" lang="ja">{opt.jp}</span>
+          {opt.label}
+        </button>
+      ))}
     </div>
   )
 }
@@ -154,42 +176,10 @@ const CATEGORY_LABEL_KEYS = {
   ambiance:     'volumeAmbiance',
 }
 
-function MasterVolume({ value, onChange, disabled }) {
+function CategoryVolume({ label, value, onChange, disabled, master = false }) {
   const pct = Math.round(value * 100)
   return (
-    <div className={`master-volume-card${disabled ? ' master-volume-card--muted' : ''}`}>
-      <div className="master-volume-header">
-        <div className="master-volume-title">
-          <IconVolume size={16} />
-          <span>Master Volume</span>
-        </div>
-        <span
-          className="master-volume-value"
-          style={{ color: pct === 0 ? 'var(--text-secondary)' : 'var(--accent2)' }}
-        >
-          {pct}%
-        </span>
-      </div>
-      <div className="master-volume-slider-wrap">
-        <div className="master-volume-fill" style={{ width: `${pct}%` }} />
-        <input
-          type="range"
-          min={0}
-          max={100}
-          step={5}
-          value={pct}
-          disabled={disabled}
-          onChange={e => onChange(Number(e.target.value) / 100)}
-        />
-      </div>
-    </div>
-  )
-}
-
-function CategoryVolume({ label, value, onChange, disabled }) {
-  const pct = Math.round(value * 100)
-  return (
-    <div className="category-volume-row">
+    <div className={`category-volume-row${master ? ' category-volume-row--master' : ''}`}>
       <span className="category-volume-row__label">{label}</span>
       <div className={`vol-slider-wrap${disabled ? ' vol-slider-wrap--disabled' : ''}`}>
         <div className="vol-slider-fill" style={{ width: `${pct}%` }} />
@@ -218,24 +208,28 @@ export function SoundMixer() {
   const muted = useMuted()
   const volumes = useVolumes()
 
+  // Eight uniform rows with the master leading them, per the 窓口
+  // artboard — the master used to be its own boxed card with a
+  // hardcoded English title, which made the densest control in the
+  // app start with its loudest exception.
   return (
     <div className="sound-mixer">
-      <MasterVolume
+      <CategoryVolume
+        master
+        label={t.volumeMaster}
         value={volumes.master}
         onChange={v => setVolume('master', v)}
         disabled={muted}
       />
-      <div className="sound-mixer__categories">
-        {SOUND_CATEGORIES.map(cat => (
-          <CategoryVolume
-            key={cat}
-            label={t[CATEGORY_LABEL_KEYS[cat]]}
-            value={volumes[cat]}
-            onChange={v => setVolume(cat, v)}
-            disabled={muted}
-          />
-        ))}
-      </div>
+      {SOUND_CATEGORIES.map(cat => (
+        <CategoryVolume
+          key={cat}
+          label={t[CATEGORY_LABEL_KEYS[cat]]}
+          value={volumes[cat]}
+          onChange={v => setVolume(cat, v)}
+          disabled={muted}
+        />
+      ))}
     </div>
   )
 }

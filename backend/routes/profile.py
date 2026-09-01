@@ -1,9 +1,12 @@
+import csv
+import io
 import logging
 import random
 import re
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import PlainTextResponse
 from psycopg2 import errors as pg_errors
 from pydantic import BaseModel, field_validator
 
@@ -324,6 +327,63 @@ def get_profile(user_id: str = Depends(get_user_id)):
         "cosmetics": cosmetics_summary(user_id),
         "badges": _badges(facts),
     }
+
+
+@router.get("/api/profile/export")
+def export_progress(user_id: str = Depends(get_user_id)):
+    """
+    The learner's whole SRS state as one CSV — the settings screen's
+    データ counter serves it as a download.
+
+    Raw card_modes columns rather than the stats screen's buckets: an
+    export exists so the data can leave the app (a spreadsheet, Anki,
+    a backup before a reset), and aggregates cannot be un-aggregated.
+    One row per (card, mode), same granularity the scheduler itself
+    keeps. The user prefix is stripped from card_id — it is an
+    implementation detail of shared tables (see core/auth.prefixed),
+    not part of the learner's data.
+    """
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            # Same LIKE-prefix pattern reset_stats uses for the same rows.
+            cur.execute(
+                """
+                SELECT card_id, mode, interval_days, next_review,
+                       total_reviews, correct_reviews
+                FROM card_modes
+                WHERE card_id LIKE %s
+                ORDER BY card_id, mode
+                """,
+                (f"{user_id}:%",),
+            )
+            rows = cur.fetchall()
+    finally:
+        conn.close()
+
+    prefix_len = len(user_id) + 1
+    buf = io.StringIO()
+    writer = csv.writer(buf, lineterminator="\n")
+    writer.writerow([
+        "card_id", "mode", "interval_days", "next_review",
+        "total_reviews", "correct_reviews",
+    ])
+    for card_id, mode, interval_days, next_review, total, correct in rows:
+        writer.writerow([
+            card_id[prefix_len:],
+            mode,
+            interval_days,
+            next_review.isoformat() if next_review else "",
+            total,
+            correct,
+        ])
+
+    logger.info("progress export user_id=%s rows=%d", user_id, len(rows))
+    return PlainTextResponse(
+        buf.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="nihongo-progress.csv"'},
+    )
 
 
 @router.patch("/api/profile")

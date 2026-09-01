@@ -22,7 +22,7 @@
 // makes a volume slider move sounds that are already playing.
 import './mixer'
 
-export { SOUND_CATEGORIES, toggleMute, useMuted, setVolume, useVolumes } from './settings'
+export { SOUND_CATEGORIES, DEFAULT_VOLUMES, toggleMute, useMuted, setVolume, useVolumes } from './settings'
 export { preload } from './context'
 // playClick/playToggle come from chimes, not playback: chimes is the
 // station's vocabulary — the names the app calls moments by — and

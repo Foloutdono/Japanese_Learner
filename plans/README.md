@@ -38,6 +38,18 @@ Nine waves live in this file:
   (the artifact linked from DESIGN.md's sibling canvas note); the charcoal
   pass ink and the concourse notice landed a session earlier from the same
   round. Record at the very bottom.
+- **Wave 11 — 窓口, the settings counter** (2026-09-01, DONE). 案三 of the
+  settings mockup round, executed directly: SettingsScreen becomes a rail of
+  five counters (環境・音・学習・データ・会員) with hash deep-links and roving
+  arrows; the theme gains 自動 (auto = no saved key, live OS follow); the
+  JLPT level becomes the map's five-stop strip and the pace the 種別 chips;
+  sound gains 静かな通勤/全部 presets over the mixer; データ ships CSV
+  export (new GET /api/profile/export) and finally fronts
+  DELETE /api/stats/reset behind a two-step confirm with its consequences
+  spelled out. The mockup's 通知 pane stayed a sketch — no dead controls on
+  a settings screen. Frontend 227 (+5), backend 543 (+2), guards clean
+  (design-system caught the un-fallbacked --stop-x; stylelint the
+  flex-flow longhand pair).
 - **Wave 9 — 統一, the harmonisation** (plans 041–053; 041–051 DONE). Planned
   2026-08-28 at commit `32c1f40`, from the maintainer's request to merge the
   CSS back into one file and establish a single artistic direction that new

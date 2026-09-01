@@ -910,8 +910,6 @@ const settings = {
 
   // Only ever surfaces as title/aria-label text (NavControls.jsx) —
   // the visible toggle is already a real IconSun/IconMoon SVG.
-  lightMode:         'Light mode',
-  darkMode:          'Dark mode',
 
   volumeMaster:       'Master volume',
   volumeKana:         'Volume kana',
@@ -1676,6 +1674,35 @@ const onboarding = {
   settingsRedoDesc: 'Recalibrate your level once you have progressed.',
   settingsRedoApply: (level) => `Switch to ${level}?`,
   levelCurrentMark: 'You are here',
+
+  // ── 窓口 — settings as the service counter ─────────────────
+  // The counter names, then each control's second voice: what the
+  // button DOES, in plain words under its name — on a settings screen
+  // nothing may need guessing.
+  settingsEnvironment: 'Display & language',
+  // The short word a rail chip carries; the slip prints the full title.
+  settingsEnvShort: 'Display',
+  settingsData: 'Data',
+  themeDark: 'Dark',
+  themeLight: 'Light',
+  themeAuto: 'System',
+  themeAutoHint: 'Follows your device setting',
+  // Each button carries its own caption — no row label. Quiet means
+  // ambiance, jingle and announcements; study sounds never move.
+  soundQuietPreset: 'station muted',
+  soundFullPreset: 'full station',
+  volumeMaster: 'Master volume',
+  settingsPerDay: '/ day',
+  settingsExport: 'Export your progress',
+  settingsExportHint: 'One CSV file — every card, its schedule, its review counts.',
+  settingsExportBtn: 'Export',
+  settingsReset: 'Reset your progress',
+  settingsResetHint: 'Erases every review, your XP and your streak. Your decks, level and preferences stay.',
+  settingsResetBtn: 'Reset',
+  settingsResetConfirmQ: 'Erase everything? This cannot be undone.',
+  settingsResetYes: 'Erase everything',
+  settingsResetDone: 'Progress reset. The map starts fresh.',
+  settingsIssuedTo: 'Card issued to',
 }
 
 export default {
