@@ -979,12 +979,20 @@
    The clamps scale continuously instead of stepping at a
    breakpoint, so there is no width at which the screen looks
    half-adjusted. */
-.analyzer {
+/* The tokens live on BOTH roots the analyser renders under: the
+   workbench (.analyzer) and the selection-screen concourse
+   (.anl-concourse), where 運行履歴 lives. Scoped to the workbench
+   alone, every anl-* rule on the concourse resolved its padding to
+   nothing — the unpadded history panel was exactly that. */
+.analyzer,
+.anl-concourse {
   --anl-gap:          clamp(16px, 1.2vw + 10px, 24px);
   --anl-pad-inline:   clamp(16px, 1.6vw + 10px, 28px);
   --anl-pad-block:    clamp(18px, 1.2vw + 12px, 26px);
   --anl-radius:       var(--surface-radius);
+}
 
+.analyzer {
   display: flex;
   flex-direction: column;
   gap: var(--anl-gap);
@@ -1006,76 +1014,435 @@
   padding: var(--anl-pad-block) var(--anl-pad-inline);
 }
 
-/* ── のりば — the platform rail ──
-   Three signs at the head of three platforms. Same four registers as
-   a 駅名標 (number, kana, kanji, plain language), because it is the
-   same signage system — see components/station/StationSign.jsx. */
-.anl-rail {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(8px, 0.8vw + 4px, 14px);
-}
-.anl-rail__sign {
-  --anl-sign: var(--line-color, var(--line-kaiseki));
+/* ── The boarding stub ──
+   Where you boarded, stated as one plate: the platform was chosen at
+   the selection-screen gate (the のりば every section shares), so up
+   here it is a fact and the ways out, not a menu. Replaces the
+   three-sign tab rail the mockup round retired. */
+.anl-stub {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: clamp(12px, 1vw + 8px, 18px) 10px 0;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.anl-stub__plate {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--anl-radius) var(--anl-radius) 0 0;
-  color: var(--text-secondary);
-  text-align: center;
-  transition: background 0.16s ease, color 0.16s ease;
+  /* The one place this strip carries the line pigment: the same
+     left-edge rail every coloured row in the app uses. */
+  border-left: 3px solid var(--line-color, var(--line-kaiseki));
+  border-radius: var(--r-plate);
 }
-.anl-rail__sign[aria-selected="true"] { color: var(--text-primary); }
-.anl-rail__sign:hover { background: var(--bg-card-hover); }
-
-.anl-rail__no {
+.anl-stub__no {
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--anl-sign);
-}
-.anl-rail__kana {
-  font-family: var(--font-jp);
-  font-size: 0.62rem;
-  letter-spacing: 0.24em;
-  text-indent: 0.24em;
-}
-.anl-rail__jp {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: clamp(1.1rem, 0.7rem + 1.4vw, 1.55rem);
-  letter-spacing: 0.1em;
-  text-indent: 0.1em;
-  line-height: 1.2;
-}
-.anl-rail__latin {
-  font-family: var(--font-display);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-indent: 0.2em;
+  letter-spacing: var(--tr-caption);
   text-transform: uppercase;
+  color: color-mix(in srgb, var(--line-kaiseki) 70%, var(--text-primary));
+  font-variant-numeric: tabular-nums;
 }
-/* The stripe is the sign's bottom edge, exactly as on a station
-   plate — full-bleed to the sign's own width, not inset. */
-.anl-rail__stripe {
+.anl-stub__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-body);
+}
+.anl-stub__jp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-stub__spacer { flex: 1; }
+
+/* The workbench's quiet button — the stub's exits and the working
+   rail's bulk action are the same idiom: a ghost beside content, never
+   competing with .anl-action, the screen's one filled control. */
+.anl-ghost {
+  padding: var(--sp-2) var(--sp-4);
+  background: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.anl-ghost:disabled { opacity: 0.45; cursor: default; }
+.anl-ghost:focus-visible,
+.anl-ghost:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line));
+}
+/* 出場 clears a finished Passage — the one destructive exit, so its
+   approach colour says so where the others tint toward the line. */
+.anl-stub__clear:hover:not(:disabled) {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 50%, transparent);
+}
+
+/* ── The working rail (the control-room half of the mockup) ──
+   Search and filters over the stops, then the line itself. A column,
+   so the wide layout can hand the whole thing the sticky slot the
+   bare line used to occupy. */
+.anl-railcol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+.anl-railhead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.anl-railhead__search {
   width: 100%;
-  height: 4px;
-  margin-top: clamp(8px, 0.6vw + 5px, 12px);
-  background: var(--surface-line);
-  border-radius: 0 0 2px 2px;
-  transition: background 0.2s ease;
+  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-sm);
 }
-.anl-rail__sign[aria-selected="true"] .anl-rail__stripe { background: var(--anl-sign); }
+.anl-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.anl-chip {
+  padding: var(--sp-1) var(--sp-4);
+  background: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  transition: color 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+}
+.anl-chip:hover { color: var(--text-primary); }
+.anl-chip[aria-pressed="true"] {
+  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
+  border-color: color-mix(in srgb, var(--line-kaiseki) 55%, transparent);
+  background: color-mix(in srgb, var(--line-kaiseki) 10%, transparent);
+}
+.anl-railfoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.anl-railfoot__count {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+/* ── The stage's two dials — view and ふりがな ──
+   Small segmented pills, hairline-divided like the rating bar, sized
+   to sit above the breakdown without competing with it. */
+.anl-stagectl {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5) var(--sp-7);
+  flex-wrap: wrap;
+}
+.anl-stagectl__group {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+/* The mockup's stagectl__label: a quiet WORD (View, Furigana), not a
+   tracked micro-caption fighting the options beside it. */
+.anl-stagectl__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+.anl-seg {
+  display: inline-flex;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.anl-seg__opt {
+  padding: var(--sp-1) var(--sp-4);
+  background: none;
+  border: none;
+  border-right: 1px solid var(--surface-line);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.anl-seg__opt:last-child { border-right: none; }
+.anl-seg__opt[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--line-kaiseki) 14%, transparent);
+  color: var(--text-primary);
+}
+/* The global ring, inset so the pill's overflow:hidden cannot clip it. */
+.anl-seg__opt:focus-visible {
+  border-radius: 0;
+  outline-offset: -2px;
+}
+
+/* ── Smart furigana ──
+   One attribute on the stage governs every phrase line inside it.
+   'unknown' bares only the words the SRS has MASTERED (the
+   .word-span--known class SentenceBreakdown stamps) -- readings stay
+   exactly where they are still needed, which is the mode the toggle
+   defaults to. Scoped to .phrase-line so a TokenCard's own reading
+   row and the WordDetail sheet are untouched.
+
+   :where() on purpose, not decoration: it zeroes the scope's
+   specificity so these stay (0,0,1) like every other `rt` rule in the
+   sheet -- without it they outrank the dictionary's later rt rules
+   and trip the no-descending-specificity ratchet. Nothing contests
+   `display` on an rt, so zero specificity loses nothing. */
+:where(.anl-stage[data-furigana="none"] .phrase-line) rt { display: none; }
+:where(.anl-stage[data-furigana="unknown"] .phrase-line .word-span--known) rt { display: none; }
+
+/* Right edge of the dials row: how much the focused Sentence holds. */
+.anl-stagectl__meta {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+/* ── The sentence pane (stage layout) ──
+   The Sentence as its own surface panel, read as a sentence: primary
+   ink throughout, the SRS speaking through a 2px underline per word
+   (--word-color, set inline from the same STATUS_COLORS the rest of
+   the analysis UI uses) and through the ruby the furigana dial
+   governs. Mastered and unmatched tokens carry no rule — the
+   underline marks work left to do, not vocabulary in general. */
+/* The stage breakdown owns the rhythm of its three bands — pane,
+   dials, card — the same way every other stack here works: the parent
+   carries the gap, the children carry none. */
+.anl-stagebd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.anl-sentence {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  padding: var(--anl-pad-block) var(--anl-pad-inline);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+/* Two classes, not one: the shared .phrase-line/.rdg-breakdown-line
+   bases sit LATER in this sheet and would otherwise win the shared
+   properties back (justify-content, margin, gap) on source order.
+
+   A PARAGRAPH, not a flex row (the mockup's .sent__jp): flex spaced
+   every token apart and stretched each one to the full 2.3 line box,
+   which put the 2px rule a whole line-height below the glyphs and
+   made the focus tint a floor-to-ceiling block. Inline flow is what
+   makes the sentence read as a sentence. */
+.anl-stagebd .anl-sentence__jp {
+  display: block;
+  margin-bottom: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sentence-fluid);
+  /* The mockup's 2.3, not a tighter one: the ruby needs the headroom
+     or it stacks into the wrapped line above it. */
+  line-height: 2.3;
+  letter-spacing: var(--tr-term);
+}
+/* Full reset first: these are bare <button>s on purpose (see the
+   stage layout's comment — the word-span bases carry the stepper's
+   diagnostic look), so the global button padding/ground must go
+   before the pane's own dress goes on.
+
+   inline-block with a tight internal line-height: the paragraph's
+   2.3 strut still spaces the wrapped LINES, while each token's box
+   hugs its own glyphs (plus ruby) — so the underline and the focus
+   tint sit ON the word, exactly as the mockup draws them. */
+.anl-stagebd .anl-sentence__tk {
+  display: inline-block;
+  vertical-align: baseline;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0 0 1px;
+  font: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  line-height: 1.4;
+  text-align: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--r-plate) var(--r-plate) 0 0;
+  transition: background 0.14s ease;
+}
+.anl-stagebd .anl-sentence__tk:hover {
+  background: var(--overlay-hover);
+}
+/* The mockup's two rules, verbatim: a word never started runs in the
+   line's own grape at full strength, a word being learned in the
+   translucent ember. Nothing else carries a rule — see
+   SentenceBreakdown's underlineClass for the mapping. */
+.anl-stagebd .anl-sentence__tk--new {
+  border-bottom-color: var(--line-kaiseki);
+}
+.anl-stagebd .anl-sentence__tk--learning {
+  border-bottom-color: color-mix(in srgb, var(--state-learning) 45%, transparent);
+}
+/* A tint, NOT a weight change: bolding the focused token reflows the
+   whole line on every arrow press. */
+.anl-stagebd .anl-sentence__tk--focus {
+  background: color-mix(in srgb, var(--line-kaiseki) 16%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .anl-stagebd .anl-sentence__tk { transition: none; }
+}
+
+/* Where you are along the Tokens — the mockup's dots. Redundant with
+   the arrows and the jump-to-word line, so they stay out of the tab
+   order and the accessibility tree. */
+.anl-stagebd__dots {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin-top: var(--sp-3);
+}
+.anl-stagebd__dot {
+  width: 5px;
+  height: 5px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--text-secondary);
+  opacity: 0.25;
+  cursor: pointer;
+  transition: opacity 0.14s ease, background 0.14s ease;
+}
+.anl-stagebd__dot--on {
+  opacity: 1;
+  background: var(--line-kaiseki);
+}
+
+/* ── The token table (the mockup's second view) ──
+   Word | Reading | Meaning | State | ＋, one Token per row. The frame
+   clips the rows; a narrow viewport scrolls the grid INSIDE the frame
+   (min-width on the row) instead of growing the page sideways. */
+.anl-toktable {
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  overflow: hidden;
+}
+.anl-toktable__scroll { overflow-x: auto; }
+.anl-trow {
+  display: grid;
+  /* The state column sizes to its label — "Pas dans le deck" must not
+     wrap into a two-line badge. */
+  grid-template-columns: minmax(90px, 130px) minmax(90px, 140px) minmax(160px, 1fr) minmax(96px, max-content) 64px;
+  align-items: center;
+  min-width: 540px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--surface-line);
+}
+.anl-toktable .anl-trow:last-child { border-bottom: none; }
+.anl-trow--head { background: transparent; }
+.anl-trow--head > span {
+  padding: var(--sp-3) var(--sp-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-trow > span,
+.anl-trow > button {
+  padding: var(--sp-3) var(--sp-4);
+  text-align: left;
+}
+.anl-trow__surface {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.anl-trow__surface:hover { background: var(--overlay-hover); }
+.anl-trow__reading {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-trow__meaning {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.anl-trow__state { white-space: nowrap; }
+.anl-trow__mine {
+  justify-self: start;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+.anl-trow__mine:hover { color: var(--success); }
+.anl-trow__mine--done { color: var(--success); }
+
+/* The keyboard map under the stage. */
+.anl-kbd {
+  display: flex;
+  gap: var(--sp-5);
+  flex-wrap: wrap;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.anl-kbd kbd {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  border: 1px solid var(--surface-line);
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-right: 2px;
+}
+
+/* 運行履歴's seat on the concourse: inset to the platform grid's own
+   gutter so the panel's edge lines up with the cards above it. */
+.anl-concourse { padding: 0 var(--sp-6) var(--sp-7); }
 
 @media (prefers-reduced-motion: reduce) {
-  .anl-rail__sign,
-  .anl-rail__stripe { transition: none; }
+  .anl-stagebd__dot { transition: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anl-ghost,
+  .anl-chip,
+  .anl-seg__opt { transition: none; }
 }
 
 /* ── 路線図 — the Passage as a line (plan 028) ─────────────
@@ -1105,29 +1472,92 @@
   min-width: 0;
 }
 
-/* 追従 — follow the clock. A toggle, so it states its own state rather
-   than naming the action: pressed means the line is following. */
-.anl-follow {
+/* ── The player, on its own sumi panel ──
+   The video and its transport are ONE object (the mockup's drawing):
+   the iframe above, the bar below, both on the ink ground the writing
+   slip already uses, so the stage's one piece of foreign chrome sits
+   inside something of the app's own. */
+.anl-player {
+  background: var(--bg-panel);
+  border-radius: var(--anl-radius);
+  overflow: hidden;
+}
+.anl-player__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+}
+.anl-player__btn {
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 25%, transparent);
+  border-radius: var(--r-pill);
+  color: var(--text-on-panel);
+  font-size: var(--fs-sm);
+  line-height: 1;
+  transition: background 0.14s ease;
+}
+.anl-player__btn:hover { background: var(--overlay-hover); }
+/* The playhead runs in 鶯色 — the video source's own colour, already
+   spent on this source's unique data (the timestamp chips) and on
+   nothing else. */
+.anl-player__track {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  overflow: hidden;
+  cursor: pointer;
+}
+.anl-player__fill {
+  display: block;
+  height: 100%;
+  background: var(--line-douga);
+  border-radius: 2px;
+}
+.anl-player__time {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tr-term);
+  color: var(--text-on-panel-soft);
+}
+
+/* 追従 — follow the clock. A toggle, so it states its own state rather
+   than naming the action: pressed means the line is following. Lives
+   in the transport bar, so it wears the panel's inks. */
+.anl-follow {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
   min-height: 32px;
   background: transparent;
-  border: 1px solid var(--surface-line);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 22%, transparent);
   border-radius: var(--anl-radius);
-  color: var(--text-secondary);
+  color: var(--text-on-panel-soft);
   transition: color 0.14s ease, border-color 0.14s ease;
 }
 .anl-follow--on {
-  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
-  border-color: color-mix(in srgb, var(--line-kaiseki) 55%, transparent);
+  color: var(--text-on-panel);
+  border-color: color-mix(in srgb, var(--line-douga) 80%, transparent);
 }
 .anl-follow__jp { font-family: var(--font-jp); font-size: 0.8rem; white-space: nowrap; }
-.anl-follow__label { font-size: 0.78rem; }
+.anl-follow__label { font-size: 0.78rem; font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) {
-  .anl-follow { transition: none; }
+  .anl-follow,
+  .anl-player__btn { transition: none; }
 }
 
 .anl-line {
@@ -1182,8 +1612,10 @@
   border: 1px solid var(--surface-line);
   border-radius: var(--anl-radius);
   color: var(--text-secondary);
-  font-family: var(--font-jp);
-  font-size: 0.62rem;
+  /* + / ✓ glyphs since the plain-language pass — figures, so the
+     display face, at a size the 28px box centres comfortably. */
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
   line-height: 1;
   transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
 }
@@ -1272,6 +1704,20 @@
   border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
 }
 
+/* The Sentence's JLPT grade. Deliberately the same quiet frame as 済:
+   context, not a call to action — i+1 keeps the only tinted badge. */
+.anl-stop__lvl {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  border: 1px solid var(--surface-line);
+}
+
 /* 済 — already explained. Deliberately the quietest badge on the stop:
    i+1 is a recommendation and gets --success, the timestamp is unique
    data and gets 鶯色, and this is a memory aid. No new pigment. */
@@ -1290,6 +1736,11 @@
    `margin: -12px 0 24px` was hand-correcting the box above it — this
    one sits in .anl-stage, whose parent owns the gap, so there is
    nothing left for a negative margin to correct. */
+.anl-explainbox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
 .anl-explain {
   display: flex;
   align-items: center;
@@ -1299,6 +1750,17 @@
 }
 .anl-explain__hint { font-size: 0.82rem; color: var(--text-secondary); }
 .anl-explain__hint--bad { color: var(--danger); }
+/* The bought explanation, above the control that bought it — the
+   mockup's explain__body: body ink, a 3px rule of the station's
+   pigment down its left. */
+.anl-explain__body {
+  margin: 0;
+  padding-left: var(--sp-5);
+  border-left: 3px solid color-mix(in srgb, var(--line-kaiseki) 45%, transparent);
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  color: var(--text-primary);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .anl-stop,
@@ -1614,29 +2076,83 @@
   overflow-x: auto;
 }
 
-/* 運行履歴 — past services. */
+/* 運行履歴 — past services, drawn the concourse's way since the
+   mockup round: Latin-first head, a numbered roundel naming the
+   platform each row came from (the cards overhead use the same
+   numbers), a relative date, and a ▶ that slides in on approach. */
 .anl-history { display: flex; flex-direction: column; }
+/* The frame around the rows (the mockup's .hist): border and radius
+   only — each ROW carries the padding, the frame just clips them. */
+.anl-hist {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  overflow: hidden;
+}
+.anl-history__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+.anl-history__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  letter-spacing: 0.02em;
+}
+.anl-history__titlejp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-history__total {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
 .anl-history__empty { color: var(--text-secondary); font-size: 0.86rem; }
 .anl-history__row {
   display: flex;
   align-items: center;
   gap: 8px;
   border-bottom: 1px solid var(--surface-line);
+  transition: background 0.14s ease;
 }
 .anl-history__row:last-child { border-bottom: none; }
+.anl-history__row:hover { background: var(--overlay-hover); }
 .anl-history__open {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 4px;
+  gap: var(--sp-4);
+  /* The mockup row's own padding — the frame around it carries none. */
+  padding: var(--sp-4) var(--sp-5);
   background: none;
   border: none;
   color: var(--text-primary);
   text-align: left;
 }
-.anl-history__open:hover { color: var(--line-kaiseki); }
+.anl-history__no {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--line-color, var(--line-kaiseki));
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--line-color, var(--line-kaiseki)) 65%, var(--text-primary));
+  font-variant-numeric: tabular-nums;
+}
 .anl-history__text {
   flex: 1;
   min-width: 0;
@@ -1646,18 +2162,22 @@
   font-family: var(--font-jp);
   font-size: 0.92rem;
 }
-.anl-history__source {
+.anl-history__go {
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border: 1px solid var(--surface-line);
-  border-radius: 3px;
-  color: var(--text-secondary);
-  font-family: 'Noto Serif JP', serif;
-  font-size: 0.64rem;
+  font-size: 0.7rem;
+  color: color-mix(in srgb, var(--line-color, var(--line-kaiseki)) 65%, var(--text-primary));
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.anl-history__row:hover .anl-history__go,
+.anl-history__open:focus-visible .anl-history__go {
+  opacity: 1;
+  transform: translateX(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .anl-history__row,
+  .anl-history__go { transition: none; }
 }
 /* 保存 stamp -- same shape as .anl-history__source's 写/動, but tinted
    --success rather than neutral: this row is a kept Sentence, not
@@ -1667,8 +2187,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  /* Sized by its glyphs, not an 18×18 box: 保存 is two CJK characters
+     and a square that small wrapped them into an overflowing stack. */
+  padding: 1px 5px;
+  white-space: nowrap;
+  line-height: 1.4;
   border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
   border-radius: 3px;
   color: var(--success);
@@ -1768,15 +2291,20 @@
     gap: var(--anl-gap);
   }
 
-  /* The scroll lives on the rail itself. A sticky column pinned to the
-     viewport with no overflow of its own cannot hold a fifty-stop
-     Passage — that is the mistake .dict-dock's own comment records,
-     and it is the same mistake here. */
-  .anl-line {
+  /* The sticky slot belongs to the whole working rail — head and line
+     together — so the search and filters stay in reach while the line
+     under them scrolls. The scroll itself lives on the LINE: a sticky
+     column pinned to the viewport with no overflow of its own cannot
+     hold a fifty-stop Passage — that is the mistake .dict-dock's own
+     comment records, and it is the same mistake here. */
+  .anl-railcol {
     flex: 0 0 clamp(260px, 24vw, 340px);
     position: sticky;
     top: 24px;
     max-height: calc(100dvh - 48px);
+  }
+  .anl-line {
+    min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-right: 4px;   /* room for the scrollbar, so no stop sits under it */
@@ -1790,91 +2318,24 @@
   }
 }
 
-/* ── 停車駅案内 — the stopping-pattern strip ──
-   The band above a train door: the same stops, laid along the
-   direction of travel, with where-you-are lit. Sticky like
-   .stroke-rail and for the same stated reason — a route map you can
-   only jump from is half a route map. */
+/* The stopping-pattern strip (plan 030's horizontal band above the
+   player) lived here until the mockup fidelity pass (2026-09-01)
+   retired it: the mockup draws the Passage exactly one way — the
+   vertical route map — at every width. Below the 1100px split the
+   rail column stacks above the stage, and with only one sticky
+   element left the measured --anl-strip-h offset machinery went too.
+
+   On a phone the line is a WINDOW, not a wall: about three stops
+   tall (a fourth peeking to say there is more), the rest scrolling
+   inside it — a 47-cue track must not bury the stage under 47 rows
+   of rail. */
 @media (max-width: 1099px) {
-  /* ONE number governs both sticky siblings. The strip is pinned to it
-     with min-height and the player offsets by it, so they cannot drift
-     apart -- which they had: the player was written against an assumed
-     64px strip and the real one measures 92px (video stops carry a
-     timestamp under the text), so the player overlapped its bottom
-     28px whenever both were stuck. Two hand-kept numbers is how that
-     happens; one token is how it stops. */
-  /* A FALLBACK only. PassageLine measures the strip and publishes the
-     real height as --anl-strip-h on this element (ResizeObserver), so
-     the player's offset tracks a stop that grows a badge instead of
-     covering the bottom of the line -- which a hand-kept number did,
-     twice. */
-  .anl-results { --anl-strip-h: 92px; }
-
-  .anl-line--strip {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    flex-direction: row;
-    gap: 0;
-    min-height: var(--anl-strip-h);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
+  .anl-line {
+    max-height: 170px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     scrollbar-width: thin;
-    padding: 10px 0 12px;
-    background: linear-gradient(180deg,
-      var(--bg-main) 0%, var(--bg-main) 78%, transparent 100%);
-  }
-  /* The strip has no room for a 28px pin beside an 88px stop -- .anl-line
-     itself becomes the row axis here, so .anl-stop-row is the flex item
-     that needs the sizing .anl-stop used to carry alone. */
-  .anl-line--strip .anl-stop-row {
-    flex: 0 0 auto;
-  }
-  .anl-line--strip .anl-stop {
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    width: 88px;
-    padding: 22px 6px 8px;
-  }
-  /* Hidden, not removed: pinning still works by text when reopened
-     from the vertical route map or 運行履歴; the strip's job is
-     "where am I", the same reasoning .anl-stop__done below already
-     uses to hide itself here. */
-  .anl-line--strip .anl-keep { display: none; }
-  /* The rail runs left-right now, threaded through the markers. */
-  .anl-line--strip .anl-stop__rail {
-    left: -50%;
-    right: -50%;
-    top: 12px;
-    bottom: auto;
-    width: auto;
-    height: 3px;
-  }
-  .anl-line--strip .anl-stop--first .anl-stop__rail { left: 50%; }
-  .anl-line--strip .anl-stop--last  .anl-stop__rail { right: 50%; }
-  .anl-line--strip .anl-stop__marker { left: 50%; top: 6px; margin: 0 0 0 -6px; }
-  .anl-line--strip .anl-stop__text {
-    width: 100%;
-    text-align: center;
-    font-size: 0.78rem;
-  }
-  /* The strip stacks text, the foreign/i+1 badge, and the timestamp
-     vertically already in an 88px column -- a fourth stacked badge
-     reads as clutter in a band whose job is "where am I", not "what
-     have I read". The vertical route map is where scanning for 済
-     happens; hide it here rather than shrink everyone else. */
-  .anl-line--strip .anl-stop__done { display: none; }
-
-  /* Under the strip, not over it, and below it in z. Offset by the
-     strip's own height token above rather than a second hand-kept
-     number. */
-  .anl-player {
-    position: sticky;
-    top: var(--anl-strip-h);
-    z-index: 4;
-    background: var(--bg-main);
-    padding-bottom: 8px;
+    padding-right: var(--sp-1);
   }
 }
 
@@ -1914,61 +2375,6 @@
   color: var(--text-secondary);
 }
 
-/* ── The folded intake ──
-   Once a Passage is on screen the intake collapses to this bar, so the
-   breakdown gets the height a full writing slip was taking. */
-.anl-reopen {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  color: var(--text-secondary);
-  text-align: left;
-  transition: color 0.16s ease, border-color 0.16s ease;
-}
-.anl-reopen:hover { color: var(--text-primary); border-color: var(--line-kaiseki); }
-.anl-reopen__jp {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: 0.08em;
-  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
-}
-.anl-reopen__label { flex: 1; font-size: 0.86rem; }
-.anl-reopen__go { flex-shrink: 0; color: var(--line-kaiseki); }
-
-.anl-reopen-row { display: flex; gap: 10px; align-items: stretch; }
-.anl-reopen-row .anl-reopen { flex: 1; }
-
-/* 出場 — leaving the gate. Secondary to 改札 by construction: clearing
-   is the rarer, more destructive of the two, so it is the quieter
-   control even though both sit on the same row. */
-.anl-clear {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: var(--anl-pad-block) 14px;
-  background: transparent;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--anl-radius);
-  color: var(--text-secondary);
-  /* WCAG 2.5.8: 24x24 CSS px minimum for a pointer target. This lands
-     well above it; do not shrink the padding without re-measuring. */
-  min-width: 64px;
-  min-height: 44px;
-  transition: color 0.14s ease, border-color 0.14s ease;
-}
-.anl-clear:hover { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
-.anl-clear__jp { font-family: var(--font-jp); font-size: 0.8rem; white-space: nowrap; }
-.anl-clear__label { font-family: var(--font-display); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
-
-@media (prefers-reduced-motion: reduce) {
-  .anl-clear { transition: none; }
-}
-
 /* The 区間 disclosure — optional, and blank means the whole Track. */
 .anl-window-set > summary {
   font-family: var(--font-display);
@@ -1981,7 +2387,6 @@
 .anl-window-set .anl-window { margin-top: 12px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .anl-reopen,
   .anl-mine__options { transition: none; }
 }
 
@@ -2034,19 +2439,36 @@
   letter-spacing: 0.04em;
 }
 .anl-deckpicker__deck {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
   width: 100%;
-  padding: 11px 4px;
+  min-height: 44px;
+  padding: var(--sp-4) var(--sp-3);
   background: none;
   border: none;
   border-bottom: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
   color: var(--text-primary);
   font-size: 0.95rem;
   text-align: left;
-  transition: color 0.16s ease;
+  transition: color 0.16s ease, background 0.16s ease;
 }
 .anl-deckpicker__deck:last-child { border-bottom: none; }
-.anl-deckpicker__deck:hover { color: var(--line-kaiseki); }
+.anl-deckpicker__deck:hover { color: var(--line-kaiseki); background: var(--overlay-hover); }
+.anl-deckpicker__name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* Where a bare press would have gone: the remembered deck. */
+.anl-deckpicker__deck--current {
+  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
+  background: color-mix(in srgb, var(--line-kaiseki) 8%, transparent);
+}
+.anl-deckpicker__mark { flex-shrink: 0; color: var(--success); }
 .anl-deckpicker__create { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .anl-deckpicker__create .anl-field { flex: 1; min-width: 160px; }
 
@@ -3045,12 +3467,16 @@
   --fs-specimen-glyph: 6.5rem;   /* 104px — ONE character, kana or kanji */
   --fs-specimen-word:  4.5rem;   /* 72px  — a word or a short phrase     */
 
-  /* The three that must breathe with the viewport. These are the
-     existing clamps lifted verbatim from the reference screens, so
-     they are tokens for what is already there, not new behaviour. */
+  /* The clamps that must breathe with the viewport. The first three
+     are the existing clamps lifted verbatim from the reference
+     screens; --fs-sentence-fluid is the analyzer mockup's own reading
+     size (.sent__jp), adopted verbatim at the owner's direction
+     (2026-09-01) — the heading clamp above it proved too heavy for a
+     line meant to be READ rather than announced. */
   --fs-heading-fluid: clamp(1.35rem, 1.1rem + 1vw, 1.75rem);
   --fs-board-fluid:   clamp(1.5rem, 1.1rem + 1.4vw, 2rem);
   --fs-display-fluid: clamp(1.9rem, 1.4rem + 2.2vw, 3.1rem);
+  --fs-sentence-fluid: clamp(1.15rem, 1rem + 0.8vw, 1.5rem);
 
   /* ── 字間 — tracking ──────────────────────────────────────
      Four values, assigned by register rather than by taste. Any line
@@ -3833,6 +4259,64 @@ button:focus-visible {
   line-height: 1.4;
   letter-spacing: 0.16em;
   color: color-mix(in srgb, var(--rail) 62%, var(--text-secondary));
+}
+
+/* A plain-language-first title with the Japanese name as its quiet
+   second register — the analyser's cards use this; every other caller
+   keeps the bare serif title. */
+.platform-card__titlerow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.platform-card__titlerow .platform-card__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  letter-spacing: 0.02em;
+}
+.platform-card__titlejp {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+}
+
+/* The right-hand column a wide card must earn (DESIGN.md's density
+   contract): the learner's own record on this platform, behind a
+   hairline, figures set the way every figure in the app is set. */
+.platform-card__aside {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-7) var(--sp-5);
+  border-left: 1px solid var(--surface-line);
+  min-width: 116px;
+}
+.platform-card__figure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sp-1);
+}
+.platform-card__num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-heading);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.platform-card__num--date { font-size: var(--fs-body); }
+.platform-card__cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 .platform-card__go,
@@ -15007,6 +15491,11 @@ textarea:focus-visible {
 .phrase-word-card__surface-wrap--clickable:active { transform: scale(0.97); }
 .phrase-word-card__surface { font-size: 22px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .phrase-word-card__reading { font-size: 14px; color: var(--text-secondary); margin-left: 8px; }
+/* The brackets are presentation, not content: the analyser's stage
+   card suppresses them (reading sits ABOVE the word there), and a
+   screen reader needn't announce punctuation either way. */
+.phrase-word-card__reading::before { content: '('; }
+.phrase-word-card__reading::after { content: ')'; }
 .phrase-word-card__pos { font-size: 11px; color: var(--text-secondary); margin-left: 8px; text-transform: uppercase; }
 .phrase-word-card__meaning { font-size: 15px; margin-top: 6px; }
 
@@ -15288,6 +15777,182 @@ textarea:focus-visible {
   font-size: 12px;
   color: var(--text-secondary);
   margin-top: 10px;
+}
+
+/* ── The analyser's stage card (the mockup round) ──
+   The same TokenCard dealt out above, grown to the analyser's stage:
+   stacked and centred, the reading over the word, the word in the
+   serif at a size worth stepping for. Scoped overrides on the shared
+   markup, not a copied card — and placed HERE, after the base rules
+   they override, so the cascade reads top to bottom instead of
+   winning on specificity tricks. Tokens only; the pixel bases above
+   predate the scale. */
+.anl-stagebd .rdg-breakdown-card-row {
+  max-width: none;
+  /* Stretch, not center: the nav columns frame the card at its full
+     height (the mockup's slim ‹ › rails), whatever the card wraps to. */
+  align-items: stretch;
+  gap: var(--sp-5);
+}
+.anl-stagebd .rdg-breakdown-card-stage { flex: 1 1 auto; }
+/* Three classes, not two: the base .rdg-breakdown-nav:not(:disabled)
+   :hover above outranks a two-class override, and the ratchet rightly
+   wants same-key selectors in ascending order. */
+.anl-stagebd .rdg-breakdown-card-row .rdg-breakdown-nav {
+  width: 40px;
+  height: auto;
+  align-self: stretch;
+  border-radius: var(--anl-radius);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  color: var(--text-secondary);
+  box-shadow: none;
+}
+.anl-stagebd .rdg-breakdown-nav:not(:disabled):hover {
+  background: var(--overlay-hover);
+  border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line));
+  color: var(--text-primary);
+}
+.anl-stagebd .rdg-breakdown-nav:not(:disabled):active { transform: none; }
+.anl-stagebd .phrase-word-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  /* The mockup's card rhythm (tok__card: gap sp-2, padding sp-5
+     sp-4), not the roomier sp-7 the first cut used — the card holds
+     five small things and the air between them was reading as empty
+     stage. */
+  gap: var(--sp-2);
+  padding: var(--sp-5) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+}
+.anl-stagebd .phrase-word-card__top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.anl-stagebd .phrase-word-card__surface-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.anl-stagebd .phrase-word-card__surface {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-display-fluid);
+  line-height: 1.2;
+  letter-spacing: var(--tr-name);
+  text-indent: var(--tr-name);
+  color: var(--text-primary);
+}
+/* The stage card carries no detached reading line any more — the
+   reading rides the word as ruby (FuriganaParts), per kanji, exactly
+   like the sentence pane. The rt inherits the sheet's ruby styling. */
+.anl-stagebd .phrase-word-card__surface rt {
+  font-weight: 400;
+  letter-spacing: var(--tr-term);
+}
+/* The list layout's affordances come OFF in the stage: the dotted
+   rule and the sumi hover belong to the diagnostic card, not the
+   mockup's clean one — a quiet overlay says "tappable" here. */
+.anl-stagebd .phrase-word-card__surface-wrap--clickable .phrase-word-card__surface {
+  text-decoration: none;
+}
+.anl-stagebd .phrase-word-card__surface-wrap--clickable:hover {
+  background: var(--overlay-hover);
+  color: inherit;
+}
+/* The mockup's tok__row: pos · state · action on one line. */
+.anl-stagebd .anl-tokrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+}
+/* The state badge in the mockup's stbadge dress: tiny caps, 700,
+   still coloured by the same STATUS_COLORS pill variable. */
+.anl-stagebd .status-pill {
+  padding: var(--sp-1) var(--sp-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  border-radius: var(--r-plate);
+}
+/* The one action, in the mockup's minebtn dress. */
+.anl-stagebd .analysis-mine-btn {
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: border-color 0.14s ease, background 0.14s ease;
+}
+.anl-stagebd .analysis-mine-btn:hover {
+  border-color: color-mix(in srgb, var(--success) 50%, var(--surface-line));
+  background: var(--overlay-hover);
+}
+/* POS as the mockup's small framed chip, not a floating word. */
+.anl-stagebd .phrase-word-card__pos {
+  margin-left: 0;
+  padding: var(--sp-1) var(--sp-2);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  line-height: 1;
+}
+.anl-stagebd .phrase-word-card__meaning { margin-top: 0; }
+.anl-stagebd .phrase-word-card__meaning:empty { display: none; }
+.anl-stagebd .phrase-word-card__kanji-row { justify-content: center; margin-top: var(--sp-2); }
+/* The mockup's kchip: a glyph and its meaning in a quiet frame ON the
+   surface — not the list layout's sumi box, whose panel ground and
+   stuffed-in controls are what overflowed the stage card. A <button>
+   in the stage (the whole surface is the control), hence the font and
+   cursor resets. */
+.anl-stagebd .phrase-kanji-chip {
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--anl-radius);
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.14s ease, background 0.14s ease;
+}
+.anl-stagebd .phrase-kanji-chip:hover {
+  border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line));
+  background: var(--overlay-hover);
+}
+.anl-stagebd .phrase-kanji-chip__char {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  color: var(--text-primary);
+}
+/* The glyph is a plain span here (the chip is the button), so the
+   list layout's per-glyph affordances must not bleed in. */
+.anl-stagebd .phrase-kanji-chip__char:hover { text-decoration: none; }
+.anl-stagebd .phrase-kanji-chip__char:active { transform: none; }
+.anl-stagebd .phrase-kanji-chip__level {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
 }
 
 /* Frequency-tier "jump to tier" row, below the fetched tier list — see

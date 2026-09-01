@@ -95,6 +95,7 @@ export function MineButton({ mining, kind, disabled, disabledReason, label, succ
       {showPicker && (
         <DeckPicker
           decks={mining.decksFor(kind)}
+          currentId={mining.targetFor(kind)?.id ?? null}
           t={t}
           onClose={() => setShowPicker(false)}
           onSelect={mine}

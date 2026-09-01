@@ -1,6 +1,12 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { PassageLine } from './PassageLine'
+// The 24px-target case measures the pin's REAL box, which lives in
+// the stylesheet (.anl-keep is 28x28 by rule). It used to pass without
+// this import only because the pin's old 保存 label happened to be two
+// CJK glyphs wide; the +/✓ glyph is not, and an unstyled measurement
+// of it asserts nothing about what ships.
+import '../../index.css'
 
 // Retargeted from components/video/Transcript.browser.test.jsx by plan
 // 028: the flat transcript became the 路線図, and these three cases are

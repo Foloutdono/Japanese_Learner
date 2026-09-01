@@ -48,8 +48,21 @@ import { useReportPlatformCount } from './platformCount'
  *       is invalid HTML that browsers resolve by dropping one of them.
  *       The wrapper below exists only to position the two.
  *   onSelect(key) — called when a card is chosen
+ *   unit — whether the 番線 unit prints under the platform number on
+ *     a numbered (non-service) card. Default true. The analyser's
+ *     source picker turns it off: its navigation is deliberately
+ *     plain-language-first, and 番線 was the one Japanese word left
+ *     captioning a roundel that reads fine from the ring alone.
+ *     jp     — optional Japanese name set as a quiet accent beside the
+ *       title (the analyser's cards lead with the plain-language name
+ *       and keep 文字/写真/動画 as the secondary register).
+ *     aside  — optional node for a right-hand column behind a
+ *       hairline. DESIGN.md's density contract: a card wider than
+ *       ~440px must EARN its width with a right-hand column (meta, a
+ *       figure, a status) — this is that column. The analyser puts
+ *       the learner's own record on each platform there.
  */
-export default function ModeSelector({ modes, onSelect }) {
+export default function ModeSelector({ modes, onSelect, unit = true }) {
   const { t } = useLang()
   useReportPlatformCount(modes.length)
 
@@ -83,18 +96,23 @@ export default function ModeSelector({ modes, onSelect }) {
               ) : (
                 <>
                   <span className="platform-card__no">{i + 1}</span>
-                  <span className="platform-card__unit" lang="ja">番線</span>
+                  {unit && <span className="platform-card__unit" lang="ja">番線</span>}
                 </>
               )}
             </span>
 
             <span className="platform-card__body">
-              <span className="platform-card__title">{m.label}</span>
+              <span className="platform-card__titlerow">
+                <span className="platform-card__title">{m.label}</span>
+                {m.jp && <span className="platform-card__titlejp" lang="ja">{m.jp}</span>}
+              </span>
               {m.desc && <span className="platform-card__desc">{m.desc}</span>}
               {m.sample && (
                 <span className="platform-card__sample" lang="ja" aria-hidden="true">{m.sample}</span>
               )}
             </span>
+
+            {m.aside && <span className="platform-card__aside">{m.aside}</span>}
 
             <span className="platform-card__go" aria-hidden="true">▶</span>
           </button>

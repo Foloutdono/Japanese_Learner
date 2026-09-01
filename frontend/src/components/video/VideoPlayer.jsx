@@ -11,7 +11,12 @@ const POLL_MS = 250
 // pausing when the learner taps a word) and reports the current
 // playback time upward via onTimeUpdate, polled rather than push-driven
 // since the IFrame API has no time-update event of its own.
-export const VideoPlayer = forwardRef(function VideoPlayer({ videoId, onTimeUpdate }, ref) {
+// `onPlayingChange` (optional) reports whether the video is actually
+// playing -- the IFrame's own truth, not a guess kept beside it. The
+// analyser's transport bar needs it: a play/pause control that tracks
+// its own boolean drifts the moment the learner uses the iframe's
+// native controls instead.
+export const VideoPlayer = forwardRef(function VideoPlayer({ videoId, onTimeUpdate, onPlayingChange }, ref) {
   const containerRef = useRef(null)
   const playerRef = useRef(null)
   const intervalRef = useRef(null)
@@ -32,6 +37,10 @@ export const VideoPlayer = forwardRef(function VideoPlayer({ videoId, onTimeUpda
               }
             }, POLL_MS)
           },
+          // YT.PlayerState.PLAYING is 1; everything else (paused,
+          // buffering, cued, ended) reads as "not playing", which is
+          // exactly what a play/pause toggle wants to display.
+          onStateChange: e => onPlayingChange?.(e.data === 1),
         },
       })
     })

@@ -24,12 +24,33 @@ vi.mock('./useMining', async importOriginal => ({
   useMining: () => ({ decks: [], mineApp: vi.fn(), mineCloze: vi.fn() }),
 }))
 vi.mock('../video/VideoPlayer', () => ({ VideoPlayer: () => <div /> }))
+// The screen now opens on the selection screen, and the platform choice
+// goes through the boarding store so TrainDoor can play over the commit.
+// The door lives in App, not in this tree, so an unmocked board() would
+// park the commit forever; committing synchronously is exactly what the
+// door itself does under prefers-reduced-motion.
+vi.mock('../../stores/boarding', () => ({ board: commit => commit() }))
 
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: AnalyzerScreen } = await import('../../screens/AnalyzerScreen')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
+
+// Board platform `key` from wherever the screen currently is. The tab
+// rail is gone: the gate's platform cards are the ONLY way onto a
+// platform, and the workbench's stub strip is the way back to them.
+// The cards render in registry order, so the nth card IS the nth
+// source — which is itself part of what these tests pin.
+async function boardPlatform(screen, key) {
+  if (!screen.container.querySelector('.platform-card')) {
+    screen.container.querySelector('.anl-stub__change').click()
+    await settle(30)
+  }
+  const idx = SOURCES.findIndex(s => s.key === key)
+  screen.container.querySelectorAll('.platform-card')[idx].click()
+  await settle(60)
+}
 
 describe('the source registry', () => {
   it('names locale keys that exist in BOTH tables', () => {
@@ -61,11 +82,12 @@ describe('the source registry', () => {
     await settle(120)
 
     for (const s of SOURCES) {
-      screen.container.querySelector(`#anl-tab-${s.key}`).click()
-      await settle(60)
+      await boardPlatform(screen, s.key)
 
-      const panel = screen.container.querySelector('[role="tabpanel"]')
-      expect(panel, `${s.key} has no panel`).not.toBeNull()
+      // Exactly one intake panel in the DOM — the boarded platform's.
+      const panels = screen.container.querySelectorAll('[id^="anl-panel-"]')
+      expect(panels.length, `${s.key} should mount one panel`).toBe(1)
+      const panel = panels[0]
       expect(panel.id).toBe(`anl-panel-${s.key}`)
       // The head proves the registry drives it; a control proves there
       // is an intake under the head rather than a bare title.
@@ -77,7 +99,7 @@ describe('the source registry', () => {
     }
   })
 
-  it('shows 運行履歴 exactly where the registry says it applies', async () => {
+  it('shows 運行履歴 on the concourse, and nowhere else', async () => {
     const screen = await render(
       <LangProvider>
         <MemoryRouter>
@@ -87,13 +109,17 @@ describe('the source registry', () => {
     )
     await settle(120)
 
+    // The one merged list lives on the selection screen (the mockup
+    // round moved it there): a recent Passage is one tap from the
+    // front door, not buried under a finished analysis.
+    expect(screen.container.querySelector('.anl-history')).not.toBeNull()
+
     for (const s of SOURCES) {
-      screen.container.querySelector(`#anl-tab-${s.key}`).click()
-      await settle(60)
+      await boardPlatform(screen, s.key)
       expect(
-        Boolean(screen.container.querySelector('.anl-history')),
-        `${s.key} history should be ${s.history}`,
-      ).toBe(s.history)
+        screen.container.querySelector('.anl-history'),
+        `${s.key} workbench should not carry the history panel`,
+      ).toBeNull()
     }
   })
 })

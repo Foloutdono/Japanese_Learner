@@ -19,38 +19,20 @@ import { formatTimecode } from '../../lib/timecode'
 // on the line itself, because it is the app's highest-value signal and
 // it used to be a badge you had to scroll to.
 //
-// Two orientations, one component, so nothing can disagree about where
-// you are: 'vertical' is the route map beside the stage, 'strip' is the
-// stopping-pattern band above a train door. Plan 030 chooses between
-// them responsively.
+// ONE orientation, on purpose. The mockup draws the Passage exactly
+// one way — the vertical route map — at every width; below the split
+// breakpoint the whole rail column simply stacks above the stage. The
+// horizontal stopping-pattern band (plan 030's 'strip') is retired
+// with the mockup fidelity pass (2026-09-01), along with the measured
+// --anl-strip-h machinery that existed only to keep two sticky
+// siblings from overlapping.
 
-export function PassageLine({ sentences, activeIndex, onSelect, t, orientation = 'vertical', scrollOnChange = true, kept, onKeep }) {
+export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChange = true, kept, onKeep }) {
   const activeRef = useRef(null)
-  const lineRef = useRef(null)
   const stopRefs = useRef({})
 
-  // The strip and the video player are two sticky siblings, so the
-  // player has to sit exactly one strip-height down or it covers the
-  // bottom of the line. That offset was a hand-kept 92px and was wrong
-  // the moment a stop grew a badge -- measured here instead, and
-  // published as a custom property the player's rule reads. One source
-  // of truth, and it cannot go stale.
-  useEffect(() => {
-    const el = lineRef.current
-    if (!el || orientation !== 'strip') return undefined
-    const target = el.parentElement
-    if (!target) return undefined
-    const publish = () => target.style.setProperty('--anl-strip-h', `${Math.ceil(el.offsetHeight)}px`)
-    publish()
-    const ro = new ResizeObserver(publish)
-    ro.observe(el)
-    return () => { ro.disconnect(); target.style.removeProperty('--anl-strip-h') }
-  }, [orientation])
-
   // Playback moves the active stop without a click, so the line has to
-  // follow. 'nearest' is what makes this correct in BOTH orientations --
-  // it scrolls the axis that actually overflows and leaves the other
-  // alone.
+  // follow. 'nearest' scrolls only the axis that actually overflows.
   useEffect(() => {
     if (!scrollOnChange) return
     const el = activeRef.current
@@ -86,8 +68,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
 
   return (
     <div
-      ref={lineRef}
-      className={`anl-line${orientation === 'strip' ? ' anl-line--strip' : ''}`}
+      className="anl-line"
       // role="group", NOT role="list". A list wants role="listitem"
       // children, and putting that on a <button> OVERRIDES the button
       // role -- assistive tech would announce these as list items, not
@@ -111,9 +92,9 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
             <button
               // Roving tabindex: ONE tab stop for the whole line, then the
               // arrow keys move within it. Without this a 47-cue subtitle
-              // track put 47 tab stops between the platform rail and the
-              // breakdown -- the exact pattern SourceRail one component up
-              // already uses, and which this component was written without.
+              // track put 47 tab stops between the intake and the
+              // breakdown -- this component was originally written
+              // without it and paid exactly that cost.
               tabIndex={active ? 0 : -1}
               ref={el => {
                 stopRefs.current[i] = el
@@ -133,6 +114,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
                 t.stopNumber(i + 1, sentences.length),
                 s.text,
                 s.foreign ? t.notJapaneseShort : null,
+                !s.foreign && s.level ? s.level : null,
                 !s.foreign && s.unknown_count === 1 ? t.iPlusOne : null,
                 s.explanation ? t.alreadyExplained : null,
                 s.cue_start != null ? formatTimecode(s.cue_start) : null,
@@ -159,8 +141,18 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
                 <span className="anl-stop__foreign" title={t.notJapaneseLine} aria-hidden="true">
                   {t.notJapaneseShort}
                 </span>
-              ) : s.unknown_count === 1 && (
-                <span className="anl-stop__iplus" title={t.iPlusOne} aria-hidden="true">i+1</span>
+              ) : (
+                <>
+                  {/* The Sentence's own JLPT grade -- the quietest badge
+                      on the stop, because it is context, not a call to
+                      action the way i+1 is. */}
+                  {s.level && (
+                    <span className="anl-stop__lvl" aria-hidden="true">{s.level}</span>
+                  )}
+                  {s.unknown_count === 1 && (
+                    <span className="anl-stop__iplus" title={t.iPlusOne} aria-hidden="true">i+1</span>
+                  )}
+                </>
               )}
 
               {/* 済 — already explained. The deep tier is the one thing on
@@ -188,6 +180,11 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
               )}
             </button>
             {onKeep && (
+              // + / ✓ rather than the 保存 it used to print: the pin is
+              // navigation, and the workbench's controls went
+              // plain-language-first with the mockup round. The glyphs
+              // need no language at all; the localized aria-label and
+              // title still carry the words.
               <button
                 type="button"
                 className={`anl-keep${isKept ? ' anl-keep--on' : ''}`}
@@ -196,7 +193,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, orientation =
                 title={isKept ? t.unkeepSentence : t.keepSentence}
                 onClick={() => onKeep(i)}
               >
-                <span lang="ja" aria-hidden="true">保存</span>
+                <span aria-hidden="true">{isKept ? '✓' : '+'}</span>
               </button>
             )}
           </div>

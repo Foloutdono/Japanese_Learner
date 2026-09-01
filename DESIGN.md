@@ -50,6 +50,16 @@ transliteration**. `解析` pairs with `ANALYZER`, not with `KAISEKI`.
 Where a screen has no real Japanese term, it gets no pair — do not invent one,
 and do not fall back to the unpaired serif heading, which is a retired form.
 
+**One standing exception, decided deliberately (2026-09-01)**: the analyzer's
+*navigation* is Latin-first. The station plate keeps the full pair (解析 over
+ANALYZER), and Japanese stays on the content and the small accents — but the
+controls, the platform cards, the working rail and the history head lead with
+the learner's own language and carry the Japanese as the quiet second register
+(`History 運行履歴`, `Texte 文字`). The reasoning: a learner picking an intake
+or filtering sentences should not need vocabulary to operate the tool that
+teaches it. Owner-directed in the analyzer mockup round. Do not cite it as
+precedent for other stations without the same argument.
+
 There is a second top-level rule, below, that outranks this one where they
 collide — see "Say less."
 

@@ -1,8 +1,8 @@
 {
   "declaration-block-no-duplicate-properties::Duplicate property \"align-items\"": 1,
   "declaration-block-no-duplicate-properties::Duplicate property \"white-space\"": 1,
-  "declaration-block-no-redundant-longhand-properties::Expected shorthand property \"inset\"": 4,
   "declaration-block-no-redundant-longhand-properties::Expected shorthand property \"gap\"": 1,
+  "declaration-block-no-redundant-longhand-properties::Expected shorthand property \"inset\"": 3,
   "declaration-property-value-keyword-no-deprecated::Deprecated keyword \"break-word\" for property \"word-break\"": 6,
   "function-url-quotes::Expected quotes around \"url\" function argument": 2,
   "keyframes-name-pattern::Expected keyframe name \"burgerFade\" to be kebab-case": 1,
@@ -15,7 +15,7 @@
   "no-descending-specificity::Expected selector \".onb-action:disabled\" to come before selector \".onb-action:hover:not(:disabled)\", at line N": 1,
   "no-descending-specificity::Expected selector \".onb-seg__btn:focus-visible\" to come before selector \".onb-seg__btn:hover:not(.onb-seg__btn--on)\", at line N": 1,
   "no-descending-specificity::Expected selector \"*\" to come before selector \".analyzer > *\", at line N": 2,
-  "no-descending-specificity::Expected selector \"button\" to come before selector \".onb-preview-bar button\", at line N": 1,
+  "no-descending-specificity::Expected selector \"button\" to come before selector \".anl-trow > button\", at line N": 1,
   "no-descending-specificity::Expected selector \"button:hover\" to come before selector \".onb-preview-bar button:hover\", at line N": 1,
   "no-descending-specificity::Expected selector \"button:focus-visible\" to come before selector \".onb-preview-bar button:hover\", at line N": 1,
   "no-descending-specificity::Expected selector \".platform-card\" to come before selector \".platform-card:nth-child(1)\", at line N": 1,

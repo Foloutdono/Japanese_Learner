@@ -12,7 +12,11 @@ import { CrossIcon } from '../ui/Icons'
 // single-kanji headline -- which wrapped "Choisir un deck" onto two
 // lines and made the dialog look broken. A dialog title is not a
 // specimen, so it has its own modest size now.
-export function DeckPicker({ decks, t, onClose, onSelect, onCreate }) {
+//
+// `currentId` (optional) marks the deck a press outside the picker
+// would have targeted — the remembered deck for this kind — so the
+// list answers "where did my last one go" at a glance.
+export function DeckPicker({ decks, t, onClose, onSelect, onCreate, currentId = null }) {
   const dialogRef = useDialog(onClose)
   const [creating, setCreating] = useState(false)
   const [name, setName] = useState('')
@@ -47,9 +51,13 @@ export function DeckPicker({ decks, t, onClose, onSelect, onCreate }) {
               key={d.id}
               type="button"
               onClick={() => onSelect(d.id)}
-              className="anl-deckpicker__deck"
+              className={`anl-deckpicker__deck${d.id === currentId ? ' anl-deckpicker__deck--current' : ''}`}
+              aria-current={d.id === currentId ? 'true' : undefined}
             >
-              {d.name}
+              <span className="anl-deckpicker__name">{d.name}</span>
+              {d.id === currentId && (
+                <span className="anl-deckpicker__mark" aria-hidden="true">✓</span>
+              )}
             </button>
           ))}
         </div>
