@@ -1238,6 +1238,68 @@ class SRSEngine:
                 (count,) = cur.fetchone()
         return int(count)
 
+    def get_journey_item_counts(
+        self,
+        user_id: str,
+        since,
+        levels: list[str],
+        include_kana: bool,
+        window_days: int = 14,
+    ) -> dict[str, int]:
+        """
+        The ghost train's two facts (plan 063): distinct ITEMS whose
+        first-ever review happened (a) since `since` and (b) inside the
+        last `window_days` calendar days. Same firsts CTE, servable-modes
+        budget and UTC day boundary as get_new_items_today — "new" means
+        one thing app-wide.
+
+        Restricted to the content a journey promise actually covers:
+        vocab/kanji/grammar cards of the given `levels` (the id grammar
+        is category_level_..., see get_daruma_facts' category note),
+        plus kana glyph cards when `include_kana`. Custom decks and
+        off-journey levels never move the train — otherwise the promise
+        would be payable in coin it never priced.
+
+        `since` may be None (no goal set): the since-count then means
+        "ever", which is what the pace-only pass back reports against.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        raw = "split_part(card_id, ':', 2)"
+        cat = f"split_part({raw}, '_', 1)"
+        lvl = f"split_part({raw}, '_', 2)"
+        scope = f"({cat} = ANY(%s) AND {lvl} = ANY(%s))"
+        if include_kana:
+            scope += f" OR {cat} = 'kana'"
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
+                    WITH firsts AS (
+                        SELECT card_id, MIN(reviewed_at) AS first_at
+                        FROM review_log
+                        WHERE card_id LIKE %s{mode_sql}
+                          AND ({scope})
+                        GROUP BY card_id
+                    )
+                    SELECT
+                      COUNT(*) FILTER (WHERE first_at >= COALESCE(%s, '-infinity'::timestamptz)),
+                      COUNT(*) FILTER (WHERE first_at >=
+                        date_trunc('day', NOW()) - make_interval(days => %s))
+                    FROM firsts
+                """
+                # window_days calendar days INCLUDING today's partial one
+                # — 13 full past days + today for the default 14, matching
+                # how the UTC day boundary makes "today" mean one thing.
+                params = (
+                    (pattern,)
+                    + mode_params
+                    + (["vocab", "kanji", "grammar"], list(levels), since, window_days - 1)
+                )
+                self._log_sql("get_journey_item_counts", sql, params)
+                cur.execute(sql, params)
+                items_done, new_in_window = cur.fetchone()
+        return {"items_done": int(items_done), "new_in_window": int(new_in_window)}
+
     # ── Daruma goal facts ─────────────────────────────────────
     # Everything srs/daruma.py's goal catalogue can be measured against,
     # in four round trips rather than one per goal — the pool is sampled

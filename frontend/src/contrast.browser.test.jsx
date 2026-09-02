@@ -310,6 +310,74 @@ const Fixture = () => (
         answer
       </button>
     </div>
+
+    {/* ── Plan 063 — the goal line (onboarding board, pass, journey) ──
+        The 行先 board and the 定期券/journey surfaces are sumi in both
+        themes; their gold, state and gold-tint inks are exactly the
+        pairs part 1's contract cannot see. Like the wall map above,
+        the real panels paint gradients/shadows the ground-walker
+        cannot composite, so the sumi is pinned inline to the token it
+        resolves to. Status TEXT reads --jour-st-ink (the pigment
+        mixed toward the panel ink — raw --danger on sumi measures
+        ~2.6:1); the cars, rails and bracket lines keep the raw
+        pigment, being graphics, not text. */}
+    <div className="onb" data-step="goal">
+      <div className="onb-board" style={{ background: 'var(--bg-panel)' }}>
+        <span className="onb-board__clock ob-clock"><span lang="ja">目標</span> 2 sept. ’27</span>
+        <button type="button" className="onb-board__row">
+          <span className="onb-board__svc-name">
+            <span className="onb-board__reco ob-reco" lang="ja">推奨</span>
+          </span>
+          <span className="onb-board__eta">
+            2 sept. ’27
+            <span className="onb-board__late ob-late" lang="ja">遅</span>
+          </span>
+        </button>
+        <div className="onb-board__row onb-board__row--charter onb-board__row--yours">
+          <span className="onb-board__pace ob-yours-pace">12</span>
+        </div>
+        <div className="onb-board__row onb-board__row--void">
+          <span className="onb-board__pace ob-void-pace">47</span>
+          <span className="onb-board__eta ob-void-eta" lang="ja">運休</span>
+        </div>
+        <div className="onb-board__notice">
+          <p className="onb-board__notice-line ob-notice">no service</p>
+        </div>
+      </div>
+      <button type="button" className="onb-dest__chip" aria-pressed="true">
+        <span className="onb-dest__roundel ob-dest-on">N3</span>
+      </button>
+      <div className="onb-form">
+        <button type="button" className="onb-form__chip ob-dep-on" aria-pressed="true">
+          <span lang="ja">夜</span>21:00
+        </button>
+      </div>
+      <div className="onb-ride">
+        <div className="onb-ride__won">
+          <span className="ob-won-body">honest rating <strong className="ob-won-strong">taken</strong></span>
+        </div>
+      </div>
+      <div className="onb-promise jour-st--delayed" style={{ background: 'var(--bg-panel)' }}>
+        <span className="onb-promise__status"><b className="ob-promise-b" lang="ja">遅延</b></span>
+      </div>
+      <div className="onb-pass" style={{ background: 'var(--bg-panel)' }}>
+        <span className="onb-pass__v onb-pass__v--gold ob-pass-gold">2 sept. ’27</span>
+      </div>
+    </div>
+    <div className="jour-st--delayed" style={{ background: 'var(--bg-panel)' }}>
+      <div className="jour-line">
+        <span className="jour-line__status"><b className="jr-status-b" lang="ja">遅延</b></span>
+        <span className="jour-line__validity"><b className="jr-validity-b">2 sept. ’27</b></span>
+      </div>
+      <div className="jour-track">
+        <span className="jour-track__span">
+          <span className="jour-track__gap" style={{ left: '10%', width: '40%' }}>
+            <b className="jr-gap-b">+400 jours</b>
+          </span>
+        </span>
+      </div>
+      <p className="jour-rev__error jr-error">error line</p>
+    </div>
   </div>
 )
 
@@ -358,6 +426,25 @@ const SITES = [
   ['.deck-card__type', 'deck card type label'],
   ['.decks-type-btn__desc', 'deck type chooser description'],
   ['.decks-type-btn__label', 'deck type chooser label'],
+
+  // Plan 063 — the goal line's sumi surfaces and tinted chips.
+  ['.ob-clock', 'departure board clock (gold on sumi)'],
+  ['.ob-reco', 'departure board 推奨 badge (gold on sumi)'],
+  ['.ob-late', 'departure board 遅 mark (amber on sumi)'],
+  ['.ob-yours-pace', 'charter row pace (kinari on gold tint)'],
+  ['.ob-void-pace', 'voided charter pace (state ink on sumi)'],
+  ['.ob-void-eta', 'voided charter 運休 (state ink on sumi)'],
+  ['.ob-notice', '運休 notice line (amber on sumi)'],
+  ['.ob-dest-on', 'chosen destination roundel (kinari on accent fill)'],
+  ['.ob-dep-on', 'chosen departure chip (ink on accent tint)'],
+  ['.ob-won-body', 'first-ride won line (soft ink on success tint)'],
+  ['.ob-won-strong', 'first-ride won strong (ink on success tint)'],
+  ['.ob-promise-b', 'promise status word (state ink on sumi)'],
+  ['.ob-pass-gold', 'printed pass 有効期限 (gold on sumi)'],
+  ['.jr-status-b', 'pass footer status word (state ink on sumi)'],
+  ['.jr-validity-b', 'pass footer 有効期限 (gold on sumi)'],
+  ['.jr-gap-b', 'ghost track day bracket (state ink on sumi)'],
+  ['.jr-error', 'journey reprint error (state ink on sumi)'],
 ]
 
 // Composite every non-transparent background from <html> down to the element.

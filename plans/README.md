@@ -143,6 +143,50 @@ Twelve waves live in this file:
   pinned the old behaviour now pins the new one, and the responsive
   suite pins the keep-on-round-trip half. Frontend 257 (39 files),
   lint/build clean.
+
+  **字幕取り — the subtitle grab (owner-directed, 2026-09-01):** the
+  transcript-paste ingest is removed (YouTube's panel hands out English
+  translations and is hard to find) and its replacement re-measured
+  every wall in adr/0003 before building: public mirrors dead or
+  200-empty (9 probed), InnerTube CORS-closed from our origin, the
+  watch page's own caption URLs now 200-empty even same-origin — but an
+  InnerTube ANDROID call made FROM the watch page still returns tracks
+  with real bodies (2,478 bytes of ja cues in the probe). So the fetch
+  runs there: a bookmarklet the app mints (`lib/captionGrab.js` — source
+  builder, gzip+base64url hash codec, transcript-XML→VTT converter, all
+  node-tested), which grabs the ja track on youtube.com and returns to
+  `/analyzer#grab=…`; the screen consumes the hash, boards 動画 itself,
+  and feeds the EXISTING file ingest — zero backend change, our servers
+  still never touch YouTube. The video intake is rebuilt around it (copy
+  button, steps, open-on-YouTube and pre-filled DownSub links, framed
+  grab block), the file drop stays as fallback with MIME types in its
+  accept list (extension-only lists grey out every file on Android — the
+  mobile report), and ensureDeck-era paste keys left both locale tables.
+  Third amendment recorded in adr/0003. Verified END-TO-END live: the
+  bookmarklet source ran on the real watch page, grabbed 47 cues,
+  returned by hash, and the app built the whole session (player, rail,
+  stage) with no click. The three terse setup lines then proved opaque
+  ("I don't understand — add a real tutorial") and became GrabTutorial:
+  a dialog walkthrough — what the bookmark is in plain words, the copy
+  control inside the step that needs it, a device switcher (desktop /
+  Android Chrome / iPhone Safari are three different gestures), the
+  browser-not-the-app warning, and a troubleshooting section that
+  translates the bookmarklet's own error messages. Frontend 269
+  (40 files), guards clean, build clean.
+- **Wave 13 — 行先, destination goals + the five-scene office** (plan 063,
+  ALL PHASES DONE 2026-09-02). The onboarding redesigned end to end and
+  the goal feature it exists to sell: a destination + validity date printed
+  on the pass, chosen off the departure board (時刻表), tracked by the ghost
+  train on the back of the /profile CommuterPass, with honest projections
+  and explicit reprints — "the date never moves in silence". Designed over
+  four interactive mockup rounds in the "Ticket Office II" artifact (link in
+  plan 063 and in auto-memory); the owner picked the timetable and the ghost
+  train from option sets, then commissioned the full five-scene rework
+  (試乗 first ride → 乗車駅 read-the-sign → 行先 board → 案内 the promise →
+  定期券 form/print/gate, progress as a stamp rally). Plan 063 carries the
+  build order: backend contract (5 nullable profile columns, extended
+  complete, /api/journey/status + reprint), shared goalMath, GhostTrack +
+  pass flip, the five scenes, copy/guards/tests.
 - **Wave 9 — 統一, the harmonisation** (plans 041–053; 041–051 DONE). Planned
   2026-08-28 at commit `32c1f40`, from the maintainer's request to merge the
   CSS back into one file and establish a single artistic direction that new

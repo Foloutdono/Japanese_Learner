@@ -23,7 +23,10 @@ def _clean_onboarding_state(user_id: str):
                 cur.execute(
                     """
                     UPDATE user_profiles
-                    SET jlpt_level = NULL, daily_new_target = NULL, onboarded_at = NULL
+                    SET jlpt_level = NULL, daily_new_target = NULL, onboarded_at = NULL,
+                        goal_start_level = NULL, goal_level = NULL,
+                        goal_target_date = NULL, goal_set_at = NULL,
+                        daily_departure = NULL
                     WHERE user_id = %s
                     """,
                     (user_id,),
@@ -101,6 +104,65 @@ def test_complete_rejects_invalid_values(client):
                        json={"jlptLevel": "N5", "dailyNewTarget": 0}).status_code == 422
     assert client.post("/api/onboarding/complete",
                        json={"jlptLevel": "N5", "dailyNewTarget": 999}).status_code == 422
+
+
+# ── The journey contract riding on complete (plan 063) ────────────
+def test_complete_with_goal_stamps_the_contract(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        done = client.post("/api/onboarding/complete", json={
+            "jlptLevel": "N5", "dailyNewTarget": 12,
+            "goalLevel": "N3", "goalTargetDate": "2030-01-01",
+            "dailyDeparture": "am",
+        })
+        assert done.status_code == 200
+        body = done.json()
+        assert body["goalLevel"] == "N3"
+        assert body["goalTargetDate"] == "2030-01-01"
+        assert body["goalSetAt"] is not None
+        assert body["dailyDeparture"] == "am"
+
+        status = client.get("/api/journey/status").json()
+        assert status["goalStartLevel"] == "N5"
+        assert status["goalLevel"] == "N3"
+        assert status["goalTargetDate"] == "2030-01-01"
+        assert status["plannedPerDay"] == 12
+        assert status["dailyDeparture"] == "am"
+
+
+def test_goalless_replay_clears_a_previous_goal(client):
+    # "Just ride" is a first-class answer — replaying the office without
+    # a destination must not leave a stale contract behind.
+    with _clean_onboarding_state(DEV_USER_ID):
+        client.post("/api/onboarding/complete", json={
+            "jlptLevel": "N5", "dailyNewTarget": 10,
+            "goalLevel": "N4", "goalTargetDate": "2030-01-01",
+        })
+        client.post("/api/onboarding/complete",
+                    json={"jlptLevel": "N5", "dailyNewTarget": 10})
+        status = client.get("/api/journey/status").json()
+        assert status["goalLevel"] is None
+        assert status["goalTargetDate"] is None
+        assert status["goalSetAt"] is None
+        assert status["goalStartLevel"] is None
+
+
+def test_complete_rejects_incoherent_goals(client):
+    base = {"jlptLevel": "N3", "dailyNewTarget": 10}
+    # Destination behind (or at) the boarding level.
+    assert client.post("/api/onboarding/complete",
+                       json={**base, "goalLevel": "N3"}).status_code == 422
+    assert client.post("/api/onboarding/complete",
+                       json={**base, "goalLevel": "N5"}).status_code == 422
+    # A date with no destination is not a goal.
+    assert client.post("/api/onboarding/complete",
+                       json={**base, "goalTargetDate": "2030-01-01"}).status_code == 422
+    # A ticket that expired before it was printed.
+    assert client.post("/api/onboarding/complete",
+                       json={**base, "goalLevel": "N1",
+                             "goalTargetDate": "2020-01-01"}).status_code == 422
+    # An hour the station doesn't announce.
+    assert client.post("/api/onboarding/complete",
+                       json={**base, "dailyDeparture": "dawn"}).status_code == 422
 
 
 def test_patch_learning_updates_only_what_was_sent(client):

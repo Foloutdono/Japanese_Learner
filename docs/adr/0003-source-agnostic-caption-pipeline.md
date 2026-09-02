@@ -218,3 +218,53 @@ think about. See `routes/video.py`.
 `_build_concatenation`, `_owning_cue` and the character offsets they produced are
 gone with the old model. Nothing outside the module's own tests ever read those
 offsets; `_video_worker` only ever wanted `text`, `cue_start` and `cue_end`.
+
+---
+
+## Amendment, 2026-09-01 — the fetch moves to the one origin where it works
+
+The transcript-paste ingest is **removed** (owner-directed): YouTube's
+transcript panel hands out a *translation* by default — learners kept
+getting English for Japanese videos — and the panel is genuinely hard to
+find. The yt-dlp instructions went with it; a CLI is no answer on a phone.
+
+Its replacement re-measures every wall this file records, and finds one
+door. All probes 2026-09-01, from this repo:
+
+1. **Public mirrors are not an API.** Nine Piped/Invidious instances
+   probed: seven down or erroring; the one healthy Invidious lists
+   caption tracks (CORS `*`) but serves **200 with an empty body** for
+   the tracks themselves — the same token wall, one hop removed.
+2. **InnerTube from our origin is CORS-closed.** `youtubei/v1/player`
+   answers without any `Access-Control-Allow-Origin`, so a browser on
+   the app's origin cannot even list tracks.
+3. **The watch page's own baseUrls are dead even on the page.** Fetched
+   from youtube.com's own origin, `ytInitialPlayerResponse` caption URLs
+   return 200-empty in every format — the proof-of-origin wall now binds
+   same-origin page fetches too.
+4. **But an InnerTube `player` call with the ANDROID client (20.10.38)
+   and the page's own `INNERTUBE_API_KEY`, made FROM the watch page,
+   returns caption tracks whose URLs still yield real bodies** — 2,478
+   bytes of correct Japanese cues in the probe. This is exactly what
+   `youtube-transcript-api` does, and why it still works from
+   residential IPs; the datacenter block (wall 1 of the second
+   amendment) still stands, so it remains useless to Render.
+
+**Decision: a bookmarklet the app mints** (`frontend/src/lib/captionGrab.js`).
+It runs on the watch page — the learner's own IP, the working origin —
+grabs the Japanese track (manual over auto-generated, refusing other
+languages by name), gzips it, and returns to `/analyzer#grab=…`. The app
+decodes the hash, converts the transcript XML to WebVTT, and feeds the
+**existing file ingest**; nothing downstream of Cue knows, which is the
+promise this ADR made for any new source. Works on phones: a bookmark is
+the one programmable thing a mobile browser allows, and the file pickers
+that blocked `.srt`/`.vtt` (extension-only `accept` lists match no MIME
+on Android) are out of the loop — though the drop zone's accept list now
+carries MIME types too, since the file path stays as the fallback,
+alongside a DownSub link pre-filled with the pasted URL.
+
+**Standing:** the learner fetches their own screen from their own IP —
+the same standing the paste ingest had ("copying their own screen",
+first amendment). Our servers still never contact YouTube. The
+bookmarklet degrades the way the paste did: visibly, on the learner's
+side, with the file path always open.

@@ -11,9 +11,10 @@
 # rather than storing it. See placement.py's header for why this is not
 # a 21st EXAM_GENERATORS entry.
 import random
+from datetime import date
 
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from content.kana_data import get_all_kana
@@ -52,9 +53,19 @@ class ScorePayload(BaseModel):
     answers: dict[str, str] = {}
 
 
+DEPARTURES = ("am", "noon", "pm")
+
+
 class CompletePayload(BaseModel):
     jlptLevel: str
     dailyNewTarget: int
+    # The journey contract (plan 063). All optional: no goalLevel means
+    # "just ride" — a pace and nothing else — and replaying the office
+    # without one CLEARS a previous goal, the same way jlptLevel and
+    # dailyNewTarget are simply overwritten on replay.
+    goalLevel: str | None = None
+    goalTargetDate: date | None = None
+    dailyDeparture: str | None = None
 
     @field_validator("jlptLevel")
     @classmethod
@@ -71,6 +82,41 @@ class CompletePayload(BaseModel):
         if not (1 <= v <= 100):
             raise ValueError("must be between 1 and 100")
         return v
+
+    @field_validator("goalLevel")
+    @classmethod
+    def valid_goal_level(cls, v: str | None) -> str | None:
+        if v is not None and v not in LEVELS:
+            raise ValueError(f"must be one of {', '.join(LEVELS)}")
+        return v
+
+    @field_validator("goalTargetDate")
+    @classmethod
+    def valid_goal_date(cls, v: date | None) -> date | None:
+        # Strictly future: the office refuses tickets it knows are
+        # already expired. The board's own 運休 refusal handles the
+        # merely-implausible; this only rejects the impossible.
+        if v is not None and v <= date.today():
+            raise ValueError("must be in the future")
+        return v
+
+    @field_validator("dailyDeparture")
+    @classmethod
+    def valid_departure(cls, v: str | None) -> str | None:
+        # NULL is "flexible" — the client never sends a fourth string.
+        if v is not None and v not in DEPARTURES:
+            raise ValueError(f"must be one of {', '.join(DEPARTURES)} or null")
+        return v
+
+    @model_validator(mode="after")
+    def goal_is_coherent(self):
+        # LEVELS is journey-ordered (N5..N1), so index comparison is
+        # "further down the line".
+        if self.goalLevel is not None and LEVELS.index(self.goalLevel) <= LEVELS.index(self.jlptLevel):
+            raise ValueError("goalLevel must be beyond jlptLevel")
+        if self.goalTargetDate is not None and self.goalLevel is None:
+            raise ValueError("goalTargetDate needs a goalLevel — a date with no destination is not a goal")
+        return self
 
 
 @router.post("/api/onboarding/placement")
@@ -98,24 +144,43 @@ def score_placement(payload: ScorePayload, user_id: str = Depends(get_user_id)):
 @router.post("/api/onboarding/complete")
 def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_user_id)):
     ensure_profile_row(user_id)
+    has_goal = payload.goalLevel is not None
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             # COALESCE keeps the first completion timestamp: replaying
             # the flow (or a double-tap on the finale button) updates
             # the choices without pretending the user onboarded twice.
+            # The goal columns move as one block: a goal-less replay
+            # clears all four, and goal_start_level is stamped with the
+            # BOARDING level so the promised total never drifts when
+            # jlpt_level later moves (plan 063).
             cur.execute(
                 """
                 UPDATE user_profiles
                 SET jlpt_level = %s,
                     daily_new_target = %s,
-                    onboarded_at = COALESCE(onboarded_at, NOW())
+                    onboarded_at = COALESCE(onboarded_at, NOW()),
+                    goal_start_level = %s,
+                    goal_level = %s,
+                    goal_target_date = %s,
+                    goal_set_at = CASE WHEN %s THEN NOW() END,
+                    daily_departure = %s
                 WHERE user_id = %s
-                RETURNING onboarded_at
+                RETURNING onboarded_at, goal_set_at
                 """,
-                (payload.jlptLevel, payload.dailyNewTarget, user_id),
+                (
+                    payload.jlptLevel,
+                    payload.dailyNewTarget,
+                    payload.jlptLevel if has_goal else None,
+                    payload.goalLevel,
+                    payload.goalTargetDate,
+                    has_goal,
+                    payload.dailyDeparture,
+                    user_id,
+                ),
             )
-            onboarded_at = cur.fetchone()[0]
+            onboarded_at, goal_set_at = cur.fetchone()
         conn.commit()
     finally:
         conn.close()
@@ -126,6 +191,10 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
         "jlptLevel": payload.jlptLevel,
         "dailyNewTarget": payload.dailyNewTarget,
         "onboardedAt": onboarded_at.isoformat(),
+        "goalLevel": payload.goalLevel,
+        "goalTargetDate": payload.goalTargetDate.isoformat() if payload.goalTargetDate else None,
+        "goalSetAt": goal_set_at.isoformat() if goal_set_at else None,
+        "dailyDeparture": payload.dailyDeparture,
     }
 
 

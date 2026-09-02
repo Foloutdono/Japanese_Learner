@@ -36,7 +36,12 @@ def _init_db() -> None:
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                     jlpt_level TEXT,
                     daily_new_target INTEGER,
-                    onboarded_at TIMESTAMPTZ
+                    onboarded_at TIMESTAMPTZ,
+                    goal_start_level TEXT,
+                    goal_level TEXT,
+                    goal_target_date DATE,
+                    goal_set_at TIMESTAMPTZ,
+                    daily_departure TEXT
                 )
             """)
             # And the same columns again as ALTERs, because the table
@@ -48,10 +53,25 @@ def _init_db() -> None:
             # serves; see core/user_level.py and docs/adr/0005. All
             # three stay NULL until the onboarding flow completes;
             # NULL onboarded_at is what makes the frontend show it.
+            #
+            # The goal_* columns are the journey contract (plan 063):
+            # goal_level + goal_target_date are the destination printed
+            # on the pass (both NULL = "just ride"), goal_start_level
+            # remembers where the line began — jlpt_level moves as the
+            # learner levels up, and itemsTotal must not drift with it —
+            # and goal_set_at anchors the itemsDone window. All written
+            # only by routes/onboarding.py and routes/journey.py.
+            # daily_departure is the optional habit hour ('am'|'noon'|
+            # 'pm', NULL = flexible), validated in code like jlpt_level.
             for col, typ in (
                 ("jlpt_level", "TEXT"),
                 ("daily_new_target", "INTEGER"),
                 ("onboarded_at", "TIMESTAMPTZ"),
+                ("goal_start_level", "TEXT"),
+                ("goal_level", "TEXT"),
+                ("goal_target_date", "DATE"),
+                ("goal_set_at", "TIMESTAMPTZ"),
+                ("daily_departure", "TEXT"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"

@@ -22,6 +22,7 @@ import { parseVideoId } from '../lib/youtube'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { formatTimecode } from '../lib/timecode'
 import { relativeDate } from '../lib/formatDate'
+import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
 
 // ── 解析駅 — one station, three platforms ─────────────────
 // The merge of PhraseAnalyzerScreen and VideoScreen (plan 027). They
@@ -159,6 +160,44 @@ export default function AnalyzerScreen({ session }) {
   // choice.
   const wide = useMediaQuery('(min-width: 1100px)')
 
+  // ── 字幕取り arrival ──
+  // The bookmarklet (lib/captionGrab.js) leaves the YouTube page for
+  // /analyzer#grab=… with the transcript XML riding the hash — the
+  // one channel that crosses origins with no server and no CORS in
+  // the way. Arriving with a readable grab IS a complete video
+  // intake: board 動画, convert to VTT, and feed the EXISTING file
+  // ingest, so nothing downstream of Cue knows the difference. The
+  // hash is consumed first so a reload cannot re-submit, and an
+  // unreadable one is silently none of our business (a stray anchor
+  // must not hijack the screen).
+  useEffect(() => {
+    let cancelled = false
+    decodeGrabHash(window.location.hash).then(grab => {
+      if (!grab || cancelled) return
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      let vtt
+      try {
+        vtt = transcriptXmlToVtt(grab.xml)
+      } catch {
+        analyzer.fail(t.grabEmpty)
+        return
+      }
+      const url = `https://youtu.be/${grab.videoId}`
+      boardPlatform('video')
+      setVideoUrl(url)
+      setDetail(null)
+      analyzer.startVideoFromFile(
+        new File([vtt], `${grab.videoId}.ja.vtt`, { type: 'text/vtt' }),
+        { url },
+      )
+    })
+    return () => { cancelled = true }
+    // Mount-only by design: the hash is read once and consumed.
+    // boardPlatform/analyzer are stable enough for a one-shot effect,
+    // and re-running on their change would re-read a hash already gone.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- id-keyed reset: a new Sentence starts at its first Token, or you land on token 7 of a 3-token line.
     setTokenIndex(0)
@@ -277,11 +316,6 @@ export default function AnalyzerScreen({ session }) {
   function startVideoFromFile(file, opts) {
     setDetail(null)
     analyzer.startVideoFromFile(file, opts)
-  }
-
-  function startVideoFromTranscript(text, opts) {
-    setDetail(null)
-    analyzer.startVideoFromTranscript(text, opts)
   }
 
   // Boarding a platform ALWAYS opens its intake, even when a result
@@ -696,8 +730,6 @@ export default function AnalyzerScreen({ session }) {
               url={videoUrl}
               onUrlChange={setVideoUrl}
               onStartFromFile={startVideoFromFile}
-              onStartFromTranscript={startVideoFromTranscript}
-              onError={analyzer.fail}
             />
           )}
         </div>
