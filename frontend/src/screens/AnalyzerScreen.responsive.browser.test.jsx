@@ -210,6 +210,80 @@ describe('AnalyzerScreen structure', () => {
     expect(screen.container.querySelector('textarea').value).toBe('')
   })
 
+  // ── The video intake, post-transcription ──
+  // The paste ingest is gone (owner-directed, 2026-09-01: YouTube's
+  // transcript panel hands out English translations and is hard to
+  // find), and the primary acquisition is the 字幕取り bookmarklet the
+  // app mints — see lib/captionGrab.js for the measurements that make
+  // it the one free route left. The file drop stays as the fallback,
+  // with an accept list mobile pickers can actually satisfy.
+  it('offers the grab and the file drop on 動画 — and no paste ingest', async () => {
+    const screen = await renderScreen()
+    await goToPlatform(screen, 'video')
+
+    // The transcription tabs are gone entirely.
+    expect(screen.container.querySelector('.anl-ingest')).toBeNull()
+    expect(screen.container.querySelector('textarea')).toBeNull()
+
+    // The grab block: a copyable bookmarklet…
+    expect(screen.container.querySelector('.anl-grab')).not.toBeNull()
+    expect(screen.container.querySelector('.anl-grab__copy')).not.toBeNull()
+
+    // …a DownSub handoff that carries the pasted link…
+    typeInto(screen.container.querySelector('.anl-field'), 'https://youtu.be/dQw4w9WgXcQ')
+    await settle(60)
+    const downsub = screen.container.querySelector('.anl-grab__downsub')
+    expect(downsub).not.toBeNull()
+    expect(downsub.getAttribute('href')).toContain('downsub.com')
+    expect(downsub.getAttribute('href')).toContain('dQw4w9WgXcQ')
+
+    // …and the drop zone, whose accept list includes MIME types —
+    // extension-only filters grey out every file on Android pickers.
+    const input = screen.container.querySelector('input[type="file"]')
+    expect(input).not.toBeNull()
+    expect(input.getAttribute('accept')).toContain('.vtt')
+    expect(input.getAttribute('accept')).toContain('text/')
+  })
+
+  // ── The grab tutorial ──
+  // "Copy a bookmarklet" means nothing to most people, and creating a
+  // bookmark by hand differs per browser — so the block opens a REAL
+  // walkthrough: numbered steps, a device switcher (making a bookmark
+  // on desktop, Android Chrome and iPhone Safari are three different
+  // gestures), the copy control inside the step that needs it, and a
+  // fallback section. Owner-directed (2026-09-01, "add a real
+  // tutorial").
+  it('opens a step-by-step tutorial with per-device instructions', async () => {
+    const screen = await renderScreen()
+    await goToPlatform(screen, 'video')
+
+    screen.container.querySelector('.anl-grab__tutorial').click()
+    await settle(60)
+
+    const dialog = document.querySelector('[role="dialog"].anl-tut')
+    expect(dialog).not.toBeNull()
+    // The walkthrough is numbered and complete: what it is, copy,
+    // create, use, and a what-if-it-fails section.
+    expect(dialog.querySelectorAll('.anl-tut__step').length).toBeGreaterThanOrEqual(3)
+    expect(dialog.querySelector('.anl-tut__copy')).not.toBeNull()
+
+    // The create step switches between three devices, and the steps
+    // actually CHANGE with the device.
+    const devices = dialog.querySelectorAll('.anl-tut__devices .anl-seg__opt')
+    expect(devices.length).toBe(3)
+    const before = dialog.querySelector('.anl-tut__devicesteps').textContent
+    devices[2].click()
+    await settle(60)
+    expect(devices[2].getAttribute('aria-pressed')).toBe('true')
+    expect(dialog.querySelector('.anl-tut__devicesteps').textContent).not.toBe(before)
+
+    // Esc-able real dialog (useDialog), and the trigger survives.
+    dialog.querySelector('.detail-close-btn').click()
+    await settle(60)
+    expect(document.querySelector('[role="dialog"].anl-tut')).toBeNull()
+    expect(screen.container.querySelector('.anl-grab__tutorial')).not.toBeNull()
+  })
+
   // ── Smart furigana ──
   // 'unknown' (the default) hides ruby ONLY over words the SRS has
   // mastered; 'all' restores everything; 'none' bares the line.

@@ -10,6 +10,7 @@ import { Daruma } from '../components/rewards/Daruma'
 import { CosmeticSwatch } from '../components/rewards/CosmeticSwatch'
 import { HallCard } from '../components/profile/HallCard'
 import { CommuterPass } from '../components/profile/CommuterPass'
+import { JourneyPass } from '../components/journey/JourneyPass'
 import { WeekStrip, Records, MasteryLadder } from '../components/profile/ProfileBlocks'
 import { EditableUsername } from '../components/profile/EditableUsername'
 import { getProfileHalls } from '../config/navLinks'
@@ -136,14 +137,25 @@ export default function ProfileScreen({ session }) {
             </div>
           )}
 
-          <CommuterPass profile={profile} t={t}>
-            <PassHolder
-              profile={profile}
-              session={session}
-              onUsernameChange={u => setProfile(p => ({ ...p, username: u }))}
-              t={t}
-            />
-          </CommuterPass>
+          {/* The pass, now two-sided: the ghost train rides its back
+              (plan 063). JourneyPass owns the flip and the journey
+              fetch; the pass itself is byte-identical — it just gains
+              the journey footer through its existing slot, and only
+              when a contract exists (renderPass(null) otherwise). */}
+          <JourneyPass
+            session={session}
+            fallbackStartLevel={profile.jlptLevel ?? null}
+            renderPass={footer => (
+              <CommuterPass profile={profile} t={t} footer={footer}>
+                <PassHolder
+                  profile={profile}
+                  session={session}
+                  onUsernameChange={u => setProfile(p => ({ ...p, username: u }))}
+                  t={t}
+                />
+              </CommuterPass>
+            )}
+          />
 
           <section className="profile-block profile-block--wide">
             <SectionHeader jp="今週" title={t.thisWeek} />

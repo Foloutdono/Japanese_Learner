@@ -79,7 +79,20 @@ CREATE TABLE user_profiles (
     -- NULL onboarded_at is the signal that shows the flow.
     jlpt_level TEXT,
     daily_new_target INTEGER,
-    onboarded_at TIMESTAMPTZ
+    onboarded_at TIMESTAMPTZ,
+    -- The journey contract (plan 063, routes/onboarding.py +
+    -- routes/journey.py): destination + validity date printed on the
+    -- pass (both NULL = "just ride"). goal_start_level remembers where
+    -- the line began — jlpt_level moves as the learner levels up, and
+    -- the promised item total must not drift with it. goal_set_at
+    -- anchors the itemsDone window. daily_departure is the optional
+    -- habit hour ('am'|'noon'|'pm', NULL = flexible), validated in
+    -- code like jlpt_level.
+    goal_start_level TEXT,
+    goal_level TEXT,
+    goal_target_date DATE,
+    goal_set_at TIMESTAMPTZ,
+    daily_departure TEXT
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came

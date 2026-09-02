@@ -1,22 +1,23 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { apiJson, apiJsonWithTimeout } from '../lib/api'
 import { playUi } from '../lib/audio'
 import { refreshSummary } from '../stores/profileSummary'
 import { EditableUsername } from '../components/profile/EditableUsername'
 import { PassWave } from '../components/profile/PassWave'
-import LevelSelector from '../components/selection/LevelSelector'
 import PlacementTest from '../components/onboarding/PlacementTest'
-import RouteProjection from '../components/onboarding/RouteProjection'
+import FirstRide from '../components/onboarding/FirstRide'
+import { LEVEL_JP, LEVEL_SAMPLE } from '../components/onboarding/levelSigns'
+import { levelItems } from '../domain/journeyProjection'
+import { DAYS_PER_MONTH, addDays, journeyItems, journeyLevels, minutesFor } from '../domain/goalMath'
+import DepartureBoard from '../components/onboarding/DepartureBoard'
+import { goalDerived } from '../components/onboarding/goalDerived'
+import CallingAt from '../components/onboarding/CallingAt'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
-import { PACES, DEFAULT_PER_DAY, paceFor } from '../components/onboarding/paces'
-// The tour's demos are the REAL study components fed literal sample
-// data — the exact controls the learner meets five minutes later, not
-// mockups of them. RewardsPreview.jsx set the precedent: real
-// component + literal payload + local state, zero backend.
-import { Flashcard, CharDisplay, MeaningDisplay, DeckProgress } from '../components/study/QuizComponents'
-import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
-import QuestionRenderer from '../exam/QuestionRenderer'
+import { DEFAULT_PER_DAY, serviceLabel } from '../components/onboarding/paces'
+import { StopPattern } from '../components/onboarding/DepartureBoard'
+import { GhostTrack } from '../components/journey/GhostTrack'
+import { journeyStations } from '../components/journey/stations'
 
 // ── みどりの窓口 — the ticket office ─────────────────────────────
 // The onboarding flow: a full-screen stepped sequence rendered by App
@@ -27,7 +28,20 @@ import QuestionRenderer from '../exam/QuestionRenderer'
 // its own): like /profile and /settings it is about you, not
 // somewhere you travel, so its rails fall back to shu-iro.
 //
-//   welcome → level → [placement] → pace → projection → tour → pass
+//   ride → level → [placement] → goal → map → pass
+//
+// 試乗 first (plan 063, phase D): the learner does the core loop once
+// — card, flip, honest rating — before any question is asked. 行先
+// (phase E) merged the old pace and projection steps: a pace chosen
+// blind and a projection shown after were one decision split in half,
+// so the departure board prices every service against the learner's
+// date or patience in one place, and the calling-at strip confirms.
+// 案内 (phase F) is the promise, not a tour — the first ride already
+// demos the loop for real, so this scene shows the learner's own line
+// with the plan-car pulling six honest days ahead: the ghost train
+// met BEFORE day one, so the first real delay report reads as a
+// promise kept. And the name is asked LAST: 窓口 folded into 定期券 —
+// the application form signs, the pass prints, the gate opens.
 //
 // Nothing persists until the single POST /api/onboarding/complete at
 // the end (or via skip), so a mid-flow refresh is a clean restart —
@@ -38,35 +52,70 @@ import QuestionRenderer from '../exam/QuestionRenderer'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-// The flow's own stopping pattern — the steps drawn as the stations
-// they are, under the office sign. The placement test is a branch of
-// 乗車駅 (you are still settling where to board), not a station of its
-// own, so it maps onto that stop.
+// The flow's own stopping pattern — a スタンプラリー stamp card
+// (plan 063): each stop inks its kanji when passed. The placement
+// test is a branch of 乗車駅 (you are still settling where to board),
+// not a station of its own, so it maps onto that stop. Five stops —
+// the wave's final shape.
 const STOPS = [
-  { key: 'welcome', jp: '窓口' },
-  { key: 'level', jp: '乗車駅' },
-  { key: 'pace', jp: '種別' },
-  { key: 'projection', jp: '路線図' },
-  { key: 'tour', jp: '案内' },
-  { key: 'pass', jp: '定期券' },
+  { key: 'ride', jp: '試乗', kanji: '試' },
+  { key: 'level', jp: '乗車駅', kanji: '乗' },
+  { key: 'goal', jp: '行先', kanji: '行' },
+  { key: 'map', jp: '案内', kanji: '案' },
+  { key: 'pass', jp: '定期券', kanji: '定' },
 ]
 
-function StepLine({ step, t }) {
+// 発車時刻 — the optional daily hour printed on the pass. Signage
+// times; null is 自由 (flexible) and stores nothing.
+const DEPART_TIMES = { am: '07:30', noon: '12:30', pm: '21:00' }
+
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+// Where a boarding level points the destination chip by default: two
+// stops up the line when they exist (N5 boards looking at N3), else
+// the next one, else no destination at all (an N1 boarder rides free).
+// A dest the learner already chose survives re-boarding when it is
+// still ahead of the new start; 未定 (null) is an explicit answer and
+// survives everything.
+function destAfterBoarding(prev, startLevel) {
+  const options = journeyLevels(startLevel).slice(1)
+  if (prev === null) return null
+  if (prev !== undefined && options.includes(prev)) return prev
+  return options[1] ?? options[0] ?? null
+}
+
+// The one live exception to "a stamp inks when you leave": rating the
+// demo card inks 試乗 on the spot — the reward IS the ink landing.
+// `freshStamp` marks the single stamp allowed to play its landing
+// animation; it is an index, not a flag, so re-renders never replay
+// the whole row and back() clears it entirely.
+function StepLine({ step, rideRated, freshStamp, t }) {
   const nowKey = step === 'placement' ? 'level' : step
   const now = STOPS.findIndex(s => s.key === nowKey)
+  const isPast = i => i < now || (i === 0 && rideRated && now === 0)
+  const isNow = i => i === now && !(i === 0 && rideRated && now === 0)
+  const pct = STOPS.length > 1 ? now / (STOPS.length - 1) : 0
   return (
     <nav className="onb-line" aria-label={t.onbStepsAria(now + 1, STOPS.length)}>
+      <span
+        className="onb-line__fill"
+        style={{ width: `calc((100% - 64px) * ${pct})` }}
+        aria-hidden="true"
+      />
       {STOPS.map((s, i) => (
         <span
           key={s.key}
           className={[
             'onb-line__stop',
-            i < now && 'onb-line__stop--past',
-            i === now && 'onb-line__stop--now',
+            isPast(i) && 'onb-line__stop--past',
+            isNow(i) && 'onb-line__stop--now',
+            freshStamp === i && 'onb-line__stop--fresh',
           ].filter(Boolean).join(' ')}
-          aria-current={i === now ? 'step' : undefined}
+          aria-current={isNow(i) ? 'step' : undefined}
         >
-          <span className="onb-line__marker" aria-hidden="true" />
+          <span className="onb-line__stamp" lang="ja" aria-hidden="true">
+            {isPast(i) ? s.kanji : ''}
+          </span>
           <span className="onb-line__name" lang="ja">{s.jp}</span>
         </span>
       ))}
@@ -79,12 +128,35 @@ function StepLine({ step, t }) {
 // volumes, every demo — but the final complete() hands over WITHOUT
 // writing onboarded_at, so the office can be replayed on repeat.
 export default function OnboardingFlow({ session, initialProfile, onComplete, dryRun = false }) {
-  const { t } = useLang()
-  const [step, setStep] = useState('welcome')
+  const { t, lang } = useLang()
+  const [step, setStep] = useState('ride')
   const [history, setHistory] = useState([])
+  const [rideRated, setRideRated] = useState(false)
+  // Which stamp just landed — the only one whose ink animation plays.
+  const [freshStamp, setFreshStamp] = useState(null)
   const [username, setUsername] = useState(initialProfile?.username ?? '')
   const [levelChoice, setLevelChoice] = useState(null) // {level, source: 'picked'|'beginner'|'test'}
+  // The 行先 scene's whole state: destination (undefined = not asked
+  // yet, null = 未定 chosen), by-date months, by-pace dial. perDay
+  // below stays the FINAL chosen pace (set on the scene's Continue) —
+  // skip and the pass read it, same as before phase E.
+  const [goal, setGoal] = useState({ dest: undefined, mode: 'date', months: 12, perDay: DEFAULT_PER_DAY })
+  // The clock reading taken on entering 行先: every date the board
+  // prints derives from it, so nothing drifts while the learner dials
+  // (and render never reads the clock — the React purity rule).
+  const [goalNow, setGoalNow] = useState(null)
   const [perDay, setPerDay] = useState(null)
+  // 定期券's two beats: the application signs, then 発行 prints. The
+  // print moment is the clock the displayed pass reads (the POST takes
+  // its own fresh reading — seconds apart at most).
+  const [printed, setPrinted] = useState(false)
+  const [printedAt, setPrintedAt] = useState(null)
+  const [depart, setDepart] = useState(null) // 'am' | 'noon' | 'pm' | null = 自由
+  // 案内's staged demo: the plan-car pulls ahead, then the bracket
+  // measures it — timeouts, never rAF (a throttled tab must still
+  // reach the final state), and static under prefers-reduced-motion.
+  const [promiseMoved, setPromiseMoved] = useState(REDUCED)
+  const [promiseGap, setPromiseGap] = useState(REDUCED)
   const [volumes, setVolumes] = useState(null)
   const [placementResult, setPlacementResult] = useState(null)
   const [completing, setCompleting] = useState(false)
@@ -127,10 +199,32 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [step])
 
+  // Plays once, like the arrival cutscene: backing out and returning
+  // shows the finished drawing, never the theatre again. Fire-and-
+  // forget timers — the flow stays mounted well past 1.2s, and a
+  // stray late setState is a no-op on the state it already has.
+  const promisePlayedRef = useRef(REDUCED)
+  useEffect(() => {
+    if (step !== 'map' || promisePlayedRef.current) return
+    promisePlayedRef.current = true
+    setTimeout(() => setPromiseMoved(true), 500)
+    setTimeout(() => setPromiseGap(true), 1200)
+  }, [step])
+
+  const startLevel = levelChoice?.level ?? 'N5'
+  const goalNowDate = useMemo(() => (goalNow != null ? new Date(goalNow) : null), [goalNow])
+  const derived = useMemo(
+    () => (volumes && goalNowDate ? goalDerived(volumes, startLevel, goal, goalNowDate) : null),
+    [volumes, startLevel, goal, goalNowDate],
+  )
+
   function advance(next) {
+    // Leaving a stop inks it: the stamp that just became --past is the
+    // fresh one (placement is 乗車駅's branch, so it inks that stop).
+    setFreshStamp(STOPS.findIndex(st => st.key === (step === 'placement' ? 'level' : step)))
     setHistory(h => [...h, step])
     setStep(next)
-    if (next === 'tour' && !arrivalPlayedRef.current) {
+    if (next === 'map' && !arrivalPlayedRef.current) {
       arrivalPlayedRef.current = true
       setShowArrival(true)
     }
@@ -138,6 +232,7 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
 
   function back() {
     playUi('click')
+    setFreshStamp(null)
     setHistory(h => {
       const prev = h[h.length - 1]
       if (!prev) return h
@@ -151,7 +246,36 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
     })
   }
 
-  function complete(level, chosenPerDay) {
+  function boardAt(level, source) {
+    setLevelChoice({ level, source })
+    setGoal(g => ({ ...g, dest: destAfterBoarding(g.dest, level) }))
+    setGoalNow(Date.now())
+    advance('goal')
+  }
+
+  // The contract the pass prints (plan 063): destination + the date
+  // this exact configuration promises — computed at POST time with a
+  // fresh clock, in BOTH modes (a by-pace goal's arrival is still a
+  // printed date; routes/journey.py falls back to the same arithmetic
+  // only when none was stored). 未定 rides pace-only: no goal fields.
+  function goalPayload() {
+    if (goal.dest == null) return null
+    const now = new Date()
+    if (goal.mode === 'date') {
+      return {
+        goalLevel: goal.dest,
+        goalTargetDate: addDays(now, goal.months * DAYS_PER_MONTH).toISOString().slice(0, 10),
+      }
+    }
+    if (!volumes) return { goalLevel: goal.dest }
+    const items = journeyItems(volumes, levelChoice?.level ?? 'N5', goal.dest)
+    return {
+      goalLevel: goal.dest,
+      goalTargetDate: addDays(now, items / goal.perDay).toISOString().slice(0, 10),
+    }
+  }
+
+  function complete(level, chosenPerDay, withGoal) {
     if (completing) return
     if (dryRun) { onComplete(); return }
     setCompleting(true)
@@ -159,7 +283,12 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
     apiJsonWithTimeout('/api/onboarding/complete', session, {
       method: 'POST',
       timeoutMs: 10000,
-      body: JSON.stringify({ jlptLevel: level, dailyNewTarget: chosenPerDay }),
+      body: JSON.stringify({
+        jlptLevel: level,
+        dailyNewTarget: chosenPerDay,
+        ...(withGoal ? goalPayload() ?? {} : {}),
+        ...(withGoal && depart ? { dailyDeparture: depart } : {}),
+      }),
     })
       .then(() => {
         // The gate reads the profile summary for the pass holder's
@@ -177,11 +306,14 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
 
   function skip() {
     playUi('click')
-    complete(levelChoice?.level ?? 'N5', perDay ?? DEFAULT_PER_DAY)
+    // Skipping the office skips the contract: whatever level and pace
+    // stand so far, no destination — a goal is signed at the pass,
+    // never implied by an escape hatch.
+    complete(levelChoice?.level ?? 'N5', perDay ?? DEFAULT_PER_DAY, false)
   }
 
   const showBack = history.length > 0
-  const showSkip = step !== 'welcome' && step !== 'pass'
+  const showSkip = step !== 'pass'
 
   return (
     <div className="onb" data-step={step}>
@@ -191,7 +323,7 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
         <span className="onb-header__latin">TICKET OFFICE</span>
       </header>
 
-      <StepLine step={step} t={t} />
+      <StepLine step={step} rideRated={rideRated} freshStamp={freshStamp} t={t} />
 
       <main className="onb-body">
         {showBack && (
@@ -200,25 +332,25 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
           </button>
         )}
 
-        {step === 'welcome' && (
-          <WelcomeStep
+        {step === 'ride' && (
+          <FirstRide
             t={t}
-            session={session}
-            username={username}
-            onUsername={setUsername}
+            lang={lang}
+            volumes={volumes}
+            rated={rideRated}
+            onRated={() => { setRideRated(true); setFreshStamp(0) }}
             onNext={() => { playUi('click'); advance('level') }}
+            onSkipDemo={() => { playUi('click'); advance('level') }}
           />
         )}
 
         {step === 'level' && (
           <BoardingStep
             t={t}
-            onPick={level => { setLevelChoice({ level, source: 'picked' }); advance('pace') }}
-            onBeginner={() => {
-              playUi('click-mode-selection')
-              setLevelChoice({ level: 'N5', source: 'beginner' })
-              advance('pace')
-            }}
+            lang={lang}
+            volumes={volumes}
+            onPick={level => boardAt(level, 'picked')}
+            onBeginner={() => { playUi('click-mode-selection'); boardAt('N5', 'beginner') }}
             onTest={() => { playUi('click-mode-selection'); advance('placement') }}
           />
         )}
@@ -234,50 +366,72 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
           <PlacementResult
             t={t}
             result={placementResult}
-            onPick={level => {
-              setLevelChoice({ level, source: 'test' })
-              advance('pace')
-            }}
+            onPick={level => boardAt(level, 'test')}
             onRetake={() => { playUi('click'); setPlacementResult(null) }}
           />
         )}
 
-        {step === 'pace' && (
-          <PaceStep
-            t={t}
-            selected={perDay}
-            onPick={p => { setPerDay(p); advance('projection') }}
-          />
-        )}
-
-        {step === 'projection' && (
+        {step === 'goal' && (
           <section className="onb-step">
-            <h2 className="onb-step__title" tabIndex={-1}>{t.onbMapTitle}</h2>
-            {volumes ? (
-              <RouteProjection
-                volumes={volumes}
-                startLevel={levelChoice?.level ?? 'N5'}
-                perDay={perDay ?? DEFAULT_PER_DAY}
-                includeKana={levelChoice?.source === 'beginner'}
-              />
+            <h2 className="onb-step__title" tabIndex={-1}>{t.onbGoalTitle}</h2>
+            <p className="onb-step__body">{t.onbGoalBody}</p>
+            {derived ? (
+              <>
+                <DepartureBoard
+                  volumes={volumes}
+                  startLevel={startLevel}
+                  goal={goal}
+                  derived={derived}
+                  now={goalNowDate}
+                  onGoal={setGoal}
+                />
+                {derived.feasible && derived.items != null && (
+                  <CallingAt
+                    volumes={volumes}
+                    startLevel={startLevel}
+                    destLevel={goal.dest}
+                    perDay={derived.effectivePerDay}
+                    now={goalNowDate}
+                  />
+                )}
+                <p className="onb-goal__hint">{honestLine(t, lang, goal, derived)}</p>
+              </>
             ) : (
-              <p className="onb-map__assumption">{t.onbMapUnavailable}</p>
+              <p className="onb-step__hint">{t.onbMapUnavailable}</p>
             )}
             <div className="onb-step__actions">
-              <button type="button" className="onb-action" onClick={() => { playUi('click'); advance('tour') }}>
+              <button
+                type="button"
+                className="onb-action"
+                disabled={derived ? !derived.feasible : false}
+                onClick={() => {
+                  setPerDay(derived?.effectivePerDay ?? DEFAULT_PER_DAY)
+                  playUi('click')
+                  advance('map')
+                }}
+              >
                 {t.onbContinue}
               </button>
             </div>
           </section>
         )}
 
-        {step === 'tour' && (
+        {step === 'map' && (
           <>
-            <TourStep t={t} onNext={() => { playUi('click'); advance('pass') }} />
-            {/* A pure overlay — the tour above is mounted and usable
-                underneath from frame one; nothing waits on it. */}
+            <PromiseStep
+              t={t}
+              volumes={volumes}
+              startLevel={startLevel}
+              goal={goal}
+              derived={derived}
+              moved={promiseMoved}
+              showGap={promiseGap}
+              onNext={() => { playUi('click'); advance('pass') }}
+            />
+            {/* A pure overlay — the scene beneath is mounted and usable
+                from frame one; nothing waits on it. */}
             {showArrival && (
-              <TrainArrival jp="案内" title={t.onbTourTitle} onDone={() => setShowArrival(false)} />
+              <TrainArrival jp="案内" title={t.onbPromiseTitle} onDone={() => setShowArrival(false)} />
             )}
           </>
         )}
@@ -285,12 +439,23 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
         {step === 'pass' && (
           <PassStep
             t={t}
+            lang={lang}
+            session={session}
             username={username}
-            level={levelChoice?.level ?? 'N5'}
+            onUsername={setUsername}
+            volumes={volumes}
+            startLevel={startLevel}
+            goal={goal}
             perDay={perDay ?? DEFAULT_PER_DAY}
+            depart={depart}
+            onDepart={setDepart}
+            printed={printed}
+            printedAt={printedAt}
+            onPrint={() => { playUi('click'); setPrintedAt(Date.now()); setPrinted(true) }}
+            onEditApp={() => { playUi('click'); setPrinted(false) }}
             completing={completing}
             error={completeError}
-            onBoard={() => complete(levelChoice?.level ?? 'N5', perDay ?? DEFAULT_PER_DAY)}
+            onBoard={() => complete(levelChoice?.level ?? 'N5', perDay ?? DEFAULT_PER_DAY, true)}
           />
         )}
 
@@ -312,31 +477,43 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
   )
 }
 
-// ── ようこそ ─────────────────────────────────────────────────────
-function WelcomeStep({ t, session, username, onUsername, onNext }) {
-  return (
-    <section className="onb-step">
-      <h2 className="onb-step__title" tabIndex={-1}>{t.onbWelcomeTitle}</h2>
-      <p className="onb-step__body">{t.onbWelcomeBody}</p>
-
-      <div className="onb-name">
-        <span className="onb-name__label">{t.onbWelcomeNameHint}</span>
-        <EditableUsername username={username} session={session} onChange={onUsername} t={t} />
-      </div>
-
-      <div className="onb-step__actions">
-        <button type="button" className="onb-action" onClick={onNext}>{t.onbContinue}</button>
-      </div>
-    </section>
-  )
-}
-
 // ── 乗車駅 ───────────────────────────────────────────────────────
-function BoardingStep({ t, onPick, onBeginner, onTest }) {
+// "Board at the last station whose sign you can read." Each level is
+// a station row: the serif sign name, the load at that stop, and one
+// sentence a learner THERE can read — the sentence is the placement
+// heuristic (plan 063, phase D; the 12-question test stays as the
+// second opinion below). The item counts come from the same volumes
+// fetch the projection uses; until they arrive the rows simply omit
+// the load line.
+function BoardingStep({ t, lang, volumes, onPick, onBeginner, onTest }) {
+  const numberFmt = lang === 'fr' ? 'fr-FR' : 'en'
   return (
     <section className="onb-step">
-      <h2 className="onb-step__title" tabIndex={-1}>{t.onbLevelTitle}</h2>
-      <LevelSelector onSelect={onPick} />
+      <h2 className="onb-step__title" tabIndex={-1}>{t.onbBoardBySign}</h2>
+      <div className="onb-lvls" role="group" aria-label={t.onbLevelTitle}>
+        {LEVELS.map(level => (
+          <button
+            key={level}
+            type="button"
+            className="onb-lvl"
+            onClick={() => { playUi('click-mode-selection'); onPick(level) }}
+          >
+            <span className="onb-lvl__roundel">{level}</span>
+            <span className="onb-lvl__body">
+              <span className="onb-lvl__head">
+                <span className="onb-lvl__jp" lang="ja">{LEVEL_JP[level]}</span>
+                {volumes && (
+                  <span className="onb-lvl__load">
+                    {t.onbLvlLoad(levelItems(volumes, level).toLocaleString(numberFmt))}
+                  </span>
+                )}
+              </span>
+              <span className="onb-lvl__sample" lang="ja">{LEVEL_SAMPLE[level]}</span>
+            </span>
+            <span className="onb-lvl__go" aria-hidden="true">▶</span>
+          </button>
+        ))}
+      </div>
 
       {/* Not stations — the diagram above is the line, these are the
           two ways of not knowing where on it you stand. */}
@@ -410,180 +587,96 @@ function PlacementResult({ t, result, onPick, onRetake }) {
   )
 }
 
-// ── 種別 ─────────────────────────────────────────────────────────
-// Which stations of a six-stop line each service actually calls at —
-// the stopping-pattern diagram that is how a real 種別 board says
-// "how fast" without a word. All six for the local, a skip-stop
-// pattern for the rapid, the two ends for the limited express.
-const PACE_PATTERNS = {
-  local:   [1, 1, 1, 1, 1, 1],
-  rapid:   [1, 0, 1, 0, 1, 1],
-  express: [1, 0, 0, 0, 0, 1],
-}
-
-function StopPattern({ served }) {
-  const n = served.length
-  // n<=1 guard: a one-stop pattern would divide by zero; centre it.
-  const x = i => (n <= 1 ? 60 : 7 + (106 * i) / (n - 1))
-  return (
-    <svg className="onb-pace__pattern" viewBox="0 0 120 14" aria-hidden="true">
-      <line className="onb-pace__pattern-rail" x1="7" y1="7" x2="113" y2="7" />
-      {served.map((s, i) => (
-        <circle
-          key={i}
-          className={s ? 'onb-pace__pattern-stop' : 'onb-pace__pattern-skip'}
-          cx={x(i)} cy="7" r={s ? 4 : 2}
-        />
-      ))}
-    </svg>
+// ── 行先's honest line ───────────────────────────────────────────
+// One sentence under the board that says, in numbers, exactly what
+// Continue signs — or exactly why it is disabled.
+function honestLine(t, lang, goal, derived) {
+  const numberFmt = lang === 'fr' ? 'fr-FR' : 'en'
+  const fmtD = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  })
+  if (!derived.hasDest) {
+    return t.onbHonestRide(goal.perDay, minutesFor(goal.perDay))
+  }
+  if (!derived.feasible) {
+    return t.onbHonestNoRun(goal.dest, goal.months, derived.required)
+  }
+  return t.onbHonestPlan(
+    derived.effectivePerDay,
+    minutesFor(derived.effectivePerDay),
+    derived.items.toLocaleString(numberFmt),
+    goal.dest,
+    fmtD.format(derived.targetDate),
   )
 }
 
-function PaceStep({ t, selected, onPick }) {
-  const hints = { local: t.onbPaceHintLocal, rapid: t.onbPaceHintRapid, express: t.onbPaceHintExpress }
-  const names = { local: t.onbPaceLocal, rapid: t.onbPaceRapid, express: t.onbPaceExpress }
+// ── 案内 — the map that will tell you the truth ─────────────────
+// The promise scene (plan 063, phase F): the learner's own line goes
+// up on a sumi panel with the SAME two-lane track the pass back uses
+// (components/journey/GhostTrack — met here first, so the first real
+// delay report post-launch reads as a promise kept, not a surprise).
+// A staged demo: the plan-car pulls six honest days ahead on mount,
+// then the bracket measures it — the flow drives both beats with
+// timeouts and hands the results down as props. One quiet roundel row
+// names the four lines; the demos are gone, because scene one already
+// demos the loop for real.
+const PROMISE_YOU = 15
+const PROMISE_PLAN = 24
+const PROMISE_DAYS = 6
+
+const LINE_ROUNDELS = [
+  { jp: '単語', color: 'var(--line-vocab)' },
+  { jp: '文法', color: 'var(--line-grammar)' },
+  { jp: '解析', color: 'var(--line-kaiseki)' },
+  { jp: '模試', color: 'var(--line-exam)' },
+]
+
+function PromiseStep({ t, volumes, startLevel, goal, derived, moved, showGap, onNext }) {
+  const dest = goal.dest ?? 'N1'
+  const stations = journeyStations(volumes, startLevel, dest, derived?.items ?? null)
+  const perDay = derived?.effectivePerDay ?? DEFAULT_PER_DAY
   return (
     <section className="onb-step">
-      <h2 className="onb-step__title" tabIndex={-1}>{t.onbPaceTitle}</h2>
-      <div className="onb-paces">
-        {PACES.map(pace => (
-          <button
-            key={pace.id}
-            type="button"
-            className={['onb-pace', selected === pace.perDay && 'onb-pace--on'].filter(Boolean).join(' ')}
-            onClick={() => { playUi('click-mode-selection'); onPick(pace.perDay) }}
+      <h2 className="onb-step__title" tabIndex={-1}>{t.onbPromiseTitle}</h2>
+      <p className="onb-step__body">{t.onbPromiseBody(perDay)}</p>
+
+      <div className="onb-promise jour-st--slightlyBehind">
+        <div className="onb-promise__head">
+          <span className="onb-promise__title">
+            <b lang="ja">路線図</b>
+            <span className="onb-promise__cap">{t.onbPromiseLine(startLevel, dest)}</span>
+          </span>
+          <span className="onb-promise__status">
+            <b lang="ja">やや遅れ</b>
+            <span className="onb-promise__cap">{t.onbPromiseExample}</span>
+          </span>
+        </div>
+        <GhostTrack
+          stations={stations}
+          youF={PROMISE_YOU}
+          planF={moved ? PROMISE_PLAN : PROMISE_YOU}
+          gapDeltaDays={showGap ? PROMISE_DAYS : null}
+          gapLabel={`+${t.jourDays(PROMISE_DAYS)}`}
+          youLabel={t.jourYou}
+          planLabel={t.jourPlan}
+        />
+        <p className="onb-promise__foot">{t.onbPromiseFoot}</p>
+      </div>
+
+      <div className="onb-lines">
+        <span className="onb-lines__note">{t.onbLinesRow}</span>
+        {LINE_ROUNDELS.map(line => (
+          <span
+            key={line.jp}
+            className="onb-lines__roundel"
+            style={{ '--row-color': line.color }}
+            lang="ja"
           >
-            {pace.recommended && (
-              <span className="onb-reco-badge">{t.onbPaceRecommended}</span>
-            )}
-            <span className="onb-pace__jp" lang="ja">{pace.jp}</span>
-            <span className="onb-pace__name">{names[pace.id]}</span>
-            <StopPattern served={PACE_PATTERNS[pace.id]} />
-            <span className="onb-pace__per-day">{t.onbPacePerDay(pace.perDay)}</span>
-            <span className="onb-pace__hint">{hints[pace.id]}</span>
-          </button>
+            {line.jp}
+          </span>
         ))}
       </div>
-    </section>
-  )
-}
 
-// ── 沿線案内 — the tour, with the real thing on every card ──────
-// Each line is presented by a working piece of itself: the actual
-// production component, fed a literal sample, tappable right here.
-// Words about a flashcard cannot compete with flipping one. Every
-// card keeps its own real --line-* colour (the old "study lines"
-// bucket borrowed kana's vermillion for four different lines, against
-// the app's own one-line-one-colour rule).
-
-const TOUR_TODAY_STATS = { total: 24, new: 10, learning: 9, mastered: 5 }
-
-// One pre-analysed N5 sentence, shaped exactly like analyze_local's
-// output. Tokens deliberately carry no vocab_match/kanji_matches:
-// TokenCard renders them as plain content (no dead lookups), and
-// wordColor falls back honestly to the neutral status colour.
-const TOUR_ANALYSIS = {
-  text: '猫が好きです',
-  level: 'N5',
-  unknown_count: 1,
-  off_deck_count: 0,
-  tokens: [
-    { surface: '猫', furigana: [{ text: '猫', reading: 'ねこ' }], reading: 'ねこ', pos: 'noun', meaning: 'cat; kitten, feline' },
-    { surface: 'が', furigana: [{ text: 'が' }], pos: 'particle', meaning: 'subject marker' },
-    { surface: '好き', furigana: [{ text: '好き', reading: 'すき' }], reading: 'すき', pos: 'adjective', meaning: 'liked; fond of' },
-    { surface: 'です', furigana: [{ text: 'です' }], pos: 'auxiliary', meaning: 'polite copula' },
-  ],
-  grammar: [{ raw_id: 'onb-tour-ga-suki', start: 0, pattern: '～が好きです', level: 'N5' }],
-  explanation: 'A likes/dislikes sentence: what is liked is marked by が, not を.',
-}
-
-// One flattened mcq-text question, the shape QuestionRenderer's
-// McqBlock consumes (see exam/examService.flattenQuestions).
-const TOUR_EXAM_QUESTION = {
-  type: 'mcq-text',
-  promptJp: '＿＿＿は　がくせいです。',
-  choiceType: 'text',
-  choices: [
-    { id: 'a', textJp: 'わたし' },
-    { id: 'b', textJp: 'たべる' },
-    { id: 'c', textJp: 'あつい' },
-    { id: 'd', textJp: 'きのう' },
-  ],
-  answer: 'a',
-}
-
-function TourCard({ jp, color, title, desc, t, children }) {
-  return (
-    <div className="onb-tour__card" style={{ '--row-color': color }}>
-      <span className="onb-tour__head">
-        <span className="onb-tour__roundel" lang="ja">{jp}</span>
-        <span className="onb-tour__text">
-          <span className="onb-tour__title">{title}</span>
-          <span className="onb-tour__desc">{desc}</span>
-        </span>
-      </span>
-      <div className="onb-tour__demo">
-        <span className="onb-tour__try">{t.onbTourTryIt}</span>
-        {children}
-      </div>
-    </div>
-  )
-}
-
-function TourStep({ t, onNext }) {
-  const [tokenIndex, setTokenIndex] = useState(0)
-  const [examSelected, setExamSelected] = useState(null)
-  const [examAnswered, setExamAnswered] = useState(false)
-
-  return (
-    <section className="onb-step">
-      <h2 className="onb-step__title" tabIndex={-1}>{t.onbTourTitle}</h2>
-      <div className="onb-tour">
-        <TourCard jp="本日" color="var(--accent2)" title={t.onbTourTodayTitle} desc={t.onbTourTodayDesc} t={t}>
-          <DeckProgress stats={TOUR_TODAY_STATS} />
-        </TourCard>
-
-        <TourCard jp="単語" color="var(--line-vocab)" title={t.onbTourVocabTitle} desc={t.onbTourVocabDesc} t={t}>
-          <div className="onb-tour__flashcard">
-            <Flashcard
-              t={t}
-              resetKey="onb-tour-vocab"
-              front={<CharDisplay char="猫" size={56} />}
-              back={<MeaningDisplay meaning="cat; kitten, feline" size={20} />}
-            />
-          </div>
-        </TourCard>
-
-        <TourCard jp="解析" color="var(--line-kaiseki)" title={t.onbTourAnalyzerTitle} desc={t.onbTourAnalyzerDesc} t={t}>
-          <SentenceBreakdown
-            analysis={TOUR_ANALYSIS}
-            t={t}
-            layout="stepper"
-            index={tokenIndex}
-            setIndex={setTokenIndex}
-            onTokenClick={() => {}}
-            onKanjiClick={() => {}}
-          />
-        </TourCard>
-
-        <TourCard jp="模試" color="var(--line-exam)" title={t.onbTourExamsTitle} desc={t.onbTourExamsDesc} t={t}>
-          <QuestionRenderer
-            question={TOUR_EXAM_QUESTION}
-            selected={examSelected}
-            onSelect={id => { setExamSelected(id); setExamAnswered(true) }}
-            revealed={examAnswered}
-          />
-          {examAnswered && (
-            <button
-              type="button"
-              className="onb-link onb-tour__again"
-              onClick={() => { playUi('click'); setExamSelected(null); setExamAnswered(false) }}
-            >
-              {t.onbTourTryAgain}
-            </button>
-          )}
-        </TourCard>
-      </div>
       <div className="onb-step__actions">
         <button type="button" className="onb-action" onClick={onNext}>{t.onbContinue}</button>
       </div>
@@ -592,8 +685,98 @@ function TourStep({ t, onNext }) {
 }
 
 // ── 定期券 ───────────────────────────────────────────────────────
-function PassStep({ t, username, level, perDay, completing, error, onBoard }) {
-  const pace = paceFor(perDay)
+// 窓口 folded in (phase F): the name is asked LAST, on the
+// application form, where leaving would mean abandoning a pass that
+// already has a destination printed on it. Two beats in one scene:
+// sign (氏名 through the same EditableUsername the profile uses,
+// 発車時刻 as an optional habit hour, 申込日, the empty 印 box) →
+// 発行 prints the pass — clip-path print, the seal stamping in — with
+// the mutual vow beneath: あなた promise the pace, 窓口 promises the
+// honest map. Board 改札へ fires the one POST and hands over to the
+// TicketGate App renders.
+function PassStep({
+  t, lang, session, username, onUsername,
+  volumes, startLevel, goal, perDay, depart, onDepart,
+  printed, printedAt, onPrint, onEditApp,
+  completing, error, onBoard,
+}) {
+  const fmtD = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  })
+  const fmtDs = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', {
+    day: 'numeric', month: 'short',
+  })
+  const fmtDy = d => `${fmtDs.format(d)} ’${String(d.getFullYear()).slice(2)}`
+  const numberFmt = lang === 'fr' ? 'fr-FR' : 'en'
+
+  if (!printed) {
+    return (
+      <section className="onb-step">
+        <span className="onb-pa" lang="ja">まもなく発車します</span>
+        <h2 className="onb-step__title" tabIndex={-1}>{t.onbSignTitle}</h2>
+
+        <div className="onb-form">
+          <span className="onb-form__seal" lang="ja">印</span>
+          <div className="onb-form__head">
+            <span className="onb-form__title" lang="ja">定期券申込書</span>
+            <span className="onb-form__latin">{t.onbFormLatin}</span>
+          </div>
+          <div className="onb-form__row">
+            <span className="onb-form__k"><span lang="ja">氏名</span>{t.onbFormName}</span>
+            <EditableUsername username={username} session={session} onChange={onUsername} t={t} />
+          </div>
+          <div className="onb-form__row onb-form__row--stack">
+            <span className="onb-form__k"><span lang="ja">発車時刻</span>{t.onbFormDepart}</span>
+            <span className="onb-form__chips" role="group" aria-label={t.onbFormDepart}>
+              {['am', 'noon', 'pm'].map(id => (
+                <button
+                  key={id}
+                  type="button"
+                  className="onb-form__chip"
+                  aria-pressed={depart === id}
+                  onClick={() => onDepart(depart === id ? null : id)}
+                >
+                  <span lang="ja">{{ am: '朝', noon: '昼', pm: '夜' }[id]}</span>
+                  {DEPART_TIMES[id]}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="onb-form__chip"
+                aria-pressed={depart === null}
+                onClick={() => onDepart(null)}
+              >
+                <span lang="ja">自由</span>
+                {t.onbDepartFlex}
+              </button>
+            </span>
+          </div>
+          <div className="onb-form__row">
+            <span className="onb-form__k"><span lang="ja">申込日</span>{t.onbFormDate}</span>
+            <span className="onb-form__v">{fmtD.format(new Date())}</span>
+          </div>
+        </div>
+        <p className="onb-step__hint">{t.onbDepartHint}</p>
+
+        <div className="onb-step__actions">
+          <button type="button" className="onb-action" onClick={onPrint}>
+            {t.onbPrint} <span lang="ja">発行</span>
+          </button>
+        </div>
+      </section>
+    )
+  }
+
+  // The printed pass reads the clock 発行 was pressed on; the POST
+  // takes its own fresh reading seconds later — same contract.
+  const printNow = new Date(printedAt)
+  const passDerived = volumes ? goalDerived(volumes, startLevel, goal, printNow) : null
+  const svc = serviceLabel(perDay)
+  const time = depart ? DEPART_TIMES[depart] : null
+  const validity = goal.dest != null && passDerived?.targetDate
+    ? fmtD.format(passDerived.targetDate)
+    : '—'
+
   return (
     <section className="onb-step">
       <h2 className="onb-step__title" tabIndex={-1}>{t.onbPassTitle}</h2>
@@ -606,22 +789,58 @@ function PassStep({ t, username, level, perDay, completing, error, onBoard }) {
           <span className="onb-pass__brand" lang="ja">定期券</span>
           <span className="onb-pass__station" lang="ja">日本語駅</span>
         </div>
-        <div className="onb-pass__main">
-          <span className="onb-pass__level">{level}</span>
-          <span className="onb-pass__holder">{username || '—'}</span>
+        <div className="onb-pass__route" lang="ja">
+          {startLevel}
+          <span className="onb-pass__arrow" aria-hidden="true">▶</span>
+          {goal.dest ?? '未定'}
         </div>
-        <div className="onb-pass__foot">
-          {pace && <span lang="ja">{pace.jp}</span>}
-          <span>{t.onbPacePerDay(perDay)}</span>
-          {/* The contactless mark every pass in the app carries — the
-              same arcs the 改札 reader beyond this button is about to
-              light up. */}
-          <PassWave className="pass__wave onb-pass__wave" />
+        <div className="onb-pass__holder">
+          {username || '—'}
+          {time && <span className="onb-pass__departs"> · {t.onbDeparts(time)}</span>}
+        </div>
+        <div className="onb-pass__pattern">
+          <StopPattern served={svc.pattern} dashed={svc.id === 'charter'} />
+        </div>
+        <div className="onb-pass__grid">
+          <span className="onb-pass__cell">
+            <span className="onb-pass__k" lang="ja">種別</span>
+            <span className="onb-pass__v"><span lang="ja">{svc.jp}</span> · {perDay}/{t.onbGoalDay}</span>
+          </span>
+          <span className="onb-pass__cell">
+            <span className="onb-pass__k" lang="ja">有効期限</span>
+            <span className="onb-pass__v onb-pass__v--gold">{validity}</span>
+          </span>
+          {passDerived?.items != null && (
+            <span className="onb-pass__cell">
+              <span className="onb-pass__k" lang="ja">運賃</span>
+              <span className="onb-pass__v">{passDerived.items.toLocaleString(numberFmt)}</span>
+            </span>
+          )}
+          <span className="onb-pass__cell">
+            <span className="onb-pass__k" lang="ja">発行</span>
+            <span className="onb-pass__v">{fmtDy(printNow)}</span>
+          </span>
+        </div>
+        <span className="onb-pass__seal" lang="ja" aria-hidden="true">日本語<br />駅長</span>
+        <PassWave className="pass__wave onb-pass__wave" />
+      </div>
+
+      <div className="onb-vow">
+        <div className="onb-vow__row">
+          <span className="onb-vow__who" lang="ja">あなた</span>
+          <span className="onb-vow__what">{t.onbVowYou(perDay, time)}</span>
+        </div>
+        <div className="onb-vow__row">
+          <span className="onb-vow__who" lang="ja">窓口</span>
+          <span className="onb-vow__what">{t.onbVowOffice}</span>
         </div>
       </div>
 
       {error && <p className="onb-error" role="alert">{t.onbPassError}</p>}
       <div className="onb-step__actions">
+        <button type="button" className="onb-link" onClick={onEditApp} disabled={completing}>
+          ← {t.onbEditApp}
+        </button>
         <button type="button" className="onb-action onb-action--board" disabled={completing} onClick={onBoard}>
           {t.onbPassBoard} <span lang="ja">改札へ</span>
         </button>

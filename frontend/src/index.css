@@ -1914,47 +1914,131 @@
   color: var(--text-secondary);
 }
 
-/* 動画 — the two ingests, as peers rather than nested disclosures. */
-.anl-ingest {
+/* 動画 — 字幕取り, the grab block. The ingest tabs it replaces died
+   with the transcript-paste path (2026-09-01): one primary road (the
+   bookmarklet) and one fallback (the file drop) need no tablist. */
+.anl-grab {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: var(--sp-3);
   margin-bottom: var(--anl-gap);
-  border-bottom: 1px solid var(--surface-line);
 }
-/* Stacked, not side by side: the French labels are long
-   ("FICHIER DE SOUS-TITRES"), and set on one line with the Japanese
-   they wrapped the KANJI mid-word — 字幕フ / ァイル — on a phone.
-   The Japanese never wraps; the plain-language line under it may. */
-.anl-ingest__tab {
+.anl-grab__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.anl-grab__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  letter-spacing: 0.02em;
+}
+.anl-grab__jp {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.anl-grab__lead {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}
+.anl-grab__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-top: var(--sp-2);
+}
+/* The ghost dress on real <a> links: same plate, no underline.
+   Keyed by the links' own classes, not `.anl-grab__row .anl-ghost` —
+   that compound shares .anl-ghost as its specificity key and would
+   ratchet as descending against the ghost's own :hover rule. */
+.anl-grab__open,
+.anl-grab__downsub {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+/* ── The 字幕取り walkthrough (GrabTutorial.jsx) ──
+   Sheet chrome comes from .detail-sheet; this block only lays out
+   the steps: a numbered roundel (the history rows' drawing), the
+   step body beside it, the device switcher reusing .anl-seg. */
+.anl-tut__what {
+  margin: 0 0 var(--sp-5);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+}
+.anl-tut__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.anl-tut__step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+}
+.anl-tut__no {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--line-kaiseki);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
+  font-variant-numeric: tabular-nums;
+}
+.anl-tut__body {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1px;
-  padding: 8px 12px;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text-secondary);
-  text-align: left;
-  transition: color 0.16s ease, border-color 0.16s ease;
+  gap: var(--sp-3);
 }
-.anl-ingest__jp {
-  font-family: var(--font-jp);
-  font-size: 0.88rem;
-  white-space: nowrap;
-}
-.anl-ingest__tab[aria-selected="true"] {
-  color: var(--text-primary);
-  border-bottom-color: var(--line-kaiseki);
-}
-.anl-ingest__latin {
+.anl-tut__steptitle {
+  margin: 0;
   font-family: var(--font-display);
-  font-size: 0.58rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: var(--fs-body);
+  letter-spacing: 0.02em;
+}
+.anl-tut__text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+}
+.anl-tut__copy { align-self: flex-start; }
+.anl-tut__devices { align-self: flex-start; }
+.anl-tut__devicesteps {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+}
+.anl-tut__devicesteps li { margin: var(--sp-2) 0; }
+.anl-tut__trouble {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--surface-line);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
 }
 
 /* The dock's drop target — a real one, replacing the raw
@@ -2259,7 +2343,7 @@
   .anl-tile,
   .anl-drop,
   .anl-action,
-  .anl-ingest__tab { transition: none; }
+  .anl-grab__copy { transition: none; }
 }
 
 /* ── 車内案内 — the responsive layout (plan 030) ────────────
@@ -2607,11 +2691,15 @@
   background: var(--success);
 }
 
-/* ── The flow's own stopping pattern ───────────────────────
-   Six stations under the office sign, current one marked — the
-   onboarding drawn as the short line it is. Markers echo
-   .route-stop__marker (white-filled, line-stroked circles); the rail
-   runs behind them. */
+/* ── The flow's own stopping pattern — a スタンプラリー ─────
+   (plan 063, phase D.) The stations under the office sign are now a
+   stamp card: each stop inks its kanji when passed — a tilted ring in
+   the office's own vermillion, alternating lean so no two land the
+   same way — the current stop is a solid ring, the ones ahead dashed.
+   The rail and its progress fill run 32px-inset so they end exactly
+   at the first and last stamp centres (stops are 64px columns), never
+   past them. Only the just-inked stamp (--fresh, one index tracked in
+   the flow) plays the landing animation. */
 .onb-line {
   position: relative;
   display: flex;
@@ -2619,41 +2707,76 @@
   width: 100%;
   max-width: 520px;
   margin-bottom: 30px;
-  padding: 0 8px;
 }
 .onb-line::before {
   content: '';
   position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 5px;
+  left: 32px;
+  right: 32px;
+  top: 13px;
   height: 3px;
   border-radius: 2px;
-  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+.onb-line__fill {
+  position: absolute;
+  left: 32px;
+  top: 13px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease;
 }
 .onb-line__stop {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: var(--sp-2);
+  width: 64px;
 }
-.onb-line__marker {
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: var(--bg-card);
-  border: 3px solid color-mix(in srgb, var(--accent) 55%, var(--border));
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+.onb-line__stamp {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  font-family: var(--font-serif);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  /* Each stamp leans its own way; --past sets the resting tilt and
+     the landing keyframes read it, so the animation always settles on
+     the tilt this stamp will keep. */
+  --stamp-tilt: 0deg;
+  color: color-mix(in srgb, var(--text-secondary) 55%, transparent);
+  background: var(--bg-main);
+  border: 2px dashed color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: var(--r-pill);
+  transform: rotate(var(--stamp-tilt));
+  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
-.onb-line__stop--past .onb-line__marker {
-  background: var(--accent);
+.onb-line__stop--now .onb-line__stamp {
+  border-style: solid;
   border-color: var(--accent);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
 }
-.onb-line__stop--now .onb-line__marker {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+.onb-line__stop--past .onb-line__stamp {
+  --stamp-tilt: -7deg;
+  border: 2.5px solid var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-main));
 }
+@keyframes onb-stamp-in {
+  0%   { transform: rotate(calc(var(--stamp-tilt) - 11deg)) scale(1.7); opacity: 0; }
+  60%  { transform: rotate(var(--stamp-tilt)) scale(0.94); opacity: 1; }
+  100% { transform: rotate(var(--stamp-tilt)) scale(1); }
+}
+.onb-line__stop--fresh .onb-line__stamp {
+  animation: onb-stamp-in 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+/* The fill span is the row's first child, so even children are the
+   1st/3rd/5th… stops — every other stamp leans the other way. */
+.onb-line__stop--past:nth-child(even) .onb-line__stamp { --stamp-tilt: 5deg; }
 .onb-line__name {
   font-size: 0.68rem;
   color: var(--text-secondary);
@@ -2663,6 +2786,10 @@
 .onb-line__stop--now .onb-line__name {
   color: var(--text-primary);
   font-weight: 700;
+}
+@media (prefers-reduced-motion: reduce) {
+  .onb-line__stop--fresh .onb-line__stamp { animation: none; }
+  .onb-line__fill { transition: none; }
 }
 
 .onb-body {
@@ -2756,26 +2883,201 @@
   font-size: 0.85rem;
 }
 
-/* ── Welcome: the name on the pass ────────────────────────── */
-.onb-name {
+/* ── 試乗 — the first ride (plan 063, phase D) ─────────────
+   The real Flashcard and the real RatingBar, framed for the office.
+   The card wrapper repeats the tour's padding override — same
+   values, same reason: the study card's full-column paddings drown a
+   single demo card. */
+.onb-ride {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 16px 18px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--surface-radius);
+  align-items: center;
+  gap: var(--sp-5);
 }
-.onb-name__label { color: var(--text-secondary); font-size: 0.85rem; }
+/* The demo card's compact padding — inherited from the retired tour's
+   recipe (phase F removed the tour; the ride is the one framed study
+   card left in the office). */
+.onb-ride__card {
+  width: 100%;
+  padding: 18px 14px;
+  --card-pad-top: 18px;
+  --card-pad-x: 14px;
+  --card-pad-y: 18px;
+}
+/* 案内放送 — the platform announcement, bookending the office:
+   ご乗車ありがとうございます on scene one, まもなく発車します on the
+   last. */
+.onb-pa {
+  align-self: center;
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tr-reading);
+  text-indent: var(--tr-reading);
+  color: var(--text-secondary);
+}
+.onb-ride__back {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.onb-ride__reading {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  letter-spacing: var(--tr-reading);
+  text-indent: var(--tr-reading);
+  color: var(--text-secondary);
+}
+.onb-ride__won {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  max-width: 420px;
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px solid color-mix(in srgb, var(--success) 45%, var(--border));
+  background: color-mix(in srgb, var(--success) 7%, transparent);
+  border-radius: var(--r-card);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+.onb-ride__won strong { color: var(--text-primary); }
+.onb-ride__won-stamp {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-family: var(--font-serif);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--accent);
+  border: 2.5px solid var(--accent);
+  border-radius: var(--r-pill);
+  transform: rotate(-7deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .onb-ride__won { animation: none; }
+}
+
+/* ── 乗車駅 — board where you can still read the sign ───────
+   (plan 063, phase D.) Station rows on the office's own rail: the
+   roundel carries the level code, the serif sign name beside the load
+   at that stop, and underneath the one sentence that IS the placement
+   heuristic. */
+.onb-lvls {
+  display: flex;
+  flex-direction: column;
+}
+.onb-lvl {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  /* Left gutter = --sp-9 (52px): clears the 25px rail + roundel and
+     lands the text column where .onb-alts already indents to. */
+  padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-9);
+  background: none;
+  border: none;
+  border-radius: var(--r-card);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.onb-lvl::before {
+  content: '';
+  position: absolute;
+  left: 25px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: color-mix(in srgb, var(--accent) 38%, transparent);
+}
+.onb-lvl:first-child::before { top: 50%; }
+.onb-lvl:last-child::before { bottom: 50%; }
+.onb-lvl__roundel {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  border: 2.5px solid var(--accent);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.onb-lvl__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  flex: 1;
+  min-width: 0;
+}
+.onb-lvl__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.onb-lvl__jp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+}
+.onb-lvl__load {
+  font-size: var(--fs-caption-xs);
+  color: var(--text-secondary);
+}
+.onb-lvl__sample {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+  letter-spacing: var(--tr-term);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+.onb-lvl__go {
+  flex: none;
+  color: var(--accent);
+  font-size: var(--fs-caption-xs);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.onb-lvl:focus-visible,
+.onb-lvl:hover { background: var(--bg-card-hover); }
+.onb-lvl:focus-visible .onb-lvl__roundel,
+.onb-lvl:hover .onb-lvl__roundel {
+  background: var(--accent);
+  color: var(--text-on-panel);
+}
+.onb-lvl:focus-visible .onb-lvl__sample,
+.onb-lvl:hover .onb-lvl__sample { color: var(--text-primary); }
+.onb-lvl:focus-visible .onb-lvl__go,
+.onb-lvl:hover .onb-lvl__go { opacity: 1; transform: none; }
+@media (max-width: 560px) {
+  .onb-lvl__sample { white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .onb-lvl__go { transition: opacity 0.15s ease; transform: none; }
+}
 
 /* ── Boarding: the two non-station answers ────────────────── */
 .onb-alts {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  /* Indented past the diagram's rail: these hang OFF the line. */
-  margin: 4px 22px 0 66px;
+  /* Indented to the station rows' text column: these hang OFF the line. */
+  margin: 4px 22px 0 52px;
 }
 .onb-alt {
   display: flex;
@@ -2879,288 +3181,825 @@
 .onb-seg__btn:hover:not(.onb-seg__btn--on),
 .onb-seg__btn:focus-visible { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
 
-/* ── Pace: the 種別 ladder ────────────────────────────────── */
-.onb-paces {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-.onb-pace {
-  /* relative: anchors the .onb-reco-badge on the recommended card. */
-  position: relative;
+/* ── 行先 — the departure board scene (plan 063, phase E) ──
+   種別 and 路線図 merged: the board IS the pace control, priced
+   against the learner's date or patience, and the calling-at strip
+   below confirms the choice. The board panel is the app's 発車標
+   object — sumi ground, --text-on-panel inks, gold accents — so it
+   borrows the board family's own hanging shadow. */
+.onb-goal {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 16px;
+  gap: var(--sp-5);
+}
+
+/* Destination chips */
+.onb-dest {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.onb-dest__chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  min-width: 82px;
+  padding: var(--sp-4) var(--sp-3) var(--sp-3);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  text-align: left;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  cursor: pointer;
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
-.onb-pace:hover, .onb-pace:focus-visible {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+.onb-dest__chip:focus-visible,
+.onb-dest__chip:hover { transform: translateY(-1px); border-color: var(--text-secondary); }
+.onb-dest__chip[aria-pressed="true"] { border-color: var(--accent); }
+.onb-dest__roundel {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  border: 2.5px solid var(--border);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
-.onb-pace--on { border-color: var(--accent); }
-.onb-pace__jp {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 1.25rem;
+.onb-dest__chip--free .onb-dest__roundel {
+  border-style: dashed;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+}
+.onb-dest__chip[aria-pressed="true"] .onb-dest__roundel {
+  border-color: var(--accent);
+  /* The btn-primary lesson, verbatim: raw shu at 4.33:1 does not
+     carry the kinari — the fill deepens toward the panel ink
+     (DESIGN.md, "The primary button"); guard 4 holds the pair. */
+  background: color-mix(in srgb, var(--accent) 70%, var(--bg-panel));
+  color: var(--text-on-panel);
+}
+.onb-dest__jp {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+.onb-dest__load {
+  font-size: var(--fs-caption-xs);
+  color: var(--text-secondary);
+}
+.onb-dest__chip--free { border-style: dashed; background: none; }
+
+/* 期日 / 種別 mode toggle */
+.onb-mode {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.onb-mode__btn {
+  padding: var(--sp-2) var(--sp-5);
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.onb-mode__btn + .onb-mode__btn { border-left: 1px solid var(--surface-line); }
+.onb-mode__btn[aria-pressed="true"] {
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+}
+.onb-mode__btn [lang="ja"] {
+  font-family: var(--font-jp);
+  font-weight: 500;
+  opacity: 0.75;
+  margin-right: var(--sp-2);
+}
+
+/* The months dial (date mode) */
+.onb-months {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.onb-months__label {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-secondary);
+}
+.onb-months__chips {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.onb-months__chip {
+  padding: var(--sp-1) var(--sp-4);
+  background: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.onb-months__chip:focus-visible,
+.onb-months__chip:hover { border-color: var(--text-secondary); }
+.onb-months__chip[aria-pressed="true"] {
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-color: var(--bg-panel);
+}
+.onb-months__dial {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex: 1;
+  min-width: 220px;
+}
+.onb-months__dial input[type="range"] {
+  flex: 1;
+  min-width: 140px;
+  accent-color: var(--accent);
+}
+.onb-months__dial output {
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  min-width: 110px;
+  text-align: right;
+}
+
+/* The board itself — a 発車標 */
+.onb-board {
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-radius: var(--r-panel);
+  padding: var(--sp-5) var(--sp-5) var(--sp-4);
+  box-shadow: var(--elev-board);
+}
+.onb-board__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding-bottom: var(--sp-3);
+  margin-bottom: var(--sp-1);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
+}
+.onb-board__title {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-body);
+}
+.onb-board__cap {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-caption-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-on-panel-soft);
+  margin-left: var(--sp-3);
+}
+.onb-board__clock {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent2);
+}
+.onb-board__clock [lang="ja"] { font-family: var(--font-jp); }
+.onb-board__cols,
+.onb-board__row {
+  display: grid;
+  grid-template-columns: 1.6fr 0.9fr 1.2fr 0.8fr;
+  gap: var(--sp-3);
+  align-items: center;
+}
+.onb-board__cols {
+  padding: var(--sp-2) var(--sp-3) var(--sp-1);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-on-panel-soft);
+}
+.onb-board__row {
+  width: 100%;
+  padding: var(--sp-3);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--r-plate);
+  color: var(--text-on-panel);
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.onb-board__row[aria-pressed] { cursor: pointer; }
+.onb-board__row[aria-pressed]:focus-visible,
+.onb-board__row[aria-pressed]:hover {
+  background: color-mix(in srgb, var(--text-on-panel) 6%, transparent);
+}
+.onb-board__row[aria-pressed="true"] { border-color: var(--accent2); }
+.onb-board__row--late { opacity: 0.42; }
+.onb-board__row--charter {
+  border-top: 1px dashed color-mix(in srgb, var(--text-on-panel) 20%, transparent);
+  border-radius: 0 0 var(--r-plate) var(--r-plate);
+}
+.onb-board__row--charter[data-selected] { border-color: var(--accent2); border-radius: var(--r-plate); }
+.onb-board__row--yours {
+  border: 1px solid var(--accent2);
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, var(--accent2) 7%, transparent);
+}
+.onb-board__svc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.onb-board__svc-name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  row-gap: var(--sp-1);
+  font-weight: 700;
+}
+.onb-board__svc-name [lang="ja"] {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
   font-weight: 700;
   white-space: nowrap;
 }
-/* The stopping-pattern diagram: which of six stations this service
-   calls at. Served stops are the house station marker; skipped ones
-   are the small dim dots a passed station is on a real 種別 board. */
-.onb-pace__pattern {
-  width: 100%;
-  max-width: 150px;
-  height: 16px;
-  margin: 2px 0;
-}
-.onb-pace__pattern-rail {
-  stroke: color-mix(in srgb, var(--accent) 45%, transparent);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-}
-.onb-pace__pattern-stop {
-  fill: var(--bg-card);
-  stroke: var(--accent);
-  stroke-width: 2.5;
-}
-.onb-pace__pattern-skip {
-  fill: var(--border);
-}
-.onb-pace__name {
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.onb-pace__per-day { font-weight: 700; font-size: 0.95rem; }
-.onb-pace__hint { color: var(--text-secondary); font-size: 0.8rem; line-height: 1.45; }
-
-/* ── 路線図 — the projection, as a route diagram ───────────
-   Vertical line, one stop per completed level — the same grammar as
-   LevelSelector's .route. Replaced the old SVG chart + absolutely-
-   positioned overlays: block rows cannot clip at a container edge,
-   which is what the chart's unclamped percentage plates could do.
-   --stop-gap (set inline per stop) is elapsed time as spacing. */
-.onb-map { display: flex; flex-direction: column; gap: 16px; }
-.onb-map__total { margin: 0; font-weight: 700; }
-.onb-map__assumption {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.78rem;
-  font-style: italic;
-}
-
-.onb-route {
-  display: flex;
-  flex-direction: column;
-  padding: 6px 4px;
-}
-.onb-route__stop {
-  position: relative;
-  display: flex;
-  gap: 14px;
-  padding-bottom: var(--stop-gap, 22px);
-  /* The same staggered arrival the flow's other pieces use. */
-  opacity: 0;
-  animation: arrive-soft 0.4s ease forwards;
-  animation-delay: calc(0.1s + var(--stop-i, 0) * 0.22s);
-}
-.onb-route__stop:last-child { padding-bottom: 0; }
-.onb-route__rail {
-  position: absolute;
-  left: 9px;
-  top: 20px;
-  bottom: -2px;
-  width: 3px;
-  background: color-mix(in srgb, var(--accent) 40%, transparent);
-}
-.onb-route__stop:last-child .onb-route__rail { display: none; }
-/* The same object as .route-stop__marker: a station on a line. */
-.onb-route__marker {
-  flex-shrink: 0;
-  width: 21px;
-  height: 21px;
-  border-radius: 50%;
-  background: var(--bg-card);
-  border: 3px solid var(--accent);
-  z-index: 1;
-}
-.onb-route__stop--now .onb-route__marker { background: var(--accent); }
-.onb-route__stop--complete .onb-route__marker {
-  background: var(--success);
-  border-color: var(--success);
-}
-.onb-route__stop--horizon .onb-route__marker {
-  border-style: dashed;
-  border-color: var(--border);
-  background: transparent;
-}
-.onb-route__body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-top: 1px;
-  min-width: 0;
-}
-.onb-route__level {
-  font-family: 'Noto Serif JP', serif;
+.onb-board__en {
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
-  font-size: 1.1rem;
-  line-height: 1.15;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-on-panel-soft);
 }
-.onb-route__when {
-  color: var(--text-secondary);
-  font-size: 0.82rem;
+.onb-board__reco {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption-xs);
+  color: var(--accent2);
+  border: 1px solid var(--accent2);
+  border-radius: var(--r-plate);
+  padding: 0 var(--sp-2);
+  transform: translateY(-2px);
 }
-.onb-route__items {
-  color: var(--text-secondary);
-  font-size: 0.78rem;
+.onb-board__pat { width: 96px; height: 11px; display: block; }
+.onb-board__pat-rail { stroke: color-mix(in srgb, var(--text-on-panel) 30%, transparent); stroke-width: 2; }
+.onb-board__pat-rail--dash { stroke-dasharray: 4 3; }
+.onb-board__pat-stop { fill: var(--text-on-panel); }
+.onb-board__pat-skip { fill: color-mix(in srgb, var(--text-on-panel) 28%, transparent); }
+.onb-board__dial {
+  width: 96px;
+  accent-color: var(--accent2);
+}
+.onb-board__pace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-/* Past the horizon the rail fades out instead of stopping — the
-   journey continues, the map just ends. Runs BELOW the dashed marker,
-   so the horizon stop reserves the room it fades through. */
-.onb-route__stop--horizon { padding-bottom: 28px; }
-.onb-route__continues {
-  position: absolute;
-  left: 9px;
-  top: 20px;
-  width: 3px;
-  height: 26px;
-  background: linear-gradient(to bottom,
-    color-mix(in srgb, var(--accent) 40%, transparent),
-    transparent);
+.onb-board__per {
+  font-weight: 500;
+  font-size: var(--fs-caption);
+  color: var(--text-on-panel-soft);
 }
-
-/* ── 沿線案内 — the tour ──────────────────────────────────
-   Each card is a head row (roundel + copy) over a live demo region
-   holding the REAL study component with sample data — see TourStep.
-   The demo panel wears a "try it" pill on its shoulder so the
-   interactivity is an invitation, not an easter egg. */
-.onb-tour { display: flex; flex-direction: column; gap: 14px; }
-.onb-tour__card {
+.onb-board__min {
+  font-size: var(--fs-caption-xs);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel-soft);
+}
+.onb-board__eta {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+/* State ink, not raw enji — the pigment alone is 2.6:1 on sumi. */
+.onb-board__row--void .onb-board__pace,
+.onb-board__row--void .onb-board__eta {
+  color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel));
+}
+.onb-board__late {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  color: var(--warning);
+  margin-left: var(--sp-2);
+}
+.onb-board__dur {
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel-soft);
+}
+.onb-board__notice {
+  margin-top: var(--sp-2);
+  padding: var(--sp-3) var(--sp-3) var(--sp-2);
+  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-  padding: 14px 16px 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--row-color, var(--accent));
-  border-radius: 6px;
+  gap: var(--sp-3);
 }
-.onb-tour__head {
+.onb-board__notice-line {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--warning);
+}
+.onb-board__notice-line [lang="ja"] {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  margin-right: var(--sp-2);
+}
+.onb-board__fixes {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.onb-board__fix {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-4);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 30%, transparent);
+  border-radius: var(--r-card);
+  color: var(--text-on-panel-soft);
+  font-size: var(--fs-caption);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.onb-board__fix:focus-visible,
+.onb-board__fix:hover { border-color: var(--accent2); color: var(--text-on-panel); }
+.onb-board__fix strong {
+  font-size: var(--fs-sm);
+  color: var(--text-on-panel);
+}
+
+/* ── 停車駅 — the calling-at strip ─────────────────────────── */
+.onb-call {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.onb-call__label {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-secondary);
+}
+.onb-call__label [lang="ja"] {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  text-transform: none;
+  letter-spacing: 0.06em;
+  margin-right: var(--sp-3);
+}
+.onb-call__line {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: var(--sp-1) var(--sp-2) 0;
+}
+.onb-call__line::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 9px;
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.onb-call__stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.onb-call__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  border: 2.5px solid var(--accent);
+}
+.onb-call__dot--now { background: var(--accent); }
+.onb-call__stop--goal .onb-call__dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent2) 40%, transparent);
+}
+.onb-call__lvl {
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  line-height: 1.2;
+}
+.onb-call__jp {
+  font-family: var(--font-jp);
+  font-weight: 500;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  margin-left: var(--sp-1);
+}
+.onb-call__when {
+  font-size: var(--fs-caption-xs);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The honest line under the board */
+.onb-goal__hint {
+  margin: 0;
+  padding-top: var(--sp-3);
+  border-top: 1px dashed var(--border);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+@media (max-width: 560px) {
+  .onb-board__cols,
+  .onb-board__row { grid-template-columns: 1.5fr 0.9fr 1.2fr; }
+  .onb-board__col-dur,
+  .onb-board__dur { display: none; }
+  .onb-call__when { display: none; }
+}
+
+/* ── 案内 — the promise (plan 063, phase F) ─────────────────
+   The learner's own line on a sumi panel, drawn by the SAME
+   GhostTrack the pass back uses (.jour-track — its inks read
+   --text-on-panel and its state colour reads --jour-st, both provided
+   here). The demos are gone; one quiet roundel row names the lines. */
+.onb-promise {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-6) var(--sp-6) var(--sp-5);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-radius: var(--r-panel);
+  box-shadow: var(--elev-board);
+}
+.onb-promise__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.onb-promise__title,
+.onb-promise__status {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.onb-promise__title b {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+}
+.onb-promise__status b {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  color: var(--jour-st-ink, var(--warning));
+}
+.onb-promise__cap {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-on-panel-soft);
+}
+.onb-promise__foot {
+  margin: 0;
+  padding-top: var(--sp-3);
+  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--text-on-panel-soft);
+}
+
+/* The four lines, named — rings in their own pigments, nothing more. */
+.onb-lines {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
 }
-.onb-tour__demo {
+.onb-lines__note {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.onb-lines__roundel {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  border: 2.5px solid var(--row-color, var(--accent));
+  color: var(--row-color, var(--accent));
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+}
+
+/* ── 定期券申込書 — the application form (phase F) ───────────
+   Token-inked on --surface: right in dark, naturally papery in light.
+   The chosen departure chip is a ring and a whisper of tint — never a
+   fill. The empty 印 box waits for the printed pass's seal. */
+.onb-form {
   position: relative;
-  padding: 18px 14px 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-}
-.onb-tour__try {
-  position: absolute;
-  top: -9px;
-  left: 12px;
-  padding: 1px 8px;
+  max-width: 460px;
+  padding: var(--sp-5) var(--sp-6) var(--sp-5);
   background: var(--surface);
-  border: 1px solid color-mix(in srgb, var(--row-color, var(--accent)) 45%, var(--border));
-  border-radius: 999px;
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
+  color: var(--text-primary);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  box-shadow: var(--elev-hang);
+}
+.onb-form::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.onb-form__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+.onb-form__title {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  letter-spacing: 0.08em;
+}
+.onb-form__latin {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-/* The flashcard cancels its host's padding via --card-pad-* (see
-   .flashcard in index.css) — matching the vars to this wrapper's own
-   padding seats it flush, with real padding inside the tappable card. */
-.onb-tour__flashcard {
-  padding: 18px 14px;
-  --card-pad-top: 18px;
-  --card-pad-x: 14px;
-  --card-pad-y: 18px;
+.onb-form__row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  /* Right gutter = --sp-9: clears the 40px 印 box at its 18px inset
+     (the dashed ring may kiss the gutter's edge; content never does). */
+  padding: var(--sp-3) var(--sp-9) var(--sp-3) 0;
 }
-.onb-tour__again {
-  display: block;
-  margin: 8px auto 0;
+.onb-form__row + .onb-form__row {
+  border-top: 1px solid color-mix(in srgb, var(--text-primary) 11%, transparent);
 }
-.onb-tour__roundel {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 46px;
-  height: 46px;
-  padding: 0 6px;
-  border-radius: 50%;
-  border: 3px solid var(--row-color, var(--accent));
-  font-family: 'Noto Serif JP', serif;
+.onb-form__row--stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+}
+.onb-form__k {
+  min-width: 108px;
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
-  font-size: 0.95rem;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
-.onb-tour__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.onb-tour__title { font-weight: 700; }
-.onb-tour__desc { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+.onb-form__k [lang="ja"] {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.06em;
+  text-transform: none;
+  margin-right: var(--sp-2);
+}
+.onb-form__v {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.onb-form__seal {
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  border: 2px dashed color-mix(in srgb, var(--danger) 65%, transparent);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-size: var(--fs-caption);
+  color: color-mix(in srgb, var(--danger) 75%, var(--text-primary));
+}
+.onb-form__chips {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.onb-form__chip {
+  padding: var(--sp-1) var(--sp-4);
+  background: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: var(--text-primary);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.onb-form__chip [lang="ja"] {
+  font-family: var(--font-jp);
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-right: var(--sp-1);
+}
+.onb-form__chip:focus-visible,
+.onb-form__chip:hover { border-color: var(--text-secondary); }
+.onb-form__chip[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+}
 
-/* ── 定期券 — the pass ────────────────────────────────────── */
+/* ── 定期券 — the printed pass (phase F) ─────────────────────
+   Route, holder + departure, the service's stopping pattern, the
+   contract grid with the gold 有効期限, the 駅長 seal stamping in
+   after the clip-path print. */
+@keyframes onb-pass-print {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+@keyframes onb-seal-in {
+  0%   { transform: rotate(-30deg) scale(2); opacity: 0; }
+  60%  { transform: rotate(9deg) scale(0.95); opacity: 1; }
+  100% { transform: rotate(9deg) scale(1); }
+}
 .onb-pass {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  max-width: 420px;
+  gap: var(--sp-4);
+  max-width: 460px;
   width: 100%;
   align-self: center;
-  padding: 20px 22px;
+  padding: var(--sp-6) var(--sp-6) var(--sp-5);
   background: var(--bg-panel);
   color: var(--text-on-panel);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  border-radius: var(--r-identity);
+  box-shadow: var(--elev-hang);
+  overflow: hidden;
+  animation: onb-pass-print 0.5s ease-out backwards;
 }
 .onb-pass__head {
   display: flex;
   justify-content: space-between;
   color: var(--text-on-panel-soft);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   letter-spacing: 0.12em;
 }
-.onb-pass__main {
+.onb-pass__route {
   display: flex;
   align-items: baseline;
-  gap: 16px;
-}
-.onb-pass__level {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 3.2rem;
+  gap: var(--sp-4);
+  font-family: var(--font-serif);
+  font-size: var(--fs-heading);
   font-weight: 700;
-  line-height: 1;
-  color: var(--accent2);
+  line-height: 1.1;
+}
+.onb-pass__arrow {
+  color: var(--accent);
+  font-size: var(--fs-body);
 }
 .onb-pass__holder {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.15rem;
+  font-size: var(--fs-lead);
   overflow-wrap: anywhere;
 }
-.onb-pass__foot {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+.onb-pass__departs {
+  font-weight: 500;
+  font-size: var(--fs-sm);
   color: var(--text-on-panel-soft);
-  font-size: 0.85rem;
 }
-/* The contactless arcs (see PassWave.jsx / .pass__wave) pushed to the
-   pass's corner — the same mark the gate reader is about to answer. */
-.onb-pass__wave { margin-left: auto; }
+.onb-pass__pattern { width: 140px; }
+.onb-pass__grid {
+  display: flex;
+  gap: var(--sp-6);
+  flex-wrap: wrap;
+  padding-top: var(--sp-4);
+  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
+}
+.onb-pass__cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.onb-pass__k {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption-xs);
+  color: var(--text-on-panel-soft);
+}
+.onb-pass__v {
+  font-weight: 700;
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+}
+.onb-pass__v [lang="ja"] { font-family: var(--font-jp); }
+.onb-pass__v--gold { color: var(--accent2); }
+.onb-pass__seal {
+  position: absolute;
+  right: 20px;
+  top: 48px;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--r-pill);
+  border: 2.5px solid var(--accent);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-caption-xs);
+  line-height: 1.25;
+  transform: rotate(9deg);
+  animation: onb-seal-in 0.45s cubic-bezier(0.22, 0.68, 0.32, 1) 0.55s backwards;
+}
+/* The contactless arcs (see PassWave.jsx / .pass__wave) in the pass's
+   corner — the same mark the gate reader is about to answer. The
+   compound selector outranks .pass__wave's own position:relative,
+   which sits later in the sheet. */
+.onb-pass .onb-pass__wave {
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+}
 .onb-action--board { align-self: center; }
+
+/* ── The mutual vow ──────────────────────────────────────────
+   Two lines, both binding: あなた promise the pace, 窓口 promises the
+   honest map. */
+.onb-vow {
+  max-width: 460px;
+  width: 100%;
+  align-self: center;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.onb-vow__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-5);
+}
+.onb-vow__row + .onb-vow__row {
+  border-top: 1px solid var(--surface-line);
+}
+.onb-vow__who {
+  flex: none;
+  width: 52px;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--accent);
+}
+.onb-vow__what {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onb-pass { animation: none; }
+  .onb-pass__seal { animation: none; }
+}
 
 /* ── Shared visual language ─────────────────────────────────
    Two devices, one accent, defined once and reused wherever the
@@ -3170,7 +4009,7 @@
      target-met mark). Same --accent2 as .onb-seg__btn--reco's ◈,
      so one colour keeps meaning one concept at two sizes.
    - .settings-card--onb: the identity frame Settings' 学習 card
-     wears — the same border-left device as .onb-tour__card, in
+     wears — the border-left device the retired tour cards minted, in
      --accent (shu-iro) because Settings, like the office, is about
      you and never claims a --line-* pigment. */
 .onb-reco-badge {
@@ -3359,14 +4198,9 @@
   }
   .onb-action:hover:not(:disabled),
   .onb-action:focus-visible,
-  .onb-pace:hover,
-  .onb-pace:focus-visible { transform: none; }
-  /* The route diagram appears complete: no staggered stops. */
-  .onb-route__stop {
-    animation: none;
-    opacity: 1;
-  }
-  .onb-line__marker { transition: none; }
+  .onb-dest__chip:hover,
+  .onb-dest__chip:focus-visible { transform: none; }
+  .onb-line__stamp { transition: none; }
 }
 
 /* ── Design system, light + dark ──────────────────────────────
@@ -6073,6 +6907,10 @@ textarea:focus-visible {
 }
 .hall-pass:hover { filter: none; }
 .hall-pass .pass { margin-bottom: 0; transition: border-color 0.15s ease, transform 0.15s ease; }
+/* Inside the /profile flip (plan 063) the container owns the pass's
+   bottom rhythm — see the 路線図の影 section at the end. Lives here,
+   before the hover variant, for the no-descending-specificity guard. */
+.jour-flip .pass { margin-bottom: 0; }
 .hall-pass:hover .pass,
 .hall-pass:focus-visible .pass {
   border-color: color-mix(in srgb, var(--pass-ink) 55%, var(--text-on-panel));
@@ -10811,6 +11649,10 @@ textarea:focus-visible {
 }
 
 .rating-bar { margin-top: 0; }
+/* Inside 試乗's demo (plan 063, phase D) the bar gets the card's
+   column instead of shrink-wrapping its labels. Lives here, after
+   the base rule, for the no-descending-specificity guard. */
+.onb-ride .rating-bar { width: min(480px, 100%); }
 
 /* Held, not hidden. RatingBar used to return null before the reveal, so
    the bar appeared out of nowhere -- and because .quiz-area is a centred
@@ -22023,4 +22865,360 @@ html { scrollbar-gutter: stable; }
   display: flex;
   gap: var(--sp-3);
   margin-top: var(--sp-6);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   路線図の影 section — the journey pass (plan 063, phase C).
+   Owns .jour-*: the /profile CommuterPass's flip, its front footer
+   line, and the back face's two-lane ghost track. Appended at the
+   end on purpose — a fresh namespace with no ties to win, so cascade
+   position carries no meaning here. Every surface in this section is
+   the pass's own permanently-sumi ground, so inks come from the
+   --text-on-panel family and state colours read against sumi in both
+   themes; --jour-st is the one injected pigment, set by the status
+   classes below and consumed everywhere a state shows.
+   ══════════════════════════════════════════════════════════════ */
+/* Two registers per status: --jour-st is the PIGMENT (cars, rails,
+   bracket lines — graphics), --jour-st-ink is what may be TEXT on the
+   sumi. Matcha and kohaku carry themselves (measured 6:1 and 8:1);
+   enji does not (2.6:1 raw), so its ink is the pigment mixed toward
+   the panel ink — guard 4 holds all four. */
+.jour-st--onTime,
+.jour-st--ahead          { --jour-st: var(--success); --jour-st-ink: var(--success); }
+.jour-st--slightlyBehind { --jour-st: var(--warning); --jour-st-ink: var(--warning); }
+.jour-st--delayed,
+.jour-st--suspended {
+  --jour-st: var(--danger);
+  --jour-st-ink: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel));
+}
+
+/* ── The flip ────────────────────────────────────────────────
+   Both faces stack in one grid cell, so the container's height is the
+   taller face and the page never jumps on turn. The hidden face drops
+   to visibility:hidden AFTER the half-turn (0.3s of the 0.6s flip),
+   which is also what removes it from the tab order — no tabIndex
+   bookkeeping across the pass's own controls. */
+.jour-flip {
+  perspective: 1100px;
+  /* The pass's own 44px bottom rhythm moves onto this container (the
+     zeroing rule lives up in the pass section, beside its family, for
+     the specificity-order guard) — or the two faces disagree on
+     height. */
+  margin-bottom: var(--sp-8);
+}
+.jour-flip__inner {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+.jour-flip--flipped .jour-flip__inner { transform: rotateY(180deg); }
+.jour-flip__face {
+  grid-area: 1 / 1;
+  min-width: 0;
+  backface-visibility: hidden;
+  transition: visibility 0s 0.3s;
+}
+.jour-flip__face--front { cursor: pointer; }
+.jour-flip--flipped .jour-flip__face--front { visibility: hidden; }
+.jour-flip__face--back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-7) var(--sp-7) var(--sp-6);
+  background: var(--bg-panel);
+  border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
+  border-radius: var(--r-identity);
+  color: var(--text-on-panel);
+  overflow: hidden;
+}
+.jour-flip:not(.jour-flip--flipped) .jour-flip__face--back { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .jour-flip__inner { transition: none; }
+  .jour-flip__face { transition: none; }
+}
+
+/* ── The front's one-line footer ─────────────────────────────
+   Status word · gold 有効期限 · the turn-over control. Rides the
+   pass's existing footer slot, on the pass's sumi. */
+.jour-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-5);
+  flex-wrap: wrap;
+}
+.jour-line__status {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.jour-line__status b {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--jour-st-ink, var(--text-on-panel));
+}
+.jour-line__status .jour-cap {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-on-panel-soft);
+}
+.jour-line__validity {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-variant-numeric: tabular-nums;
+}
+.jour-line__validity [lang="ja"] {
+  font-size: var(--fs-caption-xs);
+  color: var(--text-on-panel-soft);
+}
+.jour-line__validity b {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--accent2);
+}
+.jour-line__turn {
+  margin-left: auto;
+  padding: var(--sp-1) 0;
+  background: none;
+  border: none;
+  color: var(--text-on-panel-soft);
+  font-size: var(--fs-caption);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.jour-line__turn:hover,
+.jour-line__turn:focus-visible { color: var(--text-on-panel); }
+
+/* ── The back face's head ────────────────────────────────────── */
+.jour-rev__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.jour-rev__title,
+.jour-rev__status {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.jour-rev__title b {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+}
+.jour-rev__title .jour-cap,
+.jour-rev__status .jour-cap {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-on-panel-soft);
+}
+.jour-rev__status { margin-left: auto; }
+.jour-rev__status b {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  color: var(--jour-st-ink, var(--text-on-panel));
+}
+.jour-rev__turn {
+  padding: var(--sp-1) 0;
+  background: none;
+  border: none;
+  color: var(--text-on-panel-soft);
+  font-size: var(--fs-caption);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.jour-rev__turn:hover,
+.jour-rev__turn:focus-visible { color: var(--text-on-panel); }
+
+/* ── The two-lane track ──────────────────────────────────────
+   Positional geometry is deliberately numeric (nothing on the space
+   scale means "the rail sits 38px down a 132px drawing"); everything
+   typographic reads the token scales. The inner span insets the
+   coordinate system so edge stations and the bracket's hung label
+   stay inside the panel. */
+.jour-track { position: relative; height: 132px; }
+/* 20px, not the mockup's 14: the widest thing centred on an edge stop
+   is the tracked PLAN/YOU cap label (~38px), and the containment rule
+   must hold against the bare track box — the guarantee travels with
+   the component instead of leaning on whatever padding the panel
+   around it happens to have. */
+.jour-track__span { position: absolute; inset: 0 20px; }
+.jour-track__rail {
+  position: absolute;
+  left: 0; right: 0; top: 38px; height: 4px;
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+}
+.jour-track__done {
+  position: absolute;
+  left: 0; top: 38px; height: 4px;
+  border-radius: var(--r-plate);
+  background: var(--jour-st, var(--success));
+  transition: width 0.25s ease;
+}
+.jour-track__station {
+  position: absolute;
+  top: 34px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.jour-track__station i {
+  width: 12px; height: 12px;
+  border-radius: var(--r-pill);
+  background: var(--bg-panel);
+  border: 3px solid color-mix(in srgb, var(--text-on-panel) 70%, transparent);
+}
+.jour-track__station-name {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-on-panel-soft);
+  white-space: nowrap;
+}
+/* Two lanes: your train above the rail, the plan-car below — the
+   same x can never collide (the browser test holds this). */
+.jour-track__you,
+.jour-track__plan {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  transition: left 0.25s ease;
+}
+.jour-track__you  { top: 2px; }
+.jour-track__plan { top: 76px; }
+.jour-track__tag {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-on-panel-soft);
+  white-space: nowrap;
+}
+.jour-track__you i {
+  width: 20px; height: 13px;
+  border-radius: var(--r-plate);
+  background: var(--jour-st, var(--success));
+}
+.jour-track__plan i {
+  width: 20px; height: 13px;
+  border-radius: var(--r-plate);
+  border: 2px dashed color-mix(in srgb, var(--text-on-panel) 50%, transparent);
+}
+.jour-track__gap {
+  position: absolute;
+  top: 114px;
+  height: 0;
+  border-top: 2px solid var(--jour-st, var(--warning));
+  transition: left 0.25s ease, width 0.25s ease;
+}
+.jour-track__gap::before,
+.jour-track__gap::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  width: 2px; height: 8px;
+  background: var(--jour-st, var(--warning));
+}
+.jour-track__gap::before { left: 0; }
+.jour-track__gap::after  { right: 0; }
+.jour-track__gap b {
+  position: absolute;
+  left: 50%; top: 4px;
+  transform: translateX(-50%);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--jour-st-ink, var(--warning));
+  background: var(--bg-panel);
+  padding: 0 var(--sp-2);
+  white-space: nowrap;
+}
+/* A narrow bracket can't hold its own label — hang it off the right
+   end, or off the LEFT end when the bracket rides near the right edge. */
+.jour-track__gap--tight b {
+  left: calc(100% + 4px);
+  transform: none;
+  top: -8px;
+  padding: 0;
+}
+.jour-track__gap--left b {
+  left: auto;
+  right: calc(100% + 4px);
+  transform: none;
+  top: -8px;
+  padding: 0;
+}
+
+/* ── The honest sentence and the two honest moves ───────────── */
+.jour-rev__foot {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--text-on-panel-soft);
+}
+.jour-rev__actions {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.jour-act {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-4);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 30%, transparent);
+  border-radius: var(--r-card);
+  color: var(--text-on-panel-soft);
+  font-size: var(--fs-caption);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.jour-act:disabled { opacity: 0.45; cursor: default; }
+.jour-act:focus-visible,
+.jour-act:hover:not(:disabled) { border-color: var(--accent2); color: var(--text-on-panel); }
+.jour-act strong {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-on-panel);
+}
+.jour-act strong [lang="ja"] { font-weight: 500; margin-right: var(--sp-2); }
+.jour-rev__none {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-on-panel-soft);
+}
+.jour-rev__office {
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-on-panel);
+  font-size: var(--fs-sm);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.jour-rev__error {
+  margin: 0;
+  font-size: var(--fs-caption);
+  /* On the pass's sumi, the state ink — raw enji sits at 2.6:1. */
+  color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel));
 }

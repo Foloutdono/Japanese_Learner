@@ -1,48 +1,48 @@
 import { useState, useRef } from 'react'
-import { playUi } from '../../lib/audio'
 import { parseTimecode, formatTimecode } from '../../lib/timecode'
 import { parseVideoId } from '../../lib/youtube'
-import { WritingSlip } from './WritingSlip'
+import { buildBookmarklet } from '../../lib/captionGrab'
+import { GrabTutorial } from './GrabTutorial'
 
 // ── 3番線 動画 — the subtitle dock ────────────────────────
-// Two ingests, side by side as peers. Paste used to be a <details>
-// nested BELOW a second <details> of yt-dlp instructions, which is not a
-// hierarchy, it is a filing cabinet -- and it hid a first-class ingest
-// (docs/adr/0003 makes the pipeline source-agnostic precisely so paste
-// can be one).
+// Two ways in, in the order they should be tried:
+//
+//   1. 字幕取り — the bookmarklet the app mints (lib/captionGrab.js,
+//      where the measurements live). It runs ON the YouTube page —
+//      the one origin where captions are still fetchable — grabs the
+//      Japanese track and comes back here through the URL hash.
+//      Works on phones: a bookmark is the one programmable thing a
+//      mobile browser allows.
+//   2. A subtitle file, dropped or picked. The accept list carries
+//      MIME types alongside extensions on purpose: Android's picker
+//      matches by MIME, and `.srt`/`.vtt` map to none, so the
+//      extension-only list greyed out every file on mobile — the
+//      "they don't let you use these types of files" report.
+//
+// The transcript-paste ingest is GONE (owner-directed, 2026-09-01):
+// YouTube's transcript panel hands out a translation by default —
+// learners kept getting English for Japanese videos — and the panel
+// is genuinely hard to find. The yt-dlp instructions went with it;
+// DownSub, pre-filled with the pasted link, is the no-install
+// fallback for anything the bookmarklet cannot reach.
 
-// Enough to be a real transcript rather than a stray line, low enough
-// that a short clip still qualifies. Guards the obvious mistake of
-// pasting only the URL into both fields.
-const MIN_TRANSCRIPT_CHARS = 12
-
-const INGESTS = [
-  { key: 'file',  jp: '字幕ファイル', label: 'ingestFile' },
-  { key: 'paste', jp: '貼り付け',     label: 'ingestPaste' },
-]
-
-export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromTranscript, onError }) {
-  const [ingest, setIngest] = useState('file')
+export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
   // The Window is OPTIONAL and blank by default -- the whole Track is
   // the sensible thing to study, and MAX_SENTENCES already bounds the
   // work. See docs/adr/0003's 2026-08-27 amendment.
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
-  const [transcript, setTranscript] = useState('')
   const [dragging, setDragging] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [showTutorial, setShowTutorial] = useState(false)
   const fileRef = useRef(null)
+  const copiedTimer = useRef(null)
 
   const parsedVideoId = parseVideoId(url)
-  // Shown so "how do I get a JAPANESE .srt" is answered on the screen
-  // rather than being left as an exercise. --sub-langs ja is the whole
-  // point: it is what stops YouTube handing over an English translation.
-  const ytdlpTarget = parsedVideoId ? `https://youtu.be/${parsedVideoId}` : '<video URL>'
-  // One line, deliberately: it is meant to be copied and pasted, and a
-  // backslash-continued command breaks when pasted into PowerShell.
-  const ytdlpCommand =
-    'yt-dlp --skip-download --write-subs --write-auto-subs ' +
-    `--sub-langs ja --convert-subs srt "${ytdlpTarget}"`
-  const ytdlpListCommand = `yt-dlp --list-subs "${ytdlpTarget}"`
+  const watchUrl = parsedVideoId ? `https://www.youtube.com/watch?v=${parsedVideoId}` : null
+  const downsubHref = watchUrl
+    ? `https://downsub.com/?url=${encodeURIComponent(watchUrl)}`
+    : 'https://downsub.com/'
 
   // Parsed at the edge; the API takes numbers or nothing at all. A blank
   // field is not an error -- it means "no bound that side".
@@ -56,12 +56,19 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromT
     : null
   const windowOpts = { url, start: startSec, end: endSec }
 
-  function startFromTranscript() {
-    if (transcript.trim().length < MIN_TRANSCRIPT_CHARS) {
-      onError(t.transcriptTooShort)
-      return
+  // Copy, not drag: React (rightly) refuses javascript: hrefs, and on
+  // a phone there is nothing to drag to anyway — copy → new bookmark
+  // → paste is the flow that works everywhere.
+  async function copyBookmarklet() {
+    try {
+      await navigator.clipboard.writeText(buildBookmarklet(window.location.origin))
+      setCopied(true)
+      clearTimeout(copiedTimer.current)
+      copiedTimer.current = setTimeout(() => setCopied(false), 2400)
+    } catch {
+      // Clipboard refused (permissions, insecure context) — the
+      // button simply doesn't confirm, and the file path remains.
     }
-    onStartFromTranscript(transcript, windowOpts)
   }
 
   function handleDrop(e) {
@@ -73,99 +80,8 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromT
 
   return (
     <>
-      {/* Two ingests as peers, same roving-tabindex pattern as the
-          platform rail above. */}
-      <div className="anl-ingest" role="tablist" aria-label={t.intakeVideoLead}>
-        {INGESTS.map(g => {
-          const active = g.key === ingest
-          return (
-            <button
-              key={g.key}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              tabIndex={active ? 0 : -1}
-              className="anl-ingest__tab"
-              onClick={() => { if (!active) { playUi('click-mode-selection'); setIngest(g.key) } }}
-            >
-              <span className="anl-ingest__jp" lang="ja">{g.jp}</span>
-              <span className="anl-ingest__latin">{t[g.label]}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {ingest === 'file' && (
-        <>
-          {/* A real drop target. preventDefault on BOTH dragover and drop
-              -- without it the browser navigates away to the dropped
-              file, which loses whatever the learner had typed. */}
-          <div
-            className={`anl-drop${dragging ? ' anl-drop--over' : ''}`}
-            onDragOver={e => { e.preventDefault(); setDragging(true) }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-            onClick={() => fileRef.current?.click()}
-          >
-            <span className="anl-drop__jp" lang="ja">字幕</span>
-            <span className="anl-drop__lead">{t.dropSubtitles}</span>
-            <span className="anl-drop__note">{t.subtitleAccepted}</span>
-            {/* Visually hidden rather than display:none, which would take
-                it out of the accessibility tree -- same clip pattern as
-                .analysis-image-input__file. */}
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".srt,.vtt,.ass,.ssa"
-              className="anl-drop__input"
-              onChange={e => onStartFromFile(e.target.files?.[0], windowOpts)}
-            />
-          </div>
-
-          <details className="anl-notice">
-            <summary>{t.howToGetSubs}</summary>
-            <div className="anl-notice__lead">{t.howToGetSubsLead}</div>
-            <pre className="anl-notice__cmd">{ytdlpCommand}</pre>
-            <div className="anl-notice__lead">{t.howToGetSubsList}</div>
-            <pre className="anl-notice__cmd">{ytdlpListCommand}</pre>
-            <div className="anl-notice__lead">{t.howToGetSubsNote}</div>
-          </details>
-        </>
-      )}
-
-      {ingest === 'paste' && (
-        <>
-          <div className="anl-notice">
-            <div className="anl-notice__lead">{t.pasteTranscriptHow}</div>
-            <ol className="anl-notice__steps">
-              <li>
-                {t.pasteTranscriptStep1}
-                {parsedVideoId && (
-                  <> — <a
-                    href={`https://www.youtube.com/watch?v=${parsedVideoId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >{t.openOnYoutube}</a></>
-                )}
-              </li>
-              <li>{t.pasteTranscriptStep2}</li>
-              <li>{t.pasteTranscriptStep3}</li>
-            </ol>
-          </div>
-
-          <WritingSlip
-            t={t}
-            value={transcript}
-            onChange={setTranscript}
-            placeholder={'0:00\n…'}
-            onSubmit={startFromTranscript}
-            submitLabel={t.useTranscript}
-          />
-        </>
-      )}
-
-      {/* A real single-line field. Was .phrase-textarea -- an 18px
-          textarea rule, resize: vertical and all, on an <input>. */}
+      {/* The link leads: it names the video for the player, opens the
+          right page for the bookmarklet, and pre-fills DownSub. */}
       <label className="anl-field-row">
         <span className="anl-window__label">{t.videoUrlOptional}</span>
         <input
@@ -178,11 +94,87 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromT
         <span className="anl-window__readout">{t.videoUrlOptionalHint}</span>
       </label>
 
+      {/* ── 字幕取り — the grab ── */}
+      <div className="anl-grab">
+        <div className="anl-grab__head">
+          <span className="anl-grab__title">{t.grabTitle}</span>
+          <span className="anl-grab__jp" lang="ja">字幕取り</span>
+        </div>
+        <p className="anl-grab__lead">{t.grabLead}</p>
+        <div className="anl-grab__row">
+          <button type="button" className="anl-action anl-grab__copy" onClick={copyBookmarklet}>
+            {copied ? t.bookmarkletCopied : t.copyBookmarklet}
+          </button>
+          {/* The real walkthrough — what a bookmarklet is, and how to
+              save one on THIS device — lives in a dialog, because the
+              honest version is too long to sit in an intake panel. */}
+          <button
+            type="button"
+            className="anl-ghost anl-grab__tutorial"
+            onClick={() => setShowTutorial(true)}
+          >
+            {t.grabTutorialBtn}
+          </button>
+          {watchUrl && (
+            <a
+              className="anl-ghost anl-grab__open"
+              href={watchUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t.openOnYoutube}
+            </a>
+          )}
+          <a
+            className="anl-ghost anl-grab__downsub"
+            href={downsubHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t.downsubHint}
+          >
+            {t.downsubAlt}
+          </a>
+        </div>
+      </div>
+
+      {showTutorial && (
+        <GrabTutorial
+          t={t}
+          onClose={() => setShowTutorial(false)}
+          onCopy={copyBookmarklet}
+          copied={copied}
+          watchUrl={watchUrl}
+        />
+      )}
+
+      {/* A real drop target. preventDefault on BOTH dragover and drop
+          -- without it the browser navigates away to the dropped
+          file, which loses whatever the learner had typed. */}
+      <div
+        className={`anl-drop${dragging ? ' anl-drop--over' : ''}`}
+        onDragOver={e => { e.preventDefault(); setDragging(true) }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={handleDrop}
+        onClick={() => fileRef.current?.click()}
+      >
+        <span className="anl-drop__jp" lang="ja">字幕</span>
+        <span className="anl-drop__lead">{t.dropSubtitles}</span>
+        <span className="anl-drop__note">{t.subtitleAccepted}</span>
+        {/* Visually hidden rather than display:none, which would take
+            it out of the accessibility tree -- same clip pattern as
+            .analysis-image-input__file. */}
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".srt,.vtt,.ass,.ssa,text/vtt,text/plain,text/*,application/octet-stream"
+          className="anl-drop__input"
+          onChange={e => onStartFromFile(e.target.files?.[0], windowOpts)}
+        />
+      </div>
+
       {/* 区間 — optional. Blank means the whole Track, which is what
           almost everybody wants; MAX_SENTENCES bounds the work either
-          way. It used to be two required fields with a 5-minute cap the
-          learner had to reason about. Folded into a disclosure so it is
-          available without being in the way. */}
+          way. */}
       <details className="anl-notice anl-window-set">
         <summary>{t.windowLabel}</summary>
         <div className="anl-window">

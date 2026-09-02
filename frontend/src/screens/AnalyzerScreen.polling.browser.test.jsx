@@ -239,6 +239,67 @@ describe('AnalyzerScreen polling', () => {
       .toBeLessThan(playerSpies.play.mock.invocationCallOrder[0])
   })
 
+  // ── 字幕取り — the subtitle grab hash ──
+  // The bookmarklet (lib/captionGrab.js) leaves the YouTube page for
+  // /analyzer#grab=… with the transcript XML in the hash. The screen
+  // must treat that arrival as a complete video intake: board 動画 by
+  // itself, convert the XML to VTT, start the session through the
+  // EXISTING file ingest with the video id for the player, and consume
+  // the hash so a reload does not re-submit.
+  it('boards 動画 and starts a session when arriving with a #grab= hash', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 7, status: 'generating' })
+    apiJson.mockResolvedValue({ status: 'generating' })
+    const { encodeGrabPayload } = await import('../lib/captionGrab')
+    const xml = '<transcript><text start="1.5" dur="2">猫が好き</text></transcript>'
+    window.location.hash = '#grab=' + await encodeGrabPayload('dQw4w9WgXcQ', xml)
+    try {
+      const screen = await render(
+        <LangProvider>
+          <MemoryRouter>
+            <AnalyzerScreen session={{}} />
+          </MemoryRouter>
+        </LangProvider>
+      )
+      await settle(400)
+
+      expect(apiUpload).toHaveBeenCalledTimes(1)
+      const [path, , formData] = apiUpload.mock.calls[0]
+      expect(path).toBe('/api/video/session')
+      const sent = await formData.get('file').text()
+      expect(sent).toContain('WEBVTT')
+      expect(sent).toContain('猫が好き')
+      expect(formData.get('url')).toContain('dQw4w9WgXcQ')
+
+      // Boarded onto the video platform with no card click…
+      expect(screen.container.querySelector('#anl-panel-video')).not.toBeNull()
+      // …and the hash is consumed.
+      expect(window.location.hash).toBe('')
+    } finally {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+  })
+
+  it('ignores a hash that is not a readable grab', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 7, status: 'generating' })
+    apiJson.mockResolvedValue({ sentences: [], truncated: 0 })
+    window.location.hash = '#grab=v1.z.not-a-grab'
+    try {
+      const screen = await render(
+        <LangProvider>
+          <MemoryRouter>
+            <AnalyzerScreen session={{}} />
+          </MemoryRouter>
+        </LangProvider>
+      )
+      await settle(200)
+      expect(apiUpload).not.toHaveBeenCalled()
+      // Still on the gate, unbothered.
+      expect(screen.container.querySelector('.platform-card')).not.toBeNull()
+    } finally {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+  })
+
   it('surfaces a parse failure with the reason and a way back', async () => {
     // The ONLY way to fail now: a file or paste we could not parse.
     // Nothing is fetched, so nothing can be IP-blocked.
