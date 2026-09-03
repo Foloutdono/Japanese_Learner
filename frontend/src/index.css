@@ -12460,12 +12460,20 @@ textarea:focus-visible {
    channel.
 
    So below 560px the instrument wraps: six to two rows of three, four
-   to two of two. It stays ONE object -- one container, one border,
-   hairlines between segments -- and worst-to-best still reads left to
-   right, top to bottom. Segments go from 54px to ~109px (six) or
-   ~164px (four) at 375px, so the label needs no step-down at all: an
-   earlier pass shrank it to --fs-caption to survive six-across, and
-   there is no longer six across. Bigger targets and bigger type.
+   to two of two, and two stays on its one row because two words across
+   a phone was never the problem. It stays ONE object -- one container,
+   one border, hairlines between segments -- and worst-to-best still
+   reads left to right, top to bottom. Segments go from 54px to ~109px
+   (six) or ~164px (four) at 375px, so the label needs no step-down at
+   all: an earlier pass shrank it to --fs-caption to survive
+   six-across, and there is no longer six across. Bigger targets and
+   bigger type.
+
+   The bar keeps the card's column at every count, so the two-button
+   variant is two 320px segments on a desktop. Deliberate: switching
+   bars changes how many judgements you are offered, not where the
+   instrument sits or how wide it is, and a binary rating wants the
+   biggest, least ambiguous target of the three.
 
    The count is on the container (see RatingBar.jsx) rather than
    inferred, because the hairlines have to be redrawn for whichever
@@ -12480,6 +12488,11 @@ textarea:focus-visible {
      no-descending-specificity guard). */
   .rating-bar__buttons--6 .rating-bar__btn { flex: 0 0 33.333%; }
   .rating-bar__buttons--4 .rating-bar__btn { flex: 0 0 50%; }
+  /* Written out rather than left to the base rule's `flex: 1 1 0`,
+     which happens to produce the same two-across: every count the bar
+     can have says what it does here, so a missing one reads as an
+     omission rather than as an answer. */
+  .rating-bar__buttons--2 .rating-bar__btn { flex: 0 0 50%; }
 
   /* The first of each row has no rule to its left; the second row
      gains one above it. */

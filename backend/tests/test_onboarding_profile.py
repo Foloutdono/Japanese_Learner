@@ -207,16 +207,13 @@ def test_rating_scale_defaults_and_round_trips(client):
     with _clean_onboarding_state(DEV_USER_ID):
         # Never chosen reads as the default rather than as null: the
         # rating bar has to draw something, and a null would leave it
-        # guessing.
+        # guessing. Four is the default of the three, not the shortest.
         assert client.get("/api/profile").json()["ratingScale"] == "simple"
 
-        assert client.patch("/api/profile/learning",
-                            json={"ratingScale": "full"}).status_code == 200
-        assert client.get("/api/profile").json()["ratingScale"] == "full"
-
-        assert client.patch("/api/profile/learning",
-                            json={"ratingScale": "simple"}).status_code == 200
-        assert client.get("/api/profile").json()["ratingScale"] == "simple"
+        for scale in ("full", "binary", "simple"):
+            assert client.patch("/api/profile/learning",
+                                json={"ratingScale": scale}).status_code == 200
+            assert client.get("/api/profile").json()["ratingScale"] == scale
 
 
 def test_an_unknown_rating_scale_is_refused(client):
