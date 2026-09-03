@@ -6757,7 +6757,6 @@ textarea:focus-visible {
   border-radius: var(--surface-radius);
   overflow: hidden;
 }
-.banzuke__rows { display: flex; flex-direction: column; }
 /* The one line on the board you can act on: who is directly ahead and
    by how much. */
 .banzuke__chase {
@@ -13907,7 +13906,10 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: var(--fs-title);
   background: color-mix(in srgb, var(--accent2) 16%, transparent);
-  color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
+  /* 55%, not the 60% every other gold figure in the sheet uses: on this
+     16% wash a 60% mix measures 4.43:1 in light theme. Guard 4 holds it
+     as .pf-stub. */
+  color: color-mix(in srgb, var(--accent2) 55%, var(--text-primary));
 }
 .tkt--locked .tkt__stub { background: transparent; color: var(--text-secondary); opacity: 0.7; }
 .tkt__body {
