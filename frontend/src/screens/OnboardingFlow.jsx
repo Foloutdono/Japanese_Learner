@@ -15,6 +15,8 @@ import { goalDerived } from '../components/onboarding/goalDerived'
 import CallingAt from '../components/onboarding/CallingAt'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEFAULT_PER_DAY, serviceLabel } from '../components/onboarding/paces'
+import { DEPART_TIMES } from '../components/onboarding/departures'
+import { DepartureChips } from '../components/onboarding/DepartureChips'
 import { StopPattern } from '../components/onboarding/DepartureBoard'
 import { GhostTrack } from '../components/journey/GhostTrack'
 import { journeyStations } from '../components/journey/stations'
@@ -64,10 +66,6 @@ const STOPS = [
   { key: 'map', jp: '案内', kanji: '案' },
   { key: 'pass', jp: '定期券', kanji: '定' },
 ]
-
-// 発車時刻 — the optional daily hour printed on the pass. Signage
-// times; null is 自由 (flexible) and stores nothing.
-const DEPART_TIMES = { am: '07:30', noon: '12:30', pm: '21:00' }
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -716,40 +714,28 @@ function PassStep({
         <h2 className="onb-step__title" tabIndex={-1}>{t.onbSignTitle}</h2>
 
         <div className="onb-form">
-          <span className="onb-form__seal" lang="ja">印</span>
+          {/* An empty seal box, like the pass's own 駅長 impression — a
+              drawing of where a stamp would go, never a label. Marked
+              decorative so it is not announced as a lone 印, which is
+              also why its faint dashed vermillion is not held to the
+              text floor. */}
+          <span className="onb-form__seal" lang="ja" aria-hidden="true">印</span>
           <div className="onb-form__head">
             <span className="onb-form__title" lang="ja">定期券申込書</span>
             <span className="onb-form__latin">{t.onbFormLatin}</span>
           </div>
           <div className="onb-form__row">
             <span className="onb-form__k"><span lang="ja">氏名</span>{t.onbFormName}</span>
-            <EditableUsername username={username} session={session} onChange={onUsername} t={t} />
+            {/* 紙 — the application form is paper (--surface), not the
+                sumi the pass is. The field defaults to the panel pair
+                because its first home was the pass; forced here it
+                printed kinari-white on a cream wash at 2.22:1 in light
+                theme, i.e. the name you are typing was barely there. */}
+            <EditableUsername username={username} session={session} onChange={onUsername} t={t} ground="paper" />
           </div>
           <div className="onb-form__row onb-form__row--stack">
             <span className="onb-form__k"><span lang="ja">発車時刻</span>{t.onbFormDepart}</span>
-            <span className="onb-form__chips" role="group" aria-label={t.onbFormDepart}>
-              {['am', 'noon', 'pm'].map(id => (
-                <button
-                  key={id}
-                  type="button"
-                  className="onb-form__chip"
-                  aria-pressed={depart === id}
-                  onClick={() => onDepart(depart === id ? null : id)}
-                >
-                  <span lang="ja">{{ am: '朝', noon: '昼', pm: '夜' }[id]}</span>
-                  {DEPART_TIMES[id]}
-                </button>
-              ))}
-              <button
-                type="button"
-                className="onb-form__chip"
-                aria-pressed={depart === null}
-                onClick={() => onDepart(null)}
-              >
-                <span lang="ja">自由</span>
-                {t.onbDepartFlex}
-              </button>
-            </span>
+            <DepartureChips t={t} value={depart} onChange={onDepart} />
           </div>
           <div className="onb-form__row">
             <span className="onb-form__k"><span lang="ja">申込日</span>{t.onbFormDate}</span>

@@ -13,7 +13,12 @@ import '../index.css'
 //      PATCH /api/profile/learning is worse than the <select> it
 //      replaced;
 //   3. the reset is genuinely two-step: nothing may hit
-//      DELETE /api/stats/reset until the second, explicit press.
+//      DELETE /api/stats/reset until the second, explicit press;
+//   4. 行先 WRITES the three things it claims to — a destination
+//      issued, a destination handed back, an hour reprinted. The
+//      counter exists because the pass's back points at it, and a
+//      counter whose buttons post nothing is the same dead end with
+//      more steps.
 
 const apiJson = vi.fn()
 const apiFetch = vi.fn()
@@ -58,6 +63,41 @@ const PROFILE = {
   jlptLevel: 'N5', dailyNewTarget: 10, streak: 1, week: [], daruma: {},
 }
 
+// Shapes, not the real content volumes — the board only needs numbers
+// that make its arithmetic finite.
+const VOLUMES = {
+  vocab: { N5: 800, N4: 600, N3: 1800, N2: 1800, N1: 2500 },
+  kanji: { N5: 100, N4: 200, N3: 350, N2: 400, N1: 1200 },
+  grammar: { N5: 80, N4: 80, N3: 120, N2: 140, N1: 200 },
+  kana: 104,
+}
+
+const NO_GOAL = {
+  goalStartLevel: null, goalLevel: null, goalTargetDate: null, goalSetAt: null,
+  dailyDeparture: null, plannedPerDay: 10,
+  itemsTotal: 9000, itemsDone: 40, actual14: 14, days14: 14,
+}
+
+const WITH_GOAL = {
+  ...NO_GOAL,
+  goalStartLevel: 'N5', goalLevel: 'N3', goalTargetDate: '2031-01-01',
+  goalSetAt: '2026-01-01T00:00:00+00:00', itemsTotal: 3484,
+}
+
+/** The 行先 counter, open, with `status` on the pass. */
+async function openGoal(status) {
+  apiJson.mockImplementation((path) => {
+    if (path === '/api/journey/status') return Promise.resolve(status)
+    if (path === '/api/onboarding/volumes') return Promise.resolve(VOLUMES)
+    return Promise.resolve(status)
+  })
+  const screen = await mount()
+  await settle()
+  screen.container.querySelector('[data-id="goal"]').click()
+  await settle(30)
+  return screen.container
+}
+
 function mount() {
   return render(
     <LangProvider>
@@ -83,7 +123,7 @@ describe('SettingsScreen — the counter', () => {
     const root = screen.container
 
     const tabs = root.querySelectorAll('.stg-rail__item')
-    expect(tabs).toHaveLength(5)
+    expect(tabs).toHaveLength(6)
 
     // COMPUTED display, not the hidden attribute: the slip carries
     // .settings-card's display: flex, and an author display outranks
@@ -177,5 +217,70 @@ describe('SettingsScreen — the counter', () => {
     expect(vols.jingle).toBe(0)
     expect(vols.announcement).toBe(0)
     expect(vols.kana ?? audio.DEFAULT_VOLUMES.kana).toBe(audio.DEFAULT_VOLUMES.kana)
+  })
+
+  // ── 行先 ────────────────────────────────────────────────────
+  it('issues a destination onto a pass that has none', async () => {
+    const root = await openGoal(NO_GOAL)
+    const pane = root.querySelector('#stg-pane-goal')
+    // A goal-less pass prints its service and nothing it never
+    // promised — no 行先 cell, no 有効期限.
+    expect(pane.querySelector('.stg-contract').textContent).not.toContain('行先')
+
+    pane.querySelector('.btn-secondary').click() // 行先を決める
+    await settle(30)
+    const chips = [...pane.querySelectorAll('.onb-dest__chip')]
+    chips.find(c => c.textContent.startsWith('N3')).click()
+    await settle(30)
+
+    pane.querySelector('.stg-goal__acts .onb-action').click() // 発行
+    await settle(30)
+
+    const call = apiJson.mock.calls.find(
+      c => c[0] === '/api/journey/goal' && c[2]?.method === 'POST',
+    )
+    expect(call, 'pressing 発行 must issue a contract').toBeTruthy()
+    const body = JSON.parse(call[2].body)
+    expect(body.goalLevel).toBe('N3')
+    // The date is the one THIS configuration promises, measured from
+    // now — never a date already spent.
+    expect(new Date(body.goalTargetDate).getTime()).toBeGreaterThan(Date.now())
+    // The pace travels with the contract: a date nobody can ride to is
+    // not a promise.
+    expect(body.dailyNewTarget).toBeGreaterThan(0)
+  })
+
+  it('opens the board on the contract already printed, and 未定 hands it back', async () => {
+    const root = await openGoal(WITH_GOAL)
+    const pane = root.querySelector('#stg-pane-goal')
+    expect(pane.querySelector('.stg-contract').textContent).toContain('N3')
+
+    pane.querySelector('.btn-secondary').click() // 変更
+    await settle(30)
+    // Opening on a fresh suggestion would quietly propose a different
+    // promise than the one the pass carries.
+    const pressed = pane.querySelector('.onb-dest__chip[aria-pressed="true"]')
+    expect(pressed.textContent.startsWith('N3')).toBe(true)
+
+    pane.querySelector('.onb-dest__chip--free').click() // 未定
+    await settle(30)
+    pane.querySelector('.stg-goal__acts .onb-action').click() // 払戻
+    await settle(30)
+
+    const call = apiJson.mock.calls.find(
+      c => c[0] === '/api/journey/goal' && c[2]?.method === 'DELETE',
+    )
+    expect(call, '未定 on a printed pass IS the 払戻').toBeTruthy()
+  })
+
+  it('reprints the pass when the daily hour changes', async () => {
+    const root = await openGoal(NO_GOAL)
+    const pane = root.querySelector('#stg-pane-goal')
+    pane.querySelectorAll('.onb-form__chip')[0].click() // 朝
+    await settle(30)
+
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/journey/reprint')
+    expect(call, 'the hour is a reprint, not a new contract').toBeTruthy()
+    expect(JSON.parse(call[2].body)).toEqual({ dailyDeparture: 'am' })
   })
 })

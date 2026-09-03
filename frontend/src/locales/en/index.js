@@ -1855,6 +1855,27 @@ const onboarding = {
   settingsResetYes: 'Erase everything',
   settingsResetDone: 'Progress reset. The map starts fresh.',
   settingsIssuedTo: 'Card issued to',
+
+  // ── 行先 — the destination counter ────────────────────────
+  // The office's own words, reused where the office is not: the
+  // counter borrows the departure board whole, so it only needs the
+  // sentences the board cannot draw — what a button will do, and what
+  // it costs.
+  settingsGoal: 'Destination',
+  settingsGoalNoneDesc: 'No destination on this pass. You ride the open line — the pass still keeps score, on rhythm alone.',
+  settingsGoalChangeDesc: 'Reprint the pass with a different destination, date or service.',
+  settingsGoalSet: 'Choose a destination',
+  settingsGoalChange: 'Change',
+  settingsGoalTerminus: 'You board at N1 — the end of the line. There is no station further on to promise.',
+  settingsGoalIssue: 'Issue',
+  settingsGoalIssueHint: (dest, date, perDay) =>
+    `Prints ${dest} for ${date}, and sets your daily pace to ${perDay}. The date is measured from today, so today is when the promise starts.`,
+  settingsGoalPickHint: 'Pick a destination and the board prices it — or keep riding the open line.',
+  settingsGoalDrop: 'Hand it back',
+  settingsGoalDropHint: 'Hands the destination back. Your pace and your hour stay, and the pass reports on rhythm alone — you can buy another destination whenever you like.',
+  settingsGoalIssued: 'Pass issued. Your line is on the back of it.',
+  settingsGoalDropped: 'Destination handed back. The line runs on without one.',
+  settingsGoalDepartHint: 'The hour you plan to ride — optional, and never a reminder. It is printed on the pass because a promise with a time of day is likelier to survive its first rainy week.',
 }
 
 export default {

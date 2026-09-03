@@ -13,7 +13,7 @@ export const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
 // Lifted verbatim from ProfileScreen (which imports it back) when the
 // onboarding welcome step needed the same control — the name on your
 // pass is the first thing 窓口 offers to fix.
-export function EditableUsername({ username, session, onChange, t }) {
+export function EditableUsername({ username, session, onChange, t, ground = 'panel' }) {
   const [editing, setEditing] = useState(false)
   const [value, setValue]     = useState(username)
   const [error, setError]     = useState(null)
@@ -73,7 +73,7 @@ export function EditableUsername({ username, session, onChange, t }) {
           if (e.key === 'Enter') save()
           if (e.key === 'Escape') cancel()
         }}
-        className="field field--panel profile-card__name-input"
+        className={`field ${ground === 'panel' ? 'field--panel ' : ''}profile-card__name-input`}
         disabled={saving}
       />
       <button type="button" onClick={save} disabled={saving} className="profile-card__name-save">

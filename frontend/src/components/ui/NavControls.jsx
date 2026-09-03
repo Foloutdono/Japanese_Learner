@@ -184,6 +184,7 @@ function CategoryVolume({ label, value, onChange, disabled, master = false }) {
       <div className={`vol-slider-wrap${disabled ? ' vol-slider-wrap--disabled' : ''}`}>
         <div className="vol-slider-fill" style={{ width: `${pct}%` }} />
         <input
+          className="dial"
           type="range"
           min={0}
           max={100}

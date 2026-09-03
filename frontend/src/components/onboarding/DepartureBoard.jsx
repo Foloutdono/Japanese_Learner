@@ -166,6 +166,7 @@ export default function DepartureBoard({ volumes, startLevel, goal, derived, now
           </span>
           <span className="onb-months__dial">
             <input
+              className="dial"
               type="range"
               min="2"
               max="30"
@@ -258,7 +259,7 @@ export default function DepartureBoard({ volumes, startLevel, goal, derived, now
                 <span className="onb-board__en">{t.onbCharterAny}</span>
               </span>
               <input
-                className="onb-board__dial"
+                className="onb-board__dial dial"
                 type="range"
                 min="3"
                 max={MAX_PACE}

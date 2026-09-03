@@ -1819,6 +1819,27 @@ const onboarding = {
   settingsResetYes: 'Tout effacer',
   settingsResetDone: 'Progression réinitialisée. La carte repart de zéro.',
   settingsIssuedTo: 'Carte émise à',
+
+  // ── 行先 — le guichet des destinations ─────────────────────
+  // Les mots du guichet, réemployés là où le guichet n'est pas : le
+  // comptoir reprend le tableau des départs tel quel, il ne lui reste
+  // donc que les phrases que le tableau ne sait pas dessiner — ce que
+  // fait un bouton, et ce qu'il coûte.
+  settingsGoal: 'Destination',
+  settingsGoalNoneDesc: "Aucune destination sur cette carte. Vous roulez sur la ligne ouverte — la carte compte quand même les points, au seul rythme.",
+  settingsGoalChangeDesc: 'Réimprimer la carte avec une autre destination, une autre date ou un autre service.',
+  settingsGoalSet: 'Choisir une destination',
+  settingsGoalChange: 'Modifier',
+  settingsGoalTerminus: "Vous montez à N1 — le terminus. Aucune gare plus loin à promettre.",
+  settingsGoalIssue: 'Émettre',
+  settingsGoalIssueHint: (dest, date, perDay) =>
+    `Imprime ${dest} pour le ${date}, et fixe votre rythme à ${perDay} par jour. La date part d'aujourd'hui : la promesse commence aujourd'hui.`,
+  settingsGoalPickHint: 'Choisissez une destination, le tableau en donne le prix — ou continuez sur la ligne ouverte.',
+  settingsGoalDrop: 'Rendre le billet',
+  settingsGoalDropHint: "Rend la destination. Votre rythme et votre horaire restent, et la carte ne juge plus que le rythme — vous pourrez reprendre une destination quand vous voudrez.",
+  settingsGoalIssued: 'Carte émise. Votre ligne est au dos.',
+  settingsGoalDropped: 'Destination rendue. La ligne continue sans elle.',
+  settingsGoalDepartHint: "L'heure à laquelle vous comptez rouler — facultative, et jamais un rappel. Elle est imprimée sur la carte parce qu'une promesse avec une heure survit mieux à sa première semaine de pluie.",
 }
 
 export default {
