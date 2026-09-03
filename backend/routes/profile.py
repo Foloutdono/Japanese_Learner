@@ -42,7 +42,8 @@ def _init_db() -> None:
                     goal_level TEXT,
                     goal_target_date DATE,
                     goal_set_at TIMESTAMPTZ,
-                    daily_departure TEXT
+                    daily_departure TEXT,
+                    rating_scale TEXT
                 )
             """)
             # And the same columns again as ALTERs, because the table
@@ -64,6 +65,15 @@ def _init_db() -> None:
             # only by routes/onboarding.py and routes/journey.py.
             # daily_departure is the optional habit hour ('am'|'noon'|
             # 'pm', NULL = flexible), validated in code like jlpt_level.
+            #
+            # rating_scale is which rating bar the learner grades with —
+            # 'simple' (the four buttons they actually use) or 'full'
+            # (all six). NULL means "not chosen", which reads as the
+            # default; see RATING_SCALES below and
+            # frontend/src/domain/ratingScales.js, which owns the
+            # buttons themselves. Deliberately NOT a change of scale:
+            # both bars send the same 0..5 quality, so a learner can
+            # switch without their own history changing meaning.
             for col, typ in (
                 ("jlpt_level", "TEXT"),
                 ("daily_new_target", "INTEGER"),
@@ -73,6 +83,7 @@ def _init_db() -> None:
                 ("goal_target_date", "DATE"),
                 ("goal_set_at", "TIMESTAMPTZ"),
                 ("daily_departure", "TEXT"),
+                ("rating_scale", "TEXT"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -131,15 +142,17 @@ def ensure_profile_row(user_id: str) -> str:
 
 
 def _profile_row(user_id: str) -> tuple:
-    """(username, jlpt_level, daily_new_target, onboarded_at) — seeding
-    the row lazily like _get_or_create_username, whose creation path it
-    reuses. The three onboarding fields are NULL until the flow runs."""
+    """(username, jlpt_level, daily_new_target, onboarded_at,
+    rating_scale) — seeding the row lazily like _get_or_create_username,
+    whose creation path it reuses. The onboarding fields are NULL until
+    the flow runs, and rating_scale until the learner changes it."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT username, jlpt_level, daily_new_target, onboarded_at
+                SELECT username, jlpt_level, daily_new_target, onboarded_at,
+                       rating_scale
                 FROM user_profiles WHERE user_id = %s
                 """,
                 (user_id,),
@@ -149,7 +162,7 @@ def _profile_row(user_id: str) -> tuple:
                 return row
     finally:
         conn.close()
-    return (_get_or_create_username(user_id), None, None, None)
+    return (_get_or_create_username(user_id), None, None, None, None)
 
 
 def _usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -178,12 +191,30 @@ class UsernamePayload(BaseModel):
         return v
 
 
+# Which rating bar the learner grades with. The buttons live in
+# frontend/src/domain/ratingScales.js; the backend only stores the
+# choice, because both bars send the same canonical 0..5 quality (see
+# srs/scheduler.py's PASS/FAIL tables) and nothing downstream needs to
+# know which one was on screen.
+RATING_SCALES = ("simple", "full")
+DEFAULT_RATING_SCALE = "simple"
+
+
 class LearningPayload(BaseModel):
-    """Settings' partial update of the onboarding fields. Both optional;
-    a PATCH sending neither is a caller bug and 422s. Deliberately never
-    touches onboarded_at — changing your level later is not re-onboarding."""
+    """Settings' partial update of the onboarding fields. All optional;
+    a PATCH sending none of them is a caller bug and 422s. Deliberately
+    never touches onboarded_at — changing your level later is not
+    re-onboarding."""
     jlptLevel: str | None = None
     dailyNewTarget: int | None = None
+    ratingScale: str | None = None
+
+    @field_validator("ratingScale")
+    @classmethod
+    def valid_rating_scale(cls, v: str | None) -> str | None:
+        if v is not None and v not in RATING_SCALES:
+            raise ValueError(f"ratingScale must be one of {RATING_SCALES}")
+        return v
 
     @field_validator("jlptLevel")
     @classmethod
@@ -319,7 +350,7 @@ CALENDAR_DAYS = 35
 # ── Routes ────────────────────────────────────────────────────
 @router.get("/api/profile")
 def get_profile(user_id: str = Depends(get_user_id)):
-    username, jlpt_level, daily_new_target, onboarded_at = _profile_row(user_id)
+    username, jlpt_level, daily_new_target, onboarded_at, rating_scale = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     streak = srs.get_streak(user_id)
@@ -341,6 +372,10 @@ def get_profile(user_id: str = Depends(get_user_id)):
         "jlptLevel": jlpt_level,
         "dailyNewTarget": daily_new_target,
         "onboardedAt": onboarded_at.isoformat() if onboarded_at else None,
+        # Which rating bar to draw. Resolved here rather than in the
+        # client so a learner who has never opened settings still gets a
+        # named scale instead of a null the bar has to guess at.
+        "ratingScale": rating_scale or DEFAULT_RATING_SCALE,
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": facts["total_reviews"],
@@ -444,7 +479,7 @@ def update_profile(payload: UsernamePayload, user_id: str = Depends(get_user_id)
 
 @router.patch("/api/profile/learning")
 def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id)):
-    if payload.jlptLevel is None and payload.dailyNewTarget is None:
+    if not payload.model_fields_set:
         raise HTTPException(status_code=422, detail="Nothing to update")
     _get_or_create_username(user_id)  # ensure a row exists to update
     sets, args = [], []
@@ -454,6 +489,11 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.dailyNewTarget is not None:
         sets.append("daily_new_target = %s")
         args.append(payload.dailyNewTarget)
+    if payload.ratingScale is not None:
+        sets.append("rating_scale = %s")
+        args.append(payload.ratingScale)
+    if not sets:
+        raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
     try:
         with conn.cursor() as cur:
@@ -468,7 +508,11 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         # Write-through so this worker's resolver answers with the new
         # level immediately rather than after its TTL.
         note_stored_level(user_id, payload.jlptLevel)
-    return {"jlptLevel": payload.jlptLevel, "dailyNewTarget": payload.dailyNewTarget}
+    return {
+        "jlptLevel": payload.jlptLevel,
+        "dailyNewTarget": payload.dailyNewTarget,
+        "ratingScale": payload.ratingScale,
+    }
 
 
 @router.get("/api/leaderboard")

@@ -7,11 +7,21 @@ import { playClick, playUi, playToggle, setVolume, useVolumes, DEFAULT_VOLUMES }
 import { TopBar } from '../components/ui/TopBar'
 import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components/ui/NavControls'
 import { useProfileSummary, refreshSummary } from '../stores/profileSummary'
+import { useRatingScale, setRatingScale } from '../stores/ratingScale'
+import { RATING_SCALES, ratingButtons } from '../domain/ratingScales'
 import PlacementTest from '../components/onboarding/PlacementTest'
 import { PACES } from '../components/onboarding/paces'
 import { GoalCounter } from '../components/journey/GoalCounter'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
+
+// 段 is the counter for a grade or rank — 四段 is a four-grade scale,
+// which is what the short rating bar is. Short-first: it is the
+// default, and the six-button bar is what you opt back into.
+const RATING_SCALE_CHIPS = [
+  { id: 'simple', jp: '四段' },
+  { id: 'full',   jp: '六段' },
+]
 
 // The station-theatre channels — what 静かな通勤 silences and 全部
 // restores. The study channels (kana, voice, effects, UI) are never
@@ -325,6 +335,8 @@ function LearningRows({ t, session }) {
         </span>
       </div>
 
+      <RatingScaleRow t={t} session={session} />
+
       {failed && <div className="settings-row"><span className="onb-error" role="alert">{t.onbPassError}</span></div>}
 
       {!testing && (
@@ -374,6 +386,70 @@ function LearningRows({ t, session }) {
           </div>
         )}
       </div>}
+    </>
+  )
+}
+
+// ── Which rating bar to grade with ────────────────────────────
+// Four buttons or six. Both bars send the same 0..5 quality (see
+// domain/ratingScales.js), so this is a choice about the control, not
+// about the scheduling — which is exactly what the caption under it
+// says, because a settings screen must say what a button does.
+//
+// The list of words is BUILT from the chosen scale rather than written
+// out in the locale files: it is the bar's own words in the bar's own
+// order, so it cannot drift from what the study screens draw.
+function RatingScaleRow({ t, session }) {
+  const current = useRatingScale()
+  const [saving, setSaving] = useState(false)
+  const [failed, setFailed] = useState(false)
+
+  function choose(id) {
+    if (id === current) return
+    playClick()
+    setSaving(true)
+    setFailed(false)
+    setRatingScale(id, session)
+      .catch(() => setFailed(true))
+      .finally(() => setSaving(false))
+  }
+
+  // Worst-first, the way the bar draws them (ratingButtons is
+  // best-first for the keyboard's sake — see RatingBar.jsx).
+  const words = ratingButtons(current, t).map(b => b.label).reverse().join(' · ')
+
+  return (
+    <>
+      <div className="settings-row stg-row--wrap">
+        <span className="settings-row__label">{t.settingsRatingScale}</span>
+        <span className="stg-scales" role="radiogroup" aria-label={t.settingsRatingScale}>
+          {RATING_SCALE_CHIPS.map(chip => (
+            <button
+              key={chip.id}
+              type="button"
+              role="radio"
+              aria-checked={current === chip.id}
+              disabled={saving}
+              className={`stg-scale${current === chip.id ? ' stg-scale--on' : ''}`}
+              onClick={() => choose(chip.id)}
+            >
+              <span className="stg-scale__jp" lang="ja">{chip.jp}</span>
+              <span className="stg-scale__n">
+                {t.settingsRatingScaleOption[chip.id] ?? RATING_SCALES[chip.id].qualities.length}
+              </span>
+            </button>
+          ))}
+        </span>
+      </div>
+      <div className="settings-row settings-row--stack">
+        <span className="stg-scale__words">{words}</span>
+        <span className="stg-scale__hint">{t.settingsRatingScaleHint}</span>
+      </div>
+      {failed && (
+        <div className="settings-row">
+          <span className="onb-error" role="alert">{t.onbPassError}</span>
+        </div>
+      )}
     </>
   )
 }

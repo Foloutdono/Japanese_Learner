@@ -183,7 +183,10 @@ describe('OnboardingFlow', () => {
     expect(screen.container.querySelector('.rating-bar--idle')).toBeNull()
 
     // ANY rating completes the scene — take the worst one on purpose.
-    clickButton(screen, '.rating-bar__btn--q0')
+    // By position, not by quality: the bar draws worst-first, and which
+    // quality that is depends on which bar the learner grades with
+    // (domain/ratingScales.js). clickButton takes the first match.
+    clickButton(screen, '.rating-bar__btn')
     await settle()
 
     expect(screen.container.querySelector('.onb-ride__won')).not.toBeNull()

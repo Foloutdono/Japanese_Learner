@@ -1825,6 +1825,13 @@ const onboarding = {
   settingsJlptLevel: 'JLPT level',
   settingsPace: 'Daily pace',
   settingsRedoDesc: 'Recalibrate your level once you have progressed.',
+  // ── Which rating bar to grade with ──────────────────────────
+  // Four buttons or six. Both send the same rating to the scheduler —
+  // the short bar is the long one without its two extremes — so this
+  // changes what you are offered, never what your answers mean.
+  settingsRatingScale: 'Rating buttons',
+  settingsRatingScaleHint: 'Both grade the same way. The short bar simply leaves out the two you never press.',
+  settingsRatingScaleOption: { simple: '4 grades', full: '6 grades' },
   settingsRedoApply: (level) => `Switch to ${level}?`,
   levelCurrentMark: 'You are here',
 
