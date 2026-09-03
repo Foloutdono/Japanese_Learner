@@ -47,6 +47,11 @@ import { useReportPlatformCount } from './platformCount'
  *       inside it: the card is a <button>, and a button inside a button
  *       is invalid HTML that browsers resolve by dropping one of them.
  *       The wrapper below exists only to position the two.
+ *       When ANY card in the grid carries one, EVERY slot reserves the
+ *       row for it — otherwise a card whose neighbour has an action
+ *       would be the taller of the two by exactly that strip, and the
+ *       exam picker (where only papers you have already sat get a
+ *       別の問題 link) is precisely that mix.
  *   onSelect(key) — called when a card is chosen
  *   unit — whether the 番線 unit prints under the platform number on
  *     a numbered (non-service) card. Default true. The analyser's
@@ -65,6 +70,7 @@ import { useReportPlatformCount } from './platformCount'
 export default function ModeSelector({ modes, onSelect, unit = true }) {
   const { t } = useLang()
   useReportPlatformCount(modes.length)
+  const anyAction = modes.some(m => m.action)
 
   return (
     <div className="platform-grid">
@@ -117,18 +123,29 @@ export default function ModeSelector({ modes, onSelect, unit = true }) {
             <span className="platform-card__go" aria-hidden="true">▶</span>
           </button>
         )
-        if (!m.action) return <div className="platform-slot" key={m.key}>{card}</div>
+        if (!anyAction) return <div className="platform-slot" key={m.key}>{card}</div>
         return (
           <div className="platform-slot" key={m.key}>
             {card}
-            <button
-              type="button"
-              className="platform-slot__action"
-              title={m.action.title}
-              onClick={() => { playUi('click-mode-selection'); m.action.onClick() }}
-            >
-              {m.action.label}
-            </button>
+            {m.action ? (
+              <button
+                type="button"
+                className="platform-slot__action"
+                title={m.action.title}
+                onClick={() => { playUi('click-mode-selection'); m.action.onClick() }}
+              >
+                {m.action.label}
+              </button>
+            ) : (
+              /* The reserved row. A hidden copy of the real thing
+                 rather than a measured height, so it stays exactly one
+                 line of the action's own type however that type is set
+                 later — the non-breaking space is what gives it that
+                 line. */
+              <span className="platform-slot__action platform-slot__action--ghost" aria-hidden="true">
+                &nbsp;
+              </span>
+            )}
           </div>
         )
       })}
