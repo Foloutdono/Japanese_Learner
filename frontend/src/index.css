@@ -17524,9 +17524,24 @@ textarea:focus-visible {
    both faces clear the same floor and the card is the same height on
    both. The card's own min-height (above) still governs the UNFOOTED
    card -- Today/deck study render this same prompt without a strip,
-   and there the card really is the stage. */
+   and there the card really is the stage.
+
+   Three selectors in two vocabularies, and that asymmetry is the
+   point. Vocab and grammar reach this through the boost wrapper they
+   already wear for their padding and width. Kana and kanji have no
+   boost ON PURPOSE -- "so Kanji/Kana keep their existing card size",
+   which is about padding, not about the card changing size under the
+   learner -- so they carry `specimen-card-stage`, a class that grants
+   the floor and nothing else. Without it the section card measured
+   298px on a kana front and 208px revealed, and 190 -> 273 on a kanji
+   sens → 漢字: the rating bar moved 90px up the page in the instant
+   before it is clicked. The prose cards (読書, 翻訳, 理解) carry
+   neither class and stay content-height: they have one face, so
+   there is nothing for a floor to hold still, and forcing them to
+   265px would push a phone's answer field under the fold. */
 .vocab-card-boost .prompt-card--footed .prompt-card__body,
-.grammar-card-boost .prompt-card--footed .prompt-card__body {
+.grammar-card-boost .prompt-card--footed .prompt-card__body,
+.specimen-card-stage .prompt-card--footed .prompt-card__body {
   min-height: 220px;
 }
 

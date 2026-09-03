@@ -402,6 +402,7 @@ export default function KanaScreen({ session }) {
               disabled={locked}
             />
             <CardTransition
+              className="specimen-card-stage"
               cardKey={card.card_id} stamp={cardStamp} stage={card.stage} onStampDone={() => {
               setCardStamp(null)
               pendingGatesRef.current.delete('stamp')

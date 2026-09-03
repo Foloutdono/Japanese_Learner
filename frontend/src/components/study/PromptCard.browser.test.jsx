@@ -343,3 +343,49 @@ describe("the study card's padding", () => {
     expect(badge.getBoundingClientRect().width).toBeLessThan(content * 0.6)
   })
 })
+
+// ── The stage floor, on the two screens that had none ──────
+//
+// Kana and kanji carry `specimen-card-stage` (see index.css) purely
+// for the 220px floor vocab and grammar get through their boost. The
+// jump it removes, measured before: a kana card stood 298px with its
+// glyph up and 208px revealed, and a kanji sens → 漢字 went 190 → 273
+// — the rating bar moving up the page in the instant before it is
+// clicked. What remains is content-driven and unavoidable: a radical
+// answer is genuinely taller than the kanji that asks for it.
+describe('the study card\'s stage floor', () => {
+  it('holds a kana card up when its answer is shorter than its glyph', async () => {
+    const screen = await render(
+      <Contained>
+        <div className="quiz-card-stage specimen-card-stage">
+          <PromptCard foot={{ left: 'ひらがな あ', right: 'Kana → romaji' }}>
+            <Flashcard
+              t={{ tapToReveal: 'Touchez pour révéler' }}
+              resetKey="k1"
+              front={<CharDisplay char="あ" />}
+              back={<CharDisplay char="a" size={44} />}
+            />
+          </PromptCard>
+        </div>
+      </Contained>
+    )
+    const { container } = screen
+    await settled(container)
+    const card = container.querySelector('.prompt-card--footed')
+    const body = container.querySelector('.prompt-card__body')
+    const foot = container.querySelector('.prompt-card__foot')
+    const frontHeight = card.getBoundingClientRect().height
+
+    container.querySelector('.flashcard').click()
+    await settled(container)
+
+    expect(container.querySelector('.flashcard__face').textContent).toContain('a')
+    // The romaji answer is a third of the glyph's height; without the
+    // floor the body collapsed to it and took 90px off the card.
+    expect(body.getBoundingClientRect().height).toBeGreaterThanOrEqual(220)
+    expect(frontHeight - card.getBoundingClientRect().height).toBeLessThanOrEqual(40)
+    // And the strip is still the card's own bottom edge.
+    expect(card.getBoundingClientRect().bottom - foot.getBoundingClientRect().bottom)
+      .toBeLessThanOrEqual(BORDER)
+  })
+})

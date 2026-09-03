@@ -542,6 +542,7 @@ export default function KanjiScreen({ session }) {
             <HintBar available={availableHints} active={activeHints}
                      onToggle={toggleHint} disabled={locked} />
             <CardTransition
+              className="specimen-card-stage"
               cardKey={card.card_id}
               contentKey={`${card.card_id}:${card.lang ?? ''}`}
               stamp={cardStamp}
