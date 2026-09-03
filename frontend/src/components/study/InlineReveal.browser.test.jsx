@@ -1,8 +1,13 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from 'vitest/browser'
 import { LangProvider } from '../../LangContext'
-import { InlineReveal, MeaningDisplay } from './QuizComponents'
+import { InlineReveal, MeaningDisplay, CharDisplay, Flashcard } from './QuizComponents'
 import '../../index.css'
+
+vi.mock('../../lib/audio', async (o) => ({
+  ...(await o()), playClick: vi.fn(), playUi: vi.fn(), speakJapanese: vi.fn(),
+}))
 
 // ── The reveal must not move while it reveals ───────────────────
 // .inline-reveal is a WRAPPING flex row: main (max 340) + gap (24) +
@@ -80,5 +85,109 @@ describe('InlineReveal — the panel holds still', () => {
     // from the first frame; the clip is what actually moves.
     expect(width()).toBe(w0)
     expect(clip()).not.toBe(c0)
+  }, 30000)
+})
+
+
+// ── The same thing, at the geometry a learner actually sees ─────
+// The test above builds the row in a bare 700px box. The real one is
+// narrower: .prompt-card is --card-w (640px) less its side padding, and
+// the row sits inside a .flashcard that is mid-flip when the panel
+// opens. That flip is a 3D transform, so getBoundingClientRect reports
+// foreshortened boxes for 300ms — every measurement here is therefore
+// offsetLeft/offsetTop/offsetWidth, which are layout and which the
+// transform cannot touch.
+//
+// Positions are taken RELATIVE TO THE WORD rather than absolutely,
+// because that transform also moves the goalposts: while it is running
+// Blink reports .flashcard__face as the offsetParent, and the frame the
+// animation ends the offsets jump by the card's own padding without
+// anything having moved. Subtracting main's offsets cancels that out,
+// and "the readings do not move relative to the word" is the contract
+// anyway.
+//
+// The card is the one from the bug report: 安, whose meaning fills most
+// of the row on its own, so the readings cannot fit beside it and the
+// row must be stacked from the first open frame to the last.
+
+const ANZEN = {
+  kana: 'アン・やす.い・やす.まる・やす・やす.らか',
+  meaning: 'cheap; low; quiet; rested; contented; peaceful',
+}
+const T = { tapToReveal: 'tap', onyomi: "On'yomi", kunyomi: "Kun'yomi", readingsMore: n => `${n} more` }
+
+describe('InlineReveal — inside a real flashcard, at the real card width', () => {
+  it('opens straight into its final place and never moves again', async () => {
+    await page.viewport(1920, 1000)
+    const screen = await render(
+      <LangProvider>
+        <div className="container quiz-area">
+          <div className="prompt-card">
+            <Flashcard
+              t={T}
+              resetKey="anzen"
+              front={<CharDisplay char="安" size={100} />}
+              back={
+                <InlineReveal
+                  t={T}
+                  kana={ANZEN.kana}
+                  isLarge
+                  main={<MeaningDisplay meaning={ANZEN.meaning} size={28} />}
+                />
+              }
+            />
+          </div>
+        </div>
+      </LangProvider>
+    )
+    expect(
+      Math.round(screen.container.querySelector('.prompt-card').getBoundingClientRect().width),
+      'the fixture stopped matching the real card column',
+    ).toBe(640)
+
+    await settle(60)
+    screen.container.querySelector('.flashcard').click()
+
+    // Sample every frame for longer than the flip (300ms) and the
+    // reveal (350ms) put together.
+    const seen = []
+    const started = performance.now()
+    await new Promise(done => {
+      const tick = () => {
+        const main = screen.container.querySelector('.inline-reveal__main')
+        const panel = screen.container.querySelector('.inline-reveal__panel')
+        if (main && panel && panel.offsetWidth > 0) {
+          seen.push({
+            at: Math.round(performance.now() - started),
+            x: panel.offsetLeft - main.offsetLeft,
+            y: panel.offsetTop - main.offsetTop,
+            w: panel.offsetWidth,
+            beside: panel.offsetTop < main.offsetTop + main.offsetHeight - 1,
+          })
+        }
+        if (performance.now() - started > 700) return done()
+        requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    })
+
+    expect(seen.length, 'the panel never opened').toBeGreaterThan(20)
+    // One width and one x, from the first open frame onward. A panel
+    // that animates its own width takes a different value every frame
+    // — and takes the row across the wrap threshold partway through,
+    // which is what threw the readings from beside the word to under
+    // it mid-reveal.
+    const widths = [...new Set(seen.map(s => s.w))]
+    const places = [...new Set(seen.map(s => `${s.x},${s.y}`))]
+    expect(widths, `the panel changed width while opening: ${widths.join(' ')}`).toHaveLength(1)
+    expect(places, `the panel moved while opening: ${places.join('  ')}`).toHaveLength(1)
+
+    // And for this card it is stacked, never beside — 安's meaning is
+    // too wide to leave room for the readings next to it.
+    const strayed = seen.filter(s => s.beside)
+    expect(
+      strayed.map(s => `${s.at}ms`),
+      'the readings opened beside the word before dropping under it',
+    ).toEqual([])
   }, 30000)
 })

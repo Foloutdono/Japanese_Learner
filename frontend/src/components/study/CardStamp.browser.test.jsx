@@ -41,7 +41,12 @@ function atFade(container, selector, animationName, startedAt) {
         if (!anim) return reject(new Error(`no ${animationName} on ${selector}`))
         const { endTime } = anim.effect.getComputedTiming()
         return resolve({
-          finished: anim.playState === 'finished',
+          // A frame or two short counts as played: the hold and the
+          // animation run off independent clocks, so under load the
+          // timer can win a race it does not lose in the product by a
+          // margin anyone could see. A hold genuinely cut short misses
+          // by hundreds of ms, not by one frame.
+          finished: anim.playState === 'finished' || endTime - anim.currentTime < 40,
           deadAirMs: (performance.now() - startedAt) - endTime,
         })
       }

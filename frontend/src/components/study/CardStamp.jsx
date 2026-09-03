@@ -50,17 +50,23 @@ const STAMP_LABEL = { learning: 'En cours', mastered: 'Maîtrisé' }
 // next card until the stamp's fade-out ends (see each screen's
 // pendingGatesRef), so the wait between rating a card and seeing the
 // next one is this hold plus the 420ms .card-stamp-overlay--leaving
-// fade. Each number is therefore set to the last frame that carries
+// fade. Each number is therefore the last frame that carries
 // information, plus a beat to read it, and not a millisecond more:
 //
 //   learning  the seal lands at 520ms (60ms delay + 460ms strike)
 //   mastered  the brush stroke finishes at 1120ms (780 + 340)
 //   demoted   the seal lands at 1310ms (850 + 460), after the burn
 //
+// The margin over each of those is ~80ms rather than a few frames,
+// because this timer and the CSS animations run off independent
+// clocks: a busy main thread delays the animation's first frame but
+// not the setTimeout, and a hold trimmed to the animation's exact
+// length starts the fade over a stroke still being drawn.
+//
 // The wash and the petal shower outlast their holds and dissolve
 // mid-arc under the fade. That is on purpose — both end at opacity 0
 // anyway, so they read as clearing rather than being cut off.
-const HOLD_MS      = { learning: 560, mastered: 1150 }
+const HOLD_MS      = { learning: 600, mastered: 1200 }
 
 // A demotion still holds longest — the burn has to read before the
 // fresh stamp lands on top of it — but the burn no longer pauses
