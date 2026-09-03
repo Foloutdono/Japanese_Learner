@@ -2672,7 +2672,15 @@
   /* the thumb's own box, not a spacing rung */
   height: 18px;
   margin: 0;
+  /* The bare `input` rule is a TEXT FIELD — border, radius, card
+     ground — and its selector reaches a range input too, so without
+     these three lines every dial in the app wore a 1px bordered,
+     8px-rounded box around its track (measured: 1px solid #35303a on
+     all three). A dial draws its own rail and its own stop; it has no
+     field box to keep. */
   background: none;
+  border: none;
+  border-radius: var(--r-flat);
   outline: none;
   cursor: pointer;
 }
@@ -5422,6 +5430,18 @@ input {
   transition: border-color 0.2s;
 }
 input:focus { border-color: var(--accent2); }
+
+/* The checkable controls are not text fields either: the rule above
+   would paint a card-coloured ground behind a radio, and the UA would
+   otherwise tick it in its own blue. `accent-color` is the one line
+   that makes a native checkable wear the app's ink, and it is the same
+   defect class as the dials — a control that came from another app.
+   (The import menu's separator picker is the only radio here today.) */
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  background: none;
+}
 
 /* Keep the border tint — it is a nice ambient cue on mouse focus —
    but add the same ring every button gets, on :focus-visible only, so
