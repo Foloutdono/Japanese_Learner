@@ -4,7 +4,6 @@ import {
 import { FuriganaWord } from './Readings'
 import { GrammarRule, GrammarAnswer } from './GrammarPieces'
 import { RadicalAnswer } from './RadicalPieces'
-import { formatGlossLine } from './gloss'
 import PromptCard from './PromptCard'
 import { speakJapanese, playKana } from '../../lib/audio'
 import { RENDER, HINTS } from '../../domain/studyModes'
@@ -249,7 +248,12 @@ export default function CardPrompt({
         {!isWordReading && !showChoices && (
           <Flashcard
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
-            front={isF2B ? wordDisplay(72) : <CharDisplay char={formatGlossLine(c.meaning)} variant="word" />}
+            /* The meaning-first direction hands the prompt to
+               MeaningDisplay, not to the specimen box: a gloss line is
+               prose, and CharDisplay's one nowrap line at the word rung
+               ran a two-gloss meaning out of both card edges. See
+               VocabScreen's copy of this call for the full note. */
+            front={isF2B ? wordDisplay(72) : <MeaningDisplay meaning={c.meaning} size={44} />}
             back={
               <InlineReveal
                 t={t} kana={c.kanji ? c.kana : null} isLarge={isF2B} stacked={isF2B}
@@ -267,7 +271,9 @@ export default function CardPrompt({
           <>
             <InlineReveal
               t={t} kana={c.kanji ? c.kana : null} revealed={answered}
-              main={isF2B ? <CharDisplay char={wordForm(c)} variant="word" /> : <CharDisplay char={formatGlossLine(c.meaning)} variant="word" />}
+              main={isF2B
+                ? <CharDisplay char={wordForm(c)} variant="word" />
+                : <MeaningDisplay meaning={c.meaning} size={44} />}
             />
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}

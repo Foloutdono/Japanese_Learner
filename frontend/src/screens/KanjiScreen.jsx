@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import {
+  translatedMap, applyTranslations, retranslateSelection,
+} from '../lib/translationCache'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -208,13 +211,20 @@ export default function KanjiScreen({ session }) {
         .then(r => r.json())
         .then(data => [word, data.translation || ''])
     )).then(entries => {
-      const map = Object.fromEntries(entries)
+      // Empty translations are dropped rather than written over the
+      // card — see translatedMap for why — and the prompt and the MCQ
+      // options are rewritten together from the one map, keyed by the
+      // character, exactly as the fetch above was.
+      const map = translatedMap(entries)
       updateCurrent(cur => ({
-        ...cur,
+        ...applyTranslations(cur, entry => entry.kanji, map),
         lang: targetLang,
-        meaning: map[cur.kanji] ?? cur.meaning,
-        choices: (cur.choices ?? []).map(c => ({ ...c, meaning: map[c.kanji] ?? c.meaning })),
       }))
+      // The rows moved language under an answer already given — see
+      // retranslateSelection.
+      setSelected(prev => retranslateSelection(
+        prev, cardToTranslate.hints?.indice_1, entry => entry.kanji, map,
+      ))
     })
   }
 
@@ -532,6 +542,7 @@ export default function KanjiScreen({ session }) {
             <HintBar available={availableHints} active={activeHints}
                      onToggle={toggleHint} disabled={locked} />
             <CardTransition
+              className="specimen-card-stage"
               cardKey={card.card_id}
               contentKey={`${card.card_id}:${card.lang ?? ''}`}
               stamp={cardStamp}

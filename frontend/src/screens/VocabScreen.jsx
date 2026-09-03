@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import {
+  translatedMap, applyTranslations, retranslateSelection,
+} from '../lib/translationCache'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -174,13 +177,22 @@ export default function VocabScreen({ session }) {
         .then(r => r.json())
         .then(data => [word, data.translation || ''])
     )).then(entries => {
-      const map = Object.fromEntries(entries)
+      // Only the words that HAVE a translation reach the map — see
+      // translatedMap for why writing an untranslated one onto the
+      // card is what left MeaningDisplay with nothing to render and
+      // the reveal blank. applyTranslations then rewrites the prompt
+      // and the MCQ options from that one map, keyed the same way the
+      // fetch above was.
+      const map = translatedMap(entries)
       updateCurrent(cur => ({
-        ...cur,
+        ...applyTranslations(cur, wordForm, map),
         lang: targetLang,
-        meaning: map[wordForm(cur)] ?? cur.meaning,
-        choices: (cur.choices ?? []).map(c => ({ ...c, meaning: map[wordForm(c)] ?? c.meaning })),
       }))
+      // The rows moved language under an answer already given — see
+      // retranslateSelection.
+      setSelected(prev => retranslateSelection(
+        prev, cardToTranslate.hints?.indice_1, wordForm, map,
+      ))
     })
   }
 
@@ -624,7 +636,17 @@ export default function VocabScreen({ session }) {
                     front={
                       isKjToM
                         ? wordDisplay(72)
-                        : <CharDisplay char={formatGlossLine(card.meaning)} size={72} />
+                        // The prompt is a MEANING in this direction, not a
+                        // word: CharDisplay is a specimen box (nowrap, one
+                        // line, a fixed 72px) and a French gloss line like
+                        // "Toilettes · Petit coin" ran straight out of both
+                        // card edges, unreadable at either end -- it centres
+                        // its overflow, so `text-overflow: ellipsis` never
+                        // even got to mark the cut. MeaningDisplay is the
+                        // component for this: it wraps, and it sizes itself
+                        // from the gloss's own length. Same call Kanji's own
+                        // sens → 漢字 front has always made.
+                        : <MeaningDisplay meaning={card.meaning} size={44} />
                     }
                     back={
                       <InlineReveal
@@ -655,7 +677,9 @@ export default function VocabScreen({ session }) {
                       main={
                         isKjToM
                           ? <CharDisplay char={wordForm(card)} size={72} />
-                          : <CharDisplay char={formatGlossLine(card.meaning)} size={72} />
+                          // Same swap as the flashcard front above, for the
+                          // same reason -- see there.
+                          : <MeaningDisplay meaning={card.meaning} size={44} />
                       }
                     />
                     <RevealActions

@@ -15,7 +15,14 @@ const REFILL_AT = 4
 // names a retired mode ('qcm-kj-m', 'flashcard'). sweepStaleCaches
 // deletes them; without the bump they would refetch under a key the
 // backend no longer serves.
-const CACHE_VERSION = 'v4'
+// v5: not a shape change but a CONTENT one, and the only bump so far
+// that had to be. Kanji/VocabScreen's translate-on-language-change
+// wrote an empty meaning over any word the target language has no
+// entry for, and updateCurrent below persists what it writes — so
+// those cards are sitting in v4 caches with `meaning: ""` and would
+// still reveal blank on a client carrying the fix. A bump is the only
+// thing that reaches them.
+const CACHE_VERSION = 'v5'
 
 const KEY_PREFIX = 'jp-session'
 
