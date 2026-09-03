@@ -832,6 +832,7 @@ const misc = {
   mute:    'Mute',
   unmute:  'Unmute',
   onyomi:  "On'yomi",
+  readingsMore: (n) => `${n} more reading${n > 1 ? 's' : ''} — the dictionary card has them all`,
   kunyomi: "Kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'word',

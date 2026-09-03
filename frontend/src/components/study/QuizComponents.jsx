@@ -424,6 +424,11 @@ export function MeaningDisplay({ meaning, size = 28, color, center = true }) {
   )
 }
 
+// How many readings of each register a study card prints. Five is
+// what fits the reveal at a glance without wrapping past two rows at
+// the card's width; the rest live in the dictionary card.
+const READINGS_ON_CARD = 5
+
 // ── Inline reveal panel ──────────────────────────────────
 // Single-box layout: main content on one side, readings on the other,
 // no divider line. Used when the "answer" is already conveyed some
@@ -482,6 +487,13 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
               size={25}
               center
               isLarge={isLarge}
+              /* A study card is a glance, not a reference: a common
+                 kanji has a dozen kun readings and printing them all
+                 buries the five that teach it. The dictionary card,
+                 one tap away on this same flashcard, still prints the
+                 lot — see domain/readingPick. */
+              limit={READINGS_ON_CARD}
+              moreLabel={t.readingsMore}
             />
           </div>
         </div>

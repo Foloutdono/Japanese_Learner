@@ -817,6 +817,7 @@ const misc = {
   mute:    'Couper le son',
   unmute:  'Activer le son',
   onyomi:  "Lectures on'yomi (sino-japonaises)",
+  readingsMore: (n) => `${n} lecture${n > 1 ? 's' : ''} de plus — la fiche du dictionnaire les donne toutes`,
   kunyomi: "Lectures kun'yomi (japonaises)",
   kanjiNoun: 'kanji',
   wordNoun:  'mot',

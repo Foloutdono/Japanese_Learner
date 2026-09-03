@@ -12,6 +12,8 @@
 // it too) doesn't have to import QuizComponents — QuizComponents now
 // imports DictionaryDetail for the Flashcard's dictionary lookup sheet,
 // and that pair importing each other would be a circular dependency.
+import { pickVariedReadings } from '../../domain/readingPick'
+
 function isOnyomiToken(token) {
   const firstKana = [...token].find(c => /[\u3040-\u30FF]/.test(c))
   if (!firstKana) return false
@@ -66,8 +68,13 @@ export function FuriganaWord({ parts, size = 72, answer = false }) {
   )
 }
 
-export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false }) {
+export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-primary)', center = false, isLarge = false, limit, moreLabel }) {
   if (!readings.length) return null
+  // The study card passes a limit; the dictionary passes none and gets
+  // the lot. See domain/readingPick for why the few are chosen by stem
+  // rather than sliced off the front.
+  const shown = pickVariedReadings(readings, limit)
+  const hidden = readings.length - shown.length
   const style = {
     '--reading-size': `${size}px`,
     '--reading-index-size': `${Math.max(size - 5, 10)}px`,
@@ -82,14 +89,19 @@ export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-p
         </div>
       )}
       <div className={`reading-group__list${center ? ' reading-group__list--center' : ''}`}>
-        {readings.map((r, i) => (
+        {shown.map((r, i) => (
           <span key={i} className="reading-group__item">
-            {readings.length > 1 && (
+            {shown.length > 1 && (
               <span className="reading-group__item-index">{i + 1}.</span>
             )}
             <span className="reading-group__item-text">{r}</span>
           </span>
         ))}
+        {/* Never truncate in silence: the count says the list is
+            partial and where the rest of it lives. */}
+        {hidden > 0 && (
+          <span className="reading-group__more" title={moreLabel?.(hidden)}>+{hidden}</span>
+        )}
       </div>
     </div>
   )
@@ -98,7 +110,7 @@ export function ReadingGroup({ label, readings, size = 18, color = 'var(--text-p
 // Renders a kana reading field elegantly: on'yomi/kun'yomi split for a
 // kanji's mixed readings, or a plain (numbered if there's more than one)
 // list for a single-register reading like vocab. Returns null if empty.
-export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = false, isLarge = false }) {
+export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = false, isLarge = false, limit, moreLabel }) {
   const tokens = splitReadingTokens(kana)
   if (!tokens.length) return null
 
@@ -108,11 +120,11 @@ export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = f
   if (on.length && kun.length) {
     return (
       <div>
-        <ReadingGroup label={onLabel}  readings={on}  size={size} color={color} center={center} isLarge={isLarge} />
-        <ReadingGroup label={kunLabel} readings={kun} size={size} color={color} center={center} isLarge={isLarge} />
+        <ReadingGroup label={onLabel}  readings={on}  size={size} color={color} center={center} isLarge={isLarge} limit={limit} moreLabel={moreLabel} />
+        <ReadingGroup label={kunLabel} readings={kun} size={size} color={color} center={center} isLarge={isLarge} limit={limit} moreLabel={moreLabel} />
       </div>
     )
   }
 
-  return <ReadingGroup readings={tokens} size={size} color={color} center={center} isLarge={isLarge} />
+  return <ReadingGroup readings={tokens} size={size} color={color} center={center} isLarge={isLarge} limit={limit} moreLabel={moreLabel} />
 }
