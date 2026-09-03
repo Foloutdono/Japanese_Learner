@@ -4086,6 +4086,16 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The 印 diverges from the mockup ON PURPOSE, and a concept diff will
+   flag it as drift every time unless it reads this. The canvas inks
+   this seal with alpha — `rgba(156,52,40,0.65)` on the ring and 0.55
+   on the dash — and DESIGN.md forbids exactly that: "a mix toward
+   transparent costs contrast in BOTH themes … reach for a dimmer
+   token, not a lower alpha". So the ink mixes toward --text-primary
+   instead, which is the same pigment at a legible strength. Measured
+   against the canvas's own values on this ground: 3.34:1 vs 1.57:1 in
+   dark, 7.31:1 vs 2.85:1 in light. The rule outranks the picture
+   (DESIGN.md's own words), so the picture is what moved. */
 .onb-form__seal {
   position: absolute;
   right: 18px;
