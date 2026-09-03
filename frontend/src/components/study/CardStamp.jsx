@@ -45,15 +45,42 @@ import { useEffect, useState } from 'react'
 // No stage-tracking on the frontend at all.
 const STAMP_GLYPH = { learning: '習', mastered: '極' }
 const STAMP_LABEL = { learning: 'En cours', mastered: 'Maîtrisé' }
-const HOLD_MS      = { learning: 900, mastered: 1700 }
+// ── How long the seal sits before it dissolves ──────────────────
+// This is dead time for the reviewer: every study screen holds the
+// next card until the stamp's fade-out ends (see each screen's
+// pendingGatesRef), so the wait between rating a card and seeing the
+// next one is this hold plus the 420ms .card-stamp-overlay--leaving
+// fade. Each number is therefore set to the last frame that carries
+// information, plus a beat to read it, and not a millisecond more:
+//
+//   learning  the seal lands at 520ms (60ms delay + 460ms strike)
+//   mastered  the brush stroke finishes at 1120ms (780 + 340)
+//   demoted   the seal lands at 1310ms (850 + 460), after the burn
+//
+// The wash and the petal shower outlast their holds and dissolve
+// mid-arc under the fade. That is on purpose — both end at opacity 0
+// anyway, so they read as clearing rather than being cut off.
+const HOLD_MS      = { learning: 560, mastered: 1150 }
 
-// A demotion holds longer than a routine promotion — the burn needs
-// room to actually read before the fresh stamp lands on top of it.
-// The stamp's own strike-in delay lives in CSS (.card-stamp--demoted's
-// animation-delay override, index.css) timed to begin right as the
-// burn overlay finishes clearing; this is just how long the whole
-// sequence holds before the shared 'leaving' fade-out phase.
-const DEMOTED_HOLD_MS = 2300
+// A demotion still holds longest — the burn has to read before the
+// fresh stamp lands on top of it — but the burn no longer pauses
+// between finishing its sweep and clearing away. The stamp's own
+// strike-in delay lives in CSS (.card-stamp--demoted's animation-delay
+// override, index.css), timed to land into that clear; this is just
+// how long the whole sequence holds before the shared 'leaving'
+// fade-out phase.
+const DEMOTED_HOLD_MS = 1600
+
+// Under prefers-reduced-motion the CSS gives every part of this its
+// final state on the first frame — the strike collapses to 10ms and
+// the wash, burn, brush and petals are turned off outright. There is
+// no arc left to wait out, so the hold is only long enough to notice
+// that a seal appeared at all.
+const REDUCED_HOLD_MS = 400
+
+function prefersReducedMotion() {
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+}
 
 // Fixed ember positions, same reasoning as PETAL_LAYOUT below — a
 // mie is deliberate, not a particle system, so it's the same six
@@ -147,7 +174,9 @@ function CardStampInner({ transition, onDone }) {
   const [phase, setPhase] = useState('active')
 
   useEffect(() => {
-    const holdMs = transition.demoted ? DEMOTED_HOLD_MS : (HOLD_MS[transition.to] ?? 1000)
+    const holdMs = prefersReducedMotion()
+      ? REDUCED_HOLD_MS
+      : transition.demoted ? DEMOTED_HOLD_MS : (HOLD_MS[transition.to] ?? 700)
     const timer = setTimeout(() => setPhase('leaving'), holdMs)
     return () => clearTimeout(timer)
   }, [transition])

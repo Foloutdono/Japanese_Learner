@@ -5339,6 +5339,11 @@ button:focus-visible {
   cursor: pointer;
   transition: color 0.16s ease, background 0.16s ease;
 }
+/* The reserved row under a card whose neighbour has an action (see
+   ModeSelector). Hidden rather than absent so every card in the row
+   still ends at the same y. */
+.platform-slot__action--ghost { visibility: hidden; }
+
 .platform-slot__action:hover,
 .platform-slot__action:focus-visible {
   color: var(--text-primary);
@@ -5352,6 +5357,14 @@ button:focus-visible {
   align-items: stretch;
   gap: 0;
   width: 100%;
+  /* Fill the slot, which the grid has already stretched to the row's
+     height. Without this the card kept its own content height inside a
+     taller cell — a column flex container sizes children on the cross
+     axis, not the main one — so a row whose other card had a
+     two-line description showed this one floating short with the
+     row's slack pooled under it. Grow only: the slot is never
+     shorter than the card's content, so there is nothing to shrink. */
+  flex: 1 0 auto;
   padding: 0;
   /* Lifted off the wall behind it: in dark theme --bg-card and
      --bg-main are close enough that a flat card disappears. */
@@ -5456,6 +5469,13 @@ button:focus-visible {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  /* Centred, because everything else in the card already is — the
+     lead cell's roundel, the aside, the ▶. In a card at its own
+     content height this is identical to top-aligned (the padding is
+     symmetric); in one stretched to a taller row it keeps the title
+     level with the roundel beside it instead of leaving the slack
+     below. */
+  justify-content: center;
   gap: 8px;
   padding: 28px 20px 28px 18px;
 }
@@ -11942,15 +11962,17 @@ textarea:focus-visible {
    A mastered card lapsing back to learning (see the backend's
    stage_down) doesn't get the routine strike-in — CardStamp swaps in
    CardBurn instead of .card-stamp-wash (see CardStamp.jsx), and this
-   stamp itself waits until the burn has actually cleared before it
-   lands, via the animation-delay overrides below (source order matters
-   here: these have to come after the base .card-stamp/.card-stamp::after
-   rules to win at equal specificity). */
+   stamp itself waits for the burn before it lands, via the
+   animation-delay overrides below (source order matters here: these
+   have to come after the base .card-stamp/.card-stamp::after rules to
+   win at equal specificity). It strikes 150ms into the burn's 420ms
+   clear, so the two cross rather than queue — the card is still going
+   out as the new seal comes down on it, which is the whole read. */
 .card-stamp--demoted {
-  animation-delay: 1150ms;
+  animation-delay: 850ms;
 }
 .card-stamp--demoted::after {
-  animation-delay: 1510ms;
+  animation-delay: 1210ms;
 }
 
 /* The char itself: a dark, ember-edged sweep climbing the card from
@@ -11989,12 +12011,12 @@ textarea:focus-visible {
   clip-path: inset(100% 0 0 0);
   animation:
     card-burn-sweep-in 700ms cubic-bezier(0.45, 0, 0.2, 1) forwards,
-    card-burn-clear 420ms ease-in 950ms forwards;
+    card-burn-clear 420ms ease-in 700ms forwards;
 }
 .card-stamp-burn__embers {
   position: absolute;
   inset: 0;
-  animation: card-burn-clear 300ms ease-in 950ms forwards;
+  animation: card-burn-clear 300ms ease-in 700ms forwards;
 }
 /* 焼き印 — the burn's own sparks.
    Namespaced, and deliberately: these used to be a bare `.ember`, the
