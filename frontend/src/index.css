@@ -11191,14 +11191,43 @@ textarea:focus-visible {
      how the text inside tries to wrap. */
   max-height: 0;
   opacity: 0;
+  /* Wiped shut rather than squeezed shut. The open state below takes
+     its full width in ONE step and animates this instead, because
+     clip-path does not affect layout — see that rule. */
+  clip-path: inset(0 100% 0 0);
   transition: none;
   margin-top: 8px;
 }
 .inline-reveal__panel--open {
+  /* The full width, immediately, with NO transition on it. This used
+     to animate max-width 0 → 320 — and .inline-reveal is a wrapping
+     flex row whose budget is 340 (main) + 24 (gap) + 320 (this) = 684
+     against a 640 container, so the row could hold the panel while it
+     was narrow and not once it had grown. The panel therefore opened
+     BESIDE the word and then jumped underneath it partway through its
+     own animation: measured, still beside at 264px wide and below at
+     303px, two thirds of the way through a 350ms reveal. Any width
+     narrow enough does the same thing, so no cap fixes it — the
+     mistake was animating a property the wrap decision reads.
+     Handing the row its final geometry in one step lets it wrap once,
+     before anything moves, and the wipe below carries the same
+     sideways gesture without touching layout. */
   max-width: 320px;
   max-height: none;
   opacity: 1;
-  transition: max-width 0.35s ease, opacity 0.3s ease 0.05s;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.35s ease, opacity 0.3s ease 0.05s;
+}
+
+/* The wipe is motion; the fade is not. Keep the opacity, drop the
+   sideways travel — the panel is simply open. (The old max-width
+   transition never had this answer at all; DESIGN.md asks every
+   transition for one.) */
+@media (prefers-reduced-motion: reduce) {
+  .inline-reveal__panel--open {
+    clip-path: none;
+    transition: opacity 0.2s linear;
+  }
 }
 
 /* Sized against its own content, not against the animating parent —
@@ -11230,6 +11259,9 @@ textarea:focus-visible {
 .inline-reveal--stacked .inline-reveal__panel {
   max-width: none;
   width: 100%;
+  /* Stacked opens downward (max-height), so it wants no sideways
+     wipe — and no clip at all, or the closed inset would hide it. */
+  clip-path: none;
   transition: none;
 }
 .inline-reveal--stacked .inline-reveal__panel--open {
