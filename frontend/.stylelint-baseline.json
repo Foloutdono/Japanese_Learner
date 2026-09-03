@@ -10,7 +10,6 @@
   "length-zero-no-unit::Disallowed unit": 4,
   "no-descending-specificity::Expected selector \".anl-action:disabled\" to come before selector \".anl-action:hover:not(:disabled)\", at line N": 1,
   "no-descending-specificity::Expected selector \".anl-tile:disabled\" to come before selector \".anl-tile:hover:not(:disabled)\", at line N": 1,
-  "no-descending-specificity::Expected selector \".anl-results\" to come before selector \".anl-results:focus-visible\", at line N": 1,
   "no-descending-specificity::Expected selector \".onb-action:focus-visible\" to come before selector \".onb-action:hover:not(:disabled)\", at line N": 2,
   "no-descending-specificity::Expected selector \".onb-action:disabled\" to come before selector \".onb-action:hover:not(:disabled)\", at line N": 1,
   "no-descending-specificity::Expected selector \".onb-seg__btn:focus-visible\" to come before selector \".onb-seg__btn:hover:not(.onb-seg__btn--on)\", at line N": 1,

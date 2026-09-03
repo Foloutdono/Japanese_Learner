@@ -1458,13 +1458,16 @@
   gap: var(--anl-gap);
 }
 /* A programmatic focus target, not a tab stop -- see AnalyzerScreen's
-   arrival effect. It still needs a ring: focus that lands somewhere
-   invisible is the same as focus that was lost. */
-.anl-results:focus-visible {
-  outline: 2px solid var(--line-kaiseki);
-  outline-offset: 4px;
-  border-radius: var(--anl-radius);
-}
+   arrival effect -- and deliberately ringless. tabIndex is -1, so no
+   amount of keyboard walking can land here: the ONLY focus this region
+   ever takes is the arrival effect's own .focus(). Chrome still matches
+   :focus-visible on such a move whenever the last interaction happened
+   to be a key press (Enter on the URL field, say), so a 葡萄色 ring was
+   being drawn around the whole rail-and-stage on some analyses and not
+   others, with nothing the reader had done to explain it. The arrival
+   announces itself instead -- role="region" with a label, which is what
+   the focus move is for. Do not restore the outline here; if focus ever
+   becomes reachable by hand on this element, it needs one again. */
 .anl-stage {
   display: flex;
   flex-direction: column;
