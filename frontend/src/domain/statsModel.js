@@ -14,6 +14,8 @@
 // so the Explorer is a view and nothing else, and every number on
 // screen is derived from the same place.
 
+import { DEFAULT_RATING_SCALE, QUALITY_LABEL_KEY, scaleFor } from './ratingScales'
+
 export const CATEGORIES = ['kana', 'vocab', 'kanji', 'grammar']
 
 // ── The two axes the mode key is really carrying ──────────
@@ -412,17 +414,24 @@ export function bucketIntervals(histogram) {
 }
 
 // ── Quality mix ───────────────────────────────────────────
-// Same six ratings, same colours and same words the rating bar itself
-// uses (see RatingBar.jsx) — this is a record of which button you
-// pressed, so it should look like those buttons.
-export function qualityRows(mix, t) {
-  const LABELS = {
-    5: t.perfect, 4: t.correctHesit, 3: t.difficult,
-    2: t.wrongSeen, 1: t.wrongRated, 0: t.blackout,
-  }
-  return [5, 4, 3, 2, 1, 0].map(q => ({
+// Same ratings, same colours and same words the rating bar itself uses
+// (see RatingBar.jsx) — this is a record of which button you pressed,
+// so it should look like those buttons.
+//
+// Which rows to show follows the bar the learner grades with: on the
+// four-button bar, a permanent zero for Blackout and Perfect is a row
+// about a control that is not on screen. A grade the CURRENT bar does
+// not offer still appears if it was ever pressed, because those taps
+// happened and hiding them would quietly rewrite the record — the word
+// for a given quality is the same on both bars (domain/ratingScales),
+// so a legacy row needs no special labelling to make sense.
+export function qualityRows(mix, t, scale = DEFAULT_RATING_SCALE) {
+  const count = q => Number(mix?.[q] ?? mix?.[String(q)] ?? 0)
+  const offered = scaleFor(scale).qualities
+  const shown = [5, 4, 3, 2, 1, 0].filter(q => offered.includes(q) || count(q) > 0)
+  return shown.map(q => ({
     q,
-    label: LABELS[q],
-    count: Number(mix?.[q] ?? mix?.[String(q)] ?? 0),
+    label: t[QUALITY_LABEL_KEY[q]],
+    count: count(q),
   }))
 }

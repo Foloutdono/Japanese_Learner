@@ -26,7 +26,7 @@ def _clean_onboarding_state(user_id: str):
                     SET jlpt_level = NULL, daily_new_target = NULL, onboarded_at = NULL,
                         goal_start_level = NULL, goal_level = NULL,
                         goal_target_date = NULL, goal_set_at = NULL,
-                        daily_departure = NULL
+                        daily_departure = NULL, rating_scale = NULL
                     WHERE user_id = %s
                     """,
                     (user_id,),
@@ -197,3 +197,48 @@ def test_volumes_counts_items_not_cards(client):
     assert body["vocab"]["N5"] == 667
     assert body["kanji"]["N1"] == 1232
     assert body["kana"] == 224
+
+
+# ── Which rating bar the learner grades with ──────────────────────
+# Stored beside the other learning choices and served on the profile
+# every screen already fetches, so the bar can be drawn correctly on
+# the first paint of a study screen rather than after a second request.
+def test_rating_scale_defaults_and_round_trips(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        # Never chosen reads as the default rather than as null: the
+        # rating bar has to draw something, and a null would leave it
+        # guessing.
+        assert client.get("/api/profile").json()["ratingScale"] == "simple"
+
+        assert client.patch("/api/profile/learning",
+                            json={"ratingScale": "full"}).status_code == 200
+        assert client.get("/api/profile").json()["ratingScale"] == "full"
+
+        assert client.patch("/api/profile/learning",
+                            json={"ratingScale": "simple"}).status_code == 200
+        assert client.get("/api/profile").json()["ratingScale"] == "simple"
+
+
+def test_an_unknown_rating_scale_is_refused(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        assert client.patch("/api/profile/learning",
+                            json={"ratingScale": "sixish"}).status_code == 422
+        assert client.get("/api/profile").json()["ratingScale"] == "simple"
+
+
+def test_setting_the_scale_leaves_the_other_learning_fields_alone(client):
+    # PATCH is partial: sending one field must not blank the others,
+    # which is what an UPDATE built from a fixed column list would do.
+    with _clean_onboarding_state(DEV_USER_ID):
+        client.post("/api/onboarding/complete",
+                    json={"jlptLevel": "N3", "dailyNewTarget": 10})
+        client.patch("/api/profile/learning", json={"ratingScale": "full"})
+
+        after = client.get("/api/profile").json()
+        assert after["ratingScale"] == "full"
+        assert after["jlptLevel"] == "N3"
+        assert after["dailyNewTarget"] == 10
+
+
+def test_a_patch_with_nothing_in_it_is_still_a_caller_bug(client):
+    assert client.patch("/api/profile/learning", json={}).status_code == 422

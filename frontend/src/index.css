@@ -9522,7 +9522,8 @@ textarea:focus-visible {
    Three equal chips sharing the control column's full width (capped
    to the level strip's own bound so the two rows align), never a
    ragged 2+1 wrap. */
-.stg-paces {
+.stg-paces,
+.stg-scales {
   display: flex;
   gap: var(--sp-3);
   /* Same wrap-then-shrink contract as the level strip above. */
@@ -9530,7 +9531,8 @@ textarea:focus-visible {
   min-width: 0;
   max-width: 460px;
 }
-.stg-pace {
+.stg-pace,
+.stg-scale {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
@@ -9546,14 +9548,19 @@ textarea:focus-visible {
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.stg-pace:hover, .stg-pace:focus-visible { border-color: var(--text-secondary); filter: none; }
-.stg-pace--on {
+.stg-pace:hover, .stg-pace:focus-visible,
+.stg-scale:hover, .stg-scale:focus-visible { border-color: var(--text-secondary); filter: none; }
+.stg-pace--on,
+.stg-scale--on {
   border-color: color-mix(in srgb, var(--accent2) 55%, transparent);
   background: color-mix(in srgb, var(--accent2) 10%, transparent);
 }
-.stg-pace:disabled { opacity: 0.6; cursor: default; }
-.stg-pace__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); color: var(--text-primary); }
-.stg-pace__n {
+.stg-pace:disabled,
+.stg-scale:disabled { opacity: 0.6; cursor: default; }
+.stg-pace__jp,
+.stg-scale__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); color: var(--text-primary); }
+.stg-pace__n,
+.stg-scale__n {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: 700;
@@ -9561,7 +9568,24 @@ textarea:focus-visible {
   text-transform: uppercase;
   white-space: nowrap;
 }
-.stg-pace--on .stg-pace__n { color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary)); }
+.stg-pace--on .stg-pace__n,
+.stg-scale--on .stg-scale__n { color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary)); }
+
+/* The chosen bar spelled out, in its own words and its own order (see
+   SettingsScreen's RatingScaleRow), with the reassurance under it that
+   a shorter bar is not a different scale. Ambient inks: this sits on
+   the slip, not on a panel. */
+.stg-scale__words {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+}
+.stg-scale__hint {
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
 
 /* ── データ — the two-step reset and its outcomes ── */
 .stg-danger-btn {
@@ -9710,8 +9734,10 @@ textarea:focus-visible {
 @media (max-width: 560px) {
   .theme-choice__jp,
   .stg-preset__jp,
-  .stg-pace__jp { display: none; }
-  .stg-pace { flex-direction: row; align-items: baseline; justify-content: center; gap: var(--sp-2); }
+  .stg-pace__jp,
+  .stg-scale__jp { display: none; }
+  .stg-pace,
+  .stg-scale { flex-direction: row; align-items: baseline; justify-content: center; gap: var(--sp-2); }
 }
 
 /* Page header: même langage serif + trait-rouge que .section-header */
@@ -12433,22 +12459,38 @@ textarea:focus-visible {
    it, so falling back to ring-only would leave colour as the sole
    channel.
 
-   So below 560px the instrument wraps to two rows of three. It stays
-   ONE object -- one container, one border, hairlines between segments --
-   and worst-to-best still reads left to right, top to bottom. Segments
-   go from 54px to ~109px at 375px, so the label needs no step-down at
-   all: an earlier pass shrank it to --fs-caption to survive six-across,
-   and there is no longer six across. Bigger targets and bigger type. */
+   So below 560px the instrument wraps: six to two rows of three, four
+   to two of two. It stays ONE object -- one container, one border,
+   hairlines between segments -- and worst-to-best still reads left to
+   right, top to bottom. Segments go from 54px to ~109px (six) or
+   ~164px (four) at 375px, so the label needs no step-down at all: an
+   earlier pass shrank it to --fs-caption to survive six-across, and
+   there is no longer six across. Bigger targets and bigger type.
+
+   The count is on the container (see RatingBar.jsx) rather than
+   inferred, because the hairlines have to be redrawn for whichever
+   grid it is and nth-child cannot ask how many siblings there are. */
 @media (max-width: 560px) {
   .rating-bar__buttons { flex-wrap: wrap; }
-  .rating-bar__btn {
-    flex: 0 0 33.333%;
-    padding-inline: var(--sp-1);
+  .rating-bar__btn { padding-inline: var(--sp-1); }
+
+  /* Grouped by what they do rather than by bar — both widths first,
+     then both sets of hairlines — because an :nth-child override has
+     to come after every plain selector it outranks (the
+     no-descending-specificity guard). */
+  .rating-bar__buttons--6 .rating-bar__btn { flex: 0 0 33.333%; }
+  .rating-bar__buttons--4 .rating-bar__btn { flex: 0 0 50%; }
+
+  /* The first of each row has no rule to its left; the second row
+     gains one above it. */
+  .rating-bar__buttons--6 .rating-bar__btn:nth-child(3n + 1) { border-left: none; }
+  .rating-bar__buttons--6 .rating-bar__btn:nth-child(n + 4) {
+    border-top: 1px solid var(--surface-line);
   }
-  /* Re-draw the hairlines for a grid: the first of each row has no
-     rule to its left, and the second row gains one above it. */
-  .rating-bar__btn:nth-child(3n + 1) { border-left: none; }
-  .rating-bar__btn:nth-child(n + 4) { border-top: 1px solid var(--surface-line); }
+  .rating-bar__buttons--4 .rating-bar__btn:nth-child(2n + 1) { border-left: none; }
+  .rating-bar__buttons--4 .rating-bar__btn:nth-child(n + 3) {
+    border-top: 1px solid var(--surface-line);
+  }
 }
 
 /* ── Shared nav control button (mute / lang switcher) ─────── */

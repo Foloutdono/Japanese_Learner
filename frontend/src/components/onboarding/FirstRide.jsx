@@ -8,8 +8,9 @@ import { journeyItems } from '../../domain/goalMath'
 // core loop once — card, flip, honest rating. The pieces are the REAL
 // study components fed one literal card (the tour precedent,
 // OnboardingFlow.jsx:13): the production Flashcard and the production
-// six-quality RatingBar, sounds and keyboard shortcuts included, so
-// the first thing this app teaches is exactly the thing it is.
+// RatingBar — whichever bar the learner's own setting says, four
+// buttons or six — sounds and keyboard shortcuts included, so the
+// first thing this app teaches is exactly the thing it is.
 //
 // Any rating completes the scene — もう一度 included: the rating is
 // honesty, not a score, and the won-copy says so. Completion lives in

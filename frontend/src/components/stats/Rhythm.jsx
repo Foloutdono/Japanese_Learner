@@ -1,5 +1,6 @@
 import { useLang } from '../../LangContext'
 import { bucketIntervals, qualityRows } from '../../domain/statsModel'
+import { useRatingScale } from '../../stores/ratingScale'
 
 // ── 調子 — how you study, not how much ─────────────────────
 // Three small charts that read the same review log the counters above
@@ -60,12 +61,15 @@ export function StudyClock({ hours }) {
 }
 
 // ── The rating mix ────────────────────────────────────────
-// Which button you actually press. Same six ratings, same colours and
-// same words as the rating bar itself, so it reads as a record of your
-// own taps rather than a new vocabulary to learn.
+// Which button you actually press. Same ratings, same colours and same
+// words as the rating bar itself, so it reads as a record of your own
+// taps rather than a new vocabulary to learn — including which bar you
+// grade with, so the rows are the buttons you are actually offered
+// (plus any you pressed before switching).
 export function RatingMix({ quality }) {
   const { t } = useLang()
-  const rows = qualityRows(quality, t)
+  const scale = useRatingScale()
+  const rows = qualityRows(quality, t, scale)
   const total = rows.reduce((n, r) => n + r.count, 0)
   if (!total) return null
 

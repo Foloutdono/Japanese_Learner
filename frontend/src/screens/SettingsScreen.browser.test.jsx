@@ -61,6 +61,9 @@ const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 const PROFILE = {
   username: 'Tester', level: 3, xp: 10, xpPrevLevel: 0, xpForNext: 100,
   jlptLevel: 'N5', dailyNewTarget: 10, streak: 1, week: [], daruma: {},
+  // Served, so the rating-scale row is deterministic here rather than
+  // reading whatever this browser's localStorage mirror happens to hold.
+  ratingScale: 'simple',
 }
 
 // Shapes, not the real content volumes — the board only needs numbers
@@ -169,6 +172,39 @@ describe('SettingsScreen — the counter', () => {
     expect(call, 'picking a stop must PATCH the learning profile').toBeTruthy()
     expect(call[2].method).toBe('PATCH')
     expect(JSON.parse(call[2].body)).toEqual({ jlptLevel: 'N3' })
+  })
+
+  // 5. the rating-scale row WRITES, same reasoning as the level strip:
+  //    a radiogroup that never PATCHes is a preference the learner can
+  //    set and lose. And the caption under it has to be the bar's own
+  //    words — it is the only place the two bars are spelled out, so a
+  //    caption that drifts is a settings screen lying about a control.
+  it('the rating-scale row writes, and names the bar it is offering', async () => {
+    const screen = await mount()
+    await settle()
+    const root = screen.container
+    root.querySelector('[data-id="learning"]').click()
+    await settle(30)
+
+    const chips = [...root.querySelectorAll('.stg-scale')]
+    expect(chips).toHaveLength(2)
+    expect(chips[0].getAttribute('aria-checked')).toBe('true')   // 四段, the default
+    expect(chips[1].getAttribute('aria-checked')).toBe('false')
+
+    // The four words of the served scale, worst-first, exactly as the
+    // bar draws them. In French, which is what LangProvider defaults to
+    // — spelled out rather than rebuilt from the locale table, because
+    // a caption assembled from the same source it is being checked
+    // against would pass however wrong the assembly was.
+    expect(root.querySelector('.stg-scale__words').textContent)
+      .toBe('Raté · Presque · Difficile · Correct')
+
+    chips[1].click()
+    await settle(30)
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')
+    expect(call, 'picking a bar must PATCH the learning profile').toBeTruthy()
+    expect(call[2].method).toBe('PATCH')
+    expect(JSON.parse(call[2].body)).toEqual({ ratingScale: 'full' })
   })
 
   it('reset fires only after the second, explicit press', async () => {
