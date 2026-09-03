@@ -19,6 +19,7 @@ import { DEPART_TIMES } from '../components/onboarding/departures'
 import { DepartureChips } from '../components/onboarding/DepartureChips'
 import { StopPattern } from '../components/onboarding/DepartureBoard'
 import { GhostTrack } from '../components/journey/GhostTrack'
+import { useStationClock } from '../components/station/useStationClock'
 import { Emphasized } from '../components/ui/Emphasized'
 import { journeyStations } from '../components/journey/stations'
 
@@ -128,6 +129,7 @@ function StepLine({ step, rideRated, freshStamp, t }) {
 // writing onboarded_at, so the office can be replayed on repeat.
 export default function OnboardingFlow({ session, initialProfile, onComplete, dryRun = false }) {
   const { t, lang } = useLang()
+  const clock = useStationClock()
   const [step, setStep] = useState('ride')
   const [history, setHistory] = useState([])
   const [rideRated, setRideRated] = useState(false)
@@ -316,6 +318,11 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
 
   return (
     <div className="onb" data-step={step}>
+      {/* The station clock, on every scene — the same one the concourse
+          and the departure board tick from. */}
+      <span className="onb-clock">
+        {String(clock.getHours()).padStart(2, '0')}:{String(clock.getMinutes()).padStart(2, '0')}
+      </span>
       <header className="onb-header">
         <span className="onb-header__kana" lang="ja">みどりのまどぐち</span>
         <h1 className="onb-header__jp" lang="ja">みどりの窓口</h1>
@@ -518,11 +525,11 @@ function BoardingStep({ t, lang, volumes, onPick, onBeginner, onTest }) {
           two ways of not knowing where on it you stand. */}
       <div className="onb-alts">
         <button type="button" className="onb-alt" onClick={onBeginner}>
-          <span className="onb-alt__name">{t.onbLevelNever}</span>
+          <span className="onb-alt__name">{t.onbLevelNever}<span lang="ja">はじめて</span></span>
           <span className="onb-alt__hint">{t.onbLevelNeverHint}</span>
         </button>
         <button type="button" className="onb-alt onb-alt--test" onClick={onTest}>
-          <span className="onb-alt__name">{t.onbLevelTest}</span>
+          <span className="onb-alt__name">{t.onbLevelTest}<span lang="ja">診断</span></span>
           <span className="onb-alt__hint">{t.onbLevelTestHint}</span>
         </button>
       </div>
