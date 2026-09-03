@@ -167,6 +167,7 @@ export default function TodayScreen({ session }) {
   // here even though they share an id. See useCardSession's cardKey.
   const cardKey = useCallback(c => `${c.card_id}|${c.mode}`, [])
 
+
   // Sorted so the same selection always produces the same string —
   // otherwise Set iteration order could change the session key between
   // renders and restart the session for no reason.
@@ -202,6 +203,16 @@ export default function TodayScreen({ session }) {
     cardKey,
     extraExcludeIds,
   })
+  // The key CardTransition crossfades on, and the one any stamp routed
+  // onto it must carry. ONE expression, because the two are compared
+  // for equality: a stamp whose key does not match the live card is
+  // never rendered, and the gate it opened is never closed. This
+  // screen had two — `cardKey(card)` above (id|mode, no nonce) against
+  // an inline `id:mode:nonce` — which can never be equal, so every
+  // promotion stamp here was invisible and every stamped review hung
+  // on the 4s safety net, or forever when it also levelled you up
+  // (that path arms no timer at all).
+  const transitionKey = card ? `${card.card_id}:${card.mode}:${cardNonce}` : null
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- this is an id-keyed reset in shape, but `showRating` (and to a lesser extent `answered`) is also set mid-flow by postReview() below, independent of a card actually changing (it hides the rating bar the instant a rating is tapped, before checkAdvance()'s gates clear and the card actually swaps) — moving these into a key-remounted child would need postReview's mid-review-flow state changes threaded back down into that child too, which is a bigger restructure than this reset justifies. See postReview below.
@@ -297,10 +308,10 @@ export default function TodayScreen({ session }) {
           setXpToast({ amount, id: Date.now(), leveledUp, newLevel, quality })
           if (preview.stage_up) {
             gates.add('stamp')
-            setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: cardKey(card) })
+            setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: transitionKey })
           } else if (preview.stage_down) {
             gates.add('stamp')
-            setCardStamp({ id: Date.now(), to: preview.stage_down, demoted: true, cardKey: cardKey(card) })
+            setCardStamp({ id: Date.now(), to: preview.stage_down, demoted: true, cardKey: transitionKey })
           }
         }
       } catch (err) {
@@ -690,7 +701,7 @@ export default function TodayScreen({ session }) {
             )}
 
             <CardTransition
-              cardKey={`${card.card_id}:${card.mode}:${cardNonce}`}
+              cardKey={transitionKey}
               stamp={cardStamp}
               stage={card.stage}
               onStampDone={() => {
