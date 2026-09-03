@@ -2642,6 +2642,108 @@
    it falls back to shu-iro (--accent), which is exactly what
    LevelSelector's own CSS does for a caller with no station. */
 
+/* ── 目盛 — the dial, one slider everywhere ─────────────────
+   A native range input is the one control the UA draws end to end, and
+   it had drifted into three drawings here: the sound mixer's (a real
+   one), the exam player's scrubber (half of one), and the office's two
+   dials, which carried an `accent-color` and nothing else — that is
+   the UA's own grey track and grey thumb, tinted. That last one is the
+   control a learner meets in the ticket office, and it looked like it
+   came from another app.
+
+   One drawing now, parameterised by colour rather than copied:
+   --dial-rail is the track, --dial-ink the thumb, --dial-edge the hair
+   of ground that separates the thumb from the rail. So a dial on
+   paper, a dial on sumi and a dial wearing a line pigment are the same
+   instrument in three inks — the rail is the 3-4px rail this app draws
+   every line with, and the thumb is a stop on it. Both engines are
+   written out because WebKit and Gecko build a range from different
+   pseudo-elements and neither inherits the other's; a selector list
+   spanning the two is dropped whole by both, so the rules are twinned
+   on purpose. */
+.dial {
+  --dial-rail: var(--bg-card-hover);
+  --dial-ink: var(--text-secondary);
+  --dial-ink-hover: var(--text-primary);
+  --dial-edge: var(--bg-card);
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  /* the thumb's own box, not a spacing rung */
+  height: 18px;
+  margin: 0;
+  background: none;
+  outline: none;
+  cursor: pointer;
+}
+.dial::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--dial-rail);
+}
+.dial::-moz-range-track {
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--dial-rail);
+}
+.dial::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  /* centres the 14px thumb on the 4px rail */
+  margin-top: -5px;
+  border-radius: var(--r-pill);
+  background: var(--dial-ink);
+  border: 1px solid var(--dial-edge);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.dial::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--r-pill);
+  background: var(--dial-ink);
+  border: 1px solid var(--dial-edge);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.dial:hover::-webkit-slider-thumb {
+  transform: scale(1.2);
+  background: var(--dial-ink-hover);
+}
+.dial:hover::-moz-range-thumb {
+  transform: scale(1.2);
+  background: var(--dial-ink-hover);
+}
+/* The thumb is the control, so the ring goes on the thumb — an outline
+   on the input itself draws a rectangle around the whole track. */
+.dial:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
+.dial:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
+.dial:disabled {
+  cursor: not-allowed;
+}
+.dial:disabled::-webkit-slider-thumb {
+  background: var(--text-secondary);
+  opacity: 0.45;
+}
+.dial:disabled::-moz-range-thumb {
+  background: var(--text-secondary);
+  opacity: 0.45;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dial::-webkit-slider-thumb,
+  .dial::-moz-range-thumb { transition: none; }
+  .dial:hover::-webkit-slider-thumb,
+  .dial:hover::-moz-range-thumb { transform: none; }
+}
+
 .onb {
   min-height: 100vh;
   display: flex;
@@ -2663,6 +2765,7 @@
   animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
 .onb-header__kana {
+  font-family: var(--font-jp);
   font-size: 0.78rem;
   letter-spacing: 0.35em;
   color: var(--text-secondary);
@@ -2781,6 +2884,7 @@
    1st/3rd/5th… stops — every other stamp leans the other way. */
 .onb-line__stop--past:nth-child(even) .onb-line__stamp { --stamp-tilt: 5deg; }
 .onb-line__name {
+  font-family: var(--font-jp);
   font-size: 0.68rem;
   color: var(--text-secondary);
   white-space: nowrap;
@@ -2849,6 +2953,7 @@
   letter-spacing: 0.04em;
   transition: transform 0.15s ease, filter 0.15s ease;
 }
+.onb-action [lang="ja"] { font-family: var(--font-jp); }
 .onb-action:hover:not(:disabled),
 .onb-action:focus-visible { transform: translateY(-1px); filter: brightness(1.15); }
 .onb-action:disabled { opacity: 0.45; }
@@ -2900,9 +3005,31 @@
 /* The demo card's compact padding — inherited from the retired tour's
    recipe (phase F removed the tour; the ride is the one framed study
    card left in the office). */
+/* The card the first ride is taken on. .flashcard itself is a
+   deliberately transparent overlay — it spreads negative margins to
+   make the whole surface clickable, and on the study screens the
+   surface underneath it belongs to the stage. In the office there is
+   no stage, so without this the demo card was a specimen floating on
+   the page: no ground, no edge, nothing that reads as a card at all.
+   The app's one card (DESIGN.md, "One card, everywhere"), which is
+   also what the mockup's .fc__face draws. */
 .onb-ride__card {
   width: 100%;
   padding: 18px 14px;
+  /* The card holds its height across the turn. Its two faces are not
+     the same size — the glyph front measured 134px and the
+     reading + meaning back 109px — so without this the whole scene
+     jumped 25px UP at the exact moment the learner looked down to
+     read the answer, and the rating bar moved out from under the
+     cursor with it. The mockup pins the same card at a flat height for
+     the same reason; this is the front face's own, so the reservation
+     costs no dead space. */
+  min-height: 140px;
+  display: grid;
+  align-content: center;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
   --card-pad-top: 18px;
   --card-pad-x: 14px;
   --card-pad-y: 18px;
@@ -2958,9 +3085,18 @@
   border: 2.5px solid var(--accent);
   border-radius: var(--r-pill);
   transform: rotate(-7deg);
+  /* The seal LANDS — it is the reward for the first honest rating, and
+     the office already owns the stamp that lands (the stamp rally's
+     --fresh mark rides these same keyframes). Without it the banner
+     arrives with its stamp already printed, which is the one beat of
+     this scene that is supposed to be felt. The 0.1s wait lets the
+     banner get there first. */
+  animation: onb-stamp-in 0.4s cubic-bezier(0.22, 0.68, 0.32, 1) 0.1s backwards;
 }
 @media (prefers-reduced-motion: reduce) {
-  .onb-ride__won { animation: none; }
+  .onb-ride__won,
+  .onb-ride__won-stamp,
+  .onb-lvl { animation: none; }
 }
 
 /* ── 乗車駅 — board where you can still read the sign ───────
@@ -2972,11 +3108,17 @@
   display: flex;
   flex-direction: column;
 }
+/* The rows arrive down the rail rather than all at once — the app's
+   shared stagger (DESIGN.md, Motion: the `arrive` animation, ~30ms
+   between children, capped at the eighth). Five stations, so the cap
+   never bites here; the delays are written out because a list this
+   short does not earn a counter. */
 .onb-lvl {
   position: relative;
   display: flex;
   align-items: center;
   gap: var(--sp-5);
+  animation: arrive 0.3s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
   /* Left gutter = --sp-9 (52px): clears the 25px rail + roundel and
      lands the text column where .onb-alts already indents to. */
   padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-9);
@@ -2987,6 +3129,11 @@
   cursor: pointer;
   transition: background 0.15s ease;
 }
+.onb-lvl:nth-child(2) { animation-delay: 0.03s; }
+.onb-lvl:nth-child(3) { animation-delay: 0.06s; }
+.onb-lvl:nth-child(4) { animation-delay: 0.09s; }
+.onb-lvl:nth-child(5) { animation-delay: 0.12s; }
+
 .onb-lvl::before {
   content: '';
   position: absolute;
@@ -3329,10 +3476,12 @@
   flex: 1;
   min-width: 220px;
 }
-.onb-months__dial input[type="range"] {
+.onb-months__dial .dial {
+  --dial-ink: var(--accent);
+  --dial-ink-hover: color-mix(in srgb, var(--accent) 70%, var(--text-primary));
   flex: 1;
+  width: auto;
   min-width: 140px;
-  accent-color: var(--accent);
 }
 .onb-months__dial output {
   font-weight: 700;
@@ -3404,7 +3553,19 @@
   color: var(--text-on-panel);
   text-align: left;
   transition: background 0.15s ease, border-color 0.15s ease;
+  /* The services arrive down the board, the way a departure board
+     fills in — the app's shared stagger again (DESIGN.md, Motion).
+     The head and the column captions are children 1 and 2, so the
+     first service is 3; the delays stop at the sixth row because the
+     board never runs more services than that. */
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
+.onb-board__row:nth-child(3) { animation-delay: 0.03s; }
+.onb-board__row:nth-child(4) { animation-delay: 0.06s; }
+.onb-board__row:nth-child(5) { animation-delay: 0.09s; }
+.onb-board__row:nth-child(6) { animation-delay: 0.12s; }
+.onb-board__row:nth-child(7) { animation-delay: 0.15s; }
+.onb-board__row:nth-child(8) { animation-delay: 0.18s; }
 .onb-board__row[aria-pressed] { cursor: pointer; }
 .onb-board__row[aria-pressed]:focus-visible,
 .onb-board__row[aria-pressed]:hover {
@@ -3463,9 +3624,16 @@
 .onb-board__pat-rail--dash { stroke-dasharray: 4 3; }
 .onb-board__pat-stop { fill: var(--text-on-panel); }
 .onb-board__pat-skip { fill: color-mix(in srgb, var(--text-on-panel) 28%, transparent); }
+/* The charter dial rides the sumi board, so its rail and the hair of
+   ground around its thumb come from the panel family, never the
+   ambient one (DESIGN.md: the ambient inks flip, the sumi inks do
+   not). */
 .onb-board__dial {
+  --dial-rail: color-mix(in srgb, var(--text-on-panel) 24%, transparent);
+  --dial-ink: var(--accent2);
+  --dial-ink-hover: color-mix(in srgb, var(--accent2) 60%, var(--text-on-panel));
+  --dial-edge: var(--bg-panel);
   width: 96px;
-  accent-color: var(--accent2);
 }
 .onb-board__pace {
   display: flex;
@@ -3559,6 +3727,13 @@
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
+  /* The strip confirms the choice the board just priced, so it arrives
+     after it rather than being there all along. */
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .onb-board__row,
+  .onb-call { animation: none; }
 }
 .onb-call__label {
   font-size: var(--fs-caption-xs);
@@ -3714,6 +3889,12 @@
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
+/* The same object the profile's ledger draws (.pf-line__roundel), so
+   it takes the same ink: the raw line pigment carries the RING, but as
+   TEXT it has to be mixed toward the ambient ink to clear the floor —
+   the three drawn here measured 3.27, 2.62 and 3.71:1 wearing their
+   pigment neat, and 藤 (--line-analysis) was the worst of them. The
+   60% mix is the ledger's, already measured by Guard 4. */
 .onb-lines__roundel {
   display: grid;
   place-items: center;
@@ -3721,7 +3902,7 @@
   height: 34px;
   border-radius: var(--r-pill);
   border: 2.5px solid var(--row-color, var(--accent));
-  color: var(--row-color, var(--accent));
+  color: color-mix(in srgb, var(--row-color, var(--accent)) 60%, var(--text-primary));
   font-family: var(--font-jp);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
@@ -3826,6 +4007,15 @@
   flex-wrap: wrap;
 }
 .onb-form__chip {
+  /* The kanji is the quiet half of the pair while the chip is
+     unchosen; once it IS the chosen hour it stops being an aside, and
+     the secondary ink does not carry on the accent wash the chosen
+     state paints (4.38:1, measured). Named on the block and read by
+     the child, per DESIGN.md — a `[aria-pressed="true"] [lang="ja"]`
+     descendant rule would invert specificity against every other
+     `.x [lang="ja"]` rule below it in the sheet. The mockup ends its
+     own departure chips on this same line. */
+  --chip-jp-ink: var(--text-secondary);
   padding: var(--sp-1) var(--sp-4);
   background: none;
   border: 1px solid var(--surface-line);
@@ -3840,13 +4030,14 @@
 .onb-form__chip [lang="ja"] {
   font-family: var(--font-jp);
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--chip-jp-ink);
   margin-right: var(--sp-1);
 }
 .onb-form__chip:disabled { opacity: 0.45; cursor: default; }
 .onb-form__chip:focus-visible,
 .onb-form__chip:hover:not(:disabled) { border-color: var(--text-secondary); }
 .onb-form__chip[aria-pressed="true"] {
+  --chip-jp-ink: var(--text-primary);
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 9%, transparent);
 }
@@ -3882,6 +4073,7 @@
 }
 .onb-pass__head {
   display: flex;
+  font-family: var(--font-jp);
   justify-content: space-between;
   color: var(--text-on-panel-soft);
   font-size: var(--fs-sm);
@@ -3993,7 +4185,12 @@
   font-family: var(--font-serif);
   font-weight: 700;
   font-size: var(--fs-sm);
-  color: var(--accent);
+  /* あなた and 窓口 name the two parties of the vow — they are the
+     sentence's subject, not a mark, and the app's other seals and
+     stamps are aria-hidden precisely because they are the opposite.
+     Neat 朱 measured 2.97:1 here, so it takes the same mix toward the
+     ambient ink that the profile's ledger roundels take. */
+  color: color-mix(in srgb, var(--accent) 60%, var(--text-primary));
 }
 .onb-vow__what {
   font-size: var(--fs-sm);
@@ -4222,6 +4419,17 @@
    uses --text-on-panel(-soft) explicitly instead of the ambient
    --text-primary/--text-secondary, which are what flip. */
 :root {
+  /* The theme, declared to the BROWSER and not only to this sheet.
+     Without it every UA-drawn pixel — a range input's track and thumb,
+     `buttonface`, `buttontext`, a form field, a focus ring, the
+     scrollbar corner — is painted from the light-mode palette on top
+     of a dark page. It is why the office's two dials arrived as grey
+     Chrome sliders and why an unstyled <button> reads black-on-sumi
+     (see the base `button` rule below, which now names its own ink
+     rather than leaving it to the UA). Dark is the default theme
+     here; the light root overrides it. */
+  color-scheme: dark;
+
   /* ── Fixed tokens (identical in both themes) ── */
 
   /* Kinari (生成り) — text for use on sumi surfaces. Constant,
@@ -4561,6 +4769,7 @@
    default. Pigments are all deepened a shade so they still work as
    plain text on paper, not just as fills on ink. */
 :root[data-theme="light"] {
+  color-scheme: light;
   --bg-main:        #f6f1e4;
   --bg-card:        #efe6d0;
   --bg-card-hover:  #e7dabd;
@@ -4689,8 +4898,22 @@ html, body { height: 100%; }
    on scroll. */
 #root { min-height: 100%; }
 
+/* A <button> inherits its font from this rule and, until this line,
+   inherited NOTHING else: with no `color` of its own it fell through to
+   the UA's `buttontext` — black — and with no `background` to
+   `buttonface` — light grey. On a sumi page that is invisible text in a
+   grey pill, and it is exactly what happened to every button here that
+   trusted the cascade: the office's level rows printed 乗車駅 and their
+   N5..N1 roundels in black on #17151a (1.16:1, measured), and the
+   destination chips did the same (1.39:1). The mockup this flow was
+   built from carries `color: inherit; background: none` on its own base
+   rule; the port dropped both lines. Any button that wants a fill still
+   sets one — a class rule outranks this — and none in the sheet was
+   relying on the UA's paint. */
 button {
   cursor: pointer;
+  color: inherit;
+  background: none;
   border: none;
   border-radius: 8px;
   font-family: inherit;
@@ -4699,6 +4922,7 @@ button {
   transition: filter 0.15s;
 }
 button:hover { filter: brightness(1.15); }
+
 button:focus-visible {
   outline: 2px solid var(--accent2);
   outline-offset: 2px;
@@ -9456,74 +9680,15 @@ textarea:focus-visible {
   opacity: 0.9;
 }
 
-.vol-slider-wrap input[type="range"] {
-  width: 100%;
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  outline: none;
-  cursor: pointer;
+/* The mixer's own slider is now the shared .dial (see 目盛 above);
+   what stays here is only what is true of THIS slider and not of the
+   instrument: it fills its row, and it sits above the gold fill that
+   draws the travelled part of its track. Its inks are the family's
+   defaults, so the bank looks exactly as it did — the drawing simply
+   stopped being a second copy of one. */
+.vol-slider-wrap .dial {
   position: relative;
   z-index: 2;
-  margin: 0;
-}
-
-.vol-slider-wrap input[type="range"]::-webkit-slider-runnable-track {
-  height: 4px;
-  background: var(--bg-card-hover);
-  border-radius: 999px;
-}
-
-.vol-slider-wrap input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--text-secondary);
-  border: 1px solid var(--bg-card);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-  cursor: pointer;
-  margin-top: -5px;
-  transition: transform 0.1s, background 0.15s;
-}
-.vol-slider-wrap input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  background: var(--text-primary);
-}
-
-.vol-slider-wrap input[type="range"]::-moz-range-track {
-  height: 4px;
-  background: var(--bg-card-hover);
-  border-radius: 999px;
-}
-
-.vol-slider-wrap input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--text-secondary);
-  border: 2px solid var(--bg-card);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-  cursor: pointer;
-}
-
-/* The thumb is the control, so the ring goes on the thumb — an outline
-   on the input itself would draw a rectangle around the whole track. */
-.vol-slider-wrap input[type="range"]:focus-visible::-webkit-slider-thumb {
-  outline: 2px solid var(--accent2);
-  outline-offset: 2px;
-}
-.vol-slider-wrap input[type="range"]:focus-visible::-moz-range-thumb {
-  outline: 2px solid var(--accent2);
-  outline-offset: 2px;
-}
-
-.vol-slider-wrap input[type="range"]:disabled {
-  cursor: not-allowed;
-}
-.vol-slider-wrap input[type="range"]:disabled::-webkit-slider-thumb {
-  background: #555;
 }
 .vol-slider-wrap--disabled .vol-slider-fill {
   opacity: 0.2;
@@ -23425,6 +23590,7 @@ html { scrollbar-gutter: stable; }
   border: 3px solid color-mix(in srgb, var(--text-on-panel) 70%, transparent);
 }
 .jour-track__station-name {
+  font-family: var(--font-jp);
   font-size: var(--fs-caption);
   font-weight: 700;
   color: var(--text-on-panel-soft);
@@ -23468,6 +23634,20 @@ html { scrollbar-gutter: stable; }
   border-top: 2px solid var(--jour-st, var(--warning));
   transition: left 0.25s ease, width 0.25s ease;
 }
+/* The three moving parts of the drawing — the filled run behind you,
+   the two cars, and the bracket that measures the gap between them —
+   all animate their position. DESIGN.md: every transition needs a
+   prefers-reduced-motion answer, and these had none; the flip a few
+   rules up had one and the track it turns to reveal did not. The
+   positions are still correct with the motion off, which is the whole
+   point of answering with `none` rather than with a shorter duration. */
+@media (prefers-reduced-motion: reduce) {
+  .jour-track__done,
+  .jour-track__you,
+  .jour-track__plan,
+  .jour-track__gap { transition: none; }
+}
+
 .jour-track__gap::before,
 .jour-track__gap::after {
   content: '';

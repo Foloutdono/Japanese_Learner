@@ -714,7 +714,12 @@ function PassStep({
         <h2 className="onb-step__title" tabIndex={-1}>{t.onbSignTitle}</h2>
 
         <div className="onb-form">
-          <span className="onb-form__seal" lang="ja">印</span>
+          {/* An empty seal box, like the pass's own 駅長 impression — a
+              drawing of where a stamp would go, never a label. Marked
+              decorative so it is not announced as a lone 印, which is
+              also why its faint dashed vermillion is not held to the
+              text floor. */}
+          <span className="onb-form__seal" lang="ja" aria-hidden="true">印</span>
           <div className="onb-form__head">
             <span className="onb-form__title" lang="ja">定期券申込書</span>
             <span className="onb-form__latin">{t.onbFormLatin}</span>
