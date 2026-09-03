@@ -22065,7 +22065,20 @@ button.syllabary-cell:focus-visible {
   background: color-mix(in srgb, var(--line-color, var(--accent)) 22%, transparent);
 }
 .gate__wave { width: 16px; height: 18px; }
-.gate__wave span { border-width: 1.3px; }
+/* The reader's contactless mark is borrowed from the pass (.pass__wave),
+   and the pass is sumi — so the arcs are inked --text-on-panel, a kinari
+   that never flips. The pad it is printed on is not sumi: it sits on the
+   pillar, which is --surface, and --surface is PAPER in light theme. The
+   mark measured 1.70:1 there — the pad looked empty, on the one object
+   the whole finale asks you to touch. The mockup inks this wave gold,
+   and gold does NOT carry it: measured on the pillar it reaches only
+   1.91:1 in light theme. An ambient ground takes an ambient ink, which
+   is the contract (DESIGN.md) and measures 6.85:1 dark / 8.37:1 light.
+   The pass's own wave keeps its kinari — that one really is on sumi. */
+.gate__wave span {
+  border-width: 1.3px;
+  border-right-color: var(--text-primary);
+}
 .gate__wave span:nth-child(1) { width: 6px;  height: 6px;  margin-top: -3px; }
 .gate__wave span:nth-child(2) { width: 11px; height: 11px; margin-top: -5.5px; }
 .gate__wave span:nth-child(3) { width: 16px; height: 16px; margin-top: -8px; }

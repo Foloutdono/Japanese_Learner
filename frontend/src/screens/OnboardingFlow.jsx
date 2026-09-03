@@ -726,7 +726,12 @@ function PassStep({
           </div>
           <div className="onb-form__row">
             <span className="onb-form__k"><span lang="ja">氏名</span>{t.onbFormName}</span>
-            <EditableUsername username={username} session={session} onChange={onUsername} t={t} />
+            {/* 紙 — the application form is paper (--surface), not the
+                sumi the pass is. The field defaults to the panel pair
+                because its first home was the pass; forced here it
+                printed kinari-white on a cream wash at 2.22:1 in light
+                theme, i.e. the name you are typing was barely there. */}
+            <EditableUsername username={username} session={session} onChange={onUsername} t={t} ground="paper" />
           </div>
           <div className="onb-form__row onb-form__row--stack">
             <span className="onb-form__k"><span lang="ja">発車時刻</span>{t.onbFormDepart}</span>
