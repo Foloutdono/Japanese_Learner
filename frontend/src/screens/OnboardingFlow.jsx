@@ -15,6 +15,8 @@ import { goalDerived } from '../components/onboarding/goalDerived'
 import CallingAt from '../components/onboarding/CallingAt'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEFAULT_PER_DAY, serviceLabel } from '../components/onboarding/paces'
+import { DEPART_TIMES } from '../components/onboarding/departures'
+import { DepartureChips } from '../components/onboarding/DepartureChips'
 import { StopPattern } from '../components/onboarding/DepartureBoard'
 import { GhostTrack } from '../components/journey/GhostTrack'
 import { journeyStations } from '../components/journey/stations'
@@ -64,10 +66,6 @@ const STOPS = [
   { key: 'map', jp: '案内', kanji: '案' },
   { key: 'pass', jp: '定期券', kanji: '定' },
 ]
-
-// 発車時刻 — the optional daily hour printed on the pass. Signage
-// times; null is 自由 (flexible) and stores nothing.
-const DEPART_TIMES = { am: '07:30', noon: '12:30', pm: '21:00' }
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -727,29 +725,7 @@ function PassStep({
           </div>
           <div className="onb-form__row onb-form__row--stack">
             <span className="onb-form__k"><span lang="ja">発車時刻</span>{t.onbFormDepart}</span>
-            <span className="onb-form__chips" role="group" aria-label={t.onbFormDepart}>
-              {['am', 'noon', 'pm'].map(id => (
-                <button
-                  key={id}
-                  type="button"
-                  className="onb-form__chip"
-                  aria-pressed={depart === id}
-                  onClick={() => onDepart(depart === id ? null : id)}
-                >
-                  <span lang="ja">{{ am: '朝', noon: '昼', pm: '夜' }[id]}</span>
-                  {DEPART_TIMES[id]}
-                </button>
-              ))}
-              <button
-                type="button"
-                className="onb-form__chip"
-                aria-pressed={depart === null}
-                onClick={() => onDepart(null)}
-              >
-                <span lang="ja">自由</span>
-                {t.onbDepartFlex}
-              </button>
-            </span>
+            <DepartureChips t={t} value={depart} onChange={onDepart} />
           </div>
           <div className="onb-form__row">
             <span className="onb-form__k"><span lang="ja">申込日</span>{t.onbFormDate}</span>

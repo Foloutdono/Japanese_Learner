@@ -9,6 +9,7 @@ import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components
 import { useProfileSummary, refreshSummary } from '../stores/profileSummary'
 import PlacementTest from '../components/onboarding/PlacementTest'
 import { PACES } from '../components/onboarding/paces'
+import { GoalCounter } from '../components/journey/GoalCounter'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -27,11 +28,18 @@ const THEATRE = ['ambiance', 'jingle', 'announcement']
 // stable ids so a pane can be linked and a reload lands where you
 // were (#son, #data…).
 //
+// 行先 joined the rail after the pass's own back was found pointing
+// at a counter that did not exist: "no destination on this pass — set
+// one at the office" led here, and here had nothing about a goal on
+// it. It is deliberately its own counter rather than three more rows
+// under 学習 — a destination, a date and an hour are one contract,
+// and the pass back deep-links to them (/settings#goal).
+//
 // Deliberately NOT here: the 通知 reminders pane the artboard
 // sketched as 構想. It needs browser notifications and a preferences
 // endpoint that do not exist, and a settings screen above all must be
 // exactly what it says — no dead controls.
-const SECTION_IDS = ['env', 'son', 'learning', 'data', 'account']
+const SECTION_IDS = ['env', 'son', 'learning', 'goal', 'data', 'account']
 
 function initialSection() {
   const hash = typeof window !== 'undefined' ? window.location.hash.slice(1) : ''
@@ -51,6 +59,7 @@ export default function SettingsScreen({ session }) {
     { id: 'env',      jp: '環境',   rail: t.settingsEnvShort, title: t.settingsEnvironment },
     { id: 'son',      jp: '音',     rail: t.sound,            title: t.sound },
     { id: 'learning', jp: '学習',   rail: t.settingsLearning, title: t.settingsLearning },
+    { id: 'goal',     jp: '行先',   rail: t.settingsGoal,     title: t.settingsGoal },
     { id: 'data',     jp: 'データ', rail: t.settingsData,     title: t.settingsData },
     { id: 'account',  jp: '会員',   rail: t.account,          title: t.account },
   ]
@@ -129,6 +138,10 @@ export default function SettingsScreen({ session }) {
 
             <Slip id="learning" section={section} jp="学習" title={t.settingsLearning}>
               <LearningRows t={t} session={session} />
+            </Slip>
+
+            <Slip id="goal" section={section} jp="行先" title={t.settingsGoal}>
+              <GoalCounter session={session} />
             </Slip>
 
             <Slip id="data" section={section} jp="データ" title={t.settingsData}>

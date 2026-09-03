@@ -1,9 +1,17 @@
 # ── 路線図 — the journey endpoints ────────────────────────────────
-# Two routes for the ghost train on the back of the commuter pass
-# (plan 063):
+# The routes behind the ghost train on the back of the commuter pass
+# (plan 063), and behind 行先, the settings counter that changes what
+# the pass promises:
 #
-#   GET  /api/journey/status   the contract + the two measured facts
-#   POST /api/journey/reprint  move the date and/or the pace, in ink
+#   GET    /api/journey/status  the contract + the two measured facts
+#   POST   /api/journey/reprint move the date, the pace or the hour, in ink
+#   POST   /api/journey/goal    issue a destination onto the pass (発行)
+#   DELETE /api/journey/goal    hand the destination back (払戻)
+#
+# The last two are the settings counter's half of the office: the
+# onboarding flow signs the first contract, 行先 in /settings signs
+# every one after it. They are NOT reprints — a reprint moves a
+# promise that exists, and issuing a destination makes a new one.
 #
 # The endpoint returns FACTS, never projections: the arrival math
 # (projected date, delta days, recovery pace, status word) lives in the
@@ -19,7 +27,7 @@ from core.auth import get_user_id
 from core.db import db_conn
 from core.srs_instance import srs
 from core.user_level import LEVELS
-from routes.onboarding import VOLUMES
+from routes.onboarding import DEPARTURES, VOLUMES
 from routes.profile import ensure_profile_row
 
 router = APIRouter()
@@ -118,13 +126,20 @@ def journey_status(user_id: str = Depends(get_user_id)):
 
 
 class ReprintPayload(BaseModel):
-    """At least one of the two (checked in the route: 'neither' is a
+    """At least one of the three (checked in the route: 'none' is a
     caller bug, same convention as PATCH /api/profile/learning).
     goal_set_at deliberately survives a reprint: the contract began
     when it began — a reprint moves the promise, not history. A reprint
-    ledger is deferred, not half-built (plan 063)."""
+    ledger is deferred, not half-built (plan 063).
+
+    dailyDeparture is the one field whose None is a VALUE (自由,
+    flexible) rather than 'not sent', so the route reads
+    model_fields_set for it instead of testing for None — otherwise
+    the hour could be set from the settings counter and never
+    cleared."""
     goalTargetDate: date | None = None
     dailyNewTarget: int | None = None
+    dailyDeparture: str | None = None
 
     @field_validator("goalTargetDate")
     @classmethod
@@ -141,10 +156,21 @@ class ReprintPayload(BaseModel):
             raise ValueError("must be between 1 and 100")
         return v
 
+    @field_validator("dailyDeparture")
+    @classmethod
+    def valid_departure(cls, v: str | None) -> str | None:
+        # NULL is 自由; the client never sends a fourth string. Same
+        # rule as onboarding's own departure field.
+        if v is not None and v not in DEPARTURES:
+            raise ValueError(f"must be one of {', '.join(DEPARTURES)} or null")
+        return v
+
 
 @router.post("/api/journey/reprint")
 def journey_reprint(payload: ReprintPayload, user_id: str = Depends(get_user_id)):
-    if payload.goalTargetDate is None and payload.dailyNewTarget is None:
+    departure_sent = "dailyDeparture" in payload.model_fields_set
+    if (payload.goalTargetDate is None and payload.dailyNewTarget is None
+            and not departure_sent):
         raise HTTPException(status_code=422, detail="Nothing to reprint")
     ensure_profile_row(user_id)
     row = _journey_row(user_id)
@@ -161,6 +187,9 @@ def journey_reprint(payload: ReprintPayload, user_id: str = Depends(get_user_id)
     if payload.dailyNewTarget is not None:
         sets.append("daily_new_target = %s")
         args.append(payload.dailyNewTarget)
+    if departure_sent:
+        sets.append("daily_departure = %s")
+        args.append(payload.dailyDeparture)
     conn = db_conn()
     try:
         with conn.cursor() as cur:
@@ -173,4 +202,116 @@ def journey_reprint(payload: ReprintPayload, user_id: str = Depends(get_user_id)
         conn.close()
     # The fresh facts, so the pass back can redraw without a second
     # round trip — and the front's gold 有効期限 with it.
+    return _status_payload(user_id)
+
+
+class GoalPayload(BaseModel):
+    """行先 — a destination issued onto a pass from the settings
+    counter, replacing whatever it carried. Not a reprint: a reprint
+    moves a promise that exists, so it keeps goal_set_at, while this
+    signs a NEW contract and must stamp it (the itemsDone window is
+    anchored there — see _status_payload).
+
+    dailyNewTarget rides along because a destination and the pace that
+    reaches it are one decision, priced together on the departure
+    board (components/onboarding/DepartureBoard.jsx). Sending none
+    leaves the pace exactly as it stands.
+
+    goalTargetDate is optional for the same reason it is in
+    domain/goalMath's journeyModel: a goal signed by pace alone still
+    has an arrival, the one its own signing maths implies."""
+    goalLevel: str
+    goalTargetDate: date | None = None
+    dailyNewTarget: int | None = None
+
+    @field_validator("goalLevel")
+    @classmethod
+    def valid_goal_level(cls, v: str) -> str:
+        if v not in LEVELS:
+            raise ValueError(f"must be one of {', '.join(LEVELS)}")
+        return v
+
+    @field_validator("goalTargetDate")
+    @classmethod
+    def valid_goal_date(cls, v: date | None) -> date | None:
+        if v is not None and v <= date.today():
+            raise ValueError("must be in the future")
+        return v
+
+    @field_validator("dailyNewTarget")
+    @classmethod
+    def valid_target(cls, v: int | None) -> int | None:
+        if v is not None and not (1 <= v <= 100):
+            raise ValueError("must be between 1 and 100")
+        return v
+
+
+@router.post("/api/journey/goal")
+def journey_goal(payload: GoalPayload, user_id: str = Depends(get_user_id)):
+    ensure_profile_row(user_id)
+    row = _journey_row(user_id)
+    # The boarding level is where the learner stands TODAY, not where
+    # an older contract boarded: re-signing at N4 must not keep
+    # promising the N5 volume. Same stamp routes/onboarding.py makes,
+    # for the same reason — itemsTotal must never drift when
+    # jlpt_level later moves.
+    start = row[0] if row else None
+    if start is None:
+        raise HTTPException(
+            status_code=422,
+            detail="No boarding level — complete the office first",
+        )
+    if LEVELS.index(payload.goalLevel) <= LEVELS.index(start):
+        raise HTTPException(
+            status_code=422,
+            detail=f"goalLevel must be beyond {start}",
+        )
+    sets = [
+        "goal_start_level = %s",
+        "goal_level = %s",
+        "goal_target_date = %s",
+        "goal_set_at = NOW()",
+    ]
+    args = [start, payload.goalLevel, payload.goalTargetDate]
+    if payload.dailyNewTarget is not None:
+        sets.append("daily_new_target = %s")
+        args.append(payload.dailyNewTarget)
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"UPDATE user_profiles SET {', '.join(sets)} WHERE user_id = %s",
+                (*args, user_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    return _status_payload(user_id)
+
+
+@router.delete("/api/journey/goal")
+def journey_goal_cancel(user_id: str = Depends(get_user_id)):
+    """払戻 — hand the destination back. The pace and the departure
+    hour stay behind: giving up a destination is not giving up the
+    ride, and the goal-less pass back still reports on pace kept. The
+    four goal columns move as one block, exactly as a goal-less replay
+    of the office clears them."""
+    ensure_profile_row(user_id)
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE user_profiles
+                SET goal_start_level = NULL,
+                    goal_level = NULL,
+                    goal_target_date = NULL,
+                    goal_set_at = NULL
+                WHERE user_id = %s
+                """,
+                (user_id,),
+            )
+        conn.commit()
+    finally:
+        conn.close()
     return _status_payload(user_id)

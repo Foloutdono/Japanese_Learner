@@ -4,6 +4,7 @@ import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
 import { addDays, journeyModel } from '../../domain/goalMath'
 import { MAX_PACE, serviceLabel } from '../onboarding/paces'
+import { ContractGrid } from './ContractGrid'
 import { GhostTrack } from './GhostTrack'
 import { journeyStations } from './stations'
 
@@ -155,7 +156,7 @@ export function JourneyPass({ session, fallbackStartLevel = null, renderPass }) 
             onFlipBack={() => setFlipped(false)}
             onReprint={reprint}
             onResume={() => navigate('/')}
-            onOffice={() => navigate('/settings')}
+            onOffice={() => navigate('/settings#goal')}
           />
         </div>
       </div>
@@ -309,43 +310,3 @@ function JourneyReverse({
   )
 }
 
-// ── The contract, printed on the back ─────────────────────────
-// The cells of the application form (OnboardingFlow's printed pass),
-// reprinted on the reverse of the pass they became: where you boarded,
-// where you are going, the service you booked, the hour you said you
-// would ride, the date the pass is good until, and the day it was
-// issued. Only the cells the contract actually has — a goal-less pass
-// prints its service and nothing it never promised.
-const DEPART_JP = { am: '朝', noon: '昼', pm: '夜' }
-
-function ContractGrid({ status, start, fmt, t }) {
-  const service = status.plannedPerDay ? serviceLabel(status.plannedPerDay) : null
-  const cells = [
-    start && { k: '乗車駅', v: start },
-    status.goalLevel && { k: '行先', v: status.goalLevel },
-    service && {
-      k: '種別',
-      v: (
-        <>
-          <span lang="ja" className="jour-grid__jp">{service.jp}</span> · {status.plannedPerDay}
-          <span className="jour-grid__u"> {t.settingsPerDay}</span>
-        </>
-      ),
-    },
-    DEPART_JP[status.dailyDeparture] && { k: '発車時刻', v: <span lang="ja" className="jour-grid__jp">{DEPART_JP[status.dailyDeparture]}</span> },
-    status.goalTargetDate && { k: '有効期限', v: fmt.format(new Date(status.goalTargetDate)), gold: true },
-    status.goalSetAt && { k: '発行日', v: fmt.format(new Date(status.goalSetAt)) },
-  ].filter(Boolean)
-
-  if (!cells.length) return null
-  return (
-    <div className="jour-grid">
-      {cells.map(c => (
-        <div key={c.k} className="jour-grid__cell">
-          <span className="jour-grid__k" lang="ja">{c.k}</span>
-          <span className={`jour-grid__v${c.gold ? ' jour-grid__v--gold' : ''}`}>{c.v}</span>
-        </div>
-      ))}
-    </div>
-  )
-}

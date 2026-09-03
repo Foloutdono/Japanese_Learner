@@ -1,10 +1,10 @@
-# ── The journey endpoints: /api/journey/status + /reprint ─────────
+# ── The journey endpoints: status, reprint, and 行先's own two ────
 # Runs as a DEDICATED user (dependency override), not DEV_USER_ID:
 # itemsDone/actual14 count review_log firsts, and the shared dev user
 # accumulates review rows from every other suite — assertions on exact
 # counts would depend on test order. Each fixture use seeds and fully
 # deletes its own rows.
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 import pytest
 
@@ -201,3 +201,98 @@ def test_reprint_refusals(jclient):
     # The pace alone stays reprintable on a goal-less pass.
     assert jclient.post("/api/journey/reprint",
                         json={"dailyNewTarget": 8}).status_code == 200
+
+
+# ── 行先 — the settings counter's own two routes ──────────────────
+# POST /api/journey/goal issues a destination onto a pass (the office
+# signs the first contract; this signs every one after it), DELETE
+# hands it back. What separates them from a reprint is the anchor: a
+# reprint keeps goal_set_at, and these two must move it.
+def test_goal_issued_onto_a_passless_ride(jclient):
+    jclient.post("/api/onboarding/complete",
+                 json={"jlptLevel": "N5", "dailyNewTarget": 5})
+    before = jclient.get("/api/journey/status").json()
+    assert before["goalLevel"] is None and before["goalSetAt"] is None
+
+    target = (date.today() + timedelta(days=300)).isoformat()
+    r = jclient.post("/api/journey/goal", json={
+        "goalLevel": "N3", "goalTargetDate": target, "dailyNewTarget": 15,
+    })
+    assert r.status_code == 200
+    body = r.json()
+    assert body["goalLevel"] == "N3"
+    assert body["goalTargetDate"] == target
+    # Boarding is stamped with where the learner stands today, so the
+    # promised volume can never drift when jlpt_level later moves.
+    assert body["goalStartLevel"] == "N5"
+    assert body["goalSetAt"] is not None
+    assert body["plannedPerDay"] == 15
+    assert body["itemsTotal"] == VOLUMES["kana"] + sum(
+        _level_items(l) for l in ("N5", "N4", "N3")
+    )
+
+
+def test_reissuing_a_destination_moves_the_anchor(jclient):
+    _complete(jclient)  # N5 → N3
+    _backdate_goal(30)
+    before = jclient.get("/api/journey/status").json()
+
+    body = jclient.post("/api/journey/goal", json={"goalLevel": "N2"}).json()
+    assert body["goalLevel"] == "N2"
+    # A new destination is a new contract: the window it measures
+    # starts now, not thirty days ago.
+    assert (datetime.fromisoformat(body["goalSetAt"])
+            > datetime.fromisoformat(before["goalSetAt"]))
+    # The pace was not sent, so it stands.
+    assert body["plannedPerDay"] == before["plannedPerDay"]
+    assert body["itemsTotal"] > before["itemsTotal"]
+
+
+def test_goal_refusals(jclient):
+    # No boarding level yet — nothing to issue a ticket against.
+    assert jclient.post("/api/journey/goal",
+                        json={"goalLevel": "N3"}).status_code == 422
+    _complete(jclient)
+    # Not beyond the boarding level (LEVELS is journey-ordered).
+    assert jclient.post("/api/journey/goal",
+                        json={"goalLevel": "N5"}).status_code == 422
+    # Not a level at all, and a date already expired.
+    assert jclient.post("/api/journey/goal",
+                        json={"goalLevel": "N9"}).status_code == 422
+    assert jclient.post("/api/journey/goal",
+                        json={"goalLevel": "N2",
+                              "goalTargetDate": "2020-01-01"}).status_code == 422
+    # None of them wrote: the pass still carries the original contract.
+    body = jclient.get("/api/journey/status").json()
+    assert body["goalLevel"] == "N3"
+
+
+def test_cancelling_keeps_the_ride(jclient):
+    _complete(jclient, dailyDeparture="am")
+    body = jclient.delete("/api/journey/goal").json()
+    assert body["goalLevel"] is None
+    assert body["goalTargetDate"] is None
+    assert body["goalStartLevel"] is None
+    assert body["goalSetAt"] is None
+    # Giving up a destination is not giving up the ride.
+    assert body["plannedPerDay"] == 10
+    assert body["dailyDeparture"] == "am"
+    # And the goal-less pass reports the open line again.
+    assert body["itemsTotal"] == VOLUMES["kana"] + sum(
+        _level_items(l) for l in ("N5", "N4", "N3", "N2", "N1")
+    )
+
+
+def test_reprint_sets_and_clears_the_departure_hour(jclient):
+    # The hour is reprintable on a goal-less pass too — it is a habit,
+    # not a promise.
+    jclient.post("/api/onboarding/complete",
+                 json={"jlptLevel": "N5", "dailyNewTarget": 5})
+    body = jclient.post("/api/journey/reprint", json={"dailyDeparture": "pm"}).json()
+    assert body["dailyDeparture"] == "pm"
+    # An explicit null is 自由 — a VALUE, not "nothing to reprint".
+    body = jclient.post("/api/journey/reprint", json={"dailyDeparture": None}).json()
+    assert body["dailyDeparture"] is None
+    assert body["plannedPerDay"] == 5  # nothing else moved
+    assert jclient.post("/api/journey/reprint",
+                        json={"dailyDeparture": "midnight"}).status_code == 422

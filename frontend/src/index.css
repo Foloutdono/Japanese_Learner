@@ -3843,8 +3843,9 @@
   color: var(--text-secondary);
   margin-right: var(--sp-1);
 }
+.onb-form__chip:disabled { opacity: 0.45; cursor: default; }
 .onb-form__chip:focus-visible,
-.onb-form__chip:hover { border-color: var(--text-secondary); }
+.onb-form__chip:hover:not(:disabled) { border-color: var(--text-secondary); }
 .onb-form__chip[aria-pressed="true"] {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 9%, transparent);
@@ -9155,6 +9156,41 @@ textarea:focus-visible {
   color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
 }
 .stg-done { font-size: var(--fs-sm); font-weight: 600; color: var(--success); }
+
+/* ── 行先 — the destination counter ──
+   Two borrowed instruments and almost no CSS of its own, on purpose:
+   the contract cells are the pass's own (.jour-grid), the board is
+   the office's own (.onb-board and friends), and what the pass says
+   must be the same drawing as what the counter edits.
+
+   .jour-grid inks with the PANEL family, which is only legible on
+   sumi -- the pass's back gives it that ground, so here the counter
+   gives it the same one rather than re-inking the cells for paper
+   (the ambient inks flip with the theme and the panel inks do not;
+   see DESIGN.md and npm run lint:ink). The hairline it wears on the
+   back separated it from a foot line this slip does not print, so it
+   comes off here. */
+.stg-contract {
+  width: 100%;
+  padding: var(--sp-5);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-radius: var(--r-panel);
+}
+/* The open board: the same column rhythm the office's 行先 scene sets
+   around the board, the calling-at strip and the honest line. */
+.stg-goal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  width: 100%;
+}
+.stg-goal__acts {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
 
 /* The destructive rows carry no rail: the red-outlined and red-filled
    buttons already say danger, and the 3px bar this class used to draw
@@ -23777,6 +23813,17 @@ html { scrollbar-gutter: stable; }
 .jour-grid__jp { font-family: var(--font-jp); }
 .jour-grid__u { font-size: var(--fs-caption); font-weight: 600; color: var(--text-on-panel-soft); }
 .jour-grid__v--gold { color: var(--accent2); }
+
+/* The settings counter borrows these cells to show what the pass says
+   before you change it (.stg-contract gives them the same sumi ground
+   the back does). The hairline above them separates the grid from the
+   honest sentence on the pass's back; the counter prints no such
+   sentence, so there is nothing for it to separate. Placed after
+   .jour-grid, per no-descending-specificity. */
+.stg-contract .jour-grid {
+  padding-top: 0;
+  border-top: 0;
+}
 
 /* ── Composition overrides that must follow what they override ──
    The pass's own 44px bottom rhythm, and the flip container's, belong
