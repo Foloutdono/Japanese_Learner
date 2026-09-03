@@ -928,38 +928,58 @@ class SRSEngine:
             for offset, count in rows
         ]
 
-    def get_leaderboard(self, limit: int = 20) -> list[dict[str, Any]]:
-        """Top users by lifetime XP. Returns raw user_id — profile.py
-        joins this against user_profiles for display names."""
+    @staticmethod
+    def _xp_window(days: int | None) -> tuple[str, str, tuple]:
+        """WHERE fragments for review_log and xp_ledger, plus their
+        params, clipping an XP total to the last `days` days; all empty
+        for lifetime. The 番付's 今週 side is the same two sums the
+        lifetime board adds up, just windowed — never a third ledger
+        that could drift from them."""
+        if days is None:
+            return "", "", ()
+        return (
+            " WHERE reviewed_at >= NOW() - (%s || ' days')::interval",
+            " WHERE awarded_at >= NOW() - (%s || ' days')::interval",
+            (days, days),
+        )
+
+    def get_leaderboard(self, limit: int = 20, days: int | None = None) -> list[dict[str, Any]]:
+        """Top users by XP — lifetime, or earned within the last `days`
+        days. Returns raw user_id — profile.py joins this against
+        user_profiles for display names."""
+        log_where, ledger_where, window = self._xp_window(days)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                sql = f"""
                     SELECT user_id, SUM(xp) AS xp FROM (
-                        SELECT split_part(card_id, ':', 1) AS user_id, xp_earned AS xp FROM review_log
+                        SELECT split_part(card_id, ':', 1) AS user_id, xp_earned AS xp FROM review_log{log_where}
                         UNION ALL
-                        SELECT user_id, xp FROM xp_ledger
+                        SELECT user_id, xp FROM xp_ledger{ledger_where}
                     ) all_xp
                     GROUP BY user_id
                     ORDER BY xp DESC
                     LIMIT %s
                 """
-                self._log_sql("get_leaderboard", sql, (limit,))
-                cur.execute(sql, (limit,))
+                params = window + (limit,)
+                self._log_sql("get_leaderboard", sql, params)
+                cur.execute(sql, params)
                 rows = cur.fetchall()
         return [{"user_id": user_id, "xp": int(xp)} for user_id, xp in rows]
 
-    def get_user_rank(self, user_id: str) -> dict[str, Any]:
-        """This user's lifetime XP and 1-based rank among everyone with
-        at least one review — used so the leaderboard can show "you're
-        #47" even when only the top N are listed."""
+    def get_user_rank(self, user_id: str, days: int | None = None) -> dict[str, Any]:
+        """This user's XP and 1-based rank among everyone with at least
+        one review — lifetime, or within the last `days` days — used so
+        the leaderboard can show "you're #47" even when only the top N
+        are listed."""
+        log_where, ledger_where, window = self._xp_window(days)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                sql = f"""
                     WITH totals AS (
                         SELECT user_id, SUM(xp) AS xp FROM (
-                            SELECT split_part(card_id, ':', 1) AS user_id, xp_earned AS xp FROM review_log
+                            SELECT split_part(card_id, ':', 1) AS user_id, xp_earned AS xp FROM review_log{log_where}
                             UNION ALL
-                            SELECT user_id, xp FROM xp_ledger
+                            SELECT user_id, xp FROM xp_ledger{ledger_where}
                         ) all_xp
                         GROUP BY user_id
                     )
@@ -967,8 +987,9 @@ class SRSEngine:
                     FROM totals t1
                     WHERE t1.user_id = %s
                 """
-                self._log_sql("get_user_rank", sql, (user_id,))
-                cur.execute(sql, (user_id,))
+                params = window + (user_id,)
+                self._log_sql("get_user_rank", sql, params)
+                cur.execute(sql, params)
                 row = cur.fetchone()
         if not row:
             return {"xp": 0, "rank": None}
@@ -1070,6 +1091,27 @@ class SRSEngine:
                 cur.execute(sql, (pattern,) + mode_params)
                 row = cur.fetchone()
         return int(row[0]) if row else 0
+
+    def get_retention(self, user_id: str) -> float | None:
+        """Correct answers over all answers, across every (card, mode)
+        the learner has reviewed — the profile's 正答率. None until the
+        first review, so the screen can leave the figure out rather than
+        print 0%. Same servable-mode scope as the mastered count, so the
+        two figures describe the same set of cards."""
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
+                    SELECT COALESCE(SUM(correct_reviews), 0), COALESCE(SUM(total_reviews), 0)
+                    FROM card_modes
+                    WHERE card_id LIKE %s{mode_sql}
+                """
+                self._log_sql("get_retention", sql, (pattern,) + mode_params)
+                cur.execute(sql, (pattern,) + mode_params)
+                row = cur.fetchone()
+        correct, total = (int(row[0]), int(row[1])) if row else (0, 0)
+        return (correct / total) if total else None
 
     def get_best_quality_streak(self, user_id: str, min_quality: int = 4) -> int:
         """Longest run of consecutive reviews (by time, across all cards/

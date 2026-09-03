@@ -21,10 +21,7 @@
   "no-descending-specificity::Expected selector \".platform-card\" to come before selector \".platform-card:nth-child(1)\", at line N": 1,
   "no-descending-specificity::Expected selector \".card\" to come before selector \".analyzer .card\", at line N": 1,
   "no-descending-specificity::Expected selector \".pass__wave span\" to come before selector \".ic-card__wave span:nth-child(1)\", at line N": 1,
-  "no-descending-specificity::Expected selector \".week-day__dow\" to come before selector \".week-day--today .week-day__dow\", at line N": 1,
   "no-descending-specificity::Expected selector \".section-header__count\" to come before selector \".section-header--paired .section-header__count\", at line N": 1,
-  "no-descending-specificity::Expected selector \".banzuke\" to come before selector \".profile-container .banzuke\", at line N": 1,
-  "no-descending-specificity::Expected selector \".profile-pair\" to come before selector \".profile-container .profile-pair\", at line N": 1,
   "no-descending-specificity::Expected selector \".board-clock__colon\" to come before selector \".station-sign .board-clock__colon\", at line N": 1,
   "no-descending-specificity::Expected selector \".wmap-line\" to come before selector \".wmap-line:nth-child(1)\", at line N": 1,
   "no-descending-specificity::Expected selector \".wmap-row\" to come before selector \".wmap-row:hover\", at line N": 1,
@@ -44,11 +41,9 @@
   "no-descending-specificity::Expected selector \".stroke-ref__img\" to come before selector \".stroke-ref__frame--multi .stroke-ref__img\", at line N": 1,
   "no-descending-specificity::Expected selector \".calendar-panel__scale .calendar__day\" to come before selector \".calendar__day:not(.calendar__day--future):hover\", at line N": 1,
   "no-descending-specificity::Expected selector \".composition\" to come before selector \".explorer__totals .composition\", at line N": 1,
-  "no-descending-specificity::Expected selector \".hall-grid\" to come before selector \".profile-container .hall-grid\", at line N": 1,
   "no-descending-specificity::Expected selector \".profile-card__name\" to come before selector \".pass__holder .profile-card__name\", at line N": 1,
   "no-descending-specificity::Expected selector \".profile-card__edit-glyph\" to come before selector \".pass__holder .profile-card__name .profile-card__edit-glyph\", at line N": 1,
   "no-descending-specificity::Expected selector \".profile-card__name--editable:hover .profile-card__edit-glyph\" to come before selector \".pass__holder .profile-card__name:hover .profile-card__edit-glyph\", at line N": 1,
-  "no-descending-specificity::Expected selector \".badges-grid\" to come before selector \".profile-container .badges-grid\", at line N": 1,
   "no-descending-specificity::Expected selector \".dict-entry-card .stage-badge\" to come before selector \".hall-loadout .cos-swatch--seal .stage-badge\", at line N": 2,
   "no-descending-specificity::Expected selector \".dict-detail__stage .stage-badge\" to come before selector \".hall-loadout .cos-swatch--seal .stage-badge\", at line N": 1,
   "no-descending-specificity::Expected selector \".dict-level-badge\" to come before selector \".dict-entry-card .dict-level-badge\", at line N": 1,
@@ -124,5 +119,5 @@
   "shorthand-property-no-redundant-values::Expected \"0 0\" to be \"0\"": 1,
   "shorthand-property-no-redundant-values::Expected \"10px 10px\" to be \"10px\"": 1,
   "shorthand-property-no-redundant-values::Expected \"8px 14px 8px\" to be \"8px 14px\"": 1,
-  "value-keyword-case::Expected \"currentColor\" to be \"currentcolor\"": 6
+  "value-keyword-case::Expected \"currentColor\" to be \"currentcolor\"": 5
 }

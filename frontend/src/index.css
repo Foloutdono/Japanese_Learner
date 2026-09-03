@@ -6369,83 +6369,153 @@ textarea:focus-visible {
   transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
 }
 
-/* ══ 今週 — this week ═══════════════════════════════════════
-   Seven days, oldest to today, each as tall as the reviews done on it.
-   The streak counter gives a number; this gives the shape of the week,
-   which is the part that changes what you do tomorrow. */
-.week {
-  padding: 22px 20px 16px;
-  margin-bottom: 44px;
+/* ══ スタンプ帳 — the stamp book ═══════════════════════════════
+   The streak is a スタンプラリー (DESIGN.md, Motion), and a rally has a
+   sheet: five whole weeks, Monday to Sunday, every day ridden stamped
+   in the daruma's lacquer red, today's pressed a beat after the page
+   arrives. It replaced the week bars and the flame — the bars said how
+   much, this says WHICH days, which is the part that changes what you
+   do tomorrow. The tally beside it (streak, longest, days stamped) is
+   the sheet's own margin note, not a section of its own.
+
+   Paper ground, so ambient inks. The stamp's ink is the lacquer mixed
+   55/45 toward the ambient ink: 4.97:1 dark and 6.48:1 light on the
+   12% wash (the pass's own 70/30 mix, made for sumi, sat at 3.94 here).
+   The sheet's seven columns are capped at 40px and shrink below it, so
+   the same grid fits a phone without a second layout. */
+.sbook {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-6);
+  padding: var(--sp-6);
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--surface-radius);
+  border-radius: var(--r-card);
+  align-items: start;
 }
-.week__days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  align-items: end;
-}
-.week-day {
+.sbook__sheet {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 7px;
+  gap: var(--sp-3);
   min-width: 0;
 }
-.week-day__gauge {
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
-  height: 82px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
-  overflow: hidden;
+.sbook__dows,
+.sbook__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 40px));
+  gap: var(--sp-3);
+  justify-items: center;
 }
-.week-day__fill {
-  width: 100%;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--pass-ink, var(--accent9)) 70%, transparent);
-  transition: height 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
-}
-/* A day with nothing on it still gets a mark, so the row reads as
-   seven days rather than as four bars floating in a box. */
-.week-day--empty .week-day__fill { min-height: 3px; background: color-mix(in srgb, var(--text-primary) 14%, transparent); }
-.week-day--today .week-day__fill { background: var(--pass-ink, var(--accent9)); }
-.week-day--today .week-day__dow {
-  color: color-mix(in srgb, var(--pass-ink, var(--accent9)) 60%, var(--text-primary));
-  border-color: currentColor;
-}
-.week-day__count {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
+.sbook__dow {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
   font-weight: 700;
   color: var(--text-secondary);
+}
+.sbook__stamp {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--r-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 1.5px solid color-mix(in srgb, var(--daruma-aka) 55%, transparent);
+  color: color-mix(in srgb, var(--daruma-aka) 55%, var(--text-primary));
+  background: color-mix(in srgb, var(--daruma-aka) 12%, transparent);
+  transform: rotate(var(--stamp-tilt, 0deg));
+}
+.sbook__stamp--missed {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  background: transparent;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+.sbook__stamp--future {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  opacity: 0.4;
+}
+.sbook__stamp--today {
+  border-width: 2px;
+  border-color: var(--daruma-aka);
+  background: color-mix(in srgb, var(--daruma-aka) 22%, transparent);
+  animation: stamp-press 0.45s ease-out backwards;
+  animation-delay: 0.4s;
+}
+.sbook__side {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  padding-left: var(--sp-5);
+  border-left: 1px solid var(--surface-line);
+}
+.sbook__month {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.sbook__month-jp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  letter-spacing: var(--tr-name);
+}
+.sbook__figs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* A bare figure — large numeral, small unit inline, caps label
+   beneath — off any lattice. The lattice's own cell is .record. */
+.fig {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.fig__v {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-heading);
+  line-height: 1;
+  color: var(--text-primary);
   font-variant-numeric: tabular-nums;
 }
-.week-day__dow {
-  font-family: var(--font-jp);
-  font-size: 0.74rem;
-  font-weight: 700;
+.fig__u {
+  font-size: var(--fs-sm);
+  font-weight: 600;
   color: var(--text-secondary);
-  border-bottom: 2px solid transparent;
-  padding-bottom: 1px;
 }
-.week__empty {
-  margin: 14px 0 4px;
-  text-align: center;
-  font-size: 0.82rem;
+.fig__u[lang="ja"] { font-family: var(--font-jp); font-weight: 700; }
+.fig__l {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
   color: var(--text-secondary);
 }
 
-/* ══ 記録 — personal bests ══════════════════════════════════
-   Figures, not choices, so this takes the flush hairline grid the
-   stats screen uses rather than separated cards. */
+/* ══ The three figures ══════════════════════════════════════
+   Reviews, retention, best perfect run — the flush hairline grid the
+   stats screen uses. Three columns, always: at phone width the cells
+   shrink rather than wrap one figure onto a row of its own. */
 .records {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
-  margin-bottom: 44px;
   background: var(--surface-line);
   border: 1px solid var(--surface-line);
   border-radius: var(--surface-radius);
@@ -6469,7 +6539,6 @@ textarea:focus-visible {
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
 }
-.record__value svg { color: var(--accent); }
 .record__label {
   font-family: var(--font-display);
   font-size: 0.58rem;
@@ -6490,11 +6559,13 @@ textarea:focus-visible {
    bars further down) and is declared later at equal specificity,
    so it silently won every shared property.
    The level ring says how much you have turned up; this says how much
-   Japanese you hold. Every number here already rode along on the
-   profile response — only the label was being drawn. */
+   Japanese you hold. A flex column, so that when the card is stretched
+   to the stamp book's height beside it the slack opens between head,
+   line and foot instead of pooling under the foot. */
 .dan {
+  display: flex;
+  flex-direction: column;
   padding: 22px 22px 18px;
-  margin-bottom: 44px;
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--surface-radius);
@@ -6531,19 +6602,58 @@ textarea:focus-visible {
   font-size: 1.2rem;
   font-variant-numeric: tabular-nums;
 }
-.dan__track {
-  height: 8px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
-  overflow: hidden;
+/* The ladder drawn as a line with stops — the app's own idiom for
+   distance (the wall map, the ghost track) in place of the bar it was:
+   six ranks around where you stand, the ones behind you filled, 初段
+   and above ringed twice the way a dan seal is, your train between the
+   stop you hold and the next. Positional geometry is numeric on
+   purpose, like the wall map's and the ghost track's; the type reads
+   the tokens. The auto margins are what take the column's slack. */
+.dan-line { position: relative; height: 52px; margin: auto 0; }
+.dan-line__in { position: absolute; inset: 0 14px; }
+.dan-line__rail,
+.dan-line__done {
+  position: absolute;
+  top: 9px;
+  left: 0;
+  height: 3px;
+  border-radius: var(--r-pill);
 }
-.dan__fill {
-  height: 100%;
-  border-radius: 4px;
-  background: linear-gradient(90deg,
-    color-mix(in srgb, var(--accent2) 55%, transparent),
-    var(--accent2));
-  transition: width 0.45s cubic-bezier(0.22, 0.68, 0.32, 1);
+.dan-line__rail { width: 100%; background: color-mix(in srgb, var(--accent2) 30%, transparent); }
+.dan-line__done { background: var(--accent2); transition: width 0.45s cubic-bezier(0.22, 0.68, 0.32, 1); }
+.dan-line__stop {
+  position: absolute;
+  top: 5px;
+  width: 11px;
+  height: 11px;
+  border-radius: var(--r-pill);
+  transform: translateX(-50%);
+  border: 2px solid color-mix(in srgb, var(--accent2) 55%, var(--surface));
+  background: var(--surface);
+}
+.dan-line__stop--past { background: var(--accent2); border-color: var(--accent2); }
+.dan-line__stop--dan { outline: 1px solid color-mix(in srgb, var(--accent2) 60%, transparent); outline-offset: 2px; }
+.dan-line__label {
+  position: absolute;
+  top: 22px;
+  transform: translateX(-50%);
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.dan-line__label--now { color: var(--text-primary); }
+.dan-line__train {
+  position: absolute;
+  top: 1px;
+  width: 20px;
+  height: 13px;
+  border-radius: var(--r-plate);
+  transform: translateX(-50%);
+  background: var(--accent2);
+  outline: 2px solid var(--surface);
+  transition: left 0.45s cubic-bezier(0.22, 0.68, 0.32, 1);
 }
 .dan__foot {
   display: flex;
@@ -6579,64 +6689,66 @@ textarea:focus-visible {
   .pass__body { gap: 16px; }
   .pass__avatar-wrap { width: 64px; height: 64px; }
   .pass__avatar { font-size: 1.4rem; inset: 8px; }
-  .week { padding: 18px 12px 12px; }
-  .week__days { gap: 5px; }
-  .week-day__gauge { height: 62px; }
-  .week-day__count { font-size: 0.62rem; }
+  /* A long username on a 390px card: a rung down, and allowed to break. */
+  .pass__holder .profile-card__name { font-size: var(--fs-title); min-width: 0; overflow-wrap: anywhere; }
+  .sbook { grid-template-columns: 1fr; padding: var(--sp-5); }
+  .sbook__dows,
+  .sbook__grid { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--sp-2); }
+  /* The margin note moves under the sheet: the month on its own line,
+     the three figures in a row beneath it. */
+  .sbook__side {
+    gap: var(--sp-4);
+    padding-left: 0;
+    padding-top: var(--sp-4);
+    border-left: 0;
+    border-top: 1px solid var(--surface-line);
+  }
+  .sbook__figs { flex-flow: row wrap; justify-content: space-between; gap: var(--sp-4) var(--sp-5); }
+  .fig__v { font-size: var(--fs-title); }
   .record { padding: 16px 14px; }
-  .record__value { font-size: 1.4rem; }
+  .record__value { font-size: 1.4rem; flex-wrap: wrap; }
 }
 
 
 /* ══ The profile's composition ══════════════════════════════
-   Blocks, not a stack. A section owns its heading and its content as
-   one unit, so the spacing between sections is set once here instead
-   of by whatever margin each component happened to carry.
+   One column of inserts, no section headings: the pass names the
+   screen, and every block under it is an object that names itself — a
+   stamp sheet, a rank plaque, a ledger, a row of tickets, three
+   doorways, a ranking board (DESIGN.md, "Say less"). The rhythm between
+   blocks is set once here; the blocks carry no margins of their own
+   (the pass's and the flip's are zeroed at the end of the sheet, after
+   the rules they override).
 
-   The pairs are deliberate: records read against mastery (how much you
-   have shown up, against how much you hold), and the badge grid reads
-   against the ranking board (what you are chasing alone, against what
-   you are chasing with everyone else). Each half means more beside its
-   opposite than it did alone at full width. */
-/* A column, so the content below the heading can be told to fill the
-   rest of the block — two cards side by side that end at different
-   heights read as two loose objects rather than as a pair. */
-.profile-block {
+   Row two pairs the stamp book with the rank plaque and the three
+   figures — how often you turn up, against how much you hold. Under
+   1000px the pair stacks: a seven-column sheet on the left and a
+   six-stop line on the right each need their own room, and a
+   tablet-width row squeezes both. */
+.profile-blocks {
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  gap: var(--sp-9);
 }
-.profile-block > .section-header { margin-top: 0; }
-.profile-pair .profile-block > :last-child { flex: 1; }
-
-.profile-pair {
+.profile-row2 {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 40px;
+  gap: var(--sp-6);
+  align-items: stretch;
 }
-/* .profile-pair: not 768px. Each half holds a .records grid that is
-   itself 2 columns (see .profile-pair .records below) — going to
-   2-up at the tablet breakpoint would nest a 4-column layout into a
-   tablet-width row and squeeze every figure. 1000px is the point
-   where each half still has room for its own 2-column grid. */
 @media (min-width: 1000px) {
-  .profile-pair { grid-template-columns: 1fr 1fr; gap: 40px 44px; }
+  .profile-row2 { grid-template-columns: 1fr 1fr; }
 }
-
-/* One rhythm for the whole column, replacing six components' worth of
-   individual bottom margins. */
-.profile-container .profile-block,
-.profile-container .profile-pair { margin-bottom: 52px; }
-.profile-container .week,
-.profile-container .records,
-.profile-container .dan,
-.profile-container .hall-grid,
-.profile-container .badges-grid,
-.profile-container .banzuke { margin-bottom: 0; }
-
-/* Half-width now, so the four figures fold to two columns rather than
-   squeezing four into 480px. */
-.profile-pair .records { grid-template-columns: repeat(2, 1fr); }
+.profile-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  min-width: 0;
+}
+/* The plaque takes the column's slack, so the pair ends level. A card
+   that cannot fill its height with content is the density contract's
+   named failure — here the slack opens the line's own spacing, not
+   padding (see .dan and .dan-line). */
+.profile-col > .dan { flex: 1; }
 
 /* ══ 番付 — the ranking board ═══════════════════════════════ */
 .banzuke {
@@ -6658,43 +6770,74 @@ textarea:focus-visible {
   text-align: center;
 }
 
-/* ── A badge says what it is waiting for ─────────────────── */
-.badge-tile__progress {
+/* The board's head: 番付 and its caption, with the 今週/通算 toggle
+   pinned right. The toggle is the app's segmented pill — segments
+   divided by hairlines rather than gaps, the selected one washed 14%
+   gold — the rating bar's own construction at chip size. */
+.bz__head {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 5px;
-  width: 100%;
-  margin-top: 2px;
+  gap: var(--sp-5);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
 }
-.badge-tile__track {
-  width: 100%;
-  height: 3px;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+.bz__mark { display: flex; align-items: baseline; gap: var(--sp-3); }
+.bz__jp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  letter-spacing: var(--tr-name);
+}
+.seg {
+  margin-left: auto;
+  display: inline-flex;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
   overflow: hidden;
 }
-.badge-tile__fill {
-  display: block;
-  height: 100%;
-  border-radius: 2px;
-  background: var(--accent2);
-  transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
-}
-.badge-tile__count {
-  font-family: var(--font-display);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+.seg__opt {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-4);
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--surface-line);
   color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.seg__opt:first-child { border-left: 0; }
+.seg__opt:hover,
+.seg__opt:focus-visible { color: var(--text-primary); filter: none; }
+.seg__opt-jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); }
+.seg__opt--on { background: color-mix(in srgb, var(--accent2) 14%, transparent); color: var(--text-primary); }
+
+/* 東 and 西 — the two sides of a real 番付, the top half of the list on
+   the east. It is what lets the board take the column's full width
+   honestly instead of stretching six short rows across it. */
+.bz__sides { display: grid; grid-template-columns: 1fr 1fr; }
+.bz__side { min-width: 0; }
+.bz__side + .bz__side { border-left: 1px solid var(--surface-line); }
+.bz__side-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-5) var(--sp-2);
+}
+.bz__side-jp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
 }
 
 @media (max-width: 560px) {
-  .profile-container .profile-block,
-  .profile-container .profile-pair { margin-bottom: 40px; }
-  .profile-pair { gap: 40px; }
-  .profile-pair .records { grid-template-columns: repeat(2, 1fr); }
+  .bz__head { flex-wrap: wrap; gap: var(--sp-3); }
+  .seg { margin-left: 0; }
+  .bz__sides { grid-template-columns: 1fr; }
+  .bz__side + .bz__side { border-left: 0; border-top: 1px solid var(--surface-line); }
 }
 
 
@@ -13334,11 +13477,13 @@ textarea:focus-visible {
    simply lands in the row without a media query. */
 .hall-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  /* Three doorways, three columns. Not auto-fit: between 560 and
+     1000px that laid two beside a bare slab. The narrower tiers are
+     at the end of the sheet, with the rest of the pass-holder round. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);
-  margin-bottom: 48px;
 }
 
 .hall-card {
@@ -13556,9 +13701,13 @@ textarea:focus-visible {
    takes the card's own faint white instead. Placed after the base
    rule it overrides, not beside .pass, per no-descending-specificity. */
 .pass .profile-card__ring-track { stroke: rgba(255, 255, 255, 0.14); }
+/* Gold, like the balance bar under it and the 段位 stamp beside it:
+   the ring was 瑠璃 --accent9, a line pigment (翻訳's) on an object
+   about the learner, which DESIGN.md's colour families forbid — the
+   same reasoning that already moved the top bar's ring off it. */
 .profile-card__ring-fill {
   fill: none;
-  stroke: var(--accent9);
+  stroke: var(--accent2);
   stroke-width: 4;
   stroke-linecap: round;
 }
@@ -13704,70 +13853,123 @@ textarea:focus-visible {
   transition: width 0.4s ease;
 }
 
-/* Badges — a shoji-lattice grid like Stats' card grids, but each
-   tile is a medallion rather than a data card: unlocked badges get
-   a solid gold fill (the one "trophy" moment on the screen),
-   locked ones stay a dashed, muted outline. */
-.badges-grid {
-  display: grid;
-  /* auto-*fit*, not auto-fill: with fill, a wide screen lays out a
-     dozen 100px tracks and the six badges leave two thirds of the
-     lattice as one bare grey slab. Fit collapses the empty tracks so
-     the medallions spread across the width they actually have — and
-     keeps working when there are nine badges instead of six. */
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  /* Separated tiles, not the flush 1px-seam lattice the stats panels
-     use. That device draws its seams by letting a background show
-     through the gaps, which means an incomplete last row shows that
-     background as bare slabs — six badges in a four-column grid left
-     two grey blocks sitting there. A collection is partly empty by
-     definition, so it cannot use a device that only looks right when
-     every row is full. */
-  gap: 10px;
-  margin-bottom: 48px;
-}
+/* ══ 記念乗車券 — badges as punched tickets ═══════════════════
+   A badge was a gold medallion in a tile grid — the one object on the
+   profile that could have come from any app. A station hands out
+   commemorative tickets: a stub with the glyph, a body with the
+   occasion, a punch hole once it has been used. A locked one carries
+   its progress where the hole would be; tap any to turn it over and
+   read what it is for.
 
-.badge-tile {
-  border: 1px solid var(--surface-line);
-  border-radius: var(--surface-radius);
-  background: var(--surface);
-  padding: 22px 12px;
+   Fluid, no breakpoint: the tally leads the row and the tickets fill
+   140px columns — seven across on the profile column, two on a phone —
+   so a partly-empty collection reads as a row of things with a count,
+   never as a lattice with holes in it (the medallion grid's failure).
+   The stub's gold is the medallion's, mixed 60/40 toward the ambient
+   ink: 6.04:1 dark and 4.43:1 light for a 20px/700 glyph. */
+.tix {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--sp-4);
+  align-items: stretch;
+}
+.tix__tally {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  text-align: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-5) 0 var(--sp-1);
 }
-
-.badge-tile__glyph {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
+.tkt {
+  position: relative;
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+  min-height: 100px;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.tkt:hover,
+.tkt:focus-visible { border-color: var(--accent2); transform: translateY(-1px); filter: none; }
+.tkt__stub {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-right: 1px dashed var(--surface-line);
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: 1.4rem;
-  background: var(--accent2);
-  color: var(--text-on-fill);
+  font-size: var(--fs-title);
+  background: color-mix(in srgb, var(--accent2) 16%, transparent);
+  color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
 }
-.badge-tile--locked .badge-tile__glyph {
-  background: transparent;
-  border: 1px dashed var(--border);
-  color: var(--text-secondary);
-  opacity: 0.6;
+.tkt--locked .tkt__stub { background: transparent; color: var(--text-secondary); opacity: 0.7; }
+.tkt__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-4) var(--sp-4) var(--sp-3);
+  min-width: 0;
 }
-
-.badge-tile__label {
+.tkt__name {
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--tr-term);
   text-transform: uppercase;
+  line-height: 1.35;
   color: var(--text-primary);
 }
-.badge-tile--locked .badge-tile__label { color: var(--text-secondary); opacity: 0.7; }
+.tkt--locked .tkt__name { color: var(--text-secondary); }
+/* The punch: a hole showing the wall behind the ticket, hairline-rimmed. */
+.tkt__punch {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  box-shadow: inset 0 0 0 1px var(--surface-line);
+}
+.tkt__prog { display: flex; flex-direction: column; gap: var(--sp-2); }
+.tkt__track {
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+  overflow: hidden;
+}
+.tkt__fill {
+  display: block;
+  height: 100%;
+  background: var(--accent2);
+  transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+.tkt__count {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.tkt__req {
+  display: none;
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+.tkt--open { border-color: var(--accent2); }
+.tkt--open .tkt__name,
+.tkt--open .tkt__prog { display: none; }
+.tkt--open .tkt__req { display: block; }
 
 /* Leaderboard */
 .leaderboard-card { padding: 0; }
@@ -19337,7 +19539,7 @@ button.daruma-card:hover { background: var(--bg-card-hover); }
    instead — that one is free to be dashed, dotted or fretted. */
 .profile-card__ring-fill,
 .cos-ring__fill {
-  stroke: var(--ring-color, var(--accent9));
+  stroke: var(--ring-color, var(--accent2));
   stroke-linecap: var(--ring-cap, round);
 }
 .profile-card__ring-fill { stroke-width: var(--ring-w, 4); }
@@ -23221,4 +23423,305 @@ html { scrollbar-gutter: stable; }
   font-size: var(--fs-caption);
   /* On the pass's sumi, the state ink — raw enji sits at 2.6:1. */
   color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel));
+}
+
+/* ══════════════════════════════════════════════════════════════
+   定期入れ — the profile as a pass holder (the 2026-09 profile round).
+   Everything under the pass is an insert: the 今夜 list, the stamp
+   book (.sbook, up with the pass family), the rank line (.dan-line),
+   the ride ledger, the tickets (.tix/.tkt, where the badge grid was),
+   the halls, and the 番付 with its two sides (.bz, with the board).
+   This block holds the pieces that had no family to join — the gear on
+   the pass, the 今夜 rows, the ledger, the back face's contract grid —
+   and the composition's two overrides, which must sit after the rules
+   they override. Every ground here is paper except the pass and its
+   back, which are sumi and take the panel inks; Guard 5 holds both.
+   ══════════════════════════════════════════════════════════════ */
+
+/* A shared caption: the Latin half of a pair, at caption size. */
+.pf-cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ── The gear on the pass ──────────────────────────────────────
+   設定 belongs to the card (config/identity.js), so the card carries
+   the door to it: a hairline square beside the issuer's mark, on the
+   pass's own sumi. Profile only — the hall's pass is itself a button. */
+.pass__head-right {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.pass__gear {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--r-plate);
+  color: var(--text-on-panel-soft);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.pass__gear:hover,
+.pass__gear:focus-visible { border-color: rgba(255, 255, 255, 0.4); color: var(--text-on-panel); filter: none; }
+
+/* ── 今夜 — within reach tonight ───────────────────────────────
+   Three rows at most, each a doorway: a rail in the object's own
+   pigment on hover (the daruma's lacquer, the badge's gold, the
+   board's seal red — each the colour that object already wears), the
+   figure pinned right, a ▶ that slides in from -4px. */
+.tonight {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  overflow: hidden;
+}
+.tonight__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  margin: 0;
+  padding: var(--sp-5) var(--sp-6) var(--sp-4);
+}
+.tonight__jp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  letter-spacing: var(--tr-name);
+}
+.todo {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto 18px;
+  align-items: center;
+  gap: var(--sp-5);
+  width: 100%;
+  padding: var(--sp-4) var(--sp-6);
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--surface-line);
+  border-radius: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.todo:hover,
+.todo:focus-visible { background: var(--overlay-hover); box-shadow: inset 3px 0 0 var(--todo-color, var(--accent)); filter: none; }
+.todo__mark { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+.todo__glyph {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  border: 1px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  color: var(--text-secondary);
+}
+/* The rank you would take — the board's own disc, sumi with the panel
+   ink, exactly as .leaderboard-row__rank draws it. */
+.todo__arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: var(--bg-panel);
+  color: var(--text-on-panel-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+}
+.todo__what { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.todo__line { font-size: var(--fs-body); font-weight: 600; color: var(--text-primary); }
+.todo__of {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.todo__fig {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.todo__fig-of { font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); }
+.todo__chev {
+  color: var(--text-secondary);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.todo:hover .todo__chev,
+.todo:focus-visible .todo__chev { opacity: 0.8; transform: translateX(0); }
+
+/* ── 乗車記録 — the ride ledger ────────────────────────────────
+   A hairline lattice of the four SRS lines (DESIGN.md: a grid of bare
+   figures takes the lattice). 220px cells: four across on the profile
+   column, two on a tablet, one on a phone. The roundel and the rail
+   wear the line's pigment; the figures do not. The roundel's ink is
+   the pigment mixed 60/40 toward the ambient ink — 5.3:1 dark and
+   7.8:1 light for 藍, the coolest of the four. Hover tints the roundel
+   rather than filling it: a filled 松葉 would not carry either ink at
+   10px. */
+.pf-ledger {
+  display: grid;
+  /* Four, two or one — never three: a lattice with a short last row
+     shows its background as a bare slab (see the breakpoints below). */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--surface-line);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.pf-line {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+  padding: var(--sp-5) var(--sp-5) var(--sp-4);
+  background: var(--surface);
+  border: 0;
+  border-radius: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.pf-line:hover,
+.pf-line:focus-visible { background: var(--bg-card-hover); filter: none; }
+.pf-line__id { display: flex; align-items: center; gap: var(--sp-3); }
+.pf-line__roundel {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--line-color, var(--accent2));
+  color: color-mix(in srgb, var(--line-color, var(--accent2)) 60%, var(--text-primary));
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  transition: background 0.15s ease;
+}
+.pf-line:hover .pf-line__roundel,
+.pf-line:focus-visible .pf-line__roundel { background: color-mix(in srgb, var(--line-color, var(--accent2)) 18%, transparent); }
+.pf-line__names { display: flex; flex-direction: column; min-width: 0; }
+.pf-line__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-body); line-height: 1.2; }
+.pf-line__sen { font-size: var(--fs-caption); color: var(--text-secondary); margin-left: var(--sp-1); }
+.pf-line__fig {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pf-line__of { font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); }
+.pf-line__track {
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--line-color, var(--accent2)) 30%, transparent);
+  overflow: hidden;
+}
+.pf-line__done { display: block; height: 100%; background: var(--line-color, var(--accent2)); transition: width 0.6s ease; }
+
+/* ── The contract, printed on the back ─────────────────────────
+   乗車駅 · 行先 · 種別 · 発車時刻 · 有効期限 · 発行日 — the cells of the
+   application form (.onb-pass__grid), reprinted on the reverse of the
+   pass they became. Sumi ground, panel inks; the validity date keeps
+   the gold it wears on the front. */
+.jour-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4) var(--sp-6);
+  padding-top: var(--sp-4);
+  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
+}
+.jour-grid__cell { display: flex; flex-direction: column; gap: var(--sp-1); }
+.jour-grid__k { font-family: var(--font-jp); font-size: var(--fs-caption-xs); color: var(--text-on-panel-soft); }
+.jour-grid__v { font-weight: 700; font-size: var(--fs-body); font-variant-numeric: tabular-nums; color: var(--text-on-panel); }
+.jour-grid__jp { font-family: var(--font-jp); }
+.jour-grid__u { font-size: var(--fs-caption); font-weight: 600; color: var(--text-on-panel-soft); }
+.jour-grid__v--gold { color: var(--accent2); }
+
+/* ── Composition overrides that must follow what they override ──
+   The pass's own 44px bottom rhythm, and the flip container's, belong
+   to the profile column's gap now. Placed after .pass and .jour-flip
+   in the sheet, and qualified by the container so it does not sit
+   below .hall-pass:hover .pass, per no-descending-specificity. */
+.profile-container .profile-blocks > .pass,
+.profile-container .profile-blocks > .jour-flip { margin-bottom: 0; }
+/* The two faces share one grid cell, so the container is as tall as
+   the taller face — the back, once the contract grid and the honest
+   moves are on it. The front grows to match: the holder's row takes
+   the slack, the balance and the footer keep the card's foot. Without
+   this the pass sat in its cell with a bare strip of wall under it. */
+.profile-container .jour-flip__face--front { display: flex; flex-direction: column; }
+.profile-container .jour-flip__face--front .pass { flex: 1; }
+.profile-container .jour-flip__face--front .pass__body { flex: 1; }
+
+@media (max-width: 999px) {
+  /* Under the desktop tier the pass is stacked above everything and
+     its back — track, sentence, contract, the honest moves — runs far
+     taller than its front. Sharing one grid cell would stretch the
+     front around a void under its holder, so here the hidden face
+     leaves the flow instead and the card is as tall as the face you
+     can see. The page moves on turn; a phone forgives that, and never
+     forgives 300px of bare card. */
+  .jour-flip__inner { position: relative; }
+  .jour-flip--flipped .jour-flip__face--front,
+  .jour-flip:not(.jour-flip--flipped) .jour-flip__face--back { position: absolute; inset: 0; }
+  .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Two doorways side by side and the statistics across the foot,
+     whose three figures earn the width. */
+  .hall-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hall-grid > .hall-card:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) {
+  .tonight__head { padding: var(--sp-4) var(--sp-5) var(--sp-3); }
+  .todo { grid-template-columns: 40px minmax(0, 1fr) auto; gap: var(--sp-3); padding: var(--sp-4) var(--sp-5); }
+  .todo__chev { display: none; }
+  .pf-line { padding: var(--sp-4); }
+  .hall-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sbook__stamp--today { animation: none; }
+  .dan-line__done,
+  .dan-line__train,
+  .tkt,
+  .todo,
+  .todo__chev,
+  .pf-line__done,
+  .pass__gear { transition: none; }
 }
