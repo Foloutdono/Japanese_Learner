@@ -17,10 +17,10 @@ import RatingBar from './RatingBar'
 // and every learner's muscle memory for the digit keys now submits the
 // opposite rating with nothing to tell them it happened.
 //
-// Both bars are pinned. The four-button bar is the six-button one
-// without its two extremes (domain/ratingScales.js), and the contract
-// that has to survive that is "1 is the best answer" — which is the one
-// digit anybody has muscle memory for.
+// All three bars are pinned. Each shorter one is a longer one with
+// buttons left off (domain/ratingScales.js), and the contract that has
+// to survive that is "1 is the best answer" — which is the one digit
+// anybody has muscle memory for.
 //
 // Silent audio playback. RatingBar plays a chime on every rating; keep
 // the suite quiet and free of autoplay warnings. Spread the real module
@@ -135,5 +135,35 @@ describe('RatingBar keyboard contract — four buttons', () => {
     expect(four.container.querySelector('.rating-bar__buttons--4')).not.toBeNull()
     const six = await renderBar({ active: true, onRate: vi.fn(), scale: 'full' })
     expect(six.container.querySelector('.rating-bar__buttons--6')).not.toBeNull()
+  })
+})
+
+describe('RatingBar keyboard contract — two buttons', () => {
+  // Wrong / Correct, i.e. qualities 1 and 4 — the same two the other
+  // bars carry under the same words, with the judgements between them
+  // left off.
+  it('"1" rates 4 (Correct) and "2" rates 1 (Wrong)', async () => {
+    const onRate = vi.fn()
+    await renderBar({ active: true, onRate, scale: 'binary' })
+    press('1')
+    expect(onRate).toHaveBeenCalledWith(4)
+    press('2')
+    expect(onRate).toHaveBeenLastCalledWith(1)
+  })
+
+  it('draws exactly the two, and nothing between them', async () => {
+    const screen = await renderBar({ active: true, onRate: vi.fn(), scale: 'binary' })
+    expect(screen.container.querySelectorAll('.rating-bar__btn')).toHaveLength(2)
+    for (const q of [0, 2, 3, 5]) {
+      expect(screen.container.querySelector(`.rating-bar__btn--q${q}`)).toBeNull()
+    }
+    expect(screen.container.querySelector('.rating-bar__buttons--2')).not.toBeNull()
+  })
+
+  it('leaves the digits past its end inert', async () => {
+    const onRate = vi.fn()
+    await renderBar({ active: true, onRate, scale: 'binary' })
+    for (const key of ['3', '4', '5', '6']) press(key)
+    expect(onRate).not.toHaveBeenCalled()
   })
 })

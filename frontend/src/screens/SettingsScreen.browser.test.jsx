@@ -55,6 +55,10 @@ vi.mock('../lib/audio', async (importOriginal) => ({
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: SettingsScreen } = await import('./SettingsScreen')
+// The profile summary is a module-level cache with a 30s TTL, so a test
+// that changes what /api/profile answers has to force the refetch — the
+// mount alone would read the previous test's cached profile.
+const { refreshSummary } = await import('../stores/profileSummary')
 
 const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 
@@ -186,25 +190,43 @@ describe('SettingsScreen — the counter', () => {
     root.querySelector('[data-id="learning"]').click()
     await settle(30)
 
+    // 二段 / 四段 / 六段, shortest first, with the served one marked.
     const chips = [...root.querySelectorAll('.stg-scale')]
-    expect(chips).toHaveLength(2)
-    expect(chips[0].getAttribute('aria-checked')).toBe('true')   // 四段, the default
-    expect(chips[1].getAttribute('aria-checked')).toBe('false')
+    expect(chips).toHaveLength(3)
+    expect(chips.map(c => c.getAttribute('aria-checked')))
+      .toEqual(['false', 'true', 'false'])
 
-    // The four words of the served scale, worst-first, exactly as the
-    // bar draws them. In French, which is what LangProvider defaults to
-    // — spelled out rather than rebuilt from the locale table, because
-    // a caption assembled from the same source it is being checked
+    // The words of the served scale, worst-first, exactly as the bar
+    // draws them. In French, which is what LangProvider defaults to —
+    // spelled out rather than rebuilt from the locale table, because a
+    // caption assembled from the same source it is being checked
     // against would pass however wrong the assembly was.
     expect(root.querySelector('.stg-scale__words').textContent)
       .toBe('Raté · Presque · Difficile · Correct')
 
-    chips[1].click()
+    chips[2].click()
     await settle(30)
     const call = apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')
     expect(call, 'picking a bar must PATCH the learning profile').toBeTruthy()
     expect(call[2].method).toBe('PATCH')
     expect(JSON.parse(call[2].body)).toEqual({ ratingScale: 'full' })
+  })
+
+  it('names the two-button bar by its own two words', async () => {
+    // The caption is the only place the bars are spelled out, so it has
+    // to follow the choice rather than describe the default.
+    apiFetch.mockResolvedValue({
+      ok: true, status: 200, json: async () => ({ ...PROFILE, ratingScale: 'binary' }),
+    })
+    await refreshSummary()
+    const screen = await mount()
+    await settle()
+    const root = screen.container
+    root.querySelector('[data-id="learning"]').click()
+    await settle(30)
+
+    expect(root.querySelectorAll('.stg-scale')[0].getAttribute('aria-checked')).toBe('true')
+    expect(root.querySelector('.stg-scale__words').textContent).toBe('Raté · Correct')
   })
 
   it('reset fires only after the second, explicit press', async () => {

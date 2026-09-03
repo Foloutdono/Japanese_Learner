@@ -16,9 +16,12 @@ import { GoalCounter } from '../components/journey/GoalCounter'
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
 // 段 is the counter for a grade or rank — 四段 is a four-grade scale,
-// which is what the short rating bar is. Short-first: it is the
-// default, and the six-button bar is what you opt back into.
+// which is what the default rating bar is. Shortest first, so the row
+// reads as one range from the fewest judgements to the most; 四段 is
+// the middle of it because it is the default, not because it is a
+// compromise.
 const RATING_SCALE_CHIPS = [
+  { id: 'binary', jp: '二段' },
   { id: 'simple', jp: '四段' },
   { id: 'full',   jp: '六段' },
 ]

@@ -94,8 +94,9 @@ CREATE TABLE user_profiles (
     goal_set_at TIMESTAMPTZ,
     daily_departure TEXT,
     -- Which rating bar the learner grades with: 'simple' (wrong /
-    -- almost / difficult / correct) or 'full' (those four plus blackout
-    -- and perfect). NULL = never chosen, which reads as the default.
+    -- almost / difficult / correct — the default), 'binary' (just wrong
+    -- and correct) or 'full' (the four plus blackout and perfect).
+    -- NULL = never chosen, which reads as the default.
     -- Not a change of scale — both bars send the same canonical 0..5
     -- quality, so switching leaves the learner's own history meaning
     -- exactly what it meant. See routes/profile.py's RATING_SCALES and

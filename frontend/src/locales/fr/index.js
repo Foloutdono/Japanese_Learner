@@ -1788,13 +1788,13 @@ const onboarding = {
   settingsPace: 'Rythme quotidien',
   settingsRedoDesc: 'Recalibrez votre niveau quand vous avez progressé.',
   // ── Quelle barre de notation ────────────────────────────────
-  // Quatre boutons ou six. Les deux envoient la même note au
-  // planificateur — la barre courte est la longue sans ses deux
-  // extrêmes — donc ceci change ce qui vous est proposé, jamais le
-  // sens de vos réponses.
+  // Deux boutons, quatre ou six. Les trois envoient la même note au
+  // planificateur — chaque barre plus courte est une plus longue sans
+  // certains boutons — donc ceci change ce qui vous est proposé,
+  // jamais le sens de vos réponses.
   settingsRatingScale: 'Boutons de notation',
-  settingsRatingScaleHint: 'Les deux notent de la même façon. La barre courte retire simplement les deux que vous n’utilisez jamais.',
-  settingsRatingScaleOption: { simple: '4 niveaux', full: '6 niveaux' },
+  settingsRatingScaleHint: 'Toutes notent de la même façon. Une barre plus courte retire simplement les boutons que vous n’utilisez jamais.',
+  settingsRatingScaleOption: { binary: '2 niveaux', simple: '4 niveaux', full: '6 niveaux' },
   settingsRedoApply: (level) => `Adopter ${level} ?`,
   levelCurrentMark: 'Vous êtes ici',
 

@@ -67,9 +67,10 @@ def _init_db() -> None:
             # 'pm', NULL = flexible), validated in code like jlpt_level.
             #
             # rating_scale is which rating bar the learner grades with —
-            # 'simple' (the four buttons they actually use) or 'full'
-            # (all six). NULL means "not chosen", which reads as the
-            # default; see RATING_SCALES below and
+            # 'simple' (the four buttons they actually use), 'binary'
+            # (just wrong and correct) or 'full' (all six). NULL means
+            # "not chosen", which reads as the default; see
+            # RATING_SCALES below and
             # frontend/src/domain/ratingScales.js, which owns the
             # buttons themselves. Deliberately NOT a change of scale:
             # both bars send the same 0..5 quality, so a learner can
@@ -196,7 +197,7 @@ class UsernamePayload(BaseModel):
 # choice, because both bars send the same canonical 0..5 quality (see
 # srs/scheduler.py's PASS/FAIL tables) and nothing downstream needs to
 # know which one was on screen.
-RATING_SCALES = ("simple", "full")
+RATING_SCALES = ("binary", "simple", "full")
 DEFAULT_RATING_SCALE = "simple"
 
 
