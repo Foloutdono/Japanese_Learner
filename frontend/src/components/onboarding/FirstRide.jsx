@@ -42,7 +42,7 @@ export default function FirstRide({ t, lang, volumes, rated, onRated, onNext, on
           <Flashcard
             t={t}
             resetKey="onb-first-ride"
-            front={<CharDisplay char={RIDE_CARD.char} size={64} />}
+            front={<CharDisplay char={RIDE_CARD.char} variant="glyph" />}
             back={
               <span className="onb-ride__back">
                 <span className="onb-ride__reading" lang="ja">{RIDE_CARD.reading}</span>

@@ -2737,6 +2737,9 @@
 }
 
 .onb {
+  /* The office hangs its own clock in the corner, so it is the
+     containing block for it. */
+  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -2747,6 +2750,21 @@
 /* The office signboard — kana over name over latin, the station-plate
    reading order, but framed as a window sign rather than a 駅名標:
    this is not a place you travel to. */
+/* Every station has a clock, and the office had none — the only one a
+   learner saw during onboarding was inside the 行先 departure board, on
+   one scene of five. Ambient ink: the office is drawn on --bg-main,
+   not on a sumi panel. */
+.onb-clock {
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-5);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tr-term);
+  color: var(--text-secondary);
+}
+
 .onb-header {
   display: flex;
   flex-direction: column;
@@ -2760,6 +2778,11 @@
   font-family: var(--font-jp);
   font-size: 0.78rem;
   letter-spacing: 0.35em;
+  /* The trailing letter's tracking is counted into the shrink-to-fit
+     box, so a centred tracked line sits left of its own axis; the
+     indent cancels it. Must equal THIS rule's letter-spacing, so the
+     literal rather than --tr-reading (0.30em). */
+  text-indent: 0.35em;
   color: var(--text-secondary);
 }
 .onb-header__jp {
@@ -2907,9 +2930,14 @@
 
 .onb-step__title {
   margin: 0;
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-size: 1.35rem;
   font-weight: 700;
+  /* The office's headings are full sentences in a 680px column, so
+     several wrap with one or two orphan words on the last line.
+     Progressive enhancement — a browser without it falls back to the
+     ragged wrap that is there today. */
+  text-wrap: balance;
 }
 /* The heading receives programmatic focus on every step change (see
    OnboardingFlow's step effect) purely so the transition is announced
@@ -2941,14 +2969,37 @@
   color: var(--text-on-panel);
   border: 1px solid var(--border);
   font-family: var(--font-display);
+  /* The bare `button` rule forwards font-family and font-weight but
+     not size, so without this the UA's 13.33px wins and the office's
+     one action prints smaller than the .onb-link beside it. The mockup
+     got this from `font: inherit`. */
+  font-size: var(--fs-body);
   font-weight: 700;
   letter-spacing: 0.04em;
   transition: transform 0.15s ease, filter 0.15s ease;
 }
-.onb-action [lang="ja"] { font-family: var(--font-jp); }
+/* The office's Continue mounts mid-scene — 試乗 reveals it only once
+   the card has been rated, the placement test only once it is done —
+   so it arrives on the same shared rail as the won panel beside it
+   instead of popping in. Scoped to the step's action row: Settings and
+   the 行先 counter wear the same class but are already on screen when
+   their pane opens. */
+.onb-step__actions .onb-action {
+  animation: arrive 0.3s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+/* The Japanese half is the quiet second register: the sumi dim ink
+   (this button is --bg-panel in both themes, so the dim register is
+   the sumi one), the mid weight, and a real hold-off from the English
+   instead of the literal space in the JSX. */
+.onb-action [lang="ja"] {
+  font-family: var(--font-jp);
+  font-weight: 500;
+  color: var(--text-on-panel-soft);
+  margin-left: var(--sp-2);
+}
 .onb-action:hover:not(:disabled),
 .onb-action:focus-visible { transform: translateY(-1px); filter: brightness(1.15); }
-.onb-action:disabled { opacity: 0.45; }
+.onb-action:disabled { opacity: 0.45; cursor: default; }
 
 .onb-link {
   background: none;
@@ -2960,7 +3011,14 @@
   text-underline-offset: 3px;
   cursor: pointer;
 }
-.onb-link:hover, .onb-link:focus-visible { color: var(--text-primary); }
+.onb-link:focus-visible { color: var(--text-primary); }
+/* Disabled from JSX in two places — the footer skip while the POST is
+   in flight, and "Edit the application" on the pass — with no rule to
+   show it until now. */
+.onb-link:disabled { opacity: 0.45; cursor: default; }
+/* Last: (0,3,0) against the two (0,2,0) above, per
+   no-descending-specificity. */
+.onb-link:hover:not(:disabled) { color: var(--text-primary); }
 
 .onb-back { align-self: flex-start; margin-bottom: 10px; }
 
@@ -3007,16 +3065,27 @@
    also what the mockup's .fc__face draws. */
 .onb-ride__card {
   width: 100%;
+  /* Card and rating bar are two halves of one instrument and share one
+     column (DESIGN.md: "the quiz prompt card, its progress bar, its
+     MCQ list and its rating bar all share this one number"). Uncapped,
+     the card took .onb-body's full 680px while the bar beneath it sat
+     at 480 — overhanging it by ~100px each side, which only the card's
+     missing surface was hiding. 480px is the bar's own width (see
+     `.onb-ride .rating-bar`), the number that rule's comment already
+     calls the card's column; this is what makes that true. */
+  max-width: min(480px, 100%);
   padding: 18px 14px;
   /* The card holds its height across the turn. Its two faces are not
-     the same size — the glyph front measured 134px and the
-     reading + meaning back 109px — so without this the whole scene
-     jumped 25px UP at the exact moment the learner looked down to
+     the same size — the glyph front measures ~180px at the specimen
+     rung (--fs-specimen-glyph over a 1.15 line box, plus the card's
+     own paddings) and the reading + meaning back 109px — so without
+     this the whole scene jumped UP at the exact moment the learner
+     looked down to
      read the answer, and the rating bar moved out from under the
      cursor with it. The mockup pins the same card at a flat height for
      the same reason; this is the front face's own, so the reservation
      costs no dead space. */
-  min-height: 140px;
+  min-height: 180px;
   display: grid;
   align-content: center;
   background: var(--surface);
@@ -3248,6 +3317,17 @@
   border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
 }
 .onb-alt__name { font-weight: 700; }
+/* The quiet second register the rest of the office already carries
+   (.onb-action, .onb-mode__btn): Latin leads, Japanese trails small
+   and secondary. The face is named explicitly — the button inherits
+   --font-display, whose stack has no Japanese coverage. */
+.onb-alt__name [lang="ja"] {
+  margin-left: var(--sp-3);
+  font-family: var(--font-jp);
+  font-weight: 500;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
 .onb-alt__hint { color: var(--text-secondary); font-size: 0.8rem; }
 
 /* "Test me" opens a whole sub-flow, so it must not weigh the same as
@@ -3867,12 +3947,12 @@
 .onb-promise__title b {
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: var(--fs-lead);
+  font-size: var(--fs-body);
 }
 .onb-promise__status b {
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: var(--fs-body);
+  font-size: var(--fs-lead);
   color: var(--jour-st-ink, var(--warning));
 }
 .onb-promise__cap {
@@ -4005,6 +4085,7 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+
 .onb-form__seal {
   position: absolute;
   right: 18px;
@@ -4094,8 +4175,12 @@
   font-family: var(--font-jp);
   justify-content: space-between;
   color: var(--text-on-panel-soft);
-  font-size: var(--fs-sm);
-  letter-spacing: 0.12em;
+  /* The caption rung, so the brand line sits a clear step below the
+     route beneath it. The 0.12em tracking it carried is on none of the
+     four rungs, and is dropped rather than swapped: this is a
+     space-between row, 日本語駅 is right-flush, and a tracked flush line
+     needs a matching text-indent to cancel the trailing letter. */
+  font-size: var(--fs-caption);
 }
 .onb-pass__route {
   display: flex;
@@ -4428,7 +4513,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .onb-header,
-  .onb-step {
+  .onb-step,
+  .onb-step__actions .onb-action {
     animation: arrive-soft 0.2s linear backwards;
   }
   .onb-action:hover:not(:disabled),
@@ -4923,6 +5009,28 @@ html, body, #root {
 }
 html, body { height: 100%; }
 
+/* The mockup's base body. Deliberately a `body`-only rule and NOT
+   folded into the `html, body, #root` selector above: a font-size on
+   the ROOT element rebases every rem in this sheet, shrinking all nine
+   --fs-* rungs and every rem length by 5%. On body it sets only what
+   an unstyled string inherits — the same reason the font-family above
+   is set once here rather than restated at 183 sites.
+
+   Without this, the inherited base was the UA's 16px at `normal`
+   leading, which is not a rung of the scale at all. It is what
+   .onb-step__body was rendering at — that rule is ported from the
+   canvas verbatim and sets line-height but no size, because in the
+   canvas it inherited --fs-body from here. Same for .quiz-done__sub,
+   and .jour-rev__none was wrapping at `normal` for the same reason.
+
+   line-height has no token — the scale covers size, space, radius and
+   tracking, not leading — so 1.6 is the literal the sheet already uses
+   in 23 places. */
+body {
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
 /* min-height, not height. #root carries the backdrop (see 背景 near
    the end of this file), and a background is clipped to its own
    element's box however it is attached — so at `height: 100%` the
@@ -4949,10 +5057,17 @@ button {
   color: inherit;
   background: none;
   border: none;
-  border-radius: 8px;
+  /* --r-panel IS 8px: a rename, nothing moves. The padding was
+     10px/20px, neither a rung; --sp-3/--sp-5 are the nearest (8/16),
+     so the ~25 button classes that do not restate their own box
+     tighten by 2px vertical and 4px horizontal onto the scale. The
+     box is NOT dropped the way the concept drops it — a one-page
+     mockup can, because every button there names its own class; this
+     sheet has bare buttons that would collapse to nothing. */
+  border-radius: var(--r-panel);
   font-family: inherit;
   font-weight: 600;
-  padding: 10px 20px;
+  padding: var(--sp-3) var(--sp-5);
   transition: filter 0.15s;
 }
 button:hover { filter: brightness(1.15); }
@@ -6419,8 +6534,12 @@ textarea:focus-visible {
    magnetic stripe when the ground went dark: a charcoal stripe on a
    charcoal card said nothing, and a card's realism lives in its
    sheen, not its stripe (the drawer stub and the reissue pass keep
-   theirs; their grounds still show it). */
-.pass::after {
+   theirs; their grounds still show it). The office's printed pass
+   (.onb-pass) is the same object on the same sumi ground, so it takes
+   the same sheen; it already sets position:relative and
+   overflow:hidden, so it needs nothing else. */
+.pass::after,
+.onb-pass::after {
   content: '';
   position: absolute;
   inset: -40% 55% -40% -20%;
@@ -6526,6 +6645,7 @@ textarea:focus-visible {
 }
 .pass__holder { display: flex; align-items: center; gap: 18px; min-width: 0; }
 /* The name a pass is issued to, set at the size a pass sets it. */
+
 .pass__holder .profile-card__name {
   font-family: 'Noto Serif JP', serif;
   font-size: 1.65rem;
@@ -6539,8 +6659,33 @@ textarea:focus-visible {
      would print sumi-dark on this card. */
   color: inherit;
 }
+/* The 氏名 blank — the office's copy of the override beside it. Sits
+   interleaved with .pass__holder's rules rather than after them: the
+   two families have identical selector shapes, so any block placement
+   puts one of mine ahead of a twin of higher specificity. Same reason
+   the pass's own copy lives here.
+
+   EditableUsername's rest state is the ink ON the dashed rule, the way
+   the mockup's <input> was: .profile-card__name--editable's `font:
+   inherit` resets the base rule's size and weight, so the form's one
+   fill-in-the-blank printed at the body rung in 400 next to a 700
+   uppercase label, on no rule at all. The radius is cleared because
+   the bare button rule's would round the ends of the rule. */
+.onb-form .profile-card__name {
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  border-radius: 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--text-primary) 35%, transparent);
+  padding-bottom: var(--sp-1);
+}
+.onb-form .profile-card__name:hover,
+.onb-form .profile-card__name:focus-visible {
+  border-bottom-color: var(--accent);
+}
 .pass__holder .profile-card__name .profile-card__edit-glyph { opacity: 0.45; }
+.onb-form .profile-card__name .profile-card__edit-glyph { opacity: 0.45; }
 .pass__holder .profile-card__name:hover .profile-card__edit-glyph { opacity: 1; }
+.onb-form .profile-card__name:hover .profile-card__edit-glyph { opacity: 1; }
 .pass__avatar-wrap { position: relative; width: 76px; height: 76px; flex-shrink: 0; }
 .pass__ring { position: absolute; inset: 0; width: 100%; height: 100%; }
 .pass__avatar {
@@ -10777,7 +10922,7 @@ textarea:focus-visible {
   flex-wrap: wrap;
   justify-content: center;
 }
-.quiz-done__extra [lang="ja"] { margin-right: 6px; }
+.quiz-done__extra [lang="ja"] { font-family: var(--font-jp); margin-right: 6px; }
 .quiz-done__row .btn-ghost {
   display: inline-flex;
   align-items: center;
@@ -11161,6 +11306,23 @@ textarea:focus-visible {
   font-size: 12px;
   color: var(--text-secondary);
   margin-top: 10px;
+}
+
+/* The reveal prompt is a caption, and the office sets it in the
+   caption register the mockup drew: display face, 700, uppercase,
+   tracked. Scoped to the office's own card so the study screens are
+   byte-for-byte unaffected — the shared base rule is still a 12px
+   literal in body register, one of design-scale.json's
+   allowed-but-owed entries, and retokenising it belongs with that
+   sweep, not here. */
+.onb-ride__card .flashcard__hint {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  /* A tracked line on a left-flush axis cancels the trailing letter's
+     tracking with an equal indent (DESIGN.md, Tracking). */
+  text-indent: var(--tr-caption);
 }
 
 /* Houses the sound-replay and dictionary-lookup buttons, pinned to
@@ -12059,6 +12221,19 @@ textarea:focus-visible {
    buttons out of the tab order and out of hit-testing too, so nothing is
    focusable or clickable before there is anything to rate. */
 .rating-bar--idle { visibility: hidden; }
+/* …and arrives, rather than merely appearing. The mockup MOUNTS the
+   bar on the flip, so it inherits the office's arrival; holding its
+   space above (which kills a 34px jump) costs that entrance, and the
+   sibling it is drawn with — the won banner — kept it. Given back on
+   the CLASS change instead of on mount: dropping --idle newly matches
+   this rule, so it fires on the reveal frame and the reserved box is
+   untouched. Scoped to 試乗; the study screens' bar is unchanged. */
+.onb-ride .rating-bar:not(.rating-bar--idle) {
+  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .onb-ride .rating-bar:not(.rating-bar--idle) { animation: none; }
+}
 
 /* ── the rating bar ────────────────────────────────
    One instrument, six segments, worst to best. Two decisions here were
@@ -14025,6 +14200,7 @@ textarea:focus-visible {
   transition: opacity 0.15s ease;
 }
 .profile-card__name--editable:hover .profile-card__edit-glyph { opacity: 1; }
+
 
 .profile-card__name-edit {
   display: flex;
@@ -23538,6 +23714,9 @@ html { scrollbar-gutter: stable; }
   font-variant-numeric: tabular-nums;
 }
 .jour-line__validity [lang="ja"] {
+  /* Its row-mate .jour-line__status b names the face; without this,
+     two Japanese words inches apart resolve to two different ones. */
+  font-family: var(--font-jp);
   font-size: var(--fs-caption-xs);
   color: var(--text-on-panel-soft);
 }
@@ -23554,12 +23733,15 @@ html { scrollbar-gutter: stable; }
   border: none;
   color: var(--text-on-panel-soft);
   font-size: var(--fs-caption);
+  font-weight: 400;
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
 }
 .jour-line__turn:hover,
 .jour-line__turn:focus-visible { color: var(--text-on-panel); }
+/* The span, not the button — the control's other half is Latin. */
+.jour-line__turn [lang="ja"] { font-family: var(--font-jp); }
 
 /* ── The back face's head ────────────────────────────────────── */
 .jour-rev__head {
@@ -23577,7 +23759,7 @@ html { scrollbar-gutter: stable; }
 .jour-rev__title b {
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: var(--fs-lead);
+  font-size: var(--fs-body);
 }
 .jour-rev__title .jour-cap,
 .jour-rev__status .jour-cap {
@@ -23591,7 +23773,7 @@ html { scrollbar-gutter: stable; }
 .jour-rev__status b {
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: var(--fs-body);
+  font-size: var(--fs-lead);
   color: var(--jour-st-ink, var(--text-on-panel));
 }
 .jour-rev__turn {
@@ -23600,6 +23782,7 @@ html { scrollbar-gutter: stable; }
   border: none;
   color: var(--text-on-panel-soft);
   font-size: var(--fs-caption);
+  font-weight: 400;
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
@@ -23774,19 +23957,32 @@ html { scrollbar-gutter: stable; }
   background: none;
   border: 1px solid color-mix(in srgb, var(--text-on-panel) 30%, transparent);
   border-radius: var(--r-card);
-  color: var(--text-on-panel-soft);
+  color: var(--text-on-panel);
   font-size: var(--fs-caption);
+  /* The concept's base button rule is `font: inherit`, so this line
+     lands at 400 under the strong's 700. This sheet's base rule sets
+     600, and the @import loads only 400;500;700 — font matching rounds
+     600 UP to 700, collapsing both registers into one weight. */
+  font-weight: 400;
   text-align: left;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 .jour-act:disabled { opacity: 0.45; cursor: default; }
+/* Border AND label both go to the pass's own metal, as the mockup has
+   it: one coherent gold outline with gold ink, not gold piping around
+   an unchanged label. The bare `button` rule's brightness() is turned
+   off here — DESIGN.md: a filter is not the hover, and it is not in
+   this block's transition either, so it lands as an un-eased wash. */
 .jour-act:focus-visible,
-.jour-act:hover:not(:disabled) { border-color: var(--accent2); color: var(--text-on-panel); }
+.jour-act:hover:not(:disabled) {
+  border-color: var(--accent2);
+  color: var(--accent2);
+  filter: none;
+}
 .jour-act strong {
   font-size: var(--fs-sm);
   font-weight: 700;
-  color: var(--text-on-panel);
 }
 .jour-act strong [lang="ja"] { font-weight: 500; margin-right: var(--sp-2); }
 .jour-rev__none {
