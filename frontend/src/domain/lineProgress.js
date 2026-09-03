@@ -20,6 +20,14 @@
 
 export const LEVEL_STOPS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
+// The four sections that have a track at all, by route: the SRS lines
+// /api/stats aggregates. Shared by the wall map and the profile's ride
+// ledger so the two can never disagree about which lines exist. A new
+// section lands in the map's practice register by default; adding a
+// TRACK means the stats endpoint actually aggregates it, so this list
+// is deliberately closed here.
+export const TRACKED_LINES = { '/kana': 'kana', '/vocab': 'vocab', '/kanji': 'kanji', '/grammar': 'grammar' }
+
 // One glyph per kana set — a stop label has room for a specimen, not
 // for "HIRAGANA_COMBINATIONS". Same sets, same order as
 // domain/kanaSets.js; the slug is what joins them.
@@ -63,4 +71,28 @@ export function lineStops(stats, source) {
 /** Total distance travelled, in stops — the train marker's position. */
 export function stopsTravelled(stops) {
   return stops.reduce((sum, s) => sum + s.score, 0)
+}
+
+/**
+ * Mastered and reachable (card, mode) pairs on one line, summed over
+ * every deck and graded mode — the unit the 段位 plaque counts in
+ * (srs.get_mastered_count), so the profile's ride ledger and the rank
+ * can be read against each other. Garbage in, zeros out, like
+ * lineStops: a failed stats fetch must never throw here.
+ */
+export function lineTotals(stats, source) {
+  let mastered = 0
+  let total = 0
+  const decks = stats?.[source]
+  if (decks && typeof decks === 'object') {
+    for (const deck of Object.values(decks)) {
+      if (!deck || typeof deck !== 'object') continue
+      for (const bucket of Object.values(deck)) {
+        if (!bucket || typeof bucket !== 'object') continue
+        total += bucket.total ?? 0
+        mastered += bucket.mastered ?? 0
+      }
+    }
+  }
+  return { mastered, total }
 }

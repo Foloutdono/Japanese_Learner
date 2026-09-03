@@ -1,5 +1,6 @@
 import { levelTitle } from '../../domain/levelTitle'
 import { DEFAULT_LOADOUT } from '../../stores/cosmetics'
+import { GearIcon } from '../ui/Icons'
 
 // ── 定期券 — the commuter pass ─────────────────────────────
 // Nobody walks onto a Japanese platform without a pass, and the home
@@ -22,7 +23,11 @@ import { DEFAULT_LOADOUT } from '../../stores/cosmetics'
 // screen" forbids, so the hall renders the label as a plain span.
 // `footer`: the hall pins the stamp rally and the 新規 gauge to the
 // bottom of the card; the profile keeps its own separate blocks.
-export function CommuterPass({ profile, t, children, footer = null, headingTag: Heading = 'h1' }) {
+// `onSettings`: 設定 belongs to the card (config/identity.js), so on the
+// profile the card carries the door to it — a hairline gear beside the
+// issuer's mark. The hall leaves it out: its pass is itself a button,
+// and a button inside a button is not a thing.
+export function CommuterPass({ profile, t, children, footer = null, headingTag: Heading = 'h1', onSettings = null }) {
   const [, jpTitle, title] = levelTitle(profile.level)
 
   const span = Math.max(1, profile.xpForNext - profile.xpPrevLevel)
@@ -55,8 +60,21 @@ export function CommuterPass({ profile, t, children, footer = null, headingTag: 
           </span>
         </span>
 
-        {/* The issuing station's mark — every card says who issued it. */}
-        <span className="pass__issuer" aria-hidden="true">JP</span>
+        <span className="pass__head-right">
+          {onSettings && (
+            <button
+              type="button"
+              className="pass__gear"
+              onClick={onSettings}
+              aria-label={t.settings}
+              title={t.settings}
+            >
+              <GearIcon size={14} />
+            </button>
+          )}
+          {/* The issuing station's mark — every card says who issued it. */}
+          <span className="pass__issuer" aria-hidden="true">JP</span>
+        </span>
       </div>
 
       <div className="pass__body">

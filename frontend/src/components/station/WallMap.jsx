@@ -1,7 +1,7 @@
 import { useLang } from '../../LangContext'
 import { stationFor } from '../../config/stations'
 import { useStationClock } from './useStationClock'
-import { lineStops, stopsTravelled } from '../../domain/lineProgress'
+import { TRACKED_LINES as TRACKED, lineStops, stopsTravelled } from '../../domain/lineProgress'
 
 // ── 路線図 — the wall map ────────────────────────────────────
 // The station's main panel, in the departure board's place and on the
@@ -27,12 +27,10 @@ import { lineStops, stopsTravelled } from '../../domain/lineProgress'
 // 日本語駅, exactly as the board's was — only the panel's label
 // changed, 発車標 to 路線図.
 
-// Which map register each home section renders in, by path. A new
-// section added to navLinks lands in `practice` by default (a row is
-// never wrong, just unranked); adding a TRACK means the stats
-// endpoint actually aggregates it, so that list is deliberately
-// closed here.
-const TRACKED = { '/kana': 'kana', '/vocab': 'vocab', '/kanji': 'kanji', '/grammar': 'grammar' }
+// Which map register each home section renders in, by path. The
+// tracked four come from domain/lineProgress (the profile's ride
+// ledger reads the same list); a new section added to navLinks lands
+// in `practice` by default (a row is never wrong, just unranked).
 const FACILITIES = new Set(['/dictionary', '/decks', '/exam'])
 
 function Track({ stops, travelled }) {

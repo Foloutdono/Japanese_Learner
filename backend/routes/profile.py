@@ -3,7 +3,8 @@ import io
 import logging
 import random
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
@@ -309,6 +310,12 @@ def _badges(facts: dict) -> list[dict]:
     return out
 
 
+# The stamp book on the profile draws five whole Monday-to-Sunday weeks
+# ending on the current one: at most 28 days back to that week's Monday
+# plus the six days before it, so 35 covers the sheet on any weekday.
+CALENDAR_DAYS = 35
+
+
 # ── Routes ────────────────────────────────────────────────────
 @router.get("/api/profile")
 def get_profile(user_id: str = Depends(get_user_id)):
@@ -317,6 +324,12 @@ def get_profile(user_id: str = Depends(get_user_id)):
     progress = level_progress(xp)
     streak = srs.get_streak(user_id)
     facts = _badge_facts(user_id, streak)
+
+    # One query for the sheet; the week the home hall's stamp rally and
+    # every other consumer of `week` still read is sliced off it rather
+    # than asked for again. Same helper the stats calendar uses.
+    calendar = srs.get_daily_review_counts(user_id, days=CALENDAR_DAYS)
+    week_from = (datetime.now(timezone.utc).date() - timedelta(days=6)).isoformat()
 
     return {
         "username": username,
@@ -335,10 +348,13 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # computed for the 極 badge's predicate and previously
         # discarded; the profile shows it as a personal best.
         "bestQualityStreak": facts["best_quality_streak"],
-        # The last seven days of activity, for the 今週 strip. Same
-        # helper the stats screen's practice calendar uses, asked for a
-        # week instead of a year.
-        "week": srs.get_daily_review_counts(user_id, days=7),
+        # Correct over all answers, 0..1 — None before the first review.
+        "retention": srs.get_retention(user_id),
+        # The last seven days of activity (the hall's stamp rally), and
+        # the five weeks behind them (the profile's stamp book). Days
+        # without a review are simply absent from both.
+        "week": [d for d in calendar if d["date"] >= week_from],
+        "calendar": calendar,
         "daruma": _daruma_summary(user_id),
         # Loadout + mastery rank ride along on the one profile fetch
         # every screen already makes, so applying a paper skin or a
@@ -456,8 +472,16 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
 
 
 @router.get("/api/leaderboard")
-def get_leaderboard(limit: int = Query(20, ge=1, le=200), user_id: str = Depends(get_user_id)):
-    top = srs.get_leaderboard(limit=limit)
+def get_leaderboard(
+    limit: int = Query(20, ge=1, le=200),
+    # 通算 or 今週 — the 番付's two sides of the same sums. A week is the
+    # one span a learner can actually move tonight; anything finer is
+    # noise and anything coarser is the lifetime board again.
+    period: Literal["all", "week"] = Query("all"),
+    user_id: str = Depends(get_user_id),
+):
+    days = 7 if period == "week" else None
+    top = srs.get_leaderboard(limit=limit, days=days)
     names = _usernames_for([e["user_id"] for e in top])
 
     entries = [
@@ -475,7 +499,7 @@ def get_leaderboard(limit: int = Query(20, ge=1, le=200), user_id: str = Depends
     # #47" instead of just omitting them.
     me = next((e for e in entries if e["username"] == names.get(user_id)), None)
     if me is None:
-        mine = srs.get_user_rank(user_id)
+        mine = srs.get_user_rank(user_id, days=days)
         me = {
             "rank": mine["rank"],
             "username": _get_or_create_username(user_id),

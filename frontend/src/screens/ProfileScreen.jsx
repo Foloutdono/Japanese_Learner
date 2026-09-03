@@ -1,32 +1,52 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
 import { Loading } from '../components/ui/Loading'
-import { SectionHeader } from '../components/ui/SectionHeader'
-import { WarningIcon, FlameIcon } from '../components/ui/Icons'
+import { WarningIcon } from '../components/ui/Icons'
 import { Daruma } from '../components/rewards/Daruma'
 import { CosmeticSwatch } from '../components/rewards/CosmeticSwatch'
 import { HallCard } from '../components/profile/HallCard'
 import { CommuterPass } from '../components/profile/CommuterPass'
 import { JourneyPass } from '../components/journey/JourneyPass'
-import { WeekStrip, Records, MasteryLadder } from '../components/profile/ProfileBlocks'
+import { StampBook, Figures, MasteryLine } from '../components/profile/ProfileBlocks'
+import { Tickets } from '../components/profile/Tickets'
+import { Banzuke } from '../components/profile/Banzuke'
+import { Tonight } from '../components/profile/Tonight'
+import { LineLedger } from '../components/profile/LineLedger'
 import { EditableUsername } from '../components/profile/EditableUsername'
 import { getProfileHalls } from '../config/navLinks'
+
+// ── 定期入れ — the pass holder ─────────────────────────────────
+// The profile is the pass, and everything under it is an insert tucked
+// behind it in the holder: what is within reach tonight, the stamp
+// book, the rank plaque and three figures, the ride ledger, the
+// tickets, the three halls, the ranking board. No section headings —
+// the pass names the screen, and every insert names itself (DESIGN.md,
+// "Say less"). This replaced six headed sections, a week of bars and a
+// flame.
 
 // ── Mock fallback ─────────────────────────────────────────
 // Kept in sync with profile.py's real response shape so a backend
 // hiccup degrades to a believable screen instead of a blank one.
-//
-// It used to take `t`, because the badge labels inside it were the
-// only translated strings in the payload. They are not in the payload
-// any more — real badges and mock badges both arrive as ids and get
-// named at render time from t.badgeName — so the fallback is language
-// -agnostic by construction rather than by being rebuilt per locale.
-// Still a function, not a constant: the week below is relative to
-// today and would otherwise freeze at module load.
+// Language-agnostic by construction: badges and darumas arrive as ids
+// and get named at render time. Still a function, not a constant: the
+// calendar below is relative to today and would otherwise freeze at
+// module load.
+const LEADERBOARD_LIMIT = 6
+
 function buildMockProfile() {
+  const counts = [24, 31, 18, 40, 12, 0, 22, 27, 35, 19, 0, 41, 26, 0, 0, 33, 0, 21, 29, 38, 17, 25, 30, 44, 12, 36, 28, 24, 9, 31, 18, 40, 12, 7]
+  const now = new Date()
+  const calendar = []
+  for (let i = counts.length - 1; i >= 0; i--) {
+    const d = new Date(now)
+    d.setDate(now.getDate() - i)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const count = counts[counts.length - 1 - i]
+    if (count) calendar.push({ date: key, count })
+  }
   return {
     username: 'Aiko',
     level: 12,
@@ -37,18 +57,9 @@ function buildMockProfile() {
     streakLongest: 21,
     totalReviews: 842,
     bestQualityStreak: 12,
-    week: (() => {
-      const counts = [24, 0, 31, 18, 40, 12, 7]
-      const out = []
-      const now = new Date()
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(now)
-        d.setDate(now.getDate() - i)
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-        if (counts[6 - i]) out.push({ date: key, count: counts[6 - i] })
-      }
-      return out
-    })(),
+    retention: 0.91,
+    week: calendar.slice(-7),
+    calendar,
     cosmetics: {
       loadout: { paper: 'paper_washi', ring: 'ring_kumihimo', seal: 'seal_shu', title: 'title_minarai' },
       titleJp: '見習い',
@@ -58,10 +69,10 @@ function buildMockProfile() {
       unseen: 0,
     },
     daruma: {
-      ready: 0,
+      ready: 1,
       today: [
         { id: 'daily_reviews_30', glyph: '行', color: 'aka', rarity: 'nami', current: 18, target: 30, rewardXp: 25, rewardTokens: 0, vowed: true, claimed: false, complete: false },
-        { id: 'daily_new_5', glyph: '芽', color: 'midori', rarity: 'nami', current: 2, target: 5, rewardXp: 30, rewardTokens: 0, vowed: true, claimed: false, complete: false },
+        { id: 'daily_new_5', glyph: '芽', color: 'midori', rarity: 'nami', current: 5, target: 5, rewardXp: 30, rewardTokens: 0, vowed: true, claimed: false, complete: true },
         { id: 'daily_perfect_10', glyph: '一', color: 'kin', rarity: 'jou', current: 0, target: 10, rewardXp: 40, rewardTokens: 0, vowed: false, claimed: false, complete: false },
       ],
     },
@@ -76,28 +87,38 @@ function buildMockProfile() {
   }
 }
 
-// Usernames here are proper nouns, not translatable copy, so this one
-// stays a plain constant — no `t` dependency to route through.
+// Usernames here are proper nouns, not translatable copy.
 const MOCK_LEADERBOARD = {
   entries: [
     { rank: 1, username: 'Haruto', level: 24, xp: 9800 },
     { rank: 2, username: 'Mei',    level: 21, xp: 8600 },
-    { rank: 3, username: 'Sora',   level: 19, xp: 7950 },
-    { rank: 4, username: 'Kenji',  level: 11, xp: 3100 },
-    { rank: 5, username: 'Yui',    level: 9,  xp: 2400 },
+    { rank: 3, username: 'Sora',   level: 19, xp: 3740 },
+    { rank: 4, username: 'Aiko',   level: 12, xp: 3420 },
+    { rank: 5, username: 'Kenji',  level: 11, xp: 3100 },
+    { rank: 6, username: 'Yui',    level: 9,  xp: 2400 },
   ],
   me: { rank: 4, username: 'Aiko', level: 12, xp: 3420 },
 }
-
-const RANK_GLYPH = { 1: '一', 2: '二', 3: '三' }
+const MOCK_WEEK_LEADERBOARD = {
+  entries: [
+    { rank: 1, username: 'Mei',    level: 21, xp: 1240 },
+    { rank: 2, username: 'Haruto', level: 24, xp: 1180 },
+    { rank: 3, username: 'Aiko',   level: 12, xp: 960 },
+    { rank: 4, username: 'Sora',   level: 19, xp: 720 },
+    { rank: 5, username: 'Kenji',  level: 11, xp: 610 },
+    { rank: 6, username: 'Yui',    level: 9,  xp: 300 },
+  ],
+  me: { rank: 3, username: 'Aiko', level: 12, xp: 960 },
+}
 
 export default function ProfileScreen({ session }) {
   const navigate = useNavigate()
   const { t } = useLang()
   const [profile, setProfile]         = useState(null)
   const [leaderboard, setLeaderboard] = useState(null)
+  const [weekBoard, setWeekBoard]     = useState(null)
+  const [stats, setStats]             = useState(null)
   const [stale, setStale]             = useState(false)
-
 
   useEffect(() => {
     apiFetch('/api/profile', session)
@@ -105,17 +126,26 @@ export default function ProfileScreen({ session }) {
       .then(setProfile)
       .catch(() => { setProfile(buildMockProfile()); setStale(true) })
 
-    apiFetch('/api/leaderboard', session)
+    apiFetch(`/api/leaderboard?limit=${LEADERBOARD_LIMIT}`, session)
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(setLeaderboard)
-      .catch(() => { setLeaderboard(MOCK_LEADERBOARD); setStale(true) })
+      .catch(() => { setLeaderboard(MOCK_LEADERBOARD); setWeekBoard(MOCK_WEEK_LEADERBOARD); setStale(true) })
+
+    // The 今週 side of the board is optional: without it the board
+    // simply has no toggle, so its failure never marks the screen stale.
+    apiJson(`/api/leaderboard?limit=${LEADERBOARD_LIMIT}&period=week`, session)
+      .then(setWeekBoard)
+      .catch(() => {})
+
+    // The ride ledger reads the same stats the home wall map does; a
+    // failed fetch leaves the ledger out, never the profile.
+    apiJson('/api/stats', session)
+      .then(setStats)
+      .catch(() => setStats(null))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loading = !profile || !leaderboard
-  const badgeCount = profile
-    ? t.badgesEarned(profile.badges.filter(b => b.unlocked).length, profile.badges.length)
-    : null
 
   return (
     <div className="screen">
@@ -137,58 +167,55 @@ export default function ProfileScreen({ session }) {
             </div>
           )}
 
-          {/* The pass, now two-sided: the ghost train rides its back
-              (plan 063). JourneyPass owns the flip and the journey
-              fetch; the pass itself is byte-identical — it just gains
-              the journey footer through its existing slot, and only
-              when a contract exists (renderPass(null) otherwise). */}
-          <JourneyPass
-            session={session}
-            fallbackStartLevel={profile.jlptLevel ?? null}
-            renderPass={footer => (
-              <CommuterPass profile={profile} t={t} footer={footer}>
-                <PassHolder
+          <div className="profile-blocks">
+            {/* The pass, two-sided: the ghost train and the contract
+                ride its back (plan 063). JourneyPass owns the flip and
+                the journey fetch; the pass gains the journey footer
+                through its existing slot, and only when a contract
+                exists (renderPass(null) otherwise). The gear is the
+                profile's alone — 設定 belongs to the card. */}
+            <JourneyPass
+              session={session}
+              fallbackStartLevel={profile.jlptLevel ?? null}
+              renderPass={footer => (
+                <CommuterPass
                   profile={profile}
-                  session={session}
-                  onUsernameChange={u => setProfile(p => ({ ...p, username: u }))}
                   t={t}
-                />
-              </CommuterPass>
-            )}
-          />
+                  footer={footer}
+                  onSettings={() => navigate('/settings')}
+                >
+                  <PassHolder
+                    profile={profile}
+                    session={session}
+                    onUsernameChange={u => setProfile(p => ({ ...p, username: u }))}
+                    t={t}
+                  />
+                </CommuterPass>
+              )}
+            />
 
-          <section className="profile-block profile-block--wide">
-            <SectionHeader jp="今週" title={t.thisWeek} />
-            <WeekStrip week={profile.week} t={t} />
-          </section>
+            <Tonight profile={profile} board={leaderboard} t={t} navigate={navigate} />
 
-          <div className="profile-pair">
-            <section className="profile-block">
-              <SectionHeader jp="記録" title={t.records} />
-              <Records profile={profile} t={t} />
-            </section>
+            <div className="profile-row2">
+              <StampBook
+                calendar={profile.calendar ?? profile.week}
+                streak={profile.streak}
+                longest={profile.streakLongest}
+                t={t}
+              />
+              <div className="profile-col">
+                <MasteryLine rank={profile.cosmetics?.rank} t={t} />
+                <Figures profile={profile} t={t} />
+              </div>
+            </div>
 
-            <section className="profile-block">
-              <SectionHeader jp="段位" title={t.masteryLadder} />
-              <MasteryLadder rank={profile.cosmetics?.rank} t={t} />
-            </section>
-          </div>
+            {stats && <LineLedger stats={stats} t={t} navigate={navigate} />}
 
-          <section className="profile-block profile-block--wide">
-            <SectionHeader jp="殿堂" title={t.halls} />
+            <Tickets badges={profile.badges} t={t} />
+
             <HallGrid profile={profile} navigate={navigate} t={t} />
-          </section>
 
-          <div className="profile-pair">
-            <section className="profile-block">
-              <SectionHeader jp="徽章" title={t.badges} count={badgeCount} />
-              <BadgesGrid badges={profile.badges} t={t} />
-            </section>
-
-            <section className="profile-block">
-              <SectionHeader jp="番付" title={t.leaderboard} />
-              <Leaderboard leaderboard={leaderboard} t={t} />
-            </section>
+            <Banzuke all={leaderboard} week={weekBoard} t={t} />
           </div>
         </main>
       )}
@@ -236,22 +263,15 @@ function PassHolder({ profile, session, onUsernameChange, t }) {
   )
 }
 
-// EditableUsername moved to components/profile/EditableUsername.jsx —
-// the onboarding welcome step renders the same control.
-
 // ── The halls ─────────────────────────────────────────────
 // The three places that belong to the user rather than to the
-// language: the Daruma Hall, the Storehouse and the statistics. They
-// were scattered — two cards lost in the home screen's grid of
-// thirteen and a thin link row here — and none of that said what they
-// have in common, which is that they're all a record of what you've
-// done rather than something to go and do.
+// language: the Daruma Hall, the Storehouse and the statistics — all a
+// record of what you've done rather than something to go and do.
 //
 // The grid is driven entirely by config/navLinks.js's 'profile' scope,
 // so this renders however many halls exist; only the preview inside
 // each one is hall-specific. That's the seam a fourth hall goes
-// through (a shelf of finished dolls, a review calendar, friends):
-// one registry entry, one case below.
+// through: one registry entry, one case below.
 function HallGrid({ profile, navigate, t }) {
   return (
     <div className="hall-grid">
@@ -362,14 +382,19 @@ function LoadoutPreview({ cosmetics, t }) {
 
 // Three running totals, not a chart: the stats screen owns the charts,
 // and a doorway that tries to be the room is just a slower way in.
-// Mastered comes off the 段位 ladder's own count (see cosmetics.py) so
-// this figure and the rank plaque can never disagree.
+// Reviews, retention and the best perfect run — the same three figures
+// the lattice under the rank plaque prints, so the doorway previews
+// exactly what the room counts.
 function FiguresPreview({ profile, t }) {
   const figures = [
-    { key: 'reviews',  value: profile.totalReviews,               label: t.totalReviews },
-    { key: 'streak',   value: profile.streak,                     label: t.streak, flame: true },
-    { key: 'mastered', value: profile.cosmetics?.rank?.mastered,  label: t.mastered },
-  ].filter(f => typeof f.value === 'number')
+    { key: 'reviews',   value: profile.totalReviews,      label: t.totalReviews },
+    {
+      key: 'retention',
+      value: typeof profile.retention === 'number' ? `${Math.round(profile.retention * 100)}%` : null,
+      label: t.retention,
+    },
+    { key: 'perfect',   value: profile.bestQualityStreak, label: t.perfectRun },
+  ].filter(f => f.value != null)
 
   if (!figures.length) return null
   return (
@@ -377,102 +402,11 @@ function FiguresPreview({ profile, t }) {
       {figures.map(f => (
         <span key={f.key} className="hall-figure">
           <span className="hall-figure__value">
-            {f.flame && <FlameIcon size={13} />}
-            {f.value.toLocaleString()}
+            {typeof f.value === 'number' ? f.value.toLocaleString() : f.value}
           </span>
           <span className="hall-figure__label">{f.label}</span>
         </span>
       ))}
     </span>
-  )
-}
-
-// A badge that only says locked or unlocked is a decoration. A locked
-// one now shows how far off it is, because "7 / 10 perfect in a row"
-// is a thing you can go and finish tonight and "極" is not.
-//
-// The name comes from t.badgeName[id] rather than from the response:
-// the backend used to ship hardcoded French labels to every client.
-function BadgesGrid({ badges, t }) {
-  return (
-    <div className="badges-grid">
-      {badges.map(b => {
-        const name = t.badgeName?.[b.id] ?? b.label ?? b.id
-        const pct = b.target ? Math.round((b.progress / b.target) * 100) : 0
-        return (
-          <div
-            key={b.id}
-            className={`badge-tile${b.unlocked ? '' : ' badge-tile--locked'}`}
-            title={name}
-          >
-            <span className="badge-tile__glyph" lang="ja">{b.glyph}</span>
-            <span className="badge-tile__label">{name}</span>
-            {!b.unlocked && typeof b.target === 'number' && (
-              <span className="badge-tile__progress">
-                <span className="badge-tile__track" aria-hidden="true">
-                  <span className="badge-tile__fill" style={{ width: `${pct}%` }} />
-                </span>
-                <span className="badge-tile__count">
-                  {b.progress.toLocaleString()} / {b.target.toLocaleString()}
-                </span>
-              </span>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function LeaderboardRow({ e, isMe, t }) {
-  return (
-    <div className={`leaderboard-row${isMe ? ' leaderboard-row--me' : ''}`}>
-      <span className={`leaderboard-row__rank${e.rank <= 3 ? ` leaderboard-row__rank--${e.rank}` : ''}`}>
-        {RANK_GLYPH[e.rank] ?? e.rank ?? '—'}
-      </span>
-      <span className="leaderboard-row__name">{e.username}</span>
-      <span className="leaderboard-row__level">{t.level} {e.level}</span>
-      <span className="leaderboard-row__xp">{e.xp.toLocaleString()} XP</span>
-    </div>
-  )
-}
-
-// entries is the top N; me is the current user's own rank/xp, which
-// the backend includes separately whenever they're not already inside
-// that top N (see profile.py's get_leaderboard). If they *are* in the
-// list, `me` still gets returned but the entries loop is what renders
-// them — this just skips double-rendering that row.
-function Leaderboard({ leaderboard, t }) {
-  const { entries, me } = leaderboard
-  const meInList = me && entries.some(e => e.username === me.username)
-
-  // The person directly above you, and by how much. `entries` is the
-  // top N in rank order, so the one to catch is whoever sits at your
-  // rank minus one — which exists in the list whenever you are inside
-  // it, and whenever you are just outside it too, because that is the
-  // last row of the top N.
-  const chase = me && entries.find(e => e.rank === me.rank - 1)
-  const gap = chase ? chase.xp - me.xp : 0
-
-  return (
-    <div className="banzuke">
-      <div className="banzuke__rows">
-        {entries.map(e => (
-          <LeaderboardRow key={e.rank} e={e} isMe={me && e.username === me.username} t={t} />
-        ))}
-        {me && !meInList && (
-          <>
-            <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
-            <LeaderboardRow e={me} isMe t={t} />
-          </>
-        )}
-      </div>
-
-      {chase && gap > 0 && (
-        <p className="banzuke__chase">
-          {t.chaseNext(gap.toLocaleString(), chase.username)}
-        </p>
-      )}
-    </div>
   )
 }

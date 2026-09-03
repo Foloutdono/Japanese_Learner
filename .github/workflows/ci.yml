@@ -44,7 +44,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # 22, not 20: src/lib/supabase.js calls createClient() at module
+          # load, and @supabase/realtime-js throws "Node.js 20 detected
+          # without native WebSocket support" the moment anything imports it
+          # — which src/lib/ocr.test.js does, through lib/api. WebSocket is
+          # only global from Node 22, and the library's own advice for
+          # anything older is to install `ws` and inject it as a transport,
+          # which would mean shipping a test-only argument in app code.
+          # 22.x clears every tool's engine range too (vite ^20.19 ||
+          # >=22.12, eslint ^20.19 || ^22.13 || >=24, vitest, stylelint) —
+          # 20.19+ satisfied those as well, so WebSocket is the only reason
+          # this moved.
+          node-version: '22'
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
