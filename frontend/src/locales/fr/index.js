@@ -966,17 +966,17 @@ const profile = {
   jourTurnOver:      'Retourner',
   jourDays:          (n) => `${n} jours`,
   jourFootOnTime:    (a, p, dest, date) =>
-    `${a} par jour, pile sur les ${p} promis. L'arrivée à ${dest} tient au ${date}.`,
+    `**${a} par jour**, pile sur les **${p}** promis. L'arrivée à ${dest} tient au **${date}**.`,
   jourFootAhead:     (a, p, dest, days, date) =>
-    `${a} par jour contre ${p} promis — ${dest} arrive ${days} jours en avance, vers le ${date}.`,
+    `**${a} par jour** contre **${p}** promis — ${dest} arrive **${days} jours en avance**, vers le **${date}**.`,
   jourFootBehind:    (a, p, dest, date, days) =>
-    `14 derniers jours : ${a} par jour contre ${p} promis. À ce rythme, ${dest} arrive le ${date} — ${days} jours après la date de votre carte.`,
+    `14 derniers jours : **${a} par jour** contre **${p}** promis. À ce rythme, ${dest} arrive le **${date}** — **${days} jours** après la date de votre carte.`,
   jourFootSuspended: (date) =>
-    `Aucune étude en 14 jours. Le ${date} de votre carte ne veut plus rien dire — reprenez, ou réimprimez-la avec une date qui compte.`,
+    `Aucune étude en 14 jours. Le **${date}** de votre carte ne veut plus rien dire — reprenez, ou réimprimez-la avec une date qui compte.`,
   jourFootPaceKept:  (a, p) =>
-    `14 derniers jours : ${a} par jour contre ${p} promis. Pas d'arrivée fixée — le rythme est toute la promesse.`,
+    `14 derniers jours : **${a} par jour** contre **${p}** promis. Pas d'arrivée fixée — le rythme est toute la promesse.`,
   jourFootPaceSuspended: (p) =>
-    `Aucune étude en 14 jours contre une promesse de ${p} par jour. La ligne attend — le portillon s'ouvre avec une seule carte.`,
+    `Aucune étude en 14 jours contre une promesse de **${p} par jour**. La ligne attend — le portillon s'ouvre avec une seule carte.`,
   jourNoDest:        'Aucune destination sur cette carte.',
   jourNoDestLink:    'En choisir une au guichet',
   jourActRecover:    (pace) => `Rouler à ${pace} par jour`,
@@ -1720,15 +1720,15 @@ const onboarding = {
   onbFixDestSub: (level, n) => `${level} d'abord — ${n} éléments`,
   onbCallingAt: 'Ce train dessert',
   onbCallNow: 'Maintenant',
-  onbHonestRide: (perDay, min) => `Rouler à ${perDay} par jour (≈ ${min} min) sans destination fixe — le guichet tient quand même le compte, et une destination s'achète plus tard depuis votre carte.`,
-  onbHonestNoRun: (dest, months, required) => `${dest} en ${months} mois, c'est ${required} nouveaux éléments par jour — le guichet ne fera pas semblant que c'est un rythme. Décalez la date ou la destination, et c'en devient un.`,
-  onbHonestPlan: (perDay, min, items, dest, date) => `${perDay} par jour, chaque jour — environ ${min} minutes — ${items} éléments, arrivée à ${dest} vers le ${date}. Nouveau contenu seulement ; les révisions s'ajoutent. Manquez des jours et cette date bouge — et l'appli le dira.`,
+  onbHonestRide: (perDay, min) => `Rouler à **${perDay} par jour** (≈ ${min} min) sans destination fixe — le guichet tient quand même le compte, et une destination s'achète plus tard depuis votre carte.`,
+  onbHonestNoRun: (dest, months, required) => `**${dest}** en **${months} mois**, c'est **${required} nouveaux éléments par jour** — le guichet ne fera pas semblant que c'est un rythme. Décalez la date ou la destination, et c'en devient un.`,
+  onbHonestPlan: (perDay, min, items, dest, date) => `**${perDay} par jour, chaque jour** — environ ${min} minutes — **${items} éléments**, arrivée à **${dest}** vers le **${date}**. Nouveau contenu seulement ; les révisions s'ajoutent. Manquez des jours et cette date bouge — et l'appli le dira.`,
   // 案内 — la scène de la promesse, et les deux temps du 定期券 (plan 063, phase F).
   onbPromiseTitle: 'La carte qui vous dira la vérité.',
   onbPromiseBody: (perDay) => `Votre ligne est imprimée au dos de votre carte. Deux voitures y roulent : votre train, et une en pointillés qui montre où ${perDay} par jour dit que vous devriez être. Retournez la carte, n'importe quel jour, et la carte répond.`,
   onbPromiseLine: (start, dest) => `Votre ligne — ${start} → ${dest}`,
   onbPromiseExample: 'exemple',
-  onbPromiseFoot: "Dérivez, et la carte le dit — en jours, pas en reproches — avec les deux réparations honnêtes à un geste : rouler plus vite, ou réimprimer la date à l'encre. Elle ne bougera jamais toute seule.",
+  onbPromiseFoot: "Dérivez, et la carte le dit — **en jours, pas en reproches** — avec les deux réparations honnêtes à un geste : rouler plus vite, ou réimprimer la date à l'encre. Elle ne bougera jamais toute seule.",
   onbLinesRow: 'Quatre lignes desservent cette gare une fois passé le portillon :',
   onbSignTitle: 'Signez, et le guichet imprime.',
   onbFormLatin: "Demande d'abonnement",
@@ -1740,8 +1740,8 @@ const onboarding = {
   onbPrint: 'Imprimer la carte',
   onbEditApp: 'Modifier la demande',
   onbDeparts: (time) => `départ ${time} chaque jour`,
-  onbVowYou: (perDay, time) => `${perDay} par jour, la plupart des jours${time ? `, vers ${time}` : ''}.`,
-  onbVowOffice: "La carte honnête, chaque jour — votre date ne bouge jamais en silence.",
+  onbVowYou: (perDay, time) => `**${perDay} par jour**, la plupart des jours${time ? `, vers ${time}` : ''}.`,
+  onbVowOffice: "La carte honnête, chaque jour — **votre date ne bouge jamais en silence.**",
   onbContinue: 'Continuer',
   onbStepsAria: (n, total) => `Étape ${n} sur ${total}`,
   // Une fonction, pas une chaîne : passer valide le niveau DÉJÀ choisi

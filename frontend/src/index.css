@@ -586,37 +586,21 @@
   color: var(--text-secondary);
   letter-spacing: 0.03em;
 }
-/* A range input styled down to a scrub bar. The two vendor thumb rules
-   are deliberately NOT comma-joined — a selector one engine can't
-   parse invalidates the whole rule for that engine. */
-.exam-audio-player__range {
-  width: 100%;
-  height: 4px;
-  padding: 0;
-  margin: 0;
-  border: none;
-  border-radius: 999px;
-  background: var(--border);
-  accent-color: var(--line-color, var(--line-exam));
-  appearance: none;
-  -webkit-appearance: none;
-  cursor: pointer;
-}
-.exam-audio-player__range::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 13px;
-  height: 13px;
-  border: none;
-  border-radius: 50%;
-  background: var(--line-color, var(--line-exam));
-}
-.exam-audio-player__range::-moz-range-thumb {
-  width: 13px;
-  height: 13px;
-  border: none;
-  border-radius: 50%;
-  background: var(--line-color, var(--line-exam));
+/* The scrubber is the shared 目盛 (the .dial block), wearing the
+   listening section's own pigment — the last of the three slider
+   drawings that block was written to consolidate, and the one it left
+   behind. Its own drawing had a 13px flat thumb, no track rule at all
+   (so each engine drew whatever it liked), no hover, a dead
+   accent-color under appearance:none, and a 4px-tall control box for a
+   drag target the app's own .field comment puts a 44px floor under.
+   The compound selector is load bearing: .dial is declared LATER in
+   this file at equal specificity, so a bare .exam-audio-player__range
+   would lose these inks to the instrument's defaults and the thumb
+   would come back grey. Same shape as .onb-months__dial .dial. */
+.exam-audio-player__range.dial {
+  --dial-rail: var(--border);
+  --dial-ink: var(--line-color, var(--line-exam));
+  --dial-ink-hover: color-mix(in srgb, var(--line-color, var(--line-exam)) 70%, var(--text-primary));
 }
 .exam-audio-player__replay {
   position: relative;
@@ -3831,6 +3815,18 @@
   color: var(--text-secondary);
   line-height: 1.6;
 }
+/* The terms the sentence is actually a contract about — the pace, the
+   count, the destination, the date — lifted out of the soft ink the
+   rest of the line wears, at tabular figures (DESIGN.md, Figures). The
+   <strong> comes from the copy's own **…** runs; see components/ui/
+   Emphasized.jsx for why the marker lives in the string table. Each of
+   these takes the ink of the ground it sits on: paper for the office's
+   hint and the vow, sumi for the two feet that print on a panel. */
+.onb-goal__hint strong {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
 
 @media (max-width: 560px) {
   .onb-board__cols,
@@ -3893,6 +3889,10 @@
   font-size: var(--fs-sm);
   line-height: 1.6;
   color: var(--text-on-panel-soft);
+}
+.onb-promise__foot strong {
+  color: var(--text-on-panel);
+  font-variant-numeric: tabular-nums;
 }
 
 /* The four lines, named — rings in their own pigments, nothing more. */
@@ -4225,6 +4225,10 @@
 .onb-vow__what {
   font-size: var(--fs-sm);
   color: var(--text-secondary);
+}
+.onb-vow__what strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -23751,6 +23755,10 @@ html { scrollbar-gutter: stable; }
   font-size: var(--fs-sm);
   line-height: 1.6;
   color: var(--text-on-panel-soft);
+}
+.jour-rev__foot strong {
+  color: var(--text-on-panel);
+  font-variant-numeric: tabular-nums;
 }
 .jour-rev__actions {
   display: flex;

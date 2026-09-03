@@ -4,6 +4,7 @@ import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
 import { addDays, journeyModel } from '../../domain/goalMath'
 import { MAX_PACE, serviceLabel } from '../onboarding/paces'
+import { Emphasized } from '../ui/Emphasized'
 import { ContractGrid } from './ContractGrid'
 import { GhostTrack } from './GhostTrack'
 import { journeyStations } from './stations'
@@ -237,7 +238,7 @@ function JourneyReverse({
         planLabel={t.jourPlan}
       />
 
-      <p className="jour-rev__foot">{foot}</p>
+      <p className="jour-rev__foot"><Emphasized text={foot} /></p>
 
       <ContractGrid status={status} start={start} fmt={fmt} t={t} />
 

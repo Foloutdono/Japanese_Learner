@@ -982,17 +982,17 @@ const profile = {
   jourTurnOver:      'Turn over',
   jourDays:          (n) => `${n} days`,
   jourFootOnTime:    (a, p, dest, date) =>
-    `${a} a day, right on the promised ${p}. ${dest} arrival holds at ${date}.`,
+    `**${a} a day**, right on the promised **${p}**. ${dest} arrival holds at **${date}**.`,
   jourFootAhead:     (a, p, dest, days, date) =>
-    `${a} a day against the promised ${p} — ${dest} comes ${days} days early, around ${date}.`,
+    `**${a} a day** against the promised **${p}** — ${dest} comes **${days} days early**, around **${date}**.`,
   jourFootBehind:    (a, p, dest, date, days) =>
-    `Last 14 days: ${a} a day against the promised ${p}. At today's rhythm ${dest} arrives ${date} — ${days} days behind the date on your pass.`,
+    `Last 14 days: **${a} a day** against the promised **${p}**. At today's rhythm ${dest} arrives **${date}** — **${days} days** behind the date on your pass.`,
   jourFootSuspended: (date) =>
-    `No study in 14 days. The ${date} on your pass no longer means anything — resume, or reprint it with a date that does.`,
+    `No study in 14 days. The **${date}** on your pass no longer means anything — resume, or reprint it with a date that does.`,
   jourFootPaceKept:  (a, p) =>
-    `Last 14 days: ${a} a day against your promised ${p}. No fixed arrival — the pace is the whole promise.`,
+    `Last 14 days: **${a} a day** against your promised **${p}**. No fixed arrival — the pace is the whole promise.`,
   jourFootPaceSuspended: (p) =>
-    `No study in 14 days against a promise of ${p} a day. The line waits — the gate opens with one card.`,
+    `No study in 14 days against a promise of **${p} a day**. The line waits — the gate opens with one card.`,
   jourNoDest:        'No destination on this pass.',
   jourNoDestLink:    'Set one at the office',
   jourActRecover:    (pace) => `Run ${pace} a day`,
@@ -1758,15 +1758,15 @@ const onboarding = {
   onbFixDestSub: (level, n) => `${level} first — ${n} items`,
   onbCallingAt: 'This train calls at',
   onbCallNow: 'Now',
-  onbHonestRide: (perDay, min) => `Riding ${perDay} a day (≈ ${min} min) with no fixed destination — the office still keeps score, and you can buy a destination later from your pass.`,
-  onbHonestNoRun: (dest, months, required) => `${dest} in ${months} months means ${required} new items a day — the office won't pretend that's a pace. Move the date or the destination and it becomes one.`,
-  onbHonestPlan: (perDay, min, items, dest, date) => `${perDay} a day, every day — about ${min} minutes — ${items} items, arriving ${dest} around ${date}. New material only; reviews ride on top. Miss days and this date moves — and the app will say so.`,
+  onbHonestRide: (perDay, min) => `Riding **${perDay} a day** (≈ ${min} min) with no fixed destination — the office still keeps score, and you can buy a destination later from your pass.`,
+  onbHonestNoRun: (dest, months, required) => `**${dest}** in **${months} months** means **${required} new items a day** — the office won't pretend that's a pace. Move the date or the destination and it becomes one.`,
+  onbHonestPlan: (perDay, min, items, dest, date) => `**${perDay} a day, every day** — about ${min} minutes — **${items} items**, arriving **${dest}** around **${date}**. New material only; reviews ride on top. Miss days and this date moves — and the app will say so.`,
   // 案内 — the promise scene, and 定期券's two beats (plan 063, phase F).
   onbPromiseTitle: 'The map that will tell you the truth.',
   onbPromiseBody: (perDay) => `Your line is printed on the back of your pass. Two cars ride it: your train, and a dashed one showing where ${perDay} a day says you should be. Turn the pass over, any day, and the map answers.`,
   onbPromiseLine: (start, dest) => `Your line — ${start} → ${dest}`,
   onbPromiseExample: 'example',
-  onbPromiseFoot: 'Drift, and the map says so — in days, not guilt — with the two honest fixes one tap away: run a faster service, or reprint the date in ink. It will never move on its own.',
+  onbPromiseFoot: 'Drift, and the map says so — **in days, not guilt** — with the two honest fixes one tap away: run a faster service, or reprint the date in ink. It will never move on its own.',
   onbLinesRow: 'Four lines serve this station once you’re through:',
   onbSignTitle: 'Sign, and the office prints.',
   onbFormLatin: 'Pass application',
@@ -1778,8 +1778,8 @@ const onboarding = {
   onbPrint: 'Print the pass',
   onbEditApp: 'Edit the application',
   onbDeparts: (time) => `departs ${time} daily`,
-  onbVowYou: (perDay, time) => `${perDay} a day, most days${time ? `, around ${time}` : ''}.`,
-  onbVowOffice: 'The honest map, every day — your date never moves in silence.',
+  onbVowYou: (perDay, time) => `**${perDay} a day**, most days${time ? `, around ${time}` : ''}.`,
+  onbVowOffice: 'The honest map, every day — **your date never moves in silence.**',
   onbContinue: 'Continue',
   onbStepsAria: (n, total) => `Step ${n} of ${total}`,
   // A function, not a string: skipping completes at the level ALREADY

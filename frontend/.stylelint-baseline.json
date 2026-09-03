@@ -109,7 +109,7 @@
   "no-duplicate-selectors::Duplicate selector \".door__leaf--l\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".door__leaf--r\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".mcq-row\", first used at line N": 1,
-  "property-no-vendor-prefix::Vendor-prefixed property \"-webkit-appearance\"": 5,
+  "property-no-vendor-prefix::Vendor-prefixed property \"-webkit-appearance\"": 3,
   "property-no-vendor-prefix::Vendor-prefixed property \"-moz-appearance\"": 1,
   "shorthand-property-no-redundant-values::Expected \"0 0 8px 0\" to be \"0 0 8px\"": 1,
   "shorthand-property-no-redundant-values::Expected \"20px 12px 24px 12px\" to be \"20px 12px 24px\"": 1,
