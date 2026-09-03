@@ -19,6 +19,7 @@ import { DEPART_TIMES } from '../components/onboarding/departures'
 import { DepartureChips } from '../components/onboarding/DepartureChips'
 import { StopPattern } from '../components/onboarding/DepartureBoard'
 import { GhostTrack } from '../components/journey/GhostTrack'
+import { Emphasized } from '../components/ui/Emphasized'
 import { journeyStations } from '../components/journey/stations'
 
 // ── みどりの窓口 — the ticket office ─────────────────────────────
@@ -392,7 +393,7 @@ export default function OnboardingFlow({ session, initialProfile, onComplete, dr
                     now={goalNowDate}
                   />
                 )}
-                <p className="onb-goal__hint">{honestLine(t, lang, goal, derived)}</p>
+                <p className="onb-goal__hint"><Emphasized text={honestLine(t, lang, goal, derived)} /></p>
               </>
             ) : (
               <p className="onb-step__hint">{t.onbMapUnavailable}</p>
@@ -658,7 +659,7 @@ function PromiseStep({ t, volumes, startLevel, goal, derived, moved, showGap, on
           youLabel={t.jourYou}
           planLabel={t.jourPlan}
         />
-        <p className="onb-promise__foot">{t.onbPromiseFoot}</p>
+        <p className="onb-promise__foot"><Emphasized text={t.onbPromiseFoot} /></p>
       </div>
 
       <div className="onb-lines">
@@ -814,11 +815,11 @@ function PassStep({
       <div className="onb-vow">
         <div className="onb-vow__row">
           <span className="onb-vow__who" lang="ja">あなた</span>
-          <span className="onb-vow__what">{t.onbVowYou(perDay, time)}</span>
+          <span className="onb-vow__what"><Emphasized text={t.onbVowYou(perDay, time)} /></span>
         </div>
         <div className="onb-vow__row">
           <span className="onb-vow__who" lang="ja">窓口</span>
-          <span className="onb-vow__what">{t.onbVowOffice}</span>
+          <span className="onb-vow__what"><Emphasized text={t.onbVowOffice} /></span>
         </div>
       </div>
 

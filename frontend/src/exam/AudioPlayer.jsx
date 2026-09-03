@@ -113,7 +113,7 @@ export default function AudioPlayer({ src }) {
       <div className="exam-audio-player__track">
         <input
           type="range"
-          className="exam-audio-player__range"
+          className="dial exam-audio-player__range"
           min={0}
           max={duration || 0}
           step={0.1}
