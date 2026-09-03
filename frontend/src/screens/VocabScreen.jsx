@@ -33,6 +33,7 @@ import {
 } from '../domain/studyModes'
 import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
+import { rewardTier } from '../domain/rewardTier'
 
 // The 8s fetch timeout that used to live here is gone: useCardSession
 // owns the abort signal and the timeout now (10s, matched to the cold
@@ -315,13 +316,23 @@ export default function VocabScreen({ session }) {
     const gates = pendingGatesRef.current
 
     if (preview) {
-      gates.add('toast')
       // leveledUp/newLevel come from applyXpGain's own running total,
       // not preview.leveled_up/preview.new_level — the latter is
       // computed once per batch fetch and can't see XP already
       // earned from other cards answered earlier in this same batch
       // (see the comment on applyXpGain for why that matters here).
       const { leveledUp, newLevel } = applyXpGain({ amount: preview.xp_earned })
+      // A fare tick is a corner badge at the top-right, under the XP
+      // ring it reports to — it never touches the card. Gating the
+      // next card on its fade cost 2175ms measured (1900 hold + 260
+      // exit), on the overwhelming majority of reviews, for an
+      // animation the learner is not even looking at. XpToast's own
+      // note calls this tier "under a second, corner of the screen, no
+      // interaction"; it now behaves that way, playing over the next
+      // card instead of in place of it. The louder two tiers still
+      // gate: a level board is a moment, and a rank waits to be
+      // dismissed by hand.
+      if (rewardTier({ leveledUp, newLevel }) !== 'fare') gates.add('toast')
       setXpToast({ amount: preview.xp_earned, id: Date.now(), leveledUp, newLevel, quality })
 
       if (preview.stage_up) {

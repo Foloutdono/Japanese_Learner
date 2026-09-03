@@ -14,6 +14,7 @@ import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
+import { rewardTier } from '../domain/rewardTier'
 // The card faces themselves live beside the other study components now,
 // because the daily queue (screens/TodayScreen) renders the same five
 // structures and a second copy of them is how two payload shapes drift
@@ -285,18 +286,27 @@ export default function StudyScreen({ session }) {
 
       try {
         if (preview) {
-          gates.add('toast')
-          // Guard against a non-numeric xp_earned (undefined/NaN) — the
-          // gate above is already added by this point, and if
+          // Guard against a non-numeric xp_earned (undefined/NaN): if
           // applyXpGain or setXpToast were to throw on a bad value,
-          // execution would abort right here: no toast would ever
-          // render, meaning nothing is left to fire the animationend
-          // that normally clears the 'toast' gate. The try/catch around
-          // this whole block is the same guarantee from the other side:
-          // even if something here still throws, the gate gets dropped
-          // in the catch instead of hanging forever.
+          // execution would abort right here and no toast would ever
+          // render — so nothing would be left to fire the animationend
+          // that clears the 'toast' gate. The gate is now added BELOW,
+          // after the tier is known, so a throw before that point
+          // leaves no gate to hang on; the catch's delete stays as the
+          // guarantee from the other side for the tiers that do gate.
           const amount = typeof preview.xp_earned === 'number' ? preview.xp_earned : 0
           const { leveledUp, newLevel } = applyXpGain({ amount })
+          // A fare tick is a corner badge at the top-right, under the XP
+          // ring it reports to — it never touches the card. Gating the
+          // next card on its fade cost 2175ms measured (1900 hold + 260
+          // exit), on the overwhelming majority of reviews, for an
+          // animation the learner is not even looking at. XpToast's own
+          // note calls this tier "under a second, corner of the screen, no
+          // interaction"; it now behaves that way, playing over the next
+          // card instead of in place of it. The louder two tiers still
+          // gate: a level board is a moment, and a rank waits to be
+          // dismissed by hand.
+          if (rewardTier({ leveledUp, newLevel }) !== 'fare') gates.add('toast')
           if (leveledUp) safeToForce = false
           setXpToast({ amount, id: Date.now(), leveledUp, newLevel, quality })
           if (preview.stage_up) {
