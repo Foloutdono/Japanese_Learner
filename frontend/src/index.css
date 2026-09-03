@@ -11108,6 +11108,15 @@ textarea:focus-visible {
   margin-right: 4px;
 }
 
+/* The count of what the card is not printing. Deliberately the index
+   register, not the readings' — it is a note about the list, not a
+   member of it. */
+.reading-group__more {
+  font-size: var(--reading-index-size, 13px);
+  color: var(--text-secondary);
+  align-self: center;
+}
+
 .reading-group__item-text {
   font-family: var(--reading-font, inherit);
 }

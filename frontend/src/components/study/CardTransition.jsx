@@ -167,6 +167,22 @@ export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage,
   // there's no routing to do — just show it whenever it matches.
   const showStamp = stamp?.cardKey === cardKey
 
+  // …but a stamp we are NOT showing can never animate, and the screens
+  // hold the next card until onStampDone fires (see each screen's
+  // pendingGatesRef). So an unshowable stamp hangs the queue on an
+  // animation that will never run — which is exactly what TodayScreen
+  // did for as long as its two keys disagreed: the promotion stamp was
+  // invisible AND the card froze behind it. Report it at once instead;
+  // the ref keeps that to one report per stamp, since onStampDone is
+  // an inline arrow at every call site and changes identity on every
+  // render.
+  const reportedRef = useRef(null)
+  useEffect(() => {
+    if (!stamp || showStamp || reportedRef.current === stamp.id) return
+    reportedRef.current = stamp.id
+    onStampDone?.()
+  }, [stamp, showStamp, onStampDone])
+
   return (
     <div className={`quiz-card-stage${className ? ` ${className}` : ''}`}>
       <div
