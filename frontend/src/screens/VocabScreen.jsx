@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
-import { translatedMap } from '../lib/translationCache'
+import {
+  translatedMap, applyTranslations, retranslateSelection,
+} from '../lib/translationCache'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -178,14 +180,19 @@ export default function VocabScreen({ session }) {
       // Only the words that HAVE a translation reach the map — see
       // translatedMap for why writing an untranslated one onto the
       // card is what left MeaningDisplay with nothing to render and
-      // the reveal blank.
+      // the reveal blank. applyTranslations then rewrites the prompt
+      // and the MCQ options from that one map, keyed the same way the
+      // fetch above was.
       const map = translatedMap(entries)
       updateCurrent(cur => ({
-        ...cur,
+        ...applyTranslations(cur, wordForm, map),
         lang: targetLang,
-        meaning: map[wordForm(cur)] ?? cur.meaning,
-        choices: (cur.choices ?? []).map(c => ({ ...c, meaning: map[wordForm(c)] ?? c.meaning })),
       }))
+      // The rows moved language under an answer already given — see
+      // retranslateSelection.
+      setSelected(prev => retranslateSelection(
+        prev, cardToTranslate.hints?.indice_1, wordForm, map,
+      ))
     })
   }
 

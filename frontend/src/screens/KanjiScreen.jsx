@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
-import { translatedMap } from '../lib/translationCache'
+import {
+  translatedMap, applyTranslations, retranslateSelection,
+} from '../lib/translationCache'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -210,14 +212,19 @@ export default function KanjiScreen({ session }) {
         .then(data => [word, data.translation || ''])
     )).then(entries => {
       // Empty translations are dropped rather than written over the
-      // card — see translatedMap for why.
+      // card — see translatedMap for why — and the prompt and the MCQ
+      // options are rewritten together from the one map, keyed by the
+      // character, exactly as the fetch above was.
       const map = translatedMap(entries)
       updateCurrent(cur => ({
-        ...cur,
+        ...applyTranslations(cur, entry => entry.kanji, map),
         lang: targetLang,
-        meaning: map[cur.kanji] ?? cur.meaning,
-        choices: (cur.choices ?? []).map(c => ({ ...c, meaning: map[c.kanji] ?? c.meaning })),
       }))
+      // The rows moved language under an answer already given — see
+      // retranslateSelection.
+      setSelected(prev => retranslateSelection(
+        prev, cardToTranslate.hints?.indice_1, entry => entry.kanji, map,
+      ))
     })
   }
 
