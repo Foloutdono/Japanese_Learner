@@ -4092,18 +4092,30 @@
   color: var(--accent);
   font-size: var(--fs-body);
 }
+/* The holder's name is a NAME, and DESIGN.md assigns names the serif —
+   it says so about this exact object ("the holder's name on the pass").
+   The pass this one prints into on the profile already sets it that way
+   (.pass__holder .profile-card__name); the office's printed pass was
+   the odd one out. The departure line beside it stays on the display
+   face, which is where figures belong. */
 .onb-pass__holder {
-  font-family: var(--font-display);
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: var(--fs-lead);
   overflow-wrap: anywhere;
 }
 .onb-pass__departs {
+  font-family: var(--font-display);
   font-weight: 500;
   font-size: var(--fs-sm);
   color: var(--text-on-panel-soft);
 }
+/* The pattern is drawn by the board's own <svg>, which carries the
+   board's 96px width — so this rule sized a wrapper around a diagram
+   that stayed 96px and the printed pass never showed the 140px it
+   asks for. The width has to reach the drawing. */
 .onb-pass__pattern { width: 140px; }
+.onb-pass__pattern .onb-board__pat { width: 100%; }
 .onb-pass__grid {
   display: flex;
   gap: var(--sp-6);
@@ -23619,7 +23631,11 @@ html { scrollbar-gutter: stable; }
   flex-direction: column;
   align-items: center;
   gap: var(--sp-1);
-  transition: left 0.25s ease;
+  /* The two cars are TRAINS: they pull away and settle rather than
+     sliding at a flat rate, which is the mockup's own easing for them
+     and the reason it gives the cars a different curve from the fill
+     and the bracket (those keep 0.25s ease, here and there). */
+  transition: left 0.6s cubic-bezier(0.3, 0.7, 0.3, 1);
 }
 .jour-track__you  { top: 2px; }
 .jour-track__plan { top: 76px; }
