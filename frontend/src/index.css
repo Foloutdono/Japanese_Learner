@@ -3092,7 +3092,17 @@
   color: var(--accent);
   border: 2.5px solid var(--accent);
   border-radius: var(--r-pill);
-  transform: rotate(-7deg);
+  /* The tilt is named, not literal, because the landing keyframes READ
+     it: onb-stamp-in rotates by var(--stamp-tilt) in all three frames
+     and carries no fallback (unlike the profile's copy of the same
+     idea). --stamp-tilt is defined only on the rally's own stamps, a
+     sibling subtree, so with a literal here every transform frame
+     referenced an undefined property, was invalid at computed-value
+     time, and dropped — leaving the seal to fade in UNTILTED and then
+     snap to -7deg when the animation ended. Measured: transform "none"
+     against the rally stamp's scale 1.70 at the same instant. */
+  --stamp-tilt: -7deg;
+  transform: rotate(var(--stamp-tilt));
   /* The seal LANDS — it is the reward for the first honest rating, and
      the office already owns the stamp that lands (the stamp rally's
      --fresh mark rides these same keyframes). Without it the banner
