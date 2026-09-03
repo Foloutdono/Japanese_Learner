@@ -37,6 +37,7 @@ import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 import { PencilIcon } from '../components/ui/Icons'
 import { RadicalAnswer } from '../components/study/RadicalPieces'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
+import { rewardTier } from '../domain/rewardTier'
 
 // The 8s fetch timeout that used to live here is gone: useCardSession
 // owns the abort signal and the timeout now (10s, matched to the cold
@@ -326,7 +327,6 @@ export default function KanjiScreen({ session }) {
     }
 
     if (preview) {
-      gates.add('toast')
       // Optimistic bump for TopBar's ring / mobile level bar / burger
       // profile row — moves them immediately instead of waiting on
       // useProfileSummary's next cached /api/profile refetch.
@@ -336,6 +336,17 @@ export default function KanjiScreen({ session }) {
       // earned from other cards answered earlier in this same batch
       // (see the comment on applyXpGain for why that matters here).
       const { leveledUp, newLevel } = applyXpGain({ amount: preview.xp_earned })
+      // A fare tick is a corner badge at the top-right, under the XP
+      // ring it reports to — it never touches the card. Gating the
+      // next card on its fade cost 2175ms measured (1900 hold + 260
+      // exit), on the overwhelming majority of reviews, for an
+      // animation the learner is not even looking at. XpToast's own
+      // note calls this tier "under a second, corner of the screen, no
+      // interaction"; it now behaves that way, playing over the next
+      // card instead of in place of it. The louder two tiers still
+      // gate: a level board is a moment, and a rank waits to be
+      // dismissed by hand.
+      if (rewardTier({ leveledUp, newLevel }) !== 'fare') gates.add('toast')
       setXpToast({ amount: preview.xp_earned, id: Date.now(), leveledUp, newLevel, quality })
 
       if (preview.stage_up) {

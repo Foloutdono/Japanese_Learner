@@ -27,6 +27,7 @@ import { board } from '../stores/boarding'
 import { applyXpGain } from '../stores/profileSummary'
 import { formatGlossLine } from '../components/study/gloss'
 import { romajiEquals } from '../lib/romaji'
+import { rewardTier } from '../domain/rewardTier'
 
 // ── 本日の運行 ────────────────────────────────────────────────
 // The day's queue: everything due, across every section and every
@@ -275,11 +276,23 @@ export default function TodayScreen({ session }) {
 
       try {
         if (preview) {
-          gates.add('toast')
-          // Guard against a non-numeric xp_earned: the gate is already
-          // added, so a throw here would leave nothing to clear it.
+          // Guard against a non-numeric xp_earned: a throw here would
+          // leave nothing to clear a gate. The 'toast' gate is added
+          // below, once the tier is known, so a throw before that
+          // point leaves no gate to hang on.
           const amount = typeof preview.xp_earned === 'number' ? preview.xp_earned : 0
           const { leveledUp, newLevel } = applyXpGain({ amount })
+          // A fare tick is a corner badge at the top-right, under the XP
+          // ring it reports to — it never touches the card. Gating the
+          // next card on its fade cost 2175ms measured (1900 hold + 260
+          // exit), on the overwhelming majority of reviews, for an
+          // animation the learner is not even looking at. XpToast's own
+          // note calls this tier "under a second, corner of the screen, no
+          // interaction"; it now behaves that way, playing over the next
+          // card instead of in place of it. The louder two tiers still
+          // gate: a level board is a moment, and a rank waits to be
+          // dismissed by hand.
+          if (rewardTier({ leveledUp, newLevel }) !== 'fare') gates.add('toast')
           if (leveledUp) safeToForce = false
           setXpToast({ amount, id: Date.now(), leveledUp, newLevel, quality })
           if (preview.stage_up) {
