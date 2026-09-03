@@ -27,3 +27,7 @@ plans/*.md
 .claude/*
 !.claude/launch.json
 
+# Pre-change dumps from scripts/rescale_intervals.py --apply. They are a
+# snapshot of a learner's SRS state, and they are how the migration is
+# undone — worth keeping on the machine that ran it, never in the repo.
+rescale-restore-*.csv
