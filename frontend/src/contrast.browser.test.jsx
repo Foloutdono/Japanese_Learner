@@ -235,16 +235,37 @@ const Fixture = () => (
         element rather than children. They are here so the question is
         settled by measurement and stays settled. */}
 
-    {/* ProfileScreen.jsx:447 */}
+    {/* Banzuke.jsx -- the 番付 as the 定期入れ round rebuilt it: a head
+        carrying the 今週/通算 toggle, then 東 and 西 sides. The selected
+        segment is the ambient ink on a 14% gold wash over --surface,
+        which is a mix on a mix and so invisible to part 1. */}
     <div className="banzuke">
-      <div className="banzuke__rows">
-        <div className="leaderboard-row">
-          <span className="leaderboard-row__rank">1</span>
-          <span className="leaderboard-row__name">Aoi</span>
-          <span className="leaderboard-row__level">Niveau 12</span>
-          <span className="leaderboard-row__xp">4,210 XP</span>
+      <div className="bz__head">
+        <span className="bz__mark">
+          <span className="bz__jp" lang="ja">番付</span>
+        </span>
+        <span className="seg">
+          <button type="button" className="seg__opt bz-seg-off">
+            <span className="seg__opt-jp" lang="ja">今週</span>
+          </button>
+          <button type="button" className="seg__opt seg__opt--on bz-seg-on">
+            <span className="seg__opt-jp" lang="ja">通算</span>
+          </button>
+        </span>
+      </div>
+      <div className="bz__sides">
+        <div className="bz__side">
+          <div className="bz__side-head">
+            <span className="bz__side-jp bz-side-jp" lang="ja">東</span>
+          </div>
+          <div className="leaderboard-row">
+            <span className="leaderboard-row__rank">1</span>
+            <span className="leaderboard-row__name">Aoi</span>
+            <span className="leaderboard-row__level">Niveau 12</span>
+            <span className="leaderboard-row__xp">4,210 XP</span>
+          </div>
+          <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
         </div>
-        <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
       </div>
     </div>
 
@@ -309,6 +330,65 @@ const Fixture = () => (
         <span className="comp-option-btn__letter">A.</span>
         answer
       </button>
+    </div>
+
+    {/* ── The 定期入れ profile (2026-09) ──
+        Four inks the contract cannot predict, because each is a
+        color-mix sitting on another color-mix: the eki stamp's lacquer
+        on its own lacquer wash, the ticket stub's gold on its own gold
+        wash, and a line pigment mixed toward the ambient ink on a bare
+        --surface. The stub is the reason these are here — it shipped at
+        4.44:1 in light theme at a 60% mix and was only caught by
+        measuring, which is exactly the failure this guard exists for. */}
+    <section className="sbook">
+      <div className="sbook__grid">
+        <span className="sbook__stamp pf-stamp">18</span>
+        <span className="sbook__stamp sbook__stamp--today pf-stamp-today">31</span>
+      </div>
+    </section>
+    <div className="tix">
+      <button type="button" className="tkt">
+        <span className="tkt__stub pf-stub" lang="ja">初</span>
+        <span className="tkt__body">
+          <span className="tkt__name pf-tkt-name">First steps</span>
+          <span className="tkt__count pf-tkt-count">7 / 10</span>
+        </span>
+      </button>
+    </div>
+    {/* Both extremes of the four line pigments: 朱 is the tightest of
+        them in dark theme, 松葉 in light. The roundel is the profile's
+        one line-coloured ink. */}
+    <div className="pf-ledger">
+      <button type="button" className="pf-line" style={{ '--line-color': 'var(--line-kana)' }}>
+        <span className="pf-line__roundel pf-roundel-kana">KN</span>
+        <span className="pf-line__of pf-line-of">/ 896</span>
+      </button>
+      <button type="button" className="pf-line" style={{ '--line-color': 'var(--line-grammar)' }}>
+        <span className="pf-line__roundel pf-roundel-grammar">BP</span>
+      </button>
+    </div>
+    {/* 今夜's rank disc is the board's own sumi disc inside a paper row. */}
+    <section className="tonight">
+      <button type="button" className="todo">
+        <span className="todo__arrow pf-todo-arrow" lang="ja">三</span>
+        <span className="todo__of pf-todo-of">番付</span>
+      </button>
+    </section>
+    {/* The pass's back: sumi in both themes, pinned inline like the board
+        above because the real face paints a gradient the ground-walker
+        cannot composite. */}
+    <div className="jour-flip__face--back" style={{ background: 'var(--bg-panel)' }}>
+      <div className="jour-grid">
+        <div className="jour-grid__cell">
+          <span className="jour-grid__k pf-grid-k" lang="ja">種別</span>
+          <span className="jour-grid__v pf-grid-v">
+            10<span className="jour-grid__u pf-grid-u"> / jour</span>
+          </span>
+        </div>
+        <div className="jour-grid__cell">
+          <span className="jour-grid__v jour-grid__v--gold pf-grid-gold">1 juin 2027</span>
+        </div>
+      </div>
     </div>
 
     {/* ── Plan 063 — the goal line (onboarding board, pass, journey) ──
@@ -445,6 +525,25 @@ const SITES = [
   ['.jr-validity-b', 'pass footer 有効期限 (gold on sumi)'],
   ['.jr-gap-b', 'ghost track day bracket (state ink on sumi)'],
   ['.jr-error', 'journey reprint error (state ink on sumi)'],
+
+  // The 定期入れ profile — every one a mix on a mix (see the fixture).
+  ['.pf-stamp', 'eki stamp day (lacquer ink on lacquer wash)'],
+  ['.pf-stamp-today', "today's eki stamp (lacquer ink on denser wash)"],
+  ['.pf-stub', 'ticket stub glyph (gold ink on gold wash)'],
+  ['.pf-tkt-name', 'ticket occasion'],
+  ['.pf-tkt-count', 'ticket progress count'],
+  ['.pf-roundel-kana', 'ledger roundel, 朱 (line pigment mixed toward the ink)'],
+  ['.pf-roundel-grammar', 'ledger roundel, 松葉'],
+  ['.pf-line-of', 'ledger reachable total'],
+  ['.pf-todo-arrow', '今夜 rank disc (panel ink on sumi, inside a paper row)'],
+  ['.pf-todo-of', '今夜 row source'],
+  ['.bz-seg-on', '番付 selected period (ambient ink on gold wash)'],
+  ['.bz-seg-off', '番付 unselected period'],
+  ['.bz-side-jp', '番付 東/西 side mark'],
+  ['.pf-grid-k', 'pass contract key (sumi)'],
+  ['.pf-grid-v', 'pass contract value (sumi)'],
+  ['.pf-grid-u', 'pass contract unit (sumi)'],
+  ['.pf-grid-gold', 'pass contract 有効期限 (gold on sumi)'],
 ]
 
 // Composite every non-transparent background from <html> down to the element.

@@ -11,17 +11,33 @@ of the screens, at
 `https://claude.ai/code/artifact/0b6dadc8-6b40-4f83-9238-69dd19b5e30e`. The
 canvas is the **picture**; this file is the **rule**. Where they disagree,
 this file wins — a canvas cannot be grepped and does not travel with a clone.
+Anything it shows of the profile predates the 定期入れ round and is history,
+not a target; the round's own exploration (three directions, one chosen) is a
+second canvas at
+`https://claude.ai/code/artifact/2f8fcfaf-0c5a-447a-807d-ffad3903101f`, which
+was likewise not updated after the decision. The code is the reference for
+that screen.
 
 ## The idea
 
 The app is a Japanese railway station. Learning is a journey: sections are
 **lines** (路線), screens are **stations**, choices are **platforms** (のりば),
-your profile is a **commuter pass** (定期券), and the home screen is the
+your profile is a **commuter pass** (定期券) in its **holder** (定期入れ), and
+the home screen is the
 **gate hall**: the day's reviews at the **fare gate** (改札), your pass under
 them, and the **route map** (路線図) on the wall — every line of the app with
 your own train somewhere along it. (It was a departure board, 発車標, until
 the wall-map redesign; the map answers "how far have I come", which a board
 of equal departures never could.)
+
+The pass is a physical object, so it behaves like one. It has a front and a
+back — the contract it was issued under, 乗車駅 · 行先 · 種別 · 発車時刻 ·
+有効期限 · 発行日 — it carries the door to its own settings, because 設定 is
+the card's own preferences and not a place you travel to, and the profile
+screen is the **holder** it lives in: the card, and the inserts tucked behind
+it. An insert is a stamp sheet, a rank plaque, a ledger, a row of tickets. It
+does not need a caption, which is what lets that screen print no section
+headings at all (see Structure).
 
 This is not decoration. It is the reason the app can show eleven subjects
 without a menu that looks like a menu, and the reason a colour can mean
@@ -88,6 +104,29 @@ the screen.
 An object about the user never wears a line colour. A figure about study state
 never wears a line colour. This is why `--pass-ink` exists as a separate
 pigment rather than borrowing one.
+
+### The pass has two materials, and neither is a line
+
+Charcoal (`--pass-ink`) is the card. **Gold (`--accent2`) is its metal** — the
+balance bar, the 段位 stamp, the 有効期限 printed on the back, and the XP ring.
+
+The ring was `--accent9` until the profile round, and `--accent9` is 瑠璃,
+which in dark theme is the same value as `--line-honyaku`: the one object on
+the screen that means *you* was wearing a section's pigment. The same
+reasoning had already retired the top bar's XP arc; the profile's ring was the
+last one holding out. `--accent9` itself is a leftover from when /profile was
+modelled as a station with a pigment of its own, before `config/identity.js`
+ruled that a pass is not a place.
+
+`--accent2` and `--line-jisho` are also the same hex, in both themes. That is
+not a hidden alias and it does not make gold a line pigment — the traditional
+palette is small, so pigments coincide (`--accent` and `--line-kana` do too,
+and `--rating-wrong` was minted precisely so a third meaning would not have to
+borrow either). **The test is the object, not the hex.** A roundel on the 辞書
+card wears 辞書's pigment; a bar on the pass wears the pass's metal; they
+render identically and mean different things, and each reads its own token.
+Never reach for the token that happens to match — reach for the one that
+names what the object is.
 
 ### One line, one colour
 
@@ -195,9 +234,21 @@ next to it.
 
 - **Hairline lattice** — a grid of bare figures. `display: grid; gap: 1px` on a
   `--surface-line` background, with a 1px outer border. The hairline *is* the
-  gap; there are no inner padding boxes. Use for records, headline stats.
+  gap; there are no inner padding boxes. Use for records, headline stats, and
+  the profile's ledger of lines.
 - **Surface panel** — anything with a progress bar or prose. The standard card
   above.
+
+**A lattice's column count must divide its content**, at every breakpoint.
+The seams are the background showing through the gaps, so a short last row
+shows that background as a bare slab with nothing in it. Write the counts per
+tier (4 → 2 → 1) rather than reaching for `repeat(auto-fit, minmax(…))`, which
+looks right at the widths where the arithmetic happens to work and breaks at
+the one in between — the ledger of four lines did exactly that at three
+columns, and the three halls did it again between 560 and 1000px. Content that
+is genuinely ragged, like a collection that is partly empty, does not belong
+in a lattice at all: that is why the badges were separated tiles and are now
+tickets.
 
 ### Radii are assigned by weight
 
@@ -222,6 +273,27 @@ panel at `--r-panel`, two rows split by a `1px --surface-line` hairline. Row 1
 holds the filter chips, with the single primary action pinned right. Row 2
 holds search, with the result count pinned right. One console everywhere, not
 three — a screen that needs filtering reaches for this, not a bespoke bar.
+
+### The ticket
+
+A 記念乗車券 — the commemorative ticket a station hands out — is the app's
+object for **a thing you earned**: a stub carrying one glyph, a body carrying
+the occasion, and a punch hole through to the wall behind once it is spent. A
+ticket not yet earned carries its progress where the hole would be, and any
+ticket turns over on tap to say what it is for, because "7 / 10" means nothing
+until you know what is being counted.
+
+It replaced the badge medallion, which was the one object on the profile that
+could have come from any app, and it fixed the same problem the lattice rule
+above describes: a collection is partly empty by definition, so it cannot use
+a device that only looks right when every row is full. The stub's ink is the
+pass's gold mixed 55% toward the ambient ink, measured 6.25:1 dark and 4.81:1
+light on its own 16% wash. At 60% — the mix every other gold figure in the
+sheet uses — it read 4.43:1 in light theme, under the floor, and it was caught
+only because the pair was measured rather than eyeballed. Guard 4 holds it now
+as `.pf-stub`, along with the rest of the profile's mixes: an ink that is a
+`color-mix` sitting on a ground that is another `color-mix` is exactly what
+part 1's contract cannot predict, and every such pair belongs in the fixture.
 
 ### The primary button
 
@@ -316,7 +388,11 @@ So:
 - Cards in a grid **share a height** — uneven cards break the flow of the page.
   But the fix for a short card is to give it **content**, never padding. If a
   card cannot fill the shared height with something real, the whole row is too
-  tall: tighten it. Dead space is the failure, not unevenness.
+  tall: tighten it. Dead space is the failure, not unevenness. Where a card
+  really is stretched by its neighbour, hand the slack to the content's own
+  spacing rather than to the box: the 段位 plaque is a flex column and its
+  line takes `margin: auto 0`, so a taller neighbour opens the gaps around the
+  drawing instead of pooling emptiness under it.
 - A card wider than ~440px must **earn** its width with a right-hand column
   (meta, a figure, a status). If it has nothing to put there, it should be
   narrower or the grid should have more columns.
@@ -347,6 +423,19 @@ So:
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a
   station.
+- **The rally has two sizes, and they are the same mark.** Seven days on the
+  pass in the gate hall; five whole weeks, Monday to Sunday, as the profile's
+  スタンプ帳. Same lacquer (`--daruma-aka`), same per-slot wobble, same press
+  on today. The row answers "how many in a row"; the sheet answers "which
+  days", which is the question the week's bar chart could never answer and
+  the reason that chart is gone. A missing day is a dashed outline, not a
+  gap — seven or thirty-five slots always exist, because the shape of the
+  month is the information.
+- **A segmented toggle is the rating bar's construction at chip size** — one
+  pill, segments divided by hairlines rather than gaps, and the selected
+  segment *washed* at ~14% rather than filled. The 番付's 今週/通算 switch is
+  the first outside the quiz. Anything that picks one of two or three views of
+  the same data reaches for this, not for two buttons that both look pressable.
 
 ## Structure
 
@@ -354,6 +443,29 @@ So:
   station plate, the wall map's masthead, or the pass. A plated screen never prints
   a second heading.
 - Section headings are `<h2>` inside the paired `SectionHeader`.
+- **A screen may be composed of inserts instead of sections, and then it
+  prints no `SectionHeader` at all.** The profile is the worked example: the
+  pass is the `<h1>`, and every block beneath it is an object that names
+  itself — a stamp sheet with 九月 in its margin, a plaque that opens 三級, a
+  ledger whose cells carry their own roundels, a row of tickets, three
+  doorways, a 番付. It printed six `SectionHeader`s over six self-evident
+  objects, which is the second rule's exact failure: a caption for a figure
+  the layout already explains. **A block that needs a heading to be legible is
+  not finished** — give it the mark that names it, the way each ledger cell
+  carries its own roundel and 線 name instead of sitting under a "Lines" title.
+- **A line with stops is how this app draws distance**, and it is one drawing
+  shared by three screens: the wall map's four lines, the pass's ghost track,
+  and the 段位 ladder, which was a progress bar until the profile round. Same
+  parts every time — a rail, a filled run behind you, stops with labels, your
+  train between two of them. Reach for it over a bar whenever the axis has
+  named waypoints; keep the bar for a span that is only a percentage.
+- **A forward-looking block on a backward-looking screen offers only what is
+  actually in reach.** The profile is a record; 今夜 is its one exception, and
+  it is bounded to what a single session can finish — a daily doll, a ticket
+  within a hundred reviews, a rank within 500 XP — rendering nothing at all
+  when nothing qualifies. Mastery badges never appear there however close they
+  look, because intervals take weeks. A goal measured in weeks belongs on the
+  pass's back, where the ghost train already measures it.
 - Four column widths: `--board-w` (1040px) for the station column,
   `min(1240px, 100%)` for a plated selection screen, 720px for unplated prose,
   and `--card-w` (640px) for the study card column — the quiz prompt card,
@@ -370,8 +482,11 @@ So:
 
 - Do not create a new stylesheet. One file, namespaced selectors.
 - Do not invent a size, space, radius or tracking value.
-- Do not use a line pigment for anything that is not a section.
+- Do not use a line pigment for anything that is not a section — and check the
+  object, not the hex; several pigments coincide.
 - Do not use a state colour decoratively.
+- Do not put a heading on a block that already names itself.
+- Do not give a flush lattice a column count its content cannot fill.
 - Do not put colour on chrome.
 - Do not write the Latin line as a transliteration.
 - Do not hand-copy a component's markup to get its look — use the component.
