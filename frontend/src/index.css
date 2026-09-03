@@ -17385,73 +17385,6 @@ textarea:focus-visible {
   justify-content: center;
 }
 
-/* A footed card stacks: body, then the strip flush to the edges.
-   .vocab-card-boost .prompt-card above sets display:flex with centred
-   items at the same specificity as `.prompt-card:has(...)`, so the tie
-   broke on source order and the footer rendered BESIDE the prompt. This
-   sits after it deliberately. */
-/* Two classes, to match `.vocab-card-boost .prompt-card`'s specificity --
-   one class loses to it outright no matter where it sits in the file, which
-   is what left align-items at `center` and the strip shrink-wrapped. Placed
-   after it so the tie breaks this way. */
-.prompt-card.prompt-card--footed {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-}
-
-/* The body is the card's stage, and it owns the leftover height.
-   `justify-content: flex-start` above only says where the two rows
-   start; nothing was claiming the space below them, so a card that
-   was taller than its content -- every vocab/grammar card, which
-   carry a 220px floor -- piled that spare height up UNDER the strip
-   and the "flush to the card's edges" this whole layout exists for
-   was true on one face and not the other. Measured on the vocab
-   word->meaning card (see PromptCard.browser.test.jsx, which pins
-   this): the front stood 247.8px tall with the strip flush, and the
-   revealed meaning collapsed the card onto its 220px floor and left
-   the strip floating 37.4px above its own bottom edge.
-
-   `flex: 1 0 auto`, not `flex: 1`: the shorthand's 0 basis would hand
-   this a 0 hypothetical size and lean on `min-height: auto` to grow it
-   back -- and the floor below replaces that automatic minimum with a
-   definite one, so a card taller than `max-height: 60vh` would shrink
-   the body under its own content and spill it over the strip instead
-   of scrolling. Grow into spare height, never shrink; the card's
-   `overflow: auto` is what handles too much.
-
-   Centred rather than top-aligned, because this is where the unfooted
-   card's own `justify-content: center` used to put the prompt (see
-   .vocab-card-boost .prompt-card above) -- the strip took the padding
-   with it, and the centring has to follow. `align-items` stays at its
-   `stretch` default on purpose: `center` would shrink-wrap .flashcard
-   to its text and re-open the dead click zone its negative margins
-   exist to close (see .vocab-card-boost .flashcard below). */
-.prompt-card--footed .prompt-card__body {
-  flex: 1 0 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-/* The 220px floor is the STAGE's, not the card's. It was written when
-   the card WAS the stage; the strip is a caption added under it, so
-   leaving the floor on the card let the strip eat 43px of stage --
-   and, worse, made the card's height track its face: the 72px word
-   measured 106.8px with its "tap to reveal" line, the 28px meaning
-   that answers it 56.6px, so the card visibly shrank on every reveal
-   and took the rating bar under it along for the ride. On the body, both faces clear the same floor
-   and the card is the same height on both. The card's own min-height
-   (above) still governs the UNFOOTED card -- Today/deck study render
-   this same prompt without a strip, and there the card really is the
-   stage. */
-.vocab-card-boost .prompt-card--footed .prompt-card__body,
-.grammar-card-boost .prompt-card--footed .prompt-card__body {
-  min-height: 220px;
-}
-
 /* On every OTHER screen .flashcard is a plain block child, and a
    block element's auto width already solves negative side margins by
    growing the box to fill them — that's the whole mechanism the
@@ -17512,6 +17445,89 @@ textarea:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/* A footed card stacks: body, then the strip flush to the edges.
+   Two classes, to match `.vocab-card-boost .prompt-card`'s specificity --
+   one class loses to it outright no matter where it sits in the file, which
+   is what left align-items at `center` and the strip shrink-wrapped.
+
+   It has to sit after BOTH boosts, and for a while it only sat after
+   vocab's: .grammar-card-boost .prompt-card is declared below that one
+   and ties with this rule at (0,2,0), so on a grammar card the tie broke
+   the other way and align-items stayed `center` -- the strip shrank to
+   its own text and its hairline pulled ~40px in from each edge, a short
+   centred line floating inside the card instead of the rule that closes
+   it. Vocab was fine only because its boost happens to be declared
+   first. Moving this below the grammar boost settles both, and any
+   future `*-card-boost` belongs ABOVE it for the same reason. */
+.prompt-card.prompt-card--footed {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+/* The body is the card's stage, and it owns the leftover height.
+   `justify-content: flex-start` above only says where the two rows
+   start; nothing was claiming the space below them, so a card that
+   was taller than its content -- every vocab/grammar card, which
+   carry a 220px floor -- piled that spare height up UNDER the strip
+   and the "flush to the card's edges" this whole layout exists for
+   was true on one face and not the other. Measured on the vocab
+   word->meaning card (see PromptCard.browser.test.jsx, which pins
+   this): the front stood 247.8px tall with the strip flush, and the
+   revealed meaning collapsed the card onto its 220px floor and left
+   the strip floating 37.4px above its own bottom edge.
+
+   `flex: 1 0 auto`, not `flex: 1`: the shorthand's 0 basis would hand
+   this a 0 hypothetical size and lean on `min-height: auto` to grow it
+   back -- and the floor below replaces that automatic minimum with a
+   definite one, so a card taller than `max-height: 60vh` would shrink
+   the body under its own content and spill it over the strip instead
+   of scrolling. Grow into spare height, never shrink; the card's
+   `overflow: auto` is what handles too much.
+
+   Centred rather than top-aligned, because this is where the unfooted
+   card's own `justify-content: center` used to put the prompt (see
+   .vocab-card-boost .prompt-card above) -- the strip took the padding
+   with it, and the centring has to follow. `align-items` stays at its
+   `stretch` default on purpose: `center` would shrink-wrap .flashcard
+   to its text and re-open the dead click zone its negative margins
+   exist to close (see .vocab-card-boost .flashcard below). */
+.prompt-card--footed .prompt-card__body {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* The body is a flex column, so an INLINE child of it is a flex item
+   and stretches the full width -- which for 理解's question badge (an
+   inline-flex span whose whole visual is a 2px underline, see
+   .type-badge) drew that underline clean across the card instead of
+   under its own four words. Nothing else in a card body is inline;
+   every other mode's children are blocks, which stretched exactly as
+   they did when the body was one. */
+.prompt-card__body > .type-badge {
+  align-self: center;
+}
+
+/* The 220px floor is the STAGE's, not the card's. It was written when
+   the card WAS the stage; the strip is a caption added under it, so
+   leaving the floor on the card let the strip eat 43px of stage --
+   and, worse, made the card's height track its face: the 72px word
+   measured 106.8px with its "tap to reveal" line, the 28px meaning
+   that answers it 56.6px, so the card visibly shrank on every reveal
+   and took the rating bar under it along for the ride. On the body,
+   both faces clear the same floor and the card is the same height on
+   both. The card's own min-height (above) still governs the UNFOOTED
+   card -- Today/deck study render this same prompt without a strip,
+   and there the card really is the stage. */
+.vocab-card-boost .prompt-card--footed .prompt-card__body,
+.grammar-card-boost .prompt-card--footed .prompt-card__body {
+  min-height: 220px;
 }
 
 /* ── EmptyState component ─────────────────────────────────── */
@@ -17892,7 +17908,12 @@ textarea:focus-visible {
      sitting almost on the rating bar, and the assist buttons almost on
      the card. */
   .quiz-area { padding: 32px 24px max(32px, 14vh); gap: var(--sp-6); }
-  .flashcard__hint { margin-top: 2px;}
+  /* 2px here, with .char-display's own margin zeroed at 480px, left
+     "tap to reveal" sitting on the specimen's descenders -- one line
+     of 12px text 2px under a 104px glyph reads as a collision, not as
+     a caption. A rung of the scale, and still a compression of the
+     desktop 10px. */
+  .flashcard__hint { margin-top: var(--sp-3); }
 
   /* The Explorer's group header is five columns wide by design, and at
      this width they stop fitting on one line. Sharing the leftovers
@@ -18090,9 +18111,21 @@ textarea:focus-visible {
      card's own padding has shrunk to almost nothing. --card-pad-top
      carries that headroom into .flashcard's own clickable box too
      (see its rule), so the padding shrinking here can't reopen the
-     dead-click-zone the vars exist to close. */
+     dead-click-zone the vars exist to close.
+
+     The SIDE padding is what a phone genuinely cannot spare -- a 72px
+     word wants every pixel of a 332px card. The BOTTOM never was: at
+     --sp-1 the specimen and its "tap to reveal" line ended 4px above
+     the footer strip's hairline, measured on every footed mode (kana,
+     kanji, 読書, 翻訳, 理解) against 44px on the same card at desktop
+     width. That is not a compression of the desktop card, it is a
+     different card. --sp-6 is the rung that reads as deliberate air
+     under the content without spending the height a phone needs for
+     the rating bar. Set on --card-pad-y rather than on the padding
+     itself so .flashcard's negative margin follows it and the whole
+     strip stays clickable (see .flashcard). */
   .prompt-card {
-    --card-pad-y: var(--sp-1);
+    --card-pad-y: var(--sp-6);
     --card-pad-x: var(--sp-1);
     --card-pad-top: var(--sp-8);
     border-radius: 10px;

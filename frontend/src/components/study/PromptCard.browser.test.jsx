@@ -5,8 +5,9 @@ import { LangProvider } from '../../LangContext'
 import CardPrompt from './CardPrompt'
 import PromptCard from './PromptCard'
 import {
-  Flashcard, CharDisplay, MeaningDisplay, InlineReveal,
+  Flashcard, CharDisplay, MeaningDisplay, InlineReveal, QuestionTypeBadge,
 } from './QuizComponents'
+import { GrammarRule } from './GrammarPieces'
 import ReadingsInput from './ReadingsInput'
 import { DrawingQuiz } from './DrawingCanvas'
 // Same stylesheet-import trick as CardPrompt.browser.test.jsx (plan 048)
@@ -213,5 +214,132 @@ describe("the footed card's strip", () => {
     expect(card.getBoundingClientRect().bottom - foot.getBoundingClientRect().bottom)
       .toBeLessThanOrEqual(BORDER)
     expect(card.getBoundingClientRect().height).toBe(frontHeight)
+  })
+})
+
+// ── The card's own padding, at both widths ─────────────────
+//
+// A layout checkup of every study mode at 1280 and 390 found four
+// defects that a screenshot shows instantly and no test could see.
+// These pin what was fixed, each with the number it failed at.
+const PHONE = [390, 844]
+
+function KanjiCard() {
+  return (
+    <div className="quiz-card-stage">
+      <PromptCard foot={{ left: 'N5 漢字', right: 'Kanji → sens' }}>
+        <Flashcard
+          t={{ tapToReveal: 'Touchez pour révéler' }}
+          resetKey="j1"
+          front={<CharDisplay char="山" size={100} />}
+          back={<MeaningDisplay meaning="mountain" size={28} />}
+        />
+      </PromptCard>
+    </div>
+  )
+}
+
+describe("the study card's padding", () => {
+  it('leaves the phone card real air under its content, not 4px', async () => {
+    await page.viewport(...PHONE)
+    const screen = await render(<Contained><KanjiCard /></Contained>)
+    const { container } = screen
+    await settled(container)
+    const hint = container.querySelector('.flashcard__hint')
+    const foot = container.querySelector('.prompt-card__foot')
+    // --card-pad-y was --sp-1 (4px) on a phone: the "tap to reveal"
+    // line ended 4px above the strip's hairline while the same card at
+    // desktop width had 44px. --sp-6 now.
+    expect(foot.getBoundingClientRect().top - hint.getBoundingClientRect().bottom)
+      .toBeGreaterThanOrEqual(16)
+  })
+
+  it('keeps the hint off the specimen on a phone', async () => {
+    await page.viewport(...PHONE)
+    const screen = await render(<Contained><KanjiCard /></Contained>)
+    const { container } = screen
+    await settled(container)
+    const spec = container.querySelector('.char-display')
+    const hint = container.querySelector('.flashcard__hint')
+    // .flashcard__hint's margin-top was a 2px literal under 640px, and
+    // .char-display's own margin is zeroed under 480px: 12px of text sat
+    // 2px under a 100px glyph.
+    expect(hint.getBoundingClientRect().top - spec.getBoundingClientRect().bottom)
+      .toBeGreaterThanOrEqual(6)
+  })
+
+  it('runs the strip edge to edge on a grammar card, not just a vocab one', async () => {
+    const screen = await render(
+      <Contained>
+        <div className="quiz-card-stage grammar-card-boost">
+          <PromptCard className="grammar-prompt" foot={{ left: 'N5 文法', right: 'Règle → sens' }}>
+            <GrammarRule text="〜たことがある" size={52} />
+          </PromptCard>
+        </div>
+      </Contained>
+    )
+    const { container } = screen
+    await settled(container)
+    const card = container.querySelector('.prompt-card--footed')
+    const foot = container.querySelector('.prompt-card__foot')
+    // .grammar-card-boost .prompt-card is declared after
+    // .prompt-card.prompt-card--footed and ties with it at (0,2,0), so
+    // align-items stayed `center` here and the strip shrank to its own
+    // text — a short centred line with its hairline ~40px in from each
+    // edge. Vocab escaped only because its boost is declared first.
+    expect(foot.getBoundingClientRect().width)
+      .toBeCloseTo(card.getBoundingClientRect().width - 2, 0)
+  })
+
+  it('fits a meaning prompt inside the card instead of running it off both edges', async () => {
+    const screen = await render(
+      <Contained>
+        <CardPrompt
+          card={{
+            card_id: 'v-b2f', source: 'vocab', mode: 'vocab.flashcard.b2f',
+            direction: 'b2f', kanji: 'お手洗い', kana: 'おてあらい',
+            meaning: 'toilet, restroom, lavatory',
+          }}
+          t={t} session={{}} cardNonce={0}
+        />
+      </Contained>
+    )
+    const { container } = screen
+    await settled(container)
+    const card = container.querySelector('.prompt-card')
+    // The meaning→word front used to be a CharDisplay at the 72px word
+    // rung: one nowrap line, centred, overflowing — "Toilettes · Petit
+    // coin" was cut off at BOTH ends, with the ellipsis never shown
+    // because a centred flex overflow has no end to mark.
+    expect(card.scrollWidth).toBeLessThanOrEqual(card.clientWidth + 1)
+    expect(container.querySelector('.meaning-display__primary')).toBeTruthy()
+  })
+
+  it('lets an inline child of the body keep its own width', async () => {
+    const screen = await render(
+      <LangProvider>
+        <Contained>
+          <PromptCard foot={{ left: 'N5 理解' }}>
+            <QuestionTypeBadge type="comprehension" />
+            <div className="comp-question-text">この人はいつ散歩しますか。</div>
+          </PromptCard>
+        </Contained>
+      </LangProvider>
+    )
+    const { container } = screen
+    await settled(container)
+    const body = container.querySelector('.prompt-card__body')
+    const badge = container.querySelector('.type-badge')
+    // Against the body's CONTENT width, which is what a stretched item
+    // fills exactly — measuring against its border box instead leaves
+    // the card's own padding as slack, and a stretched badge slips
+    // through by those 44px.
+    const bodyStyle = getComputedStyle(body)
+    const content = body.clientWidth
+      - parseFloat(bodyStyle.paddingLeft) - parseFloat(bodyStyle.paddingRight)
+    // The body is a flex column, so the badge — an inline-flex span
+    // whose whole visual is a 2px underline — became a stretched flex
+    // item and drew that underline across the entire card.
+    expect(badge.getBoundingClientRect().width).toBeLessThan(content * 0.6)
   })
 })

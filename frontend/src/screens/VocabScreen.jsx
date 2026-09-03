@@ -636,7 +636,17 @@ export default function VocabScreen({ session }) {
                     front={
                       isKjToM
                         ? wordDisplay(72)
-                        : <CharDisplay char={formatGlossLine(card.meaning)} size={72} />
+                        // The prompt is a MEANING in this direction, not a
+                        // word: CharDisplay is a specimen box (nowrap, one
+                        // line, a fixed 72px) and a French gloss line like
+                        // "Toilettes · Petit coin" ran straight out of both
+                        // card edges, unreadable at either end -- it centres
+                        // its overflow, so `text-overflow: ellipsis` never
+                        // even got to mark the cut. MeaningDisplay is the
+                        // component for this: it wraps, and it sizes itself
+                        // from the gloss's own length. Same call Kanji's own
+                        // sens → 漢字 front has always made.
+                        : <MeaningDisplay meaning={card.meaning} size={44} />
                     }
                     back={
                       <InlineReveal
@@ -667,7 +677,9 @@ export default function VocabScreen({ session }) {
                       main={
                         isKjToM
                           ? <CharDisplay char={wordForm(card)} size={72} />
-                          : <CharDisplay char={formatGlossLine(card.meaning)} size={72} />
+                          // Same swap as the flashcard front above, for the
+                          // same reason -- see there.
+                          : <MeaningDisplay meaning={card.meaning} size={44} />
                       }
                     />
                     <RevealActions
