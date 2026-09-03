@@ -3,6 +3,10 @@ import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 import { LangProvider } from '../../LangContext'
 import CardPrompt from './CardPrompt'
+import PromptCard from './PromptCard'
+import {
+  Flashcard, CharDisplay, MeaningDisplay, InlineReveal,
+} from './QuizComponents'
 import ReadingsInput from './ReadingsInput'
 import { DrawingQuiz } from './DrawingCanvas'
 // Same stylesheet-import trick as CardPrompt.browser.test.jsx (plan 048)
@@ -128,5 +132,86 @@ describe('the study card column (plan 049)', () => {
         '.prompt-card.drawing-quiz__card'
       )
     ).toBe('700px')
+  })
+})
+
+// ── The footed card's strip, on both faces ─────────────────
+//
+// Study.dc.html closes the study card with a hairline strip flush to
+// its bottom edge. It was flush on the front only. The 220px floor
+// (.vocab-card-boost/.grammar-card-boost) sat on the CARD, and nothing
+// in the column claimed the height left over once the content came in
+// under it — so a revealed meaning (28px, and no "tap to reveal" hint
+// under it) left the strip floating in the middle of the card with a
+// dead band beneath it, and the card itself shrank on the flip and
+// took the rating bar under it along. Measured on this very card
+// before the fix: front 247.8px with the strip flush, back 220px with
+// the strip 37.4px above the card's own bottom edge.
+//
+// Both numbers below are read AFTER the entrance animation settles —
+// .card-transition-live enters on a 260ms scale, and a rect measured
+// mid-animation is the real one times 0.98, which silently drifts
+// every assertion here.
+const FOOT = { left: 'N5 単語', right: 'Mot → sens' }
+
+function VocabFlashcard() {
+  return (
+    <div className="quiz-card-stage vocab-card-boost">
+      <div className="card-transition">
+        <div className="card-transition-live">
+          <PromptCard foot={FOOT}>
+            <Flashcard
+              t={{ tapToReveal: 'Cliquez pour révéler' }}
+              resetKey="v1"
+              front={<CharDisplay char="あびる" size={72} />}
+              back={(
+                <InlineReveal
+                  t={{}}
+                  stacked
+                  main={<MeaningDisplay meaning="to bathe, to shower" size={28} />}
+                />
+              )}
+            />
+          </PromptCard>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+async function settled(container) {
+  await Promise.all(
+    container.getAnimations({ subtree: true }).map(a => a.finished.catch(() => {}))
+  )
+  // One frame past the last animation, so the final layout is committed
+  // before anything is measured.
+  await new Promise(resolve => requestAnimationFrame(() => resolve()))
+}
+
+// The card's own 1px bottom border sits between the strip's border box
+// and the card's — anything past that is dead space.
+const BORDER = 1.5
+
+describe("the footed card's strip", () => {
+  it('stays flush to the bottom edge, and the card the same height, across the flip', async () => {
+    const screen = await render(<Contained><VocabFlashcard /></Contained>)
+    const { container } = screen
+    const card = container.querySelector('.prompt-card--footed')
+    const foot = container.querySelector('.prompt-card__foot')
+
+    await settled(container)
+    const frontHeight = card.getBoundingClientRect().height
+    expect(card.getBoundingClientRect().bottom - foot.getBoundingClientRect().bottom)
+      .toBeLessThanOrEqual(BORDER)
+
+    container.querySelector('.flashcard').click()
+    await settled(container)
+
+    // The reveal really happened — otherwise the two heights below
+    // would match for the wrong reason.
+    expect(container.querySelector('.flashcard__face').textContent).toContain('To bathe')
+    expect(card.getBoundingClientRect().bottom - foot.getBoundingClientRect().bottom)
+      .toBeLessThanOrEqual(BORDER)
+    expect(card.getBoundingClientRect().height).toBe(frontHeight)
   })
 })

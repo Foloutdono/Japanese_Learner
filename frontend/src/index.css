@@ -17402,6 +17402,56 @@ textarea:focus-visible {
   justify-content: flex-start;
 }
 
+/* The body is the card's stage, and it owns the leftover height.
+   `justify-content: flex-start` above only says where the two rows
+   start; nothing was claiming the space below them, so a card that
+   was taller than its content -- every vocab/grammar card, which
+   carry a 220px floor -- piled that spare height up UNDER the strip
+   and the "flush to the card's edges" this whole layout exists for
+   was true on one face and not the other. Measured on the vocab
+   word->meaning card (see PromptCard.browser.test.jsx, which pins
+   this): the front stood 247.8px tall with the strip flush, and the
+   revealed meaning collapsed the card onto its 220px floor and left
+   the strip floating 37.4px above its own bottom edge.
+
+   `flex: 1 0 auto`, not `flex: 1`: the shorthand's 0 basis would hand
+   this a 0 hypothetical size and lean on `min-height: auto` to grow it
+   back -- and the floor below replaces that automatic minimum with a
+   definite one, so a card taller than `max-height: 60vh` would shrink
+   the body under its own content and spill it over the strip instead
+   of scrolling. Grow into spare height, never shrink; the card's
+   `overflow: auto` is what handles too much.
+
+   Centred rather than top-aligned, because this is where the unfooted
+   card's own `justify-content: center` used to put the prompt (see
+   .vocab-card-boost .prompt-card above) -- the strip took the padding
+   with it, and the centring has to follow. `align-items` stays at its
+   `stretch` default on purpose: `center` would shrink-wrap .flashcard
+   to its text and re-open the dead click zone its negative margins
+   exist to close (see .vocab-card-boost .flashcard below). */
+.prompt-card--footed .prompt-card__body {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* The 220px floor is the STAGE's, not the card's. It was written when
+   the card WAS the stage; the strip is a caption added under it, so
+   leaving the floor on the card let the strip eat 43px of stage --
+   and, worse, made the card's height track its face: the 72px word
+   measured 106.8px with its "tap to reveal" line, the 28px meaning
+   that answers it 56.6px, so the card visibly shrank on every reveal
+   and took the rating bar under it along for the ride. On the body, both faces clear the same floor
+   and the card is the same height on both. The card's own min-height
+   (above) still governs the UNFOOTED card -- Today/deck study render
+   this same prompt without a strip, and there the card really is the
+   stage. */
+.vocab-card-boost .prompt-card--footed .prompt-card__body,
+.grammar-card-boost .prompt-card--footed .prompt-card__body {
+  min-height: 220px;
+}
+
 /* On every OTHER screen .flashcard is a plain block child, and a
    block element's auto width already solves negative side margins by
    growing the box to fill them — that's the whole mechanism the

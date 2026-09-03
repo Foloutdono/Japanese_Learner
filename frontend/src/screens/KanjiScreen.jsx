@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import { translatedMap } from '../lib/translationCache'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -208,7 +209,9 @@ export default function KanjiScreen({ session }) {
         .then(r => r.json())
         .then(data => [word, data.translation || ''])
     )).then(entries => {
-      const map = Object.fromEntries(entries)
+      // Empty translations are dropped rather than written over the
+      // card — see translatedMap for why.
+      const map = translatedMap(entries)
       updateCurrent(cur => ({
         ...cur,
         lang: targetLang,

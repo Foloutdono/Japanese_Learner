@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import { translatedMap } from '../lib/translationCache'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { TopBar } from '../components/ui/TopBar'
@@ -174,7 +175,11 @@ export default function VocabScreen({ session }) {
         .then(r => r.json())
         .then(data => [word, data.translation || ''])
     )).then(entries => {
-      const map = Object.fromEntries(entries)
+      // Only the words that HAVE a translation reach the map — see
+      // translatedMap for why writing an untranslated one onto the
+      // card is what left MeaningDisplay with nothing to render and
+      // the reveal blank.
+      const map = translatedMap(entries)
       updateCurrent(cur => ({
         ...cur,
         lang: targetLang,
