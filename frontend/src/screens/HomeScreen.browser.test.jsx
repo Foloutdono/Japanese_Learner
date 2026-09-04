@@ -16,8 +16,8 @@ import '../index.css'
 //      four tracked lines, four practice rows, three facility chips.
 //      A section silently dropped from the map is a screen you can
 //      never visit again without the burger menu.
-//   2. The map's arithmetic reaches the DOM: stops past the halfway
-//      mark are painted, due counts ride as chips.
+//   2. The map's arithmetic reaches the DOM: the stops the train has
+//      passed are painted, due counts ride as chips.
 //   3. The gate departs to /today through the same store the rows use.
 //   4. A failed or foreign stats payload still draws the full map —
 //      the exact shape App.onboarding.browser.test.jsx's generic mock
@@ -81,12 +81,22 @@ const TODAY = {
 }
 
 const STATS = {
+  // Per-mode buckets (the stats screen's unit) and per-card items (the
+  // map's) both ship in the payload; the map reads only the latter.
   vocab: {
-    // N5 fully mastered, N4 half learning: two painted stops.
     N5: { 'vocab.flashcard.f2b': { total: 10, new: 0, learning: 0, mastered: 10 } },
     N4: { 'vocab.flashcard.f2b': { total: 10, new: 0, learning: 10, mastered: 0 } },
   },
   kana: {}, kanji: {}, grammar: {},
+  items: {
+    // N5 finished, N4 halfway: the train stands on N4's platform, so
+    // exactly one station is behind it.
+    vocab: {
+      N5: { total: 10, learned: 10, score: 1 },
+      N4: { total: 10, learned: 0, score: 0.5 },
+    },
+    kana: {}, kanji: {}, grammar: {},
+  },
 }
 
 function mount() {
@@ -133,12 +143,16 @@ describe('HomeScreen — the gate hall', () => {
     await settle()
 
     const root = screen.container
-    // vocab: N5 (1.0) and N4 (0.5) clear the half-way mark; N3..N1 don't.
+    // vocab: N5 finished and N4 half done puts the train on N4's
+    // platform, so N5 alone is behind it. A stop is painted when the
+    // train has PASSED it — it used to be painted at score >= 0.5
+    // independently of where the train was, which put a filled dot
+    // ahead of the marker.
     const vocabLine = [...root.querySelectorAll('.wmap-line')]
       .find(el => el.querySelector('.wmap-track'))
     expect(vocabLine).toBeTruthy()
     const painted = root.querySelectorAll('.wmap-track__stop--past')
-    expect(painted).toHaveLength(2)
+    expect(painted).toHaveLength(1)
 
     // The gate leads with the day's number…
     expect(root.querySelector('.gate-card__count').textContent).toBe('24')

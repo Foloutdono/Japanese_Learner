@@ -21,6 +21,13 @@ SECTIONS = (KANA, VOCAB, KANJI, GRAMMAR)
 SECTION_MODES = {source: sorted(GRADED_FOR_SOURCE[source]) for source in SECTIONS}
 
 
+# The day-count a card's interval has to reach to be "mastered" —
+# srs.py's own _classify_stage threshold, named here because the item
+# score below is a fraction OF it rather than a second, independent
+# idea of what mastery means.
+MASTERED_DAYS = 21
+
+
 def _empty_bucket(total: int) -> dict:
     # Everything starts as "new" until the cache proves otherwise.
     return {
@@ -31,6 +38,23 @@ def _empty_bucket(total: int) -> dict:
         "due_now": 0,
         "reviews": 0,   # sum of total_reviews across cards in this bucket
         "correct": 0,   # sum of correct_reviews across cards in this bucket
+    }
+
+
+def _item_stats(best: dict[str, int], total: int) -> dict:
+    """One deck's cards, counted once each.
+
+    `best` is {raw_id: the longest interval that card has reached in any
+    mode}; cards the learner has never reviewed are simply absent, and
+    score zero. `total` is every card the deck holds, so a deck nobody
+    has opened scores 0 rather than dividing by nothing.
+    """
+    learned = sum(1 for days in best.values() if days >= MASTERED_DAYS)
+    scored = sum(min(1.0, days / MASTERED_DAYS) for days in best.values())
+    return {
+        "total": total,
+        "learned": learned,
+        "score": round(scored / total, 4) if total else 0.0,
     }
 
 
@@ -56,6 +80,32 @@ def get_stats(user_id: str = Depends(get_user_id)):
             for deck_key in card_index.deck_keys(source)
         }
         for source in SECTIONS
+    }
+
+    # ── The same decks, counted in cards rather than in drills ──
+    # The per-mode buckets above are the unit the stats screen's bars are
+    # drawn in: vocab.word_reading has its own denominator because it is
+    # its own exercise. The wall map and the profile ledger ask a
+    # different question — how much of this deck do you actually know —
+    # and there a kanji you can read but not write is ONE kanji, not two
+    # fifths of one. Counting drills there made a line's denominator
+    # (card x mode) a number that exists nowhere outside this table, and
+    # capped every line at the modes the learner happens to practise.
+    #
+    # So each card is scored by its BEST mode and counted once:
+    #
+    #   score  = min(1, longest interval across its modes / 21 days)
+    #   learned = that longest interval has reached 21 days
+    #
+    # Continuous on purpose. The buckets' three states put every card at
+    # 0, a flat half, or 1, so one pass over a deck — every card reviewed
+    # once, none of them retained — scored exactly 50% and then crawled.
+    # A fraction of the way to the mastery threshold has no cliff and no
+    # magic constant: it IS the definition of mastered, read early.
+    best_interval: dict[tuple[str, str], dict[str, int]] = {
+        (source, deck_key): {}
+        for source in SECTIONS
+        for deck_key in card_index.deck_keys(source)
     }
 
     prefix_len = len(user_id) + 1  # strip "user_id:" from the stored card_id
@@ -90,7 +140,29 @@ def get_stats(user_id: str = Depends(get_user_id)):
         bucket["reviews"] += item["total_reviews"]
         bucket["correct"] += item["correct_reviews"]
 
-    return buckets
+        # A row with no reviews behind it is not progress on the card,
+        # whatever interval it happens to carry.
+        if item["total_reviews"] > 0:
+            seen = best_interval[(source, deck_key)]
+            interval = item["interval_days"] or 0
+            if interval > seen.get(raw_id, -1):
+                seen[raw_id] = interval
+
+    items = {
+        source: {
+            deck_key: _item_stats(best_interval[(source, deck_key)],
+                                  card_index.item_total(source, deck_key))
+            for deck_key in card_index.deck_keys(source)
+        }
+        for source in SECTIONS
+    }
+
+    # A sibling of the four sections rather than a field inside them:
+    # the sections' own shape is deck -> mode -> counts, and a fifth key
+    # beside the mode keys would be indistinguishable from a mode. Every
+    # consumer reads the sections by name (see the frontend's CATEGORIES
+    # and TRACKED_LINES), so nothing iterates the root and trips over it.
+    return {**buckets, "items": items}
 
 
 # A year of days plus a few, so the practice calendar always has 53

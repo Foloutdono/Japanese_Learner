@@ -1,6 +1,6 @@
 import { getNavLinks } from '../../config/navLinks'
 import { stationFor } from '../../config/stations'
-import { TRACKED_LINES, lineStops, lineTotals, stopsTravelled } from '../../domain/lineProgress'
+import { TRACKED_LINES, lineTotals } from '../../domain/lineProgress'
 
 // ── 乗車記録 — how far down each line you have ridden ───────────
 // The wall map on the home screen draws the four SRS lines with a
@@ -9,10 +9,17 @@ import { TRACKED_LINES, lineStops, lineTotals, stopsTravelled } from '../../doma
 // out of what the line can reach, and the distance travelled as a rail
 // in the line's own pigment.
 //
-// The count is in the 段位 plaque's unit (mastered card-mode pairs, see
-// lineTotals) so the four cells and the rank can be added up against
-// each other; the rail is the wall map's stop arithmetic, so the
-// profile and the home screen agree on how far along a line you are.
+// The figure and the rail are ONE number: cards learned out of cards
+// there are (lineTotals). They used to be two — the figure counted
+// (card, mode) drills while the rail averaged the wall map's stop
+// scores — so finishing N5 vocab and nothing else printed a rail at
+// 20% beside a figure of 1,838 / 24,118, which is 7.6%. Same row, same
+// line, two answers.
+//
+// It answers a different question from the wall map, deliberately: the
+// map says which station you are at, this says how much of the content
+// you know. Neither prints the other's number, so there is nothing for
+// them to disagree about.
 //
 // The one place on the profile where a line pigment appears — as a
 // ring and a rail on a cell that IS that section, which is what the
@@ -25,9 +32,8 @@ export function LineLedger({ stats, t, navigate }) {
     <div className="pf-ledger">
       {lines.map(s => {
         const source = TRACKED_LINES[s.path]
-        const { mastered, total } = lineTotals(stats, source)
-        const stops = lineStops(stats, source)
-        const pct = Math.round((stopsTravelled(stops) / Math.max(1, stops.length)) * 100)
+        const { learned, total } = lineTotals(stats, source)
+        const pct = total ? Math.round((learned / total) * 100) : 0
         return (
           <button
             type="button"
@@ -45,8 +51,8 @@ export function LineLedger({ stats, t, navigate }) {
                 <span className="pf-cap">{s.title}</span>
               </span>
             </span>
-            <span className="pf-line__fig" aria-label={`${mastered.toLocaleString()} ${t.mastered}`}>
-              {mastered.toLocaleString()}
+            <span className="pf-line__fig" aria-label={`${learned.toLocaleString()} ${t.mastered}`}>
+              {learned.toLocaleString()}
               <span className="pf-line__of">/ {total.toLocaleString()}</span>
             </span>
             <span className="pf-line__track" aria-hidden="true">
