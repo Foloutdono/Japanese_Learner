@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 
 // ── Modal behaviour, in one place ─────────────────────────
 // Every overlay in this app was already a scrim with a panel and a
@@ -30,6 +30,17 @@ export function useDialog(onClose) {
   // genuinely the control the user was on when they opened this.
   const returnTo = useRef(null)
 
+  // A ref rather than a dependency: an inline `onClose={() => ...}` gets a
+  // new identity every render, and this effect must NOT re-run over that —
+  // re-running is what re-steals focus to the first control and re-captures
+  // returnTo mid-interaction. Callers may pass a stable callback or not;
+  // either way the trap sets up once per mount and always calls the latest
+  // onClose.
+  const onCloseRef = useRef(onClose)
+  useLayoutEffect(() => {
+    onCloseRef.current = onClose
+  })
+
   useEffect(() => {
     returnTo.current = document.activeElement
 
@@ -49,7 +60,7 @@ export function useDialog(onClose) {
     function onKey(e) {
       if (e.key === 'Escape') {
         e.stopPropagation()
-        onClose()
+        onCloseRef.current()
         return
       }
       if (e.key !== 'Tab' || !ref.current) return
@@ -81,7 +92,7 @@ export function useDialog(onClose) {
         returnTo.current.focus?.()
       }
     }
-  }, [onClose])
+  }, [])
 
   return ref
 }
