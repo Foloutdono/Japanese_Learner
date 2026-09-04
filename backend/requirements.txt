@@ -1,12 +1,27 @@
 pydantic>=2.0
 fastapi>=0.100
+# Not a direct import -- fastapi's own dependency -- but pinned here as a
+# floor anyway: CVE-2026-48710 ("BadHost", Starlette <=1.0.0) is a Host-header
+# auth-bypass bug, and fastapi's own floor (>=0.46.0) is too low to rule it
+# out on its own if a future constraint elsewhere ever pulls an old resolve.
+starlette>=1.0.1
 uvicorn[standard]
 psycopg2-binary
-PyJWT
-cryptography
+# >=2.13.0: fixes CVE-2026-48526, a JWK/HMAC algorithm-confusion bug that
+# lets an attacker forge tokens -- not reachable here since get_user_id()
+# in core/auth.py pins algorithms=["ES256"], but pinned as a floor so a
+# stale resolve can't silently regress the auth path. Also fixes the
+# PyJWKClient cache/DoS bug, CVE-2026-48524.
+PyJWT>=2.13.0
+# >=50.0.0: fixes CVE-2026-69247, a Bleichenbacher timing oracle in PKCS7
+# decrypt.
+cryptography>=50.0.0
 httpx
 aiofiles
-python-multipart
+# >=0.0.32: fixes CVE-2026-40347/CVE-2026-42561 (multipart parser DoS) and
+# CVE-2026-24486 (path traversal, only reachable with UPLOAD_KEEP_FILENAME,
+# which this app doesn't set -- pinned as a floor regardless).
+python-multipart>=0.0.32
 pykakasi
 requests>=2.31.0
 fugashi
