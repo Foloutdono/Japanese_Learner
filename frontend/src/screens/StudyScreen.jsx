@@ -12,9 +12,9 @@ import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
+import { useReviewGates } from '../hooks/useReviewGates'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
-import { rewardTier } from '../domain/rewardTier'
 // The card faces themselves live beside the other study components now,
 // because the daily queue (screens/TodayScreen) renders the same five
 // structures and a second copy of them is how two payload shapes drift
@@ -30,7 +30,6 @@ import {
   modeLabel, modeDesc, usesWritingDrill,
 } from '../domain/studyModes'
 import HintBar from '../components/study/HintBar'
-import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 import { ChevronIcon, PencilIcon } from '../components/ui/Icons'
 
@@ -109,11 +108,8 @@ export default function StudyScreen({ session }) {
   const [showDrawing, setShowDrawing] = useState(false)
   const [drawingEnabled, setDrawingEnabled] = useState(true)
   const [progress, setProgress]       = useState(null)
-  const [xpToast, setXpToast]         = useState(null)
-  const [cardStamp, setCardStamp]     = useState(null)
-  const [locked, setLocked]           = useState(false)
-  // Bumped every single time advance() actually runs (see
-  // checkAdvance) — independent of whether the served card's card_id
+  // Bumped every single time advance() actually runs (see the
+  // useReviewGates call below) — independent of whether the served card_id
   // happens to be different. Everything that resets "for a new card"
   // (the UI-state effect below, Flashcard's resetKey, RevealActions'
   // resetKey) now keys off `${card_id}:${cardNonce}` instead of
@@ -124,18 +120,6 @@ export default function StudyScreen({ session }) {
   // because the nonce changed regardless.
   const [cardNonce, setCardNonce]     = useState(0)
 
-  // Same gating scheme as Kana/Kanji/Vocab/Grammar — see those
-  // screens' own comments for the full rationale.
-  const pendingGatesRef = useRef(new Set())
-  const advancedRef     = useRef(false)
-  // Belt-and-suspenders: if some gate (toast/stamp/training) never
-  // actually clears — a toast that doesn't mount for an edge-case
-  // payload, a drawing overlay dismiss that doesn't fire its onDone,
-  // anything — the session used to just sit there forever: answered
-  // card, no rating bar, nothing to do. This forces every gate open
-  // and advances anyway once too much time has passed, so a stuck
-  // gate costs a skipped animation, not a frozen quiz.
-  const safetyTimerRef  = useRef(null)
 
   // useCardSession's own exclude list only protects cards still
   // sitting unreviewed in its local queue — the card just answered
@@ -159,9 +143,6 @@ export default function StudyScreen({ session }) {
   }
 
 
-  useEffect(() => () => {
-    if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current)
-  }, [])
 
   // v3: bumped alongside this screen's field-name-adapter rewrite — a
   // cached batch from before it has the same shape but the WRONG one
@@ -199,6 +180,15 @@ export default function StudyScreen({ session }) {
     extraExcludeIds,
   })
 
+  // Every screen's rating flow: the lock, the gates the celebrations
+  // open, and the advance once they all close. See hooks/useReviewGates.
+  // The nonce rides along with the pop, so a card handed back under the
+  // same id still resets to a fresh, unrevealed one.
+  const gates = useReviewGates({
+    advance: useCallback(() => { advance(); setCardNonce(n => n + 1) }, [advance]),
+    sessionKey: storageKey,
+  })
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- id-keyed reset in shape, but `showRating`/`answered` are also set mid-flow elsewhere in this screen (hidden/toggled immediately on user action, independent of the card actually changing) — see the other setShowRating/setAnswered call sites below. Moving this into a key-remounted child would need that mid-flow logic threaded back down too, a bigger restructure than this reset justifies.
     setAnswered(false)
@@ -209,27 +199,6 @@ export default function StudyScreen({ session }) {
     setActiveHints([])
   }, [card?.card_id, cardNonce])
 
-  // ── Leaving a card mid-flight must not strand the next one ──────
-  // `locked`, the gate set and the celebration state are per-REVIEW,
-  // but they live on the screen, which survives stepping back to the
-  // picker and coming in again. Walk out while a stamp is playing and
-  // its gate is still in the set on the way back — with no stamp
-  // playing to take it out, the queue never advances and `locked`
-  // never lifts. postReview hides the rating bar the instant a rating
-  // is tapped, so the card sits revealed with no way forward and no
-  // way to rate it again: reported from production on a kana card, and
-  // reproduced in KanaScreen.stuck.browser.test.jsx.
-  //
-  // storageKey is the session's own identity (deck/level/set + mode),
-  // so this fires exactly when the session changes and never mid-card.
-  useEffect(() => {
-    pendingGatesRef.current.clear()
-    advancedRef.current = false
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the same id-keyed-reset shape as the per-card effect beside it, and for the same reason: `locked` and the two celebration states are also set mid-flow by postReview, so a key-remounted child would need that flow threaded back down.
-    setLocked(false)
-    setXpToast(null)
-    setCardStamp(null)
-  }, [storageKey])
 
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
   // mode. Fetched independently from the card so it never blocks or
@@ -249,131 +218,47 @@ export default function StudyScreen({ session }) {
     loadProgress(m)
   }
 
-  function checkAdvance() {
-    if (pendingGatesRef.current.size === 0 && !advancedRef.current) {
-      advancedRef.current = true
-      if (safetyTimerRef.current) {
-        clearTimeout(safetyTimerRef.current)
-        safetyTimerRef.current = null
-      }
-      advance()
-      setCardNonce(n => n + 1)
-      setLocked(false)
-    }
-  }
 
   function postReview(quality) {
-    if (locked || !card) return
-    setLocked(true)
+    if (!card) return
 
-    // Everything from here down is best-effort — XP toast, stage
-    // stamp, the writing drill, the review POST. The one thing that
-    // must happen regardless of whether any of it throws or hangs is
-    // checkAdvance() at the very end, so it's in a finally: a
-    // synchronous error anywhere above can no longer silently skip
-    // past it and leave the card frozen.
-    try {
-      // Same writing-drill trigger as KanjiScreen: only meaningful when
-      // struggling to recall a kanji from its meaning. Keyed on the
-      // card's STRUCTURE, not its source — a hand-written kanji card
-      // wants the same drill a browsed-in one gets, which the old
-      // `card.source === 'builtin_kanji'` check silently denied it.
-      const needTraining =
-        quality <= 3 && structureKeyOf(card) === 'kanji' && card.direction === 'b2f' && drawingEnabled
+    // Same writing-drill trigger as KanjiScreen: only meaningful when
+    // struggling to recall a kanji from its meaning. Keyed on the
+    // card's STRUCTURE, not its source — a hand-written kanji card
+    // wants the same drill a browsed-in one gets, which the old
+    // `card.source === 'builtin_kanji'` check silently denied it. It
+    // rides as a gate of this screen's own, released when the drill is
+    // dismissed (see DrawingOverlay's onDone below).
+    const needTraining =
+      quality <= 3 && structureKeyOf(card) === 'kanji' && card.direction === 'b2f' && drawingEnabled
 
-      loadProgress(mode)
+    // The gates own the lock, so a review already in flight is refused
+    // here rather than half-fired: everything below is this screen's
+    // own business, and none of it should run twice. The stamp's key
+    // carries the nonce because this screen's transition key does — the
+    // backend can hand the same card_id straight back, and a stamp
+    // keyed on the id alone would be offered to a card the transition
+    // has already stopped treating as the same one.
+    if (!gates.review(card.review_preview?.[quality], {
+      cardKey: `${card.card_id}:${cardNonce}`, quality,
+      hold: needTraining ? ['training'] : [],
+    })) return
 
-      // Precomputed at fetch time (see review_preview / preview_reviews_bulk
-      // in decks.py) for every source including custom cards now, so
-      // there's nothing to wait on a round trip for.
-      const preview = card.review_preview?.[quality]
+    setShowRating(false)
+    if (needTraining) setShowDrawing(true)
+    loadProgress(mode)
 
-      advancedRef.current = false
-      const gates = pendingGatesRef.current
-      // Whatever is still in here belongs to a review that is over — a
-      // component that would have cleared it is long gone. `locked` above
-      // means no review can be in flight at this point, so anything left
-      // is stale by construction and would hang this one forever.
-      gates.clear()
-      // A level-up toast never auto-dismisses (see XpToast — it waits
-      // indefinitely for the player to tap the claim button), so the
-      // safety-net below must never force it closed early; that's the
-      // one case where "gate still open" isn't a bug, it's the design.
-      let safeToForce = true
+    // Close the exclude-list race described above: from this point on,
+    // any refill (even one already in flight) must not be able to hand
+    // this exact card back.
+    markReviewed(card.card_id)
 
-      if (needTraining) {
-        gates.add('training')
-        setShowRating(false)
-        setShowDrawing(true)
-        // The 'training' gate clears once the drawing drill is
-        // dismissed (see DrawingOverlay's onDone below).
-      } else {
-        setShowRating(false)
-      }
-
-      try {
-        if (preview) {
-          // Guard against a non-numeric xp_earned (undefined/NaN): if
-          // applyXpGain or setXpToast were to throw on a bad value,
-          // execution would abort right here and no toast would ever
-          // render — so nothing would be left to fire the animationend
-          // that clears the 'toast' gate. The gate is now added BELOW,
-          // after the tier is known, so a throw before that point
-          // leaves no gate to hang on; the catch's delete stays as the
-          // guarantee from the other side for the tiers that do gate.
-          const amount = typeof preview.xp_earned === 'number' ? preview.xp_earned : 0
-          const { leveledUp, newLevel } = applyXpGain({ amount })
-          // A fare tick is a corner badge at the top-right, under the XP
-          // ring it reports to — it never touches the card. Gating the
-          // next card on its fade cost 2175ms measured (1900 hold + 260
-          // exit), on the overwhelming majority of reviews, for an
-          // animation the learner is not even looking at. XpToast's own
-          // note calls this tier "under a second, corner of the screen, no
-          // interaction"; it now behaves that way, playing over the next
-          // card instead of in place of it. The louder two tiers still
-          // gate: a level board is a moment, and a rank waits to be
-          // dismissed by hand.
-          if (rewardTier({ leveledUp, newLevel }) !== 'fare') gates.add('toast')
-          if (leveledUp) safeToForce = false
-          setXpToast({ amount, id: Date.now(), leveledUp, newLevel, quality })
-          if (preview.stage_up) {
-            gates.add('stamp')
-            setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: `${card.card_id}:${cardNonce}` })
-          } else if (preview.stage_down) {
-            gates.add('stamp')
-            setCardStamp({ id: Date.now(), to: preview.stage_down, demoted: true, cardKey: `${card.card_id}:${cardNonce}` })
-          }
-        }
-      } catch (err) {
-        gates.delete('toast')
-        console.error('XP toast setup failed', err)
-      }
-
-      if (gates.size > 0 && safeToForce) {
-        if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current)
-        safetyTimerRef.current = setTimeout(() => {
-          gates.clear()
-          checkAdvance()
-        }, 4000)
-      }
-
-      // Close the exclude-list race described above: from this point
-      // on, any refill (even one already in flight) must not be able
-      // to hand this exact card back.
-      markReviewed(card.card_id)
-
-      // Fire-and-forget — the response isn't read for anything the UI
-      // shows, same as Kanji/Vocab/Grammar's own review calls.
-      apiFetch(`/api/decks/${deck_id}/review`, session, {
-        method: 'POST',
-        body: JSON.stringify({ card_id: card.card_id, mode, quality, prev_stage: card.stage }),
-      }).catch(() => {})
-    } catch (err) {
-      console.error('postReview failed', err)
-      pendingGatesRef.current.clear()
-    } finally {
-      checkAdvance()
-    }
+    // Fire-and-forget — the response isn't read for anything the UI
+    // shows, same as Kana/Kanji/Vocab/Grammar's own review calls.
+    apiFetch(`/api/decks/${deck_id}/review`, session, {
+      method: 'POST',
+      body: JSON.stringify({ card_id: card.card_id, mode, quality, prev_stage: card.stage }),
+    }).catch(() => {})
   }
 
   function onMCQAnswer(choice) {
@@ -486,11 +371,7 @@ export default function StudyScreen({ session }) {
           </button>
         )}
       />
-      <XpToast toast={xpToast} onDone={() => {
-        setXpToast(null)
-        pendingGatesRef.current.delete('toast')
-        checkAdvance()
-      }} />
+      <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
       {/* 蘇芳 — a personal deck is 教材, so this screen wears the same
           pigment as Decks and DeckDetail. Per DESIGN.md's "the pigment
           is injected once"; see DecksScreen's comment for why it sits
@@ -514,19 +395,15 @@ export default function StudyScreen({ session }) {
               available={availableHints}
               active={activeHints}
               onToggle={toggleHint}
-              disabled={locked}
+              disabled={gates.locked}
             />
 
             <CardTransition
               className={cardStageClassName}
               cardKey={`${nc.card_id}:${cardNonce}`}
-              stamp={cardStamp}
+              stamp={gates.stamp}
               stage={nc.stage}
-              onStampDone={() => {
-                setCardStamp(null)
-                pendingGatesRef.current.delete('stamp')
-                checkAdvance()
-              }}
+              onStampDone={gates.stampDone}
             >
               <CardPrompt
                 card={nc} t={t} session={session}
@@ -627,7 +504,7 @@ export default function StudyScreen({ session }) {
               />
             )}
 
-            <RatingBar active={showRating && !locked} onRate={postReview} />
+            <RatingBar active={showRating && !gates.locked} onRate={postReview} />
 
             {showDrawing && (
               <DrawingOverlay
@@ -638,8 +515,7 @@ export default function StudyScreen({ session }) {
                 meaning={formatGlossLine(nc.meaning)}
                 onDone={() => {
                   setShowDrawing(false)
-                  pendingGatesRef.current.delete('training')
-                  checkAdvance()
+                  gates.release('training')
                 }}
               />
             )}
