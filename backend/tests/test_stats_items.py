@@ -17,7 +17,7 @@ import pytest
 
 from core.auth import DEV_USER_ID
 from core.db import db_conn
-from routes.stats import MASTERED_DAYS
+from routes.stats import LEARNING_SHARE, LEARNING_STEPS, MASTERED_DAYS
 from study import card_index
 
 SOURCE, DECK = "kanji", "N5"
@@ -27,23 +27,31 @@ READ, WRITE = "kanji.flashcard.f2b", "kanji.write_kanji"
 def _seed(rows):
     """(raw_id, mode, interval_days, reviews) written straight into
     card_modes — the point is a specific spread of intervals, which
-    srs.review() cannot be asked for."""
+    srs.review() cannot be asked for. Graduated unless `step` is given,
+    in which case the card is mid-learning-steps and its interval_days
+    is 0, exactly as the scheduler leaves it."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            for raw_id, mode, interval, reviews in rows:
+            for row in rows:
+                raw_id, mode, interval, reviews = row[:4]
+                step = row[4] if len(row) > 4 else None
                 full = f"{DEV_USER_ID}:{raw_id}"
                 cur.execute("INSERT INTO cards(id) VALUES (%s) ON CONFLICT DO NOTHING", (full,))
                 cur.execute(
                     """
                     INSERT INTO card_modes(card_id, mode, interval_days, next_review,
-                                           total_reviews, correct_reviews, is_learning)
-                    VALUES (%s, %s, %s, NOW() + make_interval(days => %s), %s, %s, FALSE)
+                                           total_reviews, correct_reviews,
+                                           is_learning, learning_step)
+                    VALUES (%s, %s, %s, NOW() + make_interval(days => %s), %s, %s, %s, %s)
                     ON CONFLICT (card_id, mode) DO UPDATE
                     SET interval_days = EXCLUDED.interval_days,
-                        total_reviews = EXCLUDED.total_reviews
+                        total_reviews = EXCLUDED.total_reviews,
+                        is_learning = EXCLUDED.is_learning,
+                        learning_step = EXCLUDED.learning_step
                     """,
-                    (full, mode, interval, interval, reviews, reviews),
+                    (full, mode, 0 if step is not None else interval, interval,
+                     reviews, reviews, step is not None, step or 0),
                 )
         conn.commit()
     finally:
@@ -95,11 +103,47 @@ def test_the_score_is_continuous_rather_than_three_buckets(client):
     a, b = card_index.item_ids(SOURCE, DECK)[:2]
     _seed([(a, READ, 3, 2), (b, READ, 7, 4)])
 
-    expected = (3 / MASTERED_DAYS + 7 / MASTERED_DAYS) / 103
+    graduated = lambda iv: LEARNING_SHARE + (1 - LEARNING_SHARE) * iv / MASTERED_DAYS
+    expected = (graduated(3) + graduated(7)) / 103
     assert _items(client)["score"] == pytest.approx(expected, abs=1e-4)
     assert _items(client)["learned"] == 0
     # And the flat rule those two cards used to get.
     assert expected != pytest.approx((0.5 + 0.5) / 103, abs=1e-4)
+
+
+def test_a_card_climbing_the_learning_steps_is_not_worth_nothing(client):
+    # Found by driving the real app: interval_days is 0 for the WHOLE
+    # learning phase — it is written on graduation and not before — so
+    # scoring purely on the interval put a card reviewed four times, an
+    # hour from its next drill, at exactly the same 0 as a card never
+    # opened. Every line then reads empty for a learner whose deck is
+    # mostly new, which is most learners most of the time.
+    a = card_index.item_ids(SOURCE, DECK)[0]
+    _seed([(a, READ, 0, 2, 1)])            # mid-learning-steps
+    assert _items(client)["score"] > 0
+    assert _items(client)["learned"] == 0
+
+
+def test_the_learning_steps_are_worth_more_the_further_up_they_go(client):
+    # And strictly less than a card that has actually graduated, so the
+    # two phases are one continuous ramp rather than two scales.
+    a = card_index.item_ids(SOURCE, DECK)[0]
+    seen = []
+    for step in range(LEARNING_STEPS):
+        _seed([(a, READ, 0, step + 1, step)])
+        seen.append(_items(client)["score"])
+    assert seen == sorted(seen) and seen[0] < seen[-1]
+
+    _seed([(a, READ, 1, 5)])               # just graduated
+    assert _items(client)["score"] > seen[-1]
+
+
+def test_the_learning_steps_are_worth_far_less_than_the_half_they_used_to_be(client):
+    # The other side of it: the rule this replaced counted any touched
+    # card as 0.5, so one pass over a deck bought half the line.
+    ids = card_index.item_ids(SOURCE, DECK)
+    _seed([(raw, READ, 0, 1, 0) for raw in ids])       # every card, seen once
+    assert _items(client)["score"] < 0.1
 
 
 def test_a_card_nearer_the_threshold_scores_higher_than_one_further(client):

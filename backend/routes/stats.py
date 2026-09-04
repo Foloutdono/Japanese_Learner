@@ -27,6 +27,27 @@ SECTION_MODES = {source: sorted(GRADED_FOR_SOURCE[source]) for source in SECTION
 # idea of what mastery means.
 MASTERED_DAYS = 21
 
+# What getting a card through its learning steps is worth, out of the
+# whole journey to mastery.
+#
+# It has to be more than nothing. interval_days is 0 for the entire
+# learning phase — it is written on graduation and not before — so
+# scoring purely on the interval put a card reviewed four times, an
+# hour from its next drill, at exactly the same 0 as a card never
+# opened. Every line on the wall map then reads empty for a learner
+# whose deck is mostly new, which is most learners most of the time.
+#
+# And it has to be much less than half. The rule this replaced counted
+# any touched card as 0.5, so one pass over a deck — everything seen
+# once, nothing retained — bought half the line and the rest crawled.
+#
+# A tenth: the four learning steps are a tenth of knowing a card, and
+# holding it from one day out to twenty-one is the other nine. The
+# split is a judgement, not a measurement; it is one number here so it
+# can be argued with in one place.
+LEARNING_SHARE = 0.1
+LEARNING_STEPS = 4
+
 
 def _empty_bucket(total: int) -> dict:
     # Everything starts as "new" until the cache proves otherwise.
@@ -41,16 +62,31 @@ def _empty_bucket(total: int) -> dict:
     }
 
 
-def _item_stats(best: dict[str, int], total: int) -> dict:
+def _row_score(item: dict) -> float:
+    """How far one (card, mode) has come toward being known, 0..1.
+
+    Two phases, because the card has two: climbing the learning steps,
+    then holding a growing interval. They are continuous with each other
+    — the last learning step scores just under a freshly graduated card
+    — so the number only ever goes up as the card does.
+    """
+    if item["is_learning"]:
+        step = min(item["learning_step"] or 0, LEARNING_STEPS - 1)
+        return LEARNING_SHARE * (step + 1) / LEARNING_STEPS
+    interval = item["interval_days"] or 0
+    return LEARNING_SHARE + (1 - LEARNING_SHARE) * min(1.0, interval / MASTERED_DAYS)
+
+
+def _item_stats(best: dict[str, tuple[float, int]], total: int) -> dict:
     """One deck's cards, counted once each.
 
-    `best` is {raw_id: the longest interval that card has reached in any
-    mode}; cards the learner has never reviewed are simply absent, and
-    score zero. `total` is every card the deck holds, so a deck nobody
-    has opened scores 0 rather than dividing by nothing.
+    `best` is {raw_id: (score, interval) of the mode that card has come
+    furthest in}; cards never reviewed are simply absent, and score
+    zero. `total` is every card the deck holds, so a deck nobody has
+    opened scores 0 rather than dividing by nothing.
     """
-    learned = sum(1 for days in best.values() if days >= MASTERED_DAYS)
-    scored = sum(min(1.0, days / MASTERED_DAYS) for days in best.values())
+    learned = sum(1 for _, days in best.values() if days >= MASTERED_DAYS)
+    scored = sum(score for score, _ in best.values())
     return {
         "total": total,
         "learned": learned,
@@ -94,15 +130,16 @@ def get_stats(user_id: str = Depends(get_user_id)):
     #
     # So each card is scored by its BEST mode and counted once:
     #
-    #   score  = min(1, longest interval across its modes / 21 days)
-    #   learned = that longest interval has reached 21 days
+    #   score   = how far its best mode has come toward 21 days, with
+    #             the learning steps carrying LEARNING_SHARE of that
+    #   learned = that best mode's interval has reached 21 days
     #
     # Continuous on purpose. The buckets' three states put every card at
     # 0, a flat half, or 1, so one pass over a deck — every card reviewed
     # once, none of them retained — scored exactly 50% and then crawled.
     # A fraction of the way to the mastery threshold has no cliff and no
     # magic constant: it IS the definition of mastered, read early.
-    best_interval: dict[tuple[str, str], dict[str, int]] = {
+    best_card: dict[tuple[str, str], dict[str, tuple[float, int]]] = {
         (source, deck_key): {}
         for source in SECTIONS
         for deck_key in card_index.deck_keys(source)
@@ -141,16 +178,18 @@ def get_stats(user_id: str = Depends(get_user_id)):
         bucket["correct"] += item["correct_reviews"]
 
         # A row with no reviews behind it is not progress on the card,
-        # whatever interval it happens to carry.
+        # whatever interval it happens to carry. Scored per mode and
+        # kept by the best one, so a kanji you can read but not write is
+        # one kanji at its reading's score.
         if item["total_reviews"] > 0:
-            seen = best_interval[(source, deck_key)]
-            interval = item["interval_days"] or 0
-            if interval > seen.get(raw_id, -1):
-                seen[raw_id] = interval
+            seen = best_card[(source, deck_key)]
+            scored = (_row_score(item), item["interval_days"] or 0)
+            if scored > seen.get(raw_id, (-1.0, -1)):
+                seen[raw_id] = scored
 
     items = {
         source: {
-            deck_key: _item_stats(best_interval[(source, deck_key)],
+            deck_key: _item_stats(best_card[(source, deck_key)],
                                   card_index.item_total(source, deck_key))
             for deck_key in card_index.deck_keys(source)
         }
