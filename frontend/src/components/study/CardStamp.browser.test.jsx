@@ -77,7 +77,7 @@ const CASES = [
   {
     name: 'a routine promotion',
     transition: { id: 1, to: 'learning' },
-    selector: '.card-stamp__seal', animationName: 'card-stamp-strike',
+    selector: '.card-stamp__rakkan', animationName: 'card-stamp-rakkan',
     slackMs: 250, budgetMs: 1200,
   },
   {
@@ -89,7 +89,7 @@ const CASES = [
   {
     name: 'a demotion',
     transition: { id: 3, to: 'learning', demoted: true },
-    selector: '.card-stamp__seal', animationName: 'card-stamp-reink',
+    selector: '.card-stamp__rakkan', animationName: 'card-stamp-reink',
     slackMs: 250, budgetMs: 1400,
   },
 ]
@@ -113,18 +113,24 @@ describe('CardStamp — how long it holds', () => {
     }, 30000)
   }
 
-  it('lands on the corner the resting seal sits in, wearing its form', async () => {
-    // The press is the badge being struck, so it has to BE the badge:
-    // same classes, so an equipped 印 shapes it, and the same stage
-    // colour, so 極 lands gold and 習 vermillion.
+  it('presses the stage glyph as the impression and names the stage in the corner', async () => {
+    // The impression says which stage was reached without a word —
+    // 極 for a graduation — and the word that lands in the top corner
+    // is in the learner's language, not a hardcoded one.
     const screen = await mount({ id: 4, to: 'mastered' }, () => {})
-    const seal = screen.container.querySelector('.card-stamp__seal')
-    expect(seal.classList.contains('stage-badge')).toBe(true)
-    expect(seal.classList.contains('stage-badge--mastered')).toBe(true)
-    expect(seal.textContent).toBe('極')
-    // The caption names the stage in the learner's language, not in a
-    // hardcoded one.
+    expect(screen.container.querySelector('.card-stamp__rakkan').textContent).toBe('極')
     expect(screen.container.querySelector('.card-stamp__caption').textContent).toBe('Maîtrisé')
+  })
+
+  it('stays a detail: the impression is faint, never a poster', async () => {
+    // The ink sits under a fifth of full opacity once landed. The
+    // specimen and the meaning are what the card is for; the seal is
+    // what you notice second.
+    const screen = await mount({ id: 5, to: 'learning' }, () => {})
+    const seal = screen.container.querySelector('.card-stamp__rakkan')
+    await new Promise(r => setTimeout(r, 650))
+    expect(parseFloat(getComputedStyle(seal).opacity)).toBeLessThanOrEqual(0.2)
+    expect(parseFloat(getComputedStyle(seal).opacity)).toBeGreaterThan(0.05)
   })
 
   it('barely holds at all under reduced motion, where nothing animates', async () => {

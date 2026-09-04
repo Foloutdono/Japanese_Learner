@@ -4,7 +4,6 @@ import { TopBar } from '../components/ui/TopBar'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
-import { STAMP_STYLES, readStampStyle, setStampStyle } from '../components/study/CardStamp'
 import PromptCard from '../components/study/PromptCard'
 import { CharDisplay } from '../components/study/QuizComponents'
 import { LEVEL_TITLES, levelTitle } from '../domain/levelTitle'
@@ -43,19 +42,15 @@ const RANK_CROSSINGS = LEVEL_TITLES
   .sort((a, b) => a - b)
 
 const STAMPS = [
-  { label: '新 → 習', note: 'the routine press, ~0.9s', transition: { to: 'learning' } },
-  { label: '習 → 極', note: 'the graduation: gold, a double ring, the edge lit once', transition: { to: 'mastered' } },
-  { label: '極 → 習', note: 'a lapse: the seal re-inked, with a shake', transition: { to: 'learning', demoted: true } },
+  { label: '新 → 習', note: 'the routine press: a faint vermillion 落款, ~0.9s', transition: { to: 'learning' } },
+  { label: '習 → 極', note: 'the graduation: gold, a double-line seal, the edge lit in full', transition: { to: 'mastered' } },
+  { label: '極 → 習', note: 'a lapse: the impression re-inked, with a shake', transition: { to: 'learning', demoted: true } },
 ]
 
 export default function RewardsPreview() {
   const navigate = useNavigate()
   const [toast, setToast] = useState(null)
   const [stamp, setStamp] = useState(null)
-  // The ground the card answers a press with — see CardStamp.jsx. The
-  // choice is written through to localStorage, so a real session
-  // stamps with it too.
-  const [stampStyle, pickStyle] = useState(readStampStyle)
 
   useEffect(() => { seedSummary(SEED) }, [])
 
@@ -110,27 +105,13 @@ export default function RewardsPreview() {
           ))}
         </div>
 
-        <SectionHeader jp="押印" title="Card stamp" />
+        <SectionHeader jp="落款" title="Card stamp" />
         <p className="preview-note">
-          A card climbing a stage gets its seal pressed into the corner it
-          already sits in. The next card waits for this one, so every hold
-          is measured — see CardStamp.browser.test.jsx.
+          A card climbing a stage is signed: a 落款 impression pressed into the
+          lower corner in the equipped 印's form, the stage word turning over in
+          the top corner. The next card waits for this one, so every hold is
+          measured — see CardStamp.browser.test.jsx.
         </p>
-        <div className="preview-seg">
-          <span className="seg">
-            {STAMP_STYLES.map(st => (
-              <button
-                key={st.key}
-                type="button"
-                className={`seg__opt${stampStyle === st.key ? ' seg__opt--on' : ''}`}
-                onClick={() => { setStampStyle(st.key); pickStyle(st.key) }}
-                title={st.label}
-              >
-                <span className="seg__opt-jp" lang="ja">{st.jp}</span>
-              </button>
-            ))}
-          </span>
-        </div>
         <div className="quiz-area preview-stage" style={{ '--line-color': 'var(--line-kanji)' }}>
           <CardTransition
             className="specimen-card-stage"
@@ -151,7 +132,7 @@ export default function RewardsPreview() {
               tier="stamp"
               label={label}
               note={note}
-              onClick={() => setStamp({ ...transition, style: stampStyle, id: Date.now(), cardKey: 'preview' })}
+              onClick={() => setStamp({ ...transition, id: Date.now(), cardKey: 'preview' })}
             />
           ))}
         </div>

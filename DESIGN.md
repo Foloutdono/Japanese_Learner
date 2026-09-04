@@ -474,15 +474,21 @@ objects, and only one of them ever waits to be dismissed:
   panel and nothing to dismiss; the figure is gold because XP is the pass's
   balance, never a state colour. `XpToast` still sounds the tick and tells a
   screen reader.
-- **The press** (押印) — a card climbing a stage — is the card's own corner
-  seal being struck: the new seal lands on the corner the resting one sits
-  in, at the same size and in the equipped 印's form, one ring of ink bleeds
-  out from under it, the card's edge answers in the seal's ink, and a caption
-  in the pairing register names the stage. The graduation (極) is gold and
-  lights the whole edge; a lapse re-inks the seal in vermillion with a
-  shake. It holds the next card for under a second (`CardStamp.browser.test`
-  pins every hold), because the moment is the press, not a pageant: the
-  wash, the kumadori, the brush and the petals are gone.
+- **The press** (落款) — a card climbing a stage — is the card being
+  signed. Every card carries its stage as a **word** in its top corner
+  (new · in progress · mastered, caption register, the stage's ink), not a
+  hanko; the hanko is the dictionary plate's. On a promotion a 落款
+  impression — the new stage's glyph at the specimen's size, framed as a
+  seal in the equipped 印's form — is pressed into the **lower** corner,
+  clear of the work, where a signature seal sits on a finished piece; the
+  word in the top corner turns over to the new stage; the card's edge
+  answers in the same ink. The impression is **faint by ruling**, under a
+  fifth of full opacity: a detail on the card, never a poster over the
+  specimen. The graduation (極) is gold, a double-line seal, the edge lit in
+  full; a lapse re-inks the impression in vermillion with a shake. It holds
+  the next card for under a second (`CardStamp.browser.test` pins every
+  hold and the faintness), because the moment is the press, not a pageant:
+  the wash, the kumadori, the brush and the petals are gone.
 - **The level** (進級) turns over on the **in-car display**: a sumi board
   docked across the top of a phone (the top bar is hidden while studying, so
   the edge is free and the docked rating bar stays usable) or under the top

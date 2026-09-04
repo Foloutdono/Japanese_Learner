@@ -4702,6 +4702,11 @@
   --r-panel:         8px;      /* 発車標 and the next-service strip          */
   --r-identity:     10px;      /* 定期券 and the IC card                     */
   --r-pill:        999px;      /* pills, roundels, segmented toggles         */
+  /* The 印's radius when no seal cosmetic is equipped — the same 6px
+     the stage badge always fell back to. Declared here so the 落款
+     impression can read the equipped seal's radius with no fallback
+     of its own (the cosmetics blocks override it per seal). */
+  --seal-radius:    6px;
 
   /* ── 影 — elevation, deliberately rationed ────────────────
      Two shadows in the whole app, and both mean "this object hangs".
@@ -11846,11 +11851,14 @@ textarea:focus-visible {
   margin-inline: auto;
 }
 
-/* ── Permanent stage seal ──────────────────────────────────
-   A small hanko permanently sitting in the corner of every quiz
-   card — see StageBadge.jsx. Sits well under the celebratory
-   .card-stamp-overlay's z-index (6), so a promotion's own strike
-   still visually reads as "on top of" the seal it's about to replace.
+/* ── The stage seal ────────────────────────────────────────
+   A small hanko — see StageBadge.jsx. It sat in the corner of every
+   quiz card until the study-mode redesign; the card carries the stage
+   as a word there now (.stage-mark, below) and the seal that gets
+   pressed is the 落款 impression (.card-stamp__rakkan). The dictionary's
+   entry plate still wears this one inline, and the 印 cosmetics that
+   shape it (the block near the end of this file) shape the impression
+   too.
 
    One imprint, three inks: a real name seal doesn't change shape as
    its owner's standing changes, so new/learning/mastered share the
@@ -11924,22 +11932,60 @@ textarea:focus-visible {
   right: auto;
 }
 
-/* ── 押印 — the press ──────────────────────────────────────
-   The overlay is the card stage's own box, so the seal below lands
-   exactly where StageBadge draws the resting one: it wears the
-   .stage-badge classes (and therefore the equipped 印's form) and
-   sits at the badge's own corner. One ring of ink bleeds out from
-   under it; for a graduation the card's edge is lit gold once; a
-   caption in the pairing register names the stage under the glyph.
-   Every duration here is a beat the reviewer waits through — see
-   CardStamp.jsx's HOLD_MS for the arithmetic. */
+/* ── The stage, in a word ───────────────────────────────────
+   The card's top corner says what it is to the schedule (see
+   StageMark.jsx): the caption register, in the stage's own ink mixed
+   toward the ambient one — the raw state colours are under the floor
+   as text on the card, and this is the same mix the progress legend's
+   figures use. A new card's word is the quiet register: nothing has
+   happened to it yet. While a press plays the word steps aside for
+   the press's own caption, which lands in the same corner. */
+.stage-mark {
+  --stage-ink: var(--state-new);
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-5);
+  z-index: 3;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--stage-ink) 65%, var(--text-primary));
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.stage-mark--new { color: var(--text-secondary); }
+.stage-mark--learning { --stage-ink: var(--state-learning); }
+.stage-mark--mastered { --stage-ink: var(--state-mastered); }
+.stage-mark--pressed { opacity: 0; }
+
+/* ── 落款 — the press ──────────────────────────────────────
+   The overlay is the card stage's own box, so its corners are the
+   card's. Three parts, timed against each other — see CardStamp.jsx's
+   HOLD_MS for the arithmetic:
+
+     the edge         answers first (120ms), in the seal's ink
+     the impression   lands at 520ms, in the lower corner
+     the word         presses into the top corner at 220–540ms
+
+   Every duration here is a beat the reviewer waits through. */
 .card-stamp-overlay {
+  --stamp-ink: var(--state-learning);
+  --stamp-glow: 0.35;
+  --stamp-ink-amt: 0.12;
   position: absolute;
   inset: 0;
   z-index: 6;
   pointer-events: none;
   overflow: visible;
   border-radius: var(--r-panel);
+}
+.card-stamp-overlay--mastered {
+  --stamp-ink: var(--state-mastered);
+  --stamp-glow: 0.8;
+  --stamp-ink-amt: 0.15;
 }
 .card-stamp-overlay--leaving {
   animation: card-stamp-fade-out 260ms ease-in forwards;
@@ -11949,139 +11995,15 @@ textarea:focus-visible {
   100% { opacity: 0; }
 }
 
-/* The seal itself. `.stage-badge` gives it the corner, the size, the
-   stage colour and the cosmetic form; this only adds the press. The
-   rotation is repeated inside the keyframes because a transform
-   animation replaces the resting one wholesale. */
-.stage-badge.card-stamp__seal {
-  opacity: 0;
-  animation: card-stamp-strike 420ms cubic-bezier(0.3, 0.2, 0.15, 1) 40ms forwards;
-}
-@keyframes card-stamp-strike {
-  0%   { opacity: 0; transform: scale(3.2) rotate(var(--seal-rotate, -5deg)); }
-  60%  { opacity: 1; transform: scale(0.9) rotate(var(--seal-rotate, -5deg)); }
-  80%  { transform: scale(1.06) rotate(var(--seal-rotate, -5deg)); }
-  100% { opacity: 1; transform: scale(1) rotate(var(--seal-rotate, -5deg)); }
-}
-
-/* The ink bleeding out from under the seal as it lands — the same
-   corner, the same colour, once. */
-.card-stamp__ring {
-  --stamp-ink: var(--state-learning);
+/* The impression. The stage's own glyph at the specimen's size,
+   framed as a seal in the equipped 印's form — its radius, its angle,
+   its wall, its frame — and set in the lower corner, clear of the
+   work, where a 落款 sits on a finished piece. The ink is faint by
+   ruling: the seal is a detail on the card, not the card. */
+.card-stamp__rakkan {
   position: absolute;
-  top: var(--sp-3);
-  right: var(--sp-3);
-  width: clamp(24px, 5.6vw, 32px);
-  height: clamp(24px, 5.6vw, 32px);
-  border-radius: var(--r-pill);
-  border: 2px solid var(--stamp-ink);
-  opacity: 0;
-  animation: card-stamp-bleed 520ms ease-out 300ms forwards;
-}
-.card-stamp-overlay--mastered .card-stamp__ring { --stamp-ink: var(--state-mastered); }
-@keyframes card-stamp-bleed {
-  0%   { opacity: 0.7; transform: scale(0.6); }
-  100% { opacity: 0;   transform: scale(2.8); }
-}
-
-/* The caption: JP glyph on the seal, plain word beneath it, in the
-   pairing register. The ink is the stage colour mixed toward the
-   ambient ink, the same mix the progress legend's figures use, because
-   the raw state colours are under the floor as text on the card. */
-.card-stamp__caption {
-  --stamp-ink: var(--state-learning);
-  position: absolute;
-  top: calc(var(--sp-3) + clamp(24px, 5.6vw, 32px) + var(--sp-2));
-  right: var(--sp-3);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: color-mix(in srgb, var(--stamp-ink) 65%, var(--text-primary));
-  opacity: 0;
-  animation: card-stamp-caption 260ms ease-out 300ms forwards;
-}
-.card-stamp-overlay--mastered .card-stamp__caption { --stamp-ink: var(--state-mastered); }
-@keyframes card-stamp-caption {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* The card's own edge answering the press — lit in the seal's ink
-   and fading. Colour as an edge, never a fill. A routine press gets
-   half the glow; the graduation's gold is the one that fills the
-   frame, and holds long enough to be the moment. */
-.card-stamp__ripple {
-  --stamp-ink: var(--state-learning);
-  --stamp-glow: 0.5;
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 2px var(--stamp-ink);
-  opacity: 0;
-  animation: card-stamp-ripple 700ms ease-out 120ms forwards;
-}
-.card-stamp-overlay--mastered .card-stamp__ripple {
-  --stamp-ink: var(--state-mastered);
-  --stamp-glow: 0.95;
-  box-shadow:
-    inset 0 0 0 2px var(--stamp-ink),
-    inset 0 0 24px color-mix(in srgb, var(--stamp-ink) 35%, transparent);
-}
-@keyframes card-stamp-ripple {
-  0%   { opacity: 0; }
-  30%  { opacity: var(--stamp-glow, 0.9); }
-  100% { opacity: 0; }
-}
-
-/* ── The ground — the card itself answering the press ──
-   The corner seal is small by design (it IS the resting badge), and
-   on its own it did not carry the moment. So the card answers too,
-   behind the content and never over it: a translucent layer in the
-   seal's ink that the specimen and the meaning stay legible through.
-   Three answers are drawn here while the choice is open; the one the
-   maintainer picks stays and the other two go. Each keeps the same
-   timing envelope as the press, so no hold changes.
-
-     落款 rakkan  a large seal impression struck in the card's centre,
-                  the way a signature seal sits over calligraphy
-     刷毛 hake    one brushstroke of ink swept across the card, ending
-                  at the corner the seal lands in
-     灯   akari   a lantern glow blooming out of the seal's corner and
-                  filling the card */
-.card-stamp__ground {
-  --stamp-ink: var(--state-learning);
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  overflow: hidden;
-  pointer-events: none;
-}
-.card-stamp-overlay--mastered .card-stamp__ground { --stamp-ink: var(--state-mastered); }
-.card-stamp__ground::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-}
-
-/* 落款 — the glyph is the seal's own, at the specimen's size, framed
-   as a square seal and set at the angle a hand lands. It is the one
-   ground that says which stage was reached without reading a word.
-   It sits where a signature seal sits on a finished piece — the lower
-   corner, clear of the work — not over the specimen. */
-.card-stamp__ground--rakkan {
-  overflow: visible;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding: var(--sp-6);
-  padding-bottom: calc(var(--sp-9) + var(--sp-5));
-}
-.card-stamp__ground--rakkan::before {
-  content: attr(data-glyph);
-  position: static;
+  right: var(--sp-6);
+  bottom: calc(var(--sp-9) + var(--sp-5));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12093,100 +12015,97 @@ textarea:focus-visible {
   line-height: 1;
   color: var(--stamp-ink);
   border: 0.06em solid var(--stamp-ink);
-  border-radius: var(--r-identity);
+  border-radius: var(--seal-radius);
+  outline: var(--seal-frame-w, 0) solid var(--seal-frame, transparent);
+  outline-offset: calc(var(--seal-frame-off, -4px) * 2);
   opacity: 0;
-  transform: rotate(-8deg) scale(1.7);
-  animation: card-stamp-rakkan 480ms cubic-bezier(0.3, 0.2, 0.15, 1) forwards;
+  transform: rotate(var(--seal-rotate, -8deg)) scale(1.7);
+  animation: card-stamp-rakkan 480ms cubic-bezier(0.3, 0.2, 0.15, 1) 40ms forwards;
 }
-.card-stamp-overlay--mastered .card-stamp__ground--rakkan::before {
-  outline: 0.03em solid var(--stamp-ink);
-  outline-offset: 0.06em;
+/* The graduation's seal is the double-line kind a certificate carries. */
+.card-stamp-overlay--mastered .card-stamp__rakkan {
+  border-width: 0.1em;
+  border-style: double;
 }
 @keyframes card-stamp-rakkan {
-  0%   { opacity: 0;    transform: rotate(-8deg) scale(1.7); }
-  60%  { opacity: 0.26; transform: rotate(-8deg) scale(0.96); }
-  100% { opacity: 0.2;  transform: rotate(-8deg) scale(1); }
+  0%   { opacity: 0; transform: rotate(var(--seal-rotate, -8deg)) scale(1.7); }
+  60%  { opacity: calc(var(--stamp-ink-amt) * 1.4); transform: rotate(var(--seal-rotate, -8deg)) scale(0.96); }
+  100% { opacity: var(--stamp-ink-amt); transform: rotate(var(--seal-rotate, -8deg)) scale(1); }
 }
 
-/* 刷毛 — a diagonal band of ink, soft-edged, painted left to right in
-   one stroke and left standing. */
-.card-stamp__ground--hake::before {
-  inset: -20%;
-  background: linear-gradient(
-    115deg,
-    transparent 34%,
-    color-mix(in srgb, var(--stamp-ink) 14%, transparent) 43%,
-    color-mix(in srgb, var(--stamp-ink) 30%, transparent) 50%,
-    color-mix(in srgb, var(--stamp-ink) 14%, transparent) 57%,
-    transparent 66%);
-  clip-path: inset(0 100% 0 0);
-  animation: card-stamp-hake 560ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
-}
-@keyframes card-stamp-hake {
-  0%   { clip-path: inset(0 100% 0 0); opacity: 1; }
-  70%  { clip-path: inset(0 0 0 0);    opacity: 1; }
-  100% { clip-path: inset(0 0 0 0);    opacity: 0.85; }
-}
-
-/* 灯 — a bloom out of the seal's own corner, so the light reads as
-   the press causing it; the graduation adds a second, centred glow. */
-.card-stamp__ground--akari::before {
-  background: radial-gradient(
-    circle at 92% 6%,
-    color-mix(in srgb, var(--stamp-ink) 38%, transparent) 0%,
-    color-mix(in srgb, var(--stamp-ink) 14%, transparent) 38%,
-    transparent 72%);
-  transform-origin: 92% 6%;
+/* The word: the new stage, pressed into the top corner exactly where
+   StageMark keeps the old one (which steps aside for it). */
+.card-stamp__caption {
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-5);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform-origin: right center;
+  color: color-mix(in srgb, var(--stamp-ink) 65%, var(--text-primary));
   opacity: 0;
-  animation: card-stamp-akari 620ms ease-out forwards;
+  animation: card-stamp-caption 320ms cubic-bezier(0.3, 0.2, 0.15, 1) 220ms forwards;
 }
-.card-stamp-overlay--mastered .card-stamp__ground--akari::before {
-  background:
-    radial-gradient(
-      circle at 92% 6%,
-      color-mix(in srgb, var(--stamp-ink) 40%, transparent) 0%,
-      color-mix(in srgb, var(--stamp-ink) 14%, transparent) 38%,
-      transparent 72%),
-    radial-gradient(
-      circle at 50% 55%,
-      color-mix(in srgb, var(--stamp-ink) 16%, transparent) 0%,
-      transparent 60%);
+@keyframes card-stamp-caption {
+  0%   { opacity: 0; transform: scale(1.5); }
+  60%  { opacity: 1; transform: scale(0.97); }
+  100% { opacity: 1; transform: scale(1); }
 }
-@keyframes card-stamp-akari {
-  0%   { opacity: 0;   transform: scale(0.15); }
-  45%  { opacity: 1;   transform: scale(1.05); }
-  100% { opacity: 0.8; transform: scale(1); }
+
+/* The card's own edge answering the press in the seal's ink and
+   fading. Colour as an edge, never a fill. A routine press gets a
+   third of the glow; the graduation's gold fills the frame and is the
+   beat the moment holds for. */
+.card-stamp__ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px var(--stamp-ink);
+  opacity: 0;
+  animation: card-stamp-ripple 700ms ease-out 120ms forwards;
+}
+.card-stamp-overlay--mastered .card-stamp__ripple {
+  box-shadow:
+    inset 0 0 0 2px var(--stamp-ink),
+    inset 0 0 24px color-mix(in srgb, var(--stamp-ink) 30%, transparent);
+}
+@keyframes card-stamp-ripple {
+  0%   { opacity: 0; }
+  30%  { opacity: var(--stamp-glow); }
+  100% { opacity: 0; }
 }
 
 /* ── Demotion ──
-   A mastered card lapsing to learning: the same seal, re-inked in
+   A mastered card lapsing to learning: the impression re-inked in
    vermillion with a short shake, so it reads as a correction rather
-   than as another celebration. The ring bleeds in the new ink. */
-.card-stamp-overlay--demoted .stage-badge.card-stamp__seal {
+   than as another celebration. */
+.card-stamp-overlay--demoted .card-stamp__rakkan {
   animation-name: card-stamp-reink;
   animation-duration: 560ms;
   animation-timing-function: ease-out;
 }
 @keyframes card-stamp-reink {
-  0%   { opacity: 0; transform: scale(1.3) rotate(calc(var(--seal-rotate, -5deg) - 8deg)); }
-  30%  { opacity: 1; transform: scale(1) rotate(calc(var(--seal-rotate, -5deg) + 6deg)); }
-  55%  { transform: scale(1) rotate(calc(var(--seal-rotate, -5deg) - 4deg)); }
-  80%  { transform: scale(1) rotate(calc(var(--seal-rotate, -5deg) + 2deg)); }
-  100% { opacity: 1; transform: scale(1) rotate(var(--seal-rotate, -5deg)); }
+  0%   { opacity: 0; transform: scale(1.3) rotate(calc(var(--seal-rotate, -8deg) - 8deg)); }
+  30%  { opacity: var(--stamp-ink-amt); transform: scale(1) rotate(calc(var(--seal-rotate, -8deg) + 6deg)); }
+  55%  { transform: scale(1) rotate(calc(var(--seal-rotate, -8deg) - 4deg)); }
+  80%  { transform: scale(1) rotate(calc(var(--seal-rotate, -8deg) + 2deg)); }
+  100% { opacity: var(--stamp-ink-amt); transform: scale(1) rotate(var(--seal-rotate, -8deg)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stage-badge.card-stamp__seal,
-  .card-stamp-overlay--demoted .stage-badge.card-stamp__seal {
+  .card-stamp__rakkan,
+  .card-stamp-overlay--demoted .card-stamp__rakkan {
     animation: card-stamp-still 10ms linear forwards;
   }
   @keyframes card-stamp-still {
-    from, to { opacity: 1; transform: scale(1) rotate(var(--seal-rotate, -5deg)); }
+    from, to { opacity: var(--stamp-ink-amt); transform: rotate(var(--seal-rotate, -8deg)) scale(1); }
   }
   .card-stamp__caption { animation-duration: 10ms; animation-delay: 0ms; }
-  .card-stamp__ring,
-  .card-stamp__ripple,
-  .card-stamp__ground::before { animation: none; opacity: 0; }
+  .card-stamp__ripple { animation: none; opacity: 0; }
   .card-stamp-overlay--leaving { animation-duration: 120ms; }
 }
 
@@ -23382,12 +23301,6 @@ html { scrollbar-gutter: stable; }
 .preview-row__tier--stamp { background: color-mix(in srgb, var(--state-learning) 22%, transparent); color: color-mix(in srgb, var(--state-learning) 65%, var(--text-primary)); }
 /* The card the stamp rows strike: a study stage, but one that sits in
    the page's flow rather than filling the screen. */
-/* The ground switch on the workbench, centred over the demo card. */
-.preview-seg {
-  display: flex;
-  justify-content: center;
-  margin-bottom: var(--sp-5);
-}
 .preview-stage {
   flex: none;
   padding: var(--sp-6) 0;

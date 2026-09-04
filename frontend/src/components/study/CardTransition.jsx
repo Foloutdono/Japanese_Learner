@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import { CardStamp } from './CardStamp'
-import { StageBadge } from './StageBadge'
+import { StageMark } from './StageMark'
 import { playSfx } from '../../lib/audio'
 
 // How long the outgoing card's own exit animation runs — must match
@@ -64,14 +64,16 @@ const OUTGOING_MS = 220
  * own onDone contract.
  *
  * `stage` — the live card's SRS stage ('new' | 'learning' |
- * 'mastered' | undefined), rendered as a permanent corner seal (see
- * StageBadge.jsx) rather than gated behind `cardKey` the way `stamp`
- * is — there's no "which card does this belong to" ambiguity to
- * resolve, it's always just whatever the current card's own stage is,
- * so it updates the instant `stage` does rather than waiting on the
- * crossfade. Omit it (or pass undefined) for card sources that don't
- * track a stage at all — StageBadge itself renders nothing in that
- * case.
+ * 'mastered' | undefined), rendered as the word in the card's top
+ * corner (see StageMark.jsx) rather than gated behind `cardKey` the
+ * way `stamp` is — there's no "which card does this belong to"
+ * ambiguity to resolve, it's always just whatever the current card's
+ * own stage is, so it updates the instant `stage` does rather than
+ * waiting on the crossfade. Omit it (or pass undefined) for card
+ * sources that don't track a stage at all — StageMark itself renders
+ * nothing in that case. While a press plays, the word steps aside for
+ * the press's own caption, which lands in the same corner with the
+ * new stage.
  */
 export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage, className, children }) {
   const effectiveContentKey = contentKey ?? cardKey
@@ -200,7 +202,7 @@ export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage,
         )}
       </div>
       {showStamp && <CardStamp transition={stamp} onDone={onStampDone} />}
-      <StageBadge stage={stage} />
+      <StageMark stage={stage} pressed={showStamp} />
     </div>
   )
 }

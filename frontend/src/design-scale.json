@@ -208,6 +208,7 @@
       "var(--anl-radius) var(--anl-radius) 0 0",
       "var(--mcq-radius, 6px)",
       "var(--radius)",
+      "var(--seal-radius)",
       "var(--seal-radius, 6px)"
     ],
     "gap": [
@@ -599,11 +600,12 @@
   ],
   "counts": {
     "font-size": 680,
-    "border-radius": 253,
-    "gap": 409,
+    "border-radius": 254,
+    "gap": 408,
     "padding": 351,
-    "design-token": 75,
+    "design-token": 76,
     "custom-property-length": 22,
     "js-inline-length": 16
-  }
+  },
+  "_allow_note_seal_radius": "`border-radius: var(--seal-radius)` on .card-stamp__rakkan is allowlisted because the value is not a rung of the scale but the equipped 印 cosmetic's own radius (a per-seal :root value, defaulting to 6px) — the same reason .stage-badge's `var(--seal-radius, 6px)` is here."
 }
