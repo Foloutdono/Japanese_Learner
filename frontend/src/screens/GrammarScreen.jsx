@@ -114,6 +114,28 @@ export default function GrammarScreen({ session }) {
     setActiveHints([])
   }, [card?.card_id])
 
+  // ── Leaving a card mid-flight must not strand the next one ──────
+  // `locked`, the gate set and the celebration state are per-REVIEW,
+  // but they live on the screen, which survives stepping back to the
+  // picker and coming in again. Walk out while a stamp is playing and
+  // its gate is still in the set on the way back — with no stamp
+  // playing to take it out, the queue never advances and `locked`
+  // never lifts. postReview hides the rating bar the instant a rating
+  // is tapped, so the card sits revealed with no way forward and no
+  // way to rate it again: reported from production on a kana card, and
+  // reproduced in KanaScreen.stuck.browser.test.jsx.
+  //
+  // storageKey is the session's own identity (deck/level/set + mode),
+  // so this fires exactly when the session changes and never mid-card.
+  useEffect(() => {
+    pendingGatesRef.current.clear()
+    advancedRef.current = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the same id-keyed-reset shape as the per-card effect beside it, and for the same reason: `locked` and the two celebration states are also set mid-flow by postReview, so a key-remounted child would need that flow threaded back down.
+    setLocked(false)
+    setXpToast(null)
+    setCardStamp(null)
+  }, [storageKey])
+
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
   // level+mode. Fetched independently from the card so it never blocks
   // or slows down card navigation.
@@ -174,6 +196,11 @@ export default function GrammarScreen({ session }) {
 
     advancedRef.current = false
     const gates = pendingGatesRef.current
+    // Whatever is still in here belongs to a review that is over — a
+    // component that would have cleared it is long gone. `locked` above
+    // means no review can be in flight at this point, so anything left
+    // is stale by construction and would hang this one forever.
+    gates.clear()
 
     if (preview) {
       // leveledUp/newLevel come from applyXpGain's own running total,
