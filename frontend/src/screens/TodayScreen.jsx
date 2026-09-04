@@ -78,9 +78,36 @@ function laneTypeDefs(t) {
   ]
 }
 
-function laneTitle(lane, t) {
-  if (!lane) return ''
-  return `${laneWhere(lane, t)} · ${modeLabel(t, lane.mode)}`
+// The Japanese half of the card's footer, per source — the same word
+// each section screen prints beside its level ("N5 漢字", "Hiragana
+// (de base) あ"), so a card in the queue is captioned exactly as it
+// would be on its own screen. A personal deck's card carries the
+// deck's own name and nothing else.
+const SOURCE_JP = { kana: 'あ', vocab: '単語', kanji: '漢字', grammar: '文法' }
+
+/** The card's footer strip: where it is from on the left, the mode it
+ *  is served in on the right. A mixed queue has to say this per card,
+ *  or a kanji writing prompt after a grammar question reads as the app
+ *  losing its place — and the strip is where every other study card
+ *  already says it, so the queue no longer prints a label above. */
+function laneFoot(card, t) {
+  const lane = card?.lane
+  if (!lane) return undefined
+  const left = lane.kind === 'personal'
+    ? lane.deck_name
+    : `${laneWhere(lane, t)} ${SOURCE_JP[lane.source] ?? ''}`.trim()
+  return { left, right: modeLabel(t, card.mode) }
+}
+
+/** The stage floor every section screen gives its card, by structure:
+ *  the boosts for vocab and grammar, the specimen floor for kana and
+ *  kanji (see index.css), so a card in the queue holds still on reveal
+ *  exactly as it does on its own screen. */
+function stageClassFor(structureKey) {
+  if (structureKey === 'vocab') return 'vocab-card-boost'
+  if (structureKey === 'grammar') return 'grammar-card-boost'
+  if (structureKey === 'kana' || structureKey === 'kanji') return 'specimen-card-stage'
+  return undefined
 }
 
 /** "in 3 hours" / "tomorrow" for the cleared-queue message. */
@@ -614,17 +641,12 @@ export default function TodayScreen({ session }) {
 
         {card && (
           <>
-            {/* A section screen has a header saying where you are. A
-                mixed queue has to say it per card, or the learner cannot
-                tell why a kanji writing prompt just followed a grammar
-                question. */}
-            <div className="today-lane">{laneTitle(card.lane, t)}</div>
-
-            {/* The help switch sits directly under the lane label and
-                above the card, which is where the section screens put
-                it. Below the card it was past the fold on a drawing
-                mode, so the one control that rescues a card you cannot
-                answer was hidden exactly when you needed it. */}
+            {/* The help switch sits above the card, which is where the
+                section screens put it. Below the card it was past the
+                fold on a drawing mode, so the one control that rescues
+                a card you cannot answer was hidden exactly when you
+                needed it. Where the card is from is on its own footer
+                strip (see laneFoot), as on every other study card. */}
             {availableHints.length > 0 && (
               <HintBar
                 available={availableHints} active={activeHints}
@@ -633,6 +655,7 @@ export default function TodayScreen({ session }) {
             )}
 
             <CardTransition
+              className={stageClassFor(structureKey)}
               cardKey={transitionKey}
               stamp={gates.stamp}
               stage={card.stage}
@@ -642,6 +665,7 @@ export default function TodayScreen({ session }) {
                 card={nc} t={t} session={session}
                 answered={answered} cardNonce={cardNonce}
                 activeHints={activeHints} onFlashcardReveal={reveal}
+                foot={laneFoot(card, t)}
               />
             </CardTransition>
 

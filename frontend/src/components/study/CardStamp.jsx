@@ -35,6 +35,36 @@ import { playStamp } from '../../lib/audio'
 // so an equipped 印 shapes the press too).
 const STAMP_GLYPH = { learning: '習', mastered: '極' }
 
+// ── The ground — an open choice ─────────────────────────────
+// Three ways the card itself can answer the press, behind the content
+// (see "The ground" in index.css). Drawn side by side while the choice
+// is open; the picked one stays. The choice is read per stamp from
+// localStorage so it can be tried in a real session from /dev/rewards,
+// and a stamp may carry its own `style` (the workbench does).
+// eslint-disable-next-line react-refresh/only-export-components -- the workbench's list, co-located with the component it switches.
+export const STAMP_STYLES = [
+  { key: 'rakkan', jp: '落款', label: 'Seal impression' },
+  { key: 'hake',   jp: '刷毛', label: 'Brush sweep' },
+  { key: 'akari',  jp: '灯',   label: 'Lantern glow' },
+]
+const DEFAULT_STAMP_STYLE = 'rakkan'
+const STYLE_KEY = 'jp-stamp-style'
+
+// eslint-disable-next-line react-refresh/only-export-components -- the style switch is the workbench's, and co-located with the component it switches.
+export function readStampStyle() {
+  try {
+    const v = window.localStorage.getItem(STYLE_KEY)
+    return STAMP_STYLES.some(s => s.key === v) ? v : DEFAULT_STAMP_STYLE
+  } catch {
+    return DEFAULT_STAMP_STYLE
+  }
+}
+
+// eslint-disable-next-line react-refresh/only-export-components -- see readStampStyle.
+export function setStampStyle(key) {
+  try { window.localStorage.setItem(STYLE_KEY, key) } catch { /* not persisted */ }
+}
+
 // ── How long the press holds before it dissolves ──────────────
 // Dead time for the reviewer: every study screen holds the next card
 // until the fade-out ends. Each number is the last frame that carries
@@ -44,7 +74,7 @@ const STAMP_GLYPH = { learning: '習', mastered: '極' }
 // of margin, because this timer and the CSS run off independent
 // clocks and a busy main thread delays the first frame but not the
 // setTimeout.
-const HOLD_MS = { learning: 620, mastered: 900, demoted: 760 }
+const HOLD_MS = { learning: 660, mastered: 900, demoted: 760 }
 
 // Under prefers-reduced-motion the CSS hands every part its final
 // state on the first frame, so the hold is only long enough to notice
@@ -86,6 +116,7 @@ function CardStampInner({ transition, onDone }) {
 
   const leaving = phase === 'leaving'
   const label = to === 'mastered' ? t.mastered : t.learning
+  const ground = transition.style ?? readStampStyle()
 
   const handleAnimationEnd = (e) => {
     if (e.animationName === 'card-stamp-fade-out') onDone?.()
@@ -97,6 +128,9 @@ function CardStampInner({ transition, onDone }) {
       aria-hidden="true"
       onAnimationEnd={handleAnimationEnd}
     >
+      {/* The card answering the press behind its content — see "The
+          ground" in index.css for the three answers being tried. */}
+      <span className={`card-stamp__ground card-stamp__ground--${ground}`} data-glyph={STAMP_GLYPH[to]} />
       {/* The card's own edge answering the press in the seal's ink —
           faint for a routine press, gold and full for the graduation.
           Colour is an edge, never a fill. */}

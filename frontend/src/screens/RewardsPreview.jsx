@@ -4,6 +4,7 @@ import { TopBar } from '../components/ui/TopBar'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
+import { STAMP_STYLES, readStampStyle, setStampStyle } from '../components/study/CardStamp'
 import PromptCard from '../components/study/PromptCard'
 import { CharDisplay } from '../components/study/QuizComponents'
 import { LEVEL_TITLES, levelTitle } from '../domain/levelTitle'
@@ -51,6 +52,10 @@ export default function RewardsPreview() {
   const navigate = useNavigate()
   const [toast, setToast] = useState(null)
   const [stamp, setStamp] = useState(null)
+  // The ground the card answers a press with — see CardStamp.jsx. The
+  // choice is written through to localStorage, so a real session
+  // stamps with it too.
+  const [stampStyle, pickStyle] = useState(readStampStyle)
 
   useEffect(() => { seedSummary(SEED) }, [])
 
@@ -111,6 +116,21 @@ export default function RewardsPreview() {
           already sits in. The next card waits for this one, so every hold
           is measured — see CardStamp.browser.test.jsx.
         </p>
+        <div className="preview-seg">
+          <span className="seg">
+            {STAMP_STYLES.map(st => (
+              <button
+                key={st.key}
+                type="button"
+                className={`seg__opt${stampStyle === st.key ? ' seg__opt--on' : ''}`}
+                onClick={() => { setStampStyle(st.key); pickStyle(st.key) }}
+                title={st.label}
+              >
+                <span className="seg__opt-jp" lang="ja">{st.jp}</span>
+              </button>
+            ))}
+          </span>
+        </div>
         <div className="quiz-area preview-stage" style={{ '--line-color': 'var(--line-kanji)' }}>
           <CardTransition
             className="specimen-card-stage"
@@ -131,7 +151,7 @@ export default function RewardsPreview() {
               tier="stamp"
               label={label}
               note={note}
-              onClick={() => setStamp({ ...transition, id: Date.now(), cardKey: 'preview' })}
+              onClick={() => setStamp({ ...transition, style: stampStyle, id: Date.now(), cardKey: 'preview' })}
             />
           ))}
         </div>

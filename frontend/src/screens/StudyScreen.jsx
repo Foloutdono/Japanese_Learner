@@ -350,7 +350,11 @@ export default function StudyScreen({ session }) {
   const cardStageClassName =
     structureKey === 'vocab' ? 'vocab-card-boost'
     : structureKey === 'grammar' ? 'grammar-card-boost'
+    : structureKey === 'kana' || structureKey === 'kanji' ? 'specimen-card-stage'
     : undefined
+  // The card's footer strip, as on every section screen: the deck on
+  // the left, the mode on the right.
+  const cardFoot = { left: deck?.name ?? '', right: title }
 
   return (
     <div className="screen">
@@ -404,6 +408,7 @@ export default function StudyScreen({ session }) {
                 card={nc} t={t} session={session}
                 answered={answered} cardNonce={cardNonce}
                 activeHints={activeHints} onFlashcardReveal={onFlashcardReveal}
+                foot={cardFoot}
               />
             </CardTransition>
 

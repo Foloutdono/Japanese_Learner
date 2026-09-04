@@ -7919,23 +7919,6 @@ textarea:focus-visible {
 
 /* ── The queue screen itself ─────────────────────────────────── */
 
-/* Which part of the day's study this card came from. A section screen
-   has a header saying where you are; a mixed queue has to say it per
-   card or a kanji writing prompt after a grammar question reads as the
-   app losing its place. */
-.today-lane {
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  letter-spacing: var(--tr-term);
-  /* Deliberately NOT uppercased: this line carries user-authored deck
-     names ("Mots du boulot"), and shouting someone's own words back at
-     them reads as a system label rather than as theirs. */
-  color: var(--text-secondary);
-  margin-bottom: var(--sp-3);
-}
-
 .today-remaining {
   display: inline-flex;
   align-items: center;
@@ -12053,6 +12036,128 @@ textarea:focus-visible {
   100% { opacity: 0; }
 }
 
+/* ── The ground — the card itself answering the press ──
+   The corner seal is small by design (it IS the resting badge), and
+   on its own it did not carry the moment. So the card answers too,
+   behind the content and never over it: a translucent layer in the
+   seal's ink that the specimen and the meaning stay legible through.
+   Three answers are drawn here while the choice is open; the one the
+   maintainer picks stays and the other two go. Each keeps the same
+   timing envelope as the press, so no hold changes.
+
+     落款 rakkan  a large seal impression struck in the card's centre,
+                  the way a signature seal sits over calligraphy
+     刷毛 hake    one brushstroke of ink swept across the card, ending
+                  at the corner the seal lands in
+     灯   akari   a lantern glow blooming out of the seal's corner and
+                  filling the card */
+.card-stamp__ground {
+  --stamp-ink: var(--state-learning);
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.card-stamp-overlay--mastered .card-stamp__ground { --stamp-ink: var(--state-mastered); }
+.card-stamp__ground::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+/* 落款 — the glyph is the seal's own, at the specimen's size, framed
+   as a square seal and set at the angle a hand lands. It is the one
+   ground that says which stage was reached without reading a word.
+   It sits where a signature seal sits on a finished piece — the lower
+   corner, clear of the work — not over the specimen. */
+.card-stamp__ground--rakkan {
+  overflow: visible;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: var(--sp-6);
+  padding-bottom: calc(var(--sp-9) + var(--sp-5));
+}
+.card-stamp__ground--rakkan::before {
+  content: attr(data-glyph);
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3em;
+  height: 1.3em;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-specimen-glyph);
+  line-height: 1;
+  color: var(--stamp-ink);
+  border: 0.06em solid var(--stamp-ink);
+  border-radius: var(--r-identity);
+  opacity: 0;
+  transform: rotate(-8deg) scale(1.7);
+  animation: card-stamp-rakkan 480ms cubic-bezier(0.3, 0.2, 0.15, 1) forwards;
+}
+.card-stamp-overlay--mastered .card-stamp__ground--rakkan::before {
+  outline: 0.03em solid var(--stamp-ink);
+  outline-offset: 0.06em;
+}
+@keyframes card-stamp-rakkan {
+  0%   { opacity: 0;    transform: rotate(-8deg) scale(1.7); }
+  60%  { opacity: 0.26; transform: rotate(-8deg) scale(0.96); }
+  100% { opacity: 0.2;  transform: rotate(-8deg) scale(1); }
+}
+
+/* 刷毛 — a diagonal band of ink, soft-edged, painted left to right in
+   one stroke and left standing. */
+.card-stamp__ground--hake::before {
+  inset: -20%;
+  background: linear-gradient(
+    115deg,
+    transparent 34%,
+    color-mix(in srgb, var(--stamp-ink) 14%, transparent) 43%,
+    color-mix(in srgb, var(--stamp-ink) 30%, transparent) 50%,
+    color-mix(in srgb, var(--stamp-ink) 14%, transparent) 57%,
+    transparent 66%);
+  clip-path: inset(0 100% 0 0);
+  animation: card-stamp-hake 560ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+@keyframes card-stamp-hake {
+  0%   { clip-path: inset(0 100% 0 0); opacity: 1; }
+  70%  { clip-path: inset(0 0 0 0);    opacity: 1; }
+  100% { clip-path: inset(0 0 0 0);    opacity: 0.85; }
+}
+
+/* 灯 — a bloom out of the seal's own corner, so the light reads as
+   the press causing it; the graduation adds a second, centred glow. */
+.card-stamp__ground--akari::before {
+  background: radial-gradient(
+    circle at 92% 6%,
+    color-mix(in srgb, var(--stamp-ink) 38%, transparent) 0%,
+    color-mix(in srgb, var(--stamp-ink) 14%, transparent) 38%,
+    transparent 72%);
+  transform-origin: 92% 6%;
+  opacity: 0;
+  animation: card-stamp-akari 620ms ease-out forwards;
+}
+.card-stamp-overlay--mastered .card-stamp__ground--akari::before {
+  background:
+    radial-gradient(
+      circle at 92% 6%,
+      color-mix(in srgb, var(--stamp-ink) 40%, transparent) 0%,
+      color-mix(in srgb, var(--stamp-ink) 14%, transparent) 38%,
+      transparent 72%),
+    radial-gradient(
+      circle at 50% 55%,
+      color-mix(in srgb, var(--stamp-ink) 16%, transparent) 0%,
+      transparent 60%);
+}
+@keyframes card-stamp-akari {
+  0%   { opacity: 0;   transform: scale(0.15); }
+  45%  { opacity: 1;   transform: scale(1.05); }
+  100% { opacity: 0.8; transform: scale(1); }
+}
+
 /* ── Demotion ──
    A mastered card lapsing to learning: the same seal, re-inked in
    vermillion with a short shake, so it reads as a correction rather
@@ -12080,7 +12185,8 @@ textarea:focus-visible {
   }
   .card-stamp__caption { animation-duration: 10ms; animation-delay: 0ms; }
   .card-stamp__ring,
-  .card-stamp__ripple { animation: none; opacity: 0; }
+  .card-stamp__ripple,
+  .card-stamp__ground::before { animation: none; opacity: 0; }
   .card-stamp-overlay--leaving { animation-duration: 120ms; }
 }
 
@@ -18351,12 +18457,30 @@ textarea:focus-visible {
   }
   .mcq-row + .mcq-row { margin-top: var(--sp-3); }
   .mcq-row__index { width: 28px; height: 28px; }
-  .today-lane { margin-bottom: 0; }
   /* The drawing quiz: the canvas is the point, so until there is a
      stroke order to show it has the whole width; the reference joins
      it, wrapping underneath, once the answer is revealed. */
   .drawing-quiz__correction--waiting { display: none; }
   .drawing-quiz__panels { gap: var(--sp-5); }
+  /* The kanji reveal stacks on a phone: the readings under the
+     meaning, centred, never squeezed beside it. The sideways wipe
+     that opens the desktop panel is replaced by a plain fade, since
+     there is no sideways to wipe into. */
+  .inline-reveal { flex-direction: column; gap: var(--sp-3); }
+  .inline-reveal__main { max-width: none; }
+  .inline-reveal__panel {
+    max-width: none;
+    width: 100%;
+    clip-path: none;
+    transition: none;
+  }
+  .inline-reveal__panel--open {
+    max-width: none;
+    max-height: none;
+    clip-path: none;
+    transition: opacity 0.3s ease;
+  }
+  .inline-reveal__panel-inner { width: auto; max-width: 100%; }
   /* A sumi square with a brush is a drawing surface, and the stroke
      order animates; neither needs a caption on a phone, where the
      line they cost is the line the reveal button needs to stay above
@@ -18701,10 +18825,6 @@ textarea:focus-visible {
   }
   .flashcard {
     border-radius: var(--r-panel);
-  }
-
-  .inline-reveal {
-    gap: 0px;
   }
 
   .char-display {
@@ -23262,6 +23382,12 @@ html { scrollbar-gutter: stable; }
 .preview-row__tier--stamp { background: color-mix(in srgb, var(--state-learning) 22%, transparent); color: color-mix(in srgb, var(--state-learning) 65%, var(--text-primary)); }
 /* The card the stamp rows strike: a study stage, but one that sits in
    the page's flow rather than filling the screen. */
+/* The ground switch on the workbench, centred over the demo card. */
+.preview-seg {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--sp-5);
+}
 .preview-stage {
   flex: none;
   padding: var(--sp-6) 0;

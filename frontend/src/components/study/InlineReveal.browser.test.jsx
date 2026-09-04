@@ -30,6 +30,11 @@ const t = { onyomi: "On'yomi", kunyomi: "Kun'yomi", readingsMore: n => `${n} mor
 const settle = ms => new Promise(r => setTimeout(r, ms))
 
 async function reveal(meaning) {
+  // Beside-the-word is the desktop layout; a phone stacks the readings
+  // under the meaning (index.css, the 768px block). The lane's default
+  // iframe is phone-narrow, so the desktop contract is measured at a
+  // desktop width.
+  await page.viewport(1000, 800)
   const screen = await render(
     <LangProvider>
       <div style={{ width: 700 }}>
