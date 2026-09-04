@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import {
@@ -18,6 +18,7 @@ import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
+import { useReviewGates } from '../hooks/useReviewGates'
 import LevelSelector from '../components/selection/LevelSelector'
 import TierSelector from '../components/selection/TierSelector'
 import ThemeSelector from '../components/selection/ThemeSelector'
@@ -31,9 +32,7 @@ import { speakJapanese, playUi } from '../lib/audio'
 import {
   MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries, modeLabel,
 } from '../domain/studyModes'
-import { applyXpGain } from '../stores/profileSummary'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
-import { rewardTier } from '../domain/rewardTier'
 
 // The 8s fetch timeout that used to live here is gone: useCardSession
 // owns the abort signal and the timeout now (10s, matched to the cold
@@ -80,9 +79,6 @@ export default function VocabScreen({ session }) {
   const [selected, setSelected]     = useState(null)
   const [showRating, setShowRating] = useState(false)
   const [progress, setProgress]       = useState(null)
-  const [xpToast, setXpToast]         = useState(null)
-  const [cardStamp, setCardStamp]     = useState(null)
-  const [locked, setLocked]           = useState(false)
   // ── Hint state (indice_1/2/3) ──
   // Session-wide rather than per-card: a display preference should stay
   // where the learner put it. See components/study/HintBar.jsx for why a
@@ -102,21 +98,6 @@ export default function VocabScreen({ session }) {
   const [reviewCards, setReviewCards] = useState([])
   const [reviewLoading, setReviewLoading] = useState(false)
 
-  // Gates that must all clear before the deck is allowed to move on
-  // to the next card: the review request itself, plus whichever of
-  // the XP toast / stage stamp actually end up showing. Kept in a
-  // ref, not state — nothing needs to re-render off it, it's only
-  // ever read at the moment a gate closes, to decide whether
-  // advance() can finally run.
-  const pendingGatesRef = useRef(new Set())
-  // Guards against advancing twice for the same review. Gates can
-  // reach empty more than once per review — e.g. the toast's own
-  // gate is now released as soon as we know it's safe to move on
-  // (see postReview), but the toast keeps animating and still calls
-  // its onDone → checkAdvance() later, by which point the gate set is
-  // already empty again. A ref (not state) so the guard is set the
-  // instant advance() fires, with no render/closure lag to race.
-  const advancedRef = useRef(false)
 
 
   // One session per level+mode — batched and cached so answering
@@ -208,6 +189,10 @@ export default function VocabScreen({ session }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [card, lang])
 
+  // Every screen's rating flow: the lock, the gates the celebrations
+  // open, and the advance once they all close. See hooks/useReviewGates.
+  const gates = useReviewGates({ advance, sessionKey: storageKey })
+
   // Reset per-card UI state whenever the card in hand changes —
   // advance() is a synchronous local pop now, so there's no fetch
   // callback to hang this reset off of like there used to be.
@@ -218,27 +203,6 @@ export default function VocabScreen({ session }) {
     setShowRating(false)
   }, [card?.card_id])
 
-  // ── Leaving a card mid-flight must not strand the next one ──────
-  // `locked`, the gate set and the celebration state are per-REVIEW,
-  // but they live on the screen, which survives stepping back to the
-  // picker and coming in again. Walk out while a stamp is playing and
-  // its gate is still in the set on the way back — with no stamp
-  // playing to take it out, the queue never advances and `locked`
-  // never lifts. postReview hides the rating bar the instant a rating
-  // is tapped, so the card sits revealed with no way forward and no
-  // way to rate it again: reported from production on a kana card, and
-  // reproduced in KanaScreen.stuck.browser.test.jsx.
-  //
-  // storageKey is the session's own identity (deck/level/set + mode),
-  // so this fires exactly when the session changes and never mid-card.
-  useEffect(() => {
-    pendingGatesRef.current.clear()
-    advancedRef.current = false
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the same id-keyed-reset shape as the per-card effect beside it, and for the same reason: `locked` and the two celebration states are also set mid-flow by postReview, so a key-remounted child would need that flow threaded back down.
-    setLocked(false)
-    setXpToast(null)
-    setCardStamp(null)
-  }, [storageKey])
 
   // Deck progress (à apprendre / en cours / maîtrisé) for the current
   // level+mode. Fetched independently from the card so it never blocks
@@ -296,25 +260,15 @@ export default function VocabScreen({ session }) {
       .finally(() => setReviewLoading(false))
   }
 
-  // advance() only ever runs once every gate above has cleared — see
-  // pendingGatesRef — and only once per review, even if the gate set
-  // empties out more than once (see advancedRef above).
-  function checkAdvance() {
-    if (pendingGatesRef.current.size === 0 && !advancedRef.current) {
-      advancedRef.current = true
-      advance()
-      setLocked(false)
-    }
-  }
 
   function postReview(quality) {
-    // Locked the instant a rating is picked, until the card is
-    // actually replaced — covers the XP toast (including an
-    // indefinite level-up hold) and any stage stamp, so nothing can
-    // land on a card that's already mid-celebration, and a second tap
-    // can't fire a review twice.
-    if (locked) return
-    setLocked(true)
+    // The gates own the lock, so a review already in flight is refused
+    // here rather than half-fired: everything below is this screen's
+    // own business, and none of it should run twice.
+    if (!gates.review(card.review_preview?.[quality], {
+      cardKey: card.card_id, quality,
+    })) return
+
     setShowRating(false)
     loadProgress(
       studyBy === 'level' ? { level }
@@ -323,69 +277,16 @@ export default function VocabScreen({ session }) {
       mode,
     )
 
-    // The exact outcome of this rating — xp, level-up, stage
-    // promotion — was already computed when this card was fetched
-    // (see review_preview on the card payload / preview_reviews_bulk
-    // in srs.py), so there's nothing left to guess or wait on a
-    // network round trip for. That round trip is what used to let the
-    // XP toast finish and release its "safe to advance" gate well
-    // before a slow or cold-starting backend had actually confirmed a
-    // stage promotion — which is what was making the card stamp
-    // silently never show.
-    const preview = card.review_preview?.[quality]
-
-    advancedRef.current = false
-    const gates = pendingGatesRef.current
-    // Whatever is still in here belongs to a review that is over — a
-    // component that would have cleared it is long gone. `locked` above
-    // means no review can be in flight at this point, so anything left
-    // is stale by construction and would hang this one forever.
-    gates.clear()
-
-    if (preview) {
-      // leveledUp/newLevel come from applyXpGain's own running total,
-      // not preview.leveled_up/preview.new_level — the latter is
-      // computed once per batch fetch and can't see XP already
-      // earned from other cards answered earlier in this same batch
-      // (see the comment on applyXpGain for why that matters here).
-      const { leveledUp, newLevel } = applyXpGain({ amount: preview.xp_earned })
-      // A fare tick is a corner badge at the top-right, under the XP
-      // ring it reports to — it never touches the card. Gating the
-      // next card on its fade cost 2175ms measured (1900 hold + 260
-      // exit), on the overwhelming majority of reviews, for an
-      // animation the learner is not even looking at. XpToast's own
-      // note calls this tier "under a second, corner of the screen, no
-      // interaction"; it now behaves that way, playing over the next
-      // card instead of in place of it. The louder two tiers still
-      // gate: a level board is a moment, and a rank waits to be
-      // dismissed by hand.
-      if (rewardTier({ leveledUp, newLevel }) !== 'fare') gates.add('toast')
-      setXpToast({ amount: preview.xp_earned, id: Date.now(), leveledUp, newLevel, quality })
-
-      if (preview.stage_up) {
-        gates.add('stamp')
-        setCardStamp({ id: Date.now(), to: preview.stage_up, cardKey: card.card_id })
-      } else if (preview.stage_down) {
-        gates.add('stamp')
-        setCardStamp({ id: Date.now(), to: preview.stage_down, demoted: true, cardKey: card.card_id })
-      }
-    }
-
-    // Fire-and-forget: this only has to persist the review now — the
-    // response isn't read for anything the UI shows. A slow or dead
-    // request can no longer desync the toast or the stamp from what's
-    // actually about to happen.
-    // /api/vocab/review is domain-agnostic — it only needs card_id +
-    // mode, and a theme card's card_id is the exact same id
-    // vocab_to_id/vocab_jmdict_to_id already produced for it (see
-    // theme_data.py) — so a theme review posts here too, same as
-    // level and frequency ones, no separate endpoint needed.
+    // Fire-and-forget: this only has to persist the review — the
+    // response is not read for anything the UI shows, so a slow or
+    // dead request can no longer desync the toast or the stamp from
+    // what is already happening. A theme card carries the same
+    // vocab_to_id/vocab_jmdict_to_id shape a level card does (see
+    // theme_data.py), so it posts here too — no separate endpoint.
     apiFetch('/api/vocab/review', session, {
       method: 'POST',
       body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
     }).catch(() => {})
-
-    checkAdvance()
   }
 
   function onMCQAnswer(choice) {
@@ -599,11 +500,7 @@ export default function VocabScreen({ session }) {
   return (
     <div className="screen">
       <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${sourceLabel} — ${title}`} autoHide />
-      <XpToast toast={xpToast} onDone={() => {
-        setXpToast(null)
-        pendingGatesRef.current.delete('toast')
-        checkAdvance()
-      }} />
+      <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
       <main id="main-content" className="container quiz-area"
         style={{ '--line-color': 'var(--line-vocab)' }}>
         <DeckProgress stats={progress} />
@@ -614,18 +511,14 @@ export default function VocabScreen({ session }) {
         {card && !loading && (
           <>
             <HintBar available={availableHints} active={activeHints}
-                     onToggle={toggleHint} disabled={locked} />
+                     onToggle={toggleHint} disabled={gates.locked} />
             <CardTransition
               className="vocab-card-boost"
               cardKey={card.card_id}
               contentKey={`${card.card_id}:${card.lang ?? ''}`}
-              stamp={cardStamp}
+              stamp={gates.stamp}
               stage={card.stage}
-              onStampDone={() => {
-                setCardStamp(null)
-                pendingGatesRef.current.delete('stamp')
-                checkAdvance()
-              }}
+              onStampDone={gates.stampDone}
             >
               {/* Study.dc.html's footer strip: what this card is, and
                   which way round you are studying it. */}
@@ -743,7 +636,7 @@ export default function VocabScreen({ session }) {
               />
             )}
 
-            <RatingBar active={showRating && !locked} onRate={postReview} />
+            <RatingBar active={showRating && !gates.locked} onRate={postReview} />
           </>
         )}
       </main>
