@@ -21,6 +21,7 @@ from translations.fr.vocab_fr import VOCAB_FR
 from content.kanji_meanings import KANJI_FR
 from content.radical_data import RADICAL_BY_NUMBER, siblings_by_stroke
 from content.kanji_readings import display_reading
+from study import card_index
 from study.furigana import align_deck as align_furigana
 
 # Reuse the exact same MCQ/choice-building + review-preview logic the
@@ -256,6 +257,35 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
     meaning = get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
+
+
+def _linked_entry(source: str, level: str, raw_id: str) -> dict | None:
+    """
+    The app entry a deck_cards row points at, or None when it no longer
+    resolves — a card removed from the content since it was added.
+
+    O(1), through study/card_index's import-time (source, raw_id) index,
+    rather than the linear scan of the level's entry list this used to be
+    at each of its three call sites. That scan ran once per linked card on
+    every /study, /stats, /cards and /export request, against a list of up
+    to 3,476 entries (N1 vocab) — so a deck of a few hundred N1 words cost
+    hundreds of thousands of comparisons per request, on the study path a
+    session hits repeatedly to refill its queue. The index is built once at
+    import and already paid for by routes/today.py and routes/stats.py.
+
+    The row's `level` is still checked, so this drops exactly what the scan
+    dropped and no more: every raw id embeds the level that made it
+    (`vocab_{level}_{kanji}_{kana}`), and the level is what the builders are
+    handed as their distractor pool, so a row naming a level its id does not
+    come from must not resolve.
+    """
+    entry = card_index.entry_for(source, raw_id)
+    if entry is None:
+        return None
+    cfg = SOURCES.get(source)
+    if cfg is None or cfg["to_id"](entry, level) != raw_id:
+        return None
+    return entry
 
 
 def _ensure_deck_schema() -> None:
@@ -655,14 +685,7 @@ def _listed_cards(conn, deck_id: str, user_id: str, lang: str = "fr") -> list[di
     cards = [{"origin": "custom", **c} for c in custom]
 
     for link in app_links:
-        cfg = SOURCES.get(link["source"])
-        if not cfg:
-            continue
-        entry = next(
-            (e for e in cfg["by_level"].get(link["level"], [])
-             if cfg["to_id"](e, link["level"]) == link["raw_id"]),
-            None,
-        )
+        entry = _linked_entry(link["source"], link["level"], link["raw_id"])
         if entry is None:
             continue
         fields = _meaning_preview(link["source"], entry, lang)
@@ -897,15 +920,11 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
                         # the picker was opened) shouldn't 500 out the
                         # rest of an otherwise-valid batch.
                         continue
-                    cfg = SOURCES.get(c.source)
-                    if not cfg:
-                        continue
-                    level_list = cfg["by_level"].get(c.level, [])
                     # Ignore refs that don't resolve to a real entry
                     # instead of 500ing — a stale browse result (deck
                     # data changed under it) shouldn't break the rest
                     # of the batch.
-                    if not any(cfg["to_id"](e, c.level) == c.raw_id for e in level_list):
+                    if _linked_entry(c.source, c.level, c.raw_id) is None:
                         continue
                     write_cur.execute("""
                         INSERT INTO deck_cards (deck_id, user_id, source, level, raw_id)
@@ -1050,14 +1069,7 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
         })
 
     for link in app_links:
-        cfg = SOURCES.get(link["source"])
-        if not cfg:
-            continue
-        entry = next(
-            (e for e in cfg["by_level"].get(link["level"], [])
-             if cfg["to_id"](e, link["level"]) == link["raw_id"]),
-            None,
-        )
+        entry = _linked_entry(link["source"], link["level"], link["raw_id"])
         if entry is None:
             continue
         pool.append({
