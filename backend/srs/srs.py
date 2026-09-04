@@ -739,7 +739,9 @@ class SRSEngine:
                         total_reviews,
                         interval_days,
                         next_review,
-                        correct_reviews
+                        correct_reviews,
+                        is_learning,
+                        learning_step
                     FROM card_modes
                     WHERE card_id LIKE %s{mode_sql}
                 """
@@ -758,7 +760,8 @@ class SRSEngine:
 
         result = {}
 
-        for card_id, mode, total_reviews, interval_days, next_review, correct_reviews in rows:
+        for (card_id, mode, total_reviews, interval_days, next_review,
+             correct_reviews, is_learning, learning_step) in rows:
 
             if total_reviews == 0:
                 state = "new"
@@ -775,6 +778,12 @@ class SRSEngine:
                 "total_reviews": total_reviews,
                 "correct_reviews": correct_reviews,
                 "interval_days": interval_days,
+                # interval_days is 0 for the whole of the learning
+                # steps — it is only written on graduation — so a
+                # caller scoring progress needs the step to tell a card
+                # halfway up the ladder from one never touched.
+                "is_learning": is_learning,
+                "learning_step": learning_step,
                 "next_review": next_review.isoformat() if next_review else None,
             }
 

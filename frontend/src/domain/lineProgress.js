@@ -13,9 +13,11 @@
 // nothing on screen saying why. The per-mode view still exists and is
 // still the right unit for the stats screen's bars; it is the wrong
 // one for a map. See routes/stats.py's `items` block for the score
-// itself, which is continuous — a card counts for how far its longest
-// interval has come toward the 21-day mastery mark, so one pass over a
-// deck no longer buys exactly half of it.
+// itself, which is continuous — a card counts for how far its best
+// mode has come toward the 21-day mastery mark, climbing the learning
+// steps first and then the interval — so one pass over a deck no
+// longer buys exactly half of it, and a card still in the steps is
+// not worth nothing either.
 //
 // The deck orders are the app's own: JLPT levels walk N5 → N1, and
 // kana walks the four sets in the order the kana screen teaches them.
