@@ -97,11 +97,14 @@ def _build():
         index:   (raw_id, mode key) -> (source, deck key)
         totals:  (source, deck key, mode key) -> reachable card count
         ids:     (source, deck key, mode key) -> [raw_id, ...] in deck order
+        items:   (source, deck key) -> [raw_id, ...] every card the deck
+                 has, once, whichever modes can serve it
         entries: (source, raw_id) -> the deck entry itself
     """
     index: dict[tuple[str, str], tuple[str, str]] = {}
     totals: dict[tuple[str, str, str], int] = {}
     ids: dict[tuple[str, str, str], list[str]] = {}
+    items: dict[tuple[str, str], list[str]] = {}
     entries: dict[tuple[str, str], dict] = {}
 
     for source, decks, to_id in _DECKS:
@@ -118,6 +121,27 @@ def _build():
                 for raw_id in pool:
                     index[(raw_id, mode_key)] = (source, deck_key)
 
+        # The deck's cards, counted ONCE each rather than once per mode
+        # it appears in. The union and not the sum: `total()` answers
+        # "how many drills does this mode have here", which is what the
+        # stats screen's per-mode bars need, and a card served by four
+        # modes is four of those. The wall map asks a different question
+        # — how much of this deck do you know — and there a card is one
+        # card. Deck order is kept (dict preserves insertion), so the
+        # union reads in the order the deck teaches.
+        #
+        # Union, not "the widest mode's pool": no single mode is
+        # guaranteed to be a superset. vocab.word_reading skips kana-only
+        # words while the flashcard modes carry them, and it is only by
+        # luck of the content that the flashcards happen to cover
+        # everything today.
+        for deck_key, deck_entries in decks.items():
+            seen: dict[str, None] = {}
+            for mode_key in sorted(GRADED_FOR_SOURCE[source]):
+                for raw_id in ids[(source, deck_key, mode_key)]:
+                    seen[raw_id] = None
+            items[(source, deck_key)] = list(seen)
+
         # The entries themselves, so a caller holding only a stored
         # card_id can rebuild the card without rescanning the deck. Stored
         # by reference, not copied.
@@ -125,10 +149,10 @@ def _build():
             for entry in deck_entries:
                 entries[(source, to_id(entry, deck_key))] = entry
 
-    return index, totals, ids, entries
+    return index, totals, ids, items, entries
 
 
-_INDEX, _TOTALS, _IDS, _ENTRIES = _build()
+_INDEX, _TOTALS, _IDS, _ITEMS, _ENTRIES = _build()
 
 
 def locate(raw_id: str, mode_key: str) -> tuple[str, str] | None:
@@ -146,6 +170,22 @@ def total(source: str, deck_key: str, mode_key: str) -> int:
 def raw_ids(source: str, deck_key: str, mode_key: str) -> list[str]:
     """Every card this mode can serve from this deck, in deck order."""
     return _IDS.get((source, deck_key, mode_key), [])
+
+
+def item_ids(source: str, deck_key: str) -> list[str]:
+    """Every card this deck contains, once each, in deck order.
+
+    The unit the wall map and the profile ledger count in: a kanji you
+    can read but not write is one kanji, not two fifths of one. Compare
+    `total()`/`raw_ids()`, which count per mode — that is the unit the
+    stats screen's per-mode bars are drawn in.
+    """
+    return _ITEMS.get((source, deck_key), [])
+
+
+def item_total(source: str, deck_key: str) -> int:
+    """How many cards this deck contains, counted once each."""
+    return len(_ITEMS.get((source, deck_key), ()))
 
 
 def deck_keys(source: str) -> list[str]:

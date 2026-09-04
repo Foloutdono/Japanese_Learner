@@ -1,16 +1,21 @@
 // ── 路線図 — how far down each line you have travelled ────────
 // The wall map draws each SRS section as a line with stops, and the
-// learner's position on it. This is the arithmetic behind the train
-// marker, kept pure so it can be tested without a browser and shared
-// if a second surface (stats, profile) ever wants the same figure.
+// learner's position on it. This reads the arithmetic behind the train
+// marker, kept here so the map and the profile's ledger cannot drift
+// apart about how far along a line you are.
 //
-// A stop's "score" is how complete that level is, 0..1, computed from
-// /api/stats' buckets: mastered counts fully, learning counts half,
-// new counts nothing — the same weighting a learner would give it if
-// asked "are you done with N5 vocab?". Aggregated across every graded
-// mode of the section, because the map answers for the section, not
-// for one skill: 漢字 recognised but not yet writable is genuinely
-// half-travelled.
+// A stop's score is /api/stats' own per-deck figure, 0..1, and the
+// unit is CARDS: a kanji is one kanji whether or not you can also
+// write it and name its radical. It used to be computed here out of
+// the per-mode buckets, which counted (card x mode) drills — so the
+// kanji line's denominator was 11,175 rather than 2,235, and a learner
+// who never drew a kanji was capped at four fifths of the line with
+// nothing on screen saying why. The per-mode view still exists and is
+// still the right unit for the stats screen's bars; it is the wrong
+// one for a map. See routes/stats.py's `items` block for the score
+// itself, which is continuous — a card counts for how far its longest
+// interval has come toward the 21-day mastery mark, so one pass over a
+// deck no longer buys exactly half of it.
 //
 // The deck orders are the app's own: JLPT levels walk N5 → N1, and
 // kana walks the four sets in the order the kana screen teaches them.
@@ -38,17 +43,25 @@ export const KANA_STOPS = [
   { key: 'katakana_combos', label: 'キャ' },
 ]
 
-function deckScore(deckBuckets) {
-  if (!deckBuckets) return 0
-  let weighted = 0
-  let total = 0
-  for (const bucket of Object.values(deckBuckets)) {
-    if (!bucket || typeof bucket !== 'object') continue
-    total += bucket.total ?? 0
-    weighted += (bucket.mastered ?? 0) + 0.5 * (bucket.learning ?? 0)
+/** One deck's `items` entry, defended against every shape that isn't
+ *  one: a failed fetch, an older backend that predates the block, a
+ *  test's today-shaped mock. The map must still draw. */
+function deckItems(stats, source, deckKey) {
+  const entry = stats?.items?.[source]?.[deckKey]
+  if (!entry || typeof entry !== 'object') return { score: 0, learned: 0, total: 0 }
+  const total = Number(entry.total) || 0
+  return {
+    score: Math.min(1, Math.max(0, Number(entry.score) || 0)),
+    learned: Math.min(total, Math.max(0, Number(entry.learned) || 0)),
+    total,
   }
-  if (total <= 0) return 0
-  return Math.min(1, weighted / total)
+}
+
+/** The deck keys of one line, in the order the app teaches them. */
+function lineOrder(source) {
+  return source === 'kana'
+    ? KANA_STOPS
+    : LEVEL_STOPS.map(key => ({ key, label: key }))
 }
 
 /**
@@ -57,14 +70,10 @@ function deckScore(deckBuckets) {
  * must still draw the map, just with nobody on it yet).
  */
 export function lineStops(stats, source) {
-  const decks = stats?.[source]
-  const order = source === 'kana'
-    ? KANA_STOPS
-    : LEVEL_STOPS.map(key => ({ key, label: key }))
-  return order.map(({ key, label }) => ({
+  return lineOrder(source).map(({ key, label }) => ({
     key,
     label,
-    score: deckScore(decks?.[key]),
+    score: deckItems(stats, source, key).score,
   }))
 }
 
@@ -74,25 +83,26 @@ export function stopsTravelled(stops) {
 }
 
 /**
- * Mastered and reachable (card, mode) pairs on one line, summed over
- * every deck and graded mode — the unit the 段位 plaque counts in
- * (srs.get_mastered_count), so the profile's ride ledger and the rank
- * can be read against each other. Garbage in, zeros out, like
- * lineStops: a failed stats fetch must never throw here.
+ * Cards learned and cards there are, on one line — the profile
+ * ledger's figure, and the fraction its rail fills to, so that one row
+ * cannot print two different answers about the same line. It used to
+ * count (card, mode) pairs while the rail beside it averaged the stop
+ * scores: finish N5 vocab and nothing else and the rail said 20% while
+ * the figure said 1,838 / 24,118, which is 7.6%.
+ *
+ * "Learned" is whole cards only — a count of things you know should
+ * not be fractional. The partial credit the stops carry is where
+ * work-in-progress shows up, which is the map's job, not this one's.
+ * Garbage in, zeros out, like lineStops: a failed stats fetch must
+ * never throw here.
  */
 export function lineTotals(stats, source) {
-  let mastered = 0
+  let learned = 0
   let total = 0
-  const decks = stats?.[source]
-  if (decks && typeof decks === 'object') {
-    for (const deck of Object.values(decks)) {
-      if (!deck || typeof deck !== 'object') continue
-      for (const bucket of Object.values(deck)) {
-        if (!bucket || typeof bucket !== 'object') continue
-        total += bucket.total ?? 0
-        mastered += bucket.mastered ?? 0
-      }
-    }
+  for (const { key } of lineOrder(source)) {
+    const deck = deckItems(stats, source, key)
+    learned += deck.learned
+    total += deck.total
   }
-  return { mastered, total }
+  return { learned, total }
 }

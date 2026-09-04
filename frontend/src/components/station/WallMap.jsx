@@ -34,11 +34,17 @@ import { TRACKED_LINES as TRACKED, lineStops, stopsTravelled } from '../../domai
 const FACILITIES = new Set(['/dictionary', '/decks', '/exam'])
 
 function Track({ stops, travelled }) {
-  // Percent geometry mirrors the stop count: first stop at 5%, last
-  // at 95%, the train wherever the scores put it between them.
-  const span = Math.max(1, stops.length - 1)
-  const x = i => 5 + (i / span) * 90
-  const pos = Math.min(95, 5 + (travelled / stops.length) * 90)
+  // ONE scale for the stops and the train: a stop marks where its leg
+  // BEGINS, so with n legs of work the rail is divided into n, the
+  // last stop sits one leg short of the end, and the rail past it is
+  // that last leg. `pos` and `x` are then the same function, which is
+  // the whole point — the stops used to be spaced over n-1 while the
+  // train ran over n, so the two only agreed at the ends. Finish three
+  // of five levels and the train sat at 59% while the dot it had just
+  // filled was at 72.5%: the marker lagged the stations it had passed,
+  // by up to 13 points in the middle of the line.
+  const x = i => 5 + (i / stops.length) * 90
+  const pos = Math.min(95, x(travelled))
 
   return (
     <span className="wmap-track" aria-hidden="true">
@@ -46,8 +52,12 @@ function Track({ stops, travelled }) {
       <span className="wmap-track__done" style={{ width: `${pos}%` }} />
       {stops.map((stop, i) => (
         <span key={stop.key}>
+          {/* Filled when the TRAIN has passed it, not when the stop
+              itself is half done — one rule, one story. The two used to
+              disagree openly: a level 50% done filled its dot while the
+              train was still short of it. */}
           <span
-            className={`wmap-track__stop${stop.score >= 0.5 ? ' wmap-track__stop--past' : ''}`}
+            className={`wmap-track__stop${travelled >= i + 1 ? ' wmap-track__stop--past' : ''}`}
             style={{ left: `${x(i)}%` }}
           />
           <span className="wmap-track__label" style={{ left: `${x(i)}%` }} lang={stop.key.startsWith('N') ? undefined : 'ja'}>
@@ -55,6 +65,17 @@ function Track({ stops, travelled }) {
           </span>
         </span>
       ))}
+      {/* 終点 — the end of the line, and the only mark that is not a
+          level: the stops now sit one leg apart with the last leg's
+          rail running past the final one, so without a terminus the
+          track just frays. Kanji rather than a translated word, the
+          same register as the app's other one-glyph marks (試/習/極),
+          and the one label that is the same in both locales. */}
+      <span
+        className={`wmap-track__stop wmap-track__stop--end${travelled >= stops.length ? ' wmap-track__stop--past' : ''}`}
+        style={{ left: `${x(stops.length)}%` }}
+      />
+      <span className="wmap-track__label wmap-track__label--end" style={{ left: `${x(stops.length)}%` }} lang="ja">完</span>
       <span className="wmap-track__train" style={{ left: `${pos}%` }} />
     </span>
   )

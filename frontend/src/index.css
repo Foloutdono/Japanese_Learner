@@ -8197,6 +8197,12 @@ textarea:focus-visible {
   background: var(--line-color, var(--accent2));
   border-color: var(--line-color, var(--accent2));
 }
+/* 終点 — the terminus, drawn as a station because that is what it is:
+   the end of the line, one leg past the last level. Squared off rather
+   than round, the way a terminus is marked on a route map, so it reads
+   as a destination and not as a sixth level. */
+.wmap-track__stop--end { border-radius: var(--r-plate); }
+.wmap-track__label--end { opacity: 0.45; }
 .wmap-track__label {
   position: absolute;
   top: 19px;
