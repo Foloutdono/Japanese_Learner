@@ -145,9 +145,26 @@ def _build():
         # The entries themselves, so a caller holding only a stored
         # card_id can rebuild the card without rescanning the deck. Stored
         # by reference, not copied.
+        #
+        # FIRST wins, which is why this is setdefault and not assignment.
+        # Two ids can collide: a card id is built from the entry's own
+        # fields, so two distinct N5 words with no kanji and the same kana
+        # produce one id -- たいへん is both "very" and "difficult
+        # situation", あの both "that over there" and "um...". They are
+        # therefore one card to the scheduler, and the question is only
+        # which meaning it shows.
+        #
+        # Every section screen answers that by scanning its level and
+        # taking the first match (routes/vocab.py's `next(...)` over the
+        # pool), so first-wins is what a learner already sees on the Vocab
+        # screen. Assignment here made this index answer "the last one"
+        # instead, so the same card read "very" in its section and
+        # "difficult situation" in the Today queue. Aligning the index with
+        # the screens is what lets routes/decks.py resolve a linked card
+        # through it instead of running its own scan.
         for deck_key, deck_entries in decks.items():
             for entry in deck_entries:
-                entries[(source, to_id(entry, deck_key))] = entry
+                entries.setdefault((source, to_id(entry, deck_key)), entry)
 
     return index, totals, ids, items, entries
 
