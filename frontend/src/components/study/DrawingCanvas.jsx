@@ -229,7 +229,7 @@ export function DrawingOverlay({ kanji, meaning, onDone, resetKey }) {
         </div>
         <StrokeRef kanji={kanji} meaning={meaning} />
       </div>
-      <button onClick={() => { playClick(); onDone() }} className="drawing-overlay__continue">
+      <button onClick={() => { playClick(); onDone() }} className="btn-primary drawing-overlay__continue">
         <CheckIcon size={14} /> {t.continueBtn}
       </button>
     </div>
@@ -285,8 +285,10 @@ function DrawingQuizCard({ kanji, meaning, onValidate, resetKey }) {
             <Canvas canvasRef={canvasRef} resetKey={resetKey ?? kanji} />
           </div>
 
-          {/* Correction side — hidden until validated */}
-          <div className="drawing-quiz__correction">
+          {/* Correction side — a placeholder until validated. Carries
+              the state as a class so a phone can give the canvas the
+              whole width until there is a stroke order to show. */}
+          <div className={`drawing-quiz__correction${revealed ? '' : ' drawing-quiz__correction--waiting'}`}>
             {!revealed ? (
               <>
                 <div className="stroke-ref__label">{t.strokeOrder}</div>
@@ -303,7 +305,7 @@ function DrawingQuizCard({ kanji, meaning, onValidate, resetKey }) {
 
       {/* Validate button — only before revealed */}
       {!revealed && (
-        <button onClick={handleValidate} className="drawing-quiz__validate">
+        <button onClick={handleValidate} className="btn-primary drawing-quiz__validate">
           {t.revealAnswer}
         </button>
       )}

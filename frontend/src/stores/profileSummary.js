@@ -50,6 +50,15 @@ export function refreshSummary() {
   return fetchSummary()
 }
 
+// Development only: the reward workbench (/dev/rewards) needs a
+// summary to exist so the level HUD has something to report a gain
+// against, and there is no session there to fetch one. Not a real
+// fetch, so it never resets the TTL clock — the next consumer with a
+// session still fetches the truth.
+export function seedSummary(data) {
+  setCache(data)
+}
+
 export function useProfileSummary() {
   const [summary, setSummary] = useState(cache)
 

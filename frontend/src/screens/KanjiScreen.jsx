@@ -34,7 +34,7 @@ import {
   modePickerEntries, modeLabel, usesWritingDrill,
 } from '../domain/studyModes'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
-import { PencilIcon } from '../components/ui/Icons'
+import WritingToggle from '../components/study/WritingToggle'
 import { RadicalAnswer } from '../components/study/RadicalPieces'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 
@@ -443,13 +443,7 @@ export default function KanjiScreen({ session }) {
         title={`${t.kanjiTitle} ${sourceLabel} — ${title}`}
         autoHide
         actions={usesWritingDrill(mode) ? (
-          <button
-            onClick={() => setDrawingEnabled(d => !d)}
-            className={`btn-writing-toggle ${drawingEnabled ? 'btn-writing-toggle--on' : 'btn-writing-toggle--off'}`}
-            title={t.toggleWriting}
-          >
-            <PencilIcon size={14} /> {drawingEnabled ? t.writingOn : t.writingOff}
-          </button>
+          <WritingToggle on={drawingEnabled} onToggle={() => setDrawingEnabled(d => !d)} />
         ) : undefined}
       />
       <XpToast toast={gates.xpToast} onDone={gates.toastDone} />

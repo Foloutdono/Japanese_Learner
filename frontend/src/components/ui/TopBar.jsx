@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { getNavLinks } from '../../config/navLinks'
@@ -105,6 +105,66 @@ export function useAutoHideTopBar(active = true) {
   return { hidden, reveal, onMenuOpenChange }
 }
 
+// ── 運賃 — the fare, reported where it was paid ──────────────
+// XP earned by a review used to arrive as a toast in a corner of the
+// screen. It reports to the level HUD now — the roundel on a desktop,
+// the bottom bar on a phone — because that is the object the figure
+// was paid into, and a "+4" rising off it needs no panel, no label
+// and no dismissal to be understood. Both HUDs read the same summary
+// store, so both notice the same gain; this hook is the one place
+// that turns "xp went up" into something to draw, and it does it
+// during render (the React docs' adjust-state-during-render pattern)
+// so the figure appears in the same frame the bar moves.
+//
+// Returns { gain, clear }: `gain` is null or { id, delta, fromPct,
+// toPct } — the amount, and the span of the level bar it just moved
+// through — and `clear` is what the HUD calls once its animation ends.
+function useXpGain(summary) {
+  const [last, setLast] = useState(summary?.xp ?? null)
+  const [gain, setGain] = useState(null)
+  const xp = summary?.xp
+  if (xp != null && xp !== last) {
+    setLast(xp)
+    if (last != null && xp > last) {
+      const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)
+      // Clamped against the CURRENT span so a level-up (which shifts
+      // xpPrevLevel/xpForNext) still yields a sane highlight instead
+      // of a stale or negative offset.
+      const prevInto = Math.min(span, Math.max(0, last - summary.xpPrevLevel))
+      const curInto  = Math.min(span, Math.max(0, xp - summary.xpPrevLevel))
+      setGain({
+        // xp only ever climbs, so it is its own unique key — and it
+        // keeps this render pure, which a Date.now() here is not.
+        id: xp,
+        delta: xp - last,
+        fromPct: Math.round((prevInto / span) * 100),
+        toPct:   Math.round((curInto / span) * 100),
+      })
+    }
+  }
+  const clear = useCallback(() => setGain(null), [])
+  return { gain, clear }
+}
+
+// The figure itself, shared by both HUDs: the amount, and a unit in
+// the caption register so a bare number under a level roundel cannot
+// be read as levels. `key` on the caller remounts it per gain so the
+// rise replays; the caller clears its gain off this element's own
+// animationend, never off a timer guessing at the CSS.
+function FareFigure({ gain, className, onEnd }) {
+  if (!gain) return null
+  return (
+    <span
+      key={gain.id}
+      className={className}
+      aria-hidden="true"
+      onAnimationEnd={e => { if (e.animationName === 'hud-fare') onEnd() }}
+    >
+      +{gain.delta}<span className="hud-fare__unit">xp</span>
+    </span>
+  )
+}
+
 // ── Level progress, desktop: ring ────────────────────────
 // Sits in the top bar itself next to the title. Tapping it opens the
 // full Profile screen. Renders nothing until the summary loads (or if
@@ -113,6 +173,7 @@ function TopBarProfileRing() {
   const navigate = useNavigate()
   const { t } = useLang()
   const summary = useProfileSummary()
+  const { gain, clear } = useXpGain(summary)
   if (!summary) return null
 
   // Still computed: the ring no longer draws an arc (see the roundel
@@ -124,7 +185,7 @@ function TopBarProfileRing() {
   return (
     <button
       type="button"
-      className="topbar-profile-ring"
+      className={`topbar-profile-ring${gain ? ' topbar-profile-ring--gain' : ''}`}
       onClick={() => { playClick(); navigate('/profile') }}
       title={`${t.level} ${summary.level} — ${into}/${span} XP`}
     >
@@ -134,6 +195,9 @@ function TopBarProfileRing() {
           reserves --pass-ink for. The XP figure is still in the title
           and still on the pass, one tap away. */}
       <span className="topbar-profile-ring__level">{summary.level}</span>
+      {/* The fare rising off the roundel it was paid into; the ring
+          itself pulses gold once (see --gain in index.css). */}
+      <FareFigure gain={gain} className="hud-fare hud-fare--ring" onEnd={clear} />
     </button>
   )
 }
@@ -147,28 +211,11 @@ function MobileLevelBar() {
   const navigate = useNavigate()
   const { t } = useLang()
   const summary = useProfileSummary()
-  const prevXpRef = useRef(null)
-  const [gain, setGain] = useState(null) // { fromPct, toPct, id } — segment to highlight
-
-  // Whenever xp goes up, figure out the percentage span it just moved
-  // through and flag it for a highlighted overlay — cleared once its
-  // fade-out animation ends (see onAnimationEnd below).
-  useEffect(() => {
-    if (!summary) return
-    const span = Math.max(1, summary.xpForNext - summary.xpPrevLevel)
-    if (prevXpRef.current !== null && summary.xp > prevXpRef.current) {
-      // Clamped against the *current* span so a level-up (which shifts
-      // xpPrevLevel/xpForNext) still yields a sane highlight instead
-      // of a stale or negative offset.
-      const prevInto = Math.min(span, Math.max(0, prevXpRef.current - summary.xpPrevLevel))
-      const curInto  = Math.min(span, Math.max(0, summary.xp - summary.xpPrevLevel))
-      const fromPct = Math.round((prevInto / span) * 100)
-      const toPct   = Math.round((curInto / span) * 100)
-      if (toPct > fromPct) setGain({ fromPct, toPct, id: Date.now() })
-    }
-    prevXpRef.current = summary.xp
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [summary?.xp, summary?.xpPrevLevel, summary?.xpForNext])
+  // The gain: the span of the track it just moved through lights up
+  // gold, and the amount rises off the XP figure at the right end.
+  // Both are cleared off the figure's own animationend, which is the
+  // longer of the two, so the highlight never outlives its figure.
+  const { gain, clear } = useXpGain(summary)
 
   if (!summary) return null
 
@@ -181,16 +228,18 @@ function MobileLevelBar() {
       <span className="mobile-level-bar__level">{t.level} {summary.level}</span>
       <span className="mobile-level-bar__track">
         <span className="mobile-level-bar__fill" style={{ width: `${pct}%` }} />
-        {gain && (
+        {gain && gain.toPct > gain.fromPct && (
           <span
             key={gain.id}
             className="mobile-level-bar__gain"
             style={{ left: `${gain.fromPct}%`, width: `${Math.max(0, gain.toPct - gain.fromPct)}%` }}
-            onAnimationEnd={() => setGain(null)}
           />
         )}
       </span>
-      <span className="mobile-level-bar__xp">{into}/{span} XP</span>
+      <span className="mobile-level-bar__xp">
+        {into}/{span} XP
+        <FareFigure gain={gain} className="hud-fare hud-fare--bar" onEnd={clear} />
+      </span>
     </button>
   )
 }

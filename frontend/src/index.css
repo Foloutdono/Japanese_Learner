@@ -2313,6 +2313,7 @@
    The analyser's own copy of the pattern rather than a second consumer
    of .exam-visually-hidden, per the per-feature-stylesheet rule this
    file exists to hold. */
+.sr-only,
 .anl-sr-only {
   position: absolute;
   width: 1px; height: 1px;
@@ -4589,6 +4590,16 @@
      fighting max-width directly. */
   --card-w:         640px;
   --gap:            24px;
+  /* The mobile level bar's height, safe-area excluded. It is fixed to
+     the viewport's bottom edge, so anything docked above it — the
+     study screens' rating bar, the level board — offsets by this
+     rather than by a number each of them measured for itself. */
+  --hud-h:          36px;
+  /* The phone's own insets, named once. Every rule that clears a home
+     bar or a notch reads these; the fallback lives here and nowhere
+     else. */
+  --safe-top:       env(safe-area-inset-top, 0px);
+  --safe-bottom:    env(safe-area-inset-bottom, 0px);
 
   /* ── The card surface ────────────────────────────────────
      Every raised object in the app — a platform card, an MCQ answer,
@@ -5782,7 +5793,7 @@ textarea:focus-visible {
    track + 8px + border, plus its safe-area inset, plus a row of
    breathing room. Same reasoning as .dict-page's own clearance. */
 @media (max-width: 768px) {
-  .page-pad { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  .page-pad { padding-bottom: calc(72px + var(--safe-bottom)); }
 }
 
 /* Section header — serif-JP title + a short seal-red stroke instead
@@ -5961,6 +5972,8 @@ textarea:focus-visible {
      that is 40px of horizontal padding in a 32px box, so the used width
      was forced out to 44 and the roundel came out an oval. */
   padding: 0;
+  /* The fare figure anchors to the roundel (see .hud-fare--ring). */
+  position: relative;
   background: transparent;
   /* Lifted toward the panel ink, not raw: this bar is sumi in BOTH
      themes and 消炭 charcoal is nearly sumi itself — raw it measures
@@ -5995,6 +6008,62 @@ textarea:focus-visible {
   font-size: var(--fs-caption);
   font-variant-numeric: tabular-nums;
   color: var(--text-on-panel);
+}
+
+/* ── 運賃 — the fare, on the HUD it was paid into ──────────
+   XP earned by a review reports here now rather than in a toast (see
+   TopBar.jsx's useXpGain): the roundel pulses gold once — the pass's
+   own metal — and the amount rises off it. Both HUDs draw the same
+   figure with the same keyframe; only the anchor differs. The ring's
+   fare is hidden on a phone, where the bottom bar reports instead. */
+.topbar-profile-ring--gain {
+  animation: hud-ring-gain 700ms ease-out;
+}
+@keyframes hud-ring-gain {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent2) 70%, transparent); }
+  100% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent2) 0%, transparent); }
+}
+.hud-fare {
+  position: absolute;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--accent2);
+  pointer-events: none;
+  animation: hud-fare 1000ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.hud-fare__unit {
+  font-size: var(--fs-caption-xs);
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+@keyframes hud-fare {
+  0%   { opacity: 0; transform: translate(-50%, 6px); }
+  18%  { opacity: 1; transform: translate(-50%, 0); }
+  70%  { opacity: 1; transform: translate(-50%, -18px); }
+  100% { opacity: 0; transform: translate(-50%, -28px); }
+}
+/* Under the bar's lower edge, rising toward the roundel it was paid
+   into. Its own ink pair is the bar's, since it hangs off it. */
+.hud-fare--ring {
+  top: 100%;
+  left: 50%;
+  margin-top: var(--sp-4);
+}
+@media (prefers-reduced-motion: reduce) {
+  .topbar-profile-ring--gain { animation: none; }
+  .hud-fare { animation: hud-fare-still 1000ms linear both; }
+  @keyframes hud-fare-still {
+    0%, 80% { opacity: 1; transform: translate(-50%, -8px); }
+    100%    { opacity: 0; transform: translate(-50%, -8px); }
+  }
 }
 .button-set-choice {
   background: var(--bg-card);
@@ -7838,14 +7907,14 @@ textarea:focus-visible {
    included, because the bar reserves its OWN copy for its own padding
    and this offset is independent of it. */
 @media (max-width: 768px) {
-  .today-picker { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
-  .today-picker__go { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+  .today-picker { padding-bottom: calc(72px + var(--safe-bottom)); }
+  .today-picker__go { bottom: calc(56px + var(--safe-bottom)); }
   /* The backdrop's bottom inset tracks the sticky offset above, so the
      strip the mobile bar leaves between the button and the viewport
      floor is covered here too. The picker's 72px + inset of bottom
      padding is larger than this 56px + inset, so it still overflows
      nothing. */
-  .today-picker__go::before { bottom: calc(-56px - env(safe-area-inset-bottom, 0px)); }
+  .today-picker__go::before { bottom: calc(-56px - var(--safe-bottom)); }
 }
 
 /* ── The queue screen itself ─────────────────────────────────── */
@@ -7856,13 +7925,15 @@ textarea:focus-visible {
    app losing its place. */
 .today-lane {
   text-align: center;
-  font-size: 12px;
-  letter-spacing: 0.06em;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: var(--tr-term);
   /* Deliberately NOT uppercased: this line carries user-authored deck
      names ("Mots du boulot"), and shouting someone's own words back at
      them reads as a system label rather than as theirs. */
   color: var(--text-secondary);
-  margin-bottom: 10px;
+  margin-bottom: var(--sp-3);
 }
 
 .today-remaining {
@@ -9233,7 +9304,13 @@ textarea:focus-visible {
   background: var(--bg-panel);
   color: var(--text-on-panel);
   border-top: 1px solid var(--burger-menu-border);
-  padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px));
+  /* Sized by --hud-h so the study dock can clear it exactly; the
+     safe-area inset rides underneath as padding. */
+  box-sizing: border-box;
+  height: calc(var(--hud-h) + var(--safe-bottom));
+  padding-top: 0;
+  padding-inline: var(--sp-5);
+  padding-bottom: var(--safe-bottom);
   border-radius: 0;
 }
 .mobile-level-bar__level {
@@ -9287,10 +9364,17 @@ textarea:focus-visible {
   .mobile-level-bar__gain { animation-duration: 1ms; }
 }
 .mobile-level-bar__xp {
+  position: relative;
   font-family: var(--font-display);
   font-size: 11px;
   color: var(--text-on-panel-soft);
   white-space: nowrap;
+}
+/* The fare, rising off the XP figure at the bar's right end. */
+.hud-fare--bar {
+  bottom: 100%;
+  left: 50%;
+  margin-bottom: var(--sp-1);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -10047,17 +10131,33 @@ textarea:focus-visible {
   text-overflow: ellipsis;
 }
 
-.btn-writing-toggle {
-  font-size: 12px;
-  padding: 6px 12px;
+/* An icon toggle on the sumi bar — the writing drill's switch. The
+   same hairline box as .btn-back beside it; on, the ring and the
+   glyph take the pass's gold, which is what a lit control on this
+   bar wears (the fare figure, the ring's pulse). It used to be a
+   filled chip reading "Writing ON" in the warning colour: a state
+   colour used decoratively, and the bar's only text label. */
+.btn-icon-toggle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-3);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--r-plate);
+  color: var(--text-on-panel-soft);
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
-.btn-writing-toggle--on {
-  background: var(--warning);
-  color: var(--text-on-fill);
+.btn-icon-toggle:hover,
+.btn-icon-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.34);
+  filter: none;
 }
-.btn-writing-toggle--off {
-  background: var(--bg-card);
-  color: var(--text-secondary);
+.btn-icon-toggle--on {
+  color: var(--accent2);
+  border-color: color-mix(in srgb, var(--accent2) 70%, transparent);
 }
 
 /* ── The help switch inside a merged recall mode ───────────
@@ -10073,23 +10173,35 @@ textarea:focus-visible {
   /* --sp-4, per Study.dc.html. Was 10px, on no rung. */
   gap: var(--sp-4);
 }
+/* The segmented toggle's construction at chip size: a hairline pill,
+   washed at ~14% when on rather than filled (DESIGN.md, Controls).
+   Transparent at rest — it is an offer beside the card, not a second
+   card — and the wash is the pass's gold, the same ink every other
+   "switched on" mark on a study screen wears. */
 .study-assist__toggle {
   display: inline-flex;
   align-items: center;
-  /* Study.dc.html's .assist: 6px gap, --fs-caption, --r-card. Was 7px,
-     12px and 8px -- none of the three on a scale. */
   gap: var(--sp-2);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
-  padding: 6px 12px;
-  border-radius: var(--r-card);
-  background: var(--bg-card);
+  font-weight: 600;
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-pill);
+  background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--surface-line);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.study-assist__toggle:hover,
+.study-assist__toggle:focus-visible {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+  filter: none;
 }
 .study-assist__toggle--on {
-  background: color-mix(in srgb, var(--accent2) 18%, var(--bg-card));
-  border-color: color-mix(in srgb, var(--accent2) 45%, transparent);
-  color: var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 14%, transparent);
+  border-color: color-mix(in srgb, var(--accent2) 60%, transparent);
+  color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
 }
 .study-assist__toggle:disabled { opacity: 0.4; cursor: default; }
 /* A hand-written card has no distractors to offer, so it says why
@@ -10215,10 +10327,10 @@ textarea:focus-visible {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--sp-5);
   width: 100%;
   max-height: 96px;
-  padding: 18px;
+  padding: var(--sp-5);
   background-color: var(--mcq-bg, var(--surface));
   background-image: var(--mcq-img, none);
   border: 1px solid var(--mcq-border, var(--surface-line));
@@ -10230,7 +10342,7 @@ textarea:focus-visible {
     max-height 0.32s ease, padding 0.32s ease, margin 0.32s ease,
     opacity 0.25s ease, border-width 0.32s ease;
 }
-.mcq-row + .mcq-row { margin-top: 12px; }
+.mcq-row + .mcq-row { margin-top: var(--sp-4); }
 .mcq-row:not(:disabled):hover,
 .mcq-row:not(:disabled):focus-visible {
   background: var(--bg-card-hover);
@@ -11041,7 +11153,6 @@ textarea:focus-visible {
     stroke-dashoffset: 30;
     opacity: 0.8;
   }
-  .kumadori-streak { animation: none; opacity: 0; }
 }
 
 /* Plan 049 -- tracks the same column as the card below it (--card-w,
@@ -11069,10 +11180,10 @@ textarea:focus-visible {
 
 .deck-progress__bar {
   display: flex;
-  height: 8px;
-  border-radius: 4px;
+  height: 6px;
+  border-radius: var(--r-pill);
   overflow: hidden;
-  background: var(--bg-card);
+  background: var(--surface-line);
 }
 
 .deck-progress__segment { height: 100%; }
@@ -11406,9 +11517,17 @@ textarea:focus-visible {
 }
 
 .flashcard__hint {
-  font-size: 12px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  /* A tracked line on a centred axis cancels the trailing letter's
+     tracking with an equal indent (DESIGN.md, Tracking). */
+  text-indent: var(--tr-caption);
   color: var(--text-secondary);
-  margin-top: 10px;
+  margin-top: var(--sp-4);
+  min-height: 1em;
 }
 
 /* The reveal prompt is a caption, and the office sets it in the
@@ -11493,54 +11612,6 @@ textarea:focus-visible {
 .type-badge--grammar       { --badge-color: var(--warning); }
 .type-badge--inference     { --badge-color: var(--accent); }
 .type-badge--default       { --badge-color: var(--text-secondary); }
-/* ── Kumadori burst ────────────────────────────────────────
-   Kumadori (隈取り) — the bold lines painted radiating from the eyes
-   on an aragoto (bravado) kabuki role, intensifying at the exact
-   instant of a mie. Rendered literally: straight, tapered brush-
-   stroke wedges fanned at fixed angles from centre — one extra
-   streak per quality point above q2, the same escalation the rating
-   bar itself uses (q3 accent2, q4 accent6, q5 success) — whipping
-   outward to land together with the pill's own snap. Angles are
-   fixed, not randomised: a mie is deliberate, never scattered, so
-   there's no entropy left here at all — every streak lands exactly
-   where it's meant to. */
-.kumadori-burst {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.kumadori-streak {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: clamp(6px, 1.6vw, 10px);
-  height: clamp(40px, 9vw, 64px);
-  background: currentColor;
-  clip-path: polygon(50% 0%, 63% 20%, 55% 58%, 50% 100%, 45% 58%, 37% 20%);
-  transform-origin: 50% 100%;
-  transform: translate(-50%, -100%) rotate(var(--streak-angle)) scaleY(0);
-  opacity: 0;
-  filter: drop-shadow(0 0 4px currentColor);
-  animation-name: kumadori-streak-strike;
-  animation-duration: 0.95s;
-  animation-delay: 0.14s;
-  animation-timing-function: cubic-bezier(0.2, 0.85, 0.25, 1);
-  animation-fill-mode: forwards;
-}
-@keyframes kumadori-streak-strike {
-  0%   { opacity: 0; transform: translate(-50%, -100%) rotate(var(--streak-angle)) scaleY(0); }
-  10%  { opacity: 1; }
-  40%  { transform: translate(-50%, -100%) rotate(var(--streak-angle)) scaleY(1.1); }
-  58%  { transform: translate(-50%, -100%) rotate(var(--streak-angle)) scaleY(0.95); }
-  72%  { opacity: 1; transform: translate(-50%, -100%) rotate(var(--streak-angle)) scaleY(1); }
-  100% { opacity: 0; transform: translate(-50%, -100%) rotate(var(--streak-angle)) scaleY(1); }
-}
-.kumadori-burst--big .kumadori-streak {
-  width: clamp(11px, 2vw, 18px);
-  height: clamp(72px, 15vw, 150px);
-  animation-delay: 1.16s;
-}
-
 /* ── Stage footlights ───────────────────────────────────────
    A kabuki stage reads its own floor as much as anything above it —
    footlights along the front edge (today's andon 行灯 equivalent) and
@@ -11726,8 +11797,6 @@ textarea:focus-visible {
    reduced-motion branch in the JS -- and it is why moving either of
    those two blocks relative to the other would break it silently. */
 @media (prefers-reduced-motion: reduce) {
-  .kumadori-streak { animation: none; opacity: 0; }
-
   .ember { animation: none; opacity: 0; }
   .stage-footlights__glow,
   .stage-footlights--big .stage-footlights__glow { animation: none; opacity: 0.18; }
@@ -11872,322 +11941,147 @@ textarea:focus-visible {
   right: auto;
 }
 
+/* ── 押印 — the press ──────────────────────────────────────
+   The overlay is the card stage's own box, so the seal below lands
+   exactly where StageBadge draws the resting one: it wears the
+   .stage-badge classes (and therefore the equipped 印's form) and
+   sits at the badge's own corner. One ring of ink bleeds out from
+   under it; for a graduation the card's edge is lit gold once; a
+   caption in the pairing register names the stage under the glyph.
+   Every duration here is a beat the reviewer waits through — see
+   CardStamp.jsx's HOLD_MS for the arithmetic. */
 .card-stamp-overlay {
   position: absolute;
-  inset: -10px;
+  inset: 0;
   z-index: 6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   pointer-events: none;
   overflow: visible;
-  border-radius: 12px;
+  border-radius: var(--r-panel);
 }
 .card-stamp-overlay--leaving {
-  animation: card-stamp-fade-out 420ms ease-in forwards;
+  animation: card-stamp-fade-out 260ms ease-in forwards;
 }
 @keyframes card-stamp-fade-out {
   0%   { opacity: 1; }
   100% { opacity: 0; }
 }
 
-/* A wash of ink flooding the card the instant the stamp lands — sumi
-   for the routine 'learning' notation, the warm gold of aged washi
-   paper for 'mastered' — reading less like a UI highlight and more
-   like the card's own surface reacting to the seal. */
-@keyframes card-stamp-wash-in {
-  0%   { opacity: 0; }
-  35%  { opacity: 1; }
-  100% { opacity: 0; }
-}
-.card-stamp-wash {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
+/* The seal itself. `.stage-badge` gives it the corner, the size, the
+   stage colour and the cosmetic form; this only adds the press. The
+   rotation is repeated inside the keyframes because a transform
+   animation replaces the resting one wholesale. */
+.stage-badge.card-stamp__seal {
   opacity: 0;
-  animation: card-stamp-wash-in 900ms ease-out forwards;
+  animation: card-stamp-strike 420ms cubic-bezier(0.3, 0.2, 0.15, 1) 40ms forwards;
 }
-.card-stamp-overlay--learning .card-stamp-wash {
-  background: radial-gradient(circle at 82% 12%, color-mix(in srgb, var(--state-learning) 30%, transparent) 0%, transparent 62%);
-}
-.card-stamp-overlay--mastered .card-stamp-wash {
-  background:
-    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--state-mastered) 26%, transparent) 0%, transparent 70%),
-    linear-gradient(115deg, transparent 40%, color-mix(in srgb, var(--state-mastered) 16%, transparent) 50%, transparent 60%);
-  animation-duration: 1500ms;
-}
-
-/* The seal itself. 'learning' keeps the exact off-true, corner-strike
-   posture .hanko-stamp already established (small, quick, vermillion,
-   overrunning the card's edge like a real stamp overruns a document's
-   margin) — scaled up slightly since it now has a whole card to sit
-   on rather than a banner corner. 'mastered' is a different order of
-   object entirely: centred, larger, double-ringed like an official
-   diploma seal (menkyo kaiden 免許皆伝 — the certificate of full
-   transmission this glyph is meant to evoke), struck dead-centre
-   instead of tucked in a corner. */
 @keyframes card-stamp-strike {
-  0%   { opacity: 0; transform: translate(30%, -60%) scale(2.4) rotate(-24deg); }
-  55%  { opacity: 1; transform: translate(0, 0) scale(0.9) rotate(-9deg); }
-  74%  { transform: translate(0, 0) scale(1.06) rotate(-11deg); }
-  100% { opacity: 1; transform: translate(0, 0) scale(1) rotate(-9deg); }
+  0%   { opacity: 0; transform: scale(3.2) rotate(var(--seal-rotate, -5deg)); }
+  60%  { opacity: 1; transform: scale(0.9) rotate(var(--seal-rotate, -5deg)); }
+  80%  { transform: scale(1.06) rotate(var(--seal-rotate, -5deg)); }
+  100% { opacity: 1; transform: scale(1) rotate(var(--seal-rotate, -5deg)); }
 }
-@keyframes card-stamp-strike-center {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(2.6) rotate(14deg); }
-  50%  { opacity: 1; transform: translate(-50%, -50%) scale(0.88) rotate(-4deg); }
-  70%  { transform: translate(-50%, -50%) scale(1.07) rotate(-6deg); }
-  100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-5deg); }
-}
-.card-stamp {
+
+/* The ink bleeding out from under the seal as it lands — the same
+   corner, the same colour, once. */
+.card-stamp__ring {
+  --stamp-ink: var(--state-learning);
   position: absolute;
-  top: 10%;
-  right: 6%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  width: clamp(64px, 15vw, 108px);
-  height: clamp(64px, 15vw, 108px);
-  border-radius: 14px;
-  background: var(--state-learning);
-  border: 3px solid rgba(243, 236, 223, 0.85);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.25);
-  color: var(--text-on-panel);
-  font-family: var(--font-jp);
+  top: var(--sp-3);
+  right: var(--sp-3);
+  width: clamp(24px, 5.6vw, 32px);
+  height: clamp(24px, 5.6vw, 32px);
+  border-radius: var(--r-pill);
+  border: 2px solid var(--stamp-ink);
   opacity: 0;
-  animation: card-stamp-strike 460ms cubic-bezier(0.3, 0.2, 0.15, 1) 60ms forwards;
+  animation: card-stamp-bleed 520ms ease-out 300ms forwards;
 }
-.card-stamp::after {
-  content: '';
+.card-stamp-overlay--mastered .card-stamp__ring { --stamp-ink: var(--state-mastered); }
+@keyframes card-stamp-bleed {
+  0%   { opacity: 0.7; transform: scale(0.6); }
+  100% { opacity: 0;   transform: scale(2.8); }
+}
+
+/* The caption: JP glyph on the seal, plain word beneath it, in the
+   pairing register. The ink is the stage colour mixed toward the
+   ambient ink, the same mix the progress legend's figures use, because
+   the raw state colours are under the floor as text on the card. */
+.card-stamp__caption {
+  --stamp-ink: var(--state-learning);
   position: absolute;
-  inset: -12px;
-  border-radius: 18px;
-  border: 2px solid var(--state-learning);
-  opacity: 0;
-  animation: hanko-ink-bleed 560ms ease-out 420ms forwards;
-}
-/* Restored from commit 8f28dc1. The hanko-* -> card-stamp-* rename in
-   11877a8 deleted this keyframe, and 0756427 later re-introduced a
-   reference to it on .card-stamp::after — leaving a `forwards`
-   animation pointing at nothing, so the ring sat at its declared
-   opacity: 0 forever and the ripple never rendered at all.
-   A transient bleed, not a persistent ring: it ends at opacity 0,
-   which is why the base rule starts there too. */
-@keyframes hanko-ink-bleed {
-  0%   { opacity: 0.5; transform: scale(0.3); }
-  100% { opacity: 0;   transform: scale(2.2); }
-}
-.card-stamp__glyph {
-  font-size: clamp(26px, 6vw, 44px);
+  top: calc(var(--sp-3) + clamp(24px, 5.6vw, 32px) + var(--sp-2));
+  right: var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
-  line-height: 1;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--stamp-ink) 65%, var(--text-primary));
+  opacity: 0;
+  animation: card-stamp-caption 260ms ease-out 300ms forwards;
 }
-.card-stamp__label {
-  font-size: clamp(9px, 2vw, 12px);
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  opacity: 0.9;
-}
-
-/* ── Demotion: burn away, then reappear anew ───────────────
-   A mastered card lapsing back to learning (see the backend's
-   stage_down) doesn't get the routine strike-in — CardStamp swaps in
-   CardBurn instead of .card-stamp-wash (see CardStamp.jsx), and this
-   stamp itself waits for the burn before it lands, via the
-   animation-delay overrides below (source order matters here: these
-   have to come after the base .card-stamp/.card-stamp::after rules to
-   win at equal specificity). It strikes 150ms into the burn's 420ms
-   clear, so the two cross rather than queue — the card is still going
-   out as the new seal comes down on it, which is the whole read. */
-.card-stamp--demoted {
-  animation-delay: 850ms;
-}
-.card-stamp--demoted::after {
-  animation-delay: 1210ms;
+.card-stamp-overlay--mastered .card-stamp__caption { --stamp-ink: var(--state-mastered); }
+@keyframes card-stamp-caption {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* The char itself: a dark, ember-edged sweep climbing the card from
-   its base — background stops are fixed to the element's own height,
-   not to the sweep's current progress, so the leading edge always
-   glows warmest right as it reaches a given point and everything
-   already passed settles to cold ash below it. Clipped to the card's
-   own rounded corners (inherit) so nothing bleeds past the edges —
-   this is the card catching and going out, not a screen-wide effect. */
-.card-stamp-burn {
+/* The card's own edge answering the press — lit in the seal's ink
+   and fading. Colour as an edge, never a fill. A routine press gets
+   half the glow; the graduation's gold is the one that fills the
+   frame, and holds long enough to be the moment. */
+.card-stamp__ripple {
+  --stamp-ink: var(--state-learning);
+  --stamp-glow: 0.5;
   position: absolute;
   inset: 0;
-  overflow: hidden;
   border-radius: inherit;
-  pointer-events: none;
+  box-shadow: inset 0 0 0 2px var(--stamp-ink);
+  opacity: 0;
+  animation: card-stamp-ripple 700ms ease-out 120ms forwards;
 }
-@keyframes card-burn-sweep-in {
-  0%   { clip-path: inset(100% 0 0 0); }
-  100% { clip-path: inset(0% 0 0 0); }
+.card-stamp-overlay--mastered .card-stamp__ripple {
+  --stamp-ink: var(--state-mastered);
+  --stamp-glow: 0.95;
+  box-shadow:
+    inset 0 0 0 2px var(--stamp-ink),
+    inset 0 0 24px color-mix(in srgb, var(--stamp-ink) 35%, transparent);
 }
-@keyframes card-burn-clear {
-  0%   { opacity: 1; }
+@keyframes card-stamp-ripple {
+  0%   { opacity: 0; }
+  30%  { opacity: var(--stamp-glow, 0.9); }
   100% { opacity: 0; }
 }
-.card-stamp-burn__char {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    #14100c 0%,
-    #241a12 55%,
-    #7a3315 78%,
-    #ff8a3d 90%,
-    rgba(255, 138, 61, 0) 100%
-  );
-  clip-path: inset(100% 0 0 0);
-  animation:
-    card-burn-sweep-in 700ms cubic-bezier(0.45, 0, 0.2, 1) forwards,
-    card-burn-clear 420ms ease-in 700ms forwards;
-}
-.card-stamp-burn__embers {
-  position: absolute;
-  inset: 0;
-  animation: card-burn-clear 300ms ease-in 700ms forwards;
-}
-/* 焼き印 — the burn's own sparks.
-   Namespaced, and deliberately: these used to be a bare `.ember`, the
-   same class the footlight strip (StageFootlights, further up) already
-   owned. Two (0,1,0) rules for two unrelated features means the later
-   one wins everywhere, and this was the later one — the footlights'
-   embers were quietly inheriting this one-shot burn: fired once instead
-   of looping, sway animation gone, --ember-rise dead, and lit in this
-   block's hardcoded orange rather than the ceremony's own colour. The
-   keyframe below is renamed for the same reason; there were two global
-   keyframes named "ember-rise" and only the last one existed. */
-.card-stamp__ember {
-  position: absolute;
-  bottom: 6%;
-  left: var(--ember-x, 50%);
-  width: var(--ember-size, 5px);
-  height: var(--ember-size, 5px);
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffe0a8, #ff7a2e 60%, transparent 100%);
-  opacity: 0;
-  animation: card-stamp-ember-rise var(--ember-dur, 900ms) ease-out var(--ember-delay, 0ms) forwards;
-}
-@keyframes card-stamp-ember-rise {
-  0%   { opacity: 0; transform: translate(0, 0) scale(0.6); }
-  15%  { opacity: 1; }
-  100% { opacity: 0; transform: translate(var(--ember-drift, 6px), -130px) scale(0.3); }
-}
 
-/* ── 'Mastered' — the graduation seal ──────────────────────
-   Everything the routine stamp does, turned up into a full stage
-   production: struck dead-centre rather than in a corner, a second
-   outer ring (the diploma-seal read), the same kumadori fan XpToast's
-   level-up already uses so the two celebrations share one visual
-   grammar, a brush-stroke drawn in underneath the glyph, and — the
-   one flourish unique to this moment — a shower of sakura petals,
-   hanami's full bloom standing in for a card that's finally, fully
-   learned. */
-.card-stamp--mastered {
-  top: 50%;
-  left: 50%;
-  right: auto;
-  transform: translate(-50%, -50%);
-  width: clamp(96px, 22vw, 168px);
-  height: clamp(96px, 22vw, 168px);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 32% 26%, rgba(255, 244, 214, 0.35), transparent 55%),
-    var(--state-mastered);
-  border: 4px solid rgba(243, 236, 223, 0.92);
-  box-shadow:
-    0 14px 40px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.28),
-    0 0 0 6px color-mix(in srgb, var(--state-mastered) 30%, transparent);
-  animation-name: card-stamp-strike-center;
-  animation-duration: 620ms;
-  animation-delay: 80ms;
+/* ── Demotion ──
+   A mastered card lapsing to learning: the same seal, re-inked in
+   vermillion with a short shake, so it reads as a correction rather
+   than as another celebration. The ring bleeds in the new ink. */
+.card-stamp-overlay--demoted .stage-badge.card-stamp__seal {
+  animation-name: card-stamp-reink;
+  animation-duration: 560ms;
+  animation-timing-function: ease-out;
 }
-.card-stamp--mastered::after {
-  inset: -18px;
-  border-radius: 50%;
-  border-color: var(--state-mastered);
-  animation-delay: 560ms;
-  animation-duration: 700ms;
-}
-.card-stamp--mastered .card-stamp__glyph {
-  font-size: clamp(38px, 9vw, 68px);
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-}
-.card-stamp--mastered .card-stamp__label {
-  font-size: clamp(10px, 2.4vw, 14px);
-}
-.card-stamp__burst {
-  color: var(--state-mastered);
-}
-@keyframes card-stamp-brush-draw {
-  0%   { transform: scaleX(0); opacity: 0; }
-  15%  { opacity: 1; }
-  100% { transform: scaleX(1); opacity: 1; }
-}
-.card-stamp__brush {
-  width: 62%;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--text-on-panel);
-  opacity: 0;
-  transform-origin: left center;
-  transform: scaleX(0);
-  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.4));
-  animation: card-stamp-brush-draw 340ms cubic-bezier(0.2, 0.8, 0.3, 1) 780ms forwards;
-}
-
-/* ── Sakura petal shower (mastered only) ───────────────────
-   Seven fixed petals (see PETAL_LAYOUT in CardStamp.jsx) drifting
-   down out of the top of the overlay, each a simple two-lobed shape
-   tumbling and swaying on its way past the seal — hanami's blossoming
-   as the shorthand for a card that has, at last, fully bloomed. */
-.card-stamp-petals {
-  position: absolute;
-  inset: 0;
-  overflow: visible;
-  pointer-events: none;
-}
-.petal {
-  position: absolute;
-  top: -14px;
-  left: var(--petal-x, 50%);
-  width: var(--petal-size, 12px);
-  height: var(--petal-size, 12px);
-  background: linear-gradient(135deg, #ffd9df, var(--state-mastered));
-  border-radius: 0 60% 0 60%;
-  opacity: 0;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
-  animation: petal-fall var(--petal-dur, 1600ms) ease-in var(--petal-delay, 0ms) forwards;
-}
-@keyframes petal-fall {
-  0%   { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.6); }
-  10%  { opacity: 1; }
-  100% { opacity: 0; transform: translate(var(--petal-drift, 20px), 220px) rotate(var(--petal-rot, 220deg)) scale(1); }
+@keyframes card-stamp-reink {
+  0%   { opacity: 0; transform: scale(1.3) rotate(calc(var(--seal-rotate, -5deg) - 8deg)); }
+  30%  { opacity: 1; transform: scale(1) rotate(calc(var(--seal-rotate, -5deg) + 6deg)); }
+  55%  { transform: scale(1) rotate(calc(var(--seal-rotate, -5deg) - 4deg)); }
+  80%  { transform: scale(1) rotate(calc(var(--seal-rotate, -5deg) + 2deg)); }
+  100% { opacity: 1; transform: scale(1) rotate(var(--seal-rotate, -5deg)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  @keyframes card-stamp-strike {
-    0%, 100% { opacity: 1; transform: translate(0, 0) scale(1) rotate(-9deg); }
+  .stage-badge.card-stamp__seal,
+  .card-stamp-overlay--demoted .stage-badge.card-stamp__seal {
+    animation: card-stamp-still 10ms linear forwards;
   }
-  @keyframes card-stamp-strike-center {
-    0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-5deg); }
+  @keyframes card-stamp-still {
+    from, to { opacity: 1; transform: scale(1) rotate(var(--seal-rotate, -5deg)); }
   }
-  .card-stamp, .card-stamp--mastered { animation: card-stamp-strike 10ms linear forwards; }
-  .card-stamp--mastered { animation-name: card-stamp-strike-center; }
-  .card-stamp--demoted, .card-stamp--demoted::after { animation-delay: 0ms; }
-  .card-stamp::after,
-  .card-stamp-wash,
-  .card-stamp__brush,
-  .card-stamp-burn__char,
-  .card-stamp-burn__embers,
-  .card-stamp__ember,
-  .kumadori-streak,
-  .petal { animation: none; opacity: 0; }
-  .card-stamp-overlay--leaving { animation-duration: 180ms; }
+  .card-stamp__caption { animation-duration: 10ms; animation-delay: 0ms; }
+  .card-stamp__ring,
+  .card-stamp__ripple { animation: none; opacity: 0; }
+  .card-stamp-overlay--leaving { animation-duration: 120ms; }
 }
 
 /* ── Card transition (crossfade, height-matched) ────────────
@@ -12307,7 +12201,11 @@ textarea:focus-visible {
   padding: var(--card-pad-top) var(--card-pad-x) var(--card-pad-y);
 }
 
-.rating-bar { margin-top: 0; }
+.rating-bar {
+  margin-top: 0;
+  opacity: 1;
+  transition: opacity 0.16s ease;
+}
 /* Inside 試乗's demo (plan 063, phase D) the bar gets the card's
    column instead of shrink-wrapping its labels. Lives here, after
    the base rule, for the no-descending-specificity guard. */
@@ -12325,7 +12223,17 @@ textarea:focus-visible {
    `visibility: hidden` (not opacity) is deliberate: it takes the six
    buttons out of the tab order and out of hit-testing too, so nothing is
    focusable or clickable before there is anything to rate. */
-.rating-bar--idle { visibility: hidden; }
+.rating-bar--idle {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  /* Fades rather than vanishes. The bar goes idle the instant a rating
+     is taken, and the segment just pressed stays lit (see --pressed
+     below) while the card underneath moves on — the ring closing IS
+     the acknowledgement, so it has to be on screen long enough to be
+     seen. Matched to PRESSED_MS in RatingBar.jsx. */
+  transition: opacity 0.26s ease 0.16s, visibility 0s linear 0.42s;
+}
 /* …and arrives, rather than merely appearing. The mockup MOUNTS the
    bar on the flip, so it inherits the office's arrival; holding its
    space above (which kills a 34px jump) costs that entrance, and the
@@ -12421,6 +12329,16 @@ textarea:focus-visible {
   background: var(--rating-color, transparent);
 }
 
+/* Pressed: the seal filled and the segment washed, held for the
+   moment the bar takes to fade. Written at hover's own specificity
+   so it neither loses to it nor descends below it. */
+.rating-bar__btn.rating-bar__btn--pressed {
+  background: color-mix(in srgb, var(--rating-color, transparent) 14%, transparent);
+}
+.rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-ring {
+  background: var(--rating-color, transparent);
+}
+
 .rating-bar__btn-label {
   font-family: var(--font-display);
   font-size: var(--fs-sm);
@@ -12465,15 +12383,15 @@ textarea:focus-visible {
    it, so falling back to ring-only would leave colour as the sole
    channel.
 
-   So below 560px the instrument wraps: six to two rows of three, four
-   to two of two, and two stays on its one row because two words across
-   a phone was never the problem. It stays ONE object -- one container,
-   one border, hairlines between segments -- and worst-to-best still
-   reads left to right, top to bottom. Segments go from 54px to ~109px
-   (six) or ~164px (four) at 375px, so the label needs no step-down at
-   all: an earlier pass shrank it to --fs-caption to survive
-   six-across, and there is no longer six across. Bigger targets and
-   bigger type.
+   So below 560px SIX segments wrap to two rows of three. Four and two
+   stay on one row: at 375px four segments are ~80px each, and the
+   longest word either bar carries (Difficile, ~62px at --fs-sm/700)
+   fits with room to spare. One row is the shape a thumb sweeps along
+   the bottom edge of a phone, worst to best, left to right — the same
+   shape the bar has on a desktop, so nothing has to be relearnt
+   between the two. It stays ONE object -- one container, one border,
+   hairlines between segments -- and the six-wide grid still reads
+   left to right, top to bottom.
 
    The bar keeps the card's column at every count, so the two-button
    variant is two 320px segments on a desktop. Deliberate: switching
@@ -12493,21 +12411,17 @@ textarea:focus-visible {
      to come after every plain selector it outranks (the
      no-descending-specificity guard). */
   .rating-bar__buttons--6 .rating-bar__btn { flex: 0 0 33.333%; }
-  .rating-bar__buttons--4 .rating-bar__btn { flex: 0 0 50%; }
   /* Written out rather than left to the base rule's `flex: 1 1 0`,
-     which happens to produce the same two-across: every count the bar
-     can have says what it does here, so a missing one reads as an
-     omission rather than as an answer. */
-  .rating-bar__buttons--2 .rating-bar__btn { flex: 0 0 50%; }
+     which produces the same single row: every count the bar can have
+     says what it does here, so a missing one reads as an omission
+     rather than as an answer. */
+  .rating-bar__buttons--4 .rating-bar__btn { flex: 1 1 0; }
+  .rating-bar__buttons--2 .rating-bar__btn { flex: 1 1 0; }
 
   /* The first of each row has no rule to its left; the second row
      gains one above it. */
   .rating-bar__buttons--6 .rating-bar__btn:nth-child(3n + 1) { border-left: none; }
   .rating-bar__buttons--6 .rating-bar__btn:nth-child(n + 4) {
-    border-top: 1px solid var(--surface-line);
-  }
-  .rating-bar__buttons--4 .rating-bar__btn:nth-child(2n + 1) { border-left: none; }
-  .rating-bar__buttons--4 .rating-bar__btn:nth-child(n + 3) {
     border-top: 1px solid var(--surface-line);
   }
 }
@@ -12998,12 +12912,10 @@ textarea:focus-visible {
   max-width: 600px;
 }
 
+/* The family's primary (see .btn-primary); only its place is its own.
+   It was a --success fill — a state colour as a button. */
 .drawing-overlay__continue {
-  background: var(--success);
-  color: var(--text-on-fill);
-  font-size: 16px;
-  padding: 14px 60px;
-  margin-top: 32px;
+  margin-top: var(--sp-7);
 }
 
 .drawing-quiz { width: 100%; }
@@ -13074,18 +12986,15 @@ textarea:focus-visible {
 
 .drawing-quiz__placeholder-mark { color: var(--text-secondary); font-size: 13px; }
 
+/* The family's primary (see .btn-primary), so it wears the section's
+   own pigment rather than 仮名's red on every screen. Only its place
+   is its own: matched to the card above it rather than to the panels
+   inside it, so the button reads as belonging to the card instead of
+   being a narrower, unrelated bar floating under one edge of it. */
 .drawing-quiz__validate {
-  background: var(--accent);
-  color: var(--text-on-panel);
   width: 100%;
-  /* Matched to the card above it rather than to the panels inside it,
-     so the button reads as belonging to the card instead of being a
-     narrower, unrelated bar floating under one edge of it. */
   max-width: 700px;
-  margin: 24px auto 0;
-  display: block;
-  font-size: 15px;
-  padding: 14px;
+  margin: var(--sp-6) auto 0;
 }
 
 /* ── Kanji/Vocab quiz extras ──────────────────────────────── */
@@ -13108,8 +13017,6 @@ textarea:focus-visible {
    left that needs an on-fill override here. */
 :root[data-theme="light"] .rating-btn--fill-success,
 :root[data-theme="light"] .rating-btn--fill-warning,
-:root[data-theme="light"] .btn-writing-toggle--on,
-:root[data-theme="light"] .drawing-overlay__continue,
 :root[data-theme="light"] .study-drawing-toggle--active,
 :root[data-theme="light"] .study-topbar-drawing-toggle--active {
   color: var(--text-on-panel);
@@ -18368,6 +18275,97 @@ textarea:focus-visible {
      of page padding reserved for it. */
   .mobile-level-bar { display: flex; }
 
+  /* ── The study stage, on a phone ─────────────────────────
+     The viewport is the stage. Nothing is centred in a column that
+     scrolls away; instead the column is laid out from the top edge
+     down and the one control a thumb needs is docked at the bottom:
+
+       progress   a hairline rule at the very top, figures hidden
+       hints      a row of pills
+       the card   grows to fill whatever the answer widget leaves
+       the answer choices, a field, a canvas — its own height
+       the bar    stuck above the level HUD, clear of the home bar
+
+     The card growing is what makes the layout read as one thing at
+     every height rather than as three boxes and a gap: a lone kana
+     sits in the middle of a tall card; four choices under a kanji
+     leave it its floor. The chain of flex rules below is how the
+     growth reaches .prompt-card through CardTransition's two wrappers
+     without moving the seal, which is anchored to the stage and so
+     has to stay the card's own size. The top padding clears the
+     top-bar's peek tab, which sits at the top centre. */
+  .quiz-area {
+    justify-content: flex-start;
+    gap: var(--sp-5);
+    padding-top: var(--sp-7);
+    padding-inline: var(--sp-5);
+    padding-bottom: calc(var(--hud-h) + var(--sp-5) + var(--safe-bottom));
+  }
+  .quiz-area > .quiz-done,
+  .quiz-area > .quiz-loading,
+  .quiz-area > .empty-state { margin-block: auto; }
+  .quiz-area > .quiz-card-stage {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .quiz-area > .quiz-card-stage > .card-transition,
+  .quiz-area > .quiz-card-stage .card-transition-live {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .quiz-area > .quiz-card-stage .card-transition-live > .prompt-card {
+    flex: 1 1 auto;
+    max-height: none;
+    overflow: visible;
+  }
+  .quiz-area > .quiz-card-stage .card-transition-live > .prompt-card:not(.prompt-card--footed) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .quiz-area > .rating-bar {
+    position: sticky;
+    bottom: calc(var(--hud-h) + var(--safe-bottom));
+    z-index: 10;
+    margin-top: auto;
+    padding-block: var(--sp-3);
+    background: var(--bg-main);
+  }
+  /* The figures come off; the rule stays. A 4px three-colour line at
+     the top of the stage says how much of the deck is vermillion and
+     how much is gold, in the same inks the card's own seal wears. */
+  .deck-progress__bar { height: 4px; }
+  .deck-progress__legend { display: none; }
+  /* One report per fare: the bottom bar's. The roundel's would show
+     under a hidden top bar, or twice under a visible one. */
+  .hud-fare--ring { display: none; }
+  .prompt-card__foot {
+    padding: var(--sp-3) var(--sp-5);
+    font-size: var(--fs-caption);
+  }
+  .mcq-row {
+    padding: var(--sp-4) var(--sp-5);
+    gap: var(--sp-4);
+  }
+  .mcq-row + .mcq-row { margin-top: var(--sp-3); }
+  .mcq-row__index { width: 28px; height: 28px; }
+  .today-lane { margin-bottom: 0; }
+  /* The drawing quiz: the canvas is the point, so until there is a
+     stroke order to show it has the whole width; the reference joins
+     it, wrapping underneath, once the answer is revealed. */
+  .drawing-quiz__correction--waiting { display: none; }
+  .drawing-quiz__panels { gap: var(--sp-5); }
+  /* A sumi square with a brush is a drawing surface, and the stroke
+     order animates; neither needs a caption on a phone, where the
+     line they cost is the line the reveal button needs to stay above
+     the fold. The prompt above the canvas never changes face in this
+     mode, so the stage floor that keeps the other cards still is
+     dead height here. */
+  .drawing-quiz .stroke-ref__label { display: none; }
+  .quiz-area:has(.drawing-quiz) .specimen-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
+
   .top-bar--autohide {
     position: fixed;
     top: 0;
@@ -18440,7 +18438,7 @@ textarea:focus-visible {
   .dict-detail__body {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(24px + var(--safe-bottom));
   }
   .dict-detail__close-x {
     display: flex;
@@ -18482,12 +18480,8 @@ textarea:focus-visible {
      be a compression of -- which is what left the card's footer strip
      sitting almost on the rating bar, and the assist buttons almost on
      the card. */
-  .quiz-area { padding: 32px 24px max(32px, 14vh); gap: var(--sp-6); }
-  /* 2px here, with .char-display's own margin zeroed at 480px, left
-     "tap to reveal" sitting on the specimen's descenders -- one line
-     of 12px text 2px under a 104px glyph reads as a collision, not as
-     a caption. A rung of the scale, and still a compression of the
-     desktop 10px. */
+  /* The study column's own phone layout lives in the 768px block
+     above (the stage, the dock); nothing here any more. */
   .flashcard__hint { margin-top: var(--sp-3); }
 
   /* The Explorer's group header is five columns wide by design, and at
@@ -18701,12 +18695,12 @@ textarea:focus-visible {
      strip stays clickable (see .flashcard). */
   .prompt-card {
     --card-pad-y: var(--sp-6);
-    --card-pad-x: var(--sp-1);
-    --card-pad-top: var(--sp-8);
-    border-radius: 10px;
+    --card-pad-x: var(--sp-4);
+    --card-pad-top: var(--sp-7);
+    border-radius: var(--r-panel);
   }
   .flashcard {
-    border-radius: 10px;
+    border-radius: var(--r-panel);
   }
 
   .inline-reveal {
@@ -18732,27 +18726,9 @@ textarea:focus-visible {
     overflow: hidden; /* prevent scrolling */
   }
 
-  /* .quiz-area's own side padding, just below, already keeps the
-     pill's radius clear of the screen edge -- sticky only changes the
-     bar's vertical behaviour, so that horizontal gutter still applies.
-     What a 640px pill pinned to the bottom edge still needs on its
-     own: the safe-area inset, so it doesn't tuck itself under a
-     phone's home-indicator bar, and a background plus a little
-     headroom above it so it reads as a deliberate floating instrument
-     rather than the card's last line getting silently sliced off. */
-  .rating-bar {
-    position: sticky;
-    bottom: env(safe-area-inset-bottom, 0);
-    z-index: 10;
-    padding-top: var(--sp-3);
-    background: var(--bg-main);
-  }
-  /* The main block's own max-width:560px rule already steps the label
-     down a rung and trims the side padding, and it is measured against
-     the longest word rather than guessed. Nothing to add here: the
-     JP-term override that used to live at this spot is gone with the
-     term itself. */
-  .quiz-area { padding: 32px 24px max(32px, 12vh);}
+  /* The rating bar's dock and the stage's padding are the 768px
+     block's, above; this block keeps only what is specific to a card
+     at phone width. */
 
   /* Two plaques per row rather than one tall column of six. */
   .headline { grid-template-columns: repeat(2, 1fr); }
@@ -21693,8 +21669,8 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
     box-shadow: none;
     /* Full screen means under the notch and over the home indicator,
        so the panel owns both insets rather than the page behind it. */
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
     animation: dict-sheet-up 0.26s cubic-bezier(0.22, 0.68, 0.32, 1);
   }
   @keyframes dict-sheet-up {
@@ -21931,7 +21907,7 @@ button.cos-tile:hover { background: var(--bg-card-hover); border-color: var(--te
    + 6px track + 8px bottom pad + its border, plus the safe-area inset
    it also honours, plus a row of breathing room on top. */
 @media (max-width: 768px) {
-  .dict-page { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+  .dict-page { padding-bottom: calc(56px + var(--safe-bottom)); }
 }
 
 /* ── The console on a phone ────────────────────────────────
@@ -22997,150 +22973,86 @@ html { scrollbar-gutter: stable; }
   pointer-events: none;
 }
 
-/* ══ 改札 — the fare tick ═══════════════════════════════════
-   XP with no level change, which is nearly every review. It has to
-   stay the quietest of the three — it fires constantly — but the
-   first pass overcorrected from the old kabuki toast and made it so
-   discreet it read as chrome. Bigger drums, a leading +, the quality
-   accent along the top edge, and one pulse on arrival: noticed
-   without being addressed. */
-.fare-tick {
-  --flap-size: 40px;
-  --fare-accent: var(--accent2);
-  position: fixed;
-  /* Clear of the top bar rather than on top of it — at 14px it sat
-     over the 蔵 button. Below the bar it also lands directly under
-     the XP ring, which is the thing it is reporting to. */
-  top: calc(64px + env(safe-area-inset-top, 0px));
-  right: 16px;
-  z-index: 240;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 14px 10px 12px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--bg-panel) 95%, transparent);
-  border: 1px solid color-mix(in srgb, var(--fare-accent) 40%, transparent);
-  /* The accent reads along the top edge and in the glow, so the
-     quality of the answer is legible at a glance without the tick
-     having to grow or linger. */
-  box-shadow:
-    inset 0 2px 0 var(--fare-accent),
-    0 10px 26px rgba(0, 0, 0, 0.36),
-    0 0 0 0 color-mix(in srgb, var(--fare-accent) 55%, transparent);
-  animation:
-    fare-tick-in 300ms cubic-bezier(0.2, 1.5, 0.4, 1),
-    fare-tick-pulse 620ms ease-out 120ms;
-}
-.fare-tick__plus {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--fare-accent);
-}
-.fare-tick__label {
-  font-family: var(--font-display);
-  font-size: 0.64rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--text-on-panel-soft);
-}
-
-/* Same per-quality accents the rating bar uses, so a scraped q3 and a
-   clean q5 are not celebrated identically. Below q3 the answer was
-   wrong and the tick stays neutral. */
-.fare-tick--q3 { --fare-accent: var(--accent2); }
-.fare-tick--q4 { --fare-accent: var(--accent6); }
-.fare-tick--q5 { --fare-accent: var(--success); }
-
-.fare-tick--leaving { animation: fare-tick-out 260ms ease-in forwards; }
-@keyframes fare-tick-in  { from { opacity: 0; transform: translateY(-14px) scale(0.9); } }
-@keyframes fare-tick-out { to   { opacity: 0; transform: translateY(-10px); } }
-/* One ring outward, not a loop. */
-@keyframes fare-tick-pulse {
-  from { box-shadow: inset 0 2px 0 var(--fare-accent), 0 10px 26px rgba(0,0,0,0.36),
-                     0 0 0 0 color-mix(in srgb, var(--fare-accent) 55%, transparent); }
-  to   { box-shadow: inset 0 2px 0 var(--fare-accent), 0 10px 26px rgba(0,0,0,0.36),
-                     0 0 0 14px color-mix(in srgb, var(--fare-accent) 0%, transparent); }
-}
-
 /* ══ 進級 — the level board ═════════════════════════════════
-   The number turned over. Centred and unmissable, but on a clock: it
-   leaves by itself, because this still happens often enough that
-   asking for a click would be asking too often. */
-.level-board {
+   The number turned over. It is an announcement on the in-car display
+   now: a sumi board docked across the top of a phone (the top bar is
+   hidden while studying, so the edge is free and the docked rating
+   bar at the bottom stays usable), and a panel under the top bar at
+   the roundel's side on a desktop. On a clock, never gating: it
+   leaves by itself while the next card is already in hand. The fare
+   it used to sit beside is drawn by the level HUD itself — see
+   .hud-fare. */
+.levelup {
   position: fixed;
-  inset: 0;
-  z-index: 250;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  animation: level-board-in 260ms cubic-bezier(0.22, 0.68, 0.32, 1);
-}
-.level-board--leaving { animation: level-board-out 300ms ease-in forwards; }
-@keyframes level-board-in  { from { opacity: 0; } }
-@keyframes level-board-out { to   { opacity: 0; transform: translateY(-12px); } }
-
-.level-board__panel {
-  --flap-size: 54px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 22px 30px 0;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: 10px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.34);
-  overflow: hidden;
-}
-.level-board__label {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.24em;
-  text-indent: 0.24em;
-  color: var(--accent2);
-}
-.level-board__latin {
-  font-family: var(--font-display);
-  font-size: 0.56rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.level-board__flaps {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 10px 0 6px;
-}
-.level-board__unit {
-  font-family: var(--font-display);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.level-board__xp {
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--accent2);
-  margin-bottom: 16px;
-}
-.level-board__stripe {
-  position: absolute;
+  top: var(--safe-top);
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 4px;
-  background: var(--accent2);
+  z-index: 250;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  animation: levelup-in 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+.levelup--leaving { animation: levelup-out 300ms ease-in forwards; }
+@keyframes levelup-in  { from { opacity: 0; transform: translateY(-100%); } }
+@keyframes levelup-out { to   { opacity: 0; transform: translateY(-100%); } }
+
+.levelup__board {
+  --flap-size: var(--fs-display);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  width: 100%;
+  padding: var(--sp-4) var(--sp-6);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-bottom: 3px solid var(--accent2);
+  box-shadow: var(--elev-hang);
+}
+.levelup__mark {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.levelup__jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  letter-spacing: var(--tr-name);
+  line-height: 1;
+  color: var(--accent2);
+}
+.levelup__latin,
+.levelup__unit {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.levelup__flaps {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+@media (min-width: 769px) {
+  .levelup {
+    top: calc(var(--sp-9) + var(--sp-4));
+    left: auto;
+    right: var(--sp-5);
+  }
+  .levelup__board {
+    --flap-size: calc(var(--fs-display) * 1.35);
+    width: auto;
+    gap: var(--sp-6);
+    padding: var(--sp-4) var(--sp-6);
+    border-radius: var(--r-panel);
+    border-bottom: none;
+    border-top: 3px solid var(--accent2);
+  }
 }
 
 /* ══ 再発行 — the pass re-issued ════════════════════════════
@@ -23287,7 +23199,6 @@ html { scrollbar-gutter: stable; }
 .reissue__claim:disabled { opacity: 0.5; }
 
 @media (max-width: 560px) {
-  .level-board__panel { --flap-size: 42px; padding: 18px 22px 0; }
   .reissue__pass { --flap-size: 48px; padding: 22px 20px 20px; }
   .reissue__rank { font-size: 1.15rem; gap: 8px; }
 }
@@ -23295,8 +23206,7 @@ html { scrollbar-gutter: stable; }
 /* The flaps still turn — that is the content, not decoration — but
    nothing slides or scales around them. */
 @media (prefers-reduced-motion: reduce) {
-  .fare-tick,
-  .level-board,
+  .levelup,
   .reissue,
   .reissue__pass,
   .reissue__rank-to,
@@ -23349,6 +23259,14 @@ html { scrollbar-gutter: stable; }
 .preview-row__tier--fare  { background: color-mix(in srgb, var(--text-secondary) 22%, transparent); color: var(--text-secondary); }
 .preview-row__tier--level { background: color-mix(in srgb, var(--accent2) 24%, transparent); color: var(--accent2); }
 .preview-row__tier--rank  { background: color-mix(in srgb, var(--accent) 24%, transparent); color: var(--accent); }
+.preview-row__tier--stamp { background: color-mix(in srgb, var(--state-learning) 22%, transparent); color: color-mix(in srgb, var(--state-learning) 65%, var(--text-primary)); }
+/* The card the stamp rows strike: a study stage, but one that sits in
+   the page's flow rather than filling the screen. */
+.preview-stage {
+  flex: none;
+  padding: var(--sp-6) 0;
+  min-height: 0;
+}
 .preview-row__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .preview-row__label { font-weight: 600; }
 .preview-row__note { font-size: 0.76rem; color: var(--text-secondary); }

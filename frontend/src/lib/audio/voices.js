@@ -416,6 +416,19 @@ const EVENTS = [
     ],
   },
   {
+    key: 'card-stamp', category: 'ui', family: 'rewards',
+    label: 'Card stamped', jp: '押印', where: 'A card climbing a stage — the seal pressed into its corner',
+    variants: [
+      { key: 'stamp', label: 'Ticket stamp', note: 'A knock with weight behind it — the gate marking a pass.',
+        play: (c, b) => {
+          noiseTicks(c, b, [{ freq: 1150, peak: 0.26, q: 5, dur: 0.026 }])
+          thump(c, b, { at: 0.004, from: 175, to: 115, dur: 0.09, peak: 0.11 })
+        } },
+      { key: 'soft-press', label: 'Soft press', note: 'The thump alone, no knock. A rubber stamp on paper.',
+        play: (c, b) => thump(c, b, { at: 0, from: 160, to: 100, dur: 0.11, peak: 0.10 }) },
+    ],
+  },
+  {
     key: 'level-up', category: 'sfx', family: 'rewards',
     label: 'Unlock', jp: '解禁', where: 'A cosmetic unlocked, a daruma eye filled in',
     variants: [

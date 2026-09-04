@@ -5,41 +5,56 @@ import { playFareTick, playFlapClatter, playStationMelody } from '../../lib/audi
 import { rewardTier, rankFor } from '../../domain/rewardTier'
 import { SplitFlap } from './SplitFlap'
 
-// ── 発車標 — the reward board ──────────────────────────────
-// What happens when you earn something. It used to be a kabuki
-// production — wooden clappers counting in, a kumadori burst, stage
-// footlights igniting along the bottom of the screen, a striped
-// curtain ripped open, a hanko slammed into the corner — and it played
-// at that scale for *every* review. Something that happens after
-// nearly every card cannot also be a ceremony.
+// ── What happens when you earn something ──────────────────────
+// Three tiers, three sizes; see domain/rewardTier for where the
+// boundaries come from. What changed in the study-mode redesign is
+// WHERE each one lands, and that only one of them still interrupts:
 //
-// It is the station's own display now, and it comes in three sizes.
-// See domain/rewardTier for where the boundaries come from; the short
-// version is that a rank promotion happens four times in the whole
-// progression, so only that one is allowed to stop everything.
+//   fare   XP, no level. Nearly every review. It is not a toast at
+//          all any more: the level HUD reports it in place — the
+//          bottom bar on a phone, the roundel on a desktop — with the
+//          figure rising off the object it was paid into (see
+//          components/ui/TopBar.jsx). This component only sounds the
+//          tick and announces the amount to assistive tech.
+//   level  The level turned over. An announcement on the in-car
+//          display: a board docked at the top of the screen, the
+//          number flipping on its drums, gone on its own in a couple
+//          of seconds. It no longer holds the next card.
+//   rank   The title changed. Your 定期券 is re-issued, and that one
+//          still takes the screen and waits to be dismissed by hand,
+//          because it happens four times in the whole progression.
 //
-//   fare   XP, no level. A fare tick at the gate: the amount flips up
-//          on a single small board, under a second, no interaction.
-//   level  The level turned over. The board flips the number, holds
-//          long enough to read, and leaves on its own.
-//   rank   The title changed. Your 定期券 is re-issued: the pass comes
-//          up, the level flips, the 称号 turns over under it, and it
-//          waits to be dismissed by hand.
-//
-// The kabuki is not gone, only moved: the daruma hall's 満願 ceremony
-// is genuinely theatrical and still uses StageFootlights, which now
-// lives in its own module.
-const FARE_MS  = 1900
-const LEVEL_MS = 2600
+// Scenes are keyed on the toast id and kept until they finish on
+// their own, so a level board is never cut short by the fare of the
+// card rated straight after it; a fare, though, always replaces the
+// previous fare, since two figures in the same place read as noise.
+const FARE_MS  = 900
+const LEVEL_MS = 2400
 
-// The shell reads the reward; the scene below plays it. Keyed on the
-// toast id so a second reward mounts fresh rather than needing its
-// state reset inside an effect — same shape as the ticket gate and
-// the train door, and the reason none of the three has to fight
-// react-hooks/set-state-in-effect.
 export function XpToast({ toast, onDone }) {
-  if (!toast) return null
-  return <RewardScene key={toast.id} toast={toast} onDone={onDone} />
+  const [seen, setSeen] = useState(null)
+  const [scenes, setScenes] = useState([])
+
+  // Adjust-state-during-render (the React docs pattern), not an
+  // effect: the new scene has to exist in the same render the prop
+  // arrives in, or the fare's sound would trail its own figure.
+  if (toast && toast.id !== seen) {
+    setSeen(toast.id)
+    const tier = rewardTier(toast)
+    setScenes(list => [
+      ...list.filter(s => !(tier === 'fare' && s.tier === 'fare')),
+      { ...toast, tier },
+    ])
+  }
+
+  function finish(id) {
+    setScenes(list => list.filter(s => s.id !== id))
+    onDone?.()
+  }
+
+  return scenes.map(scene => (
+    <RewardScene key={scene.id} toast={scene} onDone={() => finish(scene.id)} />
+  ))
 }
 
 function RewardScene({ toast, onDone }) {
@@ -50,22 +65,11 @@ function RewardScene({ toast, onDone }) {
   // flam. The timers below are safe by construction (cleanup clears
   // them), but this one call is immediate, so it needs the guard.
   const sounded = useRef(false)
-
-  const tier = rewardTier(toast)
+  const tier = toast.tier
 
   useEffect(() => {
-    // Each tier gets its own voice. They used to share one sample, so
-    // the rarest event in the app and a routine level sounded
-    // identical — and the fare tick borrowed the ticket gate's chime,
-    // which already means something else entirely.
-    //
-    //   fare   its own soft blip. Not playUi('click') — that points at
-    //          /sounds/ui/click.mp3, which does not exist, so the tick
-    //          was silent; and not the gate's chime, which already
-    //          means "your pass was read".
-    //   level  the board turning over — filtered noise, because a
-    //          split-flap drum is plastic hitting a stop, not a tone.
-    //   rank   発車メロディ, the platform melody. Four times ever.
+    // Each tier gets its own voice: a soft blip for the fare, the
+    // board's drums for a level, the platform melody for a rank.
     if (!sounded.current) {
       sounded.current = true
       if (tier === 'rank') playStationMelody()
@@ -73,9 +77,14 @@ function RewardScene({ toast, onDone }) {
       else playFareTick()
     }
 
-    // A promotion waits to be dismissed; the other two are on a clock.
+    // A promotion waits to be dismissed; the fare has no visual of
+    // its own here and just retires; the board is on a clock.
     if (tier === 'rank') return
-    const id = setTimeout(() => setLeaving(true), tier === 'level' ? LEVEL_MS : FARE_MS)
+    if (tier === 'fare') {
+      const id = setTimeout(() => onDone?.(), FARE_MS)
+      return () => clearTimeout(id)
+    }
+    const id = setTimeout(() => setLeaving(true), LEVEL_MS)
     return () => clearTimeout(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -86,17 +95,11 @@ function RewardScene({ toast, onDone }) {
   const onExitEnd = name => e => { if (e.animationName === name) onDone?.() }
 
   // ── fare ──
+  // Drawn by the HUD (TopBar.jsx). What is left for the portal is the
+  // one thing a rising figure cannot do: tell a screen reader.
   if (tier === 'fare') {
     return createPortal(
-      <div
-        className={`fare-tick fare-tick--q${toast.quality ?? 5}${leaving ? ' fare-tick--leaving' : ''}`}
-        aria-live="polite"
-        onAnimationEnd={onExitEnd('fare-tick-out')}
-      >
-        <span className="fare-tick__plus" aria-hidden="true">+</span>
-        <SplitFlap from={0} to={toast.amount} label={`+${toast.amount} XP`} />
-        <span className="fare-tick__label">XP</span>
-      </div>,
+      <span className="sr-only" aria-live="polite">+{toast.amount} XP</span>,
       document.body,
     )
   }
@@ -108,19 +111,19 @@ function RewardScene({ toast, onDone }) {
   if (tier === 'level') {
     return createPortal(
       <div
-        className={`level-board${leaving ? ' level-board--leaving' : ''}`}
+        className={`levelup${leaving ? ' levelup--leaving' : ''}`}
         aria-live="polite"
-        onAnimationEnd={onExitEnd('level-board-out')}
+        onAnimationEnd={onExitEnd('levelup-out')}
       >
-        <div className="level-board__panel">
-          <span className="level-board__label" lang="ja">進級</span>
-          <span className="level-board__latin">{t.levelUp}</span>
-          <div className="level-board__flaps">
-            <span className="level-board__unit">{t.level}</span>
+        <div className="levelup__board">
+          <span className="levelup__mark">
+            <span className="levelup__jp" lang="ja">進級</span>
+            <span className="levelup__latin">{t.levelUp}</span>
+          </span>
+          <span className="levelup__flaps">
+            <span className="levelup__unit">{t.level}</span>
             <SplitFlap from={level - 1} to={level} label={`${t.level} ${level}`} />
-          </div>
-          <span className="level-board__xp">+{toast.amount} XP</span>
-          <div className="level-board__stripe" aria-hidden="true" />
+          </span>
         </div>
       </div>,
       document.body,

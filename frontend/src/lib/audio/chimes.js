@@ -51,6 +51,9 @@ export function playFareTick() { playVoice('fare-tick') }
 /** 進級 — the board turning your level over. */
 export function playFlapClatter() { playVoice('flap-clatter') }
 
+/** 押印 — a card's seal pressed into its corner as it climbs a stage. */
+export function playStamp() { playVoice('card-stamp') }
+
 /** A card answered right. Deliberately quiet enough to hear the XP land under it. */
 export function playCorrect() { playVoice('correct') }
 

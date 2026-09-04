@@ -568,6 +568,7 @@
       "24px",
       "28px",
       "2px",
+      "36px",
       "3px",
       "4.5rem",
       "44px",
@@ -597,12 +598,12 @@
     "card-stamp-strike-center"
   ],
   "counts": {
-    "font-size": 773,
-    "border-radius": 298,
-    "gap": 476,
-    "padding": 404,
-    "design-token": 74,
-    "custom-property-length": 27,
-    "js-inline-length": 21
+    "font-size": 680,
+    "border-radius": 253,
+    "gap": 409,
+    "padding": 351,
+    "design-token": 75,
+    "custom-property-length": 22,
+    "js-inline-length": 16
   }
 }

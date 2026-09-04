@@ -324,8 +324,6 @@ const quiz = {
 
   // Writing practice
   writingPractice:   'Practice writing this kanji',
-  writingOn:         'Writing ON',
-  writingOff:        'Writing OFF',
   toggleWriting:     'Toggle writing practice',
   yourDrawing:       'Your drawing',
   strokeOrder:       'Stroke order',
@@ -831,9 +829,9 @@ const progress = {
 const misc = {
   mute:    'Mute',
   unmute:  'Unmute',
-  onyomi:  "On'yomi",
+  onyomi:  "音読み · on'yomi",
   readingsMore: (n) => `${n} more reading${n > 1 ? 's' : ''} — the dictionary card has them all`,
-  kunyomi: "Kun'yomi",
+  kunyomi: "訓読み · kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'word',
   // Shown by components/study/SessionError when a study session has

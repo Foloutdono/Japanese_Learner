@@ -91,6 +91,9 @@ export const BASE_GAIN = {
     // tick so a level still lands bigger than a fare.
     'fare-tick':              1.70,
     'flap-clatter':           3.60,
+    // The seal's press: the same knock the mode picker's 'stamp'
+    // voice makes, levelled with the fare tick it lands beside.
+    'card-stamp':             1.70,
   },
   jingle:       0.3,
   announcement: 1,

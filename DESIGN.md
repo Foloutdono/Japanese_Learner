@@ -414,11 +414,15 @@ So:
 ### Controls
 
 - **The rating bar** — the most-used control in the app — is **one continuous
-  instrument**, not a row of buttons. A single pill, its segments divided by
-  hairlines rather than gaps, the Japanese quality term primary with the plain
-  term beneath it. Colour is reduced to a `3px` bottom rule per segment,
-  forming one ramp across the whole bar; only the selected segment fills, at
-  ~14%.
+  instrument**, not a row of buttons. A single box, its segments divided by
+  hairlines rather than gaps, the plain word alone as the label (the
+  maintainer retired the Japanese term from the bar; see the rule's own
+  comment in `index.css`) and a ring above each word carrying the colour:
+  unfilled at rest, filled by the segment just pressed. That press is the
+  bar's whole acknowledgement — the bar fades out with the ring still
+  filled while the next card arrives, and nothing else says "rated". On a
+  phone, four segments stay on **one row**, the shape a thumb sweeps along
+  the bottom edge; only the six-segment bar wraps.
 - **The streak is a スタンプラリー stamp rally**, not a flame — a row of
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a
@@ -436,6 +440,61 @@ So:
   segment *washed* at ~14% rather than filled. The 番付's 今週/通算 switch is
   the first outside the quiz. Anything that picks one of two or three views of
   the same data reaches for this, not for two buttons that both look pressable.
+
+### The study stage on a phone
+
+The study screens are designed at phone width first and adapted up. Below
+768px the viewport is the stage and nothing is centred in a column that
+scrolls away:
+
+- the deck's progress is a **hairline rule** at the top edge, three inks and
+  no figures — the same inks the card's own seal wears, so the rule says how
+  much of the deck is vermillion and how much is gold without a legend;
+- the hint switches are a row of pills under it;
+- **the card grows** to fill whatever the answer widget leaves, so a lone
+  kana sits in the middle of a tall card and four choices under a kanji
+  leave it its floor. The card's seal stays anchored to the card, not to the
+  space around it;
+- the rating bar is **docked**, stuck above the level HUD and clear of the
+  home bar, with its space reserved from the first paint so revealing a card
+  never moves it. `--hud-h` is the one number every docked thing clears by.
+
+Above 768px the column is the centred `--card-w` it always was, with the
+progress legend back.
+
+### Rewards
+
+Every card is rewarded, and none of it is a ceremony. Three moments, three
+objects, and only one of them ever waits to be dismissed:
+
+- **The fare** (運賃) — the XP a review earns — is reported on the object it
+  was paid into: the **level HUD**. The roundel in the top bar pulses gold
+  once and the amount rises off it; on a phone the bottom bar lights the span
+  it gained and the figure rises off the XP count. There is no toast, no
+  panel and nothing to dismiss; the figure is gold because XP is the pass's
+  balance, never a state colour. `XpToast` still sounds the tick and tells a
+  screen reader.
+- **The press** (押印) — a card climbing a stage — is the card's own corner
+  seal being struck: the new seal lands on the corner the resting one sits
+  in, at the same size and in the equipped 印's form, one ring of ink bleeds
+  out from under it, the card's edge answers in the seal's ink, and a caption
+  in the pairing register names the stage. The graduation (極) is gold and
+  lights the whole edge; a lapse re-inks the seal in vermillion with a
+  shake. It holds the next card for under a second (`CardStamp.browser.test`
+  pins every hold), because the moment is the press, not a pageant: the
+  wash, the kumadori, the brush and the petals are gone.
+- **The level** (進級) turns over on the **in-car display**: a sumi board
+  docked across the top of a phone (the top bar is hidden while studying, so
+  the edge is free and the docked rating bar stays usable) or under the top
+  bar beside the roundel on a desktop, the number on split-flap drums. On a
+  clock, never gating — it leaves by itself while the next card is already
+  in hand.
+- **The rank** (再発行) — the title changed, four times in the whole
+  progression — is the one that takes the screen and waits to be claimed.
+
+Only the rank holds the queue. Everything else plays over the next card,
+because a learner who has just rated one card is already looking for the
+next.
 
 ## Structure
 
