@@ -33,16 +33,30 @@ export const STATUS = {
   suspended:      { jp: '運転見合わせ', cap: 'Suspended' },
 }
 
-export function credits(kind = 30) {
-  if (kind === 'pass') return `<button type="button" class="hud__credits hud__credits--pass"><span class="hud__credits-jp" lang="ja">定期</span><span class="hud__credits-cap">Unlimited</span></button>`
+// The balance is the commuter pass itself, at pocket size: the IC card's
+// gradient and contactless mark, the figure printed inside — 30/50 on a
+// free pass (the cap is the card's own), ∞ on a subscription.
+const WAVE = '<span class="hud__pass-wave"><span></span><span></span><span></span></span>'
+export function credits(kind = 30, cap = 50) {
+  if (kind === 'pass') return `<button type="button" class="hud__pass">${WAVE}<span class="hud__pass-fig hud__pass-fig--inf">∞</span></button>`
   const n = Number(kind)
-  const mod = n === 0 ? ' hud__credits--out' : n <= 5 ? ' hud__credits--low' : ''
-  return `<button type="button" class="hud__credits${mod}"><span>${n}</span><span class="hud__credits-cap">Credits</span></button>`
+  const mod = n === 0 ? ' hud__pass--out' : n <= 5 ? ' hud__pass--low' : ''
+  return `<button type="button" class="hud__pass${mod}">${WAVE}<span class="hud__pass-fig">${n}<span class="hud__pass-of">/${cap}</span></span></button>`
 }
 
+// The station panel: the journey model's state in the learner's own
+// language only, with the drift in days beside it (AHEAD · 9d, ON TIME,
+// LATE · 9d). The Japanese words stay on the pass, where they are printed.
+export const PANEL = {
+  ahead:          { word: 'Ahead',     delta: '9d' },
+  onTime:         { word: 'On time',   delta: '' },
+  slightlyBehind: { word: 'Late',      delta: '9d' },
+  delayed:        { word: 'Late',      delta: '32d' },
+  suspended:      { word: 'Suspended', delta: '' },
+}
 export function status(id = 'onTime') {
-  const s = STATUS[id]
-  return `<button type="button" class="hud__status hud__status--${id}"><span class="hud__status-dot"></span><span class="hud__status-jp" lang="ja">${s.jp}</span><span class="hud__status-cap">${s.cap}</span></button>`
+  const p = PANEL[id]
+  return `<button type="button" class="hud__status hud__status--${id}"><span class="hud__status-word">${p.word}</span>${p.delta ? `<span class="hud__status-delta">· ${p.delta}</span>` : ''}</button>`
 }
 
 export function hud({ level = 12, st = 'onTime', cr = 30, gain = null } = {}) {

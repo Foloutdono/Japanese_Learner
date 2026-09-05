@@ -61,7 +61,7 @@ const RUN_BODY = `
     <button type="button" class="stage__leave">${I.chevL}<span lang="ja">改札</span></button>
     <span class="stage__where"><span class="stage__where-jp" lang="ja">漢字 N4</span><span class="stage__where-latin">Kanji → meaning</span></span>
     <span class="today-remaining">18</span>
-    <span class="stage__credits">24<span class="stage__credits-cap">cr</span></span>
+    ${credits(24)}
   </div>
   <div class="deck-progress">
     <span class="deck-progress__segment" style="width: 30%; background: var(--state-new);"></span>
@@ -106,8 +106,7 @@ ${hud({ cr: 6 })}
       <div class="fare-slip__cell"><span class="fare-slip__v">+96<span class="fare-slip__u">xp</span></span><span class="cap">fare</span></div>
       <div class="fare-slip__cell"><span class="fare-slip__v fare-slip__v--gold">6</span><span class="cap">credits left</span></div>
     </div>
-    <p class="today-clear__next" style="margin-top: var(--sp-2);">30 more credits at 00:00.</p>
-    <button type="button" class="btn-depart btn-depart--ghost" style="width: 100%; margin-top: var(--sp-4);"><span class="btn-depart__jp" lang="ja">駅に戻る</span><span class="btn-depart__latin">Back to the station</span></button>
+    <button type="button" class="btn-depart btn-depart--ghost" style="width: 100%; margin-top: var(--sp-3);"><span class="btn-depart__jp" lang="ja">駅に戻る</span><span class="btn-depart__latin">Back to the station</span></button>
   </div>
 </main>
 ${tabbar('today', 0)}`
@@ -167,7 +166,7 @@ ${hud()}
 <main class="phone__content" style="--line-color: var(--line-kanji);">
   ${plate({ code: 'KJ', kana: 'かんじ', name: '漢字', latin: 'Kanji', color: 'var(--line-kanji)', noriba: 5 })}
   <div class="route">
-    <span class="route__done" style="height: 30%;"></span>
+    <span class="route__done" style="height: 64px;"></span>
     ${stop({ code: 'N5', jp: '入門', hint: 'Beginner level',     state: 'past',    done: 103, total: 103 })}
     ${stop({ code: 'N4', jp: '基礎', hint: 'Elementary level',   state: 'current', done: 121, total: 181 })}
     ${stop({ code: 'N3', jp: '日常', hint: 'Intermediate level', state: '',        done: 0,   total: 367 })}
@@ -295,9 +294,9 @@ ${tabbar('dict', 24)}`
 
 // ── 10 · Profile — the pass and its inserts ──
 const rideLine = () => `<div class="jour-line">
-  <span class="jour-line__status"><b lang="ja" style="color: var(--text-on-panel);">回数券</b><span class="jour-cap">Coupon tickets</span></span>
-  <span class="jour-line__validity"><b>30</b><span class="jour-cap">credits</span></span>
-  <span class="jour-cap" style="margin-left: auto; letter-spacing: 0.08em; text-transform: none;">+30 at 00:00 · up to 50</span>
+  <span class="jour-line__status"><b lang="ja" style="color: var(--text-on-panel);">残高</b><span class="jour-cap">Balance</span></span>
+  <span class="jour-line__validity"><b>30</b><span class="jour-cap">/ 50 credits</span></span>
+  <span class="jour-cap" style="margin-left: auto; letter-spacing: 0.08em; text-transform: none;">+30 at 00:00</span>
 </div>`
 function stampBook() {
   const start = new Date(2026, 7, 3) // Mon 3 Aug → Sun 6 Sep, five weeks
@@ -438,7 +437,7 @@ const CHROME_BODY = `
 <div class="spec">
   <div class="spec__row">
     <div class="spec__item" style="gap: var(--sp-4);">
-      <span class="spec__label">運行案内 · the HUD — level · goal status · balance</span>
+      <span class="spec__label">運行案内 · the HUD — level · station panel · commuter pass</span>
       ${hudStrip({ st: 'ahead', cr: 30 })}
       ${hudStrip({ st: 'onTime', cr: 30, gain: 4 })}
       ${hudStrip({ st: 'slightlyBehind', cr: 3 })}
@@ -448,8 +447,8 @@ const CHROME_BODY = `
     <div class="spec__item">
       <span class="spec__label">Reading the bar</span>
       <p class="spec__note"><b>Level</b> — the roundel the top bar already has (<code>.topbar-profile-ring</code>, its XP arc long retired): a pass-ink ring with the figure inside, the fare (+4xp) rising off it in gold. Tap → the pass.</p>
-      <p class="spec__note"><b>Goal status</b> — the journey model's five states, in their own inks: 順調 / 定刻 on <code>--success</code>, やや遅れ on <code>--warning</code>, 遅延 / 運転見合わせ on <code>--danger</code>. The sketch's Ahead / On time / Late. Tap → the pass turns over (the status sheet).</p>
-      <p class="spec__note"><b>Balance</b> — the gold ring the pass's issuer mark uses (<code>.pass__issuer</code>): credits are the pass's metal, never a line pigment. Warning ring at ≤5, danger at 0; a subscriber's pill reads 定期 UNLIMITED with a double ring. Tap → the balance sheet.</p>
+      <p class="spec__note"><b>Goal status</b> — a station panel: the journey model's state in the learner's own language only, with the drift in days beside it (AHEAD · 9d, ON TIME, LATE · 9d; SUSPENDED after 14 days without study). Its inks: <code>--success</code>, <code>--warning</code>, <code>--danger</code>. The Japanese words stay printed on the pass. Tap → the pass turns over (the status sheet).</p>
+      <p class="spec__note"><b>Balance</b> — the commuter pass itself at pocket size (<code>.ic-card</code>'s gradient and contactless mark), the balance printed inside: 30/50 on a free pass, the cap being the card's own, ∞ on a subscription. The figure is gold, the pass's metal, never a line pigment; the card's edge goes warning at ≤5 and danger at 0. Tap → the balance sheet.</p>
       <p class="spec__note">Sumi, two registers of ink, no line colour — the station name moved to each screen's own plate.</p>
     </div>
   </div>

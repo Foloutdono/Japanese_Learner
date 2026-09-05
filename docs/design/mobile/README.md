@@ -21,10 +21,13 @@ uses.
 
 ## The backbone (owner's sketch, 2026-09-05)
 
-- **Top bar — 運行案内, `.hud`.** Level roundel · goal status · credit balance.
-  Sumi, two registers of ink, no line colour. The station name it used to carry
-  moved to each screen's own plate (`StationHeader --sm`), so one `<h1>` per
-  screen still holds.
+- **Top bar — 運行案内, `.hud`.** Level roundel · station panel · commuter
+  pass. The panel states the goal in the learner's own language only, with the
+  drift in days beside it: AHEAD · 9d, ON TIME, LATE · 9d (SUSPENDED after 14
+  days without study). The pass is the IC card at pocket size with the balance
+  printed inside: 30/50 on a free pass, ∞ on a subscription. Sumi, no line
+  colour. The station name the bar used to carry moved to each screen's own
+  plate (`StationHeader --sm`), so one `<h1>` per screen still holds.
 - **Bottom bar — 改札口, `.tabbar`.** 学習 Learn · 実践 Practice · 本日 Today ·
   辞書 Dictionary · 定期券 Profile. Kanji as the mark, the plain word as its
   caption; the due count rides 本日 as the map's own due chip.
@@ -53,16 +56,17 @@ uses.
 
 ## The two sheets the HUD opens
 
-- **Goal status → the pass turns over.** The status pill reuses the journey
-  model's five states and inks (順調 / 定刻 on `--success`, やや遅れ on
-  `--warning`, 遅延 / 運転見合わせ on `--danger`) — the sketch's Ahead / On time /
-  Late. The sheet is the pass's back: the track, the honest sentence, the two
-  moves.
-- **Balance → the balance sheet.** The pill wears the pass's metal (`.pass__issuer`'s
-  gold ring), never a line pigment; warning ring at ≤5, danger at 0; a
-  subscriber's pill reads 定期 UNLIMITED. The sheet: the figure, the refill
-  and cap, and the 定期券 offer as the one filled action. The price is a
-  placeholder.
+- **Station panel → the pass turns over.** The panel reads the journey
+  model's five states in their inks (順調 / 定刻 on `--success`, やや遅れ on
+  `--warning`, 遅延 / 運転見合わせ on `--danger`) but prints only the English
+  word and the days; the Japanese words stay on the pass. The sheet is the
+  pass's back: the track, the honest sentence, the two moves.
+- **Commuter pass → the balance sheet.** The figure inside the pocket pass is
+  gold, the pass's metal, never a line pigment; the card's edge goes warning at
+  ≤5 and danger at 0. The sheet is where the refill and the cap are explained
+  (the screens themselves never mention the 00:00 refill): the figure, the
+  refill and cap, and the 定期券 offer as the one filled action. The price is
+  a placeholder.
 
 ## Assumed, to confirm
 

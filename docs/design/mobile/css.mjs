@@ -10,8 +10,8 @@ export const CSS = String.raw`
   --text-on-fill:       #1c1811;
   --paper:              #f3ecdf;
   --hud-h:          36px;
-  --safe-top:       54px;
-  --safe-bottom:    34px;
+  --safe-top:       47px;
+  --safe-bottom:    28px;
   --surface:        color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
   --surface-line:   color-mix(in srgb, var(--text-primary) 15%, var(--border));
   --fs-caption-xs:  0.62rem; --fs-caption: 0.72rem; --fs-sm: 0.82rem; --fs-body: 0.95rem;
@@ -107,7 +107,7 @@ export const CSS = String.raw`
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: var(--sp-5) var(--sp-5) 0;
+  padding: var(--sp-4) var(--sp-5) 0;
   gap: var(--sp-5);
 }
 .phone__content--flush { padding: 0; gap: 0; }
@@ -126,7 +126,7 @@ export const CSS = String.raw`
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-3);
-  height: 56px;
+  height: 52px;
   padding: 0 var(--sp-5);
 }
 .hud__level {
@@ -159,15 +159,21 @@ export const CSS = String.raw`
 .hud__status {
   --st: var(--success);
   --st-ink: var(--success);
+  position: relative;
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--sp-2);
-  min-height: 34px;
-  padding: var(--sp-1) var(--sp-3);
+  height: 30px;
+  padding: 0 var(--sp-4);
   border: 1px solid rgba(255,255,255,0.14);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, #000 22%, var(--bg-panel));
   white-space: nowrap;
+  overflow: hidden;
 }
+.hud__status::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 3px); }
+.hud__status-word { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--st-ink); }
+.hud__status-delta { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: var(--text-on-panel-soft); }
 .hud__status--slightlyBehind { --st: var(--warning); --st-ink: var(--warning); }
 .hud__status--delayed, .hud__status--suspended { --st: var(--danger); --st-ink: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
 .hud__status-dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--st); align-self: center; }
@@ -196,6 +202,29 @@ export const CSS = String.raw`
 .hud__credits--out { border-color: color-mix(in srgb, var(--danger) 70%, var(--text-on-panel)); color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
 .hud__credits--pass { border-style: double; border-width: 3px; padding-left: var(--sp-3); }
 .hud__credits-jp { font-family: var(--font-jp); font-size: var(--fs-caption); }
+.hud__pass {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 34px;
+  padding: 0 var(--sp-3) 0 var(--sp-3);
+  border-radius: var(--r-card);
+  background: linear-gradient(122deg, color-mix(in srgb, var(--pass-ink) 34%, var(--bg-panel)) 0%, var(--bg-panel) 58%);
+  border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
+  color: var(--text-on-panel);
+  flex: none;
+}
+.hud__pass-wave { position: relative; width: 16px; height: 18px; flex-shrink: 0; }
+.hud__pass-wave span { position: absolute; top: 50%; left: 1px; border: 1.5px solid var(--text-on-panel); border-color: transparent var(--text-on-panel) transparent transparent; border-radius: 50%; opacity: 0.75; }
+.hud__pass-wave span:nth-child(1) { width: 6px; height: 6px; margin-top: -3px; }
+.hud__pass-wave span:nth-child(2) { width: 11px; height: 11px; margin-top: -5.5px; opacity: 0.5; }
+.hud__pass-wave span:nth-child(3) { width: 16px; height: 16px; margin-top: -8px; opacity: 0.3; }
+.hud__pass-fig { display: inline-flex; align-items: baseline; font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: 0.04em; line-height: 1; font-variant-numeric: tabular-nums; color: var(--accent2); }
+.hud__pass-of { font-size: 11px; font-weight: 600; color: var(--text-on-panel-soft); }
+.hud__pass-fig--inf { font-size: 1.05rem; }
+.hud__pass--low { border-color: color-mix(in srgb, var(--warning) 70%, transparent); }
+.hud__pass--out { border-color: color-mix(in srgb, var(--danger) 70%, var(--text-on-panel)); }
+.hud__pass--out .hud__pass-fig { color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
 
 /* ── 改札口 — the tab bar. Sumi, docked, five gates. ── */
 .tabbar {
@@ -215,7 +244,7 @@ export const CSS = String.raw`
   align-items: center;
   justify-content: center;
   gap: 3px;
-  height: 56px;
+  height: 52px;
   padding: 0;
   border-radius: 0;
   color: var(--text-on-panel-soft);
@@ -245,7 +274,7 @@ export const CSS = String.raw`
 
 /* ── 駅名標 — the plate (the --sm form StationHeader draws) ── */
 .plate { --line-color: var(--accent2); margin-bottom: 0; }
-.plate__head { display: flex; align-items: stretch; justify-content: space-between; gap: 12px 20px; margin-bottom: 14px; }
+.plate__head { display: flex; align-items: stretch; justify-content: space-between; gap: 12px 20px; margin-bottom: 12px; }
 .plate__names { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .plate__roundel {
   flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
@@ -523,8 +552,8 @@ export const CSS = String.raw`
 
 /* ── the level line (LevelSelector's route) ── */
 .route { position: relative; display: flex; flex-direction: column; gap: var(--sp-3); padding-left: 30px; }
-.route::before { content: ''; position: absolute; left: 10px; top: 12px; bottom: 12px; width: 3px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--line-color) 35%, transparent); }
-.route__done { position: absolute; left: 10px; top: 12px; width: 3px; border-radius: var(--r-pill); background: var(--line-color); }
+.route::before { content: ''; position: absolute; left: 10px; top: 28px; bottom: 28px; width: 3px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--line-color) 35%, transparent); }
+.route__done { position: absolute; left: 10px; top: 28px; width: 3px; border-radius: var(--r-pill); background: var(--line-color); }
 .route-stop { position: relative; display: flex; align-items: center; gap: var(--sp-4); min-height: 56px; padding: var(--sp-3) var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); text-align: left; color: var(--text-primary); }
 .route-stop::before { content: ''; position: absolute; left: -25px; top: 50%; width: 11px; height: 11px; border-radius: var(--r-pill); transform: translate(-50%, -50%); border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--bg-main)); background: var(--bg-main); }
 .route-stop--past::before { background: var(--line-color); border-color: var(--line-color); }
@@ -576,7 +605,7 @@ export const CSS = String.raw`
 .stage__where-jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stage__where-latin { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); white-space: nowrap; }
 .today-remaining { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 22px; padding: 0 7px; border-radius: 999px; background: color-mix(in srgb, var(--accent2) 16%, transparent); color: var(--accent2); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.stage__credits { display: inline-flex; align-items: baseline; gap: 3px; height: 22px; padding: 0 8px; border-radius: 999px; border: 1.5px solid var(--accent2); color: var(--accent2); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stage .hud__pass { height: 28px; }
 .stage__credits-cap { font-size: var(--fs-caption-xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
 .deck-progress { display: flex; height: 4px; border-radius: var(--r-pill); overflow: hidden; background: var(--surface-line); }
 .deck-progress__segment { height: 100%; }
@@ -619,12 +648,12 @@ export const CSS = String.raw`
 .rating-bar__btn--q1 { --rating-color: var(--rating-wrong); }
 
 /* ── 完了 — the cleared run ── */
-.today-clear { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px 12px 48px; text-align: center; }
+.today-clear { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-3); padding: var(--sp-4) var(--sp-4) var(--sp-6); text-align: center; }
 .today-clear__mark { font-family: var(--font-serif); font-size: 44px; letter-spacing: 0.1em; text-indent: 0.1em; color: color-mix(in srgb, var(--success) 70%, transparent); line-height: 1.2; }
 .today-clear__title { font-family: var(--font-serif); font-weight: 700; font-size: 22px; }
 .today-clear__body { color: var(--text-secondary); font-size: var(--fs-body); }
 .today-clear__next { color: var(--text-secondary); font-size: var(--fs-sm); }
-.fare-slip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; width: 100%; margin-top: var(--sp-4); background: var(--surface-line); border: 1px solid var(--surface-line); border-radius: var(--r-card); overflow: hidden; }
+.fare-slip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; width: 100%; margin-top: var(--sp-3); background: var(--surface-line); border: 1px solid var(--surface-line); border-radius: var(--r-card); overflow: hidden; }
 .fare-slip__cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); padding: var(--sp-4) var(--sp-2); background: var(--surface); }
 .fare-slip__v { display: flex; align-items: baseline; gap: 3px; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-title); line-height: 1; font-variant-numeric: tabular-nums; }
 .fare-slip__u { font-size: var(--fs-caption-xs); font-weight: 600; color: var(--text-secondary); }
