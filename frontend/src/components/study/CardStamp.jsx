@@ -1,195 +1,102 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useLang } from '../../LangContext'
+import { playStamp } from '../../lib/audio'
 
-// ── Card stage stamp ──────────────────────────────────────
-// Every review can move a card up the SRS ladder — new (à apprendre)
-// → learning (en cours) → mastered (maîtrisé), the same three states
-// DeckProgress already colours with --state-new/--state-learning/
-// --state-mastered. This is the moment that promotion gets made
-// visible: the card itself gets officially notarised, kabuki-style,
-// the instant it crosses into a new stage.
+// ── 落款 — the card gets its seal ──────────────────────────────
+// Every card says what it is to the schedule in a word in its top
+// corner (see StageMark.jsx): new, in progress, mastered. A review
+// that moves the card up the ladder is the moment that changes, and
+// this draws it the way a finished piece of calligraphy is signed —
+// a 落款 seal pressed into the lower corner, clear of the work:
+//
+//   the impression  the new stage's glyph (習 or 極) at the specimen's
+//                   size, framed as a seal and set at the angle a hand
+//                   lands, in the stage's own ink at a faint opacity.
+//                   It is a detail on the card, not a poster: the
+//                   specimen and the meaning stay the thing you look
+//                   at, and the seal is what you notice second.
+//   the word        the old stage word in the top corner steps aside
+//                   and the new one presses into its place.
+//   the edge        the card's own edge answers in the same ink, half
+//                   strength for a routine press, full for a
+//                   graduation.
+//
+// The impression wears the equipped 印 (the storehouse's seal
+// cosmetics — radius, angle, wall, frame — see the 印 block in
+// index.css), so the seal a learner chose is the seal that gets
+// pressed. Three variants, deliberately unequal:
+//
+//   learning  the routine notation: vermillion, ~0.9s all in.
+//   mastered  the graduation: gold, a double-line seal, the edge lit
+//             in full. ~1.2s.
+//   demoted   a mastered card lapsing (the backend's stage_down): the
+//             impression is re-inked in vermillion with a short shake,
+//             so it reads as a correction rather than a celebration.
+//
+// This replaced, in two steps, a stage production (a wash, a kumadori
+// fan, a brush stroke, petals, and for a demotion a burn) and then a
+// press onto a small corner hanko that turned out too small to carry
+// the moment at all. Every hold is measured — see HOLD_MS.
 //
 // `transition` is `{ id, to, demoted? }` — `id` so two promotions of
-// different cards back-to-back still remount and replay (same
-// reasoning as XpToast's toast.id), `to` is 'learning' | 'mastered'.
-// `demoted` marks the one reachable *downward* crossing (mastered
-// lapsing back to learning, see the backend's stage_down) — instead
-// of the routine strike-in, the card burns away first and reappears
-// with the fresh 'learning' stamp landing on it (see CardBurn below).
+// different cards back-to-back still remount and replay.
 //
-// The two upward variants are deliberately unequal weight. 'learning' is a
-// quick administrative notation — a single vermillion hanko landing
-// on the card, in and gone in about a second, because it happens
-// often and shouldn't slow the reviewer down. 'mastered' is the
-// graduation: a wider gold-leaf seal, the same kumadori fan XpToast's
-// level-up already uses (so the two celebrations read as one
-// language), a brush-stroke drawn under the glyph, and a scatter of
-// sakura petals — hanami's flowering as the visual shorthand for
-// something finally coming to full bloom — drifting down across the
-// card before the whole thing dissolves.
-//
-// Positioning: this renders as a single absolutely-positioned overlay
-// meant to sit inside a `position: relative` wrapper the same size as
-// the card underneath it (see `.quiz-card-stage` in index.css) —
-// it does not size or place itself relative to the viewport the way
-// XpToast's level-up overlay does, because a stage promotion belongs
-// to *this card*, not to the whole screen.
-//
-// The backend (see kana.py/kanji.py/vocab.py's post_*_review) already
-// resolves the promotion itself — comparing the card's SRS stage
-// before and after the review via the same get_bulk_stats classifier
-// /stats uses — and returns it as `stage_up` on the review response,
-// so each screen only has to do:
-//
-//   if (data.stage_up) setCardStamp({ id: Date.now(), to: data.stage_up })
-//
-// No stage-tracking on the frontend at all.
+// Positioning: an absolutely-positioned overlay the size of the card
+// stage (`.quiz-card-stage` in index.css), so the corners here are
+// the card's own corners.
 const STAMP_GLYPH = { learning: '習', mastered: '極' }
-const STAMP_LABEL = { learning: 'En cours', mastered: 'Maîtrisé' }
-// ── How long the seal sits before it dissolves ──────────────────
-// This is dead time for the reviewer: every study screen holds the
-// next card until the stamp's fade-out ends (see each screen's
-// pendingGatesRef), so the wait between rating a card and seeing the
-// next one is this hold plus the 420ms .card-stamp-overlay--leaving
-// fade. Each number is therefore the last frame that carries
-// information, plus a beat to read it, and not a millisecond more:
-//
-//   learning  the seal lands at 520ms (60ms delay + 460ms strike)
-//   mastered  the brush stroke finishes at 1120ms (780 + 340)
-//   demoted   the seal lands at 1310ms (850 + 460), after the burn
-//
-// The margin over each of those is ~80ms rather than a few frames,
-// because this timer and the CSS animations run off independent
-// clocks: a busy main thread delays the animation's first frame but
-// not the setTimeout, and a hold trimmed to the animation's exact
-// length starts the fade over a stroke still being drawn.
-//
-// The wash and the petal shower outlast their holds and dissolve
-// mid-arc under the fade. That is on purpose — both end at opacity 0
-// anyway, so they read as clearing rather than being cut off.
-const HOLD_MS      = { learning: 600, mastered: 1200 }
 
-// A demotion still holds longest — the burn has to read before the
-// fresh stamp lands on top of it — but the burn no longer pauses
-// between finishing its sweep and clearing away. The stamp's own
-// strike-in delay lives in CSS (.card-stamp--demoted's animation-delay
-// override, index.css), timed to land into that clear; this is just
-// how long the whole sequence holds before the shared 'leaving'
-// fade-out phase.
-const DEMOTED_HOLD_MS = 1600
+// ── How long the press holds before it dissolves ──────────────
+// Dead time for the reviewer: every study screen holds the next card
+// until the fade-out ends. Each number is the last frame that carries
+// information plus a beat to read it — the impression landing (520ms
+// after a 40ms delay) for the routine press, the edge's end (820ms)
+// for the graduation, the re-ink's settle (600ms) for a demotion —
+// with a margin, because this timer and the CSS run off independent
+// clocks and a busy main thread delays the first frame but not the
+// setTimeout.
+const HOLD_MS = { learning: 700, mastered: 900, demoted: 780 }
 
-// Under prefers-reduced-motion the CSS gives every part of this its
-// final state on the first frame — the strike collapses to 10ms and
-// the wash, burn, brush and petals are turned off outright. There is
-// no arc left to wait out, so the hold is only long enough to notice
+// Under prefers-reduced-motion the CSS hands every part its final
+// state on the first frame, so the hold is only long enough to notice
 // that a seal appeared at all.
-const REDUCED_HOLD_MS = 400
+const REDUCED_HOLD_MS = 300
 
 function prefersReducedMotion() {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 }
 
-// Fixed ember positions, same reasoning as PETAL_LAYOUT below — a
-// mie is deliberate, not a particle system, so it's the same six
-// embers every time.
-const EMBER_LAYOUT = [
-  { x: 10, delay: 60,  drift: 5,  dur: 900,  size: 5 },
-  { x: 26, delay: 190, drift: -7, dur: 980,  size: 4 },
-  { x: 42, delay: 20,  drift: 6,  dur: 940,  size: 6 },
-  { x: 58, delay: 230, drift: -5, dur: 900,  size: 4 },
-  { x: 74, delay: 100, drift: 7,  dur: 970,  size: 5 },
-  { x: 90, delay: 270, drift: -6, dur: 920,  size: 4 },
-]
-
-// The demotion's own overlay: a dark char sweeps up from the card's
-// base and holds a beat before clearing — see CardStamp's `demoted`
-// branch below for how this hands off to the fresh stamp landing
-// right after.
-function CardBurn() {
-  return (
-    <div className="card-stamp-burn" aria-hidden="true">
-      <div className="card-stamp-burn__char" />
-      <div className="card-stamp-burn__embers">
-        {EMBER_LAYOUT.map((e, i) => (
-          <span
-            key={i}
-            className="card-stamp__ember"
-            style={{
-              '--ember-x': `${e.x}%`,
-              '--ember-delay': `${e.delay}ms`,
-              '--ember-drift': `${e.drift}px`,
-              '--ember-dur': `${e.dur}ms`,
-              '--ember-size': `${e.size}px`,
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// Fixed petal drop positions for the mastered shower — hand-placed
-// rather than randomised, same reasoning as EMBER_LAYOUT /
-// KUMADORI_ANGLES in XpToast.jsx: a mie is deliberate, not a particle
-// system, so it's the same seven petals every time.
-const PETAL_LAYOUT = [
-  { x: 8,  delay: 0,   drift: 30,  rot: 200, dur: 1500, size: 13 },
-  { x: 22, delay: 110, drift: -24, rot: 330, dur: 1700, size: 10 },
-  { x: 36, delay: 40,  drift: 26,  rot: 150, dur: 1420, size: 14 },
-  { x: 50, delay: 190, drift: -18, rot: 260, dur: 1650, size: 11 },
-  { x: 64, delay: 70,  drift: 22,  rot: 90,  dur: 1550, size: 13 },
-  { x: 78, delay: 230, drift: -28, rot: 300, dur: 1780, size: 10 },
-  { x: 92, delay: 140, drift: 18,  rot: 210, dur: 1500, size: 12 },
-]
-
-function PetalShower() {
-  return (
-    <div className="card-stamp-petals" aria-hidden="true">
-      {PETAL_LAYOUT.map((p, i) => (
-        <span
-          key={i}
-          className="petal"
-          style={{
-            '--petal-x': `${p.x}%`,
-            '--petal-delay': `${p.delay}ms`,
-            '--petal-drift': `${p.drift}px`,
-            '--petal-rot': `${p.rot}deg`,
-            '--petal-dur': `${p.dur}ms`,
-            '--petal-size': `${p.size}px`,
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
 export function CardStamp({ transition, onDone }) {
   if (!transition) return null
-  // `transition.id` is generated fresh per promotion (see the doc
-  // comment above), so keying on it here remounts CardStampInner for
-  // every new stamp — its `phase` state starts at 'active' for free
-  // on that fresh mount, no reset-on-change effect needed, and two
-  // promotions back-to-back replay cleanly instead of one instance
-  // being reused with 'phase' having to be forced back.
+  // Keyed on the id so a fresh promotion mounts fresh: `phase` starts
+  // at 'active' for free, no reset-on-change effect needed.
   return <CardStampInner key={transition.id} transition={transition} onDone={onDone} />
 }
 
 function CardStampInner({ transition, onDone }) {
-  // Same active/leaving split as XpToast: 'active' covers the strike
-  // and hold, 'leaving' is the dissolve. onDone only fires off the
-  // real animationend for the fade, never a guessed timer.
+  const { t } = useLang()
+  // 'active' covers the press and the hold, 'leaving' is the dissolve.
+  // onDone only fires off the real animationend of the fade, never a
+  // guessed timer.
   const [phase, setPhase] = useState('active')
+  const sounded = useRef(false)
+
+  const to = transition.to
+  const demoted = !!transition.demoted
+  const variant = demoted ? 'demoted' : to
 
   useEffect(() => {
-    const holdMs = prefersReducedMotion()
-      ? REDUCED_HOLD_MS
-      : transition.demoted ? DEMOTED_HOLD_MS : (HOLD_MS[transition.to] ?? 700)
+    if (!sounded.current) {
+      sounded.current = true
+      playStamp()
+    }
+    const holdMs = prefersReducedMotion() ? REDUCED_HOLD_MS : (HOLD_MS[variant] ?? 700)
     const timer = setTimeout(() => setPhase('leaving'), holdMs)
     return () => clearTimeout(timer)
-  }, [transition])
+  }, [variant])
 
-  const mastered = transition.to === 'mastered'
-  const demoted  = !!transition.demoted
-  const leaving  = phase === 'leaving'
+  const leaving = phase === 'leaving'
+  const label = to === 'mastered' ? t.mastered : t.learning
 
   const handleAnimationEnd = (e) => {
     if (e.animationName === 'card-stamp-fade-out') onDone?.()
@@ -197,29 +104,19 @@ function CardStampInner({ transition, onDone }) {
 
   return (
     <div
-      key={transition.id}
-      className={`card-stamp-overlay card-stamp-overlay--${transition.to}${demoted ? ' card-stamp-overlay--demoted' : ''}${leaving ? ' card-stamp-overlay--leaving' : ''}`}
+      className={`card-stamp-overlay card-stamp-overlay--${variant}${leaving ? ' card-stamp-overlay--leaving' : ''}`}
       aria-hidden="true"
       onAnimationEnd={handleAnimationEnd}
     >
-      {demoted ? <CardBurn /> : <div className="card-stamp-wash" />}
-      {mastered && <PetalShower />}
-      <div className={`card-stamp${mastered ? ' card-stamp--mastered' : ''}${demoted ? ' card-stamp--demoted' : ''}`}>
-        {mastered && (
-          <span
-            className="kumadori-burst kumadori-burst--big card-stamp__burst"
-            aria-hidden="true"
-            style={{ color: 'var(--state-mastered)' }}
-          >
-            <span className="kumadori-streak" style={{ '--streak-angle': '-32deg' }} />
-            <span className="kumadori-streak" style={{ '--streak-angle': '0deg' }} />
-            <span className="kumadori-streak" style={{ '--streak-angle': '28deg' }} />
-          </span>
-        )}
-        <span className="card-stamp__glyph">{STAMP_GLYPH[transition.to]}</span>
-        <span className="card-stamp__label">{STAMP_LABEL[transition.to]}</span>
-        {mastered && <span className="card-stamp__brush" aria-hidden="true" />}
-      </div>
+      {/* The card's own edge answering the press in the seal's ink —
+          faint for a routine press, gold and full for the graduation.
+          Colour is an edge, never a fill. */}
+      <span className="card-stamp__ripple" />
+      {/* The impression, in the lower corner, in the equipped 印's form. */}
+      <span className="card-stamp__rakkan" lang="ja">{STAMP_GLYPH[to]}</span>
+      {/* The new stage word, pressed into the top corner where the old
+          one was (StageMark steps aside while this plays). */}
+      <span className="card-stamp__caption">{label}</span>
     </div>
   )
 }

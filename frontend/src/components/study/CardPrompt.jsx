@@ -32,6 +32,10 @@ export default function CardPrompt({
   cardNonce,
   activeHints = [],
   onFlashcardReveal,
+  // The card's footer strip — what this card is, which way it is
+  // being studied. The section screens build it from their own
+  // selection; the daily queue and a deck session build it per card.
+  foot,
 }) {
   if (!card) return null
 
@@ -68,7 +72,7 @@ export default function CardPrompt({
     if (renderer === RENDER.TYPE) {
       // write_romaji — the kana is shown, type its reading.
       return (
-        <PromptCard>
+        <PromptCard foot={foot}>
           <CharDisplay char={c.kana} variant="glyph" />
           <RevealActions
             t={t} revealed={answered} resetKey={resetKey}
@@ -80,7 +84,7 @@ export default function CardPrompt({
     }
     if (renderer === RENDER.DRAW) {
       return (
-        <PromptCard>
+        <PromptCard foot={foot}>
           {romajiPrompt(c.romaji)}
           <RevealActions
             t={t} revealed={answered} resetKey={resetKey}
@@ -91,7 +95,7 @@ export default function CardPrompt({
       )
     }
     return (
-      <PromptCard>
+      <PromptCard foot={foot}>
         {!showChoices ? (
           <Flashcard
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
@@ -121,7 +125,7 @@ export default function CardPrompt({
       // ReadingsInput below. No flip: the answer is not one thing to
       // uncover but a set the learner produces.
       return (
-        <PromptCard>
+        <PromptCard foot={foot}>
           <CharDisplay char={c.kanji} variant="glyph" />
           <RevealActions
             t={t} revealed={answered} resetKey={resetKey}
@@ -135,7 +139,7 @@ export default function CardPrompt({
       // radical — the kanji is shown, the radical it is filed under is
       // the answer. Same flip/choices split as the meaning flashcards.
       return (
-        <PromptCard>
+        <PromptCard foot={foot}>
           {!showChoices && (
             <Flashcard
               t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
@@ -170,7 +174,7 @@ export default function CardPrompt({
     }
     if (renderer === RENDER.DRAW) {
       return (
-        <PromptCard>
+        <PromptCard foot={foot}>
           <MeaningDisplay meaning={c.meaning} size={32} />
           {c.kana && <div className="quiz-subtitle">({c.kana})</div>}
           <RevealActions
@@ -182,7 +186,7 @@ export default function CardPrompt({
       )
     }
     return (
-      <PromptCard>
+      <PromptCard foot={foot}>
         {!showChoices && (
           <Flashcard
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
@@ -217,7 +221,7 @@ export default function CardPrompt({
   // ── vocab ───────────────────────────────────────────────────
   if (structureKey === 'vocab') {
     return (
-      <PromptCard>
+      <PromptCard foot={foot}>
         {isWordReading && (
           /* word_reading — the written word is shown and the answer is
              how it is read. No meaning on either face: this drill is
@@ -289,7 +293,7 @@ export default function CardPrompt({
   // ── grammar ─────────────────────────────────────────────────
   if (structureKey === 'grammar') {
     return (
-      <PromptCard className="grammar-prompt">
+      <PromptCard className="grammar-prompt" foot={foot}>
         {/* Every mode here is the same card with a different front: a
             rule, a meaning, or a sentence. The flip is the reveal in
             all three, and switching the choices on replaces the flip
@@ -358,7 +362,7 @@ export default function CardPrompt({
 
   // ── standard (a hand-written front/back pair) ────────────────
   return (
-    <PromptCard>
+    <PromptCard foot={foot}>
       <Flashcard
         t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
         front={

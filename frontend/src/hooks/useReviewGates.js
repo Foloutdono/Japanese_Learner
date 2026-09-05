@@ -131,7 +131,7 @@ export function useReviewGates({ advance, sessionKey }) {
     gates.clear()
     advancedRef.current = false
     clearSafety()
-    // A level-up toast never auto-dismisses (see XpToast — it waits
+    // A rank re-issue never auto-dismisses (see XpToast — it waits
     // indefinitely for the claim button), so the net below must never
     // force it shut. That is the one case where an open gate is the
     // design rather than a fault.
@@ -154,15 +154,19 @@ export function useReviewGates({ advance, sessionKey }) {
           // per batch fetch and cannot see XP earned from other cards
           // answered earlier in that same batch.
           const { leveledUp, newLevel } = applyXpGain({ amount })
-          // A fare tick is a corner badge under the XP ring it reports
-          // to; it never touches the card. Gating the next card on its
-          // fade cost 2175ms measured, on the overwhelming majority of
-          // reviews, for an animation the learner is not looking at. It
-          // plays over the next card instead. The louder two tiers do
-          // still gate: a level board is a moment, and a rank waits to
-          // be dismissed by hand.
-          if (rewardTier({ leveledUp, newLevel }) !== 'fare') gates.add('toast')
-          if (leveledUp) safeToForce = false
+          // Only a rank re-issue holds the queue. The fare rides the
+          // level HUD and the level board is an announcement on the
+          // in-car display: both play over the next card, because a
+          // learner who has just rated one card is already looking for
+          // the next, and the redesign's whole point is that nothing
+          // between two cards waits on an animation. Gating the level
+          // board cost 2.9s measured per level, on top of the 2.2s the
+          // fare tick used to cost per review. The rank still waits to
+          // be dismissed by hand — four times in the whole progression.
+          if (rewardTier({ leveledUp, newLevel }) === 'rank') {
+            gates.add('toast')
+            safeToForce = false
+          }
           setXpToast({ amount, id: Date.now(), leveledUp, newLevel, quality })
 
           const to = preview.stage_up ?? preview.stage_down

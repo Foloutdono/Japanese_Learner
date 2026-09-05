@@ -1,21 +1,28 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { LangProvider } from '../../LangContext'
 import { CardStamp } from './CardStamp'
 // The hold ends in a real CSS animation, and the beats it is timed
 // against are CSS too, so the sheet has to be loaded for any of this
 // to exist.
 import '../../index.css'
 
+vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playStamp: vi.fn() }))
+
+// LangProvider fetches the content translations on mount — the same
+// offline stub every other browser test uses.
+globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
+
 // ── The stamp holds exactly as long as it has something to show ──
 // This hold is dead time: every study screen keeps the next card
-// waiting until the stamp's fade-out ends (see each screen's
-// pendingGatesRef), so a hold of 2.3s is 2.3s of the reviewer looking
-// at a card they have already answered. It was set by feel and had
-// drifted well past the animation it was covering.
+// waiting until the stamp's fade-out ends (see hooks/useReviewGates),
+// so a hold of 2.3s is 2.3s of the reviewer looking at a card they
+// have already answered. The press replaced a production that held
+// that long; these pin that it never drifts back.
 //
 // Both directions matter, so both are pinned per variant:
 //   too short — the fade starts before the last beat has played, and
-//     the learner watches a promotion dissolve half-struck;
+//     the learner watches a seal dissolve half-struck;
 //   too long  — the seal sits there finished, and the queue with it.
 //
 // One mount per test, deliberately: three renders in a single browser
@@ -23,6 +30,14 @@ import '../../index.css'
 
 const realMatchMedia = window.matchMedia
 afterEach(() => { window.matchMedia = realMatchMedia })
+
+function mount(transition, onDone) {
+  return render(
+    <LangProvider>
+      <CardStamp transition={transition} onDone={onDone} />
+    </LangProvider>
+  )
+}
 
 // Wait for the overlay to enter its 'leaving' phase, then report how
 // the named animation stood at that instant: whether it had finished,
@@ -62,23 +77,20 @@ const CASES = [
   {
     name: 'a routine promotion',
     transition: { id: 1, to: 'learning' },
-    selector: '.card-stamp', animationName: 'card-stamp-strike',
+    selector: '.card-stamp__rakkan', animationName: 'card-stamp-rakkan',
     slackMs: 250, budgetMs: 1200,
   },
   {
     name: 'a graduation',
     transition: { id: 2, to: 'mastered' },
-    selector: '.card-stamp__brush', animationName: 'card-stamp-brush-draw',
-    slackMs: 250, budgetMs: 1800,
+    selector: '.card-stamp__ripple', animationName: 'card-stamp-ripple',
+    slackMs: 250, budgetMs: 1500,
   },
   {
-    // The demotion holds longest on purpose: the seal lands into a card
-    // that is still burning, so it needs a beat of stillness afterwards
-    // to read as the replacement rather than as part of the fire.
     name: 'a demotion',
     transition: { id: 3, to: 'learning', demoted: true },
-    selector: '.card-stamp', animationName: 'card-stamp-strike',
-    slackMs: 450, budgetMs: 2300,
+    selector: '.card-stamp__rakkan', animationName: 'card-stamp-reink',
+    slackMs: 250, budgetMs: 1400,
   },
 ]
 
@@ -87,9 +99,7 @@ describe('CardStamp — how long it holds', () => {
     it(`${name} fades once its last beat has played, and closes its gate soon after`, async () => {
       const started = performance.now()
       let doneAt = 0
-      const screen = await render(
-        <CardStamp transition={transition} onDone={() => { doneAt = performance.now() - started }} />
-      )
+      const screen = await mount(transition, () => { doneAt = performance.now() - started })
 
       const { finished, deadAirMs } = await atFade(screen.container, selector, animationName, started)
       expect(finished, `${animationName} was still running when the fade began`).toBe(true)
@@ -103,6 +113,26 @@ describe('CardStamp — how long it holds', () => {
     }, 30000)
   }
 
+  it('presses the stage glyph as the impression and names the stage in the corner', async () => {
+    // The impression says which stage was reached without a word —
+    // 極 for a graduation — and the word that lands in the top corner
+    // is in the learner's language, not a hardcoded one.
+    const screen = await mount({ id: 4, to: 'mastered' }, () => {})
+    expect(screen.container.querySelector('.card-stamp__rakkan').textContent).toBe('極')
+    expect(screen.container.querySelector('.card-stamp__caption').textContent).toBe('Maîtrisé')
+  })
+
+  it('stays a detail: the impression is faint, never a poster', async () => {
+    // The ink sits under a fifth of full opacity once landed. The
+    // specimen and the meaning are what the card is for; the seal is
+    // what you notice second.
+    const screen = await mount({ id: 5, to: 'learning' }, () => {})
+    const seal = screen.container.querySelector('.card-stamp__rakkan')
+    await new Promise(r => setTimeout(r, 650))
+    expect(parseFloat(getComputedStyle(seal).opacity)).toBeLessThanOrEqual(0.2)
+    expect(parseFloat(getComputedStyle(seal).opacity)).toBeGreaterThan(0.05)
+  })
+
   it('barely holds at all under reduced motion, where nothing animates', async () => {
     // The CSS hands every part of this its final state on the first
     // frame under reduced motion, so there is no arc left to wait out.
@@ -114,14 +144,9 @@ describe('CardStamp — how long it holds', () => {
     let doneAt = 0
     // The variant that holds longest under normal motion, so what is
     // being measured is the branch and not the transition.
-    await render(
-      <CardStamp
-        transition={{ id: 9, to: 'learning', demoted: true }}
-        onDone={() => { doneAt = performance.now() - started }}
-      />
-    )
-    await new Promise(r => setTimeout(r, 1400))
+    await mount({ id: 9, to: 'mastered' }, () => { doneAt = performance.now() - started })
+    await new Promise(r => setTimeout(r, 1200))
     expect(doneAt, 'the reduced-motion hold never finished').toBeGreaterThan(0)
-    expect(doneAt, `held ${Math.round(doneAt)}ms with nothing to show`).toBeLessThan(1000)
+    expect(doneAt, `held ${Math.round(doneAt)}ms with nothing to show`).toBeLessThan(900)
   }, 30000)
 })

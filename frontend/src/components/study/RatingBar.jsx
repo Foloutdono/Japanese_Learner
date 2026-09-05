@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { playCorrect, playWrong } from '../../lib/audio'
 import { ratingButtons } from '../../domain/ratingScales'
@@ -13,9 +13,20 @@ const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '§': 5 }
  * `scale` overrides the learner's own choice — only the onboarding
  * demo and tests pass it. Everything else takes the setting.
  */
+// How long the pressed segment stays lit after the rating is taken.
+// The bar goes idle the instant a rating lands (see each screen's
+// setShowRating(false)), and .rating-bar--idle now fades rather than
+// vanishes, so the seal the learner just pressed is still on screen
+// filled while the card underneath moves on — the acknowledgement is
+// the ring closing, not a toast. Matched to the idle fade in index.css.
+const PRESSED_MS = 420
+
 export default function RatingBar({ onRate, active, scale }) {
   const { t } = useLang()
   const preferred = useRatingScale()
+  const [pressed, setPressed] = useState(null)
+  const pressedTimer = useRef(null)
+  useEffect(() => () => clearTimeout(pressedTimer.current), [])
 
   // Best-first, and it must STAY that way -- the keyboard handler below
   // indexes this array positionally, so "1" means the best answer only
@@ -37,6 +48,9 @@ export default function RatingBar({ onRate, active, scale }) {
       playCorrect()
     else
       playWrong()
+    setPressed(q)
+    clearTimeout(pressedTimer.current)
+    pressedTimer.current = setTimeout(() => setPressed(null), PRESSED_MS)
     onRate(q)
   }
 
@@ -81,7 +95,7 @@ export default function RatingBar({ onRate, active, scale }) {
             key={q}
             type="button"
             onClick={() => handleRate(q)}
-            className={`rating-bar__btn rating-bar__btn--q${q}`}
+            className={`rating-bar__btn rating-bar__btn--q${q}${pressed === q ? ' rating-bar__btn--pressed' : ''}`}
             /* The digits are deliberately NOT drawn (numeric indices are
                noise on a control this size) and are deliberately NOT in
                display order: QUALITY_BTNS is best-first, so "1" is the

@@ -77,11 +77,12 @@ describe('useReviewGates', () => {
     expect(advance, 'a stuck gate must cost a skipped animation, not the session').toHaveBeenCalledTimes(1)
   }, 20000)
 
-  it('never forces a level-up closed, because that one waits to be claimed', async () => {
+  it('never forces a rank re-issue closed, because that one waits to be claimed', async () => {
     // The exemption: XpToast's rank board waits indefinitely for the
     // player to tap it, so an open gate there is the design and not a
-    // fault. Forcing it would snatch the moment away mid-claim.
-    applyXpGain.mockReturnValue({ leveledUp: true, newLevel: 5 })
+    // fault. Forcing it would snatch the moment away mid-claim. Level
+    // 6 is the first rank crossing (見習い → 浪人, see domain/levelTitle).
+    applyXpGain.mockReturnValue({ leveledUp: true, newLevel: 6 })
     const advance = vi.fn()
     await render(<Probe advance={advance} sessionKey="a" />)
     api.review(XP, { cardKey: 'c1', quality: 5 })
@@ -92,6 +93,18 @@ describe('useReviewGates', () => {
     await settle(30)
     expect(advance).toHaveBeenCalledTimes(1)
   }, 20000)
+
+  it('lets a plain level-up play over the next card', async () => {
+    // Level 4 → 5 stays inside 見習い: the board turns over on the
+    // in-car display while the next card is already in hand. Holding
+    // the queue for it was 2.9s of dead time per level.
+    applyXpGain.mockReturnValue({ leveledUp: true, newLevel: 5 })
+    const advance = vi.fn()
+    await render(<Probe advance={advance} sessionKey="a" />)
+    api.review(XP, { cardKey: 'c1', quality: 5 })
+    await settle(30)
+    expect(advance).toHaveBeenCalledTimes(1)
+  })
 
   it('refuses a second review while one is in flight', async () => {
     // Synchronously, inside one tick: `locked` is a render away, so a

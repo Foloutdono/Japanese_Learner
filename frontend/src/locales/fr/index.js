@@ -308,8 +308,6 @@ const quiz = {
 
   // Writing practice
   writingPractice:   'Entraînez-vous à écrire ce kanji',
-  writingOn:         'Écriture ON',
-  writingOff:        'Écriture OFF',
   toggleWriting:     'Activer/désactiver l\'écriture',
   yourDrawing:       'Votre dessin',
   strokeOrder:       'Ordre des traits',
@@ -816,9 +814,9 @@ const progress = {
 const misc = {
   mute:    'Couper le son',
   unmute:  'Activer le son',
-  onyomi:  "Lectures on'yomi (sino-japonaises)",
+  onyomi:  "音読み · on'yomi",
   readingsMore: (n) => `${n} lecture${n > 1 ? 's' : ''} de plus — la fiche du dictionnaire les donne toutes`,
-  kunyomi: "Lectures kun'yomi (japonaises)",
+  kunyomi: "訓読み · kun'yomi",
   kanjiNoun: 'kanji',
   wordNoun:  'mot',
   // Affiché par components/study/SessionError quand une session n'a

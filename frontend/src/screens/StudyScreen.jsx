@@ -31,7 +31,8 @@ import {
 } from '../domain/studyModes'
 import HintBar from '../components/study/HintBar'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
-import { ChevronIcon, PencilIcon } from '../components/ui/Icons'
+import { ChevronIcon } from '../components/ui/Icons'
+import WritingToggle from '../components/study/WritingToggle'
 
 // The 8s fetch timeout that used to live here is gone: useCardSession
 // owns the abort signal and the timeout now (10s, matched to the cold
@@ -349,7 +350,11 @@ export default function StudyScreen({ session }) {
   const cardStageClassName =
     structureKey === 'vocab' ? 'vocab-card-boost'
     : structureKey === 'grammar' ? 'grammar-card-boost'
+    : structureKey === 'kana' || structureKey === 'kanji' ? 'specimen-card-stage'
     : undefined
+  // The card's footer strip, as on every section screen: the deck on
+  // the left, the mode on the right.
+  const cardFoot = { left: deck?.name ?? '', right: title }
 
   return (
     <div className="screen">
@@ -362,13 +367,7 @@ export default function StudyScreen({ session }) {
         // entirely of hand-written kanji cards used to never show it at
         // all, since `composition.kanji` only ever counted the former.
         actions={deck?.type === 'kanji' && usesWritingDrill(mode) && (
-          <button
-            onClick={() => setDrawingEnabled(d => !d)}
-            className={`btn-writing-toggle ${drawingEnabled ? 'btn-writing-toggle--on' : 'btn-writing-toggle--off'}`}
-            title={t.toggleWriting}
-          >
-            <PencilIcon size={14} /> {drawingEnabled ? t.writingOn : t.writingOff}
-          </button>
+          <WritingToggle on={drawingEnabled} onToggle={() => setDrawingEnabled(d => !d)} />
         )}
       />
       <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
@@ -409,6 +408,7 @@ export default function StudyScreen({ session }) {
                 card={nc} t={t} session={session}
                 answered={answered} cardNonce={cardNonce}
                 activeHints={activeHints} onFlashcardReveal={onFlashcardReveal}
+                foot={cardFoot}
               />
             </CardTransition>
 
