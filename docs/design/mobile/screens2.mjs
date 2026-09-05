@@ -272,7 +272,6 @@ ${hud()}
   </div>
   <div class="chip-row">
     <button type="button" class="chip">${I.plus}Add card</button>
-    <button type="button" class="chip">${I.search}Browse</button>
     <button type="button" class="chip">${I.check}Select</button>
     <button type="button" class="chip"><svg class="svg" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>More</button>
   </div>
@@ -452,7 +451,7 @@ const DICT_ENTRY = `
 <div style="height: var(--safe-top); flex: none; background: var(--bg-panel);"></div>
 <main class="dd">
   <div class="dd-plate">
-    <span class="dd-tategaki" lang="ja">漢字</span>
+    <span class="dd-tategaki" lang="ja"><span>漢</span><span>字</span></span>
     <div class="dd-plate__body">
       <div class="dd-plate__row"><span class="lvl" style="--lvl-color: var(--text-on-panel-soft); color: var(--text-on-panel-soft);">N5</span><span class="seal seal--mastered" lang="ja">極</span><span class="dd-plate__actions"><button type="button">${I.speaker}</button><button type="button">${I.cross}</button></span></div>
       <span class="dd-head" lang="ja">三</span>

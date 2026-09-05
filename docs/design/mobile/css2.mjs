@@ -252,7 +252,7 @@ export const CSS2 = String.raw`
 /* ── the dictionary entry ── */
 .dd { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-5); padding: 0 var(--sp-5); overflow: hidden; }
 .dd-plate { position: relative; display: flex; gap: var(--sp-4); padding: var(--sp-5) var(--sp-5) var(--sp-5) 0; margin-inline: calc(-1 * var(--sp-5)); padding-left: var(--sp-5); background: var(--bg-panel); color: var(--text-on-panel); }
-.dd-tategaki { writing-mode: vertical-rl; align-self: stretch; min-height: 120px; line-height: 1; font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-caption); letter-spacing: var(--tr-name); color: var(--text-on-panel-soft); border-right: 1px solid rgba(255,255,255,0.14); padding-right: var(--sp-3); flex: none; }
+.dd-tategaki { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); align-self: stretch; font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-caption); line-height: 1; color: var(--text-on-panel-soft); border-right: 1px solid rgba(255,255,255,0.14); padding-right: var(--sp-3); flex: none; }
 .dd-plate__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-3); }
 .dd-plate__row { display: flex; align-items: center; gap: var(--sp-3); }
 .dd-plate__actions { margin-left: auto; display: flex; gap: var(--sp-2); }
