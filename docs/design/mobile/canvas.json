@@ -1,0 +1,170 @@
+{
+  "pages": [
+    {
+      "id": "screens",
+      "name": "Screens"
+    },
+    {
+      "id": "chrome",
+      "name": "Chrome"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "title": "Today's run",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "Run.dc.html",
+      "title": "In a run",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "RunComplete.dc.html",
+      "title": "Run complete",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "Learning.dc.html",
+      "title": "Learning · route map",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "Station.dc.html",
+      "title": "Station · 漢字 levels",
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "Platforms.dc.html",
+      "title": "Platforms · 漢字 N4 modes",
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "Practice.dc.html",
+      "title": "Practice",
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "Dictionary.dc.html",
+      "title": "Dictionary",
+      "x": 0,
+      "y": 984,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "Analyzer.dc.html",
+      "title": "Analyzer",
+      "x": 470,
+      "y": 984,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "Profile.dc.html",
+      "title": "Profile · the pass",
+      "x": 940,
+      "y": 984,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "ProfileInserts.dc.html",
+      "title": "Profile · inserts",
+      "x": 1410,
+      "y": 984,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "StatusSheet.dc.html",
+      "title": "Goal status sheet",
+      "x": 1880,
+      "y": 984,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "BalanceSheet.dc.html",
+      "title": "Balance sheet",
+      "x": 2350,
+      "y": 984,
+      "w": 390,
+      "h": 844,
+      "page": "screens"
+    },
+    {
+      "file": "Chrome.dc.html",
+      "title": "Chrome · HUD, tab bar, gate",
+      "x": 0,
+      "y": 0,
+      "w": 1180,
+      "h": 1320,
+      "page": "chrome"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "backbone",
+      "page": "screens",
+      "x": -300,
+      "y": 0,
+      "w": 260,
+      "text": "Mobile backbone\n\nTop: level · goal status · credits (the HUD).\nBottom: 学習 Learn · 実践 Practice · 本日 Today · 辞書 Dictionary · 定期券 Profile.\n\nRow 1: the Today tab and a run, then the Learn tab down to a platform list, then Practice.\nRow 2: Dictionary and the analyzer behind it, the Profile in two scrolls, and the two sheets the HUD opens.\n\nEvery artboard has a dark / light tweak."
+    },
+    {
+      "id": "credits",
+      "page": "screens",
+      "x": -300,
+      "y": 984,
+      "w": 260,
+      "text": "Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: 定期券, unlimited.\n\nThe gate prices the run (運賃) against the balance (残高) before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits."
+    },
+    {
+      "id": "chrome-note",
+      "page": "chrome",
+      "x": 0,
+      "y": -110,
+      "w": 420,
+      "text": "Every value on this sheet is a token from index.css — the class names in the mockup source match the real ones (.hud, .tabbar are new; the rest exist)."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "screens"
+  }
+}

@@ -18,6 +18,13 @@ second canvas at
 was likewise not updated after the decision. The code is the reference for
 that screen.
 
+A third canvas (2026-09-05) draws the **mobile rework** — the five-tab
+backbone, the HUD (level · goal status · balance) and the credit system — at
+`https://claude.ai/code/artifact/760313f0-7c87-40e2-993f-708fdbf63bd0`:
+fourteen artboards, with their sources and the decisions they rest on under
+`docs/design/mobile/`. Exploration for the mobile update, not yet the rule:
+nothing in it overrides this file until it ships.
+
 ## The idea
 
 The app is a Japanese railway station. Learning is a journey: sections are
