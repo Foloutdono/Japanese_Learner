@@ -22,7 +22,7 @@ export const CSS2 = String.raw`
 .readings-input__label b { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); }
 .readings-input__label span { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .readings-input__row { display: flex; flex-direction: column; gap: var(--sp-2); }
-.field { display: flex; align-items: center; width: 100%; min-height: 44px; padding: var(--sp-3) var(--sp-4); border-radius: var(--r-card); background: var(--bg-main); border: 1px solid transparent; color: var(--text-secondary); font-size: var(--fs-body); text-align: left; }
+.field { display: flex; align-items: center; width: 100%; min-height: 44px; padding: var(--sp-3) var(--sp-4); border-radius: var(--r-card); background: var(--bg-main); border: 1px solid var(--surface-line); color: var(--text-secondary); font-size: var(--fs-body); text-align: left; }
 .field--filled { color: var(--text-primary); font-family: var(--font-jp); font-weight: 600; }
 .field--focus { border-color: var(--accent); }
 .readings-input__add { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--sp-2); height: 36px; padding: 0 var(--sp-3); color: var(--text-secondary); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 600; }
@@ -66,11 +66,11 @@ export const CSS2 = String.raw`
 /* ── 模試 — the exam runner and its result ── */
 .exam-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); }
 .exam-meta__section { display: flex; align-items: baseline; gap: var(--sp-2); }
-.exam-meta__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-lead); }
+.exam-meta__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
 .exam-timer { display: inline-flex; align-items: center; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); font-variant-numeric: tabular-nums; }
 .exam-timer--low { color: var(--danger); }
 .exam-mondai { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); min-height: 40px; padding: 0 var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); color: var(--text-secondary); font-size: var(--fs-caption); }
-.exam-mondai b { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); color: var(--text-primary); }
+.exam-mondai b { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); color: var(--text-primary); }
 .exam-underline { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 2px; text-decoration-color: var(--accent); }
 .exam-nav { display: grid; grid-template-columns: 1fr 44px 1fr; gap: var(--sp-3); }
 .exam-nav .btn-secondary, .exam-nav .btn-primary { min-height: 44px; padding-inline: var(--sp-4); font-size: var(--fs-sm); }
@@ -96,7 +96,7 @@ export const CSS2 = String.raw`
 .exam-result-figs b { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-title); font-variant-numeric: tabular-nums; line-height: 1; }
 .exam-result-figs span { font-size: var(--fs-caption); color: var(--text-secondary); }
 .exam-group { display: flex; align-items: baseline; justify-content: space-between; padding: var(--sp-3) var(--sp-4) var(--sp-2); }
-.exam-group b { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); }
+.exam-group b { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
 .exam-group span { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
 .exam-review-row { display: flex; align-items: center; gap: var(--sp-4); min-height: 44px; padding: 0 var(--sp-4); border-top: 1px solid var(--surface-line); text-align: left; color: var(--text-primary); }
 .exam-review-row__mark { width: 18px; height: 18px; border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center; flex: none; }
@@ -105,14 +105,14 @@ export const CSS2 = String.raw`
 .exam-review-row__mark .svg { width: 11px; height: 11px; stroke-width: 3; }
 .exam-review-row__q { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; width: 30px; }
 .exam-review-row__jp { flex: 1; min-width: 0; font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.exam-review-row__blank { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.exam-review-row__blank { flex: 1; font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 
 /* ── 教材 — decks ── */
 .deck-identity { display: flex; align-items: center; gap: var(--sp-4); }
 .deck-identity__names { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .deck-identity__name { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); line-height: 1.2; }
 .deck-identity__meta { font-size: var(--fs-caption); color: var(--text-secondary); }
-.chip-row { display: flex; gap: var(--sp-2); overflow: hidden; }
+.chip-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 .chip-row .chip { text-transform: none; letter-spacing: 0.02em; font-size: var(--fs-sm); font-weight: 600; color: var(--text-primary); height: 34px; padding: 0 10px; }
 .chip-row .chip .svg { width: 14px; height: 14px; color: var(--text-secondary); }
 .card-list { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); overflow: hidden; }
@@ -129,7 +129,7 @@ export const CSS2 = String.raw`
 /* ── 統計 — statistics ── */
 .section-header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; }
 .section-header__mark { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
-.section-header__jp { font-family: var(--font-serif); font-weight: 700; font-size: 1.35rem; letter-spacing: 0.1em; line-height: 1.1; color: var(--text-primary); }
+.section-header__jp { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-lead); line-height: 1.1; color: var(--text-primary); }
 .section-header__title { font-family: var(--font-display); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-secondary); }
 .section-header__count { margin-left: auto; font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .section-header__rule { flex-basis: 100%; width: 100%; height: 1px; margin-top: 4px; background: linear-gradient(90deg, var(--line-color, var(--accent)) 0 40px, var(--surface-line) 40px); }
@@ -161,13 +161,13 @@ export const CSS2 = String.raw`
 
 /* ── 設定 — the pass's own preferences ── */
 .stg-head { display: flex; flex-direction: column; gap: 2px; }
-.stg-head__jp { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-display-fluid); line-height: 1.15; letter-spacing: var(--tr-name); }
+.stg-head__jp { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); line-height: 1.2; }
 .stg-head__latin { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-secondary); }
 .stg-list { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); overflow: hidden; }
 .stg-row { display: flex; align-items: center; gap: var(--sp-4); min-height: 60px; padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--surface-line); text-align: left; color: var(--text-primary); }
 .stg-row:first-child { border-top: 0; }
 .stg-row__names { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-.stg-row__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-lead); line-height: 1.2; }
+.stg-row__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); line-height: 1.2; }
 .stg-row__latin { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .stg-row__value { font-size: var(--fs-sm); color: var(--text-secondary); white-space: nowrap; }
 .stg-row .svg { color: var(--text-secondary); }
@@ -182,11 +182,11 @@ export const CSS2 = String.raw`
 .lvlstrip__stop--on { color: var(--text-primary); }
 .lvlstrip__stop--on .lvlstrip__dot { width: 17px; height: 17px; margin: -2px 0; background: var(--text-primary); border-color: var(--text-primary); }
 .lvlstrip__code { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
-.lvlstrip__jp { font-family: var(--font-jp); font-size: var(--fs-caption-xs); }
+.lvlstrip__jp { font-family: var(--font-display); font-size: var(--fs-caption-xs); letter-spacing: 0.06em; text-transform: uppercase; }
 .svc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
 .svc { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 64px; padding: var(--sp-3) var(--sp-2); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); color: var(--text-primary); }
 .svc--on { border-color: var(--pass-ink); background: color-mix(in srgb, var(--pass-ink) 14%, var(--surface)); }
-.svc__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); }
+.svc__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
 .svc__pace { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
 .svc__star { color: var(--accent2); }
 .grades { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
@@ -213,8 +213,8 @@ export const CSS2 = String.raw`
 .onb-lvl__sample { font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .onb-alt { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); min-height: 44px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); color: var(--text-primary); font-size: var(--fs-sm); font-weight: 600; text-align: left; }
 .onb-alt span[lang="ja"] { color: var(--text-secondary); font-size: var(--fs-caption); }
-.onb-dests { display: flex; gap: var(--sp-2); overflow: hidden; }
-.onb-dest { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; min-width: 84px; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--surface-line); border-radius: var(--r-card); color: var(--text-primary); flex: none; }
+.onb-dests { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); }
+.onb-dest { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-height: 48px; padding: var(--sp-2) var(--sp-2); border: 1px solid var(--surface-line); border-radius: var(--r-card); color: var(--text-primary); }
 .onb-dest--on { border-color: var(--pass-ink); background: color-mix(in srgb, var(--pass-ink) 14%, var(--surface)); }
 .onb-dest__code { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
 .onb-dest__jp { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-body); }
@@ -323,7 +323,7 @@ export const CSS3 = String.raw`
 .reissue__scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.62); }
 .reissue__pass { --pass-color: var(--pass-ink); position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); width: 100%; padding: var(--sp-6) var(--sp-7) var(--sp-6); background: linear-gradient(122deg, color-mix(in srgb, var(--pass-color) 22%, var(--surface)) 0%, var(--surface) 62%); border: 1px solid var(--surface-line); border-radius: 12px; box-shadow: 0 26px 70px rgba(0,0,0,0.5); text-align: center; }
 .reissue__cap { display: flex; align-items: baseline; gap: var(--sp-3); }
-.reissue__cap b { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-lead); letter-spacing: var(--tr-name); color: var(--accent2); }
+.reissue__cap b { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-caption); letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--accent2); }
 .reissue__from { font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-secondary); text-decoration: line-through; }
 .reissue__rank { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-display); line-height: 1.1; letter-spacing: var(--tr-name); text-indent: var(--tr-name); }
 .reissue__latin { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: 0.3em; text-indent: 0.3em; text-transform: uppercase; color: var(--text-secondary); }
@@ -353,7 +353,7 @@ export const CSS3 = String.raw`
 .photo-frame i:nth-child(2) { top: 12px; right: 34px; border-left: 0; border-bottom: 0; }
 .photo-frame i:nth-child(3) { bottom: 12px; left: 34px; border-right: 0; border-top: 0; }
 .photo-frame i:nth-child(4) { bottom: 12px; right: 34px; border-left: 0; border-top: 0; }
-.photo-frame span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-jp); font-size: var(--fs-heading); color: var(--text-secondary); letter-spacing: var(--tr-name); }
+.photo-frame span { position: absolute; inset: 18px 40px; display: flex; align-items: center; justify-content: center; padding: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-lead); line-height: 1.6; text-align: center; color: var(--text-secondary); }
 .hint { font-size: var(--fs-caption); color: var(--text-secondary); line-height: 1.5; }
 .picker-row { display: flex; align-items: center; gap: var(--sp-4); min-height: 56px; padding: 0 var(--sp-4); border-top: 1px solid var(--surface-line); text-align: left; color: var(--text-primary); }
 .picker-row:first-child { border-top: 0; }
@@ -392,4 +392,73 @@ export const CSS3 = String.raw`
 .rating-bar__buttons--6 .rating-bar__btn:nth-child(n + 4) { border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent); }
 .rating-bar__btn--q0 { --rating-color: var(--danger); }
 .rating-bar__btn--q5 { --rating-color: var(--success); }
+`
+
+export const CSS4 = String.raw`
+/* ── 辞書 — the catalogue cards and the entry plate (rework of 2026-09-05) ── */
+.dict-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.dict-entry-card { --plate: var(--level-color, var(--text-secondary)); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; padding: 22px 12px 16px; background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); text-align: center; overflow: hidden; color: var(--text-primary); }
+.dict-entry-card::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--plate); opacity: 0.85; }
+.dict-entry-card__char { font-size: 38px; font-family: var(--font-jp); line-height: 1; }
+.dict-entry-card__kana { font-size: 13px; color: var(--text-secondary); font-family: var(--font-jp); letter-spacing: 0.02em; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dict-entry-card__meaning { font-size: 14px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
+.dict-entry-card .dict-level-badge { position: absolute; top: 7px; left: 10px; font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-secondary); opacity: 0.6; }
+.dict-entry-card .stage-mark { top: var(--sp-3); right: var(--sp-3); letter-spacing: var(--tr-term); opacity: 0.75; }
+.dict-entry { --dict-ink: color-mix(in srgb, var(--line-color, var(--accent2)) 60%, var(--text-primary)); --line-color: var(--line-jisho); flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; color: var(--text-primary); }
+.dict-plate { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-3) var(--sp-5) 0; background: var(--surface); }
+.dict-plate__row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); min-height: var(--sp-8); }
+.dict-plate__marks { display: flex; align-items: center; gap: var(--sp-4); }
+.dict-plate__level { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); color: var(--text-secondary); }
+.dict-plate__marks .stage-mark { position: static; }
+.dict-plate__actions { display: flex; align-items: center; gap: var(--sp-3); }
+.dict-plate__btn { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: var(--sp-8); height: var(--sp-8); padding: 0; border: 1px solid var(--surface-line); border-radius: var(--r-pill); color: var(--text-primary); }
+.dict-plate__btn .svg { width: 18px; height: 18px; }
+.dict-plate__stack { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); padding-bottom: var(--sp-4); text-align: center; }
+.dict-plate__reading { font-family: var(--font-jp); font-size: var(--fs-sm); letter-spacing: var(--tr-reading); text-indent: var(--tr-reading); color: var(--text-secondary); }
+.dict-plate__word { margin: 0; font-family: var(--font-jp); font-weight: 400; font-size: var(--fs-display); line-height: 1.2; letter-spacing: var(--tr-term); text-indent: var(--tr-term); color: var(--text-primary); }
+.dict-plate__word--glyph { font-size: var(--fs-specimen-word); line-height: 1.1; letter-spacing: 0; text-indent: 0; }
+.dict-plate__readings { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--sp-2) var(--sp-4); max-width: 100%; }
+.dict-plate__yomi { display: inline-flex; align-items: center; gap: var(--sp-2); font-family: var(--font-jp); font-size: var(--fs-body); letter-spacing: var(--tr-term); color: var(--text-secondary); }
+.dict-kind { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: var(--sp-6); height: var(--sp-6); border: 1px solid var(--surface-line); border-radius: var(--r-plate); font-family: var(--font-jp); font-size: var(--fs-caption-xs); font-weight: 700; line-height: 1; color: var(--text-secondary); }
+.dict-plate__more { display: inline-flex; align-items: center; gap: var(--sp-1); min-height: 30px; padding: 0 var(--sp-3); border: 1px solid var(--surface-line); border-radius: var(--r-pill); color: var(--text-secondary); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-term); }
+.dict-plate__more .svg { width: 12px; height: 12px; }
+.dict-plate__caption { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; letter-spacing: var(--tr-caption); text-indent: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.dict-plate__stripe { flex-shrink: 0; height: 3px; margin: 0 calc(-1 * var(--sp-5)); background: var(--line-color, var(--accent2)); }
+.dict-entry__body { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.dict-block { padding: var(--sp-4) var(--sp-5); }
+.dict-block + .dict-block { border-top: 1px solid var(--surface-line); }
+.dict-block__note { display: flex; justify-content: flex-end; align-items: center; gap: var(--sp-1); margin-bottom: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: color-mix(in srgb, var(--state-due) 65%, var(--text-primary)); }
+.dict-block__note .svg { width: 12px; height: 12px; }
+.dict-senses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-3); }
+.dict-sense { display: grid; grid-template-columns: var(--sp-6) minmax(0, 1fr); gap: var(--sp-3); align-items: baseline; }
+.dict-sense__n { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--dict-ink); }
+.dict-sense__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.dict-sense__gloss { font-size: var(--fs-body); line-height: 1.5; color: var(--text-primary); }
+.dict-tag { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 600; letter-spacing: var(--tr-term); color: var(--text-secondary); text-decoration: underline dotted; text-decoration-color: var(--surface-line); text-underline-offset: 3px; }
+.dict-examples { display: flex; flex-direction: column; gap: var(--sp-3); }
+.dict-ex { display: flex; flex-direction: column; gap: 2px; }
+.dict-ex__jp { font-family: var(--font-jp); font-size: var(--fs-lead); line-height: 1.7; color: var(--text-primary); }
+.dict-ex__hl { color: var(--dict-ink); font-weight: 700; }
+.dict-ex__tr { font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
+.dict-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--surface-line); border: 1px solid var(--surface-line); border-radius: var(--r-card); overflow: hidden; }
+.dict-form__sheet { grid-row: 1 / -1; display: flex; align-items: center; justify-content: center; min-height: 120px; padding: var(--sp-3); background: var(--paper); }
+.dict-form__sheet svg { width: 84px; height: 84px; }
+.dict-form .record { padding: var(--sp-3) var(--sp-4); }
+.dict-words { display: flex; flex-direction: column; margin: 0 calc(-1 * var(--sp-5)); }
+.dict-word { position: relative; display: flex; align-items: center; gap: var(--sp-3); width: 100%; min-height: 48px; padding: var(--sp-2) var(--sp-5); text-align: left; color: inherit; }
+.dict-word + .dict-word { border-top: 1px solid var(--surface-line); }
+.dict-word__jp { flex-shrink: 0; font-family: var(--font-jp); font-size: var(--fs-lead); line-height: 1.4; color: var(--text-primary); }
+.dict-word__hit { color: var(--dict-ink); font-weight: 700; }
+.dict-word__gloss { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; font-size: var(--fs-sm); color: var(--text-secondary); }
+.dict-word__chev { flex-shrink: 0; color: var(--text-secondary); opacity: 0.7; }
+.dict-register { display: flex; flex-direction: column; gap: var(--sp-3); }
+.dict-register__head { display: flex; align-items: center; gap: var(--sp-3); }
+.dict-readings__glyph { font-family: var(--font-jp); font-size: var(--fs-heading); line-height: 1; color: var(--text-primary); }
+.dict-readings__title { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.dict-reading { display: flex; flex-direction: column; gap: var(--sp-1); }
+.dict-reading__yomi { font-family: var(--font-jp); font-size: var(--fs-lead); letter-spacing: var(--tr-term); color: var(--text-primary); }
+.dict-register__rest { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.dict-register__chip { display: inline-flex; align-items: center; height: 30px; padding: 0 var(--sp-3); border: 1px solid var(--surface-line); border-radius: var(--r-pill); font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-secondary); }
+.dict-parts { display: flex; gap: var(--sp-2); }
+.dict-part { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--surface-line); border-radius: var(--r-card); font-family: var(--font-jp); font-size: var(--fs-lead); color: var(--text-primary); }
 `

@@ -2,27 +2,27 @@
   "pages": [
     {
       "id": "today",
-      "name": "本日 Today"
+      "name": "Today"
     },
     {
       "id": "learn",
-      "name": "学習 Learn"
+      "name": "Learn"
     },
     {
       "id": "practice",
-      "name": "実践 Practice"
+      "name": "Practice"
     },
     {
       "id": "dict",
-      "name": "辞書 Dictionary"
+      "name": "Dictionary"
     },
     {
       "id": "pass",
-      "name": "定期券 Profile"
+      "name": "Profile"
     },
     {
       "id": "arrival",
-      "name": "みどりの窓口 Arrival"
+      "name": "Sign in"
     },
     {
       "id": "chrome",
@@ -140,7 +140,7 @@
     },
     {
       "file": "Learning.dc.html",
-      "title": "Learning · route map",
+      "title": "Learn · route map",
       "x": 0,
       "y": 0,
       "w": 390,
@@ -149,7 +149,7 @@
     },
     {
       "file": "Station.dc.html",
-      "title": "Station · 漢字 levels",
+      "title": "Station · Kanji levels",
       "x": 470,
       "y": 0,
       "w": 390,
@@ -158,7 +158,7 @@
     },
     {
       "file": "StationTiers.dc.html",
-      "title": "Station · 漢字 by frequency",
+      "title": "Station · Kanji by frequency",
       "x": 940,
       "y": 0,
       "w": 390,
@@ -167,7 +167,7 @@
     },
     {
       "file": "Platforms.dc.html",
-      "title": "Platforms · 漢字 N4 modes",
+      "title": "Platforms · Kanji N4",
       "x": 1410,
       "y": 0,
       "w": 390,
@@ -319,9 +319,18 @@
       "page": "dict"
     },
     {
+      "file": "DictionaryReadings.dc.html",
+      "title": "Dictionary · all readings",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "dict"
+    },
+    {
       "file": "Analyzer.dc.html",
       "title": "Analyzer",
-      "x": 940,
+      "x": 1410,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -330,7 +339,7 @@
     {
       "file": "AnalyzerPhoto.dc.html",
       "title": "Analyzer · photo",
-      "x": 1410,
+      "x": 1880,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -339,7 +348,7 @@
     {
       "file": "AnalyzerVideo.dc.html",
       "title": "Analyzer · video",
-      "x": 1880,
+      "x": 2350,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -348,7 +357,7 @@
     {
       "file": "AnalyzerResult.dc.html",
       "title": "Analyzer · the sentence",
-      "x": 2350,
+      "x": 2820,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -357,7 +366,7 @@
     {
       "file": "DeckPickerSheet.dc.html",
       "title": "Analyzer · add to deck",
-      "x": 2820,
+      "x": 3290,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -445,60 +454,6 @@
       "page": "arrival"
     },
     {
-      "file": "OfficeRide.dc.html",
-      "title": "Ticket office · first ride",
-      "x": 470,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "page": "arrival"
-    },
-    {
-      "file": "OfficeBoarding.dc.html",
-      "title": "Ticket office · boarding",
-      "x": 940,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "page": "arrival"
-    },
-    {
-      "file": "OfficeTest.dc.html",
-      "title": "Ticket office · placement test",
-      "x": 1410,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "page": "arrival"
-    },
-    {
-      "file": "OfficeGoal.dc.html",
-      "title": "Ticket office · destination",
-      "x": 1880,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "page": "arrival"
-    },
-    {
-      "file": "OfficePromise.dc.html",
-      "title": "Ticket office · the promise",
-      "x": 2350,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "page": "arrival"
-    },
-    {
-      "file": "OfficePass.dc.html",
-      "title": "Ticket office · the application",
-      "x": 2820,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "page": "arrival"
-    },
-    {
       "file": "Chrome.dc.html",
       "title": "Chrome · HUD, tab bar, gate",
       "x": 0,
@@ -524,7 +479,7 @@
       "x": -300,
       "y": 0,
       "w": 260,
-      "text": "Mobile backbone\n\nTop: level · station panel · commuter pass (the HUD).\nBottom: 学習 Learn · 実践 Practice · 本日 Today · 辞書 Dictionary · 定期券 Profile.\n\nOne page per tab, the screens in walking order. This page: the gate, then a run in each of its faces, then the cleared run.\n\nEvery artboard has a dark / light tweak."
+      "text": "Mobile backbone\n\nTop: level · station panel · commuter pass (the HUD).\nBottom: Learn · Practice · Today · Dictionary · Profile.\n\nOne page per tab, the screens in walking order. The interface speaks English; Japanese is content only (a word, a sentence, a deck's name, a rank) and the tab bar's icons.\n\nEvery artboard has a dark / light tweak."
     },
     {
       "id": "credits",
@@ -532,7 +487,7 @@
       "x": -300,
       "y": 420,
       "w": 260,
-      "text": "Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: 定期券, unlimited.\n\nThe gate prices the run (運賃) against the balance (残高) before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits."
+      "text": "Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: the unlimited pass.\n\nThe gate prices the run (fare) against the balance before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits."
     },
     {
       "id": "sessions",
@@ -540,7 +495,15 @@
       "x": -300,
       "y": 0,
       "w": 260,
-      "text": "Sessions behave like a run: both bars leave, ‹ 実践 is the way out, the field or the rating bar docks on the bottom edge. Practice does not spend credits."
+      "text": "Sessions behave like a run: both bars leave, ‹ Practice is the way out, the field or the rating bar docks on the bottom edge. Practice does not spend credits."
+    },
+    {
+      "id": "dict-note",
+      "page": "dict",
+      "x": -300,
+      "y": 0,
+      "w": 260,
+      "text": "The dictionary follows the 2026-09-05 rework: catalogue cards carry the stage word; an entry opens as the catalogue plate at reading size, with two readings and a door to the readings sheet; the body is blocks divided by hairlines, no headings."
     },
     {
       "id": "chrome-note",
@@ -548,7 +511,7 @@
       "x": 0,
       "y": -110,
       "w": 420,
-      "text": "Every value on this sheet is a :root token or a literal index.css already uses (the 12px credits pill, the 0.1em map captions). Class names mirror index.css where the object exists (.pass, .board, .wmap-*, .gate-card, .btn-depart, .jour-*, .stamp-rally); .hud, .tabbar, .plate, .lane, .console, .chip, .route, .stage and .sheet are new to the mockup — see docs/design/mobile/README.md."
+      "text": "Every value on this sheet is a :root token or a literal index.css already uses. Class names mirror index.css where the object exists (.pass, .board, .wmap-*, .gate-card, .btn-depart, .jour-*, .stamp-rally, .dict-*); .hud, .tabbar, .bar, .lane, .console, .chip, .route, .stage and .sheet are new to the mockup — see docs/design/mobile/README.md."
     }
   ],
   "launch": {

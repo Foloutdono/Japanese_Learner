@@ -1,67 +1,65 @@
 import { writeFileSync } from 'node:fs'
-import { artboard, hud, tabbar, plate, clock, track, due, rally, pace, jourLine, pass, credits, status, I, STATUS } from './parts.mjs'
+import { artboard, hud, tabbar, header, back, track, due, rally, pace, jourLine, pass, credits, status, I } from './parts.mjs'
+import { SCREENS2 } from './screens2.mjs'
+import { SCREENS3, STATES_BODY } from './screens3.mjs'
 
 // ── sample data, shared by every screen ──
 const LANES = [
-  { color: 'var(--line-kanji)',   where: '漢字 N4', mode: 'Kanji → meaning', due: 9 },
-  { color: 'var(--line-vocab)',   where: '単語 N5', mode: 'Word → meaning',  due: 8 },
-  { color: 'var(--line-grammar)', where: '文法 N4', mode: 'Rule → meaning',  due: 5 },
-  { color: 'var(--line-decks)',   where: '旅行',    mode: 'Study · my deck', due: 2 },
+  { color: 'var(--line-kanji)',   where: 'Kanji N4',      mode: 'Kanji → meaning', due: 9 },
+  { color: 'var(--line-vocab)',   where: 'Vocabulary N5', mode: 'Word → meaning',  due: 8 },
+  { color: 'var(--line-grammar)', where: 'Grammar N4',    mode: 'Rule → meaning',  due: 5 },
+  { color: 'var(--line-decks)',   where: '<span lang="ja">旅行</span>', mode: 'My deck', due: 2 },
 ]
 const lane = (l, on = true) => `<button type="button" class="lane${on ? '' : ' lane--off'}" style="--lane-color: ${l.color}">
   <span class="lane__tick">${on ? I.check : ''}</span>
-  <span class="lane__where" lang="ja">${l.where}</span>
+  <span class="lane__where">${l.where}</span>
   <span class="lane__mode">${l.mode}</span>
   <span class="lane__due">${l.due}</span>
 </button>`
+const departBtn = (label = 'Depart', extra = '') => `<button type="button" class="btn-depart${extra}"><span class="btn-depart__jp">${label}</span><span class="btn-depart__go">▶</span></button>`
 
-const gateCard = ({ total = 24, balance = 30, lanes = LANES } = {}) => {
+export const gateCard = ({ total = 24, balance = 30, lanes = LANES } = {}) => {
   const short = total > balance
   const out = balance === 0
   return `<div class="gate-card">
   <div class="gate-card__head">
-    <span class="gate-card__name"><span class="gate-card__jp" lang="ja">改札</span><span class="gate-card__latin">Fare gate</span></span>
-    <span class="gate-card__figure"><span class="gate-card__count">${total}</span><span class="gate-card__unit" lang="ja">件</span></span>
+    <span class="gate-card__title">Fare gate</span>
+    <span class="gate-card__figure"><span class="gate-card__count">${total}</span><span class="gate-card__unit">due</span></span>
   </div>
   <div class="gate-card__lanes">${lanes.map(l => lane(l)).join('')}</div>
   <div class="gate-card__fare">
-    <span lang="ja">運賃</span><b>${Math.min(total, balance)}</b><span>credits</span>
+    <span>Fare</span><b>${Math.min(total, balance)}</b><span>credits</span>
     <span class="gate-card__fare-sep"></span>
-    <span lang="ja">残高</span><b class="fare-gold">${balance}</b>
+    <span>Balance</span><b class="fare-gold">${balance}</b>
   </div>
   ${out ? `<div class="gate-card__short">${I.warn}<span>No credits left — <b>+30</b> at 00:00</span></div>` : short ? `<div class="gate-card__short">${I.warn}<span><b>${balance}</b> of ${total} run today — ${total - balance} wait for tomorrow's refill</span></div>` : ''}
-  <button type="button" class="btn-depart${out ? ' btn-depart--off' : ''}"><span class="btn-depart__jp" lang="ja">出発する</span><span class="btn-depart__latin">Depart</span><span class="btn-depart__go">▶</span></button>
-  ${out ? `<button type="button" class="btn-depart"><span class="btn-depart__jp" lang="ja">定期券を買う</span><span class="btn-depart__latin">Go unlimited</span><span class="btn-depart__go">▶</span></button>` : ''}
+  ${departBtn('Depart', out ? ' btn-depart--off' : '')}
+  ${out ? departBtn('Go unlimited') : ''}
 </div>`
 }
 const gateClear = () => `<div class="gate-card" style="gap: var(--sp-3);">
-  <div class="gate-card__head">
-    <span class="gate-card__name"><span class="gate-card__jp" lang="ja">改札</span><span class="gate-card__latin">Fare gate</span></span>
-  </div>
+  <div class="gate-card__head"><span class="gate-card__title">Fare gate</span></div>
   <span class="gate-card__clear">All clear</span>
   <span class="gate-card__when">Next review in 3 hours.</span>
 </div>`
-
 const strip = () => `<div class="pass pass--strip">${rally()}${pace()}</div>`
 
-const dateAside = `<span style="display:flex;flex-direction:column;align-items:flex-end;"><span lang="ja" style="font-family:var(--font-jp);font-weight:700;font-size:var(--fs-sm);">土曜日</span><span class="cap">5 Sep</span></span>`
-
 // ── 1 · Today's run — the home tab, the fare gate ──
-const TODAY_BODY = (opts = {}) => `
+export const TODAY_BODY = (opts = {}) => `
 ${hud(opts.hud)}
 <main class="phone__content">
-  ${plate({ code: 'HN', kana: 'ほんじつ', name: '本日', latin: "Today's run", color: 'var(--accent2)', extra: dateAside })}
+  ${header({ code: 'HN', title: "Today's run", sub: 'Sat 5 Sep', color: 'var(--accent2)' })}
   ${gateCard(opts.gate)}
   ${strip()}
 </main>
 ${tabbar('today', 24)}`
 
 // ── 2 · In a run — the study stage, chrome hidden, rating bar docked ──
-const RUN_BODY = `
+export const RUN_BODY = `
 <main class="stage" style="padding-top: calc(var(--safe-top) + var(--sp-3)); --line-color: var(--line-kanji);">
   <div class="stage__head">
-    <button type="button" class="stage__leave">${I.chevL}<span lang="ja">改札</span></button>
-    <span class="stage__where"><h1 class="stage__where-jp" lang="ja">漢字 N4</h1><span class="stage__where-latin">Kanji → meaning</span></span>
+    ${back('Gate')}
+    <span class="stage__where"><h1 class="stage__where-jp">Kanji N4</h1><span class="stage__where-latin">Kanji → meaning</span></span>
     <span class="today-remaining">18</span>
     ${credits(24)}
   </div>
@@ -77,7 +75,7 @@ const RUN_BODY = `
   <div class="prompt-card">
     <span class="stage-mark stage-mark--learning">In progress</span>
     <div class="prompt-card__body"><span class="char-display" lang="ja">駅</span></div>
-    <div class="prompt-card__foot"><span lang="ja">N4 漢字</span><span>Kanji → meaning</span></div>
+    <div class="prompt-card__foot"><span>N4 · Kanji</span><span>Kanji → meaning</span></div>
   </div>
   <div class="mcq-list">
     <button type="button" class="mcq-row mcq-row--correct"><span class="mcq-row__accent"></span><span class="mcq-row__index">01</span><span class="mcq-row__text">station</span></button>
@@ -97,9 +95,9 @@ const RUN_BODY = `
 const COMPLETE_BODY = `
 ${hud({ cr: 6 })}
 <main class="phone__content">
-  ${plate({ code: 'HN', kana: 'ほんじつ', name: '本日', latin: "Today's run", color: 'var(--accent2)', extra: dateAside })}
+  ${header({ code: 'HN', title: "Today's run", sub: 'Sat 5 Sep', color: 'var(--accent2)' })}
   <div class="today-clear">
-    <div class="today-clear__mark" lang="ja">完了</div>
+    <span class="today-clear__mark">${I.check.replace('class="svg"', 'class="svg" style="width:26px;height:26px;stroke-width:2.6;"')}</span>
     <p class="today-clear__title">Run complete</p>
     <p class="today-clear__body">24 reviews cleared. Nothing else is due.</p>
     <p class="today-clear__next">Next review in 3 hours.</p>
@@ -108,16 +106,16 @@ ${hud({ cr: 6 })}
       <div class="fare-slip__cell"><span class="fare-slip__v">+96<span class="fare-slip__u">xp</span></span><span class="cap">fare</span></div>
       <div class="fare-slip__cell"><span class="fare-slip__v fare-slip__v--gold">6</span><span class="cap">credits left</span></div>
     </div>
-    <button type="button" class="btn-depart btn-depart--ghost" style="width: 100%; margin-top: var(--sp-3);"><span class="btn-depart__jp" lang="ja">駅に戻る</span><span class="btn-depart__latin">Back to the station</span></button>
+    ${departBtn('Back to the station', ' btn-depart--ghost').replace('class="btn-depart btn-depart--ghost"', 'class="btn-depart btn-depart--ghost" style="width: 100%; margin-top: var(--sp-3);"').replace('<span class="btn-depart__go">▶</span>', '')}
   </div>
 </main>
 ${tabbar('today', 0)}`
 
-// ── 4 · Learning — the route map, four lines and your own decks ──
-const line = ({ code, color, jp, latin, stops, travelled, n, on = false }) => `<button type="button" class="wmap-line${on ? ' wmap-line--on' : ''}" style="--line-color: ${color}">
+// ── 4 · Learn — the route map, four lines and your own decks ──
+const line = ({ code, color, title, stops, travelled, n }) => `<button type="button" class="wmap-line" style="--line-color: ${color}">
   <span class="wmap-line__id">
     <span class="wmap-roundel">${code}</span>
-    <span class="wmap-line__names"><span class="wmap-line__jp" lang="ja">${jp}<span class="wmap-line__sen" lang="ja">線</span></span><span class="wmap-line__latin">${latin}</span></span>
+    <span class="wmap-line__names"><span class="wmap-line__jp">${title}</span></span>
   </span>
   <span class="wmap-line__due">${due(n)}</span>
   ${track(stops, travelled)}
@@ -125,30 +123,19 @@ const line = ({ code, color, jp, latin, stops, travelled, n, on = false }) => `<
 const LEARN_BODY = `
 ${hud()}
 <main class="phone__content">
+  ${header({ code: 'JP', title: 'Route map', sub: 'Four lines', color: 'var(--accent2)' })}
   <div class="board">
-    <div class="board__masthead">
-      <span class="board__station">
-        <span class="board__roundel">JP</span>
-        <span class="board__station-names"><span class="board__kana" lang="ja">にほんご</span><h1 class="board__name" lang="ja">日本語</h1><span class="board__romaji">Nihongo</span></span>
-      </span>
-      <span class="board__now">
-        <span class="board__label"><span lang="ja">路線図</span><span class="board__label-sub">Route map</span></span>
-        ${clock()}
-      </span>
-    </div>
-    <div class="board__stripe"></div>
     <div class="wmap__lines">
-      ${line({ code: 'KN', color: 'var(--line-kana)',    jp: 'あ',   latin: 'Kana',            stops: ['あ', 'きゃ', 'ア', 'キャ'],   travelled: 4,   n: 0 })}
-      ${line({ code: 'TG', color: 'var(--line-vocab)',   jp: '単語', latin: 'Vocabulary JLPT', stops: ['N5', 'N4', 'N3', 'N2', 'N1'], travelled: 1.6, n: 8 })}
-      ${line({ code: 'KJ', color: 'var(--line-kanji)',   jp: '漢字', latin: 'Kanji',           stops: ['N5', 'N4', 'N3', 'N2', 'N1'], travelled: 1.3, n: 9 })}
-      ${line({ code: 'BP', color: 'var(--line-grammar)', jp: '文法', latin: 'Grammar',         stops: ['N5', 'N4', 'N3', 'N2', 'N1'], travelled: 1.2, n: 5 })}
+      ${line({ code: 'KN', color: 'var(--line-kana)',    title: 'Kana',       stops: ['あ', 'きゃ', 'ア', 'キャ'],   travelled: 4,   n: 0 })}
+      ${line({ code: 'TG', color: 'var(--line-vocab)',   title: 'Vocabulary', stops: ['N5', 'N4', 'N3', 'N2', 'N1'], travelled: 1.6, n: 8 })}
+      ${line({ code: 'KJ', color: 'var(--line-kanji)',   title: 'Kanji',      stops: ['N5', 'N4', 'N3', 'N2', 'N1'], travelled: 1.3, n: 9 })}
+      ${line({ code: 'BP', color: 'var(--line-grammar)', title: 'Grammar',    stops: ['N5', 'N4', 'N3', 'N2', 'N1'], travelled: 1.2, n: 5 })}
     </div>
     <div class="wmap__group">
-      <div class="wmap__caption"><span class="wmap__caption-jp" lang="ja">教材</span><span class="wmap__caption-latin">Your own decks</span></div>
       <button type="button" class="wmap-row" style="--line-color: var(--line-decks)">
         <span class="wmap-roundel">KZ</span>
-        <span class="wmap-row__names"><span class="wmap-row__jp" lang="ja">教材<span class="wmap-line__sen" lang="ja">行</span></span><span class="wmap-row__latin">My decks</span></span>
-        <span class="wmap-row__note">3 decks · 214 cards ${due(2)}</span>
+        <span class="wmap-row__names"><span class="wmap-row__jp">My decks</span><span class="wmap-row__latin">3 decks · 214 cards</span></span>
+        <span class="wmap-row__note">${due(2)}</span>
         <span class="wmap-row__go">▶</span>
       </button>
     </div>
@@ -156,131 +143,125 @@ ${hud()}
 </main>
 ${tabbar('learn', 24)}`
 
-// ── 5 · A station: 漢字, the level line ──
-const stop = ({ code, jp, hint, state, done, total }) => `<button type="button" class="route-stop${state ? ` route-stop--${state}` : ''}">
+// ── 5 · A station: Kanji, the level line ──
+const stop = ({ code, hint, state, done, total }) => `<button type="button" class="route-stop${state ? ` route-stop--${state}` : ''}">
   <span class="route-stop__code">${code}</span>
-  <span class="route-stop__names"><span class="route-stop__jp" lang="ja">${jp}</span><span class="route-stop__hint">${state === 'current' ? '<span class="route-stop__here">You are here</span> · ' : ''}${hint}</span></span>
+  <span class="route-stop__names"><span class="route-stop__jp">${hint}</span>${state === 'current' ? '<span class="route-stop__here">You are here</span>' : ''}</span>
   <span class="route-stop__fig"><b>${done}</b>/ ${total}</span>
   <span class="route-stop__go">▶</span>
 </button>`
 const STATION_BODY = `
 ${hud()}
 <main class="phone__content" style="--line-color: var(--line-kanji);">
-  ${plate({ code: 'KJ', kana: 'かんじ', name: '漢字', latin: 'Kanji', color: 'var(--line-kanji)', noriba: 5 })}
+  ${header({ code: 'KJ', title: 'Kanji', sub: 'JLPT', color: 'var(--line-kanji)', aside: '<button type="button" class="cap" style="text-decoration: underline; text-underline-offset: 3px;">By frequency</button>' })}
   <div class="route">
     <span class="route__done" style="height: 64px;"></span>
-    ${stop({ code: 'N5', jp: '入門', hint: 'Beginner level',     state: 'past',    done: 103, total: 103 })}
-    ${stop({ code: 'N4', jp: '基礎', hint: 'Elementary level',   state: 'current', done: 121, total: 181 })}
-    ${stop({ code: 'N3', jp: '日常', hint: 'Intermediate level', state: '',        done: 0,   total: 367 })}
-    ${stop({ code: 'N2', jp: '実務', hint: 'Advanced level',     state: '',        done: 0,   total: 415 })}
-    ${stop({ code: 'N1', jp: '終着', hint: 'Proficiency level',  state: '',        done: 0,   total: 1070 })}
-  </div>
-  <div style="display:flex;justify-content:space-between;gap:var(--sp-4);padding: 0 var(--sp-1);">
-    <span class="cap"><span lang="ja" style="letter-spacing:var(--tr-term);text-transform:none;">出典</span> · JLPT</span>
-    <button type="button" class="cap" style="text-decoration: underline; text-underline-offset: 3px;">Word frequency instead</button>
+    ${stop({ code: 'N5', hint: 'Beginner',     state: 'past',    done: 103, total: 103 })}
+    ${stop({ code: 'N4', hint: 'Elementary',   state: 'current', done: 121, total: 181 })}
+    ${stop({ code: 'N3', hint: 'Intermediate', state: '',        done: 0,   total: 367 })}
+    ${stop({ code: 'N2', hint: 'Advanced',     state: '',        done: 0,   total: 415 })}
+    ${stop({ code: 'N1', hint: 'Proficiency',  state: '',        done: 0,   total: 1070 })}
   </div>
 </main>
 ${tabbar('learn', 24)}`
 
-// ── 6 · A platform list: 漢字 N4, the modes on the 種別 ladder ──
+// ── 6 · A platform list: Kanji N4, the modes on the service ladder ──
 const pips = n => `<span class="platform-card__stops">${[1, 2, 3, 4].map(i => `<span class="platform-card__pip${i <= n ? ' platform-card__pip--on' : ''}"></span>`).join('')}</span>`
-const mode = ({ svc, jp, stops, title, desc }) => `<button type="button" class="platform-card platform-card--${svc}">
-  <span class="platform-card__lead"><span class="platform-card__service" lang="ja">${jp}</span>${stops ? pips(stops) : ''}</span>
+const mode = ({ svc, label, stops, title, desc }) => `<button type="button" class="platform-card platform-card--${svc}">
+  <span class="platform-card__lead"><span class="platform-card__service">${label}</span>${stops ? pips(stops) : ''}</span>
   <span class="platform-card__body"><span class="platform-card__title">${title}</span><span class="platform-card__desc">${desc}</span></span>
   <span class="platform-card__go">▶</span>
 </button>`
 const MODES_BODY = `
 ${hud()}
-<main class="phone__content" style="--line-color: var(--line-kanji); gap: var(--sp-5);">
-  ${plate({ code: 'KJ', kana: 'かんじ', name: '漢字', latin: 'Kanji', color: 'var(--line-kanji)', noriba: 6 })}
-  <div style="display:flex;align-items:center;gap:var(--sp-3);">
-    <button type="button" class="stage__leave" style="padding-right: var(--sp-2);">${I.chevL}</button>
-    <span class="cap"><span lang="ja" style="text-transform:none;letter-spacing:var(--tr-term);">N4 基礎</span> · Elementary · 121 of 181 met</span>
-  </div>
-  <div class="platform-grid">
-    ${mode({ svc: 'rapid',   jp: '快速', stops: 3, title: 'Kanji → meaning', desc: 'The kanji is shown. Recall what it means.' })}
-    ${mode({ svc: 'express', jp: '急行', stops: 2, title: 'Meaning → kanji', desc: 'The meaning is given. Recall the kanji.' })}
-    ${mode({ svc: 'ltd',     jp: '特急', stops: 1, title: 'Draw the kanji',  desc: 'The meaning is given. Draw the kanji by hand.' })}
-    ${mode({ svc: 'express', jp: '急行', stops: 2, title: 'Readings',        desc: "The kanji is shown. Type its on'yomi and kun'yomi." })}
-    ${mode({ svc: 'rapid',   jp: '快速', stops: 3, title: 'Radical',         desc: 'The kanji is shown. Recall which radical it is built on.' })}
-    ${mode({ svc: 'review',  jp: '復習', stops: 0, title: 'Fast review',     desc: 'Flip through what you have already studied. Nothing is graded.' })}
+<main class="phone__content" style="--line-color: var(--line-kanji);">
+  ${header({ code: 'KJ', title: 'Kanji', sub: 'N4 · Elementary', color: 'var(--line-kanji)', aside: back('Levels') })}
+  <div class="platform-grid" style="gap: var(--sp-3);">
+    ${mode({ svc: 'rapid',   label: 'Rapid',    stops: 3, title: 'Kanji → meaning', desc: 'The kanji is shown. Recall what it means.' })}
+    ${mode({ svc: 'express', label: 'Express',  stops: 2, title: 'Meaning → kanji', desc: 'The meaning is given. Recall the kanji.' })}
+    ${mode({ svc: 'ltd',     label: 'Ltd. exp.', stops: 1, title: 'Draw the kanji',  desc: 'The meaning is given. Draw it by hand.' })}
+    ${mode({ svc: 'express', label: 'Express',  stops: 2, title: 'Readings',        desc: "Type its on'yomi and kun'yomi." })}
+    ${mode({ svc: 'rapid',   label: 'Rapid',    stops: 3, title: 'Radical',         desc: 'Recall which radical it is built on.' })}
+    ${mode({ svc: 'review',  label: 'Review',   stops: 0, title: 'Fast review',     desc: 'Flip through what you know. Nothing is graded.' })}
   </div>
 </main>
 ${tabbar('learn', 24)}`
 
-// ── 7 · Practice — 実践, four platforms ──
-const practice = ({ n, color, jp, title, desc }) => `<button type="button" class="platform-card platform-card--line" style="--line-color: ${color}">
-  <span class="platform-card__lead"><span class="platform-card__no">${n}</span><span class="platform-card__unit" lang="ja">番線</span></span>
-  <span class="platform-card__body"><span class="platform-card__title">${title}<span class="platform-card__title-jp" lang="ja">${jp}</span></span><span class="platform-card__desc">${desc}</span></span>
+// ── 7 · Practice — four platforms ──
+const practice = ({ n, color, title, desc }) => `<button type="button" class="platform-card platform-card--line" style="--line-color: ${color}">
+  <span class="platform-card__lead"><span class="platform-card__no">${n}</span></span>
+  <span class="platform-card__body"><span class="platform-card__title">${title}</span><span class="platform-card__desc">${desc}</span></span>
   <span class="platform-card__go">▶</span>
 </button>`
 const PRACTICE_BODY = `
 ${hud()}
 <main class="phone__content">
-  ${plate({ code: '', kana: 'じっせん', name: '実践', latin: 'Practice', color: 'var(--accent2)', noriba: 4, register: true })}
+  ${header({ title: 'Practice', sub: 'Four platforms', register: true })}
   <div class="platform-grid">
-    ${practice({ n: 1, color: 'var(--line-reading)', jp: '読書', title: 'Reading practice',      desc: 'Real sentences, pitched at your level.<br>Read first, check after.' })}
-    ${practice({ n: 2, color: 'var(--line-rikai)',   jp: '理解', title: 'Reading comprehension', desc: 'Short passages, then questions.<br>The reading half of the exam, rehearsed.' })}
-    ${practice({ n: 3, color: 'var(--line-honyaku)', jp: '翻訳', title: 'Translation',           desc: 'Put it into Japanese yourself.<br>A reference answer, and a read on yours.' })}
-    ${practice({ n: 4, color: 'var(--line-exam)',    jp: '模試', title: 'Mock exam',             desc: 'Full-length practice exams, timed and scored.<br>Built to the official JLPT format.' })}
+    ${practice({ n: 1, color: 'var(--line-reading)', title: 'Reading practice',      desc: 'Real sentences, pitched at your level.' })}
+    ${practice({ n: 2, color: 'var(--line-rikai)',   title: 'Reading comprehension', desc: 'Short passages, then questions.' })}
+    ${practice({ n: 3, color: 'var(--line-honyaku)', title: 'Translation',           desc: 'Put it into Japanese yourself.' })}
+    ${practice({ n: 4, color: 'var(--line-exam)',    title: 'Mock exam',             desc: 'Timed papers in the JLPT format.' })}
   </div>
 </main>
 ${tabbar('practice', 24)}`
 
-// ── 8 · Dictionary — the console, with the analyzer as its one action ──
-const entry = ({ reading, word, gloss, lvl, seal }) => `<button type="button" class="dict-entry">
-  <span class="dict-entry__stack">
-    <span class="dict-entry__reading" lang="ja">${reading}</span>
-    <span class="dict-entry__head"><span class="dict-entry__word" lang="ja">${word}</span><span class="dict-entry__gloss">${gloss}</span></span>
-  </span>
-  <span class="lvl">${lvl}</span>
-  ${seal ? `<span class="seal seal--${seal}" lang="ja">${{ new: '新', learning: '習', mastered: '極' }[seal]}</span>` : '<span style="width:26px;flex:none;"></span>'}
+// ── 8 · Dictionary — the analyzer's door, the console, the catalogue ──
+const card = ({ kana, char, meaning, lvl, color, stage }) => `<button type="button" class="dict-entry-card" style="--level-color: ${color}">
+  <span class="dict-level-badge">${lvl}</span>
+  ${stage ? `<span class="stage-mark stage-mark--${stage}">${{ learning: 'In progress', mastered: 'Mastered' }[stage]}</span>` : ''}
+  <span class="dict-entry-card__kana" lang="ja">${kana}</span>
+  <span class="dict-entry-card__char" lang="ja">${char}</span>
+  <span class="dict-entry-card__meaning">${meaning}</span>
 </button>`
+export const ANL_DOOR = `<button type="button" class="anl-door">
+    <span class="wmap-roundel" style="--line-color: var(--line-kaiseki); color: color-mix(in srgb, var(--line-kaiseki) 60%, var(--text-primary));">KS</span>
+    <span class="anl-door__names"><span class="anl-door__title">Analyzer</span></span>
+    <span class="anl-door__intakes"><span class="anl-door__intake">${I.text}</span><span class="anl-door__intake">${I.camera}</span><span class="anl-door__intake">${I.video}</span></span>
+  </button>`
 const DICT_BODY = `
 ${hud()}
-<main class="phone__content" style="--line-color: var(--line-jisho); gap: var(--sp-5);">
-  ${plate({ code: 'JS', kana: 'じしょ', name: '辞書', latin: 'Dictionary', color: 'var(--line-jisho)' })}
-  <button type="button" class="anl-door">
-    <span class="wmap-roundel" style="--line-color: var(--line-kaiseki); color: color-mix(in srgb, var(--line-kaiseki) 60%, var(--text-primary));">KS</span>
-    <span class="anl-door__names"><span class="anl-door__title">Analyzer<span lang="ja">解析</span></span></span>
-    <span class="anl-door__intakes"><span class="anl-door__intake">${I.text}</span><span class="anl-door__intake">${I.camera}</span><span class="anl-door__intake">${I.video}</span></span>
-  </button>
+<main class="phone__content" style="--line-color: var(--line-jisho);">
+  ${header({ code: 'JS', title: 'Dictionary', color: 'var(--line-jisho)' })}
+  ${ANL_DOOR}
   <div class="console">
     <div class="console__top">
       <div class="console__chips">
-        <button type="button" class="chip chip--on" style="--tab-color: var(--line-kanji)"><span class="chip__glyph" lang="ja">漢</span>Kanji</button>
-        <button type="button" class="chip" style="--tab-color: var(--line-vocab)"><span class="chip__glyph" lang="ja">語</span>Vocab</button>
-        <button type="button" class="chip" style="--tab-color: var(--line-kana)"><span class="chip__glyph" lang="ja">あ</span>Kana</button>
-        <button type="button" class="chip" style="--tab-color: var(--line-jisho)"><span class="chip__glyph" lang="ja">辞</span>JMdict</button>
+        <button type="button" class="chip chip--on" style="--tab-color: var(--line-kanji)">Kanji</button>
+        <button type="button" class="chip" style="--tab-color: var(--line-vocab)">Vocab</button>
+        <button type="button" class="chip" style="--tab-color: var(--line-kana)">Hiragana</button>
+        <button type="button" class="chip" style="--tab-color: var(--line-rikai)">Katakana</button>
+        <button type="button" class="chip" style="--tab-color: var(--line-jisho)">JMdict</button>
       </div>
     </div>
-    <div class="console__index">${I.search}<span class="console__field console__field--filled">san</span><button type="button" style="display:inline-flex;width:22px;height:22px;border-radius:50%;background:color-mix(in srgb, var(--text-primary) 8%, transparent);color:var(--text-secondary);align-items:center;justify-content:center;padding:0;">${I.cross.replace('class="svg"', 'class="svg" style="width:12px;height:12px;"')}</button><span class="console__count">128 results</span></div>
+    <div class="console__index">${I.search}<span class="console__field console__field--filled">san</span><button type="button" class="console__clear">${I.cross}</button><span class="console__count">128 results</span></div>
   </div>
-  <div class="dict-list">
-    ${entry({ reading: 'サン・みっ(つ)', word: '三',   gloss: 'three',               lvl: 'N5', seal: 'mastered' })}
-    ${entry({ reading: 'サン・やま',     word: '山',   gloss: 'mountain',            lvl: 'N5', seal: 'learning' })}
-    ${entry({ reading: 'さんぽ',         word: '散歩', gloss: 'walk, stroll',        lvl: 'N4', seal: 'learning' })}
-    ${entry({ reading: 'さんか',         word: '参加', gloss: 'participation',       lvl: 'N3', seal: 'new' })}
-    ${entry({ reading: 'さんせい',       word: '賛成', gloss: 'approval, agreement', lvl: 'N2', seal: 'new' })}
-    ${entry({ reading: 'さんぎょう',     word: '産業', gloss: 'industry',            lvl: 'N2', seal: '' })}
+  <div class="dict-grid">
+    ${card({ kana: 'サン・みっ(つ)', char: '三',   meaning: 'three',         lvl: 'N5', color: 'var(--success)', stage: 'mastered' })}
+    ${card({ kana: 'サン・やま',     char: '山',   meaning: 'mountain',      lvl: 'N5', color: 'var(--success)', stage: 'learning' })}
+    ${card({ kana: 'さんぽ',         char: '散歩', meaning: 'walk, stroll',  lvl: 'N4', color: 'var(--teal)',    stage: 'learning' })}
+    ${card({ kana: 'さんか',         char: '参加', meaning: 'participation', lvl: 'N3', color: 'var(--warning)', stage: '' })}
+    ${card({ kana: 'さんせい',       char: '賛成', meaning: 'approval',      lvl: 'N2', color: 'var(--rust)',    stage: '' })}
+    ${card({ kana: 'さんぎょう',     char: '産業', meaning: 'industry',      lvl: 'N2', color: 'var(--rust)',    stage: '' })}
   </div>
 </main>
 ${tabbar('dict', 24)}`
 
-// ── 9 · Analyzer — the concourse: three platforms and the history (Latin-first by ruling) ──
+// ── 9 · Analyzer — one workbench: the intake switch, the field, the one action, the history ──
 const hist = ({ jp, count, when, kept }) => `<button type="button" class="anl-hist">
-  <span class="anl-hist__body"><span class="anl-hist__jp" lang="ja">${jp}</span><span class="anl-hist__meta">${kept ? '<span class="anl-kept" lang="ja">保存</span>' : ''}<span>${count}</span><span>${when}</span></span></span>
+  <span class="anl-hist__body"><span class="anl-hist__jp" lang="ja">${jp}</span><span class="anl-hist__meta">${kept ? '<span class="anl-kept">Kept</span>' : ''}<span>${count}</span><span>${when}</span></span></span>
   <span class="platform-card__go" style="--rail: var(--line-kaiseki); padding-right: 0;">▶</span>
 </button>`
+export const intakeSeg = (on) => `<div class="seg seg--full seg--kaiseki">
+    <button type="button" class="seg__opt${on === 'text' ? ' seg__opt--on' : ''}">${I.text}<span class="seg__opt-latin">Text</span></button>
+    <button type="button" class="seg__opt${on === 'photo' ? ' seg__opt--on' : ''}">${I.camera}<span class="seg__opt-latin">Photo</span></button>
+    <button type="button" class="seg__opt${on === 'video' ? ' seg__opt--on' : ''}">${I.video}<span class="seg__opt-latin">Video</span></button>
+  </div>`
 const ANL_BODY = `
 ${hud()}
-<main class="phone__content" style="--line-color: var(--line-kaiseki); gap: var(--sp-5);">
-  ${plate({ code: 'KS', kana: 'かいせき', name: '解析', latin: 'Analyzer', color: 'var(--line-kaiseki)', noriba: 3 })}
-  <div class="seg seg--full seg--kaiseki">
-    <button type="button" class="seg__opt seg__opt--on">${I.text}<span class="seg__opt-latin">Text</span></button>
-    <button type="button" class="seg__opt">${I.camera}<span class="seg__opt-latin">Photo</span></button>
-    <button type="button" class="seg__opt">${I.video}<span class="seg__opt-latin">Video</span></button>
-  </div>
+<main class="phone__content" style="--line-color: var(--line-kaiseki);">
+  ${header({ code: 'KS', title: 'Analyzer', color: 'var(--line-kaiseki)', aside: back('Dictionary') })}
+  ${intakeSeg('text')}
   <div class="textarea">Paste or type Japanese…</div>
   <button type="button" class="btn-primary" style="width: 100%;">Analyze</button>
   <div class="head2"><span class="head2__latin">History</span><span class="head2__count">16 passages</span></div>
@@ -294,14 +275,13 @@ ${tabbar('dict', 24)}`
 
 // ── 10 · Profile — the pass and its inserts ──
 const rideLine = () => `<div class="jour-line">
-  <span class="jour-line__status"><b lang="ja" style="color: var(--text-on-panel);">残高</b><span class="jour-cap">Balance</span></span>
+  <span class="jour-line__status"><b style="color: var(--text-on-panel);">Balance</b></span>
   <span class="jour-line__validity"><b>30</b><span class="jour-cap">/ 50 credits</span></span>
   <span class="jour-cap" style="margin-left: auto; letter-spacing: 0.08em; text-transform: none;">+30 at 00:00</span>
 </div>`
 function stampBook() {
-  const start = new Date(2026, 7, 3) // Mon 3 Aug → Sun 6 Sep, five weeks
-  const today = new Date(2026, 8, 5)
-  const missed = new Set(['8-22', '9-2']) // a 21-day run to 21 Aug (its start before the sheet), ten days, then the current three
+  const start = new Date(2026, 7, 3), today = new Date(2026, 8, 5)
+  const missed = new Set(['8-22', '9-2'])
   const cells = []
   for (let i = 0; i < 35; i++) {
     const d = new Date(start); d.setDate(start.getDate() + i)
@@ -312,14 +292,14 @@ function stampBook() {
     cells.push(`<span class="sbook__stamp${future ? ' sbook__stamp--future' : stamped ? '' : ' sbook__stamp--missed'}${isToday ? ' sbook__stamp--today' : ''}" style="--stamp-tilt: ${stamped ? tilt : 0}deg">${d.getDate()}</span>`)
   }
   return `<section class="sbook">
-  <div class="sbook__dows">${['月', '火', '水', '木', '金', '土', '日'].map(d => `<span class="sbook__dow" lang="ja">${d}</span>`).join('')}</div>
+  <div class="sbook__month"><span class="sbook__month-jp" style="letter-spacing: 0;">Stamp book</span><span class="fig__l">September 2026</span></div>
+  <div class="sbook__dows">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<span class="sbook__dow">${d}</span>`).join('')}</div>
   <div class="sbook__grid">${cells.join('')}</div>
   <div class="sbook__side">
-    <div class="sbook__month"><span class="sbook__month-jp" lang="ja">九月</span><span class="fig__l">2026</span></div>
     <div class="sbook__figs">
-      <div class="fig"><span class="fig__v">3<span class="fig__u" lang="ja">日</span></span><span class="fig__l">Current streak</span></div>
-      <div class="fig"><span class="fig__v">21<span class="fig__u" lang="ja">日</span></span><span class="fig__l">Longest streak</span></div>
-      <div class="fig"><span class="fig__v">32<span class="fig__u">/ 34</span></span><span class="fig__l">Days stamped</span></div>
+      <div class="fig"><span class="fig__v">3<span class="fig__u">days</span></span><span class="fig__l">Current streak</span></div>
+      <div class="fig"><span class="fig__v">21<span class="fig__u">days</span></span><span class="fig__l">Longest</span></div>
+      <div class="fig"><span class="fig__v">32<span class="fig__u">/ 34</span></span><span class="fig__l">Stamped</span></div>
     </div>
   </div>
 </section>`
@@ -332,8 +312,8 @@ ${hud()}
 </main>
 ${tabbar('profile', 24)}`
 
-const ledgerLine = ({ code, color, jp, done, total }) => `<button type="button" class="pf-line" style="--line-color: ${color}">
-  <span class="pf-line__id"><span class="pf-line__roundel">${code}</span><span class="pf-line__names"><span class="pf-line__jp" lang="ja">${jp}<span class="pf-line__sen" lang="ja">線</span></span></span></span>
+const ledgerLine = ({ code, color, title, done, total }) => `<button type="button" class="pf-line" style="--line-color: ${color}">
+  <span class="pf-line__id"><span class="pf-line__roundel">${code}</span><span class="pf-line__names"><span class="pf-line__jp">${title}</span></span></span>
   <span class="pf-line__fig">${done.toLocaleString('en')}<span class="pf-line__of">/ ${total.toLocaleString('en')}</span></span>
   <span class="pf-line__track"><span class="pf-line__done" style="width: ${Math.round(100 * done / total)}%"></span></span>
 </button>`
@@ -350,20 +330,20 @@ ${hud()}
     <div class="record"><span class="record__value">91<span class="record__unit">%</span></span><span class="record__label">Retention</span></div>
     <div class="record"><span class="record__value">12<span class="record__unit">in a row</span></span><span class="record__label">Best perfect run</span></div>
     <button type="button" class="record record--door" style="--line-color: var(--accent8)">
-      <span class="pf-line__id"><span class="pf-line__roundel">TO</span><span class="pf-line__names"><span class="pf-line__jp" lang="ja">統計</span><span class="pf-cap">Statistics</span></span></span>
+      <span class="pf-line__id"><span class="pf-line__roundel">TO</span><span class="pf-line__names"><span class="pf-line__jp">Statistics</span></span></span>
       ${I.chevR}
     </button>
   </div>
   <div class="pf-ledger">
-    ${ledgerLine({ code: 'KN', color: 'var(--line-kana)',    jp: 'かな', done: 104,  total: 104 })}
-    ${ledgerLine({ code: 'TG', color: 'var(--line-vocab)',   jp: '単語', done: 1318, total: 6000 })}
-    ${ledgerLine({ code: 'KJ', color: 'var(--line-kanji)',   jp: '漢字', done: 224,  total: 2136 })}
-    ${ledgerLine({ code: 'BP', color: 'var(--line-grammar)', jp: '文法', done: 96,   total: 604 })}
+    ${ledgerLine({ code: 'KN', color: 'var(--line-kana)',    title: 'Kana',       done: 104,  total: 104 })}
+    ${ledgerLine({ code: 'TG', color: 'var(--line-vocab)',   title: 'Vocabulary', done: 1318, total: 6000 })}
+    ${ledgerLine({ code: 'KJ', color: 'var(--line-kanji)',   title: 'Kanji',      done: 224,  total: 2136 })}
+    ${ledgerLine({ code: 'BP', color: 'var(--line-grammar)', title: 'Grammar',    done: 96,   total: 604 })}
   </div>
   <div class="banzuke">
     <div class="bz__head">
-      <span class="bz__mark"><span class="bz__jp" lang="ja">番付</span><span class="pf-cap">Ranking</span></span>
-      <span class="seg"><button type="button" class="seg__opt seg__opt--on"><span class="seg__opt-jp" lang="ja">今週</span></button><button type="button" class="seg__opt"><span class="seg__opt-jp" lang="ja">通算</span></button></span>
+      <span class="bz__mark"><span class="bz__jp">Ranking</span></span>
+      <span class="seg"><button type="button" class="seg__opt seg__opt--on"><span class="seg__opt-jp">This week</span></button><button type="button" class="seg__opt"><span class="seg__opt-jp">All time</span></button></span>
     </div>
     ${lb({ rank: 1, name: 'Mei',    xp: 1240 })}
     ${lb({ rank: 2, name: 'Haruto', xp: 1180 })}
@@ -411,26 +391,24 @@ ${TODAY_BODY()}
 <div class="scrim"></div>
 <div class="sheet">
   <span class="sheet__handle"></span>
-  <div class="sheet__head"><span class="sheet__jp" lang="ja">残高</span><span class="sheet__cap">Balance</span><span class="sheet__cap" style="margin-left:auto;"><span lang="ja" style="text-transform:none;letter-spacing:var(--tr-term);">回数券</span> · 1 credit = 1 review</span></div>
+  <div class="sheet__head"><span class="sheet__jp">Balance</span><span class="sheet__cap" style="margin-left:auto;">1 credit = 1 review</span></div>
   <div class="balance">
     <span class="balance__fig">30<span class="balance__unit">credits</span></span>
     <span class="balance__of"><span>of 50</span><span style="font-weight:600;">24 due today</span></span>
   </div>
   <div class="balance__track"><span class="balance__fill" style="width: 60%"></span></div>
   <div class="balance__rows">
-    <div class="balance__cell"><b>+30<span lang="ja">毎日</span></b><span class="cap">Refill at 00:00</span></div>
-    <div class="balance__cell"><b>50<span lang="ja">上限</span></b><span class="cap">Holds up to</span></div>
+    <div class="balance__cell"><b>+30<span>daily</span></b><span class="cap">Refill at 00:00</span></div>
+    <div class="balance__cell"><b>50<span>cap</span></b><span class="cap">Holds up to</span></div>
   </div>
   <div class="offer">
     <div class="offer__head">
-      <span class="offer__names"><span class="offer__jp" lang="ja">定期券</span><span class="offer__cap">Unlimited</span></span>
+      <span class="offer__names"><span class="offer__jp">Unlimited pass</span><span class="offer__cap">Subscription</span></span>
       <span class="pass__issuer" style="border-style: double; border-width: 3px;">∞</span>
     </div>
     <p class="offer__body">Every review, every day. <b>No balance to watch</b> — the gate opens as long as the pass is valid.</p>
     <span class="offer__price">[PRICE]<small>/ month</small></span>
-    <div class="offer__head" style="display:block;">
-      <button type="button" class="btn-depart btn-depart--sheet" style="width: 100%;"><span class="btn-depart__jp" lang="ja">定期券を買う</span><span class="btn-depart__latin">Go unlimited</span><span class="btn-depart__go">▶</span></button>
-    </div>
+    ${departBtn('Go unlimited', ' btn-depart--sheet').replace('class="btn-depart btn-depart--sheet"', 'class="btn-depart btn-depart--sheet" style="width: 100%;"')}
   </div>
 </div>`
 
@@ -440,7 +418,7 @@ const CHROME_BODY = `
 <div class="spec">
   <div class="spec__row">
     <div class="spec__item" style="gap: var(--sp-4);">
-      <span class="spec__label">運行案内 · the HUD — level · station panel · commuter pass</span>
+      <span class="spec__label">The HUD — level · station panel · commuter pass</span>
       ${hudStrip({ st: 'ahead', cr: 30 })}
       ${hudStrip({ st: 'onTime', cr: 30, gain: 4 })}
       ${hudStrip({ st: 'slightlyBehind', cr: 3 })}
@@ -450,42 +428,40 @@ const CHROME_BODY = `
     <div class="spec__item">
       <span class="spec__label">Reading the bar</span>
       <p class="spec__note"><b>Level</b> — the roundel the top bar already has (<code>.topbar-profile-ring</code>, its XP arc long retired): a pass-ink ring with the figure inside, the fare (+4xp) rising off it in gold. Tap → the pass.</p>
-      <p class="spec__note"><b>Goal status</b> — a station panel: the journey model's state in the learner's own language only, with the drift in days beside it (AHEAD · 9d, ON TIME, LATE · 9d; SUSPENDED after 14 days without study). Its inks: <code>--success</code>, <code>--warning</code>, <code>--danger</code>. The Japanese words stay printed on the pass. Tap → the pass turns over (the status sheet).</p>
+      <p class="spec__note"><b>Goal status</b> — a station panel: the journey model's state in the learner's own language, with the drift in days beside it (AHEAD · 9d, ON TIME, LATE · 9d; SUSPENDED after 14 days without study). Its inks: <code>--success</code>, <code>--warning</code>, <code>--danger</code>. Tap → the pass turns over (the status sheet).</p>
       <p class="spec__note"><b>Balance</b> — the commuter pass itself at pocket size (<code>.ic-card</code>'s gradient and contactless mark), the balance printed inside: 30/50 on a free pass, the cap being the card's own, ∞ on a subscription. The figure is gold, the pass's metal, never a line pigment; the card's edge goes warning at ≤5 and danger at 0. Tap → the balance sheet.</p>
-      <p class="spec__note">Sumi, two registers of ink, no line colour — the station name moved to each screen's own plate.</p>
+      <p class="spec__note">Sumi, two registers of ink, no line colour. The band above it is the phone's own status bar, left empty on purpose.</p>
     </div>
   </div>
   <div class="spec__row">
     <div class="spec__item" style="gap: var(--sp-4);">
-      <span class="spec__label">改札口 · the tab bar — five gates</span>
+      <span class="spec__label">The tab bar — five gates</span>
       <div class="spec__strip">${tabbar('today', 24)}</div>
       <div class="spec__strip">${tabbar('learn', 24)}</div>
       <div class="spec__strip">${tabbar('profile', 0)}</div>
     </div>
     <div class="spec__item">
       <span class="spec__label">Reading the bar</span>
-      <p class="spec__note">Kanji as the mark, the plain word as its caption — the pairing rule at chip size. Active gate: full ink and a 2px rule; the rest in <code>--text-on-panel-soft</code>. The due count rides 本日 as the map's own <code>.wmap-due</code> chip.</p>
-      <p class="spec__note">学習 is the route map (four lines + your decks). 実践 holds 読書 · 理解 · 翻訳 · 模試. 辞書 opens the analyzer from the card under its plate. 定期券 is the pass and its inserts.</p>
+      <p class="spec__note">The kanji is the icon, the plain word is the label — the only place Japanese stands in for an icon. Active gate: full ink and a 2px rule; the rest in <code>--text-on-panel-soft</code>. The due count rides Today as the map's own <code>.wmap-due</code> chip, set clear of the glyph.</p>
+      <p class="spec__note">Learn is the route map (four lines + your decks). Practice holds reading practice · comprehension · translation · mock exam. Dictionary opens the analyzer from the card under its header. Profile is the pass and its inserts.</p>
       <p class="spec__note">During a run the bar leaves with the top bar and the rating bar docks on the same edge — one console at the bottom, the card the only bright thing.</p>
     </div>
   </div>
   <div class="spec__row">
-    <div class="spec__item" style="width: 340px;"><span class="spec__label">改札 · due, fare covered</span>${gateCard()}</div>
-    <div class="spec__item" style="width: 340px;"><span class="spec__label">改札 · short of credits</span>${gateCard({ total: 42, balance: 30 })}</div>
-    <div class="spec__item" style="width: 340px;"><span class="spec__label">改札 · clear</span>${gateClear()}<p class="spec__note" style="margin-top: var(--sp-3);">Lanes are the run's picker: each row toggles, the fare counts the rows that are on. 1 credit = 1 review; a run longer than the balance stops at the balance and says so before departure.</p></div>
+    <div class="spec__item" style="width: 340px;"><span class="spec__label">Fare gate · due, fare covered</span>${gateCard()}</div>
+    <div class="spec__item" style="width: 340px;"><span class="spec__label">Fare gate · short of credits</span>${gateCard({ total: 42, balance: 30 })}</div>
+    <div class="spec__item" style="width: 340px;"><span class="spec__label">Fare gate · clear</span>${gateClear()}<p class="spec__note" style="margin-top: var(--sp-3);">Lanes are the run's picker: each row toggles, the fare counts the rows that are on. 1 credit = 1 review; a run longer than the balance stops at the balance and says so before departure.</p></div>
   </div>
 </div>`
 
 // ── write everything ──
-import { SCREENS2 } from './screens2.mjs'
-import { SCREENS3, STATES_BODY } from './screens3.mjs'
 const boards = [
   ['Main',           TODAY_BODY(),   "Today's run",              'today'],
   ['Run',            RUN_BODY,       'In a run',                 'today'],
   ['RunComplete',    COMPLETE_BODY,  'Run complete',             'today'],
-  ['Learning',       LEARN_BODY,     'Learning · route map',     'learn'],
-  ['Station',        STATION_BODY,   'Station · 漢字 levels',    'learn'],
-  ['Platforms',      MODES_BODY,     'Platforms · 漢字 N4 modes', 'learn'],
+  ['Learning',       LEARN_BODY,     'Learn · route map',        'learn'],
+  ['Station',        STATION_BODY,   'Station · Kanji levels',   'learn'],
+  ['Platforms',      MODES_BODY,     'Platforms · Kanji N4',     'learn'],
   ['Practice',       PRACTICE_BODY,  'Practice',                 'practice'],
   ['Dictionary',     DICT_BODY,      'Dictionary',               'dict'],
   ['Analyzer',       ANL_BODY,       'Analyzer',                 'dict'],
@@ -494,28 +470,27 @@ const boards = [
   ['StatusSheet',    STATUS_BODY,    'Goal status sheet',        'pass'],
   ['BalanceSheet',   CREDITS_BODY,   'Balance sheet',            'pass'],
   ...SCREENS2,
-  ...SCREENS3({ TODAY_BODY, RUN_BODY, gateCard }),
+  ...SCREENS3({ TODAY_BODY, RUN_BODY, gateCard, ANL_DOOR, intakeSeg }),
 ]
 for (const [name, body] of boards) writeFileSync(`${name}.dc.html`, artboard(body))
 writeFileSync('Chrome.dc.html', artboard(CHROME_BODY, { width: 1180, height: 1320, phone: false }))
 writeFileSync('States.dc.html', artboard(STATES_BODY, { width: 1180, height: 880, phone: false }))
 
-// One page per tab, the screens in walking order; the run's faces beside the run.
 const ORDER = {
   today:    ['Main', 'TodayOutOfCredits', 'Run', 'RunFlashcard', 'RunCloze', 'RunDraw', 'RunReadings', 'RunBrowse', 'LevelUp', 'Reissue', 'RunOutOfCredits', 'RunComplete'],
   learn:    ['Learning', 'Station', 'StationTiers', 'Platforms', 'Decks', 'DeckCreate', 'DeckDetail', 'DeckAddCard'],
   practice: ['Practice', 'Reading', 'Comprehension', 'ComprehensionResult', 'TranslationWrite', 'Translation', 'ExamPapers', 'ExamRunner', 'ConfirmSheet', 'ExamResult'],
-  dict:     ['Dictionary', 'DictionaryEntry', 'Analyzer', 'AnalyzerPhoto', 'AnalyzerVideo', 'AnalyzerResult', 'DeckPickerSheet'],
+  dict:     ['Dictionary', 'DictionaryEntry', 'DictionaryReadings', 'Analyzer', 'AnalyzerPhoto', 'AnalyzerVideo', 'AnalyzerResult', 'DeckPickerSheet'],
   pass:     ['Profile', 'ProfileInserts', 'StatusSheet', 'BalanceSheet', 'Statistics', 'Settings', 'SettingsLearn', 'SettingsDestination'],
-  arrival:  ['SignIn', 'OfficeRide', 'OfficeBoarding', 'OfficeTest', 'OfficeGoal', 'OfficePromise', 'OfficePass'],
+  arrival:  ['SignIn'],
 }
 const PAGES = [
-  { id: 'today',    name: '本日 Today' },
-  { id: 'learn',    name: '学習 Learn' },
-  { id: 'practice', name: '実践 Practice' },
-  { id: 'dict',     name: '辞書 Dictionary' },
-  { id: 'pass',     name: '定期券 Profile' },
-  { id: 'arrival',  name: 'みどりの窓口 Arrival' },
+  { id: 'today',    name: 'Today' },
+  { id: 'learn',    name: 'Learn' },
+  { id: 'practice', name: 'Practice' },
+  { id: 'dict',     name: 'Dictionary' },
+  { id: 'pass',     name: 'Profile' },
+  { id: 'arrival',  name: 'Sign in' },
   { id: 'chrome',   name: 'Chrome' },
 ]
 const W = 390, H = 844, GX = 80
@@ -536,12 +511,13 @@ const canvas = {
   pages: PAGES,
   artboards,
   annotations: [
-    { id: 'backbone', page: 'today', x: -300, y: 0, w: 260, text: 'Mobile backbone\n\nTop: level · station panel · commuter pass (the HUD).\nBottom: 学習 Learn · 実践 Practice · 本日 Today · 辞書 Dictionary · 定期券 Profile.\n\nOne page per tab, the screens in walking order. This page: the gate, then a run in each of its faces, then the cleared run.\n\nEvery artboard has a dark / light tweak.' },
-    { id: 'credits', page: 'today', x: -300, y: 420, w: 260, text: 'Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: 定期券, unlimited.\n\nThe gate prices the run (運賃) against the balance (残高) before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits.' },
-    { id: 'sessions', page: 'practice', x: -300, y: 0, w: 260, text: 'Sessions behave like a run: both bars leave, ‹ 実践 is the way out, the field or the rating bar docks on the bottom edge. Practice does not spend credits.' },
-    { id: 'chrome-note', page: 'chrome', x: 0, y: -110, w: 420, text: 'Every value on this sheet is a :root token or a literal index.css already uses (the 12px credits pill, the 0.1em map captions). Class names mirror index.css where the object exists (.pass, .board, .wmap-*, .gate-card, .btn-depart, .jour-*, .stamp-rally); .hud, .tabbar, .plate, .lane, .console, .chip, .route, .stage and .sheet are new to the mockup — see docs/design/mobile/README.md.' },
+    { id: 'backbone', page: 'today', x: -300, y: 0, w: 260, text: 'Mobile backbone\n\nTop: level · station panel · commuter pass (the HUD).\nBottom: Learn · Practice · Today · Dictionary · Profile.\n\nOne page per tab, the screens in walking order. The interface speaks English; Japanese is content only (a word, a sentence, a deck\'s name, a rank) and the tab bar\'s icons.\n\nEvery artboard has a dark / light tweak.' },
+    { id: 'credits', page: 'today', x: -300, y: 420, w: 260, text: 'Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: the unlimited pass.\n\nThe gate prices the run (fare) against the balance before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits.' },
+    { id: 'sessions', page: 'practice', x: -300, y: 0, w: 260, text: 'Sessions behave like a run: both bars leave, ‹ Practice is the way out, the field or the rating bar docks on the bottom edge. Practice does not spend credits.' },
+    { id: 'dict-note', page: 'dict', x: -300, y: 0, w: 260, text: 'The dictionary follows the 2026-09-05 rework: catalogue cards carry the stage word; an entry opens as the catalogue plate at reading size, with two readings and a door to the readings sheet; the body is blocks divided by hairlines, no headings.' },
+    { id: 'chrome-note', page: 'chrome', x: 0, y: -110, w: 420, text: 'Every value on this sheet is a :root token or a literal index.css already uses. Class names mirror index.css where the object exists (.pass, .board, .wmap-*, .gate-card, .btn-depart, .jour-*, .stamp-rally, .dict-*); .hud, .tabbar, .bar, .lane, .console, .chip, .route, .stage and .sheet are new to the mockup — see docs/design/mobile/README.md.' },
   ],
   launch: { view: 'canvas', page: 'today' },
 }
 writeFileSync('canvas.json', JSON.stringify(canvas, null, 2))
-console.log('built', boards.length + 1, 'artboards')
+console.log('built', boards.length + 2, 'artboards')
