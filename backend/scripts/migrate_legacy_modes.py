@@ -25,9 +25,9 @@ to /api/stats since the rework (card_index.locate() returns None for an
 unregistered mode, and the per-section loop skips it) while still being
 counted by the whole-account aggregates -- and now that those aggregates
 are filtered to registered modes too (SRSEngine._servable_filter), they
-count nowhere at all. A learner's mastery count, interval ladder, 段位
-rank and badges would silently drop by whatever share of their history
-sits under an old key.
+count nowhere at all. A learner's mastery count and interval ladder
+would silently drop by whatever share of their history sits under an
+old key.
 
 This script closes that gap by renaming the rows, so the progress is
 restored rather than hidden.
@@ -37,9 +37,8 @@ WHAT IT DOES
 The old key alone is ambiguous -- "write" is kana's or kanji's, and
 "flashcard" is kana's, grammar's or a personal card's -- so the mapping
 is keyed (source, old_key), exactly as LEGACY_ALIASES was. The source
-comes from the card id's own category prefix, the same trick
-get_daruma_facts uses ("A card's category is the first underscore-token
-of its raw id"):
+comes from the card id's own category prefix -- a card's category is
+the first underscore-token of its raw id:
 
     kana_...            -> kana
     kanji_{level}_...   -> kanji

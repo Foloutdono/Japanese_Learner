@@ -428,45 +428,6 @@ const EVENTS = [
         play: (c, b) => thump(c, b, { at: 0, from: 160, to: 100, dur: 0.11, peak: 0.10 }) },
     ],
   },
-  {
-    key: 'level-up', category: 'sfx', family: 'rewards',
-    label: 'Unlock', jp: '解禁', where: 'A cosmetic unlocked, a daruma eye filled in',
-    variants: [
-      { key: 'ascent', label: 'Ascent', note: 'D5, A5, D6, F♯6 over a quiet pad. Rises without shouting.',
-        play: (c, b) => tones(c, b, [
-          { freq: 587.3, at: 0, dur: 0.20, peak: 0.24 },
-          { freq: 880.0, at: 0.13, dur: 0.20, peak: 0.24 },
-          { freq: 1174.7, at: 0.26, dur: 0.24, peak: 0.26 },
-          { freq: 1480.0, at: 0.40, dur: 0.70, peak: 0.26 },
-          { freq: 293.7, at: 0, dur: 1.10, peak: 0.10, type: 'triangle', attack: 0.12 },
-        ]) },
-      { key: 'board-bell', label: 'Board, then bell', note: 'The flaps turn over first, then the chime lands. Ties an unlock to a level.',
-        play: (c, b) => {
-          clatter(c, b, 6)
-          tones(c, b, [
-            { freq: 1174.7, at: 0.28, dur: 0.26, peak: 0.24 },
-            { freq: 1760.0, at: 0.42, dur: 0.65, peak: 0.24 },
-            { freq: 587.3, at: 0.42, dur: 0.65, peak: 0.09 },
-          ])
-        } },
-      { key: 'fanfare', label: 'Fanfare', note: 'Triangle waves, five notes, brighter and more pleased with itself.',
-        play: (c, b) => tones(c, b, [
-          { freq: 587.3, at: 0, dur: 0.16, peak: 0.20, type: 'triangle' },
-          { freq: 739.99, at: 0.10, dur: 0.16, peak: 0.20, type: 'triangle' },
-          { freq: 880.0, at: 0.20, dur: 0.18, peak: 0.22, type: 'triangle' },
-          { freq: 1174.7, at: 0.32, dur: 0.22, peak: 0.22, type: 'triangle' },
-          { freq: 880.0, at: 0.50, dur: 0.60, peak: 0.20, type: 'triangle' },
-        ]) },
-      { key: 'bloom', label: 'Bloom', note: 'Two chords swelling into each other. Almost no attack — nothing is being announced.',
-        play: (c, b) => tones(c, b, [
-          { freq: 587.3, at: 0, dur: 0.70, peak: 0.15, type: 'triangle', attack: 0.14 },
-          { freq: 739.99, at: 0, dur: 0.70, peak: 0.12, type: 'triangle', attack: 0.14 },
-          { freq: 880.0, at: 0, dur: 0.70, peak: 0.12, type: 'triangle', attack: 0.14 },
-          { freq: 880.0, at: 0.45, dur: 0.95, peak: 0.16, type: 'triangle', attack: 0.16 },
-          { freq: 1174.7, at: 0.45, dur: 0.95, peak: 0.14, type: 'triangle', attack: 0.16 },
-        ]) },
-    ],
-  },
 ]
 
 // ── Lookup ────────────────────────────────────────────────

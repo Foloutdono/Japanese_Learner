@@ -215,8 +215,7 @@ export function BurgerMenu({ links = [], currentPath = null, onOpenChange }) {
 
 // Split out from BurgerMenu so useDialog — and the Escape/focus-trap
 // listener it attaches — only lives while the drawer is actually
-// mounted, the same way QuickChange separates its trigger button from
-// QuickDrawer.
+// mounted, separate from the trigger button that opens it.
 function BurgerDrawer({ onClose, t, links, currentPath, go }) {
   const dialogRef = useDialog(onClose)
 

@@ -42,10 +42,9 @@ function fetchSummary() {
 }
 
 // Force a real refetch, bypassing the TTL. For the cases where the
-// summary is known to be stale *now* rather than eventually — equipping
-// a cosmetic changes the loadout every screen reads off this cache
-// (see components/cosmetics.js), and waiting up to 30s for the TTL
-// would leave the profile ring on the old one.
+// summary is known to be stale *now* rather than eventually — a
+// settings change the pass prints, say — and waiting up to 30s for the
+// TTL would leave every HUD on the old figures.
 export function refreshSummary() {
   return fetchSummary()
 }

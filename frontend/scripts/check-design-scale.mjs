@@ -67,10 +67,10 @@
 // The enclosing selector is found by brace-matching backward from the
 // declaration to the `{` that opens its block, then reading the prelude up
 // to the previous `;`/`}`/`{` -- never inferred from indentation. A
-// cosmetics block like `:root[data-seal="x"], [data-seal-preview="x"] {
-// --seal-radius: 6px; }` still counts as `design-token`: its second
-// selector only replays the same declaration for a live-preview attribute,
-// but the block's home is :root.
+// doubled selector like `:root[data-theme="light"], [data-preview="x"] {
+// --x: 6px; }` still counts as `design-token`: its second selector only
+// replays the same declaration for a preview attribute, but the block's
+// home is :root.
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'

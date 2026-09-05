@@ -55,10 +55,9 @@ const STATIONS = {
   '/decks':                 { code: 'KZ', kana: 'きょうざい' },
   '/exam':                  { code: 'MS', kana: 'もし' },
 
-  // The halls. Not about Japanese, but still places you go to — the
-  // storehouse holds things, the daruma hall holds goals, the stats
-  // screen holds the record. They had no plate at all, which is why
-  // they were among the screens that still looked like a different
+  // The hall. Not about Japanese, but still a place you go to — the
+  // stats screen holds the record. It had no plate at all, which is
+  // why it was among the screens that still looked like a different
   // app.
   //
   // /profile and /settings are deliberately NOT here. They are you,
@@ -66,8 +65,6 @@ const STATIONS = {
   // config/identity.js — see that file for why the distinction earns
   // its own registry.
   '/stats':                 { code: 'TO', kana: 'とうけい' },
-  '/daruma':                { code: 'DR', kana: 'だるま' },
-  '/storehouse':            { code: 'KR', kana: 'くら' },
 
   // 本日 — the daily queue. Not a board row (see navLinks.js's own
   // note on why /today is scope: 'today'), but every other screen it
@@ -99,7 +96,7 @@ export const HOME_STATION = STATIONS['/']
 
 // ── Which station am I standing in? ───────────────────────
 // Two registries used to hold sections — the board's and the profile's
-// halls — and every caller that wanted "the section for this path" was
+// hall — and every caller that wanted "the section for this path" was
 // spreading both itself. StationHeader did it; the top bar needed the
 // same answer to know what colour its line is. One lookup now, over
 // getAllSections (every scope, not just the two that render a browsable

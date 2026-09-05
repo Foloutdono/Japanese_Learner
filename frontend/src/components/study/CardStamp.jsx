@@ -21,10 +21,9 @@ import { playStamp } from '../../lib/audio'
 //                   strength for a routine press, full for a
 //                   graduation.
 //
-// The impression wears the equipped 印 (the storehouse's seal
-// cosmetics — radius, angle, wall, frame — see the 印 block in
-// index.css), so the seal a learner chose is the seal that gets
-// pressed. Three variants, deliberately unequal:
+// The impression is framed as a seal — the same carved-square mark
+// the stage badge wears, at the specimen's size. Three variants,
+// deliberately unequal:
 //
 //   learning  the routine notation: vermillion, ~0.9s all in.
 //   mastered  the graduation: gold, a double-line seal, the edge lit
@@ -112,7 +111,7 @@ function CardStampInner({ transition, onDone }) {
           faint for a routine press, gold and full for the graduation.
           Colour is an edge, never a fill. */}
       <span className="card-stamp__ripple" />
-      {/* The impression, in the lower corner, in the equipped 印's form. */}
+      {/* The impression, in the lower corner. */}
       <span className="card-stamp__rakkan" lang="ja">{STAMP_GLYPH[to]}</span>
       {/* The new stage word, pressed into the top corner where the old
           one was (StageMark steps aside while this plays). */}

@@ -32,19 +32,13 @@ class WipePlanTests(unittest.TestCase):
                             f"{child} must be deleted before {parent}")
 
     def test_review_log_goes_with_card_modes(self) -> None:
-        # Clearing the schedule but not the history leaves XP, level,
-        # streak and 段位 reading as though nothing was reset -- which is
-        # exactly the bug this script exists to avoid, and the one
+        # Clearing the schedule but not the history leaves XP, level and
+        # streak reading as though nothing was reset -- which is exactly
+        # the bug this script exists to avoid, and the one
         # /api/stats/reset had.
         tables = self._tables(PLAN)
         self.assertIn("review_log", tables)
         self.assertIn("card_modes", tables)
-
-    def test_streak_mends_goes_too(self) -> None:
-        # srs._studied_days unions review_log with streak_mends, so a
-        # bought-back day would keep a phantom "showed up" alive under an
-        # otherwise empty log.
-        self.assertIn("streak_mends", self._tables(PLAN))
 
     def test_cards_is_optional_not_default(self) -> None:
         # `cards` is only an id registry now; get_new_cards selects over
@@ -58,11 +52,10 @@ class WipePlanTests(unittest.TestCase):
         self.assertEqual(overlap, set(), f"listed as both deleted and kept: {overlap}")
 
     def test_the_things_the_user_chose_to_keep_are_named(self) -> None:
-        # Cosmetics and claimed daruma were explicitly agreed to survive.
-        # Naming them in UNTOUCHED is what makes that a decision on record
-        # rather than an omission nobody notices.
-        for table in ("user_cosmetics", "daruma_state", "exam_attempts",
-                      "grammar_sentences"):
+        # Exam history and the generated sentences were explicitly agreed
+        # to survive. Naming them in UNTOUCHED is what makes that a
+        # decision on record rather than an omission nobody notices.
+        for table in ("user_profiles", "exam_attempts", "grammar_sentences"):
             self.assertIn(table, UNTOUCHED)
 
     def test_every_step_explains_itself(self) -> None:

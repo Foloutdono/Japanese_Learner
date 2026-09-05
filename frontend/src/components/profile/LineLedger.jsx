@@ -24,6 +24,26 @@ import { TRACKED_LINES, lineTotals } from '../../domain/lineProgress'
 // The one place on the profile where a line pigment appears — as a
 // ring and a rail on a cell that IS that section, which is what the
 // pigment is for. Nothing about the learner wears it.
+
+// ── The mark a cell names itself with ─────────────────────────
+// The roundel in the section's pigment, the name, its caption. The
+// ledger's cells carry it with the 線 suffix (they are lines); the
+// records' door to 統計 carries it bare (a hall). One component, so
+// the two cannot drift — DESIGN.md's "use the component" rule.
+export function LineMark({ section, suffix = null }) {
+  return (
+    <span className="pf-line__id">
+      <span className="pf-line__roundel" aria-hidden="true">{stationFor(section.path).code}</span>
+      <span className="pf-line__names">
+        <span className="pf-line__jp" lang="ja">
+          {section.icon}{suffix && <span className="pf-line__sen" lang="ja">{suffix}</span>}
+        </span>
+        <span className="pf-cap">{section.title}</span>
+      </span>
+    </span>
+  )
+}
+
 export function LineLedger({ stats, t, navigate }) {
   const lines = getNavLinks(t).filter(s => TRACKED_LINES[s.path])
   if (!lines.length) return null
@@ -42,15 +62,7 @@ export function LineLedger({ stats, t, navigate }) {
             style={{ '--line-color': s.color }}
             onClick={() => navigate(s.path)}
           >
-            <span className="pf-line__id">
-              <span className="pf-line__roundel" aria-hidden="true">{stationFor(s.path).code}</span>
-              <span className="pf-line__names">
-                <span className="pf-line__jp" lang="ja">
-                  {s.icon}<span className="pf-line__sen" lang="ja">線</span>
-                </span>
-                <span className="pf-cap">{s.title}</span>
-              </span>
-            </span>
+            <LineMark section={s} suffix="線" />
             <span className="pf-line__fig" aria-label={`${learned.toLocaleString()} ${t.mastered}`}>
               {learned.toLocaleString()}
               <span className="pf-line__of">/ {total.toLocaleString()}</span>

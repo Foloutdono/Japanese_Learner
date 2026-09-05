@@ -19,9 +19,9 @@ import { stopSpeaking } from './speech'
 //
 //  2. **Navigating between screens that share a track is seamless.**
 //     Every screen's cleanup calls stopAmbiance() and the next
-//     screen's effect calls startAmbiance(), so moving from Home to
-//     the Daruma Hall — both 'home' — used to stop the track and
-//     start it again from zero. Stops are now deferred briefly, and a
+//     screen's effect calls startAmbiance(), so moving between two
+//     screens that share 'home' used to stop the track and start it
+//     again from zero. Stops are now deferred briefly, and a
 //     start for the same track inside that window simply cancels the
 //     stop. The music just keeps playing.
 //

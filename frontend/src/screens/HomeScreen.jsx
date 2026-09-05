@@ -77,10 +77,6 @@ function ICCard() {
   const into = Math.min(span, Math.max(0, summary.xp - summary.xpPrevLevel))
   const pct  = Math.round((into / span) * 100)
 
-  // Darumas finished and unclaimed — the one thing on this screen that
-  // expires, so it keeps its dot (see the Daruma Hall on the profile).
-  const ready = summary.daruma?.ready ?? 0
-
   return (
     <button type="button" onClick={() => navigate('/profile')} className="ic-card">
       {/* The contactless mark printed on every IC card in Japan. */}
@@ -107,10 +103,6 @@ function ICCard() {
         <span className="ic-card__streak" title={t.streak} lang="ja">
           {summary.streak}日
         </span>
-      )}
-
-      {ready > 0 && (
-        <span className="ic-card__dot" title={t.darumaReadyCount(ready)}>{ready}</span>
       )}
     </button>
   )

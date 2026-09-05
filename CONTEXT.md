@@ -134,6 +134,3 @@ an IC/commuter card. `components/profile/CommuterPass.jsx`.
 
 **路線色 (rosen-shoku)** — the line pigments, one per section, that colour that
 section's stripes, rails, rings and numerals. `index.css:3189-3213`.
-
-**段位 (dan-i)** — the mastery rank ladder shown on the commuter pass.
-`components/profile/ProfileBlocks.jsx`.

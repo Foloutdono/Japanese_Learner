@@ -64,7 +64,7 @@ const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 
 const PROFILE = {
   username: 'Tester', level: 3, xp: 10, xpPrevLevel: 0, xpForNext: 100,
-  jlptLevel: 'N5', dailyNewTarget: 10, streak: 1, week: [], daruma: {},
+  jlptLevel: 'N5', dailyNewTarget: 10, streak: 1, week: [],
   // Served, so the rating-scale row is deterministic here rather than
   // reading whatever this browser's localStorage mirror happens to hold.
   ratingScale: 'simple',

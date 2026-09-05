@@ -6,19 +6,17 @@ import { UndoIcon, CheckIcon } from '../ui/Icons'
 
 const API_BASE = ''  // same-origin, always — see lib/api.js
 
-// The board stays a fixed sumi slab: it's the writing surface, not a
-// cosmetic, and it has to stay dark enough for pale ink in either
-// theme.
+// The board stays a fixed sumi slab: it's the writing surface, and it
+// has to stay dark enough for pale ink in either theme.
 const CANVAS_BOARD_COLOR = '#201d24'
 
-// The ink, though, is the equipped 筆 (see the brush block in
+// The ink is the 筆 the sheet defines (see the brush block in
 // index.css). Canvas takes numbers rather than custom properties, so
 // rather than keep a second palette in JavaScript — which is exactly
 // how the old hardcoded CANVAS_STROKE_COLOR drifted out of step with
 // --text-primary — the value is read back off the computed style at
 // the moment it's needed. Resolved per stroke, not once at module
-// load, so equipping a brush mid-session (the quick-change drawer is
-// reachable from the quiz itself now) takes effect on the very next
+// load, so a theme change mid-session takes effect on the very next
 // line without a remount.
 const FALLBACK_INK = '#ece5d8'
 

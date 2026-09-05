@@ -35,9 +35,9 @@ back — the contract it was issued under, 乗車駅 · 行先 · 種別 · 発�
 有効期限 · 発行日 — it carries the door to its own settings, because 設定 is
 the card's own preferences and not a place you travel to, and the profile
 screen is the **holder** it lives in: the card, and the inserts tucked behind
-it. An insert is a stamp sheet, a rank plaque, a ledger, a row of tickets. It
-does not need a caption, which is what lets that screen print no section
-headings at all (see Structure).
+it. An insert is a stamp sheet, a lattice of records, a ledger of lines, a
+ranking board. It does not need a caption, which is what lets that screen
+print no section headings at all (see Structure).
 
 This is not decoration. It is the reason the app can show eleven subjects
 without a menu that looks like a menu, and the reason a colour can mean
@@ -108,7 +108,7 @@ pigment rather than borrowing one.
 ### The pass has two materials, and neither is a line
 
 Charcoal (`--pass-ink`) is the card. **Gold (`--accent2`) is its metal** — the
-balance bar, the 段位 stamp, the 有効期限 printed on the back, and the XP ring.
+balance bar, the 有効期限 printed on the back, and the XP ring.
 
 The ring was `--accent9` until the profile round, and `--accent9` is 瑠璃,
 which in dark theme is the same value as `--line-honyaku`: the one object on
@@ -135,16 +135,11 @@ pigments walk the colour wheel so no two are confusable at roundel size, and
 none doubles as a state colour — an earlier palette had grammar as `--success`
 and decks as `--warning`, which made "grammar" and "correct" the same colour.
 
-**One standing exception, decided deliberately**: the cosmetics block
-(`index.css`, the `--seal-color` / livery / backdrop rules) repurposes nine
-line pigments and two state colours as user-selectable card papers, seals,
-rings and backdrops. It breaks the rule on paper. It stays, because it is an
-opt-in decorative layer with its own coherent internal system, and because a
-cosmetic the learner chose is not the app claiming a section.
-
-Do not "fix" this, and do not cite it as precedent — it is the exception that
-is allowed to exist *because* the rule is otherwise absolute. Any new use of a
-line pigment outside its section is drift.
+There is no standing exception to this any more. The cosmetics block once
+repurposed nine line pigments as user-selectable papers, seals, rings and
+backdrops; it was retired with the storehouse, and nothing outside a section
+wears its pigment now. Any new use of a line pigment outside its section is
+drift.
 
 ### Colour is an edge, a ring, or a numeral — never a fill
 
@@ -159,13 +154,12 @@ It is never a card background, and it is **never on chrome**. The top bar
 carries no line colour at all: it is sumi ink and two registers of text. The
 frame stays quiet so the content can speak.
 
-**A second standing exception, decided deliberately**: the **primary button**
-is a filled use of a line pigment — see *The primary button* under Surfaces.
-It applies to **the one action on a screen**, and to nothing else. It is not
+**One standing exception, decided deliberately**: the **primary button** is a
+filled use of a line pigment — see *The primary button* under Surfaces. It
+applies to **the one action on a screen**, and to nothing else. It is not
 precedent for filling a card, a row, a chip, a header or a second button; a
-screen with two filled buttons has misidentified which one is the action.
-Like the cosmetics exception, it is allowed to exist *because* the rule is
-otherwise absolute.
+screen with two filled buttons has misidentified which one is the action. It
+is allowed to exist *because* the rule is otherwise absolute.
 
 ### The pigment is injected once
 
@@ -247,8 +241,9 @@ looks right at the widths where the arithmetic happens to work and breaks at
 the one in between — the ledger of four lines did exactly that at three
 columns, and the three halls did it again between 560 and 1000px. Content that
 is genuinely ragged, like a collection that is partly empty, does not belong
-in a lattice at all: that is why the badges were separated tiles and are now
-tickets.
+in a lattice at all. A lattice with one cell to spare fills it with something
+real rather than leaving it bare — the profile's records are three figures and
+the door to 統計, four cells, two by two.
 
 ### Radii are assigned by weight
 
@@ -273,27 +268,6 @@ panel at `--r-panel`, two rows split by a `1px --surface-line` hairline. Row 1
 holds the filter chips, with the single primary action pinned right. Row 2
 holds search, with the result count pinned right. One console everywhere, not
 three — a screen that needs filtering reaches for this, not a bespoke bar.
-
-### The ticket
-
-A 記念乗車券 — the commemorative ticket a station hands out — is the app's
-object for **a thing you earned**: a stub carrying one glyph, a body carrying
-the occasion, and a punch hole through to the wall behind once it is spent. A
-ticket not yet earned carries its progress where the hole would be, and any
-ticket turns over on tap to say what it is for, because "7 / 10" means nothing
-until you know what is being counted.
-
-It replaced the badge medallion, which was the one object on the profile that
-could have come from any app, and it fixed the same problem the lattice rule
-above describes: a collection is partly empty by definition, so it cannot use
-a device that only looks right when every row is full. The stub's ink is the
-pass's gold mixed 55% toward the ambient ink, measured 6.25:1 dark and 4.81:1
-light on its own 16% wash. At 60% — the mix every other gold figure in the
-sheet uses — it read 4.43:1 in light theme, under the floor, and it was caught
-only because the pair was measured rather than eyeballed. Guard 4 holds it now
-as `.pf-stub`, along with the rest of the profile's mixes: an ink that is a
-`color-mix` sitting on a ground that is another `color-mix` is exactly what
-part 1's contract cannot predict, and every such pair belongs in the fixture.
 
 ### The primary button
 
@@ -327,8 +301,8 @@ hovers at 4.53:1.
 resting and 3.24:1 hovering in dark theme, and no deepening within this family
 saves it — a deepened yellow turns olive before it will carry a light ink. Gold
 takes the dark ink, or a deeper mix of its own: the console's gold pill goes to
-60% and keeps `--text-on-fill`. Gold is the 辞書 and 蔵 sections, so **a filled
-action on either of those screens is not a plain `.btn-primary`.**
+60% and keeps `--text-on-fill`. Gold is the 辞書 section, so **a filled action
+on that screen is not a plain `.btn-primary`.**
 
 Assuming one ink for every pigment is exactly what produced the defect
 this section was written for: the button shipped at 3.48:1 and every guard and
@@ -390,9 +364,10 @@ So:
   card cannot fill the shared height with something real, the whole row is too
   tall: tighten it. Dead space is the failure, not unevenness. Where a card
   really is stretched by its neighbour, hand the slack to the content's own
-  spacing rather than to the box: the 段位 plaque is a flex column and its
-  line takes `margin: auto 0`, so a taller neighbour opens the gaps around the
-  drawing instead of pooling emptiness under it.
+  spacing rather than to the box: the profile's records are a lattice
+  stretched to the stamp book's height, and each cell centres its figure, so
+  a taller neighbour opens the room around the number instead of pooling
+  emptiness under it.
 - A card wider than ~440px must **earn** its width with a right-hand column
   (meta, a figure, a status). If it has nothing to put there, it should be
   narrower or the grid should have more columns.
@@ -435,7 +410,7 @@ So:
   station.
 - **The rally has two sizes, and they are the same mark.** Seven days on the
   pass in the gate hall; five whole weeks, Monday to Sunday, as the profile's
-  スタンプ帳. Same lacquer (`--daruma-aka`), same per-slot wobble, same press
+  スタンプ帳. Same lacquer (`--stamp-ink`), same per-slot wobble, same press
   on today. The row answers "how many in a row"; the sheet answers "which
   days", which is the question the week's bar chart could never answer and
   the reason that chart is gone. A missing day is a dashed outline, not a
@@ -485,7 +460,7 @@ objects, and only one of them ever waits to be dismissed:
   (new · in progress · mastered, caption register, the stage's ink), not a
   hanko; the hanko is the dictionary plate's. On a promotion a 落款
   impression — the new stage's glyph at the specimen's size, framed as a
-  seal in the equipped 印's form — is pressed into the **lower** corner,
+  seal — is pressed into the **lower** corner,
   clear of the work, where a signature seal sits on a finished piece; the
   word in the top corner turns over to the new stage; the card's edge
   answers in the same ink. The impression is **faint by ruling**, under a
@@ -517,26 +492,23 @@ next.
 - **A screen may be composed of inserts instead of sections, and then it
   prints no `SectionHeader` at all.** The profile is the worked example: the
   pass is the `<h1>`, and every block beneath it is an object that names
-  itself — a stamp sheet with 九月 in its margin, a plaque that opens 三級, a
-  ledger whose cells carry their own roundels, a row of tickets, three
-  doorways, a 番付. It printed six `SectionHeader`s over six self-evident
+  itself — a stamp sheet with 九月 in its margin, a lattice of records with
+  the door to 統計 set into it, a ledger whose cells carry their own roundels,
+  a 番付. It printed six `SectionHeader`s over six self-evident
   objects, which is the second rule's exact failure: a caption for a figure
   the layout already explains. **A block that needs a heading to be legible is
   not finished** — give it the mark that names it, the way each ledger cell
   carries its own roundel and 線 name instead of sitting under a "Lines" title.
 - **A line with stops is how this app draws distance**, and it is one drawing
-  shared by three screens: the wall map's four lines, the pass's ghost track,
-  and the 段位 ladder, which was a progress bar until the profile round. Same
-  parts every time — a rail, a filled run behind you, stops with labels, your
+  shared by two screens: the wall map's four lines and the pass's ghost track.
+  Same parts every time — a rail, a filled run behind you, stops with labels, your
   train between two of them. Reach for it over a bar whenever the axis has
   named waypoints; keep the bar for a span that is only a percentage.
-- **A forward-looking block on a backward-looking screen offers only what is
-  actually in reach.** The profile is a record; 今夜 is its one exception, and
-  it is bounded to what a single session can finish — a daily doll, a ticket
-  within a hundred reviews, a rank within 500 XP — rendering nothing at all
-  when nothing qualifies. Mastery badges never appear there however close they
-  look, because intervals take weeks. A goal measured in weeks belongs on the
-  pass's back, where the ghost train already measures it.
+- **A backward-looking screen stays backward-looking.** The profile is a
+  record of what was done. It once carried a 今夜 list of what a session could
+  still finish; that went with the goals and the badges it counted. A goal
+  measured in weeks belongs on the pass's back, where the ghost train already
+  measures it, and the day's work belongs at the fare gate.
 - Four column widths: `--board-w` (1040px) for the station column,
   `min(1240px, 100%)` for a plated selection screen, 720px for unplated prose,
   and `--card-w` (640px) for the study card column — the quiz prompt card,

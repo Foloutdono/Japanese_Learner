@@ -72,7 +72,6 @@ that default today.
 | `station-melody` | 発車メロディ, the pass re-issued | Yo scale rising · Yo scale falling · Two bars |
 | `fare-tick` | XP earned, no level | Coin · One flap · Soft tick |
 | `flap-clatter` | 進級, the board turning your level over | Full run · Short run · Heavy board |
-| `level-up` | a cosmetic unlocked, a daruma eye filled | Ascent · Board then bell · Fanfare · Bloom |
 
 ### Levels
 

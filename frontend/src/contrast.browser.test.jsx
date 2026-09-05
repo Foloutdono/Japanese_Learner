@@ -333,28 +333,18 @@ const Fixture = () => (
     </div>
 
     {/* ── The 定期入れ profile (2026-09) ──
-        Four inks the contract cannot predict, because each is a
-        color-mix sitting on another color-mix: the eki stamp's lacquer
-        on its own lacquer wash, the ticket stub's gold on its own gold
-        wash, and a line pigment mixed toward the ambient ink on a bare
-        --surface. The stub is the reason these are here — it shipped at
-        4.44:1 in light theme at a 60% mix and was only caught by
-        measuring, which is exactly the failure this guard exists for. */}
+        Inks the contract cannot predict, because each is a color-mix
+        sitting on another color-mix: the eki stamp's lacquer on its own
+        lacquer wash, and a line pigment mixed toward the ambient ink on
+        a bare --surface. A pair like these once shipped at 4.44:1 in
+        light theme and was only caught by measuring, which is exactly
+        the failure this guard exists for. */}
     <section className="sbook">
       <div className="sbook__grid">
         <span className="sbook__stamp pf-stamp">18</span>
         <span className="sbook__stamp sbook__stamp--today pf-stamp-today">31</span>
       </div>
     </section>
-    <div className="tix">
-      <button type="button" className="tkt">
-        <span className="tkt__stub pf-stub" lang="ja">初</span>
-        <span className="tkt__body">
-          <span className="tkt__name pf-tkt-name">First steps</span>
-          <span className="tkt__count pf-tkt-count">7 / 10</span>
-        </span>
-      </button>
-    </div>
     {/* Both extremes of the four line pigments: 朱 is the tightest of
         them in dark theme, 松葉 in light. The roundel is the profile's
         one line-coloured ink. */}
@@ -367,13 +357,13 @@ const Fixture = () => (
         <span className="pf-line__roundel pf-roundel-grammar">BP</span>
       </button>
     </div>
-    {/* 今夜's rank disc is the board's own sumi disc inside a paper row. */}
-    <section className="tonight">
-      <button type="button" className="todo">
-        <span className="todo__arrow pf-todo-arrow" lang="ja">三</span>
-        <span className="todo__of pf-todo-of">番付</span>
+    {/* The records' door to 統計 wears the hall's own pigment, 桜色 — the
+        palest of any roundel on the profile, so it is measured too. */}
+    <div className="records">
+      <button type="button" className="record record--door" style={{ '--line-color': 'var(--accent8)' }}>
+        <span className="pf-line__roundel pf-roundel-stats">TO</span>
       </button>
-    </section>
+    </div>
     {/* The pass's back: sumi in both themes, pinned inline like the board
         above because the real face paints a gradient the ground-walker
         cannot composite. */}
@@ -529,14 +519,10 @@ const SITES = [
   // The 定期入れ profile — every one a mix on a mix (see the fixture).
   ['.pf-stamp', 'eki stamp day (lacquer ink on lacquer wash)'],
   ['.pf-stamp-today', "today's eki stamp (lacquer ink on denser wash)"],
-  ['.pf-stub', 'ticket stub glyph (gold ink on gold wash)'],
-  ['.pf-tkt-name', 'ticket occasion'],
-  ['.pf-tkt-count', 'ticket progress count'],
   ['.pf-roundel-kana', 'ledger roundel, 朱 (line pigment mixed toward the ink)'],
   ['.pf-roundel-grammar', 'ledger roundel, 松葉'],
+  ['.pf-roundel-stats', 'records door roundel, 桜 (the hall pigment mixed toward the ink)'],
   ['.pf-line-of', 'ledger reachable total'],
-  ['.pf-todo-arrow', '今夜 rank disc (panel ink on sumi, inside a paper row)'],
-  ['.pf-todo-of', '今夜 row source'],
   ['.bz-seg-on', '番付 selected period (ambient ink on gold wash)'],
   ['.bz-seg-off', '番付 unselected period'],
   ['.bz-side-jp', '番付 東/西 side mark'],

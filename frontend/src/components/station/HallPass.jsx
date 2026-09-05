@@ -55,8 +55,6 @@ export default function HallPass({ pace }) {
   // the profile's doorway, so nothing is unreachable meanwhile.
   if (!summary) return null
 
-  const ready = summary.daruma?.ready ?? 0
-
   return (
     <button type="button" className="hall-pass" onClick={() => navigate('/profile')}>
       <CommuterPass
@@ -72,10 +70,6 @@ export default function HallPass({ pace }) {
       >
         <div className="hall-pass__holder">{summary.username}</div>
       </CommuterPass>
-
-      {ready > 0 && (
-        <span className="ic-card__dot" title={t.darumaReadyCount(ready)}>{ready}</span>
-      )}
     </button>
   )
 }

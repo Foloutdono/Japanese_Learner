@@ -5,35 +5,29 @@ import { useLang } from '../LangContext'
 import { TopBar } from '../components/ui/TopBar'
 import { Loading } from '../components/ui/Loading'
 import { WarningIcon } from '../components/ui/Icons'
-import { Daruma } from '../components/rewards/Daruma'
-import { CosmeticSwatch } from '../components/rewards/CosmeticSwatch'
-import { HallCard } from '../components/profile/HallCard'
 import { CommuterPass } from '../components/profile/CommuterPass'
 import { JourneyPass } from '../components/journey/JourneyPass'
-import { StampBook, Figures, MasteryLine } from '../components/profile/ProfileBlocks'
-import { Tickets } from '../components/profile/Tickets'
+import { StampBook, Records } from '../components/profile/ProfileBlocks'
 import { Banzuke } from '../components/profile/Banzuke'
-import { Tonight } from '../components/profile/Tonight'
 import { LineLedger } from '../components/profile/LineLedger'
 import { EditableUsername } from '../components/profile/EditableUsername'
-import { getProfileHalls } from '../config/navLinks'
 
 // ── 定期入れ — the pass holder ─────────────────────────────────
 // The profile is the pass, and everything under it is an insert tucked
-// behind it in the holder: what is within reach tonight, the stamp
-// book, the rank plaque and three figures, the ride ledger, the
-// tickets, the three halls, the ranking board. No section headings —
-// the pass names the screen, and every insert names itself (DESIGN.md,
-// "Say less"). This replaced six headed sections, a week of bars and a
-// flame.
+// behind it in the holder: the stamp book beside the records, the ride
+// ledger, the ranking board. No section headings — the pass names the
+// screen, and every insert names itself (DESIGN.md, "Say less").
+//
+// It is a record and nothing else. The goals, the badges, the mastery
+// rank and the cosmetics that used to share this holder are gone; what
+// is left is what the learner did, counted, and one doorway — 統計,
+// set into the records — to the room that counts it in full.
 
 // ── Mock fallback ─────────────────────────────────────────
 // Kept in sync with profile.py's real response shape so a backend
 // hiccup degrades to a believable screen instead of a blank one.
-// Language-agnostic by construction: badges and darumas arrive as ids
-// and get named at render time. Still a function, not a constant: the
-// calendar below is relative to today and would otherwise freeze at
-// module load.
+// Still a function, not a constant: the calendar below is relative to
+// today and would otherwise freeze at module load.
 const LEADERBOARD_LIMIT = 6
 
 function buildMockProfile() {
@@ -60,30 +54,6 @@ function buildMockProfile() {
     retention: 0.91,
     week: calendar.slice(-7),
     calendar,
-    cosmetics: {
-      loadout: { paper: 'paper_washi', ring: 'ring_kumihimo', seal: 'seal_shu', title: 'title_minarai' },
-      titleJp: '見習い',
-      rank: { index: 7, label: '三級', isDan: false, mastered: 742, from: 700, next: 1000, nextLabel: '二級' },
-      ownedCount: 9,
-      totalCount: 36,
-      unseen: 0,
-    },
-    daruma: {
-      ready: 1,
-      today: [
-        { id: 'daily_reviews_30', glyph: '行', color: 'aka', rarity: 'nami', current: 18, target: 30, rewardXp: 25, rewardTokens: 0, vowed: true, claimed: false, complete: false },
-        { id: 'daily_new_5', glyph: '芽', color: 'midori', rarity: 'nami', current: 5, target: 5, rewardXp: 30, rewardTokens: 0, vowed: true, claimed: false, complete: true },
-        { id: 'daily_perfect_10', glyph: '一', color: 'kin', rarity: 'jou', current: 0, target: 10, rewardXp: 40, rewardTokens: 0, vowed: false, claimed: false, complete: false },
-      ],
-    },
-    badges: [
-      { id: 'first_steps',   glyph: '初', unlocked: true,  progress: 1,   target: 1 },
-      { id: 'week_streak',   glyph: '週', unlocked: true,  progress: 7,   target: 7 },
-      { id: 'month_streak',  glyph: '月', unlocked: false, progress: 21,  target: 30 },
-      { id: 'kanji_100',     glyph: '百', unlocked: true,  progress: 100, target: 100 },
-      { id: 'perfectionist', glyph: '極', unlocked: false, progress: 7,   target: 10 },
-      { id: 'dedicated',     glyph: '皆', unlocked: true,  progress: 500, target: 500 },
-    ],
   }
 }
 
@@ -194,8 +164,8 @@ export default function ProfileScreen({ session }) {
               )}
             />
 
-            <Tonight profile={profile} board={leaderboard} t={t} navigate={navigate} />
-
+            {/* How often you turned up, beside what it added up to. The
+                records carry the profile's one doorway, to 統計. */}
             <div className="profile-row2">
               <StampBook
                 calendar={profile.calendar ?? profile.week}
@@ -203,17 +173,10 @@ export default function ProfileScreen({ session }) {
                 longest={profile.streakLongest}
                 t={t}
               />
-              <div className="profile-col">
-                <MasteryLine rank={profile.cosmetics?.rank} t={t} />
-                <Figures profile={profile} t={t} />
-              </div>
+              <Records profile={profile} t={t} navigate={navigate} />
             </div>
 
             {stats && <LineLedger stats={stats} t={t} navigate={navigate} />}
-
-            <Tickets badges={profile.badges} t={t} />
-
-            <HallGrid profile={profile} navigate={navigate} t={t} />
 
             <Banzuke all={leaderboard} week={weekBoard} t={t} />
           </div>
@@ -227,9 +190,10 @@ export default function ProfileScreen({ session }) {
 // in it, and the name — which is editable in place, because changing
 // it is a one-field change and does not deserve a page of its own.
 //
-// The ring is the XP arc. It used to carry a level badge as well,
-// which is now printed large on the pass itself where a pass prints
-// its class, so the ring is left to do one job.
+// The ring is the XP arc and nothing else. It used to carry a level
+// badge as well, which is now printed large on the pass itself where
+// a pass prints its class, and a second, decorative circle for the
+// ring cosmetics to pattern, which went with them.
 function PassHolder({ profile, session, onUsernameChange, t }) {
   const span = Math.max(1, profile.xpForNext - profile.xpPrevLevel)
   const into = Math.min(span, Math.max(0, profile.xp - profile.xpPrevLevel))
@@ -244,10 +208,6 @@ function PassHolder({ profile, session, onUsernameChange, t }) {
       <div className="pass__avatar-wrap">
         <svg className="pass__ring" viewBox="0 0 96 96" aria-hidden="true">
           <circle className="profile-card__ring-track" cx="48" cy="48" r={r} />
-          {/* Decorative only, and the one part a 輪 cosmetic may
-              pattern — the arc below owns stroke-dasharray, because
-              that IS the XP progress. */}
-          <circle className="profile-card__ring-deco" cx="48" cy="48" r={r} />
           <circle
             className="profile-card__ring-fill"
             cx="48" cy="48" r={r}
@@ -260,153 +220,5 @@ function PassHolder({ profile, session, onUsernameChange, t }) {
 
       <EditableUsername username={profile.username} session={session} onChange={onUsernameChange} t={t} />
     </div>
-  )
-}
-
-// ── The halls ─────────────────────────────────────────────
-// The three places that belong to the user rather than to the
-// language: the Daruma Hall, the Storehouse and the statistics — all a
-// record of what you've done rather than something to go and do.
-//
-// The grid is driven entirely by config/navLinks.js's 'profile' scope,
-// so this renders however many halls exist; only the preview inside
-// each one is hall-specific. That's the seam a fourth hall goes
-// through: one registry entry, one case below.
-function HallGrid({ profile, navigate, t }) {
-  return (
-    <div className="hall-grid">
-      {getProfileHalls(t).map(hall => {
-        const { note, badge, preview } = hallState(hall.path, profile, t)
-        return (
-          <HallCard
-            key={hall.path}
-            hall={hall}
-            note={note}
-            badge={badge}
-            onOpen={() => navigate(hall.path)}
-          >
-            {preview}
-          </HallCard>
-        )
-      })}
-    </div>
-  )
-}
-
-// Everything here comes from the one /api/profile response the screen
-// already fetched — a hall preview must never cost its own request, or
-// opening the profile would fan out into one call per doorway.
-function hallState(path, profile, t) {
-  if (path === '/daruma') {
-    // The count of anything, anywhere, that's finished and unclaimed —
-    // the only number on this screen that expires, since an unclaimed
-    // daily doll is burned at midnight.
-    const ready = profile.daruma?.ready ?? 0
-    return {
-      badge: ready,
-      note: ready > 0 ? t.darumaReadyCount(ready) : t.darumaDoorwayDesc,
-      preview: <DarumaPreview today={profile.daruma?.today ?? []} t={t} />,
-    }
-  }
-
-  if (path === '/storehouse') {
-    const cos = profile.cosmetics
-    return {
-      // Unopened unlocks: earned, never seen. The storehouse plays the
-      // ceremony the first time you walk in on them.
-      badge: cos?.unseen ?? 0,
-      note: cos ? t.storehouseNote(cos.ownedCount, cos.totalCount) : null,
-      preview: <LoadoutPreview cosmetics={cos} t={t} />,
-    }
-  }
-
-  return {
-    badge: 0,
-    note: t.hallStatsNote,
-    preview: <FiguresPreview profile={profile} t={t} />,
-  }
-}
-
-// Today's three dolls at their real pigment, eyes and fill — the same
-// dolls the hall itself shows, just smaller. The preview *is* the
-// data, so the card earns its height instead of being a link with
-// decoration on it.
-function DarumaPreview({ today, t }) {
-  if (!today.length) return null
-  return (
-    <span className="hall-dolls">
-      {today.map(d => (
-        <span key={d.id} className="hall-doll" title={t.darumaGoalTitle?.[d.id] ?? d.id}>
-          <Daruma
-            color={d.color}
-            rarity={d.rarity}
-            glyph={d.glyph}
-            eyes={d.claimed ? 2 : (d.vowed ? 1 : 0)}
-            progress={d.target ? d.current / d.target : 0}
-            dim={!d.vowed && !d.claimed}
-            size={48}
-          />
-          <span className="hall-doll__count">{d.current}/{d.target}</span>
-        </span>
-      ))}
-    </span>
-  )
-}
-
-// What you're currently wearing, drawn with the same swatches the
-// storehouse itself uses (see CosmeticSwatch) — the real paper, the
-// real ring, the real seal, not icons standing in for them. The title
-// is text by nature, so it sits alongside as text.
-const WORN_SLOTS = ['paper', 'ring', 'seal']
-
-function LoadoutPreview({ cosmetics, t }) {
-  const loadout = cosmetics?.loadout
-  if (!loadout) return null
-  return (
-    <span className="hall-loadout">
-      {WORN_SLOTS.map(slot => (
-        <span
-          key={slot}
-          className="hall-loadout__slot"
-          title={`${t.cosmeticSlot?.[slot] ?? slot} · ${t.cosmeticName?.[loadout[slot]] ?? ''}`}
-        >
-          <CosmeticSwatch item={{ slot, id: loadout[slot] }} size={34} />
-        </span>
-      ))}
-      {cosmetics.titleJp && (
-        <span className="hall-loadout__title" lang="ja">{cosmetics.titleJp}</span>
-      )}
-    </span>
-  )
-}
-
-// Three running totals, not a chart: the stats screen owns the charts,
-// and a doorway that tries to be the room is just a slower way in.
-// Reviews, retention and the best perfect run — the same three figures
-// the lattice under the rank plaque prints, so the doorway previews
-// exactly what the room counts.
-function FiguresPreview({ profile, t }) {
-  const figures = [
-    { key: 'reviews',   value: profile.totalReviews,      label: t.totalReviews },
-    {
-      key: 'retention',
-      value: typeof profile.retention === 'number' ? `${Math.round(profile.retention * 100)}%` : null,
-      label: t.retention,
-    },
-    { key: 'perfect',   value: profile.bestQualityStreak, label: t.perfectRun },
-  ].filter(f => f.value != null)
-
-  if (!figures.length) return null
-  return (
-    <span className="hall-figures">
-      {figures.map(f => (
-        <span key={f.key} className="hall-figure">
-          <span className="hall-figure__value">
-            {typeof f.value === 'number' ? f.value.toLocaleString() : f.value}
-          </span>
-          <span className="hall-figure__label">{f.label}</span>
-        </span>
-      ))}
-    </span>
   )
 }

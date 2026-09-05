@@ -26,9 +26,8 @@ const TECH_STACK = ['React', 'Vite', 'React Router', 'Supabase']
 
 export default function LandingScreen({ onContinue }) {
   const { t } = useLang()
-  // Everything worth advertising, whichever screen it lives on now —
-  // the Daruma Hall and the Storehouse moved to the profile, but they
-  // are still two of the better reasons to sign up. See navLinks.js.
+  // Everything worth advertising — every board row, whichever screen
+  // it lives on. See navLinks.js.
   const features = getShowcase(t)
 
   const pros = [

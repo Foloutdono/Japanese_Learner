@@ -7,8 +7,8 @@ import { useStationClock } from './useStationClock'
 // ── The masthead, for screens that aren't selection screens ──
 // <SelectionScreen> has hung a 駅名標 over every level/mode picker for
 // a while; everywhere else — the profile, the stats, the decks, the
-// storehouse, the daruma hall, the dictionary, the settings — opened
-// with a TopBar and then a bare container. Those were exactly the
+// dictionary, the settings — opened with a TopBar and then a bare
+// container. Those were exactly the
 // screens that still read as a different app, because the one object
 // this app uses to say *where you are* was missing from them.
 //
