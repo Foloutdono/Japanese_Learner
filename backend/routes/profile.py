@@ -15,9 +15,7 @@ from core.db import db_conn
 from core.auth import get_user_id
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
-from srs import daruma
 from srs.xp import level_progress
-from routes.cosmetics import summary_for as cosmetics_summary
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -234,112 +232,19 @@ class LearningPayload(BaseModel):
         return v
 
 
-# ── Goals ─────────────────────────────────────────────────────
-# Goals themselves moved to the Daruma Hall (routes/daruma.py) — this
-# is only the summary the profile card and the home screen's hall badge
-# need: today's three darumas at a glance, plus how many darumas
-# anywhere are sitting complete and unclaimed, which is the number that
-# earns a dot on the nav card.
-def _daruma_summary(user_id: str) -> dict:
-    today = datetime.now(timezone.utc).date()
-    facts = srs.get_daruma_facts(user_id)
-    day_key = daruma.period_key("daily", today)
-    week_key = daruma.period_key("weekly", today)
-
-    dailies = daruma.daily_goals(user_id, today)
-    weeklies = daruma.weekly_goals(user_id, today)
-    vows = daruma.VOW_POOL
-
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT goal_id, period_key, vowed_at, claimed_at
-                FROM daruma_goals
-                WHERE user_id = %s AND period_key IN (%s, %s, 'vow')
-                """,
-                (user_id, day_key, week_key),
-            )
-            rows = {
-                (gid, period): {"vowed_at": vowed, "claimed_at": claimed}
-                for gid, period, vowed, claimed in cur.fetchall()
-            }
-    except Exception:
-        # The hall's tables are created by routes/daruma.py's own
-        # bootstrap; if that hasn't run (or the query fails for any
-        # other reason) the profile screen shouldn't 500 over a
-        # decorative summary.
-        logger.exception("daruma summary failed")
-        conn.rollback()
-        rows = {}
-    finally:
-        conn.close()
-
-    def ser(goal, key):
-        return daruma.serialize(goal, facts, rows.get((goal.id, key)))
-
-    today_dolls = [ser(g, day_key) for g in dailies]
-    everything = (
-        today_dolls
-        + [ser(g, week_key) for g in weeklies]
-        # An unvowed 大願 that happens to be satisfied isn't claimable,
-        # so it must not light the badge either.
-        + [d for d in (ser(g, "vow") for g in vows) if d["vowed"]]
-    )
-
-    return {
-        "today": today_dolls,
-        "ready": sum(1 for d in everything if d["complete"] and not d["claimed"]),
-    }
-
-
-# ── Badges ────────────────────────────────────────────────────
-# (id, glyph, fact, target) — every badge is one fact reaching one
-# number, so they are declared as data rather than as predicates.
-#
-# Two things fall out of that. A locked badge can now say how far off
-# it is, which is the difference between a badge and a decoration: you
-# cannot chase "10 sans-faute d'affilée" if the app will not tell you
-# that you are on 7. And the labels are gone from here entirely —
-# they were hardcoded French strings shipped to every client, so an
-# English user's profile has always shown six French badge names. The
-# id travels instead and the frontend names it (see t.badgeName).
-_BADGE_DEFS = [
-    ("first_steps",   "初", "total_reviews",       1),
-    ("week_streak",   "週", "streak_longest",      7),
-    ("month_streak",  "月", "streak_longest",     30),
-    ("kanji_100",     "百", "mastered_count",    100),
-    ("perfectionist", "極", "best_quality_streak", 10),
-    ("dedicated",     "皆", "total_reviews",     500),
-]
-
-
-def _badge_facts(user_id: str, streak: dict) -> dict:
-    """The numbers every badge predicate needs — and, as it turns out,
-    the numbers the profile screen wants to show. Computed once."""
+# ── Records ───────────────────────────────────────────────────
+# The three figures the pass holder prints beside the stamp book:
+# reviews, retention and the best perfect run. Computed once, here,
+# because they are the whole of what the profile counts.
+def _records(user_id: str) -> dict:
     return {
         "total_reviews": srs.get_total_reviews(user_id),
-        "mastered_count": srs.get_mastered_count(user_id),
+        # Longest unbroken run of "good or better" answers — a personal
+        # best, shown as such.
         "best_quality_streak": srs.get_best_quality_streak(user_id, min_quality=4),
-        "streak_longest": streak["longest"],
+        # Correct over all answers, 0..1 — None before the first review.
+        "retention": srs.get_retention(user_id),
     }
-
-
-def _badges(facts: dict) -> list[dict]:
-    out = []
-    for bid, glyph, fact, target in _BADGE_DEFS:
-        have = int(facts[fact])
-        out.append({
-            "id": bid,
-            "glyph": glyph,
-            "unlocked": have >= target,
-            # Capped at the target so a badge earned long ago reads
-            # "500 / 500" rather than "4 210 / 500".
-            "progress": min(have, target),
-            "target": target,
-        })
-    return out
 
 
 # The stamp book on the profile draws five whole Monday-to-Sunday weeks
@@ -355,7 +260,7 @@ def get_profile(user_id: str = Depends(get_user_id)):
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     streak = srs.get_streak(user_id)
-    facts = _badge_facts(user_id, streak)
+    records = _records(user_id)
 
     # One query for the sheet; the week the home hall's stamp rally and
     # every other consumer of `week` still read is sliced off it rather
@@ -379,25 +284,14 @@ def get_profile(user_id: str = Depends(get_user_id)):
         "ratingScale": rating_scale or DEFAULT_RATING_SCALE,
         "streak": streak["current"],
         "streakLongest": streak["longest"],
-        "totalReviews": facts["total_reviews"],
-        # Longest unbroken run of "good or better" answers. Already
-        # computed for the 極 badge's predicate and previously
-        # discarded; the profile shows it as a personal best.
-        "bestQualityStreak": facts["best_quality_streak"],
-        # Correct over all answers, 0..1 — None before the first review.
-        "retention": srs.get_retention(user_id),
+        "totalReviews": records["total_reviews"],
+        "bestQualityStreak": records["best_quality_streak"],
+        "retention": records["retention"],
         # The last seven days of activity (the hall's stamp rally), and
         # the five weeks behind them (the profile's stamp book). Days
         # without a review are simply absent from both.
         "week": [d for d in calendar if d["date"] >= week_from],
         "calendar": calendar,
-        "daruma": _daruma_summary(user_id),
-        # Loadout + mastery rank ride along on the one profile fetch
-        # every screen already makes, so applying a paper skin or a
-        # ring never costs a second request (see components/
-        # cosmetics.js, which stamps them onto <html>).
-        "cosmetics": cosmetics_summary(user_id),
-        "badges": _badges(facts),
     }
 
 

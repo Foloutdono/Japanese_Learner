@@ -60,12 +60,10 @@ export const BASE_GAIN = {
   //   0.075  the door chime
   //   0.080  arriving
   //   0.100  the platform sign (onboarding only)
-  //   0.105  an unlock
   //   0.110  the departure melody -- four times in the whole game
   sfx: {
     'card-transition': 1.60,
     'door-slide':      1.10,
-    'level-up':        0.75,
   },
   ui: {
     click:                    1.17,

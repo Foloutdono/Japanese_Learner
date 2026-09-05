@@ -16,7 +16,6 @@ import { TroubleList } from '../components/stats/TroubleList'
 
 // Minutes east of UTC — the review log is stored in UTC, so the hour
 // histogram has to be told which day the user is actually living in.
-// Same convention the daruma routes take.
 const TZ = -new Date().getTimezoneOffset()
 
 // ── 統計 ───────────────────────────────────────────────────

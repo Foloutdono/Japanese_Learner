@@ -5,8 +5,8 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 // close button. What none of them had was the part a mouse user never
 // notices: Escape, focus moving into the dialog when it opens, focus
 // staying inside while it is open, and focus going back to whatever
-// opened it when it closes. QuickChange had the Escape half and was
-// the model for the rest.
+// opened it when it closes. The retired quick-change drawer had the
+// Escape half and was the model for the rest.
 //
 // Returns a ref to attach to the dialog panel (not the scrim).
 //

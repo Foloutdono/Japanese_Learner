@@ -1,11 +1,13 @@
-import { RANK_LABELS } from '../../stores/cosmetics'
+import { getProfileHalls } from '../../config/navLinks'
+import { ChevronIcon } from '../ui/Icons'
+import { LineMark } from './LineLedger'
 
 // ── スタンプ帳 — the stamp book ────────────────────────────────
 // DESIGN.md, Motion: the streak is a スタンプラリー, not a flame. The
 // home hall stamps the last seven days on the pass; this is the rally's
 // sheet — five whole weeks, Monday to Sunday, ending on the current one,
-// every day ridden inked in the daruma's lacquer, today's pressed a beat
-// after the page arrives. It replaced the week bars and the flame: the
+// every day ridden inked in the eki stamp's lacquer, today's pressed a
+// beat after the page arrives. It replaced the week bars and the flame: the
 // bars said how much, this says WHICH days, and that is the part that
 // changes what you do tomorrow.
 //
@@ -104,13 +106,18 @@ function Figure({ value, unit, unitJp, label }) {
   )
 }
 
-// ── The three figures — reviews, retention, best perfect run ────
-// The flush hairline lattice the stats screen uses. The streaks moved
-// onto the stamp book and the mastered count onto the rank plaque, so
-// what is left here is what no other object on the screen already says.
-export function Figures({ profile, t }) {
+// ── 記録 — the records, and the door to the room that keeps them ──
+// Reviews, retention and the best perfect run — what no other object
+// on the screen already says (the streaks ride the stamp book, the
+// lines their ledger) — in the flush hairline lattice, two by two. The
+// fourth cell is 統計 itself: the one hall the profile still opens
+// onto, drawn as the ledger draws a line (roundel, name, caption) with
+// a ▶ where a figure would be, so a doorway and a record read as the
+// same kind of cell. Four cells always: a figure with nothing to count
+// yet prints a dash rather than leaving the lattice a bare slab.
+export function Records({ profile, t, navigate }) {
   const figures = [
-    { key: 'reviews',   value: profile.totalReviews,      label: t.totalReviews },
+    { key: 'reviews',   value: profile.totalReviews, label: t.totalReviews },
     {
       key: 'retention',
       value: typeof profile.retention === 'number' ? Math.round(profile.retention * 100) : null,
@@ -118,102 +125,31 @@ export function Figures({ profile, t }) {
       label: t.retention,
     },
     { key: 'perfect',   value: profile.bestQualityStreak, label: t.perfectRun, unit: t.perfectRunUnit },
-  ].filter(f => typeof f.value === 'number')
-
-  if (!figures.length) return null
+  ]
 
   return (
     <div className="records">
       {figures.map(f => (
         <div key={f.key} className="record">
           <span className="record__value">
-            {f.value.toLocaleString()}
-            {f.unit && <span className="record__unit">{f.unit}</span>}
+            {typeof f.value === 'number' ? f.value.toLocaleString() : '—'}
+            {f.unit && typeof f.value === 'number' && <span className="record__unit">{f.unit}</span>}
           </span>
           <span className="record__label">{f.label}</span>
         </div>
       ))}
+      {getProfileHalls(t).map(hall => (
+        <button
+          type="button"
+          key={hall.path}
+          className="record record--door"
+          style={{ '--line-color': hall.color }}
+          onClick={() => navigate(hall.path)}
+        >
+          <LineMark section={hall} />
+          <ChevronIcon direction="right" size={15} className="record__chev" />
+        </button>
+      ))}
     </div>
-  )
-}
-
-// ── 段位 — the mastery ladder, drawn as a line ─────────────────
-// The level ring says how much you have turned up; this says how much
-// Japanese you hold. The ladder used to be a bar; it is a line with
-// stops now — the app's own idiom for distance (the wall map, the ghost
-// track): six ranks around where you stand, the ones behind filled, 初段
-// and above ringed twice like a dan seal, your train between the stop
-// you hold and the next. Every number already rides on the profile
-// response; the labels come from the same ladder the storehouse reads.
-const SHODAN = RANK_LABELS.indexOf('初段')
-const WINDOW = 6
-
-export function MasteryLine({ rank, t }) {
-  if (!rank) return null
-
-  const idx = typeof rank.index === 'number' ? rank.index : Math.max(0, RANK_LABELS.indexOf(rank.label))
-  const from = rank.from ?? 0
-  const has = rank.mastered ?? 0
-  // The top of the ladder has no `next`: nothing further to fill toward.
-  const topped = typeof rank.next !== 'number'
-  const span = topped ? 1 : Math.max(1, rank.next - from)
-  const into = topped ? 1 : Math.min(span, Math.max(0, has - from))
-  const frac = into / span
-  const left = topped ? 0 : Math.max(0, rank.next - has)
-
-  const first = Math.max(0, Math.min(idx - 2, RANK_LABELS.length - WINDOW))
-  const stops = RANK_LABELS.slice(first, first + WINDOW).map((label, i) => ({ label, i: first + i }))
-  // Percent geometry mirrors the wall map's: first stop at 5%, last at 95%.
-  const step = 90 / Math.max(1, stops.length - 1)
-  const x = i => 5 + (i - first) * step
-  const you = topped ? x(idx) : Math.min(95, x(idx) + frac * step)
-
-  return (
-    <section className="dan">
-      <div className="dan__head">
-        <span className="dan__now">
-          <span className="dan__now-jp" lang="ja">{rank.label}</span>
-          <span className="dan__now-sub">{t.masteryRank}</span>
-        </span>
-        <span className="dan__count">
-          <span className="dan__count-value">{has.toLocaleString()}</span>
-          <span className="dan__count-label">{t.mastered}</span>
-        </span>
-      </div>
-
-      <div className="dan-line" aria-hidden="true">
-        <span className="dan-line__in">
-          <span className="dan-line__rail" />
-          <span className="dan-line__done" style={{ width: `${you}%` }} />
-          {stops.map(s => (
-            <span
-              key={s.label}
-              className={
-                'dan-line__stop'
-                + (s.i <= idx ? ' dan-line__stop--past' : '')
-                + (s.i >= SHODAN ? ' dan-line__stop--dan' : '')
-              }
-              style={{ left: `${x(s.i)}%` }}
-            />
-          ))}
-          {stops.map(s => (
-            <span
-              key={`l-${s.label}`}
-              className={`dan-line__label${s.i === idx ? ' dan-line__label--now' : ''}`}
-              style={{ left: `${x(s.i)}%` }}
-              lang="ja"
-            >
-              {s.label}
-            </span>
-          ))}
-          <span className="dan-line__train" style={{ left: `${you}%` }} />
-        </span>
-      </div>
-
-      <div className="dan__foot">
-        <span>{topped ? t.rankTopped : t.rankRemaining(left.toLocaleString(), rank.nextLabel)}</span>
-        {!topped && <span className="dan__target" lang="ja">{rank.nextLabel}</span>}
-      </div>
-    </section>
   )
 }

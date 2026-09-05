@@ -2,7 +2,7 @@
 // One list, every section, each tagged with where it lives:
 //
 //   scope: 'home'     a card on the home grid, a row in the burger menu
-//   scope: 'profile'  a hall on the profile screen — the places that are
+//   scope: 'profile'  a hall behind the profile screen — a place that is
 //                     about *you* rather than about Japanese
 //
 // The split exists because the home grid was turning into a wall: it
@@ -49,17 +49,10 @@ function sections(t) {
     // paper) — see src/exam/.
     { icon: '模試', title: t.examTitle || 'Mock Exam', desc: t.examDesc || 'Practice exams built to the JLPT format', path: '/exam', color: 'var(--line-exam)', scope: 'home' },
 
-    // ── The halls ─────────────────────────────────────────
-    // 達磨堂 — study goals as daruma dolls (see screens/DarumaScreen).
-    // The one section that doesn't take a pigment from the shared
-    // accent palette: it gets --daruma-aka, the doll's own lacquer red,
-    // since that colour is the feature's entire identity.
-    { icon: '達磨', title: t.darumaTitle, desc: t.darumaDesc, path: '/daruma', color: 'var(--daruma-aka)', scope: 'profile' },
-    // 蔵 — mastery rank and the cosmetics earned along the way (see
-    // screens/StorehouseScreen). Gold, because that is what the
-    // storehouse is for.
-    { icon: '蔵', title: t.storehouseTitle, desc: t.storehouseDesc, path: '/storehouse', color: 'var(--accent2)', scope: 'profile' },
-    // 統計 — the numbers behind all of it. Sakura-iro was the one
+    // ── The hall ──────────────────────────────────────────
+    // 統計 — the numbers behind all of it, and the one section that
+    // belongs to the learner rather than to the language: the profile
+    // opens onto it from its ledger of records. Sakura-iro was the one
     // pigment nothing visible had claimed (the '/' entry above owns it
     // on paper, but every consumer filters that entry out). `showcase:
     // false` keeps it off the landing page, where it has never been
@@ -87,7 +80,7 @@ export function getNavLinks(t) {
   return sections(t).filter(s => s.scope === 'home')
 }
 
-/** The profile screen's halls, in the order they're shown there. */
+/** The halls behind the profile screen — today, the statistics alone. */
 export function getProfileHalls(t) {
   return sections(t).filter(s => s.scope === 'profile')
 }

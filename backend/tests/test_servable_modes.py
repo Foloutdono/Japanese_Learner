@@ -5,14 +5,14 @@
 # card index and skipping what it cannot place (routes/stats.py, `if loc
 # is None: continue`). The aggregates beside those bars did not: the
 # interval ladder on the same screen, the due forecast above it, the
-# trouble list below it, the mastery count behind the profile badges and
-# the daruma goal facts all counted every row in card_modes.
+# trouble list below it and the mastery count behind the profile all
+# counted every row in card_modes.
 #
 # That gap only became visible when the reading and translation screens
 # started scheduling their sentence's source word under a mode of their
 # own -- `sentence.reading` / `sentence.translation` -- which no queue
-# serves. Those tracks moved badges and goals for progress the learner
-# could neither see in the bars nor act on in Today.
+# serves. Those tracks moved the counts for progress the learner could
+# neither see in the bars nor act on in Today.
 #
 # The rule these tests pin: card_modes is DECK PROGRESS and is filtered
 # to servable modes; review_log is ACTIVITY and is not filtered at all.
@@ -106,7 +106,7 @@ def test_the_engine_was_actually_given_the_set():
 
 
 def test_mastery_count_ignores_an_unservable_track(unservable_row, unfiltered):
-    """The badge thresholds behind the profile and cosmetics screens."""
+    """The mastery count behind the profile's ledger and the stats screen."""
     assert unfiltered.get_mastered_count(USER) == 1, "control: the row is there"
     assert srs.get_mastered_count(USER) == 0
 
@@ -142,19 +142,10 @@ def test_the_due_queue_ignores_it(unservable_row, unfiltered):
 
 
 def test_user_states_ignores_it(unservable_row, unfiltered):
-    """The map /api/stats and the known-word badges are built from."""
+    """The map /api/stats and the analyzer's known-word badges are built
+    from."""
     assert (CARD, UNSERVABLE) in unfiltered.get_user_states(USER)
     assert (CARD, UNSERVABLE) not in srs.get_user_states(USER)
-
-
-def test_daruma_goals_ignore_it(unservable_row, unfiltered):
-    """A goal like "clear what is due" must not be pinned open by a
-    track no session can present."""
-    facts = srs.get_daruma_facts(USER)
-    control = unfiltered.get_daruma_facts(USER)
-    assert control["mastered_total"] == 1 and control["due_now"] == 1
-    assert facts["mastered_total"] == 0
-    assert facts["due_now"] == 0
 
 
 def test_a_servable_track_still_counts(unfiltered):
@@ -168,8 +159,6 @@ def test_a_servable_track_still_counts(unfiltered):
         assert any(r["mode"] == SERVABLE for r in srs.get_due_rows(USER))
         assert sum(d["count"] for d in srs.get_due_forecast(USER, days=7)) == 1
         assert (CARD, SERVABLE) in srs.get_user_states(USER)
-        facts = srs.get_daruma_facts(USER)
-        assert facts["mastered_total"] == 1 and facts["due_now"] == 1
     finally:
         srs.delete_cards([CARD])
 
@@ -181,7 +170,7 @@ def test_personal_cards_survive_the_filter():
     study/modes.py, "Personal cards"), so filtering by mode must leave
     them alone. If that ever stopped being true -- a deck route writing,
     say, "custom.flashcard" -- every hand-authored card would drop out
-    of Today, the forecast and the mastery badges at once.
+    of Today, the forecast and the mastery count at once.
 
     The card is SEEDED here rather than looked for. An earlier version
     scanned the database for existing custom_ rows and asserted none used
@@ -222,22 +211,21 @@ def test_activity_still_counts_a_sentence_review(unservable_row):
     filtering review_log too would mean reading practice quietly stopped
     being studying.
 
-    This replaces an assertion that read get_daruma_facts' own source
-    looking for the string "mode = ANY". That could never fail: the
-    fragment is built once in _servable_filter and reaches every query
-    as {mode_sql}, so the literal appears nowhere in the method's text
-    either before or after a regression.
+    Asserted on the engine's own counters rather than by reading its
+    source for the string "mode = ANY": the fragment is built once in
+    _servable_filter and reaches every query as {mode_sql}, so the
+    literal appears nowhere in a method's text either before or after
+    a regression.
     """
-    before = srs.get_daruma_facts(USER)["reviews_today"]
+    before = srs.get_reviews_today(USER)
     srs.review(CARD, UNSERVABLE, 4)
-    after = srs.get_daruma_facts(USER)
 
-    assert after["reviews_today"] == before + 1, (
+    assert srs.get_reviews_today(USER) == before + 1, (
         "a sentence review stopped counting as study"
     )
     # ...while none of it reaches deck progress.
-    assert after["mastered_total"] == 0
-    assert after["due_now"] == 0
+    assert srs.get_mastered_count(USER) == 0
+    assert not any(r["mode"] == UNSERVABLE for r in srs.get_due_rows(USER))
 
 
 def test_the_pace_is_not_spent_by_a_sentence_review():
@@ -272,7 +260,6 @@ def test_the_pace_is_not_spent_by_a_sentence_review():
         assert srs.get_new_items_today(USER) == 0, (
             "reading spent the deck's new-card budget"
         )
-        assert srs.get_daruma_facts(USER)["new_cards_today"] == 0
 
         # And the budget is only deferred, never lost: the day the deck
         # itself introduces the word, it counts as new then.

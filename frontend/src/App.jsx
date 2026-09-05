@@ -39,9 +39,6 @@ import ExamScreen from './screens/ExamScreen'
 import ExamRunner from './screens/ExamRunner'
 import ExamResult from './screens/ExamResult'
 import TranslationScreen from './screens/TranslationScreen'
-import DarumaScreen from './screens/DarumaScreen'
-import StorehouseScreen from './screens/StorehouseScreen'
-import { CosmeticTheme } from './stores/cosmetics'
 
 // Renders nothing — keeps <html lang> and document.title in step with
 // the current route and language. Beside <Routes/> rather than inside
@@ -182,7 +179,6 @@ export default function App() {
   if (onboarding === 'needed') {
     return (
       <LangProvider>
-        <CosmeticTheme />
         <OnboardingFlow
           session={session}
           initialProfile={onboardingProfile}
@@ -194,11 +190,6 @@ export default function App() {
 
   return (
     <LangProvider>
-      {/* Renders nothing — keeps <html>'s data-paper/-ring/-seal
-          attributes in step with the equipped loadout, which is how
-          cosmetics reach every screen without any of them knowing
-          cosmetics exist. See components/cosmetics.js. */}
-      <CosmeticTheme />
       <BrowserRouter>
         <Routes>
           <Route path="/"                     element={<HomeScreen session={session} />} />
@@ -233,8 +224,13 @@ export default function App() {
           <Route path="/exam/:examId" element={<ExamRunner session={session} />} />
           <Route path="/exam/:examId/results" element={<ExamResult session={session} />} />
           <Route path="/translation" element={<TranslationScreen session={session} />} />
-          <Route path="/daruma" element={<DarumaScreen session={session} />} />
-          <Route path="/storehouse" element={<StorehouseScreen session={session} />} />
+          {/* The Daruma Hall and the Storehouse were retired with the
+              rest of the profile's gamification. Their paths have been
+              live and may be bookmarked, so they go home to the pass
+              they hung off rather than to a blank page — same reasoning
+              as the analyzer redirects above. */}
+          <Route path="/daruma" element={<Navigate to="/profile" replace />} />
+          <Route path="/storehouse" element={<Navigate to="/profile" replace />} />
           {import.meta.env.DEV && (
             <Route path="/dev/rewards" element={<RewardsPreview />} />
           )}

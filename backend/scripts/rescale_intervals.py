@@ -72,7 +72,7 @@ failure halfway through leaves a complete record. To put it back:
 Cards move from "mastered" back to "learning" in the stats when their
 interval drops under 21 days (srs.py's _classify_stage), because that
 is what the honest interval says. Nothing else reads interval_days:
-XP, level, streak, badges and daruma progress all come from review_log,
+XP, level, streak and the profile's records all come from review_log,
 which this never touches.
 """
 import argparse

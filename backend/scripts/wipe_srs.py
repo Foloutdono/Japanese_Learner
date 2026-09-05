@@ -12,9 +12,9 @@ Two independent reasons, either of which alone would force it:
 1. THE MODE KEYS CHANGED. card_modes.mode is a bare TEXT column with no
    CHECK and no FK, so rows under retired keys ("qcm-m-kj", "flashcard")
    do not error -- they linger. And get_mastered_count, get_due_forecast,
-   get_interval_histogram, get_weakest_cards and the daruma facts all
-   filter by card_id LIKE and never by mode, so those rows would inflate
-   the 段位 rank, vow progress and every forecast permanently.
+   get_interval_histogram and get_weakest_cards all filter by card_id
+   LIKE and never by mode, so those rows would inflate the mastery count
+   and every forecast permanently.
 
 2. EVERY GRAMMAR CARD ID CHANGED. routes/grammar.py moved onto the
    project's own catalogue, where the field is `pattern` rather than the
@@ -22,23 +22,19 @@ Two independent reasons, either of which alone would force it:
    differently for all 205 points. Those rows are already orphaned.
 
 -- What this costs --------------------------------------------
-review_log is the single source of truth for lifetime XP, level, streak,
-leaderboard standing and daruma progress: all of it is SUM(xp_earned) and
-COUNT(*) over that table. Clearing it means:
+review_log is the single source of truth for lifetime XP, level, streak
+and leaderboard standing: all of it is SUM(xp_earned) and COUNT(*) over
+that table. Clearing it means:
 
   * XP and level reset to zero
-  * BADGES RELOCK. They are recomputed live in routes/profile.py and
-    never persisted, so they follow the numbers down.
-  * the 段位 rank falls to 十級
-  * the streak resets -- which is why streak_mends goes too. A bought-back
-    day survives independently and would otherwise keep a phantom
-    "showed up" alive under an empty review log.
-  * in-flight daruma vows lose their progress
+  * the profile's records (reviews, retention, best perfect run) and
+    its stamp book empty -- they are recomputed live in
+    routes/profile.py and never persisted, so they follow the numbers
+    down.
+  * the streak resets
 
-What SURVIVES, deliberately: cosmetic unlocks (persisted on first
-satisfaction and never revoked), already-claimed daruma, exam papers and
-attempts, reading and comprehension history, and the generated
-grammar_sentences cache.
+What SURVIVES, deliberately: exam papers and attempts, reading and
+comprehension history, and the generated grammar_sentences cache.
 
 -- Operationally ----------------------------------------------
 No API restart is needed. That requirement belonged to
@@ -66,13 +62,11 @@ logger = logging.getLogger("wipe-srs")
 # Each entry is (table, user-scoping clause, why it goes).
 PLAN = [
     ("review_log", "card_id LIKE %(prefix)s",
-     "lifetime XP, level, streak, leaderboard, daruma progress"),
+     "lifetime XP, level, streak, leaderboard"),
     ("card_modes", "card_id LIKE %(prefix)s",
      "per-(card, mode) scheduler state, under retired mode keys"),
     ("xp_ledger", "user_id = %(user)s",
      "XP awarded outside a review"),
-    ("streak_mends", "user_id = %(user)s",
-     "bought-back days, which would outlive the reviews they sit beside"),
     ("custom_cards", "deck_id IN (SELECT id FROM decks WHERE user_id = %(user)s)",
      "hand-written personal cards"),
     ("deck_cards", "deck_id IN (SELECT id FROM decks WHERE user_id = %(user)s)",
@@ -91,10 +85,6 @@ OPTIONAL = [
 # Named so a reader can see these were considered and kept, rather than
 # wondering whether they were forgotten.
 UNTOUCHED = {
-    "user_cosmetics": "unlocks are persisted on first satisfaction and never revoked",
-    "user_loadout": "what the learner has equipped is not progress",
-    "daruma_state": "already-claimed daruma survive",
-    "daruma_goals": "vow definitions; their PROGRESS comes from review_log and resets with it",
     "user_profiles": "identity, not progress",
     "exam_papers": "generated papers are content, and attempts reference them",
     "exam_attempts": "exam history is separate from SRS scheduling",
@@ -169,8 +159,8 @@ def main() -> int:
         if remaining:
             logger.warning("%d row(s) survived -- expected 0", remaining)
             return 1
-        logger.info("Done. XP, level, badges, 段位 and streak now read as zero.")
-        logger.info("Cosmetics, claimed daruma and exam history were left alone.")
+        logger.info("Done. XP, level, records and streak now read as zero.")
+        logger.info("Exam history was left alone.")
         return 0
     except Exception:
         conn.rollback()

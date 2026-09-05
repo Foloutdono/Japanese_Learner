@@ -309,26 +309,6 @@ CREATE TABLE video_session_jobs (
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Owned by routes/daruma.py -- the Daruma gamification feature's
--- per-user token balance and per-period goal-claim state.
-CREATE TABLE daruma_state (
-    user_id TEXT PRIMARY KEY,
-    tokens INTEGER NOT NULL DEFAULT 0
-);
-
-CREATE TABLE daruma_goals (
-    user_id     TEXT NOT NULL,
-    goal_id     TEXT NOT NULL,
-    period_key  TEXT NOT NULL,
-    vowed_at    TIMESTAMPTZ,
-    claimed_at  TIMESTAMPTZ,
-    reward_xp   INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (user_id, goal_id, period_key)
-);
-
-CREATE INDEX idx_daruma_goals_user
-ON daruma_goals(user_id, claimed_at);
-
 -- Owned by study/exam_schema.py -- generated mock exams (one row per
 -- exam_id/revision, papers regenerated wholesale rather than patched),
 -- learner attempts against a specific revision, and the claim-lock job
@@ -402,9 +382,7 @@ CREATE TABLE phrase_analysis_cache (
 );
 
 -- Owned by srs/srs.py -- xp_ledger is the append-only source of truth
--- for XP awards (source/ref identify what earned it, e.g. a review or
--- a Daruma goal claim); streak_mends records days a broken streak was
--- repaired with a mend, for streak-calculation purposes only.
+-- for XP awarded outside a review (source/ref identify what earned it).
 CREATE TABLE xp_ledger (
     id          BIGSERIAL PRIMARY KEY,
     user_id     TEXT NOT NULL,
@@ -416,13 +394,6 @@ CREATE TABLE xp_ledger (
 
 CREATE INDEX idx_xp_ledger_user
 ON xp_ledger(user_id);
-
-CREATE TABLE streak_mends (
-    user_id   TEXT NOT NULL,
-    mend_day  DATE NOT NULL,
-    mended_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (user_id, mend_day)
-);
 
 -- Owned by routes/translation.py -- translation-mode study log,
 -- mirrors reading_log/comprehension_log's shape for the same feature
@@ -446,32 +417,6 @@ CREATE TABLE translation_log (
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Owned by routes/cosmetics.py -- unlocked cosmetic items and the
--- currently-equipped item per slot. user_loadout's slot columns are
--- generated from cosmetics.SLOTS in code (one nullable TEXT column
--- per slot); listed here as of the slots that exist today -- adding a
--- slot there requires adding the matching column here too, since this
--- file's own migration is a plain CREATE, not the ALTER loop
--- routes/cosmetics.py runs for existing rows.
-CREATE TABLE user_cosmetics (
-    user_id      TEXT NOT NULL,
-    cosmetic_id  TEXT NOT NULL,
-    unlocked_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    seen         BOOLEAN NOT NULL DEFAULT FALSE,
-    PRIMARY KEY (user_id, cosmetic_id)
-);
-
-CREATE TABLE user_loadout (
-    user_id   TEXT PRIMARY KEY,
-    paper     TEXT,
-    ring      TEXT,
-    seal      TEXT,
-    title     TEXT,
-    backdrop  TEXT,
-    flourish  TEXT,
-    brush     TEXT,
-    mcq       TEXT
-);
 -- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
 -- endpoint. Nothing here costs money (NVIDIA's vision models are on the
 -- free tier), so this bounds draw on the SHARED free quota that the

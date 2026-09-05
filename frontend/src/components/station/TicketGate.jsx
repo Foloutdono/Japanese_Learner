@@ -16,10 +16,8 @@ import { playGateChime } from '../../lib/audio'
 // screen with nothing connecting it to the tap that caused it.
 //
 // Drawn rather than filmed, and that is the whole point. A recorded
-// clip could not show *your* card — the name, the level, and the
-// seven storehouse slots that exist precisely so no two passes look
-// alike — nor take the destination's own line colour, of which there
-// are eleven. Every frame here is a transform on an element that
+// clip could not show *your* card — the name and the level — nor take
+// the destination's own line colour, of which there are eleven. Every frame here is a transform on an element that
 // already knows both.
 //
 // The budget is severe because this fires on every departure, dozens

@@ -81,10 +81,9 @@ taste; they enforce that a decision already made stays made.
      measured it. Plan 050 split it by where the declaration lives:
      - **`design-token`** — declared inside a `:root` block: bare `:root`,
        or `:root` with an attribute selector, e.g.
-       `:root[data-theme="light"]` or a cosmetics block like
-       `:root[data-seal="seal_shu"], [data-seal-preview="seal_shu"] {
-       --seal-radius: 6px; }`. This *is* the scale (and its per-cosmetic
-       overrides). Reported every run, for visibility in a diff, but
+       `:root[data-theme="light"]`. This *is* the scale (and its
+       per-theme overrides). Reported every run, for visibility in a
+       diff, but
        **never fails the build** — minting a token is a deliberate design
        act, not debt.
      - **`custom-property-length`** — the identical declaration shape

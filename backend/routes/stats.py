@@ -279,11 +279,9 @@ def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None 
       XP, and re-learning a card is not grounds for clawing it back.
     * card_ids OMITTED -- reset everything, and that has to include
       review_log. srs.delete_cards only touches card_modes and cards, so
-      the old version left XP, level, streak, leaderboard standing and
-      daruma progress fully intact while reporting {"ok": true} -- a
-      "reset" that reset the schedule and nothing a learner would look at.
-      streak_mends goes too, since a bought-back day outliving its reviews
-      keeps a phantom "showed up" alive (see srs._studied_days).
+      the old version left XP, level, streak and leaderboard standing
+      fully intact while reporting {"ok": true} -- a "reset" that reset
+      the schedule and nothing a learner would look at.
 
     See scripts/wipe_srs.py for the same operation across every user.
     """
@@ -303,7 +301,6 @@ def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None 
             # that explains it survives.
             cur.execute("DELETE FROM review_log WHERE card_id LIKE %s", (prefix,))
             cur.execute("DELETE FROM xp_ledger WHERE user_id = %s", (user_id,))
-            cur.execute("DELETE FROM streak_mends WHERE user_id = %s", (user_id,))
         conn.commit()
     except Exception:
         conn.rollback()

@@ -9,8 +9,7 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 # below study/ and imports nothing from it, but the engine still has to
 # know which modes the app can actually put in front of a learner, so
 # that its whole-account aggregates (mastery counts, the interval
-# ladder, the due forecast, daruma goals) agree with /api/stats about
-# what counts. See SRSEngine._servable_filter. This is the only place
+# ladder, the due forecast) agree with /api/stats about what counts. See SRSEngine._servable_filter. This is the only place
 # the engine is constructed, so there is no second instance counting
 # differently.
 srs = SRSEngine(DATABASE_URL, servable_modes=sorted(SRS_MODES))

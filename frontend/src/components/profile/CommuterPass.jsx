@@ -1,5 +1,4 @@
 import { levelTitle } from '../../domain/levelTitle'
-import { DEFAULT_LOADOUT } from '../../stores/cosmetics'
 import { GearIcon } from '../ui/Icons'
 
 // ── 定期券 — the commuter pass ─────────────────────────────
@@ -12,11 +11,10 @@ import { GearIcon } from '../ui/Icons'
 // of furniture on the profile that could have come from any app — with
 // the thing the rest of this app has been implying you carry.
 //
-// The two ranks under the name mean different things and both are
-// kept: the level title tracks how much you have shown up (everybody
-// has one), while 段位 tracks how much Japanese you actually hold. A
-// 称号 chosen in the storehouse outranks the automatic level title,
-// because choosing it was the point.
+// The class printed under the holder is the level title — how much you
+// have shown up, and everybody has one. It used to share its line with
+// a 段位 stamp and could be overridden by a chosen 称号; both went with
+// the mastery rank and the cosmetics, and the pass prints one class.
 // `headingTag`: the pass label is the profile screen's own <h1>, but
 // the home hall mounts this same card under the wall map's masthead —
 // two h1s on one screen is exactly what DESIGN.md's "one <h1> per
@@ -33,10 +31,6 @@ export function CommuterPass({ profile, t, children, footer = null, headingTag: 
   const span = Math.max(1, profile.xpForNext - profile.xpPrevLevel)
   const into = Math.min(span, Math.max(0, profile.xp - profile.xpPrevLevel))
   const pct  = Math.round((into / span) * 100)
-
-  const equipped = profile.cosmetics?.loadout?.title
-  const worn = equipped && equipped !== DEFAULT_LOADOUT.title
-  const rank = profile.cosmetics?.rank
 
   return (
     <div className="pass">
@@ -80,23 +74,11 @@ export function CommuterPass({ profile, t, children, footer = null, headingTag: 
       <div className="pass__body">
         {children}
 
+        {/* The class, in the two registers every name in the app is
+            set in: the title, and its plain-language caption. */}
         <div className="pass__ranks">
-          {/* The title and the 段位 stamp share one line, centred on
-              each other — the stamp belongs to the rank it seconds,
-              not to a row of its own. */}
-          <span className="pass__rank-row">
-            <span className="pass__rank-jp" lang="ja">
-              {worn ? profile.cosmetics.titleJp : jpTitle}
-            </span>
-            {rank && (
-              <span className={`pass__dan${rank.isDan ? ' pass__dan--dan' : ''}`} title={t.masteryRank}>
-                <span lang="ja">{rank.label}</span>
-              </span>
-            )}
-          </span>
-          <span className="pass__rank-latin">
-            {worn ? (t.cosmeticName?.[equipped] ?? '') : title}
-          </span>
+          <span className="pass__rank-jp" lang="ja">{jpTitle}</span>
+          <span className="pass__rank-latin">{title}</span>
         </div>
       </div>
 

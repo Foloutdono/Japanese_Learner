@@ -38,7 +38,7 @@ describe('the voice registry', () => {
       'click-menu', 'click-close-menu', 'click-mode-selection', 'click-screen-selection',
       'correct', 'wrong', 'card-transition',
       'gate-chime', 'door-chime', 'door-slide', 'platform-chime', 'arrival', 'station-melody',
-      'fare-tick', 'flap-clatter', 'level-up',
+      'fare-tick', 'flap-clatter',
     ]
     for (const key of required) {
       expect(hasVoice(key), `missing event: ${key}`).toBe(true)
@@ -162,7 +162,6 @@ describe('choosing a voice', () => {
     expect(getVoiceKey('click')).toBe('tick')
     expect(getVoiceKey('gate-chime')).toBe('rising-pair')
     expect(getVoiceKey('door-chime')).toBe('falling-pair')
-    expect(getVoiceKey('level-up')).toBe('ascent')
   })
 
   it('remembers a pick', () => {
