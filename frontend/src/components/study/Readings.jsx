@@ -12,13 +12,7 @@
 // it too) doesn't have to import QuizComponents — QuizComponents now
 // imports DictionaryDetail for the Flashcard's dictionary lookup sheet,
 // and that pair importing each other would be a circular dependency.
-import { pickVariedReadings } from '../../domain/readingPick'
-
-function isOnyomiToken(token) {
-  const firstKana = [...token].find(c => /[\u3040-\u30FF]/.test(c))
-  if (!firstKana) return false
-  return /[\u30A0-\u30FF]/.test(firstKana) // katakana range
-}
+import { pickVariedReadings, isOnyomiToken } from '../../domain/readingPick'
 
 // Exported so DictionaryScreen's card-preview truncation (shortKana)
 // splits on the exact same separators instead of drifting out of

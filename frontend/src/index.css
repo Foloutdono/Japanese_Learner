@@ -11556,9 +11556,9 @@ textarea:focus-visible {
    --card-w (640px). Everything anchored here was therefore anchored to
    the wrong rectangle:
 
-     .stage-badge     `right: 8px` -> the seal's left edge landed
-                      164.7px past the card's right edge, floating in
-                      empty space beside it.
+     the stage seal   (since retired for the stage word) `right: 8px`
+                      -> its left edge landed 164.7px past the card's
+                      right edge, floating in empty space beside it.
      .card-stamp      `right: 6%` of the overlay -> the ROUTINE
                       promotion stamp (the common one) overhung the
                       card by 151.7px, i.e. the whole 108px seal was
@@ -11595,86 +11595,6 @@ textarea:focus-visible {
   margin-inline: auto;
 }
 
-/* ── The stage seal ────────────────────────────────────────
-   A small hanko — see StageBadge.jsx. It sat in the corner of every
-   quiz card until the study-mode redesign; the card carries the stage
-   as a word there now (.stage-mark, below) and the seal that gets
-   pressed is the 落款 impression (.card-stamp__rakkan), which borrows
-   this mark's square and its tilt. The dictionary's entry plate still
-   wears this one inline.
-
-   One imprint, three inks: a real name seal doesn't change shape as
-   its owner's standing changes, so new/learning/mastered share the
-   exact same carved-square mark below and differ only by --seal-color
-   (still the same escalation the rest of the app colours new/
-   learning/mastered with, just read through ink instead of shape).
-   Tinted fill + ink-toned border (color-mix toward transparent, not a
-   flat opaque swatch) so the seal sits *in* the card's own surface —
-   whatever --bg-card is showing through — rather than floating on top
-   of it as a separate sticker; the inset shadow reads as pressed in,
-   not raised. Sized and positioned to stay fully inside the card's own
-   padding — no corner overhang — with only a couple of degrees of
-   tilt, same as a real hand-stamped impression never landing dead
-   square. */
-.stage-badge {
-  --seal-color: var(--state-new);
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(24px, 5.6vw, 32px);
-  height: clamp(24px, 5.6vw, 32px);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--seal-color) 15%, transparent);
-  border: 1.5px solid color-mix(in srgb, var(--seal-color) 65%, transparent);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
-  /* The seal sits on the card, which is sumi under it in both themes,
-     and the state colour raw measured 3.45:1 dark / 3.14:1 light at
-     12px. Mixed toward the PANEL ink, not the ambient one -- the same
-     ground rule the board and the gate follow. The 15% wash and the
-     65% ring stay raw: an edge and a tint, which DESIGN.md allows. */
-  color: color-mix(in srgb, var(--seal-color) 62%, var(--text-on-panel));
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: clamp(12px, 2.4vw, 15px);
-  line-height: 1;
-  transform: rotate(-5deg);
-  pointer-events: none;
-}
-
-/* 'new' — a seal not yet struck: the same mark, just faint, so an
-   untouched card visibly reads as "waiting" instead of missing a
-   badge or looking identical to 'learning'. */
-.stage-badge--new { opacity: 0.55; }
-
-.stage-badge--learning { --seal-color: var(--state-learning); }
-
-/* 'mastered' keeps the same block, just adds a second, fainter ring
-   just outside its own edge — the traditional double-ring seal a
-   diploma or certificate carries, kept subtle enough not to read as
-   a raised/lifted badge. */
-.stage-badge--mastered {
-  --seal-color: var(--state-mastered);
-  box-shadow:
-    inset 0 1px 3px rgba(0, 0, 0, 0.2),
-    0 0 0 3px color-mix(in srgb, var(--seal-color) 18%, transparent);
-}
-
-.stage-badge__glyph { display: block; }
-
-/* Used where there's no card corner to strike into — e.g. the
-   dictionary plate's top row (see .dict-plate__marks)
-   — same seal, laid out in flow next to the level tab instead of
-   floating absolutely over a positioned parent. */
-.stage-badge--inline {
-  position: static;
-  top: auto;
-  right: auto;
-}
-
 /* ── The stage, in a word ───────────────────────────────────
    The card's top corner says what it is to the schedule (see
    StageMark.jsx): the caption register, in the stage's own ink mixed
@@ -11703,6 +11623,9 @@ textarea:focus-visible {
 .stage-mark--learning { --stage-ink: var(--state-learning); }
 .stage-mark--mastered { --stage-ink: var(--state-mastered); }
 .stage-mark--pressed { opacity: 0; }
+/* In flow rather than pinned to a corner: the dictionary plate's marks
+   row (see StageMark.jsx). The word is the same. */
+.stage-mark--inline { position: static; }
 
 /* ── 落款 — the press ──────────────────────────────────────
    The overlay is the card stage's own box, so its corners are the
@@ -14180,36 +14103,26 @@ textarea:focus-visible {
   opacity: 0.6;
 }
 
-/* The seal reduced to a margin note: no box, no frame, no tilt, just
-   the character in the stage's ink. */
-.dict-entry-card .stage-badge {
-  position: absolute;
-  top: 5px;
-  right: 10px;
-  width: auto;
-  height: auto;
-  border: none;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  transform: none;
-  font-size: 13px;
-  opacity: 0.65;
+/* The stage word in the opposite corner — the same word the study
+   card and the plate carry (StageMark.jsx) — tucked to the card's own
+   corner and tracked tighter than the caption register, because
+   "IN PROGRESS" beside "N5" has a 130px plate to share. */
+.dict-entry-card .stage-mark {
+  top: var(--sp-3);
+  right: var(--sp-3);
+  letter-spacing: var(--tr-term);
+  opacity: 0.75;
 }
+.dict-entry-card:hover .stage-mark { opacity: 1; }
 
 /* A card you have never studied says nothing at all. 'new' is the
    default state of almost every entry in a 2000-kanji dictionary, so
-   stamping it on each one spends ink to tell you the absence of news —
+   printing it on each one spends ink to tell you the absence of news —
    and drowns out the handful of cards that do have something to say.
-   Silence is the 'new' mark here; the seal appears the moment the card
-   has actually been earned. (The detail panel still shows the faint
-   unstruck seal, where a single card has room to say "not yet".) */
-.dict-entry-card .stage-badge--new { display: none; }
-
-/* 極 keeps a little more presence than 習 — gold is quieter than
-   vermillion against both papers, and a mastered card is the one
-   worth spotting from across the grid. */
-.dict-entry-card .stage-badge--mastered { opacity: 0.85; }
+   Silence is the 'new' mark here; the word appears the moment the card
+   has actually been earned. (The plate still prints NEW, where a single
+   card has room to say "not yet".) */
+.dict-entry-card .stage-mark--new { display: none; }
 
 /* ── Syllabary chart (hiragana/katakana) ──────────────────
    Classic gojūon table — same flush shoji-lattice language as the
@@ -14448,53 +14361,82 @@ textarea:focus-visible {
   text-align: center;
 }
 
-/* A kanji's readings, on the plate: the shared <Readings> component
-   (Readings.jsx) re-laid-out as centred lines, each led by its 音 / 訓
-   mark in a small carved square, so the two registers tell apart
-   without the long translated labels the study card prints. The
-   1./2. ordinals earn their keep in a long list, not on a plate of
-   two or three tokens. */
+/* A kanji's readings, on the plate: two — the first on'yomi and the
+   first kun'yomi when it has both (domain/readingPick.js,
+   pickPlateReadings) — on one line, each led by its 音 / 訓 mark in a
+   small carved square, and a door to the rest. 生 has twenty readings;
+   the plate is not the place for them, and the door says so with the
+   count it is not printing. */
 .dict-plate__readings {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-1);
-  max-width: 100%;
-}
-.dict-plate__readings .reading-group {
-  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: var(--sp-3);
-  margin-bottom: 0;
+  gap: var(--sp-2) var(--sp-4);
+  max-width: 100%;
 }
-.dict-plate__readings .reading-group__label {
+.dict-plate__yomi {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  letter-spacing: var(--tr-term);
+  color: var(--text-secondary);
+}
+/* 音 / 訓, as a carved square — the mark the plate and the readings
+   panel share, so the two registers tell apart without the long
+   translated labels the study card prints. */
+.dict-kind {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: var(--sp-6);
   height: var(--sp-6);
-  margin-bottom: 0;
   border: 1px solid var(--surface-line);
   border-radius: var(--r-plate);
   font-family: var(--font-jp);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   line-height: 1;
+  letter-spacing: 0;
   color: var(--text-secondary);
 }
-.dict-plate__readings .reading-group__list {
-  justify-content: center;
-  gap: 0 var(--sp-4);
-}
-.dict-plate__readings .reading-group__item {
-  font-family: var(--font-jp);
-  font-size: var(--fs-body);
+/* The door: a ghost pill in the caption register carrying the count
+   of readings the plate is not printing and a chevron that turns when
+   the panel is open. The pigment on its ring on approach, as on every
+   ghost in the panel. */
+.dict-plate__more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  min-height: var(--sp-6);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
   letter-spacing: var(--tr-term);
-  color: var(--text-secondary);
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
-.dict-plate__readings .reading-group__item-index { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .dict-plate__more { transition: none; }
+}
+.dict-plate__more:hover,
+.dict-plate__more:focus-visible {
+  filter: none;
+  color: var(--text-primary);
+  border-color: var(--line-color, var(--accent2));
+}
+.dict-plate__more-chev { transition: transform 0.15s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .dict-plate__more-chev { transition: none; }
+}
+.dict-plate__more--open .dict-plate__more-chev { transform: rotate(180deg); }
 /* A word whose furigana alignment came back empty still shows its
    reading — on the line above the word, tracked like a plate's kana. */
 .dict-plate__reading {
@@ -14907,6 +14849,41 @@ textarea:focus-visible {
   opacity: 1;
   transform: translateX(0);
 }
+
+/* ── Every reading, with its words ────────────────────────
+   The panel behind the plate's door, first in the body when open. The
+   deck's order — on'yomi, then kun'yomi — each reading a small group:
+   its mark and the reading, then the words that use it in the ledger's
+   own rows, bleeding to the panel's edges as the ledger's do. A reading
+   no word demonstrates is listed alone: the panel is all of them. It
+   arrives as a fade, which reduced motion already allows. */
+.dict-readings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  animation: arrive-soft 0.2s ease;
+}
+.dict-reading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.dict-reading__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.dict-reading__yomi {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  letter-spacing: var(--tr-term);
+  color: var(--text-primary);
+}
+/* The sheet over a quiz has no dictionary underneath to jump around
+   in: the same row, with nothing to approach — no rail, no wash. */
+.dict-word--static { cursor: default; }
+.dict-word--static::before { display: none; }
+.dict-word--static:hover { background: transparent; }
 
 /* A word's kanji: a row of tiles, each the small plate of the entry
    it opens — the one card surface, the 1px lift and the pigment ring
@@ -18767,11 +18744,6 @@ button.syllabary-cell:focus-visible {
    roundel fills. */
 .dict-entry-card::after { transition: height 0.16s ease, opacity 0.16s ease; }
 .dict-entry-card:hover::after { height: 5px; opacity: 1; }
-
-/* The SRS seal is marginalia, not a second badge competing with the
-   level in the opposite corner. */
-.dict-entry-card .stage-badge { opacity: 0.75; }
-.dict-entry-card:hover .stage-badge { opacity: 1; }
 
 @media (max-width: 560px) {
   .dict-entry-card { min-height: 112px; padding: 20px 8px 14px; }

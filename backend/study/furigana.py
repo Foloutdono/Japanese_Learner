@@ -95,6 +95,35 @@ def _forms(base: str, first: bool) -> list[str]:
     return out
 
 
+def reading_token_for(surface: str, tokens: list[str], first: bool) -> str | None:
+    """
+    Which of a kanji's own readings `surface` is a form of, or None.
+
+    `surface` is the slice of a word's reading the aligner put over this
+    kanji (木曜日 gives 日 "び"); `tokens` are the deck's readings for the
+    kanji, in the deck's order (ニチ・ジツ・ひ・~び・~か); `first` says
+    whether the kanji opens the word, because rendaku only voices a
+    non-initial element.
+
+    Two passes, exact before variant: 日's "び" is listed as its own bound
+    form (~び), and that entry should own the word rather than ひ claiming
+    it through rendaku. Within a pass the deck's order decides, which is
+    where a primary reading is marked -- it comes first.
+    """
+    if not surface:
+        return None
+    surface = _to_hiragana(surface)
+    for tok in tokens:
+        bare = _to_hiragana(display_reading(tok))
+        stem = _to_hiragana(tok.split(".", 1)[0].replace("~", "")) if "." in tok else bare
+        if surface in (bare, stem):
+            return tok
+    for tok in tokens:
+        if surface in _variants(tok, first):
+            return tok
+    return None
+
+
 def _readings_for(char: str, lookup) -> list[str]:
     packed = lookup(char)
     if not packed:

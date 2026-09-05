@@ -600,8 +600,8 @@
     "card-stamp-strike-center"
   ],
   "counts": {
-    "font-size": 555,
-    "border-radius": 198,
+    "font-size": 553,
+    "border-radius": 197,
     "gap": 331,
     "padding": 290,
     "design-token": 36,

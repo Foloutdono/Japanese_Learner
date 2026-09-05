@@ -231,13 +231,14 @@ taste; they enforce that a decision already made stays made.
    model is BEM, so it only relates an ink to a ground when the names say they
    meet. A **descendant selector spanning two unrelated blocks** — a ground
    painted by one, an ink set by the other — is outside it, and nothing in
-   either name reveals the pairing. `.dict-entry-card .stage-badge` is the
-   worked example: `.stage-badge` inks toward `--text-on-panel` under a comment
-   asserting its host is sumi in both themes, which is true of the quiz card it
-   was written for and false of the dictionary card, which is `--surface` and
-   flips to pale washi. It measures **1.51:1 in light** and Guard 5 is clean on
-   it. When you write an ink into a cross-block descendant selector, check the
-   ground by hand — the guard will not.
+   either name reveals the pairing. `.dict-entry-card .stage-badge` was the
+   worked example (the seal is retired since, for the stage word, but the
+   lesson stands): `.stage-badge` inked toward `--text-on-panel` under a
+   comment asserting its host is sumi in both themes, which was true of the
+   quiz card it was written for and false of the dictionary card, which is
+   `--surface` and flips to pale washi. It measured **1.51:1 in light** and
+   Guard 5 was clean on it. When you write an ink into a cross-block
+   descendant selector, check the ground by hand — the guard will not.
 
    Allowlisted through `src/design-ink-ground.json`, entries removable only:
    a stale one fails, so a fix cannot leave debt behind it.

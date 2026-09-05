@@ -798,6 +798,7 @@ const dictionary = {
   syllabaryVoiced:   'Voiced sounds (dakuten / handakuten)',
   composingKanji:    'Made of these kanji',
   vocabExamples:     'Used in these words',
+  allReadings:       'All readings',
   // Icon-button title/aria-label on the dictionary-lookup action that
   // sits on a revealed card (RevealActions in QuizComponents.jsx).
   openDictionary:    'Open dictionary entry',

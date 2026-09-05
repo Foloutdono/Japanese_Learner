@@ -73,6 +73,14 @@ const KANJI = {
       furigana: [{ text: '植', reading: 'うえ' }, { text: '木', reading: 'き' }] },
   ],
 }
+// study/kanji_words.py's grouping: every reading in the deck's order,
+// each with the words that use it — ボク and こ~ have none in the deck.
+KANJI.readings = [
+  { reading: 'ボク', words: [] },
+  { reading: 'モク', words: [KANJI.vocab_examples[0], KANJI.vocab_examples[1]] },
+  { reading: 'き', words: [KANJI.vocab_examples[2], KANJI.vocab_examples[3]] },
+  { reading: 'こ~', words: [] },
+]
 
 const VOCAB = {
   type: 'vocab', kanji: '食べる', kana: 'たべる', meaning: 'to eat', level: 'N5',
@@ -136,6 +144,10 @@ beforeEach(async () => {
 afterEach(async () => {
   await cleanup()
   vi.mocked(speakJapanese).mockClear()
+  // The lane's files share one origin, so the language this file sets
+  // must not leak into a suite that reads the French default.
+  localStorage.removeItem('lang')
+  document.documentElement.removeAttribute('data-theme')
 })
 
 // A ruby's base text without its annotation, so a highlighted 食べました
@@ -172,11 +184,15 @@ describe('the plate — three registers, a seal, a level, two ghosts', () => {
     expect(getComputedStyle(word).fontSize).toBe(probe('fontSize', 'var(--fs-specimen-word)'))
     expect(getComputedStyle(word).fontFamily).toBe(probe('fontFamily', 'var(--font-jp)'))
 
-    const readings = root.querySelector('.dict-plate__readings')
-    const labels = [...readings.querySelectorAll('.reading-group__label')].map(el => el.textContent)
-    expect(labels).toEqual(['音', '訓'])
-    expect(readings.textContent).toContain('モク')
-    expect(readings.textContent).toContain('き')
+    // Two of the four readings: the first on'yomi and the first kun'yomi,
+    // each behind its 音/訓 mark, and a door carrying the count left out.
+    const yomi = [...root.querySelectorAll('.dict-plate__yomi')]
+    expect(yomi.map(el => el.querySelector('.dict-kind').textContent)).toEqual(['音', '訓'])
+    expect(yomi.map(el => el.textContent.replace(/^[音訓]/, ''))).toEqual(['モク', 'き'])
+    const door = root.querySelector('.dict-plate__more')
+    expect(door.textContent).toBe('+2')
+    expect(door.getAttribute('aria-expanded')).toBe('false')
+    expect(door.getAttribute('aria-label')).toBe('All readings')
 
     const caption = root.querySelector('.dict-plate__caption')
     expect(caption.textContent).toBe('Tree')
@@ -184,7 +200,11 @@ describe('the plate — three registers, a seal, a level, two ghosts', () => {
     expect(getComputedStyle(caption).fontSize).toBe(probe('fontSize', 'var(--fs-sm)'))
 
     expect(root.querySelector('.dict-plate__level').textContent).toBe('N5')
-    expect(root.querySelector('.dict-plate__marks .stage-badge--learning')).toBeTruthy()
+    // The stage is the word the study card carries, not a hanko.
+    const mark = root.querySelector('.dict-plate__marks .stage-mark--learning')
+    expect(mark.textContent).toBe('In progress')
+    expect(getComputedStyle(mark).position).toBe('static')
+    expect(root.querySelector('.stage-badge')).toBeNull()
   })
 
   it('reads a word through its furigana, at the display rung', async () => {
@@ -194,8 +214,10 @@ describe('the plate — three registers, a seal, a level, two ghosts', () => {
     expect(word.querySelector('rt').textContent).toBe('た')
     expect(getComputedStyle(word).fontSize).toBe(probe('fontSize', 'var(--fs-display)'))
     expect(root.querySelector('.dict-plate__caption').textContent).toBe('To eat')
-    // Not yet studied: the unstruck seal, not a missing one.
-    expect(root.querySelector('.dict-plate__marks .stage-badge--new')).toBeTruthy()
+    // Not yet studied says so in a word, rather than saying nothing.
+    expect(root.querySelector('.dict-plate__marks .stage-mark--new').textContent).toBe('New')
+    // A word has no readings row and no door.
+    expect(root.querySelector('.dict-plate__readings')).toBeNull()
     // No kana line: the reading already rides on the word.
     expect(root.querySelector('.dict-plate__reading')).toBeNull()
   })
@@ -207,7 +229,7 @@ describe('the plate — three registers, a seal, a level, two ghosts', () => {
     expect(root.querySelector('.dict-plate__readings')).toBeNull()
     // "Hiragana" is the backend's level slot for kana, not a JLPT level.
     expect(root.querySelector('.dict-plate__level')).toBeNull()
-    expect(root.querySelector('.stage-badge--mastered')).toBeTruthy()
+    expect(root.querySelector('.stage-mark--mastered').textContent).toBe('Mastered')
   })
 
   it('steps a long expression down one rung and prints no level for a JMdict word', async () => {
@@ -377,6 +399,91 @@ describe('the body — blocks that name themselves', () => {
     const fresh = await renderEntry(VOCAB)
     expect(fresh.root.querySelector('.records')).toBeNull()
     expect(fresh.root.querySelector('.dict-block__note')).toBeNull()
+  })
+})
+
+describe('the readings — two on the plate, all of them behind the door', () => {
+  it('opens every reading with the words that use it, and stands the ledger down meanwhile', async () => {
+    const { root, onVocabClick } = await renderEntry(KANJI)
+    const ledger = () => root.querySelector('section[aria-label="Used in these words"]')
+    expect(ledger()).toBeTruthy()
+    expect(root.querySelector('.dict-readings')).toBeNull()
+
+    const door = root.querySelector('.dict-plate__more')
+    door.click()
+    await settle()
+    expect(door.getAttribute('aria-expanded')).toBe('true')
+    const panel = root.querySelector('.dict-readings')
+    expect(panel).toBeTruthy()
+    expect(panel.id).toBe(door.getAttribute('aria-controls'))
+    expect(panel.getAttribute('aria-label')).toBe('All readings')
+    // First in the body, right under the plate.
+    expect(root.querySelector('.dict-entry__body .dict-block')).toBe(panel)
+
+    const groups = [...panel.querySelectorAll('.dict-reading')]
+    expect(groups.map(g => g.querySelector('.dict-reading__yomi').textContent)).toEqual(['ボク', 'モク', 'き', 'こ~'])
+    expect(groups.map(g => g.querySelector('.dict-kind').textContent)).toEqual(['音', '音', '訓', '訓'])
+    // A reading no word demonstrates is listed alone.
+    expect(groups[0].querySelectorAll('.dict-word')).toHaveLength(0)
+    expect([...groups[1].querySelectorAll('.dict-word__gloss')].map(el => el.textContent)).toEqual(['Thursday', 'Lumber'])
+    expect([...groups[2].querySelectorAll('.dict-word__gloss')].map(el => el.textContent)).toEqual(['Tree', 'Garden shrubs'])
+    // The same rows, the same doors.
+    groups[1].querySelector('.dict-word').click()
+    expect(onVocabClick).toHaveBeenCalledWith('木曜日', 'もくようび')
+    // The ledger says nothing the panel is not already saying.
+    expect(ledger()).toBeNull()
+
+    door.click()
+    await settle()
+    expect(root.querySelector('.dict-readings')).toBeNull()
+    expect(ledger()).toBeTruthy()
+    expect(door.getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it('keeps the door for a kanji whose two readings all fit, without a count', async () => {
+    const { root } = await renderEntry({ ...KANJI, kana: 'サン・やま', readings: [{ reading: 'サン', words: [] }, { reading: 'やま', words: [KANJI.vocab_examples[0]] }] })
+    expect([...root.querySelectorAll('.dict-plate__yomi')].map(el => el.textContent.replace(/^[音訓]/, ''))).toEqual(['サン', 'やま'])
+    const door = root.querySelector('.dict-plate__more')
+    expect(door.textContent).toBe('')
+    expect(door.querySelector('svg')).toBeTruthy()
+  })
+
+  it('lists the words as plain rows when the caller cannot navigate (the sheet over a quiz)', async () => {
+    const { root } = await renderEntry(KANJI, { onClose: vi.fn() })
+    root.querySelector('.dict-plate__more').click()
+    await settle()
+    const rows = root.querySelectorAll('.dict-readings .dict-word')
+    expect(rows).toHaveLength(4)
+    for (const r of rows) {
+      expect(r.tagName).toBe('DIV')
+      expect(r.classList.contains('dict-word--static')).toBe(true)
+      expect(r.querySelector('.dict-word__chev')).toBeNull()
+    }
+  })
+
+  it('closes when the entry changes under it', async () => {
+    const handlers = NAV()
+    const screen = await render(
+      <LangProvider>
+        <aside className="dict-dock" style={{ width: 400 }}>
+          <DictionaryDetail entry={KANJI} {...handlers} />
+        </aside>
+      </LangProvider>
+    )
+    await settle()
+    screen.container.querySelector('.dict-plate__more').click()
+    await settle()
+    expect(screen.container.querySelector('.dict-readings')).toBeTruthy()
+    await screen.rerender(
+      <LangProvider>
+        <aside className="dict-dock" style={{ width: 400 }}>
+          <DictionaryDetail entry={{ ...KANJI, kanji: '生', kana: 'セイ・ショウ・い.きる・なま', readings: [] }} {...handlers} />
+        </aside>
+      </LangProvider>
+    )
+    await settle()
+    expect(screen.container.querySelector('.dict-readings')).toBeNull()
+    expect(screen.container.querySelector('.dict-plate__more').getAttribute('aria-expanded')).toBe('false')
   })
 })
 

@@ -445,14 +445,17 @@ const Fixture = () => (
     <aside className="dict-dock">
       <article className="dict-entry">
         <header className="dict-plate">
-          <span className="dict-plate__level dj-level">N5</span>
+          <div className="dict-plate__marks">
+            <span className="stage-mark stage-mark--new stage-mark--inline dj-stage-new">New</span>
+            <span className="stage-mark stage-mark--learning stage-mark--inline dj-stage-learning">In progress</span>
+            <span className="stage-mark stage-mark--mastered stage-mark--inline dj-stage-mastered">Mastered</span>
+            <span className="dict-plate__level dj-level">N5</span>
+          </div>
           <div className="dict-plate__readings">
-            <div className="reading-group">
-              <div className="reading-group__label dj-reading-label" lang="ja">音</div>
-              <div className="reading-group__list">
-                <span className="reading-group__item dj-reading" lang="ja">モク</span>
-              </div>
-            </div>
+            <span className="dict-plate__yomi dj-reading" lang="ja">
+              <span className="dict-kind dj-kind">音</span>モク
+            </span>
+            <button type="button" className="dict-plate__more dj-more">+2</button>
           </div>
           <span className="dict-plate__caption dj-caption">Tree</span>
         </header>
@@ -494,6 +497,13 @@ const Fixture = () => (
       </article>
     </aside>
     <span className="dict-tag__tip dj-tip" style={{ position: 'static' }}>Ichidan verb</span>
+    {/* The catalogue card wears the same word, faded to marginalia. */}
+    <div className="dict-results-grid">
+      <div className="dict-entry-card">
+        <span className="stage-mark stage-mark--learning dj-card-stage">In progress</span>
+        <span className="stage-mark stage-mark--mastered dj-card-stage-gold">Mastered</span>
+      </div>
+    </div>
 
     <div className="jour-st--delayed" style={{ background: 'var(--bg-panel)' }}>
       <div className="jour-line">
@@ -594,8 +604,14 @@ const SITES = [
 
   // The 辞書 entry — 山吹 mixed toward the ink, and the due ink likewise.
   ['.dj-level', 'entry plate level numeral'],
-  ['.dj-reading-label', 'entry plate 音/訓 mark'],
+  ['.dj-stage-new', 'entry plate stage word, new'],
+  ['.dj-stage-learning', 'entry plate stage word, in progress (state ink mixed toward the ink)'],
+  ['.dj-stage-mastered', 'entry plate stage word, mastered (gold mixed toward the ink)'],
+  ['.dj-kind', 'entry plate 音/訓 mark'],
   ['.dj-reading', 'entry plate reading'],
+  ['.dj-more', 'entry plate readings door'],
+  ['.dj-card-stage', 'catalogue card stage word, in progress'],
+  ['.dj-card-stage-gold', 'catalogue card stage word, mastered'],
   ['.dj-caption', 'entry plate caption (first gloss)'],
   ['.dj-n', 'sense numeral (辞書 pigment mixed toward the ink)'],
   ['.dj-tag', 'grammatical tag'],
