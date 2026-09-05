@@ -2,6 +2,7 @@
 // pass, the stamp rally, the wall-map track. Every artboard composes
 // these so the same object is drawn the same way on every screen.
 import { CSS } from './css.mjs'
+import { CSS2 } from './css2.mjs'
 
 const FONTS = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Serif+JP:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap'
 
@@ -209,6 +210,7 @@ export function artboard(body, { width = 390, height = 844, phone = true, extraC
     body { margin: 0; background: #17151a; }
     a { color: #c99a3e; } a:hover { color: #ece5d8; }
 ${CSS}
+${CSS2}
   </style>
 </helmet>
 ${root}

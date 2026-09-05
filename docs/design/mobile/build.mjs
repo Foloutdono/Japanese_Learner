@@ -480,40 +480,67 @@ const CHROME_BODY = `
 </div>`
 
 // ── write everything ──
+import { SCREENS2 } from './screens2.mjs'
 const boards = [
-  ['Main',           TODAY_BODY(),   { title: "Today's run" }],
-  ['Run',            RUN_BODY,       { title: 'In a run' }],
-  ['RunComplete',    COMPLETE_BODY,  { title: 'Run complete' }],
-  ['Learning',       LEARN_BODY,     { title: 'Learning · route map' }],
-  ['Station',        STATION_BODY,   { title: 'Station · 漢字 levels' }],
-  ['Platforms',      MODES_BODY,     { title: 'Platforms · 漢字 N4 modes' }],
-  ['Practice',       PRACTICE_BODY,  { title: 'Practice' }],
-  ['Dictionary',     DICT_BODY,      { title: 'Dictionary' }],
-  ['Analyzer',       ANL_BODY,       { title: 'Analyzer' }],
-  ['Profile',        PROFILE_BODY,   { title: 'Profile · the pass' }],
-  ['ProfileInserts', PROFILE2_BODY,  { title: 'Profile · inserts' }],
-  ['StatusSheet',    STATUS_BODY,    { title: 'Goal status sheet' }],
-  ['BalanceSheet',   CREDITS_BODY,   { title: 'Balance sheet' }],
+  ['Main',           TODAY_BODY(),   "Today's run",              'today'],
+  ['Run',            RUN_BODY,       'In a run',                 'today'],
+  ['RunComplete',    COMPLETE_BODY,  'Run complete',             'today'],
+  ['Learning',       LEARN_BODY,     'Learning · route map',     'learn'],
+  ['Station',        STATION_BODY,   'Station · 漢字 levels',    'learn'],
+  ['Platforms',      MODES_BODY,     'Platforms · 漢字 N4 modes', 'learn'],
+  ['Practice',       PRACTICE_BODY,  'Practice',                 'practice'],
+  ['Dictionary',     DICT_BODY,      'Dictionary',               'dict'],
+  ['Analyzer',       ANL_BODY,       'Analyzer',                 'dict'],
+  ['Profile',        PROFILE_BODY,   'Profile · the pass',       'pass'],
+  ['ProfileInserts', PROFILE2_BODY,  'Profile · inserts',        'pass'],
+  ['StatusSheet',    STATUS_BODY,    'Goal status sheet',        'pass'],
+  ['BalanceSheet',   CREDITS_BODY,   'Balance sheet',            'pass'],
+  ...SCREENS2,
 ]
 for (const [name, body] of boards) writeFileSync(`${name}.dc.html`, artboard(body))
 writeFileSync('Chrome.dc.html', artboard(CHROME_BODY, { width: 1180, height: 1320, phone: false }))
 
-const W = 390, H = 844, GX = 80, GY = 140
-const row1 = boards.slice(0, 7), row2 = boards.slice(7)
-const place = (list, y) => list.map(([name, , o], i) => ({ file: `${name}.dc.html`, title: o.title, x: i * (W + GX), y, w: W, h: H, page: 'screens' }))
+// One page per tab, the screens in walking order; the run's faces beside the run.
+const ORDER = {
+  today:    ['Main', 'Run', 'RunFlashcard', 'RunDraw', 'RunReadings', 'LevelUp', 'RunComplete'],
+  learn:    ['Learning', 'Station', 'Platforms', 'Decks', 'DeckDetail'],
+  practice: ['Practice', 'Reading', 'Comprehension', 'Translation', 'ExamRunner', 'ExamResult'],
+  dict:     ['Dictionary', 'DictionaryEntry', 'Analyzer', 'AnalyzerResult'],
+  pass:     ['Profile', 'ProfileInserts', 'StatusSheet', 'BalanceSheet', 'Statistics', 'Settings', 'SettingsLearn'],
+  arrival:  ['SignIn', 'OfficeBoarding', 'OfficeGoal'],
+}
+const PAGES = [
+  { id: 'today',    name: '本日 Today' },
+  { id: 'learn',    name: '学習 Learn' },
+  { id: 'practice', name: '実践 Practice' },
+  { id: 'dict',     name: '辞書 Dictionary' },
+  { id: 'pass',     name: '定期券 Profile' },
+  { id: 'arrival',  name: 'みどりの窓口 Arrival' },
+  { id: 'chrome',   name: 'Chrome' },
+]
+const W = 390, H = 844, GX = 80
+const byName = Object.fromEntries(boards.map(b => [b[0], b]))
+const artboards = []
+for (const [page, names] of Object.entries(ORDER)) {
+  names.forEach((name, i) => {
+    const b = byName[name]; if (!b) throw new Error('unknown board ' + name)
+    artboards.push({ file: `${name}.dc.html`, title: b[2], x: i * (W + GX), y: 0, w: W, h: H, page })
+  })
+}
+const placed = new Set(artboards.map(a => a.file))
+for (const b of boards) if (!placed.has(`${b[0]}.dc.html`)) throw new Error('unplaced board ' + b[0])
+artboards.push({ file: 'Chrome.dc.html', title: 'Chrome · HUD, tab bar, gate', x: 0, y: 0, w: 1180, h: 1320, page: 'chrome' })
+
 const canvas = {
-  pages: [{ id: 'screens', name: 'Screens' }, { id: 'chrome', name: 'Chrome' }],
-  artboards: [
-    ...place(row1, 0),
-    ...place(row2, H + GY),
-    { file: 'Chrome.dc.html', title: 'Chrome · HUD, tab bar, gate', x: 0, y: 0, w: 1180, h: 1320, page: 'chrome' },
-  ],
+  pages: PAGES,
+  artboards,
   annotations: [
-    { id: 'backbone', page: 'screens', x: -300, y: 0, w: 260, text: 'Mobile backbone\n\nTop: level · goal status · credits (the HUD).\nBottom: 学習 Learn · 実践 Practice · 本日 Today · 辞書 Dictionary · 定期券 Profile.\n\nRow 1: the Today tab and a run, then the Learn tab down to a platform list, then Practice.\nRow 2: Dictionary and the analyzer behind it, the Profile in two scrolls, and the two sheets the HUD opens.\n\nEvery artboard has a dark / light tweak.' },
-    { id: 'credits', page: 'screens', x: -300, y: H + GY, w: 260, text: 'Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: 定期券, unlimited.\n\nThe gate prices the run (運賃) against the balance (残高) before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits.' },
+    { id: 'backbone', page: 'today', x: -300, y: 0, w: 260, text: 'Mobile backbone\n\nTop: level · station panel · commuter pass (the HUD).\nBottom: 学習 Learn · 実践 Practice · 本日 Today · 辞書 Dictionary · 定期券 Profile.\n\nOne page per tab, the screens in walking order. This page: the gate, then a run in each of its faces, then the cleared run.\n\nEvery artboard has a dark / light tweak.' },
+    { id: 'credits', page: 'today', x: -300, y: 420, w: 260, text: 'Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: 定期券, unlimited.\n\nThe gate prices the run (運賃) against the balance (残高) before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits.' },
+    { id: 'sessions', page: 'practice', x: -300, y: 0, w: 260, text: 'Sessions behave like a run: both bars leave, ‹ 実践 is the way out, the field or the rating bar docks on the bottom edge. Practice does not spend credits.' },
     { id: 'chrome-note', page: 'chrome', x: 0, y: -110, w: 420, text: 'Every value on this sheet is a :root token or a literal index.css already uses (the 12px credits pill, the 0.1em map captions). Class names mirror index.css where the object exists (.pass, .board, .wmap-*, .gate-card, .btn-depart, .jour-*, .stamp-rally); .hud, .tabbar, .plate, .lane, .console, .chip, .route, .stage and .sheet are new to the mockup — see docs/design/mobile/README.md.' },
   ],
-  launch: { view: 'canvas', page: 'screens' },
+  launch: { view: 'canvas', page: 'today' },
 }
 writeFileSync('canvas.json', JSON.stringify(canvas, null, 2))
 console.log('built', boards.length + 1, 'artboards')

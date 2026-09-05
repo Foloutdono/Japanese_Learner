@@ -1,8 +1,28 @@
 {
   "pages": [
     {
-      "id": "screens",
-      "name": "Screens"
+      "id": "today",
+      "name": "本日 Today"
+    },
+    {
+      "id": "learn",
+      "name": "学習 Learn"
+    },
+    {
+      "id": "practice",
+      "name": "実践 Practice"
+    },
+    {
+      "id": "dict",
+      "name": "辞書 Dictionary"
+    },
+    {
+      "id": "pass",
+      "name": "定期券 Profile"
+    },
+    {
+      "id": "arrival",
+      "name": "みどりの窓口 Arrival"
     },
     {
       "id": "chrome",
@@ -17,7 +37,7 @@
       "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "today"
     },
     {
       "file": "Run.dc.html",
@@ -26,106 +46,277 @@
       "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "today"
     },
     {
-      "file": "RunComplete.dc.html",
-      "title": "Run complete",
+      "file": "RunFlashcard.dc.html",
+      "title": "In a run · flashcard",
       "x": 940,
       "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "today"
     },
     {
-      "file": "Learning.dc.html",
-      "title": "Learning · route map",
+      "file": "RunDraw.dc.html",
+      "title": "In a run · draw",
       "x": 1410,
       "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "today"
     },
     {
-      "file": "Station.dc.html",
-      "title": "Station · 漢字 levels",
+      "file": "RunReadings.dc.html",
+      "title": "In a run · readings",
       "x": 1880,
       "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "today"
     },
     {
-      "file": "Platforms.dc.html",
-      "title": "Platforms · 漢字 N4 modes",
+      "file": "LevelUp.dc.html",
+      "title": "In a run · level up",
       "x": 2350,
       "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "today"
     },
     {
-      "file": "Practice.dc.html",
-      "title": "Practice",
+      "file": "RunComplete.dc.html",
+      "title": "Run complete",
       "x": 2820,
       "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "today"
+    },
+    {
+      "file": "Learning.dc.html",
+      "title": "Learning · route map",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "learn"
+    },
+    {
+      "file": "Station.dc.html",
+      "title": "Station · 漢字 levels",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "learn"
+    },
+    {
+      "file": "Platforms.dc.html",
+      "title": "Platforms · 漢字 N4 modes",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "learn"
+    },
+    {
+      "file": "Decks.dc.html",
+      "title": "My decks",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "learn"
+    },
+    {
+      "file": "DeckDetail.dc.html",
+      "title": "My decks · a deck",
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "learn"
+    },
+    {
+      "file": "Practice.dc.html",
+      "title": "Practice",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "practice"
+    },
+    {
+      "file": "Reading.dc.html",
+      "title": "Reading practice",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "practice"
+    },
+    {
+      "file": "Comprehension.dc.html",
+      "title": "Reading comprehension",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "practice"
+    },
+    {
+      "file": "Translation.dc.html",
+      "title": "Translation · feedback",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "practice"
+    },
+    {
+      "file": "ExamRunner.dc.html",
+      "title": "Mock exam · runner",
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "practice"
+    },
+    {
+      "file": "ExamResult.dc.html",
+      "title": "Mock exam · result",
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "practice"
     },
     {
       "file": "Dictionary.dc.html",
       "title": "Dictionary",
       "x": 0,
-      "y": 984,
+      "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "dict"
+    },
+    {
+      "file": "DictionaryEntry.dc.html",
+      "title": "Dictionary · an entry",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "dict"
     },
     {
       "file": "Analyzer.dc.html",
       "title": "Analyzer",
-      "x": 470,
-      "y": 984,
+      "x": 940,
+      "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "dict"
+    },
+    {
+      "file": "AnalyzerResult.dc.html",
+      "title": "Analyzer · the sentence",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "dict"
     },
     {
       "file": "Profile.dc.html",
       "title": "Profile · the pass",
-      "x": 940,
-      "y": 984,
+      "x": 0,
+      "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "pass"
     },
     {
       "file": "ProfileInserts.dc.html",
       "title": "Profile · inserts",
-      "x": 1410,
-      "y": 984,
+      "x": 470,
+      "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "pass"
     },
     {
       "file": "StatusSheet.dc.html",
       "title": "Goal status sheet",
-      "x": 1880,
-      "y": 984,
+      "x": 940,
+      "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "pass"
     },
     {
       "file": "BalanceSheet.dc.html",
       "title": "Balance sheet",
-      "x": 2350,
-      "y": 984,
+      "x": 1410,
+      "y": 0,
       "w": 390,
       "h": 844,
-      "page": "screens"
+      "page": "pass"
+    },
+    {
+      "file": "Statistics.dc.html",
+      "title": "Statistics",
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "pass"
+    },
+    {
+      "file": "Settings.dc.html",
+      "title": "Settings",
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "pass"
+    },
+    {
+      "file": "SettingsLearn.dc.html",
+      "title": "Settings · learning",
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "pass"
+    },
+    {
+      "file": "SignIn.dc.html",
+      "title": "Sign in",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "OfficeBoarding.dc.html",
+      "title": "Ticket office · boarding",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "OfficeGoal.dc.html",
+      "title": "Ticket office · destination",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
     },
     {
       "file": "Chrome.dc.html",
@@ -140,19 +331,27 @@
   "annotations": [
     {
       "id": "backbone",
-      "page": "screens",
+      "page": "today",
       "x": -300,
       "y": 0,
       "w": 260,
-      "text": "Mobile backbone\n\nTop: level · goal status · credits (the HUD).\nBottom: 学習 Learn · 実践 Practice · 本日 Today · 辞書 Dictionary · 定期券 Profile.\n\nRow 1: the Today tab and a run, then the Learn tab down to a platform list, then Practice.\nRow 2: Dictionary and the analyzer behind it, the Profile in two scrolls, and the two sheets the HUD opens.\n\nEvery artboard has a dark / light tweak."
+      "text": "Mobile backbone\n\nTop: level · station panel · commuter pass (the HUD).\nBottom: 学習 Learn · 実践 Practice · 本日 Today · 辞書 Dictionary · 定期券 Profile.\n\nOne page per tab, the screens in walking order. This page: the gate, then a run in each of its faces, then the cleared run.\n\nEvery artboard has a dark / light tweak."
     },
     {
       "id": "credits",
-      "page": "screens",
+      "page": "today",
       "x": -300,
-      "y": 984,
+      "y": 420,
       "w": 260,
       "text": "Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: 定期券, unlimited.\n\nThe gate prices the run (運賃) against the balance (残高) before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits."
+    },
+    {
+      "id": "sessions",
+      "page": "practice",
+      "x": -300,
+      "y": 0,
+      "w": 260,
+      "text": "Sessions behave like a run: both bars leave, ‹ 実践 is the way out, the field or the rating bar docks on the bottom edge. Practice does not spend credits."
     },
     {
       "id": "chrome-note",
@@ -165,6 +364,6 @@
   ],
   "launch": {
     "view": "canvas",
-    "page": "screens"
+    "page": "today"
   }
 }

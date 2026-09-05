@@ -1,9 +1,18 @@
 # Mobile rework — the screens
 
 The canvas: <https://claude.ai/code/artifact/760313f0-7c87-40e2-993f-708fdbf63bd0>
-— fourteen artboards. Page *Screens*: thirteen phones at 390×844, the tabs and
-what sits behind them. Page *Chrome*: the HUD, the tab bar and the fare gate in
-every state. Every artboard carries a dark / light tweak.
+— thirty-three artboards, one page per tab, the screens in the order a learner
+walks them, all at 390×844; a last page holds the chrome (the HUD, the tab bar
+and the fare gate in every state). Every artboard carries a dark / light tweak.
+
+| Page | Artboards |
+|---|---|
+| 本日 Today | the gate · a run (choices) · flashcard · draw · readings · level up · run complete |
+| 学習 Learn | the route map · a station's level line · its platforms · my decks · a deck |
+| 実践 Practice | the four platforms · reading practice · comprehension · translation · exam runner · exam result |
+| 辞書 Dictionary | the console and the analyzer's door · an entry · the analyzer · a sentence |
+| 定期券 Profile | the pass · the inserts · the status sheet · the balance sheet · statistics · settings · settings › learning |
+| みどりの窓口 Arrival | sign in · boarding station · destination and the departure board |
 
 The sources here regenerate it: `node build.mjs` writes the `.dc.html`
 artboards and `canvas.json`; `node preview.mjs` writes plain-HTML previews of
@@ -73,6 +82,40 @@ uses.
   (the screens themselves never mention the 00:00 refill): the figure, the
   refill and cap, and the 定期券 offer as the one filled action. The price is
   a placeholder.
+
+## The second wave — how each remaining feature adapts
+
+- **Sessions** (reading practice, comprehension, translation, the exam) behave
+  like a run: both bars leave, ‹ 実践 is the way out, and the field, the
+  rating bar or the exam's nav docks on the bottom edge. None of them spends
+  credits.
+- **The drawing quiz** stacks instead of sitting side by side: the prompt, a
+  square canvas with a cross grid, Erase, then Reveal answer; the stroke-order
+  reference appears under the canvas after the reveal.
+- **Readings** are one field per reading with "add a reading"; Submit docks.
+- **Level up** docks the split-flap board across the top (68px, the stage
+  slides down by that much) while the card below is signed in its lower corner
+  — both moments on one screen, neither gating the next card.
+- **The exam runner** keeps the answer sheet as a docked strip (7 / 21, two
+  rows of chips, Finish); tapping it opens the full sheet. Previous · flag ·
+  Next sit in one row above it; the もんだい instructions fold into a row.
+- **Decks** list as platform cards with the count in the aside; Study lives
+  on the deck's own page as its one filled action, and the six desktop actions
+  become four chips (Add card · Browse · Select · More).
+- **Statistics** puts the six plaques in a 2×3 lattice, the calendar fourteen
+  weeks wide (it scrolls), the forecast as seven bars; the three rhythm panels
+  stack below.
+- **Settings** is a list of the six slips, each opening its own screen; the
+  学習 slip shows the level strip, the pace chips and the rating-bar choice.
+- **The ticket office** redraws the departure board as service rows (service
+  · stopping pattern · pace and arrival), not a four-column table; the
+  calling-at line folds into the honest sentence under the board.
+- **The dictionary entry** is full-screen: the sumi plate with the vertical
+  type mark, badges, speak and close, the headword, readings; then meaning,
+  examples, stroke order beside its two tiles, and four card-stat tiles.
+- **The analyzer's stage** shows one sentence at a time (a stepper with the
+  passage's stops), every token underlined in its state ink, one token card
+  with Add to deck, a furigana switch and Explain.
 
 ## Assumed, to confirm
 
