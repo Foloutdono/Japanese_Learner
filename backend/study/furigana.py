@@ -95,6 +95,21 @@ def _forms(base: str, first: bool) -> list[str]:
     return out
 
 
+def reading_stem(token: str) -> str:
+    """
+    The part of a deck reading that is the kanji's own, in hiragana, with
+    okurigana and bound-form markers stripped: 'い.きる' → 'い', '~び' →
+    'び', 'なま~' → 'なま', 'セイ' → 'せい'. Two readings share a stem
+    when they are the same sound wearing different endings -- 上げる and
+    上がる are both あ -- which is the sense in which a list of example
+    words "varies its readings". The frontend's domain/readingPick.js
+    draws the same line for the study card.
+    """
+    bare = (token or "").replace("~", "").replace("～", "")
+    dot = bare.find(".")
+    return _to_hiragana(bare if dot == -1 else bare[:dot])
+
+
 def reading_token_for(surface: str, tokens: list[str], first: bool) -> str | None:
     """
     Which of a kanji's own readings `surface` is a form of, or None.

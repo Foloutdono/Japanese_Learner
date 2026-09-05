@@ -14823,6 +14823,15 @@ textarea:focus-visible {
   font-weight: 400;
   color: var(--text-secondary);
 }
+/* The kanji the row is an example of, and its own furigana, in the
+   entry's ink: the reading this word demonstrates is the point of the
+   row, so it is the thing the eye lands on — four rows, four readings,
+   legible at a glance. */
+.dict-word__hit,
+.dict-word__hit rt {
+  color: var(--dict-ink);
+  font-weight: 700;
+}
 .dict-word__gloss {
   flex: 1;
   min-width: 0;
@@ -14851,17 +14860,32 @@ textarea:focus-visible {
 }
 
 /* ── Every reading, with its words ────────────────────────
-   The panel behind the plate's door, first in the body when open. The
-   deck's order — on'yomi, then kun'yomi — each reading a small group:
-   its mark and the reading, then the words that use it in the ledger's
-   own rows, bleeding to the panel's edges as the ledger's do. A reading
-   no word demonstrates is listed alone: the panel is all of them. It
-   arrives as a fade, which reduced motion already allows. */
+   The sheet behind the plate's door (ReadingsSheet in
+   DictionaryDetail.jsx): the lookup sheet's shell, stacked over
+   whatever opened it, with the plate's construction as its head — the
+   kanji, what this is, the ✕, the stripe — and no registers. The deck's
+   order — on'yomi, then kun'yomi — each reading a small group: its
+   mark and the reading, then the words that use it in the ledger's own
+   rows, bleeding to the sheet's edges as the ledger's do. A reading no
+   word demonstrates is listed alone: the sheet is all of them. */
 .dict-readings {
   display: flex;
   flex-direction: column;
   gap: var(--sp-5);
-  animation: arrive-soft 0.2s ease;
+}
+.dict-readings__glyph {
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  line-height: 1;
+  color: var(--text-primary);
+}
+.dict-readings__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 .dict-reading {
   display: flex;
@@ -18207,6 +18231,10 @@ textarea:focus-visible {
   box-shadow: var(--elev-board);
   animation: arrive-soft 0.22s linear;
 }
+/* A sheet over a sheet: the readings open from an entry that may itself
+   be the lookup sheet over a quiz (z 200) or the dock in its modal
+   dress (z 201), so this scrim stands above both. */
+.dict-sheet__scrim--over { z-index: 220; }
 /* The sheet's empty state: the not-available line and a ghost close,
    because a portalled sheet has no page behind it to click away from. */
 .dict-sheet__empty {

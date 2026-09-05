@@ -486,6 +486,9 @@ const Fixture = () => (
           <section className="dict-block">
             <div className="dict-words">
               <button type="button" className="dict-word">
+                <span className="dict-word__jp" lang="ja">
+                  <ruby className="dict-word__hit dj-hit">木<rt className="dj-hit-rt">もく</rt></ruby>曜日
+                </span>
                 <span className="dict-word__gloss dj-word-gloss">Thursday</span>
               </button>
             </div>
@@ -619,6 +622,8 @@ const SITES = [
   ['.dj-tr', 'example translation'],
   ['.dj-fallback', 'stroke sheet fallback (fixed ink on washi)'],
   ['.dj-word-gloss', 'word row gloss'],
+  ['.dj-hit', 'word row: the kanji picked out (辞書 pigment mixed toward the ink)'],
+  ['.dj-hit-rt', 'word row: its furigana, in the same ink'],
   ['.dj-due', 'due note (due ink mixed toward the ink)'],
   ['.dj-tip', 'tag note (panel ink on sumi)'],
 ]

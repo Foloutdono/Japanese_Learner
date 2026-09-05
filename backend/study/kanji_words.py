@@ -30,7 +30,7 @@ from collections import defaultdict
 
 from content.kanji_data import KANJI_BY_LEVEL
 from content.vocab_data import VOCAB_BY_LEVEL
-from study.furigana import align_deck, is_kanji, reading_token_for
+from study.furigana import align_deck, is_kanji, reading_stem, reading_token_for
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 
@@ -147,21 +147,32 @@ def kanji_words(char: str, lang: str) -> dict:
                second word: by level alone 生's four came out 先生・学生・
                生活・人生, セイ four times, teaching a quarter of the
                character; round-robin gives セイ, い(きる), う(まれる), なま.
-               Words the aligner could not place come last -- a word that
-               cannot say which reading it demonstrates is the weakest
-               example, not a wrong one. A kanji with one reading is
-               unaffected: one bucket, the same order it always had.
+               "Different" is judged by stem (reading_stem): 上げる and
+               上がる are both あ, and 生まれる under う.まれる and うま.れる
+               are one sound, so okurigana variants of one reading share
+               a slot rather than each taking one. Words the aligner could
+               not place come last -- a word that cannot say which reading
+               it demonstrates is the weakest example, not a wrong one. A
+               kanji with one reading is unaffected: one bucket, the same
+               order it always had.
     """
     tokens, buckets = _buckets(char, lang)
     readings = [{"reading": tok, "words": buckets[tok][:MAX_WORDS]} for tok in tokens]
 
-    ordered: list[str | None] = [tok for tok in tokens if buckets[tok]] + [None]
+    # One queue per stem, in the deck's order; a stem's queue is its
+    # tokens' buckets back to back, so the ledger never spends two slots
+    # on one sound. The unplaced words are a queue of their own, last.
+    queues: dict[str | None, list[dict]] = {}
+    for tok in tokens:
+        if buckets[tok]:
+            queues.setdefault(reading_stem(tok), []).extend(buckets[tok])
+    queues[None] = buckets[None]
+
     examples: list[dict] = []
     depth = 0
     while len(examples) < MAX_WORDS:
         added = False
-        for tok in ordered:
-            words = buckets[tok]
+        for words in queues.values():
             if depth >= len(words):
                 continue
             examples.append(words[depth])

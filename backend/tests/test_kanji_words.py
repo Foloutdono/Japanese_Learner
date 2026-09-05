@@ -8,7 +8,8 @@ knows and this must not lose: an on-reading written in katakana in the
 deck, a kun-reading's okurigana stem, and a non-initial element voicing
 or geminating.
 """
-from study.furigana import reading_token_for
+from content.kanji_data import KANJI_BY_LEVEL
+from study.furigana import reading_stem, reading_token_for
 from study.kanji_words import kanji_words, reading_tokens, MAX_WORDS
 
 
@@ -43,6 +44,16 @@ class TestReadingTokenFor:
         assert reading_token_for("ねこ", ["ガク", "まな.ぶ"], first=True) is None
 
 
+class TestReadingStem:
+    def test_strips_okurigana_and_markers_and_reads_in_hiragana(self):
+        assert reading_stem("い.きる") == "い"
+        assert reading_stem("うま.れる") == "うま"
+        assert reading_stem("~び") == "び"
+        assert reading_stem("なま~") == "なま"
+        assert reading_stem("セイ") == "せい"
+        assert reading_stem("") == ""
+
+
 class TestKanjiWords:
     def test_every_reading_is_listed_in_the_decks_order(self):
         out = kanji_words("木", "en")
@@ -65,17 +76,35 @@ class TestKanjiWords:
         for r in kanji_words("生", "en")["readings"]:
             assert len(r["words"]) <= MAX_WORDS
 
+    @staticmethod
+    def _stems_of_examples(out):
+        """The stem each ledger word demonstrates, from the panel's filing."""
+        by_key = {}
+        for r in out["readings"]:
+            for w in r["words"]:
+                by_key.setdefault((w["kanji"], w["kana"]), reading_stem(r["reading"]))
+        return [by_key.get((w["kanji"], w["kana"])) for w in out["examples"]]
+
     def test_the_ledger_spreads_its_slots_across_readings(self):
-        # 生 has six readings in the deck; by level alone its four examples
-        # were セイ four times. Round-robin across the filed readings.
+        # 生 has twenty readings in the deck; by level alone its four
+        # examples were セイ four times. Round-robin across the filed
+        # readings, one per stem.
         out = kanji_words("生", "en")
-        by_reading = {r["reading"]: {(w["kanji"], w["kana"]) for w in r["words"]} for r in out["readings"]}
-        used = []
-        for w in out["examples"]:
-            key = (w["kanji"], w["kana"])
-            used.append(next((tok for tok, words in by_reading.items() if key in words), None))
+        stems = self._stems_of_examples(out)
         assert len(out["examples"]) == MAX_WORDS
-        assert len(set(t for t in used if t is not None)) >= 3
+        assert len(set(s for s in stems if s is not None)) == MAX_WORDS
+
+    def test_the_ledger_never_repeats_a_stem_while_another_has_words(self):
+        # Every kanji in the two commonest levels: the ledger's stems are
+        # as many as it could possibly show -- one per filed stem, up to
+        # its four slots -- before any stem gets a second word.
+        for level in ("N5", "N4"):
+            for entry in KANJI_BY_LEVEL[level]:
+                out = kanji_words(entry["kanji"], "en")
+                available = {reading_stem(r["reading"]) for r in out["readings"] if r["words"]}
+                shown = [s for s in self._stems_of_examples(out) if s is not None]
+                want = min(MAX_WORDS, len(available))
+                assert len(set(shown[:want])) == want, (entry["kanji"], shown, available)
 
     def test_a_word_the_aligner_cannot_place_is_still_a_ledger_example_last(self):
         # Nothing is ever filed under a reading it cannot vouch for, but

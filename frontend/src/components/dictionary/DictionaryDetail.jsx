@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useId } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { LEVEL_COLORS } from './levelColors'
 import { shortDate } from '../../lib/formatDate'
@@ -317,17 +317,21 @@ function StrokeSheet({ src, notAvailableLabel }) {
   )
 }
 
-// One word that uses the kanji: its furigana'd form, its first gloss,
-// and — when the caller can navigate — the ledger's chevron. Shared by
-// the "used in these words" ledger and the readings panel, where the
-// same rows sit under the reading they demonstrate. Without `onClick`
-// (the sheet over a quiz has no dictionary underneath to jump around
-// in) it is a plain row, not a dead-looking button.
-function WordRow({ w, onClick }) {
+// One word that uses the kanji: its furigana'd form with the kanji
+// itself picked out in the entry's ink — so the reading this word
+// demonstrates is what the eye lands on — its first gloss, and, when the
+// caller can navigate, the ledger's chevron. Shared by the "used in
+// these words" ledger and the readings sheet, where the same rows sit
+// under the reading they demonstrate. Without `onClick` (the sheet
+// over a quiz has no dictionary underneath to jump around in) it is a
+// plain row, not a dead-looking button.
+function WordRow({ w, char, onClick }) {
   const body = (
     <>
       <span className="dict-word__jp" lang="ja">
-        {w.furigana?.length ? <FuriganaParts parts={w.furigana} /> : w.kanji}
+        {w.furigana?.length
+          ? <FuriganaParts parts={w.furigana} hit={char} hitClassName="dict-word__hit" />
+          : w.kanji}
       </span>
       <span className="dict-word__gloss">{firstGloss(w.meaning)}</span>
     </>
@@ -346,6 +350,80 @@ function WordRow({ w, onClick }) {
 // apart without the long translated labels the study card prints.
 function KindMark({ token }) {
   return <span className="dict-kind" aria-hidden="true">{isOnyomiToken(token) ? '音' : '訓'}</span>
+}
+
+// ── Every reading, with its words ─────────────────────────────
+// The panel behind the plate's door. A sheet of its own over whatever
+// is on screen — the dock, or the lookup sheet over a quiz — in the
+// lookup sheet's chrome, so the entry underneath stays exactly as it
+// is and the list gets the width and the scroll a list that long
+// needs: 生 has twenty readings, most with words. Its head is the
+// plate's construction without the registers — the kanji, what this
+// is, the ✕ — and the same stripe. Every reading in the deck's order
+// (on'yomi, then kun'yomi), each a small group: its 音/訓 mark and the
+// reading, then up to four words that use it in the ledger's own rows,
+// the kanji picked out in each. A reading no word in the deck
+// demonstrates is still listed — this is all of them — just alone.
+// Escape and the scrim close this sheet and only this sheet (see
+// useDialog's `capture`); a word that jumps closes it too, since the
+// entry it belongs to is leaving. On a phone it is the whole screen,
+// as every sheet here is.
+function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
+  const { t } = useLang()
+  const dialogRef = useDialog(onClose, { capture: true })
+  const jump = onVocabClick
+    ? (kanji, kana) => { onClose(); onVocabClick(kanji, kana) }
+    : undefined
+  return createPortal(
+    <div onClick={onClose} className="dict-sheet__scrim dict-sheet__scrim--over">
+      <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet"
+           role="dialog" aria-modal="true" aria-label={`${t.allReadings}: ${entry.kanji}`}>
+        <article className="dict-entry">
+          <header className="dict-plate">
+            <div className="dict-plate__row">
+              <div className="dict-plate__marks">
+                <span className="dict-readings__glyph" lang="ja">{entry.kanji}</span>
+                <span className="dict-readings__title">{t.allReadings}</span>
+              </div>
+              <div className="dict-plate__actions">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="dict-plate__btn"
+                  title={t.close}
+                  aria-label={t.close}
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+            </div>
+            <div className="dict-plate__stripe" aria-hidden="true" />
+          </header>
+          <div className="dict-entry__body">
+            <section className="dict-block dict-readings" aria-label={t.allReadings}>
+              {groups.map(({ reading, words }) => (
+                <div key={reading} className="dict-reading">
+                  <div className="dict-reading__head" lang="ja">
+                    <KindMark token={reading} />
+                    <span className="dict-reading__yomi">{reading}</span>
+                  </div>
+                  {words?.length > 0 && (
+                    <div className="dict-words">
+                      {words.map((w, i) => <WordRow key={i} w={w} char={entry.kanji} onClick={jump} />)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </section>
+            <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
+              {t.close}
+            </button>
+          </div>
+        </article>
+      </div>
+    </div>,
+    document.body,
+  )
 }
 
 // How big the headword is set. A lone character is a specimen and
@@ -454,17 +532,17 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
   // ── Readings ──
   // The plate shows two: the first on'yomi and the first kun'yomi when
   // a kanji has both (see pickPlateReadings). 生 has twenty readings and
-  // a plate is not the place for them; "+N" opens the panel, where every
-  // reading is listed with the words that use it (entry.readings, from
-  // study/kanji_words.py). The open state is keyed to the entry, so
-  // moving to another kanji closes it without an effect.
+  // a plate is not the place for them; "+N" opens a sheet of its own
+  // (ReadingsSheet), where every reading is listed with the words that
+  // use it (entry.readings, from study/kanji_words.py). The open state
+  // is keyed to the entry, so moving to another kanji closes it without
+  // an effect.
   const tokens = useMemo(() => (isKanji ? splitReadingTokens(entry.kana) : []), [isKanji, entry.kana])
   const shownReadings = pickPlateReadings(tokens, 2)
   const hiddenReadings = tokens.length - shownReadings.length
   const readingGroups = entry.readings ?? []
   const [openKey, setOpenKey] = useState(null)
-  const readingsOpen = isKanji && openKey === entryKey(entry)
-  const readingsId = useId()
+  const readingsOpen = isKanji && readingGroups.length > 0 && openKey === entryKey(entry)
   // card_stats (study/card_lookup.py) says "not_started" for a card
   // with no state in any mode; the seal's vocabulary is new / learning
   // / mastered, and a card nobody has touched is the unstruck seal.
@@ -518,18 +596,20 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
               {/* Every reading, each with its words, behind one small
                   door. The count says how many the plate is not printing
                   (none, for a kanji with two); the chevron says it opens. */}
-              <button
-                type="button"
-                onClick={() => setOpenKey(readingsOpen ? null : entryKey(entry))}
-                className={`dict-plate__more${readingsOpen ? ' dict-plate__more--open' : ''}`}
-                aria-expanded={readingsOpen}
-                aria-controls={readingsId}
-                aria-label={t.allReadings}
-                title={t.allReadings}
-              >
-                {hiddenReadings > 0 && <span>+{hiddenReadings}</span>}
-                <ChevronIcon direction="down" size={14} className="dict-plate__more-chev" />
-              </button>
+              {readingGroups.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setOpenKey(readingsOpen ? null : entryKey(entry))}
+                  className={`dict-plate__more${readingsOpen ? ' dict-plate__more--open' : ''}`}
+                  aria-haspopup="dialog"
+                  aria-expanded={readingsOpen}
+                  aria-label={t.allReadings}
+                  title={t.allReadings}
+                >
+                  {hiddenReadings > 0 && <span>+{hiddenReadings}</span>}
+                  <ChevronIcon direction="down" size={14} className="dict-plate__more-chev" />
+                </button>
+              )}
             </div>
           )}
           {showKanaLine && (
@@ -547,30 +627,6 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
       </header>
 
       <div className="dict-entry__body">
-
-        {/* ── Every reading, with its words ────────────────
-            Opened from the plate. The deck's order (on'yomi, then
-            kun'yomi), each reading a small group: its 音/訓 mark and the
-            reading, then up to four words that use it in the ledger's
-            own rows. A reading no word in the deck demonstrates is
-            still listed — the panel is "all of them" — just alone. */}
-        {readingsOpen && (
-          <section className="dict-block dict-readings" id={readingsId} aria-label={t.allReadings}>
-            {readingGroups.map(({ reading, words }) => (
-              <div key={reading} className="dict-reading">
-                <div className="dict-reading__head" lang="ja">
-                  <KindMark token={reading} />
-                  <span className="dict-reading__yomi">{reading}</span>
-                </div>
-                {words?.length > 0 && (
-                  <div className="dict-words">
-                    {words.map((w, i) => <WordRow key={i} w={w} onClick={onVocabClick} />)}
-                  </div>
-                )}
-              </div>
-            ))}
-          </section>
-        )}
 
         {/* ── What it means ────────────────────────────────
             First, always. A word shows its JMdict senses (a
@@ -664,15 +720,16 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
             Two directions of one relationship, and an entry only
             ever has one of them: a kanji links out to the words it
             appears in (a ledger of rows, each a door — four words
-            chosen to cover as many readings as the deck can, and
-            stood down while the readings panel above lists the same
-            words under their readings), a word links down to the
-            kanji it is built from (a row of tiles, each the small
-            plate of the entry it opens). */}
-        {onVocabClick && isKanji && !readingsOpen && entry.vocab_examples?.length > 0 && (
+            chosen to demonstrate as many different readings as the
+            deck can, the kanji picked out in each so the reading it
+            uses is what the eye lands on; the readings sheet has the
+            complete grouping), a word links down to the kanji it is
+            built from (a row of tiles, each the small plate of the
+            entry it opens). */}
+        {onVocabClick && isKanji && entry.vocab_examples?.length > 0 && (
           <section className="dict-block" aria-label={t.vocabExamples}>
             <div className="dict-words">
-              {entry.vocab_examples.map((w, i) => <WordRow key={i} w={w} onClick={onVocabClick} />)}
+              {entry.vocab_examples.map((w, i) => <WordRow key={i} w={w} char={entry.kanji} onClick={onVocabClick} />)}
             </div>
           </section>
         )}
@@ -738,6 +795,15 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
           {t.close}
         </button>
       </div>
+
+      {readingsOpen && (
+        <ReadingsSheet
+          entry={entry}
+          groups={readingGroups}
+          onClose={() => setOpenKey(null)}
+          onVocabClick={onVocabClick}
+        />
+      )}
     </article>
   )
 }

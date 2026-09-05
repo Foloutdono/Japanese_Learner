@@ -402,42 +402,120 @@ describe('the body — blocks that name themselves', () => {
   })
 })
 
-describe('the readings — two on the plate, all of them behind the door', () => {
-  it('opens every reading with the words that use it, and stands the ledger down meanwhile', async () => {
+describe('the readings — two on the plate, all of them in a sheet of their own', () => {
+  const sheet = () => document.querySelector('.dict-sheet__scrim--over .dict-sheet[role="dialog"]')
+  // A real Escape targets the focused control, which useDialog has
+  // placed inside the top sheet; dispatched there, it climbs through
+  // window's capture phase first.
+  const escape = () => (document.activeElement ?? document.body).dispatchEvent(
+    new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+  )
+
+  it('opens every reading with its words in a sheet over the entry, and leaves the entry as it is', async () => {
     const { root, onVocabClick } = await renderEntry(KANJI)
     const ledger = () => root.querySelector('section[aria-label="Used in these words"]')
     expect(ledger()).toBeTruthy()
-    expect(root.querySelector('.dict-readings')).toBeNull()
+    expect(sheet()).toBeNull()
 
     const door = root.querySelector('.dict-plate__more')
+    expect(door.getAttribute('aria-haspopup')).toBe('dialog')
     door.click()
     await settle()
     expect(door.getAttribute('aria-expanded')).toBe('true')
-    const panel = root.querySelector('.dict-readings')
-    expect(panel).toBeTruthy()
-    expect(panel.id).toBe(door.getAttribute('aria-controls'))
-    expect(panel.getAttribute('aria-label')).toBe('All readings')
-    // First in the body, right under the plate.
-    expect(root.querySelector('.dict-entry__body .dict-block')).toBe(panel)
+    const dialog = sheet()
+    expect(dialog).toBeTruthy()
+    expect(dialog.getAttribute('aria-modal')).toBe('true')
+    expect(dialog.getAttribute('aria-label')).toBe('All readings: 木')
+    // Nothing of it is on the entry itself.
+    expect(root.querySelector('.dict-readings')).toBeNull()
+    expect(ledger()).toBeTruthy()
+    // Its head is the plate's construction without the registers.
+    expect(dialog.querySelector('.dict-readings__glyph').textContent).toBe('木')
+    expect(dialog.querySelector('.dict-readings__title').textContent).toBe('All readings')
+    expect(dialog.querySelector('.dict-plate__stripe')).toBeTruthy()
+    expect(dialog.querySelector('.dict-plate__word')).toBeNull()
 
-    const groups = [...panel.querySelectorAll('.dict-reading')]
+    const groups = [...dialog.querySelectorAll('.dict-reading')]
     expect(groups.map(g => g.querySelector('.dict-reading__yomi').textContent)).toEqual(['ボク', 'モク', 'き', 'こ~'])
     expect(groups.map(g => g.querySelector('.dict-kind').textContent)).toEqual(['音', '音', '訓', '訓'])
     // A reading no word demonstrates is listed alone.
     expect(groups[0].querySelectorAll('.dict-word')).toHaveLength(0)
     expect([...groups[1].querySelectorAll('.dict-word__gloss')].map(el => el.textContent)).toEqual(['Thursday', 'Lumber'])
     expect([...groups[2].querySelectorAll('.dict-word__gloss')].map(el => el.textContent)).toEqual(['Tree', 'Garden shrubs'])
-    // The same rows, the same doors.
-    groups[1].querySelector('.dict-word').click()
-    expect(onVocabClick).toHaveBeenCalledWith('木曜日', 'もくようび')
-    // The ledger says nothing the panel is not already saying.
-    expect(ledger()).toBeNull()
+    // Each row picks out the kanji it is an example of.
+    for (const row of dialog.querySelectorAll('.dict-word')) {
+      expect(baseText(row.querySelector('.dict-word__hit'))).toBe('木')
+    }
 
-    door.click()
+    // A word that jumps closes the sheet: its entry is leaving.
+    groups[1].querySelector('.dict-word').click()
     await settle()
-    expect(root.querySelector('.dict-readings')).toBeNull()
-    expect(ledger()).toBeTruthy()
+    expect(onVocabClick).toHaveBeenCalledWith('木曜日', 'もくようび')
+    expect(sheet()).toBeNull()
     expect(door.getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it('closes from its ✕, its scrim and Escape — and Escape reaches nothing beneath it', async () => {
+    const { root, onClose } = await renderEntry(KANJI)
+    const door = root.querySelector('.dict-plate__more')
+    // Stands in for the dictionary screen's own window-level Escape,
+    // which closes the dock.
+    const beneath = vi.fn()
+    window.addEventListener('keydown', beneath)
+    try {
+      // A pointer or the keyboard focuses the door before it opens; a
+      // programmatic click alone does not, and there would be no opener
+      // to hand focus back to.
+      door.focus(); door.click(); await settle()
+      expect(sheet().contains(document.activeElement)).toBe(true)
+      escape(); await settle()
+      expect(sheet()).toBeNull()
+      expect(beneath).not.toHaveBeenCalled()
+      expect(onClose).not.toHaveBeenCalled()
+      // Focus comes back to the door that opened it.
+      expect(document.activeElement).toBe(door)
+
+      door.click(); await settle()
+      sheet().querySelector('.dict-plate__btn').click(); await settle()
+      expect(sheet()).toBeNull()
+
+      door.click(); await settle()
+      document.querySelector('.dict-sheet__scrim--over').click(); await settle()
+      expect(sheet()).toBeNull()
+    } finally {
+      window.removeEventListener('keydown', beneath)
+    }
+  })
+
+  it('stacks over the lookup sheet, and Escape peels one sheet at a time', async () => {
+    vi.mocked(apiFetch).mockResolvedValue({ ok: true, status: 200, json: async () => ({ results: [KANJI] }) })
+    const onClose = vi.fn()
+    const screen = await render(
+      <LangProvider>
+        <DictionaryLookupSheet term="木" category="kanji" session={{ access_token: 'tok' }} onClose={onClose} />
+      </LangProvider>
+    )
+    await settle(120)
+    const lookup = document.querySelector('.dict-sheet__scrim:not(.dict-sheet__scrim--over) .dict-sheet[role="dialog"]')
+    lookup.querySelector('.dict-plate__more').click()
+    await settle()
+    expect(sheet()).toBeTruthy()
+    // Above the lookup sheet, not beside it.
+    expect(Number(getComputedStyle(document.querySelector('.dict-sheet__scrim--over')).zIndex))
+      .toBeGreaterThan(Number(getComputedStyle(lookup.parentElement).zIndex))
+    // No dictionary underneath to jump around in: plain rows.
+    for (const r of sheet().querySelectorAll('.dict-word')) {
+      expect(r.tagName).toBe('DIV')
+      expect(r.classList.contains('dict-word--static')).toBe(true)
+      expect(r.querySelector('.dict-word__chev')).toBeNull()
+    }
+    escape(); await settle()
+    expect(sheet()).toBeNull()
+    expect(onClose).not.toHaveBeenCalled()
+    expect(document.body.contains(lookup)).toBe(true)
+    escape(); await settle()
+    expect(onClose).toHaveBeenCalledTimes(1)
+    await screen.unmount()
   })
 
   it('keeps the door for a kanji whose two readings all fit, without a count', async () => {
@@ -448,17 +526,26 @@ describe('the readings — two on the plate, all of them behind the door', () =>
     expect(door.querySelector('svg')).toBeTruthy()
   })
 
-  it('lists the words as plain rows when the caller cannot navigate (the sheet over a quiz)', async () => {
-    const { root } = await renderEntry(KANJI, { onClose: vi.fn() })
-    root.querySelector('.dict-plate__more').click()
-    await settle()
-    const rows = root.querySelectorAll('.dict-readings .dict-word')
+  it('offers no door when the entry carries no grouping', async () => {
+    const { root } = await renderEntry({ ...KANJI, readings: undefined })
+    expect(root.querySelectorAll('.dict-plate__yomi')).toHaveLength(2)
+    expect(root.querySelector('.dict-plate__more')).toBeNull()
+  })
+
+  it('picks the kanji out of every ledger row, in the entry ink', async () => {
+    const { root } = await renderEntry(KANJI)
+    const rows = [...root.querySelectorAll('section[aria-label="Used in these words"] .dict-word')]
     expect(rows).toHaveLength(4)
-    for (const r of rows) {
-      expect(r.tagName).toBe('DIV')
-      expect(r.classList.contains('dict-word--static')).toBe(true)
-      expect(r.querySelector('.dict-word__chev')).toBeNull()
+    const ink = probe('color', 'color-mix(in srgb, var(--line-jisho) 60%, var(--text-primary))')
+    for (const row of rows) {
+      const hit = row.querySelector('.dict-word__hit')
+      expect(baseText(hit)).toBe('木')
+      expect(getComputedStyle(hit).color).toBe(ink)
+      expect(getComputedStyle(hit.querySelector('rt')).color).toBe(ink)
     }
+    // The rest of the word keeps the ambient ink.
+    const plain = rows[0].querySelector('.dict-word__jp ruby:not(.dict-word__hit)')
+    expect(getComputedStyle(plain).color).toBe(probe('color', 'var(--text-primary)', root))
   })
 
   it('closes when the entry changes under it', async () => {
@@ -473,17 +560,30 @@ describe('the readings — two on the plate, all of them behind the door', () =>
     await settle()
     screen.container.querySelector('.dict-plate__more').click()
     await settle()
-    expect(screen.container.querySelector('.dict-readings')).toBeTruthy()
+    expect(sheet()).toBeTruthy()
     await screen.rerender(
       <LangProvider>
         <aside className="dict-dock" style={{ width: 400 }}>
-          <DictionaryDetail entry={{ ...KANJI, kanji: '生', kana: 'セイ・ショウ・い.きる・なま', readings: [] }} {...handlers} />
+          <DictionaryDetail entry={{ ...KANJI, kanji: '生', kana: 'セイ・ショウ・い.きる・なま', readings: [{ reading: 'セイ', words: [] }] }} {...handlers} />
         </aside>
       </LangProvider>
     )
     await settle()
-    expect(screen.container.querySelector('.dict-readings')).toBeNull()
+    expect(sheet()).toBeNull()
     expect(screen.container.querySelector('.dict-plate__more').getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it('is the whole screen on a phone, its head staying put, the close slab at the foot', async () => {
+    await page.viewport(390, 700)
+    const { root } = await renderEntry(KANJI, NAV(), { width: null })
+    root.querySelector('.dict-plate__more').click()
+    await settle()
+    const dialog = sheet()
+    const r = dialog.getBoundingClientRect()
+    expect(Math.round(r.width)).toBe(vw())
+    expect(Math.round(r.height)).toBe(vh())
+    expect(getComputedStyle(dialog.querySelector('.dict-plate')).position).toBe('sticky')
+    expect(getComputedStyle(dialog.querySelector('.dict-entry__close')).display).not.toBe('none')
   })
 })
 

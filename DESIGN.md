@@ -276,10 +276,13 @@ roundels (speak, close) in the other, and 辞書's gold as the 3px stripe along
 its bottom edge — the one colour on it. A kanji's plate prints **two
 readings**, the first on'yomi and the first kun'yomi, each behind its 音/訓
 mark, and a `+N` door: 生 has twenty readings and a plate is not the place
-for them. The door opens a panel listing every reading with the words that
-use it (grouped backend-side by `study/kanji_words.py`), and the
-four-word "used in these words" ledger stands down while it is open — the
-panel is the same relationship, complete. The plate is `position: sticky`
+for them. The door opens a **sheet of its own** over the entry — the lookup
+sheet's shell, stacked above whatever opened it — listing every reading with
+the words that use it (grouped backend-side by `study/kanji_words.py`);
+nothing of that list is on the entry itself. The four-word "used in these
+words" ledger stays, and its four words demonstrate four different readings
+where the deck has them, the kanji picked out in each row in the entry's
+ink so the reading it uses is what the eye lands on. The plate is `position: sticky`
 inside whichever shell scrolls it, so the word stays in view while its
 examples pass under it; on a phone the shell is the whole screen and this is
 the reading view. Under the stripe, blocks divided by hairlines and **no
