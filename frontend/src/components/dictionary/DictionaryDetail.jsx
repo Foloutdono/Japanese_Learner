@@ -359,21 +359,52 @@ function KindMark({ token }) {
 // is and the list gets the width and the scroll a list that long
 // needs: 生 has twenty readings, most with words. Its head is the
 // plate's construction without the registers — the kanji, what this
-// is, the ✕ — and the same stripe. Every reading in the deck's order
-// (on'yomi, then kun'yomi), each a small group: its 音/訓 mark and the
-// reading, then up to four words that use it in the ledger's own rows,
-// the kanji picked out in each. A reading no word in the deck
-// demonstrates is still listed — this is all of them — just alone.
-// Escape and the scrim close this sheet and only this sheet (see
-// useDialog's `capture`); a word that jumps closes it too, since the
-// entry it belongs to is leaving. On a phone it is the whole screen,
-// as every sheet here is.
+// is, the ✕ — and the same stripe.
+//
+// Two blocks, one per register, each opened by its 音 / 訓 mark once
+// rather than beside every reading. Inside, the readings the deck has
+// words for, in the deck's order, each a small group: the reading,
+// then up to four words that use it in the ledger's own rows, the
+// kanji picked out in each. The readings no word demonstrates — for
+// 生 that is fourteen of twenty — close the block as one wrapped row
+// of quiet pills: still all of them, without twenty heads in a
+// column. Escape and the scrim close this sheet and only this sheet
+// (see useDialog's `capture`); a word that jumps closes it too, since
+// the entry it belongs to is leaving. On a phone it is the whole
+// screen, as every sheet here is.
+function ReadingsRegister({ label, mark, groups, char, onWord, t }) {
+  const withWords = groups.filter(g => g.words?.length > 0)
+  const rest = groups.filter(g => !g.words?.length)
+  return (
+    <section className="dict-block dict-register" aria-label={label}>
+      <div className="dict-register__head"><KindMark token={mark} /></div>
+      {withWords.map(({ reading, words }) => (
+        <div key={reading} className="dict-reading">
+          <div className="dict-reading__yomi" lang="ja">{reading}</div>
+          <div className="dict-words">
+            {words.map((w, i) => <WordRow key={i} w={w} char={char} onClick={onWord} />)}
+          </div>
+        </div>
+      ))}
+      {rest.length > 0 && (
+        <ul className="dict-register__rest" aria-label={t.readingsNoWords}>
+          {rest.map(({ reading }) => (
+            <li key={reading} className="dict-register__chip" lang="ja">{reading}</li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
   const { t } = useLang()
   const dialogRef = useDialog(onClose, { capture: true })
   const jump = onVocabClick
     ? (kanji, kana) => { onClose(); onVocabClick(kanji, kana) }
     : undefined
+  const on = groups.filter(g => isOnyomiToken(g.reading))
+  const kun = groups.filter(g => !isOnyomiToken(g.reading))
   return createPortal(
     <div onClick={onClose} className="dict-sheet__scrim dict-sheet__scrim--over">
       <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet"
@@ -400,21 +431,12 @@ function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
             <div className="dict-plate__stripe" aria-hidden="true" />
           </header>
           <div className="dict-entry__body">
-            <section className="dict-block dict-readings" aria-label={t.allReadings}>
-              {groups.map(({ reading, words }) => (
-                <div key={reading} className="dict-reading">
-                  <div className="dict-reading__head" lang="ja">
-                    <KindMark token={reading} />
-                    <span className="dict-reading__yomi">{reading}</span>
-                  </div>
-                  {words?.length > 0 && (
-                    <div className="dict-words">
-                      {words.map((w, i) => <WordRow key={i} w={w} char={entry.kanji} onClick={jump} />)}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </section>
+            {on.length > 0 && (
+              <ReadingsRegister label={t.onyomi} mark={on[0].reading} groups={on} char={entry.kanji} onWord={jump} t={t} />
+            )}
+            {kun.length > 0 && (
+              <ReadingsRegister label={t.kunyomi} mark={kun[0].reading} groups={kun} char={entry.kanji} onWord={jump} t={t} />
+            )}
             <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
               {t.close}
             </button>

@@ -799,6 +799,7 @@ const dictionary = {
   composingKanji:    'Made of these kanji',
   vocabExamples:     'Used in these words',
   allReadings:       'All readings',
+  readingsNoWords:   'No example words yet',
   // Icon-button title/aria-label on the dictionary-lookup action that
   // sits on a revealed card (RevealActions in QuizComponents.jsx).
   openDictionary:    'Open dictionary entry',

@@ -389,3 +389,76 @@ describe('the study card\'s stage floor', () => {
       .toBeLessThanOrEqual(BORDER)
   })
 })
+
+// ── The whole card turns it ────────────────────────────────
+//
+// .flashcard owns the tap-to-reveal, and the negative-margin trick on it
+// closed the dead zone in the card's PADDING. There was a second one:
+// the body centres its children in whatever height the card has — the
+// 220px floor on a desktop, the whole stage on a phone, where the card
+// grows to fill what the answer widget leaves — and .flashcard was only
+// as tall as its face and hint, so a thumb landing in the spare height
+// above or below the word did nothing. It grows into that height now.
+// Measured through a real hit-test: the element under a point just
+// inside the body's top edge, and one just above the strip, is the
+// flashcard, and clicking it turns the card.
+function PhoneStage({ children }) {
+  // The phone's own stage: .quiz-area with a definite height, so the
+  // card has spare height to grow into (see the ≤768px rule).
+  return (
+    <div className="container quiz-area" style={{ height: 700 }}>
+      <div className="quiz-card-stage vocab-card-boost">
+        <div className="card-transition">
+          <div className="card-transition-live">{children}</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function tapAt(x, y) {
+  const el = document.elementFromPoint(x, y)
+  el?.click()
+  return el
+}
+
+describe('the flashcard is the whole card', () => {
+  for (const [label, viewport] of [['a phone', PHONE], ['a desktop', [1280, 800]]]) {
+    it(`fills the body on ${label}, so a tap in the spare height turns it`, async () => {
+      await page.viewport(...viewport)
+      const screen = await render(
+        <PhoneStage>
+          <PromptCard foot={FOOT}>
+            <Flashcard
+              t={{ tapToReveal: 'Touchez pour révéler' }}
+              resetKey="tap"
+              front={<CharDisplay char="山" size={72} />}
+              back={<MeaningDisplay meaning="mountain" size={28} />}
+            />
+          </PromptCard>
+        </PhoneStage>
+      )
+      const { container } = screen
+      await settled(container)
+      const body = container.querySelector('.prompt-card__body').getBoundingClientRect()
+      const card = container.querySelector('.flashcard').getBoundingClientRect()
+      const face = container.querySelector('.char-display').getBoundingClientRect()
+      // The flashcard is the body's whole height, not just its face…
+      expect(Math.abs(card.top - body.top)).toBeLessThanOrEqual(1)
+      expect(Math.abs(card.bottom - body.bottom)).toBeLessThanOrEqual(1)
+      // …and there IS spare height around the face for this to matter.
+      expect(face.top - body.top).toBeGreaterThan(30)
+
+      // A thumb just inside the top edge, clear of the corner controls.
+      const hit = tapAt(body.left + body.width * 0.6, body.top + 6)
+      expect(container.querySelector('.flashcard').contains(hit)).toBe(true)
+      await settled(container)
+      expect(container.querySelector('.flashcard__face').textContent).toContain('Mountain')
+
+      // And just above the strip, on the way back.
+      tapAt(body.left + body.width * 0.4, body.bottom - 6)
+      await settled(container)
+      expect(container.querySelector('.flashcard__face').textContent).toContain('山')
+    })
+  }
+})
