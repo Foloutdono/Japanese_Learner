@@ -24,7 +24,14 @@ const FOCUSABLE = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',')
 
-export function useDialog(onClose) {
+// `capture`: for a dialog opened over another dialog — the dictionary's
+// readings sheet over its lookup sheet, or over the dictionary screen's
+// own window-level Escape. Every trap listens on window in the bubble
+// phase, so an Escape pressed in the top sheet reaches all of them and
+// closes the whole stack. A capture-phase listener on window runs before
+// any bubble-phase one, and its stopPropagation on Escape stops the
+// dialogs beneath from hearing it. Read once, at mount.
+export function useDialog(onClose, { capture = false } = {}) {
   const ref = useRef(null)
   // Captured at mount, before focus moves into the dialog, so it is
   // genuinely the control the user was on when they opened this.
@@ -81,9 +88,9 @@ export function useDialog(onClose) {
       }
     }
 
-    window.addEventListener('keydown', onKey)
+    window.addEventListener('keydown', onKey, capture)
     return () => {
-      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('keydown', onKey, capture)
       // Only restore if focus is still somewhere we put it — if the
       // user has since clicked elsewhere, yanking them back is worse
       // than leaving them alone.
@@ -92,6 +99,7 @@ export function useDialog(onClose) {
         returnTo.current.focus?.()
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `capture` is a mount-time choice, like the trap itself; re-running the effect on it would re-steal focus (see the note on onCloseRef above).
   }, [])
 
   return ref

@@ -68,3 +68,37 @@ export function pickVariedReadings(tokens, limit) {
 
   return tokens.filter((_, i) => taken.has(i))
 }
+
+/**
+ * On'yomi readings are written in katakana, kun'yomi in hiragana — a
+ * kanji's combined reading field mixes both, separated by '・' or ';',
+ * e.g. "イチ・イツ・ひと~・ひと.つ". A token is classified by its first
+ * actual kana character (skipping '.'/'~', which are okurigana/variant
+ * markers, not kana). Here rather than in Readings.jsx because it is a
+ * rule about Japanese, not about layout, and the dictionary plate needs
+ * it without the component.
+ */
+export function isOnyomiToken(token) {
+  const firstKana = [...(typeof token === 'string' ? token : '')].find(c => /[\u3040-\u30FF]/.test(c))
+  if (!firstKana) return false
+  return /[\u30A0-\u30FF]/.test(firstKana) // katakana range
+}
+
+/**
+ * The dictionary plate's two: the first on'yomi and the first kun'yomi
+ * when a kanji has both — one reading from each register says more
+ * about a kanji than two from one — otherwise the first `limit` varied
+ * readings. Order is the source's own, as everywhere in this module.
+ * The rest of the list is not lost: the plate's "+N" opens every
+ * reading with the words that use it.
+ */
+export function pickPlateReadings(tokens, limit = 2) {
+  if (!Array.isArray(tokens)) return []
+  if (tokens.length <= limit) return tokens
+  const on = tokens.find(isOnyomiToken)
+  const kun = tokens.find(t => !isOnyomiToken(t))
+  if (limit >= 2 && on !== undefined && kun !== undefined) {
+    return tokens.filter(t => t === on || t === kun).slice(0, limit)
+  }
+  return pickVariedReadings(tokens, limit)
+}

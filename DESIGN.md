@@ -190,7 +190,13 @@ this scale exists to stop. `rem` only — `px` is retired from type, because
 
 One rung sits above the nine, for one object only: `--fs-specimen-glyph`
 (104px, a single kana or kanji) and `--fs-specimen-word` (72px, a word or
-short phrase) size the study card's Japanese specimen and nothing else.
+short phrase) size the study card's Japanese specimen and nothing else. The
+one other place the word rung appears is the dictionary's entry plate, for a
+lone character (`.dict-plate__word--glyph`, decided 2026-09-05): it is the
+same specimen, read instead of quizzed, opened from a catalogue plate whose
+glyph is already 44px — a reading view cannot set it smaller than the card it
+came from. A word on that plate takes `--fs-display`, a long expression
+`--fs-heading`.
 
 ### Tracking runs inversely to size
 
@@ -260,6 +266,34 @@ else: `--elev-action`, a faint gold glow spent on `.btn-depart` alone — "this
 is the thing to press". One object, by ruling; a fourth shadow needs the same
 argument this one had. Nothing else has a
 shadow. Separation comes from `--surface-line`.
+
+### The entry plate, and a body that names itself
+
+The dictionary opens an entry as **the catalogue plate at reading size**:
+reading over headword over plain-language caption (the first gloss, or a
+kana's romaji), the stage word and the JLPT numeral in one corner, two ghost
+roundels (speak, close) in the other, and 辞書's gold as the 3px stripe along
+its bottom edge — the one colour on it. A kanji's plate prints **two
+readings**, the first on'yomi and the first kun'yomi, each behind its 音/訓
+mark, and a `+N` door: 生 has twenty readings and a plate is not the place
+for them. The door opens a **sheet of its own** over the entry — the lookup
+sheet's shell, stacked above whatever opened it — listing every reading with
+the words that use it (grouped backend-side by `study/kanji_words.py`);
+nothing of that list is on the entry itself. The four-word "used in these
+words" ledger stays, and its four words demonstrate four different readings
+where the deck has them, the kanji picked out in each row in the entry's
+ink so the reading it uses is what the eye lands on. The plate is `position: sticky`
+inside whichever shell scrolls it, so the word stays in view while its
+examples pass under it; on a phone the shell is the whole screen and this is
+the reading view. Under the stripe, blocks divided by hairlines and **no
+section headings**: a numbered list is a definition, a sentence over its
+translation is an example, strokes drawn on washi in a lattice beside their
+stroke count are how the character is written, and the reader's four figures
+are the profile's own `.record` cells. Each block carries its name as an
+`aria-label` only. The pigment arrives as `--line-color` from the shell
+(`.dict-dock`, `.dict-sheet`) and is spent as the stripe, a rail on a word
+row, a ring on hover, and the sense numerals — mixed 60% toward the ambient
+ink, because raw 山吹 reads 2.9:1 on light paper.
 
 ### The console, one everywhere
 
@@ -458,7 +492,9 @@ objects, and only one of them ever waits to be dismissed:
 - **The press** (落款) — a card climbing a stage — is the card being
   signed. Every card carries its stage as a **word** in its top corner
   (new · in progress · mastered, caption register, the stage's ink), not a
-  hanko; the hanko is the dictionary plate's. On a promotion a 落款
+  hanko. The dictionary's plate and its catalogue card carry the same
+  word (decided 2026-09-05; the hanko they wore is retired, so one
+  vocabulary says the same SRS state everywhere). On a promotion a 落款
   impression — the new stage's glyph at the specimen's size, framed as a
   seal — is pressed into the **lower** corner,
   clear of the work, where a signature seal sits on a finished piece; the

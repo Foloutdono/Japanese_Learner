@@ -771,6 +771,7 @@ const dictionary = {
   dictKatakana:      'Katakana',
   composingKanji:    'Composé de ces kanji',
   vocabExamples:     'Utilisé dans ces mots',
+  allReadings:       'Toutes les lectures',
   dictBackToRadicals:'Retour aux radicaux',
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',

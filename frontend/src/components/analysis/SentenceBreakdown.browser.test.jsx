@@ -39,7 +39,7 @@ const T = {
   detailsForKanji: k => `Details for the kanji ${k}`,
 }
 
-// CardTransition (used by the stepper layout) renders StageBadge, which
+// CardTransition (used by the stepper layout) renders StageMark, which
 // calls useLang() -- so every render needs a real LangProvider ancestor,
 // not just the tests that exercise the stepper layout directly.
 // LangProvider itself fetches /api/translations/{kanji,vocab} on mount

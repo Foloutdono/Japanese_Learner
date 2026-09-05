@@ -13,7 +13,7 @@ import {
 } from '../components/dictionary/DictionaryDetail'
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { SectionHeader } from '../components/ui/SectionHeader'
-import { StageBadge } from '../components/study/StageBadge'
+import { StageMark } from '../components/study/StageMark'
 import { ChevronIcon, SearchIcon } from '../components/ui/Icons'
 
 const LIMIT = 50
@@ -665,7 +665,7 @@ function ResultsSection({
 										{shortMeaning(entry.meaning)}
 									</div>
 									<LevelBadge level={entry.level} />
-									<StageBadge stage={entry.status?.status ?? 'new'} />
+									<StageMark stage={entry.status?.status ?? 'new'} />
 								</div>
 							))}
 						</div>

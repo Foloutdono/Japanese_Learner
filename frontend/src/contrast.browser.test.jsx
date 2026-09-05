@@ -434,6 +434,80 @@ const Fixture = () => (
         <span className="onb-pass__v onb-pass__v--gold ob-pass-gold">2 sept. ’27</span>
       </div>
     </div>
+    {/* ── 辞書 — the entry plate and its body (2026-09 redesign) ──
+        The dock injects the 辞書 pigment; the entry mixes it 60% toward
+        the ambient ink for its numerals and the highlighted headword
+        (--dict-ink), and the due note mixes the due ink the same way.
+        Raw 山吹 is 2.9:1 on light paper, which is exactly why these are
+        measured rather than trusted. The stroke sheet is the one
+        theme-independent white in the app, so its fallback line takes
+        the fixed dark ink. */}
+    <aside className="dict-dock">
+      <article className="dict-entry">
+        <header className="dict-plate">
+          <div className="dict-plate__marks">
+            <span className="stage-mark stage-mark--new stage-mark--inline dj-stage-new">New</span>
+            <span className="stage-mark stage-mark--learning stage-mark--inline dj-stage-learning">In progress</span>
+            <span className="stage-mark stage-mark--mastered stage-mark--inline dj-stage-mastered">Mastered</span>
+            <span className="dict-plate__level dj-level">N5</span>
+          </div>
+          <div className="dict-plate__readings">
+            <span className="dict-plate__yomi dj-reading" lang="ja">
+              <span className="dict-kind dj-kind">音</span>モク
+            </span>
+            <button type="button" className="dict-plate__more dj-more">+2</button>
+          </div>
+          <span className="dict-plate__caption dj-caption">Tree</span>
+        </header>
+        <div className="dict-entry__body">
+          <section className="dict-block">
+            <ol className="dict-senses">
+              <li className="dict-sense">
+                <span className="dict-sense__n dj-n">1</span>
+                <div className="dict-sense__body">
+                  <button type="button" className="dict-tag dj-tag">v1</button>
+                  <div className="dict-ex">
+                    <div className="dict-ex__jp" lang="ja">
+                      <mark className="dict-ex__hl dict-ex__seg dj-hl">食</mark>
+                    </div>
+                    <div className="dict-ex__tr dj-tr">I ate.</div>
+                  </div>
+                </div>
+              </li>
+            </ol>
+          </section>
+          <section className="dict-block">
+            <div className="dict-form">
+              <div className="dict-form__sheet">
+                <div className="dict-form__fallback dj-fallback">Not available</div>
+              </div>
+            </div>
+          </section>
+          <section className="dict-block">
+            <div className="dict-words">
+              <button type="button" className="dict-word">
+                <span className="dict-word__jp" lang="ja">
+                  <ruby className="dict-word__hit dj-hit">木<rt className="dj-hit-rt">もく</rt></ruby>曜日
+                </span>
+                <span className="dict-word__gloss dj-word-gloss">Thursday</span>
+              </button>
+            </div>
+          </section>
+          <section className="dict-block">
+            <div className="dict-block__note dj-due">Due now</div>
+          </section>
+        </div>
+      </article>
+    </aside>
+    <span className="dict-tag__tip dj-tip" style={{ position: 'static' }}>Ichidan verb</span>
+    {/* The catalogue card wears the same word, faded to marginalia. */}
+    <div className="dict-results-grid">
+      <div className="dict-entry-card">
+        <span className="stage-mark stage-mark--learning dj-card-stage">In progress</span>
+        <span className="stage-mark stage-mark--mastered dj-card-stage-gold">Mastered</span>
+      </div>
+    </div>
+
     <div className="jour-st--delayed" style={{ background: 'var(--bg-panel)' }}>
       <div className="jour-line">
         <span className="jour-line__status"><b className="jr-status-b" lang="ja">遅延</b></span>
@@ -530,6 +604,28 @@ const SITES = [
   ['.pf-grid-v', 'pass contract value (sumi)'],
   ['.pf-grid-u', 'pass contract unit (sumi)'],
   ['.pf-grid-gold', 'pass contract 有効期限 (gold on sumi)'],
+
+  // The 辞書 entry — 山吹 mixed toward the ink, and the due ink likewise.
+  ['.dj-level', 'entry plate level numeral'],
+  ['.dj-stage-new', 'entry plate stage word, new'],
+  ['.dj-stage-learning', 'entry plate stage word, in progress (state ink mixed toward the ink)'],
+  ['.dj-stage-mastered', 'entry plate stage word, mastered (gold mixed toward the ink)'],
+  ['.dj-kind', 'entry plate 音/訓 mark'],
+  ['.dj-reading', 'entry plate reading'],
+  ['.dj-more', 'entry plate readings door'],
+  ['.dj-card-stage', 'catalogue card stage word, in progress'],
+  ['.dj-card-stage-gold', 'catalogue card stage word, mastered'],
+  ['.dj-caption', 'entry plate caption (first gloss)'],
+  ['.dj-n', 'sense numeral (辞書 pigment mixed toward the ink)'],
+  ['.dj-tag', 'grammatical tag'],
+  ['.dj-hl', 'headword highlighted in an example (辞書 pigment mixed toward the ink)'],
+  ['.dj-tr', 'example translation'],
+  ['.dj-fallback', 'stroke sheet fallback (fixed ink on washi)'],
+  ['.dj-word-gloss', 'word row gloss'],
+  ['.dj-hit', 'word row: the kanji picked out (辞書 pigment mixed toward the ink)'],
+  ['.dj-hit-rt', 'word row: its furigana, in the same ink'],
+  ['.dj-due', 'due note (due ink mixed toward the ink)'],
+  ['.dj-tip', 'tag note (panel ink on sumi)'],
 ]
 
 // Composite every non-transparent background from <html> down to the element.

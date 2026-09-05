@@ -11,8 +11,9 @@ import { useEffect, useRef, useState } from 'react'
 //   - `svgText` the raw SVG markup directly, if you already have it.
 //
 // Drop-in replacement for a static <img>: it fills its container
-// (width/height: 100%) the same way `.stroke-ref__img` /
-// `.dict-detail__stroke-img` sized the old <img>, so no CSS changes
+// (width/height: 100%) the same way `.stroke-ref__img` sized the old
+// <img> (the dictionary's washi sheet, .dict-form__sheet, lets it fill
+// the cell the same way), so no CSS changes
 // are needed at the call site beyond swapping the tag. On fetch
 // failure it calls `onError()` instead of rendering anything, so the
 // caller can show its own existing fallback markup exactly like the
