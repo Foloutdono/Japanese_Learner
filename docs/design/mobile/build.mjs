@@ -17,6 +17,7 @@ const lane = (l, on = true) => `<button type="button" class="lane${on ? '' : ' l
 
 const gateCard = ({ total = 24, balance = 30, lanes = LANES } = {}) => {
   const short = total > balance
+  const out = balance === 0
   return `<div class="gate-card">
   <div class="gate-card__head">
     <span class="gate-card__name"><span class="gate-card__jp" lang="ja">改札</span><span class="gate-card__latin">Fare gate</span></span>
@@ -28,8 +29,9 @@ const gateCard = ({ total = 24, balance = 30, lanes = LANES } = {}) => {
     <span class="gate-card__fare-sep"></span>
     <span lang="ja">残高</span><b class="fare-gold">${balance}</b>
   </div>
-  ${short ? `<div class="gate-card__short">${I.warn}<span><b>${balance}</b> of ${total} run today — ${total - balance} wait for tomorrow's refill</span></div>` : ''}
-  <button type="button" class="btn-depart"><span class="btn-depart__jp" lang="ja">出発する</span><span class="btn-depart__latin">Depart</span><span class="btn-depart__go">▶</span></button>
+  ${out ? `<div class="gate-card__short">${I.warn}<span>No credits left — <b>+30</b> at 00:00</span></div>` : short ? `<div class="gate-card__short">${I.warn}<span><b>${balance}</b> of ${total} run today — ${total - balance} wait for tomorrow's refill</span></div>` : ''}
+  <button type="button" class="btn-depart${out ? ' btn-depart--off' : ''}"><span class="btn-depart__jp" lang="ja">出発する</span><span class="btn-depart__latin">Depart</span><span class="btn-depart__go">▶</span></button>
+  ${out ? `<button type="button" class="btn-depart"><span class="btn-depart__jp" lang="ja">定期券を買う</span><span class="btn-depart__latin">Go unlimited</span><span class="btn-depart__go">▶</span></button>` : ''}
 </div>`
 }
 const gateClear = () => `<div class="gate-card" style="gap: var(--sp-3);">
@@ -59,7 +61,7 @@ const RUN_BODY = `
 <main class="stage" style="padding-top: calc(var(--safe-top) + var(--sp-3)); --line-color: var(--line-kanji);">
   <div class="stage__head">
     <button type="button" class="stage__leave">${I.chevL}<span lang="ja">改札</span></button>
-    <span class="stage__where"><span class="stage__where-jp" lang="ja">漢字 N4</span><span class="stage__where-latin">Kanji → meaning</span></span>
+    <span class="stage__where"><h1 class="stage__where-jp" lang="ja">漢字 N4</h1><span class="stage__where-latin">Kanji → meaning</span></span>
     <span class="today-remaining">18</span>
     ${credits(24)}
   </div>
@@ -192,8 +194,8 @@ ${hud()}
 <main class="phone__content" style="--line-color: var(--line-kanji); gap: var(--sp-5);">
   ${plate({ code: 'KJ', kana: 'かんじ', name: '漢字', latin: 'Kanji', color: 'var(--line-kanji)', noriba: 6 })}
   <div style="display:flex;align-items:center;gap:var(--sp-3);">
-    <button type="button" class="stage__leave">${I.chevL}<span>N4</span><span lang="ja">基礎</span></button>
-    <span class="cap">Elementary · 121 of 181 met</span>
+    <button type="button" class="stage__leave" style="padding-right: var(--sp-2);">${I.chevL}</button>
+    <span class="cap"><span lang="ja" style="text-transform:none;letter-spacing:var(--tr-term);">N4 基礎</span> · Elementary · 121 of 181 met</span>
   </div>
   <div class="platform-grid">
     ${mode({ svc: 'rapid',   jp: '快速', stops: 3, title: 'Kanji → meaning', desc: 'The kanji is shown. Recall what it means.' })}
@@ -266,11 +268,6 @@ ${hud()}
 ${tabbar('dict', 24)}`
 
 // ── 9 · Analyzer — the concourse: three platforms and the history (Latin-first by ruling) ──
-const anl = ({ n, icon, title, jp, desc, count, last }) => `<button type="button" class="anl-card">
-  <span class="anl-card__lead"><span class="platform-card__no" style="--rail: var(--line-kaiseki); width: 34px; height: 34px; font-size: 0.9rem;">${n}</span></span>
-  <span class="anl-card__body"><span class="anl-card__title">${title}<span lang="ja">${jp}</span></span><span class="anl-card__desc">${desc}</span></span>
-  <span class="anl-card__aside"><span class="anl-fig"><b>${count}</b><span>Passages</span></span><span class="anl-fig"><b>${last}</b><span>Last used</span></span></span>
-</button>`
 const hist = ({ jp, count, when, kept }) => `<button type="button" class="anl-hist">
   <span class="anl-hist__body"><span class="anl-hist__jp" lang="ja">${jp}</span><span class="anl-hist__meta">${kept ? '<span class="anl-kept" lang="ja">保存</span>' : ''}<span>${count}</span><span>${when}</span></span></span>
   <span class="platform-card__go" style="--rail: var(--line-kaiseki); padding-right: 0;">▶</span>
@@ -387,13 +384,13 @@ ${TODAY_BODY({ hud: { st: 'slightlyBehind' } })}
   <div class="jour-track">
     <span class="jour-track__span">
       <span class="jour-track__rail"></span>
-      <span class="jour-track__done" style="width: 41%"></span>
+      <span class="jour-track__done" style="width: 62%"></span>
       <span class="jour-track__station jour-track__station--past" style="left: 0%"><i></i><span class="jour-track__station-name jour-track__station-name--latin">N5</span></span>
-      <span class="jour-track__station" style="left: 50%"><i></i><span class="jour-track__station-name jour-track__station-name--latin">N4</span></span>
+      <span class="jour-track__station jour-track__station--past" style="left: 50%"><i></i><span class="jour-track__station-name jour-track__station-name--latin">N4</span></span>
       <span class="jour-track__station" style="left: 100%"><i></i><span class="jour-track__station-name jour-track__station-name--latin">N3</span></span>
-      <span class="jour-track__you" style="left: 41%"><span class="jour-track__tag">You</span><i></i></span>
-      <span class="jour-track__plan" style="left: 49%"><i></i><span class="jour-track__tag">Plan</span></span>
-      <span class="jour-track__gap" style="left: 41%; width: 8%"><b>9d</b></span>
+      <span class="jour-track__you" style="left: 62%"><span class="jour-track__tag">You</span><i></i></span>
+      <span class="jour-track__plan" style="left: 70%"><i></i><span class="jour-track__tag">Plan</span></span>
+      <span class="jour-track__gap" style="left: 62%; width: 8%"><b>9d</b></span>
     </span>
   </div>
   <div class="jour-figs">
@@ -481,6 +478,7 @@ const CHROME_BODY = `
 
 // ── write everything ──
 import { SCREENS2 } from './screens2.mjs'
+import { SCREENS3, STATES_BODY } from './screens3.mjs'
 const boards = [
   ['Main',           TODAY_BODY(),   "Today's run",              'today'],
   ['Run',            RUN_BODY,       'In a run',                 'today'],
@@ -496,18 +494,20 @@ const boards = [
   ['StatusSheet',    STATUS_BODY,    'Goal status sheet',        'pass'],
   ['BalanceSheet',   CREDITS_BODY,   'Balance sheet',            'pass'],
   ...SCREENS2,
+  ...SCREENS3({ TODAY_BODY, RUN_BODY, gateCard }),
 ]
 for (const [name, body] of boards) writeFileSync(`${name}.dc.html`, artboard(body))
 writeFileSync('Chrome.dc.html', artboard(CHROME_BODY, { width: 1180, height: 1320, phone: false }))
+writeFileSync('States.dc.html', artboard(STATES_BODY, { width: 1180, height: 880, phone: false }))
 
 // One page per tab, the screens in walking order; the run's faces beside the run.
 const ORDER = {
-  today:    ['Main', 'Run', 'RunFlashcard', 'RunDraw', 'RunReadings', 'LevelUp', 'RunComplete'],
-  learn:    ['Learning', 'Station', 'Platforms', 'Decks', 'DeckDetail'],
-  practice: ['Practice', 'Reading', 'Comprehension', 'Translation', 'ExamRunner', 'ExamResult'],
-  dict:     ['Dictionary', 'DictionaryEntry', 'Analyzer', 'AnalyzerResult'],
-  pass:     ['Profile', 'ProfileInserts', 'StatusSheet', 'BalanceSheet', 'Statistics', 'Settings', 'SettingsLearn'],
-  arrival:  ['SignIn', 'OfficeBoarding', 'OfficeGoal'],
+  today:    ['Main', 'TodayOutOfCredits', 'Run', 'RunFlashcard', 'RunCloze', 'RunDraw', 'RunReadings', 'RunBrowse', 'LevelUp', 'Reissue', 'RunOutOfCredits', 'RunComplete'],
+  learn:    ['Learning', 'Station', 'StationTiers', 'Platforms', 'Decks', 'DeckCreate', 'DeckDetail', 'DeckAddCard'],
+  practice: ['Practice', 'Reading', 'Comprehension', 'ComprehensionResult', 'TranslationWrite', 'Translation', 'ExamPapers', 'ExamRunner', 'ConfirmSheet', 'ExamResult'],
+  dict:     ['Dictionary', 'DictionaryEntry', 'Analyzer', 'AnalyzerPhoto', 'AnalyzerVideo', 'AnalyzerResult', 'DeckPickerSheet'],
+  pass:     ['Profile', 'ProfileInserts', 'StatusSheet', 'BalanceSheet', 'Statistics', 'Settings', 'SettingsLearn', 'SettingsDestination'],
+  arrival:  ['SignIn', 'OfficeRide', 'OfficeBoarding', 'OfficeTest', 'OfficeGoal', 'OfficePromise', 'OfficePass'],
 }
 const PAGES = [
   { id: 'today',    name: '本日 Today' },
@@ -530,6 +530,7 @@ for (const [page, names] of Object.entries(ORDER)) {
 const placed = new Set(artboards.map(a => a.file))
 for (const b of boards) if (!placed.has(`${b[0]}.dc.html`)) throw new Error('unplaced board ' + b[0])
 artboards.push({ file: 'Chrome.dc.html', title: 'Chrome · HUD, tab bar, gate', x: 0, y: 0, w: 1180, h: 1320, page: 'chrome' })
+artboards.push({ file: 'States.dc.html', title: 'States · loading, empty, error, wrong, six grades', x: 1260, y: 0, w: 1180, h: 880, page: 'chrome' })
 
 const canvas = {
   pages: PAGES,

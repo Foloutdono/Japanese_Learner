@@ -3,7 +3,7 @@ import { hud, tabbar, plate, clock, I, credits, status, rally, pace } from './pa
 
 const stageHead = ({ leave = '改札', jp, latin, right = '' }) => `<div class="stage__head">
     <button type="button" class="stage__leave">${I.chevL}<span lang="ja">${leave}</span></button>
-    <span class="stage__where"><span class="stage__where-jp" lang="ja">${jp}</span><span class="stage__where-latin">${latin}</span></span>
+    <span class="stage__where"><h1 class="stage__where-jp" lang="ja">${jp}</h1><span class="stage__where-latin">${latin}</span></span>
     ${right}
   </div>`
 const progress = `<div class="deck-progress">
@@ -85,7 +85,7 @@ const RUN_READINGS = `
 const LEVEL_UP = `
 <div class="levelup"><div class="levelup__board">
   <span class="levelup__mark"><span class="levelup__jp" lang="ja">進級</span><span class="levelup__latin">Level up</span></span>
-  <span class="levelup__flaps"><span class="split-flap"><span class="flap">1</span><span class="flap">3</span></span><span class="levelup__unit">Level</span></span>
+  <span class="levelup__flaps"><span class="split-flap"><span class="flap">1</span><span class="flap">2</span></span><span class="levelup__unit">Level</span></span>
 </div></div>
 <main class="stage" style="padding-top: var(--sp-3); --line-color: var(--line-kanji);">
   ${stageHead({ jp: '漢字 N4', latin: 'Kanji → meaning', right: runRight(12, 18) })}
@@ -101,7 +101,7 @@ const LEVEL_UP = `
       <span class="char-display" lang="ja">駅</span>
       <span class="flashcard-answer">station</span>
     </div>
-    <span class="card-stamp__rakkan" lang="ja" style="--stamp-ink: var(--state-mastered); border-style: double; border-width: 0.09em;">極</span>
+    <span class="card-stamp__rakkan" lang="ja" style="--stamp-ink: var(--state-mastered); border-style: double;">極</span>
     <div class="prompt-card__foot"><span lang="ja">N4 漢字</span><span>Kanji → meaning</span></div>
   </div>
   ${ratingBar('q4', ' rating-bar--fading')}
@@ -130,7 +130,7 @@ const COMPREHENSION = `
   <div class="prompt-card" style="flex: none; min-height: 0;">
     <div class="prompt-card__body" style="align-items: flex-start; gap: var(--sp-3); padding: var(--sp-5);">
       <span class="type-badge">Detail</span>
-      <span class="sentence sentence--left" style="font-size: 1.25rem;" lang="ja">男の人はどうして駅に行きましたか。</span>
+      <span class="sentence sentence--left" style="font-size: var(--fs-title);" lang="ja">男の人はどうして駅に行きましたか。</span>
     </div>
     <div class="prompt-card__foot"><span lang="ja">N4 理解</span><span>Question 3</span></div>
   </div>
@@ -159,9 +159,9 @@ const TRANSLATION = `
       <span class="prose__romaji">ashita wa ame ga furu to omou</span>
       <span class="prose__rule"></span>
       <span class="prose__label">AI analysis</span>
-      <span class="prose__ai">Natural and correct. 降ります is the polite form; the reference uses the plain form — both fit the sentence.</span>
+      <span class="prose__ai">Natural and correct. <span lang="ja">降ります</span> is the polite form; the reference uses the plain form — both fit the sentence.</span>
     </div>
-    <div class="prompt-card__foot"><span lang="ja">N3 翻訳</span><span>Grammar · 〜と思う</span></div>
+    <div class="prompt-card__foot"><span lang="ja">N3 翻訳</span><span>Grammar · <span lang="ja">〜と思う</span></span></div>
   </div>
   ${ratingBar()}
 </main>`
@@ -179,7 +179,7 @@ const EXAM_RUNNER = `
   <div class="prompt-card" style="flex: none; min-height: 0;">
     <div class="prompt-card__body" style="align-items: flex-start; gap: var(--sp-3); padding: var(--sp-5);">
       <span class="cap">Q7</span>
-      <span class="sentence sentence--left" style="font-size: 1.25rem;" lang="ja">毎朝、駅まで<span class="exam-underline">＿＿＿</span>歩きます。</span>
+      <span class="sentence sentence--left" style="font-size: var(--fs-title);" lang="ja">毎朝、駅まで<span class="exam-underline">＿＿＿</span>歩きます。</span>
     </div>
   </div>
   <div class="mcq-list">
@@ -221,7 +221,7 @@ ${hud()}
     <div class="exam-group" style="border-top: 1px solid var(--surface-line);"><b lang="ja">もんだい2</b><span>5 / 7</span></div>
     <button type="button" class="exam-review-row"><span class="exam-review-row__mark exam-review-row__mark--x">${I.cross}</span><span class="exam-review-row__q">Q9</span><span class="exam-review-row__jp" lang="ja">この本はとても＿＿＿です。</span>${I.chevR}</button>
     <button type="button" class="exam-review-row"><span class="exam-review-row__mark exam-review-row__mark--x">${I.cross}</span><span class="exam-review-row__q">Q12</span><span class="exam-review-row__blank">Left blank</span>${I.chevR}</button>
-    <div class="exam-group" style="border-top: 1px solid var(--surface-line);"><b lang="ja">もんだい3</b><span>4 / 6</span></div>
+    <div class="exam-group" style="border-top: 1px solid var(--surface-line);"><b lang="ja">もんだい3</b><span>6 / 8</span></div>
     <button type="button" class="exam-review-row"><span class="exam-review-row__mark exam-review-row__mark--x">${I.cross}</span><span class="exam-review-row__q">Q16</span><span class="exam-review-row__jp" lang="ja">週末は家で＿＿＿します。</span>${I.chevR}</button>
     <button type="button" class="exam-review-row"><span class="exam-review-row__mark exam-review-row__mark--x">${I.cross}</span><span class="exam-review-row__q">Q19</span><span class="exam-review-row__jp" lang="ja">駅の＿＿＿に銀行があります。</span>${I.chevR}</button>
   </div>
@@ -232,7 +232,7 @@ ${tabbar('practice', 24)}`
 // ── Decks · the shelf ──
 const deck = ({ glyph, color, name, type, n, due }) => `<button type="button" class="platform-card" style="--rail: ${color}; --line-color: ${color};">
   <span class="platform-card__lead" style="width: 58px; padding-left: 12px;"><span class="wmap-roundel" style="color: color-mix(in srgb, ${color} 60%, var(--text-primary));" lang="ja">${glyph}</span></span>
-  <span class="platform-card__body"><span class="platform-card__title">${name}</span><span class="platform-card__desc">${type}${due ? ` · <span style="color: var(--warning); font-weight: 700;">${due} due</span>` : ''}</span></span>
+  <span class="platform-card__body"><span class="platform-card__title" lang="ja">${name}</span><span class="platform-card__desc">${type}${due ? ` · <span style="color: var(--warning); font-weight: 700;">${due} due</span>` : ''}</span></span>
   <span class="platform-card__aside" style="min-width: 70px;"><span class="deck-card__count"><b>${n}</b><span>cards</span></span></span>
   <span class="platform-card__go">▶</span>
 </button>`
@@ -267,7 +267,7 @@ ${hud()}
   ${plate({ code: 'KZ', kana: 'きょうざい', name: '教材', latin: 'My decks', color: 'var(--line-decks)' })}
   <div class="deck-identity">
     <span class="wmap-roundel" style="--line-color: var(--line-vocab); color: color-mix(in srgb, var(--line-vocab) 60%, var(--text-primary));" lang="ja">単</span>
-    <span class="deck-identity__names"><span class="deck-identity__name">旅行</span><span class="deck-identity__meta">Vocabulary · 47 cards · <span style="color: var(--warning); font-weight: 700;">2 due</span></span></span>
+    <span class="deck-identity__names"><span class="deck-identity__name" lang="ja">旅行</span><span class="deck-identity__meta">Vocabulary · 47 cards · <span style="color: var(--warning); font-weight: 700;">2 due</span></span></span>
     <button type="button" class="btn-primary" style="background: color-mix(in srgb, var(--deck-action) 70%, var(--bg-panel));">▶ Study</button>
   </div>
   <div class="chip-row">
@@ -297,14 +297,14 @@ function calendar() {
 const STATS = `
 ${hud()}
 <main class="phone__content" style="--line-color: var(--accent8);">
-  ${plate({ code: 'TO', kana: 'とうけい', name: '統計', latin: 'Statistics', color: 'var(--accent8)' })}
+  ${plate({ code: 'TO', kana: 'とうけい', name: '統計', latin: 'Statistics', color: 'var(--accent8)', extra: '<button type="button" class="stage__leave" style="height: 36px;">' + I.chevL + '<span lang="ja">定期券</span></button>' })}
   <div class="headline">
     <div class="plaque"><span class="plaque__v">3<span class="plaque__u" lang="ja">日</span></span><span class="plaque__l">Streak</span></div>
     <div class="plaque"><span class="plaque__v">24</span><span class="plaque__l">Due today</span></div>
-    <div class="plaque"><span class="plaque__v">38<span class="plaque__u">%</span></span><span class="plaque__l">Mastered</span><span class="plaque__note">of 8,241 cards</span></div>
-    <div class="plaque"><span class="plaque__v">91<span class="plaque__u">%</span></span><span class="plaque__l">Accuracy</span><span class="plaque__note">across 12,904 reviews</span></div>
+    <div class="plaque"><span class="plaque__v">20<span class="plaque__u">%</span></span><span class="plaque__l">Mastered</span><span class="plaque__note">1,742 of 8,844 cards</span></div>
+    <div class="plaque"><span class="plaque__v">91<span class="plaque__u">%</span></span><span class="plaque__l">Accuracy</span><span class="plaque__note">across 842 reviews</span></div>
     <div class="plaque"><span class="plaque__v">1,204</span><span class="plaque__l">In progress</span></div>
-    <div class="plaque"><span class="plaque__v">3,905</span><span class="plaque__l">New</span><span class="plaque__note">never seen</span></div>
+    <div class="plaque"><span class="plaque__v">5,898</span><span class="plaque__l">New</span><span class="plaque__note">never seen</span></div>
   </div>
   <div class="section-header"><span class="section-header__mark"><span class="section-header__jp" lang="ja">暦</span><span class="section-header__title">Practice calendar</span></span><span class="section-header__count">14 weeks</span><span class="section-header__rule"></span></div>
   <div class="cal">
@@ -327,7 +327,7 @@ const SETTINGS = `
 ${hud()}
 <main class="phone__content">
   <div style="display:flex; align-items:flex-end; justify-content:space-between; gap: var(--sp-4);">
-    <div class="stg-head"><span class="stg-head__jp" lang="ja">設定</span><span class="stg-head__latin">Settings</span></div>
+    <div class="stg-head"><h1 class="stg-head__jp" lang="ja">設定</h1><span class="stg-head__latin">Settings</span></div>
     <button type="button" class="stage__leave">${I.chevL}<span lang="ja">定期券</span></button>
   </div>
   <div class="stg-list">
@@ -347,7 +347,7 @@ const SETTINGS_LEARN = `
 ${hud()}
 <main class="phone__content">
   <div style="display:flex; align-items:flex-end; justify-content:space-between; gap: var(--sp-4);">
-    <div class="stg-head"><span class="stg-head__jp" lang="ja">学習</span><span class="stg-head__latin">Learning</span></div>
+    <div class="stg-head"><h1 class="stg-head__jp" lang="ja">学習</h1><span class="stg-head__latin">Learning</span></div>
     <button type="button" class="stage__leave">${I.chevL}<span lang="ja">設定</span></button>
   </div>
   <div class="slip">
@@ -422,14 +422,14 @@ const ONB_GOAL = `
   </div>
   <div class="seg seg--full"><button type="button" class="seg__opt"><span class="seg__opt-latin">By date</span></button><button type="button" class="seg__opt seg__opt--on"><span class="seg__opt-latin">By pace</span></button></div>
   <div class="onb-board">
-    <div class="onb-board__head"><b lang="ja">発車</b><span>Departures · N3 日常</span></div>
+    <div class="onb-board__head"><b lang="ja">発車</b><span>Departures · N3 <span lang="ja">日常</span></span></div>
     ${svcRow({ jp: '各駅停車', en: 'Local',         pattern: [1,1,1,1,1,1], pace: 5,  min: 12, arrive: 'Mar 2029' })}
     ${svcRow({ jp: '快速',     en: 'Rapid',         pattern: [1,0,1,0,1,1], pace: 10, min: 20, arrive: 'Dec 2027', on: true, star: true })}
     ${svcRow({ jp: '新快速',   en: 'Special rapid', pattern: [1,0,0,1,0,1], pace: 15, min: 30, arrive: 'Jul 2027' })}
     ${svcRow({ jp: '特急',     en: 'Ltd. express',  pattern: [1,0,0,0,0,1], pace: 20, min: 35, arrive: 'Apr 2027' })}
     ${svcRow({ jp: '臨時',     en: 'Extra',         pattern: [1,0,0,0,1,1], pace: 25, min: 45, arrive: 'Feb 2027' })}
   </div>
-  <p class="onb-honest"><b>10 a day, every day</b> — about 20 minutes — <b>4,712 items</b>, arriving <b>日常</b> around <b>Dec 2027</b>. Miss days and this date moves — and the app will say so.</p>
+  <p class="onb-honest"><b>10 a day, every day</b> — about 20 minutes — <b>4,712 items</b>, arriving <b lang="ja">日常</b> around <b>Dec 2027</b>. Miss days and this date moves — and the app will say so.</p>
   <button type="button" class="onb-action">Continue</button>
 </main>`
 
@@ -453,8 +453,8 @@ const DICT_ENTRY = `
   <div class="dd-plate">
     <span class="dd-tategaki" lang="ja"><span>漢</span><span>字</span></span>
     <div class="dd-plate__body">
-      <div class="dd-plate__row"><span class="lvl" style="--lvl-color: var(--text-on-panel-soft); color: var(--text-on-panel-soft);">N5</span><span class="seal seal--mastered" lang="ja">極</span><span class="dd-plate__actions"><button type="button">${I.speaker}</button><button type="button">${I.cross}</button></span></div>
-      <span class="dd-head" lang="ja">三</span>
+      <div class="dd-plate__row"><button type="button" class="stage__leave" style="height: 40px; border-color: rgba(255,255,255,0.18); color: var(--text-on-panel);">${I.chevL}<span lang="ja">辞書</span></button><span class="lvl" style="--lvl-color: var(--text-on-panel-soft); color: var(--text-on-panel-soft);">N5</span><span class="seal seal--mastered" lang="ja">極</span><span class="dd-plate__actions"><button type="button">${I.speaker}</button></span></div>
+      <h1 class="dd-head" lang="ja">三</h1>
       <div class="dd-readings"><span class="dd-reading"><b lang="ja">音</b><span lang="ja">サン</span></span><span class="dd-reading"><b lang="ja">訓</b><span lang="ja">み · みっ(つ)</span></span></div>
     </div>
   </div>
@@ -479,8 +479,8 @@ ${hud()}
 <main class="phone__content" style="--line-color: var(--line-kaiseki); gap: var(--sp-4);">
   <div class="stage__head" style="min-height: 0;">
     <button type="button" class="stage__leave">${I.chevL}<span lang="ja">解析</span></button>
-    <span class="stage__where"><span class="stage__where-jp" lang="ja">駅で友達を…</span><span class="stage__where-latin">3 sentences · N3</span></span>
-    <span class="anl-kept" lang="ja" style="height: 22px; padding: 0 8px; font-size: 11px;">保存</span>
+    <span class="stage__where"><h1 class="stage__where-jp" lang="ja">駅で友達を…</h1><span class="stage__where-latin">3 sentences · N3</span></span>
+    <span class="anl-kept" lang="ja" style="height: 22px; padding: 0 8px;">保存</span>
   </div>
   <div class="anl-stepper">
     <button type="button" class="anl-stepper__btn">${I.chevL}</button>
@@ -489,11 +489,11 @@ ${hud()}
     <button type="button" class="anl-stepper__btn">${I.chevR}</button>
   </div>
   <div class="tok-line">
-    ${tok('駅', 'えき', 'mastered')}${tok('で', '', 'particle')}${tok('友達', 'ともだち', 'learning')}${tok('を', '', 'particle')}${tok('待って', 'まって', 'unknown')}${tok('います', '', 'new')}${tok('。', '', 'particle')}
+    ${tok('駅', 'えき', 'mastered')}${tok('で', '', 'particle')}${tok('友達', 'ともだち', 'learning')}${tok('を', '', 'particle')}${tok('待って', 'まって', 'unknown')}${tok('います', '', 'offdeck')}${tok('。', '', 'particle')}
   </div>
-  <div class="anl-legend"><span><i style="background: var(--state-mastered);"></i>mastered</span><span><i style="background: var(--state-learning);"></i>in progress</span><span><i style="background: var(--state-new);"></i>new</span><span><i style="background: var(--state-due);"></i>unknown</span></div>
+  <div class="anl-legend"><span><i style="background: var(--state-mastered);"></i>mastered</span><span><i style="background: var(--state-learning);"></i>in progress</span><span><i style="background: var(--state-new);"></i>unknown</span><span><i style="border-top: 2px dashed var(--text-secondary); height: 0;"></i>off-deck</span></div>
   <div class="token-card" style="--line-color: var(--line-kaiseki);">
-    <div class="token-card__head"><span class="token-card__surface" lang="ja">待つ</span><span class="token-card__reading" lang="ja">まつ</span><span class="type-badge token-card__pos">Verb · て-form</span></div>
+    <div class="token-card__head"><span class="token-card__surface" lang="ja">待つ</span><span class="token-card__reading" lang="ja">まつ</span><span class="type-badge token-card__pos">Verb · <span lang="ja">て</span>-form</span></div>
     <span class="token-card__gloss">to wait, to wait for</span>
     <div class="token-card__foot"><span class="token-card__kanji"><span lang="ja">待</span></span><button type="button" class="btn-primary" style="min-height: 38px; padding-inline: var(--sp-4); font-size: var(--fs-sm);">${I.plus} Add to deck</button></div>
   </div>
@@ -502,6 +502,7 @@ ${hud()}
 </main>
 ${tabbar('dict', 24)}`
 
+export { EXAM_RUNNER, ANL_RESULT, stageHead, progress, ratingBar, runRight, onbHeader }
 export const SCREENS2 = [
   ['RunFlashcard',    RUN_FLASH,      'In a run · flashcard',        'today'],
   ['RunDraw',         RUN_DRAW,       'In a run · draw',             'today'],

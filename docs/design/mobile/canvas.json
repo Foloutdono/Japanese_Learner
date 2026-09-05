@@ -40,9 +40,18 @@
       "page": "today"
     },
     {
+      "file": "TodayOutOfCredits.dc.html",
+      "title": "Today · no credits left",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "today"
+    },
+    {
       "file": "Run.dc.html",
       "title": "In a run",
-      "x": 470,
+      "x": 940,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -51,7 +60,16 @@
     {
       "file": "RunFlashcard.dc.html",
       "title": "In a run · flashcard",
-      "x": 940,
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "today"
+    },
+    {
+      "file": "RunCloze.dc.html",
+      "title": "In a run · fill in",
+      "x": 1880,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -60,7 +78,7 @@
     {
       "file": "RunDraw.dc.html",
       "title": "In a run · draw",
-      "x": 1410,
+      "x": 2350,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -69,7 +87,16 @@
     {
       "file": "RunReadings.dc.html",
       "title": "In a run · readings",
-      "x": 1880,
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "today"
+    },
+    {
+      "file": "RunBrowse.dc.html",
+      "title": "In a run · fast review",
+      "x": 3290,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -78,7 +105,25 @@
     {
       "file": "LevelUp.dc.html",
       "title": "In a run · level up",
-      "x": 2350,
+      "x": 3760,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "today"
+    },
+    {
+      "file": "Reissue.dc.html",
+      "title": "In a run · the rank reissued",
+      "x": 4230,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "today"
+    },
+    {
+      "file": "RunOutOfCredits.dc.html",
+      "title": "In a run · out of credits",
+      "x": 4700,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -87,7 +132,7 @@
     {
       "file": "RunComplete.dc.html",
       "title": "Run complete",
-      "x": 2820,
+      "x": 5170,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -112,9 +157,18 @@
       "page": "learn"
     },
     {
+      "file": "StationTiers.dc.html",
+      "title": "Station · 漢字 by frequency",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "learn"
+    },
+    {
       "file": "Platforms.dc.html",
       "title": "Platforms · 漢字 N4 modes",
-      "x": 940,
+      "x": 1410,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -123,7 +177,16 @@
     {
       "file": "Decks.dc.html",
       "title": "My decks",
-      "x": 1410,
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "learn"
+    },
+    {
+      "file": "DeckCreate.dc.html",
+      "title": "My decks · create",
+      "x": 2350,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -132,7 +195,16 @@
     {
       "file": "DeckDetail.dc.html",
       "title": "My decks · a deck",
-      "x": 1880,
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "learn"
+    },
+    {
+      "file": "DeckAddCard.dc.html",
+      "title": "My decks · a new card",
+      "x": 3290,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -166,9 +238,36 @@
       "page": "practice"
     },
     {
+      "file": "ComprehensionResult.dc.html",
+      "title": "Reading comprehension · result",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "practice"
+    },
+    {
+      "file": "TranslationWrite.dc.html",
+      "title": "Translation · writing",
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "practice"
+    },
+    {
       "file": "Translation.dc.html",
       "title": "Translation · feedback",
-      "x": 1410,
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "practice"
+    },
+    {
+      "file": "ExamPapers.dc.html",
+      "title": "Mock exam · the papers",
+      "x": 2820,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -177,7 +276,16 @@
     {
       "file": "ExamRunner.dc.html",
       "title": "Mock exam · runner",
-      "x": 1880,
+      "x": 3290,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "practice"
+    },
+    {
+      "file": "ConfirmSheet.dc.html",
+      "title": "Mock exam · finish with blanks",
+      "x": 3760,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -186,7 +294,7 @@
     {
       "file": "ExamResult.dc.html",
       "title": "Mock exam · result",
-      "x": 2350,
+      "x": 4230,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -220,9 +328,36 @@
       "page": "dict"
     },
     {
+      "file": "AnalyzerPhoto.dc.html",
+      "title": "Analyzer · photo",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "dict"
+    },
+    {
+      "file": "AnalyzerVideo.dc.html",
+      "title": "Analyzer · video",
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "dict"
+    },
+    {
       "file": "AnalyzerResult.dc.html",
       "title": "Analyzer · the sentence",
-      "x": 1410,
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "dict"
+    },
+    {
+      "file": "DeckPickerSheet.dc.html",
+      "title": "Analyzer · add to deck",
+      "x": 2820,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -292,6 +427,15 @@
       "page": "pass"
     },
     {
+      "file": "SettingsDestination.dc.html",
+      "title": "Settings · destination",
+      "x": 3290,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "pass"
+    },
+    {
       "file": "SignIn.dc.html",
       "title": "Sign in",
       "x": 0,
@@ -301,9 +445,27 @@
       "page": "arrival"
     },
     {
+      "file": "OfficeRide.dc.html",
+      "title": "Ticket office · first ride",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
       "file": "OfficeBoarding.dc.html",
       "title": "Ticket office · boarding",
-      "x": 470,
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "OfficeTest.dc.html",
+      "title": "Ticket office · placement test",
+      "x": 1410,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -312,7 +474,25 @@
     {
       "file": "OfficeGoal.dc.html",
       "title": "Ticket office · destination",
-      "x": 940,
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "OfficePromise.dc.html",
+      "title": "Ticket office · the promise",
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "OfficePass.dc.html",
+      "title": "Ticket office · the application",
+      "x": 2820,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -325,6 +505,15 @@
       "y": 0,
       "w": 1180,
       "h": 1320,
+      "page": "chrome"
+    },
+    {
+      "file": "States.dc.html",
+      "title": "States · loading, empty, error, wrong, six grades",
+      "x": 1260,
+      "y": 0,
+      "w": 1180,
+      "h": 880,
       "page": "chrome"
     }
   ],
