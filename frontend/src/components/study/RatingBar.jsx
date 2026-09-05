@@ -21,41 +21,9 @@ const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '§': 5 }
 // the ring closing, not a toast. Matched to the idle fade in index.css.
 const PRESSED_MS = 420
 
-// ── The instrument's form — an open choice ─────────────────────
-// Three drawings of the same bar are side by side while the maintainer
-// picks one (see "the rating bar" in index.css): the choice is read
-// per bar from localStorage so it can be tried in a real session from
-// /dev/rewards, and a caller may name a form outright (the workbench
-// does). The picked one stays; the others go, and so does this.
-// eslint-disable-next-line react-refresh/only-export-components -- the workbench's list, co-located with the bar it draws.
-export const RATING_FORMS = [
-  { key: 'ring',  jp: '輪', label: 'Ring above the word (current)' },
-  { key: 'board', jp: '標', label: 'Board row: the ramp as a rule' },
-  { key: 'dock',  jp: '改札', label: 'Sumi dock, one with the HUD' },
-  { key: 'pill',  jp: '札', label: 'Hairline pill, colour on press' },
-]
-const DEFAULT_RATING_FORM = 'ring'
-const FORM_KEY = 'jp-rating-form'
-
-// eslint-disable-next-line react-refresh/only-export-components -- the form switch is the workbench's, co-located with the bar it switches.
-export function readRatingForm() {
-  try {
-    const v = window.localStorage.getItem(FORM_KEY)
-    return RATING_FORMS.some(f => f.key === v) ? v : DEFAULT_RATING_FORM
-  } catch {
-    return DEFAULT_RATING_FORM
-  }
-}
-
-// eslint-disable-next-line react-refresh/only-export-components -- see readRatingForm.
-export function setRatingForm(key) {
-  try { window.localStorage.setItem(FORM_KEY, key) } catch { /* not persisted */ }
-}
-
-export default function RatingBar({ onRate, active, scale, form }) {
+export default function RatingBar({ onRate, active, scale }) {
   const { t } = useLang()
   const preferred = useRatingScale()
-  const drawn = form ?? readRatingForm()
   const [pressed, setPressed] = useState(null)
   const pressedTimer = useRef(null)
   useEffect(() => () => clearTimeout(pressedTimer.current), [])
@@ -108,7 +76,7 @@ export default function RatingBar({ onRate, active, scale, form }) {
   // so nothing is reachable before there is a card to rate. The
   // keyboard handler above is separately gated on `active`.
   return (
-    <div className={`rating-bar rating-bar--${drawn}${active ? '' : ' rating-bar--idle'}`} aria-hidden={!active}>
+    <div className={`rating-bar${active ? '' : ' rating-bar--idle'}`} aria-hidden={!active}>
       {/* One continuous instrument, worst to best -- see index.css for
           why. `.map()` already returns a new array, so the `.reverse()`
           below sorts that copy and never QUALITY_BTNS itself; DOM order

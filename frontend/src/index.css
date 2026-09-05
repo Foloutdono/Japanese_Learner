@@ -12294,15 +12294,24 @@ textarea:focus-visible {
       instrument stopped reading as a shape and started reading as a
       default, and its curve ate roughly the first and last 28px of the
       colour ramp -- at exactly the two ratings pressed most. The
-      container takes --r-card, and the colour moves off the bottom edge
-      into a ring above each word: unfilled at rest, filled when that
-      rating is chosen. Colour above the type also leaves the six words
-      sharing one clean baseline. */
+      container takes --r-panel, and the colour sits above each word as
+      a mark that fills out when that rating is chosen. Colour above the
+      type also leaves the six words sharing one clean baseline.
+
+   3. IT IS CHROME (the study-mode redesign, chosen from three forms
+      drawn side by side). The bar is the same sumi as the top bar and
+      the level HUD, with the panel inks: on a phone it docks straight
+      onto the HUD, edge to edge, so the bottom of the screen is one
+      console and the paper card is the only bright thing on it. On a
+      desktop it is a sumi panel under the card. The ramp is a 6px dot
+      above each word, three-quarters strength at rest, full with a
+      halo on press. Sumi is dark in both themes, so the pair below is
+      closed: the words never take an ambient ink. */
 .rating-bar__buttons {
   display: flex;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  background: var(--bg-panel);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  border-radius: var(--r-panel);
   overflow: hidden;
   max-width: 640px;
   margin: 0 auto;
@@ -12322,14 +12331,14 @@ textarea:focus-visible {
   padding: var(--sp-3) var(--sp-1);
   background: none;
   border: none;
-  border-left: 1px solid var(--surface-line);
+  border-left: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
   /* The bare `button` rule gives every button 8px. Inherited here it
      bent each segment's 1px hairline at all four corners, so the
      dividers read as curved rather than as ruled lines -- most visible
      once the bar wraps and the grid has interior corners. The container
      keeps its own radius; the cells inside it are square. */
   border-radius: 0;
-  color: var(--text-primary);
+  color: var(--text-on-panel);
   text-align: center;
   transition: background 0.15s ease;
 }
@@ -12340,32 +12349,36 @@ textarea:focus-visible {
   background: color-mix(in srgb, var(--rating-color, transparent) 14%, transparent);
 }
 
-/* The seal. Unfilled is the resting state and filled is the chosen one,
-   which is the same gesture as pressing a hanko -- and unlike a tint it
+/* The mark. A dot in the rating's colour above each word, three
+   quarters strength at rest and full with a halo when that rating is
+   chosen -- the same gesture as pressing a hanko, and unlike a tint it
    survives being glanced at. `flex: none` because a column flex item
    shrinks to nothing next to a text run otherwise. */
 .rating-bar__btn-ring {
-  width: 12px;
-  height: 12px;
+  width: 6px;
+  height: 6px;
   border-radius: var(--r-pill);
-  border: 2px solid var(--rating-color, var(--text-secondary));
-  background: none;
+  border: 0;
+  background: var(--rating-color, var(--text-on-panel-soft));
+  opacity: 0.75;
   flex: none;
-  transition: background 0.15s ease;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
 }
 .rating-bar__btn:hover .rating-bar__btn-ring,
 .rating-bar__btn:focus-visible .rating-bar__btn-ring {
-  background: var(--rating-color, transparent);
+  opacity: 1;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rating-color, transparent) 30%, transparent);
 }
 
-/* Pressed: the seal filled and the segment washed, held for the
-   moment the bar takes to fade. Written at hover's own specificity
-   so it neither loses to it nor descends below it. */
+/* Pressed: the mark full and the segment washed, held for the moment
+   the bar takes to fade. Written at hover's own specificity so it
+   neither loses to it nor descends below it. */
 .rating-bar__btn.rating-bar__btn--pressed {
   background: color-mix(in srgb, var(--rating-color, transparent) 14%, transparent);
 }
 .rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-ring {
-  background: var(--rating-color, transparent);
+  opacity: 1;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rating-color, transparent) 30%, transparent);
 }
 
 .rating-bar__btn-label {
@@ -12390,105 +12403,6 @@ textarea:focus-visible {
    in dark theme and exactly --line-kana/--state-learning in light
    theme. See :root, above, for why this gets its own named colour. */
 .rating-bar__btn--q1 { --rating-color: var(--rating-wrong); }
-
-/* ── The instrument's form — an open choice ───────────────
-   Three redrawings of the same bar sit beside the current one while
-   the maintainer picks (see RATING_FORMS in RatingBar.jsx). Every one
-   keeps what the bar IS — one container, hairlines between segments,
-   worst to best left to right, a ring or mark that fills on press —
-   and changes only how it is drawn. The picked one folds into the base
-   rules above; the others go, and so does this block.
-
-   標 — the board row. The colour is the ramp: a 3px rule under each
-   segment, the way this bar was first described, and no ring. Flat
-   corners, like a row on the departure board.
-
-   改札 — the sumi dock. The bar is chrome: the same sumi as the top
-   bar and the level HUD, so on a phone the bottom of the screen reads
-   as one console. Kinari words; the ramp is a small mark under each,
-   which fills out on press.
-
-   札 — the hairline pill. The same construction as the hint pills
-   above the card: transparent, a hairline, the word. The ramp at rest
-   is a dot before each word; colour washes the segment only on press.
-
-   Resting rules for all three first, then every hover and press, so
-   no selector descends below one it shares a target with. */
-.rating-bar--board .rating-bar__buttons {
-  border-radius: var(--r-flat);
-  background: transparent;
-  border-inline: 0;
-}
-.rating-bar--dock .rating-bar__buttons {
-  background: var(--bg-panel);
-  border-color: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-  border-radius: var(--r-panel);
-}
-.rating-bar--pill .rating-bar__buttons {
-  border-radius: var(--r-pill);
-  background: transparent;
-}
-.rating-bar--board .rating-bar__btn {
-  position: relative;
-  gap: 0;
-  color: var(--text-secondary);
-}
-.rating-bar--dock .rating-bar__btn {
-  color: var(--text-on-panel);
-  border-left-color: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-}
-.rating-bar--pill .rating-bar__btn {
-  flex-direction: row;
-  gap: var(--sp-2);
-  color: var(--text-secondary);
-}
-.rating-bar--board .rating-bar__btn::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 3px;
-  background: var(--rating-color, var(--text-secondary));
-  opacity: 0.55;
-  transition: opacity 0.15s ease;
-}
-.rating-bar--board .rating-bar__btn .rating-bar__btn-ring { display: none; }
-.rating-bar--dock .rating-bar__btn .rating-bar__btn-ring {
-  width: 6px;
-  height: 6px;
-  border: 0;
-  background: var(--rating-color, var(--text-on-panel-soft));
-  opacity: 0.75;
-  transition: opacity 0.15s ease, box-shadow 0.15s ease;
-}
-.rating-bar--pill .rating-bar__btn .rating-bar__btn-ring {
-  width: 6px;
-  height: 6px;
-  border: 0;
-  background: var(--rating-color, var(--text-secondary));
-  opacity: 0.6;
-}
-.rating-bar--board .rating-bar__btn:hover,
-.rating-bar--board .rating-bar__btn:focus-visible,
-.rating-bar--board .rating-bar__btn.rating-bar__btn--pressed,
-.rating-bar--pill .rating-bar__btn:hover,
-.rating-bar--pill .rating-bar__btn:focus-visible { color: var(--text-primary); }
-.rating-bar--pill .rating-bar__btn.rating-bar__btn--pressed {
-  color: color-mix(in srgb, var(--rating-color, transparent) 60%, var(--text-primary));
-}
-.rating-bar--board .rating-bar__btn:hover::after,
-.rating-bar--board .rating-bar__btn:focus-visible::after,
-.rating-bar--board .rating-bar__btn.rating-bar__btn--pressed::after { opacity: 1; }
-.rating-bar--dock .rating-bar__btn:hover .rating-bar__btn-ring,
-.rating-bar--dock .rating-bar__btn:focus-visible .rating-bar__btn-ring,
-.rating-bar--dock .rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-ring {
-  opacity: 1;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rating-color, transparent) 30%, transparent);
-}
-.rating-bar--pill .rating-bar__btn:hover .rating-bar__btn-ring,
-.rating-bar--pill .rating-bar__btn:focus-visible .rating-bar__btn-ring,
-.rating-bar--pill .rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-ring { opacity: 1; }
 
 /* On a 375px phone this bar spans ~320px, so each segment is 53.3px --
    measured in the running app, not derived from the viewport, because the
@@ -18427,7 +18341,7 @@ textarea:focus-visible {
     gap: var(--sp-5);
     padding-top: var(--sp-7);
     padding-inline: var(--sp-5);
-    padding-bottom: calc(var(--hud-h) + var(--sp-5) + var(--safe-bottom));
+    padding-bottom: calc(var(--hud-h) + var(--safe-bottom));
     /* Matched to .levelup's slide, so the page moves with the board. */
     transition: padding-top 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
   }
@@ -18455,23 +18369,21 @@ textarea:focus-visible {
     flex-direction: column;
     justify-content: center;
   }
+  /* The dock: sumi, edge to edge, and straight onto the HUD below it,
+     so the two are one console at the bottom of the screen. The
+     instrument inside it goes transparent and keeps only its hairline;
+     the sumi is the wrapper's, which is what runs to the edges. */
   .quiz-area > .rating-bar {
     position: sticky;
     bottom: calc(var(--hud-h) + var(--safe-bottom));
     z-index: 10;
     margin-top: auto;
-    padding-block: var(--sp-3);
-    background: var(--bg-main);
-  }
-  /* The sumi dock (an open choice, see RatingBar.jsx): edge to edge and
-     straight onto the HUD, so the two are one console. */
-  .quiz-area > .rating-bar--dock {
-    background: var(--bg-panel);
     margin-inline: calc(-1 * var(--sp-5));
+    padding-block: var(--sp-3);
     padding-inline: var(--sp-5);
+    background: var(--bg-panel);
   }
-  .quiz-area:has(> .rating-bar--dock) { padding-bottom: calc(var(--hud-h) + var(--safe-bottom)); }
-  .quiz-area > .rating-bar--dock .rating-bar__buttons { background: transparent; }
+  .quiz-area > .rating-bar .rating-bar__buttons { background: transparent; }
   /* While the level board is docked across the top (see XpToast.jsx),
      the stage slides down under it: a panel takes its place, the card
      keeps its head clear, and everything slides back as it leaves. */
@@ -23456,33 +23368,6 @@ html { scrollbar-gutter: stable; }
 .preview-row__tier--stamp { background: color-mix(in srgb, var(--state-learning) 22%, transparent); color: color-mix(in srgb, var(--state-learning) 65%, var(--text-primary)); }
 /* The card the stamp rows strike: a study stage, but one that sits in
    the page's flow rather than filling the screen. */
-/* The rating bar's forms on the workbench, one under the other, the
-   one switched on marked. */
-.preview-forms {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-6);
-}
-.preview-form__pick {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-3);
-  margin-bottom: var(--sp-3);
-  padding: var(--sp-2) var(--sp-4);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 600;
-}
-.preview-form__pick[aria-pressed="true"] {
-  background: color-mix(in srgb, var(--accent2) 14%, transparent);
-  border-color: color-mix(in srgb, var(--accent2) 60%, transparent);
-  color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
-}
-.preview-form__pick [lang="ja"] { font-family: var(--font-jp); font-weight: 700; }
 .preview-stage {
   flex: none;
   padding: var(--sp-6) 0;

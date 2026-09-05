@@ -414,15 +414,21 @@ So:
 ### Controls
 
 - **The rating bar** — the most-used control in the app — is **one continuous
-  instrument**, not a row of buttons. A single box, its segments divided by
-  hairlines rather than gaps, the plain word alone as the label (the
-  maintainer retired the Japanese term from the bar; see the rule's own
-  comment in `index.css`) and a ring above each word carrying the colour:
-  unfilled at rest, filled by the segment just pressed. That press is the
-  bar's whole acknowledgement — the bar fades out with the ring still
-  filled while the next card arrives, and nothing else says "rated". On a
-  phone, four segments stay on **one row**, the shape a thumb sweeps along
-  the bottom edge; only the six-segment bar wraps.
+  instrument**, not a row of buttons, and it is **chrome**: the same sumi as
+  the top bar and the level HUD, with the panel inks. A single panel, its
+  segments divided by hairlines rather than gaps, the plain word alone as the
+  label (the maintainer retired the Japanese term from the bar; see the
+  rule's own comment in `index.css`) and a dot above each word carrying the
+  colour: three-quarters strength at rest, full with a halo on the segment
+  just pressed. That press is the bar's whole acknowledgement — the bar
+  fades out with the mark still full while the next card arrives, and
+  nothing else says "rated". On a phone it **docks straight onto the level
+  HUD, edge to edge**, so the bottom of the screen is one console and the
+  paper card is the only bright thing on it; four segments stay on **one
+  row**, the shape a thumb sweeps along that edge, and only the
+  six-segment bar wraps. Chosen from three forms drawn side by side in the
+  study-mode redesign (a board row with the ramp as a rule, this dock, a
+  hairline pill).
 - **The streak is a スタンプラリー stamp rally**, not a flame — a row of
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a

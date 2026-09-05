@@ -4,7 +4,6 @@ import { TopBar } from '../components/ui/TopBar'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
-import RatingBar, { RATING_FORMS, readRatingForm, setRatingForm } from '../components/study/RatingBar'
 import PromptCard from '../components/study/PromptCard'
 import { CharDisplay } from '../components/study/QuizComponents'
 import { LEVEL_TITLES, levelTitle } from '../domain/levelTitle'
@@ -52,9 +51,6 @@ export default function RewardsPreview() {
   const navigate = useNavigate()
   const [toast, setToast] = useState(null)
   const [stamp, setStamp] = useState(null)
-  // The rating bar's form — an open choice, see RatingBar.jsx. Written
-  // through to localStorage so a real session draws it too.
-  const [ratingForm, pickForm] = useState(readRatingForm)
 
   useEffect(() => { seedSummary(SEED) }, [])
 
@@ -138,28 +134,6 @@ export default function RewardsPreview() {
               note={note}
               onClick={() => setStamp({ ...transition, id: Date.now(), cardKey: 'preview' })}
             />
-          ))}
-        </div>
-
-        <SectionHeader jp="評価" title="Rating bar" />
-        <p className="preview-note">
-          Four drawings of the same instrument, live. The one switched on here
-          is the one a real session draws — pick, then study a few cards.
-        </p>
-        <div className="preview-forms">
-          {RATING_FORMS.map(f => (
-            <div key={f.key} className="preview-form">
-              <button
-                type="button"
-                className="preview-form__pick"
-                aria-pressed={ratingForm === f.key}
-                onClick={() => { setRatingForm(f.key); pickForm(f.key) }}
-              >
-                <span lang="ja">{f.jp}</span>
-                {f.label}
-              </button>
-              <RatingBar active form={f.key} onRate={() => {}} />
-            </div>
           ))}
         </div>
 
