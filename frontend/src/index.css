@@ -11666,7 +11666,7 @@ textarea:focus-visible {
 .stage-badge__glyph { display: block; }
 
 /* Used where there's no card corner to strike into — e.g. the
-   dictionary identity plate's top row (see .dict-detail__stage-badges)
+   dictionary plate's top row (see .dict-plate__marks)
    — same seal, laid out in flow next to the level tab instead of
    floating absolutely over a positioned parent. */
 .stage-badge--inline {
@@ -14325,207 +14325,653 @@ textarea:focus-visible {
   text-transform: uppercase;
 }
 
-/* ── Identity plate ────────────────────────────────────────
-   Dark ink stage for the headword — same sumi block as the top bar /
-   home header. Now a centred composition rather than a left-aligned
-   row: the headword sits alone in the middle with its reading
-   directly beneath it, level/status in one top corner and the
-   actions in the other, so the eye lands on the character first and
-   everything else reads as annotation around it. The 3px top rule
-   (previously a fixed vermillion line on the old modal shell) is
-   driven by --type-color here instead — see typeStyle in
-   DictionaryDetail.jsx — so a kanji, a word and a kana panel are
-   visibly different objects. Corners inherit whatever radius the
-   dock around it has, so it always sits flush. */
-.dict-detail__stage {
-  position: relative;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
+/* ══ 見出し語 — the entry, as a plate ═══════════════════════
+   The detail panel (components/dictionary/DictionaryDetail.jsx). It
+   used to be a different object from the catalogue plate the reader
+   had just tapped: a sumi stage, a tategaki type mark in another
+   section's pigment, a vermillion speaker, and seven uppercase section
+   labels — SENSES (JMDICT), EXAMPLES, MADE OF THESE KANJI… — each with
+   a coloured tick, captioning blocks whose content already said what
+   they were (DESIGN.md, "Say less"). Nearly every size in it was a
+   literal.
+
+   Now it is the same plate, at reading size: reading over headword
+   over plain-language caption, 辞書's gold as the stripe along its
+   bottom edge, on the one card surface. Under it, blocks divided by
+   hairlines and nothing else — a numbered list is a definition, a
+   sentence over its translation is an example, strokes drawn on washi
+   beside a stroke count are how the character is written. Figures are
+   the profile's own `.record` cells, so a stroke count here and a
+   retention figure on the 定期入れ are one object. Every size, space,
+   radius and tracking below is a token.
+
+   The pigment arrives as --line-color from the shell (.dict-dock,
+   .dict-sheet — see the catalogue block near the end of this file)
+   and is spent as an edge and as numerals, never as a fill. */
+.dict-entry {
+  /* 山吹 as an ink. Raw, the gold reads 6.4:1 on dark paper and 2.9:1
+     on light; mixed 60% toward the ambient ink it clears the floor in
+     both (5.2:1 light, 8.6:1 dark — Guard 4 measures it). Named once
+     here so the sense numerals and the highlighted headword in an
+     example read the same pair; the stripe, the rail and the hover
+     rings stay raw, because an edge is not text. */
+  --dict-ink: color-mix(in srgb, var(--line-color, var(--accent2)) 60%, var(--text-primary));
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 24px 28px;
+  min-height: 100%;
+  color: var(--text-primary);
 }
 
-.dict-detail__stage-top {
+/* ── The plate ─────────────────────────────────────────────
+   Sticky at the top of whichever shell scrolls it, so the word stays
+   in view while its examples pass under it: this is the reading view,
+   and on a phone it is the whole screen. The seal and the level in one
+   corner, the two actions in the other, the three registers centred
+   between them, the stripe as its bottom edge — the construction of
+   .dict-entry-card, one size up. */
+.dict-plate {
+  position: sticky;
+  top: var(--safe-top);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5) 0;
+  background: var(--surface);
+}
+.dict-plate__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  width: 100%;
+  gap: var(--sp-4);
+  min-height: var(--sp-8);
 }
-.dict-detail__stage-badges {
+.dict-plate__marks {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 42px; /* matches the action buttons, so the row keeps
-                       its height even for an entry with no level */
+  gap: var(--sp-4);
 }
-
-/* Level tab and status seal both live on sumi now. The seal's own
-   --seal-color is tuned for a card surface (see .stage-badge): in the
-   light theme --state-new is a near-black that would vanish against
-   this panel, so 'new' switches to the constant on-panel soft tone.
-   Vermillion and gold already read correctly on ink in both themes. */
-.dict-detail__stage .stage-badge { --seal-color: var(--text-on-panel-soft); }
-.dict-detail__stage .stage-badge--learning { --seal-color: var(--state-learning); }
-.dict-detail__stage .stage-badge--mastered { --seal-color: var(--state-mastered); }
-
-/* Running head, tategaki — what kind of entry this is, set vertically
-   down the plate's left edge the way a printed dictionary prints its
-   own. Absolutely positioned so it never pulls the headword off
-   centre, and quiet enough to read as a watermark rather than a
-   label competing with the character. */
-.dict-detail__type-mark {
-  position: absolute;
-  top: 60%;
-  left: 14px;
-  transform: translateY(-50%);
-  writing-mode: vertical-rl;
-  /* Without this the label wraps into a second column whenever the
-     plate is short — the katakana plate has no readings block, so
-     片仮名 broke across two columns and, because vertical-rl stacks
-     columns right to left, rendered as 名 / 片仮. */
-  white-space: nowrap;
-  font-family: var(--font-jp);
-  font-size: 25px;
-  letter-spacing: 0.34em;
-  color: var(--type-color, var(--accent));
-  opacity: 0.75;
-  user-select: none;
-  pointer-events: none;
+/* The level is a numeral in the caption register — N5, N1 — not the
+   catalogue's tinted tag: with one entry on screen the difficulty
+   colour has nothing to compare against. */
+.dict-plate__level {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-secondary);
 }
-
-.dict-detail__char {
-  font-size: 60px;
-  font-family: var(--font-jp);
-  color: var(--text-on-panel);
-  line-height: 1.15;
-  text-align: center;
-}
-/* Furigana over the headline word (vocab only — see headwordFurigana in
-   DictionaryDetail.jsx). Sized relative to the headline itself (em)
-   so it scales together with it at every breakpoint. */
-.dict-detail__char ruby { ruby-position: over; }
-.dict-detail__char rt {
-  font-size: 0.3em;
-  font-weight: 400;
-  color: var(--text-on-panel-soft);
-  letter-spacing: 0.02em;
-  user-select: none;
-}
-.dict-detail__speak-btn {
-  flex-shrink: 0;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--text-on-panel);
+.dict-plate__actions {
   display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+/* Two ghosts: a ring, the ambient ink, and the line pigment on the
+   ring when approached. The speaker was a filled vermillion disc — a
+   fill of 仮名's pigment on a 辞書 object, and a second "primary" on a
+   panel that has no primary action. */
+.dict-plate__btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transform: rotate(-4deg);
-  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  width: var(--sp-8);
+  height: var(--sp-8);
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
-.dict-detail__speak-btn:hover { transform: rotate(0deg) scale(1.06); }
-.dict-detail__speak-icon { width: 18px; height: 18px; }
+/* Every reduced-motion answer in this block sits right after the rule
+   it answers, before that rule's :hover — a plain selector written
+   after its own pseudo-class is descending specificity, which the
+   stylelint ratchet counts. */
+@media (prefers-reduced-motion: reduce) {
+  .dict-plate__btn { transition: none; }
+}
+.dict-plate__btn:hover,
+.dict-plate__btn:focus-visible {
+  filter: none;
+  border-color: var(--line-color, var(--accent2));
+  background: var(--overlay-hover);
+}
+.dict-icon { width: 18px; height: 18px; }
 
-.dict-detail__stage-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-
-/* ── Reading, on the plate ─────────────────────────────────
-   A kanji's on/kun split, sitting directly under the headword it
-   belongs to instead of in the body below. Reuses the shared
-   <Readings> component (see Readings.jsx) but re-laid-out for this
-   context: each group becomes one centred line, its 音 / 訓 label a
-   small carved square — the same seal language as .stage-badge — so
-   the two registers are distinguishable at a glance without the long
-   translated "Lectures on'yomi (sino-japonaises)" labels the body
-   version uses. */
-.dict-detail__stage-readings {
+.dict-plate__stack {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-5);
+  text-align: center;
+}
+
+/* A kanji's readings, on the plate: the shared <Readings> component
+   (Readings.jsx) re-laid-out as centred lines, each led by its 音 / 訓
+   mark in a small carved square, so the two registers tell apart
+   without the long translated labels the study card prints. The
+   1./2. ordinals earn their keep in a long list, not on a plate of
+   two or three tokens. */
+.dict-plate__readings {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
   max-width: 100%;
 }
-.dict-detail__stage-readings .reading-group {
+.dict-plate__readings .reading-group {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--sp-3);
   margin-bottom: 0;
 }
-.dict-detail__stage-readings .reading-group__label {
+.dict-plate__readings .reading-group__label {
   flex-shrink: 0;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 21px;
-  height: 21px;
+  width: var(--sp-6);
+  height: var(--sp-6);
   margin-bottom: 0;
-  border-radius: 4px;
-  border: 1px solid color-mix(in srgb, var(--text-on-panel-soft) 55%, transparent);
-  background: color-mix(in srgb, var(--text-on-panel-soft) 12%, transparent);
-  color: var(--text-on-panel-soft);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
   font-family: var(--font-jp);
-  font-size: 12px;
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
   line-height: 1;
+  color: var(--text-secondary);
 }
-.dict-detail__stage-readings .reading-group__list { justify-content: center; }
-.dict-detail__stage-readings .reading-group__item { color: var(--text-on-panel); }
-.dict-detail__stage-readings .reading-group__item-text { font-family: var(--font-jp); }
-/* The 1./2. ordinals earn their keep in the body's full reading list,
-   but on a one-line plate they're clutter around what is usually two
-   or three tokens. */
-.dict-detail__stage-readings .reading-group__item-index { display: none; }
+.dict-plate__readings .reading-group__list {
+  justify-content: center;
+  gap: 0 var(--sp-4);
+}
+.dict-plate__readings .reading-group__item {
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  letter-spacing: var(--tr-term);
+  color: var(--text-secondary);
+}
+.dict-plate__readings .reading-group__item-index { display: none; }
+/* A word whose furigana alignment came back empty still shows its
+   reading — on the line above the word, tracked like a plate's kana. */
+.dict-plate__reading {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tr-reading);
+  text-indent: var(--tr-reading);
+  color: var(--text-secondary);
+}
 
-/* Kana's romaji — its only "reading", so it gets the plain treatment
-   rather than the on/kun apparatus above. */
-.dict-detail__stage-romaji {
+/* The headword. --font-jp, like the catalogue plate and the study
+   card: it is a specimen, the shape the reader is here to look at,
+   not a name in the serif. A lone character takes the specimen rung
+   the study card's word uses — the one rung above the nine — because
+   it is that object, read instead of quizzed; a word the display
+   rung; a long expression steps down once so it stays whole on a
+   340px dock (see headwordSize in DictionaryDetail.jsx). */
+.dict-plate__word {
+  margin: 0;
+  max-width: 100%;
+  font-family: var(--font-jp);
+  font-weight: 400;
+  font-size: var(--fs-display);
+  line-height: 1.2;
+  letter-spacing: var(--tr-term);
+  text-indent: var(--tr-term);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+.dict-plate__word--glyph {
+  font-size: var(--fs-specimen-word);
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-indent: 0;
+}
+.dict-plate__word--long { font-size: var(--fs-heading); }
+/* Furigana over the headline word (vocab only — see headwordFurigana
+   in DictionaryDetail.jsx). */
+.dict-plate__word ruby { ruby-position: over; }
+.dict-plate__word rt {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+/* The plain-language line: the first gloss, or a kana's romaji — set
+   exactly as the station plate sets its romaji, one rung up for
+   legibility under a specimen, and clamped to two lines (the whole
+   list lives in the body). */
+.dict-plate__caption {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 100%;
   font-family: var(--font-display);
-  font-size: 15px;
-  letter-spacing: 0.16em;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
   text-transform: uppercase;
-  color: var(--text-on-panel-soft);
+  color: var(--text-secondary);
+}
+/* The line stripe: the one place the plate carries colour — the same
+   3px edge the catalogue plate wears, in 辞書's pigment here. */
+.dict-plate__stripe {
+  flex-shrink: 0;
+  height: 3px;
+  background: var(--line-color, var(--accent2));
 }
 
-/* Only shown once the fullscreen mobile sheet kicks in (see the
-   @media block below) — the desktop side panel already sits next to
-   the results grid and closes just as easily by clicking elsewhere,
-   so it doesn't need its own dismiss button up top. */
-.dict-detail__close-x {
-  display: none;
-  width: 42px;
-  height: 42px;
+/* ── The body ──────────────────────────────────────────────
+   Blocks divided by hairlines. No block prints a heading: each is
+   legible from its content, and carries its name as an aria-label for
+   a screen reader instead. */
+.dict-entry__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.dict-block { padding: var(--sp-5) var(--sp-5); }
+.dict-block + .dict-block { border-top: 1px solid var(--surface-line); }
+/* A state of the block, not a figure in it: "due now" over the
+   record, in the due ink mixed toward the ambient one the way the
+   study card's stage word is (.stage-mark) — the raw state colour is
+   under the floor as text on paper. */
+.dict-block__note {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-end;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--state-due) 65%, var(--text-primary));
+}
+.dict-block > .dict-block__note { display: flex; justify-content: flex-end; }
+
+/* ── What it means ─────────────────────────────────────────
+   JMdict senses: a tabular numeral in the entry's ink, then the tags,
+   the glosses and the sentences that illustrate that sense. */
+.dict-senses {
+  list-style: none;
+  margin: 0;
   padding: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.dict-sense {
+  display: grid;
+  grid-template-columns: var(--sp-6) minmax(0, 1fr);
+  gap: var(--sp-3);
+  align-items: baseline;
+}
+.dict-sense__n {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dict-ink);
+}
+.dict-sense__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.dict-sense__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
+}
+.dict-sense__gloss {
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+.dict-sense__examples {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: var(--sp-1);
+}
+/* The app's own gloss line, for a kanji or a word with no senses:
+   one line of prose, its glosses joined by the shared middot. */
+.dict-gloss {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* A grammatical tag ("n", "v1", "uk"): a word in the caption register
+   with a dotted rule under it, which is the whole hint that it opens
+   a note. Not a pill — a run of pills over every sense was the
+   loudest thing in the body and said the least. */
+.dict-tag {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: var(--tr-term);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  text-decoration: underline dotted;
+  text-decoration-color: var(--surface-line);
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dict-tag { transition: none; }
+}
+.dict-tag:hover,
+.dict-tag:focus-visible {
+  filter: none;
+  color: var(--text-primary);
+  text-decoration-color: var(--line-color, var(--accent2));
+}
+/* The JMdict note behind a tag. Portaled to document.body and placed
+   with fixed coordinates computed in JS (see TagChip in
+   DictionaryDetail.jsx) rather than living inside the tag as an
+   absolutely-positioned span — that used to get clipped by whichever
+   scrolling container the tag sat in. Mounting only while open means
+   no leftover hover/focus CSS is needed here. Sumi, so it reads as a
+   note held over the page; panel inks on sumi. */
+.dict-tag__tip {
+  position: fixed;
+  z-index: 500;
+  width: max-content;
+  max-width: 220px;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-panel);
   color: var(--text-on-panel);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  pointer-events: none;
+  transform: translate(-50%, 0);
+}
+.dict-tag__tip[data-placement="above"] { transform: translate(-50%, -100%); }
+
+/* ── How it's used ─────────────────────────────────────────
+   A sentence, its furigana, the headword picked out in the entry's
+   ink, and the translation beneath in the secondary register. */
+.dict-examples {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.dict-ex {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.dict-ex__n {
+  font-size: var(--fs-caption-xs);
+  letter-spacing: var(--tr-caption);
+}
+.dict-ex__jp {
+  /* Flex-wrap treats each segment as an atomic unit that wraps as a
+     whole rather than letting the browser's default CJK line-breaking
+     split in the middle of one — the fix for a lone trailing kanji
+     stranding itself at the start of the next line. The double line
+     height is headroom for the ruby, or one line's furigana collides
+     with the line above. */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: 2;
+  color: var(--text-primary);
+  text-wrap: pretty;
+}
+.dict-ex__seg {
+  display: inline-block;
+  white-space: nowrap;
+}
+.dict-ex__jp ruby { white-space: nowrap; }
+.dict-ex__jp rt {
+  font-size: var(--fs-caption-xs);
+  font-weight: 400;
+  color: var(--text-secondary);
+  user-select: none;
+}
+/* The headword itself, picked out of the sentence: no box, the
+   entry's own ink, bold. */
+.dict-ex__hl {
+  background: transparent;
+  color: var(--dict-ink);
+  font-weight: 700;
+}
+.dict-ex__tr {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* ── How it's written ──────────────────────────────────────
+   One hairline lattice: the stroke-order sheet spanning every figure
+   row on the left, the stroke count and the radical stacked on the
+   right in the profile's `.record` cells. Column and row counts are
+   set from the content (--dict-form-cols / --dict-form-rows, see
+   formStyle in DictionaryDetail.jsx) so the lattice always divides —
+   a kana has one figure and one row; a kanji two. The sheet's floor
+   is the room a specimen glyph needs plus its margins, so a one-row
+   lattice does not shrink the drawing to a stamp. */
+.dict-form {
+  display: grid;
+  grid-template-columns: repeat(var(--dict-form-cols, 2), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--dict-form-rows, 1), minmax(0, 1fr));
+  gap: 1px;
+  background: var(--surface-line);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+/* Washi (--paper) — the one bright surface, reserved for exactly this:
+   black ink strokes that need white behind them in either theme. */
+.dict-form__sheet {
+  grid-row: 1 / -1;
+  display: flex;
   align-items: center;
   justify-content: center;
+  min-height: calc(var(--fs-specimen-glyph) + 2 * var(--sp-5));
+  padding: var(--sp-3);
+  background: var(--paper);
 }
-.dict-detail__close-icon { width: 18px; height: 18px; }
+/* Constant white ground, so the ink is the fixed dark one for light
+   fills — neither ambient ink is right on a surface that never flips. */
+.dict-form__fallback {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--text-on-fill);
+}
+/* A record cell's figure and label, stacked, so the door variant can
+   set them beside its chevron (the profile's door puts a line mark
+   there instead). Generic to the records family. */
+.record__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
 
-.dict-detail__body {
-  padding: 20px 24px 24px;
-  /* Shared vertical rhythm for every supplementary section below the
-     core reading/meaning block (tags, senses, examples, meta,
-     composing kanji, stroke order) — one value instead of each
-     section picking its own 16px/20px. */
-  --dict-block-gap: 20px;
+/* ── What it connects to ───────────────────────────────────
+   A kanji's words: a ledger of rows, each a door — the rail down its
+   left edge lights in the line pigment on approach and the ▶ slides
+   in (DESIGN.md, Motion). The rows bleed to the panel's edges so the
+   rail sits on the edge, as a board row's does. */
+.dict-words {
+  display: flex;
+  flex-direction: column;
+  margin: 0 calc(-1 * var(--sp-5));
+}
+.dict-word {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-5);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background 0.15s ease;
+}
+.dict-word + .dict-word { border-top: 1px solid var(--surface-line); }
+.dict-word::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--line-color, var(--accent2));
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dict-word,
+  .dict-word::before { transition: none; }
+}
+.dict-word:hover,
+.dict-word:focus-visible {
+  filter: none;
+  background: var(--overlay-hover);
+}
+.dict-word:hover::before,
+.dict-word:focus-visible::before { opacity: 1; }
+.dict-word__jp {
+  flex-shrink: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+.dict-word__jp ruby { ruby-position: over; }
+.dict-word__jp rt {
+  font-size: var(--fs-caption-xs);
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.dict-word__gloss {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.dict-word__chev {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  transform: translateX(-4px);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+/* Keeps the opacity, drops the slide (DESIGN.md, Motion). */
+@media (prefers-reduced-motion: reduce) {
+  .dict-word__chev { transform: none; transition: none; }
+}
+.dict-word:hover .dict-word__chev,
+.dict-word:focus-visible .dict-word__chev {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* A word's kanji: a row of tiles, each the small plate of the entry
+   it opens — the one card surface, the 1px lift and the pigment ring
+   on approach that every platform card has. ≤5 short options are a
+   row, never a stack (the density contract). */
+.dict-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+.dict-part {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--sp-9);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dict-part { transition: none; }
+}
+.dict-part:hover,
+.dict-part:focus-visible {
+  filter: none;
+  border-color: var(--line-color, var(--accent2));
+  background: var(--bg-card-hover);
+  transform: translateY(-1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dict-part:hover,
+  .dict-part:focus-visible { transform: none; }
+}
+
+/* ── Closing ───────────────────────────────────────────────
+   The slab is a thumb affordance for a phone, where the entry is the
+   whole screen and the plate's ✕ is at the far end of it. It sits at
+   the very bottom (the body is a flex column and this is its last
+   item, pushed down) and clears the home bar. Everywhere else the ✕,
+   Escape and the scrim already close the panel, so it goes. */
+.dict-entry__close {
+  display: none;
+  margin: auto var(--sp-5) calc(var(--sp-5) + var(--safe-bottom));
+}
+@media (max-width: 700px) {
+  .dict-entry__close { display: inline-flex; }
+  .dict-block:last-of-type { padding-bottom: var(--sp-6); }
 }
 
 /* ── Gloss lists ───────────────────────────────────────────
    One meaning is really several synonymous glosses, and the decks
    disagree about the punctuation between them (see splitGlosses in
-   components/gloss.jsx). They're split apart and re-rendered as real
-   elements, joined by this middot — so a kanji's "; "-separated list
-   and a vocab word's ","-separated one look identical on screen, and
-   the separator recedes far enough that the words themselves are what
-   the eye picks up. Not dictionary-scoped: the quiz modes render their
-   card meanings through the same component. */
+   components/study/gloss.jsx). They're split apart and re-rendered as
+   real elements, joined by this middot — so a kanji's "; "-separated
+   list and a vocab word's ","-separated one look identical on screen,
+   and the separator recedes far enough that the words themselves are
+   what the eye picks up. Not dictionary-scoped: the quiz modes render
+   their card meanings through the same component. */
 .gloss__sep {
   margin: 0 0.45em;
   color: var(--text-secondary);
@@ -14535,431 +14981,15 @@ textarea:focus-visible {
   display: inline-block;
 }
 
-/* ── Primary gloss ─────────────────────────────────────────
-   The definition for an entry with no JMdict senses list — kanji, and
-   any vocab word JMdict returned nothing for. This is the single most
-   important fact on a kanji's panel, so it's set as real prose (serif,
-   generous) rather than the right-hand column of a label/value row
-   the way it used to be. */
-.dict-detail__gloss-text {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 19px;
-  line-height: 1.5;
-  color: var(--text-primary);
-}
-
-.dict-detail__composing-kanji { margin-top: var(--dict-block-gap); padding-top: 16px; border-top: 1px solid var(--border); }
-.dict-detail__kanji-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.dict-detail__kanji-chip {
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border-radius: 8px;
-  background: var(--bg-main);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  font-family: var(--font-jp);
-  font-size: 20px;
-  transition: background 0.15s ease;
-}
-.dict-detail__kanji-chip:hover { background: var(--bg-card-hover); }
-
-/* ── How it's written ──────────────────────────────────────
-   Stroke-order diagram with its stroke count and radical in a column
-   beside it — all three facts describe drawing the character, so they
-   share one block instead of the diagram sitting at the bottom of the
-   panel with its own numbers stranded in a metadata list further up.
-   The diagram takes the remaining width; the figures take exactly what
-   they need (auto), which keeps the washi sheet as large as possible
-   at any panel width. */
-.dict-detail__form {
-  margin-top: var(--dict-block-gap);
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-/* Kana has no gloss/senses/examples above it, so this is the first
-   thing in the body — the rule was separating "stroke order" from
-   nothing, reading as a stray line under the identity plate rather
-   than a divider between two sections. */
-.dict-detail__body > .dict-detail__form:first-child {
-  border-top: none;
-  padding-top: 0;
-}
-.dict-detail__form-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: start;
-}
-.dict-detail__form-stats {
-  grid-template-columns: 1fr;
-  min-width: 96px;
-}
-.dict-detail__stroke-frame {
-  background: var(--paper);
-  border-radius: 8px;
-  padding: 8px;
-  width: 100%;
-}
-.dict-detail__stroke-img { width: 100%; display: block; }
-.dict-detail__stroke-fallback {
-  display: none;
-  color: #999;
-  font-size: 12px;
-  text-align: center;
-  padding: 8px;
-}
-.dict-detail__close-btn {
-  background: var(--bg-panel);
-  color: var(--text-on-panel-soft);
-  width: 100%;
-  margin-top: 16px;
-  font-size: 13px;
-}
-
-.dict-tag-chip {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--text-secondary);
-  background: var(--bg-main);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 3px 11px;
-  line-height: 1.6;
-  white-space: nowrap;
-}
-/* Tooltip carries the long JMdict note the chip itself has no room
-   for. Shown on hover (desktop) and on focus (tap on mobile — the
-   chip is a real <button>, so a tap focuses it).
-   Portaled to document.body and positioned with fixed coordinates
-   computed in JS (see TagChip in DictionaryDetail.jsx) rather than
-   living inside the chip as an absolutely-positioned span — that
-   used to get clipped by whichever scrolling container the chip sat
-   in (the mobile fullscreen sheet, the desktop side panel). Mounting
-   only while open (instead of an always-mounted opacity toggle) means
-   no leftover hover/focus CSS is needed here. */
-.dict-tag-chip__tooltip {
-  position: fixed;
-  z-index: 500;
-  width: max-content;
-  max-width: 220px;
-  white-space: normal;
-  text-align: left;
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--text-primary);
-  background: var(--bg-card-hover);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 11px;
-  pointer-events: none;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
-  transform: translate(-50%, 0);
-}
-.dict-tag-chip__tooltip[data-placement="above"] {
-  transform: translate(-50%, -100%);
-}
-
-/* Additional JMdict senses beyond the app's own single gloss — same
-   "label + content below" rhythm as the examples section, since both
-   are supplementary dictionary detail rather than core card facts.
-   Each sense is a small numbered row of its own so several senses
-   read as a list, not a wall of text. */
-.dict-detail__senses { margin-top: var(--dict-block-gap); }
-.dict-sense {
-  display: flex;
-  gap: 10px;
-  padding: 7px 0;
-  align-items: flex-start;
-}
-.dict-sense + .dict-sense { border-top: 1px dashed var(--border); }
-.dict-sense__number {
-  margin-top: 1px;
-}
-.dict-sense__body { min-width: 0; flex: 1; }
-.dict-sense__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
-/* Sense-level tags are the same chip, just a touch smaller so a dense
-   list of senses doesn't turn into a wall of full-size pills. */
-.dict-sense__tags .dict-tag-chip { font-size: 11px; padding: 1px 9px; }
-.dict-sense__gloss { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
-
-/* Round number badge for JMdict sense markers — replaces the old
-   Unicode "①②③..." glyphs (illegible/inconsistent across fonts) with
-   a plain drawn circle that stays crisp and readable at any size. */
-.dict-sense-marker {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--bg-main);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  font-family: var(--font-display, inherit);
-}
-
-/* Example sentences — same "label + block below" rhythm as
-   .dict-detail__composing-kanji, kept as its own section because a
-   sentence plus its translation needs the panel's full width. */
-.dict-detail__examples { margin-top: var(--dict-block-gap); }
-
-/* One kicker style for every "supplementary detail" section header
-   in the card (senses, examples, composing kanji, stroke order) —
-   these four used to be near-identical copies that had quietly
-   drifted apart (stroke-label alone was missing text-transform and
-   used 1px tracking instead of 0.05em). Small, tracked-out, and
-   quiet: the label recedes, the content it introduces does the
-   talking. */
-.dict-detail__senses-label,
-.dict-detail__examples-label,
-.dict-detail__composing-kanji-label,
-.dict-detail__vocab-examples-label,
-.dict-detail__practice-label,
-.dict-detail__gloss-label,
-.dict-detail__form-label {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: bold;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-/* A short coloured tick opening every section header — the same
-   single-deliberate-mark gesture .section-header__rule makes on the
-   stats/profile screens, turned inline and tinted with the entry's own
-   type colour (see typeStyle in DictionaryDetail.jsx) so the panel
-   reads as one keyed document instead of a stack of unrelated blocks. */
-.dict-detail__senses-label::before,
-.dict-detail__examples-label::before,
-.dict-detail__composing-kanji-label::before,
-.dict-detail__vocab-examples-label::before,
-.dict-detail__practice-label::before,
-.dict-detail__gloss-label::before,
-.dict-detail__form-label::before {
-  content: '';
-  flex-shrink: 0;
-  width: 14px;
-  height: 2px;
-  background: var(--type-color, var(--accent));
-}
-
-/* "Used in these words" — the reverse of .dict-detail__composing-kanji
-   (that links a vocab word down to its kanji; this links a kanji out
-   to real words it appears in). Same bordered-block rhythm as the
-   composing-kanji section, but rows rather than chips since each one
-   also carries a short meaning. */
-.dict-detail__vocab-examples {
-  margin-top: var(--dict-block-gap);
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-.dict-vocab-example-list { display: flex; flex-direction: column; }
-.dict-vocab-example-row {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  width: 100%;
-  padding: 8px 4px;
-  background: transparent;
-  border-radius: 6px;
-  text-align: left;
-  font-weight: 400;
-}
-.dict-vocab-example-row:hover { background: var(--overlay-hover); }
-.dict-vocab-example-row + .dict-vocab-example-row { border-top: 1px dashed var(--border); }
-.dict-vocab-example-row__word {
-  flex-shrink: 0;
-  font-family: var(--font-jp);
-  font-size: 16px;
-  color: var(--text-primary);
-}
-.dict-vocab-example-row__word ruby { ruby-position: over; }
-.dict-vocab-example-row__word rt {
-  font-size: 0.5em;
-  font-weight: 400;
-  color: var(--text-secondary);
-}
-.dict-vocab-example-row__meaning {
-  min-width: 0;
-  flex: 1;
-  font-size: 13px;
-  color: var(--text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: right;
-}
-
-.dict-example { padding: 12px 0; }
-.dict-example + .dict-example { border-top: 1px dashed var(--border); }
-/* Which JMdict sense this sentence illustrates ("① to eat") — ties
-   an example back to a specific gloss when a word has several. */
-.dict-example__sense {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent);
-  margin-bottom: 5px;
-  letter-spacing: 0.02em;
-}
-.dict-example__sense .dict-sense-marker {
-  width: 16px;
-  height: 16px;
-  font-size: 10px;
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--text-on-panel);
-}
-.dict-example__jp {
-  font-family: var(--font-jp);
-  font-size: 17px;
-  color: var(--text-primary);
-  /* Ruby annotations need headroom above the line, or the furigana
-     of one line collides with the line above it. */
-  line-height: 2.5;
-  /* Flex-wrap treats each segment (below) as an atomic unit that
-     wraps as a whole rather than letting the browser's default CJK
-     line-breaking rules split in the middle of one — the fix for a
-     lone trailing kanji/kana stranding itself at the start of the
-     next line. text-wrap: pretty is progressive enhancement on top
-     of that for browsers that support paragraph-aware wrapping. */
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  text-wrap: pretty;
-}
-.dict-example__seg {
-  white-space: nowrap;
-  display: inline-block;
-}
-.dict-example__jp ruby { white-space: nowrap; }
-.dict-example__jp rt {
-  font-size: 0.70em;
-  font-weight: normal;
-  color: var(--text-secondary);
-  user-select: none;
-}
-/* The headword itself, picked out of the sentence — plain highlight
-   colour (matches the app's accent), no background box, same idea as
-   the reference Yomitan/Jitendex popups this feature is modelled on. */
-.dict-example__hl {
-  background: transparent;
-  color: var(--accent);
-  font-weight: 700;
-}
-.dict-example__en {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-top: 5px;
-  line-height: 1.5;
-}
-
-/* ── Figures ───────────────────────────────────────────────
-   One number with its name under it — the panel's unit for anything
-   countable (stroke count, radical, and the whole practice record).
-   Laid out in the same flush shoji lattice as the results grid and the
-   syllabary chart (hairline --border showing through 2px gaps) rather
-   than as bordered floating cards, so a run of figures reads as one
-   ruled table. auto-fit keeps four tiles on one row on a desktop panel
-   and folds them to two per row as it narrows, with no breakpoint. */
-.dict-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
-  gap: 2px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-/* The practice block always holds exactly four figures, so its track
-   count has to divide four. auto-fit only collapses tracks that are
-   empty *everywhere*; a three-column fit leaves the fourth tile alone
-   on row two with two bare cells beside it, and a bare cell in a
-   flush lattice is a slab of raw seam colour. Two by two cannot go
-   ragged at any width, in any container. The form block above it
-   keeps auto-fit: with two tiles, one column or two are both whole. */
-.dict-detail__practice .dict-stat-grid { grid-template-columns: repeat(2, 1fr); }
-
-.dict-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  /* A grid track can be narrower than its content; without this the
-     tile refuses to shrink and the value is clipped by the grid's
-     overflow: hidden rather than wrapping. */
-  min-width: 0;
-  gap: 3px;
-  padding: 10px 12px;
-  background: var(--bg-main);
-  border: none;
-  border-radius: 0;
-  text-align: left;
-  font-weight: 400;
-}
-.dict-stat__value {
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  font-variant-numeric: tabular-nums;
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--text-primary);
-}
-.dict-stat__label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-/* The radical tile navigates (see onRadicalClick) — it carries the
-   accent colour and a hover ground so it reads as the one figure in
-   the block you can actually follow somewhere. */
-.dict-stat--link { cursor: pointer; transition: background 0.15s ease; }
-.dict-stat--link .dict-stat__value { color: var(--accent); }
-.dict-stat--link:hover { background: var(--bg-card-hover); }
-
-/* ── Your own record ───────────────────────────────────────
-   Sits last in the panel: it describes the reader's progress, not the
-   word itself. The "due now" flag rides inline on the section label
-   rather than as a row of its own — it's a state of this block, not
-   another statistic in it. */
-.dict-detail__practice {
-  margin-top: var(--dict-block-gap);
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-.dict-detail__due-note {
-  margin-left: auto;
-  padding: 2px 9px;
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--state-due) 16%, var(--bg-card));
-  color: var(--state-due);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-
 /* Quiet tinted tag: the level's own colour as a wash behind its own
    text, and nothing else — no spine stroke, no border, no fill. The
    colour still carries the difficulty signal (N5 calmest -> N1 most
    intense) without the badge becoming a piece of furniture on a card
    that already has a headword and a seal competing for attention.
    The wash mixes toward `transparent` rather than a named surface, so
-   the same tag composites correctly over a card, over the sumi
-   identity plate, and over either theme's paper. */
+   the same tag composites correctly over a card and over either
+   theme's paper. Catalogue only since the plate redesign — the detail
+   plate prints its level as a bare numeral (.dict-plate__level). */
 .dict-level-badge {
   display: inline-flex;
   align-items: center;
@@ -17788,38 +17818,6 @@ textarea:focus-visible {
     display: block;
   }
 
-  /* The panel itself owns the top inset now that it is full screen
-     (see .dict-dock in the ≤700px block) — adding it here too pushed
-     the badges down by the notch height twice. */
-  .dict-detail__stage {
-    padding-top: 16px;
-    flex-shrink: 0;
-  }
-  .dict-detail__char {
-    font-size: 48px;
-  }
-  /* The washi sheet needs the full width of a phone screen to stay
-     legible, so the figures move underneath it and run as a row
-     instead of a column beside it. */
-  .dict-detail__form-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .dict-detail__form-stats {
-    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
-    min-width: 0;
-  }
-  /* Tucked in tighter next to the headword at this width, and out of
-     the way of the safe-area inset above. */
-  .dict-detail__body {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: calc(24px + var(--safe-bottom));
-  }
-  .dict-detail__close-x {
-    display: flex;
-  }
-
-
   /* Original tile was 56px; PC gets a full 1.6x bump above (90px) but
      that reads oversized on a phone screen, so mobile gets a smaller,
      more modest increase instead. */
@@ -18118,15 +18116,6 @@ textarea:focus-visible {
   .trn-feedback-card .prompt-card { max-height: 75vh; }
 }
 
-@media (max-width: 400px) {
-  /* Very narrow phones: trim the headline glyph, example-sentence
-     text, and tag chip padding a bit further so nothing crowds or
-     forces sideways scroll. */
-  .dict-detail__char { font-size: 40px; }
-  .dict-example__jp { font-size: 15px; line-height: 2.2; }
-  .dict-tag-chip { font-size: 11px; padding: 2px 9px; }
-}
-
 /* ── 筆 — the brush ───────────────────────────────────────────
    The handwriting pad is a <canvas>, and canvas takes numbers, not
    custom properties. Rather than keep a second copy of the palette in
@@ -18142,26 +18131,42 @@ textarea:focus-visible {
    phone-width override written above the rule it overrides simply
    loses — which is exactly what happened, and why the results grid
    stayed one column wide on a phone.
-   ── The dock ──
-   One node, two presentations. Wide: a sticky column beside the
-   results, so scanning and reading happen at once — which is what a
-   reference tool is and what a modal structurally prevents. Narrow:
-   the centred sheet it has always been.
+   ── The dock, and the sheet ──
+   One entry (.dict-entry, above), two shells. The dock is the
+   catalogue's: one node, three presentations. Wide, a sticky column
+   beside the results, so scanning and reading happen at once — which
+   is what a reference tool is and what a modal structurally prevents.
+   Under 1100px, a centred modal. On a phone, the whole screen. The
+   sheet is the same panel opened from a quiz card, portalled over
+   whatever is on screen: always a modal, because there is no
+   catalogue to stand beside — and on a phone, the same whole screen.
 
-   The scroll lives on the dock itself. That is the correction to the
+   The scroll lives on the shell itself. That is the correction to the
    original side panel, which was pinned to the viewport with no
    overflow of its own and therefore could not hold an entry with a
-   dozen senses — the reason it was abandoned for a modal. */
+   dozen senses — the reason it was abandoned for a modal. It is also
+   what lets the plate inside stick (.dict-plate): sticky needs a
+   scrollport, and the shell is it.
+
+   Both shells inject 辞書's pigment (DESIGN.md, "the pigment is
+   injected once"). They are the roots of this object — the dock is
+   not inside the station header that would otherwise hand it down,
+   and the sheet is a portal to <body> — so this is the one place the
+   line token is named, the way .exam-shell names its own. */
+.dict-dock,
+.dict-sheet {
+  --line-color: var(--line-jisho);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+}
 .dict-dock {
   flex: 0 0 clamp(340px, 30vw, 440px);
   position: sticky;
   top: 84px;
   max-height: calc(100dvh - 108px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--surface-radius);
+  border-radius: var(--r-card);
   animation: arrive 0.28s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
 /* The desktop-width sticky dock (>1099px) still had the plain `arrive`
@@ -18173,6 +18178,8 @@ textarea:focus-visible {
 }
 .dict-dock__scrim { display: none; }
 
+/* The modal, for both shells: the board's elevation, because this one
+   hangs over a scrim, and the panel radius. */
 @media (max-width: 1099px) {
   .dict-dock__scrim {
     display: block;
@@ -18193,8 +18200,8 @@ textarea:focus-visible {
     transform: translate(-50%, -50%);
     width: min(640px, calc(100vw - 32px));
     max-height: 88dvh;
-    border-radius: 12px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    border-radius: var(--r-panel);
+    box-shadow: var(--elev-board);
     /* NOT `arrive`. That keyframe ends on `transform: none`, which
        cancels the centring translate above for the whole 0.28s it
        runs — the panel was drawn half a viewport down and to the
@@ -18204,21 +18211,53 @@ textarea:focus-visible {
     animation: arrive-soft 0.22s linear;
   }
 }
+.dict-sheet__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6);
+  background: rgba(0, 0, 0, 0.6);
+  animation: arrive-soft 0.2s linear;
+}
+.dict-sheet {
+  position: relative;
+  width: min(640px, 100%);
+  max-height: 88dvh;
+  border-radius: var(--r-panel);
+  box-shadow: var(--elev-board);
+  animation: arrive-soft 0.22s linear;
+}
+/* The sheet's empty state: the not-available line and a ghost close,
+   because a portalled sheet has no page behind it to click away from. */
+.dict-sheet__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: var(--sp-7);
+}
 
-/* ── The sheet on a phone ──
+/* ── The whole screen, on a phone ──
    A card floating in the middle of a 390px screen puts its controls
-   where no thumb reaches and leaves slivers of the catalogue showing
-   down both sides. On a phone the entry takes the whole screen: this
-   is the reading view, and a kanji with four compounds and a stroke
-   diagram wants every pixel rather than 86% of them behind a
-   letterboxed frame.
+   where no thumb reaches and leaves slivers of the page showing down
+   both sides. On a phone the entry takes the whole screen: this is
+   the reading view, and a kanji with four compounds and a stroke
+   sheet wants every pixel rather than 86% of them behind a
+   letterboxed frame. Both shells alike — the sheet used to stay a
+   letterboxed card here.
 
    It still rises from the bottom edge, because that is where it came
    from and the motion is what says "this opened" rather than "the
    page changed". Its own transform is free here — nothing is centring
    it — so this one can move. */
 @media (max-width: 700px) {
-  .dict-dock {
+  .dict-sheet__scrim { padding: 0; }
+  .dict-dock,
+  .dict-sheet {
+    position: fixed;
     inset: 0;
     transform: none;
     width: 100%;
@@ -18228,10 +18267,10 @@ textarea:focus-visible {
     border: none;
     border-radius: 0;
     box-shadow: none;
-    /* Full screen means under the notch and over the home indicator,
-       so the panel owns both insets rather than the page behind it. */
+    /* Full screen means under the notch, so the shell owns the top
+       inset rather than the page behind it; the bottom one is the
+       close slab's (.dict-entry__close). */
     padding-top: var(--safe-top);
-    padding-bottom: var(--safe-bottom);
     animation: dict-sheet-up 0.26s cubic-bezier(0.22, 0.68, 0.32, 1);
   }
   @keyframes dict-sheet-up {
@@ -18240,11 +18279,12 @@ textarea:focus-visible {
   }
   /* The scrim stays even though nothing shows behind a full-screen
      panel once it has arrived: for the 260ms it is rising and still
-     part-transparent, the scrim is what the catalogue is dimmed by.
+     part-transparent, the scrim is what the page is dimmed by.
      Without it the entrance flashes the bright grid through. */
 }
 @media (max-width: 700px) and (prefers-reduced-motion: reduce) {
-  .dict-dock { animation: arrive-soft 0.15s linear; }
+  .dict-dock,
+  .dict-sheet { animation: arrive-soft 0.15s linear; }
 }
 
 /* ── The catalogue column ──
@@ -18519,17 +18559,6 @@ textarea:focus-visible {
   .station-header { margin-bottom: 20px;}
 }
 
-/* ── Closing the dock ──
-   In dock mode the ✕ in the panel's own header is the close, and
-   Escape works from anywhere on the page. The full-width "close"
-   slab underneath is a thumb affordance: it costs a whole row of a
-   420px reading panel to repeat something already available twice,
-   so it stays on phones and goes here. */
-@media (min-width: 1100px) {
-  .dict-dock .dict-detail__close-x { display: inline-flex; }
-  .dict-dock .dict-detail__close-btn { display: none; }
-}
-
 /* ══ 部首索引 — the radical index ═══════════════════════════
    Appended, like everything else that refines the dictionary block
    above: equal specificity, and a media query adds none. */
@@ -18748,39 +18777,6 @@ button.syllabary-cell:focus-visible {
   .dict-entry-card { min-height: 112px; padding: 20px 8px 14px; }
   .dict-entry-card__char { font-size: 34px; margin: 4px 0 6px; }
 }
-
-/* ── The standalone lookup sheet ───────────────────────────
-   Opened from a quiz card, portalled over whatever is on screen. It
-   is always centred: the catalogue docks its panel beside the results
-   on a wide screen, which is correct there and meaningless here,
-   where there is no catalogue to stand beside.
-
-   It had been borrowing .dict-modal-*, which the dock replaced — and
-   which I deleted with it, leaving this sheet unstyled. Its own
-   chrome now, so the two cannot be coupled again by accident. */
-.dict-sheet__scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-.dict-sheet {
-  width: min(640px, 100%);
-  max-height: 88dvh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: 12px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
-}
-/* A portalled sheet has no page behind it to click away from, so the
-   ✕ has to be present at every width. */
-.dict-sheet .dict-detail__close-x { display: inline-flex; }
 
 /* ══ 五十音 — the chart, properly ═══════════════════════════
    It was a spreadsheet: A I U E O across the top in latin, K S T down

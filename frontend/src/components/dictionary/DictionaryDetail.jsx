@@ -1,68 +1,85 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { LEVEL_COLORS } from './levelColors'
 import { shortDate } from '../../lib/formatDate'
-import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
 import { apiFetch } from '../../lib/api'
 import { Readings, FuriganaParts } from '../study/Readings'
 import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageBadge } from '../study/StageBadge'
-import { GlossList, firstGloss } from '../study/gloss'
-import { BoltIcon } from '../ui/Icons'
+import { GlossList, firstGloss, splitGlosses } from '../study/gloss'
+import { BoltIcon, ChevronIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { speakJapanese } from '../../lib/audio'
 
 const API_BASE = ''  // same-origin, always — see lib/api.js
 
-// Small round "1 2 3..." markers for JMdict sense numbers — used both
-// on the senses list itself and on each example sentence, so a reader
-// can tell at a glance which sense an example illustrates. Drawn with
-// CSS (a plain circle background) rather than the Unicode "①②③..."
-// glyphs — those render inconsistently across fonts/platforms and end
-// up tiny and hard to read at UI sizes, whereas a real element scales
-// and stays legible at any size.
-function SenseMarker({ number, className = '' }) {
+// ── 見出し語 — the entry, as a plate ──────────────────────────
+// The catalogue already draws every entry as a small 駅名標: reading
+// above, headword, meaning below, the level's colour along the bottom
+// edge. Opening one used to swap that plate for a different object — a
+// sumi stage with a tategaki watermark, a vermillion speaker and seven
+// uppercase section labels under it. This panel is the same plate the
+// reader just tapped, at reading size: the three registers a station
+// plate carries, 辞書's own gold as its stripe, and a body of blocks
+// that name themselves (DESIGN.md, Structure — "a block that needs a
+// heading to be legible is not finished"). A numbered list of glosses
+// is a definition; a sentence over its translation is an example; a
+// drawing of strokes on washi beside a stroke count is how the
+// character is written. None of them needs a caption saying so.
+//
+// The pigment is 辞書's, injected once by the shell this renders in
+// (.dict-dock on the dictionary screen, .dict-sheet over a quiz) and
+// read here as --line-color: the entry is a dictionary object wherever
+// it opens, the way the wall map's facility chip for 辞書 is gold on
+// every screen. It appears as an edge (the stripe, a rail, a ring on
+// hover) and as a numeral (the sense numbers) — never as a fill. The
+// type colours that used to tint the panel (TYPE_META) were other
+// sections' pigments, and stay on the catalogue's tabs where they
+// belong.
+
+// Small figure for a JMdict sense number — on the senses list itself
+// and on any example sentence that could not nest under its sense, so
+// a reader can tell which gloss a sentence illustrates. A tabular
+// numeral in the entry's ink, per DESIGN.md's "colour is a numeral":
+// no disc, no ring, no fill.
+function SenseNumeral({ number, className = '' }) {
   return (
-    <span className={`dict-sense-marker ${className}`.trim()}>
+    <span className={`dict-sense__n ${className}`.trim()}>
       {number}
     </span>
   )
 }
 
-// One example sentence: furigana'd/highlighted Japanese + translation.
-// Pulled out so both the nested-under-its-sense rendering and the flat
-// fallback list (used when there's only one sense to show examples
-// under, so nesting would add a layer for nothing) share one
-// implementation instead of drifting apart.
+// One example sentence: furigana'd/highlighted Japanese over its
+// translation. Shared by the nested-under-its-sense rendering and the
+// flat fallback list (an example whose sense number matches no listed
+// sense, or every example when there are no senses at all) so the two
+// cannot drift apart.
 function ExampleSentence({ ex, senseNumber }) {
   return (
-    <div className="dict-example">
-      {senseNumber != null && (
-        <div className="dict-example__sense">
-          <SenseMarker number={senseNumber} />
-        </div>
-      )}
-      <div className="dict-example__jp">
+    <div className="dict-ex">
+      {senseNumber != null && <SenseNumeral number={senseNumber} className="dict-ex__n" />}
+      <div className="dict-ex__jp" lang="ja">
         {ex.segments?.length > 0
           ? ex.segments.map((seg, j) => {
               // Each segment (a word, a kanji compound, a kana run) is
               // its own non-breaking unit — the line can wrap between
               // segments but never inside one, so a word never gets
               // split with a single trailing kanji/kana stranded alone
-              // on the next line.
-              // Already split per kanji by the backend (see
-              // content/vocab_extras.py's _expand_furigana), so this
-              // renders the segment as-is rather than re-splitting it.
+              // on the next line. Already split per kanji by the
+              // backend (content/vocab_extras.py's _expand_furigana),
+              // so this renders the segment as-is.
               const content = seg.reading
                 ? <ruby>{seg.text}<rt>{seg.reading}</rt></ruby>
                 : seg.text
               return seg.highlight
-                ? <mark key={j} className="dict-example__hl dict-example__seg">{content}</mark>
-                : <span key={j} className="dict-example__seg">{content}</span>
+                ? <mark key={j} className="dict-ex__hl dict-ex__seg">{content}</mark>
+                : <span key={j} className="dict-ex__seg">{content}</span>
             })
           : ex.jp}
       </div>
-      <div className="dict-example__en">{ex.en}</div>
+      <div className="dict-ex__tr">{ex.en}</div>
     </div>
   )
 }
@@ -71,37 +88,19 @@ function ExampleSentence({ ex, senseNumber }) {
 // Previously defined inside DictionaryScreen.jsx only — pulled out
 // here so anything else that needs to show a dictionary entry (e.g.
 // QuizComponents' Flashcard, via DictionaryLookupSheet below) reuses
-// the exact same badges/panel instead of a second copy drifting out
-// of sync with it.
-//
-// Status (new/learning/mastered) is now shown via the same hanko-seal
-// StageBadge every quiz card already stamps itself with (see
-// StageBadge.jsx) rather than a dictionary-only dot+label — one seal
-// vocabulary for the same underlying SRS state everywhere in the app.
+// the exact same panel instead of a second copy drifting out of sync
+// with it.
 
-// Colours pulled from the app's own palette (ai-iro indigo / rokushou
-// verdigris) instead of arbitrary hex, so — like every other colour
-// in the app — these correctly flip between the dark and light theme
-// rather than staying fixed regardless of `data-theme`.
+// Per-category colours for the catalogue's category tabs (see
+// DictionaryScreen's --tab-color). They are palette pigments so they
+// flip with the theme; the detail panel itself no longer reads them —
+// it wears 辞書's own line colour, injected by its shell.
 // eslint-disable-next-line react-refresh/only-export-components -- TYPE_META is a plain colour/label lookup consumed by DictionaryScreen.jsx; not a component.
 export const TYPE_META = {
   kanji:    { color: 'var(--accent4)', fallback: 'Kanji' },
   vocab:    { color: 'var(--accent6)', fallback: 'Vocabulaire' },
   hiragana: { color: 'var(--accent3)', fallback: 'Hiragana' },
   katakana: { color: 'var(--accent5)', fallback: 'Katakana' },
-}
-
-// Vertical (tategaki) type mark running down the identity plate's
-// left edge — what kind of entry this is, in the same register a
-// printed dictionary prints its own running head. Deliberately
-// Japanese rather than the translated TYPE_META label: it's a
-// decorative mark (aria-hidden), and the kanji read as part of the
-// plate's composition where a Latin word would read as a UI chip.
-const TYPE_MARK = {
-  kanji:    '漢字',
-  vocab:    '語彙',
-  hiragana: '平仮名',
-  katakana: '片仮名',
 }
 
 // Both kana types share every bit of detail-panel/card logic that
@@ -128,10 +127,10 @@ export function entryKey(entry) {
   return `${entry.type}:${entry.level ?? '_'}:${entry.kanji || ''}:${entry.kana || ''}`
 }
 
-// Gloss splitting/normalising lives in ./gloss — the quiz components
-// need the same helpers, and importing this whole detail-panel module
-// for a pure text utility would be backwards (same reasoning as
-// Readings.jsx being its own module).
+// Gloss splitting/normalising lives in ../study/gloss — the quiz
+// components need the same helpers, and importing this whole
+// detail-panel module for a pure text utility would be backwards
+// (same reasoning as Readings.jsx being its own module).
 
 // The mixer-aware one, imported above. This module used to define its
 // own copy that ignored mute and the tts volume entirely, so a muted
@@ -140,12 +139,12 @@ export function entryKey(entry) {
 // eslint-disable-next-line react-refresh/only-export-components -- re-exported for QuizComponents.jsx's DictionaryLookupSheet; not a component.
 export { speakJapanese }
 
-// JLPT level shown as a quiet index-tab: a left accent stroke plus a
-// lightly-tinted ground in the level's own colour, rather than a loud
-// solid-fill pill — reads like a library card's colour-coded spine
-// label. Colour still scales with difficulty (N5 calmest → N1 most
-// intense) using pigments already in the palette rather than
-// introducing new ones.
+// JLPT level as a quiet tinted tag, for the catalogue's entry cards
+// (see .dict-entry-card .dict-level-badge, which reduces it further to
+// marginalia). The detail plate does not use it: with one entry on
+// screen the level is a plain numeral in the caption register, and the
+// colour — which is a difficulty gradient, useful across a wall of
+// forty plates — has nothing to compare against.
 export function LevelBadge({ level }) {
   if (!level) return null
   return (
@@ -160,7 +159,7 @@ export function LevelBadge({ level }) {
 export function SpeakIcon() {
   return (
     <svg
-      className="dict-detail__speak-icon"
+      className="dict-icon"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -179,7 +178,7 @@ export function SpeakIcon() {
 export function CloseIcon() {
   return (
     <svg
-      className="dict-detail__close-icon"
+      className="dict-icon"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -199,42 +198,54 @@ export function CloseIcon() {
 // getting their glyph's size and colour from a `dict-` class purely by
 // accident.
 
-// One number, named underneath it. The panel's unit of measurement —
-// used for both the form block's stroke count/radical (which sit
-// beside the stroke-order diagram they describe) and the practice
-// record's grid, so a figure reads the same way wherever it appears
-// instead of each block inventing its own label/value arrangement.
-// `onClick` turns it into a real button (the radical tile navigates);
-// without one it's inert text, not a dead-looking control.
-function StatTile({ value, label, onClick }) {
-  const inner = (
-    <>
-      <span className="dict-stat__value">{value}</span>
-      <span className="dict-stat__label">{label}</span>
-    </>
+// One figure, in the profile's own cell: a large numeral, its unit
+// inline, the caps label beneath (DESIGN.md, Type — "a figure and its
+// label form a fixed pair"). It is the `.record` cell the 定期入れ's
+// records lattice is built from, not a copy of it, so the stroke
+// count beside the stroke-order sheet and the four figures of the
+// reader's own record are the same object the profile prints.
+// `onClick` makes it a door — the radical figure opens the radical
+// index — with the ledger's own chevron sliding in on approach;
+// without one it is inert text, not a dead-looking control.
+function Figure({ value, unit, unitLang, label, onClick }) {
+  const body = (
+    <span className="record__body">
+      <span className="record__value">
+        {value}
+        {unit && <span className="record__unit" lang={unitLang}>{unit}</span>}
+      </span>
+      <span className="record__label">{label}</span>
+    </span>
   )
   return onClick
-    ? <button type="button" onClick={onClick} className="dict-stat dict-stat--link">{inner}</button>
-    : <div className="dict-stat">{inner}</div>
+    ? (
+      <button type="button" onClick={onClick} className="record record--door">
+        {body}
+        <ChevronIcon direction="right" size={16} className="record__chev" />
+      </button>
+    )
+    : <div className="record">{body}</div>
 }
 
-// A grammatical/priority tag ("n", "v1", "⭐"...) with its full JMdict
-// note shown as a tooltip rather than on the pill itself (the note is
-// often a full sentence — too long to sit inline without wrapping into
-// a two-line pill). A <button> rather than a plain span so a tap on
+// A grammatical/priority tag ("n", "v1", "uk"...) with its full JMdict
+// note shown as a tooltip rather than on the tag itself (the note is
+// often a full sentence — too long to sit inline). Set as a quiet
+// dotted-underlined word in the caption register instead of a pill:
+// a run of pills over every sense was the loudest thing in the body
+// and said the least. A <button> rather than a plain span so a tap on
 // mobile can focus it and reveal the tooltip too, not just desktop
 // hover.
 //
 // The tooltip itself is portaled straight to document.body and placed
-// with fixed coordinates computed from the chip's own bounding box,
-// rather than living inside the chip as an absolutely-positioned span.
-// Both places this renders (the mobile fullscreen sheet, the desktop
-// side panel) scroll their own content, and any scrolling ancestor
-// clips an absolutely-positioned child that pokes outside it — the
-// tooltip was getting cut off at the panel's edge. Fixed-position +
-// portal escapes that entirely; the horizontal position is then
-// clamped to the viewport and the tooltip flips above the chip when
-// there isn't enough room below, so it never runs off-screen either.
+// with fixed coordinates computed from the tag's own bounding box,
+// rather than living inside the tag as an absolutely-positioned span.
+// Both places this renders (the phone sheet, the desktop dock) scroll
+// their own content, and any scrolling ancestor clips an
+// absolutely-positioned child that pokes outside it — the tooltip was
+// getting cut off at the panel's edge. Fixed-position + portal escapes
+// that entirely; the horizontal position is then clamped to the
+// viewport and the tooltip flips above the tag when there isn't
+// enough room below, so it never runs off-screen either.
 export function TagChip({ tag }) {
   const btnRef = useRef(null)
   const [popup, setPopup] = useState(null)
@@ -243,7 +254,7 @@ export function TagChip({ tag }) {
   const showTooltip = () => {
     if (!hasTooltip || !btnRef.current) return
     const rect = btnRef.current.getBoundingClientRect()
-    const halfWidth = 110 // half of .dict-tag-chip__tooltip's max-width
+    const halfWidth = 110 // half of .dict-tag__tip's max-width
     const left = Math.min(
       Math.max(rect.left + rect.width / 2, 8 + halfWidth),
       window.innerWidth - 8 - halfWidth,
@@ -258,7 +269,7 @@ export function TagChip({ tag }) {
     <button
       type="button"
       ref={btnRef}
-      className="dict-tag-chip"
+      className="dict-tag"
       onMouseEnter={showTooltip}
       onMouseLeave={hideTooltip}
       onFocus={showTooltip}
@@ -267,7 +278,7 @@ export function TagChip({ tag }) {
       {tag.label}
       {hasTooltip && popup && createPortal(
         <span
-          className="dict-tag-chip__tooltip"
+          className="dict-tag__tip"
           role="tooltip"
           data-placement={popup.placement}
           style={{ top: popup.top, left: popup.left }}
@@ -280,74 +291,94 @@ export function TagChip({ tag }) {
   )
 }
 
-// The stroke-order diagram plus its own failure fallback. Owns
-// `failed` itself and is remounted (via the `key={entry.svg_url}` its
-// caller passes) whenever the entry changes, so a previous entry's
-// load failure can never stick around and hide a diagram that would
-// otherwise load fine for the new one — no reset effect needed since
-// a fresh mount already starts from `failed: false`.
-function StrokeFrame({ src, notAvailableLabel }) {
+// The stroke-order drawing on its sheet of washi, plus its own failure
+// fallback. Owns `failed` itself and is remounted (via the
+// `key={entry.svg_url}` its caller passes) whenever the entry changes,
+// so a previous entry's load failure can never stick around and hide
+// a diagram that would otherwise load fine for the new one — no reset
+// effect needed since a fresh mount already starts from `failed: false`.
+function StrokeSheet({ src, notAvailableLabel }) {
   const [failed, setFailed] = useState(false)
   return (
-    <div className="dict-detail__stroke-frame">
+    <div className="dict-form__sheet">
       {!failed && (
         <StrokeOrderAnimation
           src={src}
           loop
-          className="dict-detail__stroke-img"
+          className="dict-form__glyph"
           onError={() => setFailed(true)}
         />
       )}
       {failed && (
-        <div className="dict-detail__stroke-fallback" style={{ display: 'block' }}>
-          {notAvailableLabel}
-        </div>
+        <div className="dict-form__fallback">{notAvailableLabel}</div>
       )}
     </div>
   )
 }
 
+// How big the headword is set. A lone character is a specimen and
+// takes the specimen rung — the reader is looking at its shape, and
+// the stroke sheet below repeats it at drawing size. A word takes the
+// display rung; a long expression steps down once more so seven or
+// eight characters still sit on a 340px dock without shattering.
+function headwordSize(text) {
+  const n = [...(text || '')].length
+  if (n <= 1) return 'glyph'
+  if (n <= 6) return 'word'
+  return 'long'
+}
+
 // ── Detail panel ──────────────────────────────────────────
-// Renders one entry's full detail. `onRadicalClick`/`onKanjiClick` are
-// optional — DictionaryScreen passes real handlers so its radical link
-// and composing-kanji chips can jump elsewhere in the dictionary; a
-// caller that can't offer that navigation (e.g. a quiz flashcard,
-// which has no dictionary screen underneath it to jump around in)
-// just omits them, and those bits simply don't render rather than
-// rendering as dead buttons.
+// Renders one entry's full detail. `onRadicalClick`/`onKanjiClick`/
+// `onVocabClick` are optional — DictionaryScreen passes real handlers
+// so its radical figure, kanji tiles and word rows can jump elsewhere
+// in the dictionary; a caller that can't offer that navigation (e.g. a
+// quiz flashcard, which has no dictionary screen underneath it to
+// jump around in) just omits them, and those blocks simply don't
+// render rather than rendering as dead buttons.
 export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
     : null
-  // Kana has no semantic "meaning" to translate — its romaji stands in
-  // as its reading on the identity plate instead, so this stays null
-  // and the gloss block simply doesn't render for it.
-  const meaning = isKanaType(entry.type)
+  const isKanji = entry.type === 'kanji'
+  const isKana  = isKanaType(entry.type)
+  // Kana has no semantic "meaning" to translate — its romaji is its
+  // plain-language name and takes the plate's caption instead.
+  const meaning = isKana
     ? null
     : lang === 'fr'
       ? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
       : entry.meaning
 
   // Every kanji character used in this vocab word, deduplicated and in
-  // reading order — each becomes a link that jumps to that kanji's own
-  // dictionary entry (see jumpToKanji in DictionaryScreen). Matches CJK
-  // Unified Ideographs; a kana-only word (entry.kanji empty) yields none.
+  // reading order — each becomes a tile that opens that kanji's own
+  // entry (see jumpToKanji in DictionaryScreen). Matches CJK Unified
+  // Ideographs; a kana-only word (entry.kanji empty) yields none.
   const composingKanji = useMemo(() => {
     if (entry.type !== 'vocab' || !entry.kanji) return []
-    const chars = entry.kanji.match(/[\u4e00-\u9faf]/g) || []
+    const chars = entry.kanji.match(/[一-龯]/g) || []
     return [...new Set(chars)]
   }, [entry.type, entry.kanji])
 
-  // The big headline character(s) get their reading shown right on top
-  // as furigana — the fastest way to see how a word is actually read.
-  // Only for vocab: a kana-only entry has nothing to annotate, and a
-  // single kanji's on'yomi/kun'yomi split (shown under the headword on
-  // the plate via <Readings>) is already the more complete picture
-  // than picking one reading to sit above it. Computed backend-side
-  // (routes/dictionary.py's _word_furigana) so a multi-kanji headword
-  // divides per kanji instead of one blanket reading.
+  // The plate's three registers. A station plate sets the reading over
+  // the name and the plain-language name under it; here the reading is
+  // the word's furigana (per kanji, computed backend-side by
+  // routes/dictionary.py's _word_furigana), the kanji's 音/訓 split, or
+  // — when a word's alignment came back empty — its kana on a line of
+  // its own, so a word never appears without its reading. The caption
+  // is the entry's first gloss (the full list lives in the body), or a
+  // kana's romaji.
+  const headword = entry.kanji || entry.kana
   const headwordFurigana = entry.type === 'vocab' ? entry.furigana : null
+  const showKanaLine = entry.type === 'vocab'
+    && !headwordFurigana?.length
+    && !!entry.kanji && !!entry.kana && entry.kana !== entry.kanji
+  const caption = isKana ? entry.romaji : firstGloss(meaning)
+  // routes/dictionary.py fills a kana's level slot with "Hiragana" /
+  // "Katakana" for the catalogue's grouping; the plate prints JLPT
+  // levels only — the script is plain from the character itself.
+  const jlpt = /^N[1-5]$/.test(entry.level ?? '') ? entry.level : null
 
   // Every JMdict sense (from get_vocab_extras) and the example
   // sentences that illustrate each one. Split into "nested under a
@@ -356,64 +387,71 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
   // of each re-deriving it slightly differently.
   const senses = entry.senses ?? []
   const examples = entry.examples ?? []
-  const senseNumbers = useMemo(() => new Set(senses.map(s => s.number)), [senses])
+  const senseNumbers = useMemo(() => new Set((entry.senses ?? []).map(s => s.number)), [entry.senses])
   // Examples that don't get nested under a sense row: either there are
-  // no senses at all (so the per-sense list itself doesn't render —
-  // see senses.length > 0 below), or an example's sense_number doesn't
-  // match any listed sense.
+  // no senses at all (so the per-sense list itself doesn't render),
+  // or an example's sense_number doesn't match any listed sense.
   const flatExamples = senses.length > 0
     ? examples.filter(ex => !senseNumbers.has(ex.sense_number))
     : examples
   const examplesBySense = number => examples.filter(ex => ex.sense_number === number)
 
-  // The panel's one data-driven accent: what kind of entry this is
-  // (see TYPE_META) tints the plate's top rule and every section
-  // marker below it, so a kanji panel and a vocab panel are
-  // recognisably different objects at a glance rather than the same
-  // grey form with different text in it.
-  const typeStyle = { '--type-color': TYPE_META[entry.type]?.color ?? 'var(--accent)' }
+  // With no senses list, the definition is the app's own gloss line.
+  // Its first gloss is already the plate's caption, so the block only
+  // prints when there is more to say than that one word.
+  const glossCount = senses.length > 0 ? 0 : splitGlosses(meaning).length
 
-  const isKanji = entry.type === 'kanji'
-  const isKana  = isKanaType(entry.type)
   // Stroke count and radical describe the *drawing* of the character,
-  // so they belong beside the stroke-order diagram rather than in a
-  // metadata run somewhere else in the panel. The whole block only
-  // exists if at least one of the three has something to show.
+  // so they sit beside the stroke-order sheet in one lattice rather
+  // than in a metadata run somewhere else in the panel. The lattice's
+  // column count divides its content (DESIGN.md, Surfaces): the sheet
+  // spans every figure row beside it, and with no sheet the figures
+  // take a column each.
   const hasRadicalLink = isKanji && entry.radical != null && !!onRadicalClick
-  const showForm = (isKanji || isKana) && (entry.svg_url || entry.stroke_count || hasRadicalLink)
+  const hasSheet = (isKanji || isKana) && !!entry.svg_url
+  const figureCount = ((isKanji || isKana) && entry.stroke_count ? 1 : 0) + (hasRadicalLink ? 1 : 0)
+  const showForm = hasSheet || figureCount > 0
+  const formStyle = {
+    '--dict-form-cols': hasSheet ? (figureCount > 0 ? 2 : 1) : figureCount,
+    '--dict-form-rows': Math.max(figureCount, 1),
+  }
+
+  const status = entry.status
+  const record = status?.total_reviews > 0
+  // card_stats (study/card_lookup.py) says "not_started" for a card
+  // with no state in any mode; the seal's vocabulary is new / learning
+  // / mastered, and a card nobody has touched is the unstruck seal.
+  const stage = !status?.status || status.status === 'not_started' ? 'new' : status.status
 
   return (
-    <>
-      {/* ── Identity plate ───────────────────────────────────
-          Everything needed to answer "what is this, and how is it
-          read" — headword, reading, level, status seal — on one sumi
-          block, so the body below can open straight onto meaning
-          instead of a row of loose badges. */}
-      <div className="dict-detail__stage" style={typeStyle}>
-        <span className="dict-detail__type-mark" aria-hidden="true">
-          {TYPE_MARK[entry.type]}
-        </span>
-
-        <div className="dict-detail__stage-top">
-          <div className="dict-detail__stage-badges">
-            <LevelBadge level={entry.level} />
-            <StageBadge stage={entry.status?.status ?? 'new'} inline />
+    <article className="dict-entry">
+      {/* ── The plate ────────────────────────────────────────
+          Sticky at the top of the scrolling shell, so the word stays
+          in view while its examples scroll under it — on a phone the
+          entry is the whole screen and this is the reading view. The
+          seal and the level ride in one corner, the two actions in the
+          other, and the three registers sit centred between them. */}
+      <header className="dict-plate">
+        <div className="dict-plate__row">
+          <div className="dict-plate__marks">
+            <StageBadge stage={stage} inline />
+            {jlpt && <span className="dict-plate__level">{jlpt}</span>}
           </div>
-          <div className="dict-detail__stage-actions">
+          <div className="dict-plate__actions">
             <button
+              type="button"
               onClick={() => speakJapanese(entry.kana)}
-              className="dict-detail__speak-btn"
+              className="dict-plate__btn"
               title={t.listen}
               aria-label={t.listen}
             >
               <SpeakIcon />
             </button>
-            {/* Mobile-only (see index.css) — the fullscreen sheet needs
-                an immediate way to dismiss without scrolling all the
-                way down to the "Fermer" button. */}
             <button
+              type="button"
               onClick={onClose}
-              className="dict-detail__close-x"
+              className="dict-plate__btn"
+              title={t.close}
               aria-label={t.close}
             >
               <CloseIcon />
@@ -421,220 +459,205 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
           </div>
         </div>
 
-        <div className="dict-detail__char">
-          {headwordFurigana?.length
-            ? <FuriganaParts parts={headwordFurigana} />
-            : (entry.kanji || entry.kana)}
+        <div className="dict-plate__stack">
+          {isKanji && (
+            <div className="dict-plate__readings">
+              <Readings kana={entry.kana} onLabel="音" kunLabel="訓" center />
+            </div>
+          )}
+          {showKanaLine && (
+            <div className="dict-plate__reading" lang="ja">{entry.kana}</div>
+          )}
+          <h2 className={`dict-plate__word dict-plate__word--${headwordSize(headword)}`} lang="ja">
+            {headwordFurigana?.length
+              ? <FuriganaParts parts={headwordFurigana} />
+              : headword}
+          </h2>
+          {caption && <div className="dict-plate__caption">{caption}</div>}
         </div>
 
-        {/* Reading, directly under the headword it belongs to. Kanji
-            gets its on/kun split labelled 音/訓 — the traditional
-            abbreviations, short enough to sit inline where the full
-            "Lectures on'yomi (sino-japonaises)" never could. Kana gets
-            its romaji. Vocab gets neither: the headword above already
-            carries its reading as furigana. */}
-        {isKanji && (
-          <div className="dict-detail__stage-readings">
-            <Readings kana={entry.kana} onLabel="音" kunLabel="訓" size={17} />
-          </div>
-        )}
-        {isKana && entry.romaji && (
-          <div className="dict-detail__stage-romaji">{entry.romaji}</div>
-        )}
-      </div>
+        <div className="dict-plate__stripe" aria-hidden="true" />
+      </header>
 
-      <div className="dict-detail__body" style={typeStyle}>
+      <div className="dict-entry__body">
 
-        {/* ── 1. What it means ─────────────────────────────
-            First thing in the body, always. Vocab shows the full
-            JMdict senses list (even a single-sense word renders
-            through it, so there's one model rather than a gloss row
-            that then repeats itself); kanji and any vocab entry
-            JMdict had no senses for show one prominent gloss line. */}
+        {/* ── What it means ────────────────────────────────
+            First, always. A word shows its JMdict senses (a
+            single-sense word renders through the same list, so there
+            is one model rather than a gloss row that then repeats
+            itself), each with the sentences that illustrate it; a
+            kanji, or a word JMdict had no senses for, lists its
+            glosses as one line of prose. */}
         {senses.length > 0 ? (
-          <div className="dict-detail__senses">
-            <div className="dict-detail__senses-label">
-              {t.senses ?? (lang === 'fr' ? 'Sens (JMdict)' : 'Senses (JMdict)')}
-            </div>
-            {senses.map(sense => (
-              <div key={sense.number} className="dict-sense">
-                <SenseMarker number={sense.number} className="dict-sense__number" />
-                <div className="dict-sense__body">
-                  {sense.tags?.length > 0 && (
-                    <div className="dict-sense__tags">
-                      {sense.tags.map(tag => (
-                        <TagChip key={`${sense.number}-${tag.code}`} tag={tag} />
-                      ))}
+          <section className="dict-block" aria-label={t.meaning}>
+            <ol className="dict-senses">
+              {senses.map(sense => {
+                const exs = examplesBySense(sense.number)
+                return (
+                  <li key={sense.number} className="dict-sense">
+                    <SenseNumeral number={sense.number} />
+                    <div className="dict-sense__body">
+                      {sense.tags?.length > 0 && (
+                        <div className="dict-sense__tags">
+                          {sense.tags.map(tag => (
+                            <TagChip key={`${sense.number}-${tag.code}`} tag={tag} />
+                          ))}
+                        </div>
+                      )}
+                      <div className="dict-sense__gloss">
+                        <GlossList meaning={sense.glossary} />
+                      </div>
+                      {exs.length > 0 && (
+                        <div className="dict-sense__examples">
+                          {exs.map((ex, i) => <ExampleSentence key={i} ex={ex} />)}
+                        </div>
+                      )}
                     </div>
-                  )}
-                  <div className="dict-sense__gloss">
-                    <GlossList meaning={sense.glossary} />
-                  </div>
-                  {examplesBySense(sense.number).length > 0 && (
-                    <div className="dict-sense__examples">
-                      {examplesBySense(sense.number).map((ex, i) => (
-                        <ExampleSentence key={i} ex={ex} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+                  </li>
+                )
+              })}
+            </ol>
+          </section>
         ) : (
-          meaning != null && (
-            <div className="dict-detail__gloss">
-              <div className="dict-detail__gloss-label">{t.meaning}</div>
-              <div className="dict-detail__gloss-text">
-                <GlossList meaning={meaning} />
-              </div>
-            </div>
+          glossCount > 1 && (
+            <section className="dict-block" aria-label={t.meaning}>
+              <p className="dict-gloss"><GlossList meaning={meaning} /></p>
+            </section>
           )
         )}
 
-        {/* ── 2. How it's used ─────────────────────────────
-            Examples that couldn't nest under a specific sense above.
-            Immediately after the definition, because a sentence reads
+        {/* ── How it's used ────────────────────────────────
+            Sentences that couldn't nest under a specific sense above.
+            Straight after the definition, because a sentence reads
             best next to the meaning it illustrates. */}
         {flatExamples.length > 0 && (
-          <div className="dict-detail__examples">
-            <div className="dict-detail__examples-label">
-              {t.examples}
-            </div>
-            {flatExamples.map((ex, i) => (
-              <ExampleSentence key={i} ex={ex} senseNumber={senses.length > 0 ? ex.sense_number : null} />
-            ))}
-          </div>
-        )}
-
-        {/* ── 3. What it connects to ───────────────────────
-            Two directions of the same relationship, and an entry only
-            ever has one of them: a vocab word links down to the kanji
-            it's built from, a kanji links out to the words it appears
-            in. Adjacent so they read as one "elsewhere in the
-            dictionary" zone. */}
-        {onKanjiClick && composingKanji.length > 0 && (
-          <div className="dict-detail__composing-kanji">
-            <div className="dict-detail__composing-kanji-label">
-              {t.composingKanji}
-            </div>
-            <div className="dict-detail__kanji-chips">
-              {composingKanji.map(char => (
-                <button
-                  key={char}
-                  onClick={() => onKanjiClick(char)}
-                  className="dict-detail__kanji-chip"
-                >
-                  {char}
-                </button>
+          <section className="dict-block" aria-label={t.examples}>
+            <div className="dict-examples">
+              {flatExamples.map((ex, i) => (
+                <ExampleSentence key={i} ex={ex} senseNumber={senses.length > 0 ? ex.sense_number : null} />
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {onVocabClick && isKanji && entry.vocab_examples?.length > 0 && (
-          <div className="dict-detail__vocab-examples">
-            <div className="dict-detail__vocab-examples-label">
-              {t.vocabExamples}
-            </div>
-            <div className="dict-vocab-example-list">
-              {entry.vocab_examples.map((w, i) => (
-                <button
-                  key={i}
-                  onClick={() => onVocabClick(w.kanji, w.kana)}
-                  className="dict-vocab-example-row"
-                >
-                  <span className="dict-vocab-example-row__word">
-                    {w.furigana?.length ? <FuriganaParts parts={w.furigana} /> : w.kanji}
-                  </span>
-                  <span className="dict-vocab-example-row__meaning">
-                    {firstGloss(w.meaning)}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── 4. How it's written ──────────────────────────
-            The stroke-order diagram with its own stroke count and
-            radical sitting right beside it — these three facts are
-            all about drawing the character, so they're one block
-            rather than a diagram at the bottom and its numbers
-            stranded in a metadata list further up. */}
+        {/* ── How it's written ─────────────────────────────
+            The stroke-order sheet with its stroke count and radical
+            beside it — three facts about drawing the character, in
+            one lattice. Before the words that use it: a 漢和辞典
+            gives the character's own facts, then its compounds. */}
         {showForm && (
-          <div className="dict-detail__form">
-            <div className="dict-detail__form-label">
-              {t.strokeOrder}
-            </div>
-            <div className="dict-detail__form-grid">
-              {entry.svg_url && (
-                <StrokeFrame
+          <section className="dict-block" aria-label={t.strokeOrder}>
+            <div className="dict-form" style={formStyle}>
+              {hasSheet && (
+                <StrokeSheet
                   key={entry.svg_url}
                   src={`${API_BASE}${entry.svg_url}`}
                   notAvailableLabel={t.notAvailable}
                 />
               )}
-              {(entry.stroke_count || hasRadicalLink) && (
-                <div className="dict-stat-grid dict-detail__form-stats">
-                  {entry.stroke_count && (
-                    <StatTile value={entry.stroke_count} label={t.strokes} />
-                  )}
-                  {hasRadicalLink && (
-                    <StatTile
-                      value={`#${entry.radical}`}
-                      label={t.radical}
-                      onClick={() => onRadicalClick(entry.radical)}
-                    />
-                  )}
-                </div>
+              {(isKanji || isKana) && entry.stroke_count && (
+                <Figure value={entry.stroke_count} unit="画" unitLang="ja" label={t.strokes} />
+              )}
+              {hasRadicalLink && (
+                <Figure
+                  value={`#${entry.radical}`}
+                  label={t.radical}
+                  onClick={() => onRadicalClick(entry.radical)}
+                />
               )}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* ── 5. Your own record ──────────────────────────
-            Last, because it's about the reader rather than the word.
-            Four figures in the same lattice the results grid uses;
-            nothing renders at all for an entry never reviewed, since
-            a grid of dashes is noise, not information. */}
-        {entry.status?.total_reviews > 0 && (
-          <div className="dict-detail__practice">
-            <div className="dict-detail__practice-label">
-              {t.cardStats}
-              {entry.status.due && (
-                <span className="dict-detail__due-note"><BoltIcon size={12} /> {t.dueNow}</span>
-              )}
+        {/* ── What it connects to ──────────────────────────
+            Two directions of one relationship, and an entry only
+            ever has one of them: a kanji links out to the words it
+            appears in (a ledger of rows, each a door), a word links
+            down to the kanji it is built from (a row of tiles, each
+            the small plate of the entry it opens). */}
+        {onVocabClick && isKanji && entry.vocab_examples?.length > 0 && (
+          <section className="dict-block" aria-label={t.vocabExamples}>
+            <div className="dict-words">
+              {entry.vocab_examples.map((w, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  onClick={() => onVocabClick(w.kanji, w.kana)}
+                  className="dict-word"
+                >
+                  <span className="dict-word__jp" lang="ja">
+                    {w.furigana?.length ? <FuriganaParts parts={w.furigana} /> : w.kanji}
+                  </span>
+                  <span className="dict-word__gloss">{firstGloss(w.meaning)}</span>
+                  <ChevronIcon direction="right" size={16} className="dict-word__chev" />
+                </button>
+              ))}
             </div>
-            <div className="dict-stat-grid">
-              <StatTile
-                value={entry.status.accuracy != null ? `${entry.status.accuracy}%` : '—'}
+          </section>
+        )}
+
+        {onKanjiClick && composingKanji.length > 0 && (
+          <section className="dict-block" aria-label={t.composingKanji}>
+            <div className="dict-parts">
+              {composingKanji.map(char => (
+                <button
+                  type="button"
+                  key={char}
+                  onClick={() => onKanjiClick(char)}
+                  className="dict-part"
+                  lang="ja"
+                >
+                  {char}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Your own record ──────────────────────────────
+            Last, because it is about the reader rather than the word.
+            Four figures, two by two, in the profile's records lattice;
+            nothing renders at all for an entry never reviewed, since a
+            grid of dashes is noise, not information. "Due now" is a
+            state of the block, so it rides above the lattice as a note
+            rather than inside it as a fifth figure. */}
+        {record && (
+          <section className="dict-block" aria-label={t.cardStats}>
+            {status.due && (
+              <div className="dict-block__note"><BoltIcon size={12} /> {t.dueNow}</div>
+            )}
+            <div className="records">
+              <Figure
+                value={status.accuracy != null ? status.accuracy : '—'}
+                unit={status.accuracy != null ? '%' : null}
                 label={t.accuracy}
               />
-              <StatTile
-                value={`${entry.status.correct_reviews}/${entry.status.total_reviews}`}
+              <Figure
+                value={`${status.correct_reviews}/${status.total_reviews}`}
                 label={t.totalReviews}
               />
-              <StatTile
-                value={entry.status.interval_days != null ? `${entry.status.interval_days} ${t.days}` : '—'}
+              <Figure
+                value={status.interval_days != null ? status.interval_days : '—'}
+                unit={status.interval_days != null ? t.days : null}
                 label={t.interval}
               />
-              <StatTile
-                value={shortDate(entry.status.next_review, lang) ?? '—'}
+              <Figure
+                value={shortDate(status.next_review, lang) ?? '—'}
                 label={t.nextReview}
               />
             </div>
-          </div>
+          </section>
         )}
 
-        <button
-          onClick={onClose}
-          className="dict-detail__close-btn"
-        >
+        {/* A thumb affordance on a phone, where the entry is the whole
+            screen and the ✕ is at the far end of it. Hidden everywhere
+            else (see .dict-entry__close): the plate's ✕, Escape and the
+            scrim already close a dock or a modal. */}
+        <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
           {t.close}
         </button>
       </div>
-    </>
+    </article>
   )
 }
 
@@ -678,7 +701,8 @@ function useDictionaryLookup(session, term, category, lang, active) {
 // chrome rather than borrowing the catalogue's: the dictionary screen
 // docks its panel beside the results on a wide screen, which is right
 // there and wrong here — this is a portal over a quiz, with no
-// catalogue to sit next to, so it is always a sheet.
+// catalogue to sit next to, so it is always a sheet. On a phone it is
+// the whole screen, exactly as the dock is (see .dict-sheet).
 export function DictionaryLookupSheet({ term, category, session, onClose }) {
   const { t, lang } = useLang()
   const { entry, loading, error } = useDictionaryLookup(session, term, category, lang, true)
@@ -692,10 +716,9 @@ export function DictionaryLookupSheet({ term, category, session, onClose }) {
           <div className="quiz-loading">{t.loadingDictionary}</div>
         )}
         {!loading && error && (
-          <div className="quiz-loading">
-            {t.notAvailable}
-            <br /><br />
-            <button onClick={onClose} className="dict-detail__close-btn">
+          <div className="dict-sheet__empty">
+            <div className="quiz-loading">{t.notAvailable}</div>
+            <button type="button" onClick={onClose} className="btn-secondary">
               {t.close}
             </button>
           </div>

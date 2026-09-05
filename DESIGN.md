@@ -190,7 +190,13 @@ this scale exists to stop. `rem` only — `px` is retired from type, because
 
 One rung sits above the nine, for one object only: `--fs-specimen-glyph`
 (104px, a single kana or kanji) and `--fs-specimen-word` (72px, a word or
-short phrase) size the study card's Japanese specimen and nothing else.
+short phrase) size the study card's Japanese specimen and nothing else. The
+one other place the word rung appears is the dictionary's entry plate, for a
+lone character (`.dict-plate__word--glyph`, decided 2026-09-05): it is the
+same specimen, read instead of quizzed, opened from a catalogue plate whose
+glyph is already 44px — a reading view cannot set it smaller than the card it
+came from. A word on that plate takes `--fs-display`, a long expression
+`--fs-heading`.
 
 ### Tracking runs inversely to size
 
@@ -260,6 +266,25 @@ else: `--elev-action`, a faint gold glow spent on `.btn-depart` alone — "this
 is the thing to press". One object, by ruling; a fourth shadow needs the same
 argument this one had. Nothing else has a
 shadow. Separation comes from `--surface-line`.
+
+### The entry plate, and a body that names itself
+
+The dictionary opens an entry as **the catalogue plate at reading size**:
+reading over headword over plain-language caption (the first gloss, or a
+kana's romaji), the seal and the JLPT numeral in one corner, two ghost
+roundels (speak, close) in the other, and 辞書's gold as the 3px stripe along
+its bottom edge — the one colour on it. The plate is `position: sticky`
+inside whichever shell scrolls it, so the word stays in view while its
+examples pass under it; on a phone the shell is the whole screen and this is
+the reading view. Under the stripe, blocks divided by hairlines and **no
+section headings**: a numbered list is a definition, a sentence over its
+translation is an example, strokes drawn on washi in a lattice beside their
+stroke count are how the character is written, and the reader's four figures
+are the profile's own `.record` cells. Each block carries its name as an
+`aria-label` only. The pigment arrives as `--line-color` from the shell
+(`.dict-dock`, `.dict-sheet`) and is spent as the stripe, a rail on a word
+row, a ring on hover, and the sense numerals — mixed 60% toward the ambient
+ink, because raw 山吹 reads 2.9:1 on light paper.
 
 ### The console, one everywhere
 

@@ -434,6 +434,67 @@ const Fixture = () => (
         <span className="onb-pass__v onb-pass__v--gold ob-pass-gold">2 sept. ’27</span>
       </div>
     </div>
+    {/* ── 辞書 — the entry plate and its body (2026-09 redesign) ──
+        The dock injects the 辞書 pigment; the entry mixes it 60% toward
+        the ambient ink for its numerals and the highlighted headword
+        (--dict-ink), and the due note mixes the due ink the same way.
+        Raw 山吹 is 2.9:1 on light paper, which is exactly why these are
+        measured rather than trusted. The stroke sheet is the one
+        theme-independent white in the app, so its fallback line takes
+        the fixed dark ink. */}
+    <aside className="dict-dock">
+      <article className="dict-entry">
+        <header className="dict-plate">
+          <span className="dict-plate__level dj-level">N5</span>
+          <div className="dict-plate__readings">
+            <div className="reading-group">
+              <div className="reading-group__label dj-reading-label" lang="ja">音</div>
+              <div className="reading-group__list">
+                <span className="reading-group__item dj-reading" lang="ja">モク</span>
+              </div>
+            </div>
+          </div>
+          <span className="dict-plate__caption dj-caption">Tree</span>
+        </header>
+        <div className="dict-entry__body">
+          <section className="dict-block">
+            <ol className="dict-senses">
+              <li className="dict-sense">
+                <span className="dict-sense__n dj-n">1</span>
+                <div className="dict-sense__body">
+                  <button type="button" className="dict-tag dj-tag">v1</button>
+                  <div className="dict-ex">
+                    <div className="dict-ex__jp" lang="ja">
+                      <mark className="dict-ex__hl dict-ex__seg dj-hl">食</mark>
+                    </div>
+                    <div className="dict-ex__tr dj-tr">I ate.</div>
+                  </div>
+                </div>
+              </li>
+            </ol>
+          </section>
+          <section className="dict-block">
+            <div className="dict-form">
+              <div className="dict-form__sheet">
+                <div className="dict-form__fallback dj-fallback">Not available</div>
+              </div>
+            </div>
+          </section>
+          <section className="dict-block">
+            <div className="dict-words">
+              <button type="button" className="dict-word">
+                <span className="dict-word__gloss dj-word-gloss">Thursday</span>
+              </button>
+            </div>
+          </section>
+          <section className="dict-block">
+            <div className="dict-block__note dj-due">Due now</div>
+          </section>
+        </div>
+      </article>
+    </aside>
+    <span className="dict-tag__tip dj-tip" style={{ position: 'static' }}>Ichidan verb</span>
+
     <div className="jour-st--delayed" style={{ background: 'var(--bg-panel)' }}>
       <div className="jour-line">
         <span className="jour-line__status"><b className="jr-status-b" lang="ja">遅延</b></span>
@@ -530,6 +591,20 @@ const SITES = [
   ['.pf-grid-v', 'pass contract value (sumi)'],
   ['.pf-grid-u', 'pass contract unit (sumi)'],
   ['.pf-grid-gold', 'pass contract 有効期限 (gold on sumi)'],
+
+  // The 辞書 entry — 山吹 mixed toward the ink, and the due ink likewise.
+  ['.dj-level', 'entry plate level numeral'],
+  ['.dj-reading-label', 'entry plate 音/訓 mark'],
+  ['.dj-reading', 'entry plate reading'],
+  ['.dj-caption', 'entry plate caption (first gloss)'],
+  ['.dj-n', 'sense numeral (辞書 pigment mixed toward the ink)'],
+  ['.dj-tag', 'grammatical tag'],
+  ['.dj-hl', 'headword highlighted in an example (辞書 pigment mixed toward the ink)'],
+  ['.dj-tr', 'example translation'],
+  ['.dj-fallback', 'stroke sheet fallback (fixed ink on washi)'],
+  ['.dj-word-gloss', 'word row gloss'],
+  ['.dj-due', 'due note (due ink mixed toward the ink)'],
+  ['.dj-tip', 'tag note (panel ink on sumi)'],
 ]
 
 // Composite every non-transparent background from <html> down to the element.
