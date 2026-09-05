@@ -9,8 +9,15 @@ The sources here regenerate it: `node build.mjs` writes the `.dc.html`
 artboards and `canvas.json`; `node preview.mjs` writes plain-HTML previews of
 each one. `css.mjs` is a near-verbatim subset of `frontend/src/index.css` —
 same tokens, same class names, same values — so a rule in the mockup can be
-diffed against the real sheet. `.hud`, `.tabbar`, `.lane`, `.route`, `.stage`,
-`.sheet`, `.balance` and `.offer` are the new families; everything else exists.
+diffed against the real sheet. Class names mirror `index.css` wherever the
+object already exists (`.pass`, `.board`, `.wmap-*`, `.gate-card`,
+`.btn-depart`, `.jour-*`, `.stamp-rally`, `.platform-card`, `.mcq-row`,
+`.rating-bar`, `.prompt-card`, `.sbook`, `.records`, `.pf-line`, `.banzuke`).
+The rest is new to the mockup — `.hud`, `.tabbar`, `.plate` (the `--sm`
+station sign), `.lane`, `.console`, `.chip`, `.route`, `.stage`, `.sheet`,
+`.balance`, `.offer`, `.dict-entry`, `.seal`, `.anl-card`, `.fare-slip` — and
+its values are still the app's own tokens, or literals `index.css` already
+uses.
 
 ## The backbone (owner's sketch, 2026-09-05)
 

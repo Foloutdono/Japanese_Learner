@@ -256,7 +256,7 @@ export const CSS = String.raw`
 }
 .plate__stack { display: flex; flex-direction: column; min-width: 0; }
 .plate__kana { font-family: var(--font-jp); font-size: 0.78rem; letter-spacing: 0.28em; text-indent: 0.28em; color: var(--text-secondary); line-height: 1.5; }
-.plate__name { font-family: var(--font-serif); font-weight: 700; font-size: 1.94rem; line-height: 1.15; letter-spacing: 0.14em; text-indent: 0.14em; color: var(--text-primary); }
+.plate__name { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-display-fluid); line-height: 1.15; letter-spacing: 0.14em; text-indent: 0.14em; color: var(--text-primary); }
 .plate__romaji { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.3em; text-indent: 0.3em; text-transform: uppercase; color: var(--text-secondary); margin-top: 5px; }
 .plate__aside { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 10px; flex-shrink: 0; text-align: right; }
 .plate__noriba { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
@@ -324,6 +324,7 @@ export const CSS = String.raw`
 .btn-depart__jp { font-family: var(--font-jp); font-size: var(--fs-lead); white-space: nowrap; }
 .btn-depart__latin { font-family: var(--font-display); font-size: var(--fs-caption-xs); letter-spacing: var(--tr-caption); text-transform: uppercase; opacity: 0.8; }
 .btn-depart__go { font-size: var(--fs-caption); opacity: 0.8; }
+.btn-depart--sheet { box-shadow: none; }
 .btn-depart--ghost { background: transparent; border: 1px solid var(--surface-line); color: var(--text-primary); box-shadow: none; }
 .btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: var(--sp-3) var(--sp-5); border-radius: var(--r-panel); background: color-mix(in srgb, var(--line-color, var(--accent)) 70%, var(--bg-panel)); color: var(--text-on-panel); font-weight: 600; font-size: var(--fs-body); }
 .btn-primary--gold { background: color-mix(in srgb, var(--accent2) 60%, var(--bg-panel)); }

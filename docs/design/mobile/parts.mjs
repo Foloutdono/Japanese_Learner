@@ -116,7 +116,7 @@ const RALLY = [
   { d: '水', on: false, tilt: 0 },  { d: '木', on: true, tilt: 3 }, { d: '金', on: true, tilt: -3 },
   { d: '土', on: true,  tilt: 2, today: true },
 ]
-export function rally(streak = 14) {
+export function rally(streak = 3) {
   return `<div class="stamp-rally">
   <span class="stamp-rally__row">${RALLY.map(s => `<span lang="ja" class="stamp-rally__stamp${s.on ? '' : ' stamp-rally__stamp--missed'}${s.today ? ' stamp-rally__stamp--today' : ''}" style="--stamp-tilt: ${s.tilt}deg">${s.d}</span>`).join('')}</span>
   <span class="stamp-rally__label"><span class="stamp-rally__count">${streak}<span class="stamp-rally__unit" lang="ja">日</span></span><span class="stamp-rally__caption">Streak</span></span>
@@ -177,9 +177,10 @@ export function pass({ name = 'Aiko', level = 12, into = 420, span = 1000, rankJ
 
 // ── one screen, wrapped: the phone frame, the theme tweak, the fonts ──
 export function artboard(body, { width = 390, height = 844, phone = true, extraClass = '' } = {}) {
+  const cls = extraClass ? ` ${extraClass}` : ""
   const root = phone
-    ? `<div class="jp phone {{theme}} ${extraClass}">${body}</div>`
-    : `<div class="jp {{theme}} ${extraClass}" style="width: ${width}px; min-height: ${height}px;">${body}</div>`
+    ? `<div class="jp phone {{theme}}${cls}">${body}</div>`
+    : `<div class="jp {{theme}}${cls}" style="width: ${width}px; min-height: ${height}px;">${body}</div>`
   return `<!doctype html>
 <html>
 <head>

@@ -98,7 +98,7 @@ ${hud({ cr: 6 })}
   ${plate({ code: 'HN', kana: 'ほんじつ', name: '本日', latin: "Today's run", color: 'var(--accent2)', extra: dateAside })}
   <div class="today-clear">
     <div class="today-clear__mark" lang="ja">完了</div>
-    <h2 class="today-clear__title">Run complete</h2>
+    <p class="today-clear__title">Run complete</p>
     <p class="today-clear__body">24 reviews cleared. Nothing else is due.</p>
     <p class="today-clear__next">Next review in 3 hours.</p>
     <div class="fare-slip">
@@ -296,13 +296,13 @@ ${tabbar('dict', 24)}`
 // ── 10 · Profile — the pass and its inserts ──
 const rideLine = () => `<div class="jour-line">
   <span class="jour-line__status"><b lang="ja" style="color: var(--text-on-panel);">回数券</b><span class="jour-cap">Coupon tickets</span></span>
-  <span class="jour-line__validity"><b>30</b><span lang="ja" style="font-family: var(--font-display); letter-spacing: var(--tr-caption); text-transform: uppercase;">credits</span></span>
+  <span class="jour-line__validity"><b>30</b><span class="jour-cap">credits</span></span>
   <span class="jour-cap" style="margin-left: auto; letter-spacing: 0.08em; text-transform: none;">+30 at 00:00 · up to 50</span>
 </div>`
 function stampBook() {
   const start = new Date(2026, 7, 3) // Mon 3 Aug → Sun 6 Sep, five weeks
   const today = new Date(2026, 8, 5)
-  const missed = new Set(['8-8', '8-13', '8-16', '8-17', '8-20', '9-2'])
+  const missed = new Set(['8-22', '9-2']) // a 21-day run to 21 Aug (its start before the sheet), ten days, then the current three
   const cells = []
   for (let i = 0; i < 35; i++) {
     const d = new Date(start); d.setDate(start.getDate() + i)
@@ -318,9 +318,9 @@ function stampBook() {
   <div class="sbook__side">
     <div class="sbook__month"><span class="sbook__month-jp" lang="ja">九月</span><span class="fig__l">2026</span></div>
     <div class="sbook__figs">
-      <div class="fig"><span class="fig__v">14<span class="fig__u" lang="ja">日</span></span><span class="fig__l">Current streak</span></div>
+      <div class="fig"><span class="fig__v">3<span class="fig__u" lang="ja">日</span></span><span class="fig__l">Current streak</span></div>
       <div class="fig"><span class="fig__v">21<span class="fig__u" lang="ja">日</span></span><span class="fig__l">Longest streak</span></div>
-      <div class="fig"><span class="fig__v">28<span class="fig__u">/ 34</span></span><span class="fig__l">Days stamped</span></div>
+      <div class="fig"><span class="fig__v">32<span class="fig__u">/ 34</span></span><span class="fig__l">Days stamped</span></div>
     </div>
   </div>
 </section>`
@@ -427,7 +427,7 @@ ${TODAY_BODY()}
     <p class="offer__body">Every review, every day. <b>No balance to watch</b> — the gate opens as long as the pass is valid.</p>
     <span class="offer__price">[PRICE]<small>/ month</small></span>
     <div class="offer__head" style="display:block;">
-      <button type="button" class="btn-depart" style="width: 100%;"><span class="btn-depart__jp" lang="ja">定期券を買う</span><span class="btn-depart__latin">Go unlimited</span><span class="btn-depart__go">▶</span></button>
+      <button type="button" class="btn-depart btn-depart--sheet" style="width: 100%;"><span class="btn-depart__jp" lang="ja">定期券を買う</span><span class="btn-depart__latin">Go unlimited</span><span class="btn-depart__go">▶</span></button>
     </div>
   </div>
 </div>`
@@ -447,7 +447,7 @@ const CHROME_BODY = `
     </div>
     <div class="spec__item">
       <span class="spec__label">Reading the bar</span>
-      <p class="spec__note"><b>Level</b> — the roundel the top bar already has (<code>.topbar-profile-ring</code>): pass-ink ring, the figure inside, the fare (+4xp) rising off it in gold. Tap → the pass.</p>
+      <p class="spec__note"><b>Level</b> — the roundel the top bar already has (<code>.topbar-profile-ring</code>, its XP arc long retired): a pass-ink ring with the figure inside, the fare (+4xp) rising off it in gold. Tap → the pass.</p>
       <p class="spec__note"><b>Goal status</b> — the journey model's five states, in their own inks: 順調 / 定刻 on <code>--success</code>, やや遅れ on <code>--warning</code>, 遅延 / 運転見合わせ on <code>--danger</code>. The sketch's Ahead / On time / Late. Tap → the pass turns over (the status sheet).</p>
       <p class="spec__note"><b>Balance</b> — the gold ring the pass's issuer mark uses (<code>.pass__issuer</code>): credits are the pass's metal, never a line pigment. Warning ring at ≤5, danger at 0; a subscriber's pill reads 定期 UNLIMITED with a double ring. Tap → the balance sheet.</p>
       <p class="spec__note">Sumi, two registers of ink, no line colour — the station name moved to each screen's own plate.</p>
@@ -506,7 +506,7 @@ const canvas = {
   annotations: [
     { id: 'backbone', page: 'screens', x: -300, y: 0, w: 260, text: 'Mobile backbone\n\nTop: level · goal status · credits (the HUD).\nBottom: 学習 Learn · 実践 Practice · 本日 Today · 辞書 Dictionary · 定期券 Profile.\n\nRow 1: the Today tab and a run, then the Learn tab down to a platform list, then Practice.\nRow 2: Dictionary and the analyzer behind it, the Profile in two scrolls, and the two sheets the HUD opens.\n\nEvery artboard has a dark / light tweak.' },
     { id: 'credits', page: 'screens', x: -300, y: H + GY, w: 260, text: 'Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: 定期券, unlimited.\n\nThe gate prices the run (運賃) against the balance (残高) before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits.' },
-    { id: 'chrome-note', page: 'chrome', x: 0, y: -110, w: 420, text: 'Every value on this sheet is a token from index.css — the class names in the mockup source match the real ones (.hud, .tabbar are new; the rest exist).' },
+    { id: 'chrome-note', page: 'chrome', x: 0, y: -110, w: 420, text: 'Every value on this sheet is a :root token or a literal index.css already uses (the 12px credits pill, the 0.1em map captions). Class names mirror index.css where the object exists (.pass, .board, .wmap-*, .gate-card, .btn-depart, .jour-*, .stamp-rally); .hud, .tabbar, .plate, .lane, .console, .chip, .route, .stage and .sheet are new to the mockup — see docs/design/mobile/README.md.' },
   ],
   launch: { view: 'canvas', page: 'screens' },
 }
