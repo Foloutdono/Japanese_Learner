@@ -4595,6 +4595,10 @@
      study screens' rating bar, the level board — offsets by this
      rather than by a number each of them measured for itself. */
   --hud-h:          36px;
+  /* The level board's height when it docks across the top of a phone
+     (see .levelup); the study stage slides down by exactly this while
+     the board is up, so the card keeps its head clear. */
+  --levelup-h:      68px;
   /* The phone's own insets, named once. Every rule that clears a home
      bar or a notch reads these; the fallback lives here and nowhere
      else. */
@@ -12387,6 +12391,105 @@ textarea:focus-visible {
    theme. See :root, above, for why this gets its own named colour. */
 .rating-bar__btn--q1 { --rating-color: var(--rating-wrong); }
 
+/* ── The instrument's form — an open choice ───────────────
+   Three redrawings of the same bar sit beside the current one while
+   the maintainer picks (see RATING_FORMS in RatingBar.jsx). Every one
+   keeps what the bar IS — one container, hairlines between segments,
+   worst to best left to right, a ring or mark that fills on press —
+   and changes only how it is drawn. The picked one folds into the base
+   rules above; the others go, and so does this block.
+
+   標 — the board row. The colour is the ramp: a 3px rule under each
+   segment, the way this bar was first described, and no ring. Flat
+   corners, like a row on the departure board.
+
+   改札 — the sumi dock. The bar is chrome: the same sumi as the top
+   bar and the level HUD, so on a phone the bottom of the screen reads
+   as one console. Kinari words; the ramp is a small mark under each,
+   which fills out on press.
+
+   札 — the hairline pill. The same construction as the hint pills
+   above the card: transparent, a hairline, the word. The ramp at rest
+   is a dot before each word; colour washes the segment only on press.
+
+   Resting rules for all three first, then every hover and press, so
+   no selector descends below one it shares a target with. */
+.rating-bar--board .rating-bar__buttons {
+  border-radius: var(--r-flat);
+  background: transparent;
+  border-inline: 0;
+}
+.rating-bar--dock .rating-bar__buttons {
+  background: var(--bg-panel);
+  border-color: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  border-radius: var(--r-panel);
+}
+.rating-bar--pill .rating-bar__buttons {
+  border-radius: var(--r-pill);
+  background: transparent;
+}
+.rating-bar--board .rating-bar__btn {
+  position: relative;
+  gap: 0;
+  color: var(--text-secondary);
+}
+.rating-bar--dock .rating-bar__btn {
+  color: var(--text-on-panel);
+  border-left-color: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+}
+.rating-bar--pill .rating-bar__btn {
+  flex-direction: row;
+  gap: var(--sp-2);
+  color: var(--text-secondary);
+}
+.rating-bar--board .rating-bar__btn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--rating-color, var(--text-secondary));
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+.rating-bar--board .rating-bar__btn .rating-bar__btn-ring { display: none; }
+.rating-bar--dock .rating-bar__btn .rating-bar__btn-ring {
+  width: 6px;
+  height: 6px;
+  border: 0;
+  background: var(--rating-color, var(--text-on-panel-soft));
+  opacity: 0.75;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+}
+.rating-bar--pill .rating-bar__btn .rating-bar__btn-ring {
+  width: 6px;
+  height: 6px;
+  border: 0;
+  background: var(--rating-color, var(--text-secondary));
+  opacity: 0.6;
+}
+.rating-bar--board .rating-bar__btn:hover,
+.rating-bar--board .rating-bar__btn:focus-visible,
+.rating-bar--board .rating-bar__btn.rating-bar__btn--pressed,
+.rating-bar--pill .rating-bar__btn:hover,
+.rating-bar--pill .rating-bar__btn:focus-visible { color: var(--text-primary); }
+.rating-bar--pill .rating-bar__btn.rating-bar__btn--pressed {
+  color: color-mix(in srgb, var(--rating-color, transparent) 60%, var(--text-primary));
+}
+.rating-bar--board .rating-bar__btn:hover::after,
+.rating-bar--board .rating-bar__btn:focus-visible::after,
+.rating-bar--board .rating-bar__btn.rating-bar__btn--pressed::after { opacity: 1; }
+.rating-bar--dock .rating-bar__btn:hover .rating-bar__btn-ring,
+.rating-bar--dock .rating-bar__btn:focus-visible .rating-bar__btn-ring,
+.rating-bar--dock .rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-ring {
+  opacity: 1;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rating-color, transparent) 30%, transparent);
+}
+.rating-bar--pill .rating-bar__btn:hover .rating-bar__btn-ring,
+.rating-bar--pill .rating-bar__btn:focus-visible .rating-bar__btn-ring,
+.rating-bar--pill .rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-ring { opacity: 1; }
+
 /* On a 375px phone this bar spans ~320px, so each segment is 53.3px --
    measured in the running app, not derived from the viewport, because the
    screen's own padding takes more than you would guess. The longest label
@@ -18325,6 +18428,8 @@ textarea:focus-visible {
     padding-top: var(--sp-7);
     padding-inline: var(--sp-5);
     padding-bottom: calc(var(--hud-h) + var(--sp-5) + var(--safe-bottom));
+    /* Matched to .levelup's slide, so the page moves with the board. */
+    transition: padding-top 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
   }
   .quiz-area > .quiz-done,
   .quiz-area > .quiz-loading,
@@ -18358,6 +18463,22 @@ textarea:focus-visible {
     padding-block: var(--sp-3);
     background: var(--bg-main);
   }
+  /* The sumi dock (an open choice, see RatingBar.jsx): edge to edge and
+     straight onto the HUD, so the two are one console. */
+  .quiz-area > .rating-bar--dock {
+    background: var(--bg-panel);
+    margin-inline: calc(-1 * var(--sp-5));
+    padding-inline: var(--sp-5);
+  }
+  .quiz-area:has(> .rating-bar--dock) { padding-bottom: calc(var(--hud-h) + var(--safe-bottom)); }
+  .quiz-area > .rating-bar--dock .rating-bar__buttons { background: transparent; }
+  /* While the level board is docked across the top (see XpToast.jsx),
+     the stage slides down under it: a panel takes its place, the card
+     keeps its head clear, and everything slides back as it leaves. */
+  :root[data-levelup] .quiz-area {
+    padding-top: calc(var(--levelup-h) + var(--safe-top) + var(--sp-4));
+  }
+
   /* The figures come off; the rule stays. A 4px three-colour line at
      the top of the stage says how much of the deck is vermillion and
      how much is gold, in the same inks the card's own seal wears. */
@@ -22918,26 +23039,34 @@ html { scrollbar-gutter: stable; }
    eye read a flap rather than a rotation. */
 .split-flap {
   display: inline-flex;
-  gap: 3px;
+  gap: 2px;
   perspective: 340px;
 }
+/* A drum is a moulded plastic card, not a cut-out of the board: it
+   sits a shade lighter than the sumi behind it, with a hairline of
+   its own edge, a sheen across its top half, and a seam that reads as
+   a real gap. The digits sit close enough to read as one number. */
 .flap {
   --flap-h: var(--flap-size, 40px);
-  --flap-w: calc(var(--flap-h) * 0.72);
+  --flap-w: calc(var(--flap-h) * 0.7);
   --flap-ms: 340ms;
+  --flap-face: color-mix(in srgb, var(--text-on-panel) 9%, var(--bg-panel));
+  --flap-sheen: color-mix(in srgb, var(--text-on-panel) 16%, var(--bg-panel));
   position: relative;
   display: inline-block;
   width: var(--flap-w);
   height: var(--flap-h);
-  border-radius: 3px;
-  background: var(--bg-panel);
+  border-radius: var(--r-plate);
+  background: var(--flap-face);
   color: var(--text-on-panel);
   font-family: var(--font-display);
   font-weight: 700;
   font-size: calc(var(--flap-h) * 0.62);
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.34);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--text-on-panel) 10%, transparent),
+    0 2px 5px rgba(0, 0, 0, 0.34);
   overflow: hidden;
 }
 
@@ -22956,10 +23085,14 @@ html { scrollbar-gutter: stable; }
   width: 100%;
   height: 50%;
   overflow: hidden;
-  background: var(--bg-panel);
+  background: var(--flap-face);
 }
+/* The top halves catch the light. */
 .flap__half--top,
-.flap__leaf--falling { top: 0; }
+.flap__leaf--falling {
+  top: 0;
+  background: linear-gradient(to bottom, var(--flap-sheen), var(--flap-face));
+}
 .flap__half--bottom,
 .flap__leaf--rising { bottom: 0; }
 
@@ -23007,7 +23140,8 @@ html { scrollbar-gutter: stable; }
   top: 50%;
   height: 2px;
   margin-top: -1px;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--text-on-panel) 8%, transparent);
   z-index: 3;
   pointer-events: none;
 }
@@ -23023,27 +23157,32 @@ html { scrollbar-gutter: stable; }
    .hud-fare. */
 .levelup {
   position: fixed;
-  top: var(--safe-top);
+  top: 0;
   left: 0;
   right: 0;
   z-index: 250;
   display: flex;
   justify-content: center;
+  /* The sumi runs up under a notch; the board's own box starts below it. */
+  padding-top: var(--safe-top);
+  background: var(--bg-panel);
   pointer-events: none;
   animation: levelup-in 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
 }
-.levelup--leaving { animation: levelup-out 300ms ease-in forwards; }
-@keyframes levelup-in  { from { opacity: 0; transform: translateY(-100%); } }
-@keyframes levelup-out { to   { opacity: 0; transform: translateY(-100%); } }
+.levelup--leaving { animation: levelup-out 320ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+@keyframes levelup-in  { from { transform: translateY(-100%); } }
+@keyframes levelup-out { to   { transform: translateY(-100%); } }
 
 .levelup__board {
   --flap-size: var(--fs-display);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-5);
   width: 100%;
-  padding: var(--sp-4) var(--sp-6);
+  height: var(--levelup-h);
+  padding-inline: var(--sp-6);
   background: var(--bg-panel);
   color: var(--text-on-panel);
   border-bottom: 3px solid var(--accent2);
@@ -23053,6 +23192,7 @@ html { scrollbar-gutter: stable; }
   display: flex;
   flex-direction: column;
   gap: var(--sp-1);
+  min-width: 0;
 }
 .levelup__jp {
   font-family: var(--font-jp);
@@ -23069,12 +23209,19 @@ html { scrollbar-gutter: stable; }
   font-weight: 700;
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--text-on-panel-soft);
 }
+/* A tracked line on a centred axis cancels the trailing letter's
+   tracking with an equal indent (DESIGN.md, Tracking). */
+.levelup__unit { text-indent: var(--tr-caption); }
+/* The figure and its label, a fixed pair: drums, caps label beneath. */
 .levelup__flaps {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--sp-1);
+  flex-shrink: 0;
 }
 
 @media (min-width: 769px) {
@@ -23082,11 +23229,18 @@ html { scrollbar-gutter: stable; }
     top: calc(var(--sp-9) + var(--sp-4));
     left: auto;
     right: var(--sp-5);
+    padding-top: 0;
+    background: transparent;
+    animation-name: levelup-in-panel;
   }
+  .levelup--leaving { animation-name: levelup-out-panel; }
+  @keyframes levelup-in-panel  { from { opacity: 0; transform: translateY(-12px); } }
+  @keyframes levelup-out-panel { to   { opacity: 0; transform: translateY(-12px); } }
   .levelup__board {
     --flap-size: calc(var(--fs-display) * 1.35);
     width: auto;
-    gap: var(--sp-6);
+    height: auto;
+    gap: var(--sp-7);
     padding: var(--sp-4) var(--sp-6);
     border-radius: var(--r-panel);
     border-bottom: none;
@@ -23245,6 +23399,7 @@ html { scrollbar-gutter: stable; }
 /* The flaps still turn — that is the content, not decoration — but
    nothing slides or scales around them. */
 @media (prefers-reduced-motion: reduce) {
+  .quiz-area { transition: none; }
   .levelup,
   .reissue,
   .reissue__pass,
@@ -23301,6 +23456,33 @@ html { scrollbar-gutter: stable; }
 .preview-row__tier--stamp { background: color-mix(in srgb, var(--state-learning) 22%, transparent); color: color-mix(in srgb, var(--state-learning) 65%, var(--text-primary)); }
 /* The card the stamp rows strike: a study stage, but one that sits in
    the page's flow rather than filling the screen. */
+/* The rating bar's forms on the workbench, one under the other, the
+   one switched on marked. */
+.preview-forms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+.preview-form__pick {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.preview-form__pick[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent2) 14%, transparent);
+  border-color: color-mix(in srgb, var(--accent2) 60%, transparent);
+  color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
+}
+.preview-form__pick [lang="ja"] { font-family: var(--font-jp); font-weight: 700; }
 .preview-stage {
   flex: none;
   padding: var(--sp-6) 0;

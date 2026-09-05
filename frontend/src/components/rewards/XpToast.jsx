@@ -89,6 +89,20 @@ function RewardScene({ toast, onDone }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // The board is a panel, not an overlay: while it is docked across
+  // the top of a phone the page slides down under it so the card
+  // keeps its head clear, and slides back as the board leaves. The
+  // attribute is what index.css keys that on (`:root[data-levelup]`);
+  // set here rather than in CSS because the board is a portal and the
+  // page is not its descendant.
+  useEffect(() => {
+    if (tier !== 'level') return
+    const root = document.documentElement
+    if (leaving) root.removeAttribute('data-levelup')
+    else root.setAttribute('data-levelup', '')
+    return () => root.removeAttribute('data-levelup')
+  }, [tier, leaving])
+
   // onDone only ever fires on the real animationend of the exit, never
   // on a timer guessing how long the CSS will take. animationend
   // bubbles from every flap, so both handlers match by name.
@@ -120,9 +134,11 @@ function RewardScene({ toast, onDone }) {
             <span className="levelup__jp" lang="ja">進級</span>
             <span className="levelup__latin">{t.levelUp}</span>
           </span>
+          {/* A figure and its label form a fixed pair: the drums, the
+              caps label beneath (DESIGN.md, Figures). */}
           <span className="levelup__flaps">
-            <span className="levelup__unit">{t.level}</span>
             <SplitFlap from={level - 1} to={level} label={`${t.level} ${level}`} />
+            <span className="levelup__unit">{t.level}</span>
           </span>
         </div>
       </div>,
