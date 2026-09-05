@@ -238,6 +238,11 @@ const DICT_BODY = `
 ${hud()}
 <main class="phone__content" style="--line-color: var(--line-jisho); gap: var(--sp-5);">
   ${plate({ code: 'JS', kana: 'じしょ', name: '辞書', latin: 'Dictionary', color: 'var(--line-jisho)' })}
+  <button type="button" class="anl-door">
+    <span class="wmap-roundel" style="--line-color: var(--line-kaiseki); color: color-mix(in srgb, var(--line-kaiseki) 60%, var(--text-primary));">KS</span>
+    <span class="anl-door__names"><span class="anl-door__title">Analyzer<span lang="ja">解析</span></span></span>
+    <span class="anl-door__intakes"><span class="anl-door__intake">${I.text}</span><span class="anl-door__intake">${I.camera}</span><span class="anl-door__intake">${I.video}</span></span>
+  </button>
   <div class="console">
     <div class="console__top">
       <div class="console__chips">
@@ -246,7 +251,6 @@ ${hud()}
         <button type="button" class="chip" style="--tab-color: var(--line-kana)"><span class="chip__glyph" lang="ja">あ</span>Kana</button>
         <button type="button" class="chip" style="--tab-color: var(--line-jisho)"><span class="chip__glyph" lang="ja">辞</span>JMdict</button>
       </div>
-      <button type="button" class="console__action console__action--gold"><span lang="ja">解析</span>Analyze</button>
     </div>
     <div class="console__index">${I.search}<span class="console__field console__field--filled">san</span><button type="button" style="display:inline-flex;width:22px;height:22px;border-radius:50%;background:color-mix(in srgb, var(--text-primary) 8%, transparent);color:var(--text-secondary);align-items:center;justify-content:center;padding:0;">${I.cross.replace('class="svg"', 'class="svg" style="width:12px;height:12px;"')}</button><span class="console__count">128 results</span></div>
   </div>
@@ -267,8 +271,7 @@ const anl = ({ n, icon, title, jp, desc, count, last }) => `<button type="button
   <span class="anl-card__body"><span class="anl-card__title">${title}<span lang="ja">${jp}</span></span><span class="anl-card__desc">${desc}</span></span>
   <span class="anl-card__aside"><span class="anl-fig"><b>${count}</b><span>Passages</span></span><span class="anl-fig"><b>${last}</b><span>Last used</span></span></span>
 </button>`
-const hist = ({ n, jp, count, when, kept }) => `<button type="button" class="anl-hist">
-  <span class="anl-hist__n">${n}</span>
+const hist = ({ jp, count, when, kept }) => `<button type="button" class="anl-hist">
   <span class="anl-hist__body"><span class="anl-hist__jp" lang="ja">${jp}</span><span class="anl-hist__meta">${kept ? '<span class="anl-kept" lang="ja">保存</span>' : ''}<span>${count}</span><span>${when}</span></span></span>
   <span class="platform-card__go" style="--rail: var(--line-kaiseki); padding-right: 0;">▶</span>
 </button>`
@@ -276,18 +279,18 @@ const ANL_BODY = `
 ${hud()}
 <main class="phone__content" style="--line-color: var(--line-kaiseki); gap: var(--sp-5);">
   ${plate({ code: 'KS', kana: 'かいせき', name: '解析', latin: 'Analyzer', color: 'var(--line-kaiseki)', noriba: 3 })}
-  <div class="platform-grid" style="gap: var(--sp-3);">
-    ${anl({ n: 1, title: 'Text',  jp: '文字', desc: 'Type or paste Japanese',          count: 12, last: 'today' })}
-    ${anl({ n: 2, title: 'Photo', jp: '写真', desc: 'Shoot or upload a picture',       count: 3,  last: '2 days ago' })}
-    ${anl({ n: 3, title: 'Video', jp: '動画', desc: 'A YouTube link and its subtitles', count: 1,  last: '12 days ago' })}
+  <div class="seg seg--full seg--kaiseki">
+    <button type="button" class="seg__opt seg__opt--on">${I.text}<span class="seg__opt-latin">Text</span></button>
+    <button type="button" class="seg__opt">${I.camera}<span class="seg__opt-latin">Photo</span></button>
+    <button type="button" class="seg__opt">${I.video}<span class="seg__opt-latin">Video</span></button>
   </div>
-  <div class="textarea">Type or paste a Japanese phrase…</div>
+  <div class="textarea">Paste or type Japanese…</div>
   <button type="button" class="btn-primary" style="width: 100%;">Analyze</button>
-  <div class="head2"><span class="head2__latin">History</span><span class="head2__jp" lang="ja">運行履歴</span><span class="head2__count">16 passages</span></div>
+  <div class="head2"><span class="head2__latin">History</span><span class="head2__count">16 passages</span></div>
   <div class="surface" style="display:flex;flex-direction:column;">
-    ${hist({ n: '16', jp: '駅で友達を待っています。',          count: '3 sentences', when: 'today' })}
-    ${hist({ n: '15', jp: '雨が降りそうです。',                count: '1 sentence',  when: 'yesterday', kept: true })}
-    ${hist({ n: '14', jp: 'ご確認のうえ、お手続きください。',   count: '2 sentences', when: '12 days ago' })}
+    ${hist({ jp: '駅で友達を待っています。',          count: '3 sentences', when: 'today' })}
+    ${hist({ jp: '雨が降りそうです。',                count: '1 sentence',  when: 'yesterday', kept: true })}
+    ${hist({ jp: 'ご確認のうえ、お手続きください。',   count: '2 sentences', when: '12 days ago' })}
   </div>
 </main>
 ${tabbar('dict', 24)}`
@@ -380,25 +383,28 @@ ${TODAY_BODY({ hud: { st: 'slightlyBehind' } })}
 <div class="scrim"></div>
 <div class="sheet sheet--sumi jour-st--slightlyBehind">
   <span class="sheet__handle"></span>
-  <div class="jour-rev__head">
-    <span class="jour-rev__title"><b lang="ja">路線図</b><span class="jour-cap">Your line</span></span>
-    <span class="jour-rev__status"><b lang="ja">やや遅れ</b><span class="jour-cap">Running behind</span></span>
-  </div>
+  <div class="jour-rev__head">${status('slightlyBehind')}</div>
   <div class="jour-track">
     <span class="jour-track__span">
       <span class="jour-track__rail"></span>
       <span class="jour-track__done" style="width: 41%"></span>
-      <span class="jour-track__station jour-track__station--past" style="left: 0%"><i></i><span class="jour-track__station-name" lang="ja">N5 入門</span></span>
-      <span class="jour-track__station" style="left: 50%"><i></i><span class="jour-track__station-name" lang="ja">N4 基礎</span></span>
-      <span class="jour-track__station" style="left: 100%"><i></i><span class="jour-track__station-name" lang="ja">N3 日常</span></span>
+      <span class="jour-track__station jour-track__station--past" style="left: 0%"><i></i><span class="jour-track__station-name jour-track__station-name--latin">N5</span></span>
+      <span class="jour-track__station" style="left: 50%"><i></i><span class="jour-track__station-name jour-track__station-name--latin">N4</span></span>
+      <span class="jour-track__station" style="left: 100%"><i></i><span class="jour-track__station-name jour-track__station-name--latin">N3</span></span>
       <span class="jour-track__you" style="left: 41%"><span class="jour-track__tag">You</span><i></i></span>
-      <span class="jour-track__plan" style="left: 49%"><i></i><span class="jour-track__tag">Plan · +9 days</span></span>
+      <span class="jour-track__plan" style="left: 49%"><i></i><span class="jour-track__tag">Plan</span></span>
+      <span class="jour-track__gap" style="left: 41%; width: 8%"><b>9d</b></span>
     </span>
   </div>
-  <p class="jour-rev__foot">Last 14 days: <b>7.1 a day</b> against the promised <b>10</b>. At today's rhythm 日常 arrives <b>23 Mar 2027</b> — <b>9 days</b> behind the date on your pass.</p>
+  <div class="jour-figs">
+    <div class="jour-fig"><span class="jour-fig__v">7.1<span class="jour-fig__u">/ day</span></span><span class="jour-fig__l">Last 14 days</span></div>
+    <div class="jour-fig"><span class="jour-fig__v">10<span class="jour-fig__u">/ day</span></span><span class="jour-fig__l">Promised</span></div>
+    <div class="jour-fig"><span class="jour-fig__v jour-fig__v--st">23 Mar</span><span class="jour-fig__l">At this pace</span></div>
+    <div class="jour-fig"><span class="jour-fig__v">14 Mar</span><span class="jour-fig__l">On the pass</span></div>
+  </div>
   <div class="jour-rev__actions">
-    <button type="button" class="jour-act"><strong><span lang="ja">新快速</span>Run 15 a day</strong>keeps 14 Mar 2027</button>
-    <button type="button" class="jour-act"><strong><span lang="ja">再発行</span>Reprint — arrive 23 Mar 2027</strong>at 7.1 a day; the date moves in ink</button>
+    <button type="button" class="jour-act"><strong>Run 15 a day</strong>keeps 14 Mar</button>
+    <button type="button" class="jour-act"><strong>Reprint at 7.1 a day</strong>arrive 23 Mar</button>
   </div>
 </div>`
 
@@ -462,7 +468,7 @@ const CHROME_BODY = `
     <div class="spec__item">
       <span class="spec__label">Reading the bar</span>
       <p class="spec__note">Kanji as the mark, the plain word as its caption — the pairing rule at chip size. Active gate: full ink and a 2px rule; the rest in <code>--text-on-panel-soft</code>. The due count rides 本日 as the map's own <code>.wmap-due</code> chip.</p>
-      <p class="spec__note">学習 is the route map (four lines + your decks). 実践 holds 読書 · 理解 · 翻訳 · 模試. 辞書 carries the analyzer as its one action. 定期券 is the pass and its inserts.</p>
+      <p class="spec__note">学習 is the route map (four lines + your decks). 実践 holds 読書 · 理解 · 翻訳 · 模試. 辞書 opens the analyzer from the card under its plate. 定期券 is the pass and its inserts.</p>
       <p class="spec__note">During a run the bar leaves with the top bar and the rating bar docks on the same edge — one console at the bottom, the card the only bright thing.</p>
     </div>
   </div>

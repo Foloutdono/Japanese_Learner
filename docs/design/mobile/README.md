@@ -48,8 +48,11 @@ uses.
   During a run both bars leave and the rating bar docks on the bottom edge
   (DESIGN.md, *The study stage on a phone*); ‹ 改札 top-left is the way out,
   beside the remaining count and the balance.
-- **辞書** keeps the one console; 解析 is its filled action (gold, dark ink —
-  DESIGN.md's ruling for 辞書's pigment) and opens the analyzer concourse.
+- **辞書** opens the analyzer from a card set directly under its plate — the
+  KS roundel, the name, and the three intakes (text · photo · video) as icon
+  doors — with the one console below it. The analyzer itself is one
+  workbench: the intake switch (Text · Photo · Video), the field, the one
+  filled action, the history.
 - **定期券** is the pass and its inserts, unchanged in kind. The pass gains one
   line: the ride balance (回数券 coupon tickets · credits · refill), under the
   journey line it already prints.
@@ -59,8 +62,11 @@ uses.
 - **Station panel → the pass turns over.** The panel reads the journey
   model's five states in their inks (順調 / 定刻 on `--success`, やや遅れ on
   `--warning`, 遅延 / 運転見合わせ on `--danger`) but prints only the English
-  word and the days; the Japanese words stay on the pass. The sheet is the
-  pass's back: the track, the honest sentence, the two moves.
+  word and the days; the Japanese words stay on the pass. The sheet says it
+  in the drawing, with no Japanese and no sentence: the station panel, the
+  track with You and Plan and the gap between them in days, four bare figures
+  (last 14 days · promised · arrival at this pace · the date on the pass), and
+  the two moves.
 - **Commuter pass → the balance sheet.** The figure inside the pocket pass is
   gold, the pass's metal, never a line pigment; the card's edge goes warning at
   ≤5 and danger at 0. The sheet is where the refill and the cap are explained

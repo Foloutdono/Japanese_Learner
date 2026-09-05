@@ -444,7 +444,7 @@ export const CSS = String.raw`
 .jour-rev__title b { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-body); }
 .jour-rev__status { margin-left: auto; }
 .jour-rev__status b { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-lead); color: var(--jour-st-ink, var(--text-on-panel)); }
-.jour-track { position: relative; height: 132px; }
+.jour-track { position: relative; height: 140px; }
 .jour-track__span { position: absolute; inset: 0 20px; }
 .jour-track__rail { position: absolute; left: 0; right: 0; top: 38px; height: 4px; border-radius: var(--r-plate); background: color-mix(in srgb, var(--text-on-panel) 18%, transparent); }
 .jour-track__done { position: absolute; left: 0; top: 38px; height: 4px; border-radius: var(--r-plate); background: var(--jour-st, var(--success)); }
@@ -452,6 +452,18 @@ export const CSS = String.raw`
 .jour-track__station i { width: 12px; height: 12px; border-radius: var(--r-pill); background: var(--bg-panel); border: 3px solid color-mix(in srgb, var(--text-on-panel) 70%, transparent); }
 .jour-track__station--past i { background: var(--jour-st, var(--success)); border-color: var(--jour-st, var(--success)); }
 .jour-track__station-name { font-family: var(--font-jp); font-size: var(--fs-caption); font-weight: 700; color: var(--text-on-panel-soft); white-space: nowrap; }
+.jour-track__station-name--latin { font-family: var(--font-display); letter-spacing: var(--tr-term); font-variant-numeric: tabular-nums; }
+.jour-track__gap { position: absolute; top: 118px; height: 0; border-top: 2px solid var(--jour-st, var(--warning)); }
+.jour-track__gap::before, .jour-track__gap::after { content: ''; position: absolute; top: -5px; width: 2px; height: 8px; background: var(--jour-st, var(--warning)); }
+.jour-track__gap::before { left: 0; }
+.jour-track__gap::after { right: 0; }
+.jour-track__gap b { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--jour-st-ink, var(--warning)); white-space: nowrap; }
+.jour-figs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--r-card); overflow: hidden; }
+.jour-fig { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-4); background: var(--bg-panel); }
+.jour-fig__v { display: flex; align-items: baseline; gap: var(--sp-2); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-title); line-height: 1; font-variant-numeric: tabular-nums; color: var(--text-on-panel); }
+.jour-fig__v--st { color: var(--jour-st-ink, var(--text-on-panel)); }
+.jour-fig__u { font-size: var(--fs-sm); font-weight: 600; color: var(--text-on-panel-soft); }
+.jour-fig__l { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); }
 .jour-track__you, .jour-track__plan { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
 .jour-track__you { top: 2px; }
 .jour-track__plan { top: 76px; }
@@ -742,6 +754,19 @@ export const CSS = String.raw`
 .offer__price small { font-size: var(--fs-caption); font-weight: 600; color: var(--text-on-panel-soft); letter-spacing: 0.06em; }
 
 /* ── analyzer (Latin-first by ruling) ── */
+.anl-door { display: flex; align-items: center; gap: var(--sp-4); min-height: 56px; padding: var(--sp-3) var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); text-align: left; color: var(--text-primary); --line-color: var(--line-kaiseki); }
+.anl-door__names { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.anl-door__title { font-family: var(--font-serif); font-weight: 600; font-size: 1.08rem; line-height: 1.3; }
+.anl-door__title [lang="ja"] { font-family: var(--font-jp); font-weight: 500; font-size: var(--fs-caption); color: var(--text-secondary); margin-left: var(--sp-2); letter-spacing: var(--tr-term); }
+.anl-door__desc { font-size: var(--fs-caption); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.anl-door__intakes { display: flex; gap: var(--sp-2); flex: none; }
+.anl-door__intake { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--r-pill); border: 1px solid var(--surface-line); color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--text-primary)); padding: 0; }
+.anl-door__intake .svg { width: 17px; height: 17px; }
+.seg--full { width: 100%; margin-left: 0; }
+.seg--full .seg__opt { flex: 1; justify-content: center; height: 40px; }
+.seg__opt-latin { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-caption); letter-spacing: var(--tr-caption); text-transform: uppercase; }
+.seg__opt--on .seg__opt-latin { color: var(--text-primary); }
+.seg--kaiseki .seg__opt--on { background: color-mix(in srgb, var(--line-kaiseki) 14%, transparent); }
 .anl-card { display: flex; align-items: stretch; background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); overflow: hidden; text-align: left; color: var(--text-primary); }
 .anl-card__lead { flex: none; width: 58px; display: flex; align-items: center; justify-content: center; padding-left: 10px; }
 .anl-card__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 12px 10px; }
@@ -763,7 +788,7 @@ export const CSS = String.raw`
 .head2__latin { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-lead); }
 .head2__jp { font-family: var(--font-jp); font-size: var(--fs-caption); color: var(--text-secondary); letter-spacing: var(--tr-term); }
 .head2__count { margin-left: auto; font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.textarea { display: flex; align-items: flex-start; min-height: 72px; padding: var(--sp-4); border-radius: var(--r-card); background: var(--bg-main); border: 1px solid transparent; color: var(--text-secondary); font-size: var(--fs-body); }
+.textarea { display: flex; align-items: flex-start; min-height: 120px; padding: var(--sp-4); border-radius: var(--r-card); background: var(--bg-main); border: 1px solid transparent; color: var(--text-secondary); font-size: var(--fs-body); }
 
 /* ── spec sheet furniture (Chrome artboard) ── */
 .spec { display: flex; flex-direction: column; gap: var(--sp-6); padding: var(--sp-7); }
