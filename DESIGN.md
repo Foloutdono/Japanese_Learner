@@ -278,8 +278,11 @@ readings**, the first on'yomi and the first kun'yomi, each behind its 音/訓
 mark, and a `+N` door: 生 has twenty readings and a plate is not the place
 for them. The door opens a **sheet of its own** over the entry — the lookup
 sheet's shell, stacked above whatever opened it — listing every reading with
-the words that use it (grouped backend-side by `study/kanji_words.py`);
-nothing of that list is on the entry itself. The four-word "used in these
+the words that use it (grouped backend-side by `study/kanji_words.py`): one
+block per register, opened by its 音/訓 mark once, the readings with words as
+small groups over the ledger's own rows, and the readings no word
+demonstrates closing the block as one row of quiet pills. Nothing of that
+list is on the entry itself. The four-word "used in these
 words" ledger stays, and its four words demonstrate four different readings
 where the deck has them, the kanji picked out in each row in the entry's
 ink so the reading it uses is what the eye lands on. The plate is `position: sticky`

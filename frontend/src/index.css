@@ -14863,15 +14863,22 @@ textarea:focus-visible {
    The sheet behind the plate's door (ReadingsSheet in
    DictionaryDetail.jsx): the lookup sheet's shell, stacked over
    whatever opened it, with the plate's construction as its head — the
-   kanji, what this is, the ✕, the stripe — and no registers. The deck's
-   order — on'yomi, then kun'yomi — each reading a small group: its
-   mark and the reading, then the words that use it in the ledger's own
-   rows, bleeding to the sheet's edges as the ledger's do. A reading no
-   word demonstrates is listed alone: the sheet is all of them. */
-.dict-readings {
+   kanji, what this is, the ✕, the stripe — and no registers. Then two
+   blocks, one per register, divided by the body's hairline and each
+   opened by its 音 / 訓 mark once. A reading the deck has words for is
+   a small group — the reading, then its words in the ledger's own
+   rows, bleeding to the sheet's edges as the ledger's do; the readings
+   no word demonstrates close the block as one wrapped row of quiet
+   pills, so twenty readings do not become twenty heads in a column. */
+.dict-register {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
+  gap: var(--sp-4);
+}
+.dict-register__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
 }
 .dict-readings__glyph {
   font-family: var(--font-jp);
@@ -14892,16 +14899,35 @@ textarea:focus-visible {
   flex-direction: column;
   gap: var(--sp-2);
 }
-.dict-reading__head {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-}
 .dict-reading__yomi {
   font-family: var(--font-jp);
   font-size: var(--fs-lead);
   letter-spacing: var(--tr-term);
   color: var(--text-primary);
+}
+/* The readings with no word to show for them: pills in the secondary
+   register, the reading alone. Hairline rings rather than a run of
+   kana joined by middots, so twenty of them read as twenty readings
+   and not as a sentence. */
+.dict-register__rest {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.dict-register__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--sp-6);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tr-term);
+  color: var(--text-secondary);
 }
 /* The sheet over a quiz has no dictionary underneath to jump around
    in: the same row, with nothing to approach — no rail, no wash. */
@@ -17340,6 +17366,33 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+/* The flashcard is the body's whole height, not just its face. The
+   body centres its children in whatever height the card has -- the
+   220px floor on a desktop, the whole stage on a phone, where the card
+   grows to fill what the answer widget leaves -- and .flashcard, which
+   owns the tap-to-reveal, was only as tall as the word and its hint.
+   The negative-margin trick above closed the dead zone in the card's
+   PADDING; this closes the one in its spare height: the flashcard
+   grows into it and centres its own face, so a thumb landing anywhere
+   on the card turns it. The unfooted card gets the same treatment where
+   it is a flex column (the phone rule near the end of this file); where
+   it is a block the grow is inert and nothing moves.
+
+   `align-content`, not a flex column of its own: the kana and kanji
+   flashcards are blocks, and turning one into a flex container stops
+   the specimen's bottom margin collapsing with the hint's top margin,
+   which grew the front face by the smaller of the two and moved the
+   strip on every reveal (PromptCard.browser.test pins that within
+   40px). Block-level align-content centres the face in the grown box
+   and leaves the block's margins to collapse as they always did; the
+   vocab and grammar boosts, which are flex columns already, centre
+   through their own justify-content and ignore it. */
+.prompt-card--footed .prompt-card__body > .flashcard,
+.prompt-card:not(.prompt-card--footed) > .flashcard {
+  flex: 1 0 auto;
+  align-content: center;
 }
 
 /* The body is a flex column, so an INLINE child of it is a flex item

@@ -435,20 +435,30 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(dialog.querySelector('.dict-plate__stripe')).toBeTruthy()
     expect(dialog.querySelector('.dict-plate__word')).toBeNull()
 
-    const groups = [...dialog.querySelectorAll('.dict-reading')]
-    expect(groups.map(g => g.querySelector('.dict-reading__yomi').textContent)).toEqual(['ボク', 'モク', 'き', 'こ~'])
-    expect(groups.map(g => g.querySelector('.dict-kind').textContent)).toEqual(['音', '音', '訓', '訓'])
-    // A reading no word demonstrates is listed alone.
-    expect(groups[0].querySelectorAll('.dict-word')).toHaveLength(0)
-    expect([...groups[1].querySelectorAll('.dict-word__gloss')].map(el => el.textContent)).toEqual(['Thursday', 'Lumber'])
-    expect([...groups[2].querySelectorAll('.dict-word__gloss')].map(el => el.textContent)).toEqual(['Tree', 'Garden shrubs'])
+    // Two blocks, one per register, each opened by its mark once.
+    const registers = [...dialog.querySelectorAll('.dict-register')]
+    expect(registers.map(r => r.getAttribute('aria-label'))).toEqual(["音読み · on'yomi", "訓読み · kun'yomi"])
+    expect(registers.map(r => r.querySelectorAll('.dict-kind').length)).toEqual([1, 1])
+    expect(registers.map(r => r.querySelector('.dict-kind').textContent)).toEqual(['音', '訓'])
+    // Inside, only the readings the deck has words for stand as groups…
+    const [on, kun] = registers
+    expect([...on.querySelectorAll('.dict-reading__yomi')].map(el => el.textContent)).toEqual(['モク'])
+    expect([...kun.querySelectorAll('.dict-reading__yomi')].map(el => el.textContent)).toEqual(['き'])
+    expect([...on.querySelectorAll('.dict-word__gloss')].map(el => el.textContent)).toEqual(['Thursday', 'Lumber'])
+    expect([...kun.querySelectorAll('.dict-word__gloss')].map(el => el.textContent)).toEqual(['Tree', 'Garden shrubs'])
+    // …and the readings no word demonstrates close each block as pills.
+    expect([...on.querySelectorAll('.dict-register__chip')].map(el => el.textContent)).toEqual(['ボク'])
+    expect([...kun.querySelectorAll('.dict-register__chip')].map(el => el.textContent)).toEqual(['こ~'])
+    expect(on.querySelector('.dict-register__rest').getAttribute('aria-label')).toBe('No example words yet')
+    // Pills come after the groups.
+    expect(on.querySelector('.dict-reading').compareDocumentPosition(on.querySelector('.dict-register__rest')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     // Each row picks out the kanji it is an example of.
     for (const row of dialog.querySelectorAll('.dict-word')) {
       expect(baseText(row.querySelector('.dict-word__hit'))).toBe('木')
     }
 
     // A word that jumps closes the sheet: its entry is leaving.
-    groups[1].querySelector('.dict-word').click()
+    on.querySelector('.dict-word').click()
     await settle()
     expect(onVocabClick).toHaveBeenCalledWith('木曜日', 'もくようび')
     expect(sheet()).toBeNull()
@@ -546,6 +556,17 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     // The rest of the word keeps the ambient ink.
     const plain = rows[0].querySelector('.dict-word__jp ruby:not(.dict-word__hit)')
     expect(getComputedStyle(plain).color).toBe(probe('color', 'var(--text-primary)', root))
+  })
+
+  it('drops a register the kanji does not have, and a pill row when every reading has words', async () => {
+    const { root } = await renderEntry({
+      ...KANJI, kana: 'やま', readings: [{ reading: 'やま', words: [KANJI.vocab_examples[2]] }],
+    })
+    root.querySelector('.dict-plate__more').click()
+    await settle()
+    const registers = [...sheet().querySelectorAll('.dict-register')]
+    expect(registers.map(r => r.getAttribute('aria-label'))).toEqual(["訓読み · kun'yomi"])
+    expect(sheet().querySelector('.dict-register__rest')).toBeNull()
   })
 
   it('closes when the entry changes under it', async () => {
