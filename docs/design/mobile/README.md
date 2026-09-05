@@ -1,12 +1,12 @@
 # Mobile rework — the screens
 
 The canvas: <https://claude.ai/code/artifact/760313f0-7c87-40e2-993f-708fdbf63bd0>
-— forty-nine artboards, one page per tab, the screens in the order a learner
-walks them, all at 390×844; a last page holds the chrome (the HUD, the tab bar
-and the fare gate in every state) and the states sheet (loading, empty, error,
-no results, a wrong answer, the closed gate, the six-grade bar). Every artboard
-carries a dark / light tweak. The onboarding is left out on purpose — it is
-being redrawn — so the arrival page holds only the sign-in.
+— sixty-five artboards, one page per tab, the screens in the order a learner
+walks them, all at 390×844; the boarding page holds the onboarding (fifteen
+screens and a motion sheet) with the sign-in; a last page holds the chrome
+(the HUD, the tab bar and the fare gate in every state) and the states sheet
+(loading, empty, error, no results, a wrong answer, the closed gate, the
+six-grade bar). Every artboard carries a dark / light tweak.
 
 | Page | Artboards |
 |---|---|
@@ -15,7 +15,7 @@ being redrawn — so the arrival page holds only the sign-in.
 | Practice | the four platforms · reading practice · comprehension and its result · translation, writing and feedback · the exam's papers · the runner · finish with blanks · the result |
 | Dictionary | the console and the analyzer's door · an entry · all readings · the analyzer (text, photo, video) · a sentence · add to deck |
 | Profile | the pass · the inserts · the status sheet · the balance sheet · statistics · settings · settings › learning · settings › destination |
-| Sign in | sign in |
+| Boarding | welcome · your name · why Japanese · the kana check · the reveal · your level · your goal · your rhythm · when you study · the nudge · the system prompt · building the journey · the plan · the welcome offer · the pass · sign in · the motion sheet |
 | Chrome | the HUD and the tab bar in every state, the three gates · the states sheet |
 
 The sources here regenerate it: `node build.mjs` writes the `.dc.html`
@@ -23,7 +23,9 @@ artboards and `canvas.json`; `node preview.mjs` writes plain-HTML previews of
 each one (screenshot them at 390×934 — a 844-tall headless window leaves the
 last band unpainted). `parts.mjs` holds the chrome and the shared pieces (HUD,
 tab bar, header, track, stamp rally, pass); `screens2.mjs` and `screens3.mjs`
-hold the second and third waves. `css.mjs` is a near-verbatim subset of
+hold the second and third waves; `screens4.mjs` is the boarding, with its
+own sheet in `css3.mjs` (CSS5, the `.brd-*` namespace). `css.mjs` is a
+near-verbatim subset of
 `frontend/src/index.css` — same tokens, same class names, same values — so a
 rule in the mockup can be diffed against the real sheet; `css2.mjs` carries
 the card faces, the sessions, the settings and, as CSS4, the dictionary rework
@@ -170,6 +172,84 @@ pills, Close.
   chips, the service, the daily ride, the pass's date and where it moves to,
   Reprint as the filled action, Hand it back as the ghost.
 
+## The boarding (owner's second sketch, 2026-09-05)
+
+Thirteen screens from the first contact to the pass, mobile first, drawn on
+the Boarding page with a motion sheet under them. The sketch is the backbone;
+what was added or read into it is listed here.
+
+- **The frame.** A round back button, the track (the progress bar: a gold rail
+  with a small train at the head, eight stops to the pass) and the count
+  (2/8). The three arrival screens — the plan, the offer, the pass — have no
+  track: the ride is over. The building screen has none either.
+- **Welcome.** 日本語 over *Learn Japanese*, two lanes of cards rolling past
+  in opposite directions (kanji, vocabulary, grammar cloze, the drawing
+  canvas, listening, reading, kana, a mock-exam question — the app's modes
+  as rolling stock), the tagline from the sketch, *Board* as the one filled
+  action, *Have an account? Sign in* as the ghost link. No language picker:
+  the language is the device's.
+- **The name.** The field is focused, the caret blinks, and *Continue* sits
+  directly under the field — the keyboard cannot reach it. Elsewhere Continue
+  docks above the keyboard inset.
+- **Why.** Five doors with an icon each (studies · fun · a trip · friends ·
+  something else). The answer writes the offer's sentence later.
+- **The kana check.** すし | ホテル, two words a beginner already knows as
+  sounds, so the reveal pays off. Four honest answers — Hiragana, Katakana,
+  Both, *Not yet* — each carrying its sample; tapping one advances, there is
+  no Continue. *Not yet* is an addition: a complete beginner needs a door
+  that is not a lie. One script or *Not yet* → the reveal (the readings rise
+  under each word: su·shi *sushi*, ho·te·ru *hotel*, the script named), then
+  the goal. Both → the level list.
+- **Level and goal.** Six stops with a line each (Novice — kana and a few
+  words; N5 simple phrases · ~100 kanji; N4 everyday talk · ~300; N3 daily
+  life with ease · ~650; N2 news and work · ~1,000; N1 almost anything ·
+  ~2,000). The goal shows only the stops ahead, the next one marked *Next
+  stop* and preselected.
+- **Rhythm.** Four cards: 5 · 10 · 15 · 20 min a day, each with what it buys
+  (~n new items), 10 marked *Recommended* and preselected. "You can change it
+  later."
+- **When you study.** A departure board in flap digits shows the hour; three
+  presets (Morning 07:30 · Noon 12:30 · Evening 21:00) and the day drawn as a
+  track from 06 to 24 with the train as the knob. Tap a preset or drag the
+  train — no wheel picker.
+- **The nudge.** The permission is asked after its value is shown: the
+  notification as the app would send it (*Your train leaves at 07:30 — 8
+  cards are waiting at the gate*) dropping in, one line of promise ("One a
+  day, at your time. Never more."), *Allow notifications* filled, *Not now*
+  as a ghost. The system prompt shows once, only after the learner said yes
+  (drawn on its own artboard so the moment is visible).
+- **Building.** The train rides four stops — your goal, your lines, your
+  daily ride, your projection — each lighting and ticking as it passes. This
+  screen is the animation; the still frame reads on its own.
+- **The plan.** The one screen that compares: *Words you'll remember* over
+  six months, daily reviews against cramming, both lines drawing themselves
+  and labelled at their ends (two series: a legend and direct labels, gold
+  and the `--accent9` blue-violet, checked for colour-vision separation).
+  Then the promise from the learner's own answers: with 10 min a day, by
+  March 2027 — ~1,500 words, ~300 kanji, everyday conversations, ready for
+  JLPT N4. Every figure wears a ~.
+- **The offer.** *Welcome offer −X% on the yearly pass, today only*, the
+  unlimited pass with three perks, the sentence written from the motivation
+  (*Board, and be ready for your trip to Japan.*), the yearly plan promoted
+  and preselected, the monthly beside it, *Get −X%* filled, "Cancel anytime."
+  The sketch's "don't show anymore" is the ghost link *Continue with the free
+  pass*: it boards without paying and keeps the offer from returning. −X% and
+  [PRICE] are placeholders on purpose.
+- **The pass.** *Your pass is ready, Aiko. Enjoy the ride.* The commuter pass
+  itself (level 1, 浪人 Rōnin, N5 → N4 on time, valid until 14 Mar 2027, 30 /
+  50 credits) slides up and is sealed 発行 (issued). *Enter the station* leads
+  to the tutorial, which is not drawn.
+- **Motion.** Between screens, the train pull: the screen you leave slides
+  out to the left as the next arrives from the right (260 ms, ease-out); the
+  track's train advances 300 ms later; back runs it in reverse; never a
+  cross-fade. One movement per screen, each with a resting state that reads
+  on its own (reduced motion loses nothing). All of it is on the motion sheet
+  with the rules that hold everywhere: Continue never hidden, the language
+  from the device, one filled action, disabled at 0.45, 44px targets, back
+  always free, optimistic and never lying, the theme in small doses.
+- **Sample learner.** Aiko, a trip to Japan, reads both kana, Beginner N5,
+  goal N4, 10 min at 07:30, notifications allowed, boards on the free pass.
+
 ## Inherited, left as they are
 
 - Today wears gold (`--accent2`) because `navLinks.js` gives it that colour;
@@ -186,7 +266,7 @@ pills, Close.
   `--accent`; the analyzer's unknown tokens take `--state-new`, off-deck a
   dashed rule, and never the due ink. "Kept" on a passage is the stamp ink —
   it is a hanko, not a warning.
-- Not drawn: the onboarding (being redrawn), the analyzer's explanation
+- Not drawn: the tutorial after the pass, the analyzer's explanation
   prose, the lapse seal, the six settings slips other than learning and
   destination (plain forms on the same pattern), the dictionary's radical and
   syllabary modes (the two charts stack), import and export (behind More).

@@ -22,7 +22,7 @@
     },
     {
       "id": "arrival",
-      "name": "Sign in"
+      "name": "Boarding"
     },
     {
       "id": "chrome",
@@ -445,9 +445,144 @@
       "page": "pass"
     },
     {
+      "file": "Welcome.dc.html",
+      "title": "Boarding · welcome",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardName.dc.html",
+      "title": "Boarding · your name",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardWhy.dc.html",
+      "title": "Boarding · why Japanese",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardKana.dc.html",
+      "title": "Boarding · can you read this",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardKanaReveal.dc.html",
+      "title": "Boarding · the reveal",
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardLevel.dc.html",
+      "title": "Boarding · your level",
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardGoal.dc.html",
+      "title": "Boarding · your goal",
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardRhythm.dc.html",
+      "title": "Boarding · your rhythm",
+      "x": 3290,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardTime.dc.html",
+      "title": "Boarding · when you study",
+      "x": 3760,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardNotify.dc.html",
+      "title": "Boarding · the nudge",
+      "x": 4230,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardNotifyPrompt.dc.html",
+      "title": "Boarding · the system prompt",
+      "x": 4700,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardBuilding.dc.html",
+      "title": "Boarding · building the journey",
+      "x": 5170,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardPlan.dc.html",
+      "title": "Boarding · the plan",
+      "x": 5640,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardOffer.dc.html",
+      "title": "Boarding · the welcome offer",
+      "x": 6110,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
+      "file": "BoardPass.dc.html",
+      "title": "Boarding · the pass",
+      "x": 6580,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "arrival"
+    },
+    {
       "file": "SignIn.dc.html",
       "title": "Sign in",
-      "x": 0,
+      "x": 7050,
       "y": 0,
       "w": 390,
       "h": 844,
@@ -470,6 +605,15 @@
       "w": 1180,
       "h": 880,
       "page": "chrome"
+    },
+    {
+      "file": "BoardMotion.dc.html",
+      "title": "Boarding · motion and rules",
+      "x": 0,
+      "y": 1004,
+      "w": 1180,
+      "h": 1040,
+      "page": "arrival"
     }
   ],
   "annotations": [
@@ -506,6 +650,30 @@
       "text": "The dictionary follows the 2026-09-05 rework: catalogue cards carry the stage word; an entry opens as the catalogue plate at reading size, with two readings and a door to the readings sheet; the body is blocks divided by hairlines, no headings."
     },
     {
+      "id": "boarding",
+      "page": "arrival",
+      "x": -300,
+      "y": 0,
+      "w": 260,
+      "text": "The boarding — the owner's sketch, drawn\n\nWelcome → name → why → the kana check → (the reveal | the level) → goal → rhythm → the hour → the nudge → building → the plan → the offer → the pass → the tutorial.\n\nEnglish only; the device's language, never asked. Japanese is content: the kana, the cards, the rank, the seal.\n\nThe track at the top is the progress bar: 8 stops to the pass. The three arrival screens (plan, offer, pass) have no track — the ride is over.\n\nSample learner: Aiko, a trip to Japan, reads both kana, N5 → N4, 10 min at 07:30. −X% and [PRICE] are placeholders on purpose."
+    },
+    {
+      "id": "boarding-kana",
+      "page": "arrival",
+      "x": 1410,
+      "y": -150,
+      "w": 300,
+      "text": "The kana check branches once. Hiragana, Katakana or Not yet → the reveal (curiosity paid, level set to Beginner or Novice). Both → the level list. Both roads meet at the goal. Not yet is an addition to the sketch: a complete beginner needs an honest door."
+    },
+    {
+      "id": "boarding-arrival",
+      "page": "arrival",
+      "x": 5640,
+      "y": -150,
+      "w": 300,
+      "text": "The arrival: building (animated, the train runs the four stops), the plan (the one screen that compares — spaced reviews against cramming, then the promise from the learner's own answers), the offer (the −X% stamps in; the ghost link boards free and stops the offer from returning), the pass (slides up, sealed 発行)."
+    },
+    {
       "id": "chrome-note",
       "page": "chrome",
       "x": 0,
@@ -516,6 +684,6 @@
   ],
   "launch": {
     "view": "canvas",
-    "page": "today"
+    "page": "arrival"
   }
 }

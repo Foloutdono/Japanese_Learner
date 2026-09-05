@@ -2,6 +2,7 @@ import { writeFileSync } from 'node:fs'
 import { artboard, hud, tabbar, header, back, track, due, rally, pace, jourLine, pass, credits, status, I } from './parts.mjs'
 import { SCREENS2 } from './screens2.mjs'
 import { SCREENS3, STATES_BODY } from './screens3.mjs'
+import { SCREENS4, MOTION_BODY } from './screens4.mjs'
 
 // ── sample data, shared by every screen ──
 const LANES = [
@@ -471,10 +472,12 @@ const boards = [
   ['BalanceSheet',   CREDITS_BODY,   'Balance sheet',            'pass'],
   ...SCREENS2,
   ...SCREENS3({ TODAY_BODY, RUN_BODY, gateCard, ANL_DOOR, intakeSeg }),
+  ...SCREENS4,
 ]
 for (const [name, body] of boards) writeFileSync(`${name}.dc.html`, artboard(body))
 writeFileSync('Chrome.dc.html', artboard(CHROME_BODY, { width: 1180, height: 1320, phone: false }))
 writeFileSync('States.dc.html', artboard(STATES_BODY, { width: 1180, height: 880, phone: false }))
+writeFileSync('BoardMotion.dc.html', artboard(MOTION_BODY, { width: 1180, height: 1040, phone: false }))
 
 const ORDER = {
   today:    ['Main', 'TodayOutOfCredits', 'Run', 'RunFlashcard', 'RunCloze', 'RunDraw', 'RunReadings', 'RunBrowse', 'LevelUp', 'Reissue', 'RunOutOfCredits', 'RunComplete'],
@@ -482,7 +485,7 @@ const ORDER = {
   practice: ['Practice', 'Reading', 'Comprehension', 'ComprehensionResult', 'TranslationWrite', 'Translation', 'ExamPapers', 'ExamRunner', 'ConfirmSheet', 'ExamResult'],
   dict:     ['Dictionary', 'DictionaryEntry', 'DictionaryReadings', 'Analyzer', 'AnalyzerPhoto', 'AnalyzerVideo', 'AnalyzerResult', 'DeckPickerSheet'],
   pass:     ['Profile', 'ProfileInserts', 'StatusSheet', 'BalanceSheet', 'Statistics', 'Settings', 'SettingsLearn', 'SettingsDestination'],
-  arrival:  ['SignIn'],
+  arrival:  ['Welcome', 'BoardName', 'BoardWhy', 'BoardKana', 'BoardKanaReveal', 'BoardLevel', 'BoardGoal', 'BoardRhythm', 'BoardTime', 'BoardNotify', 'BoardNotifyPrompt', 'BoardBuilding', 'BoardPlan', 'BoardOffer', 'BoardPass', 'SignIn'],
 }
 const PAGES = [
   { id: 'today',    name: 'Today' },
@@ -490,7 +493,7 @@ const PAGES = [
   { id: 'practice', name: 'Practice' },
   { id: 'dict',     name: 'Dictionary' },
   { id: 'pass',     name: 'Profile' },
-  { id: 'arrival',  name: 'Sign in' },
+  { id: 'arrival',  name: 'Boarding' },
   { id: 'chrome',   name: 'Chrome' },
 ]
 const W = 390, H = 844, GX = 80
@@ -506,6 +509,7 @@ const placed = new Set(artboards.map(a => a.file))
 for (const b of boards) if (!placed.has(`${b[0]}.dc.html`)) throw new Error('unplaced board ' + b[0])
 artboards.push({ file: 'Chrome.dc.html', title: 'Chrome · HUD, tab bar, gate', x: 0, y: 0, w: 1180, h: 1320, page: 'chrome' })
 artboards.push({ file: 'States.dc.html', title: 'States · loading, empty, error, wrong, six grades', x: 1260, y: 0, w: 1180, h: 880, page: 'chrome' })
+artboards.push({ file: 'BoardMotion.dc.html', title: 'Boarding · motion and rules', x: 0, y: H + 160, w: 1180, h: 1040, page: 'arrival' })
 
 const canvas = {
   pages: PAGES,
@@ -515,9 +519,12 @@ const canvas = {
     { id: 'credits', page: 'today', x: -300, y: 420, w: 260, text: 'Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: the unlimited pass.\n\nThe gate prices the run (fare) against the balance before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits.' },
     { id: 'sessions', page: 'practice', x: -300, y: 0, w: 260, text: 'Sessions behave like a run: both bars leave, ‹ Practice is the way out, the field or the rating bar docks on the bottom edge. Practice does not spend credits.' },
     { id: 'dict-note', page: 'dict', x: -300, y: 0, w: 260, text: 'The dictionary follows the 2026-09-05 rework: catalogue cards carry the stage word; an entry opens as the catalogue plate at reading size, with two readings and a door to the readings sheet; the body is blocks divided by hairlines, no headings.' },
+    { id: 'boarding', page: 'arrival', x: -300, y: 0, w: 260, text: 'The boarding — the owner\'s sketch, drawn\n\nWelcome → name → why → the kana check → (the reveal | the level) → goal → rhythm → the hour → the nudge → building → the plan → the offer → the pass → the tutorial.\n\nEnglish only; the device\'s language, never asked. Japanese is content: the kana, the cards, the rank, the seal.\n\nThe track at the top is the progress bar: 8 stops to the pass. The three arrival screens (plan, offer, pass) have no track — the ride is over.\n\nSample learner: Aiko, a trip to Japan, reads both kana, N5 → N4, 10 min at 07:30. −X% and [PRICE] are placeholders on purpose.' },
+    { id: 'boarding-kana', page: 'arrival', x: 1410, y: -150, w: 300, text: 'The kana check branches once. Hiragana, Katakana or Not yet → the reveal (curiosity paid, level set to Beginner or Novice). Both → the level list. Both roads meet at the goal. Not yet is an addition to the sketch: a complete beginner needs an honest door.' },
+    { id: 'boarding-arrival', page: 'arrival', x: 5640, y: -150, w: 300, text: 'The arrival: building (animated, the train runs the four stops), the plan (the one screen that compares — spaced reviews against cramming, then the promise from the learner\'s own answers), the offer (the −X% stamps in; the ghost link boards free and stops the offer from returning), the pass (slides up, sealed 発行).' },
     { id: 'chrome-note', page: 'chrome', x: 0, y: -110, w: 420, text: 'Every value on this sheet is a :root token or a literal index.css already uses. Class names mirror index.css where the object exists (.pass, .board, .wmap-*, .gate-card, .btn-depart, .jour-*, .stamp-rally, .dict-*); .hud, .tabbar, .bar, .lane, .console, .chip, .route, .stage and .sheet are new to the mockup — see docs/design/mobile/README.md.' },
   ],
-  launch: { view: 'canvas', page: 'today' },
+  launch: { view: 'canvas', page: 'arrival' },
 }
 writeFileSync('canvas.json', JSON.stringify(canvas, null, 2))
-console.log('built', boards.length + 2, 'artboards')
+console.log('built', boards.length + 3, 'artboards')

@@ -8,6 +8,7 @@
 // kanji are icons, not labels: their caption is the label.
 import { CSS } from './css.mjs'
 import { CSS2, CSS3, CSS4 } from './css2.mjs'
+import { CSS5 } from './css3.mjs'
 
 const FONTS = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Serif+JP:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap'
 
@@ -198,6 +199,7 @@ ${CSS}
 ${CSS2}
 ${CSS3}
 ${CSS4}
+${CSS5}
   </style>
 </helmet>
 ${root}
