@@ -3,11 +3,13 @@
 // movement per screen, all of it loop-safe so a still frame still reads.
 export const CSS5 = `
 /* ── boarding: the frame ── */
-.brd { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-5); padding: calc(var(--safe-top) + var(--sp-3)) var(--sp-5) calc(var(--safe-bottom) + var(--sp-3)); }
-.brd__body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-5); overflow-y: auto; }
-.brd__stage { flex: 1; display: flex; flex-direction: column; gap: var(--sp-5); }
-.brd__stage::before, .brd__stage::after { content: ''; flex: 1 0 0; }
-.brd__stage::after { flex-grow: 1.6; }
+.brd { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-5); padding: calc(var(--safe-top) + var(--sp-3)) var(--sp-5) calc(var(--safe-bottom) + var(--sp-6)); }
+.brd__body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-5); padding-top: calc(var(--sp-9) + var(--sp-8)); overflow-y: auto; }
+.brd__body--top { padding-top: 0; }
+.brd__body--arrival { padding-top: var(--sp-9); }
+.brd__body--center { padding-top: 0; justify-content: center; }
+.brd__stage { flex: none; display: flex; flex-direction: column; gap: var(--sp-5); margin-top: var(--sp-9); }
+.brd__body--center .brd__stage { margin-top: 0; }
 .brd__head { display: flex; align-items: center; gap: var(--sp-4); height: 44px; flex: none; }
 .brd__back { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; border: 1px solid var(--surface-line); border-radius: var(--r-pill); color: var(--text-secondary); }
 .brd__back .svg { width: 18px; height: 18px; }
@@ -15,9 +17,9 @@ export const CSS5 = `
 .brd__done { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--r-pill); background: var(--accent2); transition: width 300ms ease-out; }
 .brd__train { position: absolute; top: -4px; width: 8px; height: 14px; border-radius: var(--r-pill); background: var(--text-primary); transform: translateX(-50%); box-shadow: 0 0 0 3px var(--bg-main); }
 .brd__count { flex: none; font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
-.brd__q { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-heading); line-height: 1.3; text-wrap: pretty; animation: brd-in 360ms ease-out both; }
+.brd__q { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-heading); line-height: 1.3; text-align: center; text-wrap: pretty; animation: brd-in 360ms ease-out both; }
 .brd__q b { font-weight: 700; color: var(--accent2); }
-.brd__hint { font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
+.brd__hint { font-size: var(--fs-sm); line-height: 1.5; text-align: center; color: var(--text-secondary); }
 .brd__foot { display: flex; flex-direction: column; gap: var(--sp-3); flex: none; }
 .brd .btn-depart { width: 100%; }
 .brd__link { align-self: center; display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--sp-3); font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); text-decoration: underline; text-underline-offset: 3px; }

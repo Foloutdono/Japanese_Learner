@@ -22,9 +22,9 @@ const head = (step) => `<div class="brd__head">
   <div class="brd__track" role="progressbar" aria-valuemin="0" aria-valuemax="${STEPS}" aria-valuenow="${step}"><div class="brd__done" style="width: ${Math.round(100 * step / STEPS)}%;"></div><span class="brd__train" style="left: ${Math.round(100 * step / STEPS)}%;"></span></div>
   <span class="brd__count">${step}/${STEPS}</span>
 </div>`
-const body = (inner) => `<div class="brd__body">${inner}</div>`
+const body = (inner, variant = '') => `<div class="brd__body${variant ? ` brd__body--${variant}` : ''}">${inner}</div>`
 const stage = (inner) => `<div class="brd__stage">${inner}</div>`
-const q = (html, center = false) => `<h1 class="brd__q"${center ? ' style="text-align: center;"' : ''}>${html}</h1>`
+const q = (html) => `<h1 class="brd__q">${html}</h1>`
 const depart = (label, extra = '') => `<button type="button" class="btn-depart${extra}"><span class="btn-depart__jp">${label}</span><span class="btn-depart__go">▶</span></button>`
 const foot = (cta, link = '', fine = '') => `<div class="brd__foot">${cta}${fine ? `<span class="brd__fine">${fine}</span>` : ''}${link ? `<button type="button" class="brd__link">${link}</button>` : ''}</div>`
 const opt = ({ on = false, icon = '', code = '', label, desc = '', tag = '' }) => `<button type="button" class="brd-opt${on ? ' brd-opt--on' : ''}" aria-pressed="${on}">
@@ -70,7 +70,7 @@ const WELCOME = `
     ${q('Learn Japanese', true)}
   </div>
   <div class="brd-roll"><div class="brd-roll__lane">${DEMOS}${DEMOS}</div><div class="brd-roll__lane brd-roll__lane--back">${DEMOS2}${DEMOS2}</div></div>
-  <p class="brd-tagline">Take the train to proficiency.</p>`)}
+  <p class="brd-tagline">Take the train to proficiency.</p>`, 'top')}
   ${foot(depart('Board'), 'Have an account? Sign in')}
 </main>`
 
@@ -80,7 +80,7 @@ const NAME = `
   ${head(1)}
   ${body(`
   ${q("What's your name?")}
-  <div class="brd-field" role="textbox" aria-label="Your name">Aiko<span class="brd-field__caret"></span></div>`)}
+  ${stage('<div class="brd-field" role="textbox" aria-label="Your name">Aiko<span class="brd-field__caret"></span></div>')}`)}
   ${foot(depart('Continue'))}
 </main>`
 
@@ -112,8 +112,7 @@ const KANA = `
   ${head(3)}
   ${body(`
   ${q('Can you read this?')}
-  ${stage(kanaCard())}`)}
-  <div class="brd__foot"><div class="brd-grid">${kopt('Hiragana', 'すし')}${kopt('Katakana', 'ホテル')}${kopt('Both')}${kopt('Not yet')}</div></div>
+  ${stage(`${kanaCard()}<div class="brd-grid">${kopt('Hiragana', 'すし')}${kopt('Katakana', 'ホテル')}${kopt('Both')}${kopt('Not yet')}</div>`)}`)}
 </main>`
 
 // ── 5a · the reveal: curiosity paid, the first stop named ──
@@ -122,7 +121,7 @@ const REVEAL = `
   ${head(4)}
   ${body(`
   ${q("Soon you'll read both.")}
-  ${stage(`${kanaCard(true)}<p class="brd__hint" style="text-align: center;">Two scripts, 46 signs each. Your first stop.</p>`)}`)}
+  ${stage(`${kanaCard(true)}<p class="brd__hint">Two scripts, 46 signs each. Your first stop.</p>`)}`)}
   ${foot(depart('Continue'))}
 </main>`
 
@@ -140,10 +139,10 @@ const LEVEL = `
   ${head(4)}
   ${body(`
   ${q("Nice! What's your level?")}
+  <p class="brd__hint">The stops behind you will be marked known.</p>
   ${stage(`<div class="brd__opts">
     ${LEVELS.map(([c, l, d]) => opt({ code: c, label: l, desc: d, on: c === 'N5' })).join('')}
-  </div>
-  <p class="brd__hint">The stops behind you are marked known and spread over the coming weeks — nothing piles up on one day.</p>`)}`)}
+  </div>`)}`)}
   ${foot(depart('Continue'))}
 </main>`
 
@@ -153,8 +152,8 @@ const GOAL = `
   ${head(5)}
   ${body(`
   ${q("What's your goal?")}
-  ${stage(`<p class="brd__hint">The stops ahead of N5.</p>
-  <div class="brd__opts">
+  <p class="brd__hint">The stops ahead of N5.</p>
+  ${stage(`<div class="brd__opts">
     ${LEVELS.slice(2).map(([c, l, d]) => opt({ code: c, label: l, desc: d, on: c === 'N4', tag: c === 'N4' ? 'Next stop' : '' })).join('')}
   </div>`)}`)}
   ${foot(depart('Continue'))}
@@ -174,7 +173,7 @@ const RHYTHM = `
   ${stage(`<div class="brd-grid">
     ${minCell(5)}${minCell(10, true, 'Recommended')}${minCell(15)}${minCell(20)}
   </div>
-  <p class="brd__hint" style="text-align: center;">You can change it later.</p>`)}`)}
+  <p class="brd__hint">You can change it later.</p>`)}`)}
   ${foot(depart('Continue'))}
 </main>`
 
@@ -214,7 +213,7 @@ const NOTIF_BODY = `
       <span class="brd-notif__text">Your cards are waiting at the gate.</span>
     </div>
   </div>
-  <p class="brd__hint" style="text-align: center;">One a day, at your time. Never more.</p>`)}`)}
+  <p class="brd__hint">One a day, at your time. Never more.</p>`)}`)}
   ${foot(depart('Allow notifications'), 'Not now')}`
 const NOTIFY = `<main class="brd">${NOTIF_BODY}</main>`
 const NOTIFY_PROMPT = `<main class="brd">${NOTIF_BODY}</main>
@@ -241,7 +240,7 @@ const BUILDING = `
       ${step('done', 'Your lines', 'Four lines')}
       ${step('now',  'Your daily ride', '10 min · 07:30')}
       ${step('next', 'Your projection')}
-    </div>`))}
+    </div>`), 'center')}
 </main>`
 
 // ── 11 · the plan: the projection, then the promise — two of its lines from the motive ──
@@ -283,7 +282,7 @@ const PLAN = `
     <div class="brd-bullet">${I.check}Read signs, menus and tickets</div>
     <div class="brd-bullet">${I.check}Ask your way, order, book a room</div>
     <div class="brd-bullet">${I.check}On track for JLPT N4</div>
-  </div>`)}`)}
+  </div>`)}`, 'arrival')}
   ${foot(depart('Continue'))}
 </main>`
 
@@ -293,10 +292,10 @@ const plan = (label, price, on = false, tag = '') => `<button type="button" clas
   <span class="brd-opt__check">${I.check}</span>
 </button>`
 export const PERKS = [
-  ['Unlimited credits', 'no cap, no refill to wait for'],
-  ['Practice modes', 'reading, comprehension, translation, mock exams'],
-  ['The analyzer', 'text, photo and video'],
-  ['100 decks · 10,000 cards', 'free: 7 decks · 200 cards'],
+  ['Unlimited credits', 'no cap, no refill'],
+  ['Practice modes', 'reading, translation, exams'],
+  ['The analyzer', 'text, photo, video'],
+  ['100 decks · 10,000 cards', 'free: 7 · 200'],
 ]
 const OFFER = `
 <main class="brd" style="gap: var(--sp-4);">
@@ -316,7 +315,7 @@ const OFFER = `
   <div class="brd__opts">
     ${plan('Yearly', '<b>[PRICE]</b> / year · [PRICE] a month', true, '−X%')}
     ${plan('Monthly', '<b>[PRICE]</b> / month')}
-  </div>`)}`)}
+  </div>`)}`, 'arrival')}
   ${foot(depart('Get the −X%'), 'Continue free · don\'t show again', 'Cancel anytime.')}
 </main>`
 
@@ -336,7 +335,7 @@ const PASS_READY = `
   ${stage(`<div class="brd-issue">
     ${pass({ name: 'Aiko', level: 1, into: 0, span: 100, rankJp: '浪人', rank: 'Rōnin', heading: 'span', gear: false, footer: balanceLine() })}
     <span class="brd-issue__seal" lang="ja" aria-label="Issued">発行</span>
-  </div>`)}`)}
+  </div>`)}`, 'arrival')}
   ${foot(depart('Enter the station'))}
 </main>`
 

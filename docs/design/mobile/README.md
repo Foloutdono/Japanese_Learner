@@ -201,14 +201,18 @@ Thirteen screens from the first contact to the pass, mobile first, drawn on
 the Boarding page with a motion sheet under them. The sketch is the backbone;
 what was added or read into it is listed here.
 
-- **The frame.** A round back button, the track (the progress bar: a gold rail
-  with a small train at the head, eight stops to the pass) and the count
-  (2/8). The title sits under the head; the content takes the room between
-  the title and the foot and is centred in it, slightly high; the foot is
-  docked to the bottom on every screen and rises with the keyboard inset, so
-  Continue is never hidden (the body scrolls under it on short screens). The
-  three arrival screens — the plan, the offer, the pass — have no track: the
-  ride is over. The building screen has none either.
+- **The frame (owner's layout rule, 2026-09-06).** A round back button, the
+  track (the progress bar: a gold rail with a small train at the head, eight
+  stops to the pass) and the count (2/8). The title is centred and sits
+  about 100px under the head (`--sp-9` + `--sp-8`); the content starts about
+  65px under the title (`--sp-9` plus the body's gap), so the question and
+  its answer share the middle of the screen — the place the eye lands
+  first; a hint that explains the title sits directly under it. The foot is
+  docked at the bottom but not too low (`--safe-bottom` + `--sp-6`) and
+  rises with the keyboard inset, so Continue is never hidden; the body
+  scrolls under it on short screens. The three arrival screens — the plan,
+  the offer, the pass — have no track and start higher (`--sp-9` under the
+  status band); the building screen has none either and centres its block.
 - **Welcome.** 日本語 over *Learn Japanese*, two lanes of cards rolling past
   in opposite directions (kanji, vocabulary, grammar cloze, the drawing
   canvas, listening, reading, kana, a mock-exam question — the app's modes
@@ -231,9 +235,9 @@ what was added or read into it is listed here.
 - **Level and goal.** Six stops with a line each (Novice — kana and a few
   words; N5 simple phrases · ~100 kanji; N4 everyday talk · ~300; N3 daily
   life with ease · ~650; N2 news and work · ~1,000; N1 almost anything ·
-  ~2,000), and under them the level rule in one line ("The stops behind you
-  are marked known and spread over the coming weeks"). The goal shows only
-  the stops ahead, the next one marked *Next stop* and preselected.
+  ~2,000), with the level rule in one line under the title ("The stops
+  behind you will be marked known"). The goal shows only the stops ahead,
+  the next one marked *Next stop* and preselected.
 - **Rhythm.** Four cards: 5 · 10 · 15 · 20 min a day, each with what it buys
   (~n new items), 10 marked *Recommended* and preselected. "You can change it
   later."
