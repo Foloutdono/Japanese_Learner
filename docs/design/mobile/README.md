@@ -65,7 +65,45 @@ mode has no blank to type into yet — the sentence is shown whole and the
 rule is the flip), and docking a field's submit in the foot (the type,
 draw and readings faces keep their button under the widget).
 
+## Learn (plan 071)
+
+| Canvas class | `index.css` block | Component |
+|---|---|---|
+| `.board`, `.wmap__lines`, `.wmap-line*`, `.wmap-track*`, `.wmap-due*`, `.wmap__group`, `.wmap-row*`, `.wmap-roundel` | 路線図 — the wall map (no masthead: the bar names the place) | `components/station/WallMap.jsx`, `screens/LearnScreen.jsx` |
+| `.bar__link` | a text link in the bar's aside (By frequency, JLPT instead) | the station screens |
+| `.route`, `.route-stop*` (`--past`, `--current`, `__rail`, `__marker`, `__code`, `__names`, `__jp`, `__hint`, `__here`, `__fig`, `__go`) | 路線図 — the route diagram | `components/selection/RouteStops.jsx`, `LevelSelector.jsx` |
+| `.platform-grid`, `.platform-card*` (`__service` in the learner's language, `__stops`, `__pip`) | the platform card | `components/selection/ModeSelector.jsx`, `TierSelector.jsx`, `ThemeSelector.jsx` |
+| `.seg--full`, `.console`, `.console__index` | the tier size, the theme filter | `Seg`, `ConsoleIndex` in `components/chrome/Console.jsx` |
+| `.deck-card__lead`, `__glyph`, `__due`, `__aside`, `__count` | the shelf's card | `screens/DecksScreen.jsx` |
+| `.form`, `.form__label`, `.form__row`, `.type-list`, `.type-row*` | the create form, a card's form | `DecksScreen.jsx`, `screens/DeckDetailScreen.jsx` |
+| `.deck-identity*`, `.chip-row*`, `.card-list`, `.card-row*` | the deck page | `DeckDetailScreen.jsx` (the More sheet on `Sheet`) |
+
+The routes: `/learn` (the map), `/learn/<line>` (the station — a line's
+stops, or the kana sets), `/learn/<line>/tiers` and `/learn/vocab/themes`
+(the other ways in), `/learn/<line>/<stop>`, `/learn/<line>/tier/<n>?size=`,
+`/learn/vocab/theme/<key>` (the platforms), and the run on the stage frame
+under each of those with `/<mode>` appended; `/learn/decks`, `/learn/decks/<id>`,
+`/learn/decks/<id>/study` (the deck's platforms) and `/learn/decks/<id>/study/<mode>`.
+A pre-071 deep link (`?set=&mode=`, `?level=&mode=`) on a station goes
+straight onto the run when its mode is real.
+
 ## What retired with it
+
+`components/selection/platformCount.js` and the station plate the selection
+screens hung (`.selection-screen*`, `.selector-header*`, the のりば count and
+the clock), `.tier-size-toggle*`, `.level-selector*`, the map's masthead
+(`.board__masthead` and its names, `.board__now`, `.board__label*`), its
+practice and facility registers (`.wmap__caption*`, `.wmap__facilities`,
+`.fac-chip*`), the 線 suffix and the 番線 caption (Japanese is content), the
+shelf's console and create card (`.decks-console*`, `.decks-filter-*`,
+`.decks-index-bar*`, `.decks-create-*`, `.decks-type-*`), the deck card's
+action row and delete affordance (`.deck-card__actions`, `__act`, `__delete`,
+`__confirm-q`), and the deck page's header, toolbar and entry list
+(`.deckdetail-identity*`, `.deckdetail-header`, `.deckdetail-actions*`,
+`.deckdetail-list`, `.deckdetail-card-row*`, `.deckdetail-entry*`,
+`.deckdetail-checkbox*`, `.deckdetail-edit-btn*`, `.deckdetail-source-badge`).
+
+## What retired with the run (plan 070)
 
 `components/station/HallPass.jsx` (the whole CommuterPass under the gate;
 the strip replaces it), the Today picker (`.today-picker*`,
@@ -83,11 +121,10 @@ gate hall: concourse, IC card, notice strip — the map moved to
 `config/navLinks.js` (now `config/tabs.js`). Their CSS blocks and their
 entries in `.stylelint-baseline.json` went in the same commit.
 
-## Still to port (plans 071–075)
+## Still to port (plans 072–075)
 
-`.offer*`, `.pass-tag` (with the store); the `.route*` redraw, `.svc*`, `.lvlstrip*`, `.slip*`,
-`.stg-head`/`.stg-list`, `.cal*`, `.card-row`, `.deck-identity`, `.type-row`,
-`.form`, `.picker-row` (071–074); `.dict-plate`, `.dict-block`, `.dict-word`,
+`.offer*`, `.pass-tag` (with the store); `.svc*`, `.lvlstrip*`, `.slip*`,
+`.stg-head`/`.stg-list`, `.cal*`, `.picker-row` (072–074); `.dict-plate`, `.dict-block`, `.dict-word`,
 `.tok*`, `.token-card`, `.exam-meta`, `.exam-sheetbar` (072–073); the whole
 `.brd-*` boarding (075). Reading the canvas: `Artifact` `read` on its URL
 saves the page; the design lives in `<script id="appifact-doc">` as JSON —

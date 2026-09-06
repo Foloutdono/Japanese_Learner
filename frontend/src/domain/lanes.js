@@ -40,3 +40,14 @@ export function untilNext(iso, lang) {
   if (hours < 24) return rtf.format(hours, 'hour')
   return rtf.format(Math.round(hours / 24), 'day')
 }
+
+/** Reviews due today per deck id (as a string), from the day's lanes —
+ *  the shelf's and a deck page's "n due". */
+export function dueByDeck(today) {
+  const out = new Map()
+  for (const lane of today?.lanes ?? []) {
+    if (lane.kind !== 'personal') continue
+    out.set(String(lane.deck_id), (out.get(String(lane.deck_id)) ?? 0) + lane.due)
+  }
+  return out
+}

@@ -1,5 +1,4 @@
 {
-  "declaration-block-no-duplicate-properties::Duplicate property \"align-items\"": 1,
   "declaration-block-no-duplicate-properties::Duplicate property \"white-space\"": 1,
   "declaration-block-no-redundant-longhand-properties::Expected shorthand property \"gap\"": 1,
   "declaration-block-no-redundant-longhand-properties::Expected shorthand property \"inset\"": 3,
@@ -21,7 +20,6 @@
   "no-descending-specificity::Expected selector \".wmap-line\" to come before selector \".wmap-line:nth-child(1)\", at line N": 1,
   "no-descending-specificity::Expected selector \".wmap-row\" to come before selector \".wmap-row:hover\", at line N": 1,
   "no-descending-specificity::Expected selector \".route-stop\" to come before selector \".route-stop:nth-child(1)\", at line N": 1,
-  "no-descending-specificity::Expected selector \".route-stop--current .route-stop__marker\" to come before selector \".route-stop:hover .route-stop__marker\", at line N": 1,
   "no-descending-specificity::Expected selector \".settings-row\" to come before selector \".stg-slip .settings-row\", at line N": 1,
   "no-descending-specificity::Expected selector \".mcq-row:disabled\" to come before selector \".mcq-row:not(:disabled):hover\", at line N": 1,
   "no-descending-specificity::Expected selector \".mcq-row--correct .mcq-row__index\" to come before selector \".mcq-row:not(:disabled):hover .mcq-row__index\", at line N": 1,
@@ -36,7 +34,6 @@
   "no-descending-specificity::Expected selector \".profile-card__edit-glyph\" to come before selector \".pass__holder .profile-card__name .profile-card__edit-glyph\", at line N": 1,
   "no-descending-specificity::Expected selector \".profile-card__name--editable:hover .profile-card__edit-glyph\" to come before selector \".pass__holder .profile-card__name:hover .profile-card__edit-glyph\", at line N": 1,
   "no-descending-specificity::Expected selector \".dict-level-badge\" to come before selector \".dict-entry-card .dict-level-badge\", at line N": 1,
-  "no-descending-specificity::Expected selector \".decks-type-btn__desc\" to come before selector \".decks-type-btn--active .decks-type-btn__desc\", at line N": 2,
   "no-descending-specificity::Expected selector \".grammar-rule\" to come before selector \".grammar-answer .grammar-rule\", at line N": 1,
   "no-descending-specificity::Expected selector \".phrase-word-card__surface\" to come before selector \".phrase-word-card__surface-wrap--clickable .phrase-word-card__surface\", at line N": 1,
   "no-descending-specificity::Expected selector \".rdg-breakdown-toggle:disabled\" to come before selector \".rdg-breakdown-toggle:not(:disabled):hover\", at line N": 1,
@@ -52,8 +49,6 @@
   "no-duplicate-selectors::Duplicate selector \"body\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".settings-row__label\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".ember\", first used at line N": 1,
-  "no-duplicate-selectors::Duplicate selector \".decks-type-btn\", first used at line N": 1,
-  "no-duplicate-selectors::Duplicate selector \".decks-type-btn__desc\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \":root\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".dict-entry-card__kana\", first used at line N": 2,
   "no-duplicate-selectors::Duplicate selector \".dict-entry-card__char\", first used at line N": 2,
@@ -80,9 +75,8 @@
   "selector-not-notation::Expected complex :not() pseudo-class notation": 2,
   "shorthand-property-no-redundant-values::Expected \"0 0 8px 0\" to be \"0 0 8px\"": 1,
   "shorthand-property-no-redundant-values::Expected \"20px 12px 24px 12px\" to be \"20px 12px 24px\"": 1,
-  "shorthand-property-no-redundant-values::Expected \"24px 14px 24px\" to be \"24px 14px\"": 1,
   "shorthand-property-no-redundant-values::Expected \"0 0\" to be \"0\"": 1,
   "shorthand-property-no-redundant-values::Expected \"10px 10px\" to be \"10px\"": 1,
   "shorthand-property-no-redundant-values::Expected \"8px 14px 8px\" to be \"8px 14px\"": 1,
-  "value-keyword-case::Expected \"currentColor\" to be \"currentcolor\"": 3
+  "value-keyword-case::Expected \"currentColor\" to be \"currentcolor\"": 2
 }

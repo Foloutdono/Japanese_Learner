@@ -29,6 +29,11 @@ import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
 import TodayRun from './screens/TodayRun'
 import KanaScreen  from './screens/KanaScreen'
+import KanaRun from './screens/KanaRun'
+import VocabRun from './screens/VocabRun'
+import KanjiRun from './screens/KanjiRun'
+import GrammarRun from './screens/GrammarRun'
+import StudyRun from './screens/StudyRun'
 import VocabScreen from './screens/VocabScreen'
 import KanjiScreen from './screens/KanjiScreen'
 import StatsScreen from './screens/StatsScreen'
@@ -264,8 +269,26 @@ export default function App() {
             {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
             <Route path="/today"                element={<TodayScreen session={session} />} />
             <Route path="/learn"                element={<LearnScreen session={session} />} />
+            {/* The stations and the platforms (plan 071): a line's stops,
+                then a stop's modes, under the chrome; the run itself is
+                on the stage frame below. */}
+            <Route path="/learn/kana"                 element={<KanaScreen />} />
+            <Route path="/learn/kana/:set"            element={<KanaScreen />} />
+            <Route path="/learn/vocab"                element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/tiers"          element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/themes"         element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/tier/:tier"     element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/theme/:theme"   element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/:level"         element={<VocabScreen session={session} />} />
+            <Route path="/learn/kanji"                element={<KanjiScreen session={session} />} />
+            <Route path="/learn/kanji/tiers"          element={<KanjiScreen session={session} />} />
+            <Route path="/learn/kanji/tier/:tier"     element={<KanjiScreen session={session} />} />
+            <Route path="/learn/kanji/:level"         element={<KanjiScreen session={session} />} />
+            <Route path="/learn/grammar"              element={<GrammarScreen />} />
+            <Route path="/learn/grammar/:level"       element={<GrammarScreen />} />
             <Route path="/learn/decks"          element={<DecksScreen session={session} />} />
             <Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={session} />} />
+            <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
             <Route path="/practice"             element={<PracticeScreen />} />
             {/* No /:sectionId segment: every generated paper has exactly
                 one section (see each backend/study/exam_*_gen.py), so it
@@ -282,15 +305,19 @@ export default function App() {
 
           {/* The stage: both bars leave, the rating bar or the field
               docks on the bottom edge, and the bar's ‹ is the way out.
-              The study screens still carry their own selection phase
-              (plans 070–071 split it off onto the shell). */}
+              A run's set, level, tier, theme or deck and its mode are its
+              path (plan 071); the stations and platforms before it sit
+              under the shell above. */}
           <Route element={<StageFrame />}>
-            <Route path="/learn/kana"                 element={<KanaScreen session={session} />} />
-            <Route path="/learn/vocab"                element={<VocabScreen session={session} />} />
-            <Route path="/learn/kanji"                element={<KanjiScreen session={session} />} />
-            <Route path="/learn/grammar"              element={<GrammarScreen session={session} />} />
-            <Route path="/today/run"                element={<TodayRun session={session} />} />
-            <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
+            <Route path="/today/run"                          element={<TodayRun session={session} />} />
+            <Route path="/learn/kana/:set/:mode"              element={<KanaRun session={session} />} />
+            <Route path="/learn/vocab/tier/:tier/:mode"       element={<VocabRun session={session} />} />
+            <Route path="/learn/vocab/theme/:theme/:mode"     element={<VocabRun session={session} />} />
+            <Route path="/learn/vocab/:level/:mode"           element={<VocabRun session={session} />} />
+            <Route path="/learn/kanji/tier/:tier/:mode"       element={<KanjiRun session={session} />} />
+            <Route path="/learn/kanji/:level/:mode"           element={<KanjiRun session={session} />} />
+            <Route path="/learn/grammar/:level/:mode"         element={<GrammarRun session={session} />} />
+            <Route path="/learn/decks/:deck_id/study/:mode"   element={<StudyRun session={session} />} />
             <Route path="/practice/reading"           element={<ReadingScreen session={session} />} />
             <Route path="/practice/comprehension"     element={<ReadingComprehensionScreen session={session} />} />
             <Route path="/practice/translation"       element={<TranslationScreen session={session} />} />

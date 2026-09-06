@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
-import { useReportPlatformCount } from './platformCount'
+import { Console, ConsoleIndex } from '../chrome/Console'
+import { Loading } from '../ui/Loading'
+import Empty from '../ui/Empty'
+import { themeLabelFor } from '../../domain/themes'
 
 /**
  * ThemeSelector
@@ -42,14 +45,6 @@ import { useReportPlatformCount } from './platformCount'
  * No header of its own — every caller renders inside <SelectionScreen>,
  * which already names the section on the station plate overhead.
  */
-function _fallbackLabel(key) {
-  return key.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase())
-}
-
-function _translationKey(themeKey) {
-  return 'theme' + themeKey.split('_').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('')
-}
-
 export default function ThemeSelector({ session, onSelect, color }) {
   const { t } = useLang()
   const [themes, setThemes] = useState(null)
@@ -69,7 +64,7 @@ export default function ThemeSelector({ session, onSelect, color }) {
   // keystroke) — the list itself never changes after mount, only
   // which rows are visible does.
   const labeled = useMemo(
-    () => (themes ?? []).map(th => ({ ...th, label: t[_translationKey(th.key)] ?? _fallbackLabel(th.key) })),
+    () => (themes ?? []).map(th => ({ ...th, label: themeLabelFor(t, th.key) })),
     [themes, t],
   )
 
@@ -80,29 +75,31 @@ export default function ThemeSelector({ session, onSelect, color }) {
   }, [labeled, query])
 
   const rowStyle = color ? { '--row-color': color } : undefined
-  useReportPlatformCount(visibleThemes.length)
 
   return (
-    <div className="level-selector">
+    <div className="theme-picker">
       {themes && themes.length > 8 && (
-        <input
-          type="text"
-          className="field theme-selector__search"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder={t.filterThemes ?? 'Filter…'}
-          aria-label={t.filterThemes ?? 'Filter themes'}
-        />
+        <Console>
+          <ConsoleIndex
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onClear={() => setQuery('')}
+            placeholder={t.filterThemes ?? 'Filter…'}
+            aria-label={t.filterThemes ?? 'Filter themes'}
+            clearLabel={t.cancel}
+            count={`${visibleThemes.length} / ${labeled.length}`}
+          />
+        </Console>
       )}
 
       {!themes && !failed && (
-        <div className="selector-header__subtitle">{t.loading}</div>
+        <Loading />
       )}
       {failed && (
-        <div className="selector-header__subtitle">{t.loadError}</div>
+        <Empty tone="error" message={t.loadError} />
       )}
       {themes && visibleThemes.length === 0 && (
-        <div className="selector-header__subtitle">{t.themeNoResults ?? 'No matches'}</div>
+        <Empty message={t.themeNoResults ?? 'No matches'} />
       )}
 
       {themes && visibleThemes.length > 0 && (
@@ -117,7 +114,6 @@ export default function ThemeSelector({ session, onSelect, color }) {
             >
               <span className="platform-card__lead">
                 <span className="platform-card__no">{i + 1}</span>
-                <span className="platform-card__unit" lang="ja">番線</span>
               </span>
               <span className="platform-card__body">
                 <span className="platform-card__title">{th.label}</span>

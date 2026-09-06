@@ -64,12 +64,10 @@ export default function StatsScreen({ session }) {
   // There's no dedicated "review" screen — due cards are prioritised
   // inside a normal session, so this drops the user into the right
   // level/mode and lets the session surface them.
+  // Straight onto the run (plan 071): a set or level and a mode are a
+  // path now, /learn/<line>/<stop>/<mode>.
   function startReview(category, key, mode) {
-    if (category === 'kana') {
-      navigate(`/learn/kana?set=${encodeURIComponent(key)}&mode=${mode}`)
-      return
-    }
-    navigate(`/${category}?level=${encodeURIComponent(key)}&mode=${mode}`)
+    navigate(`/learn/${category}/${encodeURIComponent(key)}/${mode}`)
   }
 
   const dueToday = extra?.forecast?.[0]?.count ?? totals.due

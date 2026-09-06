@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
-import { useReportPlatformCount } from './platformCount'
+import { Loading } from '../ui/Loading'
+import Empty from '../ui/Empty'
+import { Seg } from '../chrome/Console'
 
 // Mirrors frequency_data.DEFAULT_TIER_SIZE on the backend — used as
 // the initial fetch before the user touches the size toggle, and as
@@ -50,9 +52,13 @@ const TIER_SIZE_OPTIONS = [100, 200, 500, 1000]
  * No header of its own — every caller renders inside <SelectionScreen>,
  * which already names the section on the station plate overhead.
  */
-export default function TierSelector({ domain, session, onSelect, color }) {
+export default function TierSelector({ domain, session, onSelect, color, tierSize: sizeProp, onTierSize }) {
   const { t } = useLang()
-  const [tierSize, setTierSize] = useState(DEFAULT_TIER_SIZE)
+  // Controlled by the station when it carries the size in its URL;
+  // local state otherwise.
+  const [ownSize, setOwnSize] = useState(DEFAULT_TIER_SIZE)
+  const tierSize = sizeProp ?? ownSize
+  const setTierSize = size => { if (onTierSize) onTierSize(size); else setOwnSize(size) }
   const [tiers, setTiers] = useState(null)
   const [failed, setFailed] = useState(false)
 
@@ -71,30 +77,26 @@ export default function TierSelector({ domain, session, onSelect, color }) {
   const rowStyle = color ? { '--row-color': color } : undefined
   const unit = domain === 'vocab' ? t.wordNoun : (t.kanjiUnit ?? 'kanji')
   const visibleTiers = (tiers ?? []).filter(tr => tr.count > 0)
-  useReportPlatformCount(visibleTiers.length)
 
   return (
-    <div className="level-selector">
-      <div className="tier-size-toggle" role="group" aria-label={t.tierSizeLabel ?? 'Tier size'}>
-        {TIER_SIZE_OPTIONS.map(size => (
-          <button
-            key={size}
-            type="button"
-            onClick={() => { if (size !== tierSize) { playUi('click-mode-selection'); setTierSize(size) } }}
-            className={`tier-size-toggle__btn ${size === tierSize ? 'tier-size-toggle__btn--active' : ''}`}
-            style={size === tierSize ? rowStyle : undefined}
-            aria-pressed={size === tierSize}
-          >
-            {size}
-          </button>
-        ))}
+    <div className="tier-picker">
+      {/* Tier size — the canvas's segmented control, full width. */}
+      <div className="tier-picker__size">
+        <span className="cap">{t.tierSizeLabel ?? 'Tier size'}</span>
+        <Seg
+          full
+          label={t.tierSizeLabel ?? 'Tier size'}
+          value={tierSize}
+          onChange={size => { playUi('click-mode-selection'); setTierSize(size) }}
+          options={TIER_SIZE_OPTIONS.map(size => ({ key: size, label: String(size) }))}
+        />
       </div>
 
       {!tiers && !failed && (
-        <div className="selector-header__subtitle">{t.loading}</div>
+        <Loading />
       )}
       {failed && (
-        <div className="selector-header__subtitle">{t.loadError}</div>
+        <Empty tone="error" message={t.loadError} />
       )}
 
       {tiers && (
@@ -112,7 +114,6 @@ export default function TierSelector({ domain, session, onSelect, color }) {
             >
               <span className="platform-card__lead">
                 <span className="platform-card__no">{i + 1}</span>
-                <span className="platform-card__unit" lang="ja">番線</span>
               </span>
               <span className="platform-card__body">
                 <span className="platform-card__title">{tr.start_rank}–{tr.end_rank}</span>

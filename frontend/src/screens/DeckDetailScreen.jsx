@@ -3,14 +3,17 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
-import { ScreenBar } from '../components/chrome/Bar'
-import { StationHeader } from '../components/station/StationHeader'
+import { Bar, Leave } from '../components/chrome/Bar'
+import { Chip } from '../components/chrome/Console'
+import { Sheet } from '../components/chrome/Sheet'
+import { useTodaySummary } from '../stores/today'
+import { dueByDeck } from '../domain/lanes'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
 import BrowseCardsMenu from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
-import { PlayIcon, ImportIcon, ExportIcon, CheckboxIcon, CheckCircleIcon, CrossIcon, CheckIcon, PencilIcon, TrashIcon, CardIcon, LightbulbIcon } from '../components/ui/Icons'
+import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PlusIcon, SearchIcon } from '../components/ui/Icons'
 
 // The name the export endpoint chose, out of its Content-Disposition.
 // Two forms arrive (RFC 6266): `filename*=UTF-8''...` percent-encoded,
@@ -250,6 +253,19 @@ export default function DeckDetailScreen({ session }) {
   const [selectMode, setSelectMode] = useState(false)
   const [selected, setSelected]     = useState(new Set())
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  // The More sheet (plan 071): import, export and the deck's own
+  // deletion, which used to sit on the shelf's card.
+  const [moreOpen, setMoreOpen] = useState(false)
+  const [confirmingDeck, setConfirmingDeck] = useState(false)
+  const today = useTodaySummary().data
+  const dueToday = dueByDeck(today).get(String(deck_id)) ?? 0
+
+  function deleteDeck() {
+    playUi('click-screen-selection')
+    apiFetch(`/api/decks/${deck_id}`, session, { method: 'DELETE' })
+      .then(() => navigate('/learn/decks'))
+      .catch(() => setConfirmingDeck(false))
+  }
 
 
   useEffect(() => { fetchCards() }, [])
@@ -444,145 +460,118 @@ export default function DeckDetailScreen({ session }) {
     fetchCards()
   }
 
+  const addLabel = String(t.addCard).replace(/^\+\s*/, '')
+
   return (
-    <div className="screen">
-      <ScreenBar onBack={() => navigate('/learn/decks')} title={deck?.name ?? t.deckFallbackTitle} />
+    <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
+      <Bar
+        code="KZ"
+        color="var(--line-decks)"
+        title={t.decks}
+        aside={<Leave onClick={() => navigate('/learn/decks')}>{t.leaveDecks}</Leave>}
+      />
 
-      {/* 蘇芳, injected once for the whole screen — see DecksScreen's
-          own comment on why it sits on <main> and not on .screen. */}
-      <main id="main-content" className="container page-pad"
-        style={{ '--line-color': 'var(--line-decks)' }}>
-        {/* Same plate every other screen in the app opens with — this
-            was one of the last two 教材 screens still starting on a bare
-            container, which is exactly what made them read as a
-            different app. It names the STATION; the identity block
-            below it names the deck. */}
-        <StationHeader />
-
-        {/* The deck, named on its own page. The name used to live only
-            in the TopBar — which auto-hides on scroll — and the type
-            wasn't shown at all, so a deck that was clearly "Kanji" in
-            the grid became anonymous the moment you opened it. Same
-            roundel, glyph and pigment as its card in DecksScreen. */}
-        <div className="deckdetail-identity" style={{ '--rail': dt.color }}>
-          <span className="platform-card__no deckdetail-identity__glyph" lang="ja" aria-hidden="true">{dt.glyph}</span>
-          <span className="deckdetail-identity__text">
-            <span className="deckdetail-identity__name">{deck?.name ?? t.deckFallbackTitle}</span>
-            <span className="deckdetail-identity__meta">
-              <span className="deckdetail-identity__type">{dt.label}</span>
-              {' · '}{cards.length} {t.cards}
-            </span>
+      {/* The deck, named on its own page: the same roundel, glyph and
+          pigment as its card on the shelf, the figures, and the one
+          filled action. */}
+      <div className="deck-identity" style={{ '--rail': dt.color }}>
+        <span className="wmap-roundel deck-identity__roundel" lang="ja" aria-hidden="true" style={{ '--line-color': dt.color }}>{dt.glyph}</span>
+        <span className="deck-identity__names">
+          <h2 className="deck-identity__name">{deck?.name ?? t.deckFallbackTitle}</h2>
+          <span className="deck-identity__meta">
+            {dt.label} · {t.cardsCount(cards.length)}
+            {dueToday > 0 && <> · <span className="deck-identity__due">{t.todayDue(dueToday)}</span></>}
           </span>
-        </div>
+        </span>
+        <button
+          type="button"
+          className="btn-primary deck-identity__study"
+          onClick={() => { playUi('click-screen-selection'); navigate(`/learn/decks/${deck_id}/study`, { state: { deck } }) }}
+        >
+          ▶ {t.study}
+        </button>
+      </div>
 
-        {/* Header row */}
-        <div className="deckdetail-header">
-          {!selectMode && (
-            <div className="deckdetail-actions">
-              <button onClick={() => { playUi('click-screen-selection'); navigate(`/learn/decks/${deck_id}/study`, { state: { deck } }) }}
-                className="btn-primary">
-                <PlayIcon size={14} /> {t.study}
-              </button>
-              {allowCustom && (
-                <button onClick={() => { playUi('click-mode-selection'); startAdd() }} className="btn-secondary">
-                  {t.addCard}
-                </button>
-              )}
-              {allowedSources.length > 0 && (
-                <button onClick={() => { playUi('click-mode-selection'); setShowBrowse(true) }} className="btn-secondary">
-                  {t.browseBtn}
-                </button>
-              )}
-              {cards.length > 0 && (
-                <button onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }} className="btn-secondary">
-                  <CheckboxIcon size={14} /> {t.select}
-                </button>
-              )}
-              {allowCustom && (
-                <button onClick={() => { playUi('click-mode-selection'); setShowImport(true) }} className="btn-secondary">
-                  <ImportIcon size={14} /> {t.import}
-                </button>
-              )}
-              {/* Gated on having cards, NOT on allowCustom the way Import
-                  is. Import writes `standard` cards, so it only makes
-                  sense where those are allowed; export only reads, and a
-                  vocab or kanji deck is just as worth taking a copy of.
-                  An empty deck is excluded because its export is a header
-                  row — a file that downloads and says nothing. */}
-              {cards.length > 0 && (
-                <button onClick={exportDeck} className="btn-secondary" disabled={exporting}>
-                  <ExportIcon size={14} /> {t.export}
-                </button>
-              )}
-            </div>
+      {/* The chip row: what you can do to the deck. Select turns the
+          row into the selection's own toolbar. */}
+      {!selectMode && (
+        <div className="chip-row">
+          {allowCustom && (
+            <Chip onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
           )}
+          {allowedSources.length > 0 && (
+            <Chip onClick={() => { playUi('click-mode-selection'); setShowBrowse(true) }}><SearchIcon size={14} />{t.browseBtn}</Chip>
+          )}
+          {cards.length > 0 && (
+            <Chip onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }}><CheckIcon size={14} />{t.select}</Chip>
+          )}
+          <Chip onClick={() => { playUi('click-mode-selection'); setMoreOpen(true) }} aria-haspopup="dialog">
+            <span className="chip__dots" aria-hidden="true">···</span>{t.deckMore}
+          </Chip>
+        </div>
+      )}
 
-          {selectMode && (
-            <div className="deckdetail-actions deckdetail-actions--select">
-              <span className="deckdetail-select-count">
-                {selected.size} {t.cards}
-              </span>
-              <button onClick={() => { playUi('click-mode-selection'); toggleSelectAll() }} className="btn-secondary">
-                {selected.size === cards.length ? t.deselectAll : t.selectAll}
+      {selectMode && (
+        <div className="chip-row chip-row--select">
+          <span className="chip-row__count">{t.cardsCount(selected.size)}</span>
+          <Chip onClick={() => { playUi('click-mode-selection'); toggleSelectAll() }}>
+            {selected.size === cards.length ? t.deselectAll : t.selectAll}
+          </Chip>
+          {confirmingDelete ? (
+            <>
+              <span className="chip-row__q">{t.deleteCardsConfirm}</span>
+              <button type="button" onClick={deleteSelected} className="btn-primary btn-primary--danger">
+                <TrashIcon size={14} /> {t.delete} ({selected.size})
               </button>
-              {confirmingDelete ? (
-                <>
-                  <span className="deckdetail-confirm-q">{t.deleteCardsConfirm}</span>
-                  <button onClick={deleteSelected} className="btn-primary deckdetail-act--danger">
-                    <TrashIcon size={14} /> {t.delete} ({selected.size})
-                  </button>
-                  <button onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(false) }} className="btn-secondary">
-                    {t.cancel}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(true) }}
-                    disabled={selected.size === 0}
-                    className="btn-primary deckdetail-act--danger">
-                    <TrashIcon size={14} /> {t.delete} ({selected.size})
-                  </button>
-                  <button onClick={() => { playUi('click-mode-selection'); exitSelectMode() }} className="btn-secondary">
-                    {t.cancel}
-                  </button>
-                </>
-              )}
-            </div>
+              <Chip onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(false) }}>{t.cancel}</Chip>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(true) }}
+                disabled={selected.size === 0}
+                className="btn-primary btn-primary--danger">
+                <TrashIcon size={14} /> {t.delete} ({selected.size})
+              </button>
+              <Chip onClick={() => { playUi('click-mode-selection'); exitSelectMode() }}><CrossIcon size={14} />{t.cancel}</Chip>
+            </>
           )}
         </div>
+      )}
 
-        {/* Import success banner */}
-        {importResult && (
-          <div className="deckdetail-import-banner">
-            <div className="deckdetail-import-banner__text">
-              <CheckCircleIcon size={15} /> {importResult.inserted} {t.cards}
-            </div>
-            <button onClick={() => setImportResult(null)} className="deckdetail-import-banner__close" aria-label={t.close}>
-              <CrossIcon size={14} />
-            </button>
+      {/* Import success banner */}
+      {importResult && (
+        <div className="deckdetail-import-banner">
+          <div className="deckdetail-import-banner__text">
+            <CheckCircleIcon size={15} /> {importResult.inserted} {t.cards}
           </div>
-        )}
+          <button onClick={() => setImportResult(null)} className="deckdetail-import-banner__close" aria-label={t.close}>
+            <CrossIcon size={14} />
+          </button>
+        </div>
+      )}
 
-        {/* A failed export is otherwise completely silent — the browser
-            simply never offers a file, which reads as a dead button. */}
-        {exportError && (
-          <div className="deckdetail-import-banner deckdetail-import-banner--error">
-            <div className="deckdetail-import-banner__text">
-              <CrossIcon size={15} /> {t.exportFailed}
-            </div>
-            <button onClick={() => setExportError(false)} className="deckdetail-import-banner__close" aria-label={t.close}>
-              <CrossIcon size={14} />
-            </button>
+      {/* A failed export is otherwise completely silent — the browser
+          simply never offers a file, which reads as a dead button. */}
+      {exportError && (
+        <div className="deckdetail-import-banner deckdetail-import-banner--error">
+          <div className="deckdetail-import-banner__text">
+            <CrossIcon size={15} /> {t.exportFailed}
           </div>
-        )}
+          <button onClick={() => setExportError(false)} className="deckdetail-import-banner__close" aria-label={t.close}>
+            <CrossIcon size={14} />
+          </button>
+        </div>
+      )}
 
-        {/* Add / Edit form */}
+        {/* Add / Edit form — one input per field the structure
+            declares (GET /api/decks/structures), on the canvas's form. */}
         {adding && (
-          <div className="card deckdetail-form">
-            <div className="deckdetail-form__title">
+          <div className="form deckdetail-form">
+            <span className="form__label">
               {editing ? t.editCard : t.newCard}
-            </div>
+            </span>
             <div className="deckdetail-form__fields">
               {/* One input per field the structure declares. A kanji card
                   asks for four things and a standard card for two, from
@@ -632,7 +621,7 @@ export default function DeckDetailScreen({ session }) {
                 onKeyDown={e => e.key === 'Enter' && saveCard()}
                 className="field deckdetail-form__input" />
             </div>
-            <div className="deckdetail-form__actions">
+            <div className="form__row">
               {/* Cancel first, Save last: the row is right-aligned now
                   (see .deckdetail-form__actions), so the confirming
                   action sits at the edge the eye and the thumb both end
@@ -658,88 +647,105 @@ export default function DeckDetailScreen({ session }) {
           <Empty icon={<CardIcon size={40} />} message={t.noCards} hint={t.addFirstCard} />
         )}
 
-        {/* Cards list */}
+        {/* The cards as rows: the entry at the size the app shows
+            Japanese everywhere else, the reading under it, the meaning
+            beside. A hand-written card opens its editor; a browsed-in
+            one is read-only here (its SRS progress is shared with the
+            rest of the app) and carries its source and a remove. */}
         {!loading && cards.length > 0 && (
-          <div className="deckdetail-list">
+          <div className="card-list">
             {cards.map(card => {
               const key   = cardKey(card)
               const isSel = selected.has(key)
+              const opens = selectMode || card.origin === 'custom'
+              const Row = opens ? 'button' : 'div'
+              const rowProps = opens
+                ? {
+                  type: 'button',
+                  onClick: selectMode ? () => toggleSelect(key) : () => startEdit(card),
+                  'aria-pressed': selectMode ? isSel : undefined,
+                }
+                : {}
               return (
-                <div
+                <Row
                   key={key}
-                  className={`card deckdetail-card-row${selectMode ? ' deckdetail-card-row--selectable' : ''}${isSel ? ' deckdetail-card-row--selected' : ''}`}
-                  onClick={selectMode ? () => toggleSelect(key) : undefined}
+                  className={`card-row${isSel ? ' card-row--selected' : ''}`}
+                  {...rowProps}
                 >
                   {selectMode && (
-                    <div className={`deckdetail-checkbox${isSel ? ' deckdetail-checkbox--checked' : ''}`}>
-                      {isSel && <span className="deckdetail-checkbox__mark"><CheckIcon size={12} /></span>}
-                    </div>
+                    <span className={`card-row__tick${isSel ? ' card-row__tick--on' : ''}`} aria-hidden="true">
+                      {isSel && <CheckIcon size={11} />}
+                    </span>
                   )}
-
-                  {/* A card, not a database row. This was five
-                      "Label / value" pairs laid out side by side —
-                      "Front", "Back / Meaning", "かな", "Hint",
-                      "Notes" — repeated down the page, so the labels
-                      outnumbered the Japanese and every entry read as
-                      a record rather than something to study. The
-                      front is now the entry, at the size the app shows
-                      Japanese everywhere else; the reading sits under
-                      it the way furigana does; the meaning follows;
-                      and hint/notes are quiet annotations at the end.
-                      Only the two optional ones still name themselves,
-                      because those genuinely aren't self-evident. */}
-                  <div className="deckdetail-card-content">
-                    <div className="deckdetail-entry">
-                      <span className="deckdetail-entry__front" lang="ja">{card.front}</span>
-                      {card.kana && <span className="deckdetail-entry__kana" lang="ja">{card.kana}</span>}
-                    </div>
-                    <div className="deckdetail-entry__back">{card.back}</div>
+                  <span className="card-row__front">
+                    <span className="card-row__jp" lang="ja">{card.front}</span>
+                    {card.kana && <span className="card-row__kana" lang="ja">{card.kana}</span>}
+                  </span>
+                  <span className="card-row__back">
+                    {card.back}
                     {(card.hint || card.notes) && (
-                      <div className="deckdetail-entry__notes">
-                        {card.hint && (
-                          <span className="deckdetail-entry__note">
-                            <LightbulbIcon size={12} /> {card.hint}
-                          </span>
-                        )}
-                        {card.notes && (
-                          <span className="deckdetail-entry__note deckdetail-entry__note--muted">{card.notes}</span>
-                        )}
-                      </div>
+                      <span className="card-row__note">
+                        {card.hint && <><LightbulbIcon size={11} /> {card.hint}</>}
+                        {card.hint && card.notes ? ' · ' : ''}
+                        {card.notes}
+                      </span>
                     )}
-                  </div>
-
-                  {/* App-sourced cards (browsed in from kanji/vocab/
-                      grammar) carry their own SRS progress shared with
-                      the rest of the app — see decks.py's _build_pool —
-                      so they're read-only here, tagged by where they
-                      came from. The tag wears that section's own
-                      pigment, same as the deck-type roundel. */}
+                  </span>
                   {card.origin === 'app' && (
                     <span
-                      className="deckdetail-source-badge"
+                      className="card-row__badge"
                       style={{ '--rail': SOURCE_COLOR[card.source] ?? 'var(--text-secondary)' }}
                     >
                       {{ kanji: t.kanjiType, vocab: t.vocabType, grammar: t.grammarType }[card.source] ?? card.source}
                       {card.level ? ` · ${card.level}` : ''}
                     </span>
                   )}
-
                   {!selectMode && card.origin === 'custom' && (
-                    <button onClick={() => startEdit(card)} className="deckdetail-edit-btn" aria-label={t.edit} title={t.edit}>
-                      <PencilIcon size={15} />
-                    </button>
+                    <ChevronIcon direction="right" size={14} className="card-row__go" />
                   )}
                   {!selectMode && card.origin === 'app' && (
-                    <button onClick={() => deleteCard(card).then(fetchCards)} className="deckdetail-edit-btn deckdetail-edit-btn--danger" aria-label={t.delete} title={t.delete}>
-                      <TrashIcon size={15} />
+                    <button
+                      type="button"
+                      onClick={() => deleteCard(card).then(fetchCards)}
+                      className="card-row__remove"
+                      aria-label={t.delete}
+                      title={t.delete}
+                    >
+                      <TrashIcon size={14} />
                     </button>
                   )}
-                </div>
+                </Row>
               )
             })}
           </div>
         )}
-      </main>
+
+      {/* The More sheet: what the shelf's card used to carry. */}
+      <Sheet open={moreOpen} onClose={() => { setMoreOpen(false); setConfirmingDeck(false) }} jp={deck?.name ?? t.deckFallbackTitle} cap={t.deckMore}>
+        {allowCustom && (
+          <button type="button" className="btn-secondary" onClick={() => { setMoreOpen(false); setShowImport(true) }}>
+            <ImportIcon size={14} /> {t.import}
+          </button>
+        )}
+        {cards.length > 0 && (
+          <button type="button" className="btn-secondary" disabled={exporting} onClick={() => { setMoreOpen(false); exportDeck() }}>
+            <ExportIcon size={14} /> {t.export}
+          </button>
+        )}
+        {confirmingDeck ? (
+          <>
+            <span className="sheet__q">{t.deleteDeckConfirm}</span>
+            <button type="button" className="btn-primary btn-primary--danger" onClick={deleteDeck}>
+              <TrashIcon size={14} /> {t.delete}
+            </button>
+            <button type="button" className="btn-secondary" onClick={() => setConfirmingDeck(false)}>{t.cancel}</button>
+          </>
+        ) : (
+          <button type="button" className="btn-secondary btn-secondary--danger" onClick={() => setConfirmingDeck(true)}>
+            <TrashIcon size={14} /> {t.deleteDeck}
+          </button>
+        )}
+      </Sheet>
 
       {showImport && (
         <ImportCardsMenu onImport={handleImport} onClose={closeImport} />
@@ -754,6 +760,6 @@ export default function DeckDetailScreen({ session }) {
           onClose={closeBrowse}
         />
       )}
-    </div>
+    </main>
   )
 }

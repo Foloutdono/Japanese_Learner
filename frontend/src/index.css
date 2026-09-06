@@ -5145,7 +5145,6 @@ button:focus-visible {
 .learn,
 .practice,
 .today,
-.selection-screen__inner,
 .stage,
 .profile-container,
 .stats-container,
@@ -5178,7 +5177,6 @@ button:focus-visible {
   .learn,
   .practice,
   .today,
-  .selection-screen__inner,
   .stage,
   .platform-card,
   .route-stop,
@@ -5194,24 +5192,8 @@ button:focus-visible {
 /* ── Selection screen shell ───────────────────────────────
    No glow, no watermark — the negative space itself (ma, 間)
    is the atmosphere. A single hairline marks the header edge. */
-.selection-screen {
-  position: relative;
-  padding: 40px 24px 64px !important;
-  text-align: left;
-}
 /* .container caps at --max-w and is declared later in this file, so
    the override has to out-specify it rather than out-order it. */
-.container.selection-screen { max-width: min(1240px, 100%); }
-.selection-screen__inner {
-  position: relative;
-  margin: 0 auto;
-  width: 100%;
-  max-width: var(--content-max-w, 720px);
-}
-.selection-screen--station .selection-screen__inner {
-  max-width: var(--content-max-w, none);
-}
-
 
 
 /* ── Selector header (eyebrow / title / subtitle) ────────── */
@@ -5219,74 +5201,9 @@ button:focus-visible {
    selection screen reads the same way regardless of which list it wraps.
    Deliberate contrast: a small tracked sans eyebrow against a large
    serif title — the pairing does the work a glow used to. */
-.selector-header {
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 8px;
-  padding-bottom: 32px;
-}
-
-.selector-header__eyebrow {
-  font-family: var(--font-display);
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-
-.selector-header__title {
-  margin: 0;
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 2.4rem;
-  line-height: 1.2;
-  letter-spacing: 0.01em;
-  text-align: center;
-}
-
-.selector-header__subtitle {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.6;
-  text-align: center;
-}
-
 /* ── Tier-size toggle (TierSelector) ─────────────────────── */
 /* Same segmented idea as .mode-toggle, sized down to sit inline under
    a selector header rather than as a standalone control row. */
-.tier-size-toggle {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.theme-selector__search {
-  width: 100%;
-  margin-bottom: var(--sp-6);
-}
-
-
-.tier-size-toggle__btn {
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-}
-
-.tier-size-toggle__btn--active {
-  background: var(--row-color, var(--accent));
-  color: var(--text-primary);
-  border-color: transparent;
-}
-
 
 
 /* ── のりば案内 — the platform signs ────────────────────────
@@ -5313,10 +5230,6 @@ button:focus-visible {
 /* The wrapper ThemeSelector/TierSelector put around a filter or size
    toggle plus the grid. It owns the horizontal inset in that case, so
    the control above lines up with the cards below it. */
-.level-selector { width: 100%; }
-.selection-screen .level-selector { padding: 40px 22px 32px; }
-.selection-screen .level-selector .platform-grid { padding: 26px 0 0; }
-
 /* The grid's cell, so a card with a secondary action beside it still
    occupies exactly one column. Only the exam picker uses the action
    today (a 別の問題 "different paper" link); every other caller renders
@@ -5441,16 +5354,12 @@ button:focus-visible {
   background: var(--rail);
   color: var(--bg-main);
 }
-.platform-card__unit {
-  font-family: var(--font-jp);
-  font-size: 0.6rem;
-  color: var(--text-secondary);
-}
-
 .platform-card__service {
-  font-family: var(--font-jp);
+  font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.74rem;
+  font-size: var(--fs-caption-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   line-height: 1.15;
   color: color-mix(in srgb, var(--rail) 65%, var(--text-primary));
   text-align: center;
@@ -5875,7 +5784,6 @@ textarea:focus-visible {
    row did, behind the phone level bar this replaces). --dock-bottom
    carries the difference; the rung on top is the breathing room. */
 .page-pad,
-.selection-screen { padding-bottom: calc(var(--sp-6) + var(--dock-bottom)); }
 
 /* Section header — serif-JP title + a short seal-red stroke instead
    of a full-width hairline (a single deliberate mark, not a line
@@ -5984,6 +5892,13 @@ textarea:focus-visible {
    rebuild each one on the bar) is a flex child here, not a second
    viewport — see .phone__content > .screen beside .screen itself. */
 .phone__content > main { flex: 1; }
+/* The station pages (plan 071): the choice under the bar, flush with
+   it — the grid's own inset was the plate's, and the plate is gone. */
+.learn .platform-grid { padding: 0; gap: var(--sp-3); }
+.tier-picker,
+.theme-picker { display: flex; flex-direction: column; gap: var(--sp-4); }
+.tier-picker__size { display: flex; align-items: center; gap: var(--sp-4); }
+.tier-picker__size .cap { flex: none; }
 /* The gates' pages: the canvas's gutter, the bar first. */
 .learn,
 .practice,
@@ -6404,6 +6319,24 @@ textarea:focus-visible {
   gap: var(--sp-3);
   flex-shrink: 0;
 }
+/* A text link in the bar's aside — the other way into a station
+   ("By frequency", "JLPT instead"): the caption register, underlined. */
+.bar__link {
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.bar__link:hover,
+.bar__link:focus-visible { color: var(--text-primary); filter: none; }
 .bar__stripe { height: 2px; background: var(--line-color); }
 .bar--register .bar__stripe { height: 1px; background: var(--surface-line); }
 
@@ -6614,6 +6547,8 @@ textarea:focus-visible {
   color: var(--text-primary);
 }
 .console__field:focus { outline: none; }
+/* Chromium's fixed grey placeholder fails both themes; the dim ink. */
+.console__field::placeholder { color: var(--text-secondary); opacity: 1; }
 .console__clear {
   position: relative;
   display: inline-flex;
@@ -7971,105 +7906,6 @@ textarea:focus-visible {
    carries — reading, name, plain-language name. Right: what the panel
    is, and the time. The line stripe under it is the same one the
    plate carries; below that, the lines. */
-.board__masthead {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px 28px;
-  flex-wrap: wrap;
-  padding: 22px 22px 18px;
-}
-
-.board__station {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-.board__roundel {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 34px;
-  height: 26px;
-  padding: 0 7px;
-  border-radius: 999px;
-  border: 2px solid var(--accent2);
-  /* Lifted toward the panel ink, not used raw. The board is sumi in BOTH
-     themes, but --accent2 is not: light theme deepens it for paper, and
-     on this dark board that deepened gold measures 4.23:1. 85% keeps it
-     unmistakably gold and clears the floor either way (7.98 dark / 5.16
-     light). The 2px border above stays raw -- an edge, which DESIGN.md
-     allows, and 4.23:1 is well over the 3:1 a non-text edge needs. */
-  color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel));
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-.board__station-names {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  align-items: center;
-}
-.board__kana {
-  font-family: var(--font-jp);
-  font-size: 0.72rem;
-  letter-spacing: 0.3em;
-  text-indent: 0.3em;
-  opacity: 0.55;
-}
-.board__name {
-  margin: 0;
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2rem);
-  line-height: 1.15;
-  letter-spacing: 0.14em;
-  text-indent: 0.14em;
-}
-.board__romaji {
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.26em;
-  text-indent: 0.26em;
-  text-transform: uppercase;
-  opacity: 0.5;
-  margin-top: 5px;
-}
-
-.board__now {
-  display: flex;
-  align-items: baseline;
-  flex-direction: column;
-  height: -webkit-fill-available;
-  justify-content: space-between;
-  align-items: end;
-}
-.board__label {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-family: var(--font-jp);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  /* Toward the panel ink, not transparent: thinning gold over sumi
-     lowers contrast rather than raising it. Same reason as
-     .board__roundel above. .board__label-sub and .board-clock__colon
-     inherit this. */
-  color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel));
-}
-.board__label-sub {
-  font-family: var(--font-display);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
 /* The line's colour, the full width of the platform — the same stroke
    the station plate carries along its own bottom edge, which is what
    ties the two objects together across screens. */
@@ -8170,28 +8006,21 @@ textarea:focus-visible {
 }
 .wmap-line:hover .wmap-roundel, .wmap-line:focus-visible .wmap-roundel,
 .wmap-row:hover .wmap-roundel,  .wmap-row:focus-visible .wmap-roundel,
-.fac-chip:hover .wmap-roundel,  .fac-chip:focus-visible .wmap-roundel {
-  background: var(--line-color, var(--accent2));
-  color: var(--text-on-panel);
-}
 .wmap-roundel--sm { width: 24px; height: 24px; }
 
 .wmap-line__id { display: flex; align-items: center; gap: var(--sp-4); min-width: 0; }
 .wmap-line__names,
 .wmap-row__names { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+/* The line's name, in the learner's language (Japanese is content,
+   not chrome — docs/design/mobile). */
 .wmap-line__jp,
 .wmap-row__jp {
-  font-family: var(--font-jp);
+  font-family: var(--font-display);
   font-weight: 700;
-  font-size: var(--fs-lead);
+  font-size: var(--fs-body);
   line-height: 1.2;
-  /* Ported with the board rows these replace, values and all. */
-  letter-spacing: 0.04em;
   white-space: nowrap;
 }
-/* 線 / 行 — "line" / "bound for", set smaller than the name the way
-   the board always set 行. */
-.wmap-line__sen { margin-left: var(--sp-1); font-size: var(--fs-caption); opacity: 0.6; }
 .wmap-line__latin,
 .wmap-row__latin {
   font-family: var(--font-display);
@@ -8283,7 +8112,15 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.wmap-due__unit { font-family: var(--font-jp); font-weight: 500; font-size: var(--fs-caption-xs); opacity: 0.8; }
+.wmap-due__unit {
+  margin-left: 2px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-caption-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
 
 /* ── 実践 / 施設 — the groups below the lines ────────────────ー */
 .wmap__group {
@@ -8292,23 +8129,6 @@ textarea:focus-visible {
   padding: var(--sp-2) var(--sp-4) var(--sp-3);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
-.wmap__caption { display: flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-3) var(--sp-3) var(--sp-2); }
-.wmap__caption-jp {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: var(--fs-caption);
-  letter-spacing: var(--tr-name);
-  color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel));
-}
-.wmap__caption-latin {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  opacity: 0.55;
-}
-
 .wmap-row {
   position: relative;
   display: grid;
@@ -8361,41 +8181,6 @@ textarea:focus-visible {
   padding: var(--sp-4) var(--sp-5) var(--sp-6);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
-.wmap__facilities .wmap__caption {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0;
-  padding: 0;
-  margin-right: var(--sp-2);
-}
-.fac-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-2);
-  border-radius: var(--r-pill);
-  background: none;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-.fac-chip:hover,
-.fac-chip:focus-visible {
-  background: rgba(255, 255, 255, 0.055);
-  border-color: var(--line-color, var(--accent2));
-  filter: none;
-}
-.fac-chip__title {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
 /* The hall folds to one column before the map's tracks crush; the
    gate and the pass pair up above the full-width map. 900px is the
    same bound the settings mixer folds at.
@@ -8434,30 +8219,30 @@ textarea:focus-visible {
    rail down the left, a marker at every station, and the level you
    want somewhere along it. A list would say "pick one of five"; a
    line says how far it goes. */
+/* ── 路線図 — the route diagram (plan 071, on the canvas) ───────
+   A station page: one rail down the left with a marker per stop, the
+   stops behind the learner filled, the one they are at ringed and
+   captioned, and on every row the code, the name and the figure. */
 .route {
-  --route-gap: 18px;
+  --route-gap: var(--sp-3);
   position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--route-gap);
   width: 100%;
-  padding: 52px 22px 32px;
+  padding-left: 30px;
 }
-
-/* Each stop is a platform card like any other choice in the app — but
-   kept in one column, because these are a line and not a grid, and
-   threaded by the rail so the line is still the thing you read first. */
 .route-stop {
-  --rail: var(--line-color, var(--accent));
   position: relative;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: var(--sp-4);
   width: 100%;
-  padding: 26px 0 26px 66px;
+  min-height: 56px;
+  padding: var(--sp-3) var(--sp-4);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
   color: var(--text-primary);
   text-align: left;
   transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
@@ -8465,82 +8250,81 @@ textarea:focus-visible {
 .route-stop:hover,
 .route-stop:focus-visible {
   background: var(--bg-card-hover);
-  border-color: color-mix(in srgb, var(--rail) 55%, var(--border));
+  border-color: color-mix(in srgb, var(--line-color) 55%, var(--surface-line));
   transform: translateY(-1px);
   filter: none;
 }
-
-/* The rail, drawn per stop so the ends can be capped — a line diagram
-   that runs off the top of the first station reads as "there is more
-   up there". It reaches past the card into the gap above and below so
-   the line stays unbroken between them. */
+.route-stop--current { border-color: var(--line-color); }
+/* The rail, drawn per stop so the ends can be capped — a line that
+   runs off the top of the first station reads as "there is more up
+   there". It reaches past the card into the gap above and below so
+   the line stays unbroken between them; the stretch behind the
+   learner is the line's own colour. */
 .route-stop__rail {
   position: absolute;
-  left: 29px;
+  left: -21px;
   top: calc(-1px - var(--route-gap));
   bottom: calc(-1px - var(--route-gap));
-  width: 4px;
-  background: color-mix(in srgb, var(--line-color, var(--accent)) 55%, transparent);
+  width: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--line-color) 35%, transparent);
 }
-.route-stop--first .route-stop__rail { top: 50%; border-radius: 2px 2px 0 0; }
-.route-stop--last  .route-stop__rail { bottom: 50%; border-radius: 0 0 2px 2px; }
-
+.route-stop--past .route-stop__rail { background: var(--line-color); }
+.route-stop--first .route-stop__rail { top: 50%; }
+.route-stop--last  .route-stop__rail { bottom: 50%; }
 .route-stop__marker {
   position: absolute;
-  left: 23px;
+  left: -25px;
   top: 50%;
-  width: 16px;
-  height: 16px;
-  margin-top: -8px;
-  border-radius: 50%;
-  background: var(--bg-card);
-  border: 4px solid var(--line-color, var(--accent));
-  transition: transform 0.15s ease;
+  width: 11px;
+  height: 11px;
+  border-radius: var(--r-pill);
+  transform: translate(-50%, -50%);
+  border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--bg-main));
+  background: var(--bg-main);
 }
-.route-stop:hover .route-stop__marker,
-.route-stop:focus-visible .route-stop__marker { transform: scale(1.2); }
-
-.route-stop__body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-.route-stop__name {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.85rem;
-  line-height: 1.05;
-}
-.route-stop__hint {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-/* ── 現在地 — the learner's own station ─────────────────────
-   Once onboarding stores a JLPT level (user_profiles.jlpt_level),
-   LevelSelector marks that stop the way a station map marks where
-   you are standing: a filled marker and a small text tag. Text, not
-   colour alone — the mark must survive both themes and colour
-   vision. Picking any other stop still works exactly as before;
-   the stored level is a landmark, never a lock (docs/adr/0005). */
+.route-stop--past .route-stop__marker { background: var(--line-color); border-color: var(--line-color); }
 .route-stop--current .route-stop__marker {
-  background: var(--line-color, var(--accent));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color, var(--accent)) 30%, transparent);
+  width: 15px;
+  height: 15px;
+  background: var(--line-color);
+  border-color: var(--line-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color) 25%, transparent);
 }
+.route-stop__code {
+  flex: none;
+  width: 34px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
+  font-variant-numeric: tabular-nums;
+}
+.route-stop__names { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.route-stop__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
+.route-stop__hint { font-size: var(--fs-caption); color: var(--text-secondary); }
+/* 現在地 — the learner's own stop (user_profiles.jlpt_level): text,
+   not colour alone, so the mark survives both themes and colour
+   vision. A landmark, never a lock (docs/adr/0005). */
 .route-stop__here {
-  align-self: flex-start;
-  margin-top: 2px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--line-color, var(--accent)) 55%, var(--border));
-  color: var(--text-secondary);
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
   text-transform: uppercase;
+  color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
 }
+.route-stop__fig {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.route-stop__fig b { color: var(--text-primary); }
 /* ── The primary button ───────────────────────────────────
    `.btn-primary` was referenced by TodayScreen for months with no rule
    anywhere in this file to answer it: the app's filled-action class
@@ -10571,6 +10355,189 @@ textarea:focus-visible {
   color: var(--text-secondary);
   margin-bottom: 8px;
 }
+
+/* ── 教材 — the deck page (plan 071, on the canvas) ─────────────
+   The identity block under the bar (the shelf card's roundel, the
+   name, the figures, ▶ Study), the chip row of actions, the cards as
+   rows on one surface, and the form a card is written on. */
+.deck-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.deck-identity__roundel { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); }
+.deck-identity__names { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.deck-identity__name {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  line-height: 1.2;
+}
+.deck-identity__meta { font-size: var(--fs-caption); color: var(--text-secondary); }
+.deck-identity__due { color: color-mix(in srgb, var(--warning) 55%, var(--text-primary)); font-weight: 700; }
+.deck-identity__study { flex: none; }
+
+.chip__dots { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.1em; }
+.chip-row__count,
+.chip-row__q {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.chip-row__q { color: var(--text-primary); }
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--sp-3) var(--sp-4);
+  background: none;
+  border: none;
+  border-top: 1px solid var(--surface-line);
+  font: inherit;
+  text-align: left;
+  color: var(--text-primary);
+}
+.card-row:first-child { border-top: 0; }
+button.card-row { cursor: pointer; }
+button.card-row:hover,
+button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; }
+.card-row--selected { background: color-mix(in srgb, var(--line-color) 10%, transparent); }
+.card-row__tick {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--r-plate);
+  border: 1.5px solid color-mix(in srgb, var(--text-secondary) 60%, transparent);
+  color: var(--bg-main);
+}
+.card-row__tick--on { background: var(--line-color); border-color: var(--line-color); }
+.card-row__front { display: flex; flex-direction: column; min-width: 0; width: 96px; flex: none; }
+.card-row__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-lead); line-height: 1.2; }
+.card-row__kana { font-family: var(--font-jp); font-size: var(--fs-caption); color: var(--text-secondary); letter-spacing: var(--tr-term); }
+.card-row__back {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.card-row__note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-row__badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-plate);
+  border: 1px solid color-mix(in srgb, var(--rail, var(--text-secondary)) 55%, transparent);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--rail, var(--text-secondary)) 50%, var(--text-primary));
+  white-space: nowrap;
+}
+.card-row__go { flex: none; color: var(--text-secondary); }
+.card-row__remove {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--surface-line);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.card-row__remove:hover,
+.card-row__remove:focus-visible { color: var(--danger); border-color: var(--danger); filter: none; }
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.form__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.form__row { display: flex; gap: var(--sp-3); }
+.form__row > * { flex: 1; min-width: 0; }
+
+.type-list { display: flex; flex-direction: column; gap: var(--sp-2); }
+.type-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--sp-2) var(--sp-4);
+  background: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font: inherit;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.type-row--on { border-color: var(--line-decks); background: color-mix(in srgb, var(--line-decks) 12%, transparent); }
+.type-row__glyph { width: 28px; height: 28px; font-size: 13px; }
+.type-row__names { display: flex; flex-direction: column; min-width: 0; }
+.type-row__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
+.type-row__desc { font-size: var(--fs-caption); color: var(--text-secondary); }
+/* On the chosen row's tint the dim ink misses the floor in light
+   (4.12:1); toward the primary ink, as the lane's mode does. */
+.type-row--on .type-row__desc { color: color-mix(in srgb, var(--text-secondary) 60%, var(--text-primary)); }
+
+/* The dangerous variants of the two buttons, and a sheet's question
+   line — a deletion asks first, in the same row. */
+.btn-primary--danger { background: color-mix(in srgb, var(--danger) 70%, var(--bg-panel)); }
+.btn-secondary--danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
+.sheet__q { font-size: var(--fs-sm); color: var(--text-primary); }
 
 /* The stage's foot (canvas): the column's last row, pushed to the
    bottom edge of the stage. The stage's own inset pads under it. */
@@ -14648,206 +14615,15 @@ textarea:focus-visible {
   letter-spacing: 0.08em;
 }
 
-/* `.btn-deck-primary` was retired here in 052 onto the shared
-   `.btn-primary` family. Its one call site (the create-deck submit)
-   now reads `btn-primary decks-create-submit`, and the shell injects
-   蘇芳 as --line-color, so it paints the same pigment it always did --
-   with the family's geometry, hit target and 0.45 disabled opacity
-   instead of its own 0.6. */
-
-/* ── Decks screen ─────────────────────────────────────────── */
-
-/* ── 目録 — the shelf's index ──────────────────────────────
-   Built from the dictionary's own console (see .dict-console): the
-   same card material, the same two-deck construction — what you are
-   looking through along the top edge, the field itself across the
-   bottom. A shelf and a catalogue are the same kind of object, so
-   they get the same instrument rather than two different ones.
-
-   What this replaces was a single right-aligned "Create deck" button
-   floating over an otherwise bare page: the only control on the
-   screen, with nothing to say what the grid under it was or any way
-   to get at one deck out of twenty. */
-.decks-console {
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-panel);
-  overflow: hidden;
-  margin-bottom: 26px;
-  /* The console is ONE pattern on two screens of very different
-     widths -- 教材's column is 1040px, 本日's picker is 620px -- so
-     what decides its row layout has to be the CONSOLE's own width,
-     not the viewport's. See the @container rule below. Safe here: no
-     descendant is absolutely positioned, and the panel's width comes
-     from its parent, never from its contents. */
-  container-type: inline-size;
-}
-
-/* Chips and the pinned action share one line only while one line can
-   actually hold them; below that the action takes a full-width row of
-   its own instead of floating against the middle of a wrapped chip
-   block. That float was the "messy" the maintainer saw: on 本日 the
-   chips need 699px and the row offers 538px, so they wrapped to three
-   rows while the button sat centred beside row two.
-
-   One rule, both screens, each answering to the space it really has:
-   教材 at desktop keeps its single row (its mockup draws no wrap at
-   all), 本日 stacks at any width, and both stack on a phone -- which
-   is what the old `@media (max-width: 768px)` pair did, and why that
-   pair is gone. 800px is just above 教材's measured one-line
-   requirement -- 575px of chips + 24px of gaps + 12px + a 147px
-   button is 758px inside a row that gives up 32px to its own padding,
-   so the console has to be ~790px wide to hold it -- which makes the
-   rule flip exactly when the row stops fitting rather than at a
-   guessed viewport. */
-@container (max-width: 800px) {
-  .decks-console__top { flex-direction: column; align-items: stretch; }
-  .decks-console__new { justify-content: center; width: 100%; }
-}
-.decks-console__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  /* One token, not the two the row/column values were (10px/16px).
-     Note that `gap` cannot take the logical-longhand route `padding`
-     can: `row-gap`/`column-gap` trip stylelint's
-     declaration-block-no-redundant-longhand-properties, which is
-     baselined for exactly one `gap` in this file. An asymmetric pair
-     therefore has to be the shorthand -- legal since plan 053 taught
-     the scale ratchet to match it per component -- but a single rung
-     was the right value here anyway. */
-  gap: var(--sp-4);
-  flex-wrap: wrap;
-  padding-block: var(--sp-4);
-  padding-inline: var(--sp-5);
-  border-bottom: 1px solid var(--surface-line);
-}
-
 /* The type chips. Same roundel-and-word construction as the
    dictionary's collection tabs, in each type's own pigment — a deck
    is already identified by that colour on its card's rail, so the
    filter that selects it wears the same one. */
-.decks-filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-width: 0;
-  /* Grows to fill the row so the pinned action (margin-left: auto,
-     see .decks-console__new) sits at the far end even once the chips
-     no longer stretch to fill it themselves — see the flex: auto
-     removal below. */
-  flex: 1;
-}
-.decks-filter-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 12px;
-  border: 1px solid var(--surface-line);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  /* --fs-caption (11.52px), not --fs-caption-xs: at 0.62rem these
-     rendered at 9.92px, and uppercase tracked Latin that small stops
-     being a label and becomes texture. Decks.dc.html sets its console
-     chip at 0.72rem. (Today.dc.html's own .tab says 0.62rem -- the two
-     mockups disagree, and the built screen showed which one was
-     right.) */
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-  justify-content: center;
-}
-/* The "All" chip carries no glyph, so its left padding matches its
-   right instead of reserving room for a roundel that isn't there. */
-.decks-filter-btn:not(:has(.decks-filter-glyph)) { padding-left: 12px; }
-/* --line-color, not --line-decks: the screen shell injects the pigment
-   (DecksScreen.jsx's <main>), and no component below it should name a
-   line token itself -- DESIGN.md, "the pigment is injected once". The
-   --tab-color override in front is unchanged; it is the per-deck-type
-   tint, and the section pigment is only what it falls back to.
-
-   --line-color still needs a fallback of its own, and lint:scale will
-   fail the build without one: the token is declared in no stylesheet
-   at all -- it is set exclusively by JSX inline styles -- so a bare
-   var(--line-color) is a reference to a property "declared nowhere".
-   That is also why it must be --line-decks and not nothing: this row
-   is the SHARED console, rendered by TodayScreen.jsx:478 as well,
-   where no --line-color exists above it. Today sets --tab-color on
-   every chip it renders, so it never reaches the fallback -- but if a
-   chip is ever added there without one, 蘇芳 is the colour it already
-   had rather than a silent invalid value. */
-.decks-filter-btn:hover { color: var(--text-primary); border-color: var(--tab-color, var(--line-color, var(--line-decks))); }
-.decks-filter-btn--active {
-  /* The raw pigment as LABEL ink failed WCAG on its own tinted chip:
-     measured, in dark, 2.33:1 (decks) / 2.46 (vocab) / 2.70 (kana) /
-     2.79 (kanji) / 3.33 (grammar) -- five of the six chips. Only the
-     gold "all" chip passed. Lightening the pigment 40% toward
-     --text-primary is the mirror of what .btn-primary does in the
-     other direction (deepen a pigment toward the panel ink so it can
-     CARRY ink); here the pigment IS the ink, so it moves toward the
-     text colour instead. It works in both themes for the same reason:
-     --text-primary is always the end of the scale furthest from the
-     surface behind it. 60% is the most pigment that still clears
-     4.5:1 everywhere -- measured worst case 4.65 dark, 4.61 light,
-     across both screens that render this console. The border and the
-     glyph roundel keep the pigment UNMIXED; they are edges, not text,
-     and carry no contrast duty. */
-  color: color-mix(in srgb, var(--tab-color, var(--line-color, var(--line-decks))) 60%, var(--text-primary));
-  border-color: color-mix(in srgb, var(--tab-color, var(--line-color, var(--line-decks))) 55%, transparent);
-  background: color-mix(in srgb, var(--tab-color, var(--line-color, var(--line-decks))) 12%, transparent);
-}
-.decks-filter-glyph {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  flex: none;
-  border: 1.5px solid currentColor;
-  border-radius: var(--r-pill);
-  font-family: var(--font-jp);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0;
-  color: color-mix(in srgb, var(--tab-color, var(--text-secondary)) 65%, var(--text-primary));
-}
 
 /* The one control here that CREATES rather than finds, so it is
    filled where the filters are outlines — the difference has to be
    visible at a glance or it reads as a sixth filter. */
-.decks-console__new {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: none;
-  /* Pinned to the row's far end at content width, now that the chip
-     group (.decks-filter-row) is what grows to fill the row instead
-     of every chip stretching to share it. */
-  margin-left: auto;
-  border: none;
-  border-radius: 999px;
-  background: var(--deck-action);
-  color: var(--text-on-panel);
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.decks-console__new--open {
-  background: transparent;
-  border: 1px solid var(--surface-line);
-  color: var(--text-secondary);
-  padding: 6px 14px;
-}
+
 
 /* The field runs the console's full width and carries no border of
    its own — the console is its frame. Mirrors .dict-console's own
@@ -14925,33 +14701,18 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
-.decks-create-card { margin-bottom: 24px; }
-.decks-create-card__title { font-size: 15px; font-weight: bold; margin-bottom: 16px; }
 /* padding and font-size come from .field now; 10px 14px and 15px were
    on neither scale. */
-.decks-create-input { width: 100%; margin-bottom: var(--sp-4); }
 
 /* An even grid, not a wrapping row of content-sized chips. Sized to
    content, the five types wrapped 3-then-2 at ragged widths with their
    descriptions centred under left-aligned labels — five different
    shapes for five equivalent choices. */
-.decks-type-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
-  gap: 8px;
-  margin-bottom: 16px;
-}
 /* A surface, not the ink panel. --bg-panel is the app's dark panel in
    BOTH themes (see the calendar's own note on that token), so five of
    these side by side came out as five near-black boxes on light paper —
    right for a solid action button like "Study", wrong for a row of
    options you are meant to read and compare before choosing. */
-.decks-type-btn {
-  background: var(--surface);
-  color: var(--text-primary);
-  font-size: 13px;
-  padding: 8px 16px;
-}
 /* Quiet tinted chip instead of a solid type-colored fill — same
    "colour carries the meaning, background stays quiet" language as
    .dict-level-badge, so picking a deck type doesn't read as 5
@@ -14971,42 +14732,17 @@ textarea:focus-visible {
    strength, which is where DESIGN.md says colour belongs anyway
    ("an edge, a ring, or a numeral"), rather than in text you have to
    read. */
-.decks-type-btn--active {
-  background: color-mix(in srgb, var(--type-color, var(--deck-action)) 14%, var(--surface));
-  border-color: color-mix(in srgb, var(--type-color, var(--deck-action)) 55%, transparent);
-  color: color-mix(in srgb, var(--type-color, var(--deck-action)) 50%, var(--text-primary));
-}
 /* The description takes the mixed ink too. It used to be dimmed to
    0.85 here, which spent most of what the mix above buys back: at
    0.85 it measured 4.41 (vocab, dark) and 4.43 (grammar, light),
    still under the floor, while the label beside it sat at 5.48+.
    See the base rule below for why no opacity is left anywhere on
    this line. */
-.decks-type-btn--active .decks-type-btn__desc { color: inherit; }
 /* The type's one-character name, sized to sit in the same chip as the
    label rather than above it. */
-.decks-type-btn {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 2px 9px;
-  height: 100%;
-  padding: 10px 14px;
-  /* Buttons centre their text by default, which left the description
-     line floating under a left-aligned label. */
-  text-align: left;
-  border: 1px solid var(--surface-line);
-}
-.decks-type-btn__desc { color: var(--text-secondary); }
-.decks-type-btn__glyph {
-  grid-row: span 2;
-  font-family: var(--font-jp);
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--type-color, var(--text-secondary));
-}
-.decks-type-btn__label { font-weight: 600; font-size: 13px; }
+
+
+
 /* No opacity. This line was dimmed to 0.75 on top of already being
    --text-secondary and already being 10.5px against the label's 13px
    — three dimmings for one "this is the quieter half", and the third
@@ -15014,9 +14750,7 @@ textarea:focus-visible {
    description came out at 3.80:1 dark and 2.79:1 light, worse than
    the active state 055 was sent here to fix. Size and ink say
    "secondary" on their own; opacity only ever subtracts contrast. */
-.decks-type-btn__desc { font-size: 10.5px; line-height: 1.45; }
 
-.decks-create-submit { width: 100%; }
 
 /* ── Deck card ──
    A .platform-card (see the block near the top of this file) rather
@@ -15039,36 +14773,15 @@ textarea:focus-visible {
    viewport, which is what made the whole grid overflow sideways
    rather than sit in one column; min() clamps the track to whatever
    room there actually is. */
-.decks-grid {
-  padding: 0;
-  grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr));
-  gap: 12px;
-}
 .deck-card { align-items: stretch; }
-/* The roundel carries the type's kanji, not a number: which pile of
-   cards this is matters, its position in the list doesn't. */
-.deck-card__glyph {
-  font-family: var(--font-jp);
-  font-size: 1.05rem;
-}
 /* Decks.dc.html's .dbody -- the text block at the top, the action row
    at the bottom, whatever height the row settles at. That is the
    visible half of DESIGN.md's density rule: cards in a grid share a
    height, so their action rows must land on the same line rather than
    floating wherever each card's own description happens to end. */
-.deck-card__body {
-  justify-content: space-between;
-  gap: var(--sp-5);
-}
 /* .dtext. The title/description pair keeps its own tighter rhythm
    than the gap that separates it from the buttons -- one `gap` on the
    body cannot say both. */
-.deck-card__text {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-  min-width: 0;
-}
 /* The type used to read in its own pigment here, so the colour that
    identifies a deck appeared twice — on the roundel and on the word.
    Measured on the built screen it does not carry: against --surface
@@ -15082,7 +14795,6 @@ textarea:focus-visible {
    identity is not lost: .platform-card__no's 2.5px ring is the same
    pigment, and DESIGN.md is explicit that colour is "an edge, a ring,
    or a numeral" — a coloured word is none of the three. */
-.deck-card__type { font-weight: 600; }
 /* Decks.dc.html's .dacts: the delete control first, then the ghost,
    then the primary. It wraps rather than shrinking — 44px is a hit
    target, not a spacing rung, so a width that cannot hold three of
@@ -15092,11 +14804,6 @@ textarea:focus-visible {
    `flex: 1` on a nowrap row makes each button as wide as the row
    allows and no narrower than its own label, so past a certain name
    length the pair simply overflowed the card's right edge. */
-.deck-card__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-3);
-}
 /* .dbtn. The buttons themselves are the shared family (`.btn-primary`
    / `.btn-secondary`, see "The primary button" far above): this class
    says only how they divide the row. It replaces `.deck-card__btn`
@@ -15109,15 +14816,10 @@ textarea:focus-visible {
    different lengths and used to come out different widths. min-width
    lets one wrap to its own line rather than push the row wider than
    the card. */
-.deck-card__act {
-  flex: 1 1 0;
-  min-width: 96px;
-}
 /* The confirm row's Delete is the shared primary with the danger
    pigment substituted for the line's, so the family's own fill and
    hover formulas (88% → 97% toward the panel ink) apply unchanged
    instead of a second filled idiom being invented for one row. */
-.deck-card__act--danger { --line-color: var(--danger); }
 /* Decks.dc.html's .dtrash. It used to float in the card's top-right
    corner at 55% opacity, over the deck's own title — which the
    maintainer flagged, and which made a destructive action something
@@ -15127,19 +14829,6 @@ textarea:focus-visible {
 
    44px is written as a literal here for the same reason .btn-primary
    writes it: it is a hit target, not a rung of the space scale. */
-.deck-card__delete {
-  display: inline-flex;
-  flex: 0 0 44px;
-  align-items: center;
-  justify-content: center;
-  height: 44px;
-  padding: 0;
-  background: transparent;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  color: var(--text-secondary);
-  transition: color 0.16s ease, border-color 0.16s ease;
-}
 /* Hover goes to danger — but to danger carried half-way to
    --text-primary, not the raw token. Measured against --surface, raw
    --danger is 2.11:1 in dark: hovering the control made its glyph
@@ -15156,12 +14845,6 @@ textarea:focus-visible {
    blanket brightness(1.15), and a brightness filter is not the hover.
    The :focus-visible half is not optional either — "every :hover rule
    needs a matching :focus-visible". */
-.deck-card__delete:hover,
-.deck-card__delete:focus-visible {
-  filter: none;
-  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
-  border-color: currentcolor;
-}
 /* Decks.dc.html's .dcount. DESIGN.md: "a card wider than ~440px must
    earn its width with a right-hand column (meta, a figure, a
    status)". The count used to be the tail of the description
@@ -15175,81 +14858,55 @@ textarea:focus-visible {
    invented here. */
 .deck-card__count {
   display: flex;
-  flex-shrink: 0;
   flex-direction: column;
   align-items: flex-end;
-  justify-content: center;
-  gap: var(--sp-1);
-  padding-right: var(--sp-6);
+  gap: 1px;
 }
-/* DESIGN.md's figure rule, and the first consumer --fs-heading has
-   had: display face, 700, line-height 1, tabular figures. */
-.deck-card__count-fig {
+.deck-card__fig {
   font-family: var(--font-display);
-  font-size: var(--fs-heading);
   font-weight: 700;
+  font-size: var(--fs-title);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-/* The caption half of the fixed pair. No text-indent: the rule that
-   cancels a tracked line's trailing space applies to a left-flush or
-   centred axis, and this column is flush RIGHT, where the same indent
-   would push the caption off its own edge. */
-.deck-card__count-cap {
+.deck-card__unit {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
-  color: var(--text-secondary);
   text-transform: uppercase;
+  color: var(--text-secondary);
 }
+/* The shelf's card (canvas Decks): the type's glyph in a roundel on
+   the lead, today's due count in the warning ink, the count aside. */
+.deck-card__lead { width: 58px; padding-left: var(--sp-4); }
+.deck-card__glyph { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); }
+.deck-card__aside { min-width: 70px; }
+.deck-card__due { color: color-mix(in srgb, var(--warning) 55%, var(--text-primary)); font-weight: 700; }
+
+/* DESIGN.md's figure rule, and the first consumer --fs-heading has
+   had: display face, 700, line-height 1, tabular figures. */
+/* The caption half of the fixed pair. No text-indent: the rule that
+   cancels a tracked line's trailing space applies to a left-flush or
+   centred axis, and this column is flush RIGHT, where the same indent
+   would push the caption off its own edge. */
 /* The question takes the whole first line of the wrapped row, with
    its two answers underneath — it is a sentence, and squeezing it
    into a third of the width beside them broke it over three lines of
    two words each. */
-.deck-card__confirm-q {
-  flex: 1 0 100%;
-  align-self: center;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
 
 /* ── Deck detail screen ───────────────────────────────────── */
 /* The deck named on its own page, in the same roundel + pigment its
    card wears in the grid — /decks/:id has no station entry of its own
    (it's one deck, not a place), so this is what tells you where you
    are once the auto-hiding TopBar has scrolled away. */
-.deckdetail-identity {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 4px 0 22px;
-  margin-bottom: 18px;
-  border-bottom: 1px solid var(--surface-line);
-}
-.deckdetail-identity__glyph {
-  flex-shrink: 0;
-  font-family: var(--font-jp);
-  font-size: 1.05rem;
-}
-.deckdetail-identity__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.deckdetail-identity__name {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 600;
-  font-size: 1.3rem;
-  line-height: 1.25;
-}
-.deckdetail-identity__meta { font-size: 0.85rem; color: var(--text-secondary); }
-.deckdetail-identity__type { color: var(--rail); font-weight: 600; }
 
-.deckdetail-header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 24px;
-}
+
+
+
+
+
 .deckdetail-count { color: var(--text-secondary); font-size: 13px; }
-.deckdetail-confirm-q { font-size: 13px; color: var(--text-secondary); }
 
 /* flex-wrap is not cosmetic here. This row holds up to five buttons and
    sits inside `.deckdetail-header`, which is `justify-content: flex-end`.
@@ -15271,12 +14928,6 @@ textarea:focus-visible {
    the row carries its own `justify-content: flex-end` so a wrapped
    second line stays on the same edge as the first rather than falling
    back to flex-start. */
-.deckdetail-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--sp-3);
-}
 /* Each button shares the row it lands on rather than sitting at its own
    label's width. Without this, wrapping (which plan 057 added to stop the
    row escaping leftward) strands whatever falls onto the last line beside
@@ -15295,10 +14946,8 @@ textarea:focus-visible {
    it is these two idioms that stretch, not any element that happens to
    be a button. It also leaves the select-mode row's count `<span>`
    alone, which must keep its natural width. */
-.deckdetail-actions > .btn-primary,
-.deckdetail-actions > .btn-secondary { flex: 1 1 auto; }
-.deckdetail-actions--select { align-items: center; }
-.deckdetail-select-count { font-size: 13px; color: var(--text-secondary); }
+
+
 
 /* The toolbar is the shared family now (`.btn-primary` / `.btn-secondary`
    in the JSX), the same move 055 made on the deck shelf. What stood here
@@ -15319,7 +14968,6 @@ textarea:focus-visible {
 
    Nothing is left to say about the row's members except which one is
    destructive, so only that survives as a class. */
-.deckdetail-act--danger { --line-color: var(--danger); }
 
 .deckdetail-import-banner {
   background: var(--bg-card);
@@ -15356,7 +15004,6 @@ textarea:focus-visible {
 }
 
 .deckdetail-form { margin-bottom: 24px; }
-.deckdetail-form__title { font-size: var(--fs-body); font-weight: 700; margin-bottom: var(--sp-5); }
 .deckdetail-form__fields { display: flex; flex-direction: column; gap: 10px; }
 /* DeckDetail.dc.html's `.field`: 12/16 and a 44px floor. It was
    `10px 14px` with no floor, which put the inputs at ~40px — two rungs
@@ -15393,25 +15040,11 @@ textarea:focus-visible {
   gap: var(--sp-3);
   margin-top: var(--sp-5);
 }
-.deckdetail-list { display: flex; flex-direction: column; gap: 8px; }
 
-.deckdetail-card-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: 6px;
-  transition: background 0.15s, border-color 0.15s;
-}
-.deckdetail-card-row--selectable { cursor: pointer; }
-.deckdetail-card-row--selectable:hover { border-color: var(--deck-action); }
+
+
 /* Selected reads as the deck line picking the row out, not as the
    quiz screens' "correct answer" accent. */
-.deckdetail-card-row--selected {
-  border-color: var(--deck-action);
-  background: color-mix(in srgb, var(--deck-action) 12%, var(--surface));
-}
 
 .deckdetail-checkbox {
   width: 20px;
@@ -15434,60 +15067,17 @@ textarea:focus-visible {
    labelled ("Front", "Back / Meaning", "かな") in a row of columns,
    which made the labels outnumber the content and turned a deck into a
    spreadsheet. */
-.deckdetail-card-content { flex: 1; min-width: 0; }
-.deckdetail-entry {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.deckdetail-entry__front {
-  font-family: var(--font-jp);
-  font-size: 24px;
-  line-height: 1.35;
-}
-.deckdetail-entry__kana {
-  font-family: var(--font-jp);
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-.deckdetail-entry__back {
-  margin-top: 2px;
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--text-primary);
-}
-.deckdetail-entry__notes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  margin-top: 7px;
-}
-.deckdetail-entry__note {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  color: var(--warning);
-}
-.deckdetail-entry__note--muted { color: var(--text-secondary); }
+
+
+
+
+
+
+
 
 /* Where a browsed-in card came from, in that section's own pigment —
    a quiet tag at the end of the row rather than a word wedged into a
    "Front" label. */
-.deckdetail-source-badge {
-  flex-shrink: 0;
-  align-self: center;
-  padding: 3px 9px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--rail) 40%, transparent);
-  background: color-mix(in srgb, var(--rail) 12%, transparent);
-  color: color-mix(in srgb, var(--rail) 65%, var(--text-primary));
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
 
 /* DeckDetail.dc.html's `.iconbtn`, and the same control 055 built as
    `.deck-card__delete` on the shelf: a real 44px bordered box on the
@@ -15497,41 +15087,16 @@ textarea:focus-visible {
 
    It is icon-only, so the aria-label/title in the JSX is all a screen
    reader gets; the box is what a thumb gets. */
-.deckdetail-edit-btn {
-  display: inline-flex;
-  flex: 0 0 44px;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  background: transparent;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  color: var(--text-primary);
-  transition: color 0.16s ease, border-color 0.16s ease;
-}
 /* The ghost hover from the shared family, so this control and the
    `.btn-secondary`s above it answer a pointer the same way.
    `filter: none` cancels the bare `button:hover` brightness, which
    DESIGN.md says is not a hover; the :focus-visible half is not
    optional ("every :hover rule needs a matching :focus-visible"). */
-.deckdetail-edit-btn:hover,
-.deckdetail-edit-btn:focus-visible {
-  filter: none;
-  background: var(--overlay-hover);
-  border-color: var(--text-secondary);
-}
 /* Only the destructive one goes red, and it goes to --danger carried
    half-way to --text-primary rather than the raw token — 055 measured
    raw --danger at 2.11:1 on --surface in dark, where hovering made the
    glyph HARDER to see than its rest state, the backwards hover
    DESIGN.md rules out. Same 50% mix, same reason. */
-.deckdetail-edit-btn--danger:hover,
-.deckdetail-edit-btn--danger:focus-visible {
-  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
-  border-color: currentcolor;
-}
 
 /* ── Grammar screen ───────────────────────────────────────── */
 .grammar-prompt { margin-bottom: 24px; }
@@ -17561,9 +17126,6 @@ textarea:focus-visible {
   /* The masthead stacks: the station's name is the thing worth the
      width, so the panel label and clock drop under it rather than
      squeezing it into two characters per line. */
-  .board__masthead { padding: 16px 14px 12px; gap: 10px; }
-  .board__now { justify-content: space-between; align-items: flex-end; }
-
   .station-sign--sm { padding: 16px 16px 14px; }
   .station-sign--sm .station-sign__stack { align-items: flex-start; }
   .station-sign--sm .station-sign__romaji {
@@ -17581,10 +17143,7 @@ textarea:focus-visible {
   /* One card per row, and the lead cell gives up the width a phone
      needs for the title beside it. */
   .platform-grid { grid-template-columns: 1fr; gap: 12px; padding: 30px 14px 24px; }
-  .decks-grid { grid-template-columns: 1fr; gap: 12px; padding: 0; }
-  .decks-console { margin-bottom: 10px; }
-  .selection-screen .level-selector { padding: 24px 14px 24px; }
-  .selection-screen .level-selector .platform-grid { padding: 18px 0 0; }
+
   .platform-card__lead { width: 64px; padding: 16px 4px 16px 12px; }
   .platform-card__no { width: 32px; height: 32px; font-size: 0.92rem; border-width: 2px; }
   .platform-card__service { font-size: 0.64rem; }
@@ -17598,11 +17157,7 @@ textarea:focus-visible {
      The shared family's --sp-6 inline pad is the one thing that gives
      here; its 44px height is not, so a width that still cannot hold
      all three lets the row wrap instead. */
-  .deck-card__body { padding-right: var(--sp-4); }
-  .deck-card__act {
-    padding-inline: var(--sp-3);
-    white-space: nowrap;
-  }
+
   /* The count column keeps its figure but gives up the gutter the
      body just gave up, so the three action controls keep the width. */
   .deck-card__count { padding-right: var(--sp-4); }
@@ -17615,15 +17170,11 @@ textarea:focus-visible {
      The stacking itself now lives in the @container rule beside
      .decks-console, which reaches this case and the 620px picker
      both; only the tightened gap is still viewport business. */
-  .decks-console__top { gap: 10px; }
   .decks-index-bar { padding: 6px 12px; gap: 10px; }
   .decks-index-bar__input { font-size: 1rem; }
   /* The count is the first thing to go: the number of decks is already
      visible as the number of cards below it. */
   .decks-index-bar__count { display: none; }
-  .selection-screen { padding: 44px 16px 56px; padding-bottom: calc(var(--sp-6) + var(--dock-bottom)); }
-  .selector-header__title { font-size: 1.7rem; }
-
   .stats-container { padding: 40px 16px 72px; }
   /* A heading and the thing it names have to read as one block, and on
      a phone 24px of gap under the title was enough for them to stop

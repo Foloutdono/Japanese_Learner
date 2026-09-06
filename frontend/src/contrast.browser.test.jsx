@@ -141,16 +141,17 @@ function contractPairs() {
  * the places where an ink meets a ground that part 1 cannot predict. */
 const Fixture = () => (
   <div className="container">
-    {/* DecksScreen.jsx:139 / TodayScreen -- the shared console, on --surface */}
-    <div className="decks-console">
-      <div className="decks-console__top">
-        <div className="decks-filter-row">
-          <button className="decks-filter-btn">ALL</button>
+    {/* DecksScreen.jsx -- the shared console (components/chrome/Console),
+        on --surface: a chip, the index field, the count */}
+    <div className="console">
+      <div className="console__top">
+        <div className="console__chips">
+          <button type="button" className="chip dk-chip">ALL</button>
         </div>
       </div>
-      <div className="decks-index-bar">
-        <input className="decks-index-bar__input" placeholder="search" />
-        <div className="decks-index-bar__count">12 DECKS</div>
+      <div className="console__index">
+        <input className="console__field dk-field" placeholder="search" />
+        <span className="console__count dk-count">12 DECKS</span>
       </div>
     </div>
 
@@ -190,14 +191,8 @@ const Fixture = () => (
         </span>
         <span className="wmap-due wm-due">8<span className="wmap-due__unit" lang="ja">件</span></span>
       </button>
-      <div className="wmap__caption">
-        <span className="wmap__caption-latin wm-caption">Practice</span>
-      </div>
-      <button type="button" className="wmap-row" style={{ '--line-color': 'var(--line-reading)' }}>
-        <span className="wmap-row__note wm-note">remark</span>
-      </button>
-      <button type="button" className="fac-chip" style={{ '--line-color': 'var(--line-jisho)' }}>
-        <span className="fac-chip__title wm-fac">Dictionary</span>
+      <button type="button" className="wmap-row" style={{ '--line-color': 'var(--line-decks)' }}>
+        <span className="wmap-row__latin wm-note">3 decks · 214 cards</span>
       </button>
     </div>
 
@@ -269,47 +264,69 @@ const Fixture = () => (
       </div>
     </div>
 
-    {/* DecksScreen.jsx:259 -- the deck shelf as plan 055 rebuilt it. The card
-        carries TWO block classes, `platform-card deck-card`, and the ground
-        comes from .platform-card while the inks are named on .deck-card__*.
-        Guard 5 keys on one block at a time and cannot follow that, so these
-        are measured here instead. */}
-    <div className="platform-grid decks-grid">
-      <div className="platform-card deck-card">
-        <span className="platform-card__body deck-card__body">
-          <span className="deck-card__text">
-            <span className="platform-card__title">漢字</span>
-            <span className="platform-card__desc">
-              <span className="deck-card__type">Kanji</span>
-            </span>
-          </span>
-          <span className="deck-card__actions">
-            <span className="deck-card__confirm-q">Supprimer ce paquet ?</span>
-            <button className="deck-card__btn deck-card__btn--muted">Annuler</button>
-          </span>
+    {/* DecksScreen.jsx -- the shelf's card (plan 071): the count aside
+        and today's due count on the platform card's surface */}
+    <div className="platform-grid">
+      <button type="button" className="platform-card deck-card" style={{ '--line-color': 'var(--line-kanji)' }}>
+        <span className="platform-card__lead deck-card__lead">
+          <span className="wmap-roundel deck-card__glyph dk-glyph" lang="ja">漢</span>
         </span>
-        <span className="deck-card__count">
-          <span className="deck-card__count-fig">42</span>
-          <span className="deck-card__count-cap">cartes</span>
+        <span className="platform-card__body">
+          <span className="platform-card__title">漢字</span>
+          <span className="platform-card__desc">Kanji · <span className="deck-card__due dk-due">2 due</span></span>
         </span>
-        <button className="deck-card__delete" aria-label="delete">🗑</button>
-      </div>
-    </div>
-
-    {/* DecksScreen.jsx:215 -- the type chooser, also plan 055 */}
-    <div className="decks-type-row">
-      <button className="decks-type-btn">
-        <span className="decks-type-btn__glyph" lang="ja">語</span>
-        <span className="decks-type-btn__label">Vocabulaire</span>
-        <span className="decks-type-btn__desc">Mots et expressions</span>
+        <span className="platform-card__aside deck-card__aside">
+          <span className="deck-card__count"><b className="deck-card__fig">42</b><span className="deck-card__unit dk-count-cap">cartes</span></span>
+        </span>
       </button>
     </div>
 
-    {/* DeckDetailScreen.jsx:424. Plan 057 retired .deckdetail-btn and its
-        four modifiers -- the toolbar is the shared button family now, so
-        the quiet button this guard was measuring is a .btn-secondary. */}
-    <div className="deckdetail-actions">
-      <button className="btn-secondary">Sélectionner</button>
+    {/* DecksScreen.jsx -- the create form's type list (plan 071) */}
+    <div className="form">
+      <div className="type-list">
+        <button type="button" className="type-row type-row--on">
+          <span className="chip__glyph type-row__glyph dk-type-glyph" lang="ja" style={{ '--tab-color': 'var(--line-vocab)' }}>単</span>
+          <span className="type-row__names">
+            <span className="type-row__label">Vocabulaire</span>
+            <span className="type-row__desc dk-type-desc">Mots et expressions</span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    {/* DeckDetailScreen.jsx -- the identity block, a chip, and the card
+        rows on one surface (plan 071) */}
+    <div className="deck-identity" style={{ '--line-color': 'var(--line-decks)' }}>
+      <span className="wmap-roundel deck-identity__roundel dk-id-glyph" lang="ja">単</span>
+      <span className="deck-identity__names">
+        <span className="deck-identity__name">旅行</span>
+        <span className="deck-identity__meta dk-meta">Vocabulary · 47 cards · <span className="deck-identity__due dk-id-due">2 due</span></span>
+      </span>
+    </div>
+    <div className="chip-row">
+      <button type="button" className="chip dk-row-chip">Sélectionner</button>
+    </div>
+    {/* The form's row: the quiet button beside the filled one. */}
+    <div className="form">
+      <div className="form__row">
+        <button type="button" className="btn-secondary">Annuler</button>
+        <button type="button" className="btn-primary">Enregistrer</button>
+      </div>
+    </div>
+    <div className="card-list" style={{ '--line-color': 'var(--line-decks)' }}>
+      <button type="button" className="card-row">
+        <span className="card-row__front">
+          <span className="card-row__jp" lang="ja">駅</span>
+          <span className="card-row__kana dk-kana" lang="ja">えき</span>
+        </span>
+        <span className="card-row__back dk-back">station<span className="card-row__note dk-note">a note</span></span>
+        <span className="card-row__badge dk-badge" style={{ '--rail': 'var(--line-kanji)' }}>Kanji · N4</span>
+      </button>
+      <div className="card-row">
+        <span className="card-row__front"><span className="card-row__jp" lang="ja">切符</span></span>
+        <span className="card-row__back">ticket</span>
+        <button type="button" className="card-row__remove dk-remove" aria-label="delete">x</button>
+      </div>
     </div>
 
     {/* TokenCard.jsx:60 -- reading/pos sit in the wrap, whose sumi
@@ -452,8 +469,8 @@ const Fixture = () => (
 )
 
 const SITES = [
-  ['.decks-filter-btn', 'decks/today console chip'],
-  ['.decks-index-bar__count', 'decks/today console count'],
+  ['.dk-chip', 'console chip'],
+  ['.dk-count', 'console count'],
   ['.gc-latin', 'fare gate title'],
   ['.gc-unit', 'fare gate unit'],
   ['.gc-when', 'fare gate next-review line'],
@@ -464,9 +481,7 @@ const SITES = [
   ['.wm-latin', 'map line caption (sumi)'],
   ['.wm-stop', 'map stop label (sumi)'],
   ['.wm-due', 'map due chip (sumi)'],
-  ['.wm-caption', 'map group caption (sumi)'],
-  ['.wm-note', 'practice row remark (sumi)'],
-  ['.wm-fac', 'facility chip label (sumi)'],
+  ['.wm-note', 'decks row meta (sumi)'],
   ['.station-sign__kana', 'station sign kana'],
   ['.station-sign__romaji', 'station sign romaji'],
   ['.record__label', 'record label'],
@@ -475,27 +490,33 @@ const SITES = [
   // Placeholders are text and carry the same floor. Measured through
   // getComputedStyle's pseudo-element argument, since ::placeholder has a
   // colour of its own that the host input's computed style does not show.
-  ['.decks-index-bar__input::placeholder', 'decks console search placeholder'],
+  ['.dk-field::placeholder', 'console search placeholder'],
   ['.dict-index-bar__input::placeholder', 'dictionary search placeholder'],
 
   // Settled by measurement rather than by reading a selector -- see the
   // comment beside their markup above.
   ['.leaderboard-row__level', 'leaderboard row level'],
   ['.leaderboard-row__gap', 'leaderboard elision row'],
-  ['.deck-card__delete', 'deck card delete affordance'],
-  ['.deck-card__btn--muted', 'deck card cancel button'],
-  ['.deck-card__confirm-q', 'deck card delete question'],
+  ['.dk-glyph', 'deck card glyph (tinted roundel)'],
+  ['.dk-due', 'deck card due (warning ink)'],
+  ['.dk-count-cap', 'deck card count caption'],
+  ['.dk-type-glyph', 'type row glyph (on)'],
+  ['.dk-type-desc', 'type row description (on)'],
+  ['.dk-id-glyph', 'deck identity glyph'],
+  ['.dk-meta', 'deck identity meta'],
+  ['.dk-id-due', 'deck identity due (warning ink)'],
+  ['.dk-row-chip', 'deck page action chip'],
+  ['.dk-kana', 'card row kana'],
+  ['.dk-back', 'card row meaning'],
+  ['.dk-note', 'card row note'],
+  ['.dk-badge', 'card row source badge'],
+  ['.dk-remove', 'card row remove affordance'],
   ['.btn-secondary', 'deck detail ghost button (shared family)'],
   ['.phrase-word-card__reading', 'token card reading'],
   ['.phrase-word-card__pos', 'token card part of speech'],
   ['.comp-option-btn__letter', 'comprehension option letter'],
 
   // Plan 055's deck shelf, merged in after the guards were written.
-  ['.deck-card__count-cap', 'deck card count caption'],
-  ['.deck-card__count-fig', 'deck card count figure'],
-  ['.deck-card__type', 'deck card type label'],
-  ['.decks-type-btn__desc', 'deck type chooser description'],
-  ['.decks-type-btn__label', 'deck type chooser label'],
 
   // Plan 063 — the goal line's sumi surfaces and tinted chips.
   ['.ob-clock', 'departure board clock (gold on sumi)'],

@@ -61,6 +61,9 @@ describe('the moved paths', () => {
   it.each([
     ['/', '/today'],
     ['/kana', '/learn/kana'],
+    // A pre-071 deep link with a real mode goes straight onto the run;
+    // one naming a retired mode stays on the station, query and all.
+    ['/kana?set=hiragana_basic&mode=kana.flashcard.f2b', '/learn/kana/hiragana_basic/kana.flashcard.f2b'],
     ['/kana?set=hiragana_basic&mode=kana.mcq.reading', '/learn/kana?set=hiragana_basic&mode=kana.mcq.reading'],
     ['/vocab', '/learn/vocab'],
     ['/decks', '/learn/decks'],
@@ -77,7 +80,9 @@ describe('the moved paths', () => {
     expect(await landing(from)).toBe(to)
   })
 
-  it('mounts the shell on a gate and the stage on a run', async () => {
+  // One render per test: the third fresh render inside a single
+  // browser test never comes up (see WallMap.geometry's own note).
+  it('mounts the shell on a gate', async () => {
     window.history.replaceState(null, '', '/learn')
     const screen = await render(<App />)
     await settle()
@@ -85,12 +90,25 @@ describe('the moved paths', () => {
     expect(document.querySelectorAll('.tab')).toHaveLength(5)
     expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('学習')
     screen.unmount()
+  })
 
+  it('mounts the shell on a station (plan 071)', async () => {
     window.history.replaceState(null, '', '/learn/kana')
-    const stage = await render(<App />)
+    const screen = await render(<App />)
+    await settle()
+    expect(document.querySelector('.tabbar')).toBeTruthy()
+    expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('学習')
+    expect(document.querySelectorAll('.route-stop')).toHaveLength(4)
+    screen.unmount()
+  })
+
+  it('mounts the stage on a run', async () => {
+    window.history.replaceState(null, '', '/learn/kana/hiragana_basic/kana.flashcard.f2b')
+    const screen = await render(<App />)
     await settle()
     expect(document.querySelector('.tabbar')).toBeNull()
     expect(document.documentElement.dataset.chrome).toBe('stage')
-    stage.unmount()
+    expect(document.querySelector('.stage__leave').textContent).toContain('Kana')
+    screen.unmount()
   })
 })

@@ -37,6 +37,14 @@ vi.mock('../stores/today', () => ({
   refreshToday: vi.fn(),
   seedTodaySummary: vi.fn(),
 }))
+// The distance travelled comes from the shared stats store now (plan
+// 071: every station reads it too).
+const statsRef = { current: null }
+vi.mock('../stores/stats', () => ({
+  useStats: () => ({ data: statsRef.current, failed: false }),
+  refreshStats: vi.fn(),
+  seedStats: vi.fn(),
+}))
 
 const playAnnouncement = vi.fn()
 vi.mock('../lib/audio', async (importOriginal) => ({
@@ -102,20 +110,25 @@ beforeEach(() => {
   beginDeparture.mockReset()
   playAnnouncement.mockReset()
   todayRef.current = TODAY
-  apiJson.mockImplementation(async url => (url === '/api/stats' ? STATS : {}))
+  statsRef.current = STATS
+  apiJson.mockImplementation(async url => (url === '/api/decks' ? { decks: [{ id: 1, card_count: 40 }, { id: 2, card_count: 7 }] } : {}))
 })
 
 describe('LearnScreen — the route map', () => {
-  it('keeps every line reachable: 4 lines, the decks shelf, one heading', async () => {
+  it('keeps every line reachable: 4 lines, the decks shelf as a row, one heading on the bar', async () => {
     const screen = await mount()
     await settle()
     const root = screen.container
     expect(root.querySelectorAll('.wmap-line')).toHaveLength(4)
-    expect(root.querySelectorAll('.fac-chip')).toHaveLength(1)
-    // The practice register is empty here: those platforms live
-    // behind their own gate now.
-    expect(root.querySelectorAll('.wmap-row')).toHaveLength(0)
+    const shelf = root.querySelectorAll('.wmap-row')
+    expect(shelf).toHaveLength(1)
+    // The shelf's figures come from /api/decks; the due chip from the
+    // shared today store.
+    expect(shelf[0].textContent).toContain('2')
+    expect(shelf[0].textContent).toContain('47')
+    expect(shelf[0].querySelector('.wmap-due').textContent).toContain('3')
     expect(root.querySelectorAll('h1')).toHaveLength(1)
+    expect(root.querySelector('h1.bar__title')).toBeTruthy()
   })
 
   it('paints the travelled stops and carries the due chips from the shared store', async () => {
@@ -141,7 +154,8 @@ describe('LearnScreen — the route map', () => {
 
   it('still draws the whole map from a failed or foreign stats payload', async () => {
     todayRef.current = { total: 0, by_source: {}, lanes: [], next_due: null }
-    apiJson.mockImplementation(async () => ({ total: 0, by_source: {}, lanes: [], next_due: null }))
+    statsRef.current = { total: 0, by_source: {}, lanes: [], next_due: null }
+    apiJson.mockImplementation(async () => { throw new Error('down') })
     const screen = await mount()
     await settle()
     const root = screen.container
