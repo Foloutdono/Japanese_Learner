@@ -86,7 +86,13 @@ export default function App() {
     if (!session) return
     let cancelled = false
     const userId = session.user?.id ?? null
-    apiJsonWithTimeout('/api/profile', session, { timeoutMs: 8000 })
+    // 45 s, not the 10 s default: the backend sleeps on Render's free
+    // tier and a cold start takes 30–60 s. On a phone, where every visit
+    // is short and the first request of the day is exactly this one, an
+    // 8 s gate that fails open showed a blank hall to everyone who
+    // arrived while the server was still waking. The wait itself is
+    // drawn honestly by AppLoading.
+    apiJsonWithTimeout('/api/profile', session, { timeoutMs: 45000 })
       .then(p => {
         if (cancelled) return
         setGate({ userId, state: p.onboardedAt ? 'done' : 'needed', profile: p })

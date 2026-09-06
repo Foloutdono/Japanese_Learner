@@ -7,6 +7,61 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 
+// One browser project per viewport, from one helper, so the two lanes
+// cannot drift apart in anything but the viewport they run at.
+//
+// The optimizer that matters here is the browser project's own -- a
+// root-level optimizeDeps does not reach it, which was verified the hard
+// way.
+//
+// `react-dom/client` is reached only from inside vitest-browser-react,
+// so the initial scan of the test files never sees it and it was
+// bundled AFTER the run had begun:
+//
+//     [optimizer] scanning dependencies...
+//     dependency optimized: react-dom/client
+//     optimized dependencies changed. reloading
+//
+// That reload re-evaluates a module graph that is already live, which
+// leaves two copies of React in the page -- `Invalid hook call` and
+// `Cannot read properties of null (reading 'useState')` out of tests
+// that do nothing unusual. Which file loses varies between runs.
+//
+// It only ever bit a COLD cache, so it was invisible locally after the
+// first run and permanent in CI, where every run is cold.
+const BROWSER_OPTIMIZE = {
+  include: [
+    'react',
+    'react-dom',
+    'react-dom/client',
+    'react/jsx-dev-runtime',
+    'vitest-browser-react',
+  ],
+};
+
+function browserProject(name, include, viewport) {
+  return {
+    optimizeDeps: BROWSER_OPTIMIZE,
+    test: {
+      name,
+      globals: false,
+      include,
+      browser: {
+        enabled: true,
+        headless: true,
+        // A French device. The app follows navigator.language on a first
+        // launch (lib/locale.js), and headless chromium reports en-US;
+        // every browser test was written against the French default the
+        // app had before that rule and pins French copy, so the lane
+        // runs as the phone those tests describe. A test that wants
+        // English switches the language, as a learner would.
+        provider: playwright({ contextOptions: { locale: 'fr-FR' } }),
+        instances: [{ browser: 'chromium', ...(viewport ? { viewport } : {}) }],
+      },
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -43,50 +98,21 @@ export default defineConfig({
           environment: 'node',
           globals: false,
           include: ['src/**/*.test.{js,jsx}'],
-          exclude: ['src/**/*.browser.test.{js,jsx}'],
+          exclude: ['src/**/*.browser.test.{js,jsx}', 'src/**/*.phone.test.{js,jsx}'],
         },
       },
-      {
-        // Vite config for THIS project. The optimizer that matters here is
-        // the browser project's own -- a root-level optimizeDeps does not
-        // reach it, which was verified the hard way.
-        //
-        // `react-dom/client` is reached only from inside vitest-browser-react,
-        // so the initial scan of the test files never sees it and it was
-        // bundled AFTER the run had begun:
-        //
-        //     [optimizer] scanning dependencies...
-        //     dependency optimized: react-dom/client
-        //     optimized dependencies changed. reloading
-        //
-        // That reload re-evaluates a module graph that is already live, which
-        // leaves two copies of React in the page -- `Invalid hook call` and
-        // `Cannot read properties of null (reading 'useState')` out of tests
-        // that do nothing unusual. Which file loses varies between runs.
-        //
-        // It only ever bit a COLD cache, so it was invisible locally after the
-        // first run and permanent in CI, where every run is cold.
-        optimizeDeps: {
-          include: [
-            'react',
-            'react-dom',
-            'react-dom/client',
-            'react/jsx-dev-runtime',
-            'vitest-browser-react',
-          ],
-        },
-        test: {
-          name: 'browser',
-          globals: false,
-          include: ['src/**/*.browser.test.{js,jsx}'],
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: playwright(),
-            instances: [{ browser: 'chromium' }],
-          },
-        },
-      },
+      browserProject('browser', ['src/**/*.browser.test.{js,jsx}']),
+      // The phone lane. The browser lane runs at chromium's default
+      // viewport and deliberately asserts no LAYOUT (see
+      // AnalyzerScreen.responsive.browser.test.jsx); a file named
+      // `*.phone.test.jsx` runs here instead, at 390×844 from the first
+      // paint, so a rule under a max-width query can be read back with
+      // getComputedStyle and a screen can be checked for horizontal
+      // overflow. Config-level, not page.viewport() mid-test: a CDP
+      // metrics change does not fire matchMedia's `change`
+      // (useMediaQuery.browser.test.jsx), so a page that STARTS at
+      // 390px is the only honest setup.
+      browserProject('phone', ['src/**/*.phone.test.{js,jsx}'], { width: 390, height: 844 }),
     ],
   },
 });

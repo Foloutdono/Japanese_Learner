@@ -1,11 +1,21 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { translations } from './i18n'
 import { getTranslations } from './lib/translationCache'
+import { pickInitialLang } from './lib/locale'
 
 const LangContext = createContext()
 
+function readSavedLang() {
+    // localStorage throws in private-mode/blocked-cookie contexts — the
+    // same case index.html's theme script guards against.
+    try { return localStorage.getItem('lang') } catch { return null }
+}
+
 export function LangProvider({ children }) {
-    const [lang, setLang]         = useState(localStorage.getItem('lang') || 'fr')
+    // The device's language, never asked: a first launch reads
+    // navigator.language and the saved choice (Settings) wins after
+    // that. See lib/locale.js for the rule.
+    const [lang, setLang]         = useState(() => pickInitialLang(readSavedLang(), navigator.language))
     const [contentMaps, setContentMaps] = useState({ kanji: {}, vocab: {} })
 
     useEffect(() => {

@@ -5014,6 +5014,19 @@ html, body, #root {
 }
 html, body { height: 100%; }
 
+/* Phone manners, in one place. The tap flash is the UA's own grey
+   rectangle on every tap of every button; the pull-to-refresh on a
+   scrolled-to-top page reloads a study session (the queue survives it,
+   an exam draft should not have to); selection is switched off on the
+   chrome only — a long-press on a card, a reading or a sentence must
+   still let a learner copy the Japanese. */
+html { overscroll-behavior-y: none; }
+body { -webkit-tap-highlight-color: transparent; }
+.rating-bar,
+.mobile-level-bar,
+.top-bar,
+.burger-drawer { user-select: none; }
+
 /* The mockup's base body. Deliberately a `body`-only rule and NOT
    folded into the `html, body, #root` selector above: a font-size on
    the ROOT element rebases every rem in this sheet, shrinking all nine
@@ -5668,6 +5681,20 @@ textarea:focus-visible {
 }
 .field:disabled { opacity: 0.45; }
 
+/* iOS Safari zooms the whole page into any focused control whose
+   font-size is under 16px, and --fs-body is 15.2px — so every field in
+   the app (sign-in, the dictionary search, a deck's import) jolted the
+   viewport on a phone. 1rem is the scale's own base, not a new rung:
+   on a phone a field sits exactly at the threshold that keeps the
+   viewport still. Bare form controls that are not yet .field get the
+   same floor, for the same reason. */
+@media (max-width: 768px) {
+  .field,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select { font-size: 1rem; }
+}
+
 /* The sumi variant. Not a different field -- the same object with the
    panel pair, for the fields that genuinely sit on --bg-panel. The well
    is a darkening of the panel rather than a token, because there is no
@@ -5767,7 +5794,10 @@ textarea:focus-visible {
    track + 8px + border, plus its safe-area inset, plus a row of
    breathing room. Same reasoning as .dict-page's own clearance. */
 @media (max-width: 768px) {
-  .page-pad { padding-bottom: calc(72px + var(--safe-bottom)); }
+  /* .selection-screen too: the kana sets' last row went behind the
+     bar on a phone (the maintainer's to-do, 2026-09). */
+  .page-pad,
+  .selection-screen { padding-bottom: calc(72px + var(--safe-bottom)); }
 }
 
 /* Section header — serif-JP title + a short seal-red stroke instead
@@ -8632,6 +8662,10 @@ textarea:focus-visible {
   width: 312px;
   max-width: 88vw;
   height: 100%;
+  /* In a standalone shell the drawer runs under the status bar; its
+     header has to clear the notch the same way the pocket clears the
+     home bar. */
+  padding-top: var(--safe-top);
   background: var(--bg-panel);
   color: var(--text-on-panel);
   display: flex;
@@ -8717,7 +8751,9 @@ textarea:focus-visible {
    screen — the contactless mark, the holder, the balance, the
    magnetic stripe down the right edge — at the size a pocket allows. */
 .burger-drawer__pocket {
-  padding: 12px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+  /* --safe-bottom, not a raw env(): the fallback lives on :root and
+     nowhere else (see the token's own comment). */
+  padding: var(--sp-4) var(--sp-4) calc(14px + var(--safe-bottom));
   border-top: 1px solid var(--burger-menu-border);
 }
 
@@ -16138,6 +16174,7 @@ textarea:focus-visible {
   top: 0;
   right: 0;
   height: 100vh;
+  height: 100dvh; /* the vh line is the fallback; see .screen's note */
   width: 360px;
   padding: 24px;
   overflow-y: auto;
@@ -18090,6 +18127,7 @@ textarea:focus-visible {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    height: 100dvh; /* a hard height on a phone: the URL bar's collapse must not clip the foot */
   }
 
   .quiz-content {
