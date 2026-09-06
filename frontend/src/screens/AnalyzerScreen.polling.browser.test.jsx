@@ -71,10 +71,8 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: AnalyzerScreen } = await import('./AnalyzerScreen')
 const { __playerSpies: playerSpies } = await import('../components/video/VideoPlayer')
 
-// Renders AND boards: the workbench (rail, intakes) only mounts once a
-// platform card on the selection screen is chosen, so every case walks
-// through the gate first. The first card is 文字; cases that need 動画
-// still switch via the rail afterwards (goToPlatform below).
+// Renders on the text platform: the three intakes are one segmented
+// control over the page (plan 073), text first.
 async function renderScreen() {
   const screen = await render(
     <LangProvider>
@@ -84,23 +82,19 @@ async function renderScreen() {
     </LangProvider>
   )
   await settle(30)
-  screen.container.querySelector('.platform-card').click()
-  await settle(30)
   return screen
 }
 
-// The three sources are three platforms at one station, and since the
-// mockup round retired the tab rail, the ONLY road between them runs
-// back through the selection-screen gate: the stub strip's Change
-// control, then the platform card. Cards render in registry order.
-// Awaited, not fire-and-forget: only the boarded platform's panel is
-// in the DOM (which is what keeps focus out of a hidden one), so the
-// subtitle input does not exist until React has re-rendered.
+// The road between platforms is the segmented control, in registry
+// order. A finished Passage shows the result instead of the intake;
+// ‹ Analyzer brings the control back first. Awaited, not
+// fire-and-forget: only the boarded platform's panel is in the DOM,
+// so the subtitle input does not exist until React has re-rendered.
 async function goToPlatform(screen, key) {
-  screen.container.querySelector('.anl-stub__change').click()
-  await settle(30)
+  const leave = screen.container.querySelector('.anl-head .stage__leave')
+  if (leave) { leave.click(); await settle(30) }
   const idx = { text: 0, photo: 1, video: 2 }[key]
-  screen.container.querySelectorAll('.platform-card')[idx].click()
+  screen.container.querySelectorAll('.anl-sources .seg__opt')[idx].click()
   await settle(30)
 }
 
@@ -201,7 +195,7 @@ describe('AnalyzerScreen polling', () => {
     // ...and the stage shows exactly ONE breakdown. (The status legend
     // that used to be asserted here belongs to the 'list' layout; the
     // stage steps through Tokens one at a time now, so there is none.)
-    expect(screen.container.querySelectorAll('.rdg-breakdown').length).toBe(1)
+    expect(screen.container.querySelectorAll('.anl-stagebd').length).toBe(1)
   })
 
   // The frozen-bar bug this pins: the transport is scaled to the
@@ -294,7 +288,7 @@ describe('AnalyzerScreen polling', () => {
       await settle(200)
       expect(apiUpload).not.toHaveBeenCalled()
       // Still on the gate, unbothered.
-      expect(screen.container.querySelector('.platform-card')).not.toBeNull()
+      expect(screen.container.querySelector('.anl-sources')).not.toBeNull()
     } finally {
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }

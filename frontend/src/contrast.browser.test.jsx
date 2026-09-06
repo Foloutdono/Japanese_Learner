@@ -206,15 +206,97 @@ const Fixture = () => (
       <span className="record__unit">days</span>
     </div>
 
-    {/* DictionaryScreen.jsx:313 -- the bar MUST stay wrapped in the console.
-        `.dict-console .dict-index-bar` sets `background: none`, so inside the
-        console the ground is the console's --surface, not the --bg-card the
-        bar paints when it stands alone. Rendered bare, this measured a ground
-        that appears nowhere in the app. */}
-    <div className="dict-console">
-      <div className="dict-index-bar">
-        <input className="dict-index-bar__input" placeholder="search" />
+    {/* DictionaryScreen.jsx / DictionaryDetail.jsx (plan 073) -- the
+        analyzer's door, the catalogue card, the plate and the entry's
+        blocks, all on --surface. The inks the contract cannot predict:
+        the door's roundel and intakes (the analyzer's pigment mixed
+        toward the ink), the card's level (the level's pigment mixed),
+        the entry ink (--dict-ink, the line's pigment mixed) on sense
+        numbers and word hits, and the due note (the state ink mixed). */}
+    <button type="button" className="anl-door">
+      <span className="wmap-roundel anl-door__roundel dc-roundel">KS</span>
+      <span className="anl-door__names">
+        <span className="anl-door__title dc-title">Analyzer</span>
+        <span className="anl-door__desc dc-desc">Text, photo, video</span>
+      </span>
+      <span className="anl-door__intakes"><span className="anl-door__intake dc-intake">T</span></span>
+    </button>
+    <div className="dict-grid">
+      <button type="button" className="dict-entry-card" style={{ '--level-color': 'var(--line-kanji)' }}>
+        <span className="dict-level-badge dc-level">N5</span>
+        <span className="dict-entry-card__kana dc-kana">えき</span>
+        <span className="dict-entry-card__char">駅</span>
+        <span className="dict-entry-card__meaning dc-meaning">station</span>
+      </button>
+    </div>
+    <article className="dict-entry">
+      <header className="dict-plate">
+        <span className="dict-plate__level dc-plate-level">N5</span>
+        <span className="dict-plate__reading dc-plate-reading">エキ</span>
+        <span className="dict-plate__yomi dc-yomi"><span className="dict-kind dc-kind">音</span><span>エキ</span></span>
+        <button type="button" className="dict-plate__more dc-more">+3</button>
+        <span className="dict-plate__caption dc-caption">station</span>
+      </header>
+      <div className="dict-block">
+        <div className="dict-block__note dc-note">Due now</div>
+        <ol className="dict-senses">
+          <li className="dict-sense"><span className="dict-sense__n dc-sense-n">1</span><span className="dict-sense__gloss">station</span></li>
+        </ol>
+        <div className="dict-ex"><span className="dict-ex__jp">駅で会う。</span><span className="dict-ex__tr dc-ex-tr">Meet at the station.</span></div>
+        <button type="button" className="dict-tag dc-tag">n</button>
       </div>
+      <div className="dict-words">
+        <button type="button" className="dict-word">
+          <span className="dict-word__jp"><span className="dict-word__hit dc-hit">駅</span>員</span>
+          <span className="dict-word__gloss dc-word-gloss">station staff</span>
+        </button>
+      </div>
+    </article>
+
+    {/* AnalyzerScreen.jsx, SentenceBreakdown.jsx, StageCard.jsx,
+        AnalyzerHistory.jsx, DeckPicker.jsx (plan 073) -- the line's
+        particle and the furigana over the focused (tinted) token, the
+        card's reading and its i+1 mark (the success ink mixed), the
+        legend, the stepper count, the history's meta and its Kept mark
+        (the stamp ink mixed), the deck picker's count. */}
+    <div className="analyzer">
+      <div className="anl-stage">
+        <div className="anl-stepper"><span className="anl-stepper__count an-count">1 / 2 · <i className="anl-stepper__i1">i+1</i></span></div>
+        <div className="tok-line">
+          <button type="button" className="tok tok--mastered tok--on"><span className="tok__furi an-furi">でんしゃ</span><span className="tok__word">電車</span></button>
+          <button type="button" className="tok tok--particle an-particle"><span className="tok__furi" /><span className="tok__word">は</span></button>
+        </div>
+        <div className="anl-legend"><span className="anl-legend__item an-legend"><i className="anl-legend__ink anl-legend__ink--mastered" />Mastered</span></div>
+        <div className="token-card token-card--i1">
+          <div className="token-card__head">
+            <span className="token-card__reading an-reading">でんしゃ</span>
+            <span className="type-badge token-card__pos an-pos">noun</span>
+          </div>
+          <span className="token-card__gloss">electric train</span>
+          <span className="token-card__i1 an-i1">One step beyond you</span>
+        </div>
+        <div className="anl-dials"><div className="anl-dial"><span className="cap anl-dial__cap an-cap">Furigana</span></div></div>
+      </div>
+      <section className="anl-history">
+        <div className="head2"><span className="head2__latin">History</span><span className="head2__count an-hcount">2 passages</span></div>
+        <div className="surface anl-hist-list">
+          <div className="anl-hist-row">
+            <button type="button" className="anl-hist">
+              <span className="anl-hist__n an-n">1</span>
+              <span className="anl-hist__body">
+                <span className="anl-hist__jp">駅前の掲示板。</span>
+                <span className="anl-hist__meta an-meta"><span className="anl-kept an-kept">Kept</span><span className="anl-hist__count">3 sentences</span></span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div className="surface picker">
+      <button type="button" className="picker-row picker-row--current">
+        <span className="picker-row__name">N5 words</span>
+        <span className="picker-row__count an-pcount">12 cards</span>
+      </button>
     </div>
 
     {/* PhraseScreen -- a sumi chip */}
@@ -548,11 +630,44 @@ const SITES = [
   ['.record__label', 'record label'],
   ['.record__unit', 'record unit'],
   ['.phrase-kanji-chip__level', 'kanji chip level (sumi)'],
+
+  // Plan 073 -- the dictionary and the analyzer (see the fixture).
+  ['.dc-roundel', 'analyzer door roundel (kaiseki mixed toward the ink)'],
+  ['.dc-title', 'analyzer door title'],
+  ['.dc-desc', 'analyzer door description'],
+  ['.dc-intake', 'analyzer door intake (kaiseki mixed toward the ink)'],
+  ['.dc-level', 'catalogue card level (level pigment mixed toward the ink)'],
+  ['.dc-kana', 'catalogue card reading'],
+  ['.dc-meaning', 'catalogue card meaning'],
+  ['.dc-plate-level', 'plate level'],
+  ['.dc-plate-reading', 'plate reading'],
+  ['.dc-yomi', 'plate on/kun reading'],
+  ['.dc-kind', 'plate 音/訓 mark'],
+  ['.dc-more', 'plate readings door'],
+  ['.dc-caption', 'plate caption'],
+  ['.dc-note', 'entry due note (state ink mixed)'],
+  ['.dc-sense-n', 'sense number (the entry ink)'],
+  ['.dc-ex-tr', 'example translation'],
+  ['.dc-tag', 'sense tag'],
+  ['.dc-hit', 'word row hit (the entry ink)'],
+  ['.dc-word-gloss', 'word row gloss'],
+  ['.an-count', 'stepper count'],
+  ['.an-furi', 'furigana over the focused token (on its tint)'],
+  ['.an-particle', 'particle token'],
+  ['.an-legend', 'line legend'],
+  ['.an-reading', 'token card reading'],
+  ['.an-pos', 'token card part of speech (type badge)'],
+  ['.an-i1', 'token card i+1 mark (success ink mixed)'],
+  ['.an-cap', 'dial caption'],
+  ['.an-hcount', 'history head count'],
+  ['.an-n', 'history row number'],
+  ['.an-meta', 'history row meta'],
+  ['.an-kept', 'history Kept mark (stamp ink mixed)'],
+  ['.an-pcount', 'deck picker card count'],
   // Placeholders are text and carry the same floor. Measured through
   // getComputedStyle's pseudo-element argument, since ::placeholder has a
   // colour of its own that the host input's computed style does not show.
   ['.dk-field::placeholder', 'console search placeholder'],
-  ['.dict-index-bar__input::placeholder', 'dictionary search placeholder'],
 
   // Settled by measurement rather than by reading a selector -- see the
   // comment beside their markup above.

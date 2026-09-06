@@ -116,6 +116,62 @@ row), the exam shell (`.exam-shell*`, `.exam-progress-bar*`, the
 summary/icon/number/chevron, the 132px ring's `__arc`/`__target`). Their
 baseline entries went in the same commit.
 
+## Dictionary and the analyzer (plan 073)
+
+| Canvas class | `index.css` block | Component |
+|---|---|---|
+| `.anl-door`, `.anl-door__roundel`, `__names`, `__title`, `__desc`, `__intakes`, `__intake` | the analyzer's door on the dictionary | `screens/DictionaryScreen.jsx` |
+| `.console` + `.chip` (a chip per collection in its line colour, the radical index as a sixth chip under kanji), `.console__index` with the count (the dots while it loads) | the console | `DictionaryScreen.jsx` on `components/chrome/Console.jsx` |
+| `.dict-grid`, `.dict-entry-card` (`--selected`, `__kana`, `__char`, `__meaning`), `.dict-level-badge`, `.stage-mark` | the catalogue | `ResultsSection` in `DictionaryScreen.jsx`; `LevelBadge` in `components/dictionary/DictionaryDetail.jsx` |
+| `.dict-entry`, `.dict-plate` (`__row`, `__marks`, `__actions`, `__btn`, `__level`, `__stack`, `__reading`, `__word` (`--glyph`), `__readings`, `__yomi`, `__more`, `__caption`, `__stripe`), `.dict-kind` | the plate | `DictionaryDetail.jsx` (`Leave` from `Bar.jsx`, `StageMark`) |
+| `.dict-entry__body`, `.dict-block` (`__note`), `.dict-senses`, `.dict-sense` (`__n`, `__body`, `__gloss`, `__tags`), `.dict-tag` (`__tip`), `.dict-examples`, `.dict-ex` (`__jp`, `__hl`, `__tr`) | the senses and their examples, divided by hairlines | `DictionaryDetail.jsx` (`ExampleSentence`, `TagChip`) |
+| `.dict-form` (`__sheet`, `__img`), `.record` (`--door`), `.records`, `.dict-entry__close` | the form and the record | `DictionaryDetail.jsx` (`StrokeFrame`) |
+| `.dict-words`, `.dict-word` (`--static`, `__jp`, `__hit`, `__gloss`, `__chev`) | the words it is used in | `WordRow` in `DictionaryDetail.jsx` |
+| `.dict-readings`, `.dict-register` (`__rest`, `__chip`), `.dict-reading` | the All readings sheet | `DictionaryDetail.jsx` on `components/chrome/Sheet.jsx` |
+| `.seg--full.seg--kaiseki` (`.anl-sources`), `.anl-panel` (`__lead`), `.anl-resume` | the three intakes | `screens/AnalyzerScreen.jsx` on `Seg` |
+| `.textarea`, `.anl-slip` (`__field`, `__count`), `.field--filled`, `.anl-action` | the writing slip | `components/analysis/WritingSlip.jsx` |
+| `.intake-pair`, `.intake-btn` | Shoot / Choose | `components/analysis/ImageInput.jsx` |
+| `.head2` (`__latin`, `__count`), `.anl-history`, `.anl-hist-list`, `.anl-hist-row`, `.anl-hist` (`__n`, `__body`, `__jp`, `__meta`, `__count`, `__when`, `__go`, `__delete`), `.anl-kept`, `.anl-undo*` | History | `components/analysis/AnalyzerHistory.jsx` |
+| `.stage__head.anl-head` (`.stage__where-jp`, `.anl-kept`), `.anl-clear` | the result's head: ‹ Analyzer, the first sentence, the count | `AnalyzerScreen.jsx` |
+| `.anl-stepper` (`__btn`, `__count`, `__i1`), `.anl-stops`, `.anl-stops__dot` (`--on`) | the stepper | `AnalyzerScreen.jsx` |
+| `.anl-stagebd` (`__card`), `.tok-line`, `.tok` (`--on`, `--mastered`, `--learning`, `--unknown`, `--offdeck`, `--particle`, `__furi`, `__word`), `.anl-stage[data-furigana]`, `.anl-legend` (`__item`, `__ink--*`) | the line and its legend | `components/analysis/SentenceBreakdown.jsx` (`layout="stage"`) |
+| `.token-card` (`--i1`, `__head`, `__surface` (`--door`), `__reading`, `__pos`, `__gloss`, `__i1`, `__foot`, `__kanji`, `__k`) | the token card | `components/analysis/StageCard.jsx` (`MineButton` as the `.btn-primary`) |
+| `.anl-dials`, `.anl-dial` (`__cap`) + `.seg` | the furigana and view dials | `AnalyzerScreen.jsx` |
+| `.anl-explainbox`, `.anl-explain__body`, `.anl-explain` | Explain this sentence | `AnalyzerScreen.jsx` |
+| `.picker`, `.picker-row` (`--current`, `--new`, `--create`, `__roundel`, `__name`, `__count`, `__mark`, `__create`) | the deck picker sheet | `components/analysis/DeckPicker.jsx` on `Sheet` |
+| `.word-detail*` | the word's own sheet (the record and the deck action) | `components/analysis/WordDetail.jsx` on `Sheet` |
+
+The routes: `/dictionary` and `/dictionary/analyzer`, both under the shell.
+The analyzer's result renders on its own page under the `‹ Analyzer` head
+rather than on the stage frame, so the working rail (search, the stop
+filter, the line) stays beside it on a wide screen (`.anl-railcol` moves
+before the stage at ≥1100px). Held from the canvas: the pass tag on the
+door (plan 069, `HAS_STORE`), the photo frame and the video section (the
+existing intakes keep their cropper and their subtitle grab), and the
+entry as a sheet — `.dict-dock` keeps its split at ≥1100px inside the
+shell's column and its modal below.
+
+## What retired with it
+
+The dictionary's console, tabs and index bar (`.dict-console*`,
+`.dict-tab-*`, `.dict-index-bar*`, `.dict-results-grid`, `.dict-page`, the
+radical back button), the identity plate and the panel it hung in
+(`.dict-detail__*` — the stage, its badges and readings, the gloss and
+senses labels, the composing kanji, the practice stats, the stroke
+panel, the close slab and ✕), the old example and word rows
+(`.dict-example*`, `.dict-vocab-example-*`, `.dict-stat*`, `.stat-row*`,
+`.dict-tag-chip*`, `.dict-sense-marker`, `.dict-sense__number`), the
+analyzer's selection screen and stub (`.anl-concourse`, `.anl-tiles`,
+`.anl-tile__*`, `.anl-stub*`, `.anl-intake__jp`, `.anl-intake__lead`), the
+sentence pane and its dials (`.anl-sentence*`, `.anl-tokrow`,
+`.anl-stagectl*`, `.anl-stagebd__dot*`), the old history panel
+(`.anl-history__*`), the old deck picker (`.anl-deckpicker__*`), the slip's
+foot and stamp, the `.detail-*` side panel, `.word-span--known` and the
+private `--anl-*` token family. Their baseline entries and their
+design-scale allowlist entries went in the same commit — along with every
+allowlist literal earlier retirements had left behind (the guard's
+`--write` only ever merges, so those had accumulated since plan 068).
+
 ## Learn (plan 071)
 
 | Canvas class | `index.css` block | Component |
@@ -172,12 +228,10 @@ gate hall: concourse, IC card, notice strip — the map moved to
 `config/navLinks.js` (now `config/tabs.js`). Their CSS blocks and their
 entries in `.stylelint-baseline.json` went in the same commit.
 
-## Still to port (plans 073–075)
+## Still to port (plans 074–075)
 
 `.offer*`, `.pass-tag` (with the store); `.svc*`, `.lvlstrip*`, `.slip*`,
-`.stg-head`/`.stg-list`, `.cal*`, `.picker-row` (074); `.dict-plate`, `.dict-block`, `.dict-word`,
-`.tok*`, `.token-card` (073); the whole
-`.brd-*` boarding (075). Reading the canvas: `Artifact` `read` on its URL
+`.stg-head`/`.stg-list`, `.cal*` (074); the whole `.brd-*` boarding (075). Reading the canvas: `Artifact` `read` on its URL
 saves the page; the design lives in `<script id="appifact-doc">` as JSON —
 `content.files` holds one `*.dc.html` per artboard plus `canvas.json`; the
 common prefix of the artboard files is this stylesheet.

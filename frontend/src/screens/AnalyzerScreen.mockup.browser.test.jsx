@@ -7,15 +7,16 @@ import { LangProvider } from '../LangContext'
 // what ships, not what the JSX intends.
 import '../index.css'
 
-// ── The mockup contract (2026-09-01) ──
-// The "Analyzer redesign · final" artifact is the specification for
-// this screen, taken literally at the maintainer's direction: the
-// sentence pane is a sentence (no badges, no speaker, no grammar
-// chips inside it), SRS status is a 2px underline on exactly the
-// words still being learned, the token table is a real table, kanji
-// chips hold a glyph and its grade and nothing else, the history
-// panel is padded like every other panel, and nothing in the stage
-// is an unexplained oval. Each case below names the mockup rule it
+// ── The canvas contract (plan 073) ──
+// The "Japanese Learner Mobile" canvas's AnalyzerResult artboard is
+// the specification for the result stage, taken literally: the
+// sentence is a line of tokens whose SRS state is a 2px rule under
+// each word in the state's own ink (never an ink change on the word),
+// the focused token is a tint, the reading rides a word with kanji as
+// a small line above it and the furigana dial governs it, the card
+// under the line carries the gloss, the kanji squares and ONE deck
+// action, the table is a real table, and the history is a section
+// head over a framed row list. Each case below names the rule it
 // pins, so a regression fails with the rule in the message.
 
 const SENTENCES = [
@@ -27,20 +28,20 @@ const SENTENCES = [
     unknown_count: 1, available: true, level: 'N2', off_deck_count: 0,
     explanation: 'から marks the origin — the train departs FROM platform three.',
     tokens: [
-      // mastered → no underline, ruby hidden in 'unknown' mode. The
+      // mastered → the mastered rule, ruby hidden in 'unknown' mode. The
       // entry carries the dictionary gloss the card shows under the
       // word before any deep tier is bought.
       { surface: '電車', reading: 'でんしゃ', pos: 'noun',
         furigana: [{ text: '電車', reading: 'でんしゃ' }],
         vocab_match: { entry: { meaning: 'electric train' }, stats: { status: 'mastered' }, level: 'N5', raw_id: 'v1' } },
-      // particle, no vocab_match → no underline ever
+      // particle, no vocab_match → no rule ever, and no reading (no kanji)
       { surface: 'は', reading: 'は', pos: 'particle',
         furigana: [{ text: 'は' }] },
-      // learning → the learning underline
+      // learning → the learning rule
       { surface: '三番線', reading: 'さんばんせん', pos: 'noun',
         furigana: [{ text: '三番線', reading: 'さんばんせん' }],
         vocab_match: { entry: {}, stats: { status: 'learning' }, level: 'N4', raw_id: 'v2' } },
-      // not yet started → the "new to you" underline, kanji chips on the card
+      // not yet started → the "new to you" rule, kanji squares on the card
       { surface: '発車', reading: 'はっしゃ', pos: 'noun',
         furigana: [{ text: '発車', reading: 'はっしゃ' }],
         vocab_match: { entry: {}, stats: { status: 'not_started' }, level: 'N3', raw_id: 'v3' },
@@ -83,21 +84,16 @@ const { apiJson, apiUpload, apiFetch } = await import('../lib/api')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
-async function renderGate() {
+// The screen opens on the text intake at its own route (plan 073): the
+// three intakes are one segmented control over the page, text first.
+async function renderScreen() {
   const screen = await render(
     <LangProvider>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/dictionary/analyzer']}>
         <AnalyzerScreen session={{}} />
       </MemoryRouter>
     </LangProvider>
   )
-  await settle(30)
-  return screen
-}
-
-async function renderScreen() {
-  const screen = await renderGate()
-  screen.container.querySelector('.platform-card').click()
   await settle(30)
   return screen
 }
@@ -114,8 +110,31 @@ async function analyze(screen) {
   await settle(150)
 }
 
-function tokenButtons(screen) {
-  return [...screen.container.querySelectorAll('.anl-sentence__tk')]
+function tokens(screen) {
+  return [...screen.container.querySelectorAll('.tok-line .tok')]
+}
+
+// The two stage dials are segmented controls in the dials block:
+// furigana first, then the view.
+function segOptions(screen, which) {
+  const idx = { furigana: 0, view: 1 }[which]
+  return screen.container.querySelectorAll('.anl-dial .seg')[idx].querySelectorAll('.seg__opt')
+}
+
+// Resolve the palette the same way the page does, so an assertion
+// holds in both themes.
+function resolver() {
+  const probe = document.createElement('div')
+  document.body.appendChild(probe)
+  return v => {
+    probe.style.color = v
+    return getComputedStyle(probe).color
+  }
+}
+
+const hidden = el => {
+  const cs = getComputedStyle(el)
+  return cs.display === 'none' || cs.visibility === 'hidden'
 }
 
 beforeEach(() => {
@@ -127,197 +146,221 @@ beforeEach(() => {
   apiFetch.mockResolvedValue({ ok: true, status: 200, json: async () => [] })
 })
 
-describe('the sentence pane (mockup: a sentence, not a readout)', () => {
-  it('holds the Japanese line and nothing else — no badge row, no speaker, no grammar chips, no explanation', async () => {
+describe('the line (canvas: a sentence of tokens, not a readout)', () => {
+  it('holds the tokens and nothing else — no badge row, no speaker, no grammar chips, no explanation', async () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    const pane = screen.container.querySelector('.anl-sentence')
-    expect(pane).not.toBeNull()
-    expect(pane.querySelector('.analysis-level-badge')).toBeNull()
-    expect(pane.querySelector('.anl-speak')).toBeNull()
-    expect(pane.querySelector('.analysis-grammar-chips')).toBeNull()
-    expect(pane.querySelector('.rdg-breakdown-explanation')).toBeNull()
-  })
-
-  it('underlines exactly the words still being learned, 2px, in the state colour', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-
-    const [mastered, particle, learning, fresh] = tokenButtons(screen)
-
-    // Resolve the palette the same way the page does, so the assertion
-    // holds in both themes.
-    const probe = document.createElement('div')
-    document.body.appendChild(probe)
-    const resolve = v => {
-      probe.style.color = v
-      return getComputedStyle(probe).color
+    const line = screen.container.querySelector('.tok-line')
+    expect(line).not.toBeNull()
+    expect(line.querySelector('.analysis-level-badge')).toBeNull()
+    expect(line.querySelector('.anl-speak')).toBeNull()
+    expect(line.querySelector('.analysis-grammar-chips')).toBeNull()
+    expect(line.querySelector('.anl-explain__body')).toBeNull()
+    // Every child is a token, and every token is the control.
+    for (const child of line.children) {
+      expect(child.classList.contains('tok'), child.className).toBe(true)
+      expect(child.tagName).toBe('BUTTON')
     }
-    const kaiseki = resolve('var(--line-kaiseki)')
-    const grey = resolve('var(--text-secondary)')
+    expect(tokens(screen).length).toBe(SENTENCES[0].tokens.length)
+  })
 
-    // The two words with work left to do carry the rule…
-    const learningStyle = getComputedStyle(learning)
-    const freshStyle = getComputedStyle(fresh)
-    expect(learningStyle.borderBottomWidth).toBe('2px')
-    expect(freshStyle.borderBottomWidth).toBe('2px')
-    // …a word never met runs in the line's own grape, full strength
-    // (the mockup's tk--new)…
-    expect(freshStyle.borderBottomColor).toBe(kaiseki)
-    // …a word being learned in the translucent ember (tk--learning),
-    // and NEITHER in the grey that made the line read as a diagnostic.
-    expect(learningStyle.borderBottomColor).not.toBe('rgba(0, 0, 0, 0)')
-    expect(learningStyle.borderBottomColor).not.toBe(freshStyle.borderBottomColor)
-    expect(learningStyle.borderBottomColor).not.toBe(grey)
-    expect(freshStyle.borderBottomColor).not.toBe(grey)
+  it('rules every word with a record, 2px, in its state ink — and never re-inks the word', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
 
-    // A mastered word and a bare particle carry none.
-    expect(getComputedStyle(mastered).borderBottomColor).toBe('rgba(0, 0, 0, 0)')
+    const [mastered, particle, learning, fresh] = tokens(screen)
+    const resolve = resolver()
+    const stateMastered = resolve('var(--state-mastered)')
+    const stateLearning = resolve('var(--state-learning)')
+    const stateNew = resolve('var(--state-new)')
+
+    for (const tok of [mastered, learning, fresh]) {
+      expect(getComputedStyle(tok).borderBottomWidth).toBe('2px')
+      expect(getComputedStyle(tok).borderBottomStyle).toBe('solid')
+    }
+    expect(getComputedStyle(mastered).borderBottomColor).toBe(stateMastered)
+    expect(getComputedStyle(learning).borderBottomColor).toBe(stateLearning)
+    expect(getComputedStyle(fresh).borderBottomColor).toBe(stateNew)
+    // A bare particle carries no rule.
     expect(getComputedStyle(particle).borderBottomColor).toBe('rgba(0, 0, 0, 0)')
-  })
 
-  it('lets the ruby breathe — the mockup line height, not a cramped one', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-
-    const line = screen.container.querySelector('.anl-sentence__jp')
-    const cs = getComputedStyle(line)
-    // Mockup .sent__jp: line-height 2.3. Anything under ~2.2 stacks the
-    // ruby into the line above it.
-    expect(parseFloat(cs.lineHeight) / parseFloat(cs.fontSize)).toBeGreaterThanOrEqual(2.2)
-  })
-
-  it('reads as running text: words flow inline and the rule hugs the word', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-
-    const line = screen.container.querySelector('.anl-sentence__jp')
-    // The mockup's sentence is a PARAGRAPH — not a flex row that spaces
-    // every token apart and stretches each one to the full line box.
-    expect(getComputedStyle(line).display).toBe('block')
-
-    // Each token's box hugs its glyphs (plus ruby), so the 2px rule and
-    // the focus tint sit right under/around the word instead of floating
-    // at the bottom of a 2.3-line-height box.
-    const fs = parseFloat(getComputedStyle(line).fontSize)
-    const focused = screen.container.querySelector('.anl-sentence__tk--focus')
-    expect(focused.getBoundingClientRect().height, 'token box must hug its text').toBeLessThan(fs * 2)
+    // The state is the rule, not the word: the three inked words share
+    // one ink (the particle alone steps back to the secondary ink).
+    const inks = new Set([mastered, learning, fresh].map(tok => getComputedStyle(tok).color))
+    expect(inks.size).toBe(1)
+    expect(getComputedStyle(particle).color).not.toBe(getComputedStyle(mastered).color)
   })
 
   it('marks the focused token with a tint, not a weight change', async () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    const focused = screen.container.querySelector('.anl-sentence__tk--focus')
-    expect(focused).not.toBeNull()
+    const on = screen.container.querySelector('.tok-line .tok--on')
+    expect(on).not.toBeNull()
+    const other = tokens(screen).find(tok => tok !== on)
     // Bolding the focused token reflows the whole line on every step.
-    expect(getComputedStyle(focused).fontWeight).toBe(getComputedStyle(tokenButtons(screen)[1]).fontWeight)
-    expect(getComputedStyle(focused).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+    expect(getComputedStyle(on).fontWeight).toBe(getComputedStyle(other).fontWeight)
+    expect(getComputedStyle(on).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+    expect(getComputedStyle(other).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+
+    // Tapping another word moves the tint with the focus.
+    tokens(screen)[2].click()
+    await settle(60)
+    expect(screen.container.querySelectorAll('.tok-line .tok--on').length).toBe(1)
+    expect(tokens(screen)[2].classList.contains('tok--on')).toBe(true)
+  })
+
+  it('prints the reading over a word with kanji only, and the furigana dial governs it', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+
+    const [mastered, particle, learning] = tokens(screen)
+    expect(mastered.querySelector('.tok__furi').textContent).toBe('でんしゃ')
+    // は already spells its own sound: the slot stays empty (and keeps
+    // the line's baseline, so the words do not jump).
+    expect(particle.querySelector('.tok__furi').textContent).toBe('')
+
+    const furi = which => which.querySelector('.tok__furi')
+
+    // All · Unknown · None — the canvas's three positions, in order.
+    // The stage opens on Unknown (the reading only where it is still
+    // needed), so All is a press away.
+    const opts = segOptions(screen, 'furigana')
+    expect(opts.length).toBe(3)
+    expect(opts[1].getAttribute('aria-checked')).toBe('true')
+    expect(hidden(furi(mastered)), 'the mastered word opens bare').toBe(true)
+    opts[0].click()
+    await settle(60)
+    expect(hidden(furi(tokens(screen)[0]))).toBe(false)
+
+    // 'Unknown' bares only the mastered word; a word still being
+    // learned keeps its reading.
+    opts[1].click()
+    await settle(60)
+    expect(hidden(furi(tokens(screen)[0])), 'mastered word keeps its furigana under Unknown').toBe(true)
+    expect(hidden(furi(tokens(screen)[2])), 'learning word lost its furigana under Unknown').toBe(false)
+
+    // 'None' hides every reading.
+    opts[2].click()
+    await settle(60)
+    expect(hidden(furi(tokens(screen)[0]))).toBe(true)
+    expect(hidden(furi(tokens(screen)[2]))).toBe(true)
+
+    // And 'All' brings them all back.
+    opts[0].click()
+    await settle(60)
+    expect(hidden(furi(tokens(screen)[0]))).toBe(false)
+    expect(hidden(furi(tokens(screen)[2]))).toBe(false)
+    expect(learning.isConnected).toBe(true)
   })
 })
 
-describe('the explanation (mockup: explain__body above the explain row)', () => {
-  it('renders inside the explain panel, not inside the sentence pane', async () => {
+describe('the explanation (canvas: explain__body above the explain row)', () => {
+  it('renders inside the explain panel, not inside the line', async () => {
     const screen = await renderScreen()
     await analyze(screen)
 
     const body = screen.container.querySelector('.anl-explain__body')
     expect(body).not.toBeNull()
     expect(body.closest('.anl-explainbox')).not.toBeNull()
-    expect(body.closest('.anl-sentence')).toBeNull()
-    // The mockup's rule: a 3px line of the station's pigment on its left.
+    expect(body.closest('.tok-line')).toBeNull()
+    // The canvas's rule: a 3px line of the station's pigment on its left.
     expect(getComputedStyle(body).borderLeftWidth).toBe('3px')
   })
 })
 
-describe('the token card (mockup: clean chips, no ovals)', () => {
-  it('keeps each kanji chip to its glyph and grade — no badge, no button stuffed inside', async () => {
+describe('the token card (canvas: gloss, squares, one action)', () => {
+  it('shows the dictionary translation under the word before any deep tier', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    // The focused token is 電車 (index 0 in this fixture) — its card
+    // must carry the entry gloss.
+    const gloss = screen.container.querySelector('.anl-stagebd .token-card__gloss')
+    expect(gloss).not.toBeNull()
+    expect(gloss.textContent).toBe('electric train')
+  })
+
+  it('rules the reading over its kanji — real ruby on the surface, the reading beside it', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    const surface = screen.container.querySelector('.anl-stagebd .token-card__surface')
+    const rt = surface.querySelector('rt')
+    expect(rt).not.toBeNull()
+    expect(rt.textContent).toBe('でんしゃ')
+    expect(getComputedStyle(rt).display).not.toBe('none')
+    expect(screen.container.querySelector('.anl-stagebd .token-card__reading').textContent).toBe('でんしゃ')
+    // The word with a record is the door to its detail.
+    expect(surface.tagName).toBe('BUTTON')
+    expect(surface.classList.contains('token-card__surface--door')).toBe(true)
+  })
+
+  it('keeps each kanji square to its glyph — the whole square is the control, the meaning waits in its title', async () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    // Step to 発車 (4th token), the one with kanji.
-    tokenButtons(screen)[3].click()
-    await settle(60)
+    // Step to 発車 (4th token), the one with kanji — and let the card's
+    // arrival (CardTransition's 0.34s) finish before measuring boxes.
+    tokens(screen)[3].click()
+    await settle(450)
 
-    const chips = [...screen.container.querySelectorAll('.anl-stagebd .phrase-kanji-chip')]
-    expect(chips.length).toBe(2)
-    for (const chip of chips) {
-      expect(chip.querySelector('.status-pill')).toBeNull()
-      expect(chip.querySelector('.analysis-mine-btn')).toBeNull()
-      // The chip sits on the surface, framed — not a sumi box.
-      const cs = getComputedStyle(chip)
-      expect(cs.borderStyle).toBe('solid')
-      // …and its content stays inside it.
-      expect(chip.scrollWidth).toBeLessThanOrEqual(chip.clientWidth + 1)
+    const squares = [...screen.container.querySelectorAll('.anl-stagebd .token-card__k')]
+    expect(squares.length).toBe(2)
+    expect(squares.map(k => k.textContent)).toEqual(['発', '車'])
+    expect(squares.map(k => k.getAttribute('title'))).toEqual(['depart', 'vehicle'])
+    for (const k of squares) {
+      expect(k.tagName).toBe('BUTTON')
+      expect(k.querySelector('.status-pill')).toBeNull()
+      expect(k.querySelector('.analysis-mine-btn')).toBeNull()
+      // A square, on the surface, framed — not a sumi box…
+      const r = k.getBoundingClientRect()
+      expect(Math.abs(r.width - r.height), `${r.width}×${r.height}`).toBeLessThan(1)
+      expect(r.width).toBeGreaterThanOrEqual(30)
+      expect(getComputedStyle(k).borderStyle).toBe('solid')
+      // …and its glyph stays inside it.
+      expect(k.scrollWidth).toBeLessThanOrEqual(k.clientWidth + 1)
     }
-    // The mockup chip pairs the glyph with its MEANING (番 number),
-    // not with a grade the detail sheet already carries.
-    expect(chips[0].textContent).toContain('depart')
-    expect(chips[1].textContent).toContain('vehicle')
-    // The row of chips stays inside the card.
-    const row = screen.container.querySelector('.anl-stagebd .phrase-word-card__kanji-row')
+    // The row of squares stays inside the card.
+    const row = screen.container.querySelector('.anl-stagebd .token-card__kanji')
     expect(row.scrollWidth).toBeLessThanOrEqual(row.clientWidth + 1)
   })
 
-  it('lays pos, state and the one deck action on a single row — no OPTIONS, no dotted rule', async () => {
-    // Desktop width — the mockup's reference drawing. (On a phone the
-    // row is allowed to wrap; that is flex-wrap doing its job.)
-    await page.viewport(1280, 900)
+  it('offers the part of speech in the head and ONE deck action in the foot — no options, no pills', async () => {
     const screen = await renderScreen()
     await analyze(screen)
-    tokenButtons(screen)[3].click()
+    tokens(screen)[3].click()
     await settle(60)
 
-    // The mockup card offers ONE action: Add to deck. The cloze
-    // disclosure lives with the full controls in WordDetail, not here.
-    expect(screen.container.querySelector('.anl-stagebd .anl-mine__options')).toBeNull()
-    const row = screen.container.querySelector('.anl-stagebd .anl-tokrow')
-    expect(row).not.toBeNull()
-    const pos = row.querySelector('.phrase-word-card__pos')
-    const badge = row.querySelector('.status-pill')
-    const mine = row.querySelector('.analysis-mine-btn')
+    const card = screen.container.querySelector('.anl-stagebd .token-card')
+    expect(card).not.toBeNull()
+    // The cloze disclosure lives with the full controls in WordDetail,
+    // not here; the line's rule already says the state.
+    expect(card.querySelector('.anl-mine__options')).toBeNull()
+    expect(card.querySelector('.status-pill')).toBeNull()
+
+    const pos = card.querySelector('.token-card__head .token-card__pos')
     expect(pos).not.toBeNull()
-    expect(badge).not.toBeNull()
-    expect(mine).not.toBeNull()
-    // One ROW: the three share a horizontal band instead of stacking.
-    const centers = [pos, badge, mine].map(el => {
-      const r = el.getBoundingClientRect()
-      return r.top + r.height / 2
-    })
-    expect(Math.max(...centers) - Math.min(...centers)).toBeLessThan(12)
+    expect(pos.textContent).toBe('noun')
 
-    // And the surface carries no dotted underline — that is the list
-    // layout's affordance, not the mockup card's.
-    const surface = screen.container.querySelector('.anl-stagebd .phrase-word-card__surface')
-    expect(getComputedStyle(surface).textDecorationLine).toBe('none')
-  })
-
-  it('draws no pill-shaped control anywhere on the stage', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-
-    // Every control on the stage is a plate or a card corner (≤ 8px)
-    // except the two the mockup itself rounds fully: the segmented
-    // dials and the stepper dots.
-    const allowed = ['anl-seg__opt', 'anl-stagebd__dot']
-    for (const btn of screen.container.querySelectorAll('.anl-stage button')) {
-      if (allowed.some(c => btn.classList.contains(c))) continue
-      const r = getComputedStyle(btn).borderTopLeftRadius
-      const px = parseFloat(r)
-      expect(px, `${btn.className} has radius ${r}`).toBeLessThanOrEqual(8)
-    }
+    const actions = card.querySelectorAll('.token-card__foot button:not(.token-card__k)')
+    expect(actions.length).toBe(1)
+    // The one filled action of the card, in the screen's gold — the
+    // canvas's button, not the analyser's old quiet control.
+    expect(actions[0].classList.contains('btn-primary')).toBe(true)
+    expect(actions[0].classList.contains('analysis-mine-btn')).toBe(false)
+    const resolve = resolver()
+    expect(getComputedStyle(actions[0]).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+    expect(getComputedStyle(actions[0]).color).toBe(resolve('var(--text-on-panel)'))
   })
 })
 
-describe('the token table (mockup: a real table, not the list layout)', () => {
+describe('the token table (canvas: a real table, not the list layout)', () => {
   it('switches the stage to a Word/Reading/Meaning/State grid and back', async () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    const viewOpts = screen.container
-      .querySelector('[aria-labelledby="anl-view-label"]')
-      .querySelectorAll('.anl-seg__opt')
+    const viewOpts = segOptions(screen, 'view')
+    expect(viewOpts.length).toBe(2)
     viewOpts[1].click()
     await settle(60)
 
@@ -326,6 +369,7 @@ describe('the token table (mockup: a real table, not the list layout)', () => {
     // The old list layout must NOT be what renders here.
     expect(screen.container.querySelector('.phrase-words-list')).toBeNull()
     expect(screen.container.querySelector('.status-legend')).toBeNull()
+    expect(screen.container.querySelector('.anl-stagebd .token-card')).toBeNull()
 
     // One row per token, plus the head.
     expect(table.querySelectorAll('.anl-trow').length).toBe(SENTENCES[0].tokens.length + 1)
@@ -333,80 +377,63 @@ describe('the token table (mockup: a real table, not the list layout)', () => {
     expect(table.textContent).toContain('でんしゃ')
     expect(table.querySelectorAll('.anl-trow .status-pill').length).toBe(3)
 
-    // The sentence pane stays above the table — the table replaces the
-    // card, not the stage.
-    expect(screen.container.querySelector('.anl-sentence')).not.toBeNull()
+    // The line stays above the table — the table replaces the card,
+    // not the stage.
+    expect(screen.container.querySelector('.tok-line')).not.toBeNull()
 
-    // A surface click focuses that token and returns to the stepper.
+    // A surface click focuses that token and returns to the card.
     table.querySelectorAll('.anl-trow__surface')[2].click()
     await settle(60)
     expect(screen.container.querySelector('.anl-toktable')).toBeNull()
-    expect(screen.container.querySelector('.rdg-breakdown-card-row')).not.toBeNull()
-    // toContain, not toBe: the stage surface carries its reading as
-    // ruby, so textContent is base + rt.
-    expect(screen.container.querySelector('.phrase-word-card__surface').textContent).toContain('三番線')
+    expect(screen.container.querySelector('.anl-stagebd .token-card')).not.toBeNull()
+    // toContain, not toBe: the surface carries its reading as ruby, so
+    // textContent is base + rt.
+    expect(screen.container.querySelector('.token-card__surface').textContent).toContain('三番線')
+    expect(tokens(screen)[2].classList.contains('tok--on')).toBe(true)
   })
 })
 
-describe('the stage rhythm and dials', () => {
-  it('breathes: pane, dials and card are separated by the stage gap', async () => {
+describe('the stage rhythm, the stepper and the dials', () => {
+  it('breathes: line, card and dials are separated by the stage gap', async () => {
     const screen = await renderScreen()
     await analyze(screen)
-    // The pane, the dials row and the card row are children of the
-    // stage breakdown — a real gap between them, not touching bands.
     const bd = screen.container.querySelector('.anl-stagebd')
-    expect(parseFloat(getComputedStyle(bd).rowGap)).toBeGreaterThanOrEqual(14)
+    expect(parseFloat(getComputedStyle(bd).rowGap)).toBeGreaterThanOrEqual(12)
   })
 
-  it('labels the dials the mockup way — words, not tracked micro-caps', async () => {
+  it('counts the stops and steps through them', async () => {
     const screen = await renderScreen()
     await analyze(screen)
-    const label = screen.container.querySelector('.anl-stagectl__label')
-    const cs = getComputedStyle(label)
-    expect(cs.textTransform).toBe('none')
-    // fs-caption (0.72rem ≈ 11.5px), not the 0.62rem micro-caption.
-    expect(parseFloat(cs.fontSize)).toBeGreaterThanOrEqual(11)
-  })
-})
+    const count = () => screen.container.querySelector('.anl-stepper__count').textContent.replace(/\s+/g, ' ').trim()
+    expect(count()).toMatch(/^1 \/ 2/)
+    // A stop per sentence, the ones reached filled.
+    expect(screen.container.querySelectorAll('.anl-stops__dot').length).toBe(2)
+    expect(screen.container.querySelectorAll('.anl-stops__dot--on').length).toBe(1)
 
-describe('the token card content', () => {
-  it('shows the dictionary translation under the word before any deep tier', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-    // Focused token is 電車 after stepping once (index 0 = 電車 in this
-    // fixture) — its card must carry the entry gloss.
-    const meaning = screen.container.querySelector('.anl-stagebd .phrase-word-card__meaning')
-    expect(meaning.textContent).toBe('electric train')
-  })
-
-  it('rules the reading over its kanji — real ruby, not a spaced line above the word', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-    const surface = screen.container.querySelector('.anl-stagebd .phrase-word-card__surface')
-    // The reading rides the word as ruby, per-kanji, exactly like the
-    // sentence pane above it…
-    const rt = surface.querySelector('rt')
-    expect(rt).not.toBeNull()
-    expect(rt.textContent).toBe('でんしゃ')
-    expect(getComputedStyle(rt).display).not.toBe('none')
-    // …and the old detached reading line is gone from the stage card.
-    expect(screen.container.querySelector('.anl-stagebd .phrase-word-card__reading')).toBeNull()
-  })
-
-  it('makes the whole kanji chip the control, not just the glyph', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-    tokenButtons(screen)[3].click()
+    const [prev, next] = screen.container.querySelectorAll('.anl-stepper__btn')
+    expect(prev.disabled).toBe(true)
+    next.click()
     await settle(60)
-    const chips = [...screen.container.querySelectorAll('.anl-stagebd .phrase-kanji-chip')]
-    expect(chips.length).toBe(2)
-    for (const chip of chips) {
-      expect(chip.tagName).toBe('BUTTON')
+    expect(count()).toMatch(/^2 \/ 2/)
+    expect(screen.container.querySelectorAll('.anl-stops__dot--on').length).toBe(2)
+    expect(screen.container.querySelectorAll('.anl-stepper__btn')[1].disabled).toBe(true)
+    // The line now holds the second sentence's tokens.
+    expect(tokens(screen).length).toBe(SENTENCES[1].tokens.length)
+  })
+
+  it('labels the dials with the caption register and draws them as segmented controls', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    const dials = screen.container.querySelectorAll('.anl-dial')
+    expect(dials.length).toBe(2)
+    for (const dial of dials) {
+      expect(dial.querySelector('.anl-dial__cap')).not.toBeNull()
+      expect(dial.querySelector('.seg[role="radiogroup"]')).not.toBeNull()
     }
   })
 })
 
-describe('the route line (mockup: always the vertical line)', () => {
+describe('the route line (the working rail keeps the vertical line)', () => {
   it('never lies down as a horizontal strip — any width, the vertical route map', async () => {
     // Explicitly NARROW: the strip was exactly the narrow-viewport
     // rendering, so this is the width where its absence means something.
@@ -414,9 +441,6 @@ describe('the route line (mockup: always the vertical line)', () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    // The mockup has exactly one drawing of the Passage: the vertical
-    // line with a stop per Sentence and the pin beside it. The
-    // stopping-pattern band is retired.
     expect(screen.container.querySelector('.anl-line--strip')).toBeNull()
     const line = screen.container.querySelector('.anl-line')
     expect(line).not.toBeNull()
@@ -441,16 +465,14 @@ describe('the route line (mockup: always the vertical line)', () => {
 
     const line = screen.container.querySelector('.anl-line')
     expect(screen.container.querySelectorAll('.anl-stop').length).toBe(8)
-    // The line's viewport holds ~3 rows; the rest scroll within it
-    // instead of burying the stage under 47 rows of rail.
     expect(line.clientHeight, `line is ${line.clientHeight}px tall`).toBeLessThanOrEqual(240)
     expect(line.scrollHeight).toBeGreaterThan(line.clientHeight)
     expect(getComputedStyle(line).overflowY).toBe('auto')
   })
 })
 
-describe('the history (mockup: a section head over a framed row list)', () => {
-  it('draws the head outside the panel and pads every row', async () => {
+describe('the history (canvas: a section head over a framed row list)', () => {
+  it('draws the head outside the list and pads every row', async () => {
     // A row to measure: the history fetch must return one passage
     // (apiFetch, raw Response shape — see useAnalyzerSession.fetchHistory).
     apiFetch.mockImplementation(async path => ({
@@ -459,33 +481,35 @@ describe('the history (mockup: a section head over a framed row list)', () => {
         ? [{ id: 1, phrase: '駅前の掲示板。', kept: true, source: 'typed', created_at: '2026-09-01T00:00:00Z' }]
         : []),
     }))
-    const screen = await renderGate()
+    const screen = await renderScreen()
     await settle(120)
 
-    // The mockup's shape: the History head is a sibling ABOVE the framed
-    // list, never inside it.
-    const hist = screen.container.querySelector('.anl-concourse .anl-hist')
-    expect(hist).not.toBeNull()
-    expect(hist.querySelector('.anl-history__head')).toBeNull()
-    expect(screen.container.querySelector('.anl-concourse .anl-history__head')).not.toBeNull()
+    // The canvas's shape: the head is a sibling ABOVE the framed list,
+    // never inside it.
+    const history = screen.container.querySelector('.anl-history')
+    expect(history).not.toBeNull()
+    const list = history.querySelector('.anl-hist-list')
+    expect(list).not.toBeNull()
+    expect(list.querySelector('.head2')).toBeNull()
+    expect(history.querySelector('.head2')).not.toBeNull()
 
-    const cs = getComputedStyle(hist)
+    const cs = getComputedStyle(list)
     expect(cs.borderTopStyle).toBe('solid')
     expect(parseFloat(cs.borderTopLeftRadius)).toBeGreaterThan(0)
 
-    // The row carries the mockup's padding (sp-4 sp-5): nothing sits
-    // flush against the frame.
-    const row = hist.querySelector('.anl-history__open')
+    // The row carries the canvas's padding (sp-3 sp-4): nothing sits
+    // flush against the frame, and the row is a real target.
+    const row = list.querySelector('.anl-hist')
     expect(row).not.toBeNull()
     const rs = getComputedStyle(row)
-    expect(parseFloat(rs.paddingLeft), `row padding-left is ${rs.paddingLeft}`).toBeGreaterThanOrEqual(16)
-    expect(parseFloat(rs.paddingTop), `row padding-top is ${rs.paddingTop}`).toBeGreaterThanOrEqual(12)
+    expect(parseFloat(rs.paddingLeft), `row padding-left is ${rs.paddingLeft}`).toBeGreaterThanOrEqual(12)
+    expect(parseFloat(rs.paddingTop), `row padding-top is ${rs.paddingTop}`).toBeGreaterThanOrEqual(8)
+    expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
 
-    // The 保存 stamp holds its two glyphs on one line inside its own
-    // frame — it was an 18×18 box with the kanji spilling out of it.
-    const stamp = hist.querySelector('.anl-history__kept')
-    expect(stamp).not.toBeNull()
-    expect(stamp.scrollWidth).toBeLessThanOrEqual(stamp.clientWidth + 1)
-    expect(stamp.scrollHeight).toBeLessThanOrEqual(stamp.clientHeight + 1)
+    // The Kept mark holds its word on one line inside its own frame.
+    const kept = row.querySelector('.anl-kept')
+    expect(kept).not.toBeNull()
+    expect(kept.scrollWidth).toBeLessThanOrEqual(kept.clientWidth + 1)
+    expect(kept.scrollHeight).toBeLessThanOrEqual(kept.clientHeight + 1)
   })
 })

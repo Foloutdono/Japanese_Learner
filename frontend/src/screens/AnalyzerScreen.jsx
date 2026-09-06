@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { ScreenBar } from '../components/chrome/Bar'
-import { StationHeader } from '../components/station/StationHeader'
+import { Bar, Leave } from '../components/chrome/Bar'
+import { Seg } from '../components/chrome/Console'
+import { stationFor } from '../config/stations'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
 import { useMining } from '../components/analysis/useMining'
@@ -13,16 +14,18 @@ import { IntakeVideo } from '../components/analysis/IntakeVideo'
 import { PassageLine } from '../components/analysis/PassageLine'
 import { Notices } from '../components/analysis/Notices'
 import { AnalyzerHistory } from '../components/analysis/AnalyzerHistory'
-import { sourceFor, SOURCES } from '../components/analysis/sources'
-import SelectionScreen from '../components/selection/SelectionScreen'
-import ModeSelector from '../components/selection/ModeSelector'
+import { sourceFor, SOURCES, DEFAULT_SOURCE } from '../components/analysis/sources'
 import { board } from '../stores/boarding'
-import { useMediaQuery } from '../hooks/useMediaQuery'
 import { parseVideoId } from '../lib/youtube'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { formatTimecode } from '../lib/timecode'
-import { relativeDate } from '../lib/formatDate'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
+import { ChevronIcon, CrossIcon } from '../components/ui/Icons'
+
+const KAISEKI = 'var(--line-kaiseki)'
+// The stepper's dots: past this many stops the count alone says where
+// you are, and the route map below the stage carries every stop.
+const MAX_STOP_DOTS = 12
 
 // ── 解析駅 — one station, three platforms ─────────────────
 // The merge of PhraseAnalyzerScreen and VideoScreen (plan 027). They
@@ -39,30 +42,26 @@ import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
 // The result is one drawing for all three sources (plan 028): the
 // Passage as a 路線図, every Sentence a stop, one of them open. The
 // three intakes are 改札口 (plan 029) -- the writing slip, the photo
-// bench and the subtitle dock -- and since the selection-screen gate
-// replaced the tab rail, exactly one of them is ever mounted: the
-// platform the learner boarded at のりば.
+// bench and the subtitle dock -- and exactly one of them is ever
+// mounted: the platform the segmented control over the page selects.
 export default function AnalyzerScreen({ session }) {
   const navigate = useNavigate()
-  const { t, lang } = useLang()
+  const { t } = useLang()
   const mining = useMining(session)
   const analyzer = useAnalyzerSession(session)
   const playerRef = useRef(null)
 
   // 'text' | 'photo' | 'video' -- which platform the learner is standing
-  // on, or null before they have chosen one. Null means the learner is
-  // still on the concourse: the screen renders the same SelectionScreen
-  // every other section boards through (see the gate below), and the
-  // workbench only mounts once a platform card is picked. Changing
-  // source afterwards goes back through that gate (the stub strip's
-  // one affordance for it); the Passage survives the trip either way,
-  // because it belongs to the hook, not to a platform.
-  const [source, setSource] = useState(null)
-  // The last platform actually boarded, surviving the trip through the
-  // gate (where `source` is null) — what boardPlatform compares
+  // on. The text platform from the first paint (plan 073): the canvas puts
+  // the three intakes on one segmented control over the page, so there
+  // is no gate to board through any more — switching is a mode switch
+  // (see boardPlatform), and the Passage a platform built stays behind
+  // it while you are on it.
+  const [source, setSource] = useState(DEFAULT_SOURCE)
+  // The last platform actually boarded — what boardPlatform compares
   // against to tell a mode SWITCH (clear the workbench) from a
-  // same-mode round trip (keep it).
-  const lastBoardedRef = useRef(null)
+  // same-mode press (keep it).
+  const lastBoardedRef = useRef(DEFAULT_SOURCE)
 
   // The draft text, shared by the 文字 and 写真 platforms on purpose --
   // they were one field on one screen before the merge, and OCR output
@@ -152,13 +151,7 @@ export default function AnalyzerScreen({ session }) {
   // edits spread across two files. See components/analysis/sources.js.
   const platform = sourceFor(source)
 
-  // The route diagram stands beside the stage when there is room for
-  // both, and stacks above it when there is not — the CSS split at
-  // 1100px handles that on its own (the mockup's one drawing at every
-  // width; the strip orientation is retired). This flag survives for
-  // the one thing that is not pure CSS: WordDetail's sheet-vs-panel
-  // choice.
-  const wide = useMediaQuery('(min-width: 1100px)')
+  const station = stationFor('/dictionary/analyzer')
 
   // ── 字幕取り arrival ──
   // The bookmarklet (lib/captionGrab.js) leaves the YouTube page for
@@ -337,7 +330,7 @@ export default function AnalyzerScreen({ session }) {
   // source is null, so by the time a card is picked the state no
   // longer remembers where the learner came from.
   function boardPlatform(key) {
-    if (lastBoardedRef.current !== null && lastBoardedRef.current !== key) {
+    if (lastBoardedRef.current !== key) {
       analyzer.reset()
       setDetail(null)
       setDraft('')
@@ -510,94 +503,12 @@ export default function AnalyzerScreen({ session }) {
     })
   }
 
-  // ── のりば案内 — the mode selection, as a real selection screen ──
-  // The same shell every other section boards through: station plate
-  // overhead (SelectionScreen derives 解析 and its 葡萄色 from the
-  // route), platform cards below, the door on the choice. This is the
-  // ONLY way onto a platform -- the workbench's stub strip states
-  // where you boarded and offers the way back here, replacing the
-  // in-place tab rail the mockup retired.
-  //
-  // The cards are deliberately plain-language-first: the localized
-  // name as the title, the localized hint as the line under it, no
-  // Japanese specimen and no 番線 caption (a decided call — the
-  // learner picking an intake shouldn't need vocabulary to do it).
-  //
-  // Below every hook on purpose (rules of hooks), and above the
-  // notice/announcement block, which dereferences `platform` — a
-  // registry lookup this branch has no key for yet.
-  if (!source) {
-    // The learner's own record on each platform, derived from the
-    // merged history the hook already fetches: sessions are the video
-    // platform's, image-sourced passages the photo's, the rest typed.
-    // This is the right-hand column the density contract asks a
-    // 440px+ card to earn — real figures, not decoration.
-    const bySource = key => analyzer.history.filter(h => (
-      key === 'video'
-        ? h.kind === 'session'
-        : h.kind === 'passage' && (key === 'photo' ? h.source === 'image' : h.source !== 'image')
-    ))
-
-    // Reopening from the concourse is boarding + opening in one act:
-    // the row says which platform it came from, so the learner does
-    // not have to know that a 写 stamp means "board Photo first".
-    function openHistoryFromGate(entry) {
-      boardPlatform(entry.kind === 'session' ? 'video' : entry.source === 'image' ? 'photo' : 'text')
-      openHistoryEntry(entry)
-    }
-
-    return (
-      <div className="screen">
-        <ScreenBar onBack={() => navigate('/dictionary')} title={t.analyzerTitle} />
-        <main id="main-content">
-          <SelectionScreen>
-            <ModeSelector
-              unit={false}
-              modes={SOURCES.map(s => {
-                const rows = bySource(s.key)
-                return {
-                  key: s.key,
-                  label: t[s.label],
-                  desc: t[s.hint],
-                  jp: s.jp,
-                  aside: (
-                    <>
-                      <span className="platform-card__figure">
-                        <span className="platform-card__num">{rows.length}</span>
-                        <span className="platform-card__cap">{t.passagesCap}</span>
-                      </span>
-                      {rows[0]?.createdAt && (
-                        <span className="platform-card__figure">
-                          <span className="platform-card__num platform-card__num--date">
-                            {relativeDate(rows[0].createdAt, lang, t)}
-                          </span>
-                          <span className="platform-card__cap">{t.lastUsedCap}</span>
-                        </span>
-                      )}
-                    </>
-                  ),
-                }
-              })}
-              onSelect={key => board(() => boardPlatform(key))}
-            />
-            {/* 運行履歴 on the concourse, not under the workbench: a
-                recent Passage is one tap from the front door, and a
-                row reopens it on the platform it came from. */}
-            <div className="anl-concourse">
-              <AnalyzerHistory
-                t={t}
-                entries={analyzer.history}
-                onOpen={openHistoryFromGate}
-                onDelete={entry => analyzer.deleteHistoryEntry(entry)}
-                lastDeleted={analyzer.lastDeleted}
-                onUndo={analyzer.undoDelete}
-                onDismissUndo={analyzer.dismissUndo}
-              />
-            </div>
-          </SelectionScreen>
-        </main>
-      </div>
-    )
+  // The rows of history, reopened where they came from: a row says
+  // which platform it belongs to, so the learner does not have to know
+  // that a photo passage means "board Photo first".
+  function openHistoryFromRow(entry) {
+    boardPlatform(entry.kind === 'session' ? 'video' : entry.source === 'image' ? 'photo' : 'text')
+    openHistoryEntry(entry)
   }
 
   const focused = analyzer.focused
@@ -631,402 +542,418 @@ export default function AnalyzerScreen({ session }) {
     : analyzer.lastDeleted ? t.entryDeleted
     : t[platform.lead]
 
+  // The page is the intake until a Passage is ready, and the result
+  // once one is: the canvas's AnalyzerResult, with ‹ Analyzer as the
+  // way back to the intake (the Passage survives the trip — the
+  // Resume row brings it back).
+  const showResult = ready && !intakeOpen
+  const isI1 = !!focused && !focused.foreign && focused.unknown_count === 1
+
   return (
-    <div className="screen">
-      {/* Back steps out to the platform choice, not straight home —
-          the same one-layer-at-a-time retreat every other section's
-          selection flow makes. The Passage survives the trip AS LONG
-          AS the learner re-boards the same platform; picking a
-          different one is a mode switch and starts fresh (see
-          boardPlatform). */}
-      <ScreenBar onBack={() => setSource(null)} title={t.analyzerTitle} />
-
-      <main id="main-content" className="container page-pad analyzer">
-        <StationHeader />
-
-        {/* ── The boarding stub ──
-            Where you boarded, as a fact rather than a menu: the choice
-            was made at the gate, so up here it is one plate and the
-            ways out. 乗換 goes back through the gate (the Passage
-            survives a same-platform round trip; boarding a DIFFERENT
-            platform clears the workbench — see boardPlatform); 出場
-            clears; the reopen affordance appears only once a result
-            has folded the intake away, which is the only time it has
-            a job. */}
-        <div className="anl-stub">
-          <span className="anl-stub__plate">
-            <span className="anl-stub__no">{t.platformNumber(platform.no)}</span>
-            <span className="anl-stub__name">{t[platform.label]}</span>
-            <span className="anl-stub__jp" lang="ja">{platform.jp}</span>
+    <main id="main-content" className="dictionary analyzer" style={{ '--line-color': KAISEKI }}>
+      {showResult ? (
+        /* ── The result's head ──
+           The first sentence names the Passage, the sub counts it and
+           grades the stop you are on, Kept says the stop is kept, and
+           Clear empties the analyser (see clearPassage). */
+        <div className="stage__head anl-head">
+          <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>
+          <span className="stage__where">
+            <h1 className="stage__where-jp" lang="ja">{sentences[0]?.text}</h1>
+            <span className="stage__where-latin">
+              {t.sentencesCount(sentences.length)}
+              {focused.level ? ` · ${focused.level}` : ''}
+            </span>
           </span>
-          <span className="anl-stub__spacer" aria-hidden="true" />
-          {ready && !intakeOpen && (
-            <button
-              type="button"
-              className="anl-ghost anl-stub__reopen"
-              onClick={() => setIntakeOpen(true)}
-            >
-              {t.reopenIntake}
-            </button>
-          )}
-          <button
-            type="button"
-            className="anl-ghost anl-stub__change"
-            onClick={() => setSource(null)}
-          >
-            {t.changeSource}
+          {analyzer.kept.has(focused.text) && <span className="anl-kept">{t.keptTitle}</span>}
+          <button type="button" className="anl-clear" onClick={clearPassage} aria-label={t.clearPassage} title={t.clearPassageHint}>
+            <CrossIcon size={14} />
           </button>
-          {(status !== 'idle' || draft) && (
-            <button
-              type="button"
-              className="anl-ghost anl-stub__clear"
-              onClick={clearPassage}
-              title={t.clearPassageHint}
-            >
-              {t.clearPassage}
+        </div>
+      ) : (
+        <Bar
+          code={station.code}
+          color={KAISEKI}
+          title={t.analyzerTitle}
+          aside={<Leave onClick={() => navigate('/dictionary')}>{t.dictionaryTitle}</Leave>}
+        />
+      )}
+
+      {!showResult && (
+        <>
+          {/* ── The three platforms, on one control (canvas Analyzer) ──
+              Choosing another is a mode switch: the workbench clears
+              (see boardPlatform), because a Passage typed on Text has
+              no business waiting behind the Photo bench. */}
+          <Seg
+            full
+            className="seg--kaiseki anl-sources"
+            label={t.changeSource}
+            value={source}
+            onChange={key => board(() => boardPlatform(key))}
+            options={SOURCES.map(s => ({ key: s.key, label: t[s.label] }))}
+          />
+
+          {/* A finished Passage waits behind the intake while you are
+              here; this is the way back to it without analysing again. */}
+          {ready && (
+            <button type="button" className="btn-secondary anl-resume" onClick={() => setIntakeOpen(false)}>
+              {t.analysisResult} · {t.sentencesCount(sentences.length)}
             </button>
           )}
-        </div>
 
-        <div
-          id={`anl-panel-${source}`}
-          tabIndex={-1}
-          className="anl-panel"
-          hidden={ready && !intakeOpen}
-        >
-          {/* The panel and its head are the same object on all three
-              platforms, so they live here and take their name and their
-              opening line from the registry. The intakes below are only
-              their own bodies. */}
-          <div className="anl-intake__head">
-            <span className="anl-intake__jp" lang="ja">{platform.jp}</span>
-            <span className="anl-intake__lead">{t[platform.lead]}</span>
-          </div>
-
-          {source === 'text' && (
-            <IntakeText
-              t={t}
-              value={draft}
-              onChange={editDraft}
-              onAnalyze={analyzeDraft}
-              busy={busy}
-            />
-          )}
-          {source === 'photo' && (
-            <IntakePhoto
-              t={t}
-              session={session}
-              value={draft}
-              onChange={editDraft}
-              onTextRecognized={text => { setDraft(text); setFromImage(true) }}
-              onAnalyze={analyzeDraft}
-              busy={busy}
-              fromImage={fromImage}
-            />
-          )}
-          {source === 'video' && (
-            <IntakeVideo
-              t={t}
-              url={videoUrl}
-              onUrlChange={setVideoUrl}
-              onStartFromFile={startVideoFromFile}
-            />
-          )}
-        </div>
-
-        <Notices notices={notices} announcement={announcement} t={t} />
-
-        {/* ── 路線図 — the Passage as a line ──
-            One drawing for all three sources (plan 028). The line is
-            every Sentence as a stop; the stage is the one you are
-            standing at. A video Passage additionally carries the player,
-            whose clock moves the same position the line reads from. */}
-        {status === 'ready' && focused && (
           <div
-            ref={resultsRef}
-            className="anl-results"
-            // -1, not 0: this is a focus TARGET for the arrival
-            // transition, not a tab stop the learner should have to
-            // walk past on every pass through the screen.
+            id={`anl-panel-${source}`}
             tabIndex={-1}
-            role="region"
-            aria-label={t.analysisResult}
+            className="anl-panel"
           >
-            {/* A route diagram of one stop is a joke at the reader's
-                expense -- below the threshold the stage takes the column
-                on its own. */}
+            {/* The intakes are only their own bodies; the panel and its
+                opening line come from the registry, so a fourth source
+                is one entry there. */}
+            <p className="hint anl-panel__lead">{t[platform.lead]}</p>
+
+            {source === 'text' && (
+              <IntakeText
+                t={t}
+                value={draft}
+                onChange={editDraft}
+                onAnalyze={analyzeDraft}
+                busy={busy}
+              />
+            )}
+            {source === 'photo' && (
+              <IntakePhoto
+                t={t}
+                session={session}
+                value={draft}
+                onChange={editDraft}
+                onTextRecognized={text => { setDraft(text); setFromImage(true) }}
+                onAnalyze={analyzeDraft}
+                busy={busy}
+                fromImage={fromImage}
+              />
+            )}
+            {source === 'video' && (
+              <IntakeVideo
+                t={t}
+                url={videoUrl}
+                onUrlChange={setVideoUrl}
+                onStartFromFile={startVideoFromFile}
+              />
+            )}
+          </div>
+        </>
+      )}
+
+      <Notices notices={notices} announcement={announcement} t={t} />
+
+      {/* History, under the intake: a recent Passage is one tap from the
+          field, and a row reopens it on the platform it came from. */}
+      {!showResult && (
+        <AnalyzerHistory
+          t={t}
+          entries={analyzer.history}
+          onOpen={openHistoryFromRow}
+          onDelete={entry => analyzer.deleteHistoryEntry(entry)}
+          lastDeleted={analyzer.lastDeleted}
+          onUndo={analyzer.undoDelete}
+          onDismissUndo={analyzer.dismissUndo}
+        />
+      )}
+
+      {/* ── The result (canvas AnalyzerResult) ──
+          The stepper walks the stops, the line shows the sentence as
+          tokens, the card the one on the stage, the dials the view and
+          the furigana; the route map with its filters and pins stands
+          beside the stage on a wide screen and below it on a phone. A
+          video Passage additionally carries the player, whose clock
+          moves the same position the stepper reads from. */}
+      {showResult && focused && (
+        <div
+          ref={resultsRef}
+          className="anl-results"
+          // -1, not 0: this is a focus TARGET for the arrival
+          // transition, not a tab stop the learner should have to
+          // walk past on every pass through the screen.
+          tabIndex={-1}
+          role="region"
+          aria-label={t.analysisResult}
+        >
+          <div className="anl-stage" data-furigana={furigana}>
             {sentences.length > 1 && (
-              <div className="anl-railcol">
-                {/* ── The working rail head ──
-                    Search and filters over the stops, with the count
-                    always visible so a filter that hides everything
-                    says so ("0 / 47") instead of looking like a lost
-                    Passage. Client-side: the Passage is in hand. */}
-                <div className="anl-railhead">
-                  <input
-                    type="search"
-                    className="anl-railhead__search"
-                    value={stopQuery}
-                    onChange={e => setStopQuery(e.target.value)}
-                    placeholder={t.searchPassage}
-                    aria-label={t.searchPassage}
-                    lang="ja"
-                  />
-                  <div className="anl-chips" role="group" aria-label={t.filterStops}>
-                    {[
-                      ['all', t.filterAll],
-                      ['kept', t.filterKept],
-                      ['i1', 'i+1'],
-                      ['new', t.filterHasNew],
-                    ].map(([key, label]) => (
-                      <button
-                        key={key}
-                        type="button"
-                        className="anl-chip"
-                        aria-pressed={stopFilter === key}
-                        onClick={() => setStopFilter(key)}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="anl-railfoot">
-                    <span
-                      className="anl-railfoot__count"
-                      aria-label={t.stopsShown(visibleStops.length, sentences.length)}
-                    >
-                      {visibleStops.length} / {sentences.length}
-                    </span>
-                    {/* i+1 is the app's highest-value signal, and on a
-                        long track keeping each one by hand is N trips
-                        down the line. Disabled once they are all kept:
-                        the button's job is done and it says so. */}
-                    {iPlusOneStops.length > 0 && (
-                      <button
-                        type="button"
-                        className="anl-ghost"
-                        onClick={keepAllIPlusOne}
-                        disabled={unkeptIPlusOne.length === 0}
-                      >
-                        {t.keepAllIPlusOne}
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <PassageLine
-                  sentences={visibleStops.map(v => v.s)}
-                  // Position WITHIN the filtered view; -1 when the
-                  // focused stop is filtered out, which simply draws no
-                  // current marker -- the stage still shows it.
-                  activeIndex={visibleStops.findIndex(v => v.i === focusIndex)}
-                  onSelect={vi => goToStop(visibleStops[vi].i)}
-                  // Only auto-scroll when something OTHER than the learner
-                  // is moving the marker. A stop they just clicked is
-                  // already under their pointer; scrolling it "into view"
-                  // moves the list out from under them.
-                  scrollOnChange={playerVideoId ? followPlayback : false}
-                  t={t}
-                  kept={analyzer.kept}
-                  onKeep={vi => analyzer.keepSentence(visibleStops[vi].i)}
-                />
+              <div className="anl-stepper">
+                <button
+                  type="button"
+                  className="anl-stepper__btn"
+                  disabled={focusIndex === 0}
+                  onClick={() => goToStop(focusIndex - 1)}
+                  aria-label={t.stopNumber(focusIndex, sentences.length)}
+                >
+                  <ChevronIcon direction="left" size={16} />
+                </button>
+                {sentences.length <= MAX_STOP_DOTS && (
+                  <span className="anl-stops" aria-hidden="true">
+                    {sentences.map((_, i) => <i key={i} className={`anl-stops__dot${i <= focusIndex ? ' anl-stops__dot--on' : ''}`} />)}
+                  </span>
+                )}
+                <span className="anl-stepper__count">
+                  {focusIndex + 1} / {sentences.length}
+                  {isI1 && <> · <i className="anl-stepper__i1">i+1</i></>}
+                </span>
+                <button
+                  type="button"
+                  className="anl-stepper__btn"
+                  disabled={focusIndex === sentences.length - 1}
+                  onClick={() => goToStop(focusIndex + 1)}
+                  aria-label={t.stopNumber(focusIndex + 2, sentences.length)}
+                >
+                  <ChevronIcon direction="right" size={16} />
+                </button>
               </div>
             )}
 
-            <div className="anl-stage" data-furigana={furigana}>
-              {playerVideoId && (
-                <div className="anl-player">
-                  <VideoPlayer
-                    ref={playerRef}
-                    videoId={playerVideoId}
-                    onTimeUpdate={handleTimeUpdate}
-                    onPlayingChange={setPlaying}
-                  />
-                  {/* The transport bar. Scaled to the Passage's own cue
-                      window, and the track is a mouse convenience only
-                      (aria-hidden): the route line is the accessible
-                      seek, stop by named stop. */}
-                  <div className="anl-player__bar">
-                    <button
-                      type="button"
-                      className="anl-player__btn"
-                      aria-label={playing ? t.pauseVideo : t.playVideo}
-                      onClick={togglePassagePlayback}
-                    >
-                      {playing ? '❚❚' : '▶'}
-                    </button>
-                    {hasWindow && (
-                      <>
-                        <div className="anl-player__track" onClick={seekFromTrack} aria-hidden="true">
-                          <span className="anl-player__fill" style={{ width: `${trackPct}%` }} />
-                        </div>
-                        <span className="anl-player__time">
-                          {formatTimecode(Math.max(0, playTime - windowStart))} / {formatTimecode(windowEnd - windowStart)}
-                        </span>
-                      </>
-                    )}
-                    <button
-                      type="button"
-                      className={`anl-follow${followPlayback ? ' anl-follow--on' : ''}`}
-                      aria-pressed={followPlayback}
-                      onClick={() => setFollowPlayback(f => !f)}
-                    >
-                      <span className="anl-follow__label">{t.followPlayback}</span>
-                      <span className="anl-follow__jp" lang="ja">追従</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* A line the app cannot take apart -- a Korean verse, an
-                  English ad-lib. It is still part of the track the
-                  learner is reading along with, so it is shown as it
-                  appears in the file and simply says why there is no
-                  breakdown under it. */}
-              {focused.foreign ? (
-                <div className="anl-foreign">
-                  <p className="anl-foreign__text">{focused.text}</p>
-                  <p className="anl-foreign__note">{t.notJapaneseLine}</p>
-                </div>
-              ) : focused.available === false ? (
-                <div className="anl-panel anl-notice-line anl-notice-line--bad">{t.sentenceAnalysisUnavailable}</div>
-              ) : (
-                <>
-                  {/* One Token at a time on the stage (the mockup's
-                      arrangement — the dials sit BETWEEN the sentence
-                      pane and the card, so they are handed to the
-                      breakdown as its `controls` slot), or every Token
-                      at once as the mockup's table. Both are the same
-                      'stage' layout: the sentence pane and the dials
-                      stay put, only the half below them switches. */}
-                  <SentenceBreakdown
-                    analysis={focused}
-                    t={t}
-                    layout="stage"
-                    tokenView={view}
-                    onJumpToToken={i => { setTokenIndex(i); setView('stepper') }}
-                    index={tokenIndex}
-                    setIndex={setTokenIndex}
-                    onTokenClick={openVocabDetail}
-                    onKanjiClick={openKanjiDetail}
-                    mining={mining}
-                    controls={
-                      /* ── The stage's two dials ──
-                         View: carousel or the full token list.
-                         Furigana: readings over everything, only over
-                         words the SRS hasn't mastered (the default),
-                         or none — applied by the data-furigana
-                         attribute on the stage, so one rule governs
-                         every phrase line inside it. */
-                      <div className="anl-stagectl">
-                        <div className="anl-stagectl__group">
-                          <span className="anl-stagectl__label" id="anl-view-label">{t.viewLabel}</span>
-                          <div className="anl-seg" role="group" aria-labelledby="anl-view-label">
-                            {[
-                              ['stepper', t.viewStepper],
-                              ['table', t.viewTable],
-                            ].map(([key, label]) => (
-                              <button
-                                key={key}
-                                type="button"
-                                className="anl-seg__opt"
-                                aria-pressed={view === key}
-                                onClick={() => setView(key)}
-                              >
-                                {label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="anl-stagectl__group">
-                          <span className="anl-stagectl__label" id="anl-furigana-label">{t.furiganaLabel}</span>
-                          <div className="anl-seg" role="group" aria-labelledby="anl-furigana-label">
-                            {[
-                              ['all', t.furiganaAll],
-                              ['unknown', t.furiganaUnknown],
-                              ['none', t.furiganaNone],
-                            ].map(([key, label]) => (
-                              <button
-                                key={key}
-                                type="button"
-                                className="anl-seg__opt"
-                                aria-pressed={furigana === key}
-                                onClick={() => setFurigana(key)}
-                              >
-                                {label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <span className="anl-stagectl__meta">
-                          {t.tokensCount(focused.tokens?.length ?? 0)}
-                          {focused.level ? ` · ${focused.level}` : ''}
-                        </span>
+            {playerVideoId && (
+              <div className="anl-player">
+                <VideoPlayer
+                  ref={playerRef}
+                  videoId={playerVideoId}
+                  onTimeUpdate={handleTimeUpdate}
+                  onPlayingChange={setPlaying}
+                />
+                {/* The transport bar. Scaled to the Passage's own cue
+                    window, and the track is a mouse convenience only
+                    (aria-hidden): the route line is the accessible
+                    seek, stop by named stop. */}
+                <div className="anl-player__bar">
+                  <button
+                    type="button"
+                    className="anl-player__btn"
+                    aria-label={playing ? t.pauseVideo : t.playVideo}
+                    onClick={togglePassagePlayback}
+                  >
+                    {playing ? '❚❚' : '▶'}
+                  </button>
+                  {hasWindow && (
+                    <>
+                      <div className="anl-player__track" onClick={seekFromTrack} aria-hidden="true">
+                        <span className="anl-player__fill" style={{ width: `${trackPct}%` }} />
                       </div>
-                    }
-                  />
-                  {/* The control does not disappear once an explanation
-                      exists. The backend caches per (phrase, lang), so a
-                      learner who switches interface language can get the
-                      explanation in the new one -- and it used to be
-                      unreachable, because the only affordance was gated
-                      on `!focused.explanation`.
-
-                      The explanation TEXT lives here too, above the
-                      control that bought it (the mockup's explain__body)
-                      — not inside the sentence pane, which holds the
-                      sentence and nothing else. */}
-                  <div className="anl-panel anl-explainbox">
-                    {focused.explanation && (
-                      <p className="anl-explain__body">{focused.explanation}</p>
-                    )}
-                    <div className="anl-explain">
-                      <span className={`anl-explain__hint${explainError[focusIndex] ? ' anl-explain__hint--bad' : ''}`}>
-                        {explainError[focusIndex]
-                          ? explainError[focusIndex]
-                          : focused.explanation
-                            ? t.explanationBought
-                            : t.noExplanationYet}
+                      <span className="anl-player__time">
+                        {formatTimecode(Math.max(0, playTime - windowStart))} / {formatTimecode(windowEnd - windowStart)}
                       </span>
-                      <button
-                        onClick={() => analyzer.explain(focusIndex)}
-                        disabled={!!explaining[focusIndex]}
-                        className="anl-ghost anl-explain__btn"
-                      >
-                        {explaining[focusIndex]
-                          ? t.explaining
-                          : focused.explanation
-                            ? t.explainAgain
-                            : t.explainSentence}
-                      </button>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    className={`anl-follow${followPlayback ? ' anl-follow--on' : ''}`}
+                    aria-pressed={followPlayback}
+                    onClick={() => setFollowPlayback(f => !f)}
+                  >
+                    <span className="anl-follow__label">{t.followPlayback}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* A line the app cannot take apart -- a Korean verse, an
+                English ad-lib. It is still part of the track the
+                learner is reading along with, so it is shown as it
+                appears in the file and simply says why there is no
+                breakdown under it. */}
+            {focused.foreign ? (
+              <div className="anl-foreign">
+                <p className="anl-foreign__text">{focused.text}</p>
+                <p className="anl-foreign__note">{t.notJapaneseLine}</p>
+              </div>
+            ) : focused.available === false ? (
+              <div className="anl-notice-line anl-notice-line--bad">{t.sentenceAnalysisUnavailable}</div>
+            ) : (
+              <>
+                {/* One Token at a time on the stage (the card), or every
+                    Token at once as the table. Both are the same 'stage'
+                    layout: the line and the dials stay put, only the
+                    half below them switches. */}
+                <SentenceBreakdown
+                  analysis={focused}
+                  t={t}
+                  layout="stage"
+                  tokenView={view}
+                  onJumpToToken={i => { setTokenIndex(i); setView('stepper') }}
+                  index={tokenIndex}
+                  setIndex={setTokenIndex}
+                  onTokenClick={openVocabDetail}
+                  onKanjiClick={openKanjiDetail}
+                  mining={mining}
+                  controls={
+                    /* ── The stage's two dials ──
+                       Furigana: readings over everything, only over
+                       words the SRS hasn't mastered (the default), or
+                       none — applied by the data-furigana attribute on
+                       the stage, so one rule governs every line inside
+                       it. View: the card or the full token table. */
+                    <div className="anl-dials">
+                      <div className="anl-dial">
+                        <span className="cap anl-dial__cap">{t.furiganaCap}</span>
+                        <Seg
+                          full
+                          className="seg--kaiseki"
+                          label={t.furiganaLabel}
+                          value={furigana}
+                          onChange={setFurigana}
+                          options={[
+                            { key: 'all', label: t.furiganaAll },
+                            { key: 'unknown', label: t.furiganaUnknown },
+                            { key: 'none', label: t.furiganaNone },
+                          ]}
+                        />
+                      </div>
+                      <div className="anl-dial">
+                        <span className="cap anl-dial__cap">{t.viewLabel}</span>
+                        <Seg
+                          full
+                          className="seg--kaiseki"
+                          label={t.viewLabel}
+                          value={view}
+                          onChange={setView}
+                          options={[
+                            { key: 'stepper', label: t.viewStepper },
+                            { key: 'table', label: t.viewTable },
+                          ]}
+                        />
+                      </div>
                     </div>
+                  }
+                />
+                {/* The control does not disappear once an explanation
+                    exists. The backend caches per (phrase, lang), so a
+                    learner who switches interface language can get the
+                    explanation in the new one -- and it used to be
+                    unreachable, because the only affordance was gated
+                    on `!focused.explanation`. The explanation TEXT
+                    lives here too, above the control that bought it. */}
+                <div className="anl-explainbox">
+                  {focused.explanation && (
+                    <p className="anl-explain__body">{focused.explanation}</p>
+                  )}
+                  <div className="anl-explain">
+                    <span className={`hint anl-explain__hint${explainError[focusIndex] ? ' anl-explain__hint--bad' : ''}`}>
+                      {explainError[focusIndex]
+                        ? explainError[focusIndex]
+                        : focused.explanation
+                          ? t.explanationBought
+                          : t.noExplanationYet}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => analyzer.explain(focusIndex)}
+                      disabled={!!explaining[focusIndex]}
+                      className="btn-secondary anl-explain__btn"
+                    >
+                      {explaining[focusIndex]
+                        ? t.explaining
+                        : focused.explanation
+                          ? t.explainAgain
+                          : t.explainSentence}
+                    </button>
                   </div>
-                  {/* The keyboard map, printed the way the mockup does:
-                      the stage IS a keyboard instrument, and nothing
-                      else on the screen says so. */}
-                  <div className="anl-kbd" aria-hidden="true">
-                    <span><kbd>←</kbd><kbd>→</kbd> {t.kbdToken}</span>
-                    <span><kbd>↑</kbd><kbd>↓</kbd> {t.kbdSentence}</span>
-                    {playerVideoId && <span><kbd>Space</kbd> {t.kbdPlay}</span>}
-                  </div>
-                </>
-              )}
-
-            </div>
+                </div>
+                {/* The keyboard map — the stage IS a keyboard instrument
+                    on a desktop, and nothing else on the screen says
+                    so. Hidden on a phone (index.css). */}
+                <div className="anl-kbd" aria-hidden="true">
+                  <span><kbd>←</kbd><kbd>→</kbd> {t.kbdToken}</span>
+                  <span><kbd>↑</kbd><kbd>↓</kbd> {t.kbdSentence}</span>
+                  {playerVideoId && <span><kbd>Space</kbd> {t.kbdPlay}</span>}
+                </div>
+              </>
+            )}
           </div>
-        )}
 
-        {/* 運行履歴 lives on the concourse now (the selection screen
-            above), where a recent Passage is one tap from the front
-            door — not below a finished analysis where finding it
-            meant scrolling past the very thing it would replace. */}
-      </main>
+          {/* A route diagram of one stop is a joke at the reader's
+              expense -- below the threshold the stage takes the column
+              on its own. */}
+          {sentences.length > 1 && (
+            <div className="anl-railcol">
+              {/* ── The working rail head ──
+                  Search and filters over the stops, with the count
+                  always visible so a filter that hides everything
+                  says so ("0 / 47") instead of looking like a lost
+                  Passage. Client-side: the Passage is in hand. */}
+              <div className="anl-railhead">
+                <input
+                  type="search"
+                  className="field anl-railhead__search"
+                  value={stopQuery}
+                  onChange={e => setStopQuery(e.target.value)}
+                  placeholder={t.searchPassage}
+                  aria-label={t.searchPassage}
+                  lang="ja"
+                />
+                <div className="chip-row anl-chips" role="group" aria-label={t.filterStops}>
+                  {[
+                    ['all', t.filterAll],
+                    ['kept', t.filterKept],
+                    ['i1', 'i+1'],
+                    ['new', t.filterHasNew],
+                  ].map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`chip anl-chip${stopFilter === key ? ' chip--on' : ''}`}
+                      aria-pressed={stopFilter === key}
+                      onClick={() => setStopFilter(key)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="anl-railfoot">
+                  <span
+                    className="anl-railfoot__count"
+                    aria-label={t.stopsShown(visibleStops.length, sentences.length)}
+                  >
+                    {visibleStops.length} / {sentences.length}
+                  </span>
+                  {/* i+1 is the app's highest-value signal, and on a
+                      long track keeping each one by hand is N trips
+                      down the line. Disabled once they are all kept:
+                      the button's job is done and it says so. */}
+                  {iPlusOneStops.length > 0 && (
+                    <button
+                      type="button"
+                      className="anl-ghost"
+                      onClick={keepAllIPlusOne}
+                      disabled={unkeptIPlusOne.length === 0}
+                    >
+                      {t.keepAllIPlusOne}
+                    </button>
+                  )}
+                </div>
+              </div>
+              <PassageLine
+                sentences={visibleStops.map(v => v.s)}
+                // Position WITHIN the filtered view; -1 when the
+                // focused stop is filtered out, which simply draws no
+                // current marker -- the stage still shows it.
+                activeIndex={visibleStops.findIndex(v => v.i === focusIndex)}
+                onSelect={vi => goToStop(visibleStops[vi].i)}
+                // Only auto-scroll when something OTHER than the learner
+                // is moving the marker. A stop they just clicked is
+                // already under their pointer; scrolling it "into view"
+                // moves the list out from under them.
+                scrollOnChange={playerVideoId ? followPlayback : false}
+                t={t}
+                kept={analyzer.kept}
+                onKeep={vi => analyzer.keepSentence(visibleStops[vi].i)}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {detail && (
-        // The screen has computed `wide` since plan 030; WordDetail has
-        // supported a side panel since the merge. They were never wired
-        // together, so a 27-inch monitor got a phone bottom sheet.
-        <WordDetail detail={detail} t={t} isMobile={!wide} onClose={closeDetail} mining={mining} />
+        <WordDetail detail={detail} t={t} onClose={closeDetail} mining={mining} />
       )}
-    </div>
+    </main>
   )
 }

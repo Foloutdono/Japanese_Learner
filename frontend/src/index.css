@@ -636,9 +636,6 @@
 }
 
 
-
-
-
 @media (max-width: 560px) {
   .exam-flyer__dates { min-width: 0; }
   .exam-generating { padding: 44px 12px; }
@@ -865,7 +862,6 @@
 }
 
 
-
 @media (prefers-reduced-motion: reduce) {
   .exam-score-ring__fill { transition: none; }
 }
@@ -908,100 +904,6 @@
 
    Written by plans 027-030; each block below names its plan. */
 
-/* ── 解析 — the analyser (plan 027) ────────────────────────
-   ONE rhythm for the whole screen, and one rule: a stack's parent
-   owns the gap. Children carry no margins for spacing, and nothing
-   here uses a negative margin.
-
-   The screen this replaces had six paddings for one card object
-   (.phrase-input-card 20/24, .phrase-history-card 16/24,
-   .phrase-result-card 20/24, .phrase-word-card 16/20,
-   .phrase-error-card 16, and .card itself 15/24) plus a -12px margin
-   correcting the box above it. That is what padding drift looks
-   like, and tokens are how it stops.
-
-   The clamps scale continuously instead of stepping at a
-   breakpoint, so there is no width at which the screen looks
-   half-adjusted. */
-/* The tokens live on BOTH roots the analyser renders under: the
-   workbench (.analyzer) and the selection-screen concourse
-   (.anl-concourse), where 運行履歴 lives. Scoped to the workbench
-   alone, every anl-* rule on the concourse resolved its padding to
-   nothing — the unpadded history panel was exactly that. */
-.analyzer,
-.anl-concourse {
-  --anl-gap:          clamp(16px, 1.2vw + 10px, 24px);
-  --anl-pad-inline:   clamp(16px, 1.6vw + 10px, 28px);
-  --anl-pad-block:    clamp(18px, 1.2vw + 12px, 26px);
-  --anl-radius:       var(--surface-radius);
-}
-
-.analyzer {
-  display: flex;
-  flex-direction: column;
-  gap: var(--anl-gap);
-}
-
-/* The intake cards still carry their own pre-merge margins (plan 029
-   retires them). Until then, zero the bottom margin inside .analyzer
-   so the parent's gap is the only thing setting the rhythm -- two
-   spacing systems stacked is exactly the drift this block exists to
-   end. */
-.analyzer > *,
-.analyzer .card { margin-bottom: 0; }
-
-/* Every panel on this screen is the same piece of material. */
-.anl-panel {
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--anl-radius);
-  padding: var(--anl-pad-block) var(--anl-pad-inline);
-}
-
-/* ── The boarding stub ──
-   Where you boarded, stated as one plate: the platform was chosen at
-   the selection-screen gate (the のりば every section shares), so up
-   here it is a fact and the ways out, not a menu. Replaces the
-   three-sign tab rail the mockup round retired. */
-.anl-stub {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  flex-wrap: wrap;
-}
-.anl-stub__plate {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--sp-3);
-  padding: var(--sp-2) var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  /* The one place this strip carries the line pigment: the same
-     left-edge rail every coloured row in the app uses. */
-  border-left: 3px solid var(--line-color, var(--line-kaiseki));
-  border-radius: var(--r-plate);
-}
-.anl-stub__no {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--line-kaiseki) 70%, var(--text-primary));
-  font-variant-numeric: tabular-nums;
-}
-.anl-stub__name {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-body);
-}
-.anl-stub__jp {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
-.anl-stub__spacer { flex: 1; }
 
 /* The workbench's quiet button — the stub's exits and the working
    rail's bulk action are the same idiom: a ghost beside content, never
@@ -1023,12 +925,6 @@
 .anl-ghost:hover:not(:disabled) {
   color: var(--text-primary);
   border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line));
-}
-/* 出場 clears a finished Passage — the one destructive exit, so its
-   approach colour says so where the others tint toward the line. */
-.anl-stub__clear:hover:not(:disabled) {
-  color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 50%, transparent);
 }
 
 /* ── The working rail (the control-room half of the mockup) ──
@@ -1088,29 +984,6 @@
   color: var(--text-secondary);
 }
 
-/* ── The stage's two dials — view and ふりがな ──
-   Small segmented pills, hairline-divided like the rating bar, sized
-   to sit above the breakdown without competing with it. */
-.anl-stagectl {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-5) var(--sp-7);
-  flex-wrap: wrap;
-}
-.anl-stagectl__group {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-}
-/* The mockup's stagectl__label: a quiet WORD (View, Furigana), not a
-   tracked micro-caption fighting the options beside it. */
-.anl-stagectl__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--text-secondary);
-}
 .anl-seg {
   display: inline-flex;
   border: 1px solid var(--surface-line);
@@ -1140,148 +1013,6 @@
   outline-offset: -2px;
 }
 
-/* ── Smart furigana ──
-   One attribute on the stage governs every phrase line inside it.
-   'unknown' bares only the words the SRS has MASTERED (the
-   .word-span--known class SentenceBreakdown stamps) -- readings stay
-   exactly where they are still needed, which is the mode the toggle
-   defaults to. Scoped to .phrase-line so a TokenCard's own reading
-   row and the WordDetail sheet are untouched.
-
-   :where() on purpose, not decoration: it zeroes the scope's
-   specificity so these stay (0,0,1) like every other `rt` rule in the
-   sheet -- without it they outrank the dictionary's later rt rules
-   and trip the no-descending-specificity ratchet. Nothing contests
-   `display` on an rt, so zero specificity loses nothing. */
-:where(.anl-stage[data-furigana="none"] .phrase-line) rt { display: none; }
-:where(.anl-stage[data-furigana="unknown"] .phrase-line .word-span--known) rt { display: none; }
-
-/* Right edge of the dials row: how much the focused Sentence holds. */
-.anl-stagectl__meta {
-  margin-left: auto;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-
-/* ── The sentence pane (stage layout) ──
-   The Sentence as its own surface panel, read as a sentence: primary
-   ink throughout, the SRS speaking through a 2px underline per word
-   (--word-color, set inline from the same STATUS_COLORS the rest of
-   the analysis UI uses) and through the ruby the furigana dial
-   governs. Mastered and unmatched tokens carry no rule — the
-   underline marks work left to do, not vocabulary in general. */
-/* The stage breakdown owns the rhythm of its three bands — pane,
-   dials, card — the same way every other stack here works: the parent
-   carries the gap, the children carry none. */
-.anl-stagebd {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-5);
-}
-.anl-sentence {
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--anl-radius);
-  padding: var(--anl-pad-block) var(--anl-pad-inline);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
-/* Two classes, not one: the shared .phrase-line/.rdg-breakdown-line
-   bases sit LATER in this sheet and would otherwise win the shared
-   properties back (justify-content, margin, gap) on source order.
-
-   A PARAGRAPH, not a flex row (the mockup's .sent__jp): flex spaced
-   every token apart and stretched each one to the full 2.3 line box,
-   which put the 2px rule a whole line-height below the glyphs and
-   made the focus tint a floor-to-ceiling block. Inline flow is what
-   makes the sentence read as a sentence. */
-.anl-stagebd .anl-sentence__jp {
-  display: block;
-  margin-bottom: 0;
-  font-family: var(--font-jp);
-  font-size: var(--fs-sentence-fluid);
-  /* The mockup's 2.3, not a tighter one: the ruby needs the headroom
-     or it stacks into the wrapped line above it. */
-  line-height: 2.3;
-  letter-spacing: var(--tr-term);
-}
-/* Full reset first: these are bare <button>s on purpose (see the
-   stage layout's comment — the word-span bases carry the stepper's
-   diagnostic look), so the global button padding/ground must go
-   before the pane's own dress goes on.
-
-   inline-block with a tight internal line-height: the paragraph's
-   2.3 strut still spaces the wrapped LINES, while each token's box
-   hugs its own glyphs (plus ruby) — so the underline and the focus
-   tint sit ON the word, exactly as the mockup draws them. */
-.anl-stagebd .anl-sentence__tk {
-  display: inline-block;
-  vertical-align: baseline;
-  background: none;
-  border: none;
-  margin: 0;
-  padding: 0 0 1px;
-  font: inherit;
-  font-size: inherit;
-  letter-spacing: inherit;
-  line-height: 1.4;
-  text-align: inherit;
-  color: var(--text-primary);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  border-radius: var(--r-plate) var(--r-plate) 0 0;
-  transition: background 0.14s ease;
-}
-.anl-stagebd .anl-sentence__tk:hover {
-  background: var(--overlay-hover);
-}
-/* The mockup's two rules, verbatim: a word never started runs in the
-   line's own grape at full strength, a word being learned in the
-   translucent ember. Nothing else carries a rule — see
-   SentenceBreakdown's underlineClass for the mapping. */
-.anl-stagebd .anl-sentence__tk--new {
-  border-bottom-color: var(--line-kaiseki);
-}
-.anl-stagebd .anl-sentence__tk--learning {
-  border-bottom-color: color-mix(in srgb, var(--state-learning) 45%, transparent);
-}
-/* A tint, NOT a weight change: bolding the focused token reflows the
-   whole line on every arrow press. */
-.anl-stagebd .anl-sentence__tk--focus {
-  background: color-mix(in srgb, var(--line-kaiseki) 16%, transparent);
-}
-@media (prefers-reduced-motion: reduce) {
-  .anl-stagebd .anl-sentence__tk { transition: none; }
-}
-
-/* Where you are along the Tokens — the mockup's dots. Redundant with
-   the arrows and the jump-to-word line, so they stay out of the tab
-   order and the accessibility tree. */
-.anl-stagebd__dots {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--sp-1);
-  margin-top: var(--sp-3);
-}
-.anl-stagebd__dot {
-  width: 5px;
-  height: 5px;
-  padding: 0;
-  border: none;
-  border-radius: var(--r-pill);
-  background: var(--text-secondary);
-  opacity: 0.25;
-  cursor: pointer;
-  transition: opacity 0.14s ease, background 0.14s ease;
-}
-.anl-stagebd__dot--on {
-  opacity: 1;
-  background: var(--line-kaiseki);
-}
 
 /* ── The token table (the mockup's second view) ──
    Word | Reading | Meaning | State | ＋, one Token per row. The frame
@@ -1289,7 +1020,7 @@
    (min-width on the row) instead of growing the page sideways. */
 .anl-toktable {
   border: 1px solid var(--surface-line);
-  border-radius: var(--anl-radius);
+  border-radius: var(--surface-radius);
   overflow: hidden;
 }
 .anl-toktable__scroll { overflow-x: auto; }
@@ -1375,13 +1106,6 @@
   margin-right: 2px;
 }
 
-/* 運行履歴's seat on the concourse: inset to the platform grid's own
-   gutter so the panel's edge lines up with the cards above it. */
-.anl-concourse { padding: 0 var(--sp-6) var(--sp-7); }
-
-@media (prefers-reduced-motion: reduce) {
-  .anl-stagebd__dot { transition: none; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .anl-ghost,
@@ -1399,7 +1123,7 @@
 .anl-results {
   display: flex;
   flex-direction: column;
-  gap: var(--anl-gap);
+  gap: var(--sp-5);
 }
 /* A programmatic focus target, not a tab stop -- see AnalyzerScreen's
    arrival effect -- and deliberately ringless. tabIndex is -1, so no
@@ -1415,7 +1139,7 @@
 .anl-stage {
   display: flex;
   flex-direction: column;
-  gap: var(--anl-gap);
+  gap: var(--sp-5);
   min-width: 0;
 }
 
@@ -1426,7 +1150,7 @@
    inside something of the app's own. */
 .anl-player {
   background: var(--bg-panel);
-  border-radius: var(--anl-radius);
+  border-radius: var(--surface-radius);
   overflow: hidden;
 }
 .anl-player__bar {
@@ -1491,7 +1215,7 @@
   min-height: 32px;
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--text-on-panel) 22%, transparent);
-  border-radius: var(--anl-radius);
+  border-radius: var(--surface-radius);
   color: var(--text-on-panel-soft);
   transition: color 0.14s ease, border-color 0.14s ease;
 }
@@ -1538,7 +1262,7 @@
   padding: 10px 12px 10px 44px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--anl-radius);
+  border-radius: var(--surface-radius);
   color: var(--text-secondary);
   text-align: left;
   transition: background 0.14s ease, color 0.14s ease;
@@ -1557,7 +1281,7 @@
   padding: 0;
   background: transparent;
   border: 1px solid var(--surface-line);
-  border-radius: var(--anl-radius);
+  border-radius: var(--surface-radius);
   color: var(--text-secondary);
   /* + / ✓ glyphs since the plain-language pass — figures, so the
      display face, at a size the 28px box centres comfortably. */
@@ -1723,143 +1447,9 @@
   align-items: baseline;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: var(--anl-gap);
-}
-.anl-intake__jp {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: 0.1em;
-}
-.anl-intake__lead { color: var(--text-secondary); font-size: 0.86rem; }
-
-/* The analyser's primary action. NOT .phrase-analyze-btn, which is
-   --accent shu-iro and is also used by DeckPicker and ImageCropper:
-   a vermillion button under a 葡萄色 plate is two colour languages on
-   one screen, which is the exact defect --deck-action was created to
-   fix for 教材 (see its note in the token block). */
-.anl-action {
-  background: var(--line-kaiseki);
-  color: var(--text-on-panel);
-  border: none;
-  border-radius: 4px;
-  padding: 9px 22px;
-  font-family: var(--font-display);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  transition: filter 0.16s ease;
-}
-.anl-action:hover:not(:disabled) { filter: brightness(1.15); }
-.anl-action:disabled { opacity: 0.45; cursor: default; }
-
-/* 文字 — the writing slip. Sumi ink, the app's one high-contrast
-   structural surface (see the --bg-panel note in the token block),
-   so the thing you are about to hand over reads as a physical slip
-   rather than as another panel. */
-.anl-slip {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: var(--anl-pad-block) var(--anl-pad-inline);
-  background: var(--bg-panel);
-  border-radius: var(--anl-radius);
-}
-/* .field--bare drops the ground and the border; .field--multi sets the
-   starting height. The slip keeps only its ceiling and its scroll. */
-.anl-slip__field {
-  width: 100%;
-  max-height: 40vh;
-  resize: none;
-  overflow-y: auto;
-  color: var(--text-on-panel);
-  font-family: var(--font-jp);
-  font-size: clamp(1rem, 0.85rem + 0.5vw, 1.2rem);
-  line-height: 1.9;
-}
-.anl-slip__field::placeholder { color: var(--text-on-panel-soft); }
-.anl-slip__field:focus { outline: none; }
-/* The ring goes on the slip, not the borderless field inside it —
-   otherwise focus is invisible, which plan 005 exists to prevent. */
-.anl-slip:focus-within {
-  outline: 2px solid var(--line-kaiseki);
-  outline-offset: 2px;
-}
-.anl-slip__foot {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-.anl-slip__count {
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-on-panel-soft);
-}
-.anl-slip__provenance {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  color: var(--text-on-panel-soft);
-}
-/* 写 — a seal, not a word: the provenance badge says "this came from
-   a photo" in one character, the way a stamp would. */
-.anl-slip__stamp {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--accent);
-  border-radius: 3px;
-  color: var(--accent);
-  font-family: 'Noto Serif JP', serif;
-  font-size: 0.7rem;
-  font-weight: 700;
+  margin-bottom: var(--sp-5);
 }
 
-/* 写真 — the two intake tiles. Side by side, stacked on a phone. */
-.anl-tiles {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--anl-gap);
-  margin-bottom: var(--anl-gap);
-}
-.anl-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: clamp(18px, 2vw + 10px, 30px) 12px;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--anl-radius);
-  color: var(--text-primary);
-  transition: background 0.16s ease, border-color 0.16s ease;
-}
-.anl-tile:hover:not(:disabled) {
-  background: var(--bg-card-hover);
-  border-color: color-mix(in srgb, var(--line-kaiseki) 45%, var(--surface-line));
-}
-.anl-tile:disabled { opacity: 0.5; cursor: default; }
-.anl-tile__jp {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: 0.08em;
-}
-.anl-tile__latin {
-  font-family: var(--font-display);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
 
 /* 動画 — 字幕取り, the grab block. The ingest tabs it replaces died
    with the transcript-paste path (2026-09-01): one primary road (the
@@ -1868,7 +1458,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
-  margin-bottom: var(--anl-gap);
+  margin-bottom: var(--sp-5);
 }
 .anl-grab__head {
   display: flex;
@@ -1997,9 +1587,9 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: clamp(24px, 3vw + 12px, 44px) var(--anl-pad-inline);
+  padding: var(--sp-7) var(--sp-5);
   border: 1px dashed color-mix(in srgb, var(--line-kaiseki) 50%, var(--surface-line));
-  border-radius: var(--anl-radius);
+  border-radius: var(--surface-radius);
   background: var(--surface);
   text-align: center;
   cursor: pointer;
@@ -2049,7 +1639,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: var(--anl-gap);
+  margin-top: var(--sp-5);
 }
 
 /* 区間 — the window. Two time fields and a readout, not two number
@@ -2057,9 +1647,9 @@
 .anl-window {
   display: flex;
   align-items: flex-end;
-  gap: var(--anl-gap);
+  gap: var(--sp-5);
   flex-wrap: wrap;
-  margin-top: var(--anl-gap);
+  margin-top: var(--sp-5);
 }
 .anl-window__field { display: flex; flex-direction: column; gap: 4px; min-width: 92px; }
 .anl-window__label {
@@ -2079,11 +1669,11 @@
 
 /* 案内 — an on-screen notice (the yt-dlp help, the paste steps). */
 .anl-notice {
-  margin-top: var(--anl-gap);
-  padding: var(--anl-pad-block) var(--anl-pad-inline);
+  margin-top: var(--sp-5);
+  padding: var(--sp-5);
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--anl-radius);
+  border-radius: var(--surface-radius);
   font-size: 0.86rem;
   line-height: 1.55;
 }
@@ -2107,154 +1697,6 @@
   overflow-x: auto;
 }
 
-/* 運行履歴 — past services, drawn the concourse's way since the
-   mockup round: Latin-first head, a numbered roundel naming the
-   platform each row came from (the cards overhead use the same
-   numbers), a relative date, and a ▶ that slides in on approach. */
-.anl-history { display: flex; flex-direction: column; }
-/* The frame around the rows (the mockup's .hist): border and radius
-   only — each ROW carries the padding, the frame just clips them. */
-.anl-hist {
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-panel);
-  overflow: hidden;
-}
-.anl-history__head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
-  margin-bottom: var(--sp-4);
-}
-.anl-history__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-lead);
-  letter-spacing: 0.02em;
-}
-.anl-history__titlejp {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
-.anl-history__total {
-  margin-left: auto;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-caption);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-.anl-history__empty { color: var(--text-secondary); font-size: 0.86rem; }
-.anl-history__row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-bottom: 1px solid var(--surface-line);
-  transition: background 0.14s ease;
-}
-.anl-history__row:last-child { border-bottom: none; }
-.anl-history__row:hover { background: var(--overlay-hover); }
-.anl-history__open {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  /* The mockup row's own padding — the frame around it carries none. */
-  padding: var(--sp-4) var(--sp-5);
-  background: none;
-  border: none;
-  color: var(--text-primary);
-  text-align: left;
-}
-.anl-history__no {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--r-pill);
-  border: 2px solid var(--line-color, var(--line-kaiseki));
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  color: color-mix(in srgb, var(--line-color, var(--line-kaiseki)) 65%, var(--text-primary));
-  font-variant-numeric: tabular-nums;
-}
-.anl-history__text {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-family: var(--font-jp);
-  font-size: 0.92rem;
-}
-.anl-history__go {
-  flex-shrink: 0;
-  font-size: 0.7rem;
-  color: color-mix(in srgb, var(--line-color, var(--line-kaiseki)) 65%, var(--text-primary));
-  opacity: 0;
-  transform: translateX(-4px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-.anl-history__row:hover .anl-history__go,
-.anl-history__open:focus-visible .anl-history__go {
-  opacity: 1;
-  transform: translateX(0);
-}
-@media (prefers-reduced-motion: reduce) {
-  .anl-history__row,
-  .anl-history__go { transition: none; }
-}
-/* 保存 stamp -- same shape as .anl-history__source's 写/動, but tinted
-   --success rather than neutral: this row is a kept Sentence, not
-   merely a visited one. */
-.anl-history__kept {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  /* Sized by its glyphs, not an 18×18 box: 保存 is two CJK characters
-     and a square that small wrapped them into an overflowing stack. */
-  padding: 1px 5px;
-  white-space: nowrap;
-  line-height: 1.4;
-  border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
-  border-radius: 3px;
-  color: var(--success);
-  font-family: 'Noto Serif JP', serif;
-  font-size: 0.64rem;
-}
-/* A session's Sentence count -- a 47-line track and a 3-line one are
-   very different things to reopen (plan 040). */
-.anl-history__count {
-  flex-shrink: 0;
-  font-size: 0.72rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-/* WCAG 2.5.8 wants 24x24 CSS px minimum for a pointer target; this was
-   a 13px icon in 4/6px padding, about 25x21. The icon stays small --
-   this is a quiet, secondary action -- and the HIT AREA grows around
-   it, which is the right way round. */
-.anl-history__delete {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 40px;
-  min-height: 40px;
-  background: none;
-  border: none;
-  border-radius: 6px;
-  color: var(--text-secondary);
-  transition: color 0.14s ease, background 0.14s ease;
-}
-.anl-history__delete:hover { color: var(--danger); background: var(--overlay-hover); }
 
 /* 案内表示 — notices. Two tones, and the difference is not decorative:
    a capped Window and a truncated Passage are true statements about
@@ -2284,9 +1726,6 @@
   border: 0;
 }
 
-@media (max-width: 560px) {
-  .anl-tiles { grid-template-columns: 1fr; }
-}
 @media (prefers-reduced-motion: reduce) {
   .anl-tile,
   .anl-drop,
@@ -2308,6 +1747,521 @@
   .anl-results { animation: arrive-soft 0.2s linear backwards; }
 }
 
+/* ── 解析 — the analyzer on the canvas (plan 073) ──
+   The three intakes on one segmented control over the page, the
+   writing slip on the page, history as a head over a surface of rows;
+   the result as the stage's head, the stepper, the line of tokens,
+   the card, the dials. The deck picker and the word detail are bottom
+   sheets. Tokens only. */
+.analyzer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.anl-resume { width: 100%; }
+.anl-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+/* The result's head: the first sentence, in the content face. */
+.anl-head { min-height: 0; }
+.anl-clear {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-secondary);
+}
+/* The Kept stamp: the seal's ink, as a caption pill. */
+.anl-kept {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-plate);
+  border: 1px solid color-mix(in srgb, var(--stamp-ink) 55%, transparent);
+  color: color-mix(in srgb, var(--stamp-ink) 65%, var(--text-primary));
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+/* A section's head, outside its surface: the word, the count. */
+.head2 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.head2__latin {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+}
+.head2__count {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* ── History ── */
+.anl-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.anl-hist-list {
+  display: flex;
+  flex-direction: column;
+}
+.anl-hist-row {
+  display: flex;
+  align-items: stretch;
+}
+.anl-hist-row + .anl-hist-row { border-top: 1px solid var(--surface-line); }
+.anl-hist {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 52px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+.anl-hist__n {
+  flex: none;
+  width: 18px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.anl-hist__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.anl-hist__jp {
+  font-family: var(--font-jp);
+  font-weight: 600;
+  font-size: var(--fs-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.anl-hist__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.anl-hist__go {
+  flex: none;
+  font-size: var(--fs-caption-xs);
+  color: color-mix(in srgb, var(--line-kaiseki) 60%, var(--text-primary));
+}
+.anl-hist__delete {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-secondary);
+}
+/* ── The writing slip and the intakes ── */
+.textarea {
+  display: block;
+  width: 100%;
+  min-height: 120px;
+  padding: var(--sp-4);
+  border-radius: var(--r-card);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  color: var(--text-primary);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  line-height: 1.8;
+  resize: none;
+}
+.textarea::placeholder { color: var(--text-secondary); opacity: 1; }
+.field--filled {
+  color: var(--text-primary);
+  font-family: var(--font-jp);
+  font-weight: 600;
+}
+.anl-slip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.anl-slip__field {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.anl-slip__count { text-align: right; }
+.anl-slip .anl-action { width: 100%; }
+.intake-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+}
+.intake-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 48px;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 600;
+}
+.intake-btn .svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+}
+/* ── The stepper ── */
+.anl-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.anl-stepper__btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-secondary);
+}
+.anl-stepper__count {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.anl-stepper__i1 { font-style: normal; text-transform: none; }
+.anl-stops {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+.anl-stops__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--line-kaiseki) 40%, transparent);
+}
+.anl-stops__dot--on { background: var(--line-kaiseki); }
+/* ── The line ──
+   The sentence as tokens: the reading over each word that needs one,
+   the SRS speaking through a 2px rule under the word in the state's
+   own ink — never an ink change on the word. */
+.anl-stagebd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.tok-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-1);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  text-align: left;
+}
+.tok {
+  --tok: var(--text-secondary);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 0 var(--sp-1);
+  border: 0;
+  border-bottom: 2px solid var(--tok);
+  border-radius: var(--r-plate);
+  background: transparent;
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+.tok--on { background: color-mix(in srgb, var(--line-kaiseki) 14%, transparent); }
+.tok--mastered { --tok: var(--state-mastered); }
+.tok--learning { --tok: var(--state-learning); }
+.tok--unknown { --tok: var(--state-new); }
+.tok--offdeck {
+  --tok: transparent;
+  border-bottom: 2px dashed var(--text-secondary);
+}
+.tok--particle {
+  --tok: transparent;
+  color: var(--text-secondary);
+}
+.tok__furi {
+  min-height: 1em;
+  font-size: var(--fs-caption-xs);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text-secondary);
+}
+/* On the focus tint the secondary ink slips under the floor in light
+   theme (3.97:1 measured by the contrast guard); the focused word's
+   reading takes the primary ink, which the tint already raises. */
+.tok--on .tok__furi { color: var(--text-primary); }
+/* The furigana dial: readings over everything, only over the words
+   the SRS has not mastered, or none. */
+.anl-stage[data-furigana="none"] .tok__furi { visibility: hidden; }
+.anl-stage[data-furigana="unknown"] .tok--mastered .tok__furi { visibility: hidden; }
+.anl-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3) var(--sp-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.anl-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.anl-legend__ink {
+  width: 14px;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: var(--text-secondary);
+}
+.anl-legend__ink--mastered { background: var(--state-mastered); }
+.anl-legend__ink--learning { background: var(--state-learning); }
+.anl-legend__ink--unknown { background: var(--state-new); }
+.anl-legend__ink--offdeck {
+  height: 0;
+  background: none;
+  border-top: 2px dashed var(--text-secondary);
+}
+/* ── The token card ── */
+.token-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  text-align: left;
+}
+.token-card__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+.token-card__surface {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-heading);
+  line-height: 1.4;
+  color: var(--text-primary);
+  text-align: left;
+}
+.token-card__surface--door {
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--surface-line);
+  text-underline-offset: 6px;
+}
+.token-card__reading {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tr-reading);
+  color: var(--text-secondary);
+}
+.token-card__pos { margin-left: auto; }
+.token-card__gloss { font-size: var(--fs-body); }
+.token-card__i1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+}
+.token-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+.token-card__kanji {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.token-card__k {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  background: transparent;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+/* The dials: a caption and a segmented control on one row. */
+.anl-dials {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.anl-dial {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.anl-dial__cap { flex: none; }
+@media (max-width: 768px) {
+  .anl-kbd { display: none; }
+}
+/* ── The deck picker (canvas DeckPickerSheet) ── */
+.picker {
+  display: flex;
+  flex-direction: column;
+}
+.picker__empty { padding: var(--sp-4); }
+.picker-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 56px;
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+.picker-row + .picker-row { border-top: 1px solid var(--surface-line); }
+.picker-row__roundel { color: color-mix(in srgb, var(--line-color, var(--text-secondary)) 60%, var(--text-primary)); }
+.picker-row__name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+}
+.picker-row__name--latin {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+}
+.picker-row__count {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.picker-row--create {
+  gap: var(--sp-3);
+  padding-block: var(--sp-3);
+}
+/* ── The word detail (a sheet) ── */
+.word-detail__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.word-detail__block + .word-detail__block {
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.word-detail__meaning { font-size: var(--fs-body); }
+.word-detail__entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.word-detail__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: var(--fs-sm);
+}
+.word-detail__key { color: var(--text-secondary); }
+.word-detail__marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.word-detail__act {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
 /* ── The stage and the line, side by side ──
    ONE one-off breakpoint, per the rule in the Breakpoints block near
    the top of this file: the component is .anl-results, and the reason
@@ -2320,7 +2274,7 @@
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    gap: var(--anl-gap);
+    gap: var(--sp-5);
   }
 
   /* The sticky slot belongs to the whole working rail — head and line
@@ -2330,6 +2284,7 @@
      hold a fifty-stop Passage — that is the mistake .dict-dock's own
      comment records, and it is the same mistake here. */
   .anl-railcol {
+    order: -1;
     flex: 0 0 clamp(260px, 24vw, 340px);
     position: sticky;
     top: 24px;
@@ -2397,7 +2352,7 @@
   gap: 8px;
   padding: 10px 12px;
   background: var(--overlay-hover);
-  border-radius: var(--anl-radius);
+  border-radius: var(--surface-radius);
 }
 .anl-mine__explain {
   margin: 0;
@@ -2430,10 +2385,10 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: var(--anl-pad-block) var(--anl-pad-inline);
+  padding: var(--sp-5);
   background: var(--surface);
   border: 1px dashed var(--surface-line);
-  border-radius: var(--anl-radius);
+  border-radius: var(--surface-radius);
 }
 .anl-foreign__text {
   margin: 0;
@@ -2470,43 +2425,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
 }
-.anl-deckpicker__deck {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  width: 100%;
-  min-height: 44px;
-  padding: var(--sp-4) var(--sp-3);
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--surface-line);
-  border-radius: var(--r-plate);
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  text-align: left;
-  transition: color 0.16s ease, background 0.16s ease;
-}
-.anl-deckpicker__deck:last-child { border-bottom: none; }
-.anl-deckpicker__deck:hover { color: var(--line-kaiseki); background: var(--overlay-hover); }
-.anl-deckpicker__name {
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-/* Where a bare press would have gone: the remembered deck. */
-.anl-deckpicker__deck--current {
-  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
-  background: color-mix(in srgb, var(--line-kaiseki) 8%, transparent);
-}
-.anl-deckpicker__mark { flex-shrink: 0; color: var(--success); }
-.anl-deckpicker__create { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.anl-deckpicker__create .anl-field { flex: 1; min-width: 160px; }
 
-@media (prefers-reduced-motion: reduce) {
-  .anl-deckpicker__deck { transition: none; }
-}
 
 /* 音声 — hear it. Two sizes: beside a Sentence's level badge, and on a
    Token's card. Both clear WCAG 2.5.8's 24x24 minimum; the md size
@@ -2532,15 +2451,6 @@
   .anl-speak:active { transform: none; }
 }
 
-.anl-history__when {
-  flex-shrink: 0;
-  font-family: var(--font-display);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
 
 .anl-undo {
   display: flex;
@@ -2563,9 +2473,6 @@
   color: var(--text-secondary);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .anl-history__delete { transition: none; }
-}
 /* ══════════════════════════════════════════════════════════════
    みどりの窓口 section — merged from
    src/components/onboarding/onboarding.css by plan 041, pasted
@@ -5102,11 +5009,11 @@ button:focus-visible {
 .learn,
 .practice,
 .today,
+.dictionary,
 .stage,
 .profile-container,
 .stats-container,
-.settings-container,
-.dict-page {
+.settings-container {
   animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
 
@@ -5134,6 +5041,7 @@ button:focus-visible {
   .learn,
   .practice,
   .today,
+  .dictionary,
   .stage,
   .platform-card,
   .route-stop,
@@ -5141,8 +5049,7 @@ button:focus-visible {
   .deck-card,
   .profile-container,
   .stats-container,
-  .settings-container,
-  .dict-page {
+  .settings-container {
     animation: arrive-soft 0.2s linear backwards;
   }
 }
@@ -5870,7 +5777,8 @@ textarea:focus-visible {
 /* The gates' pages: the canvas's gutter, the bar first. */
 .learn,
 .practice,
-.today {
+.today,
+.dictionary {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
@@ -6633,7 +6541,6 @@ textarea:focus-visible {
   font-size: 18px;
   padding: 35px 30px;
 }
-
 
 
 /* ── Responsive grid ── */
@@ -11443,10 +11350,10 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 
 .stage-badge__glyph { display: block; }
 
-/* Used where there's no card corner to strike into — e.g. the
-   dictionary identity plate's top row (see .dict-detail__stage-badges)
-   — same seal, laid out in flow next to the level tab instead of
-   floating absolutely over a positioned parent. */
+/* Used where there's no card corner to strike into — same seal, laid
+   out in flow next to a level tab instead of floating absolutely over
+   a positioned parent. (The dictionary plate that first needed it now
+   prints a .stage-mark instead — plan 073.) */
 .stage-badge--inline {
   position: static;
   top: auto;
@@ -13688,116 +13595,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   padding: 8px 20px;
 }
 
-/* ── Dictionary screen ────────────────────────────────────── */
-/* Room under the 五十音 chart's last row for the docked chrome — the
-   same clearance as .page-pad (plan 068). */
-.dict-page { padding-top: 24px; padding-bottom: calc(var(--sp-6) + var(--dock-bottom)); }
-
-/* ── Mode / category tabs ─────────────────────────────────
-   Seal-underline tabs, not filled pill buttons: the same "accent
-   marks it, doesn't drown it" language as .type-badge and the
-   choice-row/mcq-row accent bar, so the dictionary reads as the
-   same system as the quiz and selector screens instead of a
-   separate flat-UI control. */
-.dict-tab-row { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
-.dict-tab-row--category { margin-bottom: 24px; flex-wrap: wrap; row-gap: 4px; }
-
-.dict-tab-btn {
-  position: relative;
-  background: transparent;
-  color: var(--text-secondary);
-  border-radius: 0;
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 10px 16px 14px;
-  transition: color 0.15s ease;
-}
-.dict-tab-btn::after {
-  content: '';
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: -1px;
-  height: 2px;
-  background: var(--accent);
-  transform: scaleX(0);
-  transition: transform 0.2s ease;
-}
-.dict-tab-btn:hover { color: var(--text-primary); }
-.dict-tab-btn--active { background: transparent; color: var(--text-primary); }
-.dict-tab-btn--active::after { transform: scaleX(1); }
-
-.dict-tab-row--category .dict-tab-btn { font-size: 11px; padding: 8px 12px 10px; }
-
-/* Search/radical sub-toggle, nested under the kanji tab only — pill
-   buttons rather than underline tabs, so it visually reads as a
-   secondary control refining the active category, not another peer
-   of the main Kanji/Vocabulaire/Hiragana/Katakana row above it. */
-.dict-tab-row--submode {
-  display: flex;
-  gap: 8px;
-  border-bottom: none;
-  margin-bottom: 20px;
-}
-.dict-tab-row--submode .dict-tab-btn {
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  font-size: 11px;
-  padding: 6px 14px;
-  letter-spacing: 0.08em;
-}
-.dict-tab-row--submode .dict-tab-btn::after { display: none; }
-.dict-tab-row--submode .dict-tab-btn--active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--text-on-panel);
-}
-
-/* ── Search / index bar ───────────────────────────────────
-   One bordered slot (icon + field + count) instead of a floating
-   input beside a stray count — reads as a single catalog control. */
-.dict-index-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 0 18px;
-  margin-bottom: 28px;
-  background: var(--bg-card);
-  transition: border-color 0.2s ease;
-}
-.dict-index-bar:focus-within { border-color: var(--accent2); }
-.dict-index-bar__icon { width: 16px; height: 16px; color: var(--text-secondary); flex-shrink: 0; }
-.dict-index-bar__input {
-  flex: 1;
-  /* An <input> carries an intrinsic min-content width of roughly
-     170px from its default `size`, and a flex item's default
-     `min-width: auto` refuses to go below that — so on a 360px phone
-     the field held its ground and shoved the result count out through
-     the right-hand side of the bar. */
-  min-width: 0;
-  border: none;
-  background: transparent;
-  padding: 14px 0;
-  font-size: 16px;
-  color: var(--text-primary);
-}
-.dict-index-bar__input:focus { border: none; }
-.dict-index-bar__count {
-  flex-shrink: 0;
-  white-space: nowrap;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
 
 /* ── Selected-radical header ───────────────────────────────
    The radical glyph reuses the home screen's hanko-stamp box (a
@@ -13816,26 +13613,8 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   border-bottom: 1px solid var(--border);
 }
 @media (max-width: 560px) {
-  /* The button takes its own line; the stamp and its number stay
-     together underneath, which is the pair that actually belongs
-     side by side. */
-  .dict-radical-back-btn { flex: 1 0 100%; }
   .dict-radical-header { gap: 12px 14px; margin-bottom: 22px; padding-bottom: 16px; }
 }
-.dict-radical-back-btn {
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 9px 14px;
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-.dict-radical-back-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
 
 .dict-radical-char {
   position: relative;
@@ -13890,157 +13669,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    custom properties off the ref'd .dict-radical-sheets node) can never
    drift out of sync with what's actually on screen. */
 
-/* Same reasoning as .stats-filler-card: a ragged last row of the
-   lattice would otherwise leave a bare, high-contrast patch of the
-   grid background. A muted, oversized 部 (radical) watermark fills it
-   instead — decorative, not another clickable tile. */
-/* ── Results grid ─────────────────────────────────────────
-   Same flush shoji-lattice as the radical picker — the search
-   results read as index cards in one catalog drawer, not floating
-   shadowed tiles. Each card keeps a thin colour-coded top edge
-   (kanji vs. vocabulary) instead of a loud filled badge, echoing
-   the rating bar's "seal-colour stroke along the top" language. */
-.dict-results-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
-  gap: 12px;
-}
-
-/* One index card. The two bits of metadata (level, SRS stage) are
-   pinned to the top corners — out of the flow entirely — so the
-   middle of the card is nothing but headword, reading and meaning,
-   read straight down the centre in that order. They used to sit in
-   that same flow, which put a level chip between the meaning and the
-   next card's edge and gave every card a lopsided fourth line. */
-.dict-entry-card {
-  --plate: var(--level-color, var(--text-secondary));
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 4px;
-  padding: 20px 12px 16px;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--surface-radius);
-  text-align: center;
-  cursor: pointer;
-  overflow: hidden;
-  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
-}
-/* The line stripe along the plate's bottom edge, in the level's
-   colour — the one place an entry carries colour. */
-.dict-entry-card::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 3px;
-  background: var(--plate);
-  opacity: 0.85;
-}
-.dict-entry-card:hover,
-.dict-entry-card:focus-visible {
-  background: var(--bg-card-hover);
-  border-color: var(--plate);
-  transform: translateY(-2px);
-  filter: none;
-}
-.dict-entry-card:hover { background: var(--bg-card-hover); }
-.dict-entry-card--selected,
-.dict-entry-card--selected:hover {
-  background: var(--overlay-hover);
-}
-
-.dict-entry-card__char {
-  font-size: 38px;
-  font-family: var(--font-jp);
-  line-height: 1;
-}
-.dict-entry-card__kana {
-  font-size: 13px;
-  color: var(--text-secondary);
-  font-family: var(--font-jp);
-  letter-spacing: 0.02em;
-  /* A two-token reading ("サン・やま", see shortKana) is longer than the
-     old three-character slice ever was — clip it rather than let it
-     wrap and shove the meaning line out of alignment with the cards
-     either side of it. */
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.dict-entry-card__meaning {
-  font-size: 14px;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100%;
-}
-
-/* ── Marginalia, not badges ────────────────────────────────
-   Both marks used to be chips: a filled level pill and a bordered
-   hanko, one in each top corner. On a single card that's fine; on a
-   grid of forty it's eighty pieces of furniture, and the headword —
-   the only thing anyone is actually scanning for — was competing with
-   two of them on every tile. Badge treatments don't survive
-   repetition: what reads as a label once reads as noise twenty times
-   over.
-
-   So on the grid, and only on the grid, both shed everything except
-   their ink. No fill, no border, no ring, no tilt — just two small
-   characters annotated into the card's top corners, the way a reader
-   pencils a note in a margin. The information is unchanged and the
-   colour still carries it (level hue, seal ink); what's gone is the
-   box around it. The full pill and the struck seal stay exactly as
-   they were on the detail panel, where there's one entry to look at
-   and the ceremony is affordable. */
-.dict-entry-card .dict-level-badge {
-  position: absolute;
-  top: 7px;
-  left: 10px;
-  padding: 0;
-  border-radius: 0;
-  background: none;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  opacity: 0.6;
-}
-
-/* The seal reduced to a margin note: no box, no frame, no tilt, just
-   the character in the stage's ink. */
-.dict-entry-card .stage-badge {
-  position: absolute;
-  top: 5px;
-  right: 10px;
-  width: auto;
-  height: auto;
-  border: none;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  transform: none;
-  font-size: 13px;
-  opacity: 0.65;
-}
-
-/* A card you have never studied says nothing at all. 'new' is the
-   default state of almost every entry in a 2000-kanji dictionary, so
-   stamping it on each one spends ink to tell you the absence of news —
-   and drowns out the handful of cards that do have something to say.
-   Silence is the 'new' mark here; the seal appears the moment the card
-   has actually been earned. (The detail panel still shows the faint
-   unstruck seal, where a single card has room to say "not yet".) */
-.dict-entry-card .stage-badge--new { display: none; }
-
-/* 極 keeps a little more presence than 習 — gold is quieter than
-   vermillion against both papers, and a mastered card is the one
-   worth spotting from across the grid. */
-.dict-entry-card .stage-badge--mastered { opacity: 0.85; }
 
 /* ── Syllabary chart (hiragana/katakana) ──────────────────
    Classic gojūon table — same flush shoji-lattice language as the
@@ -14156,197 +13784,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   text-transform: uppercase;
 }
 
-/* ── Identity plate ────────────────────────────────────────
-   Dark ink stage for the headword — same sumi block as the top bar /
-   home header. Now a centred composition rather than a left-aligned
-   row: the headword sits alone in the middle with its reading
-   directly beneath it, level/status in one top corner and the
-   actions in the other, so the eye lands on the character first and
-   everything else reads as annotation around it. The 3px top rule
-   (previously a fixed vermillion line on the old modal shell) is
-   driven by --type-color here instead — see typeStyle in
-   DictionaryDetail.jsx — so a kanji, a word and a kana panel are
-   visibly different objects. Corners inherit whatever radius the
-   dock around it has, so it always sits flush. */
-.dict-detail__stage {
-  position: relative;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 24px 28px;
-}
-
-.dict-detail__stage-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  width: 100%;
-}
-.dict-detail__stage-badges {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 42px; /* matches the action buttons, so the row keeps
-                       its height even for an entry with no level */
-}
-
-/* Level tab and status seal both live on sumi now. The seal's own
-   --seal-color is tuned for a card surface (see .stage-badge): in the
-   light theme --state-new is a near-black that would vanish against
-   this panel, so 'new' switches to the constant on-panel soft tone.
-   Vermillion and gold already read correctly on ink in both themes. */
-.dict-detail__stage .stage-badge { --seal-color: var(--text-on-panel-soft); }
-.dict-detail__stage .stage-badge--learning { --seal-color: var(--state-learning); }
-.dict-detail__stage .stage-badge--mastered { --seal-color: var(--state-mastered); }
-
-/* Running head, tategaki — what kind of entry this is, set vertically
-   down the plate's left edge the way a printed dictionary prints its
-   own. Absolutely positioned so it never pulls the headword off
-   centre, and quiet enough to read as a watermark rather than a
-   label competing with the character. */
-.dict-detail__type-mark {
-  position: absolute;
-  top: 60%;
-  left: 14px;
-  transform: translateY(-50%);
-  writing-mode: vertical-rl;
-  /* Without this the label wraps into a second column whenever the
-     plate is short — the katakana plate has no readings block, so
-     片仮名 broke across two columns and, because vertical-rl stacks
-     columns right to left, rendered as 名 / 片仮. */
-  white-space: nowrap;
-  font-family: var(--font-jp);
-  font-size: 25px;
-  letter-spacing: 0.34em;
-  color: var(--type-color, var(--accent));
-  opacity: 0.75;
-  user-select: none;
-  pointer-events: none;
-}
-
-.dict-detail__char {
-  font-size: 60px;
-  font-family: var(--font-jp);
-  color: var(--text-on-panel);
-  line-height: 1.15;
-  text-align: center;
-}
-/* Furigana over the headline word (vocab only — see headwordFurigana in
-   DictionaryDetail.jsx). Sized relative to the headline itself (em)
-   so it scales together with it at every breakpoint. */
-.dict-detail__char ruby { ruby-position: over; }
-.dict-detail__char rt {
-  font-size: 0.3em;
-  font-weight: 400;
-  color: var(--text-on-panel-soft);
-  letter-spacing: 0.02em;
-  user-select: none;
-}
-.dict-detail__speak-btn {
-  flex-shrink: 0;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--text-on-panel);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(-4deg);
-  transition: transform 0.2s ease;
-}
-.dict-detail__speak-btn:hover { transform: rotate(0deg) scale(1.06); }
-.dict-detail__speak-icon { width: 18px; height: 18px; }
-
-.dict-detail__stage-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-
-/* ── Reading, on the plate ─────────────────────────────────
-   A kanji's on/kun split, sitting directly under the headword it
-   belongs to instead of in the body below. Reuses the shared
-   <Readings> component (see Readings.jsx) but re-laid-out for this
-   context: each group becomes one centred line, its 音 / 訓 label a
-   small carved square — the same seal language as .stage-badge — so
-   the two registers are distinguishable at a glance without the long
-   translated "Lectures on'yomi (sino-japonaises)" labels the body
-   version uses. */
-.dict-detail__stage-readings {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 100%;
-}
-.dict-detail__stage-readings .reading-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 0;
-}
-.dict-detail__stage-readings .reading-group__label {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 21px;
-  height: 21px;
-  margin-bottom: 0;
-  border-radius: 4px;
-  border: 1px solid color-mix(in srgb, var(--text-on-panel-soft) 55%, transparent);
-  background: color-mix(in srgb, var(--text-on-panel-soft) 12%, transparent);
-  color: var(--text-on-panel-soft);
-  font-family: var(--font-jp);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-}
-.dict-detail__stage-readings .reading-group__list { justify-content: center; }
-.dict-detail__stage-readings .reading-group__item { color: var(--text-on-panel); }
-.dict-detail__stage-readings .reading-group__item-text { font-family: var(--font-jp); }
-/* The 1./2. ordinals earn their keep in the body's full reading list,
-   but on a one-line plate they're clutter around what is usually two
-   or three tokens. */
-.dict-detail__stage-readings .reading-group__item-index { display: none; }
-
-/* Kana's romaji — its only "reading", so it gets the plain treatment
-   rather than the on/kun apparatus above. */
-.dict-detail__stage-romaji {
-  font-family: var(--font-display);
-  font-size: 15px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-on-panel-soft);
-}
-
-/* Only shown once the fullscreen mobile sheet kicks in (see the
-   @media block below) — the desktop side panel already sits next to
-   the results grid and closes just as easily by clicking elsewhere,
-   so it doesn't need its own dismiss button up top. */
-.dict-detail__close-x {
-  display: none;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text-on-panel);
-  align-items: center;
-  justify-content: center;
-}
-.dict-detail__close-icon { width: 18px; height: 18px; }
-
-.dict-detail__body {
-  padding: 20px 24px 24px;
-  /* Shared vertical rhythm for every supplementary section below the
-     core reading/meaning block (tags, senses, examples, meta,
-     composing kanji, stroke order) — one value instead of each
-     section picking its own 16px/20px. */
-  --dict-block-gap: 20px;
-}
 
 /* ── Gloss lists ───────────────────────────────────────────
    One meaning is really several synonymous glosses, and the decks
@@ -14366,443 +13803,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   display: inline-block;
 }
 
-/* ── Primary gloss ─────────────────────────────────────────
-   The definition for an entry with no JMdict senses list — kanji, and
-   any vocab word JMdict returned nothing for. This is the single most
-   important fact on a kanji's panel, so it's set as real prose (serif,
-   generous) rather than the right-hand column of a label/value row
-   the way it used to be. */
-.dict-detail__gloss-text {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 19px;
-  line-height: 1.5;
-  color: var(--text-primary);
-}
-
-.dict-detail__composing-kanji { margin-top: var(--dict-block-gap); padding-top: 16px; border-top: 1px solid var(--border); }
-.dict-detail__kanji-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.dict-detail__kanji-chip {
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border-radius: 8px;
-  background: var(--bg-main);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  font-family: var(--font-jp);
-  font-size: 20px;
-  transition: background 0.15s ease;
-}
-.dict-detail__kanji-chip:hover { background: var(--bg-card-hover); }
-
-/* ── How it's written ──────────────────────────────────────
-   Stroke-order diagram with its stroke count and radical in a column
-   beside it — all three facts describe drawing the character, so they
-   share one block instead of the diagram sitting at the bottom of the
-   panel with its own numbers stranded in a metadata list further up.
-   The diagram takes the remaining width; the figures take exactly what
-   they need (auto), which keeps the washi sheet as large as possible
-   at any panel width. */
-.dict-detail__form {
-  margin-top: var(--dict-block-gap);
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-/* Kana has no gloss/senses/examples above it, so this is the first
-   thing in the body — the rule was separating "stroke order" from
-   nothing, reading as a stray line under the identity plate rather
-   than a divider between two sections. */
-.dict-detail__body > .dict-detail__form:first-child {
-  border-top: none;
-  padding-top: 0;
-}
-.dict-detail__form-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: start;
-}
-.dict-detail__form-stats {
-  grid-template-columns: 1fr;
-  min-width: 96px;
-}
-.dict-detail__stroke-frame {
-  background: var(--paper);
-  border-radius: 8px;
-  padding: 8px;
-  width: 100%;
-}
-.dict-detail__stroke-img { width: 100%; display: block; }
-.dict-detail__stroke-fallback {
-  display: none;
-  color: #999;
-  font-size: 12px;
-  text-align: center;
-  padding: 8px;
-}
-.dict-detail__close-btn {
-  background: var(--bg-panel);
-  color: var(--text-on-panel-soft);
-  width: 100%;
-  margin-top: 16px;
-  font-size: 13px;
-}
-
-.dict-tag-chip {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--text-secondary);
-  background: var(--bg-main);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 3px 11px;
-  line-height: 1.6;
-  white-space: nowrap;
-}
-/* Tooltip carries the long JMdict note the chip itself has no room
-   for. Shown on hover (desktop) and on focus (tap on mobile — the
-   chip is a real <button>, so a tap focuses it).
-   Portaled to document.body and positioned with fixed coordinates
-   computed in JS (see TagChip in DictionaryDetail.jsx) rather than
-   living inside the chip as an absolutely-positioned span — that
-   used to get clipped by whichever scrolling container the chip sat
-   in (the mobile fullscreen sheet, the desktop side panel). Mounting
-   only while open (instead of an always-mounted opacity toggle) means
-   no leftover hover/focus CSS is needed here. */
-.dict-tag-chip__tooltip {
-  position: fixed;
-  z-index: 500;
-  width: max-content;
-  max-width: 220px;
-  white-space: normal;
-  text-align: left;
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--text-primary);
-  background: var(--bg-card-hover);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 11px;
-  pointer-events: none;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
-  transform: translate(-50%, 0);
-}
-.dict-tag-chip__tooltip[data-placement="above"] {
-  transform: translate(-50%, -100%);
-}
-
-/* Additional JMdict senses beyond the app's own single gloss — same
-   "label + content below" rhythm as the examples section, since both
-   are supplementary dictionary detail rather than core card facts.
-   Each sense is a small numbered row of its own so several senses
-   read as a list, not a wall of text. */
-.dict-detail__senses { margin-top: var(--dict-block-gap); }
-.dict-sense {
-  display: flex;
-  gap: 10px;
-  padding: 7px 0;
-  align-items: flex-start;
-}
-.dict-sense + .dict-sense { border-top: 1px dashed var(--border); }
-.dict-sense__number {
-  margin-top: 1px;
-}
-.dict-sense__body { min-width: 0; flex: 1; }
-.dict-sense__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
-/* Sense-level tags are the same chip, just a touch smaller so a dense
-   list of senses doesn't turn into a wall of full-size pills. */
-.dict-sense__tags .dict-tag-chip { font-size: 11px; padding: 1px 9px; }
-.dict-sense__gloss { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
-
-/* Round number badge for JMdict sense markers — replaces the old
-   Unicode "①②③..." glyphs (illegible/inconsistent across fonts) with
-   a plain drawn circle that stays crisp and readable at any size. */
-.dict-sense-marker {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--bg-main);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  font-family: var(--font-display, inherit);
-}
-
-/* Example sentences — same "label + block below" rhythm as
-   .dict-detail__composing-kanji, kept as its own section because a
-   sentence plus its translation needs the panel's full width. */
-.dict-detail__examples { margin-top: var(--dict-block-gap); }
-
-/* One kicker style for every "supplementary detail" section header
-   in the card (senses, examples, composing kanji, stroke order) —
-   these four used to be near-identical copies that had quietly
-   drifted apart (stroke-label alone was missing text-transform and
-   used 1px tracking instead of 0.05em). Small, tracked-out, and
-   quiet: the label recedes, the content it introduces does the
-   talking. */
-.dict-detail__senses-label,
-.dict-detail__examples-label,
-.dict-detail__composing-kanji-label,
-.dict-detail__vocab-examples-label,
-.dict-detail__practice-label,
-.dict-detail__gloss-label,
-.dict-detail__form-label {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: bold;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-/* A short coloured tick opening every section header — the same
-   single-deliberate-mark gesture .section-header__rule makes on the
-   stats/profile screens, turned inline and tinted with the entry's own
-   type colour (see typeStyle in DictionaryDetail.jsx) so the panel
-   reads as one keyed document instead of a stack of unrelated blocks. */
-.dict-detail__senses-label::before,
-.dict-detail__examples-label::before,
-.dict-detail__composing-kanji-label::before,
-.dict-detail__vocab-examples-label::before,
-.dict-detail__practice-label::before,
-.dict-detail__gloss-label::before,
-.dict-detail__form-label::before {
-  content: '';
-  flex-shrink: 0;
-  width: 14px;
-  height: 2px;
-  background: var(--type-color, var(--accent));
-}
-
-/* "Used in these words" — the reverse of .dict-detail__composing-kanji
-   (that links a vocab word down to its kanji; this links a kanji out
-   to real words it appears in). Same bordered-block rhythm as the
-   composing-kanji section, but rows rather than chips since each one
-   also carries a short meaning. */
-.dict-detail__vocab-examples {
-  margin-top: var(--dict-block-gap);
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-.dict-vocab-example-list { display: flex; flex-direction: column; }
-.dict-vocab-example-row {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  width: 100%;
-  padding: 8px 4px;
-  background: transparent;
-  border-radius: 6px;
-  text-align: left;
-  font-weight: 400;
-}
-.dict-vocab-example-row:hover { background: var(--overlay-hover); }
-.dict-vocab-example-row + .dict-vocab-example-row { border-top: 1px dashed var(--border); }
-.dict-vocab-example-row__word {
-  flex-shrink: 0;
-  font-family: var(--font-jp);
-  font-size: 16px;
-  color: var(--text-primary);
-}
-.dict-vocab-example-row__word ruby { ruby-position: over; }
-.dict-vocab-example-row__word rt {
-  font-size: 0.5em;
-  font-weight: 400;
-  color: var(--text-secondary);
-}
-.dict-vocab-example-row__meaning {
-  min-width: 0;
-  flex: 1;
-  font-size: 13px;
-  color: var(--text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: right;
-}
-
-.dict-example { padding: 12px 0; }
-.dict-example + .dict-example { border-top: 1px dashed var(--border); }
-/* Which JMdict sense this sentence illustrates ("① to eat") — ties
-   an example back to a specific gloss when a word has several. */
-.dict-example__sense {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent);
-  margin-bottom: 5px;
-  letter-spacing: 0.02em;
-}
-.dict-example__sense .dict-sense-marker {
-  width: 16px;
-  height: 16px;
-  font-size: 10px;
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--text-on-panel);
-}
-.dict-example__jp {
-  font-family: var(--font-jp);
-  font-size: 17px;
-  color: var(--text-primary);
-  /* Ruby annotations need headroom above the line, or the furigana
-     of one line collides with the line above it. */
-  line-height: 2.5;
-  /* Flex-wrap treats each segment (below) as an atomic unit that
-     wraps as a whole rather than letting the browser's default CJK
-     line-breaking rules split in the middle of one — the fix for a
-     lone trailing kanji/kana stranding itself at the start of the
-     next line. text-wrap: pretty is progressive enhancement on top
-     of that for browsers that support paragraph-aware wrapping. */
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  text-wrap: pretty;
-}
-.dict-example__seg {
-  white-space: nowrap;
-  display: inline-block;
-}
-.dict-example__jp ruby { white-space: nowrap; }
-.dict-example__jp rt {
-  font-size: 0.70em;
-  font-weight: normal;
-  color: var(--text-secondary);
-  user-select: none;
-}
-/* The headword itself, picked out of the sentence — plain highlight
-   colour (matches the app's accent), no background box, same idea as
-   the reference Yomitan/Jitendex popups this feature is modelled on. */
-.dict-example__hl {
-  background: transparent;
-  color: var(--accent);
-  font-weight: 700;
-}
-.dict-example__en {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-top: 5px;
-  line-height: 1.5;
-}
-
-/* ── Figures ───────────────────────────────────────────────
-   One number with its name under it — the panel's unit for anything
-   countable (stroke count, radical, and the whole practice record).
-   Laid out in the same flush shoji lattice as the results grid and the
-   syllabary chart (hairline --border showing through 2px gaps) rather
-   than as bordered floating cards, so a run of figures reads as one
-   ruled table. auto-fit keeps four tiles on one row on a desktop panel
-   and folds them to two per row as it narrows, with no breakpoint. */
-.dict-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
-  gap: 2px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-/* The practice block always holds exactly four figures, so its track
-   count has to divide four. auto-fit only collapses tracks that are
-   empty *everywhere*; a three-column fit leaves the fourth tile alone
-   on row two with two bare cells beside it, and a bare cell in a
-   flush lattice is a slab of raw seam colour. Two by two cannot go
-   ragged at any width, in any container. The form block above it
-   keeps auto-fit: with two tiles, one column or two are both whole. */
-.dict-detail__practice .dict-stat-grid { grid-template-columns: repeat(2, 1fr); }
-
-.dict-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  /* A grid track can be narrower than its content; without this the
-     tile refuses to shrink and the value is clipped by the grid's
-     overflow: hidden rather than wrapping. */
-  min-width: 0;
-  gap: 3px;
-  padding: 10px 12px;
-  background: var(--bg-main);
-  border: none;
-  border-radius: 0;
-  text-align: left;
-  font-weight: 400;
-}
-.dict-stat__value {
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  font-variant-numeric: tabular-nums;
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--text-primary);
-}
-.dict-stat__label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-/* The radical tile navigates (see onRadicalClick) — it carries the
-   accent colour and a hover ground so it reads as the one figure in
-   the block you can actually follow somewhere. */
-.dict-stat--link { cursor: pointer; transition: background 0.15s ease; }
-.dict-stat--link .dict-stat__value { color: var(--accent); }
-.dict-stat--link:hover { background: var(--bg-card-hover); }
-
-/* ── Your own record ───────────────────────────────────────
-   Sits last in the panel: it describes the reader's progress, not the
-   word itself. The "due now" flag rides inline on the section label
-   rather than as a row of its own — it's a state of this block, not
-   another statistic in it. */
-.dict-detail__practice {
-  margin-top: var(--dict-block-gap);
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-.dict-detail__due-note {
-  margin-left: auto;
-  padding: 2px 9px;
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--state-due) 16%, var(--bg-card));
-  color: var(--state-due);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-
-/* Quiet tinted tag: the level's own colour as a wash behind its own
-   text, and nothing else — no spine stroke, no border, no fill. The
-   colour still carries the difficulty signal (N5 calmest -> N1 most
-   intense) without the badge becoming a piece of furniture on a card
-   that already has a headword and a seal competing for attention.
-   The wash mixes toward `transparent` rather than a named surface, so
-   the same tag composites correctly over a card, over the sumi
-   identity plate, and over either theme's paper. */
-.dict-level-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 9px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--level-color, var(--accent3)) 18%, transparent);
-  color: var(--level-color, var(--accent3));
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
 
 /* The type chips. Same roundel-and-word construction as the
    dictionary's collection tabs, in each type's own pigment — a deck
@@ -14929,7 +13929,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    this line. */
 /* The type's one-character name, sized to sit in the same chip as the
    label rather than above it. */
-
 
 
 /* No opacity. This line was dimmed to 0.75 on top of already being
@@ -15091,10 +14090,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    are once the auto-hiding TopBar has scrolled away. */
 
 
-
-
-
-
 .deckdetail-count { color: var(--text-secondary); font-size: 13px; }
 
 /* flex-wrap is not cosmetic here. This row holds up to five buttons and
@@ -15135,7 +14130,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    it is these two idioms that stretch, not any element that happens to
    be a button. It also leaves the select-mode row's count `<span>`
    alone, which must keep its natural width. */
-
 
 
 /* The toolbar is the shared family now (`.btn-primary` / `.btn-secondary`
@@ -15231,7 +14225,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 }
 
 
-
 /* Selected reads as the deck line picking the row out, not as the
    quiz screens' "correct answer" accent. */
 
@@ -15256,12 +14249,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    labelled ("Front", "Back / Meaning", "かな") in a row of columns,
    which made the labels outnumber the content and turned a deck into a
    spreadsheet. */
-
-
-
-
-
-
 
 
 /* Where a browsed-in card came from, in that section's own pigment —
@@ -15540,12 +14527,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   justify-content: center;
   z-index: 50;
 }
-.detail-overlay-side {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 50;
-}
 .detail-sheet {
   width: 100%;
   max-width: 480px;
@@ -15554,32 +14535,10 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   max-height: 80vh;
   overflow-y: auto;
 }
-.detail-side {
-  position: fixed;
-  top: 0;
-  right: 0;
-  height: 100vh;
-  height: 100dvh; /* the vh line is the fallback; see .screen's note */
-  width: 360px;
-  padding: 24px;
-  overflow-y: auto;
-  border-radius: 0;
-}
 
 .detail-header { display: flex; justify-content: space-between; align-items: flex-start; }
-.detail-title { font-size: 40px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .detail-close-btn { background: none; font-size: 18px; color: var(--text-secondary); }
-.detail-level { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-.detail-section { margin-top: 16px; }
-.detail-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px; }
-.detail-context-value { font-size: 15px; }
-.detail-entry-list { display: flex; flex-direction: column; gap: 4px; }
-.detail-entry-row { font-size: 14px; display: flex; gap: 8px; }
-.detail-entry-row__key { color: var(--text-secondary); min-width: 90px; text-transform: capitalize; }
-.detail-badges { display: flex; gap: 10px; margin-bottom: 10px; }
 
-.stat-row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
-.stat-row__label { color: var(--text-secondary); }
 
 /* ── Phrase analyzer screen ───────────────────────────────── */
 
@@ -15687,20 +14646,11 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    the one part that was never a layout problem. */
 
 
-
-
-
-
 /* File-first video setup (2026-08-26). The yt-dlp help and the paste
    fallback are <details>, so the default view is just "pick a file". */
 
 
-
-
 /* The failure state is a handoff, not a dead end (plans/026). */
-
-
-
 
 
 .video-player__frame {
@@ -15804,19 +14754,10 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .phrase-kanji-chip__level { font-size: 11px; color: var(--text-on-panel-soft); }
 
 
-
 /* The chip's press is a flourish: under reduced motion it stays put. */
 @media (prefers-reduced-motion: reduce) {
   .phrase-kanji-chip__char:active { transform: none; }
 }
-
-
-
-
-
-
-
-
 
 
 /* AI breakdown panel (see ReadingScreen.jsx's AnalysisBreakdown) —
@@ -15909,188 +14850,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   margin-top: 10px;
 }
 
-/* ── The analyser's stage card (the mockup round) ──
-   The same TokenCard dealt out above, grown to the analyser's stage:
-   stacked and centred, the reading over the word, the word in the
-   serif at a size worth stepping for. Scoped overrides on the shared
-   markup, not a copied card — and placed HERE, after the base rules
-   they override, so the cascade reads top to bottom instead of
-   winning on specificity tricks. Tokens only; the pixel bases above
-   predate the scale. */
-.anl-stagebd .rdg-breakdown-card-row {
-  max-width: none;
-  /* Stretch, not center: the nav columns frame the card at its full
-     height (the mockup's slim ‹ › rails), whatever the card wraps to. */
-  align-items: stretch;
-  gap: var(--sp-5);
-}
-.anl-stagebd .rdg-breakdown-card-stage { flex: 1 1 auto; }
-/* Three classes, not two: the base .rdg-breakdown-nav:not(:disabled)
-   :hover above outranks a two-class override, and the ratchet rightly
-   wants same-key selectors in ascending order. */
-.anl-stagebd .rdg-breakdown-card-row .rdg-breakdown-nav {
-  width: 40px;
-  height: auto;
-  align-self: stretch;
-  border-radius: var(--anl-radius);
-  background: transparent;
-  border: 1px solid var(--surface-line);
-  color: var(--text-secondary);
-  box-shadow: none;
-}
-.anl-stagebd .rdg-breakdown-nav:not(:disabled):hover {
-  background: var(--overlay-hover);
-  border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line));
-  color: var(--text-primary);
-}
-.anl-stagebd .rdg-breakdown-nav:not(:disabled):active { transform: none; }
-.anl-stagebd .phrase-word-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  /* The mockup's card rhythm (tok__card: gap sp-2, padding sp-5
-     sp-4), not the roomier sp-7 the first cut used — the card holds
-     five small things and the air between them was reading as empty
-     stage. */
-  gap: var(--sp-2);
-  padding: var(--sp-5) var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--anl-radius);
-}
-.anl-stagebd .phrase-word-card__top {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-3);
-}
-.anl-stagebd .phrase-word-card__surface-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-2);
-}
-.anl-stagebd .phrase-word-card__surface {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-display-fluid);
-  line-height: 1.2;
-  letter-spacing: var(--tr-name);
-  text-indent: var(--tr-name);
-  color: var(--text-primary);
-}
-/* The stage card carries no detached reading line any more — the
-   reading rides the word as ruby (FuriganaParts), per kanji, exactly
-   like the sentence pane. The rt inherits the sheet's ruby styling. */
-.anl-stagebd .phrase-word-card__surface rt {
-  font-weight: 400;
-  letter-spacing: var(--tr-term);
-}
-/* The list layout's affordances come OFF in the stage: the dotted
-   rule and the sumi hover belong to the diagnostic card, not the
-   mockup's clean one — a quiet overlay says "tappable" here. */
-.anl-stagebd .phrase-word-card__surface-wrap--clickable .phrase-word-card__surface {
-  text-decoration: none;
-}
-.anl-stagebd .phrase-word-card__surface-wrap--clickable:hover {
-  background: var(--overlay-hover);
-  color: inherit;
-}
-/* The mockup's tok__row: pos · state · action on one line. */
-.anl-stagebd .anl-tokrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--sp-3);
-  margin-top: var(--sp-2);
-}
-/* The state badge in the mockup's stbadge dress: tiny caps, 700,
-   still coloured by the same STATUS_COLORS pill variable. */
-.anl-stagebd .status-pill {
-  padding: var(--sp-1) var(--sp-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 1;
-  border-radius: var(--r-plate);
-}
-/* The one action, in the mockup's minebtn dress. */
-.anl-stagebd .analysis-mine-btn {
-  padding: var(--sp-2) var(--sp-4);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-plate);
-  color: var(--text-primary);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  transition: border-color 0.14s ease, background 0.14s ease;
-}
-.anl-stagebd .analysis-mine-btn:hover {
-  border-color: color-mix(in srgb, var(--success) 50%, var(--surface-line));
-  background: var(--overlay-hover);
-}
-/* POS as the mockup's small framed chip, not a floating word. */
-.anl-stagebd .phrase-word-card__pos {
-  margin-left: 0;
-  padding: var(--sp-1) var(--sp-2);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-plate);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  line-height: 1;
-}
-.anl-stagebd .phrase-word-card__meaning { margin-top: 0; }
-.anl-stagebd .phrase-word-card__meaning:empty { display: none; }
-.anl-stagebd .phrase-word-card__kanji-row { justify-content: center; margin-top: var(--sp-2); }
-/* The mockup's kchip: a glyph and its meaning in a quiet frame ON the
-   surface — not the list layout's sumi box, whose panel ground and
-   stuffed-in controls are what overflowed the stage card. A <button>
-   in the stage (the whole surface is the control), hence the font and
-   cursor resets. */
-.anl-stagebd .phrase-kanji-chip {
-  gap: var(--sp-3);
-  padding: var(--sp-2) var(--sp-4);
-  background: transparent;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--anl-radius);
-  color: var(--text-primary);
-  font: inherit;
-  cursor: pointer;
-  transition: border-color 0.14s ease, background 0.14s ease;
-}
-.anl-stagebd .phrase-kanji-chip:hover {
-  border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line));
-  background: var(--overlay-hover);
-}
-.anl-stagebd .phrase-kanji-chip__char {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-lead);
-  color: var(--text-primary);
-}
-/* The glyph is a plain span here (the chip is the button), so the
-   list layout's per-glyph affordances must not bleed in. */
-.anl-stagebd .phrase-kanji-chip__char:hover { text-decoration: none; }
-.anl-stagebd .phrase-kanji-chip__char:active { transform: none; }
-.anl-stagebd .phrase-kanji-chip__level {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  color: var(--text-secondary);
-}
-
-
-
-
-
-
-
 
 /* .trn-feedback-card carries no styles of its own — it exists purely
    to scope the mobile max-height override further down (PromptCard
@@ -16099,23 +14858,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    used to be declared here as an empty ruleset to "hold" the name; a
    class needs no such declaration to be selectable, so the empty rule
    is gone and only the override that actually does something remains. */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* ── Study screen ──────────────────────────────────────────── */
@@ -16814,37 +15556,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
     display: block;
   }
 
-  /* The panel itself owns the top inset now that it is full screen
-     (see .dict-dock in the ≤700px block) — adding it here too pushed
-     the badges down by the notch height twice. */
-  .dict-detail__stage {
-    padding-top: 16px;
-    flex-shrink: 0;
-  }
-  .dict-detail__char {
-    font-size: 48px;
-  }
-  /* The washi sheet needs the full width of a phone screen to stay
-     legible, so the figures move underneath it and run as a row
-     instead of a column beside it. */
-  .dict-detail__form-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .dict-detail__form-stats {
-    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
-    min-width: 0;
-  }
-  /* Tucked in tighter next to the headword at this width, and out of
-     the way of the safe-area inset above. */
-  .dict-detail__body {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: calc(24px + var(--safe-bottom));
-  }
-  .dict-detail__close-x {
-    display: flex;
-  }
-
 
   /* Original tile was 56px; PC gets a full 1.6x bump above (90px) but
      that reads oversized on a phone screen, so mobile gets a smaller,
@@ -17105,14 +15816,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 
 }
 
-@media (max-width: 400px) {
-  /* Very narrow phones: trim the headline glyph, example-sentence
-     text, and tag chip padding a bit further so nothing crowds or
-     forces sideways scroll. */
-  .dict-detail__char { font-size: 40px; }
-  .dict-example__jp { font-size: 15px; line-height: 2.2; }
-  .dict-tag-chip { font-size: 11px; padding: 2px 9px; }
-}
 
 /* ── 筆 — the brush ───────────────────────────────────────────
    The handwriting pad is a <canvas>, and canvas takes numbers, not
@@ -17234,213 +15937,545 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   .dict-dock { animation: arrive-soft 0.15s linear; }
 }
 
-/* ── The catalogue column ──
-   Results and dock are siblings; the results take whatever the dock
-   leaves. min-width: 0 so the grid can actually shrink instead of
-   forcing the dock off the edge. */
-/* A catalogue with a reading panel beside it wants the room. .container
-   caps at --max-w and is declared later in this file, so the override
-   has to out-specify it rather than out-order it. */
-.container.dict-page { max-width: min(1480px, 100%); }
 
-.dict-layout { display: flex; gap: 28px; align-items: flex-start; }
-.dict-results-wrap { flex: 1; min-width: 0; }
-
-/* ── An entry, as a plate ──
-   Reading, headword, meaning — the three registers, in a card whose
-   bottom edge carries the JLPT level's colour the way a station
-   plate carries its line's. */
-.dict-entry-card__kana {
-  order: -1;
-  min-height: 1.2em;
-}
-.dict-entry-card__char {
-  font-family: var(--font-jp);
-  font-size: 40px;
-  line-height: 1.15;
-  letter-spacing: 0.02em;
-  color: var(--text-primary);
-}
-.dict-entry-card__meaning {
-  font-size: 0.78rem;
-  line-height: 1.4;
-  color: var(--text-secondary);
-  margin-top: 2px;
-}
-.dict-entry-card--selected {
-  border-color: var(--plate);
-  background: var(--bg-card-hover);
-}
-.dict-entry-card--selected::after { opacity: 1; height: 4px; }
-
-/* The level sits where a plate's station number sits, and the SRS
-   seal opposite it. Both out of the flow, so the middle of the card
-   is nothing but the three registers. */
-.dict-entry-card .dict-level-badge {
-  position: absolute;
-  top: 8px;
-  left: 10px;
-  padding: 0;
-  border: none;
-  border-radius: 0;
-  background: none;
-  color: var(--plate);
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  opacity: 0.9;
-}
-
-/* ── The category rail ──
-   Five collections, each with its own line colour, drawn as the
-   station chips the rest of the app selects things with rather than
-   as five words with an underline. */
-.dict-tab-row--category {
+/* ── 辞書 — the catalogue and the entry plate (canvas, plan 073) ──
+   The analyzer's door, the entry cards, and the plate an entry opens
+   as: the marks row, the reading over the headword, two readings and
+   a door to the rest, the caption; then blocks divided by hairlines
+   and no headings. Tokens only. */
+.anl-door {
+  --line-color: var(--line-kaiseki);
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  border-bottom: none;
-  margin-bottom: 18px;
-}
-.dict-tab-row--category .dict-tab-btn {
-  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px 8px 9px;
-  border: 1px solid var(--surface-line);
-  border-radius: 999px;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--sp-3) var(--sp-4);
   background: var(--surface);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-}
-.dict-tab-row--category .dict-tab-btn::after { display: none; }
-.dict-tab-row--category .dict-tab-btn:hover { border-color: var(--tab-color, var(--accent)); }
-.dict-tab-row--category .dict-tab-btn--active {
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
   color: var(--text-primary);
-  border-color: var(--tab-color, var(--accent));
-  background: color-mix(in srgb, var(--tab-color, var(--accent)) 12%, var(--surface));
+  font: inherit;
+  text-align: left;
 }
-.dict-tab-glyph {
+.anl-door__roundel { color: color-mix(in srgb, var(--line-kaiseki) 60%, var(--text-primary)); }
+.anl-door__names {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.anl-door__title {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: var(--fs-lead);
+  line-height: 1.3;
+}
+.anl-door__desc {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.anl-door__intakes {
+  flex: none;
+  display: flex;
+  gap: var(--sp-2);
+}
+.anl-door__intake {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, var(--tab-color, var(--accent)) 55%, transparent);
-  color: color-mix(in srgb, var(--tab-color, var(--accent)) 65%, var(--text-primary));
-  font-family: var(--font-jp);
-  font-size: 12px;
-  font-weight: 700;
-  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--surface-line);
+  color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--text-primary));
 }
-.dict-tab-btn--active .dict-tab-glyph {
-  background: var(--tab-color, var(--accent));
-  border-color: var(--tab-color, var(--accent));
-  color: var(--bg-main);
-}
+.anl-door__intake .svg { width: 17px; height: 17px; }
 
-@media (max-width: 560px) {
-  .dict-results-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; }
-  .dict-entry-card__char { font-size: 32px; }
-  .dict-tab-row--category { gap: 6px; }
-  .dict-tab-row--category .dict-tab-btn { padding: 6px 11px 6px 7px; gap: 6px; }
+/* ── The catalogue ── */
+.dict-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
 }
-
-/* ── 索引台 — the index console ────────────────────────────
-   Collections, mode and query were three stacked control rows, so the
-   first thing a dictionary showed you was four bands of chrome. One
-   instrument now: collections along the top edge, mode opposite them,
-   the field across the bottom. Built from the same card material as
-   every other object in the app, so it reads as station furniture and
-   not as a toolbar. */
-.dict-console {
+@media (min-width: 560px) {
+  .dict-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
+}
+/* One entry card: the level in one corner, the stage word in the
+   other, the three registers down the middle, the level's colour
+   along the bottom edge the way a station plate carries its line's. */
+.dict-entry-card {
+  --plate: var(--level-color, var(--text-secondary));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--sp-1);
+  width: 100%;
+  padding: var(--sp-6) var(--sp-3) var(--sp-4);
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: 10px;
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: center;
   overflow: hidden;
-  margin-bottom: 26px;
+  transition: background 0.16s ease, border-color 0.16s ease;
 }
-.dict-console__top {
+.dict-entry-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--plate);
+  opacity: 0.85;
+}
+.dict-entry-card:hover,
+.dict-entry-card:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: var(--plate);
+  filter: none;
+}
+.dict-entry-card--selected,
+.dict-entry-card--selected:hover { border-color: var(--plate); background: var(--bg-card-hover); }
+.dict-entry-card__char {
+  font-family: var(--font-jp);
+  font-size: var(--fs-specimen-word);
+  line-height: 1.1;
+}
+.dict-entry-card__kana {
+  max-width: 100%;
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dict-entry-card__meaning {
+  width: 100%;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dict-level-badge {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  color: color-mix(in srgb, var(--level-color, var(--text-secondary)) 60%, var(--text-primary));
+}
+.dict-entry-card .dict-level-badge {
+  position: absolute;
+  top: var(--sp-2);
+  left: var(--sp-3);
+  opacity: 0.8;
+}
+.dict-entry-card .stage-mark {
+  top: var(--sp-3);
+  right: var(--sp-3);
+  opacity: 0.75;
+}
+
+/* ── The entry plate ── */
+.dict-entry {
+  --dict-ink: color-mix(in srgb, var(--line-color, var(--accent2)) 60%, var(--text-primary));
+  --line-color: var(--line-jisho);
+  display: flex;
+  flex-direction: column;
+  color: var(--text-primary);
+  text-align: left;
+}
+.dict-plate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-5) 0;
+  background: var(--surface);
+}
+.dict-plate__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px 20px;
-  flex-wrap: wrap;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--surface-line);
+  gap: var(--sp-4);
+  min-height: var(--sp-8);
 }
-.dict-console .dict-tab-row--category { margin-bottom: 0; }
-
-/* The mode toggle is a property of the kanji collection, not a third
-   level of navigation, so it sits opposite the collections rather
-   than under them. */
-.dict-console .dict-tab-row--submode {
-  border-bottom: none;
-  margin-bottom: 0;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+.dict-plate__marks {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-width: 0;
 }
-.dict-console .dict-tab-btn--sub {
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 10px;
-  letter-spacing: 0.16em;
+.dict-plate__marks .stage-mark { position: static; }
+.dict-plate__level {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-secondary);
 }
-.dict-console .dict-tab-btn--sub::after { display: none; }
-.dict-console .dict-tab-btn--sub.dict-tab-btn--active {
-  background: var(--line-jisho);
-  color: var(--bg-main);
+.dict-plate__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
 }
-
-/* The field runs the full width of the console and carries no border
-   of its own — the console is its frame. */
-.dict-console .dict-index-bar {
-  border: none;
-  border-radius: 0;
-  background: none;
-  margin-bottom: 0;
-  padding: 4px 18px;
-  gap: 14px;
-}
-.dict-console .dict-index-bar:focus-within {
-  background: color-mix(in srgb, var(--line-jisho) 7%, transparent);
-}
-.dict-index-bar__input { font-size: 1.05rem; }
-.dict-index-bar__input::placeholder { color: var(--text-secondary); }
-
-/* The key that focuses the field, printed on the field. */
-.dict-index-bar__key {
+.dict-plate__btn {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
+  width: var(--sp-8);
+  height: var(--sp-8);
+  padding: 0;
   border: 1px solid var(--surface-line);
-  border-bottom-width: 2px;
-  border-radius: 5px;
-  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-primary);
+}
+.dict-plate__btn .svg { width: 18px; height: 18px; }
+.dict-plate__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-4);
+  text-align: center;
+}
+.dict-plate__reading {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tr-reading);
+  text-indent: var(--tr-reading);
   color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: 11px;
+}
+.dict-plate__word {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-weight: 400;
+  font-size: var(--fs-display);
+  line-height: 1.2;
+  letter-spacing: var(--tr-term);
+  text-indent: var(--tr-term);
+  color: var(--text-primary);
+}
+.dict-plate__word--glyph {
+  font-size: var(--fs-specimen-word);
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-indent: 0;
+}
+.dict-plate__readings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2) var(--sp-4);
+  max-width: 100%;
+}
+.dict-plate__yomi {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  letter-spacing: var(--tr-term);
+  color: var(--text-secondary);
+}
+.dict-kind {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sp-6);
+  height: var(--sp-6);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
   line-height: 1;
-  transition: opacity 0.16s ease;
+  color: var(--text-secondary);
 }
-.dict-index-bar:focus-within .dict-index-bar__key { opacity: 0; }
+.dict-plate__more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  min-height: 30px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+}
+.dict-plate__caption {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.dict-plate__stripe {
+  flex-shrink: 0;
+  height: 3px;
+  margin: 0 calc(-1 * var(--sp-5));
+  background: var(--line-color, var(--accent2));
+}
+.dict-entry__body {
+  display: flex;
+  flex-direction: column;
+}
+.dict-block { padding: var(--sp-4) var(--sp-5); }
+.dict-block + .dict-block { border-top: 1px solid var(--surface-line); }
+.dict-block__note {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--state-due) 65%, var(--text-primary));
+}
+.dict-entry__close { width: 100%; }
+/* The senses: a number in the section's ink, the gloss, its tags, the
+   examples that illustrate it. */
+.dict-senses {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.dict-sense {
+  display: grid;
+  grid-template-columns: var(--sp-6) minmax(0, 1fr);
+  gap: var(--sp-3);
+  align-items: baseline;
+}
+.dict-sense__n {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dict-ink);
+}
+.dict-sense__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.dict-sense__gloss {
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+.dict-sense__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.dict-tag {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: var(--tr-term);
+  color: var(--text-secondary);
+  text-decoration: underline dotted;
+  text-decoration-color: var(--surface-line);
+  text-underline-offset: 3px;
+}
+/* The tag's note, portalled and fixed so no scrolling ancestor clips it. */
+.dict-tag__tip {
+  position: fixed;
+  z-index: 300;
+  max-width: 220px;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-plate);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.dict-tag__tip[data-placement="above"] { transform: translate(-50%, -100%); }
+.dict-examples {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.dict-ex {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dict-ex__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+.dict-ex__hl {
+  background: none;
+  color: var(--dict-ink);
+  font-weight: 700;
+}
+.dict-ex__tr {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+/* The form: the stroke sheet on the paper, the count and the radical
+   door in the lattice beside it. */
+.dict-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--surface-line);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.dict-form__sheet {
+  grid-row: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  padding: var(--sp-3);
+  background: var(--paper);
+}
+.dict-form__img { width: 84px; height: 84px; }
+/* The words it is used in: rows with the hit in the section's ink. */
+.dict-words {
+  display: flex;
+  flex-direction: column;
+  margin: 0 calc(-1 * var(--sp-5));
+}
+.dict-word {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 48px;
+  padding: var(--sp-2) var(--sp-5);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.dict-word + .dict-word { border-top: 1px solid var(--surface-line); }
+.dict-word__jp {
+  flex-shrink: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+.dict-word__hit { color: var(--dict-ink); font-weight: 700; }
+.dict-word__gloss {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.dict-word__chev { flex-shrink: 0; color: var(--text-secondary); opacity: 0.7; }
+/* The readings sheet: every reading by register, each with the words
+   that use it, the rest as chips. */
+.dict-readings .dict-block { padding-inline: 0; }
+.dict-readings .dict-words { margin-inline: 0; }
+.dict-readings .dict-word { padding-inline: var(--sp-2); }
+.dict-register {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.dict-register__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.dict-readings__glyph {
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  line-height: 1;
+  color: var(--text-primary);
+}
+.dict-readings__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.dict-reading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.dict-reading__yomi {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  letter-spacing: var(--tr-term);
+  color: var(--text-primary);
+}
+.dict-register__rest {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.dict-register__chip {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+/* The radical you picked, over its kanji. */
 
-@media (max-width: 700px) {
-  .dict-console__top { padding: 10px 10px; }
-  .dict-console .dict-index-bar { padding: 2px 12px; gap: 10px; }
-  .dict-index-bar__input { font-size: 1rem; }
-  .dict-index-bar__key { display: none; }
-}
+.dict-layout { display: flex; gap: 28px; align-items: flex-start; }
+.dict-results-wrap { flex: 1; min-width: 0; }
+
 
 /* ── The console on a phone ────────────────────────────────
    Five collection chips, a mode toggle and a field: at 360px that was
@@ -17454,52 +16489,11 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    count you cannot read is the same as no count, but so is a count
    welded to the placeholder. */
 @media (max-width: 560px) {
-  .dict-console__top {
-    gap: 10px;
-    align-items: stretch;
-  }
-  .dict-tab-row--category { gap: 6px; width: 100%; }
-  .dict-tab-row--category .dict-tab-btn {
-    flex: 1 1 auto;
-    justify-content: center;
-    gap: 6px;
-    padding: 6px 10px 6px 6px;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-  }
-  .dict-tab-glyph { width: 20px; height: 20px; font-size: 11px; }
 
-  /* The toggle is a property of the collection above it, so at this
-     width it sits under them at full width rather than beside. */
-  .dict-console .dict-tab-row--submode { width: 100%; }
-  .dict-console .dict-tab-btn--sub { flex: 1; text-align: center; padding: 7px 10px; }
-
-  /* The count wraps to its own line. An <input> will shrink to
-     nothing before a `flex-shrink: 0` sibling gives up a pixel, so
-     side by side the field always lost — and the placeholder was cut
-     mid-word right against the number. */
-  .dict-console .dict-index-bar { flex-wrap: wrap; padding: 8px 14px 8px; row-gap: 0; }
-  .dict-index-bar__input { padding: 4px 0; }
-  .dict-index-bar__count {
-    flex: 1 0 100%;
-    text-align: right;
-    padding-bottom: 4px;
-  }
-  .dict-console { margin-bottom: 20px; }
 
   .station-header { margin-bottom: 20px;}
 }
 
-/* ── Closing the dock ──
-   In dock mode the ✕ in the panel's own header is the close, and
-   Escape works from anywhere on the page. The full-width "close"
-   slab underneath is a thumb affordance: it costs a whole row of a
-   420px reading panel to repeat something already available twice,
-   so it stays on phones and goes here. */
-@media (min-width: 1100px) {
-  .dict-dock .dict-detail__close-x { display: inline-flex; }
-  .dict-dock .dict-detail__close-btn { display: none; }
-}
 
 /* ══ 部首索引 — the radical index ═══════════════════════════
    Appended, like everything else that refines the dictionary block
@@ -17669,56 +16663,6 @@ button.syllabary-cell:focus-visible {
   .syllabary-cell__char { font-size: 21px; }
 }
 
-/* ── The entry plate, refined ──────────────────────────────
-   Three bands with room between them rather than three lines stacked
-   tight: the reading sits away from the headword, the headword gets
-   the middle of the card to itself, and the gloss is pinned to the
-   bottom above the level stripe. A fixed min-height and a two-line
-   clamp on the gloss keep every plate in a row the same size — a wall
-   of them only reads as a wall if the plates match. */
-.dict-entry-card {
-  min-height: 132px;
-  justify-content: space-between;
-  padding: 26px 12px 18px;
-  gap: 0;
-}
-.dict-entry-card__kana {
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  line-height: 1.3;
-  color: var(--text-secondary);
-  min-height: 1.3em;
-}
-.dict-entry-card__char {
-  font-size: 44px;
-  line-height: 1.05;
-  margin: 6px 0 8px;
-  transition: transform 0.16s ease;
-}
-.dict-entry-card:hover .dict-entry-card__char { transform: translateY(-1px); }
-.dict-entry-card__meaning {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-size: 0.76rem;
-  line-height: 1.35;
-  margin-top: 0;
-}
-/* The line stripe thickens on approach, the way a platform card's
-   roundel fills. */
-.dict-entry-card::after { transition: height 0.16s ease, opacity 0.16s ease; }
-.dict-entry-card:hover::after { height: 5px; opacity: 1; }
-
-/* The SRS seal is marginalia, not a second badge competing with the
-   level in the opposite corner. */
-.dict-entry-card .stage-badge { opacity: 0.75; }
-.dict-entry-card:hover .stage-badge { opacity: 1; }
-
-@media (max-width: 560px) {
-  .dict-entry-card { min-height: 112px; padding: 20px 8px 14px; }
-  .dict-entry-card__char { font-size: 34px; margin: 4px 0 6px; }
-}
 
 /* ── The standalone lookup sheet ───────────────────────────
    Opened from a quiz card, portalled over whatever is on screen. It
@@ -17749,9 +16693,6 @@ button.syllabary-cell:focus-visible {
   border-radius: 12px;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
 }
-/* A portalled sheet has no page behind it to click away from, so the
-   ✕ has to be present at every width. */
-.dict-sheet .dict-detail__close-x { display: inline-flex; }
 
 /* ══ 五十音 — the chart, properly ═══════════════════════════
    It was a spreadsheet: A I U E O across the top in latin, K S T down
@@ -19572,6 +18513,25 @@ html { scrollbar-gutter: stable; }
   transform: translateX(-4px);
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
+/* Compounds that override a base rule declared above them (the
+   picker's field, the result head's title, the dial's control, the
+   card's action, the form's record) — plan 073. */
+.picker-row--create .field { flex: 1; }
+.anl-head .stage__where-jp {
+  font-family: var(--font-jp);
+  font-weight: 600;
+  font-size: var(--fs-lead);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.anl-dial .seg { flex: 1; }
+.token-card__foot .btn-primary {
+  min-height: 44px;
+  padding-inline: var(--sp-4);
+  font-size: var(--fs-sm);
+}
+.dict-form .record { padding: var(--sp-3) var(--sp-4); }
 .record--door:hover .record__chev,
 .record--door:focus-visible .record__chev { opacity: 1; transform: translateX(0); }
 

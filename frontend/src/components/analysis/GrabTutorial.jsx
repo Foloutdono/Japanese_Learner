@@ -58,7 +58,7 @@ export function GrabTutorial({ t, onClose, onCopy, copied, watchUrl }) {
             <div className="anl-tut__body">
               <h3 className="anl-tut__steptitle">{t.tutStep1Title}</h3>
               <p className="anl-tut__text">{t.tutStep1Body}</p>
-              <button type="button" className="anl-action anl-tut__copy" onClick={onCopy}>
+              <button type="button" className="btn-secondary anl-tut__copy" onClick={onCopy}>
                 {copied ? t.bookmarkletCopied : t.copyBookmarklet}
               </button>
             </div>

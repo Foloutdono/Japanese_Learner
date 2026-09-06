@@ -37,18 +37,16 @@ const { default: AnalyzerScreen } = await import('../../screens/AnalyzerScreen')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
-// Board platform `key` from wherever the screen currently is. The tab
-// rail is gone: the gate's platform cards are the ONLY way onto a
-// platform, and the workbench's stub strip is the way back to them.
-// The cards render in registry order, so the nth card IS the nth
-// source — which is itself part of what these tests pin.
+// Board platform `key`: the three platforms are one segmented control
+// over the page (plan 073), in registry order — so the nth option IS
+// the nth source, which is itself part of what these tests pin. A
+// finished Passage shows the result instead of the intake; ‹ Analyzer
+// brings the control back.
 async function boardPlatform(screen, key) {
-  if (!screen.container.querySelector('.platform-card')) {
-    screen.container.querySelector('.anl-stub__change').click()
-    await settle(30)
-  }
+  const leave = screen.container.querySelector('.anl-head .stage__leave')
+  if (leave) { leave.click(); await settle(30) }
   const idx = SOURCES.findIndex(s => s.key === key)
-  screen.container.querySelectorAll('.platform-card')[idx].click()
+  screen.container.querySelectorAll('.anl-sources .seg__opt')[idx].click()
   await settle(60)
 }
 
@@ -89,9 +87,14 @@ describe('the source registry', () => {
       expect(panels.length, `${s.key} should mount one panel`).toBe(1)
       const panel = panels[0]
       expect(panel.id).toBe(`anl-panel-${s.key}`)
-      // The head proves the registry drives it; a control proves there
-      // is an intake under the head rather than a bare title.
-      expect(panel.textContent, `${s.key} head`).toContain(s.jp)
+      // The opening line proves the registry drives it (the interface
+      // speaks the learner's language — the browser lane runs fr-FR);
+      // a control proves there is an intake under it rather than a
+      // bare line.
+      expect(
+        panel.textContent.includes(fr[s.lead]) || panel.textContent.includes(en[s.lead]),
+        `${s.key} lead`,
+      ).toBe(true)
       expect(
         panel.querySelectorAll('button, input, textarea').length,
         `${s.key} panel has no controls`,
@@ -99,7 +102,7 @@ describe('the source registry', () => {
     }
   })
 
-  it('shows 運行履歴 on the concourse, and nowhere else', async () => {
+  it('shows the history under every intake', async () => {
     const screen = await render(
       <LangProvider>
         <MemoryRouter>
@@ -109,17 +112,16 @@ describe('the source registry', () => {
     )
     await settle(120)
 
-    // The one merged list lives on the selection screen (the mockup
-    // round moved it there): a recent Passage is one tap from the
-    // front door, not buried under a finished analysis.
+    // The one merged list lives under the intake (plan 073): a recent
+    // Passage is one tap from the field, whichever platform is boarded.
     expect(screen.container.querySelector('.anl-history')).not.toBeNull()
 
     for (const s of SOURCES) {
       await boardPlatform(screen, s.key)
       expect(
         screen.container.querySelector('.anl-history'),
-        `${s.key} workbench should not carry the history panel`,
-      ).toBeNull()
+        `${s.key} intake should carry the history`,
+      ).not.toBeNull()
     }
   })
 })

@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 //
 // Drop-in replacement for a static <img>: it fills its container
 // (width/height: 100%) the same way `.stroke-ref__img` /
-// `.dict-detail__stroke-img` sized the old <img>, so no CSS changes
+// `.dict-form__img` sized the old <img>, so no CSS changes
 // are needed at the call site beyond swapping the tag. On fetch
 // failure it calls `onError()` instead of rendering anything, so the
 // caller can show its own existing fallback markup exactly like the

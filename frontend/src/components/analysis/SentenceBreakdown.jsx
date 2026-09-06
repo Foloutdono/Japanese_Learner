@@ -8,6 +8,7 @@ import { LevelBadge } from './LevelBadge'
 import { SpeakButton } from './SpeakButton'
 import { StatusBadge } from './StatusBadge'
 import { DeckPicker } from './DeckPicker'
+import { StageCard } from './StageCard'
 
 // Real stroke-based chevron rather than `‹`/`›` text glyphs, whose
 // optical centering varies by font/OS. `display: block` avoids the few
@@ -44,30 +45,28 @@ function isUnknownToken(tok) {
     && ['not_started', 'new'].includes(tok.vocab_match.stats?.status)
 }
 
-// The class the analyser's smart-furigana rule keys on: a word the SRS
-// says the learner has MASTERED is the one whose reading they have
-// earned the right to lose. Everything else -- new, learning, due, or
-// simply not in the deck -- keeps its ruby in 'unknown' mode, because
-// "I've met it" is not "I can read it". Carries no styles of its own;
-// only .anl-stage[data-furigana] selectors read it, so the reading
-// screen sharing this component is unaffected.
-function knownClass(tok) {
-  return tok.vocab_match?.stats?.status === 'mastered' ? ' word-span--known' : ''
+// The token's state on the line (canvas AnalyzerResult): a word the
+// SRS says the learner has mastered, one being learned (or due back),
+// one never started, one the app has no card for (a proper noun,
+// JMdict-only vocabulary), and a particle or a mark — which carries
+// no rule at all. The state is a 2px rule under the word in the
+// state's own ink, never an ink change on the word itself.
+const PARTICLE_POS = new Set(['particle', 'symbol', 'auxiliary', 'punctuation', 'conjunction', 'suffix', 'prefix', 'copula'])
+const HAS_KANJI = /[一-龯々]/
+function tokState(tok) {
+  const status = tok.vocab_match?.stats?.status
+  if (status === 'mastered') return 'mastered'
+  if (status === 'learning' || status === 'due') return 'learning'
+  if (status) return 'unknown'
+  if (!tok.pos || PARTICLE_POS.has(tok.pos) || !CONTENT_POS.has(tok.pos)) return 'particle'
+  return 'offdeck'
 }
 
-// The mockup's two underline states, and only those two. A word being
-// learned (or due back) runs in the translucent ember, a word never
-// started in the line's own grape at full strength; mastered words and
-// unmatched tokens (particles, punctuation) carry no rule at all. The
-// old mapping painted every status through --word-color, which put a
-// GREY rule under every not-yet-started word — most of any real
-// sentence — and made the line read as a diagnostic instead of a
-// sentence.
-function underlineClass(tok) {
-  const status = tok.vocab_match?.stats?.status
-  if (!status || status === 'mastered') return ''
-  if (status === 'learning' || status === 'due') return ' anl-sentence__tk--learning'
-  return ' anl-sentence__tk--new'
+// The reading printed over a token on the line: only over a word
+// with a kanji in it (the rest already spells its own sound).
+function tokFurigana(tok) {
+  if (!tok.reading || !HAS_KANJI.test(tok.surface ?? '')) return ''
+  return tok.reading
 }
 
 // ── The token table (the mockup's second view) ────────────
@@ -208,42 +207,36 @@ export function SentenceBreakdown({
     // Sentence can legitimately have no tokens, and that must render
     // as "nothing to step through", not a white screen.
     const current = tokens.length ? tokens[Math.min(index, tokens.length - 1)] : null
-    const canPrev = index > 0
-    const canNext = index < tokens.length - 1
 
     return (
-      <div className="rdg-breakdown anl-stagebd">
-        {/* ── The sentence pane ──
-            The mockup's rule, taken literally: the pane holds the
-            SENTENCE and nothing else — no badge row, no speaker, no
-            grammar chips, no explanation (that text lives with the
-            Explain control). Ink stays primary and the SRS speaks
-            through a 2px underline on exactly the words still being
-            learned — see underlineClass above. */}
-        <div className="anl-sentence">
-          <p className="phrase-line rdg-breakdown-line anl-sentence__jp">
-            {tokens.map((w, i) => (
-              // Deliberately NOT word-span/rdg-breakdown-line__word:
-              // those bases colour the ink by status and chip the
-              // hover in sumi, which is the stepper's diagnostic
-              // look. The sentence pane reads as a SENTENCE — its
-              // own classes, fully styled in the anl block.
-              <button
-                key={i}
-                type="button"
-                onClick={() => setIndex(i)}
-                className={
-                  `anl-sentence__tk${i === index ? ' anl-sentence__tk--focus' : ''}`
-                  + underlineClass(w) + knownClass(w)
-                }
-                aria-label={t.jumpToTokenNamed(w.surface)}
-                aria-pressed={i === index}
-                lang="ja"
-              >
-                <FuriganaParts parts={w.furigana ?? [{ text: w.surface }]} />
-              </button>
-            ))}
-          </p>
+      <div className="anl-stagebd">
+        {/* ── The line (canvas .tok-line) ──
+            The sentence as tokens: the reading over each word that
+            needs one, the SRS speaking through a 2px rule under it
+            (see tokState), the one on the stage tinted. The furigana
+            dial (the caller's `controls`) hides the readings by state
+            through data-furigana on the stage. */}
+        <div className="tok-line" role="group" aria-label={analysis.text}>
+          {tokens.map((w, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setIndex(i)}
+              className={`tok tok--${tokState(w)}${i === index ? ' tok--on' : ''}`}
+              aria-label={t.jumpToTokenNamed(w.surface)}
+              aria-pressed={i === index}
+              lang="ja"
+            >
+              <span className="tok__furi" lang="ja">{tokFurigana(w)}</span>
+              <span className="tok__word">{w.surface}</span>
+            </button>
+          ))}
+        </div>
+        <div className="anl-legend" aria-hidden="true">
+          <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--mastered" />{t.status_mastered}</span>
+          <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--learning" />{t.status_learning}</span>
+          <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--unknown" />{t.status_new}</span>
+          <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--offdeck" />{t.cannotMineOffDeck}</span>
         </div>
 
         {controls}
@@ -256,64 +249,18 @@ export function SentenceBreakdown({
             onJumpToToken={onJumpToToken ?? setIndex}
           />
         ) : (
-        <div className="rdg-breakdown-card-row">
-          <button
-            onClick={() => setIndex(i => Math.max(0, i - 1))}
-            disabled={!canPrev}
-            className="rdg-breakdown-nav rdg-breakdown-nav--prev"
-            aria-label={t.previousWord ?? 'Previous word'}
-          >
-            <ChevronIcon direction="left" />
-          </button>
-
-          <CardTransition cardKey={index} className="rdg-breakdown-card-stage">
-            {current && <TokenCard
-              word={current}
-              t={t}
-              extraClassName="rdg-breakdown-card"
-              onWordClick={onTokenClick}
-              onKanjiClick={onKanjiClick}
-              mining={mining}
-              sentenceText={analysis.text}
-              // The pane above already offers the sentence aloud; a
-              // second speaker inside the card was one control too
-              // many on the mockup's clean card.
-              speakable={false}
-              // Mockup chips: a glyph and its grade, nothing stuffed
-              // inside. The kanji's own badges and mine control live
-              // in the WordDetail the chip opens.
-              stage
-              emphasize={analysis.unknown_count === 1 && isUnknownToken(current)}
-            />}
-          </CardTransition>
-
-          <button
-            onClick={() => setIndex(i => Math.min(tokens.length - 1, i + 1))}
-            disabled={!canNext}
-            className="rdg-breakdown-nav rdg-breakdown-nav--next"
-            aria-label={t.nextWord ?? 'Next word'}
-          >
-            <ChevronIcon direction="right" />
-          </button>
-        </div>
-        )}
-
-        {/* Where you are along the Tokens, as the mockup draws it:
-            dots, not a fraction. Redundant with the arrows and the
-            jump-to-word line (both fully accessible), so the dots
-            themselves stay out of the tab order. */}
-        {tokenView !== 'table' && tokens.length > 1 && (
-          <div className="anl-stagebd__dots" aria-hidden="true">
-            {tokens.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                tabIndex={-1}
-                className={`anl-stagebd__dot${i === index ? ' anl-stagebd__dot--on' : ''}`}
-                onClick={() => setIndex(i)}
+          <CardTransition cardKey={index} className="anl-stagebd__card">
+            {current && (
+              <StageCard
+                word={current}
+                t={t}
+                onWordClick={onTokenClick}
+                onKanjiClick={onKanjiClick}
+                mining={mining}
+                emphasize={analysis.unknown_count === 1 && isUnknownToken(current)}
               />
-            ))}
-          </div>
+            )}
+          </CardTransition>
         )}
       </div>
     )
@@ -339,7 +286,7 @@ export function SentenceBreakdown({
               key={i}
               type="button"
               onClick={() => setIndex(i)}
-              className={`word-span rdg-breakdown-line__word${i === index ? ' rdg-breakdown-line__word--active' : ''}${knownClass(w)}`}
+              className={`word-span rdg-breakdown-line__word${i === index ? ' rdg-breakdown-line__word--active' : ''}`}
               style={{ '--word-color': wordColor(w) }}
               // The line doubles as a jump-to-Token index, so each entry
               // says WHICH Token it goes to rather than repeating one
@@ -428,7 +375,7 @@ export function SentenceBreakdown({
               key={i}
               type="button"
               onClick={() => onTokenClick(w)}
-              className={`word-span word-span--clickable${knownClass(w)}`}
+              className={`word-span word-span--clickable`}
               style={{ '--word-color': wordColor(w) }}
               aria-label={t.detailsForToken(w.surface)}
               lang="ja"
@@ -436,7 +383,7 @@ export function SentenceBreakdown({
               <FuriganaParts parts={w.furigana ?? [{ text: w.surface }]} />
             </button>
           ) : (
-            <span key={i} className={`word-span${knownClass(w)}`} style={{ '--word-color': wordColor(w) }} lang="ja">
+            <span key={i} className={`word-span`} style={{ '--word-color': wordColor(w) }} lang="ja">
               <FuriganaParts parts={w.furigana ?? [{ text: w.surface }]} />
             </span>
           )))}
