@@ -1,7 +1,7 @@
 # Mobile rework — the screens
 
 The canvas: <https://claude.ai/code/artifact/760313f0-7c87-40e2-993f-708fdbf63bd0>
-— sixty-five artboards, one page per tab, the screens in the order a learner
+— sixty-seven artboards, one page per tab, the screens in the order a learner
 walks them, all at 390×844; the boarding page holds the onboarding (fifteen
 screens and a motion sheet) with the sign-in; a last page holds the chrome
 (the HUD, the tab bar and the fare gate in every state) and the states sheet
@@ -14,7 +14,7 @@ six-grade bar). Every artboard carries a dark / light tweak.
 | Learn | the route map · a station's level line · its frequency tiers · its platforms · my decks · create a deck · a deck · a new card |
 | Practice | the four platforms · reading practice · comprehension and its result · translation, writing and feedback · the exam's papers · the runner · finish with blanks · the result |
 | Dictionary | the console and the analyzer's door · an entry · all readings · the analyzer (text, photo, video) · a sentence · add to deck |
-| Profile | the pass · the inserts · the status sheet · the balance sheet · statistics · settings · settings › learning · settings › destination |
+| Profile | the pass · the inserts · the status sheet · the balance sheet · statistics · settings · settings › learning · moving up a level · moving down a level · settings › destination |
 | Boarding | welcome · your name · why Japanese · the kana check · the reveal · your level · your goal · your rhythm · when you study · the nudge · the system prompt · building the journey · the plan · the welcome offer · the pass · sign in · the motion sheet |
 | Chrome | the HUD and the tab bar in every state, the three gates · the states sheet |
 
@@ -53,6 +53,13 @@ literals `index.css` already uses.
   Today as the map's own due chip, the glyph stepping aside for it.
 - **Balance.** 1 credit = 1 review. Free: +30 every day at 00:00, holds up to
   50. Subscription: unlimited.
+- **The pass and the free ride (owner's ruling, 2026-09-06).** The pass:
+  unlimited credits · the practice modes · the analyzer · 100 decks and
+  10,000 cards. Free: 30 credits a day (cap 50) · the learning modes · the
+  dictionary without the analyzer · today's run · the full profile · 7 decks
+  and 200 cards. Practice's four platforms and the analyzer's door wear the
+  ∞ Pass tag for a free learner; the offer and the balance sheet list the
+  four perks.
 
 ## The mobile ruling on the pairing (2026-09-05)
 
@@ -93,10 +100,17 @@ implementation:
   catalogue cards of the rework on `main` (two columns on the phone). The
   analyzer itself is one workbench: the intake switch, the field, the one
   filled action, the history.
-- **Profile** is the pass and its inserts, unchanged in kind. The pass gains
-  one line: the ride balance (credits · refill), under the journey line it
-  already prints. The stamp book heads with its month and keeps the three
-  figures under the grid.
+- **Profile** is the pass and its inserts. The pass prints the holder, the
+  rank, the XP and the level, and one line: the ride balance (credits ·
+  refill). The journey line, the ghost train and the gear left it — the
+  status sheet (the pass turned over: the track, You and Plan, the four
+  figures) opens from the HUD's station panel, and Settings has its door in
+  the inserts beside Statistics. The stamp book heads with its month and
+  keeps the three figures under the grid.
+- **Statistics** is the learner's own object: no line pigment (the pass ink
+  on the header), a 2×3 lattice of records with a note each, the practice
+  calendar in the pass's gold, the seven-day forecast in the pass ink,
+  English captions with hairlines.
 
 ## The dictionary rework, on the phone
 
@@ -139,6 +153,15 @@ pills, Close.
 - **Settings** is a list of the six slips, each opening its own screen; the
   learning slip shows the level strip (only the current stop names its
   level), the pace chips and the rating-bar choice.
+- **The level rule (owner's ruling, 2026-09-06).** Choosing a level — on the
+  boarding or in Settings › Learning — marks every stop behind it known:
+  those cards start mastered, with their first check spread over the coming
+  weeks so no single day is flooded. Moving up does the same for the stops
+  crossed; cards already learning keep their place. Moving down deletes
+  nothing: the cards above are set aside with their history and rejoin the
+  run when the level rises again. Both moves confirm on a sheet that prints
+  the figures (marked known · spread over; set aside · deleted 0). The
+  placement test can be retaken from the same slip.
 - **The analyzer's stage** shows one sentence at a time (a stepper with the
   passage's stops), every token underlined in its state ink, one token card
   with Add to deck, a furigana switch and Explain.
@@ -180,31 +203,37 @@ what was added or read into it is listed here.
 
 - **The frame.** A round back button, the track (the progress bar: a gold rail
   with a small train at the head, eight stops to the pass) and the count
-  (2/8). The three arrival screens — the plan, the offer, the pass — have no
-  track: the ride is over. The building screen has none either.
+  (2/8). The title sits under the head; the content takes the room between
+  the title and the foot and is centred in it, slightly high; the foot is
+  docked to the bottom on every screen and rises with the keyboard inset, so
+  Continue is never hidden (the body scrolls under it on short screens). The
+  three arrival screens — the plan, the offer, the pass — have no track: the
+  ride is over. The building screen has none either.
 - **Welcome.** 日本語 over *Learn Japanese*, two lanes of cards rolling past
   in opposite directions (kanji, vocabulary, grammar cloze, the drawing
   canvas, listening, reading, kana, a mock-exam question — the app's modes
-  as rolling stock), the tagline from the sketch, *Board* as the one filled
-  action, *Have an account? Sign in* as the ghost link. No language picker:
-  the language is the device's.
-- **The name.** The field is focused, the caret blinks, and *Continue* sits
-  directly under the field — the keyboard cannot reach it. Elsewhere Continue
-  docks above the keyboard inset.
-- **Why.** Five doors with an icon each (studies · fun · a trip · friends ·
-  something else). The answer writes the offer's sentence later.
+  as rolling stock; each card's text is one block so clozes and sentences
+  wrap as text, never as flex items), the tagline from the sketch, *Board*
+  as the one filled action, *Have an account? Sign in* as the ghost link. No
+  language picker: the language is the device's.
+- **The name.** The field is focused, the caret blinks; *Continue* is at the
+  foot like everywhere else and rises with the keyboard.
+- **Why.** Six doors with an icon each (studies · fun · a trip · to live in
+  Japan · friends · something else). The answer writes two lines of the plan
+  and the offer's sentence later.
 - **The kana check.** すし | ホテル, two words a beginner already knows as
   sounds, so the reveal pays off. Four honest answers — Hiragana, Katakana,
-  Both, *Not yet* — each carrying its sample; tapping one advances, there is
-  no Continue. *Not yet* is an addition: a complete beginner needs a door
+  Both, *Not yet* — a 2×2 lattice docked at the foot, each carrying its
+  sample; tapping one advances, there is no Continue. *Not yet* is an addition: a complete beginner needs a door
   that is not a lie. One script or *Not yet* → the reveal (the readings rise
   under each word: su·shi *sushi*, ho·te·ru *hotel*, the script named), then
   the goal. Both → the level list.
 - **Level and goal.** Six stops with a line each (Novice — kana and a few
   words; N5 simple phrases · ~100 kanji; N4 everyday talk · ~300; N3 daily
   life with ease · ~650; N2 news and work · ~1,000; N1 almost anything ·
-  ~2,000). The goal shows only the stops ahead, the next one marked *Next
-  stop* and preselected.
+  ~2,000), and under them the level rule in one line ("The stops behind you
+  are marked known and spread over the coming weeks"). The goal shows only
+  the stops ahead, the next one marked *Next stop* and preselected.
 - **Rhythm.** Four cards: 5 · 10 · 15 · 20 min a day, each with what it buys
   (~n new items), 10 marked *Recommended* and preselected. "You can change it
   later."
@@ -218,35 +247,42 @@ what was added or read into it is listed here.
   day, at your time. Never more."), *Allow notifications* filled, *Not now*
   as a ghost. The system prompt shows once, only after the learner said yes
   (drawn on its own artboard so the moment is visible).
-- **Building.** The train rides four stops — your goal, your lines, your
-  daily ride, your projection — each lighting and ticking as it passes. This
-  screen is the animation; the still frame reads on its own.
-- **The plan.** The one screen that compares: *Words you'll remember* over
-  six months, daily reviews against cramming, both lines drawing themselves
-  and labelled at their ends (two series: a legend and direct labels, gold
-  and the `--accent9` blue-violet, checked for colour-vision separation).
-  Then the promise from the learner's own answers: with 10 min a day, by
-  March 2027 — ~1,500 words, ~300 kanji, everyday conversations, ready for
-  JLPT N4. Every figure wears a ~.
-- **The offer.** *Welcome offer −X% on the yearly pass, today only*, the
-  unlimited pass with three perks, the sentence written from the motivation
-  (*Board, and be ready for your trip to Japan.*), the yearly plan promoted
-  and preselected, the monthly beside it, *Get −X%* filled, "Cancel anytime."
-  The sketch's "don't show anymore" is the ghost link *Continue with the free
-  pass*: it boards without paying and keeps the offer from returning. −X% and
-  [PRICE] are placeholders on purpose.
+- **Building.** One track (the train drives to the stop being built) over
+  four plain rows — your goal, your lines, your daily ride, your projection —
+  ticked, pulsing or dimmed. Nothing is absolutely positioned but the train;
+  the still frame reads on its own.
+- **The plan.** The one screen that compares: *Your projection* over six
+  months, daily reviews (gold, drawn once) against cramming (a dashed
+  secondary line), labelled at their ends with a legend under, and a caption
+  that calls it an illustration. Then four promises from the learner's own
+  answers: the figures (~1,500 words and ~300 kanji at 10 min a day by March
+  2027), two lines from the motive (a trip: read signs, menus and tickets ·
+  ask your way, order, book a room — the motion sheet lists the lines for
+  every motive) and the honest stop, *On track for JLPT N4*.
+- **The offer.** *Welcome offer −X% on the yearly pass*, the ∞ pass with its
+  four perks (unlimited credits · the practice modes · the analyzer · 100
+  decks and 10,000 cards, the free limits beside), the sentence written from
+  the motivation (*Board, and be ready for your trip to Japan.*), the yearly
+  plan promoted and preselected, the monthly beside it, *Get the −X%* filled,
+  "Cancel anytime." The sketch's "don't show anymore" is the ghost link
+  *Continue free · don't show again*: it boards without paying and keeps the
+  offer from returning. −X% and [PRICE] are placeholders on purpose; "today
+  only" was left out — add it only if the offer really expires.
 - **The pass.** *Your pass is ready, Aiko. Enjoy the ride.* The commuter pass
-  itself (level 1, 浪人 Rōnin, N5 → N4 on time, valid until 14 Mar 2027, 30 /
-  50 credits) slides up and is sealed 発行 (issued). *Enter the station* leads
-  to the tutorial, which is not drawn.
+  itself (level 1, 浪人 Rōnin, 30 / 50 credits — only the balance on its
+  foot; the journey lives behind the station panel) slides up and is sealed
+  発行 (issued). *Enter the station* leads to the tutorial, which is not
+  drawn.
 - **Motion.** Between screens, the train pull: the screen you leave slides
   out to the left as the next arrives from the right (260 ms, ease-out); the
   track's train advances 300 ms later; back runs it in reverse; never a
   cross-fade. One movement per screen, each with a resting state that reads
   on its own (reduced motion loses nothing). All of it is on the motion sheet
-  with the rules that hold everywhere: Continue never hidden, the language
-  from the device, one filled action, disabled at 0.45, 44px targets, back
-  always free, optimistic and never lying, the theme in small doses.
+  with the rules that hold everywhere: Continue always at the foot and never
+  hidden, the language from the device, one filled action (selection is a
+  gold ring, never a second fill), disabled at 0.45, 44px targets, back free
+  until the plan is built, optimistic and never lying (the system prompt
+  shows the system's own words), the theme in small doses.
 - **Sample learner.** Aiko, a trip to Japan, reads both kana, Beginner N5,
   goal N4, 10 min at 07:30, notifications allowed, boards on the free pass.
 
@@ -273,7 +309,8 @@ what was added or read into it is listed here.
 
 ## Assumed, to confirm
 
-1. Practice, the dictionary and the analyzer do not spend credits.
+1. Practice and the analyzer are the pass's; the dictionary is free. Only
+   today's run spends credits.
 2. The tab bar hides during a run (the thumb needs the bottom edge for the
    rating bar); a tab tap elsewhere is the only way to leave a run mid-way.
 3. The Practice header has no roundel and a hairline stripe: it is a

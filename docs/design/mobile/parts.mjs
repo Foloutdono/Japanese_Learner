@@ -142,16 +142,16 @@ export function jourLine(st = 'onTime', valid = '14 Mar 2027') {
 }
 
 // ── the commuter pass, full size ──
-export function pass({ name = 'Aiko', level = 12, into = 420, span = 1000, rankJp = '侍', rank = 'Samurai', footer = '' } = {}) {
+export function pass({ name = 'Aiko', level = 12, into = 420, span = 1000, rankJp = '侍', rank = 'Samurai', footer = '', heading = 'h1', gear = true } = {}) {
   const r = 26, c = 2 * Math.PI * r, off = c * (1 - into / span)
   return `<div class="pass">
   <div class="pass__head">
     <span class="pass__brand">
       <span class="pass__wave"><span></span><span></span><span></span></span>
-      <h1 class="pass__brand-sub">Commuter pass</h1>
+      <${heading} class="pass__brand-sub">Commuter pass</${heading}>
     </span>
     <span class="pass__head-right">
-      <button type="button" class="pass__gear">${I.gear}</button>
+      ${gear ? `<button type="button" class="pass__gear">${I.gear}</button>` : ''}
       <span class="pass__issuer">JP</span>
     </span>
   </div>

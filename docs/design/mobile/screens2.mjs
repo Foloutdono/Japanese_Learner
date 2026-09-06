@@ -288,27 +288,26 @@ function calendar() {
 }
 const STATS = `
 ${hud()}
-<main class="phone__content" style="--line-color: var(--accent8);">
-  ${header({ code: 'TO', title: 'Statistics', color: 'var(--accent8)', aside: back('Profile') })}
-  <div class="headline">
-    <div class="plaque"><span class="plaque__v">3<span class="plaque__u">days</span></span><span class="plaque__l">Streak</span></div>
-    <div class="plaque"><span class="plaque__v">24</span><span class="plaque__l">Due today</span></div>
-    <div class="plaque"><span class="plaque__v">20<span class="plaque__u">%</span></span><span class="plaque__l">Mastered</span><span class="plaque__note">1,742 of 8,844 cards</span></div>
-    <div class="plaque"><span class="plaque__v">91<span class="plaque__u">%</span></span><span class="plaque__l">Accuracy</span><span class="plaque__note">across 842 reviews</span></div>
-    <div class="plaque"><span class="plaque__v">1,204</span><span class="plaque__l">In progress</span></div>
-    <div class="plaque"><span class="plaque__v">5,898</span><span class="plaque__l">New</span><span class="plaque__note">never seen</span></div>
+<main class="phone__content">
+  ${header({ title: 'Statistics', color: 'var(--pass-ink)', aside: back('Profile') })}
+  <div class="records">
+    <div class="record"><span class="record__value">3<span class="record__unit">days</span></span><span class="record__label">Streak</span><span class="record__note">longest 21</span></div>
+    <div class="record"><span class="record__value">24</span><span class="record__label">Due today</span><span class="record__note">318 this week</span></div>
+    <div class="record"><span class="record__value">20<span class="record__unit">%</span></span><span class="record__label">Mastered</span><span class="record__note">1,742 of 8,844 cards</span></div>
+    <div class="record"><span class="record__value">91<span class="record__unit">%</span></span><span class="record__label">Accuracy</span><span class="record__note">across 842 reviews</span></div>
+    <div class="record"><span class="record__value">1,204</span><span class="record__label">In progress</span></div>
+    <div class="record"><span class="record__value">5,898</span><span class="record__label">New</span><span class="record__note">never seen</span></div>
   </div>
-  <div class="section-header"><span class="section-header__mark"><span class="section-header__jp">Practice calendar</span></span><span class="section-header__count">14 weeks</span><span class="section-header__rule"></span></div>
-  <div class="cal">
+  <div class="stat-cap"><span>Practice calendar</span><span>14 weeks · best day <b>88</b></span></div>
+  <div class="cal cal--gold">
     <div class="cal__months"><span style="grid-column: 1 / span 4;">Jun</span><span style="grid-column: 5 / span 4;">Jul</span><span style="grid-column: 9 / span 5;">Aug</span><span>Sep</span></div>
     <div class="cal__grid">${calendar()}</div>
-    <div class="cal__foot"><span>Best day <b style="color: var(--text-primary);">88</b></span><span class="cal__scale">less <span class="cal__cell"></span><span class="cal__cell cal__cell--1"></span><span class="cal__cell cal__cell--2"></span><span class="cal__cell cal__cell--3"></span><span class="cal__cell cal__cell--4"></span> more</span></div>
+    <div class="cal__foot"><span>One square a day, darker with more reviews</span><span class="cal__scale">less <span class="cal__cell"></span><span class="cal__cell cal__cell--1"></span><span class="cal__cell cal__cell--2"></span><span class="cal__cell cal__cell--3"></span><span class="cal__cell cal__cell--4"></span> more</span></div>
   </div>
-  <div class="section-header"><span class="section-header__mark"><span class="section-header__jp">Upcoming reviews</span></span><span class="section-header__rule"></span></div>
-  <div class="forecast">
-    <div class="forecast__bars">${[[24, 'Sat'], [61, 'Sun'], [38, 'Mon'], [52, 'Tue'], [70, 'Wed'], [44, 'Thu'], [29, 'Fri']].map(([v]) => `<span class="forecast__col"><span class="forecast__v">${v}</span><span class="forecast__bar" style="height: ${Math.round(v / 70 * 72)}px;"></span></span>`).join('')}</div>
+  <div class="stat-cap"><span>Upcoming reviews</span><span>7 days · <b>318</b></span></div>
+  <div class="forecast forecast--pass">
+    <div class="forecast__bars">${[[24, 'Sat'], [61, 'Sun'], [38, 'Mon'], [52, 'Tue'], [70, 'Wed'], [44, 'Thu'], [29, 'Fri']].map(([v]) => `<span class="forecast__col"><span class="forecast__v">${v}</span><span class="forecast__bar" style="height: ${Math.round(v / 70 * 100)}%"></span></span>`).join('')}</div>
     <div class="forecast__days"><span>Sat</span><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span></div>
-    <div class="forecast__legend"><span>Per day</span><span>Running total <b>318</b></span></div>
   </div>
 </main>
 ${tabbar('profile', 24)}`
@@ -345,6 +344,7 @@ ${hud()}
     <div class="lvlstrip">
       ${[['N5', 'Beginner'], ['N4', 'Elementary'], ['N3', 'Intermed.'], ['N2', 'Advanced'], ['N1', 'Proficient']].map(([c, j]) => `<button type="button" class="lvlstrip__stop${c === 'N4' ? ' lvlstrip__stop--on' : ''}"><span class="lvlstrip__dot"></span><span class="lvlstrip__code">${c}</span>${c === 'N4' ? `<span class="lvlstrip__jp">${j}</span>` : ''}</button>`).join('')}
     </div>
+    <p class="lvl-note">Moving up marks the stops behind you <b>known</b>, spread over the coming weeks. Moving down <b>deletes nothing</b> — every review is kept.</p>
   </div>
   <div class="slip">
     <div class="slip__label"><b>Daily pace</b><span class="cap">New items a day</span></div>
@@ -364,11 +364,26 @@ ${hud()}
     <span class="slip__hint">They all grade the same way. A shorter bar simply leaves out the buttons you never press.</span>
   </div>
   <div class="slip">
-    <span class="slip__hint">Recalibrate your level once you have progressed.</span>
+    <span class="slip__hint">Not sure? Retake the placement test. Either way, nothing is lost.</span>
     <button type="button" class="btn-secondary" style="align-self: flex-start;">Retake the test</button>
   </div>
 </main>
 ${tabbar('profile', 24)}`
+
+// ── Settings · learning › the level sheets: nothing is ever lost ──
+const departBtn2 = (label) => `<button type="button" class="btn-depart btn-depart--sheet" style="width: 100%;"><span class="btn-depart__jp">${label}</span><span class="btn-depart__go">▶</span></button>`
+const levelSheet = (title, body, figs, cta, ghost) => `${SETTINGS_LEARN}
+<div class="scrim"></div>
+<div class="sheet">
+  <span class="sheet__handle"></span>
+  <div class="sheet__head"><span class="sheet__jp">${title}</span></div>
+  <p class="lvl-sheet__body">${body}</p>
+  <div class="lvl-sheet__figs">${figs.map(([v, l]) => `<div class="lvl-sheet__fig"><b>${v}</b><span>${l}</span></div>`).join('')}</div>
+  ${departBtn2(cta)}
+  <button type="button" class="btn-secondary" style="width: 100%;">${ghost}</button>
+</div>`
+const SETTINGS_LEVEL_UP = levelSheet('Move up to N3?', 'The N4 stops are marked <b>known</b>: their cards start mastered, with a first check spread over the next six weeks. Cards you are already learning keep their place. <b>Nothing is deleted.</b>', [['1,318', 'Marked known'], ['6 weeks', 'Spread over']], 'Move up to N3', 'Stay at N4')
+const SETTINGS_LEVEL_DOWN = levelSheet('Move down to N5?', 'The N4 cards are set aside, not deleted: they keep their history and rejoin the run when you move up again. Today\'s run shrinks to the N5 stops.', [['224', 'Set aside'], ['0', 'Deleted']], 'Move down to N5', 'Stay at N4')
 
 // ── Sign in ──
 const AUTH = `
@@ -484,6 +499,8 @@ export const SCREENS2 = [
   ['Statistics',      STATS,          'Statistics',                  'pass'],
   ['Settings',        SETTINGS,       'Settings',                    'pass'],
   ['SettingsLearn',   SETTINGS_LEARN, 'Settings · learning',         'pass'],
+  ['SettingsLevelUp',   SETTINGS_LEVEL_UP,   'Settings · moving up a level',   'pass'],
+  ['SettingsLevelDown', SETTINGS_LEVEL_DOWN, 'Settings · moving down a level', 'pass'],
   ['DictionaryEntry', DICT_ENTRY,     'Dictionary · an entry',       'dict'],
   ['AnalyzerResult',  ANL_RESULT,     'Analyzer · the sentence',     'dict'],
   ['SignIn',          AUTH,           'Sign in',                     'arrival'],

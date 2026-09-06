@@ -22,7 +22,7 @@ A third canvas (2026-09-05) draws the **mobile rework** — the five-tab
 backbone, the HUD (level · goal status · balance), the credit system, every
 screen and the boarding (the onboarding) — at
 `https://claude.ai/code/artifact/760313f0-7c87-40e2-993f-708fdbf63bd0`:
-sixty-five artboards, with their sources and the decisions they rest on under
+sixty-seven artboards, with their sources and the decisions they rest on under
 `docs/design/mobile/`. Exploration for the mobile update, not yet the rule:
 nothing in it overrides this file until it ships. One departure to know about:
 on the phone the interface speaks English only and Japanese is content (the

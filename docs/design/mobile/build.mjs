@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs'
 import { artboard, hud, tabbar, header, back, track, due, rally, pace, jourLine, pass, credits, status, I } from './parts.mjs'
 import { SCREENS2 } from './screens2.mjs'
 import { SCREENS3, STATES_BODY } from './screens3.mjs'
-import { SCREENS4, MOTION_BODY } from './screens4.mjs'
+import { SCREENS4, MOTION_BODY, PERKS } from './screens4.mjs'
 
 // ── sample data, shared by every screen ──
 const LANES = [
@@ -191,7 +191,7 @@ ${tabbar('learn', 24)}`
 // ── 7 · Practice — four platforms ──
 const practice = ({ n, color, title, desc }) => `<button type="button" class="platform-card platform-card--line" style="--line-color: ${color}">
   <span class="platform-card__lead"><span class="platform-card__no">${n}</span></span>
-  <span class="platform-card__body"><span class="platform-card__title">${title}</span><span class="platform-card__desc">${desc}</span></span>
+  <span class="platform-card__body"><span class="platform-card__title" style="display: flex; align-items: center; gap: var(--sp-3);">${title}<span class="pass-tag"><b>∞</b>Pass</span></span><span class="platform-card__desc">${desc}</span></span>
   <span class="platform-card__go">▶</span>
 </button>`
 const PRACTICE_BODY = `
@@ -217,7 +217,7 @@ const card = ({ kana, char, meaning, lvl, color, stage }) => `<button type="butt
 </button>`
 export const ANL_DOOR = `<button type="button" class="anl-door">
     <span class="wmap-roundel" style="--line-color: var(--line-kaiseki); color: color-mix(in srgb, var(--line-kaiseki) 60%, var(--text-primary));">KS</span>
-    <span class="anl-door__names"><span class="anl-door__title">Analyzer</span></span>
+    <span class="anl-door__names"><span class="anl-door__title" style="display: flex; align-items: center; gap: var(--sp-3);">Analyzer<span class="pass-tag"><b>∞</b>Pass</span></span></span>
     <span class="anl-door__intakes"><span class="anl-door__intake">${I.text}</span><span class="anl-door__intake">${I.camera}</span><span class="anl-door__intake">${I.video}</span></span>
   </button>`
 const DICT_BODY = `
@@ -308,7 +308,7 @@ function stampBook() {
 const PROFILE_BODY = `
 ${hud()}
 <main class="phone__content">
-  ${pass({ footer: jourLine('onTime') + rideLine() })}
+  ${pass({ footer: rideLine(), gear: false })}
   ${stampBook()}
 </main>
 ${tabbar('profile', 24)}`
@@ -329,9 +329,12 @@ ${hud()}
   <div class="records">
     <div class="record"><span class="record__value">842</span><span class="record__label">Reviews</span></div>
     <div class="record"><span class="record__value">91<span class="record__unit">%</span></span><span class="record__label">Retention</span></div>
-    <div class="record"><span class="record__value">12<span class="record__unit">in a row</span></span><span class="record__label">Best perfect run</span></div>
-    <button type="button" class="record record--door" style="--line-color: var(--accent8)">
+    <button type="button" class="record record--door" style="--line-color: var(--pass-ink)">
       <span class="pf-line__id"><span class="pf-line__roundel">TO</span><span class="pf-line__names"><span class="pf-line__jp">Statistics</span></span></span>
+      ${I.chevR}
+    </button>
+    <button type="button" class="record record--door" style="--line-color: var(--pass-ink)">
+      <span class="pf-line__id"><span class="pf-line__roundel">${I.gear}</span><span class="pf-line__names"><span class="pf-line__jp">Settings</span></span></span>
       ${I.chevR}
     </button>
   </div>
@@ -407,7 +410,7 @@ ${TODAY_BODY()}
       <span class="offer__names"><span class="offer__jp">Unlimited pass</span><span class="offer__cap">Subscription</span></span>
       <span class="pass__issuer" style="border-style: double; border-width: 3px;">∞</span>
     </div>
-    <p class="offer__body">Every review, every day. <b>No balance to watch</b> — the gate opens as long as the pass is valid.</p>
+    <div class="offer__perks">${PERKS.map(([p, d]) => `<span class="offer__perk">${I.check}<span>${p} <small>· ${d}</small></span></span>`).join('')}</div>
     <span class="offer__price">[PRICE]<small>/ month</small></span>
     ${departBtn('Go unlimited', ' btn-depart--sheet').replace('class="btn-depart btn-depart--sheet"', 'class="btn-depart btn-depart--sheet" style="width: 100%;"')}
   </div>
@@ -477,14 +480,14 @@ const boards = [
 for (const [name, body] of boards) writeFileSync(`${name}.dc.html`, artboard(body))
 writeFileSync('Chrome.dc.html', artboard(CHROME_BODY, { width: 1180, height: 1320, phone: false }))
 writeFileSync('States.dc.html', artboard(STATES_BODY, { width: 1180, height: 880, phone: false }))
-writeFileSync('BoardMotion.dc.html', artboard(MOTION_BODY, { width: 1180, height: 1040, phone: false }))
+writeFileSync('BoardMotion.dc.html', artboard(MOTION_BODY, { width: 1180, height: 1420, phone: false }))
 
 const ORDER = {
   today:    ['Main', 'TodayOutOfCredits', 'Run', 'RunFlashcard', 'RunCloze', 'RunDraw', 'RunReadings', 'RunBrowse', 'LevelUp', 'Reissue', 'RunOutOfCredits', 'RunComplete'],
   learn:    ['Learning', 'Station', 'StationTiers', 'Platforms', 'Decks', 'DeckCreate', 'DeckDetail', 'DeckAddCard'],
   practice: ['Practice', 'Reading', 'Comprehension', 'ComprehensionResult', 'TranslationWrite', 'Translation', 'ExamPapers', 'ExamRunner', 'ConfirmSheet', 'ExamResult'],
   dict:     ['Dictionary', 'DictionaryEntry', 'DictionaryReadings', 'Analyzer', 'AnalyzerPhoto', 'AnalyzerVideo', 'AnalyzerResult', 'DeckPickerSheet'],
-  pass:     ['Profile', 'ProfileInserts', 'StatusSheet', 'BalanceSheet', 'Statistics', 'Settings', 'SettingsLearn', 'SettingsDestination'],
+  pass:     ['Profile', 'ProfileInserts', 'StatusSheet', 'BalanceSheet', 'Statistics', 'Settings', 'SettingsLearn', 'SettingsLevelUp', 'SettingsLevelDown', 'SettingsDestination'],
   arrival:  ['Welcome', 'BoardName', 'BoardWhy', 'BoardKana', 'BoardKanaReveal', 'BoardLevel', 'BoardGoal', 'BoardRhythm', 'BoardTime', 'BoardNotify', 'BoardNotifyPrompt', 'BoardBuilding', 'BoardPlan', 'BoardOffer', 'BoardPass', 'SignIn'],
 }
 const PAGES = [
@@ -509,19 +512,20 @@ const placed = new Set(artboards.map(a => a.file))
 for (const b of boards) if (!placed.has(`${b[0]}.dc.html`)) throw new Error('unplaced board ' + b[0])
 artboards.push({ file: 'Chrome.dc.html', title: 'Chrome · HUD, tab bar, gate', x: 0, y: 0, w: 1180, h: 1320, page: 'chrome' })
 artboards.push({ file: 'States.dc.html', title: 'States · loading, empty, error, wrong, six grades', x: 1260, y: 0, w: 1180, h: 880, page: 'chrome' })
-artboards.push({ file: 'BoardMotion.dc.html', title: 'Boarding · motion and rules', x: 0, y: H + 160, w: 1180, h: 1040, page: 'arrival' })
+artboards.push({ file: 'BoardMotion.dc.html', title: 'Boarding · motion and rules', x: 0, y: H + 160, w: 1180, h: 1420, page: 'arrival' })
 
 const canvas = {
   pages: PAGES,
   artboards,
   annotations: [
     { id: 'backbone', page: 'today', x: -300, y: 0, w: 260, text: 'Mobile backbone\n\nTop: level · station panel · commuter pass (the HUD).\nBottom: Learn · Practice · Today · Dictionary · Profile.\n\nOne page per tab, the screens in walking order. The interface speaks English; Japanese is content only (a word, a sentence, a deck\'s name, a rank) and the tab bar\'s icons.\n\nEvery artboard has a dark / light tweak.' },
-    { id: 'credits', page: 'today', x: -300, y: 420, w: 260, text: 'Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: the unlimited pass.\n\nThe gate prices the run (fare) against the balance before departure; a run longer than the balance stops at the balance and says so.\n\nAssumed: practice, the dictionary and the analyzer do not spend credits.' },
+    { id: 'credits', page: 'today', x: -300, y: 420, w: 260, text: 'Balance system, as drawn\n\n1 credit = 1 review. Free: +30 a day at 00:00, holds up to 50. Subscription: the unlimited pass.\n\nThe gate prices the run (fare) against the balance before departure; a run longer than the balance stops at the balance and says so.\n\nThe pass (subscription): unlimited credits, the practice modes, the analyzer, 100 decks and 10,000 cards. Free: 30 credits a day (cap 50), the learning modes, the dictionary without the analyzer, today\'s run, the full profile, 7 decks and 200 cards. Practice and the analyzer wear the pass tag for free learners.' },
     { id: 'sessions', page: 'practice', x: -300, y: 0, w: 260, text: 'Sessions behave like a run: both bars leave, ‹ Practice is the way out, the field or the rating bar docks on the bottom edge. Practice does not spend credits.' },
     { id: 'dict-note', page: 'dict', x: -300, y: 0, w: 260, text: 'The dictionary follows the 2026-09-05 rework: catalogue cards carry the stage word; an entry opens as the catalogue plate at reading size, with two readings and a door to the readings sheet; the body is blocks divided by hairlines, no headings.' },
-    { id: 'boarding', page: 'arrival', x: -300, y: 0, w: 260, text: 'The boarding — the owner\'s sketch, drawn\n\nWelcome → name → why → the kana check → (the reveal | the level) → goal → rhythm → the hour → the nudge → building → the plan → the offer → the pass → the tutorial.\n\nEnglish only; the device\'s language, never asked. Japanese is content: the kana, the cards, the rank, the seal.\n\nThe track at the top is the progress bar: 8 stops to the pass. The three arrival screens (plan, offer, pass) have no track — the ride is over.\n\nSample learner: Aiko, a trip to Japan, reads both kana, N5 → N4, 10 min at 07:30. −X% and [PRICE] are placeholders on purpose.' },
+    { id: 'boarding', page: 'arrival', x: -300, y: 0, w: 260, text: 'The boarding — the owner\'s sketch, drawn\n\nWelcome → name → why → the kana check → (the reveal | the level) → goal → rhythm → the hour → the nudge → building → the plan → the offer → the pass → the tutorial.\n\nEnglish only; the device\'s language, never asked. Japanese is content: the kana, the cards, the rank, the seal.\n\nThe track at the top is the progress bar: 8 stops to the pass. The three arrival screens (plan, offer, pass) have no track — the ride is over.\n\nSample learner: Aiko, a trip to Japan, reads both kana, N5 → N4, 10 min at 07:30. −X% and [PRICE] are placeholders on purpose.\n\nThe title sits under the head, the content takes the room between, the action is always docked at the foot and rises with the keyboard.' },
     { id: 'boarding-kana', page: 'arrival', x: 1410, y: -150, w: 300, text: 'The kana check branches once. Hiragana, Katakana or Not yet → the reveal (curiosity paid, level set to Beginner or Novice). Both → the level list. Both roads meet at the goal. Not yet is an addition to the sketch: a complete beginner needs an honest door.' },
-    { id: 'boarding-arrival', page: 'arrival', x: 5640, y: -150, w: 300, text: 'The arrival: building (animated, the train runs the four stops), the plan (the one screen that compares — spaced reviews against cramming, then the promise from the learner\'s own answers), the offer (the −X% stamps in; the ghost link boards free and stops the offer from returning), the pass (slides up, sealed 発行).' },
+    { id: 'boarding-arrival', page: 'arrival', x: 5640, y: -150, w: 300, text: 'The arrival: building (the train drives the track, the passed stops tick), the plan (the one screen that compares — spaced reviews against cramming, then four promises: the figures, two lines from the motive, the JLPT stop), the offer (the pass\'s four perks, the −X% pops in; the ghost link boards free and stops the offer from returning), the pass (slides up, sealed 発行; only the balance on its foot — the journey lives behind the station panel).' },
+    { id: 'level-rule', page: 'pass', x: 3290, y: -150, w: 300, text: 'The level rule. Choosing a level (boarding or Settings › Learning) marks every stop behind it known: those cards start mastered with their next review spread over the coming weeks, so no single day is flooded. Moving up does the same for the stops crossed; moving down deletes nothing — the cards above keep their history and rejoin the run when the level rises again. Both moves confirm on a sheet first.' },
     { id: 'chrome-note', page: 'chrome', x: 0, y: -110, w: 420, text: 'Every value on this sheet is a :root token or a literal index.css already uses. Class names mirror index.css where the object exists (.pass, .board, .wmap-*, .gate-card, .btn-depart, .jour-*, .stamp-rally, .dict-*); .hud, .tabbar, .bar, .lane, .console, .chip, .route, .stage and .sheet are new to the mockup — see docs/design/mobile/README.md.' },
   ],
   launch: { view: 'canvas', page: 'arrival' },
