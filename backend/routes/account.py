@@ -78,6 +78,7 @@ PLAN = [
     ("exam_attempts",       "user_id = %(user)s",       "exam history (the papers are a shared pool and stay)"),
     ("frequency_overrides", "user_id = %(user)s",       "per-user frequency-tier tweaks"),
     ("ocr_usage",           "user_id = %(user)s",       "the OCR daily counters"),
+    ("credit_ledger",       "user_id = %(user)s",       "the credit ledger: refills, fares, grants"),
     ("user_profiles",       "user_id = %(user)s",       "identity: username, level, goal, preferences"),
 ]
 

@@ -2,6 +2,7 @@ import logging
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from core.credits import require_pass
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
@@ -11,7 +12,9 @@ import routes.reading as reading  # reused wholesale below — see get_translati
 from study.card_lookup import vocab_card_id_for_word
 from study.llm_shared import llm_configured
 
-router = APIRouter()
+# A pass feature (plan 069): every route here refuses a free learner
+# with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
+router = APIRouter(dependencies=[Depends(require_pass)])
 logger = logging.getLogger(__name__)
 
 

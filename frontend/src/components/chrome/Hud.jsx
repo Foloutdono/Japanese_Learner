@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useJourneyStatus } from '../../stores/journey'
-import { useCredits } from '../../stores/credits'
+import { useCredits, openBalance } from '../../stores/credits'
 import { useOnline } from '../../hooks/useOnline'
 import { useXpGain } from './useXpGain'
 import { journeyModel } from '../../domain/goalMath'
@@ -23,9 +23,9 @@ import { playClick } from '../../lib/audio'
 //            place the shell owns up to being offline. Tap → the
 //            pass, whose back is the status sheet (plan 074).
 //   pass     the commuter pass at pocket size with the balance inside
-//            (plan 069 fills the figure; ∞ on a subscription). The
+//            (stores/credits, plan 069; ∞ on a subscription). The
 //            card's edge goes warning at ≤5 and danger at 0. Tap → the
-//            pass (the balance sheet, plan 069).
+//            balance sheet (components/credits/BalanceSheet.jsx).
 
 // The figure itself: the amount, and a unit in the caption register so
 // a bare number under a level roundel cannot be read as levels. `key`
@@ -135,7 +135,7 @@ export function Hud() {
           <FareFigure gain={gain} className="hud-fare" onEnd={clear} />
         </button>
         <HudStatus onClick={toPass} />
-        <HudPass onClick={toPass} />
+        <HudPass onClick={() => { playClick(); openBalance() }} />
       </div>
     </header>
   )

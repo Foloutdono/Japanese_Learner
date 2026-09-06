@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import { postReview as sendReview } from '../lib/reviews'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { ScreenBar } from '../components/chrome/Bar'
@@ -150,10 +151,7 @@ export default function GrammarScreen({ session }) {
     // response is not read for anything the UI shows, so a dead
     // request can no longer freeze the quiz on every single review,
     // which is what the old fetchCard-after-POST flow used to do.
-    apiFetch('/api/grammar/review', session, {
-      method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode, quality, prev_stage: card.stage }),
-    }).catch(() => {})
+    sendReview('/api/grammar/review', session, { card_id: card.card_id, mode, quality, prev_stage: card.stage }).catch(() => {})
   }
 
   function onMCQAnswer(choice) {

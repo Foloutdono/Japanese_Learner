@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import { postReview as sendReview } from '../lib/reviews'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { ScreenBar } from '../components/chrome/Bar'
@@ -170,10 +171,7 @@ export default function KanaScreen({ session }) {
     // response is not read for anything the UI shows, so a slow or
     // dead request can no longer desync the toast or the stamp from
     // what is already happening.
-    apiFetch('/api/kana/review', session, {
-      method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode, quality }),
-    }).catch(() => {})
+    sendReview('/api/kana/review', session, { card_id: card.card_id, mode, quality }).catch(() => {})
   }
 
   function onMCQAnswer(choice) {

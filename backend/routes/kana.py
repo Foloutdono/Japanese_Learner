@@ -3,6 +3,7 @@ import random
 from fastapi import APIRouter, Depends, Query
 from content.kana_data import KANA_SETS, kana_to_id
 from core.auth import get_user_id, prefixed, unprefixed
+from core import credits
 from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
@@ -312,6 +313,9 @@ def get_kana_review_cards(set_name: str, user_id: str = Depends(get_user_id)):
 def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
+    # The fare, charged only now that the scheduler has accepted the
+    # review (plan 069): a rejected review is not a ride.
+    fare = credits.spend(user_id, credits.COST_PER_REVIEW, card_id)
     # No extra bulk-stats call needed at all now — review() returns
     # the post-review stage directly (it already has the updated
     # total_reviews/interval_days in hand from the save), and the
@@ -327,4 +331,5 @@ def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)
         "new_level": s["new_level"],
         "stage_up": _stage_promotion(payload.prev_stage, s["stage"]),
         "stage_down": _stage_demotion(payload.prev_stage, s["stage"]),
+        "credits": fare,
     }

@@ -15,6 +15,7 @@ from core.db import db_conn
 from core.auth import get_user_id
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
+from core import credits
 from srs.xp import level_progress
 
 router = APIRouter()
@@ -73,6 +74,14 @@ def _init_db() -> None:
             # buttons themselves. Deliberately NOT a change of scale:
             # both bars send the same 0..5 quality, so a learner can
             # switch without their own history changing meaning.
+            #
+            # The credits columns (plan 069, core/credits.py):
+            # credits_refilled_on is the local day the last refill (or the
+            # seed) was taken — the idempotence lock; plan/plan_until are
+            # the entitlement ('free' | 'pass', with an optional expiry —
+            # set by hand until a purchase flow exists); tz_offset_min is
+            # the device's offset east of UTC, PATCHed on boot, so the
+            # refill day is the learner's rather than the server's.
             for col, typ in (
                 ("jlpt_level", "TEXT"),
                 ("daily_new_target", "INTEGER"),
@@ -83,10 +92,28 @@ def _init_db() -> None:
                 ("goal_set_at", "TIMESTAMPTZ"),
                 ("daily_departure", "TEXT"),
                 ("rating_scale", "TEXT"),
+                ("credits_refilled_on", "DATE"),
+                ("plan", "TEXT DEFAULT 'free'"),
+                ("plan_until", "TIMESTAMPTZ"),
+                ("tz_offset_min", "INTEGER"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
                 )
+            # 回数券 — the credit ledger (plan 069). Append-only, like
+            # xp_ledger: the balance is SUM(delta), never a column. See
+            # core/credits.py for the economy and the shadow mode.
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS credit_ledger (
+                    id      BIGSERIAL PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    delta   INTEGER NOT NULL,
+                    reason  TEXT NOT NULL,
+                    ref     TEXT,
+                    at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_credit_ledger_user ON credit_ledger(user_id)")
         conn.commit()
     finally:
         conn.close()
@@ -207,6 +234,18 @@ class LearningPayload(BaseModel):
     jlptLevel: str | None = None
     dailyNewTarget: int | None = None
     ratingScale: str | None = None
+    # The device's UTC offset in minutes, east positive (the app sends
+    # -Date.getTimezoneOffset()), so the credits refill at the
+    # learner's midnight (core/credits.py). Sent on every boot.
+    tzOffsetMin: int | None = None
+
+    @field_validator("tzOffsetMin")
+    @classmethod
+    def valid_tz(cls, v: int | None) -> int | None:
+        # -14:00 .. +14:00 is the whole planet.
+        if v is not None and not (-840 <= v <= 840):
+            raise ValueError("must be between -840 and 840")
+        return v
 
     @field_validator("ratingScale")
     @classmethod
@@ -387,6 +426,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.ratingScale is not None:
         sets.append("rating_scale = %s")
         args.append(payload.ratingScale)
+    if payload.tzOffsetMin is not None:
+        sets.append("tz_offset_min = %s")
+        args.append(payload.tzOffsetMin)
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -403,10 +445,15 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         # Write-through so this worker's resolver answers with the new
         # level immediately rather than after its TTL.
         note_stored_level(user_id, payload.jlptLevel)
+    if payload.tzOffsetMin is not None:
+        # The refill day moved with the clock; the cached state must not
+        # outlive it.
+        credits.forget(user_id)
     return {
         "jlptLevel": payload.jlptLevel,
         "dailyNewTarget": payload.dailyNewTarget,
         "ratingScale": payload.ratingScale,
+        "tzOffsetMin": payload.tzOffsetMin,
     }
 
 

@@ -7,6 +7,8 @@ import { LINE_COLOR } from '../../config/tabs'
 import { beginDeparture } from '../../stores/departure'
 import { playAnnouncement } from '../../lib/audio'
 import { Loading } from '../ui/Loading'
+import { useCredits } from '../../stores/credits'
+import { fareFor, runFit, DAILY_REFILL } from '../../domain/credits'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
 // What NextService's strip grew into when the wall map replaced the
@@ -25,6 +27,50 @@ import { Loading } from '../ui/Loading'
 // (plan 067): the card's name over the three dots until /api/today
 // answers, so the phone's first screen never opens on a hole where
 // the gate will be.
+//
+// The fare (plan 069): the gate prices the run against the balance
+// before departure — Fare · n credits · Balance — and when the balance
+// is short says how many ride today and how many wait for tomorrow's
+// refill. The gate only CLOSES (the button disabled at zero) under
+// enforcement; in shadow mode the line is information and the train
+// leaves. A pass prints no balance and no notice.
+
+/** "00:00" — the next refill, on the learner's clock. */
+function refillClock(iso, lang) {
+  if (!iso) return '00:00'
+  const d = new Date(iso)
+  if (!Number.isFinite(d.getTime())) return '00:00'
+  return new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit' }).format(d)
+}
+
+function Fare({ due, credits, t, lang }) {
+  if (!credits) return null
+  const balance = credits.unlimited ? null : credits.balance
+  const fare = fareFor(due)
+  const { rides, waits } = runFit(due, balance)
+  return (
+    <>
+      <div className="gate-card__fare">
+        <span>{t.fareLabel}</span>
+        <b>{fare}</b>
+        <span>{t.creditsUnit}</span>
+        <span className="gate-card__fare-sep" aria-hidden="true" />
+        <span>{t.balanceLabel}</span>
+        <b className="fare-gold">{balance == null ? '∞' : balance}</b>
+      </div>
+      {balance != null && waits > 0 && (
+        <div className="gate-card__short" role="status">
+          <span className="gate-card__short-mark" aria-hidden="true">!</span>
+          <span>
+            {balance === 0
+              ? t.gateNoCredits(credits.dailyRefill ?? DAILY_REFILL, refillClock(credits.refillAt, lang))
+              : t.gateShort(rides, due, waits)}
+          </span>
+        </div>
+      )}
+    </>
+  )
+}
 
 /** "in 3 hours" / "tomorrow", in the UI's language. */
 function untilNext(iso, lang) {
@@ -45,6 +91,7 @@ export default function GateCard({ today, failed }) {
   // rows under 560px and shows the toggle instead, so the phone's
   // first screen is card, count, button, map. Desktop never sees it.
   const [open, setOpen] = useState(false)
+  const credits = useCredits()
 
   if (failed) return null
   if (!today) {
@@ -63,6 +110,9 @@ export default function GateCard({ today, failed }) {
 
   const due = today.total ?? 0
   const when = untilNext(today.next_due, lang)
+  // Closed only under enforcement, and only at zero: the gate never
+  // blocks in shadow mode (plan 069).
+  const closed = Boolean(credits?.enforced && !credits.unlimited && credits.balance === 0)
 
   // At most three, largest first — the point is "here is what is
   // waiting", not a second stats screen. The rest is on /today.
@@ -135,7 +185,9 @@ export default function GateCard({ today, failed }) {
         ))}
       </div>
 
-      <button type="button" className="btn-depart" onClick={depart} aria-label={t.todayDue(due)}>
+      <Fare due={due} credits={credits} t={t} lang={lang} />
+
+      <button type="button" className="btn-depart" onClick={depart} aria-label={t.todayDue(due)} disabled={closed}>
         <span className="btn-depart__jp" lang="ja">出発する</span>
         <span className="btn-depart__latin">{t.depart}</span>
         <span className="btn-depart__go" aria-hidden="true">▶</span>

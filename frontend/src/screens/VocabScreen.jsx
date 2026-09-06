@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import { postReview as sendReview } from '../lib/reviews'
 import {
   translatedMap, applyTranslations, retranslateSelection,
 } from '../lib/translationCache'
@@ -283,10 +284,7 @@ export default function VocabScreen({ session }) {
     // what is already happening. A theme card carries the same
     // vocab_to_id/vocab_jmdict_to_id shape a level card does (see
     // theme_data.py), so it posts here too — no separate endpoint.
-    apiFetch('/api/vocab/review', session, {
-      method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
-    }).catch(() => {})
+    sendReview('/api/vocab/review', session, { card_id: card.card_id, mode: card.mode, quality }).catch(() => {})
   }
 
   function onMCQAnswer(choice) {

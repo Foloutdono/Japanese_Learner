@@ -301,6 +301,8 @@ def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None 
             # that explains it survives.
             cur.execute("DELETE FROM review_log WHERE card_id LIKE %s", (prefix,))
             cur.execute("DELETE FROM xp_ledger WHERE user_id = %s", (user_id,))
+            # credit_ledger stays: the balance is not progress (plan 069),
+            # and a learner starting over keeps the credits they have.
         conn.commit()
     except Exception:
         conn.rollback()

@@ -93,6 +93,10 @@ def _seed(uid):
             )
             cur.execute("INSERT INTO ocr_usage (user_id, day, count) VALUES (%s, CURRENT_DATE, 1)", (uid,))
             cur.execute(
+                "INSERT INTO credit_ledger (user_id, delta, reason, ref) VALUES (%s, 30, 'grant', 'probe')",
+                (uid,),
+            )
+            cur.execute(
                 "INSERT INTO phrase_history (user_id, phrase, created_at) VALUES (%s, %s, NOW())",
                 (uid, "駅で待っています。"),
             )
@@ -131,6 +135,7 @@ def test_delete_user_rows_empties_every_table_and_keeps_other_users():
                 assert seeded["review_log"] >= 1 and seeded["card_modes"] >= 1
                 assert seeded["user_profiles"] == 1 and seeded["ocr_usage"] == 1
                 assert seeded["phrase_history"] == 1
+                assert seeded["credit_ledger"] == 1
 
                 counts = delete_user_rows(cur, uid)
                 conn.commit()

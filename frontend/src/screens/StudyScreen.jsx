@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import { postReview as sendReview } from '../lib/reviews'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { ScreenBar } from '../components/chrome/Bar'
@@ -256,10 +257,7 @@ export default function StudyScreen({ session }) {
 
     // Fire-and-forget — the response isn't read for anything the UI
     // shows, same as Kana/Kanji/Vocab/Grammar's own review calls.
-    apiFetch(`/api/decks/${deck_id}/review`, session, {
-      method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode, quality, prev_stage: card.stage }),
-    }).catch(() => {})
+    sendReview(`/api/decks/${deck_id}/review`, session, { card_id: card.card_id, mode, quality, prev_stage: card.stage }).catch(() => {})
   }
 
   function onMCQAnswer(choice) {

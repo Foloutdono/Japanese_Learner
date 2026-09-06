@@ -20,6 +20,7 @@ import logging
 import threading
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from core.credits import require_pass
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -38,7 +39,9 @@ from study.sentences import MAX_SENTENCES
 # routes/translation.py uses for routes/reading.py's _chat.
 from routes.phrase import _analyze_sentence
 
-router = APIRouter()
+# A pass feature (plan 069): every route here refuses a free learner
+# with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
+router = APIRouter(dependencies=[Depends(require_pass)])
 logger = logging.getLogger(__name__)
 
 # 5 minutes. Analysis cost scales with the Window, so it is bounded

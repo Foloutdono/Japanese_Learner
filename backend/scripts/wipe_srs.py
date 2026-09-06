@@ -94,6 +94,7 @@ UNTOUCHED = {
     "translation_log": "translation history",
     "frequency_overrides": "per-user frequency tweaks are settings",
     "grammar_sentences": "generated example sentences are content, and expensive",
+    "credit_ledger": "the balance is not progress: a wipe starts the schedule over, not the fare (plan 069)",
 }
 
 

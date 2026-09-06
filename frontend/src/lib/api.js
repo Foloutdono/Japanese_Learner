@@ -113,6 +113,12 @@ export class ApiError extends Error {
     this.status = status
     this.body = body
     this.path = path
+    // The fare gate's refusals (plan 069) arrive as a bare string in
+    // `detail` — 'out_of_credits', 'pass_required', 'limit_reached' —
+    // with their figures beside it in the body. `code` is that string
+    // when there is one, so a caller can tell them apart without
+    // matching on a sentence; every other error keeps code null.
+    this.code = typeof detail === 'string' && /^[a-z_]+$/.test(detail) ? detail : null
   }
 }
 

@@ -4,6 +4,7 @@ import logging
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from core.credits import require_pass
 from pydantic import BaseModel
 
 from core.db import db_conn
@@ -14,7 +15,9 @@ from study.analysis import analyze_local, attach_user_state, merge_deep
 from study.sentences import split_sentences, MAX_SENTENCES
 from routes.reading import LANG_NAMES
 
-router = APIRouter()
+# A pass feature (plan 069): every route here refuses a free learner
+# with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
+router = APIRouter(dependencies=[Depends(require_pass)])
 logger = logging.getLogger(__name__)
 
 # Model selection, provider fallback, per-model retry and the

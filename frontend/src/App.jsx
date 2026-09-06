@@ -3,11 +3,13 @@ import { DepartureGate } from './components/station/DepartureGate'
 import { TrainDoor } from './components/station/TrainDoor'
 import { TicketGate } from './components/station/TicketGate'
 import { UpdateToast, OfflineNote } from './components/ui/UpdateToast'
+import { BalanceSheet } from './components/credits/BalanceSheet'
+import { RunOutSheet } from './components/credits/RunOutSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
 import { getTabs } from './config/tabs'
 import { Shell, StageFrame } from './components/chrome/Shell'
 import { identityFor } from './config/identity'
-import { apiJsonWithTimeout } from './lib/api'
+import { apiJson, apiJsonWithTimeout } from './lib/api'
 // Development-only. Vite statically replaces import.meta.env.DEV with
 // `false` in a production build, so this import and the route below
 // are both dropped by tree-shaking — the screen is not merely
@@ -141,6 +143,13 @@ export default function App() {
     // 8 s gate that fails open showed a blank hall to everyone who
     // arrived while the server was still waking. The wait itself is
     // drawn honestly by AppLoading.
+    // The device's clock, on the profile, so the credits refill at the
+    // learner's midnight (plan 069). Fire-and-forget: a boot that could
+    // not say so refills on UTC's day until the next one that can.
+    apiJson('/api/profile/learning', session, {
+      method: 'PATCH',
+      body: JSON.stringify({ tzOffsetMin: -new Date().getTimezoneOffset() }),
+    }).catch(() => {})
     apiJsonWithTimeout('/api/profile', session, { timeoutMs: 45000 })
       .then(p => {
         if (cancelled) return
@@ -308,6 +317,13 @@ export default function App() {
             screen. */}
         <UpdateToast />
         <OfflineNote />
+
+        {/* 回数券 — the balance sheet off the HUD's pass, and the run-out
+            sheet a 402 mid-run raises (plan 069). Beside <Routes/> like
+            the notes: the first opens from outside every screen, the
+            second is raised by a review the screen fired and forgot. */}
+        <BalanceSheet />
+        <RunOutSheet />
 
         {/* 改札 — the departure cutscene. Beside <Routes/>, never
             inside it: the gate has to keep playing across the very

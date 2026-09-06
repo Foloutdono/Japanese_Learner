@@ -20,7 +20,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent / ".env")
 
-from fastapi import FastAPI                                      # noqa: E402
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse                                      # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware               # noqa: E402
 from fastapi.middleware.gzip import GZipMiddleware               # noqa: E402
 from fastapi.staticfiles import StaticFiles                      # noqa: E402
@@ -46,6 +47,8 @@ from routes.ocr             import router as ocr_router
 from routes.onboarding      import router as onboarding_router
 from routes.journey         import router as journey_router
 from routes.account         import router as account_router
+from routes.credits         import router as credits_router
+from core.credits import OutOfCredits, PassRequired, LimitReached
 
 logging.basicConfig(level=logging.INFO)
 
@@ -121,6 +124,30 @@ app.include_router(exams_router)
 app.include_router(video_router)
 app.include_router(ocr_router)
 app.include_router(onboarding_router)
+app.include_router(credits_router)
+
+
+# ── 402 — the fare gate's three refusals (plan 069) ──
+# Flat bodies, not HTTPException's {"detail": {...}}: the client reads
+# `detail` as the code and the figures beside it. All three are dormant
+# until CREDITS_ENFORCE=1 (core/credits.py).
+@app.exception_handler(OutOfCredits)
+async def _out_of_credits(request, exc: OutOfCredits):
+    return JSONResponse(status_code=402, content={
+        "detail": "out_of_credits", "balance": exc.balance, "refillAt": exc.refill_at,
+    })
+
+
+@app.exception_handler(PassRequired)
+async def _pass_required(request, exc: PassRequired):
+    return JSONResponse(status_code=402, content={"detail": "pass_required"})
+
+
+@app.exception_handler(LimitReached)
+async def _limit_reached(request, exc: LimitReached):
+    return JSONResponse(status_code=402, content={
+        "detail": "limit_reached", "what": exc.what, "limit": exc.limit,
+    })
 app.include_router(journey_router)
 app.include_router(account_router)
 

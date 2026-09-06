@@ -6206,6 +6206,133 @@ textarea:focus-visible {
   background: var(--bg-panel);
 }
 
+/* ── 残高 — the balance, on a sheet (plan 069) ──
+   The figure in the pass's gold over its track, the cap beside it, two
+   cells for the refill and the ceiling. The run-out sheet is the same
+   object at zero, in the danger register. components/credits/. */
+.balance {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.balance__fig {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-display);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent2);
+}
+.balance__fig--out { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+.balance__unit {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.balance__of {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.balance__of-wait { font-weight: 600; }
+.balance__track {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--accent2) 18%, transparent);
+  overflow: hidden;
+}
+.balance__fill { display: block; height: 100%; background: var(--accent2); }
+.balance__rows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--surface-line);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.balance__cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-4);
+  background: var(--surface);
+}
+.balance__cell b {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.balance__jp { font-size: var(--fs-caption); color: var(--text-secondary); font-weight: 500; }
+.balance__cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ── The fare slip, at the end of a run (plan 069) ── */
+.fare-slip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  width: 100%;
+  margin-top: var(--sp-3);
+  background: var(--surface-line);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.fare-slip__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  padding: var(--sp-4) var(--sp-2);
+  background: var(--surface);
+}
+.fare-slip__v {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.fare-slip__u { font-size: var(--fs-caption-xs); font-weight: 600; color: var(--text-secondary); }
+.fare-slip__v--gold { color: var(--accent2); }
+.fare-slip__cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
 /* ── the compact header: one row, a pigment rule under it ── */
 .bar {
   --line-color: var(--accent2);
@@ -7426,6 +7553,38 @@ textarea:focus-visible {
   border-radius: var(--r-panel);
 }
 .gate-card--clear { gap: var(--sp-3); }
+/* ── The fare (plan 069) ──
+   Fare · n credits · a hairline · Balance · the figure in gold: the
+   gate prices the run against the balance before departure. Under it,
+   when the balance is short, a warning-edged notice says how many ride
+   today and how many wait for tomorrow's refill. */
+.gate-card__fare {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.gate-card__fare b {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.gate-card__fare .fare-gold { color: var(--accent2); }
+.gate-card__fare-sep { flex: 1; height: 1px; align-self: center; background: var(--surface-line); }
+.gate-card__short {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-card);
+  border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.gate-card__short b { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
+.gate-card__short-mark { flex: none; color: var(--warning); font-weight: 700; }
 .gate-card__head {
   display: flex;
   align-items: baseline;

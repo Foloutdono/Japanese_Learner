@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import { postReview as sendReview } from '../lib/reviews'
 import {
   translatedMap, applyTranslations, retranslateSelection,
 } from '../lib/translationCache'
@@ -284,10 +285,7 @@ export default function KanjiScreen({ session }) {
     // response is not read for anything the UI shows, so a slow or
     // dead request can no longer desync the toast or the stamp from
     // what is already happening.
-    apiFetch('/api/kanji/review', session, {
-      method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
-    }).catch(() => {})
+    sendReview('/api/kanji/review', session, { card_id: card.card_id, mode: card.mode, quality }).catch(() => {})
   }
 
   function onMCQAnswer(choice) {

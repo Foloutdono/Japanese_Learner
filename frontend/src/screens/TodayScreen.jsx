@@ -23,6 +23,10 @@ import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { kanaSetLabel } from '../domain/kanaSets'
 import { LINE_COLOR } from '../config/tabs'
+import { postReview as sendReview } from '../lib/reviews'
+import { useCredits } from '../stores/credits'
+import { refreshToday } from '../stores/today'
+import { FareSlip } from '../components/credits/FareSlip'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 import { board } from '../stores/boarding'
 import { formatGlossLine } from '../components/study/gloss'
@@ -157,6 +161,9 @@ export default function TodayScreen({ session }) {
   const [showEx, setShowEx] = useState(false)
   const [cardNonce, setCardNonce] = useState(0)
   const [cleared, setCleared] = useState(0)
+  // What the run paid, for the fare slip at the end (plan 069).
+  const [xpTotal, setXpTotal] = useState(0)
+  const credits = useCredits()
 
   const recentlyReviewedRef = useRef(new Map())
 
@@ -238,6 +245,14 @@ export default function TodayScreen({ session }) {
     setShowEx(false)
   }, [card?.card_id, card?.mode, cardNonce])
 
+  // The shared summary the tab badge reads is a minute behind; a
+  // finished run is worth the refetch (plan 069). Once per run's end,
+  // not once per render of the done screen.
+  const finished = done || (!loading && !card)
+  useEffect(() => {
+    if (finished && cleared > 0) refreshToday()
+  }, [finished, cleared])
+
   // Every screen's rating flow: the lock, the gates the celebrations
   // open, and the advance once they all close. See hooks/useReviewGates.
   // The nonce rides along with the pop, so a card handed back under the
@@ -302,19 +317,18 @@ export default function TodayScreen({ session }) {
     // card's OTHER due mode, which the learner has not answered.
     markReviewed(cardKey(card))
     setCleared(n => n + 1)
+    setXpTotal(x => x + (card.review_preview?.[quality]?.xp_earned ?? 0))
 
     // The mode travels with the card, never from screen state — see the
     // note at the top of this file. Fire-and-forget, same as every other
-    // screen's review call.
-    apiJson('/api/today/review', session, {
-      method: 'POST',
-      body: JSON.stringify({
-        card_id: card.card_id,
-        mode: card.mode,
-        quality,
-        prev_stage: card.stage ?? null,
-      }),
-    }).catch(() => {})
+    // screen's review call; lib/reviews charges the fare and raises the
+    // run-out sheet on a 402 (plan 069).
+    sendReview('/api/today/review', session, {
+      card_id: card.card_id,
+      mode: card.mode,
+      quality,
+      prev_stage: card.stage ?? null,
+    }, { cleared: cleared + 1 }).catch(() => {})
   }
 
   const remaining = Math.max(0, (summary?.total ?? 0) - cleared)
@@ -593,6 +607,13 @@ export default function TodayScreen({ session }) {
               {cleared > 0 ? t.todayClearedCount(cleared) : t.todayNothingDue}
             </p>
             {when && <p className="today-clear__next">{t.todayNextReview(when)}</p>}
+            {cleared > 0 && (
+              <FareSlip
+                reviews={cleared}
+                xp={xpTotal}
+                creditsLeft={credits?.unlimited ? null : credits?.balance}
+              />
+            )}
             <button className="btn-primary" onClick={() => navigate('/learn')}>
               {t.backToStation ?? t.home}
             </button>

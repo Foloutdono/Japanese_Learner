@@ -7,6 +7,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Response
 from pydantic import BaseModel
 from core.auth import get_user_id, prefixed, unprefixed
+from core import credits
 from core.db import db_conn
 from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
@@ -601,6 +602,8 @@ def create_deck(payload: DeckPayload, user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            # FREE_DECKS / PASS_DECKS (plan 069); a no-op until enforcement.
+            credits.check_deck_limit(cur, user_id)
             cur.execute("""
                 INSERT INTO decks (user_id, name, type)
                 VALUES (%s, %s, %s)
@@ -734,6 +737,8 @@ def add_card(deck_id: str, payload: CardPayload, user_id: str = Depends(get_user
                     status_code=400,
                     detail=f"A {structure} card needs: {', '.join(missing)}",
                 )
+            # FREE_CARDS / PASS_CARDS (plan 069); a no-op until enforcement.
+            credits.check_card_limit(cur, user_id)
             cur.execute("""
                 INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
                 VALUES (%s, %s, %s, %s, %s)
@@ -909,6 +914,9 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
             if not deck:
                 raise HTTPException(status_code=404, detail="Deck not found")
             allowed = _allowed_sources(deck["type"])
+            # The whole batch counts against the free tier's cards
+            # (plan 069); a no-op until enforcement.
+            credits.check_card_limit(cur, user_id, adding=len(payload.cards))
 
             added = 0
             with conn.cursor() as write_cur:
@@ -1310,6 +1318,9 @@ def review_deck_card(deck_id: str, payload: ReviewPayload,
                      user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
+    # The fare, charged only now that the scheduler has accepted the
+    # review (plan 069): a rejected review is not a ride.
+    fare = credits.spend(user_id, credits.COST_PER_REVIEW, card_id)
     return {
         "card_id":     payload.card_id,
         "interval":    s["interval"],
@@ -1319,6 +1330,7 @@ def review_deck_card(deck_id: str, payload: ReviewPayload,
         "new_level":   s["new_level"],
         "stage_up":    _stage_promotion(payload.prev_stage, s["stage"]),
         "stage_down":  _stage_demotion(payload.prev_stage, s["stage"]),
+        "credits":     fare,
     }
 
 
@@ -1391,6 +1403,13 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
                 # front/back columns is exactly that shape, and asking a
                 # CSV to carry a kanji card's four fields would need a
                 # per-structure column contract nobody has asked for.
+                # Per row against the free tier (plan 069): a file that
+                # overruns it lands what fits and reports the rest.
+                try:
+                    credits.check_card_limit(cur, user_id)
+                except credits.LimitReached as e:
+                    errors.append(f"Row {i}: the deck limit of {e.limit} cards is reached — skipped")
+                    continue
                 cur.execute("""
                     INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
                     VALUES (%s, %s, 'standard', %s, %s)
