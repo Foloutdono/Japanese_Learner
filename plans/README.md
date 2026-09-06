@@ -187,6 +187,15 @@ Twelve waves live in this file:
   build order: backend contract (5 nullable profile columns, extended
   complete, /api/journey/status + reprint), shared goalMath, GhostTrack +
   pass flip, the five scenes, copy/guards/tests.
+- **Wave 14 — 携帯, the mobile release** (plans 064–077, planned 2026-09-06
+  at commit `95b1f1d`; IN PROGRESS). Three releases in one wave: the PWA of
+  today's UI (064–066), the mobile redesign to the "Japanese Learner Mobile"
+  canvas with the credits economy, the new boarding and proper loading
+  screens (067–075), then the App Store / Google Play shells (076–077).
+  Decisions confirmed with the owner: one chrome everywhere, credits with a
+  pass entitlement but no purchase UI yet, shadow-mode enforcement, PWA
+  first. The full plan — the canvas decoded, the fourteen plans, STOP
+  conditions and verification — is the last section of this file.
 - **Wave 9 — 統一, the harmonisation** (plans 041–053; 041–051 DONE). Planned
   2026-08-28 at commit `32c1f40`, from the maintainer's request to merge the
   CSS back into one file and establish a single artistic direction that new
@@ -3577,3 +3586,981 @@ onto the concourse band) landed a session earlier; this wave is the rest.
 Suites at landing: frontend 222 (37 files, +6 new), eslint 0 errors,
 stylelint ratchet SHRANK (the retired board rows carried a baselined
 violation), lint:scale no new violations, lint:ink clean, build clean.
+
+---
+
+# Wave 14 — 携帯, the mobile release (plans 064–077)
+
+## Context
+
+The app is a React/Vite SPA on Vercel talking same-origin to a FastAPI backend
+on Render, with Supabase email/password auth. The owner wants it on phones,
+**redesigned to the "Japanese Learner Mobile" canvas**
+(https://claude.ai/code/artifact/760313f0-7c87-40e2-993f-708fdbf63bd0 — 67
+phone artboards, three spec sheets, nine annotation notes), **with the credits
+economy the canvas draws, its new boarding flow, and proper loading screens**,
+released first as an installable PWA and then in the App Store and Google Play.
+
+What exploration established (three read-only sweeps of `frontend/`,
+`backend/`, `DESIGN.md`, `plans/README.md`, CI; a design pass on the four
+hardest code pieces; a full decode of the canvas; a survey of the current
+onboarding, quotas and loading states):
+
+- **Zero shell infrastructure.** No manifest, no icon artwork, no favicon, no
+  service worker, no `vite-plugin-pwa`, no Capacitor.
+- **The CSS is already mobile-first where it matters** (safe-area tokens,
+  docked rating bar, auto-hiding top bar, `dvh` fallbacks, a gesture-gated
+  `AudioContext`, a localStorage-mirrored study queue with backoff). Most of
+  the canvas's *objects* already exist in `index.css` by the same names:
+  `.gate-card`, `.btn-depart`, `.wmap-*`, `.pass`/`.pass__*`, `.stamp-rally`,
+  `.hall-pace`, `.jour-*` (97 rules), `.route`/`.route-stop`, `.platform-card`,
+  `.mcq-row`, `.rating-bar`, `.prompt-card`, `.deck-progress`, `.levelup`,
+  `.card-stamp`, `.reissue`, `.dict-entry-card`, `.anl-hist`, `.records`/
+  `.record`, `.leaderboard-row`, `.sbook`, `.pf-line`, `.forecast`,
+  `.readings-input`, `.exam-review-row`, `.exam-score-ring`, `.today-clear`.
+  **New to the codebase**: `.hud`, `.tabbar`/`.tab`, `.bar`, `.lane`,
+  `.console`/`.chip`, `.sheet`/`.scrim`, `.stage__*` (a redraw), `.loading`/
+  `.empty__*`, `.balance`, `.offer`, `.pass-tag`, `.fare-slip`, `.brd-*` (the
+  whole boarding), `.dict-plate`/`.dict-block`/`.dict-word`, `.tok`/
+  `.token-card`, `.exam-meta`/`.exam-sheetbar`, `.svc`, `.lvlstrip`, `.slip`,
+  `.stg-head`/`.stg-list`, `.cal`, `.card-row`, `.deck-identity`, `.type-row`,
+  `.form`, `.picker-row`, `.seg--full`.
+- **The canvas's tokens are `index.css`'s tokens.** Its `.jp` block carries the
+  same `--fs-*`, `--sp-*`, `--r-*`, `--tr-*`, colours and line pigments as
+  `:root`; the chrome note says "every value on this sheet is a :root token or
+  a literal index.css already uses". The mockup stylesheet (169 KB, one
+  `<style>` shared by all artboards) can be ported rule by rule.
+- **The one architectural blocker**: `lib/api.js:12` is `api = path => path`.
+  Same-origin is a hard-won decision (2026-09-01 carrier outage; `CLAUDE.md`
+  Deployment). A Capacitor WebView's origin is `capacitor://localhost` /
+  `https://localhost`, so the native build needs an origin knob that the web
+  build can never pick up.
+- **No credits, balance, tokens or quota exist** beyond `ocr_usage` (60
+  images/day, a bare 429). `xp_ledger` (append-only, signed `xp INTEGER`,
+  written by the unused-but-tested `srs.award_xp`) is the ledger template;
+  `stores/profileSummary.js`'s `applyXpGain` is the optimistic-update
+  template; `core/user_level.py` is the per-user cached-scalar template. The
+  word "balance" is currently the XP bar on the pass, the IC card and the pass
+  stub — the canvas keeps that bar and prints credits on a separate footer
+  line.
+- **The current onboarding** (`OnboardingFlow.jsx`, 844 lines; 12 components;
+  ~1,795 CSS lines at index.css:2740–4535; 81 locale keys × 2; 17 browser
+  tests) posts one `POST /api/onboarding/complete` `{jlptLevel,
+  dailyNewTarget, goalLevel?, goalTargetDate?, dailyDeparture?}`. Six of its
+  components are shared with Settings and `components/journey/GoalCounter`
+  and cannot go with the flow.
+- **Loading today** is one ensō ring (`components/ui/Loading.jsx`), two
+  hard-coded French `Chargement...` full-screen waits in `App.jsx:142-173`,
+  no skeletons, and no loading state at all on Home and Settings. The canvas
+  rules: loading is three gold dots, no spinner; an empty state names the
+  missing thing and one action; an error owns up and offers retry.
+- **Store compliance gaps**: no account deletion (Apple 5.1.1(v), Play data
+  deletion), no privacy policy URL, no Latin app name, fonts from Google
+  Fonts via a CSS `@import`. **Render free tier** cold starts (30–60 s) blow
+  the 8 s onboarding gate and 10 s client timeout.
+- **Plan numbering**: `CLAUDE.md:37` is stale ("001–045"); `plans/README.md`
+  shows waves through 063. This wave spends **064–077**.
+
+## Decisions (confirmed with the owner)
+
+| Question | Answer |
+|---|---|
+| Target | Phased: PWA of today's UI first → the redesign, credits, boarding, loading → App Store + Play |
+| Platforms | Both. No Mac: iOS builds on GitHub Actions `macos` runners with fastlane |
+| Offline | Graceful: cached shell/fonts/icons/kana audio, offline notice, queue keeps playing; no offline review submission |
+| Push | Deferred; the boarding's nudge uses **local** notifications on native only |
+| Desktop | **One chrome everywhere**: the phone backbone at every width, centred column on wide screens; the burger drawer, top bar and concourse home retire |
+| Payments | **Credits + a `pass` entitlement now; no purchase UI** — the offer screen, pass tags and every "Go unlimited" stay hidden until a purchase flow exists (no dead controls) |
+| Enforcement | **Shadow mode first**: the ledger runs and the HUD shows the balance, nothing is blocked; one env flag (`CREDITS_ENFORCE=1`) flips it |
+
+Design decisions this plan makes (cheap to reverse before a plan runs):
+
+- Native builds call the **Vercel origin**, never Render; the knob exists only
+  in a `native` Vite mode and the config refuses any other mode carrying it.
+- Service worker only in the web build; fonts self-hosted via `@fontsource`;
+  `android/` and `ios/` committed.
+- **The interface speaks the learner's language; Japanese is content** (the
+  canvas's rule). The bilingual JP+Latin *chrome* pairing retires for the
+  mobile chrome; the tab bar is the one place a kanji stands in for an icon.
+  Both locales stay (`fr`/`en`, device locale seeds, Settings keeps the
+  switch); the canvas's English strings are the `en` table.
+- **Economy constants** (from the canvas): 1 credit = 1 review; free +30 at
+  local 00:00, cap 50; pass = unlimited; free 7 decks / 200 cards, pass 100 /
+  10,000; practice modes and the analyzer are pass features (gated only under
+  enforcement).
+- **Level rule** (canvas "level-rule" note): choosing or raising a level marks
+  the stops behind it known — those cards start mastered with first checks
+  spread over six weeks; lowering deletes nothing.
+- The existing cutscenes (TicketGate, TrainDoor, XpToast/Reissue) survive; the
+  boarding's own motion is the "train pull".
+
+## Execution order
+
+Three releases. Plans 064–066 are the PWA release; 067–075 the redesign;
+076–077 the store release.
+
+| Plan | Title | Effort | Depends on | Release |
+|---|---|---|---|---|
+| 064 | 手入れ — mobile hardening of today's UI | M | — | PWA |
+| 065 | 駅舎 — the PWA shell: fonts, icons, manifest, service worker, offline/install/update UX | M | 064 (weak), 066.1 | **PWA release** |
+| 066 | 裏方 — backend readiness: origin knob + CORS, cold start, account deletion, privacy page, ADR | M | — | PWA + native |
+| 067 | 待合 — loading screens and the three states | S | — | redesign |
+| 068 | 車内 — the chrome: HUD, tab bar, bar, stage, sheet; the shell and routes; DESIGN.md amendments | L | 067 | redesign |
+| 069 | 回数券 — the credits system (ledger, refill, fare gate, balance sheet, entitlements, shadow mode) | L | 068 | redesign |
+| 070 | 本日 — Today and the run | L | 068, 069 | redesign |
+| 071 | 学習 — Learn: route map, stations, platforms, decks | M | 068 | redesign |
+| 072 | 実践 — Practice: reading, comprehension, translation, mock exam | M | 068 | redesign |
+| 073 | 辞書 — Dictionary and the analyzer | M | 068 | redesign |
+| 074 | 定期券 — Profile, statistics, settings, the level rule | L | 068, 069 | redesign |
+| 075 | 乗車 — the boarding and sign-in | L | 068, 069, 074 (level rule) | **redesign release** |
+| 076 | 車両 — Capacitor shells for Android and iOS | L | 065, 066, 075 | stores |
+| 077 | 出発 — CI builds, signing, TestFlight / closed test, listings | M | 076 | **store release** |
+
+064 ∥ 066 (independent); 065 needs 066.1's `native` mode for the plugin's
+`disable` line. 067 is small and first because every later screen uses it.
+068 is the gate for 069–075; 071–073 fan out from 068 and can run in parallel
+(each edits different screens); 070 and 074 need 069; 075 is last in the
+redesign because it prints the pass and seeds levels. 076 needs the redesign
+because the store screenshots and review happen on it.
+
+Owner tasks that take calendar time — start now: enroll in the **Apple
+Developer Program** and **Google Play Console** (new personal accounts need a
+closed test with ≥12 testers for 14 days); pick the **store name** (Latin;
+`日本語` stays the in-app masthead) and **bundle id**; approve the **icon**
+(065 proposes `日本語` in the serif on sumi) and own the **privacy policy**
+text (066 drafts it).
+
+---
+
+## The canvas, decoded (reference for plans 067–075)
+
+**Reading it.** `Artifact` `read` on the URL saves the page; the design lives
+in `<script id="appifact-doc">` as JSON: `content.files` holds one
+`*.dc.html` per artboard plus `canvas.json` (artboards, pages, and the
+`annotations` — read them first). The **common prefix** of all artboard files
+(~169 KB) is the shared `<style>` = the mockup stylesheet; each file's unique
+tail is that screen's markup. Extract once with a small script; commit the
+stylesheet and a class map as `docs/design/mobile/mockup.css` and
+`docs/design/mobile/README.md` (the chrome note cites that README; it does not
+exist yet). The stylesheet is *reference*, never imported: rules move into
+`index.css` under their namespaces, tokens only.
+
+**The backbone.** Top: the HUD — level roundel · goal-status panel · commuter
+pass with the balance (sumi, two inks, no line colour). Bottom: five tabs,
+学習 Learn · 実践 Practice · 本日 Today (due badge) · 辞書 Dictionary · 定期券
+Profile; active = full ink + 2px rule. During a run or a practice session both
+bars leave; the rating bar (or the field) docks on the bottom edge; `‹ Gate`
+/ `‹ Practice` is the way out. Every screen: compact `.bar` header (roundel,
+title, sub, aside, pigment stripe), content, one filled gold action.
+
+**Tabs → routes → screens.**
+
+| Tab | Artboards | Route(s) | Today's screen it absorbs |
+|---|---|---|---|
+| Today | Main, TodayOutOfCredits, Run + 5 forms, LevelUp, Reissue, RunOutOfCredits, RunComplete | `/today`, `/today/run` | HomeScreen's gate card + TodayScreen; the study stage of Kana/Vocab/Kanji/Grammar/Study screens |
+| Learn | Learning (route map), Station, StationTiers, Platforms, Decks, DeckCreate, DeckDetail, DeckAddCard | `/learn`, `/learn/:line`, `/learn/:line/:level`, `/learn/decks[/:id]` | HomeScreen's wall map; SelectionScreen/ModeSelector; Decks screens |
+| Practice | Practice, Reading, Comprehension(+Result), TranslationWrite/Translation, ExamPapers, ExamRunner, ConfirmSheet, ExamResult | `/practice`, `/practice/reading`, `/practice/comprehension`, `/practice/translation`, `/practice/exam[/:id[/results]]` | Reading, ReadingComprehension, Translation, Exam* screens |
+| Dictionary | Dictionary, DictionaryEntry, DictionaryReadings, Analyzer, AnalyzerPhoto/Video/Result, DeckPickerSheet | `/dictionary[/:entry]`, `/dictionary/analyzer` | DictionaryScreen, AnalyzerScreen |
+| Profile | Profile, ProfileInserts, StatusSheet, BalanceSheet, Statistics, Settings + 4 sub-pages | `/profile`, `/profile/stats`, `/profile/settings[/learning|destination|display|sound|data|account]` | ProfileScreen, StatsScreen, SettingsScreen |
+| Boarding | Welcome, BoardName … BoardPass, SignIn | pre-auth / pre-onboarding, no router | LandingScreen, AuthScreen, OnboardingFlow |
+
+Old paths (`/kana`, `/vocab`, `/kanji`, `/grammar`, `/decks/*`, `/reading`,
+`/reading-comprehension`, `/translation`, `/exam/*`, `/analyzer`, `/stats`,
+`/settings`) stay as redirects — they are bookmarked.
+
+**The states sheet.** Loading = three gold dots (`.loading > i×3`,
+`--accent2`, opacities .35/.7/1), never a spinner. Empty (`.empty`): icon,
+serif message, one hint, at most one secondary action. Error: "That did not
+work" + "Check your connection — your progress is safe" + Try again. A wrong
+MCQ pick: the pick goes danger, the right row success, the rest fall back.
+Disabled = opacity 0.45 and nothing else.
+
+**The motion sheet.** Between boarding screens: the leaving screen slides left
+as the next arrives from the right, 260 ms ease-out; the track's train
+advances 300 ms later; back reverses; never a cross-fade. A screen's own
+movement starts +120 ms after the pull and ends within 500 ms; runs once;
+under reduced motion only the rest state is drawn. The frame: title under the
+head, content centred between, the action docked at the foot and rising with
+the keyboard. 44 px targets, a name on every icon button, `aria-pressed` on
+every choice, visible focus ring.
+
+**The economy note.** "1 credit = 1 review. Free: +30 a day at 00:00, holds up
+to 50. Subscription: the unlimited pass. The gate prices the run (fare)
+against the balance before departure; a run longer than the balance stops at
+the balance and says so. Pass: unlimited credits, the practice modes, the
+analyzer, 100 decks and 10,000 cards. Free: 30 credits a day (cap 50), the
+learning modes, the dictionary without the analyzer, today's run, the full
+profile, 7 decks and 200 cards. Practice does not spend credits."
+
+**The boarding note.** Welcome → name → why → the kana check → (the reveal |
+the level) → goal → rhythm → the hour → the nudge → building → the plan →
+the offer → the pass → the tutorial. The track at the top is the progress bar:
+8 stops to the pass; the three arrival screens have no track and no back.
+Kana: Hiragana / Katakana / Not yet → the reveal (level set to Beginner or
+Novice); Both → the level list. Goal shows only the stops ahead, the next one
+preselected. Plan: two promise lines from the motive (trip: signs, menus,
+tickets · ask your way, order, book a room; studies; fun; live in Japan;
+friends; something else). Offer → "continue free" boards free and stops the
+offer returning. Welcome → Sign in for returning learners. Every figure wears
+a ~ and comes from the learner's own answers.
+
+---
+
+## Plan 064 — 手入れ, mobile hardening of today's UI
+
+Frontend only; ships the current UI on phones properly. Only items the
+redesign keeps are worth doing here — the rest is deferred to 068+.
+
+1. **Canvas pointer events (cleanup).** `.canvas-board` already has
+   `touch-action: none` (index.css:12600); `DrawingCanvas.jsx:96,112,125`
+   still call `preventDefault()` inside React's passive `touchmove` (a console
+   error per stroke). Move to `onPointerDown/Move/Up` + `setPointerCapture`,
+   drop the `e.touches` branch. The canvas survives into RunDraw.
+2. **Bare `100vh`** at index.css:16140 (`.detail-side`) and :18092
+   (`.quiz-container` ≤480px): add the `dvh` line (pattern at :9957). Skip
+   :2744 `.onb` — the onboarding is replaced by 075.
+3. **iOS focus-zoom.** `.field` (index.css:5646) inherits 15.2px; under
+   `@media (max-width: 768px)` set `.field`, bare `input`/`textarea`/`select`
+   to `1rem`. If `1rem` is not on the size scale in `design-scale.json`, raise
+   it as a design decision, do not allowlist.
+4. **Global touch polish** in the `html, body` block (index.css:5015):
+   `-webkit-tap-highlight-color: transparent`; `overscroll-behavior-y: none`
+   on `html`; `user-select: none` on chrome only (`.rating-bar`,
+   `.mobile-level-bar`, `.top-bar`, `.burger-drawer`) — never on card text.
+5. **Safe areas in the drawer** (interim, until 068 retires it):
+   `.burger-drawer__pocket` (index.css:8720) raw `env()` → `var(--safe-bottom)`;
+   `padding-top: var(--safe-top)` on `.burger-drawer`; drop the raw string
+   from the `padding` allowlist once unused.
+6. **`<html lang>` and first-run language.** `index.html:2` is `lang="fr"`;
+   `LangContext.jsx:8` defaults to `'fr'`. Seed from `navigator.language`
+   (`en*` → `'en'`, else `'fr'`) when no `lang` key is stored; the effect at
+   `LangContext.jsx:32-34` already syncs `document.documentElement.lang`.
+7. **The two `to_do.txt` items**: kana-section bottom padding under the HUD
+   (the `.page-pad` pattern, index.css:5770) and the section-header margin on
+   mobile; delete the lines.
+8. **Cold-start honesty, client half** (server half 066.3): `App.jsx:89`'s
+   8 s gate → 45 s; after ~4 s the placeholder becomes a translated
+   "サーバー起動中 / Waking the server" line (the placeholder itself is
+   rebuilt in 067). Keep the fail-open.
+9. **Phone-width test lane.** Third vitest project `phone` in
+   `vite.config.js`: include `src/**/*.phone.test.{js,jsx}`, chromium with
+   `instances: [{ browser: 'chromium', viewport: { width: 390, height: 844 } }]`
+   (confirm the option name in the installed vitest 4 typings; runtime
+   `page.viewport()` is worse — CDP metric changes do not fire `matchMedia`
+   `change`, per `useMediaQuery.browser.test.jsx:5-11`). Extract a
+   `browserProject(name, include, viewport)` helper so the browser lane's
+   `optimizeDeps.include` postmortem list is shared; add the phone glob to the
+   node lane's `exclude`. First files: `src/layout.phone.test.jsx` (docked
+   rating bar clears `--hud-h` + inset; `.canvas-board` and
+   `.analysis-cropper__stage` have `touch-action: none`; no horizontal
+   overflow at 390 on Home, a study screen, Dictionary — reuse the mocks of
+   the sibling `.browser.test.jsx` files). This lane is where 068–075 pin
+   their mockup contracts (the `AnalyzerScreen.mockup.browser.test.jsx`
+   computed-style pattern).
+10. **Build in CI + node pin.** `ci.yml` never runs `npm run build`; add it
+    after tests. `engines.node: ">=22"` in `package.json`, `.nvmrc` = `22`.
+
+STOP: a literal not on the scale is a design question, not an allowlist
+entry; no `@media (pointer: coarse)` as a mobile switch (breakpoints are
+560/768 and `TopBar.MOBILE_BREAKPOINT` moves with them, index.css:5746); never
+lower the 390 px lane width to make a test pass.
+
+---
+
+## Plan 065 — 駅舎, the PWA shell
+
+1. **Dependencies.** dev `vite-plugin-pwa` (STOP: `npm view vite-plugin-pwa
+   peerDependencies` must list `vite ^8`; take the newest release that does,
+   never `--legacy-peer-deps`); deps `@fontsource/space-grotesk`,
+   `@fontsource/noto-serif-jp`, `@fontsource/noto-sans-jp` (the canvas adds
+   Noto Sans JP 400/500/700 as `--font-jp`; today `--font-jp` relies on system
+   fonts — add it now so the redesign renders identically on every phone).
+2. **Fonts.** Delete index.css:1 (Google `@import`); import
+   `@fontsource/space-grotesk/latin-{400,500,700}.css`,
+   `@fontsource/noto-serif-jp/{600,700}.css`,
+   `@fontsource/noto-sans-jp/{400,500,700}.css` from `main.jsx` before
+   `./index.css`; keep the "weight 400 must stay" warning (index.css:5005)
+   true by moving its sentence to the imports; fix the exam-section comment
+   at index.css:3-4. Noto is ~120 `unicode-range` slices per weight — they
+   are **runtime-cached, not precached**. `build.assetsInlineLimit` returns
+   `false` for `.woff2` so small slices are not base64-inlined.
+3. **Icon source.** `frontend/brand/icon.svg` (1024 grid): sumi panel
+   (`--bg-panel` #100e13), `日本語` in Noto Serif JP 700, paper ink (`--paper`
+   #f3ecdf), content inside the central 80% (maskable-safe); monochrome
+   variant. `@vite-pwa/assets-generator --preset minimal-2023 brand/icon.svg`
+   → `public/pwa-64x64.png`, `pwa-192x192.png`, `pwa-512x512.png`,
+   `maskable-icon-512x512.png`, `apple-touch-icon-180x180.png`,
+   `favicon.ico`. The same SVG feeds `@capacitor/assets` in 076. Owner signs
+   off first.
+4. **`index.html` head**: icon, apple-touch-icon, `theme-color`,
+   `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`
+   (`black-translucent`), `mobile-web-app-capable`, `description`; the inline
+   theme script (index.html:12-26) also writes `theme-color` from the
+   resolved theme (`--bg-main` #17151a dark / #f6f1e4 light); the theme
+   switch updates the meta when it flips.
+5. **`VitePWA` block** (function-form config from 066.1):
+   ```js
+   VitePWA({
+     disable: mode !== 'production',       // off in native, dev, test
+     registerType: 'prompt', injectRegister: false,
+     includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png'],
+     manifest: { id: '/', name: '<store name>', short_name: '日本語', lang: 'fr',
+       start_url: '/', scope: '/', display: 'standalone',
+       theme_color: '#100e13', background_color: '#17151a',
+       icons: [192, 512, maskable 512],
+       shortcuts: [{ name: '本日', url: '/today' }] },
+     workbox: {
+       globPatterns: ['**/*.{js,css,html,ico,svg,png,woff2}'],   // never sounds/** (4.8 MB)
+       globIgnores: ['**/noto-*.woff2'],                          // fix to real emitted names after the first build
+       maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+       navigateFallbackDenylist: [/^\/api\//, /^\/kanjivg\//, /^\/exam-audio\//, /^\/privacy/],
+       runtimeCaching: [ /sounds/** CacheFirst 200×1y · *.woff2 CacheFirst 80×1y ·
+         /kanjivg/** CacheFirst 500×30d · /exam-audio/** CacheFirst 40×30d rangeRequests ·
+         /api/translations/* StaleWhileRevalidate 8×7d · /api/** NetworkOnly (last) ],
+     },
+   })
+   ```
+   `urlPattern`s are closure-free functions serialised into the SW.
+6. **Registration + update UX.** `main.jsx`: `registerSW` only when
+   `import.meta.env.MODE !== 'native' && 'serviceWorker' in navigator`.
+   `onNeedRefresh` → `stores/swUpdate.js` (module store + `useSwUpdate()`,
+   the `hooks/useMediaQuery.js` idiom) → `components/ui/UpdateToast.jsx` in
+   `App.jsx` beside `<DocumentHead />`: `role="status"`, "ダイヤ改正 / New
+   timetable in effect", one button → `updateSW(true)`, one "later". Never
+   reload behind the learner (a mid-exam reload races the exam draft). CSS:
+   sumi pair (`--bg-panel` + `--text-on-panel`), own `.sw-toast__btn`,
+   `bottom: calc(var(--hud-h) + var(--safe-bottom) + var(--sp-4))` (068
+   retargets to the tab bar).
+7. **Offline notice.** `hooks/useOnline.js` (`navigator.onLine` +
+   `online`/`offline`, `useSyncExternalStore`). `HomeScreen.jsx`'s
+   `HallNotice` (line 116) gains an offline tenant ("運休 / No connection");
+   `TopBar.jsx` a one-line strip elsewhere (share the `.station__notice-*`
+   classes). 068 moves this onto the HUD's status panel.
+8. **Install affordance.** Settings 環境: "ホーム画面に追加 / Install the app";
+   Android captures `beforeinstallprompt` (`stores/installPrompt.js`); iOS
+   opens a `useDialog` sheet (Share → Add to Home Screen); hidden under
+   `useMediaQuery('(display-mode: standalone)')`.
+9. **`vercel.json`**: `headers` `Cache-Control: no-cache` for `/sw.js`,
+   `/manifest.webmanifest`; rewrite `/privacy` → `/privacy.html` before the
+   catch-all (filesystem wins over rewrites).
+10. **Locales** (both tables; `locales.test.js` enforces parity):
+    `pwaUpdateReady/Btn/Later`, offline line, install copy, waking copy.
+11. **Lighthouse PWA pass** on the Vercel preview; record it in the README
+    entry.
+
+STOP: never cache `/api/*` beyond translations; never let `globPatterns`
+match `sounds/**` or the Noto slices; no `skipWaiting` without a tap; no
+third stylesheet; no `--pwa-*` custom-property prefix (stylelint blesses only
+`anl|onb|exam|card`).
+
+---
+
+## Plan 066 — 裏方, backend readiness and the origin knob
+
+1. **The origin knob.** `lib/api.js`: `const ORIGIN = import.meta.env.VITE_API_ORIGIN ?? ''`,
+   `api = path => ORIGIN + path`; route the three bypass sites through
+   `api()`: `lib/translationCache.js:9-10`, `components/study/DrawingCanvas.jsx:7,55`
+   (drop `API_BASE`), `components/dictionary/DictionaryDetail.jsx:15,574`
+   (drop `API_BASE`); `StrokeOrderAnimation.jsx:37` unchanged (comment that
+   `src` arrives resolved); `/sounds/` and `/sprites/` never go through
+   `api()`. Tracked `frontend/.env.native`:
+   `VITE_API_ORIGIN=https://japanese-learner-seven.vercel.app` + the two
+   `VITE_SUPABASE_*` values mirrored from `.env.production` (Vite loads
+   `.env.[mode]`, not `.env.production`, under `--mode native`; `NODE_ENV` is
+   still production so `DEV` routes stay out). Script
+   `"build:native": "vite build --mode native --outDir dist-native"` (ignore
+   `dist-native`). **Guard**: `defineConfig(({ mode }) => …)` with
+   `loadEnv(mode, process.cwd(), 'VITE_')`; if `mode !== 'native' &&
+   env.VITE_API_ORIGIN`, throw naming the dashboard (`loadEnv` merges
+   `process.env.VITE_*` over the files — exactly how the dashboard won last
+   time). Tests: `api.test.js` (`api('/api/x') === '/api/x'`),
+   `api.origin.test.js` (`vi.stubEnv` + `vi.resetModules()`),
+   `env.native.test.js` (Supabase values equal across files; no
+   `VITE_API_ORIGIN` in `.env.production`). Update `.env.example`, `CLAUDE.md`.
+2. **CORS.** `backend/main.py:72`: `NATIVE_ORIGINS = ["capacitor://localhost",
+   "https://localhost"]` hardcoded beside the Vercel origin with the
+   rationale (app-only origins; bearer auth, `allow_credentials` off; a
+   dashboard variable is the invisible state the outage taught this repo to
+   avoid). Starlette matches by exact string. Test: OPTIONS preflight per
+   origin in `test_http_smoke.py`. **Unverified: Vercel forwarding `Origin`
+   on external rewrites** — after deploy:
+   `curl -sS -i -X OPTIONS https://japanese-learner-seven.vercel.app/api/profile -H "Origin: capacitor://localhost" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: authorization,content-type"`;
+   fallback is `CapacitorHttp` (no CORS; verify `apiUpload`'s `FormData`).
+3. **Cold start.** `render.yaml`: `healthCheckPath: /`; recommended `plan:
+   starter` (else a documented GitHub cron keep-warm). `GZipMiddleware`
+   (min 1 KB) — `translationCache.js` pulls the full meaning maps
+   uncompressed.
+4. **`DELETE /api/account`** — new `backend/routes/account.py` mirroring
+   `scripts/wipe_srs.py`'s `PLAN`/`UNTOUCHED` shape. Children before
+   parents, `user_profiles` last:
+   `review_log`, `card_modes`, `cards` (`LIKE '{uid}:%'`, escape `%_\`),
+   `xp_ledger`, `custom_cards`, `deck_cards`, `decks`, `video_session_jobs`
+   (by session), `video_sessions`, `phrase_history`, `reading_log`,
+   `comprehension_log`, `translation_log`, `exam_attempts`,
+   `frequency_overrides`, `ocr_usage`, (069 adds `credit_ledger`),
+   `user_profiles`. **Shared, never touched**: `exam_papers`,
+   `exam_generation_jobs`, `grammar_sentences`, `phrase_analysis_cache`;
+   exam MP3s. Evict `core/user_level.py`'s cache (`forget_stored_level`).
+   Order: one transaction, commit, **then** GoTrue
+   `DELETE {SUPABASE_URL}/auth/v1/admin/users/{uid}` (`httpx`, service key
+   as `Authorization` + `apikey`, 10 s; 200/204/404 = gone, idempotent).
+   `DEV_USER_ID` → skip the admin call, `auth_deleted: false`. Admin failure
+   → 502 "your data was erased, the sign-in account could not be removed
+   yet, try again". Tests `test_account.py`: plan shape; **completeness
+   guard** (`CREATE TABLE` names in `data_structure.sql` == `PLAN ∪ SHARED`);
+   real deletion on `probe-<uuid>` ids with another user's rows surviving;
+   route wiring with `delete_user_rows`/`_delete_auth_user` monkeypatched;
+   GoTrue call mocked.
+5. **Settings row** (today's `DataRows`, `SettingsScreen.jsx:467`; 074 moves
+   it to Settings › Data): third `settings-row--danger` row with the reset's
+   arm → confirm markup, `data-action` on both danger buttons, then
+   `apiJson('/api/account', …, { method: 'DELETE' })` and
+   `supabase.auth.signOut({ scope: 'local' })`. Sign-out (line 179) also
+   becomes `scope: 'local'`. Keys: `settingsDeleteAccount`, `…Hint`, `…Btn`,
+   `…ConfirmQ`, `…Yes`, `…Failed`. Play's deletion URL:
+   `…/settings#data` + the privacy page's steps.
+6. **Privacy policy page.** `frontend/public/privacy.html` (static,
+   bilingual, inline styles as literals — outside `src/`): what is collected
+   (email via Supabase; study data; sentences/images sent to the LLM/vision
+   providers named in `backend/study/llm_shared.py`; YouTube's iframe),
+   retention, the deletion path, a contact. Linked from Welcome and
+   Settings › Account. **The owner reviews it.**
+7. **ADR 0008** — "Native shells reach the API through the web origin".
+
+STOP: never `VITE_API_ORIGIN` in `.env.production` or the dashboard; never
+the four shared tables in `PLAN`; never GoTrue before the commit; never the
+service key in the frontend.
+
+---
+
+## Plan 067 — 待合, loading screens and the three states
+
+Small, first: every later screen consumes these.
+
+1. **`components/ui/Loading.jsx`** → the canvas's three gold dots:
+   `<div class="loading" role="status" aria-label={t.loading}><i/><i/><i/></div>`,
+   optional `copy` prop for long waits ("Writing your exam…"). CSS `.loading`
+   from the mockup (`--accent2`, opacities .35/.7/1, a slow breathe under
+   motion, static under reduced motion). The ensō ring (`.quiz-loading__*`,
+   index.css:10842-10886) retires with it.
+2. **`screens/AppLoading.jsx`** — the boot screen: the `日本語` glyph
+   (`.auth-header__glyph`) over the dots on `--bg-main`, safe-area aware,
+   themed. Replaces both hard-coded French waits in `App.jsx:142-173`;
+   carries 064.8's "Waking the server" line after ~4 s; is what the native
+   splash (076) hands off to — `SplashScreen.hide()` once `AppLoading` has
+   painted, so there is one wait, not two.
+3. **`components/ui/Empty.jsx`** — `.empty` (icon slot, serif message, hint,
+   ≤1 secondary action). `DecksScreen`/`DeckDetailScreen`'s `EmptyState` and
+   `SessionError.jsx` re-render through it: error = "That did not work" +
+   "Check your connection — your progress is safe" + Try again (the retry
+   stays wired to `useCardSession().retry`).
+4. **Where a wait was missing**: Home/Today (gate card shows the dots until
+   `/api/today` answers), Settings (dots until the summary), Dictionary
+   (dots in the console's count slot while `loading`), Analyzer (the notice
+   line keeps its "analyzing…" copy; add the dots beside it). Long waits keep
+   honest copy: `ExamRunner`'s brush strokes stay (it is the one long-wait
+   screen the canvas did not redraw), comprehension/translation use
+   `<Loading copy>`.
+5. **The disabled treatment**: one rule, `opacity: 0.45` and nothing else,
+   on `[disabled]` for `.btn-depart`, `.btn-primary`, `.btn-secondary`,
+   `.chip`, `.tab` — the canvas's "closed gate keeps its shape".
+6. **Locales**: `loading` stays; add `waitingServer`, `errorTitle`,
+   `errorHint`, `tryAgain` if missing. Contract tests in the phone lane:
+   dots present and not animated under reduced motion; `AppLoading` renders
+   with no session; `Empty` renders the action only when given.
+
+---
+
+## Plan 068 — 車内, the chrome, the shell and the routes
+
+The backbone. Everything in 069–075 renders inside it.
+
+1. **Shell routes.** `App.jsx`: a `<Shell>` layout route (`<Hud/>`,
+   `<main class="phone__content"><Outlet/></main>`, `<TabBar/>`) for the five
+   tab trees, and a `<Stage>` layout route (no chrome; `.stage` + docked
+   foot) for runs and sessions: `/today/run`, `/learn/:line/:level/:mode`,
+   `/practice/*` sessions, `/practice/exam/:id`, `/dictionary/analyzer/result`.
+   `/` → `/today`. Redirects for every old path (list in "Tabs → routes").
+   `DepartureGate`, `TrainDoor`, `UpdateToast`, `DocumentHead` stay beside
+   `<Routes>`.
+2. **Components** in `components/chrome/`: `Hud.jsx` (level roundel from
+   `useProfileSummary` — the retired `.topbar-profile-ring` idea; the goal
+   status panel from `/api/journey/status` through `domain/goalMath` /
+   `journeyProjection` → AHEAD·9d / ON TIME / LATE·9d / SUSPENDED after 14
+   idle days, inks `--success/--warning/--danger`, tap → the status sheet;
+   the pass at pocket size with `hud__pass-fig` from `stores/credits`
+   (069), `--low` ≤5, `--out` at 0, ∞ on a pass, tap → the balance sheet;
+   the `hud-fare` "+4 xp" rising off the roundel reuses the `XpToast` fare
+   tier), `TabBar.jsx` (five gates from a new `config/tabs.js`; `tab__due`
+   badge from `/api/today` total; `aria-current`), `Bar.jsx` (roundel,
+   title, sub, aside, stripe; `--register` variant), `Sheet.jsx` (scrim +
+   bottom sheet on `useDialog`'s focus trap, `--sumi` variant, swipe-down
+   optional), `Console.jsx` + `Chip.jsx` + `Seg.jsx` (chips row, index
+   field, count), `StageHead.jsx` (`‹ leave`, where, remaining pill, the
+   pass). The offline tenant from 065.7 moves into the HUD status panel.
+3. **CSS** in `index.css`, namespaced exactly as the canvas (`.hud*`,
+   `.tabbar`/`.tab*`, `.bar*`, `.sheet*`/`.scrim`, `.console*`/`.chip*`,
+   `.seg*`, `.stage*` redrawn, `.route*` redrawn), tokens only. Mint in
+   `:root`: `--tabbar-h: 50px` and repurpose `--hud-h` as the top HUD's
+   48 px (every docked thing reads the two); `--font-jp` gains Noto Sans JP
+   first. Retire `.top-bar*`, `.top-bar__peek`, `.burger-*`,
+   `.mobile-level-bar`, `.station__concourse*`, `.gatehall`, `.hall-pace`
+   moves to the Today strip. The ratchets shrink; the retired blocks' baseline
+   entries go with them in the same commits.
+4. **Desktop.** The same shell: `.phone__content` gets `max-width:
+   var(--board-w); margin-inline: auto` above 768px; the tab bar stays
+   docked full-width with its inner grid at the same max width; the HUD
+   likewise. No second chrome. Study stages keep `--card-w`.
+5. **Retire**: `TopBar.jsx`, `BurgerMenu.jsx`, `MobileLevelBar`,
+   `NavControls.jsx` (theme + language move to Settings › Display &
+   language), `HomeScreen.jsx` (gate card → 070, wall map → 071, `HallNotice`
+   → the HUD), `config/navLinks.js` → `config/tabs.js` + per-tab section
+   lists, `stations.js` keeps codes/kana for roundels and the cutscenes.
+6. **DESIGN.md amendments**: "Japanese is content, not chrome" (the pairing
+   rule retires for chrome; the tab bar's kanji are icons); the frame (title
+   under the head, action docked at the foot, rises with the keyboard); one
+   filled action per screen, gold, 52 px; selection is a gold ring; disabled
+   = 0.45; loading = three dots; the train pull; the new chrome tokens. Add
+   `docs/design/mobile/README.md` (class map: canvas class → index.css
+   block → component) and `docs/design/mobile/mockup.css` (the extracted
+   stylesheet, reference only).
+7. **Tests**: phone-lane contracts for the HUD (48 px + `--safe-top`; sumi
+   ink pair), tab bar (five gates, active rule, badge clear of the glyph, 50
+   px + `--safe-bottom`), stage (both bars absent, foot docked), sheet (focus
+   trapped, Escape closes); redirects (`/kana` → `/learn/kana`); `lint:ink`
+   passes on `--text-on-panel` for every HUD/tab label.
+
+STOP: no colour on chrome (the tab bar and HUD are sumi + two inks); no
+`--mob-*`/`--pwa-*` prefixes; never two chromes; never delete a retired
+block's baseline entries without the block.
+
+---
+
+## Plan 069 — 回数券, the credits system
+
+Backend ledger + gate pricing + balance sheet + entitlements, in shadow mode.
+
+1. **Schema** (added in `routes/profile.py`'s `_init_db` ALTER loop, the
+   project's migration mechanism): `credit_ledger(id BIGSERIAL, user_id,
+   delta INTEGER, reason TEXT ('refill'|'review'|'grant'|'adjust'), ref TEXT,
+   at TIMESTAMPTZ)` modelled on `xp_ledger` (+ index on `user_id`);
+   `user_profiles` gains `credits_refilled_on DATE`, `plan TEXT DEFAULT
+   'free'`, `plan_until TIMESTAMPTZ`, `tz_offset_min INTEGER`. Add
+   `credit_ledger` to `data_structure.sql`, to 066's account `PLAN`, to
+   `scripts/wipe_srs.py`'s lists and to `stats.py`'s reset (reset keeps the
+   balance: it is not progress).
+2. **`backend/core/credits.py`**: constants `DAILY_REFILL=30`, `CAP=50`,
+   `COST_PER_REVIEW=1`, `FREE_DECKS=7`, `FREE_CARDS=200`, `PASS_DECKS=100`,
+   `PASS_CARDS=10000`; `ENFORCE = os.environ.get("CREDITS_ENFORCE") == "1"`;
+   `entitlement(user_id)` → `'free'|'pass'` (`plan` + `plan_until`);
+   `balance(user_id)` = `SUM(delta)`; `refill_if_due(user_id, local_today)`
+   inserts `min(DAILY_REFILL, CAP - balance)` once per local day, idempotent
+   via `credits_refilled_on` (local day from `tz_offset_min`, the
+   `stats.py:234` precedent; the app PATCHes the offset on boot); a new
+   account is seeded with `DAILY_REFILL` on first read (the boarding's pass
+   prints 30/50); `spend(user_id, n, ref)` → in shadow mode records
+   `min(n, balance)` and never blocks (logs "would have blocked"); under
+   `ENFORCE` raises `OutOfCredits` when `balance < n` → **402**
+   `{detail: 'out_of_credits', balance, refillAt}`; a pass never spends.
+   Per-worker 60 s cache like `core/user_level.py`, evicted on spend.
+3. **Routes.** `GET /api/credits` → `{balance, cap, dailyRefill, refillAt,
+   plan, unlimited}` (refills on read). The six review routes
+   (`/api/today/review`, `/api/{kana,vocab,kanji,grammar}/review`,
+   `/api/decks/{id}/review`) call `spend(user_id, 1, card_id)` **after** the
+   scheduler accepts the review (never charge a rejected review) and return
+   `credits: {balance}` in the response. `/api/today` adds `fare` (= total)
+   and `credits`; `/api/today/cards` caps the run at the balance under
+   `ENFORCE` (the queue already takes a limit). `PATCH /api/profile/learning`
+   accepts `tzOffsetMin`. Practice modes are free of credits by design.
+4. **Entitlement gates** (all no-ops unless `ENFORCE`): `require_pass`
+   dependency on the practice routers (`reading`, `translation`, `exams`),
+   the analyzer routers (`phrase`, `video`, `ocr`) → 402
+   `{detail: 'pass_required'}`; deck/card counts in `POST /api/decks` and
+   the card-add routes → 402 `{detail: 'limit_reached', limit}`.
+5. **Frontend.** `stores/credits.js` (module store like `profileSummary`,
+   `applySpend(n)` optimistic decrement, refreshed from every review
+   response's `credits`); `lib/api.js`: `ApiError.code` from `detail` so
+   `'out_of_credits'` / `'pass_required'` / `'limit_reached'` are
+   distinguishable (today every non-401 is undifferentiated); `Hud` pass
+   figure (068); the **gate card fare line** (`gate-card__fare`: Fare · n
+   credits · Balance · gold) and `gate-card__short` ("30 of 42 run today —
+   12 wait for tomorrow's refill"; "No credits left — +30 at 00:00" with
+   the gate closed at 0); the **balance sheet** (`.balance` figure/track,
+   the +30 daily cell; the cap cell; **no offer block, no "Go unlimited"**
+   per the owner's decision); the **run-out sheet** mid-run
+   (`RunOutOfCredits`: "0 credits · 12 cleared · 12 wait for tomorrow" +
+   "Back to the station"); `RunComplete`'s fare slip (reviews · +xp · credits
+   left). Pass tags on Practice/Analyzer and every "Go unlimited" are
+   **hidden** until a purchase flow exists (one `HAS_STORE = false` constant
+   in `domain/credits.js`, mirrored economy constants for copy).
+6. **Tests.** Backend: refill idempotence across a local-midnight boundary;
+   cap; seed on first read; spend after a rejected review does nothing;
+   shadow never blocks and never goes negative; `ENFORCE` 402 shapes; deck
+   limit; pass never spends; account deletion covers the ledger (066's
+   completeness guard forces it). Frontend: optimistic decrement then
+   reconciliation from the response; gate copy at balance < due and at 0;
+   the run-out sheet at 402.
+
+STOP: never charge before the scheduler accepts; never block in shadow mode;
+never show the offer/pass tags/"Go unlimited" while `HAS_STORE` is false;
+never make the balance a column that can drift from the ledger (it is a SUM,
+cached).
+
+---
+
+## Plan 070 — 本日, Today and the run
+
+1. **Today** (`screens/TodayScreen.jsx` rebuilt on the Bar + gate card):
+   `gate-card` with the **lanes as the run's picker** (each `.lane` toggles,
+   `--off` at 0.5, the fare counts the rows that are on — `/api/today/cards`
+   gains a `lanes=` filter matching `daily_queue.lanes` keys; `/api/today`'s
+   `lanes` breakdown already carries key/label/due); the fare line and short
+   notice (069); `btn-depart` → the existing `beginDeparture` TicketGate
+   cutscene → `/today/run`; "All clear" + "Next review in 3 hours" from
+   `next_due`; the `pass--strip` (StampRally + hall-pace "New items 4/10")
+   under it; `RunComplete` (`today-clear` + fare slip + "Back to the station").
+2. **The run** — one `components/study/StudyStage.jsx` wrapping
+   `useCardSession` for Today and for every learning mode (Kana/Vocab/Kanji/
+   Grammar/Study screens become thin route components that pick the mode and
+   render the stage): `StageHead` (‹ Gate/‹ Kanji, where, remaining pill,
+   the pass), `deck-progress` hairline, `study-assist` toggles (Show/Hide
+   choices, Show a sentence, Hide furigana), the `prompt-card` with
+   `stage-mark` (New / In progress / Mastered) and the six faces the canvas
+   draws: MCQ (`mcq-list`, wrong pick → danger, right → success), flashcard
+   (word · reading · answer), cloze (`cloze__blank`, field + Submit in the
+   foot), draw (`draw-prompt` + `canvas-wrap` + Erase + Reveal answer),
+   readings (`readings-input` on/kun rows + add a reading), fast review
+   (`browse-nav` Previous/Next, "Nothing is graded"); the docked
+   `rating-bar` (2/4/6 grades, existing); `LevelUp` board (existing `levelup`)
+   and `Reissue` (existing) over the stage; `RunOutOfCredits` sheet (069).
+   All existing review gates, the stamp press, `XpToast`, and the
+   localStorage queue mirror are kept — this is a re-skin of the stage, not
+   of the session logic.
+3. **Backend**: `lanes=` filter; `RunComplete` figures come from the session
+   (client counts) plus `credits` from the last review response.
+4. **Tests**: the existing `TodayScreen.browser.test.jsx`, `KanaScreen.*`
+   and `reviewGates.guard.test.js` keep passing through the new stage;
+   phone-lane contracts for the docked bar and the six faces at 390 px;
+   lane toggling changes the fare.
+
+---
+
+## Plan 071 — 学習, Learn: route map, stations, platforms, decks
+
+1. **Route map** (`/learn`, `screens/LearnScreen.jsx`): the four
+   `wmap-line` rows (Kana / Vocabulary / Kanji / Grammar) with roundel,
+   `wmap-due` chip, the track with stops (`あ きゃ ア キャ` / N5…N1), past
+   stops filled, the train at the current stop — `components/station/WallMap.jsx`
+   + `domain/lineProgress.js` already draw this; plus the "My decks" row.
+2. **Station** (`/learn/:line`): the level list as `.route` + `route-stop`
+   rows (code, name, "You are here", `121 / 181`, ▶) with the line's
+   pigment; Kanji/Vocabulary get the "By frequency" aside → tiers page
+   (`seg--full` 100/200/500/1000 + `platform-card` per tier; backend
+   `routes/frequency.py`). Kana's station lists the four sets.
+3. **Platforms** (`/learn/:line/:level`): `platform-card` per mode with the
+   service badge and stop pips (`SERVICES` in `config/stations.js`), the
+   description, and the Review card ("Flip through what you know") —
+   `components/selection/SelectionScreen` + `ModeSelector` restyled; tapping
+   boards the `TrainDoor` (existing) into `/learn/:line/:level/:mode` on the
+   stage (070).
+4. **Decks** (`/learn/decks`): `Bar` with "Create deck" console action,
+   `console` (All/Vocab/Kanji/Grammar chips, "Find a deck…", count),
+   `platform-card` per deck (glyph roundel 単/漢/文, name, "Vocabulary · 2
+   due", `deck-card__count`); `DeckCreate` (field + `type-list` rows
+   Standard/Vocabulary/Kanji/Grammar + Create); `DeckDetail`
+   (`deck-identity` + ▶ Study, chip row Add card / Select / More,
+   `card-list` of `card-row`s); `DeckAddCard` (`form` rows, "A kanji deck's
+   form adds the readings and a radical" hint). Free-tier counts surface
+   only under enforcement (069).
+5. **Tests**: existing decks tests; phone-lane contracts for the track and
+   route rows.
+
+---
+
+## Plan 072 — 実践, Practice
+
+1. **Hub** (`/practice`): `bar--register` "Practice · Four platforms", four
+   `platform-card--line` rows (Reading practice, Reading comprehension,
+   Translation, Mock exam) — pass tags hidden (069).
+2. **Sessions on the stage** (both bars leave; `‹ Practice`): Reading
+   (`timer` bar + label, `sentence`, field "Write what you saw, in romaji" +
+   Submit in the foot); Comprehension (`deck-progress`, `type-badge`,
+   `sentence--left`, `mcq-list` A–D with `--selected`, "Re-read the text" /
+   Next; result = `result-lattice` records + `qrow` list + "Original text" /
+   Change level / Try again); Translation (`prose` EN card, field + Submit;
+   feedback = your answer / reference / romaji / AI analysis + the rating
+   bar); Mock exam (papers = `platform-card` per section with "written on
+   first open" / "sat twice" + `paper-slot` "Different paper"; runner =
+   `exam-meta` (‹ Exam, section, timer), `exam-mondai` toggle, Q card with
+   `exam-underline`, `mcq-list`, `exam-nav` (Previous · flag · Next),
+   `exam-sheetbar` (chips done/flag) + Finish; the confirm `sheet` "Finish
+   with 14 unanswered questions?" (Keep working / Go to first blank / Finish
+   anyway); result = `exam-score-ring` + figures + "Review your answers"
+   with the Missed-only chip + `exam-group`/`exam-review-row` + Back to
+   exams / New paper). Existing screens re-skinned; `examService.js`, the
+   draft key and the generation wait (067) unchanged.
+3. **Tests**: existing exam/reading tests; the confirm sheet; the timer at
+   390 px.
+
+---
+
+## Plan 073 — 辞書, Dictionary and the analyzer
+
+1. **Dictionary** (`/dictionary`): `Bar` "Dictionary", the `anl-door` (KS
+   roundel, "Analyzer", three intake icons; pass tag hidden), the `console`
+   (Kanji/Vocab/Hiragana/Katakana/JMdict chips, field with clear, "128
+   results"), `dict-grid` of `dict-entry-card`s (level badge, `stage-mark`,
+   kana, glyph, meaning). **Entry** (`/dictionary/:entry`): the `dict-plate`
+   header (‹ Dictionary, stage mark, level, action; reading, glyph, on/kun
+   readings + "+3" door, caption, stripe), body as `dict-block`s divided by
+   hairlines — senses with examples, form (stroke sheet, strokes, radical
+   door), words (`dict-word` with the hit highlighted), the SRS records
+   (accuracy, reviews, interval, next review, "Due now"). **All readings**
+   sheet (`dict-register` on/kun groups with words and the rest as chips,
+   Close). `DictionaryScreen` + `DictionaryDetail` restyled; `.dict-dock`'s
+   desktop split stays under the shell's column.
+2. **Analyzer** (`/dictionary/analyzer`): `seg--full seg--kaiseki`
+   Text/Photo/Video; text = `textarea` + Analyze + History (`head2`,
+   `anl-hist` rows with Kept/sentences/when); photo = `intake-pair` Shoot /
+   Choose, `photo-frame`, editable field, OCR hint, Analyze (existing
+   `ImageInput` + cropper); video = link field, subtitles hint (bookmarklet
+   on web only), Choose a file, section From/To, cap hint, Analyze;
+   **result** on the stage (‹ Analyzer, "駅で友達を…", `anl-kept`):
+   `anl-stepper` with stops and `i+1`, the `tok-line` (mastered / learning /
+   unknown / off-deck / particle) + legend, the `token-card` (surface,
+   reading, POS badge, gloss, kanji chips, Add to deck), the furigana
+   `seg` All/Unknown/None, "Explain this sentence"; `DeckPickerSheet`
+   (`picker-row`s + New deck). `AnalyzerScreen` restyled; its polling,
+   mockup-contract and responsive suites updated to the new markup.
+3. **Tests**: the dictionary and analyzer browser suites re-pinned to the
+   new class contract in the phone lane.
+
+---
+
+## Plan 074 — 定期券, Profile, statistics, settings, the level rule
+
+1. **Profile** (`/profile`): `CommuterPass` (existing, with the new footer
+   `jour-line`: Balance · 30 / 50 credits · +30 at 00:00) and the `sbook`
+   month grid (stamps, missed, today, future; streak / longest / stamped).
+   **Inserts** (scroll): `records` 2×2 (Reviews, Retention, doors to
+   Statistics and Settings), `pf-ledger` of `pf-line`s (Kana 104/104 …), the
+   `banzuke` ranking with the This week / All time `seg`. **Status sheet**:
+   the existing pass back (`jour-*`: track with You/Plan and the gap,
+   figures, the two `jour-act`ions) as a `sheet--sumi`. **Balance sheet**
+   (069).
+2. **Statistics** (`/profile/stats`): `records` (Streak, Due today,
+   Mastered, Accuracy, In progress, New with notes), `stat-cap` +
+   `cal--gold` 14-week practice calendar (from `/api/profile`'s calendar
+   extended to 98 days, or `/api/stats/extra`), the 7-day `forecast`
+   (existing). `StatsScreen` restyled.
+3. **Settings** (`/profile/settings`): `stg-head` + `stg-list` rows with
+   values (Display & language "Dark · English", Sound, Learning "N4 · 10 /
+   day", Destination "N3 · 14 Mar 2027", Data, Account "aiko@…") + Sign out;
+   sub-pages: Display & language (theme 自動/dark/light + language — from the
+   retired NavControls), Sound (existing mixer/presets), **Learning**
+   (`slip`s: JLPT `lvlstrip` with "You are here" and the level note; Daily
+   pace `svc-grid` Local/Rapid/Express; Rating buttons 2/4/6 grades + hint;
+   "Retake the test" → the existing `PlacementTest`), **Destination**
+   (`onb-dest` chips, service, daily ride hour grid incl. Flexible, validity
+   `jour-line`, Hand it back / Reprint → `journey` endpoints), Data (export
+   + reset + delete account from 066.5), Account (email, privacy link).
+4. **The level rule** (backend + the two sheets): `srs.seed_known(user_id,
+   card_ids, mode, spread_days=42)` inserts `card_modes` rows for cards with
+   no row yet — `is_learning=false`, `interval_days` above
+   `_classify_stage`'s mastered threshold, `repetitions` ≥ 3, `next_review`
+   spread uniformly over the next 42 days — never touching cards that
+   already have history; chunked (N1 is 1,070 kanji × modes). `PATCH
+   /api/profile/learning {jlptLevel}` calls it for every stop behind the new
+   level (via `study/card_index`), for the modes the run serves; moving down
+   deletes nothing; `daily_queue.lanes` gains a level filter (lanes whose
+   deck key is a JLPT level above the learner's are held back, so "Today's
+   run shrinks to the N5 stops"). `GET /api/profile/learning/preview?jlptLevel=`
+   returns `{markedKnown, spreadWeeks}` or `{setAside, deleted: 0}` for the
+   **confirm sheets** (Move up to N3? / Move down to N5? — Stay at N4). The
+   boarding (075) reuses `seed_known` through `onboarding/complete`.
+5. **Tests**: `seed_known` idempotence, spread bounds, no overwrite of
+   history, level filter on lanes; the sheets' figures; existing profile,
+   stats and settings suites re-pinned.
+
+STOP: `seed_known` never updates an existing row; moving down never deletes;
+the placement test stays reachable.
+
+---
+
+## Plan 075 — 乗車, the boarding and sign-in
+
+Replaces `LandingScreen`, `AuthScreen`'s look and `OnboardingFlow`.
+
+1. **Screens** in `components/boarding/` with `screens/BoardingFlow.jsx`
+   owning the state machine and the `brd` frame (head with back + track +
+   `n/8`, body, docked foot): Welcome (the `日本語` sign, two rolling lanes of
+   demo cards, "Take the train to proficiency.", Board, "Have an account?
+   Sign in"), Name (`brd-field`, focused, keyboard pushes the foot), Why (six
+   `brd-opt`s: studies / fun / trip / live / friends / something else),
+   Kana ("Can you read this?" すし · ホテル; Hiragana / Katakana / Both / Not
+   yet — the answers are the foot), Reveal (readings rise, "Two scripts, 46
+   signs each. Your first stop."), Level (Novice — / N5 … N1 with kanji
+   counts; "The stops behind you will be marked known"), Goal (stops ahead
+   only, next preselected), Rhythm (5/10/15/20 min, Recommended tag),
+   Time (departure board flaps + Morning/Noon/Evening + the day track knob,
+   `role="slider"`), Nudge (the notification mock; Allow notifications /
+   Not now), Building (train drives the track, steps tick: goal, lines,
+   daily ride, projection), Plan (the chart — an illustration, legend,
+   "At 10 min a day, by March 2027, for your trip:" + four bullets from the
+   motive and `domain/journeyProjection.js`), **Offer — skipped while
+   `HAS_STORE` is false**, Pass (the printed `CommuterPass` with the 発行
+   seal; "Enter the station" → the existing TicketGate finale), then the
+   tutorial: keep the wave-8 tour if it survives the shell; else defer.
+   **Sign in**: `AuthScreen` restyled (`auth-card`, Login / Sign up seg,
+   fields, "Everything can be changed later in Settings.").
+2. **Branches & rules** (motion sheet): kana → one script or Not yet → the
+   reveal → goal with level set to Beginner (N5) / Novice; Both → the level
+   list; back keeps answers and exists until the plan is built; the three
+   arrival screens have no back; the language is the device's (064.6);
+   figures wear a ~; 44 px targets, `aria-pressed` on every choice.
+3. **Contract.** `POST /api/onboarding/complete` extended (backwards
+   compatible): `motive`, `kanaKnown` ('hiragana'|'katakana'|'both'|'none'),
+   `rhythmMin`, `reminderTime` ("07:30"|null), `notifications` (bool),
+   `tzOffsetMin`; `user_profiles` gains `motive`, `kana_known`,
+   `reminder_time`, `notifications`; the level seeds via 074's `seed_known`;
+   `dailyNewTarget` = the rhythm's items; `goalTargetDate` from the plan's
+   projection (`goalMath`). `CompletePayload`'s validators stay (goal beyond
+   level, future date).
+4. **The nudge.** Native (076): `@capacitor/local-notifications` schedules
+   one daily reminder at `reminderTime` ("Your train leaves at 07:30 · Your
+   cards are waiting at the gate"); the OS prompt is the system's own. Web:
+   the screen stores the hour and permission request is skipped (no
+   scheduling API) — show the screen only when `Capacitor.isNativePlatform()`;
+   Settings › Destination's "Daily ride" edits the hour on both.
+5. **Motion.** The train pull between screens (260 ms ease-out, +300 ms
+   train advance; back reverses); one movement per screen as the sheet
+   lists; all rest-state-only under reduced motion (`REDUCED` constant
+   pattern from the current flow).
+6. **Retire** `OnboardingFlow.jsx` and `FirstRide.jsx`, the `.onb-*` block
+   (index.css:2740–4535) except `.onb-dest*` (Settings › Destination) and
+   the scattered rules other blocks share (:6591 `.onb-pass::after`, :6727,
+   :11272, :11978 — check each before deleting), and the `onb*` locale keys
+   not reused. **Keep** `TrainArrival.jsx` (the 到着 cutscene, usable for
+   the building → plan arrival), `PlacementTest`, `DepartureBoard`,
+   `CallingAt`, `DepartureChips`, `goalDerived.js`, `paces.js`,
+   `departures.js`, `levelSigns.js` (shared with Settings and
+   `GoalCounter`). `OnboardingPreview.jsx` (`/dev/onboarding`) drives the
+   new flow with `dryRun`.
+7. **Tests**: a browser suite mirroring today's 17 (single POST of the whole
+   contract; back keeps answers; the kana branch both ways; reduced motion
+   mounts rest states; the pass prints the balance); backend
+   `test_onboarding_profile.py` extended for the new fields and the seeding.
+
+STOP: the offer screen and any price stay out while `HAS_STORE` is false;
+never delete the shared onboarding components; never ask the language.
+
+---
+
+## Plan 076 — 車両, the Capacitor shells
+
+1. **Install** `@capacitor/core`, `@capacitor/cli`, `@capacitor/android`,
+   `@capacitor/ios` (current major) + `@capacitor/app`, `status-bar`,
+   `splash-screen`, `browser`, `filesystem`, `share`, `preferences`,
+   `keyboard`, `local-notifications`; dev `@capacitor/assets`. `npx cap init
+   "<store name>" <bundle id> --web-dir dist-native`, `cap add android`,
+   `cap add ios`; commit both, ignore build outputs. `"cap:sync": "npm run
+   build:native && cap sync"`. Icons + splash from `brand/icon.svg`.
+2. **`capacitor.config.ts`**: `webDir: 'dist-native'`,
+   `android.allowMixedContent: false`, `ios.contentInset: 'never'`,
+   SplashScreen `launchAutoHide: false` (hidden by `AppLoading`, 067.2),
+   StatusBar overlay + style following `data-theme`. Never `server.url`.
+   Verify `env(safe-area-inset-*)` on Android 15 (edge-to-edge); else
+   `adjustMarginsForEdgeToEdge` / `@capacitor-community/safe-area`.
+3. **Native branches** (`lib/platform.js`): no SW; external links through
+   `@capacitor/browser`; the two blob exports (deck CSV, progress CSV) write
+   with `Filesystem` then `Share.share`; hide the YouTube bookmarklet grab
+   and the on-device tesseract option; Android back → close an open sheet,
+   else `history.back()`, else `App.exitApp()` at a tab root;
+   `LocalNotifications` for the nudge (075.4); `auth.storage` on
+   `@capacitor/preferences`.
+4. **Permissions**: Android `CAMERA`, `READ_MEDIA_IMAGES`,
+   `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM` (or inexact daily); iOS
+   `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`;
+   `AVAudioSession` `.playback` so kana audio plays with the silent switch
+   on (verify first); `TARGETED_DEVICE_FAMILY = 1`.
+5. **Device verification** (Android from Linux with `npx cap run android`;
+   iOS via TestFlight): boarding end to end, a run with the docked bar, a
+   draw card, the dictionary sheets, an exam with audio, deck CSV share,
+   the nudge fires, sign-out, account deletion on a throwaway account.
+   Watch CORS on the first `/api` call and on `kanjivg` fetches. Measure
+   the door/gate cutscenes on a mid-range Android; drop `.door__glass`'s
+   `backdrop-filter` (index.css:19264) under 768px if frames drop.
+
+STOP: never `VITE_API_ORIGIN` at onrender.com; never `server.url`; never
+commit signing material.
+
+---
+
+## Plan 077 — 出発, CI builds and the store release
+
+1. **`.github/workflows/mobile.yml`**: PR → Android debug APK (ubuntu, JDK 21,
+   `android-actions/setup-android`, `./gradlew assembleDebug`, artifact);
+   tag `v*` → signed AAB (keystore from secrets) and iOS archive on
+   `macos-15` with fastlane (`match` creating certs/profiles from an App
+   Store Connect API key — no Mac needed; `gym`; `pilot` to TestFlight);
+   iOS on tags only (macOS minutes cost 10×). Version/build numbers derived
+   from the tag.
+2. **Play**: closed testing with the 12 testers; Data safety (email, user
+   content, usage data; deletion → privacy page + `/settings#data`); content
+   rating; Education; fr + en listings from the locales; screenshots of the
+   redesigned app; target SDK per Play's floor.
+3. **App Store Connect**: privacy labels, account-deletion reviewer note
+   (Settings › Data), test account, support + privacy URLs, 6.7" and 6.1"
+   screenshots, TestFlight external group, submit.
+4. **Release hygiene**: `docs/release.md` runbook (tag → CI → TestFlight /
+   closed test → promote). Wave 14 section in `plans/README.md` (064–077
+   spent); fix `CLAUDE.md:37`.
+
+---
+
+## Deferred (next wave)
+
+- **Payments**: RevenueCat (App Store + Play + web), the offer screen
+  (BoardOffer, the balance sheet's offer block, TodayOutOfCredits' "Go
+  unlimited"), the pass tags; flip `HAS_STORE`, then `CREDITS_ENFORCE=1`
+  after a grace announcement. Pricing is the owner's ([PRICE], −X%).
+- **Push notifications** (server-scheduled, beyond the local nudge).
+- **Full offline study**; Android TTS voice for the Speak button.
+
+---
+
+## Verification
+
+- **Every plan, before push**: `frontend/`: `npm run lint && npm run
+  lint:css && npm run lint:scale && npm run lint:ink && npm test && npm run
+  build`; `backend/`: `python -m pytest -q`. The guards are a ratchet: a
+  rising count fails; a silently changed baseline is the forbidden thing.
+  Redesign plans shrink the ratchets as they retire blocks.
+- **064**: phone lane green; on a phone: no console error per stroke, no
+  focus zoom, no pull-to-refresh, drawer header clears the notch.
+- **065**: Lighthouse "Installable"; install on Android Chrome + iOS Safari;
+  network off → shell + offline line + a cached kana session; deploy → the
+  toast, reload only on tap; fonts offline; `ls dist/assets | grep woff2`
+  confirms Noto slices are not precached.
+- **066**: `pytest` (CORS, account); the Vercel preflight `curl` echoes
+  `capacitor://localhost`; delete a throwaway account end to end;
+  `VITE_API_ORIGIN=x npm run build` fails with the guard's message; the
+  waking line appears against a spun-down Render.
+- **067**: dots render everywhere a wait exists; static under reduced
+  motion; `AppLoading` replaces both `Chargement...` waits.
+- **068**: every old path redirects; HUD/tab bar/stage/sheet contracts in
+  the phone lane; `lint:ink` clean on chrome inks; desktop shows one
+  centred column under the same chrome.
+- **069**: refill/cap/spend/shadow tests; the HUD figure decrements on a
+  review and reconciles; `CREDITS_ENFORCE=1` locally shows the closed gate
+  at 0 and the run-out sheet; nothing about a purchase is visible.
+- **070–074**: each screen pinned against its artboard at 390 px (computed-
+  style contracts, the `AnalyzerScreen.mockup` pattern); existing suites
+  re-pinned rather than deleted; the level sheets' figures match
+  `seed_known`'s counts.
+- **075**: the boarding suite; a fresh account boards, gets 30 credits, a
+  seeded level, a printed pass, and lands at the gate; `/dev/onboarding`
+  replays it.
+- **076**: `npm run cap:sync && npx cap run android` — the 076.5 checklist.
+- **077**: tag → green workflow → AAB in the closed test and a TestFlight
+  build; repeat the checklist from the store builds.

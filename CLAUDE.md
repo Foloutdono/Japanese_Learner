@@ -33,9 +33,10 @@ runtime purpose. Two consequences worth knowing:
 - **Plan numbers are cited in source comments** (e.g. "Plan 034" in
   `PassageLine.browser.test.jsx`), so they must never be reused.
 - **`git ls-tree HEAD plans/` under-reports which numbers are taken**, because
-  earlier plan files were lost to a working-tree cleanup. Numbers **001–045**
-  are used. When starting a new wave, begin at **046** or higher, and check
-  `plans/README.md` if it is present on disk.
+  earlier plan files were lost to a working-tree cleanup. Numbers **001–077**
+  are used (wave 14, the mobile release, spends 064–077). When starting a new
+  wave, begin at **078** or higher, and check `plans/README.md` — its wave
+  index is the only authority on which numbers are spent.
 
 ## Commands
 
