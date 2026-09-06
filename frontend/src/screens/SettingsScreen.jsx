@@ -170,13 +170,21 @@ export default function SettingsScreen({ session }) {
                   </span>
                 </div>
               )}
+              <div className="settings-row">
+                <span className="settings-row__label">{t.privacyPolicy}</span>
+                <a className="btn-secondary" href="/privacy.html" target="_blank" rel="noreferrer">{t.privacyPolicy}</a>
+              </div>
               <div className="settings-row settings-row--danger">
                 <span className="settings-row__label">{t.signOutDesc}</span>
                 {/* Filled danger per the standing ruling on this exact
                     button (see .settings-signout) — the artboard's
                     pass-ink fill loses to a measured 2.11:1 outline
                     already tried and rejected here. */}
-                <button type="button" className="btn-primary settings-signout" onClick={() => supabase.auth.signOut()}>
+                {/* `local` scope: this is "sign out of this device", which
+                    is what the row says. The default `global` also revokes
+                    the learner's other devices — signing out of a phone
+                    must not log the laptop out too. */}
+                <button type="button" className="btn-primary settings-signout" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
                   {t.signOut}
                 </button>
               </div>
@@ -470,6 +478,32 @@ function DataRows({ t, session }) {
   const [arming, setArming] = useState(false)
   const [resetting, setResetting] = useState(false)
   const [resetState, setResetState] = useState(null) // 'done' | 'failed' | null
+  const [armingDelete, setArmingDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteFailed, setDeleteFailed] = useState(false)
+
+  // The account, erased (plan 066). Both stores require it in the app;
+  // DELETE /api/account removes every row and then the Supabase user
+  // (routes/account.py has the order and the reasons). On success this
+  // device's session is the last thing standing and it is dead: signed
+  // out with `local` scope, because a server-side sign-out would be
+  // for a user that no longer exists, and App's auth listener lands on
+  // the sign-in screen either way. On failure the row says so and stays
+  // armed-off — the message has to be honest in both failure modes
+  // (nothing happened; the data is gone but the sign-in remains), so
+  // it asks for a retry, which is idempotent.
+  async function deleteAccount() {
+    setDeleting(true)
+    setDeleteFailed(false)
+    try {
+      await apiJson('/api/account', session, { method: 'DELETE' })
+      await supabase.auth.signOut({ scope: 'local' })
+    } catch {
+      setDeleteFailed(true)
+      setDeleting(false)
+      setArmingDelete(false)
+    }
+  }
 
   async function exportCsv() {
     setExporting(true)
@@ -519,7 +553,7 @@ function DataRows({ t, session }) {
           <span className="stg-hint">{t.settingsResetHint}</span>
         </span>
         {!arming && (
-          <button type="button" className="stg-danger-btn" onClick={() => { playClick(); setArming(true) }}>
+          <button type="button" className="stg-danger-btn" data-action="reset" onClick={() => { playClick(); setArming(true) }}>
             {t.settingsResetBtn}
           </button>
         )}
@@ -540,6 +574,32 @@ function DataRows({ t, session }) {
       )}
       {resetState === 'failed' && (
         <div className="settings-row"><span className="onb-error" role="alert">{t.onbPassError}</span></div>
+      )}
+
+      <div className="settings-row settings-row--danger stg-row--wrap">
+        <span className="settings-row__label">
+          {t.settingsDeleteAccount}
+          <span className="stg-hint">{t.settingsDeleteAccountHint}</span>
+        </span>
+        {!armingDelete && (
+          <button type="button" className="stg-danger-btn" data-action="delete-account" onClick={() => { playClick(); setArmingDelete(true) }}>
+            {t.settingsDeleteAccountBtn}
+          </button>
+        )}
+        {armingDelete && (
+          <span className="stg-confirm">
+            <span className="stg-confirm__q" role="alert">{t.settingsDeleteAccountConfirmQ}</span>
+            <button type="button" className="stg-danger-btn" data-action="delete-account-confirm" disabled={deleting} onClick={deleteAccount}>
+              {deleting ? '…' : t.settingsDeleteAccountYes}
+            </button>
+            <button type="button" className="btn-secondary" disabled={deleting} onClick={() => setArmingDelete(false)}>
+              {t.cancel}
+            </button>
+          </span>
+        )}
+      </div>
+      {deleteFailed && (
+        <div className="settings-row"><span className="onb-error" role="alert">{t.settingsDeleteAccountFailed}</span></div>
       )}
     </>
   )

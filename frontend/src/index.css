@@ -12528,6 +12528,17 @@ textarea:focus-visible {
   font-size: 0.8rem;
   margin-top: 24px;
 }
+/* The policy link under the tip: a quiet line, not a button — the
+   footer already carries the one call to action. */
+.landing-footer__legal {
+  display: inline-block;
+  margin-top: var(--sp-4);
+  font-size: var(--fs-caption);
+  color: var(--text-on-panel-soft); /* the footer is sumi */
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 
 /* ── Auth screen ──────────────────────────────────────────── */
 .auth-screen {

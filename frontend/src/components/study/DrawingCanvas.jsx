@@ -3,8 +3,7 @@ import { useLang } from '../../LangContext'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { playClick } from '../../lib/audio'
 import { UndoIcon, CheckIcon } from '../ui/Icons'
-
-const API_BASE = ''  // same-origin, always — see lib/api.js
+import { api } from '../../lib/origin'
 
 // The board stays a fixed sumi slab: it's the writing surface, and it
 // has to stay dark enough for pale ink in either theme.
@@ -52,7 +51,7 @@ function applyBrush(ctx) {
 // string. See StrokeRef for why that distinction is load-bearing.
 function charToSvgUrl(char) {
   const codepoint = char.codePointAt(0).toString(16).padStart(5, '0')
-  return `${API_BASE}/kanjivg/${codepoint}.svg`
+  return api(`/kanjivg/${codepoint}.svg`)
 }
 
 // ── Shared canvas drawing logic ───────────────────────────

@@ -22,6 +22,7 @@ load_dotenv(Path(__file__).parent / ".env")
 
 from fastapi import FastAPI                                      # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware               # noqa: E402
+from fastapi.middleware.gzip import GZipMiddleware               # noqa: E402
 from fastapi.staticfiles import StaticFiles                      # noqa: E402
 
 from routes.kana            import router as kana_router         # noqa: E402
@@ -44,6 +45,7 @@ from routes.video           import router as video_router
 from routes.ocr             import router as ocr_router
 from routes.onboarding      import router as onboarding_router
 from routes.journey         import router as journey_router
+from routes.account         import router as account_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -69,7 +71,20 @@ app.mount(
 # ever being hardcoded into the deployed list. Unset, which is the
 # case in production, this is exactly the single-origin list it has
 # always been.
-CORS_ORIGINS = ["https://japanese-learner-seven.vercel.app"] + [
+#
+# The native shell's own WebView origins (plan 066, ADR 0008) — hardcoded
+# like the Vercel origin rather than fed through CORS_ORIGINS: they are
+# what the shipped app IS, not a per-machine allowance, and a dashboard
+# variable is exactly the invisible state the 2026-09-01 outage taught
+# this repo to avoid. Neither is reachable by a browser page an attacker
+# controls in any useful way — capacitor:// is not a navigable scheme,
+# https://localhost names the user's own machine — and auth is a bearer
+# header, never a cookie (allow_credentials stays off), so listing them
+# widens nothing. Starlette matches Origin by exact string, so the
+# scheme has to be spelled exactly as the WebView sends it.
+NATIVE_ORIGINS = ["capacitor://localhost", "https://localhost"]
+
+CORS_ORIGINS = ["https://japanese-learner-seven.vercel.app", *NATIVE_ORIGINS] + [
     o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()
 ]
 
@@ -79,6 +94,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# The translation maps (/api/translations/*) are the whole kanji and
+# vocab meaning tables, pulled on every cold load by
+# frontend/src/lib/translationCache.js, and nothing in front of this
+# process compresses them. On a phone that is the single largest
+# transfer of a session. Small responses stay as they are.
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 app.include_router(kana_router)
 app.include_router(vocab_router)
@@ -100,6 +122,7 @@ app.include_router(video_router)
 app.include_router(ocr_router)
 app.include_router(onboarding_router)
 app.include_router(journey_router)
+app.include_router(account_router)
 
 @app.get("/")
 def root():

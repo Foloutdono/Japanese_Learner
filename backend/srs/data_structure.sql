@@ -7,6 +7,11 @@
 -- place to read the whole schema at a glance. backend/tests/
 -- test_schema_declared.py keeps it honest: it fails if a table any
 -- module creates isn't declared here.
+--
+-- Every table declared here is also classified in routes/account.py —
+-- the learner's own rows (PLAN, erased by DELETE /api/account) or
+-- shared content (SHARED, never touched). tests/test_account.py fails
+-- when a table is declared here and classified in neither list.
 
 CREATE TABLE cards (
     id TEXT PRIMARY KEY

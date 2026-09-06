@@ -1,15 +1,32 @@
 import { supabase } from './supabase'
 
-// Same-origin, unconditionally. This used to resolve against
-// VITE_API_URL, until the deployed value pointed the browser straight
-// at onrender.com — a zone some mobile carriers cannot reach at all
-// (2026-09-01: every preflight died in transit) — and a leftover copy
-// of the variable in the Vercel dashboard silently out-prioritised the
-// tracked .env.production that had been emptied to fix it. The API is
-// reached through the app's own origin everywhere (Vite proxy in dev,
-// vercel.json rewrites in prod), so the knob only existed to
-// reintroduce the outage.
-export const api = (path) => path
+// Same-origin, unconditionally — on the web. This used to resolve
+// against VITE_API_URL, until the deployed value pointed the browser
+// straight at onrender.com — a zone some mobile carriers cannot reach
+// at all (2026-09-01: every preflight died in transit) — and a leftover
+// copy of the variable in the Vercel dashboard silently out-prioritised
+// the tracked .env.production that had been emptied to fix it. The API
+// is reached through the app's own origin everywhere (Vite proxy in
+// dev, vercel.json rewrites in prod), so a knob for the web build only
+// ever existed to reintroduce the outage.
+//
+// The one exception is the native shell (plan 066, ADR 0008). A
+// WebView's own origin is capacitor://localhost on iOS and
+// https://localhost on Android, and it serves nothing but the bundle,
+// so there the app needs an absolute origin — the VERCEL one, so the
+// rewrite proxy stays in the path and no build ever talks to
+// onrender.com. It is set only by .env.native (`vite build --mode
+// native`); vite.config.js refuses any other build that carries it,
+// which is what keeps a dashboard leftover from doing this again.
+//
+// Bundled assets (/sounds, /sprites) never pass through here: in the
+// shell they live inside the app and resolving them against the web
+// origin would fetch them over the network instead.
+//
+// The value itself lives in lib/origin.js (see there for why); this is
+// the name every backend caller imports.
+export { api } from './origin'
+import { api } from './origin'
 
 // ── 401 recovery ──────────────────────────────────────────────
 // A session the backend rejects used to be invisible: supabase-js

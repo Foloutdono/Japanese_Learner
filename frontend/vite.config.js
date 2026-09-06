@@ -3,7 +3,7 @@
 // every file browser globals only, and this config is the one file in
 // src reach that legitimately runs in Node.
 import process from 'node:process';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 
@@ -62,7 +62,24 @@ function browserProject(name, include, viewport) {
   };
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // The one knob the native shell has, refused everywhere else (ADR
+  // 0008). loadEnv merges process.env.VITE_* over the .env files —
+  // exactly the path a Vercel dashboard variable takes, and how a
+  // leftover one out-prioritised the tracked .env.production on
+  // 2026-09-01. `mode !== 'native'` rather than `=== 'production'`: a
+  // dev server carrying it would be just as wrong (dev is same-origin
+  // through the proxy below), and vitest's mode `test` never sets it.
+  const env = loadEnv(mode, process.cwd(), 'VITE_');
+  if (mode !== 'native' && env.VITE_API_ORIGIN) {
+    throw new Error(
+      `VITE_API_ORIGIN=${env.VITE_API_ORIGIN} is set in mode "${mode}". The web build is ` +
+      'same-origin by design (src/lib/origin.js, docs/adr/0008); the variable belongs to ' +
+      '.env.native alone. Remove it from the environment and from the Vercel dashboard.',
+    );
+  }
+
+  return {
   plugins: [react()],
   server: {
     // Vite does not read PORT on its own, and 5173 is only a default:
@@ -115,4 +132,5 @@ export default defineConfig({
       browserProject('phone', ['src/**/*.phone.test.{js,jsx}'], { width: 390, height: 844 }),
     ],
   },
+  };
 });

@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:native": "vite build --mode native --outDir dist-native",
     "lint": "eslint .",
     "lint:css": "node scripts/stylelint-ratchet.mjs",
     "lint:css:report": "stylelint \"src/**/*.css\"",

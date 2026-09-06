@@ -11,8 +11,7 @@ import { GlossList, firstGloss } from '../study/gloss'
 import { BoltIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { speakJapanese } from '../../lib/audio'
-
-const API_BASE = ''  // same-origin, always — see lib/api.js
+import { api } from '../../lib/origin'
 
 // Small round "1 2 3..." markers for JMdict sense numbers — used both
 // on the senses list itself and on each example sentence, so a reader
@@ -571,7 +570,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
               {entry.svg_url && (
                 <StrokeFrame
                   key={entry.svg_url}
-                  src={`${API_BASE}${entry.svg_url}`}
+                  src={api(entry.svg_url)}
                   notAvailableLabel={t.notAvailable}
                 />
               )}

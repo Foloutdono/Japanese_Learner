@@ -136,3 +136,10 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
   `.env.production` and silently rebaked the direct URL). A new backend static
   mount needs a matching rewrite in `vercel.json` (and in `vite.config.js`'s
   dev proxy).
+- The one exception is the native shell (Capacitor): its WebView origin is
+  `capacitor://localhost` / `https://localhost`, so `npm run build:native`
+  (`vite build --mode native`, output `dist-native/`) reads the tracked
+  `frontend/.env.native`, whose `VITE_API_ORIGIN` is the **Vercel** origin —
+  never Render — so the proxy stays in the path. `vite.config.js` refuses
+  any other mode that carries the variable; `backend/main.py` lists the two
+  WebView origins in CORS. See `docs/adr/0008-native-shells-reach-the-api-through-the-web-origin.md`.

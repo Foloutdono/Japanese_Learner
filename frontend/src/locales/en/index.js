@@ -1416,6 +1416,13 @@ const onboarding = {
   settingsResetConfirmQ: 'Erase everything? This cannot be undone.',
   settingsResetYes: 'Erase everything',
   settingsResetDone: 'Progress reset. The map starts fresh.',
+  settingsDeleteAccount: 'Delete your account',
+  settingsDeleteAccountHint: 'Erases everything — every review, deck, card, setting and your sign-in. Export first if you want to keep a copy.',
+  settingsDeleteAccountBtn: 'Delete',
+  settingsDeleteAccountConfirmQ: 'Delete your account and everything in it? This cannot be undone.',
+  settingsDeleteAccountYes: 'Delete my account',
+  settingsDeleteAccountFailed: 'The deletion could not be completed. Please try again.',
+  privacyPolicy: 'Privacy policy',
   settingsIssuedTo: 'Card issued to',
 
   // ── 行先 — the destination counter ────────────────────────

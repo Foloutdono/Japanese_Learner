@@ -132,6 +132,9 @@ export default function LandingScreen({ onContinue }) {
           {t.landingCta}
         </button>
         <p className="landing-footer__tip"><LightbulbIcon size={14} /> {t.tip}</p>
+        {/* A static page (public/privacy.html), reachable without a
+            session: both app stores want the policy at a plain URL. */}
+        <a className="landing-footer__legal" href="/privacy.html">{t.privacyPolicy}</a>
       </footer>
     </div>
   )

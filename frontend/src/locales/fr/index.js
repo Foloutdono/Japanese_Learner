@@ -1387,6 +1387,13 @@ const onboarding = {
   settingsResetConfirmQ: 'Tout effacer ? Impossible à annuler.',
   settingsResetYes: 'Tout effacer',
   settingsResetDone: 'Progression réinitialisée. La carte repart de zéro.',
+  settingsDeleteAccount: 'Supprimer votre compte',
+  settingsDeleteAccountHint: 'Efface tout — chaque révision, paquet, carte, réglage et votre identifiant de connexion. Exportez d\'abord si vous voulez garder une copie.',
+  settingsDeleteAccountBtn: 'Supprimer',
+  settingsDeleteAccountConfirmQ: 'Supprimer votre compte et tout ce qu\'il contient ? Impossible à annuler.',
+  settingsDeleteAccountYes: 'Supprimer mon compte',
+  settingsDeleteAccountFailed: 'La suppression n\'a pas pu aboutir. Réessayez.',
+  privacyPolicy: 'Politique de confidentialité',
   settingsIssuedTo: 'Carte émise à',
 
   // ── 行先 — le guichet des destinations ─────────────────────

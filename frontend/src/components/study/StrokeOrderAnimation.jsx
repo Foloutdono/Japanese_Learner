@@ -34,6 +34,10 @@ export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, 
     if (!src) return
     const controller = new AbortController()
     setSvgText(null)
+    // `src` arrives already resolved through lib/api's api() by both
+    // callers (DrawingCanvas, DictionaryDetail) — this is a fetch, not
+    // an <img>, so in the native shell it is CORS-checked against the
+    // web origin like any API call.
     fetch(src, { signal: controller.signal })
       .then(r => (r.ok ? r.text() : Promise.reject(new Error('not ok'))))
       .then(setSvgText)

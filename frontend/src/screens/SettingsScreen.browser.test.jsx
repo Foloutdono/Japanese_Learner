@@ -21,6 +21,8 @@ import '../index.css'
 //      more steps.
 
 const apiJson = vi.fn()
+// Hoisted like apiJson: the delete-account test asserts the sign-out's scope.
+const signOut = vi.fn(async () => {})
 const apiFetch = vi.fn()
 
 vi.mock('../lib/api', () => ({
@@ -37,7 +39,7 @@ vi.mock('../lib/supabase', () => ({
     auth: {
       getSession: async () => ({ data: { session: { access_token: 'tok' } } }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
-      signOut: async () => {},
+      signOut: (...a) => signOut(...a),
     },
   },
 }))
@@ -246,6 +248,28 @@ describe('SettingsScreen — the counter', () => {
     const call = apiJson.mock.calls.find(c => c[0] === '/api/stats/reset')
     expect(call).toBeTruthy()
     expect(call[2].method).toBe('DELETE')
+  })
+
+  it('deleting the account is two-step too, then signs this device out locally', async () => {
+    const screen = await mount()
+    await settle()
+    const root = screen.container
+    root.querySelector('[data-id="data"]').click()
+    await settle(30)
+
+    root.querySelector('[data-action="delete-account"]').click()
+    await settle(30)
+    expect(root.querySelector('[data-action="delete-account-confirm"]')).toBeTruthy()
+    expect(apiJson.mock.calls.some(c => c[0] === '/api/account')).toBe(false)
+    // Arming the deletion never touches the reset's own confirm.
+    expect(root.querySelector('[data-action="reset"]')).toBeTruthy()
+
+    root.querySelector('[data-action="delete-account-confirm"]').click()
+    await settle(30)
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/account')
+    expect(call).toBeTruthy()
+    expect(call[2].method).toBe('DELETE')
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' })
   })
 
   it('the quiet preset silences exactly the station theatre', async () => {

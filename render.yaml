@@ -5,6 +5,14 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    # GET / is the smoke route (main.py); with it named here Render
+    # restarts a wedged instance instead of routing to it.
+    healthCheckPath: /
+    # Not `plan: starter` yet — a paid tier is the owner's call. On the
+    # free tier the instance sleeps after 15 idle minutes and a cold
+    # start takes 30–60 s, which on a phone is the first thing every
+    # visit feels; the frontend's boot wait says so honestly
+    # (AppLoading), but only a plan that stays up fixes it.
     disk:
       name: srs-data
       mountPath: /data

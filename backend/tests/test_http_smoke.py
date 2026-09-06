@@ -47,3 +47,33 @@ def test_today_queue_responds_for_fresh_user(client):
     assert response.status_code == 200
     body = response.json()
     assert isinstance(body, dict)
+
+
+# ── CORS — the native shell's own origins (plan 066) ─────────────
+# Starlette matches Origin by exact string, so the two WebView origins
+# have to be spelled exactly as Capacitor sends them. A preflight is
+# what the first /api call from the shell does; the echo below is what
+# lets it through.
+import pytest
+
+
+@pytest.mark.parametrize("origin", ["capacitor://localhost", "https://localhost"])
+def test_native_origins_pass_the_cors_preflight(client, origin):
+    response = client.options(
+        "/api/profile",
+        headers={
+            "Origin": origin,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "authorization,content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == origin
+
+
+def test_an_unknown_origin_is_not_echoed(client):
+    response = client.options(
+        "/api/profile",
+        headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "GET"},
+    )
+    assert response.headers.get("access-control-allow-origin") is None
