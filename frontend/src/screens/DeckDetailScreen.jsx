@@ -5,7 +5,7 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
 import { StationHeader } from '../components/station/StationHeader'
-import EmptyState from '../components/ui/EmptyState'
+import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
 import BrowseCardsMenu from '../components/decks/BrowseCardsMenu'
@@ -302,7 +302,7 @@ export default function DeckDetailScreen({ session }) {
       .then(data => { setCards(data.cards || []); setLoading(false) })
       // Same fix as DecksScreen's fetchDecks — a failed request used
       // to leave `loading` true forever instead of settling into the
-      // (empty) card list / EmptyState.
+      // (empty) card list / Empty.
       .catch(() => setLoading(false))
   }
 
@@ -655,7 +655,7 @@ export default function DeckDetailScreen({ session }) {
         {loading && <Loading />}
 
         {!loading && cards.length === 0 && !adding && (
-          <EmptyState icon={<CardIcon size={40} />} message={t.noCards} hint={t.addFirstCard} />
+          <Empty icon={<CardIcon size={40} />} message={t.noCards} hint={t.addFirstCard} />
         )}
 
         {/* Cards list */}

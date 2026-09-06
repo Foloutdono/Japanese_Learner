@@ -5,7 +5,7 @@ import { playUi } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
 import { CardTransition } from '../components/study/CardTransition'
 import { CHOICE_KEY_INDEX } from '../domain/choiceKeys'
-import EmptyState from '../components/ui/EmptyState'
+import Empty from '../components/ui/Empty'
 import { getExam, flattenQuestions, submitAttempt } from '../exam/examService'
 import { paperTitle } from '../exam/examKinds'
 import QuestionRenderer from '../exam/QuestionRenderer'
@@ -310,7 +310,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
       <div className="screen">
         <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
         <main id="main-content" className="container exam-shell">
-          <EmptyState
+          <Empty
             icon={<PageIcon size={40} />}
             message={t.examLoadFailed}
             hint={retryAfter > 0 ? t.examLoadFailedCooldown(waitMinutes) : t.examLoadFailedHint}
@@ -326,7 +326,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
       <div className="screen">
         <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
         <main id="main-content" className="container exam-shell">
-          <EmptyState
+          <Empty
             icon={<PageIcon size={40} />}
             message={t.examSectionEmpty}
             action={{ label: t.examBackToExams, onClick: () => navigate('/exam') }}

@@ -40,6 +40,7 @@ import ExamScreen from './screens/ExamScreen'
 import ExamRunner from './screens/ExamRunner'
 import ExamResult from './screens/ExamResult'
 import TranslationScreen from './screens/TranslationScreen'
+import AppLoading from './screens/AppLoading'
 
 // Renders nothing — keeps <html lang> and document.title in step with
 // the current route and language. Beside <Routes/> rather than inside
@@ -146,12 +147,13 @@ export default function App() {
     )
   }
 
+  // The two waits below are the same screen (screens/AppLoading.jsx,
+  // plan 067). Only the second asks for the "waking the server" line:
+  // this one is Supabase reading its own storage, never a round trip.
   if (session === undefined) {
     return (
       <LangProvider>
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ color: 'var(--text-secondary)' }}>Chargement...</div>
-        </div>
+        <AppLoading />
       </LangProvider>
     )
   }
@@ -167,14 +169,14 @@ export default function App() {
   }
 
   // Signed in, but the profile hasn't answered "onboarded?" yet — the
-  // same centered wait as the session check above, for the same reason:
+  // same wait as the session check above, for the same reason:
   // flashing the wrong screen for 200ms is worse than a beat of quiet.
+  // This is the request a sleeping backend holds for 30–60 s, so the
+  // screen says so after a few seconds (see the 45 s gate above).
   if (onboarding === undefined) {
     return (
       <LangProvider>
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ color: 'var(--text-secondary)' }}>Chargement...</div>
-        </div>
+        <AppLoading wakesServer />
       </LangProvider>
     )
   }

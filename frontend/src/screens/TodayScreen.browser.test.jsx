@@ -156,7 +156,7 @@ describe('TodayScreen — the primary button (plan 051)', () => {
 // GET /api/today with `setSummary(null)`, the exact same null the
 // screen starts in: a network blip and "still loading" were the same
 // state, forever, with no error and no retry. `summaryError` now tells
-// the two apart on the picker side, reusing SessionError/EmptyState
+// the two apart on the picker side, reusing SessionError/Empty
 // (the queue side's own error surface) rather than a new component.
 describe('TodayScreen — a rejected /api/today (plan 051)', () => {
   it('renders the error branch with a retry, not a permanent spinner', async () => {
@@ -176,11 +176,11 @@ describe('TodayScreen — a rejected /api/today (plan 051)', () => {
     await settle(200)
 
     // The error surface, not the spinner it used to be stuck on.
-    expect(screen.container.querySelector('.quiz-loading')).toBeNull()
-    const empty = screen.container.querySelector('.empty-state')
+    expect(screen.container.querySelector('.loading')).toBeNull()
+    const empty = screen.container.querySelector('.empty')
     expect(empty, `no error branch in DOM — page: ${screen.container.textContent.slice(0, 300)}`).toBeTruthy()
 
-    const retryBtn = empty.querySelector('.empty-state__action')
+    const retryBtn = empty.querySelector('.empty__action')
     expect(retryBtn).toBeTruthy()
 
     // A retry that succeeds moves the picker past the error branch --
@@ -192,8 +192,8 @@ describe('TodayScreen — a rejected /api/today (plan 051)', () => {
     retryBtn.click()
     await settle(200)
 
-    expect(screen.container.querySelector('.empty-state')).toBeNull()
-    expect(screen.container.querySelector('.quiz-loading')).toBeNull()
+    expect(screen.container.querySelector('.empty')).toBeNull()
+    expect(screen.container.querySelector('.loading')).toBeNull()
     expect(screen.container.querySelector('.btn-primary')).toBeTruthy()
   })
 })

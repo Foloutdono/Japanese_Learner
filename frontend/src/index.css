@@ -7720,7 +7720,6 @@ textarea:focus-visible {
   z-index: 1;
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
 }
-.today-picker__go:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 
 /* Lane rows used to scroll AROUND the sticky button -- visible in the
    clearance below it and in the gap above its top edge, which reads as
@@ -8663,15 +8662,21 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 /* One disabled treatment for the family, not the eight now in use --
-   Controls.dc.html's note under the specimen board. It sits last so it
-   wins over both variants' own states, and so stylelint's
+   Controls.dc.html's note under the specimen board, and the states
+   sheet's "the closed gate keeps its shape" (plan 067): opacity 0.45
+   and nothing else -- no fill change, no lift, no shadow. .btn-depart
+   joins the family here; .chip and .tab join in plan 068. It sits last
+   so it wins over each variant's own states, and so stylelint's
    no-descending-specificity sees each base selector before its
    pseudo-class. */
+.btn-depart:disabled,
 .btn-primary:disabled,
 .btn-secondary:disabled {
   opacity: 0.45;
   cursor: not-allowed;
   filter: none;
+  box-shadow: none;
+  transform: none;
 }
 
 /* ── Ghost / panel button utilities ──────────────────────── */
@@ -10957,57 +10962,67 @@ textarea:focus-visible {
   gap: 8px;
 }
 
-/* An ensō (円相) — the single-stroke ink circle of Zen calligraphy —
-   standing in for a plain "Loading…" spinner. Draws itself open,
-   fades, and closes again on a slow loop while turning, rather than
-   the flat text label the app had before. */
-.quiz-loading {
+/* ── 待合 — the wait (plan 067) ──────────────────────────────
+   The canvas's states sheet: three gold dots, no spinner. The rest
+   state is the sheet's own (.35 / .7 / 1) and is what reduced motion
+   draws; under motion the three breathe in turn. Drawn by
+   components/ui/Loading.jsx — the ensō ring this replaces was a
+   second visual language for the same moment. */
+.loading {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-7);
   color: var(--text-secondary);
-  text-align: center;
-  padding: 40px;
 }
-
-.quiz-loading__ensor {
-  width: 40px;
-  height: 40px;
-  overflow: visible;
+/* A class on the <i>, not the bare element the mockup writes: three
+   other blocks end their selectors in a bare `i` (.jour-track__*),
+   and stylelint's no-descending-specificity would read every one of
+   them against `.loading > i:nth-child(2)`. */
+.loading__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--accent2);
+  opacity: 0.35;
+  animation: loading-breathe 1.4s ease-in-out infinite;
 }
-
-.quiz-loading__ensor-circle {
-  stroke: var(--accent);
-  stroke-dasharray: 119;
-  transform-origin: 24px 24px;
-  animation:
-    ensor-draw 1.8s ease-in-out infinite,
-    ensor-spin 2.6s linear infinite;
-}
-
-@keyframes ensor-draw {
-  0%   { stroke-dashoffset: 119; opacity: 0.25; }
-  50%  { stroke-dashoffset: 24;  opacity: 1; }
-  100% { stroke-dashoffset: 119; opacity: 0.25; }
-}
-
-@keyframes ensor-spin {
-  to { transform: rotate(360deg); }
-}
-
-.quiz-loading__text {
-  font-size: 13px;
-  letter-spacing: 0.02em;
-}
-
+/* Before the :nth-child rules on purpose (the same guard reads source
+   order): those set only the rest opacity and a delay, so
+   `animation: none` here still holds. */
 @media (prefers-reduced-motion: reduce) {
-  .quiz-loading__ensor-circle {
-    animation: none;
-    stroke-dashoffset: 30;
-    opacity: 0.8;
-  }
+  .loading__dot { animation: none; }
 }
+.loading__dot:nth-child(2) { opacity: 0.7; animation-delay: 0.2s; }
+.loading__dot:nth-child(3) { opacity: 1; animation-delay: 0.4s; }
+@keyframes loading-breathe {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+/* The sentence a long wait owes ("Writing your exam…"), under the dots. */
+.loading__copy {
+  flex-basis: 100%;
+  margin-top: var(--sp-2);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+/* In a slot — the console's count, a notice line: no padding, and the
+   copy sits beside the dots. */
+.loading--inline {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  padding: 0;
+  vertical-align: middle;
+}
+.loading--inline .loading__copy {
+  flex-basis: auto;
+  margin-top: 0;
+  margin-left: var(--sp-2);
+}
+/* Inside a card (the gate, waiting), at the card's rhythm. */
+.loading--tight { padding: var(--sp-4); }
 
 /* Plan 049 -- tracks the same column as the card below it (--card-w,
    defined on :root, see its own comment there) rather than its own
@@ -12659,7 +12674,8 @@ textarea:focus-visible {
   margin-bottom: 40px;
 }
 
-.auth-header__glyph {
+.auth-header__glyph,
+.app-loading__sign {
   font-family: var(--font-jp);
   font-size: 4rem;
   color: var(--accent);
@@ -12671,6 +12687,43 @@ textarea:focus-visible {
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: 1.25rem;
+}
+
+/* ── 待合室 — the boot screen (plan 067) ─────────────────────
+   screens/AppLoading.jsx: the sign (the auth screen's own glyph, one
+   rule above) over the dots on the page ground, under the notch,
+   before the app knows who is here. The note under the dots is empty
+   until the server has kept the learner waiting (WAKE_AFTER_MS), then
+   says so. */
+.app-loading {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-7) var(--sp-5);
+  padding-top: calc(var(--safe-top) + var(--sp-7));
+  padding-bottom: calc(var(--safe-bottom) + var(--sp-7));
+  background: var(--bg-main);
+  color: var(--text-primary);
+  text-align: center;
+}
+.app-loading__note {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--sp-3);
+  min-height: 1.5em;
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.app-loading__note-jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
 }
 
 .auth-card {
@@ -15115,14 +15168,6 @@ textarea:focus-visible {
    with the family's geometry, hit target and 0.45 disabled opacity
    instead of its own 0.6. */
 
-/* ── Shared loading block ─────────────────────────────────── */
-.loading-block {
-  text-align: center;
-  color: var(--text-secondary);
-  padding: 60px;
-}
-.loading-block--lg { padding: 80px; }
-
 /* ── Decks screen ─────────────────────────────────────────── */
 
 /* ── 目録 — the shelf's index ──────────────────────────────
@@ -17078,7 +17123,6 @@ textarea:focus-visible {
   color: var(--text-secondary);
   margin-bottom: 6px;
 }
-.trn-analysis-loading,
 .trn-analysis-unavailable { font-size: 14px; color: var(--text-secondary); font-style: italic; }
 .trn-analysis-text { font-size: 15px; color: var(--text-primary); line-height: 1.6; }
 
@@ -17096,7 +17140,6 @@ textarea:focus-visible {
 
 /* ── Reading comprehension screen ─────────────────────────── */
 .comp-loading-wrap { padding: 80px; text-align: center; }
-.comp-loading-text { color: var(--text-secondary); margin-top: 16px; font-size: 14px; }
 
 .comp-error-page { padding: 40px; text-align: center; }
 .comp-error-card { padding: 24px; color: var(--danger); }
@@ -17489,15 +17532,33 @@ textarea:focus-visible {
   min-height: 220px;
 }
 
-/* ── EmptyState component ─────────────────────────────────── */
-.empty-state { text-align: center; color: var(--text-secondary); padding: 60px; }
-/* Icon prop is a real <Icon/> SVG now, not an emoji character — center
-   it as a block instead of relying on text-align/line-height tuned
-   for a glyph. */
-.empty-state__icon { display: flex; justify-content: center; color: var(--text-secondary); opacity: 0.7; margin-bottom: 16px; }
-.empty-state__message { font-size: 15px; }
-.empty-state__hint { font-size: 13px; margin-top: 8px; }
-.empty-state__action { background: var(--accent); color: var(--text-on-panel); margin-top: 20px; }
+/* ── 空 — the empty state, and the error (plan 067) ──────────
+   The states sheet: an icon slot, a serif message, one hint, at most
+   one secondary action, on the surface. The error is the same object
+   with its border and icon gone toward --danger. Drawn by
+   components/ui/Empty.jsx. */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-7) var(--sp-5);
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.empty__icon { display: flex; color: var(--text-secondary); }
+.empty__icon svg { width: 28px; height: 28px; }
+.empty__msg {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+}
+.empty__hint { font-size: var(--fs-sm); color: var(--text-secondary); }
+.empty__action { margin-top: var(--sp-2); }
+.empty--error { border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
+.empty--error .empty__icon { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
 
 /* ── ImportCardsMenu component ────────────────────────────── */
 .import-overlay {
@@ -17781,8 +17842,8 @@ textarea:focus-visible {
     transition: padding-top 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
   }
   .quiz-area > .quiz-done,
-  .quiz-area > .quiz-loading,
-  .quiz-area > .empty-state { margin-block: auto; }
+  .quiz-area > .loading,
+  .quiz-area > .empty { margin-block: auto; }
   .quiz-area > .quiz-card-stage {
     flex: 1 0 auto;
     display: flex;

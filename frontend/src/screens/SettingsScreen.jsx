@@ -6,7 +6,8 @@ import { apiFetch, apiJson } from '../lib/api'
 import { playClick, playUi, playToggle, setVolume, useVolumes, DEFAULT_VOLUMES } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
 import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components/ui/NavControls'
-import { useProfileSummary, refreshSummary } from '../stores/profileSummary'
+import { useProfileSummaryState, refreshSummary } from '../stores/profileSummary'
+import { Loading } from '../components/ui/Loading'
 import { useRatingScale, setRatingScale } from '../stores/ratingScale'
 import { RATING_SCALES, ratingButtons } from '../domain/ratingScales'
 import PlacementTest from '../components/onboarding/PlacementTest'
@@ -277,7 +278,7 @@ function SoundPresets({ t }) {
 // their whole range at once: the level as the wall map's own five-stop
 // strip, the pace as the onboarding's 種別 ladder.
 function LearningRows({ t, session }) {
-  const summary = useProfileSummary()
+  const { summary, failed: summaryFailed } = useProfileSummaryState()
   const [saving, setSaving] = useState(false)
   const [failed, setFailed] = useState(false)
   const [testing, setTesting] = useState(false)
@@ -295,6 +296,12 @@ function LearningRows({ t, session }) {
   const currentLevel = summary?.jlptLevel ?? ''
   const currentPace = summary?.dailyNewTarget ?? ''
   const knownPace = PACES.some(p => p.perDay === currentPace)
+
+  // The wait, drawn (plan 067): three dots until the summary answers,
+  // instead of a level strip with no stop lit and a pace with nothing
+  // on. A refused fetch still shows the controls — they work without
+  // the summary, and a save refreshes it.
+  if (!summary && !summaryFailed) return <Loading />
 
   return (
     <>

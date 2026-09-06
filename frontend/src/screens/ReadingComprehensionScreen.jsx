@@ -151,10 +151,9 @@ export default function ReadingComprehensionScreen({ session }) {
       <div className="screen">
         <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} autoHide />
         <main id="main-content" className="comp-loading-wrap">
-          <Loading />
-          <div className="comp-loading-text">
-            {t.comprehensionGenerating}
-          </div>
+          {/* A long wait (the text is written on demand) owes a
+              sentence; the dots carry it (plan 067). */}
+          <Loading copy={t.comprehensionGenerating} />
         </main>
       </div>
     )

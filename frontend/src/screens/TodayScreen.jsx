@@ -6,7 +6,7 @@ import { playUi } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
 import { StationHeader } from '../components/station/StationHeader'
 import { Loading } from '../components/ui/Loading'
-import EmptyState from '../components/ui/EmptyState'
+import Empty from '../components/ui/Empty'
 import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
@@ -521,7 +521,7 @@ export default function TodayScreen({ session }) {
           </div>
 
           {filteredLanes.length === 0 && (
-            <EmptyState
+            <Empty
               message={t.todayNoMatch}
               hint={t.todayNoMatchHint}
               action={{ label: t.todayClearFilters, onClick: clearLaneFilters }}

@@ -59,6 +59,9 @@ const nav = {
   edit:              'Edit',
   close:             'Close',
   loading:           'Loading...',
+  waitingServer:     'Waking the server…',
+  errorTitle:        'That did not work',
+  errorHint:         'Check your connection — your progress is safe.',
   import:            'Import',
   export:            'Export',
   exportFailed:      'Export failed',
@@ -774,8 +777,6 @@ const dictionary = {
   examples:          'Examples',
   level:             'Level',
   listen:            'Listen',
-  loadingDictionary: 'Loading...',
-  loadingMore:       'Loading more...',
   displayedKanji:    'kanji displayed',
     radical:           'Radical',
   // Additional dictionary keys used by screens
@@ -897,7 +898,6 @@ const misc = {
   mode_fast_review:                'Fast review',
   mode_fast_review_desc:           'Flip through what you have already studied. Nothing is graded.',
   retry:              'Try again',
-  sessionLoadFailed:  "Couldn't load your cards.",
 }
 
 // ── Profile ───────────────────────────────────────────────

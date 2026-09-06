@@ -487,9 +487,7 @@ function SessionView({
                     {t.aiAnalysis ?? 'AI analysis'}
                   </div>
                   {analysisLoading && (
-                    <div className="trn-analysis-loading">
-                      {t.analyzingTranslation ?? 'Analyzing your translation…'}
-                    </div>
+                    <Loading inline copy={t.analyzingTranslation} />
                   )}
                   {!analysisLoading && analysis && (
                     <div className="trn-analysis-text">{analysis}</div>

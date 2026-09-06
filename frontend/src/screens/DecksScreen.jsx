@@ -5,7 +5,7 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
 import { StationHeader } from '../components/station/StationHeader'
-import EmptyState from '../components/ui/EmptyState'
+import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import { deckTypes, deckTypeOf } from '../components/decks/deckTypes'
 import { TrashIcon, PencilIcon, PlayIcon, BooksIcon, CrossIcon, SearchIcon } from '../components/ui/Icons'
@@ -48,7 +48,7 @@ export default function DecksScreen({ session }) {
       .then(data => { setDecks(data.decks || []); setLoading(false) })
       // Without this, a failed/unreachable request left `loading` true
       // forever — the spinner just spun with no way out. Falls back to
-      // an empty list (→ the "no decks yet" EmptyState) instead.
+      // an empty list (→ the "no decks yet" Empty) instead.
       .catch(() => setLoading(false))
   }
 
@@ -230,7 +230,7 @@ export default function DecksScreen({ session }) {
         {loading && <Loading />}
 
         {!loading && decks.length === 0 && (
-          <EmptyState icon={<BooksIcon size={40} />} message={t.noDecks} hint={t.createFirstDeck} />
+          <Empty icon={<BooksIcon size={40} />} message={t.noDecks} hint={t.createFirstDeck} />
         )}
 
         {/* An empty SHELF and an empty RESULT are different situations
@@ -238,7 +238,7 @@ export default function DecksScreen({ session }) {
             with two decks sitting behind a filter, was simply untrue.
             This one offers the way out instead of advice. */}
         {!loading && decks.length > 0 && shown.length === 0 && (
-          <EmptyState
+          <Empty
             icon={<BooksIcon size={40} />}
             message={t.decksNoMatch}
             hint={t.decksNoMatchHint}

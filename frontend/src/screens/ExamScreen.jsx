@@ -8,7 +8,7 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import { Loading } from '../components/ui/Loading'
-import EmptyState from '../components/ui/EmptyState'
+import Empty from '../components/ui/Empty'
 import { listExams } from '../exam/examService'
 import { KIND_ORDER, kindMeta } from '../exam/examKinds'
 import { PageIcon } from '../components/ui/Icons'
@@ -64,7 +64,7 @@ export default function ExamScreen({ session }) {
           <SelectionScreen>
             {exams === null && <Loading />}
             {exams?.length === 0 && (
-              <EmptyState icon={<PageIcon size={40} />} message={t.examNoneAvailable} />
+              <Empty icon={<PageIcon size={40} />} message={t.examNoneAvailable} />
             )}
             {exams?.length > 0 && <LevelSelector onSelect={setLevel} />}
           </SelectionScreen>

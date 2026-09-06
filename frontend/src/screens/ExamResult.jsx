@@ -4,7 +4,7 @@ import { useLang } from '../LangContext'
 import { playUi, playCorrect } from '../lib/audio'
 import { TopBar } from '../components/ui/TopBar'
 import QuestionRenderer from '../exam/QuestionRenderer'
-import EmptyState from '../components/ui/EmptyState'
+import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import { flattenQuestions, getAttempt, getExam } from '../exam/examService'
 import { paperTitle } from '../exam/examKinds'
@@ -152,7 +152,7 @@ export default function ExamResult({ session }) {
       <div className="screen">
         <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
         <main id="main-content" className="container exam-shell">
-          <EmptyState
+          <Empty
             icon={<PageIcon size={40} />}
             message={t.examResultMissing}
             action={{ label: t.examBackToExams, onClick: () => navigate('/exam') }}

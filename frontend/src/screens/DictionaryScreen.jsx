@@ -15,6 +15,8 @@ import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { StageBadge } from '../components/study/StageBadge'
 import { ChevronIcon, SearchIcon } from '../components/ui/Icons'
+import { Loading } from '../components/ui/Loading'
+import Empty from '../components/ui/Empty'
 
 const LIMIT = 50
 
@@ -382,11 +384,11 @@ export default function DictionaryScreen({ session }) {
 						    reference tool you use all day should tell you how
 						    to reach it without the mouse. */}
 						<kbd className="dict-index-bar__key" aria-hidden="true">/</kbd>
-						{!loading && (
-							<div className="dict-index-bar__count">
-								{t.dictionaryResults(total)}
-							</div>
-						)}
+						{/* The count slot is where the wait shows (plan 067): the
+						    dots stand in for the figure until it exists. */}
+						<div className="dict-index-bar__count">
+							{loading ? <Loading inline /> : t.dictionaryResults(total)}
+						</div>
 					</div>
 				)}
 				</div>
@@ -515,7 +517,7 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 	}
 
 	if (loading || !groups) {
-		return <div className="quiz-loading">{t.loadingDictionary}</div>
+		return <Loading />
 	}
 
 	return (
@@ -625,16 +627,10 @@ function ResultsSection({
 
 	return (
 		<>
-			{loading && (
-				<div className="quiz-loading">
-					{t.loadingDictionary}
-				</div>
-			)}
+			{loading && <Loading />}
 
 			{!loading && results.length === 0 && (
-				<div className="quiz-loading">
-					{t.noResults} « {query} »
-				</div>
+				<Empty icon={null} message={`${t.noResults} « ${query} »`} />
 			)}
 
 			{!loading && results.length > 0 && (
@@ -674,7 +670,7 @@ function ResultsSection({
 						<div ref={sentinelRef} className="dict-sentinel">
 							{loadingMore && (
 								<div className="dict-sentinel__text">
-									{t.loadingMore}
+									<Loading inline />
 								</div>
 							)}
 							{!hasMore && results.length > 0 && (
@@ -819,13 +815,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 		return out
 	}, [byGroup])
 
-	if (loading) {
-		return (
-			<div className="quiz-loading">
-				{t.loadingDictionary}
-			</div>
-		)
-	}
+	if (loading) return <Loading />
 
 	return (
 		<div className="dict-layout">

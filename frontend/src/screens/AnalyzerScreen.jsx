@@ -608,7 +608,7 @@ export default function AnalyzerScreen({ session }) {
   // analysed, not failures, and used to be drawn in --danger alongside
   // a real error.
   const notices = []
-  if (busy) notices.push({ id: 'busy', tone: 'info', text: t[platform.busy] })
+  if (busy) notices.push({ id: 'busy', tone: 'info', text: t[platform.busy], wait: true })
   if (status === 'failed' && error) notices.push({ id: 'failed', tone: 'bad', text: error })
   if (passage?.windowCapped) notices.push({ id: 'capped', tone: 'info', text: t.windowCapped })
   if (passage?.truncated > 0) notices.push({ id: 'truncated', tone: 'info', text: t.passageTruncated(sentences.length) })

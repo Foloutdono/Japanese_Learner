@@ -1,3 +1,5 @@
+import { Loading } from '../ui/Loading'
+
 // ── 案内表示 — the notices under the intake ────────────────
 // Four hand-rolled status banners used to live in AnalyzerScreen's own
 // render: busy, failed, window-capped, and Passage-truncated. Two of
@@ -28,7 +30,10 @@
 
 // `t` is accepted for future callers (plan 037's dismiss control); every
 // notice already arrives with its text resolved, so the screen stays
-// the one place that maps state to copy.
+// the one place that maps state to copy. A notice with `wait` set is
+// work in progress, and the three dots sit beside its text (plan 067)
+// — the dots are decoration here, not a second live region: the
+// region below already announces the work.
 // eslint-disable-next-line no-unused-vars
 export function Notices({ notices = [], announcement, t }) {
   return (
@@ -38,6 +43,7 @@ export function Notices({ notices = [], announcement, t }) {
           key={n.id}
           className={`anl-panel anl-notice-line anl-notice-line--${n.tone}`}
         >
+          {n.wait && <Loading inline />}
           {n.text}
         </div>
       ))}

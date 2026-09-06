@@ -6,6 +6,7 @@ import { sectionFor } from '../../config/stations'
 import { LINE_COLOR } from '../../config/navLinks'
 import { beginDeparture } from '../../stores/departure'
 import { playAnnouncement } from '../../lib/audio'
+import { Loading } from '../ui/Loading'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
 // What NextService's strip grew into when the wall map replaced the
@@ -15,12 +16,15 @@ import { playAnnouncement } from '../../lib/audio'
 // everywhere you could go later — it just stopped being a single
 // line squeezed over a board that no longer exists.
 //
-// The same two manners carry over from the strip it replaces:
-// nothing is rendered while the first fetch is in flight or after it
-// failed (a broken gate shouting an error above the map would be
-// worse than its absence), and a cleared queue does not blank the
-// card — "next review in 3 hours" is what makes an empty gate read
-// as a finished day rather than a broken one.
+// Two manners carry over from the strip it replaces: nothing is
+// rendered after the fetch failed (a broken gate shouting an error
+// above the map would be worse than its absence — the hall's notice
+// line owns up instead), and a cleared queue does not blank the card
+// — "next review in 3 hours" is what makes an empty gate read as a
+// finished day rather than a broken one. The wait itself is drawn
+// (plan 067): the card's name over the three dots until /api/today
+// answers, so the phone's first screen never opens on a hole where
+// the gate will be.
 
 /** "in 3 hours" / "tomorrow", in the UI's language. */
 function untilNext(iso, lang) {
@@ -42,7 +46,20 @@ export default function GateCard({ today, failed }) {
   // first screen is card, count, button, map. Desktop never sees it.
   const [open, setOpen] = useState(false)
 
-  if (failed || !today) return null
+  if (failed) return null
+  if (!today) {
+    return (
+      <div className="gate-card gate-card--waiting" aria-busy="true">
+        <div className="gate-card__head">
+          <span className="gate-card__name">
+            <span className="gate-card__jp" lang="ja">改札</span>
+            <span className="gate-card__latin">{t.todayTitle}</span>
+          </span>
+        </div>
+        <Loading tight />
+      </div>
+    )
+  }
 
   const due = today.total ?? 0
   const when = untilNext(today.next_due, lang)

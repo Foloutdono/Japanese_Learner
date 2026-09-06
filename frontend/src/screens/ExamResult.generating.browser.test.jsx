@@ -72,7 +72,7 @@ describe('ExamResult with getExam\'s two shapes', () => {
 
     // The real assertion is that rendering completed at all -- before the
     // fix this threw during render and React unmounted the tree.
-    expect(screen.container.querySelector('.empty-state')).not.toBeNull()
+    expect(screen.container.querySelector('.empty')).not.toBeNull()
     expect(screen.container.querySelector('.exam-result-header')).toBeNull()
   })
 

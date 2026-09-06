@@ -9,6 +9,8 @@ import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageBadge } from '../study/StageBadge'
 import { GlossList, firstGloss } from '../study/gloss'
 import { BoltIcon } from '../ui/Icons'
+import { Loading } from '../ui/Loading'
+import Empty from '../ui/Empty'
 import { useDialog } from '../../hooks/useDialog'
 import { speakJapanese } from '../../lib/audio'
 import { api } from '../../lib/origin'
@@ -687,17 +689,9 @@ export function DictionaryLookupSheet({ term, category, session, onClose }) {
     <div onClick={onClose} className="dict-sheet__scrim">
       <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet"
            role="dialog" aria-modal="true" aria-label={`${t.dictionaryTitle}: ${term}`}>
-        {loading && (
-          <div className="quiz-loading">{t.loadingDictionary}</div>
-        )}
+        {loading && <Loading />}
         {!loading && error && (
-          <div className="quiz-loading">
-            {t.notAvailable}
-            <br /><br />
-            <button onClick={onClose} className="dict-detail__close-btn">
-              {t.close}
-            </button>
-          </div>
+          <Empty tone="error" icon={null} message={t.notAvailable} action={{ label: t.close, onClick: onClose }} />
         )}
         {!loading && entry && (
           <DictionaryDetail entry={entry} onClose={onClose} />

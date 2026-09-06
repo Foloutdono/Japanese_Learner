@@ -60,6 +60,9 @@ const nav = {
   edit:              'Modifier',
   close:             'Fermer',
   loading:           'Chargement...',
+  waitingServer:     'Réveil du serveur…',
+  errorTitle:        'Ça n’a pas fonctionné',
+  errorHint:         'Vérifiez votre connexion — votre progression est en sécurité.',
   import:            'Importer',
   export:            'Exporter',
   exportFailed:      "L'export a échoué",
@@ -759,8 +762,6 @@ const dictionary = {
   examples:          'Exemples',
   level:             'Niveau',
   listen:            'Écouter',
-  loadingDictionary: 'Chargement...',
-  loadingMore:       'Chargement...',
   displayedKanji:    'kanji affichés',
   radical:           'Radical',
   // Additional dictionary keys used by screens
@@ -882,7 +883,6 @@ const misc = {
   mode_fast_review:                'Révision rapide',
   mode_fast_review_desc:           "Parcourez ce que vous avez déjà étudié. Rien n'est noté.",
   retry:     'Réessayer',
-  sessionLoadFailed: 'Impossible de charger vos cartes.',
 }
 
 // ── Profile ───────────────────────────────────────────────

@@ -4,7 +4,7 @@ import { Flashcard } from './QuizComponents'
 import { CardTransition } from './CardTransition'
 import PromptCard from './PromptCard'
 import { Loading } from '../ui/Loading'
-import EmptyState from '../ui/EmptyState'
+import Empty from '../ui/Empty'
 import { ChevronIcon, OpenBookIcon } from '../ui/Icons'
 
 // ── Review deck (self-paced, ungraded browse) ──────────────
@@ -35,7 +35,7 @@ export default function ReviewDeck({
 
   if (!cards || cards.length === 0) {
     return (
-      <EmptyState
+      <Empty
         icon={<OpenBookIcon size={40} />}
         message={t.reviewEmpty}
         action={{ label: t.backToMenu, onClick: onExit }}
