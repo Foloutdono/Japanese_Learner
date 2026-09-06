@@ -1423,6 +1423,18 @@ const onboarding = {
   settingsDeleteAccountYes: 'Delete my account',
   settingsDeleteAccountFailed: 'The deletion could not be completed. Please try again.',
   privacyPolicy: 'Privacy policy',
+  // ── The installed app (plan 065) ──
+  pwaUpdateReady: 'A new timetable is in effect.',
+  pwaUpdateBtn: 'Reload',
+  pwaUpdateLater: 'Later',
+  offlineLine: 'No connection — the station is closed for now.',
+  installApp: 'Install the app',
+  installAppHint: 'On your home screen, full screen, with the kana audio kept for offline.',
+  installAppBtn: 'Install',
+  installIosTitle: 'Add to your home screen',
+  installIosStep1: 'Tap Share in Safari\'s toolbar.',
+  installIosStep2: 'Choose « Add to Home Screen », then Add.',
+  installIosBody: 'iPhone and iPad install web apps from Safari\'s share sheet — there is no button for it.',
   settingsIssuedTo: 'Card issued to',
 
   // ── 行先 — the destination counter ────────────────────────

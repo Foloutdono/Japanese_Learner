@@ -12,6 +12,9 @@ import { RATING_SCALES, ratingButtons } from '../domain/ratingScales'
 import PlacementTest from '../components/onboarding/PlacementTest'
 import { PACES } from '../components/onboarding/paces'
 import { GoalCounter } from '../components/journey/GoalCounter'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import { useInstallPrompt, promptInstall, isIosSafari } from '../stores/installPrompt'
+import { InstallSheet } from '../components/ui/InstallSheet'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -140,6 +143,7 @@ export default function SettingsScreen({ session }) {
                 <span className="settings-row__label">{t.language}</span>
                 <LangSwitcher />
               </div>
+              <InstallRow t={t} />
             </Slip>
 
             <Slip id="son" section={section} jp="音" title={t.sound} aside={<MuteButton />}>
@@ -461,6 +465,39 @@ function RatingScaleRow({ t, session }) {
           <span className="onb-error" role="alert">{t.onbPassError}</span>
         </div>
       )}
+    </>
+  )
+}
+
+// ── ホーム画面に追加 — install the app (plan 065) ──────────────
+// A row, not a banner: the offer lives where the environment's other
+// choices live, and only where it can be honoured — Chromium hands the
+// prompt over (stores/installPrompt.js), iOS Safari has the share
+// sheet and gets the explanation instead, and once the app runs
+// standalone the row is gone. Anywhere else the row does not exist,
+// so nothing on this screen is a dead control.
+function InstallRow({ t }) {
+  const standalone = useMediaQuery('(display-mode: standalone)')
+  const promptable = useInstallPrompt()
+  const [sheet, setSheet] = useState(false)
+  const ios = isIosSafari()
+  if (standalone || (!promptable && !ios)) return null
+  return (
+    <>
+      <div className="settings-row">
+        <span className="settings-row__label">
+          {t.installApp}
+          <span className="stg-hint">{t.installAppHint}</span>
+        </span>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => { playClick(); if (promptable) promptInstall(); else setSheet(true) }}
+        >
+          {t.installAppBtn}
+        </button>
+      </div>
+      {sheet && <InstallSheet onClose={() => setSheet(false)} />}
     </>
   )
 }

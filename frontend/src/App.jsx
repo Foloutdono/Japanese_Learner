@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { DepartureGate } from './components/station/DepartureGate'
 import { TrainDoor } from './components/station/TrainDoor'
 import { TicketGate } from './components/station/TicketGate'
+import { UpdateToast, OfflineNote } from './components/ui/UpdateToast'
 import { sectionFor, HOME_STATION } from './config/stations'
 import { identityFor } from './config/identity'
 import { apiJsonWithTimeout } from './lib/api'
@@ -246,6 +247,13 @@ export default function App() {
         </Routes>
 
         <DocumentHead />
+
+        {/* 掲示 — the docked notes (plan 065): a new build waiting, or
+            no network. Beside <Routes/> for the same reason as the gate
+            below: they must outlive the navigation that would unmount a
+            screen. */}
+        <UpdateToast />
+        <OfflineNote />
 
         {/* 改札 — the departure cutscene. Beside <Routes/>, never
             inside it: the gate has to keep playing across the very

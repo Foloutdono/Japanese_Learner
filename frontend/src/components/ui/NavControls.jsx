@@ -10,6 +10,17 @@ import {
 
 const THEME_KEY = 'jp-theme'
 
+// --bg-main of each theme, for the browser's own chrome (the installed
+// app's status bar). Mirrored in index.html's blocking script, which
+// paints it before React runs; a change here is a change there.
+const THEME_COLOR = { dark: '#17151a', light: '#f6f1e4' }
+
+function applyThemeAttribute(theme) {
+  document.documentElement.setAttribute('data-theme', theme)
+  const meta = document.querySelector('meta[name="theme-color"]')
+  if (meta) meta.setAttribute('content', THEME_COLOR[theme] ?? THEME_COLOR.dark)
+}
+
 function osTheme() {
   return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
 }
@@ -91,10 +102,7 @@ export function ThemeToggle() {
       if (next === 'auto') window.localStorage.removeItem(THEME_KEY)
       else window.localStorage.setItem(THEME_KEY, next)
     } catch { /* private mode — the attribute below still applies */ }
-    document.documentElement.setAttribute(
-      'data-theme',
-      next === 'auto' ? osTheme() : next,
-    )
+    applyThemeAttribute(next === 'auto' ? osTheme() : next)
     playToggle()
   }
 
@@ -103,7 +111,7 @@ export function ThemeToggle() {
   useEffect(() => {
     if (choice !== 'auto' || !window.matchMedia) return
     const mq = window.matchMedia('(prefers-color-scheme: light)')
-    const follow = () => document.documentElement.setAttribute('data-theme', osTheme())
+    const follow = () => applyThemeAttribute(osTheme())
     mq.addEventListener('change', follow)
     return () => mq.removeEventListener('change', follow)
   }, [choice])

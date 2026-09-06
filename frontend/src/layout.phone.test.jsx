@@ -59,6 +59,11 @@ describe('the phone layout contract', () => {
     expect(getComputedStyle(screen.container.querySelector('.rating-bar')).userSelect).toBe('none')
   })
 
+  it('the docked note sits above the level bar on a phone', async () => {
+    const screen = await render(<div className="dock-note" />)
+    expect(getComputedStyle(screen.container.querySelector('.dock-note')).bottom).toBe(`${HUD_H}px`)
+  })
+
   it('the drawer reads the inset tokens, not a raw env()', async () => {
     const screen = await render(
       <div className="burger-drawer"><div className="burger-drawer__pocket" /></div>

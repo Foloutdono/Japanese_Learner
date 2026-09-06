@@ -1394,6 +1394,18 @@ const onboarding = {
   settingsDeleteAccountYes: 'Supprimer mon compte',
   settingsDeleteAccountFailed: 'La suppression n\'a pas pu aboutir. Réessayez.',
   privacyPolicy: 'Politique de confidentialité',
+  // ── L'application installée (plan 065) ──
+  pwaUpdateReady: 'Un nouvel horaire est en vigueur.',
+  pwaUpdateBtn: 'Recharger',
+  pwaUpdateLater: 'Plus tard',
+  offlineLine: 'Pas de connexion — la gare est fermée pour le moment.',
+  installApp: 'Installer l\'application',
+  installAppHint: 'Sur votre écran d\'accueil, en plein écran, avec l\'audio des kanas gardé hors ligne.',
+  installAppBtn: 'Installer',
+  installIosTitle: 'Ajouter à l\'écran d\'accueil',
+  installIosStep1: 'Touchez Partager dans la barre de Safari.',
+  installIosStep2: 'Choisissez « Sur l\'écran d\'accueil », puis Ajouter.',
+  installIosBody: 'Sur iPhone et iPad, une application web s\'installe depuis la feuille de partage de Safari — il n\'y a pas de bouton pour ça.',
   settingsIssuedTo: 'Carte émise à',
 
   // ── 行先 — le guichet des destinations ─────────────────────

@@ -5,6 +5,7 @@
 import process from 'node:process';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 import { playwright } from '@vitest/browser-playwright';
 
 // One browser project per viewport, from one helper, so the two lanes
@@ -80,7 +81,93 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-  plugins: [react()],
+  plugins: [
+    react(),
+    // ── 駅舎 — the installable app (plan 065) ──
+    // The web build only: the native shell's WebView (custom scheme on
+    // iOS) has no service worker and its assets ARE the bundle, and a
+    // dev server serving yesterday's cache is a debugging trap, so the
+    // plugin is off everywhere but a production web build. `prompt`,
+    // not autoUpdate: a new worker waits until the learner taps the
+    // ダイヤ改正 note (components/ui/UpdateToast.jsx) — a reload behind
+    // their back mid-exam would race the exam draft.
+    VitePWA({
+      disable: mode !== 'production',
+      registerType: 'prompt',
+      injectRegister: false,
+      includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png'],
+      manifest: {
+        id: '/',
+        // The store name is the owner's to pick (plans/README.md, wave
+        // 14); until then the app's own masthead.
+        name: '日本語 — Apprendre le japonais',
+        short_name: '日本語',
+        lang: 'fr',
+        start_url: '/',
+        scope: '/',
+        display: 'standalone',
+        theme_color: '#100e13',       // --bg-panel, dark: the sumi chrome
+        background_color: '#17151a',  // --bg-main, dark
+        icons: [
+          { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+        shortcuts: [
+          { name: '本日 — Today', short_name: '本日', url: '/today' },
+          { name: 'かな — Kana', short_name: 'かな', url: '/kana' },
+        ],
+      },
+      workbox: {
+        // The app shell: code, styles, icons, the Latin faces. Never
+        // public/sounds (4.8 MB), never the 716 KB streak sprite sheet,
+        // and never the ~240 Noto slices — all three arrive on demand
+        // and are kept by the runtime rules below.
+        globPatterns: ['**/*.{js,css,html,ico,svg,png,woff2}'],
+        globIgnores: ['**/noto-*.woff2', '**/sprites/**'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        // The SPA fallback must not swallow the proxied backend paths or
+        // the static policy page.
+        navigateFallbackDenylist: [/^\/api\//, /^\/kanjivg\//, /^\/exam-audio\//, /^\/privacy/],
+        runtimeCaching: [
+          // Closure-free functions: they are serialised into the worker.
+          { urlPattern: ({ url, sameOrigin }) => sameOrigin && (url.pathname.startsWith('/sounds/') || url.pathname.startsWith('/sprites/')),
+            handler: 'CacheFirst',
+            options: { cacheName: 'media', expiration: { maxEntries: 200, maxAgeSeconds: 31536000 },
+                       cacheableResponse: { statuses: [200] } } },
+          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.endsWith('.woff2'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'fonts', expiration: { maxEntries: 80, maxAgeSeconds: 31536000 },
+                       cacheableResponse: { statuses: [200] } } },
+          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/kanjivg/'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'kanjivg', expiration: { maxEntries: 500, maxAgeSeconds: 2592000 },
+                       cacheableResponse: { statuses: [200] } } },
+          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/exam-audio/'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'exam-audio', rangeRequests: true,
+                       expiration: { maxEntries: 40, maxAgeSeconds: 2592000 },
+                       cacheableResponse: { statuses: [200] } } },
+          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/api/translations/'),
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'translations', expiration: { maxEntries: 8, maxAgeSeconds: 604800 },
+                       cacheableResponse: { statuses: [200] } } },
+          // Everything else under /api is the learner's own state behind
+          // a bearer token, and the worker's cache is not partitioned by
+          // user. Last, so the translations rule above wins.
+          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/api/'),
+            handler: 'NetworkOnly' },
+        ],
+      },
+    }),
+  ],
+  // The Noto slices are tiny and would be base64-inlined into the CSS
+  // bundle under Vite's default 4 KB threshold — the opposite of the
+  // on-demand loading the unicode-range split exists for.
+  build: {
+    assetsInlineLimit: (file) => (file.endsWith('.woff2') ? false : undefined),
+  },
   server: {
     // Vite does not read PORT on its own, and 5173 is only a default:
     // when two Claude Code sessions share this folder, the preview

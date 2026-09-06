@@ -1,5 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Serif+JP:wght@600;700&display=swap');
 /* ══════════════════════════════════════════════════════════════
+   (The faces are imported from @fontsource in src/main.jsx — plan 065
+   retired the Google Fonts @import that opened this file, so the app
+   renders the same offline and inside the native shell.)
+
    Exam section — merged from src/exam/exam.css by plan 041. Pasted
    here, immediately after the Google Fonts import rule and before this
    file's own design-system body, because that is the exact position
@@ -4729,7 +4732,11 @@
   --board-w:        1040px;
 
   --font-display:   'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
-  --font-jp:        'Yu Gothic', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Noto Sans JP first, now that it ships with the app (plan 065): the
+     same Japanese on every phone, instead of Yu Gothic on Windows and
+     whatever the device had elsewhere. Yu Gothic stays as the fallback
+     for a face slice that has not arrived yet. */
+  --font-jp:        'Noto Sans JP', 'Yu Gothic', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* The deck/study subsystem's primary action fill (Study, Create
      deck, Start session, Import…) — independent of the per-deck-type
@@ -5002,10 +5009,10 @@
    to load and you are seeing the fallback — check
    document.fonts.check('16px "Space Grotesk"').
 
-   The @import at the top of this file must keep weight 400 for this rule to
-   mean what it says: with only 500 and 700 loaded, CSS font matching
-   resolves an unstyled 400 up to 500 and every default string silently
-   gains weight. */
+   The @fontsource imports in src/main.jsx must keep weight 400 for this
+   rule to mean what it says: with only 500 and 700 loaded, CSS font
+   matching resolves an unstyled 400 up to 500 and every default string
+   silently gains weight. */
 html, body, #root {
   background: var(--bg-main);
   color: var(--text-primary);
@@ -5770,6 +5777,80 @@ textarea:focus-visible {
   padding-top: 24px;
   padding-bottom: 40px;
 }
+/* ── ホーム画面に追加 — the iOS install sheet (plan 065) ──
+   The analyzer tutorial's sheet chrome (.detail-sheet) with two lines
+   of body and a numbered pair of steps; nothing here is a new object. */
+.install-sheet__body {
+  margin: 0 0 var(--sp-4);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+.install-sheet__steps {
+  margin: 0;
+  padding-left: var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  font-size: var(--fs-body);
+}
+
+/* ── 掲示 — the docked note: 運休 (offline) and ダイヤ改正 (update) ──
+   One object, drawn by components/ui/UpdateToast.jsx: a sumi strip on
+   the bottom edge — above the level bar on a phone — with the panel
+   inks, one line, and at most two quiet actions. It sits under the
+   level bar's z-index and never covers a run's rating bar: a run has
+   its own retry, and the note only says why a request will fail. */
+.dock-note {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--safe-bottom);
+  z-index: 29;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3) var(--sp-5);
+  padding: var(--sp-3) var(--sp-5);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-top: 1px solid var(--burger-menu-border);
+  font-size: var(--fs-sm);
+}
+.dock-note__text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.dock-note__jp {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  color: var(--text-on-panel-soft);
+}
+.dock-note__actions {
+  display: inline-flex;
+  gap: var(--sp-3);
+}
+.dock-note__btn {
+  min-height: 36px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--text-on-panel-soft);
+  border-radius: var(--r-plate);
+  background: transparent;
+  color: var(--text-on-panel);
+  font: inherit;
+  font-weight: 700;
+}
+.dock-note__btn--quiet {
+  border-color: transparent;
+  color: var(--text-on-panel-soft);
+}
+@media (max-width: 768px) {
+  .dock-note { bottom: calc(var(--hud-h) + var(--safe-bottom)); }
+}
+
 /* ── Breakpoints ──────────────────────────────────────────
    Two, and they are the whole scale:
 
@@ -5880,6 +5961,9 @@ textarea:focus-visible {
   position: relative;
   top: 0;
   z-index: 10;
+  /* Standalone on iOS runs under the status bar (black-translucent,
+     index.html); the inset token clears it and is 0 everywhere else. */
+  padding-top: var(--safe-top);
 }
 
 .top-bar__inner {
@@ -5929,6 +6013,7 @@ textarea:focus-visible {
 
 .top-bar__peek {
   display: none; /* desktop: no peek tab, no autohide at all */
+  top: var(--safe-top);
 }
 
 /* Icon-only (a real ChevronIcon SVG, not the '←' text glyph it used
@@ -6132,6 +6217,7 @@ textarea:focus-visible {
 .station__concourse {
   padding: 0 24px;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  padding-top: var(--safe-top); /* the clock, in a standalone install */
 }
 /* Same column as the board below — see --board-w. */
 .station__concourse-inner {
@@ -12280,6 +12366,7 @@ textarea:focus-visible {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  padding-top: var(--safe-top); /* standalone on iOS: under the status bar */
 }
 
 .landing-topbar {
@@ -12550,6 +12637,7 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  padding-top: var(--safe-top);
 }
 
 /* Icon-only now (ChevronIcon SVG, not the '←' text glyph) — centered

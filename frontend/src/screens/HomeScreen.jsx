@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useOnline } from '../hooks/useOnline'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { getNavLinks } from '../config/navLinks'
@@ -113,7 +114,20 @@ function ICCard() {
 // component because the line renders twice (concourse band ≥560px,
 // footer strip under it) and the two must never disagree about
 // whether the hall is broken.
-function HallNotice({ down, onRetry, t }) {
+function HallNotice({ down, offline, onRetry, t }) {
+  // 運休: no network at all. Said before "the feed failed", because it
+  // is the reason the feed failed, and without the retry button — the
+  // request path retries by itself when the line comes back
+  // ([session]/[attempt] effects), and a retry into no network is a
+  // second failure for the learner to read.
+  if (offline) {
+    return (
+      <>
+        <span className="station__notice-chime station__notice-chime--warn" aria-hidden="true">!</span>
+        <span className="station__notice-text">{t.offlineLine}</span>
+      </>
+    )
+  }
   if (!down) {
     return (
       <>
@@ -170,6 +184,7 @@ export default function HomeScreen({ session }) {
   // account (seen on production, 2026-09-01). The notice line is the
   // one place that owns up, and it doubles as the retry.
   const feedDown = todayFailed || statsFailed
+  const online = useOnline()
 
   useEffect(() => {
     startAmbiance('home')
@@ -204,7 +219,7 @@ export default function HomeScreen({ session }) {
               for phones, where this band has no room for a sentence;
               the 560px query decides which of the two shows. */}
           <span className="station__concourse-notice">
-            <HallNotice down={feedDown} onRetry={() => setAttempt(a => a + 1)} t={t} />
+            <HallNotice down={feedDown} offline={!online} onRetry={() => setAttempt(a => a + 1)} t={t} />
           </span>
           <div className="station__concourse-right">
             <ICCard />
@@ -250,7 +265,7 @@ export default function HomeScreen({ session }) {
           it belongs to. */}
       <footer className="station__notice">
         <span className="station__notice-inner">
-          <HallNotice down={feedDown} onRetry={() => setAttempt(a => a + 1)} t={t} />
+          <HallNotice down={feedDown} offline={!online} onRetry={() => setAttempt(a => a + 1)} t={t} />
         </span>
       </footer>
     </div>
