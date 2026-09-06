@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import LevelSelector from '../components/selection/LevelSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import PromptCard from '../components/study/PromptCard'
@@ -132,7 +132,7 @@ export default function ReadingComprehensionScreen({ session }) {
   if (stage === 'selecting') {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.comprehensionTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/practice')} title={t.comprehensionTitle} />
         {/* No subtitle here — LevelSelector supplies its own header
             (defaults to t.selectLevel), same convention as Kanji/Vocab;
             passing subtitle too used to render the header twice. */}
@@ -149,7 +149,7 @@ export default function ReadingComprehensionScreen({ session }) {
   if (stage === 'loading') {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} autoHide />
+        <ScreenBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} />
         <main id="main-content" className="comp-loading-wrap">
           {/* A long wait (the text is written on demand) owes a
               sentence; the dots carry it (plan 067). */}
@@ -163,7 +163,7 @@ export default function ReadingComprehensionScreen({ session }) {
   if (stage === 'error') {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} autoHide />
+        <ScreenBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} />
         <main id="main-content" className="container comp-error-page">
           <div className="card comp-error-card">{error}</div>
           <button onClick={() => startSession(level)} className="comp-retry-btn">
@@ -180,7 +180,7 @@ export default function ReadingComprehensionScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => { clearTimer(); setStage('selecting') }} title={`${t.comprehensionTitle} — ${level}`} autoHide />
+        <ScreenBar onBack={() => { clearTimer(); setStage('selecting') }} title={`${t.comprehensionTitle} — ${level}`} />
         <main id="main-content" className="container comp-reading-page">
 
           <div className="comp-reading-header">
@@ -239,13 +239,13 @@ export default function ReadingComprehensionScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} autoHide />
+        <ScreenBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} />
         {/* 黄丹, per DESIGN.md's "the pigment is injected once" — see
             DecksScreen's comment for why it sits on <main> and not on
             .screen.
 
             --line-rikai, NOT --line-reading: 理解 is its own board row
-            with its own pigment in config/navLinks.js, and "one line,
+            with its own pigment in config/tabs.js, and "one line,
             one colour" means it cannot borrow 読書's 緑青. Note for
             whoever adds a filled action here — 黄丹 is one of the two
             pigments DESIGN.md flags as too light for --text-on-panel,
@@ -308,7 +308,7 @@ export default function ReadingComprehensionScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} autoHide />
+        <ScreenBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} />
         <main id="main-content" className="container page-pad">
 
           <div className="card comp-score-card">

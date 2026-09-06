@@ -109,7 +109,7 @@ function RewardScene({ toast, onDone }) {
   const onExitEnd = name => e => { if (e.animationName === name) onDone?.() }
 
   // ── fare ──
-  // Drawn by the HUD (TopBar.jsx). What is left for the portal is the
+  // Drawn by the HUD (components/chrome/Hud.jsx). What is left for the portal is the
   // one thing a rising figure cannot do: tell a screen reader.
   if (tier === 'fare') {
     return createPortal(

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { CardTransition } from '../components/study/CardTransition'
 import { CHOICE_KEY_INDEX } from '../domain/choiceKeys'
 import Empty from '../components/ui/Empty'
@@ -283,7 +283,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   if (exam === null) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/practice/exam')} title={t.examTitle} />
         <main id="main-content" className="container exam-shell">
           <div className="exam-generating">
             <div className="exam-generating__brush" aria-hidden="true">
@@ -308,7 +308,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     const waitMinutes = Math.ceil(retryAfter / 60)
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/practice/exam')} title={t.examTitle} />
         <main id="main-content" className="container exam-shell">
           <Empty
             icon={<PageIcon size={40} />}
@@ -324,12 +324,12 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   if (questions.length === 0 || !current) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/practice/exam')} title={t.examTitle} />
         <main id="main-content" className="container exam-shell">
           <Empty
             icon={<PageIcon size={40} />}
             message={t.examSectionEmpty}
-            action={{ label: t.examBackToExams, onClick: () => navigate('/exam') }}
+            action={{ label: t.examBackToExams, onClick: () => navigate('/practice/exam') }}
           />
         </main>
       </div>
@@ -417,7 +417,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
       clearDraft(examId, exam.revision)
       // attempt id in the URL (not just router state) is what makes a
       // reloaded result page recoverable — see ExamResult.
-      navigate(`/exam/${examId}/results?attempt=${summary.attemptId}`, { state: { summary, exam } })
+      navigate(`/practice/exam/${examId}/results?attempt=${summary.attemptId}`, { state: { summary, exam } })
     } catch {
       // This path used to not exist: a failed submit left the guard ref
       // latched true forever, so a finished exam sat on screen with no
@@ -432,7 +432,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
       {/* Walking out of a timed exam is worth a question — and the
           answer ("your progress is saved") is something the learner
           otherwise has no way to know. */}
-      <TopBar onBack={() => setLeaving(true)} title={paperTitle(exam, t)} autoHide />
+      <ScreenBar onBack={() => setLeaving(true)} title={paperTitle(exam, t)} />
       <main id="main-content" className="container exam-shell">
         <div
           className="exam-progress-bar"
@@ -565,7 +565,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
               <button type="button" className="btn-secondary exam-nav-btn" onClick={() => setLeaving(false)}>
                 {t.examLeaveStay}
               </button>
-              <button type="button" className="btn-primary exam-nav-btn" onClick={() => navigate('/exam')}>
+              <button type="button" className="btn-primary exam-nav-btn" onClick={() => navigate('/practice/exam')}>
                 {t.examLeaveConfirm}
               </button>
             </div>

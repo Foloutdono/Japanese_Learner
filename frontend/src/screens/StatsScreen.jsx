@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { StationHeader } from '../components/station/StationHeader'
 import { Loading } from '../components/ui/Loading'
 import { SectionHeader } from '../components/ui/SectionHeader'
@@ -66,7 +66,7 @@ export default function StatsScreen({ session }) {
   // level/mode and lets the session surface them.
   function startReview(category, key, mode) {
     if (category === 'kana') {
-      navigate(`/kana?set=${encodeURIComponent(key)}&mode=${mode}`)
+      navigate(`/learn/kana?set=${encodeURIComponent(key)}&mode=${mode}`)
       return
     }
     navigate(`/${category}?level=${encodeURIComponent(key)}&mode=${mode}`)
@@ -77,7 +77,7 @@ export default function StatsScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title={t.statistics} autoHide />
+      <ScreenBar onBack={() => navigate('/profile')} title={t.statistics} />
 
       {!stats && <Loading />}
 

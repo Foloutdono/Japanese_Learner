@@ -71,6 +71,6 @@ describe('Records — three figures and one door, in a lattice of four', () => {
     expect(door.textContent).toContain('統計')
     expect(door.textContent).toContain('Statistics')
     door.click()
-    expect(navigate).toHaveBeenCalledWith('/stats')
+    expect(navigate).toHaveBeenCalledWith('/profile/stats')
   })
 })

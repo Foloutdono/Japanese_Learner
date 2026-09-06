@@ -3,7 +3,7 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { StationHeader } from '../components/station/StationHeader'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
@@ -446,7 +446,7 @@ export default function DeckDetailScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? t.deckFallbackTitle} autoHide />
+      <ScreenBar onBack={() => navigate('/learn/decks')} title={deck?.name ?? t.deckFallbackTitle} />
 
       {/* 蘇芳, injected once for the whole screen — see DecksScreen's
           own comment on why it sits on <main> and not on .screen. */}
@@ -479,7 +479,7 @@ export default function DeckDetailScreen({ session }) {
         <div className="deckdetail-header">
           {!selectMode && (
             <div className="deckdetail-actions">
-              <button onClick={() => { playUi('click-screen-selection'); navigate(`/decks/${deck_id}/study`, { state: { deck } }) }}
+              <button onClick={() => { playUi('click-screen-selection'); navigate(`/learn/decks/${deck_id}/study`, { state: { deck } }) }}
                 className="btn-primary">
                 <PlayIcon size={14} /> {t.study}
               </button>

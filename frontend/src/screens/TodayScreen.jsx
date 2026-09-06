@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { StationHeader } from '../components/station/StationHeader'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
@@ -22,7 +22,7 @@ import { ChevronIcon, CrossIcon, CheckIcon, SearchIcon } from '../components/ui/
 import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { kanaSetLabel } from '../domain/kanaSets'
-import { LINE_COLOR } from '../config/navLinks'
+import { LINE_COLOR } from '../config/tabs'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 import { board } from '../stores/boarding'
 import { formatGlossLine } from '../components/study/gloss'
@@ -54,7 +54,7 @@ function laneWhere(lane, t) {
 }
 
 // LINE_COLOR — the line colour each section already owns everywhere
-// else it appears — now comes from config/navLinks.js. It used to be
+// else it appears — now comes from config/tabs.js. It used to be
 // declared here AND, identically, in station/NextService.jsx; plan 060
 // lifted the one table into the file that already holds every other
 // section→pigment mapping.
@@ -414,7 +414,7 @@ export default function TodayScreen({ session }) {
       if (summaryError) {
         return (
           <div className="screen">
-            <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
+            <ScreenBar title={t.todayTitle} />
             <main id="main-content" className="container quiz-area">
               <SessionError error={summaryError} onRetry={() => setSummaryReload(n => n + 1)} />
             </main>
@@ -423,7 +423,7 @@ export default function TodayScreen({ session }) {
       }
       return (
         <div className="screen">
-          <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
+          <ScreenBar title={t.todayTitle} />
           <main id="main-content" className="container quiz-area"><Loading /></main>
         </div>
       )
@@ -433,14 +433,14 @@ export default function TodayScreen({ session }) {
       const when = untilNext(summary.next_due, lang)
       return (
         <div className="screen">
-          <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
+          <ScreenBar title={t.todayTitle} />
           <main id="main-content" className="container quiz-area">
             <div className="today-clear">
               <div className="today-clear__mark" lang="ja" aria-hidden="true">完了</div>
               <h2 className="today-clear__title">{t.todayClearTitle}</h2>
               <p className="today-clear__body">{t.todayNothingDue}</p>
               {when && <p className="today-clear__next">{t.todayNextReview(when)}</p>}
-              <button className="btn-primary" onClick={() => navigate('/')}>{t.backToStation}</button>
+              <button className="btn-primary" onClick={() => navigate('/learn')}>{t.backToStation}</button>
             </div>
           </main>
         </div>
@@ -449,7 +449,7 @@ export default function TodayScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
+        <ScreenBar title={t.todayTitle} />
         <main id="main-content" className="container today-picker">
           {/* Same plate every other screen opens with, in place of a
               hand-rolled masthead the picker used to draw itself --
@@ -572,7 +572,7 @@ export default function TodayScreen({ session }) {
   if (error && !card) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
+        <ScreenBar title={t.todayTitle} />
         <main id="main-content" className="container quiz-area">
           <SessionError error={error} onRetry={retry} />
         </main>
@@ -584,7 +584,7 @@ export default function TodayScreen({ session }) {
     const when = untilNext(summary?.next_due, lang)
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.todayTitle} autoHide />
+        <ScreenBar title={t.todayTitle} />
         <main id="main-content" className="container quiz-area">
           <div className="today-clear">
             <div className="today-clear__mark" lang="ja" aria-hidden="true">完了</div>
@@ -593,7 +593,7 @@ export default function TodayScreen({ session }) {
               {cleared > 0 ? t.todayClearedCount(cleared) : t.todayNothingDue}
             </p>
             {when && <p className="today-clear__next">{t.todayNextReview(when)}</p>}
-            <button className="btn-primary" onClick={() => navigate('/')}>
+            <button className="btn-primary" onClick={() => navigate('/learn')}>
               {t.backToStation ?? t.home}
             </button>
           </div>
@@ -604,10 +604,8 @@ export default function TodayScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar
-        onBack={() => navigate('/')}
+      <ScreenBar
         title={t.todayTitle}
-        autoHide
         actions={remaining > 0 && (
           <span className="today-remaining" title={t.todayRemaining}>{remaining}</span>
         )}

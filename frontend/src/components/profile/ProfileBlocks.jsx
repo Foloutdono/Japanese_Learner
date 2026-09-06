@@ -1,4 +1,4 @@
-import { getProfileHalls } from '../../config/navLinks'
+import { getProfileHalls } from '../../config/tabs'
 import { ChevronIcon } from '../ui/Icons'
 import { LineMark } from './LineLedger'
 

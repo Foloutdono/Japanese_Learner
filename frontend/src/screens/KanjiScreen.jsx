@@ -6,7 +6,7 @@ import {
 } from '../lib/translationCache'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import RatingBar from '../components/study/RatingBar'
 import {
   MCQGrid, DoneMessage, DeckProgress,
@@ -307,7 +307,7 @@ export default function KanjiScreen({ session }) {
   if (!studyBy) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.kanjiTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/learn')} title={t.kanjiTitle} />
         <main id="main-content">
           <SelectionScreen>
             <ModeSelector
@@ -327,7 +327,7 @@ export default function KanjiScreen({ session }) {
   if (studyBy === 'level' && !level) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={t.kanjiTitle} autoHide />
+        <ScreenBar onBack={() => setStudyBy(null)} title={t.kanjiTitle} />
         <main id="main-content">
           <SelectionScreen>
             <LevelSelector onSelect={setLevel} />
@@ -341,7 +341,7 @@ export default function KanjiScreen({ session }) {
   if (studyBy === 'frequency' && !tier) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={t.kanjiTitle} autoHide />
+        <ScreenBar onBack={() => setStudyBy(null)} title={t.kanjiTitle} />
         <main id="main-content">
           <SelectionScreen>
             <TierSelector
@@ -369,7 +369,7 @@ export default function KanjiScreen({ session }) {
       : MODES.filter(m => m.key !== FAST_REVIEW)
     return (
       <div className="screen">
-        <TopBar onBack={() => (studyBy === 'level' ? setLevel(null) : setTier(null))} title={backTitle} autoHide />
+        <ScreenBar onBack={() => (studyBy === 'level' ? setLevel(null) : setTier(null))} title={backTitle} />
         <main id="main-content">
           <SelectionScreen>
             <ModeSelector
@@ -392,7 +392,7 @@ export default function KanjiScreen({ session }) {
   if (reviewing) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setReviewing(false)} title={`${t.kanjiTitle} ${level} — ${t.modeReview}`} autoHide />
+        <ScreenBar onBack={() => setReviewing(false)} title={`${t.kanjiTitle} ${level} — ${t.modeReview}`} />
         {/* 藤色, per DESIGN.md's "the pigment is injected once" — see
             DecksScreen's comment for why it sits on <main> and not on
             .screen. This is the screen whose components were reaching
@@ -438,10 +438,9 @@ export default function KanjiScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar
+      <ScreenBar
         onBack={() => setMode(null)}
         title={`${t.kanjiTitle} ${sourceLabel} — ${title}`}
-        autoHide
         actions={usesWritingDrill(mode) ? (
           <WritingToggle on={drawingEnabled} onToggle={() => setDrawingEnabled(d => !d)} />
         ) : undefined}

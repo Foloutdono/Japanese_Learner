@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { Loading } from '../components/ui/Loading'
 import { WarningIcon } from '../components/ui/Icons'
 import { CommuterPass } from '../components/profile/CommuterPass'
@@ -119,7 +119,7 @@ export default function ProfileScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title={t.profileTitle} autoHide />
+      <ScreenBar title={t.profileTitle} />
 
       {loading && <Loading />}
 
@@ -152,7 +152,7 @@ export default function ProfileScreen({ session }) {
                   profile={profile}
                   t={t}
                   footer={footer}
-                  onSettings={() => navigate('/settings')}
+                  onSettings={() => navigate('/profile/settings')}
                 >
                   <PassHolder
                     profile={profile}

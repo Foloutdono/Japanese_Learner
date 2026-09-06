@@ -4,7 +4,7 @@ import { useLang } from '../LangContext'
 import { supabase } from '../lib/supabase'
 import { apiFetch, apiJson } from '../lib/api'
 import { playClick, playUi, playToggle, setVolume, useVolumes, DEFAULT_VOLUMES } from '../lib/audio'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components/ui/NavControls'
 import { useProfileSummaryState, refreshSummary } from '../stores/profileSummary'
 import { Loading } from '../components/ui/Loading'
@@ -104,7 +104,7 @@ export default function SettingsScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title={t.settings} autoHide />
+      <ScreenBar onBack={() => navigate('/profile')} title={t.settings} />
 
       <main id="main-content" className="container settings-container">
         <div className="stg-counter">

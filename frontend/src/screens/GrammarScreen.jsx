@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import RatingBar from '../components/study/RatingBar'
 import {
   MCQGrid, DoneMessage, DeckProgress,
@@ -173,7 +173,7 @@ export default function GrammarScreen({ session }) {
   if (!level) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.grammarTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/learn')} title={t.grammarTitle} />
         {/* No subtitle here — LevelSelector supplies its own header
             (defaulting to t.selectLevel) via SelectionScreen's bare
             layout shell, same as Kanji/Vocab. Passing subtitle here
@@ -191,7 +191,7 @@ export default function GrammarScreen({ session }) {
   if (!mode && !reviewing) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setLevel(null)} title={`${t.grammarTitle} ${level}`} autoHide />
+        <ScreenBar onBack={() => setLevel(null)} title={`${t.grammarTitle} ${level}`} />
         <main id="main-content">
           <SelectionScreen>
             <ModeSelector
@@ -208,7 +208,7 @@ export default function GrammarScreen({ session }) {
   if (reviewing) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setReviewing(false)} title={`${t.grammarTitle} ${level} — ${t.modeReview}`} autoHide />
+        <ScreenBar onBack={() => setReviewing(false)} title={`${t.grammarTitle} ${level} — ${t.modeReview}`} />
         {/* 松葉色, per DESIGN.md's "the pigment is injected once" — see
             DecksScreen's comment for why it sits on <main> and not on
             .screen. Both study shells carry it, review and quiz alike. */}
@@ -270,7 +270,7 @@ export default function GrammarScreen({ session }) {
   // ── Quiz ──
   return (
     <div className="screen">
-      <TopBar onBack={() => setMode(null)} title={`${t.grammarTitle} ${level} — ${currentModeLabel}`} autoHide />
+      <ScreenBar onBack={() => setMode(null)} title={`${t.grammarTitle} ${level} — ${currentModeLabel}`} />
       <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
       <main id="main-content" className="container quiz-area"
         style={{ '--line-color': 'var(--line-grammar)' }}>

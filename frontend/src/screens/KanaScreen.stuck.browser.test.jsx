@@ -114,7 +114,9 @@ describe('KanaScreen — a rated card is always followed by another', () => {
     // Rate the promoting card, then walk out while its stamp is still
     // playing — the back arrow is live throughout.
     await answer(screen, 'first')
-    const back = screen.container.querySelector('.btn-back')
+    // The bar's leave button (components/chrome/Bar.jsx); it was the
+    // retired top bar's .btn-back.
+    const back = screen.container.querySelector('.stage__leave')
     expect(back, 'the back arrow is live throughout the stamp').toBeTruthy()
     back.click()
     await settle(200)

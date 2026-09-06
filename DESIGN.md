@@ -485,9 +485,44 @@ next.
 
 ## Structure
 
+### The chrome (the mobile canvas, plan 068)
+
+- **One chrome at every width.** The HUD across the top (level roundel ·
+  goal-status panel · commuter pass), the five gates across the bottom
+  (学習 Learn · 実践 Practice · 本日 Today · 辞書 Dictionary · 定期券
+  Profile), the screen between them; on a wide screen the same frame is a
+  centred column of `--board-w`. There is no second chrome — the burger
+  drawer, the auto-hiding top bar and the concourse home retired with it.
+- **Both bars are sumi with the two panel inks and no line colour.** The
+  pigment belongs to the screen's own bar (`.bar`): roundel, title, sub,
+  aside, and a 2px stripe in the section's colour under it. A screen that
+  is not a place on a line (Practice, the halls behind the pass) takes the
+  `--register` bar: no roundel, a hairline.
+- **Japanese is content, not chrome.** The interface speaks the learner's
+  language; a word, a sentence, a deck's name, a rank are Japanese. The
+  tab bar is the one place a kanji stands in for a pictogram, and the
+  bilingual JP + Latin pairing the desktop chrome used does not apply to
+  the mobile chrome.
+- **A run leaves the chrome.** Both bars go; the rating bar (or the field)
+  docks on the bottom edge and `‹ Gate` in the stage head is the way out.
+  Everything docked reads `--dock-bottom` — the tab bar plus the safe-area
+  inset under the shell, the inset alone on a stage — never a number of its
+  own.
+- **One filled action per screen**, gold, 52px, docked at the foot and
+  rising with the keyboard; a selection is a gold ring; disabled is
+  `opacity: 0.45` and nothing else; loading is three gold dots, never a
+  spinner (`components/ui/Loading.jsx`); an empty state names the missing
+  thing and the one thing to do about it (`components/ui/Empty.jsx`).
+- **Between boarding screens the train pulls**: the leaving screen slides
+  left as the next arrives from the right, 260ms ease-out; never a
+  cross-fade. Under reduced motion only the rest state is drawn.
+- The chrome's tokens: `--hud-h` (48px), `--tabbar-h` (50px),
+  `--dock-bottom`. The class map from the canvas to `index.css` is
+  `docs/design/mobile/README.md`.
+
 - **One `<h1>` per screen**, and it is the object that names the place — the
-  station plate, the wall map's masthead, or the pass. A plated screen never prints
-  a second heading.
+  station plate, the wall map's masthead, the pass, or the screen's bar. A plated
+  screen never prints a second heading.
 - Section headings are `<h2>` inside the paired `SectionHeader`.
 - **A screen may be composed of inserts instead of sections, and then it
   prints no `SectionHeader` at all.** The profile is the worked example: the

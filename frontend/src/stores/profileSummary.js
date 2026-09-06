@@ -3,8 +3,8 @@ import { supabase } from '../lib/supabase'
 import { apiFetch } from '../lib/api'
 import { xpThreshold } from '../domain/xpCurve'
 
-// ── Level/XP summary, shared by TopBar's profile ring, the mobile
-// level bar, and the burger menu's profile row ──────────────────
+// ── Level/XP summary, shared by the HUD's level roundel, the pass
+// and the settings ─────────────────────────────────────────────
 // A small shared store rather than one fetch per consumer: `cache` is
 // the last known summary, `listeners` are every currently-mounted
 // hook instance's setState. Real fetches are TTL'd so navigating

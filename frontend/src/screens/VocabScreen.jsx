@@ -6,7 +6,7 @@ import {
 } from '../lib/translationCache'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import RatingBar from '../components/study/RatingBar'
 import {
   MCQGrid, DoneMessage, DeckProgress,
@@ -322,7 +322,7 @@ export default function VocabScreen({ session }) {
   if (!studyBy) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.vocabulary} autoHide />
+        <ScreenBar onBack={() => navigate('/learn')} title={t.vocabulary} />
         <main id="main-content">
           <SelectionScreen>
             <ModeSelector
@@ -350,7 +350,7 @@ export default function VocabScreen({ session }) {
   if (studyBy === 'level' && !level) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} JLPT`} autoHide />
+        <ScreenBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} JLPT`} />
         <main id="main-content">
           <SelectionScreen>
             <LevelSelector onSelect={setLevel} />
@@ -364,7 +364,7 @@ export default function VocabScreen({ session }) {
   if (studyBy === 'theme' && !theme) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} — ${t.byTheme}`} autoHide />
+        <ScreenBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} — ${t.byTheme}`} />
         <main id="main-content">
           <SelectionScreen>
             <ThemeSelector
@@ -384,7 +384,7 @@ export default function VocabScreen({ session }) {
       : t.vocabulary
     return (
       <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={tierTitle} autoHide />
+        <ScreenBar onBack={() => setStudyBy(null)} title={tierTitle} />
         <main id="main-content">
           <SelectionScreen>
             <TierSelector
@@ -429,7 +429,7 @@ export default function VocabScreen({ session }) {
       : MODES.filter(m => m.key !== FAST_REVIEW)
     return (
       <div className="screen">
-        <TopBar onBack={goBack} title={backTitle} autoHide />
+        <ScreenBar onBack={goBack} title={backTitle} />
         <main id="main-content">
           <SelectionScreen>
             <ModeSelector modes={modesWithReview} onSelect={startMode} />
@@ -443,7 +443,7 @@ export default function VocabScreen({ session }) {
   if (reviewing) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setReviewing(false)} title={`${t.vocabulary} ${level} — ${t.modeReview}`} autoHide />
+        <ScreenBar onBack={() => setReviewing(false)} title={`${t.vocabulary} ${level} — ${t.modeReview}`} />
         {/* 藍色, per DESIGN.md's "the pigment is injected once" — see
             DecksScreen's comment for why it sits on <main> and not on
             .screen. Both study shells carry it, review and quiz alike. */}
@@ -499,7 +499,7 @@ export default function VocabScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${sourceLabel} — ${title}`} autoHide />
+      <ScreenBar onBack={() => setMode(null)} title={`${t.vocabulary} ${sourceLabel} — ${title}`} />
       <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
       <main id="main-content" className="container quiz-area"
         style={{ '--line-color': 'var(--line-vocab)' }}>

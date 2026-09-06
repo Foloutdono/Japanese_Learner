@@ -1,9 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { DepartureGate } from './components/station/DepartureGate'
 import { TrainDoor } from './components/station/TrainDoor'
 import { TicketGate } from './components/station/TicketGate'
 import { UpdateToast, OfflineNote } from './components/ui/UpdateToast'
 import { sectionFor, HOME_STATION } from './config/stations'
+import { getTabs } from './config/tabs'
+import { Shell, StageFrame } from './components/chrome/Shell'
 import { identityFor } from './config/identity'
 import { apiJsonWithTimeout } from './lib/api'
 // Development-only. Vite statically replaces import.meta.env.DEV with
@@ -20,7 +22,8 @@ import { LangProvider, useLang } from './LangContext'
 import LandingScreen from './screens/LandingScreen'
 import AuthScreen  from './screens/AuthScreen'
 import OnboardingFlow from './screens/OnboardingFlow'
-import HomeScreen  from './screens/HomeScreen'
+import LearnScreen from './screens/LearnScreen'
+import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
 import KanaScreen  from './screens/KanaScreen'
 import VocabScreen from './screens/VocabScreen'
@@ -48,9 +51,10 @@ import AppLoading from './screens/AppLoading'
 // need to remember to set its own title, and the six that forgot the
 // theme snippet are the evidence for how that goes.
 //
-// The route's own title comes from the same pair TopBar uses —
-// sectionFor for stations, identityFor for the two pass routes — so a
-// new station added to stations.js gets a document title for free.
+// The route's own title comes from the same registries the bar uses —
+// sectionFor for stations, identityFor for the two pass routes, and
+// the tab itself for a gate's root — so a new station added to
+// stations.js gets a document title for free.
 function DocumentHead() {
   const { t } = useLang()
   const { pathname } = useLocation()
@@ -58,11 +62,54 @@ function DocumentHead() {
   useEffect(() => {
     const identity = identityFor(pathname, t)
     const section = identity ? null : sectionFor(pathname, t)
-    const screen = identity?.title ?? section?.title
+    const tab = identity || section ? null : getTabs(t).find(x => x.path === pathname)
+    const screen = identity?.title ?? section?.title ?? tab?.label
     document.title = screen ? `${screen} — ${t.appTitle}` : t.appTitle
   }, [pathname, t])
 
   return null
+}
+
+// ── Moved ──
+// Every path the app has ever had stays reachable: the old top-level
+// routes (/kana, /decks/<id>, /exam/<id>/results …) were live for
+// months, sit in browser histories and bookmarks, and a 404 on a URL
+// that used to work is the worst possible outcome of a rename. Each
+// one redirects to its place behind a gate (config/tabs.js), keeping
+// its params and its query (`/kana?set=…`, `/exam/<id>?exclude=…`).
+// `replace`, so Back from the destination leaves rather than bouncing.
+const MOVED = [
+  ['/kana',                    '/learn/kana'],
+  ['/vocab',                   '/learn/vocab'],
+  ['/kanji',                   '/learn/kanji'],
+  ['/grammar',                 '/learn/grammar'],
+  ['/decks',                   '/learn/decks'],
+  ['/decks/:deck_id',          '/learn/decks/:deck_id'],
+  ['/decks/:deck_id/study',    '/learn/decks/:deck_id/study'],
+  ['/reading',                 '/practice/reading'],
+  ['/reading-comprehension',   '/practice/comprehension'],
+  ['/translation',             '/practice/translation'],
+  ['/exam',                    '/practice/exam'],
+  ['/exam/:examId',            '/practice/exam/:examId'],
+  ['/exam/:examId/results',    '/practice/exam/:examId/results'],
+  // Merged into the analyzer by plan 027; the analyzer moved behind
+  // the dictionary's door in plan 068.
+  ['/analyzer',                '/dictionary/analyzer'],
+  ['/phrase-analyzer',         '/dictionary/analyzer'],
+  ['/video',                   '/dictionary/analyzer'],
+  ['/stats',                   '/profile/stats'],
+  ['/settings',                '/profile/settings'],
+  // The Daruma Hall and the Storehouse were retired with the rest of
+  // the profile's gamification; they go home to the pass they hung off.
+  ['/daruma',                  '/profile'],
+  ['/storehouse',              '/profile'],
+]
+
+function Moved({ to }) {
+  const params = useParams()
+  const { search, hash } = useLocation()
+  const path = to.replace(/:(\w+)/g, (_, key) => params[key])
+  return <Navigate to={path + search + hash} replace />
 }
 
 export default function App() {
@@ -201,45 +248,50 @@ export default function App() {
     <LangProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/"                     element={<HomeScreen session={session} />} />
-          {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
-          <Route path="/today"                element={<TodayScreen session={session} />} />
-          <Route path="/kana"                 element={<KanaScreen session={session} />} />
-          <Route path="/vocab"                element={<VocabScreen session={session} />} />
-          <Route path="/kanji"                element={<KanjiScreen session={session} />} />
-          <Route path="/stats"                element={<StatsScreen session={session} />} />
-          <Route path="/dictionary"           element={<DictionaryScreen session={session} />} />
-          <Route path="/decks"                element={<DecksScreen session={session} />} />
-          <Route path="/decks/:deck_id"       element={<DeckDetailScreen session={session} />} />
-          <Route path="/decks/:deck_id/study" element={<StudyScreen session={session} />} />
-          <Route path="/grammar"              element={<GrammarScreen session={session} />} />
-          <Route path="/analyzer"             element={<AnalyzerScreen session={session} />} />
-          {/* Merged into /analyzer by plan 027. Kept as redirects, not
-              deleted: both paths have been live, are in browser history
-              and may be bookmarked, and a 404 on a URL that used to work
-              is the worst possible outcome of a rename. `replace` so Back
-              from the analyzer goes home rather than back to the redirect. */}
-          <Route path="/phrase-analyzer"      element={<Navigate to="/analyzer" replace />} />
-          <Route path="/video"                element={<Navigate to="/analyzer" replace />} />
-          <Route path="/reading"              element={<ReadingScreen session={session} />} />
-          <Route path="/reading-comprehension" element={<ReadingComprehensionScreen session={session} />} />
-          <Route path="/profile" element={<ProfileScreen session={session} />} />
-          <Route path="/settings" element={<SettingsScreen session={session} />} />
-          {/* No /:sectionId segment: every generated paper has exactly
-              one section (see each backend/study/exam_*_gen.py), so it
-              was a parameter with one legal value and a picker screen
-              that only ever offered one choice. */}
-          <Route path="/exam" element={<ExamScreen session={session} />} />
-          <Route path="/exam/:examId" element={<ExamRunner session={session} />} />
-          <Route path="/exam/:examId/results" element={<ExamResult session={session} />} />
-          <Route path="/translation" element={<TranslationScreen session={session} />} />
-          {/* The Daruma Hall and the Storehouse were retired with the
-              rest of the profile's gamification. Their paths have been
-              live and may be bookmarked, so they go home to the pass
-              they hung off rather than to a blank page — same reasoning
-              as the analyzer redirects above. */}
-          <Route path="/daruma" element={<Navigate to="/profile" replace />} />
-          <Route path="/storehouse" element={<Navigate to="/profile" replace />} />
+          {/* 車内 — the shell (plan 068): the HUD, the screen, the five
+              gates. One chrome at every width. */}
+          <Route element={<Shell />}>
+            {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
+            <Route path="/today"                element={<TodayScreen session={session} />} />
+            <Route path="/learn"                element={<LearnScreen session={session} />} />
+            <Route path="/learn/decks"          element={<DecksScreen session={session} />} />
+            <Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={session} />} />
+            <Route path="/practice"             element={<PracticeScreen />} />
+            {/* No /:sectionId segment: every generated paper has exactly
+                one section (see each backend/study/exam_*_gen.py), so it
+                was a parameter with one legal value and a picker screen
+                that only ever offered one choice. */}
+            <Route path="/practice/exam"        element={<ExamScreen session={session} />} />
+            <Route path="/practice/exam/:examId/results" element={<ExamResult session={session} />} />
+            <Route path="/dictionary"           element={<DictionaryScreen session={session} />} />
+            <Route path="/dictionary/analyzer"  element={<AnalyzerScreen session={session} />} />
+            <Route path="/profile"              element={<ProfileScreen session={session} />} />
+            <Route path="/profile/stats"        element={<StatsScreen session={session} />} />
+            <Route path="/profile/settings"     element={<SettingsScreen session={session} />} />
+          </Route>
+
+          {/* The stage: both bars leave, the rating bar or the field
+              docks on the bottom edge, and the bar's ‹ is the way out.
+              The study screens still carry their own selection phase
+              (plans 070–071 split it off onto the shell). */}
+          <Route element={<StageFrame />}>
+            <Route path="/learn/kana"                 element={<KanaScreen session={session} />} />
+            <Route path="/learn/vocab"                element={<VocabScreen session={session} />} />
+            <Route path="/learn/kanji"                element={<KanjiScreen session={session} />} />
+            <Route path="/learn/grammar"              element={<GrammarScreen session={session} />} />
+            <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
+            <Route path="/practice/reading"           element={<ReadingScreen session={session} />} />
+            <Route path="/practice/comprehension"     element={<ReadingComprehensionScreen session={session} />} />
+            <Route path="/practice/translation"       element={<TranslationScreen session={session} />} />
+            <Route path="/practice/exam/:examId"      element={<ExamRunner session={session} />} />
+          </Route>
+
+          {/* The gate hall retired with the chrome; the front door is
+              the run. */}
+          <Route path="/" element={<Navigate to="/today" replace />} />
+          {MOVED.map(([from, to]) => (
+            <Route key={from} path={from} element={<Moved to={to} />} />
+          ))}
           {import.meta.env.DEV && (
             <Route path="/dev/rewards" element={<RewardsPreview />} />
           )}
@@ -272,12 +324,12 @@ export default function App() {
         <TrainDoor />
 
         {/* The onboarding finale: the learner's FIRST pass through the
-            改札, played over the already-mounted router (HomeScreen is
+            改札, played over the already-mounted router (the run is
             under the scrim from frame one) — rendered here and not by
             OnboardingFlow, which has just unmounted and would take the
             cutscene down mid-wipe with it. onNavigate is a no-op
-            because '/' is already where the router mounts. Under
-            prefers-reduced-motion TicketGate fires both callbacks
+            because '/' (→ /today) is already where the router mounts.
+            Under prefers-reduced-motion TicketGate fires both callbacks
             synchronously and renders nothing, per house rule. */}
         {onboarding === 'finishing' && (
           <TicketGate

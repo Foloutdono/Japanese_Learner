@@ -76,7 +76,9 @@ const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 async function renderScreen() {
   const screen = await render(
     <LangProvider>
-      <MemoryRouter>
+      {/* At its own route: the plate reads the section off the pathname
+          (config/tabs.js), and '/' names no station any more. */}
+      <MemoryRouter initialEntries={['/dictionary/analyzer']}>
         <AnalyzerScreen session={{}} />
       </MemoryRouter>
     </LangProvider>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { board } from '../stores/boarding'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
@@ -59,7 +59,7 @@ export default function ExamScreen({ session }) {
   if (!level) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.examTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/practice')} title={t.examTitle} />
         <main id="main-content">
           <SelectionScreen>
             {exams === null && <Loading />}
@@ -104,7 +104,7 @@ export default function ExamScreen({ session }) {
           ? {
               label: t.examFreshPaper,
               title: t.examFreshPaperHint,
-              onClick: () => board(() => navigate(`/exam/${exam.id}?exclude=${exam.revision}`)),
+              onClick: () => board(() => navigate(`/practice/exam/${exam.id}?exclude=${exam.revision}`)),
             }
           : undefined,
       }
@@ -112,14 +112,14 @@ export default function ExamScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => setLevel(null)} title={`${t.examTitle} ${level}`} autoHide />
+      <ScreenBar onBack={() => setLevel(null)} title={`${t.examTitle} ${level}`} />
       <main id="main-content">
         <SelectionScreen>
           <ModeSelector
             modes={modes}
             onSelect={examId => {
               playUi('click-screen-selection')
-              board(() => navigate(`/exam/${examId}`))
+              board(() => navigate(`/practice/exam/${examId}`))
             }}
           />
         </SelectionScreen>

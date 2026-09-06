@@ -3,7 +3,7 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import RatingBar from '../components/study/RatingBar'
 import { MCQGrid, DoneMessage, DeckProgress } from '../components/study/QuizComponents'
 import { usePace } from '../components/study/usePace'
@@ -279,7 +279,7 @@ export default function StudyScreen({ session }) {
   if (!mode) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/decks')} title={deck?.name ?? t.deckFallbackTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/learn/decks')} title={deck?.name ?? t.deckFallbackTitle} />
         {/* No `heading` — /decks/:id/study resolves to 教材 station by
             prefix now (see config/stations.js), so the plate names the
             screen and a "Choose your training mode" title under it
@@ -358,10 +358,9 @@ export default function StudyScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar
+      <ScreenBar
         onBack={() => setMode(null)}
         title={`${deck?.name ?? ''} — ${title}`}
-        autoHide
         // The toggle is keyed on the DECK's structure, not on whether
         // any browsed-in kanji cards happen to be present — a deck made
         // entirely of hand-written kanji cards used to never show it at

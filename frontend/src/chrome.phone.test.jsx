@@ -1,0 +1,231 @@
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render } from 'vitest-browser-react'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { LangProvider } from './LangContext'
+import './index.css'
+
+// ── The chrome's contract at phone width (plan 068) ─────────────
+// The canvas's backbone, pinned against the real cascade at 390×844:
+// the HUD is sumi at --hud-h over the safe-area inset with the two
+// panel inks; the tab bar is five gates at --tabbar-h on the bottom
+// edge with the active one in full ink under a rule and the badge
+// clear of the glyph; under the shell every docked object clears the
+// tab bar and on a stage it sits on the inset; the bar prints the
+// section's pigment as its stripe; the sheet traps focus and closes on
+// Escape. The stores behind the HUD are stubbed: this is about the
+// chrome, not the feeds.
+
+const apiFetch = vi.fn(async () => ({ ok: false, status: 500, json: async () => ({}) }))
+vi.mock('./lib/api', () => ({
+  api: p => p,
+  apiFetch: (...a) => apiFetch(...a),
+  apiJson: vi.fn(async () => ({})),
+  apiJsonWithTimeout: vi.fn(),
+  apiUpload: vi.fn(),
+  ApiError: class ApiError extends Error {},
+}))
+vi.mock('./lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: async () => ({ data: { session: { access_token: 'tok' } } }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
+    },
+  },
+}))
+vi.mock('./stores/profileSummary', () => ({
+  useProfileSummary: () => ({ level: 12, xp: 1200, xpPrevLevel: 1000, xpForNext: 1500, username: 'Aiko', streak: 3 }),
+  useProfileSummaryState: () => ({ summary: null, failed: false }),
+  refreshSummary: vi.fn(),
+}))
+const journeyRef = { current: null }
+vi.mock('./stores/journey', () => ({
+  useJourneyStatus: () => ({ data: journeyRef.current, failed: false }),
+  refreshJourney: vi.fn(),
+  seedJourneyStatus: vi.fn(),
+}))
+const todayRef = { current: { total: 24, by_source: {}, lanes: [], next_due: null } }
+vi.mock('./stores/today', () => ({
+  useTodaySummary: () => ({ data: todayRef.current, failed: false }),
+  refreshToday: vi.fn(),
+  seedTodaySummary: vi.fn(),
+}))
+vi.mock('./lib/audio', async (importOriginal) => ({
+  ...(await importOriginal()),
+  playClick: vi.fn(),
+}))
+globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
+
+const { Shell, StageFrame } = await import('./components/chrome/Shell')
+const { Bar } = await import('./components/chrome/Bar')
+const { Sheet } = await import('./components/chrome/Sheet')
+
+const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
+const HUD_H = 48
+const TABBAR_H = 50
+
+function mountShell(path = '/today', screen = <main id="main-content">here</main>) {
+  return render(
+    <LangProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route element={<Shell />}>
+            <Route path="/today" element={screen} />
+            <Route path="/learn" element={screen} />
+            <Route path="/learn/decks" element={screen} />
+            <Route path="/profile" element={screen} />
+          </Route>
+          <Route element={<StageFrame />}>
+            <Route path="/learn/kana" element={screen} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </LangProvider>
+  )
+}
+
+afterEach(() => { journeyRef.current = null })
+
+describe('the shell', () => {
+  it('stamps itself on the document and docks the content over the tab bar', async () => {
+    await mountShell()
+    await settle()
+    expect(document.documentElement.dataset.chrome).toBe('shell')
+    // Custom properties come back substituted: the tab bar's height and
+    // the (zero, in chromium) inset.
+    const dock = getComputedStyle(document.documentElement).getPropertyValue('--dock-bottom').replace(/\s/g, '')
+    expect(dock).toBe(`calc(${TABBAR_H}px+0px)`)
+    const content = document.querySelector('.phone__content')
+    expect(getComputedStyle(content).paddingBottom).toBe(`${TABBAR_H}px`)
+  })
+
+  it('leaves both bars on a stage and docks on the inset', async () => {
+    await mountShell('/learn/kana')
+    await settle()
+    expect(document.documentElement.dataset.chrome).toBe('stage')
+    expect(document.querySelector('.hud')).toBeNull()
+    expect(document.querySelector('.tabbar')).toBeNull()
+    const note = document.createElement('div')
+    note.className = 'dock-note'
+    document.body.appendChild(note)
+    expect(getComputedStyle(note).bottom).toBe('0px')
+    note.remove()
+  })
+})
+
+describe('the HUD', () => {
+  it('is sumi at its height, under the notch, with the level in a roundel and the pass beside it', async () => {
+    await mountShell()
+    await settle()
+    const hud = document.querySelector('.hud')
+    const inner = hud.querySelector('.hud__inner')
+    expect(getComputedStyle(inner).height).toBe(`${HUD_H}px`)
+    expect(getComputedStyle(hud).paddingTop).toBe('0px') // --safe-top is 0 in chromium
+    expect(getComputedStyle(hud).position).toBe('sticky')
+    const level = hud.querySelector('.hud__level')
+    expect(level.textContent).toBe('12')
+    expect(getComputedStyle(level).color).toBe(getComputedStyle(hud).color)
+    expect(hud.querySelector('.hud__pass')).toBeTruthy()
+    expect(hud.querySelectorAll('.hud__pass-ring')).toHaveLength(3)
+    // No contract yet: no panel, and nothing pretends there is one.
+    expect(hud.querySelector('.hud__status')).toBeNull()
+  })
+
+  it('prints the journey model\'s word on the station panel, with the drift', async () => {
+    journeyRef.current = {
+      goalLevel: 'N4', goalTargetDate: '2027-03-14', goalSetAt: '2026-09-01T00:00:00Z',
+      plannedPerDay: 10, itemsTotal: 1000, itemsDone: 100, actual14: 14, days14: 14,
+    }
+    await mountShell()
+    await settle()
+    const panel = document.querySelector('.hud__status')
+    expect(panel).toBeTruthy()
+    // 1 a day against 10 promised: the projected arrival is far past
+    // the printed one — late, by a delta the panel prints in days.
+    expect(panel.classList.contains('hud__status--delayed')).toBe(true)
+    expect(panel.querySelector('.hud__status-word').textContent.length).toBeGreaterThan(0)
+    expect(panel.querySelector('.hud__status-delta').textContent).toMatch(/\d/)
+  })
+})
+
+describe('the tab bar', () => {
+  it('is five gates on the bottom edge, the active one in full ink under a rule', async () => {
+    await mountShell('/learn')
+    await settle()
+    const bar = document.querySelector('.tabbar')
+    expect(getComputedStyle(bar).position).toBe('fixed')
+    expect(Math.round(bar.getBoundingClientRect().bottom)).toBe(window.innerHeight)
+    const tabs = bar.querySelectorAll('.tab')
+    expect(tabs).toHaveLength(5)
+    expect(tabs[0].tagName).toBe('A')
+    expect(getComputedStyle(tabs[0]).height).toBe(`${TABBAR_H}px`)
+    const on = bar.querySelector('.tab--on')
+    expect(on.getAttribute('aria-current')).toBe('page')
+    expect(on.querySelector('.tab__jp').textContent).toBe('学習')
+    expect(getComputedStyle(on).color).toBe(getComputedStyle(bar).color)
+    expect(getComputedStyle(on, '::before').height).toBe('2px')
+    const off = tabs[1]
+    expect(getComputedStyle(off).color).not.toBe(getComputedStyle(bar).color)
+  })
+
+  it('carries the due count on Today, clear of the glyph', async () => {
+    await mountShell('/profile')
+    await settle()
+    const today = [...document.querySelectorAll('.tab')].find(el => el.querySelector('.tab__jp').textContent === '本日')
+    const due = today.querySelector('.tab__due')
+    expect(due.textContent).toBe('24')
+    const glyph = today.querySelector('.tab__jp').getBoundingClientRect()
+    const badge = due.getBoundingClientRect()
+    expect(badge.left).toBeGreaterThanOrEqual(glyph.right - 2)
+  })
+
+  it('lights the gate a nested screen is behind', async () => {
+    await mountShell('/learn/decks')
+    await settle()
+    expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('学習')
+  })
+})
+
+describe('the bar', () => {
+  it('prints the roundel and the section\'s pigment as its stripe; the register form has neither', async () => {
+    const screen = await render(
+      <LangProvider>
+        <div>
+          <Bar code="KJ" title="Kanji" sub="JLPT" color="var(--line-kanji)" />
+          <Bar register title="Practice" sub="Four platforms" />
+        </div>
+      </LangProvider>
+    )
+    const [plate, register] = screen.container.querySelectorAll('.bar')
+    expect(plate.querySelector('.bar__roundel').textContent).toBe('KJ')
+    expect(plate.querySelector('h1.bar__title').textContent).toBe('Kanji')
+    const stripe = getComputedStyle(plate.querySelector('.bar__stripe'))
+    expect(stripe.height).toBe('2px')
+    expect(stripe.backgroundColor).toBe(getComputedStyle(plate.querySelector('.bar__roundel')).borderTopColor)
+    expect(register.querySelector('.bar__roundel')).toBeNull()
+    expect(getComputedStyle(register.querySelector('.bar__stripe')).height).toBe('1px')
+  })
+})
+
+describe('the sheet', () => {
+  it('rises from the bottom edge, holds focus, and closes on Escape', async () => {
+    const onClose = vi.fn()
+    await render(
+      <LangProvider>
+        <button type="button" id="opener">open</button>
+        <Sheet open onClose={onClose} jp="残高" cap="Balance">
+          <button type="button" id="first">one</button>
+          <button type="button" id="last">two</button>
+        </Sheet>
+      </LangProvider>
+    )
+    await settle()
+    const sheet = document.querySelector('.sheet')
+    expect(sheet.getAttribute('role')).toBe('dialog')
+    expect(getComputedStyle(sheet).position).toBe('fixed')
+    expect(Math.round(sheet.getBoundingClientRect().bottom)).toBe(window.innerHeight)
+    expect(document.querySelector('.scrim')).toBeTruthy()
+    expect(sheet.contains(document.activeElement)).toBe(true)
+    document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+})

@@ -5,10 +5,9 @@ import { render } from 'vitest-browser-react'
 // getComputedStyle reads back. These are stylesheet contracts on
 // fixture markup — the objects a phone user reaches for, pinned by the
 // real classes rather than by mounting whole screens (the same trick as
-// index.tokens.browser.test.jsx).
+// index.tokens.browser.test.jsx). The chrome itself is
+// chrome.phone.test.jsx.
 import './index.css'
-
-const HUD_H = 36 // --hud-h; --safe-bottom is 0 in chromium
 
 describe('the phone layout contract', () => {
   it('runs at phone width', () => {
@@ -16,24 +15,35 @@ describe('the phone layout contract', () => {
     expect(window.matchMedia('(max-width: 768px)').matches).toBe(true)
   })
 
-  it('the study stage clears the level bar and docks the rating bar on it', async () => {
+  it('the study stage docks the rating bar on the dock edge', async () => {
+    // No data-chrome on the document here: --dock-bottom is the inset
+    // alone (0 in chromium), as on a stage. The shell's own case is
+    // chrome.phone.test.jsx.
     const screen = await render(
       <main className="container quiz-area"><div className="rating-bar" /></main>
     )
     const area = screen.container.querySelector('.quiz-area')
     const bar  = screen.container.querySelector('.rating-bar')
-    expect(getComputedStyle(area).paddingBottom).toBe(`${HUD_H}px`)
+    expect(getComputedStyle(area).paddingBottom).toBe('0px')
     expect(getComputedStyle(bar).position).toBe('sticky')
-    expect(getComputedStyle(bar).bottom).toBe(`${HUD_H}px`)
+    expect(getComputedStyle(bar).bottom).toBe('0px')
   })
 
-  it('the level bar sits on the bottom edge at its own height', async () => {
-    const screen = await render(<div className="mobile-level-bar" />)
-    const bar = screen.container.querySelector('.mobile-level-bar')
-    expect(getComputedStyle(bar).display).not.toBe('none')
-    const rect = bar.getBoundingClientRect()
-    expect(rect.height).toBe(HUD_H)
-    expect(Math.round(rect.bottom)).toBe(window.innerHeight)
+  it('the same rules read the tab bar under the shell', async () => {
+    document.documentElement.dataset.chrome = 'shell'
+    try {
+      const screen = await render(
+        <div>
+          <main className="container quiz-area"><div className="rating-bar" /></main>
+          <div className="dock-note" />
+        </div>
+      )
+      expect(getComputedStyle(screen.container.querySelector('.quiz-area')).paddingBottom).toBe('50px')
+      expect(getComputedStyle(screen.container.querySelector('.rating-bar')).bottom).toBe('50px')
+      expect(getComputedStyle(screen.container.querySelector('.dock-note')).bottom).toBe('50px')
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
   })
 
   it('a drawn stroke never scrolls the page: touch-action none on the canvases', async () => {
@@ -57,21 +67,6 @@ describe('the phone layout contract', () => {
     expect(getComputedStyle(document.documentElement).overscrollBehaviorY).toBe('none')
     const screen = await render(<div className="rating-bar" />)
     expect(getComputedStyle(screen.container.querySelector('.rating-bar')).userSelect).toBe('none')
-  })
-
-  it('the docked note sits above the level bar on a phone', async () => {
-    const screen = await render(<div className="dock-note" />)
-    expect(getComputedStyle(screen.container.querySelector('.dock-note')).bottom).toBe(`${HUD_H}px`)
-  })
-
-  it('the drawer reads the inset tokens, not a raw env()', async () => {
-    const screen = await render(
-      <div className="burger-drawer"><div className="burger-drawer__pocket" /></div>
-    )
-    const pocket = screen.container.querySelector('.burger-drawer__pocket')
-    // 14px + --safe-bottom (0 here): the same number the raw env() gave,
-    // now through the token that carries the fallback.
-    expect(getComputedStyle(pocket).paddingBottom).toBe('14px')
   })
 
   it('a section header keeps the tighter phone rhythm', async () => {

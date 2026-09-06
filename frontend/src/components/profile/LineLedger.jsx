@@ -1,4 +1,4 @@
-import { getNavLinks } from '../../config/navLinks'
+import { getSections } from '../../config/tabs'
 import { stationFor } from '../../config/stations'
 import { TRACKED_LINES, lineTotals } from '../../domain/lineProgress'
 
@@ -45,7 +45,7 @@ export function LineMark({ section, suffix = null }) {
 }
 
 export function LineLedger({ stats, t, navigate }) {
-  const lines = getNavLinks(t).filter(s => TRACKED_LINES[s.path])
+  const lines = getSections('learn', t).filter(s => TRACKED_LINES[s.path])
   if (!lines.length) return null
 
   return (

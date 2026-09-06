@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi, playCorrect } from '../lib/audio'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import QuestionRenderer from '../exam/QuestionRenderer'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
@@ -141,7 +141,7 @@ export default function ExamResult({ session }) {
   if (loaded === null && attemptId) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/practice/exam')} title={t.examTitle} />
         <main id="main-content"><Loading /></main>
       </div>
     )
@@ -150,12 +150,12 @@ export default function ExamResult({ session }) {
   if (!summary || !exam || !sectionStats) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/exam')} title={t.examTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/practice/exam')} title={t.examTitle} />
         <main id="main-content" className="container exam-shell">
           <Empty
             icon={<PageIcon size={40} />}
             message={t.examResultMissing}
-            action={{ label: t.examBackToExams, onClick: () => navigate('/exam') }}
+            action={{ label: t.examBackToExams, onClick: () => navigate('/practice/exam') }}
           />
         </main>
       </div>
@@ -172,7 +172,7 @@ export default function ExamResult({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/exam')} title={paperTitle(exam, t)} autoHide />
+      <ScreenBar onBack={() => navigate('/practice/exam')} title={paperTitle(exam, t)} />
       <main id="main-content" className="container exam-shell">
         <div className={`exam-result-header${metTarget ? '' : ' exam-result-header--low'}`}>
           <ScoreRing pct={sectionStats.pct} metTarget={metTarget} />
@@ -262,7 +262,7 @@ export default function ExamResult({ session }) {
           })}
 
         <div className="exam-nav-buttons exam-nav-buttons--result">
-          <button type="button" className="btn-secondary exam-nav-btn" onClick={() => { playUi('click-screen-selection'); navigate('/exam') }}>
+          <button type="button" className="btn-secondary exam-nav-btn" onClick={() => { playUi('click-screen-selection'); navigate('/practice/exam') }}>
             {t.examBackToExams}
           </button>
           {/* A NEW paper, not this one again. Re-sitting a paper whose
@@ -278,7 +278,7 @@ export default function ExamResult({ session }) {
             className="btn-primary exam-nav-btn"
             onClick={() => {
               playUi('click-screen-selection')
-              navigate(`/exam/${examId}?exclude=${exam.revision}`, { replace: true })
+              navigate(`/practice/exam/${examId}?exclude=${exam.revision}`, { replace: true })
             }}
           >
             {t.examNewPaper}

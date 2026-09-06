@@ -156,8 +156,8 @@ export function JourneyPass({ session, fallbackStartLevel = null, renderPass }) 
             reprintError={reprintError}
             onFlipBack={() => setFlipped(false)}
             onReprint={reprint}
-            onResume={() => navigate('/')}
-            onOffice={() => navigate('/settings#goal')}
+            onResume={() => navigate('/today')}
+            onOffice={() => navigate('/profile/settings#goal')}
           />
         </div>
       </div>

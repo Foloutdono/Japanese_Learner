@@ -19,7 +19,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { WallMap } = await import('./WallMap')
 
 const SECTIONS = [
-  { path: '/kanji', title: 'Kanji', icon: '漢字', color: 'var(--accent)' },
+  { path: '/learn/kanji', title: 'Kanji', icon: '漢字', color: 'var(--accent)' },
 ]
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']

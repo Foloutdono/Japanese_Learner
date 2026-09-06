@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { StationHeader } from '../components/station/StationHeader'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
@@ -548,7 +548,7 @@ export default function AnalyzerScreen({ session }) {
 
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.analyzerTitle} autoHide />
+        <ScreenBar onBack={() => navigate('/dictionary')} title={t.analyzerTitle} />
         <main id="main-content">
           <SelectionScreen>
             <ModeSelector
@@ -639,7 +639,7 @@ export default function AnalyzerScreen({ session }) {
           AS the learner re-boards the same platform; picking a
           different one is a mode switch and starts fresh (see
           boardPlatform). */}
-      <TopBar onBack={() => setSource(null)} title={t.analyzerTitle} />
+      <ScreenBar onBack={() => setSource(null)} title={t.analyzerTitle} />
 
       <main id="main-content" className="container page-pad analyzer">
         <StationHeader />

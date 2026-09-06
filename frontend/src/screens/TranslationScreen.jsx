@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
@@ -278,7 +278,7 @@ export default function TranslationScreen({ session }) {
   if (!source) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.translationTitle ?? 'Translation'} />
+        <ScreenBar onBack={() => navigate('/practice')} title={t.translationTitle ?? 'Translation'} />
         <main id="main-content">
           <SelectionScreen heading={t.selectStudySource}>
             <ModeSelector modes={SOURCES} onSelect={setSource} />
@@ -292,7 +292,7 @@ export default function TranslationScreen({ session }) {
   if (source === 'level' && !level) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
+        <ScreenBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
         <main id="main-content">
           <SelectionScreen heading={t.selectLevel}>
             <LevelSelector onSelect={setLevel} />
@@ -306,7 +306,7 @@ export default function TranslationScreen({ session }) {
   if (source === 'frequency' && !domain) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
+        <ScreenBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
         <main id="main-content">
           <SelectionScreen heading={t.selectDomain}>
             <ModeSelector modes={DOMAINS} onSelect={setDomain} />
@@ -319,7 +319,7 @@ export default function TranslationScreen({ session }) {
   if (source === 'frequency' && domain && tier == null) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setDomain(null)} title={t.translationTitle ?? 'Translation'} />
+        <ScreenBar onBack={() => setDomain(null)} title={t.translationTitle ?? 'Translation'} />
         <main id="main-content">
           <SelectionScreen heading={t.selectTier}>
             <TierPicker session={session} domain={domain} onSelect={setTier} t={t} />
@@ -379,11 +379,10 @@ function SessionView({
 
   return (
     <div className="screen">
-      <TopBar
+      <ScreenBar
         onBack={onBack}
         title={t.translationTitle ?? 'Translation'}
         tag={titleSuffix}
-        autoHide
       />
       {/* 瑠璃色, per DESIGN.md's "the pigment is injected once" — see
           DecksScreen's comment for why it sits on <main> and not on

@@ -29,9 +29,9 @@ import { TRACKED_LINES as TRACKED, lineStops, stopsTravelled } from '../../domai
 
 // Which map register each home section renders in, by path. The
 // tracked four come from domain/lineProgress (the profile's ride
-// ledger reads the same list); a new section added to navLinks lands
-// in `practice` by default (a row is never wrong, just unranked).
-const FACILITIES = new Set(['/dictionary', '/decks', '/exam'])
+// ledger reads the same list); a new section added to config/tabs.js
+// lands in `practice` by default (a row is never wrong, just unranked).
+const FACILITIES = new Set(['/dictionary', '/learn/decks', '/practice/exam'])
 
 function Track({ stops, travelled }) {
   // ONE scale for the stops and the train: a stop marks where its leg
@@ -195,7 +195,7 @@ export function WallMap({ sections, station, name, stats, bySource, onDepart }) 
           const code = stationFor(section.path).code
           // Personal decks are the one facility with a review queue of
           // its own, so its chip carries the waiting count.
-          const due = section.path === '/decks' ? (bySource?.personal ?? 0) : 0
+          const due = section.path === '/learn/decks' ? (bySource?.personal ?? 0) : 0
           return (
             <button
               type="button"

@@ -1,5 +1,5 @@
 import { useLang } from '../LangContext'
-import { getShowcase } from '../config/navLinks'
+import { getShowcase } from '../config/tabs'
 import { LightbulbIcon } from '../components/ui/Icons'
 
 // ── Landing screen ──────────────────────────────────────────
@@ -27,7 +27,7 @@ const TECH_STACK = ['React', 'Vite', 'React Router', 'Supabase']
 export default function LandingScreen({ onContinue }) {
   const { t } = useLang()
   // Everything worth advertising — every board row, whichever screen
-  // it lives on. See navLinks.js.
+  // it lives on. See config/tabs.js.
   const features = getShowcase(t)
 
   const pros = [

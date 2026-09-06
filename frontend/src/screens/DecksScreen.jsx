@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { StationHeader } from '../components/station/StationHeader'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
@@ -110,7 +110,7 @@ export default function DecksScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title={t.decks} autoHide />
+      <ScreenBar onBack={() => navigate('/learn')} title={t.decks} />
 
       {/* 蘇芳 is injected here, on the content shell, per DESIGN.md's
           "the pigment is injected once": everything below reads
@@ -314,12 +314,12 @@ export default function DecksScreen({ session }) {
                         <TrashIcon size={16} />
                       </button>
                       <button
-                        onClick={() => { playUi('click-mode-selection'); navigate(`/decks/${deck.id}`, { state: { deck } }) }}
+                        onClick={() => { playUi('click-mode-selection'); navigate(`/learn/decks/${deck.id}`, { state: { deck } }) }}
                         className="btn-secondary deck-card__act">
                         <PencilIcon size={14} /> {t.edit}
                       </button>
                       <button
-                        onClick={() => { playUi('click-screen-selection'); navigate(`/decks/${deck.id}/study`, { state: { deck } }) }}
+                        onClick={() => { playUi('click-screen-selection'); navigate(`/learn/decks/${deck.id}/study`, { state: { deck } }) }}
                         className="btn-primary deck-card__act">
                         <PlayIcon size={14} /> {t.study}
                       </button>

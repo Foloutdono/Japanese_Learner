@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { StationHeader } from '../components/station/StationHeader'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
@@ -22,7 +21,6 @@ const LIMIT = 50
 
 export default function DictionaryScreen({ session }) {
 	const { t, lang } = useLang()
-	const navigate            = useNavigate()
 
 	const [mode, setMode]             = useState('search') // 'search' | 'radical'
 	const [query, setQuery]           = useState('')
@@ -287,7 +285,7 @@ export default function DictionaryScreen({ session }) {
 
 	return (
 		<div className="screen">
-			<TopBar onBack={() => navigate('/')} title={t.dictionaryTitle} />
+			<ScreenBar title={t.dictionaryTitle} />
 
 			<main id="main-content" className="container dict-page">
 				<StationHeader />

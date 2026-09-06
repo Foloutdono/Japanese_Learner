@@ -62,6 +62,26 @@ const nav = {
   waitingServer:     'Waking the server…',
   errorTitle:        'That did not work',
   errorHint:         'Check your connection — your progress is safe.',
+  // ── The chrome (plan 068): the five gates and the HUD ──
+  tabLearn:          'Learn',
+  tabPractice:       'Practice',
+  tabToday:          'Today',
+  tabDictionary:     'Dictionary',
+  tabProfile:        'Profile',
+  tabBarLabel:       'Sections',
+  practiceSub:       'Four platforms',
+  hudStatusLabel:    'Goal status',
+  hudOffline:        'Offline',
+  hudDays:           (n) => `${n}d`,
+  // The station panel's word. Late twice on purpose: the days beside
+  // it and the ink tell running behind from delayed.
+  hudStatus: {
+    ahead:          'Ahead',
+    onTime:         'On time',
+    slightlyBehind: 'Late',
+    delayed:        'Late',
+    suspended:      'Suspended',
+  },
   import:            'Import',
   export:            'Export',
   exportFailed:      'Export failed',

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import RatingBar from '../components/study/RatingBar'
 import {
   CharDisplay, MCQGrid, DoneMessage,
@@ -214,7 +214,7 @@ export default function KanaScreen({ session }) {
   if (!selectedSet) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.kana} autoHide />
+        <ScreenBar onBack={() => navigate('/learn')} title={t.kana} />
         <main id="main-content">
           <SelectionScreen>
             <ModeSelector
@@ -231,7 +231,7 @@ export default function KanaScreen({ session }) {
   if (!mode && !reviewing) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setSelectedSet(null)} title={selectedSet.label} autoHide />
+        <ScreenBar onBack={() => setSelectedSet(null)} title={selectedSet.label} />
         <main id="main-content">
           <SelectionScreen>
             <ModeSelector
@@ -249,7 +249,7 @@ export default function KanaScreen({ session }) {
     const dictCategory = selectedSet.slug.startsWith('hiragana') ? 'hiragana' : 'katakana'
     return (
       <div className="screen">
-        <TopBar onBack={() => setReviewing(false)} title={`${selectedSet.label} — ${modeLabel(t, FAST_REVIEW)}`} autoHide />
+        <ScreenBar onBack={() => setReviewing(false)} title={`${selectedSet.label} — ${modeLabel(t, FAST_REVIEW)}`} />
         {/* 朱色, per DESIGN.md's "the pigment is injected once" — see
             DecksScreen's comment for why it sits on <main> and not on
             .screen. Both of this screen's study shells carry it, review
@@ -321,7 +321,7 @@ export default function KanaScreen({ session }) {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => setMode(null)} title={`${selectedSet.label} — ${title}`} autoHide/>
+      <ScreenBar onBack={() => setMode(null)} title={`${selectedSet.label} — ${title}`}/>
       <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
       <main id="main-content" className="container quiz-area"
         style={{ '--line-color': 'var(--line-kana)' }}>

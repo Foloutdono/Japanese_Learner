@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
@@ -78,7 +78,7 @@ export default function RewardsPreview() {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title="Rewards preview" />
+      <ScreenBar onBack={() => navigate('/')} title="Rewards preview" />
 
       <main id="main-content" className="container preview-container">
         <p className="preview-lede">

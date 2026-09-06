@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
@@ -368,7 +368,7 @@ export default function ReadingScreen({ session }) {
   if (!source) {
     return (
       <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.readingTitle} />
+        <ScreenBar onBack={() => navigate('/practice')} title={t.readingTitle} />
         <main id="main-content">
           <SelectionScreen heading={t.selectStudySource}>
             {/* 'mastery' needs no further choice, so choosing it is the
@@ -388,7 +388,7 @@ export default function ReadingScreen({ session }) {
   if (source === 'level' && !level) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
+        <ScreenBar onBack={() => setSource(null)} title={t.readingTitle} />
         <main id="main-content">
           <SelectionScreen heading={t.selectLevel}>
             <LevelSelector onSelect={lvl => board(() => setLevel(lvl))} />
@@ -402,7 +402,7 @@ export default function ReadingScreen({ session }) {
   if (source === 'frequency' && !domain) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
+        <ScreenBar onBack={() => setSource(null)} title={t.readingTitle} />
         <main id="main-content">
           <SelectionScreen heading={t.selectDomain}>
             <ModeSelector modes={DOMAINS} onSelect={setDomain} />
@@ -415,7 +415,7 @@ export default function ReadingScreen({ session }) {
   if (source === 'frequency' && domain && tier == null) {
     return (
       <div className="screen">
-        <TopBar onBack={() => setDomain(null)} title={t.readingTitle} />
+        <ScreenBar onBack={() => setDomain(null)} title={t.readingTitle} />
         <main id="main-content">
           <SelectionScreen heading={t.selectTier}>
             <TierPicker session={session} domain={domain} onSelect={tr => board(() => setTier(tr))} t={t} />
@@ -490,10 +490,9 @@ function SessionView({
 
   return (
     <div className="screen">
-      <TopBar
+      <ScreenBar
         onBack={onBack}
         title={`${t.readingTitle} — ${titleSuffix}`}
-        autoHide
       />
       {/* 緑青, per DESIGN.md's "the pigment is injected once" — see
           DecksScreen's comment for why it sits on <main> and not on
