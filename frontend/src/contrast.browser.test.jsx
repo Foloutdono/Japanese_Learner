@@ -341,13 +341,74 @@ const Fixture = () => (
       </div>
     </div>
 
-    {/* ReadingComprehensionScreen.jsx:264 */}
-    <div className="comp-options">
-      <button className="comp-option-btn">
-        <span className="comp-option-btn__letter">A.</span>
-        answer
+    {/* ── Practice (plan 072): the sessions on the stage and the exam's
+        result under the bar. Inks the contract cannot predict — a pigment
+        mixed toward the ink on the card or on a tint of itself, the soft
+        ink on the sheet bar's sumi. */}
+    <main className="stage" style={{ '--line-color': 'var(--line-reading)' }}>
+      <div className="stage__head">
+        <span className="stage__streak pr-streak">3</span>
+      </div>
+      <div className="timer"><span className="timer__label pr-timer">12.3s</span></div>
+      <div className="prompt-card prompt-card--footed">
+        <div className="prompt-card__body prompt-card__body--prose prose">
+          <span className="prose__label pr-label">EN</span>
+          <span className="prose__romaji pr-romaji">ashita wa</span>
+          <span className="prose__ai pr-ai">Natural and correct.</span>
+          <span className="prose__verdict prose__verdict--ok pr-ok">Correct!</span>
+          <span className="prose__verdict prose__verdict--x pr-x">Not quite</span>
+        </div>
+      </div>
+      <div className="prompt-card prompt-card--ask">
+        <span className="type-badge type-badge--comprehension pr-badge">Detail</span>
+        <span className="cap pr-cap">Q7</span>
+      </div>
+      <div className="surface qrows">
+        <div className="qrow-item">
+          <button type="button" className="qrow">
+            <span className="qrow__q">Q3</span>
+            <span className="qrow__note pr-note">You · B — correct · D</span>
+          </button>
+        </div>
+      </div>
+      <div className="exam-meta"><span className="exam-timer exam-timer--low pr-low">0:42</span></div>
+      <button type="button" className="exam-mondai pr-mondai">
+        <span><b className="exam-mondai__part pr-part">Part 3</b> · Show instructions</span>
       </button>
-    </div>
+      <div className="exam-nav"><button type="button" className="exam-flag exam-flag--on pr-flag">f</button></div>
+      <div className="exam-sheetbar">
+        <button type="button" className="exam-sheetbar__open">
+          <span className="exam-sheetbar__label">
+            <b className="exam-sheetbar__fig pr-fig">7 / 21</b>
+            <span className="exam-sheetbar__cap pr-sheetcap">Answer sheet</span>
+          </span>
+        </button>
+        <button type="button" className="exam-finish pr-finish">Finish</button>
+      </div>
+    </main>
+    <main className="practice" style={{ '--line-color': 'var(--line-exam)' }}>
+      <div className="exam-result-head">
+        <div className="exam-result-figs">
+          <span className="exam-result-figs__cap pr-rcap">correct</span>
+          <span className="exam-result-figs__note pr-rnote">Practice target 60%</span>
+        </div>
+      </div>
+      <p className="hint pr-hint">Tap a question.</p>
+      <div className="surface exam-review">
+        <div className="exam-review__part">
+          <div className="exam-group"><b className="exam-group__part">Part 1</b><span className="exam-group__score pr-gscore">6 / 6</span></div>
+          <button type="button" className="exam-review-row">
+            <span className="exam-review-row__mark exam-review-row__mark--x pr-mark-x">x</span>
+            <span className="exam-review-row__jp pr-rjp">この本は</span>
+            <span className="exam-review-row__blank pr-rblank">Left blank</span>
+          </button>
+          <button type="button" className="exam-review-row">
+            <span className="exam-review-row__mark exam-review-row__mark--ok pr-mark-ok">v</span>
+          </button>
+        </div>
+      </div>
+      <div className="platform-slot"><span className="platform-slot__action pr-slot">Different paper</span></div>
+    </main>
 
     {/* ── The 定期入れ profile (2026-09) ──
         Inks the contract cannot predict, because each is a color-mix
@@ -514,7 +575,35 @@ const SITES = [
   ['.btn-secondary', 'deck detail ghost button (shared family)'],
   ['.phrase-word-card__reading', 'token card reading'],
   ['.phrase-word-card__pos', 'token card part of speech'],
-  ['.comp-option-btn__letter', 'comprehension option letter'],
+
+  // Plan 072 — the practice sessions on the stage, the exam on the stage
+  // and its result under the bar.
+  ['.pr-streak', 'practice streak (warning ink mixed)'],
+  ['.pr-timer', 'practice timer label'],
+  ['.pr-label', 'prose label'],
+  ['.pr-romaji', 'prose romaji'],
+  ['.pr-ai', 'prose AI analysis'],
+  ['.pr-ok', 'verdict (success ink mixed)'],
+  ['.pr-x', 'verdict (danger ink mixed)'],
+  ['.pr-badge', 'question type badge (tinted)'],
+  ['.pr-cap', 'question cap'],
+  ['.pr-note', 'result row note'],
+  ['.pr-low', 'exam timer, last minute (danger ink mixed)'],
+  ['.pr-mondai', 'exam part row'],
+  ['.pr-part', 'exam part label'],
+  ['.pr-flag', 'exam flag, on (warning ink mixed)'],
+  ['.pr-fig', 'sheet bar count (on sumi)'],
+  ['.pr-sheetcap', 'sheet bar caption (soft ink on sumi)'],
+  ['.pr-finish', 'sheet bar finish (on sumi)'],
+  ['.pr-rcap', 'result figures caption'],
+  ['.pr-rnote', 'result figures note'],
+  ['.pr-hint', 'hint line'],
+  ['.pr-gscore', 'exam part score'],
+  ['.pr-mark-x', 'review mark, missed (danger ink on its tint)'],
+  ['.pr-mark-ok', 'review mark, correct (success ink on its tint)'],
+  ['.pr-rjp', 'review row question line'],
+  ['.pr-rblank', 'review row left blank'],
+  ['.pr-slot', 'paper slot (Different paper)'],
 
   // Plan 055's deck shelf, merged in after the guards were written.
 

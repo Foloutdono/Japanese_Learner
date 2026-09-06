@@ -20,45 +20,6 @@
    flips correctly with the light/dark theme for free since every
    colour here is a var(), never a literal hex. */
 
-/* Sits inside .container under the bar now, like every other screen
-   in the app — it used to be a bare full-page block with no masthead
-   at all, which is what made the exam feel like a different product
-   the moment you started one. .container already supplies the page
-   gutter, so this only sets the reading column and the bottom room. */
-.exam-shell {
-  width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
-  /* 模試's own pigment, injected once for everything below -- DESIGN.md,
-     "the pigment is injected once". Until plan 061 this section reached
-     for var(--accent) twenty-five times, and --accent IS --line-kana, so
-     the exam wore 仮名's vermillion throughout while --line-exam sat at
-     zero consumers.
-
-     Declared in CSS rather than as a JSX style the way the study screens
-     do it, because .exam-shell is a class only these two screens use and
-     they render SIX shells between them (loading, error and live
-     branches). One rule covers all six; six inline styles would have
-     had to stay in step, and a missed branch makes the pigment flicker
-     between states.
-
-     The list screen at /exam needs nothing: it renders inside
-     <SelectionScreen>, which derives the pigment from the route
-     (sectionFor -> navLinks' `color: var(--line-exam)`), so it has been
-     correct all along. */
-  --line-color: var(--line-exam);
-}
-/* Compound selector on purpose, not plain `.exam-shell`. This section
-   sits at the very top of index.css, so at equal specificity
-   every rule here loses on source order to index.css's own — including
-   `.container { padding: 0 24px }`, which silently flattened this
-   element's vertical padding to zero when it was written as a
-   single-class rule. The side gutter still comes from .container; the
-   top gap under the bar and the bottom room are set here. */
-.exam-shell.container {
-  padding-top: 28px;
-  padding-bottom: 72px;
-}
 
 /* ── Generating ──
    A never-before-opened paper is written on demand (several LLM calls
@@ -109,118 +70,389 @@
   color: var(--text-secondary);
 }
 
-/* ── Progress bar ── */
-.exam-progress-bar {
-  width: 100%;
-  height: 3px;
-  background: var(--border);
-  border-radius: 999px;
-  overflow: hidden;
-  margin-bottom: 16px;
+/* ── The runner (canvas ExamRunner, plan 072) ──
+   On the stage frame: both bars have left, and the exam's own head
+   row is the way out, the paper and the clock. The question card, the
+   way through the paper, and the sheet bar docked on the bottom edge
+   (the ≤768px block on .stage docks it the way it docks the rating
+   bar) follow in one column. Tokens only — DESIGN.md, the scales. */
+.exam-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
 }
-.exam-progress-bar__fill {
-  height: 100%;
-  background: var(--line-color, var(--line-exam));
-  transition: width 0.25s ease;
+.exam-meta__section {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+.exam-meta__jp {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.exam-timer {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  font-variant-numeric: tabular-nums;
+}
+/* Last minute. A class rather than an inline colour, so the urgency is
+   describable in one place — and can pulse, which an inline colour
+   couldn't. The danger pigment is mixed toward the ink: raw, it does
+   not clear 4.5:1 on the light sheet. */
+.exam-timer--low {
+  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
+  animation: exam-timer-pulse 1s ease-in-out infinite;
 }
 
-.exam-shell__meta {
+/* ── Part n · Show instructions ──
+   Instructions are byte-identical for every question inside a mondai,
+   so they open on its first question and fold away after — a row that
+   is the toggle, on every question. */
+.exam-mondai {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  text-align: left;
+}
+.exam-mondai__part {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+}
+.exam-mondai__text {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-line;
+  text-align: left;
+}
+
+/* ── The question card ──
+   The card is the stage's page (.prompt-card--ask, in the study block);
+   this only keeps the exam's own column. An exam question plus its MCQ
+   rows is denser than a flashcard, not sparser, so it earns no more
+   room than the rest of the study card column -- 640 is the right
+   number on purpose, not a default nobody chose (plan 049). */
+.exam-card.prompt-card {
+  --card-w: 640px;
+  width: 100%;
+}
+
+/* ── The way through the paper ── */
+.exam-nav {
+  display: grid;
+  grid-template-columns: 1fr 44px 1fr;
+  gap: var(--sp-3);
+}
+/* The flag ("come back to this one"): icon-only, so the box IS the
+   target, and 44 is the minimum. */
+.exam-flag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--r-panel);
+  border: 1px solid var(--surface-line);
+  background: transparent;
+  color: var(--text-secondary);
+}
+.exam-flag--on {
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+  border-color: color-mix(in srgb, var(--warning) 55%, transparent);
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+}
+
+/* ── The sheet bar ──
+   Sumi: the count and the word open the grid, the chips are the same
+   facts at a glance (done, flagged, and where you are), Finish sits
+   on the right. */
+.exam-sheetbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-top: auto;
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--r-card);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+}
+.exam-sheetbar__open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.exam-sheetbar__label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.exam-sheetbar__fig {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.exam-sheetbar__cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+  white-space: nowrap;
+}
+.exam-sheetbar__chips {
+  display: grid;
+  grid-template-columns: repeat(11, 8px);
+  gap: 3px;
+}
+.exam-sheetbar__chip {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+}
+.exam-sheetbar__chip--done { background: var(--text-on-panel-soft); }
+.exam-sheetbar__chip--flag { background: var(--warning); }
+.exam-sheetbar__chip--here { outline: 1px solid var(--accent2); outline-offset: 1px; }
+.exam-finish {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-card);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  background: transparent;
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+/* ── Answer sheet ──
+   The numbered grid, in the sheet the bar opens (the legend and the
+   chips below are its rows). */
+.exam-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+/* ── The result (canvas ExamResult) ──
+   Under the shell: the bar names the paper; the ring and the figures
+   head the page; the review is a surface of parts and rows. */
+.exam-result-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: var(--sp-4) 0;
+}
+/* The score ring: an arc for the score and a tick for the practice
+   target, so "48% against 60%" is one glance instead of two numbers
+   to compare by reading. */
+.exam-score-ring {
+  position: relative;
+  flex: none;
+  width: 108px;
+  height: 108px;
+}
+.exam-score-ring__svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.exam-score-ring__track { fill: none; stroke: var(--surface-line); stroke-width: 8; }
+.exam-score-ring__fill {
+  fill: none;
+  stroke: var(--success);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease;
+}
+.exam-score-ring--low .exam-score-ring__fill { stroke: var(--danger); }
+.exam-score-ring__tick { stroke: var(--text-secondary); stroke-width: 2; }
+.exam-score-ring__pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-heading);
+  font-variant-numeric: tabular-nums;
+}
+.exam-result-figs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+  text-align: left;
+}
+.exam-result-figs__score {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.exam-result-figs__cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.exam-result-figs__note {
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+/* The Missed-only chip sits at the header's right edge. */
+.section-header__chip { margin-left: auto; }
+.exam-review {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.exam-review__part + .exam-review__part { border-top: 1px solid var(--surface-line); }
+.exam-group {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 20px;
+  padding: var(--sp-3) var(--sp-4) var(--sp-2);
 }
-.exam-shell__section {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-.exam-shell__timer {
+.exam-group__part {
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-weight: 700;
+  font-size: var(--fs-sm);
+}
+.exam-group__score {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
-  letter-spacing: 0.03em;
 }
-/* Last minute. A class rather than the inline --timer-color the JSX
-   used to set, so the urgency is describable in one place — and can
-   pulse, which an inline colour couldn't. */
-.exam-shell__timer--low {
-  color: var(--danger);
+.exam-review-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-top: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+/* The mark: three outcomes, not two — a question left blank scores
+   like a wrong answer but isn't one. Pigment as ink is mixed toward
+   the text ink (the raw pigments do not clear 3:1 on the light sheet). */
+.exam-review-row__mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+}
+.exam-review-row__mark--ok {
+  background: color-mix(in srgb, var(--success) 20%, transparent);
+  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+}
+.exam-review-row__mark--x {
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  color: color-mix(in srgb, var(--danger) 45%, var(--text-primary));
+}
+.exam-review-row__mark--blank {
+  background: color-mix(in srgb, var(--text-secondary) 20%, transparent);
+  color: var(--text-secondary);
+}
+.exam-review-row__q {
+  flex: none;
+  width: 30px;
+  font-family: var(--font-display);
   font-weight: 700;
-  animation: exam-timer-pulse 1s ease-in-out infinite;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
 }
+.exam-review-row__jp {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.exam-review-row__blank {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.exam-review-row__chev { flex: none; color: var(--text-secondary); }
+.exam-review-row__detail {
+  padding: 0 var(--sp-4) var(--sp-5);
+  text-align: left;
+}
+
+
 @keyframes exam-timer-pulse {
   50% { opacity: 0.45; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .exam-shell__timer--low { animation: none; }
+  .exam-timer--low { animation: none; }
 }
 
-/* ── Mondai instructions strip ── */
-.exam-mondai-instructions {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 16px;
-  margin-bottom: 20px;
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  border-left: 3px solid var(--line-color, var(--line-exam));
-}
-.exam-mondai-instructions__label {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary));
-}
-.exam-mondai-instructions__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-/* Opens on the first question of a mondai and folds away after: the
-   instructions are byte-identical for every question inside one, and
-   redrawing four lines of kana above each of them pushed the question
-   itself below the fold on a phone. */
-.exam-mondai-instructions__toggle {
-  padding: 2px 0;
-  background: none;
-  border: none;
-  border-radius: 0;
-  color: var(--text-secondary);
-  font-size: 0.72rem;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.exam-mondai-instructions__toggle:hover { color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary)); }
-.exam-mondai-instructions__text {
-  font-size: 0.88rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
-  white-space: pre-line;
-}
 
-/* ── Question card ── */
-.exam-card-stage {
-  margin-bottom: 24px;
-}
-/* Plan 049 -- explicit rather than accidental. This element carries
-   class "prompt-card" too, so the base .prompt-card rule
-   (index.css:13659) already matches it and would hand it the ambient
-   --card-w (640px) even without a line here. Writing it down anyway:
-   an exam question plus its MCQ rows is denser than a flashcard, not
-   sparser, so it earns no more room than the rest of the study card
-   column -- 640 is the right number on purpose, not a default nobody
-   chose. */
-.exam-card.prompt-card {
-  --card-w: 640px;
-  max-height: none;
-  text-align: left;
-  padding: 28px 24px;
-}
 .exam-question__prompt {
   font-family: var(--font-jp);
   font-size: clamp(17px, 2.2vw, 20px);
@@ -403,114 +635,11 @@
   white-space: pre-line;
 }
 
-/* ── Bottom nav bar ── */
-.exam-nav-buttons {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 8px;
-}
-/* Only a layout hook now. Plan 061 moved this whole family onto the
-   shared buttons -- .btn-secondary for the plain ones, .btn-primary for
-   what was --primary -- so the fill, the ink, the 44px hit target and
-   the disabled treatment all come from there. The class survives because
-   .exam-confirm__actions and the phone query below both size by it.
 
-   The family moved TOGETHER on purpose. Plan 052 deferred this exact
-   migration because repointing only --primary would have put one 44px
-   button beside siblings still inheriting the bare `button` rule's ~37px
-   in the same flex row. */
-.exam-nav-btn { /* layout hook; see above */ }
 
-/* ── Result screen ── */
-.exam-result-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 36px 20px 30px;
-  margin-bottom: 14px;
-  background: var(--bg-card);
-  border-radius: var(--radius);
-}
-.exam-result-header__score {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-}
-/* The number the percentage is being judged against, stated plainly
-   next to it — a bare "48%" in red says you did badly without ever
-   saying badly against what. */
-.exam-result-header__target {
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  color: var(--text-secondary);
-  opacity: 0.85;
-  padding-top: 6px;
-  border-top: 1px solid var(--border);
-}
-.exam-result-disclaimer {
-  margin-bottom: 28px;
-  font-size: 0.75rem;
-  line-height: 1.6;
-  text-align: center;
-  color: var(--text-secondary);
-  opacity: 0.8;
-}
 
-.exam-review__title {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-.exam-review__hint {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
-}
-
-.exam-review-list {
-  border-top: 1px solid var(--border);
-  margin-bottom: 24px;
-}
-.exam-review-row {
-  border-bottom: 1px solid var(--border);
-}
-.exam-review-row__summary {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 14px 6px;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  color: var(--text-primary);
-  text-align: left;
-}
-.exam-review-row__icon {
-  width: 22px;
-  text-align: center;
-  font-weight: 700;
-}
-.exam-review-row--correct .exam-review-row__icon { color: var(--success); }
-.exam-review-row--wrong .exam-review-row__icon { color: var(--danger); }
-.exam-review-row__number {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-.exam-review-row__chevron { color: var(--text-secondary); }
-.exam-review-row__detail {
-  padding: 4px 6px 20px;
-}
 
 @media (max-width: 560px) {
-  .exam-shell.container { padding-top: 20px; padding-bottom: 56px; }
-  .exam-card.prompt-card { padding: 22px 16px; }
   .exam-flyer__dates { min-width: 0; }
   .exam-generating { padding: 44px 12px; }
 }
@@ -666,54 +795,7 @@
   white-space: pre-line;
 }
 
-/* ── Flag ("come back to this one") ── */
-.exam-flag-btn {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  /* 44px, not the 40 this shipped at: it is icon-only, so the box IS
-     the target, and 40 is under the minimum. The circle is kept -- it is
-     what tells a toggle apart from the rectangular nav buttons beside
-     it. */
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border-radius: 50%;
-  background: var(--bg-card);
-  color: var(--text-secondary);
-}
-.exam-flag-btn:hover { color: var(--accent2); }
-.exam-flag-btn--on {
-  background: color-mix(in srgb, var(--accent2) 16%, var(--bg-card));
-  color: var(--accent2);
-}
 
-/* ── Answer sheet ──
-   The numbered grid that replaced a linear Prev/Next walk and a
-   "3 / 21 answered" string which named a count but never which ones. */
-.exam-sheet {
-  margin-top: 20px;
-  padding: 14px 16px;
-  background: var(--bg-card);
-  border-radius: var(--radius);
-}
-.exam-sheet__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  margin-bottom: 12px;
-}
-.exam-sheet__title {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
 .exam-sheet__legend {
   display: flex;
   flex-wrap: wrap;
@@ -782,141 +864,16 @@
   outline-offset: 2px;
 }
 
-/* ── Finish ──
-   Available on every question, not only the last: skipping question 3
-   used to mean no way to submit short of walking to the end. */
-/* Also on .btn-primary now, so only its placement lives here: it spans
-   the sheet and sits below it. Padding, weight, ink and the disabled
-   opacity come from the family. */
-.exam-finish-btn {
-  width: 100%;
-  margin-top: 16px;
-}
 
-/* ── Inline confirm / error panels ──
-   Not window.confirm: it can't be themed, can't be translated by the
-   app's own locale, and is suppressed outright in some embedded
-   webviews — which for the leave-guard would mean silently losing the
-   guard rather than silently keeping it. */
-.exam-confirm {
-  margin-top: 16px;
-  padding: 16px 18px;
-  background: var(--bg-card);
-  border: 1px solid var(--line-color, var(--line-exam));
-  border-radius: var(--radius);
-}
-.exam-confirm--error { border-color: var(--danger); }
-.exam-confirm__title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 0.92rem;
-  margin-bottom: 6px;
-}
-.exam-confirm--error .exam-confirm__title { color: var(--danger); }
-.exam-confirm__body {
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
-  margin-bottom: 14px;
-}
-.exam-confirm__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.exam-confirm__actions .exam-nav-btn { flex: 1 1 auto; }
 
-/* ── Score ring ──
-   A bare red 48% says you did badly without saying badly against what.
-   The target is a tick on the ring, so the comparison is seen rather
-   than read off two numbers. */
-.exam-score-ring {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.exam-score-ring__track { stroke: var(--border); }
-.exam-score-ring__arc {
-  stroke: var(--success);
-  transition: stroke-dashoffset 0.6s ease;
-}
-.exam-result-header--low .exam-score-ring__arc { stroke: var(--danger); }
-.exam-score-ring__target { stroke: var(--text-secondary); }
-.exam-result-header__pct {
-  position: absolute;
-  font-family: 'Noto Serif JP', serif;
-  font-size: 2.1rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--success);
-}
-.exam-result-header__pct--low { color: var(--danger); }
 @media (prefers-reduced-motion: reduce) {
-  .exam-score-ring__arc { transition: none; }
+  .exam-score-ring__fill { transition: none; }
 }
 
-/* ── Review: filter + mondai grouping ── */
-.exam-review__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-}
-.exam-review__filter {
-  flex-shrink: 0;
-  padding: 7px 14px;
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-.exam-review__filter[aria-pressed="true"] {
-  background: var(--line-color, var(--line-exam));
-  color: var(--text-on-panel);
-}
-.exam-review__perfect {
-  padding: 22px 0 28px;
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--success);
-}
-.exam-review-group { margin-top: 18px; }
-.exam-review-group__title {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 4px;
-  font-family: 'Noto Serif JP', serif;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-.exam-review-group__score {
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-/* Blank is a third outcome, not a shade of wrong: it scores the same
-   and means something entirely different (ran out of time, or skipped
-   and never came back). */
-.exam-review-row--blank .exam-review-row__icon { color: var(--text-secondary); }
-.exam-review-row__blank {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-.exam-nav-buttons--result { margin-top: 28px; }
 
 @media (max-width: 560px) {
-  .exam-sheet { padding: 12px; }
   .exam-sheet__chip { width: 34px; height: 34px; font-size: 0.75rem; }
   .exam-audio-player { gap: 10px; padding: 10px 12px; }
-  .exam-confirm__actions .exam-nav-btn { flex-basis: 100%; }
   /* Inert, and left inert deliberately. `.mcq-row__tag` is also declared
      at top level further down this file (search for the "Your answer" /
      "Correct answer" block), at the same (0,1,0) specificity; a media
@@ -5246,14 +5203,15 @@ button:focus-visible {
    button. Understated on purpose — the card is the destination, this is
    the small print under it. */
 .platform-slot__action {
+  /* The canvas's .paper-slot ("Different paper"), plan 072. */
   align-self: flex-end;
-  margin-top: 6px;
-  padding: 4px 8px;
+  margin-top: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
   background: none;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--r-plate);
   font-family: var(--font-jp);
-  font-size: 0.72rem;
+  font-size: var(--fs-caption);
   line-height: 1.3;
   color: var(--text-secondary);
   cursor: pointer;
@@ -5898,6 +5856,16 @@ textarea:focus-visible {
 .tier-picker,
 .theme-picker { display: flex; flex-direction: column; gap: var(--sp-4); }
 .tier-picker__size { display: flex; align-items: center; gap: var(--sp-4); }
+/* A caption in the Latin face (canvas .cap): a question's number, a
+   segmented control's label. */
+.cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
 .tier-picker__size .cap { flex: none; }
 /* The gates' pages: the canvas's gutter, the bar first. */
 .learn,
@@ -10561,6 +10529,228 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .browse-nav .btn-secondary,
 .browse-nav .btn-primary { width: 100%; }
 
+/* ── The practice sessions (canvas Reading / Comprehension /
+   Translation / ComprehensionResult, plan 072) ──
+   The timer over a card, a sentence on it, a page in it, a field and
+   the filled action in the foot; the result as a lattice of records
+   and a surface of rows. Tokens only. */
+.timer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.timer__bar {
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+  overflow: hidden;
+}
+.timer__fill {
+  display: block;
+  height: 100%;
+  background: var(--warning);
+  transition: width 0.1s linear;
+}
+.timer__fill--low { background: var(--danger); }
+.timer__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  text-align: center;
+}
+/* The sentence: the card's one line, Japanese as content. */
+.sentence {
+  display: block;
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: var(--tr-term);
+  text-align: center;
+}
+.sentence--left { font-size: var(--fs-title); text-align: left; }
+.sentence--covered { color: var(--text-secondary); }
+/* The card as a page: labels, a line of English, a line of Japanese,
+   its romaji, a rule between registers. */
+.prose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  width: 100%;
+  text-align: left;
+}
+.prose__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.prose__en {
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 500;
+  line-height: 1.5;
+}
+.prose__en--lead { font-size: var(--fs-title); }
+.prose__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  line-height: 1.6;
+}
+.prose__jp--passage {
+  font-weight: 500;
+  line-height: 1.9;
+  white-space: pre-line;
+}
+.prose__romaji {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.prose__ai {
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  color: var(--text-secondary);
+  white-space: pre-line;
+}
+.prose__rule { height: 1px; background: var(--border); }
+/* The verdict the learner gives: a pigment as ink, mixed toward the
+   text ink so it reads on the light sheet. */
+.prose__verdict {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.prose__verdict--ok { color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+.prose__verdict--x { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+.prose__breakdown {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--sp-4);
+}
+/* A question card: flat, left-aligned, its own height. */
+.prompt-card.prompt-card--ask {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-height: 0;
+  max-height: none;
+  padding: var(--sp-5);
+  text-align: left;
+}
+/* A comprehension question and its options are written in the
+   learner's language (reading.py's prompt), so the row's text is set
+   in the Latin face. */
+.mcq-row__text--latin {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 500;
+}
+/* The result: two records in a lattice, then a surface of rows. */
+.result-lattice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--surface-line);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  text-align: left;
+}
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.qrows {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.qrow-item + .qrow-item { border-top: 1px solid var(--surface-line); }
+.qrow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  text-align: left;
+}
+.qrow__q {
+  flex: none;
+  width: 30px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.qrow__note {
+  margin-left: auto;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.qrow__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-4) var(--sp-4);
+}
+/* Two actions side by side, the filled one forward: equal columns,
+   as the browse foot's pair is drawn (a flex split keeps the two
+   buttons' border difference). On the stage's foot (a flex column)
+   the compound says the grid again. */
+.btn-row,
+.stage__foot.btn-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--sp-3);
+}
+/* The exam's way through the paper (canvas ExamRunner): the two
+   buttons either side of the flag drop to the small rung. Declared
+   here, after the button family, not in the exam section at the top
+   of the file: a compound must follow the plain selector it overrides. */
+.exam-nav .btn-secondary,
+.exam-nav .btn-primary {
+  min-height: 44px;
+  padding-inline: var(--sp-4);
+  font-size: var(--fs-sm);
+}
+/* A line of help under a title or in a sheet. */
+.hint {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-align: left;
+}
+/* The streak, in the head's aside: a lightweight gaming touch. */
+.stage__streak {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--warning) 55%, var(--text-primary));
+}
+
 .reading-group { margin-bottom: 10px; }
 
 .reading-group__label {
@@ -10908,25 +11098,24 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 }
 .reveal-action-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
 
-/* A hairline underline in the type's colour, not a filled pill — the
-   accent marks the label instead of drowning it, keeping the palette
-   restrained (ink + one accent) the way a seal-stamp of colour sits
-   on plain paper rather than tinting the whole card. */
+/* The canvas's outlined caption pill (plan 072): the type's colour is
+   a tint on the hairline and the ink, mixed toward the text ink so it
+   reads on the light sheet, never a fill — a seal-stamp of colour on
+   plain paper rather than a tinted card. */
 .type-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0 2px 7px;
-  border: none;
-  border-bottom: 2px solid var(--badge-color, var(--text-secondary));
-  border-radius: 0;
+  height: 20px;
+  padding: 0 var(--sp-2);
+  border: 1px solid color-mix(in srgb, var(--badge-color, var(--text-secondary)) 55%, transparent);
+  border-radius: var(--r-plate);
   background: none;
-  color: var(--text-secondary);
+  color: color-mix(in srgb, var(--badge-color, var(--text-secondary)) 60%, var(--text-primary));
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tr-caption);
   text-transform: uppercase;
-  margin-bottom: 18px;
 }
 .type-badge--comprehension { --badge-color: var(--accent3); }
 .type-badge--vocabulary    { --badge-color: var(--success); }
@@ -15614,163 +15803,21 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    sumi one. The ambient --text-secondary measured 3.04:1 in light. */
 .phrase-kanji-chip__level { font-size: 11px; color: var(--text-on-panel-soft); }
 
-/* ── Reading practice screen ──────────────────────────────── */
-.rdg-area { width: 100%; max-width: 640px; margin: 0 auto; box-sizing: border-box; }
 
-.rdg-score-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-.rdg-score { font-size: 14px; color: var(--text-secondary); }
 
-/* Lightweight gaming touch: a streak badge that only appears once
-   there's an actual streak (>1) to show off — see ReadingScreen.jsx's
-   `streak` state. Reuses --warning (the same "fire"/attention hue
-   badges elsewhere use) rather than inventing a new accent. */
-.rdg-streak {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--warning);
-  background: var(--bg-panel);
-  border-radius: 999px;
-  padding: 3px 12px;
-  animation: rdg-streak-pop 0.25s ease;
-}
-@keyframes rdg-streak-pop {
-  0%   { transform: scale(0.85); opacity: 0.4; }
-  100% { transform: scale(1); opacity: 1; }
-}
-/* Pure entrance flourish — the streak count is already text content,
-   the pop just announces the badge. No base opacity/transform is set
-   outside the animation, so dropping it entirely still renders the
-   badge fully visible at its natural scale. Covers .trn-streak too
-   (translation screen's identical badge, further down, shares this
-   keyframe). */
+/* The chip's press is a flourish: under reduced motion it stays put. */
 @media (prefers-reduced-motion: reduce) {
-  .rdg-streak, .trn-streak { animation: none; }
   .phrase-kanji-chip__char:active { transform: none; }
 }
 
-.rdg-error-card { padding: 16px; color: var(--danger); }
-.rdg-retry-wrap { margin-top: 12px; }
-.rdg-retry-btn { background: var(--accent); color: var(--text-on-panel); }
 
-.rdg-phrase-display {
-  font-size: clamp(24px, 6vw, 36px);
-  font-family: 'Yu Gothic', system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: var(--text-primary);
-  line-height: 1.4;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-/* Once the timer runs out the phrase is covered (see ReadingScreen.jsx's
-   `phraseCovered`) rather than the whole layout jumping to a different
-   stage — the writing field stays exactly where it was. */
-.rdg-phrase-display--covered {
-  font-size: clamp(28px, 8vw, 40px);
-  color: var(--text-secondary);
-  opacity: 0.7;
-}
 
-.rdg-phrase-progress {
-  height: 6px;
-  background: var(--bg-panel);
-  border-radius: 4px;
-  overflow: hidden;
-  max-width: 300px;
-  width: 100%;
-  margin: 0 auto;
-  color: var(--text-on-panel);
-}
-.rdg-phrase-progress__fill {
-  height: 100%;
-  background: var(--accent);
-  width: var(--pct, 0%);
-  transition: width 0.1s linear;
-}
-.rdg-timer-wrap { margin-top: 16px; }
-.rdg-timer-label { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
 
-.rdg-answering-hint { font-size: 18px; color: var(--text-secondary); }
 
-/* Fix: centers the writing field as its own block regardless of the
-   parent flex container's cross-axis alignment (previously the input's
-   max-width could leave it hugging one edge instead of sitting in the
-   middle of the screen — see ReadingScreen.jsx's 'reading' stage). */
-.rdg-input-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
 
-/* .field field--panel carries the ground, the ink, the placeholder, the
-   radius and the floor. The 22px stays: this is the one thing the learner
-   is typing on the screen, and it is deliberately a size above the family
-   default. It is off the type scale and stays on the ratchet's allowlist. */
-.rdg-answer-input {
-  font-size: 22px;
-  width: 100%;
-  max-width: 360px;
-  margin: var(--sp-5) auto 0;
-  text-align: center;
-  align-self: center;
-}
-.rdg-submit-wrap { margin-top: 16px; display: flex; justify-content: center; }
-.rdg-submit-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
 
-.rdg-feedback-phrase {
-  font-size: clamp(22px, 5.5vw, 32px);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  margin-bottom: 12px;
-  line-height: 1.5;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-.rdg-feedback-status {
-  font-size: 18px;
-  font-weight: bold;
-  color: var(--status-color, var(--text-secondary));
-}
-.rdg-feedback-romaji { font-size: 15px; color: var(--text-secondary); margin-top: 8px; }
-.rdg-feedback-translation { font-size: 15px; color: var(--text-primary); margin-top: 4px; }
-.rdg-feedback-your-answer { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
 
-/* The grammar point a curated sentence was written to demonstrate. A
-   chip rather than another line of the feedback stack: it is not a
-   result of what the reader just did, it is what the sentence was
-   FOR — so it reads as a label on the sentence, the way the level
-   badge does on a dictionary entry. */
-.rdg-feedback-grammar {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-top: 10px;
-  padding: 5px 12px;
-  border: 1px solid var(--surface-line);
-  border-radius: 999px;
-  background: var(--surface);
-}
-.rdg-feedback-grammar__label {
-  font-family: var(--font-display);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.rdg-feedback-grammar__pattern {
-  font-family: var(--font-jp);
-  font-size: 14px;
-  color: color-mix(in srgb, var(--line-rikai, var(--accent2)) 65%, var(--text-primary));
-}
 
-.rdg-feedback-actions { margin-top: 16px; }
-.rdg-next-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
 
 /* AI breakdown panel (see ReadingScreen.jsx's AnalysisBreakdown) —
    layered on top of .phrase-line/.phrase-word-card/.phrase-explanation
@@ -16038,99 +16085,12 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   color: var(--text-secondary);
 }
 
-/* Frequency-tier "jump to tier" row, below the fetched tier list — see
-   TierPicker in ReadingScreen.jsx (2026-08, frequency-based sentence
-   source). Reuses .rdg-answer-input/.rdg-submit-btn for the input and
-   button themselves, this just lays the pair out side by side. */
-.rdg-tier-jump {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-}
-.rdg-tier-jump .rdg-answer-input { margin-top: 0; max-width: 140px; font-size: 16px; padding: 10px; }
 
-/* ── Translation practice screen ──────────────────────────── */
-/* Mirrors .rdg-* (reading practice, above) almost exactly — same
-   session shell, score row, input/submit pair, and self-graded
-   feedback actions — kept as its own trn-* set rather than reusing
-   rdg-* directly so the two screens can evolve independently. The
-   real differences: no timer/progress bar (translation is untimed),
-   a labeled prompt block instead of a "phrase you're reading" block,
-   and an always-visible AI analysis section instead of an optional
-   breakdown carousel. */
-.trn-area { width: 100%; max-width: 640px; margin: 0 auto; box-sizing: border-box; }
 
-.trn-score-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-.trn-score { font-size: 14px; color: var(--text-secondary); }
 
-.trn-streak {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--warning);
-  background: var(--bg-panel);
-  border-radius: 999px;
-  padding: 3px 12px;
-  animation: rdg-streak-pop 0.25s ease; /* shared keyframe, defined above */
-}
 
-.trn-error-card { padding: 16px; color: var(--danger); }
-.trn-retry-wrap { margin-top: 12px; }
-.trn-retry-btn { background: var(--accent); color: var(--text-on-panel); }
 
-.trn-prompt-label {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-.trn-prompt-text {
-  font-size: clamp(20px, 5vw, 28px);
-  color: var(--text-primary);
-  line-height: 1.5;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
 
-.trn-input-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  margin-top: 20px;
-}
-/* As .rdg-answer-input, plus the Japanese face: this field is typed INTO in
-   Japanese, so it names --font-jp rather than inheriting the display face. */
-/* No max-width: the mockup runs the answer field to the SAME width as
-   the prompt card above it, edge to edge. It was capped at 360px, which
-   left a 232px shortfall against a 592px card and read as two objects
-   that had nothing to do with each other. */
-.trn-answer-input {
-  font-size: 22px;
-  width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  align-self: center;
-  font-family: var(--font-jp);
-}
-.trn-submit-wrap { margin-top: 16px; display: flex; justify-content: center; }
-/* .btn-primary carries the fill, the ink, the radius and the 44px floor
-   now. The fill it paints is this screen's own 瑠璃色, deepened -- the
-   shell has been injecting --line-color all along (see TranslationScreen's
-   own comment saying nothing read it) and this button was the thing that
-   never did, painting 朱色 instead: kana's pigment on a translation
-   screen. */
-.trn-submit-btn { padding: 10px 28px; }
 
 /* .trn-feedback-card carries no styles of its own — it exists purely
    to scope the mobile max-height override further down (PromptCard
@@ -16140,161 +16100,23 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    class needs no such declaration to be selectable, so the empty rule
    is gone and only the override that actually does something remains. */
 
-.trn-feedback-prompt {
-  font-size: 15px;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
-}
-.trn-feedback-your-answer {
-  font-size: 17px;
-  color: var(--text-primary);
-  margin-bottom: 16px;
-  font-family: 'Yu Gothic', system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-.trn-feedback-phrase {
-  font-size: clamp(22px, 5.5vw, 32px);
-  font-family: 'Yu Gothic', system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: var(--success);
-  line-height: 1.4;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-.trn-feedback-romaji { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
 
-.trn-analysis-wrap {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-  text-align: left;
-}
-.trn-analysis-label {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-}
-.trn-analysis-unavailable { font-size: 14px; color: var(--text-secondary); font-style: italic; }
-.trn-analysis-text { font-size: 15px; color: var(--text-primary); line-height: 1.6; }
 
-.trn-feedback-actions { margin-top: 16px; }
-.trn-next-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 28px; font-size: 15px; }
 
-.trn-tier-jump {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-}
-.trn-tier-jump .trn-answer-input { margin-top: 0; max-width: 140px; font-size: 16px; padding: 10px; }
 
-/* ── Reading comprehension screen ─────────────────────────── */
-.comp-loading-wrap { padding: 80px; text-align: center; }
 
-.comp-error-page { padding: 40px; text-align: center; }
-.comp-error-card { padding: 24px; color: var(--danger); }
-.comp-retry-btn { margin-top: 16px; background: var(--accent); color: var(--text-on-panel); }
 
-.comp-reading-page { padding: 24px 24px 40px; }
-.comp-reading-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.comp-time-remaining { font-size: 13px; color: var(--text-secondary); }
-.comp-time-value { color: var(--time-color, var(--text-primary)); }
-.comp-reading-actions { display: flex; gap: 8px; }
-.comp-toggle-translation { background: var(--chip-bg); color: var(--text-secondary); font-size: 12px; }
-.comp-done-btn { background: var(--accent); color: var(--text-on-panel); font-size: 13px; }
 
-.comp-bar-track {
-  height: 4px;
-  background: var(--bg-panel);
-  border-radius: 4px;
-  overflow: hidden;
-}
-.comp-bar-track--reading { margin-bottom: 24px; }
-.comp-bar-track--question { margin-top: 8px; }
-.comp-bar-fill {
-  height: 100%;
-  background: var(--fill-color, var(--accent));
-  width: var(--fill-pct, 0%);
-  transition: width 0.3s;
-}
-.comp-bar-fill--linear { transition: width 1s linear; }
 
-.comp-text-card { padding: 24px 28px; margin-bottom: 16px; }
-.comp-text-content {
-  font-size: 18px;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  line-height: 2.0;
-  color: var(--text-primary);
-}
 
-.comp-translation-card { padding: 16px 24px; border-left: 3px solid var(--accent2); }
-.comp-translation-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; }
-.comp-translation-text { font-size: 15px; line-height: 1.6; }
 
-.comp-q-progress { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
 
-.comp-question-text { font-size: 17px; font-weight: bold; line-height: 1.6; margin-top: 10px; margin-bottom: 8px; }
 
-.comp-options { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; text-align: left; }
-.comp-option-btn {
-  text-align: left;
-  padding: 14px 20px;
-  border-radius: 10px;
-  font-size: 15px;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.comp-option-btn:hover { background: var(--bg-hover, rgba(255, 255, 255, 0.08)); }
-/* Inside .comp-option-btn, which is sumi and inks --text-on-panel: the
-   letter is a dim register on that ground, not on the page. */
-.comp-option-btn__letter { color: var(--text-on-panel-soft); margin-right: 12px; font-weight: bold; }
 
-.comp-reread-btn { margin-top: 24px; background: none; color: var(--text-secondary); font-size: 13px; text-decoration: underline; }
 
-.comp-score-card {
-  text-align: center;
-  padding: 32px 24px;
-  margin-bottom: 24px;
-  display: flex;
-  gap: 32px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.comp-score-value { font-size: 56px; font-weight: bold; color: var(--score-color, var(--text-primary)); }
-.comp-score-label { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
 
-.comp-results-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
-.comp-result-item { padding: 16px 20px; border-left: 3px solid var(--border-color, var(--border)); }
-.comp-result-item__q { font-weight: bold; margin-bottom: 10px; font-size: 15px; }
-.comp-result-item__qnum { color: var(--text-secondary); margin-right: 8px; }
-.comp-result-item__options { display: flex; flex-direction: column; gap: 4px; }
-.comp-result-option { font-size: 14px; color: var(--opt-color, var(--text-secondary)); display: flex; gap: 8px; align-items: center; }
-.comp-result-option__letter { font-weight: bold; min-width: 20px; }
-.comp-result-option__mark { font-size: 12px; margin-left: 4px; }
 
-.comp-original-card { padding: 16px 24px; margin-bottom: 32px; }
-.comp-original-label { font-size: 13px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; }
-.comp-original-text {
-  font-size: 16px;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  line-height: 2.0;
-  color: var(--text-primary);
-}
-.comp-original-translation { margin-top: 12px; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
 
-.comp-results-actions { display: flex; gap: 12px; justify-content: center; }
-.comp-try-again-btn { background: var(--accent); color: var(--text-on-panel); padding: 10px 24px; }
-.comp-change-level-btn { background: var(--chip-bg); color: var(--text-primary); padding: 10px 24px; }
 
 /* ── Study screen ──────────────────────────────────────────── */
 .study-config-page { padding: 40px 24px; max-width: 560px; }
@@ -16540,6 +16362,13 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+/* The body as a page (plan 072): left-aligned, top-down, the card's
+   padding at the reading rung — a translation's prompt, a passage. */
+.prompt-card--footed .prompt-card__body--prose {
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: var(--sp-5);
 }
 
 /* The body is a flex column, so an INLINE child of it is a flex item
@@ -16914,6 +16743,16 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
     background: var(--bg-panel);
   }
   .stage > .rating-bar .rating-bar__buttons { background: transparent; }
+  /* The exam's sheet bar docks the same way (plan 072): sumi, edge to
+     edge, on the dock's edge, its own inset under it. */
+  .stage > .exam-sheetbar {
+    position: sticky;
+    bottom: var(--dock-bottom);
+    z-index: 10;
+    margin-inline: calc(-1 * var(--sp-5));
+    border-radius: 0;
+    padding-bottom: calc(var(--sp-3) + var(--safe-bottom));
+  }
   /* While the level board is docked across the top (see XpToast.jsx),
      the stage slides down under it: a panel takes its place, the card
      keeps its head clear, and everything slides back as it leaves. */
@@ -17260,17 +17099,10 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   .headline { grid-template-columns: repeat(2, 1fr); }
   .stats-reset-btn { font-size: 11px; padding: 6px 12px; }
 
-  .rdg-area { max-width: 100%; }
-  .rdg-answer-input { max-width: 100%; }
-  .rdg-next-btn { width: 100%; }
   .rdg-breakdown-card-stage { max-width: 100%; }
   .rdg-breakdown-nav { width: 34px; height: 34px; }
   .rdg-breakdown-nav svg { width: 16px; height: 16px; }
 
-  .trn-area { max-width: 100%; }
-  .trn-answer-input { max-width: 100%; }
-  .trn-next-btn { width: 100%; }
-  .trn-feedback-card .prompt-card { max-height: 75vh; }
 }
 
 @media (max-width: 400px) {

@@ -321,7 +321,7 @@ describe("the study card's padding", () => {
         <Contained>
           <PromptCard foot={{ left: 'N5 理解' }}>
             <QuestionTypeBadge type="comprehension" />
-            <div className="comp-question-text">この人はいつ散歩しますか。</div>
+            <div className="prose__en">この人はいつ散歩しますか。</div>
           </PromptCard>
         </Contained>
       </LangProvider>

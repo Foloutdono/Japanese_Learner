@@ -73,7 +73,7 @@ describe('ExamResult with getExam\'s two shapes', () => {
     // The real assertion is that rendering completed at all -- before the
     // fix this threw during render and React unmounted the tree.
     expect(screen.container.querySelector('.empty')).not.toBeNull()
-    expect(screen.container.querySelector('.exam-result-header')).toBeNull()
+    expect(screen.container.querySelector('.exam-result-head')).toBeNull()
   })
 
   it('renders the result when a real paper comes back', async () => {
@@ -92,6 +92,6 @@ describe('ExamResult with getExam\'s two shapes', () => {
     const screen = await renderResult()
     await settle()
 
-    expect(screen.container.querySelector('.exam-result-header')).not.toBeNull()
+    expect(screen.container.querySelector('.exam-result-head')).not.toBeNull()
   })
 })

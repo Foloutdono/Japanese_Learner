@@ -2,27 +2,35 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { ScreenBar } from '../components/chrome/Bar'
+import { board } from '../stores/boarding'
+import { Leave } from '../components/chrome/Bar'
+import { Seg } from '../components/chrome/Console'
 import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
+import TierSelector from '../components/selection/TierSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
+import { StudyStage } from '../components/study/StudyStage'
 import PromptCard from '../components/study/PromptCard'
 import { Loading } from '../components/ui/Loading'
+import Empty from '../components/ui/Empty'
 import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { FireIcon } from '../components/ui/Icons'
+import { tierLabelFor, DEFAULT_TIER_SIZE } from '../domain/tiers'
 
-const DEFAULT_TIER_SIZE = 200
+const TRANSLATION_COLOR = 'var(--line-honyaku)'
 
 // NOTE ON TRANSLATION KEYS: reuses the same generic study-source keys
 // ReadingScreen.jsx does (t.byLevel/byLevelDesc, t.byFrequency/
 // byFrequencyDesc, t.byMastery/byMasteryDesc, t.selectStudySource,
-// t.selectLevel, t.selectDomain, t.selectTier, t.domainVocabDeck/Desc,
-// t.domainVocabJmdict/Desc, t.tierLabel, t.jumpToTier, t.submit,
+// t.selectLevel, t.selectDomain, t.selectTier, t.tierLabel, t.submit,
 // t.loadError, t.retry, t.score, t.correct, t.incorrect, t.yourAnswer).
-// Genuinely new keys are given an inline `??` fallback below so a
-// missing translations.js entry never breaks the screen.
 
+// Route: /practice/translation (plan 072: the pickers on the station
+// page, the session on the stage — the canvas's TranslationWrite and
+// Translation artboards: the prompt as a page, the field and Submit
+// docked in the foot; then the answer, the reference, the AI's
+// reading of it, and the rating bar docked).
 export default function TranslationScreen({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
@@ -33,15 +41,11 @@ export default function TranslationScreen({ session }) {
     { key: 'mastery',   label: t.byMastery,   desc: t.byMasteryDesc },
   ]
 
-  const DOMAINS = [
-    { key: 'vocab',        label: t.domainVocabDeck,   desc: t.domainVocabDecDesc },
-    { key: 'vocab_jmdict', label: t.domainVocabJmdict, desc: t.domainVocabJmdictDesc },
-  ]
-
   const [source, setSource] = useState(null)       // 'level' | 'frequency' | 'mastery'
   const [level, setLevel]   = useState(null)        // source === 'level'
-  const [domain, setDomain] = useState(null)        // source === 'frequency'
-  const [tier, setTier]     = useState(null)        // source === 'frequency'
+  const [domain, setDomain] = useState('vocab')     // source === 'frequency'
+  const [tier, setTier]     = useState(null)
+  const [tierSize, setTierSize] = useState(DEFAULT_TIER_SIZE)
 
   // 'loading' | 'writing' | 'feedback' | 'error'
   const [stage, setStage]   = useState('loading')
@@ -60,7 +64,6 @@ export default function TranslationScreen({ session }) {
   // this mode, not a supplementary extra.
   const [analysis, setAnalysis] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
-
 
   const fetchingRef = useRef(false) // guards against duplicate concurrent prefetches
   const queueRef = useRef([])       // upcoming phrases, prefetched (not rendered, so a ref is fine)
@@ -94,7 +97,11 @@ export default function TranslationScreen({ session }) {
   function batchUrl(count) {
     const params = new URLSearchParams({ source, count, lang })
     if (source === 'level') params.set('level', level)
-    if (source === 'frequency') { params.set('domain', domain); params.set('tier', tier) }
+    if (source === 'frequency') {
+      params.set('domain', domain)
+      params.set('tier', tier)
+      params.set('tier_size', tierSize)
+    }
     // Capped: the bank is 30-55 sentences a level, so anything past that
     // is a query string growing without bound for no effect.
     if (seenRef.current.length) params.set('exclude', seenRef.current.slice(-60).join('|'))
@@ -270,62 +277,64 @@ export default function TranslationScreen({ session }) {
   function resetAll() {
     setSource(null)
     setLevel(null)
-    setDomain(null)
     setTier(null)
   }
 
   // ── Source selection (level / frequency / my cards) ──
   if (!source) {
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => navigate('/practice')} title={t.translationTitle ?? 'Translation'} />
-        <main id="main-content">
-          <SelectionScreen heading={t.selectStudySource}>
-            <ModeSelector modes={SOURCES} onSelect={setSource} />
-          </SelectionScreen>
-        </main>
-      </div>
+      <SelectionScreen
+        title={t.translationTitle}
+        sub={t.selectStudySource}
+        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
+      >
+        <ModeSelector
+          modes={SOURCES}
+          onSelect={key => (key === 'mastery' ? board(() => setSource(key)) : setSource(key))}
+        />
+      </SelectionScreen>
     )
   }
 
   // ── Level source: pick a JLPT level ──
   if (source === 'level' && !level) {
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
-        <main id="main-content">
-          <SelectionScreen heading={t.selectLevel}>
-            <LevelSelector onSelect={setLevel} />
-          </SelectionScreen>
-        </main>
-      </div>
+      <SelectionScreen
+        title={t.translationTitle}
+        sub={t.selectLevel}
+        aside={<Leave onClick={() => setSource(null)}>{t.leaveSources}</Leave>}
+      >
+        <LevelSelector onSelect={lvl => board(() => setLevel(lvl))} />
+      </SelectionScreen>
     )
   }
 
-  // ── Frequency source: pick a word list, then a tier ──
-  if (source === 'frequency' && !domain) {
+  // ── Frequency source: the word list and the tier, on one page ──
+  if (source === 'frequency' && tier == null) {
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => setSource(null)} title={t.translationTitle ?? 'Translation'} />
-        <main id="main-content">
-          <SelectionScreen heading={t.selectDomain}>
-            <ModeSelector modes={DOMAINS} onSelect={setDomain} />
-          </SelectionScreen>
-        </main>
-      </div>
-    )
-  }
-
-  if (source === 'frequency' && domain && tier == null) {
-    return (
-      <div className="screen">
-        <ScreenBar onBack={() => setDomain(null)} title={t.translationTitle ?? 'Translation'} />
-        <main id="main-content">
-          <SelectionScreen heading={t.selectTier}>
-            <TierPicker session={session} domain={domain} onSelect={setTier} t={t} />
-          </SelectionScreen>
-        </main>
-      </div>
+      <SelectionScreen
+        title={t.translationTitle}
+        sub={t.selectTier}
+        aside={<Leave onClick={() => setSource(null)}>{t.leaveSources}</Leave>}
+      >
+        <Seg
+          full
+          label={t.selectDomain}
+          value={domain}
+          onChange={setDomain}
+          options={[
+            { key: 'vocab', label: t.freqDomainDeck },
+            { key: 'vocab_jmdict', label: t.freqDomainJmdict },
+          ]}
+        />
+        <TierSelector
+          domain={domain}
+          session={session}
+          tierSize={tierSize}
+          onTierSize={setTierSize}
+          onSelect={tr => board(() => setTier(tr))}
+        />
+      </SelectionScreen>
     )
   }
 
@@ -337,6 +346,7 @@ export default function TranslationScreen({ session }) {
       level={level}
       domain={domain}
       tier={tier}
+      tierSize={tierSize}
       stage={stage}
       data={data}
       answer={answer}
@@ -357,11 +367,20 @@ export default function TranslationScreen({ session }) {
   )
 }
 
+function Streak({ streak, t }) {
+  if (streak < 2) return null
+  return (
+    <span className="stage__streak" title={t.streak}>
+      <FireIcon size={14} /> {streak}
+    </span>
+  )
+}
+
 // Kicks off the session's first batch fetch exactly once, then renders
 // the stage machine. Split out for the same reason ReadingScreen.jsx
 // splits it: keeps the selection-screen early-returns above simple.
 function SessionView({
-  t, source, level, domain, tier, stage, data, answer, setAnswer,
+  t, source, level, domain, tier, tierSize, stage, data, answer, setAnswer,
   feedback, score, streak, error, analysis, analysisLoading,
   onBack, onStart, submitAnswer, gradeAnswer, next, retry,
 }) {
@@ -372,211 +391,107 @@ function SessionView({
     onStart()
   }, [])
 
-  const titleSuffix =
-    source === 'level' ? level :
-    source === 'frequency' ? `${domain === 'vocab_jmdict' ? t.domainVocabJmdict : t.domainVocabDeck} — ${t.tierLabel ? t.tierLabel.replace('{n}', tier) : `Tier ${tier}`}` :
+  const where =
+    source === 'level' ? `${level} · ${t.stationJlpt}` :
+    source === 'frequency' ? `${domain === 'vocab_jmdict' ? t.freqDomainJmdict : t.freqDomainDeck} · ${tierLabelFor(tier, tierSize)}` :
     t.byMastery
 
+  // Real example sentences only carry an English gloss regardless of
+  // UI language — see reading.py's translation_lang note — labelled
+  // explicitly rather than implying it's already in the UI language.
+  const promptLabel = data?.translation_lang === 'en' ? t.translationEnglish : t.translation
+
   return (
-    <div className="screen">
-      <ScreenBar
-        onBack={onBack}
-        title={t.translationTitle ?? 'Translation'}
-        tag={titleSuffix}
-      />
-      {/* 瑠璃色, per DESIGN.md's "the pigment is injected once" — see
-          DecksScreen's comment for why it sits on <main> and not on
-          .screen. As on ReadingScreen, nothing under here reads
-          var(--line-color) yet; the shell states the section anyway. */}
-      <main id="main-content" className="container stage trn-area"
-        style={{ '--line-color': 'var(--line-honyaku)' }}>
+    <StudyStage
+      color={TRANSLATION_COLOR}
+      onLeave={onBack}
+      leaveLabel={t.tabPractice}
+      where={t.translationTitle}
+      sub={where}
+      remaining={`${score.correct} / ${score.total}`}
+      pass={false}
+      aside={<Streak streak={streak} t={t} />}
+    >
+      {stage === 'loading' && <Loading />}
 
-        <div className="trn-score-row">
-          <div className="trn-score">
-            {t.score}: {score.correct}/{score.total}
-          </div>
-          {streak > 1 && (
-            <div className="trn-streak" title={t.streak ?? 'Streak'}>
-              <FireIcon size={14} /> {streak}
-            </div>
-          )}
-        </div>
+      {stage === 'error' && (
+        <Empty tone="error" message={error} action={{ label: t.retry, onClick: retry }} />
+      )}
 
-        {stage === 'loading' && <Loading />}
+      {stage === 'writing' && data && (
+        <>
+          <CardTransition cardKey={data._uiKey}>
+            <PromptCard prose foot={{ left: where, right: t.translationTitle }}>
+              <span className="prose__label">{promptLabel}</span>
+              <span className="prose__en prose__en--lead">{data.translation}</span>
+            </PromptCard>
+          </CardTransition>
 
-        {stage === 'error' && (
-          <div className="card trn-error-card">
-            {error}
-            <div className="trn-retry-wrap">
-              <button onClick={retry} className="trn-retry-btn">
-                {t.retry}
+          <form className="stage__foot" onSubmit={e => { e.preventDefault(); submitAnswer() }}>
+            <input
+              autoFocus
+              value={answer}
+              onChange={e => setAnswer(e.target.value)}
+              placeholder={t.japanesePlaceholder}
+              aria-label={t.japanesePlaceholder}
+              className="field"
+              lang="ja"
+            />
+            <button type="submit" className="btn-primary" disabled={!answer.trim()}>
+              {t.submit}
+            </button>
+          </form>
+        </>
+      )}
+
+      {stage === 'feedback' && data && feedback && (
+        <>
+          <PromptCard
+            prose
+            foot={{
+              left: where,
+              // What this sentence was chosen to practise. Only a curated
+              // sentence carries it, and a test proves the sentence
+              // contains the point it names -- see
+              // content/reading_sentences.py.
+              right: data.grammar
+                ? <>{t.readingGrammarPoint} · <span lang="ja">{data.grammar}</span></>
+                : t.translationTitle,
+            }}
+          >
+            <span className="prose__label">{promptLabel}</span>
+            <span className="prose__en">{data.translation}</span>
+            <span className="prose__rule" />
+            <span className="prose__label">{t.yourAnswer}</span>
+            <span className="prose__jp" lang="ja">{answer}</span>
+            <span className="prose__label">{t.reference}</span>
+            <span className="prose__jp" lang="ja">{data.phrase}</span>
+            <span className="prose__romaji">{data.romaji}</span>
+            <span className="prose__rule" />
+            <span className="prose__label">{t.aiAnalysis}</span>
+            {analysisLoading && <Loading inline copy={t.analyzingTranslation} />}
+            {!analysisLoading && analysis && <span className="prose__ai">{analysis}</span>}
+            {!analysisLoading && !analysis && <span className="prose__ai">{t.analysisUnavailable}</span>}
+          </PromptCard>
+
+          {feedback.correct === null ? (
+            /* The same six-segment instrument the study screens grade
+               with, instead of a right/wrong pair. A translation is
+               rarely simply right or wrong, and the learner already
+               knows how close they were -- the two buttons made them
+               flatten that to a coin flip. RatingBar's own threshold
+               decides correctness: q > 2 is a pass, which is the same
+               line it draws between playCorrect and playWrong. */
+            <RatingBar active onRate={q => gradeAnswer(q >= 3, q)} />
+          ) : (
+            <div className="stage__foot">
+              <button type="button" onClick={next} className="btn-primary">
+                {t.nextPhrase}
               </button>
             </div>
-          </div>
-        )}
-
-        {stage === 'writing' && data && (
-          <>
-            <CardTransition cardKey={data._uiKey}>
-              {/* Study.dc.html's footer strip. */}
-              <PromptCard foot={{ left: level ? `${level} 翻訳` : '翻訳' }}>
-                <div className="trn-prompt-label">
-                  {/* Real example sentences only carry an English gloss
-                      regardless of UI language — see reading.py's
-                      translation_lang note — labelled explicitly rather
-                      than implying it's already in the UI language. */}
-                  {data.translation_lang === 'en' ? (t.translationEnglish ?? 'EN') : t.translation}
-                </div>
-                <div className="trn-prompt-text">
-                  {data.translation}
-                </div>
-              </PromptCard>
-            </CardTransition>
-
-            <div className="trn-input-center">
-              <input
-                autoFocus
-                value={answer}
-                onChange={e => setAnswer(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && submitAnswer()}
-                placeholder={t.japanesePlaceholder ?? 'Write it in Japanese…'}
-                className="field field--panel trn-answer-input"
-              />
-              <div className="trn-submit-wrap">
-                <button
-                  onClick={submitAnswer}
-                  disabled={!answer.trim()}
-                  className="btn-primary trn-submit-btn"
-                >
-                  {t.submit}
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {stage === 'feedback' && data && feedback && (
-          <>
-            <div className="trn-feedback-card">
-              <PromptCard>
-                <div className="trn-feedback-prompt">
-                  {data.translation}
-                </div>
-                <div className="trn-feedback-your-answer">
-                  {t.yourAnswer}: <strong>{answer}</strong>
-                </div>
-                <div className="trn-feedback-phrase">
-                  {data.phrase}
-                </div>
-                <div className="trn-feedback-romaji">{data.romaji}</div>
-
-                {/* What this sentence was chosen to practise. Only a
-                    curated sentence carries it, and a test proves the
-                    sentence contains the point it names -- see
-                    content/reading_sentences.py. */}
-                {data.grammar && (
-                  <div className="rdg-feedback-grammar">
-                    <span className="rdg-feedback-grammar__label">{t.readingGrammarPoint}</span>
-                    <span className="rdg-feedback-grammar__pattern" lang="ja">{data.grammar}</span>
-                  </div>
-                )}
-
-                <div className="trn-analysis-wrap">
-                  <div className="trn-analysis-label">
-                    {t.aiAnalysis ?? 'AI analysis'}
-                  </div>
-                  {analysisLoading && (
-                    <Loading inline copy={t.analyzingTranslation} />
-                  )}
-                  {!analysisLoading && analysis && (
-                    <div className="trn-analysis-text">{analysis}</div>
-                  )}
-                  {!analysisLoading && !analysis && (
-                    <div className="trn-analysis-unavailable">
-                      {t.analysisUnavailable ?? 'Analysis unavailable — judge against the reference above.'}
-                    </div>
-                  )}
-                </div>
-              </PromptCard>
-            </div>
-
-            <div className="trn-feedback-actions">
-              {feedback.correct === null ? (
-                /* The same six-segment instrument the study screens
-                   grade with, instead of a right/wrong pair. A
-                   translation is rarely simply right or wrong, and the
-                   learner already knows how close they were -- the two
-                   buttons made them flatten that to a coin flip.
-                   RatingBar's own threshold decides correctness: q > 2
-                   is a pass, which is the same line it draws between
-                   playCorrect and playWrong. */
-                <RatingBar active onRate={q => gradeAnswer(q >= 3, q)} />
-              ) : (
-                <button
-                  onClick={next}
-                  className="trn-next-btn"
-                >
-                  {t.nextPhrase}
-                </button>
-              )}
-            </div>
-          </>
-        )}
-      </main>
-    </div>
-  )
-}
-
-// ── Frequency tier picker ────────────────────────────────
-// Same shape as ReadingScreen.jsx's own TierPicker (not exported from
-// there, so duplicated rather than shared — small enough that pulling
-// it into its own component file wasn't worth doing just for this).
-function TierPicker({ session, domain, onSelect, t }) {
-  const [tiers, setTiers] = useState(null)
-  const [error, setError] = useState(false)
-  const [jumpValue, setJumpValue] = useState('')
-
-  useEffect(() => {
-    let cancelled = false
-    apiFetch(`/api/frequency/${domain}/tiers?tier_size=${DEFAULT_TIER_SIZE}`, session)
-      .then(r => { if (!r.ok) throw new Error('failed'); return r.json() })
-      .then(d => { if (!cancelled) setTiers(d.tiers || []) })
-      .catch(() => { if (!cancelled) setError(true) })
-    return () => { cancelled = true }
-  }, [domain])
-
-  if (error) return <div className="card trn-error-card">{t.loadError}</div>
-  if (!tiers) return <Loading />
-
-  const visible = tiers.slice(0, 50)
-  const modes = visible.map(tr => ({
-    key: String(tr.tier),
-    label: t.tierLabel ? t.tierLabel.replace('{n}', tr.tier) : `Tier ${tr.tier}`,
-    desc: `${tr.start_rank}–${tr.end_rank} (${tr.count})`,
-  }))
-
-  return (
-    <>
-      <ModeSelector modes={modes} onSelect={key => onSelect(Number(key))} />
-      <div className="trn-tier-jump">
-        <input
-          type="number"
-          min="1"
-          max={tiers.length}
-          value={jumpValue}
-          onChange={e => setJumpValue(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && jumpValue && onSelect(Number(jumpValue))}
-          placeholder={t.jumpToTier}
-          className="field field--panel trn-answer-input"
-        />
-        <button
-          onClick={() => jumpValue && onSelect(Number(jumpValue))}
-          disabled={!jumpValue}
-          className="trn-submit-btn"
-        >
-          {t.submit}
-        </button>
-      </div>
-    </>
+          )}
+        </>
+      )}
+    </StudyStage>
   )
 }

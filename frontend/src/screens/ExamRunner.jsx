@@ -2,15 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
-import { ScreenBar } from '../components/chrome/Bar'
+import { Leave } from '../components/chrome/Bar'
+import { Sheet } from '../components/chrome/Sheet'
+import { StudyStage } from '../components/study/StudyStage'
 import { CardTransition } from '../components/study/CardTransition'
 import { CHOICE_KEY_INDEX } from '../domain/choiceKeys'
 import Empty from '../components/ui/Empty'
 import { getExam, flattenQuestions, submitAttempt } from '../exam/examService'
 import { paperTitle } from '../exam/examKinds'
 import QuestionRenderer from '../exam/QuestionRenderer'
-import AnswerSheet from '../exam/AnswerSheet'
-import { PageIcon, ChevronIcon, FlagIcon, WarningIcon } from '../components/ui/Icons'
+import AnswerSheet, { SheetBar } from '../exam/AnswerSheet'
+import { PageIcon, ChevronIcon, FlagIcon } from '../components/ui/Icons'
 
 // Poll cadence while the server generates a paper (it answers 202 until
 // the paper exists). Starts responsive, backs off geometrically so a
@@ -21,6 +23,8 @@ const POLL_MAX_MS = 10000
 // Minutes-remaining marks that get spoken aloud. The red pulsing timer
 // only helps someone already looking at the corner of the screen.
 const TIME_WARNINGS = [5, 1]
+
+const EXAM_COLOR = 'var(--line-exam)'
 
 // ── Mid-exam draft persistence ─────────────────────────────────
 // Same load/save-wrapped-in-try/catch convention as
@@ -98,12 +102,12 @@ export default function ExamRunner({ session }) {
   )
 }
 
-// Route: /exam/:examId
+// Route: /practice/exam/:examId — on the stage frame (plan 072).
 // Renders one question at a time via CardTransition so moving between
 // questions gets the same crossfade Kana/Kanji/Vocab already use — no
 // new animation language. Order is the learner's, not the screen's:
-// the answer sheet below the card jumps to any question, which is how
-// a paper exam is actually worked.
+// the answer sheet (a bottom sheet the docked sheet bar opens) jumps
+// to any question, which is how a paper exam is actually worked.
 //
 // The section is read off the paper rather than the URL: every
 // generator emits exactly one section (see each backend/study/
@@ -135,15 +139,16 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   // persisting it directly would restore every flag as empty.
   const [flagged, setFlagged] = useState(() => new Set())
 
-  // Which mondai's instructions the learner has explicitly opened. The
-  // first question of each mondai shows them regardless (see
-  // `instructionsOpen` below); this is only the manual override for
-  // the questions after it.
+  // The mondai whose instructions the learner last toggled by hand,
+  // and which way. Without a toggle the first question of each mondai
+  // shows them and the rest fold them away (see `instructionsOpen`
+  // below).
   const [openMondai, setOpenMondai] = useState(null)
 
   // 'idle' | 'confirming' (unanswered questions) | 'sending' | 'error'
   const [submitState, setSubmitState] = useState('idle')
   const [leaving, setLeaving] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   // A heartbeat, not a clock: its value is never read, only its change
   // forces a re-render each second so the derived `timeLeft` below gets
@@ -239,6 +244,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   // `pieces` for sentence-order, `choices` for everything else — the
   // keyboard shortcut needs whichever list the renderer will draw.
   const currentOptions = current ? current.choices ?? current.pieces ?? [] : null
+  const dialogOpen = submitState !== 'idle' || leaving || sheetOpen
 
   // Digits pick an answer, arrows move, `f` flags. Same binding the
   // study quiz has had all along (CHOICE_KEY_INDEX is imported from it
@@ -246,7 +252,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   // got it, so the one screen where somebody answers twenty questions
   // in a row was the one screen that required a mouse for every one.
   useEffect(() => {
-    if (!current || submitState !== 'idle' || leaving) return
+    if (!current || dialogOpen) return
     const handler = e => {
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
       const tag = e.target?.tagName
@@ -272,7 +278,9 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     // jumpTo/toggleFlag are re-created every render and close over the
     // current index — the deps that matter are what they read.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, currentOptions, index, questions.length, submitState, leaving])
+  }, [current, currentOptions, index, questions.length, dialogOpen])
+
+  const leaveToPapers = () => navigate('/practice/exam')
 
   // ── Generating ──
   // Not the shared <Loading/>: opening a never-before-seen paper runs
@@ -282,20 +290,17 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   // difference between waiting and giving up.
   if (exam === null) {
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => navigate('/practice/exam')} title={t.examTitle} />
-        <main id="main-content" className="container exam-shell">
-          <div className="exam-generating">
-            <div className="exam-generating__brush" aria-hidden="true">
-              <span className="exam-generating__stroke" />
-              <span className="exam-generating__stroke" />
-              <span className="exam-generating__stroke" />
-            </div>
-            <p className="exam-generating__title">{t.examGenerating}</p>
-            <p className="exam-generating__hint">{t.examGeneratingHint}</p>
+      <StudyStage color={EXAM_COLOR} onLeave={leaveToPapers} leaveLabel={t.leaveExam} where={t.examTitle} pass={false}>
+        <div className="exam-generating">
+          <div className="exam-generating__brush" aria-hidden="true">
+            <span className="exam-generating__stroke" />
+            <span className="exam-generating__stroke" />
+            <span className="exam-generating__stroke" />
           </div>
-        </main>
-      </div>
+          <p className="exam-generating__title">{t.examGenerating}</p>
+          <p className="exam-generating__hint">{t.examGeneratingHint}</p>
+        </div>
+      </StudyStage>
     )
   }
 
@@ -307,32 +312,26 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   if (exam === false) {
     const waitMinutes = Math.ceil(retryAfter / 60)
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => navigate('/practice/exam')} title={t.examTitle} />
-        <main id="main-content" className="container exam-shell">
-          <Empty
-            icon={<PageIcon size={40} />}
-            message={t.examLoadFailed}
-            hint={retryAfter > 0 ? t.examLoadFailedCooldown(waitMinutes) : t.examLoadFailedHint}
-            action={retryAfter > 0 ? undefined : { label: t.examRetry, onClick: onRetry }}
-          />
-        </main>
-      </div>
+      <StudyStage color={EXAM_COLOR} onLeave={leaveToPapers} leaveLabel={t.leaveExam} where={t.examTitle} pass={false}>
+        <Empty
+          icon={<PageIcon size={40} />}
+          message={t.examLoadFailed}
+          hint={retryAfter > 0 ? t.examLoadFailedCooldown(waitMinutes) : t.examLoadFailedHint}
+          action={retryAfter > 0 ? undefined : { label: t.examRetry, onClick: onRetry }}
+        />
+      </StudyStage>
     )
   }
 
   if (questions.length === 0 || !current) {
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => navigate('/practice/exam')} title={t.examTitle} />
-        <main id="main-content" className="container exam-shell">
-          <Empty
-            icon={<PageIcon size={40} />}
-            message={t.examSectionEmpty}
-            action={{ label: t.examBackToExams, onClick: () => navigate('/practice/exam') }}
-          />
-        </main>
-      </div>
+      <StudyStage color={EXAM_COLOR} onLeave={leaveToPapers} leaveLabel={t.leaveExam} where={t.examTitle} pass={false}>
+        <Empty
+          icon={<PageIcon size={40} />}
+          message={t.examSectionEmpty}
+          action={{ label: t.examBackToExams, onClick: leaveToPapers }}
+        />
+      </StudyStage>
     )
   }
 
@@ -345,7 +344,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   const unansweredCount = questions.length - answeredCount
   // Answered, not position. A bar that fills as you walk PAST unanswered
   // questions claims progress the learner hasn't made — and position is
-  // what the answer sheet shows anyway.
+  // what the sheet bar shows anyway.
   const progressPct = Math.round((answeredCount / questions.length) * 100)
   const isFlagged = flagged.has(current.id)
 
@@ -353,8 +352,9 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   // so they open on its first question and fold away after — they were
   // four lines of kana redrawn above every single question, taking the
   // top of the viewport before the learner reached what was being asked.
+  // The row above the card is the toggle on every question (canvas).
   const isFirstOfMondai = questions.findIndex(q => q.mondaiId === current.mondaiId) === index
-  const instructionsOpen = isFirstOfMondai || openMondai === current.mondaiId
+  const instructionsOpen = openMondai?.id === current.mondaiId ? openMondai.open : isFirstOfMondai
 
   function jumpTo(i) {
     if (i < 0 || i >= questions.length || i === index) return
@@ -429,27 +429,19 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
 
   return (
     <div className="screen">
-      {/* Walking out of a timed exam is worth a question — and the
-          answer ("your progress is saved") is something the learner
-          otherwise has no way to know. */}
-      <ScreenBar onBack={() => setLeaving(true)} title={paperTitle(exam, t)} />
-      <main id="main-content" className="container exam-shell">
-        <div
-          className="exam-progress-bar"
-          role="progressbar"
-          aria-valuenow={progressPct}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={t.examSheetTitle}
-        >
-          <div className="exam-progress-bar__fill" style={{ width: `${progressPct}%` }} />
-        </div>
-
-        <div className="exam-shell__meta">
-          <span className="exam-shell__section" lang="ja">{section.labelJp}</span>
+      <main id="main-content" className="container stage" style={{ '--line-color': EXAM_COLOR }}>
+        {/* The exam's own head row (canvas ExamRunner): the way out,
+            the paper, the clock. Walking out of a timed exam is worth
+            a question — and the answer ("your progress is saved") is
+            something the learner otherwise has no way to know. */}
+        <div className="exam-meta">
+          <Leave onClick={() => setLeaving(true)}>{t.leaveExam}</Leave>
+          <span className="exam-meta__section">
+            <h1 className="exam-meta__jp">{paperTitle(exam, t)}</h1>
+          </span>
           {timeLeft !== null && (
             <span
-              className={`exam-shell__timer${timeLeft < 60 ? ' exam-shell__timer--low' : ''}`}
+              className={`exam-timer${timeLeft < 60 ? ' exam-timer--low' : ''}`}
               role="timer"
             >
               {formatTime(timeLeft)}
@@ -457,48 +449,60 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
           )}
         </div>
 
+        <div
+          className="deck-progress"
+          role="progressbar"
+          aria-valuenow={progressPct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={t.examSheetTitle}
+        >
+          <div className="deck-progress__bar">
+            <div className="deck-progress__segment" style={{ width: `${progressPct}%`, background: EXAM_COLOR }} />
+          </div>
+        </div>
+
         {/* Spoken at 5:00 and 1:00. The pulsing red timer only reaches
             somebody already watching the corner of the screen. */}
         <p className="exam-visually-hidden" role="status" aria-live="polite">{announcement}</p>
 
         {mondai && (
-          <div className="exam-mondai-instructions">
-            <div className="exam-mondai-instructions__head">
-              <span className="exam-mondai-instructions__label" lang="ja">もんだい{mondai.number}</span>
-              {!isFirstOfMondai && (
-                <button
-                  type="button"
-                  className="exam-mondai-instructions__toggle"
-                  aria-expanded={instructionsOpen}
-                  onClick={() => setOpenMondai(instructionsOpen ? null : current.mondaiId)}
-                >
-                  {instructionsOpen ? t.examHideInstructions : t.examShowInstructions}
-                </button>
-              )}
-            </div>
+          <>
+            <button
+              type="button"
+              className="exam-mondai"
+              aria-expanded={instructionsOpen}
+              onClick={() => setOpenMondai({ id: current.mondaiId, open: !instructionsOpen })}
+            >
+              <span>
+                <b className="exam-mondai__part">{t.examPart(mondai.number)}</b>
+                {' · '}
+                {instructionsOpen ? t.examHideInstructions : t.examShowInstructions}
+              </span>
+              <ChevronIcon direction={instructionsOpen ? 'up' : 'down'} size={14} />
+            </button>
             {instructionsOpen && (
-              <p className="exam-mondai-instructions__text" lang="ja">{mondai.instructionsJp}</p>
+              <p className="exam-mondai__text" lang="ja">{mondai.instructionsJp}</p>
             )}
-          </div>
+          </>
         )}
 
-        <CardTransition cardKey={current.id} className="exam-card-stage">
-          <div className="prompt-card exam-card">
+        <CardTransition cardKey={current.id}>
+          <div className="prompt-card prompt-card--ask exam-card">
+            <span className="cap">{t.examQuestionAbbrev}{current.number}</span>
             <QuestionRenderer question={current} selected={selected} onSelect={select} devMode={devMode} />
           </div>
         </CardTransition>
 
-        <div className="exam-nav-buttons">
+        <div className="exam-nav">
           {/* Reuses ReviewDeck's prev/next wording (see quizModes' review
-              mode) rather than inventing a third "back"/"next" pair —
-              t.back is a bare icon-only button made for TopBar's compact
-              style, not a fit here. */}
-          <button type="button" className="btn-secondary exam-nav-btn" disabled={index === 0} onClick={() => jumpTo(index - 1)}>
+              mode) rather than inventing a third "back"/"next" pair. */}
+          <button type="button" className="btn-secondary" disabled={index === 0} onClick={() => jumpTo(index - 1)}>
             <ChevronIcon direction="left" size={14} /> {t.reviewPrev}
           </button>
           <button
             type="button"
-            className={`exam-flag-btn${isFlagged ? ' exam-flag-btn--on' : ''}`}
+            className={`exam-flag${isFlagged ? ' exam-flag--on' : ''}`}
             onClick={toggleFlag}
             aria-pressed={isFlagged}
             aria-label={isFlagged ? t.examUnflag : t.examFlag}
@@ -508,7 +512,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
           </button>
           <button
             type="button"
-            className="btn-primary exam-nav-btn"
+            className="btn-primary"
             disabled={index === questions.length - 1}
             onClick={() => jumpTo(index + 1)}
           >
@@ -516,71 +520,65 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
           </button>
         </div>
 
+        <SheetBar
+          questions={questions}
+          answers={answers}
+          flagged={flagged}
+          index={index}
+          answered={answeredCount}
+          onOpen={() => { playUi('click-mode-selection'); setSheetOpen(true) }}
+          onFinish={requestFinish}
+          busy={submitState === 'sending'}
+        />
+      </main>
+
+      {/* The grid, in a sheet the bar opens. Jumping closes it: the
+          question is what the learner asked for. */}
+      <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} jp={t.examSheetTitle}>
         <AnswerSheet
           questions={questions}
           answers={answers}
           flagged={flagged}
           index={index}
-          onJump={jumpTo}
+          onJump={i => { setSheetOpen(false); jumpTo(i) }}
         />
+      </Sheet>
 
-        {submitState === 'confirming' && (
-          <div className="exam-confirm" role="alertdialog" aria-label={t.examConfirmTitle}>
-            <p className="exam-confirm__title">
-              <WarningIcon size={16} /> {t.examConfirmTitle}
-            </p>
-            <p className="exam-confirm__body">{t.examConfirmBody(unansweredCount)}</p>
-            <div className="exam-confirm__actions">
-              <button type="button" className="btn-secondary exam-nav-btn" onClick={() => setSubmitState('idle')}>
-                {t.examKeepGoing}
-              </button>
-              <button type="button" className="btn-secondary exam-nav-btn" onClick={goToFirstBlank}>
-                {t.examReviewBlanks}
-              </button>
-              <button type="button" className="btn-primary exam-nav-btn" onClick={finish}>
-                {t.examSubmitAnyway}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {submitState === 'error' && (
-          <div className="exam-confirm exam-confirm--error" role="alert">
-            <p className="exam-confirm__title">
-              <WarningIcon size={16} /> {t.examSubmitFailed}
-            </p>
-            <div className="exam-confirm__actions">
-              <button type="button" className="btn-primary exam-nav-btn" onClick={finish}>
-                {t.examSubmitRetry}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {leaving && (
-          <div className="exam-confirm" role="alertdialog" aria-label={t.examLeaveTitle}>
-            <p className="exam-confirm__title">{t.examLeaveTitle}</p>
-            <p className="exam-confirm__body">{t.examLeaveBody}</p>
-            <div className="exam-confirm__actions">
-              <button type="button" className="btn-secondary exam-nav-btn" onClick={() => setLeaving(false)}>
-                {t.examLeaveStay}
-              </button>
-              <button type="button" className="btn-primary exam-nav-btn" onClick={() => navigate('/practice/exam')}>
-                {t.examLeaveConfirm}
-              </button>
-            </div>
-          </div>
-        )}
-
-        <button
-          type="button"
-          className="btn-primary exam-finish-btn"
-          onClick={requestFinish}
-          disabled={submitState === 'sending'}
-        >
-          {submitState === 'sending' ? t.examSubmitting : t.examFinishSection}
+      {/* Not window.confirm: it can't be themed, can't be translated by
+          the app's own locale, and is suppressed outright in some
+          embedded webviews — which for the leave-guard would mean
+          silently losing the guard rather than silently keeping it. */}
+      <Sheet open={submitState === 'confirming'} onClose={() => setSubmitState('idle')} jp={t.examConfirmTitle}>
+        <p className="hint">{t.examConfirmBody(unansweredCount)}</p>
+        <button type="button" className="btn-primary" onClick={() => setSubmitState('idle')}>
+          {t.examKeepGoing}
         </button>
-      </main>
+        <button type="button" className="btn-secondary" onClick={goToFirstBlank}>
+          {t.examReviewBlanks}
+        </button>
+        <button type="button" className="btn-secondary btn-secondary--danger" onClick={finish}>
+          {t.examSubmitAnyway}
+        </button>
+      </Sheet>
+
+      <Sheet open={submitState === 'error'} onClose={() => setSubmitState('idle')} jp={t.examSubmitFailed} label={t.examSubmitFailed}>
+        <button type="button" className="btn-primary" onClick={finish}>
+          {t.examSubmitRetry}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setSubmitState('idle')}>
+          {t.examKeepGoing}
+        </button>
+      </Sheet>
+
+      <Sheet open={leaving} onClose={() => setLeaving(false)} jp={t.examLeaveTitle}>
+        <p className="hint">{t.examLeaveBody}</p>
+        <button type="button" className="btn-primary" onClick={() => setLeaving(false)}>
+          {t.examLeaveStay}
+        </button>
+        <button type="button" className="btn-secondary" onClick={leaveToPapers}>
+          {t.examLeaveConfirm}
+        </button>
+      </Sheet>
     </div>
   )
 }

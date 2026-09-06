@@ -2,7 +2,7 @@
   "declaration-block-no-duplicate-properties::Duplicate property \"white-space\"": 1,
   "declaration-block-no-redundant-longhand-properties::Expected shorthand property \"gap\"": 1,
   "declaration-block-no-redundant-longhand-properties::Expected shorthand property \"inset\"": 3,
-  "declaration-property-value-keyword-no-deprecated::Deprecated keyword \"break-word\" for property \"word-break\"": 6,
+  "declaration-property-value-keyword-no-deprecated::Deprecated keyword \"break-word\" for property \"word-break\"": 2,
   "length-zero-no-unit::Disallowed unit": 1,
   "no-descending-specificity::Expected selector \".anl-action:disabled\" to come before selector \".anl-action:hover:not(:disabled)\", at line N": 1,
   "no-descending-specificity::Expected selector \".anl-tile:disabled\" to come before selector \".anl-tile:hover:not(:disabled)\", at line N": 1,

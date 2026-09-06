@@ -413,6 +413,14 @@ const stats = {
   leaveThemes:        'Thèmes',
   leaveDecks:         'Decks',
   leaveDeck:          'Deck',
+  // ── Pratique (plan 072) ──
+  leaveSources:       'Sources',
+  leaveExam:          'Examen',
+  compBackToQuestions: 'Retour aux questions',
+  practiceResult:     'Résultat',
+  reference:          'Référence',
+  compNote: (you, right) => `Vous · ${you} — correct · ${right}`,
+  examPart: (n) => `Partie ${n}`,
   kanaSetsSub:        'Quatre séries',
   serviceName: {
     local:   'Omnibus',

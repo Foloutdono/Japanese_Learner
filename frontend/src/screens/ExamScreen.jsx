@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { board } from '../stores/boarding'
-import { ScreenBar } from '../components/chrome/Bar'
+import { Leave } from '../components/chrome/Bar'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
@@ -13,7 +13,7 @@ import { listExams } from '../exam/examService'
 import { KIND_ORDER, kindMeta } from '../exam/examKinds'
 import { PageIcon } from '../components/ui/Icons'
 
-// Route: /exam
+// Route: /practice/exam
 // Level first, then which paper — the same two-step every other study
 // section uses (see KanjiScreen's level → mode path), rather than the
 // flat list of every level's every paper this screen used to be. That
@@ -27,6 +27,12 @@ import { PageIcon } from '../components/ui/Icons'
 // construction — see each backend/study/exam_*_gen.py, which returns a
 // single-entry `sections` list — so that screen only ever offered one
 // choice, and existed purely to make the learner tap it.
+//
+// Plan 072 put both steps on the station page (SelectionScreen draws
+// the bar — 模試's roundel and pigment, the level as the sub, the way
+// back in the aside — the canvas's ExamPapers): the level list is the
+// route diagram every station shows, the papers are platform cards
+// with the "Different paper" slot under a paper you have already sat.
 
 // Kinds are named/ordered in exam/examKinds.js — shared with the two
 // screens downstream, which have a paper but no catalog entry to take
@@ -36,7 +42,7 @@ import { PageIcon } from '../components/ui/Icons'
 // the vocab/grammar/reading line colours, and the screen this replaces
 // did exactly that — but 模試 is its own station with its own pigment
 // (--line-exam), and SelectionScreen deliberately hands that one
-// colour down to everything below the plate ("one line, one colour",
+// colour down to everything below the bar ("one line, one colour",
 // see its own comment). Four different pigments here would read as
 // four different lines leaving one station. The Japanese specimen and
 // the localized name already tell the four apart.
@@ -58,18 +64,17 @@ export default function ExamScreen({ session }) {
   // ── Level ──
   if (!level) {
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => navigate('/practice')} title={t.examTitle} />
-        <main id="main-content">
-          <SelectionScreen>
-            {exams === null && <Loading />}
-            {exams?.length === 0 && (
-              <Empty icon={<PageIcon size={40} />} message={t.examNoneAvailable} />
-            )}
-            {exams?.length > 0 && <LevelSelector onSelect={setLevel} />}
-          </SelectionScreen>
-        </main>
-      </div>
+      <SelectionScreen
+        title={t.examTitle}
+        sub={t.stationJlpt}
+        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
+      >
+        {exams === null && <Loading />}
+        {exams?.length === 0 && (
+          <Empty icon={<PageIcon size={40} />} message={t.examNoneAvailable} />
+        )}
+        {exams?.length > 0 && <LevelSelector onSelect={setLevel} />}
+      </SelectionScreen>
     )
   }
 
@@ -111,19 +116,18 @@ export default function ExamScreen({ session }) {
     })
 
   return (
-    <div className="screen">
-      <ScreenBar onBack={() => setLevel(null)} title={`${t.examTitle} ${level}`} />
-      <main id="main-content">
-        <SelectionScreen>
-          <ModeSelector
-            modes={modes}
-            onSelect={examId => {
-              playUi('click-screen-selection')
-              board(() => navigate(`/practice/exam/${examId}`))
-            }}
-          />
-        </SelectionScreen>
-      </main>
-    </div>
+    <SelectionScreen
+      title={t.examTitle}
+      sub={level}
+      aside={<Leave onClick={() => setLevel(null)}>{t.leaveLevels}</Leave>}
+    >
+      <ModeSelector
+        modes={modes}
+        onSelect={examId => {
+          playUi('click-screen-selection')
+          board(() => navigate(`/practice/exam/${examId}`))
+        }}
+      />
+    </SelectionScreen>
   )
 }

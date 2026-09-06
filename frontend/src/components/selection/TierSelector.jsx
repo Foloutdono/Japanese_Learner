@@ -6,13 +6,9 @@ import { Loading } from '../ui/Loading'
 import Empty from '../ui/Empty'
 import { Seg } from '../chrome/Console'
 
-// Mirrors frequency_data.DEFAULT_TIER_SIZE on the backend — used as
-// the initial fetch before the user touches the size toggle, and as
-// the fallback if a later /tiers fetch fails. Options are a fixed set
-// (not free-form input) so every value stays a "clean" bucket size
-// that reads naturally in a label like "1–500".
-const DEFAULT_TIER_SIZE = 200
-const TIER_SIZE_OPTIONS = [100, 200, 500, 1000]
+// The default size and the size options live with the tier maths in
+// domain/tiers.js (the practice pickers read them too, plan 072).
+import { DEFAULT_TIER_SIZE, TIER_SIZE_OPTIONS } from '../../domain/tiers'
 
 /**
  * TierSelector

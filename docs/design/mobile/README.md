@@ -28,7 +28,7 @@ used retires for the mobile chrome.
 | `.chip`, `.chip--on`, `.chip__glyph`, `.chip-row` | chips | `Chip` in `Console.jsx` |
 | `.seg`, `.seg__opt`, `.seg__opt--on`, `.seg__opt-jp`, `.seg__opt-latin`, `.seg--full`, `.seg--kaiseki` | the segmented control | `Seg` in `Console.jsx` (the profile's 番付 already drew `.seg`) |
 | `.loading`, `.loading__dot`, `.empty*` | 待合 / 空 (plan 067) | `components/ui/Loading.jsx`, `components/ui/Empty.jsx` |
-| `.platform-card--line`, `.platform-card__title-jp` | the platform card | `screens/PracticeScreen.jsx` (until plan 072) |
+| `.platform-card--line`, `.platform-card__title-jp` | the platform card | `screens/PracticeScreen.jsx` |
 
 Tokens minted for the chrome: `--hud-h` (48px, the HUD's own height —
 it was the retired phone level bar's 36px), `--tabbar-h` (50px), and
@@ -64,6 +64,57 @@ from the router's state. Held from the canvas: the cloze face (the fill-in
 mode has no blank to type into yet — the sentence is shown whole and the
 rule is the flip), and docking a field's submit in the foot (the type,
 draw and readings faces keep their button under the widget).
+
+## Practice (plan 072)
+
+| Canvas class | `index.css` block | Component |
+|---|---|---|
+| `.bar--register`, `.platform-card--line` | the hub | `screens/PracticeScreen.jsx` (plan 068) |
+| `.timer`, `.timer__bar`, `.timer__fill` (`--low`), `.timer__label` | the practice sessions | `screens/ReadingScreen.jsx`, `screens/ReadingComprehensionScreen.jsx` |
+| `.sentence`, `.sentence--left`, `.sentence--covered` | the card's one line | `ReadingScreen.jsx` |
+| `.prose`, `.prose__label`, `.prose__en` (`--lead`), `.prose__jp` (`--passage`), `.prose__romaji`, `.prose__ai`, `.prose__rule`, `.prose__verdict` (`--ok`, `--x`), `.prose__breakdown` | the card as a page — `PromptCard`'s `prose` prop puts it on `.prompt-card__body` (`.prompt-card__body--prose`) | `ReadingScreen.jsx`, `screens/TranslationScreen.jsx`, `ReadingComprehensionScreen.jsx` |
+| `.prompt-card--ask` | a flat, left-aligned question card | `ReadingComprehensionScreen.jsx`, `screens/ExamRunner.jsx` (with `.exam-card`) |
+| `.type-badge` | the outlined caption pill (its type's colour as a tint) | `QuestionTypeBadge` in `components/study/QuizComponents.jsx` |
+| `.mcq-list`, `.mcq-row` (`--selected`, `--correct`, `--wrong`, `--filler`), `.mcq-row__index` (A–D), `.mcq-row__text--latin` | the choices | `ReadingComprehensionScreen.jsx`; the exam's rows are `exam/QuestionRenderer.jsx` |
+| `.stage__foot` (a `<form>` with `.field` + `.btn-primary`), `.btn-row` | the field and the action docked in the foot; two actions side by side | the three sessions, `screens/ExamResult.jsx` |
+| `.result-lattice` (of `.record`s), `.surface`, `.qrows`, `.qrow-item`, `.qrow`, `.qrow__q`, `.qrow__note`, `.qrow__detail` | the comprehension result | `ReadingComprehensionScreen.jsx` |
+| `.paper-slot` | `.platform-slot__action` ("Different paper", under a sat paper) | `ModeSelector`'s `action` slot, from `screens/ExamScreen.jsx` |
+| `.exam-meta`, `.exam-meta__section`, `.exam-meta__jp`, `.exam-timer` (`--low`) | the runner's head row | `ExamRunner.jsx` |
+| `.exam-mondai`, `.exam-mondai__part`, `.exam-mondai__text` | Part n · Show instructions | `ExamRunner.jsx` |
+| `.cap`, `.exam-underline` | the question's number and its underline | `ExamRunner.jsx`, `QuestionRenderer.jsx` |
+| `.exam-nav`, `.exam-flag` (`--on`) | Previous · flag · Next | `ExamRunner.jsx` |
+| `.exam-sheetbar`, `.exam-sheetbar__open`, `__label`, `__fig`, `__cap`, `__chips`, `__chip` (`--done`, `--flag`, `--here`), `.exam-finish` | the sheet bar, docked like the rating bar (the ≤768px block on `.stage`) | `SheetBar` in `exam/AnswerSheet.jsx` |
+| `.exam-sheet`, `.exam-sheet__legend*`, `__grid`, `__chip*` | the numbered grid, in a `Sheet` the bar opens | `AnswerSheet` in `exam/AnswerSheet.jsx` |
+| `.sheet` + `.hint` + `.btn-primary` / `.btn-secondary` (`--danger`) | the confirm, the leave guard, the submit error | `ExamRunner.jsx` on `components/chrome/Sheet.jsx` |
+| `.exam-result-head`, `.exam-score-ring` (`--low`, `__svg`, `__track`, `__fill`, `__tick`, `__pct`), `.exam-result-figs` (`__score`, `__cap`, `__note`) | the result's head, under the bar | `ExamResult.jsx` |
+| `.section-header--paired` + `.chip--on` (`.section-header__chip`) | Review your answers · Missed only | `ExamResult.jsx` |
+| `.exam-review`, `.exam-review__part`, `.exam-group` (`__part`, `__score`), `.exam-review-row` (`__mark` `--ok`/`--x`/`--blank`, `__q`, `__jp`, `__blank`, `__chev`, `__detail`) | the review surface | `ExamResult.jsx` |
+
+The practice pickers (source, level, word list + tier, the exam's level and
+papers) render on `SelectionScreen` — the station page's own bar, with the
+way back in its aside — the way every station does since plan 071. The
+sessions and the exam runner render on `StudyStage` / the stage frame with
+`‹ Practice` (`‹ Exam`) as the way out and no pocket pass: practice spends
+no credits. The reading and translation tier step is the vocab station's
+tiers page (a `Seg` for the word list over `TierSelector`), and the batch
+carries the chosen `tier_size`. The comprehension exercise commits a pick
+with Next (the canvas), and re-reading the text pauses the clock. Held from
+the canvas: the "sat twice" line on a paper (the catalog carries no attempt
+count).
+
+## What retired with it
+
+The three sessions' private blocks (`.rdg-*` except the breakdown carousel
+`.rdg-breakdown*`, which the analyzer shares; `.trn-*`; `.comp-*`), the
+reading and translation screens' own `TierPicker` (and its jump-to-tier
+row), the exam shell (`.exam-shell*`, `.exam-progress-bar*`, the
+`.exam-mondai-instructions*` strip, `.exam-card-stage`, `.exam-nav-buttons`,
+`.exam-nav-btn`, `.exam-flag-btn*`, the answer-sheet card's head and title,
+`.exam-finish-btn`, the inline `.exam-confirm*` panels), and the old result
+(`.exam-result-header*`, `.exam-result-disclaimer`, `.exam-review__*`,
+`.exam-review-list`, `.exam-review-group*`, the old `.exam-review-row__*`
+summary/icon/number/chevron, the 132px ring's `__arc`/`__target`). Their
+baseline entries went in the same commit.
 
 ## Learn (plan 071)
 
@@ -121,11 +172,11 @@ gate hall: concourse, IC card, notice strip — the map moved to
 `config/navLinks.js` (now `config/tabs.js`). Their CSS blocks and their
 entries in `.stylelint-baseline.json` went in the same commit.
 
-## Still to port (plans 072–075)
+## Still to port (plans 073–075)
 
 `.offer*`, `.pass-tag` (with the store); `.svc*`, `.lvlstrip*`, `.slip*`,
-`.stg-head`/`.stg-list`, `.cal*`, `.picker-row` (072–074); `.dict-plate`, `.dict-block`, `.dict-word`,
-`.tok*`, `.token-card`, `.exam-meta`, `.exam-sheetbar` (072–073); the whole
+`.stg-head`/`.stg-list`, `.cal*`, `.picker-row` (074); `.dict-plate`, `.dict-block`, `.dict-word`,
+`.tok*`, `.token-card` (073); the whole
 `.brd-*` boarding (075). Reading the canvas: `Artifact` `read` on its URL
 saves the page; the design lives in `<script id="appifact-doc">` as JSON —
 `content.files` holds one `*.dc.html` per artboard plus `canvas.json`; the

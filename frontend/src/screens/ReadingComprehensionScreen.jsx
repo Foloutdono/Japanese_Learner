@@ -2,16 +2,35 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { ScreenBar } from '../components/chrome/Bar'
+import { board } from '../stores/boarding'
+import { playUi } from '../lib/audio'
+import { Leave } from '../components/chrome/Bar'
 import LevelSelector from '../components/selection/LevelSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
+import { StudyStage } from '../components/study/StudyStage'
 import PromptCard from '../components/study/PromptCard'
-import { QuestionTypeBadge  } from '../components/study/QuizComponents'
+import { QuestionTypeBadge } from '../components/study/QuizComponents'
 import { Loading } from '../components/ui/Loading'
-import { CheckIcon, CrossIcon } from '../components/ui/Icons'
+import Empty from '../components/ui/Empty'
+import { CheckIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
 
+const RIKAI_COLOR = 'var(--line-rikai)'
+
+// A, B, C, D — the canvas indexes a comprehension question's options
+// by letter (the exam's rows carry the paper's own 1–4).
+const letter = i => String.fromCharCode(65 + i)
+
+const formatTime = secs => {
+  const m = Math.floor(secs / 60)
+  const s = Math.floor(secs % 60)
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
+
+// Route: /practice/comprehension (plan 072: the level list on the
+// station page, then the whole exercise on the stage — the canvas's
+// Comprehension and ComprehensionResult artboards).
+//
 // 'selecting' | 'loading' | 'reading' | 'questions' | 'submitting' | 'results' | 'error'
-
 export default function ReadingComprehensionScreen({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
@@ -21,19 +40,29 @@ export default function ReadingComprehensionScreen({ session }) {
   const [exercise, setExercise] = useState(null)   // { text, translation, questions, read_seconds }
   const [timeLeft, setTimeLeft] = useState(0)
   const [showTranslation, setShowTranslation] = useState(false)
+  // Re-reading the text from the questions pauses the clock: the
+  // reading window was for the first read, and coming back to check
+  // a detail is what the paper allows.
+  const [rereading, setRereading] = useState(false)
   const [currentQ, setCurrentQ] = useState(0)
   const [answers, setAnswers]   = useState([])     // chosen option index per question
+  const [picked, setPicked]     = useState(null)   // the current question's choice, until Next commits it
   const [results, setResults]   = useState(null)   // final { score, total, results[] }
+  const [showOriginal, setShowOriginal] = useState(false)
+  const [openRow, setOpenRow]   = useState(null)   // which result row is opened on its question
   const [error, setError]       = useState(null)
 
   const timerRef = useRef(null)
-
 
   function startSession(lvl) {
     setLevel(lvl)
     setStage('loading')
     setError(null)
     setShowTranslation(false)
+    setRereading(false)
+    setShowOriginal(false)
+    setOpenRow(null)
+    setPicked(null)
 
     apiFetch(`/api/reading/comprehension?level=${lvl}&lang=${lang}`, session)
       .then(r => {
@@ -54,9 +83,9 @@ export default function ReadingComprehensionScreen({ session }) {
       })
   }
 
-  // Reading countdown
+  // Reading countdown — the first read only.
   useEffect(() => {
-    if (stage !== 'reading') return
+    if (stage !== 'reading' || rereading) return
 
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
@@ -70,7 +99,7 @@ export default function ReadingComprehensionScreen({ session }) {
     }, 1000)
 
     return clearTimer
-  }, [stage])
+  }, [stage, rereading])
 
   function clearTimer() {
     if (timerRef.current) {
@@ -81,12 +110,23 @@ export default function ReadingComprehensionScreen({ session }) {
 
   function finishReading() {
     clearTimer()
+    setRereading(false)
     setStage('questions')
   }
 
-  function answerQuestion(optionIndex) {
-    const newAnswers = [...answers, optionIndex]
+  function reread() {
+    setRereading(true)
+    setStage('reading')
+  }
+
+  // Next commits the pick (the canvas: choose a row, then Next) and
+  // submits on the last question.
+  function commitAnswer() {
+    if (picked == null) return
+    playUi('click-mode-selection')
+    const newAnswers = [...answers, picked]
     setAnswers(newAnswers)
+    setPicked(null)
 
     if (newAnswers.length < exercise.questions.length) {
       setCurrentQ(q => q + 1)
@@ -122,265 +162,220 @@ export default function ReadingComprehensionScreen({ session }) {
       })
   }
 
-  const formatTime = secs => {
-    const m = Math.floor(secs / 60)
-    const s = Math.floor(secs % 60)
-    return `${m}:${s.toString().padStart(2, '0')}`
+  function leave() {
+    clearTimer()
+    setStage('selecting')
   }
 
   // ── Level selection ──
   if (stage === 'selecting') {
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => navigate('/practice')} title={t.comprehensionTitle} />
-        {/* No subtitle here — LevelSelector supplies its own header
-            (defaults to t.selectLevel), same convention as Kanji/Vocab;
-            passing subtitle too used to render the header twice. */}
-        <main id="main-content">
-          <SelectionScreen>
-            <LevelSelector onSelect={startSession} />
-          </SelectionScreen>
-        </main>
-      </div>
+      <SelectionScreen
+        title={t.comprehensionTitle}
+        sub={t.selectLevel}
+        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
+      >
+        <LevelSelector onSelect={lvl => board(() => startSession(lvl))} />
+      </SelectionScreen>
     )
   }
 
-  // ── Loading ──
-  if (stage === 'loading') {
-    return (
-      <div className="screen">
-        <ScreenBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} />
-        <main id="main-content" className="comp-loading-wrap">
-          {/* A long wait (the text is written on demand) owes a
-              sentence; the dots carry it (plan 067). */}
-          <Loading copy={t.comprehensionGenerating} />
-        </main>
-      </div>
-    )
-  }
+  const total = exercise?.questions?.length ?? 0
 
-  // ── Error ──
-  if (stage === 'error') {
-    return (
-      <div className="screen">
-        <ScreenBar onBack={() => setStage('selecting')} title={t.comprehensionTitle} />
-        <main id="main-content" className="container comp-error-page">
-          <div className="card comp-error-card">{error}</div>
-          <button onClick={() => startSession(level)} className="comp-retry-btn">
-            {t.retry}
-          </button>
-        </main>
-      </div>
-    )
-  }
+  // Everything after the level is on the stage: the same frame, the
+  // same way out, the sub saying where in the exercise you are.
+  const sub =
+    stage === 'questions' || stage === 'submitting' ? `${level} · ${t.question} ${currentQ + 1} / ${total}` :
+    stage === 'results' ? `${level} · ${t.practiceResult}` :
+    level
 
-  // ── Reading stage ──
-  if (stage === 'reading' && exercise) {
-    const readPct = (timeLeft / exercise.read_seconds) * 100
+  return (
+    <StudyStage
+      color={RIKAI_COLOR}
+      onLeave={leave}
+      leaveLabel={t.tabPractice}
+      where={t.comprehensionTitle}
+      sub={sub}
+      remaining={stage === 'questions' ? `${currentQ + 1} / ${total}` : undefined}
+      pass={false}
+    >
+      {/* A long wait (the text is written on demand) owes a sentence;
+          the dots carry it (plan 067). */}
+      {stage === 'loading' && <Loading copy={t.comprehensionGenerating} />}
+      {stage === 'submitting' && <Loading />}
 
-    return (
-      <div className="screen">
-        <ScreenBar onBack={() => { clearTimer(); setStage('selecting') }} title={`${t.comprehensionTitle} — ${level}`} />
-        <main id="main-content" className="container comp-reading-page">
+      {stage === 'error' && (
+        <Empty tone="error" message={error} action={{ label: t.retry, onClick: () => startSession(level) }} />
+      )}
 
-          <div className="comp-reading-header">
-            <div className="comp-time-remaining">
-              {t.timeRemaining}: <strong className="comp-time-value" style={{ '--time-color': timeLeft < 60 ? 'var(--danger)' : 'var(--text-primary)' }}>
-                {formatTime(timeLeft)}
-              </strong>
-            </div>
-            <div className="comp-reading-actions">
-              <button
-                onClick={() => setShowTranslation(s => !s)}
-                className="comp-toggle-translation"
-              >
-                {showTranslation ? (t.hideTranslation) : (t.showTranslation)}
-              </button>
-              <button
-                onClick={finishReading}
-                className="comp-done-btn"
-              >
-                {t.doneReading}
-              </button>
-            </div>
-          </div>
-
-          <div className="comp-bar-track comp-bar-track--reading">
-            <div
-              className="comp-bar-fill comp-bar-fill--linear"
-              style={{ '--fill-color': timeLeft < 60 ? 'var(--danger)' : 'var(--accent)', '--fill-pct': `${readPct}%` }}
-            />
-          </div>
-
-          <div className="card comp-text-card">
-            <div className="comp-text-content">
-              {exercise.text}
-            </div>
-          </div>
-
-          {showTranslation && (
-            <div className="card comp-translation-card">
-              <div className="comp-translation-label">
-                {t.translation}
+      {stage === 'reading' && exercise && (
+        <>
+          {!rereading && (
+            <div className="timer">
+              <div className="timer__bar" aria-hidden="true">
+                <span
+                  className={`timer__fill${timeLeft < 60 ? ' timer__fill--low' : ''}`}
+                  style={{ width: `${(timeLeft / exercise.read_seconds) * 100}%` }}
+                />
               </div>
-              <div className="comp-translation-text">{exercise.translation}</div>
+              <span className="timer__label" role="timer">{t.timeRemaining} · {formatTime(timeLeft)}</span>
             </div>
           )}
 
-        </main>
-      </div>
-    )
-  }
+          <PromptCard prose foot={{ left: level, right: t.comprehensionTitle }}>
+            <span className="prose__jp prose__jp--passage" lang="ja">{exercise.text}</span>
+            {showTranslation && (
+              <>
+                <span className="prose__rule" />
+                <span className="prose__label">{t.translation}</span>
+                <span className="prose__en">{exercise.translation}</span>
+              </>
+            )}
+          </PromptCard>
 
-  // ── Questions stage ──
-  if ((stage === 'questions' || stage === 'submitting') && exercise) {
-    const q = exercise.questions[currentQ]
-    const total = exercise.questions.length
+          <div className="stage__foot btn-row">
+            <button type="button" className="btn-secondary" onClick={() => setShowTranslation(s => !s)}>
+              {showTranslation ? t.hideTranslation : t.showTranslation}
+            </button>
+            <button type="button" className="btn-primary" onClick={finishReading}>
+              {rereading ? t.compBackToQuestions : t.doneReading}
+            </button>
+          </div>
+        </>
+      )}
 
-    return (
-      <div className="screen">
-        <ScreenBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} />
-        {/* 黄丹, per DESIGN.md's "the pigment is injected once" — see
-            DecksScreen's comment for why it sits on <main> and not on
-            .screen.
-
-            --line-rikai, NOT --line-reading: 理解 is its own board row
-            with its own pigment in config/tabs.js, and "one line,
-            one colour" means it cannot borrow 読書's 緑青. Note for
-            whoever adds a filled action here — 黄丹 is one of the two
-            pigments DESIGN.md flags as too light for --text-on-panel,
-            so a .btn-primary under this shell needs its ratio measured
-            before it ships. Nothing here fills today. */}
-        <main id="main-content" className="container stage"
-          style={{ '--line-color': 'var(--line-rikai)' }}>
-
-          {stage === 'submitting' ? (
-            <Loading />
-          ) : (
-            <>
-              <div className="comp-q-progress">
-                {t.question} {currentQ + 1} / {total}
-                <div className="comp-bar-track comp-bar-track--question">
-                  <div className="comp-bar-fill" style={{ '--fill-pct': `${((currentQ + 1) / total) * 100}%` }} />
-                </div>
+      {stage === 'questions' && exercise && (() => {
+        const q = exercise.questions[currentQ]
+        return (
+          <>
+            <div className="deck-progress" aria-hidden="true">
+              <div className="deck-progress__bar">
+                <div className="deck-progress__segment" style={{ width: `${((currentQ + 1) / total) * 100}%`, background: RIKAI_COLOR }} />
               </div>
+            </div>
 
-              {/* Study.dc.html's footer strip. */}
-              <PromptCard foot={{ left: level ? `${level} 理解` : '理解' }}>
-                <QuestionTypeBadge type={q.type}/>
-                <div className="comp-question-text">
-                  {q.question}
-                </div>
-              </PromptCard>
+            {/* The questions are written in the learner's language
+                (reading.py's comprehension prompt), so the card is a
+                page, not a Japanese face. */}
+            <PromptCard className="prompt-card--ask">
+              <QuestionTypeBadge type={q.type} />
+              <span className="prose__en prose__en--lead">{q.question}</span>
+            </PromptCard>
 
-              <div className="comp-options">
-                {q.options.map((option, i) => (
-                  <button
-                    key={i}
-                    onClick={() => answerQuestion(i)}
-                    className="comp-option-btn"
-                  >
-                    <span className="comp-option-btn__letter">
-                      {String.fromCharCode(65 + i)}.
-                    </span>
-                    {option}
-                  </button>
-                ))}
-              </div>
+            <div className="mcq-list" role="group" aria-label={q.question}>
+              {q.options.map((option, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={`mcq-row${picked === i ? ' mcq-row--selected' : ''}`}
+                  aria-pressed={picked === i}
+                  onClick={() => { playUi('click-mode-selection'); setPicked(i) }}
+                >
+                  <span className="mcq-row__accent" aria-hidden="true" />
+                  <span className="mcq-row__index">{letter(i)}</span>
+                  <span className="mcq-row__text mcq-row__text--latin">{option}</span>
+                </button>
+              ))}
+            </div>
 
-              <button
-                onClick={() => setStage('reading')}
-                className="comp-reread-btn"
-              >
+            <div className="stage__foot btn-row">
+              <button type="button" className="btn-secondary" onClick={reread}>
                 {t.reReadText}
               </button>
-            </>
-          )}
-        </main>
-      </div>
-    )
-  }
-
-  // ── Results ──
-  if (stage === 'results' && results) {
-    const pct = Math.round((results.score / results.total) * 100)
-    const scoreColor = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)'
-
-    return (
-      <div className="screen">
-        <ScreenBar onBack={() => setStage('selecting')} title={`${t.comprehensionTitle} — ${level}`} />
-        <main id="main-content" className="container page-pad">
-
-          <div className="card comp-score-card">
-            <div>
-              <div className="comp-score-value" style={{ '--score-color': scoreColor }}>
-                {results.score}/{results.total}
-              </div>
-              <div className="comp-score-label">{t.score}</div>
+              <button type="button" className="btn-primary" disabled={picked == null} onClick={commitAnswer}>
+                {currentQ + 1 < total ? t.reviewNext : t.submit}
+              </button>
             </div>
-            <div>
-              <div className="comp-score-value" style={{ '--score-color': scoreColor }}>{pct}%</div>
-              <div className="comp-score-label">{t.accuracy}</div>
+          </>
+        )
+      })()}
+
+      {stage === 'results' && results && (
+        <>
+          <div className="result-lattice">
+            <div className="record">
+              <span className="record__value">{results.score}<span className="record__unit">/ {results.total}</span></span>
+              <span className="record__label">{t.score}</span>
+            </div>
+            <div className="record">
+              <span className="record__value">{Math.round((results.score / results.total) * 100)}<span className="record__unit">%</span></span>
+              <span className="record__label">{t.accuracy}</span>
             </div>
           </div>
 
-          <div className="comp-results-list">
-            {results.results.map((r, i) => (
-              <div key={i} className="card comp-result-item" style={{ '--border-color': r.is_correct ? 'var(--success)' : 'var(--danger)' }}>
-                <div className="comp-result-item__q">
-                  <span className="comp-result-item__qnum">Q{i + 1}.</span>
-                  {r.question}
-                </div>
-                <div className="comp-result-item__options">
-                  {r.options.map((opt, j) => {
-                    const isCorrect = j === r.correct
-                    const isUser = j === r.user_answer
-                    const color = isCorrect ? 'var(--success)' : (isUser && !isCorrect ? 'var(--danger)' : 'var(--text-secondary)')
-                    return (
-                      <div key={j} className="comp-result-option" style={{ '--opt-color': color }}>
-                        <span className="comp-result-option__letter">{String.fromCharCode(65 + j)}.</span>
-                        <span>{opt}</span>
-                        {isCorrect && <span className="comp-result-option__mark"><CheckIcon size={13} /></span>}
-                        {isUser && !isCorrect && <span className="comp-result-option__mark"><CrossIcon size={13} /> {t.yourAnswer}</span>}
+          {/* One row per question; a missed one says what was picked
+              and what was right. Tapping a row opens the question
+              with its options marked. */}
+          <div className="surface qrows">
+            {results.results.map((r, i) => {
+              const isOpen = openRow === i
+              return (
+                <div key={i} className="qrow-item">
+                  <button
+                    type="button"
+                    className="qrow"
+                    aria-expanded={isOpen}
+                    onClick={() => { playUi('click-mode-selection'); setOpenRow(isOpen ? null : i) }}
+                  >
+                    <span className={`exam-review-row__mark exam-review-row__mark--${r.is_correct ? 'ok' : 'x'}`} aria-hidden="true">
+                      {r.is_correct ? <CheckIcon size={11} /> : <CrossIcon size={11} />}
+                    </span>
+                    <span className="qrow__q">Q{i + 1}</span>
+                    {!r.is_correct && (
+                      <span className="qrow__note">{t.compNote(letter(r.user_answer), letter(r.correct))}</span>
+                    )}
+                    <span className="exam-review-row__chev" aria-hidden="true">
+                      <ChevronIcon direction={isOpen ? 'up' : 'down'} size={14} />
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div className="qrow__detail">
+                      <span className="prose__en">{r.question}</span>
+                      <div className="mcq-list">
+                        {r.options.map((opt, j) => {
+                          const cls = [
+                            'mcq-row',
+                            j === r.correct && 'mcq-row--correct',
+                            j === r.user_answer && j !== r.correct && 'mcq-row--wrong',
+                            j !== r.correct && j !== r.user_answer && 'mcq-row--filler',
+                          ].filter(Boolean).join(' ')
+                          return (
+                            <div key={j} className={cls}>
+                              <span className="mcq-row__accent" aria-hidden="true" />
+                              <span className="mcq-row__index">{letter(j)}</span>
+                              <span className="mcq-row__text mcq-row__text--latin">{opt}</span>
+                            </div>
+                          )
+                        })}
                       </div>
-                    )
-                  })}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
-          <div className="card comp-original-card">
-            <div className="comp-original-label">
-              {t.originalText}
-            </div>
-            <div className="comp-original-text">
-              {exercise.text}
-            </div>
-            <div className="comp-original-translation">
-              {exercise.translation}
-            </div>
-          </div>
+          <button type="button" className="btn-secondary" onClick={() => setShowOriginal(s => !s)} aria-expanded={showOriginal}>
+            {t.originalText}
+          </button>
+          {showOriginal && (
+            <PromptCard prose foot={{ left: level, right: t.comprehensionTitle }}>
+              <span className="prose__jp prose__jp--passage" lang="ja">{exercise.text}</span>
+              <span className="prose__rule" />
+              <span className="prose__en">{exercise.translation}</span>
+            </PromptCard>
+          )}
 
-          <div className="comp-results-actions">
-            <button
-              onClick={() => startSession(level)}
-              className="comp-try-again-btn"
-            >
-              {t.tryAgain}
-            </button>
-            <button
-              onClick={() => setStage('selecting')}
-              className="comp-change-level-btn"
-            >
+          <div className="stage__foot btn-row">
+            <button type="button" className="btn-secondary" onClick={leave}>
               {t.changeLevel}
             </button>
+            <button type="button" className="btn-primary" onClick={() => startSession(level)}>
+              {t.tryAgain}
+            </button>
           </div>
-
-        </main>
-      </div>
-    )
-  }
-
-  return null
+        </>
+      )}
+    </StudyStage>
+  )
 }
