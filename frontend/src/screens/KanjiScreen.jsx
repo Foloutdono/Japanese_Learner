@@ -16,7 +16,7 @@ import {
 import { usePace } from '../components/study/usePace'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
-import { XpToast } from '../components/rewards/XpToast'
+import { StudyStage } from '../components/study/StudyStage'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 import LevelSelector from '../components/selection/LevelSelector'
@@ -389,17 +389,16 @@ export default function KanjiScreen({ session }) {
   // ── Review (self-paced, ungraded browse of already-studied cards) ──
   if (reviewing) {
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => setReviewing(false)} title={`${t.kanjiTitle} ${level} — ${t.modeReview}`} />
-        {/* 藤色, per DESIGN.md's "the pigment is injected once" — see
-            DecksScreen's comment for why it sits on <main> and not on
-            .screen. This is the screen whose components were reaching
-            for var(--line-kanji) by name as a fallback (plan 059);
-            with the shell injecting, that fallback is now dead weight
-            rather than the thing doing the work. */}
-        <main id="main-content" className="container quiz-area"
-          style={{ '--line-color': 'var(--line-kanji)' }}>
+      <StudyStage
+        color="var(--line-kanji)"
+        onLeave={() => setReviewing(false)}
+        leaveLabel={t.kanjiTitle}
+        where={`${t.kanjiTitle} ${level}`}
+        sub={t.modeReview}
+        pass={false}
+      >
           <ReviewDeck
+            foot={`${t.kanjiTitle} ${level}`}
             cards={reviewCards}
             loading={reviewLoading}
             t={t}
@@ -413,8 +412,7 @@ export default function KanjiScreen({ session }) {
             )}
             onExit={() => setReviewing(false)}
           />
-        </main>
-      </div>
+      </StudyStage>
     )
   }
 
@@ -435,17 +433,18 @@ export default function KanjiScreen({ session }) {
   const isRadical = STUDY_MODES[mode]?.base === 'radical'
 
   return (
-    <div className="screen">
-      <ScreenBar
-        onBack={() => setMode(null)}
-        title={`${t.kanjiTitle} ${sourceLabel} — ${title}`}
-        actions={usesWritingDrill(mode) ? (
-          <WritingToggle on={drawingEnabled} onToggle={() => setDrawingEnabled(d => !d)} />
-        ) : undefined}
-      />
-      <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
-      <main id="main-content" className="container quiz-area"
-        style={{ '--line-color': 'var(--line-kanji)' }}>
+    <StudyStage
+      color="var(--line-kanji)"
+      onLeave={() => setMode(null)}
+      leaveLabel={t.kanjiTitle}
+      where={`${t.kanjiTitle} ${sourceLabel}`}
+      sub={title}
+      aside={usesWritingDrill(mode) ? (
+        <WritingToggle on={drawingEnabled} onToggle={() => setDrawingEnabled(d => !d)} />
+      ) : undefined}
+      toast={gates.xpToast}
+      onToastDone={gates.toastDone}
+    >
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
@@ -657,7 +656,6 @@ export default function KanjiScreen({ session }) {
             )}
           </>
         )}
-      </main>
-    </div>
+    </StudyStage>
   )
 }

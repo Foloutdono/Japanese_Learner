@@ -20,9 +20,9 @@ describe('the phone layout contract', () => {
     // alone (0 in chromium), as on a stage. The shell's own case is
     // chrome.phone.test.jsx.
     const screen = await render(
-      <main className="container quiz-area"><div className="rating-bar" /></main>
+      <main className="container stage"><div className="rating-bar" /></main>
     )
-    const area = screen.container.querySelector('.quiz-area')
+    const area = screen.container.querySelector('.stage')
     const bar  = screen.container.querySelector('.rating-bar')
     expect(getComputedStyle(area).paddingBottom).toBe('0px')
     expect(getComputedStyle(bar).position).toBe('sticky')
@@ -34,11 +34,11 @@ describe('the phone layout contract', () => {
     try {
       const screen = await render(
         <div>
-          <main className="container quiz-area"><div className="rating-bar" /></main>
+          <main className="container stage"><div className="rating-bar" /></main>
           <div className="dock-note" />
         </div>
       )
-      expect(getComputedStyle(screen.container.querySelector('.quiz-area')).paddingBottom).toBe('50px')
+      expect(getComputedStyle(screen.container.querySelector('.stage')).paddingBottom).toBe('50px')
       expect(getComputedStyle(screen.container.querySelector('.rating-bar')).bottom).toBe('50px')
       expect(getComputedStyle(screen.container.querySelector('.dock-note')).bottom).toBe('50px')
     } finally {

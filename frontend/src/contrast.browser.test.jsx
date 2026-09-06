@@ -157,16 +157,16 @@ const Fixture = () => (
     {/* GateCard.jsx -- the fare gate on --surface, its lane tint, and
         the gold depart action (the wall-map redesign's one fill) */}
     <div className="gate-card">
-      <span className="gate-card__latin gc-latin">Today</span>
-      <span className="gate-card__unit gc-unit" lang="ja">件</span>
+      <span className="gate-card__title gc-latin">Fare gate</span>
+      <span className="gate-card__unit gc-unit">due</span>
       <span className="gate-card__when gc-when">3h</span>
-      <span className="gate-lane" style={{ '--lane-color': 'var(--line-kanji)' }}>
-        <span className="gate-lane__where gc-where" lang="ja">漢字</span>
-        <span className="gate-lane__mode gc-mode">writing</span>
-      </span>
+      <button type="button" className="lane" style={{ '--lane-color': 'var(--line-kanji)' }}>
+        <span className="lane__where gc-where">Kanji N4</span>
+        <span className="lane__mode gc-mode">writing</span>
+      </button>
       <button type="button" className="btn-depart">
-        <span className="btn-depart__jp gc-depart-jp" lang="ja">出発する</span>
-        <span className="btn-depart__latin gc-depart-latin">Depart</span>
+        <span className="btn-depart__jp gc-depart-jp">Depart</span>
+        <span className="btn-depart__go gc-depart-latin" aria-hidden="true">▶</span>
       </button>
     </div>
 
@@ -454,13 +454,13 @@ const Fixture = () => (
 const SITES = [
   ['.decks-filter-btn', 'decks/today console chip'],
   ['.decks-index-bar__count', 'decks/today console count'],
-  ['.gc-latin', 'fare gate caption'],
+  ['.gc-latin', 'fare gate title'],
   ['.gc-unit', 'fare gate unit'],
   ['.gc-when', 'fare gate next-review line'],
   ['.gc-where', 'gate lane name (tinted surface)'],
   ['.gc-mode', 'gate lane mode (tinted surface)'],
   ['.gc-depart-jp', 'depart button name (gold fill)'],
-  ['.gc-depart-latin', 'depart button caption (gold fill)'],
+  ['.gc-depart-latin', 'depart button arrow (gold fill)'],
   ['.wm-latin', 'map line caption (sumi)'],
   ['.wm-stop', 'map stop label (sumi)'],
   ['.wm-due', 'map due chip (sumi)'],

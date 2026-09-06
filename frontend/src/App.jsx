@@ -27,6 +27,7 @@ import OnboardingFlow from './screens/OnboardingFlow'
 import LearnScreen from './screens/LearnScreen'
 import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
+import TodayRun from './screens/TodayRun'
 import KanaScreen  from './screens/KanaScreen'
 import VocabScreen from './screens/VocabScreen'
 import KanjiScreen from './screens/KanjiScreen'
@@ -288,6 +289,7 @@ export default function App() {
             <Route path="/learn/vocab"                element={<VocabScreen session={session} />} />
             <Route path="/learn/kanji"                element={<KanjiScreen session={session} />} />
             <Route path="/learn/grammar"              element={<GrammarScreen session={session} />} />
+            <Route path="/today/run"                element={<TodayRun session={session} />} />
             <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
             <Route path="/practice/reading"           element={<ReadingScreen session={session} />} />
             <Route path="/practice/comprehension"     element={<ReadingComprehensionScreen session={session} />} />

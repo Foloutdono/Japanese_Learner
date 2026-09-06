@@ -126,7 +126,7 @@ describe('InlineReveal — inside a real flashcard, at the real card width', () 
     await page.viewport(1920, 1000)
     const screen = await render(
       <LangProvider>
-        <div className="container quiz-area">
+        <div className="container stage">
           <div className="prompt-card">
             <Flashcard
               t={T}

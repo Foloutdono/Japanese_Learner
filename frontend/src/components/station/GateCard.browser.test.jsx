@@ -20,7 +20,11 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: GateCard } = await import('./GateCard')
 
-const TODAY = { total: 24, lanes: [], next_due: null }
+const LANES = [
+  { id: 's~kanji~N4~kanji.flashcard.f2b', kind: 'section', source: 'kanji', deck: 'N4', mode: 'kanji.flashcard.f2b', due: 14 },
+  { id: 's~vocab~N5~vocab.flashcard.f2b', kind: 'section', source: 'vocab', deck: 'N5', mode: 'vocab.flashcard.f2b', due: 10 },
+]
+const TODAY = { total: 24, lanes: LANES, next_due: null }
 const FREE = { balance: 30, cap: 50, dailyRefill: 30, refillAt: '2026-09-07T22:00:00+00:00', plan: 'free', unlimited: false, enforced: false }
 
 function mount(today = TODAY) {
@@ -49,7 +53,9 @@ describe('GateCard — the fare', () => {
 
   it('says how many ride and how many wait when the balance is short', async () => {
     creditsRef.current = { ...FREE, balance: 12 }
-    const screen = await mount({ ...TODAY, total: 42 })
+    // The fare is the chosen lanes' due (plan 070), so the lanes carry
+    // the 42, not `total`.
+    const screen = await mount({ ...TODAY, total: 42, lanes: [{ ...LANES[0], due: 30 }, { ...LANES[1], due: 12 }] })
     const short = screen.container.querySelector('.gate-card__short')
     expect(short.textContent).toContain('12')
     expect(short.textContent).toContain('42')
@@ -76,8 +82,23 @@ describe('GateCard — the fare', () => {
 
   it('prints ∞ and no notice on a pass', async () => {
     creditsRef.current = { ...FREE, balance: null, unlimited: true }
-    const screen = await mount({ ...TODAY, total: 99 })
+    const screen = await mount()
     expect(screen.container.querySelector('.fare-gold').textContent).toBe('∞')
+    expect(screen.container.querySelector('.gate-card__short')).toBeNull()
+  })
+
+  it('a lane switched off comes out of the fare, and the notice follows (plan 070)', async () => {
+    creditsRef.current = { ...FREE, balance: 12 }
+    const screen = await mount()
+    expect(screen.container.querySelector('.gate-card__short')).toBeTruthy()
+    // Grouped by line, vocab before kanji: pick the kanji lane by name.
+    const kanji = [...screen.container.querySelectorAll('.lane')].find(l => l.textContent.includes('N4'))
+    expect(kanji.getAttribute('aria-pressed')).toBe('true')
+    kanji.click()
+    await new Promise(r => setTimeout(r, 60))
+    expect(kanji.getAttribute('aria-pressed')).toBe('false')
+    expect(screen.container.querySelector('.gate-card__fare b').textContent).toBe('10')
+    // Ten ride on twelve credits: nothing waits any more.
     expect(screen.container.querySelector('.gate-card__short')).toBeNull()
   })
 

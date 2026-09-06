@@ -388,7 +388,7 @@ function SessionView({
           DecksScreen's comment for why it sits on <main> and not on
           .screen. As on ReadingScreen, nothing under here reads
           var(--line-color) yet; the shell states the section anyway. */}
-      <main id="main-content" className="container quiz-area trn-area"
+      <main id="main-content" className="container stage trn-area"
         style={{ '--line-color': 'var(--line-honyaku)' }}>
 
         <div className="trn-score-row">

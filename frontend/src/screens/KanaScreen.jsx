@@ -14,7 +14,7 @@ import { usePace } from '../components/study/usePace'
 import HintBar from '../components/study/HintBar'
 import { DrawingQuiz } from '../components/study/DrawingCanvas'
 import { Loading } from '../components/ui/Loading'
-import { XpToast } from '../components/rewards/XpToast'
+import { StudyStage } from '../components/study/StudyStage'
 import { CardTransition } from '../components/study/CardTransition'
 import PromptCard from '../components/study/PromptCard'
 import SelectionScreen from '../components/selection/SelectionScreen'
@@ -246,15 +246,16 @@ export default function KanaScreen({ session }) {
   if (reviewing) {
     const dictCategory = selectedSet.slug.startsWith('hiragana') ? 'hiragana' : 'katakana'
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => setReviewing(false)} title={`${selectedSet.label} — ${modeLabel(t, FAST_REVIEW)}`} />
-        {/* 朱色, per DESIGN.md's "the pigment is injected once" — see
-            DecksScreen's comment for why it sits on <main> and not on
-            .screen. Both of this screen's study shells carry it, review
-            and quiz alike, or the pigment would flicker between them. */}
-        <main id="main-content" className="container quiz-area"
-          style={{ '--line-color': 'var(--line-kana)' }}>
+      <StudyStage
+        color="var(--line-kana)"
+        onLeave={() => setReviewing(false)}
+        leaveLabel={t.kanaTitle}
+        where={selectedSet.label}
+        sub={modeLabel(t, FAST_REVIEW)}
+        pass={false}
+      >
           <ReviewDeck
+            foot={selectedSet.label}
             cards={reviewCards}
             loading={reviewLoading}
             t={t}
@@ -271,8 +272,7 @@ export default function KanaScreen({ session }) {
             )}
             onExit={() => setReviewing(false)}
           />
-        </main>
-      </div>
+      </StudyStage>
     )
   }
 
@@ -318,11 +318,15 @@ export default function KanaScreen({ session }) {
   const romajiPrompt = text => <CharDisplay char={text} size={44} />
 
   return (
-    <div className="screen">
-      <ScreenBar onBack={() => setMode(null)} title={`${selectedSet.label} — ${title}`}/>
-      <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
-      <main id="main-content" className="container quiz-area"
-        style={{ '--line-color': 'var(--line-kana)' }}>
+    <StudyStage
+      color="var(--line-kana)"
+      onLeave={() => setMode(null)}
+      leaveLabel={t.kanaTitle}
+      where={selectedSet.label}
+      sub={title}
+      toast={gates.xpToast}
+      onToastDone={gates.toastDone}
+    >
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
@@ -444,7 +448,6 @@ export default function KanaScreen({ session }) {
             <RatingBar active={showRating && !gates.locked} onRate={postReview} />
           </>
         )}
-      </main>
-    </div>
+    </StudyStage>
   )
 }

@@ -112,7 +112,7 @@ export default function RewardsPreview() {
           the top corner. The next card waits for this one, so every hold is
           measured — see CardStamp.browser.test.jsx.
         </p>
-        <div className="quiz-area preview-stage" style={{ '--line-color': 'var(--line-kanji)' }}>
+        <div className="stage preview-stage" style={{ '--line-color': 'var(--line-kanji)' }}>
           <CardTransition
             className="specimen-card-stage"
             cardKey="preview"

@@ -14,7 +14,7 @@ import { usePace } from '../components/study/usePace'
 import { GrammarRule, GrammarAnswer } from '../components/study/GrammarPieces'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
-import { XpToast } from '../components/rewards/XpToast'
+import { StudyStage } from '../components/study/StudyStage'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 import LevelSelector from '../components/selection/LevelSelector'
@@ -205,14 +205,16 @@ export default function GrammarScreen({ session }) {
   // ── Review (self-paced, ungraded browse of already-studied cards) ──
   if (reviewing) {
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => setReviewing(false)} title={`${t.grammarTitle} ${level} — ${t.modeReview}`} />
-        {/* 松葉色, per DESIGN.md's "the pigment is injected once" — see
-            DecksScreen's comment for why it sits on <main> and not on
-            .screen. Both study shells carry it, review and quiz alike. */}
-        <main id="main-content" className="container quiz-area"
-          style={{ '--line-color': 'var(--line-grammar)' }}>
+      <StudyStage
+        color="var(--line-grammar)"
+        onLeave={() => setReviewing(false)}
+        leaveLabel={t.grammarTitle}
+        where={`${t.grammarTitle} ${level}`}
+        sub={t.modeReview}
+        pass={false}
+      >
           <ReviewDeck
+            foot={`${t.grammarTitle} ${level}`}
             cards={reviewCards}
             loading={reviewLoading}
             t={t}
@@ -229,8 +231,7 @@ export default function GrammarScreen({ session }) {
             )}
             onExit={() => setReviewing(false)}
           />
-        </main>
-      </div>
+      </StudyStage>
     )
   }
 
@@ -267,11 +268,15 @@ export default function GrammarScreen({ session }) {
 
   // ── Quiz ──
   return (
-    <div className="screen">
-      <ScreenBar onBack={() => setMode(null)} title={`${t.grammarTitle} ${level} — ${currentModeLabel}`} />
-      <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
-      <main id="main-content" className="container quiz-area"
-        style={{ '--line-color': 'var(--line-grammar)' }}>
+    <StudyStage
+      color="var(--line-grammar)"
+      onLeave={() => setMode(null)}
+      leaveLabel={t.grammarTitle}
+      where={`${t.grammarTitle} ${level}`}
+      sub={currentModeLabel}
+      toast={gates.xpToast}
+      onToastDone={gates.toastDone}
+    >
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
@@ -402,7 +407,6 @@ export default function GrammarScreen({ session }) {
             <RatingBar active={showRating && !gates.locked} onRate={postReview} />
           </>
         )}
-      </main>
-    </div>
+    </StudyStage>
   )
 }

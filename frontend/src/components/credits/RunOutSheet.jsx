@@ -49,8 +49,7 @@ export function RunOutSheet() {
         </div>
       </div>
       <button type="button" className="btn-depart" onClick={leave}>
-        <span className="btn-depart__jp" lang="ja">駅へ戻る</span>
-        <span className="btn-depart__latin">{t.backToStation}</span>
+        <span className="btn-depart__jp">{t.backToStation}</span>
       </button>
     </Sheet>
   )

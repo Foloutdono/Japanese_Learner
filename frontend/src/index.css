@@ -4584,7 +4584,7 @@
   /* The quiz card's own column -- narrower than --max-w on purpose
      (plan 049). Lives here, not on .prompt-card itself, because
      .deck-progress needs the exact same number and sits BESIDE the
-     card in the DOM (a sibling under .quiz-area), not inside it -- a
+     card in the DOM (a sibling under .stage), not inside it -- a
      custom property declared only on .prompt-card would never reach
      it. .prompt-card (index.css:13659) and .deck-progress
      (index.css:7808) both just consume var(--card-w); an exception
@@ -5144,8 +5144,9 @@ button:focus-visible {
 
 .learn,
 .practice,
+.today,
 .selection-screen__inner,
-.quiz-area,
+.stage,
 .profile-container,
 .stats-container,
 .settings-container,
@@ -5176,8 +5177,9 @@ button:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .learn,
   .practice,
+  .today,
   .selection-screen__inner,
-  .quiz-area,
+  .stage,
   .platform-card,
   .route-stop,
   .wmap-line,
@@ -5769,7 +5771,7 @@ textarea:focus-visible {
 }
 
 /* Vertical breathing room for a plain `.container` page that isn't
-   `.quiz-area` (which already bakes in its own padding) — e.g. the
+   `.stage` (which already bakes in its own padding) — e.g. the
    reading-comprehension results screen. Mirrors `.dict-page`'s
    top/bottom rhythm so a page like this doesn't sit flush against the
    bar with no space above its first card. */
@@ -5982,9 +5984,10 @@ textarea:focus-visible {
    rebuild each one on the bar) is a flex child here, not a second
    viewport — see .phone__content > .screen beside .screen itself. */
 .phone__content > main { flex: 1; }
-/* The two new gates' pages: the canvas's gutter, the bar first. */
+/* The gates' pages: the canvas's gutter, the bar first. */
 .learn,
-.practice {
+.practice,
+.today {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
@@ -6411,6 +6414,8 @@ textarea:focus-visible {
   gap: var(--sp-4);
   min-height: 40px;
 }
+.stage__head .hud__pass { height: 34px; }
+
 /* ‹ and the name of where it goes. */
 .stage__leave {
   display: inline-flex;
@@ -7587,24 +7592,16 @@ textarea:focus-visible {
 .gate-card__short-mark { flex: none; color: var(--warning); font-weight: 700; }
 .gate-card__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--sp-4);
 }
-.gate-card__name { display: flex; flex-direction: column; }
-.gate-card__jp {
+/* "Fare gate" — the canvas's name for the card, in the learner's
+   language (Japanese is content, not chrome: docs/design/mobile). */
+.gate-card__title {
   font-family: var(--font-serif);
   font-weight: 700;
-  font-size: var(--fs-title);
-  letter-spacing: var(--tr-name);
-}
-.gate-card__latin {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
+  font-size: var(--fs-lead);
 }
 .gate-card__figure { display: flex; align-items: baseline; gap: var(--sp-2); }
 /* Gold as a figure, mixed toward the card's own ink — the same
@@ -7618,67 +7615,95 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
   color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
 }
-.gate-card__unit { font-family: var(--font-jp); font-size: var(--fs-caption); color: var(--text-secondary); }
-.gate-card__clear { font-size: var(--fs-body); font-weight: 600; color: var(--success); }
-.gate-card__when { font-size: var(--fs-sm); color: var(--text-secondary); }
-
-/* 内訳 — the phone's disclosure. Desktop never sees it: the lanes are
-   simply there. Under 560px the lanes collapse behind this toggle so
-   the phone's first screen is card, count, button, map. */
-.gate-card__toggle {
-  display: none;
-  align-items: baseline;
-  gap: var(--sp-3);
-  padding: 0;
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.gate-card__toggle:hover,
-.gate-card__toggle:focus-visible { color: var(--text-primary); filter: none; }
-.gate-card__toggle-jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); }
-.gate-card__toggle-latin {
+.gate-card__unit {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
+  color: var(--text-secondary);
 }
-.gate-card__chev { margin-left: auto; font-size: var(--fs-caption); transition: transform 0.15s ease; }
-.gate-card__toggle[aria-expanded="true"] .gate-card__chev { transform: rotate(180deg); }
+.gate-card__clear { font-size: var(--fs-body); font-weight: 600; color: var(--success); }
+.gate-card__when { font-size: var(--fs-sm); color: var(--text-secondary); }
 
+/* ── The lanes are the picker (plan 070) ──
+   Each row is one (section, level, mode) service due today, and each
+   is a switch: the run covers the rows that are on, the fare counts
+   them, and a row switched off waits (`.lane--off`, at the disabled
+   opacity, its tint gone). Everything on is the default — the common
+   case is "clear the day" — and the one affordance the canvas does
+   not draw, the all/none toggle, is kept from the picker this
+   replaces: a learner with sixteen lanes and ten minutes says "just
+   the kanji" in two taps, not fifteen. */
 .gate-card__lanes { display: flex; flex-direction: column; gap: var(--sp-2); }
-.gate-lane {
+.gate-card__pick {
+  align-self: flex-end;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.gate-card__pick:hover,
+.gate-card__pick:focus-visible { color: var(--text-primary); filter: none; }
+.lane {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
+  width: 100%;
+  min-height: 44px;
   padding: var(--sp-2) var(--sp-4);
   border-radius: var(--r-card);
   border: 1px solid color-mix(in srgb, var(--lane-color, var(--accent2)) 30%, transparent);
   background: color-mix(in srgb, var(--lane-color, var(--accent2)) 10%, transparent);
   font-size: var(--fs-sm);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
-.gate-lane__rail {
-  width: 3px;
-  height: 14px;
-  border-radius: var(--r-pill);
+.lane:hover,
+.lane:focus-visible { border-color: color-mix(in srgb, var(--lane-color, var(--accent2)) 60%, transparent); filter: none; }
+.lane--off { opacity: 0.5; border-color: var(--surface-line); background: transparent; }
+.lane__tick {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--r-plate);
+  border: 1.5px solid color-mix(in srgb, var(--text-secondary) 60%, transparent);
+  color: var(--bg-main);
+}
+.lane:not(.lane--off) .lane__tick {
   background: var(--lane-color, var(--accent2));
-  flex-shrink: 0;
+  border-color: var(--lane-color, var(--accent2));
 }
-.gate-lane__where {
-  font-family: var(--font-jp);
+.lane__where {
+  font-family: var(--font-display);
   font-weight: 700;
   color: color-mix(in srgb, var(--lane-color, var(--accent2)) 45%, var(--text-primary));
+  white-space: nowrap;
 }
 /* Toward the primary ink, not bare --text-secondary: the lane's 10%
    pigment tint is just enough ground for the secondary ink to miss
    the floor in light theme (measured 4.32:1). Guard 4 pins this pair
    (.gc-mode). */
-.gate-lane__mode { color: color-mix(in srgb, var(--text-secondary) 60%, var(--text-primary)); font-size: var(--fs-caption); }
-.gate-lane__due { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+.lane__mode {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-caption);
+  color: color-mix(in srgb, var(--text-secondary) 60%, var(--text-primary));
+}
+.lane__due { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* The screen's one filled action. Gold, because Today is gold — and
    gold follows its own standing ruling, not .btn-primary's: the 60%
@@ -7720,49 +7745,41 @@ textarea:focus-visible {
   filter: none;
 }
 .btn-depart:active { transform: translateY(1px); }
-.btn-depart__jp { font-family: var(--font-jp); font-size: var(--fs-lead); white-space: nowrap; }
-.btn-depart__latin {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  opacity: 0.8;
-}
+/* The label, in the learner's language since plan 070 (the class
+   keeps the canvas's name). */
+.btn-depart__jp { font-family: var(--font-display); font-size: var(--fs-lead); white-space: nowrap; }
 .btn-depart__go { font-size: var(--fs-caption); opacity: 0.8; }
-
-/* ── The pass, in the hall ──────────────────────────────────
-   components/station/HallPass mounts the profile's own CommuterPass
-   here; these rules are only the hall's frame around it — the whole
-   card is a shortcut to the profile, and the standalone bottom margin
-   the profile gives it belongs to that page's rhythm, not this one. */
-.hall-pass {
-  position: relative;
-  display: block;
+/* The ghost: the finish's way back, and a sheet's second action —
+   the same shape with no fill, so the one filled action stays one. */
+.btn-depart--ghost {
   width: 100%;
-  padding: 0;
-  background: none;
-  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--surface-line);
+  box-shadow: none;
+}
+.btn-depart--ghost:hover,
+.btn-depart--ghost:focus-visible { box-shadow: none; border-color: var(--text-secondary); }
+
+/* ── The strip (plan 070) ──
+   The pass at strip size under the gate: the stamp rally and the
+   day's new-item gauge, and nothing else of the card — a shortcut to
+   the profile, not the profile. The full pass stays on /profile. */
+.pass--strip {
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  margin-bottom: 0;
+  width: 100%;
   font: inherit;
-  color: inherit;
   text-align: left;
   cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
 }
-.hall-pass:hover { filter: none; }
-.hall-pass .pass { margin-bottom: 0; transition: border-color 0.15s ease, transform 0.15s ease; }
-/* Inside the /profile flip (plan 063) the container owns the pass's
-   bottom rhythm — see the 路線図の影 section at the end. Lives here,
-   before the hover variant, for the no-descending-specificity guard. */
-.jour-flip .pass { margin-bottom: 0; }
-.hall-pass:hover .pass,
-.hall-pass:focus-visible .pass {
+.pass--strip:hover,
+.pass--strip:focus-visible {
   border-color: color-mix(in srgb, var(--pass-ink) 55%, var(--text-on-panel));
   transform: translateY(-1px);
-}
-.hall-pass__holder {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-heading);
-  line-height: 1.1;
+  filter: none;
 }
 .pass__footer { display: flex; flex-direction: column; gap: var(--sp-4); }
 .pass__footer-rule { height: 1px; background: rgba(255, 255, 255, 0.12); }
@@ -7879,225 +7896,6 @@ textarea:focus-visible {
   line-height: 1.4;
 }
 
-/* ── The picker ──────────────────────────────────────────────
-   Between the strip and the queue: everything due is the right default
-   but not the only thing anyone wants, and a learner with ten minutes
-   and sixty cards due needs to be able to say "just the kanji". */
-.today-picker {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  max-width: 620px;
-  padding-top: 8px;
-}
-
-/* The console below is .decks-console, reused rather than redrawn (see
-   the JSX comment on why) -- these three rules retint its two
-   decks-specific accents to the picker's OWN identity colour, so
-   "today" does not borrow 教材's maroon by mistake. Scoped to
-   .today-picker so DecksScreen's own console is untouched. */
-.today-picker .decks-index-bar:focus-within {
-  background: color-mix(in srgb, var(--accent2) 7%, transparent);
-}
-/* The gold deepened 40% toward the panel ink so it can carry a LIGHT
-   label. Black-on-gold passed contrast (6.88:1) and was what
-   Today.dc.html:118 drew, but the maintainer saw it built and ruled
-   against it; this supersedes the mockup. Raw 山吹色 cannot take
-   --text-on-panel (2.19:1), so the fill had to darken with it. 60% is
-   the first rung clearing 4.5:1 in BOTH themes and the least departure
-   from gold -- and it works here, where DESIGN.md's "deepening does not
-   save gold" note applies to .btn-primary's fixed 88%, not to a mix
-   free to go this far. --bg-panel is dark in both themes, which is why
-   one figure holds for both. */
-.today-picker .decks-console__new {
-  background: color-mix(in srgb, var(--accent2) 60%, var(--bg-panel));
-  color: var(--text-on-panel);
-  justify-content: center;
-}
-
-.today-picker__lanes {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* A row rather than a checkbox in a list: the whole row is the target,
-   which is what a thumb expects and what the deck and board rows in
-   this app already are. */
-.today-lane-row {
-  width: 100%;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  /* An asymmetric pad, block one rung tighter than inline, so the row
-     reads as a row rather than a card. Written as logical longhands,
-     which is now purely a style choice: plan 053 taught the scale
-     ratchet to match `padding`/`gap`/`border-radius` per component, so
-     `padding: var(--sp-4) var(--sp-5)` passes just as well and renders
-     the same. Reach for whichever reads better. */
-  padding-block: var(--sp-4);
-  padding-inline: var(--sp-5);
-  font: inherit;
-  text-align: left;
-  color: var(--text-primary);
-  /* The same raised card every other selectable row in the app is
-     (.deckdetail-card-row, .dict-entry-card) -- this
-     used to sit on the sumi ink DESIGN.md reserves for chrome (the
-     top bar, the nav drawer), which made the picker read as frame
-     rather than as a list of choices. */
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-left: 3px solid transparent;
-  border-radius: var(--r-card);
-  cursor: pointer;
-  transition: border-color 130ms ease, background 130ms ease, opacity 130ms ease;
-  /* Off is dimmed, not hidden: the count still has to be readable, or
-     you cannot tell what you are choosing to skip. */
-  opacity: 0.5;
-}
-.today-lane-row--on {
-  opacity: 1;
-  border-left-color: var(--lane-color, var(--accent2));
-  /* No whole-row tint here on purpose: the left rail and the filled
-     tick already both carry --lane-color, and a third statement of
-     the same pigment across the row was tuned against the sumi-ink
-     background this row no longer sits on. */
-}
-.today-lane-row:hover { border-color: color-mix(in srgb, var(--lane-color, var(--accent2)) 40%, transparent); }
-
-.today-lane-row__tick {
-  flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-  border-radius: var(--r-plate);
-  border: 1.5px solid color-mix(in srgb, var(--text-secondary) 60%, transparent);
-  /* Flex-centers the checkmark rather than placing it with hand-tuned
-     left/top pixels. */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.today-lane-row--on .today-lane-row__tick {
-  background: var(--lane-color, var(--accent2));
-  border-color: var(--lane-color, var(--accent2));
-}
-/* The mark itself is the shared CheckIcon (components/ui/Icons.jsx),
-   rendered by TodayScreen only when the row is on -- not a hand-drawn
-   rotated-border ::after any more. currentColor is what CheckIcon's
-   stroke reads, so setting `color` here is the whole job. */
-.today-lane-row__check {
-  color: var(--bg-main);
-}
-
-.today-lane-row__body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-}
-.today-lane-row__where {
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  color: color-mix(in srgb, var(--lane-color, var(--accent2)) 65%, var(--text-primary));
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.today-lane-row__mode { font-size: var(--fs-caption); color: var(--text-secondary); }
-.today-lane-row__due {
-  flex: 0 0 auto;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  font-size: var(--fs-body);
-}
-
-/* Stuck to the bottom, because the lane list is as long as the number
-   of things the learner has been studying — sixteen rows on a normal
-   day — and a start button below sixteen rows is a start button nobody
-   sees. The count on it changes as lanes are toggled, so it has to stay
-   visible for the toggling to have visible feedback at all. */
-.today-picker__go {
-  position: sticky;
-  bottom: 12px;
-  width: 100%;
-  margin-top: 6px;
-  z-index: 1;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
-}
-
-/* Lane rows used to scroll AROUND the sticky button -- visible in the
-   clearance below it and in the gap above its top edge, which reads as
-   a rendering bug rather than as a pinned control. The button already
-   sets `z-index: 1` and so is a stacking context of its own; a
-   ::before at `z-index: -1` therefore paints ABOVE the rows and BELOW
-   the button's own face.
-
-   The insets are structural, not spacing, and every one of them is
-   the negative of a length that already exists:
-
-   -24px is .container's own `padding: 0 24px`, cancelled so the
-   backdrop reaches the content column's true edges (that padding has
-   no responsive override, so the figure holds at every width).
-
-   -20px is the 14px flex gap of .today-picker plus the button's own
-   6px margin-top -- the whole space a row can show through above the
-   button, not part of it.
-
-   The bottom inset is the sticky `bottom` offset NEGATED, so the
-   backdrop covers exactly the clearance between the button and the
-   viewport floor and stops there. It must NOT be a viewport-sized
-   overhang: an absolutely positioned pseudo-element still contributes
-   scrollable overflow, and `bottom: -100vh` added ~884px of empty
-   scroll past the end of the list and let the button scroll away with
-   it. Every inset here stays inside .today-picker's own padding box,
-   so the page's scroll height is unchanged.
-
-   The tab bar is z-index 30 and still draws on top, correctly. */
-.today-picker__go::before {
-  content: '';
-  position: absolute;
-  /* top | left-and-right | bottom -- the three-value `inset`, which is
-     what stylelint's redundant-longhand rule asks for here and what
-     plan 053 taught this file to prefer. */
-  inset: -20px -24px -12px;
-  background: var(--bg-main);
-  z-index: -1;
-}
-
-/* Room under the last row so the sticky button never rests on it. */
-.today-picker { padding-bottom: 16px; }
-
-/* .mobile-level-bar is `position: fixed` along the bottom edge below
-   768px (z-index 30) and reserves no space of its own -- it simply
-   sits on top of whatever the page's last rows are. A STICKY element's
-   `bottom` offset is measured from the true edge of the viewport, the
-   same edge that bar occupies, so `bottom: 12px` put the button
-   directly BEHIND it: the button has no fixed position of its own and
-   the bar draws over it every time the picker is scrolled to its end,
-   which on a list of ten-plus lanes is most of the time.
-
-   56px clears the bar's own box (8px pad + 6px track + 8px pad + its
-   border, the same figure .dict-page's clearance uses for the same
-   bar) with a little breathing room on top; the safe-area inset is
-   added again on top of that rather than relied on to already be
-   included, because the bar reserves its OWN copy for its own padding
-   and this offset is independent of it. */
-@media (max-width: 768px) {
-  .today-picker { padding-bottom: calc(72px + var(--safe-bottom)); }
-  .today-picker__go { bottom: calc(56px + var(--safe-bottom)); }
-  /* The backdrop's bottom inset tracks the sticky offset above, so the
-     strip the mobile bar leaves between the button and the viewport
-     floor is covered here too. The picker's 72px + inset of bottom
-     padding is larger than this 56px + inset, so it still overflows
-     nothing. */
-  .today-picker__go::before { bottom: calc(-56px - var(--safe-bottom)); }
-}
-
 /* ── The queue screen itself ─────────────────────────────────── */
 
 .today-remaining {
@@ -8124,8 +7922,13 @@ textarea:focus-visible {
   text-align: center;
 }
 .today-clear__mark {
-  font-size: 44px;
-  letter-spacing: 0.1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-pill);
+  border: 2px solid color-mix(in srgb, var(--success) 70%, transparent);
   color: color-mix(in srgb, var(--success) 70%, transparent);
 }
 .today-clear__title { margin: 0; font-size: 22px; }
@@ -9781,7 +9584,7 @@ textarea:focus-visible {
    that used to live on deck-progress/prompt-card/rating-bar, so the
    whole stack keeps one consistent rhythm instead of several
    independently-tuned ones. */
-.quiz-area {
+.stage {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -10146,7 +9949,7 @@ textarea:focus-visible {
    The fallback here is `--line-kanji` rather than `--accent` because
    no screen that renders this component injects `--line-color` at all
    (checked: Kanji, Study and Today all mount it inside a bare
-   `.container.quiz-area`; the eight injectors are the selection/
+   `.container.stage`; the eight injectors are the selection/
    station components and the two Decks screens). Reading
    `--line-color` first keeps DESIGN.md's "the pigment is injected
    once" contract for the day a shell does inject one -- a personal
@@ -10705,7 +10508,7 @@ textarea:focus-visible {
    again.
 
    width: 100% is load-bearing, not decorative. .deck-progress is a
-   DIRECT child of .quiz-area (display: flex; flex-direction: column),
+   DIRECT child of .stage (display: flex; flex-direction: column),
    so it's a flex item on the CROSS axis -- and per the flexbox spec,
    an auto cross-axis margin (this rule's own `margin: 0 auto`)
    suppresses stretch outright, sizing the item to its CONTENT instead
@@ -10769,17 +10572,27 @@ textarea:focus-visible {
   margin-bottom: 8px;
 }
 
-.review-deck__nav {
+/* The stage's foot (canvas): the column's last row, pushed to the
+   bottom edge of the stage. The stage's own inset pads under it. */
+.stage__foot {
+  flex: none;
   display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 16px;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: auto;
 }
-
-.review-deck__nav .btn-panel:disabled {
-  opacity: 0.4;
-  cursor: default;
+/* The way through a browse: two buttons on the stage's foot
+   (canvas RunBrowse), the filled one forward. */
+.browse-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+  width: 100%;
+  max-width: var(--card-w);
+  margin: 0 auto;
 }
+.browse-nav .btn-secondary,
+.browse-nav .btn-primary { width: 100%; }
 
 .reading-group { margin-bottom: 10px; }
 
@@ -11787,7 +11600,7 @@ textarea:focus-visible {
 .onb-ride .rating-bar { width: min(480px, 100%); }
 
 /* Held, not hidden. RatingBar used to return null before the reveal, so
-   the bar appeared out of nowhere -- and because .quiz-area is a centred
+   the bar appeared out of nowhere -- and because .stage is a centred
    flex column, adding 58px of bar plus an 18px gap below the card pushed
    everything above it UP by half that. Measured on a vocab card: the card
    shrinks 7px on reveal but moves up 34px, so the jump a learner sees is
@@ -17009,7 +16822,7 @@ textarea:focus-visible {
      through CardTransition's block DIVs, where width:auto already
      fills the available space before max-width clamps it -- but
      ReadingsInput renders `.prompt-card.readings-input` as a DIRECT
-     child of .quiz-area (display: flex; flex-direction: column), and
+     child of .stage (display: flex; flex-direction: column), and
      a flex item's auto cross-axis margin (margin-inline: auto, right
      below) suppresses stretch per spec, sizing it to its own content
      (a ~307px shrink-wrap around the narrower reading rows) instead
@@ -17074,7 +16887,7 @@ textarea:focus-visible {
    single kanji, and it needs the room.
 
    This used to cap the width at 560px and centre it with `margin: 0
-   auto`, which produced the opposite of what it intended. `.quiz-area`
+   auto`, which produced the opposite of what it intended. `.stage`
    is a COLUMN flex container, and an auto margin on a flex item's cross
    axis suppresses `align-self: stretch` outright — so the card stopped
    filling the row and collapsed to fit-content instead, leaving a
@@ -17486,35 +17299,37 @@ textarea:focus-visible {
      growth reaches .prompt-card through CardTransition's two wrappers
      without moving the seal, which is anchored to the stage and so
      has to stay the card's own size. */
-  .quiz-area {
+  .stage {
     justify-content: flex-start;
     gap: var(--sp-5);
-    padding-top: var(--sp-7);
+    /* Under the notch: both bars have left, so the stage carries the
+       inset itself (canvas: safe-top + --sp-3). */
+    padding-top: calc(var(--safe-top) + var(--sp-3));
     padding-inline: var(--sp-5);
     padding-bottom: var(--dock-bottom);
     /* Matched to .levelup's slide, so the page moves with the board. */
     transition: padding-top 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
   }
-  .quiz-area > .quiz-done,
-  .quiz-area > .loading,
-  .quiz-area > .empty { margin-block: auto; }
-  .quiz-area > .quiz-card-stage {
+  .stage > .quiz-done,
+  .stage > .loading,
+  .stage > .empty { margin-block: auto; }
+  .stage > .quiz-card-stage {
     flex: 1 0 auto;
     display: flex;
     flex-direction: column;
   }
-  .quiz-area > .quiz-card-stage > .card-transition,
-  .quiz-area > .quiz-card-stage .card-transition-live {
+  .stage > .quiz-card-stage > .card-transition,
+  .stage > .quiz-card-stage .card-transition-live {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
   }
-  .quiz-area > .quiz-card-stage .card-transition-live > .prompt-card {
+  .stage > .quiz-card-stage .card-transition-live > .prompt-card {
     flex: 1 1 auto;
     max-height: none;
     overflow: visible;
   }
-  .quiz-area > .quiz-card-stage .card-transition-live > .prompt-card:not(.prompt-card--footed) {
+  .stage > .quiz-card-stage .card-transition-live > .prompt-card:not(.prompt-card--footed) {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -17523,7 +17338,7 @@ textarea:focus-visible {
      so the two are one console at the bottom of the screen. The
      instrument inside it goes transparent and keeps only its hairline;
      the sumi is the wrapper's, which is what runs to the edges. */
-  .quiz-area > .rating-bar {
+  .stage > .rating-bar {
     position: sticky;
     bottom: var(--dock-bottom);
     z-index: 10;
@@ -17533,11 +17348,11 @@ textarea:focus-visible {
     padding-inline: var(--sp-5);
     background: var(--bg-panel);
   }
-  .quiz-area > .rating-bar .rating-bar__buttons { background: transparent; }
+  .stage > .rating-bar .rating-bar__buttons { background: transparent; }
   /* While the level board is docked across the top (see XpToast.jsx),
      the stage slides down under it: a panel takes its place, the card
      keeps its head clear, and everything slides back as it leaves. */
-  :root[data-levelup] .quiz-area {
+  :root[data-levelup] .stage {
     padding-top: calc(var(--levelup-h) + var(--safe-top) + var(--sp-4));
   }
 
@@ -17589,7 +17404,7 @@ textarea:focus-visible {
      mode, so the stage floor that keeps the other cards still is
      dead height here. */
   .drawing-quiz .stroke-ref__label { display: none; }
-  .quiz-area:has(.drawing-quiz) .specimen-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
+  .stage:has(.drawing-quiz) .specimen-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
 
   .dict-layout {
     display: block;
@@ -19573,7 +19388,7 @@ html { scrollbar-gutter: stable; }
 /* The flaps still turn — that is the content, not decoration — but
    nothing slides or scales around them. */
 @media (prefers-reduced-motion: reduce) {
-  .quiz-area { transition: none; }
+  .stage { transition: none; }
   .levelup,
   .reissue,
   .reissue__pass,

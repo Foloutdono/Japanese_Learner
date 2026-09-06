@@ -500,7 +500,7 @@ function SessionView({
           today (the rdg-* controls are all private classes), so this
           changes no pixel yet; it is here so the next component put on
           this screen inherits its section rather than 仮名's red. */}
-      <main id="main-content" className="container quiz-area rdg-area"
+      <main id="main-content" className="container stage rdg-area"
         style={{ '--line-color': 'var(--line-reading)' }}>
 
         <div className="rdg-score-row">

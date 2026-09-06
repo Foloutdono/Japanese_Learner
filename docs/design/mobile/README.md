@@ -36,7 +36,44 @@ it was the retired phone level bar's 36px), `--tabbar-h` (50px), and
 safe-area inset under the shell (`:root[data-chrome="shell"]`, stamped by
 `components/chrome/useChrome.js`), the inset alone on a stage.
 
+## The run (plan 070)
+
+| Canvas class | `index.css` block | Component |
+|---|---|---|
+| `.stage` (the frame), `.stage__foot` | the study stage — the ≤768px block docks the rating bar and grows the card | `components/study/StudyStage.jsx`; the six study screens render inside it |
+| `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining`, `.stage__head .hud__pass` | the head of a run | `components/chrome/StageHead.jsx` |
+| `.deck-progress`, `.deck-progress__bar`, `.deck-progress__segment` | the hairline (the legend hides on a phone) | `DeckProgress` in `components/study/QuizComponents.jsx`; the run's own bar in `screens/TodayRun.jsx` |
+| `.study-assist`, `.study-assist__toggle`, `--on` | the assist toggles | `components/study/HintBar.jsx` |
+| `.prompt-card`, `.prompt-card__body`, `.prompt-card__foot`, `.stage-mark*`, `.char-display*`, `.flashcard*` | the card | `components/study/PromptCard.jsx`, `CardPrompt.jsx`, `StageMark.jsx`, `QuizComponents.jsx` |
+| `.mcq-list`, `.mcq-row*` | the choices | `MCQGrid` in `QuizComponents.jsx` |
+| `.rating-bar*` | the docked rating bar | `components/study/RatingBar.jsx` |
+| `.draw-prompt`, `.canvas-wrap`, `.canvas-clear-btn` | the draw face | `components/study/DrawingCanvas.jsx` |
+| `.readings-input*` | the readings face | `components/study/ReadingsInput.jsx` |
+| `.browse-nav` | the fast review's foot | `components/study/ReviewDeck.jsx` |
+| `.levelup*`, `.reissue*`, `.card-stamp*` | the boards over the stage | `components/rewards/XpToast.jsx`, `components/study/CardStamp.jsx` |
+| `.gate-card`, `.gate-card__head`, `.gate-card__title`, `.gate-card__figure`, `.gate-card__count`, `.gate-card__unit`, `.gate-card__lanes`, `.gate-card__pick`, `.gate-card__fare*`, `.gate-card__short*`, `.btn-depart`, `.btn-depart--ghost` | 改札 — the fare gate | `components/station/GateCard.jsx` |
+| `.lane`, `.lane--off`, `.lane__tick`, `.lane__where`, `.lane__mode`, `.lane__due` | the lanes are the picker | `GateCard.jsx` |
+| `.pass--strip` (with `.stamp-rally*`, `.hall-pace*`) | the strip under the gate | `components/station/PassStrip.jsx` |
+| `.today-clear*`, `.fare-slip*` | the finish | `RunComplete` in `screens/TodayScreen.jsx`, `components/credits/FareSlip.jsx` |
+| `.balance*` | the balance sheet (plan 069) | `components/credits/BalanceSheet.jsx`, `RunOutSheet.jsx` |
+
+The run is `/today/run` on the stage frame, reached through the ticket
+gate from `/today`; the chosen lanes ride in the query (`?lanes=a,b`, absent
+when every lane is on). The finish is printed by `/today` under the chrome
+from the router's state. Held from the canvas: the cloze face (the fill-in
+mode has no blank to type into yet — the sentence is shown whole and the
+rule is the flip), and docking a field's submit in the foot (the type,
+draw and readings faces keep their button under the widget).
+
 ## What retired with it
+
+`components/station/HallPass.jsx` (the whole CommuterPass under the gate;
+the strip replaces it), the Today picker (`.today-picker*`,
+`.today-lane-row*` — the lanes on the gate are the picker), the read-only
+`.gate-lane*` rows, the gate's bilingual name and its 内訳 disclosure,
+`.review-deck__nav`, and `.btn-depart__latin`.
+
+## What retired with the chrome (plan 068)
 
 `components/ui/TopBar.jsx` (the in-car display, its auto-hide and peek tab,
 the desktop profile ring, the phone level bar), `components/ui/BurgerMenu.jsx`
@@ -46,10 +83,9 @@ gate hall: concourse, IC card, notice strip — the map moved to
 `config/navLinks.js` (now `config/tabs.js`). Their CSS blocks and their
 entries in `.stylelint-baseline.json` went in the same commit.
 
-## Still to port (plans 069–075)
+## Still to port (plans 071–075)
 
-`.gate-card__fare`, `.lane*`, `.balance*`, `.offer*`, `.pass-tag`,
-`.fare-slip*` (069–070); the `.route*` redraw, `.svc*`, `.lvlstrip*`, `.slip*`,
+`.offer*`, `.pass-tag` (with the store); the `.route*` redraw, `.svc*`, `.lvlstrip*`, `.slip*`,
 `.stg-head`/`.stg-list`, `.cal*`, `.card-row`, `.deck-identity`, `.type-row`,
 `.form`, `.picker-row` (071–074); `.dict-plate`, `.dict-block`, `.dict-word`,
 `.tok*`, `.token-card`, `.exam-meta`, `.exam-sheetbar` (072–073); the whole

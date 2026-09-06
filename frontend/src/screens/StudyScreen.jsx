@@ -11,7 +11,7 @@ import { usePace } from '../components/study/usePace'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
-import { XpToast } from '../components/rewards/XpToast'
+import { StudyStage } from '../components/study/StudyStage'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 import ModeSelector from '../components/selection/ModeSelector'
@@ -355,25 +355,18 @@ export default function StudyScreen({ session }) {
   const cardFoot = { left: deck?.name ?? '', right: title }
 
   return (
-    <div className="screen">
-      <ScreenBar
-        onBack={() => setMode(null)}
-        title={`${deck?.name ?? ''} — ${title}`}
-        // The toggle is keyed on the DECK's structure, not on whether
-        // any browsed-in kanji cards happen to be present — a deck made
-        // entirely of hand-written kanji cards used to never show it at
-        // all, since `composition.kanji` only ever counted the former.
-        actions={deck?.type === 'kanji' && usesWritingDrill(mode) && (
-          <WritingToggle on={drawingEnabled} onToggle={() => setDrawingEnabled(d => !d)} />
-        )}
-      />
-      <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
-      {/* 蘇芳 — a personal deck is 教材, so this screen wears the same
-          pigment as Decks and DeckDetail. Per DESIGN.md's "the pigment
-          is injected once"; see DecksScreen's comment for why it sits
-          on <main> and not on .screen. */}
-      <main id="main-content" className="container quiz-area"
-        style={{ '--line-color': 'var(--line-decks)' }}>
+    <StudyStage
+      color="var(--line-decks)"
+      onLeave={() => setMode(null)}
+      leaveLabel={t.decksTitle}
+      where={deck?.name ?? ''}
+      sub={title}
+      aside={deck?.type === 'kanji' && usesWritingDrill(mode) ? (
+        <WritingToggle on={drawingEnabled} onToggle={() => setDrawingEnabled(d => !d)} />
+      ) : undefined}
+      toast={gates.xpToast}
+      onToastDone={gates.toastDone}
+    >
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
@@ -518,7 +511,6 @@ export default function StudyScreen({ session }) {
             )}
           </>
         )}
-      </main>
-    </div>
+    </StudyStage>
   )
 }

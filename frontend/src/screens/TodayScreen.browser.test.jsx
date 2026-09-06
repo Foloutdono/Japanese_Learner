@@ -1,43 +1,60 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 // Same stylesheet-import trick as PromptCard.browser.test.jsx (plan 048):
-// the rule this test pins only exists once the real sheet is loaded.
+// the rules these tests pin only exist once the real sheet is loaded.
 import '../index.css'
 
-// Plan 051 — the screen's primary action, `.btn-primary`, had no rule
-// anywhere in the stylesheet: the app's filled-action class was
-// `.btn-primary-purple`, renamed to `.btn-deck-primary` in e9690b7, and
-// TodayScreen reached for a name that had already gone. Nothing caught
-// it, because nothing checks that a referenced class exists — so the
-// "Start N cards" button (and its two siblings on the cleared-queue
-// screens) fell through to the bare `button` rule and painted as the
-// browser's own default control, in the platform's own face, on a
-// screen that otherwise speaks entirely in --font-display.
+// ── The gate (plan 070) ───────────────────────────────────────
+// /today is the bar, the fare gate with the day's lanes as the run's
+// picker, and the strip. The finish comes back from the run through
+// the router's state and is printed here, under the chrome.
 //
-// Written to fail against today's behaviour first, per plan convention
-// (see PromptCard.browser.test.jsx / CardPrompt.browser.test.jsx, which
-// do the same).
+// The two .btn-primary contracts below predate the gate (plans 051 and
+// 052): the screen's filled action used to be a .btn-primary and the
+// class had lost its rule once, unnoticed, so the rule is pinned on the
+// class itself — the run's Submit and Reveal buttons still wear it.
 
-const apiJson = vi.fn()
-
-vi.mock('../lib/api', () => ({
-  api: p => p,
-  apiFetch: vi.fn(),
-  apiJson: (...a) => apiJson(...a),
-  apiJsonWithTimeout: vi.fn(),
-  apiUpload: vi.fn(),
-  ApiError: class ApiError extends Error {},
+const todayRef = { current: null }
+vi.mock('../stores/today', () => ({
+  useTodaySummary: () => ({ data: todayRef.current, failed: false }),
+  refreshToday: vi.fn(),
+  seedTodaySummary: vi.fn(),
 }))
-
-// LangContext fetches /api/translations/{kanji,vocab} on mount -- same
-// offline stub as KanaScreen.pace.browser.test.jsx / RatingBar.browser.test.jsx.
+vi.mock('../stores/profileSummary', () => ({
+  useProfileSummary: () => ({ username: 'Aiko', week: [], streak: 3, level: 12 }),
+}))
+vi.mock('../stores/credits', async (o) => ({
+  ...(await o()),
+  useCredits: () => ({ balance: 30, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: false }),
+}))
+vi.mock('../stores/departure', () => ({ beginDeparture: vi.fn() }))
+vi.mock('../lib/audio', async (o) => ({ ...(await o()), playAnnouncement: vi.fn() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: TodayScreen } = await import('./TodayScreen')
+const { beginDeparture } = await import('../stores/departure')
 
-const settle = (ms = 50) => new Promise(r => setTimeout(r, ms))
+const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
+
+const LANES = [
+  { id: 's~kanji~N4~kanji.flashcard.f2b', kind: 'section', source: 'kanji', deck: 'N4', mode: 'kanji.flashcard.f2b', due: 9 },
+  { id: 's~vocab~N5~vocab.flashcard.f2b', kind: 'section', source: 'vocab', deck: 'N5', mode: 'vocab.flashcard.f2b', due: 8 },
+  { id: 'p~3~vocab.flashcard.f2b', kind: 'personal', deck_id: 3, deck_name: '旅行', mode: 'vocab.flashcard.f2b', due: 2 },
+]
+
+function mount(entry = '/today') {
+  return render(
+    <LangProvider>
+      <MemoryRouter initialEntries={[entry]}>
+        <Routes>
+          <Route path="/today" element={<TodayScreen />} />
+        </Routes>
+      </MemoryRouter>
+    </LangProvider>
+  )
+}
 
 // Plan 052 — Chromium serialises a resolved `color-mix(in srgb, ...)`
 // as `color(srgb 0.673569 0.241255 0.160784)`, at float precision, not
@@ -61,139 +78,109 @@ function contrast(a, b) {
   return (hi + 0.05) / (lo + 0.05)
 }
 
-describe('TodayScreen — the primary button (plan 051)', () => {
-  it('renders .btn-primary as a real filled button, not the bare-button default', async () => {
-    // The emptiest shape that reaches a `.btn-primary`: no lanes due at
-    // all renders the "back to station" button on the cleared screen
-    // (TodayScreen.jsx:426) without needing any lane/card fixtures.
-    apiJson.mockImplementation(async url => {
-      if (url === '/api/today') return { lanes: [], total: 0, next_due: null }
-      return {}
-    })
+beforeEach(() => {
+  todayRef.current = { total: 19, lanes: LANES, next_due: null, pace: { target: 10, newToday: 4, remaining: 6 } }
+  beginDeparture.mockClear()
+})
 
+describe('TodayScreen — the gate', () => {
+  it('opens on the bar, the gate with every lane on, and the strip', async () => {
+    const screen = await mount()
+    await settle()
+    expect(screen.container.querySelector('.bar__roundel').textContent).toBe('HN')
+    expect(screen.container.querySelector('h1.bar__title').textContent).toBe('Service du jour')
+    const lanes = screen.container.querySelectorAll('.lane')
+    expect(lanes).toHaveLength(3)
+    expect([...lanes].every(l => l.getAttribute('aria-pressed') === 'true')).toBe(true)
+    expect(screen.container.querySelector('.gate-card__count').textContent).toBe('19')
+    expect(screen.container.querySelector('.pass--strip .stamp-rally')).toBeTruthy()
+    expect(screen.container.querySelector('.hall-pace')).toBeTruthy()
+  })
+
+  it('a lane switched off leaves the fare, and the run carries the choice', async () => {
+    const screen = await mount()
+    await settle()
+    // The lanes are grouped by line, vocab before kanji: pick by name.
+    const kanji = [...screen.container.querySelectorAll('.lane')].find(l => l.textContent.includes('N4'))
+    kanji.click()
+    await settle()
+    expect(kanji.classList.contains('lane--off')).toBe(true)
+    expect(screen.container.querySelector('.gate-card__count').textContent).toBe('10')
+    expect(screen.container.querySelector('.gate-card__fare b').textContent).toBe('10')
+
+    screen.container.querySelector('.btn-depart').click()
+    expect(beginDeparture).toHaveBeenCalledTimes(1)
+    const section = beginDeparture.mock.calls[0][0]
+    expect(section.path).toBe('/today/run?lanes=' + encodeURIComponent('s~vocab~N5~vocab.flashcard.f2b,p~3~vocab.flashcard.f2b'))
+  })
+
+  it('every lane on departs without a query; none on cannot depart', async () => {
+    const screen = await mount()
+    await settle()
+    screen.container.querySelector('.btn-depart').click()
+    expect(beginDeparture.mock.calls[0][0].path).toBe('/today/run')
+
+    screen.container.querySelector('.gate-card__pick').click()
+    await settle()
+    expect(screen.container.querySelectorAll('.lane--off')).toHaveLength(3)
+    expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)
+  })
+
+  it('prints the finish the run handed back, and the way back to the gate', async () => {
     const screen = await render(
       <LangProvider>
-        <MemoryRouter>
-          <TodayScreen session={{ access_token: 'tok' }} />
+        <MemoryRouter initialEntries={[{ pathname: '/today', state: { run: { cleared: 12, xp: 48 } } }]}>
+          <Routes>
+            <Route path="/today" element={<TodayScreen />} />
+          </Routes>
         </MemoryRouter>
       </LangProvider>
     )
-    await settle(200)
+    await settle()
+    const clear = screen.container.querySelector('.today-clear')
+    expect(clear).toBeTruthy()
+    expect(clear.querySelector('.today-clear__body').textContent).toContain('12')
+    expect(clear.querySelector('.fare-slip')).toBeTruthy()
+    expect(screen.container.querySelector('.gate-card')).toBeNull()
 
-    const btn = screen.container.querySelector('.btn-primary')
-    expect(btn, `no .btn-primary in DOM — page: ${screen.container.textContent.slice(0, 300)}`).toBeTruthy()
+    clear.querySelector('.btn-depart--ghost').click()
+    await settle()
+    expect(screen.container.querySelector('.today-clear')).toBeNull()
+    expect(screen.container.querySelector('.gate-card')).toBeTruthy()
+  })
+})
 
-    const style = getComputedStyle(btn)
-    // Not the bare `button` rule's fallthrough (no background set at
-    // all -> transparent) and not a leftover default.
+describe('.btn-primary — the filled action (plans 051, 052)', () => {
+  function mountButton() {
+    return render(
+      <LangProvider>
+        <MemoryRouter>
+          <main className="stage"><button type="button" className="btn-primary">Submit</button></main>
+        </MemoryRouter>
+      </LangProvider>
+    )
+  }
+
+  it('renders as a real filled button, not the bare-button default', async () => {
+    const screen = await mountButton()
+    const style = getComputedStyle(screen.container.querySelector('.btn-primary'))
     expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
     expect(style.backgroundColor).not.toBe('transparent')
-    // The app's own display face. Plan 056 made --font-display the
-    // document default, so this no longer distinguishes the button's
-    // own rule from what it inherits — it now only catches the face
-    // being lost outright (a failed font load, or the default being
-    // 'fixed' back to a platform stack).
     expect(style.fontFamily).toContain('Space Grotesk')
   })
 
-  // Plan 052 — 051 fixed the missing rule but inked it with
-  // --text-on-fill (#1c1811, a near-black documented for *light* fills)
-  // where every primary swatch in Controls.dc.html uses --text-on-panel
-  // (#f3ecdf). On the vermillion that measured 3.48:1 dark / 3.18:1
-  // light, against a 4.5:1 floor for 15.2px/600 text. Nothing in the
-  // suite checks colour, and no guard checks contrast, which is exactly
-  // how the defect shipped. This pins the ink and the fill so it cannot
-  // silently regress again.
-  it('inks .btn-primary with the paper ink on a deepened pigment fill (plan 052)', async () => {
-    apiJson.mockReset()
-    apiJson.mockImplementation(async url => {
-      if (url === '/api/today') return { lanes: [], total: 0, next_due: null }
-      return {}
-    })
-
-    const screen = await render(
-      <LangProvider>
-        <MemoryRouter>
-          <TodayScreen session={{ access_token: 'tok' }} />
-        </MemoryRouter>
-      </LangProvider>
-    )
-    await settle(200)
-
-    const btn = screen.container.querySelector('.btn-primary')
-    expect(btn).toBeTruthy()
-    const style = getComputedStyle(btn)
-
-    // --text-on-panel #f3ecdf, the mockup's ink at every primary swatch
-    // -- NOT --text-on-fill #1c1811, which 051 used.
+  it('inks the paper ink on a deepened pigment fill, above the 4.5:1 floor', async () => {
+    const screen = await mountButton()
+    const style = getComputedStyle(screen.container.querySelector('.btn-primary'))
+    // --text-on-panel #f3ecdf, the mockup's ink at every primary swatch.
     expect(rgbOf(style.color)).toEqual([243, 236, 223])
-
-    // The fill is the section pigment deepened toward --bg-panel:
-    // color-mix(in srgb, #c1442c 70%, #100e13). Asserting the mix
-    // (rather than "not transparent") is what makes a silent return to
-    // the raw pigment -- 4.33:1, below the floor -- fail here.
-    //
-    // Was 88% until plan 060. That figure was calibrated on the only
-    // two pigments this button then wore, and did not survive the study
-    // screens: 松葉色 landed at 4.05:1 and 黄丹 at 3.87:1, both under
-    // the floor. 70/79 is the one pair that clears 4.5:1 on all twelve
-    // pigments in both themes and both states.
+    // color-mix(in srgb, #c1442c 70%, #100e13): the raw pigment measures
+    // 4.33:1, under the floor; 70/79 is the one pair that clears it on
+    // all twelve pigments in both themes (plan 060).
     const fill = rgbOf(style.backgroundColor)
     expect(fill[0]).toBeCloseTo(139.9, 0)
     expect(fill[1]).toBeCloseTo(51.8, 0)
     expect(fill[2]).toBeCloseTo(36.5, 0)
-
-    // And the thing all of the above is *for*. Nothing else in the app
-    // checks contrast -- no guard does either -- so the floor the whole
-    // plan turns on is asserted here directly rather than implied by a
-    // hex. 5.9:1 as written; 4.33:1 if the deepening is dropped,
-    // 3.48:1 if the ink goes back to --text-on-fill.
-    expect(contrast(fill, rgbOf(style.color))).toBeGreaterThanOrEqual(4.5)
-  })
-})
-
-// Plan 051, step 7 — TodayScreen.jsx:156 used to catch a failed
-// GET /api/today with `setSummary(null)`, the exact same null the
-// screen starts in: a network blip and "still loading" were the same
-// state, forever, with no error and no retry. `summaryError` now tells
-// the two apart on the picker side, reusing SessionError/Empty
-// (the queue side's own error surface) rather than a new component.
-describe('TodayScreen — a rejected /api/today (plan 051)', () => {
-  it('renders the error branch with a retry, not a permanent spinner', async () => {
-    apiJson.mockReset()
-    apiJson.mockImplementation(async url => {
-      if (url === '/api/today') throw new Error('offline')
-      return {}
-    })
-
-    const screen = await render(
-      <LangProvider>
-        <MemoryRouter>
-          <TodayScreen session={{ access_token: 'tok' }} />
-        </MemoryRouter>
-      </LangProvider>
-    )
-    await settle(200)
-
-    // The error surface, not the spinner it used to be stuck on.
-    expect(screen.container.querySelector('.loading')).toBeNull()
-    const empty = screen.container.querySelector('.empty')
-    expect(empty, `no error branch in DOM — page: ${screen.container.textContent.slice(0, 300)}`).toBeTruthy()
-
-    const retryBtn = empty.querySelector('.empty__action')
-    expect(retryBtn).toBeTruthy()
-
-    // A retry that succeeds moves the picker past the error branch --
-    // proving `onRetry` actually re-fetches rather than just existing.
-    apiJson.mockImplementation(async url => {
-      if (url === '/api/today') return { lanes: [], total: 0, next_due: null }
-      return {}
-    })
-    retryBtn.click()
-    await settle(200)
-
-    expect(screen.container.querySelector('.empty')).toBeNull()
-    expect(screen.container.querySelector('.loading')).toBeNull()
-    expect(screen.container.querySelector('.btn-primary')).toBeTruthy()
+    expect(contrast(rgbOf(style.color), fill)).toBeGreaterThanOrEqual(4.5)
   })
 })

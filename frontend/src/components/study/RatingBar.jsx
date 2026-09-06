@@ -66,7 +66,7 @@ export default function RatingBar({ onRate, active, scale }) {
 
   // Rendered even before the reveal, inert, so its space is RESERVED.
   // Returning null here used to make the bar appear out of nowhere on
-  // reveal -- and because .quiz-area is a centred flex column, adding
+  // reveal -- and because .stage is a centred flex column, adding
   // 58px of bar plus an 18px gap below the card pushed everything above
   // it up by half that. Measured on a vocab card: the card shrinks 7px
   // on reveal but moves up 34px, so the jump was almost entirely this.

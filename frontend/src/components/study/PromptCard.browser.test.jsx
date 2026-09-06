@@ -86,9 +86,9 @@ const READINGS = {
 }
 
 // Reproduces the real ancestor every one of the 8 screens renders this
-// card inside -- <main className="container quiz-area">, not just
+// card inside -- <main className="container stage">, not just
 // .container -- for a reason beyond matching the plan's ~1052px
-// prediction: .quiz-area is display:flex, and ReadingsInput renders
+// prediction: .stage is display:flex, and ReadingsInput renders
 // `.prompt-card.readings-input` as a DIRECT flex child of it (unlike
 // CardPrompt's card, which sits inside CardTransition's block DIVs).
 // A flex item's auto cross-axis margin suppresses stretch per spec,
@@ -97,7 +97,7 @@ const READINGS = {
 // to-content bug that width:100% exists to prevent (found live, not
 // by this test, the first time -- see index.css:13710's own comment).
 function Contained({ children }) {
-  return <div className="container quiz-area">{children}</div>
+  return <div className="container stage">{children}</div>
 }
 
 async function promptCardWidth(node, selector = '.prompt-card') {

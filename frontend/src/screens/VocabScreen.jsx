@@ -17,7 +17,7 @@ import { usePace } from '../components/study/usePace'
 import { FuriganaWord } from '../components/study/Readings'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
-import { XpToast } from '../components/rewards/XpToast'
+import { StudyStage } from '../components/study/StudyStage'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 import LevelSelector from '../components/selection/LevelSelector'
@@ -440,14 +440,16 @@ export default function VocabScreen({ session }) {
   // ── Review (self-paced, ungraded browse of already-studied cards) ──
   if (reviewing) {
     return (
-      <div className="screen">
-        <ScreenBar onBack={() => setReviewing(false)} title={`${t.vocabulary} ${level} — ${t.modeReview}`} />
-        {/* 藍色, per DESIGN.md's "the pigment is injected once" — see
-            DecksScreen's comment for why it sits on <main> and not on
-            .screen. Both study shells carry it, review and quiz alike. */}
-        <main id="main-content" className="container quiz-area"
-          style={{ '--line-color': 'var(--line-vocab)' }}>
+      <StudyStage
+        color="var(--line-vocab)"
+        onLeave={() => setReviewing(false)}
+        leaveLabel={t.vocabTitle}
+        where={`${t.vocabulary} ${level}`}
+        sub={t.modeReview}
+        pass={false}
+      >
           <ReviewDeck
+            foot={`${t.vocabulary} ${level}`}
             cards={reviewCards}
             loading={reviewLoading}
             t={t}
@@ -466,8 +468,7 @@ export default function VocabScreen({ session }) {
             )}
             onExit={() => setReviewing(false)}
           />
-        </main>
-      </div>
+      </StudyStage>
     )
   }
 
@@ -496,11 +497,15 @@ export default function VocabScreen({ session }) {
     : tierLabel
 
   return (
-    <div className="screen">
-      <ScreenBar onBack={() => setMode(null)} title={`${t.vocabulary} ${sourceLabel} — ${title}`} />
-      <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
-      <main id="main-content" className="container quiz-area"
-        style={{ '--line-color': 'var(--line-vocab)' }}>
+    <StudyStage
+      color="var(--line-vocab)"
+      onLeave={() => setMode(null)}
+      leaveLabel={t.vocabTitle}
+      where={`${t.vocabulary} ${sourceLabel}`}
+      sub={title}
+      toast={gates.xpToast}
+      onToastDone={gates.toastDone}
+    >
         <DeckProgress stats={progress} />
         {loading && <Loading />}
         {error && !card && <SessionError error={error} onRetry={retry} />}
@@ -637,7 +642,6 @@ export default function VocabScreen({ session }) {
             <RatingBar active={showRating && !gates.locked} onRate={postReview} />
           </>
         )}
-      </main>
-    </div>
+    </StudyStage>
   )
 }

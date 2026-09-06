@@ -251,7 +251,7 @@ export default function ReadingComprehensionScreen({ session }) {
             pigments DESIGN.md flags as too light for --text-on-panel,
             so a .btn-primary under this shell needs its ratio measured
             before it ships. Nothing here fills today. */}
-        <main id="main-content" className="container quiz-area"
+        <main id="main-content" className="container stage"
           style={{ '--line-color': 'var(--line-rikai)' }}>
 
           {stage === 'submitting' ? (
