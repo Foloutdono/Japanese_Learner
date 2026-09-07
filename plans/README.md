@@ -188,14 +188,18 @@ Twelve waves live in this file:
   complete, /api/journey/status + reprint), shared goalMath, GhostTrack +
   pass flip, the five scenes, copy/guards/tests.
 - **Wave 14 — 携帯, the mobile release** (plans 064–077, planned 2026-09-06
-  at commit `95b1f1d`; IN PROGRESS). Three releases in one wave: the PWA of
-  today's UI (064–066), the mobile redesign to the "Japanese Learner Mobile"
-  canvas with the credits economy, the new boarding and proper loading
-  screens (067–075), then the App Store / Google Play shells (076–077).
-  Decisions confirmed with the owner: one chrome everywhere, credits with a
-  pass entitlement but no purchase UI yet, shadow-mode enforcement, PWA
-  first. The full plan — the canvas decoded, the fourteen plans, STOP
-  conditions and verification — is the last section of this file.
+  at commit `95b1f1d`; 064–077 DONE 2026-09-07). Three releases in one wave:
+  the PWA of today's UI (064–066), the mobile redesign to the "Japanese
+  Learner Mobile" canvas with the credits economy, the new boarding and
+  proper loading screens (067–075), then the App Store / Google Play shells
+  and their CI builds (076–077; `docs/release.md` is the runbook). Decisions
+  confirmed with the owner: one chrome everywhere, credits with a pass
+  entitlement but no purchase UI yet, shadow-mode enforcement, PWA first.
+  What stays the owner's: the store accounts, the store name and bundle id
+  (placeholders in the shells), the icon, the privacy text, the Render plan,
+  the listings and the closed test. The full plan — the canvas decoded, the
+  fourteen plans, STOP conditions and verification — is the last section of
+  this file.
 - **Wave 9 — 統一, the harmonisation** (plans 041–053; 041–051 DONE). Planned
   2026-08-28 at commit `32c1f40`, from the maintainer's request to merge the
   CSS back into one file and establish a single artistic direction that new

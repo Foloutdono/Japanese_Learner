@@ -1,0 +1,6 @@
+# fastlane for the iOS lane of .github/workflows/mobile.yml (plan 077).
+# A Gemfile so ruby/setup-ruby's bundler-cache pins one version per run
+# instead of whatever the runner image carries that week.
+source "https://rubygems.org"
+
+gem "fastlane", "~> 2.228"
