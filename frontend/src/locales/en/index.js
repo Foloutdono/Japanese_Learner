@@ -11,7 +11,6 @@ const auth = {
   signupBtn:         'Sign up',
   signupSuccess:     'Check your email to confirm your account.',
   signOut:           'Sign Out',
-  usernameOptional:  'Username (optional)',
   usernameInvalid:   'Username must be 3-20 characters (letters, numbers, underscore).',
   usernameTaken:     'This username is already taken.',
 }
@@ -21,27 +20,6 @@ const auth = {
 // reused for both the hero button and the closing footer button
 // rather than duplicated under a second key.
 const landing = {
-  landingSignIn:         'Sign in',
-  landingTagline:        'A complete, self-paced toolkit for learning Japanese — spaced repetition (SM-2), kana to kanji, grammar, and real reading practice, all in one place.',
-  landingCta:            'Get started',
-  landingFeaturesTitle:  'Everything in one place',
-  landingFeaturesIntro:  'Kana, vocabulary, kanji, grammar, reading, and more — one app instead of five separate tools.',
-  landingWhyTitle:       'Why it works',
-  landingPro1Title:      'A path, not a pile',
-  landingPro1Desc:       'Kana, vocabulary, kanji, grammar, and reading are each organized from N5 to N1, so you always know what comes next.',
-  landingPro2Title:      'Spaced repetition (SM-2)',
-  landingPro2Desc:       "Every card is scheduled with the SM-2 algorithm, so you review things right before you'd forget them, not on a fixed calendar.",
-  landingPro3Title:      'Streaks and stats',
-  landingPro3Desc:       'A daily streak and a full stats page — new, in progress, mastered, due now, and your weakest items — show exactly where you stand.',
-  landingPro4Title:      'Reading you can actually do',
-  landingPro4Desc:       "A dictionary and a phrase analyzer sit right next to the reading and reading-comprehension exercises, so nothing you don't understand is a dead end.",
-  landingPro5Title:      'Your own decks, too',
-  landingPro5Desc:       'Build custom flashcard, vocabulary, or kanji decks, import cards straight from a spreadsheet, and mix them with the built-in JLPT content.',
-  landingTechTitle:      'Built with',
-  landingCreatorTitle:   'Who made this, and why',
-  landingCreatorBody:    "This app started as a personal tool for going from zero Japanese to reading real text, without juggling five different apps for kana, vocabulary, kanji, grammar, and reading practice. It's built and maintained by a solo developer, and every feature here is something used daily while learning Japanese.",
-  landingCreatorName:    '— Built and maintained solo.',
-  landingFooterCta:      'Ready to start?',
 }
 
 // ── Navigation ────────────────────────────────────────────
@@ -1406,85 +1384,108 @@ const exam = {
 }
 
 // ── みどりの窓口 — onboarding ──────────────────────────────
+// ── 乗車 — the boarding (plan 075) ──────────────────────────
+// The canvas's boarding: Welcome → name → why → the kana check → (the
+// reveal | the level) → goal → rhythm → the hour → the nudge →
+// building → the plan → the pass. The interface speaks the learner's
+// language; the kana, the cards and the seal are content and stay
+// Japanese (components/boarding/*, screens/BoardingFlow.jsx).
+const boarding = {
+  authFoot: 'Everything can be changed later in Settings.',
+  authModeAria: 'Login or sign up',
+  brdDocumentTitle: 'Boarding',
+  // Welcome: the sign, the rolling stock, the promise.
+  brdTagline: 'Take the train to proficiency.',
+  brdBoard: 'Board',
+  brdHaveAccount: 'Have an account? Sign in',
+  brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulary', grammar: 'Grammar', listening: 'Listening', reading: 'Reading', kana: 'Kana', exam: 'Mock exam' },
+  brdDemoMeaning: { station: 'station', toEat: 'to eat', fillIn: 'Fill in', craft: 'craft', listen: 'Listen', readIt: 'Read it', ticket: 'ticket', mountain: 'mountain', kippu: 'ki · p · pu', timer: '24:18' },
+  brdDemoFoot: { kanjiMeaning: 'Kanji → meaning', wordMeaning: 'Word → meaning', ruleSentence: 'Rule → sentence', meaningKanji: 'Meaning → kanji', soundMeaning: 'Sound → meaning', sentenceMeaning: 'Sentence → meaning', kanjiReading: 'Kanji → reading', kanaSound: 'Kana → sound', timedPaper: 'Timed paper' },
+  // The questions.
+  brdNameQ: 'What’s your name?',
+  brdNameAria: 'Your name',
+  brdWhyQ: (name) => `Why are you learning Japanese, **${name}**?`,
+  brdMotive: { studies: 'For my studies', fun: 'For fun', trip: 'For a trip to Japan', live: 'To live in Japan', friends: 'To make friends', other: 'Something else' },
+  brdKanaQ: 'Can you read this?',
+  brdKana: { hiragana: 'Hiragana', katakana: 'Katakana', both: 'Both', none: 'Not yet' },
+  brdKanaWord: { sushi: 'sushi', hotel: 'hotel' },
+  brdRevealQ: 'Soon you’ll read both.',
+  brdRevealHint: 'Two scripts, 46 signs each. Your first stop.',
+  brdLevelQ: 'Nice! What’s your level?',
+  brdLevelHint: 'The stops behind you will be marked known.',
+  brdNovice: 'Novice',
+  // The kanji figure is the app's own count through that stop (~, rounded).
+  brdLevelDesc: {
+    novice: 'Kana and a few words',
+    N5: (k) => `Simple phrases · ~${k} kanji`,
+    N4: (k) => `Everyday talk · ~${k} kanji`,
+    N3: (k) => `Daily life with ease · ~${k} kanji`,
+    N2: (k) => `News and work · ~${k} kanji`,
+    N1: (k) => `Almost anything · ~${k} kanji`,
+  },
+  brdGoalQ: 'What’s your goal?',
+  brdGoalHint: (level) => `The stops ahead of ${level}.`,
+  brdNextStop: 'Next stop',
+  brdRhythmQ: 'What’s your rhythm?',
+  brdMinADay: 'min a day',
+  brdNewItems: (n) => `~${n} new items`,
+  brdChangeLater: 'You can change it later.',
+  brdTimeQ: 'When do you study?',
+  brdDeparture: 'Departure',
+  brdDayAria: 'Departure time',
+  // The nudge (native only), and the notification as the app sends it.
+  // brdAppName is the store name: the owner's to set (plan 077).
+  brdNudgeQ: (time) => `A nudge at **${time}**?`,
+  brdAppName: 'Japanese Learner',
+  brdNotifNow: 'now',
+  brdNotifTitle: (time) => `Your train leaves at ${time}`,
+  brdNotifText: 'Your cards are waiting at the gate.',
+  brdNudgeHint: 'One a day, at your time. Never more.',
+  brdAllow: 'Allow notifications',
+  brdNotNow: 'Not now',
+  // The arrival: building, the plan, the pass.
+  brdBuildingQ: (name) => `Building your journey, **${name}**`,
+  brdBuildingAria: 'Building your journey',
+  brdBuildGoal: 'Your goal',
+  brdBuildLines: 'Your lines',
+  brdBuildRide: 'Your daily ride',
+  brdBuildProjection: 'Your projection',
+  brdFourLines: 'Four lines',
+  brdArrivalTitle: 'Your plan',
+  brdPlanQ: (name) => `Your plan is ready, **${name}**.`,
+  brdChartTitle: 'Your projection',
+  brdChartAria: (words) => `Words remembered over the ride: daily reviews climb to about ${words}; cramming levels off early.`,
+  brdChartLabel: (words) => `~${words} words · daily reviews`,
+  brdChartCram: 'cramming',
+  brdLegendUs: (min) => `Daily reviews, ${min} min`,
+  brdLegendThem: 'Cramming',
+  brdChartCap: 'Spaced reviews against cramming — an illustration, not a measurement.',
+  brdLead: (min, date, purpose) => `At **${min} min a day**, by **${date}**, ${purpose}:`,
+  brdFor: { studies: 'for your studies', fun: 'for the fun of it', trip: 'for your trip', live: 'for your life in Japan', friends: 'for your friends', other: 'for yourself' },
+  brdBulletFigures: (words, kanji) => `~${words} words and ~${kanji} kanji`,
+  // Two promise lines per motive (the canvas's boarding note).
+  brdPromise: {
+    studies: ['Your course material', 'A lecture’s key terms'],
+    fun: ['Manga panels, lyrics', 'A drama without pausing'],
+    trip: ['Read signs, menus and tickets', 'Ask your way, order, book a room'],
+    live: ['The town hall, the bank, the doctor', 'Your mail and contracts'],
+    friends: ['Chat by message', 'A dinner conversation'],
+    other: ['Read what you meet every day', 'Say what you mean'],
+  },
+  brdOnTrack: (level) => `On track for JLPT ${level}`,
+  brdOnTrackLine: 'On track for the whole line',
+  brdPassQ: (name) => `Your pass is ready, **${name}**.`,
+  brdEnjoy: 'Enjoy the ride.',
+  brdIssued: 'Issued',
+  brdEnter: 'Enter the station',
+}
+
 const onboarding = {
-  // 試乗 — the first ride (plan 063): a real card before any question.
-  onbRideTitle: 'Before any questions — ride once.',
-  onbRideBody: 'This is the whole app in one object: a card, a flip, and an honest answer. Fifteen seconds.',
-  onbRideSkip: 'I know how SRS works — skip the demo',
-  onbRideWon: 'First card met, honestly rated — that rating is the entire skill.',
-  onbRideWonCount: (n) => `The other ${n} ride the same rail.`,
-  // 乗車駅 — self-placement by signage; the short key below stays as
-  // the group label for assistive tech and the placement override.
-  onbBoardBySign: 'Board at the last station whose sign you can read.',
-  onbLvlLoad: (n) => `${n} items at this stop`,
-  // 行先 — the departure board (plan 063, phase E). Train-type names
-  // (各駅停車, Rapid…) are signage from paces.js, never translated;
-  // everything a learner must parse to decide is here.
-  onbGoalTitle: 'Where is this line taking you?',
-  onbGoalBody: 'Name a destination and read the board — every service, priced in minutes a day and months of your life. Or just ride.',
-  onbGoalDestAria: 'Destination',
-  onbGoalModeAria: 'How to choose',
-  onbDestLoad: (n) => `${n} items`,
-  onbDestFree: 'just ride',
-  onbModeDate: 'By date',
-  onbModePace: 'By pace',
-  onbArriveIn: 'Arrive in',
-  onbMonths: (n) => `${n} mo`,
-  onbGoalDepartures: 'Departures',
-  onbGoalDay: 'day',
-  onbGoalMin: (n) => `≈ ${n} min`,
-  onbColService: 'Service',
-  onbColPace: 'Pace',
-  onbColArrival: 'Arrival',
-  onbColJourney: 'Journey',
-  onbCharterYours: 'Charter — yours',
-  onbCharterAny: 'Charter — any pace',
-  onbCharterAria: 'Custom new items per day',
   durDays: (n) => `${n} days`,
   durMonths: (n) => `${n} mo`,
   durYears: (n) => `${n} yr`,
-  onbNoService: (n, max) => `No service runs at ${n} new items a day — the fastest, 臨時, runs at ${max}. The office won't sell this ticket.`,
-  onbFixDate: 'Move the date',
-  onbFixDateSub: (dest, dur) => `${dest} in ${dur} at 特急 20/day`,
-  onbFixDest: 'Nearer destination',
-  onbFixDestSub: (level, n) => `${level} first — ${n} items`,
-  onbCallingAt: 'This train calls at',
-  onbCallNow: 'Now',
-  onbHonestRide: (perDay, min) => `Riding **${perDay} a day** (≈ ${min} min) with no fixed destination — the office still keeps score, and you can buy a destination later from your pass.`,
-  onbHonestNoRun: (dest, months, required) => `**${dest}** in **${months} months** means **${required} new items a day** — the office won't pretend that's a pace. Move the date or the destination and it becomes one.`,
-  onbHonestPlan: (perDay, min, items, dest, date) => `**${perDay} a day, every day** — about ${min} minutes — **${items} items**, arriving **${dest}** around **${date}**. New material only; reviews ride on top. Miss days and this date moves — and the app will say so.`,
-  // 案内 — the promise scene, and 定期券's two beats (plan 063, phase F).
-  onbPromiseTitle: 'The map that will tell you the truth.',
-  onbPromiseBody: (perDay) => `Your line is printed on the back of your pass. Two cars ride it: your train, and a dashed one showing where ${perDay} a day says you should be. Turn the pass over, any day, and the map answers.`,
-  onbPromiseLine: (start, dest) => `Your line — ${start} → ${dest}`,
-  onbPromiseExample: 'example',
-  onbPromiseFoot: 'Drift, and the map says so — **in days, not guilt** — with the two honest fixes one tap away: run a faster service, or reprint the date in ink. It will never move on its own.',
-  onbLinesRow: 'Four lines serve this station once you’re through:',
-  onbSignTitle: 'Sign, and the office prints.',
-  onbFormLatin: 'Pass application',
-  onbFormName: 'Name',
-  onbFormDepart: 'Daily ride',
-  onbFormDate: 'Date',
-  onbDepartFlex: 'Flexible',
-  onbDepartHint: 'A daily hour is optional — but a promise with a time of day is twice as likely to survive its first rainy week.',
-  onbPrint: 'Print the pass',
-  onbEditApp: 'Edit the application',
-  onbDeparts: (time) => `departs ${time} daily`,
-  onbVowYou: (perDay, time) => `**${perDay} a day**, most days${time ? `, around ${time}` : ''}.`,
-  onbVowOffice: 'The honest map, every day — **your date never moves in silence.**',
   onbContinue: 'Continue',
   onbStepsAria: (n, total) => `Step ${n} of ${total}`,
-  // A function, not a string: skipping completes at the level ALREADY
-  // chosen (see skip() in OnboardingFlow), which is N5 only by default.
-  onbSkip: (level) => `Skip — start at ${level}`,
-  onbSkipHint: 'Everything can be changed later in Settings.',
-  onbDocumentTitle: 'Ticket Office',
-  onbLevelTitle: 'Which station are you boarding from?',
-  onbLevelNever: 'I’ve never studied Japanese',
-  onbLevelNeverHint: 'Board at N5 — kana come first.',
-  onbLevelTest: 'Test me',
-  onbLevelTestHint: '12 questions, two minutes, scored instantly.',
-  onbTestTitle: 'The placement test',
   onbTestProgress: (n, total) => `${n} / ${total}`,
   onbTestKind: {
     reading: 'How is this word read?',
@@ -1496,14 +1497,8 @@ const onboarding = {
   onbTestFinish: 'See my result',
   onbTestError: 'The test could not be loaded. Try again in a moment.',
   onbTestRetake: 'Retake the test',
-  onbTestResultTitle: 'Your boarding station',
   onbTestResult: (level, correct, total) => `${correct} of ${total} correct — we recommend boarding at ${level}.`,
-  onbTestOverrideHint: 'It’s a recommendation, not a verdict — pick the station that feels right.',
   onbPaceRecommended: 'Recommended',
-  onbMapAssumption: 'Projection: new words, kanji and grammar points only, at a constant pace — reviews come on top.',
-  onbMapUnavailable: 'The projection is unavailable right now — it will be waiting inside the app.',
-  onbPassTitle: 'Your pass is ready',
-  onbPassBoard: 'Through the gate',
   onbPassError: 'Saving failed — check your connection and try again.',
   // The daily pace, lived: the concourse 新規 gauge and the study
   // screens' session terminus (see components/study/usePace.js).
@@ -1618,4 +1613,5 @@ export default {
   ...decks,
   ...exam,
   ...onboarding,
+  ...boarding,
 }

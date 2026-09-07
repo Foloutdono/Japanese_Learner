@@ -83,6 +83,15 @@ def _init_db() -> None:
             # set by hand until a purchase flow exists); tz_offset_min is
             # the device's offset east of UTC, PATCHed on boot, so the
             # refill day is the learner's rather than the server's.
+            #
+            # The boarding's own answers (plan 075, routes/onboarding.py):
+            # motive is why the learner is here (the plan screen's two
+            # promise lines come from it), kana_known which scripts they
+            # already read ('hiragana' | 'katakana' | 'both' | 'none' --
+            # the sets marked known at the boarding), reminder_time the
+            # daily nudge's hour ('HH:MM', NULL = none) and notifications
+            # whether they said yes to it. The native shell (plan 076)
+            # reads the last two on boot to schedule the local reminder.
             for col, typ in (
                 ("jlpt_level", "TEXT"),
                 ("daily_new_target", "INTEGER"),
@@ -97,6 +106,10 @@ def _init_db() -> None:
                 ("plan", "TEXT DEFAULT 'free'"),
                 ("plan_until", "TIMESTAMPTZ"),
                 ("tz_offset_min", "INTEGER"),
+                ("motive", "TEXT"),
+                ("kana_known", "TEXT"),
+                ("reminder_time", "TEXT"),
+                ("notifications", "BOOLEAN NOT NULL DEFAULT FALSE"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -170,16 +183,18 @@ def ensure_profile_row(user_id: str) -> str:
 
 def _profile_row(user_id: str) -> tuple:
     """(username, jlpt_level, daily_new_target, onboarded_at,
-    rating_scale) — seeding the row lazily like _get_or_create_username,
-    whose creation path it reuses. The onboarding fields are NULL until
-    the flow runs, and rating_scale until the learner changes it."""
+    rating_scale, motive, kana_known, reminder_time, notifications) —
+    seeding the row lazily like _get_or_create_username, whose creation
+    path it reuses. The onboarding fields are NULL until the flow runs,
+    and rating_scale until the learner changes it."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
                 SELECT username, jlpt_level, daily_new_target, onboarded_at,
-                       rating_scale
+                       rating_scale, motive, kana_known, reminder_time,
+                       notifications
                 FROM user_profiles WHERE user_id = %s
                 """,
                 (user_id,),
@@ -189,7 +204,7 @@ def _profile_row(user_id: str) -> tuple:
                 return row
     finally:
         conn.close()
-    return (_get_or_create_username(user_id), None, None, None, None)
+    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False)
 
 
 def _usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -318,6 +333,17 @@ def apply_level_rule(user_id: str, current: str | None, target: str) -> dict:
     return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
 
 
+def apply_kana_rule(user_id: str, known: str | None) -> dict:
+    """The kana door (plan 075): mark the scripts the learner already
+    reads known -- one row per sign in the kana line's primary mode,
+    spread like the level rule's. Idempotent for the same reason; a
+    replay that names MORE scripts adds only the new ones."""
+    mode, ids = level_rule.kana_batch(known)
+    marked = srs.seed_known(prefixed(ids, user_id), mode, spread_days=level_rule.SPREAD_DAYS) if ids else 0
+    logger.info("kana rule user_id=%s known=%s marked_known=%d", user_id, known, marked)
+    return {"kanaKnown": known, "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
+
+
 # ── Records ───────────────────────────────────────────────────
 # The three figures the pass holder prints beside the stamp book:
 # reviews, retention and the best perfect run. Computed once, here,
@@ -342,7 +368,8 @@ CALENDAR_DAYS = 35
 # ── Routes ────────────────────────────────────────────────────
 @router.get("/api/profile")
 def get_profile(user_id: str = Depends(get_user_id)):
-    username, jlpt_level, daily_new_target, onboarded_at, rating_scale = _profile_row(user_id)
+    (username, jlpt_level, daily_new_target, onboarded_at, rating_scale,
+     motive, kana_known, reminder_time, notifications) = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     streak = srs.get_streak(user_id)
@@ -368,6 +395,14 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # client so a learner who has never opened settings still gets a
         # named scale instead of a null the bar has to guess at.
         "ratingScale": rating_scale or DEFAULT_RATING_SCALE,
+        # The boarding's answers (plan 075): what the plan screen and the
+        # native shell's daily reminder read back. All NULL/false until
+        # the boarding runs; an account boarded before plan 075 simply
+        # never answered.
+        "motive": motive,
+        "kanaKnown": kana_known,
+        "reminderTime": reminder_time,
+        "notifications": bool(notifications),
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],

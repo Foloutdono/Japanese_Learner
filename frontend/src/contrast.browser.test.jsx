@@ -598,59 +598,83 @@ const Fixture = () => (
     <div className="lvl-sheet__figs"><div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v ls-v">1,318</b><span className="lvl-sheet__fig-l ls-l">Marked known</span></div></div>
     <p className="lvl-sheet__body ls-body">The stops are marked <strong className="lvl-sheet__strong ls-strong">known</strong>.</p>
 
-    {/* ── Plan 063 — the goal line (onboarding board, pass, journey) ──
-        The 行先 board and the 定期券/journey surfaces are sumi in both
-        themes; their gold, state and gold-tint inks are exactly the
-        pairs part 1's contract cannot see. Like the wall map above,
-        the real panels paint gradients/shadows the ground-walker
-        cannot composite, so the sumi is pinned inline to the token it
-        resolves to. Status TEXT reads --jour-st-ink (the pigment
-        mixed toward the panel ink — raw --danger on sumi measures
-        ~2.6:1); the cars, rails and bracket lines keep the raw
-        pigment, being graphics, not text. */}
-    <div className="onb" data-step="goal">
-      <div className="onb-board" style={{ background: 'var(--bg-panel)' }}>
-        <span className="onb-board__clock ob-clock"><span lang="ja">目標</span> 2 sept. ’27</span>
-        <button type="button" className="onb-board__row">
-          <span className="onb-board__svc-name">
-            <span className="onb-board__reco ob-reco" lang="ja">推奨</span>
-          </span>
-          <span className="onb-board__eta">
-            2 sept. ’27
-            <span className="onb-board__late ob-late" lang="ja">遅</span>
-          </span>
-        </button>
-        <div className="onb-board__row onb-board__row--charter onb-board__row--yours">
-          <span className="onb-board__pace ob-yours-pace">12</span>
-        </div>
-        <div className="onb-board__row onb-board__row--void">
-          <span className="onb-board__pace ob-void-pace">47</span>
-          <span className="onb-board__eta ob-void-eta" lang="ja">運休</span>
-        </div>
-        <div className="onb-board__notice">
-          <p className="onb-board__notice-line ob-notice">no service</p>
-        </div>
-      </div>
-      <button type="button" className="onb-dest__chip" aria-pressed="true">
-        <span className="onb-dest__roundel ob-dest-on">N3</span>
+    {/* ── Plan 075 — the boarding and the sign-in ──
+        The boarding stands on the page ground with its cards on
+        --surface; the departure board, the notification's app mark and
+        the printed pass are sumi (pinned inline like the panels above,
+        whose gradients the walker cannot composite). The gold inks --
+        the name in a question, a kana's meaning, the tag's ring -- are
+        exactly the pairs part 1's contract cannot see. */}
+    <div className="brd" data-step="why">
+      <h1 className="brd__q">Why, <strong className="brd__q-em ob-q-em">Aiko</strong>?</h1>
+      <p className="brd__hint ob-hint">The stops behind you will be marked known.</p>
+      <span className="brd__count ob-count">2/8</span>
+      <p className="brd__error ob-error">Saving failed</p>
+      <button type="button" className="brd__link ob-link">Not now</button>
+      <button type="button" className="brd-opt brd-opt--on" aria-pressed="true">
+        <span className="brd-opt__code ob-code-on">N5</span>
+        <span className="brd-opt__names">
+          <span className="brd-opt__label ob-label-on">Beginner<span className="brd-tag ob-tag">Next stop</span></span>
+          <span className="brd-opt__desc ob-desc-on">Simple phrases · ~100 kanji</span>
+        </span>
       </button>
-      <div className="onb-form">
-        <button type="button" className="onb-form__chip ob-dep-on" aria-pressed="true">
-          <span lang="ja">夜</span>21:00
-        </button>
-      </div>
-      <div className="onb-ride">
-        <div className="onb-ride__won">
-          <span className="ob-won-body">honest rating <strong className="ob-won-strong">taken</strong></span>
+      <button type="button" className="brd-opt" aria-pressed="false">
+        <span className="brd-opt__code ob-code">N4</span>
+        <span className="brd-opt__names"><span className="brd-opt__desc ob-desc">Everyday talk</span></span>
+      </button>
+      <button type="button" className="brd-cell brd-cell--on" aria-pressed="true">
+        <span className="brd-cell__n ob-cell-n">10</span>
+        <span className="brd-cell__u ob-cell-u">min a day</span>
+        <span className="brd-cell__sub ob-cell-sub">~10 new items</span>
+      </button>
+      <button type="button" className="brd-kopt"><span className="brd-kopt__jp ob-kopt-jp" lang="ja">すし</span></button>
+      <div className="brd-kana">
+        <div className="brd-kana__pane">
+          <span className="brd-kana__romaji ob-romaji">su · shi</span>
+          <span className="brd-kana__en ob-kana-en">sushi</span>
+          <span className="brd-kana__script ob-script">Hiragana</span>
         </div>
       </div>
-      <div className="onb-promise jour-st--delayed" style={{ background: 'var(--bg-panel)' }}>
-        <span className="onb-promise__status"><b className="ob-promise-b" lang="ja">遅延</b></span>
+      <div className="brd-demo" style={{ '--line-color': 'var(--line-kanji)' }}>
+        <span className="brd-demo__tag ob-demo-tag">Kanji</span>
+        <span className="brd-demo__meaning ob-demo-meaning">station</span>
+        <span className="brd-demo__foot ob-demo-foot">Kanji → meaning</span>
       </div>
-      <div className="onb-pass" style={{ background: 'var(--bg-panel)' }}>
-        <span className="onb-pass__v onb-pass__v--gold ob-pass-gold">2 sept. ’27</span>
+      <div className="brd-demo" style={{ '--line-color': 'var(--line-exam)' }}>
+        <span className="brd-demo__tag ob-demo-tag-exam">Listening</span>
+      </div>
+      <div className="brd-board" style={{ background: 'var(--bg-panel)' }}>
+        <span className="brd-board__cap ob-board-cap">Departure</span>
+        <span className="brd-flap ob-flap">0</span>
+        <span className="brd-board__colon ob-colon">:</span>
+      </div>
+      <div className="brd-day"><span className="brd-day__tick ob-tick">06</span></div>
+      <div className="brd-notif">
+        <span className="brd-notif__app ob-notif-app" style={{ background: 'var(--bg-panel)' }}>JP</span>
+        <div className="brd-notif__head ob-notif-head"><span>Japanese Learner</span></div>
+        <span className="brd-notif__text ob-notif-text">Your cards are waiting at the gate.</span>
+      </div>
+      <div className="brd-step brd-step--done"><span className="brd-step__val ob-step-val">N5 → N4</span></div>
+      <div className="brd-chart">
+        <span className="brd-chart__title ob-chart-title">Your projection</span>
+        <div className="brd-legend ob-legend">Daily reviews</div>
+        <span className="brd-chart__cap ob-chart-cap">an illustration, not a measurement</span>
+      </div>
+      <p className="brd-lead ob-lead">At <strong className="brd-lead__em ob-lead-em">10 min a day</strong></p>
+      <div className="brd-bullet ob-bullet">~1,300 words</div>
+      <div className="brd-issue" style={{ background: 'var(--bg-panel)' }}>
+        <span className="brd-issue__seal ob-seal" lang="ja">発行</span>
       </div>
     </div>
+    <main className="auth">
+      <span className="auth-header__glyph ob-auth-glyph" lang="ja">日本語</span>
+      <h1 className="auth-header__title ob-auth-title">Learn Japanese</h1>
+      <div className="auth-card">
+        <p className="auth-message auth-message--error ob-auth-error">Wrong password</p>
+        <button type="button" className="auth-submit ob-auth-submit">Login</button>
+      </div>
+      <p className="auth-foot ob-auth-foot">Everything can be changed later in Settings.</p>
+    </main>
     <div className="jour-st--delayed" style={{ background: 'var(--bg-panel)' }}>
       <div className="jour-line">
         <span className="jour-line__status"><b className="jr-status-b" lang="ja">遅延</b></span>
@@ -778,19 +802,48 @@ const SITES = [
   // Plan 055's deck shelf, merged in after the guards were written.
 
   // Plan 063 — the goal line's sumi surfaces and tinted chips.
-  ['.ob-clock', 'departure board clock (gold on sumi)'],
-  ['.ob-reco', 'departure board 推奨 badge (gold on sumi)'],
-  ['.ob-late', 'departure board 遅 mark (amber on sumi)'],
-  ['.ob-yours-pace', 'charter row pace (kinari on gold tint)'],
-  ['.ob-void-pace', 'voided charter pace (state ink on sumi)'],
-  ['.ob-void-eta', 'voided charter 運休 (state ink on sumi)'],
-  ['.ob-notice', '運休 notice line (amber on sumi)'],
-  ['.ob-dest-on', 'chosen destination roundel (kinari on accent fill)'],
-  ['.ob-dep-on', 'chosen departure chip (ink on accent tint)'],
-  ['.ob-won-body', 'first-ride won line (soft ink on success tint)'],
-  ['.ob-won-strong', 'first-ride won strong (ink on success tint)'],
-  ['.ob-promise-b', 'promise status word (state ink on sumi)'],
-  ['.ob-pass-gold', 'printed pass 有効期限 (gold on sumi)'],
+  ['.ob-q-em', 'boarding question, the name in gold'],
+  ['.ob-hint', 'boarding hint (soft ink on page)'],
+  ['.ob-count', 'boarding track count'],
+  ['.ob-error', 'boarding error line (danger on page)'],
+  ['.ob-link', 'boarding ghost link'],
+  ['.ob-code-on', 'chosen row code (ink on gold tint)'],
+  ['.ob-label-on', 'chosen row label (ink on gold tint)'],
+  ['.ob-tag', 'the tag (ink in a gold ring)'],
+  ['.ob-desc-on', 'chosen row description (soft ink on gold tint)'],
+  ['.ob-code', 'row code (soft ink on surface)'],
+  ['.ob-desc', 'row description (soft ink on surface)'],
+  ['.ob-cell-n', 'chosen cell figure (ink on gold tint)'],
+  ['.ob-cell-u', 'chosen cell unit (soft ink on gold tint)'],
+  ['.ob-cell-sub', 'chosen cell sub (soft ink on gold tint)'],
+  ['.ob-kopt-jp', 'kana answer sample (soft ink on surface)'],
+  ['.ob-romaji', 'kana reading (soft ink on surface)'],
+  ['.ob-kana-en', 'kana meaning (gold on surface)'],
+  ['.ob-script', 'kana script caption (soft ink on surface)'],
+  ['.ob-demo-tag', 'demo card tag (kanji pigment on surface)'],
+  ['.ob-demo-tag-exam', 'demo card tag (exam pigment on surface)'],
+  ['.ob-demo-meaning', 'demo card meaning (shu-iro on surface)'],
+  ['.ob-demo-foot', 'demo card foot (soft ink on surface)'],
+  ['.ob-board-cap', 'departure board caption (soft panel ink on sumi)'],
+  ['.ob-flap', 'departure board flap (panel ink on flap face)'],
+  ['.ob-colon', 'departure board colon (soft panel ink on sumi)'],
+  ['.ob-tick', 'day track tick (soft ink on page)'],
+  ['.ob-notif-app', 'notification app mark (gold on sumi)'],
+  ['.ob-notif-head', 'notification head (soft ink on surface)'],
+  ['.ob-notif-text', 'notification text (soft ink on surface)'],
+  ['.ob-step-val', 'build step value (soft ink on surface)'],
+  ['.ob-chart-title', 'chart title (soft ink on surface)'],
+  ['.ob-legend', 'chart legend (soft ink on surface)'],
+  ['.ob-chart-cap', 'chart caption (soft ink on surface)'],
+  ['.ob-lead', 'plan lead (soft ink on page)'],
+  ['.ob-lead-em', 'plan lead term (ink on page)'],
+  ['.ob-bullet', 'plan promise (ink on page)'],
+  ['.ob-seal', 'the 発行 seal (stamp ink on sumi)'],
+  ['.ob-auth-glyph', 'sign-in glyph (ink on page)'],
+  ['.ob-auth-title', 'sign-in title (soft ink on page)'],
+  ['.ob-auth-error', 'sign-in error (danger on surface)'],
+  ['.ob-auth-submit', 'sign-in action (panel ink on shu-iro fill)'],
+  ['.ob-auth-foot', 'sign-in foot (soft ink on page)'],
   ['.jr-status-b', 'pass footer status word (state ink on sumi)'],
   ['.jr-validity-b', 'pass footer 有効期限 (gold on sumi)'],
   ['.jr-gap-b', 'ghost track day bracket (state ink on sumi)'],

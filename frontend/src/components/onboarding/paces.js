@@ -27,8 +27,9 @@ export function paceFor(perDay) {
 // the same diagram grammar the current pace step already draws by
 // hand). `en` is the row's small-caps Latin caption — signage, like
 // `jp`, not locale copy; the FR/EN string tables never translate a
-// train type. PACES above stays until the old pace step retires with
-// phase E — SettingsScreen and OnboardingFlow still render it.
+// train type. PACES above stays for Settings › Learning's pace cards;
+// the boarding (plan 075) asks minutes a day instead and stores the
+// items they hold as the same daily_new_target.
 export const SERVICES = [
   { id: 'local',   jp: '各駅停車', en: 'Local',         perDay: 5,  pattern: [1, 1, 1, 1, 1, 1] },
   { id: 'rapid',   jp: '快速',     en: 'Rapid',         perDay: 10, pattern: [1, 0, 1, 0, 1, 1], recommended: true },

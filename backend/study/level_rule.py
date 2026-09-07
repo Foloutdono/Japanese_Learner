@@ -16,7 +16,7 @@ complete) own the request.
 """
 from study import card_index
 from study.difficulty import LEVELS
-from study.modes import KANJI, VOCAB, GRAMMAR, MODES_FOR_SOURCE
+from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES_FOR_SOURCE
 
 # The stops a level stands behind are JLPT stops. Kana is a different
 # door (the boarding's kana check, plan 075) and personal decks are
@@ -64,6 +64,38 @@ def known_batches(stops) -> list[tuple[str, str, list[str]]]:
         if ids:
             out.append((source, mode, ids))
     return out
+
+
+# ── The kana door (plan 075) ──────────────────────────────────────
+# The boarding's kana check is the one question about a script rather
+# than a stop: a learner who already reads hiragana, katakana or both
+# has those sets marked known the same way a level marks the stops
+# behind it -- one row per sign in the kana line's primary mode, first
+# checks spread over the same six weeks. 'none' marks nothing; the
+# syllabaries are then the first stop of the run.
+KANA_KNOWN = ("hiragana", "katakana", "both", "none")
+
+_KANA_SETS_FOR = {
+    "hiragana": ("hiragana_basic", "hiragana_combos"),
+    "katakana": ("katakana_basic", "katakana_combos"),
+}
+_KANA_SETS_FOR["both"] = _KANA_SETS_FOR["hiragana"] + _KANA_SETS_FOR["katakana"]
+_KANA_SETS_FOR["none"] = ()
+
+
+def kana_sets_for(known: str | None) -> tuple[str, ...]:
+    """The kana sets a boarding answer marks known, in line order."""
+    return _KANA_SETS_FOR.get(known or "none", ())
+
+
+def kana_batch(known: str | None) -> tuple[str, list[str]]:
+    """(mode, raw ids) for the signs `known` covers -- the unit
+    seed_known writes, like known_batches above. Empty for 'none'."""
+    mode = primary_mode(KANA)
+    ids: list[str] = []
+    for set_name in kana_sets_for(known):
+        ids.extend(card_index.raw_ids(KANA, set_name, mode))
+    return mode, list(dict.fromkeys(ids))
 
 
 def item_batches(stops) -> list[list[str]]:

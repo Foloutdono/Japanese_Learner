@@ -725,7 +725,7 @@
    The compound selector is load bearing: .dial is declared LATER in
    this file at equal specificity, so a bare .exam-audio-player__range
    would lose these inks to the instrument's defaults and the thumb
-   would come back grey. Same shape as .onb-months__dial .dial. */
+   would come back grey. Same shape as the sound mixer's .dial compound. */
 .exam-audio-player__range.dial {
   --dial-rail: var(--border);
   --dial-ink: var(--line-color, var(--line-exam));
@@ -2474,20 +2474,22 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   みどりの窓口 section — merged from
-   src/components/onboarding/onboarding.css by plan 041, pasted
-   directly after the 解析 section for the same cascade-order reason.
-   Owns .onb-*. Plan 041 left two named exceptions here: an un-prefixed
-   arrival-cutscene family, and a Settings-retake pair that belonged in
-   the Settings section rather than this one. Both were plan 042's job:
-   the cutscene is properly namespaced now, and the retake pair moved
-   to sit beside its own family in the Settings section below.
+   みどりの窓口 section — what is left of the ticket office. Merged
+   from src/components/onboarding/onboarding.css by plan 041 and
+   pasted directly after the 解析 section for the cascade-order
+   reason; the office itself retired with plan 075 (the boarding,
+   `.brd-*`, at the end of this file). What stays here is what
+   Settings › Learning and the boarding still use: the dial (the one
+   slider everywhere), the placement test (.onb-test*) with its
+   action/link pair (.onb-action, .onb-link, .onb-step__actions), the
+   gold pill (.onb-reco-badge), the 到着 cutscene (.onb-arrival*) and
+   the /dev/onboarding workbench chrome (.onb-preview*).
    Ends where this file's own design-system body begins, below. ══ */
-/* ── みどりの窓口 — the onboarding flow ─────────────────────
-   Per-feature section, merged into index.css the same way
-   the exam and 解析 sections above it were. Everything here is namespaced
-   .onb-*; the shared route-diagram classes (.route, .route-stop)
-   stay in index.css because six study screens use them.
+/* ── The office's survivors ─────────────────────────────────
+   Per-feature section, merged into index.css the same way the exam and
+   解析 sections above it were. Everything here is namespaced .onb-*;
+   the shared route-diagram classes (.route, .route-stop) stay in
+   index.css because six study screens use them.
 
    The office is an identity surface, like /profile and /settings:
    no --line-* pigment of its own. Where a rail or accent is needed
@@ -2604,222 +2606,6 @@
   .dial:hover::-moz-range-thumb { transform: none; }
 }
 
-.onb {
-  /* The office hangs its own clock in the corner, so it is the
-     containing block for it. */
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 28px 18px 60px;
-}
-
-/* The office signboard — kana over name over latin, the station-plate
-   reading order, but framed as a window sign rather than a 駅名標:
-   this is not a place you travel to. */
-/* Every station has a clock, and the office had none — the only one a
-   learner saw during onboarding was inside the 行先 departure board, on
-   one scene of five. Ambient ink: the office is drawn on --bg-main,
-   not on a sumi panel. */
-.onb-clock {
-  position: absolute;
-  top: var(--sp-4);
-  right: var(--sp-5);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--tr-term);
-  color: var(--text-secondary);
-}
-
-.onb-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  margin-bottom: 26px;
-  text-align: center;
-  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
-}
-.onb-header__kana {
-  font-family: var(--font-jp);
-  font-size: 0.78rem;
-  letter-spacing: 0.35em;
-  /* The trailing letter's tracking is counted into the shrink-to-fit
-     box, so a centred tracked line sits left of its own axis; the
-     indent cancels it. Must equal THIS rule's letter-spacing, so the
-     literal rather than --tr-reading (0.30em). */
-  text-indent: 0.35em;
-  color: var(--text-secondary);
-}
-.onb-header__jp {
-  margin: 0;
-  font-family: 'Noto Serif JP', serif;
-  font-size: 1.9rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-.onb-header__latin {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  letter-spacing: 0.5em;
-  /* Trailing letter-spacing skews centering; padding rebalances. */
-  padding-left: 0.5em;
-  color: var(--text-secondary);
-}
-/* The green window: the sign carries the office's own colour the way
-   the real みどりの窓口 sign does — the one green thing in the app,
-   an underline, not a pigment claimed for structure. */
-.onb-header::after {
-  content: '';
-  width: 68px;
-  height: 4px;
-  margin-top: 10px;
-  border-radius: 2px;
-  background: var(--success);
-}
-
-/* ── The flow's own stopping pattern — a スタンプラリー ─────
-   (plan 063, phase D.) The stations under the office sign are now a
-   stamp card: each stop inks its kanji when passed — a tilted ring in
-   the office's own vermillion, alternating lean so no two land the
-   same way — the current stop is a solid ring, the ones ahead dashed.
-   The rail and its progress fill run 32px-inset so they end exactly
-   at the first and last stamp centres (stops are 64px columns), never
-   past them. Only the just-inked stamp (--fresh, one index tracked in
-   the flow) plays the landing animation. */
-.onb-line {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 520px;
-  margin-bottom: 30px;
-}
-.onb-line::before {
-  content: '';
-  position: absolute;
-  left: 32px;
-  right: 32px;
-  top: 13px;
-  height: 3px;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--accent) 26%, transparent);
-}
-.onb-line__fill {
-  position: absolute;
-  left: 32px;
-  top: 13px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--accent);
-  transition: width 0.3s ease;
-}
-.onb-line__stop {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-2);
-  width: 64px;
-}
-.onb-line__stamp {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  font-family: var(--font-serif);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  /* Each stamp leans its own way; --past sets the resting tilt and
-     the landing keyframes read it, so the animation always settles on
-     the tilt this stamp will keep. */
-  --stamp-tilt: 0deg;
-  color: color-mix(in srgb, var(--text-secondary) 55%, transparent);
-  background: var(--bg-main);
-  border: 2px dashed color-mix(in srgb, var(--accent) 30%, var(--border));
-  border-radius: var(--r-pill);
-  transform: rotate(var(--stamp-tilt));
-  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-}
-.onb-line__stop--now .onb-line__stamp {
-  border-style: solid;
-  border-color: var(--accent);
-  color: var(--text-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
-}
-.onb-line__stop--past .onb-line__stamp {
-  --stamp-tilt: -7deg;
-  border: 2.5px solid var(--accent);
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, var(--bg-main));
-}
-@keyframes onb-stamp-in {
-  0%   { transform: rotate(calc(var(--stamp-tilt) - 11deg)) scale(1.7); opacity: 0; }
-  60%  { transform: rotate(var(--stamp-tilt)) scale(0.94); opacity: 1; }
-  100% { transform: rotate(var(--stamp-tilt)) scale(1); }
-}
-.onb-line__stop--fresh .onb-line__stamp {
-  animation: onb-stamp-in 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
-}
-/* The fill span is the row's first child, so even children are the
-   1st/3rd/5th… stops — every other stamp leans the other way. */
-.onb-line__stop--past:nth-child(even) .onb-line__stamp { --stamp-tilt: 5deg; }
-.onb-line__name {
-  font-family: var(--font-jp);
-  font-size: 0.68rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  letter-spacing: 0.05em;
-}
-.onb-line__stop--now .onb-line__name {
-  color: var(--text-primary);
-  font-weight: 700;
-}
-@media (prefers-reduced-motion: reduce) {
-  .onb-line__stop--fresh .onb-line__stamp { animation: none; }
-  .onb-line__fill { transition: none; }
-}
-
-.onb-body {
-  width: 100%;
-  max-width: 680px;
-  display: flex;
-  flex-direction: column;
-}
-
-.onb-step {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
-}
-
-.onb-step__title {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-size: 1.35rem;
-  font-weight: 700;
-  /* The office's headings are full sentences in a 680px column, so
-     several wrap with one or two orphan words on the last line.
-     Progressive enhancement — a browser without it falls back to the
-     ragged wrap that is there today. */
-  text-wrap: balance;
-}
-/* The heading receives programmatic focus on every step change (see
-   OnboardingFlow's step effect) purely so the transition is announced
-   and the scroll anchors — it is tabIndex={-1}, unreachable by Tab, so
-   the ring would only ever flash uninvited on a non-control. */
-.onb-step__title:focus { outline: none; }
-.onb-step__body,
-.onb-step__hint {
-  margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-.onb-step__hint { font-size: 0.85rem; }
-
 .onb-step__actions {
   display: flex;
   justify-content: flex-end;
@@ -2888,337 +2674,6 @@
    no-descending-specificity. */
 .onb-link:hover:not(:disabled) { color: var(--text-primary); }
 
-.onb-back { align-self: flex-start; margin-bottom: 10px; }
-
-/* The escape hatch, not a third answer: a hairline above and a size
-   step down keep it from competing with the step's real choices. */
-.onb-footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  margin-top: 48px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-}
-.onb-skip { font-size: 0.78rem; opacity: 0.85; }
-.onb-skip__hint { color: var(--text-secondary); font-size: 0.72rem; }
-
-.onb-error {
-  color: var(--danger);
-  font-size: 0.85rem;
-}
-
-/* ── 試乗 — the first ride (plan 063, phase D) ─────────────
-   The real Flashcard and the real RatingBar, framed for the office.
-   The card wrapper repeats the tour's padding override — same
-   values, same reason: the study card's full-column paddings drown a
-   single demo card. */
-.onb-ride {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-5);
-}
-/* The demo card's compact padding — inherited from the retired tour's
-   recipe (phase F removed the tour; the ride is the one framed study
-   card left in the office). */
-/* The card the first ride is taken on. .flashcard itself is a
-   deliberately transparent overlay — it spreads negative margins to
-   make the whole surface clickable, and on the study screens the
-   surface underneath it belongs to the stage. In the office there is
-   no stage, so without this the demo card was a specimen floating on
-   the page: no ground, no edge, nothing that reads as a card at all.
-   The app's one card (DESIGN.md, "One card, everywhere"), which is
-   also what the mockup's .fc__face draws. */
-.onb-ride__card {
-  width: 100%;
-  /* Card and rating bar are two halves of one instrument and share one
-     column (DESIGN.md: "the quiz prompt card, its progress bar, its
-     MCQ list and its rating bar all share this one number"). Uncapped,
-     the card took .onb-body's full 680px while the bar beneath it sat
-     at 480 — overhanging it by ~100px each side, which only the card's
-     missing surface was hiding. 480px is the bar's own width (see
-     `.onb-ride .rating-bar`), the number that rule's comment already
-     calls the card's column; this is what makes that true. */
-  max-width: min(480px, 100%);
-  padding: 18px 14px;
-  /* The card holds its height across the turn. Its two faces are not
-     the same size — the glyph front measures ~180px at the specimen
-     rung (--fs-specimen-glyph over a 1.15 line box, plus the card's
-     own paddings) and the reading + meaning back 109px — so without
-     this the whole scene jumped UP at the exact moment the learner
-     looked down to
-     read the answer, and the rating bar moved out from under the
-     cursor with it. The mockup pins the same card at a flat height for
-     the same reason; this is the front face's own, so the reservation
-     costs no dead space. */
-  min-height: 180px;
-  display: grid;
-  align-content: center;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  --card-pad-top: 18px;
-  --card-pad-x: 14px;
-  --card-pad-y: 18px;
-}
-/* 案内放送 — the platform announcement, bookending the office:
-   ご乗車ありがとうございます on scene one, まもなく発車します on the
-   last. */
-.onb-pa {
-  align-self: center;
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption);
-  letter-spacing: var(--tr-reading);
-  text-indent: var(--tr-reading);
-  color: var(--text-secondary);
-}
-.onb-ride__back {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-2);
-}
-.onb-ride__reading {
-  font-family: var(--font-jp);
-  font-size: var(--fs-lead);
-  letter-spacing: var(--tr-reading);
-  text-indent: var(--tr-reading);
-  color: var(--text-secondary);
-}
-.onb-ride__won {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  max-width: 420px;
-  padding: var(--sp-4) var(--sp-5);
-  border: 1px solid color-mix(in srgb, var(--success) 45%, var(--border));
-  background: color-mix(in srgb, var(--success) 7%, transparent);
-  border-radius: var(--r-card);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
-}
-.onb-ride__won strong { color: var(--text-primary); }
-.onb-ride__won-stamp {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  font-family: var(--font-serif);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--accent);
-  border: 2.5px solid var(--accent);
-  border-radius: var(--r-pill);
-  /* The tilt is named, not literal, because the landing keyframes READ
-     it: onb-stamp-in rotates by var(--stamp-tilt) in all three frames
-     and carries no fallback (unlike the profile's copy of the same
-     idea). --stamp-tilt is defined only on the rally's own stamps, a
-     sibling subtree, so with a literal here every transform frame
-     referenced an undefined property, was invalid at computed-value
-     time, and dropped — leaving the seal to fade in UNTILTED and then
-     snap to -7deg when the animation ended. Measured: transform "none"
-     against the rally stamp's scale 1.70 at the same instant. */
-  --stamp-tilt: -7deg;
-  transform: rotate(var(--stamp-tilt));
-  /* The seal LANDS — it is the reward for the first honest rating, and
-     the office already owns the stamp that lands (the stamp rally's
-     --fresh mark rides these same keyframes). Without it the banner
-     arrives with its stamp already printed, which is the one beat of
-     this scene that is supposed to be felt. The 0.1s wait lets the
-     banner get there first. */
-  animation: onb-stamp-in 0.4s cubic-bezier(0.22, 0.68, 0.32, 1) 0.1s backwards;
-}
-@media (prefers-reduced-motion: reduce) {
-  .onb-ride__won,
-  .onb-ride__won-stamp,
-  .onb-lvl { animation: none; }
-}
-
-/* ── 乗車駅 — board where you can still read the sign ───────
-   (plan 063, phase D.) Station rows on the office's own rail: the
-   roundel carries the level code, the serif sign name beside the load
-   at that stop, and underneath the one sentence that IS the placement
-   heuristic. */
-.onb-lvls {
-  display: flex;
-  flex-direction: column;
-}
-/* The rows arrive down the rail rather than all at once — the app's
-   shared stagger (DESIGN.md, Motion: the `arrive` animation, ~30ms
-   between children, capped at the eighth). Five stations, so the cap
-   never bites here; the delays are written out because a list this
-   short does not earn a counter. */
-.onb-lvl {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-5);
-  animation: arrive 0.3s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
-  /* Left gutter = --sp-9 (52px): clears the 25px rail + roundel and
-     lands the text column where .onb-alts already indents to. */
-  padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-9);
-  background: none;
-  border: none;
-  border-radius: var(--r-card);
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.onb-lvl:nth-child(2) { animation-delay: 0.03s; }
-.onb-lvl:nth-child(3) { animation-delay: 0.06s; }
-.onb-lvl:nth-child(4) { animation-delay: 0.09s; }
-.onb-lvl:nth-child(5) { animation-delay: 0.12s; }
-
-.onb-lvl::before {
-  content: '';
-  position: absolute;
-  left: 25px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: color-mix(in srgb, var(--accent) 38%, transparent);
-}
-.onb-lvl:first-child::before { top: 50%; }
-.onb-lvl:last-child::before { bottom: 50%; }
-.onb-lvl__roundel {
-  position: absolute;
-  left: 13px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: grid;
-  place-items: center;
-  width: 27px;
-  height: 27px;
-  border-radius: var(--r-pill);
-  background: var(--bg-main);
-  border: 2.5px solid var(--accent);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.onb-lvl__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-  flex: 1;
-  min-width: 0;
-}
-.onb-lvl__head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
-  flex-wrap: wrap;
-}
-.onb-lvl__jp {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-lead);
-}
-.onb-lvl__load {
-  font-size: var(--fs-caption-xs);
-  color: var(--text-secondary);
-}
-.onb-lvl__sample {
-  font-family: var(--font-serif);
-  font-size: var(--fs-body);
-  color: var(--text-secondary);
-  letter-spacing: var(--tr-term);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: color 0.15s ease;
-}
-.onb-lvl__go {
-  flex: none;
-  color: var(--accent);
-  font-size: var(--fs-caption-xs);
-  opacity: 0;
-  transform: translateX(-4px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-.onb-lvl:focus-visible,
-.onb-lvl:hover { background: var(--bg-card-hover); }
-.onb-lvl:focus-visible .onb-lvl__roundel,
-.onb-lvl:hover .onb-lvl__roundel {
-  background: var(--accent);
-  color: var(--text-on-panel);
-}
-.onb-lvl:focus-visible .onb-lvl__sample,
-.onb-lvl:hover .onb-lvl__sample { color: var(--text-primary); }
-.onb-lvl:focus-visible .onb-lvl__go,
-.onb-lvl:hover .onb-lvl__go { opacity: 1; transform: none; }
-@media (max-width: 560px) {
-  .onb-lvl__sample { white-space: normal; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .onb-lvl__go { transition: opacity 0.15s ease; transform: none; }
-}
-
-/* ── Boarding: the two non-station answers ────────────────── */
-.onb-alts {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  /* Indented to the station rows' text column: these hang OFF the line. */
-  margin: 4px 22px 0 52px;
-}
-.onb-alt {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  padding: 13px 16px;
-  background: transparent;
-  border: 1px dashed var(--border);
-  border-radius: 6px;
-  text-align: left;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-.onb-alt:hover, .onb-alt:focus-visible {
-  background: var(--bg-card-hover);
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
-}
-.onb-alt__name { font-weight: 700; }
-/* The quiet second register the rest of the office already carries
-   (.onb-action, .onb-mode__btn): Latin leads, Japanese trails small
-   and secondary. The face is named explicitly — the button inherits
-   --font-display, whose stack has no Japanese coverage. */
-.onb-alt__name [lang="ja"] {
-  margin-left: var(--sp-3);
-  font-family: var(--font-jp);
-  font-weight: 500;
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
-.onb-alt__hint { color: var(--text-secondary); font-size: 0.8rem; }
-
-/* "Test me" opens a whole sub-flow, so it must not weigh the same as
-   the one-tap dashed answer above it: solid tinted border, a whisper
-   of fill, and the ▶ every "this leads onward" control in the app
-   already carries (see .route-stop__go). */
-.onb-alt--test {
-  position: relative;
-  border-style: solid;
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
-  background: color-mix(in srgb, var(--accent) 5%, transparent);
-  padding-right: 38px;
-}
-.onb-alt--test::after {
-  content: '▶';
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--accent);
-  font-size: 0.7rem;
-}
-
 /* ── Placement test ───────────────────────────────────────── */
 .onb-test { display: flex; flex-direction: column; gap: 14px; }
 .onb-test__meta {
@@ -3240,972 +2695,13 @@
 }
 .onb-test__error { text-align: center; color: var(--text-secondary); }
 
-/* Result: per-level scoreboard + the override group. */
-.onb-result__levels {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.onb-result__row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-}
-.onb-result__level { font-weight: 700; }
-.onb-result__score { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
-
-.onb-seg { display: flex; gap: 8px; }
-.onb-seg__btn {
-  flex: 1;
-  padding: 10px 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-.onb-seg__btn--reco::after {
-  content: '◈';
-  margin-left: 5px;
-  color: var(--accent2);
-}
-.onb-seg__btn--on {
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border-color: var(--bg-panel);
-}
-.onb-seg__btn:hover:not(.onb-seg__btn--on),
-.onb-seg__btn:focus-visible { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
-
-/* ── 行先 — the departure board scene (plan 063, phase E) ──
-   種別 and 路線図 merged: the board IS the pace control, priced
-   against the learner's date or patience, and the calling-at strip
-   below confirms the choice. The board panel is the app's 発車標
-   object — sumi ground, --text-on-panel inks, gold accents — so it
-   borrows the board family's own hanging shadow. */
-.onb-goal {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-5);
-}
-
-/* Destination chips */
-.onb-dest {
-  display: flex;
-  gap: var(--sp-3);
-  flex-wrap: wrap;
-}
-.onb-dest__chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-1);
-  min-width: 82px;
-  padding: var(--sp-4) var(--sp-3) var(--sp-3);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  cursor: pointer;
-  transition: border-color 0.15s ease, transform 0.15s ease;
-}
-.onb-dest__chip:focus-visible,
-.onb-dest__chip:hover { transform: translateY(-1px); border-color: var(--text-secondary); }
-.onb-dest__chip[aria-pressed="true"] { border-color: var(--accent); }
-.onb-dest__roundel {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--r-pill);
-  border: 2.5px solid var(--border);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
-}
-.onb-dest__chip--free .onb-dest__roundel {
-  border-style: dashed;
-  font-family: var(--font-jp);
-  font-size: var(--fs-sm);
-}
-.onb-dest__chip[aria-pressed="true"] .onb-dest__roundel {
-  border-color: var(--accent);
-  /* The btn-primary lesson, verbatim: raw shu at 4.33:1 does not
-     carry the kinari — the fill deepens toward the panel ink
-     (DESIGN.md, "The primary button"); guard 4 holds the pair. */
-  background: color-mix(in srgb, var(--accent) 70%, var(--bg-panel));
-  color: var(--text-on-panel);
-}
-.onb-dest__jp {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  font-size: var(--fs-sm);
-}
-.onb-dest__load {
-  font-size: var(--fs-caption-xs);
-  color: var(--text-secondary);
-}
-.onb-dest__chip--free { border-style: dashed; background: none; }
-
-/* 期日 / 種別 mode toggle */
-.onb-mode {
-  display: inline-flex;
-  align-self: flex-start;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  overflow: hidden;
-}
-.onb-mode__btn {
-  padding: var(--sp-2) var(--sp-5);
-  background: none;
-  border: none;
-  color: var(--text-primary);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-}
-.onb-mode__btn + .onb-mode__btn { border-left: 1px solid var(--surface-line); }
-.onb-mode__btn[aria-pressed="true"] {
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-}
-.onb-mode__btn [lang="ja"] {
-  font-family: var(--font-jp);
-  font-weight: 500;
-  opacity: 0.75;
-  margin-right: var(--sp-2);
-}
-
-/* The months dial (date mode) */
-.onb-months {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  flex-wrap: wrap;
-}
-.onb-months__label {
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  color: var(--text-secondary);
-}
-.onb-months__chips {
-  display: flex;
-  gap: var(--sp-2);
-  flex-wrap: wrap;
-}
-.onb-months__chip {
-  padding: var(--sp-1) var(--sp-4);
-  background: none;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  color: var(--text-primary);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-.onb-months__chip:focus-visible,
-.onb-months__chip:hover { border-color: var(--text-secondary); }
-.onb-months__chip[aria-pressed="true"] {
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border-color: var(--bg-panel);
-}
-.onb-months__dial {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  flex: 1;
-  min-width: 220px;
-}
-.onb-months__dial .dial {
-  --dial-ink: var(--accent);
-  --dial-ink-hover: color-mix(in srgb, var(--accent) 70%, var(--text-primary));
-  flex: 1;
-  width: auto;
-  min-width: 140px;
-}
-.onb-months__dial output {
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  font-variant-numeric: tabular-nums;
-  min-width: 110px;
-  text-align: right;
-}
-
-/* The board itself — a 発車標 */
-.onb-board {
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border-radius: var(--r-panel);
-  padding: var(--sp-5) var(--sp-5) var(--sp-4);
-  box-shadow: var(--elev-board);
-}
-.onb-board__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--sp-4);
-  padding-bottom: var(--sp-3);
-  margin-bottom: var(--sp-1);
-  border-bottom: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
-}
-.onb-board__title {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: var(--fs-body);
-}
-.onb-board__cap {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-caption-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  color: var(--text-on-panel-soft);
-  margin-left: var(--sp-3);
-}
-.onb-board__clock {
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--accent2);
-}
-.onb-board__clock [lang="ja"] { font-family: var(--font-jp); }
-.onb-board__cols,
-.onb-board__row {
-  display: grid;
-  grid-template-columns: 1.6fr 0.9fr 1.2fr 0.8fr;
-  gap: var(--sp-3);
-  align-items: center;
-}
-.onb-board__cols {
-  padding: var(--sp-2) var(--sp-3) var(--sp-1);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  color: var(--text-on-panel-soft);
-}
-.onb-board__row {
-  width: 100%;
-  padding: var(--sp-3);
-  background: none;
-  border: 1px solid transparent;
-  border-radius: var(--r-plate);
-  color: var(--text-on-panel);
-  text-align: left;
-  transition: background 0.15s ease, border-color 0.15s ease;
-  /* The services arrive down the board, the way a departure board
-     fills in — the app's shared stagger again (DESIGN.md, Motion).
-     The head and the column captions are children 1 and 2, so the
-     first service is 3; the delays stop at the sixth row because the
-     board never runs more services than that. */
-  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
-}
-.onb-board__row:nth-child(3) { animation-delay: 0.03s; }
-.onb-board__row:nth-child(4) { animation-delay: 0.06s; }
-.onb-board__row:nth-child(5) { animation-delay: 0.09s; }
-.onb-board__row:nth-child(6) { animation-delay: 0.12s; }
-.onb-board__row:nth-child(7) { animation-delay: 0.15s; }
-.onb-board__row:nth-child(8) { animation-delay: 0.18s; }
-.onb-board__row[aria-pressed] { cursor: pointer; }
-.onb-board__row[aria-pressed]:focus-visible,
-.onb-board__row[aria-pressed]:hover {
-  background: color-mix(in srgb, var(--text-on-panel) 6%, transparent);
-}
-.onb-board__row[aria-pressed="true"] { border-color: var(--accent2); }
-.onb-board__row--late { opacity: 0.42; }
-.onb-board__row--charter {
-  border-top: 1px dashed color-mix(in srgb, var(--text-on-panel) 20%, transparent);
-  border-radius: 0 0 var(--r-plate) var(--r-plate);
-}
-.onb-board__row--charter[data-selected] { border-color: var(--accent2); border-radius: var(--r-plate); }
-.onb-board__row--yours {
-  border: 1px solid var(--accent2);
-  border-radius: var(--r-plate);
-  background: color-mix(in srgb, var(--accent2) 7%, transparent);
-}
-.onb-board__svc {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-  min-width: 0;
-}
-.onb-board__svc-name {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
-  flex-wrap: wrap;
-  row-gap: var(--sp-1);
-  font-weight: 700;
-}
-.onb-board__svc-name [lang="ja"] {
-  font-family: var(--font-jp);
-  font-size: var(--fs-lead);
-  font-weight: 700;
-  white-space: nowrap;
-}
-.onb-board__en {
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  color: var(--text-on-panel-soft);
-}
-.onb-board__reco {
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption-xs);
-  color: var(--accent2);
-  border: 1px solid var(--accent2);
-  border-radius: var(--r-plate);
-  padding: 0 var(--sp-2);
-  transform: translateY(-2px);
-}
-.onb-board__pat { width: 96px; height: 11px; display: block; }
-.onb-board__pat-rail { stroke: color-mix(in srgb, var(--text-on-panel) 30%, transparent); stroke-width: 2; }
-.onb-board__pat-rail--dash { stroke-dasharray: 4 3; }
-.onb-board__pat-stop { fill: var(--text-on-panel); }
-.onb-board__pat-skip { fill: color-mix(in srgb, var(--text-on-panel) 28%, transparent); }
-/* The charter dial rides the sumi board, so its rail and the hair of
-   ground around its thumb come from the panel family, never the
-   ambient one (DESIGN.md: the ambient inks flip, the sumi inks do
-   not). */
-.onb-board__dial {
-  --dial-rail: color-mix(in srgb, var(--text-on-panel) 24%, transparent);
-  --dial-ink: var(--accent2);
-  --dial-ink-hover: color-mix(in srgb, var(--accent2) 60%, var(--text-on-panel));
-  --dial-edge: var(--bg-panel);
-  width: 96px;
-}
-.onb-board__pace {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.onb-board__per {
-  font-weight: 500;
-  font-size: var(--fs-caption);
-  color: var(--text-on-panel-soft);
-}
-.onb-board__min {
-  font-size: var(--fs-caption-xs);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-on-panel-soft);
-}
-.onb-board__eta {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-/* State ink, not raw enji — the pigment alone is 2.6:1 on sumi. */
-.onb-board__row--void .onb-board__pace,
-.onb-board__row--void .onb-board__eta {
-  color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel));
-}
-.onb-board__late {
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption);
-  color: var(--warning);
-  margin-left: var(--sp-2);
-}
-.onb-board__dur {
-  font-size: var(--fs-sm);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-on-panel-soft);
-}
-.onb-board__notice {
-  margin-top: var(--sp-2);
-  padding: var(--sp-3) var(--sp-3) var(--sp-2);
-  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
-.onb-board__notice-line {
-  margin: 0;
-  font-size: var(--fs-sm);
-  color: var(--warning);
-}
-.onb-board__notice-line [lang="ja"] {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  margin-right: var(--sp-2);
-}
-.onb-board__fixes {
-  display: flex;
-  gap: var(--sp-3);
-  flex-wrap: wrap;
-}
-.onb-board__fix {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sp-1);
-  padding: var(--sp-2) var(--sp-4);
-  background: none;
-  border: 1px solid color-mix(in srgb, var(--text-on-panel) 30%, transparent);
-  border-radius: var(--r-card);
-  color: var(--text-on-panel-soft);
-  font-size: var(--fs-caption);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
-}
-.onb-board__fix:focus-visible,
-.onb-board__fix:hover { border-color: var(--accent2); color: var(--text-on-panel); }
-.onb-board__fix strong {
-  font-size: var(--fs-sm);
-  color: var(--text-on-panel);
-}
-
-/* ── 停車駅 — the calling-at strip ─────────────────────────── */
-.onb-call {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-  padding: var(--sp-4) var(--sp-5) var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  /* The strip confirms the choice the board just priced, so it arrives
-     after it rather than being there all along. */
-  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
-}
-@media (prefers-reduced-motion: reduce) {
-  .onb-board__row,
-  .onb-call { animation: none; }
-}
-.onb-call__label {
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  color: var(--text-secondary);
-}
-.onb-call__label [lang="ja"] {
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption);
-  text-transform: none;
-  letter-spacing: 0.06em;
-  margin-right: var(--sp-3);
-}
-.onb-call__line {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  padding: var(--sp-1) var(--sp-2) 0;
-}
-.onb-call__line::before {
-  content: '';
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 9px;
-  height: 3px;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--accent) 40%, transparent);
-}
-.onb-call__stop {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-1);
-  min-width: 0;
-}
-.onb-call__dot {
-  width: 11px;
-  height: 11px;
-  border-radius: var(--r-pill);
-  background: var(--bg-main);
-  border: 2.5px solid var(--accent);
-}
-.onb-call__dot--now { background: var(--accent); }
-.onb-call__stop--goal .onb-call__dot {
-  background: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent2) 40%, transparent);
-}
-.onb-call__lvl {
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  line-height: 1.2;
-}
-.onb-call__jp {
-  font-family: var(--font-jp);
-  font-weight: 500;
-  font-size: var(--fs-caption);
-  color: var(--text-secondary);
-  margin-left: var(--sp-1);
-}
-.onb-call__when {
-  font-size: var(--fs-caption-xs);
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-/* The honest line under the board */
-.onb-goal__hint {
-  margin: 0;
-  padding-top: var(--sp-3);
-  border-top: 1px dashed var(--border);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-/* The terms the sentence is actually a contract about — the pace, the
-   count, the destination, the date — lifted out of the soft ink the
-   rest of the line wears, at tabular figures (DESIGN.md, Figures). The
-   <strong> comes from the copy's own **…** runs; see components/ui/
-   Emphasized.jsx for why the marker lives in the string table. Each of
-   these takes the ink of the ground it sits on: paper for the office's
-   hint and the vow, sumi for the two feet that print on a panel. */
-.onb-goal__hint strong {
-  color: var(--text-primary);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-@media (max-width: 560px) {
-  .onb-board__cols,
-  .onb-board__row { grid-template-columns: 1.5fr 0.9fr 1.2fr; }
-  .onb-board__col-dur,
-  .onb-board__dur { display: none; }
-  .onb-call__when { display: none; }
-}
-
-/* ── 案内 — the promise (plan 063, phase F) ─────────────────
-   The learner's own line on a sumi panel, drawn by the SAME
-   GhostTrack the pass back uses (.jour-track — its inks read
-   --text-on-panel and its state colour reads --jour-st, both provided
-   here). The demos are gone; one quiet roundel row names the lines. */
-.onb-promise {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-  padding: var(--sp-6) var(--sp-6) var(--sp-5);
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border-radius: var(--r-panel);
-  box-shadow: var(--elev-board);
-}
-.onb-promise__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--sp-4);
-  flex-wrap: wrap;
-}
-.onb-promise__title,
-.onb-promise__status {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
-}
-.onb-promise__title b {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: var(--fs-body);
-}
-.onb-promise__status b {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: var(--fs-lead);
-  color: var(--jour-st-ink, var(--warning));
-}
-.onb-promise__cap {
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  color: var(--text-on-panel-soft);
-}
-.onb-promise__foot {
-  margin: 0;
-  padding-top: var(--sp-3);
-  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-  font-size: var(--fs-sm);
-  line-height: 1.6;
-  color: var(--text-on-panel-soft);
-}
-.onb-promise__foot strong {
-  color: var(--text-on-panel);
-  font-variant-numeric: tabular-nums;
-}
-
-/* The four lines, named — rings in their own pigments, nothing more. */
-.onb-lines {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-4);
-  flex-wrap: wrap;
-}
-.onb-lines__note {
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
-/* The same object the profile's ledger draws (.pf-line__roundel), so
-   it takes the same ink: the raw line pigment carries the RING, but as
-   TEXT it has to be mixed toward the ambient ink to clear the floor —
-   the three drawn here measured 3.27, 2.62 and 3.71:1 wearing their
-   pigment neat, and 藤 (--line-analysis) was the worst of them. The
-   60% mix is the ledger's, already measured by Guard 4. */
-.onb-lines__roundel {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--r-pill);
-  border: 2.5px solid var(--row-color, var(--accent));
-  color: color-mix(in srgb, var(--row-color, var(--accent)) 60%, var(--text-primary));
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-}
-
-/* ── 定期券申込書 — the application form (phase F) ───────────
-   Token-inked on --surface: right in dark, naturally papery in light.
-   The chosen departure chip is a ring and a whisper of tint — never a
-   fill. The empty 印 box waits for the printed pass's seal. */
-.onb-form {
-  position: relative;
-  max-width: 460px;
-  padding: var(--sp-5) var(--sp-6) var(--sp-5);
-  background: var(--surface);
-  color: var(--text-primary);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-plate);
-  box-shadow: var(--elev-hang);
-}
-.onb-form::before {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
-  border-radius: 2px;
-  pointer-events: none;
-}
-.onb-form__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--sp-4);
-  margin-bottom: var(--sp-4);
-}
-.onb-form__title {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-lead);
-  letter-spacing: 0.08em;
-}
-.onb-form__latin {
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.onb-form__row {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-4);
-  /* Right gutter = --sp-9: clears the 40px 印 box at its 18px inset
-     (the dashed ring may kiss the gutter's edge; content never does). */
-  padding: var(--sp-3) var(--sp-9) var(--sp-3) 0;
-}
-.onb-form__row + .onb-form__row {
-  border-top: 1px solid color-mix(in srgb, var(--text-primary) 11%, transparent);
-}
-.onb-form__row--stack {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sp-3);
-}
-.onb-form__k {
-  min-width: 108px;
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.onb-form__k [lang="ja"] {
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption);
-  letter-spacing: 0.06em;
-  text-transform: none;
-  margin-right: var(--sp-2);
-}
-.onb-form__v {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-/* The 印 diverges from the mockup ON PURPOSE, and a concept diff will
-   flag it as drift every time unless it reads this. The canvas inks
-   this seal with alpha — `rgba(156,52,40,0.65)` on the ring and 0.55
-   on the dash — and DESIGN.md forbids exactly that: "a mix toward
-   transparent costs contrast in BOTH themes … reach for a dimmer
-   token, not a lower alpha". So the ink mixes toward --text-primary
-   instead, which is the same pigment at a legible strength. Measured
-   against the canvas's own values on this ground: 3.34:1 vs 1.57:1 in
-   dark, 7.31:1 vs 2.85:1 in light. The rule outranks the picture
-   (DESIGN.md's own words), so the picture is what moved. */
-.onb-form__seal {
-  position: absolute;
-  right: 18px;
-  bottom: 14px;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--r-pill);
-  border: 2px dashed color-mix(in srgb, var(--danger) 65%, transparent);
-  display: grid;
-  place-items: center;
-  font-family: var(--font-serif);
-  font-size: var(--fs-caption);
-  color: color-mix(in srgb, var(--danger) 75%, var(--text-primary));
-}
-.onb-form__chips {
-  display: flex;
-  gap: var(--sp-2);
-  flex-wrap: wrap;
-}
-.onb-form__chip {
-  /* The kanji is the quiet half of the pair while the chip is
-     unchosen; once it IS the chosen hour it stops being an aside, and
-     the secondary ink does not carry on the accent wash the chosen
-     state paints (4.38:1, measured). Named on the block and read by
-     the child, per DESIGN.md — a `[aria-pressed="true"] [lang="ja"]`
-     descendant rule would invert specificity against every other
-     `.x [lang="ja"]` rule below it in the sheet. The mockup ends its
-     own departure chips on this same line. */
-  --chip-jp-ink: var(--text-secondary);
-  padding: var(--sp-1) var(--sp-4);
-  background: none;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  color: var(--text-primary);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-.onb-form__chip [lang="ja"] {
-  font-family: var(--font-jp);
-  font-weight: 500;
-  color: var(--chip-jp-ink);
-  margin-right: var(--sp-1);
-}
-.onb-form__chip:disabled { opacity: 0.45; cursor: default; }
-.onb-form__chip:focus-visible,
-.onb-form__chip:hover:not(:disabled) { border-color: var(--text-secondary); }
-.onb-form__chip[aria-pressed="true"] {
-  --chip-jp-ink: var(--text-primary);
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 9%, transparent);
-}
-
-/* ── 定期券 — the printed pass (phase F) ─────────────────────
-   Route, holder + departure, the service's stopping pattern, the
-   contract grid with the gold 有効期限, the 駅長 seal stamping in
-   after the clip-path print. */
-@keyframes onb-pass-print {
-  from { clip-path: inset(0 0 100% 0); }
-  to   { clip-path: inset(0 0 0 0); }
-}
-@keyframes onb-seal-in {
-  0%   { transform: rotate(-30deg) scale(2); opacity: 0; }
-  60%  { transform: rotate(9deg) scale(0.95); opacity: 1; }
-  100% { transform: rotate(9deg) scale(1); }
-}
-.onb-pass {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-  max-width: 460px;
-  width: 100%;
-  align-self: center;
-  padding: var(--sp-6) var(--sp-6) var(--sp-5);
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border-radius: var(--r-identity);
-  box-shadow: var(--elev-hang);
-  overflow: hidden;
-  animation: onb-pass-print 0.5s ease-out backwards;
-}
-.onb-pass__head {
-  display: flex;
-  font-family: var(--font-jp);
-  justify-content: space-between;
-  color: var(--text-on-panel-soft);
-  /* The caption rung, so the brand line sits a clear step below the
-     route beneath it. The 0.12em tracking it carried is on none of the
-     four rungs, and is dropped rather than swapped: this is a
-     space-between row, 日本語駅 is right-flush, and a tracked flush line
-     needs a matching text-indent to cancel the trailing letter. */
-  font-size: var(--fs-caption);
-}
-.onb-pass__route {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-4);
-  font-family: var(--font-serif);
-  font-size: var(--fs-heading);
-  font-weight: 700;
-  line-height: 1.1;
-}
-.onb-pass__arrow {
-  color: var(--accent);
-  font-size: var(--fs-body);
-}
-/* The holder's name is a NAME, and DESIGN.md assigns names the serif —
-   it says so about this exact object ("the holder's name on the pass").
-   The pass this one prints into on the profile already sets it that way
-   (.pass__holder .profile-card__name); the office's printed pass was
-   the odd one out. The departure line beside it stays on the display
-   face, which is where figures belong. */
-.onb-pass__holder {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-lead);
-  overflow-wrap: anywhere;
-}
-.onb-pass__departs {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: var(--fs-sm);
-  color: var(--text-on-panel-soft);
-}
-/* The pattern is drawn by the board's own <svg>, which carries the
-   board's 96px width — so this rule sized a wrapper around a diagram
-   that stayed 96px and the printed pass never showed the 140px it
-   asks for. The width has to reach the drawing. */
-.onb-pass__pattern { width: 140px; }
-.onb-pass__pattern .onb-board__pat { width: 100%; }
-.onb-pass__grid {
-  display: flex;
-  gap: var(--sp-6);
-  flex-wrap: wrap;
-  padding-top: var(--sp-4);
-  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
-}
-.onb-pass__cell {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-}
-.onb-pass__k {
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption-xs);
-  color: var(--text-on-panel-soft);
-}
-.onb-pass__v {
-  font-weight: 700;
-  font-size: var(--fs-body);
-  font-variant-numeric: tabular-nums;
-}
-.onb-pass__v [lang="ja"] { font-family: var(--font-jp); }
-.onb-pass__v--gold { color: var(--accent2); }
-.onb-pass__seal {
-  position: absolute;
-  right: 20px;
-  top: 48px;
-  width: 46px;
-  height: 46px;
-  border-radius: var(--r-pill);
-  border: 2.5px solid var(--accent);
-  color: var(--accent);
-  display: grid;
-  place-items: center;
-  text-align: center;
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-caption-xs);
-  line-height: 1.25;
-  transform: rotate(9deg);
-  animation: onb-seal-in 0.45s cubic-bezier(0.22, 0.68, 0.32, 1) 0.55s backwards;
-}
-/* The contactless arcs (see PassWave.jsx / .pass__wave) in the pass's
-   corner — the same mark the gate reader is about to answer. The
-   compound selector outranks .pass__wave's own position:relative,
-   which sits later in the sheet. */
-.onb-pass .onb-pass__wave {
-  position: absolute;
-  right: 18px;
-  bottom: 14px;
-}
-.onb-action--board { align-self: center; }
-
-/* ── The mutual vow ──────────────────────────────────────────
-   Two lines, both binding: あなた promise the pace, 窓口 promises the
-   honest map. */
-.onb-vow {
-  max-width: 460px;
-  width: 100%;
-  align-self: center;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  overflow: hidden;
-}
-.onb-vow__row {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-4);
-  padding: var(--sp-3) var(--sp-5);
-}
-.onb-vow__row + .onb-vow__row {
-  border-top: 1px solid var(--surface-line);
-}
-.onb-vow__who {
-  flex: none;
-  width: 52px;
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  /* あなた and 窓口 name the two parties of the vow — they are the
-     sentence's subject, not a mark, and the app's other seals and
-     stamps are aria-hidden precisely because they are the opposite.
-     Neat 朱 measured 2.97:1 here, so it takes the same mix toward the
-     ambient ink that the profile's ledger roundels take. */
-  color: color-mix(in srgb, var(--accent) 60%, var(--text-primary));
-}
-.onb-vow__what {
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
-.onb-vow__what strong {
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .onb-pass { animation: none; }
-  .onb-pass__seal { animation: none; }
-}
-
 /* ── Shared visual language ─────────────────────────────────
    Two devices, one accent, defined once and reused wherever the
    onboarding's vocabulary appears:
    - .onb-reco-badge: the gold "recommended / achieved" pill for
-     card-shaped contexts (PaceStep's 快速 card, NextService's
-     target-met mark). Same --accent2 as .onb-seg__btn--reco's ◈,
-     so one colour keeps meaning one concept at two sizes.
+     card-shaped contexts (the Today strip's target-met mark,
+     components/station/PassStrip.jsx). The boarding's own tag
+     (.brd-tag) is the same concept drawn as a ring, per the canvas.
    - .settings-card--onb: the identity frame Settings' 学習 card
      wears — the border-left device the retired tour cards minted, in
      --accent (shu-iro) because Settings, like the office, is about
@@ -4383,23 +2879,16 @@
 
 /* ── Responsive & reduced motion ──────────────────────────── */
 @media (max-width: 560px) {
-  .onb-paces { grid-template-columns: 1fr; }
-  .onb-alts { margin-left: 22px; }
   .onb-step__actions { justify-content: stretch; }
   .onb-step__actions .onb-action { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .onb-header,
-  .onb-step,
   .onb-step__actions .onb-action {
     animation: arrive-soft 0.2s linear backwards;
   }
   .onb-action:hover:not(:disabled),
-  .onb-action:focus-visible,
-  .onb-dest__chip:hover,
-  .onb-dest__chip:focus-visible { transform: none; }
-  .onb-line__stamp { transition: none; }
+.onb-action:focus-visible { transform: none; }
 }
 
 /* ── Design system, light + dark ──────────────────────────────
@@ -4910,9 +3399,9 @@ body { -webkit-tap-highlight-color: transparent; }
 
    Without this, the inherited base was the UA's 16px at `normal`
    leading, which is not a rung of the scale at all. It is what
-   .onb-step__body was rendering at — that rule is ported from the
-   canvas verbatim and sets line-height but no size, because in the
-   canvas it inherited --fs-body from here. Same for .quiz-done__sub,
+   the old office's step body was rendering at — that rule was ported
+   from the canvas verbatim and set line-height but no size, because
+   in the canvas it inherited --fs-body from here. Same for .quiz-done__sub,
    and .jour-rev__none was wrapping at `normal` for the same reason.
 
    line-height has no token — the scale covers size, space, radius and
@@ -6805,12 +5294,10 @@ textarea:focus-visible {
    magnetic stripe when the ground went dark: a charcoal stripe on a
    charcoal card said nothing, and a card's realism lives in its
    sheen, not its stripe (the drawer stub and the reissue pass keep
-   theirs; their grounds still show it). The office's printed pass
-   (.onb-pass) is the same object on the same sumi ground, so it takes
-   the same sheen; it already sets position:relative and
-   overflow:hidden, so it needs nothing else. */
-.pass::after,
-.onb-pass::after {
+   theirs; their grounds still show it). The boarding's printed pass
+   (plan 075) is this same object on the same sumi ground, so it takes
+   the same sheen. */
+.pass::after {
   content: '';
   position: absolute;
   inset: -40% 55% -40% -20%;
@@ -6922,33 +5409,8 @@ textarea:focus-visible {
      would print sumi-dark on this card. */
   color: inherit;
 }
-/* The 氏名 blank — the office's copy of the override beside it. Sits
-   interleaved with .pass__holder's rules rather than after them: the
-   two families have identical selector shapes, so any block placement
-   puts one of mine ahead of a twin of higher specificity. Same reason
-   the pass's own copy lives here.
-
-   EditableUsername's rest state is the ink ON the dashed rule, the way
-   the mockup's <input> was: .profile-card__name--editable's `font:
-   inherit` resets the base rule's size and weight, so the form's one
-   fill-in-the-blank printed at the body rung in 400 next to a 700
-   uppercase label, on no rule at all. The radius is cleared because
-   the bare button rule's would round the ends of the rule. */
-.onb-form .profile-card__name {
-  font-size: var(--fs-lead);
-  font-weight: 700;
-  border-radius: 0;
-  border-bottom: 1px dashed color-mix(in srgb, var(--text-primary) 35%, transparent);
-  padding-bottom: var(--sp-1);
-}
-.onb-form .profile-card__name:hover,
-.onb-form .profile-card__name:focus-visible {
-  border-bottom-color: var(--accent);
-}
 .pass__holder .profile-card__name .profile-card__edit-glyph { opacity: 0.45; }
-.onb-form .profile-card__name .profile-card__edit-glyph { opacity: 0.45; }
 .pass__holder .profile-card__name:hover .profile-card__edit-glyph { opacity: 1; }
-.onb-form .profile-card__name:hover .profile-card__edit-glyph { opacity: 1; }
 .pass__avatar-wrap { position: relative; width: 76px; height: 76px; flex-shrink: 0; }
 /* Turned a quarter back so the arc climbs from twelve o'clock, the way
    every ring gauge is read; the SVG's own zero is at three. */
@@ -10079,23 +8541,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   min-height: 1em;
 }
 
-/* The reveal prompt is a caption, and the office sets it in the
-   caption register the mockup drew: display face, 700, uppercase,
-   tracked. Scoped to the office's own card so the study screens are
-   byte-for-byte unaffected — the shared base rule is still a 12px
-   literal in body register, one of design-scale.json's
-   allowed-but-owed entries, and retokenising it belongs with that
-   sweep, not here. */
-.onb-ride__card .flashcard__hint {
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  /* A tracked line on a left-flush axis cancels the trailing letter's
-     tracking with an equal indent (DESIGN.md, Tracking). */
-  text-indent: var(--tr-caption);
-}
-
 /* Houses the sound-replay and dictionary-lookup buttons, pinned to
    the top-left corner of the card they belong to (Flashcard's own
    `.flashcard`, or the plain `.prompt-card` in MCQ/write modes —
@@ -10788,10 +9233,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   opacity: 1;
   transition: opacity 0.16s ease;
 }
-/* Inside 試乗's demo (plan 063, phase D) the bar gets the card's
-   column instead of shrink-wrapping its labels. Lives here, after
-   the base rule, for the no-descending-specificity guard. */
-.onb-ride .rating-bar { width: min(480px, 100%); }
 
 /* Held, not hidden. RatingBar used to return null before the reveal, so
    the bar appeared out of nowhere -- and because .stage is a centred
@@ -10815,19 +9256,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
      the acknowledgement, so it has to be on screen long enough to be
      seen. Matched to PRESSED_MS in RatingBar.jsx. */
   transition: opacity 0.26s ease 0.16s, visibility 0s linear 0.42s;
-}
-/* …and arrives, rather than merely appearing. The mockup MOUNTS the
-   bar on the flip, so it inherits the office's arrival; holding its
-   space above (which kills a 34px jump) costs that entrance, and the
-   sibling it is drawn with — the won banner — kept it. Given back on
-   the CLASS change instead of on mount: dropping --idle newly matches
-   this rule, so it fires on the reveal frame and the reserved box is
-   untouched. Scoped to 試乗; the study screens' bar is unchanged. */
-.onb-ride .rating-bar:not(.rating-bar--idle) {
-  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
-}
-@media (prefers-reduced-motion: reduce) {
-  .onb-ride .rating-bar:not(.rating-bar--idle) { animation: none; }
 }
 
 /* ── the rating bar ────────────────────────────────
@@ -11021,327 +9449,11 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   }
 }
 
-/* ── Landing screen ───────────────────────────────────────────
-   The front door for signed-out visitors, shown once before
-   AuthScreen. Reuses the station's own vocabulary — sumi hero with
-   the stamped glyph, the shoji-lattice grid, the seal-red section
-   rule — so it reads as this app's own front page rather than a
-   bolted-on marketing site. The feature grid and pros list are
-   plain divs, not buttons: there's no session yet, so no Router is
-   mounted for these paths to navigate to. Every CTA on the page
-   (top-bar link, hero button, closing button) calls the same
-   onContinue handoff into AuthScreen. */
-.landing-screen {
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  padding-top: var(--safe-top); /* standalone on iOS: under the status bar */
-}
-
-.landing-topbar {
-  border-bottom: 1px solid var(--border);
-}
-
-.landing-topbar__inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 18px;
-  padding-bottom: 18px;
-}
-
-.landing-topbar__brand {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.landing-topbar__glyph {
-  font-family: var(--font-jp);
-  color: var(--accent);
-  font-size: 1.35rem;
-  line-height: 1;
-}
-
-.landing-topbar__name {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-
-.landing-topbar__signin {
-  background: var(--chip-bg);
-  color: var(--text-primary);
-  font-size: 13px;
-}
-
-/* Hero — a sumi panel with a stamped glyph, sized up and given its
-   own tagline + CTA since there's no IC card or settings gear to
-   share the row with yet. */
-.landing-hero {
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  text-align: center;
-  padding: 100px 24px 92px;
-}
-
-.landing-hero__glyph {
-  position: relative;
-  display: inline-block;
-  font-family: var(--font-jp);
-  font-size: 4.6rem;
-  color: var(--accent);
-  line-height: 1;
-  padding: 6px 18px;
-}
-.landing-hero__glyph::after {
-  content: '';
-  position: absolute;
-  inset: -6px 2px;
-  border: 1.5px solid var(--accent);
-  transform: rotate(-2deg);
-  opacity: 0.65;
-}
-
-.landing-hero__title {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.9rem;
-  letter-spacing: 0.04em;
-  margin-top: 24px;
-}
-
-.landing-hero__tagline {
-  color: var(--text-on-panel-soft);
-  font-size: 1.05rem;
-  line-height: 1.75;
-  max-width: 560px;
-  margin: 20px auto 0;
-}
-
-.landing-hero__cta {
-  background: var(--accent);
-  color: var(--text-on-panel);
-  font-size: 15px;
-  padding: 15px 38px;
-  margin-top: 32px;
-}
-
-.landing-main {
-  flex: 1;
-  padding: 80px 24px;
-}
-
-.landing-section {
-  margin-bottom: 76px;
-}
-.landing-section:last-child { margin-bottom: 0; }
-
-.landing-section__intro {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.7;
-  max-width: 640px;
-  margin-bottom: 32px;
-}
-
-/* Feature grid — the shoji-lattice technique (1px gap doubling as a
-   hairline) the app uses for every card grid; see .pf-ledger. This
-   one is a shop window, so it stays a grid rather than becoming the
-   departure board the signed-in home screen is. */
-.landing-feature-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-}
-
-.landing-feature {
-  background: var(--bg-card);
-  padding: 28px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.landing-feature__glyph {
-  font-family: var(--font-jp);
-  font-size: 1.7rem;
-  line-height: 1;
-  color: color-mix(in srgb, var(--row-color, var(--accent)) 65%, var(--text-primary));
-}
-
-.landing-feature__title {
-  margin: 0;
-  color: var(--text-primary);
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.02rem;
-}
-
-.landing-feature__desc {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  line-height: 1.6;
-  white-space: pre-line;
-}
-
-/* Pros list — same editorial hairline-row language as .choice-row,
-   simplified: nothing here is clickable, so no hover/selected state,
-   just a fixed glyph column standing in for the numbered marker. */
-.landing-pros-list {
-  list-style: none;
-  border-top: 1px solid var(--border);
-}
-
-.landing-pros-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 24px;
-  padding: 26px 6px;
-  border-bottom: 1px solid var(--border);
-}
-
-.landing-pros-item__glyph {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 1.05rem;
-  min-width: 56px;
-  padding-top: 3px;
-}
-
-.landing-pros-item__body {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.landing-pros-item__title {
-  color: var(--text-primary);
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-}
-
-.landing-pros-item__desc {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  line-height: 1.65;
-  max-width: 560px;
-}
-
-.landing-tech {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.landing-tech__chip {
-  background: var(--chip-bg);
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 9px 20px;
-  border-radius: 999px;
-}
-
-.landing-creator {
-  border-left: 3px solid var(--accent);
-  max-width: 640px;
-}
-
-.landing-creator__body {
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  line-height: 1.8;
-}
-
-.landing-creator__name {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  margin-top: 16px;
-  font-family: var(--font-display);
-  letter-spacing: 0.02em;
-}
-
-.landing-footer {
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  text-align: center;
-  padding: 68px 24px 60px;
-}
-
-.landing-footer__title {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.3rem;
-}
-
-.landing-footer__tip {
-  color: var(--text-on-panel-soft);
-  font-size: 0.8rem;
-  margin-top: 24px;
-}
-/* The policy link under the tip: a quiet line, not a button — the
-   footer already carries the one call to action. */
-.landing-footer__legal {
-  display: inline-block;
-  margin-top: var(--sp-4);
-  font-size: var(--fs-caption);
-  color: var(--text-on-panel-soft); /* the footer is sumi */
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-
-/* ── Auth screen ──────────────────────────────────────────── */
-.auth-screen {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  padding-top: var(--safe-top);
-}
-
-/* Icon-only now (ChevronIcon SVG, not the '←' text glyph) — centered
-   square padding instead of the wider text-label padding. */
-.auth-back-btn {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  background: var(--chip-bg);
-  color: var(--text-primary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.auth-header__glyph,
 .app-loading__sign {
   font-family: var(--font-jp);
   font-size: 4rem;
   color: var(--accent);
   line-height: 1;
-}
-
-.auth-header__title {
-  margin: 8px 0 0;
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.25rem;
 }
 
 /* ── 待合室 — the boot screen (plan 067) ─────────────────────
@@ -11380,54 +9492,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   font-weight: 700;
   letter-spacing: var(--tr-term);
 }
-
-.auth-card {
-  width: 100%;
-  max-width: 400px;
-}
-
-.auth-mode-toggle {
-  display: flex;
-  margin-bottom: 24px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.auth-mode-toggle__btn {
-  flex: 1;
-  border-radius: 0;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  font-size: 14px;
-}
-.auth-mode-toggle__btn--active { background: var(--accent); }
-
-.auth-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* .field carries the box, the ink, the placeholder and the 44px floor
-   now; the two literals that used to live here (12px 16px, 15px) were
-   this field's own invention and are gone with them. The class stays
-   only as a hook -- .auth-fields spaces them. */
-
-.auth-message {
-  font-size: 13px;
-  margin-top: 12px;
-}
-.auth-message--error   { color: var(--danger); }
-.auth-message--success { color: var(--success); }
-
-.auth-submit {
-  background: var(--accent);
-  color: var(--text-on-panel);
-  width: 100%;
-  margin-top: 20px;
-  font-size: 15px;
-}
-.auth-submit:disabled { opacity: 0.7; }
 
 /* ── Drawing canvas ───────────────────────────────────────── */
 .canvas-wrap {
@@ -14172,27 +12236,12 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   }
 }
 
-@media (max-width: 768px) {
-  .landing-feature-grid { grid-template-columns: repeat(2, 1fr); }
-
-}
-
-/* Third tier between 768px tablet and 560px phone, for the landing
-   page / explorer / board-row / profile-card group specifically:
-   .landing-feature-grid needs a step down from 2 columns before it
-   goes to 1 (see the 768px block above), and .explorer__control's
+/* Third tier between 768px tablet and 560px phone, for the explorer /
+   board-row / profile-card group specifically: .explorer__control's
    row-of-chips layout (below) genuinely breaks — six lines of chrome
    for three controls — if it waits until 560px to stack. Collapsing
    this into 560px would reintroduce exactly that. */
 @media (max-width: 640px) {
-  .landing-hero { padding: 72px 20px 60px; }
-  .landing-hero__glyph { font-size: 3.6rem; }
-  .landing-hero__title { font-size: 1.6rem; }
-  .landing-main { padding: 56px 16px; }
-  .landing-section { margin-bottom: 56px; }
-  .landing-feature-grid { grid-template-columns: 1fr; }
-  .landing-pros-item { gap: 14px; padding: 22px 4px; }
-  .landing-pros-item__glyph { min-width: 40px; }
   /* The column keeps --sp-6 between blocks on a phone too. It was 18px
      here -- off every rung, and tighter than the desktop it is meant to
      be a compression of -- which is what left the card's footer strip
@@ -17478,4 +15527,576 @@ html { scrollbar-gutter: stable; }
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
   color: var(--text-secondary);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   乗車 — the boarding and the sign-in (plan 075; canvas Welcome,
+   BoardName … BoardPass, SignIn). Ported from the canvas's `.brd-*`
+   and `.auth*` rules on the :root tokens; the class map is
+   docs/design/mobile/README.md. The offer's blocks (`.brd-offer__*`,
+   `.brd-perks*`, `.brd-plan*`) and the drawn OS prompt (`.brd-dim`,
+   `.brd-alert*`) are NOT here: the offer stays out while
+   domain/credits.js's HAS_STORE is false, and the system prompt shows
+   the system's own words, never a drawing of them.
+
+   The frame: a head with the back button, the track and n/N; the body
+   with the question under the head and the content centred in the
+   room between; the foot docked at the bottom, rising with the
+   keyboard. Between screens the train pulls (the `.brd__car` pair):
+   the leaving car slides out to the left as the next arrives from the
+   right, 260 ms ease-out; back reverses; the track's train advances
+   300 ms later; a screen's own movement starts once the pull has
+   landed (+120 ms) and runs once. Under reduced motion only the rest
+   state is drawn -- the block at the end. ══ */
+
+/* ── sign-in ── */
+.auth {
+  position: relative;
+  flex: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: var(--card-w);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-6);
+  padding: 0 var(--sp-6);
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+.auth__head {
+  position: absolute;
+  top: calc(var(--safe-top) + var(--sp-3));
+  left: var(--sp-5);
+  display: flex;
+  align-items: center;
+  height: 44px;
+}
+.auth-header { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.auth-header__glyph {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-display);
+  letter-spacing: var(--tr-name);
+  text-indent: var(--tr-name);
+  line-height: 1.1;
+}
+.auth-header__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-reading);
+  text-indent: var(--tr-reading);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.auth-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-6);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.auth-message { margin: 0; font-size: var(--fs-sm); text-align: center; }
+.auth-message--error { color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
+.auth-message--success { color: var(--success); }
+.auth-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  border: none;
+  border-radius: var(--r-panel);
+  background: color-mix(in srgb, var(--accent) 70%, var(--bg-panel));
+  color: var(--text-on-panel);
+  font: inherit;
+  font-weight: 700;
+  font-size: var(--fs-body);
+  cursor: pointer;
+}
+.auth-foot { margin: 0; text-align: center; font-size: var(--fs-caption); color: var(--text-secondary); }
+
+/* ── boarding: the frame ── */
+.brd {
+  position: relative;
+  flex: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: var(--card-w);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: 0 var(--sp-5);
+  padding-top: calc(var(--safe-top) + var(--sp-3));
+  padding-bottom: calc(var(--safe-bottom) + var(--sp-6));
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+.brd--welcome { gap: var(--sp-4); }
+.brd__cars { position: relative; flex: 1; min-height: 0; display: flex; overflow: hidden; }
+.brd__car { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-5); }
+.brd__car--in { animation: brd-pull-in 260ms ease-out both; }
+.brd__car--in[data-dir="back"] { animation-name: brd-pull-in-back; }
+.brd__car--out { position: absolute; inset: 0; pointer-events: none; animation: brd-pull-out 260ms ease-out forwards; }
+.brd__car--out[data-dir="back"] { animation-name: brd-pull-out-back; }
+.brd__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding-top: calc(var(--sp-9) + var(--sp-8));
+  overflow-y: auto;
+}
+.brd__body--top { padding-top: 0; }
+.brd__body--arrival { padding-top: var(--sp-9); }
+.brd__body--center { padding-top: 0; justify-content: center; }
+.brd__stage { flex: none; display: flex; flex-direction: column; gap: var(--sp-5); margin-top: var(--sp-9); }
+.brd__body--center .brd__stage { margin-top: 0; }
+.brd__head { display: flex; align-items: center; gap: var(--sp-4); height: 44px; flex: none; }
+.brd__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.brd__back .svg { width: 18px; height: 18px; }
+.brd__back--void { visibility: hidden; }
+.brd__track { position: relative; flex: 1; height: 6px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent2) 18%, transparent); }
+/* The train advances once the new screen stands still: 300 ms after the pull. */
+.brd__done { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--r-pill); background: var(--accent2); transition: width 300ms ease-out 300ms; }
+.brd__train {
+  position: absolute;
+  top: -4px;
+  width: 8px;
+  height: 14px;
+  border-radius: var(--r-pill);
+  background: var(--text-primary);
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 3px var(--bg-main);
+  transition: left 300ms ease-out 300ms;
+}
+.brd__count { flex: none; font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.brd__q {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-heading);
+  line-height: 1.3;
+  text-align: center;
+  text-wrap: pretty;
+  outline: none;
+  animation: brd-in 360ms ease-out both;
+}
+/* Gold text on paper reads at ~3.4:1 in light theme; the name in a
+   question, a kana's meaning, are mixed toward the ambient ink (the
+   same move the status inks make on sumi). */
+.brd__q-em { font-weight: 700; color: color-mix(in srgb, var(--accent2) 65%, var(--text-primary)); }
+.brd__hint { margin: 0; font-size: var(--fs-sm); line-height: 1.5; text-align: center; color: var(--text-secondary); }
+.brd__error { margin: 0; font-size: var(--fs-sm); line-height: 1.5; text-align: center; color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
+.brd__foot { display: flex; flex-direction: column; gap: var(--sp-3); flex: none; }
+.brd .btn-depart { width: 100%; min-height: 52px; }
+.brd__link {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ── options: one row, one choice ── */
+.brd__opts { display: flex; flex-direction: column; gap: var(--sp-3); }
+.brd__opts > * { animation: brd-in 360ms ease-out both; }
+.brd__opts > :nth-child(2) { animation-delay: 40ms; }
+.brd__opts > :nth-child(3) { animation-delay: 80ms; }
+.brd__opts > :nth-child(4) { animation-delay: 120ms; }
+.brd__opts > :nth-child(5) { animation-delay: 160ms; }
+.brd__opts > :nth-child(6) { animation-delay: 200ms; }
+.brd-opt {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 60px;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font: inherit;
+  text-align: left;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.brd-opt--on { border-color: var(--accent2); background: color-mix(in srgb, var(--accent2) 14%, var(--surface)); }
+.brd-opt__icon { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex: none; border: 1px solid var(--surface-line); border-radius: var(--r-pill); color: var(--text-secondary); }
+.brd-opt__icon .svg { width: 16px; height: 16px; }
+.brd-opt--on .brd-opt__icon { border-color: var(--accent2); color: var(--accent2); }
+.brd-opt__code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tr-term);
+  color: var(--text-secondary);
+}
+.brd-opt--on .brd-opt__code { border-color: var(--accent2); color: var(--text-primary); }
+.brd-opt__names { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.brd-opt__label { display: flex; align-items: center; gap: var(--sp-3); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); line-height: 1.3; }
+.brd-opt__desc { font-size: var(--fs-caption); line-height: 1.4; color: var(--text-secondary); }
+/* On the gold wash the soft ink drops under the floor (4.4:1); the
+   chosen row's caption takes the full ink, like Settings' service cards. */
+.brd-opt--on .brd-opt__desc { color: var(--text-primary); }
+.brd-opt__check { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; flex: none; border: 1.5px solid var(--surface-line); border-radius: var(--r-pill); color: transparent; }
+.brd-opt__check .svg { width: 12px; height: 12px; stroke-width: 3; }
+.brd-opt--on .brd-opt__check { border-color: var(--accent2); color: var(--accent2); }
+.brd-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 var(--sp-2);
+  flex: none;
+  border: 1px solid var(--accent2);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.brd-kopt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: 56px;
+  padding: 0 var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font: inherit;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.brd-kopt--on { border-color: var(--accent2); background: color-mix(in srgb, var(--accent2) 14%, var(--surface)); }
+.brd-kopt__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
+.brd-kopt__jp { font-family: var(--font-jp); font-size: var(--fs-lead); color: var(--text-secondary); }
+
+/* ── welcome: the sign, the rolling stock, the promise ── */
+.brd-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); padding-top: var(--sp-7); text-align: center; animation: brd-in 480ms ease-out both; }
+.brd-roll { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
+.brd-roll__lane { display: flex; gap: var(--sp-4); width: max-content; animation: brd-roll 26s linear infinite; }
+.brd-roll__lane--back { animation-duration: 34s; animation-direction: reverse; }
+.brd-demo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  width: 156px;
+  height: 204px;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-top: 3px solid var(--line-color, var(--accent2));
+  border-radius: var(--r-panel);
+}
+.brd-demo__tag { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: color-mix(in srgb, var(--line-color, var(--accent2)) 70%, var(--text-primary)); }
+.brd-demo__glyph { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.brd-demo__t { display: block; width: 100%; font-family: var(--font-jp); font-size: var(--fs-display); line-height: 1.2; text-align: center; white-space: nowrap; color: var(--text-primary); }
+.brd-demo__t--sm { font-size: var(--fs-lead); line-height: 1.6; white-space: normal; text-wrap: balance; }
+.brd-demo__t--cap { display: block; margin-bottom: var(--sp-1); font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.brd-demo__t .cloze { color: var(--accent2); border-bottom: 2px solid var(--accent2); white-space: nowrap; }
+.brd-demo__meaning { text-align: center; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); color: color-mix(in srgb, var(--accent) 55%, var(--text-primary)); }
+.brd-demo__foot { font-size: var(--fs-caption-xs); color: var(--text-secondary); text-align: center; }
+.brd-demo__draw {
+  flex: 1;
+  position: relative;
+  margin: 0 var(--sp-3);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  background-image: linear-gradient(var(--surface-line), var(--surface-line)), linear-gradient(var(--surface-line), var(--surface-line));
+  background-size: 1px 100%, 100% 1px;
+  background-position: center, center;
+  background-repeat: no-repeat;
+}
+.brd-demo__draw svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.brd-demo__draw path { fill: none; stroke: var(--text-primary); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 120; stroke-dashoffset: 0; animation: brd-draw-in 1.6s ease-out 600ms both; }
+.brd-demo__wave { flex: 1; display: flex; align-items: center; justify-content: center; gap: var(--sp-1); }
+.brd-demo__bar { width: 4px; height: 14px; border-radius: var(--r-pill); background: var(--line-color, var(--accent2)); animation: brd-wave 1.1s ease-in-out infinite alternate; }
+.brd-demo__bar:nth-child(2) { height: 26px; animation-delay: 120ms; }
+.brd-demo__bar:nth-child(3) { height: 36px; animation-delay: 240ms; }
+.brd-demo__bar:nth-child(4) { height: 22px; animation-delay: 360ms; }
+.brd-demo__bar:nth-child(5) { height: 30px; animation-delay: 480ms; }
+.brd-demo__bar:nth-child(6) { height: 16px; animation-delay: 600ms; }
+.brd-tagline { margin: 0; font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-lead); text-align: center; line-height: 1.4; text-wrap: pretty; }
+
+/* ── the name ── */
+.brd-field {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 64px;
+  padding: 0 var(--sp-5);
+  background: var(--surface);
+  border: 1.5px solid var(--accent2);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-heading);
+  color: var(--text-primary);
+  caret-color: var(--accent2);
+  outline: none;
+}
+.brd-field--empty { border-color: var(--surface-line); }
+.brd-field::placeholder { color: var(--text-secondary); font-weight: 500; }
+.brd-field:focus-visible { border-color: var(--accent2); outline: none; }
+
+/* ── the kana card ── */
+.brd-kana { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); overflow: hidden; animation: brd-in 420ms ease-out both; }
+.brd-kana__pane { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-3); min-height: 236px; padding: var(--sp-5) var(--sp-3); }
+.brd-kana__pane + .brd-kana__pane { border-left: 1px solid var(--surface-line); }
+.brd-kana__jp { font-family: var(--font-jp); font-size: var(--fs-display); line-height: 1; color: var(--text-primary); }
+.brd-kana__read { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); animation: brd-rise 500ms ease-out 200ms both; }
+.brd-kana__read--second { animation-delay: 420ms; }
+.brd-kana__romaji { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.brd-kana__en { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); color: color-mix(in srgb, var(--accent2) 65%, var(--text-primary)); }
+.brd-kana__script { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+
+/* ── the rhythm and the hours: cards in a lattice ── */
+.brd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.brd-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.brd-grid > * { animation: brd-in 360ms ease-out both; }
+.brd-grid > :nth-child(2) { animation-delay: 40ms; }
+.brd-grid > :nth-child(3) { animation-delay: 80ms; }
+.brd-grid > :nth-child(4) { animation-delay: 120ms; }
+.brd-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-height: 120px;
+  padding: var(--sp-4) var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font: inherit;
+  color: var(--text-primary);
+  text-align: center;
+  cursor: pointer;
+}
+.brd-cell--on { border-color: var(--accent2); background: color-mix(in srgb, var(--accent2) 14%, var(--surface)); }
+.brd-cell__n { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-display); line-height: 1; font-variant-numeric: tabular-nums; }
+.brd-cell__u { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.brd-cell__sub { margin-top: var(--sp-1); font-size: var(--fs-caption); color: var(--text-secondary); }
+.brd-cell--on .brd-cell__u, .brd-cell--on .brd-cell__sub { color: var(--text-primary); }
+.brd-cell__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
+.brd-cell__time { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-title); font-variant-numeric: tabular-nums; }
+.brd-cell .brd-tag { margin-bottom: var(--sp-1); }
+.brd-cell--sm { min-height: 76px; }
+
+/* ── the departure board and the day track ── */
+.brd-board { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); padding: var(--sp-5); background: var(--bg-panel); color: var(--text-on-panel); border: 1px solid color-mix(in srgb, var(--accent2) 16%, transparent); border-radius: var(--r-panel); animation: brd-in 420ms ease-out both; }
+.brd-board__cap { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); }
+.brd-board__flaps { display: flex; align-items: center; gap: var(--sp-1); perspective: 400px; }
+.brd-board__colon { padding: 0 var(--sp-1); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-title); color: var(--text-on-panel-soft); }
+/* The board's own tile: a split-flap face at rest (the rewards'
+   .flap is the animated instrument; this one only turns its last digit once). */
+.brd-flap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 40px;
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, var(--text-on-panel) 9%, var(--bg-panel));
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-panel) 10%, transparent);
+}
+.brd-flap--turn { animation: brd-flip 900ms ease-in-out 380ms 1 both; }
+.brd-day { position: relative; height: 48px; margin: 0 var(--sp-3); touch-action: none; }
+.brd-day__rail { position: absolute; left: 0; right: 0; top: 16px; height: 3px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent2) 30%, transparent); }
+.brd-day__done { position: absolute; left: 0; top: 16px; height: 3px; border-radius: var(--r-pill); background: var(--accent2); }
+.brd-day__tick { position: absolute; top: 28px; transform: translateX(-50%); font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-term); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.brd-day__tick--first { transform: none; }
+.brd-day__tick--last { transform: translateX(-100%); }
+.brd-day__train {
+  position: absolute;
+  top: 6px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  border: 3px solid var(--accent2);
+  transform: translateX(-50%);
+  cursor: grab;
+}
+.brd-day__train::before { content: ''; position: absolute; inset: -11px; }
+
+/* ── the notification, as the app would send it ── */
+.brd-notif { display: flex; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-5); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); box-shadow: var(--elev-hang); animation: brd-drop 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.brd-notif__app { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; flex: none; border-radius: var(--r-card); background: var(--bg-panel); color: var(--accent2); font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-lead); }
+.brd-notif__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.brd-notif__head { display: flex; justify-content: space-between; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.brd-notif__title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
+.brd-notif__text { font-size: var(--fs-sm); color: var(--text-secondary); }
+
+/* ── building the journey ── */
+.brd-build__track { position: relative; height: 8px; margin: var(--sp-3) var(--sp-2) var(--sp-4); border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent2) 18%, transparent); }
+.brd-build__done { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--r-pill); background: var(--accent2); transition: width 600ms ease-in-out; }
+.brd-build__train { position: absolute; top: -5px; width: 10px; height: 18px; border-radius: var(--r-pill); background: var(--text-primary); transform: translateX(-50%); box-shadow: 0 0 0 3px var(--bg-main); transition: left 600ms ease-in-out; }
+.brd-steps { display: flex; flex-direction: column; gap: var(--sp-3); }
+.brd-step { display: flex; align-items: center; gap: var(--sp-4); min-height: 56px; padding: 0 var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); }
+.brd-step__mark { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: none; border: 1.5px solid var(--surface-line); border-radius: var(--r-pill); color: var(--accent2); }
+.brd-step__mark .svg { width: 13px; height: 13px; stroke-width: 3; }
+.brd-step--done .brd-step__mark { border-color: var(--accent2); }
+.brd-step--now .brd-step__mark { border-color: var(--accent2); animation: brd-pulse 1.2s ease-in-out infinite alternate; }
+.brd-step--now .brd-step__mark::before { content: ''; width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--accent2); }
+.brd-step--next { opacity: 0.5; }
+.brd-step__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
+.brd-step__val { margin-left: auto; font-size: var(--fs-sm); color: var(--text-secondary); white-space: nowrap; }
+
+/* ── the plan: the projection and the promise ── */
+.brd-chart { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); animation: brd-in 420ms ease-out both; }
+.brd-chart__title { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.brd-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.brd-chart__grid { stroke: var(--surface-line); stroke-width: 1; }
+.brd-chart__axis { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-term); fill: var(--text-secondary); }
+.brd-chart__lbl { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; fill: var(--text-primary); }
+.brd-chart__lbl--soft { fill: var(--text-secondary); }
+.brd-chart__line { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.brd-chart__line--us { stroke: var(--accent2); stroke-dasharray: 400; stroke-dashoffset: 0; animation: brd-draw-line 1.6s ease-out 300ms both; }
+.brd-chart__line--them { stroke: var(--text-secondary); stroke-width: 2; stroke-dasharray: 6 5; animation: brd-in 600ms ease-out 200ms both; }
+.brd-chart__dot { stroke-width: 2; stroke: var(--surface); }
+.brd-chart__dot--us { fill: var(--accent2); }
+.brd-chart__dot--them { fill: var(--text-secondary); }
+.brd-chart__cap { font-size: var(--fs-caption); line-height: 1.4; color: var(--text-secondary); }
+.brd-legend { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-5); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
+.brd-legend__key { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.brd-legend__swatch { width: 14px; height: 3px; border-radius: var(--r-pill); background: var(--accent2); }
+.brd-legend__swatch--them { background: repeating-linear-gradient(90deg, var(--text-secondary) 0 4px, transparent 4px 7px); }
+.brd-lead { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); }
+.brd-lead__em { color: var(--text-primary); }
+.brd-bullets { display: flex; flex-direction: column; gap: var(--sp-2); }
+.brd-bullet { display: flex; align-items: center; gap: var(--sp-3); min-height: 30px; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); animation: brd-in 360ms ease-out both; }
+.brd-bullet:nth-child(2) { animation-delay: 60ms; }
+.brd-bullet:nth-child(3) { animation-delay: 120ms; }
+.brd-bullet:nth-child(4) { animation-delay: 180ms; }
+.brd-bullet .svg { width: 18px; height: 18px; flex: none; color: var(--accent2); stroke-width: 3; }
+
+/* ── the pass, issued ── */
+.brd-offer { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); text-align: center; }
+.brd-issue { position: relative; margin-top: var(--sp-3); animation: brd-up 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.brd-issue__seal {
+  position: absolute;
+  right: var(--sp-4);
+  bottom: var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border: 3px solid var(--stamp-ink);
+  border-radius: var(--r-plate);
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  /* The ring keeps the stamp's own red; the glyph is mixed toward the
+     pass's ink so 発行 reads on sumi (raw stamp ink measures ~3:1). */
+  color: color-mix(in srgb, var(--stamp-ink) 55%, var(--text-on-panel));
+  background: color-mix(in srgb, var(--stamp-ink) 10%, transparent);
+  transform: rotate(-12deg);
+  opacity: 0.9;
+  animation: brd-stamp 500ms cubic-bezier(0.2, 0.8, 0.2, 1) 700ms both;
+}
+
+/* ── the pull, and a screen's own movement after it ── */
+@keyframes brd-pull-in { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes brd-pull-out { to { transform: translateX(-100%); } }
+@keyframes brd-pull-in-back { from { transform: translateX(-100%); } to { transform: none; } }
+@keyframes brd-pull-out-back { to { transform: translateX(100%); } }
+@keyframes brd-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes brd-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes brd-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+@keyframes brd-drop { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: none; } }
+@keyframes brd-stamp { from { opacity: 0; transform: scale(1.5) rotate(-12deg); } to { opacity: 0.9; transform: scale(1) rotate(-12deg); } }
+@keyframes brd-roll { from { transform: translateX(0); } to { transform: translateX(calc(-50% - var(--sp-4) / 2)); } }
+@keyframes brd-draw-in { from { stroke-dashoffset: 120; } }
+@keyframes brd-draw-line { from { stroke-dashoffset: 400; } }
+@keyframes brd-wave { from { transform: scaleY(0.4); } to { transform: scaleY(1); } }
+@keyframes brd-flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(90deg); } 100% { transform: rotateX(0); } }
+@keyframes brd-pulse { from { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent2) 30%, transparent); } to { box-shadow: 0 0 0 9px color-mix(in srgb, var(--accent2) 10%, transparent); } }
+/* A screen that arrived by the pull starts its own movement once the
+   pull has landed (+120 ms), the stagger riding on top. */
+.brd__car--in .brd__q,
+.brd__car--in .brd__opts > *,
+.brd__car--in .brd-grid > *,
+.brd__car--in .brd-kana,
+.brd__car--in .brd-board,
+.brd__car--in .brd-notif,
+.brd__car--in .brd-chart,
+.brd__car--in .brd-issue,
+.brd__car--in .brd-bullet { animation-delay: 380ms; }
+.brd__car--in .brd__opts > :nth-child(2), .brd__car--in .brd-grid > :nth-child(2) { animation-delay: 420ms; }
+.brd__car--in .brd__opts > :nth-child(3), .brd__car--in .brd-grid > :nth-child(3) { animation-delay: 460ms; }
+.brd__car--in .brd__opts > :nth-child(4), .brd__car--in .brd-grid > :nth-child(4) { animation-delay: 500ms; }
+.brd__car--in .brd__opts > :nth-child(5) { animation-delay: 540ms; }
+.brd__car--in .brd__opts > :nth-child(6) { animation-delay: 580ms; }
+.brd__car--in .brd-kana__read { animation-delay: 580ms; }
+.brd__car--in .brd-kana__read--second { animation-delay: 800ms; }
+.brd__car--in .brd-bullet:nth-child(2) { animation-delay: 440ms; }
+.brd__car--in .brd-bullet:nth-child(3) { animation-delay: 500ms; }
+.brd__car--in .brd-bullet:nth-child(4) { animation-delay: 560ms; }
+/* The leaving car is the still frame it was: nothing replays on it. */
+.brd__car--out .brd__q,
+.brd__car--out [class*="brd-"],
+.brd__car--out .brd__opts > * { animation: none; }
+.brd :focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .brd [class*="brd"],
+  .brd [class*="brd"]::before,
+  .brd .brd__q,
+  .brd__car { animation: none; }
+  .brd__done, .brd__train, .brd-build__done, .brd-build__train { transition: none; }
 }

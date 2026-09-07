@@ -190,7 +190,7 @@ allowlist literal earlier retirements had left behind (the guard's
 | `.svc-grid` (`--2`), `.svc` (`--on`, `__jp`, `__pace`, `__star`, `__words`), `.grades`, `.hour-grid` | the service cards: theme, language, presets and mute, pace, grades, the daily hour | `components/settings/DisplayPage.jsx`, `SoundPage.jsx`, `LearningPage.jsx`, `DestinationPage.jsx` |
 | `.lvlstrip` (`__stop` `--on`, `__dot`, `__code`, `__jp`), `.lvl-note` (`__strong`) | the level strip and its note | `LearningPage.jsx` |
 | `.sheet.lvl-sheet`, `.lvl-sheet__body` (`__strong`), `__figs`, `__fig` (`-v`, `-l`), `.btn-depart--sheet` | the level confirm sheets (Move up / Move down) | `LevelSheet` in `LearningPage.jsx` |
-| `.onb-dests` → `.dest-grid`, `.onb-dest` → `.dest` (`--on`, `__code`, `__load`); `.jour-line.dest-line` (`__date`, `__note`), `.form__row` | Destination: the stops ahead, the pass line on paper, Hand it back / Reprint | `DestinationPage.jsx` (renamed because the boarding's own `.onb-dest` block stands until plan 075) |
+| `.onb-dests` → `.dest-grid`, `.onb-dest` → `.dest` (`--on`, `__code`, `__load`); `.jour-line.dest-line` (`__date`, `__note`), `.form__row` | Destination: the stops ahead, the pass line on paper, Hand it back / Reprint | `DestinationPage.jsx` (renamed while the old boarding's `.onb-dest` block still stood; it retired with plan 075) |
 
 The routes: `/profile` (the pass and its inserts, no bar), `/profile/stats`
 (the bar with ‹ Profile), `/profile/settings` (the list) and
@@ -284,9 +284,58 @@ gate hall: concourse, IC card, notice strip — the map moved to
 `config/navLinks.js` (now `config/tabs.js`). Their CSS blocks and their
 entries in `.stylelint-baseline.json` went in the same commit.
 
-## Still to port (plan 075)
+## The boarding and the sign-in (plan 075)
 
-`.offer*`, `.pass-tag` (with the store); the whole `.brd-*` boarding (075). Reading the canvas: `Artifact` `read` on its URL
-saves the page; the design lives in `<script id="appifact-doc">` as JSON —
-`content.files` holds one `*.dc.html` per artboard plus `canvas.json`; the
-common prefix of the artboard files is this stylesheet.
+| Canvas class | `index.css` block | Component |
+|---|---|---|
+| `.brd` (`--welcome`), `.brd__head`, `.brd__back` (`--void`), `.brd__track`, `.brd__done`, `.brd__train`, `.brd__count`, `.brd__body` (`--top`, `--arrival`, `--center`), `.brd__stage`, `.brd__q` (`.brd__q-em` for the canvas's `b`), `.brd__hint`, `.brd__error`, `.brd__foot`, `.brd__link`; `.brd__cars`, `.brd__car` (`--in`, `--out`, `[data-dir]`) | 乗車 — the frame and the train pull | `screens/BoardingFlow.jsx` (the state machine), `BoardHead`, `BoardQuestion`, `Continue`, `BoardLink` in `components/boarding/BoardFrame.jsx` |
+| `.brd-hero`, `.brd-roll` (`__lane`, `--back`), `.brd-demo` (`__tag`, `__glyph`, `__t` `--sm`/`--cap`, `.cloze`, `__meaning`, `__foot`, `__draw`, `__wave`, `__bar`), `.brd-tagline` | Welcome: the sign, the rolling stock, the promise | `components/boarding/Welcome.jsx`, the cards in `demoCards.js` |
+| `.brd-field` (`--empty`) | the name | `NameStep.jsx` |
+| `.brd__opts`, `.brd-opt` (`--on`, `__icon`, `__code`, `__names`, `__label`, `__desc`, `__check`), `.brd-tag` | one row, one choice: why, the level, the goal | `BoardOption.jsx`, `WhyStep.jsx`, `LevelStep`/`GoalStep` in `LevelStep.jsx`, the motive glyphs in `icons.jsx` |
+| `.brd-kana` (`__pane`, `__jp`, `__read` `--second`, `__romaji`, `__en`, `__script`), `.brd-grid`, `.brd-kopt` (`--on`, `__label`, `__jp`) | the kana check and the reveal | `KanaStep`/`KanaReveal` in `KanaStep.jsx` |
+| `.brd-grid` (`--3`), `.brd-cell` (`--on`, `--sm`, `__n`, `__u`, `__sub`, `__label`, `__time`) | the rhythm and the hours | `RhythmStep.jsx`, `TimeStep.jsx` |
+| `.brd-board` (`__cap`, `__flaps`, `__colon`), `.brd-flap` (`--turn`; the canvas's `.flap`, drawn at rest — the rewards' `.flap` is the animated instrument), `.brd-day` (`__rail`, `__done`, `__tick` `--first`/`--last`, `__train` as `role="slider"`) | the departure board and the day track | `TimeStep.jsx` |
+| `.brd-notif` (`__app`, `__body`, `__head`, `__title`, `__text`) | the nudge (native shells only, `lib/platform.js`) | `NudgeStep.jsx` |
+| `.brd-build__track` (`__done`, `__train`), `.brd-steps`, `.brd-step` (`--done`, `--now`, `--next`, `__mark`, `__label`, `__val`) | building the journey | `Building.jsx`; the 到着 signboard over the plan is `components/onboarding/TrainArrival.jsx` |
+| `.brd-chart` (`__title`, `__grid`, `__axis`, `__lbl` `--soft`, `__line` `--us`/`--them`, `__dot`, `__cap`), `.brd-legend` (`__key`, `__swatch` `--them`), `.brd-lead` (`.brd-lead__em`), `.brd-bullets`, `.brd-bullet` | the plan | `PlanStep.jsx`, the figures from `domain/boarding.js` |
+| `.brd-offer` (the centred title block only), `.brd-issue` (`__seal`), the `.pass` with `.balance-line` on its foot | the pass, issued | `PassStep.jsx` over `components/profile/CommuterPass.jsx` |
+| `.auth`, `.auth__head`, `.auth-header` (`__glyph`, `__title`), `.auth-card` with a `Seg` (`.seg--full`) and `.field`s, `.auth-message` (`--error`, `--success`), `.auth-submit`, `.auth-foot` | the sign-in | `screens/AuthScreen.jsx` |
+
+Pre-auth and pre-onboarding, no router: `App.jsx` mounts Welcome for a
+signed-out visitor (Board → the sign-in on Sign up, "Have an account?" →
+Login), and the boarding for a signed-in one whose profile has no
+`onboardedAt`; the TicketGate finale plays over the mounted router as
+before. One POST at "Enter the station" — `POST /api/onboarding/complete`,
+extended with `motive`, `kanaKnown`, `rhythmMin`, `reminderTime`,
+`notifications` and `tzOffsetMin` (backwards compatible) — and the level
+rule and the kana door (`study/level_rule.py`, `SRSEngine.seed_known`) mark
+the stops behind the level and the scripts already read known. The name is
+written when its screen accepts it (`PATCH /api/profile`), so a taken name
+is refused there and never on the pass. Held from the canvas: the offer
+screen (`.brd-offer__*`, `.brd-perks*`, `.brd-plan*`) waits for a store
+(`domain/credits.js` HAS_STORE); the drawn OS prompt (`.brd-dim`,
+`.brd-alert*`) is never rendered — the system shows its own; the nudge
+screen is skipped on the web; the tutorial is deferred. The motion sheet's
+pull, the +120 ms rule and the rest-state-only rule under reduced motion are
+pinned in `screens/BoardingFlow.browser.test.jsx`, its `.reduced` twin and
+`boarding.phone.test.jsx`.
+
+## What retired with it
+
+`screens/OnboardingFlow.jsx` (the ticket office and its five scenes),
+`screens/LandingScreen.jsx` (`.landing*`), `components/onboarding/FirstRide.jsx`,
+`DepartureBoard.jsx`, `CallingAt.jsx`, `DepartureChips.jsx` and `levelSigns.js`,
+the old `.auth*` block (the mode toggle, the back button, the fields
+wrapper), the whole `.onb-*` block except what Settings and the boarding
+still use (the dial, `.onb-test*`, `.onb-action`/`.onb-link`/
+`.onb-step__actions`, `.onb-reco-badge`, `.onb-arrival*`, `.onb-preview*`),
+the `landing*` and unused `onb*` locale keys, and `config/tabs.js`'s
+`getShowcase`. Their baseline entries went in the same commit.
+
+## Still to port
+
+`.offer*`, `.pass-tag`, `.brd-offer__*`, `.brd-perks*`, `.brd-plan*` (with the
+store). Reading the canvas: `Artifact` `read` on its URL saves the page; the
+design lives in `<script id="appifact-doc">` as JSON — `content.files` holds
+one `*.dc.html` per artboard plus `canvas.json`; the common prefix of the
+artboard files is this stylesheet.

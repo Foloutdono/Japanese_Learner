@@ -42,7 +42,7 @@ function useIsCramped() {
 // should differ).
 //
 // CharDisplay is shared well beyond CardPrompt.jsx -- KanaScreen,
-// KanjiScreen, VocabScreen and OnboardingFlow all import it directly
+// KanjiScreen and VocabScreen import it directly
 // with their own numeric `size` props, none of it plan 048's to touch.
 // `variant` is opt-in, not a new default, precisely so those callers
 // are byte-for-byte unaffected: no `variant` (the only shape they pass)

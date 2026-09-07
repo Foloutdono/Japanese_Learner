@@ -115,7 +115,19 @@ CREATE TABLE user_profiles (
     credits_refilled_on DATE,
     plan TEXT DEFAULT 'free',
     plan_until TIMESTAMPTZ,
-    tz_offset_min INTEGER
+    tz_offset_min INTEGER,
+    -- The boarding's own answers (plan 075, routes/onboarding.py): why
+    -- the learner is here ('studies' | 'fun' | 'trip' | 'live' |
+    -- 'friends' | 'other'), which kana they already read ('hiragana' |
+    -- 'katakana' | 'both' | 'none' -- the sets marked known at the
+    -- boarding, study/level_rule.py), the daily nudge's hour ('HH:MM',
+    -- NULL = none; routes/journey.py's reprint moves it with the ride's
+    -- hour) and whether they said yes to the nudge. All validated in
+    -- code; NULL/false until the boarding runs.
+    motive TEXT,
+    kana_known TEXT,
+    reminder_time TEXT,
+    notifications BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came

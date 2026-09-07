@@ -11,7 +11,6 @@ const auth = {
   signupBtn:         "S'inscrire",
   signupSuccess:     'Vérifiez vos emails pour confirmer votre compte.',
   signOut:           'Déconnexion',
-  usernameOptional:  "Nom d'utilisateur (optionnel)",
   usernameInvalid:   "Le nom d'utilisateur doit contenir 3 à 20 caractères (lettres, chiffres, underscore).",
   usernameTaken:     'Ce nom d\'utilisateur est déjà pris.',
 }
@@ -21,27 +20,6 @@ const auth = {
 // reused for both the hero button and the closing footer button
 // rather than duplicated under a second key.
 const landing = {
-  landingSignIn:         'Se connecter',
-  landingTagline:        'Une trousse complète et à votre rythme pour apprendre le japonais — répétition espacée (SM-2), du kana au kanji, la grammaire, et une vraie pratique de lecture, tout en un seul endroit.',
-  landingCta:            'Commencer',
-  landingFeaturesTitle:  'Tout au même endroit',
-  landingFeaturesIntro:  'Kana, vocabulaire, kanji, grammaire, lecture, et plus encore — une seule application au lieu de cinq outils séparés.',
-  landingWhyTitle:       'Pourquoi ça marche',
-  landingPro1Title:      'Un parcours, pas un tas',
-  landingPro1Desc:       'Kana, vocabulaire, kanji, grammaire et lecture sont chacun organisés de N5 à N1, pour toujours savoir ce qui vient ensuite.',
-  landingPro2Title:      'Répétition espacée (SM-2)',
-  landingPro2Desc:       "Chaque carte est planifiée avec l'algorithme SM-2, pour réviser juste avant de l'oublier, pas selon un calendrier fixe.",
-  landingPro3Title:      'Séries et statistiques',
-  landingPro3Desc:       'Une série quotidienne et une page de statistiques complète — nouveau, en cours, maîtrisé, à réviser maintenant, et vos points faibles — montrent exactement où vous en êtes.',
-  landingPro4Title:      'Une lecture que vous pouvez vraiment faire',
-  landingPro4Desc:       "Un dictionnaire et un analyseur de phrases se trouvent juste à côté des exercices de lecture et de compréhension, pour que rien de ce que vous ne comprenez pas ne soit une impasse.",
-  landingPro5Title:      'Vos propres decks, aussi',
-  landingPro5Desc:       'Créez vos propres decks de flashcards, de vocabulaire ou de kanji, importez des cartes directement depuis une feuille de calcul, et mélangez-les avec le contenu JLPT intégré.',
-  landingTechTitle:      'Construit avec',
-  landingCreatorTitle:   'Qui a fait ça, et pourquoi',
-  landingCreatorBody:    "Cette application a commencé comme un outil personnel pour passer de zéro japonais à la lecture de vrais textes, sans jongler entre cinq applications différentes pour le kana, le vocabulaire, le kanji, la grammaire et la lecture. Elle est développée et maintenue par un développeur solo, et chaque fonctionnalité ici est utilisée quotidiennement en apprenant le japonais.",
-  landingCreatorName:    '— Développée et maintenue en solo.',
-  landingFooterCta:      'Prêt à commencer ?',
 }
 
 // ── Navigation ────────────────────────────────────────────
@@ -1373,85 +1351,110 @@ const exam = {
 }
 
 // ── みどりの窓口 — onboarding ──────────────────────────────
+// ── 乗車 — l’embarquement (plan 075) ────────────────────────
+// L’embarquement de la maquette : Bienvenue → le nom → le pourquoi →
+// les kana → (la révélation | le niveau) → l’objectif → le rythme →
+// l’heure → le rappel → la préparation → le plan → la carte.
+// L’interface parle la langue de l’apprenant ; les kana, les cartes et
+// le sceau sont du contenu et restent en japonais
+// (components/boarding/*, screens/BoardingFlow.jsx).
+const boarding = {
+  authFoot: 'Tout peut être modifié plus tard dans les réglages.',
+  authModeAria: 'Connexion ou inscription',
+  brdDocumentTitle: 'Embarquement',
+  // Bienvenue : l’enseigne, le matériel roulant, la promesse.
+  brdTagline: 'Prenez le train vers la maîtrise.',
+  brdBoard: 'Embarquer',
+  brdHaveAccount: 'Déjà un compte ? Se connecter',
+  brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulaire', grammar: 'Grammaire', listening: 'Écoute', reading: 'Lecture', kana: 'Kana', exam: 'Examen blanc' },
+  brdDemoMeaning: { station: 'gare', toEat: 'manger', fillIn: 'À compléter', craft: 'métier', listen: 'Écoutez', readIt: 'Lisez', ticket: 'billet', mountain: 'montagne', kippu: 'ki · p · pu', timer: '24:18' },
+  brdDemoFoot: { kanjiMeaning: 'Kanji → sens', wordMeaning: 'Mot → sens', ruleSentence: 'Règle → phrase', meaningKanji: 'Sens → kanji', soundMeaning: 'Son → sens', sentenceMeaning: 'Phrase → sens', kanjiReading: 'Kanji → lecture', kanaSound: 'Kana → son', timedPaper: 'Épreuve chronométrée' },
+  // Les questions.
+  brdNameQ: 'Comment vous appelez-vous ?',
+  brdNameAria: 'Votre nom',
+  brdWhyQ: (name) => `Pourquoi apprenez-vous le japonais, **${name}** ?`,
+  brdMotive: { studies: 'Pour mes études', fun: 'Pour le plaisir', trip: 'Pour un voyage au Japon', live: 'Pour vivre au Japon', friends: 'Pour me faire des amis', other: 'Autre chose' },
+  brdKanaQ: 'Pouvez-vous lire ceci ?',
+  brdKana: { hiragana: 'Hiragana', katakana: 'Katakana', both: 'Les deux', none: 'Pas encore' },
+  brdKanaWord: { sushi: 'sushi', hotel: 'hôtel' },
+  brdRevealQ: 'Bientôt, vous lirez les deux.',
+  brdRevealHint: 'Deux écritures, 46 signes chacune. Votre premier arrêt.',
+  brdLevelQ: 'Bien ! Quel est votre niveau ?',
+  brdLevelHint: 'Les arrêts derrière vous seront marqués connus.',
+  brdNovice: 'Novice',
+  // Le nombre de kanji est celui de l’appli jusqu’à cet arrêt (~, arrondi).
+  brdLevelDesc: {
+    novice: 'Les kana et quelques mots',
+    N5: (k) => `Phrases simples · ~${k} kanji`,
+    N4: (k) => `Conversation courante · ~${k} kanji`,
+    N3: (k) => `Le quotidien sans effort · ~${k} kanji`,
+    N2: (k) => `Presse et travail · ~${k} kanji`,
+    N1: (k) => `Presque tout · ~${k} kanji`,
+  },
+  brdGoalQ: 'Quel est votre objectif ?',
+  brdGoalHint: (level) => `Les arrêts après ${level}.`,
+  brdNextStop: 'Prochain arrêt',
+  brdRhythmQ: 'Quel est votre rythme ?',
+  brdMinADay: 'min par jour',
+  brdNewItems: (n) => `~${n} nouveautés`,
+  brdChangeLater: 'Modifiable plus tard.',
+  brdTimeQ: 'Quand étudiez-vous ?',
+  brdDeparture: 'Départ',
+  brdDayAria: 'Heure de départ',
+  // Le rappel (natif seulement), et la notification telle que l’appli
+  // l’envoie. brdAppName est le nom sur les stores : au propriétaire
+  // de le fixer (plan 077).
+  brdNudgeQ: (time) => `Un rappel à **${time}** ?`,
+  brdAppName: 'Japanese Learner',
+  brdNotifNow: 'maintenant',
+  brdNotifTitle: (time) => `Votre train part à ${time}`,
+  brdNotifText: 'Vos cartes vous attendent au portillon.',
+  brdNudgeHint: 'Un par jour, à votre heure. Jamais plus.',
+  brdAllow: 'Autoriser les notifications',
+  brdNotNow: 'Pas maintenant',
+  // L’arrivée : la préparation, le plan, la carte.
+  brdBuildingQ: (name) => `Préparation de votre trajet, **${name}**`,
+  brdBuildingAria: 'Préparation de votre trajet',
+  brdBuildGoal: 'Votre objectif',
+  brdBuildLines: 'Vos lignes',
+  brdBuildRide: 'Votre trajet quotidien',
+  brdBuildProjection: 'Votre projection',
+  brdFourLines: 'Quatre lignes',
+  brdArrivalTitle: 'Votre plan',
+  brdPlanQ: (name) => `Votre plan est prêt, **${name}**.`,
+  brdChartTitle: 'Votre projection',
+  brdChartAria: (words) => `Mots retenus au fil du trajet : les révisions quotidiennes montent à environ ${words} ; le bachotage plafonne tôt.`,
+  brdChartLabel: (words) => `~${words} mots · révisions quotidiennes`,
+  brdChartCram: 'bachotage',
+  brdLegendUs: (min) => `Révisions quotidiennes, ${min} min`,
+  brdLegendThem: 'Bachotage',
+  brdChartCap: 'Révisions espacées contre bachotage — une illustration, pas une mesure.',
+  brdLead: (min, date, purpose) => `À **${min} min par jour**, d’ici **${date}**, ${purpose} :`,
+  brdFor: { studies: 'pour vos études', fun: 'pour le plaisir', trip: 'pour votre voyage', live: 'pour votre vie au Japon', friends: 'pour vos amis', other: 'pour vous' },
+  brdBulletFigures: (words, kanji) => `~${words} mots et ~${kanji} kanji`,
+  // Deux promesses par motif (la note « boarding » de la maquette).
+  brdPromise: {
+    studies: ['Vos supports de cours', 'Les termes clés d’un cours'],
+    fun: ['Des cases de manga, des paroles', 'Un drama sans pause'],
+    trip: ['Lire les panneaux, les menus, les billets', 'Demander son chemin, commander, réserver une chambre'],
+    live: ['La mairie, la banque, le médecin', 'Votre courrier et vos contrats'],
+    friends: ['Discuter par message', 'Une conversation au dîner'],
+    other: ['Lire ce que vous croisez chaque jour', 'Dire ce que vous voulez dire'],
+  },
+  brdOnTrack: (level) => `En route vers le JLPT ${level}`,
+  brdOnTrackLine: 'En route sur toute la ligne',
+  brdPassQ: (name) => `Votre carte est prête, **${name}**.`,
+  brdEnjoy: 'Bon voyage.',
+  brdIssued: 'Émise',
+  brdEnter: 'Entrer en gare',
+}
+
 const onboarding = {
-  // 試乗 — le premier trajet (plan 063) : une vraie carte avant toute question.
-  onbRideTitle: 'Avant toute question — un premier trajet.',
-  onbRideBody: "Toute l'appli tient dans cet objet : une carte, un retournement, une réponse honnête. Quinze secondes.",
-  onbRideSkip: 'Je connais la répétition espacée — passer la démo',
-  onbRideWon: 'Première carte rencontrée, notée honnêtement — cette note est toute la compétence.',
-  onbRideWonCount: (n) => `Les ${n} autres roulent sur le même rail.`,
-  // 乗車駅 — l'auto-placement par la signalétique ; la clé courte
-  // ci-dessous reste l'étiquette de groupe pour l'accessibilité.
-  onbBoardBySign: 'Montez à la dernière gare dont vous savez lire le panneau.',
-  onbLvlLoad: (n) => `${n} éléments à cet arrêt`,
-  // 行先 — le tableau des départs (plan 063, phase E). Les types de
-  // trains (各駅停車, Rapid…) sont de la signalétique (paces.js),
-  // jamais traduits ; tout ce qu'il faut comprendre pour décider est ici.
-  onbGoalTitle: 'Où cette ligne vous emmène-t-elle ?',
-  onbGoalBody: "Choisissez une destination et lisez le tableau — chaque service, chiffré en minutes par jour et en mois de votre vie. Ou roulez librement.",
-  onbGoalDestAria: 'Destination',
-  onbGoalModeAria: 'Comment choisir',
-  onbDestLoad: (n) => `${n} éléments`,
-  onbDestFree: 'rouler librement',
-  onbModeDate: 'Par date',
-  onbModePace: 'Par rythme',
-  onbArriveIn: 'Arriver dans',
-  onbMonths: (n) => `${n} mois`,
-  onbGoalDepartures: 'Départs',
-  onbGoalDay: 'jour',
-  onbGoalMin: (n) => `≈ ${n} min`,
-  onbColService: 'Service',
-  onbColPace: 'Rythme',
-  onbColArrival: 'Arrivée',
-  onbColJourney: 'Trajet',
-  onbCharterYours: 'Affrété — le vôtre',
-  onbCharterAny: 'Affrété — au choix',
-  onbCharterAria: 'Nouveaux éléments par jour, au choix',
   durDays: (n) => `${n} jours`,
   durMonths: (n) => `${n} mois`,
   durYears: (n) => `${n} ans`,
-  onbNoService: (n, max) => `Aucun service ne roule à ${n} nouveaux éléments par jour — le plus rapide, 臨時, plafonne à ${max}. Le guichet ne vendra pas ce billet.`,
-  onbFixDate: 'Décaler la date',
-  onbFixDateSub: (dest, dur) => `${dest} en ${dur} à 特急 20/jour`,
-  onbFixDest: 'Destination plus proche',
-  onbFixDestSub: (level, n) => `${level} d'abord — ${n} éléments`,
-  onbCallingAt: 'Ce train dessert',
-  onbCallNow: 'Maintenant',
-  onbHonestRide: (perDay, min) => `Rouler à **${perDay} par jour** (≈ ${min} min) sans destination fixe — le guichet tient quand même le compte, et une destination s'achète plus tard depuis votre carte.`,
-  onbHonestNoRun: (dest, months, required) => `**${dest}** en **${months} mois**, c'est **${required} nouveaux éléments par jour** — le guichet ne fera pas semblant que c'est un rythme. Décalez la date ou la destination, et c'en devient un.`,
-  onbHonestPlan: (perDay, min, items, dest, date) => `**${perDay} par jour, chaque jour** — environ ${min} minutes — **${items} éléments**, arrivée à **${dest}** vers le **${date}**. Nouveau contenu seulement ; les révisions s'ajoutent. Manquez des jours et cette date bouge — et l'appli le dira.`,
-  // 案内 — la scène de la promesse, et les deux temps du 定期券 (plan 063, phase F).
-  onbPromiseTitle: 'La carte qui vous dira la vérité.',
-  onbPromiseBody: (perDay) => `Votre ligne est imprimée au dos de votre carte. Deux voitures y roulent : votre train, et une en pointillés qui montre où ${perDay} par jour dit que vous devriez être. Retournez la carte, n'importe quel jour, et la carte répond.`,
-  onbPromiseLine: (start, dest) => `Votre ligne — ${start} → ${dest}`,
-  onbPromiseExample: 'exemple',
-  onbPromiseFoot: "Dérivez, et la carte le dit — **en jours, pas en reproches** — avec les deux réparations honnêtes à un geste : rouler plus vite, ou réimprimer la date à l'encre. Elle ne bougera jamais toute seule.",
-  onbLinesRow: 'Quatre lignes desservent cette gare une fois passé le portillon :',
-  onbSignTitle: 'Signez, et le guichet imprime.',
-  onbFormLatin: "Demande d'abonnement",
-  onbFormName: 'Nom',
-  onbFormDepart: 'Trajet quotidien',
-  onbFormDate: 'Date',
-  onbDepartFlex: 'Libre',
-  onbDepartHint: "L'heure quotidienne est facultative — mais une promesse avec une heure survit deux fois mieux à sa première semaine de pluie.",
-  onbPrint: 'Imprimer la carte',
-  onbEditApp: 'Modifier la demande',
-  onbDeparts: (time) => `départ ${time} chaque jour`,
-  onbVowYou: (perDay, time) => `**${perDay} par jour**, la plupart des jours${time ? `, vers ${time}` : ''}.`,
-  onbVowOffice: "La carte honnête, chaque jour — **votre date ne bouge jamais en silence.**",
   onbContinue: 'Continuer',
   onbStepsAria: (n, total) => `Étape ${n} sur ${total}`,
-  // Une fonction, pas une chaîne : passer valide le niveau DÉJÀ choisi
-  // (voir skip() dans OnboardingFlow), qui n'est N5 que par défaut.
-  onbSkip: (level) => `Passer — commencer en ${level}`,
-  onbSkipHint: 'Tout se règle plus tard dans les Réglages.',
-  onbDocumentTitle: 'Guichet',
-  onbLevelTitle: 'De quelle gare partez-vous ?',
-  onbLevelNever: 'Je n’ai jamais étudié le japonais',
-  onbLevelNeverHint: 'Départ en N5 — les kana d’abord.',
-  onbLevelTest: 'Testez-moi',
-  onbLevelTestHint: '12 questions, deux minutes, correction immédiate.',
-  onbTestTitle: 'Le test de niveau',
   onbTestProgress: (n, total) => `${n} / ${total}`,
   onbTestKind: {
     reading: 'Comment se lit ce mot ?',
@@ -1463,14 +1466,8 @@ const onboarding = {
   onbTestFinish: 'Voir le résultat',
   onbTestError: 'Le test n’a pas pu être chargé. Réessayez dans un instant.',
   onbTestRetake: 'Repasser le test',
-  onbTestResultTitle: 'Votre gare de départ',
   onbTestResult: (level, correct, total) => `${correct} bonnes réponses sur ${total} — nous vous recommandons de partir de ${level}.`,
-  onbTestOverrideHint: 'C’est une recommandation, pas un verdict — choisissez la gare qui vous ressemble.',
   onbPaceRecommended: 'Recommandé',
-  onbMapAssumption: 'Projection : nouveaux mots, kanji et points de grammaire uniquement, à rythme constant — les révisions s’y ajoutent.',
-  onbMapUnavailable: 'La projection est indisponible pour l’instant — elle vous attend dans l’application.',
-  onbPassTitle: 'Votre passe est prêt',
-  onbPassBoard: 'Passer le portillon',
   onbPassError: 'L’enregistrement a échoué — vérifiez votre connexion et réessayez.',
   // Le rythme quotidien, vécu : la jauge 新規 du hall et le terminus
   // de session des écrans d'étude (voir components/study/usePace.js).
@@ -1587,4 +1584,5 @@ export default {
   ...decks,
   ...exam,
   ...onboarding,
+  ...boarding,
 }

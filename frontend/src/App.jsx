@@ -22,9 +22,9 @@ import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { LangProvider, useLang } from './LangContext'
 
-import LandingScreen from './screens/LandingScreen'
+import Welcome from './components/boarding/Welcome'
 import AuthScreen  from './screens/AuthScreen'
-import OnboardingFlow from './screens/OnboardingFlow'
+import BoardingFlow from './screens/BoardingFlow'
 import LearnScreen from './screens/LearnScreen'
 import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
@@ -123,7 +123,9 @@ function Moved({ to }) {
 
 export default function App() {
   const [session, setSession] = useState(undefined)
-  const [showLanding, setShowLanding] = useState(true)
+  // Signed out: Welcome (the boarding's step zero) until Board or
+  // "Have an account?" opens the sign-in on the matching side.
+  const [authMode, setAuthMode] = useState(null) // null | 'login' | 'signup'
   // The onboarding gate: undefined = still asking, 'needed' = show the
   // ticket office instead of the router, 'finishing' = the router is
   // up with the TicketGate cutscene playing over it, 'done' = normal.
@@ -224,9 +226,9 @@ export default function App() {
   if (!session) {
     return (
       <LangProvider>
-        {showLanding
-          ? <LandingScreen onContinue={() => setShowLanding(false)} />
-          : <AuthScreen onBack={() => setShowLanding(true)} />}
+        {authMode
+          ? <AuthScreen mode={authMode} onBack={() => setAuthMode(null)} />
+          : <Welcome onBoard={() => setAuthMode('signup')} onSignIn={() => setAuthMode('login')} />}
       </LangProvider>
     )
   }
@@ -244,14 +246,14 @@ export default function App() {
     )
   }
 
-  // みどりの窓口 — the ticket office, instead of the router: the same
-  // continuum Landing → Auth uses. No route, no station; see
-  // screens/OnboardingFlow.jsx for why. onComplete goes through
+  // 乗車 — the boarding, instead of the router: the same continuum
+  // Welcome → Auth uses. No route, no station; see
+  // screens/BoardingFlow.jsx for why. onComplete goes through
   // 'finishing' so the TicketGate below plays over the mounted router.
   if (onboarding === 'needed') {
     return (
       <LangProvider>
-        <OnboardingFlow
+        <BoardingFlow
           session={session}
           initialProfile={onboardingProfile}
           onComplete={() => setOnboarding('finishing')}
@@ -380,7 +382,7 @@ export default function App() {
         {/* The onboarding finale: the learner's FIRST pass through the
             改札, played over the already-mounted router (the run is
             under the scrim from frame one) — rendered here and not by
-            OnboardingFlow, which has just unmounted and would take the
+            BoardingFlow, which has just unmounted and would take the
             cutscene down mid-wipe with it. onNavigate is a no-op
             because '/' (→ /today) is already where the router mounts.
             Under prefers-reduced-motion TicketGate fires both callbacks

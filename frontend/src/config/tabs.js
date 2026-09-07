@@ -83,16 +83,14 @@ function sections(t) {
     // 統計 — the numbers behind all of it, and the one section that
     // belongs to the learner rather than to the language: the profile
     // opens onto it from its ledger of records. Sakura-iro was the one
-    // pigment nothing visible had claimed. `showcase: false` keeps it
-    // off the landing page, where it has never been advertised — a
-    // stats screen sells nobody on learning Japanese.
-    { icon: '統計', title: t.statistics, desc: t.statsDesc, path: '/profile/stats', color: 'var(--accent8)', tab: 'profile', showcase: false },
+    // pigment nothing visible had claimed.
+    { icon: '統計', title: t.statistics, desc: t.statsDesc, path: '/profile/stats', color: 'var(--accent8)', tab: 'profile' },
 
     // ── 本日 — the daily queue (see screens/TodayScreen) ──
     // --accent2 rather than a --line-* pigment: those eleven are all
     // claimed by lines and platforms, and gold is what the gate has
     // always been painted in.
-    { icon: '本日', title: t.todayTitle, desc: t.todayDesc, path: '/today', color: 'var(--accent2)', tab: 'today', showcase: false },
+    { icon: '本日', title: t.todayTitle, desc: t.todayDesc, path: '/today', color: 'var(--accent2)', tab: 'today' },
   ]
 }
 
@@ -104,11 +102,6 @@ export function getSections(tabId, t) {
 /** The halls behind the profile screen — today, the statistics alone. */
 export function getProfileHalls(t) {
   return getSections('profile', t)
-}
-
-/** Everything worth advertising — the landing page's feature grid. */
-export function getShowcase(t) {
-  return sections(t).filter(s => s.showcase !== false)
 }
 
 /**

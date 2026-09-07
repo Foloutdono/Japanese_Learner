@@ -45,6 +45,20 @@ def test_known_batches_take_one_row_per_item_in_the_primary_mode():
     assert not any(source == "kana" for source, _, _ in batches)
 
 
+def test_kana_batch_names_the_sets_a_script_covers():
+    mode, hira = level_rule.kana_batch("hiragana")
+    assert mode == "kana.flashcard.f2b"
+    assert hira[0] == "kana_あ" and len(hira) == 104
+    _, kata = level_rule.kana_batch("katakana")
+    assert kata[0] == "kana_ア" and len(kata) == 120
+    _, both = level_rule.kana_batch("both")
+    assert both == hira + kata
+    assert level_rule.kana_batch("none") == (mode, [])
+    assert level_rule.kana_batch(None) == (mode, [])
+    assert level_rule.kana_sets_for("both") == (
+        "hiragana_basic", "hiragana_combos", "katakana_basic", "katakana_combos")
+
+
 def test_hold_above_keeps_the_stops_at_or_behind_the_level():
     lanes = daily_queue.OrderedDict([
         ((SECTION, "kanji", "N5", "kanji.flashcard.f2b"), ["a"]),

@@ -27,7 +27,7 @@ from core.auth import get_user_id
 from core.db import db_conn
 from core.srs_instance import srs
 from core.user_level import LEVELS
-from routes.onboarding import DEPARTURES, VOLUMES
+from routes.onboarding import DEPARTURES, DEPART_TIMES, VOLUMES
 from routes.profile import ensure_profile_row
 
 router = APIRouter()
@@ -190,6 +190,12 @@ def journey_reprint(payload: ReprintPayload, user_id: str = Depends(get_user_id)
     if departure_sent:
         sets.append("daily_departure = %s")
         args.append(payload.dailyDeparture)
+        # The daily nudge follows the hour (plan 075): Settings ›
+        # Destination is the one place the ride's hour changes after the
+        # boarding, and a reminder that kept naming the old time would
+        # be a pass that lies. Flexible clears it.
+        sets.append("reminder_time = %s")
+        args.append(DEPART_TIMES.get(payload.dailyDeparture))
     conn = db_conn()
     try:
         with conn.cursor() as cur:
