@@ -12,6 +12,13 @@ const KANJI = {
   type: 'kanji', kanji: '駅', kana: 'エキ・えき・うまや', meaning: 'station', level: 'N5',
   status: { status: 'mastered', total_reviews: 14, correct_reviews: 13, accuracy: 92, interval_days: 21, next_review: '2026-09-20T00:00:00Z', due: false },
   stroke_count: 14, radical: 187,
+  // Every reading with the words that use it (study/kanji_words.py):
+  // うまや has none and prints as a chip in the sheet's kun register.
+  readings: [
+    { reading: 'エキ', words: [{ kanji: '駅員', kana: 'えきいん', meaning: 'station staff' }] },
+    { reading: 'えき', words: [{ kanji: '駅前', kana: 'えきまえ', meaning: 'in front of the station' }] },
+    { reading: 'うまや', words: [] },
+  ],
   vocab_examples: [
     { kanji: '駅員', kana: 'えきいん', meaning: 'station staff' },
     { kanji: '駅前', kana: 'えきまえ', meaning: 'in front of the station' },
@@ -167,18 +174,19 @@ describe('the dictionary screen', () => {
 
     more.click()
     await settle(60)
-    const sheet = document.querySelector('.sheet.dict-readings')
+    // The readings sheet (the entry's own, over the dock): the on
+    // register and the kun register; うまや, which no word carries,
+    // sits in the kun register as a chip.
+    const sheet = document.querySelector('.dict-sheet__scrim--over .dict-sheet[role="dialog"]')
     expect(sheet).not.toBeNull()
-    // The on register and the kun register; うまや, which no word
-    // carries, sits in the kun register as a chip.
     expect(sheet.querySelectorAll('.dict-register').length).toBe(2)
     expect(sheet.querySelector('.dict-register__chip').textContent).toBe('うまや')
-    document.querySelector('.scrim').click()
+    document.querySelector('.dict-sheet__scrim--over').click()
     await settle(60)
-    expect(document.querySelector('.sheet.dict-readings')).toBeNull()
+    expect(document.querySelector('.dict-sheet__scrim--over')).toBeNull()
     expect(screen.container.querySelector('.dict-entry')).not.toBeNull()
 
-    plate.querySelector('.stage__leave').click()
+    plate.querySelector(`.dict-plate__btn[aria-label="${T.close}"]`).click()
     await settle(60)
     expect(screen.container.querySelector('.dict-entry')).toBeNull()
   })

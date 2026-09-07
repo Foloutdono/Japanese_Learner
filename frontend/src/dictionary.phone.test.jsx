@@ -133,7 +133,12 @@ describe('the dictionary at phone width', () => {
     expect(getComputedStyle(plate.querySelector('.dict-plate__more')).borderTopLeftRadius).toBe('999px')
     const stripe = plate.querySelector('.dict-plate__stripe')
     expect(getComputedStyle(stripe).height).toBe('3px')
-    expect(stripe.getBoundingClientRect().width).toBeCloseTo(plate.getBoundingClientRect().width, 0)
+    // main's plate (the 2026-09 dictionary-detail redesign, merged into
+    // this wave) keeps the stripe inside the plate's own padding: it
+    // spans the content box, edge to edge of what the plate prints.
+    const ps = getComputedStyle(plate)
+    const content = plate.getBoundingClientRect().width - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight)
+    expect(stripe.getBoundingClientRect().width).toBeCloseTo(content, 0)
 
     const blocks = screen.container.querySelectorAll('.dict-block')
     expect(getComputedStyle(blocks[0]).borderTopWidth).toBe('0px')
@@ -265,8 +270,11 @@ describe('the analyzer at phone width', () => {
     expect(getComputedStyle(rows[0]).borderTopWidth).toBe('0px')
     expect(getComputedStyle(rows[1]).borderTopWidth).toBe('1px')
     expect(getComputedStyle(rows[2]).borderTopWidth).toBe('1px')
+    // The register's chips are quiet pills, not targets (nothing opens
+    // from one): the --sp-6 floor of main's rule, in a pill.
+    const resolve = resolver()
     for (const chip of screen.container.querySelectorAll('.dict-register__chip')) {
-      expect(chip.getBoundingClientRect().height).toBe(30)
+      expect(chip.getBoundingClientRect().height).toBeGreaterThanOrEqual(parseFloat(resolve('minHeight', 'var(--sp-6)')))
       expect(getComputedStyle(chip).borderTopLeftRadius).toBe('999px')
     }
   })

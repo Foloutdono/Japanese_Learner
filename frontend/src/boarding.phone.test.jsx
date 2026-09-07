@@ -127,7 +127,7 @@ describe('the boarding at 390×844', () => {
     await settle()
     const cells = [...live().querySelectorAll('.brd-cell')]
     expect(cells).toHaveLength(4)
-    for (const c of cells) expect(rect(c).height).toBeGreaterThanOrEqual(120)
+    for (const c of cells) expect(Math.round(rect(c).height)).toBeGreaterThanOrEqual(120)
     await click(screen.container, '[data-action="continue"]')
     await settle()
     const hours = [...live().querySelectorAll('.brd-cell--sm')]

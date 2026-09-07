@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readingStem, pickVariedReadings } from './readingPick'
+import { readingStem, pickVariedReadings, isOnyomiToken, pickPlateReadings } from './readingPick'
 
 // 下's real reading field, from content/kanji_data.py — the card that
 // prompted this: two on'yomi and twelve kun, of which five are okurigana
@@ -60,5 +60,43 @@ describe('pickVariedReadings', () => {
     expect(pickVariedReadings(oneStem, 3)).toEqual(['とお.る', 'かよ.う', 'とお.す'].sort(
       (a, b) => oneStem.indexOf(a) - oneStem.indexOf(b)))
     expect(pickVariedReadings(oneStem, 3)).toHaveLength(3)
+  })
+})
+
+// 木's and 山's real reading fields, from content/kanji_data.py.
+const KI = ['ボク', 'モク', 'き', 'こ~']
+const YAMA = ['サン', 'セン', 'やま']
+
+describe('isOnyomiToken', () => {
+  it('reads the register off the first kana, skipping markers', () => {
+    expect(isOnyomiToken('モク')).toBe(true)
+    expect(isOnyomiToken('き')).toBe(false)
+    expect(isOnyomiToken('こ~')).toBe(false)
+    expect(isOnyomiToken('~び')).toBe(false)   // the marker is not kana
+    expect(isOnyomiToken('い.きる')).toBe(false)
+  })
+
+  it('survives junk', () => {
+    expect(isOnyomiToken('')).toBe(false)
+    expect(isOnyomiToken(undefined)).toBe(false)
+    expect(isOnyomiToken('abc')).toBe(false)
+  })
+})
+
+describe('pickPlateReadings', () => {
+  it('takes the first on\'yomi and the first kun\'yomi when a kanji has both', () => {
+    expect(pickPlateReadings(KI)).toEqual(['ボク', 'き'])
+    expect(pickPlateReadings(YAMA)).toEqual(['サン', 'やま'])
+  })
+
+  it('falls back to two varied readings when only one register exists', () => {
+    expect(pickPlateReadings(['カ', 'ゲ', 'キ'])).toEqual(['カ', 'ゲ'])
+    expect(pickPlateReadings(SHITA_KUN)).toEqual(['した', 'しも'])
+  })
+
+  it('leaves a list that already fits alone, and survives junk', () => {
+    expect(pickPlateReadings(['ガク', 'まな.ぶ'])).toEqual(['ガク', 'まな.ぶ'])
+    expect(pickPlateReadings(['ひ'])).toEqual(['ひ'])
+    expect(pickPlateReadings(undefined)).toEqual([])
   })
 })

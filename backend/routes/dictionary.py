@@ -15,9 +15,9 @@ from translations.fr.vocab_fr import VOCAB_FR
 from core.auth import get_user_id
 from core.srs_instance import srs
 from study.card_lookup import (
-    card_stats, VOCAB_STATUS_MODES, KANJI_STATUS_MODES, KANA_STATUS_MODES, is_kanji,
+    card_stats, VOCAB_STATUS_MODES, KANJI_STATUS_MODES, KANA_STATUS_MODES,
 )
-from study.furigana import align_deck
+from study.kanji_words import kanji_words, word_furigana
 
 router = APIRouter()
 
@@ -60,132 +60,6 @@ def _build_app_radical_index():
 
 
 _APP_RADICAL_KANJI = _build_app_radical_index()
-
-# Same ordering rule card_lookup._level_rank uses (lower = more common) —
-# duplicated here rather than imported since that name is private to
-# card_lookup.py.
-_LEVEL_ORDER = {"N5": 0, "N4": 1, "N3": 2, "N2": 3, "N1": 4}
-
-
-def _level_rank(level: str) -> int:
-    return _LEVEL_ORDER.get(level, 99)
-
-
-def _build_kanji_to_vocab_index():
-    """
-    kanji char -> [(level, vocab_entry), ...], for every word in the app's
-    own vocab deck (VOCAB_BY_LEVEL) whose kanji field contains that
-    character. Powers each kanji's "used in these words" example list (see
-    _vocab_examples_for_kanji) — built once at import time, same reasoning
-    as _build_app_radical_index above.
-    """
-    index = defaultdict(list)
-    for level, vocab_list in VOCAB_BY_LEVEL.items():
-        for w in vocab_list:
-            chars = {c for c in w.get("kanji", "") if is_kanji(c)}
-            for char in chars:
-                index[char].append((level, w))
-    return index
-
-
-_KANJI_TO_VOCAB = _build_kanji_to_vocab_index()
-
-_MAX_KANJI_VOCAB_EXAMPLES = 4
-
-
-def _word_furigana(kanji: str, kana: str) -> list[dict]:
-    """Per-kanji furigana for a headword, computed once here rather than
-    left to the frontend's weaker anchor-only splitter — same algorithm
-    (study.furigana) the vocab screen's indice_3 hint already renders
-    with. `kana` may pack several readings with "/"; only the first,
-    primary one is annotated, matching how the dictionary panel's
-    headline furigana already picks it."""
-    if not kanji or not kana:
-        return []
-    primary = kana.split("/")[0].strip()
-    return align_deck(kanji, primary) if primary else []
-
-
-def _reading_of(char: str, furigana: list[dict]) -> str | None:
-    """Which reading of `char` a word actually uses, from its own furigana.
-
-    Only counted when the aligner isolated the character on its own — a
-    part covering a whole unsegmented run ("生活" → せいかつ) says nothing
-    about which half is which, so it comes back None and the caller
-    treats the word as "reading unknown" rather than inventing one.
-    """
-    for part in furigana:
-        if part.get("text") == char:
-            return part.get("reading")
-    return None
-
-
-def _vocab_examples_for_kanji(char: str, lang: str) -> list[dict]:
-    """Up to _MAX_KANJI_VOCAB_EXAMPLES real vocab words containing `char`,
-    chosen to show as MANY DIFFERENT READINGS of it as the deck can.
-
-    Ordering within a reading is unchanged — most-common level first, and
-    multi-character compounds before the bare single-character word, since
-    a kanji's card should show how it combines with others rather than
-    just repeat itself. What is new is the pass across readings on top of
-    that: the four slots are filled one reading at a time before any
-    reading is allowed a second word.
-
-    This matters most on exactly the kanji a learner most needs it for.
-    生 has six readings in the deck; by level alone its four examples came
-    out 先生・学生・生活・人生 — セイ, four times, teaching a quarter of the
-    character. Round-robin gives セイ, い(きる), う(まれる), なま instead.
-    Kanji with only one reading are unaffected: one bucket, same order it
-    always had.
-    """
-    candidates = _KANJI_TO_VOCAB.get(char, [])
-    compounds = sorted((c for c in candidates if len(c[1].get("kanji", "")) > 1), key=lambda c: _level_rank(c[0]))
-    singles   = sorted((c for c in candidates if len(c[1].get("kanji", "")) <= 1), key=lambda c: _level_rank(c[0]))
-
-    # Bucket by the reading each word gives `char`, keeping insertion
-    # order so both the buckets themselves and the words inside them stay
-    # in the compounds-then-singles, common-level-first order above.
-    # `None` (the aligner could not isolate the character) is a bucket
-    # like any other, drawn from last — a word that cannot say which
-    # reading it demonstrates is the weakest example, not a wrong one.
-    seen: set[tuple[str, str]] = set()
-    by_reading: dict[str | None, list[dict]] = {}
-    for level, w in compounds + singles:
-        key = (w.get("kanji", ""), w.get("kana", ""))
-        if key in seen:
-            continue
-        seen.add(key)
-        furigana = _word_furigana(w.get("kanji", ""), w.get("kana", ""))
-        entry = {
-            "kanji":    w.get("kanji", ""),
-            "kana":     w.get("kana", ""),
-            "meaning":  get_meaning(w, lang, VOCAB_FR_MAP),
-            "level":    level,
-            "furigana": furigana,
-        }
-        by_reading.setdefault(_reading_of(char, furigana), []).append(entry)
-
-    # Round-robin: one word per reading per pass, so four slots cover four
-    # readings when four exist and fall back to the plain order when they
-    # do not. Nones last within each pass.
-    ordered = sorted(by_reading, key=lambda r: r is None)
-    out: list[dict] = []
-    depth = 0
-    while len(out) < _MAX_KANJI_VOCAB_EXAMPLES:
-        added = False
-        for reading in ordered:
-            words = by_reading[reading]
-            if depth >= len(words):
-                continue
-            out.append(words[depth])
-            added = True
-            if len(out) >= _MAX_KANJI_VOCAB_EXAMPLES:
-                break
-        if not added:
-            break
-        depth += 1
-    return out
-
 
 @router.get("/api/dictionary/radicals")
 def get_radical_grid(all: bool = False):
@@ -284,7 +158,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 "level":    None,
                 "senses":   extras["senses"],
                 "examples": extras["examples"],
-                "furigana": _word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
+                "furigana": word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
                 "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
             })
         return {
@@ -363,6 +237,9 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
             raw_id    = kanji_to_id(entry, level)
             codepoint = hex(ord(entry["kanji"]))[2:].zfill(5)
             info      = KANJI_RADICALS.get(entry["kanji"])
+            # Both the "used in these words" ledger and the per-reading
+            # panel come from one grouping pass -- see study/kanji_words.py.
+            words = kanji_words(entry["kanji"], lang)
             results.append({
                 "type":         "kanji",
                 "kanji":        entry["kanji"],
@@ -375,7 +252,10 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 "level":        level,
                 "svg_url":      f"/kanjivg/{codepoint}.svg",
                 "status":       card_stats(states, user_id, raw_id, KANJI_STATUS_MODES),
-                "vocab_examples": _vocab_examples_for_kanji(entry["kanji"], lang),
+                "vocab_examples": words["examples"],
+                # Every reading in the deck's order, each with the words
+                # that use it -- the plate shows two, the panel all.
+                "readings":     words["readings"],
             })
         elif kind == "vocab":
             raw_id = vocab_to_id(entry, level)
@@ -398,7 +278,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 # dictionary picture instead of only the one meaning.
                 "senses":   extras["senses"],
                 "examples": extras["examples"],
-                "furigana": _word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
+                "furigana": word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
                 "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
             })
         else:  # hiragana or katakana

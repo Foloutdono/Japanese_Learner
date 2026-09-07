@@ -11,8 +11,9 @@ import { useEffect, useRef, useState } from 'react'
 //   - `svgText` the raw SVG markup directly, if you already have it.
 //
 // Drop-in replacement for a static <img>: it fills its container
-// (width/height: 100%) the same way `.stroke-ref__img` /
-// `.dict-form__img` sized the old <img>, so no CSS changes
+// (width/height: 100%) the same way `.stroke-ref__img` sized the old
+// <img> (the dictionary's washi sheet, .dict-form__sheet, lets it fill
+// the cell the same way), so no CSS changes
 // are needed at the call site beyond swapping the tag. On fetch
 // failure it calls `onError()` instead of rendering anything, so the
 // caller can show its own existing fallback markup exactly like the
@@ -34,10 +35,6 @@ export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, 
     if (!src) return
     const controller = new AbortController()
     setSvgText(null)
-    // `src` arrives already resolved through lib/api's api() by both
-    // callers (DrawingCanvas, DictionaryDetail) — this is a fetch, not
-    // an <img>, so in the native shell it is CORS-checked against the
-    // web origin like any API call.
     fetch(src, { signal: controller.signal })
       .then(r => (r.ok ? r.text() : Promise.reject(new Error('not ok'))))
       .then(setSvgText)

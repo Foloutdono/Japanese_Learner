@@ -6,9 +6,19 @@ import { playUi } from '../lib/audio'
 import { splitReadingTokens } from '../components/study/Readings'
 import { firstGloss } from '../components/study/gloss'
 import {
-	TYPE_META, isKanaType, entryKey, stageOf,
+	TYPE_META, isKanaType, entryKey,
 	DictionaryDetail, LevelBadge,
 } from '../components/dictionary/DictionaryDetail'
+
+// The catalogue card's stage word: the SRS status folded onto the three
+// stages the mark knows. A due card is still in progress; an unknown
+// status prints nothing (StageMark returns null for it).
+function stageOf(status) {
+	if (status === 'mastered') return 'mastered'
+	if (status === 'learning' || status === 'due') return 'learning'
+	if (status === 'new') return 'new'
+	return null
+}
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { StageMark } from '../components/study/StageMark'

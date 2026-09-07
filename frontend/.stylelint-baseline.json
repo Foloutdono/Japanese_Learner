@@ -36,8 +36,6 @@
   "no-duplicate-selectors::Duplicate selector \"body\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".ember\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \":root\", first used at line N": 1,
-  "no-duplicate-selectors::Duplicate selector \".dict-radical-index\", first used at line N": 1,
-  "no-duplicate-selectors::Duplicate selector \".dict-radical-sheets\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".syllabary-chart-group\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".syllabary-table\", first used at line N": 2,
   "no-duplicate-selectors::Duplicate selector \".syllabary-cell\", first used at line N": 2,
