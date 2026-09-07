@@ -77,3 +77,20 @@ def test_an_unknown_origin_is_not_echoed(client):
         headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "GET"},
     )
     assert response.headers.get("access-control-allow-origin") is None
+
+
+# ── CORS on the static mounts, not just /api ─────────────────────
+# The stroke-order drawing is the one backend asset the frontend reads
+# with fetch() rather than an <img>/<audio> src (it parses the SVG to
+# animate it path by path -- components/study/StrokeOrderAnimation),
+# and fetch is CORS-checked where a media element's src is not. So in
+# the shell, where /kanjivg is cross-origin (ADR 0008), the mount has
+# to answer with the echo too or every kanji falls back to "not
+# available". CORSMiddleware wraps the mounts as well as the routers;
+# this is what keeps that true.
+@pytest.mark.parametrize("origin", ["capacitor://localhost", "https://localhost"])
+def test_the_kanjivg_mount_answers_the_native_origins(client, origin):
+    response = client.get("/kanjivg/06728.svg", headers={"Origin": origin})
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == origin
+    assert "<svg" in response.text

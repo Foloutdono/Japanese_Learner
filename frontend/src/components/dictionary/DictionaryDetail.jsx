@@ -4,6 +4,7 @@ import { LEVEL_COLORS } from './levelColors'
 import { shortDate } from '../../lib/formatDate'
 import { useLang } from '../../LangContext'
 import { apiFetch } from '../../lib/api'
+import { api } from '../../lib/origin'
 import { FuriganaParts, splitReadingTokens } from '../study/Readings'
 import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageMark } from '../study/StageMark'
@@ -12,8 +13,6 @@ import { GlossList, firstGloss, splitGlosses } from '../study/gloss'
 import { BoltIcon, ChevronIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { speakJapanese } from '../../lib/audio'
-
-const API_BASE = ''  // same-origin, always — see lib/api.js
 
 // ── 見出し語 — the entry, as a plate ──────────────────────────
 // The catalogue already draws every entry as a small 駅名標: reading
@@ -720,7 +719,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
               {hasSheet && (
                 <StrokeSheet
                   key={entry.svg_url}
-                  src={`${API_BASE}${entry.svg_url}`}
+                  src={api(entry.svg_url)}
                   notAvailableLabel={t.notAvailable}
                 />
               )}
