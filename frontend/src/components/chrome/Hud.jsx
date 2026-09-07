@@ -6,6 +6,7 @@ import { useCredits, openBalance } from '../../stores/credits'
 import { useOnline } from '../../hooks/useOnline'
 import { useXpGain } from './useXpGain'
 import { journeyModel } from '../../domain/goalMath'
+import { showsCap } from '../../domain/credits'
 import { playClick } from '../../lib/audio'
 
 // ── 運行案内 — the HUD (plan 068) ─────────────────────────────
@@ -116,7 +117,8 @@ export function HudPass({ onClick }) {
       {credits?.unlimited && <span className="hud__pass-fig hud__pass-fig--inf">∞</span>}
       {balance != null && (
         <span className="hud__pass-fig">
-          {balance}<span className="hud__pass-of">/{credits.cap}</span>
+          {balance}
+          {showsCap(balance, credits.cap) && <span className="hud__pass-of">/{credits.cap}</span>}
         </span>
       )}
     </button>

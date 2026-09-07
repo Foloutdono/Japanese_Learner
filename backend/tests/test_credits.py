@@ -4,7 +4,9 @@
 Every test runs on its own probe-<uuid> user so the rows it writes are
 its own and are erased on the way out (delete_user_rows, the account
 route's own plan). The economy's rules, one each: a new account is
-seeded with the day's refill; the refill is taken once per local day
+welcomed with the signup bonus, which sits above the cap and is spent
+down before the daily refill has anything to do; the refill is taken
+once per local day
 and never past the cap; a fare is charged only after the scheduler
 accepted the review; shadow mode records what there is and never
 blocks; enforcement refuses with the 402 shapes; a pass never spends;
@@ -65,28 +67,54 @@ def _set_profile(user, **cols):
 
 # ── The seed and the refill ──────────────────────────────────────
 
-def test_a_new_account_starts_with_the_days_refill(uid):
+def test_a_new_account_is_welcomed_with_the_signup_bonus(uid):
     s = credits.summary(uid)
-    assert s["balance"] == credits.DAILY_REFILL
+    assert s["balance"] == credits.SIGNUP_BONUS
     assert s["cap"] == credits.CAP and s["dailyRefill"] == credits.DAILY_REFILL
+    assert s["signupBonus"] == credits.SIGNUP_BONUS
     assert s["plan"] == "free" and s["unlimited"] is False
     assert s["enforced"] is False
-    assert _rows(uid) == [(credits.DAILY_REFILL, "grant", "seed")]
-    # The seed IS today's refill: reading again adds nothing.
+    assert _rows(uid) == [(credits.SIGNUP_BONUS, "grant", "welcome")]
+    # The welcome IS today's refill: reading again adds nothing.
     credits.refill_if_due(uid)
-    assert _rows(uid) == [(credits.DAILY_REFILL, "grant", "seed")]
+    assert _rows(uid) == [(credits.SIGNUP_BONUS, "grant", "welcome")]
+    # It is deliberately over the cap — the cap bounds the daily refill,
+    # not what a learner may hold — and it is granted once, ever.
+    assert credits.SIGNUP_BONUS > credits.CAP
+
+
+def test_the_welcome_is_spent_down_before_the_daily_refill_resumes(uid):
+    credits.summary(uid)
+    # A balance still above the cap takes nothing: the refill tops up TO
+    # the cap, and there is nothing to top up.
+    _set_profile(uid, credits_refilled_on=date.today() - timedelta(days=1))
+    assert credits.refill_if_due(uid)["balance"] == credits.SIGNUP_BONUS
+    assert len(_rows(uid)) == 1
+    # Spent down to just over the cap, still nothing.
+    credits.grant(uid, credits.CAP + 1 - credits.SIGNUP_BONUS, "test")
+    _set_profile(uid, credits_refilled_on=date.today() - timedelta(days=1))
+    assert credits.refill_if_due(uid)["balance"] == credits.CAP + 1
+    # Under it, the refill resumes — and still holds at the cap, so
+    # what it pays out is only the room there was.
+    credits.grant(uid, -2, "test")
+    _set_profile(uid, credits_refilled_on=date.today() - timedelta(days=1))
+    assert credits.refill_if_due(uid)["balance"] == credits.CAP
+    assert _rows(uid)[-1] == (1, "refill", date.today().isoformat())
 
 
 def test_the_refill_comes_once_per_local_day_and_holds_at_the_cap(uid):
     credits.summary(uid)
-    # Yesterday's seed (30), today's refill: only what the cap allows.
+    # Down to 30 first: the welcome is over the cap, and the refill's
+    # arithmetic only has anything to do below it.
+    credits.grant(uid, credits.DAILY_REFILL - credits.SIGNUP_BONUS, "test")
     _set_profile(uid, credits_refilled_on=date.today() - timedelta(days=1))
     s = credits.refill_if_due(uid)
     assert s["balance"] == credits.CAP
-    assert [(r[0], r[1]) for r in _rows(uid)] == [(30, "grant"), (20, "refill")]
+    assert [(r[0], r[1]) for r in _rows(uid)][-1] == (20, "refill")
     # Asking twice the same day is one refill.
+    n = len(_rows(uid))
     credits.refill_if_due(uid)
-    assert len(_rows(uid)) == 2
+    assert len(_rows(uid)) == n
     # Spent down to 5, the next day's refill is the whole 30.
     credits.grant(uid, -45, "test")
     _set_profile(uid, credits_refilled_on=date.today() - timedelta(days=1))
@@ -136,7 +164,7 @@ def test_a_review_costs_one_credit_after_the_scheduler_accepts_it(client):
 
 def test_shadow_mode_records_what_there_is_and_never_blocks(uid, caplog):
     credits.summary(uid)
-    credits.grant(uid, -credits.DAILY_REFILL + 1, "test")  # 1 credit left
+    credits.grant(uid, -credits.SIGNUP_BONUS + 1, "test")  # 1 credit left
     assert credits.spend(uid, 1, "c1") == {"balance": 0, "unlimited": False}
     # Empty, and still not refused: the ledger records nothing (there
     # was nothing to record), the balance never goes below zero, and
@@ -156,7 +184,7 @@ def test_shadow_mode_records_what_there_is_and_never_blocks(uid, caplog):
 def test_enforcement_refuses_with_the_402_shapes(uid, monkeypatch):
     monkeypatch.setattr(credits, "ENFORCE", True)
     credits.summary(uid)
-    credits.grant(uid, -credits.DAILY_REFILL, "test")  # 0
+    credits.grant(uid, -credits.SIGNUP_BONUS, "test")  # 0
     with pytest.raises(credits.OutOfCredits) as e:
         credits.spend(uid, 1, "c1")
     assert e.value.balance == 0 and e.value.refill_at.endswith("+00:00")

@@ -76,6 +76,25 @@ def _backdate_goal(days_ago: int):
         conn.close()
 
 
+def _backdate_start(days_ago: int):
+    """Age the ACCOUNT, not the contract — onboarded_at is what the rate
+    window is measured against (routes/journey.py's _window_days)."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE user_profiles
+                SET onboarded_at = NOW() - make_interval(days => %s)
+                WHERE user_id = %s
+                """,
+                (days_ago, JUID),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def _complete(jclient, **extra):
     body = {"jlptLevel": "N5", "dailyNewTarget": 10,
             "goalLevel": "N3", "goalTargetDate": "2030-01-01", **extra}
@@ -147,6 +166,59 @@ def test_windows_and_the_goal_anchor(jclient):
     # 1-day-old first drops out of itemsDone yet stays in the window.
     _backdate_goal(0)
     body = jclient.get("/api/journey/status").json()
+    assert body["itemsDone"] == 0
+    assert body["actual14"] == 1
+
+
+def test_the_rate_window_is_never_longer_than_the_account(jclient):
+    """days14 is the DIVISOR the client turns actual14 into a daily rate
+    with, and it used to be a flat 14 whatever the learner's age.
+
+    A learner who signed up today and did four items had done four items
+    in one day; dividing them by fourteen called it 0.3/day, and
+    goalMath's journeyModel divides the remaining items BY that rate to
+    get an arrival — so the pass announced a brand-new account nearly
+    two decades late (6,580 days, reported from the phone) on the
+    morning it was created. The window can never be longer than the
+    account it measures.
+    """
+    _complete(jclient)
+    # Day one is one day, not fourteen.
+    body = jclient.get("/api/journey/status").json()
+    assert body["days14"] == 1
+
+    # And it grows a day at a time, up to the full window.
+    for age, expected in ((1, 2), (6, 7), (13, 14), (30, 14), (400, 14)):
+        _backdate_start(age)
+        assert jclient.get("/api/journey/status").json()["days14"] == expected
+
+    # The rate this makes is the honest one: four items on a two-day-old
+    # account is 2/day, where the flat window called it 0.29.
+    _backdate_start(1)
+    for i in range(4):
+        _seed_review(f"vocab_N5_10{i}", 0.1)
+    body = jclient.get("/api/journey/status").json()
+    assert body["actual14"] == 4
+    assert body["days14"] == 2
+    assert body["actual14"] / body["days14"] == 2.0
+
+
+def test_a_new_goal_on_an_old_account_keeps_the_full_window(jclient):
+    """The anchor is onboarded_at, which is stamped once and never
+    moves. Anchoring on goal_set_at instead would make a veteran who
+    signs a fresh destination today divide a fortnight of items by one
+    day — the same bug with the sign flipped."""
+    _complete(jclient)
+    _backdate_start(200)
+    _seed_review("vocab_N5_0200", 3)
+    # A brand-new contract, signed just now, on a long-standing account.
+    r = jclient.post("/api/journey/goal",
+                     json={"goalLevel": "N4", "goalTargetDate": "2031-01-01"})
+    assert r.status_code == 200
+    body = jclient.get("/api/journey/status").json()
+    assert body["days14"] == 14
+    # The item predates the new contract, so it is not "done" against it
+    # — but it is still part of the fortnight's measured rhythm.
     assert body["itemsDone"] == 0
     assert body["actual14"] == 1
 

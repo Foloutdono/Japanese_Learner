@@ -21,6 +21,7 @@ import OnboardingPreview from './screens/OnboardingPreview'
 import SoundPalette from './screens/SoundPalette'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
+import { isGuest, startGuest } from './lib/guest'
 import { LangProvider, useLang } from './LangContext'
 
 import Welcome from './components/boarding/Welcome'
@@ -127,6 +128,35 @@ export default function App() {
   // Signed out: Welcome (the boarding's step zero) until Board or
   // "Have an account?" opens the sign-in on the matching side.
   const [authMode, setAuthMode] = useState(null) // null | 'login' | 'signup'
+  // Embarquer mints a guest pass rather than asking for an account
+  // (lib/guest.js): the boarding runs on a real user with no
+  // credentials, and the account is offered at the END, refusably. The
+  // flag is only the button's own "working on it" — the session
+  // arrives through the auth listener like any other.
+  const [boarding, setBoarding] = useState(false)
+
+  // Anonymous sign-ins are a project setting, so this can legitimately
+  // be unavailable. It is not something the learner can act on, so the
+  // fall-back is silent and is simply the flow this replaced: ask for
+  // the account up front.
+  async function board() {
+    if (boarding) return
+    setBoarding(true)
+    const r = await startGuest()
+    if (!r.ok) setAuthMode('signup')
+    setBoarding(false)
+  }
+
+  // The two ways out of the boarding, both of which end at Welcome:
+  // back from its first question, and "already have an account". A
+  // guest pass with nothing on it is worth nothing, so leaving drops
+  // it rather than stranding a half-filled account in the session —
+  // and signing out is what puts Welcome back on screen. `local`
+  // scope, like Settings' own sign-out: this device only.
+  function leaveBoarding(mode = null) {
+    setAuthMode(mode)
+    supabase.auth.signOut({ scope: 'local' })
+  }
   // The onboarding gate: undefined = still asking, 'needed' = show the
   // ticket office instead of the router, 'finishing' = the router is
   // up with the TicketGate cutscene playing over it, 'done' = normal.
@@ -229,7 +259,7 @@ export default function App() {
       <LangProvider>
         {authMode
           ? <AuthScreen mode={authMode} onBack={() => setAuthMode(null)} />
-          : <Welcome onBoard={() => setAuthMode('signup')} onSignIn={() => setAuthMode('login')} />}
+          : <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} />}
       </LangProvider>
     )
   }
@@ -257,7 +287,10 @@ export default function App() {
         <BoardingFlow
           session={session}
           initialProfile={onboardingProfile}
+          guest={isGuest(session)}
           onComplete={() => setOnboarding('finishing')}
+          onExit={() => leaveBoarding()}
+          onSignIn={() => leaveBoarding('login')}
         />
       </LangProvider>
     )

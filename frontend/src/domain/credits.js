@@ -4,6 +4,10 @@
 // is the truth for the balance itself.
 export const DAILY_REFILL = 30
 export const CAP = 50
+// 開通祝い — what a new account is handed on its first read, once. Well
+// above CAP on purpose: the cap bounds the daily REFILL, not what a
+// learner may hold (backend/core/credits.py).
+export const SIGNUP_BONUS = 200
 export const COST_PER_REVIEW = 1
 export const FREE_DECKS = 7
 export const FREE_CARDS = 200
@@ -17,6 +21,17 @@ export const PASS_CARDS = 10000
 // plans/README.md, wave 14). Flipping it is the next wave's, with
 // the store.
 export const HAS_STORE = false
+
+/**
+ * Whether the cap belongs beside a balance. It bounds the daily refill,
+ * not the wallet, so a balance above it — a fresh welcome is, at
+ * SIGNUP_BONUS — has no honest denominator: "200/50" reads as a broken
+ * fraction, and the figure stands better alone until the welcome has
+ * been spent down to where the refill has something to do again.
+ */
+export function showsCap(balance, cap = CAP) {
+  return balance != null && balance <= cap
+}
 
 /** The fare a run of `due` reviews costs. */
 export function fareFor(due) {

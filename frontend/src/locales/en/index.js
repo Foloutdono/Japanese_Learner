@@ -1106,6 +1106,14 @@ const settings = {
   language:          'Language',
   account:           'Account',
   signOutDesc:       'Sign out of your account on this device.',
+  // A guest holds no key: signing out ends the journey for good. The
+  // row says so rather than letting it be discovered.
+  signOutGuestDesc:  'Without an account your progress lives only on this device: signing out will erase it for good.',
+  guestLabel:        'Guest pass',
+  guestCap:          'No address',
+  guestClaimDesc:    'Your progress is already here. Add an address and a password to keep it — nothing moves, it is the same account.',
+  guestClaimConfirm: 'Almost: confirm the address from the link we just sent you.',
+  guestClaimDone:    'Account created. Your progress is kept.',
 
   // Only ever surfaces as title/aria-label text (NavControls.jsx) —
   // the visible toggle is already a real IconSun/IconMoon SVG.
@@ -1400,6 +1408,17 @@ const boarding = {
   brdTagline: 'Take the train to proficiency.',
   brdBoard: 'Board',
   brdHaveAccount: 'Have an account? Sign in',
+  // Google: "continue", never "sign up" or "sign in" — a provider does
+  // not tell the two apart. You simply arrive.
+  continueWithGoogle: 'Continue with Google',
+  orWithEmail: 'or with an email address',
+  // Last stop: the account, asked once everything has been seen — and
+  // refusable. "Keep" rather than "create": the progress already
+  // exists, this only puts a key on it (lib/guest.js).
+  brdAccountQ: 'Keep your progress.',
+  brdAccountHint: 'Your journey is already saved. An account is how you reach it from another device — and how you keep it when you change phones.',
+  brdAccountCreate: 'Create my account',
+  brdAccountSkip: 'Continue without an account',
   brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulary', grammar: 'Grammar', listening: 'Listening', reading: 'Reading', kana: 'Kana', exam: 'Mock exam' },
   brdDemoMeaning: { station: 'station', toEat: 'to eat', fillIn: 'Fill in', craft: 'craft', listen: 'Listen', readIt: 'Read it', ticket: 'ticket', mountain: 'mountain', kippu: 'ki · p · pu', timer: '24:18' },
   brdDemoFoot: { kanjiMeaning: 'Kanji → meaning', wordMeaning: 'Word → meaning', ruleSentence: 'Rule → sentence', meaningKanji: 'Meaning → kanji', soundMeaning: 'Sound → meaning', sentenceMeaning: 'Sentence → meaning', kanjiReading: 'Kanji → reading', kanaSound: 'Kana → sound', timedPaper: 'Timed paper' },

@@ -1,9 +1,11 @@
 """
 回数券 — the credits ledger (plan 069).
 
-1 credit = 1 review. A free pass refills by DAILY_REFILL at the
-learner's local midnight and holds at most CAP; the subscription pass is
-unlimited. The fare gate prices a run against the balance before
+1 credit = 1 review. A new account is welcomed with SIGNUP_BONUS. After
+that a free pass refills by DAILY_REFILL at the learner's local midnight
+and tops up to at most CAP -- a balance still above CAP (a fresh welcome
+is) simply takes nothing until it has been spent down; the subscription
+pass is unlimited. The fare gate prices a run against the balance before
 departure, and a run longer than the balance stops at the balance.
 
 -- The balance is a SUM, never a column ----------------------
@@ -48,6 +50,13 @@ logger = logging.getLogger(__name__)
 
 DAILY_REFILL = 30
 CAP = 50
+# 開通祝い — what a new account is handed on its first read, once, ever.
+# Deliberately well above CAP: the cap is a ceiling on the DAILY REFILL,
+# not on what a learner may hold, so the welcome sits on top of it and
+# is simply spent down. Once the balance falls below CAP the daily
+# refill resumes on its own -- no special case anywhere, because the
+# balance is a SUM and the refill already tops up only to the cap.
+SIGNUP_BONUS = 200
 COST_PER_REVIEW = 1
 FREE_DECKS = 7
 FREE_CARDS = 200
@@ -175,10 +184,14 @@ def _settle(cur, user_id: str, now: datetime) -> dict:
     today = local_today(bits["tz"], now)
 
     if total is None:
-        # The boarding's pass prints 30/50: a new account starts with
-        # the day's refill, and that IS the day's refill.
+        # A new account is welcomed with SIGNUP_BONUS, and that grant IS
+        # today's refill: the day is claimed alongside it, so the first
+        # day does not also pay out DAILY_REFILL on the next read.
+        # `total is None` means an empty ledger, so this is once per
+        # account; _claim_day is the lock that keeps two workers racing
+        # a first read from welcoming the same learner twice.
         if _claim_day(cur, user_id, today):
-            _insert(cur, user_id, DAILY_REFILL, "grant", "seed")
+            _insert(cur, user_id, SIGNUP_BONUS, "grant", "welcome")
             bits["refilled_on"] = today
         total = _ledger_sum(cur, user_id) or 0
     elif not unlimited and (bits["refilled_on"] is None or bits["refilled_on"] < today):
@@ -223,6 +236,7 @@ def summary(user_id: str) -> dict:
         "balance": None if s["unlimited"] else s["balance"],
         "cap": CAP,
         "dailyRefill": DAILY_REFILL,
+        "signupBonus": SIGNUP_BONUS,
         "refillAt": next_refill_at(s["tz"]).isoformat(),
         "plan": s["plan"],
         "unlimited": s["unlimited"],

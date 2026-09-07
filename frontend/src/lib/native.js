@@ -43,6 +43,48 @@ export async function openExternal(url) {
   await Browser.open({ url })
 }
 
+// ── 改札 — the OAuth round trip, outside the WebView ─────────────
+// The WebView's origin IS the bundle, so a page that navigates to
+// Google can never come home. The authorization page opens in the
+// system browser instead — a real browser, with the learner's own
+// Google session and its own address bar, which is also the only place
+// Google is willing to be signed into — and the answer comes back as a
+// deep link on the app's scheme (lib/oauth.js's NATIVE_REDIRECT,
+// registered in AndroidManifest.xml and Info.plist).
+//
+// `scheme` is passed in rather than imported so this module and
+// lib/oauth.js do not have to import each other; oauth owns the one
+// copy of the redirect the manifests are written against.
+//
+// Resolves with the callback URL, or null if the learner closed the
+// browser instead of finishing. Both listeners are always removed:
+// leaving an appUrlOpen handler behind would have the NEXT sign-in
+// resolved by the previous attempt's promise.
+export function openAuthTab(url, scheme) {
+  return new Promise((resolve) => {
+    let settled = false
+    const handles = []
+    const finish = (value) => {
+      if (settled) return
+      settled = true
+      for (const h of handles) h.then(l => l.remove()).catch(() => {})
+      resolve(value)
+    }
+
+    handles.push(App.addListener('appUrlOpen', ({ url: back }) => {
+      if (!back?.startsWith(scheme)) return
+      // The browser stays open over the app until it is told to go.
+      Browser.close().catch(() => {})
+      finish(back)
+    }))
+    // Dismissing the browser is an answer too — "no" — and without
+    // this the caller would wait on a promise nothing can settle.
+    handles.push(Browser.addListener('browserFinished', () => finish(null)))
+
+    Browser.open({ url }).catch(() => finish(null))
+  })
+}
+
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()

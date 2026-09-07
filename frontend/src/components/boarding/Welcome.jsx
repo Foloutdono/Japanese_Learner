@@ -6,10 +6,11 @@ import { FRONT_LANE, BACK_LANE } from './demoCards'
 // The first screen a stranger sees and the boarding's step zero: the
 // 日本語 sign over two lanes of cards rolling past like trains (each
 // lane is its cards twice, so the loop has no seam), the tagline, and
-// the one action. Board → sign up → the questions; "Have an account?"
-// → sign in, and a returning learner skips the boarding. Pre-auth, so
-// no session and no router: App.jsx mounts it in place of the old
-// landing page.
+// the one action. Board → the questions, on a guest pass rather than
+// an account (lib/guest.js): the sign-up moved to the END of the
+// boarding, where it can be refused. "Have an account?" → sign in, and
+// a returning learner skips the boarding. Pre-auth, so no session and
+// no router: App.jsx mounts it in place of the old landing page.
 
 function DemoFace({ card }) {
   if (card.kind === 'draw') {
@@ -74,7 +75,7 @@ function Lane({ cards, back = false, t }) {
   )
 }
 
-export default function Welcome({ onBoard, onSignIn }) {
+export default function Welcome({ onBoard, onSignIn, boarding = false }) {
   const { t } = useLang()
   return (
     <main className="brd brd--welcome" id="main-content">
@@ -91,7 +92,7 @@ export default function Welcome({ onBoard, onSignIn }) {
         <p className="brd-tagline">{t.brdTagline}</p>
       </div>
       <div className="brd__foot">
-        <Continue label={t.brdBoard} onClick={onBoard} data-action="board" />
+        <Continue label={t.brdBoard} onClick={onBoard} disabled={boarding} data-action="board" />
         <BoardLink onClick={onSignIn} data-action="sign-in">{t.brdHaveAccount}</BoardLink>
       </div>
     </main>

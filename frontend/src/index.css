@@ -16009,12 +16009,67 @@ html { scrollbar-gutter: stable; }
 }
 .auth-foot { margin: 0; text-align: center; font-size: var(--fs-caption); color: var(--text-secondary); }
 
+/* ── 改札 — a provider's own button ──
+   A GHOST beside the screen's one filled action, never a second fill:
+   a screen with two filled buttons has misidentified which one is the
+   action (DESIGN.md, The primary button). So the same box as
+   .auth-submit and .btn-depart, in the ghost's clothes — transparent,
+   a --surface-line edge, --text-primary — and it reads as the other
+   way in rather than as a rival to it.
+
+   The mark inside is Google's own artwork and keeps its four colours
+   in both themes: it is the one graphic in this app that is not ours
+   to restyle, so the bare button:hover brightness is cancelled here
+   rather than tinting somebody's trademark. */
+.auth-provider {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 700;
+  font-size: var(--fs-body);
+}
+.auth-provider:hover { filter: none; border-color: var(--text-secondary); }
+.auth-provider:disabled { opacity: 0.45; cursor: default; }
+.auth-provider__mark { display: inline-flex; flex: none; }
+
+/* The two ways in, told apart without a heading over either. */
+.auth-or {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.auth-or::before,
+.auth-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--surface-line);
+}
+
 /* ── boarding: the frame ── */
 .brd {
   position: relative;
   flex: 1;
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* A definite height, not a minimum. `.brd__body` below is the part
+     that scrolls (flex: 1 + overflow-y), and a flex item only scrolls
+     inside a container whose own height is settled -- with a bare
+     min-height the frame just grew instead, the body never overflowed,
+     and the whole document scrolled: on a short screen that carried
+     `.brd__foot` -- Embarquer and "Déjà un compte ?" -- off the bottom
+     of a screen whose one job is to offer them. */
+  height: 100vh;
+  height: 100dvh;
   width: 100%;
   max-width: var(--card-w);
   margin-inline: auto;
@@ -16204,10 +16259,32 @@ html { scrollbar-gutter: stable; }
 .brd-kopt__jp { font-family: var(--font-jp); font-size: var(--fs-lead); color: var(--text-secondary); }
 
 /* ── welcome: the sign, the rolling stock, the promise ── */
+/* The scrolling body is full-bleed here, with the frame's own gutter
+   moved inside it as padding. `.brd-roll` below reaches the screen edge
+   by pulling var(--sp-5) out on each side, and a box that scrolls one
+   axis always scrolls the other (`overflow-y: auto` computes x to
+   `auto` -- the spec, not a quirk), so against an inset body that bleed
+   was 16px of real horizontal overflow: the welcome screen panned
+   sideways under a scrollbar of its own. Widening the body to the edge
+   lands the roll exactly on its padding box instead -- same gutter for
+   the text, same bleed for the cards, nothing left to scroll. Scoped to
+   the welcome: every other step's body sits inside `.brd__cars`, which
+   clips, and none of them has a bleeding child. */
+.brd--welcome .brd__body { margin-inline: calc(-1 * var(--sp-5)); padding-inline: var(--sp-5); }
 .brd-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); padding-top: var(--sp-7); text-align: center; animation: brd-in 480ms ease-out both; }
-.brd-roll { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
+.brd-roll { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
 .brd-roll__lane { display: flex; gap: var(--sp-4); width: max-content; animation: brd-roll 26s linear infinite; }
 .brd-roll__lane--back { animation-duration: 34s; animation-direction: reverse; }
+/* Two whole lanes want 424px -- two 204px cards and the sp-4 between
+   them -- and the roll is the part of the body that gives way when the
+   screen is short (min-height: 0 above). Under 740px, measured rather
+   than guessed, centring them slices BOTH: a card cut through its own
+   word reads as breakage, not as a train passing. The roll is
+   decoration the tagline already says in words (aria-hidden), so a
+   short screen keeps one lane whole instead of two broken ones. */
+@media (max-height: 739px) {
+  .brd-roll__lane--back { display: none; }
+}
 .brd-demo {
   position: relative;
   display: flex;

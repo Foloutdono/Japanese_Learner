@@ -18,6 +18,23 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- 改札 — where Supabase sends the learner back after Google
+                 (src/lib/oauth.js's NATIVE_REDIRECT). Google itself never
+                 sees this scheme: it redirects to the Supabase project's
+                 own callback, and Supabase redirects here, which is why a
+                 custom scheme is allowed at all. The same string has to
+                 be in Supabase's Redirect URLs allowlist.
+                 launchMode is already singleTask above, so this arrives
+                 on the running Activity as onNewIntent (Capacitor's App
+                 plugin turns it into appUrlOpen) rather than starting a
+                 second copy of the app over the first. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.japaneselearner.app" android:host="auth-callback" />
+            </intent-filter>
         </activity>
 
         <provider

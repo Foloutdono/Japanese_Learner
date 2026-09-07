@@ -26,6 +26,18 @@ vi.mock('../../lib/api', () => ({
   ApiError: class ApiError extends Error {},
 }))
 
+// The native shell's one build-time knob (lib/origin, ADR 0008), stubbed
+// to a sentinel origin so an assertion below can tell a backend path
+// that was resolved against it from a bare one. Inside the WebView that
+// difference is the whole bug: its own origin serves the bundle and
+// nothing else. The literal is repeated rather than read from
+// SHELL_ORIGIN because vi.mock is hoisted above every declaration.
+vi.mock('../../lib/origin', () => ({
+  API_ORIGIN: 'https://shell.test',
+  api: path => 'https://shell.test' + path,
+}))
+const SHELL_ORIGIN = 'https://shell.test'
+
 // LangContext fetches the content maps on mount; the stroke sheet
 // fetches its KanjiVG file. Both offline here — the sheet gets a
 // two-stroke stand-in so the lattice's first cell holds a drawing.
@@ -337,6 +349,23 @@ describe('the body — blocks that name themselves', () => {
     expect(door.tagName).toBe('BUTTON')
     door.click()
     expect(onRadicalClick).toHaveBeenCalledWith(75)
+  })
+
+  // The sheet's KanjiVG file is a backend path like any other, so it has
+  // to be resolved against the API origin (ADR 0008). It used to be
+  // pasted onto a private `API_BASE = ''` this file kept of its own —
+  // same-origin, unconditionally, written before the shell existed — so
+  // in the WebView every kanji asked its own bundle for a stroke file
+  // that isn't there and fell through to "not available", with the web
+  // build none the wiser.
+  it('fetches the stroke file from the API origin, never the WebView\'s own', async () => {
+    await renderEntry(KANJI)
+    const asked = globalThis.fetch.mock.calls
+      .map(c => String(c[0]))
+      .filter(u => u.includes('kanjivg'))
+    expect(asked.length).toBeGreaterThan(0)
+    expect(asked).toContain(`${SHELL_ORIGIN}/kanjivg/06728.svg`)
+    expect(asked.every(u => u.startsWith(SHELL_ORIGIN))).toBe(true)
   })
 
   it('gives a kana the sheet alone, full width, with nothing bare beside it', async () => {

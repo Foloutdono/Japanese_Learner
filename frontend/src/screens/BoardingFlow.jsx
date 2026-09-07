@@ -22,14 +22,33 @@ import NudgeStep from '../components/boarding/NudgeStep'
 import Building from '../components/boarding/Building'
 import PlanStep from '../components/boarding/PlanStep'
 import PassStep from '../components/boarding/PassStep'
+import AccountStep from '../components/boarding/AccountStep'
 
 // ── 乗車 — the boarding (plan 075) ────────────────────────────────
 // The canvas's boarding, the owner's sketch drawn: name → why → the
 // kana check → (the reveal | the level) → goal → rhythm → the hour →
-// (the nudge, native only) → building → the plan → the pass. Welcome
-// is step zero, before the account exists (components/boarding/
-// Welcome.jsx, mounted by App.jsx in place of the old landing page);
-// the offer stays out while domain/credits.js's HAS_STORE is false.
+// (the nudge, native only) → building → the plan → (the account) →
+// the pass. Welcome is step zero (components/boarding/Welcome.jsx,
+// mounted by App.jsx in place of the old landing page); the offer
+// stays out while domain/credits.js's HAS_STORE is false.
+//
+// The account is asked for at the END, and refusably. Boarding starts
+// on a guest pass — a real Supabase user with no credentials on it, so
+// every question here writes to real server-side state (lib/guest.js
+// explains why that is a whole account rather than a local shadow) —
+// and `account` offers to put an email and a password onto the very
+// row the learner has been filling in. Nothing is migrated because
+// nothing moved. A learner who says no rides on exactly as they were.
+// The step is skipped for anyone who already has real credentials,
+// which is how an interrupted sign-up resumes without being asked
+// twice.
+//
+// `onExit` is the way back OUT of the first question: back on step one
+// has nowhere to go inside the flow, so it leaves for Welcome, where
+// the sign-in is. `onSignIn` is the same door named directly, offered
+// on the name screen and again at the account step, so a returning
+// learner who tapped Embarquer by mistake is one tap from where they
+// meant to be.
 //
 // The track at the head is the progress bar -- one stop per question,
 // the train where you are; the three arrival screens have no track and
@@ -54,6 +73,39 @@ import PassStep from '../components/boarding/PassStep'
 // flow, the real volumes, and no write -- neither the name nor the
 // contract.
 
+// ── The stash — surviving an OAuth redirect ──────────────────────
+// Signing in with Google on the WEB navigates the page away and comes
+// back as a fresh load, which would otherwise mean answering all eight
+// questions again for the crime of choosing the fast way to keep them.
+// So the answers are written down at exactly the moment the redirect
+// is about to happen, and picked back up on the next mount.
+//
+// sessionStorage, not local: the stash belongs to this tab and this
+// attempt. Cleared the instant it is read, and again when the contract
+// is signed, so a later boarding can never resume someone else's.
+// Deliberately NOT a general autosave — a mid-flow refresh is still a
+// clean restart, which is the behaviour every other screen here was
+// written against.
+const STASH_KEY = 'jp-boarding-stash'
+
+function stash(state) {
+  try { sessionStorage.setItem(STASH_KEY, JSON.stringify(state)) } catch { /* private mode */ }
+}
+
+function takeStash() {
+  try {
+    const raw = sessionStorage.getItem(STASH_KEY)
+    sessionStorage.removeItem(STASH_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function clearStash() {
+  try { sessionStorage.removeItem(STASH_KEY) } catch { /* private mode */ }
+}
+
 const PULL_MS = 260
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
@@ -72,9 +124,16 @@ function trackStops(answers) {
   ]
 }
 
-export default function BoardingFlow({ session, initialProfile, onComplete, dryRun = false }) {
+export default function BoardingFlow({
+  session, initialProfile, onComplete, onExit = null, onSignIn = null,
+  guest = false, dryRun = false,
+}) {
   const { t, lang } = useLang()
   const profile = { level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, username: '', ...(initialProfile ?? {}) }
+
+  // Read once, in the initialiser rather than an effect: the flow must
+  // never paint question one before resuming the step it left from.
+  const [resumed] = useState(takeStash)
 
   const [answers, setAnswers] = useState({
     name: profile.username ?? '',
@@ -86,12 +145,13 @@ export default function BoardingFlow({ session, initialProfile, onComplete, dryR
     rhythm: RECOMMENDED_RHYTHM,
     minute: timeToMinutes(DEFAULT_TIME),
     notifications: false,
+    ...(resumed?.answers ?? {}),
   })
-  const [step, setStep] = useState('name')
+  const [step, setStep] = useState(resumed?.step ?? 'name')
   const [history, setHistory] = useState([])
   const [leaving, setLeaving] = useState(null)   // { step, dir } during a pull
   const [volumes, setVolumes] = useState(null)
-  const [savedName, setSavedName] = useState(profile.username ?? '')
+  const [savedName, setSavedName] = useState(resumed?.savedName ?? profile.username ?? '')
   const [nameError, setNameError] = useState(null)
   const [busy, setBusy] = useState(false)
   const [saveError, setSaveError] = useState(false)
@@ -231,6 +291,7 @@ export default function BoardingFlow({ session, initialProfile, onComplete, dryR
       body: JSON.stringify(body),
     })
       .then(() => {
+        clearStash()
         // The gate reads the profile summary for the pass holder's
         // name and the HUD reads the balance -- refresh both before the
         // cutscene mounts. Fire-and-forget: both stores fail quietly.
@@ -259,6 +320,7 @@ export default function BoardingFlow({ session, initialProfile, onComplete, dryR
             value={answers.name}
             onChange={v => { set({ name: v }); setNameError(null) }}
             onContinue={continueName}
+            onSignIn={onSignIn}
             error={nameError}
             busy={busy}
           />
@@ -315,7 +377,16 @@ export default function BoardingFlow({ session, initialProfile, onComplete, dryR
             goal={answers.goal}
             figures={figures}
             now={now}
-            onContinue={() => go('pass')}
+            onContinue={() => go(guest ? 'account' : 'pass')}
+          />
+        )
+      case 'account':
+        return (
+          <AccountStep
+            onCreated={() => go('pass')}
+            onSkip={() => go('pass')}
+            onSignIn={onSignIn}
+            onLeaveForAuth={() => stash({ answers, step, savedName })}
           />
         )
       case 'pass':
@@ -327,7 +398,7 @@ export default function BoardingFlow({ session, initialProfile, onComplete, dryR
 
   return (
     <main className="brd" id="main-content" data-step={step} ref={frameRef}>
-      {onTrack && <BoardHead index={index} total={total} onBack={history.length > 0 ? back : null} />}
+      {onTrack && <BoardHead index={index} total={total} onBack={history.length > 0 ? back : onExit} />}
       <div className="brd__cars">
         {leaving && (
           <div className="brd__car brd__car--out" data-dir={leaving.dir} aria-hidden="true" inert>
