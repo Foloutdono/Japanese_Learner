@@ -1408,6 +1408,10 @@ const boarding = {
   brdTagline: 'Take the train to proficiency.',
   brdBoard: 'Board',
   brdHaveAccount: 'Have an account? Sign in',
+  // Google: "continue", never "sign up" or "sign in" — a provider does
+  // not tell the two apart. You simply arrive.
+  continueWithGoogle: 'Continue with Google',
+  orWithEmail: 'or with an email address',
   // Last stop: the account, asked once everything has been seen — and
   // refusable. "Keep" rather than "create": the progress already
   // exists, this only puts a key on it (lib/guest.js).

@@ -5,6 +5,7 @@ import { isNative, openExternal } from '../../lib/platform'
 import { isGuest } from '../../lib/guest'
 import { useClaim } from '../../hooks/useClaim'
 import { ClaimFields } from '../account/ClaimAccount'
+import { ProviderButton } from '../account/ProviderButton'
 import { SettingsPage, Slip } from './SettingsPage'
 
 // ── Account ───────────────────────────────────────────────────
@@ -25,6 +26,13 @@ function ClaimSlip() {
   return (
     <Slip label={t.guestLabel} cap={t.guestCap}>
       <p className="slip__hint">{t.guestClaimDesc}</p>
+      {/* `link`, and never a fall-back to a plain sign-in: this learner
+          has real progress on this account, and signing in as a Google
+          user instead would walk away from it without saying so. If
+          manual linking is off on the project the error says so and
+          nothing is lost. */}
+      <ProviderButton link onError={claim.setError} />
+      <p className="auth-or">{t.orWithEmail}</p>
       <ClaimFields claim={claim} />
       {!claim.done && (
         <button

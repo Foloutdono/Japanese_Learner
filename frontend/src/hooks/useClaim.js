@@ -38,5 +38,7 @@ export function useClaim({ onDone } = {}) {
     onDone?.(r)
   }
 
-  return { email, setEmail, password, setPassword, error, done, busy, filled, submit }
+  // setError is exposed so a provider button beside these fields can
+  // report into the same line rather than growing a second one.
+  return { email, setEmail, password, setPassword, error, setError, done, busy, filled, submit }
 }

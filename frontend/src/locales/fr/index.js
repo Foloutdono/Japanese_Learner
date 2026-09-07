@@ -1380,6 +1380,10 @@ const boarding = {
   brdTagline: 'En route vers la maîtrise.',
   brdBoard: 'Embarquer',
   brdHaveAccount: 'Déjà un compte ? Se connecter',
+  // Google : « continuer », jamais « s'inscrire » ni « se connecter »
+  // — un fournisseur ne distingue pas les deux, on arrive, c'est tout.
+  continueWithGoogle: 'Continuer avec Google',
+  orWithEmail: 'ou avec une adresse e-mail',
   // Dernier arrêt : le compte, proposé une fois tout vu — et
   // refusable. « Garder » plutôt que « créer » : la progression
   // existe déjà, on ne fait qu'y mettre une clé (lib/guest.js).

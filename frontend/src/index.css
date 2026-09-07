@@ -16009,6 +16009,54 @@ html { scrollbar-gutter: stable; }
 }
 .auth-foot { margin: 0; text-align: center; font-size: var(--fs-caption); color: var(--text-secondary); }
 
+/* ── 改札 — a provider's own button ──
+   A GHOST beside the screen's one filled action, never a second fill:
+   a screen with two filled buttons has misidentified which one is the
+   action (DESIGN.md, The primary button). So the same box as
+   .auth-submit and .btn-depart, in the ghost's clothes — transparent,
+   a --surface-line edge, --text-primary — and it reads as the other
+   way in rather than as a rival to it.
+
+   The mark inside is Google's own artwork and keeps its four colours
+   in both themes: it is the one graphic in this app that is not ours
+   to restyle, so the bare button:hover brightness is cancelled here
+   rather than tinting somebody's trademark. */
+.auth-provider {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 700;
+  font-size: var(--fs-body);
+}
+.auth-provider:hover { filter: none; border-color: var(--text-secondary); }
+.auth-provider:disabled { opacity: 0.45; cursor: default; }
+.auth-provider__mark { display: inline-flex; flex: none; }
+
+/* The two ways in, told apart without a heading over either. */
+.auth-or {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.auth-or::before,
+.auth-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--surface-line);
+}
+
 /* ── boarding: the frame ── */
 .brd {
   position: relative;

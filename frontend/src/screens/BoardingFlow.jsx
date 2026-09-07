@@ -73,6 +73,39 @@ import AccountStep from '../components/boarding/AccountStep'
 // flow, the real volumes, and no write -- neither the name nor the
 // contract.
 
+// ── The stash — surviving an OAuth redirect ──────────────────────
+// Signing in with Google on the WEB navigates the page away and comes
+// back as a fresh load, which would otherwise mean answering all eight
+// questions again for the crime of choosing the fast way to keep them.
+// So the answers are written down at exactly the moment the redirect
+// is about to happen, and picked back up on the next mount.
+//
+// sessionStorage, not local: the stash belongs to this tab and this
+// attempt. Cleared the instant it is read, and again when the contract
+// is signed, so a later boarding can never resume someone else's.
+// Deliberately NOT a general autosave — a mid-flow refresh is still a
+// clean restart, which is the behaviour every other screen here was
+// written against.
+const STASH_KEY = 'jp-boarding-stash'
+
+function stash(state) {
+  try { sessionStorage.setItem(STASH_KEY, JSON.stringify(state)) } catch { /* private mode */ }
+}
+
+function takeStash() {
+  try {
+    const raw = sessionStorage.getItem(STASH_KEY)
+    sessionStorage.removeItem(STASH_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function clearStash() {
+  try { sessionStorage.removeItem(STASH_KEY) } catch { /* private mode */ }
+}
+
 const PULL_MS = 260
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
@@ -98,6 +131,10 @@ export default function BoardingFlow({
   const { t, lang } = useLang()
   const profile = { level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, username: '', ...(initialProfile ?? {}) }
 
+  // Read once, in the initialiser rather than an effect: the flow must
+  // never paint question one before resuming the step it left from.
+  const [resumed] = useState(takeStash)
+
   const [answers, setAnswers] = useState({
     name: profile.username ?? '',
     motive: null,
@@ -108,12 +145,13 @@ export default function BoardingFlow({
     rhythm: RECOMMENDED_RHYTHM,
     minute: timeToMinutes(DEFAULT_TIME),
     notifications: false,
+    ...(resumed?.answers ?? {}),
   })
-  const [step, setStep] = useState('name')
+  const [step, setStep] = useState(resumed?.step ?? 'name')
   const [history, setHistory] = useState([])
   const [leaving, setLeaving] = useState(null)   // { step, dir } during a pull
   const [volumes, setVolumes] = useState(null)
-  const [savedName, setSavedName] = useState(profile.username ?? '')
+  const [savedName, setSavedName] = useState(resumed?.savedName ?? profile.username ?? '')
   const [nameError, setNameError] = useState(null)
   const [busy, setBusy] = useState(false)
   const [saveError, setSaveError] = useState(false)
@@ -253,6 +291,7 @@ export default function BoardingFlow({
       body: JSON.stringify(body),
     })
       .then(() => {
+        clearStash()
         // The gate reads the profile summary for the pass holder's
         // name and the HUD reads the balance -- refresh both before the
         // cutscene mounts. Fire-and-forget: both stores fail quietly.
@@ -347,6 +386,7 @@ export default function BoardingFlow({
             onCreated={() => go('pass')}
             onSkip={() => go('pass')}
             onSignIn={onSignIn}
+            onLeaveForAuth={() => stash({ answers, step, savedName })}
           />
         )
       case 'pass':

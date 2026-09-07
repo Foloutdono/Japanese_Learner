@@ -2,6 +2,7 @@ import { useLang } from '../../LangContext'
 import { BoardQuestion, Continue, BoardLink } from './BoardFrame'
 import { useClaim } from '../../hooks/useClaim'
 import { ClaimFields } from '../account/ClaimAccount'
+import { ProviderButton } from '../account/ProviderButton'
 
 // ── 本乗車券 — the last stop before the pass ─────────────────────
 // The boarding runs on a guest pass (lib/guest.js), so by the time
@@ -17,7 +18,7 @@ import { ClaimFields } from '../account/ClaimAccount'
 // without either. The skip is the point of the screen — an account
 // asked for at the end and refusable is a different promise from one
 // demanded at the door.
-export default function AccountStep({ onCreated, onSkip, onSignIn }) {
+export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAuth = null }) {
   const { t } = useLang()
   const claim = useClaim()
 
@@ -26,6 +27,12 @@ export default function AccountStep({ onCreated, onSkip, onSignIn }) {
       <div className="brd__body brd__body--arrival">
         <BoardQuestion hint={t.brdAccountHint}>{t.brdAccountQ}</BoardQuestion>
         <div className="brd__stage">
+          {/* `link` so the guest KEEPS this account rather than being
+              handed a second, empty one; onLeaveForAuth is the last
+              moment before the web navigates away, when the answers
+              still only exist in memory. */}
+          <ProviderButton link onBeforeRedirect={onLeaveForAuth} onDone={onCreated} onError={claim.setError} />
+          <p className="auth-or">{t.orWithEmail}</p>
           <ClaimFields claim={claim} variant="board" />
         </div>
       </div>

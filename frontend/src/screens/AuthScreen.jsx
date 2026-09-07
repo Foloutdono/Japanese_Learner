@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useLang } from '../LangContext'
 import { Seg } from '../components/chrome/Console'
 import { BackChevron } from '../components/boarding/icons'
+import { ProviderButton } from '../components/account/ProviderButton'
 
 // ── Sign in (plan 075, canvas SignIn) ────────────────────────────
 // The sign over one card: Login / Sign up as a segmented control, the
@@ -13,6 +14,11 @@ import { BackChevron } from '../components/boarding/icons'
 // boarding asks the name on its first screen, and Settings keeps it
 // editable; a sign-up that needs email confirmation simply comes back
 // to Login.
+//
+// Google sits above the segmented control because it answers both
+// halves of it at once: there is no such thing as signing up versus
+// signing in with a provider, only arriving. It is a ghost button —
+// the filled action on this screen is the one below it (DESIGN.md).
 export default function AuthScreen({ mode: initialMode = 'login', onBack } = {}) {
   const { t } = useLang()
   const [mode, setMode]         = useState(initialMode) // 'login' | 'signup'
@@ -60,6 +66,8 @@ export default function AuthScreen({ mode: initialMode = 'login', onBack } = {})
       </div>
 
       <div className="auth-card">
+        <ProviderButton onError={setError} />
+        <p className="auth-or">{t.orWithEmail}</p>
         <Seg
           full
           options={[{ key: 'login', label: t.login }, { key: 'signup', label: t.signup }]}
