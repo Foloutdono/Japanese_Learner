@@ -1365,7 +1365,11 @@ const boarding = {
   authModeAria: 'Connexion ou inscription',
   brdDocumentTitle: 'Embarquement',
   // Bienvenue : l’enseigne, le matériel roulant, la promesse.
-  brdTagline: 'Prenez le train vers la maîtrise.',
+  // Pas « Prenez le train vers la maîtrise » : c’est le calque de
+  // l’anglais et il sonne faux — on prend le train POUR une gare, pas
+  // « vers » une qualité abstraite. « En route vers… » est la tournure
+  // que le français a déjà pour ça, et elle enchaîne sur Embarquer.
+  brdTagline: 'En route vers la maîtrise.',
   brdBoard: 'Embarquer',
   brdHaveAccount: 'Déjà un compte ? Se connecter',
   brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulaire', grammar: 'Grammaire', listening: 'Écoute', reading: 'Lecture', kana: 'Kana', exam: 'Examen blanc' },
