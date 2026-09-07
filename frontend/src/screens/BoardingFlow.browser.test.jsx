@@ -46,6 +46,7 @@ const nudgeRef = { current: false }
 vi.mock('../lib/platform', () => ({
   isNative: () => nudgeRef.current,
   canNudge: () => nudgeRef.current,
+  requestNudgePermission: async () => nudgeRef.current,
 }))
 vi.mock('../lib/audio', async (importOriginal) => ({
   ...(await importOriginal()),

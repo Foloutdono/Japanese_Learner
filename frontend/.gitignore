@@ -46,3 +46,14 @@ shots/
 # committing.
 .vitest-attachments/
 **/__screenshots__/
+
+# Native shells (plan 076). The projects under android/ and ios/ are
+# committed; their build outputs are ignored by the .gitignore each one
+# carries. Signing material never enters the repository -- the keystore,
+# the App Store Connect key, certificates and profiles live in CI secrets
+# (docs/release.md).
+*.jks
+*.keystore
+*.p8
+*.p12
+*.mobileprovision

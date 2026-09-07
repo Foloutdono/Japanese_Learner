@@ -10,6 +10,10 @@
     "dev": "vite",
     "build": "vite build",
     "build:native": "vite build --mode native --outDir dist-native",
+    "cap:sync": "npm run build:native && cap sync",
+    "cap:android": "npm run cap:sync && cap run android",
+    "cap:ios": "npm run cap:sync && cap open ios",
+    "assets:native": "capacitor-assets generate --android --ios --iconBackgroundColor '#100e13' --iconBackgroundColorDark '#100e13' --splashBackgroundColor '#17151a' --splashBackgroundColorDark '#17151a'",
     "icons": "node scripts/render-icon.mjs && pwa-assets-generator && node scripts/place-icons.mjs",
     "lint": "eslint .",
     "lint:css": "node scripts/stylelint-ratchet.mjs",
@@ -21,6 +25,16 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/browser": "^8.0.4",
+    "@capacitor/core": "^8.5.1",
+    "@capacitor/filesystem": "^8.1.3",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/local-notifications": "^8.3.1",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@fontsource/noto-sans-jp": "^5.3.0",
     "@fontsource/noto-serif-jp": "^5.3.0",
     "@fontsource/space-grotesk": "^5.3.0",
@@ -31,6 +45,10 @@
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.1",
+    "@capacitor/ios": "^8.5.1",
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

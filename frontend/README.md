@@ -12,8 +12,44 @@ npm run lint       # JS/JSX
 npm run lint:css   # CSS -- see "Design conformance guards" below
 npm run lint:scale # design-token scale ratchet -- see below
 npm run lint:ink   # ink/ground structural rule -- see below
-npm test           # vitest, two lanes (node + browser)
+npm test           # vitest, three lanes (node, browser, phone)
+npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
+npm run cap:sync      # build:native, then copy it into android/ and ios/
+npm run cap:android   # cap:sync, then run on a connected device / emulator
+npm run assets:native # icons and splash screens for the shells, from assets/logo*.png
 ```
+
+## Native shells (plan 076)
+
+`android/` and `ios/` are Capacitor 8 projects and are committed; what they
+wrap is the web build in `native` mode (`dist-native/`, ignored), which
+calls the Vercel origin and never Render — `docs/adr/0008`. The config is
+`capacitor.config.json` (a JSON so the CLI needs no TypeScript to read it):
+the splash stays up until `screens/AppLoading.jsx` has painted, the status
+bar follows `<html data-theme>`, the keyboard resizes the WebView so a
+docked action rises with it, and Android's edge-to-edge insets are left to
+the platform (`adjustMarginsForEdgeToEdge: auto`).
+
+Everything the shell does that a browser cannot goes through one seam,
+`src/lib/platform.js`: `isNative()`, and beside it `openExternal`,
+`saveBlob`, `hideSplash`, `requestNudgePermission`, `syncNudge`,
+`bindBackButton`, `exitApp`. Each has its web behaviour there and loads the
+plugin half, `src/lib/native.js`, dynamically only inside a shell — Vite
+emits it as its own chunk (`native-*.js`), which the web never requests,
+and a web test never touches a plugin. The two habits
+that need the router (Android's back button; the daily nudge following the
+profile's `reminderTime` / `notifications`) are
+`components/chrome/NativeBridge.jsx`. The session store is the platform's
+own in the shell (`src/lib/authStorage.js` over `@capacitor/preferences`).
+On native the bookmarklet grab, the on-device OCR tier and the install row
+are hidden; the privacy policy opens in the system browser; the two CSV
+exports go to the share sheet.
+
+The Android toolchain is not needed to change the app — only to run it on a
+device (`npm run cap:android`) or build it (`android/gradlew`); the release
+builds run in `.github/workflows/mobile.yml`, and `docs/release.md` is the
+runbook. The store name and bundle id are placeholders until the owner
+picks them (see the runbook).
 
 ## Design conformance guards
 

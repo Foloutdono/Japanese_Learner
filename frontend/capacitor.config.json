@@ -1,0 +1,33 @@
+{
+  "appId": "com.japaneselearner.app",
+  "appName": "Japanese Learner",
+  "webDir": "dist-native",
+  "android": {
+    "allowMixedContent": false,
+    "adjustMarginsForEdgeToEdge": "auto"
+  },
+  "ios": {
+    "contentInset": "never"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#17151a",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": false
+    },
+    "StatusBar": {
+      "overlaysWebView": false,
+      "style": "DARK",
+      "backgroundColor": "#100e13"
+    },
+    "Keyboard": {
+      "resize": "native",
+      "resizeOnFullScreen": true
+    },
+    "LocalNotifications": {
+      "iconColor": "#c9a24a"
+    }
+  }
+}

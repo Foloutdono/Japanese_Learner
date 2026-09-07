@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { recognize, recognizeRemote } from '../../lib/ocr'
+import { isNative } from '../../lib/platform'
 import { loadImage, toBlob, MAX_UPLOAD_BYTES } from '../../lib/image'
 import { ImageCropper } from './ImageCropper'
 
@@ -104,14 +105,19 @@ export function ImageInput({ t, session, onTextReady }) {
           </div>
         )}
         {error && <div className="analysis-image-input__error">{error}</div>}
-        <button
-          type="button"
-          onClick={() => runRecognition(null, { local: true })}
-          disabled={busy}
-          className="analysis-image-input__local"
-        >
-          {t.ocrLocalOption}
-        </button>
+        {/* The on-device tier downloads tesseract's worker and language
+            data on first use -- a browser's cache keeps them, the shell's
+            WebView is not the place (plan 076): the server's tier only. */}
+        {!isNative() && (
+          <button
+            type="button"
+            onClick={() => runRecognition(null, { local: true })}
+            disabled={busy}
+            className="analysis-image-input__local"
+          >
+            {t.ocrLocalOption}
+          </button>
+        )}
       </div>
     )
   }

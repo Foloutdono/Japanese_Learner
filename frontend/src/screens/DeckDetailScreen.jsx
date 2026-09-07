@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+import { saveBlob } from '../lib/platform'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { Bar, Leave } from '../components/chrome/Bar'
@@ -291,20 +292,13 @@ export default function DeckDetailScreen({ session }) {
       const res = await apiFetch(`/api/decks/${deck_id}/export?lang=${lang}`, session)
       if (!res.ok) throw new Error(`export failed: ${res.status}`)
       const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
       // The server already sanitised this — a deck name is user-authored
-      // and frequently Japanese, so it arrives percent-encoded.
-      a.download = filenameFromDisposition(res.headers.get('Content-Disposition'))
+      // and frequently Japanese, so it arrives percent-encoded. A
+      // download on the web, the share sheet in the shell (plan 076;
+      // lib/platform.js keeps Safari's next-tick revoke).
+      const filename = filenameFromDisposition(res.headers.get('Content-Disposition'))
         || `deck-${deck_id}.csv`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      // Revoked on the next tick rather than immediately: Safari reads
-      // the href after click() returns, and revoking synchronously hands
-      // it a dead URL and a silently empty download.
-      setTimeout(() => URL.revokeObjectURL(url), 0)
+      await saveBlob(blob, filename)
     } catch {
       setExportError(true)
     } finally {

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLang } from '../../LangContext'
 import { supabase } from '../../lib/supabase'
 import { apiFetch, apiJson } from '../../lib/api'
+import { saveBlob } from '../../lib/platform'
 import { playClick } from '../../lib/audio'
 import { refreshSummary } from '../../stores/profileSummary'
 import { SettingsPage, Slip } from './SettingsPage'
@@ -33,12 +34,8 @@ export function DataPage({ session }) {
       const r = await apiFetch('/api/profile/export', session)
       if (!r.ok) throw new Error(String(r.status))
       const blob = await r.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'nihongo-progress.csv'
-      a.click()
-      URL.revokeObjectURL(url)
+      // A download on the web, the share sheet in the shell (plan 076).
+      await saveBlob(blob, 'nihongo-progress.csv')
     } catch {
       setExportFailed(true)
     } finally {

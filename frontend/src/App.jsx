@@ -9,6 +9,7 @@ import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
 import { getTabs } from './config/tabs'
 import { Shell, StageFrame } from './components/chrome/Shell'
+import { NativeBridge } from './components/chrome/NativeBridge'
 import { identityFor } from './config/identity'
 import { apiJson, apiJsonWithTimeout } from './lib/api'
 // Development-only. Vite statically replaces import.meta.env.DEV with
@@ -346,6 +347,10 @@ export default function App() {
         </Routes>
 
         <DocumentHead />
+        {/* 車両 — the shell's habits (plan 076): Android's back button
+            and the daily nudge. Inside the router for the history and
+            the profile; nothing on the web. */}
+        <NativeBridge />
 
         {/* 掲示 — the docked notes (plan 065): a new build waiting, or
             no network. Beside <Routes/> for the same reason as the gate

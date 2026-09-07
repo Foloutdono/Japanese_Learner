@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { apiFetch, apiJson, apiJsonWithTimeout } from '../lib/api'
-import { canNudge } from '../lib/platform'
+import { canNudge, requestNudgePermission } from '../lib/platform'
 import { refreshSummary } from '../stores/profileSummary'
 import { refreshCredits } from '../stores/credits'
 import { USERNAME_RE } from '../components/profile/EditableUsername'
@@ -281,7 +281,11 @@ export default function BoardingFlow({ session, initialProfile, onComplete, dryR
         return (
           <NudgeStep
             time={time}
-            onAllow={() => { set({ notifications: true }); go('building') }}
+            // Allow asks the OS -- its own prompt, its own words -- and
+            // the answer is the answer: a refusal boards without the nudge.
+            onAllow={() => {
+              requestNudgePermission().then(granted => { set({ notifications: granted }); go('building') })
+            }}
             onSkip={() => { set({ notifications: false }); go('building') }}
           />
         )

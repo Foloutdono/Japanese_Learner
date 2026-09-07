@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { parseTimecode, formatTimecode } from '../../lib/timecode'
 import { parseVideoId } from '../../lib/youtube'
 import { buildBookmarklet } from '../../lib/captionGrab'
+import { isNative } from '../../lib/platform'
 import { GrabTutorial } from './GrabTutorial'
 
 // ── 3番線 動画 — the subtitle dock ────────────────────────
@@ -94,8 +95,11 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
         <span className="anl-window__readout">{t.videoUrlOptionalHint}</span>
       </label>
 
-      {/* ── 字幕取り — the grab ── */}
-      <div className="anl-grab">
+      {/* ── 字幕取り — the grab ──
+          Web only: a bookmarklet needs a browser's bookmarks bar, which
+          the shell's WebView has no way to offer (plan 076); there the
+          link names the video and the file path stays. */}
+      {!isNative() && <div className="anl-grab">
         <div className="anl-grab__head">
           <span className="anl-grab__title">{t.grabTitle}</span>
           <span className="anl-grab__jp" lang="ja">字幕取り</span>
@@ -135,7 +139,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
             {t.downsubAlt}
           </a>
         </div>
-      </div>
+      </div>}
 
       {showTutorial && (
         <GrabTutorial

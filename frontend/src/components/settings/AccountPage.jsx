@@ -1,5 +1,7 @@
 import { useLang } from '../../LangContext'
 import { supabase } from '../../lib/supabase'
+import { API_ORIGIN } from '../../lib/origin'
+import { isNative, openExternal } from '../../lib/platform'
 import { SettingsPage, Slip } from './SettingsPage'
 
 // ── Account ───────────────────────────────────────────────────
@@ -17,7 +19,18 @@ export function AccountPage({ session }) {
         </Slip>
       )}
       <Slip label={t.privacyPolicy}>
-        <a className="btn-secondary slip__act" href="/privacy.html" target="_blank" rel="noreferrer">{t.privacyPolicy}</a>
+        {/* In the shell the policy opens in the system browser at the web
+            origin (plan 076): the bundled copy would open inside the
+            WebView with no way back. */}
+        <a
+          className="btn-secondary slip__act"
+          href="/privacy.html"
+          target="_blank"
+          rel="noreferrer"
+          onClick={e => { if (isNative()) { e.preventDefault(); openExternal(`${API_ORIGIN}/privacy.html`) } }}
+        >
+          {t.privacyPolicy}
+        </a>
       </Slip>
       <Slip label={t.signOutDesc}>
         <button type="button" className="btn-secondary slip__act" onClick={() => supabase.auth.signOut({ scope: 'local' })}>

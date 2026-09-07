@@ -22,6 +22,7 @@ import './index.css'
 import App from './App.jsx'
 import { registerSW } from 'virtual:pwa-register'
 import { swUpdate } from './stores/swUpdate'
+import { isNative } from './lib/platform'
 
 // ── The service worker (plan 065) ──
 // Web build only. vite-plugin-pwa is disabled for the native mode (a
@@ -34,6 +35,15 @@ if (import.meta.env.MODE !== 'native' && 'serviceWorker' in navigator) {
     onNeedRefresh() { swUpdate.offer(() => updateSW(true)) },
     onRegisterError(err) { console.warn('[sw] registration failed', err) },
   })
+}
+
+// ── The shell (plan 076) ──
+// Inside the Capacitor WebView the bridge module is loaded -- and only
+// there: lib/native.js and every plugin stay out of the web bundle.
+// It wires the status bar to the theme; the splash hides once
+// screens/AppLoading.jsx has painted.
+if (isNative()) {
+  import('./lib/native').then(n => n.initNative()).catch(() => {})
 }
 
 createRoot(document.getElementById('root')).render(

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { authStorage } from './authStorage'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -13,9 +14,12 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 // placeholder project when real credentials aren't present. Calls
 // made against it (auth.getSession(), etc.) simply fail/resolve to no
 // session, same as any other offline state.
+// The session's store is the platform's own inside the native shell
+// (lib/authStorage.js, plan 076); `undefined` keeps the default here.
 export const supabase = createClient(
   SUPABASE_URL || 'https://placeholder.supabase.co',
   SUPABASE_ANON_KEY || 'placeholder-anon-key',
+  authStorage ? { auth: { storage: authStorage } } : undefined,
 )
 
 // A missing URL in `npm run dev` is nearly always the .env trap:

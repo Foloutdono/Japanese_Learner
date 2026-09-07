@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLang } from '../LangContext'
 import { Loading } from '../components/ui/Loading'
+import { hideSplash } from '../lib/platform'
 
 // ── 待合室 — the boot screen (plan 067) ───────────────────────
 // What the app shows before it knows who is here: the sign over the
@@ -16,14 +17,16 @@ import { Loading } from '../components/ui/Loading'
 // wait asks for the line: the session check is a local read that
 // never talks to the server.
 //
-// Plan 076: the native splash hides once this has painted —
-// SplashScreen.hide() belongs in an effect here, so the learner sees
-// one wait, not the splash and then this.
+// The native splash (plan 076) hides once this has painted, so the
+// learner sees one wait, not the splash and then this; on the web the
+// call is a no-op (lib/platform.js).
 export const WAKE_AFTER_MS = 4000
 
 export default function AppLoading({ wakesServer = false, wakeAfterMs = WAKE_AFTER_MS }) {
   const { t } = useLang()
   const [waking, setWaking] = useState(false)
+
+  useEffect(() => { hideSplash() }, [])
 
   useEffect(() => {
     if (!wakesServer) return

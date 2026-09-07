@@ -5,6 +5,7 @@ import { playClick, playToggle } from '../../lib/audio'
 import { useThemeChoice } from '../../stores/theme'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useInstallPrompt, promptInstall, isIosSafari } from '../../stores/installPrompt'
+import { isNative } from '../../lib/platform'
 import { InstallSheet } from '../ui/InstallSheet'
 import { SettingsPage, Slip } from './SettingsPage'
 
@@ -73,7 +74,8 @@ function InstallSlip({ t }) {
   const promptable = useInstallPrompt()
   const [sheet, setSheet] = useState(false)
   const ios = isIosSafari()
-  if (standalone || (!promptable && !ios)) return null
+  // The store app is already installed (plan 076).
+  if (isNative() || standalone || (!promptable && !ios)) return null
   return (
     <Slip label={t.installApp}>
       <span className="slip__hint">{t.installAppHint}</span>

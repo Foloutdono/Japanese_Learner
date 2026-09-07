@@ -93,7 +93,8 @@ describe('the boarding at 390×844', () => {
     const rows = [...screen.container.querySelectorAll('.brd__car:not(.brd__car--out) .brd-opt')]
     expect(rows).toHaveLength(6)
     for (const row of rows) {
-      expect(rect(row).height).toBeGreaterThanOrEqual(60)
+      // Rounded: a 60 px min-height lays out at 59.99997 on a fractional scale.
+      expect(Math.round(rect(row).height)).toBeGreaterThanOrEqual(60)
       expect(row.getAttribute('aria-pressed')).not.toBeNull()
     }
     expect(Math.round(rect(rows[0]).width)).toBeGreaterThanOrEqual(Math.round(rect(frame).width) - 2 * 20 - 4)
