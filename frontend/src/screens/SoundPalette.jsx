@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TopBar } from '../components/ui/TopBar'
+import { ScreenBar } from '../components/chrome/Bar'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import {
   VOICE_EVENTS, VOICE_FAMILIES,
@@ -45,7 +45,7 @@ export default function SoundPalette() {
 
   return (
     <div className="screen">
-      <TopBar onBack={() => navigate('/')} title="Sound palette" />
+      <ScreenBar onBack={() => navigate('/')} title="Sound palette" />
 
       <main id="main-content" className="container preview-container">
         <p className="preview-lede">

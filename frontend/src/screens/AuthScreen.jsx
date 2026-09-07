@@ -1,129 +1,100 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { ChevronIcon } from '../components/ui/Icons'
+import { Seg } from '../components/chrome/Console'
+import { BackChevron } from '../components/boarding/icons'
 
-const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
-
-export default function AuthScreen({ onBack } = {}) {
+// ── Sign in (plan 075, canvas SignIn) ────────────────────────────
+// The sign over one card: Login / Sign up as a segmented control, the
+// two fields, the one action, and the line that takes the pressure
+// off ("Everything can be changed later in Settings."). Reached from
+// Welcome -- Board opens it on Sign up, "Have an account?" on Login --
+// and the back button returns there. No username here any more: the
+// boarding asks the name on its first screen, and Settings keeps it
+// editable; a sign-up that needs email confirmation simply comes back
+// to Login.
+export default function AuthScreen({ mode: initialMode = 'login', onBack } = {}) {
   const { t } = useLang()
-  const [mode, setMode]       = useState('login') // 'login' | 'signup'
-  const [email, setEmail]     = useState('')
+  const [mode, setMode]         = useState(initialMode) // 'login' | 'signup'
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
-  const [username, setUsername] = useState('')
-  const [error, setError]     = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(null)
+  const [error, setError]       = useState(null)
+  const [loading, setLoading]   = useState(false)
+  const [success, setSuccess]   = useState(null)
 
+  function switchMode(next) {
+    setMode(next)
+    setError(null)
+    setSuccess(null)
+  }
 
   async function handleSubmit() {
     setError(null)
     setSuccess(null)
-
-    if (mode === 'signup' && username && !USERNAME_RE.test(username)) {
-      setError(t.usernameInvalid)
-      return
-    }
-
     setLoading(true)
-
     if (mode === 'signup') {
-      const { data, error } = await supabase.auth.signUp({ email, password })
-      if (error) {
-        setError(error.message)
-      } else {
-        setSuccess(t.signupSuccess)
-        // Username is optional at signup — if left blank, /api/profile
-        // will assign a random one on first login, editable later from
-        // the Profile screen. If a session comes back immediately (no
-        // email confirmation required), set it right away rather than
-        // waiting on that fallback. When confirmation *is* required,
-        // there's no session yet to authenticate this call with, so
-        // the chosen name can't be applied until they log in — at
-        // which point the random fallback has already claimed a name
-        // and they'd need to rename it manually. Revisit once we know
-        // whether email confirmation is enabled for this project.
-        if (username && data.session) {
-          apiFetch('/api/profile', data.session, {
-            method: 'PATCH',
-            body: JSON.stringify({ username }),
-          }).catch(() => {})
-        }
-      }
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (error) setError(error.message)
+      else setSuccess(t.signupSuccess)
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError(error.message)
     }
-
     setLoading(false)
   }
 
+  const onEnter = e => { if (e.key === 'Enter') handleSubmit() }
+
   return (
-    <div className="auth-screen">
+    <main className="auth" id="main-content">
       {onBack && (
-        <button type="button" onClick={onBack} className="auth-back-btn" aria-label={t.back} title={t.back}>
-          <ChevronIcon direction="left" size={16} />
-        </button>
+        <div className="auth__head">
+          <button type="button" className="brd__back" onClick={onBack} aria-label={t.back}>
+            <BackChevron />
+          </button>
+        </div>
       )}
+      <div className="auth-header">
+        <span className="auth-header__glyph" lang="ja">{t.appTitle}</span>
+        <h1 className="auth-header__title">{t.learnJapanese}</h1>
+      </div>
 
-      <main id="main-content">
-        <div className="auth-header">
-          <div className="auth-header__glyph">{t.appTitle}</div>
-          <h1 className="auth-header__title">{t.learnJapanese}</h1>
-        </div>
-
-        <div className="card auth-card">
-        <div className="auth-mode-toggle">
-          {[['login', t.login], ['signup', t.signup]].map(([m, label]) => (
-            <button
-              key={m}
-              onClick={() => { setMode(m); setError(null); setSuccess(null) }}
-              className={`auth-mode-toggle__btn${mode === m ? ' auth-mode-toggle__btn--active' : ''}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="auth-fields">
-          {mode === 'signup' && (
-            <input
-              type="text"
-              placeholder={t.usernameOptional}
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-              className="field auth-input"
-              maxLength={20}
-            />
-          )}
-          <input
-            type="email"
-            placeholder={t.email}
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            className="field auth-input"
-          />
-          <input
-            type="password"
-            placeholder={t.password}
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            className="field auth-input"
-          />
-        </div>
-
-        {error && <div className="auth-message auth-message--error">{error}</div>}
-        {success && <div className="auth-message auth-message--success">{success}</div>}
-
-        <button onClick={handleSubmit} disabled={loading} className="auth-submit">
+      <div className="auth-card">
+        <Seg
+          full
+          options={[{ key: 'login', label: t.login }, { key: 'signup', label: t.signup }]}
+          value={mode}
+          onChange={switchMode}
+          label={t.authModeAria}
+        />
+        <input
+          type="email"
+          className="field"
+          placeholder={t.email}
+          aria-label={t.email}
+          autoComplete="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          onKeyDown={onEnter}
+        />
+        <input
+          type="password"
+          className="field"
+          placeholder={t.password}
+          aria-label={t.password}
+          autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          onKeyDown={onEnter}
+        />
+        {error && <p className="auth-message auth-message--error" role="alert">{error}</p>}
+        {success && <p className="auth-message auth-message--success" role="status">{success}</p>}
+        <button type="button" className="auth-submit" onClick={handleSubmit} disabled={loading}>
           {loading ? t.loading : mode === 'login' ? t.loginBtn : t.signupBtn}
         </button>
-        </div>
-      </main>
-    </div>
+      </div>
+
+      <p className="auth-foot">{t.authFoot}</p>
+    </main>
   )
 }

@@ -12,10 +12,12 @@ from psycopg2 import errors as pg_errors
 from pydantic import BaseModel, field_validator
 
 from core.db import db_conn
-from core.auth import get_user_id
+from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
+from core import credits
 from srs.xp import level_progress
+from study import level_rule
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -73,6 +75,23 @@ def _init_db() -> None:
             # buttons themselves. Deliberately NOT a change of scale:
             # both bars send the same 0..5 quality, so a learner can
             # switch without their own history changing meaning.
+            #
+            # The credits columns (plan 069, core/credits.py):
+            # credits_refilled_on is the local day the last refill (or the
+            # seed) was taken — the idempotence lock; plan/plan_until are
+            # the entitlement ('free' | 'pass', with an optional expiry —
+            # set by hand until a purchase flow exists); tz_offset_min is
+            # the device's offset east of UTC, PATCHed on boot, so the
+            # refill day is the learner's rather than the server's.
+            #
+            # The boarding's own answers (plan 075, routes/onboarding.py):
+            # motive is why the learner is here (the plan screen's two
+            # promise lines come from it), kana_known which scripts they
+            # already read ('hiragana' | 'katakana' | 'both' | 'none' --
+            # the sets marked known at the boarding), reminder_time the
+            # daily nudge's hour ('HH:MM', NULL = none) and notifications
+            # whether they said yes to it. The native shell (plan 076)
+            # reads the last two on boot to schedule the local reminder.
             for col, typ in (
                 ("jlpt_level", "TEXT"),
                 ("daily_new_target", "INTEGER"),
@@ -83,10 +102,32 @@ def _init_db() -> None:
                 ("goal_set_at", "TIMESTAMPTZ"),
                 ("daily_departure", "TEXT"),
                 ("rating_scale", "TEXT"),
+                ("credits_refilled_on", "DATE"),
+                ("plan", "TEXT DEFAULT 'free'"),
+                ("plan_until", "TIMESTAMPTZ"),
+                ("tz_offset_min", "INTEGER"),
+                ("motive", "TEXT"),
+                ("kana_known", "TEXT"),
+                ("reminder_time", "TEXT"),
+                ("notifications", "BOOLEAN NOT NULL DEFAULT FALSE"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
                 )
+            # 回数券 — the credit ledger (plan 069). Append-only, like
+            # xp_ledger: the balance is SUM(delta), never a column. See
+            # core/credits.py for the economy and the shadow mode.
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS credit_ledger (
+                    id      BIGSERIAL PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    delta   INTEGER NOT NULL,
+                    reason  TEXT NOT NULL,
+                    ref     TEXT,
+                    at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_credit_ledger_user ON credit_ledger(user_id)")
         conn.commit()
     finally:
         conn.close()
@@ -142,16 +183,18 @@ def ensure_profile_row(user_id: str) -> str:
 
 def _profile_row(user_id: str) -> tuple:
     """(username, jlpt_level, daily_new_target, onboarded_at,
-    rating_scale) — seeding the row lazily like _get_or_create_username,
-    whose creation path it reuses. The onboarding fields are NULL until
-    the flow runs, and rating_scale until the learner changes it."""
+    rating_scale, motive, kana_known, reminder_time, notifications) —
+    seeding the row lazily like _get_or_create_username, whose creation
+    path it reuses. The onboarding fields are NULL until the flow runs,
+    and rating_scale until the learner changes it."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
                 SELECT username, jlpt_level, daily_new_target, onboarded_at,
-                       rating_scale
+                       rating_scale, motive, kana_known, reminder_time,
+                       notifications
                 FROM user_profiles WHERE user_id = %s
                 """,
                 (user_id,),
@@ -161,7 +204,7 @@ def _profile_row(user_id: str) -> tuple:
                 return row
     finally:
         conn.close()
-    return (_get_or_create_username(user_id), None, None, None, None)
+    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False)
 
 
 def _usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -207,6 +250,18 @@ class LearningPayload(BaseModel):
     jlptLevel: str | None = None
     dailyNewTarget: int | None = None
     ratingScale: str | None = None
+    # The device's UTC offset in minutes, east positive (the app sends
+    # -Date.getTimezoneOffset()), so the credits refill at the
+    # learner's midnight (core/credits.py). Sent on every boot.
+    tzOffsetMin: int | None = None
+
+    @field_validator("tzOffsetMin")
+    @classmethod
+    def valid_tz(cls, v: int | None) -> int | None:
+        # -14:00 .. +14:00 is the whole planet.
+        if v is not None and not (-840 <= v <= 840):
+            raise ValueError("must be between -840 and 840")
+        return v
 
     @field_validator("ratingScale")
     @classmethod
@@ -230,6 +285,63 @@ class LearningPayload(BaseModel):
         if v is not None and not (1 <= v <= 100):
             raise ValueError("must be between 1 and 100")
         return v
+
+
+# ── The level rule (plan 074) ─────────────────────────────────
+# Choosing a level marks the stops behind it known; see
+# study/level_rule.py for the rule and SRSEngine.seed_known for the
+# rows. Both halves answer in the same shape the settings sheets
+# print: "up" carries what would be (or was) marked known and the
+# spread, "down" what is set aside and the zero that is deleted.
+def _level_direction(current: str | None, target: str) -> str:
+    if current == target:
+        return "same"
+    if current is None or LEVELS.index(target) > LEVELS.index(current):
+        return "up"
+    return "down"
+
+
+def level_rule_preview(user_id: str, current: str | None, target: str) -> dict:
+    direction = _level_direction(current, target)
+    if direction == "same":
+        return {"direction": "same"}
+    if direction == "up":
+        marked = 0
+        for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target)):
+            full = prefixed(ids, user_id)
+            marked += len(full) - srs.count_rows(full, mode)
+        return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
+    set_aside = sum(
+        srs.count_cards_with_rows(prefixed(ids, user_id))
+        for ids in level_rule.item_batches(level_rule.stops_between(target, current))
+    )
+    return {"direction": "down", "setAside": set_aside, "deleted": 0}
+
+
+def apply_level_rule(user_id: str, current: str | None, target: str) -> dict:
+    """Write the rule for a level just stored: seed every stop behind
+    `target` (rows that exist are left alone, so the stops behind the
+    previous level cost nothing a second time). A move down writes
+    nothing and says so in the same shape."""
+    direction = _level_direction(current, target)
+    if direction != "up":
+        return level_rule_preview(user_id, current, target)
+    marked = 0
+    for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target)):
+        marked += srs.seed_known(prefixed(ids, user_id), mode, spread_days=level_rule.SPREAD_DAYS)
+    logger.info("level rule user_id=%s %s -> %s marked_known=%d", user_id, current, target, marked)
+    return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
+
+
+def apply_kana_rule(user_id: str, known: str | None) -> dict:
+    """The kana door (plan 075): mark the scripts the learner already
+    reads known -- one row per sign in the kana line's primary mode,
+    spread like the level rule's. Idempotent for the same reason; a
+    replay that names MORE scripts adds only the new ones."""
+    mode, ids = level_rule.kana_batch(known)
+    marked = srs.seed_known(prefixed(ids, user_id), mode, spread_days=level_rule.SPREAD_DAYS) if ids else 0
+    logger.info("kana rule user_id=%s known=%s marked_known=%d", user_id, known, marked)
+    return {"kanaKnown": known, "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
 
 
 # ── Records ───────────────────────────────────────────────────
@@ -256,7 +368,8 @@ CALENDAR_DAYS = 35
 # ── Routes ────────────────────────────────────────────────────
 @router.get("/api/profile")
 def get_profile(user_id: str = Depends(get_user_id)):
-    username, jlpt_level, daily_new_target, onboarded_at, rating_scale = _profile_row(user_id)
+    (username, jlpt_level, daily_new_target, onboarded_at, rating_scale,
+     motive, kana_known, reminder_time, notifications) = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     streak = srs.get_streak(user_id)
@@ -282,6 +395,14 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # client so a learner who has never opened settings still gets a
         # named scale instead of a null the bar has to guess at.
         "ratingScale": rating_scale or DEFAULT_RATING_SCALE,
+        # The boarding's answers (plan 075): what the plan screen and the
+        # native shell's daily reminder read back. All NULL/false until
+        # the boarding runs; an account boarded before plan 075 simply
+        # never answered.
+        "motive": motive,
+        "kanaKnown": kana_known,
+        "reminderTime": reminder_time,
+        "notifications": bool(notifications),
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],
@@ -377,6 +498,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if not payload.model_fields_set:
         raise HTTPException(status_code=422, detail="Nothing to update")
     _get_or_create_username(user_id)  # ensure a row exists to update
+    # The level the rule moves FROM, read before the write: a move up
+    # seeds the stops crossed, a move down seeds nothing.
+    previous_level = _profile_row(user_id)[1] if payload.jlptLevel is not None else None
     sets, args = [], []
     if payload.jlptLevel is not None:
         sets.append("jlpt_level = %s")
@@ -387,6 +511,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.ratingScale is not None:
         sets.append("rating_scale = %s")
         args.append(payload.ratingScale)
+    if payload.tzOffsetMin is not None:
+        sets.append("tz_offset_min = %s")
+        args.append(payload.tzOffsetMin)
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -403,11 +530,32 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         # Write-through so this worker's resolver answers with the new
         # level immediately rather than after its TTL.
         note_stored_level(user_id, payload.jlptLevel)
+    if payload.tzOffsetMin is not None:
+        # The refill day moved with the clock; the cached state must not
+        # outlive it.
+        credits.forget(user_id)
+    level_rule_result = (
+        apply_level_rule(user_id, previous_level, payload.jlptLevel)
+        if payload.jlptLevel is not None else None
+    )
     return {
         "jlptLevel": payload.jlptLevel,
         "dailyNewTarget": payload.dailyNewTarget,
         "ratingScale": payload.ratingScale,
+        "tzOffsetMin": payload.tzOffsetMin,
+        "levelRule": level_rule_result,
     }
+
+
+@router.get("/api/profile/learning/preview")
+def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_user_id)):
+    """What choosing `jlptLevel` would do, for the confirm sheet -- how
+    many cards a move up marks known and over how many weeks, or how
+    many a move down sets aside (and the zero it deletes)."""
+    if jlptLevel not in LEVELS:
+        raise HTTPException(status_code=422, detail=f"jlptLevel must be one of {', '.join(LEVELS)}")
+    current = _profile_row(user_id)[1]
+    return level_rule_preview(user_id, current, jlptLevel)
 
 
 @router.get("/api/leaderboard")

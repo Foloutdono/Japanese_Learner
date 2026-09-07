@@ -4,6 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>日本語 — Apprendre le japonais</title>
+    <meta name="description" content="Apprendre le japonais — kana, vocabulaire, kanji, grammaire, lecture, répétition espacée. Learn Japanese, from kana to reading real text." />
+    <!-- The installed app's chrome (plan 065). theme-color is written by
+         the script below from the resolved theme and again by the theme
+         toggle (components/ui/NavControls.jsx), so the status bar follows
+         jp-theme and not just the OS. The manifest link is injected at
+         build time by vite-plugin-pwa (vite.config.js). -->
+    <meta name="theme-color" content="#17151a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="日本語" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/pwa-64x64.png" type="image/png" sizes="64x64" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
     <!-- Resolves the theme before first paint. Deliberately a blocking
          inline script and not a React component: anything that runs in
          React runs after the first paint, which is exactly the flash
@@ -17,6 +31,10 @@
             ? saved
             : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
           document.documentElement.setAttribute('data-theme', theme)
+          // --bg-main of each theme (index.css :root / [data-theme=light]);
+          // mirrored in NavControls.jsx's THEME_COLOR, keep the two in step.
+          var meta = document.querySelector('meta[name="theme-color"]')
+          if (meta) meta.setAttribute('content', theme === 'light' ? '#f6f1e4' : '#17151a')
         } catch (e) {
           /* localStorage can throw in private-mode/blocked-cookie contexts.
              Falling through leaves the :root default (dark) in place, which

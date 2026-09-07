@@ -1,10 +1,17 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { DepartureGate } from './components/station/DepartureGate'
 import { TrainDoor } from './components/station/TrainDoor'
 import { TicketGate } from './components/station/TicketGate'
+import { UpdateToast, OfflineNote } from './components/ui/UpdateToast'
+import { BalanceSheet } from './components/credits/BalanceSheet'
+import { RunOutSheet } from './components/credits/RunOutSheet'
+import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
+import { getTabs } from './config/tabs'
+import { Shell, StageFrame } from './components/chrome/Shell'
+import { NativeBridge } from './components/chrome/NativeBridge'
 import { identityFor } from './config/identity'
-import { apiJsonWithTimeout } from './lib/api'
+import { apiJson, apiJsonWithTimeout } from './lib/api'
 // Development-only. Vite statically replaces import.meta.env.DEV with
 // `false` in a production build, so this import and the route below
 // are both dropped by tree-shaking — the screen is not merely
@@ -16,12 +23,19 @@ import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { LangProvider, useLang } from './LangContext'
 
-import LandingScreen from './screens/LandingScreen'
+import Welcome from './components/boarding/Welcome'
 import AuthScreen  from './screens/AuthScreen'
-import OnboardingFlow from './screens/OnboardingFlow'
-import HomeScreen  from './screens/HomeScreen'
+import BoardingFlow from './screens/BoardingFlow'
+import LearnScreen from './screens/LearnScreen'
+import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
+import TodayRun from './screens/TodayRun'
 import KanaScreen  from './screens/KanaScreen'
+import KanaRun from './screens/KanaRun'
+import VocabRun from './screens/VocabRun'
+import KanjiRun from './screens/KanjiRun'
+import GrammarRun from './screens/GrammarRun'
+import StudyRun from './screens/StudyRun'
 import VocabScreen from './screens/VocabScreen'
 import KanjiScreen from './screens/KanjiScreen'
 import StatsScreen from './screens/StatsScreen'
@@ -39,6 +53,7 @@ import ExamScreen from './screens/ExamScreen'
 import ExamRunner from './screens/ExamRunner'
 import ExamResult from './screens/ExamResult'
 import TranslationScreen from './screens/TranslationScreen'
+import AppLoading from './screens/AppLoading'
 
 // Renders nothing — keeps <html lang> and document.title in step with
 // the current route and language. Beside <Routes/> rather than inside
@@ -46,9 +61,10 @@ import TranslationScreen from './screens/TranslationScreen'
 // need to remember to set its own title, and the six that forgot the
 // theme snippet are the evidence for how that goes.
 //
-// The route's own title comes from the same pair TopBar uses —
-// sectionFor for stations, identityFor for the two pass routes — so a
-// new station added to stations.js gets a document title for free.
+// The route's own title comes from the same registries the bar uses —
+// sectionFor for stations, identityFor for the two pass routes, and
+// the tab itself for a gate's root — so a new station added to
+// stations.js gets a document title for free.
 function DocumentHead() {
   const { t } = useLang()
   const { pathname } = useLocation()
@@ -56,16 +72,61 @@ function DocumentHead() {
   useEffect(() => {
     const identity = identityFor(pathname, t)
     const section = identity ? null : sectionFor(pathname, t)
-    const screen = identity?.title ?? section?.title
+    const tab = identity || section ? null : getTabs(t).find(x => x.path === pathname)
+    const screen = identity?.title ?? section?.title ?? tab?.label
     document.title = screen ? `${screen} — ${t.appTitle}` : t.appTitle
   }, [pathname, t])
 
   return null
 }
 
+// ── Moved ──
+// Every path the app has ever had stays reachable: the old top-level
+// routes (/kana, /decks/<id>, /exam/<id>/results …) were live for
+// months, sit in browser histories and bookmarks, and a 404 on a URL
+// that used to work is the worst possible outcome of a rename. Each
+// one redirects to its place behind a gate (config/tabs.js), keeping
+// its params and its query (`/kana?set=…`, `/exam/<id>?exclude=…`).
+// `replace`, so Back from the destination leaves rather than bouncing.
+const MOVED = [
+  ['/kana',                    '/learn/kana'],
+  ['/vocab',                   '/learn/vocab'],
+  ['/kanji',                   '/learn/kanji'],
+  ['/grammar',                 '/learn/grammar'],
+  ['/decks',                   '/learn/decks'],
+  ['/decks/:deck_id',          '/learn/decks/:deck_id'],
+  ['/decks/:deck_id/study',    '/learn/decks/:deck_id/study'],
+  ['/reading',                 '/practice/reading'],
+  ['/reading-comprehension',   '/practice/comprehension'],
+  ['/translation',             '/practice/translation'],
+  ['/exam',                    '/practice/exam'],
+  ['/exam/:examId',            '/practice/exam/:examId'],
+  ['/exam/:examId/results',    '/practice/exam/:examId/results'],
+  // Merged into the analyzer by plan 027; the analyzer moved behind
+  // the dictionary's door in plan 068.
+  ['/analyzer',                '/dictionary/analyzer'],
+  ['/phrase-analyzer',         '/dictionary/analyzer'],
+  ['/video',                   '/dictionary/analyzer'],
+  ['/stats',                   '/profile/stats'],
+  ['/settings',                '/profile/settings'],
+  // The Daruma Hall and the Storehouse were retired with the rest of
+  // the profile's gamification; they go home to the pass they hung off.
+  ['/daruma',                  '/profile'],
+  ['/storehouse',              '/profile'],
+]
+
+function Moved({ to }) {
+  const params = useParams()
+  const { search, hash } = useLocation()
+  const path = to.replace(/:(\w+)/g, (_, key) => params[key])
+  return <Navigate to={path + search + hash} replace />
+}
+
 export default function App() {
   const [session, setSession] = useState(undefined)
-  const [showLanding, setShowLanding] = useState(true)
+  // Signed out: Welcome (the boarding's step zero) until Board or
+  // "Have an account?" opens the sign-in on the matching side.
+  const [authMode, setAuthMode] = useState(null) // null | 'login' | 'signup'
   // The onboarding gate: undefined = still asking, 'needed' = show the
   // ticket office instead of the router, 'finishing' = the router is
   // up with the TicketGate cutscene playing over it, 'done' = normal.
@@ -86,7 +147,20 @@ export default function App() {
     if (!session) return
     let cancelled = false
     const userId = session.user?.id ?? null
-    apiJsonWithTimeout('/api/profile', session, { timeoutMs: 8000 })
+    // 45 s, not the 10 s default: the backend sleeps on Render's free
+    // tier and a cold start takes 30–60 s. On a phone, where every visit
+    // is short and the first request of the day is exactly this one, an
+    // 8 s gate that fails open showed a blank hall to everyone who
+    // arrived while the server was still waking. The wait itself is
+    // drawn honestly by AppLoading.
+    // The device's clock, on the profile, so the credits refill at the
+    // learner's midnight (plan 069). Fire-and-forget: a boot that could
+    // not say so refills on UTC's day until the next one that can.
+    apiJson('/api/profile/learning', session, {
+      method: 'PATCH',
+      body: JSON.stringify({ tzOffsetMin: -new Date().getTimezoneOffset() }),
+    }).catch(() => {})
+    apiJsonWithTimeout('/api/profile', session, { timeoutMs: 45000 })
       .then(p => {
         if (cancelled) return
         setGate({ userId, state: p.onboardedAt ? 'done' : 'needed', profile: p })
@@ -139,12 +213,13 @@ export default function App() {
     )
   }
 
+  // The two waits below are the same screen (screens/AppLoading.jsx,
+  // plan 067). Only the second asks for the "waking the server" line:
+  // this one is Supabase reading its own storage, never a round trip.
   if (session === undefined) {
     return (
       <LangProvider>
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ color: 'var(--text-secondary)' }}>Chargement...</div>
-        </div>
+        <AppLoading />
       </LangProvider>
     )
   }
@@ -152,34 +227,34 @@ export default function App() {
   if (!session) {
     return (
       <LangProvider>
-        {showLanding
-          ? <LandingScreen onContinue={() => setShowLanding(false)} />
-          : <AuthScreen onBack={() => setShowLanding(true)} />}
+        {authMode
+          ? <AuthScreen mode={authMode} onBack={() => setAuthMode(null)} />
+          : <Welcome onBoard={() => setAuthMode('signup')} onSignIn={() => setAuthMode('login')} />}
       </LangProvider>
     )
   }
 
   // Signed in, but the profile hasn't answered "onboarded?" yet — the
-  // same centered wait as the session check above, for the same reason:
+  // same wait as the session check above, for the same reason:
   // flashing the wrong screen for 200ms is worse than a beat of quiet.
+  // This is the request a sleeping backend holds for 30–60 s, so the
+  // screen says so after a few seconds (see the 45 s gate above).
   if (onboarding === undefined) {
     return (
       <LangProvider>
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ color: 'var(--text-secondary)' }}>Chargement...</div>
-        </div>
+        <AppLoading wakesServer />
       </LangProvider>
     )
   }
 
-  // みどりの窓口 — the ticket office, instead of the router: the same
-  // continuum Landing → Auth uses. No route, no station; see
-  // screens/OnboardingFlow.jsx for why. onComplete goes through
+  // 乗車 — the boarding, instead of the router: the same continuum
+  // Welcome → Auth uses. No route, no station; see
+  // screens/BoardingFlow.jsx for why. onComplete goes through
   // 'finishing' so the TicketGate below plays over the mounted router.
   if (onboarding === 'needed') {
     return (
       <LangProvider>
-        <OnboardingFlow
+        <BoardingFlow
           session={session}
           initialProfile={onboardingProfile}
           onComplete={() => setOnboarding('finishing')}
@@ -192,45 +267,77 @@ export default function App() {
     <LangProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/"                     element={<HomeScreen session={session} />} />
-          {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
-          <Route path="/today"                element={<TodayScreen session={session} />} />
-          <Route path="/kana"                 element={<KanaScreen session={session} />} />
-          <Route path="/vocab"                element={<VocabScreen session={session} />} />
-          <Route path="/kanji"                element={<KanjiScreen session={session} />} />
-          <Route path="/stats"                element={<StatsScreen session={session} />} />
-          <Route path="/dictionary"           element={<DictionaryScreen session={session} />} />
-          <Route path="/decks"                element={<DecksScreen session={session} />} />
-          <Route path="/decks/:deck_id"       element={<DeckDetailScreen session={session} />} />
-          <Route path="/decks/:deck_id/study" element={<StudyScreen session={session} />} />
-          <Route path="/grammar"              element={<GrammarScreen session={session} />} />
-          <Route path="/analyzer"             element={<AnalyzerScreen session={session} />} />
-          {/* Merged into /analyzer by plan 027. Kept as redirects, not
-              deleted: both paths have been live, are in browser history
-              and may be bookmarked, and a 404 on a URL that used to work
-              is the worst possible outcome of a rename. `replace` so Back
-              from the analyzer goes home rather than back to the redirect. */}
-          <Route path="/phrase-analyzer"      element={<Navigate to="/analyzer" replace />} />
-          <Route path="/video"                element={<Navigate to="/analyzer" replace />} />
-          <Route path="/reading"              element={<ReadingScreen session={session} />} />
-          <Route path="/reading-comprehension" element={<ReadingComprehensionScreen session={session} />} />
-          <Route path="/profile" element={<ProfileScreen session={session} />} />
-          <Route path="/settings" element={<SettingsScreen session={session} />} />
-          {/* No /:sectionId segment: every generated paper has exactly
-              one section (see each backend/study/exam_*_gen.py), so it
-              was a parameter with one legal value and a picker screen
-              that only ever offered one choice. */}
-          <Route path="/exam" element={<ExamScreen session={session} />} />
-          <Route path="/exam/:examId" element={<ExamRunner session={session} />} />
-          <Route path="/exam/:examId/results" element={<ExamResult session={session} />} />
-          <Route path="/translation" element={<TranslationScreen session={session} />} />
-          {/* The Daruma Hall and the Storehouse were retired with the
-              rest of the profile's gamification. Their paths have been
-              live and may be bookmarked, so they go home to the pass
-              they hung off rather than to a blank page — same reasoning
-              as the analyzer redirects above. */}
-          <Route path="/daruma" element={<Navigate to="/profile" replace />} />
-          <Route path="/storehouse" element={<Navigate to="/profile" replace />} />
+          {/* 車内 — the shell (plan 068): the HUD, the screen, the five
+              gates. One chrome at every width. */}
+          <Route element={<Shell />}>
+            {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
+            <Route path="/today"                element={<TodayScreen session={session} />} />
+            <Route path="/learn"                element={<LearnScreen session={session} />} />
+            {/* The stations and the platforms (plan 071): a line's stops,
+                then a stop's modes, under the chrome; the run itself is
+                on the stage frame below. */}
+            <Route path="/learn/kana"                 element={<KanaScreen />} />
+            <Route path="/learn/kana/:set"            element={<KanaScreen />} />
+            <Route path="/learn/vocab"                element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/tiers"          element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/themes"         element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/tier/:tier"     element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/theme/:theme"   element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/:level"         element={<VocabScreen session={session} />} />
+            <Route path="/learn/kanji"                element={<KanjiScreen session={session} />} />
+            <Route path="/learn/kanji/tiers"          element={<KanjiScreen session={session} />} />
+            <Route path="/learn/kanji/tier/:tier"     element={<KanjiScreen session={session} />} />
+            <Route path="/learn/kanji/:level"         element={<KanjiScreen session={session} />} />
+            <Route path="/learn/grammar"              element={<GrammarScreen />} />
+            <Route path="/learn/grammar/:level"       element={<GrammarScreen />} />
+            <Route path="/learn/decks"          element={<DecksScreen session={session} />} />
+            <Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={session} />} />
+            <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
+            <Route path="/practice"             element={<PracticeScreen />} />
+            {/* No /:sectionId segment: every generated paper has exactly
+                one section (see each backend/study/exam_*_gen.py), so it
+                was a parameter with one legal value and a picker screen
+                that only ever offered one choice. */}
+            <Route path="/practice/exam"        element={<ExamScreen session={session} />} />
+            <Route path="/practice/exam/:examId/results" element={<ExamResult session={session} />} />
+            <Route path="/dictionary"           element={<DictionaryScreen session={session} />} />
+            <Route path="/dictionary/analyzer"  element={<AnalyzerScreen session={session} />} />
+            <Route path="/profile"              element={<ProfileScreen session={session} />} />
+            <Route path="/profile/stats"        element={<StatsScreen session={session} />} />
+            <Route path="/profile/settings"     element={<SettingsScreen session={session} />} />
+            {/* The settings pages (plan 074): display, sound, learning,
+                destination, data, account — each its own page under
+                the list. */}
+            <Route path="/profile/settings/:page" element={<SettingsScreen session={session} />} />
+          </Route>
+
+          {/* The stage: both bars leave, the rating bar or the field
+              docks on the bottom edge, and the bar's ‹ is the way out.
+              A run's set, level, tier, theme or deck and its mode are its
+              path (plan 071); the stations and platforms before it sit
+              under the shell above. */}
+          <Route element={<StageFrame />}>
+            <Route path="/today/run"                          element={<TodayRun session={session} />} />
+            <Route path="/learn/kana/:set/:mode"              element={<KanaRun session={session} />} />
+            <Route path="/learn/vocab/tier/:tier/:mode"       element={<VocabRun session={session} />} />
+            <Route path="/learn/vocab/theme/:theme/:mode"     element={<VocabRun session={session} />} />
+            <Route path="/learn/vocab/:level/:mode"           element={<VocabRun session={session} />} />
+            <Route path="/learn/kanji/tier/:tier/:mode"       element={<KanjiRun session={session} />} />
+            <Route path="/learn/kanji/:level/:mode"           element={<KanjiRun session={session} />} />
+            <Route path="/learn/grammar/:level/:mode"         element={<GrammarRun session={session} />} />
+            <Route path="/learn/decks/:deck_id/study/:mode"   element={<StudyRun session={session} />} />
+            <Route path="/practice/reading"           element={<ReadingScreen session={session} />} />
+            <Route path="/practice/comprehension"     element={<ReadingComprehensionScreen session={session} />} />
+            <Route path="/practice/translation"       element={<TranslationScreen session={session} />} />
+            <Route path="/practice/exam/:examId"      element={<ExamRunner session={session} />} />
+          </Route>
+
+          {/* The gate hall retired with the chrome; the front door is
+              the run. */}
+          <Route path="/" element={<Navigate to="/today" replace />} />
+          {MOVED.map(([from, to]) => (
+            <Route key={from} path={from} element={<Moved to={to} />} />
+          ))}
           {import.meta.env.DEV && (
             <Route path="/dev/rewards" element={<RewardsPreview />} />
           )}
@@ -240,6 +347,28 @@ export default function App() {
         </Routes>
 
         <DocumentHead />
+        {/* 車両 — the shell's habits (plan 076): Android's back button
+            and the daily nudge. Inside the router for the history and
+            the profile; nothing on the web. */}
+        <NativeBridge />
+
+        {/* 掲示 — the docked notes (plan 065): a new build waiting, or
+            no network. Beside <Routes/> for the same reason as the gate
+            below: they must outlive the navigation that would unmount a
+            screen. */}
+        <UpdateToast />
+        <OfflineNote />
+
+        {/* 回数券 — the balance sheet off the HUD's pass, and the run-out
+            sheet a 402 mid-run raises (plan 069). Beside <Routes/> like
+            the notes: the first opens from outside every screen, the
+            second is raised by a review the screen fired and forgot. */}
+        <BalanceSheet />
+        <RunOutSheet />
+        {/* 運行状況 — the status sheet off the HUD's station panel
+            (plan 074): the pass's back, the ghost train and the two
+            honest moves. */}
+        <StatusSheet session={session} />
 
         {/* 改札 — the departure cutscene. Beside <Routes/>, never
             inside it: the gate has to keep playing across the very
@@ -256,12 +385,12 @@ export default function App() {
         <TrainDoor />
 
         {/* The onboarding finale: the learner's FIRST pass through the
-            改札, played over the already-mounted router (HomeScreen is
+            改札, played over the already-mounted router (the run is
             under the scrim from frame one) — rendered here and not by
-            OnboardingFlow, which has just unmounted and would take the
+            BoardingFlow, which has just unmounted and would take the
             cutscene down mid-wipe with it. onNavigate is a no-op
-            because '/' is already where the router mounts. Under
-            prefers-reduced-motion TicketGate fires both callbacks
+            because '/' (→ /today) is already where the router mounts.
+            Under prefers-reduced-motion TicketGate fires both callbacks
             synchronously and renders nothing, per house rule. */}
         {onboarding === 'finishing' && (
           <TicketGate

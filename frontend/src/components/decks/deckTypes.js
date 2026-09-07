@@ -9,14 +9,14 @@
 // indigo, a grammar deck 文法's pine. Before, these were picked from
 // whatever was spare in the accent palette, so a "Kanji" deck was
 // rust-red while the 漢字 station it pulls from was wisteria: the same
-// thing named twice in two colours. config/navLinks.js documents that
+// thing named twice in two colours. config/tabs.js documents that
 // exact mistake as the reason the --line-* family exists.
 //
 // `standard` has no section behind it, so it takes the neutral rail
 // .platform-card--local and --review already use for "no service type".
 //
 // `glyph` is the type's name in one character, for the card roundel —
-// the same way every section in navLinks.js is identified by its kanji
+// the same way every section in config/tabs.js is identified by its kanji
 // rather than an icon. Deck types are data, not copy, so the glyph and
 // colour live here while the label/description stay in the locales.
 //

@@ -1,0 +1,53 @@
+import { useLang } from '../LangContext'
+import { getSections } from '../config/tabs'
+import { beginDeparture } from '../stores/departure'
+import { playAnnouncement } from '../lib/audio'
+import { Bar } from '../components/chrome/Bar'
+
+// ── 実践 — the Practice gate: four platforms (plan 068) ───────
+// Reading practice, reading comprehension, translation, the mock
+// exam — the sentence-level sections, which schedule words rather
+// than levels and so have no line on the map. A register bar (no
+// roundel: Practice is not a place on a line) over one platform card
+// per section, each in its own pigment; boarding one announces it and
+// departs through the gate, like any other section. The pass tags the
+// canvas draws on these cards stay out until a purchase flow exists
+// (plan 069, HAS_STORE).
+export default function PracticeScreen() {
+  const { t } = useLang()
+  const platforms = getSections('practice', t)
+
+  function depart(section) {
+    playAnnouncement(section.clip)
+    beginDeparture(section)
+  }
+
+  return (
+    <main id="main-content" className="practice">
+      <Bar register title={t.tabPractice} sub={t.practiceSub} />
+      <div className="platform-grid">
+        {platforms.map((section, i) => (
+          <button
+            key={section.path}
+            type="button"
+            className="platform-card platform-card--line"
+            style={{ '--line-color': section.color }}
+            onClick={() => depart(section)}
+          >
+            <span className="platform-card__lead">
+              <span className="platform-card__no">{i + 1}</span>
+            </span>
+            <span className="platform-card__body">
+              <span className="platform-card__title">
+                {section.title}
+                <span className="platform-card__title-jp" lang="ja">{section.icon}</span>
+              </span>
+              <span className="platform-card__desc">{(section.desc ?? '').split('\n')[0]}</span>
+            </span>
+            <span className="platform-card__go" aria-hidden="true">▶</span>
+          </button>
+        ))}
+      </div>
+    </main>
+  )
+}

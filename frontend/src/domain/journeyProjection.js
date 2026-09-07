@@ -8,7 +8,7 @@
 //
 // The model is honestly linear: perDay new items × 30.4 days a month,
 // new material only — reviews come on top, and the copy that renders
-// this (t.onbMapAssumption) says so. It is a projection, not a plan;
+// this (the plan's chart caption, plan 075) says so. It is a projection, not a plan;
 // its job is to make "the app will teach you 8,000 words" a line you
 // can stand on rather than a slogan.
 

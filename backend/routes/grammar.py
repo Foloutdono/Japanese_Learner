@@ -2,6 +2,7 @@ import logging
 import random
 from fastapi import APIRouter, Depends, Query
 from core.auth import get_user_id, prefixed, unprefixed
+from core import credits
 from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
@@ -344,6 +345,9 @@ def post_grammar_review(payload: ReviewPayload,
                         user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
+    # The fare, charged only now that the scheduler has accepted the
+    # review (plan 069): a rejected review is not a ride.
+    fare = credits.spend(user_id, credits.COST_PER_REVIEW, card_id)
     # xp_earned/leveled_up/new_level were already being computed by
     # srs.review() (same engine kana/vocab/kanji use) but previously
     # dropped on the floor here — grammar reviews were earning XP with
@@ -359,6 +363,7 @@ def post_grammar_review(payload: ReviewPayload,
         "new_level":   s["new_level"],
         "stage_up":    _stage_promotion(payload.prev_stage, s["stage"]),
         "stage_down":  _stage_demotion(payload.prev_stage, s["stage"]),
+        "credits":     fare,
     }
 
 

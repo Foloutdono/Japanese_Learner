@@ -1,0 +1,10 @@
+# match keeps the distribution certificate and the App Store provisioning
+# profile in a private git repository, encrypted with MATCH_PASSWORD, and
+# creates both with the App Store Connect API key when they do not exist
+# yet -- which is what makes an iOS release possible with no Mac
+# (docs/release.md). The repository URL and its token are secrets.
+git_url(ENV["MATCH_GIT_URL"])
+storage_mode("git")
+type("appstore")
+app_identifier(["com.japaneselearner.app"])
+readonly(false)

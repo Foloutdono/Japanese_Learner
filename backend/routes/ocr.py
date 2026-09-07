@@ -13,6 +13,7 @@ import logging
 import os
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from core.credits import require_pass
 
 from core.auth import get_user_id
 from core.db import db_conn
@@ -20,7 +21,9 @@ from study.llm_shared import chat, LLMUnavailable
 from study.ocr_prompt import OCR_PROMPT, VERTICAL_HINT
 from study.text_normalize import normalize_recognized_text
 
-router = APIRouter()
+# A pass feature (plan 069): every route here refuses a free learner
+# with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
+router = APIRouter(dependencies=[Depends(require_pass)])
 logger = logging.getLogger(__name__)
 
 # A phone photo is routinely 4-12 MB; the client downscales before

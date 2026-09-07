@@ -1,7 +1,6 @@
 import { useLang } from '../../LangContext'
 import { serviceFor } from '../../config/stations'
 import { playUi } from '../../lib/audio'
-import { useReportPlatformCount } from './platformCount'
 
 /**
  * ModeSelector — のりば案内
@@ -34,7 +33,9 @@ import { useReportPlatformCount } from './platformCount'
  * own 番線 platform number rather than a wrong badge.
  *
  * No header of its own — every caller renders inside <SelectionScreen>,
- * which already names the section on the station plate overhead.
+ * whose bar names the section overhead. The service badge prints its
+ * name in the learner's language (Rapid, Express…); the pips are what
+ * make the ladder legible without any railway vocabulary.
  *
  * Props:
  *   modes    — array of { key, label, desc?, sample?, color?, action? }
@@ -53,11 +54,6 @@ import { useReportPlatformCount } from './platformCount'
  *       exam picker (where only papers you have already sat get a
  *       別の問題 link) is precisely that mix.
  *   onSelect(key) — called when a card is chosen
- *   unit — whether the 番線 unit prints under the platform number on
- *     a numbered (non-service) card. Default true. The analyser's
- *     source picker turns it off: its navigation is deliberately
- *     plain-language-first, and 番線 was the one Japanese word left
- *     captioning a roundel that reads fine from the ring alone.
  *     jp     — optional Japanese name set as a quiet accent beside the
  *       title (the analyser's cards lead with the plain-language name
  *       and keep 文字/写真/動画 as the secondary register).
@@ -67,9 +63,8 @@ import { useReportPlatformCount } from './platformCount'
  *       figure, a status) — this is that column. The analyser puts
  *       the learner's own record on each platform there.
  */
-export default function ModeSelector({ modes, onSelect, unit = true }) {
+export default function ModeSelector({ modes, onSelect }) {
   const { t } = useLang()
-  useReportPlatformCount(modes.length)
   const anyAction = modes.some(m => m.action)
 
   return (
@@ -87,7 +82,7 @@ export default function ModeSelector({ modes, onSelect, unit = true }) {
             <span className="platform-card__lead">
               {service ? (
                 <>
-                  <span className="platform-card__service" lang="ja">{service.jp}</span>
+                  <span className="platform-card__service">{t.serviceName?.[service.key] ?? service.jp}</span>
                   {service.stops > 0 && (
                     <span className="platform-card__stops" aria-hidden="true">
                       {[1, 2, 3, 4].map(n => (
@@ -102,7 +97,6 @@ export default function ModeSelector({ modes, onSelect, unit = true }) {
               ) : (
                 <>
                   <span className="platform-card__no">{i + 1}</span>
-                  {unit && <span className="platform-card__unit" lang="ja">番線</span>}
                 </>
               )}
             </span>

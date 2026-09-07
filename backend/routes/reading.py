@@ -7,6 +7,7 @@ from functools import lru_cache
 
 import pykakasi
 from fastapi import APIRouter, Depends, HTTPException, Query
+from core.credits import require_pass
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
@@ -26,7 +27,9 @@ from study.llm_shared import chat, llm_configured, LLMUnavailable
 import content.vocab_jmdict_data as jmdict_db
 import content.frequency_data as freq
 
-router = APIRouter()
+# A pass feature (plan 069): every route here refuses a free learner
+# with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
+router = APIRouter(dependencies=[Depends(require_pass)])
 logger = logging.getLogger(__name__)
 
 

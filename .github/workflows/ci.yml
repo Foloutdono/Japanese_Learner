@@ -81,3 +81,9 @@ jobs:
       - name: Test
         working-directory: frontend
         run: npm test
+      # The production build was never exercised by CI: Vercel built it,
+      # and a build-only break (a plugin config, an import that only the
+      # bundler resolves) surfaced as a failed deploy after the merge.
+      - name: Build
+        working-directory: frontend
+        run: npm run build

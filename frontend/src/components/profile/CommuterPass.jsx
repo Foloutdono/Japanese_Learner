@@ -1,5 +1,4 @@
 import { levelTitle } from '../../domain/levelTitle'
-import { GearIcon } from '../ui/Icons'
 
 // ── 定期券 — the commuter pass ─────────────────────────────
 // Nobody walks onto a Japanese platform without a pass, and the home
@@ -15,17 +14,17 @@ import { GearIcon } from '../ui/Icons'
 // have shown up, and everybody has one. It used to share its line with
 // a 段位 stamp and could be overridden by a chosen 称号; both went with
 // the mastery rank and the cosmetics, and the pass prints one class.
-// `headingTag`: the pass label is the profile screen's own <h1>, but
-// the home hall mounts this same card under the wall map's masthead —
-// two h1s on one screen is exactly what DESIGN.md's "one <h1> per
-// screen" forbids, so the hall renders the label as a plain span.
-// `footer`: the hall pins the stamp rally and the 新規 gauge to the
-// bottom of the card; the profile keeps its own separate blocks.
-// `onSettings`: 設定 belongs to the card (config/identity.js), so on the
-// profile the card carries the door to it — a hairline gear beside the
-// issuer's mark. The hall leaves it out: its pass is itself a button,
-// and a button inside a button is not a thing.
-export function CommuterPass({ profile, t, children, footer = null, headingTag: Heading = 'h1', onSettings = null }) {
+// `headingTag`: the pass label is the profile screen's own <h1>; a
+// caller mounting the card under another heading renders it as a
+// plain span (one <h1> per screen).
+// `footer`: the profile prints the balance line there (plan 074); a
+// caller with nothing to print leaves it null.
+//
+// The brand is the wave and the word in the learner's language — the
+// canvas's rule (plan 068): Japanese is content, and a pass's label is
+// chrome. The gear that used to sit beside the issuer went with the
+// records' door to Settings (ProfileBlocks.jsx).
+export function CommuterPass({ profile, t, children, footer = null, headingTag: Heading = 'h1' }) {
   const [, jpTitle, title] = levelTitle(profile.level)
 
   const span = Math.max(1, profile.xpForNext - profile.xpPrevLevel)
@@ -43,29 +42,12 @@ export function CommuterPass({ profile, t, children, footer = null, headingTag: 
           {/* The contactless mark every IC card in Japan is printed
               with — three arcs thickening outward. */}
           <span className="pass__wave" aria-hidden="true"><span /><span /><span /></span>
-          <span className="pass__brand-names">
-            <span className="pass__brand-jp" lang="ja">定期券</span>
-            {/* This screen's own <h1> — no station plate here (see
-                ProfileScreen's comment), but TopBar already treats this
-                route as "your pass" rather than a place (see its own
-                identity-route comment), so the pass label is exactly
-                this screen's name. */}
-            <Heading className="pass__brand-sub">{t.passLabel}</Heading>
-          </span>
+          {/* This screen's own <h1>: the pass label is exactly this
+              screen's name. */}
+          <Heading className="pass__brand-sub">{t.passLabel}</Heading>
         </span>
 
         <span className="pass__head-right">
-          {onSettings && (
-            <button
-              type="button"
-              className="pass__gear"
-              onClick={onSettings}
-              aria-label={t.settings}
-              title={t.settings}
-            >
-              <GearIcon size={14} />
-            </button>
-          )}
           {/* The issuing station's mark — every card says who issued it. */}
           <span className="pass__issuer" aria-hidden="true">JP</span>
         </span>

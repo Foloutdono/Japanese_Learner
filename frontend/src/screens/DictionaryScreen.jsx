@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { StationHeader } from '../components/station/StationHeader'
-import { TopBar } from '../components/ui/TopBar'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
@@ -11,16 +9,58 @@ import {
 	TYPE_META, isKanaType, entryKey,
 	DictionaryDetail, LevelBadge,
 } from '../components/dictionary/DictionaryDetail'
+
+// The catalogue card's stage word: the SRS status folded onto the three
+// stages the mark knows. A due card is still in progress; an unknown
+// status prints nothing (StageMark returns null for it).
+function stageOf(status) {
+	if (status === 'mastered') return 'mastered'
+	if (status === 'learning' || status === 'due') return 'learning'
+	if (status === 'new') return 'new'
+	return null
+}
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { StageMark } from '../components/study/StageMark'
-import { ChevronIcon, SearchIcon } from '../components/ui/Icons'
+import { Bar, Leave } from '../components/chrome/Bar'
+import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
+import { stationFor } from '../config/stations'
+import { Loading } from '../components/ui/Loading'
+import Empty from '../components/ui/Empty'
+
+const DICTIONARY_COLOR = 'var(--line-jisho)'
+const ANALYZER_COLOR = 'var(--line-kaiseki)'
 
 const LIMIT = 50
 
+// The five collections, in their own line colours (canvas Dictionary).
+// "jmdict" is the full JMdict pool beyond the app's own curated deck
+// (see vocab_jmdict_data.py on the backend) — a separate collection
+// rather than folded into "vocab" so the default, curated ~8k-word
+// search experience doesn't get swamped by ~293k largely obscure
+// entries; someone who wants the full dictionary asks for it.
+function categoriesFor(t) {
+	return [
+		['kanji',    t.dictKanji,    'var(--line-kanji)'],
+		['vocab',    t.dictVocab,    'var(--line-vocab)'],
+		['hiragana', t.dictHiragana, 'var(--line-kana)'],
+		['katakana', t.dictKatakana, 'var(--line-rikai)'],
+		['jmdict',   t.dictJMdict,   'var(--line-jisho)'],
+	]
+}
+
+// Route: /dictionary — under the shell (plan 073: the canvas's
+// Dictionary). The bar, the analyzer's door, the console with the
+// collections and the field, then the catalogue: a grid of entry
+// cards, the radical index, or the syllabary charts. An entry opens
+// in the dock (a full-screen plate on a phone, a column beside the
+// catalogue on a wide screen — see .dict-dock).
 export default function DictionaryScreen({ session }) {
 	const { t, lang } = useLang()
-	const navigate            = useNavigate()
+	const navigate = useNavigate()
+	const station = stationFor('/dictionary')
+	const analyzerStation = stationFor('/dictionary/analyzer')
+	const CATEGORIES = categoriesFor(t)
 
 	const [mode, setMode]             = useState('search') // 'search' | 'radical'
 	const [query, setQuery]           = useState('')
@@ -284,176 +324,139 @@ export default function DictionaryScreen({ session }) {
 	const isSyllabary = mode === 'search' && (category === 'hiragana' || category === 'katakana')
 
 	return (
-		<div className="screen">
-			<TopBar onBack={() => navigate('/')} title={t.dictionaryTitle} />
+		<main id="main-content" className="dictionary" style={{ '--line-color': DICTIONARY_COLOR }}>
+			<Bar code={station.code} color={DICTIONARY_COLOR} title={t.dictionaryTitle} />
 
-			<main id="main-content" className="container dict-page">
-				<StationHeader />
+			{/* The analyzer, behind its door (canvas Dictionary): one row
+			    naming the section and its three intakes. The pass tag the
+			    canvas draws on it stays out until a purchase flow exists
+			    (plan 069, HAS_STORE). */}
+			<button type="button" className="anl-door" onClick={() => { playUi('click-screen-selection'); navigate('/dictionary/analyzer') }}>
+				<span className="wmap-roundel anl-door__roundel" style={{ '--line-color': ANALYZER_COLOR }} aria-hidden="true">{analyzerStation.code}</span>
+				<span className="anl-door__names">
+					<span className="anl-door__title">{t.analyzerTitle}</span>
+					<span className="anl-door__desc">{t.analyzerDoorSub}</span>
+				</span>
+				<span className="anl-door__intakes" aria-hidden="true">
+					<span className="anl-door__intake"><TextLinesIcon /></span>
+					<span className="anl-door__intake"><CameraIcon /></span>
+					<span className="anl-door__intake"><VideoIcon /></span>
+				</span>
+			</button>
 
-				{/* No heading block here: TopBar above already names the
-				    screen, and a subtitle explaining that a dictionary is
-				    for looking things up only pushes the category tabs —
-				    the actual first thing you use — further down the page. */}
-
-				{/* Category tabs — primary navigation. "jmdict" is the full
-				    JMdict pool beyond the app's own curated deck (see
-				    vocab_jmdict_data.py on the backend) — a separate tab
-				    rather than folded into "vocab" so the default, curated
-				    ~8k-word search experience doesn't get swamped by ~293k
-				    largely obscure entries; someone who wants the full
-				    dictionary asks for it explicitly. */}
-				{/* ── 索引台 — the index console ──
-				    Category, mode and query were three control rows stacked
-				    down the page, so the first four things on a dictionary
-				    were four bands of chrome. They are one instrument now:
-				    collections along the top edge, the mode opposite them,
-				    the field itself across the bottom. Same card material as
-				    everything else, so the console reads as a piece of the
-				    station's furniture rather than a toolbar. */}
-				<div className="dict-console">
-				<div className="dict-console__top">
-				<div className="dict-tab-row dict-tab-row--category">
-					{[
-						['kanji',    t.dictKanji,                '漢', 'var(--line-kanji)'],
-						['vocab',    t.dictVocab,                '語', 'var(--line-vocab)'],
-						['hiragana', t.dictHiragana,             'あ', 'var(--line-kana)'],
-						['katakana', t.dictKatakana,             'ア', 'var(--line-rikai)'],
-						['jmdict',   t.dictJMdict ?? 'JMdict',   '辞', 'var(--line-jisho)'],
-					].map(([key, label, glyph, color]) => (
-						<button
-							key={key}
-							onClick={() => switchCategory(key)}
-							style={{ '--tab-color': color }}
-							className={`dict-tab-btn${category === key ? ' dict-tab-btn--active' : ''}`}
-						>
-							{/* Each collection gets the roundel the rest of the app
-							    selects things with, in its own line colour — five
-							    words with an underline said nothing about which
-							    collection you were standing in. */}
-							<span className="dict-tab-glyph" lang="ja" aria-hidden="true">{glyph}</span>
-							{label}
-						</button>
-					))}
-				</div>
-
-				{/* Search / radical sub-toggle — radical browsing only makes
-				    sense for kanji (a word can span several, and kana have
-				    no radical at all), so it only appears under that tab.
-				    Opposite the collections rather than on a row of its
-				    own: it is a property of the kanji collection, not a
-				    third navigation level. */}
-				{category === 'kanji' && (
-					<div className="dict-tab-row dict-tab-row--submode">
-						{[
-							['search',  t.dictModeSearch],
-							['radical', t.dictModeRadical],
-						].map(([key, label]) => (
-							<button
-								key={key}
-								onClick={() => key === 'radical' ? switchToRadicalMode() : switchToSearchMode()}
-								className={`dict-tab-btn dict-tab-btn--sub${mode === key ? ' dict-tab-btn--active' : ''}`}
-							>
+			{/* ── The console (canvas) ──
+			    The five collections as chips in their own line colours, the
+			    radical index as a sixth chip that only exists under the kanji
+			    collection (a word can span several, and kana have no radical
+			    at all), and the field itself across the bottom with the
+			    count in its slot — the dots stand in for the figure until
+			    it exists (plan 067). */}
+			<Console>
+				<ConsoleTop>
+					<Chips label={t.dictCollections}>
+						{CATEGORIES.map(([key, label, color]) => (
+							<Chip key={key} on={category === key} color={color} onClick={() => switchCategory(key)}>
 								{label}
-							</button>
+							</Chip>
 						))}
-					</div>
-				)}
-				</div>
-
-				{/* Search bar + count — hidden while browsing the plain radical grid,
-				    shown again once a radical is picked (to narrow further), and hidden
-				    for the syllabary categories (nothing to search on a fixed chart) */}
-				{!showingRadicalGrid && !isSyllabary && (
-					<div className="dict-index-bar">
-						<SearchIcon className="dict-index-bar__icon" />
-						<input
-							ref={searchRef}
-							value={query}
-							onChange={onSearch}
-							placeholder={
-								mode === 'radical'
-									? (t.dictionaryPlaceholderRadical)
-									: (t.dictionaryPlaceholder)
-							}
-							autoFocus={mode === 'search'}
-							className="field field--bare dict-index-bar__input"
-						/>
-						{/* The key that focuses this field, printed on it. A
-						    reference tool you use all day should tell you how
-						    to reach it without the mouse. */}
-						<kbd className="dict-index-bar__key" aria-hidden="true">/</kbd>
-						{!loading && (
-							<div className="dict-index-bar__count">
-								{t.dictionaryResults(total)}
-							</div>
+						{category === 'kanji' && (
+							<Chip
+								on={mode === 'radical'}
+								glyph="部"
+								color={DICTIONARY_COLOR}
+								onClick={() => (mode === 'radical' ? switchToSearchMode() : switchToRadicalMode())}
+							>
+								{t.dictModeRadical}
+							</Chip>
 						)}
-					</div>
-				)}
-				</div>
-
-				{/* Selected-radical header */}
-				{mode === 'radical' && selectedRadical != null && (
-					<div className="dict-radical-header">
-						<button
-							onClick={backToRadicalGrid}
-							className="dict-radical-back-btn"
-						>
-							<ChevronIcon direction="left" size={14} /> {t.dictBackToRadicals}
-						</button>
-						<div className="dict-radical-char">
-							{radicalCharByNumber[selectedRadical] ?? '?'}
-						</div>
-						<span className="dict-radical-label">
-							{t.dictRadicalNumber ? t.dictRadicalNumber(selectedRadical) : `radical #${selectedRadical}`}
-						</span>
-					</div>
-				)}
-
-				{/* Radical picker grid */}
-				{showingRadicalGrid && (
-					<RadicalGrid
-						groups={radicalGroups}
-						loading={loadingRadicals}
-						onPick={pickRadical}
-						t={t}
+					</Chips>
+				</ConsoleTop>
+				{/* Hidden while browsing the plain radical grid, shown again
+				    once a radical is picked (to narrow further), and hidden for
+				    the syllabary categories (nothing to search on a fixed chart). */}
+				{!showingRadicalGrid && !isSyllabary && (
+					<ConsoleIndex
+						inputRef={searchRef}
+						value={query}
+						onChange={onSearch}
+						onClear={() => onSearch({ target: { value: '' } })}
+						placeholder={mode === 'radical' ? t.dictionaryPlaceholderRadical : t.dictionaryPlaceholder}
+						autoFocus={mode === 'search'}
+						clearLabel={t.close}
+						count={loading ? <Loading inline /> : t.dictionaryResults(total)}
 					/>
 				)}
+			</Console>
 
-				{/* Results (search mode, or a radical's kanji) */}
-				{!showingRadicalGrid && (
-					isSyllabary ? (
-						<SyllabaryGrid
-							results={results}
-							loading={loading}
-							selected={selected}
-							setSelected={setSelected}
-							onRadicalClick={jumpToRadical}
-							onKanjiClick={jumpToKanji}
-							onVocabClick={jumpToVocab}
-							accentColor={TYPE_META[category]?.color}
-							t={t}
-						/>
-					) : (
-						<ResultsSection
-							loading={loading}
-							loadingMore={loadingMore}
-							hasMore={hasMore}
-							results={results}
-							total={total}
-							query={query}
-							selected={selected}
-							setSelected={setSelected}
-							sentinelRef={sentinelRef}
-							onRadicalClick={jumpToRadical}
-							onKanjiClick={jumpToKanji}
-							onVocabClick={jumpToVocab}
-							t={t}
-						/>
-					)
-				)}
-			</main>
-		</div>
+			{/* Selected-radical header */}
+			{mode === 'radical' && selectedRadical != null && (
+				<div className="dict-radical-header">
+					<Leave onClick={backToRadicalGrid}>{t.dictBackToRadicals}</Leave>
+					<div className="dict-radical-char" lang="ja">
+						{radicalCharByNumber[selectedRadical] ?? '?'}
+					</div>
+					<span className="dict-radical-label">
+						{t.dictRadicalNumber ? t.dictRadicalNumber(selectedRadical) : `radical #${selectedRadical}`}
+					</span>
+				</div>
+			)}
+
+			{/* Radical picker grid */}
+			{showingRadicalGrid && (
+				<RadicalGrid
+					groups={radicalGroups}
+					loading={loadingRadicals}
+					onPick={pickRadical}
+					t={t}
+				/>
+			)}
+
+			{/* Results (search mode, or a radical's kanji) */}
+			{!showingRadicalGrid && (
+				isSyllabary ? (
+					<SyllabaryGrid
+						results={results}
+						loading={loading}
+						selected={selected}
+						setSelected={setSelected}
+						onRadicalClick={jumpToRadical}
+						onKanjiClick={jumpToKanji}
+						onVocabClick={jumpToVocab}
+						accentColor={TYPE_META[category]?.color}
+						t={t}
+					/>
+				) : (
+					<ResultsSection
+						loading={loading}
+						loadingMore={loadingMore}
+						hasMore={hasMore}
+						results={results}
+						total={total}
+						query={query}
+						selected={selected}
+						setSelected={setSelected}
+						sentinelRef={sentinelRef}
+						onRadicalClick={jumpToRadical}
+						onKanjiClick={jumpToKanji}
+						onVocabClick={jumpToVocab}
+						t={t}
+					/>
+				)
+			)}
+		</main>
 	)
+}
+
+// The three intakes on the analyzer's door (canvas): lines of text,
+// a camera, a video frame.
+function TextLinesIcon() {
+	return <svg className="svg" viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="16" y2="12" /><line x1="4" y1="18" x2="12" y2="18" /></svg>
+}
+function CameraIcon() {
+	return <svg className="svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+}
+function VideoIcon() {
+	return <svg className="svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2" /><polygon points="16 10 21 7 21 17 16 14" /></svg>
 }
 
 // ── Radical picker grid ─────────────────────────────────────
@@ -515,7 +518,7 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 	}
 
 	if (loading || !groups) {
-		return <div className="quiz-loading">{t.loadingDictionary}</div>
+		return <Loading />
 	}
 
 	return (
@@ -625,56 +628,52 @@ function ResultsSection({
 
 	return (
 		<>
-			{loading && (
-				<div className="quiz-loading">
-					{t.loadingDictionary}
-				</div>
-			)}
+			{loading && <Loading />}
 
 			{!loading && results.length === 0 && (
-				<div className="quiz-loading">
-					{t.noResults} « {query} »
-				</div>
+				<Empty icon={null} message={`${t.noResults} « ${query} »`} />
 			)}
 
 			{!loading && results.length > 0 && (
 				<div className="dict-layout">
 
-					{/* Grid */}
+					{/* The catalogue (canvas): reading above, headword large,
+					    meaning below — the three registers a 駅名標 carries, in
+					    the order it carries them — with the level in one corner
+					    and the stage word in the other. */}
 					<div className="dict-results-wrap">
-						<div className="dict-results-grid">
-							{results.map(entry => (
-								<div
-									key={entryKey(entry)}
-									onClick={() => { playUi('click-menu'); setSelected(entry) }}
-									style={{ '--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)' }}
-									className={`dict-entry-card${selected && entryKey(selected) === entryKey(entry) ? ' dict-entry-card--selected' : ''}`}
-								>
-									{/* Reading above, headword large, meaning below — the
-									    three registers a 駅名標 carries, in the order it
-									    carries them. A kanji is a name with a reading and a
-									    meaning, which is exactly what a station plate is
-									    for, so the catalogue is a wall of them. */}
-									<div className="dict-entry-card__kana">
-										{shortKana(entry.kana, entry.type)}
-									</div>
-									<div className="dict-entry-card__char">
-										{entry.kanji || entry.kana}
-									</div>
-									<div className="dict-entry-card__meaning">
-										{shortMeaning(entry.meaning)}
-									</div>
-									<LevelBadge level={entry.level} />
-									<StageMark stage={entry.status?.status ?? 'new'} />
-								</div>
-							))}
+						<div className="dict-grid">
+							{results.map(entry => {
+								const stage = stageOf(entry.status?.status)
+								return (
+									<button
+										key={entryKey(entry)}
+										type="button"
+										onClick={() => { playUi('click-menu'); setSelected(entry) }}
+										style={{ '--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)' }}
+										className={`dict-entry-card${selected && entryKey(selected) === entryKey(entry) ? ' dict-entry-card--selected' : ''}`}
+									>
+										<LevelBadge level={entry.level} />
+										{stage && <StageMark stage={stage} />}
+										<span className="dict-entry-card__kana" lang="ja">
+											{shortKana(entry.kana, entry.type)}
+										</span>
+										<span className="dict-entry-card__char" lang="ja">
+											{entry.kanji || entry.kana}
+										</span>
+										<span className="dict-entry-card__meaning">
+											{shortMeaning(entry.meaning)}
+										</span>
+									</button>
+								)
+							})}
 						</div>
 
 						{/* Infinite scroll sentinel */}
 						<div ref={sentinelRef} className="dict-sentinel">
 							{loadingMore && (
 								<div className="dict-sentinel__text">
-									{t.loadingMore}
+									<Loading inline />
 								</div>
 							)}
 							{!hasMore && results.length > 0 && (
@@ -819,13 +818,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 		return out
 	}, [byGroup])
 
-	if (loading) {
-		return (
-			<div className="quiz-loading">
-				{t.loadingDictionary}
-			</div>
-		)
-	}
+	if (loading) return <Loading />
 
 	return (
 		<div className="dict-layout">

@@ -28,45 +28,48 @@
 // exception is 日本語駅 itself, which has no board row to borrow a
 // name from, so it keeps its own.
 
-import { getAllSections } from './navLinks'
+import { getAllSections } from './tabs'
 import { serviceKeyFor } from '../domain/studyModes'
 
 // path -> { code, kana }
 //   code   two letters, the way a real line is coded (JY, G, T…). It
 //          rides in the coloured roundel on the board and the plate.
 //   kana   the reading, set above the name on a station plate.
+// Keyed by the mobile routes (config/tabs.js, plan 068): a section's
+// path is under its tab's root, and the old top-level paths only
+// redirect there.
 const STATIONS = {
   '/':                      { code: 'JP', kana: 'にほんご',   latin: 'NIHONGO' },
-  '/kana':                  { code: 'KN', kana: 'かな' },
-  '/vocab':                 { code: 'TG', kana: 'たんご' },
-  '/kanji':                 { code: 'KJ', kana: 'かんじ' },
-  '/grammar':               { code: 'BP', kana: 'ぶんぽう' },
-  '/reading':               { code: 'DS', kana: 'どくしょ' },
-  '/reading-comprehension': { code: 'RK', kana: 'りかい' },
-  '/translation':           { code: 'HY', kana: 'ほんやく' },
+  '/learn/kana':            { code: 'KN', kana: 'かな' },
+  '/learn/vocab':           { code: 'TG', kana: 'たんご' },
+  '/learn/kanji':           { code: 'KJ', kana: 'かんじ' },
+  '/learn/grammar':         { code: 'BP', kana: 'ぶんぽう' },
+  '/practice/reading':      { code: 'DS', kana: 'どくしょ' },
+  '/practice/comprehension': { code: 'RK', kana: 'りかい' },
+  '/practice/translation':  { code: 'HY', kana: 'ほんやく' },
   // 解析 — one station, three platforms (文字 / 写真 / 動画). Was two
   // entries, /phrase-analyzer and /video (DG どうが), until plan 027
   // merged them: both produced the same thing, a Passage of Sentences.
   // The old paths still resolve — App.jsx redirects them here — but they
   // are deliberately absent from this registry, because they are not
   // places any more.
-  '/analyzer':              { code: 'KS', kana: 'かいせき' },
+  '/dictionary/analyzer':   { code: 'KS', kana: 'かいせき' },
   '/dictionary':            { code: 'JS', kana: 'じしょ' },
-  '/decks':                 { code: 'KZ', kana: 'きょうざい' },
-  '/exam':                  { code: 'MS', kana: 'もし' },
+  '/learn/decks':           { code: 'KZ', kana: 'きょうざい' },
+  '/practice/exam':         { code: 'MS', kana: 'もし' },
 
   // The hall. Not about Japanese, but still a place you go to — the
   // stats screen holds the record. It had no plate at all, which is
   // why it was among the screens that still looked like a different
   // app.
   //
-  // /profile and /settings are deliberately NOT here. They are you,
-  // not somewhere you travel, and they are modelled in
+  // /profile and /profile/settings are deliberately NOT here. They are
+  // you, not somewhere you travel, and they are modelled in
   // config/identity.js — see that file for why the distinction earns
   // its own registry.
-  '/stats':                 { code: 'TO', kana: 'とうけい' },
+  '/profile/stats':         { code: 'TO', kana: 'とうけい' },
 
-  // 本日 — the daily queue. Not a board row (see navLinks.js's own
+  // 本日 — the daily queue. Not a line on the map (see config/tabs.js's own
   // note on why /today is scope: 'today'), but every other screen it
   // opens through — the concourse strip, its own gate, its own top
   // bar — still needs a plate to name.
@@ -76,8 +79,8 @@ const STATIONS = {
 const UNKNOWN = { code: '??', kana: '' }
 
 // Falls back to the longest matching prefix, the same way sectionFor
-// below does and for the same reason: a nested route (/decks/<id>,
-// /decks/<id>/study) is still standing in that section's station, and
+// below does and for the same reason: a nested route (/learn/decks/<id>,
+// /learn/decks/<id>/study) is still standing in that section's station, and
 // returning UNKNOWN there printed a "??" roundel over an empty kana
 // line — a plate that said nothing, on a screen that does have an
 // answer. Exact match still wins, so nothing that had a plate changes.
@@ -97,26 +100,21 @@ export const HOME_STATION = STATIONS['/']
 // ── Which station am I standing in? ───────────────────────
 // Two registries used to hold sections — the board's and the profile's
 // hall — and every caller that wanted "the section for this path" was
-// spreading both itself. StationHeader did it; the top bar needed the
-// same answer to know what colour its line is. One lookup now, over
-// getAllSections (every scope, not just the two that render a browsable
-// list) — /today needed a third scope that is neither a board row nor
-// a profile hall, and a lookup narrowed to the first two would silently
-// have no answer for it. A new station is still added in one place and
-// every masthead in the app finds it.
+// spreading both itself. One lookup now, over getAllSections (every
+// tab, not just the one a screen renders). A new station is still
+// added in one place and every masthead in the app finds it.
 //
 // Falls back to the longest matching prefix so a nested route
-// (/decks/<id>) still knows which line it is on, and returns null —
+// (/learn/decks/<id>) still knows which line it is on, and returns null —
 // not a blank — for a path that has no station, so callers can render
 // nothing rather than an empty plate. The identity routes fall
 // through to that null by design: they are not stations, and asking
 // this function for one is how a caller finds that out.
 export function sectionFor(path, t) {
-  // Every section regardless of scope -- getNavLinks/getProfileHalls
-  // are deliberately narrower lists (what the board and the profile
-  // screen each render), and /today belongs to neither, but it still
-  // needs a colour and a title wherever this function is asked for one
-  // (StationHeader, TopBar, the gate, the door).
+  // Every section regardless of tab -- getSections/getProfileHalls
+  // are deliberately narrower lists (what one gate renders), but a
+  // path needs its colour and title wherever this function is asked
+  // for one (StationHeader, the bar, the gate, the door).
   const all = getAllSections(t)
   const exact = all.find(s => s.path === path)
   if (exact) return exact

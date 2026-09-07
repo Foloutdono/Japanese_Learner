@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import { TrainDoor } from '../components/station/TrainDoor'
 
@@ -30,9 +30,11 @@ vi.mock('../lib/audio', async (o) => ({
   ...(await o()), playKana: vi.fn(), playCorrect: vi.fn(), playWrong: vi.fn(),
   playClick: vi.fn(), playUi: vi.fn(), playSfx: vi.fn(),
 }))
+vi.mock('../stores/stats', () => ({ useStats: () => ({ data: null, failed: false }), refreshStats: vi.fn(), seedStats: vi.fn() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: KanaScreen } = await import('./KanaScreen')
+const { default: KanaRun } = await import('./KanaRun')
 
 const card = (id, kana, romaji, preview) => ({
   card_id: id, kana, romaji,
@@ -100,8 +102,12 @@ describe('KanaScreen — a rated card is always followed by another', () => {
 
     const screen = await render(
       <LangProvider>
-        <MemoryRouter>
-          <KanaScreen session={{ access_token: 'tok' }} />
+        <MemoryRouter initialEntries={['/learn/kana']}>
+          <Routes>
+            <Route path="/learn/kana" element={<KanaScreen />} />
+            <Route path="/learn/kana/:set" element={<KanaScreen />} />
+            <Route path="/learn/kana/:set/:mode" element={<KanaRun session={{ access_token: 'tok' }} />} />
+          </Routes>
           <TrainDoor />
         </MemoryRouter>
       </LangProvider>
@@ -114,7 +120,9 @@ describe('KanaScreen — a rated card is always followed by another', () => {
     // Rate the promoting card, then walk out while its stamp is still
     // playing — the back arrow is live throughout.
     await answer(screen, 'first')
-    const back = screen.container.querySelector('.btn-back')
+    // The bar's leave button (components/chrome/Bar.jsx); it was the
+    // retired top bar's .btn-back.
+    const back = screen.container.querySelector('.stage__leave')
     expect(back, 'the back arrow is live throughout the stamp').toBeTruthy()
     back.click()
     await settle(200)

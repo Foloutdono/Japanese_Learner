@@ -4,7 +4,7 @@ import { Flashcard } from './QuizComponents'
 import { CardTransition } from './CardTransition'
 import PromptCard from './PromptCard'
 import { Loading } from '../ui/Loading'
-import EmptyState from '../ui/EmptyState'
+import Empty from '../ui/Empty'
 import { ChevronIcon, OpenBookIcon } from '../ui/Icons'
 
 // ── Review deck (self-paced, ungraded browse) ──────────────
@@ -24,10 +24,12 @@ import { ChevronIcon, OpenBookIcon } from '../ui/Icons'
 //   onReplaySound(card)          — optional sound-replay wiring
 //   onExit       — called from the empty state's back button (the
 //     screen's own TopBar already covers the non-empty case)
+//   foot         — optional: what these cards are ("N4 · Kanji"); the
+//     card's footer strip prints it beside "Nothing is graded"
 export default function ReviewDeck({
   cards, loading, t, session,
   renderFront, renderBack, dictTerm, dictCategory, onReplaySound,
-  onExit,
+  onExit, foot,
 }) {
   const [index, setIndex] = useState(0)
 
@@ -35,7 +37,7 @@ export default function ReviewDeck({
 
   if (!cards || cards.length === 0) {
     return (
-      <EmptyState
+      <Empty
         icon={<OpenBookIcon size={40} />}
         message={t.reviewEmpty}
         action={{ label: t.backToMenu, onClick: onExit }}
@@ -53,7 +55,7 @@ export default function ReviewDeck({
     <>
       <div className="review-deck__counter">{safeIndex + 1} / {cards.length}</div>
       <CardTransition cardKey={card.card_id} stage={card.stage}>
-        <PromptCard>
+        <PromptCard foot={foot ? { left: foot, right: t.nothingGraded } : undefined}>
           <Flashcard
             t={t}
             resetKey={card.card_id}
@@ -66,11 +68,13 @@ export default function ReviewDeck({
           />
         </PromptCard>
       </CardTransition>
-      <div className="review-deck__nav">
-        <button onClick={goPrev} disabled={safeIndex === 0} className="btn-panel">
+      {/* The stage's foot (canvas RunBrowse): the way back, and the
+          filled action forward. */}
+      <div className="stage__foot browse-nav">
+        <button type="button" onClick={goPrev} disabled={safeIndex === 0} className="btn-secondary">
           <ChevronIcon direction="left" size={14} /> {t.reviewPrev}
         </button>
-        <button onClick={goNext} disabled={safeIndex === cards.length - 1} className="btn-panel">
+        <button type="button" onClick={goNext} disabled={safeIndex === cards.length - 1} className="btn-primary">
           {t.reviewNext} <ChevronIcon direction="right" size={14} />
         </button>
       </div>

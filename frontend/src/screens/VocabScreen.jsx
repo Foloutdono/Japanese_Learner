@@ -1,645 +1,124 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { apiFetch, apiJson } from '../lib/api'
-import {
-  translatedMap, applyTranslations, retranslateSelection,
-} from '../lib/translationCache'
+import { useNavigate, useParams, useLocation, useSearchParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
-import { TopBar } from '../components/ui/TopBar'
-import RatingBar from '../components/study/RatingBar'
-import {
-  MCQGrid, DoneMessage, DeckProgress,
-  InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
-} from '../components/study/QuizComponents'
-import { usePace } from '../components/study/usePace'
-import { FuriganaWord } from '../components/study/Readings'
-import { formatGlossLine } from '../components/study/gloss'
-import { Loading } from '../components/ui/Loading'
-import { XpToast } from '../components/rewards/XpToast'
-import { CardTransition } from '../components/study/CardTransition'
-import { useReviewGates } from '../hooks/useReviewGates'
+import { Leave } from '../components/chrome/Bar'
+import { Seg } from '../components/chrome/Console'
+import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
 import TierSelector from '../components/selection/TierSelector'
 import ThemeSelector from '../components/selection/ThemeSelector'
 import ModeSelector from '../components/selection/ModeSelector'
-import SelectionScreen from '../components/selection/SelectionScreen'
-import PromptCard from '../components/study/PromptCard'
-import HintBar from '../components/study/HintBar'
-import SessionError from '../components/study/SessionError'
-import ReviewDeck from '../components/study/ReviewDeck'
-import { speakJapanese, playUi } from '../lib/audio'
-import {
-  MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries, modeLabel,
-} from '../domain/studyModes'
-import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
+import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
+import { tierLabelFor } from '../domain/tiers'
+import { themeLabelFor } from '../domain/themes'
 
-// The 8s fetch timeout that used to live here is gone: useCardSession
-// owns the abort signal and the timeout now (10s, matched to the cold
-// start it was always meant to bridge), so the five screens no longer
-// each hand-roll a controller that only ever timed out and never
-// aborted on unmount.
+const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
+// ── 単語 — the station and the platforms (plan 071) ──────────
+// /learn/vocab is the JLPT line as a route, with two other ways in on
+// the bar: by frequency (/learn/vocab/tiers — the JLPT deck's own
+// ranking, or every JMdict word beyond it with ?domain=jmdict) and by
+// theme (/learn/vocab/themes). /learn/vocab/:level, /tier/:tier
+// (?size=&domain=) and /theme/:theme list that stop's modes as
+// platforms; picking one boards the train into the run on the stage
+// frame (screens/VocabRun.jsx). The fast review exists on the JLPT
+// path only. See KanaScreen.jsx for the deep-link shape the station
+// still accepts.
 export default function VocabScreen({ session }) {
-  const navigate    = useNavigate()
-  const { t, lang } = useLang()
+  const { t } = useLang()
+  const navigate = useNavigate()
+  const { pathname, search } = useLocation()
+  const { level, tier, theme } = useParams()
+  const [sp, setSp] = useSearchParams()
 
   const MODES = modePickerEntries(t, 'vocab')
+  const validMode = m => m === FAST_REVIEW || STUDY_MODES[m]?.source === 'vocab'
+  const tiersPage = pathname.endsWith('/tiers')
+  const themesPage = pathname.endsWith('/themes')
+  const tierSize = Number(sp.get('size')) || 200
+  const jmdict = sp.get('domain') === 'jmdict'
+  const freqDomain = jmdict ? 'vocab_jmdict' : 'vocab'
 
-  // See KanjiScreen for the full rationale — studyBy picks 'level'
-  // (JLPT N5…N1), 'theme' (Fruits / Jobs / Body parts / ...), or
-  // 'frequency' (Top 200 / 201-400 / ...), and only one of
-  // level/theme/tier is meaningful at a time depending on it.
-  //
-  // freqDomain distinguishes WHICH frequency pool a 'frequency' session
-  // draws from — the JLPT deck itself ("vocab", ranked by JMdict
-  // priority once vocab_frequency.json is a real ranking — see
-  // frequency_data.py) vs. the much larger pool of JMdict words outside
-  // the deck ("vocab_jmdict"). Both are just "frequency domains" to the
-  // backend (see frequency_data.py / frequency.py), so studyBy itself
-  // still only needs 'level'/'theme'/'frequency' — freqDomain is the
-  // axis orthogonal to that (and irrelevant to 'theme': a theme's word
-  // pool already mixes both domains internally — see theme_data.py),
-  // which is what lets every existing tier/mode/quiz code path below
-  // stay domain-agnostic instead of forking into a near-duplicate
-  // branch.
-  const [studyBy, setStudyBy]       = useState(null)
-  const [freqDomain, setFreqDomain] = useState('vocab') // 'vocab' | 'vocab_jmdict'
-  const [level, setLevel]           = useState(null)
-  const [tier, setTier]             = useState(null)
-  const [tierLabel, setTierLabel]   = useState(null)
-  // tier_size the chosen tier was built at — see KanjiScreen's
-  // loadProgress comment and TierSelector's onSelect for the full
-  // rationale; has to travel alongside `tier` everywhere below.
-  const [tierSize, setTierSize]     = useState(200)
-  const [theme, setTheme]           = useState(null)
-  const [themeLabel, setThemeLabel] = useState(null)
-  const [mode, setMode]             = useState(null)
-  const [answered, setAnswered]     = useState(false)
-  const [selected, setSelected]     = useState(null)
-  const [showRating, setShowRating] = useState(false)
-  const [progress, setProgress]       = useState(null)
-  // ── Hint state (indice_1/2/3) ──
-  // Session-wide rather than per-card: a display preference should stay
-  // where the learner put it. See components/study/HintBar.jsx for why a
-  // hint is a switch on the card and not a mode of its own.
-  const [activeHints, setActiveHints] = useState(() => new Set())
-  function toggleHint(key) {
-    playUi('click-mode-selection')
-    setActiveHints(prev => {
-      const next = new Set(prev)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
-      return next
-    })
+  const qLevel = sp.get('level')
+  const qMode = sp.get('mode')
+  const station = !level && !tier && !theme && !tiersPage && !themesPage
+  if (station && qLevel && qMode && LEVELS.includes(qLevel) && validMode(qMode)) {
+    return <Navigate replace to={`/learn/vocab/${qLevel}/${qMode}`} />
   }
+  if (level && !LEVELS.includes(level)) return <Navigate replace to="/learn/vocab" />
 
-  const [reviewing, setReviewing]     = useState(false)
-  const [reviewCards, setReviewCards] = useState([])
-  const [reviewLoading, setReviewLoading] = useState(false)
-
-
-
-  // One session per level+mode — batched and cached so answering
-  // never waits on a fetch, and a backend cold start doesn't blank
-  // the screen (see useCardSession). storageKey stays a stable
-  // 'idle' placeholder until a level+mode is chosen; the hook itself
-  // is always called (rules of hooks), it just has nothing to fetch
-  // yet. lang is intentionally NOT part of the key — switching UI
-  // language mid-session re-translates in place (see the effect
-  // below) rather than starting a new session.
-  const storageKey =
-    studyBy === 'level' && level && mode ? sessionKey('vocab', level, mode)
-    : studyBy === 'theme' && theme && mode ? sessionKey('vocab', 'theme', theme, mode)
-    : studyBy === 'frequency' && tier && mode ? sessionKey('vocab', 'freq', freqDomain, tier, tierSize, mode)
-    : IDLE_KEY
-
-  const paceCtl = usePace(storageKey)
-
-  const fetchBatch = useCallback(async (count, excludeIds, signal) => {
-    if (studyBy === 'level' && (!level || !mode)) return []
-    if (studyBy === 'theme' && (!theme || !mode)) return []
-    if (studyBy === 'frequency' && (!tier || !mode)) return []
-    if (!studyBy || !mode) return []
-    const url = studyBy === 'level'
-      ? `/api/vocab/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-      : studyBy === 'theme'
-      ? `/api/vocab/theme/${theme}/cards?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-      : `/api/frequency/${freqDomain}/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-    const data = paceCtl.capture(await apiJson(url + paceCtl.query, session, { signal }))
-    return (data.cards ?? []).map(c => ({ ...c, lang }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studyBy, freqDomain, level, theme, tier, tierSize, mode, session, paceCtl.query, paceCtl.capture])
-  // (lang deliberately excluded above: changing lang shouldn't change
-  // what fetchBatch fetches going forward mid-refill-cycle, only
-  // re-translate what's already in hand — see the effect below)
-
-  const { current: card, loading, done, error, retry, advance, updateCurrent } = useCardSession({
-    storageKey,
-    fetchBatch,
-    batchSize: 10,
-    mode,
-  })
-
-  // The written form to quiz on — some vocab entries are kana-only (no
-  // kanji), so fall back to kana for both the prompt and the choices.
-  function wordForm(entry) {
-    return entry.kanji || entry.kana
-  }
-
-  // Mirrors KanjiScreen's translateCard: words are looked up by
-  // wordForm (kanji, falling back to kana for kana-only entries) since
-  // that's also how the backend's vocab translation map is keyed.
-  function translateCard(cardToTranslate, targetLang) {
-    if (!cardToTranslate) return
-    const words = [wordForm(cardToTranslate), ...(cardToTranslate.hints?.indice_1 ?? []).map(wordForm)]
-    const unique = [...new Set(words.filter(Boolean))]
-    Promise.all(unique.map(word =>
-      apiFetch(`/api/translation/vocab?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
-        .then(r => r.json())
-        .then(data => [word, data.translation || ''])
-    )).then(entries => {
-      // Only the words that HAVE a translation reach the map — see
-      // translatedMap for why writing an untranslated one onto the
-      // card is what left MeaningDisplay with nothing to render and
-      // the reveal blank. applyTranslations then rewrites the prompt
-      // and the MCQ options from that one map, keyed the same way the
-      // fetch above was.
-      const map = translatedMap(entries)
-      updateCurrent(cur => ({
-        ...applyTranslations(cur, wordForm, map),
-        lang: targetLang,
-      }))
-      // The rows moved language under an answer already given — see
-      // retranslateSelection.
-      setSelected(prev => retranslateSelection(
-        prev, cardToTranslate.hints?.indice_1, wordForm, map,
-      ))
-    })
-  }
-
-  // Re-translate the card in hand when the UI language changes, or
-  // when a newly-current card (just advanced to) still carries the
-  // language it was originally fetched in — the latter matters now
-  // that cards are prefetched ahead of time, so a card sitting a few
-  // slots deep in the queue when the user switches language would
-  // otherwise show stale text until it's re-fetched.
-  useEffect(() => {
-    if (card && card.lang !== lang) translateCard(card, lang)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card, lang])
-
-  // Every screen's rating flow: the lock, the gates the celebrations
-  // open, and the advance once they all close. See hooks/useReviewGates.
-  const gates = useReviewGates({ advance, sessionKey: storageKey })
-
-  // Reset per-card UI state whenever the card in hand changes —
-  // advance() is a synchronous local pop now, so there's no fetch
-  // callback to hang this reset off of like there used to be.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- id-keyed reset in shape, but `showRating`/`answered` are also set mid-flow elsewhere in this screen (hidden/toggled immediately on user action, independent of the card actually changing) — see the other setShowRating/setAnswered call sites below. Moving this into a key-remounted child would need that mid-flow logic threaded back down too, a bigger restructure than this reset justifies.
-    setAnswered(false)
-    setSelected(null)
-    setShowRating(false)
-  }, [card?.card_id])
-
-
-  // Deck progress (à apprendre / en cours / maîtrisé) for the current
-  // level+mode. Fetched independently from the card so it never blocks
-  // or slows down card navigation.
-  // `source` is { level }, { theme }, or { tier } — see KanjiScreen's
-  // loadProgress for why this stays one function rather than three
-  // near-duplicates.
-  function loadProgress(source, m) {
-    const url = 'level' in source
-      ? `/api/vocab/stats?level=${encodeURIComponent(source.level)}&mode=${m}`
-      : 'theme' in source
-      ? `/api/vocab/theme/${source.theme}/stats?mode=${m}`
-      : `/api/frequency/${freqDomain}/stats?tier=${source.tier}&tier_size=${source.tierSize}&mode=${m}`
-    apiFetch(url, session)
-      .then(r => r.json())
-      .then(data => setProgress(data?.error ? null : data))
-      .catch(() => {})
-  }
-
-  function startLevelSession(lvl, m) {
-    setStudyBy('level')
-    setLevel(lvl)
-    setMode(m)
-    loadProgress({ level: lvl }, m)
-  }
-
-  function startFrequencySession(tr, label, m) {
-    setStudyBy('frequency')
-    setTier(tr)
-    setTierLabel(label)
-    setMode(m)
-    loadProgress({ tier: tr, tierSize }, m)
-  }
-
-  function startThemeSession(th, label, m) {
-    setStudyBy('theme')
-    setTheme(th)
-    setThemeLabel(label)
-    setMode(m)
-    loadProgress({ theme: th }, m)
-  }
-
-  // Fetches the full set of already-studied cards once — see
-  // ReviewDeck for why this doesn't go through useCardSession (no due
-  // queue, no refill, just a fixed list to flip through). JLPT-level
-  // only for now: the theme/frequency paths have no matching backend
-  // endpoint yet.
-  function startReview() {
-    setReviewing(true)
-    setReviewLoading(true)
-    apiFetch(`/api/vocab/review-cards?level=${level}&lang=${lang}`, session)
-      .then(r => r.json())
-      .then(data => setReviewCards(data.cards ?? []))
-      .catch(() => setReviewCards([]))
-      .finally(() => setReviewLoading(false))
-  }
-
-
-  function postReview(quality) {
-    // The gates own the lock, so a review already in flight is refused
-    // here rather than half-fired: everything below is this screen's
-    // own business, and none of it should run twice.
-    if (!gates.review(card.review_preview?.[quality], {
-      cardKey: card.card_id, quality,
-    })) return
-
-    setShowRating(false)
-    loadProgress(
-      studyBy === 'level' ? { level }
-      : studyBy === 'theme' ? { theme }
-      : { tier, tierSize },
-      mode,
-    )
-
-    // Fire-and-forget: this only has to persist the review — the
-    // response is not read for anything the UI shows, so a slow or
-    // dead request can no longer desync the toast or the stamp from
-    // what is already happening. A theme card carries the same
-    // vocab_to_id/vocab_jmdict_to_id shape a level card does (see
-    // theme_data.py), so it posts here too — no separate endpoint.
-    apiFetch('/api/vocab/review', session, {
-      method: 'POST',
-      body: JSON.stringify({ card_id: card.card_id, mode: card.mode, quality }),
-    }).catch(() => {})
-  }
-
-  function onMCQAnswer(choice) {
-    if (answered) return
-    setSelected(choice)
-    setAnswered(true)
-    setShowRating(true)
-    speakJapanese(card.kana)
-  }
-
-  function onFlashcardReveal() {
-    if (answered) return
-    setAnswered(true)
-    setShowRating(true)
-    speakJapanese(card.kana)
-  }
-
-  // Wraps setStudyBy so picking "jmdict" also points the frequency path
-  // at the vocab_jmdict domain instead of the JLPT deck's own "vocab"
-  // domain — studyBy itself stays just 'level'/'frequency' either way
-  // (see freqDomain's declaration above for why).
-  function selectStudySource(key) {
-    if (key === 'jmdict') {
-      setFreqDomain('vocab_jmdict')
-      setStudyBy('frequency')
-    } else {
-      setFreqDomain('vocab')
-      setStudyBy(key)
-    }
-  }
-
-  // ── Study-source selection: JLPT level vs. frequency tier ──
-  if (!studyBy) {
+  // ── The station: the JLPT line ──
+  if (station) {
     return (
-      <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.vocabulary} autoHide />
-        <main id="main-content">
-          <SelectionScreen>
-            <ModeSelector
-              modes={[
-                { key: 'level', label: t.byLevel, desc: t.byLevelDesc },
-                { key: 'theme', label: t.byTheme, desc: t.byThemeDesc },
-                { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
-                {
-                  key: 'jmdict',
-                  label: t.byJmdict ?? (lang === 'fr' ? 'Hors-JLPT' : 'Beyond JLPT'),
-                  desc: t.byJmdictDesc ?? (lang === 'fr'
-                    ? 'Tout le vocabulaire JMdict hors programme JLPT, classé par fréquence'
-                    : 'Every JMdict word outside the JLPT curriculum, ranked by frequency'),
-                },
-              ]}
-              onSelect={selectStudySource}
-            />
-          </SelectionScreen>
-        </main>
-      </div>
-    )
-  }
-
-  // ── Level selection (JLPT path) ──
-  if (studyBy === 'level' && !level) {
-    return (
-      <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} JLPT`} autoHide />
-        <main id="main-content">
-          <SelectionScreen>
-            <LevelSelector onSelect={setLevel} />
-          </SelectionScreen>
-        </main>
-      </div>
-    )
-  }
-
-  // ── Theme selection (thematic-deck path) ──
-  if (studyBy === 'theme' && !theme) {
-    return (
-      <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={`${t.vocabulary} — ${t.byTheme}`} autoHide />
-        <main id="main-content">
-          <SelectionScreen>
-            <ThemeSelector
-              session={session}
-              onSelect={(th, label) => { setTheme(th); setThemeLabel(label) }}
-            />
-          </SelectionScreen>
-        </main>
-      </div>
-    )
-  }
-
-  // ── Tier selection (frequency path) ──
-  if (studyBy === 'frequency' && !tier) {
-    const tierTitle = freqDomain === 'vocab_jmdict'
-      ? `${t.vocabulary} — ${t.byJmdict ?? (lang === 'fr' ? 'Hors-JLPT' : 'Beyond JLPT')}`
-      : t.vocabulary
-    return (
-      <div className="screen">
-        <TopBar onBack={() => setStudyBy(null)} title={tierTitle} autoHide />
-        <main id="main-content">
-          <SelectionScreen>
-            <TierSelector
-              domain={freqDomain}
-              session={session}
-              onSelect={(tr, label, ts) => { setTier(tr); setTierLabel(label); setTierSize(ts) }}
-            />
-          </SelectionScreen>
-        </main>
-      </div>
-    )
-  }
-
-  // ── Mode selection (shared by all three paths) ──
-  if (!mode && !reviewing) {
-    const backTitle =
-      studyBy === 'level' ? `${t.vocabulary} ${level}`
-      : studyBy === 'theme' ? `${t.vocabulary} ${themeLabel}`
-      : `${t.vocabulary} ${tierLabel}`
-    const goBack = () => {
-      if (studyBy === 'level') setLevel(null)
-      else if (studyBy === 'theme') setTheme(null)
-      else setTier(null)
-    }
-    const startMode = m => {
-      // Review is a browse, not a session — it does not board.
-      if (m === FAST_REVIEW) { startReview(); return }
-      board(() => {
-        if (studyBy === 'level') startLevelSession(level, m)
-        else if (studyBy === 'theme') startThemeSession(theme, themeLabel, m)
-        else startFrequencySession(tier, tierLabel, m)
-      })
-    }
-    // Review only exists for the JLPT-level path today (see
-    // startReview) — theme/frequency decks keep the plain mode list.
-    // The registry already puts the ungraded browse last for every
-    // source; the frequency-tier path is the one place it doesn't apply
-    // (see startReview), so that path drops it rather than the level
-    // path adding it.
-    const modesWithReview = studyBy === 'level'
-      ? MODES
-      : MODES.filter(m => m.key !== FAST_REVIEW)
-    return (
-      <div className="screen">
-        <TopBar onBack={goBack} title={backTitle} autoHide />
-        <main id="main-content">
-          <SelectionScreen>
-            <ModeSelector modes={modesWithReview} onSelect={startMode} />
-          </SelectionScreen>
-        </main>
-      </div>
-    )
-  }
-
-  // ── Review (self-paced, ungraded browse of already-studied cards) ──
-  if (reviewing) {
-    return (
-      <div className="screen">
-        <TopBar onBack={() => setReviewing(false)} title={`${t.vocabulary} ${level} — ${t.modeReview}`} autoHide />
-        {/* 藍色, per DESIGN.md's "the pigment is injected once" — see
-            DecksScreen's comment for why it sits on <main> and not on
-            .screen. Both study shells carry it, review and quiz alike. */}
-        <main id="main-content" className="container quiz-area"
-          style={{ '--line-color': 'var(--line-vocab)' }}>
-          <ReviewDeck
-            cards={reviewCards}
-            loading={reviewLoading}
-            t={t}
-            session={session}
-            dictCategory="vocab"
-            dictTerm={c => wordForm(c)}
-            onReplaySound={c => speakJapanese(c.kana)}
-            renderFront={c => <CharDisplay char={wordForm(c)} size={72} />}
-            renderBack={c => (
-              <InlineReveal
-                t={t}
-                stacked
-                kana={c.kanji ? c.kana : null}
-                main={<MeaningDisplay meaning={c.meaning} size={28} />}
-              />
-            )}
-            onExit={() => setReviewing(false)}
-          />
-        </main>
-      </div>
-    )
-  }
-
-  // ── Quiz ──
-  const isKjToM = card?.direction === 'f2b'
-  // Only the hints this card could actually build — a mode may declare
-  // indice_1 while a particular card has no distractors to offer.
-  const availableHints = Object.keys(card?.hints ?? {})
-  const showChoices = activeHints.has('indice_1') && Array.isArray(card?.hints?.indice_1)
-  // indice_3 — furigana, already split per kanji by the backend (see
-  // study/furigana.py), so this renders parts rather than guessing where
-  // だい ends and がく begins.
-  const furigana = activeHints.has('indice_3') ? card?.hints?.indice_3 : null
-
-  /** The word, with furigana when the hint is on and the card has it. */
-  function wordDisplay(size) {
-    if (furigana?.length) return <FuriganaWord parts={furigana} size={size} />
-    return <CharDisplay char={wordForm(card)} size={size} />
-  }
-  const isWordReading = STUDY_MODES[mode]?.base === 'word_reading'
-
-  const title = modeLabel(t, mode)
-  const sourceLabel =
-    studyBy === 'level' ? level
-    : studyBy === 'theme' ? themeLabel
-    : tierLabel
-
-  return (
-    <div className="screen">
-      <TopBar onBack={() => setMode(null)} title={`${t.vocabulary} ${sourceLabel} — ${title}`} autoHide />
-      <XpToast toast={gates.xpToast} onDone={gates.toastDone} />
-      <main id="main-content" className="container quiz-area"
-        style={{ '--line-color': 'var(--line-vocab)' }}>
-        <DeckProgress stats={progress} />
-        {loading && <Loading />}
-        {error && !card && <SessionError error={error} onRetry={retry} />}
-        {done    && <DoneMessage onBack={() => setMode(null)} pace={paceCtl.pace}
-          onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
-        {card && !loading && (
+      <SelectionScreen
+        title={t.vocabulary}
+        sub={t.stationJlpt}
+        aside={(
           <>
-            <HintBar available={availableHints} active={activeHints}
-                     onToggle={toggleHint} disabled={gates.locked} />
-            <CardTransition
-              className="vocab-card-boost"
-              cardKey={card.card_id}
-              contentKey={`${card.card_id}:${card.lang ?? ''}`}
-              stamp={gates.stamp}
-              stage={card.stage}
-              onStampDone={gates.stampDone}
-            >
-              {/* Study.dc.html's footer strip: what this card is, and
-                  which way round you are studying it. */}
-              <PromptCard foot={{ left: level ? `${level} 単語` : '単語', right: title }}>
-                {/* word_reading — the written word is shown and the answer
-                    is how it is read. The backend has already removed the
-                    kana-only entries from the pool, since for those the
-                    prompt would print its own answer. No meaning on either
-                    face: this drill is about reading, not knowing. */}
-                {isWordReading && (
-                  <Flashcard
-                    t={t}
-                    resetKey={card.card_id}
-                    onReveal={onFlashcardReveal}
-                    front={<CharDisplay char={card.kanji} size={72} />}
-                    back={
-                      /* Both halves of the answer, and both are needed.
-                         The furigana (see `furigana` on the payload, built
-                         by study/furigana.py) is what says WHICH kanji
-                         takes which part of the reading — the entire point
-                         of this drill; the plain kana below is the reading
-                         as one word, which is what the learner was
-                         actually asked to produce. Showing only the ruby
-                         leaves them assembling the answer from pieces;
-                         showing only the kana is the version this
-                         replaced. */
-                      <div>
-                        {card.furigana?.length
-                          ? <FuriganaWord parts={card.furigana} size={64} answer />
-                          : <CharDisplay char={card.kanji} size={56} />}
-                        <div className="flashcard-reading" lang="ja">{card.kana}</div>
-                      </div>
-                    }
-                    dictTerm={wordForm(card)}
-                    dictCategory="vocab"
-                    session={session}
-                    onReplaySound={() => speakJapanese(card.kana)}
-                  />
-                )}
-
-                {!isWordReading && !showChoices && (
-                  <Flashcard
-                    t={t}
-                    resetKey={card.card_id}
-                    onReveal={onFlashcardReveal}
-                    front={
-                      isKjToM
-                        ? wordDisplay(72)
-                        // The prompt is a MEANING in this direction, not a
-                        // word: CharDisplay is a specimen box (nowrap, one
-                        // line, a fixed 72px) and a French gloss line like
-                        // "Toilettes · Petit coin" ran straight out of both
-                        // card edges, unreadable at either end -- it centres
-                        // its overflow, so `text-overflow: ellipsis` never
-                        // even got to mark the cut. MeaningDisplay is the
-                        // component for this: it wraps, and it sizes itself
-                        // from the gloss's own length. Same call Kanji's own
-                        // sens → 漢字 front has always made.
-                        : <MeaningDisplay meaning={card.meaning} size={44} />
-                    }
-                    back={
-                      <InlineReveal
-                        t={t}
-                        kana={card.kanji ? card.kana : null}
-                        isLarge={isKjToM}
-                        stacked={isKjToM}
-                        main={
-                          isKjToM
-                            ? <MeaningDisplay meaning={card.meaning} size={28} />
-                            : <CharDisplay char={wordForm(card)} size={72} />
-                        }
-                      />
-                    }
-                    dictTerm={wordForm(card)}
-                    dictCategory="vocab"
-                    session={session}
-                    onReplaySound={() => speakJapanese(card.kana)}
-                  />
-                )}
-
-                {!isWordReading && showChoices && (
-                  <>
-                    <InlineReveal
-                      t={t}
-                      kana={card.kanji ? card.kana : null}
-                      revealed={answered}
-                      main={
-                        isKjToM
-                          ? <CharDisplay char={wordForm(card)} size={72} />
-                          // Same swap as the flashcard front above, for the
-                          // same reason -- see there.
-                          : <MeaningDisplay meaning={card.meaning} size={44} />
-                      }
-                    />
-                    <RevealActions
-                      t={t}
-                      revealed={answered}
-                      resetKey={card.card_id}
-                      dictTerm={wordForm(card)}
-                      dictCategory="vocab"
-                      session={session}
-                      onReplaySound={() => speakJapanese(card.kana)}
-                    />
-                  </>
-                )}
-              </PromptCard>
-            </CardTransition>
-
-            {!isWordReading && showChoices && (
-              <MCQGrid
-                choices={(card.hints?.indice_1 ?? []).map(c => isKjToM ? c.meaning : wordForm(c))}
-                correct={isKjToM ? card.meaning : wordForm(card)}
-                formatChoice={isKjToM ? formatGlossLine : undefined}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer}
-              />
-            )}
-
-            <RatingBar active={showRating && !gates.locked} onRate={postReview} />
+            <button type="button" className="bar__link" onClick={() => navigate('/learn/vocab/tiers')}>{t.byFrequencyShort}</button>
+            <button type="button" className="bar__link" onClick={() => navigate('/learn/vocab/themes')}>{t.byThemeShort}</button>
           </>
         )}
-      </main>
-    </div>
+      >
+        <LevelSelector source="vocab" onSelect={lvl => navigate(`/learn/vocab/${lvl}`)} />
+      </SelectionScreen>
+    )
+  }
+
+  const jlptLink = <button type="button" className="bar__link" onClick={() => navigate('/learn/vocab')}>{t.jlptInstead}</button>
+
+  // ── The tiers: by frequency, in either pool ──
+  if (tiersPage) {
+    const domainQuery = jmdict ? '&domain=jmdict' : ''
+    return (
+      <SelectionScreen title={t.vocabulary} sub={t.byFrequencyShort} aside={jlptLink}>
+        <Seg
+          full
+          label={t.byFrequencyShort}
+          value={jmdict ? 'jmdict' : 'vocab'}
+          onChange={key => setSp(key === 'jmdict' ? { size: String(tierSize), domain: 'jmdict' } : { size: String(tierSize) }, { replace: true })}
+          options={[
+            { key: 'vocab', label: t.freqDomainDeck },
+            { key: 'jmdict', label: t.freqDomainJmdict },
+          ]}
+        />
+        <TierSelector
+          domain={freqDomain}
+          session={session}
+          tierSize={tierSize}
+          onTierSize={size => setSp(jmdict ? { size: String(size), domain: 'jmdict' } : { size: String(size) }, { replace: true })}
+          onSelect={(tr, label, ts) => navigate(`/learn/vocab/tier/${tr}?size=${ts}${domainQuery}`)}
+        />
+      </SelectionScreen>
+    )
+  }
+
+  // ── The themes ──
+  if (themesPage) {
+    return (
+      <SelectionScreen title={t.vocabulary} sub={t.byThemeShort} aside={jlptLink}>
+        <ThemeSelector session={session} onSelect={key => navigate(`/learn/vocab/theme/${key}`)} />
+      </SelectionScreen>
+    )
+  }
+
+  // ── The platforms: a stop's modes ──
+  const sub = level ? `${level} · ${t[`levelHint${level}`] ?? ''}`
+    : theme ? themeLabelFor(t, theme)
+    : tierLabelFor(Number(tier), tierSize)
+  const back = level ? '/learn/vocab'
+    : theme ? '/learn/vocab/themes'
+    : `/learn/vocab/tiers?size=${tierSize}${jmdict ? '&domain=jmdict' : ''}`
+  const backLabel = level ? t.leaveLevels : theme ? t.leaveThemes : t.leaveTiers
+  const modes = level ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
+  const run = m => navigate(`${pathname}/${m}${search}`)
+  return (
+    <SelectionScreen
+      title={t.vocabulary}
+      sub={sub}
+      aside={<Leave onClick={() => navigate(back)}>{backLabel}</Leave>}
+    >
+      <ModeSelector modes={modes} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+    </SelectionScreen>
   )
 }

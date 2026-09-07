@@ -3,8 +3,7 @@ import { useLang } from '../../LangContext'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { playClick } from '../../lib/audio'
 import { UndoIcon, CheckIcon } from '../ui/Icons'
-
-const API_BASE = ''  // same-origin, always — see lib/api.js
+import { api } from '../../lib/origin'
 
 // The board stays a fixed sumi slab: it's the writing surface, and it
 // has to stay dark enough for pale ink in either theme.
@@ -52,7 +51,7 @@ function applyBrush(ctx) {
 // string. See StrokeRef for why that distinction is load-bearing.
 function charToSvgUrl(char) {
   const codepoint = char.codePointAt(0).toString(16).padStart(5, '0')
-  return `${API_BASE}/kanjivg/${codepoint}.svg`
+  return api(`/kanjivg/${codepoint}.svg`)
 }
 
 // ── Shared canvas drawing logic ───────────────────────────
@@ -72,10 +71,9 @@ function Canvas({ canvasRef, onClear, resetKey }) {
     const rect   = canvas.getBoundingClientRect()
     const scaleX = canvas.width  / rect.width
     const scaleY = canvas.height / rect.height
-    const src    = e.touches ? e.touches[0] : e
     return {
-      x: (src.clientX - rect.left) * scaleX,
-      y: (src.clientY - rect.top)  * scaleY,
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top)  * scaleY,
     }
   }
 
@@ -92,9 +90,17 @@ function Canvas({ canvasRef, onClear, resetKey }) {
     onClear?.()
   }
 
+  // Pointer events — one handler set for mouse, pen and finger. This
+  // was a mouse pair plus a touch pair, and the touch pair called
+  // preventDefault() from React's touchmove, which React registers as
+  // PASSIVE: the call was a console error on every stroke and never
+  // did anything. What actually keeps a finger from scrolling the page
+  // is .canvas-board's `touch-action: none`. Capturing the pointer
+  // keeps a stroke alive when the finger drifts off the board.
   function startDraw(e) {
-    e.preventDefault()
+    if (e.button != null && e.button !== 0) return
     drawing.current = true
+    e.currentTarget.setPointerCapture?.(e.pointerId)
     const canvas = canvasRef.current
     const pos    = getPos(e, canvas)
     lastPos.current = pos
@@ -109,7 +115,6 @@ function Canvas({ canvasRef, onClear, resetKey }) {
   }
 
   function draw(e) {
-    e.preventDefault()
     if (!drawing.current) return
     const canvas = canvasRef.current
     const ctx    = canvas.getContext('2d')
@@ -122,9 +127,10 @@ function Canvas({ canvasRef, onClear, resetKey }) {
   }
 
   function stopDraw(e) {
-    e.preventDefault()
     drawing.current = false
     lastPos.current = null
+    const el = e.currentTarget
+    if (el.hasPointerCapture?.(e.pointerId)) el.releasePointerCapture(e.pointerId)
   }
 
   return (
@@ -133,9 +139,8 @@ function Canvas({ canvasRef, onClear, resetKey }) {
         ref={canvasRef}
         width={260} height={260}
         className="canvas-board"
-        onMouseDown={startDraw} onMouseMove={draw}
-        onMouseUp={stopDraw}   onMouseLeave={stopDraw}
-        onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw}
+        onPointerDown={startDraw} onPointerMove={draw}
+        onPointerUp={stopDraw}    onPointerCancel={stopDraw}
       />
       <button onClick={() => { playClick(); clear() }} className="canvas-clear-btn">
         <UndoIcon size={14} /> {t.eraseBtn}

@@ -12,8 +12,13 @@
  *               right. Passing it switches the card to a body+foot
  *               layout, because the strip has to run flush to the card's
  *               edges while the content keeps its padding.
+ *   prose     — the body reads as a page rather than a face (plan 072,
+ *               the canvas's `.prompt-card__body.prose`): left-aligned,
+ *               top-down, the card's own padding at the reading rung.
+ *               A translation's prompt and its feedback, a reading
+ *               passage. Only meaningful with `foot`.
  */
-export default function PromptCard({ children, className = '', foot }) {
+export default function PromptCard({ children, className = '', foot, prose = false }) {
   const cls = `prompt-card${foot ? ' prompt-card--footed' : ''}`
     + `${className ? ` ${className}` : ''}`
 
@@ -23,7 +28,7 @@ export default function PromptCard({ children, className = '', foot }) {
 
   return (
     <div className={cls}>
-      <div className="prompt-card__body">{children}</div>
+      <div className={`prompt-card__body${prose ? ' prompt-card__body--prose prose' : ''}`}>{children}</div>
       <div className="prompt-card__foot">
         <span>{foot.left}</span>
         <span>{foot.right}</span>

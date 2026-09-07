@@ -6,10 +6,10 @@ import { playPlatformChime } from '../../lib/audio'
 // The third cutscene in the station family, and the first that means
 // "you have arrived" rather than "you are leaving" (改札 TicketGate)
 // or "you are boarding" (扉 TrainDoor). Plays exactly once, over the
-// onboarding tour's first entry (see OnboardingFlow's advance()):
+// boarding's plan as it arrives (screens/BoardingFlow.jsx, plan 075):
 // the scrim drops, the platform signboard slides down into place with
 // the destination on it, the chime lands, and the whole thing steps
-// aside — the tour is mounted and interactive underneath from frame
+// aside — the plan is mounted and interactive underneath from frame
 // one, so nothing is ever gated behind the animation finishing.
 //
 // Same discipline as its two siblings, deliberately: one SPEED dial
@@ -21,7 +21,7 @@ import { playPlatformChime } from '../../lib/audio'
 //
 // No store and no shell, unlike gate/door: those exist because their
 // cutscenes must outlive the screen that triggered them, and
-// OnboardingFlow never unmounts between steps. The precedent is
+// BoardingFlow never unmounts between steps. The precedent is
 // App.jsx's own direct <TicketGate/> render for the finale.
 
 const SPEED = 1.4

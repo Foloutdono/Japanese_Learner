@@ -70,19 +70,18 @@ const { apiJson, apiUpload, apiFetch } = await import('../lib/api')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
-// Renders AND boards through the selection screen: the workbench (rail,
-// intakes) only mounts once a platform card is chosen. The first card
-// is 文字; cases that need 動画 switch via the rail (goToPlatform).
+// Renders on the text platform: the three intakes are one segmented
+// control over the page (plan 073), text first.
 async function renderScreen() {
   const screen = await render(
     <LangProvider>
-      <MemoryRouter>
+      {/* At its own route: the bar reads the section off the pathname
+          (config/tabs.js), and '/' names no station any more. */}
+      <MemoryRouter initialEntries={['/dictionary/analyzer']}>
         <AnalyzerScreen session={{}} />
       </MemoryRouter>
     </LangProvider>
   )
-  await settle(30)
-  screen.container.querySelector('.platform-card').click()
   await settle(30)
   return screen
 }
@@ -99,25 +98,30 @@ async function analyze(screen) {
   await settle(150)
 }
 
-// The road between platforms runs back through the selection-screen
-// gate now: the stub strip's Change control, then the platform card
-// (cards render in registry order). Only the boarded platform's panel
-// is in the DOM, so the switch has to settle before anything inside
-// the new panel can be queried.
+// The road between platforms is the segmented control, in registry
+// order. A finished Passage shows the result instead of the intake;
+// ‹ Analyzer brings the control back first. Only the boarded
+// platform's panel is in the DOM, so the switch has to settle before
+// anything inside the new panel can be queried.
+async function leaveResult(screen) {
+  const leave = screen.container.querySelector('.anl-head .stage__leave')
+  if (leave) { leave.click(); await settle(30) }
+}
 async function goToPlatform(screen, key) {
-  screen.container.querySelector('.anl-stub__change').click()
-  await settle(30)
+  await leaveResult(screen)
   const idx = { text: 0, photo: 1, video: 2 }[key]
-  screen.container.querySelectorAll('.platform-card')[idx].click()
+  screen.container.querySelectorAll('.anl-sources .seg__opt')[idx].click()
   await settle(30)
 }
 
-// The two stage dials render as .anl-seg groups labelled by their own
-// ids -- structural, so the queries survive both locales.
-function segOptions(screen, labelId) {
+// The two stage dials are segmented controls in the dials block:
+// furigana first, then the view — structural, so the queries survive
+// both locales.
+function segOptions(screen, which) {
+  const idx = { 'anl-furigana-label': 0, 'anl-view-label': 1 }[which]
   return screen.container
-    .querySelector(`[aria-labelledby="${labelId}"]`)
-    .querySelectorAll('.anl-seg__opt')
+    .querySelectorAll('.anl-dial .seg')[idx]
+    .querySelectorAll('.seg__opt')
 }
 
 // Drives the 動画 platform's file input the way IntakeVideo actually
@@ -177,9 +181,8 @@ describe('AnalyzerScreen structure', () => {
     const panels = screen.container.querySelectorAll('[id^="anl-panel-"]')
     expect(panels.length).toBe(1)
     expect(panels[0].id).toBe('anl-panel-text')
-    // And the stub states where you boarded -- the plate is a fact,
-    // not a menu, so it is not a button.
-    expect(screen.container.querySelector('.anl-stub__plate')).not.toBeNull()
+    // And the three platforms are one control over the page.
+    expect(screen.container.querySelectorAll('.anl-sources .seg__opt').length).toBe(3)
   })
 
   // ── Boarding another platform is a NEW JOB ──
@@ -194,19 +197,26 @@ describe('AnalyzerScreen structure', () => {
     await analyze(screen)
     expect(screen.container.querySelector('.anl-results')).not.toBeNull()
 
-    // Out to the gate and back onto the SAME platform: still there.
-    await goToPlatform(screen, 'text')
-    expect(screen.container.querySelector('.anl-results')).not.toBeNull()
+    // ‹ Analyzer, back to the intake on the SAME platform: the Passage
+    // waits behind it (the Resume row), the draft is still there.
+    await leaveResult(screen)
+    expect(screen.container.querySelector('.anl-results')).toBeNull()
+    expect(screen.container.querySelector('.anl-resume')).not.toBeNull()
     expect(screen.container.querySelector('textarea').value).not.toBe('')
+    screen.container.querySelector('.anl-resume').click()
+    await settle(30)
+    expect(screen.container.querySelector('.anl-results')).not.toBeNull()
 
-    // A DIFFERENT platform: results gone, draft gone.
+    // A DIFFERENT platform: results gone, draft gone, nothing to resume.
     await goToPlatform(screen, 'photo')
     expect(screen.container.querySelector('.anl-results')).toBeNull()
+    expect(screen.container.querySelector('.anl-resume')).toBeNull()
     expect(screen.container.querySelector('textarea').value).toBe('')
 
     // And coming back does not resurrect the old Passage.
     await goToPlatform(screen, 'text')
     expect(screen.container.querySelector('.anl-results')).toBeNull()
+    expect(screen.container.querySelector('.anl-resume')).toBeNull()
     expect(screen.container.querySelector('textarea').value).toBe('')
   })
 
@@ -293,42 +303,42 @@ describe('AnalyzerScreen structure', () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    const mastered = screen.container.querySelector('.rdg-breakdown-line .word-span--known rt')
+    const mastered = screen.container.querySelector('.tok--mastered .tok__furi')
     expect(mastered).not.toBeNull()
-    expect(getComputedStyle(mastered).display).toBe('none')
+    expect(getComputedStyle(mastered).visibility).toBe('hidden')
 
-    // 'All' restores the mastered word's ruby...
+    // 'All' restores the mastered word's reading...
     segOptions(screen, 'anl-furigana-label')[0].click()
     await settle(60)
     expect(getComputedStyle(
-      screen.container.querySelector('.rdg-breakdown-line .word-span--known rt'),
-    ).display).not.toBe('none')
+      screen.container.querySelector('.tok--mastered .tok__furi'),
+    ).visibility).toBe('visible')
 
     // ...and 'none' hides every reading on the line.
     segOptions(screen, 'anl-furigana-label')[2].click()
     await settle(60)
-    for (const rt of screen.container.querySelectorAll('.rdg-breakdown-line rt')) {
-      expect(getComputedStyle(rt).display).toBe('none')
+    for (const furi of screen.container.querySelectorAll('.tok__furi')) {
+      expect(getComputedStyle(furi).visibility).toBe('hidden')
     }
   })
 
-  it('switches the stage between the stepper and the token table', async () => {
+  it('switches the stage between the card and the token table', async () => {
     const screen = await renderScreen()
     await analyze(screen)
-    expect(screen.container.querySelector('.rdg-breakdown-card-row')).not.toBeNull()
+    expect(screen.container.querySelector('.token-card')).not.toBeNull()
 
-    // The table replaces the CARD, not the stage: the sentence pane and
-    // the dials stay put (mockup behaviour — see the mockup contract
-    // suite for the table's own shape).
+    // The table replaces the CARD, not the stage: the line and the
+    // dials stay put (canvas behaviour — see the mockup contract suite
+    // for the table's own shape).
     segOptions(screen, 'anl-view-label')[1].click()
     await settle(60)
     expect(screen.container.querySelector('.anl-toktable')).not.toBeNull()
-    expect(screen.container.querySelector('.rdg-breakdown-card-row')).toBeNull()
-    expect(screen.container.querySelector('.anl-sentence')).not.toBeNull()
+    expect(screen.container.querySelector('.token-card')).toBeNull()
+    expect(screen.container.querySelector('.tok-line')).not.toBeNull()
 
     segOptions(screen, 'anl-view-label')[0].click()
     await settle(60)
-    expect(screen.container.querySelector('.rdg-breakdown-card-row')).not.toBeNull()
+    expect(screen.container.querySelector('.token-card')).not.toBeNull()
   })
 
   // ── The working rail ──
@@ -409,12 +419,12 @@ describe('AnalyzerScreen structure', () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    let panel = screen.container.querySelector('[id^="anl-panel-"]')
-    expect(panel.hasAttribute('hidden')).toBe(true)
+    // A finished Passage IS the page: no intake panel in the DOM.
+    expect(screen.container.querySelector('[id^="anl-panel-"]')).toBeNull()
 
     await goToPlatform(screen, 'photo')
 
-    panel = screen.container.querySelector('[id^="anl-panel-"]')
+    const panel = screen.container.querySelector('[id^="anl-panel-"]')
     expect(panel.id).toBe('anl-panel-photo')
     expect(panel.hasAttribute('hidden')).toBe(false)
   })
@@ -456,12 +466,13 @@ describe('AnalyzerScreen structure', () => {
 
     expect(screen.container.querySelector('.anl-results')).not.toBeNull()
 
-    screen.container.querySelector('.anl-stub__clear').click()
+    screen.container.querySelector('.anl-clear').click()
     await settle(60)
 
     expect(screen.container.querySelector('.anl-results')).toBeNull()
+    expect(screen.container.querySelector('.anl-resume')).toBeNull()
     expect(screen.container.querySelector('textarea').value).toBe('')
-    expect(screen.container.querySelector('[id^="anl-panel-"]').hasAttribute('hidden')).toBe(false)
+    expect(screen.container.querySelector('[id^="anl-panel-"]')).not.toBeNull()
   })
 
   // Plan 032 (reviewer follow-up): a WordDetail sheet describes a Token
@@ -475,11 +486,12 @@ describe('AnalyzerScreen structure', () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    const tokenEl = screen.container.querySelector('.phrase-word-card__surface-wrap--clickable')
+    const tokenEl = screen.container.querySelector('.token-card__surface--door')
     expect(tokenEl).not.toBeNull()
     tokenEl.click()
     await settle(60)
-    expect(screen.container.querySelector('[role="dialog"]')).not.toBeNull()
+    // The word's sheet is portalled to the body (plan 073).
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull()
 
     await startFromFile(screen)
 

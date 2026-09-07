@@ -1,23 +1,23 @@
 import { useState } from 'react'
-import OnboardingFlow from './OnboardingFlow'
+import BoardingFlow from './BoardingFlow'
 import { TicketGate } from '../components/station/TicketGate'
 import { HOME_STATION } from '../config/stations'
 import { playClick } from '../lib/audio'
 
-// ── /dev/onboarding — the ticket office on repeat ─────────────
-// Development-only workbench, the RewardsPreview of the onboarding:
-// the REAL flow (real placement paper, real volumes, real demos, the
-// real TicketGate finale) with two dev affordances — dryRun, so the
-// final POST never writes onboarded_at, and a replay control that
-// remounts the flow fresh (key bump), arrival cutscene included.
+// ── /dev/onboarding — the boarding on repeat ──────────────────
+// Development-only workbench, the RewardsPreview of the boarding: the
+// REAL flow (the real volumes, the real screens, the real TicketGate
+// finale) with two dev affordances — dryRun, so neither the name nor
+// the contract is ever written, and a replay control that remounts the
+// flow fresh (key bump), arrival cutscene included.
 //
 // Registered next to /dev/rewards in App.jsx, outside the auth gate
 // and dropped from production bundles the same way (the route only
 // exists behind import.meta.env.DEV, so this file is tree-shaken).
 // The synthetic bearer token works because a dev backend runs with
-// DEV_USER_ID and never verifies it; the placement and volumes calls
-// are therefore live, which is the point — a preview of fake data
-// would not exercise the thing being polished.
+// DEV_USER_ID and never verifies it; the volumes call is therefore
+// live, which is the point — a preview of fake data would not
+// exercise the thing being polished.
 export default function OnboardingPreview() {
   const [run, setRun] = useState(1)
   const [phase, setPhase] = useState('flow') // flow | gate | done
@@ -32,11 +32,11 @@ export default function OnboardingPreview() {
   return (
     <>
       {phase !== 'done' && (
-        <OnboardingFlow
+        <BoardingFlow
           key={run}
           session={session}
           dryRun
-          initialProfile={{ username: 'Preview' }}
+          initialProfile={{ username: 'Preview', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
           onComplete={() => setPhase('gate')}
         />
       )}

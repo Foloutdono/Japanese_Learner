@@ -14,15 +14,17 @@ import { render } from 'vitest-browser-react'
 import './index.css'
 
 describe('the dimmed text register', () => {
-  it('gives the Today tick a border colour of its own', async () => {
-    // index.css's .today-lane-row__tick mixes the same dim-text token
-    // inside a border shorthand; with the token undefined the whole
-    // color-mix() dropped and border-color fell back to currentColor.
+  it('gives a lane\'s tick a border colour of its own', async () => {
+    // index.css's .lane__tick mixes the same dim-text token inside a
+    // border shorthand; with the token undefined the whole color-mix()
+    // dropped and border-color fell back to currentColor. The picker
+    // row this once pinned retired with plan 070; the gate's lane
+    // switch is its successor and mixes the same way.
     const screen = await render(
-      <div className="today-lane-row"><span className="today-lane-row__tick" /></div>
+      <button type="button" className="lane lane--off"><span className="lane__tick" /></button>
     )
-    const row  = screen.container.querySelector('.today-lane-row')
-    const tick = screen.container.querySelector('.today-lane-row__tick')
+    const row  = screen.container.querySelector('.lane')
+    const tick = screen.container.querySelector('.lane__tick')
     expect(getComputedStyle(tick).borderTopColor)
       .not.toBe(getComputedStyle(row).color)
   })

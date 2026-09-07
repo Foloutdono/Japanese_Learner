@@ -13,7 +13,13 @@ vi.mock('./supabase', () => ({
   },
 }))
 
-import { apiJson, apiJsonWithTimeout, ApiError } from './api'
+import { api, apiJson, apiJsonWithTimeout, ApiError } from './api'
+
+describe('api', () => {
+  it('is same-origin with no env: the web build never carries an origin', () => {
+    expect(api('/api/x')).toBe('/api/x')
+  })
+})
 
 function mockFetchOnce(status, body) {
   globalThis.fetch = vi.fn().mockResolvedValue({

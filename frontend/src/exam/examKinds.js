@@ -29,9 +29,10 @@ const KIND_BY_SECTION_ID = {
   listening: 'listening',
 }
 
-/** Localized "N5 Vocabulaire" for a fetched paper, for the TopBar. */
+/** Localized "N5 · Vocabulaire" for a fetched paper — the runner's
+ * meta row and the result's bar sub (the canvas's "N4 · Vocabulary"). */
 export function paperTitle(exam, t) {
   const kind = KIND_BY_SECTION_ID[exam?.sections?.[0]?.id]
   const label = kind ? kindMeta(t)[kind].label : exam?.sections?.[0]?.label
-  return [exam?.level, label].filter(Boolean).join(' ')
+  return [exam?.level, label].filter(Boolean).join(' · ')
 }

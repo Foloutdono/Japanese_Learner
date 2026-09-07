@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { recognize, recognizeRemote } from '../../lib/ocr'
+import { isNative } from '../../lib/platform'
 import { loadImage, toBlob, MAX_UPLOAD_BYTES } from '../../lib/image'
 import { ImageCropper } from './ImageCropper'
 
@@ -104,14 +105,19 @@ export function ImageInput({ t, session, onTextReady }) {
           </div>
         )}
         {error && <div className="analysis-image-input__error">{error}</div>}
-        <button
-          type="button"
-          onClick={() => runRecognition(null, { local: true })}
-          disabled={busy}
-          className="analysis-image-input__local"
-        >
-          {t.ocrLocalOption}
-        </button>
+        {/* The on-device tier downloads tesseract's worker and language
+            data on first use -- a browser's cache keeps them, the shell's
+            WebView is not the place (plan 076): the server's tier only. */}
+        {!isNative() && (
+          <button
+            type="button"
+            onClick={() => runRecognition(null, { local: true })}
+            disabled={busy}
+            className="analysis-image-input__local"
+          >
+            {t.ocrLocalOption}
+          </button>
+        )}
       </div>
     )
   }
@@ -121,34 +127,26 @@ export function ImageInput({ t, session, onTextReady }) {
       {/* Two intake tiles (plan 029). These were .phrase-history-toggle
           -- the HISTORY class, borrowed as a generic secondary button --
           which is how a class name stops meaning anything. */}
-      <div className="anl-tiles">
+      {/* The two ways in (canvas AnalyzerPhoto): shoot, or choose. */}
+      <div className="intake-pair">
         <button
           type="button"
           onClick={() => cameraRef.current?.click()}
-          disabled={busy}
-          className="anl-tile"
-          title={t.takePhoto}
+          className="intake-btn"
         >
-          <span className="anl-tile__jp" lang="ja">撮影</span>
-          <span className="anl-tile__latin">{t.shootPhoto}</span>
+          <svg className="svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+          {t.shootPhoto}
         </button>
         <button
           type="button"
           onClick={() => galleryRef.current?.click()}
-          disabled={busy}
-          className="anl-tile"
-          title={t.chooseImage}
+          className="intake-btn"
         >
-          <span className="anl-tile__jp" lang="ja">選択</span>
-          <span className="anl-tile__latin">{t.pickPhoto}</span>
+          <svg className="svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="2" /><path d="M21 16l-5-5-8 8" /></svg>
+          {t.pickPhoto}
         </button>
       </div>
 
-      {/* TWO inputs, not one. `capture` sends a mobile browser straight
-          to the camera and hides the gallery entirely, so a single input
-          cannot offer both -- the old UI promised "Take a photo / Choose
-          an image" and, on a phone, only ever did the first. On desktop
-          both open the same picker, which is harmless. */}
       <input
         ref={cameraRef}
         type="file"

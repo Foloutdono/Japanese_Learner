@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { parseTimecode, formatTimecode } from '../../lib/timecode'
 import { parseVideoId } from '../../lib/youtube'
 import { buildBookmarklet } from '../../lib/captionGrab'
+import { isNative } from '../../lib/platform'
 import { GrabTutorial } from './GrabTutorial'
 
 // ── 3番線 動画 — the subtitle dock ────────────────────────
@@ -86,7 +87,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
         <span className="anl-window__label">{t.videoUrlOptional}</span>
         <input
           type="text"
-          className="field field--panel anl-field"
+          className="field anl-field"
           value={url}
           onChange={e => onUrlChange(e.target.value)}
           placeholder="https://youtu.be/…"
@@ -94,15 +95,18 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
         <span className="anl-window__readout">{t.videoUrlOptionalHint}</span>
       </label>
 
-      {/* ── 字幕取り — the grab ── */}
-      <div className="anl-grab">
+      {/* ── 字幕取り — the grab ──
+          Web only: a bookmarklet needs a browser's bookmarks bar, which
+          the shell's WebView has no way to offer (plan 076); there the
+          link names the video and the file path stays. */}
+      {!isNative() && <div className="anl-grab">
         <div className="anl-grab__head">
           <span className="anl-grab__title">{t.grabTitle}</span>
           <span className="anl-grab__jp" lang="ja">字幕取り</span>
         </div>
         <p className="anl-grab__lead">{t.grabLead}</p>
         <div className="anl-grab__row">
-          <button type="button" className="anl-action anl-grab__copy" onClick={copyBookmarklet}>
+          <button type="button" className="btn-secondary anl-grab__copy" onClick={copyBookmarklet}>
             {copied ? t.bookmarkletCopied : t.copyBookmarklet}
           </button>
           {/* The real walkthrough — what a bookmarklet is, and how to
@@ -135,7 +139,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
             {t.downsubAlt}
           </a>
         </div>
-      </div>
+      </div>}
 
       {showTutorial && (
         <GrabTutorial
@@ -183,7 +187,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
             <input
               type="text"
               inputMode="numeric"
-              className={`field field--panel anl-field${startBad ? ' anl-field--bad' : ''}`}
+              className={`field anl-field${startBad ? ' anl-field--bad' : ''}`}
               value={from}
               onChange={e => setFrom(e.target.value)}
               placeholder={t.windowWhole}
@@ -194,7 +198,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
             <input
               type="text"
               inputMode="numeric"
-              className={`field field--panel anl-field${endBad || backwards ? ' anl-field--bad' : ''}`}
+              className={`field anl-field${endBad || backwards ? ' anl-field--bad' : ''}`}
               value={to}
               onChange={e => setTo(e.target.value)}
               placeholder={t.windowWhole}

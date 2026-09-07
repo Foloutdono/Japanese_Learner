@@ -3,10 +3,10 @@ import { render } from 'vitest-browser-react'
 
 // ── The onboarding gate in App ─────────────────────────────────
 // Three behaviours, one of which is the load-bearing one: a signed-in
-// user whose profile has no onboardedAt gets the ticket office instead
-// of the router; one with it gets the router; and — the case that
-// protects real users — a FAILED profile fetch opens the app rather
-// than trapping anyone behind a gate their network dropped.
+// user whose profile has no onboardedAt gets the boarding (plan 075)
+// instead of the router; one with it gets the router; and — the case
+// that protects real users — a FAILED profile fetch opens the app
+// rather than trapping anyone behind a gate their network dropped.
 
 const apiJsonWithTimeout = vi.fn()
 // /api/today, shaped fully so NextService renders quietly.
@@ -46,13 +46,14 @@ beforeEach(() => {
 })
 
 describe('App onboarding gate', () => {
-  it('shows the ticket office when the profile has no onboardedAt', async () => {
+  it('shows the boarding when the profile has no onboardedAt', async () => {
     apiJsonWithTimeout.mockResolvedValue({ username: 'Tester', onboardedAt: null, jlptLevel: null })
 
     const screen = await render(<App />)
     await settle()
 
-    expect(screen.container.querySelector('.onb')).not.toBeNull()
+    expect(screen.container.querySelector('.brd')).not.toBeNull()
+    expect(screen.container.querySelector('.brd').dataset.step).toBe('name')
     // No router mounted: the flow replaces the app, it doesn't cover it.
     // (.gatehall is the home screen's room — the wall-map redesign's
     // successor to the departure board this assertion used to probe.)
@@ -65,7 +66,7 @@ describe('App onboarding gate', () => {
     const screen = await render(<App />)
     await settle()
 
-    expect(screen.container.querySelector('.onb')).toBeNull()
+    expect(screen.container.querySelector('.brd')).toBeNull()
   })
 
   it('FAILS OPEN into the app when the profile fetch fails', async () => {
@@ -74,6 +75,6 @@ describe('App onboarding gate', () => {
     const screen = await render(<App />)
     await settle()
 
-    expect(screen.container.querySelector('.onb')).toBeNull()
+    expect(screen.container.querySelector('.brd')).toBeNull()
   })
 })

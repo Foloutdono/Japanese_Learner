@@ -81,6 +81,14 @@ def note_stored_level(user_id: str, level: str) -> None:
         _cache[user_id] = (level, time.monotonic() + _CACHE_TTL_S)
 
 
+def forget_stored_level(user_id: str) -> None:
+    """Account deletion (routes/account.py): drop this process's cached
+    level for the id, so a later request under the same uuid — a token
+    that is still valid for up to an hour — cannot read a level that
+    belongs to a row that no longer exists."""
+    _cache.pop(user_id, None)
+
+
 def resolve_level(user_id: str, requested: str | None = None) -> str:
     """The JLPT level to treat `user_id` as, for one request.
 

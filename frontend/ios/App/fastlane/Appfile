@@ -1,0 +1,5 @@
+# The app's identity for fastlane (plan 077). The bundle id is the one
+# capacitor.config.json declares; the team id comes from the workflow's
+# secrets, never from this file.
+app_identifier("com.japaneselearner.app")
+team_id(ENV["APPLE_TEAM_ID"])

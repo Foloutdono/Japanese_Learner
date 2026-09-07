@@ -1,4 +1,5 @@
 import { HINTS } from '../domain/studyModes'
+import { api } from './origin'
 
 const cache = {}
 
@@ -6,8 +7,11 @@ export async function getTranslations(lang) {
     if (cache[lang]) return cache[lang]
 
     const [kanji, vocab] = await Promise.all([
-    fetch(`/api/translations/kanji?lang=${lang}`).then(r => r.json()),
-    fetch(`/api/translations/vocab?lang=${lang}`).then(r => r.json()),
+    // Through api() like every other backend path — the native shell
+    // resolves it to the web origin (lib/api.js). Still a bare fetch,
+    // not apiFetch: these two endpoints are public and carry no token.
+    fetch(api(`/api/translations/kanji?lang=${lang}`)).then(r => r.json()),
+    fetch(api(`/api/translations/vocab?lang=${lang}`)).then(r => r.json()),
     ])
 
     cache[lang] = { kanji, vocab }

@@ -4,7 +4,7 @@ import { levelItems } from '../../domain/journeyProjection'
 // ── The stations under the ghost track ───────────────────────────
 // 発 at the origin, then each level at its cumulative share of the
 // promised total — the same arithmetic routes/journey.py priced the
-// journey with. Shared by the pass back (JourneyPass) and the
+// journey with. Shared by the status sheet (StatusSheet) and the
 // onboarding's 案内 promise scene; its own module because component
 // files export components only (react-refresh's rule). Without
 // volumes the drawing degrades to departure + destination.

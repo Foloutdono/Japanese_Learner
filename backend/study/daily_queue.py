@@ -10,6 +10,7 @@ Postgres instance.
 from collections import OrderedDict
 
 from study import card_index
+from study.difficulty import LEVELS
 
 # A lane is one (section, deck, mode) triple -- "N4 kanji writing" -- or
 # one (personal deck, mode) pair. It is the unit the learner recognises
@@ -144,6 +145,27 @@ def keep_lanes(all_lanes, wanted: set):
     for key, ids in all_lanes.items():
         if lane_id(key) in wanted:
             kept[key] = ids
+    return kept
+
+
+def hold_above(all_lanes, level):
+    """Hold back the section lanes of JLPT stops beyond the learner's
+    level. A move down sets those cards aside rather than deleting them
+    (the level rule, plan 074), and "set aside" means their reviews wait
+    until the level rises again -- the run shrinks to the stops the
+    learner stands on or behind. Kana sets, personal decks and a lane
+    whose deck key is no level pass through; so does everything when the
+    level is unknown (never onboarded), because holding back on a guess
+    would hide a review that is genuinely due.
+    """
+    if level not in LEVELS:
+        return all_lanes
+    cut = LEVELS.index(level)
+    kept: "OrderedDict[tuple, list[str]]" = OrderedDict()
+    for key, ids in all_lanes.items():
+        if key[0] == SECTION and key[2] in LEVELS and LEVELS.index(key[2]) > cut:
+            continue
+        kept[key] = ids
     return kept
 
 

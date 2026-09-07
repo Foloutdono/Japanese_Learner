@@ -20,7 +20,7 @@
 // 設定 belongs with the pass rather than beside it: preferences are
 // the card's own settings — sound, theme, language, the account the
 // pass is issued to — not a destination of their own.
-const ROUTES = ['/profile', '/settings']
+const ROUTES = ['/profile', '/profile/settings']
 
 export function isIdentityRoute(path) {
   return ROUTES.includes(path)

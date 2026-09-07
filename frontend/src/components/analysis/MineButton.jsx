@@ -12,11 +12,15 @@ import { DeckPicker } from './DeckPicker'
 // cloze via mining.mineCloze) -- this component only owns picking the
 // target deck and showing the outcome.
 //
+// `className` replaces the default look outright (StageCard prints the
+// card's one filled action as `.btn-primary`) — the outcome text and the
+// disabled note keep their own classes either way.
+//
 // `mining` is a useMining(session) instance, shared by every mine
 // control on the screen -- undefined is a valid, deliberate value
 // (ReadingScreen.jsx doesn't create one), in which case this renders
 // nothing at all rather than a broken control.
-export function MineButton({ mining, kind, disabled, disabledReason, label, successLabel, onMine, t }) {
+export function MineButton({ mining, kind, disabled, disabledReason, label, successLabel, onMine, t, className = '' }) {
   const [showPicker, setShowPicker] = useState(false)
   const [pending, setPending] = useState(false)
   // null = not attempted yet; a number once a mine WRITE succeeded
@@ -86,7 +90,7 @@ export function MineButton({ mining, kind, disabled, disabledReason, label, succ
 
   return (
     <>
-      <button onClick={handleClick} disabled={pending} className="analysis-mine-btn">
+      <button onClick={handleClick} disabled={pending} className={className || 'analysis-mine-btn'}>
         {addedOnce ? (t.addToAnotherDeck ?? 'Add to another deck') : (label ?? (t.mineToDeck ?? 'Mine'))}
       </button>
       {outcome !== null && (

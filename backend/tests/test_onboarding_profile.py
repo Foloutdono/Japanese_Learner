@@ -6,10 +6,16 @@
 # elsewhere in the suite are served.
 import contextlib
 
+import pytest
+
 import core.user_level as user_level
 import routes.profile as profile_module
-from core.auth import DEV_USER_ID
+from core.auth import DEV_USER_ID, prefixed
 from core.db import db_conn
+from core.srs_instance import srs
+from main import app
+from routes.profile import get_user_id
+from study import level_rule
 
 
 @contextlib.contextmanager
@@ -26,7 +32,9 @@ def _clean_onboarding_state(user_id: str):
                     SET jlpt_level = NULL, daily_new_target = NULL, onboarded_at = NULL,
                         goal_start_level = NULL, goal_level = NULL,
                         goal_target_date = NULL, goal_set_at = NULL,
-                        daily_departure = NULL, rating_scale = NULL
+                        daily_departure = NULL, rating_scale = NULL,
+                        motive = NULL, kana_known = NULL, reminder_time = NULL,
+                        notifications = FALSE
                     WHERE user_id = %s
                     """,
                     (user_id,),
@@ -239,3 +247,192 @@ def test_setting_the_scale_leaves_the_other_learning_fields_alone(client):
 
 def test_a_patch_with_nothing_in_it_is_still_a_caller_bug(client):
     assert client.patch("/api/profile/learning", json={}).status_code == 422
+
+
+# ── The boarding's own answers (plan 075) ─────────────────────────
+# Motive, the kana check, the rhythm, the hour and the nudge ride on
+# the same single POST, are served back on the profile (the plan
+# screen and the native shell's daily reminder read them there), and
+# every one of them is optional so the office's older callers --
+# Settings' retake, a client one build behind -- still complete.
+def test_complete_stores_the_boarding_answers_and_the_profile_serves_them(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        before = client.get("/api/profile").json()
+        assert before["motive"] is None
+        assert before["kanaKnown"] is None
+        assert before["reminderTime"] is None
+        assert before["notifications"] is False
+
+        done = client.post("/api/onboarding/complete", json={
+            "jlptLevel": "N5", "dailyNewTarget": 10,
+            "goalLevel": "N4", "goalTargetDate": "2030-01-01",
+            "dailyDeparture": "am",
+            "motive": "trip", "kanaKnown": "none", "rhythmMin": 10,
+            "reminderTime": "07:30", "notifications": True, "tzOffsetMin": 540,
+        })
+        assert done.status_code == 200, done.text
+        body = done.json()
+        assert body["motive"] == "trip"
+        assert body["kanaKnown"] == "none"
+        assert body["rhythmMin"] == 10
+        assert body["reminderTime"] == "07:30"
+        assert body["notifications"] is True
+        # 'none' marks nothing known -- the syllabaries are the first stop.
+        assert body["kanaRule"] == {"kanaKnown": "none", "markedKnown": 0,
+                                    "spreadWeeks": level_rule.SPREAD_WEEKS}
+
+        after = client.get("/api/profile").json()
+        assert after["motive"] == "trip"
+        assert after["kanaKnown"] == "none"
+        assert after["reminderTime"] == "07:30"
+        assert after["notifications"] is True
+
+
+def test_the_boarding_answers_are_optional_and_a_replay_overwrites_them(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        # The old five-field contract still completes...
+        first = client.post("/api/onboarding/complete",
+                            json={"jlptLevel": "N4", "dailyNewTarget": 10})
+        assert first.status_code == 200
+        assert first.json()["motive"] is None
+        assert first.json()["notifications"] is False
+        # ...and a replay that answers is simply the new state.
+        client.post("/api/onboarding/complete", json={
+            "jlptLevel": "N4", "dailyNewTarget": 10,
+            "motive": "fun", "reminderTime": "21:00", "notifications": False,
+        })
+        after = client.get("/api/profile").json()
+        assert after["motive"] == "fun"
+        assert after["reminderTime"] == "21:00"
+        assert after["notifications"] is False
+        # A replay with no hour clears it -- like every other choice.
+        client.post("/api/onboarding/complete", json={"jlptLevel": "N4", "dailyNewTarget": 10})
+        assert client.get("/api/profile").json()["reminderTime"] is None
+
+
+def test_complete_rejects_bad_boarding_answers(client):
+    base = {"jlptLevel": "N5", "dailyNewTarget": 10}
+    for bad in (
+        {"motive": "boredom"},
+        {"kanaKnown": "hangul"},
+        {"rhythmMin": 0},
+        {"rhythmMin": 999},
+        {"reminderTime": "25:00"},
+        {"reminderTime": "7:30"},
+        {"reminderTime": "07:60"},
+        {"tzOffsetMin": 900},
+    ):
+        assert client.post("/api/onboarding/complete", json={**base, **bad}).status_code == 422, bad
+
+
+# ── The kana door: the scripts already read start known ───────────
+# Its own user, like test_level_rule.py's: the rows this writes are
+# real card_modes rows, and the shared DEV user's kana state is what
+# the kana tests elsewhere in the suite are served.
+KUID = "kana-door-test-user"
+
+
+def _wipe(user_id: str) -> None:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM review_log WHERE card_id LIKE %s", (f"{user_id}:%",))
+            cur.execute("DELETE FROM card_modes WHERE card_id LIKE %s", (f"{user_id}:%",))
+            cur.execute("DELETE FROM cards WHERE id LIKE %s", (f"{user_id}:%",))
+            cur.execute("DELETE FROM user_profiles WHERE user_id = %s", (user_id,))
+        conn.commit()
+    finally:
+        conn.close()
+    user_level._cache.pop(user_id, None)
+
+
+@pytest.fixture()
+def kclient(client):
+    _wipe(KUID)
+    app.dependency_overrides[get_user_id] = lambda: KUID
+    try:
+        yield client
+    finally:
+        app.dependency_overrides.pop(get_user_id, None)
+        _wipe(KUID)
+
+
+def _kana_rows(known: str) -> int:
+    mode, ids = level_rule.kana_batch(known)
+    return srs.count_rows(prefixed(ids, KUID), mode)
+
+
+def test_kana_known_marks_the_named_scripts_known_and_only_them(kclient):
+    hira_mode, hira = level_rule.kana_batch("hiragana")
+    _, kata = level_rule.kana_batch("katakana")
+    assert hira_mode == "kana.flashcard.f2b"
+    assert len(hira) == 104 and len(kata) == 120
+
+    done = kclient.post("/api/onboarding/complete",
+                        json={"jlptLevel": "N5", "dailyNewTarget": 10, "kanaKnown": "hiragana"})
+    assert done.status_code == 200, done.text
+    assert done.json()["kanaRule"]["markedKnown"] == len(hira)
+    assert _kana_rows("hiragana") == len(hira)
+    assert _kana_rows("katakana") == 0
+    assert kclient.get("/api/profile").json()["kanaKnown"] == "hiragana"
+
+    # Replaying with both adds only the other script -- seed_known never
+    # touches a row that exists.
+    again = kclient.post("/api/onboarding/complete",
+                         json={"jlptLevel": "N5", "dailyNewTarget": 10, "kanaKnown": "both"})
+    assert again.json()["kanaRule"]["markedKnown"] == len(kata)
+    assert _kana_rows("both") == len(hira) + len(kata)
+
+    # And answering 'none' afterwards deletes nothing (moving down never
+    # does): the rows stay, the answer is what changes.
+    none = kclient.post("/api/onboarding/complete",
+                        json={"jlptLevel": "N5", "dailyNewTarget": 10, "kanaKnown": "none"})
+    assert none.json()["kanaRule"]["markedKnown"] == 0
+    assert _kana_rows("both") == len(hira) + len(kata)
+    assert kclient.get("/api/profile").json()["kanaKnown"] == "none"
+
+
+def test_the_seeded_kana_rows_are_mastered_and_spread(kclient):
+    kclient.post("/api/onboarding/complete",
+                 json={"jlptLevel": "N5", "dailyNewTarget": 10, "kanaKnown": "katakana"})
+    mode, ids = level_rule.kana_batch("katakana")
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT MIN(next_review), MAX(next_review), BOOL_AND(NOT is_learning),
+                       MIN(interval_days)
+                FROM card_modes WHERE mode = %s AND card_id = ANY(%s)
+                """,
+                (mode, prefixed(ids, KUID)),
+            )
+            first, last, all_known, min_interval = cur.fetchone()
+    finally:
+        conn.close()
+    assert all_known is True
+    assert min_interval >= 21
+    # The last check lands on the six-week horizon, the first well inside it.
+    assert (last - first).days >= level_rule.SPREAD_DAYS - 1
+
+
+# ── Settings › Destination moves the nudge with the hour ──────────
+def test_reprinting_the_daily_hour_moves_the_reminder_with_it(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        client.post("/api/onboarding/complete", json={
+            "jlptLevel": "N5", "dailyNewTarget": 10, "goalLevel": "N4",
+            "dailyDeparture": "am", "reminderTime": "08:00", "notifications": True,
+        })
+        r = client.post("/api/journey/reprint", json={"dailyDeparture": "pm"})
+        assert r.status_code == 200, r.text
+        assert r.json()["dailyDeparture"] == "pm"
+        assert client.get("/api/profile").json()["reminderTime"] == "21:00"
+
+        # Flexible clears the reminder: no hour, no nudge.
+        client.post("/api/journey/reprint", json={"dailyDeparture": None})
+        after = client.get("/api/profile").json()
+        assert after["reminderTime"] is None
+        # A reprint of the DATE alone leaves the hour where it was.
+        client.post("/api/journey/reprint", json={"dailyDeparture": "noon"})
+        client.post("/api/journey/reprint", json={"goalTargetDate": "2031-01-01"})
+        assert client.get("/api/profile").json()["reminderTime"] == "12:30"

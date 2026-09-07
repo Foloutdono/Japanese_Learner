@@ -4,6 +4,9 @@
 #   POST /api/onboarding/placement        a fresh 12-question paper
 #   POST /api/onboarding/placement/score  grade it, recommend a level
 #   POST /api/onboarding/complete         stamp level + pace + onboarded_at
+#                                         (+ the boarding's own answers,
+#                                         plan 075: motive, kana, rhythm,
+#                                         the hour and the nudge)
 #   GET  /api/onboarding/volumes          per-level item counts (projection)
 #
 # The placement round trip is stateless by design: the paper is a pure
@@ -11,6 +14,7 @@
 # rather than storing it. See placement.py's header for why this is not
 # a 21st EXAM_GENERATORS entry.
 import random
+import re
 from datetime import date
 
 from fastapi import APIRouter, Depends
@@ -23,8 +27,9 @@ from content.vocab_data import VOCAB_BY_LEVEL
 from core.auth import get_user_id
 from core.db import db_conn
 from core.user_level import LEVELS, note_stored_level
-from routes.profile import ensure_profile_row
+from routes.profile import apply_kana_rule, apply_level_rule, ensure_profile_row
 from study.exam_scoring import flatten_questions, score_attempt
+from study.level_rule import KANA_KNOWN
 from study.placement import build_placement_paper, recommend_level, strip_answers
 
 router = APIRouter()
@@ -55,6 +60,22 @@ class ScorePayload(BaseModel):
 
 DEPARTURES = ("am", "noon", "pm")
 
+# The hour each daily ride is announced at -- the same three the
+# frontend's departures.js prints. Settings › Destination moves the
+# hour by bucket (routes/journey.py's reprint) and the reminder follows
+# it, so the nudge and the pass never name different times.
+DEPART_TIMES = {"am": "07:30", "noon": "12:30", "pm": "21:00"}
+
+# Why the learner is here (the boarding's second question, plan 075).
+# The plan screen's two promise lines are chosen from it client-side;
+# stored so a later screen can say "for your trip" without asking twice.
+MOTIVES = ("studies", "fun", "trip", "live", "friends", "other")
+
+# A reminder hour is 'HH:MM' on the 24-hour clock, minutes included --
+# the day track offers half hours, the column stores whatever a client
+# sends within the day.
+_REMINDER_RE = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
+
 
 class CompletePayload(BaseModel):
     jlptLevel: str
@@ -66,6 +87,57 @@ class CompletePayload(BaseModel):
     goalLevel: str | None = None
     goalTargetDate: date | None = None
     dailyDeparture: str | None = None
+    # The boarding's own answers (plan 075). All optional and
+    # backwards compatible: a client that sends only the five fields
+    # above (Settings' retake, the old office) still completes. A
+    # replay overwrites them like every other choice; kanaKnown marks
+    # the scripts named known (study/level_rule.py's kana door) and,
+    # being idempotent, costs nothing a second time.
+    motive: str | None = None
+    kanaKnown: str | None = None
+    rhythmMin: int | None = None
+    reminderTime: str | None = None
+    notifications: bool = False
+    tzOffsetMin: int | None = None
+
+    @field_validator("motive")
+    @classmethod
+    def valid_motive(cls, v: str | None) -> str | None:
+        if v is not None and v not in MOTIVES:
+            raise ValueError(f"must be one of {', '.join(MOTIVES)}")
+        return v
+
+    @field_validator("kanaKnown")
+    @classmethod
+    def valid_kana_known(cls, v: str | None) -> str | None:
+        if v is not None and v not in KANA_KNOWN:
+            raise ValueError(f"must be one of {', '.join(KANA_KNOWN)}")
+        return v
+
+    @field_validator("rhythmMin")
+    @classmethod
+    def valid_rhythm(cls, v: int | None) -> int | None:
+        # The boarding offers 5/10/15/20 minutes; the bound keeps out
+        # nonsense without freezing those four into the API.
+        if v is not None and not (1 <= v <= 180):
+            raise ValueError("must be between 1 and 180")
+        return v
+
+    @field_validator("reminderTime")
+    @classmethod
+    def valid_reminder(cls, v: str | None) -> str | None:
+        if v is not None and not _REMINDER_RE.match(v):
+            raise ValueError("must be HH:MM on the 24-hour clock")
+        return v
+
+    @field_validator("tzOffsetMin")
+    @classmethod
+    def valid_tz(cls, v: int | None) -> int | None:
+        # -14:00 .. +14:00 is the whole planet (same bound as the
+        # profile PATCH's).
+        if v is not None and not (-840 <= v <= 840):
+            raise ValueError("must be between -840 and 840")
+        return v
 
     @field_validator("jlptLevel")
     @classmethod
@@ -165,7 +237,12 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
                     goal_level = %s,
                     goal_target_date = %s,
                     goal_set_at = CASE WHEN %s THEN NOW() END,
-                    daily_departure = %s
+                    daily_departure = %s,
+                    motive = %s,
+                    kana_known = %s,
+                    reminder_time = %s,
+                    notifications = %s,
+                    tz_offset_min = COALESCE(%s, tz_offset_min)
                 WHERE user_id = %s
                 RETURNING onboarded_at, goal_set_at
                 """,
@@ -177,6 +254,11 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
                     payload.goalTargetDate,
                     has_goal,
                     payload.dailyDeparture,
+                    payload.motive,
+                    payload.kanaKnown,
+                    payload.reminderTime,
+                    payload.notifications,
+                    payload.tzOffsetMin,
                     user_id,
                 ),
             )
@@ -187,14 +269,28 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
     # Write-through so this worker's resolver serves the new level
     # immediately rather than after its TTL (core/user_level.py).
     note_stored_level(user_id, payload.jlptLevel)
+    # The level rule (plan 074): the stops behind the boarding level are
+    # marked known. Seeding is idempotent, so a replay of the office
+    # costs nothing a second time.
+    level_rule_result = apply_level_rule(user_id, None, payload.jlptLevel)
+    # The kana door (plan 075): the scripts the learner already reads
+    # start known, the same way and with the same spread.
+    kana_rule_result = apply_kana_rule(user_id, payload.kanaKnown)
     return {
         "jlptLevel": payload.jlptLevel,
         "dailyNewTarget": payload.dailyNewTarget,
         "onboardedAt": onboarded_at.isoformat(),
+        "levelRule": level_rule_result,
+        "kanaRule": kana_rule_result,
         "goalLevel": payload.goalLevel,
         "goalTargetDate": payload.goalTargetDate.isoformat() if payload.goalTargetDate else None,
         "goalSetAt": goal_set_at.isoformat() if goal_set_at else None,
         "dailyDeparture": payload.dailyDeparture,
+        "motive": payload.motive,
+        "kanaKnown": payload.kanaKnown,
+        "rhythmMin": payload.rhythmMin,
+        "reminderTime": payload.reminderTime,
+        "notifications": payload.notifications,
     }
 
 

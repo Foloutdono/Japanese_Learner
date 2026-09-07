@@ -3,32 +3,37 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
-import { TopBar } from '../components/ui/TopBar'
+import { Leave } from '../components/chrome/Bar'
+import { Seg } from '../components/chrome/Console'
 import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
+import TierSelector from '../components/selection/TierSelector'
 import SelectionScreen from '../components/selection/SelectionScreen'
+import { StudyStage } from '../components/study/StudyStage'
 import PromptCard from '../components/study/PromptCard'
 import { Loading } from '../components/ui/Loading'
+import Empty from '../components/ui/Empty'
 import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { FireIcon, EyeOffIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
+import { tierLabelFor, DEFAULT_TIER_SIZE } from '../domain/tiers'
 
 const MOBILE_BREAKPOINT = 768
+const READING_COLOR = 'var(--line-reading)'
 
 // NOTE ON TRANSLATION KEYS: reuses the app's existing generic
 // study-source keys (t.byLevel/byLevelDesc, t.byFrequency/
 // byFrequencyDesc, t.byMastery/byMasteryDesc, t.selectStudySource,
 // t.selectTier, t.loadError, t.status_*, t.clickForDetails,
 // t.appDefinition, t.cardStats, t.inThisPhrase) rather than inventing
-// reading-specific duplicates. Genuinely new keys (all with an inline
-// `??` fallback below, so a missing translations.js entry never breaks
-// the screen) are: showBreakdown, hideBreakdown, preparingBreakdown,
-// streak.
+// reading-specific duplicates.
 
-const DEFAULT_TIER_SIZE = 200
-
+// Route: /practice/reading (plan 072 puts the pickers on the station
+// page and the session on the stage — the canvas's Reading artboard:
+// the timer over the sentence, the field and Submit docked in the
+// foot, the rating bar docked once the answer is in).
 export default function ReadingScreen({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
@@ -39,15 +44,14 @@ export default function ReadingScreen({ session }) {
     { key: 'mastery',   label: t.byMastery,   desc: t.byMasteryDesc },
   ]
 
-  const DOMAINS = [
-    { key: 'vocab',        label: t.domainVocabDeck,   desc: t.domainVocabDecDesc },
-    { key: 'vocab_jmdict', label: t.domainVocabJmdict, desc: t.domainVocabJmdictDesc },
-  ]
-
   const [source, setSource] = useState(null)       // 'level' | 'frequency' | 'mastery'
   const [level, setLevel]   = useState(null)        // source === 'level'
-  const [domain, setDomain] = useState(null)        // source === 'frequency'
-  const [tier, setTier]     = useState(null)        // source === 'frequency'
+  // source === 'frequency': the word list is a segmented control over
+  // the tier list (the vocab station's own tiers page, plan 071),
+  // not a step of its own.
+  const [domain, setDomain] = useState('vocab')     // 'vocab' | 'vocab_jmdict'
+  const [tier, setTier]     = useState(null)
+  const [tierSize, setTierSize] = useState(DEFAULT_TIER_SIZE)
 
   // 'loading' | 'reading' | 'feedback' | 'error'
   //
@@ -92,7 +96,6 @@ export default function ReadingScreen({ session }) {
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
   )
-
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT)
@@ -159,7 +162,11 @@ export default function ReadingScreen({ session }) {
   function batchUrl(count) {
     const params = new URLSearchParams({ source, count, lang })
     if (source === 'level') params.set('level', level)
-    if (source === 'frequency') { params.set('domain', domain); params.set('tier', tier) }
+    if (source === 'frequency') {
+      params.set('domain', domain)
+      params.set('tier', tier)
+      params.set('tier_size', tierSize)
+    }
     // Capped: the curated bank is 30-55 sentences a level, so anything
     // past that is a query string growing without bound for no effect.
     if (seenRef.current.length) params.set('exclude', seenRef.current.slice(-60).join('|'))
@@ -315,10 +322,7 @@ export default function ReadingScreen({ session }) {
 
     setFeedback(f => ({ ...f, correct: isCorrect }))
     setScore(s => ({ correct: s.correct + (isCorrect ? 1 : 0), total: s.total + 1 }))
-    setStreak(s => {
-      const next = isCorrect ? s + 1 : 0
-      return next
-    })
+    setStreak(s => (isCorrect ? s + 1 : 0))
     // No playCorrect here any more: RatingBar plays the tap itself, on
     // both sides, and grading is only ever reached through it now --
     // calling it here too doubled the sound on a correct answer.
@@ -358,70 +362,70 @@ export default function ReadingScreen({ session }) {
   }
 
   function resetAll() {
+    clearTimer()
     setSource(null)
     setLevel(null)
-    setDomain(null)
     setTier(null)
   }
 
   // ── Source selection (level / frequency / my cards) ──
   if (!source) {
     return (
-      <div className="screen">
-        <TopBar onBack={() => navigate('/')} title={t.readingTitle} />
-        <main id="main-content">
-          <SelectionScreen heading={t.selectStudySource}>
-            {/* 'mastery' needs no further choice, so choosing it is the
-                last step and boards straight away. The other two each
-                have one more list after this one. */}
-            <ModeSelector
-              modes={SOURCES}
-              onSelect={key => (key === 'mastery' ? board(() => setSource(key)) : setSource(key))}
-            />
-          </SelectionScreen>
-        </main>
-      </div>
+      <SelectionScreen
+        title={t.readingTitle}
+        sub={t.selectStudySource}
+        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
+      >
+        {/* 'mastery' needs no further choice, so choosing it is the
+            last step and boards straight away. The other two each
+            have one more list after this one. */}
+        <ModeSelector
+          modes={SOURCES}
+          onSelect={key => (key === 'mastery' ? board(() => setSource(key)) : setSource(key))}
+        />
+      </SelectionScreen>
     )
   }
 
   // ── Level source: pick a JLPT level ──
   if (source === 'level' && !level) {
     return (
-      <div className="screen">
-        <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
-        <main id="main-content">
-          <SelectionScreen heading={t.selectLevel}>
-            <LevelSelector onSelect={lvl => board(() => setLevel(lvl))} />
-          </SelectionScreen>
-        </main>
-      </div>
+      <SelectionScreen
+        title={t.readingTitle}
+        sub={t.selectLevel}
+        aside={<Leave onClick={() => setSource(null)}>{t.leaveSources}</Leave>}
+      >
+        <LevelSelector onSelect={lvl => board(() => setLevel(lvl))} />
+      </SelectionScreen>
     )
   }
 
-  // ── Frequency source: pick a word list, then a tier ──
-  if (source === 'frequency' && !domain) {
+  // ── Frequency source: the word list and the tier, on one page ──
+  if (source === 'frequency' && tier == null) {
     return (
-      <div className="screen">
-        <TopBar onBack={() => setSource(null)} title={t.readingTitle} />
-        <main id="main-content">
-          <SelectionScreen heading={t.selectDomain}>
-            <ModeSelector modes={DOMAINS} onSelect={setDomain} />
-          </SelectionScreen>
-        </main>
-      </div>
-    )
-  }
-
-  if (source === 'frequency' && domain && tier == null) {
-    return (
-      <div className="screen">
-        <TopBar onBack={() => setDomain(null)} title={t.readingTitle} />
-        <main id="main-content">
-          <SelectionScreen heading={t.selectTier}>
-            <TierPicker session={session} domain={domain} onSelect={tr => board(() => setTier(tr))} t={t} />
-          </SelectionScreen>
-        </main>
-      </div>
+      <SelectionScreen
+        title={t.readingTitle}
+        sub={t.selectTier}
+        aside={<Leave onClick={() => setSource(null)}>{t.leaveSources}</Leave>}
+      >
+        <Seg
+          full
+          label={t.selectDomain}
+          value={domain}
+          onChange={setDomain}
+          options={[
+            { key: 'vocab', label: t.freqDomainDeck },
+            { key: 'vocab_jmdict', label: t.freqDomainJmdict },
+          ]}
+        />
+        <TierSelector
+          domain={domain}
+          session={session}
+          tierSize={tierSize}
+          onTierSize={setTierSize}
+          onSelect={tr => board(() => setTier(tr))}
+        />
+      </SelectionScreen>
     )
   }
 
@@ -433,6 +437,7 @@ export default function ReadingScreen({ session }) {
       level={level}
       domain={domain}
       tier={tier}
+      tierSize={tierSize}
       stage={stage}
       data={data}
       timeLeft={timeLeft}
@@ -463,12 +468,23 @@ export default function ReadingScreen({ session }) {
   )
 }
 
+// The streak, in the head's aside: a lightweight gaming touch that
+// only appears once there is one to show off.
+function Streak({ streak, t }) {
+  if (streak < 2) return null
+  return (
+    <span className="stage__streak" title={t.streak}>
+      <FireIcon size={14} /> {streak}
+    </span>
+  )
+}
+
 // Kicks off the session's very first batch fetch exactly once, then
 // renders the same stage machine the single-screen version used to.
 // Split out mainly to keep the selection-screen early-returns above
 // simple (each of those is a plain "pick one thing" screen).
 function SessionView({
-  t, source, level, domain, tier, stage, data, timeLeft, answer, setAnswer,
+  t, source, level, domain, tier, tierSize, stage, data, timeLeft, answer, setAnswer,
   feedback, score, streak, error, detail, isMobile, analysis, analysisLoading,
   showBreakdown, setShowBreakdown, breakdownIndex, setBreakdownIndex, onBack, onStart, submitAnswer,
   gradeAnswer, next, retry, openAnalysisWordDetail,
@@ -481,273 +497,170 @@ function SessionView({
     onStart()
   }, [])
 
-  const titleSuffix =
-    source === 'level' ? level :
-    source === 'frequency' ? `${domain === 'vocab_jmdict' ? t.domainVocabJmdict : t.domainVocabDeck} — ${t.tierLabel ? t.tierLabel.replace('{n}', tier) : `Tier ${tier}`}` :
+  // Where the sentences come from, for the head and the card's foot:
+  // "N4 · JLPT", "Curated deck · 1–200", "My cards".
+  const where =
+    source === 'level' ? `${level} · ${t.stationJlpt}` :
+    source === 'frequency' ? `${domain === 'vocab_jmdict' ? t.freqDomainJmdict : t.freqDomainDeck} · ${tierLabelFor(tier, tierSize)}` :
     t.byMastery
 
   const phraseCovered = stage === 'reading' && timeLeft <= 0
 
   return (
-    <div className="screen">
-      <TopBar
-        onBack={onBack}
-        title={`${t.readingTitle} — ${titleSuffix}`}
-        autoHide
-      />
-      {/* 緑青, per DESIGN.md's "the pigment is injected once" — see
-          DecksScreen's comment for why it sits on <main> and not on
-          .screen. Nothing under this shell reads var(--line-color)
-          today (the rdg-* controls are all private classes), so this
-          changes no pixel yet; it is here so the next component put on
-          this screen inherits its section rather than 仮名's red. */}
-      <main id="main-content" className="container quiz-area rdg-area"
-        style={{ '--line-color': 'var(--line-reading)' }}>
+    <StudyStage
+      color={READING_COLOR}
+      onLeave={onBack}
+      leaveLabel={t.tabPractice}
+      where={t.readingTitle}
+      sub={where}
+      remaining={`${score.correct} / ${score.total}`}
+      pass={false}
+      aside={<Streak streak={streak} t={t} />}
+    >
+      {stage === 'loading' && <Loading />}
 
-        <div className="rdg-score-row">
-          <div className="rdg-score">
-            {t.score}: {score.correct}/{score.total}
-          </div>
-          {streak > 1 && (
-            <div className="rdg-streak" title={t.streak ?? 'Streak'}>
-              <FireIcon size={14} /> {streak}
+      {stage === 'error' && (
+        <Empty tone="error" message={error} action={{ label: t.retry, onClick: retry }} />
+      )}
+
+      {stage === 'reading' && data && (
+        <>
+          <div className="timer">
+            <div className="timer__bar" aria-hidden="true">
+              <span className="timer__fill" style={{ width: `${(timeLeft / data.display_seconds) * 100}%` }} />
             </div>
-          )}
-        </div>
+            <span className="timer__label" role="timer">
+              {phraseCovered ? t.writeWhatYouSaw : `${timeLeft.toFixed(1)}s`}
+            </span>
+          </div>
 
-        {stage === 'loading' && <Loading />}
+          <CardTransition cardKey={data._uiKey}>
+            <PromptCard foot={{ left: where, right: t.readingTitle }}>
+              {/* The sentence is covered when the clock runs out, so
+                  recall keeps mattering for anyone still writing. */}
+              <span className={`sentence${phraseCovered ? ' sentence--covered' : ''}`} lang="ja">
+                {phraseCovered ? <EyeOffIcon size={34} /> : data.phrase}
+              </span>
+            </PromptCard>
+          </CardTransition>
 
-        {stage === 'error' && (
-          <div className="card rdg-error-card">
-            {error}
-            <div className="rdg-retry-wrap">
-              <button onClick={retry} className="rdg-retry-btn">
-                {t.retry}
+          {/* The answer field is available the whole time the phrase is
+              on screen, not only after the timer runs out — the reader
+              can start writing as soon as they're ready. */}
+          <form className="stage__foot" onSubmit={e => { e.preventDefault(); submitAnswer() }}>
+            <input
+              autoFocus
+              value={answer}
+              onChange={e => setAnswer(e.target.value)}
+              placeholder={t.romajiPlaceholder}
+              aria-label={t.writeWhatYouSaw}
+              className="field"
+            />
+            <button type="submit" className="btn-primary" disabled={!answer.trim()}>
+              {t.submit}
+            </button>
+          </form>
+        </>
+      )}
+
+      {stage === 'feedback' && data && feedback && (
+        <>
+          <PromptCard
+            prose
+            foot={{
+              left: where,
+              // Only a curated sentence carries a grammar point: it was
+              // written to demonstrate exactly this one, and a test
+              // proves it contains it (content/reading_sentences.py).
+              // A corpus sentence gets the section's name rather than
+              // a guessed label.
+              right: data.grammar
+                ? <>{t.readingGrammarPoint} · <span lang="ja">{data.grammar}</span></>
+                : t.readingTitle,
+            }}
+          >
+            {/* Pushing "show breakdown" hides everything above the toggle
+                (phrase/romaji/translation/your answer) so the single-card
+                breakdown below gets the room instead of being squeezed
+                under a wall of already-read text. */}
+            {!showBreakdown && (
+              <>
+                <span className="prose__jp" lang="ja">{data.phrase}</span>
+                <span className="prose__romaji">{feedback.romaji}</span>
+                {data.translation && (
+                  <>
+                    {/* Real example sentences only carry an English gloss
+                        regardless of UI language — see reading.py's
+                        translation_lang note — so this is labelled
+                        explicitly instead of implying it matches `lang`. */}
+                    <span className="prose__label">{data.translation_lang === 'en' ? t.translationEnglish : t.translation}</span>
+                    <span className="prose__en">{data.translation}</span>
+                  </>
+                )}
+                <span className="prose__rule" />
+                <span className="prose__label">{t.yourAnswer}</span>
+                <span className="prose__en">{answer}</span>
+                <span
+                  className={`prose__verdict${feedback.correct === null ? '' : feedback.correct ? ' prose__verdict--ok' : ' prose__verdict--x'}`}
+                >
+                  {feedback.correct === null ? t.didYouGetIt : feedback.correct ? t.correct : t.incorrect}
+                </span>
+              </>
+            )}
+
+            {feedback.correct !== null && (
+              <div className="prose__breakdown">
+                <button
+                  type="button"
+                  onClick={() => setShowBreakdown(s => !s)}
+                  disabled={!analysis && !analysisLoading}
+                  className="btn-secondary"
+                >
+                  {showBreakdown
+                    ? t.hideBreakdown
+                    : analysis
+                      ? t.showBreakdown
+                      : t.preparingBreakdown}
+                </button>
+
+                {showBreakdown && analysis && (
+                  <SentenceBreakdown
+                    analysis={analysis}
+                    layout="stepper"
+                    index={breakdownIndex}
+                    setIndex={setBreakdownIndex}
+                    t={t}
+                    onTokenClick={openAnalysisWordDetail}
+                    onKanjiClick={openAnalysisKanjiDetail}
+                  />
+                )}
+              </div>
+            )}
+          </PromptCard>
+
+          {feedback.correct === null ? (
+            /* Six-way rating rather than the two buttons this used to
+               have, for the same reason TranslationScreen was changed:
+               reading a sentence is rarely simply right or wrong, and
+               the learner already knows how close they were -- the two
+               buttons made them flatten that to a coin flip. RatingBar's
+               own threshold decides correctness: q > 2 is a pass, the
+               same line it draws between playCorrect and playWrong. It
+               docks on the stage's bottom edge (index.css, .stage). */
+            <RatingBar active onRate={q => gradeAnswer(q >= 3, q)} />
+          ) : (
+            <div className="stage__foot">
+              <button type="button" onClick={next} className="btn-primary">
+                {t.nextPhrase}
               </button>
             </div>
-          </div>
-        )}
-
-        {stage === 'reading' && data && (
-          <>
-            <CardTransition cardKey={data._uiKey}>
-              {/* Study.dc.html's footer strip. No mode concept here, so
-                  the right half stays empty rather than invented. */}
-              <PromptCard foot={{ left: level ? `${level} 読書` : '読書' }}>
-                <div className={`rdg-phrase-display${phraseCovered ? ' rdg-phrase-display--covered' : ''}`}>
-                  {phraseCovered ? <EyeOffIcon size={34} /> : data.phrase}
-                </div>
-              </PromptCard>
-            </CardTransition>
-
-            <div className="rdg-timer-wrap">
-              <div className="rdg-phrase-progress">
-                <div
-                  className="rdg-phrase-progress__fill"
-                  style={{ '--pct': `${(timeLeft / data.display_seconds) * 100}%` }}
-                />
-              </div>
-              <div className="rdg-timer-label">
-                {phraseCovered ? (t.writeWhatYouSaw) : `${timeLeft.toFixed(1)}s`}
-              </div>
-            </div>
-
-            {/* Fix: the answer field is available the whole time the
-                phrase is on screen, not only after the timer runs out —
-                the reader can start writing as soon as they're ready. */}
-            <div className="rdg-input-center">
-              <input
-                autoFocus
-                value={answer}
-                onChange={e => setAnswer(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && submitAnswer()}
-                placeholder={t.romajiPlaceholder}
-                className="field field--panel rdg-answer-input"
-              />
-              <div className="rdg-submit-wrap">
-                <button
-                  onClick={submitAnswer}
-                  disabled={!answer.trim()}
-                  className="rdg-submit-btn"
-                >
-                  {t.submit}
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {stage === 'feedback' && data && feedback && (
-          <>
-            {/* rdg-feedback-card wrapper only exists to scope the mobile
-                max-height override below (see index.css) — PromptCard
-                itself caps at 60vh with internal scroll everywhere else
-                in the app (flashcard sizing), which turns into an
-                unwanted "scroll to see the rest of the breakdown" on
-                small screens once the single-card breakdown is open. */}
-            <div className="rdg-feedback-card">
-            <PromptCard>
-              {/* Fix: pushing "show breakdown" hides everything above the
-                  toggle (phrase/status/romaji/translation/your-answer) so
-                  the single-card breakdown below gets the room instead of
-                  being squeezed under a wall of already-read text. */}
-              {!showBreakdown && (
-                <>
-                  <div className="rdg-feedback-phrase">
-                    {data.phrase}
-                  </div>
-                  <div
-                    className="rdg-feedback-status"
-                    style={{ '--status-color': feedback.correct === null ? 'var(--text-secondary)' : (feedback.correct ? 'var(--success)' : 'var(--danger)') }}
-                  >
-                    {feedback.correct === null
-                      ? (t.didYouGetIt)
-                      : (feedback.correct ? (t.correct) : (t.incorrect))}
-                  </div>
-                  <div className="rdg-feedback-romaji">
-                    {t.correctRomaji}: <strong>{feedback.romaji}</strong>
-                  </div>
-                  {data.translation && (
-                    <div className="rdg-feedback-translation">
-                      {/* Real example sentences only carry an English gloss
-                          regardless of UI language — see reading.py's
-                          translation_lang note — so this is labelled
-                          explicitly instead of implying it matches `lang`. */}
-                      {data.translation_lang === 'en' ? (t.translationEnglish ?? 'EN') : t.translation}: {data.translation}
-                    </div>
-                  )}
-                  {/* Only a curated sentence carries this: it was written
-                      to demonstrate exactly this point, and a test proves
-                      it contains it (see content/reading_sentences.py).
-                      A corpus sentence gets no label rather than a
-                      guessed one. */}
-                  {data.grammar && (
-                    <div className="rdg-feedback-grammar">
-                      <span className="rdg-feedback-grammar__label">{t.readingGrammarPoint}</span>
-                      <span className="rdg-feedback-grammar__pattern" lang="ja">{data.grammar}</span>
-                    </div>
-                  )}
-                  <div className="rdg-feedback-your-answer">
-                    {t.yourAnswer}: {answer}
-                  </div>
-                </>
-              )}
-
-              {feedback.correct !== null && (
-                <div className="rdg-breakdown-wrap">
-                  <button
-                    onClick={() => setShowBreakdown(s => !s)}
-                    disabled={!analysis && !analysisLoading}
-                    className="rdg-breakdown-toggle"
-                  >
-                    {showBreakdown
-                      ? (t.hideBreakdown ?? 'Hide breakdown')
-                      : analysis
-                        ? (t.showBreakdown ?? 'Show breakdown')
-                        : (t.preparingBreakdown ?? 'Preparing breakdown…')}
-                  </button>
-
-                  {showBreakdown && analysis && (
-                    <SentenceBreakdown
-                      analysis={analysis}
-                      layout="stepper"
-                      index={breakdownIndex}
-                      setIndex={setBreakdownIndex}
-                      t={t}
-                      onTokenClick={openAnalysisWordDetail}
-                      onKanjiClick={openAnalysisKanjiDetail}
-                    />
-                  )}
-                </div>
-              )}
-            </PromptCard>
-            </div>
-            <div className="rdg-feedback-actions">
-              {feedback.correct === null ? (
-                /* Six-way rating rather than the two buttons this used
-                   to have, for the same reason TranslationScreen was
-                   changed: reading a sentence is rarely simply right or
-                   wrong, and the learner already knows how close they
-                   were -- the two buttons made them flatten that to a
-                   coin flip. RatingBar's own threshold decides
-                   correctness: q > 2 is a pass, the same line it draws
-                   between playCorrect and playWrong. */
-                <RatingBar active onRate={q => gradeAnswer(q >= 3, q)} />
-              ) : (
-                <button
-                  onClick={next}
-                  className="rdg-next-btn"
-                >
-                  {t.nextPhrase}
-                </button>
-              )}
-            </div>
-          </>
-        )}
-      </main>
+          )}
+        </>
+      )}
 
       {detail && (
         <WordDetail detail={detail} t={t} isMobile={isMobile} onClose={closeDetail} />
       )}
-    </div>
+    </StudyStage>
   )
 }
-
-// ── Frequency tier picker ────────────────────────────────
-// No pre-existing tier-selection UI to reuse here (the study screens
-// that already have frequency tiers weren't part of this rewrite), so
-// this is a small purpose-built list: the first 50 tiers (ranks
-// 1-10,000 at the default tier size — plenty for how deep most readers
-// will want to go) plus a manual "jump to tier" input for anything
-// further out. Mirrors ModeSelector's visual language rather than
-// introducing a new one.
-function TierPicker({ session, domain, onSelect, t }) {
-  const [tiers, setTiers] = useState(null)
-  const [error, setError] = useState(false)
-  const [jumpValue, setJumpValue] = useState('')
-
-  useEffect(() => {
-    let cancelled = false
-    apiFetch(`/api/frequency/${domain}/tiers?tier_size=${DEFAULT_TIER_SIZE}`, session)
-      .then(r => { if (!r.ok) throw new Error('failed'); return r.json() })
-      .then(d => { if (!cancelled) setTiers(d.tiers || []) })
-      .catch(() => { if (!cancelled) setError(true) })
-    return () => { cancelled = true }
-  }, [domain])
-
-  if (error) return <div className="card rdg-error-card">{t.loadError}</div>
-  if (!tiers) return <Loading />
-
-  const visible = tiers.slice(0, 50)
-  const modes = visible.map(tr => ({
-    key: String(tr.tier),
-    label: t.tierLabel ? t.tierLabel.replace('{n}', tr.tier) : `Tier ${tr.tier}`,
-    desc: `${tr.start_rank}–${tr.end_rank} (${tr.count})`,
-  }))
-
-  return (
-    <>
-      <ModeSelector modes={modes} onSelect={key => onSelect(Number(key))} />
-      <div className="rdg-tier-jump">
-        <input
-          type="number"
-          min="1"
-          max={tiers.length}
-          value={jumpValue}
-          onChange={e => setJumpValue(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && jumpValue && onSelect(Number(jumpValue))}
-          placeholder={t.jumpToTier}
-          className="field field--panel rdg-answer-input"
-        />
-        <button
-          onClick={() => jumpValue && onSelect(Number(jumpValue))}
-          disabled={!jumpValue}
-          className="rdg-submit-btn"
-        >
-          {t.submit}
-        </button>
-      </div>
-    </>
-  )
-}
-

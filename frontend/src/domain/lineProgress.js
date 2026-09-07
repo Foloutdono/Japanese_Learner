@@ -33,7 +33,7 @@ export const LEVEL_STOPS = ['N5', 'N4', 'N3', 'N2', 'N1']
 // section lands in the map's practice register by default; adding a
 // TRACK means the stats endpoint actually aggregates it, so this list
 // is deliberately closed here.
-export const TRACKED_LINES = { '/kana': 'kana', '/vocab': 'vocab', '/kanji': 'kanji', '/grammar': 'grammar' }
+export const TRACKED_LINES = { '/learn/kana': 'kana', '/learn/vocab': 'vocab', '/learn/kanji': 'kanji', '/learn/grammar': 'grammar' }
 
 // One glyph per kana set — a stop label has room for a specimen, not
 // for "HIRAGANA_COMBINATIONS". Same sets, same order as

@@ -209,13 +209,14 @@ describe('MineButton (via useMining)', () => {
     await vi.waitFor(() => {
       expect(screen.container.querySelector('.analysis-mine-btn').textContent).toBe(MINE_T.addToAnotherDeck)
     })
-    expect(screen.container.querySelector('[role="dialog"]')).toBeNull()
+    // The picker is a bottom sheet portalled to the body (plan 073).
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
 
     // Second press: a different deck is by definition a choice, so the
     // picker opens rather than mining the same target again.
     await screen.container.querySelector('.analysis-mine-btn').click()
     await vi.waitFor(() => {
-      expect(screen.container.querySelector('[role="dialog"]')).not.toBeNull()
+      expect(document.querySelector('[role="dialog"]')).not.toBeNull()
     })
     expect(onMine).toHaveBeenCalledTimes(1)
   })

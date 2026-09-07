@@ -47,9 +47,11 @@ from pydantic import BaseModel
 import psycopg2.extras
 
 from core.auth import get_user_id, prefixed, unprefixed
+from core import credits
 from core.db import db_conn
 from core.pace import resolve_pace
 from core.srs_instance import srs
+from core.user_level import resolve_level
 from study import card_index, daily_queue
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES, try_resolve
 
@@ -166,7 +168,12 @@ def get_today(user_id: str = Depends(get_user_id)):
     """
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id)
-    lanes = daily_queue.lanes(user_id, due_rows, personal)
+    # The stops beyond the learner's level wait (the level rule, plan
+    # 074): moving down sets them aside, and the badge must not count
+    # what the run will not serve.
+    lanes = daily_queue.hold_above(
+        daily_queue.lanes(user_id, due_rows, personal), resolve_level(user_id)
+    )
 
     by_source: dict[str, int] = defaultdict(int)
     breakdown = []
@@ -206,6 +213,11 @@ def get_today(user_id: str = Depends(get_user_id)):
     )
     pace = resolve_pace(user_id)
     return {
+        # The fare gate prices the run against the balance (plan 069):
+        # one credit a review, so the fare IS the total, and the balance
+        # rides beside it. Reading it settles the day's refill.
+        "fare": total,
+        "credits": credits.summary(user_id),
         # Counted from the lanes rather than from len(due_rows): rows
         # naming content that no longer exists are dropped above, and
         # promising a card the queue cannot build is worse than
@@ -241,12 +253,23 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     the separator because neither a card id nor a registry mode key can
     contain one.
     """
+    # Under enforcement a run longer than the balance stops at the
+    # balance (plan 069); a pass has no balance to stop at. In shadow
+    # mode the queue is untouched.
+    if credits.ENFORCE:
+        have = credits.balance(user_id)
+        if have is not None:
+            count = min(count, have)
+            if count == 0:
+                return {"cards": []}
     count = max(1, min(count, MAX_BATCH))
 
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id)
     chosen = daily_queue.keep_lanes(
-        daily_queue.lanes(user_id, due_rows, personal),
+        daily_queue.hold_above(
+            daily_queue.lanes(user_id, due_rows, personal), resolve_level(user_id)
+        ),
         daily_queue.parse_lane_ids(lanes),
     )
     chosen = daily_queue.drop_seen(chosen, daily_queue.parse_exclude(exclude))
@@ -331,6 +354,9 @@ def post_today_review(payload: TodayReviewPayload, user_id: str = Depends(get_us
 
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
+    # The fare, charged only now that the scheduler has accepted the
+    # review (plan 069): a rejected review is not a ride.
+    fare = credits.spend(user_id, credits.COST_PER_REVIEW, card_id)
     return {
         "card_id": payload.card_id,
         "interval": s["interval"],
@@ -339,4 +365,5 @@ def post_today_review(payload: TodayReviewPayload, user_id: str = Depends(get_us
         "leveled_up": s["leveled_up"],
         "new_level": s["new_level"],
         "stage": s["stage"],
+        "credits": fare,
     }

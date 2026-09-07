@@ -1,0 +1,147 @@
+# ── 出発 — the store builds (plan 077) ─────────────────────────
+# Two shapes of run. A pull request or a push to main builds a debug
+# Android APK on Linux (cheap, catches a broken shell before it reaches
+# a tag). A tag `v*` builds what the stores take: the signed Android
+# App Bundle, and on a macOS runner the iOS archive through fastlane,
+# pushed to TestFlight. iOS runs on tags only -- macOS minutes cost ten
+# times Linux ones -- and needs the App Store Connect key and the
+# certificates repository that `match` manages; see docs/release.md for
+# the secrets and how to mint them. Version numbers come from the tag:
+# v1.2.3 is versionName 1.2.3 and versionCode 10203 on Android,
+# MARKETING_VERSION 1.2.3 with the run number as the build on iOS.
+name: Mobile
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/mobile.yml'
+
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Install
+        working-directory: frontend
+        run: npm ci
+      # The native bundle: `vite build --mode native`, reading the tracked
+      # .env.native (the Vercel origin, never Render -- ADR 0008), then
+      # copied into the Android project.
+      - name: Build the web bundle for the shell
+        working-directory: frontend
+        run: npm run build:native
+      - name: Sync Capacitor
+        working-directory: frontend
+        run: npx cap sync android
+      - name: Version from the tag
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            NAME="${GITHUB_REF#refs/tags/v}"
+            IFS=. read -r MAJ MIN PAT <<< "$NAME"
+            CODE=$(( MAJ * 10000 + MIN * 100 + PAT ))
+          else
+            NAME="0.0.${GITHUB_RUN_NUMBER}"
+            CODE="${GITHUB_RUN_NUMBER}"
+          fi
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+      - name: Debug APK
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        working-directory: frontend/android
+        run: ./gradlew assembleDebug -PversionName=${{ steps.version.outputs.name }} -PversionCode=${{ steps.version.outputs.code }} --no-daemon
+      - name: Upload the debug APK
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+      # The upload key is decoded from a secret onto the runner's disk for
+      # the length of the build and named to Gradle through the four
+      # variables android/app/build.gradle reads. Never committed.
+      - name: Release keystore
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: frontend/android
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > release.keystore
+      - name: Signed App Bundle
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: frontend/android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/frontend/android/release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew bundleRelease -PversionName=${{ steps.version.outputs.name }} -PversionCode=${{ steps.version.outputs.code }} --no-daemon
+      - name: Upload the App Bundle
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: frontend/android/app/build/outputs/bundle/release/app-release.aab
+
+  ios:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: frontend/ios/App
+      - name: Install
+        working-directory: frontend
+        run: npm ci
+      - name: Build the web bundle for the shell
+        working-directory: frontend
+        run: npm run build:native
+      - name: Sync Capacitor
+        working-directory: frontend
+        run: npx cap sync ios
+      # match creates or fetches the distribution certificate and the
+      # App Store profile from the certificates repository with the App
+      # Store Connect key -- no Mac and no Apple ID password anywhere.
+      # gym archives, pilot uploads to TestFlight. The Fastfile is
+      # ios/App/fastlane/Fastfile.
+      - name: Archive and upload to TestFlight
+        working-directory: frontend/ios/App
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_P8: ${{ secrets.APP_STORE_CONNECT_KEY_P8 }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MARKETING_VERSION: ${GITHUB_REF_NAME#v}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: bundle exec fastlane beta
+      - name: Upload the archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: frontend/ios/App/output/*.ipa
+          if-no-files-found: ignore

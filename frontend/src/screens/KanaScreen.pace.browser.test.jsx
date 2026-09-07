@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import { TrainDoor } from '../components/station/TrainDoor'
 
@@ -25,9 +25,11 @@ vi.mock('../lib/api', () => ({
 
 // LangContext pulls the content-translation maps over the network on
 // mount — same stub the other browser tests use.
+vi.mock('../stores/stats', () => ({ useStats: () => ({ data: null, failed: false }), refreshStats: vi.fn(), seedStats: vi.fn() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: KanaScreen } = await import('./KanaScreen')
+const { default: KanaRun } = await import('./KanaRun')
 
 const PACE_SPENT = { target: 5, newToday: 5, remaining: 0 }
 const CARD = {
@@ -65,8 +67,12 @@ describe('KanaScreen pace', () => {
 
     const screen = await render(
       <LangProvider>
-        <MemoryRouter>
-          <KanaScreen session={{ access_token: 'tok' }} />
+        <MemoryRouter initialEntries={['/learn/kana']}>
+          <Routes>
+            <Route path="/learn/kana" element={<KanaScreen />} />
+            <Route path="/learn/kana/:set" element={<KanaScreen />} />
+            <Route path="/learn/kana/:set/:mode" element={<KanaRun session={{ access_token: 'tok' }} />} />
+          </Routes>
           <TrainDoor />
         </MemoryRouter>
       </LangProvider>
@@ -109,8 +115,12 @@ describe('KanaScreen pace', () => {
 
     const screen = await render(
       <LangProvider>
-        <MemoryRouter>
-          <KanaScreen session={{ access_token: 'tok' }} />
+        <MemoryRouter initialEntries={['/learn/kana']}>
+          <Routes>
+            <Route path="/learn/kana" element={<KanaScreen />} />
+            <Route path="/learn/kana/:set" element={<KanaScreen />} />
+            <Route path="/learn/kana/:set/:mode" element={<KanaRun session={{ access_token: 'tok' }} />} />
+          </Routes>
           <TrainDoor />
         </MemoryRouter>
       </LangProvider>

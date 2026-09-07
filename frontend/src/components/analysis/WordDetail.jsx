@@ -1,156 +1,89 @@
 import { useLang } from '../../LangContext'
-import { useDialog } from '../../hooks/useDialog'
 import { shortDate } from '../../lib/formatDate'
-import { CrossIcon } from '../ui/Icons'
+import { Sheet } from '../chrome/Sheet'
 import { StatusBadge } from './StatusBadge'
 import { MineButton } from './MineButton'
 
-function Label({ children }) {
+function Record({ value, label }) {
   return (
-    <div className="detail-label">
-      {children}
+    <div className="record">
+      <span className="record__value">{value}</span>
+      <span className="record__label">{label}</span>
     </div>
   )
 }
 
-function StatRow({ label, value }) {
-  return (
-    <div className="stat-row">
-      <span className="stat-row__label">{label}</span>
-      <span>{value}</span>
-    </div>
-  )
-}
-
-// Slide-up (mobile) / side-panel (desktop) detail for a clicked word or
-// kanji: the app's own definition plus the learner's real SRS stats.
+// The word or kanji you tapped, as a bottom sheet (plan 073): the
+// app's own definition plus the learner's real SRS record, and the
+// one deck action. Modal behaviour comes from the sheet itself
+// (hooks/useDialog: Escape closes, focus is trapped and returned).
 //
-// Merged from two DetailPanel copies that had genuinely diverged, not
-// just drifted:
-//   - ReadingScreen.jsx's used useDialog (focus trap, Escape-to-close)
-//     and a responsive isMobile split (bottom sheet vs. side panel).
-//   - PhraseAnalyzerScreen.jsx's had neither, but showed an extra
-//     "in this phrase" section (contextMeaning/reading) the other
-//     didn't need, since reading practice's word cards already show
-//     the meaning inline.
-// Per the plan, ReadingScreen's version wins where they conflict
-// (useDialog, the responsive split) since it's the newer and more
-// complete one; the analyzer's extra section survives as an
-// additional, presence-gated block rather than being dropped.
-//
-// `isMobile` defaults to true so a caller that doesn't pass it gets
-// exactly the bottom-sheet-only behavior it always had — useDialog's
-// focus trap and Escape handling are the only thing that changes for
-// it, and both are additive. (The analyzer used to be such a caller;
-// it now passes the real value, computed from its own `wide` media
-// query.)
+// `isMobile` is accepted for the callers that still pass it and
+// ignored: under the shell's one column there is no side panel to
+// choose (plan 068), so the sheet is the drawing at every width.
 //
 // `mining` (see plan 017 / useMining.js) is optional. `detail.rawId` /
 // `detail.kind` / `detail.source` are only set by callers that built
 // this MineButton support in -- absent, MineButton renders nothing.
+// eslint-disable-next-line no-unused-vars
 export function WordDetail({ detail, t, isMobile = true, onClose, mining }) {
   // `t` arrives as a prop but the locale itself does not, and the
   // review date needs it — reading the context here beats threading a
   // second argument through every caller.
   const { lang } = useLang()
   const { title, reading, contextMeaning, entry, stats, level, rawId, kind, source } = detail
-  const dialogRef = useDialog(onClose)
+  const cap = [level, reading].filter(Boolean).join(' · ')
 
-  const content = (
-    <>
-      <div className="detail-header">
-        <div className="detail-title" id="analysis-detail-title">{title}</div>
-        <button onClick={onClose} className="detail-close-btn" aria-label={t.close}><CrossIcon size={16} /></button>
-      </div>
-
-      {level && (
-        <div className="detail-level">{level}</div>
-      )}
-
+  return (
+    <Sheet open onClose={onClose} jp={title} cap={cap || undefined} label={title} className="word-detail">
       {contextMeaning && (
-        <div className="detail-section">
-          <Label>{t.inThisPhrase}</Label>
-          <div className="detail-context-value">{contextMeaning} {reading && `(${reading})`}</div>
+        <div className="word-detail__block">
+          <span className="cap">{t.inThisPhrase}</span>
+          <span className="word-detail__meaning">{contextMeaning}</span>
         </div>
       )}
 
       {entry && Object.keys(entry).length > 0 && (
-        <div className="detail-section">
-          <Label>{t.appDefinition}</Label>
-          <div className="detail-entry-list">
+        <div className="word-detail__block">
+          <span className="cap">{t.appDefinition}</span>
+          <div className="word-detail__entry">
             {Object.entries(entry).map(([key, value]) => (
-              <div key={key} className="detail-entry-row">
-                <span className="detail-entry-row__key">{key}</span>
-                <span>{String(value)}</span>
+              <div key={key} className="word-detail__row">
+                <span className="word-detail__key">{key}</span>
+                <span className="word-detail__val">{String(value)}</span>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <div className="detail-section">
-        <Label>{t.cardStats}</Label>
-        <div className="detail-badges">
+      <div className="word-detail__block">
+        <span className="cap">{t.cardStats}</span>
+        <div className="word-detail__marks">
           <StatusBadge status={stats.status} t={t} />
           {stats.due && <StatusBadge status="due" t={t} />}
-          {kind && (
+        </div>
+        <div className="records word-detail__records">
+          <Record value={stats.total_reviews} label={t.totalReviews} />
+          <Record value={stats.correct_reviews} label={t.correctReviews} />
+          <Record value={stats.accuracy !== null ? `${stats.accuracy}%` : '—'} label={t.accuracy} />
+          <Record value={stats.interval_days !== null ? `${stats.interval_days} ${t.days}` : '—'} label={t.interval} />
+          <Record value={shortDate(stats.next_review, lang) ?? '—'} label={t.nextReview} />
+        </div>
+        {kind && (
+          <div className="word-detail__act">
             <MineButton
               mining={mining}
               kind={kind}
               disabled={!rawId}
               disabledReason={t.cannotMineOffDeck ?? 'Not in the app deck'}
+              label={t.addToDeck}
               onMine={rawId ? deckId => mining.mineApp({ deckId, source, level, rawId, kind }) : undefined}
               t={t}
             />
-          )}
-        </div>
-        <StatRow label={t.totalReviews} value={stats.total_reviews} />
-        <StatRow label={t.correctReviews} value={stats.correct_reviews} />
-        <StatRow
-          label={t.accuracy}
-          value={stats.accuracy !== null ? `${stats.accuracy}%` : '—'}
-        />
-        <StatRow
-          label={t.interval}
-          value={stats.interval_days !== null ? `${stats.interval_days} ${t.days}` : '—'}
-        />
-        <StatRow
-          label={t.nextReview}
-          value={shortDate(stats.next_review, lang) ?? '—'}
-        />
+          </div>
+        )}
       </div>
-    </>
-  )
-
-  if (isMobile) {
-    return (
-      <div onClick={onClose} className="detail-overlay-sheet">
-        <div
-          ref={dialogRef}
-          onClick={e => e.stopPropagation()}
-          className="card detail-sheet"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="analysis-detail-title"
-        >
-          {content}
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div onClick={onClose} className="detail-overlay-side">
-      <div
-        ref={dialogRef}
-        onClick={e => e.stopPropagation()}
-        className="card detail-side"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="analysis-detail-title"
-      >
-        {content}
-      </div>
-    </div>
+    </Sheet>
   )
 }

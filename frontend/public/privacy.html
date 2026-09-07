@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Politique de confidentialité · Privacy policy — 日本語</title>
+  <meta name="robots" content="noindex">
+  <!-- A static page, on purpose: both app stores want a privacy policy at a
+       URL that answers without signing in, and the app itself gates every
+       route behind a session. Outside src/ so the design guards do not scan
+       it; the values below are the paper/sumi tokens copied as literals. -->
+  <style>
+    :root { color-scheme: dark; --bg: #17151a; --ink: #ece5d8; --dim: #a79c8c; --gold: #c99a3e; --line: #35303a; }
+    @media (prefers-color-scheme: light) { :root { color-scheme: light; --bg: #f6f1e4; --ink: #221d15; --dim: #665c4a; --gold: #a97a25; --line: #c3af7c; } }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 "Space Grotesk", "Segoe UI", system-ui, sans-serif; }
+    main { max-width: 720px; margin: 0 auto; padding: 44px 22px 88px; }
+    h1 { font-family: "Noto Serif JP", serif; font-size: 1.7rem; margin: 0 0 6px; }
+    h2 { font-size: 1.12rem; margin: 44px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .glyph { font-family: "Noto Serif JP", serif; font-size: 2.5rem; color: var(--gold); line-height: 1; margin-bottom: 22px; }
+    .cap { color: var(--dim); font-size: 0.82rem; letter-spacing: 0.18em; text-transform: uppercase; }
+    .lang { display: flex; gap: 12px; margin: 22px 0 0; }
+    .lang a { color: var(--gold); }
+    a { color: var(--gold); }
+    ul { padding-left: 20px; }
+    li { margin: 6px 0; }
+    .updated { color: var(--dim); font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="glyph">日本語</div>
+  <nav class="lang"><a href="#fr">Français</a> · <a href="#en">English</a></nav>
+
+  <section id="fr" lang="fr">
+    <p class="cap">Politique de confidentialité</p>
+    <h1>Ce que l'application sait de vous, et pourquoi</h1>
+    <p class="updated">Dernière mise à jour : 6 septembre 2026. <!-- OWNER: relire, compléter le contact, dater. --></p>
+
+    <h2>Le compte</h2>
+    <p>La connexion est assurée par Supabase. Nous conservons votre adresse e-mail (l'identifiant du compte), un identifiant technique et la date de création. Le mot de passe n'est jamais lisible par nous.</p>
+
+    <h2>Votre apprentissage</h2>
+    <p>Chaque révision est enregistrée : la carte, le mode, la note que vous lui donnez, la date. C'est ce qui permet la répétition espacée, vos statistiques, votre niveau, votre série et le classement (où seul votre nom d'utilisateur apparaît). S'y ajoutent vos paquets et vos cartes personnelles, vos réglages (niveau JLPT, rythme, destination, heure de rappel), vos phrases analysées, vos tentatives d'examen blanc et vos exercices de lecture et de traduction.</p>
+
+    <h2>Ce qui est envoyé à des tiers</h2>
+    <ul>
+      <li><b>Analyse de phrases, correction de traductions, génération d'examens et de textes</b> : le texte japonais concerné est envoyé à un fournisseur de modèle de langage (NVIDIA NIM ou OpenRouter, selon la disponibilité) pour être analysé. Aucune donnée de compte ne l'accompagne.</li>
+      <li><b>Lecture d'une photo</b> : l'image que vous cadrez est envoyée à un modèle de vision chez le même fournisseur pour en extraire le texte, puis n'est pas conservée par nous.</li>
+      <li><b>Vidéos</b> : le lecteur YouTube est celui de YouTube, avec sa propre politique ; nos serveurs ne contactent jamais YouTube.</li>
+      <li><b>Audio des examens</b> : les dialogues sont synthétisés à partir de texte généré, sans donnée personnelle.</li>
+    </ul>
+    <p>Aucune publicité, aucun traqueur, aucune revente de données.</p>
+
+    <h2>Conservation et suppression</h2>
+    <p>Vos données restent tant que votre compte existe. Vous pouvez à tout moment exporter votre progression (Réglages › Données), la réinitialiser, ou <b>supprimer votre compte</b> : dans l'application, Réglages › Données › Supprimer le compte efface toutes vos données et votre identifiant de connexion, immédiatement et sans retour possible. Le même chemin est accessible à l'adresse <a href="/settings#data">/settings#data</a> une fois connecté.</p>
+
+    <h2>Contact</h2>
+    <p><!-- OWNER: adresse de contact --> Écrivez au développeur à l'adresse indiquée sur la page d'accueil de l'application.</p>
+  </section>
+
+  <section id="en" lang="en">
+    <p class="cap">Privacy policy</p>
+    <h1>What the app knows about you, and why</h1>
+    <p class="updated">Last updated: 6 September 2026. <!-- OWNER: review, add the contact, date it. --></p>
+
+    <h2>The account</h2>
+    <p>Sign-in is handled by Supabase. We keep your e-mail address (the account's identifier), a technical id and the creation date. Your password is never readable by us.</p>
+
+    <h2>Your learning</h2>
+    <p>Every review is recorded: the card, the mode, the grade you give it, the date. That is what makes spaced repetition, your statistics, your level, your streak and the ranking (where only your username appears) work. Alongside it: your decks and personal cards, your settings (JLPT level, pace, destination, reminder hour), the sentences you analyse, your mock-exam attempts and your reading and translation practice.</p>
+
+    <h2>What is sent to third parties</h2>
+    <ul>
+      <li><b>Sentence analysis, translation feedback, exam and text generation</b>: the Japanese text in question is sent to a language-model provider (NVIDIA NIM or OpenRouter, depending on availability) to be analysed. No account data travels with it.</li>
+      <li><b>Reading a photo</b>: the image you frame is sent to a vision model at the same provider to extract its text, and is not kept by us afterwards.</li>
+      <li><b>Videos</b>: the YouTube player is YouTube's own, under its own policy; our servers never contact YouTube.</li>
+      <li><b>Exam audio</b>: dialogues are synthesised from generated text, with no personal data.</li>
+    </ul>
+    <p>No advertising, no trackers, no sale of data.</p>
+
+    <h2>Retention and deletion</h2>
+    <p>Your data stays as long as your account exists. At any time you can export your progress (Settings › Data), reset it, or <b>delete your account</b>: in the app, Settings › Data › Delete account erases all of your data and your sign-in, immediately and irreversibly. The same path is reachable at <a href="/settings#data">/settings#data</a> once signed in.</p>
+
+    <h2>Contact</h2>
+    <p><!-- OWNER: contact address --> Write to the developer at the address given on the app's landing page.</p>
+  </section>
+</main>
+</body>
+</html>

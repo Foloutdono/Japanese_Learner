@@ -31,6 +31,8 @@ const T = {
   dateToday: 'today',
   dateYesterday: 'yesterday',
   dateDaysAgo: n => `${n} days ago`,
+  passagesCount: n => `${n} ${n === 1 ? 'passage' : 'passages'}`,
+  keptTitle: 'Kept',
 }
 
 // AnalyzerHistory calls useLang() (for `shortDate`'s locale), so it
@@ -68,7 +70,7 @@ describe('AnalyzerHistory', () => {
     const screen = await render(
       withLang(<AnalyzerHistory t={T} entries={entries} onOpen={() => {}} onDelete={() => {}} />)
     )
-    const whens = screen.container.querySelectorAll('.anl-history__when')
+    const whens = screen.container.querySelectorAll('.anl-hist__when')
     expect(whens.length).toBe(1)
   })
 
@@ -78,7 +80,7 @@ describe('AnalyzerHistory', () => {
     const screen = await render(
       withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={onDelete} />)
     )
-    screen.container.querySelector('.anl-history__delete').click()
+    screen.container.querySelector('.anl-hist__delete').click()
     expect(onDelete).toHaveBeenCalledWith(entry)
     // Regression guard: the old signature passed the bare id.
     expect(onDelete).not.toHaveBeenCalledWith(42)
@@ -109,7 +111,7 @@ describe('AnalyzerHistory', () => {
     const screen = await render(
       withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={() => {}} />)
     )
-    const rect = screen.container.querySelector('.anl-history__delete').getBoundingClientRect()
+    const rect = screen.container.querySelector('.anl-hist__delete').getBoundingClientRect()
     expect(rect.width).toBeGreaterThanOrEqual(24)
     expect(rect.height).toBeGreaterThanOrEqual(24)
   })
@@ -122,7 +124,7 @@ describe('AnalyzerHistory', () => {
     const screen = await render(
       withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={() => {}} />)
     )
-    const roundel = screen.container.querySelector('.anl-history__no')
+    const roundel = screen.container.querySelector('.anl-hist__n')
     expect(roundel).not.toBeNull()
     expect(roundel.textContent).toBe('2')
     expect(roundel.getAttribute('aria-label')).toBeTruthy()
@@ -134,8 +136,8 @@ describe('AnalyzerHistory', () => {
     const screen = await render(
       withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={() => {}} />)
     )
-    expect(screen.container.querySelector('.anl-history__count').textContent).toBe('5 sentences')
-    const roundel = screen.container.querySelector('.anl-history__no')
+    expect(screen.container.querySelector('.anl-hist__count').textContent).toBe('5 sentences')
+    const roundel = screen.container.querySelector('.anl-hist__n')
     expect(roundel).not.toBeNull()
     expect(roundel.textContent).toBe('3')
     expect(roundel.getAttribute('aria-label')).toBeTruthy()
@@ -146,7 +148,7 @@ describe('AnalyzerHistory', () => {
     const screen = await render(
       withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={() => {}} />)
     )
-    expect(screen.container.querySelector('.anl-history__delete')).toBeNull()
+    expect(screen.container.querySelector('.anl-hist__delete')).toBeNull()
   })
 
   it('lists a session with no video', async () => {
@@ -157,6 +159,6 @@ describe('AnalyzerHistory', () => {
     const screen = await render(
       withLang(<AnalyzerHistory t={T} entries={[entry]} onOpen={() => {}} onDelete={() => {}} />)
     )
-    expect(screen.container.querySelector('.anl-history__text').textContent).toBe('no-video.srt')
+    expect(screen.container.querySelector('.anl-hist__jp').textContent).toBe('no-video.srt')
   })
 })

@@ -7,6 +7,11 @@
 -- place to read the whole schema at a glance. backend/tests/
 -- test_schema_declared.py keeps it honest: it fails if a table any
 -- module creates isn't declared here.
+--
+-- Every table declared here is also classified in routes/account.py —
+-- the learner's own rows (PLAN, erased by DELETE /api/account) or
+-- shared content (SHARED, never touched). tests/test_account.py fails
+-- when a table is declared here and classified in neither list.
 
 CREATE TABLE cards (
     id TEXT PRIMARY KEY
@@ -101,7 +106,28 @@ CREATE TABLE user_profiles (
     -- quality, so switching leaves the learner's own history meaning
     -- exactly what it meant. See routes/profile.py's RATING_SCALES and
     -- frontend/src/domain/ratingScales.js.
-    rating_scale TEXT
+    rating_scale TEXT,
+    -- The credits (plan 069, core/credits.py): the local day the last
+    -- refill or the seed was taken (the idempotence lock), the
+    -- entitlement ('free' | 'pass', with an optional expiry -- set by
+    -- hand until a purchase flow exists) and the device's UTC offset in
+    -- minutes east, so the refill day is the learner's.
+    credits_refilled_on DATE,
+    plan TEXT DEFAULT 'free',
+    plan_until TIMESTAMPTZ,
+    tz_offset_min INTEGER,
+    -- The boarding's own answers (plan 075, routes/onboarding.py): why
+    -- the learner is here ('studies' | 'fun' | 'trip' | 'live' |
+    -- 'friends' | 'other'), which kana they already read ('hiragana' |
+    -- 'katakana' | 'both' | 'none' -- the sets marked known at the
+    -- boarding, study/level_rule.py), the daily nudge's hour ('HH:MM',
+    -- NULL = none; routes/journey.py's reprint moves it with the ride's
+    -- hour) and whether they said yes to the nudge. All validated in
+    -- code; NULL/false until the boarding runs.
+    motive TEXT,
+    kana_known TEXT,
+    reminder_time TEXT,
+    notifications BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came
@@ -394,6 +420,25 @@ CREATE TABLE xp_ledger (
 
 CREATE INDEX idx_xp_ledger_user
 ON xp_ledger(user_id);
+
+-- Owned by core/credits.py (plan 069) -- the credit ledger, append-only
+-- like xp_ledger: a signed row per refill ('refill', the daily +30 at
+-- the learner's midnight), fare ('review', -1 a review), grant ('grant':
+-- the seed a new account starts with, or a hand-out) or correction
+-- ('adjust'). The balance is SUM(delta) and never a column of its own.
+-- ref names what the row is about (a card id, a day). Shadow mode by
+-- default: nothing is blocked until CREDITS_ENFORCE=1.
+CREATE TABLE credit_ledger (
+    id       BIGSERIAL PRIMARY KEY,
+    user_id  TEXT NOT NULL,
+    delta    INTEGER NOT NULL,
+    reason   TEXT NOT NULL,
+    ref      TEXT,
+    at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_credit_ledger_user
+ON credit_ledger(user_id);
 
 -- Owned by routes/translation.py -- translation-mode study log,
 -- mirrors reading_log/comprehension_log's shape for the same feature

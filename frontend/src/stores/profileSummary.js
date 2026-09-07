@@ -3,8 +3,8 @@ import { supabase } from '../lib/supabase'
 import { apiFetch } from '../lib/api'
 import { xpThreshold } from '../domain/xpCurve'
 
-// ── Level/XP summary, shared by TopBar's profile ring, the mobile
-// level bar, and the burger menu's profile row ──────────────────
+// ── Level/XP summary, shared by the HUD's level roundel, the pass
+// and the settings ─────────────────────────────────────────────
 // A small shared store rather than one fetch per consumer: `cache` is
 // the last known summary, `listeners` are every currently-mounted
 // hook instance's setState. Real fetches are TTL'd so navigating
@@ -15,8 +15,17 @@ import { xpThreshold } from '../domain/xpCurve'
 // sitting frozen until the next real fetch lands.
 let cache = null
 let cacheAt = 0
+// Whether the LAST real fetch was refused. The store fails quiet by
+// design (see fetchSummary), but a screen that draws a wait until the
+// summary arrives needs to know when it never will — Settings would
+// otherwise hold three dots forever over controls that still work.
+let failed = false
 const TTL_MS = 30_000
 const listeners = new Set()
+
+function notify() {
+  listeners.forEach(fn => fn())
+}
 
 function setCache(data, { real = false } = {}) {
   cache = data
@@ -24,7 +33,7 @@ function setCache(data, { real = false } = {}) {
   // bump must never postpone the next real fetch, or a wrong client-
   // side guess (see applyXpGain) could linger indefinitely.
   if (real) cacheAt = Date.now()
-  listeners.forEach(fn => fn(cache))
+  notify()
 }
 
 function fetchSummary() {
@@ -35,10 +44,11 @@ function fetchSummary() {
       return apiFetch('/api/profile', session)
     })
     .then(r => (r.ok ? r.json() : Promise.reject()))
-    .then(data => setCache(data, { real: true }))
+    .then(data => { failed = false; setCache(data, { real: true }) })
     // Silent fail — this is a background HUD element, not worth a
     // visible error state the way the full Profile screen's fetch is.
-    .catch(() => {})
+    // The flag is the one thing recorded, for useProfileSummaryState.
+    .catch(() => { failed = true; notify() })
 }
 
 // Force a real refetch, bypassing the TTL. For the cases where the
@@ -59,15 +69,24 @@ export function seedSummary(data) {
 }
 
 export function useProfileSummary() {
-  const [summary, setSummary] = useState(cache)
+  return useProfileSummaryState().summary
+}
+
+// The summary AND whether the fetch behind it failed, for a consumer
+// that draws the wait (plan 067): `summary` null with `failed` false
+// is "still coming", null with `failed` true is "not coming" — the
+// screen shows its controls either way once it knows which.
+export function useProfileSummaryState() {
+  const [state, setState] = useState(() => ({ summary: cache, failed }))
 
   useEffect(() => {
-    listeners.add(setSummary)
+    const sync = () => setState({ summary: cache, failed })
+    listeners.add(sync)
     if (!cache || Date.now() - cacheAt >= TTL_MS) fetchSummary()
-    return () => { listeners.delete(setSummary) }
+    return () => { listeners.delete(sync) }
   }, [])
 
-  return summary
+  return state
 }
 
 // Call right after a review response comes back (xp_earned, from
