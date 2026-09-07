@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
 import { useCredits } from '../../stores/credits'
-import { DAILY_REFILL, CAP } from '../../domain/credits'
+import { DAILY_REFILL, CAP, showsCap } from '../../domain/credits'
 
 // ── The balance, printed on the pass (canvas Profile, plan 074) ───
 // The commuter pass's footer line: the word, the figure over its cap,
@@ -26,7 +26,11 @@ export function BalanceLine() {
       <span className="jour-line__status"><b className="balance-line__word">{t.balanceLabel}</b></span>
       <span className="jour-line__validity">
         <b>{balance == null ? '∞' : balance}</b>
-        {balance != null && <span className="jour-cap">/ {cap} {t.creditsUnit}</span>}
+        {balance != null && (
+          <span className="jour-cap">
+            {showsCap(balance, cap) ? `/ ${cap} ` : ''}{t.creditsUnit}
+          </span>
+        )}
       </span>
       {balance != null && <span className="jour-cap balance-line__refill">{t.balanceRefillLine(refill, at)}</span>}
     </div>

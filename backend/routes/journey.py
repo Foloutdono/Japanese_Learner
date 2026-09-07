@@ -43,7 +43,19 @@ def _journey_row(user_id: str):
                 """
                 SELECT jlpt_level, daily_new_target, goal_start_level,
                        goal_level, goal_target_date, goal_set_at,
-                       daily_departure
+                       daily_departure,
+                       -- Whole days between the learner's first day and
+                       -- today, on the same clock and day boundary the
+                       -- window count uses (get_journey_item_counts's
+                       -- date_trunc('day', NOW())), so the rate's two
+                       -- halves can never be measured against different
+                       -- days. onboarded_at is stamped once and never
+                       -- moves -- not by a reprint, not by a new
+                       -- destination -- so a veteran signing a fresh
+                       -- goal today keeps their full window; created_at
+                       -- only backstops a row from before onboarding.
+                       (date_trunc('day', NOW())::date
+                        - date_trunc('day', COALESCE(onboarded_at, created_at))::date)
                 FROM user_profiles WHERE user_id = %s
                 """,
                 (user_id,),
@@ -60,6 +72,34 @@ def _journey_levels(start: str, goal: str | None) -> list[str]:
     a = LEVELS.index(start)
     b = LEVELS.index(goal) if goal else len(LEVELS) - 1
     return list(LEVELS[a:b + 1])
+
+
+def _window_days(days_since_start) -> int:
+    """How many days the rate is honestly measured over.
+
+    WINDOW_DAYS is the ceiling, not the answer. The window count is a
+    number of items; dividing it by a flat 14 assumes the learner has
+    had 14 days to earn them, and a brand-new account has had one. That
+    assumption understated a first-day rate by up to 14x, and the
+    frontend's journeyModel turns a rate into an arrival date by
+    dividing the remaining items BY it -- so a learner who signed up
+    today and did four items read as 0.3/day, projected nearly two
+    decades out, and the pass announced them 6,580 days late on the
+    morning they joined.
+
+    Counted so that the learner's first day is day one, matching the
+    window's own "13 full past days + today".
+
+    Only the divisor narrows; the count still runs over the full
+    WINDOW_DAYS. No first-ever review can predate the account, so on a
+    young account the two spans hold exactly the same items and the
+    distinction is academic -- while narrowing the count as well would
+    move its cutoff to today's midnight, which is a different and much
+    sharper edge for anything that seeds history by hand.
+    """
+    if days_since_start is None:
+        return WINDOW_DAYS
+    return max(1, min(WINDOW_DAYS, int(days_since_start) + 1))
 
 
 def _items_total(levels: list[str], include_kana: bool) -> int:
@@ -87,7 +127,8 @@ def _status_payload(user_id: str) -> dict:
             "days14": WINDOW_DAYS,
         }
     (jlpt_level, daily_new_target, goal_start_level, goal_level,
-     goal_target_date, goal_set_at, daily_departure) = row
+     goal_target_date, goal_set_at, daily_departure, days_since_start) = row
+    window = _window_days(days_since_start)
     start = goal_start_level or jlpt_level
     levels = _journey_levels(start, goal_level)
     # The kana front-load belongs to the journey exactly when the line
@@ -114,9 +155,12 @@ def _status_payload(user_id: str) -> dict:
         "itemsDone": counts["items_done"],
         # actual14 is a COUNT over the window; the client divides by
         # days14. Sending the raw pair keeps the rounding rule in one
-        # place (the frontend's goal math) instead of two.
+        # place (the frontend's goal math) instead of two -- and it is
+        # why the window has to be sent, not assumed: both halves come
+        # from the same span (see _window_days), which is at most
+        # WINDOW_DAYS and, on a young account, exactly its age.
         "actual14": counts["new_in_window"],
-        "days14": WINDOW_DAYS,
+        "days14": window,
     }
 
 
