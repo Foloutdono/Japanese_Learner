@@ -26,11 +26,11 @@
 
 const RUN = /\*\*(.+?)\*\*/s
 
-export function Emphasized({ text }) {
+export function Emphasized({ text, strongClassName }) {
   if (typeof text !== 'string') return text ?? null
   // split() on a capturing group alternates plain, captured, plain… so
   // the odd indices ARE the emphasised runs.
   const parts = text.split(new RegExp(RUN, 'gs'))
   if (parts.length === 1) return text
-  return parts.map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part))
+  return parts.map((part, i) => (i % 2 ? <strong key={i} className={strongClassName}>{part}</strong> : part))
 }

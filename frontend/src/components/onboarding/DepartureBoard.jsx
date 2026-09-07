@@ -25,7 +25,7 @@ import {
 // switches to pace mode with that pace. All state lives in the flow's
 // one `goal` object; `now` is the clock reading the flow captured on
 // entering the scene (a render must not read the clock — see
-// JourneyPass for the same rule), so the printed dates hold still
+// StatusSheet for the same rule), so the printed dates hold still
 // while the learner dials.
 
 const MONTH_CHIPS = [3, 6, 12, 18]

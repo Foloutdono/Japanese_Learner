@@ -12,11 +12,12 @@ from psycopg2 import errors as pg_errors
 from pydantic import BaseModel, field_validator
 
 from core.db import db_conn
-from core.auth import get_user_id
+from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
 from core import credits
 from srs.xp import level_progress
+from study import level_rule
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -271,6 +272,52 @@ class LearningPayload(BaseModel):
         return v
 
 
+# ── The level rule (plan 074) ─────────────────────────────────
+# Choosing a level marks the stops behind it known; see
+# study/level_rule.py for the rule and SRSEngine.seed_known for the
+# rows. Both halves answer in the same shape the settings sheets
+# print: "up" carries what would be (or was) marked known and the
+# spread, "down" what is set aside and the zero that is deleted.
+def _level_direction(current: str | None, target: str) -> str:
+    if current == target:
+        return "same"
+    if current is None or LEVELS.index(target) > LEVELS.index(current):
+        return "up"
+    return "down"
+
+
+def level_rule_preview(user_id: str, current: str | None, target: str) -> dict:
+    direction = _level_direction(current, target)
+    if direction == "same":
+        return {"direction": "same"}
+    if direction == "up":
+        marked = 0
+        for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target)):
+            full = prefixed(ids, user_id)
+            marked += len(full) - srs.count_rows(full, mode)
+        return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
+    set_aside = sum(
+        srs.count_cards_with_rows(prefixed(ids, user_id))
+        for ids in level_rule.item_batches(level_rule.stops_between(target, current))
+    )
+    return {"direction": "down", "setAside": set_aside, "deleted": 0}
+
+
+def apply_level_rule(user_id: str, current: str | None, target: str) -> dict:
+    """Write the rule for a level just stored: seed every stop behind
+    `target` (rows that exist are left alone, so the stops behind the
+    previous level cost nothing a second time). A move down writes
+    nothing and says so in the same shape."""
+    direction = _level_direction(current, target)
+    if direction != "up":
+        return level_rule_preview(user_id, current, target)
+    marked = 0
+    for _source, mode, ids in level_rule.known_batches(level_rule.stops_behind(target)):
+        marked += srs.seed_known(prefixed(ids, user_id), mode, spread_days=level_rule.SPREAD_DAYS)
+    logger.info("level rule user_id=%s %s -> %s marked_known=%d", user_id, current, target, marked)
+    return {"direction": "up", "markedKnown": marked, "spreadWeeks": level_rule.SPREAD_WEEKS}
+
+
 # ── Records ───────────────────────────────────────────────────
 # The three figures the pass holder prints beside the stamp book:
 # reviews, retention and the best perfect run. Computed once, here,
@@ -416,6 +463,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if not payload.model_fields_set:
         raise HTTPException(status_code=422, detail="Nothing to update")
     _get_or_create_username(user_id)  # ensure a row exists to update
+    # The level the rule moves FROM, read before the write: a move up
+    # seeds the stops crossed, a move down seeds nothing.
+    previous_level = _profile_row(user_id)[1] if payload.jlptLevel is not None else None
     sets, args = [], []
     if payload.jlptLevel is not None:
         sets.append("jlpt_level = %s")
@@ -449,12 +499,28 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         # The refill day moved with the clock; the cached state must not
         # outlive it.
         credits.forget(user_id)
+    level_rule_result = (
+        apply_level_rule(user_id, previous_level, payload.jlptLevel)
+        if payload.jlptLevel is not None else None
+    )
     return {
         "jlptLevel": payload.jlptLevel,
         "dailyNewTarget": payload.dailyNewTarget,
         "ratingScale": payload.ratingScale,
         "tzOffsetMin": payload.tzOffsetMin,
+        "levelRule": level_rule_result,
     }
+
+
+@router.get("/api/profile/learning/preview")
+def preview_learning(jlptLevel: str = Query(...), user_id: str = Depends(get_user_id)):
+    """What choosing `jlptLevel` would do, for the confirm sheet -- how
+    many cards a move up marks known and over how many weeks, or how
+    many a move down sets aside (and the zero it deletes)."""
+    if jlptLevel not in LEVELS:
+        raise HTTPException(status_code=422, detail=f"jlptLevel must be one of {', '.join(LEVELS)}")
+    current = _profile_row(user_id)[1]
+    return level_rule_preview(user_id, current, jlptLevel)
 
 
 @router.get("/api/leaderboard")

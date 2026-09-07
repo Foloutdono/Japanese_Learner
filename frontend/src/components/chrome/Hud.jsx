@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { useProfileSummary } from '../../stores/profileSummary'
-import { useJourneyStatus } from '../../stores/journey'
+import { useJourneyStatus, openStatus } from '../../stores/journey'
 import { useCredits, openBalance } from '../../stores/credits'
 import { useOnline } from '../../hooks/useOnline'
 import { useXpGain } from './useXpGain'
@@ -21,7 +21,8 @@ import { playClick } from '../../lib/audio'
 //            days), inked --success / --warning / --danger. When the
 //            network is gone the panel says so instead — the one
 //            place the shell owns up to being offline. Tap → the
-//            pass, whose back is the status sheet (plan 074).
+//            status sheet (components/journey/StatusSheet.jsx, plan
+//            074): the pass's back, as a sheet.
 //   pass     the commuter pass at pocket size with the balance inside
 //            (stores/credits, plan 069; ∞ on a subscription). The
 //            card's edge goes warning at ≤5 and danger at 0. Tap → the
@@ -58,6 +59,25 @@ function statusOf(model) {
   return { status, days: days || null }
 }
 
+// The station panel itself — the word and the drift — shared with the
+// status sheet (plan 074), which opens on the same object it was
+// tapped from. A button on the HUD, a plain mark on the sheet.
+export function StatusChip({ model, onClick = null }) {
+  const { t } = useLang()
+  const panel = statusOf(model)
+  if (!panel) return null
+  const Tag = onClick ? 'button' : 'span'
+  return (
+    <Tag
+      {...(onClick ? { type: 'button', onClick, 'aria-label': t.hudStatusLabel } : {})}
+      className={`hud__status hud__status--${panel.status}`}
+    >
+      <span className="hud__status-word">{t.hudStatus[panel.status]}</span>
+      {panel.days && <span className="hud__status-delta">· {t.hudDays(panel.days)}</span>}
+    </Tag>
+  )
+}
+
 function HudStatus({ onClick }) {
   const { t } = useLang()
   const online = useOnline()
@@ -70,20 +90,8 @@ function HudStatus({ onClick }) {
       </button>
     )
   }
-  const panel = statusOf(data ? journeyModel(data) : null)
   // No contract yet (never onboarded): nothing to judge, no panel.
-  if (!panel) return null
-  return (
-    <button
-      type="button"
-      className={`hud__status hud__status--${panel.status}`}
-      onClick={onClick}
-      aria-label={t.hudStatusLabel}
-    >
-      <span className="hud__status-word">{t.hudStatus[panel.status]}</span>
-      {panel.days && <span className="hud__status-delta">· {t.hudDays(panel.days)}</span>}
-    </button>
-  )
+  return <StatusChip model={data ? journeyModel(data) : null} onClick={onClick} />
 }
 
 // The pass at pocket size. Shared with the stage head (plan 070), so a
@@ -134,7 +142,9 @@ export function Hud() {
           <span>{summary?.level ?? ''}</span>
           <FareFigure gain={gain} className="hud-fare" onEnd={clear} />
         </button>
-        <HudStatus onClick={toPass} />
+        {/* The panel opens the status sheet — the pass's back (plan
+            074) — rather than walking to the pass. */}
+        <HudStatus onClick={() => { playClick(); openStatus() }} />
         <HudPass onClick={() => { playClick(); openBalance() }} />
       </div>
     </header>

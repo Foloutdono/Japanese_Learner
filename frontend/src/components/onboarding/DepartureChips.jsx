@@ -7,7 +7,7 @@ import { DEPARTURES, DEPART_JP, DEPART_TIMES } from './departures'
 //
 // One component, two counters: the office asks it on the application
 // form (OnboardingFlow's PassStep) and the settings counter changes
-// it afterwards (GoalCounter) — the same chips, not a second set that
+// it afterwards (Settings › Destination) — the same chips, not a second set that
 // drifts from these within two features.
 
 export function DepartureChips({ t, value, onChange, disabled = false }) {

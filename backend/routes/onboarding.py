@@ -23,7 +23,7 @@ from content.vocab_data import VOCAB_BY_LEVEL
 from core.auth import get_user_id
 from core.db import db_conn
 from core.user_level import LEVELS, note_stored_level
-from routes.profile import ensure_profile_row
+from routes.profile import apply_level_rule, ensure_profile_row
 from study.exam_scoring import flatten_questions, score_attempt
 from study.placement import build_placement_paper, recommend_level, strip_answers
 
@@ -187,10 +187,15 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
     # Write-through so this worker's resolver serves the new level
     # immediately rather than after its TTL (core/user_level.py).
     note_stored_level(user_id, payload.jlptLevel)
+    # The level rule (plan 074): the stops behind the boarding level are
+    # marked known. Seeding is idempotent, so a replay of the office
+    # costs nothing a second time.
+    level_rule_result = apply_level_rule(user_id, None, payload.jlptLevel)
     return {
         "jlptLevel": payload.jlptLevel,
         "dailyNewTarget": payload.dailyNewTarget,
         "onboardedAt": onboarded_at.isoformat(),
+        "levelRule": level_rule_result,
         "goalLevel": payload.goalLevel,
         "goalTargetDate": payload.goalTargetDate.isoformat() if payload.goalTargetDate else None,
         "goalSetAt": goal_set_at.isoformat() if goal_set_at else None,

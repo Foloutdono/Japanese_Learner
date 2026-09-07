@@ -2,44 +2,36 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { ScreenBar } from '../components/chrome/Bar'
-import { StationHeader } from '../components/station/StationHeader'
+import { Bar, Leave } from '../components/chrome/Bar'
 import { Loading } from '../components/ui/Loading'
-import { SectionHeader } from '../components/ui/SectionHeader'
 import { flattenStats, sumRows } from '../domain/statsModel'
-import { Headline } from '../components/stats/Headline'
 import { PracticeCalendar } from '../components/stats/PracticeCalendar'
 import { Explorer } from '../components/stats/Explorer'
 import { Forecast } from '../components/stats/Forecast'
-import { StudyClock, RatingMix, IntervalLadder } from '../components/stats/Rhythm'
 import { TroubleList } from '../components/stats/TroubleList'
 
 // Minutes east of UTC — the review log is stored in UTC, so the hour
 // histogram has to be told which day the user is actually living in.
 const TZ = -new Date().getTimezoneOffset()
 
-// ── 統計 ───────────────────────────────────────────────────
+const CAL_WEEKS = 14
+
+// ── Statistics (canvas Statistics, plan 074) ──────────────────
 // The screen is four questions, in the order they get asked:
 //
-//   Where do I stand?      the headline band
+//   Where do I stand?       the six records
 //   Have I been showing up? the practice calendar
-//   Where am I weak?        the Explorer, then the trouble list
-//   What's coming?          the forecast, then the rhythm charts
+//   What's coming?          the week's forecast
+//   Where am I weak?        the explorer, then the trouble list
 //
-// The old screen answered the first and then printed the payload:
-// eighteen cards of level × mode progress bars in backend order, which
-// is complete in the sense that everything is on the page and useless
-// in the sense that nothing can be compared. Every number here comes
-// from the same two fetches it always did — plus three aggregates that
-// were sitting unused in the database (see routes/stats.py's _rhythm)
-// and one, the daily trend, that was already being fetched on every
-// load and thrown away without ever being drawn.
+// Every number comes from the same two fetches it always did. The
+// records are the canvas's lattice with a note under each figure, so
+// a bare number is never left to mean whatever you assume it means.
 export default function StatsScreen({ session }) {
   const navigate = useNavigate()
   const { t }    = useLang()
   const [stats, setStats] = useState(null)
   const [extra, setExtra] = useState(null)
-
 
   useEffect(() => {
     apiFetch('/api/stats', session)
@@ -54,65 +46,99 @@ export default function StatsScreen({ session }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // One flattening for the whole screen: the headline, the Explorer
-  // and every total below them read the same array, so they cannot
-  // drift apart the way three separate reduce()s over a nested payload
+  // One flattening for the whole screen: the records, the explorer and
+  // every total below them read the same array, so they cannot drift
+  // apart the way three separate reduce()s over a nested payload
   // eventually do.
   const rows   = useMemo(() => flattenStats(stats, t), [stats, t])
   const totals = useMemo(() => sumRows(rows), [rows])
 
   // There's no dedicated "review" screen — due cards are prioritised
   // inside a normal session, so this drops the user into the right
-  // level/mode and lets the session surface them.
-  // Straight onto the run (plan 071): a set or level and a mode are a
-  // path now, /learn/<line>/<stop>/<mode>.
+  // level/mode and lets the session surface them. A set or level and a
+  // mode are a path (plan 071).
   function startReview(category, key, mode) {
     navigate(`/learn/${category}/${encodeURIComponent(key)}/${mode}`)
   }
 
-  const dueToday = extra?.forecast?.[0]?.count ?? totals.due
-  const rhythm = extra?.rhythm
+  const week = extra?.forecast?.slice(0, 7) ?? []
+  const dueToday = week[0]?.count ?? totals.due
+  const weekTotal = week.reduce((n, f) => n + f.count, 0)
+  const streak = extra?.streak
+  const bestDay = extra?.trend?.reduce((b, d) => Math.max(b, d.count), 0) ?? 0
+  const mastery = Math.round(totals.masteryPct)
+  const accuracy = totals.accuracyPct === null ? null : Math.round(totals.accuracyPct)
 
   return (
-    <div className="screen">
-      <ScreenBar onBack={() => navigate('/profile')} title={t.statistics} />
+    <main id="main-content" className="stats" style={{ '--line-color': 'var(--pass-ink)' }}>
+      <Bar
+        title={t.statistics}
+        color="var(--pass-ink)"
+        aside={<Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>}
+      />
 
       {!stats && <Loading />}
 
       {stats && (
-        <main id="main-content" className="container stats-container">
-          <StationHeader />
-          <Headline totals={totals} streak={extra?.streak} dueToday={dueToday} t={t} />
+        <>
+          <div className="records records--stats">
+            <Record
+              value={streak?.current ?? 0}
+              unit={t.daysUnit}
+              label={t.streak}
+              note={streak?.longest ? t.longestNote(streak.longest) : t.noStreakYet}
+            />
+            <Record value={dueToday} label={t.dueToday} note={t.dueWeekNote(weekTotal)} />
+            <Record value={mastery} unit="%" label={t.mastered} note={t.masteredNote(totals.mastered, totals.total)} />
+            <Record
+              value={accuracy ?? '—'}
+              unit={accuracy == null ? null : '%'}
+              label={t.accuracy}
+              note={t.acrossReviews(totals.reviews.toLocaleString())}
+            />
+            <Record value={totals.learning} label={t.learning} />
+            <Record value={totals.new} label={t.new} note={t.untouchedNote} />
+          </div>
 
-          <SectionHeader jp="暦" title={t.practiceCalendar} />
-          <PracticeCalendar trend={extra?.trend} />
+          <div className="stat-cap">
+            <span>{t.practiceCalendar}</span>
+            <span>{t.calWeeksCap(CAL_WEEKS)} <b className="stat-cap__fig">{bestDay.toLocaleString()}</b></span>
+          </div>
+          <PracticeCalendar trend={extra?.trend} weeks={CAL_WEEKS} />
 
-          <SectionHeader jp="内訳" title={t.explorer} />
+          <div className="stat-cap">
+            <span>{t.upcomingReviews}</span>
+            <span>{t.forecastCap(7)} <b className="stat-cap__fig">{weekTotal.toLocaleString()}</b></span>
+          </div>
+          <Forecast forecast={week} />
+
+          <div className="stat-cap"><span>{t.explorer}</span></div>
           <Explorer rows={rows} onStartReview={startReview} />
-
-          <SectionHeader jp="予定" title={t.upcomingReviews} />
-          <Forecast forecast={extra?.forecast} />
-
-          {rhythm && (
-            <>
-              <SectionHeader jp="時間帯" title={t.rhythm} />
-              <div className="rhythm-grid">
-                <StudyClock hours={rhythm.hours} />
-                <RatingMix quality={rhythm.quality} />
-                <IntervalLadder intervals={rhythm.intervals} />
-              </div>
-            </>
-          )}
 
           {extra?.weakest?.length > 0 && (
             <>
-              <SectionHeader jp="弱点" title={t.weakestItems} />
-              <p className="stats-lede">{t.troubleLede}</p>
+              <div className="stat-cap"><span>{t.weakestItems}</span></div>
+              <p className="hint">{t.troubleLede}</p>
               <TroubleList weakest={extra.weakest} onStartReview={startReview} />
             </>
           )}
-        </main>
+        </>
       )}
+    </main>
+  )
+}
+
+// One cell of the lattice: the figure with its unit, the label, and
+// the note that says what the figure is a share of.
+function Record({ value, unit = null, label, note = null }) {
+  return (
+    <div className="record">
+      <span className="record__value">
+        {typeof value === 'number' ? value.toLocaleString() : value}
+        {unit && <span className="record__unit">{unit}</span>}
+      </span>
+      <span className="record__label">{label}</span>
+      {note && <span className="record__note">{note}</span>}
     </div>
   )
 }

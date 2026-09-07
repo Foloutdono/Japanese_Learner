@@ -5,6 +5,7 @@ import { TicketGate } from './components/station/TicketGate'
 import { UpdateToast, OfflineNote } from './components/ui/UpdateToast'
 import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
+import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
 import { getTabs } from './config/tabs'
 import { Shell, StageFrame } from './components/chrome/Shell'
@@ -301,6 +302,10 @@ export default function App() {
             <Route path="/profile"              element={<ProfileScreen session={session} />} />
             <Route path="/profile/stats"        element={<StatsScreen session={session} />} />
             <Route path="/profile/settings"     element={<SettingsScreen session={session} />} />
+            {/* The settings pages (plan 074): display, sound, learning,
+                destination, data, account — each its own page under
+                the list. */}
+            <Route path="/profile/settings/:page" element={<SettingsScreen session={session} />} />
           </Route>
 
           {/* The stage: both bars leave, the rating bar or the field
@@ -353,6 +358,10 @@ export default function App() {
             second is raised by a review the screen fired and forgot. */}
         <BalanceSheet />
         <RunOutSheet />
+        {/* 運行状況 — the status sheet off the HUD's station panel
+            (plan 074): the pass's back, the ghost train and the two
+            honest moves. */}
+        <StatusSheet session={session} />
 
         {/* 改札 — the departure cutscene. Beside <Routes/>, never
             inside it: the gate has to keep playing across the very

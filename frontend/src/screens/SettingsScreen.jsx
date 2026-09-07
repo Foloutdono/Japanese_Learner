@@ -1,650 +1,108 @@
-import { useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
+import { LANGUAGES } from '../i18n'
 import { supabase } from '../lib/supabase'
-import { apiFetch, apiJson } from '../lib/api'
-import { playClick, playUi, playToggle, setVolume, useVolumes, DEFAULT_VOLUMES } from '../lib/audio'
-import { ScreenBar } from '../components/chrome/Bar'
-import { MuteButton, ThemeToggle, LangSwitcher, SoundMixer } from '../components/ui/NavControls'
-import { useProfileSummaryState, refreshSummary } from '../stores/profileSummary'
-import { Loading } from '../components/ui/Loading'
-import { useRatingScale, setRatingScale } from '../stores/ratingScale'
-import { RATING_SCALES, ratingButtons } from '../domain/ratingScales'
-import PlacementTest from '../components/onboarding/PlacementTest'
-import { PACES } from '../components/onboarding/paces'
-import { GoalCounter } from '../components/journey/GoalCounter'
-import { useMediaQuery } from '../hooks/useMediaQuery'
-import { useInstallPrompt, promptInstall, isIosSafari } from '../stores/installPrompt'
-import { InstallSheet } from '../components/ui/InstallSheet'
+import { playClick } from '../lib/audio'
+import { useVolumes, useMuted, DEFAULT_VOLUMES } from '../lib/audio'
+import { useProfileSummary } from '../stores/profileSummary'
+import { useJourneyStatus } from '../stores/journey'
+import { useThemeChoice } from '../stores/theme'
+import { Leave } from '../components/chrome/Bar'
+import { ChevronIcon } from '../components/ui/Icons'
+import { DisplayPage } from '../components/settings/DisplayPage'
+import { SoundPage } from '../components/settings/SoundPage'
+import { LearningPage } from '../components/settings/LearningPage'
+import { DestinationPage } from '../components/settings/DestinationPage'
+import { DataPage } from '../components/settings/DataPage'
+import { AccountPage } from '../components/settings/AccountPage'
 
-const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
+// ── Settings (canvas Settings, plan 074) ──────────────────────
+// A list of six rows, each printing its current value, each a door to
+// its own page at /profile/settings/<page>; Sign out under the list.
+// The pages are components/settings/*; this screen is the list and
+// the switch. Deliberately NOT here: a notifications page — it needs
+// a preferences endpoint that does not exist, and a settings screen
+// above all must be exactly what it says (no dead controls).
+const PAGES = {
+  display: DisplayPage,
+  sound: SoundPage,
+  learning: LearningPage,
+  destination: DestinationPage,
+  data: DataPage,
+  account: AccountPage,
+}
 
-// 段 is the counter for a grade or rank — 四段 is a four-grade scale,
-// which is what the default rating bar is. Shortest first, so the row
-// reads as one range from the fewest judgements to the most; 四段 is
-// the middle of it because it is the default, not because it is a
-// compromise.
-const RATING_SCALE_CHIPS = [
-  { id: 'binary', jp: '二段' },
-  { id: 'simple', jp: '四段' },
-  { id: 'full',   jp: '六段' },
-]
-
-// The station-theatre channels — what 静かな通勤 silences and 全部
-// restores. The study channels (kana, voice, effects, UI) are never
-// touched by a preset: presets exist for the commute-with-headphones
-// case, not as a second mute button.
 const THEATRE = ['ambiance', 'jingle', 'announcement']
 
-// ── 窓口 — settings as the service counter ──────────────────
-// One rail of sections, one slip at a time — built to the settings
-// round's 案三 artboard: the slip carries its own paired heading
-// inside the card, rows set the label left and the control right, and
-// the rail marks the open counter with the pass's ink (this screen
-// belongs to the holder; see config/identity.js). Sections keep
-// stable ids so a pane can be linked and a reload lands where you
-// were (#son, #data…).
-//
-// 行先 joined the rail after the pass's own back was found pointing
-// at a counter that did not exist: "no destination on this pass — set
-// one at the office" led here, and here had nothing about a goal on
-// it. It is deliberately its own counter rather than three more rows
-// under 学習 — a destination, a date and an hour are one contract,
-// and the pass back deep-links to them (/settings#goal).
-//
-// Deliberately NOT here: the 通知 reminders pane the artboard
-// sketched as 構想. It needs browser notifications and a preferences
-// endpoint that do not exist, and a settings screen above all must be
-// exactly what it says — no dead controls.
-const SECTION_IDS = ['env', 'son', 'learning', 'goal', 'data', 'account']
-
-function initialSection() {
-  const hash = typeof window !== 'undefined' ? window.location.hash.slice(1) : ''
-  return SECTION_IDS.includes(hash) ? hash : SECTION_IDS[0]
-}
-
 export default function SettingsScreen({ session }) {
+  const { page } = useParams()
+  if (page && !PAGES[page]) return <Navigate to="/profile/settings" replace />
+  if (page) {
+    const Page = PAGES[page]
+    return <Page session={session} />
+  }
+  return <SettingsList session={session} />
+}
+
+function SettingsList({ session }) {
+  const { t, lang } = useLang()
   const navigate = useNavigate()
-  const { t } = useLang()
-  const [section, setSection] = useState(initialSection)
-  const railRef = useRef(null)
-
-  // `rail` is the short word a chip can carry (the artboard writes
-  // Affichage, not Affichage & langue, on the rail); the slip's own
-  // head prints the full title.
-  const SECTIONS = [
-    { id: 'env',      jp: '環境',   rail: t.settingsEnvShort, title: t.settingsEnvironment },
-    { id: 'son',      jp: '音',     rail: t.sound,            title: t.sound },
-    { id: 'learning', jp: '学習',   rail: t.settingsLearning, title: t.settingsLearning },
-    { id: 'goal',     jp: '行先',   rail: t.settingsGoal,     title: t.settingsGoal },
-    { id: 'data',     jp: 'データ', rail: t.settingsData,     title: t.settingsData },
-    { id: 'account',  jp: '会員',   rail: t.account,          title: t.account },
-  ]
-
-  function select(id) {
-    setSection(id)
-    // Replace, not push: the back button should leave settings, not
-    // unwind every counter visited on the way.
-    window.history.replaceState(null, '', `#${id}`)
-  }
-
-  // Roving arrows on the rail, per the tabs pattern: Left/Up and
-  // Right/Down move the selection, and focus follows it.
-  function onRailKeyDown(e) {
-    const delta = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1
-      : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0
-    if (!delta) return
-    e.preventDefault()
-    const next = SECTION_IDS[
-      (SECTION_IDS.indexOf(section) + delta + SECTION_IDS.length) % SECTION_IDS.length
-    ]
-    select(next)
-    railRef.current?.querySelector(`[data-id="${next}"]`)?.focus()
-  }
-
-  return (
-    <div className="screen">
-      <ScreenBar onBack={() => navigate('/profile')} title={t.settings} />
-
-      <main id="main-content" className="container settings-container">
-        <div className="stg-counter">
-          <nav
-            ref={railRef}
-            className="stg-rail"
-            role="tablist"
-            aria-label={t.settings}
-            onKeyDown={onRailKeyDown}
-          >
-            {SECTIONS.map(s => (
-              <button
-                key={s.id}
-                type="button"
-                role="tab"
-                data-id={s.id}
-                id={`stg-tab-${s.id}`}
-                aria-selected={section === s.id}
-                aria-controls={`stg-pane-${s.id}`}
-                tabIndex={section === s.id ? 0 : -1}
-                className="stg-rail__item"
-                onClick={() => { playClick(); select(s.id) }}
-              >
-                <span className="stg-rail__jp" lang="ja">{s.jp}</span>
-                <span className="stg-rail__latin">{s.rail}</span>
-              </button>
-            ))}
-          </nav>
-
-          <div className="stg-panes">
-            <Slip id="env" section={section} jp="環境" title={t.settingsEnvironment}>
-              <div className="settings-row stg-row--wrap">
-                <span className="settings-row__label">{t.theme}</span>
-                <ThemeToggle />
-              </div>
-              <div className="settings-row">
-                <span className="settings-row__label">{t.language}</span>
-                <LangSwitcher />
-              </div>
-              <InstallRow t={t} />
-            </Slip>
-
-            <Slip id="son" section={section} jp="音" title={t.sound} aside={<MuteButton />}>
-              <SoundPresets t={t} />
-              <div className="settings-row settings-row--stack">
-                <SoundMixer />
-              </div>
-            </Slip>
-
-            <Slip id="learning" section={section} jp="学習" title={t.settingsLearning}>
-              <LearningRows t={t} session={session} />
-            </Slip>
-
-            <Slip id="goal" section={section} jp="行先" title={t.settingsGoal}>
-              <GoalCounter session={session} />
-            </Slip>
-
-            <Slip id="data" section={section} jp="データ" title={t.settingsData}>
-              <DataRows t={t} session={session} />
-            </Slip>
-
-            <Slip id="account" section={section} jp="会員" title={t.account}>
-              {session?.user?.email && (
-                <div className="settings-row">
-                  <span className="settings-row__label">
-                    {t.settingsIssuedTo}
-                    <span className="stg-hint">{session.user.email}</span>
-                  </span>
-                </div>
-              )}
-              <div className="settings-row">
-                <span className="settings-row__label">{t.privacyPolicy}</span>
-                <a className="btn-secondary" href="/privacy.html" target="_blank" rel="noreferrer">{t.privacyPolicy}</a>
-              </div>
-              <div className="settings-row settings-row--danger">
-                <span className="settings-row__label">{t.signOutDesc}</span>
-                {/* Filled danger per the standing ruling on this exact
-                    button (see .settings-signout) — the artboard's
-                    pass-ink fill loses to a measured 2.11:1 outline
-                    already tried and rejected here. */}
-                {/* `local` scope: this is "sign out of this device", which
-                    is what the row says. The default `global` also revokes
-                    the learner's other devices — signing out of a phone
-                    must not log the laptop out too. */}
-                <button type="button" className="btn-primary settings-signout" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
-                  {t.signOut}
-                </button>
-              </div>
-            </Slip>
-          </div>
-        </div>
-      </main>
-    </div>
-  )
-}
-
-// A slip: the card with its own paired heading inside, exactly as the
-// artboard draws it — not a SectionHeader floating above a bare card.
-// Hidden (not unmounted) when another counter is open, so a half-taken
-// placement test survives a glance at the mixer. `aside` is the head's
-// right-hand slot (the sound slip parks the mute control there).
-function Slip({ id, section, jp, title, aside = null, children }) {
-  return (
-    <section
-      id={`stg-pane-${id}`}
-      role="tabpanel"
-      aria-labelledby={`stg-tab-${id}`}
-      hidden={section !== id}
-      className="stg-slip card settings-card"
-    >
-      <div className="stg-slip__head">
-        <span className="stg-slip__jp" lang="ja">{jp}</span>
-        <h2 className="stg-slip__latin">{title}</h2>
-        {aside && <span className="stg-slip__aside">{aside}</span>}
-      </div>
-      {children}
-    </section>
-  )
-}
-
-// ── 音 — the two presets over the mixer ─────────────────────
-// A bare row of two, no label — each button says what it does in its
-// own caption, the artboard's grammar. One tap for the commute:
-// 静かな通勤 zeroes the station theatre and 全部 brings it back. The
-// states are read from the live volumes, so dragging a theatre slider
-// yourself is reflected here instead of contradicted.
-function SoundPresets({ t }) {
+  const summary = useProfileSummary()
+  const { data: journey } = useJourneyStatus()
+  const [theme] = useThemeChoice()
   const volumes = useVolumes()
+  const muted = useMuted()
+
+  const themeLabel = { auto: t.themeAuto, dark: t.themeDark, light: t.themeLight }[theme]
+  const langLabel = LANGUAGES.find(l => l.code === lang)?.label ?? lang
   const quiet = THEATRE.every(k => volumes[k] === 0)
   const full = THEATRE.every(k => volumes[k] === DEFAULT_VOLUMES[k])
+  const soundValue = muted ? t.mute : quiet ? t.soundValueQuiet : full ? t.soundValueFull : t.soundValueMixed
+  const learningValue = summary?.jlptLevel
+    ? `${summary.jlptLevel}${summary.dailyNewTarget ? ` · ${summary.dailyNewTarget} ${t.settingsPerDay}` : ''}`
+    : ''
+  const fmt = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { day: 'numeric', month: 'short', year: 'numeric' })
+  const destinationValue = journey?.goalLevel
+    ? `${journey.goalLevel}${journey.goalTargetDate ? ` · ${fmt.format(new Date(journey.goalTargetDate))}` : ''}`
+    : (journey ? t.settingsGoalNoneShort : '')
+  const email = session?.user?.email ?? ''
+  const accountValue = email ? `${email.split('@')[0]}@…` : ''
 
-  function applyPreset(values) {
-    THEATRE.forEach(k => setVolume(k, values[k]))
-    playToggle()
-  }
-
-  return (
-    <div className="settings-row stg-presets">
-      <button
-        type="button"
-        className={`stg-preset${quiet ? ' stg-preset--on' : ''}`}
-        aria-pressed={quiet}
-        onClick={() => applyPreset({ ambiance: 0, jingle: 0, announcement: 0 })}
-      >
-        <span className="stg-preset__jp" lang="ja">静かな通勤</span>
-        {t.soundQuietPreset}
-      </button>
-      <button
-        type="button"
-        className={`stg-preset${full ? ' stg-preset--on' : ''}`}
-        aria-pressed={full}
-        onClick={() => applyPreset(DEFAULT_VOLUMES)}
-      >
-        <span className="stg-preset__jp" lang="ja">全部</span>
-        {t.soundFullPreset}
-      </button>
-    </div>
-  )
-}
-
-// ── 学習 — the onboarding choices, revisitable ─────────────────
-// Level and pace write through PATCH /api/profile/learning (which
-// never touches onboarded_at — changing your level later is not
-// re-onboarding), then refreshSummary() so the TopBar HUD and every
-// LevelSelector's 現在地 mark learn the new value immediately. The
-// placement test is the exact component the onboarding flow runs;
-// here its result is an offer ("switch to N3?"), never an automatic
-// write.
-//
-// The 窓口 round replaced both <select>s with the controls that show
-// their whole range at once: the level as the wall map's own five-stop
-// strip, the pace as the onboarding's 種別 ladder.
-function LearningRows({ t, session }) {
-  const { summary, failed: summaryFailed } = useProfileSummaryState()
-  const [saving, setSaving] = useState(false)
-  const [failed, setFailed] = useState(false)
-  const [testing, setTesting] = useState(false)
-  const [testResult, setTestResult] = useState(null)
-
-  function save(patch) {
-    setSaving(true)
-    setFailed(false)
-    apiJson('/api/profile/learning', session, { method: 'PATCH', body: JSON.stringify(patch) })
-      .then(() => refreshSummary())
-      .catch(() => setFailed(true))
-      .finally(() => setSaving(false))
-  }
-
-  const currentLevel = summary?.jlptLevel ?? ''
-  const currentPace = summary?.dailyNewTarget ?? ''
-  const knownPace = PACES.some(p => p.perDay === currentPace)
-
-  // The wait, drawn (plan 067): three dots until the summary answers,
-  // instead of a level strip with no stop lit and a pace with nothing
-  // on. A refused fetch still shows the controls — they work without
-  // the summary, and a save refreshes it.
-  if (!summary && !summaryFailed) return <Loading />
+  const ROWS = [
+    { id: 'display', label: t.settingsEnvironment, value: `${themeLabel} · ${langLabel}` },
+    { id: 'sound', label: t.sound, value: soundValue },
+    { id: 'learning', label: t.settingsLearning, value: learningValue },
+    { id: 'destination', label: t.settingsGoal, value: destinationValue },
+    { id: 'data', label: t.settingsData, value: '' },
+    { id: 'account', label: t.account, value: accountValue },
+  ]
 
   return (
-    <>
-      <div className="settings-row stg-row--wrap">
-        <span className="settings-row__label">{t.settingsJlptLevel}</span>
-        <div className="stg-lvlstrip" role="radiogroup" aria-label={t.settingsJlptLevel}>
-          <span className="stg-lvlstrip__rail" aria-hidden="true" />
-          {LEVELS.map((level, i) => (
-            <span key={level} className="stg-lvlstrip__slot" style={{ '--stop-x': `${(i / (LEVELS.length - 1)) * 100}%` }}>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={currentLevel === level}
-                disabled={saving}
-                className="stg-lvlstrip__stop"
-                onClick={() => { if (currentLevel !== level) { playClick(); save({ jlptLevel: level }) } }}
-              >
-                <span className="stg-lvlstrip__cap">{level}</span>
-              </button>
-            </span>
-          ))}
-        </div>
+    <main id="main-content" className="settings">
+      <div className="stg-headrow">
+        <div className="stg-head"><h1 className="stg-head__jp">{t.settings}</h1></div>
+        <Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>
       </div>
 
-      <div className="settings-row stg-row--wrap">
-        <span className="settings-row__label">{t.settingsPace}</span>
-        <span className="stg-paces" role="radiogroup" aria-label={t.settingsPace}>
-          {/* A pace set outside the three offered tiers (the column is
-              a free integer) still shows honestly instead of nowhere. */}
-          {currentPace !== '' && !knownPace && (
-            <span className="stg-pace stg-pace--on" aria-hidden="true">
-              <span className="stg-pace__n">{currentPace} {t.settingsPerDay}</span>
-            </span>
-          )}
-          {PACES.map(pace => (
-            <button
-              key={pace.id}
-              type="button"
-              role="radio"
-              aria-checked={currentPace === pace.perDay}
-              disabled={saving}
-              className={`stg-pace${currentPace === pace.perDay ? ' stg-pace--on' : ''}`}
-              title={pace.recommended ? t.onbPaceRecommended : undefined}
-              onClick={() => { if (currentPace !== pace.perDay) { playClick(); save({ dailyNewTarget: pace.perDay }) } }}
-            >
-              <span className="stg-pace__jp" lang="ja">{pace.jp}</span>
-              {/* The ★ rides the figure, not the Japanese name — the
-                  phone hides the kanji register and the recommended
-                  mark must survive that. */}
-              <span className="stg-pace__n">{pace.perDay} {t.settingsPerDay}{pace.recommended ? ' ★' : ''}</span>
-            </button>
-          ))}
-        </span>
-      </div>
-
-      <RatingScaleRow t={t} session={session} />
-
-      {failed && <div className="settings-row"><span className="onb-error" role="alert">{t.onbPassError}</span></div>}
-
-      {!testing && (
-        <div className="settings-row">
-          <span className="settings-row__label">{t.settingsRedoDesc}</span>
+      <div className="stg-list">
+        {ROWS.map(row => (
           <button
+            key={row.id}
             type="button"
-            className="btn-secondary"
-            onClick={() => { playClick(); setTestResult(null); setTesting(true) }}
+            className="stg-row"
+            data-page={row.id}
+            onClick={() => { playClick(); navigate(`/profile/settings/${row.id}`) }}
           >
-            {t.onbTestRetake}
+            <span className="stg-row__names"><span className="stg-row__jp">{row.label}</span></span>
+            <span className="stg-row__value">{row.value}</span>
+            <ChevronIcon direction="right" size={16} className="stg-row__chev" />
           </button>
-        </div>
-      )}
-
-      {testing && <div className="settings-row settings-row--stack">
-        {!testResult && (
-          <PlacementTest
-            session={session}
-            onResult={setTestResult}
-            onCancel={() => setTesting(false)}
-          />
-        )}
-
-        {testResult && (
-          <div className="settings-redo-result">
-            <p className="onb-step__body">
-              {t.onbTestResult(testResult.recommendedLevel, testResult.correct, testResult.total)}
-            </p>
-            <div className="settings-redo-actions">
-              <button
-                type="button"
-                className="onb-action"
-                disabled={saving}
-                onClick={() => {
-                  playUi('click')
-                  save({ jlptLevel: testResult.recommendedLevel })
-                  setTesting(false)
-                }}
-              >
-                {t.settingsRedoApply(testResult.recommendedLevel)}
-              </button>
-              <button type="button" className="onb-link" onClick={() => setTesting(false)}>
-                {t.cancel}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>}
-    </>
-  )
-}
-
-// ── Which rating bar to grade with ────────────────────────────
-// Four buttons or six. Both bars send the same 0..5 quality (see
-// domain/ratingScales.js), so this is a choice about the control, not
-// about the scheduling — which is exactly what the caption under it
-// says, because a settings screen must say what a button does.
-//
-// The list of words is BUILT from the chosen scale rather than written
-// out in the locale files: it is the bar's own words in the bar's own
-// order, so it cannot drift from what the study screens draw.
-function RatingScaleRow({ t, session }) {
-  const current = useRatingScale()
-  const [saving, setSaving] = useState(false)
-  const [failed, setFailed] = useState(false)
-
-  function choose(id) {
-    if (id === current) return
-    playClick()
-    setSaving(true)
-    setFailed(false)
-    setRatingScale(id, session)
-      .catch(() => setFailed(true))
-      .finally(() => setSaving(false))
-  }
-
-  // Worst-first, the way the bar draws them (ratingButtons is
-  // best-first for the keyboard's sake — see RatingBar.jsx).
-  const words = ratingButtons(current, t).map(b => b.label).reverse().join(' · ')
-
-  return (
-    <>
-      <div className="settings-row stg-row--wrap">
-        <span className="settings-row__label">{t.settingsRatingScale}</span>
-        <span className="stg-scales" role="radiogroup" aria-label={t.settingsRatingScale}>
-          {RATING_SCALE_CHIPS.map(chip => (
-            <button
-              key={chip.id}
-              type="button"
-              role="radio"
-              aria-checked={current === chip.id}
-              disabled={saving}
-              className={`stg-scale${current === chip.id ? ' stg-scale--on' : ''}`}
-              onClick={() => choose(chip.id)}
-            >
-              <span className="stg-scale__jp" lang="ja">{chip.jp}</span>
-              <span className="stg-scale__n">
-                {t.settingsRatingScaleOption[chip.id] ?? RATING_SCALES[chip.id].qualities.length}
-              </span>
-            </button>
-          ))}
-        </span>
+        ))}
       </div>
-      <div className="settings-row settings-row--stack">
-        <span className="stg-scale__words">{words}</span>
-        <span className="stg-scale__hint">{t.settingsRatingScaleHint}</span>
-      </div>
-      {failed && (
-        <div className="settings-row">
-          <span className="onb-error" role="alert">{t.onbPassError}</span>
-        </div>
-      )}
-    </>
-  )
-}
 
-// ── ホーム画面に追加 — install the app (plan 065) ──────────────
-// A row, not a banner: the offer lives where the environment's other
-// choices live, and only where it can be honoured — Chromium hands the
-// prompt over (stores/installPrompt.js), iOS Safari has the share
-// sheet and gets the explanation instead, and once the app runs
-// standalone the row is gone. Anywhere else the row does not exist,
-// so nothing on this screen is a dead control.
-function InstallRow({ t }) {
-  const standalone = useMediaQuery('(display-mode: standalone)')
-  const promptable = useInstallPrompt()
-  const [sheet, setSheet] = useState(false)
-  const ios = isIosSafari()
-  if (standalone || (!promptable && !ios)) return null
-  return (
-    <>
-      <div className="settings-row">
-        <span className="settings-row__label">
-          {t.installApp}
-          <span className="stg-hint">{t.installAppHint}</span>
-        </span>
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={() => { playClick(); if (promptable) promptInstall(); else setSheet(true) }}
-        >
-          {t.installAppBtn}
-        </button>
-      </div>
-      {sheet && <InstallSheet onClose={() => setSheet(false)} />}
-    </>
-  )
-}
-
-// ── データ — the learner's data, theirs to take or erase ─────
-// Export streams GET /api/profile/export (one CSV row per card and
-// mode, the scheduler's own granularity). Reset fronts the
-// DELETE /api/stats/reset the backend has carried since the stats
-// screen was built, with no UI anywhere until this counter — behind a
-// two-step confirm, with the consequences spelled out beside it,
-// because a settings screen must say exactly what a button does.
-function DataRows({ t, session }) {
-  const [exporting, setExporting] = useState(false)
-  const [exportFailed, setExportFailed] = useState(false)
-  const [arming, setArming] = useState(false)
-  const [resetting, setResetting] = useState(false)
-  const [resetState, setResetState] = useState(null) // 'done' | 'failed' | null
-  const [armingDelete, setArmingDelete] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [deleteFailed, setDeleteFailed] = useState(false)
-
-  // The account, erased (plan 066). Both stores require it in the app;
-  // DELETE /api/account removes every row and then the Supabase user
-  // (routes/account.py has the order and the reasons). On success this
-  // device's session is the last thing standing and it is dead: signed
-  // out with `local` scope, because a server-side sign-out would be
-  // for a user that no longer exists, and App's auth listener lands on
-  // the sign-in screen either way. On failure the row says so and stays
-  // armed-off — the message has to be honest in both failure modes
-  // (nothing happened; the data is gone but the sign-in remains), so
-  // it asks for a retry, which is idempotent.
-  async function deleteAccount() {
-    setDeleting(true)
-    setDeleteFailed(false)
-    try {
-      await apiJson('/api/account', session, { method: 'DELETE' })
-      await supabase.auth.signOut({ scope: 'local' })
-    } catch {
-      setDeleteFailed(true)
-      setDeleting(false)
-      setArmingDelete(false)
-    }
-  }
-
-  async function exportCsv() {
-    setExporting(true)
-    setExportFailed(false)
-    try {
-      const r = await apiFetch('/api/profile/export', session)
-      if (!r.ok) throw new Error(String(r.status))
-      const blob = await r.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'nihongo-progress.csv'
-      a.click()
-      URL.revokeObjectURL(url)
-    } catch {
-      setExportFailed(true)
-    } finally {
-      setExporting(false)
-    }
-  }
-
-  function reset() {
-    setResetting(true)
-    setResetState(null)
-    apiJson('/api/stats/reset', session, { method: 'DELETE' })
-      .then(() => { setResetState('done'); refreshSummary() })
-      .catch(() => setResetState('failed'))
-      .finally(() => { setResetting(false); setArming(false) })
-  }
-
-  return (
-    <>
-      <div className="settings-row">
-        <span className="settings-row__label">
-          {t.settingsExport}
-          <span className="stg-hint">{t.settingsExportHint}</span>
-        </span>
-        <button type="button" className="btn-secondary" disabled={exporting} onClick={() => { playClick(); exportCsv() }}>
-          {exporting ? '…' : t.settingsExportBtn}
-        </button>
-      </div>
-      {exportFailed && <div className="settings-row"><span className="onb-error" role="alert">{t.onbPassError}</span></div>}
-
-      <div className="settings-row settings-row--danger stg-row--wrap">
-        <span className="settings-row__label">
-          {t.settingsReset}
-          <span className="stg-hint">{t.settingsResetHint}</span>
-        </span>
-        {!arming && (
-          <button type="button" className="stg-danger-btn" data-action="reset" onClick={() => { playClick(); setArming(true) }}>
-            {t.settingsResetBtn}
-          </button>
-        )}
-        {arming && (
-          <span className="stg-confirm">
-            <span className="stg-confirm__q" role="alert">{t.settingsResetConfirmQ}</span>
-            <button type="button" className="stg-danger-btn" disabled={resetting} onClick={reset}>
-              {resetting ? '…' : t.settingsResetYes}
-            </button>
-            <button type="button" className="btn-secondary" disabled={resetting} onClick={() => setArming(false)}>
-              {t.cancel}
-            </button>
-          </span>
-        )}
-      </div>
-      {resetState === 'done' && (
-        <div className="settings-row"><span className="stg-done" role="status">{t.settingsResetDone}</span></div>
-      )}
-      {resetState === 'failed' && (
-        <div className="settings-row"><span className="onb-error" role="alert">{t.onbPassError}</span></div>
-      )}
-
-      <div className="settings-row settings-row--danger stg-row--wrap">
-        <span className="settings-row__label">
-          {t.settingsDeleteAccount}
-          <span className="stg-hint">{t.settingsDeleteAccountHint}</span>
-        </span>
-        {!armingDelete && (
-          <button type="button" className="stg-danger-btn" data-action="delete-account" onClick={() => { playClick(); setArmingDelete(true) }}>
-            {t.settingsDeleteAccountBtn}
-          </button>
-        )}
-        {armingDelete && (
-          <span className="stg-confirm">
-            <span className="stg-confirm__q" role="alert">{t.settingsDeleteAccountConfirmQ}</span>
-            <button type="button" className="stg-danger-btn" data-action="delete-account-confirm" disabled={deleting} onClick={deleteAccount}>
-              {deleting ? '…' : t.settingsDeleteAccountYes}
-            </button>
-            <button type="button" className="btn-secondary" disabled={deleting} onClick={() => setArmingDelete(false)}>
-              {t.cancel}
-            </button>
-          </span>
-        )}
-      </div>
-      {deleteFailed && (
-        <div className="settings-row"><span className="onb-error" role="alert">{t.settingsDeleteAccountFailed}</span></div>
-      )}
-    </>
+      <button type="button" className="btn-secondary stg-signout" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
+        {t.signOut}
+      </button>
+    </main>
   )
 }

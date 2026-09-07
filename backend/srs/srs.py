@@ -1,6 +1,7 @@
 import copy
 import logging
 from datetime import datetime, timedelta, timezone
+from psycopg2.extras import execute_values
 from typing import Any
 
 from .models import CardState
@@ -1225,6 +1226,90 @@ class SRSEngine:
                 cur.execute(sql, (pattern,) + mode_params)
                 (count,) = cur.fetchone()
         return int(count)
+
+    # ── The level rule (plan 074) ───────────────────────────────
+    # A card marked KNOWN gets the state of a card that graduated and
+    # was checked once at the mastered interval: the first real review
+    # then grows or lapses it exactly as it would a card the learner
+    # earned that state on (scheduler.py's _handle_review). The single
+    # virtual check is what get_bulk_stats and _classify_stage read --
+    # a row with no reviews is "new", whatever its interval -- and it
+    # is a card_modes count only: the review log, and so the profile's
+    # reviews, retention and XP, never sees it.
+    KNOWN_STATE = {
+        "difficulty": 2.5, "stability": 4.0, "interval_days": 21,
+        "repetitions": 3, "lapses": 0, "learning_step": 0, "is_learning": False,
+        "total_reviews": 1, "correct_reviews": 1, "last_quality": 4,
+    }
+
+    def seed_known(self, card_ids: list[str], mode: str, spread_days: int = 42,
+                   now: datetime | None = None) -> int:
+        """Mark cards KNOWN. Inserts a mastered row for every (card, mode)
+        that has none, its first check spread evenly over the next
+        `spread_days` (the i-th of n cards at day spread * (i + 1) / n,
+        so the last lands exactly on the horizon and no day is
+        flooded). A row that exists is never touched -- ON CONFLICT DO
+        NOTHING, not an upsert -- so a card already being learned keeps
+        its place. Returns how many rows were written."""
+        if not card_ids:
+            return 0
+        now = now or datetime.now(timezone.utc)
+        n = len(card_ids)
+        k = self.KNOWN_STATE
+        rows = [
+            (
+                cid, mode, k["difficulty"], k["stability"], k["interval_days"],
+                k["repetitions"], k["lapses"], k["learning_step"], k["is_learning"],
+                now + timedelta(days=spread_days * (i + 1) / n),
+                k["total_reviews"], k["correct_reviews"], k["last_quality"],
+            )
+            for i, cid in enumerate(card_ids)
+        ]
+        with self.storage.cursor() as cur:
+            self._log_sql("seed_known_cards", "INSERT INTO cards(id) VALUES %s ON CONFLICT(id) DO NOTHING", (n,))
+            execute_values(
+                cur, "INSERT INTO cards(id) VALUES %s ON CONFLICT(id) DO NOTHING",
+                [(cid,) for cid in card_ids], page_size=1000,
+            )
+            sql = """
+                INSERT INTO card_modes(
+                    card_id, mode, difficulty, stability, interval_days,
+                    repetitions, lapses, learning_step, is_learning,
+                    next_review, total_reviews, correct_reviews, last_quality
+                )
+                VALUES %s
+                ON CONFLICT (card_id, mode) DO NOTHING
+                RETURNING card_id
+            """
+            self._log_sql("seed_known", sql, (mode, n))
+            written = execute_values(cur, sql, rows, page_size=1000, fetch=True)
+        return len(written)
+
+    def count_rows(self, card_ids: list[str], mode: str) -> int:
+        """How many of these (card, mode) pairs already have a scheduler
+        row -- what seed_known would leave alone."""
+        if not card_ids:
+            return 0
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = "SELECT COUNT(*) FROM card_modes WHERE mode = %s AND card_id = ANY(%s)"
+                self._log_sql("count_rows", sql, (mode, len(card_ids)))
+                cur.execute(sql, (mode, list(card_ids)))
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
+
+    def count_cards_with_rows(self, card_ids: list[str]) -> int:
+        """How many of these cards have a row under ANY mode -- the
+        cards a move down sets aside, counted once each."""
+        if not card_ids:
+            return 0
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = "SELECT COUNT(DISTINCT card_id) FROM card_modes WHERE card_id = ANY(%s)"
+                self._log_sql("count_cards_with_rows", sql, (len(card_ids),))
+                cur.execute(sql, (list(card_ids),))
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
 
     def get_journey_item_counts(
         self,

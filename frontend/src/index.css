@@ -5011,9 +5011,9 @@ button:focus-visible {
 .today,
 .dictionary,
 .stage,
-.profile-container,
-.stats-container,
-.settings-container {
+.profile,
+.stats,
+.settings {
   animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
 
@@ -5047,9 +5047,9 @@ button:focus-visible {
   .route-stop,
   .wmap-line,
   .deck-card,
-  .profile-container,
-  .stats-container,
-  .settings-container {
+  .profile,
+  .stats,
+  .settings {
     animation: arrive-soft 0.2s linear backwards;
   }
 }
@@ -6769,12 +6769,6 @@ textarea:focus-visible {
 .station-header .station-sign--sm { padding: 0; }
 .station-header .station-sign__stripe { margin: 0; }
 
-/* Those screens open straight onto the plate now, so they no longer
-   need the top padding that stood in for a header. */
-.profile-container,
-.stats-container,
-.settings-container { padding-top: 32px; }
-
 
 /* ══ 定期券 — the commuter pass ═════════════════════════════
    The profile's hero. The home concourse has drawn your pass as a
@@ -6848,14 +6842,6 @@ textarea:focus-visible {
 .pass__wave span:nth-child(1) { width: 7px;  height: 7px;  margin-top: -3.5px; }
 .pass__wave span:nth-child(2) { width: 13px; height: 13px; margin-top: -6.5px; opacity: 0.45; }
 .pass__wave span:nth-child(3) { width: 20px; height: 20px; margin-top: -10px;  opacity: 0.25; }
-
-.pass__brand-names { display: flex; flex-direction: column; gap: 1px; }
-.pass__brand-jp {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 0.92rem;
-  letter-spacing: 0.14em;
-}
 .pass__brand-sub {
   margin: 0;
   font-family: var(--font-display);
@@ -7042,145 +7028,6 @@ textarea:focus-visible {
   transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
 }
 
-/* ══ スタンプ帳 — the stamp book ═══════════════════════════════
-   The streak is a スタンプラリー (DESIGN.md, Motion), and a rally has a
-   sheet: five whole weeks, Monday to Sunday, every day ridden stamped
-   in the stamp ink's lacquer red, today's pressed a beat after the page
-   arrives. It replaced the week bars and the flame — the bars said how
-   much, this says WHICH days, which is the part that changes what you
-   do tomorrow. The tally beside it (streak, longest, days stamped) is
-   the sheet's own margin note, not a section of its own.
-
-   Paper ground, so ambient inks. The stamp's ink is the lacquer mixed
-   55/45 toward the ambient ink: 4.97:1 dark and 6.48:1 light on the
-   12% wash (the pass's own 70/30 mix, made for sumi, sat at 3.94 here).
-   The sheet's seven columns are capped at 40px and shrink below it, so
-   the same grid fits a phone without a second layout. */
-.sbook {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--sp-6);
-  padding: var(--sp-6);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  align-items: start;
-}
-.sbook__sheet {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-  min-width: 0;
-}
-.sbook__dows,
-.sbook__grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 40px));
-  gap: var(--sp-3);
-  justify-items: center;
-}
-.sbook__dow {
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  color: var(--text-secondary);
-}
-.sbook__stamp {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: var(--r-pill);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  border: 1.5px solid color-mix(in srgb, var(--stamp-ink) 55%, transparent);
-  color: color-mix(in srgb, var(--stamp-ink) 55%, var(--text-primary));
-  background: color-mix(in srgb, var(--stamp-ink) 12%, transparent);
-  transform: rotate(var(--stamp-tilt, 0deg));
-}
-.sbook__stamp--missed {
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
-  background: transparent;
-  color: var(--text-secondary);
-  opacity: 0.6;
-}
-.sbook__stamp--future {
-  border-color: transparent;
-  background: transparent;
-  color: var(--text-secondary);
-  opacity: 0.4;
-}
-.sbook__stamp--today {
-  border-width: 2px;
-  border-color: var(--stamp-ink);
-  background: color-mix(in srgb, var(--stamp-ink) 22%, transparent);
-  animation: stamp-press 0.45s ease-out backwards;
-  animation-delay: 0.4s;
-}
-.sbook__side {
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: var(--sp-5);
-  padding-left: var(--sp-5);
-  border-left: 1px solid var(--surface-line);
-}
-.sbook__month {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
-}
-.sbook__month-jp {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-title);
-  letter-spacing: var(--tr-name);
-}
-.sbook__figs {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-5);
-}
-
-/* A bare figure — large numeral, small unit inline, caps label
-   beneath — off any lattice. The lattice's own cell is .record. */
-.fig {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-  min-width: 0;
-}
-.fig__v {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-2);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-heading);
-  line-height: 1;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-.fig__u {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-.fig__u[lang="ja"] { font-family: var(--font-jp); font-weight: 700; }
-.fig__l {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
 /* The tally beside a section title — data, so tracked and tabular
    against the serif heading. */
 .section-header__count {
@@ -7203,50 +7050,6 @@ textarea:focus-visible {
   .pass__avatar { font-size: 1.4rem; inset: 8px; }
   /* A long username on a 390px card: a rung down, and allowed to break. */
   .pass__holder .profile-card__name { font-size: var(--fs-title); min-width: 0; overflow-wrap: anywhere; }
-  .sbook { grid-template-columns: 1fr; padding: var(--sp-5); }
-  .sbook__dows,
-  .sbook__grid { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--sp-2); }
-  /* The margin note moves under the sheet: the month on its own line,
-     the three figures in a row beneath it. */
-  .sbook__side {
-    gap: var(--sp-4);
-    padding-left: 0;
-    padding-top: var(--sp-4);
-    border-left: 0;
-    border-top: 1px solid var(--surface-line);
-  }
-  .sbook__figs { flex-flow: row wrap; justify-content: space-between; gap: var(--sp-4) var(--sp-5); }
-  .fig__v { font-size: var(--fs-title); }
-}
-
-
-/* ══ The profile's composition ══════════════════════════════
-   One column of inserts, no section headings: the pass names the
-   screen, and every block under it is an object that names itself — a
-   stamp sheet, a lattice of records with the door to 統計 set into it,
-   a ledger of lines, a ranking board (DESIGN.md, "Say less"). The
-   rhythm between blocks is set once here; the blocks carry no margins
-   of their own (the pass's and the flip's are zeroed at the end of the
-   sheet, after the rules they override).
-
-   Row two pairs the stamp book with the records — how often you turn
-   up, against what it added up to. Under 1000px the pair stacks: a
-   seven-column sheet needs its own room, and a tablet-width row
-   squeezes it. The records take the sheet's height; see .records, at
-   the end of the sheet with the rest of the 定期入れ round. */
-.profile-blocks {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-9);
-}
-.profile-row2 {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-6);
-  align-items: stretch;
-}
-@media (min-width: 1000px) {
-  .profile-row2 { grid-template-columns: 1fr 1fr; }
 }
 
 /* ══ 番付 — the ranking board ═══════════════════════════════ */
@@ -7255,17 +7058,6 @@ textarea:focus-visible {
   border: 1px solid var(--surface-line);
   border-radius: var(--surface-radius);
   overflow: hidden;
-}
-/* The one line on the board you can act on: who is directly ahead and
-   by how much. */
-.banzuke__chase {
-  margin: 0;
-  padding: 13px 18px;
-  border-top: 1px solid var(--surface-line);
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  text-align: center;
 }
 
 /* The board's head: 番付 and its caption, with the 今週/通算 toggle
@@ -7325,30 +7117,9 @@ textarea:focus-visible {
 .seg--full .seg__opt { flex: 1; justify-content: center; align-items: center; height: 40px; }
 .seg--kaiseki .seg__opt--on { background: color-mix(in srgb, var(--line-kaiseki) 14%, transparent); }
 
-/* 東 and 西 — the two sides of a real 番付, the top half of the list on
-   the east. It is what lets the board take the column's full width
-   honestly instead of stretching six short rows across it. */
-.bz__sides { display: grid; grid-template-columns: 1fr 1fr; }
-.bz__side { min-width: 0; }
-.bz__side + .bz__side { border-left: 1px solid var(--surface-line); }
-.bz__side-head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-5) var(--sp-2);
-}
-.bz__side-jp {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-body);
-  color: var(--text-secondary);
-}
-
 @media (max-width: 560px) {
   .bz__head { flex-wrap: wrap; gap: var(--sp-3); }
   .seg { margin-left: 0; }
-  .bz__sides { grid-template-columns: 1fr; }
-  .bz__side + .bz__side { border-left: 0; border-top: 1px solid var(--surface-line); }
 }
 
 
@@ -8406,607 +8177,6 @@ textarea:focus-visible {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Settings panel — refined
-   ═══════════════════════════════════════════════════════════ */
-
-.settings-container {
-  padding: 48px 24px 88px;
-  /* 1040px, the width Settings.dc.html gives this page. It was 640,
-     which is the reading measure a prose column wants and the wrong
-     one for a control panel: the sound mixer is eight rows of
-     label + track + value and it was being asked to fit in half the
-     room the artboard gives it. */
-  max-width: 1040px;
-  margin: 0 auto;
-}
-
-/* ── 窓口 — settings as the service counter ──────────────────
-   案三 of the settings round: a rail of sections on the left, one slip
-   at a time on the right. The flat two-up page it replaces put the
-   eight-row mixer beside two one-line selects and had nowhere for a
-   sixth concern to go; the counter scales by adding a rail item.
-   Every pane reuses the same .settings-card / .settings-row material
-   the flat page already had — only the room around them changed. */
-.stg-counter {
-  display: grid;
-  grid-template-columns: 230px minmax(0, 1fr);
-  gap: var(--sp-6);
-  align-items: start;
-}
-.stg-rail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-}
-.stg-rail__item {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
-  border: 1px solid transparent;
-  border-radius: var(--r-card);
-  background: transparent;
-  color: var(--text-secondary);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-}
-.stg-rail__item:hover,
-.stg-rail__item:focus-visible {
-  color: var(--text-primary);
-  background: var(--bg-card-hover);
-  filter: none;
-}
-/* The open counter: filled surface, and the pass's own ink down its
-   edge — this screen belongs to the holder, so the rail marks itself
-   the way the leaderboard marks "you", never with a line pigment. */
-.stg-rail__item[aria-selected="true"] {
-  color: var(--text-primary);
-  background: var(--surface);
-  border-color: var(--surface-line);
-  box-shadow: inset 3px 0 0 var(--pass-ink);
-}
-.stg-rail__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-body); }
-.stg-rail__latin {
-  margin-left: auto;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  opacity: 0.6;
-  text-align: right;
-}
-.stg-panes { min-width: 0; }
-
-/* ── The slip ───────────────────────────────────────────────
-   The card carries its own paired heading inside, exactly as the
-   artboard draws it — jp serif beside the plain-language h2, a
-   hairline under both — rather than a SectionHeader floating above a
-   bare card. Rows inside give up their side padding; the slip's own
-   frame provides it once. */
-.stg-slip { padding: var(--sp-6); }
-/* The slip is also .settings-card, whose display: flex OUTRANKS the
-   `hidden` attribute — author display always beats the UA's
-   [hidden] { display: none }. Without this rule every counter's slip
-   rendered at once and the rail looked dead. Pinned by computed style
-   in SettingsScreen.browser.test.jsx, because asserting the attribute
-   alone is exactly how it shipped broken. */
-.stg-slip[hidden] { display: none; }
-.stg-slip__head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
-  padding-bottom: var(--sp-4);
-  margin-bottom: var(--sp-2);
-  border-bottom: 1px solid color-mix(in srgb, var(--surface-line) 60%, transparent);
-}
-.stg-slip__jp {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-title);
-  letter-spacing: var(--tr-name);
-}
-.stg-slip__latin {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.stg-slip__aside { margin-left: auto; }
-.stg-slip .settings-row {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-/* A row whose control is wider than half the card (the three-way
-   theme choice, the preset pair) wraps under its label instead of
-   crushing it. */
-.stg-row--wrap { flex-wrap: wrap; }
-
-/* The second register every counter uses: what a control DOES, in
-   plain words under its name. A settings screen must say exactly
-   what a button will do. */
-.stg-hint {
-  display: block;
-  font-size: var(--fs-caption);
-  color: var(--text-secondary);
-  font-weight: 400;
-  max-width: 46ch;
-}
-
-/* ── 音 — the presets over the mixer ──
-   A bare row of two, no label, per the artboard: each button carries
-   its own caption. */
-.stg-presets { display: flex; justify-content: flex-start; gap: var(--sp-3); flex-wrap: wrap; }
-.stg-preset {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-4);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-}
-.stg-preset:hover, .stg-preset:focus-visible {
-  color: var(--text-primary);
-  border-color: var(--text-secondary);
-  filter: none;
-}
-.stg-preset--on {
-  border-color: color-mix(in srgb, var(--accent2) 55%, transparent);
-  background: color-mix(in srgb, var(--accent2) 10%, transparent);
-  color: var(--text-primary);
-}
-.stg-preset__jp { font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-primary); }
-
-/* ── 学習 — the level as the map's own five-stop strip ── */
-.stg-lvlstrip {
-  position: relative;
-  /* Basis 280 decides WHERE it lives (beside the label when the row
-     has room, on its own line when not); min-width 0 lets the strip
-     then shrink to the line it owns. A hard 280px MINIMUM was what
-     pushed N1 out of the card on phones — the stops sit at
-     percentages and work at any width. */
-  flex: 1 1 280px;
-  min-width: 0;
-  max-width: 460px;
-  height: 54px;
-  /* Half a stop of inset on each side, so the end stops' 28px circles
-     (and the N5/N1 captions under them) stay inside the strip instead
-     of clipping at the slip's edge on narrow screens. */
-  margin-inline: 14px;
-}
-.stg-lvlstrip__rail {
-  position: absolute;
-  top: 13px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--pass-ink) 55%, var(--border));
-}
-.stg-lvlstrip__slot {
-  position: absolute;
-  top: 0;
-  /* --stop-x is set inline per stop (SettingsScreen's LevelStrip);
-     the 0% fallback keeps a styleless slot at the first stop instead
-     of silently dropping the whole declaration. */
-  left: var(--stop-x, 0%);
-  transform: translateX(-50%);
-}
-.stg-lvlstrip__stop {
-  position: relative;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--pass-ink) 55%, var(--border));
-  background: var(--surface);
-  cursor: pointer;
-}
-.stg-lvlstrip__stop:hover,
-.stg-lvlstrip__stop:focus-visible { border-color: var(--text-secondary); filter: none; }
-/* 現在地 — the same red mark every LevelSelector already prints. */
-.stg-lvlstrip__stop[aria-checked="true"] {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
-}
-.stg-lvlstrip__stop:disabled { opacity: 0.6; cursor: default; }
-.stg-lvlstrip__cap {
-  position: absolute;
-  top: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-.stg-lvlstrip__stop[aria-checked="true"] .stg-lvlstrip__cap { color: var(--text-primary); }
-
-/* ── 学習 — the pace as the 種別 ladder ──
-   Three equal chips sharing the control column's full width (capped
-   to the level strip's own bound so the two rows align), never a
-   ragged 2+1 wrap. */
-.stg-paces,
-.stg-scales {
-  display: flex;
-  gap: var(--sp-3);
-  /* Same wrap-then-shrink contract as the level strip above. */
-  flex: 1 1 280px;
-  min-width: 0;
-  max-width: 460px;
-}
-.stg-pace,
-.stg-scale {
-  flex: 1 1 0;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 2px;
-  padding: var(--sp-3) var(--sp-4);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-.stg-pace:hover, .stg-pace:focus-visible,
-.stg-scale:hover, .stg-scale:focus-visible { border-color: var(--text-secondary); filter: none; }
-.stg-pace--on,
-.stg-scale--on {
-  border-color: color-mix(in srgb, var(--accent2) 55%, transparent);
-  background: color-mix(in srgb, var(--accent2) 10%, transparent);
-}
-.stg-pace:disabled,
-.stg-scale:disabled { opacity: 0.6; cursor: default; }
-.stg-pace__jp,
-.stg-scale__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); color: var(--text-primary); }
-.stg-pace__n,
-.stg-scale__n {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.stg-pace--on .stg-pace__n,
-.stg-scale--on .stg-scale__n { color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary)); }
-
-/* The chosen bar spelled out, in its own words and its own order (see
-   SettingsScreen's RatingScaleRow), with the reassurance under it that
-   a shorter bar is not a different scale. Ambient inks: this sits on
-   the slip, not on a panel. */
-.stg-scale__words {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  color: var(--text-primary);
-}
-.stg-scale__hint {
-  font-size: var(--fs-caption);
-  line-height: 1.5;
-  color: var(--text-secondary);
-}
-
-/* ── データ — the two-step reset and its outcomes ── */
-.stg-danger-btn {
-  padding: var(--sp-2) var(--sp-5);
-  border: 1px solid color-mix(in srgb, var(--danger) 60%, transparent);
-  border-radius: var(--r-card);
-  background: transparent;
-  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.stg-danger-btn:hover, .stg-danger-btn:focus-visible {
-  background: color-mix(in srgb, var(--danger) 12%, transparent);
-  filter: none;
-}
-/* When a row wraps, its control keeps the right edge instead of
-   falling under the first letter of the label — the row's grammar
-   (label left, control right) survives the fold. The stack row (the
-   mixer owns its whole line), the preset pair (a left-flush cluster)
-   and the level strip (whose inline margins ARE its clip guard) are
-   the three that must not take an auto margin. Placed after every
-   base rule it outranks, per no-descending-specificity. */
-.stg-slip .settings-row:not(.settings-row--stack, .stg-presets) > :last-child:not(:only-child, .stg-lvlstrip) {
-  margin-left: auto;
-}
-/* The presets are one cluster, left-flush — bare .settings-row's
-   space-between (a later rule, so it wins on source order) was
-   scattering the pair to opposite ends of the card. */
-.stg-slip .stg-presets { justify-content: flex-start; }
-
-.stg-confirm { display: inline-flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
-.stg-confirm__q {
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
-}
-.stg-done { font-size: var(--fs-sm); font-weight: 600; color: var(--success); }
-
-/* ── 行先 — the destination counter ──
-   Two borrowed instruments and almost no CSS of its own, on purpose:
-   the contract cells are the pass's own (.jour-grid), the board is
-   the office's own (.onb-board and friends), and what the pass says
-   must be the same drawing as what the counter edits.
-
-   .jour-grid inks with the PANEL family, which is only legible on
-   sumi -- the pass's back gives it that ground, so here the counter
-   gives it the same one rather than re-inking the cells for paper
-   (the ambient inks flip with the theme and the panel inks do not;
-   see DESIGN.md and npm run lint:ink). The hairline it wears on the
-   back separated it from a foot line this slip does not print, so it
-   comes off here. */
-.stg-contract {
-  width: 100%;
-  padding: var(--sp-5);
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border-radius: var(--r-panel);
-}
-/* The open board: the same column rhythm the office's 行先 scene sets
-   around the board, the calling-at strip and the honest line. */
-.stg-goal {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-5);
-  width: 100%;
-}
-.stg-goal__acts {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  flex-wrap: wrap;
-}
-
-/* The destructive rows carry no rail: the red-outlined and red-filled
-   buttons already say danger, and the 3px bar this class used to draw
-   read as a stray stripe once the slips took the rows' side padding
-   away (removed on review of the 窓口 build). The class stays as the
-   semantic hook. */
-
-/* 暗 / 明 / 自動 with every option visible and the current one filled
-   -- a switch showing one icon has to be read twice before it tells
-   you anything, and the old control was showing the destination
-   rather than the state. The third segment is the 窓口 round's 自動:
-   follow the device, which is "no saved key" underneath (see
-   NavControls.ThemeToggle). */
-.theme-choice {
-  display: inline-flex;
-  gap: var(--sp-2);
-}
-.theme-choice__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-2);
-  min-height: 38px;
-  padding-block: var(--sp-2);
-  padding-inline: var(--sp-4);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-}
-.theme-choice__btn:hover { filter: none; color: var(--text-primary); }
-/* The chosen one is a filled charcoal, the pass's ink -- this page
-   belongs to the holder, not to a section, so it borrows no line
-   colour. */
-.theme-choice__btn--on {
-  /* Deepened 30% toward the panel, the same formula .btn-primary uses
-     and the reason it was adopted here: the pass's previous slate at
-     full strength carried --text-on-panel at only 4.32:1, under the
-     floor for the 15px glyph sitting on it. Charcoal would clear the
-     floor raw, but the fill stays on the family formula rather than
-     becoming a special case. */
-  background: color-mix(in srgb, var(--pass-ink) 70%, var(--bg-panel));
-  border-color: color-mix(in srgb, var(--pass-ink) 70%, var(--bg-panel));
-  color: var(--text-on-panel);
-}
-.theme-choice__btn--on:hover { color: var(--text-on-panel); }
-.theme-choice__jp { font-family: var(--font-jp); font-size: var(--fs-body); }
-
-/* One column once the pane can no longer keep its width beside the
-   rail; the rail turns into a row of chips above the slip. The chips
-   keep the PLAIN-LANGUAGE word and drop the Japanese — settings must
-   be readable before the kanji are, and the slip's own paired heading
-   still carries both registers where there is room for the pair. */
-@media (max-width: 900px) {
-  .stg-counter { grid-template-columns: minmax(0, 1fr); }
-  .stg-rail { flex-flow: row wrap; }
-  .stg-rail__item { flex: 1 1 auto; justify-content: center; }
-  .stg-rail__item[aria-selected="true"] { box-shadow: inset 0 -3px 0 var(--pass-ink); }
-  .stg-rail__jp { display: none; }
-  .stg-rail__latin { margin-left: 0; opacity: 1; font-size: var(--fs-caption); }
-}
-
-/* The small screen's buttons speak en/fr only — the bilingual pair
-   needs room, and a phone's segments have none. The kanji register
-   stays on the slip heads. The pace chips flatten to one line so the
-   figure that survives (10 / jour ★) reads as the whole label. */
-@media (max-width: 560px) {
-  .theme-choice__jp,
-  .stg-preset__jp,
-  .stg-pace__jp,
-  .stg-scale__jp { display: none; }
-  .stg-pace,
-  .stg-scale { flex-direction: row; align-items: baseline; justify-content: center; gap: var(--sp-2); }
-}
-
-/* Page header: même langage serif + trait-rouge que .section-header */
-.settings-header {
-  margin-bottom: 40px;
-}
-
-.settings-header__title {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: clamp(1.8rem, 1.4rem + 1.5vw, 2.4rem);
-  letter-spacing: 0.01em;
-  color: var(--text-primary);
-}
-
-.settings-header__rule {
-  height: 3px;
-  width: 40px;
-  background: var(--accent);
-  margin-top: 12px;
-}
-
-/* Card: accent en haut (sceau) au lieu d'une lourde bordure basse */
-.settings-card {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 32px;
-  border-radius: var(--surface-radius);
-  border: 1px solid var(--surface-line);
-  background: var(--surface);
-  overflow: hidden;
-}
-
-/* Row: barre d'accent à gauche au survol, même langage que .choice-row */
-/* `overflow: hidden` is here for the sliding left bar (::before), so
-   anything the row cannot fit is cut rather than wrapped — and French
-   labels ("Se déconnecter de votre compte") are long enough to hit
-   that at 360px. Wrapping lets the control drop under its label
-   instead of the label being sliced off. */
-.settings-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px 16px;
-  /* Uniform, per Settings.dc.html's .row -- it was 18/24/18/28, four
-     different numbers reading as a mistake rather than a rhythm. */
-  padding: var(--sp-7);
-  transition: background 0.15s ease;
-  overflow: hidden;
-}
-.settings-row__label { min-width: 0; overflow-wrap: anywhere; }
-
-.settings-row:hover::before,
-.settings-row:focus-within::before {
-  transform: scaleY(1);
-}
-
-.settings-row:not(:last-child) {
-  border-bottom: 1px solid var(--border);
-}
-
-/* Variante stack (sound mixer) — pas de barre latérale : la rangée
-   porte un instrument entier, pas une paire libellé/contrôle. */
-.settings-row--stack {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 4px;
-  padding: 20px 12px 24px 12px;
-}
-
-.settings-row--stack::before {
-  display: none;
-}
-
-/* The row's primary voice, on the scale: every label a counter prints
-   is this one rung, weight 600 — the same size the buttons beside it
-   speak, so nothing in a row is bigger without a reason. (15px/500
-   first, then --fs-body 600, both read off against everything else
-   in the slips; --fs-sm is where the row settles.) */
-.settings-row__label {
-  color: var(--text-primary);
-  font-size: var(--fs-sm);
-  font-weight: 600;
-}
-
-/* Labels de section ("Sound", "Theme", "Language") */
-.settings-row__label--section {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: 0.02em;
-}
-
-/* Boutons dans une settings-row: fond transparent pour
-   s'harmoniser avec var(--bg-card), et flex centré pour les SVG */
-.settings-row .btn-nav {
-  background: transparent;
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.settings-row .btn-nav:hover,
-.settings-row .btn-nav:focus-visible {
-  background: var(--bg-card-hover);
-}
-
-.btn-nav--off {
-  opacity: 0.45;
-}
-
-/* Sign out: hover inversé vermillon */
-/* Settings.dc.html draws this FILLED, not outlined: the danger colour
-   as the ground with the panel ink on it. As an outline it was danger
-   used as text and measured 2.11:1. It is .btn-primary now with the
-   pigment substituted, the same substitution the deck and exam delete
-   buttons make. */
-.settings-signout {
-  --line-color: var(--danger);
-  font-size: 13px;
-  border-radius: 8px;
-  font-family: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.settings-signout:hover {
-  background: var(--danger);
-  color: var(--text-on-panel);
-  filter: none;
-}
-
-/* ── Settings' 学習 card ─────────────────────────────────────
-   Deliberately carries NONE of the office's own dress: the card uses
-   the Settings page's native rows and .lang-select controls (see
-   LearningCard's header comment). Only the inline retake flow below
-   borrows onboarding pieces, because it literally IS the placement
-   test. An earlier accent frame + segmented buttons here read as a
-   different app grafted into Settings and were removed on review.
-   Lived in onboarding.css until plan 042; it is the Settings page's
-   own family and belongs beside it. */
-.settings-redo-result { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-.settings-redo-actions { display: flex; align-items: center; gap: 16px; }
-
-/* ═══════════════════════════════════════════════════════════
    Sound mixer — eight uniform rows, master first
    ═══════════════════════════════════════════════════════════ */
 
@@ -9088,45 +8258,6 @@ textarea:focus-visible {
   font-weight: 700;
   text-align: right;
   font-variant-numeric: tabular-nums;
-}
-
-/* ── Language dropdown ──────────────────────────────────────
-   Shares .btn-nav's background/color (dark-panel default, plus the
-   .settings-row .btn-nav card-context override above) — this just
-   strips the native <select> chrome and draws a themed two-stroke
-   arrow with currentColor, so it stays correct in both contexts and
-   both themes without a separate icon asset. */
-/* The artboard's .sel: a real control box, not the browser's. Nothing in
-   this sheet styles a bare <select>, so this one was rendering at the
-   UA's 30px -- square corners, and under the 44px minimum target. */
-.lang-select {
-  box-sizing: border-box;
-  min-height: 44px;
-  padding-block: 0;
-  padding-inline: var(--sp-4);
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-card);
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: var(--fs-body);
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding-right: 30px;
-  background-image:
-    linear-gradient(45deg, transparent 50%, currentColor 50%),
-    linear-gradient(135deg, currentColor 50%, transparent 50%);
-  background-position:
-    calc(100% - 15px) calc(50% - 2px),
-    calc(100% - 10px) calc(50% - 2px);
-  background-size: 5px 5px, 5px 5px;
-  background-repeat: no-repeat;
-  cursor: pointer;
-}
-.lang-select:focus-visible {
-  outline: 2px solid var(--accent2);
-  outline-offset: 2px;
 }
 
 /* An icon toggle on the sumi bar — the writing drill's switch. A
@@ -11890,30 +11021,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   }
 }
 
-/* ── Shared nav control button (mute / lang switcher) ─────── */
-/* Consolidated — this used to be defined twice (here and further
-   down, right after the rating bar), with the second copy silently
-   winning on cascade order for `.btn-nav`'s own font-size/padding.
-   One definition now instead of two that could drift apart. */
-.btn-nav {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-on-panel);
-  font-size: 14px;
-  padding: 6px 12px;
-}
-/* Square padding for a square glyph, and line-height:0 so the button
-   is exactly the icon plus its padding. An <svg> is inline-level: it
-   sits on the text baseline with descender space reserved under it, so
-   `align-items: center` centres a line box that is taller than the
-   glyph and the icon ends up sitting high. The `display: block` below
-   takes the icon out of that line box entirely. */
-.btn-nav--icon {
-  padding: 8px;
-  line-height: 0;
-}
-.btn-nav svg { display: block; }
-.btn-nav--lang { font-size: 14px; padding: 6px 12px; }
-
 /* ── Landing screen ───────────────────────────────────────────
    The front door for signed-out visitors, shown once before
    AuthScreen. Reuses the station's own vocabulary — sumi hero with
@@ -12536,258 +11643,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 :root[data-theme="light"] .study-topbar-drawing-toggle--active {
   color: var(--text-on-panel);
 }
-/* ── Stats screen ─────────────────────────────────────────
-   Ledger, not dashboard: numbers sit in a hairline shoji-lattice
-   (same 1px-gap-on-border technique as .pf-ledger) rather than
-   floating rounded/shadowed cards, and every heading keeps the
-   serif-JP-title + seal-red-rule pairing used across the app's
-   selector headers. Data (counts, percentages) consistently uses
-   --font-display — the same tracked sans the rest of the app
-   reserves for numerals/index marks — while set names and prompt
-   words keep --font-jp, so the ink/kana vs. ledger/number split
-   reads the same way it does everywhere else in the app. */
-.stats-reset-btn {
-  background: transparent;
-  color: var(--danger);
-  border: 1px solid var(--danger);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  padding: 8px 16px;
-}
-.stats-reset-btn:hover {
-  background: var(--danger);
-  color: var(--text-on-panel);
-  filter: none;
-}
-
-.stats-container { padding: 48px 24px 88px; }
-
-/* One line of orientation under a section header, for the two sections
-   that are tools rather than readouts. A control you have to poke at
-   to understand is a control most people won't poke at. */
-.stats-lede {
-  margin: -6px 0 18px;
-  max-width: 70ch;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--text-secondary);
-}
-
-/* ── The headline band ─────────────────────────────────────
-   Six figures, each with a second line, in the same flush lattice the
-   rest of the app uses for card grids. Every plaque takes its accent
-   from the state it reports — the same six colours the progress bars,
-   seals and rating buttons use elsewhere — so a number's colour means
-   the same thing here as it does on a quiz card. */
-.headline {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  margin-bottom: 48px;
-}
-
-.plaque {
-  --plaque-color: var(--text-primary);
-  position: relative;
-  background: var(--surface);
-  padding: 22px 18px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.plaque--streak   { --plaque-color: var(--warning); }
-.plaque--due      { --plaque-color: var(--state-due); }
-.plaque--mastered { --plaque-color: var(--state-mastered); }
-.plaque--accuracy { --plaque-color: var(--success); }
-.plaque--learning { --plaque-color: var(--state-learning); }
-.plaque--new      { --plaque-color: var(--state-new); }
-
-.plaque__rule {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--plaque-color);
-  opacity: 0.5;
-}
-
-.plaque__top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 38px;
-}
-.plaque__value {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1.6rem, 1.1rem + 1.5vw, 2.2rem);
-  line-height: 1;
-  /* Plain ink, per Stats.dc.html: its lattice sets every .fig in the
-     ambient ink and colours exactly ONE figure -- DUE TODAY. The
-     coloured figure is the exception that makes the day's workload
-     findable at a glance; six coloured figures is a palette, not a
-     signal, and it was also what dragged them all under the contrast
-     floor. The 2px --plaque-color rule along each cell's top edge still
-     carries the colour coding, which is where DESIGN.md wants it: an
-     edge, not a numeral. */
-  color: var(--text-primary);
-}
-/* The single coloured figure in Stats.dc.html's lattice -- mixed toward
-   the ink like every other state colour used as text, because raw it
-   measured 2.58:1 against the cell at 35px, under even the 3:1 a large
-   figure gets. */
-.plaque--due .plaque__value { color: color-mix(in srgb, var(--plaque-color) 55%, var(--text-primary)); }
-.headline__flame { margin-bottom: 2px; }
-
-.plaque__ring {
-  width: 34px;
-  height: 34px;
-  margin-left: auto;
-  transform: rotate(-90deg);
-  flex-shrink: 0;
-}
-.plaque__ring-track { fill: none; stroke: var(--border); stroke-width: 3; }
-.plaque__ring-fill {
-  fill: none;
-  stroke: var(--plaque-color);
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-.plaque__icon {
-  margin-left: auto;
-  color: color-mix(in srgb, var(--plaque-color) 55%, var(--text-primary));
-  opacity: 0.45;
-  line-height: 0;
-}
-
-.plaque__label {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-primary);
-}
-.plaque__note {
-  font-size: 11.5px;
-  line-height: 1.4;
-  color: var(--text-secondary);
-}
-
-/* ── 稽古暦 — the practice calendar ─────────────────────────
-   Half a year of days, dyed in ai-iro: the indigo a cloth takes darker
-   the more times it goes back in the vat, which is exactly what this
-   chart is measuring. Scrolls horizontally on narrow screens rather
-   than shrinking the squares below the size of a thumb. */
-.calendar-panel {
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--surface-radius);
-  padding: 20px 20px 14px;
-  margin-bottom: 48px;
-}
-.calendar-panel__scroll {
-  overflow-x: auto;
-  padding-bottom: 6px;
-}
-
-.calendar {
-  --cell: 15px;
-  --cell-gap: 3px;
-  display: inline-block;
-  min-width: 100%;
-}
-
-.calendar__months {
-  display: grid;
-  grid-template-columns: repeat(var(--weeks), calc(var(--cell) + var(--cell-gap)));
-  height: 13px;
-  margin-bottom: 3px;
-  font-family: var(--font-display);
-  font-size: 9.5px;
-  letter-spacing: 0.04em;
-  color: var(--text-secondary);
-}
-.calendar__month { white-space: nowrap; }
-
-.calendar__grid { display: flex; gap: var(--cell-gap); }
-.calendar__week {
-  display: flex;
-  flex-direction: column;
-  gap: var(--cell-gap);
-}
-
-/* The ramp is mixed toward --bg-card, the surface the calendar is
-   actually drawn on, and never toward --bg-panel: that token is the
-   app's dark ink panel in *both* themes, so an unworked day came out
-   near-black on light paper and the whole year read as a solid block
-   with a few blue holes in it. */
-.calendar__day {
-  width: var(--cell);
-  height: var(--cell);
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--border) 55%, var(--bg-card));
-}
-.calendar__day--l1 { background: color-mix(in srgb, var(--accent4) 30%, var(--bg-card)); }
-.calendar__day--l2 { background: color-mix(in srgb, var(--accent4) 55%, var(--bg-card)); }
-.calendar__day--l3 { background: color-mix(in srgb, var(--accent4) 78%, var(--bg-card)); }
-.calendar__day--l4 { background: var(--accent4); }
-.calendar__day:not(.calendar__day--future):hover {
-  outline: 1.5px solid var(--text-primary);
-  outline-offset: 1px;
-}
-/* Days that haven't happened. Drawn as an empty frame rather than a
-   zero square, so the calendar doesn't claim you skipped tomorrow. */
-.calendar__day--future {
-  background: transparent;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border) 65%, transparent);
-}
-
-.calendar-panel__footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 12px;
-}
-.calendar-panel__reading {
-  font-family: var(--font-display);
-  font-size: 11.5px;
-  color: var(--text-secondary);
-}
-.calendar-panel__legend {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-left: auto;
-}
-.calendar-panel__best {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  color: color-mix(in srgb, var(--accent4) 55%, var(--text-primary));
-}
-.calendar-panel__scale {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-.calendar-panel__scale .calendar__day { width: 11px; height: 11px; }
-.calendar-panel__scale-label,
-.calendar-panel__scale-max {
-  font-family: var(--font-display);
-  font-size: 9.5px;
-  color: var(--text-secondary);
-}
-.calendar-panel__scale-max { margin-left: 4px; }
 
 /* ── The Explorer ──────────────────────────────────────────
    Controls on top, a totals line that follows the current slice, then
@@ -13060,136 +11915,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .composition__seg--mastered { background: var(--state-mastered); }
 .composition__seg--learning { background: var(--state-learning); }
 
-/* ── Forecast ──────────────────────────────────────────────
-   Bars are each day's own pile; the pale block behind them is the
-   running total, because "what if I skip a day" is the question a
-   forecast is actually asked. */
-.forecast {
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--surface-radius);
-  padding: 20px 20px 14px;
-  margin-bottom: 48px;
-}
-.forecast__chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  height: 158px;
-}
-.forecast__day {
-  flex: 1;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-}
-.forecast__count {
-  height: 14px;
-  font-family: var(--font-display);
-  font-size: 10.5px;
-  color: var(--text-secondary);
-}
-.forecast__bars {
-  position: relative;
-  flex: 1;
-  width: 100%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.forecast__cumulative {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: color-mix(in srgb, var(--state-due) 14%, transparent);
-  border-top: 1px solid color-mix(in srgb, var(--state-due) 40%, transparent);
-}
-.forecast__bar {
-  position: relative;
-  width: 62%;
-  background: var(--state-due);
-  border-radius: 2px 2px 0 0;
-}
-/* Today already contains everything overdue — the backend folds late
-   cards into day zero — so it is a backlog, not a plan, and gets the
-   seal red the rest of the app uses for "now". */
-.forecast__day--today .forecast__bar { background: var(--accent); }
-.forecast__label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: var(--font-display);
-  font-size: 9.5px;
-  color: var(--text-secondary);
-}
-.forecast__day--today .forecast__label { color: color-mix(in srgb, var(--accent) 55%, var(--text-primary)); }
-.forecast__date { opacity: 0.7; }
-
-.forecast__legend {
-  display: flex;
-  gap: 18px;
-  margin-top: 12px;
-}
-.forecast__legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-display);
-  font-size: 10.5px;
-  color: var(--text-secondary);
-}
-.forecast__legend-item::before {
-  content: '';
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-}
-.forecast__legend-item--bar::before { background: var(--state-due); }
-.forecast__legend-item--cum::before {
-  background: color-mix(in srgb, var(--state-due) 14%, transparent);
-  border: 1px solid color-mix(in srgb, var(--state-due) 40%, transparent);
-}
-
-/* ── 調子 — the rhythm panels ──────────────────────────────── */
-.rhythm-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  margin-bottom: 48px;
-}
-.rhythm-panel {
-  background: var(--surface);
-  padding: 18px 18px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.rhythm-panel__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-}
-.rhythm-panel__title {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 0.98rem;
-}
-.rhythm-panel__note,
-.rhythm-panel__foot {
-  font-family: var(--font-display);
-  font-size: 10.5px;
-  color: var(--text-secondary);
-  text-align: right;
-}
-.rhythm-panel__foot { text-align: left; }
-
 /* Twenty-four columns with the small hours shaded behind them, so a
    late-night habit reads as late-night and not just as a tall bar. */
 .clock {
@@ -13400,51 +12125,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 }
 .trouble__lapses-unit { font-size: 9px; margin-left: 1px; opacity: 0.7; }
 .trouble__go { flex-shrink: 0; color: var(--text-secondary); opacity: 0.45; }
-
-/* ── Profile screen ────────────────────────────────────────
-   Same visual language as Stats (hairline lattices, serif-JP names,
-   --font-display for numbers), with the one gaming touch it keeps —
-   the medal colours on the 番付's top three — flat and hairline-bound
-   rather than glossy, so it still reads as épuré. */
-.profile-container { padding: 48px 24px 88px; }
-
-/* Shown only when a real fetch failure forced the screen to fall
-   back to placeholder data — quiet by design (hairline + muted
-   warning tint, no icon-heavy alert box) so it reads as a small
-   caveat rather than an error state the user needs to act on. */
-.profile-stale-notice {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  color: var(--warning);
-  background: color-mix(in srgb, var(--warning) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
-  border-radius: 8px;
-  padding: 8px 14px;
-  margin-bottom: 18px;
-}
-.profile-stale-notice__glyph {
-  font-size: 13px;
-  line-height: 1;
-}
-
-.profile-card__ring-track { fill: none; stroke: var(--border); stroke-width: 4; }
-/* On the pass — a charcoal card in both themes since 案一 — the
-   shared --border token is a paper hairline and vanishes; the track
-   takes the card's own faint white instead. Placed after the base
-   rule it overrides, not beside .pass, per no-descending-specificity. */
-.pass .profile-card__ring-track { stroke: rgba(255, 255, 255, 0.14); }
-/* Gold, like the balance bar under it: the ring was 瑠璃 --accent9, a line pigment (翻訳's) on an object
-   about the learner, which DESIGN.md's colour families forbid — the
-   same reasoning that already moved the top bar's ring off it. */
-.profile-card__ring-fill {
-  fill: none;
-  stroke: var(--accent2);
-  stroke-width: 4;
-  stroke-linecap: round;
-}
-
 .profile-card__name {
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
@@ -13520,80 +12200,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 
 /* Leaderboard */
 .leaderboard-card { padding: 0; }
-
-.leaderboard-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-}
-.leaderboard-row:last-child { border-bottom: none; }
-
-/* The current user's row gets a seal-red inset stroke rather than a
-   full background swap — consistent with how the rest of the app
-   marks "this one" (selected MCQ choice, active tab) with a single
-   accent edge instead of an entire fill change. */
-.leaderboard-row--me { box-shadow: inset 3px 0 0 var(--accent); background: var(--overlay-hover); }
-
-.leaderboard-row__rank {
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 13px;
-  background: var(--bg-panel);
-  color: var(--text-on-panel-soft);
-}
-/* Medal tones for the top 3 — kanji numerals in a filled disc rather
-   than 🥇🥈🥉, so it stays inside the app's ink/pigment language. */
-.leaderboard-row__rank--1 { background: var(--medal-gold);   color: var(--text-on-fill); border-color: transparent; }
-.leaderboard-row__rank--2 { background: var(--medal-silver); color: var(--text-on-fill); border-color: transparent; }
-.leaderboard-row__rank--3 { background: var(--medal-bronze); color: var(--text-on-fill); border-color: transparent; }
-
-.leaderboard-row__name {
-  flex: 1;
-  min-width: 0;
-  font-family: var(--font-jp);
-  font-weight: 700;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.leaderboard-row__level {
-  flex-shrink: 0;
-  font-family: var(--font-display);
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
-.leaderboard-row__xp {
-  flex-shrink: 0;
-  min-width: 76px;
-  text-align: right;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--text-primary);
-}
-
-/* The "···" divider between the visible top N and the current user's
-   own row when they're further down the list — a gap, not a row, so
-   it's centered and doesn't try to align to the rank/name/xp columns. */
-.leaderboard-row__gap {
-  justify-content: center;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  letter-spacing: 0.2em;
-  padding: 8px 20px;
-}
 
 
 /* ── Selected-radical header ───────────────────────────────
@@ -15652,11 +14258,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
      line takes one and the ellipsis goes back to being a backstop. */
   .explorer-leaf__group { white-space: normal; }
   .explorer-leaf__acc, .explorer-leaf__size { display: none; }
-  .forecast__chart { height: 130px; gap: 3px; }
-  /* Fourteen numbers across a phone collide into one grey smear —
-     the bar heights still rank the days, and the exact figure is a
-     tap away on the tooltip. */
-  .forecast__count { display: none; }
 
   .profile-card { flex-direction: column; text-align: center; gap: 18px; }
   .profile-card__info { width: 100%; }
@@ -15725,7 +14326,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   /* The count is the first thing to go: the number of decks is already
      visible as the number of cards below it. */
   .decks-index-bar__count { display: none; }
-  .stats-container { padding: 40px 16px 72px; }
   /* A heading and the thing it names have to read as one block, and on
      a phone 24px of gap under the title was enough for them to stop
      doing that — what followed started looking like the next section
@@ -15735,17 +14335,9 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
      gap ABOVE stays large — that one separates two sections from each
      other and is doing real work. */
   .section-header { margin: 44px 0 12px; }
-  .plaque { padding: 18px 14px 14px; }
-  .calendar-panel,
-  .forecast { padding: 16px 14px 12px; }
-  .rhythm-panel { padding: 16px 14px; }
   .trouble__row { padding: 12px; gap: 10px; }
-
-  .profile-container { padding: 40px 16px 72px; }
   .profile-card { padding: 24px 20px; }
   .badges-grid { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
-  .leaderboard-row { padding: 12px 16px; gap: 10px; }
-  .leaderboard-row__level { display: none; }
 }
 
 @media (max-width: 480px) {
@@ -15801,14 +14393,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
     flex: 1;
     overflow: hidden; /* prevent scrolling */
   }
-
-  /* The rating bar's dock and the stage's padding are the 768px
-     block's, above; this block keeps only what is specific to a card
-     at phone width. */
-
-  /* Two plaques per row rather than one tall column of six. */
-  .headline { grid-template-columns: repeat(2, 1fr); }
-  .stats-reset-btn { font-size: 11px; padding: 6px 12px; }
 
   .rdg-breakdown-card-stage { max-width: 100%; }
   .rdg-breakdown-nav { width: 34px; height: 34px; }
@@ -17931,52 +16515,6 @@ html { scrollbar-gutter: stable; }
   --jour-st-ink: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel));
 }
 
-/* ── The flip ────────────────────────────────────────────────
-   Both faces stack in one grid cell, so the container's height is the
-   taller face and the page never jumps on turn. The hidden face drops
-   to visibility:hidden AFTER the half-turn (0.3s of the 0.6s flip),
-   which is also what removes it from the tab order — no tabIndex
-   bookkeeping across the pass's own controls. */
-.jour-flip {
-  perspective: 1100px;
-  /* The pass's own 44px bottom rhythm moves onto this container (the
-     zeroing rule lives up in the pass section, beside its family, for
-     the specificity-order guard) — or the two faces disagree on
-     height. */
-  margin-bottom: var(--sp-8);
-}
-.jour-flip__inner {
-  display: grid;
-  transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.3, 1);
-}
-.jour-flip--flipped .jour-flip__inner { transform: rotateY(180deg); }
-.jour-flip__face {
-  grid-area: 1 / 1;
-  min-width: 0;
-  backface-visibility: hidden;
-  transition: visibility 0s 0.3s;
-}
-.jour-flip__face--front { cursor: pointer; }
-.jour-flip--flipped .jour-flip__face--front { visibility: hidden; }
-.jour-flip__face--back {
-  transform: rotateY(180deg);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-5);
-  padding: var(--sp-7) var(--sp-7) var(--sp-6);
-  background: var(--bg-panel);
-  border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
-  border-radius: var(--r-identity);
-  color: var(--text-on-panel);
-  overflow: hidden;
-}
-.jour-flip:not(.jour-flip--flipped) .jour-flip__face--back { visibility: hidden; }
-@media (prefers-reduced-motion: reduce) {
-  .jour-flip__inner { transition: none; }
-  .jour-flip__face { transition: none; }
-}
-
 /* ── The front's one-line footer ─────────────────────────────
    Status word · gold 有効期限 · the turn-over control. Rides the
    pass's existing footer slot, on the pass's sumi. */
@@ -18023,22 +16561,6 @@ html { scrollbar-gutter: stable; }
   font-size: var(--fs-sm);
   color: var(--accent2);
 }
-.jour-line__turn {
-  margin-left: auto;
-  padding: var(--sp-1) 0;
-  background: none;
-  border: none;
-  color: var(--text-on-panel-soft);
-  font-size: var(--fs-caption);
-  font-weight: 400;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.jour-line__turn:hover,
-.jour-line__turn:focus-visible { color: var(--text-on-panel); }
-/* The span, not the button — the control's other half is Latin. */
-.jour-line__turn [lang="ja"] { font-family: var(--font-jp); }
 
 /* ── The back face's head ────────────────────────────────────── */
 .jour-rev__head {
@@ -18047,45 +16569,6 @@ html { scrollbar-gutter: stable; }
   gap: var(--sp-4);
   flex-wrap: wrap;
 }
-.jour-rev__title,
-.jour-rev__status {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
-}
-.jour-rev__title b {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: var(--fs-body);
-}
-.jour-rev__title .jour-cap,
-.jour-rev__status .jour-cap {
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tr-caption);
-  color: var(--text-on-panel-soft);
-}
-.jour-rev__status { margin-left: auto; }
-.jour-rev__status b {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: var(--fs-lead);
-  color: var(--jour-st-ink, var(--text-on-panel));
-}
-.jour-rev__turn {
-  padding: var(--sp-1) 0;
-  background: none;
-  border: none;
-  color: var(--text-on-panel-soft);
-  font-size: var(--fs-caption);
-  font-weight: 400;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.jour-rev__turn:hover,
-.jour-rev__turn:focus-visible { color: var(--text-on-panel); }
 
 /* ── The two-lane track ──────────────────────────────────────
    Positional geometry is deliberately numeric (nothing on the space
@@ -18228,18 +16711,6 @@ html { scrollbar-gutter: stable; }
   top: -8px;
   padding: 0;
 }
-
-/* ── The honest sentence and the two honest moves ───────────── */
-.jour-rev__foot {
-  margin: 0;
-  font-size: var(--fs-sm);
-  line-height: 1.6;
-  color: var(--text-on-panel-soft);
-}
-.jour-rev__foot strong {
-  color: var(--text-on-panel);
-  font-variant-numeric: tabular-nums;
-}
 .jour-rev__actions {
   display: flex;
   gap: var(--sp-3);
@@ -18282,50 +16753,6 @@ html { scrollbar-gutter: stable; }
   font-weight: 700;
 }
 .jour-act strong [lang="ja"] { font-weight: 500; margin-right: var(--sp-2); }
-.jour-rev__none {
-  margin: 0;
-  font-size: var(--fs-sm);
-  color: var(--text-on-panel-soft);
-}
-.jour-rev__office {
-  padding: 0;
-  background: none;
-  border: none;
-  color: var(--text-on-panel);
-  font-size: var(--fs-sm);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.jour-rev__error {
-  margin: 0;
-  font-size: var(--fs-caption);
-  /* On the pass's sumi, the state ink — raw enji sits at 2.6:1. */
-  color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel));
-}
-
-/* ══════════════════════════════════════════════════════════════
-   定期入れ — the profile as a pass holder (the 2026-09 profile round,
-   pruned to a record when the goals, badges, rank and cosmetics went).
-   Everything under the pass is an insert: the stamp book (.sbook, up
-   with the pass family), the records with the door to 統計, the ride
-   ledger, and the 番付 with its two sides (.bz, with the board). This
-   block holds the pieces that had no family to join — the gear on the
-   pass, the ledger, the records, the back face's contract grid — and
-   the composition's two overrides, which must sit after the rules they
-   override. Every ground here is paper except the pass and its back,
-   which are sumi and take the panel inks; Guard 5 holds both.
-   ══════════════════════════════════════════════════════════════ */
-
-/* A shared caption: the Latin half of a pair, at caption size. */
-.pf-cap {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
 
 /* ── The gear on the pass ──────────────────────────────────────
    設定 belongs to the card (config/identity.js), so the card carries
@@ -18338,22 +16765,6 @@ html { scrollbar-gutter: stable; }
   align-items: center;
   gap: var(--sp-3);
 }
-.pass__gear {
-  width: 26px;
-  height: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: var(--r-plate);
-  color: var(--text-on-panel-soft);
-  cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
-}
-.pass__gear:hover,
-.pass__gear:focus-visible { border-color: rgba(255, 255, 255, 0.4); color: var(--text-on-panel); filter: none; }
 
 /* ── 乗車記録 — the ride ledger ────────────────────────────────
    A hairline lattice of the four SRS lines (DESIGN.md: a grid of bare
@@ -18411,8 +16822,7 @@ html { scrollbar-gutter: stable; }
 .pf-line:hover .pf-line__roundel,
 .pf-line:focus-visible .pf-line__roundel { background: color-mix(in srgb, var(--line-color, var(--accent2)) 18%, transparent); }
 .pf-line__names { display: flex; flex-direction: column; min-width: 0; }
-.pf-line__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-body); line-height: 1.2; }
-.pf-line__sen { font-size: var(--fs-caption); color: var(--text-secondary); margin-left: var(--sp-1); }
+.pf-line__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); line-height: 1.2; }
 .pf-line__fig {
   display: flex;
   align-items: baseline;
@@ -18535,63 +16945,7 @@ html { scrollbar-gutter: stable; }
 .record--door:hover .record__chev,
 .record--door:focus-visible .record__chev { opacity: 1; transform: translateX(0); }
 
-/* ── The contract, printed on the back ─────────────────────────
-   乗車駅 · 行先 · 種別 · 発車時刻 · 有効期限 · 発行日 — the cells of the
-   application form (.onb-pass__grid), reprinted on the reverse of the
-   pass they became. Sumi ground, panel inks; the validity date keeps
-   the gold it wears on the front. */
-.jour-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-4) var(--sp-6);
-  padding-top: var(--sp-4);
-  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
-}
-.jour-grid__cell { display: flex; flex-direction: column; gap: var(--sp-1); }
-.jour-grid__k { font-family: var(--font-jp); font-size: var(--fs-caption-xs); color: var(--text-on-panel-soft); }
-.jour-grid__v { font-weight: 700; font-size: var(--fs-body); font-variant-numeric: tabular-nums; color: var(--text-on-panel); }
-.jour-grid__jp { font-family: var(--font-jp); }
-.jour-grid__u { font-size: var(--fs-caption); font-weight: 600; color: var(--text-on-panel-soft); }
-.jour-grid__v--gold { color: var(--accent2); }
-
-/* The settings counter borrows these cells to show what the pass says
-   before you change it (.stg-contract gives them the same sumi ground
-   the back does). The hairline above them separates the grid from the
-   honest sentence on the pass's back; the counter prints no such
-   sentence, so there is nothing for it to separate. Placed after
-   .jour-grid, per no-descending-specificity. */
-.stg-contract .jour-grid {
-  padding-top: 0;
-  border-top: 0;
-}
-
-/* ── Composition overrides that must follow what they override ──
-   The pass's own 44px bottom rhythm, and the flip container's, belong
-   to the profile column's gap now. Placed after .pass and .jour-flip
-   in the sheet, and qualified by the container so it does not sit
-   below .hall-pass:hover .pass, per no-descending-specificity. */
-.profile-container .profile-blocks > .pass,
-.profile-container .profile-blocks > .jour-flip { margin-bottom: 0; }
-/* The two faces share one grid cell, so the container is as tall as
-   the taller face — the back, once the contract grid and the honest
-   moves are on it. The front grows to match: the holder's row takes
-   the slack, the balance and the footer keep the card's foot. Without
-   this the pass sat in its cell with a bare strip of wall under it. */
-.profile-container .jour-flip__face--front { display: flex; flex-direction: column; }
-.profile-container .jour-flip__face--front .pass { flex: 1; }
-.profile-container .jour-flip__face--front .pass__body { flex: 1; }
-
 @media (max-width: 999px) {
-  /* Under the desktop tier the pass is stacked above everything and
-     its back — track, sentence, contract, the honest moves — runs far
-     taller than its front. Sharing one grid cell would stretch the
-     front around a void under its holder, so here the hidden face
-     leaves the flow instead and the card is as tall as the face you
-     can see. The page moves on turn; a phone forgives that, and never
-     forgives 300px of bare card. */
-  .jour-flip__inner { position: relative; }
-  .jour-flip--flipped .jour-flip__face--front,
-  .jour-flip:not(.jour-flip--flipped) .jour-flip__face--back { position: absolute; inset: 0; }
   .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
@@ -18600,9 +16954,528 @@ html { scrollbar-gutter: stable; }
   .record__value { font-size: var(--fs-title); flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sbook__stamp--today { animation: none; }
   .pf-line__done,
-  .record--door,
-  .record__chev,
-  .pass__gear { transition: none; }
+.record--door,
+.record__chev { transition: none; }
+}
+
+
+/* ══ 定期券 — the profile, the statistics and the settings (plan 074) ══
+   The canvas's Profile, ProfileInserts, StatusSheet, Statistics,
+   Settings and its pages, ported rule by rule onto the :root tokens
+   (docs/design/mobile/README.md has the class map). The profile is
+   the pass over its inserts, the statistics a lattice over the
+   calendar and the forecast, the settings a list of rows and a page
+   of slips behind each. Appended after every block it refines, so
+   the compounds below never precede the rules they override. */
+
+/* ── The three pages ── */
+.profile,
+.stats,
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.profile__stale { display: flex; align-items: center; gap: var(--sp-2); margin: 0; }
+.profile__stale-glyph { flex: none; color: var(--warning); }
+
+/* ── The pass's ring, and the balance on its footer ── */
+.pass__ring-track { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-width: 5; }
+.pass__ring-fill { fill: none; stroke: var(--accent2); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+.balance-line__refill { margin-left: auto; letter-spacing: var(--tr-term); text-transform: none; }
+
+/* ── The stamp book (canvas Profile) ──
+   Five whole weeks, a stamp a day: inked in the eki stamp's lacquer,
+   dashed where a day was missed, pressed harder today, faint ahead. */
+.sbook {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.sbook__month {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--surface-line);
+}
+.sbook__title {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  letter-spacing: var(--tr-name);
+}
+.sbook__dows,
+.sbook__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--sp-2);
+  justify-items: center;
+}
+.sbook__dow {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.sbook__stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1.5px solid color-mix(in srgb, var(--stamp-ink) 55%, transparent);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--stamp-ink) 12%, transparent);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--stamp-ink) 55%, var(--text-primary));
+  transform: rotate(var(--stamp-tilt, 0deg));
+}
+.sbook__stamp--missed {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  background: transparent;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  transform: none;
+}
+.sbook__stamp--future {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  transform: none;
+}
+.sbook__stamp--today {
+  border-width: 2px;
+  border-color: var(--stamp-ink);
+  background: color-mix(in srgb, var(--stamp-ink) 22%, transparent);
+}
+.sbook__side { padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); }
+.sbook__figs {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  gap: var(--sp-4) var(--sp-5);
+}
+.fig { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.fig__v {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.fig__u { font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); }
+.fig__l {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ── The records' notes and the door with an icon (canvas ProfileInserts, Statistics) ── */
+.record__note { font-size: var(--fs-caption); color: var(--text-secondary); }
+.pf-line__roundel--icon { display: inline-flex; align-items: center; justify-content: center; }
+
+/* ── The ranking (canvas ProfileInserts) ──
+   One list: the rank in a roundel — gold, silver and bronze for the
+   first three — the name, the XP; your own row marked with the pass
+   ink. The board's toggle sits on the head's right. */
+.bz__seg { margin-left: auto; }
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+}
+.leaderboard-row:last-child { border-bottom: 0; }
+.leaderboard-row--me { box-shadow: inset 3px 0 0 var(--pass-ink); background: var(--overlay-hover); }
+.leaderboard-row__rank {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-pill);
+  background: var(--bg-panel);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel-soft);
+}
+/* The metal is the ring; the figure inside is the metal mixed toward
+   the panel ink — bronze alone measured 2.83:1 on sumi in light theme. */
+.leaderboard-row__rank--gold { color: color-mix(in srgb, var(--medal-gold) 70%, var(--text-on-panel)); box-shadow: inset 0 0 0 1.5px var(--medal-gold); }
+.leaderboard-row__rank--silver { color: color-mix(in srgb, var(--medal-silver) 70%, var(--text-on-panel)); box-shadow: inset 0 0 0 1.5px var(--medal-silver); }
+.leaderboard-row__rank--bronze { color: color-mix(in srgb, var(--medal-bronze) 55%, var(--text-on-panel)); box-shadow: inset 0 0 0 1.5px var(--medal-bronze); }
+.leaderboard-row__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.leaderboard-row__xp {
+  flex-shrink: 0;
+  text-align: right;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.leaderboard-row__gap { justify-content: center; color: var(--text-secondary); }
+
+/* ── The status sheet (canvas StatusSheet) ──
+   The pass's back as a sumi sheet: the station panel's own word, the
+   ghost track, four figures in a lattice, the two honest moves. */
+.status-sheet .jour-rev__head { align-items: center; }
+.jour-figs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.jour-fig { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-4); background: var(--bg-panel); }
+.jour-fig__v {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel);
+}
+.jour-fig__v--st { color: var(--jour-st-ink, var(--text-on-panel)); }
+.jour-fig__u { font-size: var(--fs-sm); font-weight: 600; color: var(--text-on-panel-soft); }
+.jour-fig__l {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.status-sheet__none { margin: 0; color: var(--text-on-panel-soft); }
+.status-sheet__office {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--text-on-panel);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.status-sheet__error { margin: 0; color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
+
+/* ── The statistics (canvas Statistics) ── */
+.stat-cap {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--surface-line);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.stat-cap__fig { color: var(--text-primary); }
+.cal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.cal__months {
+  display: grid;
+  grid-template-columns: repeat(var(--weeks, 14), minmax(0, 1fr));
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.cal__month { overflow: hidden; white-space: nowrap; }
+.cal__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--weeks, 14), minmax(0, 1fr));
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  grid-auto-flow: column;
+  gap: var(--sp-1);
+}
+.cal__cell { aspect-ratio: 1; border-radius: var(--r-plate); background: color-mix(in srgb, var(--text-primary) 6%, transparent); }
+.cal__cell--future { opacity: 0.35; }
+.cal--gold .cal__cell--1 { background: color-mix(in srgb, var(--accent2) 30%, transparent); }
+.cal--gold .cal__cell--2 { background: color-mix(in srgb, var(--accent2) 55%, transparent); }
+.cal--gold .cal__cell--3 { background: color-mix(in srgb, var(--accent2) 80%, transparent); }
+.cal--gold .cal__cell--4 { background: var(--accent2); }
+.cal__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.cal__scale { display: inline-flex; align-items: center; gap: var(--sp-1); }
+.cal__scale .cal__cell { width: 9px; height: 9px; aspect-ratio: auto; }
+.forecast {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.forecast__bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--sp-2);
+  align-items: end;
+  height: 96px;
+}
+.forecast__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-1);
+  height: 100%;
+}
+.forecast__bar {
+  width: 100%;
+  border-radius: var(--r-plate) var(--r-plate) 0 0;
+  background: color-mix(in srgb, var(--state-due) 75%, var(--text-primary));
+}
+.forecast--pass .forecast__bar { background: color-mix(in srgb, var(--pass-ink) 55%, var(--text-primary)); }
+.forecast__v {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.forecast__days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--sp-2);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ── The settings list and its pages (canvas Settings, SettingsLearn,
+   SettingsDestination, SettingsLevelUp / Down) ── */
+.stg-headrow { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); }
+.stg-head { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.stg-head__jp { margin: 0; font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); line-height: 1.2; }
+.stg-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.stg-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 60px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 0;
+  border-top: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+.stg-row:first-child { border-top: 0; }
+.stg-row__names { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.stg-row__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); line-height: 1.2; }
+.stg-row__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.stg-row__chev { flex: none; color: var(--text-secondary); }
+.stg-signout { align-self: stretch; }
+.slip { display: flex; flex-direction: column; gap: var(--sp-3); }
+.slip__label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.slip__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
+.slip__hint { font-size: var(--fs-caption); color: var(--text-secondary); line-height: 1.5; }
+.slip__act { align-self: flex-start; }
+.slip__value { font-size: var(--fs-body); color: var(--text-primary); overflow-wrap: anywhere; }
+.slip__confirm { display: flex; flex-direction: column; gap: var(--sp-3); }
+.lvlstrip {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: var(--sp-3) 0 0;
+}
+.lvlstrip::before {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 17px;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--pass-ink) 60%, var(--text-secondary));
+}
+.lvlstrip__stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+}
+.lvlstrip__dot {
+  width: 13px;
+  height: 13px;
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  border: 2px solid var(--text-secondary);
+}
+.lvlstrip__stop--on { color: var(--text-primary); }
+.lvlstrip__stop--on .lvlstrip__dot {
+  width: 17px;
+  height: 17px;
+  margin: -2px 0;
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+}
+.lvlstrip__code { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
+.lvlstrip__jp { font-family: var(--font-display); font-size: var(--fs-caption-xs); letter-spacing: var(--tr-term); text-transform: uppercase; }
+.lvl-note { margin: 0; font-size: var(--fs-caption); line-height: 1.5; color: var(--text-secondary); }
+.lvl-note__strong { color: var(--text-primary); }
+.svc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+.svc-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grades { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+.hour-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); }
+.svc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-height: 64px;
+  padding: var(--sp-3) var(--sp-2);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: center;
+}
+.svc--on { border-color: var(--pass-ink); background: color-mix(in srgb, var(--pass-ink) 14%, var(--surface)); }
+.svc__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
+.svc__pace {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.svc__star { color: var(--accent2); }
+.svc__words { font-family: var(--font-display); font-size: var(--fs-caption-xs); color: var(--text-secondary); line-height: 1.4; }
+/* On the chosen card's wash the secondary ink slips under the floor
+   in light theme (3.96:1 measured); its captions take the primary ink. */
+.svc--on .svc__pace,
+.svc--on .svc__words { color: var(--text-primary); }
+.dest-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); }
+.dest {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-height: 48px;
+  padding: var(--sp-2);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+}
+.dest--on { border-color: var(--pass-ink); background: color-mix(in srgb, var(--pass-ink) 14%, var(--surface)); }
+.dest__code { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
+.dest__load { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-term); color: var(--text-secondary); }
+.dest--on .dest__load { color: var(--text-primary); }
+.dest-line { color: var(--text-primary); }
+.dest-line .jour-cap { color: var(--text-secondary); }
+.dest-line .dest-line__date { color: var(--text-primary); }
+.dest-line__note { margin-left: auto; letter-spacing: var(--tr-term); text-transform: none; }
+.btn-depart--sheet { box-shadow: none; }
+.lvl-sheet__body { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); }
+.lvl-sheet__strong { color: var(--text-primary); }
+.lvl-sheet__figs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--surface-line);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.lvl-sheet__fig { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-4); background: var(--surface); }
+.lvl-sheet__fig-v { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); line-height: 1; font-variant-numeric: tabular-nums; }
+.lvl-sheet__fig-l {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }

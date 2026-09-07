@@ -30,7 +30,7 @@ describe('Emphasized', () => {
     expect(p.querySelector('strong')).toBeNull()
     expect(p.textContent).toBe('No destination on this pass.')
 
-    // JourneyPass builds its foot before it knows whether there is one.
+    // The status sheet builds its foot before it knows whether there is one.
     const empty = await render(<p id="e"><Emphasized text={null} /></p>)
     expect(empty.container.querySelector('#e').textContent).toBe('')
   })

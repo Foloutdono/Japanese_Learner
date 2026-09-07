@@ -172,6 +172,62 @@ design-scale allowlist entries went in the same commit — along with every
 allowlist literal earlier retirements had left behind (the guard's
 `--write` only ever merges, so those had accumulated since plan 068).
 
+## Profile, statistics and settings (plan 074)
+
+| Canvas class | `index.css` block | Component |
+|---|---|---|
+| `.pass` (the existing block), `.pass__ring-track`, `.pass__ring-fill`, `.jour-line` as the balance line (`.balance-line`, `__refill`) | the pass, the balance on its footer | `components/profile/CommuterPass.jsx`, `PassHolder.jsx`, `components/credits/BalanceLine.jsx` |
+| `.sbook` (`__month`, `__title`, `__dows`, `__dow`, `__grid`, `__stamp` `--missed`/`--today`/`--future`, `__side`, `__figs`), `.fig` (`__v`, `__u`, `__l`) | the stamp book | `StampBook` in `components/profile/ProfileBlocks.jsx` |
+| `.records`, `.record` (`--door`, `__note`), `.pf-line__id` (`__roundel` `--icon`, `__names`, `__jp`) | the records and the two doors | `Records` in `ProfileBlocks.jsx`, `LineMark` in `LineLedger.jsx` |
+| `.pf-ledger`, `.pf-line` (`__fig`, `__of`, `__track`, `__done`) | the ride ledger | `components/profile/LineLedger.jsx` |
+| `.banzuke`, `.bz__head`, `.bz__mark`, `.bz__jp`, `.bz__seg` (a `Seg`), `.leaderboard-row` (`--me`, `__rank` `--gold`/`--silver`/`--bronze`, `__name`, `__xp`, `__gap`) | the ranking | `components/profile/Banzuke.jsx` |
+| `.sheet--sumi.status-sheet` + `.jour-st--*`, `.hud__status` (the chip), `.jour-track*`, `.jour-figs`, `.jour-fig` (`__v` `--st`, `__u`, `__l`), `.jour-rev__actions`, `.jour-act`, `.status-sheet__none`, `__office`, `__error` | the status sheet, off the HUD's station panel | `components/journey/StatusSheet.jsx` (`StatusChip` from `components/chrome/Hud.jsx`, `GhostTrack.jsx`; the open state in `stores/journey.js`) |
+| `.bar` + `.stage__leave`, `.records--stats` (six `.record`s with `__note`s) | the statistics head and lattice | `screens/StatsScreen.jsx` |
+| `.stat-cap` (`__fig`), `.cal.cal--gold` (`__months`, `__month`, `__grid`, `__cell` `--1`…`--4`/`--future`, `__foot`, `__scale`) | the practice calendar (fourteen weeks, whole) | `components/stats/PracticeCalendar.jsx` |
+| `.forecast.forecast--pass` (`__bars`, `__col`, `__v`, `__bar`, `__days`) | the week's forecast | `components/stats/Forecast.jsx` |
+| `.stg-headrow`, `.stg-head` (`__jp`), `.stg-list`, `.stg-row` (`__names`, `__jp`, `__value`, `__chev`), `.stg-signout` | the settings list | `screens/SettingsScreen.jsx` |
+| `.slip` (`__label`, `__name`, `__hint`, `__act`, `__value`, `__confirm`), `.cap` | a page's slips | `SettingsPage`, `Slip` in `components/settings/SettingsPage.jsx` |
+| `.svc-grid` (`--2`), `.svc` (`--on`, `__jp`, `__pace`, `__star`, `__words`), `.grades`, `.hour-grid` | the service cards: theme, language, presets and mute, pace, grades, the daily hour | `components/settings/DisplayPage.jsx`, `SoundPage.jsx`, `LearningPage.jsx`, `DestinationPage.jsx` |
+| `.lvlstrip` (`__stop` `--on`, `__dot`, `__code`, `__jp`), `.lvl-note` (`__strong`) | the level strip and its note | `LearningPage.jsx` |
+| `.sheet.lvl-sheet`, `.lvl-sheet__body` (`__strong`), `__figs`, `__fig` (`-v`, `-l`), `.btn-depart--sheet` | the level confirm sheets (Move up / Move down) | `LevelSheet` in `LearningPage.jsx` |
+| `.onb-dests` → `.dest-grid`, `.onb-dest` → `.dest` (`--on`, `__code`, `__load`); `.jour-line.dest-line` (`__date`, `__note`), `.form__row` | Destination: the stops ahead, the pass line on paper, Hand it back / Reprint | `DestinationPage.jsx` (renamed because the boarding's own `.onb-dest` block stands until plan 075) |
+
+The routes: `/profile` (the pass and its inserts, no bar), `/profile/stats`
+(the bar with ‹ Profile), `/profile/settings` (the list) and
+`/profile/settings/<display|sound|learning|destination|data|account>`. The
+HUD's station panel opens the status sheet from every screen; the pass no
+longer flips. The level rule (the canvas's note): choosing a level in
+Settings › Learning previews the move on a sheet (`GET
+/api/profile/learning/preview`) and the write (`PATCH /api/profile/learning`)
+marks the stops behind a raised level known — `study/level_rule.py`,
+`SRSEngine.seed_known` — while a lowered level holds the stops above back
+from the run (`daily_queue.hold_above`) and deletes nothing. Held from the
+canvas: the explorer and the trouble list stay under the statistics'
+forecast (the canvas does not draw them and they carry the doors to a
+review), the theme is offered as three service cards (the canvas names the
+page and draws no control), and the install row (plan 065) keeps its place
+on Display & language.
+
+## What retired with it
+
+The pass's flip and its back (`components/journey/JourneyPass.jsx`,
+`.jour-flip*`, `.jour-rev__title`/`__status`/`__turn`/`__foot`/`__none`/
+`__office`/`__error`, `.jour-line__turn`), the contract grid
+(`ContractGrid.jsx`, `.jour-grid*`), the destination counter
+(`GoalCounter.jsx`, `.stg-contract`, `.stg-goal*`), the pass's gear and its
+Japanese brand line, the old stamp book, figures and records block, the
+ranking's two sides and chase line (`.bz__side*`, `.banzuke__chase`, the
+level on a row), the statistics' headline (`Headline.jsx`, `.headline*`,
+`.plaque*`), the scrolling year calendar (`.calendar*`, `.calendar-panel*`),
+the fortnight forecast with its cumulative ghost, the rhythm charts
+(`Rhythm.jsx`, `.rhythm-*`), the settings counter with its rail and slips
+(`.stg-counter`, `.stg-rail*`, `.stg-panes`, `.stg-slip*`, `.stg-preset*`,
+`.stg-lvlstrip*`, `.stg-pace*`, `.stg-scale*`, `.stg-danger-btn`,
+`.stg-confirm*`, `.settings-*`), the theme toggle and the language select
+(`ThemeToggle`, `LangSwitcher`, the mute button and `.btn-nav*`, `.theme-choice*`,
+`.lang-select`), and the three `*-container` page classes. Their baseline
+entries went in the same commit.
+
 ## Learn (plan 071)
 
 | Canvas class | `index.css` block | Component |
@@ -228,10 +284,9 @@ gate hall: concourse, IC card, notice strip — the map moved to
 `config/navLinks.js` (now `config/tabs.js`). Their CSS blocks and their
 entries in `.stylelint-baseline.json` went in the same commit.
 
-## Still to port (plans 074–075)
+## Still to port (plan 075)
 
-`.offer*`, `.pass-tag` (with the store); `.svc*`, `.lvlstrip*`, `.slip*`,
-`.stg-head`/`.stg-list`, `.cal*` (074); the whole `.brd-*` boarding (075). Reading the canvas: `Artifact` `read` on its URL
+`.offer*`, `.pass-tag` (with the store); the whole `.brd-*` boarding (075). Reading the canvas: `Artifact` `read` on its URL
 saves the page; the design lives in `<script id="appifact-doc">` as JSON —
 `content.files` holds one `*.dc.html` per artboard plus `canvas.json`; the
 common prefix of the artboard files is this stylesheet.

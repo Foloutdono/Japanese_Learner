@@ -312,38 +312,40 @@ const Fixture = () => (
         element rather than children. They are here so the question is
         settled by measurement and stays settled. */}
 
-    {/* Banzuke.jsx -- the 番付 as the 定期入れ round rebuilt it: a head
-        carrying the 今週/通算 toggle, then 東 and 西 sides. The selected
-        segment is the ambient ink on a 14% gold wash over --surface,
-        which is a mix on a mix and so invisible to part 1. */}
+    {/* Banzuke.jsx -- the ranking as the canvas draws it (plan 074): a
+        head carrying the This week / All time toggle, then one list of
+        rows. The selected segment is the ambient ink on a 14% gold wash
+        over --surface, which is a mix on a mix and so invisible to part
+        1; the medal roundels are three metal inks on sumi. */}
     <div className="banzuke">
       <div className="bz__head">
-        <span className="bz__mark">
-          <span className="bz__jp" lang="ja">番付</span>
-        </span>
-        <span className="seg">
-          <button type="button" className="seg__opt bz-seg-off">
-            <span className="seg__opt-jp" lang="ja">今週</span>
-          </button>
-          <button type="button" className="seg__opt seg__opt--on bz-seg-on">
-            <span className="seg__opt-jp" lang="ja">通算</span>
-          </button>
+        <span className="bz__mark"><span className="bz__jp">Ranking</span></span>
+        <span className="seg bz__seg">
+          <button type="button" className="seg__opt seg__opt--on bz-seg-on"><span className="seg__opt-latin">This week</span></button>
+          <button type="button" className="seg__opt bz-seg-off"><span className="seg__opt-latin">All time</span></button>
         </span>
       </div>
-      <div className="bz__sides">
-        <div className="bz__side">
-          <div className="bz__side-head">
-            <span className="bz__side-jp bz-side-jp" lang="ja">東</span>
-          </div>
-          <div className="leaderboard-row">
-            <span className="leaderboard-row__rank">1</span>
-            <span className="leaderboard-row__name">Aoi</span>
-            <span className="leaderboard-row__level">Niveau 12</span>
-            <span className="leaderboard-row__xp">4,210 XP</span>
-          </div>
-          <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
-        </div>
+      <div className="leaderboard-row">
+        <span className="leaderboard-row__rank leaderboard-row__rank--gold bz-rank-gold">1</span>
+        <span className="leaderboard-row__name bz-name">Aoi</span>
+        <span className="leaderboard-row__xp bz-xp">4,210 XP</span>
       </div>
+      <div className="leaderboard-row">
+        <span className="leaderboard-row__rank leaderboard-row__rank--silver bz-rank-silver">2</span>
+        <span className="leaderboard-row__name">Mei</span>
+        <span className="leaderboard-row__xp">3,900 XP</span>
+      </div>
+      <div className="leaderboard-row leaderboard-row--me">
+        <span className="leaderboard-row__rank leaderboard-row__rank--bronze bz-rank-bronze">3</span>
+        <span className="leaderboard-row__name bz-me-name">Aiko</span>
+        <span className="leaderboard-row__xp">960 XP</span>
+      </div>
+      <div className="leaderboard-row">
+        <span className="leaderboard-row__rank bz-rank">4</span>
+        <span className="leaderboard-row__name">Sora</span>
+        <span className="leaderboard-row__xp">720 XP</span>
+      </div>
+      <div className="leaderboard-row leaderboard-row__gap" aria-hidden="true">⋯</div>
     </div>
 
     {/* DecksScreen.jsx -- the shelf's card (plan 071): the count aside
@@ -524,22 +526,77 @@ const Fixture = () => (
         <span className="pf-line__roundel pf-roundel-stats">TO</span>
       </button>
     </div>
-    {/* The pass's back: sumi in both themes, pinned inline like the board
-        above because the real face paints a gradient the ground-walker
-        cannot composite. */}
-    <div className="jour-flip__face--back" style={{ background: 'var(--bg-panel)' }}>
-      <div className="jour-grid">
-        <div className="jour-grid__cell">
-          <span className="jour-grid__k pf-grid-k" lang="ja">種別</span>
-          <span className="jour-grid__v pf-grid-v">
-            10<span className="jour-grid__u pf-grid-u"> / jour</span>
-          </span>
+    {/* The status sheet (plan 074): sumi in both themes, pinned inline
+        like the board above. The figures' inks, the state-inked one,
+        the goal-less line and its link, the error line. */}
+    <div className="status-sheet jour-st--slightlyBehind" style={{ background: 'var(--bg-panel)' }}>
+      <div className="jour-figs">
+        <div className="jour-fig">
+          <span className="jour-fig__v ss-fig-v">7.1<span className="jour-fig__u ss-fig-u">/ day</span></span>
+          <span className="jour-fig__l ss-fig-l">Last 14 days</span>
         </div>
-        <div className="jour-grid__cell">
-          <span className="jour-grid__v jour-grid__v--gold pf-grid-gold">1 juin 2027</span>
+        <div className="jour-fig">
+          <span className="jour-fig__v jour-fig__v--st ss-fig-st">23 Mar</span>
+          <span className="jour-fig__l">At this pace</span>
         </div>
       </div>
+      <p className="hint status-sheet__none ss-none">
+        No destination. <button type="button" className="status-sheet__office ss-office">Set one</button>
+      </p>
+      <p className="hint status-sheet__error ss-error">error line</p>
     </div>
+    {/* The pass's footer (plan 074): the balance line on the pass's own
+        sumi — the word, the gold figure, the cap and the refill. */}
+    <div className="pass" style={{ background: 'var(--bg-panel)' }}>
+      <div className="jour-line balance-line">
+        <span className="jour-line__status"><b className="bl-word">Balance</b></span>
+        <span className="jour-line__validity"><b className="bl-fig">30</b><span className="jour-cap bl-cap">/ 50 credits</span></span>
+        <span className="jour-cap balance-line__refill bl-refill">+30 at 00:00</span>
+      </div>
+    </div>
+    {/* Plan 074 -- the statistics' notes and caps, the settings' rows,
+        the service cards (on the pass-ink wash when chosen), the level
+        strip, the destination chips and the pass line on paper. */}
+    <div className="records"><div className="record"><span className="record__value">24</span><span className="record__label">Due today</span><span className="record__note st-note">318 this week</span></div></div>
+    <div className="stat-cap st-cap"><span>Practice calendar</span><span>14 weeks · best day <b className="stat-cap__fig st-fig">88</b></span></div>
+    <div className="cal cal--gold"><div className="cal__foot st-cal-foot"><span>One square a day</span></div></div>
+    <div className="forecast forecast--pass">
+      <div className="forecast__bars"><span className="forecast__col"><span className="forecast__v st-fc-v">24</span></span></div>
+      <div className="forecast__days st-fc-days"><span>Sat</span></div>
+    </div>
+    <section className="sbook"><div className="sbook__dows"><span className="sbook__dow sb-dow">M</span></div></section>
+    <div className="stg-list">
+      <button type="button" className="stg-row">
+        <span className="stg-row__names"><span className="stg-row__jp st-row">Learning</span></span>
+        <span className="stg-row__value st-value">N4 · 10 / day</span>
+      </button>
+    </div>
+    <div className="slip">
+      <div className="slip__label"><b className="slip__name st-slip-name">JLPT level</b><span className="cap st-slip-cap">You are here</span></div>
+      <span className="slip__hint st-slip-hint">A hint.</span>
+      <div className="lvlstrip">
+        <button type="button" className="lvlstrip__stop"><span className="lvlstrip__dot" /><span className="lvlstrip__code lv-code">N5</span></button>
+        <button type="button" className="lvlstrip__stop lvlstrip__stop--on"><span className="lvlstrip__dot" /><span className="lvlstrip__code lv-code-on">N4</span><span className="lvlstrip__jp lv-jp">Elementary</span></button>
+      </div>
+      <p className="lvl-note lv-note">Moving up marks the stops <strong className="lvl-note__strong lv-strong">known</strong>.</p>
+    </div>
+    <div className="svc-grid">
+      <button type="button" className="svc"><span className="svc__jp sv-jp">Local</span><span className="svc__pace sv-pace">5 / day</span></button>
+      <button type="button" className="svc svc--on">
+        <span className="svc__jp sv-on-jp">Rapid</span>
+        <span className="svc__pace sv-on-pace">10 / day</span>
+        <span className="svc__words sv-on-words">Wrong · Correct</span>
+      </button>
+    </div>
+    <div className="dest-grid">
+      <button type="button" className="dest dest--on"><span className="dest__code ds-code">N3</span><span className="dest__load ds-load">Intermediate</span></button>
+    </div>
+    <div className="jour-line dest-line">
+      <span className="jour-line__validity"><span className="jour-cap ds-cap">Valid until</span><b className="dest-line__date ds-date">14 Mar 2027</b></span>
+      <span className="jour-cap dest-line__note ds-note">moves to 23 Mar</span>
+    </div>
+    <div className="lvl-sheet__figs"><div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v ls-v">1,318</b><span className="lvl-sheet__fig-l ls-l">Marked known</span></div></div>
+    <p className="lvl-sheet__body ls-body">The stops are marked <strong className="lvl-sheet__strong ls-strong">known</strong>.</p>
 
     {/* ── Plan 063 — the goal line (onboarding board, pass, journey) ──
         The 行先 board and the 定期券/journey surfaces are sumi in both
@@ -606,7 +663,6 @@ const Fixture = () => (
           </span>
         </span>
       </div>
-      <p className="jour-rev__error jr-error">error line</p>
     </div>
   </div>
 )
@@ -671,7 +727,6 @@ const SITES = [
 
   // Settled by measurement rather than by reading a selector -- see the
   // comment beside their markup above.
-  ['.leaderboard-row__level', 'leaderboard row level'],
   ['.leaderboard-row__gap', 'leaderboard elision row'],
   ['.dk-glyph', 'deck card glyph (tinted roundel)'],
   ['.dk-due', 'deck card due (warning ink)'],
@@ -739,7 +794,6 @@ const SITES = [
   ['.jr-status-b', 'pass footer status word (state ink on sumi)'],
   ['.jr-validity-b', 'pass footer 有効期限 (gold on sumi)'],
   ['.jr-gap-b', 'ghost track day bracket (state ink on sumi)'],
-  ['.jr-error', 'journey reprint error (state ink on sumi)'],
 
   // The 定期入れ profile — every one a mix on a mix (see the fixture).
   ['.pf-stamp', 'eki stamp day (lacquer ink on lacquer wash)'],
@@ -750,11 +804,58 @@ const SITES = [
   ['.pf-line-of', 'ledger reachable total'],
   ['.bz-seg-on', '番付 selected period (ambient ink on gold wash)'],
   ['.bz-seg-off', '番付 unselected period'],
-  ['.bz-side-jp', '番付 東/西 side mark'],
-  ['.pf-grid-k', 'pass contract key (sumi)'],
-  ['.pf-grid-v', 'pass contract value (sumi)'],
-  ['.pf-grid-u', 'pass contract unit (sumi)'],
-  ['.pf-grid-gold', 'pass contract 有効期限 (gold on sumi)'],
+  ['.bz-rank-gold', 'ranking gold roundel (medal ink on sumi)'],
+  ['.bz-rank-silver', 'ranking silver roundel (medal ink on sumi)'],
+  ['.bz-rank-bronze', 'ranking bronze roundel (medal ink on sumi)'],
+  ['.bz-rank', 'ranking roundel (soft ink on sumi)'],
+  ['.bz-name', 'ranking name'],
+  ['.bz-xp', 'ranking XP'],
+  ['.bz-me-name', 'your own ranking row (on the hover wash)'],
+
+  // Plan 074 — the status sheet, the pass footer, the statistics and
+  // the settings (see the fixture).
+  ['.ss-fig-v', 'status sheet figure (sumi)'],
+  ['.ss-fig-u', 'status sheet figure unit (soft ink on sumi)'],
+  ['.ss-fig-l', 'status sheet figure label (soft ink on sumi)'],
+  ['.ss-fig-st', 'status sheet projected date (state ink on sumi)'],
+  ['.ss-none', 'status sheet goal-less line (soft ink on sumi)'],
+  ['.ss-office', 'status sheet office link (on sumi)'],
+  ['.ss-error', 'status sheet error (state ink on sumi)'],
+  ['.bl-word', 'pass balance word (on sumi)'],
+  ['.bl-fig', 'pass balance figure (gold on sumi)'],
+  ['.bl-cap', 'pass balance cap (soft ink on sumi)'],
+  ['.bl-refill', 'pass balance refill (soft ink on sumi)'],
+  ['.st-note', 'record note'],
+  ['.st-cap', 'statistics cap'],
+  ['.st-fig', 'statistics cap figure'],
+  ['.st-cal-foot', 'calendar foot'],
+  ['.st-fc-v', 'forecast value'],
+  ['.st-fc-days', 'forecast day names'],
+  ['.sb-dow', 'stamp book weekday'],
+  ['.st-row', 'settings row'],
+  ['.st-value', 'settings row value'],
+  ['.st-slip-name', 'slip label'],
+  ['.st-slip-cap', 'slip cap'],
+  ['.st-slip-hint', 'slip hint'],
+  ['.lv-code', 'level strip stop'],
+  ['.lv-code-on', 'level strip current stop'],
+  ['.lv-jp', 'level strip current name'],
+  ['.lv-note', 'level note'],
+  ['.lv-strong', 'level note emphasis'],
+  ['.sv-jp', 'service card name'],
+  ['.sv-pace', 'service card pace'],
+  ['.sv-on-jp', 'chosen service card name (on the pass-ink wash)'],
+  ['.sv-on-pace', 'chosen service card pace (on the pass-ink wash)'],
+  ['.sv-on-words', 'chosen grade card words (on the pass-ink wash)'],
+  ['.ds-code', 'chosen destination code (on the pass-ink wash)'],
+  ['.ds-load', 'chosen destination name (on the pass-ink wash)'],
+  ['.ds-cap', 'pass line cap on paper'],
+  ['.ds-date', 'pass line date on paper'],
+  ['.ds-note', 'pass line drift note on paper'],
+  ['.ls-v', 'level sheet figure'],
+  ['.ls-l', 'level sheet figure label'],
+  ['.ls-body', 'level sheet body'],
+  ['.ls-strong', 'level sheet emphasis'],
 ]
 
 // Composite every non-transparent background from <html> down to the element.

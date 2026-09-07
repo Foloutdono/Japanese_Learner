@@ -13,12 +13,19 @@ import { apiFetch } from '../lib/api'
 // needs "the last answer from /api/x" comes from here.
 //
 //   const today = createRemoteStore('/api/today', { ttlMs: 60_000 })
-//   today.use()      -> { data, failed }   (a hook)
+//   today.use()      -> { data, failed, at }   (a hook; `at` is when the
+//                       answer arrived, so a consumer that needs a clock
+//                       reading can take the answer's own instead of
+//                       reading Date.now() in render)
 //   today.refresh()  -> Promise, bypassing the TTL
 //   today.seed(data) -> for the dev workbenches; never resets the TTL
 export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
   let cache = null
   let cacheAt = 0
+  // When a seed was planted (the workbenches, the tests): `at` falls
+  // back to it, so a consumer taking the answer's own clock reading
+  // has one; the TTL clock itself stays untouched by a seed.
+  let seededAt = 0
   let failed = false
   let inflight = null
   const listeners = new Set()
@@ -51,9 +58,9 @@ export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
   }
 
   function use() {
-    const [state, setState] = useState(() => ({ data: cache, failed }))
+    const [state, setState] = useState(() => ({ data: cache, failed, at: cacheAt || seededAt }))
     useEffect(() => {
-      const sync = () => setState({ data: cache, failed })
+      const sync = () => setState({ data: cache, failed, at: cacheAt || seededAt })
       listeners.add(sync)
       if (!cache || Date.now() - cacheAt >= ttlMs) fetchOnce()
       return () => { listeners.delete(sync) }
@@ -64,7 +71,7 @@ export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
   return {
     use,
     refresh: fetchOnce,
-    seed(data) { cache = data; failed = false; notify() },
+    seed(data) { cache = data; seededAt = Date.now(); failed = false; notify() },
     /** The last answer, outside React (a store mutating another). */
     peek: () => cache,
   }

@@ -51,6 +51,7 @@ from core import credits
 from core.db import db_conn
 from core.pace import resolve_pace
 from core.srs_instance import srs
+from core.user_level import resolve_level
 from study import card_index, daily_queue
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES, try_resolve
 
@@ -167,7 +168,12 @@ def get_today(user_id: str = Depends(get_user_id)):
     """
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id)
-    lanes = daily_queue.lanes(user_id, due_rows, personal)
+    # The stops beyond the learner's level wait (the level rule, plan
+    # 074): moving down sets them aside, and the badge must not count
+    # what the run will not serve.
+    lanes = daily_queue.hold_above(
+        daily_queue.lanes(user_id, due_rows, personal), resolve_level(user_id)
+    )
 
     by_source: dict[str, int] = defaultdict(int)
     breakdown = []
@@ -261,7 +267,9 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id)
     chosen = daily_queue.keep_lanes(
-        daily_queue.lanes(user_id, due_rows, personal),
+        daily_queue.hold_above(
+            daily_queue.lanes(user_id, due_rows, personal), resolve_level(user_id)
+        ),
         daily_queue.parse_lane_ids(lanes),
     )
     chosen = daily_queue.drop_seen(chosen, daily_queue.parse_exclude(exclude))

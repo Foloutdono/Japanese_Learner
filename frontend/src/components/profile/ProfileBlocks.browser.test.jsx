@@ -7,21 +7,21 @@ import '../../index.css'
 // ── The records lattice always divides its content ────────────
 // DESIGN.md, Surfaces: a lattice's column count must divide its
 // content, because the seams are the background showing through and
-// a short last row is a bare slab. The records are two by two — three
-// figures and the door to 統計 — so the block holds four cells whatever
-// the profile has to say: a figure with nothing to count yet prints a
-// dash rather than dropping out of the grid.
+// a short last row is a bare slab. The records are two by two — two
+// figures and the two doors behind the pass (plan 074) — so the block
+// holds four cells whatever the profile has to say: a figure with
+// nothing to count yet prints a dash rather than dropping out of the
+// grid.
 
 const t = {
   totalReviews: 'Reviews',
   retention: 'Retention',
-  perfectRun: 'Best perfect run',
-  perfectRunUnit: 'in a row',
   statistics: 'Statistics',
   statsDesc: 'Everything you have done, counted',
+  settings: 'Settings',
 }
 
-const PROFILE = { totalReviews: 842, retention: 0.91, bestQualityStreak: 12 }
+const PROFILE = { totalReviews: 842, retention: 0.91 }
 
 function records(profile, navigate = () => {}) {
   return render(
@@ -33,44 +33,50 @@ function records(profile, navigate = () => {}) {
   )
 }
 
-describe('Records — three figures and one door, in a lattice of four', () => {
+describe('Records — two figures and two doors, in a lattice of four', () => {
   it('lays four cells out two by two', async () => {
     const screen = await records(PROFILE)
     const cells = [...screen.container.querySelectorAll('.record')]
     expect(cells).toHaveLength(4)
 
-    const [a, b, c, door] = cells.map(el => el.getBoundingClientRect())
-    // Two rows of two: the second cell sits beside the first, the third
-    // under it, and the door closes the second row.
+    const [a, b, c, d] = cells.map(el => el.getBoundingClientRect())
+    // Two rows of two: the second cell sits beside the first, the
+    // doors close the second row.
     expect(b.top).toBeCloseTo(a.top, 0)
     expect(b.left).toBeGreaterThan(a.right - 1)
     expect(c.top).toBeGreaterThan(a.bottom - 1)
-    expect(door.top).toBeCloseTo(c.top, 0)
-    expect(door.left).toBeCloseTo(b.left, 0)
+    expect(d.top).toBeCloseTo(c.top, 0)
+    expect(d.left).toBeCloseTo(b.left, 0)
   })
 
   it('prints the figures with their units', async () => {
     const screen = await records(PROFILE)
     const values = [...screen.container.querySelectorAll('.record__value')].map(el => el.textContent)
-    expect(values).toEqual(['842', '91%', '12in a row'])
+    expect(values).toEqual(['842', '91%'])
   })
 
   it('keeps four cells when a figure has nothing to count yet', async () => {
-    const screen = await records({ totalReviews: 0, retention: null, bestQualityStreak: 0 })
+    const screen = await records({ totalReviews: 0, retention: null })
     expect(screen.container.querySelectorAll('.record')).toHaveLength(4)
     const retention = [...screen.container.querySelectorAll('.record')]
       .find(el => el.textContent.includes('Retention'))
     expect(retention.querySelector('.record__value').textContent).toBe('—')
   })
 
-  it('is the door to 統計, wearing the station code', async () => {
+  it('is the door to the statistics and to the settings', async () => {
     const navigate = vi.fn()
     const screen = await records(PROFILE, navigate)
-    const door = screen.container.querySelector('.record--door')
-    expect(door.querySelector('.pf-line__roundel').textContent).toBe('TO')
-    expect(door.textContent).toContain('統計')
-    expect(door.textContent).toContain('Statistics')
-    door.click()
+    const doors = [...screen.container.querySelectorAll('.record--door')]
+    expect(doors).toHaveLength(2)
+    // The statistics door wears the hall's station code; the settings
+    // door the gear.
+    expect(doors[0].querySelector('.pf-line__roundel').textContent).toBe('TO')
+    expect(doors[0].textContent).toContain('Statistics')
+    expect(doors[1].querySelector('.pf-line__roundel svg')).not.toBeNull()
+    expect(doors[1].textContent).toContain('Settings')
+    doors[0].click()
     expect(navigate).toHaveBeenCalledWith('/profile/stats')
+    doors[1].click()
+    expect(navigate).toHaveBeenCalledWith('/profile/settings')
   })
 })

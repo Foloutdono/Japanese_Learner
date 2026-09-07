@@ -42,6 +42,9 @@ vi.mock('./stores/journey', () => ({
   useJourneyStatus: () => ({ data: journeyRef.current, failed: false }),
   refreshJourney: vi.fn(),
   seedJourneyStatus: vi.fn(),
+  // The panel opens the status sheet (plan 074); the sheet itself is
+  // not mounted here.
+  openStatus: vi.fn(),
 }))
 const todayRef = { current: { total: 24, by_source: {}, lanes: [], next_due: null } }
 vi.mock('./stores/today', () => ({

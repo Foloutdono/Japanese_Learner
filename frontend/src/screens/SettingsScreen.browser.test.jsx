@@ -1,27 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter } from 'react-router-dom'
-import { LangProvider } from '../LangContext'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { LangProvider, useLang } from '../LangContext'
 import '../index.css'
 
-// ── 窓口 — the settings counter ────────────────────────────────
-// The rail-and-slips rebuild (案三 of the settings round). Pinned
-// here: the parts that fail quietly —
-//   1. every counter is reachable and switching shows exactly one slip
-//      (a pane lost to a typo'd id would just never render);
-//   2. the level strip WRITES — a pretty radiogroup that never calls
-//      PATCH /api/profile/learning is worse than the <select> it
-//      replaced;
-//   3. the reset is genuinely two-step: nothing may hit
-//      DELETE /api/stats/reset until the second, explicit press;
-//   4. 行先 WRITES the three things it claims to — a destination
-//      issued, a destination handed back, an hour reprinted. The
-//      counter exists because the pass's back points at it, and a
-//      counter whose buttons post nothing is the same dead end with
-//      more steps.
+// ── Settings (plan 074) ───────────────────────────────────────────
+// The list and its six pages. Pinned here: the parts that fail
+// quietly —
+//   1. every row is reachable and prints its value;
+//   2. the level strip WRITES — through the confirm sheet, whose
+//      figures come from the preview — and Stay writes nothing;
+//   3. the grade cards write, and name the bar's own words;
+//   4. the reset and the deletion are genuinely two-step;
+//   5. Destination WRITES the three things it claims to — a
+//      destination issued, a destination handed back, an hour
+//      reprinted.
 
 const apiJson = vi.fn()
-// Hoisted like apiJson: the delete-account test asserts the sign-out's scope.
 const signOut = vi.fn(async () => {})
 const apiFetch = vi.fn()
 
@@ -61,18 +56,21 @@ const { default: SettingsScreen } = await import('./SettingsScreen')
 // that changes what /api/profile answers has to force the refetch — the
 // mount alone would read the previous test's cached profile.
 const { refreshSummary } = await import('../stores/profileSummary')
+const { seedJourneyStatus, seedVolumes, refreshJourney } = await import('../stores/journey')
 
 const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
+
+const SESSION = { access_token: 'tok', user: { email: 'dev@example.com' } }
 
 const PROFILE = {
   username: 'Tester', level: 3, xp: 10, xpPrevLevel: 0, xpForNext: 100,
   jlptLevel: 'N5', dailyNewTarget: 10, streak: 1, week: [],
-  // Served, so the rating-scale row is deterministic here rather than
+  // Served, so the grade cards are deterministic here rather than
   // reading whatever this browser's localStorage mirror happens to hold.
   ratingScale: 'simple',
 }
 
-// Shapes, not the real content volumes — the board only needs numbers
+// Shapes, not the real content volumes — the page only needs numbers
 // that make its arithmetic finite.
 const VOLUMES = {
   vocab: { N5: 800, N4: 600, N3: 1800, N2: 1800, N1: 2500 },
@@ -93,120 +91,154 @@ const WITH_GOAL = {
   goalSetAt: '2026-01-01T00:00:00+00:00', itemsTotal: 3484,
 }
 
-/** The 行先 counter, open, with `status` on the pass. */
-async function openGoal(status) {
-  apiJson.mockImplementation((path) => {
-    if (path === '/api/journey/status') return Promise.resolve(status)
-    if (path === '/api/onboarding/volumes') return Promise.resolve(VOLUMES)
-    return Promise.resolve(status)
-  })
-  const screen = await mount()
-  await settle()
-  screen.container.querySelector('[data-id="goal"]').click()
-  await settle(30)
-  return screen.container
+// The locale's own strings, read from the provider rather than
+// imported, so the cases hold in whichever language the lane runs.
+let T
+function Probe() {
+  T = useLang().t
+  return null
 }
 
-function mount() {
+function mount(path = '/profile/settings') {
   return render(
     <LangProvider>
-      <MemoryRouter>
-        <SettingsScreen session={{ access_token: 'tok', user: { email: 'dev@example.com' } }} />
+      <Probe />
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/profile" element={<div className="probe-profile" />} />
+          <Route path="/profile/settings" element={<SettingsScreen session={SESSION} />} />
+          <Route path="/profile/settings/:page" element={<SettingsScreen session={SESSION} />} />
+        </Routes>
       </MemoryRouter>
     </LangProvider>
   )
 }
 
-beforeEach(() => {
+let journey = NO_GOAL
+let profile = PROFILE
+
+beforeEach(async () => {
+  journey = NO_GOAL
+  profile = PROFILE
   apiJson.mockReset()
   apiFetch.mockReset()
-  apiFetch.mockResolvedValue({ ok: true, status: 200, json: async () => PROFILE })
+  apiFetch.mockImplementation(async path => ({
+    ok: true, status: 200,
+    json: async () => {
+      const p = String(path)
+      if (p.startsWith('/api/journey/status')) return journey
+      if (p.startsWith('/api/onboarding/volumes')) return VOLUMES
+      if (p.startsWith('/api/profile')) return profile
+      return {}
+    },
+  }))
   apiJson.mockResolvedValue({})
-  window.history.replaceState(null, '', '/')
+  seedVolumes(VOLUMES)
+  seedJourneyStatus(NO_GOAL)
+  await Promise.all([refreshSummary(), refreshJourney()])
 })
 
-describe('SettingsScreen — the counter', () => {
-  it('shows one slip at a time and switches counters (hash included)', async () => {
+describe('SettingsScreen — the list', () => {
+  it('prints six rows with their values, each a door to its page', async () => {
     const screen = await mount()
+    await settle()
+    const rows = [...screen.container.querySelectorAll('.stg-row')]
+    expect(rows).toHaveLength(6)
+    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'learning', 'destination', 'data', 'account'])
+    expect(rows[2].querySelector('.stg-row__value').textContent).toContain('N5 · 10')
+    expect(rows[3].querySelector('.stg-row__value').textContent).toBe(T.settingsGoalNoneShort)
+    expect(rows[5].querySelector('.stg-row__value').textContent).toBe('dev@…')
+
+    rows[4].click()
+    await settle(30)
+    expect(screen.container.querySelector('.stg-head__jp').textContent).toBe(T.settingsData)
+    // ‹ Settings brings the list back.
+    screen.container.querySelector('.stage__leave').click()
+    await settle(30)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(6)
+  })
+
+  it('an unknown page falls back to the list', async () => {
+    const screen = await mount('/profile/settings/nothing')
+    await settle()
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(6)
+  })
+})
+
+describe('SettingsScreen — Learning', () => {
+  it('marks the profile level, previews a move and writes it from the sheet', async () => {
+    apiJson.mockImplementation(async path => (
+      String(path).startsWith('/api/profile/learning/preview')
+        ? { direction: 'up', markedKnown: 1318, spreadWeeks: 6 }
+        : {}
+    ))
+    const screen = await mount('/profile/settings/learning')
     await settle()
     const root = screen.container
 
-    const tabs = root.querySelectorAll('.stg-rail__item')
-    expect(tabs).toHaveLength(6)
+    const checked = root.querySelector('.lvlstrip__stop[aria-checked="true"]')
+    expect(checked.textContent.startsWith('N5')).toBe(true)
 
-    // COMPUTED display, not the hidden attribute: the slip carries
-    // .settings-card's display: flex, and an author display outranks
-    // the UA's [hidden] rule — asserting the attribute alone passed
-    // while every slip rendered at once (shipped broken exactly so).
-    const visible = () => [...root.querySelectorAll('[role="tabpanel"]')]
-      .filter(p => getComputedStyle(p).display !== 'none')
-    expect(visible()).toHaveLength(1)
-    expect(visible()[0].id).toBe('stg-pane-env')
-
-    root.querySelector('[data-id="data"]').click()
-    await settle(30)
-    expect(visible()).toHaveLength(1)
-    expect(visible()[0].id).toBe('stg-pane-data')
-    expect(window.location.hash).toBe('#data')
-  })
-
-  it('opens on the counter the hash names', async () => {
-    window.history.replaceState(null, '', '#son')
-    const screen = await mount()
+    const stops = [...root.querySelectorAll('.lvlstrip__stop')]
+    stops.find(s => s.textContent.startsWith('N3')).click()
     await settle()
-    const open = [...screen.container.querySelectorAll('[role="tabpanel"]')]
-      .filter(p => getComputedStyle(p).display !== 'none')
-    expect(open).toHaveLength(1)
-    expect(open[0].id).toBe('stg-pane-son')
-  })
 
-  it('level strip marks the profile level and writes the picked one', async () => {
-    const screen = await mount()
+    // The sheet first, with the preview's figures; nothing written yet.
+    const sheet = document.querySelector('[role="dialog"].lvl-sheet')
+    expect(sheet).not.toBeNull()
+    expect(sheet.textContent).toContain('318')
+    expect(apiJson.mock.calls.some(c => c[0] === '/api/profile/learning')).toBe(false)
+
+    sheet.querySelector('[data-action="level-confirm"]').click()
     await settle()
-    const root = screen.container
-    root.querySelector('[data-id="learning"]').click()
-    await settle(30)
-
-    const checked = root.querySelector('.stg-lvlstrip__stop[aria-checked="true"]')
-    expect(checked.textContent).toBe('N5')
-
-    const stops = [...root.querySelectorAll('.stg-lvlstrip__stop')]
-    stops.find(s => s.textContent === 'N3').click()
-    await settle(30)
-
     const call = apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')
-    expect(call, 'picking a stop must PATCH the learning profile').toBeTruthy()
+    expect(call, 'confirming the sheet must PATCH the learning profile').toBeTruthy()
     expect(call[2].method).toBe('PATCH')
     expect(JSON.parse(call[2].body)).toEqual({ jlptLevel: 'N3' })
+    expect(document.querySelector('[role="dialog"].lvl-sheet')).toBeNull()
   })
 
-  // 5. the rating-scale row WRITES, same reasoning as the level strip:
-  //    a radiogroup that never PATCHes is a preference the learner can
-  //    set and lose. And the caption under it has to be the bar's own
-  //    words — it is the only place the two bars are spelled out, so a
-  //    caption that drifts is a settings screen lying about a control.
-  it('the rating-scale row writes, and names the bar it is offering', async () => {
-    const screen = await mount()
+  it('Stay writes nothing', async () => {
+    apiJson.mockImplementation(async path => (
+      String(path).startsWith('/api/profile/learning/preview')
+        ? { direction: 'down', setAside: 224, deleted: 0 }
+        : {}
+    ))
+    profile = { ...PROFILE, jlptLevel: 'N4' }
+    await refreshSummary()
+    const screen = await mount('/profile/settings/learning')
+    await settle()
+    const stops = [...screen.container.querySelectorAll('.lvlstrip__stop')]
+    stops.find(s => s.textContent.startsWith('N5')).click()
+    await settle()
+    const sheet = document.querySelector('[role="dialog"].lvl-sheet')
+    expect(sheet.textContent).toContain('224')
+    sheet.querySelector('.btn-secondary').click()
+    await settle(30)
+    expect(document.querySelector('[role="dialog"].lvl-sheet')).toBeNull()
+    expect(apiJson.mock.calls.some(c => c[0] === '/api/profile/learning')).toBe(false)
+  })
+
+  it('the grade cards write, and name the bar they are offering', async () => {
+    const screen = await mount('/profile/settings/learning')
     await settle()
     const root = screen.container
-    root.querySelector('[data-id="learning"]').click()
-    await settle(30)
 
-    // 二段 / 四段 / 六段, shortest first, with the served one marked.
-    const chips = [...root.querySelectorAll('.stg-scale')]
-    expect(chips).toHaveLength(3)
-    expect(chips.map(c => c.getAttribute('aria-checked')))
-      .toEqual(['false', 'true', 'false'])
+    // 2 / 4 / 6 grades, shortest first, with the served one marked.
+    const cards = [...root.querySelectorAll('.grades .svc')]
+    expect(cards).toHaveLength(3)
+    expect(cards.map(c => c.getAttribute('aria-checked'))).toEqual(['false', 'true', 'false'])
 
     // The words of the served scale, worst-first, exactly as the bar
     // draws them. In French, which is what LangProvider defaults to —
     // spelled out rather than rebuilt from the locale table, because a
     // caption assembled from the same source it is being checked
     // against would pass however wrong the assembly was.
-    expect(root.querySelector('.stg-scale__words').textContent)
+    expect(cards[1].querySelector('.svc__words').textContent)
       .toBe('Raté · Presque · Difficile · Correct')
+    expect(cards[0].querySelector('.svc__words').textContent).toBe('Raté · Correct')
 
-    chips[2].click()
+    cards[2].click()
     await settle(30)
     const call = apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')
     expect(call, 'picking a bar must PATCH the learning profile').toBeTruthy()
@@ -214,36 +246,39 @@ describe('SettingsScreen — the counter', () => {
     expect(JSON.parse(call[2].body)).toEqual({ ratingScale: 'full' })
   })
 
-  it('names the two-button bar by its own two words', async () => {
-    // The caption is the only place the bars are spelled out, so it has
-    // to follow the choice rather than describe the default.
-    apiFetch.mockResolvedValue({
-      ok: true, status: 200, json: async () => ({ ...PROFILE, ratingScale: 'binary' }),
-    })
+  it('marks the two-button bar when that is what is served', async () => {
+    profile = { ...PROFILE, ratingScale: 'binary' }
     await refreshSummary()
-    const screen = await mount()
+    const screen = await mount('/profile/settings/learning')
     await settle()
-    const root = screen.container
-    root.querySelector('[data-id="learning"]').click()
-    await settle(30)
-
-    expect(root.querySelectorAll('.stg-scale')[0].getAttribute('aria-checked')).toBe('true')
-    expect(root.querySelector('.stg-scale__words').textContent).toBe('Raté · Correct')
+    const cards = [...screen.container.querySelectorAll('.grades .svc')]
+    expect(cards[0].getAttribute('aria-checked')).toBe('true')
   })
 
+  it('the pace cards write the service picked', async () => {
+    const screen = await mount('/profile/settings/learning')
+    await settle()
+    const cards = [...screen.container.querySelectorAll('.svc-grid .svc')]
+    expect(cards.map(c => c.getAttribute('aria-checked'))).toEqual(['false', 'true', 'false'])
+    cards[2].click()
+    await settle(30)
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')
+    expect(JSON.parse(call[2].body)).toEqual({ dailyNewTarget: 20 })
+  })
+})
+
+describe('SettingsScreen — Data', () => {
   it('reset fires only after the second, explicit press', async () => {
-    const screen = await mount()
+    const screen = await mount('/profile/settings/data')
     await settle()
     const root = screen.container
-    root.querySelector('[data-id="data"]').click()
-    await settle(30)
 
-    root.querySelector('.stg-danger-btn').click()
+    root.querySelector('[data-action="reset"]').click()
     await settle(30)
-    expect(root.querySelector('.stg-confirm')).toBeTruthy()
+    expect(root.querySelector('[data-action="reset-confirm"]')).toBeTruthy()
     expect(apiJson.mock.calls.some(c => c[0] === '/api/stats/reset')).toBe(false)
 
-    root.querySelector('.stg-confirm .stg-danger-btn').click()
+    root.querySelector('[data-action="reset-confirm"]').click()
     await settle(30)
     const call = apiJson.mock.calls.find(c => c[0] === '/api/stats/reset')
     expect(call).toBeTruthy()
@@ -251,11 +286,9 @@ describe('SettingsScreen — the counter', () => {
   })
 
   it('deleting the account is two-step too, then signs this device out locally', async () => {
-    const screen = await mount()
+    const screen = await mount('/profile/settings/data')
     await settle()
     const root = screen.container
-    root.querySelector('[data-id="data"]').click()
-    await settle(30)
 
     root.querySelector('[data-action="delete-account"]').click()
     await settle(30)
@@ -271,57 +304,49 @@ describe('SettingsScreen — the counter', () => {
     expect(call[2].method).toBe('DELETE')
     expect(signOut).toHaveBeenCalledWith({ scope: 'local' })
   })
+})
 
+describe('SettingsScreen — Sound', () => {
   it('the quiet preset silences exactly the station theatre', async () => {
     const audio = await import('../lib/audio')
-    const screen = await mount()
+    const screen = await mount('/profile/settings/sound')
     await settle()
-    const root = screen.container
-    root.querySelector('[data-id="son"]').click()
-    await settle(30)
-
-    const quiet = root.querySelector('.stg-preset')
+    const quiet = screen.container.querySelector('[data-preset="quiet"]')
     quiet.click()
     await settle(30)
     expect(quiet.getAttribute('aria-pressed')).toBe('true')
 
-    // The model itself, not just the button: theatre at zero, study
+    // The model itself, not just the card: theatre at zero, study
     // channels untouched.
-    const read = () => {
-      let out
-      const unsub = () => {}
-      out = JSON.parse(window.localStorage.getItem('jp-app-volumes') ?? '{}')
-      void unsub
-      return out
-    }
-    const vols = read()
+    const vols = JSON.parse(window.localStorage.getItem('jp-app-volumes') ?? '{}')
     expect(vols.ambiance).toBe(0)
     expect(vols.jingle).toBe(0)
     expect(vols.announcement).toBe(0)
     expect(vols.kana ?? audio.DEFAULT_VOLUMES.kana).toBe(audio.DEFAULT_VOLUMES.kana)
   })
+})
 
-  // ── 行先 ────────────────────────────────────────────────────
+describe('SettingsScreen — Destination', () => {
   it('issues a destination onto a pass that has none', async () => {
-    const root = await openGoal(NO_GOAL)
-    const pane = root.querySelector('#stg-pane-goal')
-    // A goal-less pass prints its service and nothing it never
-    // promised — no 行先 cell, no 有効期限.
-    expect(pane.querySelector('.stg-contract').textContent).not.toContain('行先')
+    const screen = await mount('/profile/settings/destination')
+    await settle()
+    const root = screen.container
+    // The stops ahead of N5, none chosen; nothing to reprint or hand back yet.
+    const chips = [...root.querySelectorAll('.dest')]
+    expect(chips.map(c => c.querySelector('.dest__code').textContent)).toEqual(['N4', 'N3', 'N2', 'N1'])
+    expect(root.querySelector('[data-action="goal-reprint"]').disabled).toBe(true)
+    expect(root.querySelector('[data-action="goal-drop"]').disabled).toBe(true)
 
-    pane.querySelector('.btn-secondary').click() // 行先を決める
+    chips[1].click() // N3
     await settle(30)
-    const chips = [...pane.querySelectorAll('.onb-dest__chip')]
-    chips.find(c => c.textContent.startsWith('N3')).click()
-    await settle(30)
+    expect(root.querySelector('[data-action="goal-reprint"]').disabled).toBe(false)
+    // The line the pass will print, from this service's own arithmetic.
+    expect(root.querySelector('.dest-line__date')).not.toBeNull()
 
-    pane.querySelector('.stg-goal__acts .onb-action').click() // 発行
+    root.querySelector('[data-action="goal-reprint"]').click()
     await settle(30)
-
-    const call = apiJson.mock.calls.find(
-      c => c[0] === '/api/journey/goal' && c[2]?.method === 'POST',
-    )
-    expect(call, 'pressing 発行 must issue a contract').toBeTruthy()
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/journey/goal' && c[2]?.method === 'POST')
+    expect(call, 'pressing Reprint on a new stop must issue a contract').toBeTruthy()
     const body = JSON.parse(call[2].body)
     expect(body.goalLevel).toBe('N3')
     // The date is the one THIS configuration promises, measured from
@@ -329,38 +354,53 @@ describe('SettingsScreen — the counter', () => {
     expect(new Date(body.goalTargetDate).getTime()).toBeGreaterThan(Date.now())
     // The pace travels with the contract: a date nobody can ride to is
     // not a promise.
-    expect(body.dailyNewTarget).toBeGreaterThan(0)
+    expect(body.dailyNewTarget).toBe(10)
   })
 
-  it('opens the board on the contract already printed, and 未定 hands it back', async () => {
-    const root = await openGoal(WITH_GOAL)
-    const pane = root.querySelector('#stg-pane-goal')
-    expect(pane.querySelector('.stg-contract').textContent).toContain('N3')
-
-    pane.querySelector('.btn-secondary').click() // 変更
-    await settle(30)
+  it('opens on the contract already printed, and Hand it back returns it', async () => {
+    journey = WITH_GOAL
+    seedJourneyStatus(WITH_GOAL)
+    await refreshJourney()
+    const screen = await mount('/profile/settings/destination')
+    await settle()
+    const root = screen.container
     // Opening on a fresh suggestion would quietly propose a different
     // promise than the one the pass carries.
-    const pressed = pane.querySelector('.onb-dest__chip[aria-pressed="true"]')
-    expect(pressed.textContent.startsWith('N3')).toBe(true)
+    const on = root.querySelector('.dest--on')
+    expect(on.querySelector('.dest__code').textContent).toBe('N3')
+    expect(root.querySelector('.dest-line__date').textContent).toMatch(/2031/)
+    expect(root.querySelector('[data-action="goal-reprint"]').disabled).toBe(true)
 
-    pane.querySelector('.onb-dest__chip--free').click() // 未定
+    root.querySelector('[data-action="goal-drop"]').click()
     await settle(30)
-    pane.querySelector('.stg-goal__acts .onb-action').click() // 払戻
-    await settle(30)
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/journey/goal' && c[2]?.method === 'DELETE')
+    expect(call, 'Hand it back IS the 払戻').toBeTruthy()
+  })
 
-    const call = apiJson.mock.calls.find(
-      c => c[0] === '/api/journey/goal' && c[2]?.method === 'DELETE',
-    )
-    expect(call, '未定 on a printed pass IS the 払戻').toBeTruthy()
+  it('a changed service on the same stop is a reprint, not a new contract', async () => {
+    journey = WITH_GOAL
+    seedJourneyStatus(WITH_GOAL)
+    await refreshJourney()
+    const screen = await mount('/profile/settings/destination')
+    await settle()
+    const root = screen.container
+    root.querySelectorAll('.svc-grid .svc')[2].click() // Express
+    await settle(30)
+    root.querySelector('[data-action="goal-reprint"]').click()
+    await settle(30)
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/journey/reprint')
+    expect(call).toBeTruthy()
+    const body = JSON.parse(call[2].body)
+    expect(body.dailyNewTarget).toBe(20)
+    expect(body.goalLevel).toBeUndefined()
+    expect(new Date(body.goalTargetDate).getTime()).toBeGreaterThan(Date.now())
   })
 
   it('reprints the pass when the daily hour changes', async () => {
-    const root = await openGoal(NO_GOAL)
-    const pane = root.querySelector('#stg-pane-goal')
-    pane.querySelectorAll('.onb-form__chip')[0].click() // 朝
+    const screen = await mount('/profile/settings/destination')
+    await settle()
+    screen.container.querySelector('[data-hour="am"]').click()
     await settle(30)
-
     const call = apiJson.mock.calls.find(c => c[0] === '/api/journey/reprint')
     expect(call, 'the hour is a reprint, not a new contract').toBeTruthy()
     expect(JSON.parse(call[2].body)).toEqual({ dailyDeparture: 'am' })
